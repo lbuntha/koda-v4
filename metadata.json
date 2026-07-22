@@ -1,0 +1,6 @@
+{
+  "name": "Counting Skills Studio",
+  "description": "An interactive, responsive drag-and-drop studio to design, build, and test custom math counting questions based on early childhood learning techniques.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

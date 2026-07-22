@@ -1,0 +1,324 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+@import "tailwindcss";
+
+/* Drive `dark:` from an explicit `.dark` class instead of the OS `prefers-color-scheme`
+   default. Canvases receive theme as an `isDark` prop, so OS-driven dark styling
+   desynced from the app's own theme toggle. Components opt in by putting `dark` on
+   their root when `isDark` is true. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* Theme Palette from image:
+     Primary: #6B46C1
+     Secondary: #FF2D78
+     Tertiary: #FFD600
+     Neutral: #F0F4FF (Mapped to standard slate-100 and slate slate shades)
+  */
+  --color-indigo-50: #F3F0FC;
+  --color-indigo-100: #E6E0FA;
+  --color-indigo-200: #D0C3F6;
+  --color-indigo-300: #B794F4;
+  --color-indigo-400: #9F7AEA;
+  --color-indigo-500: #805AD5;
+  --color-indigo-600: #6B46C1;
+  --color-indigo-650: #5F3DAF;
+  --color-indigo-700: #553C9A;
+  --color-indigo-800: #44337A;
+  --color-indigo-900: #322659;
+
+  --color-rose-50: #FFF0F6;
+  --color-rose-100: #FFD6E8;
+  --color-rose-200: #FFB3D1;
+  --color-rose-300: #FF85B3;
+  --color-rose-400: #FF5E9B;
+  --color-rose-500: #FF4D94;
+  --color-rose-600: #FF2D78;
+  --color-rose-700: #D0145A;
+  --color-rose-800: #A30D42;
+
+  --color-amber-50: #FFFDF0;
+  --color-amber-100: #FFF9C4;
+  --color-amber-200: #FFF59D;
+  --color-amber-300: #FFE082;
+  --color-amber-400: #FFD54F;
+  --color-amber-500: #FFEB3B;
+  --color-amber-600: #FFD600;
+  --color-amber-700: #D4B200;
+  --color-amber-800: #A88F00;
+
+  --color-slate-50: #F8FAFC;
+  --color-slate-100: #F0F4FF; /* Custom brand neutral background */
+  --color-slate-200: #E2E8F0;
+  --color-slate-300: #CBD5E1;
+  --color-slate-350: #B0BECE;
+  --color-slate-400: #94A3B8;
+  --color-slate-500: #64748B;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1E293B;
+  --color-slate-900: #0F172A;
+  --color-slate-950: #020617;
+}
+
+/* Custom Playful Keyframe Animations */
+@keyframes scaleIn {
+  from {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px) rotate(-1deg); }
+  75% { transform: translateX(4px) rotate(1deg); }
+}
+
+@keyframes confettiRain {
+  0% {
+    transform: translateY(-20px) rotate(0deg) translateX(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(50vh) rotate(360deg) translateX(25px);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(105vh) rotate(720deg) translateX(-15px);
+    opacity: 0.3;
+  }
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-shake {
+  animation: shake 0.25s ease-in-out;
+}
+
+.animate-confetti {
+  animation: confettiRain 3.5s linear forwards;
+}
+
+/* Touch devices: suppress double-tap zoom and the long-press callout so quick
+   repeated taps on counting objects register as taps, not browser gestures. */
+@media (pointer: coarse) {
+  html {
+    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    overscroll-behavior: none;
+    -webkit-touch-callout: none;
+  }
+}
+
+/* User selection prevention for tactile cards */
+.select-none-all {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Ensure child custom SVGs automatically scale to their container dimensions */
+.custom-svg-container svg {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Custom Interactive Resizable Workspace Override */
+#interactive-workspace-wrapper > div > div {
+  height: 100% !important;
+}
+
+/* ==========================================
+   GLOBAL DARK/LIGHT OVERRIDES FOR ALL MATH CANVASES
+   ========================================== */
+/* Remove redundant inner gray box background and border from canvas root containers */
+.canvas-light > div,
+.canvas-dark > div,
+.canvas-light > div.bg-slate-50,
+.canvas-dark > div.bg-slate-50,
+.canvas-light > div.bg-slate-900,
+.canvas-dark > div.bg-slate-900,
+.canvas-light .w-1\/2,
+.canvas-dark .w-1\/2,
+.canvas-light .w-1\/2[class*="bg-"],
+.canvas-dark .w-1\/2[class*="bg-"] {
+  background-color: transparent !important;
+  border: none !important;
+  border-width: 0 !important;
+  box-shadow: none !important;
+}
+
+.canvas-dark .bg-slate-50 {
+  background-color: #0f172a !important; /* deep slate-900 for inner sub-panels only */
+  border-color: #334155 !important;     /* slate-700 */
+  color: #f8fafc !important;             /* slate-50 */
+}
+
+/* Remove or soften background watermarks / radial patterns inside canvas */
+.canvas-light .bg-radial,
+.canvas-light [class*="bg-radial"],
+.canvas-dark .bg-radial,
+.canvas-dark [class*="bg-radial"] {
+  background-image: none !important;
+}
+
+/* Interactive elements / cards / buttons */
+.canvas-dark button.bg-white,
+.canvas-dark div.bg-white,
+.canvas-dark .bg-white.border-slate-200,
+.canvas-dark .bg-white.border-2.border-slate-200,
+.canvas-dark .border-slate-200.bg-white {
+  background-color: #1e293b !important; /* slate-800 */
+  border-color: #334155 !important;     /* slate-700 */
+  color: #f1f5f9 !important;
+}
+
+/* Success active items */
+.canvas-dark .bg-emerald-50\/50,
+.canvas-dark .bg-emerald-50,
+.canvas-dark .border-emerald-400.bg-emerald-50\/50,
+.canvas-dark .border-emerald-300.bg-emerald-50\/40 {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+  border-color: #10b981 !important;
+}
+
+.canvas-dark .bg-indigo-50,
+.canvas-dark .bg-indigo-50\/40,
+.canvas-dark .bg-indigo-100\/60,
+.canvas-dark .border-indigo-400.bg-indigo-50\/50,
+.canvas-dark .border-indigo-500.bg-indigo-100\/60 {
+  background-color: rgba(99, 102, 241, 0.15) !important;
+  border-color: #6366f1 !important;
+}
+
+/* Target sort bins, baskets and frames */
+.canvas-dark div.w-1\/2.border-2.border-dashed.bg-white\/60,
+.canvas-dark div.w-1\/2.border-2.border-dashed.bg-indigo-50\/20,
+.canvas-dark div.w-1\/2.border-2.border-dashed.bg-pink-50\/20,
+.canvas-dark div.border-2.border-dashed.bg-indigo-50\/20,
+.canvas-dark div.bg-indigo-50\/20,
+.canvas-dark div.bg-pink-50\/20 {
+  background-color: rgba(30, 41, 59, 0.4) !important;
+  border-color: #475569 !important;
+}
+
+/* Text elements */
+.canvas-dark .text-slate-800,
+.canvas-dark .text-slate-700 {
+  color: #f8fafc !important;
+}
+
+.canvas-dark .text-slate-655,
+.canvas-dark .text-slate-600,
+.canvas-dark .text-slate-500,
+.canvas-dark .text-slate-400 {
+  color: #cbd5e1 !important;
+}
+
+.canvas-dark .text-slate-350,
+.canvas-dark .text-slate-300 {
+  color: #94a3b8 !important;
+}
+
+.canvas-dark .bg-slate-100\/80.text-slate-500,
+.canvas-dark .bg-slate-50.border {
+  background-color: #1e293b !important;
+  color: #94a3b8 !important;
+  border-color: #334155 !important;
+}
+
+.canvas-dark .bg-indigo-100.text-indigo-500,
+.canvas-dark .bg-indigo-100.text-indigo-600 {
+  background-color: rgba(99, 102, 241, 0.2) !important;
+  color: #a5b4fc !important;
+}
+
+/* Curved arrows and count traces */
+.canvas-dark path.stroke-indigo-400 {
+  stroke: #818cf8 !important;
+}
+
+.canvas-dark circle.fill-indigo-500.stroke-white {
+  fill: #6366f1 !important;
+  stroke: #1e293b !important;
+}
+
+/* Formula wrappers and overlays */
+.canvas-dark div.bg-white\/80,
+.canvas-dark div.bg-white\/70,
+.canvas-dark div.bg-white\/60,
+.canvas-dark div.bg-white\/45,
+.canvas-dark .bg-white.border {
+  background-color: rgba(30, 41, 59, 0.85) !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+/* Reset / count controllers */
+.canvas-dark button.bg-white,
+.canvas-dark button.hover\:bg-slate-50,
+.canvas-dark button.border-slate-200 {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+.canvas-dark button.bg-white:hover {
+  background-color: #334155 !important;
+}
+
+.canvas-dark .bg-slate-100 {
+  background-color: #1e293b !important;
+}
+
+/* Koda Pattern & custom canvas gradient boxes */
+.canvas-dark .from-amber-50,
+.canvas-dark .bg-gradient-to-b.from-amber-50 {
+  background-image: linear-gradient(to bottom, #1e1b4b, #0f172a) !important;
+  border-color: #312e81 !important;
+}
+
+.canvas-dark .bg-amber-500 {
+  background-color: #6366f1 !important;
+}
+

@@ -1,0 +1,36 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Koda">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#A855F7"/>
+      <stop offset="50%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#4527C9"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="60" y1="30" x2="290" y2="270" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.22"/>
+      <stop offset="70%" stop-color="#FFFFFF" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="clip">
+      <rect width="512" height="512" rx="114"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="114" fill="url(#bg)"/>
+
+  <!-- Top-left gloss -->
+  <ellipse cx="175" cy="125" rx="248" ry="150" fill="url(#shine)" clip-path="url(#clip)"/>
+
+  <!-- Bottom inner depth shadow -->
+  <ellipse cx="295" cy="495" rx="238" ry="84" fill="#1A0C78" opacity="0.30" clip-path="url(#clip)"/>
+
+  <!-- K letterform — stroke-based for clean rounded ends -->
+  <g clip-path="url(#clip)" fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Vertical bar -->
+    <line x1="156" y1="116" x2="156" y2="396" stroke-width="68"/>
+    <!-- Upper arm -->
+    <line x1="188" y1="252" x2="360" y2="116" stroke-width="60"/>
+    <!-- Lower arm -->
+    <line x1="188" y1="262" x2="360" y2="396" stroke-width="60"/>
+  </g>
+</svg>
