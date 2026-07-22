@@ -1,0 +1,51 @@
+# Runs the whole stack: MongoDB + FastAPI backend + Vite frontend (nginx).
+#
+#   make up      # build + start (detached)
+#   make logs    # follow logs
+#   make down    # stop
+#
+# Secrets: set JWT_SECRET and OPENAI_API_KEY in a root `.env` (compose reads it),
+# or export them in your shell. Defaults below are for local dev only.
+
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  api:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      MONGO_URI: mongodb://mongo:27017
+      MONGO_DB: koda
+      JWT_SECRET: ${JWT_SECRET:-dev-only-insecure-secret-change-me-0000000000000000}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      CORS_ORIGINS: '["http://localhost:3000"]'
+    ports:
+      - "8000:8000"
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      args:
+        VITE_API_URL: /api
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+
+volumes:
+  mongo_data:
