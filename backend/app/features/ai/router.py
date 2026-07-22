@@ -5,9 +5,9 @@ key never ships to the browser. Adults only."""
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from ..config import settings
-from ..models.user import User
-from ..auth.deps import get_current_user
+from ...core.config import settings
+from ...models.user import User
+from ...core.deps import get_current_user
 
 router = APIRouter(prefix="/ai", tags=["ai"])
 

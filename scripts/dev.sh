@@ -4,13 +4,14 @@
 # Vite frontend together, wired to talk to each other. Ctrl+C stops everything.
 #
 #   ./scripts/dev.sh            # run all three
-#   npm run dev:all             # same, via package.json
+#   make dev-local             # same, via the Makefile
 #
 # First run auto-provisions: backend venv + deps, backend/.env (with a generated
 # JWT secret), and frontend .env.local (pointing the app at the local API).
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BACKEND="$ROOT/backend"
+FRONTEND="$ROOT/frontend"
 BACKEND_PORT="${BACKEND_PORT:-8000}"
 FRONTEND_PORT="${FRONTEND_PORT:-3000}"
 MONGO_PORT="${MONGO_PORT:-27017}"
@@ -75,11 +76,11 @@ ensure_backend() {
 
 # ── Frontend provisioning ────────────────────────────────────────────────────
 ensure_frontend() {
-  [ -d "$ROOT/node_modules" ] || { say "installing frontend deps…"; (cd "$ROOT" && npm install); }
+  [ -d "$FRONTEND/node_modules" ] || { say "installing frontend deps…"; (cd "$FRONTEND" && npm install); }
   # Point the app at the local API (idempotent; .env.local is git-ignored).
-  if [ ! -f "$ROOT/.env.local" ] || ! grep -q '^VITE_API_URL=' "$ROOT/.env.local"; then
-    echo "VITE_API_URL=http://localhost:$BACKEND_PORT" >> "$ROOT/.env.local"
-    say "set VITE_API_URL in .env.local → http://localhost:$BACKEND_PORT"
+  if [ ! -f "$FRONTEND/.env.local" ] || ! grep -q '^VITE_API_URL=' "$FRONTEND/.env.local"; then
+    echo "VITE_API_URL=http://localhost:$BACKEND_PORT" >> "$FRONTEND/.env.local"
+    say "set VITE_API_URL in frontend/.env.local → http://localhost:$BACKEND_PORT"
   fi
 }
 
@@ -90,7 +91,7 @@ run_api() {
     | while IFS= read -r l; do printf '%s[api]%s %s\n' "$C_API" "$C_OFF" "$l"; done
 }
 run_web() {
-  cd "$ROOT"
+  cd "$FRONTEND"
   npm run dev 2>&1 \
     | while IFS= read -r l; do printf '%s[web]%s %s\n' "$C_WEB" "$C_OFF" "$l"; done
 }

@@ -2,27 +2,14 @@
 
 from beanie import PydanticObjectId
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, Field
 
-from ..models.user import User
-from ..models.student import Student
-from ..auth.deps import get_current_parent
-from ..auth.security import hash_secret
+from ...models.user import User
+from ...models.student import Student
+from ...core.deps import get_current_parent
+from ...core.security import hash_secret
+from .schemas import ChildIn, ChildOut
 
 router = APIRouter(prefix="/family", tags=["family"])
-
-
-class ChildIn(BaseModel):
-    name: str
-    avatar: str | None = None
-    pin: str | None = Field(default=None, min_length=4, max_length=8)
-
-
-class ChildOut(BaseModel):
-    id: str
-    name: str
-    avatar: str | None = None
-    has_pin: bool
 
 
 def _out(s: Student) -> ChildOut:

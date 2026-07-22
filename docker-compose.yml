@@ -26,7 +26,7 @@ services:
     restart: unless-stopped
     environment:
       MONGO_URI: mongodb://mongo:27017
-      MONGO_DB: koda
+      MONGO_DB: koda_v4
       JWT_SECRET: ${JWT_SECRET:-dev-only-insecure-secret-change-me-0000000000000000}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       CORS_ORIGINS: '["http://localhost:3000"]'
@@ -38,7 +38,7 @@ services:
 
   web:
     build:
-      context: .
+      context: ./frontend
       args:
         VITE_API_URL: /api
     restart: unless-stopped

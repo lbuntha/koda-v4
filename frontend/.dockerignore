@@ -1,10 +1,5 @@
 node_modules
 dist
-.git
-.github
-backend
-scripts
-memory
 .env
 .env.*
 *.log

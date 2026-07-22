@@ -5,9 +5,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .config import settings
-from .db import init_db, close_db
-from .routers import auth, family, content, events, analytics, ai
+from .core.config import settings
+from .core.db import init_db, close_db
+from .features import ALL_ROUTERS
 
 
 @asynccontextmanager
@@ -27,12 +27,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth.router)
-app.include_router(family.router)
-app.include_router(content.router)
-app.include_router(events.router)
-app.include_router(analytics.router)
-app.include_router(ai.router)
+for router in ALL_ROUTERS:
+    app.include_router(router)
 
 
 @app.get("/health", tags=["meta"])

@@ -1,7 +1,7 @@
 # Koda — dev & container tasks. Run `make` (or `make help`) to list targets.
 
 .DEFAULT_GOAL := help
-.PHONY: help dev-local up down build logs restart clean api-shell mongo-shell
+.PHONY: help dev-local up down build logs restart clean api-shell mongo-shell seed seed-docker
 
 help: ## List available targets
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -10,6 +10,12 @@ help: ## List available targets
 # ── Local (no containers) ─────────────────────────────────────────────────────
 dev-local: ## Run MongoDB + backend + frontend as local processes (Ctrl+C stops all)
 	@bash scripts/dev.sh
+
+seed: ## Seed/reset the initial admin account (local venv)
+	@cd backend && ./.venv/bin/python seed.py
+
+seed-docker: ## Seed/reset the initial admin account (in Docker)
+	docker compose run --rm api python seed.py
 
 # ── Docker Compose (mongo + api + web) ────────────────────────────────────────
 up: ## Build + start the full stack in Docker (detached)

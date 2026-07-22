@@ -1,23 +1,17 @@
 """Owner-scoped authored content: the curriculum tree and the question deck.
 Whole-document GET/PUT mirrors the frontend's localStorage read/write."""
 
-from typing import Any
-
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel
 
-from ..models.user import User
-from ..models.content import Curriculum, QuestionDeck
-from ..auth.deps import get_current_user
+from ...models.user import User
+from ...models.content import Curriculum, QuestionDeck
+from ...core.deps import get_current_user
+from .schemas import CurriculumIn, QuestionsIn
 
 router = APIRouter(tags=["content"])
 
 
 # ── Curriculum tree ──────────────────────────────────────────────────────────
-
-class CurriculumIn(BaseModel):
-    tree: dict[str, Any]
-
 
 @router.get("/curriculum")
 async def get_curriculum(user: User = Depends(get_current_user)):
@@ -37,10 +31,6 @@ async def put_curriculum(body: CurriculumIn, user: User = Depends(get_current_us
 
 
 # ── Question deck ────────────────────────────────────────────────────────────
-
-class QuestionsIn(BaseModel):
-    questions: list[dict[str, Any]]
-
 
 @router.get("/questions")
 async def get_questions(user: User = Depends(get_current_user)):

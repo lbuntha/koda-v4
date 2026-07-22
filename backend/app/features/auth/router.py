@@ -2,34 +2,26 @@
 
 import secrets
 import string
-from typing import Literal
 
 from beanie import PydanticObjectId
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from pydantic import BaseModel, EmailStr, Field
 
-from ..models.user import User, Role
-from ..models.student import Student
-from ..auth.deps import Principal, get_principal, get_current_parent
-from ..auth.security import (
+from ...models.user import User, Role
+from ...models.student import Student
+from ...core.deps import Principal, get_principal, get_current_parent
+from ...core.security import (
     hash_secret,
     verify_secret,
     create_access_token,
     create_refresh_token,
     decode_token,
 )
+from .schemas import TokenPair, RegisterIn, RefreshIn, StudentLoginIn, LaunchIn
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 _CODE_ALPHABET = string.ascii_uppercase + string.digits
-
-
-class TokenPair(BaseModel):
-    access_token: str
-    refresh_token: str
-    token_type: str = "bearer"
-    role: str
 
 
 def _issue(sub: str, role: str) -> TokenPair:
@@ -49,13 +41,6 @@ async def _unique_family_code() -> str:
 
 
 # ── Adult accounts ───────────────────────────────────────────────────────────
-
-class RegisterIn(BaseModel):
-    role: Literal["parent", "teacher", "admin"]
-    email: EmailStr
-    password: str = Field(min_length=8)
-    name: str
-
 
 @router.post("/register", response_model=TokenPair, status_code=status.HTTP_201_CREATED)
 async def register(body: RegisterIn):
@@ -79,10 +64,6 @@ async def login(form: OAuth2PasswordRequestForm = Depends()):
     if not user or not verify_secret(form.password, user.password_hash):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect email or password")
     return _issue(str(user.id), user.role.value)
-
-
-class RefreshIn(BaseModel):
-    refresh_token: str
 
 
 @router.post("/refresh", response_model=TokenPair)
@@ -117,12 +98,6 @@ async def me(principal: Principal = Depends(get_principal)):
 
 # ── Kid sign-in ──────────────────────────────────────────────────────────────
 
-class StudentLoginIn(BaseModel):
-    family_code: str
-    name: str
-    pin: str
-
-
 @router.post("/student/login", response_model=TokenPair)
 async def student_login(body: StudentLoginIn):
     """Independent flow: kid signs in with the family code + their name + PIN."""
@@ -137,10 +112,6 @@ async def student_login(body: StudentLoginIn):
     if not student or not student.pin_hash or not verify_secret(body.pin, student.pin_hash):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect name or PIN")
     return _issue(str(student.id), Role.student.value)
-
-
-class LaunchIn(BaseModel):
-    student_id: str
 
 
 @router.post("/student/launch", response_model=TokenPair)

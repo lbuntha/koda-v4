@@ -4,7 +4,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
 
 from .config import settings
-from .models import ALL_MODELS
+from ..models import ALL_MODELS
 
 _client: AsyncIOMotorClient | None = None
 

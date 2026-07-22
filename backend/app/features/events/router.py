@@ -1,21 +1,15 @@
 """Learning-event ingest (student writes its own) + read-back (guardian reads their kid's)."""
 
-from typing import Any
+from fastapi import APIRouter, Depends
 
-from beanie import PydanticObjectId
-from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
-
-from ..models.user import User, Role
-from ..models.student import Student
-from ..models.event import LearningEvent
-from ..auth.deps import get_current_student, get_current_user
+from ...models.student import Student
+from ...models.user import User
+from ...models.event import LearningEvent
+from ...core.deps import get_current_student, get_current_user
+from ...core.permissions import authorize_guardian_read
+from .schemas import EventsIn
 
 router = APIRouter(tags=["events"])
-
-
-class EventsIn(BaseModel):
-    events: list[dict[str, Any]]
 
 
 @router.post("/events")
@@ -42,25 +36,13 @@ async def ingest_events(body: EventsIn, student: Student = Depends(get_current_s
     return {"inserted": len(docs)}
 
 
-async def _authorize_read(student_id: str, user: User) -> None:
-    if user.role in (Role.admin, Role.teacher):
-        return
-    # Parents may only read their own children.
-    try:
-        student = await Student.get(PydanticObjectId(student_id))
-    except Exception:
-        student = None
-    if not student or str(user.id) not in student.guardian_parent_ids:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "Not your child")
-
-
 @router.get("/events")
 async def read_events(
     student_id: str,
     limit: int = 500,
     user: User = Depends(get_current_user),
 ):
-    await _authorize_read(student_id, user)
+    await authorize_guardian_read(student_id, user)
     events = (
         await LearningEvent.find(LearningEvent.student_id == student_id)
         .sort(-LearningEvent.client_timestamp_ms)

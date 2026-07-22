@@ -4,17 +4,17 @@ parent dashboard can call directly. Port the full algorithm here later if needed
 
 from fastapi import APIRouter, Depends
 
-from ..models.user import User
-from ..models.event import LearningEvent
-from ..auth.deps import get_current_user
-from .events import _authorize_read
+from ...models.user import User
+from ...models.event import LearningEvent
+from ...core.deps import get_current_user
+from ...core.permissions import authorize_guardian_read
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
 
 @router.get("/summary")
 async def summary(student_id: str, user: User = Depends(get_current_user)):
-    await _authorize_read(student_id, user)
+    await authorize_guardian_read(student_id, user)
 
     events = await LearningEvent.find(LearningEvent.student_id == student_id).to_list()
     attempts = [e for e in events if e.event_type == "attempt"]

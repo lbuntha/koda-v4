@@ -8,7 +8,9 @@ class Settings(BaseSettings):
 
     # Database
     mongo_uri: str = "mongodb://localhost:27017"
-    mongo_db: str = "koda"
+    # Dedicated DB for this app. Do NOT reuse "koda" — that belongs to koda-v3
+    # (different schema); sharing it causes index conflicts on startup.
+    mongo_db: str = "koda_v4"
 
     # Auth
     jwt_secret: str = "change-me-please-use-a-long-random-string"
