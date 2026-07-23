@@ -20,9 +20,24 @@ interface CanvasPreviewProps {
   question: CountingQuestion;
   isDark?: boolean;
   className?: string;
+  isPlayMode?: boolean;
+  onSuccess?: () => void;
+  onAttempt?: (
+    outcome: "correct" | "incorrect" | "partial",
+    detail?: { expected?: string; selected?: string; details?: Record<string, any> },
+  ) => void;
+  onHint?: (details?: Record<string, any>) => void;
 }
 
-export const CanvasPreview: React.FC<CanvasPreviewProps> = ({ question, isDark = false, className }) => {
+export const CanvasPreview: React.FC<CanvasPreviewProps> = ({
+  question,
+  isDark = false,
+  className,
+  isPlayMode = true,
+  onSuccess,
+  onAttempt,
+  onHint,
+}) => {
   const Canvas = CANVAS_BY_TECHNIQUE[question.technique] || OneToOneCanvas;
 
   return (
@@ -31,9 +46,11 @@ export const CanvasPreview: React.FC<CanvasPreviewProps> = ({ question, isDark =
         <Canvas
           key={`${question.id}-${question.technique}`}
           question={question}
-          isPlayMode
+          isPlayMode={isPlayMode}
           isDark={isDark}
-          onSuccess={() => {}}
+          onSuccess={onSuccess ?? (() => {})}
+          onAttempt={onAttempt}
+          onHint={onHint}
         />
       </LazyBoundary>
     </div>

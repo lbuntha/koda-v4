@@ -8,12 +8,12 @@
  * of the Property Studio's side panel.
  */
 
-import React, { useState } from "react";
-import { ChevronLeft } from "lucide-react";
+import React, { useMemo, useState } from "react";
+import { ChevronLeft, Search, X } from "lucide-react";
 import { CountingQuestion } from "../../types";
 import { Skill } from "../../curriculum/types";
 import { Drawer, Button, Label, Input, Textarea } from "../ui";
-import { TECHNIQUE_OPTIONS, defaultTargetCountForTechnique } from "../studio/techniqueOptions";
+import { TECHNIQUE_OPTIONS } from "../studio/techniqueOptions";
 import { TECHNIQUE_PANELS } from "../studio/panels";
 import { LazyBoundary } from "../LazyBoundary";
 import { createBlankSkillQuestion } from "./questionOps";
@@ -27,15 +27,25 @@ interface AddQuestionDrawerProps {
 
 export const AddQuestionDrawer: React.FC<AddQuestionDrawerProps> = ({ isOpen, onClose, skill, onSave }) => {
   const [draft, setDraft] = useState<CountingQuestion | null>(null);
+  const [query, setQuery] = useState("");
+
+  const filteredTechniques = useMemo(() => {
+    const term = query.trim().toLowerCase();
+    if (!term) return TECHNIQUE_OPTIONS;
+    return TECHNIQUE_OPTIONS.filter(technique =>
+      `${technique.name} ${technique.id.replaceAll("_", " ")}`.toLowerCase().includes(term)
+    );
+  }, [query]);
 
   const handleClose = () => {
     setDraft(null);
+    setQuery("");
     onClose();
   };
 
   const selectTechnique = (tech: (typeof TECHNIQUE_OPTIONS)[number]) => {
     const blank = createBlankSkillQuestion(tech.id, skill.id);
-    setDraft({ ...blank, title: tech.name, targetCount: defaultTargetCountForTechnique(tech.id) });
+    setDraft({ ...blank, title: tech.name });
   };
 
   const update = (patch: Partial<CountingQuestion>) => setDraft(d => (d ? { ...d, ...patch } : d));
@@ -51,23 +61,76 @@ export const AddQuestionDrawer: React.FC<AddQuestionDrawerProps> = ({ isOpen, on
   const TechniquePanel = draft ? TECHNIQUE_PANELS[draft.technique] : null;
 
   return (
-    <Drawer isOpen={isOpen} onClose={handleClose} title={draft ? "New Question" : "Add Question"} widthClassName="w-full sm:w-[420px]">
+    <Drawer isOpen={isOpen} onClose={handleClose} title={draft ? "New Question" : "Add Question"} widthClassName="w-full sm:w-[480px]">
       {!draft ? (
-        <div className="space-y-3">
-          <p className="text-xs text-slate-500">
+        <div className="flex min-h-0 flex-col gap-3">
+          <p className="koda-admin-label text-[#6D6997]">
             Choose a technique for <strong>{skill.label}</strong>.
           </p>
-          <div className="grid grid-cols-1 gap-1.5 max-h-[70vh] overflow-y-auto pr-1">
-            {TECHNIQUE_OPTIONS.map(tech => (
+
+          <div className="relative">
+            <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#8D89AE]" />
+            <Input
+              value={query}
+              onChange={event => setQuery(event.target.value)}
+              placeholder="Search components…"
+              aria-label="Search question components"
+              className="h-10 rounded-lg border-[#E7E3F6] bg-[#FBFAFF] pl-9 pr-9 text-xs"
+              autoFocus
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-[#8D89AE] transition-colors hover:bg-[#F0EDFC] hover:text-[#534AB7]"
+                aria-label="Clear component search"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between gap-3">
+            <span className="koda-admin-chip text-[#6D6997]">
+              {filteredTechniques.length} of {TECHNIQUE_OPTIONS.length} components
+            </span>
+            {query && filteredTechniques.length > 0 && (
+              <span className="koda-admin-chip text-[#8D89AE]">Filtered</span>
+            )}
+          </div>
+
+          <div className="grid max-h-[calc(100vh-220px)] grid-cols-1 gap-1.5 overflow-y-auto pr-1 sm:grid-cols-2">
+            {filteredTechniques.map(tech => {
+              const match = tech.name.match(/^(\d+)\.\s*(.*)$/);
+              const number = match?.[1];
+              const label = match?.[2] ?? tech.name;
+              return (
               <button
                 key={tech.id}
                 onClick={() => selectTechnique(tech)}
-                className="flex items-center gap-2.5 p-2.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-indigo-50 hover:border-indigo-300 text-left text-xs font-bold text-slate-700 transition-colors cursor-pointer"
+                className="group flex min-h-11 items-center gap-2 rounded-lg border border-[#E7E3F6] bg-[#FBFAFF] px-2.5 py-2 text-left text-xs font-medium text-[#0E0B55] transition-colors hover:border-[#7C6DD8] hover:bg-[#F4F1FD] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7C6DD8]/30"
               >
-                <span className="flex-shrink-0">{tech.icon}</span>
-                <span className="truncate">{tech.name}</span>
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white shadow-xs transition-colors group-hover:bg-white">
+                  {tech.icon}
+                </span>
+                <span className="min-w-0 flex-1 truncate">{label}</span>
+                {number && <span className="koda-admin-chip shrink-0 text-[#8D89AE]">{number}</span>}
               </button>
-            ))}
+              );
+            })}
+
+            {filteredTechniques.length === 0 && (
+              <div className="col-span-full rounded-xl border border-dashed border-[#DCD6F2] bg-[#FBFAFF] px-4 py-8 text-center">
+                <p className="koda-admin-label text-[#0E0B55]">No components found</p>
+                <button
+                  type="button"
+                  onClick={() => setQuery("")}
+                  className="koda-admin-chip mt-1 text-[#534AB7] hover:text-[#453DA0]"
+                >
+                  Clear search
+                </button>
+              </div>
+            )}
           </div>
         </div>
       ) : (

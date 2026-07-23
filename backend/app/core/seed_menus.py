@@ -13,13 +13,14 @@ DEFAULT_MENUS = [
     {"key": "studio", "section": "studio", "section_label": "Studio", "label": "Interactive Studio", "icon": "Palette", "order": 6},
     {"key": "assets", "section": "studio", "section_label": "Studio", "label": "SVG Assets", "icon": "PenTool", "order": 7},
     {"key": "curriculum", "section": "studio", "section_label": "Studio", "label": "Curriculum", "icon": "BookOpen", "order": 8},
-    {"key": "settings", "section": "system", "section_label": "System", "label": "Settings", "icon": "Settings", "order": 9},
+    {"key": "assignments", "section": "studio", "section_label": "Studio", "label": "Assignments", "icon": "ClipboardList", "order": 9},
+    {"key": "settings", "section": "system", "section_label": "System", "label": "Settings", "icon": "Settings", "order": 10},
 ]
 
 # Roles and the menu keys each may access. ["*"] = all (admin default).
 DEFAULT_ROLES = [
     {"key": "admin", "label": "Admin", "menu_keys": ["*"]},
-    {"key": "teacher", "label": "Teacher", "menu_keys": ["studio", "assets", "curriculum"]},
+    {"key": "teacher", "label": "Teacher", "menu_keys": ["studio", "assets", "curriculum", "assignments"]},
     {"key": "parent", "label": "Parent", "menu_keys": []},
     {"key": "student", "label": "Student", "menu_keys": []},
 ]

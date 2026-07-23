@@ -10,6 +10,7 @@ from .ai.router import router as ai_router
 from .admin.router import router as admin_router
 from .menus.router import router as menus_router
 from .settings.router import router as settings_router
+from .placement.router import router as placement_router
 
 ALL_ROUTERS = [
     auth_router,
@@ -21,4 +22,5 @@ ALL_ROUTERS = [
     admin_router,
     menus_router,
     settings_router,
+    placement_router,
 ]

@@ -28,6 +28,10 @@ import { kodaPattern } from "./kodaPattern";
 import { flexibleCanvas } from "./flexibleCanvas";
 import { additionTutor } from "./additionTutor";
 import { columnAddition } from "./columnAddition";
+import { columnSubtraction } from "./columnSubtraction";
+import { multiRowColumnAddition } from "./multiRowColumnAddition";
+import { multiRowColumnSubtraction } from "./multiRowColumnSubtraction";
+import { columnMultiplication } from "./columnMultiplication";
 
 /** Ordered exactly as the Studio picker lists them (1..16). */
 export const ALL_TECHNIQUES: TechniqueManifest[] = [
@@ -48,6 +52,10 @@ export const ALL_TECHNIQUES: TechniqueManifest[] = [
   flexibleCanvas,
   additionTutor,
   columnAddition,
+  columnSubtraction,
+  multiRowColumnAddition,
+  multiRowColumnSubtraction,
+  columnMultiplication,
 ];
 
 // Loud in dev / logged in prod if a game is missing or double-registered.

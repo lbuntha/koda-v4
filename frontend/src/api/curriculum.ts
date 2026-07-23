@@ -71,4 +71,8 @@ export const curriculumApi = {
     api.put<{ ok: true; revision: number; updatedAt: string }>(curriculumId ? `/curricula/${curriculumId}` : "/curriculum", { tree, revision, published }),
   audit: (limit = 100, curriculumId?: string) =>
     api.get<{ events: CurriculumAuditEvent[] }>(`/content-audit?resource_type=curriculum&limit=${limit}${curriculumId ? `&curriculum_id=${encodeURIComponent(curriculumId)}` : ""}`),
+  releases: (curriculumId: string) =>
+    api.get<{ releases: import("./assignments").ReleaseSummary[] }>("/curricula/" + curriculumId + "/releases"),
+  publishRelease: (curriculumId: string) =>
+    api.post<import("./assignments").ReleaseSummary>("/curricula/" + curriculumId + "/releases"),
 };

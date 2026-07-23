@@ -184,12 +184,164 @@ export const COLUMN_ADDITION_PRESETS: AiPreset[] = [
   }
 ];
 
+export const COLUMN_SUBTRACTION_PRESETS: AiPreset[] = [
+  {
+    id: "cs-first-borrow-42-18",
+    label: "First Borrow (42 − 18)",
+    prompt: "A two-digit column subtraction problem for 42 minus 18 with borrowing",
+    emoji: "🔢",
+    technique: CountingTechnique.SUBTRACTION_COLUMN,
+    theme: "nature"
+  },
+  {
+    id: "cs-cascade-10000-1",
+    label: "Borrow Through Zeros",
+    prompt: "A five-digit column subtraction problem for 10000 minus 1 with borrowing through every zero",
+    emoji: "🧠",
+    technique: CountingTechnique.SUBTRACTION_COLUMN,
+    theme: "space"
+  },
+  {
+    id: "cs-five-digit-54321-12345",
+    label: "Five-Digit Practice",
+    prompt: "A five-digit column subtraction problem for 54321 minus 12345 with regrouping",
+    emoji: "🚀",
+    technique: CountingTechnique.SUBTRACTION_COLUMN,
+    theme: "space"
+  },
+  {
+    id: "cs-no-borrow-99999-12345",
+    label: "No Regrouping",
+    prompt: "A five-digit column subtraction problem for 99999 minus 12345 without borrowing",
+    emoji: "✅",
+    technique: CountingTechnique.SUBTRACTION_COLUMN,
+    theme: "nature"
+  }
+];
+
+export const MULTI_ROW_COLUMN_ADDITION_PRESETS: AiPreset[] = [
+  {
+    id: "mra-first-12-23-34",
+    label: "Three Rows, No Carry",
+    prompt: "Three-row column addition for 12 plus 23 plus 34 without carrying",
+    emoji: "🔢",
+    technique: CountingTechnique.ADDITION_COLUMN_MULTI,
+    theme: "nature"
+  },
+  {
+    id: "mra-carry-268-175-349",
+    label: "Carry Across Columns",
+    prompt: "Three-row column addition for 268 plus 175 plus 349 with carrying",
+    emoji: "🧠",
+    technique: CountingTechnique.ADDITION_COLUMN_MULTI,
+    theme: "space"
+  },
+  {
+    id: "mra-carry-two-999-999-999",
+    label: "Carry Two",
+    prompt: "Three-row column addition for 999 plus 999 plus 999 where each column carries 2",
+    emoji: "🚀",
+    technique: CountingTechnique.ADDITION_COLUMN_MULTI,
+    theme: "space"
+  },
+  {
+    id: "mra-five-digit-45678-23456-12345",
+    label: "Five-Digit Challenge",
+    prompt: "Three-row five-digit column addition for 45678 plus 23456 plus 12345",
+    emoji: "⭐",
+    technique: CountingTechnique.ADDITION_COLUMN_MULTI,
+    theme: "nature"
+  }
+];
+
+export const MULTI_ROW_COLUMN_SUBTRACTION_PRESETS: AiPreset[] = [
+  {
+    id: "mrs-basic-90-20-10",
+    label: "Three Rows, No Borrow",
+    prompt: "Three-row column subtraction for 90 minus 20 minus 10 without borrowing",
+    emoji: "🔢",
+    technique: CountingTechnique.SUBTRACTION_COLUMN_MULTI,
+    theme: "nature"
+  },
+  {
+    id: "mrs-regroup-432-178-56",
+    label: "Regroup Across Columns",
+    prompt: "Three-row column subtraction for 432 minus 178 minus 56 with regrouping",
+    emoji: "🧠",
+    technique: CountingTechnique.SUBTRACTION_COLUMN_MULTI,
+    theme: "space"
+  },
+  {
+    id: "mrs-borrow-two-30-9-8",
+    label: "Borrow Two",
+    prompt: "Three-row column subtraction for 30 minus 9 minus 8 where the ones column borrows 2 tens",
+    emoji: "🚀",
+    technique: CountingTechnique.SUBTRACTION_COLUMN_MULTI,
+    theme: "space"
+  },
+  {
+    id: "mrs-five-digit-90000-23456-12345",
+    label: "Five-Digit Challenge",
+    prompt: "Three-row five-digit column subtraction for 90000 minus 23456 minus 12345",
+    emoji: "⭐",
+    technique: CountingTechnique.SUBTRACTION_COLUMN_MULTI,
+    theme: "nature"
+  }
+];
+
+export const COLUMN_MULTIPLICATION_PRESETS: AiPreset[] = [
+  {
+    id: "cm-single-321-4",
+    label: "Single Partial Row",
+    prompt: "Column multiplication for 321 times 4 with carrying",
+    emoji: "🔢",
+    technique: CountingTechnique.MULTIPLICATION_COLUMN,
+    theme: "nature"
+  },
+  {
+    id: "cm-partials-234-56",
+    label: "Two Partial Rows",
+    prompt: "Long column multiplication for 234 times 56 using two shifted partial products",
+    emoji: "🧠",
+    technique: CountingTechnique.MULTIPLICATION_COLUMN,
+    theme: "space"
+  },
+  {
+    id: "cm-three-999-123",
+    label: "Three Partial Rows",
+    prompt: "Column multiplication for 999 times 123 using three partial products",
+    emoji: "🚀",
+    technique: CountingTechnique.MULTIPLICATION_COLUMN,
+    theme: "space"
+  },
+  {
+    id: "cm-five-54321-98",
+    label: "Five-Digit Challenge",
+    prompt: "Column multiplication for 54321 times 98 with carrying and shifted partial products",
+    emoji: "⭐",
+    technique: CountingTechnique.MULTIPLICATION_COLUMN,
+    theme: "nature"
+  }
+];
+
 export function getPresetsForTechnique(tech: CountingTechnique): AiPreset[] {
   if (tech === CountingTechnique.ADDITION_TUTOR) {
     return ADDITION_TUTOR_PRESETS;
   }
   if (tech === CountingTechnique.ADDITION_COLUMN) {
     return COLUMN_ADDITION_PRESETS;
+  }
+  if (tech === CountingTechnique.SUBTRACTION_COLUMN) {
+    return COLUMN_SUBTRACTION_PRESETS;
+  }
+  if (tech === CountingTechnique.ADDITION_COLUMN_MULTI) {
+    return MULTI_ROW_COLUMN_ADDITION_PRESETS;
+  }
+  if (tech === CountingTechnique.SUBTRACTION_COLUMN_MULTI) {
+    return MULTI_ROW_COLUMN_SUBTRACTION_PRESETS;
+  }
+  if (tech === CountingTechnique.MULTIPLICATION_COLUMN) {
+    return COLUMN_MULTIPLICATION_PRESETS;
   }
   return MOVE_AND_COUNT_PRESETS;
 }

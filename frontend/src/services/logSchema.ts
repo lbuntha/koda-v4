@@ -67,6 +67,10 @@ export const TECHNIQUE_TAXONOMY: Record<CountingTechnique, { subjectArea: Subjec
   [CountingTechnique.FLEXIBLE_CANVAS]: { subjectArea: "sorting_classification", skillTags: ["classification"] },
   [CountingTechnique.ADDITION_TUTOR]: { subjectArea: "addition", skillTags: ["addition_carrying", "make_ten_regrouping"] },
   [CountingTechnique.ADDITION_COLUMN]: { subjectArea: "addition", skillTags: ["addition_carrying", "multi_digit_column_addition"] },
+  [CountingTechnique.SUBTRACTION_COLUMN]: { subjectArea: "subtraction", skillTags: ["subtraction_borrowing", "multi_digit_column_subtraction"] },
+  [CountingTechnique.ADDITION_COLUMN_MULTI]: { subjectArea: "addition", skillTags: ["addition_carrying", "multi_addend_column_addition"] },
+  [CountingTechnique.SUBTRACTION_COLUMN_MULTI]: { subjectArea: "subtraction", skillTags: ["subtraction_borrowing", "multi_subtrahend_column_subtraction"] },
+  [CountingTechnique.MULTIPLICATION_COLUMN]: { subjectArea: "multiplication", skillTags: ["partial_products", "multi_digit_column_multiplication"] },
 };
 
 export const getTaxonomy = (technique: CountingTechnique) =>
@@ -119,6 +123,10 @@ export interface LearningEvent {
   /** Published curriculum document/revision that supplied this play session. */
   curriculumId?: string;
   curriculumRevision?: number;
+  /** Immutable content snapshot that supplied this question. */
+  releaseId?: string;
+  /** Assigned learning path; populated when assignment delivery is enabled. */
+  assignmentId?: string;
   slideIndex: number;
   totalSlides: number;
 

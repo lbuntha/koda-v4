@@ -25,6 +25,7 @@ import { CreateUserModal } from "./CreateUserModal";
 import { SettingsPage } from "./SettingsPage";
 import { InteractiveStudioPage } from "./InteractiveStudioPage";
 import { CurriculumAdminPage } from "./CurriculumAdminPage";
+import { AssignmentsPage } from "./AssignmentsPage";
 import App from "../App";
 
 const SUBTITLES: Record<string, string> = {
@@ -37,6 +38,7 @@ const SUBTITLES: Record<string, string> = {
   assets: "Create and manage reusable SVG counting assets",
   settings: "Application preferences, AI provider, grades, and subjects",
   curriculum: "Design grades, subjects, units, skills, and linked activities",
+  assignments: "Assign immutable curriculum releases and place students",
 };
 
 /** Data the data-backed content screens share. */
@@ -77,6 +79,7 @@ const CONTENT: Record<string, (ctx: AdminCtx) => React.ReactNode> = {
   studio: (c) => <InteractiveStudioPage onExit={() => c.navigate("overview")} />,
   assets: () => <App embedded initialAdminTab="assets" />,
   curriculum: (c) => <CurriculumAdminPage onOpenAssets={() => c.navigate("assets")} />,
+  assignments: () => <AssignmentsPage />,
   settings: () => <SettingsPage />,
 };
 

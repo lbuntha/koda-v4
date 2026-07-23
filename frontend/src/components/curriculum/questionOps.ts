@@ -10,18 +10,28 @@
  */
 
 import { CountingQuestion, CountingTechnique } from "../../types";
+import { ALL_TECHNIQUES } from "../../techniques";
+import { createQuestionId } from "../../studio/questionIds";
 
-/** Mirrors App.tsx's own addNewQuestion() factory (apple / 5 / One-to-One), plus a skillId stamp. */
+/**
+ * Build a complete question from the selected component's canonical schema.
+ * This keeps Curriculum's Add Question flow aligned with every component's
+ * real defaults instead of giving all techniques the old apple/5/empty-config
+ * One-to-One placeholder.
+ */
 export function createBlankSkillQuestion(technique: CountingTechnique, skillId: string): CountingQuestion {
-  return {
-    id: `q-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    technique,
-    title: "Custom Counting Question",
-    instruction: "Tap each item to count them up!",
-    objectId: "apple",
-    targetCount: 5,
-    skillId,
+  const manifest = ALL_TECHNIQUES.find(item => item.technique === technique);
+  if (!manifest) throw new Error(`Question component is not registered: ${technique}`);
+  const defaults = manifest.schema.validate({
+    targetCount: manifest.defaultTargetCount,
     config: {},
+  }, 0);
+
+  return {
+    ...defaults,
+    id: createQuestionId(),
+    skillId,
+    config: { ...defaults.config },
   };
 }
 

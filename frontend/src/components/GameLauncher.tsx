@@ -35,7 +35,12 @@ interface GameLauncherProps {
   activeId: string;
   setActiveId: (id: string) => void;
   onClose: () => void;
-  learningContext?: { curriculumId: string; curriculumRevision: number };
+  learningContext?: {
+    releaseId: string;
+    curriculumId: string;
+    curriculumRevision: number;
+    assignmentId?: string;
+  };
 }
 
 interface ConfettiParticle {
@@ -76,6 +81,8 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
       curriculumSkillId: q.skillId,
       curriculumId: learningContext?.curriculumId,
       curriculumRevision: learningContext?.curriculumRevision,
+      releaseId: learningContext?.releaseId,
+      assignmentId: learningContext?.assignmentId,
       details: {
         objectId: q.objectId,
         ...(q.config?.customSvgAssetId ? { customSvgAssetId: q.config.customSvgAssetId } : {}),
@@ -103,9 +110,17 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
    * `onAttempt("incorrect", {...})` itself for the diagnostic detail; this
    * bridge only ever reports the eventual correct solve.
    */
-  const handleAttempt = (outcome: AttemptOutcome, detail?: { expected?: string; selected?: string }) => {
+  const handleAttempt = (
+    outcome: AttemptOutcome,
+    detail?: { expected?: string; selected?: string; details?: Record<string, any> },
+  ) => {
     if (!activeQuestion) return;
     analyticsLogger.logAttempt(slideContext(activeQuestion, currentIdx), outcome, detail);
+  };
+
+  const handleHint = (details?: Record<string, any>) => {
+    if (!activeQuestion) return;
+    analyticsLogger.logHintRequested(slideContext(activeQuestion, currentIdx), details);
   };
 
   // Synchronize dynamic CUSTOM_SVG_OBJECT_PLACEHOLDER for the slide player canvas
@@ -212,7 +227,8 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
       showGrid: false,
       isDark,
       onSuccess: handleSuccess,
-      onAttempt: handleAttempt
+      onAttempt: handleAttempt,
+      onHint: handleHint,
     };
 
     const Canvas = CANVAS_BY_TECHNIQUE[activeQuestion.technique] || OneToOneCanvas;

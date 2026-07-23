@@ -198,12 +198,13 @@ class AnalyticsLoggerService {
     });
   }
 
-  public logHintRequested(ctx: SlideContext) {
+  public logHintRequested(ctx: SlideContext, details?: Record<string, any>) {
     this.hintShownSinceView.add(ctx.slideIndex);
     return this.record({
       ...this.baseFields(ctx),
       eventType: "hint_requested",
       actionSummary: `Hint shown on Slide ${ctx.slideIndex + 1}: ${ctx.questionTitle}`,
+      details: { ...ctx.details, ...details },
     });
   }
 
@@ -212,7 +213,11 @@ class AnalyticsLoggerService {
    * attempt, with attempt number, hint context, and diagnostic before/after
    * values — everything computeSkillMastery() needs.
    */
-  public logAttempt(ctx: SlideContext, outcome: AttemptOutcome, detail?: { expected?: string; selected?: string }) {
+  public logAttempt(
+    ctx: SlideContext,
+    outcome: AttemptOutcome,
+    detail?: { expected?: string; selected?: string; details?: Record<string, any> },
+  ) {
     const nextAttempt = (this.attemptCounts.get(ctx.slideIndex) || 0) + 1;
     this.attemptCounts.set(ctx.slideIndex, nextAttempt);
     const openedAt = this.slideOpenedAt.get(ctx.slideIndex);
@@ -233,6 +238,7 @@ class AnalyticsLoggerService {
       expected: detail?.expected,
       selected: detail?.selected,
       errorMagnitude,
+      details: { ...ctx.details, ...detail?.details },
       actionSummary: outcome === "correct"
         ? `Correct! Solved Slide ${ctx.slideIndex + 1}: ${ctx.questionTitle} (attempt ${nextAttempt})`
         : `${outcome === "incorrect" ? "Incorrect" : "Partial"} attempt on Slide ${ctx.slideIndex + 1}: ${ctx.questionTitle} (attempt ${nextAttempt})`,
@@ -341,6 +347,8 @@ interface SlideContext {
   curriculumSkillId?: string;
   curriculumId?: string;
   curriculumRevision?: number;
+  releaseId?: string;
+  assignmentId?: string;
   details?: Record<string, any>;
   slideIndex: number;
   totalSlides: number;

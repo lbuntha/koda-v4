@@ -17,7 +17,17 @@ export interface CanvasProps {
    * *wrong* attempt — e.g. a multiple-choice tap, a mismatched drop — since
    * that detail can't be inferred from onSuccess alone.
    */
-  onAttempt?: (outcome: "correct" | "incorrect" | "partial", detail?: { expected?: string; selected?: string; blankIndex?: number }) => void;
+  onAttempt?: (
+    outcome: "correct" | "incorrect" | "partial",
+    detail?: {
+      expected?: string;
+      selected?: string;
+      blankIndex?: number;
+      details?: Record<string, any>;
+    },
+  ) => void;
+  /** Report an optional student-requested hint with component-specific detail. */
+  onHint?: (details?: Record<string, any>) => void;
 }
 
 export interface Sparkle {

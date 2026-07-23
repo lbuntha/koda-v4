@@ -113,7 +113,7 @@ export function detectTechniqueFromPrompt(prompt: string): ComponentSchema {
   for (const schema of SCHEMA_REGISTRY) {
     let score = 0;
     for (const keyword of schema.triggerKeywords) {
-      if (lower.includes(keyword)) {
+      if (containsKeyword(lower, keyword)) {
         score += keyword.length; // longer keyword = more specific match
       }
     }
@@ -124,6 +124,21 @@ export function detectTechniqueFromPrompt(prompt: string): ComponentSchema {
   }
 
   return bestSchema;
+}
+
+/**
+ * Match complete words/phrases, not arbitrary substrings. Without boundaries,
+ * a harmless prompt such as "create a counting question" matched the
+ * subtraction keyword "eat" inside "create" and was validated against the
+ * wrong component schema.
+ */
+function containsKeyword(prompt: string, keyword: string): boolean {
+  const escaped = keyword
+    .trim()
+    .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+    .replace(/\s+/g, "\\s+");
+  if (!escaped) return false;
+  return new RegExp(`(^|[^a-z0-9])${escaped}(?=$|[^a-z0-9])`, "i").test(prompt);
 }
 
 // ── System Prompt Builder ───────────────────────────────────────────────────

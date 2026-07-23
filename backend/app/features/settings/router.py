@@ -4,10 +4,12 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException, status
 from pymongo.errors import DuplicateKeyError
 
+from ...core.audit import record_audit
 from ...core.config import settings as env_settings
 from ...core.deps import get_current_admin, get_current_user
 from ...core.runtime_settings import get_system_settings, resolve_openai_api_key
 from ...core.security import encrypt_secret
+from ...core.scoring_config import default_scoring_config
 from ...models.user import Role, User
 from ...models.academic import Grade, Subject
 from ...models.audit import ContentAuditEvent
@@ -18,11 +20,14 @@ router = APIRouter(prefix="/settings", tags=["settings"])
 
 
 def _out(doc, api_key: str | None) -> SettingsOut:
+    scoring = doc.scoring or default_scoring_config()
     return SettingsOut(
         sound_enabled=doc.sound_enabled,
         ai_model=doc.ai_model,
         api_key_configured=bool(api_key),
         api_key_hint=f"••••{api_key[-4:]}" if api_key else None,
+        scoring=scoring,
+        scoring_revision=doc.scoring_revision,
     )
 
 
@@ -35,19 +40,63 @@ async def get_settings(user: User = Depends(get_current_user)):
     return output
 
 
+def _settings_snapshot(doc) -> dict:
+    """Audit-safe snapshot — records whether an API key is set, never the key."""
+    return {
+        "sound_enabled": doc.sound_enabled,
+        "ai_model": doc.ai_model,
+        "api_key_set": bool(doc.openai_api_key_encrypted),
+    }
+
+
+def _scoring_snapshot(doc) -> dict:
+    return {
+        "revision": doc.scoring_revision,
+        "config": doc.scoring or default_scoring_config(),
+    }
+
+
 @router.put("", response_model=SettingsOut)
-async def update_settings(body: SettingsUpdate, _: User = Depends(get_current_admin)):
-    if body.ai_model not in ALLOWED_AI_MODELS:
+async def update_settings(body: SettingsUpdate, user: User = Depends(get_current_admin)):
+    if body.ai_model is not None and body.ai_model not in ALLOWED_AI_MODELS:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Unsupported AI model")
     doc = await get_system_settings()
-    doc.sound_enabled = body.sound_enabled
-    doc.ai_model = body.ai_model
+    before = _settings_snapshot(doc)
+    scoring_before = _scoring_snapshot(doc)
+    if body.sound_enabled is not None:
+        doc.sound_enabled = body.sound_enabled
+    if body.ai_model is not None:
+        doc.ai_model = body.ai_model
     if body.clear_api_key:
         doc.openai_api_key_encrypted = None
     elif body.openai_api_key is not None and body.openai_api_key.strip():
         doc.openai_api_key_encrypted = encrypt_secret(body.openai_api_key.strip())
+    if body.scoring is not None:
+        if body.scoring_revision != doc.scoring_revision:
+            raise HTTPException(
+                status.HTTP_409_CONFLICT,
+                "Scoring configuration changed in another session; reload before saving",
+            )
+        doc.scoring = body.scoring.model_dump()
+        doc.scoring_revision += 1
     doc.updated_at = datetime.now(timezone.utc)
     await doc.save()
+    after = _settings_snapshot(doc)
+    if before != after:
+        await record_audit(
+            actor=user, resource_type="system_settings", action="settings_updated",
+            before=before, after=after,
+        )
+    scoring_after = _scoring_snapshot(doc)
+    if scoring_before != scoring_after:
+        await record_audit(
+            actor=user,
+            resource_type="scoring_config",
+            action="scoring_config_updated",
+            revision=doc.scoring_revision,
+            before=scoring_before,
+            after=scoring_after,
+        )
     return _out(doc, await resolve_openai_api_key(doc))
 
 

@@ -8,11 +8,14 @@ from beanie import PydanticObjectId
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from ...models.user import User
-from ...models.content import Curriculum, QuestionDeck, SvgLibrary
+from ...models.content import Curriculum, CurriculumRelease, QuestionDeck, SvgLibrary
 from ...models.academic import Grade, Subject
 from ...models.audit import ContentAuditEvent
 from ...core.deps import get_current_student, get_current_user
 from ...models.student import Student
+from ...models.assignment import Assignment, Placement, ProgressionState
+from .placement import select_delivery_skill_ids
+from .release import ReleaseValidationError, build_release_payload
 from .schemas import CurriculumArchiveIn, CurriculumCreateIn, CurriculumIn, QuestionsIn, SvgLibraryIn
 
 router = APIRouter(tags=["content"])
@@ -372,6 +375,101 @@ async def archive_curriculum(curriculum_id: str, body: CurriculumArchiveIn, user
         )
     return await _curriculum_out(doc, user)
 
+# ── Immutable releases (Phase 0) ─────────────────────────────────────────────
+
+async def _next_release_revision(curriculum_id: str) -> int:
+    """Release revisions are their own monotonic sequence, independent of the
+    draft's mutable `revision` — so an immutable release number never rewinds
+    even if the draft is edited and re-saved between publishes."""
+    latest = (
+        await CurriculumRelease.find(CurriculumRelease.curriculum_id == curriculum_id)
+        .sort("-revision")
+        .first_or_none()
+    )
+    return (latest.revision + 1) if latest else 1
+
+
+async def _publish_release(doc: Curriculum, user: User) -> CurriculumRelease:
+    """Resolve the draft (hydrated tree + owner's questions + assets) into one
+    validated, hashed, immutable `CurriculumRelease`."""
+    owner_id = doc.owner_id
+    resolved_tree = await _resolved_tree(doc.tree)
+    deck = await QuestionDeck.find_one(QuestionDeck.owner_id == owner_id)
+    svg = await SvgLibrary.find_one(SvgLibrary.owner_id == owner_id)
+
+    try:
+        payload = build_release_payload(
+            tree=resolved_tree,
+            questions=deck.questions if deck else [],
+            assets=svg.assets if svg else [],
+        )
+    except ReleaseValidationError as exc:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Cannot publish release: {exc}")
+
+    curriculum_id = await _ensure_curriculum_id(doc)
+    revision = await _next_release_revision(curriculum_id)
+    release = CurriculumRelease(
+        release_id=uuid4().hex,
+        curriculum_id=curriculum_id,
+        owner_id=owner_id,
+        revision=revision,
+        tree=payload["tree"],
+        question_manifest=payload["question_manifest"],
+        asset_manifest=payload["asset_manifest"],
+        content_hashes=payload["content_hashes"],
+        published_by=str(user.id),
+    )
+    await release.insert()
+    await _audit(user, owner_id, "curriculum_release", "published", revision, {
+        "releaseId": release.release_id,
+        "counts": {
+            "skills": len(resolved_tree.get("skills", [])),
+            "questions": len(payload["question_manifest"]),
+            "assets": len(payload["asset_manifest"]),
+        },
+        "contentHashes": payload["content_hashes"],
+    }, curriculum_id)
+    return release
+
+
+def _release_out(release: CurriculumRelease) -> dict:
+    """Summary view — never returns the private `grading` blobs in the manifest."""
+    return {
+        "releaseId": release.release_id,
+        "curriculumId": release.curriculum_id,
+        "revision": release.revision,
+        "questionCount": len(release.question_manifest),
+        "assetCount": len(release.asset_manifest),
+        "contentHashes": release.content_hashes,
+        "publishedBy": release.published_by,
+        "publishedAt": release.published_at,
+    }
+
+
+@router.post("/curricula/{curriculum_id}/releases", status_code=status.HTTP_201_CREATED)
+async def publish_release(curriculum_id: str, user: User = Depends(get_current_user)):
+    doc = await Curriculum.find_one({"curriculum_id": curriculum_id, "owner_id": str(user.id)})
+    if not doc:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Curriculum not found")
+    if doc.archived_at:
+        raise HTTPException(status.HTTP_409_CONFLICT, "Restore this curriculum before publishing")
+    release = await _publish_release(doc, user)
+    return _release_out(release)
+
+
+@router.get("/curricula/{curriculum_id}/releases")
+async def list_releases(curriculum_id: str, user: User = Depends(get_current_user)):
+    owned = await Curriculum.find_one({"curriculum_id": curriculum_id, "owner_id": str(user.id)})
+    if not owned:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Curriculum not found")
+    releases = (
+        await CurriculumRelease.find(CurriculumRelease.curriculum_id == curriculum_id)
+        .sort("-revision")
+        .to_list()
+    )
+    return {"releases": [_release_out(r) for r in releases]}
+
+
 @router.get("/curriculum")
 async def get_curriculum(user: User = Depends(get_current_user)):
     doc = await Curriculum.find({"owner_id": str(user.id), "archived_at": None}).sort("-updated_at").first_or_none()
@@ -473,19 +571,69 @@ async def put_questions(body: QuestionsIn, user: User = Depends(get_current_user
 
 
 @router.get("/learning/curriculum")
-async def get_published_curriculum(_: Student = Depends(get_current_student)):
-    curriculum = await Curriculum.find({"published": True, "archived_at": None}).sort("-updated_at").first_or_none()
-    if not curriculum:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "No published curriculum is available")
-    deck = await QuestionDeck.find_one(QuestionDeck.owner_id == curriculum.owner_id)
-    tree = await _resolved_tree(curriculum.tree)
-    skill_ids = {skill.get("id") for skill in tree.get("skills", [])}
-    questions = [q for q in (deck.questions if deck else []) if q.get("skillId") in skill_ids]
+async def get_published_curriculum(student: Student = Depends(get_current_student)):
+    """Deliver the immutable release and skill selected by the kid's assignment.
+
+    Placement and learning must use the same pinned release. Selecting the newest
+    global release here would make the stored placement irreproducible and could
+    send a student into another teacher's curriculum.
+    """
+    assignments = await Assignment.find(
+        Assignment.student_id == str(student.id),
+        Assignment.status == "active",
+    ).sort("priority", "created_at").to_list()
+    if not assignments:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "No active curriculum assignment is available")
+
+    assignment = assignments[0]
+    release = await CurriculumRelease.find_one(CurriculumRelease.release_id == assignment.release_id)
+    if not release:
+        raise HTTPException(status.HTTP_409_CONFLICT, "The assigned curriculum release is no longer available")
+
+    progression = await ProgressionState.find_one(
+        ProgressionState.student_id == str(student.id),
+        ProgressionState.assignment_id == str(assignment.id),
+    )
+    if assignment.placement_required and not progression:
+        pending = await Placement.find_one(
+            Placement.student_id == str(student.id),
+            Placement.assignment_id == str(assignment.id),
+        )
+        if not pending or pending.status in {"pending", "in_progress"}:
+            raise HTTPException(status.HTTP_409_CONFLICT, "Complete placement before starting this assignment")
+
+    available_skill_ids = {
+        entry.get("skill_id")
+        for entry in release.question_manifest
+        if entry.get("skill_id")
+    }
+    delivery_skill_ids = select_delivery_skill_ids(
+        release.tree,
+        assignment.scope,
+        progression.frontier_skill_id if progression else None,
+        progression.eligible_skill_ids if progression else [],
+        available_skill_ids,
+    )
+    if not delivery_skill_ids:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "The assigned curriculum has no playable questions in scope")
+
+    questions = []
+    for entry in release.question_manifest:
+        if entry.get("skill_id") not in delivery_skill_ids:
+            continue
+        playable = dict(entry.get("playable") or {})
+        playable.setdefault("difficulty", entry.get("difficulty", "medium"))
+        questions.append(playable)
     return {
-        "curriculumId": curriculum.curriculum_id or str(curriculum.id),
-        "revision": curriculum.revision,
-        "tree": tree,
+        "assignmentId": str(assignment.id),
+        "releaseId": release.release_id,
+        "curriculumId": release.curriculum_id,
+        "revision": release.revision,
+        "tree": release.tree,
         "questions": questions,
+        "frontierSkillId": progression.frontier_skill_id if progression else delivery_skill_ids[0],
+        "eligibleSkillIds": progression.eligible_skill_ids if progression else [],
+        "deliverySkillIds": delivery_skill_ids,
     }
 
 

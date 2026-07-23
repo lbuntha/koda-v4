@@ -20,7 +20,11 @@ export enum CountingTechnique {
   KODA_PATTERN = "KODA_PATTERN",
   FLEXIBLE_CANVAS = "FLEXIBLE_CANVAS",
   ADDITION_TUTOR = "ADDITION_TUTOR",
-  ADDITION_COLUMN = "ADDITION_COLUMN"
+  ADDITION_COLUMN = "ADDITION_COLUMN",
+  SUBTRACTION_COLUMN = "SUBTRACTION_COLUMN",
+  ADDITION_COLUMN_MULTI = "ADDITION_COLUMN_MULTI",
+  SUBTRACTION_COLUMN_MULTI = "SUBTRACTION_COLUMN_MULTI",
+  MULTIPLICATION_COLUMN = "MULTIPLICATION_COLUMN"
 }
 
 export interface CountableObject {
@@ -85,6 +89,13 @@ export interface CountingQuestion {
    * of a curriculum yet; every canvas and existing worksheet is unaffected.
    */
   skillId?: string;
+  /**
+   * Standard authored difficulty band. Drives the placement generator's
+   * hard-band sampling and the scoring engine's hard-question gate. The release
+   * publisher (backend release.py `normalize_difficulty`) reads this first, then
+   * falls back to `config.difficulty`, then "medium".
+   */
+  difficulty?: "easy" | "medium" | "hard";
   config: {
     assetType?: string;
     customSvgMarkup?: string;
@@ -126,6 +137,9 @@ export interface CountingQuestion {
     addend1?: number;
     addend2?: number;
     subtrahend?: number;
+    subtrahend2?: number;
+    multiplicand?: number;
+    multiplier?: number;
     minuend?: number;
     rows?: number;
     cols?: number;
@@ -140,6 +154,7 @@ export interface CountingQuestion {
     arrayLayout?: { x: number; y: number; width: number; height: number };
     num1?: number;
     num2?: number;
+    num3?: number;
     /**
      * Addition Tutor: author-defined fluency problems for the final phase.
      * When omitted the canvas derives three problems that match the taught

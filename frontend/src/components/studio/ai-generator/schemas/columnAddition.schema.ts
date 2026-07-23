@@ -4,7 +4,7 @@
  * Defines parameters for the multi-digit vertical column-addition tutor with
  * struggle-triggered guidance. Distinct from the Addition Tutor (base-10 blocks
  * / make-a-ten): this one is the standard written algorithm and scales to
- * 3-digit + 3-digit with carries cascading across columns.
+ * 5-digit + 5-digit with carries cascading across columns.
  */
 
 import { CountingTechnique, SVG_OBJECTS, EMOJI_OBJECTS } from "../../../../types";
@@ -14,7 +14,6 @@ import { COLUMN_ADDITION_PRESETS } from "../presets";
 import {
   buildColumnAdditionModel,
   clampAddend,
-  normaliseChallenges,
   ADDEND_MIN,
   ADDEND_MAX,
 } from "../../../canvases/columnAdditionModel";
@@ -34,13 +33,13 @@ export const columnAdditionSchema: ComponentSchema = {
   name: "Column Addition",
 
   description: `Multi-digit vertical column-addition tutor using the standard written algorithm.
-Handles 1-digit + 1-digit through 3-digit + 3-digit, with carries cascading across the ones, tens and hundreds columns.
+Handles 1-digit + 1-digit through 5-digit + 5-digit, with carries cascading through the ten-thousands column and into a six-digit answer.
 The student fills one answer box per column (right to left); after two wrong checks an animated walkthrough carries the "1" up between columns, narrated by a caption strip. A "Show me how" guide is always available.`,
 
-  promptSummary: "Vertical column addition (up to 3-digit + 3-digit) with per-column answer boxes and a struggle-triggered carrying animation.",
+  promptSummary: "Vertical column addition (up to 5-digit + 5-digit) with place-value labels, per-column answer boxes, and a struggle-triggered carrying animation.",
 
   topLevelFields: {
-    targetCount: { min: 2, max: 1998, default: 31 },
+    targetCount: { min: 0, max: ADDEND_MAX * 2, default: 443 },
   },
 
   configFields: [
@@ -49,7 +48,7 @@ The student fills one answer box per column (right to left); after two wrong che
       label: "First Number",
       type: "number",
       defaultValue: 268,
-      description: `The first addend, ${ADDEND_MIN}-${ADDEND_MAX}. 1-, 2- and 3-digit are all supported.`,
+      description: `The first addend, ${ADDEND_MIN}-${ADDEND_MAX}. One- through five-digit numbers are supported.`,
       required: true,
     },
     {
@@ -59,15 +58,6 @@ The student fills one answer box per column (right to left); after two wrong che
       defaultValue: 175,
       description: `The second addend, ${ADDEND_MIN}-${ADDEND_MAX}. Carries are computed per column automatically.`,
       required: true,
-    },
-    {
-      key: "columnChallenges",
-      label: "Practice Problems",
-      type: "json",
-      jsonShape: '[{"num1":257,"num2":168}]',
-      defaultValue: [],
-      description: "Optional extra practice problems, as [{num1, num2}]. Omit to auto-derive problems matching the first problem's digit shape and carrying.",
-      exposeToAI: false,
     },
     {
       key: "assetType",
@@ -93,7 +83,8 @@ The student fills one answer box per column (right to left); after two wrong che
   triggerKeywords: [
     "column addition", "vertical addition", "standard algorithm", "carrying",
     "carry", "regroup", "regrouping", "add in columns", "long addition",
-    "3 digit", "three digit", "268 + 175", "hundreds", "stacked addition",
+    "3 digit", "three digit", "5 digit", "five digit", "ten-thousands",
+    "268 + 175", "hundreds", "stacked addition",
   ],
 
   exampleOutput: {
@@ -117,7 +108,6 @@ The student fills one answer box per column (right to left); after two wrong che
     const num2 = clampAddend(raw.config?.num2 ?? 175);
     const objectId = VALID_ASSET_IDS.includes(raw.objectId) ? raw.objectId : "apple";
     const frameColor = VALID_COLORS.includes(raw.config?.frameColor) ? raw.config.frameColor : "indigo";
-    const columnChallenges = normaliseChallenges(raw.config?.columnChallenges);
     const model = buildColumnAdditionModel(num1, num2);
 
     return {
@@ -132,7 +122,6 @@ The student fills one answer box per column (right to left); after two wrong che
         num2,
         assetType: objectId,
         frameColor,
-        ...(columnChallenges.length > 0 ? { columnChallenges } : {}),
       },
     };
   },

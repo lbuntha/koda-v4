@@ -4,10 +4,15 @@ import type { CountingQuestion } from "../types";
 import type { LearningEvent } from "../services/logSchema";
 
 export interface PublishedCurriculum {
+  assignmentId: string;
+  releaseId: string;
   curriculumId: string;
   revision: number;
   tree: CurriculumTree;
   questions: CountingQuestion[];
+  frontierSkillId: string | null;
+  eligibleSkillIds: string[];
+  deliverySkillIds: string[];
 }
 
 export const learningApi = {

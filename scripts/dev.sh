@@ -59,11 +59,13 @@ ensure_mongo() {
 # ── Backend provisioning ─────────────────────────────────────────────────────
 ensure_backend() {
   if [ ! -d "$BACKEND/.venv" ]; then
-    say "first run: creating backend venv + installing deps (this is a one-time step)…"
+    say "first run: creating backend venv…"
     python3 -m venv "$BACKEND/.venv" || { err "failed to create venv"; return 1; }
     "$BACKEND/.venv/bin/pip" install -q --upgrade pip
-    "$BACKEND/.venv/bin/pip" install -q -r "$BACKEND/requirements.txt" || { err "pip install failed"; return 1; }
   fi
+  # Requirements evolve after the venv is created. Keep it synchronized on
+  # every launch so newly declared packages are not missing at API import time.
+  "$BACKEND/.venv/bin/pip" install -q -r "$BACKEND/requirements.txt" || { err "pip install failed"; return 1; }
   if [ ! -f "$BACKEND/.env" ]; then
     cp "$BACKEND/.env.example" "$BACKEND/.env"
     if command -v openssl >/dev/null 2>&1; then

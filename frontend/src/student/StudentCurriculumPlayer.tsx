@@ -5,25 +5,39 @@ import { useAuth } from "../auth/AuthContext";
 import { GameLauncher } from "../components/GameLauncher";
 import { Button } from "../components/ui";
 import { analyticsLogger } from "../services/analyticsLogger";
+import { placementApi, PlacementQuiz } from "../api/placement";
+import { PlacementWarmup } from "./PlacementWarmup";
 
 export const StudentCurriculumPlayer: React.FC = () => {
   const { account, playSession, endChildPlay, logout } = useAuth();
   const [curriculum, setCurriculum] = useState<PublishedCurriculum | null>(null);
   const [activeId, setActiveId] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [placement, setPlacement] = useState<PlacementQuiz | null>(null);
 
   useEffect(() => {
     if (!account?.id) return;
     analyticsLogger.enableServerSync(account.id);
-    void learningApi.curriculum().then(
-      data => {
-        setCurriculum(data);
-        setActiveId(data.questions[0]?.id || "");
-      },
-      reason => setError(reason instanceof Error ? reason.message : "Unable to load curriculum"),
-    );
+    void placementApi.quiz().then(async quiz => {
+      if (quiz.status === "pending" && quiz.items.length > 0) {
+        setPlacement(quiz);
+        return;
+      }
+      const data = await learningApi.curriculum();
+      setCurriculum(data);
+      setActiveId(data.questions[0]?.id || "");
+    }).catch(reason => setError(reason instanceof Error ? reason.message : "Unable to load learning content"));
     return () => analyticsLogger.disableServerSync();
   }, [account?.id]);
+
+  const finishPlacement = () => {
+    setPlacement(null);
+    setError(null);
+    void learningApi.curriculum().then(data => {
+      setCurriculum(data);
+      setActiveId(data.questions[0]?.id || "");
+    }).catch(reason => setError(reason instanceof Error ? reason.message : "Unable to load curriculum"));
+  };
 
   const orderedQuestions = useMemo(() => {
     if (!curriculum) return [];
@@ -59,6 +73,7 @@ export const StudentCurriculumPlayer: React.FC = () => {
       </div>
     );
   }
+  if (placement) return <PlacementWarmup quiz={placement} onComplete={finishPlacement} />;
   if (!curriculum || !activeId) return <div className="flex min-h-screen items-center justify-center bg-[#FBFAFF]"><Loader2 className="animate-spin text-[#534AB7]" /></div>;
 
   return (
@@ -67,7 +82,12 @@ export const StudentCurriculumPlayer: React.FC = () => {
       activeId={activeId}
       setActiveId={setActiveId}
       onClose={() => void exit()}
-      learningContext={{ curriculumId: curriculum.curriculumId, curriculumRevision: curriculum.revision }}
+      learningContext={{
+        assignmentId: curriculum.assignmentId,
+        releaseId: curriculum.releaseId,
+        curriculumId: curriculum.curriculumId,
+        curriculumRevision: curriculum.revision,
+      }}
     />
   );
 };

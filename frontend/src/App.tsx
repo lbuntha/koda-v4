@@ -321,9 +321,20 @@ export default function App({ embedded = false, initialAdminTab = "dashboard", o
   // Add multiple slides to the deck (used by AI Generator)
   const addSlides = (newSlides: CountingQuestion[]) => {
     if (newSlides.length === 0) return;
+    // The MongoDB deck requires unique, non-empty ids. Provider ids are not
+    // trusted here because this is the final shared boundary for both the
+    // OpenAI and offline generators.
+    const usedIds = new Set(questions.map((question) => question.id));
+    const safeSlides = newSlides.map((slide) => {
+      let id = slide.id?.trim();
+      if (!id || id.length > 120 || usedIds.has(id)) id = createQuestionId("q-ai");
+      while (usedIds.has(id)) id = createQuestionId("q-ai");
+      usedIds.add(id);
+      return id === slide.id ? slide : { ...slide, id };
+    });
     const activeIdx = questions.findIndex(q => q.id === activeId);
     const updated = [...questions];
-    updated.splice(activeIdx + 1, 0, ...newSlides);
+    updated.splice(activeIdx + 1, 0, ...safeSlides);
     saveQuestions(updated);
   };
 
@@ -346,19 +357,23 @@ export default function App({ embedded = false, initialAdminTab = "dashboard", o
     setIsSuccess(false);
   };
 
-  // Delete active question
-  const deleteActive = () => {
+  const deleteQuestion = (questionId: string) => {
     if (questions.length <= 1) return; // keep at least one
     sounds.playFailure();
-    const activeIdx = questions.findIndex(q => q.id === activeId);
-    const updated = questions.filter(q => q.id !== activeId);
+    const deletedIdx = questions.findIndex(q => q.id === questionId);
+    if (deletedIdx < 0) return;
+    const updated = questions.filter(q => q.id !== questionId);
     saveQuestions(updated);
-    
-    // Select next logical question
-    const nextIdx = activeIdx === 0 ? 0 : activeIdx - 1;
-    setActiveId(updated[nextIdx].id);
+
+    if (activeId === questionId) {
+      const nextIdx = Math.min(deletedIdx, updated.length - 1);
+      setActiveId(updated[nextIdx].id);
+    }
     setIsSuccess(false);
   };
+
+  // Delete active question
+  const deleteActive = () => deleteQuestion(activeId);
 
   // Reorder worksheet deck (slide up/down)
   const moveQuestion = (direction: "up" | "down") => {
@@ -390,8 +405,15 @@ export default function App({ embedded = false, initialAdminTab = "dashboard", o
 
   // Update specific field on the active question
   const updateActiveQuestion = (fields: Partial<CountingQuestion>) => {
+    // During initial MongoDB hydration activeQuestion already falls back to
+    // the first row, while activeId is set on the following effect. Applying
+    // AI in that small window must still update the visible question.
+    const targetId = questions.some((question) => question.id === activeId)
+      ? activeId
+      : activeQuestion?.id;
+    if (!targetId) return;
     const updated = questions.map(q => {
-      if (q.id !== activeId) return q;
+      if (q.id !== targetId) return q;
       const updatedQ = { ...q, ...fields } as CountingQuestion;
 
       // Handle self-consistent adjustments for specific techniques when counts change
@@ -1251,6 +1273,7 @@ export default function App({ embedded = false, initialAdminTab = "dashboard", o
               sounds.playPop();
             }}
             onAddQuestion={(technique) => addNewQuestion(technique)}
+            onDeleteQuestion={deleteQuestion}
           />
         </div>
 

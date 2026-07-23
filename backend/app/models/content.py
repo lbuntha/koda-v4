@@ -8,6 +8,7 @@ from typing import Any
 from beanie import Document
 from pydantic import Field
 from pymongo import IndexModel
+from ..core.scoring_config import default_scoring_config
 
 
 def _now() -> datetime:
@@ -29,6 +30,37 @@ class Curriculum(Document):
         indexes = [
             IndexModel("curriculum_id", unique=True),
             IndexModel([("owner_id", 1), ("updated_at", -1)]),
+        ]
+
+
+class CurriculumRelease(Document):
+    """Immutable published snapshot of a curriculum (Phase 0).
+
+    The editable `Curriculum`, `QuestionDeck`, and `SvgLibrary` above stay as
+    drafts; publishing resolves and validates them into ONE frozen release that
+    every assignment, placement, and learning event points back to. Manifests and
+    hashes are produced by `features/content/release.build_release_payload`; this
+    document only adds identity and persistence. Nothing here is edited after
+    insert — a change is a new release, never a mutation.
+    """
+
+    release_id: str                       # immutable public identifier
+    curriculum_id: str                    # stable identity across releases
+    owner_id: str
+    revision: int
+    tree: dict[str, Any]                  # immutable tree snapshot
+    question_manifest: list[dict[str, Any]]  # playable snapshots + private grading + hashes
+    asset_manifest: list[dict[str, Any]]     # asset snapshots + hashes
+    content_hashes: dict[str, str]        # {tree, questions, assets}
+    published_by: str
+    published_at: datetime = Field(default_factory=_now)
+
+    class Settings:
+        name = "curriculum_releases"
+        indexes = [
+            IndexModel("release_id", unique=True),
+            IndexModel([("curriculum_id", 1), ("revision", 1)], unique=True),
+            IndexModel([("owner_id", 1), ("published_at", -1)]),
         ]
 
 
@@ -62,6 +94,8 @@ class SystemSettings(Document):
     sound_enabled: bool = True
     ai_model: str = "gpt-4o-mini"
     openai_api_key_encrypted: str | None = None
+    scoring: dict[str, Any] = Field(default_factory=default_scoring_config)
+    scoring_revision: int = 1
     updated_at: datetime = Field(default_factory=_now)
 
     class Settings:

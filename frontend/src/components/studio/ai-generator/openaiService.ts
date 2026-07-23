@@ -4,6 +4,7 @@ import { api } from "../../../api/client";
 import { ParsedSlideConfig } from "./types";
 import { AI_CONFIG } from "./config";
 import { detectTechniqueFromPrompt, buildSystemPrompt } from "./schemas";
+import type { ComponentSchema } from "./schemas";
 import type { CustomSvgAsset } from "../../../types";
 
 interface ChatCompletionResponse {
@@ -13,7 +14,7 @@ interface ChatCompletionResponse {
 export async function generateWithAI(
   prompt: string,
   count: number = 1,
-  existingQuestions: Array<{ title: string; objectId: string; targetCount: number }> = [],
+  existingQuestions: Array<{ id?: string; title: string; objectId: string; targetCount: number }> = [],
   customAssets: CustomSvgAsset[] = []
 ): Promise<ParsedSlideConfig[]> {
   const schema = detectTechniqueFromPrompt(prompt);
@@ -53,16 +54,91 @@ export async function generateWithAI(
 
   try {
     const result = JSON.parse(cleanJson);
-    const parsed = Array.isArray(result)
-      ? result
-      : Array.isArray(result?.slides)
-        ? result.slides
-        : [result];
-    return parsed.map((item, index) => applyCustomAssetSelection(item, schema.validate(item, index), customAssets));
+    return normalizeGeneratedSlides(
+      result,
+      schema,
+      customAssets,
+      existingQuestions.flatMap((question) => question.id ? [question.id] : []),
+    );
   } catch (cause) {
     if (cause instanceof SyntaxError) throw new Error("AI returned invalid JSON. Please try again.");
     throw cause;
   }
+}
+
+/**
+ * Convert the common JSON shapes returned by providers into complete,
+ * MongoDB-safe question rows. Keeping this boundary strict means Apply never
+ * sends a wrapper object, a missing field, an overlong id, or a duplicate id
+ * into the question deck.
+ */
+export function normalizeGeneratedSlides(
+  result: unknown,
+  schema: ComponentSchema,
+  customAssets: CustomSvgAsset[] = [],
+  reservedIds: string[] = [],
+): ParsedSlideConfig[] {
+  const items = extractGeneratedItems(result);
+  if (items.length === 0) throw new Error("AI returned no questions. Please try again.");
+
+  const usedIds = new Set(reservedIds);
+  return items.map((item, index) => {
+    const validated = applyCustomAssetSelection(item, schema.validate(item, index), customAssets);
+    const missing = [
+      !validated.title?.trim() && "title",
+      !validated.technique && "technique",
+      !validated.instruction?.trim() && "instruction",
+      !validated.objectId?.trim() && "objectId",
+      (!Number.isFinite(validated.targetCount) || validated.targetCount <= 0) && "targetCount",
+      (!validated.config || typeof validated.config !== "object" || Array.isArray(validated.config)) && "config",
+    ].filter(Boolean);
+    if (missing.length > 0) {
+      throw new Error(`Generated question ${index + 1} is missing required schema fields: ${missing.join(", ")}.`);
+    }
+
+    return {
+      ...validated,
+      id: uniqueQuestionId(validated.id, usedIds, index),
+      title: validated.title.trim(),
+      instruction: validated.instruction.trim(),
+      config: { ...validated.config },
+    };
+  });
+}
+
+function extractGeneratedItems(result: unknown): Record<string, unknown>[] {
+  if (Array.isArray(result)) return result.filter(isRecord);
+  if (!isRecord(result)) throw new Error("AI returned an unsupported question schema.");
+
+  for (const key of ["slides", "questions"] as const) {
+    const value = result[key];
+    if (Array.isArray(value)) return value.filter(isRecord);
+  }
+  for (const key of ["slide", "question"] as const) {
+    const value = result[key];
+    if (isRecord(value)) return [value];
+  }
+  if ("title" in result || "instruction" in result || "config" in result) return [result];
+  throw new Error("AI response did not contain a slide or question object.");
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
+
+function uniqueQuestionId(preferred: unknown, usedIds: Set<string>, index: number): string {
+  const preferredId = typeof preferred === "string" ? preferred.trim() : "";
+  const base = preferredId && preferredId.length <= 120
+    ? preferredId
+    : `q-ai-${Date.now()}-${index}`;
+  let candidate = base;
+  let suffix = 2;
+  while (usedIds.has(candidate)) {
+    const tail = `-${suffix++}`;
+    candidate = `${base.slice(0, 120 - tail.length)}${tail}`;
+  }
+  usedIds.add(candidate);
+  return candidate;
 }
 
 export function applyCustomAssetSelection(

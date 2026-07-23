@@ -4,6 +4,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
 
 from .config import settings
+from .scoring_config import default_scoring_config
 from ..models import ALL_MODELS
 
 _client: AsyncIOMotorClient | None = None
@@ -25,6 +26,15 @@ async def init_db() -> None:
     await curriculum.update_many(
         {"curriculum_id": {"$exists": False}},
         [{"$set": {"curriculum_id": {"$toString": "$_id"}}}],
+    )
+    system_settings = database["system_settings"]
+    await system_settings.update_many(
+        {"scoring": {"$exists": False}},
+        {"$set": {"scoring": default_scoring_config(), "scoring_revision": 1}},
+    )
+    await system_settings.update_many(
+        {"scoring_revision": {"$exists": False}},
+        {"$set": {"scoring_revision": 1}},
     )
     audit_events = database["content_audit_events"]
     for legacy in await curriculum.find({}, {"owner_id": 1, "curriculum_id": 1}).to_list(length=None):
