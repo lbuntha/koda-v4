@@ -23,6 +23,8 @@ export interface Account {
   email?: string;
   family_code?: string | null;
   avatar?: string | null;
+  /** Per-user menu ids granted on top of the role's menus (admin-assignable). */
+  menu_ids?: string[] | null;
 }
 
 function store(pair: TokenPair): TokenPair {
@@ -31,7 +33,7 @@ function store(pair: TokenPair): TokenPair {
 }
 
 export const authApi = {
-  registerAdult: (body: { role: "parent" | "teacher" | "admin"; email: string; password: string; name: string }) =>
+  registerAdult: (body: { role: "parent" | "teacher"; email: string; password: string; name: string }) =>
     api.post<TokenPair>("/auth/register", body).then(store),
 
   login: (email: string, password: string) =>

@@ -2,11 +2,9 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Persists `LearningEvent`s (services/logSchema.ts) to localStorage today.
- * The storage layer is the ONLY thing that should need to change to move to
- * a real backend — swap `loadFromStorage`/`saveToStorage`/`logEvent` for
- * fetch calls against your API; every consumer (GameLauncher,
- * AnalyticsViewerModal) talks to this service, never to localStorage directly.
+ * Persists a local history for instant teacher feedback and, during an
+ * authenticated student curriculum session, mirrors events through a durable
+ * outbox to MongoDB. Consumers never write storage or call the API directly.
  */
 
 import {
@@ -17,10 +15,12 @@ import {
   CURRENT_SCHEMA_VERSION,
   computeSkillMastery,
 } from "./logSchema";
+import { learningApi } from "../api/learning";
 
 const STORAGE_KEY = "koda_learning_events_v1";
 const SESSION_KEY = "koda_session_id_v1";
 const MAX_LOG_HISTORY = 1000;
+const OUTBOX_PREFIX = "koda_learning_event_outbox_v1";
 
 type LogSubscriber = (events: LearningEvent[]) => void;
 
@@ -46,9 +46,61 @@ class AnalyticsLoggerService {
   private sessionId = getSessionId();
   /** Null until GameLauncher has a real "who is playing" picker — see the note at the bottom of curriculum/types.ts. Settable now so wiring that picker later is a one-line call, not a re-plumb. */
   private currentStudentId: string | null = null;
+  private serverSyncStudentId: string | null = null;
+  private outbox: LearningEvent[] = [];
+  private syncTimer: number | null = null;
+  private flushing = false;
 
   public setCurrentStudent(studentId: string | null) {
     this.currentStudentId = studentId;
+  }
+
+  public enableServerSync(studentId: string) {
+    this.currentStudentId = studentId;
+    this.serverSyncStudentId = studentId;
+    try {
+      const parsed = JSON.parse(localStorage.getItem(`${OUTBOX_PREFIX}:${studentId}`) || "[]");
+      this.outbox = Array.isArray(parsed) ? parsed : [];
+    } catch { this.outbox = []; }
+    void this.flush();
+  }
+
+  public disableServerSync() {
+    this.serverSyncStudentId = null;
+    this.currentStudentId = null;
+    if (this.syncTimer !== null) window.clearTimeout(this.syncTimer);
+    this.syncTimer = null;
+  }
+
+  private saveOutbox() {
+    if (!this.serverSyncStudentId) return;
+    try { localStorage.setItem(`${OUTBOX_PREFIX}:${this.serverSyncStudentId}`, JSON.stringify(this.outbox)); } catch { /* retry remains in memory */ }
+  }
+
+  private scheduleFlush() {
+    if (!this.serverSyncStudentId || this.syncTimer !== null) return;
+    this.syncTimer = window.setTimeout(() => {
+      this.syncTimer = null;
+      void this.flush();
+    }, 800);
+  }
+
+  public async flush(): Promise<void> {
+    if (!this.serverSyncStudentId || this.flushing || this.outbox.length === 0) return;
+    this.flushing = true;
+    try {
+      while (this.outbox.length > 0 && this.serverSyncStudentId) {
+        const batch = this.outbox.slice(0, 50);
+        await learningApi.ingestEvents(batch);
+        const sentIds = new Set(batch.map(event => event.id));
+        this.outbox = this.outbox.filter(event => !sentIds.has(event.id));
+        this.saveOutbox();
+      }
+    } catch {
+      this.saveOutbox();
+    } finally {
+      this.flushing = false;
+    }
   }
   /** slideIndex -> ms timestamp the slide was opened, for timeOnTaskMs. */
   private slideOpenedAt = new Map<number, number>();
@@ -58,6 +110,9 @@ class AnalyticsLoggerService {
 
   constructor() {
     this.loadFromStorage();
+    if (typeof window !== "undefined") {
+      window.addEventListener("online", () => void this.flush());
+    }
   }
 
   private loadFromStorage() {
@@ -114,6 +169,11 @@ class AnalyticsLoggerService {
       ...partial,
     };
     this.events = [event, ...this.events].slice(0, MAX_LOG_HISTORY);
+    if (this.serverSyncStudentId) {
+      this.outbox.push(event);
+      this.saveOutbox();
+      this.scheduleFlush();
+    }
     this.saveToStorage();
     this.notifySubscribers();
     return event;
@@ -279,6 +339,9 @@ interface SlideContext {
   skillTags: LearningEvent["skillTags"];
   /** From question.skillId — present only for curated, curriculum-mapped questions. */
   curriculumSkillId?: string;
+  curriculumId?: string;
+  curriculumRevision?: number;
+  details?: Record<string, any>;
   slideIndex: number;
   totalSlides: number;
   questionTitle: string;

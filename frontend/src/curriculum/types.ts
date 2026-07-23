@@ -28,6 +28,10 @@ export interface Grade {
   id: string;      // "grade-1"
   label: string;   // "Grade 1"
   order: number;
+  description?: string;
+  ageRange?: string;
+  code?: string;
+  active?: boolean;
 }
 
 export interface Subject {
@@ -35,6 +39,11 @@ export interface Subject {
   gradeId: string;  // FK -> Grade.id
   label: string;    // "Math"
   order: number;
+  description?: string;
+  code?: string;
+  icon?: string;
+  color?: string;
+  active?: boolean;
 }
 
 export interface Unit {
@@ -42,6 +51,8 @@ export interface Unit {
   subjectId: string;  // FK -> Subject.id
   label: string;      // "Unit 1"
   order: number;
+  description?: string;
+  learningObjectives?: string[];
 }
 
 export interface Skill {
@@ -57,6 +68,13 @@ export interface Skill {
 }
 
 export interface CurriculumTree {
+  id?: string;
+  title?: string;
+  description?: string;
+  version?: string;
+  /** Primary catalog context shown when Curriculum Studio opens. */
+  primaryGradeId?: string;
+  primarySubjectId?: string;
   grades: Grade[];
   subjects: Subject[];
   units: Unit[];
@@ -81,6 +99,26 @@ export interface Student {
 }
 
 export const DEFAULT_MIN_QUESTIONS = 10;
+
+/**
+ * Curriculum subjects that at least one question type can actually serve.
+ * Every technique in logSchema.ts's TECHNIQUE_TAXONOMY is a counting/math
+ * interaction today, so only Math is served — a Language Arts or Art skill can
+ * be authored in the tree but has no playable question type behind it yet.
+ *
+ * This is the ONE place the studio checks. When a non-math technique lands
+ * (a phonics game, say), add that subject's code (or label) here — don't
+ * re-hardcode the check at the call site. Entries are matched
+ * case-insensitively against a Subject's stable `code` first, then its `label`,
+ * so renaming a subject's display label alone won't silently break coverage.
+ */
+export const SUBJECT_KEYS_WITH_QUESTION_SUPPORT = new Set(["math"]);
+
+export function subjectHasQuestionSupport(subject: Pick<Subject, "code" | "label">): boolean {
+  const code = subject.code?.trim().toLowerCase();
+  if (code && SUBJECT_KEYS_WITH_QUESTION_SUPPORT.has(code)) return true;
+  return SUBJECT_KEYS_WITH_QUESTION_SUPPORT.has(subject.label.trim().toLowerCase());
+}
 
 // ── Tree lookups ──────────────────────────────────────────────────────────
 
@@ -267,17 +305,7 @@ export function computeCurriculumMastery(events: LearningEvent[], tree: Curricul
 /**
  * ── The one missing link ──────────────────────────────────────────────
  *
- * Nothing in the app today identifies a student. GameLauncher plays a
- * question set with no "who is playing" concept, so every LearningEvent's
- * studentId (services/logSchema.ts) is always null — sessions are
- * anonymous, tracked only by a random per-tab sessionId. The existing
- * "Copy Student Link" button (App.tsx) copies a generic `?mode=game` URL
- * today; it doesn't actually encode a student.
- *
- * To close the loop for real: GameLauncher needs a `currentStudent: Student
- * | null` passed in, sourced either from a `?student=<id>` query param (so
- * "Copy Student Link" becomes genuinely per-student) or a one-time roster
- * picker shown before play starts when no id is present. Once that exists,
- * analyticsLogger's `record()` stamps the real id instead of null, and
- * every LearningEvent this session produces belongs to a real learner.
+ * StudentCurriculumPlayer now supplies the authenticated learner plus the
+ * published curriculum id/revision. GameLauncher adds the question's skillId,
+ * and the server always replaces the payload student id with the token owner.
  */

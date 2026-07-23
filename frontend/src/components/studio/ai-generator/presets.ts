@@ -149,9 +149,47 @@ export const ADDITION_TUTOR_PRESETS: AiPreset[] = [
   }
 ];
 
+export const COLUMN_ADDITION_PRESETS: AiPreset[] = [
+  {
+    id: "ca-hundreds-268-175",
+    label: "Carry Twice (268 + 175)",
+    prompt: "A column addition problem for 268 + 175 that carries in the ones and the tens",
+    emoji: "🔢",
+    technique: CountingTechnique.ADDITION_COLUMN,
+    theme: "space"
+  },
+  {
+    id: "ca-tens-18-13",
+    label: "First Carry (18 + 13)",
+    prompt: "A two-digit column addition for 18 plus 13 that carries one ten",
+    emoji: "🍎",
+    technique: CountingTechnique.ADDITION_COLUMN,
+    theme: "nature"
+  },
+  {
+    id: "ca-nocarry-321-56",
+    label: "No Carry (321 + 56)",
+    prompt: "A three-digit plus two-digit column addition for 321 + 56 with no carrying",
+    emoji: "🧱",
+    technique: CountingTechnique.ADDITION_COLUMN,
+    theme: "nature"
+  },
+  {
+    id: "ca-big-457-386",
+    label: "Big Carry (457 + 386)",
+    prompt: "A three-digit column addition for 457 plus 386 that carries across every column",
+    emoji: "🚀",
+    technique: CountingTechnique.ADDITION_COLUMN,
+    theme: "space"
+  }
+];
+
 export function getPresetsForTechnique(tech: CountingTechnique): AiPreset[] {
   if (tech === CountingTechnique.ADDITION_TUTOR) {
     return ADDITION_TUTOR_PRESETS;
+  }
+  if (tech === CountingTechnique.ADDITION_COLUMN) {
+    return COLUMN_ADDITION_PRESETS;
   }
   return MOVE_AND_COUNT_PRESETS;
 }

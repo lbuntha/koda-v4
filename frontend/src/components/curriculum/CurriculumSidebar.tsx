@@ -15,9 +15,10 @@
  */
 
 import React, { useState } from "react";
-import { BookOpen, Plus, Pencil, AlertTriangle, Search } from "lucide-react";
-import { Select, Input, Badge } from "../ui";
-import { CurriculumTree, Grade, Subject, Unit, Skill, SkillCoverage } from "../../curriculum/types";
+import { BookOpen, Plus, Pencil, AlertTriangle, Search, Cloud, CloudOff, Loader2, Send } from "lucide-react";
+import { Select, Input, Badge, Button } from "../ui";
+import { CurriculumTree, Grade, Subject, Unit, Skill, SkillCoverage, subjectHasQuestionSupport } from "../../curriculum/types";
+import { CurriculumPersistenceStatus } from "../../curriculum/useCurriculumTree";
 
 interface CurriculumSidebarProps {
   tree: CurriculumTree;
@@ -27,18 +28,19 @@ interface CurriculumSidebarProps {
   selectedSkillId: string | null;
   coverageBySkillId: Map<string, SkillCoverage>;
   issueCount: number;
+  persistenceStatus: CurriculumPersistenceStatus;
+  published: boolean;
+  onTogglePublished: () => void;
   onSelectGrade: (gradeId: string) => void;
   onSelectSubject: (subjectId: string) => void;
   onSelectUnit: (unitId: string) => void;
   onSelectSkill: (skillId: string) => void;
   onAddUnit: (label: string) => void;
   onAddSkill: (unitId: string, label: string) => void;
-  onEditSkill: (skill: Skill) => void;
+  onEditUnit: (unitId: string, label: string) => void;
+  onEditSkill: (skillId: string, label: string) => void;
   onOpenHealthDrawer: () => void;
 }
-
-/** Subjects with real technique support today vs. legitimate-but-unserved tree entries (Language Arts, Art, ...). */
-const SUBJECTS_WITH_TECHNIQUES = new Set(["Math"]);
 
 export const CurriculumSidebar: React.FC<CurriculumSidebarProps> = ({
   tree,
@@ -48,12 +50,16 @@ export const CurriculumSidebar: React.FC<CurriculumSidebarProps> = ({
   selectedSkillId,
   coverageBySkillId,
   issueCount,
+  persistenceStatus,
+  published,
+  onTogglePublished,
   onSelectGrade,
   onSelectSubject,
   onSelectUnit,
   onSelectSkill,
   onAddUnit,
   onAddSkill,
+  onEditUnit,
   onEditSkill,
   onOpenHealthDrawer,
 }) => {
@@ -61,11 +67,14 @@ export const CurriculumSidebar: React.FC<CurriculumSidebarProps> = ({
   const [addingUnitLabel, setAddingUnitLabel] = useState<string | null>(null);
   const [addingSkillFor, setAddingSkillFor] = useState<string | null>(null);
   const [draftLabel, setDraftLabel] = useState("");
+  const [editingUnitId, setEditingUnitId] = useState<string | null>(null);
+  const [editingSkillId, setEditingSkillId] = useState<string | null>(null);
+  const [editLabel, setEditLabel] = useState("");
 
   const subjects = tree.subjects.filter(s => s.gradeId === selectedGradeId);
   const units = tree.units.filter(u => u.subjectId === selectedSubjectId).sort((a, b) => a.order - b.order);
   const selectedSubject = tree.subjects.find(s => s.id === selectedSubjectId);
-  const subjectHasTechniques = selectedSubject ? SUBJECTS_WITH_TECHNIQUES.has(selectedSubject.label) : true;
+  const subjectHasTechniques = selectedSubject ? subjectHasQuestionSupport(selectedSubject) : true;
 
   const matchesQuery = (label: string) => !query.trim() || label.toLowerCase().includes(query.trim().toLowerCase());
 
@@ -81,6 +90,24 @@ export const CurriculumSidebar: React.FC<CurriculumSidebarProps> = ({
     setDraftLabel("");
   };
 
+  const cancelEdit = () => {
+    setEditingUnitId(null);
+    setEditingSkillId(null);
+    setEditLabel("");
+  };
+
+  const commitEditUnit = (unit: Unit) => {
+    const label = editLabel.trim();
+    if (label && label !== unit.label) onEditUnit(unit.id, label);
+    cancelEdit();
+  };
+
+  const commitEditSkill = (skill: Skill) => {
+    const label = editLabel.trim();
+    if (label && label !== skill.label) onEditSkill(skill.id, label);
+    cancelEdit();
+  };
+
   return (
     <aside className="w-full md:w-72 bg-white border-b md:border-b-0 md:border-r border-slate-200 flex flex-col shrink-0 overflow-hidden">
       {/* Brand */}
@@ -90,7 +117,10 @@ export const CurriculumSidebar: React.FC<CurriculumSidebarProps> = ({
         </div>
         <div className="min-w-0">
           <h2 className="text-xs font-extrabold text-slate-800 leading-none">Curriculum Studio</h2>
-          <span className="text-[9px] font-mono uppercase tracking-widest text-slate-400">Learn with Koda</span>
+          <span className="flex items-center gap-1 text-[9px] font-mono uppercase tracking-widest text-slate-400">
+            {persistenceStatus === "loading" || persistenceStatus === "saving" ? <Loader2 size={9} className="animate-spin" /> : persistenceStatus === "error" ? <CloudOff size={9} /> : <Cloud size={9} />}
+            {persistenceStatus === "loading" ? "Loading" : persistenceStatus === "saving" ? "Saving" : persistenceStatus === "error" ? "Offline cache" : "MongoDB saved"}
+          </span>
         </div>
       </div>
 
@@ -145,24 +175,46 @@ export const CurriculumSidebar: React.FC<CurriculumSidebarProps> = ({
 
           return (
             <div key={unit.id} className="mb-1">
-              <button
-                onClick={() => onSelectUnit(unit.id)}
-                className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left cursor-pointer transition-colors ${
-                  isUnitActive ? "bg-indigo-50" : "hover:bg-slate-50"
-                }`}
-              >
-                <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 20 20">
-                  <circle cx="10" cy="10" r="8" fill="none" stroke="#E2E8F0" strokeWidth="2.6" />
-                  {skills.length > 0 && (
-                    <circle
-                      cx="10" cy="10" r="8" fill="none" stroke={ringPct === 1 ? "#0E9F6E" : "#C2760C"} strokeWidth="2.6"
-                      strokeDasharray={`${ringPct * 50.3} 50.3`} strokeLinecap="round" transform="rotate(-90 10 10)"
-                    />
-                  )}
-                </svg>
-                <span className="text-xs font-bold text-slate-700 flex-1 truncate">{unit.label}</span>
-                <span className="text-[10px] font-mono text-slate-400 flex-shrink-0">{completeCount}/{skills.length}</span>
-              </button>
+              {editingUnitId === unit.id ? (
+                <Input
+                  autoFocus
+                  value={editLabel}
+                  onChange={(e) => setEditLabel(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); e.currentTarget.blur(); } if (e.key === "Escape") cancelEdit(); }}
+                  onBlur={() => commitEditUnit(unit)}
+                  placeholder="Unit name…"
+                  aria-label={`Edit ${unit.label}`}
+                  className="h-8"
+                />
+              ) : (
+                <div className={`group flex w-full items-center rounded-lg transition-colors ${isUnitActive ? "bg-indigo-50" : "hover:bg-slate-50"}`}>
+                  <button
+                    type="button"
+                    onClick={() => onSelectUnit(unit.id)}
+                    className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 px-2 py-1.5 text-left"
+                  >
+                    <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 20 20">
+                      <circle cx="10" cy="10" r="8" fill="none" stroke="#E2E8F0" strokeWidth="2.6" />
+                      {skills.length > 0 && (
+                        <circle
+                          cx="10" cy="10" r="8" fill="none" stroke={ringPct === 1 ? "#0E9F6E" : "#C2760C"} strokeWidth="2.6"
+                          strokeDasharray={`${ringPct * 50.3} 50.3`} strokeLinecap="round" transform="rotate(-90 10 10)"
+                        />
+                      )}
+                    </svg>
+                    <span className="flex-1 truncate text-xs font-bold text-slate-700">{unit.label}</span>
+                    <span className="flex-shrink-0 font-mono text-[10px] text-slate-400">{completeCount}/{skills.length}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setEditingUnitId(unit.id); setEditingSkillId(null); setEditLabel(unit.label); }}
+                    className="mr-1 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md text-slate-400 opacity-0 transition-opacity hover:bg-white hover:text-indigo-600 focus:opacity-100 group-hover:opacity-100"
+                    aria-label={`Edit ${unit.label}`}
+                  >
+                    <Pencil size={12} />
+                  </button>
+                </div>
+              )}
 
               <div className="ml-4 pl-2 border-l border-slate-100 space-y-0.5 mt-0.5">
                 {skills.map(skill => {
@@ -170,30 +222,46 @@ export const CurriculumSidebar: React.FC<CurriculumSidebarProps> = ({
                   const isActive = selectedSkillId === skill.id;
                   const dotColor = !cov || cov.questionCount === 0 ? "bg-slate-300" : cov.isComplete ? "bg-emerald-500" : "bg-amber-500";
                   return (
-                    <div
-                      key={skill.id}
-                      className={`group flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer transition-colors ${
-                        isActive ? "bg-indigo-600" : "hover:bg-slate-50"
-                      }`}
-                      onClick={() => onSelectSkill(skill.id)}
-                    >
-                      <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isActive ? "bg-white" : dotColor}`} />
-                      <span className={`text-[11.5px] flex-1 truncate ${isActive ? "text-white font-bold" : "text-slate-600"}`}>
-                        {skill.label}
-                      </span>
-                      <Badge
-                        variant={cov?.isComplete ? "success" : "warning"}
-                        className={`text-[9px] px-1.5 py-0 flex-shrink-0 ${isActive ? "bg-white/20 text-white border-white/30" : ""}`}
+                    editingSkillId === skill.id ? (
+                      <Input
+                        key={skill.id}
+                        autoFocus
+                        value={editLabel}
+                        onChange={(e) => setEditLabel(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); e.currentTarget.blur(); } if (e.key === "Escape") cancelEdit(); }}
+                        onBlur={() => commitEditSkill(skill)}
+                        placeholder="Skill name…"
+                        aria-label={`Edit ${skill.label}`}
+                        className="h-8"
+                      />
+                    ) : (
+                      <div
+                        key={skill.id}
+                        className={`group flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer transition-colors ${
+                          isActive ? "bg-indigo-600" : "hover:bg-slate-50"
+                        }`}
+                        onClick={() => onSelectSkill(skill.id)}
                       >
-                        {cov?.questionCount ?? 0}/{cov?.minQuestions ?? skill.minQuestions}
-                      </Badge>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); onEditSkill(skill); }}
-                        className={`flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? "text-white/80" : "text-slate-400"}`}
-                      >
-                        <Pencil size={11} />
-                      </button>
-                    </div>
+                        <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isActive ? "bg-white" : dotColor}`} />
+                        <span className={`text-[11.5px] flex-1 truncate ${isActive ? "text-white font-bold" : "text-slate-600"}`}>
+                          {skill.label}
+                        </span>
+                        <Badge
+                          variant={cov?.isComplete ? "success" : "warning"}
+                          className={`text-[9px] px-1.5 py-0 flex-shrink-0 ${isActive ? "bg-white/20 text-white border-white/30" : ""}`}
+                        >
+                          {cov?.questionCount ?? 0}/{cov?.minQuestions ?? skill.minQuestions}
+                        </Badge>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setEditingSkillId(skill.id); setEditingUnitId(null); setEditLabel(skill.label); }}
+                          className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md opacity-0 transition-opacity focus:opacity-100 group-hover:opacity-100 ${isActive ? "text-white/80 hover:bg-white/10" : "text-slate-400 hover:bg-white hover:text-indigo-600"}`}
+                          aria-label={`Edit ${skill.label}`}
+                        >
+                          <Pencil size={11} />
+                        </button>
+                      </div>
+                    )
                   );
                 })}
 
@@ -242,6 +310,15 @@ export const CurriculumSidebar: React.FC<CurriculumSidebarProps> = ({
 
       {/* Health badge */}
       <div className="p-3 border-t border-slate-100">
+        <Button
+          size="sm"
+          variant={published ? "outline" : "default"}
+          className="mb-2 w-full"
+          onClick={onTogglePublished}
+          disabled={persistenceStatus === "loading" || persistenceStatus === "saving"}
+        >
+          <Send size={12} /> {published ? "Published" : "Publish curriculum"}
+        </Button>
         <button
           onClick={onOpenHealthDrawer}
           disabled={issueCount === 0}

@@ -13,6 +13,12 @@ import { CountingTechnique, CountingQuestion } from "../types";
 import { CurriculumTree } from "./types";
 
 export const EXAMPLE_TREE: CurriculumTree = {
+  id: "koda-primary-math",
+  title: "Koda Primary Mathematics",
+  description: "Interactive foundational mathematics curriculum.",
+  version: "1.0",
+  primaryGradeId: "grade-1",
+  primarySubjectId: "grade-1-math",
   grades: [
     { id: "grade-1", label: "Grade 1", order: 1 },
   ],

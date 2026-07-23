@@ -19,7 +19,8 @@ export enum CountingTechnique {
   KODA_SUDOKU = "KODA_SUDOKU",
   KODA_PATTERN = "KODA_PATTERN",
   FLEXIBLE_CANVAS = "FLEXIBLE_CANVAS",
-  ADDITION_TUTOR = "ADDITION_TUTOR"
+  ADDITION_TUTOR = "ADDITION_TUTOR",
+  ADDITION_COLUMN = "ADDITION_COLUMN"
 }
 
 export interface CountableObject {
@@ -87,6 +88,7 @@ export interface CountingQuestion {
   config: {
     assetType?: string;
     customSvgMarkup?: string;
+    customSvgAssetId?: string;
     customSvgLabel?: string;
     customSvgScale?: number;
     baseCount?: number;
@@ -144,6 +146,12 @@ export interface CountingQuestion {
      * problem's digit shape and regrouping behaviour.
      */
     tutorChallenges?: { num1: number; num2: number }[];
+    /**
+     * Column Addition: optional extra practice problems for the standard
+     * vertical algorithm. When omitted the canvas derives problems that match
+     * the authored problem's digit shape and carrying behaviour.
+     */
+    columnChallenges?: { num1: number; num2: number }[];
     // Flexible Canvas features
     flexibleMode?: "multichoice" | "textinput" | "dragmatch" | "tapcount";
     flexibleBgStyle?: "clean" | "board" | "grid" | "stars" | "meadow";

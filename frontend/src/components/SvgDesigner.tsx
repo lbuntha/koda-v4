@@ -1,8 +1,13 @@
 import React, { useState } from "react";
-import { Plus, Trash2, Code, Sparkles, Sliders, Check, FolderHeart, Wrench, Tag, Maximize2, Info, Copy, RotateCcw } from "lucide-react";
+import { Plus, Trash2, Code, Sparkles, Sliders, Check, FolderHeart, Tag, Maximize2, Info, Copy, RotateCcw } from "lucide-react";
 import { CustomSvgAsset, CountingQuestion } from "../types";
 import { CountingAsset } from "./Assets";
 import { sounds } from "../sound";
+import { Button, Card, Tabs, TabsContent, TabsList, TabsTrigger } from "./ui";
+import { useSvgLibrary } from "../assets/SvgLibraryContext";
+import { SvgLibraryAsset } from "../assets/SvgLibraryAsset";
+import { isSafeSvgMarkup } from "../assets/svgSafety";
+import { createSvgAssetId } from "../assets/svgIds";
 
 const STARTER_TEMPLATES = [
   {
@@ -155,27 +160,30 @@ export function preprocessSvgMarkup(svgMarkup: string): string {
 }
 
 interface SvgDesignerProps {
-  customSvgs: CustomSvgAsset[];
-  setCustomSvgs: (assets: CustomSvgAsset[]) => void;
   questions?: CountingQuestion[];
   setQuestions?: (qs: CountingQuestion[]) => void;
-  svgOverrides?: Record<string, { markup: string; scale: number }>;
-  setSvgOverrides?: (overrides: Record<string, { markup: string; scale: number }>) => void;
+  flush?: boolean;
 }
 
 export const SvgDesigner: React.FC<SvgDesignerProps> = ({ 
-  customSvgs, 
-  setCustomSvgs,
   questions,
   setQuestions,
-  svgOverrides = {},
-  setSvgOverrides
+  flush = false,
 }) => {
+  const {
+    assets: customSvgs,
+    setAssets: setCustomSvgs,
+    overrides: svgOverrides,
+    setOverrides: setSvgOverrides,
+    persistenceStatus,
+  } = useSvgLibrary();
   const [labelInput, setLabelInput] = useState("");
   const [markupInput, setMarkupInput] = useState("");
   const [scaleInput, setScaleInput] = useState(1.0);
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
+  const [libraryTab, setLibraryTab] = useState<"assets" | "built-in">("assets");
   const [notification, setNotification] = useState<string | null>(null);
+  const [isResetting, setIsResetting] = useState(false);
 
   const triggerNotification = (msg: string) => {
     setNotification(msg);
@@ -191,6 +199,10 @@ export const SvgDesigner: React.FC<SvgDesignerProps> = ({
       triggerNotification("⚠️ Please paste valid SVG markup starting with <svg>.");
       return;
     }
+    if (!isSafeSvgMarkup(markupInput)) {
+      triggerNotification("⚠️ Remove scripts, event handlers, or embedded content from the SVG.");
+      return;
+    }
 
     sounds.playSuccess();
     const processedMarkup = preprocessSvgMarkup(markupInput);
@@ -198,15 +210,12 @@ export const SvgDesigner: React.FC<SvgDesignerProps> = ({
     if (selectedAssetId && selectedAssetId.startsWith("override_")) {
       // Overriding a built-in SVG
       const type = selectedAssetId.replace("override_", "");
-      if (setSvgOverrides) {
-        const updated = {
-          ...svgOverrides,
-          [type]: { markup: processedMarkup, scale: scaleInput }
-        };
-        setSvgOverrides(updated);
-        localStorage.setItem("koda_svg_overrides", JSON.stringify(updated));
-        triggerNotification(`✅ Overrode built-in ${labelInput}!`);
-      }
+      const updated = {
+        ...svgOverrides,
+        [type]: { markup: processedMarkup, scale: scaleInput }
+      };
+      setSvgOverrides(updated);
+      triggerNotification(`✅ Overrode built-in ${labelInput}!`);
     } else if (selectedAssetId) {
       // Editing existing custom asset
       const oldAsset = customSvgs.find(a => a.id === selectedAssetId);
@@ -216,12 +225,12 @@ export const SvgDesigner: React.FC<SvgDesignerProps> = ({
           : a
       );
       setCustomSvgs(updated);
-      localStorage.setItem("koda_custom_svg_assets", JSON.stringify(updated));
 
       // Propagate edits to any slide using this custom SVG in the workspace
       if (questions && setQuestions && oldAsset) {
         const updatedQuestions = questions.map(q => {
           const isMatch = q.objectId === "custom_svg" && (
+            q.config?.customSvgAssetId === oldAsset.id ||
             q.config?.customSvgLabel === oldAsset.label ||
             q.config?.customSvgMarkup === oldAsset.markup
           );
@@ -230,6 +239,7 @@ export const SvgDesigner: React.FC<SvgDesignerProps> = ({
               ...q,
               config: {
                 ...q.config,
+                customSvgAssetId: oldAsset.id,
                 customSvgLabel: labelInput.trim(),
                 customSvgMarkup: processedMarkup,
                 customSvgScale: scaleInput
@@ -246,14 +256,13 @@ export const SvgDesigner: React.FC<SvgDesignerProps> = ({
     } else {
       // Creating new custom asset
       const newAsset: CustomSvgAsset = {
-        id: `custom_svg_${Date.now()}`,
+        id: createSvgAssetId(),
         label: labelInput.trim(),
         markup: processedMarkup,
         scale: scaleInput
       };
       const updated = [...customSvgs, newAsset];
       setCustomSvgs(updated);
-      localStorage.setItem("koda_custom_svg_assets", JSON.stringify(updated));
       setSelectedAssetId(newAsset.id);
       triggerNotification("🎉 Asset added to library!");
     }
@@ -264,7 +273,6 @@ export const SvgDesigner: React.FC<SvgDesignerProps> = ({
     sounds.playPop();
     const updated = customSvgs.filter(a => a.id !== id);
     setCustomSvgs(updated);
-    localStorage.setItem("koda_custom_svg_assets", JSON.stringify(updated));
     if (selectedAssetId === id) {
       handleClear();
     }
@@ -272,14 +280,13 @@ export const SvgDesigner: React.FC<SvgDesignerProps> = ({
   };
 
   const handleResetOverride = () => {
-    if (!selectedAssetId || !selectedAssetId.startsWith("override_") || !setSvgOverrides) return;
+    if (!selectedAssetId || !selectedAssetId.startsWith("override_")) return;
     sounds.playPop();
     const type = selectedAssetId.replace("override_", "");
     
     const updated = { ...svgOverrides };
     delete updated[type];
     setSvgOverrides(updated);
-    localStorage.setItem("koda_svg_overrides", JSON.stringify(updated));
 
     const defaultTpl = STARTER_TEMPLATES.find(t => t.id === `tpl_${type}`);
     if (defaultTpl) {
@@ -296,6 +303,12 @@ export const SvgDesigner: React.FC<SvgDesignerProps> = ({
     setMarkupInput("");
     setScaleInput(1.0);
     setSelectedAssetId(null);
+  };
+
+  const handleResetForm = () => {
+    setIsResetting(true);
+    handleClear();
+    window.setTimeout(() => setIsResetting(false), 350);
   };
 
   const selectAsset = (asset: { id?: string; label: string; markup: string; scale: number }) => {
@@ -321,28 +334,48 @@ export const SvgDesigner: React.FC<SvgDesignerProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col md:flex-row h-full overflow-hidden bg-slate-50 text-slate-800 p-6 gap-6">
+    <div className={`flex-1 flex flex-col xl:grid xl:grid-cols-[17rem_minmax(0,1fr)_19rem] h-full overflow-y-auto xl:overflow-hidden bg-indigo-50/30 text-slate-800 ${flush ? "p-0 gap-3" : "p-3 gap-4 md:p-4"}`}>
       
       {/* LEFT PANEL: Asset Library List & Templates */}
-      <div className="w-full md:w-80 flex flex-col bg-white border border-slate-200/80 rounded-2xl p-4 overflow-hidden shadow-sm gap-4 shrink-0">
-        
-        {/* Custom Library */}
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <div className="flex items-center justify-between mb-3 shrink-0">
-            <div>
-              <h3 className="text-xs font-extrabold text-slate-800 flex items-center gap-1.5 uppercase tracking-wider">
-                <FolderHeart size={14} className="text-indigo-600" /> My Custom SVGs
-              </h3>
-            </div>
-            <button
-              onClick={handleClear}
-              className="p-1 px-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 rounded-lg text-indigo-600 transition-all cursor-pointer text-[10px] font-bold flex items-center gap-0.5"
-            >
-              <Plus size={10} /> New
-            </button>
+      <Card className={`w-full xl:w-auto xl:min-h-0 flex flex-col p-3 overflow-hidden gap-3 shrink-0 ${flush ? "rounded-none" : ""}`}>
+        <div className="flex shrink-0 items-start justify-between gap-2">
+          <div className="min-w-0">
+            <h3 className="flex items-center gap-2 text-xs font-semibold text-slate-800">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-[10px] font-semibold text-indigo-700">1</span>
+              SVG library
+            </h3>
+            <p className="mt-1 pl-7 text-[10px] text-slate-500">Choose an asset or start a new one</p>
           </div>
+          <Button
+            onClick={() => {
+              setLibraryTab("assets");
+              handleClear();
+            }}
+            variant="secondary"
+            size="xs"
+            className="shrink-0 whitespace-nowrap text-indigo-600"
+          >
+            <Plus size={10} /> New
+          </Button>
+        </div>
 
-          <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+        <Tabs
+          value={libraryTab}
+          onValueChange={value => setLibraryTab(value as "assets" | "built-in")}
+          variant="underline"
+          className="flex min-h-0 flex-1 flex-col"
+        >
+          <TabsList className="shrink-0 gap-3 px-0" aria-label="SVG library sections">
+            <TabsTrigger value="assets" className="flex-1 justify-start py-2 text-[11px]">
+              <FolderHeart size={13} /> Asset library
+            </TabsTrigger>
+            <TabsTrigger value="built-in" className="flex-1 justify-start py-2 text-[11px]">
+              <Sparkles size={13} /> Built-in SVGs
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="assets" className="min-h-0 flex-1 overflow-y-auto pt-2 pr-1">
+            <div className="space-y-1.5">
             {customSvgs.length === 0 ? (
               <div className="h-28 flex flex-col items-center justify-center text-center p-3 border border-dashed border-slate-200 rounded-xl text-slate-400">
                 <FolderHeart size={20} className="mb-1 text-slate-300" />
@@ -353,10 +386,11 @@ export const SvgDesigner: React.FC<SvgDesignerProps> = ({
               customSvgs.map((asset) => {
                 const isSelected = selectedAssetId === asset.id;
                 return (
-                  <div
+                  <Card
+                    interactive
                     key={asset.id}
                     onClick={() => selectAsset(asset)}
-                    className={`group p-2.5 border rounded-xl flex items-center justify-between transition-all cursor-pointer ${
+                    className={`group p-2 rounded-xl flex items-center justify-between ${
                       isSelected
                         ? "bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-600/10"
                         : "bg-slate-50/50 border-slate-200/70 text-slate-700 hover:bg-slate-50 hover:border-slate-300"
@@ -364,18 +398,20 @@ export const SvgDesigner: React.FC<SvgDesignerProps> = ({
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
-                        <CountingAsset type="custom_svg" customSvgMarkup={asset.markup} scale={asset.scale} size={22} />
+                        <SvgLibraryAsset assetId={asset.id} size={22} />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs font-extrabold truncate leading-tight">{asset.label}</p>
+                        <p className="text-xs font-semibold truncate leading-tight">{asset.label}</p>
                         <p className={`text-[9px] font-mono mt-0.5 ${isSelected ? "text-indigo-200" : "text-slate-400"}`}>
                           Scale: {Math.round(asset.scale * 100)}%
                         </p>
                       </div>
                     </div>
-                    <button
+                    <Button
                       onClick={(e) => handleDelete(asset.id, e)}
-                      className={`p-1 rounded-lg border cursor-pointer opacity-0 group-hover:opacity-100 transition-all ${
+                      variant="outline"
+                      size="xs"
+                      className={`h-7 w-7 px-0 opacity-0 group-hover:opacity-100 ${
                         isSelected
                           ? "bg-indigo-700/50 hover:bg-indigo-800/50 border-indigo-500 text-indigo-100 hover:text-white"
                           : "bg-white hover:bg-red-50 border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-200"
@@ -383,80 +419,94 @@ export const SvgDesigner: React.FC<SvgDesignerProps> = ({
                       title="Delete Asset"
                     >
                       <Trash2 size={10} />
-                    </button>
-                  </div>
+                    </Button>
+                  </Card>
                 );
               })
             )}
-          </div>
-        </div>
+            </div>
+          </TabsContent>
 
-        {/* Built-in Templates (Override) */}
-        <div className="flex flex-col h-56 border-t border-slate-100 pt-3 shrink-0">
-          <h3 className="text-xs font-extrabold text-slate-500 flex items-center gap-1.5 uppercase tracking-wider mb-2">
-            <Sparkles size={14} className="text-amber-500 animate-pulse" /> Override Built-in SVGs
-          </h3>
-          <div className="flex-1 overflow-y-auto space-y-1.5 pr-1">
-            {STARTER_TEMPLATES.map((tpl) => {
-              const type = tpl.id.replace("tpl_", "");
-              const isOverridden = !!svgOverrides[type];
-              const isSelected = selectedAssetId === `override_${type}`;
-              return (
-                <div
-                  key={tpl.id}
-                  onClick={() => selectBuiltInAsset(type, tpl.label, tpl.markup)}
-                  className={`p-2 border rounded-xl flex items-center justify-between transition-all cursor-pointer ${
-                    isSelected 
-                      ? "bg-slate-100 border-indigo-300"
-                      : "bg-slate-50/30 border-slate-200 hover:bg-slate-50 hover:border-slate-300"
-                  }`}
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
-                      <CountingAsset type={type as any} size={22} />
+          <TabsContent value="built-in" className="min-h-0 flex-1 overflow-y-auto pt-2 pr-1">
+            <div className="space-y-1.5">
+              {STARTER_TEMPLATES.map((tpl) => {
+                const type = tpl.id.replace("tpl_", "");
+                const isOverridden = !!svgOverrides[type];
+                const isSelected = selectedAssetId === `override_${type}`;
+                return (
+                  <Card
+                    interactive
+                    key={tpl.id}
+                    onClick={() => selectBuiltInAsset(type, tpl.label, tpl.markup)}
+                    className={`p-2 rounded-xl flex items-center justify-between ${
+                      isSelected
+                        ? "bg-slate-100 border-indigo-300"
+                        : "bg-slate-50/30 border-slate-200 hover:bg-slate-50 hover:border-slate-300"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
+                        <CountingAsset type={type as any} size={22} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[11px] font-semibold text-slate-700 truncate">{tpl.label}</p>
+                        <p className="text-[8px] text-slate-400">Click to customize</p>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-[11px] font-extrabold text-slate-700 truncate">{tpl.label}</p>
-                      <p className="text-[8px] text-slate-400">Click to customize</p>
-                    </div>
-                  </div>
-                  {isOverridden && (
-                    <span className="text-[8px] bg-green-50 text-green-600 font-bold border border-green-200 px-1 rounded uppercase tracking-wide">
-                      Active
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+                    {isOverridden && (
+                      <span className="text-[8px] bg-green-50 text-green-600 font-bold border border-green-200 px-1 rounded uppercase tracking-wide">
+                        Active
+                      </span>
+                    )}
+                  </Card>
+                );
+              })}
+            </div>
+          </TabsContent>
+        </Tabs>
 
-      </div>
+      </Card>
 
       {/* CENTER & RIGHT PANEL: Workspace Editor & Card Preview */}
-      <div className="flex-1 flex flex-col lg:flex-row gap-6 overflow-y-auto">
+      <div className="contents">
         
         {/* Editor Settings Form */}
-        <div className="flex-1 bg-white border border-slate-200/80 rounded-2xl p-5 flex flex-col gap-4 shadow-sm">
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-            <Wrench size={16} className="text-indigo-600" />
-            <div>
-              <h3 className="text-sm font-extrabold text-slate-800">
+        <Card className={`min-w-0 p-4 flex flex-col gap-3 ${flush ? "rounded-none" : ""}`}>
+          <div className="flex items-start gap-2.5 border-b border-slate-100 pb-2.5">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-[10px] font-semibold text-indigo-700">2</span>
+            <div className="min-w-0">
+              <h3 className="text-sm font-semibold text-slate-800">
                 {selectedAssetId && selectedAssetId.startsWith("override_") 
                   ? `Override Built-in ${labelInput}` 
                   : selectedAssetId 
                   ? "Edit Custom Asset" 
                   : "Build Custom Asset"}
               </h3>
-              <p className="text-[10px] text-slate-400 font-semibold mt-0.5">
+              <p className="text-[10px] text-slate-500 mt-0.5">
                 Convert any SVG markup into a high-quality responsive object
               </p>
             </div>
+            <span
+              className={`ml-auto shrink-0 rounded-full border px-2 py-1 text-[9px] font-medium ${
+                persistenceStatus === "error"
+                  ? "border-rose-200 bg-rose-50 text-rose-700"
+                  : persistenceStatus === "saved"
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                    : "border-indigo-200 bg-indigo-50 text-indigo-700"
+              }`}
+              title={persistenceStatus === "error" ? "MongoDB unavailable; changes remain cached locally" : undefined}
+            >
+              {persistenceStatus === "loading" && "Loading…"}
+              {persistenceStatus === "saving" && "Saving…"}
+              {persistenceStatus === "saved" && "MongoDB"}
+              {persistenceStatus === "error" && "Local cache"}
+              {persistenceStatus === "local" && "Local"}
+            </span>
           </div>
 
-          <div className="space-y-3.5">
+          <div className="space-y-3">
             <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-extrabold text-slate-600 flex items-center gap-1.5">
+              <label className="text-[11px] font-medium text-slate-600 flex items-center gap-1.5">
                 <Tag size={12} className="text-slate-400" /> Asset Name / Label
               </label>
               <input
@@ -470,7 +520,7 @@ export const SvgDesigner: React.FC<SvgDesignerProps> = ({
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-extrabold text-slate-600 flex items-center justify-between">
+              <label className="text-[11px] font-medium text-slate-600 flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
                   <Maximize2 size={12} className="text-slate-400" /> Sizing Scale Factor
                 </span>
@@ -496,7 +546,7 @@ export const SvgDesigner: React.FC<SvgDesignerProps> = ({
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-extrabold text-slate-600 flex items-center gap-1">
+              <label className="text-[11px] font-medium text-slate-600 flex items-center gap-1">
                 <Code size={12} /> SVG Source Code
               </label>
               <textarea
@@ -512,72 +562,87 @@ export const SvgDesigner: React.FC<SvgDesignerProps> = ({
             </div>
           </div>
 
-          <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between gap-2 shrink-0">
-            <button
-              onClick={handleClear}
-              className="px-3.5 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all cursor-pointer"
+          <div className="mt-auto pt-2.5 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 shrink-0">
+            <Button
+              onClick={handleResetForm}
+              variant="outline"
+              size="icon"
+              className="h-9 w-9"
+              title="Reset form"
+              aria-label="Reset form"
+              loading={isResetting}
             >
-              Reset Form
-            </button>
-            <div className="flex items-center gap-2">
+              <RotateCcw size={14} />
+            </Button>
+            <div className="flex flex-wrap items-center justify-end gap-2">
               {selectedAssetId && selectedAssetId.startsWith("override_") && (
-                <button
+                <Button
                   onClick={handleResetOverride}
-                  className="px-3.5 py-2.5 border border-red-200 rounded-xl text-xs font-bold text-red-600 hover:text-red-700 hover:bg-red-50 transition-all cursor-pointer flex items-center gap-1"
+                  variant="outline"
+                  size="sm"
+                  className="border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700"
                 >
                   <RotateCcw size={12} /> Reset to Default
-                </button>
+                </Button>
               )}
               {selectedAssetId && !selectedAssetId.startsWith("override_") && (
-                <button
+                <Button
                   onClick={() => {
+                    const label = labelInput.trim();
+                    if (!label) {
+                      triggerNotification("Add an asset name before saving a copy.");
+                      return;
+                    }
+                    if (!isSafeSvgMarkup(markupInput)) {
+                      triggerNotification("This SVG contains unsupported or unsafe markup.");
+                      return;
+                    }
                     sounds.playSuccess();
                     const newAsset: CustomSvgAsset = {
-                      id: `custom_svg_${Date.now()}`,
-                      label: `${labelInput.trim()} Copy`,
+                      id: createSvgAssetId(),
+                      label: `${label} Copy`,
                       markup: preprocessSvgMarkup(markupInput),
                       scale: scaleInput
                     };
                     const updated = [...customSvgs, newAsset];
                     setCustomSvgs(updated);
-                    localStorage.setItem("koda_custom_svg_assets", JSON.stringify(updated));
                     setSelectedAssetId(newAsset.id);
                     setLabelInput(newAsset.label);
                     triggerNotification("🎉 Saved as a new copy!");
                   }}
-                  className="px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition-all cursor-pointer flex items-center gap-1"
+                  variant="outline"
+                  size="sm"
                 >
                   <Copy size={12} /> Save as Copy
-                </button>
+                </Button>
               )}
-              <button
+              <Button
                 onClick={handleSave}
-                className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/10 cursor-pointer flex items-center gap-1.5 hover:scale-[1.02] transition-all"
+                size="sm"
+                loading={persistenceStatus === "saving"}
+                loadingText="Saving..."
               >
                 <Check size={14} /> {selectedAssetId && selectedAssetId.startsWith("override_") ? "Override Default" : selectedAssetId ? "Save Changes" : "Save to Library"}
-              </button>
+              </Button>
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Live Card Preview Simulator */}
-        <div className="w-full lg:w-80 bg-white border border-slate-200/80 rounded-2xl p-5 flex flex-col gap-4 shadow-sm select-none">
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-            <Sparkles className="text-amber-500 animate-pulse" size={16} />
-            <div>
-              <h3 className="text-sm font-extrabold text-slate-800">Live Simulator Preview</h3>
-              <p className="text-[10px] text-slate-400 font-semibold mt-0.5">
+        <Card className={`w-full xl:w-auto p-4 flex flex-col gap-3 select-none ${flush ? "rounded-none" : ""}`}>
+          <div className="flex items-start gap-2.5 border-b border-slate-100 pb-2.5">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-[10px] font-semibold text-indigo-700">3</span>
+            <div className="min-w-0">
+              <h3 className="text-sm font-semibold text-slate-800">Live Simulator Preview</h3>
+              <p className="text-[10px] text-slate-500 mt-0.5">
                 Real-time scaling & display simulation
               </p>
             </div>
           </div>
 
-          <div className="flex-1 flex flex-col items-center justify-center p-6 bg-slate-50/50 border border-slate-200/70 rounded-xl relative overflow-hidden min-h-[220px]">
+          <div className="flex-1 flex flex-col items-center justify-center p-4 bg-slate-50/50 border border-slate-200/70 rounded-xl relative overflow-hidden min-h-[220px]">
             {/* Display grid grid-lines backdrop to simulate workspace */}
-            <div className="absolute inset-0 opacity-[0.05] pointer-events-none" style={{
-              backgroundImage: "linear-gradient(to right, #000000 1px, transparent 1px), linear-gradient(to bottom, #000000 1px, transparent 1px)",
-              backgroundSize: "20px 20px"
-            }} />
+            <div className="absolute inset-0 opacity-[0.05] pointer-events-none [background-image:linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] [background-size:20px_20px]" />
 
             {markupInput.trim().toLowerCase().startsWith("<svg") ? (
               <div className="flex flex-col items-center gap-4">
@@ -606,7 +671,7 @@ export const SvgDesigner: React.FC<SvgDesignerProps> = ({
 
           {/* Sizing guides */}
           <div className="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200/60">
-            <h4 className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+            <h4 className="text-[10px] font-semibold text-slate-500 flex items-center gap-1">
               <Info size={12} className="text-slate-400" /> Sizing Guide
             </h4>
             <ul className="text-[9px] text-slate-400 space-y-1 leading-normal list-disc list-inside">
@@ -615,15 +680,15 @@ export const SvgDesigner: React.FC<SvgDesignerProps> = ({
               <li>If it overflows or sits off-center, verify the `viewBox` coordinates.</li>
             </ul>
           </div>
-        </div>
+        </Card>
 
       </div>
 
       {/* Floating Action Notifications */}
       {notification && (
-        <div className="fixed bottom-6 right-6 px-4 py-2.5 bg-white border border-indigo-100 text-slate-700 rounded-xl shadow-xl flex items-center gap-2 text-xs font-extrabold z-[9999] animate-slide-in">
+        <Card className="fixed bottom-6 right-6 px-4 py-2.5 border-indigo-100 text-slate-700 rounded-xl shadow-xl flex items-center gap-2 text-xs font-semibold z-[9999] animate-slide-in">
           {notification}
-        </div>
+        </Card>
       )}
     </div>
   );

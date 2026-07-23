@@ -418,7 +418,7 @@ export const AnalyticsViewerModal: React.FC<AnalyticsViewerModalProps> = ({
               : <><strong>{mastery.length}</strong> tracked skills</>
             }
           </span>
-          <span>💾 localStorage today (<code className="font-mono">koda_learning_events_v1</code>) — schema is DB-ready, see services/logSchema.ts</span>
+          <span>💾 Local live cache with authenticated student sessions synchronized to MongoDB</span>
         </div>
       </div>
     </div>

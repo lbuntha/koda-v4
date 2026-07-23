@@ -40,4 +40,4 @@ Interactive API docs: http://localhost:8000/docs
 | `services/analyticsLogger.ts` | `POST /events`, `GET /events` |
 | `curriculum/useCurriculumTree.ts` | `GET/PUT /curriculum` |
 | the question deck | `GET/PUT /questions` |
-| `ai-generator/openaiService.ts` (browser key) | `POST /ai/generate` (key server-side) |
+| `ai-generator/openaiService.ts` | `POST /ai/generate` (encrypted/server-side key) |

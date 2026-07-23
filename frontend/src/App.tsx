@@ -5,11 +5,12 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "motion/react";
-import { CountingQuestion, CountingTechnique, COUNT_OBJECTS, SVG_OBJECTS, EMOJI_OBJECTS, CUSTOM_SVG_OBJECT_PLACEHOLDER, CustomSvgAsset } from "./types";
-import { CountingAsset, SVG_OVERRIDES_CACHE } from "./components/Assets";
+import { CountingQuestion, CountingTechnique, COUNT_OBJECTS, SVG_OBJECTS, EMOJI_OBJECTS, CUSTOM_SVG_OBJECT_PLACEHOLDER } from "./types";
+import { CountingAsset } from "./components/Assets";
 import { SvgDesigner } from "./components/SvgDesigner";
 import { DEFAULT_QUESTIONS } from "./templates";
 import { sounds } from "./sound";
+import { useAuth } from "./auth/AuthContext";
 import { OneToOneCanvas } from "./components/canvases/OneToOneCanvas";
 import { LazyBoundary } from "./components/LazyBoundary";
 import {
@@ -53,15 +54,12 @@ import {
   MinusCircle,
   LayoutGrid,
   Magnet,
-  Eye,
   PlusSquare,
   MinusSquare,
   Hash,
   Workflow,
   Sliders,
-  Edit3,
-  Smile,
-  Wand2
+  Smile
 } from "lucide-react";
 import { UIPaletteLab } from "./components/UIPaletteLab";
 import { GameLauncher } from "./components/GameLauncher";
@@ -70,6 +68,10 @@ import { TECHNIQUE_PANELS } from "./components/studio/panels";
 import { TECHNIQUE_OPTIONS, defaultTargetCountForTechnique } from "./components/studio/techniqueOptions";
 import { CANVAS_BY_TECHNIQUE } from "./components/studio/canvasRegistry";
 import { AiGeneratorPanel } from "./components/studio/ai-generator";
+import { useSvgLibrary } from "./assets/SvgLibraryContext";
+import { useQuestionDeck } from "./studio/useQuestionDeck";
+import { createQuestionId } from "./studio/questionIds";
+import { SkillDeckPanel, StudioSkillFilter } from "./components/studio/SkillDeckPanel";
 import {
   Button,
   Card,
@@ -98,11 +100,22 @@ interface ConfettiParticle {
   size: string;
 }
 
-export default function App() {
-  const [questions, setQuestions] = useState<CountingQuestion[]>([]);
+type AdminTab = "dashboard" | "studio" | "assets" | "slides" | "presets" | "settings" | "curriculum";
+
+interface AppProps {
+  embedded?: boolean;
+  initialAdminTab?: AdminTab;
+  onExitStudio?: () => void;
+}
+
+export default function App({ embedded = false, initialAdminTab = "dashboard", onExitStudio }: AppProps = {}) {
+  const { isStudent, logout, playSession, endChildPlay } = useAuth();
+  const { assets: customSvgs } = useSvgLibrary();
+  const { questions, setQuestions, persistenceStatus: questionPersistenceStatus } = useQuestionDeck(DEFAULT_QUESTIONS);
+  const isSaving = questionPersistenceStatus === "loading" || questionPersistenceStatus === "saving";
   const [activeId, setActiveId] = useState<string>("");
   const [isPlayMode, setIsPlayMode] = useState<boolean>(true); // default to play mode so it's instantly interactive
-  const [adminTab, setAdminTab] = useState<"dashboard" | "studio" | "assets" | "slides" | "presets" | "settings" | "curriculum">("dashboard");
+  const [adminTab, setAdminTab] = useState<AdminTab>(initialAdminTab);
   const [students, setStudents] = useState([
     { id: "s1", name: "Noah S.", progress: "14/15 solved", activeId: "q-pattern", speed: "Fast", status: "Active" },
     { id: "s2", name: "Sophia K.", progress: "15/15 completed", activeId: "q-flexible-sorting", speed: "Super Fast", status: "Done" },
@@ -116,14 +129,19 @@ export default function App() {
     }
     return false;
   });
+  // A signed-in student goes straight to play — they never see the studio.
+  useEffect(() => {
+    if (isStudent) setIsGameLaunched(true);
+  }, [isStudent]);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const [confetti, setConfetti] = useState<ConfettiParticle[]>([]);
   const [copied, setCopied] = useState<boolean>(false);
   const [localHeight, setLocalHeight] = useState<number | null>(null);
   const [localWidth, setLocalWidth] = useState<number | null>(null);
-  const [isSaving, setIsSaving] = useState<boolean>(false);
   const [activePropTab, setActivePropTab] = useState<"visual" | "design" | "component" | "json" | "ai">("visual");
+  const [mobileStudioPanel, setMobileStudioPanel] = useState<"deck" | "canvas" | "properties">("canvas");
+  const [selectedStudioSkillId, setSelectedStudioSkillId] = useState<StudioSkillFilter>("all");
   const [jsonInput, setJsonInput] = useState<string>("");
   const [jsonError, setJsonError] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
@@ -132,30 +150,6 @@ export default function App() {
   const [isPropStudioCollapsed, setIsPropStudioCollapsed] = useState<boolean>(false);
   const [zoom, setZoom] = useState<number>(100);
   const [isTabChanging, setIsTabChanging] = useState<boolean>(false);
-  const [customSvgs, setCustomSvgs] = useState<CustomSvgAsset[]>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("koda_custom_svg_assets");
-      return saved ? JSON.parse(saved) : [];
-    }
-    return [];
-  });
-
-  const [svgOverrides, setSvgOverrides] = useState<Record<string, { markup: string; scale: number }>>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("koda_svg_overrides");
-      try {
-        return saved ? JSON.parse(saved) : {};
-      } catch (e) {
-        return {};
-      }
-    }
-    return {};
-  });
-
-  useEffect(() => {
-    SVG_OVERRIDES_CACHE.overrides = svgOverrides;
-  }, [svgOverrides]);
-
   // Find active question
   const activeQuestion = questions.find(q => q.id === activeId) || questions[0];
 
@@ -233,38 +227,19 @@ export default function App() {
       setJsonError(null);
       const updatedQuestions = questions.map(q => q.id === parsed.id ? parsed : q);
       setQuestions(updatedQuestions);
-      localStorage.setItem("counting_studio_questions", JSON.stringify(updatedQuestions));
     } catch (err: any) {
       setJsonError(err.message || "Invalid JSON syntax");
     }
   };
 
-  // Initialize and load from local storage
   useEffect(() => {
-    const stored = localStorage.getItem("counting_studio_questions");
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored) as CountingQuestion[];
-        if (parsed.length > 0) {
-          setQuestions(parsed);
-          setActiveId(parsed[0].id);
-          return;
-        }
-      } catch (e) {
-        console.error("Failed to parse stored questions:", e);
-      }
-    }
-    // Fallback to default templates
-    setQuestions(DEFAULT_QUESTIONS);
-    setActiveId(DEFAULT_QUESTIONS[0].id);
-  }, []);
+    if (questions.length === 0) return;
+    if (!questions.some((question) => question.id === activeId)) setActiveId(questions[0].id);
+  }, [questions, activeId]);
 
-  // Save to local storage whenever questions change
+  // Persistence is handled by useQuestionDeck (MongoDB + account cache).
   const saveQuestions = (newQuestions: CountingQuestion[]) => {
     setQuestions(newQuestions);
-    localStorage.setItem("counting_studio_questions", JSON.stringify(newQuestions));
-    setIsSaving(true);
-    setTimeout(() => setIsSaving(false), 2000);
   };
 
   const storedHeight = activeQuestion?.config?.workspaceHeight;
@@ -325,12 +300,12 @@ export default function App() {
   };
 
   // Add a new blank question
-  const addNewQuestion = () => {
+  const addNewQuestion = (technique: CountingTechnique = CountingTechnique.ONE_TO_ONE) => {
     sounds.playPop();
-    const newId = `q-${Date.now()}`;
+    const newId = createQuestionId();
     const newQ: CountingQuestion = {
       id: newId,
-      technique: CountingTechnique.ONE_TO_ONE,
+      technique,
       title: "Custom Counting Question",
       instruction: "Tap each item to count them up!",
       objectId: "apple",
@@ -356,7 +331,7 @@ export default function App() {
   const duplicateActive = () => {
     if (!activeQuestion) return;
     sounds.playPop();
-    const newId = `q-dup-${Date.now()}`;
+    const newId = createQuestionId("q-dup");
     const newQ: CountingQuestion = {
       ...activeQuestion,
       id: newId,
@@ -583,6 +558,7 @@ export default function App() {
         activeId={activeId}
         setActiveId={setActiveId}
         onClose={() => {
+          if (isStudent) { playSession ? endChildPlay() : logout(); return; }
           setIsGameLaunched(false);
           setIsSuccess(false);
         }}
@@ -592,10 +568,10 @@ export default function App() {
 
   // --- MAIN DASHBOARD / STUDIO LAYOUT ---
   return (
-    <div className="md:h-screen flex flex-col bg-slate-50 text-slate-900 font-sans overflow-hidden">
+    <div className={`${embedded ? "h-full min-h-0" : "md:h-screen"} flex flex-col bg-slate-50 text-slate-900 font-sans overflow-hidden`}>
 
-      {/* Main Studio Header */}
-      <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 shadow-sm z-30">
+      {/* Worksheet tools are useful in authoring views, but not in the standalone SVG library. */}
+      {!embedded && adminTab !== "assets" && <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 shadow-sm z-30">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-indigo-600 rounded flex items-center justify-center text-white shrink-0 shadow-sm shadow-indigo-600/10">
             <Layers size={18} className="text-white" />
@@ -680,12 +656,12 @@ export default function App() {
             Launch Game
           </Button>
         </div>
-      </header>
+      </header>}
 
       {/* Main Studio Workspace columns layout */}
       <div className="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden bg-slate-50">
         {/* LEFT SIDEBAR: Admin Navigation */}
-        <Sidebar
+        {!embedded && <Sidebar
           adminTab={adminTab}
           setAdminTab={(tab) => {
             setIsTabChanging(true);
@@ -699,10 +675,10 @@ export default function App() {
             setIsSuccess(false);
             sounds.playSuccess();
           }}
-        />
+        />}
 
           {/* MAIN CONTAINER FOR ADMIN CONTENT */}
-          <div className={`flex-1 flex flex-col overflow-hidden bg-slate-100/60 ${adminTab === "studio" ? "p-0" : "p-6"}`}>
+          <div className={`flex-1 flex flex-col overflow-hidden bg-slate-100/60 ${adminTab === "studio" || adminTab === "assets" ? "p-0" : "p-6"}`}>
             {isTabChanging ? (
               <div className="flex-1 flex flex-col items-center justify-center p-8 font-sans select-none bg-slate-50/50">
                 <div className="bg-white border border-slate-200/80 p-8 rounded-3xl shadow-xl flex flex-col items-center gap-5 text-center max-w-sm">
@@ -731,7 +707,7 @@ export default function App() {
             ) : (
               <>
                 {/* Dashboard Header */}
-            {adminTab !== "studio" && adminTab !== "curriculum" && (
+            {adminTab !== "studio" && adminTab !== "curriculum" && !(embedded && adminTab === "assets") && (
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 pb-4 mb-6 shrink-0">
                 <div>
                   <h3 className="text-lg font-black text-slate-800 tracking-tight flex items-center gap-2">
@@ -1182,8 +1158,7 @@ export default function App() {
                       <Button
                         onClick={() => {
                           if (window.confirm("Danger: Clear all local storage caching and restore original worksheet deck? This cannot be undone.")) {
-                            localStorage.removeItem("counting_studio_questions");
-                            setQuestions(DEFAULT_QUESTIONS);
+                            saveQuestions(DEFAULT_QUESTIONS);
                             setActiveId(DEFAULT_QUESTIONS[0].id);
                             sounds.playLevelUp();
                             alert("Workspace caches cleared. Original templates restored!");
@@ -1203,112 +1178,86 @@ export default function App() {
             {/* TAB CONTENT: assets (Custom SVG Maker) */}
             {adminTab === "assets" && (
               <SvgDesigner 
-                customSvgs={customSvgs} 
-                setCustomSvgs={setCustomSvgs} 
                 questions={questions}
                 setQuestions={setQuestions}
-                svgOverrides={svgOverrides}
-                setSvgOverrides={setSvgOverrides}
+                flush={embedded}
               />
             )}
             {adminTab === "studio" && (
-              <main className="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden bg-slate-50 animate-fade-in">
-        
-        {/* LEFT PANEL: Lesson Worksheet slides list */}
-        <aside className="w-full md:w-64 bg-white border-b md:border-b-0 md:border-r border-slate-200 flex flex-col shrink-0 overflow-hidden">
-          <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Lesson Worksheet</h2>
-            <span className="text-[10px] font-bold bg-indigo-50 text-indigo-600 border border-indigo-150 px-2 py-0.5 rounded-full font-mono">
-              {questions.length} Cards
-            </span>
-          </div>
-
-          {/* Scrollable list items container */}
-          <div className="flex-1 p-4 overflow-y-auto space-y-2 min-h-[220px]">
-            {questions.map((q, idx) => {
-              const isActive = q.id === activeId;
-              const activeObj = COUNT_OBJECTS.find(o => o.id === q.objectId) || COUNT_OBJECTS[0];
-              return (
-                <div
-                  key={q.id}
-                  onClick={() => {
-                    setActiveId(q.id);
-                    setIsSuccess(false);
-                    sounds.playPop();
-                  }}
-                  className={`group flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all
-                    ${isActive 
-                      ? "bg-indigo-50 border-indigo-300 shadow-sm animate-fade-in" 
-                      : "bg-slate-50 border-slate-200 hover:border-indigo-200 hover:shadow-sm hover:bg-white"
-                    }
-                  `}
-                >
-                  {/* Square icon/number badge like reference */}
-                  <div className={`w-8 h-8 shrink-0 flex items-center justify-center rounded border font-mono text-xs font-bold transition-all
-                    ${isActive 
-                      ? "bg-indigo-600 text-white border-indigo-500" 
-                      : "bg-white text-slate-500 border-slate-200 group-hover:bg-indigo-50 group-hover:text-indigo-600 group-hover:border-indigo-200"
-                    }
-                  `}>
-                    {idx + 1}
-                  </div>
-                  
-                  <div className="min-w-0 flex-1">
-                    <h4 className={`text-xs font-bold truncate leading-tight transition-colors
-                      ${isActive ? "text-indigo-950 font-extrabold" : "text-slate-700 group-hover:text-slate-900"}
-                    `}>
-                      {q.title.replace(/^\d+\.\s*/, "")}
-                    </h4>
-                    <div className="text-[10px] text-slate-400 font-semibold flex items-center gap-1.5 mt-0.5">
-                      <span className="text-xs select-none select-none-all leading-none">
-                        {activeObj.id === "custom_svg" ? (
-                          <CountingAsset type="custom_svg" emoji={activeObj.emoji} size={14} className="inline-block align-middle" />
-                        ) : (
-                          activeObj.emoji
-                        )}
+              <div className="flex min-h-0 flex-1 flex-col bg-[#FBFAFF]">
+                {embedded && (
+                  <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[#E7E3F6] bg-white px-3 py-2 sm:px-4">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <span className={`h-2 w-2 shrink-0 rounded-full ${questionPersistenceStatus === "error" ? "bg-rose-500" : isSaving ? "animate-pulse bg-amber-400" : "bg-emerald-500"}`} />
+                      <span className="truncate text-xs font-medium text-[#6D6997]">
+                        {questionPersistenceStatus === "error" ? "Saved locally — MongoDB unavailable" : isSaving ? "Saving worksheet…" : "Worksheet saved"}
                       </span>
-                      <span>Count: {q.targetCount}</span>
+                    </div>
+                    <div className="flex flex-wrap items-center justify-end gap-2">
+                      <Button onClick={restoreDefaults} variant="outline" size="icon" className="h-9 w-9" title="Reset workspace" aria-label="Reset workspace">
+                        <RotateCcw size={14} />
+                      </Button>
+                      <Button onClick={toggleMute} variant="outline" size="icon" className="h-9 w-9" title={isMuted ? "Unmute sound" : "Mute sound"} aria-label={isMuted ? "Unmute sound" : "Mute sound"}>
+                        {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          const studentUrl = `${window.location.origin}${window.location.pathname}?mode=game`;
+                          void navigator.clipboard.writeText(studentUrl).then(() => {
+                            setCopied(true);
+                            sounds.playSuccess();
+                            setTimeout(() => setCopied(false), 2000);
+                          });
+                        }}
+                        variant="outline"
+                        size="sm"
+                      >
+                        <Link size={13} /> <span className="hidden sm:inline">{copied ? "Link copied" : "Copy student link"}</span>
+                      </Button>
+                      <Button onClick={() => { setIsGameLaunched(true); setIsSuccess(false); sounds.playSuccess(); }} size="sm">
+                        <Play size={13} /> Preview
+                      </Button>
+                    </div>
+                    <div className="order-last grid w-full grid-cols-3 gap-1 rounded-xl bg-[#F3F0FF] p-1 lg:hidden">
+                      {([
+                        ["deck", "Deck", Layers],
+                        ["canvas", "Canvas", Gamepad2],
+                        ["properties", "Properties", Sliders],
+                      ] as const).map(([panel, label, Icon]) => (
+                        <button
+                          key={panel}
+                          type="button"
+                          onClick={() => setMobileStudioPanel(panel)}
+                          className={`flex h-8 items-center justify-center gap-1.5 rounded-lg text-[11px] font-medium transition-colors ${mobileStudioPanel === panel ? "bg-white text-[#534AB7] shadow-sm" : "text-[#6D6997]"}`}
+                        >
+                          <Icon size={12} /> {label}
+                        </button>
+                      ))}
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                )}
+              <main className="relative flex min-h-0 flex-1 flex-col overflow-y-auto bg-[#FBFAFF] animate-fade-in lg:flex-row lg:overflow-hidden">
 
-          {/* Bottom actions container with tips */}
-          <div className="mt-auto p-4 bg-indigo-50 border-t border-indigo-100 flex flex-col gap-3">
-            <Button
-              onClick={() => {
-                setAdminTab("dashboard");
-                sounds.playPop();
-              }}
-              className="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-extrabold flex items-center justify-center gap-1.5 shadow-sm border border-amber-600/20 cursor-pointer"
-            >
-              <BarChart2 size={14} />
-              Classroom Dashboard
-            </Button>
-            <Button
-              onClick={addNewQuestion}
-              variant="outline"
-              size="sm"
-              className="w-full bg-white hover:bg-indigo-50 border-indigo-150 text-indigo-600 font-bold"
-            >
-              <Plus size={14} />
-              Add New Card
-            </Button>
-            <p className="text-[10px] leading-relaxed text-indigo-700/80 font-medium">
-              <strong>Tip:</strong> Reorder, duplicate, or delete cards to customize the worksheet flow for student lesson delivery.
-            </p>
-            <div className="text-[9px] text-slate-400 font-mono border-t border-indigo-100/40 pt-2 text-center">
-              Counting Objects Skills © 2026
-            </div>
-          </div>
-        </aside>
+        <div className={`${mobileStudioPanel === "deck" ? "flex" : "hidden"} min-h-0 w-full flex-1 lg:flex lg:w-64 lg:flex-none`}>
+          <SkillDeckPanel
+            questions={questions}
+            activeId={activeId}
+            selectedSkillId={selectedStudioSkillId}
+            onSelectSkill={setSelectedStudioSkillId}
+            onSelectQuestion={(questionId) => {
+              setActiveId(questionId);
+              setIsSuccess(false);
+              setMobileStudioPanel("canvas");
+              sounds.playPop();
+            }}
+            onAddQuestion={(technique) => addNewQuestion(technique)}
+          />
+        </div>
 
         {/* CENTER COLUMN: PREVIEW CANVAS ARENA */}
-        <section className="flex-1 bg-slate-50 p-6 md:p-8 overflow-y-auto relative flex flex-col items-center justify-start gap-6">
+        <section className={`${mobileStudioPanel === "canvas" ? "flex" : "hidden"} lg:flex flex-1 bg-[#FBFAFF] p-3 sm:p-5 lg:p-6 overflow-y-auto relative flex-col items-center justify-start gap-4 lg:gap-6`}>
           
-          <div className="max-w-2xl w-full flex flex-col gap-6">
+          <div className={`${isPropStudioCollapsed ? "max-w-5xl" : "max-w-2xl"} flex w-full flex-col gap-6 transition-[max-width] duration-200`}>
             
             {/* Active Workspace Card - styled EXACTLY like the active card in the Reference design */}
             <div className="bg-white rounded-xl shadow-md border-2 border-indigo-500 p-6 relative">
@@ -1633,25 +1582,25 @@ export default function App() {
 
         {/* RIGHT PANEL: ADVANCED PROPERTY STUDIO & JSON SCHEMA HANDLER */}
         {isPropStudioCollapsed ? (
-          <aside className="w-full md:w-12 bg-slate-50 border-t md:border-t-0 md:border-l border-slate-200 flex flex-col items-center py-4 shrink-0 overflow-hidden">
+          <aside className={`${mobileStudioPanel === "properties" ? "flex" : "hidden"} w-full shrink-0 flex-col items-center overflow-hidden border-t border-slate-200 bg-slate-50 py-4 lg:absolute lg:right-3 lg:top-3 lg:z-20 lg:flex lg:h-auto lg:w-auto lg:border-0 lg:bg-transparent lg:p-0`}>
             <button
               onClick={() => {
                 setIsPropStudioCollapsed(false);
                 sounds.playPop();
               }}
-              className="w-8 h-8 rounded-lg bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-500 hover:text-indigo-600 hover:border-indigo-200 transition-all cursor-pointer mb-6"
+              className="mb-6 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 shadow-sm transition-all hover:border-indigo-200 hover:text-indigo-600 lg:mb-0"
               title="Expand Property Studio"
             >
               <ChevronLeft size={16} />
             </button>
-            <div className="flex-1 flex items-center justify-center [writing-mode:vertical-lr] select-none pointer-events-none">
+            <div className="pointer-events-none flex flex-1 select-none items-center justify-center [writing-mode:vertical-lr] lg:hidden">
               <span className="text-xs font-black text-slate-400 uppercase tracking-widest font-mono">
                 Property Studio
               </span>
             </div>
           </aside>
         ) : (
-          <aside className="w-full md:w-80 bg-white border-t md:border-t-0 md:border-l border-slate-200 flex flex-col shrink-0 overflow-hidden">
+          <aside className={`${mobileStudioPanel === "properties" ? "flex" : "hidden"} w-full lg:flex lg:w-80 bg-white border-t lg:border-t-0 lg:border-l border-[#E7E3F6] flex-col shrink-0 overflow-hidden`}>
             {/* Section Header */}
             <div className="p-4 border-b border-slate-100 bg-slate-50 shrink-0">
               <div className="flex items-center justify-between mb-3">
@@ -1667,11 +1616,12 @@ export default function App() {
                     <ChevronRight size={14} />
                   </button>
                   <h2 className="text-sm font-extrabold text-slate-800 tracking-tight">Property Studio</h2>
-                  {isSaving && (
-                    <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 animate-fade-in text-[10px] px-1.5 py-0">
-                      Saved
-                    </Badge>
-                  )}
+                  <Badge
+                    variant="secondary"
+                    className={`text-[10px] px-1.5 py-0 ${questionPersistenceStatus === "error" ? "bg-rose-100 text-rose-700" : isSaving ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"}`}
+                  >
+                    {questionPersistenceStatus === "error" ? "Offline" : isSaving ? "Saving" : "Saved"}
+                  </Badge>
                 </div>
               </div>
 
@@ -1681,26 +1631,11 @@ export default function App() {
                 sounds.playPop();
               }}>
                 <TabsList className="grid grid-cols-5 gap-1 w-full">
-                  <TabsTrigger value="visual" className="flex items-center justify-center gap-1 text-[11px] font-bold">
-                    <Eye size={12} className="text-indigo-500" />
-                    <span>Visual</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="design" className="flex items-center justify-center gap-1 text-[11px] font-bold">
-                    <Edit3 size={12} className="text-emerald-500" />
-                    <span>Design</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="component" className="flex items-center justify-center gap-1 text-[11px] font-bold">
-                    <Sliders size={12} className="text-purple-500" />
-                    <span>Rules</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="json" className="flex items-center justify-center gap-1 text-[11px] font-bold">
-                    <Layers size={12} className="text-amber-500" />
-                    <span>JSON</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="ai" className="flex items-center justify-center gap-1 text-[11px] font-bold">
-                    <Wand2 size={12} className="text-fuchsia-500" />
-                    <span>AI ✨</span>
-                  </TabsTrigger>
+                  <TabsTrigger value="visual" className="text-[11px] font-bold">Visual</TabsTrigger>
+                  <TabsTrigger value="ai" className="text-[11px] font-bold">AI</TabsTrigger>
+                  <TabsTrigger value="design" className="text-[11px] font-bold">Design</TabsTrigger>
+                  <TabsTrigger value="component" className="text-[11px] font-bold">Rules</TabsTrigger>
+                  <TabsTrigger value="json" className="text-[11px] font-bold">JSON</TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>
@@ -1808,7 +1743,9 @@ export default function App() {
                     {customSvgs.length > 0 ? (
                       <div className="grid grid-cols-4 gap-1.5">
                         {customSvgs.map((asset) => {
-                          const isSelected = activeQuestion?.objectId === "custom_svg" && activeQuestion.config?.customSvgMarkup === asset.markup;
+                          const isSelected = activeQuestion?.objectId === "custom_svg" && (
+                            activeQuestion.config?.customSvgAssetId === asset.id || activeQuestion.config?.customSvgMarkup === asset.markup
+                          );
                           return (
                             <button
                               key={asset.id}
@@ -1819,6 +1756,7 @@ export default function App() {
                                   config: {
                                     ...activeQuestion.config,
                                     assetType: "custom_svg",
+                                    customSvgAssetId: asset.id,
                                     customSvgMarkup: asset.markup,
                                     customSvgLabel: asset.label,
                                     customSvgScale: asset.scale
@@ -2164,6 +2102,7 @@ export default function App() {
         </aside>
         )}
       </main>
+      </div>
     )}
 
             {/* TAB CONTENT: curriculum studio — owns its own header/breadcrumb, no shared header block above */}

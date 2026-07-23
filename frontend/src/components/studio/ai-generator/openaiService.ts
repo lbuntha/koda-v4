@@ -1,168 +1,91 @@
-/**
- * OpenAI Service — Schema-driven AI generation service.
- *
- * Uses the Schema Registry to auto-build system prompts for any component.
- * The system prompt is generated from schema definitions, NOT hardcoded.
- *
- * Architecture:
- *   Frontend (now)  → calls OpenAI directly with user's API key
- *   Backend (later)  → swap config.API_ENDPOINT, set DIRECT_MODE=false
- *
- * Your backend endpoint should accept:
- *   POST { prompt: string, count: number, technique?: string }
- *   Response: { slides: ParsedSlideConfig[] }
- */
+/** Schema-driven AI generation through Koda's authenticated backend proxy. */
 
+import { api } from "../../../api/client";
 import { ParsedSlideConfig } from "./types";
 import { AI_CONFIG } from "./config";
 import { detectTechniqueFromPrompt, buildSystemPrompt } from "./schemas";
+import type { CustomSvgAsset } from "../../../types";
 
-// ─── API Key Management ─────────────────────────────────────────────────────
-
-export function getStoredApiKey(): string {
-  try {
-    return localStorage.getItem(AI_CONFIG.STORAGE_KEY) || "";
-  } catch {
-    return "";
-  }
+interface ChatCompletionResponse {
+  choices?: Array<{ message?: { content?: string } }>;
 }
 
-export function setStoredApiKey(key: string): void {
-  try {
-    if (key.trim()) {
-      localStorage.setItem(AI_CONFIG.STORAGE_KEY, key.trim());
-    } else {
-      localStorage.removeItem(AI_CONFIG.STORAGE_KEY);
-    }
-  } catch {
-    // localStorage unavailable
-  }
-}
-
-export function hasApiKey(): boolean {
-  return getStoredApiKey().length > 0;
-}
-
-export function getStoredModel(): string {
-  try {
-    return localStorage.getItem(AI_CONFIG.MODEL_STORAGE_KEY) || AI_CONFIG.MODEL;
-  } catch {
-    return AI_CONFIG.MODEL;
-  }
-}
-
-export function setStoredModel(model: string): void {
-  try {
-    localStorage.setItem(AI_CONFIG.MODEL_STORAGE_KEY, model);
-  } catch {
-    // localStorage unavailable
-  }
-}
-
-// ─── Core API Call ──────────────────────────────────────────────────────────
-
-/**
- * Generate slides using AI with schema-driven prompts.
- *
- * 1. Detects the technique from the prompt (via schema triggerKeywords)
- * 2. Builds a system prompt from that schema's fields, assets, rules
- * 3. Calls OpenAI (or your backend)
- * 4. Validates output using the schema's validate() function
- */
 export async function generateWithAI(
   prompt: string,
   count: number = 1,
-  existingQuestions: Array<{ title: string; objectId: string; targetCount: number }> = []
+  existingQuestions: Array<{ title: string; objectId: string; targetCount: number }> = [],
+  customAssets: CustomSvgAsset[] = []
 ): Promise<ParsedSlideConfig[]> {
-  const apiKey = getStoredApiKey();
-
-  // Detect which component schema to use
   const schema = detectTechniqueFromPrompt(prompt);
-
-  // Dedup context: object+count pairs are all the model needs to avoid repeats
   const existingContext = existingQuestions.length > 0
-    ? `\nAlready used (avoid repeating): ${existingQuestions.map(q => `${q.objectId}x${q.targetCount}`).join(", ")}`
+    ? `\nAlready used (avoid repeating): ${existingQuestions.map((question) => `${question.objectId}x${question.targetCount}`).join(", ")}`
     : "";
-
-  // ── Backend proxy mode (future) ──
-  if (!AI_CONFIG.DIRECT_MODE) {
-    const response = await fetch(AI_CONFIG.API_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt, count, technique: schema.technique, existingContext })
-    });
-
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      throw new Error((err as any)?.message || `Server error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const raw = Array.isArray(data.slides) ? data.slides : Array.isArray(data) ? data : [data];
-    return raw.map((item: any, i: number) => schema.validate(item, i));
-  }
-
-  // ── Direct OpenAI mode (current) ──
-  if (!apiKey) {
-    throw new Error("No API key set. Enter your OpenAI API key above.");
-  }
-
-  // Build system prompt from schema (auto-generated, not hardcoded!)
-  const systemPrompt = buildSystemPrompt(schema);
-
   const userMessage = `Teacher request: "${prompt}". Generate ${count} slide${count > 1 ? "s" : ""}.${existingContext}`;
 
-  const response = await fetch(AI_CONFIG.API_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`
-    },
-    body: JSON.stringify({
-      model: getStoredModel(),
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userMessage }
-      ],
-      temperature: AI_CONFIG.TEMPERATURE,
-      // Guaranteed-parseable JSON: no markdown fences, no retry burn
-      response_format: { type: "json_object" },
-      // Scale the budget with the ask instead of paying for 2000 every time
-      max_tokens: Math.min(AI_CONFIG.MAX_TOKENS, 180 * count + 120)
-    })
+  // Keep provider prompts compact and never send SVG markup upstream. The
+  // full asset is joined back onto the validated slide in the browser.
+  const aiAssetCatalog: Array<{ id: string; label: string }> = [];
+  let catalogSize = 0;
+  for (const asset of customAssets) {
+    const item = { id: asset.id.slice(0, 120), label: asset.label.slice(0, 160) };
+    const encodedSize = JSON.stringify(item).length;
+    if (catalogSize + encodedSize > 6_000) break;
+    aiAssetCatalog.push(item);
+    catalogSize += encodedSize;
+  }
+
+  const data = await api.post<ChatCompletionResponse>("/ai/generate", {
+    messages: [
+      { role: "system", content: buildSystemPrompt(schema, aiAssetCatalog) },
+      { role: "user", content: userMessage },
+    ],
+    temperature: AI_CONFIG.TEMPERATURE,
+    response_format: { type: "json_object" },
+    max_tokens: Math.min(AI_CONFIG.MAX_TOKENS, 180 * count + 120),
   });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    const msg = (errorData as any)?.error?.message || "";
-    if (response.status === 401) throw new Error("Invalid API key. Check your OpenAI key.");
-    if (response.status === 429) throw new Error("Rate limit exceeded. Wait a moment and retry.");
-    if (response.status === 402) throw new Error("Insufficient credits. Check your OpenAI billing.");
-    throw new Error(msg || `OpenAI API error: ${response.status}`);
-  }
-
-  const data = await response.json();
   const rawContent = data.choices?.[0]?.message?.content?.trim();
-  if (!rawContent) throw new Error("Empty response from OpenAI.");
+  if (!rawContent) throw new Error("The AI provider returned an empty response.");
 
-  // response_format guarantees JSON, but stay tolerant of fenced output from
-  // older models or a future backend proxy.
-  let cleanJson = rawContent;
-  if (cleanJson.startsWith("```")) {
-    cleanJson = cleanJson.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
-  }
+  const cleanJson = rawContent.startsWith("```")
+    ? rawContent.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "")
+    : rawContent;
 
-  let parsed: any[];
   try {
     const result = JSON.parse(cleanJson);
-    // Accept {"slides":[...]}, a bare array, or a single object
-    parsed = Array.isArray(result) ? result
-      : Array.isArray(result?.slides) ? result.slides
-      : [result];
-  } catch {
-    throw new Error("AI returned invalid JSON. Please try again.");
+    const parsed = Array.isArray(result)
+      ? result
+      : Array.isArray(result?.slides)
+        ? result.slides
+        : [result];
+    return parsed.map((item, index) => applyCustomAssetSelection(item, schema.validate(item, index), customAssets));
+  } catch (cause) {
+    if (cause instanceof SyntaxError) throw new Error("AI returned invalid JSON. Please try again.");
+    throw cause;
   }
+}
 
-  // Validate using the schema's own validator
-  return parsed.map((item, i) => schema.validate(item, i));
+export function applyCustomAssetSelection(
+  raw: unknown,
+  validated: ParsedSlideConfig,
+  customAssets: CustomSvgAsset[]
+): ParsedSlideConfig {
+  if (!raw || typeof raw !== "object") return validated;
+  const requestedId = (raw as { objectId?: unknown }).objectId;
+  if (typeof requestedId !== "string") return validated;
+  const asset = customAssets.find(candidate => candidate.id === requestedId);
+  if (!asset) return validated;
+
+  return {
+    ...validated,
+    objectId: "custom_svg",
+    config: {
+      ...validated.config,
+      assetType: "custom_svg",
+      customSvgAssetId: asset.id,
+      customSvgMarkup: asset.markup,
+      customSvgLabel: asset.label,
+      customSvgScale: asset.scale,
+    },
+  };
 }

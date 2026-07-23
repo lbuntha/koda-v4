@@ -35,6 +35,7 @@ interface GameLauncherProps {
   activeId: string;
   setActiveId: (id: string) => void;
   onClose: () => void;
+  learningContext?: { curriculumId: string; curriculumRevision: number };
 }
 
 interface ConfettiParticle {
@@ -49,7 +50,8 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
   questions,
   activeId,
   setActiveId,
-  onClose
+  onClose,
+  learningContext,
 }) => {
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const [confetti, setConfetti] = useState<ConfettiParticle[]>([]);
@@ -72,6 +74,12 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
       // Present only when this question has been assigned to a curriculum
       // skill in the Curriculum Studio — see logSchema.ts's LearningEvent.
       curriculumSkillId: q.skillId,
+      curriculumId: learningContext?.curriculumId,
+      curriculumRevision: learningContext?.curriculumRevision,
+      details: {
+        objectId: q.objectId,
+        ...(q.config?.customSvgAssetId ? { customSvgAssetId: q.config.customSvgAssetId } : {}),
+      },
       slideIndex: idx,
       totalSlides: questions.length,
       questionTitle: q.title,

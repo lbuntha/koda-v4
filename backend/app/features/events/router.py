@@ -16,15 +16,26 @@ router = APIRouter(tags=["events"])
 async def ingest_events(body: EventsIn, student: Student = Depends(get_current_student)):
     """A student pushes a batch of its own events. student_id is forced from the
     token — the client's value is never trusted."""
+    student_id = str(student.id)
+    client_ids = [str(raw.get("id")) for raw in body.events if raw.get("id")]
+    existing = set()
+    if client_ids:
+        rows = await LearningEvent.find(
+            LearningEvent.student_id == student_id,
+            {"client_id": {"$in": client_ids}},
+        ).to_list()
+        existing = {row.client_id for row in rows if row.client_id}
     docs: list[LearningEvent] = []
     for raw in body.events:
         data = dict(raw)
         data.pop("_id", None)
         client_id = data.pop("id", None)
+        if client_id and client_id in existing:
+            continue
         docs.append(
             LearningEvent(
                 **data,
-                student_id=str(student.id),
+                student_id=student_id,
                 client_id=client_id,
                 event_type=data.get("eventType"),
                 slide_index=data.get("slideIndex"),
@@ -33,7 +44,7 @@ async def ingest_events(body: EventsIn, student: Student = Depends(get_current_s
         )
     if docs:
         await LearningEvent.insert_many(docs)
-    return {"inserted": len(docs)}
+    return {"inserted": len(docs), "duplicates": len(body.events) - len(docs)}
 
 
 @router.get("/events")

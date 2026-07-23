@@ -8,8 +8,8 @@
  * one later: stable UUIDs, ISO 8601 timestamps, nullable foreign-key-shaped
  * fields (studentId), a small closed set of enums, and a `schemaVersion` so
  * old rows never need silent reinterpretation when the shape changes.
- * `analyticsLogger` currently persists this to localStorage — swapping that
- * for a real API call is the only thing that should ever need to change.
+ * `analyticsLogger` keeps a local read cache and uploads authenticated student
+ * sessions to the server through an idempotent batch outbox.
  *
  * Today's gap this schema closes: only 4 of 8 possible event types are ever
  * logged (see analyticsLogger.ts), and `answer_check` only fires on SUCCESS —
@@ -66,6 +66,7 @@ export const TECHNIQUE_TAXONOMY: Record<CountingTechnique, { subjectArea: Subjec
   [CountingTechnique.KODA_PATTERN]: { subjectArea: "pattern_recognition", skillTags: ["ab_patterns", "sequence_prediction"] },
   [CountingTechnique.FLEXIBLE_CANVAS]: { subjectArea: "sorting_classification", skillTags: ["classification"] },
   [CountingTechnique.ADDITION_TUTOR]: { subjectArea: "addition", skillTags: ["addition_carrying", "make_ten_regrouping"] },
+  [CountingTechnique.ADDITION_COLUMN]: { subjectArea: "addition", skillTags: ["addition_carrying", "multi_digit_column_addition"] },
 };
 
 export const getTaxonomy = (technique: CountingTechnique) =>
@@ -115,6 +116,9 @@ export interface LearningEvent {
    * logs both.
    */
   curriculumSkillId?: string;
+  /** Published curriculum document/revision that supplied this play session. */
+  curriculumId?: string;
+  curriculumRevision?: number;
   slideIndex: number;
   totalSlides: number;
 

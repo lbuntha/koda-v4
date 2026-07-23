@@ -13,10 +13,11 @@ import React from "react";
 import { CountingQuestion, CountableObject, CustomSvgAsset, SVG_OBJECTS, EMOJI_OBJECTS } from "../../types";
 import { CountingAsset } from "../Assets";
 import { Label } from "../ui";
+import { useSvgLibrary } from "../../assets/SvgLibraryContext";
 
 interface AssetPickerProps {
   question: CountingQuestion;
-  customSvgs: CustomSvgAsset[];
+  customSvgs?: CustomSvgAsset[];
   onSelectObject: (item: CountableObject) => void;
   onSelectCustomSvg: (asset: CustomSvgAsset) => void;
   onOpenSvgMaker?: () => void;
@@ -29,6 +30,9 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
   onSelectCustomSvg,
   onOpenSvgMaker,
 }) => {
+  const { assets: sharedSvgAssets } = useSvgLibrary();
+  const availableCustomSvgs = customSvgs ?? sharedSvgAssets;
+
   return (
     <>
       <div className="flex flex-col gap-1.5">
@@ -66,10 +70,12 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
             </span>
           </div>
 
-          {customSvgs.length > 0 ? (
+          {availableCustomSvgs.length > 0 ? (
             <div className="grid grid-cols-4 gap-1.5">
-              {customSvgs.map((asset) => {
-                const isSelected = question.objectId === "custom_svg" && question.config?.customSvgMarkup === asset.markup;
+              {availableCustomSvgs.map((asset) => {
+                const isSelected = question.objectId === "custom_svg" && (
+                  question.config?.customSvgAssetId === asset.id || question.config?.customSvgMarkup === asset.markup
+                );
                 return (
                   <button
                     key={asset.id}

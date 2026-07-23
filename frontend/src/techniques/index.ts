@@ -27,6 +27,7 @@ import { kodaSudoku } from "./kodaSudoku";
 import { kodaPattern } from "./kodaPattern";
 import { flexibleCanvas } from "./flexibleCanvas";
 import { additionTutor } from "./additionTutor";
+import { columnAddition } from "./columnAddition";
 
 /** Ordered exactly as the Studio picker lists them (1..16). */
 export const ALL_TECHNIQUES: TechniqueManifest[] = [
@@ -46,6 +47,7 @@ export const ALL_TECHNIQUES: TechniqueManifest[] = [
   kodaPattern,
   flexibleCanvas,
   additionTutor,
+  columnAddition,
 ];
 
 // Loud in dev / logged in prod if a game is missing or double-registered.

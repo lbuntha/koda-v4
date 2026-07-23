@@ -13,7 +13,9 @@ class TokenPair(BaseModel):
 
 
 class RegisterIn(BaseModel):
-    role: Literal["parent", "teacher", "admin"]
+    # Public sign-up is parent/teacher only. Admins are created by another admin
+    # (POST /admin/users) or the seed script — never through this endpoint.
+    role: Literal["parent", "teacher"]
     email: EmailStr
     password: str = Field(min_length=8)
     name: str

@@ -1,10 +1,19 @@
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
-import App from './App.tsx';
+import {AuthProvider} from './auth/AuthContext';
+import {RoleRouter} from './auth/RoleRouter';
+import {SvgLibraryProvider} from './assets/SvgLibraryContext';
+import {AppSettingsProvider} from './settings/AppSettingsContext';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <AuthProvider>
+      <AppSettingsProvider>
+        <SvgLibraryProvider>
+          <RoleRouter />
+        </SvgLibraryProvider>
+      </AppSettingsProvider>
+    </AuthProvider>
   </StrictMode>,
 );

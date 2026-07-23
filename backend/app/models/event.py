@@ -30,4 +30,9 @@ class LearningEvent(Document):
         name = "learning_events"
         indexes = [
             IndexModel([("student_id", 1), ("client_timestamp_ms", -1)]),
+            IndexModel(
+                [("student_id", 1), ("client_id", 1)],
+                unique=True,
+                partialFilterExpression={"client_id": {"$type": "string"}},
+            ),
         ]

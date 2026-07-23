@@ -1,8 +1,5 @@
 """Authentication: adult register/login/refresh + the two kid sign-in flows."""
 
-import secrets
-import string
-
 from beanie import PydanticObjectId
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -10,6 +7,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from ...models.user import User, Role
 from ...models.student import Student
 from ...core.deps import Principal, get_principal, get_current_parent
+from ...core.codes import unique_family_code
 from ...core.security import (
     hash_secret,
     verify_secret,
@@ -21,8 +19,6 @@ from .schemas import TokenPair, RegisterIn, RefreshIn, StudentLoginIn, LaunchIn
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-_CODE_ALPHABET = string.ascii_uppercase + string.digits
-
 
 def _issue(sub: str, role: str) -> TokenPair:
     return TokenPair(
@@ -32,14 +28,6 @@ def _issue(sub: str, role: str) -> TokenPair:
     )
 
 
-async def _unique_family_code() -> str:
-    for _ in range(10):
-        code = "".join(secrets.choice(_CODE_ALPHABET) for _ in range(6))
-        if not await User.find_one(User.family_code == code):
-            return code
-    raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Could not allocate family code")
-
-
 # ── Adult accounts ───────────────────────────────────────────────────────────
 
 @router.post("/register", response_model=TokenPair, status_code=status.HTTP_201_CREATED)
@@ -47,15 +35,15 @@ async def register(body: RegisterIn):
     if await User.find_one(User.email == body.email):
         raise HTTPException(status.HTTP_409_CONFLICT, "Email already registered")
     user = User(
-        role=Role(body.role),
+        role=body.role,
         email=body.email,
         password_hash=hash_secret(body.password),
         name=body.name,
     )
     if user.role == Role.parent:
-        user.family_code = await _unique_family_code()
+        user.family_code = await unique_family_code()
     await user.insert()
-    return _issue(str(user.id), user.role.value)
+    return _issue(str(user.id), user.role)
 
 
 @router.post("/login", response_model=TokenPair)
@@ -63,7 +51,9 @@ async def login(form: OAuth2PasswordRequestForm = Depends()):
     user = await User.find_one(User.email == form.username)
     if not user or not verify_secret(form.password, user.password_hash):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect email or password")
-    return _issue(str(user.id), user.role.value)
+    if user.disabled_at is not None:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Account is disabled")
+    return _issue(str(user.id), user.role)
 
 
 @router.post("/refresh", response_model=TokenPair)
@@ -89,10 +79,11 @@ async def me(principal: Principal = Depends(get_principal)):
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Account not found")
     return {
         "id": principal.id,
-        "role": user.role.value,
+        "role": user.role,
         "name": user.name,
         "email": user.email,
         "family_code": user.family_code,
+        "menu_ids": user.menu_ids,
     }
 
 

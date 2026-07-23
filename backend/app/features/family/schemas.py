@@ -9,6 +9,12 @@ class ChildIn(BaseModel):
     pin: str | None = Field(default=None, min_length=4, max_length=8)
 
 
+class ChildUpdate(BaseModel):
+    name: str | None = None
+    avatar: str | None = None
+    pin: str | None = Field(default=None, min_length=4, max_length=8)
+
+
 class ChildOut(BaseModel):
     id: str
     name: str

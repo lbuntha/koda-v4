@@ -6,8 +6,8 @@
  * offline rule-based fallback. To support a new canvas, register its schema —
  * this panel needs no changes.
  *
- * Uses OpenAI API when a key is configured, falls back to schema.offlineFallback.
- * API key is stored in localStorage for now; will move to backend later.
+ * Uses the authenticated backend AI proxy when configured, otherwise falls
+ * back to the schema's offline generator.
  *
  * Two operating modes: normal (Studio tab — "Apply to Current Slide"/"Apply
  * All N Slides" may overwrite activeQuestion) vs. skill-scoped append-only
@@ -15,14 +15,16 @@
  * every generated slide is stamped with skillId, added only via onAddSlides).
  */
 
-import React, { useState, useRef, useEffect } from "react";
-import { Sparkles, Wand2, Zap, Layers, ArrowRight, Key, Eye, EyeOff, AlertCircle, Settings2 } from "lucide-react";
+import React, { useState, useRef } from "react";
+import { Sparkles, Wand2, Zap, Layers, ArrowRight, AlertCircle, Database } from "lucide-react";
 import { CountingQuestion, CountingTechnique } from "../../../types";
 import { sounds } from "../../../sound";
 import { Button, Label, Badge } from "../../ui";
-import { generateWithAI, getStoredApiKey, setStoredApiKey, hasApiKey } from "./openaiService";
+import { generateWithAI } from "./openaiService";
 import { detectTechniqueFromPrompt, getSchemaByTechnique, SCHEMA_REGISTRY } from "./schemas";
 import { GenerationStep } from "./types";
+import { useAppSettings } from "../../../settings/AppSettingsContext";
+import { useSvgLibrary } from "../../../assets/SvgLibraryContext";
 
 interface AiGeneratorPanelProps {
   activeQuestion: CountingQuestion;
@@ -55,47 +57,9 @@ export const AiGeneratorPanel: React.FC<AiGeneratorPanelProps> = ({
   const [batchResults, setBatchResults] = useState<CountingQuestion[]>([]);
   const [error, setError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  // API Key state
-  const [apiKey, setApiKey] = useState<string>(getStoredApiKey());
-  const [showKey, setShowKey] = useState(false);
-  const [showSettings, setShowSettings] = useState(!hasApiKey());
-  const [keySaved, setKeySaved] = useState(false);
-
-  useEffect(() => {
-    const handleKeySync = () => {
-      const stored = getStoredApiKey();
-      setApiKey(stored);
-      if (stored) {
-        setShowSettings(false);
-      }
-    };
-    window.addEventListener("koda-apikey-changed", handleKeySync);
-    return () => {
-      window.removeEventListener("koda-apikey-changed", handleKeySync);
-    };
-  }, []);
-
-  const isOpenAI = apiKey.trim().length > 0;
-
-  const handleSaveKey = () => {
-    setStoredApiKey(apiKey);
-    setKeySaved(true);
-    sounds.playPop();
-    window.dispatchEvent(new Event("koda-apikey-changed"));
-    setTimeout(() => setKeySaved(false), 2000);
-    if (apiKey.trim()) {
-      setShowSettings(false);
-    }
-  };
-
-  const handleClearKey = () => {
-    setApiKey("");
-    setStoredApiKey("");
-    window.dispatchEvent(new Event("koda-apikey-changed"));
-    setShowSettings(true);
-    sounds.playTock();
-  };
+  const { settings } = useAppSettings();
+  const { assets: customAssets, persistenceStatus: assetPersistenceStatus } = useSvgLibrary();
+  const isOpenAI = settings.api_key_configured;
 
   const GENERATION_STEPS_OPENAI: string[] = [
     "Connecting to OpenAI...",
@@ -133,7 +97,7 @@ export const AiGeneratorPanel: React.FC<AiGeneratorPanelProps> = ({
 
         // Call OpenAI
         const slideCount = batchMode ? batchCount : 1;
-        const slides = await generateWithAI(prompt, slideCount, questions);
+        const slides = await generateWithAI(prompt, slideCount, questions, customAssets);
         const stamped = targetSkillId ? slides.map(s => ({ ...s, skillId: targetSkillId })) : slides;
 
         // Show remaining steps
@@ -265,84 +229,7 @@ export const AiGeneratorPanel: React.FC<AiGeneratorPanelProps> = ({
             </p>
           </div>
         </div>
-        <button
-          onClick={() => setShowSettings(!showSettings)}
-          className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all cursor-pointer
-            ${showSettings
-              ? "bg-indigo-100 text-indigo-650"
-              : isOpenAI
-                ? "bg-indigo-50 text-indigo-600 hover:bg-indigo-100"
-                : "bg-slate-100 text-slate-400 hover:bg-slate-200"
-            }`}
-          title="API Settings"
-        >
-          <Settings2 size={14} />
-        </button>
       </div>
-
-      {/* ── API Key Settings ── */}
-      {showSettings && (
-        <div className="p-3 rounded-xl border border-slate-200 bg-slate-50 space-y-3 animate-fade-in">
-          <div className="flex items-center gap-1.5">
-            <Key size={12} className="text-indigo-550" />
-            <label className="text-[11px] font-bold text-slate-700">OpenAI API Key</label>
-            {isOpenAI && (
-              <span className="ml-auto text-[9px] px-1.5 py-0.5 bg-indigo-50 border border-indigo-100 text-indigo-700 rounded-full font-bold flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 inline-block animate-pulse"></span>
-                Connected
-              </span>
-            )}
-          </div>
-
-          <div className="flex gap-1.5">
-            <div className="flex-1 relative">
-              <input
-                type={showKey ? "text" : "password"}
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="sk-..."
-                className="w-full px-3 py-2 pr-8 text-[11px] border border-slate-250 rounded-lg bg-white
-                  focus:ring-2 focus:ring-indigo-100/50 focus:border-indigo-500 outline-none
-                  placeholder:text-slate-300 font-mono transition-all"
-              />
-              <button
-                onClick={() => setShowKey(!showKey)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-              >
-                {showKey ? <EyeOff size={13} /> : <Eye size={13} />}
-              </button>
-            </div>
-            <Button
-              onClick={handleSaveKey}
-              size="sm"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold px-3 border-0 cursor-pointer"
-            >
-              {keySaved ? "✓ Saved" : "Save"}
-            </Button>
-          </div>
-
-          {isOpenAI && (
-            <div className="flex items-center justify-between">
-              <p className="text-[9px] text-slate-400 font-medium">
-                Key stored locally in your browser. Will not be shared.
-              </p>
-              <button
-                onClick={handleClearKey}
-                className="text-[9px] text-rose-500 hover:text-rose-700 font-bold underline cursor-pointer"
-              >
-                Remove Key
-              </button>
-            </div>
-          )}
-
-          {!isOpenAI && (
-            <p className="text-[9px] text-slate-400 font-medium leading-relaxed">
-              Without an API key, the generator uses a built-in rule-based engine.
-              Add your <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-indigo-600 underline font-bold">OpenAI API key</a> for smarter, more creative results.
-            </p>
-          )}
-        </div>
-      )}
 
       {/* ── Mode Indicator ── */}
       <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-[10px] font-bold ${
@@ -352,6 +239,17 @@ export const AiGeneratorPanel: React.FC<AiGeneratorPanelProps> = ({
       }`}>
         <span className={`w-2 h-2 rounded-full ${isOpenAI ? "bg-indigo-500 animate-pulse" : "bg-slate-400"}`} />
         {isOpenAI ? "OpenAI GPT Mode — smarter, creative generation" : "Built-in Engine — fast, rule-based generation"}
+      </div>
+
+      <div className="flex items-center gap-2 rounded-lg border border-[#E7E3F6] bg-[#FBFAFF] px-3 py-2 text-[10px] font-medium text-[#6D6997]">
+        <Database size={12} className="shrink-0 text-[#534AB7]" />
+        <span>
+          {assetPersistenceStatus === "loading"
+            ? "Loading MongoDB asset library…"
+            : assetPersistenceStatus === "saved"
+              ? `MongoDB library connected · ${customAssets.length} custom asset${customAssets.length === 1 ? "" : "s"} available to AI`
+              : `${customAssets.length} cached custom asset${customAssets.length === 1 ? "" : "s"} available · MongoDB offline`}
+        </span>
       </div>
 
       {/* ── Prompt Input ── */}

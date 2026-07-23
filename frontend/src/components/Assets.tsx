@@ -1,5 +1,8 @@
 import React from "react";
 import { CUSTOM_SVG_OBJECT_PLACEHOLDER } from "../types";
+import { useSvgLibrary } from "../assets/SvgLibraryContext";
+import { sanitizeSvgMarkup } from "../assets/svgSafety";
+import { scopeSvgIds } from "../assets/svgIds";
 
 /**
  * Single source of truth for the built-in drawable vector shapes. The panel
@@ -33,39 +36,29 @@ interface AssetProps {
   scale?: number;
 }
 
-export const SVG_OVERRIDES_CACHE = {
-  overrides: (() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("koda_svg_overrides");
-      try {
-        return saved ? JSON.parse(saved) : {};
-      } catch (e) {
-        return {};
-      }
-    }
-    return {};
-  })() as Record<string, { markup: string; scale?: number }>
-};
-
 export const CountingAsset: React.FC<AssetProps> = ({ type, emoji, size = 48, className = "", customSvgMarkup, scale }) => {
-  // If it's a pre-built SVG and has an active override in cache, render the custom overridden SVG instead!
+  const svgScope = React.useId();
+  const { overrides } = useSvgLibrary();
+  // Built-in shapes automatically consume the account's shared Mongo-backed override.
   if (type !== "emoji" && type !== "custom_svg") {
-    const override = SVG_OVERRIDES_CACHE.overrides[type];
-    if (override) {
+    const override = overrides[type];
+    const safeOverrideMarkup = override ? scopeSvgIds(sanitizeSvgMarkup(override.markup), svgScope) : "";
+    if (override && safeOverrideMarkup) {
       const activeScale = scale !== undefined ? scale : (override.scale !== undefined ? override.scale : 1.0);
       const finalSize = size * activeScale;
       return (
         <div 
           className={`custom-svg-container flex items-center justify-center pointer-events-none select-none ${className}`}
           style={{ width: `${finalSize}px`, height: `${finalSize}px` }}
-          dangerouslySetInnerHTML={{ __html: override.markup }}
+          dangerouslySetInnerHTML={{ __html: safeOverrideMarkup }}
         />
       );
     }
   }
 
   if (type === "custom_svg") {
-    const markup = customSvgMarkup || CUSTOM_SVG_OBJECT_PLACEHOLDER.emoji || emoji || "";
+    const markup = scopeSvgIds(sanitizeSvgMarkup(customSvgMarkup || CUSTOM_SVG_OBJECT_PLACEHOLDER.emoji || emoji || ""), svgScope);
+    if (!markup) return null;
     const activeScale = scale !== undefined ? scale : (CUSTOM_SVG_OBJECT_PLACEHOLDER.scale || 1.0);
     const finalSize = size * activeScale;
     return (

@@ -1,16 +1,21 @@
 import React from "react";
+import { Loader2 } from "lucide-react";
 import { cn } from "../../lib/utils";
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "default" | "secondary" | "outline" | "ghost" | "link" | "destructive";
   size?: "xs" | "sm" | "md" | "lg" | "icon";
+  loading?: boolean;
+  loadingText?: string;
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = "default", size = "md", ...props }, ref) => {
+  ({ className, variant = "default", size = "md", loading = false, loadingText, disabled, children, ...props }, ref) => {
     return (
       <button
         ref={ref}
+        disabled={disabled || loading}
+        aria-busy={loading || undefined}
         className={cn(
           "inline-flex items-center justify-center rounded-xl font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/20 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer",
           // Variants
@@ -29,7 +34,14 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           className
         )}
         {...props}
-      />
+      >
+        {loading ? (
+          <>
+            <Loader2 size={14} className="shrink-0 animate-spin" />
+            {loadingText && <span>{loadingText}</span>}
+          </>
+        ) : children}
+      </button>
     );
   }
 );

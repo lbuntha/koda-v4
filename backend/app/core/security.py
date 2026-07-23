@@ -1,13 +1,32 @@
 """Password/PIN hashing (argon2 via pwdlib) and JWT access/refresh tokens (PyJWT)."""
 
 from datetime import datetime, timedelta, timezone
+import base64
+import hashlib
 
 import jwt
+from cryptography.fernet import Fernet, InvalidToken
 from pwdlib import PasswordHash
 
 from .config import settings
 
 _hasher = PasswordHash.recommended()
+
+
+def _secret_cipher() -> Fernet:
+    key = base64.urlsafe_b64encode(hashlib.sha256(settings.jwt_secret.encode("utf-8")).digest())
+    return Fernet(key)
+
+
+def encrypt_secret(raw: str) -> str:
+    return _secret_cipher().encrypt(raw.encode("utf-8")).decode("ascii")
+
+
+def decrypt_secret(encrypted: str) -> str | None:
+    try:
+        return _secret_cipher().decrypt(encrypted.encode("ascii")).decode("utf-8")
+    except (InvalidToken, ValueError):
+        return None
 
 
 # ── Secret hashing (passwords + PINs) ────────────────────────────────────────

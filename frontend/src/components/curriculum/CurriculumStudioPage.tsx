@@ -10,11 +10,11 @@
  * plain values down, never question objects, to curriculum/* code.
  */
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
+import { ArrowLeft, FileText, History } from "lucide-react";
 import { CountingQuestion, CustomSvgAsset } from "../../types";
 import { useCurriculumTree } from "../../curriculum/useCurriculumTree";
-import { EXAMPLE_QUESTIONS } from "../../curriculum/seedExample";
-import { computeSkillCoverage, auditCurriculum, SkillCoverage, Skill, CurriculumIssue } from "../../curriculum/types";
+import { computeSkillCoverage, auditCurriculum, SkillCoverage, CurriculumIssue } from "../../curriculum/types";
 import * as mutations from "../../curriculum/mutations";
 import { CurriculumSidebar } from "./CurriculumSidebar";
 import { UnitOverview } from "./UnitOverview";
@@ -25,20 +25,25 @@ import { CurriculumHealthDrawer } from "./CurriculumHealthDrawer";
 import { QuestionPreviewModal } from "./QuestionPreviewModal";
 import { EditQuestionDrawer } from "./EditQuestionDrawer";
 import { spliceReordered, filterAndSortBySkill } from "./questionOps";
+import { CurriculumStudioSkeleton } from "./CurriculumStudioSkeleton";
+import { CurriculumDetailsDrawer, CurriculumDetailsTab } from "./CurriculumDetailsDrawer";
+import { Badge, Button } from "../ui";
 
 interface CurriculumStudioPageProps {
+  curriculumId?: string;
   questions: CountingQuestion[];
   saveQuestions: (next: CountingQuestion[]) => void;
   customSvgs: CustomSvgAsset[];
   onOpenSvgMaker: () => void;
+  onBack?: () => void;
 }
 
-export const CurriculumStudioPage: React.FC<CurriculumStudioPageProps> = ({ questions, saveQuestions, customSvgs, onOpenSvgMaker }) => {
-  const { tree, setTree } = useCurriculumTree();
+export const CurriculumStudioPage: React.FC<CurriculumStudioPageProps> = ({ curriculumId, questions, saveQuestions, customSvgs, onOpenSvgMaker, onBack }) => {
+  const { tree, setTree, published, setPublished, persistenceStatus, loadError, owner, createdAt, updatedAt, revision } = useCurriculumTree(curriculumId);
 
-  const [selectedGradeId, setSelectedGradeId] = useState(tree.grades[0]?.id ?? "");
+  const [selectedGradeId, setSelectedGradeId] = useState(tree.primaryGradeId || tree.grades[0]?.id || "");
   const [selectedSubjectId, setSelectedSubjectId] = useState(
-    tree.subjects.find(s => s.gradeId === (tree.grades[0]?.id ?? ""))?.id ?? ""
+    tree.primarySubjectId || tree.subjects.find(s => s.gradeId === (tree.primaryGradeId || tree.grades[0]?.id || ""))?.id || ""
   );
   const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null);
   const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
@@ -47,19 +52,8 @@ export const CurriculumStudioPage: React.FC<CurriculumStudioPageProps> = ({ ques
   const [isFillWithAiOpen, setIsFillWithAiOpen] = useState(false);
   const [previewQuestion, setPreviewQuestion] = useState<CountingQuestion | null>(null);
   const [editingQuestion, setEditingQuestion] = useState<CountingQuestion | null>(null);
-
-  // First-run seeding: a brand-new teacher should see "Counting & Number
-  // Sense" at a real 10/10, not an empty tree next to a seed literally
-  // named around 10 questions. Runs once; a ref-free length/id check keeps
-  // it idempotent across re-renders and refreshes.
-  useEffect(() => {
-    const existingIds = new Set(questions.map(q => q.id));
-    const missing = EXAMPLE_QUESTIONS.filter(q => !existingIds.has(q.id));
-    if (missing.length === EXAMPLE_QUESTIONS.length) {
-      saveQuestions([...questions, ...EXAMPLE_QUESTIONS]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const [detailsTab, setDetailsTab] = useState<CurriculumDetailsTab>("metadata");
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   const questionSkillIds = useMemo(() => questions.map(q => q.skillId), [questions]);
   const coverage = useMemo(() => computeSkillCoverage(tree, questionSkillIds), [tree, questionSkillIds]);
@@ -100,12 +94,8 @@ export const CurriculumStudioPage: React.FC<CurriculumStudioPageProps> = ({ ques
 
   const handleAddUnit = (label: string) => setTree(t => mutations.addUnit(t, selectedSubjectId, label));
   const handleAddSkill = (unitId: string, label: string) => setTree(t => mutations.addSkill(t, unitId, { label }));
-  const handleEditSkill = (skill: Skill) => {
-    const nextLabel = window.prompt("Skill name", skill.label);
-    if (nextLabel && nextLabel.trim() && nextLabel.trim() !== skill.label) {
-      setTree(t => mutations.updateSkill(t, skill.id, { label: nextLabel.trim() }));
-    }
-  };
+  const handleEditUnit = (unitId: string, label: string) => setTree(t => mutations.renameUnit(t, unitId, label));
+  const handleEditSkill = (skillId: string, label: string) => setTree(t => mutations.updateSkill(t, skillId, { label }));
 
   const handleDeleteQuestion = (questionId: string) => {
     saveQuestions(questions.filter(q => q.id !== questionId));
@@ -144,6 +134,35 @@ export const CurriculumStudioPage: React.FC<CurriculumStudioPageProps> = ({ ques
     setIsHealthDrawerOpen(false);
   };
 
+  if (persistenceStatus === "loading") return <CurriculumStudioSkeleton />;
+
+  if (loadError) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-slate-50 p-8">
+        <div className="max-w-sm text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50">
+            <span className="text-2xl">📕</span>
+          </div>
+          <h3 className="mb-1.5 text-sm font-bold text-slate-700">Can’t open this curriculum</h3>
+          <p className="text-xs leading-relaxed text-slate-400">{loadError}</p>
+          {onBack && (
+            <Button variant="outline" size="sm" className="mt-4" onClick={onBack}>
+              <ArrowLeft size={14} /> Back to curricula
+            </Button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  const primaryGrade = tree.grades.find(grade => grade.id === (tree.primaryGradeId || selectedGradeId));
+  const primarySubject = tree.subjects.find(subject => subject.id === (tree.primarySubjectId || selectedSubjectId));
+
+  const openDetails = (tab: CurriculumDetailsTab) => {
+    setDetailsTab(tab);
+    setIsDetailsOpen(true);
+  };
+
   return (
     <div className="flex flex-col md:flex-row h-full w-full bg-slate-50">
       <CurriculumSidebar
@@ -154,17 +173,46 @@ export const CurriculumStudioPage: React.FC<CurriculumStudioPageProps> = ({ ques
         selectedSkillId={selectedSkillId}
         coverageBySkillId={coverageBySkillId}
         issueCount={issues.length}
+        persistenceStatus={persistenceStatus}
+        published={published}
+        onTogglePublished={() => setPublished(value => !value)}
         onSelectGrade={handleSelectGrade}
         onSelectSubject={handleSelectSubject}
         onSelectUnit={handleSelectUnit}
         onSelectSkill={handleSelectSkill}
         onAddUnit={handleAddUnit}
         onAddSkill={handleAddSkill}
+        onEditUnit={handleEditUnit}
         onEditSkill={handleEditSkill}
         onOpenHealthDrawer={() => setIsHealthDrawerOpen(true)}
       />
 
-      <main className="flex-1 overflow-y-auto">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <header className="flex shrink-0 flex-col gap-3 border-b border-[#E7E3F6] bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-start gap-2.5">
+            {onBack && (
+              <Button variant="outline" size="icon" className="h-9 w-9 shrink-0" onClick={onBack} aria-label="Back to curricula" title="Back to curricula">
+                <ArrowLeft size={14} />
+              </Button>
+            )}
+            <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="truncate text-sm font-semibold text-[#0E0B55]">{tree.title || "Untitled curriculum"}</h1>
+              <Badge variant={published ? "success" : "default"}>{published ? "Published" : "Draft"}</Badge>
+              {tree.version && <Badge variant="default">v{tree.version}</Badge>}
+            </div>
+            <p className="mt-1 truncate text-[11px] text-[#6D6997]">
+              {[primaryGrade?.label, primarySubject?.label, owner?.name ? `Owned by ${owner.name}` : null].filter(Boolean).join(" · ") || "Add curriculum metadata"}
+            </p>
+            </div>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => openDetails("history")}><History size={13} /> History</Button>
+            <Button variant="secondary" size="sm" onClick={() => openDetails("metadata")}><FileText size={13} /> Details</Button>
+          </div>
+        </header>
+
+        <main className="min-h-0 flex-1 overflow-y-auto">
         {selectedSkill ? (
           <SkillDetail
             skill={selectedSkill}
@@ -198,7 +246,8 @@ export const CurriculumStudioPage: React.FC<CurriculumStudioPageProps> = ({ ques
             </div>
           </div>
         )}
-      </main>
+        </main>
+      </div>
 
       <CurriculumHealthDrawer
         isOpen={isHealthDrawerOpen}
@@ -236,6 +285,37 @@ export const CurriculumStudioPage: React.FC<CurriculumStudioPageProps> = ({ ques
         questions={questions}
         customSvgs={customSvgs}
         onOpenSvgMaker={onOpenSvgMaker}
+      />
+
+      <CurriculumDetailsDrawer
+        curriculumId={curriculumId}
+        isOpen={isDetailsOpen}
+        initialTab={detailsTab}
+        onClose={() => setIsDetailsOpen(false)}
+        tree={tree}
+        owner={owner}
+        revision={revision}
+        createdAt={createdAt}
+        updatedAt={updatedAt}
+        published={published}
+        persistenceStatus={persistenceStatus}
+        onSave={draft => {
+          setTree(current => ({
+            ...current,
+            title: draft.title,
+            description: draft.description,
+            version: draft.version,
+            primaryGradeId: draft.primaryGradeId,
+            primarySubjectId: draft.primarySubjectId,
+            grades: draft.grades,
+            subjects: draft.subjects,
+          }));
+          setPublished(draft.published);
+          setSelectedGradeId(draft.primaryGradeId);
+          setSelectedSubjectId(draft.primarySubjectId);
+          setSelectedUnitId(null);
+          setSelectedSkillId(null);
+        }}
       />
     </div>
   );

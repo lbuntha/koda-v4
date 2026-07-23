@@ -51,12 +51,20 @@ async def get_current_user(principal: Principal = Depends(get_principal)) -> Use
     user = await User.get(PydanticObjectId(principal.id))
     if not user:
         raise _unauthorized("Account not found")
+    if user.disabled_at is not None:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Account is disabled")
     return user
 
 
 async def get_current_parent(user: User = Depends(get_current_user)) -> User:
     if user.role != Role.parent:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Parent account required")
+    return user
+
+
+async def get_current_admin(user: User = Depends(get_current_user)) -> User:
+    if user.role != Role.admin:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Admin account required")
     return user
 
 

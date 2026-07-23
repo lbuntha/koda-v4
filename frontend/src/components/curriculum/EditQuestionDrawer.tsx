@@ -115,6 +115,7 @@ export const EditQuestionDrawer: React.FC<EditQuestionDrawerProps> = ({
                     config: {
                       ...draft.config,
                       assetType: "custom_svg",
+                      customSvgAssetId: asset.id,
                       customSvgMarkup: asset.markup,
                       customSvgLabel: asset.label,
                       customSvgScale: asset.scale,
