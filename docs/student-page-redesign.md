@@ -202,8 +202,12 @@ shared/
    (fallback `student`). Frontend: `GradeBand` type, threaded through
    `Account` → `StudentCurriculumPlayer` → `StudentTodayHome` (`data-band`).
    Tests: `test_grade_band.py`. Layout components per band are phases 3–5.
-2. **Shared skeleton refactor.** Extract `Header / HeroActivity / UpNextRow /
-   FreePlayButton / LevelUpDialog`; drop rank/skill-map/toggle from the home.
+2. **Shared skeleton refactor.** ✅ **Done.** Extracted `student/home/`:
+   `HomeHeader`, `HeroActivity`, `UpNextRow`, `FreePlaySwitch`, `LevelUpDialog`,
+   `kinds.ts`. `StudentTodayHome` now composes them as a compact single-focus
+   home (hero + up-next, plan-by-default, level-up kept); rank card, skill-map
+   grid, and the segmented mode toggle removed. Band-neutral for now — the three
+   band treatments compose these same pieces in phases 3–5.
 3. **Band B (Student)** first — the neutral middle; validates the shared parts.
 4. **Band A (Kid)** — playful treatment + optional parent-gated exit.
 5. **Band C (Focus)** — sleek study-tool treatment + more agency.

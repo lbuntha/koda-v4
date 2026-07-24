@@ -193,7 +193,6 @@ export const StudentCurriculumPlayer: React.FC = () => {
     <>
       <StudentTodayHome
         course={course}
-        progress={progress}
         levelUp={levelUp}
         studentName={account?.name || "Learner"}
         studentAvatar={account?.avatar}
