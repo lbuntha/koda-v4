@@ -209,6 +209,10 @@ shared/
    grid, and the segmented mode toggle removed. Band-neutral for now — the three
    band treatments compose these same pieces in phases 3–5.
 3. **Band B (Student)** first — the neutral middle; validates the shared parts.
+   ✅ **Done.** `StudentTodayHome` is now a band **router** (`LAYOUTS` by band
+   over shared `StudentHomeProps`); `home/StudentHome.tsx` is Band B — the
+   compact baseline plus a light "N to practise today" signal. Kid/Focus route
+   to it as a fallback until phases 4–5.
 4. **Band A (Kid)** — playful treatment + optional parent-gated exit.
 5. **Band C (Focus)** — sleek study-tool treatment + more agency.
 6. **Relocate analytics** — surface rank + skill map per kid on the parent/teacher
