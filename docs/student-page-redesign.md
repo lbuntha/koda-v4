@@ -135,6 +135,40 @@ a focused list with session goal + time estimate. Maximum agency.
 - Learner can pick any queue item; free practice one click away.
 - Room for "due for review" and light goals (they can handle more data).
 
+### 4a. Responsive behavior (phone / tablet / desktop)
+
+Mockup: side-by-side at all three sizes — `scratchpad/band-mockups.html`
+(artifact: https://claude.ai/code/artifact/60db16fd-d0f8-448f-9b13-51716a85f657).
+
+**Breakpoint rule.** Single column at ≤ ~840px (phone + tablet portrait);
+two-column above (tablet landscape + desktop). Tablet portrait is the phone
+layout with more breathing room and larger type — not a separate design.
+
+| Band | Phone / tablet-portrait | Desktop / wide |
+|------|-------------------------|----------------|
+| **Kid** | Centered single column: quest bar, buddy, big Play, catch-up. | **Centered stage** — a floating panel enlarges buddy + Play; deliberately *not* stretched across a wide monitor (kids shouldn't track a full-width screen). |
+| **Student** | Stacked: stats → hero card → Revisit → Free play. | **Hero + rail** — hero card on the left, a right rail holding stats, Up next, and Revisit. |
+| **Focus** | Stacked: stat strip → plan list → Start. | **Study dashboard** — plan list (main) beside a sidebar of stats + a weekly-activity chart. |
+
+Kid opts out of two-column by design; Student and Focus use the extra width for
+a side rail / dashboard rather than a wider single column.
+
+### 4b. Performance + missed-skill signals
+
+A change from §3, which had moved *all* progress to the adult dashboard: the
+student home carries a **light** performance signal and a **catch-up on
+missed/skipped skills**, tuned per band (never the old heavy rank card + full
+skill map). Full analytics still lives on the parent/teacher view.
+
+| Band | Performance | Missed / skipped ("catch-up") |
+|------|-------------|-------------------------------|
+| **Kid** | A playful "quest" progress bar + today's stars. | Gentle **"Try again"** card — encouragement, never framed as failure. |
+| **Student** | Two small stat tiles: daily ring (N today) + streak. | **"Revisit"** card: e.g. *"Count to 20 — skipped last time."* |
+| **Focus** | Stat strip: streak · proficiency % · due/missed count. | **"Overdue"** flag inline in the plan + a due/missed stat tile. |
+
+> Open decision: keep these signals student-facing (as mocked), or revert to
+> adult-only per the original §3. Flagged with the user 2026-07-24.
+
 ---
 
 ## 5. Band resolution — configured in admin ✅
