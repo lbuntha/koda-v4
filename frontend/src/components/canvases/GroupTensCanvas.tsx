@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { COUNT_OBJECTS } from "../../types";
 import { CountingAsset } from "../Assets";
 import { sounds } from "../../sound";
-import { RotateCcw, Grid2X2, Move, Maximize2 } from "lucide-react";
+import { RotateCcw, Grid2X2, Move, Maximize2, Check, Calculator, AlertCircle, Delete } from "lucide-react";
 import { CanvasProps } from "./types";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import { GhostGuideOverlay, useGhostGuide } from "../../pedagogy";
@@ -41,6 +42,7 @@ const GRID_STEP = 20;
 export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, showGrid, isDark = false, onSuccess, onUpdateQuestionConfig }) => {
   const obj = COUNT_OBJECTS.find(o => o.id === question.objectId) || COUNT_OBJECTS[0];
   const count = question.targetCount;
+  const requireAnswerInput = question.config.requireAnswerInput ?? true;
 
   const [dots, setDots] = useState<TenFrameDot[]>([]);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
@@ -50,8 +52,22 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
   const shelfRef = useRef<HTMLDivElement>(null);
   const cellRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
+  // Answer Input State
+  const [answerInput, setAnswerInput] = useState<string>("");
+  const [answerStatus, setAnswerStatus] = useState<"idle" | "error" | "correct">("idle");
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [showNumberPad, setShowNumberPad] = useState<boolean>(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onSuccessRef = useRef(onSuccess);
+  onSuccessRef.current = onSuccess;
+
   const [dimensions, setDimensions] = useState({ width: 480, height: 320 });
-  const solvedForGuide = dots.length > 0 && dots.every(d => d.snappedCell !== null);
+
+  const snappedList = dots.filter(d => d.snappedCell !== null);
+  const isGroupTensComplete = snappedList.length === count && count > 0;
+  const solvedForGuide = isGroupTensComplete && (requireAnswerInput ? answerStatus === "correct" : true);
+  
   const { showGhostGuide, reportActivity } = useGhostGuide({
     isPlayMode,
     isSolved: solvedForGuide,
@@ -79,6 +95,18 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
 
   const w = dimensions.width;
   const h = dimensions.height;
+
+  // Reset answer state on question change
+  useEffect(() => {
+    setAnswerInput("");
+    setAnswerStatus("idle");
+    setErrorMessage("");
+    setShowNumberPad(false);
+    if (successTimeoutRef.current) {
+      clearTimeout(successTimeoutRef.current);
+      successTimeoutRef.current = null;
+    }
+  }, [question.id, count]);
 
   // Measure shelf layout in play mode on mobile to place dots correctly
   useEffect(() => {
@@ -111,7 +139,6 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
       const framesStacked = isMobile && count > 10;
       const minFramesHeight = framesStacked ? 328 : 160;
 
-      // Ignore saved coordinates in play mode to enforce standard, responsive, centered layouts
       const useSaved = !isPlayMode;
       const saved = useSaved ? question.config.containerPositions?.['shelf'] : null;
       const savedDim = useSaved ? (question.config as any).shelfDimensions : null;
@@ -136,7 +163,7 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
     }
   }, [w, h, question.id, count, isPlayMode]);
 
-  // Helper: get default tray position for an item index (vertically centered inside bottom shelf)
+  // Helper: get default tray position for an item index
   const getTrayPos = useCallback((idx: number, w: number, h: number) => {
     const isMobile = w < 640;
     const sLeft = shelfLayout.width > 0 ? shelfLayout.left : 12;
@@ -146,22 +173,18 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
 
     const availableHeight = sHeight - 36;
     
-    // Choose columns per row dynamically based on the width of the shelf!
     const gapX = isMobile ? 36 : (count > 16 ? 38 : count > 10 ? 44 : 48);
     const maxItemsFit = Math.floor((sWidth - 16) / gapX);
     const itemsPerRow = Math.max(4, Math.min(maxItemsFit, count));
     const totalRows = Math.ceil(count / itemsPerRow);
     
-    // Vertical layout calculations
     const spacingY = totalRows > 1 ? Math.min(24, (availableHeight - dotSize) / (totalRows - 1)) : 0;
     const totalHeight = dotSize + (totalRows - 1) * spacingY;
     const yOffset = (availableHeight - totalHeight) / 2;
     
-    // Horizontal layout calculations
     const row = Math.floor(idx / itemsPerRow);
     const col = idx % itemsPerRow;
     
-    // Center the columns inside the container width
     const itemsInThisRow = Math.min(itemsPerRow, count - row * itemsPerRow);
     const rowWidth = itemsInThisRow * gapX;
     const startX = (sWidth - rowWidth) / 2;
@@ -175,7 +198,6 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
   // Reset or update positions based on questions or dimensions
   useEffect(() => {
     const isMobile = dimensions.width < 640;
-    // Ignore custom absolute positions in play mode on mobile to maintain responsiveness
     const customPositions = (isMobile && isPlayMode) ? [] : (question.config.customPositions || []);
     setDots(prev => {
       return Array.from({ length: count }).map((_, idx) => {
@@ -184,7 +206,6 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
         const existing = prev.find(d => d.id === `tenframe-dot-${idx}`);
 
         if (existing) {
-          // If snapped, update to the actual cell location (recalculated for new parent dimensions)
           if (existing.snappedCell !== null) {
             const key = `${existing.snappedCell.frameIdx}-${existing.snappedCell.cellIdx}`;
             const cell = cellRefs.current[key];
@@ -199,10 +220,9 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
                 y: Math.round(cellCenterY - dotSize / 2)
               };
             }
+            return existing;
           }
-          if (savedPos) {
-            return { ...existing, x: savedPos.x, y: savedPos.y, snappedCell: null };
-          }
+          if (savedPos) return { ...existing, x: savedPos.x, y: savedPos.y };
           return { ...existing, x: defaultPos.x, y: defaultPos.y };
         }
 
@@ -215,88 +235,39 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
         };
       });
     });
-  }, [question, count, dimensions, getTrayPos, obj.emoji, dotSize, isPlayMode]);
+  }, [question, count, dimensions.width, dimensions.height, getTrayPos, dotSize, obj.emoji, isPlayMode]);
 
-  const handleResetLayout = () => {
-    sounds.playPop();
-    const isMobile = w < 640;
-    const framesStacked = isMobile && count > 10;
-    const minFramesHeight = framesStacked ? 328 : 160;
-
-    const defaultW = isMobile ? (w - 24) : Math.round(w * 0.5);
+  const handleAutoLayout = () => {
+    const isMobile = dimensions.width < 640;
+    const defaultW = isMobile ? (dimensions.width - 24) : Math.round(dimensions.width * 0.5);
     const gapX = isMobile ? 36 : (count > 16 ? 38 : count > 10 ? 44 : 48);
     const maxItemsFit = Math.floor((defaultW - 16) / gapX);
     const itemsPerRow = Math.max(4, Math.min(maxItemsFit, count));
     const totalRows = Math.ceil(count / itemsPerRow);
     const defaultH = isMobile && totalRows > 2 ? 140 : TRAY_HEIGHT;
 
-    const defaultX = isMobile ? 12 : Math.round((w - defaultW) / 2);
-    const defaultY = Math.max(minFramesHeight + 16, h - 12 - defaultH);
-    
-    const tempLayout = { left: defaultX, top: defaultY, width: defaultW, height: defaultH };
-    setShelfLayout(tempLayout);
+    const defaultX = isMobile ? 12 : Math.round((dimensions.width - defaultW) / 2);
+    const defaultY = Math.max(180, dimensions.height - 12 - defaultH);
+    setShelfLayout({ left: defaultX, top: defaultY, width: defaultW, height: defaultH });
 
-    onUpdateQuestionConfig?.({
-      customPositions: [],
-      containerPositions: {},
-      shelfDimensions: undefined
-    } as any);
-
-    const availableHeight = defaultH - 36;
-    const spacingY = totalRows > 1 ? Math.min(24, (availableHeight - dotSize) / (totalRows - 1)) : 0;
-    const totalHeight = dotSize + (totalRows - 1) * spacingY;
-    const yOffset = (availableHeight - totalHeight) / 2;
-
-    setDots(Array.from({ length: count }).map((_, idx) => {
-      const row = Math.floor(idx / itemsPerRow);
-      const col = idx % itemsPerRow;
-      const itemsInThisRow = Math.min(itemsPerRow, count - row * itemsPerRow);
-      const rowWidth = itemsInThisRow * gapX;
-      const startX = (defaultW - rowWidth) / 2;
-      return {
-        id: `tenframe-dot-${idx}`,
-        emoji: obj.emoji,
-        x: Math.round(defaultX + startX + col * gapX + (gapX - dotSize) / 2),
-        y: Math.round(defaultY + 36 + yOffset + row * spacingY),
-        snappedCell: null
-      };
+    setDots(prev => prev.map((d, idx) => {
+      const pos = getTrayPos(idx, dimensions.width, dimensions.height);
+      return { ...d, x: pos.x, y: pos.y, snappedCell: null };
     }));
   };
 
-  const handleAutoLayout = () => {
-    sounds.playPop();
-    const autoPositions = Array.from({ length: count }).map((_, idx) => {
-      const pos = getTrayPos(idx, w, h);
-      return {
-        id: `tenframe-dot-${idx}`,
-        x: pos.x,
-        y: pos.y
-      };
-    });
-    setDots(prev => prev.map((d, idx) => ({ ...d, x: autoPositions[idx].x, y: autoPositions[idx].y, snappedCell: null })));
-    onUpdateQuestionConfig?.({
-      customPositions: autoPositions
-    });
-  };
+  const handleResetLayout = () => {
+    if (successTimeoutRef.current) {
+      clearTimeout(successTimeoutRef.current);
+      successTimeoutRef.current = null;
+    }
+    setAnswerInput("");
+    setAnswerStatus("idle");
+    setErrorMessage("");
+    setShowNumberPad(false);
 
-  const handleShelfMoveDown = (e: React.PointerEvent) => {
-    if (isPlayMode) return;
-    e.stopPropagation();
     sounds.playPop();
-    setShelfDrag('move');
-    shelfDragStart.current = { mx: e.clientX, my: e.clientY };
-    shelfDragStartLayout.current = { ...shelfLayout };
-    containerRef.current?.setPointerCapture(e.pointerId);
-  };
-
-  const handleShelfResizeDown = (e: React.PointerEvent) => {
-    if (isPlayMode) return;
-    e.stopPropagation();
-    sounds.playPop();
-    setShelfDrag('resize');
-    shelfDragStart.current = { mx: e.clientX, my: e.clientY };
-    shelfDragStartLayout.current = { ...shelfLayout };
-    containerRef.current?.setPointerCapture(e.pointerId);
+    handleAutoLayout();
   };
 
   const handlePointerDown = (e: React.PointerEvent, id: string) => {
@@ -304,7 +275,7 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
     sounds.playPop();
     setActiveDragId(id);
 
-    const rect = e.currentTarget.getBoundingClientRect();
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const parentRect = containerRef.current?.getBoundingClientRect();
     if (!parentRect) return;
 
@@ -316,8 +287,27 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
     containerRef.current?.setPointerCapture(e.pointerId);
   };
 
+  const handleShelfMoveDown = (e: React.PointerEvent) => {
+    if (isPlayMode) return;
+    e.stopPropagation();
+    setShelfDrag('move');
+    shelfDragStart.current = { mx: e.clientX, my: e.clientY };
+    shelfDragStartLayout.current = { ...shelfLayout };
+    containerRef.current?.setPointerCapture(e.pointerId);
+  };
+
+  const handleShelfResizeDown = (e: React.PointerEvent) => {
+    if (isPlayMode) return;
+    e.stopPropagation();
+    setShelfDrag('resize');
+    shelfDragStart.current = { mx: e.clientX, my: e.clientY };
+    shelfDragStartLayout.current = { ...shelfLayout };
+    containerRef.current?.setPointerCapture(e.pointerId);
+  };
+
   const handleContainerPointerMove = (e: React.PointerEvent) => {
-    if (!containerRef.current) return;
+    const parentRect = containerRef.current?.getBoundingClientRect();
+    if (!parentRect) return;
 
     if (!isPlayMode && shelfDrag) {
       const dx = e.clientX - shelfDragStart.current.mx;
@@ -325,47 +315,47 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
       const orig = shelfDragStartLayout.current;
 
       if (shelfDrag === 'move') {
-        let nextX = Math.max(0, Math.min(w - orig.width, orig.left + dx));
-        let nextY = Math.max(0, Math.min(h - orig.height, orig.top + dy));
+        let newX = orig.left + dx;
+        let newY = orig.top + dy;
         if (showGrid) {
-          nextX = Math.round(nextX / GRID_STEP) * GRID_STEP;
-          nextY = Math.round(nextY / GRID_STEP) * GRID_STEP;
+          newX = Math.round(newX / GRID_STEP) * GRID_STEP;
+          newY = Math.round(newY / GRID_STEP) * GRID_STEP;
         }
-        setShelfLayout(prev => ({ ...prev, left: nextX, top: nextY }));
-      } else {
-        let nextW = Math.max(160, Math.min(w - orig.left, orig.width + dx));
-        let nextH = Math.max(80, Math.min(h - orig.top, orig.height + dy));
+        newX = Math.max(4, Math.min(parentRect.width - orig.width - 4, newX));
+        newY = Math.max(4, Math.min(parentRect.height - orig.height - 4, newY));
+        setShelfLayout(prev => ({ ...prev, left: newX, top: newY }));
+      } else if (shelfDrag === 'resize') {
+        let newW = orig.width + dx;
+        let newH = orig.height + dy;
         if (showGrid) {
-          nextW = Math.round(nextW / GRID_STEP) * GRID_STEP;
-          nextH = Math.round(nextH / GRID_STEP) * GRID_STEP;
+          newW = Math.round(newW / GRID_STEP) * GRID_STEP;
+          newH = Math.round(newH / GRID_STEP) * GRID_STEP;
         }
-        setShelfLayout(prev => ({ ...prev, width: nextW, height: nextH }));
+        newW = Math.max(160, Math.min(parentRect.width - orig.left - 4, newW));
+        newH = Math.max(80, Math.min(parentRect.height - orig.top - 4, newH));
+        setShelfLayout(prev => ({ ...prev, width: newW, height: newH }));
       }
       return;
     }
 
     if (!activeDragId) return;
-    const parentRect = containerRef.current?.getBoundingClientRect();
-    if (!parentRect) return;
 
     let x = e.clientX - parentRect.left - dragOffset.current.x;
     let y = e.clientY - parentRect.top - dragOffset.current.y;
 
-    // Boundary constraints
-    x = Math.max(5, Math.min(parentRect.width - dotSize - 5, x));
-    y = Math.max(5, Math.min(parentRect.height - dotSize - 5, y));
+    x = Math.max(0, Math.min(parentRect.width - dotSize, x));
+    y = Math.max(0, Math.min(parentRect.height - dotSize, y));
 
-    // Grid snap in design mode
     if (!isPlayMode && showGrid) {
-       x = Math.round(x / GRID_STEP) * GRID_STEP;
-       y = Math.round(y / GRID_STEP) * GRID_STEP;
+      x = Math.round(x / GRID_STEP) * GRID_STEP;
+      y = Math.round(y / GRID_STEP) * GRID_STEP;
     }
 
     setDragPos({ x: Math.round(x), y: Math.round(y) });
 
-    setDots(prev =>
-      prev.map(d => (d.id === activeDragId ? { ...d, x: Math.round(x), y: Math.round(y), snappedCell: null } : d))
-    );
+    setDots(prev => prev.map(item =>
+      item.id === activeDragId ? { ...item, x: Math.round(x), y: Math.round(y), snappedCell: null } : item
+    ));
   };
 
   const handleContainerPointerUp = (e: React.PointerEvent) => {
@@ -400,7 +390,7 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
         const dotCenterY = item.y + dotSize / 2;
 
         let closestCell: { frameIdx: number; cellIdx: number } | null = null;
-        let minDistance = 40; // generous snap tolerance
+        let minDistance = 40;
 
         for (const key in cellRefs.current) {
           const cell = cellRefs.current[key];
@@ -461,7 +451,6 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
         });
       });
     } else {
-      // Design Mode: save custom positions
       setDots(prev => {
         if (onUpdateQuestionConfig) {
           onUpdateQuestionConfig({
@@ -491,24 +480,77 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
     setDragPos(null);
   };
 
-  // Compute stats
-  const snappedList = dots.filter(d => d.snappedCell !== null);
+  const handleCheckAnswer = (overrideValue?: string) => {
+    const valueToTest = overrideValue !== undefined ? overrideValue : answerInput;
+    const parsed = parseInt(valueToTest.trim(), 10);
+
+    if (isNaN(parsed) || valueToTest.trim() === "") {
+      setAnswerStatus("error");
+      setErrorMessage("Please enter a number!");
+      sounds.playFailure();
+      return;
+    }
+
+    if (parsed === count) {
+      setAnswerStatus("correct");
+      setErrorMessage("");
+      sounds.playSuccess();
+      successTimeoutRef.current = setTimeout(() => {
+        onSuccessRef.current?.();
+        successTimeoutRef.current = null;
+      }, 500);
+    } else {
+      setAnswerStatus("error");
+      setErrorMessage(`Not quite! You grouped ${count} ${obj.label}${count === 1 ? "" : "s"}. Enter ${count}!`);
+      sounds.playFailure();
+    }
+  };
+
+  const handleDigitPress = (digit: string) => {
+    if (answerStatus === "correct") return;
+    if (answerStatus === "error") {
+      setAnswerStatus("idle");
+      setErrorMessage("");
+    }
+    setAnswerInput(prev => (prev.length < 3 ? prev + digit : prev));
+  };
+
+  const handleBackspacePress = () => {
+    if (answerStatus === "correct") return;
+    if (answerStatus === "error") {
+      setAnswerStatus("idle");
+      setErrorMessage("");
+    }
+    setAnswerInput(prev => prev.slice(0, -1));
+  };
+
   const frame1Count = snappedList.filter(d => d.snappedCell!.frameIdx === 0).length;
   const frame2Count = snappedList.filter(d => d.snappedCell!.frameIdx === 1).length;
 
+  const hasTriggeredSuccess = useRef(false);
+
   useEffect(() => {
-    if (snappedList.length === count && count > 0) {
-      sounds.playSuccess();
-      if (onSuccess) onSuccess();
+    if (isGroupTensComplete) {
+      if (!requireAnswerInput) {
+        if (!hasTriggeredSuccess.current) {
+          hasTriggeredSuccess.current = true;
+          sounds.playSuccess();
+          if (onSuccess) onSuccess();
+        }
+      } else {
+        setTimeout(() => {
+          inputRef.current?.focus();
+        }, 350);
+      }
+    } else {
+      hasTriggeredSuccess.current = false;
     }
-  }, [snappedList.length]);
+  }, [snappedList.length, requireAnswerInput, isGroupTensComplete]);
 
   const accent: CanvasAccent = FRAME_ACCENTS[question.config.frameColor || "indigo"] || "indigo";
-
-  // Get currently dragged dot for alignment lines
   const draggedDot = activeDragId ? dots.find(d => d.id === activeDragId) : null;
 
-  const isSolved = snappedList.length === count && count > 0;
+  const isSolved = solvedForGuide;
   const remaining = count - snappedList.length;
   const tens = frame1Count === 10 ? 1 : 0;
   const ones = snappedList.length - tens * 10;
@@ -552,7 +594,11 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
       accent={accent}
       headerIcon={<Grid2X2 size={16} />}
       headerTitle="Group Tens"
-      headerSubtitle={`${tens} ten + ${ones} ${ones === 1 ? "one" : "ones"} = ${snappedList.length}`}
+      headerSubtitle={
+        isGroupTensComplete && requireAnswerInput
+          ? "Grouping complete! Enter the total answer below."
+          : `${tens} ten + ${ones} ${ones === 1 ? "one" : "ones"} = ${snappedList.length}`
+      }
       readAloudText={question.instruction || `Group ${count} ${obj.label} into tens. Fill the ten-frame first, then place the extra ones.`}
       headerActions={
         isPlayMode ? (
@@ -621,7 +667,11 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
         <div className="relative flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch z-0">
           <GhostGuideOverlay
             show={showGhostGuide && !isSolved}
-            label={"Drag items up into the ten-frame!"}
+            label={
+              isGroupTensComplete && requireAnswerInput
+                ? `Enter how many items you grouped (${count}) in the box!`
+                : "Drag items up into the ten-frame!"
+            }
             isDark={isDark}
             labelPlacement="top"
           />
@@ -748,6 +798,158 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
             </div>
           );
         })}
+
+        {/* ── Answer Input Box Overlay after grouping all items ── */}
+        <AnimatePresence>
+          {isPlayMode && requireAnswerInput && isGroupTensComplete && (
+            <motion.div
+              initial={{ opacity: 0, y: 30, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              className="absolute inset-x-2 bottom-2 z-50 flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl backdrop-blur-md border shadow-2xl transition-all max-w-lg mx-auto"
+              style={{
+                backgroundColor: isDark ? "rgba(15, 23, 42, 0.94)" : "rgba(255, 255, 255, 0.96)",
+                borderColor: answerStatus === "error" 
+                  ? "#ef4444" 
+                  : answerStatus === "correct" 
+                  ? "#10b981" 
+                  : isDark ? "#334155" : "#cbd5e1"
+              }}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xl">🎉</span>
+                <span className={`text-xs sm:text-sm font-extrabold tracking-tight ${
+                  isDark ? "text-slate-100" : "text-slate-800"
+                }`}>
+                  How many {obj.label}{count === 1 ? "" : "s"} did you group in total?
+                </span>
+              </div>
+
+              {/* Answer Input Controls */}
+              <div className="flex items-center gap-2 w-full justify-center max-w-xs">
+                <div className="relative flex-1">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={answerInput}
+                    onChange={(e) => {
+                      setAnswerInput(e.target.value);
+                      if (answerStatus === "error") {
+                        setAnswerStatus("idle");
+                        setErrorMessage("");
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleCheckAnswer();
+                    }}
+                    placeholder="Total..."
+                    disabled={answerStatus === "correct"}
+                    className={`w-full h-11 px-3 text-center text-lg sm:text-xl font-bold font-mono rounded-xl border-2 transition-all outline-none ${
+                      answerStatus === "error"
+                        ? "border-red-500 bg-red-50/50 text-red-700 animate-shake dark:bg-red-950/40 dark:text-red-300"
+                        : answerStatus === "correct"
+                        ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+                        : isDark
+                        ? "bg-slate-900 border-slate-700 text-white focus:border-indigo-500"
+                        : "bg-white border-slate-300 text-slate-900 focus:border-indigo-500"
+                    }`}
+                  />
+                </div>
+
+                <Button
+                  onClick={() => handleCheckAnswer()}
+                  disabled={answerStatus === "correct" || !answerInput.trim()}
+                  className={`h-11 px-4 text-sm font-bold flex items-center gap-1.5 rounded-xl shadow-md transition-all active:scale-95 ${
+                    answerStatus === "correct"
+                      ? "bg-emerald-600 hover:bg-emerald-600 text-white"
+                      : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                  }`}
+                >
+                  {answerStatus === "correct" ? <Check size={18} /> : "Check"}
+                </Button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowNumberPad(prev => !prev)}
+                  className={`h-11 w-11 flex items-center justify-center rounded-xl border transition-all ${
+                    showNumberPad
+                      ? "bg-indigo-100 border-indigo-400 text-indigo-700 dark:bg-indigo-950 dark:border-indigo-600 dark:text-indigo-300"
+                      : isDark
+                      ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
+                      : "bg-slate-100 border-slate-300 text-slate-600 hover:bg-slate-200"
+                  }`}
+                  title="Toggle Number Pad"
+                >
+                  <Calculator size={18} />
+                </button>
+              </div>
+
+              {/* Error feedback banner */}
+              {answerStatus === "error" && errorMessage && (
+                <div className="flex items-center gap-1.5 text-xs text-red-500 dark:text-red-400 font-bold mt-2 animate-fade-in text-center">
+                  <AlertCircle size={14} className="flex-shrink-0" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
+              {/* On-screen Number Keypad for Kids / Mobile / Tablets */}
+              <AnimatePresence>
+                {showNumberPad && answerStatus !== "correct" && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="w-full mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 flex flex-col items-center gap-2 overflow-hidden"
+                  >
+                    <div className="grid grid-cols-5 gap-1.5 w-full max-w-xs">
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((num) => (
+                        <button
+                          key={num}
+                          type="button"
+                          onClick={() => handleDigitPress(String(num))}
+                          className={`h-9 font-mono text-base font-extrabold rounded-lg border shadow-sm transition-all active:scale-95 ${
+                            isDark
+                              ? "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"
+                              : "bg-white border-slate-200 text-slate-800 hover:bg-slate-50"
+                          }`}
+                        >
+                          {num}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex items-center justify-between gap-2 w-full max-w-xs">
+                      <button
+                        type="button"
+                        onClick={handleBackspacePress}
+                        className={`flex-1 h-8 text-xs font-extrabold rounded-lg border flex items-center justify-center gap-1 transition-all ${
+                          isDark
+                            ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
+                            : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200"
+                        }`}
+                      >
+                        <Delete size={14} /> Backspace
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAnswerInput("")}
+                        className={`px-3 h-8 text-xs font-extrabold rounded-lg border transition-all ${
+                          isDark
+                            ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
+                            : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200"
+                        }`}
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </SharedCanvasLayout>
   );

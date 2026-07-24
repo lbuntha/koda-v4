@@ -38,6 +38,12 @@ DEFAULT_SCORING_CONFIG: dict[str, Any] = {
         "generator_revision": 1,
         "rapid_confirmation_plays": 2,
     },
+    "recommendation": {
+        "skills_per_session": 3,
+        "max_non_new": 2,
+        "skip_cooldown_sessions": 1,
+        "reinforce_threshold": 0.6,
+    },
 }
 
 

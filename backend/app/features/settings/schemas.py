@@ -1,4 +1,5 @@
 import re
+from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
@@ -60,6 +61,13 @@ class PlacementConfigIn(BaseModel):
     rapid_confirmation_plays: int = Field(ge=1, le=20)
 
 
+class RecommendationConfigIn(BaseModel):
+    skills_per_session: int = Field(default=3, ge=1, le=10)
+    max_non_new: int = Field(default=2, ge=0, le=10)
+    skip_cooldown_sessions: int = Field(default=1, ge=0, le=10)
+    reinforce_threshold: float = Field(default=0.6, ge=0, le=1)
+
+
 class ScoringConfigIn(BaseModel):
     weights: ScoreWeightsIn
     developingScore: float = Field(ge=0, le=1)
@@ -70,6 +78,7 @@ class ScoringConfigIn(BaseModel):
     speedBaselineMs: int = Field(ge=100, le=3_600_000)
     reviewIntervalDays: ReviewIntervalsIn
     placement: PlacementConfigIn
+    recommendation: RecommendationConfigIn = Field(default_factory=RecommendationConfigIn)
 
     @model_validator(mode="after")
     def thresholds_are_ordered(self):
@@ -81,6 +90,8 @@ class ScoringConfigIn(BaseModel):
             <= self.gates.master.minPlays
         ):
             raise ValueError("Play gates must be ordered developing ≤ proficient ≤ master")
+        if self.recommendation.max_non_new > self.recommendation.skills_per_session:
+            raise ValueError("Recommendation non-new cap cannot exceed skills per session")
         return self
 
 
@@ -102,6 +113,11 @@ class SettingsUpdate(BaseModel):
     scoring_revision: int | None = Field(default=None, ge=1)
 
 
+class ScoringPreviewIn(BaseModel):
+    scoring: ScoringConfigIn
+    scoring_revision: int = Field(ge=1)
+
+
 _KEY_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 _CODE_PATTERN = re.compile(r"^[A-Z0-9]+(?:[-_.][A-Z0-9]+)*$")
 
@@ -113,6 +129,8 @@ class GradeIn(BaseModel):
     description: str = Field(default="", max_length=1000)
     age_range: str = Field(default="", max_length=60)
     order: int = Field(default=1, ge=0, le=1000)
+    # None ⇒ auto-derive the student-page layout band from `order`.
+    layout_band: Literal["kid", "student", "focus"] | None = None
     active: bool = True
     revision: int = Field(default=0, ge=0)
 

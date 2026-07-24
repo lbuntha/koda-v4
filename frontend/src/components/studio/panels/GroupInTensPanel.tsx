@@ -43,5 +43,17 @@ export const GroupInTensPanel: React.FC<PanelProps> = ({ question, update, updat
                         className="w-4 h-4 text-indigo-600 accent-indigo-600 cursor-pointer"
                       />
                     </div>
+
+                    <div className="flex items-center justify-between p-1 bg-slate-50/50 rounded-lg">
+                      <span className="text-xs font-bold text-slate-600">Require answer input after grouping</span>
+                      <input
+                        type="checkbox"
+                        checked={question.config.requireAnswerInput ?? true}
+                        onChange={(e) => update({
+                          config: { ...question.config, requireAnswerInput: e.target.checked }
+                        })}
+                        className="w-4 h-4 text-indigo-600 accent-indigo-600 cursor-pointer"
+                      />
+                    </div>
                   </div>
 );

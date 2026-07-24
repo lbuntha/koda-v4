@@ -6,6 +6,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from ...models.user import User, Role
 from ...models.student import Student
+from ...models.assignment import Assignment
+from ...models.academic import Grade, resolve_layout_band
 from ...core.deps import Principal, get_principal, get_current_parent
 from ...core.codes import unique_family_code
 from ...core.security import (
@@ -67,13 +69,36 @@ async def refresh(body: RefreshIn):
     return _issue(payload["sub"], payload["role"])
 
 
+async def _student_grade_band(student_id: str) -> str:
+    """Resolve which student-page layout band this kid gets.
+
+    Derived from the highest-priority active assignment's grade (grade_id maps to
+    ``Grade.key``). Falls back to ``"student"`` (the neutral middle) when the kid
+    has no active assignment or the grade is missing.
+    """
+    assignments = await Assignment.find(
+        Assignment.student_id == student_id,
+        Assignment.status == "active",
+    ).sort("priority", "created_at").to_list()
+    if not assignments:
+        return "student"
+    grade = await Grade.find_one(Grade.key == assignments[0].grade_id)
+    return resolve_layout_band(grade) if grade else "student"
+
+
 @router.get("/me")
 async def me(principal: Principal = Depends(get_principal)):
     if principal.role == Role.student.value:
         student = await Student.get(PydanticObjectId(principal.id))
         if not student:
             raise HTTPException(status.HTTP_404_NOT_FOUND, "Student not found")
-        return {"id": principal.id, "role": "student", "name": student.name, "avatar": student.avatar}
+        return {
+            "id": principal.id,
+            "role": "student",
+            "name": student.name,
+            "avatar": student.avatar,
+            "gradeBand": await _student_grade_band(principal.id),
+        }
     user = await User.get(PydanticObjectId(principal.id))
     if not user:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Account not found")

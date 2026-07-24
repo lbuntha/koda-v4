@@ -3,15 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from "react";
-import { KeyRound, Trash2 } from "lucide-react";
+import React, { useState } from "react";
+import { BarChart3, KeyRound, Trash2 } from "lucide-react";
 import { Button } from "../components/ui";
 import { adminApi, AdminStudent } from "../api/admin";
+import { ChildAnalyticsDrawer } from "../analytics/ChildAnalyticsDrawer";
 
 const th = "px-5 py-2.5 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400";
 const td = "px-5 py-3 align-middle";
 
 export const KidsTable: React.FC<{ students: AdminStudent[]; onChanged: () => void }> = ({ students, onChanged }) => {
+  const [selected, setSelected] = useState<AdminStudent | null>(null);
   const resetPin = async (s: AdminStudent) => {
     const pin = window.prompt(`New PIN for ${s.name} (4–8 digits)`);
     if (!pin) return;
@@ -37,6 +39,7 @@ export const KidsTable: React.FC<{ students: AdminStudent[]; onChanged: () => vo
   };
 
   return (
+    <>
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
@@ -62,6 +65,9 @@ export const KidsTable: React.FC<{ students: AdminStudent[]; onChanged: () => vo
               <td className={`${td} text-slate-500`}>{s.has_pin ? "set" : "none"}</td>
               <td className={td}>
                 <div className="flex items-center justify-end gap-1">
+                  <Button variant="ghost" size="xs" onClick={() => setSelected(s)}>
+                    <BarChart3 size={12} /> Progress
+                  </Button>
                   <Button variant="ghost" size="xs" onClick={() => resetPin(s)}>
                     <KeyRound size={12} /> Reset PIN
                   </Button>
@@ -80,5 +86,7 @@ export const KidsTable: React.FC<{ students: AdminStudent[]; onChanged: () => vo
         </tbody>
       </table>
     </div>
+    <ChildAnalyticsDrawer student={selected} onClose={() => setSelected(null)} />
+    </>
   );
 };

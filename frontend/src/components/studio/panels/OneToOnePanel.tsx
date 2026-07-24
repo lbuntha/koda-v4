@@ -50,6 +50,12 @@ export const OneToOnePanel: React.FC<PanelProps> = ({ question, updateConfig }) 
         checked={question.config.showNumbersOnTap ?? true}
         onChange={(checked) => updateConfig({ showNumbersOnTap: checked })}
       />
+
+      <ToggleField
+        label="Require answer input after count"
+        checked={question.config.requireAnswerInput ?? true}
+        onChange={(checked) => updateConfig({ requireAnswerInput: checked })}
+      />
     </PanelSection>
   );
 };

@@ -8,6 +8,7 @@ from app.features.progression.projection import (
     build_mastery_states,
     needs_backfill,
     plan_backfill,
+    plan_projection_drift,
     _to_engine_event,
 )
 from app.features.events.contract import normalize_event
@@ -101,3 +102,36 @@ def test_build_mastery_states_excludes_unverified_and_skill_less():
     states = build_mastery_states("stu-1", events)
     assert len(states) == 1
     assert states[0]["plays"] == 6          # the unverified 7th did not count
+
+
+def test_projection_drift_reports_missing_changed_and_extra_rows():
+    base = {
+        "student_id": "stu-1",
+        "curriculum_id": "c1",
+        "level": "beginner",
+        "score": 0.5,
+        "components": {},
+        "plays": 2,
+        "sessions": 1,
+        "distinct_days": 1,
+        "hard_plays": 0,
+        "recent_score": 0.5,
+        "last_event_id": "e2",
+        "scoring_revision": 1,
+        "engine_revision": "scoring-2",
+    }
+    expected = [
+        {**base, "skill_id": "count"},
+        {**base, "skill_id": "add", "level": "developing"},
+    ]
+    stored = [
+        {**base, "skill_id": "count", "score": 0.4},
+        {**base, "skill_id": "subtract"},
+    ]
+    report = plan_projection_drift(expected, stored)
+    assert report["expected"] == 2
+    assert report["stored"] == 2
+    assert report["changed"] == 1
+    assert report["missing"] == 1
+    assert report["extra"] == 1
+    assert report["drifted"] == 3

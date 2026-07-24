@@ -34,7 +34,7 @@ from app.features.events.contract import (  # noqa: E402
     EventContractError, QUESTION_EVENTS, validate_release_binding,
 )
 from app.features.progression.projection import (  # noqa: E402
-    apply_backfill_fields, build_mastery_states,
+    apply_backfill_fields, build_mastery_states, plan_projection_drift,
 )
 from app.models import ALL_MODELS  # noqa: E402
 from app.models.event import LearningEvent  # noqa: E402
@@ -178,9 +178,41 @@ async def run_replay(dry_run: bool, student: str | None) -> None:
     print(f"replay: {total_students} students → {total_states} mastery states {suffix}")
 
 
+async def run_drift(student: str | None) -> None:
+    if student:
+        students = [student]
+    else:
+        students = await LearningEvent.get_motor_collection().distinct("student_id")
+    settings_doc = await SystemSettings.find_one(SystemSettings.key == "global")
+    scoring_config = (
+        settings_doc.scoring
+        if settings_doc and settings_doc.scoring
+        else DEFAULT_SCORING_CONFIG
+    )
+    scoring_revision = settings_doc.scoring_revision if settings_doc else 1
+    now_ms = round(datetime.now(timezone.utc).timestamp() * 1000)
+    expected = []
+    for student_id in students:
+        events = await LearningEvent.find(LearningEvent.student_id == student_id).to_list()
+        expected.extend(build_mastery_states(
+            student_id,
+            [event.model_dump() for event in events],
+            config=scoring_config,
+            now_ms=now_ms,
+            scoring_revision=scoring_revision,
+        ))
+    stored_query = {"student_id": student} if student else {}
+    stored = [
+        state.model_dump()
+        for state in await MasteryState.find(stored_query).to_list()
+    ]
+    report = plan_projection_drift(expected, stored)
+    print(f"drift: {report}")
+
+
 async def main() -> None:
     parser = argparse.ArgumentParser(description="Backfill events / replay mastery projection.")
-    parser.add_argument("mode", choices=["backfill", "replay", "all"])
+    parser.add_argument("mode", choices=["backfill", "replay", "rescore", "drift", "all"])
     parser.add_argument("--dry-run", action="store_true", help="report counts, write nothing")
     parser.add_argument("--student", default=None, help="limit to one student id")
     args = parser.parse_args()
@@ -189,8 +221,10 @@ async def main() -> None:
     try:
         if args.mode in ("backfill", "all"):
             await run_backfill(args.dry_run, args.student)
-        if args.mode in ("replay", "all"):
+        if args.mode in ("replay", "rescore", "all"):
             await run_replay(args.dry_run, args.student)
+        if args.mode in ("drift", "all"):
+            await run_drift(args.student)
     finally:
         client.close()
 

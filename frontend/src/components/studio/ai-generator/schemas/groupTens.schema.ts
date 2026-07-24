@@ -36,6 +36,10 @@ Only useful for counts > 10 — a count of 10 or less has no "ones" to group, so
       key: "showNumbersInSlots", label: "Show Slot Numbers", type: "boolean", defaultValue: true,
       description: "Teacher-facing display toggle.", exposeToAI: false,
     },
+    {
+      key: "requireAnswerInput", label: "Answer Input Box", type: "boolean", defaultValue: true,
+      description: "Require typing/selecting answer after grouping items in ten-frames.", exposeToAI: false,
+    },
     assetTypeField("apple"),
   ],
 

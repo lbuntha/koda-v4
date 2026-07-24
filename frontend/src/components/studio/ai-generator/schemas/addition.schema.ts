@@ -40,6 +40,10 @@ The header shows the live equation (addend1 + addend2 = basketCount).`,
     },
     assetTypeField("apple"),
     {
+      key: "requireAnswerInput", label: "Answer Input Box", type: "boolean", defaultValue: true,
+      description: "Require typing/selecting answer after adding all items into basket.", exposeToAI: false,
+    },
+    {
       key: "defaultRepresentation", label: "CPA Representation", type: "enum",
       enumValues: ["concrete", "pictorial", "abstract"], defaultValue: "concrete",
       description: "Teacher-facing pedagogy toggle.", exposeToAI: false,

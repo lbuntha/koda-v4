@@ -16,7 +16,7 @@ class PlacementError(ValueError):
     pass
 
 
-def _ordered_skills(tree: dict[str, Any], scope: dict[str, Any] | None = None) -> list[dict]:
+def ordered_skills(tree: dict[str, Any], scope: dict[str, Any] | None = None) -> list[dict]:
     grade_order = {item.get("id"): item.get("order", 0) for item in tree.get("grades", [])}
     subjects = {
         item.get("id"): (grade_order.get(item.get("gradeId"), 0), item.get("order", 0))
@@ -82,7 +82,7 @@ def select_delivery_skill_ids(
     skill for a short confirmation rather than silently jumping to unrelated
     global content.
     """
-    ordered_ids = [skill.get("id") for skill in _ordered_skills(tree, scope) if skill.get("id")]
+    ordered_ids = [skill.get("id") for skill in ordered_skills(tree, scope) if skill.get("id")]
     playable = [skill_id for skill_id in ordered_ids if skill_id in available_skill_ids]
     if not playable:
         return []
@@ -99,7 +99,7 @@ def select_delivery_skill_ids(
 
 def build_placement(release: dict, scope: dict[str, Any] | None, config: dict[str, Any], seed: str) -> dict:
     tree = release.get("tree") or {}
-    skills = _ordered_skills(tree, scope)
+    skills = ordered_skills(tree, scope)
     checkpoints = _checkpoint_skills(skills, bool(config.get("checkpoints_only", True)))
     cap = int(config.get("checkpoint_cap", 8))
     if len(checkpoints) > cap:

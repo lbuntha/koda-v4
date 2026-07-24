@@ -49,10 +49,15 @@ class AnalyticsLoggerService {
   private serverSyncStudentId: string | null = null;
   private outbox: LearningEvent[] = [];
   private syncTimer: number | null = null;
-  private flushing = false;
+  private flushPromise: Promise<void> | null = null;
 
   public setCurrentStudent(studentId: string | null) {
     this.currentStudentId = studentId;
+  }
+
+  public setSessionId(sessionId: string) {
+    this.sessionId = sessionId;
+    try { sessionStorage.setItem(SESSION_KEY, sessionId); } catch { /* memory value is sufficient */ }
   }
 
   public enableServerSync(studentId: string) {
@@ -85,9 +90,7 @@ class AnalyticsLoggerService {
     }, 800);
   }
 
-  public async flush(): Promise<void> {
-    if (!this.serverSyncStudentId || this.flushing || this.outbox.length === 0) return;
-    this.flushing = true;
+  private async runFlush(): Promise<void> {
     try {
       while (this.outbox.length > 0 && this.serverSyncStudentId) {
         const batch = this.outbox.slice(0, 50);
@@ -98,9 +101,19 @@ class AnalyticsLoggerService {
       }
     } catch {
       this.saveOutbox();
-    } finally {
-      this.flushing = false;
     }
+  }
+
+  public flush(): Promise<void> {
+    if (!this.serverSyncStudentId || this.outbox.length === 0) {
+      return this.flushPromise ?? Promise.resolve();
+    }
+    if (this.flushPromise) return this.flushPromise;
+    this.flushPromise = this.runFlush().finally(() => {
+      this.flushPromise = null;
+      if (this.outbox.length > 0) this.scheduleFlush();
+    });
+    return this.flushPromise;
   }
   /** slideIndex -> ms timestamp the slide was opened, for timeOnTaskMs. */
   private slideOpenedAt = new Map<number, number>();
@@ -255,7 +268,15 @@ class AnalyticsLoggerService {
     });
   }
 
-  public logLessonComplete(ctx: { slideIndex: number; totalSlides: number }) {
+  public logLessonComplete(ctx: {
+    slideIndex: number;
+    totalSlides: number;
+    curriculumId?: string;
+    curriculumRevision?: number;
+    releaseId?: string;
+    assignmentId?: string;
+    recommendationRunId?: string;
+  }) {
     return this.record({
       questionId: "",
       technique: undefined as any,
@@ -263,6 +284,11 @@ class AnalyticsLoggerService {
       skillTags: [],
       slideIndex: ctx.slideIndex,
       totalSlides: ctx.totalSlides,
+      curriculumId: ctx.curriculumId,
+      curriculumRevision: ctx.curriculumRevision,
+      releaseId: ctx.releaseId,
+      assignmentId: ctx.assignmentId,
+      recommendationRunId: ctx.recommendationRunId,
       eventType: "lesson_complete",
       actionSummary: `Completed all ${ctx.totalSlides} interactive slides! 🎉`,
     });
@@ -349,6 +375,7 @@ interface SlideContext {
   curriculumRevision?: number;
   releaseId?: string;
   assignmentId?: string;
+  recommendationRunId?: string;
   details?: Record<string, any>;
   slideIndex: number;
   totalSlides: number;

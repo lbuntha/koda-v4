@@ -36,6 +36,10 @@ async def init_db() -> None:
         {"scoring_revision": {"$exists": False}},
         {"$set": {"scoring_revision": 1}},
     )
+    await system_settings.update_many(
+        {"scoring.recommendation": {"$exists": False}},
+        {"$set": {"scoring.recommendation": default_scoring_config()["recommendation"]}},
+    )
     audit_events = database["content_audit_events"]
     for legacy in await curriculum.find({}, {"owner_id": 1, "curriculum_id": 1}).to_list(length=None):
         await audit_events.update_many(

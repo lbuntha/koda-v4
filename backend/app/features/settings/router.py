@@ -1,7 +1,8 @@
+from collections import defaultdict
 from datetime import datetime, timezone
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from pymongo.errors import DuplicateKeyError
 
 from ...core.audit import record_audit
@@ -10,11 +11,17 @@ from ...core.deps import get_current_admin, get_current_user
 from ...core.runtime_settings import get_system_settings, resolve_openai_api_key
 from ...core.security import encrypt_secret
 from ...core.scoring_config import default_scoring_config
+from ..progression.service import create_rescore_job, run_rescore_job
 from ...models.user import Role, User
-from ...models.academic import Grade, Subject
+from ...models.academic import Grade, Subject, resolve_layout_band
 from ...models.audit import ContentAuditEvent
 from ...models.content import Curriculum
-from .schemas import ALLOWED_AI_MODELS, GradeIn, SettingsOut, SettingsUpdate, SubjectIn
+from ...models.mastery import ProjectionJob
+from ...models.event import LearningEvent
+from ...models.student import Student
+from ..progression.projection import build_mastery_states
+from .schemas import ALLOWED_AI_MODELS, GradeIn, ScoringPreviewIn, SettingsOut, SettingsUpdate, SubjectIn
+from .simulator import compare_mastery_states, delivery_impact
 
 router = APIRouter(prefix="/settings", tags=["settings"])
 
@@ -57,7 +64,11 @@ def _scoring_snapshot(doc) -> dict:
 
 
 @router.put("", response_model=SettingsOut)
-async def update_settings(body: SettingsUpdate, user: User = Depends(get_current_admin)):
+async def update_settings(
+    body: SettingsUpdate,
+    background_tasks: BackgroundTasks,
+    user: User = Depends(get_current_admin),
+):
     if body.ai_model is not None and body.ai_model not in ALLOWED_AI_MODELS:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Unsupported AI model")
     doc = await get_system_settings()
@@ -89,6 +100,9 @@ async def update_settings(body: SettingsUpdate, user: User = Depends(get_current
         )
     scoring_after = _scoring_snapshot(doc)
     if scoring_before != scoring_after:
+        job = await create_rescore_job(doc.scoring_revision)
+        background_tasks.add_task(run_rescore_job, job.job_id)
+        scoring_after = {**scoring_after, "rescore_job_id": job.job_id}
         await record_audit(
             actor=user,
             resource_type="scoring_config",
@@ -119,6 +133,79 @@ async def test_ai_connection(_: User = Depends(get_current_admin)):
     return {"ok": True}
 
 
+@router.get("/rescore-jobs")
+async def list_rescore_jobs(
+    limit: int = 20,
+    _: User = Depends(get_current_admin),
+):
+    rows = await ProjectionJob.find_all().sort("-created_at").limit(min(max(limit, 1), 100)).to_list()
+    return {"jobs": [row.model_dump(mode="json") for row in rows]}
+
+
+@router.get("/rescore-jobs/{job_id}")
+async def get_rescore_job(job_id: str, _: User = Depends(get_current_admin)):
+    row = await ProjectionJob.find_one(ProjectionJob.job_id == job_id)
+    if not row:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Re-score job not found")
+    return row.model_dump(mode="json")
+
+
+@router.post("/scoring-preview")
+async def preview_scoring(
+    body: ScoringPreviewIn,
+    _: User = Depends(get_current_admin),
+):
+    """Replay verified events under a draft config without writing any state."""
+    doc = await get_system_settings()
+    if body.scoring_revision != doc.scoring_revision:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            "Scoring configuration changed in another session; reload before simulating",
+        )
+    now_ms = round(datetime.now(timezone.utc).timestamp() * 1000)
+    events = await LearningEvent.find(
+        LearningEvent.verified == True,
+        {"curriculum_skill_id": {"$type": "string"}},
+    ).sort("student_id", "client_timestamp_ms").to_list()
+    by_student: dict[str, list[dict]] = defaultdict(list)
+    for event in events:
+        by_student[event.student_id].append(event.model_dump(mode="python"))
+
+    current_states: list[dict] = []
+    proposed_states: list[dict] = []
+    current_config = doc.scoring or default_scoring_config()
+    proposed_config = body.scoring.model_dump()
+    for student_id, student_events in by_student.items():
+        current_states.extend(build_mastery_states(
+            student_id,
+            student_events,
+            config=current_config,
+            now_ms=now_ms,
+            scoring_revision=doc.scoring_revision,
+        ))
+        proposed_states.extend(build_mastery_states(
+            student_id,
+            student_events,
+            config=proposed_config,
+            now_ms=now_ms,
+            scoring_revision=doc.scoring_revision + 1,
+        ))
+    students = await Student.find_all().to_list()
+    output = compare_mastery_states(
+        current_states,
+        proposed_states,
+        student_names={str(student.id): student.name for student in students},
+        now_ms=now_ms,
+    )
+    return {
+        "currentRevision": doc.scoring_revision,
+        "proposedRevision": doc.scoring_revision + 1,
+        **output,
+        "deliveryImpact": delivery_impact(current_config, proposed_config),
+        "readOnly": True,
+    }
+
+
 def _grade_out(item: Grade) -> dict:
     return {
         "key": item.key,
@@ -127,6 +214,8 @@ def _grade_out(item: Grade) -> dict:
         "description": item.description,
         "age_range": item.age_range,
         "order": item.order,
+        "layout_band": item.layout_band,
+        "effective_band": resolve_layout_band(item),
         "active": item.active,
         "revision": item.revision,
         "updated_at": item.updated_at.isoformat(),

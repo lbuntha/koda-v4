@@ -17,5 +17,16 @@ export interface PublishedCurriculum {
 
 export const learningApi = {
   curriculum: () => api.get<PublishedCurriculum>("/learning/curriculum"),
-  ingestEvents: (events: LearningEvent[]) => api.post<{ inserted: number; duplicates: number }>("/events", { events }),
+  ingestEvents: (events: LearningEvent[]) => api.post<{
+    inserted: number;
+    duplicates: number;
+    unverified: number;
+    masteryUpdates: Array<{
+      skillId: string;
+      curriculumId: string | null;
+      previousLevel: string;
+      level: string;
+      promoted: boolean;
+    }>;
+  }>("/events", { events }),
 };

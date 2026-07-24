@@ -11,6 +11,8 @@ from .admin.router import router as admin_router
 from .menus.router import router as menus_router
 from .settings.router import router as settings_router
 from .placement.router import router as placement_router
+from .learning.router import router as learning_router
+from .progression.router import router as progression_router
 
 ALL_ROUTERS = [
     auth_router,
@@ -23,4 +25,6 @@ ALL_ROUTERS = [
     menus_router,
     settings_router,
     placement_router,
+    learning_router,
+    progression_router,
 ]

@@ -79,5 +79,17 @@ export const CountOnPanel: React.FC<PanelProps> = ({ question, update, updateCon
                         className="w-4 h-4 text-amber-600 accent-amber-600 cursor-pointer"
                       />
                     </div>
+
+                    <div className="flex items-center justify-between p-1 bg-white/40 rounded-lg">
+                      <span className="text-xs font-bold text-amber-950">Require answer input after count on</span>
+                      <input
+                        type="checkbox"
+                        checked={question.config.requireAnswerInput ?? true}
+                        onChange={(e) => update({
+                          config: { ...question.config, requireAnswerInput: e.target.checked }
+                        })}
+                        className="w-4 h-4 text-amber-600 accent-amber-600 cursor-pointer"
+                      />
+                    </div>
                   </div>
 );

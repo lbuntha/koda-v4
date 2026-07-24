@@ -7,7 +7,9 @@ from ...models.user import User
 from ...models.student import Student
 from ...core.deps import get_current_parent
 from ...core.security import hash_secret
+from ...core.audit import record_audit
 from .schemas import ChildIn, ChildUpdate, ChildOut
+from ..analytics.service import purge_learning_data
 
 router = APIRouter(prefix="/family", tags=["family"])
 
@@ -60,4 +62,12 @@ async def update_child(student_id: str, body: ChildUpdate, parent: User = Depend
 @router.delete("/children/{student_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def remove_child(student_id: str, parent: User = Depends(get_current_parent)):
     student = await _own_child_or_404(student_id, parent)
-    await student.delete()
+    counts = await purge_learning_data(str(student.id), include_student=True)
+    await record_audit(
+        actor=parent,
+        resource_type="student_data",
+        action="child_profile_deleted",
+        owner_id=student_id,
+        reason="Guardian deleted child profile",
+        summary={"studentId": student_id, "deletedCounts": counts},
+    )

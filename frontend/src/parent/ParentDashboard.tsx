@@ -16,12 +16,14 @@ import { FamilyCodeCard } from "./FamilyCodeCard";
 import { KidCard } from "./KidCard";
 import { ChildFormModal } from "./ChildFormModal";
 import { Child, ChildInput } from "../api/family";
+import { ChildAnalyticsDrawer } from "../analytics/ChildAnalyticsDrawer";
 
 export const ParentDashboard: React.FC = () => {
   const { account, logout, startChildPlay } = useAuth();
   const { children, loading, error, addChild, updateChild, removeChild } = useFamily();
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Child | null>(null);
+  const [progressChild, setProgressChild] = useState<Child | null>(null);
 
   const openAdd = () => {
     setEditing(null);
@@ -99,6 +101,7 @@ export const ParentDashboard: React.FC = () => {
                   onPlay={() => startChildPlay(c.id, c.name)}
                   onEdit={() => openEdit(c)}
                   onRemove={() => remove(c)}
+                  onProgress={() => setProgressChild(c)}
                 />
               ))}
             </div>
@@ -107,6 +110,7 @@ export const ParentDashboard: React.FC = () => {
       </div>
 
       <ChildFormModal isOpen={formOpen} onClose={() => setFormOpen(false)} onSubmit={submit} initial={editing} />
+      <ChildAnalyticsDrawer student={progressChild} onClose={() => setProgressChild(null)} />
     </div>
   );
 };

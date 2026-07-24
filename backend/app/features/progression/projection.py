@@ -126,3 +126,51 @@ def build_mastery_states(
             "last_event_id": last_event.get("client_id"),
         })
     return states
+
+
+def projection_signature(state: dict[str, Any]) -> dict[str, Any]:
+    """Stable fields used by drift detection (timestamps intentionally omitted)."""
+    return {
+        key: state.get(key)
+        for key in (
+            "level", "score", "components", "plays", "sessions", "distinct_days",
+            "hard_plays", "recent_score", "last_event_id", "scoring_revision",
+            "engine_revision",
+        )
+    }
+
+
+def plan_projection_drift(
+    expected_states: list[dict],
+    stored_states: list[dict],
+) -> dict:
+    """Compare replay output with stored projections using stable score fields."""
+    def key(state: dict) -> tuple:
+        return (
+            state.get("student_id"),
+            state.get("curriculum_id"),
+            state.get("skill_id"),
+        )
+
+    expected = {key(state): projection_signature(state) for state in expected_states}
+    stored = {key(state): projection_signature(state) for state in stored_states}
+    sort_key = lambda item: tuple("" if value is None else str(value) for value in item)
+    missing = sorted((item for item in expected if item not in stored), key=sort_key)
+    extra = sorted((item for item in stored if item not in expected), key=sort_key)
+    changed = sorted((
+        item for item in expected.keys() & stored.keys()
+        if expected[item] != stored[item]
+    ), key=sort_key)
+    return {
+        "expected": len(expected),
+        "stored": len(stored),
+        "missing": len(missing),
+        "changed": len(changed),
+        "extra": len(extra),
+        "drifted": len(missing) + len(changed) + len(extra),
+        "keys": {
+            "missing": missing,
+            "changed": changed,
+            "extra": extra,
+        },
+    }

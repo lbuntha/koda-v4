@@ -14,7 +14,7 @@ text stays a frontend concern (`toNextLevel`) and is intentionally not ported.
 
 Events here use the same field names as the TS `LearningEvent` (camelCase):
 `eventType, outcome, attemptNumber, hintUsedBeforeAttempt, timeOnTaskMs,
-sessionId, occurredAt, clientTimestampMs, details.difficulty`. Phase 4's ingest
+sessionId, occurredAt, clientTimestampMs, details.difficulty`. Phase 3's ingest
 path adapts stored Mongo events (snake_case) into this shape.
 """
 

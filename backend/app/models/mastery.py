@@ -52,3 +52,26 @@ class MasteryState(Document):
             IndexModel([("student_id", 1), ("curriculum_id", 1), ("skill_id", 1)], unique=True),
             IndexModel([("student_id", 1), ("next_review_at", 1)]),
         ]
+
+
+class ProjectionJob(Document):
+    """Durable record for a scoring-revision re-score operation."""
+
+    job_id: str
+    kind: str = "rescore"
+    target_scoring_revision: int
+    status: str = "pending"
+    students_total: int = 0
+    students_processed: int = 0
+    states_written: int = 0
+    error: str | None = None
+    created_at: datetime = Field(default_factory=_now)
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+
+    class Settings:
+        name = "projection_jobs"
+        indexes = [
+            IndexModel("job_id", unique=True),
+            IndexModel([("status", 1), ("created_at", -1)]),
+        ]

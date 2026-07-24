@@ -82,5 +82,17 @@ export const CountBackPanel: React.FC<PanelProps> = ({ question, update, updateC
                         className="w-4 h-4 text-red-600 accent-red-600 cursor-pointer"
                       />
                     </div>
+
+                    <div className="flex items-center justify-between p-1 bg-white/40 rounded-lg">
+                      <span className="text-xs font-bold text-red-950">Require answer input after count back</span>
+                      <input
+                        type="checkbox"
+                        checked={question.config.requireAnswerInput ?? true}
+                        onChange={(e) => update({
+                          config: { ...question.config, requireAnswerInput: e.target.checked }
+                        })}
+                        className="w-4 h-4 text-red-600 accent-red-600 cursor-pointer"
+                      />
+                    </div>
                   </div>
 );

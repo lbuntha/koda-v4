@@ -116,6 +116,7 @@ export interface CountingQuestion {
     workspaceHeight?: number;
     workspaceWidth?: number;
     showNumbersOnTap?: boolean;
+    requireAnswerInput?: boolean;
     sourceBinLabel?: string;
     destinationBinLabel?: string;
     slotBorderStyle?: "dashed" | "solid" | "dotted";

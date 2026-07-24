@@ -27,6 +27,7 @@ from ..models.user import User
 AUDITED_RESOURCES = frozenset({
     "assignment", "roster", "scoring_config", "system_settings",
     "curriculum_release", "progression_override",
+    "student_data",
 })
 
 

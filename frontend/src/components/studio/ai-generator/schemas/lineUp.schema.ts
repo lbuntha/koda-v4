@@ -41,6 +41,10 @@ The canvas has two zones: an unordered tray and a slots stage. Dropping near a s
       key: "showNumbersInSlots", label: "Show Slot Numbers", type: "boolean", defaultValue: true,
       description: "Teacher-facing display toggle.", exposeToAI: false,
     },
+    {
+      key: "requireAnswerInput", label: "Answer Input Box", type: "boolean", defaultValue: true,
+      description: "Require typing/selecting answer after lining up all items.", exposeToAI: false,
+    },
     assetTypeField("apple"),
   ],
 

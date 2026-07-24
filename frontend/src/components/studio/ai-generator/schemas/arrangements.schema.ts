@@ -34,6 +34,10 @@ Conceptually similar to One-to-One, but the pedagogical point is specifically th
       description: "Visual arrangement of items — prefer circle or scatter over line/grid to make the pedagogical point (count stays the same however it's arranged).",
       promptHint: "prefer circle or scatter to teach count conservation",
     },
+    {
+      key: "requireAnswerInput", label: "Answer Input Box", type: "boolean", defaultValue: true,
+      description: "Require typing/selecting answer after counting all items in arrangement.", exposeToAI: false,
+    },
     frameColorField("indigo"),
     assetTypeField("apple"),
   ],

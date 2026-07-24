@@ -23,6 +23,7 @@ import {
   Palette,
   PenTool,
   ClipboardList,
+  BookOpen,
   Circle,
 } from "lucide-react";
 import type { ElementType } from "react";
@@ -44,6 +45,7 @@ export const ICON_MAP: Record<string, ElementType> = {
   Palette,
   PenTool,
   ClipboardList,
+  BookOpen,
 };
 
 /** Icon names offered when designing a menu. */

@@ -53,6 +53,7 @@ FIELD_MAP: dict[str, str] = {
     "curriculumRevision": "curriculum_revision",
     "releaseId": "release_id",
     "assignmentId": "assignment_id",
+    "recommendationRunId": "recommendation_run_id",
     "slideIndex": "slide_index",
     "totalSlides": "total_slides",
 }

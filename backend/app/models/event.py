@@ -43,6 +43,7 @@ class LearningEvent(Document):
     curriculum_revision: int | None = None
     release_id: str | None = None
     assignment_id: str | None = None
+    recommendation_run_id: str | None = None
     slide_index: int | None = None
     total_slides: int | None = None
     verified: bool = False

@@ -581,33 +581,50 @@ release-pinned placement, submits server-graded responses, and lands on a fronti
 skill. Full scheduled recommendation and rapid-confirmation sessions remain Phase 2.
 
 ### Phase 2 — Take the course  ▸ *recommend what to learn next*
-- [ ] `recommendationEngine` (pure fn, tested) — buckets, prerequisite eligibility,
+- [x] `recommendationEngine` (pure fn, tested) — buckets, prerequisite eligibility,
       reserved new slot, multi-assignment balancing, deterministic ties, skip cooldown
-- [ ] `RecommendationRun` decision snapshots
-- [ ] `GET /learning/today` (replaces the single global `/learning/curriculum`) +
+- [x] `RecommendationRun` decision snapshots
+- [x] `GET /learning/today` (replaces the single global `/learning/curriculum`) +
       authorized adult preview
-- [ ] `StudentSession` model + `/sessions/start|end` (login log)
-- [ ] Frontend: home screen shows the recommended queue; Scheduled/Free toggle
+- [x] `StudentSession` model + `/sessions/start|end` (login log)
+- [x] Frontend: home screen shows the recommended queue; Scheduled/Free toggle
+- [x] Recommended lesson completion invalidates the run; configured first-try
+      rapid confirmation advances progression eligibility/frontier without mastery
 
 **Done when:** the kid's home shows a sensible next-skill queue that respects the frontier.
 
 ### Phase 3 — Practice  ▸ *play, log, climb the ladder*
-- [ ] `MasteryState` model + idempotent recompute-on-ingest using the backend engine
-- [ ] `POST /events/skip` + skip handling in the engine
-- [ ] Projection replay/drift check and scoring-revision re-score job
-- [ ] `GET /progress/{student_id}` and `/{skill_id}` (server results)
-- [ ] Frontend: skill map with live levels; level-up celebration (sketch exists)
+- [x] `MasteryState` model + idempotent recompute-on-ingest using the backend engine
+- [x] `POST /events/skip` + skip handling in the engine
+- [x] Projection replay/drift check and scoring-revision re-score job
+- [x] `GET /progress/{student_id}` and `/{skill_id}` (server results)
+- [x] Frontend: skill map with live levels; level-up celebration
 
 **Done when:** practicing moves a skill Beginner → … → Master with the gates enforced.
 
+**Completed:** verified events recompute only their touched curriculum/skill projection
+under a per-key lock; progress responses expose current/stale projection provenance,
+rank, review due state, and next-rung coaching. Scoring-setting revisions create a
+durable background re-score job (`/settings/rescore-jobs`), while
+`scripts/replay.py drift` compares the cache with a fresh replay. The learner home
+reloads server progress after a durable event flush and celebrates real promotions.
+
 ### Phase 4 — Analytics  ▸ *authorized adults see it, admins tune it*
-- [ ] `/analytics/mastery`, `/analytics/activity`, `/analytics/recommendations`
-- [ ] Parent/teacher dashboard: rank, proficiency map, streaks, "recommended & why",
+- [x] `/analytics/mastery`, `/analytics/activity`, `/analytics/recommendations`
+- [x] Parent/teacher dashboard: rank, proficiency map, streaks, "recommended & why",
       skipped-skill flags, filters by assignment/grade/subject
-- [ ] Recommendation-run and scoring-revision explanations
-- [ ] Child-data retention, export, and deletion workflow
+- [x] Recommendation-run and scoring-revision explanations
+- [x] Child-data retention, export, and deletion workflow
 
 **Done when:** a parent can see each kid's Beginner→Master progress and what's next.
+
+**Completed:** one responsive progress drawer is shared by the parent, teacher, and
+admin surfaces. It exposes roster-scoped mastery, rank, streaks, activity, recommendation
+reasons/skips, revision provenance, and assignment/grade/subject filters. Child learning
+data can be exported or permanently purged by a guardian/admin; full child deletion
+cascades through learning collections and both paths write an audit event. Admin
+Settings exposes the full validated progression contract, revision-safe saves, and
+re-score job status.
 
 **Dependencies:** 0 → 1 → 2 → 3 are sequential. Phase 4 can start once Phase 3 writes
 server-authoritative `mastery_states`. The frontend `scoringEngine.ts` is the reference
@@ -685,9 +702,9 @@ data model:
 | Assignment-pinned frontier delivery (`/learning/curriculum`) | ✅ Phase 1 bridge — `/learning/today` replaces it with the multi-assignment queue in Phase 2 |
 | `Assignment`, `Placement`, `ProgressionState` models | ✅ Phase 1 foundation |
 | `buildPlacement()` generator (deterministic, from immutable release) | ✅ Phase 1 foundation |
-| Recommendation engine + decision snapshots + `/learning/today` | 🔲 Phase 2 |
-| Skip logging, progress endpoints, ingest→mastery recompute | 🔲 Phase 3 |
-| Analytics endpoints + authorized adult dashboard | 🔲 Phase 4 |
+| Recommendation engine + decision snapshots + `/learning/today` | ✅ Phase 2 |
+| Skip logging, progress endpoints, ingest→mastery recompute | ✅ Phase 3 |
+| Analytics endpoints + authorized adult dashboard | ✅ Phase 4 |
 
 ---
 

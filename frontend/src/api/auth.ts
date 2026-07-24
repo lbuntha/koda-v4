@@ -8,6 +8,8 @@
 import { api, tokenStore } from "./client";
 
 export type Role = "admin" | "teacher" | "parent" | "student";
+/** Which student-page layout a learner sees, by grade band. */
+export type GradeBand = "kid" | "student" | "focus";
 
 export interface TokenPair {
   access_token: string;
@@ -23,6 +25,8 @@ export interface Account {
   email?: string;
   family_code?: string | null;
   avatar?: string | null;
+  /** Student-page layout band, resolved from the kid's grade (students only). */
+  gradeBand?: GradeBand;
   /** Per-user menu ids granted on top of the role's menus (admin-assignable). */
   menu_ids?: string[] | null;
 }

@@ -46,6 +46,10 @@ Enforces strict right-to-left order — the next item to cross out is always hig
       description: "How crossed-out items are visually marked.",
       exposeToAI: false,
     },
+    {
+      key: "requireAnswerInput", label: "Answer Input Box", type: "boolean", defaultValue: true,
+      description: "Require typing/selecting answer after completing counting back.", exposeToAI: false,
+    },
     frameColorField("rose"),
     assetTypeField("balloon"),
   ],

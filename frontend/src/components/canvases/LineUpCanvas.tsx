@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { COUNT_OBJECTS } from "../../types";
 import { CountingAsset } from "../Assets";
 import { sounds } from "../../sound";
-import { RotateCcw, ListOrdered } from "lucide-react";
+import { RotateCcw, ListOrdered, Check, Calculator, AlertCircle, Delete } from "lucide-react";
 import { CanvasProps } from "./types";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import { GhostGuideOverlay, useGhostGuide } from "../../pedagogy";
@@ -30,6 +31,7 @@ const FRAME_ACCENTS: Record<string, CanvasAccent> = {
 export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, showGrid, isDark = false, onSuccess, onUpdateQuestionConfig }) => {
   const obj = COUNT_OBJECTS.find(o => o.id === question.objectId) || COUNT_OBJECTS[0];
   const count = question.targetCount;
+  const requireAnswerInput = question.config.requireAnswerInput ?? true;
 
   const [items, setItems] = useState<LineUpItem[]>([]);
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
@@ -37,9 +39,21 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
   const containerRef = useRef<HTMLDivElement>(null);
   const dragOffset = useRef({ x: 0, y: 0 });
 
+  // Answer Input State
+  const [answerInput, setAnswerInput] = useState<string>("");
+  const [answerStatus, setAnswerStatus] = useState<"idle" | "error" | "correct">("idle");
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [showNumberPad, setShowNumberPad] = useState<boolean>(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onSuccessRef = useRef(onSuccess);
+  onSuccessRef.current = onSuccess;
+
   const [dimensions, setDimensions] = useState({ width: 480, height: 280 });
 
-  const solvedForGuide = items.length > 0 && items.every(i => i.snappedSlotIndex !== null);
+  const isLinedUpComplete = items.length > 0 && items.every(i => i.snappedSlotIndex !== null);
+  const solvedForGuide = count > 0 && isLinedUpComplete && (requireAnswerInput ? answerStatus === "correct" : true);
+  
   const { showGhostGuide, reportActivity } = useGhostGuide({
     isPlayMode,
     isSolved: solvedForGuide,
@@ -61,13 +75,6 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
     return () => ro.disconnect();
   }, []);
 
-  /**
-   * One geometry source of truth, derived from the measured container.
-   *
-   * Item and slot share a single `unit` size so a dropped item lands exactly in
-   * its slot at any screen width, and the row always fits without scrolling —
-   * that is what makes the phone layout hold together.
-   */
   const geometry = useMemo(() => {
     const w = dimensions.width;
     const h = dimensions.height;
@@ -105,7 +112,6 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
       trayGap,
       slotStartX: Math.round((w - rowWidth(slotGap)) / 2),
       slotGap,
-      /** Snap radius scales with the objects so it stays thumb-friendly. */
       snapRadius: Math.max(48, unit * 1.15)
     };
   }, [dimensions.width, dimensions.height, count]);
@@ -122,6 +128,18 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
     }),
     [geometry]
   );
+
+  // Reset answer state on question change
+  useEffect(() => {
+    setAnswerInput("");
+    setAnswerStatus("idle");
+    setErrorMessage("");
+    setShowNumberPad(false);
+    if (successTimeoutRef.current) {
+      clearTimeout(successTimeoutRef.current);
+      successTimeoutRef.current = null;
+    }
+  }, [question.id, count]);
 
   // Initialize items
   useEffect(() => {
@@ -153,6 +171,15 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
   }, [question, count, geometry, getShelfX, getSlotCenter, obj.emoji]);
 
   const reset = () => {
+    if (successTimeoutRef.current) {
+      clearTimeout(successTimeoutRef.current);
+      successTimeoutRef.current = null;
+    }
+    setAnswerInput("");
+    setAnswerStatus("idle");
+    setErrorMessage("");
+    setShowNumberPad(false);
+
     sounds.playPop();
     setItems(Array.from({ length: count }).map((_, idx) => ({
       id: `lineup-item-${idx}`,
@@ -162,8 +189,6 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
       snappedSlotIndex: null
     })));
   };
-
-  // ── Pointer-event based drag (no Framer Motion drag) ──
 
   const handlePointerDown = (e: React.PointerEvent, id: string) => {
     reportActivity();
@@ -190,17 +215,14 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
     let x = e.clientX - parentRect.left - dragOffset.current.x;
     let y = e.clientY - parentRect.top - dragOffset.current.y;
 
-    // Boundary constraints
     x = Math.max(0, Math.min(parentRect.width - geometry.unit, x));
     y = Math.max(0, Math.min(parentRect.height - geometry.unit, y));
 
-    // Grid snap in design mode
     if (!isPlayMode && showGrid) {
       x = Math.round(x / GRID_STEP) * GRID_STEP;
       y = Math.round(y / GRID_STEP) * GRID_STEP;
     }
 
-    // Smart drop zone detection in real-time
     if (isPlayMode) {
       const itemCenterX = x + geometry.unit / 2;
       const itemCenterY = y + geometry.unit / 2;
@@ -231,7 +253,6 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
     const id = draggedItemId;
 
     if (isPlayMode) {
-      // Check snap to slot
       setItems(prev => {
         const item = prev.find(i => i.id === id);
         if (!item) return prev;
@@ -240,7 +261,7 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
         const itemCenterY = item.y + geometry.unit / 2;
 
         let snappedIndex: number | null = null;
-        let minDistance = geometry.snapRadius; // matches the live drag detection
+        let minDistance = geometry.snapRadius;
 
         for (let i = 0; i < count; i++) {
           const c = getSlotCenter(i);
@@ -266,14 +287,12 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
               y: Math.round(c.y - geometry.unit / 2)
             };
           }
-          // Return to shelf
           if (i.snappedSlotIndex !== null) sounds.playSlide();
           const itemIdx = parseInt(id.split("-").pop() || "0");
           return { ...i, snappedSlotIndex: null, x: getShelfX(itemIdx), y: geometry.trayItemY };
         });
       });
     } else {
-      // Design Mode: persist positions
       setItems(prev => {
         if (onUpdateQuestionConfig) {
           onUpdateQuestionConfig({
@@ -289,13 +308,70 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
     containerRef.current?.releasePointerCapture(e.pointerId);
   };
 
+  const handleCheckAnswer = (overrideValue?: string) => {
+    const valueToTest = overrideValue !== undefined ? overrideValue : answerInput;
+    const parsed = parseInt(valueToTest.trim(), 10);
+
+    if (isNaN(parsed) || valueToTest.trim() === "") {
+      setAnswerStatus("error");
+      setErrorMessage("Please enter a number!");
+      sounds.playFailure();
+      return;
+    }
+
+    if (parsed === count) {
+      setAnswerStatus("correct");
+      setErrorMessage("");
+      sounds.playSuccess();
+      successTimeoutRef.current = setTimeout(() => {
+        onSuccessRef.current?.();
+        successTimeoutRef.current = null;
+      }, 500);
+    } else {
+      setAnswerStatus("error");
+      setErrorMessage(`Not quite! You lined up ${count} ${obj.label}${count === 1 ? "" : "s"}. Enter ${count}!`);
+      sounds.playFailure();
+    }
+  };
+
+  const handleDigitPress = (digit: string) => {
+    if (answerStatus === "correct") return;
+    if (answerStatus === "error") {
+      setAnswerStatus("idle");
+      setErrorMessage("");
+    }
+    setAnswerInput(prev => (prev.length < 3 ? prev + digit : prev));
+  };
+
+  const handleBackspacePress = () => {
+    if (answerStatus === "correct") return;
+    if (answerStatus === "error") {
+      setAnswerStatus("idle");
+      setErrorMessage("");
+    }
+    setAnswerInput(prev => prev.slice(0, -1));
+  };
+
+  const hasTriggeredSuccess = useRef(false);
+
   // Success trigger
   useEffect(() => {
-    if (items.length > 0 && items.every(i => i.snappedSlotIndex !== null)) {
-      sounds.playSuccess();
-      if (onSuccess) onSuccess();
+    if (isLinedUpComplete) {
+      if (!requireAnswerInput) {
+        if (!hasTriggeredSuccess.current) {
+          hasTriggeredSuccess.current = true;
+          sounds.playSuccess();
+          if (onSuccess) onSuccess();
+        }
+      } else {
+        setTimeout(() => {
+          inputRef.current?.focus();
+        }, 350);
+      }
+    } else {
+      hasTriggeredSuccess.current = false;
     }
-  }, [items.map(i => i.snappedSlotIndex).join(",")]);
+  }, [items.map(i => i.snappedSlotIndex).join(","), requireAnswerInput, isLinedUpComplete]);
 
   const accent: CanvasAccent = FRAME_ACCENTS[question.config.frameColor || "indigo"] || "indigo";
   const borderStyle = question.config.slotBorderStyle === "solid"
@@ -306,10 +382,9 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
 
   const linedUp = items.filter(i => i.snappedSlotIndex !== null).length;
   const remaining = count - linedUp;
-  const isSolved = count > 0 && linedUp === count;
+  const isSolved = solvedForGuide;
   const draggedItem = draggedItemId ? items.find(i => i.id === draggedItemId) : null;
 
-  // Zones are separated by elevation only; colour is reserved for live state.
   const zoneClass = `absolute rounded-3xl transition-colors duration-300 ${surfaceClass(isDark)}`;
   const zoneLabelClass = `absolute left-4 top-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.18em] pointer-events-none ${captionClass(isDark)}`;
 
@@ -322,7 +397,11 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
       accent={accent}
       headerIcon={<ListOrdered size={16} />}
       headerTitle="Line Up"
-      headerSubtitle={`${linedUp} of ${count} lined up`}
+      headerSubtitle={
+        isLinedUpComplete && requireAnswerInput
+          ? "Line-up complete! Enter the total answer below."
+          : `${linedUp} of ${count} lined up`
+      }
       readAloudText={question.instruction || `Drag each ${obj.label} into the numbered slots, in order from 1 to ${count}.`}
       headerActions={
         isPlayMode ? (
@@ -394,7 +473,11 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
         {/* Idle hint — highlights the slot row after 10s of inactivity */}
         <GhostGuideOverlay
           show={showGhostGuide && !isSolved}
-          label={`Drag each ${obj.label} into the numbered slots!`}
+          label={
+            isLinedUpComplete && requireAnswerInput
+              ? `Enter how many items you lined up (${count}) in the box!`
+              : `Drag each ${obj.label} into the numbered slots!`
+          }
           isDark={isDark}
           labelPlacement="top"
           style={{ top: geometry.stageTop, left: 0, right: 0, height: geometry.stageHeight }}
@@ -491,6 +574,158 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
             </div>
           );
         })}
+
+        {/* ── Answer Input Box Overlay after lining up all items ── */}
+        <AnimatePresence>
+          {isPlayMode && requireAnswerInput && isLinedUpComplete && (
+            <motion.div
+              initial={{ opacity: 0, y: 30, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              className="absolute inset-x-2 bottom-2 z-50 flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl backdrop-blur-md border shadow-2xl transition-all max-w-lg mx-auto"
+              style={{
+                backgroundColor: isDark ? "rgba(15, 23, 42, 0.94)" : "rgba(255, 255, 255, 0.96)",
+                borderColor: answerStatus === "error" 
+                  ? "#ef4444" 
+                  : answerStatus === "correct" 
+                  ? "#10b981" 
+                  : isDark ? "#334155" : "#cbd5e1"
+              }}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xl">🎉</span>
+                <span className={`text-xs sm:text-sm font-extrabold tracking-tight ${
+                  isDark ? "text-slate-100" : "text-slate-800"
+                }`}>
+                  How many {obj.label}{count === 1 ? "" : "s"} did you line up in total?
+                </span>
+              </div>
+
+              {/* Answer Input Controls */}
+              <div className="flex items-center gap-2 w-full justify-center max-w-xs">
+                <div className="relative flex-1">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={answerInput}
+                    onChange={(e) => {
+                      setAnswerInput(e.target.value);
+                      if (answerStatus === "error") {
+                        setAnswerStatus("idle");
+                        setErrorMessage("");
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleCheckAnswer();
+                    }}
+                    placeholder="Total..."
+                    disabled={answerStatus === "correct"}
+                    className={`w-full h-11 px-3 text-center text-lg sm:text-xl font-bold font-mono rounded-xl border-2 transition-all outline-none ${
+                      answerStatus === "error"
+                        ? "border-red-500 bg-red-50/50 text-red-700 animate-shake dark:bg-red-950/40 dark:text-red-300"
+                        : answerStatus === "correct"
+                        ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+                        : isDark
+                        ? "bg-slate-900 border-slate-700 text-white focus:border-indigo-500"
+                        : "bg-white border-slate-300 text-slate-900 focus:border-indigo-500"
+                    }`}
+                  />
+                </div>
+
+                <Button
+                  onClick={() => handleCheckAnswer()}
+                  disabled={answerStatus === "correct" || !answerInput.trim()}
+                  className={`h-11 px-4 text-sm font-bold flex items-center gap-1.5 rounded-xl shadow-md transition-all active:scale-95 ${
+                    answerStatus === "correct"
+                      ? "bg-emerald-600 hover:bg-emerald-600 text-white"
+                      : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                  }`}
+                >
+                  {answerStatus === "correct" ? <Check size={18} /> : "Check"}
+                </Button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowNumberPad(prev => !prev)}
+                  className={`h-11 w-11 flex items-center justify-center rounded-xl border transition-all ${
+                    showNumberPad
+                      ? "bg-indigo-100 border-indigo-400 text-indigo-700 dark:bg-indigo-950 dark:border-indigo-600 dark:text-indigo-300"
+                      : isDark
+                      ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
+                      : "bg-slate-100 border-slate-300 text-slate-600 hover:bg-slate-200"
+                  }`}
+                  title="Toggle Number Pad"
+                >
+                  <Calculator size={18} />
+                </button>
+              </div>
+
+              {/* Error feedback banner */}
+              {answerStatus === "error" && errorMessage && (
+                <div className="flex items-center gap-1.5 text-xs text-red-500 dark:text-red-400 font-bold mt-2 animate-fade-in text-center">
+                  <AlertCircle size={14} className="flex-shrink-0" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
+              {/* On-screen Number Keypad for Kids / Mobile / Tablets */}
+              <AnimatePresence>
+                {showNumberPad && answerStatus !== "correct" && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="w-full mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 flex flex-col items-center gap-2 overflow-hidden"
+                  >
+                    <div className="grid grid-cols-5 gap-1.5 w-full max-w-xs">
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((num) => (
+                        <button
+                          key={num}
+                          type="button"
+                          onClick={() => handleDigitPress(String(num))}
+                          className={`h-9 font-mono text-base font-extrabold rounded-lg border shadow-sm transition-all active:scale-95 ${
+                            isDark
+                              ? "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"
+                              : "bg-white border-slate-200 text-slate-800 hover:bg-slate-50"
+                          }`}
+                        >
+                          {num}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex items-center justify-between gap-2 w-full max-w-xs">
+                      <button
+                        type="button"
+                        onClick={handleBackspacePress}
+                        className={`flex-1 h-8 text-xs font-extrabold rounded-lg border flex items-center justify-center gap-1 transition-all ${
+                          isDark
+                            ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
+                            : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200"
+                        }`}
+                      >
+                        <Delete size={14} /> Backspace
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAnswerInput("")}
+                        className={`px-3 h-8 text-xs font-extrabold rounded-lg border transition-all ${
+                          isDark
+                            ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
+                            : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200"
+                        }`}
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </SharedCanvasLayout>
   );

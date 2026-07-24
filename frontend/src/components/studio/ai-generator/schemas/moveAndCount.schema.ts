@@ -102,6 +102,14 @@ The canvas has two labeled zones: the Source Bin (left) and Destination Bin (rig
       exposeToAI: false,
     },
     {
+      key: "requireAnswerInput",
+      label: "Answer Input Box",
+      type: "boolean",
+      defaultValue: true,
+      description: "Require typing/selecting answer after moving all items.",
+      exposeToAI: false,
+    },
+    {
       key: "showLayoutRulers",
       label: "Show Layout Rulers",
       type: "boolean",

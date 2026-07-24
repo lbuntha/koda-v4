@@ -1,4 +1,5 @@
 import { api } from "./client";
+import type { GradeBand } from "./auth";
 
 export interface GradeCatalogItem {
   key: string;
@@ -7,6 +8,10 @@ export interface GradeCatalogItem {
   description: string;
   age_range: string;
   order: number;
+  /** Explicit student-page band; null ⇒ auto-derived from `order`. */
+  layout_band: GradeBand | null;
+  /** Server-computed effective band (explicit value, else the auto default). */
+  effective_band: GradeBand;
   active: boolean;
   revision: number;
   updated_at: string;
@@ -26,7 +31,7 @@ export interface SubjectCatalogItem {
   updated_at: string;
 }
 
-export type GradeCatalogInput = Omit<GradeCatalogItem, "updated_at">;
+export type GradeCatalogInput = Omit<GradeCatalogItem, "updated_at" | "effective_band">;
 export type SubjectCatalogInput = Omit<SubjectCatalogItem, "updated_at">;
 
 export interface AcademicCatalog {

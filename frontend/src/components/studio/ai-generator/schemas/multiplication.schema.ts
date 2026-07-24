@@ -38,6 +38,10 @@ The header shows the live equation (rows × cols = filled count).`,
       promptHint: "integer 1-6",
       required: true,
     },
+    {
+      key: "requireAnswerInput", label: "Answer Input Box", type: "boolean", defaultValue: true,
+      description: "Require typing/selecting answer after filling the array.", exposeToAI: false,
+    },
     assetTypeField("apple"),
   ],
 

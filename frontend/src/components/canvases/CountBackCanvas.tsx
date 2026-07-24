@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { COUNT_OBJECTS } from "../../types";
 import { CountingAsset } from "../Assets";
 import { sounds } from "../../sound";
-import { RotateCcw, Sparkles, MinusCircle } from "lucide-react";
+import { RotateCcw, Sparkles, MinusCircle, Check, Calculator, AlertCircle, Delete } from "lucide-react";
 import { CanvasProps } from "./types";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import { GhostGuideOverlay, useGhostGuide } from "../../pedagogy";
+import { Button } from "../ui";
 
 interface CountBackItem {
   id: string;
@@ -22,16 +24,31 @@ export const CountBackCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
   const obj = COUNT_OBJECTS.find(o => o.id === question.objectId) || COUNT_OBJECTS[0];
   const totalCount = question.config.totalCount || 8;
   const removeCount = question.config.removeCount || 3;
+  const requireAnswerInput = question.config.requireAnswerInput ?? true;
+  const expectedAnswer = totalCount - removeCount;
 
   const [items, setItems] = useState<CountBackItem[]>([]);
   const [crossOrder, setCrossOrder] = useState<string[]>([]); // holds ids of items as they are crossed out
 
-  const solvedForGuide = removeCount > 0 && crossOrder.length === removeCount;
+  // Answer Input State
+  const [answerInput, setAnswerInput] = useState<string>("");
+  const [answerStatus, setAnswerStatus] = useState<"idle" | "error" | "correct">("idle");
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [showNumberPad, setShowNumberPad] = useState<boolean>(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onSuccessRef = useRef(onSuccess);
+  onSuccessRef.current = onSuccess;
+
+  const isCountBackComplete = removeCount > 0 && crossOrder.length === removeCount;
+  const solvedForGuide = removeCount > 0 && isCountBackComplete && (requireAnswerInput ? answerStatus === "correct" : true);
+  
   const { showGhostGuide, reportActivity } = useGhostGuide({
     isPlayMode,
     isSolved: solvedForGuide,
     idleThresholdMs: 10000
   });
+
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
   const [dragPos, setDragPos] = useState<{ x: number; y: number } | null>(null);
   const dragOffset = useRef({ x: 0, y: 0 });
@@ -64,14 +81,14 @@ export const CountBackCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
   const getCoordinates = useCallback((index: number, w: number, h: number) => {
     const isMobile = w < 640;
     const itemSize = isMobile ? 52 : 64;
-    const margin = isMobile ? 24 : 50;
+    const margin = isMobile ? 20 : 40;
     const centerX = w / 2;
-    const centerY = isMobile ? (h - 100) / 2 - 10 : (h - 80) / 2 + 10;
+    const centerY = isMobile ? (h - 120) / 2 : (h - 100) / 2;
 
     // Grid layout for count back
     const columns = Math.min(totalCount, Math.ceil(Math.sqrt(totalCount)) + 1);
-    const spacingX = isMobile ? Math.min(56, Math.floor((w - margin * 2) / columns)) : totalCount > 8 ? 60 : 72;
-    const spacingY = isMobile ? 54 : totalCount > 8 ? 56 : 68;
+    const spacingX = isMobile ? Math.min(54, Math.floor((w - margin * 2) / columns)) : totalCount > 8 ? 60 : 72;
+    const spacingY = isMobile ? 52 : totalCount > 8 ? 56 : 68;
     const col = index % columns;
     const row = Math.floor(index / columns);
     const totalRows = Math.ceil(totalCount / columns);
@@ -81,6 +98,19 @@ export const CountBackCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
       y: Math.round(centerY - ((totalRows - 1) * spacingY) / 2 + row * spacingY - itemSize / 2)
     };
   }, [totalCount]);
+
+  // Reset progress on question change
+  useEffect(() => {
+    setCrossOrder([]);
+    setAnswerInput("");
+    setAnswerStatus("idle");
+    setErrorMessage("");
+    setShowNumberPad(false);
+    if (successTimeoutRef.current) {
+      clearTimeout(successTimeoutRef.current);
+      successTimeoutRef.current = null;
+    }
+  }, [question.id, totalCount, removeCount]);
 
   // Initialize items
   useEffect(() => {
@@ -110,7 +140,15 @@ export const CountBackCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
   }, [question, totalCount, dimensions, getCoordinates, obj.emoji, isPlayMode]);
 
   const reset = () => {
+    if (successTimeoutRef.current) {
+      clearTimeout(successTimeoutRef.current);
+      successTimeoutRef.current = null;
+    }
     setCrossOrder([]);
+    setAnswerInput("");
+    setAnswerStatus("idle");
+    setErrorMessage("");
+    setShowNumberPad(false);
     setItems(prev =>
       prev.map((item, idx) => {
         const defaultPos = getCoordinates(idx, dimensions.width, dimensions.height);
@@ -143,7 +181,67 @@ export const CountBackCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
     setItems(prev =>
       prev.map(item => (item.id === id ? { ...item, crossed: true } : item))
     );
-    setCrossOrder(prev => [...prev, id]);
+    const newCrossOrder = [...crossOrder, id];
+    setCrossOrder(newCrossOrder);
+
+    // If counting back is complete
+    if (newCrossOrder.length === removeCount && removeCount > 0) {
+      if (!requireAnswerInput) {
+        successTimeoutRef.current = setTimeout(() => {
+          sounds.playSuccess();
+          onSuccessRef.current?.();
+          successTimeoutRef.current = null;
+        }, 500);
+      } else {
+        setTimeout(() => {
+          inputRef.current?.focus();
+        }, 350);
+      }
+    }
+  };
+
+  const handleCheckAnswer = (overrideValue?: string) => {
+    const valueToTest = overrideValue !== undefined ? overrideValue : answerInput;
+    const parsed = parseInt(valueToTest.trim(), 10);
+
+    if (isNaN(parsed) || valueToTest.trim() === "") {
+      setAnswerStatus("error");
+      setErrorMessage("Please enter a number!");
+      sounds.playFailure();
+      return;
+    }
+
+    if (parsed === expectedAnswer) {
+      setAnswerStatus("correct");
+      setErrorMessage("");
+      sounds.playSuccess();
+      successTimeoutRef.current = setTimeout(() => {
+        onSuccessRef.current?.();
+        successTimeoutRef.current = null;
+      }, 500);
+    } else {
+      setAnswerStatus("error");
+      setErrorMessage(`Not quite! ${totalCount} take away ${removeCount} leaves ${expectedAnswer} ${obj.label}${expectedAnswer === 1 ? "" : "s"}. Enter ${expectedAnswer}!`);
+      sounds.playFailure();
+    }
+  };
+
+  const handleDigitPress = (digit: string) => {
+    if (answerStatus === "correct") return;
+    if (answerStatus === "error") {
+      setAnswerStatus("idle");
+      setErrorMessage("");
+    }
+    setAnswerInput(prev => (prev.length < 3 ? prev + digit : prev));
+  };
+
+  const handleBackspacePress = () => {
+    if (answerStatus === "correct") return;
+    if (answerStatus === "error") {
+      setAnswerStatus("idle");
+      setErrorMessage("");
+    }
+    setAnswerInput(prev => prev.slice(0, -1));
   };
 
   const handlePointerDown = (e: React.PointerEvent, id: string) => {
@@ -216,20 +314,12 @@ export const CountBackCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
     setDragPos(null);
   };
 
-  useEffect(() => {
-    if (crossOrder.length === removeCount && removeCount > 0) {
-      sounds.playSuccess();
-      if (onSuccess) onSuccess();
-    }
-  }, [crossOrder.length, removeCount]);
-
   const draggedItem = draggedItemId ? items.find(i => i.id === draggedItemId) : null;
 
   const frameColor = question.config.frameColor || "indigo";
   let itemBg = isDark ? "bg-slate-800/80 border-violet-500/40 text-violet-200 hover:border-cyan-400" : "bg-white border-slate-200 hover:border-violet-300";
   let nextRing = isDark ? "border-cyan-400 ring-4 ring-cyan-400/30 scale-105" : "border-indigo-400 ring-4 ring-indigo-400/20 scale-105";
   let crossedBg = isDark ? "bg-slate-900/60 border-rose-500/60 opacity-60 scale-95" : "bg-slate-200 border-rose-400 opacity-60 scale-95";
-  let countdownBg = isDark ? "bg-slate-900/80 border-slate-700/80 text-slate-200 shadow-black/40" : "bg-white/90 border-slate-200 text-slate-700 shadow-sm";
 
   if (frameColor === "emerald") {
     itemBg = isDark ? "bg-slate-800/80 border-emerald-500/40 text-emerald-200 hover:border-teal-400" : "bg-white border-slate-200 hover:border-emerald-300";
@@ -256,6 +346,11 @@ export const CountBackCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
       accent="rose"
       headerIcon={<MinusCircle size={16} />}
       headerTitle="Count Back"
+      headerSubtitle={
+        isCountBackComplete && requireAnswerInput
+          ? `Count back complete! How many ${obj.label}s are left?`
+          : `Start at ${totalCount} • tap ${removeCount} ${obj.label}${removeCount === 1 ? "" : "s"} to count back`
+      }
       readAloudText={dynamicInstruction}
       designerHint="Drag items to reposition them on the canvas grid."
     >
@@ -268,7 +363,11 @@ export const CountBackCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
       >
       <GhostGuideOverlay
         show={showGhostGuide && !solvedForGuide}
-        label={`Start at ${totalCount} — tap items to count backward!`}
+        label={
+          isCountBackComplete && requireAnswerInput
+            ? `Enter how many items are left (${expectedAnswer}) in the box!`
+            : `Start at ${totalCount} — tap items to count backward!`
+        }
         isDark={isDark}
         labelPlacement="top"
       />
@@ -426,6 +525,158 @@ export const CountBackCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
           ))}
         </div>
       </div>
+
+      {/* ── Answer Input Box Overlay after count back complete ── */}
+      <AnimatePresence>
+        {isPlayMode && requireAnswerInput && isCountBackComplete && (
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            className="absolute inset-x-2 bottom-2 z-50 flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl backdrop-blur-md border shadow-2xl transition-all max-w-lg mx-auto"
+            style={{
+              backgroundColor: isDark ? "rgba(15, 23, 42, 0.94)" : "rgba(255, 255, 255, 0.96)",
+              borderColor: answerStatus === "error" 
+                ? "#ef4444" 
+                : answerStatus === "correct" 
+                ? "#10b981" 
+                : isDark ? "#334155" : "#cbd5e1"
+            }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xl">🎉</span>
+              <span className={`text-xs sm:text-sm font-extrabold tracking-tight ${
+                isDark ? "text-slate-100" : "text-slate-800"
+              }`}>
+                How many {obj.label}{expectedAnswer === 1 ? "" : "s"} are left?
+              </span>
+            </div>
+
+            {/* Answer Input Controls */}
+            <div className="flex items-center gap-2 w-full justify-center max-w-xs">
+              <div className="relative flex-1">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={answerInput}
+                  onChange={(e) => {
+                    setAnswerInput(e.target.value);
+                    if (answerStatus === "error") {
+                      setAnswerStatus("idle");
+                      setErrorMessage("");
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleCheckAnswer();
+                  }}
+                  placeholder="Remaining..."
+                  disabled={answerStatus === "correct"}
+                  className={`w-full h-11 px-3 text-center text-lg sm:text-xl font-bold font-mono rounded-xl border-2 transition-all outline-none ${
+                    answerStatus === "error"
+                      ? "border-red-500 bg-red-50/50 text-red-700 animate-shake dark:bg-red-950/40 dark:text-red-300"
+                      : answerStatus === "correct"
+                      ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+                      : isDark
+                      ? "bg-slate-900 border-slate-700 text-white focus:border-indigo-500"
+                      : "bg-white border-slate-300 text-slate-900 focus:border-indigo-500"
+                  }`}
+                />
+              </div>
+
+              <Button
+                onClick={() => handleCheckAnswer()}
+                disabled={answerStatus === "correct" || !answerInput.trim()}
+                className={`h-11 px-4 text-sm font-bold flex items-center gap-1.5 rounded-xl shadow-md transition-all active:scale-95 ${
+                  answerStatus === "correct"
+                    ? "bg-emerald-600 hover:bg-emerald-600 text-white"
+                    : "bg-rose-600 hover:bg-rose-700 text-white"
+                }`}
+              >
+                {answerStatus === "correct" ? <Check size={18} /> : "Check"}
+              </Button>
+
+              <button
+                type="button"
+                onClick={() => setShowNumberPad(prev => !prev)}
+                className={`h-11 w-11 flex items-center justify-center rounded-xl border transition-all ${
+                  showNumberPad
+                    ? "bg-rose-100 border-rose-400 text-rose-700 dark:bg-rose-950 dark:border-rose-600 dark:text-rose-300"
+                    : isDark
+                    ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
+                    : "bg-slate-100 border-slate-300 text-slate-600 hover:bg-slate-200"
+                }`}
+                title="Toggle Number Pad"
+              >
+                <Calculator size={18} />
+              </button>
+            </div>
+
+            {/* Error feedback banner */}
+            {answerStatus === "error" && errorMessage && (
+              <div className="flex items-center gap-1.5 text-xs text-red-500 dark:text-red-400 font-bold mt-2 animate-fade-in text-center">
+                <AlertCircle size={14} className="flex-shrink-0" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
+
+            {/* On-screen Number Keypad for Kids / Mobile / Tablets */}
+            <AnimatePresence>
+              {showNumberPad && answerStatus !== "correct" && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="w-full mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 flex flex-col items-center gap-2 overflow-hidden"
+                >
+                  <div className="grid grid-cols-5 gap-1.5 w-full max-w-xs">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((num) => (
+                      <button
+                        key={num}
+                        type="button"
+                        onClick={() => handleDigitPress(String(num))}
+                        className={`h-9 font-mono text-base font-extrabold rounded-lg border shadow-sm transition-all active:scale-95 ${
+                          isDark
+                            ? "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"
+                            : "bg-white border-slate-200 text-slate-800 hover:bg-slate-50"
+                        }`}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between gap-2 w-full max-w-xs">
+                    <button
+                      type="button"
+                      onClick={handleBackspacePress}
+                      className={`flex-1 h-8 text-xs font-extrabold rounded-lg border flex items-center justify-center gap-1 transition-all ${
+                        isDark
+                          ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
+                          : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200"
+                      }`}
+                    >
+                      <Delete size={14} /> Backspace
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAnswerInput("")}
+                      className={`px-3 h-8 text-xs font-extrabold rounded-lg border transition-all ${
+                        isDark
+                          ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
+                          : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200"
+                      }`}
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       </div>
     </SharedCanvasLayout>

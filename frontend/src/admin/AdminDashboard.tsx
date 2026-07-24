@@ -26,6 +26,7 @@ import { SettingsPage } from "./SettingsPage";
 import { InteractiveStudioPage } from "./InteractiveStudioPage";
 import { CurriculumAdminPage } from "./CurriculumAdminPage";
 import { AssignmentsPage } from "./AssignmentsPage";
+import { AnalyticsRosterPage } from "../analytics/AnalyticsRosterPage";
 import App from "../App";
 
 const SUBTITLES: Record<string, string> = {
@@ -39,6 +40,7 @@ const SUBTITLES: Record<string, string> = {
   settings: "Application preferences, AI provider, grades, and subjects",
   curriculum: "Design grades, subjects, units, skills, and linked activities",
   assignments: "Assign immutable curriculum releases and place students",
+  analytics: "Review learner mastery, activity, streaks, and recommendations",
 };
 
 /** Data the data-backed content screens share. */
@@ -80,6 +82,7 @@ const CONTENT: Record<string, (ctx: AdminCtx) => React.ReactNode> = {
   assets: () => <App embedded initialAdminTab="assets" />,
   curriculum: (c) => <CurriculumAdminPage onOpenAssets={() => c.navigate("assets")} />,
   assignments: () => <AssignmentsPage />,
+  analytics: () => <AnalyticsRosterPage />,
   settings: () => <SettingsPage />,
 };
 

@@ -1,19 +1,19 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { CanvasProps } from "./types";
 import { COUNT_OBJECTS } from "../../types";
 import { CountingAsset } from "../Assets";
 import { Button } from "../ui";
 import { sounds } from "../../sound";
-import { Sparkles, RotateCcw, Package, PlusCircle, Move, Maximize2 } from "lucide-react";
+import { Sparkles, RotateCcw, Package, PlusCircle, Move, Maximize2, Check, Calculator, AlertCircle, Delete } from "lucide-react";
 import { SpeechReadAloudButton, GhostGuideOverlay, useGhostGuide, useCPASwitcher, FactFamilyCelebrationCard } from "../../pedagogy";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import { CanvasChip, surfaceClass, captionClass, accentChipClass } from "./canvasTheme";
 
 const getTenFrameMetrics = (zone: LayoutRect) => {
   const availW = Math.max(80, zone.width - 24);
-  const availH = Math.max(40, zone.height - 46); // 36 header + 10 padding
+  const availH = Math.max(40, zone.height - 46);
   
-  // Aspect ratio 5:2
   const frameW = Math.min(availW, availH * 2.5);
   const frameH = frameW / 2.5;
   
@@ -117,6 +117,7 @@ export const AdditionCanvas: React.FC<CanvasProps> = ({
   const a1 = question.config.addend1 ?? 3;
   const a2 = question.config.addend2 ?? 2;
   const targetSum = a1 + a2;
+  const requireAnswerInput = question.config.requireAnswerInput ?? true;
 
   const [items, setItems] = useState<VisualItem[]>([]);
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
@@ -130,8 +131,21 @@ export const AdditionCanvas: React.FC<CanvasProps> = ({
   const updateConfigRef = useRef(onUpdateQuestionConfig);
   updateConfigRef.current = onUpdateQuestionConfig;
 
+  // Answer Input State
+  const [answerInput, setAnswerInput] = useState<string>("");
+  const [answerStatus, setAnswerStatus] = useState<"idle" | "error" | "correct">("idle");
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [showNumberPad, setShowNumberPad] = useState<boolean>(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onSuccessRef = useRef(onSuccess);
+  onSuccessRef.current = onSuccess;
+
   const basketCount = items.filter(it => it.groupId === "basket").length;
-  const isSolved = basketCount === targetSum;
+  const isAdditionComplete = basketCount === targetSum;
+  const solvedForGuide = isAdditionComplete && (requireAnswerInput ? answerStatus === "correct" : true);
+  const isSolved = solvedForGuide;
+
   const { showGhostGuide, reportActivity } = useGhostGuide({
     isPlayMode,
     isSolved,
@@ -144,6 +158,18 @@ export const AdditionCanvas: React.FC<CanvasProps> = ({
       setRepresentation(question.config.defaultRepresentation);
     }
   }, [question.config.defaultRepresentation, setRepresentation]);
+
+  // Reset answer state on question change
+  useEffect(() => {
+    setAnswerInput("");
+    setAnswerStatus("idle");
+    setErrorMessage("");
+    setShowNumberPad(false);
+    if (successTimeoutRef.current) {
+      clearTimeout(successTimeoutRef.current);
+      successTimeoutRef.current = null;
+    }
+  }, [question.id, targetSum]);
 
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [basketLayout, setBasketLayout] = useState<LayoutRect>({ left: 0, top: 0, width: 0, height: 0 });
@@ -249,38 +275,25 @@ export const AdditionCanvas: React.FC<CanvasProps> = ({
 
     const cols = Math.ceil(Math.sqrt(count));
     const rows = Math.ceil(count / cols);
-    const col = index % cols;
-    const row = Math.floor(index / cols);
 
-    const spacingX = cols > 1 ? (areaW - dynamicSize) / (cols - 1) : 0;
-    const spacingY = rows > 1 ? (areaH - dynamicSize) / (rows - 1) : 0;
+    const gapX = cols > 1 ? (areaW - cols * dynamicSize) / (cols - 1) : 0;
+    const gapY = rows > 1 ? (areaH - rows * dynamicSize) / (rows - 1) : 0;
 
-    const xOffset = cols > 1 ? col * spacingX : (areaW - dynamicSize) / 2;
-    const yOffset = rows > 1 ? row * spacingY : (areaH - dynamicSize) / 2;
+    const r = Math.floor(index / cols);
+    const c = index % cols;
 
     return {
-      x: Math.round(areaLeft + xOffset),
-      y: Math.round(areaTop + yOffset),
+      x: Math.round(areaLeft + c * (dynamicSize + gapX)),
+      y: Math.round(areaTop + r * (dynamicSize + gapY)),
       size: dynamicSize
     };
   }, [getGroupZone, representation]);
 
-  // Grid layout helper inside sum basket
-  const getBasketItemPos = useCallback((index: number, count: number) => {
+  // Grid layout helper inside bottom basket
+  const getBasketItemPos = useCallback((index: number, total: number) => {
     const zone = getBasketZone();
 
-    if (representation === "pictorial") {
-      const metrics = getTenFrameMetrics(zone);
-      const row = Math.floor(index / 5);
-      const col = index % 5;
-      return {
-        x: Math.round(zone.left + metrics.left + col * metrics.cellWidth + (metrics.cellWidth - metrics.itemSize) / 2),
-        y: Math.round(zone.top + metrics.top + row * metrics.cellHeight + (metrics.cellHeight - metrics.itemSize) / 2),
-        size: metrics.itemSize
-      };
-    }
-
-    if (representation === "abstract") {
+    if (representation === "pictorial" || representation === "abstract") {
       const metrics = getTenFrameMetrics(zone);
       const row = Math.floor(index / 5);
       const col = index % 5;
@@ -294,167 +307,166 @@ export const AdditionCanvas: React.FC<CanvasProps> = ({
     const areaLeft = zone.left + 16;
     const areaTop = zone.top + 36;
     const areaW = Math.max(ITEM_SIZE, zone.width - 32);
-    const areaH = Math.max(ITEM_SIZE, zone.height - 46);
+    const areaH = Math.max(ITEM_SIZE, zone.height - 48);
 
-    const dynamicSize = count > 8 ? 32 : count > 6 ? 36 : 40;
+    const dynamicSize = total > 8 ? 32 : total > 6 ? 36 : 40;
 
-    const cols = Math.max(1, Math.min(count, Math.ceil(count / 2)));
-    const rows = Math.ceil(count / cols);
-    const col = index % cols;
-    const row = Math.floor(index / cols);
+    const cols = Math.min(8, Math.max(3, Math.ceil(total / 2)));
+    const rows = Math.ceil(total / cols);
 
-    const spacingX = cols > 1 ? (areaW - dynamicSize) / (cols - 1) : 0;
-    const spacingY = rows > 1 ? (areaH - dynamicSize) / (rows - 1) : 0;
+    const stepX = cols > 1 ? (areaW - dynamicSize) / (cols - 1) : 0;
+    const stepY = rows > 1 ? (areaH - dynamicSize) / (rows - 1) : 0;
 
-    const xOffset = cols > 1 ? col * spacingX : (areaW - dynamicSize) / 2;
-    const yOffset = rows > 1 ? row * spacingY : (areaH - dynamicSize) / 2;
+    const r = Math.floor(index / cols);
+    const c = index % cols;
 
     return {
-      x: Math.round(areaLeft + xOffset),
-      y: Math.round(areaTop + yOffset),
+      x: Math.round(areaLeft + c * stepX),
+      y: Math.round(areaTop + r * stepY),
       size: dynamicSize
     };
   }, [getBasketZone, representation]);
 
-  // Unified reset/init function. Launch mode only accepts saved source positions
-  // that still fall inside the matching addend container.
-  const reset = useCallback((useSavedPositions = true) => {
-    if (w === 0) return;
+  // Initialize or update visual items
+  useEffect(() => {
+    if (w === 0 || h === 0) return;
+
     const customPositions = question.config.customPositions || [];
-    const layoutReference = question.config.layoutReference;
-    const scaleX = layoutReference?.width ? w / layoutReference.width : 1;
-    const scaleY = layoutReference?.height ? h / layoutReference.height : 1;
+    const layoutRef = question.config.layoutReference;
 
-    // Group 1
-    const g1List = Array.from({ length: a1 }).map((_, idx) => {
-      const defaultPos = getGroupItemPos(1, idx, a1);
-      const savedPos = useSavedPositions && !isPlayMode ? customPositions.find(p => p.id === `g1-${idx}`) : undefined;
-      const savedX = savedPos ? Math.round(savedPos.x * scaleX) : defaultPos.x;
-      const savedY = savedPos ? Math.round(savedPos.y * scaleY) : defaultPos.y;
-      const savedIsValid = !isPlayMode && containsItemCenter(getGroupZone(1), savedX, savedY, defaultPos.size);
-      const initialX = savedPos && savedIsValid ? savedX : defaultPos.x;
-      const initialY = savedPos && savedIsValid ? savedY : defaultPos.y;
-      return {
-        id: `g1-${idx}`,
-        emoji: obj.emoji,
-        assetType,
-        groupId: 1 as const,
-        x: initialX,
-        y: initialY,
-        origX: initialX,
-        origY: initialY
-      };
-    });
-
-    // Group 2
-    const g2List = Array.from({ length: a2 }).map((_, idx) => {
-      const defaultPos = getGroupItemPos(2, idx, a2);
-      const savedPos = useSavedPositions && !isPlayMode ? customPositions.find(p => p.id === `g2-${idx}`) : undefined;
-      const savedX = savedPos ? Math.round(savedPos.x * scaleX) : defaultPos.x;
-      const savedY = savedPos ? Math.round(savedPos.y * scaleY) : defaultPos.y;
-      const savedIsValid = !isPlayMode && containsItemCenter(getGroupZone(2), savedX, savedY, defaultPos.size);
-      const initialX = savedPos && savedIsValid ? savedX : defaultPos.x;
-      const initialY = savedPos && savedIsValid ? savedY : defaultPos.y;
-      return {
-        id: `g2-${idx}`,
-        emoji: obj.emoji,
-        assetType,
-        groupId: 2 as const,
-        x: initialX,
-        y: initialY,
-        origX: initialX,
-        origY: initialY
-      };
-    });
-
-    const nextItems = [...g1List, ...g2List];
-    setItems(nextItems);
-
-    if (!useSavedPositions && !isPlayMode && updateConfigRef.current) {
-      updateConfigRef.current({
-        customPositions: nextItems.map(item => ({ id: item.id, x: item.x, y: item.y })),
-        layoutReference: { width: w, height: h }
-      });
-    }
-  }, [a1, a2, obj.emoji, assetType, w, h, isPlayMode, customPositionKey, representation, question.config.layoutReference?.width, question.config.layoutReference?.height, getGroupItemPos, getGroupZone]);
-
-  // Initial trigger once dimensions are measured and after CSS transitions
-  useEffect(() => {
-    if (w > 0 && h > 0) {
-      reset(true);
-      const timer1 = setTimeout(() => reset(true), 150);
-      const timer2 = setTimeout(() => reset(true), 350);
-      return () => {
-        clearTimeout(timer1);
-        clearTimeout(timer2);
-      };
-    }
-  }, [w, h, question.id, a1, a2, obj.emoji, isPlayMode, customPositionKey, representation, reset]);
-
-  // When basket dimensions change or items move to basket, update snapped basket positions for non-dragged items
-  useEffect(() => {
-    setItems(prev => {
-      const basketItems = prev.filter(it => it.groupId === "basket");
-      if (basketItems.length === 0) return prev;
-      return prev.map(it => {
-        if (it.groupId === "basket" && it.id !== draggedItemId) {
-          const bIdx = basketItems.findIndex(bi => bi.id === it.id);
-          const snapped = getBasketItemPos(bIdx, basketItems.length);
-          return { ...it, x: snapped.x, y: snapped.y };
+    const computeInitialItems = (): VisualItem[] => {
+      const g1Items: VisualItem[] = Array.from({ length: a1 }).map((_, i) => {
+        const id = `g1-${i}`;
+        const saved = customPositions.find(p => p.id === id);
+        let x: number, y: number;
+        if (!isPlayMode && saved) {
+          if (layoutRef && layoutRef.width > 0 && layoutRef.height > 0) {
+            x = Math.round(saved.x * (w / layoutRef.width));
+            y = Math.round(saved.y * (h / layoutRef.height));
+          } else {
+            x = saved.x;
+            y = saved.y;
+          }
+        } else {
+          const defaultPos = getGroupItemPos(1, i, a1);
+          x = defaultPos.x;
+          y = defaultPos.y;
         }
-        return it;
+        return {
+          id,
+          emoji: obj.emoji,
+          assetType,
+          groupId: 1,
+          x,
+          y,
+          origX: x,
+          origY: y
+        };
+      });
+
+      const g2Items: VisualItem[] = Array.from({ length: a2 }).map((_, i) => {
+        const id = `g2-${i}`;
+        const saved = customPositions.find(p => p.id === id);
+        let x: number, y: number;
+        if (!isPlayMode && saved) {
+          if (layoutRef && layoutRef.width > 0 && layoutRef.height > 0) {
+            x = Math.round(saved.x * (w / layoutRef.width));
+            y = Math.round(saved.y * (h / layoutRef.height));
+          } else {
+            x = saved.x;
+            y = saved.y;
+          }
+        } else {
+          const defaultPos = getGroupItemPos(2, i, a2);
+          x = defaultPos.x;
+          y = defaultPos.y;
+        }
+        return {
+          id,
+          emoji: obj.emoji,
+          assetType,
+          groupId: 2,
+          x,
+          y,
+          origX: x,
+          origY: y
+        };
+      });
+
+      return [...g1Items, ...g2Items];
+    };
+
+    setItems(prev => {
+      if (prev.length === 0 || !isPlayMode) return computeInitialItems();
+
+      return prev.map(it => {
+        if (it.groupId === "basket") return it;
+        const groupId = it.id.startsWith("g1-") ? 1 : 2;
+        const index = parseInt(it.id.split("-")[1], 10);
+        const groupCount = groupId === 1 ? a1 : a2;
+        const pos = getGroupItemPos(groupId, index, groupCount);
+        return {
+          ...it,
+          x: pos.x,
+          y: pos.y,
+          origX: pos.x,
+          origY: pos.y
+        };
       });
     });
-  }, [basketWidth, basketHeight, basketX, basketY, draggedItemId, getBasketItemPos]);
+  }, [w, h, a1, a2, obj.emoji, assetType, isPlayMode, customPositionKey, getGroupItemPos, question.config.layoutReference]);
 
   const handleResetLayout = () => {
+    if (successTimeoutRef.current) {
+      clearTimeout(successTimeoutRef.current);
+      successTimeoutRef.current = null;
+    }
+    setAnswerInput("");
+    setAnswerStatus("idle");
+    setErrorMessage("");
+    setShowNumberPad(false);
+
     sounds.playPop();
     setBasketLayout({ left: basketX, top: basketY, width: basketWidth, height: basketHeight });
-    onUpdateQuestionConfig?.({
-      customPositions: [],
-      containerPositions: {},
-      basketDimensions: undefined
-    } as any);
-    reset(false);
+    setItems(prev => prev.map(it => {
+      const groupId = it.id.startsWith("g1-") ? 1 : 2;
+      const index = parseInt(it.id.split("-")[1], 10);
+      const groupCount = groupId === 1 ? a1 : a2;
+      const pos = getGroupItemPos(groupId, index, groupCount);
+      return {
+        ...it,
+        groupId,
+        x: pos.x,
+        y: pos.y,
+        origX: pos.x,
+        origY: pos.y
+      };
+    }));
+
+    if (updateConfigRef.current) {
+      updateConfigRef.current({
+        customPositions: [],
+        containerPositions: { basket: { x: basketX, y: basketY } },
+        basketDimensions: { width: basketWidth, height: basketHeight }
+      } as any);
+    }
   };
 
   const getCanvasPointer = (e: React.PointerEvent) => {
     const container = containerRef.current;
     if (!container) return null;
     const rect = container.getBoundingClientRect();
-    const scaleX = rect.width > 0 ? container.clientWidth / rect.width : 1;
-    const scaleY = rect.height > 0 ? container.clientHeight / rect.height : 1;
+    const scaleX = container.clientWidth / (rect.width || 1);
+    const scaleY = container.clientHeight / (rect.height || 1);
     return {
       x: (e.clientX - rect.left) * scaleX,
       y: (e.clientY - rect.top) * scaleY
     };
   };
 
-  const handlePointerDown = (e: React.PointerEvent, id: string) => {
-    if (e.button !== 0 || !containerRef.current) return;
-    e.preventDefault();
-    e.stopPropagation();
-    const pointer = getCanvasPointer(e);
-    const item = items.find(candidate => candidate.id === id);
-    if (!pointer || !item) return;
-
-    reportActivity();
-    sounds.playPop();
-    setDraggedItemId(id);
-    dragOffset.current = {
-      x: pointer.x - item.x,
-      y: pointer.y - item.y
-    };
-    dragStart.current = { id, x: item.x, y: item.y };
-    latestDragPosition.current = { x: item.x, y: item.y };
-
-    containerRef.current.setPointerCapture(e.pointerId);
-  };
-
   const handleBasketMoveDown = (e: React.PointerEvent) => {
-    if (isPlayMode) return;
     e.stopPropagation();
-    sounds.playPop();
+    e.preventDefault();
     setBasketDrag('move');
     basketDragStart.current = { mx: e.clientX, my: e.clientY };
     basketDragStartLayout.current = { ...basketLayout };
@@ -462,12 +474,31 @@ export const AdditionCanvas: React.FC<CanvasProps> = ({
   };
 
   const handleBasketResizeDown = (e: React.PointerEvent) => {
-    if (isPlayMode) return;
     e.stopPropagation();
-    sounds.playPop();
+    e.preventDefault();
     setBasketDrag('resize');
     basketDragStart.current = { mx: e.clientX, my: e.clientY };
     basketDragStartLayout.current = { ...basketLayout };
+    containerRef.current?.setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerDown = (e: React.PointerEvent, id: string) => {
+    reportActivity();
+    e.stopPropagation();
+    sounds.playPop();
+    setDraggedItemId(id);
+
+    const pointer = getCanvasPointer(e);
+    const item = items.find(it => it.id === id);
+    if (pointer && item) {
+      dragOffset.current = {
+        x: pointer.x - item.x,
+        y: pointer.y - item.y
+      };
+      dragStart.current = { id, x: item.x, y: item.y };
+      latestDragPosition.current = { x: item.x, y: item.y };
+    }
+
     containerRef.current?.setPointerCapture(e.pointerId);
   };
 
@@ -475,26 +506,27 @@ export const AdditionCanvas: React.FC<CanvasProps> = ({
     if (!containerRef.current) return;
 
     if (!isPlayMode && basketDrag) {
+      e.preventDefault();
       const dx = e.clientX - basketDragStart.current.mx;
       const dy = e.clientY - basketDragStart.current.my;
-      const orig = basketDragStartLayout.current;
+      const initial = basketDragStartLayout.current;
 
       if (basketDrag === 'move') {
-        let nextX = Math.max(0, Math.min(w - orig.width, orig.left + dx));
-        let nextY = Math.max(0, Math.min(h - orig.height, orig.top + dy));
+        let newX = Math.max(8, Math.min(w - initial.width - 8, initial.left + dx));
+        let newY = Math.max(8, Math.min(h - initial.height - 8, initial.top + dy));
         if (showGrid) {
-          nextX = Math.round(nextX / gridSize) * gridSize;
-          nextY = Math.round(nextY / gridSize) * gridSize;
+          newX = Math.round(newX / gridSize) * gridSize;
+          newY = Math.round(newY / gridSize) * gridSize;
         }
-        setBasketLayout(prev => ({ ...prev, left: nextX, top: nextY }));
-      } else {
-        let nextW = Math.max(160, Math.min(w - orig.left, orig.width + dx));
-        let nextH = Math.max(80, Math.min(h - orig.top, orig.height + dy));
+        setBasketLayout(prev => ({ ...prev, left: newX, top: newY }));
+      } else if (basketDrag === 'resize') {
+        let newW = Math.max(160, Math.min(w - initial.left - 8, initial.width + dx));
+        let newH = Math.max(80, Math.min(h - initial.top - 8, initial.height + dy));
         if (showGrid) {
-          nextW = Math.round(nextW / gridSize) * gridSize;
-          nextH = Math.round(nextH / gridSize) * gridSize;
+          newW = Math.round(newW / gridSize) * gridSize;
+          newH = Math.round(newH / gridSize) * gridSize;
         }
-        setBasketLayout(prev => ({ ...prev, width: nextW, height: nextH }));
+        setBasketLayout(prev => ({ ...prev, width: newW, height: newH }));
       }
       return;
     }
@@ -609,8 +641,14 @@ export const AdditionCanvas: React.FC<CanvasProps> = ({
       const basketItems = nextItems.filter(it => it.groupId === "basket");
 
       if (basketItems.length === targetSum) {
-        sounds.playSuccess();
-        if (onSuccess) onSuccess();
+        if (!requireAnswerInput) {
+          sounds.playSuccess();
+          onSuccessRef.current?.();
+        } else {
+          setTimeout(() => {
+            inputRef.current?.focus();
+          }, 350);
+        }
       }
 
       return nextItems;
@@ -622,6 +660,50 @@ export const AdditionCanvas: React.FC<CanvasProps> = ({
     if (containerRef.current?.hasPointerCapture(e.pointerId)) {
       containerRef.current.releasePointerCapture(e.pointerId);
     }
+  };
+
+  const handleCheckAnswer = (overrideValue?: string) => {
+    const valueToTest = overrideValue !== undefined ? overrideValue : answerInput;
+    const parsed = parseInt(valueToTest.trim(), 10);
+
+    if (isNaN(parsed) || valueToTest.trim() === "") {
+      setAnswerStatus("error");
+      setErrorMessage("Please enter a number!");
+      sounds.playFailure();
+      return;
+    }
+
+    if (parsed === targetSum) {
+      setAnswerStatus("correct");
+      setErrorMessage("");
+      sounds.playSuccess();
+      successTimeoutRef.current = setTimeout(() => {
+        onSuccessRef.current?.();
+        successTimeoutRef.current = null;
+      }, 500);
+    } else {
+      setAnswerStatus("error");
+      setErrorMessage(`Not quite! ${a1} and ${a2} makes ${targetSum} ${obj.label}${targetSum === 1 ? "" : "s"}. Enter ${targetSum}!`);
+      sounds.playFailure();
+    }
+  };
+
+  const handleDigitPress = (digit: string) => {
+    if (answerStatus === "correct") return;
+    if (answerStatus === "error") {
+      setAnswerStatus("idle");
+      setErrorMessage("");
+    }
+    setAnswerInput(prev => (prev.length < 3 ? prev + digit : prev));
+  };
+
+  const handleBackspacePress = () => {
+    if (answerStatus === "correct") return;
+    if (answerStatus === "error") {
+      setAnswerStatus("idle");
+      setErrorMessage("");
+    }
+    setAnswerInput(prev => prev.slice(0, -1));
   };
 
   const handleContainerPointerCancel = (e: React.PointerEvent) => {
@@ -664,7 +746,11 @@ export const AdditionCanvas: React.FC<CanvasProps> = ({
       accent="violet"
       headerIcon={<PlusCircle size={16} />}
       headerTitle="Addition Tree"
-      headerSubtitle={`${a1} + ${a2} = ${basketCount}`}
+      headerSubtitle={
+        isAdditionComplete && requireAnswerInput
+          ? "All objects added! Enter the sum answer below."
+          : `${a1} + ${a2} = ${basketCount}`
+      }
       readAloudText={`Addition. ${a1} plus ${a2} equals ${targetSum}. Drag the objects into the basket!`}
       headerActions={
         <CanvasChip accent="violet" isDark={isDark} aria-label={`Target sum: ${targetSum}`}>
@@ -698,7 +784,7 @@ export const AdditionCanvas: React.FC<CanvasProps> = ({
           </div>
         )}
 
-        {/* Top Section: Move and Count Group Containers (Stacked on mobile, side-by-side on tablet/desktop) */}
+        {/* Top Section: Move and Count Group Containers */}
         <div className="flex flex-col sm:flex-row gap-3 sm:justify-between items-center w-full relative z-10 mt-1 px-1">
         {/* Left Addend Container */}
         <div
@@ -833,7 +919,6 @@ export const AdditionCanvas: React.FC<CanvasProps> = ({
                 }`} />
               </div>
             ) : (
-              // Abstract digits mode
               <div 
                 className="w-full h-full rounded-full border border-white dark:border-slate-800 bg-indigo-650 text-white font-mono font-black text-[10px] shadow-sm transition-transform flex items-center justify-center hover:bg-indigo-700 ring-1 ring-indigo-400/40 select-none pointer-events-none"
                 style={{ width: `${currentSize}px`, height: `${currentSize}px` }}
@@ -861,7 +946,7 @@ export const AdditionCanvas: React.FC<CanvasProps> = ({
         >
           <GhostGuideOverlay show={showGhostGuide && !isSolved} label={"Drag items into the basket!"} isDark={isDark} labelPlacement="top" />
           
-          {/* ── Grab-bar drag handle at the top of the basket ── */}
+          {/* Grab-bar drag handle at top of basket */}
           {!isPlayMode && (
             <div
               onPointerDown={handleBasketMoveDown}
@@ -883,7 +968,7 @@ export const AdditionCanvas: React.FC<CanvasProps> = ({
             </div>
           )}
 
-          {/* ── Resize handle — bottom-right ── */}
+          {/* Resize handle — bottom-right */}
           {!isPlayMode && (
             <div
               onPointerDown={handleBasketResizeDown}
@@ -925,6 +1010,158 @@ export const AdditionCanvas: React.FC<CanvasProps> = ({
 
         </div>
       )}
+
+      {/* ── Answer Input Box Overlay after completing addition ── */}
+      <AnimatePresence>
+        {isPlayMode && requireAnswerInput && isAdditionComplete && (
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            className="absolute inset-x-2 bottom-2 z-50 flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl backdrop-blur-md border shadow-2xl transition-all max-w-lg mx-auto"
+            style={{
+              backgroundColor: isDark ? "rgba(15, 23, 42, 0.94)" : "rgba(255, 255, 255, 0.96)",
+              borderColor: answerStatus === "error" 
+                ? "#ef4444" 
+                : answerStatus === "correct" 
+                ? "#10b981" 
+                : isDark ? "#334155" : "#cbd5e1"
+            }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xl">🎉</span>
+              <span className={`text-xs sm:text-sm font-extrabold tracking-tight ${
+                isDark ? "text-slate-100" : "text-slate-800"
+              }`}>
+                What is {a1} + {a2}? Enter the sum of {obj.label}{targetSum === 1 ? "" : "s"}!
+              </span>
+            </div>
+
+            {/* Answer Input Controls */}
+            <div className="flex items-center gap-2 w-full justify-center max-w-xs">
+              <div className="relative flex-1">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={answerInput}
+                  onChange={(e) => {
+                    setAnswerInput(e.target.value);
+                    if (answerStatus === "error") {
+                      setAnswerStatus("idle");
+                      setErrorMessage("");
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleCheckAnswer();
+                  }}
+                  placeholder="Sum..."
+                  disabled={answerStatus === "correct"}
+                  className={`w-full h-11 px-3 text-center text-lg sm:text-xl font-bold font-mono rounded-xl border-2 transition-all outline-none ${
+                    answerStatus === "error"
+                      ? "border-red-500 bg-red-50/50 text-red-700 animate-shake dark:bg-red-950/40 dark:text-red-300"
+                      : answerStatus === "correct"
+                      ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+                      : isDark
+                      ? "bg-slate-900 border-slate-700 text-white focus:border-indigo-500"
+                      : "bg-white border-slate-300 text-slate-900 focus:border-indigo-500"
+                  }`}
+                />
+              </div>
+
+              <Button
+                onClick={() => handleCheckAnswer()}
+                disabled={answerStatus === "correct" || !answerInput.trim()}
+                className={`h-11 px-4 text-sm font-bold flex items-center gap-1.5 rounded-xl shadow-md transition-all active:scale-95 ${
+                  answerStatus === "correct"
+                    ? "bg-emerald-600 hover:bg-emerald-600 text-white"
+                    : "bg-violet-600 hover:bg-violet-700 text-white"
+                }`}
+              >
+                {answerStatus === "correct" ? <Check size={18} /> : "Check"}
+              </Button>
+
+              <button
+                type="button"
+                onClick={() => setShowNumberPad(prev => !prev)}
+                className={`h-11 w-11 flex items-center justify-center rounded-xl border transition-all ${
+                  showNumberPad
+                    ? "bg-violet-100 border-violet-400 text-violet-700 dark:bg-violet-950 dark:border-violet-600 dark:text-violet-300"
+                    : isDark
+                    ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
+                    : "bg-slate-100 border-slate-300 text-slate-600 hover:bg-slate-200"
+                }`}
+                title="Toggle Number Pad"
+              >
+                <Calculator size={18} />
+              </button>
+            </div>
+
+            {/* Error feedback banner */}
+            {answerStatus === "error" && errorMessage && (
+              <div className="flex items-center gap-1.5 text-xs text-red-500 dark:text-red-400 font-bold mt-2 animate-fade-in text-center">
+                <AlertCircle size={14} className="flex-shrink-0" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
+
+            {/* On-screen Number Keypad for Kids / Mobile / Tablets */}
+            <AnimatePresence>
+              {showNumberPad && answerStatus !== "correct" && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="w-full mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 flex flex-col items-center gap-2 overflow-hidden"
+                >
+                  <div className="grid grid-cols-5 gap-1.5 w-full max-w-xs">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((num) => (
+                      <button
+                        key={num}
+                        type="button"
+                        onClick={() => handleDigitPress(String(num))}
+                        className={`h-9 font-mono text-base font-extrabold rounded-lg border shadow-sm transition-all active:scale-95 ${
+                          isDark
+                            ? "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"
+                            : "bg-white border-slate-200 text-slate-800 hover:bg-slate-50"
+                        }`}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between gap-2 w-full max-w-xs">
+                    <button
+                      type="button"
+                      onClick={handleBackspacePress}
+                      className={`flex-1 h-8 text-xs font-extrabold rounded-lg border flex items-center justify-center gap-1 transition-all ${
+                        isDark
+                          ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
+                          : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200"
+                      }`}
+                    >
+                      <Delete size={14} /> Backspace
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAnswerInput("")}
+                      className={`px-3 h-8 text-xs font-extrabold rounded-lg border transition-all ${
+                        isDark
+                          ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
+                          : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200"
+                      }`}
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <FactFamilyCelebrationCard
         isSolved={isSolved}

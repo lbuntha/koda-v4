@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { BookOpen, CheckCircle2, Eye, EyeOff, KeyRound, Music2, Settings2, Volume2, VolumeX, Wand2 } from "lucide-react";
+import { BookOpen, CheckCircle2, Eye, EyeOff, Gauge, KeyRound, Music2, Settings2, Volume2, VolumeX, Wand2 } from "lucide-react";
 import { Button, Card, Input, Label, Select, Skeleton, SkeletonCard, SkeletonText, Switch, Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui";
 import { sounds } from "../sound";
 import { useAppSettings } from "../settings/AppSettingsContext";
 import { AcademicCatalogSettings } from "./AcademicCatalogSettings";
+import { ProgressionSettings } from "./ProgressionSettings";
 
 const SettingsGeneralSkeleton: React.FC = () => (
   <div className="flex flex-1 flex-col gap-4" role="status" aria-label="Loading application settings" aria-busy="true">
@@ -41,7 +42,7 @@ export const SettingsPage: React.FC = () => {
   const [testing, setTesting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [section, setSection] = useState<"general" | "curriculum">("general");
+  const [section, setSection] = useState<"general" | "curriculum" | "progression">("general");
 
   useEffect(() => {
     setSoundEnabled(settings.sound_enabled);
@@ -96,10 +97,15 @@ export const SettingsPage: React.FC = () => {
       <TabsList aria-label="Settings sections">
         <TabsTrigger value="general"><Settings2 size={14} /> General</TabsTrigger>
         <TabsTrigger value="curriculum"><BookOpen size={14} /> Curriculum models</TabsTrigger>
+        <TabsTrigger value="progression"><Gauge size={14} /> Progression & mastery</TabsTrigger>
       </TabsList>
 
       <TabsContent value="curriculum" className="flex min-h-0 flex-1 pt-4">
         <AcademicCatalogSettings />
+      </TabsContent>
+
+      <TabsContent value="progression" className="flex min-h-0 flex-1 pt-4">
+        <ProgressionSettings />
       </TabsContent>
 
       <TabsContent value="general" className="flex flex-1 flex-col gap-4 pt-4">

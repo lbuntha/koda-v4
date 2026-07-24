@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { Play, Pencil, Trash2 } from "lucide-react";
+import { BarChart3, Play, Pencil, Trash2 } from "lucide-react";
 import { Button, Card } from "../components/ui";
 import { Child } from "../api/family";
 import { AVATAR_FALLBACK } from "./AvatarPicker";
@@ -14,9 +14,10 @@ interface Props {
   onPlay: () => void;
   onEdit: () => void;
   onRemove: () => void;
+  onProgress: () => void;
 }
 
-export const KidCard: React.FC<Props> = ({ child, onPlay, onEdit, onRemove }) => (
+export const KidCard: React.FC<Props> = ({ child, onPlay, onEdit, onRemove, onProgress }) => (
   <Card className="p-4 flex flex-col items-center gap-3">
     <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-3xl">
       {child.avatar ?? AVATAR_FALLBACK}
@@ -30,7 +31,10 @@ export const KidCard: React.FC<Props> = ({ child, onPlay, onEdit, onRemove }) =>
     <Button size="sm" className="w-full" onClick={onPlay}>
       <Play size={14} /> Play
     </Button>
-    <div className="flex gap-1">
+    <div className="flex flex-wrap justify-center gap-1">
+      <Button variant="ghost" size="xs" onClick={onProgress}>
+        <BarChart3 size={12} /> Progress
+      </Button>
       <Button variant="ghost" size="xs" onClick={onEdit}>
         <Pencil size={12} /> Edit
       </Button>

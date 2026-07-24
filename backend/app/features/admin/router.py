@@ -12,7 +12,9 @@ from ...models.menu import RoleDef
 from ...core.deps import get_current_admin
 from ...core.codes import unique_family_code
 from ...core.security import hash_secret
+from ...core.audit import record_audit
 from .schemas import CreateUserIn, UpdateUserIn, ResetPinIn, AdminUserOut, AdminStudentOut
+from ..analytics.service import purge_learning_data
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -134,6 +136,14 @@ async def reset_pin(student_id: str, body: ResetPinIn, _: User = Depends(get_cur
 
 
 @router.delete("/students/{student_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_student(student_id: str, _: User = Depends(get_current_admin)):
+async def delete_student(student_id: str, admin: User = Depends(get_current_admin)):
     student = await _student_or_404(student_id)
-    await student.delete()
+    counts = await purge_learning_data(str(student.id), include_student=True)
+    await record_audit(
+        actor=admin,
+        resource_type="student_data",
+        action="child_profile_deleted",
+        owner_id=student_id,
+        reason="Administrator deleted child profile",
+        summary={"studentId": student_id, "deletedCounts": counts},
+    )

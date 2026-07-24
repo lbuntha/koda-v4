@@ -40,6 +40,10 @@ Items can be arranged in a line, circle, wave, grid, columns, pairs, or scattere
       key: "showNumbersOnTap", label: "Show Count Bubble", type: "boolean", defaultValue: true,
       description: "Teacher-facing display toggle.", exposeToAI: false,
     },
+    {
+      key: "requireAnswerInput", label: "Answer Input Box", type: "boolean", defaultValue: true,
+      description: "Require typing/selecting answer after completing counting.", exposeToAI: false,
+    },
   ],
 
   assets: ALL_ASSETS,

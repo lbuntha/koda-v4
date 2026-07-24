@@ -34,6 +34,10 @@ The container's face animates happily as items go in. Simpler than Move & Count:
       description: "Visual shape of the container.",
       promptHint: "match theme: basket for fruit, box for toys, chest for treasure, mystery otherwise",
     },
+    {
+      key: "requireAnswerInput", label: "Answer Input Box", type: "boolean", defaultValue: true,
+      description: "Require typing/selecting answer after collecting all items into the container.", exposeToAI: false,
+    },
     frameColorField("indigo"),
     assetTypeField("apple"),
   ],

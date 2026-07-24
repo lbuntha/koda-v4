@@ -1,14 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BookOpen, GraduationCap, Pencil, Plus, Trash2 } from "lucide-react";
 import { academicApi, GradeCatalogInput, GradeCatalogItem, SubjectCatalogInput, SubjectCatalogItem } from "../api/academic";
+import type { GradeBand } from "../api/auth";
 import { Button, Card, Input, Label, Select, Skeleton, SkeletonCard, SkeletonText, Textarea } from "../components/ui";
 
+// Mirrors backend default_band_for_order — the band a grade gets when unset.
+const autoBand = (order: number): GradeBand => (order <= 6 ? "kid" : order <= 9 ? "student" : "focus");
 const slugify = (value: string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const codeify = (value: string) => value.toUpperCase().trim().replace(/[^A-Z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 30);
 
-const emptyGrade = (): GradeCatalogInput => ({ key: "", code: "", name: "", description: "", age_range: "", order: 1, active: true, revision: 0 });
+const emptyGrade = (): GradeCatalogInput => ({ key: "", code: "", name: "", description: "", age_range: "", order: 1, layout_band: null, active: true, revision: 0 });
 const emptySubject = (gradeId = ""): SubjectCatalogInput => ({ key: "", grade_id: gradeId, code: "", name: "", description: "", icon: "", color: "#534AB7", order: 1, active: true, revision: 0 });
-const gradeInput = (item: GradeCatalogItem): GradeCatalogInput => ({ key: item.key, code: item.code, name: item.name, description: item.description, age_range: item.age_range, order: item.order, active: item.active, revision: item.revision });
+const gradeInput = (item: GradeCatalogItem): GradeCatalogInput => ({ key: item.key, code: item.code, name: item.name, description: item.description, age_range: item.age_range, order: item.order, layout_band: item.layout_band, active: item.active, revision: item.revision });
 const subjectInput = (item: SubjectCatalogItem): SubjectCatalogInput => ({ key: item.key, grade_id: item.grade_id, code: item.code, name: item.name, description: item.description, icon: item.icon, color: item.color, order: item.order, active: item.active, revision: item.revision });
 const sortGrades = (items: GradeCatalogItem[]) => [...items].sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
 const sortSubjects = (items: SubjectCatalogItem[]) => [...items].sort((a, b) => a.grade_id.localeCompare(b.grade_id) || a.order - b.order || a.name.localeCompare(b.name));
@@ -177,6 +180,7 @@ export const AcademicCatalogSettings: React.FC = () => {
               <div><Label>Stable key</Label><Input value={gradeDraft.key || slugify(gradeDraft.name)} disabled={gradeDraft.revision > 0} onChange={e => updateGrade({ key: slugify(e.target.value) })} placeholder="grade-1" /></div>
               <div><Label>Description</Label><Textarea rows={3} value={gradeDraft.description} onChange={e => updateGrade({ description: e.target.value })} placeholder="Learning stage and curriculum scope" /></div>
               <div className="grid grid-cols-2 gap-3"><div><Label>Age range</Label><Input value={gradeDraft.age_range} onChange={e => updateGrade({ age_range: e.target.value })} placeholder="6–7 years" /></div><div><Label>Display order</Label><Input type="number" min={0} value={gradeDraft.order} onChange={e => updateGrade({ order: Number(e.target.value) })} /></div></div>
+              <div><Label>Student page layout</Label><Select value={gradeDraft.layout_band ?? ""} onChange={e => updateGrade({ layout_band: e.target.value ? (e.target.value as GradeBand) : null })}><option value="">Auto — {autoBand(gradeDraft.order)} (from order)</option><option value="kid">Kid (grades 1–6): playful, supervised</option><option value="student">Student (grades 7–9): independent</option><option value="focus">Focus (grades 10–12): professional</option></Select></div>
               <label className="flex items-center gap-2 text-xs text-[#6D6997]"><input type="checkbox" checked={gradeDraft.active} onChange={e => updateGrade({ active: e.target.checked })} className="accent-[#534AB7]" /> Available for curriculum design</label>
               <div className="flex flex-wrap justify-end gap-2">{gradeDraft.revision > 0 && <Button variant="destructive" size="sm" onClick={() => void removeGrade(gradeDraft as GradeCatalogItem)} loading={deletingGradeKey === gradeDraft.key} loadingText="Deleting..."><Trash2 size={13} /> Delete</Button>}<Button size="sm" onClick={() => void saveGrade()} loading={savingGrade} loadingText="Saving..."><Pencil size={13} /> {gradeDraft.revision ? "Save grade" : "Create grade"}</Button></div>
             </div>

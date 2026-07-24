@@ -127,6 +127,8 @@ export interface LearningEvent {
   releaseId?: string;
   /** Assigned learning path; populated when assignment delivery is enabled. */
   assignmentId?: string;
+  /** Recommendation decision that selected this skill for the session. */
+  recommendationRunId?: string;
   slideIndex: number;
   totalSlides: number;
 

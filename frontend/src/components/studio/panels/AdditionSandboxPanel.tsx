@@ -53,5 +53,17 @@ export const AdditionSandboxPanel: React.FC<PanelProps> = ({ question, update, u
                         })}
                       />
                     </div>
+
+                    <div className="flex items-center justify-between p-1 bg-white/50 rounded-lg">
+                      <span className="text-xs font-bold text-sky-950">Require answer input after adding</span>
+                      <input
+                        type="checkbox"
+                        checked={question.config.requireAnswerInput ?? true}
+                        onChange={(e) => update({
+                          config: { ...question.config, requireAnswerInput: e.target.checked }
+                        })}
+                        className="w-4 h-4 text-sky-600 accent-sky-600 cursor-pointer"
+                      />
+                    </div>
                   </div>
 );

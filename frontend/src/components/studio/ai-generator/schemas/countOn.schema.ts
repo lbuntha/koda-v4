@@ -46,6 +46,10 @@ Teaches counting on from a known quantity instead of always starting at 1. Tappi
       description: "Visual shape of the closed starting container.",
       promptHint: "match theme: chest for treasure, basket for fruit, mystery for surprise, box otherwise",
     },
+    {
+      key: "requireAnswerInput", label: "Answer Input Box", type: "boolean", defaultValue: true,
+      description: "Require typing/selecting answer after completing counting on.", exposeToAI: false,
+    },
     frameColorField("indigo"),
     assetTypeField("apple"),
   ],

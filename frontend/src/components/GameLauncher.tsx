@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { CountingQuestion, CUSTOM_SVG_OBJECT_PLACEHOLDER } from "../types";
 import { sounds } from "../sound";
 import { OneToOneCanvas } from "./canvases/OneToOneCanvas";
@@ -40,6 +40,7 @@ interface GameLauncherProps {
     curriculumId: string;
     curriculumRevision: number;
     assignmentId?: string;
+    recommendationRunId?: string;
   };
 }
 
@@ -64,6 +65,7 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
   const [isMuted, setIsMuted] = useState<boolean>(() => !sounds.isEnabled());
   const [isDark, setIsDark] = useState<boolean>(true);
   const [showAnalyticsModal, setShowAnalyticsModal] = useState<boolean>(false);
+  const correctAttemptLogged = useRef(false);
 
   const activeQuestion = questions.find(q => q.id === activeId) || questions[0];
   const currentIdx = questions.findIndex(q => q.id === activeId);
@@ -83,6 +85,7 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
       curriculumRevision: learningContext?.curriculumRevision,
       releaseId: learningContext?.releaseId,
       assignmentId: learningContext?.assignmentId,
+      recommendationRunId: learningContext?.recommendationRunId,
       details: {
         objectId: q.objectId,
         ...(q.config?.customSvgAssetId ? { customSvgAssetId: q.config.customSvgAssetId } : {}),
@@ -97,6 +100,7 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
   useEffect(() => {
     setIsSuccess(false);
     setConfetti([]);
+    correctAttemptLogged.current = false;
     if (activeQuestion) {
       analyticsLogger.logSlideView(slideContext(activeQuestion, currentIdx));
     }
@@ -115,6 +119,10 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
     detail?: { expected?: string; selected?: string; details?: Record<string, any> },
   ) => {
     if (!activeQuestion) return;
+    if (outcome === "correct") {
+      if (correctAttemptLogged.current) return;
+      correctAttemptLogged.current = true;
+    }
     analyticsLogger.logAttempt(slideContext(activeQuestion, currentIdx), outcome, detail);
   };
 
@@ -160,7 +168,7 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
   const handleSuccess = () => {
     setIsSuccess(true);
     triggerConfetti();
-    handleAttempt("correct");
+    if (!correctAttemptLogged.current) handleAttempt("correct");
   };
 
   const triggerConfetti = () => {
@@ -204,7 +212,15 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
       setActiveId(questions[currentIdx + 1].id);
       sounds.playPop();
     } else {
-      analyticsLogger.logLessonComplete({ slideIndex: currentIdx, totalSlides: questions.length });
+      analyticsLogger.logLessonComplete({
+        slideIndex: currentIdx,
+        totalSlides: questions.length,
+        curriculumId: learningContext?.curriculumId,
+        curriculumRevision: learningContext?.curriculumRevision,
+        releaseId: learningContext?.releaseId,
+        assignmentId: learningContext?.assignmentId,
+        recommendationRunId: learningContext?.recommendationRunId,
+      });
       sounds.playSuccess();
       onClose();
     }
