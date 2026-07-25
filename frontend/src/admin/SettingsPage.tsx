@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { BookOpen, CheckCircle2, Eye, EyeOff, Gauge, KeyRound, Music2, Settings2, Volume2, VolumeX, Wand2 } from "lucide-react";
+import { BookOpen, CheckCircle2, Eye, EyeOff, KeyRound, Music2, Settings2, TrendingUp, Volume2, VolumeX, Wand2 } from "lucide-react";
 import { Button, Card, Input, Label, Select, Skeleton, SkeletonCard, SkeletonText, Switch, Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui";
 import { sounds } from "../sound";
 import { useAppSettings } from "../settings/AppSettingsContext";
@@ -97,7 +97,7 @@ export const SettingsPage: React.FC = () => {
       <TabsList aria-label="Settings sections">
         <TabsTrigger value="general"><Settings2 size={14} /> General</TabsTrigger>
         <TabsTrigger value="curriculum"><BookOpen size={14} /> Curriculum models</TabsTrigger>
-        <TabsTrigger value="progression"><Gauge size={14} /> Progression & mastery</TabsTrigger>
+        <TabsTrigger value="progression"><TrendingUp size={14} /> Progression & mastery</TabsTrigger>
       </TabsList>
 
       <TabsContent value="curriculum" className="flex min-h-0 flex-1 pt-4">

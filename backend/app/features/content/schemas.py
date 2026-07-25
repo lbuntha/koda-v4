@@ -66,6 +66,95 @@ class CurriculumIn(BaseModel):
         invalid_skills = sorted(item["id"] for item in self.tree["skills"] if item.get("unitId") not in units_by_id)
         if invalid_skills:
             raise ValueError(f"Curriculum skills reference missing units: {', '.join(invalid_skills)}")
+        rewards = self.tree.get("rewards") or {}
+        quest = rewards.get("quest") or {}
+        xp = rewards.get("xp") or {}
+        activities = quest.get("activitiesPerSession")
+        if activities is not None and (
+            not isinstance(activities, int) or isinstance(activities, bool) or not 1 <= activities <= 5
+        ):
+            raise ValueError("Quest activities per session must be between 1 and 5")
+        quest_label = quest.get("label")
+        if quest_label is not None and (
+            not isinstance(quest_label, str) or not quest_label.strip() or len(quest_label) > 80
+        ):
+            raise ValueError("Quest label must be between 1 and 80 characters")
+        for field in ("correctAnswer", "firstTryBonus", "activityCompletion"):
+            value = xp.get(field)
+            if value is not None and (
+                not isinstance(value, int) or isinstance(value, bool) or not 0 <= value <= 100
+            ):
+                raise ValueError(f"XP {field} must be between 0 and 100")
+        level = rewards.get("level") or {}
+        xp_per_level = level.get("xpPerLevel")
+        if xp_per_level is not None and (
+            not isinstance(xp_per_level, int)
+            or isinstance(xp_per_level, bool)
+            or not 1 <= xp_per_level <= 10_000
+        ):
+            raise ValueError("XP per level must be between 1 and 10,000")
+        achievements = rewards.get("achievements") or []
+        if not isinstance(achievements, list) or len(achievements) > 12:
+            raise ValueError("Achievements must be a list of at most 12 items")
+        achievement_ids: list[str] = []
+        allowed_metrics = {
+            "xpEarned", "lessonsCompleted", "firstTryCorrect",
+            "proficientSkills", "masteredSkills", "streakDays",
+        }
+        allowed_icons = {"star", "medal", "award", "trophy", "gem", "flame"}
+        allowed_accents = {"purple", "blue", "green", "amber", "pink"}
+        for achievement in achievements:
+            if not isinstance(achievement, dict):
+                raise ValueError("Each achievement must be an object")
+            achievement_id = achievement.get("id")
+            if not isinstance(achievement_id, str) or not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,79}", achievement_id):
+                raise ValueError("Achievement id must use lowercase letters, numbers, and hyphens")
+            achievement_ids.append(achievement_id)
+            label = achievement.get("label")
+            description = achievement.get("description")
+            if not isinstance(label, str) or not label.strip() or len(label) > 80:
+                raise ValueError(f"Achievement {achievement_id} label is invalid")
+            if not isinstance(description, str) or not description.strip() or len(description) > 200:
+                raise ValueError(f"Achievement {achievement_id} description is invalid")
+            if achievement.get("metric") not in allowed_metrics:
+                raise ValueError(f"Achievement {achievement_id} metric is invalid")
+            target = achievement.get("target")
+            if not isinstance(target, int) or isinstance(target, bool) or not 1 <= target <= 10_000:
+                raise ValueError(f"Achievement {achievement_id} target must be between 1 and 10,000")
+            if achievement.get("icon") not in allowed_icons:
+                raise ValueError(f"Achievement {achievement_id} icon is invalid")
+            if achievement.get("accent") not in allowed_accents:
+                raise ValueError(f"Achievement {achievement_id} accent is invalid")
+        if len(achievement_ids) != len(set(achievement_ids)):
+            raise ValueError("Achievement ids must be unique")
+        for skill in self.tree["skills"]:
+            completion_xp = skill.get("completionXp")
+            if completion_xp is not None and (
+                not isinstance(completion_xp, int) or isinstance(completion_xp, bool) or not 0 <= completion_xp <= 100
+            ):
+                raise ValueError(f"Skill {skill['id']} completion XP must be between 0 and 100")
+            presentation = skill.get("presentation") or {}
+            for field, limit in (("title", 120), ("description", 300), ("thumbnailUrl", 500)):
+                value = presentation.get(field)
+                if value is not None and (not isinstance(value, str) or len(value.strip()) > limit):
+                    raise ValueError(f"Skill {skill['id']} presentation {field} is invalid")
+            thumbnail = presentation.get("thumbnailUrl")
+            if thumbnail and not (
+                thumbnail.startswith("/") or thumbnail.startswith("https://") or thumbnail.startswith("http://")
+            ):
+                raise ValueError(f"Skill {skill['id']} thumbnail must be an app path or HTTP URL")
+            thumbnail_asset_id = presentation.get("thumbnailAssetId")
+            if thumbnail_asset_id is not None and (
+                not isinstance(thumbnail_asset_id, str)
+                or not thumbnail_asset_id.strip()
+                or len(thumbnail_asset_id) > 120
+            ):
+                raise ValueError(f"Skill {skill['id']} thumbnail asset id is invalid")
+            if thumbnail and thumbnail_asset_id:
+                raise ValueError(f"Skill {skill['id']} must use either a thumbnail URL or library asset")
+            accent = presentation.get("accent")
+            if accent is not None and accent not in {"purple", "blue", "green", "amber", "pink"}:
+                raise ValueError(f"Skill {skill['id']} presentation accent is invalid")
         if len(str(self.tree).encode("utf-8")) > 2_000_000:
             raise ValueError("Curriculum exceeds the 2 MB storage limit")
         return self

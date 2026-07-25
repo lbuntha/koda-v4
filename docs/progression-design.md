@@ -624,7 +624,9 @@ reasons/skips, revision provenance, and assignment/grade/subject filters. Child 
 data can be exported or permanently purged by a guardian/admin; full child deletion
 cascades through learning collections and both paths write an audit event. Admin
 Settings exposes the full validated progression contract, revision-safe saves, and
-re-score job status.
+re-score job status. Its read-only simulator replays verified events under a draft
+configuration and previews mastery, review timing, session-plan, and placement
+changes before an admin saves.
 
 **Dependencies:** 0 → 1 → 2 → 3 are sequential. Phase 4 can start once Phase 3 writes
 server-authoritative `mastery_states`. The frontend `scoringEngine.ts` is the reference

@@ -77,6 +77,7 @@ export interface ScoringPreview {
   skillsScanned: number;
   affectedStudents: number;
   changedSkills: number;
+  scoreChangedSkills: number;
   promotedSkills: number;
   demotedSkills: number;
   reviewDueChanged: number;

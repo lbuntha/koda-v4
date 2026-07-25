@@ -224,6 +224,41 @@ class SoundSynthesizer {
   public playLevelUp() {
     this.playSuccess();
   }
+
+  public playPour(transferCount: number = 1) {
+    this.schedule((ctx, now) => {
+      // Play a sequence of rising bubble pop sounds to simulate pouring liquid
+      const count = 4 + transferCount * 2;
+      for (let i = 0; i < count; i++) {
+        const time = now + i * 0.07;
+        const freq = 320 + i * 65; // rising pitch as liquid fills target
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, time);
+
+        // Quick attack and exponential decay for organic bubble sound
+        gain.gain.setValueAtTime(0, time);
+        gain.gain.linearRampToValueAtTime(0.06, time + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.07);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(time);
+        osc.stop(time + 0.08);
+
+        osc.onended = () => {
+          try {
+            osc.disconnect();
+            gain.disconnect();
+          } catch {}
+        };
+      }
+    });
+  }
 }
 
 export const sounds = new SoundSynthesizer();
+

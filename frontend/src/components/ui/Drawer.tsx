@@ -52,13 +52,13 @@ export const Drawer: React.FC<DrawerProps> = ({
       />
 
       {/* Panel */}
-      <div className={`relative h-full bg-white border-l border-slate-200 shadow-2xl z-10 flex flex-col animate-slide-in-right ${widthClassName}`}>
+      <div className={`relative h-full bg-white border-l border-slate-200 shadow-2xl z-10 flex flex-col animate-slide-in-right dark:bg-[#151A2B] dark:border-white/10 ${widthClassName}`}>
         {title && (
-          <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-slate-100 flex-shrink-0">
-            <h2 className="text-sm font-bold text-slate-800 truncate">{title}</h2>
+          <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-slate-100 flex-shrink-0 dark:border-white/10">
+            <h2 className="text-sm font-bold text-slate-800 truncate dark:text-[#E2E0F2]">{title}</h2>
             <button
               onClick={onClose}
-              className="text-slate-400 hover:text-slate-600 transition-colors p-1.5 hover:bg-slate-50 rounded-lg cursor-pointer flex-shrink-0"
+              className="text-slate-400 hover:text-slate-600 transition-colors p-1.5 hover:bg-slate-50 rounded-lg cursor-pointer flex-shrink-0 dark:text-slate-500 dark:hover:bg-white/10 dark:hover:text-slate-200"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 6 6 18M6 6l12 12" />

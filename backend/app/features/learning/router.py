@@ -2,23 +2,27 @@
 
 from __future__ import annotations
 
+import re
 from datetime import datetime, timedelta, timezone
 from typing import Any, Literal
+from urllib.parse import quote
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 
 from ...core.deps import get_current_student, get_current_user
 from ...core.permissions import authorize_guardian_read
 from ...core.runtime_settings import get_system_settings
 from ...models.assignment import Assignment, ProgressionState
 from ...models.content import CurriculumRelease
+from ...models.event import LearningEvent
 from ...models.mastery import MasteryState
 from ...models.recommendation import RecommendationRun, StudentSession
 from ...models.student import Student
 from ...models.user import User
 from ..content.placement import ordered_skills
 from .recommendation import ENGINE_REVISION, recommend
+from .rewards import available_xp, calculate_xp, reward_config, skill_metadata
 from .skips import record_recommendation_skip
 from .schemas import RecommendationSkipIn, SessionEndIn, SessionStartIn
 
@@ -32,6 +36,57 @@ def _now() -> datetime:
 
 def _utc(value: datetime) -> datetime:
     return value if value.tzinfo is not None else value.replace(tzinfo=timezone.utc)
+
+
+def _thumbnail_url(presentation: dict[str, Any], release_id: str) -> str | None:
+    if presentation.get("thumbnailUrl"):
+        return presentation["thumbnailUrl"]
+    asset_id = presentation.get("thumbnailAssetId")
+    if not asset_id:
+        return None
+    return f"/api/learning/assets/{quote(release_id, safe='')}/{quote(asset_id, safe='')}"
+
+
+SVG_NAMESPACE = "http://www.w3.org/2000/svg"
+
+
+def _ensure_svg_namespace(markup: str) -> str:
+    """Guarantee the SVG namespace on artwork served as its own document.
+
+    Studio markup is authored as a JSX-style fragment, where `xmlns` is optional. Served to
+    an `<img>` — how the student home shows a skill thumbnail — a document without it fails
+    to parse and renders as a broken image. Releases are immutable, so artwork published
+    before the studio started emitting `xmlns` can only be repaired here, at read time.
+    """
+    stripped = markup.lstrip()
+    if stripped[:4].lower() != "<svg":
+        return markup
+    opening_end = stripped.find(">")
+    if opening_end == -1:
+        return markup
+    if re.search(r"\bxmlns\s*=", stripped[:opening_end], re.IGNORECASE):
+        return markup
+    return f'<svg xmlns="{SVG_NAMESPACE}"{stripped[4:]}'
+
+
+@router.get("/learning/assets/{release_id}/{asset_id}", response_class=Response)
+async def get_published_svg_asset(release_id: str, asset_id: str):
+    """Serve sanitized learner artwork from an immutable published release."""
+    release = await CurriculumRelease.find_one(CurriculumRelease.release_id == release_id)
+    if not release:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Published asset not found")
+    entry = next(
+        (row for row in release.asset_manifest if row.get("asset_id") == asset_id),
+        None,
+    )
+    markup = (entry or {}).get("snapshot", {}).get("markup")
+    if not isinstance(markup, str) or not markup.strip():
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Published asset not found")
+    return Response(
+        content=_ensure_svg_namespace(markup),
+        media_type="image/svg+xml",
+        headers={"Cache-Control": "public, max-age=31536000, immutable"},
+    )
 
 
 def _session_out(session: StudentSession) -> dict[str, Any]:
@@ -164,7 +219,11 @@ async def _recent_skips(student_id: str, cooldown_sessions: int, current_session
     return output
 
 
-def _item_out(item: dict[str, Any], releases: dict[str, CurriculumRelease]) -> dict[str, Any]:
+def _item_out(
+    item: dict[str, Any],
+    releases: dict[str, CurriculumRelease],
+    status_value: str = "not_completed",
+) -> dict[str, Any]:
     release = releases[item["release_id"]]
     questions = []
     for entry in release.question_manifest:
@@ -173,18 +232,25 @@ def _item_out(item: dict[str, Any], releases: dict[str, CurriculumRelease]) -> d
         playable = dict(entry.get("playable") or {})
         playable.setdefault("difficulty", entry.get("difficulty", "medium"))
         questions.append(playable)
+    presentation = skill_metadata(release.tree, item["skill_id"])
     return {
         "assignmentId": item["assignment_id"],
         "releaseId": item["release_id"],
         "curriculumId": item["curriculum_id"],
         "curriculumRevision": release.revision,
         "skillId": item["skill_id"],
-        "skillLabel": item["skill_label"],
+        "skillLabel": presentation["title"],
+        "curriculumSkillLabel": item["skill_label"],
+        "description": presentation["description"],
+        "thumbnailUrl": _thumbnail_url(presentation, release.release_id),
+        "accent": presentation["accent"],
+        "xpAvailable": available_xp(release.tree, item["skill_id"], len(questions)),
         "unitId": item.get("unit_id"),
         "subjectId": item.get("subject_id"),
         "kind": item["kind"],
         "reason": item["reason"],
         "optional": item["optional"],
+        "status": status_value,
         "questions": questions,
     }
 
@@ -214,6 +280,103 @@ def _free_items(assignments: list[dict[str, Any]], releases: dict[str, Curriculu
     return items
 
 
+async def _session_completion(
+    *,
+    student_id: str,
+    session_id: str,
+    releases: dict[str, CurriculumRelease],
+) -> tuple[dict[tuple[str, str], str], list[dict[str, Any]], dict[str, Any]]:
+    rows = await LearningEvent.find(
+        LearningEvent.student_id == student_id,
+        LearningEvent.session_id == session_id,
+        LearningEvent.verified == True,
+        {"event_type": {"$in": ["attempt", "lesson_complete"]}},
+    ).sort("client_timestamp_ms").to_list()
+    statuses: dict[tuple[str, str], str] = {}
+    completed_by_key: dict[tuple[str, str], dict[str, Any]] = {}
+    for row in rows:
+        if not row.assignment_id or not row.curriculum_skill_id:
+            continue
+        key = (row.assignment_id, row.curriculum_skill_id)
+        if row.event_type == "attempt" and statuses.get(key) != "completed":
+            statuses[key] = "in_progress"
+            continue
+        if row.event_type != "lesson_complete":
+            continue
+        statuses[key] = "completed"
+        release = releases.get(row.release_id or "")
+        skill = next(
+            (
+                entry for entry in (release.tree.get("skills", []) if release else [])
+                if entry.get("id") == row.curriculum_skill_id
+            ),
+            {},
+        )
+        presentation = skill_metadata(release.tree if release else {}, row.curriculum_skill_id)
+        completed_by_key[key] = {
+            "assignmentId": row.assignment_id,
+            "releaseId": row.release_id,
+            "curriculumId": row.curriculum_id,
+            "skillId": row.curriculum_skill_id,
+            "skillLabel": presentation["title"],
+            "curriculumSkillLabel": skill.get("label") or skill.get("name") or row.curriculum_skill_id,
+            "thumbnailUrl": _thumbnail_url(presentation, release.release_id) if release else None,
+            "status": "completed",
+            "completedAt": row.occurred_at or row.received_at.isoformat(),
+        }
+    xp = calculate_xp(rows, {release_id: release.tree for release_id, release in releases.items()})
+    for item in completed_by_key.values():
+        item["xpEarned"] = sum(
+            row["totalXp"]
+            for row in xp["breakdown"]
+            if row["releaseId"] == item["releaseId"] and row["skillId"] == item["skillId"]
+        )
+    return statuses, list(completed_by_key.values()), xp
+
+
+def _annotate_queue(
+    items: list[dict[str, Any]],
+    statuses: dict[tuple[str, str], str],
+) -> list[dict[str, Any]]:
+    for item in items:
+        item["status"] = statuses.get(
+            (item["assignmentId"], item["skillId"]),
+            "not_completed",
+        )
+    return items
+
+
+async def _quest_payload(
+    *,
+    student_id: str,
+    session_id: str,
+    label: str,
+    current_items: list[dict[str, Any]],
+    completed_items: list[dict[str, Any]],
+    xp: dict[str, Any],
+) -> dict[str, Any]:
+    first = await RecommendationRun.find_one(
+        RecommendationRun.student_id == student_id,
+        RecommendationRun.session_id == session_id,
+        RecommendationRun.sequence == 1,
+    )
+    planned = first.served_items if first else current_items
+    planned_keys = {
+        (item.get("assignment_id") or item.get("assignmentId"), item.get("skill_id") or item.get("skillId"))
+        for item in planned
+    }
+    completed = sum(
+        (item["assignmentId"], item["skillId"]) in planned_keys
+        for item in completed_items
+    )
+    return {
+        "label": label,
+        "target": len(planned_keys),
+        "completed": completed,
+        "xpEarned": xp["totalXp"],
+    }
+
+
 async def _build_today(
     *,
     student_id: str,
@@ -224,12 +387,27 @@ async def _build_today(
     assignment_inputs, assignments, releases = await _course_inputs(student_id)
     if not assignment_inputs:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "No placement-ready assignment is available")
+    statuses, completed_items, xp = await _session_completion(
+        student_id=student_id,
+        session_id=session.session_id,
+        releases=releases,
+    )
+    primary_release = releases[assignments[0].release_id]
+    authored_rewards = reward_config(primary_release.tree)
     if mode == "free":
         return {
             "mode": "free",
             "sessionId": session.session_id,
             "recommendationRunId": None,
-            "queue": _free_items(assignment_inputs, releases),
+            "queue": _annotate_queue(_free_items(assignment_inputs, releases), statuses),
+            "completedItems": completed_items,
+            "completedCount": len(completed_items),
+            "quest": {
+                "label": authored_rewards["quest"]["label"],
+                "target": 0,
+                "completed": 0,
+                "xpEarned": xp["totalXp"],
+            },
         }
 
     if persist:
@@ -239,15 +417,30 @@ async def _build_today(
             RecommendationRun.invalidated_at == None,
         )
         if latest:
+            quest = await _quest_payload(
+                student_id=student_id,
+                session_id=session.session_id,
+                label=authored_rewards["quest"]["label"],
+                current_items=latest.served_items,
+                completed_items=completed_items,
+                xp=xp,
+            )
             return {
                 "mode": "scheduled",
                 "sessionId": session.session_id,
                 "recommendationRunId": latest.run_id,
-                "queue": [_item_out(item, releases) for item in latest.served_items],
+                "queue": _annotate_queue(
+                    [_item_out(item, releases) for item in latest.served_items],
+                    statuses,
+                ),
+                "completedItems": completed_items,
+                "completedCount": len(completed_items),
+                "quest": quest,
             }
 
     settings_doc = await get_system_settings()
     config = dict((settings_doc.scoring or {}).get("recommendation") or {})
+    config["skills_per_session"] = authored_rewards["quest"]["activitiesPerSession"]
     highest_priority = assignments[0]
     schedule = highest_priority.schedule or {}
     if schedule.get("skills_per_session") is not None:
@@ -263,6 +456,10 @@ async def _build_today(
             session.session_id,
         ),
         config=config,
+        completed_keys={
+            key for key, value in statuses.items()
+            if value == "completed"
+        },
     )
     run = None
     if persist:
@@ -282,12 +479,26 @@ async def _build_today(
             served_items=result["served_items"],
         )
         await run.insert()
+    quest = await _quest_payload(
+        student_id=student_id,
+        session_id=session.session_id,
+        label=authored_rewards["quest"]["label"],
+        current_items=result["served_items"],
+        completed_items=completed_items,
+        xp=xp,
+    )
     return {
         "mode": "scheduled",
         "sessionId": session.session_id,
         "recommendationRunId": run.run_id if run else None,
         "engineRevision": ENGINE_REVISION,
-        "queue": [_item_out(item, releases) for item in result["served_items"]],
+        "queue": _annotate_queue(
+            [_item_out(item, releases) for item in result["served_items"]],
+            statuses,
+        ),
+        "completedItems": completed_items,
+        "completedCount": len(completed_items),
+        "quest": quest,
     }
 
 

@@ -47,7 +47,7 @@ gets.
 
 Every band composes the same regions, styled differently:
 
-- **Header** — avatar + greeting + Exit. (Band A may parent-gate Exit.)
+- **Header** — avatar + greeting + Exit.
 - **Primary focus** — the next recommended activity (`course.queue[0]`) → **Play**.
 - **Up next** — the rest of the queue (`course.queue.slice(1)`), tappable.
 - **Free play** — one secondary button; switching shows a "← Back to my plan" link.
@@ -86,7 +86,15 @@ text. Up-next is 2–3 friendly bubbles. Sounds/animations on. Rewards prominent
 
 - Tone: warm, encouraging ("Let's practise!", "Great job!").
 - Big rounded controls; generous spacing; high-contrast, cheerful color.
-- Exit optionally behind a quick parent gate (supervised context).
+- Exit returns directly to the parent dashboard for parent-launched play.
+- **Progress = a trophy/star shelf, not a dashboard** ✅. Cumulative stars and
+  badges shown as collectible icons (no numbers, no charts, no percentages).
+  Gives a sense of history + "score/XP" in a reward idiom a child reads. Real
+  analytics (rank, skill map, proficiency %) stays parent/teacher-only per §2.3.
+- **Retest = free replay** ✅. *Any* completed activity is always replayable —
+  from Up-next or by tapping its trophy on the shelf. Framed as fun ("Play
+  again"), never pass/fail; replaying earns more stars. No gated "retest" and no
+  parent step required for a kid to redo a level.
 
 ### Band B — Student (grades 7–9)
 
@@ -162,12 +170,13 @@ skill map). Full analytics still lives on the parent/teacher view.
 
 | Band | Performance | Missed / skipped ("catch-up") |
 |------|-------------|-------------------------------|
-| **Kid** | A playful "quest" progress bar + today's stars. | Gentle **"Try again"** card — encouragement, never framed as failure. |
+| **Kid** | Quest bar + today's stars, plus a cumulative **trophy/star shelf** (collectible icons — the kid-facing "history/score/XP"). ✅ | Gentle **"Try again"** card for missed skills; **any** activity is freely replayable ("Play again") from Up-next or the shelf. ✅ |
 | **Student** | Two small stat tiles: daily ring (N today) + streak. | **"Revisit"** card: e.g. *"Count to 20 — skipped last time."* |
 | **Focus** | Stat strip: streak · proficiency % · due/missed count. | **"Overdue"** flag inline in the plan + a due/missed stat tile. |
 
-> Open decision: keep these signals student-facing (as mocked), or revert to
-> adult-only per the original §3. Flagged with the user 2026-07-24.
+> ✅ Decision implemented: keep the light, band-appropriate signals
+> student-facing. The detailed event feed, rank breakdown, and full skill
+> analytics remain adult-only.
 
 ---
 
@@ -218,7 +227,7 @@ StudentCurriculumPlayer         // loads course/progress/session, resolves band
 shared/
   Header, HeroActivity, UpNextRow, FreePlayButton, LevelUpDialog
   gradeBand.ts   // grade → band + per-band design tokens
-                 // (sizes, tone/copy, sounds on/off, parent-gate, density)
+                 // (sizes, tone/copy, sounds on/off, density)
 ```
 
 - `gradeBand.ts` centralizes the mapping and the tunable tokens so bands stay
@@ -247,11 +256,39 @@ shared/
    over shared `StudentHomeProps`); `home/StudentHome.tsx` is Band B — the
    compact baseline plus a light "N to practise today" signal. Kid/Focus route
    to it as a fallback until phases 4–5.
-4. **Band A (Kid)** — playful treatment + optional parent-gated exit.
-5. **Band C (Focus)** — sleek study-tool treatment + more agency.
-6. **Relocate analytics** — surface rank + skill map per kid on the parent/teacher
-   dashboard (data already comes from `courseApi.progress(studentId)`).
-7. *(Optional)* align `PlacementWarmup` styling per band too.
+4. **Band A (Kid).** ✅ **Done.** `home/KidHome.tsx` provides the centered
+   playful stage, dominant Play action, three-item Up next, gentle Try again,
+   direct parent-dashboard Exit, empty state, and responsive phone/desktop
+   treatment.
+   Progress is real rather than decorative: today markers come from mastery
+   activity, and the trophy shelf joins completed skill progress to the playable
+   free-practice catalog so every displayed trophy replays its actual activity.
+   Tests: `home/kidHomeModel.test.ts`.
+5. **Band C (Focus).** ✅ **Done.** `home/FocusHome.tsx` provides a restrained,
+   dark-mode-friendly plan with selectable rows, session estimate, inline
+   overdue flags, and maximum learner agency. At widths above 840px it becomes a
+   plan + progress-rail study dashboard; smaller screens use the stacked stat
+   strip and plan. Proficiency and due state come from real mastery data.
+   `/progress/{student_id}/activity-signal` safely exposes only the learner's
+   own streak and seven-day activity series (not the adult event feed).
+   Tests: `home/focusHomeModel.test.ts`, `test_analytics_phase4.py`.
+6. **Relocate analytics.** ✅ **Done.** Student homes contain only their light
+   band-appropriate signals. Parent kid cards open `ChildAnalyticsDrawer`, while
+   teachers/admins use the authorized Learning progress roster. The adult drawer
+   contains rank, proficiency map, the complete filterable skill list, activity,
+   and recommendation history. Teacher reads are limited to active classroom
+   enrollments; raw export and permanent deletion remain guardian/admin-only.
+7. **Band-aware placement.** ✅ **Done.** `PlacementWarmup` receives the resolved
+   `GradeBand` before the home loads. Kid opens in a bright, large-control,
+   low-text treatment with playful completion; Student uses the balanced light
+   baseline; Focus defaults to the compact dark study-tool treatment. Placement
+   mechanics and server grading remain shared. Tests: `placementBand.test.ts`.
+
+   Grade 1 functional verification is available through `make seed-grade1`
+   for Docker or `make seed-grade1-local` for the local dev stack. Each
+   idempotently creates/resets an isolated parent, Grade 1 Kid-band learner,
+   four playable counting/addition questions, active assignment, and fresh
+   placement flow in the matching database.
 
 **Files touched:** `student/StudentTodayHome.tsx` (rewrite → router),
 `student/StudentCurriculumPlayer.tsx` (thread band), new band + shared components,
@@ -266,10 +303,10 @@ parent side (`parent/ParentDashboard.tsx`, `KidCard.tsx`) for the moved analytic
    system-wide default rule by `order`, or both (default + per-grade override)?
 2. **Canonical grade source** — store `grade`/`grade_id` on the Student record
    (recommended), or derive from the active assignment's `grade_id`?
-3. **Analytics relocation** — do it in this effort (phase 6), or park it and just
-   remove analytics from the kid home for now?
+3. **Analytics relocation** — ✅ completed in phase 6.
 4. **"Up next" tap** — start the activity immediately, or swap it into the hero to
    preview first?
-5. **Band A Exit** — parent-gate it (supervised) or leave it a normal Exit?
+5. **Band A Exit** — ✅ normal Exit; parent-launched play returns directly to
+   the parent dashboard.
 6. **Default band boundaries** — confirm order 1–6 / 7–9 / 10–12 as the defaults
    admins can override.

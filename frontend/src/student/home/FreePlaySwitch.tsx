@@ -15,11 +15,23 @@ interface Props {
  */
 export const FreePlaySwitch: React.FC<Props> = ({ mode, loading, onModeChange }) =>
   mode === "free" ? (
-    <Button variant="ghost" size="sm" disabled={loading} onClick={() => onModeChange("scheduled")}>
+    <Button
+      variant="ghost"
+      size="sm"
+      disabled={loading}
+      onClick={() => onModeChange("scheduled")}
+      className="dark:text-[#B6B0CE] dark:hover:bg-white/10 dark:hover:text-white"
+    >
       <ArrowLeft size={15} /> Back to my plan
     </Button>
   ) : (
-    <Button variant="outline" size="sm" disabled={loading} onClick={() => onModeChange("free")}>
+    <Button
+      variant="outline"
+      size="sm"
+      disabled={loading}
+      onClick={() => onModeChange("free")}
+      className="dark:border-white/10 dark:bg-white/5 dark:text-[#C5CBDA] dark:hover:bg-white/10 dark:hover:text-white"
+    >
       <Shuffle size={15} /> Free play
     </Button>
   );

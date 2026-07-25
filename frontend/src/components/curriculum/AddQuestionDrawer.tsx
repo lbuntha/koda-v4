@@ -108,12 +108,26 @@ export const AddQuestionDrawer: React.FC<AddQuestionDrawerProps> = ({ isOpen, on
               <button
                 key={tech.id}
                 onClick={() => selectTechnique(tech)}
-                className="group flex min-h-11 items-center gap-2 rounded-lg border border-[#E7E3F6] bg-[#FBFAFF] px-2.5 py-2 text-left text-xs font-medium text-[#0E0B55] transition-colors hover:border-[#7C6DD8] hover:bg-[#F4F1FD] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7C6DD8]/30"
+                className="group flex min-h-14 items-center gap-2.5 rounded-lg border border-[#E7E3F6] bg-[#FBFAFF] px-2.5 py-2 text-left text-xs font-medium text-[#0E0B55] transition-colors hover:border-[#7C6DD8] hover:bg-[#F4F1FD] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7C6DD8]/30"
               >
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white shadow-xs transition-colors group-hover:bg-white">
-                  {tech.icon}
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[#EEEAF8] bg-white transition-colors group-hover:border-[#DCD6F2]">
+                  {tech.defaultThumbnailUrl ? (
+                    <img
+                      src={tech.defaultThumbnailUrl}
+                      alt=""
+                      className="h-full w-full object-contain"
+                      title="Component default thumbnail"
+                    />
+                  ) : tech.icon}
                 </span>
-                <span className="min-w-0 flex-1 truncate">{label}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate">{label}</span>
+                  {tech.defaultThumbnailUrl && (
+                    <span className="mt-0.5 block text-[9px] font-medium text-[#7C6DD8]">
+                      Includes default art
+                    </span>
+                  )}
+                </span>
                 {number && <span className="koda-admin-chip shrink-0 text-[#8D89AE]">{number}</span>}
               </button>
               );

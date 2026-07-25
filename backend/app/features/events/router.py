@@ -15,6 +15,7 @@ from ..learning.skips import record_recommendation_skip
 from ..progression.service import recompute_touched_mastery
 from ...core.deps import get_current_student, get_current_user
 from ...core.permissions import authorize_guardian_read
+from ..content.grading import GradingError, grade
 from .contract import (
     EventContractError,
     FIELD_MAP,
@@ -31,21 +32,121 @@ _CONSUMED_SOURCE_KEYS = frozenset(FIELD_MAP) | {"difficulty"}
 router = APIRouter(tags=["events"])
 
 
+def _manifest_entry(release: CurriculumRelease, question_id: str | None) -> dict | None:
+    return next(
+        (item for item in release.question_manifest if item.get("question_id") == question_id),
+        None,
+    )
+
+
+async def _verify_lesson_completions(
+    student_id: str,
+    docs: list[LearningEvent],
+    release_cache: dict[str, CurriculumRelease | None],
+) -> None:
+    """Only verify completion after every released question was solved.
+
+    Correct attempts can already exist in Mongo because the browser outbox
+    flushes in small batches, or can be in the same not-yet-inserted batch as
+    the completion event.
+    """
+    completions = [doc for doc in docs if doc.event_type == "lesson_complete" and doc.verified]
+    for completion in completions:
+        try:
+            assignment = await Assignment.get(PydanticObjectId(completion.assignment_id))
+        except Exception:
+            assignment = None
+        if (
+            not assignment
+            or assignment.student_id != student_id
+            or assignment.release_id != completion.release_id
+            or assignment.curriculum_id != completion.curriculum_id
+        ):
+            completion.verified = False
+            completion.verification_error = "lesson completion does not match the student's assignment"
+            continue
+        release = release_cache.get(completion.release_id or "")
+        if release is None and completion.release_id:
+            release = await CurriculumRelease.find_one(
+                CurriculumRelease.release_id == completion.release_id
+            )
+            release_cache[completion.release_id] = release
+        required_ids = {
+            item.get("question_id")
+            for item in (release.question_manifest if release else [])
+            if item.get("skill_id") == completion.curriculum_skill_id
+        }
+        required_ids.discard(None)
+        if not required_ids:
+            completion.verified = False
+            completion.verification_error = "lesson skill has no released questions"
+            continue
+
+        stored = await LearningEvent.find(
+            LearningEvent.student_id == student_id,
+            LearningEvent.session_id == completion.session_id,
+            LearningEvent.assignment_id == completion.assignment_id,
+            LearningEvent.release_id == completion.release_id,
+            LearningEvent.curriculum_skill_id == completion.curriculum_skill_id,
+            LearningEvent.event_type == "attempt",
+            LearningEvent.outcome == "correct",
+            LearningEvent.verified == True,
+        ).to_list()
+        correct_ids = {row.question_id for row in stored}
+        correct_ids.update(
+            row.question_id
+            for row in docs
+            if row is not completion
+            and row.verified
+            and row.event_type == "attempt"
+            and row.outcome == "correct"
+            and row.session_id == completion.session_id
+            and row.assignment_id == completion.assignment_id
+            and row.release_id == completion.release_id
+            and row.curriculum_skill_id == completion.curriculum_skill_id
+        )
+        missing = sorted(required_ids - correct_ids)
+        if missing:
+            completion.verified = False
+            completion.verification_error = (
+                "lesson completion is missing verified correct attempts for: "
+                + ", ".join(missing)
+            )
+
+
 async def _complete_recommendation_runs(student_id: str, docs: list[LearningEvent]) -> None:
-    completed_run_ids = {
-        doc.recommendation_run_id
+    completions = {
+        (
+            doc.recommendation_run_id,
+            doc.assignment_id,
+            doc.release_id,
+            doc.curriculum_id,
+            doc.curriculum_skill_id,
+        )
         for doc in docs
-        if doc.event_type == "lesson_complete" and doc.recommendation_run_id
+        if doc.verified and doc.event_type == "lesson_complete" and doc.recommendation_run_id
     }
-    for run_id in completed_run_ids:
+    for run_id, assignment_id, release_id, curriculum_id, skill_id in completions:
         run = await RecommendationRun.find_one(
             RecommendationRun.run_id == run_id,
             RecommendationRun.student_id == student_id,
         )
         if not run:
             continue
-        if not any(decision.get("action") == "completed" for decision in run.decisions):
-            run.decisions.append({"action": "completed", "occurred_at": docs[-1].received_at.isoformat()})
+        if not any(
+            decision.get("action") == "completed"
+            and decision.get("assignment_id") == assignment_id
+            and decision.get("skill_id") == skill_id
+            for decision in run.decisions
+        ):
+            run.decisions.append({
+                "action": "completed",
+                "assignment_id": assignment_id,
+                "release_id": release_id,
+                "curriculum_id": curriculum_id,
+                "skill_id": skill_id,
+                "occurred_at": docs[-1].received_at.isoformat(),
+            })
         run.invalidated_at = docs[-1].received_at
         await run.save()
 
@@ -118,7 +219,6 @@ async def ingest_events(body: EventsIn, student: Student = Depends(get_current_s
         ).to_list()
         existing = {row.client_id for row in rows if row.client_id}
     docs: list[LearningEvent] = []
-    unverified = 0
     release_cache: dict[str, CurriculumRelease | None] = {}
     for raw in body.events:
         data = dict(raw)
@@ -154,11 +254,51 @@ async def ingest_events(body: EventsIn, student: Student = Depends(get_current_s
                     revision=release.revision,
                     question_manifest=release.question_manifest,
                 )
+                if canonical.get("event_type") == "attempt":
+                    entry = _manifest_entry(release, canonical.get("question_id"))
+                    client_outcome = canonical.get("outcome")
+                    selection = data.get("selected")
+                    if selection is None:
+                        selection = (data.get("details") or {}).get("selection")
+                    if entry is None:
+                        raise EventContractError("questionId is not present in the published release")
+                    try:
+                        canonical["outcome"] = grade(entry, selection)
+                    except GradingError as exc:
+                        raise EventContractError(f"server grading failed: {exc}") from exc
+                    data["clientOutcome"] = client_outcome
+                    data["gradingSource"] = "server"
+                    if client_outcome != canonical["outcome"]:
+                        data["outcomeOverridden"] = True
             except EventContractError as exc:
                 canonical["verified"] = False
                 canonical["verification_error"] = str(exc)
-        if not canonical["verified"]:
-            unverified += 1
+        elif canonical["event_type"] == "lesson_complete" and has_curriculum_context:
+            release_id = canonical.get("release_id")
+            if release_id and release_id not in release_cache:
+                release_cache[release_id] = await CurriculumRelease.find_one(
+                    CurriculumRelease.release_id == release_id
+                )
+            release = release_cache.get(release_id or "")
+            skill_ids = {
+                item.get("skill_id")
+                for item in (release.question_manifest if release else [])
+            }
+            if release is None:
+                canonical["verified"] = False
+                canonical["verification_error"] = "releaseId does not exist"
+            elif canonical.get("curriculum_id") != release.curriculum_id:
+                canonical["verified"] = False
+                canonical["verification_error"] = "curriculumId does not match the published release"
+            elif canonical.get("curriculum_revision") != release.revision:
+                canonical["verified"] = False
+                canonical["verification_error"] = "curriculumRevision does not match the published release"
+            elif not canonical.get("assignment_id"):
+                canonical["verified"] = False
+                canonical["verification_error"] = "lesson completion requires assignmentId"
+            elif canonical.get("curriculum_skill_id") not in skill_ids:
+                canonical["verified"] = False
+                canonical["verification_error"] = "lesson completion skill is not present in the release"
         # Everything not folded into a canonical column stays as a diagnostic extra.
         diagnostics = {k: v for k, v in data.items() if k not in _CONSUMED_SOURCE_KEYS}
         docs.append(
@@ -169,6 +309,8 @@ async def ingest_events(body: EventsIn, student: Student = Depends(get_current_s
                 **diagnostics,
             )
         )
+    await _verify_lesson_completions(student_id, docs, release_cache)
+    unverified = sum(not doc.verified for doc in docs)
     if docs:
         await LearningEvent.insert_many(docs)
         by_session: dict[str, int] = {}

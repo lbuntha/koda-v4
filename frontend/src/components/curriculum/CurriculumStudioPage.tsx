@@ -225,6 +225,7 @@ export const CurriculumStudioPage: React.FC<CurriculumStudioPageProps> = ({ curr
             onFillWithAi={() => setIsFillWithAiOpen(true)}
             onPreviewQuestion={(questionId) => setPreviewQuestion(questions.find(q => q.id === questionId) ?? null)}
             onEditQuestion={(questionId) => setEditingQuestion(questions.find(q => q.id === questionId) ?? null)}
+            onUpdateSkill={patch => setTree(current => mutations.updateSkill(current, selectedSkill.id, patch))}
           />
         ) : selectedUnit ? (
           <UnitOverview
@@ -309,6 +310,7 @@ export const CurriculumStudioPage: React.FC<CurriculumStudioPageProps> = ({ curr
             primarySubjectId: draft.primarySubjectId,
             grades: draft.grades,
             subjects: draft.subjects,
+            rewards: draft.rewards,
           }));
           setPublished(draft.published);
           setSelectedGradeId(draft.primaryGradeId);

@@ -27,6 +27,7 @@ export const KodaSudokuCanvas: React.FC<CanvasProps> = ({
   showGrid,
   isDark = false,
   onSuccess,
+  onAttempt,
   onUpdateQuestionConfig
 }) => {
   const rows = question.config.rows ?? 4;
@@ -204,7 +205,8 @@ export const KodaSudokuCanvas: React.FC<CanvasProps> = ({
 
     if (isExactMatch || isRuleValid) {
       sounds.playSuccess();
-      if (onSuccess) onSuccess();
+      onAttempt?.("correct", { selected: updated });
+      onSuccess?.();
     }
   };
 
@@ -642,4 +644,3 @@ export const KodaSudokuCanvas: React.FC<CanvasProps> = ({
     </SharedCanvasLayout>
   );
 };
-

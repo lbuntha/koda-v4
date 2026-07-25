@@ -11,6 +11,7 @@ import {
   CourseQueueItem,
   courseApi,
   MasteryLevel,
+  StudentActivitySignal,
   StudentProgress,
   TodayCourse,
 } from "../api/course";
@@ -22,6 +23,8 @@ export const StudentCurriculumPlayer: React.FC = () => {
   const [placement, setPlacement] = useState<PlacementQuiz | null>(null);
   const [course, setCourse] = useState<TodayCourse | null>(null);
   const [progress, setProgress] = useState<StudentProgress | null>(null);
+  const [activitySignal, setActivitySignal] = useState<StudentActivitySignal | null>(null);
+  const [replayItems, setReplayItems] = useState<CourseQueueItem[]>([]);
   const [levelUp, setLevelUp] = useState<{
     skillLabel: string;
     previousLevel: MasteryLevel;
@@ -38,14 +41,27 @@ export const StudentCurriculumPlayer: React.FC = () => {
     setLoadingMode(mode);
     setError(null);
     try {
-      const [nextCourse, nextProgress] = await Promise.all([
+      const shouldLoadKidCatalog = account?.gradeBand === "kid" && mode === "scheduled";
+      const shouldLoadFocusSignal = account?.gradeBand === "focus";
+      const [nextCourse, nextProgress, kidCatalog, nextActivitySignal] = await Promise.all([
         courseApi.today(mode),
         account?.id ? courseApi.progress(account.id) : Promise.resolve(null),
+        shouldLoadKidCatalog
+          ? courseApi.today("free").catch(() => null)
+          : Promise.resolve(null),
+        account?.id && shouldLoadFocusSignal
+          ? courseApi.activitySignal(account.id).catch(() => null)
+          : Promise.resolve(null),
       ]);
       setCourse(nextCourse);
       if (nextProgress) setProgress(nextProgress);
+      if (mode === "free") setReplayItems(nextCourse.queue);
+      else if (kidCatalog) setReplayItems(kidCatalog.queue);
+      if (nextActivitySignal) setActivitySignal(nextActivitySignal);
+      return nextCourse;
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Unable to load today’s learning plan");
+      return null;
     } finally {
       setLoadingMode(null);
     }
@@ -126,7 +142,17 @@ export const StudentCurriculumPlayer: React.FC = () => {
         // loadCourse below is the recovery path if this immediate refresh fails.
       }
     }
-    await loadCourse(course?.mode ?? "scheduled");
+    const nextCourse = await loadCourse(course?.mode ?? "scheduled");
+    if (
+      completed
+      && nextCourse
+      && !(nextCourse.completedItems ?? []).some(item =>
+        item.assignmentId === completed.assignmentId
+        && item.skillId === completed.skillId
+      )
+    ) {
+      setError("This activity is not completed yet because the server could not verify every answer.");
+    }
   };
 
   const skip = async (item: CourseQueueItem) => {
@@ -152,7 +178,15 @@ export const StudentCurriculumPlayer: React.FC = () => {
     else logout();
   };
 
-  if (placement) return <PlacementWarmup quiz={placement} onComplete={finishPlacement} />;
+  if (placement) {
+    return (
+      <PlacementWarmup
+        quiz={placement}
+        band={account?.gradeBand ?? "student"}
+        onComplete={finishPlacement}
+      />
+    );
+  }
 
   if (selected && activeId) {
     return (
@@ -161,12 +195,15 @@ export const StudentCurriculumPlayer: React.FC = () => {
         activeId={activeId}
         setActiveId={setActiveId}
         onClose={() => void finishLesson()}
+        onExit={() => void exit()}
+        kidMode={account?.gradeBand === "kid"}
         learningContext={{
           assignmentId: selected.assignmentId,
           releaseId: selected.releaseId,
           curriculumId: selected.curriculumId,
           curriculumRevision: selected.curriculumRevision,
           recommendationRunId: course?.recommendationRunId ?? undefined,
+          skillId: selected.skillId,
         }}
       />
     );
@@ -193,6 +230,9 @@ export const StudentCurriculumPlayer: React.FC = () => {
     <>
       <StudentTodayHome
         course={course}
+        progress={progress}
+        activitySignal={activitySignal}
+        replayItems={replayItems}
         levelUp={levelUp}
         studentName={account?.name || "Learner"}
         studentAvatar={account?.avatar}

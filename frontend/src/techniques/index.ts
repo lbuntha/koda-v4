@@ -32,6 +32,7 @@ import { columnSubtraction } from "./columnSubtraction";
 import { multiRowColumnAddition } from "./multiRowColumnAddition";
 import { multiRowColumnSubtraction } from "./multiRowColumnSubtraction";
 import { columnMultiplication } from "./columnMultiplication";
+import { liquidSort } from "./liquidSort";
 
 /** Ordered exactly as the Studio picker lists them (1..16). */
 export const ALL_TECHNIQUES: TechniqueManifest[] = [
@@ -56,10 +57,48 @@ export const ALL_TECHNIQUES: TechniqueManifest[] = [
   multiRowColumnAddition,
   multiRowColumnSubtraction,
   columnMultiplication,
+  liquidSort,
 ];
 
 // Loud in dev / logged in prod if a game is missing or double-registered.
 assertComplete(ALL_TECHNIQUES);
+
+/** Resolve component-owned learner artwork without mounting the game canvas. */
+export function defaultThumbnailForTechnique(
+  technique: string | null | undefined,
+): string | null {
+  if (!technique) return null;
+  return ALL_TECHNIQUES.find(manifest => manifest.technique === technique)?.defaultThumbnailUrl ?? null;
+}
+
+export type TechniqueThumbnailSource = "curriculum" | "component" | "generic";
+
+export interface ResolvedTechniqueThumbnail {
+  url: string;
+  source: TechniqueThumbnailSource;
+  componentDefaultUrl: string | null;
+}
+
+/**
+ * Resolve learner artwork in one consistent order:
+ * curriculum override → component manifest default → generic app fallback.
+ */
+export function resolveTechniqueThumbnail(
+  curriculumUrl: string | null | undefined,
+  technique: string | null | undefined,
+  genericUrl = "/assets/owl-mascot.svg",
+): ResolvedTechniqueThumbnail {
+  const authoredUrl = curriculumUrl?.trim();
+  const componentDefaultUrl = defaultThumbnailForTechnique(technique);
+
+  if (authoredUrl) {
+    return { url: authoredUrl, source: "curriculum", componentDefaultUrl };
+  }
+  if (componentDefaultUrl) {
+    return { url: componentDefaultUrl, source: "component", componentDefaultUrl };
+  }
+  return { url: genericUrl, source: "generic", componentDefaultUrl: null };
+}
 
 export { byTechnique } from "./manifest";
 export type { TechniqueManifest } from "./manifest";

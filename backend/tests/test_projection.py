@@ -68,6 +68,14 @@ def test_to_engine_event_maps_snake_to_camel():
     assert m["details"] == {"difficulty": "hard"}
 
 
+def test_to_engine_event_derives_missing_occurrence_time_from_client_timestamp():
+    event = _snake_event(1)
+    event["occurred_at"] = None
+    mapped = _to_engine_event(event)
+    assert mapped["occurredAt"].startswith("2025-07-20T")
+    assert build_mastery_states("stu-1", [event])[0]["distinct_days"] == 1
+
+
 # ── Projection ───────────────────────────────────────────────────────────────────
 
 def test_build_mastery_states_scores_each_skill():

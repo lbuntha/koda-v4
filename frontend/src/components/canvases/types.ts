@@ -20,8 +20,8 @@ export interface CanvasProps {
   onAttempt?: (
     outcome: "correct" | "incorrect" | "partial",
     detail?: {
-      expected?: string;
-      selected?: string;
+      expected?: unknown;
+      selected?: unknown;
       blankIndex?: number;
       details?: Record<string, any>;
     },

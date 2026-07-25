@@ -18,6 +18,7 @@ from ...models.content import CurriculumRelease
 from ...models.event import LearningEvent
 from ...models.mastery import MasteryState, ProjectionJob
 from ..content.placement import ordered_skills
+from ..learning.rewards import achievement_profile
 from .projection import build_mastery_states
 from .scoring import ENGINE_REVISION, MASTERY_ORDER
 
@@ -327,10 +328,15 @@ async def build_progress(student_id: str) -> dict[str, Any]:
     }
     skills: list[dict[str, Any]] = []
     seen: set[tuple[str, str]] = set()
+    active_curricula: list[tuple[str, dict[str, Any]]] = []
+    release_trees: dict[str, dict[str, Any]] = {}
     for assignment in assignments:
         release = await CurriculumRelease.find_one(CurriculumRelease.release_id == assignment.release_id)
         if not release:
             continue
+        release_trees[release.release_id] = release.tree
+        if not any(curriculum_id == assignment.curriculum_id for curriculum_id, _ in active_curricula):
+            active_curricula.append((assignment.curriculum_id, release.tree))
         units = {unit.get("id"): unit for unit in release.tree.get("units", [])}
         for skill in ordered_skills(release.tree, assignment.scope):
             skill_id = skill.get("id")
@@ -367,10 +373,32 @@ async def build_progress(student_id: str) -> dict[str, Any]:
             current_revision=settings.scoring_revision,
             config=settings.scoring,
         ))
+    events = await LearningEvent.find(
+        LearningEvent.student_id == student_id,
+        LearningEvent.verified == True,
+    ).sort("client_timestamp_ms").to_list()
+    event_release_ids = {
+        event.release_id for event in events
+        if event.release_id and event.release_id not in release_trees
+    }
+    if event_release_ids:
+        historical_releases = await CurriculumRelease.find(
+            {"release_id": {"$in": list(event_release_ids)}}
+        ).to_list()
+        release_trees.update({
+            release.release_id: release.tree
+            for release in historical_releases
+        })
     return {
         "studentId": student_id,
         "scoringRevision": settings.scoring_revision,
         "engineRevision": ENGINE_REVISION,
         "rank": rank_out(skills),
+        "rewardProfile": achievement_profile(
+            events,
+            release_trees,
+            active_curricula,
+            mastery_rows,
+        ),
         "skills": skills,
     }

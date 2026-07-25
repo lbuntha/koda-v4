@@ -34,10 +34,10 @@ export const Dialog: React.FC<DialogProps> = ({ isOpen, onClose, children, maxWi
       />
       
       {/* Content wrapper */}
-      <div className={`bg-white rounded-2xl border border-slate-100 shadow-2xl w-full ${maxWidthClassName} p-6 z-10 relative animate-scale-in max-h-[90vh] overflow-y-auto`}>
+      <div className={`bg-white dark:bg-[#1B2032] dark:border-white/10 rounded-2xl border border-slate-100 shadow-2xl w-full ${maxWidthClassName} p-6 z-10 relative animate-scale-in max-h-[90vh] overflow-y-auto`}>
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors p-1.5 hover:bg-slate-50 rounded-lg cursor-pointer"
+          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors p-1.5 hover:bg-slate-50 rounded-lg cursor-pointer dark:text-slate-500 dark:hover:bg-white/10 dark:hover:text-slate-200"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

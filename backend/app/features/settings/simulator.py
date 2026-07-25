@@ -38,7 +38,7 @@ def compare_mastery_states(
     keys = sorted(set(current) | set(proposed), key=lambda item: tuple(value or "" for value in item))
     transitions: Counter[str] = Counter()
     affected_students: set[str] = set()
-    promoted = demoted = review_due_changed = 0
+    promoted = demoted = review_due_changed = score_changed_skills = 0
     changes: list[dict[str, Any]] = []
     impacted_keys: set[tuple[str, str | None, str]] = set()
 
@@ -47,11 +47,14 @@ def compare_mastery_states(
         after = proposed.get(item_key, {})
         before_level = str(before.get("level") or "not_started")
         after_level = str(after.get("level") or "not_started")
+        before_score = float(before.get("score") or 0)
+        after_score = float(after.get("score") or 0)
         before_due = bool(before.get("next_review_at_ms") and before["next_review_at_ms"] <= now_ms)
         after_due = bool(after.get("next_review_at_ms") and after["next_review_at_ms"] <= now_ms)
         level_changed = before_level != after_level
+        score_changed = abs(before_score - after_score) > 0.000001
         due_changed = before_due != after_due
-        if not level_changed and not due_changed:
+        if not level_changed and not score_changed and not due_changed:
             continue
         impacted_keys.add(item_key)
         student_id, curriculum_id, skill_id = item_key
@@ -64,6 +67,8 @@ def compare_mastery_states(
                 demoted += 1
         if due_changed:
             review_due_changed += 1
+        if score_changed:
+            score_changed_skills += 1
         if len(changes) < sample_limit:
             changes.append({
                 "studentId": student_id,
@@ -72,8 +77,8 @@ def compare_mastery_states(
                 "skillId": skill_id,
                 "beforeLevel": before_level,
                 "afterLevel": after_level,
-                "beforeScore": float(before.get("score") or 0),
-                "afterScore": float(after.get("score") or 0),
+                "beforeScore": before_score,
+                "afterScore": after_score,
                 "beforeDue": before_due,
                 "afterDue": after_due,
             })
@@ -82,7 +87,8 @@ def compare_mastery_states(
         "studentsScanned": len({item[0] for item in keys}),
         "skillsScanned": len(keys),
         "affectedStudents": len(affected_students),
-        "changedSkills": sum(transitions.values()),
+        "changedSkills": len(impacted_keys),
+        "scoreChangedSkills": score_changed_skills,
         "promotedSkills": promoted,
         "demotedSkills": demoted,
         "reviewDueChanged": review_due_changed,

@@ -12,7 +12,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
       ref={ref}
       className={cn(
         // Border-led surface with a barely-there shadow (matches the reference).
-        "rounded-2xl border border-slate-200/70 bg-white text-slate-950 shadow-[0_1px_2px_rgba(16,24,40,0.04)]",
+        "rounded-2xl border border-slate-200/70 bg-white text-slate-950 shadow-[0_1px_2px_rgba(16,24,40,0.04)] dark:border-white/10 dark:bg-[#171B2E] dark:text-[#E2E0F2] dark:shadow-none",
         interactive && "transition-all hover:border-slate-300 hover:shadow-[0_2px_8px_rgba(16,24,40,0.06)] cursor-pointer",
         className
       )}

@@ -134,10 +134,25 @@ def test_flexible_multichoice():
     assert grade(e, "dog") == "incorrect"
 
 
-def test_flexible_unsupported_mode_raises():
-    e = _entry("FLEXIBLE_CANVAS", {"flexibleMode": "dragmatch"})
-    with pytest.raises(GradingError, match="not implemented"):
-        grade(e, [])
+def test_flexible_tapcount_uses_curriculum_items():
+    e = _entry("FLEXIBLE_CANVAS", {
+        "flexibleMode": "tapcount",
+        "flexibleItems": [{"id": "one"}, {"id": "two"}, {"id": "three"}],
+    })
+    assert grade(e, 3) == "correct"
+    assert grade(e, 2) == "incorrect"
+
+
+def test_flexible_dragmatch_uses_curriculum_target_mapping():
+    e = _entry("FLEXIBLE_CANVAS", {
+        "flexibleMode": "dragmatch",
+        "flexibleItems": [
+            {"id": "apple", "targetBin": "fruit"},
+            {"id": "carrot", "targetBin": "vegetable"},
+        ],
+    })
+    assert grade(e, {"apple": "fruit", "carrot": "vegetable"}) == "correct"
+    assert grade(e, {"apple": "vegetable", "carrot": "fruit"}) == "incorrect"
 
 
 # ── Registry ─────────────────────────────────────────────────────────────────────

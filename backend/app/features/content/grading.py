@@ -231,11 +231,24 @@ def grade_sudoku(entry: dict, selection: Any) -> GradeOutcome:
 
 @register("FLEXIBLE_CANVAS")
 def grade_flexible(entry: dict, selection: Any) -> GradeOutcome:
-    mode = _config(entry).get("flexibleMode", "multichoice")
+    cfg = _config(entry)
+    mode = cfg.get("flexibleMode", "multichoice")
     if mode in ("multichoice", "textinput"):
         key = _keys(entry).get("flexibleCorrectAnswer")
         if key is None:
             raise GradingError("flexible question has no correct answer key")
         return "correct" if _norm(selection) == _norm(key) else "incorrect"
-    # dragmatch / tapcount grade off item placement, not a single key — later slice.
-    raise GradingError(f"flexible mode {mode!r} grading not implemented yet")
+    items = cfg.get("flexibleItems") or []
+    if mode == "tapcount":
+        return "correct" if _to_int(selection) == len(items) else "incorrect"
+    if mode == "dragmatch":
+        if not isinstance(selection, dict):
+            raise GradingError("dragmatch selection must map item ids to target ids")
+        expected = {
+            str(item.get("id")): item.get("targetBin")
+            for item in items
+            if item.get("id") is not None and item.get("targetBin") is not None
+        }
+        actual = {str(key): value for key, value in selection.items()}
+        return "correct" if actual == expected else "incorrect"
+    raise GradingError(f"flexible mode {mode!r} grading is not supported")

@@ -30,6 +30,7 @@ def test_simulator_counts_promotions_demotions_and_due_changes():
     assert result["promotedSkills"] == 1
     assert result["demotedSkills"] == 1
     assert result["reviewDueChanged"] == 1
+    assert result["changedSkills"] == 3
 
 
 def test_delivery_impact_is_deterministic():

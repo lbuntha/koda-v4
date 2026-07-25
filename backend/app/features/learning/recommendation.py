@@ -67,6 +67,7 @@ def recommend(
     skipped_keys: set[tuple[str, str]],
     config: dict[str, Any],
     now: datetime | None = None,
+    completed_keys: set[tuple[str, str]] | None = None,
 ) -> dict[str, Any]:
     """Rank a deterministic, assignment-balanced queue for one student."""
     now = now or datetime.now(timezone.utc)
@@ -133,7 +134,10 @@ def recommend(
                 "bucket_rank": BUCKET_ORDER[kind or "stretch"],
                 "excluded": None,
             }
-            if (assignment["id"], skill_id) in skipped_keys:
+            key = (assignment["id"], skill_id)
+            if key in (completed_keys or set()):
+                candidate["excluded"] = "completed_session"
+            elif key in skipped_keys:
                 candidate["excluded"] = "skip_cooldown"
             candidates.append(candidate)
 

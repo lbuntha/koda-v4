@@ -389,7 +389,7 @@ export const AnalyticsViewerModal: React.FC<AnalyticsViewerModalProps> = ({
                           <span className={`text-[10px] font-mono px-2.5 py-1 rounded-xl border ${
                             isDark ? "bg-slate-900/60 border-slate-700 text-slate-400" : "bg-slate-50 border-slate-200 text-slate-500"
                           }`}>
-                            expected {event.expected} → picked {event.selected}
+                            expected {String(event.expected)} → picked {String(event.selected)}
                           </span>
                         )}
                         {typeof event.timeOnTaskMs === "number" && (

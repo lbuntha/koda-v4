@@ -6,6 +6,7 @@ that replaces the old "any teacher can read any student" access.
 """
 
 from app.core.permissions import can_read_student
+from app.features.analytics.router import can_manage_student_data
 from app.models.user import Role
 
 
@@ -57,3 +58,10 @@ def test_student_or_unknown_role_denied():
         role="something_else", user_id="x",
         guardian_parent_ids=["x"], teacher_has_active_enrollment=True,
     ) is False
+
+
+def test_only_admins_and_parents_manage_learning_data():
+    assert can_manage_student_data(Role.admin.value) is True
+    assert can_manage_student_data(Role.parent.value) is True
+    assert can_manage_student_data(Role.teacher.value) is False
+    assert can_manage_student_data(Role.student.value) is False

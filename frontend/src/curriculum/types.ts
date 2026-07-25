@@ -65,6 +65,53 @@ export interface Skill {
   order: number;
   /** "at least 10 questions" — configurable per skill since not every skill needs the same depth. */
   minQuestions: number;
+  /** Student-facing presentation, resolved from the published release. */
+  presentation?: {
+    title?: string;
+    description?: string;
+    thumbnailUrl?: string;
+    /** Stable reference to an SVG saved in the adult account's shared library. */
+    thumbnailAssetId?: string;
+    accent?: "purple" | "blue" | "green" | "amber" | "pink";
+  };
+  /** Optional override for this skill's completion bonus. */
+  completionXp?: number;
+}
+
+export interface CurriculumRewards {
+  quest: {
+    label: string;
+    activitiesPerSession: number;
+  };
+  xp: {
+    correctAnswer: number;
+    firstTryBonus: number;
+    activityCompletion: number;
+  };
+  level: {
+    xpPerLevel: number;
+  };
+  achievements: CurriculumAchievement[];
+}
+
+export type AchievementMetric =
+  | "xpEarned"
+  | "lessonsCompleted"
+  | "firstTryCorrect"
+  | "proficientSkills"
+  | "masteredSkills"
+  | "streakDays";
+
+export type AchievementIcon = "star" | "medal" | "award" | "trophy" | "gem" | "flame";
+
+export interface CurriculumAchievement {
+  id: string;
+  label: string;
+  description: string;
+  metric: AchievementMetric;
+  target: number;
+  icon: AchievementIcon;
+  accent: "purple" | "blue" | "green" | "amber" | "pink";
 }
 
 export interface CurriculumTree {
@@ -75,6 +122,7 @@ export interface CurriculumTree {
   /** Primary catalog context shown when Curriculum Studio opens. */
   primaryGradeId?: string;
   primarySubjectId?: string;
+  rewards?: CurriculumRewards;
   grades: Grade[];
   subjects: Subject[];
   units: Unit[];
@@ -99,6 +147,33 @@ export interface Student {
 }
 
 export const DEFAULT_MIN_QUESTIONS = 10;
+export const DEFAULT_CURRICULUM_REWARDS: CurriculumRewards = {
+  quest: { label: "Today’s quest", activitiesPerSession: 3 },
+  xp: { correctAnswer: 0, firstTryBonus: 0, activityCompletion: 0 },
+  level: { xpPerLevel: 0 },
+  achievements: [],
+};
+
+export const curriculumRewards = (tree: CurriculumTree): CurriculumRewards => ({
+  quest: {
+    label: tree.rewards?.quest?.label || DEFAULT_CURRICULUM_REWARDS.quest.label,
+    activitiesPerSession: tree.rewards?.quest?.activitiesPerSession
+      ?? DEFAULT_CURRICULUM_REWARDS.quest.activitiesPerSession,
+  },
+  xp: {
+    correctAnswer: tree.rewards?.xp?.correctAnswer
+      ?? DEFAULT_CURRICULUM_REWARDS.xp.correctAnswer,
+    firstTryBonus: tree.rewards?.xp?.firstTryBonus
+      ?? DEFAULT_CURRICULUM_REWARDS.xp.firstTryBonus,
+    activityCompletion: tree.rewards?.xp?.activityCompletion
+      ?? DEFAULT_CURRICULUM_REWARDS.xp.activityCompletion,
+  },
+  level: {
+    xpPerLevel: tree.rewards?.level?.xpPerLevel
+      ?? DEFAULT_CURRICULUM_REWARDS.level.xpPerLevel,
+  },
+  achievements: tree.rewards?.achievements ?? [],
+});
 
 /**
  * Curriculum subjects that at least one question type can actually serve.

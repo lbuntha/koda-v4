@@ -35,6 +35,7 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
   showGrid, 
   isDark = false,
   onSuccess, 
+  onAttempt,
   onUpdateQuestionConfig 
 }) => {
   // Config states with safe defaults
@@ -294,7 +295,14 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
                 if (allCorrect && nextItems.length > 0) {
                   sounds.playSuccess();
                   setGuideSolved(true);
-                  if (onSuccess) onSuccess();
+                  onAttempt?.("correct", {
+                    selected: Object.fromEntries(
+                      nextItems
+                        .filter(item => item.targetBin)
+                        .map(item => [item.id, item.targetBin]),
+                    ),
+                  });
+                  onSuccess?.();
                 }
 
                 return nextItems;
@@ -361,7 +369,15 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
 
     if (allCorrect && localItems.length > 0) {
       sounds.playSuccess();
-      setGuideSolved(true); if (onSuccess) onSuccess();
+      setGuideSolved(true);
+      onAttempt?.("correct", {
+        selected: Object.fromEntries(
+          localItems
+            .filter(item => item.targetBin)
+            .map(item => [item.id, item.targetBin]),
+        ),
+      });
+      onSuccess?.();
     }
   };
 
@@ -380,7 +396,9 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
       if (updated.length === localItems.length) {
         setFeedbackMsg("Amazing! You counted all of them!");
         sounds.playSuccess();
-        setGuideSolved(true); if (onSuccess) onSuccess();
+        setGuideSolved(true);
+        onAttempt?.("correct", { selected: updated.length });
+        onSuccess?.();
       }
     }
   };
@@ -407,11 +425,14 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
       setErrorFlash(false);
       setFeedbackMsg("Correct! Super job!");
       sounds.playSuccess();
-      setGuideSolved(true); if (onSuccess) onSuccess();
+      setGuideSolved(true);
+      onAttempt?.("correct", { selected: choice });
+      onSuccess?.();
     } else {
       sounds.playFailure();
       setErrorFlash(true);
       setFeedbackMsg("Try again! You can do it!");
+      onAttempt?.("incorrect", { selected: choice });
       setTimeout(() => setErrorFlash(false), 800);
     }
   };
@@ -425,11 +446,14 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
       setErrorFlash(false);
       setFeedbackMsg("Wow! Perfect answer!");
       sounds.playSuccess();
-      setGuideSolved(true); if (onSuccess) onSuccess();
+      setGuideSolved(true);
+      onAttempt?.("correct", { selected: textValue });
+      onSuccess?.();
     } else {
       sounds.playFailure();
       setErrorFlash(true);
       setFeedbackMsg("Not quite! Let's count them again.");
+      onAttempt?.("incorrect", { selected: textValue });
       setTimeout(() => setErrorFlash(false), 800);
     }
   };

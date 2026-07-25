@@ -11,6 +11,7 @@ import {
   Sparkles,
   Target,
   Trash2,
+  Zap,
 } from "lucide-react";
 import {
   analyticsApi,
@@ -200,6 +201,12 @@ export const ChildAnalyticsDrawer: React.FC<Props> = ({ student, onClose, onData
   };
 
   const summary = activity?.summary;
+  const practicedSkills = (mastery?.skills ?? []).filter(skill => skill.plays > 0);
+  const strongestSkill = [...practicedSkills].sort((left, right) => right.score - left.score)[0];
+  const supportSkills = [...practicedSkills]
+    .filter(skill => skill.isDue || skill.score < 0.6)
+    .sort((left, right) => left.score - right.score)
+    .slice(0, 3);
 
   return (
     <Drawer
@@ -230,16 +237,65 @@ export const ChildAnalyticsDrawer: React.FC<Props> = ({ student, onClose, onData
               {[
                 { label: "Rank", value: mastery?.rank.tierLabel ?? "Rookie", icon: Award },
                 { label: "Accuracy", value: summary?.accuracy == null ? "—" : `${Math.round(summary.accuracy * 100)}%`, icon: Target },
+                { label: "First try", value: summary?.firstTryAccuracy == null ? "—" : `${Math.round(summary.firstTryAccuracy * 100)}%`, icon: Sparkles },
+                { label: "Independent", value: summary?.independenceRate == null ? "—" : `${Math.round(summary.independenceRate * 100)}%`, icon: ShieldAlert },
+                { label: "XP earned", value: String(summary?.xpEarned ?? 0), icon: Zap },
                 { label: "Current streak", value: `${summary?.currentStreakDays ?? 0} days`, icon: Flame },
                 { label: "Time learning", value: duration(summary?.timeOnTaskMs ?? 0), icon: CalendarDays },
+                { label: "Completed", value: String(summary?.lessonsCompleted ?? 0), icon: Award },
               ].map(item => (
                 <div key={item.label} className="rounded-2xl border border-[#E7E3F6] bg-white p-4">
                   <item.icon size={17} className="mb-3 text-[#6D55D8]" />
                   <p className="koda-admin-label">{item.label}</p>
-                  <p className="mt-1 text-lg font-semibold text-[#0E0B55]">{item.value}</p>
+                  <p className="koda-admin-metric mt-1 text-[#0E0B55]">{item.value}</p>
                 </div>
               ))}
             </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4">
+                <p className="koda-admin-label text-emerald-700">Growing strength</p>
+                <p className="mt-1 text-sm font-semibold text-emerald-950">
+                  {strongestSkill?.skillLabel || "Complete an activity to reveal a strength"}
+                </p>
+                {strongestSkill && (
+                  <p className="mt-1 text-xs text-emerald-700">
+                    {Math.round(strongestSkill.score * 100)}% evidence score · {strongestSkill.plays} tries
+                  </p>
+                )}
+              </div>
+              <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4">
+                <p className="koda-admin-label text-amber-700">Needs support</p>
+                <p className="mt-1 text-sm font-semibold text-amber-950">
+                  {supportSkills.length
+                    ? supportSkills.map(skill => skill.skillLabel).join(", ")
+                    : "No urgent review is due"}
+                </p>
+                <p className="mt-1 text-xs text-amber-700">
+                  Based on verified accuracy and review due dates.
+                </p>
+              </div>
+            </div>
+            {(activity?.xpBreakdown?.length ?? 0) > 0 && (
+              <div className="rounded-2xl border border-[#E7E3F6] bg-white p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="koda-admin-section-title">XP evidence</p>
+                    <p className="koda-admin-secondary mt-1">Where earned XP came from</p>
+                  </div>
+                  <Badge variant="warning">{summary?.xpEarned ?? 0} XP</Badge>
+                </div>
+                <div className="mt-3 space-y-2">
+                  {activity!.xpBreakdown.slice(0, 5).map(row => (
+                    <div key={`${row.releaseId}:${row.skillId}`} className="flex items-center justify-between gap-3 rounded-xl bg-[#FAF9FF] px-3 py-2">
+                      <span className="truncate text-xs font-semibold text-[#17143D]">{row.skillLabel}</span>
+                      <span className="shrink-0 text-xs font-semibold text-[#6D55D8]">
+                        {row.correctXp} answers + {row.firstTryXp} first try + {row.completionXp} completion = {row.totalXp} XP
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="rounded-2xl border border-[#E7E3F6] bg-[#FAF9FF] p-4 sm:p-5">
               <div className="flex items-center justify-between gap-3">
                 <div>

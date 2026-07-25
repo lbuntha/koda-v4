@@ -67,21 +67,21 @@ export const FormModal: React.FC<FormModalProps> = ({
   return (
     <Dialog isOpen={isOpen} onClose={onClose} maxWidthClassName={maxWidthClassName}>
       <div className="mb-5 pr-6">
-        <h3 className="text-base font-black text-slate-900 tracking-tight">{title}</h3>
-        {description && <p className="text-xs text-slate-500 mt-0.5">{description}</p>}
+        <h3 className="text-base font-black text-slate-900 tracking-tight dark:text-[#E7E5F7]">{title}</h3>
+        {description && <p className="text-xs text-slate-500 mt-0.5 dark:text-[#9A94B8]">{description}</p>}
       </div>
 
       <form onSubmit={handle} className="space-y-4">
         {children}
 
         {error && (
-          <div className="text-xs font-medium text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
+          <div className="text-xs font-medium text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2 dark:border-rose-400/25 dark:bg-rose-400/10 dark:text-rose-300">
             {error}
           </div>
         )}
 
         <div className="flex gap-2 pt-1">
-          <Button type="button" variant="secondary" className="flex-1" onClick={onClose}>
+          <Button type="button" variant="secondary" className="flex-1 dark:border-white/10 dark:bg-white/10 dark:text-[#DEDCF0] dark:hover:bg-white/15" onClick={onClose}>
             Cancel
           </Button>
           <Button type="submit" className="flex-1" disabled={busy || submitDisabled}>

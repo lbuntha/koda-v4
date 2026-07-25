@@ -16,12 +16,15 @@ export interface TechniqueOption {
   id: CountingTechnique;
   name: string;
   icon: React.ReactElement<{ className?: string }>;
+  /** Static learner artwork owned by the component manifest. */
+  defaultThumbnailUrl?: string;
 }
 
 export const TECHNIQUE_OPTIONS: TechniqueOption[] = ALL_TECHNIQUES.map((m) => ({
   id: m.technique,
   name: m.label,
   icon: m.icon,
+  defaultThumbnailUrl: m.defaultThumbnailUrl,
 }));
 
 /** Per-technique default target count applied when a technique is first picked. */

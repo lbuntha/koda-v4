@@ -53,13 +53,30 @@ export interface ActivitySnapshot {
     correct: number;
     incorrect: number;
     accuracy: number | null;
+    firstTryAccuracy: number | null;
+    independenceRate: number | null;
     hints: number;
     lessonsCompleted: number;
+    xpEarned: number;
     timeOnTaskMs: number;
     currentStreakDays: number;
     longestStreakDays: number;
     activeDays: number;
+    weeklyActivity: Array<{
+      date: string;
+      day: string;
+      count: number;
+    }>;
   };
+  xpBreakdown: Array<{
+    releaseId: string;
+    skillId: string;
+    skillLabel: string;
+    correctXp: number;
+    firstTryXp: number;
+    completionXp: number;
+    totalXp: number;
+  }>;
   sessions: Array<{
     sessionId: string;
     source: string;

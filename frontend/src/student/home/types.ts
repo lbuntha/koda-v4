@@ -1,10 +1,19 @@
-import type { CourseMode, CourseQueueItem, TodayCourse } from "../../api/course";
+import type {
+  CourseMode,
+  CourseQueueItem,
+  StudentActivitySignal,
+  StudentProgress,
+  TodayCourse,
+} from "../../api/course";
 import type { GradeBand } from "../../api/auth";
 import type { LevelUp } from "./LevelUpDialog";
 
 /** Props shared by every band layout. `StudentTodayHome` routes these by band. */
 export interface StudentHomeProps {
   course: TodayCourse;
+  progress: StudentProgress | null;
+  activitySignal: StudentActivitySignal | null;
+  replayItems: CourseQueueItem[];
   levelUp: LevelUp | null;
   studentName: string;
   studentAvatar?: string | null;

@@ -35,6 +35,13 @@ export interface TechniqueManifest {
   defaultTargetCount: number;
 
   /**
+   * Static learner-facing fallback used when a curriculum skill has no
+   * authored thumbnail. Keeping it in the technique manifest makes the
+   * component the owner of its default presentation.
+   */
+  defaultThumbnailUrl?: string;
+
+  /**
    * The interactive canvas. Typed as ComponentType (not FC) so a future
    * switch to React.lazy(...) for per-game code-splitting is a drop-in change
    * here — no consumer edits — once Suspense boundaries are added.

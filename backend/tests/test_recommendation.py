@@ -70,6 +70,24 @@ def test_skip_cooldown_excludes_skill_and_surfaces_next_candidate():
     assert excluded["excluded"] == "skip_cooldown"
 
 
+def test_completed_skill_is_excluded_for_the_current_session():
+    result = recommend(
+        assignments=[assignment("a1")],
+        mastery_states=[],
+        progressions=[{
+            "assignment_id": "a1",
+            "frontier_skill_id": "add",
+            "eligible_skill_ids": ["count"],
+        }],
+        skipped_keys=set(),
+        completed_keys={("a1", "add")},
+        config=CONFIG,
+    )
+    assert all(item["skill_id"] != "add" for item in result["served_items"])
+    excluded = next(item for item in result["candidates"] if item["skill_id"] == "add")
+    assert excluded["excluded"] == "completed_session"
+
+
 def test_multiple_assignments_round_robin_by_priority():
     result = recommend(
         assignments=[assignment("a1", 10), assignment("a2", 20)],

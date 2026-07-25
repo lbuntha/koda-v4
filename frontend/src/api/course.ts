@@ -3,6 +3,7 @@ import type { CountingQuestion } from "../types";
 
 export type CourseMode = "scheduled" | "free";
 export type RecommendationKind = "reinforce" | "review" | "new" | "stretch" | "free";
+export type ActivityStatus = "not_completed" | "in_progress" | "completed";
 
 export interface CourseQueueItem {
   assignmentId: string;
@@ -11,12 +12,31 @@ export interface CourseQueueItem {
   curriculumRevision: number;
   skillId: string;
   skillLabel: string;
+  curriculumSkillLabel?: string;
+  description?: string;
+  thumbnailUrl?: string | null;
+  accent?: "purple" | "blue" | "green" | "amber" | "pink";
+  xpAvailable?: number;
   unitId?: string | null;
   subjectId?: string | null;
   kind: RecommendationKind;
   reason: string;
   optional: boolean;
+  status?: ActivityStatus;
   questions: CountingQuestion[];
+}
+
+export interface CompletedCourseItem {
+  assignmentId: string;
+  releaseId: string;
+  curriculumId: string;
+  skillId: string;
+  skillLabel: string;
+  curriculumSkillLabel?: string;
+  thumbnailUrl?: string | null;
+  xpEarned?: number;
+  status: "completed";
+  completedAt: string;
 }
 
 export interface TodayCourse {
@@ -25,6 +45,14 @@ export interface TodayCourse {
   recommendationRunId: string | null;
   engineRevision?: string;
   queue: CourseQueueItem[];
+  completedItems?: CompletedCourseItem[];
+  completedCount?: number;
+  quest?: {
+    label: string;
+    target: number;
+    completed: number;
+    xpEarned: number;
+  };
 }
 
 export interface StudentSessionResult {
@@ -74,7 +102,40 @@ export interface StudentProgress {
     assignedSkills: number;
     progressToNext: number;
   };
+  rewardProfile?: {
+    totalXp: number;
+    level: {
+      number: number;
+      currentXp: number;
+      xpPerLevel: number;
+      xpToNext: number;
+      progress: number;
+    } | null;
+    achievements: Array<{
+      curriculumId: string;
+      id: string;
+      label: string;
+      description: string;
+      metric: "xpEarned" | "lessonsCompleted" | "firstTryCorrect" | "proficientSkills" | "masteredSkills" | "streakDays";
+      target: number;
+      icon: "star" | "medal" | "award" | "trophy" | "gem" | "flame";
+      accent: "purple" | "blue" | "green" | "amber" | "pink";
+      current: number;
+      earned: boolean;
+      progress: number;
+    }>;
+  };
   skills: SkillProgress[];
+}
+
+export interface StudentActivitySignal {
+  studentId: string;
+  currentStreakDays: number;
+  weeklyActivity: Array<{
+    date: string;
+    day: string;
+    count: number;
+  }>;
 }
 
 export const courseApi = {
@@ -86,6 +147,8 @@ export const courseApi = {
     api.get<TodayCourse>(`/learning/today?mode=${mode}`),
   progress: (studentId: string) =>
     api.get<StudentProgress>(`/progress/${encodeURIComponent(studentId)}`),
+  activitySignal: (studentId: string) =>
+    api.get<StudentActivitySignal>(`/progress/${encodeURIComponent(studentId)}/activity-signal`),
   skip: (runId: string, item: Pick<CourseQueueItem, "assignmentId" | "skillId">) =>
     api.post<{ ok: true; eventId: string | null; requeuedAfter: string }>("/events/skip", {
       recommendation_run_id: runId,

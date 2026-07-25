@@ -17,8 +17,11 @@ import { KidCard } from "./KidCard";
 import { ChildFormModal } from "./ChildFormModal";
 import { Child, ChildInput } from "../api/family";
 import { ChildAnalyticsDrawer } from "../analytics/ChildAnalyticsDrawer";
+import { ThemeToggle } from "../theme/ThemeToggle";
+import { useThemeMode } from "../theme/appTheme";
 
 export const ParentDashboard: React.FC = () => {
+  const [theme, toggleTheme] = useThemeMode();
   const { account, logout, startChildPlay } = useAuth();
   const { children, loading, error, addChild, updateChild, removeChild } = useFamily();
   const [formOpen, setFormOpen] = useState(false);
@@ -42,22 +45,34 @@ export const ParentDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-indigo-50 via-white to-violet-50 font-sans">
+    <div
+      className={`min-h-screen w-full bg-gradient-to-br from-indigo-50 via-white to-violet-50 font-sans dark:from-[#0E1226] dark:via-[#0C0F1F] dark:to-[#150F2A] dark:text-[#DEDCF0] ${
+        theme === "dark" ? "dark" : ""
+      }`}
+    >
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-600/20">
+            <div className="w-11 h-11 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-600/20 dark:shadow-none">
               <Crown size={22} />
             </div>
             <div>
-              <h1 className="text-lg font-black text-slate-900 leading-tight">Hi, {account?.name} 👋</h1>
-              <p className="text-xs text-slate-500">Your family</p>
+              <h1 className="text-lg font-black text-slate-900 leading-tight dark:text-[#EDECF8]">Hi, {account?.name} 👋</h1>
+              <p className="text-xs text-slate-500 dark:text-[#9A94B8]">Your family</p>
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={logout} className="text-slate-500">
-            <LogOut size={14} /> Sign out
-          </Button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle theme={theme} onToggle={toggleTheme} />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={logout}
+              className="text-slate-500 dark:text-[#A9A3C4] dark:hover:bg-white/10 dark:hover:text-white"
+            >
+              <LogOut size={14} /> Sign out
+            </Button>
+          </div>
         </div>
 
         {account?.family_code && <FamilyCodeCard code={account.family_code} />}
@@ -65,7 +80,7 @@ export const ParentDashboard: React.FC = () => {
         {/* Kids */}
         <div className="mt-6">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-black text-slate-800">Kids</h2>
+            <h2 className="text-sm font-black text-slate-800 dark:text-[#E4E1F4]">Kids</h2>
             {children.length > 0 && (
               <Button size="sm" onClick={openAdd}>
                 <Plus size={14} /> Add child
@@ -78,15 +93,15 @@ export const ParentDashboard: React.FC = () => {
               <Loader2 size={22} className="animate-spin text-indigo-400" />
             </div>
           ) : error ? (
-            <div className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">{error}</div>
+            <div className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2 dark:border-rose-400/25 dark:bg-rose-400/10 dark:text-rose-300">{error}</div>
           ) : children.length === 0 ? (
-            <Card className="border-dashed border-slate-300 bg-white/60 p-10 flex flex-col items-center text-center gap-3">
-              <div className="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500">
+            <Card className="border-dashed border-slate-300 bg-white/60 p-10 flex flex-col items-center text-center gap-3 dark:border-white/15 dark:bg-white/5">
+              <div className="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500 dark:bg-indigo-400/15 dark:text-indigo-300">
                 <UserPlus size={26} />
               </div>
               <div>
-                <p className="font-bold text-slate-800">Add your first child</p>
-                <p className="text-xs text-slate-500 mt-0.5">Give them a name, an avatar, and an optional PIN.</p>
+                <p className="font-bold text-slate-800 dark:text-[#E4E1F4]">Add your first child</p>
+                <p className="text-xs text-slate-500 mt-0.5 dark:text-[#9A94B8]">Give them a name, an avatar, and an optional PIN.</p>
               </div>
               <Button onClick={openAdd}>
                 <Plus size={16} /> Add child

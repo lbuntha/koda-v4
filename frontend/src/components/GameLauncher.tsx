@@ -29,18 +29,25 @@ import {
 import { AnalyticsViewerModal } from "./AnalyticsViewerModal";
 import { analyticsLogger } from "../services/analyticsLogger";
 import { getTaxonomy, AttemptOutcome } from "../services/logSchema";
+import { solvedSelection } from "../student/answerSelection";
 
 interface GameLauncherProps {
   questions: CountingQuestion[];
   activeId: string;
   setActiveId: (id: string) => void;
+  /** Called only after the last card has been solved. */
   onClose: () => void;
+  /** Leaves an unfinished player without reporting lesson completion. */
+  onExit?: () => void;
+  /** Simplified, non-skippable practice flow for early learners. */
+  kidMode?: boolean;
   learningContext?: {
     releaseId: string;
     curriculumId: string;
     curriculumRevision: number;
     assignmentId?: string;
     recommendationRunId?: string;
+    skillId?: string;
   };
 }
 
@@ -57,6 +64,8 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
   activeId,
   setActiveId,
   onClose,
+  onExit,
+  kidMode = false,
   learningContext,
 }) => {
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
@@ -116,7 +125,7 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
    */
   const handleAttempt = (
     outcome: AttemptOutcome,
-    detail?: { expected?: string; selected?: string; details?: Record<string, any> },
+    detail?: { expected?: unknown; selected?: unknown; details?: Record<string, any> },
   ) => {
     if (!activeQuestion) return;
     if (outcome === "correct") {
@@ -168,7 +177,10 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
   const handleSuccess = () => {
     setIsSuccess(true);
     triggerConfetti();
-    if (!correctAttemptLogged.current) handleAttempt("correct");
+    if (!correctAttemptLogged.current) {
+      const selected = solvedSelection(activeQuestion);
+      handleAttempt("correct", selected == null ? undefined : { selected });
+    }
   };
 
   const triggerConfetti = () => {
@@ -220,11 +232,18 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
         releaseId: learningContext?.releaseId,
         assignmentId: learningContext?.assignmentId,
         recommendationRunId: learningContext?.recommendationRunId,
+        curriculumSkillId: learningContext?.skillId ?? activeQuestion?.skillId,
       });
       sounds.playSuccess();
       onClose();
     }
   };
+
+  useEffect(() => {
+    if (!kidMode || !isSuccess) return;
+    const timer = window.setTimeout(handleNextSlide, 1200);
+    return () => window.clearTimeout(timer);
+  }, [activeId, isSuccess, kidMode]);
 
   const handlePrevSlide = () => {
     setIsSuccess(false);
@@ -291,7 +310,7 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
           <div className="hidden sm:block">
             <p className={`text-[9px] font-bold uppercase tracking-[0.2em] font-mono leading-none mb-0.5
               ${isDark ? 'text-slate-500' : 'text-slate-400'}
-            `}>Worksheet Game</p>
+            `}>{kidMode ? "Practice time" : "Worksheet Game"}</p>
             <h1 className={`text-sm font-extrabold leading-none
               ${isDark ? 'text-white' : 'text-slate-800'}
             `}>{activeQuestion?.title || "Learning Time"}</h1>
@@ -318,41 +337,47 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
 
         {/* Right – controls */}
         <div className="flex items-center gap-1.5">
-          <button
-            onClick={() => { setShowAnalyticsModal(true); sounds.playPop(); }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all cursor-pointer ${
-              isDark
-                ? "bg-indigo-500/20 hover:bg-indigo-500/30 border-indigo-500/40 text-indigo-300"
-                : "bg-indigo-50 hover:bg-indigo-100 border-indigo-200 text-indigo-700 shadow-sm"
-            }`}
-            title="View & Export Interactive JSON Logs (FastAPI ready)"
-          >
-            <Activity size={13} className="animate-pulse text-indigo-400" />
-            <span className="hidden sm:inline">JSON Logs</span>
-          </button>
-          <button
-            onClick={() => { setIsDark(d => !d); sounds.playPop(); }}
-            className={`${iconBtn} ${isDark ? iconBtnDark : iconBtnLight}`}
-            title={isDark ? "Light Mode" : "Dark Mode"}
-          >
-            {isDark ? <Sun size={15} /> : <Moon size={15} />}
-          </button>
-          <button
-            onClick={resetSlide}
-            className={`${iconBtn} ${isDark ? iconBtnDark : iconBtnLight}`}
-            title="Reset Challenge"
-          >
-            <RotateCcw size={15} />
-          </button>
+          {!kidMode && (
+            <>
+              <button
+                onClick={() => { setShowAnalyticsModal(true); sounds.playPop(); }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all cursor-pointer ${
+                  isDark
+                    ? "bg-indigo-500/20 hover:bg-indigo-500/30 border-indigo-500/40 text-indigo-300"
+                    : "bg-indigo-50 hover:bg-indigo-100 border-indigo-200 text-indigo-700 shadow-sm"
+                }`}
+                title="View & Export Interactive JSON Logs (FastAPI ready)"
+              >
+                <Activity size={13} className="animate-pulse text-indigo-400" />
+                <span className="hidden sm:inline">JSON Logs</span>
+              </button>
+              <button
+                onClick={() => { setIsDark(d => !d); sounds.playPop(); }}
+                className={`${iconBtn} ${isDark ? iconBtnDark : iconBtnLight}`}
+                title={isDark ? "Light Mode" : "Dark Mode"}
+              >
+                {isDark ? <Sun size={15} /> : <Moon size={15} />}
+              </button>
+              <button
+                onClick={resetSlide}
+                className={`${iconBtn} ${isDark ? iconBtnDark : iconBtnLight}`}
+                title="Reset Challenge"
+              >
+                <RotateCcw size={15} />
+              </button>
+            </>
+          )}
           <button onClick={toggleMute} className={`${iconBtn} ${isDark ? iconBtnDark : iconBtnLight}`} title="Toggle sound">
             {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
           </button>
-          <button onClick={toggleBrowserFullscreen} className={`${iconBtn} ${isDark ? iconBtnDark : iconBtnLight}`}>
-            {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
-          </button>
+          {!kidMode && (
+            <button onClick={toggleBrowserFullscreen} className={`${iconBtn} ${isDark ? iconBtnDark : iconBtnLight}`}>
+              {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+            </button>
+          )}
           <div className={`w-px h-5 mx-0.5 ${isDark ? 'bg-white/10' : 'bg-black/10'}`} />
           <button
-            onClick={() => { onClose(); sounds.playPop(); }}
+            onClick={() => { (onExit ?? onClose)(); sounds.playPop(); }}
             className="flex items-center gap-1.5 px-3 py-2 bg-rose-500 hover:bg-rose-400 text-white rounded-xl text-[11px] font-bold transition-all shadow-md shadow-rose-500/20 cursor-pointer"
           >
             <X size={13} />
@@ -400,37 +425,51 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
                         <Trophy size={22} />
                       </div>
                       <div>
-                        <h3 className="font-extrabold text-base leading-tight">Breathtaking! Correct! 🎉</h3>
-                        <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-300' : 'text-emerald-100'}`}>You solved the counting challenge!</p>
+                        <h3 className="font-extrabold text-base leading-tight">
+                          {kidMode ? "Great job! 🎉" : "Breathtaking! Correct! 🎉"}
+                        </h3>
+                        <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-300' : 'text-emerald-100'}`}>
+                          {kidMode
+                            ? currentIdx < questions.length - 1
+                              ? "Next question coming up…"
+                              : "You finished this practice!"
+                            : "You solved the counting challenge!"}
+                        </p>
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={resetSlide}
-                        className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold rounded-2xl transition-colors cursor-pointer ${
-                          isDark
-                            ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60'
-                            : 'bg-white/20 hover:bg-white/30 text-white'
-                        }`}
-                      >
-                        <RotateCcw size={12} />
-                        Play Again
-                      </button>
-                      <button
-                        onClick={handleNextSlide}
-                        className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-extrabold rounded-2xl transition-all shadow-md cursor-pointer ${
-                          isDark
-                            ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-500/20'
-                            : 'bg-yellow-400 hover:bg-yellow-300 text-indigo-950 shadow-yellow-400/20'
-                        }`}
-                      >
-                        {currentIdx < questions.length - 1 ? (
-                          <><span>Next Card</span><ArrowRight size={13} /></>
-                        ) : (
-                          <span>Finish Lesson 🎊</span>
-                        )}
-                      </button>
-                    </div>
+                    {kidMode ? (
+                      <div className={`h-2 overflow-hidden rounded-full ${isDark ? "bg-white/10" : "bg-white/25"}`}>
+                        <div className="h-full w-full animate-pulse rounded-full bg-amber-300" />
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={resetSlide}
+                          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold rounded-2xl transition-colors cursor-pointer ${
+                            isDark
+                              ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60'
+                              : 'bg-white/20 hover:bg-white/30 text-white'
+                          }`}
+                        >
+                          <RotateCcw size={12} />
+                          Play Again
+                        </button>
+                        <button
+                          onClick={handleNextSlide}
+                          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-extrabold rounded-2xl transition-all shadow-md cursor-pointer ${
+                            isDark
+                              ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-500/20'
+                              : 'bg-yellow-400 hover:bg-yellow-300 text-indigo-950 shadow-yellow-400/20'
+                          }`}
+                        >
+                          {currentIdx < questions.length - 1 ? (
+                            <><span>Next Card</span><ArrowRight size={13} /></>
+                          ) : (
+                            <span>Finish Lesson 🎊</span>
+                          )}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -440,23 +479,25 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
           {/* ── Bottom navigation bar ── */}
           <div className="flex-shrink-0 flex items-center gap-3">
             {/* Prev */}
-            <button
-              onClick={handlePrevSlide}
-              disabled={currentIdx === 0}
-              className={`flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-bold transition-all cursor-pointer border
-                ${currentIdx === 0
-                  ? isDark
-                    ? 'bg-white/[0.03] border-white/[0.05] text-slate-600 cursor-not-allowed'
-                    : 'bg-slate-100 border-slate-200 text-slate-300 cursor-not-allowed'
-                  : isDark
-                    ? 'bg-white/[0.07] border-white/[0.1] text-slate-300 hover:bg-white/10 hover:text-white hover:scale-105'
-                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:scale-105 shadow-sm'
-                }
-              `}
-            >
-              <ChevronLeft size={16} />
-              <span className="hidden sm:inline">Back</span>
-            </button>
+            {!kidMode && (
+              <button
+                onClick={handlePrevSlide}
+                disabled={currentIdx === 0}
+                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-bold transition-all cursor-pointer border
+                  ${currentIdx === 0
+                    ? isDark
+                      ? 'bg-white/[0.03] border-white/[0.05] text-slate-600 cursor-not-allowed'
+                      : 'bg-slate-100 border-slate-200 text-slate-300 cursor-not-allowed'
+                    : isDark
+                      ? 'bg-white/[0.07] border-white/[0.1] text-slate-300 hover:bg-white/10 hover:text-white hover:scale-105'
+                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:scale-105 shadow-sm'
+                  }
+                `}
+              >
+                <ChevronLeft size={16} />
+                <span className="hidden sm:inline">Back</span>
+              </button>
+            )}
 
             {/* Progress dots */}
             <div className="flex-1 flex items-center justify-center gap-1.5 overflow-hidden">
@@ -464,13 +505,21 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
                 questions.map((q, idx) => (
                   <button
                     key={q.id}
-                    onClick={() => { setActiveId(q.id); setIsSuccess(false); sounds.playPop(); }}
-                    className={`rounded-full transition-all duration-300 cursor-pointer
+                    type="button"
+                    disabled={kidMode}
+                    aria-label={`Question ${idx + 1}${idx === currentIdx ? ", current" : ""}`}
+                    onClick={() => {
+                      if (kidMode) return;
+                      setActiveId(q.id);
+                      setIsSuccess(false);
+                      sounds.playPop();
+                    }}
+                    className={`rounded-full transition-all duration-300
                       ${idx === currentIdx
                         ? 'w-6 h-2.5 bg-indigo-500'
                         : isDark
-                          ? 'w-2 h-2 bg-white/15 hover:bg-white/30'
-                          : 'w-2 h-2 bg-black/15 hover:bg-black/30'
+                          ? `w-2 h-2 bg-white/15 ${kidMode ? "cursor-default" : "cursor-pointer hover:bg-white/30"}`
+                          : `w-2 h-2 bg-black/15 ${kidMode ? "cursor-default" : "cursor-pointer hover:bg-black/30"}`
                       }
                     `}
                   />
@@ -483,30 +532,34 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
             </div>
 
             {/* Next */}
-            <button
-              onClick={handleNextSlide}
-              className={`flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-bold transition-all cursor-pointer shadow-md
-                ${currentIdx === questions.length - 1
-                  ? 'bg-emerald-500 hover:bg-emerald-400 border border-emerald-400/30 text-white shadow-emerald-500/20 hover:scale-105'
-                  : 'bg-indigo-600 hover:bg-indigo-500 border border-indigo-500/30 text-white shadow-indigo-600/20 hover:scale-105'
-                }
-              `}
-            >
-              <span className="hidden sm:inline">
-                {currentIdx === questions.length - 1 ? "Finish" : "Next"}
-              </span>
-              <ChevronRight size={16} />
-            </button>
+            {!kidMode && (
+              <button
+                onClick={handleNextSlide}
+                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-bold transition-all cursor-pointer shadow-md
+                  ${currentIdx === questions.length - 1
+                    ? 'bg-emerald-500 hover:bg-emerald-400 border border-emerald-400/30 text-white shadow-emerald-500/20 hover:scale-105'
+                    : 'bg-indigo-600 hover:bg-indigo-500 border border-indigo-500/30 text-white shadow-indigo-600/20 hover:scale-105'
+                  }
+                `}
+              >
+                <span className="hidden sm:inline">
+                  {currentIdx === questions.length - 1 ? "Finish" : "Next"}
+                </span>
+                <ChevronRight size={16} />
+              </button>
+            )}
           </div>
         </div>
       </div>
 
       {/* ── Interactive Logs / JSON Analytics Modal ── */}
-      <AnalyticsViewerModal
-        isOpen={showAnalyticsModal}
-        onClose={() => setShowAnalyticsModal(false)}
-        isDark={isDark}
-      />
+      {!kidMode && (
+        <AnalyticsViewerModal
+          isOpen={showAnalyticsModal}
+          onClose={() => setShowAnalyticsModal(false)}
+          isDark={isDark}
+        />
+      )}
       {/* ── Confetti Particles ──────────────────────────── */}
       {confetti.map(p => (
         <div

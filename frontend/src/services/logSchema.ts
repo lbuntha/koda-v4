@@ -71,7 +71,9 @@ export const TECHNIQUE_TAXONOMY: Record<CountingTechnique, { subjectArea: Subjec
   [CountingTechnique.ADDITION_COLUMN_MULTI]: { subjectArea: "addition", skillTags: ["addition_carrying", "multi_addend_column_addition"] },
   [CountingTechnique.SUBTRACTION_COLUMN_MULTI]: { subjectArea: "subtraction", skillTags: ["subtraction_borrowing", "multi_subtrahend_column_subtraction"] },
   [CountingTechnique.MULTIPLICATION_COLUMN]: { subjectArea: "multiplication", skillTags: ["partial_products", "multi_digit_column_multiplication"] },
+  [CountingTechnique.LIQUID_SORT]: { subjectArea: "sorting_classification", skillTags: ["sorting", "classification"] },
 };
+
 
 export const getTaxonomy = (technique: CountingTechnique) =>
   TECHNIQUE_TAXONOMY[technique] || { subjectArea: "counting" as SubjectArea, skillTags: [] };
@@ -145,9 +147,9 @@ export interface LearningEvent {
 
   // ── Diagnostic detail — the "why" behind right/wrong, for recommendations ──
   /** The correct answer/value, stringified for storage uniformity across techniques (a number, an emoji, a grid cell). */
-  expected?: string;
+  expected?: unknown;
   /** What the child actually selected/produced. */
-  selected?: string;
+  selected?: unknown;
   /** |expected-selected| when both are numeric — lets a report rank "off by one" vs. "wild guess" differently. */
   errorMagnitude?: number;
 

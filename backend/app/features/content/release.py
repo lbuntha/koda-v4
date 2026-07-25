@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from typing import Any
 
 # Config fields that are answer keys / solutions — they must be stripped from the
@@ -199,6 +200,74 @@ def validate_checkpoints(tree: dict) -> None:
             )
 
 
+def validate_reward_metadata(tree: dict) -> None:
+    rewards = tree.get("rewards") or {}
+    quest = rewards.get("quest") or {}
+    xp = rewards.get("xp") or {}
+    activities = quest.get("activitiesPerSession", 3)
+    if not isinstance(activities, int) or isinstance(activities, bool) or not 1 <= activities <= 5:
+        raise ReleaseValidationError("quest activitiesPerSession must be between 1 and 5")
+    for field, default in (
+        ("correctAnswer", 0),
+        ("firstTryBonus", 0),
+        ("activityCompletion", 0),
+    ):
+        value = xp.get(field, default)
+        if not isinstance(value, int) or isinstance(value, bool) or not 0 <= value <= 100:
+            raise ReleaseValidationError(f"XP {field} must be between 0 and 100")
+    level = rewards.get("level") or {}
+    xp_per_level = level.get("xpPerLevel")
+    if xp_per_level is not None and (
+        not isinstance(xp_per_level, int)
+        or isinstance(xp_per_level, bool)
+        or not 1 <= xp_per_level <= 10_000
+    ):
+        raise ReleaseValidationError("XP per level must be between 1 and 10,000")
+    achievements = rewards.get("achievements") or []
+    if not isinstance(achievements, list) or len(achievements) > 12:
+        raise ReleaseValidationError("Achievements must contain at most 12 items")
+    allowed_metrics = {
+        "xpEarned", "lessonsCompleted", "firstTryCorrect",
+        "proficientSkills", "masteredSkills", "streakDays",
+    }
+    allowed_icons = {"star", "medal", "award", "trophy", "gem", "flame"}
+    allowed_accents = {"purple", "blue", "green", "amber", "pink"}
+    ids = []
+    for achievement in achievements:
+        if not isinstance(achievement, dict):
+            raise ReleaseValidationError("Each achievement must be an object")
+        achievement_id = achievement.get("id")
+        ids.append(achievement_id)
+        if (
+            not isinstance(achievement_id, str)
+            or not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,79}", achievement_id)
+        ):
+            raise ReleaseValidationError("Achievement id is invalid")
+        if achievement.get("metric") not in allowed_metrics:
+            raise ReleaseValidationError(f"achievement {achievement_id!r}: metric is invalid")
+        if achievement.get("icon") not in allowed_icons:
+            raise ReleaseValidationError(f"achievement {achievement_id!r}: icon is invalid")
+        if achievement.get("accent") not in allowed_accents:
+            raise ReleaseValidationError(f"achievement {achievement_id!r}: accent is invalid")
+        target = achievement.get("target")
+        if not isinstance(target, int) or isinstance(target, bool) or not 1 <= target <= 10_000:
+            raise ReleaseValidationError(f"achievement {achievement_id!r}: target is invalid")
+        for field, limit in (("label", 80), ("description", 200)):
+            value = achievement.get(field)
+            if not isinstance(value, str) or not value.strip() or len(value) > limit:
+                raise ReleaseValidationError(f"achievement {achievement_id!r}: {field} is invalid")
+    if len(ids) != len(set(ids)):
+        raise ReleaseValidationError("Achievement ids must be unique")
+    for skill in tree.get("skills", []):
+        value = skill.get("completionXp")
+        if value is not None and (
+            not isinstance(value, int) or isinstance(value, bool) or not 0 <= value <= 100
+        ):
+            raise ReleaseValidationError(
+                f"skill {skill.get('id')!r}: completionXp must be between 0 and 100"
+            )
+
+
 def validate_release_structure(tree: dict) -> None:
     """Run every structural check a release must pass. `CurriculumIn` already
     validates the base tree (FK integrity, unique ids) on the draft; this adds the
@@ -206,6 +275,7 @@ def validate_release_structure(tree: dict) -> None:
     """
     validate_prerequisites(tree)
     validate_checkpoints(tree)
+    validate_reward_metadata(tree)
 
 
 # ── Assembly ────────────────────────────────────────────────────────────────────
@@ -227,6 +297,17 @@ def build_release_payload(
 
     skill_ids = set(_skill_index(tree))
     question_manifest = build_question_manifest(questions, skill_ids)
+    available_asset_ids = {
+        asset.get("id")
+        for asset in (assets or [])
+        if isinstance(asset.get("id"), str)
+    }
+    for skill in tree.get("skills", []):
+        thumbnail_asset_id = (skill.get("presentation") or {}).get("thumbnailAssetId")
+        if thumbnail_asset_id and thumbnail_asset_id not in available_asset_ids:
+            raise ReleaseValidationError(
+                f"skill {skill.get('id')!r}: thumbnail asset {thumbnail_asset_id!r} is missing"
+            )
     asset_manifest = [
         {"asset_id": a.get("id"), "snapshot": a, "content_hash": content_hash(a)}
         for a in (assets or [])

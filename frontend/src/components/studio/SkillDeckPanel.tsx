@@ -74,6 +74,7 @@ export const SkillDeckPanel: React.FC<SkillDeckPanelProps> = ({
             {visibleQuestions.map((question, index) => {
               const isActive = question.id === activeId;
               const activeObject = COUNT_OBJECTS.find((object) => object.id === question.objectId) || COUNT_OBJECTS[0];
+              const technique = TECHNIQUE_OPTIONS.find((option) => option.id === question.technique);
               return (
                 <div
                   key={question.id}
@@ -85,8 +86,14 @@ export const SkillDeckPanel: React.FC<SkillDeckPanelProps> = ({
                     className="flex min-w-0 flex-1 items-center gap-2.5 p-2.5 text-left"
                     aria-current={isActive ? "true" : undefined}
                   >
-                    <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[10px] font-semibold ${isActive ? "bg-[#534AB7] text-white" : "bg-slate-100 text-slate-500"}`}>
-                      {index + 1}
+                    <span className={`relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border text-[10px] font-semibold ${isActive ? "border-[#B8AFE8] bg-white text-[#534AB7]" : "border-[#EEEAF8] bg-[#FBFAFF] text-slate-500"}`}>
+                      {technique?.defaultThumbnailUrl ? (
+                        <img
+                          src={technique.defaultThumbnailUrl}
+                          alt=""
+                          className="h-full w-full object-contain"
+                        />
+                      ) : index + 1}
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className={`block truncate text-xs font-medium ${isActive ? "text-[#0E0B55]" : "text-slate-700"}`}>

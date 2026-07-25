@@ -26,6 +26,20 @@ class PurgeIn(BaseModel):
     reason: str = Field(default="Requested by authorized adult", max_length=300)
 
 
+def can_manage_student_data(role: str) -> bool:
+    """Only guardians and admins may export or permanently delete child data."""
+    return role in {Role.admin.value, Role.parent.value}
+
+
+def _require_data_manager(user: User) -> None:
+    role = user.role.value if hasattr(user.role, "value") else str(user.role)
+    if not can_manage_student_data(role):
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            "Only an administrator or guardian may manage learning data",
+        )
+
+
 async def _student(student_id: str) -> Student:
     try:
         row = await Student.get(PydanticObjectId(student_id))
@@ -87,9 +101,6 @@ async def activity(
     user: User = Depends(get_current_user),
 ):
     await authorize_guardian_read(student_id, user)
-    role = user.role.value if hasattr(user.role, "value") else str(user.role)
-    if role not in {Role.admin.value, Role.parent.value}:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "Only an administrator or guardian may delete learning data")
     return await activity_snapshot(student_id, limit=limit, assignment_id=assignment_id)
 
 
@@ -106,6 +117,7 @@ async def recommendations(
 @router.get("/data-export/{student_id}")
 async def data_export(student_id: str, user: User = Depends(get_current_user)):
     await authorize_guardian_read(student_id, user)
+    _require_data_manager(user)
     student = await _student(student_id)
     output = await export_student_data(student)
     await record_audit(
@@ -125,6 +137,7 @@ async def delete_learning_data(
     user: User = Depends(get_current_user),
 ):
     await authorize_guardian_read(student_id, user)
+    _require_data_manager(user)
     if body.confirmation != "DELETE":
         raise HTTPException(status.HTTP_400_BAD_REQUEST, 'Type "DELETE" to confirm')
     await _student(student_id)

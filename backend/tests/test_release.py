@@ -162,3 +162,53 @@ def test_build_release_payload_is_deterministic():
     first = build_release_payload(tree=tree, questions=questions)
     second = build_release_payload(tree=tree, questions=questions)
     assert first["content_hashes"] == second["content_hashes"]
+
+
+def test_build_release_payload_keeps_selected_thumbnail_asset_in_snapshot():
+    skill = _skill("s1")
+    skill["presentation"] = {"thumbnailAssetId": "custom_svg_thumbnail"}
+    asset = {
+        "id": "custom_svg_thumbnail",
+        "label": "Counting thumbnail",
+        "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>",
+        "scale": 1,
+    }
+
+    payload = build_release_payload(tree=_tree([skill]), questions=[], assets=[asset])
+
+    assert payload["tree"]["skills"][0]["presentation"]["thumbnailAssetId"] == asset["id"]
+    assert payload["asset_manifest"][0]["snapshot"] == asset
+
+
+def test_build_release_payload_rejects_missing_thumbnail_asset():
+    skill = _skill("s1")
+    skill["presentation"] = {"thumbnailAssetId": "missing"}
+
+    with pytest.raises(ReleaseValidationError, match="thumbnail asset.*is missing"):
+        build_release_payload(tree=_tree([skill]), questions=[], assets=[])
+
+
+@pytest.mark.parametrize(
+    "rewards",
+    [
+        {"quest": {"activitiesPerSession": 0}},
+        {"quest": {"activitiesPerSession": 6}},
+        {"xp": {"correctAnswer": -1}},
+        {"xp": {"firstTryBonus": 101}},
+        {"xp": {"activityCompletion": 1.5}},
+        {"level": {"xpPerLevel": 0}},
+        {"achievements": [{"id": "bad", "label": "Bad", "description": "Bad", "metric": "madeUp", "target": 1, "icon": "star", "accent": "purple"}]},
+    ],
+)
+def test_build_release_payload_rejects_invalid_reward_configuration(rewards):
+    tree = _tree([_skill("s1")])
+    tree["rewards"] = rewards
+    with pytest.raises(ReleaseValidationError):
+        build_release_payload(tree=tree, questions=[])
+
+
+def test_build_release_payload_rejects_invalid_skill_completion_xp():
+    skill = _skill("s1")
+    skill["completionXp"] = 101
+    with pytest.raises(ReleaseValidationError, match="completionXp"):
+        build_release_payload(tree=_tree([skill]), questions=[])

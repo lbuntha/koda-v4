@@ -229,14 +229,14 @@ class AnalyticsLoggerService {
   public logAttempt(
     ctx: SlideContext,
     outcome: AttemptOutcome,
-    detail?: { expected?: string; selected?: string; details?: Record<string, any> },
+    detail?: { expected?: unknown; selected?: unknown; details?: Record<string, any> },
   ) {
     const nextAttempt = (this.attemptCounts.get(ctx.slideIndex) || 0) + 1;
     this.attemptCounts.set(ctx.slideIndex, nextAttempt);
     const openedAt = this.slideOpenedAt.get(ctx.slideIndex);
 
     const errorMagnitude = (() => {
-      if (!detail?.expected || !detail?.selected) return undefined;
+      if (detail?.expected == null || detail?.selected == null) return undefined;
       const e = Number(detail.expected), s = Number(detail.selected);
       return Number.isFinite(e) && Number.isFinite(s) ? Math.abs(e - s) : undefined;
     })();
@@ -276,6 +276,7 @@ class AnalyticsLoggerService {
     releaseId?: string;
     assignmentId?: string;
     recommendationRunId?: string;
+    curriculumSkillId?: string;
   }) {
     return this.record({
       questionId: "",
@@ -289,6 +290,7 @@ class AnalyticsLoggerService {
       releaseId: ctx.releaseId,
       assignmentId: ctx.assignmentId,
       recommendationRunId: ctx.recommendationRunId,
+      curriculumSkillId: ctx.curriculumSkillId,
       eventType: "lesson_complete",
       actionSummary: `Completed all ${ctx.totalSlides} interactive slides! 🎉`,
     });

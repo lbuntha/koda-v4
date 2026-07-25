@@ -1,9 +1,17 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Clock3, FileText, History, ShieldCheck, UserRound } from "lucide-react";
+import { Clock3, FileText, History, Plus, ShieldCheck, Star, Trash2, UserRound, Zap } from "lucide-react";
 import { academicApi, AcademicCatalog } from "../../api/academic";
 import type { CurriculumAuditEvent, CurriculumOwner } from "../../api/curriculum";
 import { curriculumApi } from "../../api/curriculum";
-import type { CurriculumTree, Grade, Subject } from "../../curriculum/types";
+import {
+  curriculumRewards,
+  type AchievementIcon,
+  type AchievementMetric,
+  type CurriculumRewards,
+  type CurriculumTree,
+  type Grade,
+  type Subject,
+} from "../../curriculum/types";
 import type { CurriculumPersistenceStatus } from "../../curriculum/useCurriculumTree";
 import { Badge, Button, Drawer, Input, Label, Select, Skeleton, Tabs, TabsContent, TabsList, TabsTrigger, Textarea } from "../ui";
 
@@ -18,6 +26,7 @@ interface MetadataDraft {
   published: boolean;
   grades: Grade[];
   subjects: Subject[];
+  rewards: CurriculumRewards;
 }
 
 interface CurriculumDetailsDrawerProps {
@@ -96,6 +105,7 @@ const makeDraft = (tree: CurriculumTree, published: boolean): MetadataDraft => {
     published,
     grades: tree.grades,
     subjects: tree.subjects,
+    rewards: curriculumRewards(tree),
   };
 };
 
@@ -174,7 +184,61 @@ export const CurriculumDetailsDrawer: React.FC<CurriculumDetailsDrawerProps> = (
   }, [isOpen, tab, revision, curriculumId]);
 
   const unchanged = JSON.stringify(draft) === JSON.stringify(makeDraft(tree, published));
-  const invalid = !draft.title.trim() || !draft.version.trim() || !draft.primaryGradeId || !draft.primarySubjectId;
+  const rewardValues = [
+    draft.rewards.xp.correctAnswer,
+    draft.rewards.xp.firstTryBonus,
+    draft.rewards.xp.activityCompletion,
+  ];
+  const rewardsInvalid = (
+    !draft.rewards.quest.label.trim()
+    || !Number.isInteger(draft.rewards.quest.activitiesPerSession)
+    || draft.rewards.quest.activitiesPerSession < 1
+    || draft.rewards.quest.activitiesPerSession > 5
+    || rewardValues.some(value => !Number.isInteger(value) || value < 0 || value > 100)
+    || !Number.isInteger(draft.rewards.level.xpPerLevel)
+    || draft.rewards.level.xpPerLevel < 1
+    || draft.rewards.level.xpPerLevel > 10_000
+  );
+  const achievementsInvalid = draft.rewards.achievements.some(achievement => (
+    !achievement.id
+    || !achievement.label.trim()
+    || !achievement.description.trim()
+    || !Number.isInteger(achievement.target)
+    || achievement.target < 1
+    || achievement.target > 10_000
+  )) || new Set(draft.rewards.achievements.map(achievement => achievement.id)).size !== draft.rewards.achievements.length;
+  const invalid = (
+    !draft.title.trim()
+    || !draft.version.trim()
+    || !draft.primaryGradeId
+    || !draft.primarySubjectId
+    || rewardsInvalid
+    || achievementsInvalid
+  );
+
+  const addAchievement = () => {
+    const existingIds = new Set(draft.rewards.achievements.map(achievement => achievement.id));
+    let sequence = draft.rewards.achievements.length + 1;
+    while (existingIds.has(`award-${sequence}`)) sequence += 1;
+    setDraft(current => ({
+      ...current,
+      rewards: {
+        ...current.rewards,
+        achievements: [
+          ...current.rewards.achievements,
+          {
+            id: `award-${sequence}`,
+            label: "",
+            description: "",
+            metric: "lessonsCompleted",
+            target: 1,
+            icon: "star",
+            accent: "purple",
+          },
+        ],
+      },
+    }));
+  };
 
   const handleSave = () => {
     if (invalid) return;
@@ -299,6 +363,286 @@ export const CurriculumDetailsDrawer: React.FC<CurriculumDetailsDrawerProps> = (
                   <option value="published">Published</option>
                 </Select>
               </div>
+            </div>
+
+            <div className="rounded-2xl border border-[#E7E3F6] bg-[#FBFAFF] p-4">
+              <div className="koda-admin-card-title flex items-center gap-2 text-[#0E0B55]">
+                <Star size={16} className="text-[#534AB7]" /> Quest and XP
+              </div>
+              <p className="koda-admin-label mt-1 text-[#6D6997]">
+                Released values drive the learner quest and parent reward reporting.
+              </p>
+              <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="quest-label">Quest label</Label>
+                  <Input
+                    id="quest-label"
+                    maxLength={80}
+                    value={draft.rewards.quest.label}
+                    onChange={event => setDraft(current => ({
+                      ...current,
+                      rewards: {
+                        ...current.rewards,
+                        quest: { ...current.rewards.quest, label: event.target.value },
+                      },
+                    }))}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="quest-activities">Activities / stars</Label>
+                  <Input
+                    id="quest-activities"
+                    type="number"
+                    min={1}
+                    max={5}
+                    value={draft.rewards.quest.activitiesPerSession}
+                    onChange={event => setDraft(current => ({
+                      ...current,
+                      rewards: {
+                        ...current.rewards,
+                        quest: {
+                          ...current.rewards.quest,
+                          activitiesPerSession: Number(event.target.value),
+                        },
+                      },
+                    }))}
+                  />
+                </div>
+              </div>
+              <div className="mt-4 flex items-center gap-2 border-t border-[#E7E3F6] pt-4">
+                <Zap size={15} className="text-[#EF9F27]" />
+                <span className="koda-admin-card-title text-[#0E0B55]">XP awards</span>
+              </div>
+              <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                {([
+                  ["correctAnswer", "Correct"],
+                  ["firstTryBonus", "First try"],
+                  ["activityCompletion", "Completion"],
+                ] as const).map(([field, label]) => (
+                  <div key={field} className="space-y-1.5">
+                    <Label htmlFor={`xp-${field}`}>{label}</Label>
+                    <Input
+                      id={`xp-${field}`}
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={draft.rewards.xp[field]}
+                      onChange={event => setDraft(current => ({
+                        ...current,
+                        rewards: {
+                          ...current.rewards,
+                          xp: { ...current.rewards.xp, [field]: Number(event.target.value) },
+                        },
+                      }))}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3 space-y-1.5">
+                <Label htmlFor="xp-per-level">XP needed for each level</Label>
+                <Input
+                  id="xp-per-level"
+                  type="number"
+                  min={1}
+                  max={10000}
+                  value={draft.rewards.level.xpPerLevel || ""}
+                  placeholder="Required"
+                  onChange={event => setDraft(current => ({
+                    ...current,
+                    rewards: {
+                      ...current.rewards,
+                      level: { xpPerLevel: Number(event.target.value) },
+                    },
+                  }))}
+                />
+              </div>
+              {rewardsInvalid && (
+                <p className="mt-3 text-[11px] font-medium text-rose-600">
+                  Enter a quest label, 1–5 activities, XP awards from 0–100, and an admin level threshold from 1–10,000.
+                </p>
+              )}
+            </div>
+
+            <div className="rounded-2xl border border-[#E7E3F6] bg-white p-4 shadow-[0_2px_12px_rgba(83,74,183,0.05)]">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="koda-admin-card-title flex items-center gap-2 text-[#0E0B55]">
+                    <Star size={16} className="text-[#EF9F27]" /> Practice achievements
+                  </div>
+                  <p className="koda-admin-label mt-1 text-[#6D6997]">
+                    Admin-authored rules calculated from verified learner practice.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={addAchievement}
+                  disabled={draft.rewards.achievements.length >= 12}
+                >
+                  <Plus size={14} /> Add
+                </Button>
+              </div>
+
+              {draft.rewards.achievements.length === 0 ? (
+                <div className="mt-4 rounded-xl border border-dashed border-[#D8D1ED] bg-[#FBFAFF] px-4 py-5 text-center">
+                  <p className="koda-admin-label text-[#6D6997]">No achievements configured. Learners will not see or earn badges.</p>
+                </div>
+              ) : (
+                <div className="mt-4 space-y-3">
+                  {draft.rewards.achievements.map((achievement, index) => (
+                    <div key={achievement.id} className="rounded-xl border border-[#E7E3F6] bg-[#FBFAFF] p-3">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="space-y-1.5">
+                          <Label htmlFor={`achievement-label-${achievement.id}`}>Badge name</Label>
+                          <Input
+                            id={`achievement-label-${achievement.id}`}
+                            maxLength={80}
+                            value={achievement.label}
+                            placeholder="e.g. Math Champ"
+                            onChange={event => setDraft(current => ({
+                              ...current,
+                              rewards: {
+                                ...current.rewards,
+                                achievements: current.rewards.achievements.map((item, itemIndex) =>
+                                  itemIndex === index ? { ...item, label: event.target.value } : item
+                                ),
+                              },
+                            }))}
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor={`achievement-description-${achievement.id}`}>How to earn it</Label>
+                          <Input
+                            id={`achievement-description-${achievement.id}`}
+                            maxLength={200}
+                            value={achievement.description}
+                            placeholder="Explain the milestone"
+                            onChange={event => setDraft(current => ({
+                              ...current,
+                              rewards: {
+                                ...current.rewards,
+                                achievements: current.rewards.achievements.map((item, itemIndex) =>
+                                  itemIndex === index ? { ...item, description: event.target.value } : item
+                                ),
+                              },
+                            }))}
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor={`achievement-metric-${achievement.id}`}>Verified metric</Label>
+                          <Select
+                            id={`achievement-metric-${achievement.id}`}
+                            value={achievement.metric}
+                            onChange={event => setDraft(current => ({
+                              ...current,
+                              rewards: {
+                                ...current.rewards,
+                                achievements: current.rewards.achievements.map((item, itemIndex) =>
+                                  itemIndex === index
+                                    ? { ...item, metric: event.target.value as AchievementMetric }
+                                    : item
+                                ),
+                              },
+                            }))}
+                          >
+                            <option value="lessonsCompleted">Practices completed</option>
+                            <option value="firstTryCorrect">First-try answers</option>
+                            <option value="xpEarned">XP earned</option>
+                            <option value="proficientSkills">Proficient skills</option>
+                            <option value="masteredSkills">Mastered skills</option>
+                            <option value="streakDays">Best practice streak</option>
+                          </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor={`achievement-target-${achievement.id}`}>Target</Label>
+                          <Input
+                            id={`achievement-target-${achievement.id}`}
+                            type="number"
+                            min={1}
+                            max={10000}
+                            value={achievement.target}
+                            onChange={event => setDraft(current => ({
+                              ...current,
+                              rewards: {
+                                ...current.rewards,
+                                achievements: current.rewards.achievements.map((item, itemIndex) =>
+                                  itemIndex === index ? { ...item, target: Number(event.target.value) } : item
+                                ),
+                              },
+                            }))}
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor={`achievement-icon-${achievement.id}`}>Icon</Label>
+                          <Select
+                            id={`achievement-icon-${achievement.id}`}
+                            value={achievement.icon}
+                            onChange={event => setDraft(current => ({
+                              ...current,
+                              rewards: {
+                                ...current.rewards,
+                                achievements: current.rewards.achievements.map((item, itemIndex) =>
+                                  itemIndex === index
+                                    ? { ...item, icon: event.target.value as AchievementIcon }
+                                    : item
+                                ),
+                              },
+                            }))}
+                          >
+                            {["star", "medal", "award", "trophy", "gem", "flame"].map(icon => (
+                              <option key={icon} value={icon}>{icon}</option>
+                            ))}
+                          </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor={`achievement-accent-${achievement.id}`}>Color</Label>
+                          <div className="flex gap-2">
+                            <Select
+                              id={`achievement-accent-${achievement.id}`}
+                              value={achievement.accent}
+                              onChange={event => setDraft(current => ({
+                                ...current,
+                                rewards: {
+                                  ...current.rewards,
+                                  achievements: current.rewards.achievements.map((item, itemIndex) =>
+                                    itemIndex === index
+                                      ? { ...item, accent: event.target.value as typeof achievement.accent }
+                                      : item
+                                  ),
+                                },
+                              }))}
+                            >
+                              {["purple", "blue", "green", "amber", "pink"].map(accent => (
+                                <option key={accent} value={accent}>{accent}</option>
+                              ))}
+                            </Select>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              aria-label={`Remove ${achievement.label || "achievement"}`}
+                              onClick={() => setDraft(current => ({
+                                ...current,
+                                rewards: {
+                                  ...current.rewards,
+                                  achievements: current.rewards.achievements.filter((_, itemIndex) => itemIndex !== index),
+                                },
+                              }))}
+                            >
+                              <Trash2 size={14} />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {achievementsInvalid && (
+                <p className="mt-3 text-[11px] font-medium text-rose-600">
+                  Every achievement needs a name, explanation, and whole-number target from 1–10,000.
+                </p>
+              )}
             </div>
 
             <div className="rounded-2xl border border-[#E7E3F6] bg-[#FBFAFF] p-4">

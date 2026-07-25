@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, Beaker, CheckCircle2, Gauge, RefreshCcw, RotateCcw, Route, Save, SlidersHorizontal, TrendingDown, TrendingUp, Users } from "lucide-react";
+import { AlertTriangle, Beaker, CheckCircle2, Gauge, RefreshCcw, RotateCcw, Route, Save, Scale, SlidersHorizontal, TrendingDown, TrendingUp, Users } from "lucide-react";
 import { RescoreJob, ScoringConfig, ScoringPreview, settingsApi } from "../api/settings";
 import { Badge, Button, Card, FieldHint, Input, Label, SkeletonCard, Switch } from "../components/ui";
 import { useAppSettings } from "../settings/AppSettingsContext";
+import { MasteryJourneySimulator } from "./MasteryJourneySimulator";
 
 const DEFAULT_SCORING: ScoringConfig = {
   weights: { firstTry: 0.45, accuracy: 0.2, independence: 0.2, speed: 0.15 },
@@ -57,8 +58,8 @@ const NumberField: React.FC<NumberFieldProps> = ({
   suffix,
   help,
 }) => (
-  <div className="min-w-0 space-y-1.5">
-    <div className="flex min-h-5 items-center gap-1">
+  <div className="min-w-0 space-y-1">
+    <div className="flex min-h-4 items-center gap-1">
       <Label className="normal-case tracking-normal">{label}</Label>
       {help && <FieldHint text={help} label={`About ${label}`} />}
     </div>
@@ -70,20 +71,17 @@ const NumberField: React.FC<NumberFieldProps> = ({
         max={max}
         step={step}
         onChange={event => onChange(Number(event.target.value))}
-        className={suffix ? "pr-12" : undefined}
+        className={`h-9 rounded-lg px-3 ${suffix ? "pr-12" : ""}`}
       />
       {suffix && <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#8D89AE]">{suffix}</span>}
     </div>
   </div>
 );
 
-const SectionHeader: React.FC<{ icon: React.ElementType; title: string; description: string }> = ({ icon: Icon, title, description }) => (
-  <div className="mb-4 flex items-start gap-3 border-b border-[#EEEAF8] pb-4">
-    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#F3F0FF] text-[#534AB7]"><Icon size={17} /></span>
-    <div>
-      <h3 className="koda-admin-section-title">{title}</h3>
-      <p className="koda-admin-secondary mt-1">{description}</p>
-    </div>
+const SectionHeader: React.FC<{ icon: React.ElementType; title: string }> = ({ icon: Icon, title }) => (
+  <div className="mb-3 flex items-center gap-2.5 border-b border-[#EEEAF8] pb-3">
+    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#F3F0FF] text-[#534AB7]"><Icon size={15} /></span>
+    <h3 className="koda-admin-section-title">{title}</h3>
   </div>
 );
 
@@ -179,11 +177,10 @@ export const ProgressionSettings: React.FC = () => {
   }
 
   return (
-    <div className="w-full space-y-4">
-      <div className="flex flex-col gap-3 rounded-2xl border border-[#DED8F3] bg-[#F7F4FF] p-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="w-full space-y-3">
+      <div className="flex flex-col gap-2 rounded-xl border border-[#DED8F3] bg-[#F7F4FF] px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="koda-admin-section-title">Progression engine · revision {settings.scoring_revision}</p>
-          <p className="koda-admin-secondary mt-1">These global rules decide how evidence becomes Beginner, Developing, Proficient, and Master.</p>
         </div>
         {job && (
           <span className={`koda-admin-chip inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 ${
@@ -197,10 +194,12 @@ export const ProgressionSettings: React.FC = () => {
         )}
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-2">
-        <Card className="border-[#E7E3F6] p-4 sm:p-5">
-          <SectionHeader icon={Gauge} title="Evidence and thresholds" description="Balance the evidence signals and set the score needed for each rung." />
-          <div className="grid gap-3 sm:grid-cols-2">
+      <MasteryJourneySimulator config={draft} />
+
+      <div className="grid gap-3 xl:grid-cols-2">
+        <Card className="border-[#E7E3F6] p-4">
+          <SectionHeader icon={Scale} title="Evidence and thresholds" />
+          <div className="grid gap-x-3 gap-y-2.5 sm:grid-cols-2">
             <NumberField label="First-try weight" help="How much the score rewards a correct first submitted answer. Higher values emphasize immediate understanding." value={percent(draft.weights.firstTry)} onChange={value => setWeight("firstTry", value)} max={100} suffix="%" />
             <NumberField label="Accuracy weight" help="How much all correct attempts contribute to the score, including retries. Higher values emphasize overall correctness." value={percent(draft.weights.accuracy)} onChange={value => setWeight("accuracy", value)} max={100} suffix="%" />
             <NumberField label="Independence weight" help="How much working without hints contributes to the score. Higher values make hint-free work more important." value={percent(draft.weights.independence)} onChange={value => setWeight("independence", value)} max={100} suffix="%" />
@@ -213,24 +212,24 @@ export const ProgressionSettings: React.FC = () => {
           </div>
         </Card>
 
-        <Card className="border-[#E7E3F6] p-4 sm:p-5">
-          <SectionHeader icon={SlidersHorizontal} title="Mastery gates" description="Require enough volume, spacing, and challenge before promotion." />
-          <div className="space-y-4">
+        <Card className="border-[#E7E3F6] p-4">
+          <SectionHeader icon={SlidersHorizontal} title="Mastery gates" />
+          <div className="space-y-3">
             <div>
-              <p className="koda-admin-label mb-2">Developing</p>
+              <p className="koda-admin-label mb-1.5">Developing</p>
               <NumberField label="Minimum plays" help="Minimum verified question attempts required before a skill can reach Developing." value={draft.gates.developing.minPlays} onChange={value => setGate("developing", "minPlays", value)} min={1} />
             </div>
             <div>
-              <p className="koda-admin-label mb-2">Proficient</p>
-              <div className="grid gap-3 sm:grid-cols-3">
+              <p className="koda-admin-label mb-1.5">Proficient</p>
+              <div className="grid gap-2.5 sm:grid-cols-3">
                 <NumberField label="Minimum plays" help="Total verified attempts required before Proficient, even when the score is already high enough." value={draft.gates.proficient.minPlays} onChange={value => setGate("proficient", "minPlays", value)} min={1} />
                 <NumberField label="Sessions" help="Separate learning sessions required for Proficient. This prevents one short burst from proving durable understanding." value={draft.gates.proficient.minSessions} onChange={value => setGate("proficient", "minSessions", value)} min={1} />
                 <NumberField label="Hard plays" help="Hard-difficulty attempts required for Proficient. Set to zero if difficult questions are not required." value={draft.gates.proficient.minHardPlays} onChange={value => setGate("proficient", "minHardPlays", value)} />
               </div>
             </div>
             <div>
-              <p className="koda-admin-label mb-2">Master</p>
-              <div className="grid gap-3 sm:grid-cols-2">
+              <p className="koda-admin-label mb-1.5">Master</p>
+              <div className="grid gap-2.5 sm:grid-cols-2">
                 <NumberField label="Minimum plays" help="Total verified attempts required before Master. It must be at least the Proficient play requirement." value={draft.gates.master.minPlays} onChange={value => setGate("master", "minPlays", value)} min={1} />
                 <NumberField label="Distinct days" help="Different calendar days with practice required for Master, ensuring learning is spaced over time." value={draft.gates.master.minDistinctDays} onChange={value => setGate("master", "minDistinctDays", value)} min={1} />
                 <NumberField label="Hard plays" help="Hard-difficulty attempts required for Master, providing evidence that the student can handle challenge." value={draft.gates.master.minHardPlays} onChange={value => setGate("master", "minHardPlays", value)} />
@@ -240,9 +239,9 @@ export const ProgressionSettings: React.FC = () => {
           </div>
         </Card>
 
-        <Card className="border-[#E7E3F6] p-4 sm:p-5">
-          <SectionHeader icon={Route} title="Practice delivery" description="Control session size, reinforcement, skips, and placement behavior." />
-          <div className="grid gap-3 sm:grid-cols-2">
+        <Card className="border-[#E7E3F6] p-4">
+          <SectionHeader icon={Route} title="Practice delivery" />
+          <div className="grid gap-x-3 gap-y-2.5 sm:grid-cols-2">
             <NumberField label="Skills per session" help="Number of skills placed in the student's recommended plan. Larger plans offer variety but take longer." value={draft.recommendation.skills_per_session} onChange={value => setDraft(current => ({ ...current, recommendation: { ...current.recommendation, skills_per_session: value } }))} min={1} max={10} />
             <NumberField label="Review/reinforcement cap" help="Maximum plan slots that may be review or reinforcement. Remaining slots are reserved for forward progress." value={draft.recommendation.max_non_new} onChange={value => setDraft(current => ({ ...current, recommendation: { ...current.recommendation, max_non_new: value } }))} max={10} />
             <NumberField label="Skip cooldown" help="Sessions to wait before recommending a skipped skill again. Zero allows it to return immediately." value={draft.recommendation.skip_cooldown_sessions} onChange={value => setDraft(current => ({ ...current, recommendation: { ...current.recommendation, skip_cooldown_sessions: value } }))} max={10} suffix="sessions" />
@@ -253,21 +252,20 @@ export const ProgressionSettings: React.FC = () => {
             <NumberField label="Rapid confirmation plays" help="Consecutive strong first-try, no-hint answers needed to advance a knowledgeable student quickly after placement." value={draft.placement.rapid_confirmation_plays} onChange={value => setDraft(current => ({ ...current, placement: { ...current.placement, rapid_confirmation_plays: value } }))} min={1} max={20} />
             <NumberField label="Generator revision" help="Version stamped on newly generated placement manifests. Increase only when placement-generation behavior changes." value={draft.placement.generator_revision} onChange={value => setDraft(current => ({ ...current, placement: { ...current.placement, generator_revision: value } }))} min={1} />
           </div>
-          <div className="mt-4 flex items-center justify-between rounded-xl border border-[#EEEAF8] bg-[#FBFAFF] px-3 py-2.5">
+          <div className="mt-3 flex items-center justify-between rounded-lg border border-[#EEEAF8] bg-[#FBFAFF] px-3 py-2">
             <div>
               <div className="flex items-center gap-1">
                 <p className="text-xs font-medium text-[#17143D]">Checkpoint skills only</p>
                 <FieldHint text="When enabled, placement samples authored checkpoint skills. When disabled, it can sample the broader in-scope skill sequence." label="About checkpoint skills only" />
               </div>
-              <p className="text-[11px] text-[#6D6997]">Keep placement compact and curriculum-directed.</p>
             </div>
             <Switch checked={draft.placement.checkpoints_only} onCheckedChange={value => setDraft(current => ({ ...current, placement: { ...current.placement, checkpoints_only: value } }))} />
           </div>
         </Card>
 
-        <Card className="border-[#E7E3F6] p-4 sm:p-5">
-          <SectionHeader icon={RefreshCcw} title="Review intervals" description="Choose how soon each earned level returns for spaced review." />
-          <div className="grid gap-3 sm:grid-cols-2">
+        <Card className="border-[#E7E3F6] p-4">
+          <SectionHeader icon={RefreshCcw} title="Review intervals" />
+          <div className="grid gap-x-3 gap-y-2.5 sm:grid-cols-2">
             {(["beginner", "developing", "proficient", "master"] as const).map(level => (
               <NumberField
                 key={level}
@@ -287,7 +285,7 @@ export const ProgressionSettings: React.FC = () => {
               />
             ))}
           </div>
-          <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3">
+          <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-2.5">
             <div className="flex gap-2">
               <AlertTriangle size={16} className="mt-0.5 shrink-0 text-amber-700" />
               <div>
@@ -295,7 +293,7 @@ export const ProgressionSettings: React.FC = () => {
                 <p className="mt-1 text-[11px] leading-4 text-amber-800">Saving creates a new revision and re-scores every learner from the append-only event log.</p>
               </div>
             </div>
-            <label className="mt-3 flex cursor-pointer items-center gap-2 text-xs text-amber-900">
+            <label className="mt-2 flex cursor-pointer items-center gap-2 text-xs text-amber-900">
               <input type="checkbox" checked={acknowledged} onChange={event => setAcknowledged(event.target.checked)} className="h-4 w-4 accent-[#534AB7]" />
               I understand this may change displayed mastery levels.
             </label>
@@ -320,7 +318,7 @@ export const ProgressionSettings: React.FC = () => {
             {[
               { label: "Learners scanned", value: preview.studentsScanned, icon: Users, tone: "text-[#534AB7]" },
               { label: "Learners affected", value: preview.affectedStudents, icon: Users, tone: "text-amber-600" },
-              { label: "Skills scanned", value: preview.skillsScanned, icon: Gauge, tone: "text-[#534AB7]" },
+              { label: `Skills changed / ${preview.skillsScanned}`, value: preview.changedSkills, icon: Gauge, tone: "text-[#534AB7]" },
               { label: "Promotions", value: preview.promotedSkills, icon: TrendingUp, tone: "text-emerald-600" },
               { label: "Demotions", value: preview.demotedSkills, icon: TrendingDown, tone: "text-rose-600" },
               { label: "Review dates changed", value: preview.reviewDueChanged, icon: RefreshCcw, tone: "text-amber-600" },

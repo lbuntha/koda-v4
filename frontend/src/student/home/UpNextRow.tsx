@@ -1,6 +1,7 @@
 import React from "react";
 import type { CourseQueueItem } from "../../api/course";
 import { KIND } from "./kinds";
+import { ActivityStatusBadge } from "./ActivityStatusBadge";
 
 interface Props {
   items: CourseQueueItem[];
@@ -13,7 +14,7 @@ export const UpNextRow: React.FC<Props> = ({ items, onStart }) => {
   if (items.length === 0) return null;
   return (
     <section className="mt-6">
-      <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[#8178AE]">Up next</p>
+      <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[#8178AE] dark:text-[#9C93C6]">Up next</p>
       <div className="flex flex-wrap gap-2">
         {items.map(item => {
           const Icon = KIND[item.kind].icon;
@@ -22,9 +23,10 @@ export const UpNextRow: React.FC<Props> = ({ items, onStart }) => {
               key={`${item.assignmentId}:${item.skillId}`}
               type="button"
               onClick={() => onStart(item)}
-              className="inline-flex items-center gap-2 rounded-full border border-[#E2DEEF] bg-white px-3.5 py-2 text-xs font-semibold text-[#4A4568] shadow-sm transition hover:border-[#B9AEEC] hover:bg-[#F6F3FF]"
+              className="inline-flex items-center gap-2 rounded-full border border-[#E2DEEF] bg-white px-3.5 py-2 text-xs font-semibold text-[#4A4568] shadow-sm transition hover:border-[#B9AEEC] hover:bg-[#F6F3FF] dark:border-white/10 dark:bg-white/5 dark:text-[#CFCBE6] dark:shadow-none dark:hover:border-white/20 dark:hover:bg-white/10"
             >
-              <Icon size={13} className="text-[#8178AE]" /> {item.skillLabel}
+              <Icon size={13} className="text-[#8178AE] dark:text-[#9C93C6]" /> {item.skillLabel}
+              <ActivityStatusBadge status={item.status} />
             </button>
           );
         })}

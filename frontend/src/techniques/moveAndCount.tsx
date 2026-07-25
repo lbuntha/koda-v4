@@ -20,6 +20,7 @@ export const moveAndCount = defineTechnique({
   label: "2. Move & Count",
   icon: <ArrowRightLeft size={14} className="text-emerald-500" />,
   defaultTargetCount: 5,
+  defaultThumbnailUrl: "/assets/components/move-and-count.svg",
   component: React.lazy(() =>
     import("../components/canvases/MoveAndCountCanvas").then((m) => ({ default: m.MoveAndCountCanvas })),
   ),

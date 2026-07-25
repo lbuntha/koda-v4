@@ -135,6 +135,50 @@
   animation: confettiRain 3.5s linear forwards;
 }
 
+/* Hero mascot idle hop with weight: crouch, fast launch, hang at the apex, then
+   an accelerating fall, a landing squash and one small secondary bounce. Per-step
+   timing functions carry the gravity — the shadow keyframes react in sync. */
+@keyframes mascotHop {
+  0% { transform: translateY(0) scale(1, 1); animation-timing-function: ease-in-out; }
+  8% { transform: translateY(1%) scale(1.07, 0.9); animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1); }
+  16% { transform: translateY(-14%) scale(0.95, 1.09); animation-timing-function: cubic-bezier(0.15, 0.6, 0.3, 1); }
+  30% { transform: translateY(-22%) scale(1, 1); animation-timing-function: ease-in-out; }
+  38% { transform: translateY(-21%) scale(1, 1); animation-timing-function: cubic-bezier(0.7, 0, 0.9, 0.4); }
+  50% { transform: translateY(0) scale(1.08, 0.9); animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1); }
+  57% { transform: translateY(-7%) scale(0.97, 1.04); animation-timing-function: cubic-bezier(0.6, 0, 0.9, 0.5); }
+  64% { transform: translateY(0) scale(1.04, 0.95); animation-timing-function: ease-out; }
+  70% { transform: translateY(-2%) scale(0.99, 1.01); animation-timing-function: ease-in-out; }
+  76%, 100% { transform: translateY(0) scale(1, 1); }
+}
+
+/* Ground shadow: tight and faint at the apex, wide and dark on impact. */
+@keyframes mascotShadow {
+  0% { transform: scale(1, 1); opacity: 0.26; }
+  8% { transform: scale(1.1, 1); opacity: 0.3; }
+  30% { transform: scale(0.6, 0.75); opacity: 0.1; }
+  38% { transform: scale(0.62, 0.78); opacity: 0.11; }
+  50% { transform: scale(1.18, 1.05); opacity: 0.32; }
+  57% { transform: scale(0.86, 0.92); opacity: 0.2; }
+  64% { transform: scale(1.08, 1); opacity: 0.29; }
+  76%, 100% { transform: scale(1, 1); opacity: 0.26; }
+}
+
+.animate-mascot-hop {
+  transform-origin: 50% 92%;
+  animation: mascotHop 3s linear infinite;
+}
+
+.animate-mascot-shadow {
+  animation: mascotShadow 3s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-mascot-hop,
+  .animate-mascot-shadow {
+    animation: none;
+  }
+}
+
 /* Touch devices: suppress double-tap zoom and the long-press callout so quick
    repeated taps on counting objects register as taps, not browser gestures. */
 @media (pointer: coarse) {

@@ -7,6 +7,7 @@ from ...core.deps import Principal, get_principal
 from ...core.permissions import authorize_guardian_read
 from ...models.student import Student
 from ...models.user import Role, User
+from ..analytics.service import activity_snapshot
 from .service import build_progress
 
 
@@ -37,6 +38,19 @@ async def _authorize(student_id: str, principal: Principal) -> None:
 async def progress(student_id: str, principal: Principal = Depends(get_principal)):
     await _authorize(student_id, principal)
     return await build_progress(student_id)
+
+
+@router.get("/{student_id}/activity-signal")
+async def activity_signal(student_id: str, principal: Principal = Depends(get_principal)):
+    """Student-safe home signal: no raw events or adult-only analytics detail."""
+    await _authorize(student_id, principal)
+    output = await activity_snapshot(student_id, limit=1)
+    summary = output["summary"]
+    return {
+        "studentId": student_id,
+        "currentStreakDays": summary["currentStreakDays"],
+        "weeklyActivity": summary["weeklyActivity"],
+    }
 
 
 @router.get("/{student_id}/{skill_id}")

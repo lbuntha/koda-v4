@@ -25,6 +25,16 @@ uvicorn app.main:app --reload --port 8000
 Needs a running MongoDB (local `mongod`, Docker, or Atlas — set `MONGO_URI`).
 Interactive API docs: http://localhost:8000/docs
 
+## Grade 1 functional fixture
+
+With the Docker stack running, use `make seed-grade1` from the repository root.
+For `make dev-local`, use `make seed-grade1-local` instead. Each command
+creates/resets an isolated Grade 1 parent, learner, Kid-band catalog entry,
+playable curriculum, active assignment, and fresh placement flow in the
+matching database. The command prints the demo credentials it configured. Set
+`SEED_GRADE1_RESET=0` to preserve that learner's existing placement and progress
+on a later run.
+
 ## Auth flows
 
 - **Adults:** `POST /auth/register` then `POST /auth/login` (OAuth2 password form) →

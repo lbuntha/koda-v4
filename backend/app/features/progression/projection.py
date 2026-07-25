@@ -17,6 +17,7 @@ cache. The command writes idempotently (upsert by student+curriculum+skill).
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from typing import Any
 
 from ..events.contract import CANONICAL_FIELDS, normalize_event
@@ -65,6 +66,12 @@ def plan_backfill(stored_events: list[dict]) -> dict:
 def _to_engine_event(e: dict) -> dict:
     """Adapt a stored canonical (snake_case) event into the engine's event shape."""
     difficulty = e.get("difficulty")
+    occurred_at = e.get("occurred_at")
+    if not occurred_at and isinstance(e.get("client_timestamp_ms"), (int, float)):
+        occurred_at = datetime.fromtimestamp(
+            e["client_timestamp_ms"] / 1000,
+            tz=timezone.utc,
+        ).isoformat()
     return {
         "eventType": e.get("event_type"),
         "outcome": e.get("outcome"),
@@ -72,7 +79,7 @@ def _to_engine_event(e: dict) -> dict:
         "hintUsedBeforeAttempt": e.get("hint_used_before_attempt"),
         "timeOnTaskMs": e.get("time_on_task_ms"),
         "sessionId": e.get("session_id"),
-        "occurredAt": e.get("occurred_at"),
+        "occurredAt": occurred_at,
         "clientTimestampMs": e.get("client_timestamp_ms"),
         "details": {"difficulty": difficulty} if difficulty else {},
     }

@@ -16,7 +16,9 @@ export const AvatarPicker: React.FC<{ value: string | null; onChange: (v: string
         type="button"
         onClick={() => onChange(a)}
         className={`aspect-square rounded-xl text-xl flex items-center justify-center transition-all cursor-pointer ${
-          value === a ? "bg-indigo-100 ring-2 ring-indigo-500" : "bg-slate-50 hover:bg-slate-100"
+          value === a
+            ? "bg-indigo-100 ring-2 ring-indigo-500 dark:bg-indigo-400/20 dark:ring-indigo-400"
+            : "bg-slate-50 hover:bg-slate-100 dark:bg-white/5 dark:hover:bg-white/10"
         }`}
       >
         {a}

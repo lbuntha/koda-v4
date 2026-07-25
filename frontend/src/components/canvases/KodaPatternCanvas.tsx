@@ -78,7 +78,10 @@ export const KodaPatternCanvas: React.FC<CanvasProps> = ({
       setErrorFlash(false);
       sounds.playSuccess();
       // Only signal the slide complete once every blank is filled.
-      if (next.every(p => p !== null) && onSuccess) onSuccess();
+      if (next.every(p => p !== null)) {
+        onAttempt?.("correct", { selected: next });
+        onSuccess?.();
+      }
     } else {
       sounds.playFailure();
       setErrorFlash(true);

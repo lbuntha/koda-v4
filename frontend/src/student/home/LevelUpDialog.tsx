@@ -20,10 +20,10 @@ export const LevelUpDialog: React.FC<Props> = ({ levelUp, onDismiss }) => (
   <Dialog isOpen={levelUp !== null} onClose={onDismiss}>
     {levelUp && (
       <div className="py-3 text-center">
-        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-amber-50 text-amber-500"><Trophy size={31} /></span>
-        <p className="mt-5 text-xs font-bold uppercase tracking-[0.18em] text-[#6B57D8]">Level up</p>
-        <h2 className="mt-2 text-2xl font-bold text-[#17152F]">{levelName(levelUp.level)}</h2>
-        <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-[#716C8C]">
+        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-amber-50 text-amber-500 dark:bg-amber-400/15 dark:text-amber-300"><Trophy size={31} /></span>
+        <p className="mt-5 text-xs font-bold uppercase tracking-[0.18em] text-[#6B57D8] dark:text-[#B7A7FF]">Level up</p>
+        <h2 className="mt-2 text-2xl font-bold text-[#17152F] dark:text-[#E7E5F7]">{levelName(levelUp.level)}</h2>
+        <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-[#716C8C] dark:text-[#9A94B8]">
           Your work on <strong>{levelUp.skillLabel}</strong> moved you from {levelName(levelUp.previousLevel)} to {levelName(levelUp.level)}.
         </p>
         <Button className="mt-6 w-full" onClick={onDismiss}>Keep learning</Button>

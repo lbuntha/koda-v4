@@ -6,7 +6,7 @@ import { sounds } from "../sound";
 import { Button, Card, Tabs, TabsContent, TabsList, TabsTrigger } from "./ui";
 import { useSvgLibrary } from "../assets/SvgLibraryContext";
 import { SvgLibraryAsset } from "../assets/SvgLibraryAsset";
-import { isSafeSvgMarkup } from "../assets/svgSafety";
+import { isSafeSvgMarkup, normalizeSvgDocumentMarkup } from "../assets/svgSafety";
 import { createSvgAssetId } from "../assets/svgIds";
 
 const STARTER_TEMPLATES = [
@@ -155,8 +155,10 @@ export function preprocessSvgMarkup(svgMarkup: string): string {
     
   openingTag = openingTag.replace(/\s+/g, " ").trim();
   const newAttributes = ` width="100%" height="100%"` + (viewBox ? ` viewBox="${viewBox}"` : "");
-  
-  return openingTag + newAttributes + cleaned.substring(openingTagEnd);
+
+  // Library artwork is also served as its own SVG document to the student hero's <img>,
+  // so it needs the namespace and hyphenated presentation attributes to render there.
+  return normalizeSvgDocumentMarkup(openingTag + newAttributes + cleaned.substring(openingTagEnd));
 }
 
 interface SvgDesignerProps {

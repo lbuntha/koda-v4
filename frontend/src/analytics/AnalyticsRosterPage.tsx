@@ -40,7 +40,7 @@ export const AnalyticsRosterPage: React.FC = () => {
             <div key={student.id} className="flex items-center gap-3 rounded-2xl border border-[#E7E3F6] bg-white p-4 shadow-[0_5px_20px_rgba(83,74,183,0.05)]">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#F1EDFF] text-2xl">{student.avatar ?? "🧒"}</div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-[#17143D]">{student.name}</p>
+                <p className="koda-admin-card-title truncate">{student.name}</p>
                 <p className="koda-admin-secondary mt-0.5">Mastery, activity, and next steps</p>
               </div>
               <Button size="xs" variant="outline" onClick={() => setSelected(student)}>

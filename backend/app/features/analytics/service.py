@@ -8,10 +8,12 @@ from typing import Any
 from ...models.assignment import Assignment, Placement, ProgressionState
 from ...models.classroom import ClassEnrollment, Classroom
 from ...models.event import LearningEvent
+from ...models.content import CurriculumRelease
 from ...models.mastery import MasteryState
 from ...models.recommendation import RecommendationRun, StudentSession
 from ...models.student import Student
 from ...models.user import Role, User
+from ..learning.rewards import calculate_xp, skill_metadata
 
 
 def _role(user: User) -> str:
@@ -91,6 +93,31 @@ def _streak(days: set[date]) -> tuple[int, int]:
     return current, longest
 
 
+def _weekly_activity(events: list[Any], today: date | None = None) -> list[dict[str, Any]]:
+    """Return a compact seven-day activity series without exposing event detail."""
+    end = today or datetime.now(timezone.utc).date()
+    start = end - timedelta(days=6)
+    counts = {start + timedelta(days=offset): 0 for offset in range(7)}
+    for event in events:
+        raw = getattr(event, "occurred_at", None)
+        if not raw:
+            continue
+        try:
+            event_day = datetime.fromisoformat(raw.replace("Z", "+00:00")).date()
+        except ValueError:
+            continue
+        if event_day in counts:
+            counts[event_day] += 1
+    return [
+        {
+            "date": day.isoformat(),
+            "day": day.strftime("%a")[0],
+            "count": counts[day],
+        }
+        for day in counts
+    ]
+
+
 async def activity_snapshot(
     student_id: str,
     *,
@@ -101,8 +128,9 @@ async def activity_snapshot(
     if assignment_id:
         query["assignment_id"] = assignment_id
     events = await LearningEvent.find(query).sort("-client_timestamp_ms").to_list()
-    attempts = [event for event in events if event.event_type == "attempt"]
+    attempts = [event for event in events if event.event_type == "attempt" and event.verified]
     correct = sum(event.outcome == "correct" for event in attempts)
+    first_attempts = [event for event in attempts if event.attempt_number == 1]
     days: set[date] = set()
     for event in events:
         raw = event.occurred_at
@@ -116,6 +144,22 @@ async def activity_snapshot(
     sessions = await StudentSession.find(
         StudentSession.student_id == student_id,
     ).sort("-started_at").limit(50).to_list()
+    release_ids = list({event.release_id for event in events if event.release_id})
+    release_rows = await CurriculumRelease.find(
+        {"release_id": {"$in": release_ids}}
+    ).to_list() if release_ids else []
+    release_trees = {row.release_id: row.tree for row in release_rows}
+    xp = calculate_xp(events, release_trees)
+    xp_breakdown = []
+    for row in xp["breakdown"]:
+        presentation = skill_metadata(
+            release_trees.get(row["releaseId"], {}),
+            row["skillId"],
+        )
+        xp_breakdown.append({
+            **row,
+            "skillLabel": presentation["title"],
+        })
     return {
         "studentId": student_id,
         "summary": {
@@ -124,13 +168,27 @@ async def activity_snapshot(
             "correct": correct,
             "incorrect": sum(event.outcome == "incorrect" for event in attempts),
             "accuracy": round(correct / len(attempts), 3) if attempts else None,
+            "firstTryAccuracy": (
+                round(sum(event.outcome == "correct" for event in first_attempts) / len(first_attempts), 3)
+                if first_attempts else None
+            ),
+            "independenceRate": (
+                round(sum(not event.hint_used_before_attempt for event in attempts) / len(attempts), 3)
+                if attempts else None
+            ),
             "hints": sum(event.event_type == "hint_requested" for event in events),
-            "lessonsCompleted": sum(event.event_type == "lesson_complete" for event in events),
+            "lessonsCompleted": sum(
+                event.event_type == "lesson_complete" and event.verified
+                for event in events
+            ),
+            "xpEarned": xp["totalXp"],
             "timeOnTaskMs": sum(event.time_on_task_ms or 0 for event in attempts),
             "currentStreakDays": current_streak,
             "longestStreakDays": longest_streak,
             "activeDays": len(days),
+            "weeklyActivity": _weekly_activity(events),
         },
+        "xpBreakdown": xp_breakdown,
         "sessions": [
             {
                 "sessionId": row.session_id,
