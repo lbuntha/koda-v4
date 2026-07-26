@@ -17,8 +17,12 @@ import {
 } from "../api/course";
 import { PlacementWarmup } from "./PlacementWarmup";
 import { StudentTodayHome } from "./StudentTodayHome";
+import { useThemeMode } from "../theme/appTheme";
 
 export const StudentCurriculumPlayer: React.FC = () => {
+  // These surfaces render outside the band layout, so they carry the theme class themselves.
+  const [theme] = useThemeMode();
+  const dark = theme === "dark" ? "dark" : "";
   const { account, playSession, endChildPlay, logout } = useAuth();
   const [placement, setPlacement] = useState<PlacementQuiz | null>(null);
   const [course, setCourse] = useState<TodayCourse | null>(null);
@@ -42,7 +46,8 @@ export const StudentCurriculumPlayer: React.FC = () => {
     setError(null);
     try {
       const shouldLoadKidCatalog = account?.gradeBand === "kid" && mode === "scheduled";
-      const shouldLoadFocusSignal = account?.gradeBand === "focus";
+      // Kid and focus bands both surface the day streak; it comes from the same signal.
+      const shouldLoadFocusSignal = account?.gradeBand === "focus" || account?.gradeBand === "kid";
       const [nextCourse, nextProgress, kidCatalog, nextActivitySignal] = await Promise.all([
         courseApi.today(mode),
         account?.id ? courseApi.progress(account.id) : Promise.resolve(null),
@@ -211,11 +216,11 @@ export const StudentCurriculumPlayer: React.FC = () => {
 
   if (error && !course) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#FBFAFF] p-5">
-        <div className="max-w-sm rounded-3xl border border-[#E7E3F6] bg-white p-7 text-center shadow-sm">
-          <BookOpen className="mx-auto text-[#534AB7]" />
-          <h1 className="mt-3 text-base font-semibold text-[#0E0B55]">No learning plan available</h1>
-          <p className="mt-1 text-xs leading-relaxed text-[#6D6997]">{error}</p>
+      <div className={`flex min-h-screen items-center justify-center bg-[#FBFAFF] p-5 dark:bg-[#0E0A20] ${dark}`}>
+        <div className="max-w-sm rounded-3xl border border-[#E7E3F6] bg-white p-7 text-center shadow-sm dark:border-white/10 dark:bg-[#191338] dark:shadow-none">
+          <BookOpen className="mx-auto text-[#534AB7] dark:text-[#B6A6FF]" />
+          <h1 className="mt-3 text-base font-semibold text-[#0E0B55] dark:text-[#EDE9FF]">No learning plan available</h1>
+          <p className="mt-1 text-xs leading-relaxed text-[#6D6997] dark:text-[#A79FC4]">{error}</p>
           <Button className="mt-4" onClick={() => void exit()}>Back</Button>
         </div>
       </div>
@@ -223,7 +228,11 @@ export const StudentCurriculumPlayer: React.FC = () => {
   }
 
   if (!course || loadingMode && !course) {
-    return <div className="flex min-h-screen items-center justify-center bg-[#FBFAFF]"><Loader2 className="animate-spin text-[#534AB7]" /></div>;
+    return (
+      <div className={`flex min-h-screen items-center justify-center bg-[#FBFAFF] dark:bg-[#0E0A20] ${dark}`}>
+        <Loader2 className="animate-spin text-[#534AB7] dark:text-[#B6A6FF]" />
+      </div>
+    );
   }
 
   return (
@@ -245,7 +254,13 @@ export const StudentCurriculumPlayer: React.FC = () => {
         onDismissLevelUp={() => setLevelUp(null)}
         onExit={() => void exit()}
       />
-      {error && <div className="fixed bottom-5 left-1/2 z-50 -translate-x-1/2 rounded-xl border border-rose-200 bg-white px-4 py-2 text-xs font-semibold text-rose-700 shadow-lg">{error}</div>}
+      {error && (
+        <div className={dark}>
+          <div className="fixed bottom-5 left-1/2 z-50 -translate-x-1/2 rounded-xl border border-rose-200 bg-white px-4 py-2 text-xs font-semibold text-rose-700 shadow-lg dark:border-rose-400/25 dark:bg-[#2A1620] dark:text-rose-300">
+            {error}
+          </div>
+        </div>
+      )}
     </>
   );
 };

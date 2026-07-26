@@ -12,6 +12,7 @@ import {
   ArrowDown,
   ArrowUp,
   Check,
+  Clock,
   Eye,
   FolderHeart,
   Image,
@@ -67,6 +68,11 @@ export const SkillDetail: React.FC<SkillDetailProps> = ({
   const completionXpInvalid = (
     skill.completionXp !== undefined
     && (!Number.isInteger(skill.completionXp) || skill.completionXp < 0 || skill.completionXp > 100)
+  );
+  const estimatedMinutes = skill.presentation?.estimatedMinutes;
+  const estimatedMinutesInvalid = (
+    estimatedMinutes !== undefined
+    && (!Number.isInteger(estimatedMinutes) || estimatedMinutes < 1 || estimatedMinutes > 90)
   );
 
   const skillQuestions = filterAndSortBySkill(questions, skill.id);
@@ -270,6 +276,28 @@ export const SkillDetail: React.FC<SkillDetailProps> = ({
                 <option key={value} value={value}>{value}</option>
               ))}
             </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="skill-estimated-minutes">
+              <span className="inline-flex items-center gap-1"><Clock size={12} /> Estimated minutes</span>
+            </Label>
+            <Input
+              id="skill-estimated-minutes"
+              type="number"
+              min={1}
+              max={90}
+              value={skill.presentation?.estimatedMinutes ?? ""}
+              placeholder="Shown on the learner card"
+              onChange={event => onUpdateSkill({
+                presentation: {
+                  ...skill.presentation,
+                  estimatedMinutes: event.target.value === "" ? undefined : Number(event.target.value),
+                },
+              })}
+            />
+            {estimatedMinutesInvalid && (
+              <p className="text-[11px] font-medium text-rose-600">Use a whole number from 1–90.</p>
+            )}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="skill-completion-xp">

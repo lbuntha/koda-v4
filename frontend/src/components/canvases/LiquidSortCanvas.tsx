@@ -15,6 +15,8 @@ import {
   Layers,
 } from "lucide-react";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
+import { Celebration } from "./Celebration";
+import { surfaceClass } from "./canvasTheme";
 import {
   LIQUID_SORT_CURRICULUM_LEVELS,
   getCurriculumLevel,
@@ -156,7 +158,11 @@ export function solveLiquidSort(
 
 export const LiquidSortCanvas: React.FC<CanvasProps> = ({
   question,
+  isPlayMode = true,
+  isDark = false,
   onSuccess,
+  onAttempt,
+  onHint,
 }) => {
   const initialLevelId = (question.config as any)?.levelId || "level_1";
   const [selectedLevelId, setSelectedLevelId] = useState<string>(initialLevelId);
@@ -214,15 +220,36 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
   const [bubbles, setBubbles] = useState<BuoyantBubble[]>([]);
   const [splashes, setSplashes] = useState<SplashDroplet[]>([]);
 
+  const pourTimeoutsRef = useRef<number[]>([]);
+
+  const safeTimeout = (fn: () => void, delay: number) => {
+    const timer = window.setTimeout(() => {
+      fn();
+      pourTimeoutsRef.current = pourTimeoutsRef.current.filter((t) => t !== timer);
+    }, delay);
+    pourTimeoutsRef.current.push(timer);
+    return timer;
+  };
+
+  const clearPourTimeouts = () => {
+    pourTimeoutsRef.current.forEach((t) => window.clearTimeout(t));
+    pourTimeoutsRef.current = [];
+  };
+
+  const initialBottlesRef = useRef<BottleState[]>([]);
+
   // Sync level selection when question config changes
   useEffect(() => {
     const qLevelId = (question.config as any)?.levelId || "level_1";
     setSelectedLevelId(qLevelId);
-  }, [(question.config as any)?.levelId]);
+  }, [(question.config as any)?.levelId, question.id]);
 
-  // Load level bottles when selectedLevelId changes
+  // Load level bottles when selectedLevelId or question changes
   useEffect(() => {
+    clearPourTimeouts();
     const lvl = getCurriculumLevel(selectedLevelId);
+    const initial = loadLevelBottles(lvl);
+    initialBottlesRef.current = initial;
     setBottles(loadLevelBottles(lvl));
     setHistory([]);
     setSelectedId(null);
@@ -231,7 +258,9 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
     setSeconds(0);
     setHintMove(null);
     setPouringInfo(null);
-  }, [selectedLevelId]);
+
+    return () => clearPourTimeouts();
+  }, [selectedLevelId, question.id]);
 
   // Timer interval
   useEffect(() => {
@@ -241,6 +270,28 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
     }, 1000);
     return () => clearInterval(interval);
   }, [isWon]);
+
+  // Keyboard Shortcuts (H = Hint, U = Undo, R = Reset, Escape = Deselect)
+  useEffect(() => {
+    if (!isPlayMode) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
+
+      if (e.key === "Escape") {
+        setSelectedId(null);
+      } else if (e.key.toLowerCase() === "h") {
+        handleGetHint();
+      } else if (e.key.toLowerCase() === "u") {
+        handleUndo();
+      } else if (e.key.toLowerCase() === "r") {
+        handleReset();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isPlayMode, bottles, isWon, history, pouringInfo]);
 
   // Trigger liquid surface slosh impulse
   const triggerSlosh = (id: string, impulse: number) => {
@@ -362,17 +413,57 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
       setIsWon(true);
       sounds.playWin();
       if (onSuccess) onSuccess();
+      if (onAttempt) {
+        onAttempt("correct", {
+          expected: selectedLevelId,
+          selected: selectedLevelId,
+          details: {
+            levelId: selectedLevelId,
+            moveCount,
+            seconds,
+            stars: calculateStars(),
+          },
+        });
+      }
     }
   }, [bottles]);
 
   // Handle Smart Hint Solver request
   const handleGetHint = () => {
     if (isWon || pouringInfo) return;
+
+    // Second tap on Hint auto-executes the recommended pour!
+    if (hintMove) {
+      const srcId = hintMove.from;
+      const tgtId = hintMove.to;
+      setSelectedId(null);
+      setHintMove(null);
+
+      // Execute tap source then target
+      const source = bottles.find((b) => b.id === srcId);
+      const target = bottles.find((b) => b.id === tgtId);
+      if (source && target && source.layers.length > 0) {
+        setSelectedId(srcId);
+        setTimeout(() => {
+          handleBottleClick(tgtId);
+        }, 150);
+      }
+      return;
+    }
+
     const move = solveLiquidSort(bottles);
     if (move) {
       setHintMove(move);
+      setSelectedId(move.from); // Auto-select source bottle!
       sounds.playPop();
-      setTimeout(() => setHintMove(null), 3000);
+      setTimeout(() => setHintMove(null), 8000); // 8-second guidance duration
+      if (onHint) {
+        onHint({
+          levelId: selectedLevelId,
+          hintFrom: move.from,
+          hintTo: move.to,
+        });
+      }
     }
   };
 
@@ -492,7 +583,7 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
         });
 
         sounds.playPop();
-        setTimeout(() => {
+        safeTimeout(() => {
           sounds.playPour(actualTransfer);
         }, 180);
 
@@ -502,11 +593,13 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
         );
 
         // Reveal Mystery Layer if now on top!
+        let revealedMystery = false;
         if (
           newSourceLayers.length > 0 &&
           newSourceLayers[newSourceLayers.length - 1].hidden
         ) {
           newSourceLayers[newSourceLayers.length - 1].hidden = false;
+          revealedMystery = true;
         }
 
         const newTargetLayers = [
@@ -516,7 +609,7 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
             .map(() => ({ colorKey: topSourceColor, hidden: false })),
         ];
 
-        setTimeout(() => {
+        safeTimeout(() => {
           setBottles((prev) =>
             prev.map((b) => {
               if (b.id === selectedId) return { ...b, layers: newSourceLayers };
@@ -524,10 +617,18 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
               return b;
             })
           );
-          setMoveCount((prev) => prev + 1);
+          setMoveCount((prev) => {
+            const nextCount = prev + 1;
+            sounds.playTick(nextCount);
+            return nextCount;
+          });
+          if (revealedMystery) {
+            triggerSlosh(selectedId, 18);
+            sounds.playSparkle();
+          }
         }, 300);
 
-        setTimeout(() => {
+        safeTimeout(() => {
           triggerSlosh(clickedId, 16);
           setPouringInfo(null);
           setSelectedId(null);
@@ -535,6 +636,17 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
       } else {
         triggerSlosh(selectedId, -10);
         setSelectedId(null);
+        sounds.playFailure();
+        if (onAttempt) {
+          onAttempt("incorrect", {
+            expected: topSourceColor,
+            selected: topTargetColor,
+            details: {
+              levelId: selectedLevelId,
+              reason: target.layers.length >= target.capacity ? "bottle_full" : "mismatched_color",
+            },
+          });
+        }
       }
     }
   };
@@ -551,13 +663,25 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
 
   const handleReset = () => {
     if (pouringInfo) return;
-    setBottles(loadLevelBottles(currentLevel));
+    clearPourTimeouts();
+    const lvl = getCurriculumLevel(selectedLevelId);
+    const freshBottles =
+      initialBottlesRef.current.length > 0
+        ? initialBottlesRef.current.map((b) => ({
+            id: b.id,
+            capacity: b.capacity,
+            layers: b.layers.map((l) => ({ ...l })),
+          }))
+        : loadLevelBottles(lvl);
+
+    setBottles(freshBottles);
     setHistory([]);
     setSelectedId(null);
     setIsWon(false);
     setMoveCount(0);
     setSeconds(0);
     setHintMove(null);
+    setPouringInfo(null);
     sounds.playPop();
   };
 
@@ -603,7 +727,12 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
   ) => {
     const isMystery = layer.hidden;
     const color = isMystery
-      ? { fill: "#334155", stroke: "#1E293B", glow: "#64748B", label: "Mystery" }
+      ? {
+          fill: isDark ? "#334155" : "#CBD5E1",
+          stroke: isDark ? "#1E293B" : "#94A3B8",
+          glow: isDark ? "#64748B" : "#94A3B8",
+          label: "Mystery",
+        }
       : COLOR_PALETTE[layer.colorKey] || COLOR_PALETTE.cyan;
 
     const isSourcePouring = pouringInfo?.sourceId === bottle.id;
@@ -646,7 +775,7 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
               x="50"
               y={effectiveYTop + segmentHeight / 2 + 5}
               textAnchor="middle"
-              fill="#94A3B8"
+              fill={isDark ? "#94A3B8" : "#475569"}
               fontSize="16"
               fontWeight="900"
             >
@@ -697,7 +826,7 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
             x="50"
             y={effectiveYTop + segmentHeight / 2 + 5}
             textAnchor="middle"
-            fill="#94A3B8"
+            fill={isDark ? "#94A3B8" : "#475569"}
             fontSize="16"
             fontWeight="900"
           >
@@ -708,86 +837,181 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
     );
   };
 
+  const btnPill = (variant: "neutral" | "indigo" | "cyan" = "neutral") =>
+    `flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-bold transition-colors disabled:opacity-40 ${
+      isDark
+        ? variant === "indigo"
+          ? "border-indigo-500/40 bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600/30"
+          : variant === "cyan"
+          ? "border-cyan-500/30 bg-cyan-600/20 text-cyan-300"
+          : "border-white/10 bg-white/[0.08] text-slate-300 hover:bg-white/[0.16]"
+        : variant === "indigo"
+        ? "border-indigo-200 bg-indigo-50/90 text-indigo-700 hover:bg-indigo-100 shadow-sm"
+        : variant === "cyan"
+        ? "border-slate-200 bg-slate-100/90 text-slate-700 shadow-sm"
+        : "border-slate-200 bg-white text-slate-700 hover:bg-slate-100 shadow-sm"
+    }`;
+
+  const headerControls = (
+    <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+      <div className={btnPill("neutral")}>
+        <span className={isDark ? "text-slate-400" : "text-slate-500"}>Moves:</span>
+        <span className={isDark ? "text-indigo-400 font-extrabold" : "text-indigo-600 font-extrabold"}>
+          {moveCount}
+        </span>
+      </div>
+
+      <div className={btnPill("cyan")}>
+        <Timer size={14} className={isDark ? "text-cyan-400" : "text-slate-500"} />
+        <span>{formatTime(seconds)}</span>
+      </div>
+
+      <button
+        type="button"
+        onClick={handleGetHint}
+        disabled={pouringInfo !== null || isWon}
+        className={btnPill("indigo")}
+      >
+        <Lightbulb size={14} className={isDark ? "text-indigo-300" : "text-indigo-600"} /> Hint
+      </button>
+
+      <button
+        type="button"
+        onClick={handleUndo}
+        disabled={history.length === 0 || pouringInfo !== null}
+        className={btnPill("neutral")}
+      >
+        <RotateCcw size={14} /> Undo
+      </button>
+
+      <button
+        type="button"
+        onClick={handleReset}
+        disabled={pouringInfo !== null}
+        className={btnPill("neutral")}
+      >
+        <RotateCw size={14} /> Reset
+      </button>
+
+      <button
+        type="button"
+        onClick={handleAddBottle}
+        disabled={bottles.length >= 10 || pouringInfo !== null}
+        className={btnPill("indigo")}
+      >
+        <Plus size={14} /> Tube
+      </button>
+    </div>
+  );
+
   return (
-    <SharedCanvasLayout isPlayMode={true} headerTitle="Liquid Color Sort" isDark={true}>
+    <SharedCanvasLayout
+      isPlayMode={isPlayMode}
+      headerTitle={question.title || "Liquid Color Sort"}
+      headerSubtitle={(question as any).subtitle || `${currentLevel.name} (${currentLevel.targetCount} Tubes)`}
+      playHint="Sort all liquid colors so each tube contains a single solid color."
+      designerHint="Tap a tube to pick up its top liquid color, then tap a destination tube to pour."
+      headerActions={headerControls}
+      footerStatus={
+        isWon
+          ? `Brilliant! You sorted all liquid colors in ${moveCount} moves and ${formatTime(seconds)}!`
+          : hintMove
+          ? "💡 Tap highlighted target tube to pour (or tap Hint again to auto-pour)"
+          : selectedId
+          ? "Select a destination tube to pour liquid into"
+          : undefined
+      }
+      footerSolved={isWon}
+      isDark={isDark}
+    >
       <div
         ref={stageRef}
-        className="flex min-h-[620px] w-full flex-col items-center justify-between p-3 sm:p-6 select-none bg-[#090D16] text-white rounded-3xl relative overflow-hidden"
+        className={`flex min-h-[580px] w-full flex-col items-center justify-between p-3 sm:p-6 select-none rounded-3xl relative overflow-hidden transition-colors duration-300 ${
+          isDark
+            ? `${surfaceClass(isDark)} text-white`
+            : "bg-transparent text-slate-900 border-none shadow-none"
+        }`}
       >
-        {/* Ambient Glow Orbs */}
-        <div className="pointer-events-none absolute -top-20 -left-20 h-96 w-96 rounded-full bg-indigo-600/20 blur-[100px]" />
-        <div className="pointer-events-none absolute -bottom-20 -right-20 h-96 w-96 rounded-full bg-purple-600/20 blur-[100px]" />
+        {/* Ambient Glow Orbs (Dark Mode Only) */}
+        {isDark && (
+          <>
+            <div className="pointer-events-none absolute -top-20 -left-20 h-96 w-96 rounded-full bg-indigo-600/15 blur-[100px]" />
+            <div className="pointer-events-none absolute -bottom-20 -right-20 h-96 w-96 rounded-full bg-purple-600/15 blur-[100px]" />
+          </>
+        )}
 
-        {/* Header Control Panel */}
-        <div className="z-10 flex w-full max-w-5xl flex-wrap items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
-          {/* System Curriculum Level Selector Dropdown */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 text-xs font-black text-indigo-400">
-              <Layers size={16} />
-              <span>LEVEL:</span>
-            </div>
-            <select
-              value={selectedLevelId}
-              onChange={(e) => setSelectedLevelId(e.target.value)}
-              disabled={pouringInfo !== null}
-              className="rounded-xl border border-indigo-500/40 bg-slate-800/90 px-3 py-1.5 text-xs font-bold text-indigo-200 outline-none focus:ring-2 focus:ring-indigo-400"
-            >
-              {LIQUID_SORT_CURRICULUM_LEVELS.map((lvl) => (
-                <option key={lvl.id} value={lvl.id}>
-                  {lvl.name} ({lvl.targetCount} Tubes)
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* Interactive SVG Hint Trajectory Curved Motion Arrow */}
+        {hintMove && !pouringInfo && (() => {
+          const srcEl = bottleRefs.current[hintMove.from];
+          const tgtEl = bottleRefs.current[hintMove.to];
+          const stageRect = stageRef.current?.getBoundingClientRect();
 
-          {/* Game Stats & Helper Buttons */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 rounded-xl bg-slate-800/80 px-3 py-1.5 border border-slate-700/60 text-xs font-bold">
-              <span className="text-slate-400">Moves:</span>
-              <span className="text-indigo-400">{moveCount}</span>
-            </div>
+          if (srcEl && tgtEl && stageRect) {
+            const sRect = srcEl.getBoundingClientRect();
+            const tRect = tgtEl.getBoundingClientRect();
 
-            <div className="flex items-center gap-1.5 rounded-xl bg-slate-800/80 px-3 py-1.5 border border-slate-700/60 text-xs font-bold text-amber-400">
-              <Timer size={14} />
-              <span>{formatTime(seconds)}</span>
-            </div>
+            const startX = sRect.left + sRect.width / 2 - stageRect.left;
+            const startY = sRect.top + 20 - stageRect.top;
+            const endX = tRect.left + tRect.width / 2 - stageRect.left;
+            const endY = tRect.top + 20 - stageRect.top;
 
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={handleGetHint}
-                disabled={pouringInfo !== null || isWon}
-                className="flex items-center gap-1 rounded-xl border border-amber-500/40 bg-amber-500/20 px-2.5 py-1.5 text-xs font-bold text-amber-300 hover:bg-amber-500/30 disabled:opacity-40"
-              >
-                <Lightbulb size={14} /> Hint
-              </button>
-              <button
-                type="button"
-                onClick={handleUndo}
-                disabled={history.length === 0 || pouringInfo !== null}
-                className="flex items-center gap-1 rounded-xl border border-slate-700 bg-slate-800/80 px-2.5 py-1.5 text-xs font-bold text-slate-300 hover:bg-slate-700 disabled:opacity-40"
-              >
-                <RotateCcw size={14} /> Undo
-              </button>
-              <button
-                type="button"
-                onClick={handleReset}
-                disabled={pouringInfo !== null}
-                className="flex items-center gap-1 rounded-xl border border-slate-700 bg-slate-800/80 px-2.5 py-1.5 text-xs font-bold text-slate-300 hover:bg-slate-700 disabled:opacity-40"
-              >
-                <RotateCw size={14} /> Reset
-              </button>
-              <button
-                type="button"
-                onClick={handleAddBottle}
-                disabled={bottles.length >= 10 || pouringInfo !== null}
-                className="flex items-center gap-1 rounded-xl border border-indigo-500/40 bg-indigo-600/20 px-2.5 py-1.5 text-xs font-bold text-indigo-300 hover:bg-indigo-600/30 disabled:opacity-40"
-              >
-                <Plus size={14} /> + Tube
-              </button>
-            </div>
-          </div>
-        </div>
+            const isRight = endX >= startX;
+            const controlX = (startX + endX) / 2 + (isRight ? 18 : -18);
+            const controlY = Math.min(startY, endY) - 50;
+            const path = `M ${startX} ${startY} Q ${controlX} ${controlY} ${endX} ${endY}`;
+
+            return (
+              <svg className="pointer-events-none absolute inset-0 z-30 h-full w-full overflow-visible">
+                <defs>
+                  <linearGradient id="liquid-hint-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#818CF8" />
+                    <stop offset="100%" stopColor="#34D399" />
+                  </linearGradient>
+                </defs>
+
+                {/* Outer Glow Line */}
+                <motion.path
+                  d={path}
+                  fill="none"
+                  stroke="#818CF8"
+                  strokeWidth="10"
+                  strokeLinecap="round"
+                  style={{ filter: "blur(5px)" }}
+                  opacity="0.6"
+                />
+
+                {/* Animated Dashed Trajectory Line */}
+                <motion.path
+                  d={path}
+                  fill="none"
+                  stroke="url(#liquid-hint-grad)"
+                  strokeWidth="4"
+                  strokeDasharray="8 6"
+                  animate={{ strokeDashoffset: [-28, 0] }}
+                  transition={{ repeat: Infinity, duration: 0.35, ease: "linear" }}
+                />
+
+                {/* Source Tube Start Bulb */}
+                <circle cx={startX} cy={startY} r="6" fill="#818CF8" className="animate-pulse" />
+
+                {/* Destination Target Pulsing Ring */}
+                <g transform={`translate(${endX}, ${endY})`}>
+                  <motion.circle
+                    r="22"
+                    fill="none"
+                    stroke="#34D399"
+                    strokeWidth="3.5"
+                    initial={{ scale: 0.8, opacity: 0.9 }}
+                    animate={{ scale: [0.8, 1.4, 0.8], opacity: [0.9, 0.3, 0.9] }}
+                    transition={{ repeat: Infinity, duration: 0.7 }}
+                  />
+                  <circle r="7" fill="#34D399" />
+                </g>
+              </svg>
+            );
+          }
+          return null;
+        })()}
 
         {/* Parabolic Liquid Pour Stream & Spout Meniscus SVG Overlay */}
         {pouringInfo && (() => {
@@ -908,7 +1132,7 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
 
         {/* Responsive Bottles Grid Stage */}
         <div
-          className={`z-10 my-auto grid w-full gap-4 sm:gap-6 py-6 justify-items-center ${getGridColsClass(
+          className={`z-10 my-auto grid w-full gap-3 sm:gap-6 py-6 justify-items-center ${getGridColsClass(
             bottles.length
           )}`}
         >
@@ -957,6 +1181,17 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
                   isSelected || isPouring ? "z-20" : "z-10"
                 }`}
               >
+                {/* Target Bottle 'POUR HERE 🎯' Floating Badge */}
+                {isHintTgt && (
+                  <motion.div
+                    initial={{ scale: 0, y: -10 }}
+                    animate={{ scale: [0.9, 1.1, 0.9], y: [0, -4, 0] }}
+                    transition={{ repeat: Infinity, duration: 0.6 }}
+                    className="absolute -top-6 z-30 bg-emerald-500 text-white font-extrabold text-[10px] px-2 py-0.5 rounded-full shadow-lg border border-emerald-300 flex items-center gap-1"
+                  >
+                    <span>POUR HERE 🎯</span>
+                  </motion.div>
+                )}
                 {/* Hint Glowing Pulse Highlight */}
                 {(isHintSrc || isHintTgt) && (
                   <motion.div
@@ -972,7 +1207,7 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
                 )}
 
                 {/* SVG Glass Bottle Container */}
-                <svg viewBox="0 0 100 240" className="h-48 sm:h-56 w-20 sm:w-24 drop-shadow-2xl">
+                <svg viewBox="0 0 100 240" className="h-44 sm:h-56 w-16 sm:w-24 drop-shadow-xl">
                   <defs>
                     <clipPath id={`clip-${bottle.id}`}>
                       <path d="M 35 10 H 65 V 35 L 85 70 V 220 C 85 230 75 235 50 235 C 25 235 15 230 15 220 V 70 L 35 35 Z" />
@@ -1018,7 +1253,7 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
                     stroke="white"
                     strokeWidth="4"
                     strokeLinecap="round"
-                    opacity="0.3"
+                    opacity={isDark ? "0.3" : "0.55"}
                   />
 
                   {/* Outer Contour */}
@@ -1032,7 +1267,9 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
                         ? "#10B981"
                         : isSelected || isPouring
                         ? "#818CF8"
-                        : "#475569"
+                        : isDark
+                        ? "#475569"
+                        : "#64748B"
                     }
                     strokeWidth={isSelected || isPouring || isHintSrc || isHintTgt ? "4" : "2.5"}
                   />
@@ -1063,69 +1300,8 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
           })}
         </div>
 
-        {/* Victory Dialog Modal */}
-        <AnimatePresence>
-          {isWon && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 z-40 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-6"
-            >
-              <div className="flex flex-col items-center rounded-3xl border border-indigo-500/30 bg-slate-900 p-8 text-center shadow-2xl max-w-md w-full">
-                <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-400/20 text-amber-400">
-                  <Trophy size={42} />
-                </div>
-                <h2 className="text-3xl font-black text-white">Puzzle Solved! 🎉</h2>
-                <p className="mt-1 text-sm font-bold text-slate-400">
-                  Completed in <span className="text-white">{moveCount} moves</span> &{" "}
-                  <span className="text-white">{formatTime(seconds)}</span>
-                </p>
-
-                {/* 3-Star Rating */}
-                <div className="mt-4 flex items-center gap-2">
-                  {[1, 2, 3].map((starIndex) => (
-                    <Star
-                      key={starIndex}
-                      size={28}
-                      className={
-                        starIndex <= calculateStars()
-                          ? "fill-amber-400 text-amber-400 drop-shadow-md"
-                          : "text-slate-700"
-                      }
-                    />
-                  ))}
-                </div>
-
-                <div className="mt-6 flex w-full gap-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const allIds = LIQUID_SORT_CURRICULUM_LEVELS.map((l) => l.id);
-                      const currIdx = allIds.indexOf(selectedLevelId);
-                      if (currIdx < allIds.length - 1) {
-                        setSelectedLevelId(allIds[currIdx + 1]);
-                      } else {
-                        handleReset();
-                      }
-                    }}
-                    className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-6 py-3 text-sm font-extrabold text-white shadow-lg shadow-indigo-500/30 hover:bg-indigo-500"
-                  >
-                    Next Level <Sparkles size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleReset}
-                    className="flex items-center justify-center gap-1.5 rounded-2xl border border-slate-700 bg-slate-800 px-5 py-3 text-sm font-bold text-slate-300 hover:bg-slate-700"
-                  >
-                    <RotateCw size={16} /> Replay
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
+      <Celebration show={isWon} />
     </SharedCanvasLayout>
   );
 };

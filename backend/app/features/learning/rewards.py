@@ -34,6 +34,7 @@ def skill_metadata(tree: dict[str, Any], skill_id: str) -> dict[str, Any]:
         "thumbnailUrl": presentation.get("thumbnailUrl"),
         "thumbnailAssetId": presentation.get("thumbnailAssetId"),
         "accent": presentation.get("accent") or "purple",
+        "estimatedMinutes": presentation.get("estimatedMinutes"),
         "completionXp": skill.get("completionXp"),
     }
 

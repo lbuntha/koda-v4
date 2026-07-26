@@ -72,6 +72,7 @@ export const TECHNIQUE_TAXONOMY: Record<CountingTechnique, { subjectArea: Subjec
   [CountingTechnique.SUBTRACTION_COLUMN_MULTI]: { subjectArea: "subtraction", skillTags: ["subtraction_borrowing", "multi_subtrahend_column_subtraction"] },
   [CountingTechnique.MULTIPLICATION_COLUMN]: { subjectArea: "multiplication", skillTags: ["partial_products", "multi_digit_column_multiplication"] },
   [CountingTechnique.LIQUID_SORT]: { subjectArea: "sorting_classification", skillTags: ["sorting", "classification"] },
+  [CountingTechnique.GOODS_SORT]: { subjectArea: "sorting_classification", skillTags: ["goods_sorting", "triple_matching"] },
 };
 
 

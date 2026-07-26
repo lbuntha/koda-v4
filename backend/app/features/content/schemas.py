@@ -152,6 +152,13 @@ class CurriculumIn(BaseModel):
                 raise ValueError(f"Skill {skill['id']} thumbnail asset id is invalid")
             if thumbnail and thumbnail_asset_id:
                 raise ValueError(f"Skill {skill['id']} must use either a thumbnail URL or library asset")
+            estimated_minutes = presentation.get("estimatedMinutes")
+            if estimated_minutes is not None and (
+                not isinstance(estimated_minutes, int)
+                or isinstance(estimated_minutes, bool)
+                or not 1 <= estimated_minutes <= 90
+            ):
+                raise ValueError(f"Skill {skill['id']} estimated minutes must be between 1 and 90")
             accent = presentation.get("accent")
             if accent is not None and accent not in {"purple", "blue", "green", "amber", "pink"}:
                 raise ValueError(f"Skill {skill['id']} presentation accent is invalid")

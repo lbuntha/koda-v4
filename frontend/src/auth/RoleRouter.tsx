@@ -21,6 +21,7 @@ import { AdminDashboard } from "../admin/AdminDashboard";
 import { RoleConsole } from "../components/RoleConsole";
 import App from "../App";
 import { StudentCurriculumPlayer } from "../student/StudentCurriculumPlayer";
+import { ThemeProvider } from "../theme/appTheme";
 
 const Splash: React.FC = () => (
   <div className="min-h-screen w-full flex flex-col items-center justify-center gap-4 bg-gradient-to-br from-indigo-50 via-white to-violet-50">
@@ -31,7 +32,7 @@ const Splash: React.FC = () => (
   </div>
 );
 
-export const RoleRouter: React.FC = () => {
+const RoleScreen: React.FC = () => {
   const { status, role } = useAuth();
 
   if (status === "loading") return <Splash />;
@@ -47,3 +48,13 @@ export const RoleRouter: React.FC = () => {
   // offline mode (no VITE_API_URL) → studio as before
   return <App />;
 };
+
+/**
+ * The provider only holds state — each page still opts into `dark` on its own root, so admin
+ * and studio screens are unaffected by a learner's or parent's choice.
+ */
+export const RoleRouter: React.FC = () => (
+  <ThemeProvider>
+    <RoleScreen />
+  </ThemeProvider>
+);

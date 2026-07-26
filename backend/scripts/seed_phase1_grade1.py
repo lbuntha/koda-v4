@@ -40,6 +40,7 @@ from app.features.progression.scoring import ENGINE_REVISION as SCORING_ENGINE_R
 from app.models.assignment import Assignment, Placement, ProgressionState
 from app.models.academic import Grade, Subject
 from app.models.content import Curriculum, CurriculumRelease, QuestionDeck, SvgLibrary
+from app.models.event import LearningEvent
 from app.models.mastery import MasteryState
 from app.models.student import Student
 from app.models.user import Role, User
@@ -53,7 +54,7 @@ FAMILY_CODE = os.getenv("SEED_GRADE1_FAMILY_CODE", "G1DEMO")
 STUDENT_NAME = os.getenv("SEED_GRADE1_STUDENT_NAME", "Grade 1 Learner")
 STUDENT_PIN = os.getenv("SEED_GRADE1_STUDENT_PIN", "1111")
 CURRICULUM_ID = "seed-grade1-phase1"
-RELEASE_ID = "seed-grade1-phase1-release-7"
+RELEASE_ID = "seed-grade1-phase1-release-9"
 RESET_LEARNING = os.getenv("SEED_GRADE1_RESET", "1").lower() not in {"0", "false", "no"}
 SCENARIO = os.getenv("SEED_GRADE1_SCENARIO", "fresh").strip().lower()
 
@@ -86,12 +87,16 @@ def fixture_tree() -> dict:
     return {
         "title": "Grade 1 Functional Test Fixture",
         "description": "LOCAL TEST FIXTURE — placement and recommendation coverage.",
-        "version": "test-7.0",
+        "version": "test-9.0",
         "primaryGradeId": "grade-1",
         "primarySubjectId": "grade-1-math",
         "grades": [{"id": "grade-1", "order": 1}],
-        "subjects": [{"id": "grade-1-math", "gradeId": "grade-1", "order": 1}],
-        "units": [{"id": "seed-g1-unit-counting", "subjectId": "grade-1-math", "order": 1}],
+        "subjects": [{"id": "grade-1-math", "gradeId": "grade-1", "label": "Maths", "order": 1}],
+        "units": [
+            {"id": "seed-g1-unit-counting", "subjectId": "grade-1-math", "label": "Counting & Number Sense", "order": 1},
+            {"id": "seed-g1-unit-addition", "subjectId": "grade-1-math", "label": "Addition", "order": 2},
+            {"id": "seed-g1-unit-subtraction", "subjectId": "grade-1-math", "label": "Subtraction", "order": 3},
+        ],
         "rewards": {
             "quest": {"label": "Today’s number quest", "activitiesPerSession": 3},
             "xp": {"correctAnswer": 5, "firstTryBonus": 2, "activityCompletion": 10},
@@ -164,6 +169,7 @@ def fixture_tree() -> dict:
                 "presentation": {
                     "title": "Count to 10",
                     "description": "Count each object once and discover how many there are.",
+                    "estimatedMinutes": 3,
                     "accent": "purple",
                 },
             },
@@ -177,13 +183,14 @@ def fixture_tree() -> dict:
                 "presentation": {
                     "title": "Spot the number",
                     "description": "See a small group and tell how many without counting one by one.",
+                    "estimatedMinutes": 2,
                     "thumbnailAssetId": LIBRARY_ASSET_ID,
                     "accent": "blue",
                 },
             },
             {
                 "id": "seed-g1-skill-add",
-                "unitId": "seed-g1-unit-counting",
+                "unitId": "seed-g1-unit-addition",
                 "label": "Add within 10",
                 "order": 3,
                 "placementCheckpoint": True,
@@ -191,13 +198,14 @@ def fixture_tree() -> dict:
                 "presentation": {
                     "title": "Add within 10",
                     "description": "Put two groups together and find the total.",
+                    "estimatedMinutes": 4,
                     "thumbnailUrl": "/assets/curriculum/count-to-10.svg",
                     "accent": "green",
                 },
             },
             {
                 "id": "seed-g1-skill-subtract",
-                "unitId": "seed-g1-unit-counting",
+                "unitId": "seed-g1-unit-subtraction",
                 "label": "Take away within 10",
                 "order": 4,
                 "placementCheckpoint": True,
@@ -205,6 +213,7 @@ def fixture_tree() -> dict:
                 "presentation": {
                     "title": "Take away within 10",
                     "description": "Remove part of a group and find how many remain.",
+                    "estimatedMinutes": 4,
                     "thumbnailUrl": "/assets/owl-mascot.svg",
                     "accent": "amber",
                 },
@@ -306,6 +315,69 @@ def fixture_questions() -> list[dict]:
             "config": {"minuend": 10, "subtrahend": 6, "frameColor": "purple"},
         },
     ]
+
+
+
+async def seed_learning_history(
+    *,
+    student_id: str,
+    assignment: Assignment,
+    days: int = 3,
+) -> dict[str, int]:
+    """Insert verified attempt + lesson_complete events across the last few days.
+
+    XP, the day streak and the lessons-completed achievement are all derived from events, so
+    the only honest way to demo them is to lay down the events and let the same aggregation
+    run. Deterministic: reruns replace the seeded learner's data via purge_learning_data.
+    """
+    assignment_id = str(assignment.id)
+    plan = [
+        ("seed-g1-skill-count", "seed-g1-q-count-easy", "easy"),
+        ("seed-g1-skill-subitize", "seed-g1-q-subitize-easy", "easy"),
+        ("seed-g1-skill-count", "seed-g1-q-count-hard", "hard"),
+    ]
+    events: list[LearningEvent] = []
+    lessons = 0
+    for day_offset in range(days):
+        day = now() - timedelta(days=day_offset)
+        skill_id, question_id, difficulty = plan[day_offset % len(plan)]
+        session_id = f"seed-session-{day_offset}"
+        for attempt in range(2):
+            events.append(LearningEvent(
+                student_id=student_id,
+                session_id=session_id,
+                event_type="attempt",
+                outcome="correct",
+                attempt_number=1,
+                hint_used_before_attempt=False,
+                time_on_task_ms=9000,
+                question_id=question_id,
+                difficulty=difficulty,
+                curriculum_skill_id=skill_id,
+                curriculum_id=CURRICULUM_ID,
+                release_id=RELEASE_ID,
+                assignment_id=assignment_id,
+                occurred_at=(day - timedelta(minutes=5 - attempt)).isoformat(),
+                client_timestamp_ms=int((day - timedelta(minutes=5 - attempt)).timestamp() * 1000),
+                verified=True,
+            ))
+        events.append(LearningEvent(
+            student_id=student_id,
+            session_id=session_id,
+            event_type="lesson_complete",
+            question_id=question_id,
+            curriculum_skill_id=skill_id,
+            curriculum_id=CURRICULUM_ID,
+            release_id=RELEASE_ID,
+            assignment_id=assignment_id,
+            occurred_at=day.isoformat(),
+            client_timestamp_ms=int(day.timestamp() * 1000),
+            verified=True,
+        ))
+        lessons += 1
+    for event in events:
+        await event.insert()
+    return {"events": len(events), "lessonsCompleted": lessons, "days": days}
 
 
 async def seed_missed_recommendations(
@@ -508,7 +580,7 @@ async def main() -> None:
                 curriculum_id=CURRICULUM_ID,
                 owner_id=owner_id,
                 tree=tree,
-                revision=7,
+                revision=9,
                 published=True,
             )
             await curriculum.insert()
@@ -518,7 +590,7 @@ async def main() -> None:
                 resource_type="curriculum",
                 action="seeded_test_fixture",
                 curriculum_id=CURRICULUM_ID,
-                revision=7,
+                revision=9,
                 reason="Local Grade 1 functional verification fixture",
                 summary={"title": tree["title"], "fixture": True},
             )
@@ -529,7 +601,7 @@ async def main() -> None:
                 curriculum.tree = tree
                 curriculum.owner_id = owner_id
                 curriculum.published = True
-                curriculum.revision = max(curriculum.revision, 7)
+                curriculum.revision = max(curriculum.revision, 9)
                 curriculum.updated_at = now()
                 await curriculum.save()
 
@@ -572,7 +644,7 @@ async def main() -> None:
                 release_id=RELEASE_ID,
                 curriculum_id=CURRICULUM_ID,
                 owner_id=owner_id,
-                revision=7,
+                revision=9,
                 published_by=owner_id,
                 **payload,
             )
@@ -584,7 +656,7 @@ async def main() -> None:
                 resource_type="curriculum_release",
                 action="published_test_fixture",
                 curriculum_id=CURRICULUM_ID,
-                revision=7,
+                revision=9,
                 reason="Local Grade 1 functional verification fixture",
                 summary={"releaseId": RELEASE_ID, "questionCount": len(release.question_manifest), "fixture": True},
             )
@@ -620,6 +692,8 @@ async def main() -> None:
                 summary={"assignmentId": str(assignment.id), "studentId": student_id, "fixture": True},
             )
 
+        history = await seed_learning_history(student_id=student_id, assignment=assignment)
+
         recommendation_scenario: list[dict[str, str]] = []
         if SCENARIO == "missed":
             settings_doc = await get_system_settings()
@@ -651,6 +725,7 @@ async def main() -> None:
             "assignmentId": str(assignment.id),
             "assignmentCreated": assignment_created,
             "learningReset": RESET_LEARNING,
+            "learningHistory": history,
             "resetCounts": reset_counts,
             "questionIds": [entry["question_id"] for entry in release.question_manifest],
             "questionCount": len(release.question_manifest),

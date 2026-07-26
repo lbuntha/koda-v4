@@ -145,7 +145,7 @@ export const PlacementWarmup: React.FC<Props> = ({ quiz, band, onComplete }) => 
             {isKid ? "🎉" : <CheckCircle2 size={32} />}
           </span>
           <p className={`mt-5 text-[10px] font-bold uppercase tracking-[0.18em] ${
-            isDark ? "text-indigo-400" : isKid ? "text-[#806DD2]" : "text-[#6B57D8]"
+            isDark ? "text-indigo-400" : isKid ? "text-[#7059C8]" : "text-[#6B57D8]"
           }`}>
             {presentation.completionEyebrow}
           </p>
@@ -225,7 +225,7 @@ export const PlacementWarmup: React.FC<Props> = ({ quiz, band, onComplete }) => 
             {isKid ? <img src="/assets/owl-mascot.svg" alt="" className="h-full w-full object-contain" /> : <Gamepad2 size={18} />}
           </span>
           <div>
-            <p className={`text-[9px] font-bold uppercase tracking-[0.18em] ${isDark ? "text-slate-500" : isKid ? "text-[#806DD2]" : "text-slate-400"}`}>{presentation.eyebrow}</p>
+            <p className={`text-[9px] font-bold uppercase tracking-[0.18em] ${isDark ? "text-slate-500" : isKid ? "text-[#7059C8]" : "text-slate-400"}`}>{presentation.eyebrow}</p>
             <h1 className={isKid ? "text-base font-black" : "text-sm font-extrabold"}>{item.title}</h1>
           </div>
         </div>
@@ -233,7 +233,7 @@ export const PlacementWarmup: React.FC<Props> = ({ quiz, band, onComplete }) => 
         <div className="mx-8 hidden max-w-md flex-1 md:block">
           <div className="mb-1.5 flex justify-between text-[9px] font-bold uppercase tracking-widest text-slate-500">
             <span>{isKid ? "Your adventure" : "Progress"}</span>
-            <span className={isKid ? "text-[#806DD2]" : "text-indigo-400"}>{index + 1} / {quiz.items.length}</span>
+            <span className={isKid ? "text-[#7059C8]" : "text-indigo-400"}>{index + 1} / {quiz.items.length}</span>
           </div>
           <div className="flex gap-1.5" aria-hidden>
             {quiz.items.map((entry, step) => (
@@ -266,7 +266,7 @@ export const PlacementWarmup: React.FC<Props> = ({ quiz, band, onComplete }) => 
 
       <main className={`relative z-10 flex min-h-0 flex-1 flex-col ${isKid ? "p-3 md:p-6" : isFocus ? "p-3 md:p-4" : "p-3 md:p-5"}`}>
         <div className={`mb-2 flex shrink-0 items-center justify-center gap-2 text-center ${isKid ? "min-h-10" : ""}`}>
-          <BookOpen size={isKid ? 17 : 14} className={isKid ? "text-[#806DD2]" : "text-indigo-400"} />
+          <BookOpen size={isKid ? 17 : 14} className={isKid ? "text-[#7059C8]" : "text-indigo-400"} />
           <span className={`${isKid ? "text-sm font-bold" : "text-xs font-semibold"} ${isDark ? "text-slate-400" : "text-slate-600"}`}>
             {item.instruction || presentation.fallbackInstruction}
           </span>

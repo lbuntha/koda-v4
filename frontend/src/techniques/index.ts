@@ -33,6 +33,7 @@ import { multiRowColumnAddition } from "./multiRowColumnAddition";
 import { multiRowColumnSubtraction } from "./multiRowColumnSubtraction";
 import { columnMultiplication } from "./columnMultiplication";
 import { liquidSort } from "./liquidSort";
+import { goodsSort } from "./goodsSort";
 
 /** Ordered exactly as the Studio picker lists them (1..16). */
 export const ALL_TECHNIQUES: TechniqueManifest[] = [
@@ -58,6 +59,7 @@ export const ALL_TECHNIQUES: TechniqueManifest[] = [
   multiRowColumnSubtraction,
   columnMultiplication,
   liquidSort,
+  goodsSort,
 ];
 
 // Loud in dev / logged in prod if a game is missing or double-registered.

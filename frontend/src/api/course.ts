@@ -16,6 +16,8 @@ export interface CourseQueueItem {
   description?: string;
   thumbnailUrl?: string | null;
   accent?: "purple" | "blue" | "green" | "amber" | "pink";
+  /** Authored in the curriculum — the learner UI shows this rather than guessing a duration. */
+  estimatedMinutes?: number;
   xpAvailable?: number;
   unitId?: string | null;
   subjectId?: string | null;
@@ -70,6 +72,8 @@ export interface SkillProgress {
   skillId: string;
   skillLabel: string;
   unitId?: string | null;
+  /** Unit name for learner-facing skill paths; absent on historical rows. */
+  unitLabel?: string | null;
   subjectId?: string | null;
   level: MasteryLevel;
   highestEarnedLevel: MasteryLevel;

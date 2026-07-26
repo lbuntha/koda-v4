@@ -244,6 +244,7 @@ def _item_out(
         "description": presentation["description"],
         "thumbnailUrl": _thumbnail_url(presentation, release.release_id),
         "accent": presentation["accent"],
+        "estimatedMinutes": presentation.get("estimatedMinutes"),
         "xpAvailable": available_xp(release.tree, item["skill_id"], len(questions)),
         "unitId": item.get("unit_id"),
         "subjectId": item.get("subject_id"),

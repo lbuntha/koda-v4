@@ -49,8 +49,8 @@ const AutoHint: React.FC<{
   }, [text, solved, durationMs]);
 
   const tone = solved
-    ? isDark ? "text-emerald-400" : "text-emerald-600"
-    : isDark ? "text-slate-400" : "text-slate-500";
+    ? isDark ? "text-emerald-400 font-extrabold drop-shadow-sm" : "text-emerald-700 font-extrabold"
+    : isDark ? "text-slate-300 font-bold" : "text-slate-700 font-bold";
 
   return (
     // Fixed height so the canvas never reflows as the hint comes and goes.

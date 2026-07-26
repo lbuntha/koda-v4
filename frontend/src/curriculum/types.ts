@@ -72,6 +72,8 @@ export interface Skill {
     thumbnailUrl?: string;
     /** Stable reference to an SVG saved in the adult account's shared library. */
     thumbnailAssetId?: string;
+    /** Roughly how long this activity takes, shown to the learner. 1–90. */
+    estimatedMinutes?: number;
     accent?: "purple" | "blue" | "green" | "amber" | "pink";
   };
   /** Optional override for this skill's completion bonus. */

@@ -10,7 +10,7 @@
  * choice is remembered and wins.
  */
 
-import { useCallback, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 
 export type ThemeMode = "light" | "dark";
 
@@ -47,11 +47,9 @@ export const systemThemeMode = (): ThemeMode =>
     ? "dark"
     : "light";
 
-/**
- * Returns the active mode and a toggle. Apply `dark` to the page root when the mode is
- * `"dark"` — one hook per mounted page, since only one of these pages renders at a time.
- */
-export const useThemeMode = (): [ThemeMode, () => void] => {
+export type ThemeState = [ThemeMode, () => void];
+
+const useLocalThemeMode = (): ThemeState => {
   const [stored, setStored] = useState<ThemeMode | null>(readStoredThemeMode);
   const [system, setSystem] = useState<ThemeMode>(systemThemeMode);
 
@@ -78,4 +76,26 @@ export const useThemeMode = (): [ThemeMode, () => void] => {
   }, []);
 
   return [resolveThemeMode(stored, system), toggle];
+};
+
+const ThemeContext = createContext<ThemeState | null>(null);
+
+/**
+ * Shares one theme state across a role's screens. Without this, a page that renders *outside*
+ * the themed page root — the student player's loading, error and toast surfaces — would hold
+ * its own copy of the state and stay light while the page around it went dark.
+ */
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <ThemeContext.Provider value={useLocalThemeMode()}>{children}</ThemeContext.Provider>
+);
+
+/**
+ * Returns the active mode and a toggle. Apply `dark` to the page root when the mode is
+ * `"dark"`. Uses the shared state from `ThemeProvider` when one is mounted, and falls back to
+ * its own state so a screen rendered on its own still themes correctly.
+ */
+export const useThemeMode = (): ThemeState => {
+  const shared = useContext(ThemeContext);
+  const standalone = useLocalThemeMode();
+  return shared ?? standalone;
 };

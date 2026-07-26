@@ -4,6 +4,7 @@
  */
 
 import React from "react";
+import { KidAvatar } from "./KidAvatar";
 
 export const AVATARS = ["🦊", "🐼", "🐯", "🦄", "🐸", "🐵", "🐙", "🦁", "🐧", "🐨", "🐰", "🐮", "🐷", "🐳", "🦉", "🐝"];
 export const AVATAR_FALLBACK = "🧒";
@@ -15,13 +16,14 @@ export const AvatarPicker: React.FC<{ value: string | null; onChange: (v: string
         key={a}
         type="button"
         onClick={() => onChange(a)}
-        className={`aspect-square rounded-xl text-xl flex items-center justify-center transition-all cursor-pointer ${
+        aria-label={`Avatar ${a}`}
+        className={`aspect-square rounded-xl p-1.5 text-xl flex items-center justify-center transition-all cursor-pointer ${
           value === a
-            ? "bg-indigo-100 ring-2 ring-indigo-500 dark:bg-indigo-400/20 dark:ring-indigo-400"
-            : "bg-slate-50 hover:bg-slate-100 dark:bg-white/5 dark:hover:bg-white/10"
+            ? "bg-indigo-500 ring-2 ring-indigo-500 dark:bg-indigo-500 dark:ring-indigo-400"
+            : "bg-slate-200/70 hover:bg-slate-300/70 dark:bg-white/10 dark:hover:bg-white/15"
         }`}
       >
-        {a}
+        <KidAvatar avatar={a} className="h-full w-full" />
       </button>
     ))}
   </div>
