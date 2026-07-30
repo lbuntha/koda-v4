@@ -5,6 +5,8 @@ from __future__ import annotations
 from datetime import date, datetime, timedelta, timezone
 from typing import Any
 
+from ...core.logging import get_logger
+from ...core.runtime_settings import get_system_settings
 from ...models.assignment import Assignment, Placement, ProgressionState
 from ...models.classroom import ClassEnrollment, Classroom
 from ...models.event import LearningEvent
@@ -14,6 +16,13 @@ from ...models.recommendation import RecommendationRun, StudentSession
 from ...models.student import Student
 from ...models.user import Role, User
 from ..learning.rewards import calculate_xp, skill_metadata
+from ..learning.streak import DEFAULT_STREAK, current_run, longest_run, reference_today, streak_days
+
+logger = get_logger("analytics")
+
+#: Ceiling on events loaded for one activity snapshot. Chosen to be unreachable in normal use
+#: while still bounding the worst case; crossing it is logged rather than silently truncating.
+MAX_SNAPSHOT_EVENTS = 25_000
 
 
 def _role(user: User) -> str:
@@ -71,28 +80,6 @@ def _event_out(event: LearningEvent) -> dict[str, Any]:
     }
 
 
-def _streak(days: set[date]) -> tuple[int, int]:
-    if not days:
-        return 0, 0
-    ordered = sorted(days)
-    longest = current_run = 1
-    for previous, current in zip(ordered, ordered[1:]):
-        if current == previous + timedelta(days=1):
-            current_run += 1
-            longest = max(longest, current_run)
-        else:
-            current_run = 1
-    latest = ordered[-1]
-    today = datetime.now(timezone.utc).date()
-    current = 0
-    cursor = latest
-    if latest >= today - timedelta(days=1):
-        while cursor in days:
-            current += 1
-            cursor -= timedelta(days=1)
-    return current, longest
-
-
 def _weekly_activity(events: list[Any], today: date | None = None) -> list[dict[str, Any]]:
     """Return a compact seven-day activity series without exposing event detail."""
     end = today or datetime.now(timezone.utc).date()
@@ -127,20 +114,31 @@ async def activity_snapshot(
     query: dict[str, Any] = {"student_id": student_id}
     if assignment_id:
         query["assignment_id"] = assignment_id
-    events = await LearningEvent.find(query).sort("-client_timestamp_ms").to_list()
+    # Every figure below — XP, lifetime totals, longest streak — is defined over the learner's
+    # whole history, so this cannot be narrowed to a recent window without changing what those
+    # numbers mean. What it can have is a ceiling, so one learner's history can never load the
+    # whole collection into memory on a page view. The cap is far above a real learner (a busy
+    # one produces a few thousand events a year) and is served by the
+    # (student_id, client_timestamp_ms) index, so the newest events are the ones kept.
+    events = await (
+        LearningEvent.find(query).sort("-client_timestamp_ms").limit(MAX_SNAPSHOT_EVENTS).to_list()
+    )
+    if len(events) == MAX_SNAPSHOT_EVENTS:
+        # Reaching this means totals are now understated. Better a log line than silence.
+        logger.warning(
+            "activity snapshot truncated at cap student_id=%s cap=%s",
+            student_id, MAX_SNAPSHOT_EVENTS,
+        )
     attempts = [event for event in events if event.event_type == "attempt" and event.verified]
     correct = sum(event.outcome == "correct" for event in attempts)
     first_attempts = [event for event in attempts if event.attempt_number == 1]
-    days: set[date] = set()
-    for event in events:
-        raw = event.occurred_at
-        if not raw:
-            continue
-        try:
-            days.add(datetime.fromisoformat(raw.replace("Z", "+00:00")).date())
-        except ValueError:
-            continue
-    current_streak, longest_streak = _streak(days)
+    settings_doc = await get_system_settings()
+    streak_config = {**DEFAULT_STREAK, **dict((settings_doc.scoring or {}).get("streak") or {})}
+    days = streak_days(events, streak_config)
+    current_streak = current_run(
+        days, reference_today(events), int(streak_config["grace_days"]),
+    )
+    longest_streak = longest_run(days)
     sessions = await StudentSession.find(
         StudentSession.student_id == student_id,
     ).sort("-started_at").limit(50).to_list()

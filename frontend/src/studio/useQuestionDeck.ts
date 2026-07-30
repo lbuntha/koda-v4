@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { questionsApi } from "../api/questions";
 import { useAuth } from "../auth/AuthContext";
+import { mayPersistRemotely } from "../api/persistenceGuard";
 import type { CountingQuestion } from "../types";
 
 const LEGACY_KEY = "counting_studio_questions";
@@ -32,7 +33,14 @@ export function useQuestionDeck(defaultQuestions: CountingQuestion[]) {
     return legacy.length > 0 ? legacy : defaultQuestions;
   });
   const [persistenceStatus, setPersistenceStatus] = useState<QuestionPersistenceStatus>("local");
+  // Why the last save failed. Without it the UI could only guess, and it guessed wrong: a 400
+  // from the server ("questions reference missing curriculum skills") was reported to the
+  // author as "MongoDB unavailable", sending them to look at the database instead of the
+  // curriculum. The status says something is wrong; this says what.
+  const [persistenceError, setPersistenceError] = useState<string | null>(null);
   const hydratedRef = useRef(false);
+  /** See the save effect: a load that failed must never be allowed to write. */
+  const hydrationFailedRef = useRef(false);
   const remoteRevisionRef = useRef(0);
   const changeRevisionRef = useRef(0);
   const queueRef = useRef<Promise<{ ok: true; revision: number } | undefined>>(Promise.resolve(undefined));
@@ -43,6 +51,7 @@ export function useQuestionDeck(defaultQuestions: CountingQuestion[]) {
     const cacheKey = `${LEGACY_KEY}:${ownerId}`;
     let cancelled = false;
     hydratedRef.current = false;
+    hydrationFailedRef.current = false;
     setPersistenceStatus("loading");
 
     void (async () => {
@@ -73,9 +82,13 @@ export function useQuestionDeck(defaultQuestions: CountingQuestion[]) {
         setPersistenceStatus("saved");
       } catch {
         if (cancelled) return;
+        // Show the cache so the studio still opens, but nothing here is authoritative: when
+        // the cache is empty `questions` keeps the starter deck, which is emphatically not
+        // this account's bank. Saving is blocked below until a load succeeds.
         const cached = readQuestions(cacheKey);
         if (cached.length > 0) setQuestions(cached);
         hydratedRef.current = true;
+        hydrationFailedRef.current = true;
         setPersistenceStatus("error");
       }
     })();
@@ -92,24 +105,43 @@ export function useQuestionDeck(defaultQuestions: CountingQuestion[]) {
 
     const cacheKey = `${LEGACY_KEY}:${account.id}`;
     writeQuestions(cacheKey, questions);
+
+    // `remoteRevisionRef` outlives a single load, so after one good load it still holds a
+    // revision the server accepts. Without this guard a later failed load would push the
+    // cache — or the starter deck — over the account's whole question bank and report
+    // "Saved". Reading has to succeed before writing is allowed.
+    if (!mayPersistRemotely({
+      hydrated: hydratedRef.current, hydrationFailed: hydrationFailedRef.current,
+    })) {
+      setPersistenceStatus("error");
+      setPersistenceError("Couldn't load your worksheets, so saving is paused. Reload to try again.");
+      return;
+    }
     const changeRevision = ++changeRevisionRef.current;
     setPersistenceStatus("saving");
     const timeout = window.setTimeout(() => {
       const save = () => questionsApi.put(questions, remoteRevisionRef.current);
+      // Swallows only the *previous* save's rejection, so one failure doesn't poison the
+      // queue for every later save. This save's own outcome is handled below.
       queueRef.current = queueRef.current.catch(() => undefined).then(save);
       void queueRef.current.then(
         (result) => {
           if (!result) return;
           remoteRevisionRef.current = result.revision;
-          if (changeRevisionRef.current === changeRevision) setPersistenceStatus("saved");
+          if (changeRevisionRef.current === changeRevision) {
+            setPersistenceStatus("saved");
+            setPersistenceError(null);
+          }
         },
-        () => {
-          if (changeRevisionRef.current === changeRevision) setPersistenceStatus("error");
+        (cause) => {
+          if (changeRevisionRef.current !== changeRevision) return;
+          setPersistenceStatus("error");
+          setPersistenceError(cause instanceof Error ? cause.message : "Saving failed.");
         }
       );
     }, 400);
     return () => window.clearTimeout(timeout);
   }, [questions, status, account?.id, account?.role]);
 
-  return { questions, setQuestions, persistenceStatus };
+  return { questions, setQuestions, persistenceStatus, persistenceError };
 }

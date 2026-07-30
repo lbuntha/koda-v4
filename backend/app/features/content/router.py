@@ -11,12 +11,15 @@ from ...models.user import User
 from ...models.content import Curriculum, CurriculumRelease, QuestionDeck, SvgLibrary
 from ...models.academic import Grade, Subject
 from ...models.audit import ContentAuditEvent
+from ...core.logging import get_logger
 from ...core.deps import get_current_student, get_current_user
 from ...models.student import Student
 from ...models.assignment import Assignment, Placement, ProgressionState
 from .placement import select_delivery_skill_ids
 from .release import ReleaseValidationError, build_release_payload
 from .schemas import CurriculumArchiveIn, CurriculumCreateIn, CurriculumIn, QuestionsIn, SvgLibraryIn
+
+logger = get_logger("content")
 
 router = APIRouter(tags=["content"])
 
@@ -499,6 +502,7 @@ async def get_questions(user: User = Depends(get_current_user)):
 @router.put("/questions")
 async def put_questions(body: QuestionsIn, user: User = Depends(get_current_user)):
     owner_id = str(user.id)
+    doc = await QuestionDeck.find_one(QuestionDeck.owner_id == owner_id)
     curricula = await Curriculum.find({"owner_id": owner_id, "archived_at": None}).to_list()
     if curricula:
         valid_skill_ids = {
@@ -506,10 +510,29 @@ async def put_questions(body: QuestionsIn, user: User = Depends(get_current_user
             for curriculum in curricula
             for skill in curriculum.tree.get("skills", [])
         }
-        invalid = sorted({q.get("skillId") for q in body.questions if q.get("skillId") and q.get("skillId") not in valid_skill_ids})
+        # Only references this request *introduces* are rejected.
+        #
+        # Validating the whole deck deadlocked the studio: deleting one skill in the
+        # curriculum studio orphaned a question, and from then on every save of the entire
+        # 110-question deck failed with 400 — including saves that had nothing to do with the
+        # orphan, and including the deck the server itself had just served. There was no way
+        # out from inside the app. A pre-existing orphan is now carried through untouched and
+        # logged, so authoring keeps working while the inconsistency stays visible.
+        already_referenced = {
+            question.get("skillId")
+            for question in (doc.questions if doc else [])
+            if question.get("skillId")
+        }
+        referenced = {q.get("skillId") for q in body.questions if q.get("skillId")}
+        invalid = sorted((referenced - valid_skill_ids) - already_referenced)
         if invalid:
             raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Questions reference missing curriculum skills: {', '.join(invalid)}")
-    doc = await QuestionDeck.find_one(QuestionDeck.owner_id == owner_id)
+        stale = sorted((referenced & already_referenced) - valid_skill_ids)
+        if stale:
+            logger.warning(
+                "question deck references deleted skills owner_id=%s skills=%s",
+                owner_id, stale,
+            )
     if doc:
         if body.revision != doc.revision:
             raise HTTPException(status.HTTP_409_CONFLICT, "Question deck changed in another session; reload before saving")
@@ -692,8 +715,36 @@ async def get_content_audit(
 async def get_svg_assets(user: User = Depends(get_current_user)):
     doc = await SvgLibrary.find_one(SvgLibrary.owner_id == str(user.id))
     if not doc:
-        return {"exists": False, "assets": [], "overrides": {}, "revision": 0}
-    return {"exists": True, "assets": doc.assets, "overrides": doc.overrides, "revision": doc.revision}
+        return {"exists": False, "assets": [], "overrides": {},
+                "techniqueThumbnails": {}, "revision": 0}
+    return {"exists": True, "assets": doc.assets, "overrides": doc.overrides,
+            "techniqueThumbnails": doc.technique_thumbnails, "revision": doc.revision}
+
+
+@router.get("/svg-assets/usage")
+async def get_svg_asset_usage(user: User = Depends(get_current_user)):
+    """Which curriculum skills reference each asset in this owner's library.
+
+    The link lives on the skill (`presentation.thumbnailAssetId`), so the Assets page has no
+    way to know an asset is in use — or that deleting it would strand a skill's artwork.
+    This reads the owner's draft curricula and inverts the reference.
+    """
+    usage: dict[str, list[dict[str, str]]] = {}
+    async for doc in Curriculum.find(Curriculum.owner_id == str(user.id)):
+        if doc.archived_at:
+            continue
+        title = (doc.tree or {}).get("title") or "Untitled curriculum"
+        for skill in (doc.tree or {}).get("skills", []):
+            asset_id = (skill.get("presentation") or {}).get("thumbnailAssetId")
+            if not asset_id:
+                continue
+            usage.setdefault(asset_id, []).append({
+                "curriculumId": doc.curriculum_id or str(doc.id),
+                "curriculumTitle": title,
+                "skillId": skill.get("id"),
+                "skillLabel": skill.get("label") or skill.get("id"),
+            })
+    return {"usage": usage}
 
 
 @router.put("/svg-assets")
@@ -707,12 +758,14 @@ async def put_svg_assets(body: SvgLibraryIn, user: User = Depends(get_current_us
             raise HTTPException(status.HTTP_409_CONFLICT, "SVG library changed in another session; reload before saving")
         doc.assets = assets
         doc.overrides = overrides
+        doc.technique_thumbnails = body.technique_thumbnails
         doc.revision += 1
         doc.updated_at = datetime.now(timezone.utc)
         await doc.save()
     else:
         if body.revision != 0:
             raise HTTPException(status.HTTP_409_CONFLICT, "SVG library revision is stale")
-        doc = SvgLibrary(owner_id=owner_id, assets=assets, overrides=overrides, revision=1)
+        doc = SvgLibrary(owner_id=owner_id, assets=assets, overrides=overrides,
+                         technique_thumbnails=body.technique_thumbnails, revision=1)
         await doc.insert()
     return {"ok": True, "revision": doc.revision}

@@ -15,12 +15,19 @@ from typing import Any, Iterable
 from ...core.runtime_settings import get_system_settings
 from ...models.assignment import Assignment
 from ...models.content import CurriculumRelease
+from ...core.logging import get_logger
 from ...models.event import LearningEvent
 from ...models.mastery import MasteryState, ProjectionJob
 from ..content.placement import ordered_skills
+from ..learning.path import grade_scope
 from ..learning.rewards import achievement_profile
 from .projection import build_mastery_states
 from .scoring import ENGINE_REVISION, MASTERY_ORDER
+
+logger = get_logger("progression")
+
+#: Ceiling on events loaded to build one progress payload. See the note at the query.
+MAX_PROGRESS_EVENTS = 25_000
 
 
 _locks: dict[tuple[str, str | None, str], asyncio.Lock] = {}
@@ -194,11 +201,22 @@ async def run_rescore_job(job_id: str) -> None:
         job.status = "completed"
         job.completed_at = _now()
         await job.save()
+        logger.info(
+            "rescore completed job_id=%s students=%s states_written=%s",
+            job_id, job.students_total, states_written,
+        )
     except Exception as exc:
         job.status = "failed"
         job.error = str(exc)[:1000]
         job.completed_at = _now()
         await job.save()
+        # The failure is recorded on the job, but nothing reads that unless an admin happens
+        # to open the settings page. A half-finished rescore leaves mastery inconsistent with
+        # the scoring config, which is exactly the state that must not pass unnoticed.
+        logger.exception(
+            "rescore failed job_id=%s processed=%s of=%s",
+            job_id, job.students_processed, job.students_total,
+        )
 
 
 async def create_rescore_job(scoring_revision: int) -> ProjectionJob:
@@ -340,7 +358,11 @@ async def build_progress(student_id: str) -> dict[str, Any]:
         if not any(curriculum_id == assignment.curriculum_id for curriculum_id, _ in active_curricula):
             active_curricula.append((assignment.curriculum_id, release.tree))
         units = {unit.get("id"): unit for unit in release.tree.get("units", [])}
-        for skill in ordered_skills(release.tree, assignment.scope):
+        # Narrowed to the assignment's grade, exactly as the learner's path is. A release
+        # may span several grades and `scope={"kind": "all"}` means *the release*, so
+        # without this a Grade 1 learner's progress listed Grade 5 skills as theirs.
+        scope = grade_scope(release.tree, assignment.scope, assignment.grade_id)
+        for skill in ordered_skills(release.tree, scope):
             skill_id = skill.get("id")
             if not skill_id:
                 continue
@@ -376,10 +398,28 @@ async def build_progress(student_id: str) -> dict[str, Any]:
             current_revision=settings.scoring_revision,
             config=settings.scoring,
         ))
+    # Bounded for the same reason as the analytics snapshot: achievements are lifetime, so a
+    # recent window would change what they mean, but one learner's history must never be able
+    # to pull the whole collection into memory on a page load.
     events = await LearningEvent.find(
         LearningEvent.student_id == student_id,
         LearningEvent.verified == True,
-    ).sort("client_timestamp_ms").to_list()
+    ).sort("client_timestamp_ms").limit(MAX_PROGRESS_EVENTS).to_list()
+    if len(events) == MAX_PROGRESS_EVENTS:
+        logger.warning(
+            "progress events truncated at cap student_id=%s cap=%s",
+            student_id, MAX_PROGRESS_EVENTS,
+        )
+
+    stale = sum(skill["projectionStatus"] == "stale" for skill in skills)
+    if stale:
+        # Stale means mastery was computed under a scoring config or engine that no longer
+        # applies, so what the learner and their adult see is not what today's rules produce.
+        # It clears itself on the next rescore — a count that stays high means one never ran.
+        logger.warning(
+            "stale projections student_id=%s stale=%s of=%s scoring_revision=%s engine=%s",
+            student_id, stale, len(skills), settings.scoring_revision, ENGINE_REVISION,
+        )
     event_release_ids = {
         event.release_id for event in events
         if event.release_id and event.release_id not in release_trees
@@ -402,6 +442,9 @@ async def build_progress(student_id: str) -> dict[str, Any]:
             release_trees,
             active_curricula,
             mastery_rows,
+            # `settings` is the same document the home chip reads, so the achievement and
+            # the chip agree on what a streak day is.
+            dict((settings.scoring or {}).get("streak") or {}),
         ),
         "skills": skills,
     }

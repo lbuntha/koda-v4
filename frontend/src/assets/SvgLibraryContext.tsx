@@ -1,11 +1,20 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../auth/AuthContext";
+import { mayPersistRemotely } from "../api/persistenceGuard";
 import { svgAssetsApi, SvgOverride } from "../api/svgAssets";
 import type { CustomSvgAsset } from "../types";
 import { normalizeSvgAssetIds } from "./svgIds";
+import {
+  ASSETS_KEY as LEGACY_ASSETS_KEY,
+  OVERRIDES_KEY as LEGACY_OVERRIDES_KEY,
+  THUMBNAILS_KEY,
+  accountKey,
+  readCache,
+  readJson,
+  writeCache,
+  writeJson,
+} from "./libraryCache";
 
-const LEGACY_ASSETS_KEY = "koda_custom_svg_assets";
-const LEGACY_OVERRIDES_KEY = "koda_svg_overrides";
 const LEGACY_MIGRATION_OWNER_KEY = "koda_svg_migration_owner";
 
 export type SvgPersistenceStatus = "local" | "loading" | "saving" | "saved" | "error";
@@ -15,29 +24,10 @@ interface SvgLibraryContextValue {
   setAssets: React.Dispatch<React.SetStateAction<CustomSvgAsset[]>>;
   overrides: Record<string, SvgOverride>;
   setOverrides: React.Dispatch<React.SetStateAction<Record<string, SvgOverride>>>;
+  /** Counting technique -> SVG asset id, replacing that component's static artwork. */
+  techniqueThumbnails: Record<string, string>;
+  setTechniqueThumbnails: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   persistenceStatus: SvgPersistenceStatus;
-}
-
-function readJson<T>(key: string, fallback: T): T {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function accountKey(base: string, ownerId: string): string {
-  return `${base}:${ownerId}`;
-}
-
-function writeJson(key: string, value: unknown): boolean {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 const SvgLibraryContext = createContext<SvgLibraryContextValue | null>(null);
@@ -46,8 +36,15 @@ export const SvgLibraryProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const { status, account } = useAuth();
   const [assets, setAssets] = useState<CustomSvgAsset[]>(() => readJson(LEGACY_ASSETS_KEY, []));
   const [overrides, setOverrides] = useState<Record<string, SvgOverride>>(() => readJson(LEGACY_OVERRIDES_KEY, {}));
+  const [techniqueThumbnails, setTechniqueThumbnails] = useState<Record<string, string>>({});
   const [persistenceStatus, setPersistenceStatus] = useState<SvgPersistenceStatus>("local");
   const hydratedRef = useRef(false);
+  /**
+   * True when the last load failed and local state is therefore a cache, not the account's
+   * library. Saving in that condition would push a partial picture over a server copy we
+   * never managed to read — see the guard in the save effect.
+   */
+  const hydrationFailedRef = useRef(false);
   const saveRevisionRef = useRef(0);
   const remoteRevisionRef = useRef(0);
   const saveQueueRef = useRef<Promise<{ ok: true; revision: number } | undefined>>(Promise.resolve(undefined));
@@ -62,6 +59,7 @@ export const SvgLibraryProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     let cancelled = false;
     const ownerId = account.id;
     hydratedRef.current = false;
+    hydrationFailedRef.current = false;
     setPersistenceStatus("loading");
 
     void (async () => {
@@ -92,6 +90,7 @@ export const SvgLibraryProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           const created = await svgAssetsApi.put({
             assets: nextAssets,
             overrides: nextOverrides,
+            techniqueThumbnails: {},
             revision: remote.revision,
           });
           remoteRevisionRef.current = created.revision;
@@ -107,17 +106,24 @@ export const SvgLibraryProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         if (cancelled) return;
         setAssets(nextAssets);
         setOverrides(nextOverrides);
-        writeJson(accountKey(LEGACY_ASSETS_KEY, ownerId), nextAssets);
-        writeJson(accountKey(LEGACY_OVERRIDES_KEY, ownerId), nextOverrides);
+        const nextThumbnails = remote.techniqueThumbnails || {};
+        setTechniqueThumbnails(nextThumbnails);
+        writeCache(ownerId, {
+          assets: nextAssets, overrides: nextOverrides, techniqueThumbnails: nextThumbnails,
+        });
         hydratedRef.current = true;
         setPersistenceStatus("saved");
       } catch {
         if (cancelled) return;
-        const cachedAssets = readJson<CustomSvgAsset[]>(accountKey(LEGACY_ASSETS_KEY, ownerId), []);
-        const cachedOverrides = readJson<Record<string, SvgOverride>>(accountKey(LEGACY_OVERRIDES_KEY, ownerId), {});
-        setAssets(cachedAssets);
-        setOverrides(cachedOverrides);
+        // Show the cached library so the studio still works, but every part of it — including
+        // the thumbnails, which used to be left empty here — so an edit can't push a
+        // half-remembered picture back over the server copy.
+        const cached = readCache(ownerId);
+        setAssets(cached.assets);
+        setOverrides(cached.overrides);
+        setTechniqueThumbnails(cached.techniqueThumbnails);
         hydratedRef.current = true;
+        hydrationFailedRef.current = true;
         setPersistenceStatus("error");
       }
     })();
@@ -137,13 +143,28 @@ export const SvgLibraryProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
 
     const ownerId = account.id;
-    writeJson(accountKey(LEGACY_ASSETS_KEY, ownerId), assets);
-    writeJson(accountKey(LEGACY_OVERRIDES_KEY, ownerId), overrides);
+    writeCache(ownerId, { assets, overrides, techniqueThumbnails });
+
+    // Local cache updated either way; the remote write is what a failed load forfeits.
+    //
+    // `remoteRevisionRef` survives across loads, so after one successful load it holds a
+    // revision the server will still accept. A later load that fails would otherwise write
+    // cached state over the real library and report "Saved" — losing artwork choices the
+    // failed GET never told us about. Reading has to succeed before writing is allowed.
+    if (!mayPersistRemotely({
+      hydrated: hydratedRef.current, hydrationFailed: hydrationFailedRef.current,
+    })) {
+      setPersistenceStatus("error");
+      return;
+    }
+
     const revision = ++saveRevisionRef.current;
     setPersistenceStatus("saving");
 
     const timeout = window.setTimeout(() => {
-      const save = () => svgAssetsApi.put({ assets, overrides, revision: remoteRevisionRef.current });
+      const save = () => svgAssetsApi.put({ assets, overrides, techniqueThumbnails, revision: remoteRevisionRef.current });
+      // Swallows only the *previous* save's rejection, so one failure doesn't poison the
+      // queue for every later save. This save's own outcome is handled below.
       saveQueueRef.current = saveQueueRef.current.catch(() => undefined).then(save);
       void saveQueueRef.current.then(
         (result) => {
@@ -158,11 +179,14 @@ export const SvgLibraryProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }, 350);
 
     return () => window.clearTimeout(timeout);
-  }, [assets, overrides, status, account?.id, account?.role]);
+  }, [assets, overrides, techniqueThumbnails, status, account?.id, account?.role]);
 
   const value = useMemo<SvgLibraryContextValue>(
-    () => ({ assets, setAssets, overrides, setOverrides, persistenceStatus }),
-    [assets, overrides, persistenceStatus]
+    () => ({
+      assets, setAssets, overrides, setOverrides,
+      techniqueThumbnails, setTechniqueThumbnails, persistenceStatus,
+    }),
+    [assets, overrides, techniqueThumbnails, persistenceStatus]
   );
 
   return <SvgLibraryContext.Provider value={value}>{children}</SvgLibraryContext.Provider>;

@@ -3,6 +3,7 @@ import { curriculumApi } from "../api/curriculum";
 import type { CurriculumOwner } from "../api/curriculum";
 import { ApiError } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
+import { mayPersistRemotely } from "../api/persistenceGuard";
 import { CurriculumTree } from "./types";
 import { EXAMPLE_TREE } from "./seedExample";
 
@@ -35,6 +36,8 @@ export function useCurriculumTree(curriculumId?: string) {
   );
   const [loadError, setLoadError] = useState<string | null>(null);
   const hydratedRef = useRef(false);
+  /** See the save effect: a load that failed must never be allowed to write. */
+  const hydrationFailedRef = useRef(false);
   const remoteRevisionRef = useRef(0);
   const changeRevisionRef = useRef(0);
   // Set just before a conflict reconcile adopts the server's tree, so the
@@ -47,6 +50,7 @@ export function useCurriculumTree(curriculumId?: string) {
     const cacheKey = `${LEGACY_KEY}:${account.id}${curriculumId ? `:${curriculumId}` : ""}`;
     let cancelled = false;
     hydratedRef.current = false;
+    hydrationFailedRef.current = false;
     setLoadError(null);
     setPersistenceStatus("loading");
 
@@ -103,9 +107,13 @@ export function useCurriculumTree(curriculumId?: string) {
           setPersistenceStatus("error");
           return;
         }
+        // Same reasoning as the by-id branch above, which has always refused to save an id
+        // it couldn't read: show the cache so the studio opens, but treat it as a cache.
+        // When there is none, `tree` keeps the example tree — never this account's work.
         const cached = readTree(cacheKey);
         if (cached) setTree(cached);
         hydratedRef.current = true;
+        hydrationFailedRef.current = true;
         setPersistenceStatus("error");
       }
     })();
@@ -121,6 +129,15 @@ export function useCurriculumTree(curriculumId?: string) {
     if (status !== "authenticated" || !account || account.role === "student" || !hydratedRef.current) return;
     const cacheKey = `${LEGACY_KEY}:${account.id}${curriculumId ? `:${curriculumId}` : ""}`;
     writeTree(cacheKey, tree);
+
+    // `remoteRevisionRef` outlives a load, so a failed reload after a good one would write
+    // cached — or example — content over the real curriculum and report "Saved".
+    if (!mayPersistRemotely({
+      hydrated: hydratedRef.current, hydrationFailed: hydrationFailedRef.current,
+    })) {
+      setPersistenceStatus("error");
+      return;
+    }
     if (suppressSaveRef.current) {
       // This tree was adopted from the server by a conflict reconcile, not
       // edited by the user — cache it, but don't save it back and re-bump the
@@ -132,6 +149,8 @@ export function useCurriculumTree(curriculumId?: string) {
     setPersistenceStatus("saving");
     const timeout = window.setTimeout(() => {
       const save = () => curriculumApi.put(tree, remoteRevisionRef.current, published, curriculumId);
+      // Swallows only the *previous* save's rejection, so one failure doesn't poison the
+      // queue for every later save. This save's own outcome is handled below.
       queueRef.current = queueRef.current.catch(() => undefined).then(save);
       void queueRef.current.then(
         result => {
