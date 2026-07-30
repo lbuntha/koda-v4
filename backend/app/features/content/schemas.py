@@ -63,6 +63,17 @@ class CurriculumIn(BaseModel):
         invalid_units = sorted(item["id"] for item in self.tree["units"] if item.get("subjectId") not in subject_ids)
         if invalid_units:
             raise ValueError(f"Curriculum units reference missing subjects: {', '.join(invalid_units)}")
+        for unit in self.tree["units"]:
+            raw_presentation = unit.get("presentation")
+            if raw_presentation is not None and not isinstance(raw_presentation, dict):
+                raise ValueError(f"Unit {unit['id']} presentation must be an object")
+            presentation = raw_presentation or {}
+            icon = presentation.get("icon")
+            if icon is not None and icon not in {"hash", "brain", "shapes", "puzzle", "sparkles", "book"}:
+                raise ValueError(f"Unit {unit['id']} presentation icon is invalid")
+            accent = presentation.get("accent")
+            if accent is not None and accent not in {"purple", "blue", "green", "amber", "pink"}:
+                raise ValueError(f"Unit {unit['id']} presentation accent is invalid")
         invalid_skills = sorted(item["id"] for item in self.tree["skills"] if item.get("unitId") not in units_by_id)
         if invalid_skills:
             raise ValueError(f"Curriculum skills reference missing units: {', '.join(invalid_skills)}")
@@ -221,6 +232,9 @@ class SvgOverrideIn(BaseModel):
 class SvgLibraryIn(BaseModel):
     assets: list[SvgAssetIn] = Field(default_factory=list, max_length=500)
     overrides: dict[str, SvgOverrideIn] = Field(default_factory=dict, max_length=100)
+    #: technique id -> asset id. Validated against `assets` so a saved reference can never
+    #: dangle; a technique with no entry keeps its manifest's static artwork.
+    technique_thumbnails: dict[str, str] = Field(default_factory=dict, max_length=100)
     revision: int = Field(default=0, ge=0)
 
     @model_validator(mode="after")
@@ -228,6 +242,11 @@ class SvgLibraryIn(BaseModel):
         ids = [asset.id for asset in self.assets]
         if len(ids) != len(set(ids)):
             raise ValueError("SVG asset ids must be unique")
+        unknown = sorted(set(self.technique_thumbnails.values()) - set(ids))
+        if unknown:
+            raise ValueError(
+                f"Technique thumbnails reference assets that are not in the library: {', '.join(unknown)}"
+            )
         total_bytes = sum(len(asset.markup.encode("utf-8")) for asset in self.assets)
         total_bytes += sum(len(override.markup.encode("utf-8")) for override in self.overrides.values())
         if total_bytes > 12_000_000:

@@ -5,6 +5,8 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
+from .streak import longest_run, streak_days
+
 
 DEFAULT_REWARDS = {
     "quest": {"label": "Today’s quest", "activitiesPerSession": 3},
@@ -120,30 +122,12 @@ def calculate_xp(
     }
 
 
-def _longest_streak(events: list[Any]) -> int:
-    days = set()
-    for event in events:
-        raw = event.occurred_at
-        if not raw:
-            continue
-        try:
-            days.add(datetime.fromisoformat(raw.replace("Z", "+00:00")).date())
-        except ValueError:
-            continue
-    longest = run = 0
-    previous = None
-    for day in sorted(days):
-        run = run + 1 if previous and (day - previous).days == 1 else 1
-        longest = max(longest, run)
-        previous = day
-    return longest
-
-
 def achievement_profile(
     events: list[Any],
     release_trees: dict[str, dict[str, Any]],
     active_curricula: list[tuple[str, dict[str, Any]]],
     mastery_states: list[Any],
+    streak_config: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build level and badge progress from verified, replayable learning state."""
     verified = [event for event in events if event.verified]
@@ -202,7 +186,8 @@ def achievement_profile(
                 state.highest_earned_level == "master"
                 for state in curriculum_mastery
             ),
-            "streakDays": _longest_streak(curriculum_events),
+            # Same day rule as the learner's home chip; longest run rather than current.
+            "streakDays": longest_run(streak_days(curriculum_events, streak_config)),
         }
         for definition in reward_config(tree)["achievements"]:
             key = (curriculum_id, definition["id"])

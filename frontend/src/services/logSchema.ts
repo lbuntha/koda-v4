@@ -73,6 +73,9 @@ export const TECHNIQUE_TAXONOMY: Record<CountingTechnique, { subjectArea: Subjec
   [CountingTechnique.MULTIPLICATION_COLUMN]: { subjectArea: "multiplication", skillTags: ["partial_products", "multi_digit_column_multiplication"] },
   [CountingTechnique.LIQUID_SORT]: { subjectArea: "sorting_classification", skillTags: ["sorting", "classification"] },
   [CountingTechnique.GOODS_SORT]: { subjectArea: "sorting_classification", skillTags: ["goods_sorting", "triple_matching"] },
+  [CountingTechnique.NUMBER_PATH]: { subjectArea: "number_recognition", skillTags: ["count_to_120", "count_on", "numeral_recognition", "ten_more_ten_less"] },
+  [CountingTechnique.STORY_PROBLEM_MAT]: { subjectArea: "addition", skillTags: ["addition_subtraction_stories", "word_problems", "unknown_quantities", "compare_problems"] },
+  [CountingTechnique.PLACE_VALUE_LAB]: { subjectArea: "place_value", skillTags: ["tens_and_ones", "base_ten_blocks", "compose_decompose", "regroup_ten_ones"] },
 };
 
 
@@ -243,4 +246,29 @@ export function computeSkillMastery(events: LearningEvent[]): SkillMasterySnapsh
   }
 
   return snapshots.sort((a, b) => a.accuracy - b.accuracy); // weakest skills first — what a teacher wants to see first
+}
+
+/**
+ * An ISO timestamp carrying the learner's own UTC offset, e.g. `2026-07-27T06:30:00.000+07:00`.
+ *
+ * `Date.toISOString()` always emits `Z`, so every event reached the server as UTC and the
+ * learner's local calendar was unrecoverable. Anything that asks "which day was this?" then
+ * answered in UTC: at +07:00 the first seven hours of a learner's day were credited to the
+ * one before — a 6am practice extended yesterday's streak and left today looking empty.
+ *
+ * The instant is unchanged; only the frame it is expressed in. Both the streak
+ * (`streak_days`) and the mastery engines' `distinctDays` read the date off this string, so
+ * both now count the learner's days rather than Greenwich's.
+ */
+export function localIsoTimestamp(date: Date): string {
+  const pad = (value: number, width = 2) => String(Math.abs(value)).padStart(width, "0");
+  // getTimezoneOffset() is minutes *behind* UTC, so east of Greenwich is negative.
+  const offsetMinutes = -date.getTimezoneOffset();
+  const sign = offsetMinutes < 0 ? "-" : "+";
+  return (
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+    + `T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+    + `.${pad(date.getMilliseconds(), 3)}`
+    + `${sign}${pad(Math.trunc(offsetMinutes / 60))}:${pad(offsetMinutes % 60)}`
+  );
 }

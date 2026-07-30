@@ -27,7 +27,12 @@ export function addSubject(tree: CurriculumTree, gradeId: string, label: string)
 }
 
 export function addUnit(tree: CurriculumTree, subjectId: string, label: string): CurriculumTree {
-  const unit: Unit = { id: genId("unit"), subjectId, label, order: nextOrder(tree.units.filter(u => u.subjectId === subjectId)) };
+  const unit: Unit = {
+    id: genId("unit"),
+    subjectId,
+    label,
+    order: nextOrder(tree.units.filter(u => u.subjectId === subjectId)),
+  };
   return { ...tree, units: [...tree.units, unit] };
 }
 
@@ -49,7 +54,15 @@ export function addSkill(
 }
 
 export function renameUnit(tree: CurriculumTree, unitId: string, label: string): CurriculumTree {
-  return { ...tree, units: tree.units.map(u => (u.id === unitId ? { ...u, label } : u)) };
+  return updateUnit(tree, unitId, { label });
+}
+
+export function updateUnit(
+  tree: CurriculumTree,
+  unitId: string,
+  patch: Partial<Omit<Unit, "id" | "subjectId">>,
+): CurriculumTree {
+  return { ...tree, units: tree.units.map(unit => (unit.id === unitId ? { ...unit, ...patch } : unit)) };
 }
 
 export function updateSkill(

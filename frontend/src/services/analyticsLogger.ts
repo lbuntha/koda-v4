@@ -14,6 +14,7 @@ import {
   SkillMasterySnapshot,
   CURRENT_SCHEMA_VERSION,
   computeSkillMastery,
+  localIsoTimestamp,
 } from "./logSchema";
 import { learningApi } from "../api/learning";
 
@@ -177,7 +178,7 @@ class AnalyticsLoggerService {
       schemaVersion: CURRENT_SCHEMA_VERSION,
       sessionId: this.sessionId,
       studentId: this.currentStudentId, // null until a real "who is playing" picker calls setCurrentStudent()
-      occurredAt: now.toISOString(),
+      occurredAt: localIsoTimestamp(now),
       clientTimestampMs: now.getTime(),
       ...partial,
     };

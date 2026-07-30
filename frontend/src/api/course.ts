@@ -1,8 +1,13 @@
 import { api } from "./client";
 import type { CountingQuestion } from "../types";
+import type { UnitAccent, UnitIcon } from "../curriculum/types";
 
 export type CourseMode = "scheduled" | "free";
-export type RecommendationKind = "reinforce" | "review" | "new" | "stretch" | "free";
+/**
+ * `continue` is a started skill that is going well but has not yet earned enough plays to
+ * reach `developing` — distinct from `review` (secure, resurfacing) and `reinforce` (a gap).
+ */
+export type RecommendationKind = "reinforce" | "continue" | "review" | "new" | "stretch" | "free";
 export type ActivityStatus = "not_completed" | "in_progress" | "completed";
 
 export interface CourseQueueItem {
@@ -132,6 +137,57 @@ export interface StudentProgress {
   skills: SkillProgress[];
 }
 
+/**
+ * Where one skill stands on the curriculum road. Server-derived from mastery + prerequisites
+ * — see `backend/app/features/learning/path.py`.
+ */
+export type SkillPathStatus = "completed" | "overdue" | "in_progress" | "new" | "pending";
+
+export interface PathSkill {
+  skillId: string;
+  skillLabel: string;
+  unitId?: string | null;
+  unitLabel?: string | null;
+  status: SkillPathStatus;
+  level: MasteryLevel;
+  score: number;
+  /** Index in curriculum order across the whole assigned grade. */
+  position: number;
+  /** False when the release published no questions for this skill. */
+  playable: boolean;
+}
+
+export interface PathUnit {
+  unitId?: string | null;
+  unitLabel: string;
+  unitIcon?: UnitIcon | null;
+  unitAccent?: UnitAccent | null;
+  subjectId?: string | null;
+  subjectLabel?: string | null;
+  gradeId?: string | null;
+  gradeLabel?: string | null;
+  skills: PathSkill[];
+}
+
+export interface CurriculumPath {
+  pathRevision: string;
+  assignmentId: string;
+  curriculumId: string;
+  releaseId: string;
+  gradeId?: string | null;
+  units: PathUnit[];
+  counts: {
+    completed: number;
+    overdue: number;
+    inProgress: number;
+    new: number;
+    pending: number;
+    total: number;
+  };
+  /** First skill still wanting work, walking the curriculum A→Z. Null when the path is done. */
+  nextSkill: PathSkill | null;
+}
+
 export interface StudentActivitySignal {
   studentId: string;
   currentStreakDays: number;
@@ -149,6 +205,8 @@ export const courseApi = {
     api.post<StudentSessionResult>("/sessions/end", { session_id }),
   today: (mode: CourseMode = "scheduled") =>
     api.get<TodayCourse>(`/learning/today?mode=${mode}`),
+  /** The full assigned curriculum walk, A→Z, with each skill's status. */
+  path: () => api.get<{ paths: CurriculumPath[] }>("/learning/path"),
   progress: (studentId: string) =>
     api.get<StudentProgress>(`/progress/${encodeURIComponent(studentId)}`),
   activitySignal: (studentId: string) =>

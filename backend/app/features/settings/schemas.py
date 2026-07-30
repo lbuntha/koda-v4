@@ -68,6 +68,18 @@ class RecommendationConfigIn(BaseModel):
     reinforce_threshold: float = Field(default=0.6, ge=0, le=1)
 
 
+class StreakConfigIn(BaseModel):
+    """What earns a learner a streak day.
+
+    `counts` picks the evidence: `any` event (opening an activity is enough), a verified
+    `attempt` (they answered something), or `lesson_complete` (they finished an activity).
+    """
+
+    counts: Literal["any", "attempt", "lesson_complete"] = "attempt"
+    min_events_per_day: int = Field(default=1, ge=1, le=50)
+    grace_days: int = Field(default=1, ge=0, le=7)
+
+
 class ScoringConfigIn(BaseModel):
     weights: ScoreWeightsIn
     developingScore: float = Field(ge=0, le=1)
@@ -79,6 +91,7 @@ class ScoringConfigIn(BaseModel):
     reviewIntervalDays: ReviewIntervalsIn
     placement: PlacementConfigIn
     recommendation: RecommendationConfigIn = Field(default_factory=RecommendationConfigIn)
+    streak: StreakConfigIn = Field(default_factory=StreakConfigIn)
 
     @model_validator(mode="after")
     def thresholds_are_ordered(self):

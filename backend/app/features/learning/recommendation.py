@@ -13,9 +13,9 @@ from typing import Any
 from ..content.placement import ordered_skills
 
 
-ENGINE_REVISION = "recommendation-1"
+ENGINE_REVISION = "recommendation-2"
 LEVEL_ORDER = {"not_started": 0, "beginner": 1, "developing": 2, "proficient": 3, "master": 4}
-BUCKET_ORDER = {"reinforce": 0, "review": 1, "new": 2, "stretch": 3}
+BUCKET_ORDER = {"reinforce": 0, "continue": 1, "review": 2, "new": 3, "stretch": 4}
 
 
 def _due(state: dict[str, Any], now: datetime) -> bool:
@@ -88,14 +88,47 @@ def recommend(
             continue
         state = progression.get(assignment["id"]) or {}
         eligible = set(state.get("eligible_skill_ids") or [])
-        for key, score in mastery.items():
-            if key[0] == assignment["curriculum_id"] and score.get("level", "not_started") != "not_started":
+        # Sequencing evidence, not exposure. A skill only unlocks the next skill's
+        # prerequisites once its mastery clears the developing gate; one beginner-level
+        # touch proves nothing (docs/progression-design.md §13.2 rule 3). Rapid
+        # confirmation stays the fast path for a learner who already knows it — it writes
+        # `eligible_skill_ids` directly on ingest.
+        for key, mastery_row in mastery.items():
+            if (
+                key[0] == assignment["curriculum_id"]
+                and LEVEL_ORDER.get(mastery_row.get("level", "not_started"), 0) >= LEVEL_ORDER["developing"]
+            ):
                 eligible.add(key[1])
 
         frontier_id = state.get("frontier_skill_id")
-        frontier_index = next((index for index, skill in enumerate(skills) if skill.get("id") == frontier_id), 0)
-        if frontier_id is None and state.get("eligible_skill_ids"):
-            frontier_index = max(0, len(skills) - 1)
+        if frontier_id is not None:
+            frontier_index = next(
+                (index for index, skill in enumerate(skills) if skill.get("id") == frontier_id),
+                0,
+            )
+        else:
+            # No explicit frontier — derive it: the first ordered skill placement did not
+            # clear and the learner has not started.
+            #
+            # This used to jump to the LAST skill whenever any skill was eligible, on the
+            # assumption that "no frontier" means "passed everything". A capped placement
+            # normally clears a few checkpoints and leaves gaps between them, so that
+            # assumption excluded every skill before the end: with 9 skills, 8 of them could
+            # never be offered as `new` and the queue fell through to a stretch fallback.
+            frontier_index = next(
+                (
+                    index for index, skill in enumerate(skills)
+                    if skill.get("id") not in eligible
+                    and LEVEL_ORDER.get(
+                        mastery.get(
+                            (assignment["curriculum_id"], skill.get("id")), {},
+                        ).get("level", "not_started"),
+                        0,
+                    ) == 0
+                ),
+                # Genuinely nothing left unproven: the original end-of-curriculum behaviour.
+                max(0, len(skills) - 1),
+            )
 
         units = {item.get("id"): item for item in tree.get("units", [])}
         for index, skill in enumerate(skills):
@@ -104,12 +137,21 @@ def recommend(
             level = score.get("level", "not_started")
             kind: str | None = None
             reason = ""
-            if _due(score, now) and (float(score.get("score", 0)) < reinforce_threshold or score.get("last_review_outcome") == "unsuccessful"):
+            is_due = _due(score, now)
+            level_rank = LEVEL_ORDER.get(level, 0)
+            if is_due and (float(score.get("score", 0)) < reinforce_threshold or score.get("last_review_outcome") == "unsuccessful"):
                 kind = "reinforce"
                 reason = "Needs reinforcement before moving on"
-            elif _due(score, now) and LEVEL_ORDER.get(level, 0) >= LEVEL_ORDER["developing"]:
+            elif is_due and level_rank >= LEVEL_ORDER["developing"]:
                 kind = "review"
                 reason = "Due for review"
+            elif is_due and level_rank >= LEVEL_ORDER["beginner"]:
+                # Started, going well, but short of the plays the developing gate needs.
+                # Without this bucket the skill is neither "new" (it has mastery) nor
+                # "review" (it is below developing), so it would fall to stretch, never be
+                # served again, and stall at beginner for good.
+                kind = "continue"
+                reason = "Keep practicing to lock this in"
             elif level == "not_started" and skill_id not in eligible and index >= frontier_index:
                 prerequisites = set(skill.get("prerequisiteSkillIds") or [])
                 if prerequisites <= eligible:
@@ -145,7 +187,7 @@ def recommend(
     session_size = max(1, min(10, int(config.get("skills_per_session", 3))))
     max_non_new = max(0, min(session_size, int(config.get("max_non_new", 2))))
     new_items = _interleave([item for item in active if item["kind"] == "new"])
-    non_new = _interleave([item for item in active if item["kind"] in {"reinforce", "review"}])
+    non_new = _interleave([item for item in active if item["kind"] in {"reinforce", "continue", "review"}])
     stretches = _interleave([item for item in active if item["kind"] == "stretch"])
 
     non_new_limit = min(max_non_new, session_size - 1) if new_items else min(max_non_new, session_size)

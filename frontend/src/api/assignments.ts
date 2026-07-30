@@ -46,4 +46,10 @@ export const assignmentsApi = {
   }) => api.post<Assignment>("/assignments", body),
   setStatus: (id: string, status: Assignment["status"]) =>
     api.patch<Assignment>("/assignments/" + id, { status }),
+  /**
+   * Move a learner onto a newer release of the same curriculum. Releases are immutable, so
+   * published changes — a skill's artwork, a new question — only reach a student through this.
+   */
+  setRelease: (id: string, releaseId: string) =>
+    api.patch<Assignment>("/assignments/" + id, { release_id: releaseId }),
 };

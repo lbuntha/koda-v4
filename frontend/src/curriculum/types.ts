@@ -46,6 +46,9 @@ export interface Subject {
   active?: boolean;
 }
 
+export type UnitIcon = "hash" | "brain" | "shapes" | "puzzle" | "sparkles" | "book";
+export type UnitAccent = "purple" | "blue" | "green" | "amber" | "pink";
+
 export interface Unit {
   id: string;         // "g1-math-unit-1"
   subjectId: string;  // FK -> Subject.id
@@ -53,6 +56,11 @@ export interface Unit {
   order: number;
   description?: string;
   learningObjectives?: string[];
+  /** Learner-facing unit marker. Skill artwork remains configured on each skill. */
+  presentation?: {
+    icon?: UnitIcon;
+    accent?: UnitAccent;
+  };
 }
 
 export interface Skill {
@@ -195,6 +203,47 @@ export function subjectHasQuestionSupport(subject: Pick<Subject, "code" | "label
   const code = subject.code?.trim().toLowerCase();
   if (code && SUBJECT_KEYS_WITH_QUESTION_SUPPORT.has(code)) return true;
   return SUBJECT_KEYS_WITH_QUESTION_SUPPORT.has(subject.label.trim().toLowerCase());
+}
+
+// ── Authored duration ─────────────────────────────────────────────────────
+
+/**
+ * Bounds for `presentation.estimatedMinutes`. The studio's number input and its validation
+ * message read the same two constants, so the field can never advertise a range it rejects.
+ */
+export const SKILL_MINUTES_MIN = 1;
+export const SKILL_MINUTES_MAX = 90;
+
+export function isValidSkillMinutes(minutes: number | undefined): boolean {
+  return minutes === undefined
+    || (Number.isInteger(minutes) && minutes >= SKILL_MINUTES_MIN && minutes <= SKILL_MINUTES_MAX);
+}
+
+/**
+ * A skill's authored duration, or null when the author left it blank. Never estimated from
+ * question count: the learner card shows what the curriculum authored rather than guessing a
+ * duration, and the studio has to show the author the same truth.
+ */
+export function formatSkillMinutes(skill: Skill): string | null {
+  const minutes = skill.presentation?.estimatedMinutes;
+  return typeof minutes === "number" ? `${minutes} min` : null;
+}
+
+export interface UnitMinutes {
+  /** Sum of the authored minutes present. Skills without one contribute nothing. */
+  total: number;
+  /** How many skills still need a duration — what an author has left to fill in. */
+  missing: number;
+}
+
+/** Unit-level rollup of authored durations, for the unit header. */
+export function sumSkillMinutes(skills: Skill[]): UnitMinutes {
+  return skills.reduce<UnitMinutes>((totals, skill) => {
+    const minutes = skill.presentation?.estimatedMinutes;
+    return typeof minutes === "number"
+      ? { total: totals.total + minutes, missing: totals.missing }
+      : { total: totals.total, missing: totals.missing + 1 };
+  }, { total: 0, missing: 0 });
 }
 
 // ── Tree lookups ──────────────────────────────────────────────────────────

@@ -159,7 +159,7 @@ export interface SkillScore {
   plays: number; // questions answered (first-attempt events)
   attempts: number; // raw attempt events (a question can have several)
   sessions: number; // distinct sessionId
-  distinctDays: number; // distinct UTC calendar days
+  distinctDays: number; // distinct calendar days on the learner's own clock
   hardPlays: number; // first-attempt events tagged difficulty "hard"
   difficultyTagged: boolean; // was any attempt difficulty-tagged at all
   hintRate: number; // 0..1

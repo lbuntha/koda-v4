@@ -2,7 +2,8 @@ from datetime import date, timedelta
 
 from types import SimpleNamespace
 
-from app.features.analytics.service import _streak, _weekly_activity
+from app.features.analytics.service import _weekly_activity
+from app.features.learning.streak import current_run, longest_run
 from app.features.progression.service import state_out
 
 
@@ -18,14 +19,14 @@ def test_streak_counts_current_and_longest_runs():
         today - timedelta(days=10),
     }
 
-    assert _streak(days) == (3, 4)
+    assert (current_run(days, today), longest_run(days)) == (3, 4)
 
 
 def test_streak_keeps_yesterday_run_current():
     today = date.today()
     days = {today - timedelta(days=1), today - timedelta(days=2)}
 
-    assert _streak(days) == (2, 2)
+    assert (current_run(days, today), longest_run(days)) == (2, 2)
 
 
 def test_weekly_activity_returns_zero_filled_seven_day_series():

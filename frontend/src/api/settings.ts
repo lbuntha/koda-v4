@@ -50,6 +50,12 @@ export interface ScoringConfig {
     generator_revision: number;
     rapid_confirmation_plays: number;
   };
+  streak: {
+    /** What earns a day: any event, a verified answer, or a finished activity. */
+    counts: "any" | "attempt" | "lesson_complete";
+    min_events_per_day: number;
+    grace_days: number;
+  };
   recommendation: {
     skills_per_session: number;
     max_non_new: number;

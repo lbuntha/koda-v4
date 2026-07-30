@@ -35,6 +35,9 @@ class User(Document):
     family_code: str | None = None
     # Set to disable an account: it can no longer authenticate.
     disabled_at: datetime | None = None
+    #: Set when the password changes. Refresh tokens issued before this are rejected, which
+    #: is what makes a reset actually evict whoever else was signed in.
+    credentials_changed_at: datetime | None = None
     # Extra menu ids granted to this specific user, on top of their role's menus.
     menu_ids: list[str] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=_now)

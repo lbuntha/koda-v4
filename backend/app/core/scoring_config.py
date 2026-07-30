@@ -44,6 +44,16 @@ DEFAULT_SCORING_CONFIG: dict[str, Any] = {
         "skip_cooldown_sessions": 1,
         "reinforce_threshold": 0.6,
     },
+    # What a learner has to do for a day to count towards their streak.
+    #
+    # The default is `attempt`: answering at least one question. Historically the streak
+    # counted *any* event, so opening an activity and leaving kept it alive — attendance
+    # rather than practice, next to labels that read as practice.
+    "streak": {
+        "counts": "attempt",          # any | attempt | lesson_complete
+        "min_events_per_day": 1,      # qualifying events a day needs to count
+        "grace_days": 1,              # how stale the newest active day may be before it resets
+    },
 }
 
 

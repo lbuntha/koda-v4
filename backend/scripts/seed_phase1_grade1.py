@@ -214,7 +214,7 @@ def fixture_tree() -> dict:
                     "title": "Take away within 10",
                     "description": "Remove part of a group and find how many remain.",
                     "estimatedMinutes": 4,
-                    "thumbnailUrl": "/assets/owl-mascot.svg",
+                    "thumbnailUrl": "/assets/curriculum/subtraction-within-10.svg",
                     "accent": "amber",
                 },
             },
