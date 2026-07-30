@@ -32,7 +32,7 @@ export const ParentOverview: React.FC<OverviewProps> = ({ childCount, summaries,
     </section>
     {showSummary && (
       <div className="mt-6 grid items-start gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(21rem,0.75fr)]">
-        <FamilySummary summaries={summaries} loading={summariesLoading} className="mt-0" />
+        <FamilySummary summaries={summaries} loading={summariesLoading} expectedProfiles={childCount} className="mt-0" />
         <RecentActivity profiles={profiles} summaries={summariesByChild} loading={summariesLoading} onOpenProgress={onOpenProgress} />
       </div>
     )}

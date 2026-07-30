@@ -86,6 +86,8 @@ export interface Skill {
   };
   /** Optional override for this skill's completion bonus. */
   completionXp?: number;
+  /** Include this skill when generating a diagnostic from a published release. */
+  placementCheckpoint?: boolean;
 }
 
 export interface CurriculumRewards {

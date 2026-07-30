@@ -15,6 +15,7 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
+  Compass,
   Eye,
   FolderHeart,
   Images,
@@ -39,7 +40,7 @@ import {
   isValidSkillMinutes,
 } from "../../curriculum/types";
 import { filterAndSortBySkill, formatTechniqueLabel } from "./questionOps";
-import { Badge, Button, Dialog, Input, Label, Select, Textarea } from "../ui";
+import { Badge, Button, Dialog, Input, Label, Select, Switch, Textarea } from "../ui";
 import { ALL_TECHNIQUES, resolveTechniqueThumbnail } from "../../techniques";
 import { useSvgLibrary } from "../../assets/SvgLibraryContext";
 import { isSafeSvgMarkup } from "../../assets/svgSafety";
@@ -250,6 +251,24 @@ export const SkillDetail: React.FC<SkillDetailProps> = ({
               {presentationOpen ? "Done" : "Edit card"}
             </Button>
           )}
+        </div>
+
+        <div className="flex items-center gap-3 border-t border-[#EEEAF8] bg-[#FBFAFF]/70 px-3 py-2.5">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#EEEAFE] text-[#534AB7]">
+            <Compass size={15} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="koda-admin-label font-medium text-[#0E0B55]">Placement checkpoint</p>
+            <p className="text-[10px] leading-relaxed text-[#6D6997]">
+              Sample 1–2 published, gradable questions from this skill during placement.
+            </p>
+          </div>
+          <Switch
+            size="sm"
+            checked={skill.placementCheckpoint === true}
+            onCheckedChange={checked => onUpdateSkill({ placementCheckpoint: checked || undefined })}
+            aria-label={`Use ${skill.label} as a placement checkpoint`}
+          />
         </div>
 
         {showPresentationFields && (

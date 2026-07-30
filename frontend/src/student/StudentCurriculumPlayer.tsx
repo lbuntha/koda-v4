@@ -227,6 +227,7 @@ export const StudentCurriculumPlayer: React.FC = () => {
         quiz={placement}
         band={account?.gradeBand ?? "student"}
         onComplete={finishPlacement}
+        onExit={() => void exit()}
       />
     );
   }

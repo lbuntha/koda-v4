@@ -51,6 +51,17 @@ interface GameLauncherProps {
     recommendationRunId?: string;
     skillId?: string;
   };
+  /**
+   * Runs the same activity canvas as a diagnostic instead of a lesson.
+   * Diagnostic responses are kept local and submitted together; they never
+   * emit lesson analytics, completion XP, or mastery events.
+   */
+  assessment?: {
+    eyebrow?: string;
+    finishLabel?: string;
+    responseId?: (question: CountingQuestion) => string;
+    onComplete: (responses: Array<{ questionId: string; selection: string }>) => Promise<void> | void;
+  };
 }
 
 interface ConfettiParticle {
@@ -69,6 +80,7 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
   onExit,
   kidMode = false,
   learningContext,
+  assessment,
 }) => {
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const [confetti, setConfetti] = useState<ConfettiParticle[]>([]);
@@ -77,10 +89,26 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
   const [theme, toggleTheme] = useThemeMode();
   const isDark = theme === "dark";
   const [showAnalyticsModal, setShowAnalyticsModal] = useState<boolean>(false);
+  const [assessmentResponses, setAssessmentResponses] = useState<Record<string, string>>({});
+  const [assessmentSaving, setAssessmentSaving] = useState(false);
+  const [assessmentError, setAssessmentError] = useState<string | null>(null);
   const correctAttemptLogged = useRef(false);
 
   const activeQuestion = questions.find(q => q.id === activeId) || questions[0];
   const currentIdx = questions.findIndex(q => q.id === activeId);
+  const responseIdFor = (question: CountingQuestion) => assessment?.responseId?.(question) ?? question.id;
+  const activeResponseId = activeQuestion ? responseIdFor(activeQuestion) : "";
+  const assessmentAnswered = Boolean(activeResponseId && assessmentResponses[activeResponseId]);
+
+  const recordAssessmentResponse = (selection: unknown) => {
+    if (!assessment || !activeQuestion || selection == null) return;
+    const normalized = String(selection);
+    if (!normalized) return;
+    const responseId = responseIdFor(activeQuestion);
+    setAssessmentResponses(current => current[responseId]
+      ? current
+      : { ...current, [responseId]: normalized });
+  };
 
   /** Builds the slide-context fields every learning event needs — one place, so the taxonomy lookup can't drift between call sites. */
   const slideContext = (q: CountingQuestion, idx: number) => {
@@ -113,7 +141,7 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
     setIsSuccess(false);
     setConfetti([]);
     correctAttemptLogged.current = false;
-    if (activeQuestion) {
+    if (activeQuestion && !assessment) {
       analyticsLogger.logSlideView(slideContext(activeQuestion, currentIdx));
     }
   }, [activeId]);
@@ -131,6 +159,13 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
     detail?: { expected?: unknown; selected?: unknown; details?: Record<string, any> },
   ) => {
     if (!activeQuestion) return;
+    if (assessment) {
+      // Some arithmetic canvases report intermediate rows. Placement records
+      // only the final checked response that the release grader understands.
+      const stage = detail?.details?.stage;
+      if (!stage || stage === "final") recordAssessmentResponse(detail?.selected);
+      return;
+    }
     if (outcome === "correct") {
       if (correctAttemptLogged.current) return;
       correctAttemptLogged.current = true;
@@ -140,6 +175,7 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
 
   const handleHint = (details?: Record<string, any>) => {
     if (!activeQuestion) return;
+    if (assessment) return;
     analyticsLogger.logHintRequested(slideContext(activeQuestion, currentIdx), details);
   };
 
@@ -178,6 +214,10 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
   };
 
   const handleSuccess = () => {
+    if (assessment) {
+      recordAssessmentResponse(solvedSelection(activeQuestion));
+      return;
+    }
     setIsSuccess(true);
     triggerConfetti();
     if (!correctAttemptLogged.current) {
@@ -213,7 +253,7 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
     setIsSuccess(false);
     setConfetti([]);
     sounds.playPop();
-    if (activeQuestion) {
+    if (activeQuestion && !assessment) {
       analyticsLogger.logSlideReset(slideContext(activeQuestion, currentIdx));
     }
     const currentId = activeId;
@@ -221,11 +261,26 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
     setTimeout(() => setActiveId(currentId), 30);
   };
 
-  const handleNextSlide = () => {
+  const handleNextSlide = async () => {
+    if (assessment && !assessmentAnswered) return;
     setIsSuccess(false);
+    setAssessmentError(null);
     if (currentIdx < questions.length - 1) {
       setActiveId(questions[currentIdx + 1].id);
       sounds.playPop();
+    } else if (assessment) {
+      setAssessmentSaving(true);
+      try {
+        await assessment.onComplete(questions.map(question => {
+          const questionId = responseIdFor(question);
+          return { questionId, selection: assessmentResponses[questionId] || "" };
+        }));
+        sounds.playSuccess();
+      } catch (cause) {
+        setAssessmentError(cause instanceof Error ? cause.message : "Unable to save placement");
+      } finally {
+        setAssessmentSaving(false);
+      }
     } else {
       analyticsLogger.logLessonComplete({
         slideIndex: currentIdx,
@@ -243,10 +298,10 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
   };
 
   useEffect(() => {
-    if (!kidMode || !isSuccess) return;
-    const timer = window.setTimeout(handleNextSlide, 1200);
+    if (assessment || !kidMode || !isSuccess) return;
+    const timer = window.setTimeout(() => void handleNextSlide(), 1200);
     return () => window.clearTimeout(timer);
-  }, [activeId, isSuccess, kidMode]);
+  }, [activeId, isSuccess, kidMode, assessment]);
 
   const handlePrevSlide = () => {
     setIsSuccess(false);
@@ -319,7 +374,11 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
                 someone scanning a dense authoring UI. An early reader cannot read it, and it
                 sits directly above the activity name they need. Learners get the name alone,
                 at a size meant to be read. */}
-            {!kidMode && (
+            {assessment ? (
+              <p className={`text-[9px] font-bold uppercase tracking-[0.16em] leading-none mb-0.5
+                ${isDark ? 'text-indigo-400' : 'text-indigo-600'}
+              `}>{assessment.eyebrow ?? "Placement check"}</p>
+            ) : !kidMode && (
               <p className={`text-[9px] font-bold uppercase tracking-[0.2em] font-mono leading-none mb-0.5
                 ${isDark ? 'text-slate-500' : 'text-slate-400'}
               `}>Worksheet Game</p>
@@ -355,7 +414,7 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
 
         {/* Right – controls */}
         <div className="flex items-center gap-1.5">
-          {!kidMode && (
+          {!kidMode && !assessment && (
             <>
               <button
                 onClick={() => { setShowAnalyticsModal(true); sounds.playPop(); }}
@@ -388,19 +447,23 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
           <button onClick={toggleMute} className={`${iconBtn} ${isDark ? iconBtnDark : iconBtnLight}`} title="Toggle sound">
             {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
           </button>
-          {!kidMode && (
+          {(!kidMode || Boolean(assessment)) && (
             <button onClick={toggleBrowserFullscreen} className={`${iconBtn} ${isDark ? iconBtnDark : iconBtnLight}`}>
               {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
             </button>
           )}
-          <div className={`w-px h-5 mx-0.5 ${isDark ? 'bg-white/10' : 'bg-black/10'}`} />
-          <button
-            onClick={() => { (onExit ?? onClose)(); sounds.playPop(); }}
-            className="flex items-center gap-1.5 px-3 py-2 bg-rose-500 hover:bg-rose-400 text-white rounded-xl text-[11px] font-bold transition-all shadow-md shadow-rose-500/20 cursor-pointer"
-          >
-            <X size={13} />
-            <span className="hidden sm:inline">Exit</span>
-          </button>
+          {(!assessment || onExit) && (
+            <>
+              <div className={`w-px h-5 mx-0.5 ${isDark ? 'bg-white/10' : 'bg-black/10'}`} />
+              <button
+                onClick={() => { (onExit ?? onClose)(); sounds.playPop(); }}
+                className="flex items-center gap-1.5 px-3 py-2 bg-rose-500 hover:bg-rose-400 text-white rounded-xl text-[11px] font-bold transition-all shadow-md shadow-rose-500/20 cursor-pointer"
+              >
+                <X size={13} />
+                <span className="hidden sm:inline">Exit</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -428,7 +491,7 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
             </div>
 
             {/* ── Success overlay ── */}
-            {isSuccess && (
+            {isSuccess && !assessment && (
               <div className="absolute inset-0 flex items-end justify-center pb-6 z-30 pointer-events-none">
                 <div className="pointer-events-auto w-full max-w-md mx-4">
                   <div className={`p-5 rounded-3xl flex flex-col gap-4 animate-scale-in border shadow-2xl transition-all duration-300 ${
@@ -473,7 +536,7 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
                           Play Again
                         </button>
                         <button
-                          onClick={handleNextSlide}
+                          onClick={() => void handleNextSlide()}
                           className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-extrabold rounded-2xl transition-all shadow-md cursor-pointer ${
                             isDark
                               ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-500/20'
@@ -499,7 +562,7 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
               kid mode this whole strip was a full-width band of decoration repeating the
               progress already shown in the header. Dropping it gives the canvas the height
               back — which is what the child is actually looking at. */}
-          {!kidMode && (
+          {(!kidMode || assessment) && (
           <div className="flex-shrink-0 flex items-center gap-3">
             {/* Prev */}
             <button
@@ -528,7 +591,9 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
                     key={q.id}
                     type="button"
                     aria-label={`Question ${idx + 1}${idx === currentIdx ? ", current" : ""}`}
+                    disabled={Boolean(assessment)}
                     onClick={() => {
+                      if (assessment) return;
                       setActiveId(q.id);
                       setIsSuccess(false);
                       sounds.playPop();
@@ -537,8 +602,8 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
                       ${idx === currentIdx
                         ? 'w-6 h-2.5 bg-indigo-500'
                         : isDark
-                          ? "w-2 h-2 bg-white/15 cursor-pointer hover:bg-white/30"
-                          : "w-2 h-2 bg-black/15 cursor-pointer hover:bg-black/30"
+                          ? `w-2 h-2 bg-white/15 ${assessment ? "cursor-default" : "cursor-pointer hover:bg-white/30"}`
+                          : `w-2 h-2 bg-black/15 ${assessment ? "cursor-default" : "cursor-pointer hover:bg-black/30"}`
                       }
                     `}
                   />
@@ -552,26 +617,48 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
 
             {/* Next */}
             <button
-                onClick={handleNextSlide}
-                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-bold transition-all cursor-pointer shadow-md
-                  ${currentIdx === questions.length - 1
+                onClick={() => void handleNextSlide()}
+                disabled={(assessment && !assessmentAnswered) || assessmentSaving}
+                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-bold transition-all shadow-md
+                  ${(assessment && !assessmentAnswered) || assessmentSaving
+                    ? isDark
+                      ? 'cursor-not-allowed border border-white/5 bg-white/[0.04] text-slate-600 shadow-none'
+                      : 'cursor-not-allowed border border-slate-200 bg-slate-100 text-slate-300 shadow-none'
+                    : currentIdx === questions.length - 1
                     ? 'bg-emerald-500 hover:bg-emerald-400 border border-emerald-400/30 text-white shadow-emerald-500/20 hover:scale-105'
                     : 'bg-indigo-600 hover:bg-indigo-500 border border-indigo-500/30 text-white shadow-indigo-600/20 hover:scale-105'
                   }
                 `}
               >
                 <span className="hidden sm:inline">
-                  {currentIdx === questions.length - 1 ? "Finish" : "Next"}
+                  {assessmentSaving
+                    ? "Saving…"
+                    : currentIdx === questions.length - 1
+                      ? assessment?.finishLabel ?? "Finish"
+                      : "Next"}
                 </span>
                 <ChevronRight size={16} />
               </button>
           </div>
           )}
+          {assessment && (
+            <div className={`-mt-1 text-center text-xs font-semibold ${
+              assessmentError
+                ? "text-rose-500"
+                : assessmentAnswered
+                  ? "text-emerald-500"
+                  : isDark ? "text-slate-500" : "text-slate-400"
+            }`} role={assessmentError ? "alert" : "status"}>
+              {assessmentError ?? (assessmentAnswered
+                ? "Response recorded"
+                : kidMode ? "Have a go to keep moving" : "Check an answer to continue")}
+            </div>
+          )}
         </div>
       </div>
 
       {/* ── Interactive Logs / JSON Analytics Modal ── */}
-      {!kidMode && (
+      {!kidMode && !assessment && (
         <AnalyticsViewerModal
           isOpen={showAnalyticsModal}
           onClose={() => setShowAnalyticsModal(false)}

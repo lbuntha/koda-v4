@@ -184,10 +184,20 @@ async def activity_snapshot(
                 if attempts else None
             ),
             "hints": sum(event.event_type == "hint_requested" for event in events),
-            "lessonsCompleted": sum(
-                event.event_type == "lesson_complete" and event.verified
+            # A retry or network replay can store the same completion more than once. Count
+            # the completed learning activity, not transport deliveries of its event.
+            "lessonsCompleted": len({
+                (
+                    event.session_id,
+                    event.assignment_id,
+                    event.release_id,
+                    event.curriculum_skill_id,
+                )
                 for event in events
-            ),
+                if event.event_type == "lesson_complete"
+                and event.verified
+                and event.curriculum_skill_id
+            }),
             "xpEarned": xp["totalXp"],
             "timeOnTaskMs": sum(event.time_on_task_ms or 0 for event in attempts),
             "currentStreakDays": current_streak,

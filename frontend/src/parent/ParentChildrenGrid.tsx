@@ -2,7 +2,7 @@ import React from "react";
 import { Plus } from "lucide-react";
 import type { AnalyticsSummary } from "../api/analytics";
 import type { Child } from "../api/family";
-import { Button, Card, CardContent, Spinner } from "../components/ui";
+import { Spinner } from "../components/ui";
 import { ParentChildCard } from "./ParentChildCard";
 
 interface Props {
@@ -21,14 +21,11 @@ interface Props {
 }
 
 const AddChildCard: React.FC<{ onAdd: () => void }> = ({ onAdd }) => (
-  <Card className="min-h-56 rounded-3xl border border-dashed border-[#D9DDEA] bg-white/45 shadow-none dark:border-white/10 dark:bg-white/[0.02]">
-    <CardContent className="flex h-full min-h-56 flex-col items-center justify-center p-5 text-center">
-      <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F0EBFF] text-[#7252D8] dark:bg-violet-400/15 dark:text-[#CDBEFF]"><Plus size={25} /></span>
-      <p className="mt-4 text-sm font-black text-[#344057] dark:text-white">Add a child</p>
-      <p className="mt-1.5 text-xs font-bold text-[#8A95A8] dark:text-[#8F99AD]">Create another learner profile.</p>
-      <Button type="button" variant="ghost" size="sm" onClick={onAdd} className="mt-4 rounded-full text-xs font-extrabold text-[#6844EA] dark:text-[#CDBEFF]">Add child</Button>
-    </CardContent>
-  </Card>
+  <button type="button" onClick={onAdd} className="group flex min-h-48 w-full flex-col items-center justify-center rounded-3xl border border-dashed border-[#D9DDEA] bg-white/45 p-4 text-center transition-all hover:border-[#A997F3] hover:bg-white/75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7252D8]/30 dark:border-white/10 dark:bg-white/[0.02] dark:hover:border-violet-300/35 dark:hover:bg-white/[0.045]">
+    <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F0EBFF] text-[#7252D8] transition-transform group-hover:scale-105 dark:bg-violet-400/15 dark:text-[#CDBEFF]"><Plus size={22} /></span>
+    <p className="mt-3 text-sm font-black text-[#344057] dark:text-white">New learner profile</p>
+    <p className="mt-1 text-xs font-bold text-[#8A95A8] dark:text-[#8F99AD]">Set up another child.</p>
+  </button>
 );
 
 export const ParentChildrenGrid: React.FC<Props> = ({
@@ -49,7 +46,7 @@ export const ParentChildrenGrid: React.FC<Props> = ({
   if (error) return <div className="rounded-xl bg-rose-50 px-4 py-3 text-xs font-bold text-rose-700 dark:bg-rose-400/10 dark:text-rose-300">{error}</div>;
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
       {profiles.map(child => (
         <ParentChildCard
           key={child.id}

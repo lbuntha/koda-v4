@@ -7,6 +7,7 @@ import type { KodaKidAvatarId } from "../../../parent/onboarding/LearnerPortrait
 import type { ThemeMode } from "../../../theme/appTheme";
 import { ThemeToggle } from "../../../theme/ThemeToggle";
 import type { KidStats } from "../kidHomeModel";
+import { AnimatedXpPill } from "../shared/AnimatedXpPill";
 import { AppToolbar } from "../shared";
 
 interface Props {
@@ -179,15 +180,7 @@ export const KidHomeToolbar: React.FC<Props> = ({
       }
       actions={
         <>
-          <span
-            className="inline-flex h-8 items-center gap-1.5 rounded-full bg-[#F8FAFD] px-2.5 text-[10px] font-black text-[#3F4654] ring-1 ring-[#EDF0F5] sm:px-3 sm:text-xs dark:bg-white/5 dark:text-[#E4DEFF] dark:ring-white/10"
-            aria-label={`${stats.totalXp} experience points`}
-          >
-            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#FFC928] text-white shadow-sm">
-              <Zap size={9} className="fill-current" />
-            </span>
-            {stats.totalXp}
-          </span>
+          <AnimatedXpPill value={stats.totalXp} />
           <div ref={profileRef} className="relative">
             <Button
               type="button"
