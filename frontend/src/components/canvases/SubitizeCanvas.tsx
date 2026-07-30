@@ -189,10 +189,15 @@ export const SubitizeCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, is
       }
       footerSolved={isSolved}
     >
-      {/* Stage */}
+      {/* Stage.
+          `flex-1` made this fill every pixel of vertical space it was given while staying
+          capped at 500px wide, so on a laptop the flash surface became a 500×650 column with
+          one small button adrift in the middle of it. Holding a 4:3 shape keeps the objects
+          grouped closely enough to actually be subitized — which is the whole exercise — and
+          `max-h-full` still lets it shrink on a short screen rather than overflow. */}
       <div
         ref={containerRef}
-        className={`relative flex-1 w-full max-w-[500px] mx-auto min-h-[200px] rounded-[2.2rem] flex items-center justify-center p-4 transition-colors duration-300 overflow-hidden touch-none select-none overscroll-none ${surfaceClass(isDark)}`}
+        className={`relative w-full max-w-[500px] mx-auto my-auto aspect-[4/3] max-h-full min-h-[200px] rounded-[2.2rem] flex items-center justify-center p-4 transition-colors duration-300 overflow-hidden touch-none select-none overscroll-none ${surfaceClass(isDark)}`}
       >
         <GhostGuideOverlay
           show={showGhostGuide && !isSolved}

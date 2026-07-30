@@ -2,6 +2,7 @@ import React, { forwardRef, useEffect, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { Edit3, Sparkles } from "lucide-react";
 import { SpeechReadAloudButton } from "../../pedagogy";
+import { useCanvasAudience } from "./presentation";
 import { CanvasAccent, accentIconClass } from "./canvasTheme";
 
 /** How long a hint stays on screen before fading out. */
@@ -81,6 +82,8 @@ export interface SharedCanvasLayoutProps extends React.HTMLAttributes<HTMLDivEle
   showGrid?: boolean;
   /** Whether dark mode is active */
   isDark?: boolean;
+  /** Condenses the chrome for embedded card previews. */
+  compact?: boolean;
   /** Minor grid cell size in pixels */
   gridSize?: number;
   /** Number of minor cells between stronger guide lines */
@@ -132,6 +135,7 @@ export const SharedCanvasLayout = forwardRef<HTMLDivElement, SharedCanvasLayoutP
   isPlayMode,
   showGrid = false,
   isDark = false,
+  compact = false,
   gridSize = 20,
   majorGridEvery = 5,
   showRulers = false,
@@ -151,6 +155,7 @@ export const SharedCanvasLayout = forwardRef<HTMLDivElement, SharedCanvasLayoutP
   className = "",
   ...restProps
 }, ref) => {
+  const { learnerMode } = useCanvasAudience();
   const safeGridSize = Math.max(8, Math.min(80, Math.round(gridSize)));
   const majorGridSize = safeGridSize * Math.max(2, majorGridEvery);
   const rulerMarks = Array.from({ length: 12 }).map((_, idx) => idx * majorGridSize);
@@ -158,7 +163,9 @@ export const SharedCanvasLayout = forwardRef<HTMLDivElement, SharedCanvasLayoutP
   return (
     <div
       ref={ref}
-      className={`relative w-full h-full min-h-[350px] sm:min-h-[410px] md:min-h-[460px] rounded-3xl transition-colors duration-300 overflow-hidden select-none touch-none flex flex-col justify-between p-1 gap-3 bg-transparent border-0 shadow-none text-slate-800 dark:text-slate-100 ${className}`}
+      className={`relative w-full h-full min-h-[350px] sm:min-h-[410px] md:min-h-[460px] rounded-3xl transition-colors duration-300 overflow-hidden select-none touch-none flex flex-col justify-between bg-transparent border-0 shadow-none text-slate-800 dark:text-slate-100 ${
+        compact ? "gap-1 p-0" : "gap-3 p-1"
+      } ${className}`}
       {...restProps}
     >
       {/* ── Precision Structural Layout Grid Overlay ── */}
@@ -239,7 +246,9 @@ export const SharedCanvasLayout = forwardRef<HTMLDivElement, SharedCanvasLayoutP
 
       {/* ── Top Header Bar ── */}
       {(headerTitle || headerActions || readAloudText) && (
-        <div className={`relative z-20 flex flex-wrap items-center justify-between gap-2.5 pb-2 px-1 border-b transition-all ${
+        <div className={`relative z-20 flex flex-wrap justify-between border-b transition-all ${
+          compact ? "flex-col items-stretch gap-1 pb-1 px-0.5" : "items-center gap-2.5 pb-2 px-1"
+        } ${
           isDark ? "text-slate-100 border-white/[0.07]" : "text-slate-800 border-black/[0.06]"
         }`}>
           <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
@@ -255,7 +264,11 @@ export const SharedCanvasLayout = forwardRef<HTMLDivElement, SharedCanvasLayoutP
               live state, its name takes the prominent line instead.
             */}
             <div className="min-w-0 flex-1">
-              {headerTitle && (
+              {/* The technique name ("Subitize", "Group in tens") is authoring vocabulary.
+                  An adult uses it to find the right component; a six-year-old cannot read it
+                  and it is set above the one line that actually tells them what to do. For a
+                  learner it is dropped, and the instruction becomes the heading. */}
+              {headerTitle && !(learnerMode && headerSubtitle) && (
                 <div className={
                   headerSubtitle
                     ? `text-[9px] font-mono font-bold uppercase tracking-[0.18em] truncate leading-none ${
@@ -267,14 +280,20 @@ export const SharedCanvasLayout = forwardRef<HTMLDivElement, SharedCanvasLayoutP
                 </div>
               )}
               {headerSubtitle && (
-                <div className="text-sm sm:text-base font-extrabold tracking-tight truncate leading-tight mt-1">
+                <div className={`font-extrabold tracking-tight truncate leading-tight ${
+                  learnerMode
+                    ? "text-base sm:text-lg md:text-xl"
+                    : "text-sm sm:text-base mt-1"
+                }`}>
                   {headerSubtitle}
                 </div>
               )}
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+          <div className={`flex items-center gap-1.5 sm:gap-2 flex-shrink-0 ${
+            compact ? "w-full justify-center" : ""
+          }`}>
             {readAloudText && <SpeechReadAloudButton text={readAloudText} />}
             {headerActions}
           </div>
@@ -296,7 +315,7 @@ export const SharedCanvasLayout = forwardRef<HTMLDivElement, SharedCanvasLayoutP
       )}
 
       {/* ── Main Canvas Interactive Area ── */}
-      <div className="relative z-10 flex-1 flex flex-col w-full min-h-0 mt-2">
+      <div className={`relative z-10 flex-1 flex flex-col w-full min-h-0 ${compact ? "mt-0" : "mt-2"}`}>
         {children}
       </div>
 

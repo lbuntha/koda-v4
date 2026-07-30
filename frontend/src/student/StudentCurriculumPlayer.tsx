@@ -9,6 +9,7 @@ import { placementApi, PlacementQuiz } from "../api/placement";
 import {
   CourseMode,
   CourseQueueItem,
+  CurriculumPath,
   courseApi,
   MasteryLevel,
   StudentActivitySignal,
@@ -17,6 +18,7 @@ import {
 } from "../api/course";
 import { PlacementWarmup } from "./PlacementWarmup";
 import { StudentTodayHome } from "./StudentTodayHome";
+import { ErrorBoundary } from "../components/ErrorBoundary";
 import { useThemeMode } from "../theme/appTheme";
 
 export const StudentCurriculumPlayer: React.FC = () => {
@@ -29,6 +31,7 @@ export const StudentCurriculumPlayer: React.FC = () => {
   const [progress, setProgress] = useState<StudentProgress | null>(null);
   const [activitySignal, setActivitySignal] = useState<StudentActivitySignal | null>(null);
   const [replayItems, setReplayItems] = useState<CourseQueueItem[]>([]);
+  const [paths, setPaths] = useState<CurriculumPath[]>([]);
   const [levelUp, setLevelUp] = useState<{
     skillLabel: string;
     previousLevel: MasteryLevel;
@@ -48,7 +51,11 @@ export const StudentCurriculumPlayer: React.FC = () => {
       const shouldLoadKidCatalog = account?.gradeBand === "kid" && mode === "scheduled";
       // Kid and focus bands both surface the day streak; it comes from the same signal.
       const shouldLoadFocusSignal = account?.gradeBand === "focus" || account?.gradeBand === "kid";
-      const [nextCourse, nextProgress, kidCatalog, nextActivitySignal] = await Promise.all([
+      // The first two are required — if they fail the outer catch shows the error screen.
+      // The rest are enrichments (a browse catalog, the streak chip, the path map): a learner
+      // with a working lesson should not be blocked from it because a chip couldn't load, so
+      // these degrade to null and the components render without them.
+      const [nextCourse, nextProgress, kidCatalog, nextActivitySignal, nextPaths] = await Promise.all([
         courseApi.today(mode),
         account?.id ? courseApi.progress(account.id) : Promise.resolve(null),
         shouldLoadKidCatalog
@@ -57,8 +64,10 @@ export const StudentCurriculumPlayer: React.FC = () => {
         account?.id && shouldLoadFocusSignal
           ? courseApi.activitySignal(account.id).catch(() => null)
           : Promise.resolve(null),
+        courseApi.path().catch(() => null),
       ]);
       setCourse(nextCourse);
+      if (nextPaths) setPaths(nextPaths.paths);
       if (nextProgress) setProgress(nextProgress);
       if (mode === "free") setReplayItems(nextCourse.queue);
       else if (kidCatalog) setReplayItems(kidCatalog.queue);
@@ -174,6 +183,12 @@ export const StudentCurriculumPlayer: React.FC = () => {
     }
   };
 
+  /**
+   * Leave Koda entirely: back to the guardian who launched the session, or signed out.
+   *
+   * Only the home screen offers this. From inside an activity the same word means something
+   * much smaller — see `leaveActivity`.
+   */
   const exit = async () => {
     await analyticsLogger.flush();
     if (sessionId) {
@@ -181,6 +196,29 @@ export const StudentCurriculumPlayer: React.FC = () => {
     }
     if (playSession) await endChildPlay();
     else logout();
+  };
+
+  /**
+   * Leave the activity and go back to the learner's home.
+   *
+   * This used to call `exit`, so a child who wanted out of one activity was signed out or
+   * handed back to their parent — the session ended and everything else on their home
+   * became unreachable. Nothing about stopping an activity implies leaving the app.
+   *
+   * Answers already given are kept: they were logged as they happened, and the flush makes
+   * sure the last of them has left the buffer before the screen changes.
+   */
+  const leaveActivity = async () => {
+    await analyticsLogger.flush();
+    setSelected(null);
+    setActiveId("");
+    if (account?.id) {
+      // The home screen shows progress and the streak, both of which may have moved during
+      // the activity. Failing here only means slightly stale tiles, so it stays quiet.
+      try {
+        setProgress(await courseApi.progress(account.id));
+      } catch { /* home renders from the previous snapshot */ }
+    }
   };
 
   if (placement) {
@@ -195,12 +233,15 @@ export const StudentCurriculumPlayer: React.FC = () => {
 
   if (selected && activeId) {
     return (
+      // A single malformed question must not take down the learner's whole session — the
+      // boundary keeps the failure to the activity and offers a way back.
+      <ErrorBoundary surface="game-launcher">
       <GameLauncher
         questions={selected.questions}
         activeId={activeId}
         setActiveId={setActiveId}
         onClose={() => void finishLesson()}
-        onExit={() => void exit()}
+        onExit={() => void leaveActivity()}
         kidMode={account?.gradeBand === "kid"}
         learningContext={{
           assignmentId: selected.assignmentId,
@@ -211,6 +252,7 @@ export const StudentCurriculumPlayer: React.FC = () => {
           skillId: selected.skillId,
         }}
       />
+      </ErrorBoundary>
     );
   }
 
@@ -242,6 +284,7 @@ export const StudentCurriculumPlayer: React.FC = () => {
         progress={progress}
         activitySignal={activitySignal}
         replayItems={replayItems}
+        paths={paths}
         levelUp={levelUp}
         studentName={account?.name || "Learner"}
         studentAvatar={account?.avatar}

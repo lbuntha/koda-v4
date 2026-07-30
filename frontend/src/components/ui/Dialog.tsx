@@ -1,5 +1,5 @@
-import React from "react";
-import { cn } from "../../lib/utils";
+import React, { useEffect } from "react";
+import { createPortal } from "react-dom";
 
 interface DialogProps {
   isOpen: boolean;
@@ -25,7 +25,11 @@ export const Dialog: React.FC<DialogProps> = ({ isOpen, onClose, children, maxWi
 
   if (!isOpen) return null;
 
-  return (
+  // Rendered into <body> rather than in place. `position: fixed` and a z-index only rank an
+  // element within its own stacking context, and a modal is routinely mounted inside one —
+  // the Property Studio panel is `absolute … z-20`, so a dialog opened from it was trapped
+  // below the canvas chrome at z-30/z-40 and the page painted straight through it.
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div 
@@ -55,9 +59,8 @@ export const Dialog: React.FC<DialogProps> = ({ isOpen, onClose, children, maxWi
         </button>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
 
-// Simple hook import for ease of React 19 standard
-import { useEffect } from "react";

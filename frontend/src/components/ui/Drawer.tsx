@@ -10,6 +10,7 @@
  */
 
 import React, { useEffect } from "react";
+import { createPortal } from "react-dom";
 
 interface DrawerProps {
   isOpen: boolean;
@@ -17,6 +18,12 @@ interface DrawerProps {
   title?: string;
   /** Defaults to a comfortable reading width; override for wider content (e.g. an AI batch review list). */
   widthClassName?: string;
+  /**
+   * A fixed row between the title bar and the scrolling body — a tab bar belongs here rather
+   * than `sticky` inside the body, where the scroll container's padding leaves content sliding
+   * visibly past its gutters.
+   */
+  subHeader?: React.ReactNode;
   children: React.ReactNode;
 }
 
@@ -25,6 +32,7 @@ export const Drawer: React.FC<DrawerProps> = ({
   onClose,
   title,
   widthClassName = "w-full sm:w-[440px]",
+  subHeader,
   children
 }) => {
   useEffect(() => {
@@ -43,7 +51,11 @@ export const Drawer: React.FC<DrawerProps> = ({
 
   if (!isOpen) return null;
 
-  return (
+  // Rendered into <body> for the same reason Dialog is: `fixed` positions against the nearest
+  // positioned ancestor once one exists, so a drawer opened from inside a panel that sets
+  // `position`/`z-index` (the Property Studio does) would be clipped and stacked wrongly. No
+  // caller hits that today; portaling removes the trap rather than relying on nobody finding it.
+  return createPortal(
     <div className="fixed inset-0 z-50 flex justify-end">
       {/* Backdrop */}
       <div
@@ -66,10 +78,12 @@ export const Drawer: React.FC<DrawerProps> = ({
             </button>
           </div>
         )}
+        {subHeader && <div className="shrink-0 px-5">{subHeader}</div>}
         <div className="flex-1 overflow-y-auto p-5">
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };

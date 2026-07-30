@@ -6,6 +6,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { CountingQuestion, CUSTOM_SVG_OBJECT_PLACEHOLDER } from "../types";
 import { sounds } from "../sound";
+import { CanvasAudienceProvider } from "./canvases/presentation";
 import { OneToOneCanvas } from "./canvases/OneToOneCanvas";
 import { CANVAS_BY_TECHNIQUE } from "./studio/canvasRegistry";
 import { LazyBoundary } from "./LazyBoundary";
@@ -268,9 +269,13 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
 
     const Canvas = CANVAS_BY_TECHNIQUE[activeQuestion.technique] || OneToOneCanvas;
     return (
-      <LazyBoundary>
-        <Canvas key={activeQuestion.id} {...canvasProps} />
-      </LazyBoundary>
+      // Every canvas shares one layout; this tells that layout who is looking, so none of
+      // the twenty-six need a prop for it.
+      <CanvasAudienceProvider learnerMode={kidMode}>
+        <LazyBoundary>
+          <Canvas key={activeQuestion.id} {...canvasProps} />
+        </LazyBoundary>
+      </CanvasAudienceProvider>
     );
   };
 
@@ -308,22 +313,33 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
             </div>
           </div>
           <div className="hidden sm:block">
-            <p className={`text-[9px] font-bold uppercase tracking-[0.2em] font-mono leading-none mb-0.5
-              ${isDark ? 'text-slate-500' : 'text-slate-400'}
-            `}>{kidMode ? "Practice time" : "Worksheet Game"}</p>
-            <h1 className={`text-sm font-extrabold leading-none
+            {/* The eyebrow is set in 9px tracked-out monospace — a tool's voice, aimed at
+                someone scanning a dense authoring UI. An early reader cannot read it, and it
+                sits directly above the activity name they need. Learners get the name alone,
+                at a size meant to be read. */}
+            {!kidMode && (
+              <p className={`text-[9px] font-bold uppercase tracking-[0.2em] font-mono leading-none mb-0.5
+                ${isDark ? 'text-slate-500' : 'text-slate-400'}
+              `}>Worksheet Game</p>
+            )}
+            <h1 className={`font-extrabold leading-none ${kidMode ? 'text-base sm:text-lg' : 'text-sm'}
               ${isDark ? 'text-white' : 'text-slate-800'}
             `}>{activeQuestion?.title || "Learning Time"}</h1>
           </div>
         </div>
 
-        {/* Center – progress bar */}
-        <div className="flex-1 max-w-xs mx-6 hidden md:block">
-          <div className="flex justify-between mb-1">
-            <span className={`text-[9px] font-mono font-bold uppercase tracking-widest ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
-              Progress
-            </span>
-            <span className={`text-[9px] font-mono font-bold ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`}>
+        {/* Center – progress bar.
+            Hidden on narrow screens for an adult, who still has the dot rail and Back/Next
+            below. A learner has neither — this is their only sense of how far through they
+            are, so it stays visible at every width. */}
+        <div className={`flex-1 max-w-xs mx-3 md:mx-6 ${kidMode ? "block" : "hidden md:block"}`}>
+          <div className={`flex mb-1 ${kidMode ? "justify-center" : "justify-between"}`}>
+            {!kidMode && (
+              <span className={`text-[9px] font-mono font-bold uppercase tracking-widest ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                Progress
+              </span>
+            )}
+            <span className={`font-bold ${kidMode ? 'text-xs sm:text-sm' : 'text-[9px] font-mono'} ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`}>
               {currentIdx + 1} / {questions.length}
             </span>
           </div>
@@ -476,11 +492,15 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
             )}
           </div>
 
-          {/* ── Bottom navigation bar ── */}
+          {/* ── Bottom navigation bar ──
+              Back and Next are both adult-only, and the dots are inert for a learner, so in
+              kid mode this whole strip was a full-width band of decoration repeating the
+              progress already shown in the header. Dropping it gives the canvas the height
+              back — which is what the child is actually looking at. */}
+          {!kidMode && (
           <div className="flex-shrink-0 flex items-center gap-3">
             {/* Prev */}
-            {!kidMode && (
-              <button
+            <button
                 onClick={handlePrevSlide}
                 disabled={currentIdx === 0}
                 className={`flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-bold transition-all cursor-pointer border
@@ -497,7 +517,6 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
                 <ChevronLeft size={16} />
                 <span className="hidden sm:inline">Back</span>
               </button>
-            )}
 
             {/* Progress dots */}
             <div className="flex-1 flex items-center justify-center gap-1.5 overflow-hidden">
@@ -506,10 +525,8 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
                   <button
                     key={q.id}
                     type="button"
-                    disabled={kidMode}
                     aria-label={`Question ${idx + 1}${idx === currentIdx ? ", current" : ""}`}
                     onClick={() => {
-                      if (kidMode) return;
                       setActiveId(q.id);
                       setIsSuccess(false);
                       sounds.playPop();
@@ -518,8 +535,8 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
                       ${idx === currentIdx
                         ? 'w-6 h-2.5 bg-indigo-500'
                         : isDark
-                          ? `w-2 h-2 bg-white/15 ${kidMode ? "cursor-default" : "cursor-pointer hover:bg-white/30"}`
-                          : `w-2 h-2 bg-black/15 ${kidMode ? "cursor-default" : "cursor-pointer hover:bg-black/30"}`
+                          ? "w-2 h-2 bg-white/15 cursor-pointer hover:bg-white/30"
+                          : "w-2 h-2 bg-black/15 cursor-pointer hover:bg-black/30"
                       }
                     `}
                   />
@@ -532,8 +549,7 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
             </div>
 
             {/* Next */}
-            {!kidMode && (
-              <button
+            <button
                 onClick={handleNextSlide}
                 className={`flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-bold transition-all cursor-pointer shadow-md
                   ${currentIdx === questions.length - 1
@@ -547,8 +563,8 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
                 </span>
                 <ChevronRight size={16} />
               </button>
-            )}
           </div>
+          )}
         </div>
       </div>
 
