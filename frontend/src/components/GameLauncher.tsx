@@ -447,11 +447,14 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
           <button onClick={toggleMute} className={`${iconBtn} ${isDark ? iconBtnDark : iconBtnLight}`} title="Toggle sound">
             {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
           </button>
-          {(!kidMode || Boolean(assessment)) && (
-            <button onClick={toggleBrowserFullscreen} className={`${iconBtn} ${isDark ? iconBtnDark : iconBtnLight}`}>
-              {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
-            </button>
-          )}
+          <button
+            onClick={toggleBrowserFullscreen}
+            className={`${iconBtn} ${isDark ? iconBtnDark : iconBtnLight}`}
+            title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+          >
+            {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+          </button>
           {(!assessment || onExit) && (
             <>
               <div className={`w-px h-5 mx-0.5 ${isDark ? 'bg-white/10' : 'bg-black/10'}`} />
