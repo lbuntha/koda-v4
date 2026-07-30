@@ -45,6 +45,23 @@ export const GOODS_CATALOG: Record<string, { label: string; emoji: string; color
   crown: { label: "Gold Crown", emoji: "👑", color: "#EAB308", svgType: "crown" },
   star: { label: "Star Trophy", emoji: "⭐", color: "#F59E0B", svgType: "star" },
   gift: { label: "Gift Box", emoji: "🎁", color: "#EC4899", svgType: "gift" },
+  // 16 New Fun Goods Items
+  pizza: { label: "Pizza Slice", emoji: "🍕", color: "#EF4444", svgType: "pizza" },
+  icecream: { label: "Soft Ice Cream", emoji: "🍦", color: "#F472B6", svgType: "icecream" },
+  cookie: { label: "Choco Cookie", emoji: "🍪", color: "#D97706", svgType: "cookie" },
+  candy: { label: "Sweet Candy", emoji: "🍬", color: "#EC4899", svgType: "candy" },
+  car: { label: "Toy Racecar", emoji: "🚗", color: "#3B82F6", svgType: "car" },
+  robot: { label: "Toy Robot", emoji: "🤖", color: "#6366F1", svgType: "robot" },
+  ball: { label: "Soccer Ball", emoji: "⚽", color: "#10B981", svgType: "ball" },
+  palette: { label: "Art Palette", emoji: "🎨", color: "#8B5CF6", svgType: "palette" },
+  book: { label: "Story Book", emoji: "📚", color: "#2563EB", svgType: "book" },
+  guitar: { label: "Guitar", emoji: "🎸", color: "#F97316", svgType: "guitar" },
+  camera: { label: "Retro Camera", emoji: "📷", color: "#06B6D4", svgType: "camera" },
+  trophy: { label: "Gold Trophy", emoji: "🏆", color: "#EAB308", svgType: "trophy" },
+  diamond: { label: "Sparkly Ring", emoji: "💍", color: "#38BDF8", svgType: "diamond" },
+  key: { label: "Golden Key", emoji: "🔑", color: "#F59E0B", svgType: "key" },
+  rocket: { label: "Space Rocket", emoji: "🚀", color: "#DC2626", svgType: "rocket" },
+  controller: { label: "Game Controller", emoji: "🎮", color: "#4F46E5", svgType: "controller" },
 };
 
 export function createItem(typeKey: string, index: number, customMeta?: Partial<GoodsItem>): GoodsItem {
@@ -209,8 +226,8 @@ export function generateDynamicGoodsLevel(config: {
   goodsTypes?: string[];
   customGoods?: Array<{ typeKey: string; label: string; emoji: string; color: string }>;
 }): GoodsLevel {
-  const rows = Math.max(2, Math.min(5, config.rows || 3));
-  const cols = Math.max(2, Math.min(5, config.cols || 3));
+  const rows = Math.max(2, Math.min(6, config.rows || 3));
+  const cols = Math.max(2, Math.min(6, config.cols || 3));
   const totalShelves = rows * cols;
   const capacity = Math.max(3, Math.min(4, config.compartmentCapacity || 3));
 
@@ -228,14 +245,13 @@ export function generateDynamicGoodsLevel(config: {
     }
   });
 
-  // Calculate filled vs empty shelves
-  // Reserve at least 2 empty shelves for movement
+  // Calculate filled vs empty shelves (reserve at least 2 empty shelves for movement)
   const filledShelvesCount = Math.min(
     Math.ceil(allItems.length / capacity),
     Math.max(1, totalShelves - 2)
   );
 
-  // Distribute items across filled shelves
+  // Initialize shelf compartments array
   const shelves: ShelfCompartment[] = [];
   for (let i = 0; i < totalShelves; i++) {
     shelves.push({
@@ -245,16 +261,51 @@ export function generateDynamicGoodsLevel(config: {
     });
   }
 
-  // Interleave/shuffle items into filled shelves so they are not already sorted
-  allItems.forEach((item, index) => {
-    const targetShelfIdx = index % filledShelvesCount;
-    if (shelves[targetShelfIdx].items.length < capacity) {
-      shelves[targetShelfIdx].items.push(item);
+  // Select active shelf indices randomly across all rows and columns in the cabinet
+  const allShelfIndices = Array.from({ length: totalShelves }, (_, i) => i);
+  for (let i = allShelfIndices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [allShelfIndices[i], allShelfIndices[j]] = [allShelfIndices[j], allShelfIndices[i]];
+  }
+  const selectedShelfIndices = new Set(allShelfIndices.slice(0, filledShelvesCount));
+
+  // Fisher-Yates Random Shuffle of all items for a thoroughly messed up, vibrant puzzle
+  const shuffledItems = [...allItems];
+  for (let i = shuffledItems.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffledItems[i], shuffledItems[j]] = [shuffledItems[j], shuffledItems[i]];
+  }
+
+  // Scramble and place items across the randomly selected shelves in different rows and columns
+  shuffledItems.forEach((item) => {
+    // Find active candidate shelves that are not full yet
+    const candidateShelves = shelves.filter(
+      (s, idx) => selectedShelfIndices.has(idx) && s.items.length < capacity
+    );
+
+    if (candidateShelves.length > 0) {
+      const targetShelf = candidateShelves[Math.floor(Math.random() * candidateShelves.length)];
+      targetShelf.items.push(item);
     } else {
-      // Fallback to next available filled shelf
-      const openShelf = shelves.slice(0, filledShelvesCount).find((s) => s.items.length < capacity);
+      const openShelf = shelves.find((s) => s.items.length < capacity);
       if (openShelf) {
         openShelf.items.push(item);
+      }
+    }
+  });
+
+  // Ensure no shelf starts off 100% matched/solved automatically
+  shelves.forEach((shelf) => {
+    if (shelf.items.length === capacity && shelf.items.every((it) => it.typeKey === shelf.items[0].typeKey)) {
+      // Find another non-empty shelf with a different item type and swap the top item
+      const otherShelf = shelves.find(
+        (s) => s.id !== shelf.id && s.items.length > 0 && s.items[s.items.length - 1].typeKey !== shelf.items[0].typeKey
+      );
+      if (otherShelf) {
+        const itemA = shelf.items.pop()!;
+        const itemB = otherShelf.items.pop()!;
+        shelf.items.push(itemB);
+        otherShelf.items.push(itemA);
       }
     }
   });

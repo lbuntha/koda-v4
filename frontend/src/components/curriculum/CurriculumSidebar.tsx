@@ -17,7 +17,7 @@
 import React, { useState } from "react";
 import { BookOpen, Plus, Pencil, AlertTriangle, Search, Cloud, CloudOff, Loader2, Send } from "lucide-react";
 import { Select, Input, Badge, Button } from "../ui";
-import { CurriculumTree, Grade, Subject, Unit, Skill, SkillCoverage, subjectHasQuestionSupport } from "../../curriculum/types";
+import { CurriculumTree, Grade, Subject, Unit, Skill, SkillCoverage, subjectHasQuestionSupport, sumSkillMinutes } from "../../curriculum/types";
 import { CurriculumPersistenceStatus } from "../../curriculum/useCurriculumTree";
 
 interface CurriculumSidebarProps {
@@ -30,7 +30,11 @@ interface CurriculumSidebarProps {
   issueCount: number;
   persistenceStatus: CurriculumPersistenceStatus;
   published: boolean;
-  onTogglePublished: () => void;
+  publishing: boolean;
+  publishError: string | null;
+  /** Confirmation of the release and active-learner rollout. */
+  publishNotice: string | null;
+  onPublish: () => void;
   onSelectGrade: (gradeId: string) => void;
   onSelectSubject: (subjectId: string) => void;
   onSelectUnit: (unitId: string) => void;
@@ -52,7 +56,10 @@ export const CurriculumSidebar: React.FC<CurriculumSidebarProps> = ({
   issueCount,
   persistenceStatus,
   published,
-  onTogglePublished,
+  publishing,
+  publishError,
+  publishNotice,
+  onPublish,
   onSelectGrade,
   onSelectSubject,
   onSelectUnit,
@@ -111,7 +118,7 @@ export const CurriculumSidebar: React.FC<CurriculumSidebarProps> = ({
   return (
     <aside className="w-full md:w-72 bg-white border-b md:border-b-0 md:border-r border-slate-200 flex flex-col shrink-0 overflow-hidden">
       {/* Brand */}
-      <div className="p-4 border-b border-slate-100 flex items-center gap-2.5">
+      <div className="px-3 py-2.5 border-b border-slate-100 flex items-center gap-2.5">
         <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center flex-shrink-0">
           <BookOpen size={14} className="text-white" />
         </div>
@@ -125,7 +132,7 @@ export const CurriculumSidebar: React.FC<CurriculumSidebarProps> = ({
       </div>
 
       {/* Grade / Subject context switcher — not a tree level */}
-      <div className="p-3 border-b border-slate-100 grid grid-cols-2 gap-2">
+      <div className="px-2.5 py-2 border-b border-slate-100 grid grid-cols-2 gap-2">
         <Select value={selectedGradeId} onChange={(e) => onSelectGrade(e.target.value)} className="h-9 text-xs px-2.5">
           {tree.grades.map(g => (
             <option key={g.id} value={g.id}>{g.label}</option>
@@ -148,7 +155,7 @@ export const CurriculumSidebar: React.FC<CurriculumSidebarProps> = ({
       )}
 
       {/* Search */}
-      <div className="p-3 border-b border-slate-100">
+      <div className="px-2.5 py-2 border-b border-slate-100">
         <div className="relative">
           <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <Input
@@ -172,6 +179,7 @@ export const CurriculumSidebar: React.FC<CurriculumSidebarProps> = ({
           const completeCount = skills.filter(s => coverageBySkillId.get(s.id)?.isComplete).length;
           const ringPct = skills.length ? completeCount / skills.length : 0;
           const isUnitActive = selectedUnitId === unit.id && !selectedSkillId;
+          const unitMinutes = sumSkillMinutes(skills);
 
           return (
             <div key={unit.id} className="mb-1">
@@ -203,7 +211,13 @@ export const CurriculumSidebar: React.FC<CurriculumSidebarProps> = ({
                       )}
                     </svg>
                     <span className="flex-1 truncate text-xs font-bold text-slate-700">{unit.label}</span>
-                    <span className="flex-shrink-0 font-mono text-[10px] text-slate-400">{completeCount}/{skills.length}</span>
+                    <span
+                      className="flex-shrink-0 font-mono text-[10px] text-slate-400"
+                      title={unitMinutes.missing > 0 ? `${unitMinutes.missing} skill(s) without a duration` : undefined}
+                    >
+                      {completeCount}/{skills.length}
+                      {unitMinutes.total > 0 && ` · ${unitMinutes.total}m`}
+                    </span>
                   </button>
                   <button
                     type="button"
@@ -246,6 +260,14 @@ export const CurriculumSidebar: React.FC<CurriculumSidebarProps> = ({
                         <span className={`text-[11.5px] flex-1 truncate ${isActive ? "text-white font-bold" : "text-slate-600"}`}>
                           {skill.label}
                         </span>
+                        {typeof skill.presentation?.estimatedMinutes === "number" && (
+                          <span
+                            className={`flex-shrink-0 font-mono text-[9px] ${isActive ? "text-white/70" : "text-slate-400"}`}
+                            title={`${skill.presentation.estimatedMinutes} min on the learner card`}
+                          >
+                            {skill.presentation.estimatedMinutes}m
+                          </span>
+                        )}
                         <Badge
                           variant={cov?.isComplete ? "success" : "warning"}
                           className={`text-[9px] px-1.5 py-0 flex-shrink-0 ${isActive ? "bg-white/20 text-white border-white/30" : ""}`}
@@ -309,16 +331,28 @@ export const CurriculumSidebar: React.FC<CurriculumSidebarProps> = ({
       </div>
 
       {/* Health badge */}
-      <div className="p-3 border-t border-slate-100">
+      <div className="px-2.5 py-2.5 border-t border-slate-100">
         <Button
           size="sm"
           variant={published ? "outline" : "default"}
           className="mb-2 w-full"
-          onClick={onTogglePublished}
+          onClick={onPublish}
+          loading={publishing}
+          loadingText="Publishing & updating…"
           disabled={persistenceStatus === "loading" || persistenceStatus === "saving"}
         >
-          <Send size={12} /> {published ? "Published" : "Publish curriculum"}
+          <Send size={12} /> Publish & update learners
         </Button>
+        {publishError && (
+          <p className="mb-2 rounded-lg border border-rose-200 bg-rose-50 px-2 py-1.5 text-[10px] leading-snug text-rose-700">
+            {publishError}
+          </p>
+        )}
+        {publishNotice && (
+          <p className="mb-2 rounded-lg border border-emerald-200 bg-emerald-50 px-2 py-1.5 text-[10px] leading-snug text-emerald-700">
+            {publishNotice}
+          </p>
+        )}
         <button
           onClick={onOpenHealthDrawer}
           disabled={issueCount === 0}

@@ -41,10 +41,10 @@ export const TabsList = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HT
         className={cn(
           "flex max-w-full items-center overflow-x-auto overscroll-x-contain",
           context?.variant === "admin"
-            ? "w-full gap-1 rounded-2xl border border-[#E7E3F6] bg-white p-1.5 shadow-[0_4px_18px_rgba(83,74,183,0.04)] sm:w-fit"
+            ? "w-full gap-1 rounded-2xl border border-[#E7E3F6] bg-white p-1.5 shadow-[0_4px_18px_rgba(83,74,183,0.04)] sm:w-fit dark:border-white/10 dark:bg-[#161B2E]"
             : context?.variant === "underline"
-              ? "w-full gap-5 border-b border-[#E7E3F6] bg-transparent px-1"
-              : "justify-start rounded-xl bg-slate-100 p-1 text-slate-500",
+              ? "w-full gap-3.5 border-b border-[#E7E3F6] bg-transparent px-0.5 dark:border-b-white/10"
+              : "justify-start rounded-xl bg-slate-100 p-1 text-slate-500 dark:bg-white/10 dark:text-slate-400",
           className,
         )}
         {...props}
@@ -98,15 +98,15 @@ export const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>
         className={cn(
           "inline-flex min-w-fit cursor-pointer select-none items-center justify-center whitespace-nowrap transition-all focus-visible:outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50",
           context.variant === "admin"
-            ? "koda-admin-nav-label flex-1 gap-2 rounded-xl px-4 py-2 text-[#6D6997] hover:bg-[#F5F2FF] hover:text-[#0E0B55] focus-visible:ring-[#7C6DD8]/35 sm:flex-none"
+            ? "flex-1 gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold text-[#6D6997] hover:bg-[#F5F2FF] hover:text-[#0E0B55] dark:text-[#9A94B8] dark:hover:bg-white/10 dark:hover:text-white sm:flex-none"
             : context.variant === "underline"
-              ? "koda-admin-nav-label -mb-px gap-2 rounded-none border-b-2 border-transparent px-1 py-3 text-[#6D6997] hover:text-[#0E0B55] focus-visible:ring-[#7C6DD8]/35"
-              : "rounded-lg px-3 py-1.5 text-xs font-bold font-mono uppercase tracking-wider text-slate-500 hover:text-slate-950 focus-visible:ring-indigo-500/20",
+              ? "-mb-px gap-1.5 rounded-none border-b-2 border-transparent px-1 py-1.5 text-xs font-extrabold text-[#6D6997] hover:text-[#0E0B55] dark:text-[#9A94B8] dark:hover:text-[#EDECF8]"
+              : "rounded-lg px-2.5 py-1 text-xs font-bold text-slate-500 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white",
           isActive && (context.variant === "admin"
-            ? "bg-[#534AB7] text-white shadow-sm hover:bg-[#453DA0] hover:text-white"
+            ? "bg-[#534AB7] text-white shadow-sm hover:bg-[#453DA0] hover:text-white dark:bg-[#BEACFF] dark:text-[#191338]"
             : context.variant === "underline"
-              ? "border-[#534AB7] text-[#0E0B55]"
-              : "bg-white font-extrabold text-slate-900 shadow-sm"),
+              ? "border-[#534AB7] text-[#0E0B55] dark:border-[#BEACFF] dark:text-[#EDECF8]"
+              : "bg-white font-extrabold text-slate-900 shadow-sm dark:bg-white/15 dark:text-white"),
           className,
         )}
         {...props}

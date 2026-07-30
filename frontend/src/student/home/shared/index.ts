@@ -1,8 +1,10 @@
 /** Shared building blocks for the learner pages. One import site keeps the bands consistent. */
 export { ActivityCard, type ActivityState } from "./ActivityCard";
 export { AppToolbar } from "./AppToolbar";
+export { LearningPathSkillCard } from "./LearningPathSkillCard";
 export { MedallionCard, type MedallionTone } from "./MedallionCard";
-export { NextUpCard } from "./NextUpCard";
+export { MascotFigure, type MascotTone } from "./MascotFigure";
+export { NextUpCard, type NextUpCardDifficulty } from "./NextUpCard";
 export { RecommendationCard, type RecommendationTone } from "./RecommendationCard";
 export { ProgressMeter } from "./ProgressMeter";
 export { SectionHeader } from "./SectionHeader";

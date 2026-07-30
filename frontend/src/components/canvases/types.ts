@@ -5,6 +5,8 @@ export interface CanvasProps {
   isPlayMode: boolean; // false means design/editor mode, true means play/test mode
   showGrid?: boolean; // toggle to show grid overlay and optionally snap
   isDark?: boolean; // true = dark mode styling
+  /** Render a space-efficient version for small previews such as the landing hero. */
+  compact?: boolean;
   onCountUpdate?: (count: number) => void;
   onSuccess?: () => void;
   onUpdateQuestionConfig?: (config: Partial<CountingQuestion["config"]>) => void;

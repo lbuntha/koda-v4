@@ -17,6 +17,7 @@ import { kodaPatternSchema } from "../components/studio/ai-generator/schemas/kod
 
 export const kodaPattern = defineTechnique({
   technique: CountingTechnique.KODA_PATTERN,
+  defaultThumbnailUrl: "/assets/components/koda-pattern.svg",
   label: "14. Pattern Completion",
   icon: <Workflow size={14} className="text-purple-600" />,
   defaultTargetCount: 5,

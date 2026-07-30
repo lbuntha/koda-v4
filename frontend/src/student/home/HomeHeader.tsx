@@ -50,7 +50,7 @@ export const HomeHeader: React.FC<Props> = ({
             "text-[10px] font-bold uppercase tracking-[0.18em]",
             variant === "focus" ? "text-[#7A8296] dark:text-[#8891AC]" : "text-[#6A5FA0] dark:text-[#9C93C6]",
           )}>Today’s learning</p>
-          <h1 className="text-lg font-bold">Hi {studentName}</h1>
+          <h1 className="text-lg font-bold">Koda Learning</h1>
         </div>
       </div>
       <div className="flex items-center gap-3">

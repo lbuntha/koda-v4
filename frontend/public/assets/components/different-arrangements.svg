@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-labelledby="title description">
+  <title id="title">Different Arrangements</title>
+  <desc id="description">The same five objects laid out two different ways.</desc>
+  <!-- Transparent background on purpose: every surface that shows this supplies its own
+       card, so a baked tile would read as a second one. viewBox is a shared 200x200 so the
+       whole technique set sits at one optical weight. -->
+  <defs>
+    <linearGradient id="g" x1="30" y1="30" x2="170" y2="175" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9B86FF"/><stop offset="1" stop-color="#7A5CF0"/>
+    </linearGradient>
+    <filter id="s" x="-25%" y="-25%" width="150%" height="160%">
+      <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#5C46B8" flood-opacity=".22"/>
+    </filter>
+  </defs>
+  <g filter="url(#s)">
+    <circle cx="46" cy="62" r="10" fill="url(#g)"/>
+    <circle cx="78" cy="62" r="10" fill="url(#g)"/>
+    <circle cx="46" cy="94" r="10" fill="url(#g)"/>
+    <circle cx="78" cy="94" r="10" fill="url(#g)"/>
+    <circle cx="62" cy="126" r="10" fill="url(#g)"/>
+    <circle cx="130" cy="62" r="10" fill="#F59E0B"/>
+    <circle cx="162" cy="78" r="10" fill="#F59E0B"/>
+    <circle cx="146" cy="100" r="10" fill="#F59E0B"/>
+    <circle cx="130" cy="122" r="10" fill="#F59E0B"/>
+    <circle cx="162" cy="122" r="10" fill="#F59E0B"/>
+    <path d="M100 60v80" stroke="#5C46B8" stroke-width="4" stroke-linecap="round" stroke-dasharray="8 10" opacity=".45"/>
+  </g>
+</svg>

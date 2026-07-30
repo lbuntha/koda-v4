@@ -16,7 +16,8 @@
  */
 
 import React from "react";
-import { AVATAR_FALLBACK } from "./AvatarPicker";
+import { cn } from "../lib/utils";
+import { AVATAR_FALLBACK } from "../parent/AvatarPicker";
 
 /** Eyes, noses, stripes. */
 const INK = "#2A2350";
@@ -209,13 +210,20 @@ const ART: Record<string, React.ReactNode> = {
     </>
   ),
   "🐝": (
+    // Head and body are separate so the stripes stay on the body — drawn across the whole
+    // figure they read as bared teeth rather than a bee.
     <>
-      <ellipse cx="18" cy="22" rx="9" ry="6" transform="rotate(-28 18 22)" fill={SHADE} />
-      <ellipse cx="46" cy="22" rx="9" ry="6" transform="rotate(28 46 22)" fill={SHADE} />
-      <path d="M26 14c-2-3-5-4-7-3M38 14c2-3 5-4 7-3" stroke={INK} strokeWidth="2" strokeLinecap="round" fill="none" />
-      <ellipse cx="32" cy="37" rx="14" ry="17" fill="#fff" />
-      <path d="M19.5 34h25M21 43h22" stroke={INK} strokeWidth="4" strokeLinecap="round" />
-      <Eyes y={27} dx={5.5} r={2.5} />
+      <path d="M26 15c-2-4-5-6-8-5M38 15c2-4 5-6 8-5" stroke={INK} strokeWidth="2" strokeLinecap="round" fill="none" />
+      <circle cx="17" cy="9" r="2.2" fill={INK} />
+      <circle cx="47" cy="9" r="2.2" fill={INK} />
+      <ellipse cx="15" cy="34" rx="9" ry="6.5" transform="rotate(-32 15 34)" fill={SHADE} />
+      <ellipse cx="49" cy="34" rx="9" ry="6.5" transform="rotate(32 49 34)" fill={SHADE} />
+      <ellipse cx="32" cy="43" rx="13.5" ry="12.5" fill="#fff" />
+      <path d="M21 39h22M23.5 47h17" stroke={INK} strokeWidth="4" strokeLinecap="round" />
+      <circle cx="32" cy="24" r="11" fill="#fff" />
+      <circle cx="28" cy="23" r="2.5" fill={INK} />
+      <circle cx="36" cy="23" r="2.5" fill={INK} />
+      <path d="M29 28.5c1.8 1.6 4.2 1.6 6 0" stroke={INK} strokeWidth="2" strokeLinecap="round" fill="none" />
     </>
   ),
 };
@@ -223,23 +231,46 @@ const ART: Record<string, React.ReactNode> = {
 export const AVATAR_ART_KEYS = Object.keys(ART);
 
 interface Props {
-  avatar?: string | null;
-  /** Sizing/colour classes for the SVG (or the fallback glyph). */
+  /** The stored avatar value: an art key, a data/HTTP URL, raw SVG, or an emoji. */
+  avatar?: string;
   className?: string;
 }
 
 export const KidAvatar: React.FC<Props> = ({ avatar, className }) => {
-  const art = avatar ? ART[avatar] : undefined;
-  if (!art) {
+  if (!avatar) {
+    return <span className={className} aria-hidden>{AVATAR_FALLBACK}</span>;
+  }
+
+  // Case 1: Avatar is a stored data URL (data:image/svg+xml...) or HTTP(S) URL
+  if (avatar.startsWith("data:") || avatar.startsWith("http://") || avatar.startsWith("https://")) {
+    return <img src={avatar} alt="" className={cn("object-contain", className)} aria-hidden />;
+  }
+
+  // Case 2: Avatar is raw SVG XML code
+  if (avatar.startsWith("<svg")) {
     return (
-      <span className={className} aria-hidden>
-        {avatar || AVATAR_FALLBACK}
-      </span>
+      <span
+        className={cn("inline-block object-contain", className)}
+        aria-hidden
+        dangerouslySetInnerHTML={{ __html: avatar }}
+      />
     );
   }
+
+  // Case 3: Avatar is mapped in local ART dictionary
+  const art = ART[avatar];
+  if (art) {
+    return (
+      <svg viewBox="0 0 64 64" className={className} role="presentation" aria-hidden focusable="false">
+        {art}
+      </svg>
+    );
+  }
+
+  // Case 4: Fallback to rendering avatar character or emoji
   return (
-    <svg viewBox="0 0 64 64" className={className} role="presentation" aria-hidden focusable="false">
-      {art}
-    </svg>
+    <span className={className} aria-hidden>
+      {avatar}
+    </span>
   );
 };

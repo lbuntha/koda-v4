@@ -3,6 +3,7 @@ import { BarChart3, Search } from "lucide-react";
 import { analyticsApi, AnalyticsStudent } from "../api/analytics";
 import { Button, Input, SkeletonCard } from "../components/ui";
 import { ChildAnalyticsDrawer } from "./ChildAnalyticsDrawer";
+import { KidAvatar } from "../components/KidAvatar";
 
 export const AnalyticsRosterPage: React.FC = () => {
   const [students, setStudents] = useState<AnalyticsStudent[]>([]);
@@ -35,16 +36,18 @@ export const AnalyticsRosterPage: React.FC = () => {
           <Search size={16} className="pointer-events-none absolute left-3.5 top-3.5 text-[#9893B6]" />
           <Input value={search} onChange={event => setSearch(event.target.value)} placeholder="Find a learner…" className="pl-10" />
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
           {filtered.map(student => (
-            <div key={student.id} className="flex items-center gap-3 rounded-2xl border border-[#E7E3F6] bg-white p-4 shadow-[0_5px_20px_rgba(83,74,183,0.05)]">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#F1EDFF] text-2xl">{student.avatar ?? "🧒"}</div>
-              <div className="min-w-0 flex-1">
-                <p className="koda-admin-card-title truncate">{student.name}</p>
-                <p className="koda-admin-secondary mt-0.5">Mastery, activity, and next steps</p>
+            <div key={student.id} className="flex items-center gap-2.5 rounded-xl border border-[#E7E3F6] bg-white p-2.5 shadow-[0_2px_10px_rgba(83,74,183,0.04)] transition-all hover:border-[#D0C7F7] hover:shadow-[0_4px_14px_rgba(83,74,183,0.08)] dark:border-white/10 dark:bg-[#161B2E]">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#F1EDFF] p-1 text-lg dark:bg-white/10">
+                <KidAvatar avatar={student.avatar ?? undefined} className="h-full w-full object-contain" />
               </div>
-              <Button size="xs" variant="outline" onClick={() => setSelected(student)}>
-                <BarChart3 size={13} /> View
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs font-extrabold text-[#0E0B55] dark:text-[#EDECF8]">{student.name}</p>
+                <p className="truncate text-[10px] font-medium text-[#6D6997] dark:text-[#9A94B8]">Mastery, activity, and next steps</p>
+              </div>
+              <Button size="xs" variant="outline" onClick={() => setSelected(student)} className="shrink-0 rounded-lg px-2 py-1 text-[11px] font-bold dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/10">
+                <BarChart3 size={12} /> View
               </Button>
             </div>
           ))}

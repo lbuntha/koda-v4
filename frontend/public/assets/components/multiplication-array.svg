@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-labelledby="title description">
+  <title id="title">Multiplication Array</title>
+  <desc id="description">A three by four array of objects.</desc>
+  <!-- Transparent background on purpose: every surface that shows this supplies its own
+       card. Shared 200x200 viewBox so the whole technique set sits at one optical weight. -->
+  <defs>
+    <linearGradient id="g" x1="30" y1="30" x2="170" y2="175" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFC85C"/><stop offset="1" stop-color="#F59E0B"/>
+    </linearGradient>
+    <filter id="s" x="-25%" y="-25%" width="150%" height="160%">
+      <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#B4740A" flood-opacity=".22"/>
+    </filter>
+  </defs>
+  <g filter="url(#s)">
+    <circle cx="54" cy="62" r="12" fill="url(#g)"/>
+    <circle cx="86" cy="62" r="12" fill="url(#g)"/>
+    <circle cx="118" cy="62" r="12" fill="url(#g)"/>
+    <circle cx="150" cy="62" r="12" fill="url(#g)"/>
+    <circle cx="54" cy="94" r="12" fill="url(#g)"/>
+    <circle cx="86" cy="94" r="12" fill="url(#g)"/>
+    <circle cx="118" cy="94" r="12" fill="url(#g)"/>
+    <circle cx="150" cy="94" r="12" fill="url(#g)"/>
+    <circle cx="54" cy="126" r="12" fill="url(#g)"/>
+    <circle cx="86" cy="126" r="12" fill="url(#g)"/>
+    <circle cx="118" cy="126" r="12" fill="url(#g)"/>
+    <circle cx="150" cy="126" r="12" fill="url(#g)"/>
+    <path d="M36 50v104" stroke="#B4740A" stroke-width="5" stroke-linecap="round" opacity=".5"/>
+    <path d="M42 44h116" stroke="#B4740A" stroke-width="5" stroke-linecap="round" opacity=".5"/>
+  </g>
+</svg>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Plus, Trash2, Code, Sparkles, Sliders, Check, FolderHeart, Tag, Maximize2, Info, Copy, RotateCcw } from "lucide-react";
 import { CustomSvgAsset, CountingQuestion } from "../types";
 import { CountingAsset } from "./Assets";
@@ -6,8 +6,10 @@ import { sounds } from "../sound";
 import { Button, Card, Tabs, TabsContent, TabsList, TabsTrigger } from "./ui";
 import { useSvgLibrary } from "../assets/SvgLibraryContext";
 import { SvgLibraryAsset } from "../assets/SvgLibraryAsset";
-import { isSafeSvgMarkup, normalizeSvgDocumentMarkup } from "../assets/svgSafety";
+import { isSafeSvgMarkup } from "../assets/svgSafety";
+import { preprocessSvgMarkup } from "../assets/svgPreprocess";
 import { createSvgAssetId } from "../assets/svgIds";
+import { svgAssetsApi, type SvgAssetUse } from "../api/svgAssets";
 
 const STARTER_TEMPLATES = [
   {
@@ -116,50 +118,249 @@ const STARTER_TEMPLATES = [
   <circle cx="6" cy="12" r="3" fill="#EF4444" />
   <circle cx="18" cy="12" r="3" fill="#EF4444" />
 </svg>`
+  },
+  {
+    id: "tpl_fox",
+    label: "Fox Avatar",
+    scale: 1.0,
+    markup: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M13 14 24 27 11 30Z" fill="#ffffff" />
+  <path d="M51 14 40 27l13 3Z" fill="#ffffff" />
+  <path d="M13 14 22 25l-9 3Z" fill="rgba(42,35,80,0.17)" />
+  <path d="M51 14 42 25l9 3Z" fill="rgba(42,35,80,0.17)" />
+  <path d="M32 20c11 0 17 7 17 15 0 7-4 12-9 15l-8 5-8-5c-5-3-9-8-9-15 0-8 6-15 17-15Z" fill="#ffffff" />
+  <path d="M32 39c4 0 7 2 7 5 0 4-4 7-7 9-3-2-7-5-7-9 0-3 3-5 7-5Z" fill="rgba(42,35,80,0.17)" />
+  <g fill="#2A2350"><circle cx="24" cy="33" r="3" /><circle cx="40" cy="33" r="3" /></g>
+  <circle cx="32" cy="45" r="2.8" fill="#2A2350" />
+</svg>`
+  },
+  {
+    id: "tpl_panda_avatar",
+    label: "Panda Avatar",
+    scale: 1.0,
+    markup: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="17" cy="20" r="7.5" fill="#2A2350" />
+  <circle cx="47" cy="20" r="7.5" fill="#2A2350" />
+  <circle cx="32" cy="34" r="19" fill="#ffffff" />
+  <ellipse cx="24" cy="31" rx="5.4" ry="6.4" fill="#2A2350" />
+  <ellipse cx="40" cy="31" rx="5.4" ry="6.4" fill="#2A2350" />
+  <circle cx="24" cy="31" r="2.1" fill="#ffffff" />
+  <circle cx="40" cy="31" r="2.1" fill="#ffffff" />
+  <ellipse cx="32" cy="42" rx="4" ry="2.9" fill="#2A2350" />
+  <path d="M27 47c3 2 7 2 10 0" stroke="#2A2350" strokeWidth="2" strokeLinecap="round" fill="none" />
+</svg>`
+  },
+  {
+    id: "tpl_tiger_avatar",
+    label: "Tiger Avatar",
+    scale: 1.0,
+    markup: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="18" cy="21" r="6.5" fill="#ffffff" />
+  <circle cx="46" cy="21" r="6.5" fill="#ffffff" />
+  <circle cx="18" cy="21" r="3" fill="rgba(42,35,80,0.17)" />
+  <circle cx="46" cy="21" r="3" fill="rgba(42,35,80,0.17)" />
+  <circle cx="32" cy="35" r="19" fill="#ffffff" />
+  <path d="M32 17v6M24 19l1.5 5M40 19l-1.5 5" stroke="#2A2350" strokeWidth="2.6" strokeLinecap="round" fill="none" />
+  <g fill="#2A2350"><circle cx="24" cy="33" r="3" /><circle cx="40" cy="33" r="3" /></g>
+  <ellipse cx="32" cy="43" rx="7" ry="5" fill="rgba(42,35,80,0.17)" />
+  <path d="M32 41v3M28 47c2 1.5 6 1.5 8 0" stroke="#2A2350" strokeWidth="2" strokeLinecap="round" fill="none" />
+</svg>`
+  },
+  {
+    id: "tpl_unicorn_avatar",
+    label: "Unicorn Avatar",
+    scale: 1.0,
+    markup: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M32 7 37 21H27Z" fill="#ffffff" />
+  <path d="M32 7 37 21H27Z" fill="rgba(42,35,80,0.17)" />
+  <path d="M30 10h4M28.5 15h7" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" />
+  <path d="M32 20c11 0 17 8 17 17s-7 16-17 16-17-5-17-16 6-17 17-17Z" fill="#ffffff" />
+  <path d="M17 25c5-5 12-4 15 1-5 4-11 4-15-1ZM15 34c4-3 9-2 11 2-4 3-9 2-11-2Z" fill="rgba(42,35,80,0.17)" />
+  <g fill="#2A2350"><circle cx="24" cy="34" r="3" /><circle cx="40" cy="34" r="3" /></g>
+  <ellipse cx="32" cy="45" rx="5.5" ry="4" fill="rgba(42,35,80,0.17)" />
+  <circle cx="30" cy="45" r="1.4" fill="#2A2350" />
+  <circle cx="34" cy="45" r="1.4" fill="#2A2350" />
+</svg>`
+  },
+  {
+    id: "tpl_frog_avatar",
+    label: "Frog Avatar",
+    scale: 1.0,
+    markup: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="19" cy="21" r="8.5" fill="#ffffff" />
+  <circle cx="45" cy="21" r="8.5" fill="#ffffff" />
+  <circle cx="19" cy="21" r="3.6" fill="#2A2350" />
+  <circle cx="45" cy="21" r="3.6" fill="#2A2350" />
+  <path d="M32 26c12 0 19 6 19 14 0 7-8 12-19 12s-19-5-19-12c0-8 7-14 19-14Z" fill="#ffffff" />
+  <path d="M23 41c5 5 13 5 18 0" stroke="#2A2350" strokeWidth="2.6" strokeLinecap="round" fill="none" />
+  <circle cx="24" cy="47" r="1.6" fill="rgba(42,35,80,0.3)" />
+  <circle cx="40" cy="47" r="1.6" fill="rgba(42,35,80,0.3)" />
+</svg>`
+  },
+  {
+    id: "tpl_monkey_avatar",
+    label: "Monkey Avatar",
+    scale: 1.0,
+    markup: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="13" cy="32" r="7.5" fill="#ffffff" />
+  <circle cx="51" cy="32" r="7.5" fill="#ffffff" />
+  <circle cx="13" cy="32" r="3.4" fill="rgba(42,35,80,0.17)" />
+  <circle cx="51" cy="32" r="3.4" fill="rgba(42,35,80,0.17)" />
+  <circle cx="32" cy="33" r="19" fill="#ffffff" />
+  <path d="M32 26c8 0 12 5 12 10s-5 9-12 9-12-4-12-9 4-10 12-10Z" fill="rgba(42,35,80,0.17)" />
+  <g fill="#2A2350"><circle cx="25" cy="29" r="3" /><circle cx="39" cy="29" r="3" /></g>
+  <ellipse cx="32" cy="38" rx="3.6" ry="2.4" fill="#2A2350" />
+  <path d="M27 43c3 2 7 2 10 0" stroke="#2A2350" strokeWidth="2" strokeLinecap="round" fill="none" />
+</svg>`
+  },
+  {
+    id: "tpl_octopus_avatar",
+    label: "Octopus Avatar",
+    scale: 1.0,
+    markup: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M32 13c11 0 18 8 18 18v7H14v-7c0-10 7-18 18-18Z" fill="#ffffff" />
+  <path d="M14 38h36c0 5-2 9-5 11 0-4-2-6-4-6s-4 2-4 6c0-4-2-6-4-6s-4 2-4 6c0-4-2-6-4-6s-4 2-4 6c-3-2-5-6-5-11Z" fill="#ffffff" />
+  <path d="M21 40c0 4-1 7-2 9M43 40c0 4 1 7 2 9" stroke="rgba(42,35,80,0.17)" strokeWidth="2.4" strokeLinecap="round" fill="none" />
+  <g fill="#2A2350"><circle cx="24.5" cy="29" r="3" /><circle cx="39.5" cy="29" r="3" /></g>
+  <path d="M27 38c3 2 7 2 10 0" stroke="#2A2350" strokeWidth="2" strokeLinecap="round" fill="none" />
+  <circle cx="22" cy="24" r="2.4" fill="rgba(42,35,80,0.17)" />
+</svg>`
+  },
+  {
+    id: "tpl_lion_avatar",
+    label: "Lion Avatar",
+    scale: 1.0,
+    markup: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="32" cy="33" r="22" fill="rgba(42,35,80,0.17)" />
+  <path d="M32 11v6M50 21l-4 4M54 33h-6M50 45l-4-4M32 55v-6M14 45l4-4M10 33h6M14 21l4 4" stroke="rgba(42,35,80,0.3)" strokeWidth="3" strokeLinecap="round" />
+  <circle cx="32" cy="34" r="15" fill="#ffffff" />
+  <g fill="#2A2350"><circle cx="25.5" cy="31" r="3" /><circle cx="38.5" cy="31" r="3" /></g>
+  <ellipse cx="32" cy="39" rx="4.4" ry="3" fill="#2A2350" />
+  <path d="M27 44c3 2 7 2 10 0" stroke="#2A2350" strokeWidth="2" strokeLinecap="round" fill="none" />
+</svg>`
+  },
+  {
+    id: "tpl_penguin_avatar",
+    label: "Penguin Avatar",
+    scale: 1.0,
+    markup: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="32" cy="33" rx="17" ry="21" fill="#ffffff" />
+  <path d="M32 16c7 0 11 6 11 13 0 9-5 16-11 16s-11-7-11-16c0-7 4-13 11-13Z" fill="rgba(42,35,80,0.17)" />
+  <g fill="#2A2350"><circle cx="26" cy="26" r="2.7" /><circle cx="38" cy="26" r="2.7" /></g>
+  <path d="M32 31 38 35l-6 4-6-4Z" fill="#2A2350" />
+  <path d="M13 30c-3 3-3 9 0 12M51 30c3 3 3 9 0 12" stroke="rgba(42,35,80,0.17)" strokeWidth="3" strokeLinecap="round" fill="none" />
+</svg>`
+  },
+  {
+    id: "tpl_koala_avatar",
+    label: "Koala Avatar",
+    scale: 1.0,
+    markup: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="14" cy="24" r="9" fill="#ffffff" />
+  <circle cx="50" cy="24" r="9" fill="#ffffff" />
+  <circle cx="14" cy="24" r="4.4" fill="rgba(42,35,80,0.17)" />
+  <circle cx="50" cy="24" r="4.4" fill="rgba(42,35,80,0.17)" />
+  <circle cx="32" cy="35" r="18" fill="#ffffff" />
+  <g fill="#2A2350"><circle cx="24.5" cy="33" r="3" /><circle cx="39.5" cy="33" r="3" /></g>
+  <path d="M32 38c3 0 5 2 5 5s-2 6-5 6-5-3-5-6 2-5 5-5Z" fill="#2A2350" />
+</svg>`
+  },
+  {
+    id: "tpl_rabbit_avatar",
+    label: "Rabbit Avatar",
+    scale: 1.0,
+    markup: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="24" cy="15" rx="5" ry="12" fill="#ffffff" />
+  <ellipse cx="40" cy="15" rx="5" ry="12" fill="#ffffff" />
+  <ellipse cx="24" cy="16" rx="2.2" ry="7.5" fill="rgba(42,35,80,0.17)" />
+  <ellipse cx="40" cy="16" rx="2.2" ry="7.5" fill="rgba(42,35,80,0.17)" />
+  <circle cx="32" cy="39" r="16" fill="#ffffff" />
+  <g fill="#2A2350"><circle cx="25" cy="36" r="3" /><circle cx="39" cy="36" r="3" /></g>
+  <path d="M32 41 34.6 43 32 45l-2.6-2Z" fill="#2A2350" />
+  <path d="M26 47c4 2 8 2 12 0" stroke="#2A2350" strokeWidth="2" strokeLinecap="round" fill="none" />
+</svg>`
+  },
+  {
+    id: "tpl_cow_avatar",
+    label: "Cow Avatar",
+    scale: 1.0,
+    markup: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M11 19c-4 1-4 6 0 8 3 1 5-2 4-5Z" fill="rgba(42,35,80,0.3)" />
+  <path d="M53 19c4 1 4 6 0 8-3 1-5-2-4-5Z" fill="rgba(42,35,80,0.3)" />
+  <circle cx="32" cy="34" r="19" fill="#ffffff" />
+  <path d="M20 22c4-3 8-2 9 2-4 2-8 1-9-2Z" fill="rgba(42,35,80,0.17)" />
+  <g fill="#2A2350"><circle cx="24" cy="30" r="3" /><circle cx="40" cy="30" r="3" /></g>
+  <ellipse cx="32" cy="43" rx="10" ry="7" fill="rgba(42,35,80,0.17)" />
+  <ellipse cx="28" cy="43" rx="1.8" ry="2.4" fill="#2A2350" />
+  <ellipse cx="36" cy="43" rx="1.8" ry="2.4" fill="#2A2350" />
+</svg>`
+  },
+  {
+    id: "tpl_pig_avatar",
+    label: "Pig Avatar",
+    scale: 1.0,
+    markup: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M16 19 25 26l-9 4Z" fill="#ffffff" />
+  <path d="M48 19 39 26l9 4Z" fill="#ffffff" />
+  <circle cx="32" cy="35" r="18" fill="#ffffff" />
+  <g fill="#2A2350"><circle cx="24" cy="31" r="3" /><circle cx="40" cy="31" r="3" /></g>
+  <ellipse cx="32" cy="43" rx="9.5" ry="7" fill="rgba(42,35,80,0.17)" />
+  <ellipse cx="28.4" cy="43" rx="1.8" ry="2.4" fill="#2A2350" />
+  <ellipse cx="35.6" cy="43" rx="1.8" ry="2.4" fill="#2A2350" />
+</svg>`
+  },
+  {
+    id: "tpl_whale_avatar",
+    label: "Whale Avatar",
+    scale: 1.0,
+    markup: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M30 10c0 4-1 7-3 9M36 12c0 3 1 6 2 8" stroke="rgba(42,35,80,0.3)" strokeWidth="3" strokeLinecap="round" fill="none" />
+  <path d="M25 24c13 0 23 6 23 15 0 8-8 13-19 13-10 0-16-6-16-13 0-9 5-15 12-15Z" fill="#ffffff" />
+  <path d="M48 32c4-3 9-4 9 0 0 4-2 9-5 11-2 1-4-3-4-6Z" fill="rgba(42,35,80,0.17)" />
+  <path d="M13 41c9 4 21 4 30-1" stroke="rgba(42,35,80,0.17)" strokeWidth="2.4" fill="none" />
+  <circle cx="23" cy="35" r="3" fill="#2A2350" />
+  <path d="M17 45c4 3 9 3 13 0" stroke="#2A2350" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+</svg>`
+  },
+  {
+    id: "tpl_owl_avatar",
+    label: "Owl Avatar",
+    scale: 1.0,
+    markup: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M15 17 25 26l-10 3Z" fill="#ffffff" />
+  <path d="M49 17 39 26l10 3Z" fill="#ffffff" />
+  <path d="M32 18c11 0 18 8 18 18s-8 17-18 17-18-6-18-17 7-18 18-18Z" fill="#ffffff" />
+  <circle cx="24" cy="32" r="7.5" fill="rgba(42,35,80,0.17)" />
+  <circle cx="40" cy="32" r="7.5" fill="rgba(42,35,80,0.17)" />
+  <circle cx="24" cy="32" r="3.4" fill="#2A2350" />
+  <circle cx="40" cy="32" r="3.4" fill="#2A2350" />
+  <path d="M32 37 35.5 41 32 44.5 28.5 41Z" fill="#2A2350" />
+  <path d="M25 47c4 2 10 2 14 0" stroke="rgba(42,35,80,0.3)" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+</svg>`
+  },
+  {
+    id: "tpl_bee_avatar",
+    label: "Bee Avatar",
+    scale: 1.0,
+    markup: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M26 15c-2-4-5-6-8-5M38 15c2-4 5-6 8-5" stroke="#2A2350" strokeWidth="2" strokeLinecap="round" fill="none" />
+  <circle cx="17" cy="9" r="2.2" fill="#2A2350" />
+  <circle cx="47" cy="9" r="2.2" fill="#2A2350" />
+  <ellipse cx="15" cy="34" rx="9" ry="6.5" transform="rotate(-32 15 34)" fill="rgba(42,35,80,0.17)" />
+  <ellipse cx="49" cy="34" rx="9" ry="6.5" transform="rotate(32 49 34)" fill="rgba(42,35,80,0.17)" />
+  <ellipse cx="32" cy="43" rx="13.5" ry="12.5" fill="#ffffff" />
+  <path d="M21 39h22M23.5 47h17" stroke="#2A2350" strokeWidth="4" strokeLinecap="round" />
+  <circle cx="32" cy="24" r="11" fill="#ffffff" />
+  <circle cx="28" cy="23" r="2.5" fill="#2A2350" />
+  <circle cx="36" cy="23" r="2.5" fill="#2A2350" />
+  <path d="M29 28.5c1.8 1.6 4.2 1.6 6 0" stroke="#2A2350" strokeWidth="2" strokeLinecap="round" fill="none" />
+</svg>`
   }
 ];
 
-// Robust helper to sanitize, clean up, and scale user-pasted SVG strings
-export function preprocessSvgMarkup(svgMarkup: string): string {
-  if (!svgMarkup) return "";
-  let cleaned = svgMarkup.trim();
-  
-  if (!cleaned.toLowerCase().startsWith("<svg")) {
-    return cleaned;
-  }
-  
-  const viewBoxMatch = cleaned.match(/viewBox=["']([^"']+)["']/i);
-  const widthMatch = cleaned.match(/width=["']([^"']+)["']/i);
-  const heightMatch = cleaned.match(/height=["']([^"']+)["']/i);
-  
-  let viewBox = viewBoxMatch ? viewBoxMatch[1] : null;
-  let width = widthMatch ? widthMatch[1] : null;
-  let height = heightMatch ? heightMatch[1] : null;
-  
-  if (!viewBox && width && height) {
-    const wNum = parseFloat(width);
-    const hNum = parseFloat(height);
-    if (!isNaN(wNum) && !isNaN(hNum)) {
-      viewBox = `0 0 ${wNum} ${hNum}`;
-    }
-  }
-  
-  let openingTagEnd = cleaned.indexOf(">");
-  if (openingTagEnd === -1) return cleaned;
-  
-  let openingTag = cleaned.substring(0, openingTagEnd);
-  openingTag = openingTag
-    .replace(/\bwidth\s*=\s*["']?[^"'>\s]*["']?/gi, "")
-    .replace(/\bheight\s*=\s*["']?[^"'>\s]*["']?/gi, "")
-    .replace(/\bviewBox\s*=\s*["']?[^"'>\s]*["']?/gi, "");
-    
-  openingTag = openingTag.replace(/\s+/g, " ").trim();
-  const newAttributes = ` width="100%" height="100%"` + (viewBox ? ` viewBox="${viewBox}"` : "");
-
-  // Library artwork is also served as its own SVG document to the student hero's <img>,
-  // so it needs the namespace and hyphenated presentation attributes to render there.
-  return normalizeSvgDocumentMarkup(openingTag + newAttributes + cleaned.substring(openingTagEnd));
-}
+// Extracted so surfaces that only normalize markup (e.g. the curriculum studio's
+// thumbnail field) need not import this whole designer.
+export { preprocessSvgMarkup } from "../assets/svgPreprocess";
 
 interface SvgDesignerProps {
   questions?: CountingQuestion[];
@@ -183,6 +384,19 @@ export const SvgDesigner: React.FC<SvgDesignerProps> = ({
   const [markupInput, setMarkupInput] = useState("");
   const [scaleInput, setScaleInput] = useState(1.0);
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
+  // `null` means "not loaded" — distinct from a loaded-but-empty map. Conflating them made
+  // a failed request claim every asset was unused, which is a false statement, not a blank.
+  const [assetUsage, setAssetUsage] = useState<Record<string, SvgAssetUse[]> | null>(null);
+
+  // Refetched whenever the library changes, so a newly linked asset stops reading "Not used
+  // yet" without a reload. Failure is silent: usage is context, not something to block on.
+  useEffect(() => {
+    let cancelled = false;
+    void svgAssetsApi.usage()
+      .then(response => { if (!cancelled) setAssetUsage(response.usage); })
+      .catch(() => undefined);
+    return () => { cancelled = true; };
+  }, [customSvgs.length]);
   const [libraryTab, setLibraryTab] = useState<"assets" | "built-in">("assets");
   const [notification, setNotification] = useState<string | null>(null);
   const [isResetting, setIsResetting] = useState(false);
@@ -407,6 +621,24 @@ export const SvgDesigner: React.FC<SvgDesignerProps> = ({
                         <p className={`text-[9px] font-mono mt-0.5 ${isSelected ? "text-indigo-200" : "text-slate-400"}`}>
                           Scale: {Math.round(asset.scale * 100)}%
                         </p>
+                        {/* The link lives on the skill, so without this the library cannot
+                            show that an asset is in use — or that deleting it strands a
+                            skill's artwork. */}
+                        {assetUsage && (
+                          <p
+                            className={`text-[9px] mt-0.5 truncate ${
+                              isSelected ? "text-indigo-100"
+                                : (assetUsage[asset.id]?.length ?? 0) > 0 ? "text-emerald-600" : "text-slate-400"
+                            }`}
+                            title={(assetUsage[asset.id] ?? []).map(use => `${use.curriculumTitle} · ${use.skillLabel}`).join("\n")}
+                          >
+                            {(assetUsage[asset.id]?.length ?? 0) === 0
+                              ? "Not used yet"
+                              : assetUsage[asset.id].length === 1
+                                ? `Used by ${assetUsage[asset.id][0].skillLabel}`
+                                : `Used by ${assetUsage[asset.id].length} skills`}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <Button

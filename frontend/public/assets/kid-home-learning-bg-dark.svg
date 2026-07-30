@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1100" viewBox="0 0 1600 1100" fill="none">
+  <defs>
+    <radialGradient id="washA" cx="0" cy="0" r="1" gradientTransform="translate(180 150) rotate(35) scale(440 350)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#43367D" stop-opacity=".5"/>
+      <stop offset="1" stop-color="#43367D" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="washB" cx="0" cy="0" r="1" gradientTransform="translate(1440 360) rotate(130) scale(430 360)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#174A66" stop-opacity=".48"/>
+      <stop offset="1" stop-color="#174A66" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="1100" fill="#0E1020"/>
+  <rect width="1600" height="1100" fill="url(#washA)"/>
+  <rect width="1600" height="1100" fill="url(#washB)"/>
+
+  <g opacity=".3">
+    <path d="M42 232C112 181 164 220 209 174C248 134 221 91 285 61" stroke="#9F8AE8" stroke-width="3" stroke-linecap="round" stroke-dasharray="7 13"/>
+    <circle cx="44" cy="232" r="10" fill="#E6B94A"/><circle cx="123" cy="199" r="8" fill="#4EAC87"/><circle cx="209" cy="174" r="9" fill="#5A9BCB"/><circle cx="285" cy="61" r="12" fill="#886ED9"/>
+  </g>
+  <g fill="#B4A2EF" opacity=".2" font-family="Plus Jakarta Sans, Arial, sans-serif" font-weight="800">
+    <text x="52" y="104" font-size="58">1</text><text x="112" y="93" font-size="42">2</text><text x="1520" y="175" font-size="48">3</text><text x="23" y="775" font-size="54">8</text>
+  </g>
+  <g opacity=".22" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M1500 238 1553 328h-106l53-90Z" stroke="#9279E5" stroke-width="6"/>
+    <circle cx="1464" cy="424" r="43" stroke="#4B9FC1" stroke-width="6"/>
+    <rect x="1512" y="480" width="70" height="70" rx="14" transform="rotate(12 1512 480)" stroke="#5DA979" stroke-width="6"/>
+  </g>
+  <g opacity=".22" stroke="#9B86E9" stroke-width="7" stroke-linecap="round">
+    <path d="M73 411h45M95.5 388.5v45"/><path d="M1480 690h52"/><path d="M1468 747h55M1468 767h55"/>
+  </g>
+  <g opacity=".2" fill="#D85D8A"><circle cx="91" cy="565" r="8"/><circle cx="118" cy="565" r="8"/><circle cx="145" cy="565" r="8"/></g>
+  <g opacity=".2" fill="#4EAC87"><circle cx="1470" cy="590" r="7"/><circle cx="1494" cy="590" r="7"/><circle cx="1518" cy="590" r="7"/><circle cx="1542" cy="590" r="7"/></g>
+</svg>

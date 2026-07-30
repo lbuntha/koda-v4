@@ -4,9 +4,11 @@ import type {
   StudentProgress,
 } from "../../api/course";
 
+/** Unfinished work: everything the engine surfaced because it is already owed, not new. */
 export const FOCUS_DUE_KINDS: ReadonlySet<RecommendationKind> = new Set([
   "review",
   "reinforce",
+  "continue",
 ]);
 
 export const estimateFocusMinutes = (queue: CourseQueueItem[]): number => {

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-labelledby="title description">
+  <title id="title">Count Magnets</title>
+  <desc id="description">Two horseshoe magnets ready to be counted.</desc>
+  <!-- Transparent background on purpose: every surface that shows this supplies its own
+       card, so a baked tile would read as a second one. viewBox is a shared 200x200 so the
+       whole technique set sits at one optical weight. -->
+  <defs>
+    <linearGradient id="g" x1="30" y1="30" x2="170" y2="175" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9B86FF"/><stop offset="1" stop-color="#7A5CF0"/>
+    </linearGradient>
+    <filter id="s" x="-25%" y="-25%" width="150%" height="160%">
+      <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#5C46B8" flood-opacity=".22"/>
+    </filter>
+  </defs>
+  <g filter="url(#s)">
+    <path d="M36 116v-22a26 26 0 0 1 52 0v22h-18v-22a8 8 0 0 0-16 0v22Z" fill="url(#g)"/>
+    <rect x="36" y="116" width="16" height="16" rx="3" fill="#E03A5E"/>
+    <rect x="72" y="116" width="16" height="16" rx="3" fill="#0EA5E9"/>
+    <path d="M112 116v-22a26 26 0 0 1 52 0v22h-18v-22a8 8 0 0 0-16 0v22Z" fill="url(#g)"/>
+    <rect x="112" y="116" width="16" height="16" rx="3" fill="#E03A5E"/>
+    <rect x="148" y="116" width="16" height="16" rx="3" fill="#0EA5E9"/>
+  </g>
+</svg>

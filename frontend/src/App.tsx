@@ -69,6 +69,7 @@ import { TECHNIQUE_OPTIONS, defaultTargetCountForTechnique } from "./components/
 import { CANVAS_BY_TECHNIQUE } from "./components/studio/canvasRegistry";
 import { AiGeneratorPanel } from "./components/studio/ai-generator";
 import { useSvgLibrary } from "./assets/SvgLibraryContext";
+import { SvgLibraryAsset } from "./assets/SvgLibraryAsset";
 import { useQuestionDeck } from "./studio/useQuestionDeck";
 import { createQuestionId } from "./studio/questionIds";
 import { SkillDeckPanel, StudioSkillFilter } from "./components/studio/SkillDeckPanel";
@@ -88,6 +89,7 @@ import {
   TabsList,
   TabsTrigger,
   Badge,
+  Dialog,
   Sidebar
 } from "./components/ui";
 
@@ -110,8 +112,9 @@ interface AppProps {
 
 export default function App({ embedded = false, initialAdminTab = "dashboard", onExitStudio }: AppProps = {}) {
   const { isStudent, logout, playSession, endChildPlay } = useAuth();
-  const { assets: customSvgs } = useSvgLibrary();
-  const { questions, setQuestions, persistenceStatus: questionPersistenceStatus } = useQuestionDeck(DEFAULT_QUESTIONS);
+  const { assets: customSvgs, techniqueThumbnails, setTechniqueThumbnails } = useSvgLibrary();
+  const [thumbnailPickerFor, setThumbnailPickerFor] = useState<string | null>(null);
+  const { questions, setQuestions, persistenceStatus: questionPersistenceStatus, persistenceError: questionPersistenceError } = useQuestionDeck(DEFAULT_QUESTIONS);
   const isSaving = questionPersistenceStatus === "loading" || questionPersistenceStatus === "saving";
   const [activeId, setActiveId] = useState<string>("");
   const [isPlayMode, setIsPlayMode] = useState<boolean>(true); // default to play mode so it's instantly interactive
@@ -139,7 +142,7 @@ export default function App({ embedded = false, initialAdminTab = "dashboard", o
   const [copied, setCopied] = useState<boolean>(false);
   const [localHeight, setLocalHeight] = useState<number | null>(null);
   const [localWidth, setLocalWidth] = useState<number | null>(null);
-  const [activePropTab, setActivePropTab] = useState<"visual" | "design" | "component" | "json" | "ai">("visual");
+  const [activePropTab, setActivePropTab] = useState<"visual" | "design" | "component" | "technique" | "json" | "ai">("visual");
   const [mobileStudioPanel, setMobileStudioPanel] = useState<"deck" | "canvas" | "properties">("canvas");
   const [selectedStudioSkillId, setSelectedStudioSkillId] = useState<StudioSkillFilter>("all");
   const [jsonInput, setJsonInput] = useState<string>("");
@@ -1212,7 +1215,9 @@ export default function App({ embedded = false, initialAdminTab = "dashboard", o
                     <div className="flex min-w-0 items-center gap-2">
                       <span className={`h-2 w-2 shrink-0 rounded-full ${questionPersistenceStatus === "error" ? "bg-rose-500" : isSaving ? "animate-pulse bg-amber-400" : "bg-emerald-500"}`} />
                       <span className="truncate text-xs font-medium text-[#6D6997]">
-                        {questionPersistenceStatus === "error" ? "Saved locally — MongoDB unavailable" : isSaving ? "Saving worksheet…" : "Worksheet saved"}
+                        {questionPersistenceStatus === "error"
+                          ? questionPersistenceError ?? "Saved locally — couldn't reach the server"
+                          : isSaving ? "Saving worksheet…" : "Worksheet saved"}
                       </span>
                     </div>
                     <div className="flex flex-wrap items-center justify-end gap-2">
@@ -1653,8 +1658,9 @@ export default function App({ embedded = false, initialAdminTab = "dashboard", o
                 setActivePropTab(val as any);
                 sounds.playPop();
               }}>
-                <TabsList className="grid grid-cols-5 gap-1 w-full">
+                <TabsList className="grid grid-cols-3 gap-1 w-full">
                   <TabsTrigger value="visual" className="text-[11px] font-bold">Visual</TabsTrigger>
+                  <TabsTrigger value="technique" className="text-[11px] font-bold">Components</TabsTrigger>
                   <TabsTrigger value="ai" className="text-[11px] font-bold">AI</TabsTrigger>
                   <TabsTrigger value="design" className="text-[11px] font-bold">Design</TabsTrigger>
                   <TabsTrigger value="component" className="text-[11px] font-bold">Rules</TabsTrigger>
@@ -1686,38 +1692,6 @@ export default function App({ embedded = false, initialAdminTab = "dashboard", o
                     onChange={(e) => updateActiveQuestion({ instruction: e.target.value })}
                     placeholder="Touch each object to count them up!"
                   />
-                </div>
-
-                 {/* Techniques selection dropdown */}
-                <div className="flex flex-col gap-1.5">
-                  <Label>Counting Technique</Label>
-                  <div className="grid grid-cols-1 gap-1 max-h-[140px] overflow-y-auto pr-1">
-                    {TECHNIQUE_OPTIONS.map((tech) => {
-                      const isSelected = activeQuestion?.technique === tech.id;
-                      return (
-                        <button
-                          key={tech.id}
-                          onClick={() => {
-                            sounds.playPop();
-                            updateActiveQuestion({
-                              technique: tech.id,
-                              title: tech.name,
-                              targetCount: defaultTargetCountForTechnique(tech.id)
-                            });
-                          }}
-                          className={`text-[11px] font-bold p-2 rounded-lg border text-left transition-all truncate cursor-pointer flex items-center gap-2
-                            ${isSelected 
-                              ? "bg-indigo-600 text-white border-indigo-600 shadow-sm" 
-                              : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300"
-                            }
-                          `}
-                        >
-                          <span className="flex-shrink-0">{React.cloneElement(tech.icon, { className: isSelected ? "text-white" : tech.icon.props.className })}</span>
-                          <span className="truncate">{tech.name}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
                 </div>
 
                 {/* SVG Assets picker */}
@@ -1872,6 +1846,146 @@ export default function App({ embedded = false, initialAdminTab = "dashboard", o
               </div>
             )}
             
+            {activePropTab === "technique" && (
+              <div className="animate-fade-in">
+                {/* The whole tab scrolls, so the list is no longer clamped to 140px with its
+                    own inner scrollbar — every technique is reachable by scrolling once. */}
+                <div className="mb-3 flex items-baseline justify-between">
+                  <Label>Counting Technique</Label>
+                  <span className="text-[10px] font-mono text-slate-400">
+                    {TECHNIQUE_OPTIONS.length} components
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {TECHNIQUE_OPTIONS.map((tech) => {
+                    const isSelected = activeQuestion?.technique === tech.id;
+                    return (
+                      // Two independent actions — pick this component, or change its artwork —
+                      // so they are sibling buttons in a plain container. Nesting the second
+                      // inside the first left a focusable element inside a button, which is
+                      // invalid and reaches screen readers as a single ambiguous control.
+                      <div
+                        key={tech.id}
+                        className={`flex flex-col items-center gap-1.5 rounded-xl border p-2 text-center transition-all ${
+                          isSelected
+                            ? "border-indigo-600 bg-indigo-50 shadow-sm ring-1 ring-indigo-600"
+                            : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                        }`}
+                      >
+                        <button
+                          type="button"
+                          aria-pressed={isSelected}
+                          onClick={() => {
+                            sounds.playPop();
+                            updateActiveQuestion({
+                              technique: tech.id,
+                              title: tech.name,
+                              targetCount: defaultTargetCountForTechnique(tech.id),
+                            });
+                          }}
+                          className="flex w-full cursor-pointer flex-col items-center gap-1.5 rounded-lg"
+                        >
+                          {/* An account's own choice from the SVG library wins over the
+                              static file the component manifest ships with. */}
+                          {techniqueThumbnails[tech.id] ? (
+                            <SvgLibraryAsset assetId={techniqueThumbnails[tech.id]} size={56} />
+                          ) : tech.defaultThumbnailUrl ? (
+                            <img
+                              src={tech.defaultThumbnailUrl}
+                              alt=""
+                              className="h-14 w-14 object-contain"
+                            />
+                          ) : (
+                            <span className="flex h-14 w-14 items-center justify-center text-slate-400">
+                              {tech.icon}
+                            </span>
+                          )}
+                          <span
+                            className={`text-[10px] font-bold leading-tight ${
+                              isSelected ? "text-indigo-700" : "text-slate-600"
+                            }`}
+                          >
+                            {tech.name}
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setThumbnailPickerFor(tech.id)}
+                          className="cursor-pointer rounded-md px-1.5 py-0.5 text-[9px] font-bold text-indigo-600 hover:bg-indigo-50"
+                        >
+                          {techniqueThumbnails[tech.id] ? "Change art" : "Set art"}
+                          {/* Names the component for anyone who can't see which tile this is in. */}
+                          <span className="sr-only"> for {tech.name}</span>
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Choose from the account's Mongo-backed SVG library. Assets are made on
+                    the Assets page; this only points a component at one. */}
+                <Dialog
+                  isOpen={thumbnailPickerFor !== null}
+                  onClose={() => setThumbnailPickerFor(null)}
+                  maxWidthClassName="max-w-2xl"
+                >
+                  <h3 className="text-sm font-bold text-slate-800">Component artwork</h3>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Pick an SVG from your library for{" "}
+                    <strong>{TECHNIQUE_OPTIONS.find((t) => t.id === thumbnailPickerFor)?.name}</strong>.
+                    Saved to your account, so it follows you between devices.
+                  </p>
+                  {customSvgs.length === 0 ? (
+                    <p className="mt-4 rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-xs text-slate-400">
+                      Your SVG library is empty. Create artwork on the Assets page first.
+                    </p>
+                  ) : (
+                    <div className="mt-4 grid max-h-80 grid-cols-4 gap-2 overflow-y-auto pr-1">
+                      {customSvgs.map((asset) => (
+                        <button
+                          key={asset.id}
+                          onClick={() => {
+                            sounds.playPop();
+                            setTechniqueThumbnails((current) => ({
+                              ...current,
+                              [thumbnailPickerFor!]: asset.id,
+                            }));
+                            setThumbnailPickerFor(null);
+                          }}
+                          className="flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-2.5 text-center hover:border-indigo-400 hover:bg-indigo-50"
+                        >
+                          <SvgLibraryAsset assetId={asset.id} size={48} />
+                          <span className="line-clamp-2 text-[10px] font-semibold text-slate-600">
+                            {asset.label}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <div className="mt-4 flex justify-between border-t border-slate-100 pt-3">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      disabled={!thumbnailPickerFor || !techniqueThumbnails[thumbnailPickerFor]}
+                      onClick={() => {
+                        setTechniqueThumbnails((current) => {
+                          const next = { ...current };
+                          delete next[thumbnailPickerFor!];
+                          return next;
+                        });
+                        setThumbnailPickerFor(null);
+                      }}
+                    >
+                      Use component default
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => setThumbnailPickerFor(null)}>
+                      Cancel
+                    </Button>
+                  </div>
+                </Dialog>
+              </div>
+            )}
+
             {activePropTab === "design" && (
               <div className="space-y-4 animate-fade-in">
                 <Label>Canvas Layout</Label>

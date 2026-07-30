@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-labelledby="title description">
+  <title id="title">Goods Sort</title>
+  <desc id="description">Objects being sorted into two labelled bins.</desc>
+  <!-- Transparent background on purpose: every surface that shows this supplies its own
+       card. Shared 200x200 viewBox so the whole technique set sits at one optical weight. -->
+  <defs>
+    <linearGradient id="g" x1="30" y1="30" x2="170" y2="175" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9B86FF"/><stop offset="1" stop-color="#7A5CF0"/>
+    </linearGradient>
+    <filter id="s" x="-25%" y="-25%" width="150%" height="160%">
+      <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#5C46B8" flood-opacity=".22"/>
+    </filter>
+  </defs>
+  <g filter="url(#s)">
+    <rect x="30" y="104" width="60" height="52" rx="12" fill="url(#g)"/>
+    <rect x="110" y="104" width="60" height="52" rx="12" fill="#F59E0B"/>
+    <circle cx="46" cy="84" r="10" fill="#7A5CF0"/>
+    <circle cx="74" cy="66" r="10" fill="#7A5CF0"/>
+    <circle cx="126" cy="66" r="10" fill="#F59E0B"/>
+    <circle cx="154" cy="84" r="10" fill="#F59E0B"/>
+  </g>
+</svg>

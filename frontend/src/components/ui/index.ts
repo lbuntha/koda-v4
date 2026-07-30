@@ -14,3 +14,4 @@ export { FormModal, FormField, FormRow } from "./FormModal";
 export { Drawer } from "./Drawer";
 export { Sidebar } from "./Sidebar";
 export { FieldHint } from "./FieldHint";
+export { ConfirmModal } from "./ConfirmModal";

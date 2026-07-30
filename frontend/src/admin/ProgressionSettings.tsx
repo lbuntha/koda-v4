@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, Beaker, CheckCircle2, Gauge, RefreshCcw, RotateCcw, Route, Save, Scale, SlidersHorizontal, TrendingDown, TrendingUp, Users } from "lucide-react";
+import { AlertTriangle, Beaker, CheckCircle2, Flame, Gauge, RefreshCcw, RotateCcw, Route, Save, Scale, SlidersHorizontal, TrendingDown, TrendingUp, Users } from "lucide-react";
 import { RescoreJob, ScoringConfig, ScoringPreview, settingsApi } from "../api/settings";
 import { Badge, Button, Card, FieldHint, Input, Label, SkeletonCard, Switch } from "../components/ui";
 import { useAppSettings } from "../settings/AppSettingsContext";
@@ -25,6 +25,11 @@ const DEFAULT_SCORING: ScoringConfig = {
     checkpoints_only: true,
     generator_revision: 1,
     rapid_confirmation_plays: 2,
+  },
+  streak: {
+    counts: "attempt",
+    min_events_per_day: 1,
+    grace_days: 1,
   },
   recommendation: {
     skills_per_session: 3,
@@ -103,6 +108,8 @@ export const ProgressionSettings: React.FC = () => {
   }, [settings.scoring, settings.scoring_revision]);
 
   useEffect(() => {
+    // Absence of a job card is indistinguishable from "no job running", which is the common
+    // case and harmless — the next save refreshes this. Nothing here is destructive.
     settingsApi.rescoreJobs()
       .then(result => setJob(result.jobs[0] ?? null))
       .catch(() => undefined);
@@ -260,6 +267,50 @@ export const ProgressionSettings: React.FC = () => {
               </div>
             </div>
             <Switch checked={draft.placement.checkpoints_only} onCheckedChange={value => setDraft(current => ({ ...current, placement: { ...current.placement, checkpoints_only: value } }))} />
+          </div>
+        </Card>
+
+        <Card className="border-[#E7E3F6] p-4">
+          <SectionHeader icon={Flame} title="Daily streak" />
+          <p className="mb-2.5 text-[11px] leading-relaxed text-[#6D6997]">
+            What a learner has to do for a day to count. Streaks recompute from existing
+            events, so a change here restates every learner&rsquo;s current number immediately.
+          </p>
+          <div className="grid gap-x-3 gap-y-2.5 sm:grid-cols-2">
+            <div className="space-y-1">
+              <Label htmlFor="streak-counts">A day counts when the learner</Label>
+              <select
+                id="streak-counts"
+                value={draft.streak.counts}
+                onChange={event => setDraft(current => ({
+                  ...current,
+                  streak: { ...current.streak, counts: event.target.value as ScoringConfig["streak"]["counts"] },
+                }))}
+                className="h-9 w-full rounded-lg border border-[#E7E3F6] bg-white px-2.5 text-xs text-[#17143D]"
+              >
+                <option value="attempt">Answers a question</option>
+                <option value="lesson_complete">Finishes an activity</option>
+                <option value="any">Opens an activity</option>
+              </select>
+              <FieldHint text="&ldquo;Opens&rdquo; counts attendance — a learner who views a question and leaves keeps their streak. &ldquo;Answers&rdquo; requires a verified attempt." />
+            </div>
+            <NumberField
+              label="Events needed per day"
+              help="How many qualifying events a day needs before it counts. One means a single answer is enough."
+              value={draft.streak.min_events_per_day}
+              onChange={value => setDraft(current => ({ ...current, streak: { ...current.streak, min_events_per_day: value } }))}
+              min={1}
+              max={50}
+            />
+            <NumberField
+              label="Grace days"
+              help="How stale the last active day may be before the streak resets. One keeps today's number visible until yesterday is missed too; zero resets the moment a day passes with no work."
+              value={draft.streak.grace_days}
+              onChange={value => setDraft(current => ({ ...current, streak: { ...current.streak, grace_days: value } }))}
+              min={0}
+              max={7}
+              suffix="days"
+            />
           </div>
         </Card>
 

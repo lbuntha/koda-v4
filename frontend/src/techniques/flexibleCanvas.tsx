@@ -17,6 +17,7 @@ import { flexibleCanvasSchema } from "../components/studio/ai-generator/schemas/
 
 export const flexibleCanvas = defineTechnique({
   technique: CountingTechnique.FLEXIBLE_CANVAS,
+  defaultThumbnailUrl: "/assets/components/flexible-canvas.svg",
   label: "15. Flexible Canvas",
   icon: <Sliders size={14} className="text-indigo-500" />,
   defaultTargetCount: 5,

@@ -14,6 +14,7 @@ import { goodsSortSchema } from "../components/studio/ai-generator/schemas/goods
 
 export const goodsSort = defineTechnique({
   technique: CountingTechnique.GOODS_SORT,
+  defaultThumbnailUrl: "/assets/components/goods-sort.svg",
   label: "Goods Shelf Sort",
   icon: <PackageCheck size={14} className="text-amber-400" />,
   defaultTargetCount: 3,

@@ -108,16 +108,22 @@ assignment scopes + recent recommendation decisions/skips.
 | # | Bucket | Rule | Why |
 |---|---|---|---|
 | 1 | **Reinforce** | in-scope due skills scored below `REINFORCE` (0.60) **or whose latest review failed** | a real/current gap — re-teach before moving on |
-| 2 | **Review** | Developing+/Proficient+ skills whose `nextReviewAt` has passed | keep what's learned from decaying |
-| 3 | **New** | next `not_started` skills in curriculum order whose explicit prerequisites are progression-eligible (frontier and beyond) | forward progress |
-| 4 | **Stretch / free** | nothing due → offer the next new skill early, or hand off to free practice | never a dead end |
+| 2 | **Continue** | due skills below `developing` that are *not* a gap — started, going well, short of the developing gate's play count | finish what was started; without this bucket the skill is neither new nor review and stalls at beginner forever |
+| 3 | **Review** | Developing+/Proficient+ skills whose `nextReviewAt` has passed | keep what's learned from decaying |
+| 4 | **New** | next `not_started` skills in curriculum order whose explicit prerequisites are progression-eligible (frontier and beyond) | forward progress |
+| 5 | **Stretch / free** | nothing due → offer the next new skill early, or hand off to free practice | never a dead end |
+
+**What counts as progression eligibility for bucket 4.** Only placement, rapid confirmation,
+or mastery that has cleared the **developing** gate. A single beginner-level touch is exposure,
+not evidence, and must not unlock a dependent skill's prerequisites (§13.2 rule 3).
 
 **Session assembly.** A session shows `SKILLS_PER_SESSION` items (default 3). When an
 eligible new skill exists, reserve one slot for it. Fill at most
 `MAX_NON_NEW_PER_SESSION` slots (default 2) with reinforce/review items. With multiple
 assignments, select candidates by assignment priority and round-robin subject balance
 so one large curriculum cannot starve the others.
-Each item carries `{ skillId, kind: reinforce|review|new|stretch, reason, optional: true }`.
+Each item carries
+`{ skillId, kind: reinforce|continue|review|new|stretch, reason, optional: true }`.
 
 **"Can miss or not."** Every recommendation is `optional`. If the kid **skips**, we
 log a `recommendation_skipped` event; the engine drops that skill to the back of the
@@ -133,11 +139,12 @@ recommend(scores, progression, releases, assignments, recentRuns, opts):
     state     = materialize every inScope skill with score-or-not_started
     due       = state where s.isDue
     reinforce = due ∩ ({score < REINFORCE} ∪ {latestReviewFailed}) # bucket 1
-    review    = due ∩ {level ≥ developing} − reinforce          # bucket 2
+    continue_ = due ∩ {level == beginner} − reinforce           # bucket 2
+    review    = due ∩ {level ≥ developing} − reinforce          # bucket 3
     new       = ordered(state where level == not_started
                          and prerequisitesEligible(skill, progression)
-                         and order ≥ frontier.order)            # bucket 3
-    dueSlots = interleaveByAssignment(reinforce, review)
+                         and order ≥ frontier.order)            # bucket 4
+    dueSlots = interleaveByAssignment(reinforce, continue_, review)
                [:MAX_NON_NEW_PER_SESSION]
     newSlots = interleaveByAssignment(new)
     queue = dueSlots + reserveAtLeastOne(newSlots when available)
@@ -402,7 +409,7 @@ through guardianship and teachers through active classroom enrollment.
 | `POST` | `/family/children` | parent | Create kid *(exists)* |
 | `POST` | `/assignments` | parent·teacher | Assign a published release + mode |
 | `GET` | `/assignments?student_id=` | authorized adult | List a kid's assignments |
-| `PATCH` | `/assignments/{id}` | assigning adult | Pause / change delivery settings |
+| `PATCH` | `/assignments/{id}` | assigning adult | Pause, or upgrade to a newer release of the same curriculum (audited as `release_upgraded`) |
 | `GET` | `/student/placement/quiz` | kid | Start/resume the next pending placement |
 | `POST` | `/student/placement/{placement_id}/submit` | kid | Submit the stored manifest's responses → sets frontier |
 | `GET` | `/students/{student_id}/placements` | authorized adult | Placement history/status |
@@ -845,8 +852,11 @@ receive unearned Beginner→Master badges.
 - Deleting/recreating a skill uses a new ID. If content authors intentionally replace
   one skill with another, the release may include an audited `skill_migrations`
   mapping with an explicit transfer policy.
-- Assignment upgrades are explicit. New sessions use the new `release_id`; historical
-  events keep the release that served them.
+- Assignment upgrades are explicit: `PATCH /assignments/{id}` with a `release_id` for the
+  same curriculum. New sessions use the new `release_id`; historical events keep the release
+  that served them. Studio **Publish** cuts the release; **Assignments → Update to vN** rolls
+  it out. Both halves are required — publishing alone changes nothing for a learner already
+  pinned to an older release.
 - Mastery groups by `(student_id, curriculum_id, skill_id)`, so compatible releases
   retain evidence while unrelated curricula never collide.
 

@@ -115,7 +115,9 @@ export const TenRod: React.FC<{
   /** Skip the entrance animation when a parent owns the movement. */
   noEnter?: boolean;
   orientation?: "horizontal" | "vertical";
-}> = ({ type, noEnter, orientation = "horizontal" }) => {
+  /** Stronger indigo faces for place-value mats where the block itself carries meaning. */
+  highContrast?: boolean;
+}> = ({ type, noEnter, orientation = "horizontal", highContrast = false }) => {
   const u = useUnitSize();
   const reduce = useReducedMotion();
   const still = reduce || noEnter;
@@ -130,7 +132,11 @@ export const TenRod: React.FC<{
       animate={{ scale: 1, opacity: 1, y: 0 }}
       transition={BLOCK_SPRING}
       aria-label="Ten rod"
-      className={`inline-flex items-center border-2 border-indigo-500 bg-indigo-500/10 dark:bg-indigo-500/10 shadow-sm ${
+      className={`inline-flex items-center border-2 shadow-sm ${
+        highContrast
+          ? "border-indigo-600 bg-indigo-200/80 shadow-indigo-500/15 dark:border-indigo-400 dark:bg-indigo-500/20"
+          : "border-indigo-500 bg-indigo-500/10 dark:bg-indigo-500/10"
+      } ${
         orientation === "horizontal" ? "flex-row" : "flex-col"
       }`}
       style={{ gap, padding: pad, borderRadius: px(u * 0.35, 6) }}
@@ -141,7 +147,10 @@ export const TenRod: React.FC<{
           initial={still ? false : { opacity: 0, scale: 0.4 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: still ? 0 : 0.1 + j * 0.03, duration: 0.18 }}
-          className="flex items-center justify-center bg-white dark:bg-slate-800 border border-indigo-400/25"
+          className={`flex items-center justify-center border ${highContrast
+            ? "border-indigo-300 bg-indigo-50 dark:border-indigo-400/30 dark:bg-slate-800"
+            : "border-indigo-400/25 bg-white dark:bg-slate-800"
+          }`}
           style={{ width: u, height: u, borderRadius: px(u * 0.22, 3) }}
         >
           <CountingAsset type={type as AssetType} size={cell} />
@@ -158,7 +167,8 @@ export const OneUnit: React.FC<{
   isInteractive?: boolean;
   label?: string;
   noEnter?: boolean;
-}> = ({ type, onClick, isInteractive, label, noEnter }) => {
+  highContrast?: boolean;
+}> = ({ type, onClick, isInteractive, label, noEnter, highContrast = false }) => {
   const u = useUnitSize();
   const reduce = useReducedMotion() || noEnter;
   const badge = px(u * 0.36, 12);
@@ -183,8 +193,10 @@ export const OneUnit: React.FC<{
     </>
   );
 
-  const base =
-    "flex items-center justify-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm relative select-none";
+  const base = `flex items-center justify-center border shadow-sm relative select-none ${highContrast
+    ? "border-indigo-400 bg-indigo-100 shadow-indigo-500/15 dark:border-indigo-400/40 dark:bg-indigo-500/15"
+    : "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800"
+  }`;
   const style = { width: u, height: u, borderRadius: px(u * 0.28, 6) };
 
   const enter = {

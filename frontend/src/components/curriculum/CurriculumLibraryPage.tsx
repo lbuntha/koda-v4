@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Archive, BookOpen, ChevronLeft, ChevronRight, Plus, RotateCcw, Search } from "lucide-react";
 import { academicApi, AcademicCatalog } from "../../api/academic";
 import { curriculumApi, CurriculumStatus, CurriculumSummary } from "../../api/curriculum";
+import { createGrade1MathTemplate, GRADE_1_MATH_TEMPLATE_COUNTS } from "../../curriculum/grade1MathTemplate";
 import { Badge, Button, Card, Dialog, Input, Label, Select, Skeleton, Textarea } from "../ui";
 
 interface CurriculumLibraryPageProps {
@@ -9,6 +10,7 @@ interface CurriculumLibraryPageProps {
 }
 
 interface CreateDraft {
+  startingPoint: "blank" | "grade1-math";
   title: string;
   description: string;
   version: string;
@@ -65,7 +67,7 @@ export const CurriculumLibraryPage: React.FC<CurriculumLibraryPageProps> = ({ on
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [archivingId, setArchivingId] = useState<string | null>(null);
-  const [draft, setDraft] = useState<CreateDraft>({ title: "", description: "", version: "1.0", gradeId: "", subjectId: "" });
+  const [draft, setDraft] = useState<CreateDraft>({ startingPoint: "blank", title: "", description: "", version: "1.0", gradeId: "", subjectId: "" });
 
   const load = async () => {
     setLoading(true);
@@ -99,6 +101,8 @@ export const CurriculumLibraryPage: React.FC<CurriculumLibraryPageProps> = ({ on
   const visible = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   const activeGrades = catalog.grades.filter(item => item.active);
   const activeSubjects = catalog.subjects.filter(item => item.active);
+  const gradeOne = activeGrades.find(item => item.key === "grade-1" || item.code.toLowerCase() === "g1" || item.name.toLowerCase() === "grade 1");
+  const gradeOneMath = gradeOne && activeSubjects.find(item => item.grade_id === gradeOne.key && (item.code.toLowerCase() === "math" || item.name.toLowerCase().includes("math")));
   const createSubjects = activeSubjects.filter(item => item.grade_id === draft.gradeId);
   const counts = {
     total: curricula.filter(item => item.status !== "archived").length,
@@ -108,9 +112,16 @@ export const CurriculumLibraryPage: React.FC<CurriculumLibraryPageProps> = ({ on
   };
 
   const openCreate = () => {
-    const gradeId = activeGrades[0]?.key || "";
-    const subjectId = activeSubjects.find(item => item.grade_id === gradeId)?.key || "";
-    setDraft({ title: "", description: "", version: "1.0", gradeId, subjectId });
+    const gradeId = gradeOne?.key || activeGrades[0]?.key || "";
+    const subjectId = gradeOneMath?.key || activeSubjects.find(item => item.grade_id === gradeId)?.key || "";
+    setDraft({
+      startingPoint: gradeOne && gradeOneMath ? "grade1-math" : "blank",
+      title: gradeOne && gradeOneMath ? "Grade 1 Mathematics" : "",
+      description: gradeOne && gradeOneMath ? "A complete Grade 1 mathematics scope covering operations, place value, measurement, time, data, and geometry." : "",
+      version: "1.0",
+      gradeId,
+      subjectId,
+    });
     setCreateError(null);
     setCreateOpen(true);
   };
@@ -128,6 +139,27 @@ export const CurriculumLibraryPage: React.FC<CurriculumLibraryPageProps> = ({ on
         primary_grade_id: draft.gradeId,
         primary_subject_id: draft.subjectId,
       });
+      if (draft.startingPoint === "grade1-math" && created.id) {
+        const selectedGrade = activeGrades.find(item => item.key === draft.gradeId);
+        const selectedSubject = activeSubjects.find(item => item.key === draft.subjectId);
+        if (!selectedGrade || !selectedSubject) throw new Error("The Grade 1 Math catalog context is unavailable.");
+        const template = createGrade1MathTemplate({
+          curriculumId: created.tree?.id,
+          gradeId: selectedGrade.key,
+          gradeLabel: selectedGrade.name,
+          gradeOrder: selectedGrade.order,
+          subjectId: selectedSubject.key,
+          subjectLabel: selectedSubject.name,
+          subjectOrder: selectedSubject.order,
+          subjectCode: selectedSubject.code,
+          subjectIcon: selectedSubject.icon,
+          subjectColor: selectedSubject.color,
+          title: draft.title.trim(),
+          description: draft.description.trim(),
+          version: draft.version.trim() || "1.0",
+        });
+        await curriculumApi.put(template, created.revision, false, created.id);
+      }
       setCreateOpen(false);
       if (created.id) onOpen(created.id);
     } catch (cause) {
@@ -197,13 +229,40 @@ export const CurriculumLibraryPage: React.FC<CurriculumLibraryPageProps> = ({ on
       <Dialog isOpen={createOpen} onClose={() => !creating && setCreateOpen(false)} maxWidthClassName="max-w-lg">
         <div className="mb-5 pr-6"><h2 className="koda-admin-section-title">New curriculum</h2><p className="mt-1 text-xs text-[#6D6997]">Choose the starting grade and subject. You can expand its scope later.</p></div>
         <form onSubmit={createCurriculum} className="space-y-4">
+          <div className="space-y-1.5">
+            <Label>Starting point</Label>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <Button
+                type="button"
+                variant={draft.startingPoint === "grade1-math" ? "secondary" : "outline"}
+                className="h-auto justify-start px-3 py-2.5 text-left"
+                disabled={!gradeOne || !gradeOneMath}
+                onClick={() => gradeOne && gradeOneMath && setDraft(current => ({
+                  ...current,
+                  startingPoint: "grade1-math",
+                  title: "Grade 1 Mathematics",
+                  description: "A complete Grade 1 mathematics scope covering operations, place value, measurement, time, data, and geometry.",
+                  gradeId: gradeOne.key,
+                  subjectId: gradeOneMath.key,
+                }))}
+              >
+                <BookOpen size={15} />
+                <span><span className="block text-xs font-semibold">Grade 1 Math</span><span className="block text-[10px] font-normal opacity-70">{GRADE_1_MATH_TEMPLATE_COUNTS.units} units · {GRADE_1_MATH_TEMPLATE_COUNTS.skills} skills</span></span>
+              </Button>
+              <Button type="button" variant={draft.startingPoint === "blank" ? "secondary" : "outline"} className="h-auto justify-start px-3 py-2.5 text-left" onClick={() => setDraft(current => ({ ...current, startingPoint: "blank" }))}>
+                <Plus size={15} />
+                <span><span className="block text-xs font-semibold">Blank curriculum</span><span className="block text-[10px] font-normal opacity-70">Build the scope yourself</span></span>
+              </Button>
+            </div>
+            {draft.startingPoint === "grade1-math" && <p className="text-[10px] leading-relaxed text-[#6D6997]">Creates an unpublished standards-aligned outline for review. Activities and learner results are not generated.</p>}
+          </div>
           <div className="space-y-1.5"><Label htmlFor="new-curriculum-title">Title</Label><Input id="new-curriculum-title" autoFocus maxLength={160} value={draft.title} onChange={event => setDraft(current => ({ ...current, title: event.target.value }))} placeholder="Primary Mathematics Program" /></div>
           <div className="space-y-1.5"><Label htmlFor="new-curriculum-description">Description</Label><Textarea id="new-curriculum-description" rows={3} maxLength={2000} value={draft.description} onChange={event => setDraft(current => ({ ...current, description: event.target.value }))} placeholder="Learning scope and intended learners" /></div>
-          <div className="grid gap-3 sm:grid-cols-2"><div className="space-y-1.5"><Label htmlFor="new-curriculum-grade">Primary grade</Label><Select id="new-curriculum-grade" value={draft.gradeId} onChange={event => { const gradeId = event.target.value; const subjectId = activeSubjects.find(item => item.grade_id === gradeId)?.key || ""; setDraft(current => ({ ...current, gradeId, subjectId })); }}>{activeGrades.map(item => <option key={item.key} value={item.key}>{item.name}</option>)}</Select></div><div className="space-y-1.5"><Label htmlFor="new-curriculum-subject">Primary subject</Label><Select id="new-curriculum-subject" value={draft.subjectId} onChange={event => setDraft(current => ({ ...current, subjectId: event.target.value }))}>{createSubjects.map(item => <option key={item.key} value={item.key}>{item.name}</option>)}</Select></div></div>
+          <div className="grid gap-3 sm:grid-cols-2"><div className="space-y-1.5"><Label htmlFor="new-curriculum-grade">Primary grade</Label><Select id="new-curriculum-grade" disabled={draft.startingPoint === "grade1-math"} value={draft.gradeId} onChange={event => { const gradeId = event.target.value; const subjectId = activeSubjects.find(item => item.grade_id === gradeId)?.key || ""; setDraft(current => ({ ...current, gradeId, subjectId })); }}>{activeGrades.map(item => <option key={item.key} value={item.key}>{item.name}</option>)}</Select></div><div className="space-y-1.5"><Label htmlFor="new-curriculum-subject">Primary subject</Label><Select id="new-curriculum-subject" disabled={draft.startingPoint === "grade1-math"} value={draft.subjectId} onChange={event => setDraft(current => ({ ...current, subjectId: event.target.value }))}>{createSubjects.map(item => <option key={item.key} value={item.key}>{item.name}</option>)}</Select></div></div>
           <div className="space-y-1.5"><Label htmlFor="new-curriculum-version">Version</Label><Input id="new-curriculum-version" maxLength={40} value={draft.version} onChange={event => setDraft(current => ({ ...current, version: event.target.value }))} /></div>
           <p className="rounded-xl border border-[#E7E3F6] bg-[#F3F0FF] px-3 py-2 text-[10px] leading-relaxed text-[#6D6997]">The primary context controls where Studio opens first. One curriculum can still contain several grades and subjects.</p>
           {createError && <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">{createError}</p>}
-          <div className="flex justify-end gap-2 border-t border-[#EEEAF8] pt-4"><Button type="button" variant="outline" onClick={() => setCreateOpen(false)} disabled={creating}>Cancel</Button><Button type="submit" loading={creating} loadingText="Creating..." disabled={!draft.title.trim() || !draft.gradeId || !draft.subjectId}>Create curriculum</Button></div>
+          <div className="flex justify-end gap-2 border-t border-[#EEEAF8] pt-4"><Button type="button" variant="outline" onClick={() => setCreateOpen(false)} disabled={creating}>Cancel</Button><Button type="submit" loading={creating} loadingText="Creating..." disabled={!draft.title.trim() || !draft.gradeId || !draft.subjectId}>{draft.startingPoint === "grade1-math" ? "Create Grade 1 draft" : "Create curriculum"}</Button></div>
         </form>
       </Dialog>
     </div>

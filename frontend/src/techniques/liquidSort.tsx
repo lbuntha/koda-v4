@@ -14,6 +14,7 @@ import { liquidSortSchema } from "../components/studio/ai-generator/schemas/liqu
 
 export const liquidSort = defineTechnique({
   technique: CountingTechnique.LIQUID_SORT,
+  defaultThumbnailUrl: "/assets/components/liquid-sort.svg",
   label: "Liquid Color Sort",
   icon: <FlaskConical size={14} className="text-cyan-400" />,
   defaultTargetCount: 4,

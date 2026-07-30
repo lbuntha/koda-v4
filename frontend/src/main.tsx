@@ -9,7 +9,13 @@ import './index.css';
 
 // Unlinked design gallery: /?preview=learner-cards renders the real learner cards on their own,
 // so a design can be checked against a reference before a page is rebuilt around it.
-const previewing = new URLSearchParams(window.location.search).get('preview') === 'learner-cards';
+//
+// Development only. `import.meta.env.DEV` is statically false in a production build, so the
+// branch and the gallery it imports are dropped by the bundler rather than merely hidden —
+// a query string cannot reach it on a deployment.
+const previewing =
+  Boolean((import.meta as any).env?.DEV)
+  && new URLSearchParams(window.location.search).get('preview') === 'learner-cards';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

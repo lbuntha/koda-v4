@@ -6,6 +6,7 @@ import {
   Download,
   Flame,
   Lightbulb,
+  RotateCcw,
   Search,
   ShieldAlert,
   Sparkles,
@@ -24,6 +25,7 @@ import { useAuth } from "../auth/AuthContext";
 import {
   Badge,
   Button,
+  ConfirmModal,
   Drawer,
   Input,
   Select,
@@ -67,6 +69,15 @@ const duration = (ms: number) => {
   return `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
 };
 
+const formatLabel = (val?: string | null) => {
+  if (!val) return "Learning Activity";
+  const cleaned = val
+    .replace(/^(seed-[a-z0-9]+-skill-|skill-)/i, "")
+    .replace(/_/g, " ")
+    .toLowerCase();
+  return cleaned.replace(/\b\w/g, char => char.toUpperCase());
+};
+
 const AnalyticsSkeleton = () => (
   <div className="space-y-4" aria-label="Loading learning progress">
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -100,6 +111,7 @@ export const ChildAnalyticsDrawer: React.FC<Props> = ({ student, onClose, onData
   const [exporting, setExporting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteText, setDeleteText] = useState("");
+  const [confirmClearOpen, setConfirmClearOpen] = useState(false);
   const canManageData = account?.role === "admin" || account?.role === "parent";
 
   const load = useCallback(async () => {
@@ -200,6 +212,21 @@ export const ChildAnalyticsDrawer: React.FC<Props> = ({ student, onClose, onData
     }
   };
 
+  const purgeQuick = async () => {
+    if (!student) return;
+    setDeleting(true);
+    try {
+      await analyticsApi.purgeData(student.id, "Learning data reset for testing");
+      setDeleteText("");
+      await load();
+      onDataDeleted?.();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Deletion failed.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const summary = activity?.summary;
   const practicedSkills = (mastery?.skills ?? []).filter(skill => skill.plays > 0);
   const strongestSkill = [...practicedSkills].sort((left, right) => right.score - left.score)[0];
@@ -212,7 +239,11 @@ export const ChildAnalyticsDrawer: React.FC<Props> = ({ student, onClose, onData
     <Drawer
       isOpen={Boolean(student)}
       onClose={onClose}
-      title={student ? `${student.avatar ?? "🧒"} ${student.name}'s learning progress` : undefined}
+      title={
+        student
+          ? `${student.avatar && student.avatar.length <= 4 ? `${student.avatar} ` : ""}${student.name}'s learning progress`
+          : undefined
+      }
       widthClassName="w-full sm:w-[620px] lg:w-[760px]"
     >
       {loading ? <AnalyticsSkeleton /> : error && !mastery ? (
@@ -233,7 +264,7 @@ export const ChildAnalyticsDrawer: React.FC<Props> = ({ student, onClose, onData
           {error && <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">{error}</div>}
 
           <TabsContent value="overview" className="space-y-4 pt-4">
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
               {[
                 { label: "Rank", value: mastery?.rank.tierLabel ?? "Rookie", icon: Award },
                 { label: "Accuracy", value: summary?.accuracy == null ? "—" : `${Math.round(summary.accuracy * 100)}%`, icon: Target },
@@ -244,234 +275,299 @@ export const ChildAnalyticsDrawer: React.FC<Props> = ({ student, onClose, onData
                 { label: "Time learning", value: duration(summary?.timeOnTaskMs ?? 0), icon: CalendarDays },
                 { label: "Completed", value: String(summary?.lessonsCompleted ?? 0), icon: Award },
               ].map(item => (
-                <div key={item.label} className="rounded-2xl border border-[#E7E3F6] bg-white p-4">
-                  <item.icon size={17} className="mb-3 text-[#6D55D8]" />
-                  <p className="koda-admin-label">{item.label}</p>
-                  <p className="koda-admin-metric mt-1 text-[#0E0B55]">{item.value}</p>
+                <div key={item.label} className="rounded-xl border border-[#E7E3F6] bg-white p-3 shadow-[0_2px_8px_rgba(83,74,183,0.03)] dark:border-white/10 dark:bg-[#161B2E]">
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#6D6997] dark:text-[#9A94B8]">{item.label}</span>
+                    <item.icon size={13} className="shrink-0 text-[#6D55D8] dark:text-[#BEACFF]" />
+                  </div>
+                  <p className="mt-1 text-sm font-extrabold tracking-tight text-[#0E0B55] dark:text-[#EDECF8]">{item.value}</p>
                 </div>
               ))}
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4">
-                <p className="koda-admin-label text-emerald-700">Growing strength</p>
-                <p className="mt-1 text-sm font-semibold text-emerald-950">
+            <div className="grid gap-2.5 sm:grid-cols-2">
+              <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/60 p-3 dark:border-emerald-500/20 dark:bg-emerald-500/10">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Growing strength</p>
+                <p className="mt-0.5 text-xs font-bold text-emerald-950 dark:text-emerald-200">
                   {strongestSkill?.skillLabel || "Complete an activity to reveal a strength"}
                 </p>
                 {strongestSkill && (
-                  <p className="mt-1 text-xs text-emerald-700">
+                  <p className="mt-0.5 text-[10px] font-medium text-emerald-700 dark:text-emerald-400">
                     {Math.round(strongestSkill.score * 100)}% evidence score · {strongestSkill.plays} tries
                   </p>
                 )}
               </div>
-              <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4">
-                <p className="koda-admin-label text-amber-700">Needs support</p>
-                <p className="mt-1 text-sm font-semibold text-amber-950">
+              <div className="rounded-xl border border-amber-200/80 bg-amber-50/60 p-3 dark:border-amber-500/20 dark:bg-amber-500/10">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">Needs support</p>
+                <p className="mt-0.5 text-xs font-bold text-amber-950 dark:text-amber-200">
                   {supportSkills.length
                     ? supportSkills.map(skill => skill.skillLabel).join(", ")
                     : "No urgent review is due"}
                 </p>
-                <p className="mt-1 text-xs text-amber-700">
+                <p className="mt-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-400">
                   Based on verified accuracy and review due dates.
                 </p>
               </div>
             </div>
             {(activity?.xpBreakdown?.length ?? 0) > 0 && (
-              <div className="rounded-2xl border border-[#E7E3F6] bg-white p-4">
+              <div className="rounded-xl border border-[#E7E3F6] bg-white p-3 dark:border-white/10 dark:bg-[#161B2E]">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="koda-admin-section-title">XP evidence</p>
-                    <p className="koda-admin-secondary mt-1">Where earned XP came from</p>
+                    <p className="text-xs font-bold text-[#0E0B55] dark:text-[#EDECF8]">XP evidence</p>
+                    <p className="text-[10px] text-[#6D6997] dark:text-[#9A94B8]">Where earned XP came from</p>
                   </div>
                   <Badge variant="warning">{summary?.xpEarned ?? 0} XP</Badge>
                 </div>
-                <div className="mt-3 space-y-2">
+                <div className="mt-2.5 space-y-1.5">
                   {activity!.xpBreakdown.slice(0, 5).map(row => (
-                    <div key={`${row.releaseId}:${row.skillId}`} className="flex items-center justify-between gap-3 rounded-xl bg-[#FAF9FF] px-3 py-2">
-                      <span className="truncate text-xs font-semibold text-[#17143D]">{row.skillLabel}</span>
-                      <span className="shrink-0 text-xs font-semibold text-[#6D55D8]">
-                        {row.correctXp} answers + {row.firstTryXp} first try + {row.completionXp} completion = {row.totalXp} XP
+                    <div key={`${row.releaseId}:${row.skillId}`} className="flex items-center justify-between gap-3 rounded-lg bg-[#FAF9FF] px-2.5 py-1.5 dark:bg-white/5">
+                      <span className="truncate text-xs font-semibold text-[#17143D] dark:text-[#DEDCF0]">{row.skillLabel}</span>
+                      <span className="shrink-0 text-[11px] font-bold text-[#6D55D8] dark:text-[#BEACFF]">
+                        {row.correctXp} correct + {row.firstTryXp} bonus + {row.completionXp} comp = {row.totalXp} XP
                       </span>
                     </div>
                   ))}
                 </div>
               </div>
             )}
-            <div className="rounded-2xl border border-[#E7E3F6] bg-[#FAF9FF] p-4 sm:p-5">
+            <div className="rounded-xl border border-[#E7E3F6] bg-[#FAF9FF] p-3.5 dark:border-white/10 dark:bg-[#161B2E]">
               <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="koda-admin-section-title">Proficiency map</p>
-                  <p className="koda-admin-secondary mt-1">
+                <div className="min-w-0">
+                  <p className="text-xs font-black tracking-tight text-[#0E0B55] dark:text-[#EDECF8]">Proficiency map</p>
+                  <p className="mt-0.5 text-[11px] font-medium text-[#6D6997] dark:text-[#9A94B8]">
                     {mastery?.rank.proficientPlus ?? 0} proficient or mastered of {mastery?.rank.assignedSkills ?? 0} assigned skills
                   </p>
                 </div>
                 <Badge variant="success">{mastery?.rank.mastered ?? 0} mastered</Badge>
               </div>
-              <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#E9E5F6]">
+              <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-[#E9E5F6] dark:bg-white/10">
                 <div
-                  className="h-full rounded-full bg-[#6D55D8] transition-all"
+                  className="h-full rounded-full bg-[#6D55D8] transition-all dark:bg-[#BEACFF]"
                   style={{ width: `${Math.round((mastery?.rank.progressToNext ?? 0) * 100)}%` }}
                 />
               </div>
-              <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-                <div><p className="text-lg font-semibold text-[#0E0B55]">{summary?.lessonsCompleted ?? 0}</p><p className="koda-admin-label">Lessons</p></div>
-                <div><p className="text-lg font-semibold text-[#0E0B55]">{summary?.activeDays ?? 0}</p><p className="koda-admin-label">Active days</p></div>
-                <div><p className="text-lg font-semibold text-[#0E0B55]">{summary?.hints ?? 0}</p><p className="koda-admin-label">Hints used</p></div>
+              <div className="mt-3 flex items-center justify-around border-t border-[#E7E3F6]/60 pt-2.5 text-center dark:border-white/10">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-sm font-extrabold text-[#0E0B55] dark:text-[#EDECF8]">{summary?.lessonsCompleted ?? 0}</span>
+                  <span className="text-[10px] font-bold text-[#6D6997] dark:text-[#9A94B8]">Lessons</span>
+                </div>
+                <div className="h-3 w-px bg-[#E7E3F6] dark:bg-white/10" />
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-sm font-extrabold text-[#0E0B55] dark:text-[#EDECF8]">{summary?.activeDays ?? 0}</span>
+                  <span className="text-[10px] font-bold text-[#6D6997] dark:text-[#9A94B8]">Active days</span>
+                </div>
+                <div className="h-3 w-px bg-[#E7E3F6] dark:bg-white/10" />
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-sm font-extrabold text-[#0E0B55] dark:text-[#EDECF8]">{summary?.hints ?? 0}</span>
+                  <span className="text-[10px] font-bold text-[#6D6997] dark:text-[#9A94B8]">Hints used</span>
+                </div>
               </div>
             </div>
           </TabsContent>
 
-          <TabsContent value="skills" className="space-y-3 pt-4">
-            <div className="grid gap-2 sm:grid-cols-2">
-              <div className="relative">
-                <Search size={15} className="pointer-events-none absolute left-3 top-3 text-[#9893B6]" />
-                <Input value={search} onChange={event => setSearch(event.target.value)} placeholder="Find a skill…" className="pl-9" />
+          <TabsContent value="skills" className="space-y-2.5 pt-3">
+            <div className="grid gap-1.5 sm:grid-cols-3 xl:grid-cols-5">
+              <div className="relative xl:col-span-1">
+                <Search size={14} className="pointer-events-none absolute left-2.5 top-2.5 text-[#9893B6]" />
+                <Input value={search} onChange={event => setSearch(event.target.value)} placeholder="Find skill…" className="h-8 pl-8 text-xs" />
               </div>
-              <Select value={level} onChange={event => setLevel(event.target.value)} aria-label="Mastery level">
+              <Select value={level} onChange={event => setLevel(event.target.value)} aria-label="Mastery level" className="h-8 text-xs">
                 <option value="all">All levels</option>
                 {LEVELS.map(value => <option key={value} value={value}>{LEVEL_LABEL[value]}</option>)}
               </Select>
-              <Select value={grade} onChange={event => setGrade(event.target.value)} aria-label="Grade">
+              <Select value={grade} onChange={event => setGrade(event.target.value)} aria-label="Grade" className="h-8 text-xs">
                 <option value="all">All grades</option>
                 {grades.map(value => <option key={value} value={value}>{value}</option>)}
               </Select>
-              <Select value={subject} onChange={event => setSubject(event.target.value)} aria-label="Subject">
+              <Select value={subject} onChange={event => setSubject(event.target.value)} aria-label="Subject" className="h-8 text-xs">
                 <option value="all">All subjects</option>
                 {subjects.map(value => <option key={value} value={value}>{value}</option>)}
               </Select>
-              <Select value={assignment} onChange={event => setAssignment(event.target.value)} aria-label="Assignment">
+              <Select value={assignment} onChange={event => setAssignment(event.target.value)} aria-label="Assignment" className="h-8 text-xs">
                 <option value="all">All assignments</option>
                 {assignments.map((value, index) => <option key={value} value={value}>Assignment {index + 1}</option>)}
               </Select>
             </div>
-            <p className="koda-admin-secondary">{filteredSkills.length} skills</p>
-            <div className="space-y-2">
+            <p className="text-[11px] font-semibold text-[#6D6997] dark:text-[#9A94B8]">{filteredSkills.length} skills</p>
+            <div className="space-y-1.5">
               {filteredSkills.map(skill => (
-                <div key={`${skill.curriculumId}-${skill.skillId}`} className="rounded-xl border border-[#E7E3F6] bg-white p-3.5">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-[#17143D]">{skill.skillLabel}</p>
-                      <p className="koda-admin-secondary mt-1">
+                <div key={`${skill.curriculumId}-${skill.skillId}`} className="rounded-lg border border-[#E7E3F6] bg-white p-2.5 shadow-[0_1px_4px_rgba(83,74,183,0.02)] dark:border-white/10 dark:bg-[#161B2E]">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-xs font-bold text-[#17143D] dark:text-[#EDECF8]">{skill.skillLabel}</p>
+                      <p className="mt-0.5 text-[10px] font-medium text-[#6D6997] dark:text-[#9A94B8]">
                         {skill.plays} tries · {skill.sessions} sessions · {Math.round(skill.score * 100)}% score
                       </p>
                     </div>
                     <Badge variant={LEVEL_BADGE[skill.level]}>{LEVEL_LABEL[skill.level]}</Badge>
                   </div>
                   {skill.toNextLevel.length > 0 && (
-                    <p className="mt-2 text-xs text-[#6D6997]">Next: {skill.toNextLevel.join(" · ")}</p>
+                    <p className="mt-1 text-[10px] font-medium text-[#6D6997] dark:text-[#9A94B8]">Next: {skill.toNextLevel.join(" · ")}</p>
                   )}
                 </div>
               ))}
-              {filteredSkills.length === 0 && <div className="rounded-xl bg-[#FAF9FF] p-8 text-center koda-admin-secondary">No skills match these filters.</div>}
+              {filteredSkills.length === 0 && <div className="rounded-lg bg-[#FAF9FF] p-6 text-center text-xs font-semibold text-[#6D6997] dark:bg-white/5 dark:text-[#9A94B8]">No skills match these filters.</div>}
             </div>
           </TabsContent>
 
-          <TabsContent value="activity" className="space-y-3 pt-4">
-            <div className="flex items-center justify-between gap-3">
-              <p className="koda-admin-secondary">{filteredEvents.length} recent events</p>
-              <Select value={eventType} onChange={event => setEventType(event.target.value)} className="w-44" aria-label="Event type">
+          <TabsContent value="activity" className="space-y-2.5 pt-3">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-[11px] font-semibold text-[#6D6997] dark:text-[#9A94B8]">{filteredEvents.length} recent events</p>
+              <Select value={eventType} onChange={event => setEventType(event.target.value)} className="h-8 w-40 text-xs" aria-label="Event type">
                 <option value="all">All activity</option>
-                {eventTypes.map(value => <option key={value} value={value}>{value.replaceAll("_", " ")}</option>)}
+                {eventTypes.map(value => <option key={value} value={value}>{formatLabel(value)}</option>)}
               </Select>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {filteredEvents.map(event => (
-                <div key={event.id} className="flex items-start gap-3 rounded-xl border border-[#E7E3F6] bg-white p-3">
-                  <div className="mt-0.5 rounded-lg bg-[#F1EDFF] p-2 text-[#6D55D8]"><Activity size={15} /></div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-sm font-semibold capitalize text-[#17143D]">{(event.eventType ?? "activity").replaceAll("_", " ")}</p>
-                      {event.outcome && <Badge variant={event.outcome === "correct" ? "success" : "warning"}>{event.outcome}</Badge>}
-                      {!event.verified && <Badge variant="secondary">Unverified</Badge>}
+                <div key={event.id} className="flex items-center gap-2.5 rounded-lg border border-[#E7E3F6] bg-white px-2.5 py-1.5 shadow-[0_1px_4px_rgba(83,74,183,0.02)] dark:border-white/10 dark:bg-[#161B2E]">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#F1EDFF] text-[#6D55D8] dark:bg-white/10 dark:text-[#BEACFF]">
+                    <Activity size={13} />
+                  </div>
+                  <div className="min-w-0 flex-1 flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-bold text-[#17143D] dark:text-[#EDECF8]">
+                          {formatLabel(event.eventType ?? "activity")}
+                        </span>
+                        {event.outcome && (
+                          <Badge variant={event.outcome === "correct" ? "success" : "warning"}>
+                            {event.outcome}
+                          </Badge>
+                        )}
+                        {!event.verified && <Badge variant="secondary">Unverified</Badge>}
+                      </div>
+                      <p className="mt-0.5 truncate text-[10px] font-medium text-[#6D6997] dark:text-[#9A94B8]">
+                        {formatLabel(event.technique || event.skillId || "Learning session")}
+                      </p>
                     </div>
-                    <p className="koda-admin-secondary mt-1">{event.technique ?? event.skillId ?? "Learning session"} · {compactDate(event.occurredAt)}</p>
+                    <span className="shrink-0 text-[10px] font-medium text-[#9893B6] dark:text-[#8882AC]">
+                      {compactDate(event.occurredAt)}
+                    </span>
                   </div>
                 </div>
               ))}
-              {filteredEvents.length === 0 && <div className="rounded-xl bg-[#FAF9FF] p-8 text-center koda-admin-secondary">No activity recorded yet.</div>}
+              {filteredEvents.length === 0 && (
+                <div className="rounded-lg bg-[#FAF9FF] p-6 text-center text-xs font-semibold text-[#6D6997] dark:bg-white/5 dark:text-[#9A94B8]">
+                  No activity recorded yet.
+                </div>
+              )}
             </div>
           </TabsContent>
 
-          <TabsContent value="recommendations" className="space-y-3 pt-4">
-            {(recommendations?.runs ?? []).map(run => (
-              <div key={run.runId} className="rounded-2xl border border-[#E7E3F6] bg-white p-4">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <Sparkles size={16} className="text-[#6D55D8]" />
-                    <p className="text-sm font-semibold text-[#17143D]">Recommendation set {run.sequence}</p>
+          <TabsContent value="recommendations" className="space-y-2.5 pt-3">
+            {(recommendations?.runs ?? []).map((run, idx) => (
+              <div key={run.runId || idx} className="rounded-xl border border-[#E7E3F6] bg-white p-2.5 dark:border-white/10 dark:bg-[#161B2E]">
+                <div className="flex items-center justify-between gap-2 border-b border-[#E7E3F6]/50 pb-2 dark:border-white/10">
+                  <div className="flex items-center gap-1.5">
+                    <Sparkles size={14} className="text-[#6D55D8] dark:text-[#BEACFF]" />
+                    <p className="text-xs font-extrabold text-[#17143D] dark:text-[#EDECF8]">
+                      Recommendation Set {run.sequence || idx + 1}
+                    </p>
                   </div>
-                  <p className="koda-admin-secondary">{compactDate(run.createdAt)}</p>
+                  <p className="text-[10px] font-semibold text-[#6D6997] dark:text-[#9A94B8]">{compactDate(run.createdAt)}</p>
                 </div>
-                <div className="mt-3 space-y-2">
+                <div className="mt-2 space-y-1">
                   {run.served.map((item, index) => (
-                    <div key={`${item.skillId}-${index}`} className="rounded-xl bg-[#FAF9FF] p-3">
-                      <p className="text-sm font-medium text-[#17143D]">{item.skillLabel ?? item.skillId ?? "Recommended skill"}</p>
-                      <p className="koda-admin-secondary mt-1">{item.reason ?? "Selected from the learner's current progression state."}</p>
+                    <div key={`${item.skillId}-${index}`} className="flex items-start gap-2 rounded-lg bg-[#FAF9FF] px-2.5 py-1.5 dark:bg-white/5">
+                      <div className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#6D55D8] dark:bg-[#BEACFF]" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-bold text-[#17143D] dark:text-[#EDECF8]">
+                          {formatLabel(item.skillLabel ?? item.skillId ?? "Recommended skill")}
+                        </p>
+                        <p className="mt-0.5 text-[10px] font-medium text-[#6D6997] dark:text-[#9A94B8]">
+                          {item.reason ?? "Selected from the learner's current progression state."}
+                        </p>
+                      </div>
                     </div>
                   ))}
                 </div>
                 {run.excluded.length > 0 && (
-                  <details className="mt-3 text-xs text-[#6D6997]">
-                    <summary className="cursor-pointer font-medium">Skipped candidates ({run.excluded.length})</summary>
-                    <div className="mt-2 space-y-1">
-                      {run.excluded.map((item, index) => <p key={`${item.skillId}-${index}`}>{item.skillLabel ?? item.skillId}: {item.reason}</p>)}
+                  <details className="mt-2 text-[10px] font-medium text-[#6D6997] dark:text-[#9A94B8]">
+                    <summary className="cursor-pointer font-bold hover:text-[#534AB7]">Skipped candidates ({run.excluded.length})</summary>
+                    <div className="mt-1 space-y-0.5 pl-2 border-l border-[#E7E3F6] dark:border-white/10">
+                      {run.excluded.map((item, index) => (
+                        <p key={`${item.skillId}-${index}`}>
+                          <strong className="text-[#17143D] dark:text-[#DEDCF0]">{formatLabel(item.skillLabel ?? item.skillId)}:</strong> {item.reason}
+                        </p>
+                      ))}
                     </div>
                   </details>
                 )}
                 {run.decisions.filter(decision => decision.action === "skipped").map((decision, index) => (
-                  <div key={`${decision.skill_id}-${index}`} className="mt-3 flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+                  <div key={`${decision.skill_id}-${index}`} className="mt-1.5 flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-2 py-1">
                     <Badge variant="warning">Skipped</Badge>
-                    <p className="text-xs text-amber-800">
-                      {decision.skill_id ?? "Recommended skill"} · {compactDate(decision.occurred_at)}
+                    <p className="text-[10px] font-semibold text-amber-800">
+                      {formatLabel(decision.skill_id ?? "Recommended skill")} · {compactDate(decision.occurred_at)}
                     </p>
                   </div>
                 ))}
-                <p className="mt-3 text-[10px] uppercase tracking-wider text-[#9893B6]">Scoring r{run.scoringRevision} · Engine {run.engineRevision}</p>
               </div>
             ))}
             {(recommendations?.runs.length ?? 0) === 0 && (
-              <div className="rounded-xl bg-[#FAF9FF] p-8 text-center">
-                <Lightbulb size={22} className="mx-auto mb-2 text-[#8A7AE6]" />
-                <p className="text-sm font-semibold text-[#17143D]">No recommendations yet</p>
-                <p className="koda-admin-secondary mt-1">A recommendation history appears after the learner starts an assigned path.</p>
+              <div className="rounded-lg bg-[#FAF9FF] p-6 text-center dark:bg-white/5">
+                <Lightbulb size={20} className="mx-auto mb-1.5 text-[#8A7AE6]" />
+                <p className="text-xs font-bold text-[#17143D] dark:text-[#EDECF8]">No recommendations yet</p>
+                <p className="mt-0.5 text-[10px] font-medium text-[#6D6997] dark:text-[#9A94B8]">A recommendation history appears after the learner starts an assigned path.</p>
               </div>
             )}
           </TabsContent>
 
-          <TabsContent value="data" className="space-y-4 pt-4">
-            <p className="koda-admin-secondary">
+          <TabsContent value="data" className="space-y-3 pt-3">
+            <p className="text-xs font-medium leading-relaxed text-[#6D6997] dark:text-[#9A94B8]">
               Learning data is retained while this child profile exists. Export and deletion actions are recorded in the audit trail.
             </p>
-            <div className="rounded-2xl border border-[#E7E3F6] bg-white p-4 sm:p-5">
-              <div className="flex items-start gap-3">
-                <Download size={18} className="mt-0.5 text-[#6D55D8]" />
-                <div className="flex-1">
-                  <p className="koda-admin-section-title">Export learning data</p>
-                  <p className="koda-admin-secondary mt-1">Download events, mastery, assignments, placement, and recommendation history as JSON.</p>
-                  <Button className="mt-4" size="sm" variant="outline" loading={exporting} loadingText="Preparing…" onClick={downloadExport}>
-                    <Download size={14} /> Export JSON
-                  </Button>
-                </div>
-              </div>
-            </div>
-            <div className="rounded-2xl border border-rose-200 bg-rose-50/60 p-4 sm:p-5">
-              <div className="flex items-start gap-3">
-                <ShieldAlert size={18} className="mt-0.5 text-rose-600" />
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-rose-900">Delete learning history</p>
-                  <p className="mt-1 text-xs leading-5 text-rose-700">This permanently removes events, mastery, sessions, recommendations, assignments, and placements. The child profile stays available.</p>
-                  <label className="mt-4 block text-xs font-medium text-rose-900" htmlFor="analytics-delete-confirm">Type DELETE to confirm</label>
-                  <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-                    <Input id="analytics-delete-confirm" value={deleteText} onChange={event => setDeleteText(event.target.value)} placeholder="DELETE" />
-                    <Button variant="destructive" loading={deleting} loadingText="Deleting…" disabled={deleteText !== "DELETE"} onClick={purge}>
-                      <Trash2 size={14} /> Delete history
-                    </Button>
+            <div className="rounded-xl border border-[#E7E3F6] bg-white p-3.5 dark:border-white/10 dark:bg-[#161B2E]">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#F1EDFF] text-[#6D55D8] dark:bg-white/10 dark:text-[#BEACFF]">
+                    <Download size={15} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-[#0E0B55] dark:text-[#EDECF8]">Export learning data</p>
+                    <p className="mt-0.5 truncate text-[10px] font-medium text-[#6D6997] dark:text-[#9A94B8]">Download events, mastery, assignments, and history as JSON.</p>
                   </div>
                 </div>
+                <Button size="xs" variant="outline" loading={exporting} loadingText="Exporting…" onClick={downloadExport} className="shrink-0 rounded-lg px-2.5 py-1 text-xs font-bold dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/10">
+                  <Download size={12} /> Export JSON
+                </Button>
+              </div>
+            </div>
+            <div className="rounded-xl border border-rose-200/80 bg-rose-50/50 p-3.5 dark:border-rose-500/20 dark:bg-rose-500/10">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400">
+                    <ShieldAlert size={15} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-rose-950 dark:text-rose-200">Clear learning history</p>
+                    <p className="mt-0.5 truncate text-[10px] font-medium text-rose-700 dark:text-rose-300">Permanently reset events, mastery, and attempts.</p>
+                  </div>
+                </div>
+                <Button
+                  variant="destructive"
+                  size="xs"
+                  loading={deleting}
+                  loadingText="Clearing…"
+                  onClick={() => setConfirmClearOpen(true)}
+                  className="shrink-0 rounded-lg px-3 py-1 text-xs font-extrabold"
+                >
+                  <Trash2 size={12} /> Clear history
+                </Button>
               </div>
             </div>
           </TabsContent>
         </Tabs>
       )}
+      <ConfirmModal
+        isOpen={confirmClearOpen}
+        onClose={() => setConfirmClearOpen(false)}
+        onConfirm={purgeQuick}
+        title={`Clear logs for ${student?.name}?`}
+        description="This will clear all learning events, attempts, XP, and mastery data so you can re-test fresh."
+        confirmText="Clear logs"
+        cancelText="Cancel"
+        variant="warning"
+      />
     </Drawer>
   );
 };

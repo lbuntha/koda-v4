@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-labelledby="title description">
+  <title id="title">Column Subtraction</title>
+  <desc id="description">Two numbers stacked for column subtraction.</desc>
+  <!-- Transparent background on purpose: every surface that shows this supplies its own
+       card. Shared 200x200 viewBox so the whole technique set sits at one optical weight. -->
+  <defs>
+    <linearGradient id="g" x1="30" y1="30" x2="170" y2="175" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF8A9B"/><stop offset="1" stop-color="#E03A5E"/>
+    </linearGradient>
+    <filter id="s" x="-25%" y="-25%" width="150%" height="160%">
+      <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#B02745" flood-opacity=".22"/>
+    </filter>
+  </defs>
+  <g filter="url(#s)">
+    <text x="148" y="62" fill="#B02745" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif" font-size="42" font-weight="900" text-anchor="end">37</text>
+    <text x="148" y="102" fill="#B02745" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif" font-size="42" font-weight="900" text-anchor="end">14</text>
+    <text x="56" y="102" fill="#E03A5E" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif" font-size="40" font-weight="900">−</text>
+    <path d="M48 118h104" stroke="#E03A5E" stroke-width="7" stroke-linecap="round"/>
+    <rect x="108" y="132" width="44" height="10" rx="5" fill="#E03A5E" opacity=".3"/>
+  </g>
+</svg>

@@ -35,7 +35,7 @@ export const SectionHeader: React.FC<Props> = ({ icon: Icon, title, subtitle, ac
       <button
         type="button"
         onClick={action.onClick}
-        className="hidden shrink-0 items-center gap-1 text-xs font-extrabold text-[#5C46DF] hover:underline sm:inline-flex dark:text-[#C3B4FF]"
+        className="inline-flex shrink-0 items-center gap-1 text-xs font-extrabold text-[#5C46DF] hover:underline dark:text-[#C3B4FF]"
       >
         {action.label} <ArrowRight size={13} />
       </button>

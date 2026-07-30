@@ -34,6 +34,8 @@ class SoundSynthesizer {
     const unlock = () => {
       const ctx = this.ctx;
       if (!ctx) return;
+      // Resuming can reject if the gesture wasn't one the browser accepts. Nothing to do:
+      // the next gesture re-runs this, and silence is a fine outcome for sound effects.
       ctx.resume().catch(() => {});
       try {
         const buffer = ctx.createBuffer(1, 1, 22050);

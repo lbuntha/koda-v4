@@ -17,6 +17,7 @@ import { multiplicationSchema } from "../components/studio/ai-generator/schemas/
 
 export const multiplication = defineTechnique({
   technique: CountingTechnique.MULTIPLICATION_ARRAY,
+  defaultThumbnailUrl: "/assets/components/multiplication-array.svg",
   label: "12. Koda Multiplication",
   icon: <Grid size={14} className="text-blue-600" />,
   defaultTargetCount: 5,

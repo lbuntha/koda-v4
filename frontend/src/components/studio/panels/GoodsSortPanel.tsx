@@ -211,7 +211,7 @@ export const GoodsSortPanel: React.FC<PanelProps> = ({ question, update }) => {
             <input
               type="range"
               min={2}
-              max={5}
+              max={6}
               value={rows}
               onChange={(e) => handleGridChange(Number(e.target.value), cols)}
               className="w-full accent-indigo-600"
@@ -224,7 +224,7 @@ export const GoodsSortPanel: React.FC<PanelProps> = ({ question, update }) => {
             <input
               type="range"
               min={2}
-              max={5}
+              max={6}
               value={cols}
               onChange={(e) => handleGridChange(rows, Number(e.target.value))}
               className="w-full accent-indigo-600"

@@ -17,6 +17,7 @@ import { subitizeSchema } from "../components/studio/ai-generator/schemas/subiti
 
 export const subitize = defineTechnique({
   technique: CountingTechnique.SUBITIZE,
+  defaultThumbnailUrl: "/assets/components/subitize.svg",
   label: "9. Subitize Flash",
   icon: <Eye size={14} className="text-violet-500" />,
   defaultTargetCount: 5,

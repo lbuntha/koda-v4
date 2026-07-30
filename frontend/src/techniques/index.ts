@@ -34,6 +34,9 @@ import { multiRowColumnSubtraction } from "./multiRowColumnSubtraction";
 import { columnMultiplication } from "./columnMultiplication";
 import { liquidSort } from "./liquidSort";
 import { goodsSort } from "./goodsSort";
+import { numberPath } from "./numberPath";
+import { storyProblemMat } from "./storyProblemMat";
+import { placeValueLab } from "./placeValueLab";
 
 /** Ordered exactly as the Studio picker lists them (1..16). */
 export const ALL_TECHNIQUES: TechniqueManifest[] = [
@@ -60,6 +63,9 @@ export const ALL_TECHNIQUES: TechniqueManifest[] = [
   columnMultiplication,
   liquidSort,
   goodsSort,
+  numberPath,
+  storyProblemMat,
+  placeValueLab,
 ];
 
 // Loud in dev / logged in prod if a game is missing or double-registered.
@@ -90,7 +96,13 @@ export function resolveTechniqueThumbnail(
   technique: string | null | undefined,
   genericUrl = "/assets/owl-mascot.svg",
 ): ResolvedTechniqueThumbnail {
-  const authoredUrl = curriculumUrl?.trim();
+  let authoredUrl = curriculumUrl?.trim();
+
+  // If the stored URL is the generic owl mascot from old seed/cache, ignore it in favor of curriculum artwork
+  if (authoredUrl && (authoredUrl.includes("owl-mascot") || authoredUrl.includes("owl_mascot"))) {
+    authoredUrl = undefined;
+  }
+
   const componentDefaultUrl = defaultThumbnailForTechnique(technique);
 
   if (authoredUrl) {

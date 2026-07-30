@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { ClipboardList, Plus, Users } from "lucide-react";
+import { ArrowUpCircle, ClipboardList, Plus, Users } from "lucide-react";
 import { assignmentsApi, Assignment, AssignableStudent, ReleaseSummary } from "../api/assignments";
 import { curriculumApi, CurriculumSummary } from "../api/curriculum";
 import { Badge, Button, Card, Dialog, Label, Select, Skeleton } from "../components/ui";
@@ -9,6 +9,7 @@ export const AssignmentsPage: React.FC = () => {
   const [students, setStudents] = useState<AssignableStudent[]>([]);
   const [curricula, setCurricula] = useState<CurriculumSummary[]>([]);
   const [releases, setReleases] = useState<ReleaseSummary[]>([]);
+  const [latestRelease, setLatestRelease] = useState<Record<string, ReleaseSummary>>({});
   const [studentId, setStudentId] = useState("");
   const [curriculumId, setCurriculumId] = useState("");
   const [releaseId, setReleaseId] = useState("");
@@ -33,6 +34,20 @@ export const AssignmentsPage: React.FC = () => {
       setAssignments(assignmentResponse.assignments);
       setStudents(studentResponse.students);
       setCurricula(curriculumResponse.curricula.filter(item => item.status === "published"));
+      // Releases are immutable and assignments pin one, so a learner can sit on old content
+      // indefinitely. Knowing the newest release per curriculum is what lets a row say so.
+      const assignedCurricula = [...new Set(assignmentResponse.assignments.map(row => row.curriculumId))];
+      const latest = await Promise.all(assignedCurricula.map(async id => {
+        try {
+          const response = await curriculumApi.releases(id);
+          return [id, response.releases[0]] as const;
+        } catch {
+          return [id, undefined] as const;
+        }
+      }));
+      setLatestRelease(Object.fromEntries(
+        latest.filter((entry): entry is readonly [string, ReleaseSummary] => Boolean(entry[1])),
+      ));
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Unable to load assignments");
     } finally {
@@ -117,6 +132,19 @@ export const AssignmentsPage: React.FC = () => {
     }
   };
 
+  const upgradeRelease = async (item: Assignment, releaseSummary: ReleaseSummary) => {
+    setUpdating(item.id);
+    setError(null);
+    try {
+      const updated = await assignmentsApi.setRelease(item.id, releaseSummary.releaseId);
+      setAssignments(current => current.map(row => row.id === item.id ? updated : row));
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Unable to update the release");
+    } finally {
+      setUpdating(null);
+    }
+  };
+
   const studentName = (id: string) => students.find(student => student.id === id)?.name || "Unknown student";
   const curriculumName = (id: string) => curricula.find(curriculum => curriculum.id === id)?.title || "Curriculum";
 
@@ -147,15 +175,32 @@ export const AssignmentsPage: React.FC = () => {
             <div className="hidden grid-cols-[1.1fr_1.4fr_1fr_100px_110px] gap-3 border-b border-[#E7E3F6] bg-[#FBFAFF] px-4 py-3 text-[10px] font-medium text-[#6D6997] md:grid">
               <span>Student</span><span>Curriculum</span><span>Release</span><span>Status</span><span />
             </div>
-            {assignments.map(item => (
-              <div key={item.id} className="grid gap-3 border-b border-[#EEEAF8] px-4 py-4 last:border-0 md:grid-cols-[1.1fr_1.4fr_1fr_100px_110px] md:items-center">
-                <div className="flex items-center gap-2"><span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F3F0FF] text-[#534AB7]"><Users size={14} /></span><span className="text-xs font-semibold text-[#0E0B55]">{studentName(item.studentId)}</span></div>
-                <span className="text-xs text-[#6D6997]">{curriculumName(item.curriculumId)}</span>
-                <span className="text-xs text-[#6D6997]">v{item.releaseId.slice(0, 8)} · Grade {item.gradeId}</span>
-                <Badge variant={item.status === "active" ? "success" : "secondary"}>{item.status}</Badge>
-                <Button variant="ghost" size="xs" loading={updating === item.id} onClick={() => void changeStatus(item)}>{item.status === "active" ? "Pause" : "Resume"}</Button>
-              </div>
-            ))}
+            {assignments.map(item => {
+              const newest = latestRelease[item.curriculumId];
+              const behind = newest && newest.releaseId !== item.releaseId;
+              return (
+                <div key={item.id} className="grid gap-3 border-b border-[#EEEAF8] px-4 py-4 last:border-0 md:grid-cols-[1.1fr_1.4fr_1fr_100px_110px] md:items-center">
+                  <div className="flex items-center gap-2"><span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F3F0FF] text-[#534AB7]"><Users size={14} /></span><span className="text-xs font-semibold text-[#0E0B55]">{studentName(item.studentId)}</span></div>
+                  <span className="text-xs text-[#6D6997]">{curriculumName(item.curriculumId)}</span>
+                  <div className="min-w-0">
+                    <span className="block text-xs text-[#6D6997]">v{item.releaseId.slice(0, 8)} · Grade {item.gradeId}</span>
+                    {behind && (
+                      <button
+                        type="button"
+                        onClick={() => void upgradeRelease(item, newest)}
+                        disabled={updating === item.id}
+                        className="mt-1 inline-flex cursor-pointer items-center gap-1 rounded-full border border-[#DCD5FA] bg-[#F3F0FF] px-2 py-0.5 text-[10px] font-semibold text-[#534AB7] transition-colors hover:bg-[#E9E3FF] disabled:opacity-60"
+                        title="This learner is on an older release. Published changes reach them only after this update."
+                      >
+                        <ArrowUpCircle size={11} /> Update to v{newest.revision}
+                      </button>
+                    )}
+                  </div>
+                  <Badge variant={item.status === "active" ? "success" : "secondary"}>{item.status}</Badge>
+                  <Button variant="ghost" size="xs" loading={updating === item.id} onClick={() => void changeStatus(item)}>{item.status === "active" ? "Pause" : "Resume"}</Button>
+                </div>
+              );
+            })}
           </Card>
         )}
       </div>

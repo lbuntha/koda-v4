@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-labelledby="title description">
+  <title id="title">Pattern</title>
+  <desc id="description">A repeating shape pattern with the next place empty.</desc>
+  <!-- Transparent background on purpose: every surface that shows this supplies its own
+       card. Shared 200x200 viewBox so the whole technique set sits at one optical weight. -->
+  <defs>
+    <linearGradient id="g" x1="30" y1="30" x2="170" y2="175" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9B86FF"/><stop offset="1" stop-color="#7A5CF0"/>
+    </linearGradient>
+    <filter id="s" x="-25%" y="-25%" width="150%" height="160%">
+      <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#5C46B8" flood-opacity=".22"/>
+    </filter>
+  </defs>
+  <g filter="url(#s)">
+    <circle cx="46" cy="100" r="13" fill="url(#g)"/>
+    <rect x="70" y="87" width="26" height="26" rx="7" fill="#F59E0B"/>
+    <circle cx="118" cy="100" r="13" fill="url(#g)"/>
+    <rect x="142" y="87" width="26" height="26" rx="7" fill="#F59E0B"/>
+    <rect x="178" y="87" width="26" height="26" rx="7" fill="none" stroke="#5C46B8" stroke-width="4" stroke-dasharray="6 5"/>
+  </g>
+</svg>

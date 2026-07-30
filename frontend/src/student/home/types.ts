@@ -1,6 +1,7 @@
 import type {
   CourseMode,
   CourseQueueItem,
+  CurriculumPath,
   StudentActivitySignal,
   StudentProgress,
   TodayCourse,
@@ -13,6 +14,8 @@ export interface StudentHomeProps {
   course: TodayCourse;
   progress: StudentProgress | null;
   activitySignal: StudentActivitySignal | null;
+  /** The assigned curriculum walked A→Z, with each skill's status. */
+  paths: CurriculumPath[];
   replayItems: CourseQueueItem[];
   levelUp: LevelUp | null;
   studentName: string;

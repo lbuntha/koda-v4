@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-labelledby="title description">
+  <title id="title">Addition Sandbox</title>
+  <desc id="description">Two groups of objects being joined together.</desc>
+  <!-- Transparent background on purpose: every surface that shows this supplies its own
+       card. Shared 200x200 viewBox so the whole technique set sits at one optical weight. -->
+  <defs>
+    <linearGradient id="g" x1="30" y1="30" x2="170" y2="175" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5FE0A6"/><stop offset="1" stop-color="#16A34A"/>
+    </linearGradient>
+    <filter id="s" x="-25%" y="-25%" width="150%" height="160%">
+      <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#0E7A48" flood-opacity=".22"/>
+    </filter>
+  </defs>
+  <g filter="url(#s)">
+    <circle cx="58" cy="96" r="10" fill="url(#g)"/>
+    <circle cx="34" cy="96" r="10" fill="url(#g)"/>
+    <circle cx="82" cy="96" r="10" fill="url(#g)"/>
+    <circle cx="146" cy="96" r="10" fill="#F59E0B"/>
+    <circle cx="122" cy="96" r="10" fill="#F59E0B"/>
+    <circle cx="170" cy="96" r="10" fill="#F59E0B"/>
+    <text x="100" y="110" fill="#16A34A" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif" font-size="38" font-weight="900" text-anchor="middle">+</text>
+  </g>
+</svg>

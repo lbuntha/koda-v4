@@ -26,7 +26,10 @@ export enum CountingTechnique {
   SUBTRACTION_COLUMN_MULTI = "SUBTRACTION_COLUMN_MULTI",
   MULTIPLICATION_COLUMN = "MULTIPLICATION_COLUMN",
   LIQUID_SORT = "LIQUID_SORT",
-  GOODS_SORT = "GOODS_SORT"
+  GOODS_SORT = "GOODS_SORT",
+  NUMBER_PATH = "NUMBER_PATH",
+  STORY_PROBLEM_MAT = "STORY_PROBLEM_MAT",
+  PLACE_VALUE_LAB = "PLACE_VALUE_LAB"
 }
 
 export interface CountableObject {
@@ -99,6 +102,8 @@ export interface CountingQuestion {
    */
   difficulty?: "easy" | "medium" | "hard";
   config: {
+    /** Authored curriculum level used by multi-level game canvases such as Liquid Sort. */
+    levelId?: string;
     assetType?: string;
     customSvgMarkup?: string;
     customSvgAssetId?: string;
@@ -170,6 +175,25 @@ export interface CountingQuestion {
      * the authored problem's digit shape and carrying behaviour.
      */
     columnChallenges?: { num1: number; num2: number }[];
+    // Number Path & 120 Chart
+    numberChartView?: "path" | "circle" | "stepping_stones" | "maze" | "chart";
+    numberChartTask?: "count_forward" | "find_number" | "ten_more" | "ten_less";
+    numberChartDifficulty?: "guided" | "independent" | "challenge";
+    numberChartStart?: number;
+    numberChartEnd?: number;
+    storyProblemType?: "add_to" | "take_from" | "put_together" | "take_apart" | "compare" | "three_addends";
+    storyUnknown?: "result" | "change" | "start" | "part";
+    storyStart?: number;
+    storyChange?: number;
+    storyPart2?: number;
+    storyPart3?: number;
+    storyScene?: "park" | "picnic" | "pond" | "space" | "classroom";
+    storyCharacterName?: string;
+    storyChoices?: number[];
+    placeValueTask?: "build_number" | "read_number" | "regroup_ones";
+    placeValueDifficulty?: "guided" | "independent";
+    placeValueTarget?: number;
+    placeValueShowExpanded?: boolean;
     // Flexible Canvas features
     flexibleMode?: "multichoice" | "textinput" | "dragmatch" | "tapcount";
     flexibleBgStyle?: "clean" | "board" | "grid" | "stars" | "meadow";

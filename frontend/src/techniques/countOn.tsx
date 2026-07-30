@@ -17,6 +17,7 @@ import { countOnSchema } from "../components/studio/ai-generator/schemas/countOn
 
 export const countOn = defineTechnique({
   technique: CountingTechnique.COUNT_ON,
+  defaultThumbnailUrl: "/assets/components/count-on.svg",
   label: "5. Count On",
   icon: <PlusCircle size={14} className="text-purple-500" />,
   defaultTargetCount: 8,

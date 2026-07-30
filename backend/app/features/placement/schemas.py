@@ -26,7 +26,21 @@ class AssignmentIn(BaseModel):
 
 
 class AssignmentStatusIn(BaseModel):
-    status: Literal["active", "paused", "completed", "archived"]
+    """Both edits an adult may make to a live assignment.
+
+    `release_id` is the explicit upgrade path required by docs/progression-design.md §13.3:
+    releases stay immutable, so newly published content (a skill's artwork, a new question)
+    only reaches a learner when an authorized adult moves the assignment onto it. Historical
+    events keep the release that served them.
+    """
+
+    status: Literal["active", "paused", "completed", "archived"] | None = None
+    release_id: str | None = Field(default=None, min_length=1, max_length=120)
+
+    @field_validator("release_id")
+    @classmethod
+    def clean_release_id(cls, value: str | None) -> str | None:
+        return value.strip() if value else None
 
 
 class PlacementSubmitIn(BaseModel):

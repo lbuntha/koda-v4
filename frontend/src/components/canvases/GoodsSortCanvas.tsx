@@ -489,9 +489,42 @@ export const GoodsSortCanvas: React.FC<CanvasProps> = ({
   );
 
   const getGridColsClass = (cols: number) => {
-    if (cols <= 3) return "grid-cols-3 max-w-lg";
-    if (cols <= 4) return "grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 max-w-2xl";
-    return "grid-cols-3 sm:grid-cols-4 md:grid-cols-5 max-w-4xl";
+    if (cols === 2) return "grid-cols-2";
+    if (cols === 3) return "grid-cols-3";
+    if (cols === 4) return "grid-cols-4";
+    if (cols === 5) return "grid-cols-5";
+    if (cols >= 6) return "grid-cols-6";
+    return "grid-cols-3";
+  };
+
+  const getDynamicItemStyles = (cols: number) => {
+    if (cols <= 3) {
+      return {
+        svgClass: "w-9 xs:w-11 sm:w-13 md:w-16 h-9 xs:h-11 sm:h-13 md:h-16 filter drop-shadow-md",
+        emojiClass: "text-3xl xs:text-4xl sm:text-5xl md:text-6xl select-none filter drop-shadow-md transform hover:scale-105 transition-transform",
+        stepX: 14,
+      };
+    }
+    if (cols === 4) {
+      return {
+        svgClass: "w-7 xs:w-9 sm:w-11 md:w-13 h-7 xs:h-9 sm:h-11 md:h-13 filter drop-shadow-md",
+        emojiClass: "text-2xl xs:text-3xl sm:text-4xl md:text-5xl select-none filter drop-shadow-md transform hover:scale-105 transition-transform",
+        stepX: 10,
+      };
+    }
+    if (cols === 5) {
+      return {
+        svgClass: "w-5 xs:w-7 sm:w-9 md:w-11 h-5 xs:h-7 sm:h-9 md:h-11 filter drop-shadow-md",
+        emojiClass: "text-xl xs:text-2xl sm:text-3xl md:text-4xl select-none filter drop-shadow-md transform hover:scale-105 transition-transform",
+        stepX: 7,
+      };
+    }
+    // cols >= 6
+    return {
+      svgClass: "w-4.5 xs:w-6 sm:w-7 md:w-9 h-4.5 xs:h-6 sm:h-7 md:h-9 filter drop-shadow-md",
+      emojiClass: "text-lg xs:text-xl sm:text-2xl md:text-3xl select-none filter drop-shadow-md transform hover:scale-105 transition-transform",
+      stepX: 5,
+    };
   };
 
   return (
@@ -599,12 +632,12 @@ export const GoodsSortCanvas: React.FC<CanvasProps> = ({
           return null;
         })()}
 
-        {/* Goods Shelf Grid Matrix - Compact 100% Fluid Responsive Warm Light Oak Bookcase Cabinet */}
-        <div className="z-10 my-auto w-full max-w-[min(100%,50vh)] aspect-square p-1.5 sm:p-2.5 rounded-xl bg-[#D89454] border-4 sm:border-8 border-[#C48042] shadow-2xl flex flex-col justify-center items-center relative overflow-visible">
+        {/* Goods Shelf Grid Matrix - Fluid Responsive Bookcase Cabinet */}
+        <div className="z-10 my-auto w-full max-w-[min(100%,48vh)] sm:max-w-[min(100%,58vh)] md:max-w-[min(100%,66vh)] lg:max-w-[min(100%,70vh)] aspect-square p-0.5 sm:p-2.5 rounded-2xl bg-[#D89454] border-1 sm:border-5 border-[#C48042] shadow-2xl flex flex-col justify-center items-center relative overflow-visible">
           
           {/* LAYER 1: Recessed Cubby Cavity Backboards & Wooden Floor Planks */}
           <div
-            className={`grid w-full h-full gap-1.5 sm:gap-2 bg-[#D89454] p-0.5 justify-items-center items-center ${getGridColsClass(
+            className={`grid w-full h-full gap-0.5 sm:gap-1.5 bg-[#D89454] p-0.5 justify-items-center items-center ${getGridColsClass(
               currentLevel.cols
             )}`}
           >
@@ -639,7 +672,7 @@ export const GoodsSortCanvas: React.FC<CanvasProps> = ({
                       : { y: 0, scale: 1 }
                   }
                   transition={{ type: "spring", stiffness: 380, damping: 26 }}
-                  className="relative flex aspect-square w-full max-w-[64px] xs:max-w-[76px] sm:max-w-[90px] md:max-w-[102px] flex-col justify-end items-center p-0.5 rounded-sm cursor-pointer transition-all z-0"
+                  className="relative flex aspect-square w-full h-full flex-col justify-end items-center p-0.5 rounded-sm cursor-pointer transition-all z-0"
                 >
                   {/* Recessed Dark Brown Cubby Cavity Backboard Background */}
                   <div
@@ -706,20 +739,22 @@ export const GoodsSortCanvas: React.FC<CanvasProps> = ({
 
           {/* LAYER 2: Foreground Items Grid Overlay (Unclipped Drag Layer Above All Backboards & Wooden Partitions) */}
           <div
-            className={`absolute inset-0 p-1.5 sm:p-2.5 pointer-events-none z-50 grid w-full h-full gap-1.5 sm:gap-2 justify-items-center items-center overflow-visible ${getGridColsClass(
+            className={`absolute inset-0 p-0.5 sm:p-2.5 pointer-events-none z-50 grid w-full h-full gap-0.5 sm:gap-1.5 justify-items-center items-center overflow-visible ${getGridColsClass(
               currentLevel.cols
             )}`}
           >
             {shelves.map((shelf) => {
               const isSelected = selectedShelfId === shelf.id;
               const isDraggingThisShelf = activeDraggingShelfId === shelf.id;
+              const itemStyles = getDynamicItemStyles(currentLevel.cols);
 
               return (
                 <div
                   key={`items-${shelf.id}`}
-                  className="relative flex aspect-square w-full max-w-[64px] xs:max-w-[76px] sm:max-w-[90px] md:max-w-[102px] flex-col justify-end items-center p-0.5 rounded-sm overflow-visible"
+                  data-shelf-id={shelf.id}
+                  className="relative flex aspect-square w-full h-full flex-col justify-end items-center p-0.5 rounded-sm overflow-visible pointer-events-auto"
                 >
-                  <div className="relative flex items-end justify-center w-full h-full pb-2 sm:pb-2.5 pointer-events-none overflow-visible">
+                  <div className="relative flex items-end justify-center w-full h-full pb-1 sm:pb-2 pointer-events-none overflow-visible">
                     <AnimatePresence>
                       {shelf.items.map((item, idx) => {
                         const isFront = idx === shelf.items.length - 1;
@@ -731,6 +766,7 @@ export const GoodsSortCanvas: React.FC<CanvasProps> = ({
                             drag={isFront && isPlayMode}
                             dragConstraints={stageRef}
                             dragElastic={0.2}
+                            dragSnapToOrigin={true}
                             whileDrag={{
                               scale: 1.4,
                               rotate: 6,
@@ -763,14 +799,14 @@ export const GoodsSortCanvas: React.FC<CanvasProps> = ({
                             animate={{
                               scale: isFront ? 1 : 0.94,
                               opacity: 1,
-                              x: (idx - (shelf.items.length - 1) / 2) * (shelf.items.length > 2 ? 10 : 12),
+                              x: (idx - (shelf.items.length - 1) / 2) * itemStyles.stepX,
                               y: 0,
                               rotate: isSelected && isFront ? [0, -3, 3, 0] : 0,
                             }}
                             exit={{ scale: 0, opacity: 0 }}
                             transition={{ type: "spring", stiffness: 380, damping: 26 }}
-                            className={`absolute bottom-2.5 sm:bottom-3 flex flex-col items-center justify-center p-0.5 rounded-xl select-none ${
-                              isFront ? "cursor-grab active:cursor-grabbing z-20 pointer-events-auto" : "z-10 pointer-events-none"
+                            className={`absolute bottom-0.5 sm:bottom-2 flex flex-col items-center justify-center p-1 rounded-xl select-none touch-none ${
+                              isFront ? "cursor-grab active:cursor-grabbing z-20 pointer-events-auto min-w-[44px] min-h-[44px]" : "z-10 pointer-events-none"
                             }`}
                           >
                             {/* Clean Standalone Object (No Background Card Box) */}
@@ -779,7 +815,7 @@ export const GoodsSortCanvas: React.FC<CanvasProps> = ({
                                 switch (item.svgType) {
                                   case "chips":
                                     return (
-                                      <svg viewBox="0 0 64 64" className="w-6 xs:w-7 sm:w-9 md:w-10 h-7 xs:h-8 sm:h-10 md:h-11 filter drop-shadow-md">
+                                      <svg viewBox="0 0 64 64" className={itemStyles.svgClass}>
                                         <path d="M16 12 L48 8 L52 54 L12 56 Z" fill="#EF4444" />
                                         <path d="M16 12 L48 8 L46 22 L18 24 Z" fill="#F59E0B" opacity="0.9" />
                                         <polygon points="26,30 38,30 42,46 22,46" fill="#FBBF24" />
@@ -788,7 +824,7 @@ export const GoodsSortCanvas: React.FC<CanvasProps> = ({
                                     );
                                   case "soda":
                                     return (
-                                      <svg viewBox="0 0 64 64" className="w-6 xs:w-7 sm:w-9 md:w-10 h-7 xs:h-8 sm:h-10 md:h-11 filter drop-shadow-md">
+                                      <svg viewBox="0 0 64 64" className={itemStyles.svgClass}>
                                         <rect x="20" y="10" width="24" height="46" rx="4" fill="#DC2626" />
                                         <rect x="22" y="12" width="20" height="6" fill="#9CA3AF" />
                                         <ellipse cx="32" cy="32" rx="9" ry="12" fill="#FBBF24" />
@@ -798,7 +834,7 @@ export const GoodsSortCanvas: React.FC<CanvasProps> = ({
                                     );
                                   case "milk":
                                     return (
-                                      <svg viewBox="0 0 64 64" className="w-6 xs:w-7 sm:w-9 md:w-10 h-7 xs:h-8 sm:h-10 md:h-11 filter drop-shadow-md">
+                                      <svg viewBox="0 0 64 64" className={itemStyles.svgClass}>
                                         <path d="M22 20 L32 10 L42 20 L42 54 L22 54 Z" fill="#2563EB" />
                                         <path d="M24 22 L40 22 L40 52 L24 52 Z" fill="#FFFFFF" />
                                         <path d="M24 32 L40 32 L40 42 L24 42 Z" fill="#60A5FA" opacity="0.4" />
@@ -807,7 +843,7 @@ export const GoodsSortCanvas: React.FC<CanvasProps> = ({
                                     );
                                   case "jam":
                                     return (
-                                      <svg viewBox="0 0 64 64" className="w-6 xs:w-7 sm:w-9 md:w-10 h-7 xs:h-8 sm:h-10 md:h-11 filter drop-shadow-md">
+                                      <svg viewBox="0 0 64 64" className={itemStyles.svgClass}>
                                         <rect x="20" y="18" width="24" height="36" rx="6" fill="#EC4899" opacity="0.85" />
                                         <rect x="18" y="12" width="28" height="8" rx="2" fill="#BE185D" />
                                         <circle cx="32" cy="36" r="6" fill="#F472B6" />
@@ -815,7 +851,7 @@ export const GoodsSortCanvas: React.FC<CanvasProps> = ({
                                     );
                                   default:
                                     return (
-                                      <span className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl select-none filter drop-shadow-md transform hover:scale-110 transition-transform">
+                                      <span className={itemStyles.emojiClass}>
                                         {item.emoji}
                                       </span>
                                     );

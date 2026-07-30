@@ -160,6 +160,7 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
   question,
   isPlayMode = true,
   isDark = false,
+  compact = false,
   onSuccess,
   onAttempt,
   onHint,
@@ -734,6 +735,7 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
           label: "Mystery",
         }
       : COLOR_PALETTE[layer.colorKey] || COLOR_PALETTE.cyan;
+    const liquidGradientId = `liquid-${bottle.id}-${isMystery ? "mystery" : layer.colorKey}`;
 
     const isSourcePouring = pouringInfo?.sourceId === bottle.id;
     const isTargetPouring = pouringInfo?.targetId === bottle.id;
@@ -766,7 +768,7 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
             y={effectiveYTop - 1}
             width="100"
             height={segmentHeight + 3}
-            fill={color.fill}
+            fill={`url(#${liquidGradientId})`}
             stroke={color.stroke}
             strokeWidth="0.8"
           />
@@ -809,7 +811,7 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
           animate={{ d: wavePath }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
-          fill={color.fill}
+          fill={`url(#${liquidGradientId})`}
           stroke={color.stroke}
           strokeWidth="1"
         />
@@ -838,7 +840,9 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
   };
 
   const btnPill = (variant: "neutral" | "indigo" | "cyan" = "neutral") =>
-    `flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-bold transition-colors disabled:opacity-40 ${
+    `flex items-center gap-1 rounded-full border font-bold transition-colors disabled:opacity-40 ${
+      compact ? "px-2 py-0.5 text-[10px]" : "px-2.5 py-1 text-xs"
+    } ${
       isDark
         ? variant === "indigo"
           ? "border-indigo-500/40 bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600/30"
@@ -853,7 +857,7 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
     }`;
 
   const headerControls = (
-    <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+    <div className={`flex items-center flex-wrap ${compact ? "gap-1" : "gap-1.5 sm:gap-2"}`}>
       <div className={btnPill("neutral")}>
         <span className={isDark ? "text-slate-400" : "text-slate-500"}>Moves:</span>
         <span className={isDark ? "text-indigo-400 font-extrabold" : "text-indigo-600 font-extrabold"}>
@@ -861,10 +865,12 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
         </span>
       </div>
 
-      <div className={btnPill("cyan")}>
-        <Timer size={14} className={isDark ? "text-cyan-400" : "text-slate-500"} />
-        <span>{formatTime(seconds)}</span>
-      </div>
+      {!compact && (
+        <div className={btnPill("cyan")}>
+          <Timer size={14} className={isDark ? "text-cyan-400" : "text-slate-500"} />
+          <span>{formatTime(seconds)}</span>
+        </div>
+      )}
 
       <button
         type="button"
@@ -872,7 +878,7 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
         disabled={pouringInfo !== null || isWon}
         className={btnPill("indigo")}
       >
-        <Lightbulb size={14} className={isDark ? "text-indigo-300" : "text-indigo-600"} /> Hint
+        <Lightbulb size={compact ? 11 : 14} className={isDark ? "text-indigo-300" : "text-indigo-600"} /> Hint
       </button>
 
       <button
@@ -881,34 +887,41 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
         disabled={history.length === 0 || pouringInfo !== null}
         className={btnPill("neutral")}
       >
-        <RotateCcw size={14} /> Undo
+        <RotateCcw size={compact ? 11 : 14} /> Undo
       </button>
 
-      <button
-        type="button"
-        onClick={handleReset}
-        disabled={pouringInfo !== null}
-        className={btnPill("neutral")}
-      >
-        <RotateCw size={14} /> Reset
-      </button>
+      {!compact && (
+        <button
+          type="button"
+          onClick={handleReset}
+          disabled={pouringInfo !== null}
+          className={btnPill("neutral")}
+        >
+          <RotateCw size={14} /> Reset
+        </button>
+      )}
 
-      <button
-        type="button"
-        onClick={handleAddBottle}
-        disabled={bottles.length >= 10 || pouringInfo !== null}
-        className={btnPill("indigo")}
-      >
-        <Plus size={14} /> Tube
-      </button>
+      {!compact && (
+        <button
+          type="button"
+          onClick={handleAddBottle}
+          disabled={bottles.length >= 10 || pouringInfo !== null}
+          className={btnPill("indigo")}
+        >
+          <Plus size={14} /> Tube
+        </button>
+      )}
     </div>
   );
 
   return (
     <SharedCanvasLayout
       isPlayMode={isPlayMode}
-      headerTitle={question.title || "Liquid Color Sort"}
-      headerSubtitle={(question as any).subtitle || `${currentLevel.name} (${currentLevel.targetCount} Tubes)`}
+      headerTitle={compact ? undefined : question.title || "Liquid Color Sort"}
+      headerSubtitle={
+        (question as any).subtitle ||
+        `${compact ? currentLevel.name.replace(/^Level \d+:\s*/, "") : currentLevel.name} (${currentLevel.targetCount} Tubes)`
+      }
       playHint="Sort all liquid colors so each tube contains a single solid color."
       designerHint="Tap a tube to pick up its top liquid color, then tap a destination tube to pour."
       headerActions={headerControls}
@@ -923,10 +936,15 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
       }
       footerSolved={isWon}
       isDark={isDark}
+      compact={compact}
+      hintDurationMs={compact ? 1800 : undefined}
+      className={compact ? "!h-full !min-h-0 gap-1 p-0" : undefined}
     >
       <div
         ref={stageRef}
-        className={`flex min-h-[580px] w-full flex-col items-center justify-between p-3 sm:p-6 select-none rounded-3xl relative overflow-hidden transition-colors duration-300 ${
+        className={`flex w-full flex-col items-center justify-between select-none rounded-3xl relative overflow-hidden transition-colors duration-300 ${
+          compact ? "h-full min-h-0 px-2 py-1" : "min-h-[580px] p-3 sm:p-6"
+        } ${
           isDark
             ? `${surfaceClass(isDark)} text-white`
             : "bg-transparent text-slate-900 border-none shadow-none"
@@ -1132,9 +1150,15 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
 
         {/* Responsive Bottles Grid Stage */}
         <div
-          className={`z-10 my-auto grid w-full gap-3 sm:gap-6 py-6 justify-items-center ${getGridColsClass(
-            bottles.length
-          )}`}
+          className={`z-10 my-auto grid w-full justify-items-center ${
+            compact ? "translate-y-4 gap-3 py-1" : "gap-3 py-6 sm:gap-6"
+          } ${
+            compact
+              ? bottles.length <= 5
+                ? "grid-cols-5 max-w-sm"
+                : "grid-cols-6 max-w-md"
+              : getGridColsClass(bottles.length)
+          }`}
         >
           {bottles.map((bottle) => {
             const isSelected = selectedId === bottle.id;
@@ -1164,7 +1188,7 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
                         rotate: rotationAngle,
                       }
                     : isSelected
-                    ? { x: 0, y: -26, rotate: 0 }
+                    ? { x: 0, y: compact ? -10 : -26, rotate: 0 }
                     : isHintSrc || isHintTgt
                     ? { y: [-4, 4, -4] }
                     : { x: 0, y: 0, rotate: 0 }
@@ -1207,12 +1231,54 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
                 )}
 
                 {/* SVG Glass Bottle Container */}
-                <svg viewBox="0 0 100 240" className="h-44 sm:h-56 w-16 sm:w-24 drop-shadow-xl">
+                <svg
+                  viewBox="0 0 100 240"
+                  className={
+                    compact
+                      ? "h-32 w-14 drop-shadow-md"
+                      : "h-44 w-16 drop-shadow-xl sm:h-56 sm:w-24"
+                  }
+                >
                   <defs>
                     <clipPath id={`clip-${bottle.id}`}>
                       <path d="M 35 10 H 65 V 35 L 85 70 V 220 C 85 230 75 235 50 235 C 25 235 15 230 15 220 V 70 L 35 35 Z" />
                     </clipPath>
+                    <linearGradient id={`glass-${bottle.id}`} x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor={isDark ? "#94A3B8" : "#CBD5E1"} stopOpacity="0.34" />
+                      <stop offset="18%" stopColor="#FFFFFF" stopOpacity="0.2" />
+                      <stop offset="52%" stopColor="#FFFFFF" stopOpacity="0.04" />
+                      <stop offset="82%" stopColor={isDark ? "#334155" : "#94A3B8"} stopOpacity="0.2" />
+                      <stop offset="100%" stopColor={isDark ? "#0F172A" : "#64748B"} stopOpacity="0.34" />
+                    </linearGradient>
+                    <linearGradient id={`sheen-${bottle.id}`} x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.34" />
+                      <stop offset="16%" stopColor="#FFFFFF" stopOpacity="0.12" />
+                      <stop offset="48%" stopColor="#FFFFFF" stopOpacity="0" />
+                      <stop offset="78%" stopColor="#0F172A" stopOpacity="0.08" />
+                      <stop offset="100%" stopColor="#0F172A" stopOpacity="0.2" />
+                    </linearGradient>
+                    {Object.entries(COLOR_PALETTE).map(([key, palette]) => (
+                      <linearGradient key={key} id={`liquid-${bottle.id}-${key}`} x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor={palette.stroke} />
+                        <stop offset="16%" stopColor={palette.fill} />
+                        <stop offset="48%" stopColor={palette.glow} />
+                        <stop offset="76%" stopColor={palette.fill} />
+                        <stop offset="100%" stopColor={palette.stroke} />
+                      </linearGradient>
+                    ))}
+                    <linearGradient id={`liquid-${bottle.id}-mystery`} x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor={isDark ? "#1E293B" : "#94A3B8"} />
+                      <stop offset="48%" stopColor={isDark ? "#64748B" : "#E2E8F0"} />
+                      <stop offset="100%" stopColor={isDark ? "#1E293B" : "#94A3B8"} />
+                    </linearGradient>
                   </defs>
+
+                  {/* Ground and glass volume create the dimensional bottle silhouette. */}
+                  <ellipse cx="51" cy="234" rx="31" ry="5" fill="#0F172A" opacity={isDark ? "0.28" : "0.13"} />
+                  <path
+                    d="M 35 10 H 65 V 35 L 85 70 V 220 C 85 230 75 235 50 235 C 25 235 15 230 15 220 V 70 L 35 35 Z"
+                    fill={`url(#glass-${bottle.id})`}
+                  />
 
                   {/* Inner Stacked Liquid Layers */}
                   <g clipPath={`url(#clip-${bottle.id})`}>
@@ -1244,6 +1310,9 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
                           />
                         </g>
                       ))}
+
+                    {/* A translucent side-to-side sheen unifies glass and liquid. */}
+                    <rect x="12" y="8" width="76" height="228" fill={`url(#sheen-${bottle.id})`} />
                   </g>
 
                   {/* Glass Highlights */}
@@ -1254,6 +1323,24 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
                     strokeWidth="4"
                     strokeLinecap="round"
                     opacity={isDark ? "0.3" : "0.55"}
+                  />
+                  <path
+                    d="M 73 72 V 216 C 73 224 68 228 61 230"
+                    fill="none"
+                    stroke={isDark ? "#0F172A" : "#475569"}
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    opacity={isDark ? "0.32" : "0.18"}
+                  />
+                  <ellipse
+                    cx="50"
+                    cy="222"
+                    rx="29"
+                    ry="9"
+                    fill="none"
+                    stroke="#FFFFFF"
+                    strokeWidth="2"
+                    opacity={isDark ? "0.16" : "0.3"}
                   />
 
                   {/* Outer Contour */}

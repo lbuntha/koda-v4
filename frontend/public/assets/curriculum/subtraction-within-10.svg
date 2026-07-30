@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="54 56 400 400" role="img" aria-labelledby="title description">
+  <title id="title">Take away within 10</title>
+  <desc id="description">Subtraction sign with colorful gems and numbers for taking away within 10.</desc>
+  <defs>
+    <linearGradient id="minusGrad" x1="100" y1="200" x2="400" y2="300" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF5E7E"/>
+      <stop offset="1" stop-color="#E03A5E"/>
+    </linearGradient>
+    <filter id="soft-shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#E03A5E" flood-opacity=".25"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#soft-shadow)">
+    <!-- Big 3D Minus Sign -->
+    <rect x="110" y="210" width="290" height="90" rx="45" fill="url(#minusGrad)" />
+    <text x="170" y="180" fill="#E03A5E" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif" font-size="120" font-weight="900" text-anchor="middle">10</text>
+    <text x="340" y="380" fill="#E03A5E" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif" font-size="120" font-weight="900" text-anchor="middle">4</text>
+  </g>
+
+  <!-- Floating colorful gem bubbles -->
+  <g fill="#FF8DA1" stroke="#FFEAEF" stroke-width="3">
+    <circle cx="116" cy="112" r="22" fill="#FFBE3F"/>
+    <circle cx="390" cy="120" r="18" fill="#55D7B1"/>
+    <circle cx="95" cy="350" r="24" fill="#7C65F5"/>
+    <circle cx="256" cy="400" r="16" fill="#FFCA3D"/>
+  </g>
+</svg>

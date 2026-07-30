@@ -17,6 +17,7 @@ import { countBackSchema } from "../components/studio/ai-generator/schemas/count
 
 export const countBack = defineTechnique({
   technique: CountingTechnique.COUNT_BACK,
+  defaultThumbnailUrl: "/assets/components/count-back.svg",
   label: "6. Count Back",
   icon: <MinusCircle size={14} className="text-rose-500" />,
   defaultTargetCount: 5,

@@ -12,10 +12,11 @@ import {
   ArrowDown,
   ArrowUp,
   Check,
+  ChevronDown,
+  ChevronUp,
   Clock,
   Eye,
   FolderHeart,
-  Image,
   Images,
   ListOrdered,
   Pencil,
@@ -25,12 +26,25 @@ import {
   Trash2,
   Zap,
 } from "lucide-react";
-import { CountingQuestion } from "../../types";
-import { CurriculumTree, Skill, SkillCoverage, getSkillPath, formatSkillPath } from "../../curriculum/types";
+import { CountingQuestion, CustomSvgAsset } from "../../types";
+import {
+  CurriculumTree,
+  Skill,
+  SkillCoverage,
+  SKILL_MINUTES_MAX,
+  SKILL_MINUTES_MIN,
+  formatSkillMinutes,
+  formatSkillPath,
+  getSkillPath,
+  isValidSkillMinutes,
+} from "../../curriculum/types";
 import { filterAndSortBySkill, formatTechniqueLabel } from "./questionOps";
 import { Badge, Button, Dialog, Input, Label, Select, Textarea } from "../ui";
 import { ALL_TECHNIQUES, resolveTechniqueThumbnail } from "../../techniques";
 import { useSvgLibrary } from "../../assets/SvgLibraryContext";
+import { isSafeSvgMarkup } from "../../assets/svgSafety";
+import { preprocessSvgMarkup } from "../../assets/svgPreprocess";
+import { createSvgAssetId } from "../../assets/svgIds";
 import { CountingAsset } from "../Assets";
 
 interface SkillDetailProps {
@@ -62,18 +76,18 @@ export const SkillDetail: React.FC<SkillDetailProps> = ({
 }) => {
   const path = getSkillPath(skill.id, tree);
   const [isReordering, setIsReordering] = useState(false);
+  const [presentationOpen, setPresentationOpen] = useState(false);
   const [thumbnailPickerOpen, setThumbnailPickerOpen] = useState(false);
   const [thumbnailQuery, setThumbnailQuery] = useState("");
-  const { assets: svgAssets, persistenceStatus: svgPersistenceStatus } = useSvgLibrary();
+  const { assets: svgAssets, setAssets: setSvgAssets, persistenceStatus: svgPersistenceStatus } = useSvgLibrary();
+  const [markupNotice, setMarkupNotice] = useState<string | null>(null);
+  const [markupError, setMarkupError] = useState<string | null>(null);
   const completionXpInvalid = (
     skill.completionXp !== undefined
     && (!Number.isInteger(skill.completionXp) || skill.completionXp < 0 || skill.completionXp > 100)
   );
-  const estimatedMinutes = skill.presentation?.estimatedMinutes;
-  const estimatedMinutesInvalid = (
-    estimatedMinutes !== undefined
-    && (!Number.isInteger(estimatedMinutes) || estimatedMinutes < 1 || estimatedMinutes > 90)
-  );
+  const minutesLabel = formatSkillMinutes(skill);
+  const estimatedMinutesInvalid = !isValidSkillMinutes(skill.presentation?.estimatedMinutes);
 
   const skillQuestions = filterAndSortBySkill(questions, skill.id);
   const primaryTechnique = skillQuestions[0]?.technique;
@@ -94,7 +108,26 @@ export const SkillDetail: React.FC<SkillDetailProps> = ({
     : thumbnail.source === "component"
       ? `${formatTechniqueLabel(primaryTechnique)} default`
       : "Generic fallback";
+  const missingLibraryAsset = Boolean(
+    selectedLibraryAssetId && !selectedLibraryAsset && svgPersistenceStatus !== "loading",
+  );
+  // Anything a publish would reject. Collapsing the form must never hide it, so an issue
+  // both flags the strip and forces the fields open.
+  const presentationIssue = estimatedMinutesInvalid || completionXpInvalid || missingLibraryAsset;
+  const showPresentationFields = presentationOpen || presentationIssue;
   const thumbnailOptions = [
+    {
+      id: "curriculum:count-to-10",
+      label: "Count & Math 10",
+      url: "/assets/curriculum/count-to-10.svg",
+      source: "Curriculum artwork",
+    },
+    {
+      id: "curriculum:subtraction",
+      label: "Take away & Subtraction",
+      url: "/assets/curriculum/subtraction-within-10.svg",
+      source: "Curriculum artwork",
+    },
     ...ALL_TECHNIQUES
       .filter(manifest => manifest.defaultThumbnailUrl)
       .map(manifest => ({
@@ -103,12 +136,6 @@ export const SkillDetail: React.FC<SkillDetailProps> = ({
         url: manifest.defaultThumbnailUrl!,
         source: "Component artwork",
       })),
-    {
-      id: "generic:owl",
-      label: "Koda owl",
-      url: "/assets/owl-mascot.svg",
-      source: "Generic artwork",
-    },
   ];
   const normalizedThumbnailQuery = thumbnailQuery.trim().toLowerCase();
   const visibleSvgAssets = svgAssets.filter(asset =>
@@ -119,6 +146,33 @@ export const SkillDetail: React.FC<SkillDetailProps> = ({
     || `${option.label} ${option.source}`.toLowerCase().includes(normalizedThumbnailQuery)
   );
 
+  /**
+   * Accept SVG markup pasted into the URL field by saving it to the shared library and
+   * linking the skill to it.
+   *
+   * The field is a *reference* — the backend rejects anything that is not an app path or
+   * HTTP URL, so pasted markup used to fail validation and leave a broken preview. Markup is
+   * artwork, and artwork lives in the library, where it gets an id, is reusable across
+   * skills, and is snapshotted into the release. Sanitising first is what keeps a paste from
+   * carrying a script into every learner's page.
+   */
+  const attachPastedMarkup = (raw: string) => {
+    setMarkupNotice(null);
+    setMarkupError(null);
+    const markup = preprocessSvgMarkup(raw.trim());
+    if (!isSafeSvgMarkup(markup)) {
+      setMarkupError("That markup contains script or event handlers, so it was not saved.");
+      return;
+    }
+    const label = (skill.presentation?.title || skill.label || "Skill artwork").slice(0, 60);
+    const asset: CustomSvgAsset = { id: createSvgAssetId(), label, markup, scale: 1 };
+    setSvgAssets(current => [...current, asset]);
+    onUpdateSkill({
+      presentation: { ...skill.presentation, thumbnailUrl: undefined, thumbnailAssetId: asset.id },
+    });
+    setMarkupNotice(`Saved to your SVG library as “${label}” and linked to this skill.`);
+  };
+
   const moveQuestion = (index: number, direction: -1 | 1) => {
     const targetIndex = index + direction;
     if (targetIndex < 0 || targetIndex >= skillQuestions.length) return;
@@ -128,54 +182,78 @@ export const SkillDetail: React.FC<SkillDetailProps> = ({
   };
 
   return (
-    <div className="p-6 md:p-8">
+    <div className="p-4 md:p-6">
       {path && (
-        <span className="block text-2xs font-mono uppercase tracking-widest text-slate-400 mb-1.5">
+        <span className="block text-2xs font-mono uppercase tracking-widest text-slate-400 mb-1">
           {formatSkillPath(path)}
         </span>
       )}
-      <div className="flex items-center gap-3 mb-2">
-        <h1 className="text-xl font-extrabold text-slate-800">{skill.label}</h1>
+      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+        <h1 className="text-base font-extrabold text-slate-800">{skill.label}</h1>
         <Badge variant={coverage.isComplete ? "success" : "warning"}>
           {coverage.questionCount}/{coverage.minQuestions}
         </Badge>
+        {skill.standardRef && <span className="text-2xs font-mono text-slate-400">{skill.standardRef}</span>}
       </div>
-      {skill.description && <p className="text-xs text-slate-500 mb-1">{skill.description}</p>}
-      {skill.standardRef && <span className="text-2xs font-mono text-slate-400">{skill.standardRef}</span>}
+      {skill.description && <p className="mt-1 text-xs text-slate-500">{skill.description}</p>}
 
-      <section className="mt-5 rounded-2xl border border-[#E7E3F6] bg-white p-4 shadow-[0_2px_12px_rgba(83,74,183,0.05)]">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h2 className="koda-admin-card-title flex items-center gap-2 text-[#0E0B55]">
-              <Image size={16} className="text-[#534AB7]" /> Student presentation
-            </h2>
-            <p className="koda-admin-label mt-1 text-[#6D6997]">
-              The published values shown on this skill’s learner card.
+      <section className="mt-3 overflow-hidden rounded-2xl border border-[#E7E3F6] bg-white shadow-[0_2px_12px_rgba(83,74,183,0.05)]">
+        {/* The learner card at a glance. Six authoring fields sit behind one toggle so the
+            page leads with the questions, but a validation problem always forces them open. */}
+        <div className="flex items-center gap-2.5 p-2.5">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[#E7E3F6] bg-[#FBFAFF]">
+            {selectedLibraryAsset ? (
+              <CountingAsset
+                type="custom_svg"
+                customSvgMarkup={selectedLibraryAsset.markup}
+                size={38}
+                scale={1}
+              />
+            ) : (
+              <img
+                src={thumbnail.url}
+                alt={`${skill.label} thumbnail preview`}
+                className="h-full w-full object-contain"
+              />
+            )}
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs font-semibold text-[#0E0B55]">
+              {skill.presentation?.title || skill.label}
             </p>
-          </div>
-          <div className="flex shrink-0 flex-col items-end gap-1.5">
-            <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-xl border border-[#E7E3F6] bg-[#FBFAFF]">
-              {selectedLibraryAsset ? (
-                <CountingAsset
-                  type="custom_svg"
-                  customSvgMarkup={selectedLibraryAsset.markup}
-                  size={56}
-                  scale={1}
-                />
-              ) : (
-                <img
-                  src={thumbnail.url}
-                  alt={`${skill.label} thumbnail preview`}
-                  className="h-full w-full object-contain"
-                />
-              )}
+            <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-[#6D6997]">
+              <span
+                className={`inline-flex items-center gap-1 font-medium ${minutesLabel ? "text-[#6D6997]" : "text-[#B7B2CC]"}`}
+                title={minutesLabel ? "Authored duration shown on the learner card" : "No duration authored yet"}
+              >
+                <Clock size={10} /> {minutesLabel ?? "No time set"}
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <Zap size={10} />
+                {typeof skill.completionXp === "number" ? `${skill.completionXp} XP` : "Default XP"}
+              </span>
+              <span className="capitalize">{skill.presentation?.accent || "purple"}</span>
+              <span className="truncate">{thumbnailSourceLabel}</span>
             </div>
-            <Badge variant="outline" className="max-w-40 truncate text-[9px]">
-              {thumbnailSourceLabel}
-            </Badge>
           </div>
+          {presentationIssue ? (
+            <Badge variant="warning" className="shrink-0">Needs attention</Badge>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              size="xs"
+              className="shrink-0"
+              onClick={() => setPresentationOpen(open => !open)}
+            >
+              {presentationOpen ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+              {presentationOpen ? "Done" : "Edit card"}
+            </Button>
+          )}
         </div>
-        <div className="mt-4 grid gap-3 md:grid-cols-2">
+
+        {showPresentationFields && (
+        <div className="grid gap-3 border-t border-[#EEEAF8] p-3 md:grid-cols-2">
           <div className="space-y-1.5">
             <Label htmlFor="skill-student-title">Student title</Label>
             <Input
@@ -220,7 +298,7 @@ export const SkillDetail: React.FC<SkillDetailProps> = ({
             </div>
             <Input
               id="skill-thumbnail"
-              maxLength={500}
+              maxLength={20000}
               value={skill.presentation?.thumbnailUrl || ""}
               placeholder={
                 selectedLibraryAsset
@@ -229,19 +307,38 @@ export const SkillDetail: React.FC<SkillDetailProps> = ({
                     ? "Selected SVG is no longer in the library"
                   : thumbnail.componentDefaultUrl || "/assets/owl-mascot.svg"
               }
-              onChange={event => onUpdateSkill({
-                presentation: {
-                  ...skill.presentation,
-                  thumbnailUrl: event.target.value,
-                  thumbnailAssetId: undefined,
-                },
-              })}
+              onPaste={event => {
+                const pasted = event.clipboardData.getData("text");
+                if (pasted.trim().toLowerCase().startsWith("<svg")) {
+                  event.preventDefault();
+                  attachPastedMarkup(pasted);
+                }
+              }}
+              onChange={event => {
+                const value = event.target.value;
+                if (value.trim().toLowerCase().startsWith("<svg")) {
+                  attachPastedMarkup(value);
+                  return;
+                }
+                onUpdateSkill({
+                  presentation: {
+                    ...skill.presentation,
+                    thumbnailUrl: value,
+                    thumbnailAssetId: undefined,
+                  },
+                });
+              }}
             />
             <p className="text-[10px] leading-relaxed text-[#8D89AE]">
-              Browse your shared SVG Library or paste an app path/HTTP URL. Empty uses the first
+              Browse your shared SVG Library, paste an app path/HTTP URL, or paste SVG markup
+              straight in — markup is saved to your library and linked. Empty uses the first
               question component’s default artwork.
             </p>
-            {selectedLibraryAssetId && !selectedLibraryAsset && svgPersistenceStatus !== "loading" && (
+            {markupError && <p className="text-[10px] font-medium text-rose-600">{markupError}</p>}
+            {!markupError && markupNotice && (
+              <p className="text-[10px] font-medium text-emerald-700">{markupNotice}</p>
+            )}
+            {missingLibraryAsset && (
               <p className="text-[10px] font-medium text-rose-600">
                 This SVG was removed from the library. Choose another thumbnail before publishing.
               </p>
@@ -284,8 +381,8 @@ export const SkillDetail: React.FC<SkillDetailProps> = ({
             <Input
               id="skill-estimated-minutes"
               type="number"
-              min={1}
-              max={90}
+              min={SKILL_MINUTES_MIN}
+              max={SKILL_MINUTES_MAX}
               value={skill.presentation?.estimatedMinutes ?? ""}
               placeholder="Shown on the learner card"
               onChange={event => onUpdateSkill({
@@ -296,7 +393,9 @@ export const SkillDetail: React.FC<SkillDetailProps> = ({
               })}
             />
             {estimatedMinutesInvalid && (
-              <p className="text-[11px] font-medium text-rose-600">Use a whole number from 1–90.</p>
+              <p className="text-[11px] font-medium text-rose-600">
+                Use a whole number from {SKILL_MINUTES_MIN}–{SKILL_MINUTES_MAX}.
+              </p>
             )}
           </div>
           <div className="space-y-1.5">
@@ -319,34 +418,40 @@ export const SkillDetail: React.FC<SkillDetailProps> = ({
             )}
           </div>
         </div>
+        )}
       </section>
 
-      <div className="flex items-center gap-2 mt-6 mb-4">
-        <Button size="sm" onClick={onAddQuestion} className="gap-1.5">
-          <Plus size={13} /> Add Question
-        </Button>
-        <Button size="sm" variant="secondary" onClick={onFillWithAi} className="gap-1.5">
-          <Sparkles size={13} /> Fill with AI
-        </Button>
-        <Button
-          size="sm"
-          variant={isReordering ? "default" : "outline"}
-          onClick={() => setIsReordering(v => !v)}
-          className="gap-1.5 ml-auto"
-          disabled={skillQuestions.length < 2}
-        >
-          <ListOrdered size={13} /> {isReordering ? "Done Reordering" : "Reorder"}
-        </Button>
+      <div className="mb-2.5 mt-4 flex flex-wrap items-center gap-2">
+        <h2 className="text-xs font-bold text-slate-700">Questions</h2>
+        <span className="font-mono text-2xs text-slate-400">
+          {skillQuestions.length} of {coverage.minQuestions} needed
+        </span>
+        <div className="ml-auto flex items-center gap-1.5">
+          <Button size="xs" onClick={onAddQuestion}>
+            <Plus size={12} /> Add
+          </Button>
+          <Button size="xs" variant="secondary" onClick={onFillWithAi}>
+            <Sparkles size={12} /> Fill with AI
+          </Button>
+          <Button
+            size="xs"
+            variant={isReordering ? "default" : "outline"}
+            onClick={() => setIsReordering(v => !v)}
+            disabled={skillQuestions.length < 2}
+          >
+            <ListOrdered size={12} /> {isReordering ? "Done" : "Reorder"}
+          </Button>
+        </div>
       </div>
 
       {skillQuestions.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-200 p-10 text-center">
+        <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center">
           <p className="text-xs text-slate-400">No questions yet — add one or fill this skill with AI.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
           {skillQuestions.map((q, index) => (
-            <div key={q.id} className="rounded-xl border border-slate-200 bg-white p-3.5 flex flex-col gap-2">
+            <div key={q.id} className="flex flex-col gap-1.5 rounded-xl border border-slate-200 bg-white p-2.5">
               <div className="flex items-start justify-between gap-2">
                 <h4 className="text-xs font-bold text-slate-700 leading-snug flex-1 truncate">{q.title}</h4>
                 <div className="flex items-center gap-2 flex-shrink-0">

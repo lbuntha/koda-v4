@@ -36,6 +36,11 @@ const DEFAULTS: AppSettings = {
       skip_cooldown_sessions: 1,
       reinforce_threshold: 0.6,
     },
+    streak: {
+      counts: "attempt",
+      min_events_per_day: 1,
+      grace_days: 1,
+    },
   },
 };
 
@@ -43,6 +48,8 @@ interface AppSettingsContextValue {
   settings: AppSettings;
   loading: boolean;
   save: (update: AppSettingsUpdate) => Promise<AppSettings>;
+  /** The last load failed, so `settings` holds defaults rather than this account's values. */
+  loadError: boolean;
   testAi: () => Promise<void>;
 }
 
@@ -52,11 +59,13 @@ export const AppSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const { status, account } = useAuth();
   const [settings, setSettings] = useState<AppSettings>(DEFAULTS);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     if (status !== "authenticated" || !account || account.role === "student") return;
     let active = true;
     setLoading(true);
+    setLoadError(false);
     void settingsApi.get()
       .then((next) => {
         if (!active) return;
@@ -64,7 +73,9 @@ export const AppSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ c
         sounds.setEnabled(next.sound_enabled);
       })
       .catch(() => {
-        // Keep safe defaults when settings are temporarily unavailable.
+        // Safe defaults keep the app usable, but they are not this account's settings and
+        // must not be presented as if they were — `loadError` lets the settings screen say so.
+        if (active) setLoadError(true);
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -77,6 +88,7 @@ export const AppSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const value = useMemo<AppSettingsContextValue>(() => ({
     settings,
     loading,
+    loadError,
     save: async (update) => {
       const next = await settingsApi.update(update);
       setSettings(next);
@@ -86,7 +98,7 @@ export const AppSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ c
     testAi: async () => {
       await settingsApi.testAi();
     },
-  }), [settings, loading]);
+  }), [settings, loading, loadError]);
 
   return <AppSettingsContext.Provider value={value}>{children}</AppSettingsContext.Provider>;
 };

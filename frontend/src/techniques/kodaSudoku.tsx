@@ -17,6 +17,7 @@ import { kodaSudokuSchema } from "../components/studio/ai-generator/schemas/koda
 
 export const kodaSudoku = defineTechnique({
   technique: CountingTechnique.KODA_SUDOKU,
+  defaultThumbnailUrl: "/assets/components/koda-sudoku.svg",
   label: "13. Mini Sudoku",
   icon: <Hash size={14} className="text-purple-600" />,
   defaultTargetCount: 5,

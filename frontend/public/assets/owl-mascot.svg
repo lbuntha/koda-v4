@@ -1,60 +1,42 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="72 115 366 366" role="img" aria-labelledby="title description">
-  <title id="title">Koda owl</title>
-  <desc id="description">The Koda owl mascot, a friendly violet owl with a cream belly.</desc>
-  <!-- Generic learner artwork fallback. Vector and transparent by construction so it
-       sits on the student hero's white card with no baked background box, and stays
-       crisp at every size from a 36px chip to the 112px hero. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="20 12 160 168" role="img" aria-labelledby="title description">
+  <title id="title">Koda</title>
+  <desc id="description">The Koda owl mascot.</desc>
+  <!-- The generic learner fallback, referenced by name from the placement warm-up, the
+       component preview, and resolveTechniqueThumbnail's last resort. Transparent
+       background on purpose: every surface that shows it supplies its own card, so a
+       baked tile would read as a second one. viewBox is cropped to the artwork. -->
   <defs>
-    <linearGradient id="body" x1="140" y1="150" x2="380" y2="450" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#8B73F7"/>
-      <stop offset="1" stop-color="#5B43DD"/>
+    <linearGradient id="owl-body" x1="60" y1="36" x2="150" y2="170" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9B86FF"/>
+      <stop offset="1" stop-color="#7A5CF0"/>
     </linearGradient>
-    <linearGradient id="belly" x1="190" y1="280" x2="330" y2="430" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#FFF7EA"/>
-      <stop offset="1" stop-color="#FFE6C4"/>
-    </linearGradient>
-    <linearGradient id="beak" x1="234" y1="292" x2="282" y2="336" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#FFC94F"/>
-      <stop offset="1" stop-color="#FF9B4A"/>
-    </linearGradient>
-    <filter id="owl-shadow" x="-25%" y="-25%" width="150%" height="160%">
-      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#4A3E8C" flood-opacity=".18"/>
+    <filter id="owl-shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#5C46B8" flood-opacity=".22"/>
     </filter>
   </defs>
 
   <g filter="url(#owl-shadow)">
-    <path d="M214 452h26a12 12 0 0 1 0 24h-26a12 12 0 0 1 0-24Z" fill="#FFAE3A"/>
-    <path d="M272 452h26a12 12 0 0 1 0 24h-26a12 12 0 0 1 0-24Z" fill="#FFAE3A"/>
+    <!-- Ear tufts sit behind the head so the silhouette stays one shape. -->
+    <path d="M64 54 74 24 94 46Z" fill="#7A5CF0"/>
+    <path d="M136 54 126 24 106 46Z" fill="#7A5CF0"/>
 
-    <path d="M150 192 176 120l38 52Z" fill="#6A52E8"/>
-    <path d="M298 172 336 120l26 72Z" fill="#6A52E8"/>
+    <path d="M100 36c-30 0-52 24-52 56v22c0 28 23 48 52 48s52-20 52-48V92c0-32-22-56-52-56Z" fill="url(#owl-body)"/>
 
-    <ellipse cx="256" cy="300" rx="150" ry="160" fill="url(#body)"/>
-    <ellipse cx="140" cy="330" rx="40" ry="74" transform="rotate(-12 140 330)" fill="#6A52E8"/>
-    <ellipse cx="372" cy="330" rx="40" ry="74" transform="rotate(12 372 330)" fill="#6A52E8"/>
-    <ellipse cx="256" cy="354" rx="92" ry="90" fill="url(#belly)"/>
-  </g>
+    <!-- Wings, tucked. Darker than the body so they read against it at 32px. -->
+    <path d="M52 98c-7 20-5 39 4 52 5 7 12 5 12-4-6-16-7-33-4-48 2-8-8-8-12 0Z" fill="#8A72F7"/>
+    <path d="M148 98c7 20 5 39-4 52-5 7-12 5-12-4 6-16 7-33 4-48-2-8 8-8 12 0Z" fill="#8A72F7"/>
 
-  <!-- Eye rims are light lilac, not white: a pure white outline would vanish where the
-       artwork is composited onto the white hero card. -->
-  <g stroke="#E7E0FF" stroke-width="4">
-    <circle cx="206" cy="254" r="46" fill="#FFF"/>
-    <circle cx="306" cy="254" r="46" fill="#FFF"/>
-  </g>
-  <g fill="#2B2350">
-    <circle cx="214" cy="258" r="22"/>
-    <circle cx="298" cy="258" r="22"/>
-  </g>
-  <g fill="#FFF">
-    <circle cx="206" cy="250" r="7"/>
-    <circle cx="290" cy="250" r="7"/>
-  </g>
+    <ellipse cx="100" cy="126" rx="29" ry="33" fill="#EFE9FF"/>
 
-  <path d="M232 300h48l-24 34Z" fill="url(#beak)" stroke="#F08A2E" stroke-width="3" stroke-linejoin="round"/>
+    <circle cx="80" cy="86" r="21" fill="#fff"/>
+    <circle cx="120" cy="86" r="21" fill="#fff"/>
+    <circle cx="80" cy="88" r="9.5" fill="#2B2150"/>
+    <circle cx="120" cy="88" r="9.5" fill="#2B2150"/>
+    <circle cx="83.5" cy="84" r="3.4" fill="#fff"/>
+    <circle cx="123.5" cy="84" r="3.4" fill="#fff"/>
 
-  <g fill="#CFC4FF">
-    <circle cx="112" cy="200" r="7"/>
-    <circle cx="400" cy="230" r="6"/>
-    <circle cx="128" cy="148" r="5"/>
+    <path d="M100 99l9.5 11.5L100 119l-9.5-8.5Z" fill="#FFB13B"/>
+
+    <path d="M85 159v8m-6-4h12M115 159v8m-6-4h12" stroke="#FFB13B" stroke-width="5" stroke-linecap="round" fill="none"/>
   </g>
 </svg>

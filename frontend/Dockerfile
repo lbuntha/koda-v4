@@ -1,11 +1,18 @@
-# Koda frontend — Vite build served by nginx, which also reverse-proxies /api
-# to the backend container (so the browser talks to one origin, no CORS).
-FROM node:20-alpine AS build
+# Koda frontend. Compose uses the `dev` target for Vite HMR; production uses the final
+# nginx image built from the `build` target.
+FROM node:20-alpine AS dependencies
 WORKDIR /app
 
 COPY package.json package-lock.json ./
 RUN npm ci
 
+FROM dependencies AS dev
+COPY . .
+ENV VITE_API_URL=http://localhost:8000
+EXPOSE 3000
+CMD ["npm", "run", "dev"]
+
+FROM dependencies AS build
 COPY . .
 # Baked into the build: the app calls "/api/..." which nginx proxies to the API.
 ARG VITE_API_URL=/api

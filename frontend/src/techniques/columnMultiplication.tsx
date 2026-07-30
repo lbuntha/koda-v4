@@ -6,6 +6,7 @@ import { defineTechnique } from "./manifest";
 
 export const columnMultiplication = defineTechnique({
   technique: CountingTechnique.MULTIPLICATION_COLUMN,
+  defaultThumbnailUrl: "/assets/components/multiplication-column.svg",
   label: "21. Column Multiplication",
   icon: <Columns3 size={14} className="text-blue-600" />,
   defaultTargetCount: 13_104,

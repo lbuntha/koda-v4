@@ -32,7 +32,7 @@ const SettingsGeneralSkeleton: React.FC = () => (
 );
 
 export const SettingsPage: React.FC = () => {
-  const { settings, loading, save, testAi } = useAppSettings();
+  const { settings, loading, loadError, save, testAi } = useAppSettings();
   const [soundEnabled, setSoundEnabled] = useState(settings.sound_enabled);
   const [model, setModel] = useState(settings.ai_model);
   const [apiKey, setApiKey] = useState("");
@@ -110,6 +110,14 @@ export const SettingsPage: React.FC = () => {
 
       <TabsContent value="general" className="flex flex-1 flex-col gap-4 pt-4">
       {loading ? <SettingsGeneralSkeleton /> : <>
+      {/* Otherwise the defaults below read as the account's saved settings, and saving one
+          field on this screen would look like a confirmation of all of them. */}
+      {loadError && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-800">
+          Couldn’t load your saved settings, so these are the defaults — not your values.
+          Reload before changing anything here.
+        </div>
+      )}
       <div className="grid flex-1 gap-4 lg:grid-cols-2 2xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
       <Card className="flex h-full min-w-0 flex-col border-[#E7E3F6] p-4 shadow-[0_6px_24px_rgba(83,74,183,0.06)] sm:p-5 md:p-6">
         <div className="flex items-start justify-between gap-4 border-b border-[#EEEAF8] pb-4">

@@ -1,5 +1,19 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Clock3, FileText, History, Plus, ShieldCheck, Star, Trash2, UserRound, Zap } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Clock3,
+  FileText,
+  History,
+  Layers,
+  Plus,
+  ShieldCheck,
+  Star,
+  Trash2,
+  UserRound,
+  Zap,
+  type LucideIcon,
+} from "lucide-react";
 import { academicApi, AcademicCatalog } from "../../api/academic";
 import type { CurriculumAuditEvent, CurriculumOwner } from "../../api/curriculum";
 import { curriculumApi } from "../../api/curriculum";
@@ -91,6 +105,42 @@ const eventDetail = (event: CurriculumAuditEvent): string => {
   return `Revision ${event.revision}`;
 };
 
+/**
+ * A collapsed group: its header carries the values, so the drawer reads as five short lines
+ * until you open the one you came to change. `issue` forces the body open and swaps the
+ * chevron for a flag — a collapsed section must never hide a value that blocks saving.
+ */
+const Section: React.FC<{
+  icon: LucideIcon;
+  title: string;
+  summary: string;
+  open: boolean;
+  issue?: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}> = ({ icon: Icon, title, summary, open, issue, onToggle, children }) => (
+  <section className="overflow-hidden rounded-xl border border-[#E7E3F6] bg-white">
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-expanded={open || Boolean(issue)}
+      className="flex w-full cursor-pointer items-center gap-2 px-3 py-2.5 text-left transition-colors hover:bg-[#FBFAFF]"
+    >
+      <Icon size={14} className="shrink-0 text-[#534AB7]" />
+      <span className="shrink-0 text-xs font-semibold text-[#0E0B55]">{title}</span>
+      <span className="min-w-0 flex-1 truncate text-[10px] text-[#6D6997]">{summary}</span>
+      {issue ? (
+        <Badge variant="warning" className="shrink-0">Check</Badge>
+      ) : open ? (
+        <ChevronUp size={13} className="shrink-0 text-[#8D89AE]" />
+      ) : (
+        <ChevronDown size={13} className="shrink-0 text-[#8D89AE]" />
+      )}
+    </button>
+    {(open || issue) && <div className="border-t border-[#EEEAF8] p-3">{children}</div>}
+  </section>
+);
+
 const makeDraft = (tree: CurriculumTree, published: boolean): MetadataDraft => {
   const primaryGradeId = tree.primaryGradeId || tree.grades[0]?.id || "";
   const primarySubjectId = tree.primarySubjectId
@@ -130,8 +180,15 @@ export const CurriculumDetailsDrawer: React.FC<CurriculumDetailsDrawerProps> = (
   const [saveError, setSaveError] = useState<string | null>(null);
   const [events, setEvents] = useState<CurriculumAuditEvent[]>([]);
   const [catalog, setCatalog] = useState<AcademicCatalog>({ grades: [], subjects: [] });
+  // An empty catalog and a catalog that failed to load look identical on screen — both render
+  // no chips — but mean opposite things. Without this the author reads "no grades exist".
+  const [catalogError, setCatalogError] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+
+  const toggleSection = (key: string) =>
+    setOpenSections(current => ({ ...current, [key]: !current[key] }));
 
   const availableSubjects = useMemo(
     () => draft.subjects.filter(subject => subject.gradeId === draft.primaryGradeId),
@@ -153,7 +210,11 @@ export const CurriculumDetailsDrawer: React.FC<CurriculumDetailsDrawerProps> = (
   useEffect(() => {
     if (!isOpen || tab !== "metadata") return;
     let cancelled = false;
-    void academicApi.list().then(response => { if (!cancelled) setCatalog(response); }).catch(() => undefined);
+    setCatalogError(false);
+    void academicApi.list().then(
+      response => { if (!cancelled) setCatalog(response); },
+      () => { if (!cancelled) setCatalogError(true); },
+    );
     return () => { cancelled = true; };
   }, [isOpen, tab]);
 
@@ -215,6 +276,20 @@ export const CurriculumDetailsDrawer: React.FC<CurriculumDetailsDrawerProps> = (
     || rewardsInvalid
     || achievementsInvalid
   );
+
+  const scopeSummary = [
+    draft.grades.map(grade => grade.label).join(", ") || "No grades",
+    draft.subjects.map(subject => subject.label).join(", ") || "No subjects",
+  ].join(" · ");
+  const rewardsSummary = [
+    draft.rewards.quest.label || "No quest label",
+    `${draft.rewards.quest.activitiesPerSession} activities`,
+    `${draft.rewards.level.xpPerLevel || 0} XP per level`,
+  ].join(" · ");
+  const achievementsSummary = draft.rewards.achievements.length === 0
+    ? "No badges configured"
+    : `${draft.rewards.achievements.length} badge${draft.rewards.achievements.length === 1 ? "" : "s"}`;
+  const ownershipSummary = `${owner?.name || "Local owner"} · updated ${dateLabel(updatedAt)}`;
 
   const addAchievement = () => {
     const existingIds = new Set(draft.rewards.achievements.map(achievement => achievement.id));
@@ -293,45 +368,42 @@ export const CurriculumDetailsDrawer: React.FC<CurriculumDetailsDrawerProps> = (
     setDraft(current => ({ ...current, subjects: [...current.subjects, subject].sort((a, b) => a.order - b.order), primarySubjectId: current.primarySubjectId || subject.id }));
   };
 
-  return (
-    <Drawer isOpen={isOpen} onClose={onClose} title="Curriculum details" widthClassName="w-full sm:w-[500px]">
-      <Tabs value={tab} onValueChange={value => setTab(value as CurriculumDetailsTab)} variant="underline" className="flex min-h-full flex-col">
-        <TabsList className="sticky top-0 z-10 bg-white" aria-label="Curriculum details sections">
-          <TabsTrigger value="metadata"><FileText size={14} /> Metadata</TabsTrigger>
-          <TabsTrigger value="history"><History size={14} /> Audit history</TabsTrigger>
-        </TabsList>
+  // `Tabs` has to sit outside `Drawer` so its context reaches both the fixed tab bar and the
+  // scrolling body. It must not become a box while doing so: this component is a child of the
+  // studio's row layout, and a plain wrapper div would take a flex slot and squash the page.
+  // `contents` keeps the provider without generating any layout, and the drawer stays fixed.
+  if (!isOpen) return null;
 
-        <TabsContent value="metadata" className="flex flex-1 flex-col pt-5">
-          <div className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="curriculum-title">Title</Label>
-              <Input id="curriculum-title" value={draft.title} maxLength={160} onChange={event => setDraft(current => ({ ...current, title: event.target.value }))} placeholder="Primary Mathematics" />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="curriculum-description">Description</Label>
-              <Textarea id="curriculum-description" rows={4} maxLength={2000} value={draft.description} onChange={event => setDraft(current => ({ ...current, description: event.target.value }))} placeholder="Purpose, learning scope, and intended learners" />
-            </div>
-            <div className="rounded-2xl border border-[#E7E3F6] bg-[#FBFAFF] p-4">
-              <div className="mb-1 text-sm font-semibold text-[#0E0B55]">Curriculum scope</div>
-              <p className="mb-3 text-[10px] leading-relaxed text-[#6D6997]">Choose every grade and subject included in this curriculum. Contexts already used by units stay locked.</p>
-              <Label>Grades</Label>
-              <div className="mt-1.5 flex flex-wrap gap-1.5">
-                {catalog.grades.filter(item => item.active).map(item => {
-                  const active = draft.grades.some(grade => grade.id === item.key);
-                  const locked = active && lockedGradeIds.has(item.key);
-                  return <button key={item.key} type="button" aria-pressed={active} onClick={() => toggleGrade(item.key)} title={locked ? "This grade contains units and cannot be removed" : undefined} className={`rounded-full border px-2.5 py-1.5 text-[10px] font-medium transition-colors ${active ? "border-[#534AB7] bg-[#534AB7] text-white" : "border-[#E7E3F6] bg-white text-[#6D6997] hover:border-[#7C6DD8]"} ${locked ? "cursor-not-allowed opacity-75" : "cursor-pointer"}`}>{item.name}</button>;
-                })}
+  return (
+    <Tabs
+      value={tab}
+      onValueChange={value => setTab(value as CurriculumDetailsTab)}
+      variant="underline"
+      className="contents"
+    >
+      <Drawer
+        isOpen={isOpen}
+        onClose={onClose}
+        title="Curriculum details"
+        widthClassName="w-full sm:w-[500px]"
+        subHeader={
+          <TabsList aria-label="Curriculum details sections">
+            <TabsTrigger value="metadata"><FileText size={14} /> Metadata</TabsTrigger>
+            <TabsTrigger value="history"><History size={14} /> Audit history</TabsTrigger>
+          </TabsList>
+        }
+      >
+        <TabsContent value="metadata" className="flex min-h-full flex-col">
+          <div className="space-y-2.5">
+            <div className="grid gap-2.5 sm:grid-cols-2">
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="curriculum-title">Title</Label>
+                <Input id="curriculum-title" value={draft.title} maxLength={160} onChange={event => setDraft(current => ({ ...current, title: event.target.value }))} placeholder="Primary Mathematics" />
               </div>
-              <Label className="mt-3 block">Subjects</Label>
-              <div className="mt-1.5 flex flex-wrap gap-1.5">
-                {catalog.subjects.filter(item => item.active && draft.grades.some(grade => grade.id === item.grade_id)).map(item => {
-                  const active = draft.subjects.some(subject => subject.id === item.key);
-                  const locked = active && lockedSubjectIds.has(item.key);
-                  return <button key={item.key} type="button" aria-pressed={active} onClick={() => toggleSubject(item.key)} title={locked ? "This subject contains units and cannot be removed" : undefined} className={`rounded-full border px-2.5 py-1.5 text-[10px] font-medium transition-colors ${active ? "border-[#534AB7] bg-[#F3F0FF] text-[#534AB7]" : "border-[#E7E3F6] bg-white text-[#6D6997] hover:border-[#7C6DD8]"} ${locked ? "cursor-not-allowed opacity-75" : "cursor-pointer"}`}>{item.name}</button>;
-                })}
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="curriculum-description">Description</Label>
+                <Textarea id="curriculum-description" rows={2} maxLength={2000} value={draft.description} onChange={event => setDraft(current => ({ ...current, description: event.target.value }))} placeholder="Purpose, learning scope, and intended learners" />
               </div>
-            </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="curriculum-grade">Primary grade</Label>
                 <Select
@@ -365,14 +437,50 @@ export const CurriculumDetailsDrawer: React.FC<CurriculumDetailsDrawerProps> = (
               </div>
             </div>
 
-            <div className="rounded-2xl border border-[#E7E3F6] bg-[#FBFAFF] p-4">
-              <div className="koda-admin-card-title flex items-center gap-2 text-[#0E0B55]">
-                <Star size={16} className="text-[#534AB7]" /> Quest and XP
+            <Section
+              icon={Layers}
+              title="Scope"
+              summary={scopeSummary}
+              open={Boolean(openSections.scope)}
+              onToggle={() => toggleSection("scope")}
+            >
+              <p className="mb-2.5 text-[10px] leading-relaxed text-[#6D6997]">Choose every grade and subject included in this curriculum. Contexts already used by units stay locked.</p>
+              {catalogError && (
+                <p className="mb-2.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-2 text-[10px] font-semibold text-amber-800">
+                  Couldn’t load the grade and subject list. Reopen this drawer to try again —
+                  the choices below may be incomplete until then.
+                </p>
+              )}
+              <Label>Grades</Label>
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                {catalog.grades.filter(item => item.active).map(item => {
+                  const active = draft.grades.some(grade => grade.id === item.key);
+                  const locked = active && lockedGradeIds.has(item.key);
+                  return <button key={item.key} type="button" aria-pressed={active} onClick={() => toggleGrade(item.key)} title={locked ? "This grade contains units and cannot be removed" : undefined} className={`rounded-full border px-2.5 py-1.5 text-[10px] font-medium transition-colors ${active ? "border-[#534AB7] bg-[#534AB7] text-white" : "border-[#E7E3F6] bg-white text-[#6D6997] hover:border-[#7C6DD8]"} ${locked ? "cursor-not-allowed opacity-75" : "cursor-pointer"}`}>{item.name}</button>;
+                })}
               </div>
-              <p className="koda-admin-label mt-1 text-[#6D6997]">
+              <Label className="mt-3 block">Subjects</Label>
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                {catalog.subjects.filter(item => item.active && draft.grades.some(grade => grade.id === item.grade_id)).map(item => {
+                  const active = draft.subjects.some(subject => subject.id === item.key);
+                  const locked = active && lockedSubjectIds.has(item.key);
+                  return <button key={item.key} type="button" aria-pressed={active} onClick={() => toggleSubject(item.key)} title={locked ? "This subject contains units and cannot be removed" : undefined} className={`rounded-full border px-2.5 py-1.5 text-[10px] font-medium transition-colors ${active ? "border-[#534AB7] bg-[#F3F0FF] text-[#534AB7]" : "border-[#E7E3F6] bg-white text-[#6D6997] hover:border-[#7C6DD8]"} ${locked ? "cursor-not-allowed opacity-75" : "cursor-pointer"}`}>{item.name}</button>;
+                })}
+              </div>
+            </Section>
+
+            <Section
+              icon={Zap}
+              title="Quest and XP"
+              summary={rewardsSummary}
+              issue={rewardsInvalid}
+              open={Boolean(openSections.rewards)}
+              onToggle={() => toggleSection("rewards")}
+            >
+              <p className="mb-2.5 text-[10px] leading-relaxed text-[#6D6997]">
                 Released values drive the learner quest and parent reward reporting.
               </p>
-              <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                 <div className="space-y-1.5">
                   <Label htmlFor="quest-label">Quest label</Label>
                   <Input
@@ -409,11 +517,10 @@ export const CurriculumDetailsDrawer: React.FC<CurriculumDetailsDrawerProps> = (
                   />
                 </div>
               </div>
-              <div className="mt-4 flex items-center gap-2 border-t border-[#E7E3F6] pt-4">
-                <Zap size={15} className="text-[#EF9F27]" />
-                <span className="koda-admin-card-title text-[#0E0B55]">XP awards</span>
-              </div>
-              <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <p className="mt-3 border-t border-[#EEEAF8] pt-2.5 text-[10px] font-semibold uppercase tracking-wider text-[#8D89AE]">
+                XP awards
+              </p>
+              <div className="mt-2 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
                 {([
                   ["correctAnswer", "Correct"],
                   ["firstTryBonus", "First try"],
@@ -438,7 +545,7 @@ export const CurriculumDetailsDrawer: React.FC<CurriculumDetailsDrawerProps> = (
                   </div>
                 ))}
               </div>
-              <div className="mt-3 space-y-1.5">
+              <div className="mt-2.5 space-y-1.5">
                 <Label htmlFor="xp-per-level">XP needed for each level</Label>
                 <Input
                   id="xp-per-level"
@@ -457,41 +564,44 @@ export const CurriculumDetailsDrawer: React.FC<CurriculumDetailsDrawerProps> = (
                 />
               </div>
               {rewardsInvalid && (
-                <p className="mt-3 text-[11px] font-medium text-rose-600">
+                <p className="mt-2.5 text-[11px] font-medium text-rose-600">
                   Enter a quest label, 1–5 activities, XP awards from 0–100, and an admin level threshold from 1–10,000.
                 </p>
               )}
-            </div>
+            </Section>
 
-            <div className="rounded-2xl border border-[#E7E3F6] bg-white p-4 shadow-[0_2px_12px_rgba(83,74,183,0.05)]">
+            <Section
+              icon={Star}
+              title="Achievements"
+              summary={achievementsSummary}
+              issue={achievementsInvalid}
+              open={Boolean(openSections.achievements)}
+              onToggle={() => toggleSection("achievements")}
+            >
               <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="koda-admin-card-title flex items-center gap-2 text-[#0E0B55]">
-                    <Star size={16} className="text-[#EF9F27]" /> Practice achievements
-                  </div>
-                  <p className="koda-admin-label mt-1 text-[#6D6997]">
-                    Admin-authored rules calculated from verified learner practice.
-                  </p>
-                </div>
+                <p className="text-[10px] leading-relaxed text-[#6D6997]">
+                  Admin-authored rules calculated from verified learner practice.
+                </p>
                 <Button
                   type="button"
-                  size="sm"
+                  size="xs"
+                  className="shrink-0"
                   onClick={addAchievement}
                   disabled={draft.rewards.achievements.length >= 12}
                 >
-                  <Plus size={14} /> Add
+                  <Plus size={12} /> Add
                 </Button>
               </div>
 
               {draft.rewards.achievements.length === 0 ? (
-                <div className="mt-4 rounded-xl border border-dashed border-[#D8D1ED] bg-[#FBFAFF] px-4 py-5 text-center">
+                <div className="mt-2.5 rounded-xl border border-dashed border-[#D8D1ED] bg-[#FBFAFF] px-4 py-4 text-center">
                   <p className="koda-admin-label text-[#6D6997]">No achievements configured. Learners will not see or earn badges.</p>
                 </div>
               ) : (
-                <div className="mt-4 space-y-3">
+                <div className="mt-2.5 space-y-2">
                   {draft.rewards.achievements.map((achievement, index) => (
-                    <div key={achievement.id} className="rounded-xl border border-[#E7E3F6] bg-[#FBFAFF] p-3">
-                      <div className="grid gap-3 sm:grid-cols-2">
+                    <div key={achievement.id} className="rounded-xl border border-[#E7E3F6] bg-[#FBFAFF] p-2.5">
+                      <div className="grid gap-2.5 sm:grid-cols-2">
                         <div className="space-y-1.5">
                           <Label htmlFor={`achievement-label-${achievement.id}`}>Badge name</Label>
                           <Input
@@ -639,15 +749,20 @@ export const CurriculumDetailsDrawer: React.FC<CurriculumDetailsDrawerProps> = (
                 </div>
               )}
               {achievementsInvalid && (
-                <p className="mt-3 text-[11px] font-medium text-rose-600">
+                <p className="mt-2.5 text-[11px] font-medium text-rose-600">
                   Every achievement needs a name, explanation, and whole-number target from 1–10,000.
                 </p>
               )}
-            </div>
+            </Section>
 
-            <div className="rounded-2xl border border-[#E7E3F6] bg-[#FBFAFF] p-4">
-              <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-[#0E0B55]"><ShieldCheck size={16} className="text-[#534AB7]" /> Ownership</div>
-              <div className="flex items-center gap-3">
+            <Section
+              icon={ShieldCheck}
+              title="Ownership"
+              summary={ownershipSummary}
+              open={Boolean(openSections.ownership)}
+              onToggle={() => toggleSection("ownership")}
+            >
+              <div className="flex items-center gap-2.5">
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#F3F0FF] text-[#534AB7]"><UserRound size={16} /></span>
                 <div className="min-w-0">
                   <p className="truncate text-xs font-semibold text-slate-800">{owner?.name || "Local curriculum owner"}</p>
@@ -655,25 +770,26 @@ export const CurriculumDetailsDrawer: React.FC<CurriculumDetailsDrawerProps> = (
                 </div>
                 {owner?.role && <Badge className="ml-auto capitalize">{owner.role}</Badge>}
               </div>
-              <div className="mt-3 grid grid-cols-2 gap-3 border-t border-[#E7E3F6] pt-3 text-[10px] text-[#6D6997]">
+              <div className="mt-2.5 grid grid-cols-2 gap-3 border-t border-[#EEEAF8] pt-2.5 text-[10px] text-[#6D6997]">
                 <div><span className="block font-medium text-slate-600">Created</span>{dateLabel(createdAt)}</div>
                 <div><span className="block font-medium text-slate-600">Updated</span>{dateLabel(updatedAt)}</div>
               </div>
-            </div>
+            </Section>
           </div>
 
-          {saveError && <p className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">{saveError}</p>}
+          {saveError && <p className="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">{saveError}</p>}
 
-          <div className="mt-auto flex items-center justify-between gap-3 border-t border-[#E7E3F6] pt-4">
+          {/* Sticky action bar: the save button stays reachable however long the form runs. */}
+          <div className="sticky bottom-0 -mx-5 mt-auto flex items-center justify-between gap-3 border-t border-[#E7E3F6] bg-white px-5 pb-1 pt-3">
             <p className="text-[10px] text-[#6D6997]">Revision {revision}</p>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={onClose} disabled={submitted}>Cancel</Button>
-              <Button onClick={handleSave} disabled={invalid || submitted} loading={submitted} loadingText="Saving...">Save metadata</Button>
+              <Button variant="outline" size="sm" onClick={onClose} disabled={submitted}>Cancel</Button>
+              <Button size="sm" onClick={handleSave} disabled={invalid || submitted} loading={submitted} loadingText="Saving...">Save</Button>
             </div>
           </div>
         </TabsContent>
 
-        <TabsContent value="history" className="pt-5">
+        <TabsContent value="history">
           {historyLoading ? (
             <div className="space-y-3" role="status" aria-label="Loading curriculum audit history">
               {Array.from({ length: 6 }, (_, index) => <Skeleton key={index} className="h-20 w-full" />)}
@@ -687,18 +803,18 @@ export const CurriculumDetailsDrawer: React.FC<CurriculumDetailsDrawerProps> = (
               <p className="mt-1 text-xs">Changes will appear after the curriculum is saved.</p>
             </div>
           ) : (
-            <ol className="space-y-3">
+            <ol className="space-y-2">
               {events.map((event, index) => (
-                <li key={event.id || `${event.occurred_at}-${index}`} className="rounded-2xl border border-[#E7E3F6] bg-white p-3.5 shadow-[0_2px_10px_rgba(83,74,183,0.04)]">
-                  <div className="flex items-start gap-3">
-                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#F3F0FF] text-[#534AB7]"><Clock3 size={14} /></span>
+                <li key={event.id || `${event.occurred_at}-${index}`} className="rounded-xl border border-[#E7E3F6] bg-white p-2.5">
+                  <div className="flex items-start gap-2.5">
+                    <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#F3F0FF] text-[#534AB7]"><Clock3 size={13} /></span>
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <p className="text-xs font-semibold text-[#0E0B55]">{actionLabels[event.action] || event.action.replaceAll("_", " ")}</p>
                         <Badge variant="default">r{event.revision}</Badge>
                       </div>
-                      <p className="mt-1 text-[11px] leading-relaxed text-[#6D6997]">{eventDetail(event)}</p>
-                      <p className="mt-2 text-[10px] text-[#8D89AE]">{event.actor?.name || "System"} · {dateLabel(event.occurred_at)}</p>
+                      <p className="mt-0.5 text-[11px] leading-relaxed text-[#6D6997]">{eventDetail(event)}</p>
+                      <p className="mt-1 text-[10px] text-[#8D89AE]">{event.actor?.name || "System"} · {dateLabel(event.occurred_at)}</p>
                     </div>
                   </div>
                 </li>
@@ -706,7 +822,7 @@ export const CurriculumDetailsDrawer: React.FC<CurriculumDetailsDrawerProps> = (
             </ol>
           )}
         </TabsContent>
-      </Tabs>
-    </Drawer>
+      </Drawer>
+    </Tabs>
   );
 };

@@ -27,6 +27,9 @@ import { EditQuestionDrawer } from "./EditQuestionDrawer";
 import { spliceReordered, filterAndSortBySkill } from "./questionOps";
 import { CurriculumStudioSkeleton } from "./CurriculumStudioSkeleton";
 import { CurriculumDetailsDrawer, CurriculumDetailsTab } from "./CurriculumDetailsDrawer";
+import { curriculumApi } from "../../api/curriculum";
+import { assignmentsApi } from "../../api/assignments";
+import { activeAssignmentsToUpgrade } from "../../curriculum/publishing";
 import { Badge, Button } from "../ui";
 
 interface CurriculumStudioPageProps {
@@ -54,6 +57,9 @@ export const CurriculumStudioPage: React.FC<CurriculumStudioPageProps> = ({ curr
   const [editingQuestion, setEditingQuestion] = useState<CountingQuestion | null>(null);
   const [detailsTab, setDetailsTab] = useState<CurriculumDetailsTab>("metadata");
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
+  const [lastRelease, setLastRelease] = useState<string | null>(null);
 
   const questionSkillIds = useMemo(() => questions.map(q => q.skillId), [questions]);
   const coverage = useMemo(() => computeSkillCoverage(tree, questionSkillIds), [tree, questionSkillIds]);
@@ -163,6 +169,47 @@ export const CurriculumStudioPage: React.FC<CurriculumStudioPageProps> = ({ curr
     setIsDetailsOpen(true);
   };
 
+  /** One explicit rollout: cut an immutable release, then move only active learners onto it. */
+  const publish = async () => {
+    if (!curriculumId) {
+      setPublished(value => !value);
+      return;
+    }
+    setPublishError(null);
+    setLastRelease(null);
+    setPublishing(true);
+    let publishedRevision: number | null = null;
+    try {
+      const release = await curriculumApi.publishRelease(curriculumId);
+      publishedRevision = release.revision;
+      setPublished(true);
+      const response = await assignmentsApi.list();
+      const targets = activeAssignmentsToUpgrade(response.assignments, curriculumId, release.releaseId);
+      const results = await Promise.allSettled(
+        targets.map(assignment => assignmentsApi.setRelease(assignment.id, release.releaseId)),
+      );
+      const updated = results.filter(result => result.status === "fulfilled").length;
+      const failed = results.length - updated;
+      setLastRelease(
+        targets.length === 0
+          ? `v${release.revision} published · no active learners needed updating`
+          : `v${release.revision} published · ${updated} active learner${updated === 1 ? "" : "s"} updated · refresh the learner page`,
+      );
+      if (failed > 0) {
+        setPublishError(`${failed} learner assignment${failed === 1 ? "" : "s"} could not be updated. Try publishing again.`);
+      }
+    } catch (cause) {
+      setPublishError(
+        publishedRevision === null
+          ? cause instanceof Error ? cause.message : "Unable to publish this curriculum"
+          : `v${publishedRevision} was published, but active learners could not be updated. Try publishing again.`,
+      );
+      if (publishedRevision !== null) setLastRelease(`v${publishedRevision} published`);
+    } finally {
+      setPublishing(false);
+    }
+  };
+
   return (
     <div className="flex flex-col md:flex-row h-full w-full bg-slate-50">
       <CurriculumSidebar
@@ -175,7 +222,10 @@ export const CurriculumStudioPage: React.FC<CurriculumStudioPageProps> = ({ curr
         issueCount={issues.length}
         persistenceStatus={persistenceStatus}
         published={published}
-        onTogglePublished={() => setPublished(value => !value)}
+        publishing={publishing}
+        publishError={publishError}
+        publishNotice={lastRelease}
+        onPublish={() => void publish()}
         onSelectGrade={handleSelectGrade}
         onSelectSubject={handleSelectSubject}
         onSelectUnit={handleSelectUnit}
@@ -188,22 +238,21 @@ export const CurriculumStudioPage: React.FC<CurriculumStudioPageProps> = ({ curr
       />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="flex shrink-0 flex-col gap-3 border-b border-[#E7E3F6] bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex min-w-0 items-start gap-2.5">
+        {/* One line on a desktop: title, state, and context share a row rather than stacking. */}
+        <header className="flex shrink-0 flex-col gap-2 border-b border-[#E7E3F6] bg-white px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-center gap-2">
             {onBack && (
-              <Button variant="outline" size="icon" className="h-9 w-9 shrink-0" onClick={onBack} aria-label="Back to curricula" title="Back to curricula">
+              <Button variant="outline" size="icon" className="h-8 w-8 shrink-0" onClick={onBack} aria-label="Back to curricula" title="Back to curricula">
                 <ArrowLeft size={14} />
               </Button>
             )}
-            <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
               <h1 className="truncate text-sm font-semibold text-[#0E0B55]">{tree.title || "Untitled curriculum"}</h1>
               <Badge variant={published ? "success" : "default"}>{published ? "Published" : "Draft"}</Badge>
               {tree.version && <Badge variant="default">v{tree.version}</Badge>}
-            </div>
-            <p className="mt-1 truncate text-[11px] text-[#6D6997]">
-              {[primaryGrade?.label, primarySubject?.label, owner?.name ? `Owned by ${owner.name}` : null].filter(Boolean).join(" · ") || "Add curriculum metadata"}
-            </p>
+              <span className="truncate text-[11px] text-[#6D6997]">
+                {[primaryGrade?.label, primarySubject?.label, owner?.name ? `Owned by ${owner.name}` : null].filter(Boolean).join(" · ") || "Add curriculum metadata"}
+              </span>
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -233,6 +282,7 @@ export const CurriculumStudioPage: React.FC<CurriculumStudioPageProps> = ({ curr
             skills={tree.skills.filter(s => s.unitId === selectedUnit.id).sort((a, b) => a.order - b.order)}
             coverageBySkillId={coverageBySkillId}
             onSelectSkill={handleSelectSkill}
+            onUpdateUnit={patch => setTree(current => mutations.updateUnit(current, selectedUnit.id, patch))}
           />
         ) : (
           <div className="h-full flex items-center justify-center p-8">

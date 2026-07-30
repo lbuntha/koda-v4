@@ -63,7 +63,7 @@ export const AiGeneratorPanel: React.FC<AiGeneratorPanelProps> = ({
 
   const GENERATION_STEPS_OPENAI: string[] = [
     "Connecting to OpenAI...",
-    "Sending prompt to GPT...",
+    "Sending prompt to the model...",
     "Analyzing pedagogy & assets...",
     "Parsing AI response...",
     "Validating slide schema ✨"
@@ -225,7 +225,7 @@ export const AiGeneratorPanel: React.FC<AiGeneratorPanelProps> = ({
           <div>
             <h3 className="text-sm font-bold text-slate-800 tracking-tight">AI Activity Generator</h3>
             <p className="text-[10px] text-slate-400 font-medium">
-              {isOpenAI ? "Powered by OpenAI GPT" : "Using built-in engine"}
+              {isOpenAI ? "Powered by OpenAI" : "Using built-in engine"}
             </p>
           </div>
         </div>
@@ -238,7 +238,7 @@ export const AiGeneratorPanel: React.FC<AiGeneratorPanelProps> = ({
           : "bg-slate-50 border-slate-200 text-slate-500"
       }`}>
         <span className={`w-2 h-2 rounded-full ${isOpenAI ? "bg-indigo-500 animate-pulse" : "bg-slate-400"}`} />
-        {isOpenAI ? "OpenAI GPT Mode — smarter, creative generation" : "Built-in Engine — fast, rule-based generation"}
+        {isOpenAI ? "OpenAI Mode — smarter, creative generation" : "Built-in Engine — fast, rule-based generation"}
       </div>
 
       <div className="flex items-center gap-2 rounded-lg border border-[#E7E3F6] bg-[#FBFAFF] px-3 py-2 text-[10px] font-medium text-[#6D6997]">
@@ -276,7 +276,7 @@ export const AiGeneratorPanel: React.FC<AiGeneratorPanelProps> = ({
       {/* ── Quick Presets ── */}
       <div className="space-y-2">
         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
-          <Zap size={10} className="text-amber-500" />
+          <Zap size={10} className="text-indigo-500" />
           Quick Prompts
         </label>
         <div className="flex flex-wrap gap-1.5">
@@ -342,8 +342,8 @@ export const AiGeneratorPanel: React.FC<AiGeneratorPanelProps> = ({
         {isGenerating
           ? "Generating..."
           : batchMode
-            ? `Generate ${batchCount} Slides ${isOpenAI ? "with GPT" : ""} ✨`
-            : `Generate Slide ${isOpenAI ? "with GPT" : ""} ✨`
+            ? `Generate ${batchCount} Slides ${isOpenAI ? "with AI" : ""} ✨`
+            : `Generate Slide ${isOpenAI ? "with AI" : ""} ✨`
         }
       </Button>
 
@@ -497,9 +497,11 @@ export const AiGeneratorPanel: React.FC<AiGeneratorPanelProps> = ({
       )}
 
       {/* ── Tip ── */}
-      <div className="p-2.5 rounded-xl bg-amber-50/80 border border-amber-200/60 text-[10px] text-amber-700 font-medium leading-relaxed animate-pulse">
+      {/* Sky, not amber: this is advice, not a warning — and it must stay readable, so no
+          pulse fading the text in and out. */}
+      <div className="p-2.5 rounded-xl bg-sky-50 border border-sky-200 text-[10px] text-sky-800 font-medium leading-relaxed">
         💡 <strong>Tip:</strong> {isOpenAI
-          ? `With GPT you can be more descriptive! E.g. "${dynamicTip}"`
+          ? `With AI you can be more descriptive! E.g. "${dynamicTip}"`
           : dynamicTip
         }
       </div>

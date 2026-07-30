@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-labelledby="title description">
+  <title id="title">Count Back</title>
+  <desc id="description">Starting at eight and stepping three back.</desc>
+  <!-- Transparent background on purpose: every surface that shows this supplies its own
+       card, so a baked tile would read as a second one. viewBox is a shared 200x200 so the
+       whole technique set sits at one optical weight. -->
+  <defs>
+    <linearGradient id="g" x1="30" y1="30" x2="170" y2="175" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF8A9B"/><stop offset="1" stop-color="#E03A5E"/>
+    </linearGradient>
+    <filter id="s" x="-25%" y="-25%" width="150%" height="160%">
+      <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#B02745" flood-opacity=".22"/>
+    </filter>
+  </defs>
+  <g filter="url(#s)">
+    <text x="150" y="112" fill="#E03A5E" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif" font-size="60" font-weight="900" text-anchor="middle">8</text>
+    <circle cx="38" cy="95" r="12" fill="url(#g)"/>
+    <circle cx="68" cy="95" r="12" fill="url(#g)"/>
+    <circle cx="98" cy="95" r="12" fill="url(#g)"/>
+    <path d="M110 140H38" stroke="#E03A5E" stroke-width="6" stroke-linecap="round"/>
+    <path d="M46 131l-12 9 12 9" stroke="#E03A5E" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </g>
+</svg>
