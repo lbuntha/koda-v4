@@ -19,7 +19,9 @@ from ...core.security import (
     create_refresh_token,
     decode_token,
 )
+from ...core.logging import get_logger
 from ...core.throttle import ADULT_LOGIN, STUDENT_PIN
+from ..notifications.service import notify_pin_lockout
 from .guard import address_scope, clear, enforce, note_failure
 from . import reset as reset_service
 from .schemas import (
@@ -32,6 +34,7 @@ from .schemas import (
 _DUMMY_HASH = hash_secret("timing-equalisation-placeholder")
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+logger = get_logger("auth.router")
 
 
 def _issue(sub: str, role: str) -> TokenPair:
@@ -141,6 +144,9 @@ async def me(principal: Principal = Depends(get_principal)):
         "email": user.email,
         "family_code": user.family_code,
         "menu_ids": user.menu_ids,
+        "email_digest_enabled": user.email_digest_enabled,
+        "email_inactivity_enabled": user.email_inactivity_enabled,
+        "email_announcements_enabled": user.email_announcements_enabled,
     }
 
 
@@ -174,7 +180,17 @@ async def student_login(request: Request, body: StudentLoginIn):
     ) if parent else None
     correct = verify_secret(body.pin, student.pin_hash if student and student.pin_hash else _DUMMY_HASH)
     if not student or not student.pin_hash or not correct:
-        await note_failure(scopes)
+        newly_locked = await note_failure(scopes)
+        # Only alert when a real child of a real family just got locked out — that is the case
+        # worth telling a guardian about, and it keeps a wrong *name* from generating mail about
+        # a child who does not exist. Notifying is best-effort: a mail failure must not turn a
+        # failed sign-in into a 500, nor change the answer below.
+        pin_scope = scopes[0][0]
+        if student and parent and pin_scope in newly_locked:
+            try:
+                await notify_pin_lockout(parent, student, newly_locked[pin_scope])
+            except Exception:
+                logger.exception("pin lockout alert failed student_id=%s", student.id)
         # One message for every failure: an unknown family code, a wrong name and a wrong PIN
         # must be indistinguishable, or the endpoint enumerates households and children.
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect family code, name, or PIN")

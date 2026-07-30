@@ -263,50 +263,39 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
               const snappedX = target.x + (target.width - 44) / 2;
               const snappedY = target.y + (target.height - 44) / 2;
 
-              setLocalItems(prev => {
-                const nextItems = prev.map(item => item.id === draggedItemId ? {
-                  ...item,
-                  x: snappedX,
-                  y: snappedY
-                } : item);
+              const nextItems = localItems.map(item => item.id === draggedItemId ? {
+                ...item,
+                x: snappedX,
+                y: snappedY
+              } : item);
+              setLocalItems(nextItems);
 
-                // Instantly check sorting completion on the fresh array state
-                let allCorrect = true;
-                nextItems.forEach(it => {
-                  if (it.targetBin) {
-                    const bin = localTargets.find(t => t.id === it.targetBin);
-                    if (bin) {
-                      const itCenterX = it.x + 22;
-                      const itCenterY = it.y + 22;
-                      const isItInside = 
-                        itCenterX >= bin.x && 
-                        itCenterX <= bin.x + bin.width &&
-                        itCenterY >= bin.y && 
-                        itCenterY <= bin.y + bin.height;
-                      if (!isItInside) {
-                        allCorrect = false;
-                      }
-                    } else {
-                      allCorrect = false;
-                    }
-                  }
-                });
-
-                if (allCorrect && nextItems.length > 0) {
-                  sounds.playSuccess();
-                  setGuideSolved(true);
-                  onAttempt?.("correct", {
-                    selected: Object.fromEntries(
-                      nextItems
-                        .filter(item => item.targetBin)
-                        .map(item => [item.id, item.targetBin]),
-                    ),
-                  });
-                  onSuccess?.();
-                }
-
-                return nextItems;
+              // Completion callbacks update GameLauncher. Keep them in the pointer event,
+              // never inside a local-state updater (which React may execute during render).
+              const allCorrect = nextItems.every(item => {
+                if (!item.targetBin) return true;
+                const bin = localTargets.find(candidate => candidate.id === item.targetBin);
+                if (!bin) return false;
+                const itemCenterX = item.x + ITEM_SIZE / 2;
+                const itemCenterY = item.y + ITEM_SIZE / 2;
+                return itemCenterX >= bin.x
+                  && itemCenterX <= bin.x + bin.width
+                  && itemCenterY >= bin.y
+                  && itemCenterY <= bin.y + bin.height;
               });
+
+              if (allCorrect && nextItems.length > 0) {
+                sounds.playSuccess();
+                setGuideSolved(true);
+                onAttempt?.("correct", {
+                  selected: Object.fromEntries(
+                    nextItems
+                      .filter(item => item.targetBin)
+                      .map(item => [item.id, item.targetBin]),
+                  ),
+                });
+                onSuccess?.();
+              }
 
               sounds.playTick(localItems.filter(i => isItemInTarget(i, target)).length + 1);
               triggerSparkle(e.clientX, e.clientY);
@@ -349,36 +338,6 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
   const isActiveDropTarget = (target: FlexibleTarget) => {
     if (!draggedItemId) return false;
     return localItems.find(i => i.id === draggedItemId)?.targetBin === target.id;
-  };
-
-  const checkDragMatchCompletion = () => {
-    // Check if every item that has a targetBin is correctly placed in it
-    let allCorrect = true;
-    localItems.forEach(item => {
-      if (item.targetBin) {
-        const target = localTargets.find(t => t.id === item.targetBin);
-        if (target) {
-          if (!isItemInTarget(item, target)) {
-            allCorrect = false;
-          }
-        } else {
-          allCorrect = false;
-        }
-      }
-    });
-
-    if (allCorrect && localItems.length > 0) {
-      sounds.playSuccess();
-      setGuideSolved(true);
-      onAttempt?.("correct", {
-        selected: Object.fromEntries(
-          localItems
-            .filter(item => item.targetBin)
-            .map(item => [item.id, item.targetBin]),
-        ),
-      });
-      onSuccess?.();
-    }
   };
 
   // Student Tap-to-Count handler

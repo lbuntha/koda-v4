@@ -22,6 +22,7 @@ import { KidsTable } from "./KidsTable";
 import { MenusAccess } from "./MenusAccess";
 import { MenusManager } from "./MenusManager";
 import { CreateUserModal } from "./CreateUserModal";
+import { NotificationsPage } from "./NotificationsPage";
 import { SettingsPage } from "./SettingsPage";
 import { InteractiveStudioPage } from "./InteractiveStudioPage";
 import { CurriculumAdminPage } from "./CurriculumAdminPage";
@@ -37,10 +38,11 @@ const SUBTITLES: Record<string, string> = {
   menus: "Add, edit, and reorder menus",
   studio: "Build and preview interactive math activities",
   assets: "Create and manage reusable SVG counting assets",
-  settings: "Application preferences, AI provider, grades, and subjects",
+  settings: "Application preferences, academic catalog, and progression",
   curriculum: "Design grades, subjects, units, skills, and linked activities",
   assignments: "Assign immutable curriculum releases and place students",
   analytics: "Review learner mastery, activity, streaks, and recommendations",
+  notifications: "Compose broadcasts and manage automated notifications",
 };
 
 /** Data the data-backed content screens share. */
@@ -83,11 +85,12 @@ const CONTENT: Record<string, (ctx: AdminCtx) => React.ReactNode> = {
   curriculum: (c) => <CurriculumAdminPage onOpenAssets={() => c.navigate("assets")} />,
   assignments: () => <AssignmentsPage />,
   analytics: () => <AnalyticsRosterPage />,
+  notifications: (c) => <NotificationsPage users={c.users} students={c.students} />,
   settings: () => <SettingsPage />,
 };
 
 /** Content screens that need the admin users/students load. */
-const DATA_SECTIONS = new Set(["overview", "users", "kids"]);
+const DATA_SECTIONS = new Set(["overview", "users", "kids", "notifications"]);
 
 export const AdminDashboard: React.FC = () => {
   const { account, logout } = useAuth();

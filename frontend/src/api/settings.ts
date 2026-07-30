@@ -5,6 +5,14 @@ export interface AppSettings {
   ai_model: string;
   api_key_configured: boolean;
   api_key_hint: string | null;
+  mail_transport: "console" | "smtp";
+  mail_configured: boolean;
+  mail_from: string | null;
+  smtp_host: string | null;
+  smtp_port: number | null;
+  smtp_username: string | null;
+  smtp_use_tls: boolean | null;
+  smtp_password_hint: string | null;
   scoring: ScoringConfig;
   scoring_revision: number;
 }
@@ -14,6 +22,14 @@ export interface AppSettingsUpdate {
   ai_model?: string;
   openai_api_key?: string;
   clear_api_key?: boolean;
+  mail_transport?: "console" | "smtp";
+  mail_from?: string;
+  smtp_host?: string;
+  smtp_port?: number;
+  smtp_username?: string;
+  smtp_password?: string;
+  clear_smtp_password?: boolean;
+  smtp_use_tls?: boolean;
   scoring?: ScoringConfig;
   scoring_revision?: number;
 }
@@ -61,6 +77,17 @@ export interface ScoringConfig {
     max_non_new: number;
     skip_cooldown_sessions: number;
     reinforce_threshold: number;
+  };
+  notifications: {
+    auto_achievement_enabled: boolean;
+    auto_streak_enabled: boolean;
+    auto_weekly_digest_enabled: boolean;
+    weekly_digest_day: "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
+    streak_milestones: number[];
+    auto_review_enabled: boolean;
+    auto_inactivity_enabled: boolean;
+    inactivity_days: number;
+    auto_pin_lockout_enabled: boolean;
   };
 }
 
@@ -118,6 +145,7 @@ export const settingsApi = {
   get: () => api.get<AppSettings>("/settings"),
   update: (body: AppSettingsUpdate) => api.put<AppSettings>("/settings", body),
   testAi: () => api.post<{ ok: true }>("/settings/test-ai"),
+  testMail: () => api.post<{ ok: true; sentTo: string }>("/settings/test-mail"),
   rescoreJobs: () => api.get<{ jobs: RescoreJob[] }>("/settings/rescore-jobs"),
   previewScoring: (scoring: ScoringConfig, scoringRevision: number) =>
     api.post<ScoringPreview>("/settings/scoring-preview", {

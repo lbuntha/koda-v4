@@ -14,6 +14,7 @@ from ...core.runtime_settings import get_system_settings
 from ..learning.progression import advance_frontier
 from ..learning.skips import record_recommendation_skip
 from ..progression.service import recompute_touched_mastery
+from ..notifications.service import on_events_ingested
 from ...core.deps import get_current_student, get_current_user
 from ...core.permissions import authorize_guardian_read
 from ..content.grading import GradingError, grade
@@ -341,6 +342,7 @@ async def ingest_events(body: EventsIn, student: Student = Depends(get_current_s
         await _apply_rapid_confirmation(student_id, docs)
         await _complete_recommendation_runs(student_id, docs)
         mastery_updates = await recompute_touched_mastery(student_id, docs)
+        await on_events_ingested(student, mastery_updates, docs)
     else:
         mastery_updates = []
     return {

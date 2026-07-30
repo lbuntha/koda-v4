@@ -27,16 +27,32 @@ export interface SubjectCatalogItem {
   color: string;
   order: number;
   active: boolean;
+  /** A published curriculum offering is available for learners. */
+  content_ready?: boolean;
   revision: number;
   updated_at: string;
 }
 
 export type GradeCatalogInput = Omit<GradeCatalogItem, "updated_at" | "effective_band">;
-export type SubjectCatalogInput = Omit<SubjectCatalogItem, "updated_at">;
+export type SubjectCatalogInput = Omit<SubjectCatalogItem, "updated_at" | "content_ready">;
 
 export interface AcademicCatalog {
   grades: GradeCatalogItem[];
   subjects: SubjectCatalogItem[];
+}
+
+export interface CurriculumOffering {
+  grade_id: string;
+  subject_id: string;
+  curriculum_id: string;
+  release_id: string;
+  active: boolean;
+  successor_grade_id: string | null;
+  successor_subject_id: string | null;
+  promotion_completion_rule: "activities_completed" | "proficient" | "master";
+  promotion_placement_required: boolean;
+  revision: number;
+  updated_at: string;
 }
 
 export const academicApi = {
@@ -47,4 +63,7 @@ export const academicApi = {
   createSubject: (body: SubjectCatalogInput) => api.post<SubjectCatalogItem>("/settings/subjects", body),
   updateSubject: (key: string, body: SubjectCatalogInput) => api.put<SubjectCatalogItem>(`/settings/subjects/${key}`, body),
   deleteSubject: (key: string) => api.del<void>(`/settings/subjects/${key}`),
+  listOfferings: () => api.get<{ offerings: CurriculumOffering[] }>("/settings/curriculum-offerings"),
+  putOffering: (body: Omit<CurriculumOffering, "updated_at">) =>
+    api.put<CurriculumOffering>("/settings/curriculum-offerings", body),
 };

@@ -37,7 +37,7 @@ from app.core.security import hash_secret
 from app.features.analytics.service import purge_learning_data
 from app.features.content.release import build_release_payload
 from app.features.progression.scoring import ENGINE_REVISION as SCORING_ENGINE_REVISION
-from app.models.assignment import Assignment, Placement, ProgressionState
+from app.models.assignment import Assignment, CurriculumOffering, Placement, ProgressionState
 from app.models.academic import Grade, Subject
 from app.models.content import Curriculum, CurriculumRelease, QuestionDeck, SvgLibrary
 from app.models.event import LearningEvent
@@ -223,7 +223,7 @@ def fixture_tree() -> dict:
 
 
 def fixture_questions() -> list[dict]:
-    return [
+    questions = [
         {
             "id": "seed-g1-q-count-easy",
             "title": "Move and count the apples",
@@ -315,6 +315,9 @@ def fixture_questions() -> list[dict]:
             "config": {"minuend": 10, "subtrahend": 6, "frameColor": "purple"},
         },
     ]
+    for question in questions:
+        question["curriculumId"] = CURRICULUM_ID
+    return questions
 
 
 
@@ -661,6 +664,28 @@ async def main() -> None:
                 summary={"releaseId": RELEASE_ID, "questionCount": len(release.question_manifest), "fixture": True},
             )
 
+        offering = await CurriculumOffering.find_one(
+            CurriculumOffering.grade_id == "grade-1",
+            CurriculumOffering.subject_id == "grade-1-math",
+        )
+        if not offering:
+            await CurriculumOffering(
+                grade_id="grade-1",
+                subject_id="grade-1-math",
+                curriculum_id=CURRICULUM_ID,
+                release_id=RELEASE_ID,
+                created_by=owner_id,
+                updated_by=owner_id,
+            ).insert()
+        elif offering.release_id != RELEASE_ID or offering.curriculum_id != CURRICULUM_ID:
+            offering.curriculum_id = CURRICULUM_ID
+            offering.release_id = RELEASE_ID
+            offering.active = True
+            offering.revision += 1
+            offering.updated_by = owner_id
+            offering.updated_at = now()
+            await offering.save()
+
         assignment = await Assignment.find_one(
             Assignment.student_id == student_id,
             Assignment.release_id == RELEASE_ID,
@@ -674,6 +699,7 @@ async def main() -> None:
                 curriculum_id=CURRICULUM_ID,
                 release_id=RELEASE_ID,
                 grade_id="grade-1",
+                subject_id="grade-1-math",
                 scope={"kind": "all", "ids": []},
                 mode="self_paced",
                 priority=100,

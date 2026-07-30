@@ -13,16 +13,17 @@ class AssignmentIn(BaseModel):
     curriculum_id: str = Field(min_length=1, max_length=120)
     release_id: str = Field(min_length=1, max_length=120)
     grade_id: str = Field(min_length=1, max_length=120)
+    subject_id: str | None = Field(default=None, min_length=1, max_length=120)
     scope: ScopeIn = Field(default_factory=ScopeIn)
     mode: Literal["scheduled", "self_paced"] = "scheduled"
     schedule: dict[str, Any] | None = None
     priority: int = Field(default=100, ge=0, le=1000)
     placement_required: bool = True
 
-    @field_validator("student_id", "curriculum_id", "release_id", "grade_id")
+    @field_validator("student_id", "curriculum_id", "release_id", "grade_id", "subject_id")
     @classmethod
-    def clean_ids(cls, value: str) -> str:
-        return value.strip()
+    def clean_ids(cls, value: str | None) -> str | None:
+        return value.strip() if value is not None else None
 
 
 class AssignmentStatusIn(BaseModel):

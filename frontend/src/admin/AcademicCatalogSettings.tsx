@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { BookOpen, GraduationCap, Pencil, Plus, Trash2 } from "lucide-react";
-import { academicApi, GradeCatalogInput, GradeCatalogItem, SubjectCatalogInput, SubjectCatalogItem } from "../api/academic";
+import { ArrowRight, BookOpen, GraduationCap, Pencil, Plus, Trash2 } from "lucide-react";
+import { academicApi, CurriculumOffering, GradeCatalogInput, GradeCatalogItem, SubjectCatalogInput, SubjectCatalogItem } from "../api/academic";
 import type { GradeBand } from "../api/auth";
 import { Button, Card, Input, Label, Select, Skeleton, SkeletonCard, SkeletonText, Textarea } from "../components/ui";
 
@@ -11,11 +11,61 @@ const codeify = (value: string) => value.toUpperCase().trim().replace(/[^A-Z0-9]
 
 const emptyGrade = (): GradeCatalogInput => ({ key: "", code: "", name: "", description: "", age_range: "", order: 1, layout_band: null, active: true, revision: 0 });
 const emptySubject = (gradeId = ""): SubjectCatalogInput => ({ key: "", grade_id: gradeId, code: "", name: "", description: "", icon: "", color: "#534AB7", order: 1, active: true, revision: 0 });
-const gradeInput = (item: GradeCatalogItem): GradeCatalogInput => ({ key: item.key, code: item.code, name: item.name, description: item.description, age_range: item.age_range, order: item.order, layout_band: item.layout_band, active: item.active, revision: item.revision });
-const subjectInput = (item: SubjectCatalogItem): SubjectCatalogInput => ({ key: item.key, grade_id: item.grade_id, code: item.code, name: item.name, description: item.description, icon: item.icon, color: item.color, order: item.order, active: item.active, revision: item.revision });
+// Catalog rows can predate newer optional fields. Normalize every server response before it
+// enters form state so React inputs never move from a controlled value to `undefined` after save.
+const gradeInput = (item: Partial<GradeCatalogItem>): GradeCatalogInput => ({
+  key: item.key ?? "",
+  code: item.code ?? "",
+  name: item.name ?? "",
+  description: item.description ?? "",
+  age_range: item.age_range ?? "",
+  order: Number.isFinite(item.order) ? Number(item.order) : 1,
+  layout_band: item.layout_band ?? null,
+  active: item.active ?? true,
+  revision: Number.isFinite(item.revision) ? Number(item.revision) : 0,
+});
+const subjectInput = (item: Partial<SubjectCatalogItem>): SubjectCatalogInput => ({
+  key: item.key ?? "",
+  grade_id: item.grade_id ?? "",
+  code: item.code ?? "",
+  name: item.name ?? "",
+  description: item.description ?? "",
+  icon: item.icon ?? "",
+  color: item.color ?? "#534AB7",
+  order: Number.isFinite(item.order) ? Number(item.order) : 1,
+  active: item.active ?? true,
+  revision: Number.isFinite(item.revision) ? Number(item.revision) : 0,
+});
 const sortGrades = (items: GradeCatalogItem[]) => [...items].sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
 const sortSubjects = (items: SubjectCatalogItem[]) => [...items].sort((a, b) => a.grade_id.localeCompare(b.grade_id) || a.order - b.order || a.name.localeCompare(b.name));
 const upsertByKey = <T extends { key: string }>(items: T[], saved: T): T[] => [...items.filter(item => item.key !== saved.key), saved];
+
+interface CatalogSelection {
+  gradeId: string;
+  subjectId: string;
+}
+
+const CATALOG_SELECTION_KEY = "koda-admin-academic-catalog-selection";
+const readCatalogSelection = (): CatalogSelection => {
+  if (typeof window === "undefined") return { gradeId: "", subjectId: "" };
+  try {
+    const parsed = JSON.parse(window.sessionStorage.getItem(CATALOG_SELECTION_KEY) ?? "{}") as Partial<CatalogSelection>;
+    return {
+      gradeId: typeof parsed.gradeId === "string" ? parsed.gradeId : "",
+      subjectId: typeof parsed.subjectId === "string" ? parsed.subjectId : "",
+    };
+  } catch {
+    return { gradeId: "", subjectId: "" };
+  }
+};
+const writeCatalogSelection = (selection: CatalogSelection) => {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(CATALOG_SELECTION_KEY, JSON.stringify(selection));
+  } catch {
+    // Selection persistence is a convenience; the form still works when storage is blocked.
+  }
+};
 
 interface CatalogCardProps {
   title: string;
@@ -67,27 +117,47 @@ const CatalogCardSkeleton: React.FC = () => (
 );
 
 export const AcademicCatalogSettings: React.FC = () => {
+  const [catalogSelection, setCatalogSelection] = useState<CatalogSelection>(readCatalogSelection);
+  const catalogSelectionRef = React.useRef(catalogSelection);
   const [grades, setGrades] = useState<GradeCatalogItem[]>([]);
   const [subjects, setSubjects] = useState<SubjectCatalogItem[]>([]);
+  const [offerings, setOfferings] = useState<CurriculumOffering[]>([]);
   const [gradeDraft, setGradeDraft] = useState<GradeCatalogInput>(emptyGrade);
-  const [subjectDraft, setSubjectDraft] = useState<SubjectCatalogInput>(emptySubject);
+  const [subjectDraft, setSubjectDraft] = useState<SubjectCatalogInput>(() => emptySubject(catalogSelection.gradeId));
   const [loading, setLoading] = useState(true);
   const [savingGrade, setSavingGrade] = useState(false);
   const [savingSubject, setSavingSubject] = useState(false);
+  const [savingProgression, setSavingProgression] = useState(false);
   const [deletingGradeKey, setDeletingGradeKey] = useState<string | null>(null);
   const [deletingSubjectKey, setDeletingSubjectKey] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const rememberCatalogSelection = useCallback((selection: CatalogSelection) => {
+    catalogSelectionRef.current = selection;
+    setCatalogSelection(selection);
+    writeCatalogSelection(selection);
+  }, []);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const catalog = await academicApi.list();
+      const [catalog, offeringResponse] = await Promise.all([
+        academicApi.list(),
+        academicApi.listOfferings(),
+      ]);
       setGrades(sortGrades(catalog.grades));
       setSubjects(sortSubjects(catalog.subjects));
+      setOfferings(offeringResponse.offerings);
       setGradeDraft(current => current.key ? (catalog.grades.find(item => item.key === current.key) ? gradeInput(catalog.grades.find(item => item.key === current.key)!) : emptyGrade()) : current);
-      setSubjectDraft(current => current.key ? (catalog.subjects.find(item => item.key === current.key) ? subjectInput(catalog.subjects.find(item => item.key === current.key)!) : emptySubject(current.grade_id)) : current);
+      setSubjectDraft(current => {
+        const remembered = catalogSelectionRef.current;
+        const selectedId = remembered.subjectId || current.key;
+        const selected = catalog.subjects.find(item => item.key === selectedId);
+        if (selected) return subjectInput(selected);
+        return current.key ? emptySubject(remembered.gradeId || current.grade_id) : current;
+      });
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Unable to load curriculum models");
     } finally {
@@ -100,6 +170,14 @@ export const AcademicCatalogSettings: React.FC = () => {
   const filteredSubjects = useMemo(
     () => subjects.filter(item => !subjectDraft.grade_id || item.grade_id === subjectDraft.grade_id),
     [subjects, subjectDraft.grade_id],
+  );
+  const selectedOffering = offerings.find(item =>
+    item.grade_id === subjectDraft.grade_id && item.subject_id === subjectDraft.key
+  );
+  const progressionChoices = subjects.filter(subject =>
+    offerings.some(offering =>
+      offering.active && offering.grade_id === subject.grade_id && offering.subject_id === subject.key
+    ) && !(subject.grade_id === subjectDraft.grade_id && subject.key === subjectDraft.key)
   );
 
   const updateGrade = (patch: Partial<GradeCatalogInput>) => setGradeDraft(current => ({ ...current, ...patch }));
@@ -126,11 +204,37 @@ export const AcademicCatalogSettings: React.FC = () => {
     try {
       const saved = subjectDraft.revision ? await academicApi.updateSubject(subjectDraft.key, payload) : await academicApi.createSubject(payload);
       setSubjects(current => sortSubjects(upsertByKey(current, saved)));
-      setSubjectDraft(subjectInput(saved));
+      const savedDraft = subjectInput(saved);
+      setSubjectDraft(savedDraft);
+      rememberCatalogSelection({ gradeId: savedDraft.grade_id, subjectId: savedDraft.key });
       setMessage(`${saved.name} saved.`);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Unable to save subject");
     } finally { setSavingSubject(false); }
+  };
+
+  const updateSelectedOffering = (patch: Partial<CurriculumOffering>) => {
+    if (!selectedOffering) return;
+    setOfferings(current => current.map(item =>
+      item.grade_id === selectedOffering.grade_id && item.subject_id === selectedOffering.subject_id
+        ? { ...item, ...patch }
+        : item
+    ));
+  };
+
+  const saveProgression = async () => {
+    if (!selectedOffering) return;
+    setSavingProgression(true); setError(null); setMessage(null);
+    try {
+      const { updated_at: _updatedAt, ...payload } = selectedOffering;
+      const saved = await academicApi.putOffering(payload);
+      setOfferings(current => current.map(item =>
+        item.grade_id === saved.grade_id && item.subject_id === saved.subject_id ? saved : item
+      ));
+      setMessage("Curriculum promotion path saved.");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Unable to save the promotion path");
+    } finally { setSavingProgression(false); }
   };
 
   const removeGrade = async (item: GradeCatalogItem) => {
@@ -146,7 +250,13 @@ export const AcademicCatalogSettings: React.FC = () => {
     if (!window.confirm(`Delete ${item.name}? Referenced subjects cannot be deleted.`)) return;
     setDeletingSubjectKey(item.key);
     setError(null); setMessage(null);
-    try { await academicApi.deleteSubject(item.key); setSubjects(current => current.filter(subject => subject.key !== item.key)); setSubjectDraft(emptySubject(item.grade_id)); setMessage(`${item.name} deleted.`); }
+    try {
+      await academicApi.deleteSubject(item.key);
+      setSubjects(current => current.filter(subject => subject.key !== item.key));
+      setSubjectDraft(emptySubject(item.grade_id));
+      rememberCatalogSelection({ gradeId: item.grade_id, subjectId: "" });
+      setMessage(`${item.name} deleted.`);
+    }
     catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to delete subject"); }
     finally { setDeletingSubjectKey(null); }
   };
@@ -187,13 +297,24 @@ export const AcademicCatalogSettings: React.FC = () => {
           </div>
         </CatalogCard>
 
-        <CatalogCard title="Subject models" description="Manage subjects within a grade, including visual metadata and order." icon={<BookOpen size={18} />} onNew={() => setSubjectDraft(emptySubject(subjectDraft.grade_id || grades[0]?.key || ""))}>
+        <CatalogCard title="Subject models" description="Manage subjects within a grade, including visual metadata and order." icon={<BookOpen size={18} />} onNew={() => {
+          const gradeId = subjectDraft.grade_id || grades[0]?.key || "";
+          setSubjectDraft(emptySubject(gradeId));
+          rememberCatalogSelection({ gradeId, subjectId: "" });
+        }}>
           <div className="mt-4 space-y-4">
-            <div><Label>Filter by grade</Label><Select value={subjectDraft.grade_id} onChange={e => setSubjectDraft(emptySubject(e.target.value))}><option value="">Select a grade</option>{grades.map(item => <option key={item.key} value={item.key}>{item.name}</option>)}</Select></div>
+            <div><Label>Filter by grade</Label><Select value={subjectDraft.grade_id} onChange={e => {
+              const gradeId = e.target.value;
+              setSubjectDraft(emptySubject(gradeId));
+              rememberCatalogSelection({ gradeId, subjectId: "" });
+            }}><option value="">Select a grade</option>{grades.map(item => <option key={item.key} value={item.key}>{item.name}</option>)}</Select></div>
             <div className="grid gap-4 md:grid-cols-[minmax(150px,0.72fr)_minmax(0,1.28fr)]">
               <div className="max-h-64 space-y-2 overflow-y-auto pr-1 xl:max-h-[27rem]">
                 {filteredSubjects.map(item => (
-                  <button key={item.key} type="button" onClick={() => setSubjectDraft(subjectInput(item))} className={`w-full rounded-xl border p-3 text-left transition ${subjectDraft.key === item.key ? "border-[#7C6DD8] bg-[#F5F2FF]" : "border-[#E7E3F6] bg-white hover:bg-[#FBFAFF]"}`}>
+                  <button key={item.key} type="button" onClick={() => {
+                    setSubjectDraft(subjectInput(item));
+                    rememberCatalogSelection({ gradeId: item.grade_id, subjectId: item.key });
+                  }} className={`w-full rounded-xl border p-3 text-left transition ${subjectDraft.key === item.key ? "border-[#7C6DD8] bg-[#F5F2FF]" : "border-[#E7E3F6] bg-white hover:bg-[#FBFAFF]"}`}>
                     <span className="flex items-center justify-between gap-2"><span className="text-sm font-medium text-[#0E0B55]">{item.name}</span><span className="h-2 w-2 rounded-full" style={{ backgroundColor: item.active ? item.color : "#CBD5E1" }} /></span>
                     <span className="mt-1 block text-[11px] text-[#6D6997]">{item.code}</span>
                   </button>
@@ -206,6 +327,75 @@ export const AcademicCatalogSettings: React.FC = () => {
                 <div><Label>Description</Label><Textarea rows={3} value={subjectDraft.description} onChange={e => updateSubject({ description: e.target.value })} placeholder="Subject scope and learning focus" /></div>
                 <div className="grid grid-cols-3 gap-3"><div><Label>Icon</Label><Input value={subjectDraft.icon} onChange={e => updateSubject({ icon: e.target.value })} placeholder="Calculator" /></div><div><Label>Color</Label><Input type="color" value={subjectDraft.color} onChange={e => updateSubject({ color: e.target.value })} className="p-1" /></div><div><Label>Order</Label><Input type="number" min={0} value={subjectDraft.order} onChange={e => updateSubject({ order: Number(e.target.value) })} /></div></div>
                 <label className="flex items-center gap-2 text-xs text-[#6D6997]"><input type="checkbox" checked={subjectDraft.active} onChange={e => updateSubject({ active: e.target.checked })} className="accent-[#534AB7]" /> Available for curriculum design</label>
+                {subjectDraft.revision > 0 && (
+                  <div className="rounded-2xl bg-[#F7F5FF] p-3">
+                    <div className="flex items-start gap-2">
+                      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#EDE8FF] text-[#534AB7]"><ArrowRight size={14} /></span>
+                      <div className="min-w-0 flex-1">
+                        <p className="koda-admin-card-title text-xs text-[#0E0B55]">Completion and promotion</p>
+                        <p className="mt-0.5 text-[10px] leading-relaxed text-[#6D6997]">Choose when learners are ready and where they go next. Parents approve the transition.</p>
+                      </div>
+                    </div>
+                    {selectedOffering ? (
+                      <div className="mt-3 space-y-2.5">
+                        <div>
+                          <Label>Promotion requirement</Label>
+                          <Select
+                            value={selectedOffering.promotion_completion_rule ?? "activities_completed"}
+                            onChange={event => updateSelectedOffering({
+                              promotion_completion_rule: event.target.value as CurriculumOffering["promotion_completion_rule"],
+                            })}
+                          >
+                            <option value="activities_completed">Complete every activity (Recommended)</option>
+                            <option value="proficient">Reach Proficient in every skill</option>
+                            <option value="master">Reach Master in every skill</option>
+                          </Select>
+                          <p className="mt-1 text-[10px] leading-relaxed text-[#6D6997]">
+                            Controls when the promotion card becomes available to parents.
+                          </p>
+                        </div>
+                        <div>
+                          <Label>Next published curriculum</Label>
+                          <Select
+                            value={selectedOffering.successor_grade_id && selectedOffering.successor_subject_id
+                              ? `${selectedOffering.successor_grade_id}::${selectedOffering.successor_subject_id}`
+                              : ""}
+                            onChange={event => {
+                              const [gradeId, subjectId] = event.target.value.split("::");
+                              updateSelectedOffering({
+                                successor_grade_id: gradeId || null,
+                                successor_subject_id: subjectId || null,
+                              });
+                            }}
+                          >
+                            <option value="">Terminal curriculum — no successor</option>
+                            {progressionChoices.map(subject => (
+                              <option key={subject.key} value={`${subject.grade_id}::${subject.key}`}>
+                                {grades.find(grade => grade.key === subject.grade_id)?.name || subject.grade_id} · {subject.name}
+                              </option>
+                            ))}
+                          </Select>
+                        </div>
+                        <label className="flex items-center gap-2 text-xs text-[#6D6997]">
+                          <input
+                            type="checkbox"
+                            checked={selectedOffering.promotion_placement_required ?? true}
+                            onChange={event => updateSelectedOffering({ promotion_placement_required: event.target.checked })}
+                            className="accent-[#534AB7]"
+                          />
+                          Run placement when the parent promotes
+                        </label>
+                        <div className="flex justify-end">
+                          <Button size="xs" onClick={() => void saveProgression()} loading={savingProgression} loadingText="Saving...">
+                            Save progression
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="mt-3 text-[10px] font-medium text-[#8D89AE]">Publish and activate this subject’s curriculum before configuring its successor.</p>
+                    )}
+                  </div>
+                )}
                 <div className="flex flex-wrap justify-end gap-2">{subjectDraft.revision > 0 && <Button variant="destructive" size="sm" onClick={() => void removeSubject(subjectDraft as SubjectCatalogItem)} loading={deletingSubjectKey === subjectDraft.key} loadingText="Deleting..."><Trash2 size={13} /> Delete</Button>}<Button size="sm" onClick={() => void saveSubject()} loading={savingSubject} loadingText="Saving..."><Pencil size={13} /> {subjectDraft.revision ? "Save subject" : "Create subject"}</Button></div>
               </div>
             </div>

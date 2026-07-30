@@ -1,4 +1,7 @@
+from types import SimpleNamespace
+
 from app.features.content.placement import build_placement, compute_placement
+from app.features.placement.router import _placement_out
 
 
 def _release():
@@ -67,3 +70,23 @@ def test_compute_placement_scores_by_skill_and_sets_frontier():
     assert result["score_by_skill"] == {"s1": 1.0, "s2": 0.0}
     assert result["frontier_skill_id"] == "s2"
     assert result["eligible_skill_ids"] == ["s1"]
+
+
+def test_placement_payload_identifies_subject_and_sequence():
+    placement = SimpleNamespace(
+        id="placement-1",
+        assignment_id="assignment-1",
+        release_id="release-1",
+        status="completed",
+        frontier_skill_id="s1",
+        eligible_skill_ids=["s1"],
+        score_by_skill={"s1": 1.0},
+        completed_at=None,
+    )
+    release = SimpleNamespace(tree={"subjects": [{"id": "reading", "label": "Reading"}]})
+    assignment = SimpleNamespace(subject_id="reading")
+    payload = _placement_out(placement, release, assignment, subject_position=2, subject_total=3)
+    assert payload["subjectId"] == "reading"
+    assert payload["subjectName"] == "Reading"
+    assert payload["subjectPosition"] == 2
+    assert payload["subjectTotal"] == 3

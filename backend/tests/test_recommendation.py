@@ -255,6 +255,25 @@ def test_clearing_everything_still_lands_at_the_end():
     assert [item["kind"] for item in result["served_items"]] == ["stretch"]
 
 
+def test_mastering_every_skill_does_not_create_endless_stretch_work():
+    every = [f"s{index}" for index in range(9)]
+    result = recommend(
+        assignments=[_wide_assignment()],
+        mastery_states=[
+            {
+                "curriculum_id": "c1", "skill_id": skill_id, "level": "master",
+                "score": 1.0, "next_review_at": None,
+            }
+            for skill_id in every
+        ],
+        progressions=[{"assignment_id": "a1", "frontier_skill_id": None, "eligible_skill_ids": every}],
+        skipped_keys=set(),
+        config=CONFIG,
+    )
+    assert result["served_items"] == []
+    assert all(item["excluded"] == "mastered" for item in result["candidates"])
+
+
 def test_started_skills_do_not_push_the_frontier_backwards():
     """A skill in progress is served by `continue`, not by rewinding the frontier."""
     now = datetime.now(timezone.utc)

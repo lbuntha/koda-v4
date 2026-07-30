@@ -15,6 +15,7 @@ from ...models.content import CurriculumRelease
 from ...models.student import Student
 from ...models.user import Role, User
 from ..content.placement import PlacementError, build_placement, compute_placement
+from ..content.offerings import infer_assignment_subject, release_includes
 from .schemas import AssignmentIn, AssignmentStatusIn, PlacementSubmitIn
 
 logger = get_logger("placement")
@@ -49,6 +50,7 @@ def _assignment_out(item: Assignment) -> dict:
         "curriculumId": item.curriculum_id,
         "releaseId": item.release_id,
         "gradeId": item.grade_id,
+        "subjectId": item.subject_id,
         "scope": item.scope,
         "mode": item.mode,
         "schedule": item.schedule,
@@ -101,6 +103,8 @@ async def _release_for_create(body: AssignmentIn, user: User) -> CurriculumRelea
     grade_ids = {item.get("id") for item in release.tree.get("grades", [])}
     if body.grade_id not in grade_ids:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Grade is not included in this release")
+    if body.subject_id and not release_includes(release.tree, body.grade_id, body.subject_id):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Subject is not included in this release for this grade")
     scope_ids = set(body.scope.ids)
     if body.scope.kind == "grades" and not scope_ids <= grade_ids:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Scope contains an unknown grade")
@@ -143,12 +147,16 @@ async def create_assignment(body: AssignmentIn, user: User = Depends(get_current
     await _student_or_404(body.student_id)
     await authorize_guardian_read(body.student_id, user)
     release = await _release_for_create(body, user)
+    subject_id = body.subject_id or infer_assignment_subject(release.tree, body.grade_id, body.scope.model_dump())
+    if not subject_id:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Choose a subject for this assignment")
     assignment = Assignment(
         owner_id=str(user.id),
         student_id=body.student_id,
         curriculum_id=body.curriculum_id,
         release_id=body.release_id,
         grade_id=body.grade_id,
+        subject_id=subject_id,
         scope=body.scope.model_dump(),
         mode=body.mode,
         schedule=body.schedule,
@@ -226,7 +234,18 @@ def _placement_items(placement: Placement, release: CurriculumRelease) -> list[d
     return items
 
 
-def _placement_out(placement: Placement, release: CurriculumRelease) -> dict:
+def _placement_out(
+    placement: Placement,
+    release: CurriculumRelease,
+    assignment: Assignment | None = None,
+    subject_position: int | None = None,
+    subject_total: int | None = None,
+) -> dict:
+    subject_id = assignment.subject_id if assignment else None
+    subject = next(
+        (item for item in release.tree.get("subjects", []) if item.get("id") == subject_id),
+        None,
+    )
     return {
         "placementId": str(placement.id),
         "assignmentId": placement.assignment_id,
@@ -237,6 +256,10 @@ def _placement_out(placement: Placement, release: CurriculumRelease) -> dict:
         "eligibleSkillIds": placement.eligible_skill_ids,
         "scoreBySkill": placement.score_by_skill,
         "completedAt": placement.completed_at,
+        "subjectId": subject_id,
+        "subjectName": (subject or {}).get("label") or subject_id,
+        "subjectPosition": subject_position,
+        "subjectTotal": subject_total,
     }
 
 
@@ -317,10 +340,22 @@ async def get_student_placement(student: Student = Depends(get_current_student))
         Assignment.status == "active",
         Assignment.placement_required == True,
     ).sort("priority", "created_at").to_list()
+    assessed: list[tuple[Assignment, Placement, CurriculumRelease]] = []
     for assignment in assignments:
         placement, release = await _get_or_create_placement(assignment)
+        # Initialise every subject before choosing the next screen. Subjects with no
+        # placement-compatible questions are skipped and must not inflate “1 of 2”.
+        if placement.status != "skipped":
+            assessed.append((assignment, placement, release))
+    for index, (assignment, placement, release) in enumerate(assessed):
         if placement.status in {"pending", "in_progress"}:
-            return _placement_out(placement, release)
+            return _placement_out(
+                placement,
+                release,
+                assignment,
+                subject_position=index + 1,
+                subject_total=len(assessed),
+            )
     return {"placementId": None, "status": "none", "items": [], "frontierSkillId": None, "eligibleSkillIds": []}
 
 
@@ -357,7 +392,7 @@ async def submit_student_placement(
     placement.completed_at = datetime.now(timezone.utc)
     await placement.save()
     await _upsert_progression(placement)
-    return _placement_out(placement, release)
+    return _placement_out(placement, release, assignment)
 
 
 @router.get("/students/{student_id}/placements")
@@ -368,5 +403,6 @@ async def list_student_placements(student_id: str, user: User = Depends(get_curr
     for row in rows:
         release = await CurriculumRelease.find_one(CurriculumRelease.release_id == row.release_id)
         if release:
-            output.append(_placement_out(row, release))
+            assignment = await _get_by_id(Assignment, row.assignment_id)
+            output.append(_placement_out(row, release, assignment))
     return {"placements": output}

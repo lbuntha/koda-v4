@@ -21,7 +21,7 @@ from datetime import datetime, timedelta, timezone
 
 from ...core.config import settings
 from ...core.logging import get_logger
-from ...core.mail import Message, get_mailer
+from ...core.mail import Message, resolve_mailer
 from ...models.password_reset import PasswordResetToken
 from ...models.user import User
 
@@ -76,7 +76,7 @@ async def issue(user: User) -> str:
 
     message = compose(user.name or "there", token)
     message.to = str(user.email)
-    get_mailer().send(message)
+    (await resolve_mailer()).send(message)
     # Never the token or the link — this line ends up in shipped logs.
     logger.info("password reset requested user_id=%s", user.id)
     return token

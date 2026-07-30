@@ -1,11 +1,12 @@
 import React from "react";
 import { CheckCircle2, ChevronDown, Lock, Play, RotateCcw } from "lucide-react";
 import type { CurriculumPath, PathUnit } from "../../../api/course";
-import { Button, Card, CardContent, Tabs, TabsList, TabsTrigger } from "../../../components/ui";
+import { Button, Card, CardContent } from "../../../components/ui";
 import { unitAccentTone, unitIcon } from "../../../curriculum/unitPresentation";
 
 interface Props {
   paths: CurriculumPath[];
+  subjectName: string;
   playableSkillIds: ReadonlySet<string>;
   thumbnailBySkillId: ReadonlyMap<string, string | undefined>;
   onStartSkill: (skillId: string) => void;
@@ -13,7 +14,6 @@ interface Props {
 
 interface SkillUnitView {
   id: string;
-  subject: string;
   unit: PathUnit;
   completed: number;
   total: number;
@@ -26,7 +26,6 @@ const buildUnits = (paths: CurriculumPath[]): SkillUnitView[] => paths.flatMap(p
     const completed = unit.skills.filter(skill => skill.status === "completed").length;
     return {
       id: `${path.assignmentId}:${unit.unitId ?? unit.unitLabel}`,
-      subject: unit.subjectLabel?.trim() || "Skills",
       unit,
       completed,
       total,
@@ -35,21 +34,17 @@ const buildUnits = (paths: CurriculumPath[]): SkillUnitView[] => paths.flatMap(p
   }),
 );
 
-/** Browse every assigned curriculum unit by its real subject and completion state. */
+/** Browse the selected subject's curriculum units and completion state. */
 export const SkillsExplorerSection: React.FC<Props> = ({
   paths,
+  subjectName,
   playableSkillIds,
   thumbnailBySkillId,
   onStartSkill,
 }) => {
   const units = buildUnits(paths);
-  const subjects = ["All", ...new Set(units.map(unit => unit.subject))];
-  const [activeSubject, setActiveSubject] = React.useState("All");
   const [expandedUnitId, setExpandedUnitId] = React.useState<string | null>(null);
   const [showAllSkills, setShowAllSkills] = React.useState(false);
-  const visibleUnits = activeSubject === "All"
-    ? units
-    : units.filter(unit => unit.subject === activeSubject);
 
   if (units.length === 0) return null;
 
@@ -59,31 +54,14 @@ export const SkillsExplorerSection: React.FC<Props> = ({
       className="mt-6"
     >
       <header>
-        <h2 className="text-base font-black text-[#27334A] sm:text-lg dark:text-white">Explore all skills</h2>
+        <h2 className="text-base font-black text-[#27334A] sm:text-lg dark:text-white">{subjectName} skills</h2>
         <p className="mt-0.5 text-[10px] font-bold text-[#8792A5] sm:text-[11px] dark:text-[#8F99AD]">
-          Browse your assigned subjects and see what you have completed.
+          Explore each unit and continue from where you left off.
         </p>
       </header>
 
-      <Tabs
-        value={activeSubject}
-        variant="learner"
-        className="mt-4"
-        onValueChange={subject => {
-          setActiveSubject(subject);
-          setExpandedUnitId(null);
-          setShowAllSkills(false);
-        }}
-      >
-        <TabsList aria-label="Subjects" className="[scrollbar-width:none]">
-          {subjects.map(subject => (
-            <TabsTrigger key={subject} value={subject}>{subject}</TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
-
       <div className="mt-4 space-y-2.5">
-        {visibleUnits.map(entry => {
+        {units.map(entry => {
           const fallbackSeed = entry.unit.unitId ?? entry.unit.unitLabel;
           const Icon = unitIcon(entry.unit.unitIcon ?? undefined, fallbackSeed);
           const summary = entry.unit.skills.slice(0, 2).map(skill => skill.skillLabel).join(" · ");
@@ -117,9 +95,6 @@ export const SkillsExplorerSection: React.FC<Props> = ({
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                     <h3 className="truncate text-sm font-black text-[#28334A] sm:text-base dark:text-[#F2EEFF]">{entry.unit.unitLabel}</h3>
-                    {activeSubject === "All" && (
-                      <span className="text-[9px] font-extrabold uppercase tracking-wide text-[#8D78D7] dark:text-[#AFA0E8]">{entry.subject}</span>
-                    )}
                   </div>
                   {summary && <p className="mt-0.5 truncate text-[10px] font-semibold text-[#8A95A8] sm:text-[11px] dark:text-[#8F99AD]">{summary}</p>}
                   <p className="mt-1 text-[10px] font-extrabold text-[#68758A] dark:text-[#A8B0C1]">

@@ -80,6 +80,20 @@ class StreakConfigIn(BaseModel):
     grace_days: int = Field(default=1, ge=0, le=7)
 
 
+class NotificationsConfigIn(BaseModel):
+    """Admin-level kill switches for the automated notification types."""
+
+    auto_achievement_enabled: bool = True
+    auto_streak_enabled: bool = True
+    auto_weekly_digest_enabled: bool = True
+    weekly_digest_day: Literal["mon", "tue", "wed", "thu", "fri", "sat", "sun"] = "sun"
+    streak_milestones: list[int] = Field(default_factory=lambda: [3, 7, 14, 30, 60, 100])
+    auto_review_enabled: bool = True
+    auto_inactivity_enabled: bool = True
+    inactivity_days: int = Field(default=7, ge=2, le=90)
+    auto_pin_lockout_enabled: bool = True
+
+
 class ScoringConfigIn(BaseModel):
     weights: ScoreWeightsIn
     developingScore: float = Field(ge=0, le=1)
@@ -92,6 +106,7 @@ class ScoringConfigIn(BaseModel):
     placement: PlacementConfigIn
     recommendation: RecommendationConfigIn = Field(default_factory=RecommendationConfigIn)
     streak: StreakConfigIn = Field(default_factory=StreakConfigIn)
+    notifications: NotificationsConfigIn = Field(default_factory=NotificationsConfigIn)
 
     @model_validator(mode="after")
     def thresholds_are_ordered(self):
@@ -113,6 +128,15 @@ class SettingsOut(BaseModel):
     ai_model: str
     api_key_configured: bool
     api_key_hint: str | None = None
+    # Effective mail transport (env default, or the admin override below if set).
+    mail_transport: str
+    mail_configured: bool
+    mail_from: str | None = None
+    smtp_host: str | None = None
+    smtp_port: int | None = None
+    smtp_username: str | None = None
+    smtp_use_tls: bool | None = None
+    smtp_password_hint: str | None = None
     scoring: ScoringConfigIn
     scoring_revision: int
 
@@ -122,6 +146,14 @@ class SettingsUpdate(BaseModel):
     ai_model: str | None = None
     openai_api_key: str | None = Field(default=None, max_length=300)
     clear_api_key: bool = False
+    mail_transport: Literal["console", "smtp"] | None = None
+    mail_from: str | None = Field(default=None, max_length=200)
+    smtp_host: str | None = Field(default=None, max_length=200)
+    smtp_port: int | None = Field(default=None, ge=1, le=65535)
+    smtp_username: str | None = Field(default=None, max_length=200)
+    smtp_password: str | None = Field(default=None, max_length=300)
+    clear_smtp_password: bool = False
+    smtp_use_tls: bool | None = None
     scoring: ScoringConfigIn | None = None
     scoring_revision: int | None = Field(default=None, ge=1)
 
@@ -201,3 +233,26 @@ class SubjectIn(BaseModel):
     @classmethod
     def clean_text(cls, value: str) -> str:
         return value.strip()
+
+
+class CurriculumOfferingIn(BaseModel):
+    grade_id: str = Field(min_length=2, max_length=80)
+    subject_id: str = Field(min_length=2, max_length=100)
+    curriculum_id: str = Field(min_length=1, max_length=120)
+    release_id: str = Field(min_length=1, max_length=120)
+    active: bool = True
+    successor_grade_id: str | None = Field(default=None, min_length=2, max_length=80)
+    successor_subject_id: str | None = Field(default=None, min_length=2, max_length=100)
+    promotion_completion_rule: Literal[
+        "activities_completed", "proficient", "master"
+    ] = "activities_completed"
+    promotion_placement_required: bool = True
+    revision: int = Field(default=0, ge=0)
+
+    @field_validator(
+        "grade_id", "subject_id", "curriculum_id", "release_id",
+        "successor_grade_id", "successor_subject_id",
+    )
+    @classmethod
+    def clean_ids(cls, value: str | None) -> str | None:
+        return value.strip() if value is not None else None

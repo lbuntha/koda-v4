@@ -14,3 +14,7 @@ class SessionEndIn(BaseModel):
 class RecommendationSkipIn(BaseModel):
     assignment_id: str = Field(min_length=1, max_length=120)
     skill_id: str = Field(min_length=1, max_length=120)
+
+
+class SubjectSelectionIn(BaseModel):
+    subject_id: str = Field(min_length=1, max_length=120)

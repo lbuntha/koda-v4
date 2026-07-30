@@ -8,6 +8,14 @@ const DEFAULTS: AppSettings = {
   ai_model: "gpt-4o-mini",
   api_key_configured: false,
   api_key_hint: null,
+  mail_transport: "console",
+  mail_configured: false,
+  mail_from: null,
+  smtp_host: null,
+  smtp_port: null,
+  smtp_username: null,
+  smtp_use_tls: null,
+  smtp_password_hint: null,
   scoring_revision: 1,
   scoring: {
     weights: { firstTry: 0.45, accuracy: 0.2, independence: 0.2, speed: 0.15 },
@@ -41,6 +49,17 @@ const DEFAULTS: AppSettings = {
       min_events_per_day: 1,
       grace_days: 1,
     },
+    notifications: {
+      auto_achievement_enabled: true,
+      auto_streak_enabled: true,
+      auto_weekly_digest_enabled: true,
+      weekly_digest_day: "sun",
+      streak_milestones: [3, 7, 14, 30, 60, 100],
+      auto_review_enabled: true,
+      auto_inactivity_enabled: true,
+      inactivity_days: 7,
+      auto_pin_lockout_enabled: true,
+    },
   },
 };
 
@@ -51,6 +70,7 @@ interface AppSettingsContextValue {
   /** The last load failed, so `settings` holds defaults rather than this account's values. */
   loadError: boolean;
   testAi: () => Promise<void>;
+  testMail: () => Promise<string>;
 }
 
 const AppSettingsContext = createContext<AppSettingsContextValue | null>(null);
@@ -97,6 +117,10 @@ export const AppSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ c
     },
     testAi: async () => {
       await settingsApi.testAi();
+    },
+    testMail: async () => {
+      const result = await settingsApi.testMail();
+      return result.sentTo;
     },
   }), [settings, loading, loadError]);
 

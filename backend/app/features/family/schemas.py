@@ -28,6 +28,15 @@ class ChildUpdate(BaseModel):
     pin: str | None = Field(default=None, min_length=4, max_length=8)
 
 
+class NotificationPrefsIn(BaseModel):
+    """One optional field per feature: the screen sends only the switch that moved,
+    so an absent field must leave that preference alone."""
+
+    email_digest_enabled: bool | None = None
+    email_inactivity_enabled: bool | None = None
+    email_announcements_enabled: bool | None = None
+
+
 class ChildOut(BaseModel):
     id: str
     name: str

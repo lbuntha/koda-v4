@@ -177,7 +177,11 @@ def recommend(
                 "excluded": None,
             }
             key = (assignment["id"], skill_id)
-            if key in (completed_keys or set()):
+            if level == "master" and not is_due:
+                # Mastery is a terminal curriculum state. Keep future scheduled reviews,
+                # but do not turn a completed curriculum into endless generic stretch work.
+                candidate["excluded"] = "mastered"
+            elif key in (completed_keys or set()):
                 candidate["excluded"] = "completed_session"
             elif key in skipped_keys:
                 candidate["excluded"] = "skip_cooldown"

@@ -2,6 +2,7 @@ import React from "react";
 import { Plus } from "lucide-react";
 import type { AnalyticsSummary } from "../api/analytics";
 import type { Child } from "../api/family";
+import { useAcademicCatalog } from "../components/academic";
 import { Spinner } from "../components/ui";
 import { ParentChildCard } from "./ParentChildCard";
 
@@ -42,6 +43,7 @@ export const ParentChildrenGrid: React.FC<Props> = ({
   onRemove,
   onUnlockPin,
 }) => {
+  const { subjects } = useAcademicCatalog();
   if (loading) return <div className="flex justify-center py-20"><Spinner label="Loading children" className="text-[#7252D8]" /></div>;
   if (error) return <div className="rounded-xl bg-rose-50 px-4 py-3 text-xs font-bold text-rose-700 dark:bg-rose-400/10 dark:text-rose-300">{error}</div>;
 
@@ -51,6 +53,7 @@ export const ParentChildrenGrid: React.FC<Props> = ({
         <ParentChildCard
           key={child.id}
           child={child}
+          subjects={subjects}
           summary={summaries[child.id]}
           loadingSummary={loadingSummaries}
           showRemove={allowRemove}

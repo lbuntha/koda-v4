@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Sparkles } from "lucide-react";
-import { Input, FormModal, FormField } from "../components/ui";
+import { Input, FormModal, FormField, Select } from "../components/ui";
 import { AvatarPicker, AVATARS } from "./AvatarPicker";
 import { KidAvatar } from "../components/KidAvatar";
 import { Child, ChildInput } from "../api/family";
-import { GradeSelect, SubjectSelect, useAcademicCatalog } from "../components/academic";
+import { GradeSelect, useAcademicCatalog } from "../components/academic";
 import { KidOnboardingWizard } from "./onboarding/KidOnboardingWizard";
+import { SubjectChoiceGrid } from "./SubjectChoiceGrid";
 
 interface Props {
   isOpen: boolean;
@@ -20,9 +21,10 @@ export const ChildFormModal: React.FC<Props> = ({ isOpen, onClose, onSubmit, ini
   const [avatar, setAvatar] = useState(AVATARS[0]);
   const [gradeLevel, setGradeLevel] = useState("grade_1");
   const [primarySubject, setPrimarySubject] = useState("math");
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [pin, setPin] = useState("");
 
-  const { grades, subjects, loading: catalogLoading, error: catalogError } = useAcademicCatalog();
+  const { grades, subjects, loading: catalogLoading } = useAcademicCatalog();
 
   useEffect(() => {
     if (!isOpen) return;
@@ -30,21 +32,34 @@ export const ChildFormModal: React.FC<Props> = ({ isOpen, onClose, onSubmit, ini
     setAvatar(initial?.avatar ?? AVATARS[0]);
     const nextGrade = initial?.grade_level ?? grades[0]?.key ?? "grade_1";
     const subjectsForGrade = subjects.filter(subject => !subject.grade_id || subject.grade_id === nextGrade || subject.grade_id === "all");
+    const existingSubjects = (initial?.learning_goals?.length ? initial.learning_goals : [initial?.primary_subject]).filter((key): key is string => Boolean(key) && subjectsForGrade.some(subject => subject.key === key));
+    const fallbackSubject = subjectsForGrade.find(subject => subject.content_ready)?.key ?? "";
+    const nextSubjects = existingSubjects.length ? existingSubjects : fallbackSubject ? [fallbackSubject] : [];
     setGradeLevel(nextGrade);
-    setPrimarySubject(initial?.primary_subject ?? subjectsForGrade[0]?.key ?? "math");
+    setSelectedSubjects(nextSubjects);
+    setPrimarySubject(nextSubjects.includes(initial?.primary_subject ?? "") ? initial?.primary_subject ?? nextSubjects[0] : nextSubjects[0] ?? "");
     setPin("");
   }, [isOpen, initial, grades, subjects]);
 
   const changeGrade = (nextGrade: string) => {
     setGradeLevel(nextGrade);
     const matchingSubjects = subjects.filter(subject => !subject.grade_id || subject.grade_id === nextGrade || subject.grade_id === "all");
-    if (!matchingSubjects.some(subject => subject.key === primarySubject)) {
-      setPrimarySubject(matchingSubjects[0]?.key ?? "");
-    }
+    const retained = selectedSubjects.filter(key => matchingSubjects.some(subject => subject.key === key && subject.content_ready));
+    const next = retained.length ? retained : matchingSubjects.find(subject => subject.content_ready) ? [matchingSubjects.find(subject => subject.content_ready)!.key] : [];
+    setSelectedSubjects(next);
+    setPrimarySubject(next.includes(primarySubject) ? primarySubject : next[0] ?? "");
+  };
+
+  const changeSubjects = (next: string[]) => {
+    setSelectedSubjects(next);
+    if (!next.includes(primarySubject)) setPrimarySubject(next[0] ?? "");
   };
 
   const submit = async () => {
     if (pin && !/^\d{4,8}$/.test(pin)) throw new Error("PIN must be 4–8 digits.");
+    if (!selectedSubjects.length) throw new Error("Choose at least one subject with published content.");
+    const unavailable = selectedSubjects.filter(key => !subjects.find(subject => subject.key === key)?.content_ready);
+    if (unavailable.length) throw new Error("Remove subjects marked as unavailable before saving.");
 
     let finalAvatar = avatar;
     if (avatar.startsWith("http://") || avatar.startsWith("https://")) {
@@ -59,11 +74,13 @@ export const ChildFormModal: React.FC<Props> = ({ isOpen, onClose, onSubmit, ini
       }
     }
 
+    const orderedSubjects = [primarySubject, ...selectedSubjects.filter(key => key !== primarySubject)];
     const data: ChildInput = {
       name: name.trim(),
       avatar: finalAvatar,
       grade_level: gradeLevel,
       primary_subject: primarySubject,
+      learning_goals: orderedSubjects,
     };
     if (pin.trim()) data.pin = pin.trim();
     await onSubmit(data);
@@ -86,7 +103,7 @@ export const ChildFormModal: React.FC<Props> = ({ isOpen, onClose, onSubmit, ini
       description={editing ? "Update avatar, grade, and profile details." : "Create a new kid profile with personalized grade placement recommendations."}
       submitLabel={editing ? "Save Profile" : "Add Student"}
       onSubmit={submit}
-      maxWidthClassName="max-w-md sm:max-w-lg"
+      maxWidthClassName="max-w-md sm:max-w-2xl"
     >
       {/* Live Profile Header Preview */}
       <div className="mb-4 flex flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-[#F5F2FF] to-[#EBE4FF] p-3.5 text-center dark:from-white/10 dark:to-white/5 border border-indigo-100/70 dark:border-white/10">
@@ -117,7 +134,7 @@ export const ChildFormModal: React.FC<Props> = ({ isOpen, onClose, onSubmit, ini
         />
       </FormField>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <FormField
           label="Grade Model"
           hint="Loaded from Curriculum models catalog."
@@ -129,20 +146,27 @@ export const ChildFormModal: React.FC<Props> = ({ isOpen, onClose, onSubmit, ini
           />
         </FormField>
 
-        <FormField
-          label="Subject Focus"
-          hint={catalogError ? "Using fallback subjects because admin settings could not be loaded." : "Loaded from the subjects configured in Admin Settings."}
-        >
-          <SubjectSelect
+        <FormField label="Primary subject" hint="This subject opens first when learning begins.">
+          <Select
             value={primarySubject}
             onChange={(e) => setPrimarySubject(e.target.value)}
-            gradeId={gradeLevel}
-            disabled={catalogLoading}
+            disabled={catalogLoading || selectedSubjects.length === 0}
             required
             className="h-11 rounded-xl text-sm font-bold"
-          />
+          >
+            {selectedSubjects.map(key => <option key={key} value={key}>{subjects.find(subject => subject.key === key)?.name ?? key}</option>)}
+          </Select>
         </FormField>
       </div>
+
+      <FormField label="Learning subjects" hint="Select every subject this child can access. Subjects without published content stay unavailable.">
+        <SubjectChoiceGrid
+          subjects={subjects.filter(subject => !subject.grade_id || subject.grade_id === gradeLevel || subject.grade_id === "all")}
+          selected={[primarySubject, ...selectedSubjects.filter(key => key !== primarySubject)].filter(Boolean)}
+          onChange={changeSubjects}
+          compact
+        />
+      </FormField>
 
       <FormField label="Select Avatar">
         <AvatarPicker value={avatar} onChange={setAvatar} />

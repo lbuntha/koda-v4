@@ -70,6 +70,27 @@ DEFAULT_SCORING_CONFIG: dict[str, Any] = {
         "xp": {"correctAnswer": 4, "firstTryBonus": 2, "activityCompletion": 12},
         "level": {"xpPerLevel": 120},
     },
+    # Global kill switches for the automated notification types. Turning one off
+    # stops new notifications of that kind from being generated; it does not
+    # retract ones already sent. A parent's own per-account opt-outs (the weekly
+    # digest email, announcement emails) live on `User`, not here — these are the
+    # admin-level "does this feature exist at all" switches.
+    "notifications": {
+        "auto_achievement_enabled": True,
+        "auto_streak_enabled": True,
+        "auto_weekly_digest_enabled": True,
+        "weekly_digest_day": "sun",  # mon|tue|wed|thu|fri|sat|sun
+        "streak_milestones": [3, 7, 14, 30, 60, 100],
+        # One grouped note when skills come due for review — never one per skill,
+        # which at a realistic backlog would fire five to ten times a day.
+        "auto_review_enabled": True,
+        # A parent hears once when a learner who had been practising goes quiet.
+        "auto_inactivity_enabled": True,
+        "inactivity_days": 7,
+        # A locked PIN is a dead end the child cannot escape and no adult is told
+        # about; this is the only notification treated as an account alert.
+        "auto_pin_lockout_enabled": True,
+    },
 }
 
 

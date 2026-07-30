@@ -2,12 +2,14 @@ import React from "react";
 import { BarChart3, LockOpen, Pencil, Play, Trash2 } from "lucide-react";
 import type { AnalyticsSummary } from "../api/analytics";
 import type { Child } from "../api/family";
+import type { SubjectCatalogItem } from "../api/academic";
 import { KidAvatar } from "../components/KidAvatar";
 import { Button, Card, CardContent, Skeleton } from "../components/ui";
 import { PROFILE_TONE_CLASS, profileToneFor } from "./profileTone";
 
 interface Props {
   child: Child;
+  subjects?: SubjectCatalogItem[];
   summary?: AnalyticsSummary;
   loadingSummary?: boolean;
   showRemove?: boolean;
@@ -23,6 +25,7 @@ const label = (value?: string | null) =>
 
 export const ParentChildCard: React.FC<Props> = ({
   child,
+  subjects = [],
   summary,
   loadingSummary,
   showRemove,
@@ -37,6 +40,8 @@ export const ParentChildCard: React.FC<Props> = ({
   const assigned = summary?.rank.assignedSkills ?? 0;
   const progress = assigned > 0 ? Math.min(100, Math.round((mastered / assigned) * 100)) : 0;
   const pinLocked = Boolean(child.pin_locked_until && new Date(child.pin_locked_until).getTime() > Date.now());
+  const subjectIds = child.learning_goals?.length ? child.learning_goals : child.primary_subject ? [child.primary_subject] : [];
+  const subjectName = (key: string) => subjects.find(subject => subject.key === key)?.name ?? label(key.replace(/^grade[-_]\d+[-_]?/i, ""));
 
   return (
     <Card className="overflow-hidden rounded-3xl border-0 bg-white shadow-[0_12px_34px_-24px_rgba(39,51,74,0.5)] dark:bg-white/[0.045] dark:shadow-none">
@@ -49,9 +54,7 @@ export const ParentChildCard: React.FC<Props> = ({
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
                 <h3 className="truncate text-base font-black text-[#27334A] dark:text-white">{child.name}</h3>
-                <p className="mt-0.5 truncate text-xs font-bold text-[#8792A5] dark:text-[#9AA3B5]">
-                  {label(child.grade_level)} · {label(child.primary_subject)}
-                </p>
+                <p className="mt-0.5 truncate text-xs font-bold text-[#8792A5] dark:text-[#9AA3B5]">{label(child.grade_level)}</p>
               </div>
               <div className="flex shrink-0 gap-0.5">
                 <Button type="button" variant="ghost" size="icon" onClick={onProgress} aria-label={`View ${child.name}'s progress`} className="h-8 w-8 rounded-xl text-[#7C72A0] hover:text-[#6844EA] dark:text-[#AFA6C8]">
@@ -69,6 +72,16 @@ export const ParentChildCard: React.FC<Props> = ({
             </div>
           </div>
         </div>
+
+        {subjectIds.length > 0 && (
+          <div className="mt-2.5 flex flex-wrap gap-1.5" aria-label={`${child.name}'s subjects`}>
+            {subjectIds.map((key, index) => (
+              <span key={key} className={`rounded-full px-2.5 py-1 text-[10px] font-extrabold ${index === 0 ? "bg-[#EEE9FF] text-[#6844EA] dark:bg-violet-400/15 dark:text-[#CDBEFF]" : "bg-[#F1F4F8] text-[#657086] dark:bg-white/[0.07] dark:text-[#B3BBC9]"}`}>
+                {subjectName(key)}{index === 0 ? " · Primary" : ""}
+              </span>
+            ))}
+          </div>
+        )}
 
         <div className="mt-3">
           {loadingSummary ? (

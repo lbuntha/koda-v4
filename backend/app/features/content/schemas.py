@@ -1,6 +1,6 @@
 """Request models for the content feature."""
 
-from typing import Any
+from typing import Any, Literal
 import re
 
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -69,7 +69,7 @@ class CurriculumIn(BaseModel):
                 raise ValueError(f"Unit {unit['id']} presentation must be an object")
             presentation = raw_presentation or {}
             icon = presentation.get("icon")
-            if icon is not None and icon not in {"hash", "brain", "shapes", "puzzle", "sparkles", "book"}:
+            if icon is not None and icon not in {"hash", "brain", "shapes", "puzzle", "sparkles", "book", "leaf", "paw", "weather"}:
                 raise ValueError(f"Unit {unit['id']} presentation icon is invalid")
             accent = presentation.get("accent")
             if accent is not None and accent not in {"purple", "blue", "green", "amber", "pink"}:
@@ -188,6 +188,17 @@ class CurriculumCreateIn(BaseModel):
 
 class CurriculumArchiveIn(BaseModel):
     archived: bool = True
+
+
+class CurriculumRolloutIn(BaseModel):
+    grade_id: str = Field(min_length=1, max_length=120)
+    subject_id: str = Field(min_length=1, max_length=120)
+    strategy: Literal["new_learners", "active_learners"] = "new_learners"
+
+    @field_validator("grade_id", "subject_id")
+    @classmethod
+    def clean_rollout_ids(cls, value: str) -> str:
+        return value.strip()
 
 
 class QuestionsIn(BaseModel):

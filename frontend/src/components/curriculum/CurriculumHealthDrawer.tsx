@@ -11,7 +11,7 @@
 
 import React from "react";
 import { AlertOctagon, AlertTriangle, ChevronRight, CheckCircle2 } from "lucide-react";
-import { Drawer, Badge } from "../ui";
+import { Drawer, Badge, Button } from "../ui";
 import { CurriculumIssue } from "../../curriculum/types";
 
 interface CurriculumHealthDrawerProps {
@@ -19,6 +19,7 @@ interface CurriculumHealthDrawerProps {
   onClose: () => void;
   issues: CurriculumIssue[];
   onJumpToIssue: (issue: CurriculumIssue) => void;
+  onRepairQuestionIssue: (issue: CurriculumIssue) => void;
 }
 
 const LEVEL_LABEL: Record<CurriculumIssue["level"], string> = {
@@ -30,7 +31,13 @@ const LEVEL_LABEL: Record<CurriculumIssue["level"], string> = {
   rewards: "Rewards",
 };
 
-export const CurriculumHealthDrawer: React.FC<CurriculumHealthDrawerProps> = ({ isOpen, onClose, issues, onJumpToIssue }) => {
+export const CurriculumHealthDrawer: React.FC<CurriculumHealthDrawerProps> = ({
+  isOpen,
+  onClose,
+  issues,
+  onJumpToIssue,
+  onRepairQuestionIssue,
+}) => {
   const errors = issues.filter(i => i.severity === "error");
   const warnings = issues.filter(i => i.severity === "warning");
 
@@ -39,13 +46,14 @@ export const CurriculumHealthDrawer: React.FC<CurriculumHealthDrawerProps> = ({ 
   const renderRow = (issue: CurriculumIssue, index: number) => {
     const jumpable = canJumpTo(issue);
     return (
-      <button
+      <div
         key={`${issue.level}-${issue.id}-${index}`}
         onClick={() => jumpable && onJumpToIssue(issue)}
-        disabled={!jumpable}
-        className={`w-full flex items-start gap-2.5 p-3 rounded-xl border text-left transition-colors ${
-          issue.severity === "error" ? "border-rose-200 bg-rose-50" : "border-amber-200 bg-amber-50"
-        } ${jumpable ? "hover:brightness-95 cursor-pointer" : "cursor-default"}`}
+        role={jumpable ? "button" : undefined}
+        tabIndex={jumpable ? 0 : undefined}
+        className={`flex w-full items-start gap-2.5 rounded-xl p-3 text-left ring-1 transition-colors ${
+          issue.severity === "error" ? "bg-rose-50/70 ring-rose-200" : "bg-amber-50/70 ring-amber-200"
+        } ${jumpable ? "cursor-pointer hover:brightness-95" : ""}`}
       >
         {issue.severity === "error" ? (
           <AlertOctagon size={14} className="text-rose-500 flex-shrink-0 mt-0.5" />
@@ -59,9 +67,24 @@ export const CurriculumHealthDrawer: React.FC<CurriculumHealthDrawerProps> = ({ 
           <p className={`text-xs leading-snug ${issue.severity === "error" ? "text-rose-700" : "text-amber-700"}`}>
             {issue.message}
           </p>
+          {issue.level === "question" && (
+            <div className="mt-2">
+              <Button
+                variant="outline"
+                size="xs"
+                onClick={event => {
+                  event.stopPropagation();
+                  onRepairQuestionIssue(issue);
+                }}
+              >
+                Unassign safely
+              </Button>
+              <p className="mt-1 text-[10px] leading-4 text-rose-600/80">Keeps the question; removes only its broken skill link.</p>
+            </div>
+          )}
         </div>
         {jumpable && <ChevronRight size={14} className="text-slate-400 flex-shrink-0 mt-0.5" />}
-      </button>
+      </div>
     );
   };
 
@@ -77,13 +100,13 @@ export const CurriculumHealthDrawer: React.FC<CurriculumHealthDrawerProps> = ({ 
         <div className="space-y-5">
           {errors.length > 0 && (
             <div className="space-y-2">
-              <span className="text-2xs font-bold text-rose-600 uppercase tracking-widest">Errors ({errors.length})</span>
+              <span className="koda-admin-chip text-rose-600">Errors ({errors.length})</span>
               <div className="space-y-1.5">{errors.map(renderRow)}</div>
             </div>
           )}
           {warnings.length > 0 && (
             <div className="space-y-2">
-              <span className="text-2xs font-bold text-amber-600 uppercase tracking-widest">Warnings ({warnings.length})</span>
+              <span className="koda-admin-chip text-amber-600">Warnings ({warnings.length})</span>
               <div className="space-y-1.5">{warnings.map(renderRow)}</div>
             </div>
           )}

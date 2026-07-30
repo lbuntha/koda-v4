@@ -12,7 +12,7 @@ import { CelebrationEffects } from "./home/shared";
 interface Props {
   quiz: PlacementQuiz;
   band: GradeBand;
-  onComplete: () => void;
+  onComplete: () => void | Promise<void>;
   /** Leave without submitting; the same server placement resumes next time. */
   onExit: () => void;
 }
@@ -29,6 +29,8 @@ export const PlacementWarmup: React.FC<Props> = ({ quiz, band, onComplete, onExi
   const isDark = theme === "dark";
   const isKid = band === "kid";
   const [result, setResult] = useState<PlacementResult | null>(null);
+  const [continuing, setContinuing] = useState(false);
+  const [continueError, setContinueError] = useState<string | null>(null);
 
   const questions = useMemo(() => quiz.items.map(item => ({
     ...item,
@@ -46,6 +48,22 @@ export const PlacementWarmup: React.FC<Props> = ({ quiz, band, onComplete, onExi
     if (!quiz.placementId) throw new Error("Placement is not available");
     setResult(await placementApi.submit(quiz.placementId, responses));
   };
+
+  const continuePlacement = async () => {
+    setContinuing(true);
+    setContinueError(null);
+    try {
+      await onComplete();
+    } catch (reason) {
+      setContinueError(reason instanceof Error ? reason.message : "Could not load the next subject yet.");
+    } finally {
+      setContinuing(false);
+    }
+  };
+
+  const subjectProgress = quiz.subjectPosition && quiz.subjectTotal
+    ? `Subject ${quiz.subjectPosition} of ${quiz.subjectTotal}`
+    : null;
 
   if (result) {
     const frontierItem = quiz.items.find(entry => entry.skillId === result.frontierSkillId)
@@ -79,7 +97,7 @@ export const PlacementWarmup: React.FC<Props> = ({ quiz, band, onComplete, onExi
           <div className="koda-celebration-copy">
             <p className={`mt-5 text-[10px] font-bold uppercase tracking-[0.18em] ${
               isDark ? "text-indigo-400" : isKid ? "text-[#7059C8]" : "text-[#6B57D8]"
-            }`}>{presentation.completionEyebrow}</p>
+            }`}>{[presentation.completionEyebrow, quiz.subjectName, subjectProgress].filter(Boolean).join(" · ")}</p>
             <h1 className={isKid ? "mt-2 text-3xl font-black" : "mt-2 text-2xl font-extrabold"}>
               {presentation.completionTitle}
             </h1>
@@ -102,10 +120,15 @@ export const PlacementWarmup: React.FC<Props> = ({ quiz, band, onComplete, onExi
               </div>
             </div>
           )}
+          {continueError && (
+            <p className="mt-4 text-xs font-semibold text-rose-600 dark:text-rose-300">{continueError}</p>
+          )}
           <Button
             size={isKid ? "lg" : "md"}
             className={`koda-celebration-cta mt-6 w-full ${isKid ? "h-15 rounded-full text-lg font-black" : ""}`}
-            onClick={onComplete}
+            onClick={() => void continuePlacement()}
+            loading={continuing}
+            loadingText="Finding what’s next..."
           >
             {presentation.continueLabel} <ChevronRight size={16} />
           </Button>
@@ -125,7 +148,7 @@ export const PlacementWarmup: React.FC<Props> = ({ quiz, band, onComplete, onExi
       onExit={onExit}
       kidMode={isKid}
       assessment={{
-        eyebrow: presentation.eyebrow,
+        eyebrow: [presentation.eyebrow, quiz.subjectName, subjectProgress].filter(Boolean).join(" · "),
         finishLabel: isKid ? "All done" : "Finish placement",
         responseId: question => placementIdByQuestionId.get(question.id) ?? question.id,
         onComplete: submit,

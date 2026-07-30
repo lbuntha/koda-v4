@@ -1,7 +1,7 @@
 # Koda — dev & container tasks. Run `make` (or `make help`) to list targets.
 
 .DEFAULT_GOAL := help
-.PHONY: help dev-local up down build logs restart clean api-shell mongo-shell seed seed-grade1 seed-grade1-missed seed-grade1-local seed-grade1-missed-local seed-docker
+.PHONY: help dev-local up down build logs restart clean api-shell mongo-shell seed seed-grade1 seed-grade1-missed seed-grade1-local seed-grade1-missed-local seed-grade2-science seed-grade2-science-local seed-docker
 
 help: ## List available targets
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -25,6 +25,12 @@ seed-grade1-local: ## Seed/reset Grade 1 fixture for make dev-local
 
 seed-grade1-missed-local: ## Seed Grade 1 with overdue retry/review recommendations locally
 	@cd backend && SEED_GRADE1_SCENARIO=missed ./.venv/bin/python scripts/seed_phase1_grade1.py
+
+seed-grade2-science: ## Seed Grade 2 Science and its Grade 1 promotion path in Docker
+	docker compose exec -T api python -m scripts.seed_grade2_science
+
+seed-grade2-science-local: ## Seed Grade 2 Science for make dev-local
+	@cd backend && ./.venv/bin/python -m scripts.seed_grade2_science
 
 seed-docker: ## Seed/reset the initial admin account (in Docker)
 	docker compose run --rm api python seed.py

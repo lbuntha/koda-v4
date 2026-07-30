@@ -9,12 +9,14 @@ from urllib.parse import quote
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
+from pymongo.errors import DuplicateKeyError
 
 from ...core.deps import get_current_student, get_current_user
 from ...core.logging import get_logger
 from ...core.permissions import authorize_guardian_read
 from ...core.runtime_settings import get_system_settings
 from ...models.assignment import Assignment, ProgressionState
+from ...models.academic import Subject
 from ...models.content import CurriculumRelease
 from ...models.event import LearningEvent
 from ...models.mastery import MasteryState
@@ -26,7 +28,7 @@ from .path import build_path
 from .recommendation import ENGINE_REVISION, recommend
 from .rewards import available_xp, calculate_xp, reward_config, skill_metadata
 from .skips import record_recommendation_skip
-from .schemas import RecommendationSkipIn, SessionEndIn, SessionStartIn
+from .schemas import RecommendationSkipIn, SessionEndIn, SessionStartIn, SubjectSelectionIn
 
 logger = get_logger("learning")
 
@@ -158,11 +160,14 @@ async def end_session(body: SessionEndIn, student: Student = Depends(get_current
     return _session_out(session)
 
 
-async def _course_inputs(student_id: str) -> tuple[list[dict[str, Any]], list[Assignment], dict[str, CurriculumRelease]]:
-    rows = await Assignment.find(
-        Assignment.student_id == student_id,
-        Assignment.status == "active",
-    ).sort("priority", "created_at").to_list()
+async def _course_inputs(
+    student_id: str,
+    subject_id: str | None = None,
+) -> tuple[list[dict[str, Any]], list[Assignment], dict[str, CurriculumRelease]]:
+    query: dict[str, Any] = {"student_id": student_id, "status": "active"}
+    if subject_id:
+        query["subject_id"] = subject_id
+    rows = await Assignment.find(query).sort("priority", "created_at").to_list()
     if not rows:
         return [], [], {}
     progressions = await ProgressionState.find(
@@ -315,13 +320,17 @@ async def _session_completion(
     session_id: str,
     releases: dict[str, CurriculumRelease],
     system_rewards: dict[str, Any] | None = None,
+    assignment_ids: set[str] | None = None,
 ) -> tuple[dict[tuple[str, str], str], list[dict[str, Any]], dict[str, Any]]:
-    rows = await LearningEvent.find(
+    filters: list[Any] = [
         LearningEvent.student_id == student_id,
         LearningEvent.session_id == session_id,
         LearningEvent.verified == True,
         {"event_type": {"$in": ["attempt", "lesson_complete"]}},
-    ).sort("client_timestamp_ms").to_list()
+    ]
+    if assignment_ids:
+        filters.append({"assignment_id": {"$in": list(assignment_ids)}})
+    rows = await LearningEvent.find(*filters).sort("client_timestamp_ms").to_list()
     statuses: dict[tuple[str, str], str] = {}
     completed_by_key: dict[tuple[str, str], dict[str, Any]] = {}
     for row in rows:
@@ -416,8 +425,9 @@ async def _build_today(
     session: StudentSession,
     mode: Literal["scheduled", "free"],
     persist: bool,
+    subject_id: str | None = None,
 ) -> dict[str, Any]:
-    assignment_inputs, assignments, releases = await _course_inputs(student_id)
+    assignment_inputs, assignments, releases = await _course_inputs(student_id, subject_id)
     if not assignment_inputs:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "No placement-ready assignment is available")
     # Loaded once here and threaded down: what playing is worth is an admin setting, so every
@@ -430,12 +440,14 @@ async def _build_today(
         session_id=session.session_id,
         releases=releases,
         system_rewards=system_rewards,
+        assignment_ids={str(item.id) for item in assignments},
     )
     primary_release = releases[assignments[0].release_id]
     authored_rewards = reward_config(primary_release.tree, system_rewards)
     if mode == "free":
         return {
             "mode": "free",
+            "subjectId": assignments[0].subject_id,
             "sessionId": session.session_id,
             "recommendationRunId": None,
             "queue": _annotate_queue(_free_items(assignment_inputs, releases, system_rewards), statuses),
@@ -453,6 +465,7 @@ async def _build_today(
         latest = await RecommendationRun.find_one(
             RecommendationRun.student_id == student_id,
             RecommendationRun.session_id == session.session_id,
+            RecommendationRun.subject_id == assignments[0].subject_id,
             RecommendationRun.invalidated_at == None,
         )
         if latest and not _run_matches_assignments(latest, assignments):
@@ -473,6 +486,7 @@ async def _build_today(
             )
             return {
                 "mode": "scheduled",
+                "subjectId": assignments[0].subject_id,
                 "sessionId": session.session_id,
                 "recommendationRunId": latest.run_id,
                 "queue": _annotate_queue(
@@ -517,22 +531,32 @@ async def _build_today(
 
     run = None
     if persist:
-        last = await RecommendationRun.find(
-            RecommendationRun.student_id == student_id,
-            RecommendationRun.session_id == session.session_id,
-        ).sort("-sequence").first_or_none()
-        run = RecommendationRun(
-            run_id=uuid4().hex,
-            student_id=student_id,
-            session_id=session.session_id,
-            sequence=(last.sequence + 1) if last else 1,
-            assignment_release_ids=_assignment_release_bindings(assignments),
-            scoring_revision=settings_doc.scoring_revision,
-            engine_revision=result["engine_revision"],
-            candidates=result["candidates"],
-            served_items=result["served_items"],
-        )
-        await run.insert()
+        # Math and Science may load almost together while the learner changes tabs. The
+        # sequence index is shared by the session, so allocate defensively if another
+        # request claims the same next number between our read and insert.
+        for attempt in range(4):
+            last = await RecommendationRun.find(
+                RecommendationRun.student_id == student_id,
+                RecommendationRun.session_id == session.session_id,
+            ).sort("-sequence").first_or_none()
+            run = RecommendationRun(
+                run_id=uuid4().hex,
+                student_id=student_id,
+                session_id=session.session_id,
+                subject_id=assignments[0].subject_id,
+                sequence=(last.sequence + 1) if last else 1,
+                assignment_release_ids=_assignment_release_bindings(assignments),
+                scoring_revision=settings_doc.scoring_revision,
+                engine_revision=result["engine_revision"],
+                candidates=result["candidates"],
+                served_items=result["served_items"],
+            )
+            try:
+                await run.insert()
+                break
+            except DuplicateKeyError:
+                if attempt == 3:
+                    raise
     quest = await _quest_payload(
         student_id=student_id,
         session_id=session.session_id,
@@ -543,6 +567,7 @@ async def _build_today(
     )
     return {
         "mode": "scheduled",
+        "subjectId": assignments[0].subject_id,
         "sessionId": session.session_id,
         "recommendationRunId": run.run_id if run else None,
         "engineRevision": ENGINE_REVISION,
@@ -559,15 +584,92 @@ async def _build_today(
 @router.get("/learning/today")
 async def learning_today(
     mode: Literal["scheduled", "free"] = "scheduled",
+    subject_id: str | None = None,
     student: Student = Depends(get_current_student),
 ):
     student_id = str(student.id)
     session = await _open_session(student_id)
-    return await _build_today(student_id=student_id, session=session, mode=mode, persist=True)
+    return await _build_today(
+        student_id=student_id,
+        session=session,
+        mode=mode,
+        persist=True,
+        subject_id=subject_id,
+    )
+
+
+@router.get("/learning/subjects")
+async def learning_subjects(student: Student = Depends(get_current_student)):
+    assignments = await Assignment.find(
+        Assignment.student_id == str(student.id),
+        Assignment.status == "active",
+    ).sort("priority", "created_at").to_list()
+    catalog = {
+        item.key: item
+        for item in await Subject.find({"key": {"$in": [row.subject_id for row in assignments if row.subject_id]}}).to_list()
+    }
+    progression_rows = await ProgressionState.find(
+        ProgressionState.student_id == str(student.id),
+        {"assignment_id": {"$in": [str(row.id) for row in assignments]}},
+    ).to_list()
+    progression = {row.assignment_id: row for row in progression_rows}
+    subjects = []
+    for assignment in assignments:
+        if not assignment.subject_id:
+            continue
+        item = catalog.get(assignment.subject_id)
+        state = progression.get(str(assignment.id))
+        ready = not assignment.placement_required or bool(
+            state and state.placement_status in {"completed", "skipped"}
+        )
+        subjects.append({
+            "id": assignment.subject_id,
+            "name": item.name if item else assignment.subject_id,
+            "icon": item.icon if item else "",
+            "color": item.color if item else "#7252D8",
+            "assignmentId": str(assignment.id),
+            "ready": ready,
+            "primary": assignment.subject_id == student.primary_subject,
+        })
+    subjects.sort(key=lambda item: (not item["primary"], item["name"].lower()))
+    current = next((
+        item["id"] for item in subjects
+        if item["id"] == student.preferred_subject and item["ready"]
+    ), None)
+    current = current or next((item["id"] for item in subjects if item["primary"] and item["ready"]), None)
+    current = current or next((item["id"] for item in subjects if item["ready"]), None)
+    return {"currentSubjectId": current, "subjects": subjects}
+
+
+@router.put("/learning/subjects/current")
+async def select_learning_subject(
+    body: SubjectSelectionIn,
+    student: Student = Depends(get_current_student),
+):
+    assignment = await Assignment.find_one(
+        Assignment.student_id == str(student.id),
+        Assignment.subject_id == body.subject_id,
+        Assignment.status == "active",
+    )
+    if not assignment:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "This subject is not assigned to the learner")
+    if assignment.placement_required:
+        progression = await ProgressionState.find_one(
+            ProgressionState.student_id == str(student.id),
+            ProgressionState.assignment_id == str(assignment.id),
+        )
+        if not progression or progression.placement_status not in {"completed", "skipped"}:
+            raise HTTPException(status.HTTP_409_CONFLICT, "Finish this subject’s placement check first")
+    student.preferred_subject = body.subject_id
+    await student.save()
+    return {"currentSubjectId": body.subject_id}
 
 
 @router.get("/learning/path")
-async def learning_path(student: Student = Depends(get_current_student)):
+async def learning_path(
+    subject_id: str | None = None,
+    student: Student = Depends(get_current_student),
+):
     """The whole assigned road, A→Z, with every skill's state.
 
     Complements `/learning/today`: that returns a short prioritised session plan, this returns
@@ -575,7 +677,7 @@ async def learning_path(student: Student = Depends(get_current_student)):
     skills are done, in progress, overdue, unlocked, or still waiting on an earlier one.
     """
     student_id = str(student.id)
-    assignment_inputs, assignments, _releases = await _course_inputs(student_id)
+    assignment_inputs, assignments, _releases = await _course_inputs(student_id, subject_id)
     if not assignment_inputs:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "No placement-ready assignment is available")
     mastery = await _mastery_inputs(student_id)

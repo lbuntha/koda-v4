@@ -46,7 +46,7 @@ export interface Subject {
   active?: boolean;
 }
 
-export type UnitIcon = "hash" | "brain" | "shapes" | "puzzle" | "sparkles" | "book";
+export type UnitIcon = "hash" | "brain" | "shapes" | "puzzle" | "sparkles" | "book" | "leaf" | "paw" | "weather";
 export type UnitAccent = "purple" | "blue" | "green" | "amber" | "pink";
 
 export interface Unit {
@@ -309,6 +309,28 @@ export function computeSkillCoverage(tree: CurriculumTree, questionSkillIds: (st
   });
 }
 
+export interface CurriculumQuestionReference {
+  curriculumId?: string;
+  skillId?: string;
+}
+
+/** Scope the account-wide question deck to one curriculum, retaining legacy rows by skill. */
+export function questionSkillIdsForCurriculum(
+  tree: CurriculumTree,
+  curriculumId: string | undefined,
+  questions: CurriculumQuestionReference[],
+): (string | undefined)[] {
+  if (!curriculumId) return questions.map(question => question.skillId);
+  const currentSkillIds = new Set(tree.skills.map(skill => skill.id));
+  return questions
+    .filter(question => (
+      question.curriculumId
+        ? question.curriculumId === curriculumId
+        : Boolean(question.skillId && currentSkillIds.has(question.skillId))
+    ))
+    .map(question => question.skillId);
+}
+
 /**
  * Registry-style self-check, same shape/spirit as ai-generator's
  * auditRegistry() — run it in the studio to catch structural problems before
@@ -348,10 +370,17 @@ export function auditCurriculum(tree: CurriculumTree, questionSkillIds: (string 
     }
   });
 
-  questionSkillIds.forEach((id, i) => {
-    if (id && !skillIds.has(id)) {
-      issues.push({ level: "question", id: `question[${i}]`, severity: "error", message: `assigned to missing skill "${id}"` });
-    }
+  const orphanCounts = new Map<string, number>();
+  questionSkillIds.forEach(id => {
+    if (id && !skillIds.has(id)) orphanCounts.set(id, (orphanCounts.get(id) || 0) + 1);
+  });
+  orphanCounts.forEach((count, id) => {
+    issues.push({
+      level: "question",
+      id,
+      severity: "error",
+      message: `${count} question${count === 1 ? " is" : "s are"} assigned to deleted skill "${id}"`,
+    });
   });
 
   issues.push(...auditRewards(tree));

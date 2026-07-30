@@ -61,6 +61,37 @@ export interface CurriculumCreateInput {
   primary_subject_id: string;
 }
 
+export type CurriculumImpactLevel = "initial" | "patch" | "minor" | "major";
+export type CurriculumRolloutStrategy = "new_learners" | "active_learners";
+
+export interface CurriculumImpactItem {
+  id: string;
+  label: string;
+  fields?: string[];
+}
+
+export interface CurriculumReleaseImpact {
+  level: CurriculumImpactLevel;
+  addedSkills: CurriculumImpactItem[];
+  removedSkills: CurriculumImpactItem[];
+  structuralChanges: CurriculumImpactItem[];
+  currentRelease: import("./assignments").ReleaseSummary | null;
+  activeAssignments: number;
+  activeLearners: number;
+  affectedLearners: number;
+}
+
+export interface CurriculumRolloutResult {
+  release: import("./assignments").ReleaseSummary;
+  rollout: {
+    strategy: CurriculumRolloutStrategy;
+    impactLevel: CurriculumImpactLevel;
+    offeringUpdated: boolean;
+    assignmentsUpdated: number;
+    learnersUpdated: number;
+  };
+}
+
 export const curriculumApi = {
   list: () => api.get<{ curricula: CurriculumSummary[] }>("/curricula"),
   create: (body: CurriculumCreateInput) => api.post<CurriculumResponse>("/curricula", body),
@@ -75,4 +106,12 @@ export const curriculumApi = {
     api.get<{ releases: import("./assignments").ReleaseSummary[] }>("/curricula/" + curriculumId + "/releases"),
   publishRelease: (curriculumId: string) =>
     api.post<import("./assignments").ReleaseSummary>("/curricula/" + curriculumId + "/releases"),
+  releaseImpact: (curriculumId: string, gradeId: string, subjectId: string) => {
+    const query = new URLSearchParams({ grade_id: gradeId, subject_id: subjectId });
+    return api.get<CurriculumReleaseImpact>(`/curricula/${curriculumId}/release-impact?${query.toString()}`);
+  },
+  publishRollout: (
+    curriculumId: string,
+    body: { grade_id: string; subject_id: string; strategy: CurriculumRolloutStrategy },
+  ) => api.post<CurriculumRolloutResult>(`/curricula/${curriculumId}/publish-rollout`, body),
 };

@@ -40,6 +40,14 @@ class User(Document):
     credentials_changed_at: datetime | None = None
     # Extra menu ids granted to this specific user, on top of their role's menus.
     menu_ids: list[str] = Field(default_factory=list)
+    # Personal notification preferences, one per feature a guardian can receive —
+    # separate from the admin-level kill switches in SystemSettings, which control
+    # whether the type exists at all. One field per feature rather than a shared
+    # flag: a parent who wants the weekly summary but not the quiet-learner nudge
+    # was previously forced to take both.
+    email_digest_enabled: bool = True
+    email_inactivity_enabled: bool = True
+    email_announcements_enabled: bool = True
     created_at: datetime = Field(default_factory=_now)
 
     class Settings:

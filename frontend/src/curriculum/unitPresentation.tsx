@@ -1,4 +1,4 @@
-import { BookOpen, Brain, Hash, Puzzle, Shapes, Sparkles, type LucideIcon } from "lucide-react";
+import { BookOpen, Brain, CloudSun, Hash, Leaf, PawPrint, Puzzle, Shapes, Sparkles, type LucideIcon } from "lucide-react";
 import type { UnitAccent, UnitIcon } from "./types";
 
 export const UNIT_ICON_CHOICES: Array<{ value: UnitIcon; label: string; icon: LucideIcon }> = [
@@ -8,6 +8,9 @@ export const UNIT_ICON_CHOICES: Array<{ value: UnitIcon; label: string; icon: Lu
   { value: "puzzle", label: "Puzzle", icon: Puzzle },
   { value: "sparkles", label: "Discovery", icon: Sparkles },
   { value: "book", label: "Book", icon: BookOpen },
+  { value: "leaf", label: "Nature", icon: Leaf },
+  { value: "paw", label: "Animals", icon: PawPrint },
+  { value: "weather", label: "Weather", icon: CloudSun },
 ];
 
 export const UNIT_ACCENT_CHOICES: Array<{ value: UnitAccent; label: string }> = [
@@ -27,6 +30,9 @@ const FALLBACKS: Array<{ icon: UnitIcon; accent: UnitAccent }> = [
   { icon: "puzzle", accent: "blue" },
   { icon: "sparkles", accent: "amber" },
   { icon: "book", accent: "purple" },
+  { icon: "leaf", accent: "green" },
+  { icon: "paw", accent: "blue" },
+  { icon: "weather", accent: "amber" },
 ];
 
 /** Stable for a unit id: filtering or reordering never changes an unauthored fallback. */

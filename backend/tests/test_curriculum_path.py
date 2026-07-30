@@ -170,6 +170,7 @@ def test_a_finished_path_asks_for_nothing():
     )
     assert result["nextSkill"] is None
     assert result["counts"]["completed"] == 3
+    assert result["complete"] is True
 
 
 def test_an_unauthored_skill_stays_visible_but_does_not_block_the_road():

@@ -2,6 +2,7 @@ import React from "react";
 import { Star, Target } from "lucide-react";
 import { Card, CardContent } from "../../components/ui";
 import { HomeHeader } from "./HomeHeader";
+import { NotificationBell } from "../../notifications/NotificationBell";
 import { HeroActivity } from "./HeroActivity";
 import { UpNextRow } from "./UpNextRow";
 import { FreePlaySwitch } from "./FreePlaySwitch";
@@ -48,7 +49,7 @@ export const StudentHome: React.FC<StudentHomeProps> = ({
         studentName={studentName}
         studentAvatar={studentAvatar}
         onExit={onExit}
-        right={goal}
+        right={<><NotificationBell recipientType="student" />{goal}</>}
         theme={theme}
         onToggleTheme={toggleTheme}
       />

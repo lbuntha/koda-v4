@@ -33,10 +33,12 @@ export const UnitOverview: React.FC<UnitOverviewProps> = ({ unit, skills, covera
 
   return (
     <div className="p-4 md:p-6">
-      <div className="mb-4 flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-        <span className="text-2xs font-mono uppercase tracking-widest text-slate-400">Unit</span>
+      <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1.5">
+        <span className="rounded-full bg-[#EDE8FF] px-2.5 py-1 text-[10px] font-semibold leading-4 text-[#534AB7]">
+          Unit
+        </span>
         <h1 className="text-base font-extrabold text-slate-800">{unit.label}</h1>
-        <span className="text-[11px] text-slate-400">
+        <span className="text-[11px] font-medium text-[#8D89AE]">
           {skills.length} skill{skills.length === 1 ? "" : "s"}
           {minutes.total > 0 && ` · ${minutes.total} min`}
           {minutes.missing > 0 && ` · ${minutes.missing} without a time`}

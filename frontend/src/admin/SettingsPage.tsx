@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { BookOpen, CheckCircle2, Eye, EyeOff, KeyRound, Music2, Settings2, TrendingUp, Volume2, VolumeX, Wand2 } from "lucide-react";
+import { BookOpen, CheckCircle2, Eye, EyeOff, KeyRound, Mail, Music2, Settings2, TrendingUp, Volume2, VolumeX, Wand2 } from "lucide-react";
 import { Button, Card, Input, Label, Select, Skeleton, SkeletonCard, SkeletonText, Switch, Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui";
 import { sounds } from "../sound";
 import { useAppSettings } from "../settings/AppSettingsContext";
@@ -32,14 +32,24 @@ const SettingsGeneralSkeleton: React.FC = () => (
 );
 
 export const SettingsPage: React.FC = () => {
-  const { settings, loading, loadError, save, testAi } = useAppSettings();
+  const { settings, loading, loadError, save, testAi, testMail } = useAppSettings();
   const [soundEnabled, setSoundEnabled] = useState(settings.sound_enabled);
   const [model, setModel] = useState(settings.ai_model);
   const [apiKey, setApiKey] = useState("");
   const [showKey, setShowKey] = useState(false);
   const [clearApiKey, setClearApiKey] = useState(false);
+  const [mailTransport, setMailTransport] = useState(settings.mail_transport);
+  const [mailFrom, setMailFrom] = useState(settings.mail_from ?? "");
+  const [smtpHost, setSmtpHost] = useState(settings.smtp_host ?? "");
+  const [smtpPort, setSmtpPort] = useState(String(settings.smtp_port ?? ""));
+  const [smtpUsername, setSmtpUsername] = useState(settings.smtp_username ?? "");
+  const [smtpUseTls, setSmtpUseTls] = useState(Boolean(settings.smtp_use_tls));
+  const [smtpPassword, setSmtpPassword] = useState("");
+  const [showSmtpPassword, setShowSmtpPassword] = useState(false);
+  const [clearSmtpPassword, setClearSmtpPassword] = useState(false);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
+  const [testingMail, setTestingMail] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [section, setSection] = useState<"general" | "curriculum" | "progression">("general");
@@ -47,7 +57,16 @@ export const SettingsPage: React.FC = () => {
   useEffect(() => {
     setSoundEnabled(settings.sound_enabled);
     setModel(settings.ai_model);
-  }, [settings.sound_enabled, settings.ai_model]);
+    setMailTransport(settings.mail_transport);
+    setMailFrom(settings.mail_from ?? "");
+    setSmtpHost(settings.smtp_host ?? "");
+    setSmtpPort(String(settings.smtp_port ?? ""));
+    setSmtpUsername(settings.smtp_username ?? "");
+    setSmtpUseTls(Boolean(settings.smtp_use_tls));
+  }, [
+    settings.sound_enabled, settings.ai_model, settings.mail_transport, settings.mail_from,
+    settings.smtp_host, settings.smtp_port, settings.smtp_username, settings.smtp_use_tls,
+  ]);
 
   const toggleSound = (next: boolean) => {
     setSoundEnabled(next);
@@ -65,9 +84,19 @@ export const SettingsPage: React.FC = () => {
         ai_model: model,
         ...(apiKey.trim() ? { openai_api_key: apiKey.trim() } : {}),
         clear_api_key: clearApiKey,
+        mail_transport: mailTransport,
+        mail_from: mailFrom.trim(),
+        smtp_host: smtpHost.trim(),
+        smtp_port: smtpPort.trim() ? Number(smtpPort) : undefined,
+        smtp_username: smtpUsername.trim(),
+        smtp_use_tls: smtpUseTls,
+        ...(smtpPassword.trim() ? { smtp_password: smtpPassword.trim() } : {}),
+        clear_smtp_password: clearSmtpPassword,
       });
       setApiKey("");
       setClearApiKey(false);
+      setSmtpPassword("");
+      setClearSmtpPassword(false);
       setMessage("Settings saved.");
       sounds.playSuccess();
     } catch (cause) {
@@ -92,11 +121,26 @@ export const SettingsPage: React.FC = () => {
     }
   };
 
+  const handleTestMail = async () => {
+    setTestingMail(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const sentTo = await testMail();
+      setMessage(`Test email sent to ${sentTo}.`);
+      sounds.playSuccess();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Unable to send a test email");
+    } finally {
+      setTestingMail(false);
+    }
+  };
+
   return (
     <Tabs value={section} onValueChange={value => setSection(value as typeof section)} variant="underline" className="flex min-h-full w-full flex-col">
       <TabsList aria-label="Settings sections">
         <TabsTrigger value="general"><Settings2 size={14} /> General</TabsTrigger>
-        <TabsTrigger value="curriculum"><BookOpen size={14} /> Curriculum models</TabsTrigger>
+        <TabsTrigger value="curriculum"><BookOpen size={14} /> Academic catalog</TabsTrigger>
         <TabsTrigger value="progression"><TrendingUp size={14} /> Progression & mastery</TabsTrigger>
       </TabsList>
 
@@ -216,6 +260,100 @@ export const SettingsPage: React.FC = () => {
 
           <div className="mt-auto rounded-xl border border-[#E7E3F6] bg-[#FBFAFF] px-3 py-2.5 text-xs leading-relaxed text-[#6D6997]">
             Your API key is encrypted in MongoDB and is never included in settings responses.
+          </div>
+        </div>
+      </Card>
+
+      <Card className="flex h-full min-w-0 flex-col border-[#E7E3F6] p-4 shadow-[0_6px_24px_rgba(83,74,183,0.06)] sm:p-5 md:p-6">
+        <div className="flex items-start justify-between gap-4 border-b border-[#EEEAF8] pb-4">
+          <div className="flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#F3F0FF] text-[#534AB7]">
+              <Mail size={18} />
+            </span>
+            <div className="min-w-0">
+              <h2 className="text-base font-semibold text-[#0E0B55]">Mail delivery</h2>
+              <p className="mt-1 text-xs leading-relaxed text-[#6D6997]">Where password resets and notification emails actually go out through.</p>
+            </div>
+          </div>
+          <span className={`shrink-0 text-[10px] font-medium ${settings.mail_configured ? "text-emerald-600" : "text-[#8D89AE]"}`}>
+            {settings.mail_configured ? "SMTP configured" : "Console (dev only)"}
+          </span>
+        </div>
+
+        <div className="mt-4 flex flex-1 flex-col gap-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="mail-transport" className="normal-case tracking-normal">Transport</Label>
+            <Select id="mail-transport" value={mailTransport} onChange={(event) => setMailTransport(event.target.value as "console" | "smtp")}>
+              <option value="console">Console (logs only — nothing is sent)</option>
+              <option value="smtp">SMTP</option>
+            </Select>
+          </div>
+
+          {mailTransport === "smtp" && (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="smtp-host" className="normal-case tracking-normal">Host</Label>
+                  <Input id="smtp-host" value={smtpHost} onChange={(e) => setSmtpHost(e.target.value)} placeholder="smtp.example.com" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="smtp-port" className="normal-case tracking-normal">Port</Label>
+                  <Input id="smtp-port" type="number" value={smtpPort} onChange={(e) => setSmtpPort(e.target.value)} placeholder="587" />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="smtp-username" className="normal-case tracking-normal">Username</Label>
+                <Input id="smtp-username" value={smtpUsername} onChange={(e) => setSmtpUsername(e.target.value)} autoComplete="off" />
+              </div>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <Label htmlFor="smtp-password" className="normal-case tracking-normal">Password</Label>
+                  <span className={`shrink-0 text-[10px] font-medium ${settings.smtp_password_hint ? "text-emerald-600" : "text-[#8D89AE]"}`}>
+                    {settings.smtp_password_hint ? `Configured ${settings.smtp_password_hint}` : "Not configured"}
+                  </span>
+                </div>
+                <div className="relative">
+                  <Input
+                    id="smtp-password"
+                    type={showSmtpPassword ? "text" : "password"}
+                    value={smtpPassword}
+                    onChange={(event) => { setSmtpPassword(event.target.value); setClearSmtpPassword(false); }}
+                    placeholder={settings.smtp_password_hint ? "Leave blank to keep current password" : "••••••••"}
+                    className="pr-10 font-mono text-xs"
+                    autoComplete="off"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowSmtpPassword((shown) => !shown)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    aria-label={showSmtpPassword ? "Hide password" : "Show password"}
+                  >
+                    {showSmtpPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+                {settings.smtp_password_hint && (
+                  <Button variant="link" size="xs" onClick={() => { setClearSmtpPassword(true); setSmtpPassword(""); }} className="text-rose-600">
+                    <KeyRound size={11} /> {clearSmtpPassword ? "Password will be removed on save" : "Remove configured password"}
+                  </Button>
+                )}
+              </div>
+              <div className="flex items-center justify-between gap-2 rounded-xl border border-[#E7E3F6] bg-[#FBFAFF] px-3.5 py-2.5">
+                <Label className="normal-case tracking-normal">Use TLS</Label>
+                <Switch checked={smtpUseTls} onCheckedChange={setSmtpUseTls} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="mail-from" className="normal-case tracking-normal">From address</Label>
+                <Input id="mail-from" value={mailFrom} onChange={(e) => setMailFrom(e.target.value)} placeholder="Koda <no-reply@koda.app>" />
+              </div>
+            </>
+          )}
+
+          <Button variant="outline" size="sm" onClick={handleTestMail} loading={testingMail} loadingText="Sending..." disabled={!settings.mail_configured}>
+            <CheckCircle2 size={14} /> Send test email
+          </Button>
+
+          <div className="mt-auto rounded-xl border border-[#E7E3F6] bg-[#FBFAFF] px-3 py-2.5 text-xs leading-relaxed text-[#6D6997]">
+            The password is encrypted in MongoDB and is never included in settings responses. Save first, then send a test.
           </div>
         </div>
       </Card>

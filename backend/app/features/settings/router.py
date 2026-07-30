@@ -8,19 +8,30 @@ from pymongo.errors import DuplicateKeyError
 from ...core.audit import record_audit
 from ...core.config import settings as env_settings
 from ...core.deps import get_current_admin, get_current_user
+from ...core.mail import Message, resolve_mailer
 from ...core.runtime_settings import get_system_settings, resolve_openai_api_key
-from ...core.security import encrypt_secret
+from ...core.security import decrypt_secret, encrypt_secret
 from ...core.scoring_config import default_scoring_config
 from ..progression.service import create_rescore_job, run_rescore_job
 from ...models.user import Role, User
 from ...models.academic import Grade, Subject, resolve_layout_band
 from ...models.audit import ContentAuditEvent
-from ...models.content import Curriculum
+from ...models.content import Curriculum, CurriculumRelease
+from ...models.assignment import CurriculumOffering
 from ...models.mastery import ProjectionJob
 from ...models.event import LearningEvent
 from ...models.student import Student
 from ..progression.projection import build_mastery_states
-from .schemas import ALLOWED_AI_MODELS, GradeIn, ScoringPreviewIn, SettingsOut, SettingsUpdate, SubjectIn
+from .schemas import (
+    ALLOWED_AI_MODELS,
+    CurriculumOfferingIn,
+    GradeIn,
+    ScoringPreviewIn,
+    SettingsOut,
+    SettingsUpdate,
+    SubjectIn,
+)
+from ..content.offerings import release_includes
 from .simulator import compare_mastery_states, delivery_impact
 
 router = APIRouter(prefix="/settings", tags=["settings"])
@@ -28,11 +39,21 @@ router = APIRouter(prefix="/settings", tags=["settings"])
 
 def _out(doc, api_key: str | None) -> SettingsOut:
     scoring = doc.scoring or default_scoring_config()
+    smtp_password = decrypt_secret(doc.smtp_password_encrypted) if doc.smtp_password_encrypted else None
+    mail_transport = (doc.mail_transport_override or env_settings.mail_transport).strip().lower()
     return SettingsOut(
         sound_enabled=doc.sound_enabled,
         ai_model=doc.ai_model,
         api_key_configured=bool(api_key),
         api_key_hint=f"••••{api_key[-4:]}" if api_key else None,
+        mail_transport=mail_transport,
+        mail_configured=mail_transport == "smtp",
+        mail_from=doc.mail_from_override or env_settings.mail_from,
+        smtp_host=doc.smtp_host_override or env_settings.smtp_host,
+        smtp_port=doc.smtp_port_override or env_settings.smtp_port,
+        smtp_username=doc.smtp_username_override or env_settings.smtp_username,
+        smtp_use_tls=doc.smtp_use_tls_override if doc.smtp_use_tls_override is not None else env_settings.smtp_use_tls,
+        smtp_password_hint=f"••••{smtp_password[-4:]}" if smtp_password else None,
         scoring=scoring,
         scoring_revision=doc.scoring_revision,
     )
@@ -44,15 +65,19 @@ async def get_settings(user: User = Depends(get_current_user)):
     output = _out(doc, await resolve_openai_api_key(doc))
     if user.role != Role.admin:
         output.api_key_hint = None
+        output.smtp_password_hint = None
     return output
 
 
 def _settings_snapshot(doc) -> dict:
-    """Audit-safe snapshot — records whether an API key is set, never the key."""
+    """Audit-safe snapshot — records whether a secret is set, never the secret itself."""
     return {
         "sound_enabled": doc.sound_enabled,
         "ai_model": doc.ai_model,
         "api_key_set": bool(doc.openai_api_key_encrypted),
+        "mail_transport_override": doc.mail_transport_override,
+        "smtp_host_override": doc.smtp_host_override,
+        "smtp_password_set": bool(doc.smtp_password_encrypted),
     }
 
 
@@ -82,6 +107,22 @@ async def update_settings(
         doc.openai_api_key_encrypted = None
     elif body.openai_api_key is not None and body.openai_api_key.strip():
         doc.openai_api_key_encrypted = encrypt_secret(body.openai_api_key.strip())
+    if body.mail_transport is not None:
+        doc.mail_transport_override = body.mail_transport
+    if body.mail_from is not None:
+        doc.mail_from_override = body.mail_from.strip() or None
+    if body.smtp_host is not None:
+        doc.smtp_host_override = body.smtp_host.strip() or None
+    if body.smtp_port is not None:
+        doc.smtp_port_override = body.smtp_port
+    if body.smtp_username is not None:
+        doc.smtp_username_override = body.smtp_username.strip() or None
+    if body.smtp_use_tls is not None:
+        doc.smtp_use_tls_override = body.smtp_use_tls
+    if body.clear_smtp_password:
+        doc.smtp_password_encrypted = None
+    elif body.smtp_password is not None and body.smtp_password.strip():
+        doc.smtp_password_encrypted = encrypt_secret(body.smtp_password.strip())
     if body.scoring is not None:
         if body.scoring_revision != doc.scoring_revision:
             raise HTTPException(
@@ -131,6 +172,20 @@ async def test_ai_connection(_: User = Depends(get_current_admin)):
     if response.status_code >= 400:
         raise HTTPException(status.HTTP_502_BAD_GATEWAY, "OpenAI rejected the configured API key")
     return {"ok": True}
+
+
+@router.post("/test-mail")
+async def test_mail_connection(user: User = Depends(get_current_admin)):
+    mailer = await resolve_mailer()
+    try:
+        mailer.send(Message(
+            to=str(user.email),
+            subject="Koda test email",
+            body="This is a test email from Koda's mail delivery settings. If you received this, your configuration works.",
+        ))
+    except Exception as exc:
+        raise HTTPException(status.HTTP_502_BAD_GATEWAY, f"Sending failed: {exc}")
+    return {"ok": True, "sentTo": str(user.email)}
 
 
 @router.get("/rescore-jobs")
@@ -222,7 +277,7 @@ def _grade_out(item: Grade) -> dict:
     }
 
 
-def _subject_out(item: Subject) -> dict:
+def _subject_out(item: Subject, ready_subject_ids: set[str] | None = None) -> dict:
     return {
         "key": item.key,
         "grade_id": item.grade_id,
@@ -233,6 +288,23 @@ def _subject_out(item: Subject) -> dict:
         "color": item.color,
         "order": item.order,
         "active": item.active,
+        "revision": item.revision,
+        "updated_at": item.updated_at.isoformat(),
+        "content_ready": item.key in ready_subject_ids if ready_subject_ids is not None else False,
+    }
+
+
+def _offering_out(item: CurriculumOffering) -> dict:
+    return {
+        "grade_id": item.grade_id,
+        "subject_id": item.subject_id,
+        "curriculum_id": item.curriculum_id,
+        "release_id": item.release_id,
+        "active": item.active,
+        "successor_grade_id": item.successor_grade_id,
+        "successor_subject_id": item.successor_subject_id,
+        "promotion_completion_rule": item.promotion_completion_rule,
+        "promotion_placement_required": item.promotion_placement_required,
         "revision": item.revision,
         "updated_at": item.updated_at.isoformat(),
     }
@@ -254,7 +326,107 @@ async def _catalog_audit(user: User, resource_type: str, action: str, revision: 
 async def get_curriculum_catalog(_: User = Depends(get_current_user)):
     grades = await Grade.find_all().sort("order", "name").to_list()
     subjects = await Subject.find_all().sort("grade_id", "order", "name").to_list()
-    return {"grades": [_grade_out(item) for item in grades], "subjects": [_subject_out(item) for item in subjects]}
+    offerings = await CurriculumOffering.find(CurriculumOffering.active == True).to_list()
+    ready_subject_ids = {item.subject_id for item in offerings}
+    return {
+        "grades": [_grade_out(item) for item in grades],
+        "subjects": [_subject_out(item, ready_subject_ids) for item in subjects],
+    }
+
+
+@router.get("/curriculum-offerings")
+async def list_curriculum_offerings(_: User = Depends(get_current_admin)):
+    rows = await CurriculumOffering.find_all().sort("grade_id", "subject_id").to_list()
+    return {"offerings": [_offering_out(item) for item in rows]}
+
+
+@router.put("/curriculum-offerings")
+async def put_curriculum_offering(
+    body: CurriculumOfferingIn,
+    user: User = Depends(get_current_admin),
+):
+    grade = await Grade.find_one(Grade.key == body.grade_id)
+    if not grade:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Selected grade does not exist")
+    subject = await Subject.find_one(
+        Subject.key == body.subject_id,
+        Subject.grade_id == body.grade_id,
+    )
+    if not subject:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Selected subject does not belong to this grade")
+    if body.active and (not grade.active or not subject.active):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Activate the grade and subject before enabling this offering")
+    release = await CurriculumRelease.find_one(CurriculumRelease.release_id == body.release_id)
+    if not release or release.curriculum_id != body.curriculum_id:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Release does not belong to this curriculum")
+    if not release_includes(release.tree, body.grade_id, body.subject_id):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Release does not include this grade and subject")
+    if bool(body.successor_grade_id) != bool(body.successor_subject_id):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Choose both the successor grade and subject")
+    if body.successor_grade_id and body.successor_subject_id:
+        if (body.successor_grade_id, body.successor_subject_id) == (body.grade_id, body.subject_id):
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "An offering cannot promote to itself")
+        successor_subject = await Subject.find_one(
+            Subject.key == body.successor_subject_id,
+            Subject.grade_id == body.successor_grade_id,
+        )
+        if not successor_subject:
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "Successor subject does not belong to the selected grade")
+
+    item = await CurriculumOffering.find_one(
+        CurriculumOffering.grade_id == body.grade_id,
+        CurriculumOffering.subject_id == body.subject_id,
+    )
+    before = _offering_out(item) if item else None
+    if item:
+        if body.revision != item.revision:
+            raise HTTPException(
+                status.HTTP_409_CONFLICT,
+                "Curriculum offering changed in another session; reload before saving",
+            )
+        item.curriculum_id = body.curriculum_id
+        item.release_id = body.release_id
+        item.active = body.active
+        item.successor_grade_id = body.successor_grade_id
+        item.successor_subject_id = body.successor_subject_id
+        item.promotion_completion_rule = body.promotion_completion_rule
+        item.promotion_placement_required = body.promotion_placement_required
+        item.revision += 1
+        item.updated_by = str(user.id)
+        item.updated_at = datetime.now(timezone.utc)
+        await item.save()
+        action = "updated"
+    else:
+        if body.revision != 0:
+            raise HTTPException(status.HTTP_409_CONFLICT, "A new curriculum offering must start at revision 0")
+        item = CurriculumOffering(
+            grade_id=body.grade_id,
+            subject_id=body.subject_id,
+            curriculum_id=body.curriculum_id,
+            release_id=body.release_id,
+            active=body.active,
+            successor_grade_id=body.successor_grade_id,
+            successor_subject_id=body.successor_subject_id,
+            promotion_completion_rule=body.promotion_completion_rule,
+            promotion_placement_required=body.promotion_placement_required,
+            created_by=str(user.id),
+            updated_by=str(user.id),
+        )
+        try:
+            await item.insert()
+        except DuplicateKeyError:
+            raise HTTPException(status.HTTP_409_CONFLICT, "Curriculum offering already exists; reload before saving")
+        action = "created"
+
+    after = _offering_out(item)
+    await _catalog_audit(
+        user,
+        "curriculum_offering",
+        action,
+        item.revision,
+        {"gradeId": item.grade_id, "subjectId": item.subject_id, "before": before, "after": after},
+    )
+    return after
 
 
 @router.post("/grades", status_code=status.HTTP_201_CREATED)
@@ -365,5 +537,7 @@ async def delete_subject(key: str, user: User = Depends(get_current_admin)):
     curricula = await Curriculum.find_all().to_list()
     if any(any(ref.get("id") == key for ref in doc.tree.get("subjects", [])) for doc in curricula):
         raise HTTPException(status.HTTP_409_CONFLICT, "Subject is referenced by a curriculum; deactivate it instead")
+    if await CurriculumOffering.find_one(CurriculumOffering.subject_id == key):
+        raise HTTPException(status.HTTP_409_CONFLICT, "Subject has a curriculum offering; deactivate it instead")
     await item.delete()
     await _catalog_audit(user, "subject", "deleted", item.revision, {"key": key, "before": _subject_out(item)})

@@ -15,6 +15,7 @@ DEFAULT_MENUS = [
     {"key": "curriculum", "section": "studio", "section_label": "Studio", "label": "Curriculum", "icon": "BookOpen", "order": 8},
     {"key": "assignments", "section": "studio", "section_label": "Studio", "label": "Assignments", "icon": "ClipboardList", "order": 9},
     {"key": "analytics", "section": "people", "section_label": "People", "label": "Learning progress", "icon": "BarChart3", "order": 9},
+    {"key": "notifications", "section": "people", "section_label": "People", "label": "Notifications", "icon": "Bell", "order": 11},
     {"key": "settings", "section": "system", "section_label": "System", "label": "Settings", "icon": "Settings", "order": 10},
 ]
 

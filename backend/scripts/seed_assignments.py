@@ -22,6 +22,7 @@ import asyncio
 from app.core.db import init_db
 from app.models.assignment import Assignment
 from app.models.content import CurriculumRelease
+from app.features.content.offerings import infer_assignment_subject
 from app.models.student import Student
 
 
@@ -38,6 +39,9 @@ async def main(curriculum_id: str, dry_run: bool) -> None:
     grade_id = next((g.get("id") for g in release.tree.get("grades", [])), None)
     if not grade_id:
         raise SystemExit(f"Release {release.release_id} has no grade to anchor an assignment")
+    subject_id = infer_assignment_subject(release.tree, grade_id)
+    if not subject_id:
+        raise SystemExit(f"Release {release.release_id} has no unambiguous subject for {grade_id}")
     print(f"target release rev {release.revision} ({release.release_id}) grade={grade_id}\n")
 
     created = skipped = 0
@@ -62,6 +66,7 @@ async def main(curriculum_id: str, dry_run: bool) -> None:
             curriculum_id=curriculum_id,
             release_id=release.release_id,
             grade_id=grade_id,
+            subject_id=subject_id,
             scope={"kind": "all", "ids": []},
             mode="scheduled",
             schedule=None,

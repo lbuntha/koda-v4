@@ -402,6 +402,7 @@ const pathWith = (units: CurriculumPath["units"]): CurriculumPath => ({
   gradeId: "grade-1",
   units,
   counts: { completed: 0, overdue: 0, inProgress: 0, new: 0, pending: 0, total: 0 },
+  complete: false,
   nextSkill: null,
 });
 

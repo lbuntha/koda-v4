@@ -213,12 +213,147 @@
   animation: xpBoltSpark 620ms cubic-bezier(0.2, 0.9, 0.3, 1.35) both;
 }
 
+/* Shared learner celebrations. The icon lands with weight, settles through two
+   smaller rebounds, and particles arc outward before gravity pulls them down. */
+@keyframes celebrationCardLand {
+  0% { opacity: 0; transform: translateY(42px) scale(0.92); }
+  48% { opacity: 1; transform: translateY(-7px) scale(1.015); }
+  68% { transform: translateY(3px) scale(0.994); }
+  84% { transform: translateY(-1px) scale(1.003); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes celebrationIconLand {
+  0% { opacity: 0; transform: translateY(-68px) rotate(-13deg) scale(0.46); }
+  42% { opacity: 1; transform: translateY(8px) rotate(5deg) scale(1.12, 0.88); }
+  60% { transform: translateY(-13px) rotate(-3deg) scale(0.96, 1.06); }
+  76% { transform: translateY(3px) rotate(1deg) scale(1.035, 0.97); }
+  88% { transform: translateY(-2px) rotate(0) scale(0.99, 1.01); }
+  100% { opacity: 1; transform: translateY(0) rotate(0) scale(1); }
+}
+
+@keyframes celebrationIconWiggle {
+  0%, 100% { transform: rotate(0) scale(1); }
+  30% { transform: rotate(-7deg) scale(1.08); }
+  65% { transform: rotate(6deg) scale(1.04); }
+}
+
+@keyframes celebrationCopyRise {
+  0% { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes celebrationHaloPulse {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.35); }
+  46% { opacity: 0.44; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.65); }
+}
+
+@keyframes celebrationParticleBurst {
+  0%, 18% { opacity: 0; transform: translate(-50%, -50%) scale(0.2) rotate(0deg); }
+  28% { opacity: 1; }
+  68% {
+    opacity: 1;
+    transform: translate(calc(-50% + var(--burst-x-mid)), calc(-50% + var(--burst-y-mid))) scale(1) rotate(var(--burst-spin));
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--burst-x)), calc(-50% + var(--burst-y) + 54px)) scale(0.72) rotate(var(--burst-spin));
+  }
+}
+
+@keyframes celebrationCtaRise {
+  0% { opacity: 0; transform: translateY(18px) scale(0.97); }
+  70% { opacity: 1; transform: translateY(-2px) scale(1.006); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.koda-celebration-card {
+  transform-origin: 50% 72%;
+  animation: celebrationCardLand 760ms cubic-bezier(0.18, 0.88, 0.28, 1.18) both;
+}
+
+.koda-celebration-icon {
+  position: relative;
+  z-index: 2;
+  transform-origin: 50% 100%;
+  animation: celebrationIconLand 980ms cubic-bezier(0.2, 0.82, 0.25, 1.16) 100ms both;
+  box-shadow: 0 14px 32px -18px rgba(107, 70, 193, 0.52);
+}
+
+.koda-celebration-icon-art {
+  display: inline-flex;
+  transform-origin: center;
+  animation: celebrationIconWiggle 460ms ease-in-out 990ms both;
+}
+
+.koda-celebration-copy {
+  animation: celebrationCopyRise 520ms cubic-bezier(0.16, 1, 0.3, 1) 520ms both;
+}
+
+.koda-celebration-cta {
+  animation: celebrationCtaRise 520ms cubic-bezier(0.18, 0.88, 0.3, 1.15) 720ms both;
+}
+
+.koda-celebration-effects {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.koda-celebration-halo {
+  position: absolute;
+  left: 50%;
+  top: 23%;
+  width: 132px;
+  height: 132px;
+  border: 3px solid rgba(124, 92, 229, 0.25);
+  border-radius: 999px;
+  animation: celebrationHaloPulse 1050ms ease-out 140ms both;
+}
+
+.koda-celebration-halo--trophy {
+  border-color: rgba(255, 213, 79, 0.38);
+}
+
+.koda-celebration-particle {
+  position: absolute;
+  left: 50%;
+  top: 23%;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--burst-color);
+  animation: celebrationParticleBurst 1180ms cubic-bezier(0.14, 0.72, 0.3, 1) var(--burst-delay) both;
+}
+
+.koda-celebration-particle.particle-1 {
+  width: 6px;
+  height: 12px;
+  border-radius: 999px;
+}
+
+.koda-celebration-particle.particle-2 {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-mascot-hop,
   .animate-mascot-shadow,
   .kid-xp-pill,
   .kid-xp-pill::after,
-  .kid-xp-bolt {
+  .kid-xp-bolt,
+  .koda-celebration-card,
+  .koda-celebration-icon,
+  .koda-celebration-icon-art,
+  .koda-celebration-copy,
+  .koda-celebration-cta,
+  .koda-celebration-halo,
+  .koda-celebration-particle {
     animation: none;
   }
 }

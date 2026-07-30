@@ -74,11 +74,12 @@ export const KidOnboardingWizard: React.FC<Props> = ({ isOpen, onClose, onSubmit
         ? ageGrade
         : grades.some(item => item.key === current.gradeLevel) ? current.gradeLevel : grades[0]?.key ?? current.gradeLevel;
       const matchingSubjects = subjects.filter(subject => !subject.grade_id || subject.grade_id === grade || subject.grade_id === "all");
-      const retainedGoals = current.learningGoals.filter(key => matchingSubjects.some(subject => subject.key === key));
+      const retainedGoals = current.learningGoals.filter(key => matchingSubjects.some(subject => subject.key === key && subject.content_ready));
+      const firstReady = matchingSubjects.find(subject => subject.content_ready);
       return {
         ...current,
         gradeLevel: grade,
-        learningGoals: retainedGoals.length ? retainedGoals : matchingSubjects[0] ? [matchingSubjects[0].key] : [],
+        learningGoals: retainedGoals.length ? retainedGoals : firstReady ? [firstReady.key] : [],
       };
     });
     setCatalogSeeded(true);
@@ -88,8 +89,9 @@ export const KidOnboardingWizard: React.FC<Props> = ({ isOpen, onClose, onSubmit
   const changeGrade = (gradeLevel: string) => {
     setDraft(current => {
       const matching = subjects.filter(subject => !subject.grade_id || subject.grade_id === gradeLevel || subject.grade_id === "all");
-      const retained = current.learningGoals.filter(key => matching.some(subject => subject.key === key));
-      return { ...current, gradeLevel, learningGoals: retained.length ? retained : matching[0] ? [matching[0].key] : [] };
+      const retained = current.learningGoals.filter(key => matching.some(subject => subject.key === key && subject.content_ready));
+      const firstReady = matching.find(subject => subject.content_ready);
+      return { ...current, gradeLevel, learningGoals: retained.length ? retained : firstReady ? [firstReady.key] : [] };
     });
   };
   const changeAge = (age: number) => {
@@ -97,8 +99,9 @@ export const KidOnboardingWizard: React.FC<Props> = ({ isOpen, onClose, onSubmit
     const inferredGrade = orderedGrades[Math.min(Math.max(age - 5, 0), Math.max(orderedGrades.length - 1, 0))]?.key ?? draft.gradeLevel;
     setDraft(current => {
       const matching = subjects.filter(subject => !subject.grade_id || subject.grade_id === inferredGrade || subject.grade_id === "all");
-      const retained = current.learningGoals.filter(key => matching.some(subject => subject.key === key));
-      return { ...current, age, levelChoice: "age", gradeLevel: inferredGrade, learningGoals: retained.length ? retained : matching[0] ? [matching[0].key] : [] };
+      const retained = current.learningGoals.filter(key => matching.some(subject => subject.key === key && subject.content_ready));
+      const firstReady = matching.find(subject => subject.content_ready);
+      return { ...current, age, levelChoice: "age", gradeLevel: inferredGrade, learningGoals: retained.length ? retained : firstReady ? [firstReady.key] : [] };
     });
   };
   const changeLevelChoice = (levelChoice: KidOnboardingDraft["levelChoice"]) => {
@@ -110,7 +113,7 @@ export const KidOnboardingWizard: React.FC<Props> = ({ isOpen, onClose, onSubmit
     if (step === 1 && !draft.name.trim()) return "Enter your child’s name to continue.";
     if (step === 1 && draft.pin && !/^\d{4,8}$/.test(draft.pin)) return "PIN must contain 4–8 digits.";
     if (step === 2 && !draft.gradeLevel) return "Choose a grade to continue.";
-    if (step === 3 && subjectsForGrade.length > 0 && draft.learningGoals.length === 0) return "Choose at least one learning goal.";
+    if (step === 3 && draft.learningGoals.length === 0) return "Choose at least one subject with published content.";
     if (step === 5 && !draft.avatar) return "Choose an avatar to continue.";
     return null;
   };

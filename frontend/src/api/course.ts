@@ -48,6 +48,7 @@ export interface CompletedCourseItem {
 
 export interface TodayCourse {
   mode: CourseMode;
+  subjectId?: string | null;
   sessionId: string;
   recommendationRunId: string | null;
   engineRevision?: string;
@@ -60,6 +61,21 @@ export interface TodayCourse {
     completed: number;
     xpEarned: number;
   };
+}
+
+export interface LearnerSubject {
+  id: string;
+  name: string;
+  icon?: string;
+  color: string;
+  assignmentId: string;
+  ready: boolean;
+  primary: boolean;
+}
+
+export interface LearnerSubjects {
+  currentSubjectId: string | null;
+  subjects: LearnerSubject[];
 }
 
 export interface StudentSessionResult {
@@ -184,6 +200,8 @@ export interface CurriculumPath {
     pending: number;
     total: number;
   };
+  /** True once every required skill in this immutable assignment release is Master. */
+  complete: boolean;
   /** First skill still wanting work, walking the curriculum A→Z. Null when the path is done. */
   nextSkill: PathSkill | null;
 }
@@ -203,10 +221,17 @@ export const courseApi = {
     api.post<StudentSessionResult>("/sessions/start", { source }),
   endSession: (session_id: string) =>
     api.post<StudentSessionResult>("/sessions/end", { session_id }),
-  today: (mode: CourseMode = "scheduled") =>
-    api.get<TodayCourse>(`/learning/today?mode=${mode}`),
+  today: (mode: CourseMode = "scheduled", subjectId?: string | null) =>
+    api.get<TodayCourse>(`/learning/today?mode=${mode}${subjectId ? `&subject_id=${encodeURIComponent(subjectId)}` : ""}`),
+  subjects: () => api.get<LearnerSubjects>("/learning/subjects"),
+  selectSubject: (subjectId: string) => api.put<{ currentSubjectId: string }>(
+    "/learning/subjects/current",
+    { subject_id: subjectId },
+  ),
   /** The full assigned curriculum walk, A→Z, with each skill's status. */
-  path: () => api.get<{ paths: CurriculumPath[] }>("/learning/path"),
+  path: (subjectId?: string | null) => api.get<{ paths: CurriculumPath[] }>(
+    `/learning/path${subjectId ? `?subject_id=${encodeURIComponent(subjectId)}` : ""}`,
+  ),
   progress: (studentId: string) =>
     api.get<StudentProgress>(`/progress/${encodeURIComponent(studentId)}`),
   activitySignal: (studentId: string) =>

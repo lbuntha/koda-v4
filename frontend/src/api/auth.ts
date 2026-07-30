@@ -29,6 +29,10 @@ export interface Account {
   gradeBand?: GradeBand;
   /** Per-user menu ids granted on top of the role's menus (admin-assignable). */
   menu_ids?: string[] | null;
+  /** Parents only — one opt-out per notification feature they can receive by email. */
+  email_digest_enabled?: boolean;
+  email_inactivity_enabled?: boolean;
+  email_announcements_enabled?: boolean;
 }
 
 function store(pair: TokenPair): TokenPair {

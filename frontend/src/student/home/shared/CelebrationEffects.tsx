@@ -19,9 +19,13 @@ export const CelebrationEffects: React.FC<CelebrationEffectsProps> = ({
     {Array.from({ length: 16 }, (_, index) => {
       const angle = ((index * 137.5) - 105) * (Math.PI / 180);
       const distance = 92 + (index % 4) * 24;
+      const x = Math.cos(angle) * distance;
+      const y = Math.sin(angle) * distance;
       const style = {
-        "--burst-x": `${(Math.cos(angle) * distance).toFixed(1)}px`,
-        "--burst-y": `${(Math.sin(angle) * distance).toFixed(1)}px`,
+        "--burst-x": `${x.toFixed(1)}px`,
+        "--burst-y": `${y.toFixed(1)}px`,
+        "--burst-x-mid": `${(x * 0.82).toFixed(1)}px`,
+        "--burst-y-mid": `${(y * 0.82).toFixed(1)}px`,
         "--burst-spin": `${180 + index * 47}deg`,
         "--burst-delay": `${90 + (index % 5) * 38}ms`,
         "--burst-color": COLORS[index % COLORS.length],

@@ -12,16 +12,92 @@ from ...models.content import Curriculum, CurriculumRelease, QuestionDeck, SvgLi
 from ...models.academic import Grade, Subject
 from ...models.audit import ContentAuditEvent
 from ...core.logging import get_logger
-from ...core.deps import get_current_student, get_current_user
+from ...core.deps import get_current_admin, get_current_student, get_current_user
 from ...models.student import Student
-from ...models.assignment import Assignment, Placement, ProgressionState
+from ...models.assignment import Assignment, CurriculumOffering, Placement, ProgressionState
+from ...models.mastery import MasteryState
+from .offerings import release_includes
 from .placement import select_delivery_skill_ids
 from .release import ReleaseValidationError, build_release_payload
-from .schemas import CurriculumArchiveIn, CurriculumCreateIn, CurriculumIn, QuestionsIn, SvgLibraryIn
+from .schemas import CurriculumArchiveIn, CurriculumCreateIn, CurriculumIn, CurriculumRolloutIn, QuestionsIn, SvgLibraryIn
 
 logger = get_logger("content")
 
 router = APIRouter(tags=["content"])
+
+
+def analyze_curriculum_impact(before: dict | None, after: dict) -> dict:
+    """Classify changes by their effect on an in-flight learning path."""
+    if before is None:
+        return {
+            "level": "initial",
+            "addedSkills": _item_summaries(after.get("skills", []), [item.get("id") for item in after.get("skills", []) if item.get("id")]),
+            "removedSkills": [],
+            "structuralChanges": [],
+        }
+    old_skills = {item.get("id"): item for item in before.get("skills", []) if item.get("id")}
+    new_skills = {item.get("id"): item for item in after.get("skills", []) if item.get("id")}
+    old_units = {item.get("id"): item for item in before.get("units", []) if item.get("id")}
+    new_units = {item.get("id"): item for item in after.get("units", []) if item.get("id")}
+    added = sorted(set(new_skills) - set(old_skills))
+    removed = sorted(set(old_skills) - set(new_skills))
+    structural: list[dict] = []
+    for skill_id in sorted(set(old_skills) & set(new_skills)):
+        old, new = old_skills[skill_id], new_skills[skill_id]
+        changed = [
+            field for field in ("unitId", "order", "prerequisiteSkillIds", "placementCheckpoint")
+            if old.get(field) != new.get(field)
+        ]
+        if changed:
+            structural.append({"id": skill_id, "label": new.get("label") or skill_id, "fields": changed})
+    removed_units = sorted(set(old_units) - set(new_units))
+    for unit_id in sorted(set(old_units) & set(new_units)):
+        old, new = old_units[unit_id], new_units[unit_id]
+        changed = [
+            field for field in ("subjectId", "order")
+            if old.get(field) != new.get(field)
+        ]
+        if changed:
+            structural.append({"id": unit_id, "label": new.get("label") or unit_id, "fields": changed})
+    catalog_changed = any(
+        {item.get("id") for item in before.get(key, [])} != {item.get("id") for item in after.get(key, [])}
+        for key in ("grades", "subjects")
+    )
+    major = bool(removed or removed_units or structural or catalog_changed)
+    minor = bool(added or set(new_units) - set(old_units))
+    return {
+        "level": "major" if major else "minor" if minor else "patch",
+        "addedSkills": _item_summaries(after.get("skills", []), added),
+        "removedSkills": _item_summaries(before.get("skills", []), removed),
+        "structuralChanges": structural,
+    }
+
+
+def apply_delivery_impact(impact: dict, before_manifest: list[dict], after_manifest: list[dict]) -> dict:
+    """Escalate when a previously playable skill would lose all activities."""
+    before_skills = {item.get("skill_id") for item in before_manifest if item.get("skill_id")}
+    after_skills = {item.get("skill_id") for item in after_manifest if item.get("skill_id")}
+    lost_delivery = sorted(before_skills - after_skills)
+    if not lost_delivery:
+        return impact
+    existing = {item.get("id") for item in impact["structuralChanges"]}
+    labels = {
+        item.get("id"): item.get("label") or item.get("id")
+        for item in impact.get("removedSkills", []) + impact.get("addedSkills", [])
+    }
+    changes = [*impact["structuralChanges"]]
+    for skill_id in lost_delivery:
+        if skill_id not in existing:
+            changes.append({"id": skill_id, "label": labels.get(skill_id, skill_id), "fields": ["activities"]})
+    return {**impact, "level": "major", "structuralChanges": changes}
+
+
+def ensure_rollout_is_safe(impact_level: str, strategy: str) -> None:
+    if impact_level == "major" and strategy == "active_learners":
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            "Major curriculum changes can only be published for new learners. Keep current learners on their existing release.",
+        )
 
 
 def _role_value(user: User) -> str:
@@ -446,6 +522,195 @@ def _release_out(release: CurriculumRelease) -> dict:
         "contentHashes": release.content_hashes,
         "publishedBy": release.published_by,
         "publishedAt": release.published_at,
+    }
+
+
+async def _latest_release(curriculum_id: str) -> CurriculumRelease | None:
+    return (
+        await CurriculumRelease.find(CurriculumRelease.curriculum_id == curriculum_id)
+        .sort("-revision")
+        .first_or_none()
+    )
+
+
+async def _release_impact(
+    doc: Curriculum,
+    *,
+    grade_id: str | None = None,
+    subject_id: str | None = None,
+) -> dict:
+    curriculum_id = await _ensure_curriculum_id(doc)
+    latest = await _latest_release(curriculum_id)
+    resolved_tree = await _resolved_tree(doc.tree)
+    impact = analyze_curriculum_impact(latest.tree if latest else None, resolved_tree)
+    deck = await QuestionDeck.find_one(QuestionDeck.owner_id == doc.owner_id)
+    svg = await SvgLibrary.find_one(SvgLibrary.owner_id == doc.owner_id)
+    try:
+        prospective = build_release_payload(
+            tree=resolved_tree,
+            questions=deck.questions if deck else [],
+            assets=svg.assets if svg else [],
+        )
+    except ReleaseValidationError as exc:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Cannot publish release: {exc}")
+    impact = apply_delivery_impact(
+        impact,
+        latest.question_manifest if latest else [],
+        prospective["question_manifest"],
+    )
+
+    assignment_filter: dict = {
+        "curriculum_id": curriculum_id,
+        "status": "active",
+    }
+    if grade_id:
+        assignment_filter["grade_id"] = grade_id
+    if subject_id:
+        assignment_filter["subject_id"] = subject_id
+    assignments = await Assignment.find(assignment_filter).to_list()
+    learner_ids = {item.student_id for item in assignments}
+    removed_skill_ids = [item["id"] for item in impact["removedSkills"]]
+    affected_learner_ids: set[str] = set()
+    if learner_ids and removed_skill_ids:
+        mastery_rows = await MasteryState.find({
+            "curriculum_id": curriculum_id,
+            "student_id": {"$in": list(learner_ids)},
+            "skill_id": {"$in": removed_skill_ids},
+            "plays": {"$gt": 0},
+        }).to_list()
+        affected_learner_ids = {item.student_id for item in mastery_rows}
+
+    return {
+        **impact,
+        "currentRelease": _release_out(latest) if latest else None,
+        "activeAssignments": len(assignments),
+        "activeLearners": len(learner_ids),
+        "affectedLearners": len(affected_learner_ids),
+    }
+
+
+@router.get("/curricula/{curriculum_id}/release-impact")
+async def get_release_impact(
+    curriculum_id: str,
+    grade_id: str | None = None,
+    subject_id: str | None = None,
+    user: User = Depends(get_current_user),
+):
+    doc = await Curriculum.find_one({"curriculum_id": curriculum_id, "owner_id": str(user.id)})
+    if not doc:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Curriculum not found")
+    if bool(grade_id) != bool(subject_id):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Choose both a grade and subject")
+    if grade_id and subject_id:
+        resolved_tree = await _resolved_tree(doc.tree)
+        if not release_includes(resolved_tree, grade_id, subject_id):
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "Draft does not include this grade and subject")
+    return await _release_impact(doc, grade_id=grade_id, subject_id=subject_id)
+
+
+@router.post("/curricula/{curriculum_id}/publish-rollout", status_code=status.HTTP_201_CREATED)
+async def publish_and_rollout(
+    curriculum_id: str,
+    body: CurriculumRolloutIn,
+    user: User = Depends(get_current_admin),
+):
+    """Publish once, update the offering, and optionally migrate safe active assignments."""
+    doc = await Curriculum.find_one({"curriculum_id": curriculum_id, "owner_id": str(user.id)})
+    if not doc:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Curriculum not found")
+    if doc.archived_at:
+        raise HTTPException(status.HTTP_409_CONFLICT, "Restore this curriculum before publishing")
+
+    grade = await Grade.find_one(Grade.key == body.grade_id)
+    subject = await Subject.find_one(Subject.key == body.subject_id, Subject.grade_id == body.grade_id)
+    if not grade or not subject:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Selected subject does not belong to this grade")
+    if not grade.active or not subject.active:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Activate the grade and subject before publishing")
+
+    impact = await _release_impact(doc, grade_id=body.grade_id, subject_id=body.subject_id)
+    resolved_tree = await _resolved_tree(doc.tree)
+    if not release_includes(resolved_tree, body.grade_id, body.subject_id):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Draft does not include this grade and subject")
+    ensure_rollout_is_safe(impact["level"], body.strategy)
+
+    release = await _publish_release(doc, user)
+    now = datetime.now(timezone.utc)
+    offering = await CurriculumOffering.find_one(
+        CurriculumOffering.grade_id == body.grade_id,
+        CurriculumOffering.subject_id == body.subject_id,
+    )
+    if offering:
+        offering.curriculum_id = curriculum_id
+        offering.release_id = release.release_id
+        offering.active = True
+        offering.revision += 1
+        offering.updated_by = str(user.id)
+        offering.updated_at = now
+        await offering.save()
+    else:
+        offering = CurriculumOffering(
+            grade_id=body.grade_id,
+            subject_id=body.subject_id,
+            curriculum_id=curriculum_id,
+            release_id=release.release_id,
+            active=True,
+            created_by=str(user.id),
+            updated_by=str(user.id),
+        )
+        await offering.insert()
+
+    updated_assignments: list[Assignment] = []
+    if body.strategy == "active_learners":
+        updated_assignments = await Assignment.find({
+            "curriculum_id": curriculum_id,
+            "grade_id": body.grade_id,
+            "subject_id": body.subject_id,
+            "status": "active",
+        }).to_list()
+        for assignment in updated_assignments:
+            assignment.release_id = release.release_id
+            assignment.updated_at = now
+            await assignment.save()
+            progression = await ProgressionState.find_one(
+                ProgressionState.student_id == assignment.student_id,
+                ProgressionState.assignment_id == str(assignment.id),
+            )
+            if progression:
+                progression.release_id = release.release_id
+                progression.updated_at = now
+                await progression.save()
+
+    learner_ids = {item.student_id for item in updated_assignments}
+    await _audit(
+        user,
+        str(user.id),
+        "curriculum_rollout",
+        body.strategy,
+        release.revision,
+        {
+            "releaseId": release.release_id,
+            "gradeId": body.grade_id,
+            "subjectId": body.subject_id,
+            "impactLevel": impact["level"],
+            "activeAssignmentsBeforePublish": impact["activeAssignments"],
+            "assignmentsUpdated": len(updated_assignments),
+            "learnersUpdated": len(learner_ids),
+        },
+        curriculum_id,
+    )
+    doc.published = True
+    doc.updated_at = now
+    await doc.save()
+    return {
+        "release": _release_out(release),
+        "rollout": {
+            "strategy": body.strategy,
+            "impactLevel": impact["level"],
+            "offeringUpdated": True,
+            "assignmentsUpdated": len(updated_assignments),
+            "learnersUpdated": len(learner_ids),
+        },
     }
 
 

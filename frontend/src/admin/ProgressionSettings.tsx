@@ -37,6 +37,17 @@ const DEFAULT_SCORING: ScoringConfig = {
     skip_cooldown_sessions: 1,
     reinforce_threshold: 0.6,
   },
+  notifications: {
+    auto_achievement_enabled: true,
+    auto_streak_enabled: true,
+    auto_weekly_digest_enabled: true,
+    weekly_digest_day: "sun",
+    streak_milestones: [3, 7, 14, 30, 60, 100],
+    auto_review_enabled: true,
+    auto_inactivity_enabled: true,
+    inactivity_days: 7,
+    auto_pin_lockout_enabled: true,
+  },
 };
 
 const clone = (value: ScoringConfig): ScoringConfig => JSON.parse(JSON.stringify(value)) as ScoringConfig;

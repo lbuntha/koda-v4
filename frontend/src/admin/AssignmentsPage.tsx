@@ -3,6 +3,7 @@ import { ArrowUpCircle, ClipboardList, Plus, Users } from "lucide-react";
 import { assignmentsApi, Assignment, AssignableStudent, ReleaseSummary } from "../api/assignments";
 import { curriculumApi, CurriculumSummary } from "../api/curriculum";
 import { Badge, Button, Card, Dialog, Label, Select, Skeleton } from "../components/ui";
+import { CurriculumPromotion, promotionsApi } from "../api/promotions";
 
 export const AssignmentsPage: React.FC = () => {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
@@ -10,6 +11,7 @@ export const AssignmentsPage: React.FC = () => {
   const [curricula, setCurricula] = useState<CurriculumSummary[]>([]);
   const [releases, setReleases] = useState<ReleaseSummary[]>([]);
   const [latestRelease, setLatestRelease] = useState<Record<string, ReleaseSummary>>({});
+  const [promotions, setPromotions] = useState<CurriculumPromotion[]>([]);
   const [studentId, setStudentId] = useState("");
   const [curriculumId, setCurriculumId] = useState("");
   const [releaseId, setReleaseId] = useState("");
@@ -26,14 +28,16 @@ export const AssignmentsPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const [assignmentResponse, studentResponse, curriculumResponse] = await Promise.all([
+      const [assignmentResponse, studentResponse, curriculumResponse, promotionResponse] = await Promise.all([
         assignmentsApi.list(),
         assignmentsApi.students(),
         curriculumApi.list(),
+        promotionsApi.adminList(),
       ]);
       setAssignments(assignmentResponse.assignments);
       setStudents(studentResponse.students);
       setCurricula(curriculumResponse.curricula.filter(item => item.status === "published"));
+      setPromotions(promotionResponse.promotions);
       // Releases are immutable and assignments pin one, so a learner can sit on old content
       // indefinitely. Knowing the newest release per curriculum is what lets a row say so.
       const assignedCurricula = [...new Set(assignmentResponse.assignments.map(row => row.curriculumId))];
@@ -178,6 +182,7 @@ export const AssignmentsPage: React.FC = () => {
             {assignments.map(item => {
               const newest = latestRelease[item.curriculumId];
               const behind = newest && newest.releaseId !== item.releaseId;
+              const promotion = promotions.find(row => row.fromAssignmentId === item.id);
               return (
                 <div key={item.id} className="grid gap-3 border-b border-[#EEEAF8] px-4 py-4 last:border-0 md:grid-cols-[1.1fr_1.4fr_1fr_100px_110px] md:items-center">
                   <div className="flex items-center gap-2"><span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F3F0FF] text-[#534AB7]"><Users size={14} /></span><span className="text-xs font-semibold text-[#0E0B55]">{studentName(item.studentId)}</span></div>
@@ -196,7 +201,18 @@ export const AssignmentsPage: React.FC = () => {
                       </button>
                     )}
                   </div>
-                  <Badge variant={item.status === "active" ? "success" : "secondary"}>{item.status}</Badge>
+                  <div className="flex flex-col items-start gap-1">
+                    <Badge variant={item.status === "active" ? "success" : "secondary"}>{item.status}</Badge>
+                    {promotion && (
+                      <span className={`rounded-full px-2 py-0.5 text-[9px] font-medium ${
+                        promotion.status === "completed"
+                          ? "bg-emerald-50 text-emerald-700"
+                          : "bg-[#F3F0FF] text-[#534AB7]"
+                      }`}>
+                        Promotion {promotion.status}
+                      </span>
+                    )}
+                  </div>
                   <Button variant="ghost" size="xs" loading={updating === item.id} onClick={() => void changeStatus(item)}>{item.status === "active" ? "Pause" : "Resume"}</Button>
                 </div>
               );

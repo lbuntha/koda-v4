@@ -10,11 +10,11 @@
  * plain values down, never question objects, to curriculum/* code.
  */
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, FileText, History } from "lucide-react";
 import { CountingQuestion, CustomSvgAsset } from "../../types";
 import { useCurriculumTree } from "../../curriculum/useCurriculumTree";
-import { computeSkillCoverage, auditCurriculum, SkillCoverage, CurriculumIssue } from "../../curriculum/types";
+import { computeSkillCoverage, auditCurriculum, questionSkillIdsForCurriculum, SkillCoverage, CurriculumIssue } from "../../curriculum/types";
 import * as mutations from "../../curriculum/mutations";
 import { CurriculumSidebar } from "./CurriculumSidebar";
 import { UnitOverview } from "./UnitOverview";
@@ -27,10 +27,9 @@ import { EditQuestionDrawer } from "./EditQuestionDrawer";
 import { spliceReordered, filterAndSortBySkill } from "./questionOps";
 import { CurriculumStudioSkeleton } from "./CurriculumStudioSkeleton";
 import { CurriculumDetailsDrawer, CurriculumDetailsTab } from "./CurriculumDetailsDrawer";
-import { curriculumApi } from "../../api/curriculum";
-import { assignmentsApi } from "../../api/assignments";
-import { activeAssignmentsToUpgrade } from "../../curriculum/publishing";
+import { curriculumApi, CurriculumReleaseImpact, CurriculumRolloutStrategy } from "../../api/curriculum";
 import { Badge, Button } from "../ui";
+import { PublishRolloutDialog } from "./PublishRolloutDialog";
 
 interface CurriculumStudioPageProps {
   curriculumId?: string;
@@ -60,8 +59,55 @@ export const CurriculumStudioPage: React.FC<CurriculumStudioPageProps> = ({ curr
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [lastRelease, setLastRelease] = useState<string | null>(null);
+  const [releaseImpact, setReleaseImpact] = useState<CurriculumReleaseImpact | null>(null);
+  const [isPublishDialogOpen, setIsPublishDialogOpen] = useState(false);
 
-  const questionSkillIds = useMemo(() => questions.map(q => q.skillId), [questions]);
+  // The hook begins with a cached/example tree and hydrates the requested curriculum later.
+  // A <select> can visually display its first option while its controlled value still points
+  // at the old tree; the sidebar then filters units by that invisible stale id and looks empty.
+  useEffect(() => {
+    if (persistenceStatus === "loading") return;
+    const nextGradeId = tree.grades.some(grade => grade.id === selectedGradeId)
+      ? selectedGradeId
+      : tree.primaryGradeId || tree.grades[0]?.id || "";
+    const nextSubjectId = tree.subjects.some(
+      subject => subject.id === selectedSubjectId && subject.gradeId === nextGradeId,
+    )
+      ? selectedSubjectId
+      : tree.subjects.find(subject => (
+          subject.id === tree.primarySubjectId && subject.gradeId === nextGradeId
+        ))?.id || tree.subjects.find(subject => subject.gradeId === nextGradeId)?.id || "";
+    const nextUnits = tree.units
+      .filter(unit => unit.subjectId === nextSubjectId)
+      .sort((a, b) => a.order - b.order);
+    const nextUnitId = selectedUnitId && nextUnits.some(unit => unit.id === selectedUnitId)
+      ? selectedUnitId
+      : nextUnits[0]?.id || null;
+    const nextSkillId = selectedSkillId && tree.skills.some(
+      skill => skill.id === selectedSkillId && skill.unitId === nextUnitId,
+    ) ? selectedSkillId : null;
+
+    if (nextGradeId !== selectedGradeId) setSelectedGradeId(nextGradeId);
+    if (nextSubjectId !== selectedSubjectId) setSelectedSubjectId(nextSubjectId);
+    if (nextUnitId !== selectedUnitId) setSelectedUnitId(nextUnitId);
+    if (nextSkillId !== selectedSkillId) setSelectedSkillId(nextSkillId);
+  }, [
+    persistenceStatus,
+    tree.grades,
+    tree.subjects,
+    tree.units,
+    tree.skills,
+    tree.primaryGradeId,
+    tree.primarySubjectId,
+    selectedGradeId,
+    selectedSubjectId,
+    selectedUnitId,
+    selectedSkillId,
+  ]);
+  const questionSkillIds = useMemo(
+    () => questionSkillIdsForCurriculum(tree, curriculumId, questions),
+    [tree, curriculumId, questions],
+  );
   const coverage = useMemo(() => computeSkillCoverage(tree, questionSkillIds), [tree, questionSkillIds]);
   const coverageBySkillId = useMemo(() => {
     const map = new Map<string, SkillCoverage>();
@@ -113,7 +159,7 @@ export const CurriculumStudioPage: React.FC<CurriculumStudioPageProps> = ({ curr
   };
 
   const handleAddQuestionSave = (question: CountingQuestion) => {
-    saveQuestions([...questions, question]);
+    saveQuestions([...questions, { ...question, curriculumId }]);
   };
 
   const handleEditQuestionSave = (updated: CountingQuestion) => {
@@ -169,42 +215,48 @@ export const CurriculumStudioPage: React.FC<CurriculumStudioPageProps> = ({ curr
     setIsDetailsOpen(true);
   };
 
-  /** One explicit rollout: cut an immutable release, then move only active learners onto it. */
-  const publish = async () => {
+  const preparePublish = async () => {
     if (!curriculumId) {
       setPublished(value => !value);
+      return;
+    }
+    if (!primaryGrade?.id || !primarySubject?.id) {
+      setPublishError("Choose a primary grade and subject before publishing.");
       return;
     }
     setPublishError(null);
     setLastRelease(null);
     setPublishing(true);
-    let publishedRevision: number | null = null;
     try {
-      const release = await curriculumApi.publishRelease(curriculumId);
-      publishedRevision = release.revision;
-      setPublished(true);
-      const response = await assignmentsApi.list();
-      const targets = activeAssignmentsToUpgrade(response.assignments, curriculumId, release.releaseId);
-      const results = await Promise.allSettled(
-        targets.map(assignment => assignmentsApi.setRelease(assignment.id, release.releaseId)),
-      );
-      const updated = results.filter(result => result.status === "fulfilled").length;
-      const failed = results.length - updated;
-      setLastRelease(
-        targets.length === 0
-          ? `v${release.revision} published · no active learners needed updating`
-          : `v${release.revision} published · ${updated} active learner${updated === 1 ? "" : "s"} updated · refresh the learner page`,
-      );
-      if (failed > 0) {
-        setPublishError(`${failed} learner assignment${failed === 1 ? "" : "s"} could not be updated. Try publishing again.`);
-      }
+      setReleaseImpact(await curriculumApi.releaseImpact(curriculumId, primaryGrade.id, primarySubject.id));
+      setIsPublishDialogOpen(true);
     } catch (cause) {
-      setPublishError(
-        publishedRevision === null
-          ? cause instanceof Error ? cause.message : "Unable to publish this curriculum"
-          : `v${publishedRevision} was published, but active learners could not be updated. Try publishing again.`,
+      setPublishError(cause instanceof Error ? cause.message : "Unable to check this curriculum release");
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const publish = async (strategy: CurriculumRolloutStrategy) => {
+    if (!curriculumId || !primaryGrade?.id || !primarySubject?.id) return;
+    setPublishError(null);
+    setPublishing(true);
+    try {
+      const result = await curriculumApi.publishRollout(curriculumId, {
+        grade_id: primaryGrade.id,
+        subject_id: primarySubject.id,
+        strategy,
+      });
+      setPublished(true);
+      setIsPublishDialogOpen(false);
+      setReleaseImpact(null);
+      setLastRelease(
+        strategy === "new_learners"
+          ? `v${result.release.revision} published · new learners will use this release · active learners kept their current path`
+          : `v${result.release.revision} published · ${result.rollout.learnersUpdated} active learner${result.rollout.learnersUpdated === 1 ? "" : "s"} moved safely`,
       );
-      if (publishedRevision !== null) setLastRelease(`v${publishedRevision} published`);
+    } catch (cause) {
+      setPublishError(cause instanceof Error ? cause.message : "Unable to publish this curriculum");
     } finally {
       setPublishing(false);
     }
@@ -225,7 +277,7 @@ export const CurriculumStudioPage: React.FC<CurriculumStudioPageProps> = ({ curr
         publishing={publishing}
         publishError={publishError}
         publishNotice={lastRelease}
-        onPublish={() => void publish()}
+        onPublish={() => void preparePublish()}
         onSelectGrade={handleSelectGrade}
         onSelectSubject={handleSelectSubject}
         onSelectUnit={handleSelectUnit}
@@ -305,6 +357,11 @@ export const CurriculumStudioPage: React.FC<CurriculumStudioPageProps> = ({ curr
         onClose={() => setIsHealthDrawerOpen(false)}
         issues={issues}
         onJumpToIssue={handleJumpToIssue}
+        onRepairQuestionIssue={issue => {
+          saveQuestions(questions.map(question => (
+            question.skillId === issue.id ? { ...question, skillId: undefined } : question
+          )));
+        }}
       />
 
       {selectedSkill && (
@@ -323,7 +380,10 @@ export const CurriculumStudioPage: React.FC<CurriculumStudioPageProps> = ({ curr
           skill={selectedSkill}
           skillQuestions={filterAndSortBySkill(questions, selectedSkill.id)}
           coverage={coverageBySkillId.get(selectedSkill.id)!}
-          onAddSlides={(slides) => saveQuestions([...questions, ...slides])}
+          onAddSlides={(slides) => saveQuestions([
+            ...questions,
+            ...slides.map(question => ({ ...question, curriculumId })),
+          ])}
         />
       )}
 
@@ -368,6 +428,18 @@ export const CurriculumStudioPage: React.FC<CurriculumStudioPageProps> = ({ curr
           setSelectedUnitId(null);
           setSelectedSkillId(null);
         }}
+      />
+
+      <PublishRolloutDialog
+        isOpen={isPublishDialogOpen}
+        impact={releaseImpact}
+        gradeLabel={primaryGrade?.label || "Primary grade"}
+        subjectLabel={primarySubject?.label || "Primary subject"}
+        publishing={publishing}
+        onClose={() => {
+          if (!publishing) setIsPublishDialogOpen(false);
+        }}
+        onPublish={strategy => void publish(strategy)}
       />
     </div>
   );

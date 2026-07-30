@@ -13,6 +13,7 @@ import {
   ArrowUp,
   Check,
   ChevronDown,
+  ChevronRight,
   ChevronUp,
   Clock,
   Compass,
@@ -35,7 +36,6 @@ import {
   SKILL_MINUTES_MAX,
   SKILL_MINUTES_MIN,
   formatSkillMinutes,
-  formatSkillPath,
   getSkillPath,
   isValidSkillMinutes,
 } from "../../curriculum/types";
@@ -91,6 +91,9 @@ export const SkillDetail: React.FC<SkillDetailProps> = ({
   const estimatedMinutesInvalid = !isValidSkillMinutes(skill.presentation?.estimatedMinutes);
 
   const skillQuestions = filterAndSortBySkill(questions, skill.id);
+  const coverageLabel = coverage.shortfall === 0
+    ? `${skillQuestions.length} questions · requirement met`
+    : `${skillQuestions.length} questions · ${coverage.shortfall} more required`;
   const primaryTechnique = skillQuestions[0]?.technique;
   const selectedLibraryAssetId = skill.presentation?.thumbnailAssetId;
   const selectedLibraryAsset = selectedLibraryAssetId
@@ -183,11 +186,25 @@ export const SkillDetail: React.FC<SkillDetailProps> = ({
   };
 
   return (
-    <div className="p-4 md:p-6">
+    <div className="p-3 md:p-5">
       {path && (
-        <span className="block text-2xs font-mono uppercase tracking-widest text-slate-400 mb-1">
-          {formatSkillPath(path)}
-        </span>
+        <nav aria-label="Skill location" className="mb-2 flex flex-wrap items-center gap-1.5">
+          {[path.grade.label, path.subject.label, path.unit.label].map((label, index) => (
+            <React.Fragment key={`${label}-${index}`}>
+              {index > 0 && <ChevronRight size={11} aria-hidden="true" className="text-[#B7B2CC]" />}
+              <span className="koda-admin-chip max-w-full rounded-full bg-[#F2F0FA] px-2 py-0.5 text-[10px] leading-4 text-[#6D6997]">
+                {label}
+              </span>
+            </React.Fragment>
+          ))}
+          <ChevronRight size={11} aria-hidden="true" className="text-[#B7B2CC]" />
+          <span
+            className="koda-admin-chip max-w-full rounded-full bg-[#EDE8FF] px-2 py-0.5 text-[10px] leading-4 text-[#534AB7]"
+            aria-current="page"
+          >
+            {path.skill.label}
+          </span>
+        </nav>
       )}
       <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
         <h1 className="text-base font-extrabold text-slate-800">{skill.label}</h1>
@@ -198,7 +215,7 @@ export const SkillDetail: React.FC<SkillDetailProps> = ({
       </div>
       {skill.description && <p className="mt-1 text-xs text-slate-500">{skill.description}</p>}
 
-      <section className="mt-3 overflow-hidden rounded-2xl border border-[#E7E3F6] bg-white shadow-[0_2px_12px_rgba(83,74,183,0.05)]">
+      <section className="mt-3 overflow-hidden rounded-xl border border-[#E7E3F6] bg-white">
         {/* The learner card at a glance. Six authoring fields sit behind one toggle so the
             page leads with the questions, but a validation problem always forces them open. */}
         <div className="flex items-center gap-2.5 p-2.5">
@@ -440,10 +457,10 @@ export const SkillDetail: React.FC<SkillDetailProps> = ({
         )}
       </section>
 
-      <div className="mb-2.5 mt-4 flex flex-wrap items-center gap-2">
-        <h2 className="text-xs font-bold text-slate-700">Questions</h2>
-        <span className="font-mono text-2xs text-slate-400">
-          {skillQuestions.length} of {coverage.minQuestions} needed
+      <div className="mb-2 mt-3.5 flex flex-wrap items-center gap-2">
+        <h2 className="koda-admin-section-title text-sm text-[#0E0B55]">Questions</h2>
+        <span className={`koda-admin-chip text-[10px] ${coverage.shortfall === 0 ? "text-emerald-700" : "text-amber-700"}`}>
+          {coverageLabel}
         </span>
         <div className="ml-auto flex items-center gap-1.5">
           <Button size="xs" onClick={onAddQuestion}>
@@ -468,59 +485,100 @@ export const SkillDetail: React.FC<SkillDetailProps> = ({
           <p className="text-xs text-slate-400">No questions yet — add one or fill this skill with AI.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2 2xl:grid-cols-3">
           {skillQuestions.map((q, index) => (
-            <div key={q.id} className="flex flex-col gap-1.5 rounded-xl border border-slate-200 bg-white p-2.5">
-              <div className="flex items-start justify-between gap-2">
-                <h4 className="text-xs font-bold text-slate-700 leading-snug flex-1 truncate">{q.title}</h4>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <button
+            <article
+              key={q.id}
+              className="group flex min-w-0 flex-col rounded-xl border border-[#E7E3F6] bg-white px-3 py-2 transition-colors hover:border-[#CFC7EE]"
+            >
+              <div className="flex min-w-0 items-start gap-2">
+                <span className="koda-admin-chip mt-0.5 flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-[#F2F0FA] px-1.5 text-[10px] leading-none text-[#6D6997]">
+                  {index + 1}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h3 className="koda-admin-card-title truncate text-xs leading-4 text-[#24213F]" title={q.title}>{q.title}</h3>
+                  {q.instruction && (
+                    <p className="mt-0.5 truncate text-[10px] text-[#8D89AE]" title={q.instruction}>
+                      {q.instruction}
+                    </p>
+                  )}
+                </div>
+                <div className="flex shrink-0 items-center gap-0.5">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="xs"
                     onClick={() => onPreviewQuestion(q.id)}
                     title="Preview question"
-                    className="text-slate-300 hover:text-indigo-500 transition-colors cursor-pointer"
+                    aria-label={`Preview ${q.title}`}
+                    className="h-7 w-7 p-0 text-[#A8A3BF] hover:text-[#534AB7]"
                   >
-                    <Eye size={13} />
-                  </button>
-                  <button
+                    <Eye size={14} />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="xs"
                     onClick={() => onEditQuestion(q.id)}
                     title="Edit question"
-                    className="text-slate-300 hover:text-indigo-500 transition-colors cursor-pointer"
+                    aria-label={`Edit ${q.title}`}
+                    className="h-7 w-7 p-0 text-[#A8A3BF] hover:text-[#534AB7]"
                   >
-                    <Pencil size={13} />
-                  </button>
-                  <button
+                    <Pencil size={14} />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="xs"
                     onClick={() => onDeleteQuestion(q.id)}
                     title="Delete question"
-                    className="text-slate-300 hover:text-rose-500 transition-colors cursor-pointer"
+                    aria-label={`Delete ${q.title}`}
+                    className="h-7 w-7 p-0 text-[#C0BBD1] hover:bg-rose-50 hover:text-rose-600"
                   >
-                    <Trash2 size={13} />
-                  </button>
+                    <Trash2 size={14} />
+                  </Button>
                 </div>
               </div>
-              <div className="flex items-center justify-between gap-2">
-                <Badge variant="outline" className="text-2xs">{formatTechniqueLabel(q.technique)}</Badge>
-                <span className="text-2xs font-mono text-slate-400">target {q.targetCount}</span>
+              <div className="mt-1.5 flex min-w-0 flex-wrap items-center gap-1 pl-7">
+                <span
+                  className="koda-admin-chip max-w-full truncate rounded-full bg-[#F3F0FF] px-2 py-0.5 text-[10px] leading-4 text-[#534AB7]"
+                  title={formatTechniqueLabel(q.technique)}
+                >
+                  {formatTechniqueLabel(q.technique)}
+                </span>
+                <span className="koda-admin-chip rounded-full bg-[#F7F6FB] px-2 py-0.5 text-[10px] leading-4 capitalize text-[#6D6997]">
+                  {q.difficulty || "medium"}
+                </span>
+                <span className="koda-admin-chip ml-auto whitespace-nowrap text-[10px] leading-4 text-[#6D6997]">
+                  Target <strong className="ml-0.5 text-[#24213F]">{q.targetCount}</strong>
+                </span>
               </div>
 
               {isReordering && (
-                <div className="flex items-center gap-1.5 pt-1.5 border-t border-slate-100 mt-1">
-                  <button
+                <div className="mt-2 flex items-center gap-1.5 border-t border-[#EEEAF8] pt-2 pl-7">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="xs"
                     onClick={() => moveQuestion(index, -1)}
                     disabled={index === 0}
-                    className="flex-1 flex items-center justify-center gap-1 py-1 rounded-lg bg-slate-50 text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-default text-2xs font-bold cursor-pointer"
+                    className="flex-1"
                   >
                     <ArrowUp size={11} /> Up
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="xs"
                     onClick={() => moveQuestion(index, 1)}
                     disabled={index === skillQuestions.length - 1}
-                    className="flex-1 flex items-center justify-center gap-1 py-1 rounded-lg bg-slate-50 text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-default text-2xs font-bold cursor-pointer"
+                    className="flex-1"
                   >
                     <ArrowDown size={11} /> Down
-                  </button>
+                  </Button>
                 </div>
               )}
-            </div>
+            </article>
           ))}
         </div>
       )}

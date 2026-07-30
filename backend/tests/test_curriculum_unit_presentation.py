@@ -30,6 +30,12 @@ def test_unit_presentation_accepts_supported_icon_and_accent():
     assert value.tree["units"][0]["presentation"] == {"icon": "hash", "accent": "green"}
 
 
+@pytest.mark.parametrize("icon", ["leaf", "paw", "weather"])
+def test_unit_presentation_accepts_science_icons(icon: str):
+    value = CurriculumIn(tree=tree({"icon": icon, "accent": "green"}))
+    assert value.tree["units"][0]["presentation"]["icon"] == icon
+
+
 @pytest.mark.parametrize("presentation", [
     {"icon": "rocket", "accent": "green"},
     {"icon": "hash", "accent": "orange"},

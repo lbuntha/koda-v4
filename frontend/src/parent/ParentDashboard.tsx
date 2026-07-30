@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from "react";
-import { LayoutDashboard, LogOut, Users } from "lucide-react";
+import { LayoutDashboard, LogOut, Settings, Users } from "lucide-react";
 import type { AnalyticsSummary } from "../api/analytics";
 import { analyticsApi } from "../api/analytics";
 import type { Child, ChildInput } from "../api/family";
@@ -13,15 +13,18 @@ import { ChildAnalyticsDrawer } from "../analytics/ChildAnalyticsDrawer";
 import { useAuth } from "../auth/AuthContext";
 import { DashboardLayout, type NavSection } from "../components/layout/DashboardLayout";
 import { Button, ConfirmModal } from "../components/ui";
+import { NotificationBell } from "../notifications/NotificationBell";
 import { ThemeToggle } from "../theme/ThemeToggle";
 import { useThemeMode } from "../theme/appTheme";
 import { ChildFormModal } from "./ChildFormModal";
 import { FamilyCodeCard } from "./FamilyCodeCard";
 import { ParentChildrenGrid } from "./ParentChildrenGrid";
 import { ParentChildrenPage, ParentOverview } from "./ParentDashboardSections";
+import { ParentSettingsPage } from "./ParentSettingsPage";
 import { useFamily } from "./useFamily";
+import { CurriculumPromotion, promotionsApi } from "../api/promotions";
 
-type ParentView = "dashboard" | "children";
+type ParentView = "dashboard" | "children" | "settings";
 
 const PARENT_NAV: NavSection[] = [{
   id: "parent",
@@ -29,6 +32,7 @@ const PARENT_NAV: NavSection[] = [{
   items: [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "children", label: "Children", icon: Users },
+    { id: "settings", label: "Settings", icon: Settings },
   ],
 }];
 
@@ -43,6 +47,10 @@ export const ParentDashboard: React.FC = () => {
   const [deletingChild, setDeletingChild] = useState<Child | null>(null);
   const [summaries, setSummaries] = useState<Record<string, AnalyticsSummary>>({});
   const [summariesLoading, setSummariesLoading] = useState(false);
+  const [promotions, setPromotions] = useState<CurriculumPromotion[]>([]);
+  const [promotionsLoading, setPromotionsLoading] = useState(true);
+  const [updatingPromotionId, setUpdatingPromotionId] = useState<string | null>(null);
+  const [promotionError, setPromotionError] = useState<string | null>(null);
   const childIds = children.map(child => child.id).join("|");
 
   useEffect(() => {
@@ -66,6 +74,42 @@ export const ParentDashboard: React.FC = () => {
   // Child identity is the only input: profile edits do not change analytics summaries.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [childIds]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setPromotionsLoading(true);
+    void promotionsApi.list()
+      .then(response => { if (!cancelled) setPromotions(response.promotions); })
+      .catch(() => { if (!cancelled) setPromotions([]); })
+      .finally(() => { if (!cancelled) setPromotionsLoading(false); });
+    return () => { cancelled = true; };
+  }, [childIds]);
+
+  const approvePromotion = async (item: CurriculumPromotion) => {
+    setUpdatingPromotionId(item.id);
+    setPromotionError(null);
+    try {
+      const updated = await promotionsApi.approve(item.id);
+      setPromotions(current => current.map(row => row.id === updated.id ? updated : row));
+    } catch (cause) {
+      setPromotionError(cause instanceof Error ? cause.message : "Unable to promote this curriculum");
+    } finally {
+      setUpdatingPromotionId(null);
+    }
+  };
+
+  const deferPromotion = async (item: CurriculumPromotion) => {
+    setUpdatingPromotionId(item.id);
+    setPromotionError(null);
+    try {
+      const updated = await promotionsApi.defer(item.id);
+      setPromotions(current => current.map(row => row.id === updated.id ? updated : row));
+    } catch (cause) {
+      setPromotionError(cause instanceof Error ? cause.message : "Unable to defer this promotion");
+    } finally {
+      setUpdatingPromotionId(null);
+    }
+  };
 
   const familySummaries = useMemo(() => Object.values(summaries), [summaries]);
   const openAdd = () => {
@@ -110,6 +154,7 @@ export const ParentDashboard: React.FC = () => {
         contentClassName="flex-1 overflow-auto bg-[#F6F8FC] px-5 py-5 sm:px-7 sm:py-6 lg:px-8 dark:bg-[#0E1020]"
         actions={
           <div className="flex items-center gap-1">
+            <NotificationBell recipientType="user" />
             <ThemeToggle theme={theme} onToggle={toggleTheme} variant="round" />
             <Button variant="ghost" size="sm" onClick={logout} className="text-slate-500 dark:text-slate-300">
               <LogOut size={14} /> <span className="hidden sm:inline">Sign out</span>
@@ -129,11 +174,21 @@ export const ParentDashboard: React.FC = () => {
               onAdd={openAdd}
               onOpenProgress={setProgressChild}
               childrenGrid={childrenGrid}
+              promotions={promotions}
+              promotionsLoading={promotionsLoading}
+              updatingPromotionId={updatingPromotionId}
+              promotionError={promotionError}
+              onApprovePromotion={item => void approvePromotion(item)}
+              onDeferPromotion={item => void deferPromotion(item)}
             />
-          ) : (
+          ) : activeView === "children" ? (
             <ParentChildrenPage onAdd={openAdd} childrenGrid={childrenGrid} />
+          ) : (
+            <ParentSettingsPage />
           )}
-          {account?.family_code && <div className="mt-6"><FamilyCodeCard code={account.family_code} /></div>}
+          {activeView !== "settings" && account?.family_code && (
+            <div className="mt-6"><FamilyCodeCard code={account.family_code} /></div>
+          )}
         </div>
       </DashboardLayout>
 

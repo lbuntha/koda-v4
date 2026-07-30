@@ -71,12 +71,21 @@ async def enforce(keys: list[tuple[str, ThrottlePolicy]]) -> None:
             )
 
 
-async def note_failure(keys: list[tuple[str, ThrottlePolicy]]) -> None:
-    """Count a failed attempt against every scope it belongs to."""
+async def note_failure(keys: list[tuple[str, ThrottlePolicy]]) -> dict[str, datetime]:
+    """Count a failed attempt against every scope it belongs to.
+
+    Returns the scopes that *just* became locked, mapped to when they unlock, so a
+    caller can tell someone about a lockout it caused. Already-locked scopes are not
+    reported: `enforce` refuses those before a caller ever reaches this, and a
+    repeat would mean alerting on every subsequent attempt rather than on the event.
+    """
     now = _now()
+    newly_locked: dict[str, datetime] = {}
     for key, policy in keys:
         row, state = await _load(key)
         nxt = record_failure(state, policy, now)
+        if nxt.locked_until and state.locked_until is None:
+            newly_locked[key] = nxt.locked_until
         # Keep the row only while it can still deny something.
         expires_at = (nxt.locked_until or now + policy.window) + timedelta(minutes=1)
         if row:
@@ -94,6 +103,7 @@ async def note_failure(keys: list[tuple[str, ThrottlePolicy]]) -> None:
             ).insert()
         if nxt.locked_until:
             logger.warning("login locked key=%s until=%s", key, nxt.locked_until.isoformat())
+    return newly_locked
 
 
 #: For a spend quota every call counts, not just the failures. Same counter, different

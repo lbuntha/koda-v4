@@ -16,6 +16,7 @@ class RecommendationRun(Document):
     run_id: str
     student_id: str
     session_id: str
+    subject_id: str | None = None
     sequence: int = 1
     assignment_release_ids: list[str] = Field(default_factory=list)
     scoring_revision: int = 1

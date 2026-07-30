@@ -18,12 +18,14 @@ import {
 import { LevelUpDialog } from "./LevelUpDialog";
 import { StudentFooter } from "./StudentFooter";
 import {
+  CurriculumCompletionCard,
   RecommendationCard,
   SectionHeader,
   type RecommendationTone,
 } from "./shared";
 import { useThemeMode } from "../../theme/appTheme";
 import type { StudentHomeProps } from "./types";
+import { useLearnerSubject } from "../subject/LearnerSubjectContext";
 import {
   KidHomeToolbar,
   LearningPathSection,
@@ -67,6 +69,7 @@ export const KidHome: React.FC<StudentHomeProps> = ({
   onDismissLevelUp,
   onExit,
 }) => {
+  const { subjects, activeSubjectId, switching, onChange } = useLearnerSubject();
   const { refreshSession } = useAuth();
   const [theme, toggleTheme] = useThemeMode();
   const [activeDestination, setActiveDestination] = React.useState<KidHomeDestination>(() => {
@@ -98,6 +101,9 @@ export const KidHome: React.FC<StudentHomeProps> = ({
     `${roadTotals.done} of ${roadTotals.total} skills done`,
     roadTotals.overdue > 0 ? `${roadTotals.overdue} to practise again` : null,
   ].filter(Boolean).join(" · ");
+  const subjectComplete = paths.length > 0 && paths.every(path => path.complete);
+  const activeSubjectName = subjects.find(subject => subject.id === activeSubjectId)?.name ?? "Learning";
+  const completedGradeName = paths.flatMap(path => path.units).find(unit => unit.gradeLabel)?.gradeLabel;
 
   React.useEffect(() => {
     const syncFromHash = () => {
@@ -147,12 +153,17 @@ export const KidHome: React.FC<StudentHomeProps> = ({
           await refreshSession();
         }}
         onExit={onExit}
+        subjects={subjects}
+        activeSubjectId={activeSubjectId}
+        switchingSubject={switching}
+        onSubjectChange={onChange}
       />
 
       {activeDestination === "skills" ? (
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-8 sm:px-6">
           <SkillsExplorerSection
             paths={paths}
+            subjectName={subjects.find(subject => subject.id === activeSubjectId)?.name ?? "Learning"}
             playableSkillIds={playableSkillIds}
             thumbnailBySkillId={pathThumbnailBySkillId}
             onStartSkill={skillId => {
@@ -163,23 +174,36 @@ export const KidHome: React.FC<StudentHomeProps> = ({
         </main>
       ) : activeDestination === "quests" ? (
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-8 sm:px-6">
-          <QuestSection quest={course.quest} activities={course.queue} onStart={onStart} />
+          <QuestSection
+            quest={course.quest}
+            activities={course.queue}
+            subjectName={subjects.find(subject => subject.id === activeSubjectId)?.name ?? "Learning"}
+            onStart={onStart}
+          />
         </main>
       ) : (
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-8 sm:px-6">
-        <WelcomeMissionSection
-          mode={course.mode}
-          studentName={studentName}
-          hero={hero}
-          artUrl={hero ? activityThumbnail(hero) : undefined}
-          badge={hero ? kidReason(hero) : undefined}
-          difficulty={hero ? activityDifficulty(hero) ?? undefined : undefined}
-          mastery={hero ? kidSkillMastery(progress, hero) : undefined}
-          canSkip={canSkip}
-          skipping={Boolean(hero && skippingSkillId === hero.skillId)}
-          onStart={onStart}
-          onSkip={onSkip}
-        />
+        {subjectComplete ? (
+          <CurriculumCompletionCard
+            subjectName={activeSubjectName}
+            gradeName={completedGradeName}
+            skillsMastered={roadTotals.done}
+          />
+        ) : (
+          <WelcomeMissionSection
+            mode={course.mode}
+            studentName={studentName}
+            hero={hero}
+            artUrl={hero ? activityThumbnail(hero) : undefined}
+            badge={hero ? kidReason(hero) : undefined}
+            difficulty={hero ? activityDifficulty(hero) ?? undefined : undefined}
+            mastery={hero ? kidSkillMastery(progress, hero) : undefined}
+            canSkip={canSkip}
+            skipping={Boolean(hero && skippingSkillId === hero.skillId)}
+            onStart={onStart}
+            onSkip={onSkip}
+          />
+        )}
 
         {/* Activities */}
         {hasActivities && (

@@ -9,6 +9,10 @@ export interface PlacementQuiz {
   items: (CountingQuestion & { placementItemId: string; skillId: string })[];
   frontierSkillId: string | null;
   eligibleSkillIds: string[];
+  subjectId?: string | null;
+  subjectName?: string | null;
+  subjectPosition?: number | null;
+  subjectTotal?: number | null;
 }
 
 export interface PlacementResult extends PlacementQuiz {

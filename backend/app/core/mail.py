@@ -111,3 +111,45 @@ def get_mailer() -> Mailer:
             "MAIL_TRANSPORT=console is not usable in production; configure smtp"
         )
     return ConsoleMailer()
+
+
+async def resolve_mailer() -> Mailer:
+    """Like `get_mailer()`, but layers admin-configured SMTP overrides (stored,
+    encrypted, on `SystemSettings` — set via the admin Settings page) atop the env
+    defaults. Every field falls back independently, so filling in just host/port
+    while leaving transport on the env default still works.
+
+    A test override always wins, same as `get_mailer()` — this only changes how
+    a real transport gets its connection details.
+    """
+    if _override is not None:
+        return _override
+
+    # Imported here, not at module load: `runtime_settings` imports `models.content`,
+    # which would be a needless import-time dependency for the common case (tests,
+    # scripts) that only ever call `get_mailer()`.
+    from .runtime_settings import get_system_settings
+    from .security import decrypt_secret
+
+    doc = await get_system_settings()
+    transport = (doc.mail_transport_override or settings.mail_transport).strip().lower()
+    if transport == "memory":
+        return MemoryMailer()
+    if transport == "smtp":
+        password = (
+            decrypt_secret(doc.smtp_password_encrypted)
+            if doc.smtp_password_encrypted else settings.smtp_password
+        )
+        return SmtpMailer(
+            host=doc.smtp_host_override or settings.smtp_host,
+            port=doc.smtp_port_override or settings.smtp_port,
+            username=doc.smtp_username_override or settings.smtp_username,
+            password=password,
+            use_tls=doc.smtp_use_tls_override if doc.smtp_use_tls_override is not None else settings.smtp_use_tls,
+            sender=doc.mail_from_override or settings.mail_from,
+        )
+    if settings.is_production:
+        raise RuntimeError(
+            "MAIL_TRANSPORT=console is not usable in production; configure smtp"
+        )
+    return ConsoleMailer()

@@ -11,6 +11,7 @@ import {
   CourseQueueItem,
   CurriculumPath,
   courseApi,
+  LearnerSubject,
   MasteryLevel,
   StudentActivitySignal,
   StudentProgress,
@@ -20,6 +21,7 @@ import { PlacementWarmup } from "./PlacementWarmup";
 import { StudentTodayHome } from "./StudentTodayHome";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { useThemeMode } from "../theme/appTheme";
+import { LearnerSubjectProvider } from "./subject/LearnerSubjectContext";
 
 export const StudentCurriculumPlayer: React.FC = () => {
   // These surfaces render outside the band layout, so they carry the theme class themselves.
@@ -32,6 +34,9 @@ export const StudentCurriculumPlayer: React.FC = () => {
   const [activitySignal, setActivitySignal] = useState<StudentActivitySignal | null>(null);
   const [replayItems, setReplayItems] = useState<CourseQueueItem[]>([]);
   const [paths, setPaths] = useState<CurriculumPath[]>([]);
+  const [subjects, setSubjects] = useState<LearnerSubject[]>([]);
+  const [activeSubjectId, setActiveSubjectId] = useState<string | null>(null);
+  const [switchingSubject, setSwitchingSubject] = useState(false);
   const [levelUp, setLevelUp] = useState<{
     skillLabel: string;
     previousLevel: MasteryLevel;
@@ -44,7 +49,7 @@ export const StudentCurriculumPlayer: React.FC = () => {
   const [skippingSkillId, setSkippingSkillId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const loadCourse = async (mode: CourseMode) => {
+  const loadCourse = async (mode: CourseMode, subjectId: string | null = activeSubjectId) => {
     setLoadingMode(mode);
     setError(null);
     try {
@@ -56,17 +61,18 @@ export const StudentCurriculumPlayer: React.FC = () => {
       // with a working lesson should not be blocked from it because a chip couldn't load, so
       // these degrade to null and the components render without them.
       const [nextCourse, nextProgress, kidCatalog, nextActivitySignal, nextPaths] = await Promise.all([
-        courseApi.today(mode),
+        courseApi.today(mode, subjectId),
         account?.id ? courseApi.progress(account.id) : Promise.resolve(null),
         shouldLoadKidCatalog
-          ? courseApi.today("free").catch(() => null)
+          ? courseApi.today("free", subjectId).catch(() => null)
           : Promise.resolve(null),
         account?.id && shouldLoadFocusSignal
           ? courseApi.activitySignal(account.id).catch(() => null)
           : Promise.resolve(null),
-        courseApi.path().catch(() => null),
+        courseApi.path(subjectId).catch(() => null),
       ]);
       setCourse(nextCourse);
+      if (nextCourse.subjectId) setActiveSubjectId(nextCourse.subjectId);
       if (nextPaths) setPaths(nextPaths.paths);
       if (nextProgress) setProgress(nextProgress);
       if (mode === "free") setReplayItems(nextCourse.queue);
@@ -79,6 +85,14 @@ export const StudentCurriculumPlayer: React.FC = () => {
     } finally {
       setLoadingMode(null);
     }
+  };
+
+  const loadSubjectsAndCourse = async () => {
+    const response = await courseApi.subjects();
+    setSubjects(response.subjects);
+    const subjectId = response.currentSubjectId ?? response.subjects.find(subject => subject.ready)?.id ?? null;
+    setActiveSubjectId(subjectId);
+    return loadCourse("scheduled", subjectId);
   };
 
   useEffect(() => {
@@ -97,7 +111,7 @@ export const StudentCurriculumPlayer: React.FC = () => {
           setPlacement(quiz);
           setLoadingMode(null);
         } else {
-          await loadCourse("scheduled");
+          await loadSubjectsAndCourse();
         }
       } catch (reason) {
         if (!cancelled) {
@@ -112,9 +126,40 @@ export const StudentCurriculumPlayer: React.FC = () => {
     };
   }, [account?.id]);
 
-  const finishPlacement = () => {
-    setPlacement(null);
-    void loadCourse("scheduled");
+  const finishPlacement = async () => {
+    setError(null);
+    try {
+      const nextPlacement = await placementApi.quiz();
+      if (nextPlacement.status === "pending" && nextPlacement.items.length > 0) {
+        setPlacement(nextPlacement);
+        return;
+      }
+      setPlacement(null);
+      await loadSubjectsAndCourse();
+    } catch (reason) {
+      const message = reason instanceof Error ? reason.message : "Unable to continue placement";
+      setError(message);
+      throw reason instanceof Error ? reason : new Error(message);
+    }
+  };
+
+  const changeSubject = async (subjectId: string) => {
+    if (subjectId === activeSubjectId || switchingSubject) return;
+    const previousSubjectId = activeSubjectId;
+    setSwitchingSubject(true);
+    setError(null);
+    setActiveSubjectId(subjectId);
+    setSelected(null);
+    setActiveId("");
+    try {
+      await courseApi.selectSubject(subjectId);
+      await loadCourse(course?.mode ?? "scheduled", subjectId);
+    } catch (reason) {
+      setActiveSubjectId(previousSubjectId);
+      setError(reason instanceof Error ? reason.message : "Unable to change subject");
+    } finally {
+      setSwitchingSubject(false);
+    }
   };
 
   const startItem = (item: CourseQueueItem) => {
@@ -156,7 +201,7 @@ export const StudentCurriculumPlayer: React.FC = () => {
         // loadCourse below is the recovery path if this immediate refresh fails.
       }
     }
-    const nextCourse = await loadCourse(course?.mode ?? "scheduled");
+    const nextCourse = await loadCourse(course?.mode ?? "scheduled", activeSubjectId);
     if (
       completed
       && nextCourse
@@ -175,7 +220,7 @@ export const StudentCurriculumPlayer: React.FC = () => {
     setError(null);
     try {
       await courseApi.skip(course.recommendationRunId, item);
-      await loadCourse("scheduled");
+      await loadCourse("scheduled", activeSubjectId);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Unable to skip this recommendation");
     } finally {
@@ -224,6 +269,7 @@ export const StudentCurriculumPlayer: React.FC = () => {
   if (placement) {
     return (
       <PlacementWarmup
+        key={placement.placementId ?? "placement"}
         quiz={placement}
         band={account?.gradeBand ?? "student"}
         onComplete={finishPlacement}
@@ -280,24 +326,31 @@ export const StudentCurriculumPlayer: React.FC = () => {
 
   return (
     <>
-      <StudentTodayHome
-        course={course}
-        progress={progress}
-        activitySignal={activitySignal}
-        replayItems={replayItems}
-        paths={paths}
-        levelUp={levelUp}
-        studentName={account?.name || "Learner"}
-        studentAvatar={account?.avatar}
-        band={account?.gradeBand ?? "student"}
-        loadingMode={loadingMode}
-        skippingSkillId={skippingSkillId}
-        onModeChange={mode => void loadCourse(mode)}
-        onStart={startItem}
-        onSkip={item => void skip(item)}
-        onDismissLevelUp={() => setLevelUp(null)}
-        onExit={() => void exit()}
-      />
+      <LearnerSubjectProvider value={{
+        subjects,
+        activeSubjectId,
+        switching: switchingSubject,
+        onChange: subjectId => void changeSubject(subjectId),
+      }}>
+        <StudentTodayHome
+          course={course}
+          progress={progress}
+          activitySignal={activitySignal}
+          replayItems={replayItems}
+          paths={paths}
+          levelUp={levelUp}
+          studentName={account?.name || "Learner"}
+          studentAvatar={account?.avatar}
+          band={account?.gradeBand ?? "student"}
+          loadingMode={loadingMode}
+          skippingSkillId={skippingSkillId}
+          onModeChange={mode => void loadCourse(mode, activeSubjectId)}
+          onStart={startItem}
+          onSkip={item => void skip(item)}
+          onDismissLevelUp={() => setLevelUp(null)}
+          onExit={() => void exit()}
+        />
+      </LearnerSubjectProvider>
       {error && (
         <div className={dark}>
           <div className="fixed bottom-5 left-1/2 z-50 -translate-x-1/2 rounded-xl border border-rose-200 bg-white px-4 py-2 text-xs font-semibold text-rose-700 shadow-lg dark:border-rose-400/25 dark:bg-[#2A1620] dark:text-rose-300">

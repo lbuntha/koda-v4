@@ -178,6 +178,7 @@ def build_path(
             ordered_units.append(by_unit[unit_id])
         by_unit[unit_id]["skills"].append(entry)
 
+    total = sum(counts.values())
     return {
         "pathRevision": PATH_REVISION,
         "assignmentId": assignment["id"],
@@ -191,7 +192,8 @@ def build_path(
             "inProgress": counts[IN_PROGRESS],
             "new": counts[NEW],
             "pending": counts[PENDING],
-            "total": sum(counts.values()),
+            "total": total,
         },
+        "complete": total > 0 and counts[COMPLETED] == total,
         "nextSkill": next_skill,
     }

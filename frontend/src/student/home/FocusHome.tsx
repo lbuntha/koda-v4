@@ -18,6 +18,7 @@ import {
 } from "./focusHomeModel";
 import { FreePlaySwitch } from "./FreePlaySwitch";
 import { HomeHeader } from "./HomeHeader";
+import { NotificationBell } from "../../notifications/NotificationBell";
 import { KIND, cardsLabel } from "./kinds";
 import { LevelUpDialog } from "./LevelUpDialog";
 import { ActivityStatusBadge } from "./ActivityStatusBadge";
@@ -69,7 +70,7 @@ export const FocusHome: React.FC<StudentHomeProps> = ({
         studentName={studentName}
         studentAvatar={studentAvatar}
         onExit={onExit}
-        right={sessionMeta}
+        right={<><NotificationBell recipientType="student" />{sessionMeta}</>}
         variant="focus"
         wide
         theme={theme}

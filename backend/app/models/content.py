@@ -100,6 +100,16 @@ class SystemSettings(Document):
     sound_enabled: bool = True
     ai_model: str = "gpt-4o-mini"
     openai_api_key_encrypted: str | None = None
+    # Mail transport overrides — admin-configured, layered atop the env `Settings`
+    # defaults by `mail.resolve_mailer()`. None means "use the env default" for
+    # every field independently, so a partially-filled form still falls back sanely.
+    mail_transport_override: str | None = None
+    smtp_host_override: str | None = None
+    smtp_port_override: int | None = None
+    smtp_username_override: str | None = None
+    smtp_password_encrypted: str | None = None
+    smtp_use_tls_override: bool | None = None
+    mail_from_override: str | None = None
     scoring: dict[str, Any] = Field(default_factory=default_scoring_config)
     scoring_revision: int = 1
     updated_at: datetime = Field(default_factory=_now)

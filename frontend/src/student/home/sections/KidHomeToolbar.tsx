@@ -7,6 +7,8 @@ import type { KodaKidAvatarId } from "../../../parent/onboarding/LearnerPortrait
 import type { ThemeMode } from "../../../theme/appTheme";
 import { ThemeToggle } from "../../../theme/ThemeToggle";
 import type { KidStats } from "../kidHomeModel";
+import type { LearnerSubject } from "../../../api/course";
+import { SubjectSwitcher } from "../SubjectSwitcher";
 import { AnimatedXpPill } from "../shared/AnimatedXpPill";
 import { AppToolbar } from "../shared";
 
@@ -20,6 +22,10 @@ interface Props {
   onToggleTheme: () => void;
   onAvatarChange: (avatar: KodaKidAvatarId) => Promise<void>;
   onExit: () => void;
+  subjects: LearnerSubject[];
+  activeSubjectId: string | null;
+  switchingSubject: boolean;
+  onSubjectChange: (subjectId: string) => void;
 }
 
 export type KidHomeDestination = "home" | "skills" | "quests";
@@ -41,6 +47,10 @@ export const KidHomeToolbar: React.FC<Props> = ({
   onToggleTheme,
   onAvatarChange,
   onExit,
+  subjects,
+  activeSubjectId,
+  switchingSubject,
+  onSubjectChange,
 }) => {
   const [rewardsOpen, setRewardsOpen] = React.useState(false);
   const [profileOpen, setProfileOpen] = React.useState(false);
@@ -178,6 +188,15 @@ export const KidHomeToolbar: React.FC<Props> = ({
           </div>
         </>
       }
+      subnav={subjects.length > 1 ? (
+        <SubjectSwitcher
+          subjects={subjects}
+          activeSubjectId={activeSubjectId}
+          loading={switchingSubject}
+          onChange={onSubjectChange}
+          className="justify-center py-0"
+        />
+      ) : undefined}
       actions={
         <>
           <AnimatedXpPill value={stats.totalXp} />

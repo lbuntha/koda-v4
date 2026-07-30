@@ -83,6 +83,8 @@ export interface CustomSvgAsset {
 
 export interface CountingQuestion {
   id: string;
+  /** Stable owner curriculum. Keeps the shared question deck scoped in Studio. */
+  curriculumId?: string;
   technique: CountingTechnique;
   title: string;
   instruction: string;

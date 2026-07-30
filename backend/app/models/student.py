@@ -16,6 +16,9 @@ class Student(Document):
     avatar: str | None = None
     grade_level: str | None = "grade_1"
     primary_subject: str | None = "math"
+    # The learner's last open subject. Unlike primary_subject (the adult's default),
+    # this is a harmless navigation preference and may be changed by the child.
+    preferred_subject: str | None = None
     profile_gender: str | None = None
     learning_goals: list[str] = Field(default_factory=list)
     # Optional 4-digit PIN (hashed). Required for independent sign-in; a

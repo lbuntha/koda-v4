@@ -7,6 +7,7 @@ import { Button, Card, CardContent, Tabs, TabsContent, TabsList, TabsTrigger } f
 interface Props {
   quest?: TodayCourse["quest"];
   activities: CourseQueueItem[];
+  subjectName: string;
   onStart: (item: CourseQueueItem) => void;
 }
 
@@ -14,7 +15,7 @@ const percent = (completed: number, target: number): number =>
   target > 0 ? Math.min(100, Math.round((completed / target) * 100)) : 0;
 
 /** A real daily quest backed by /learning/today. Weekly and challenge contracts do not exist yet. */
-export const QuestSection: React.FC<Props> = ({ quest, activities, onStart }) => {
+export const QuestSection: React.FC<Props> = ({ quest, activities, subjectName, onStart }) => {
   const [tab, setTab] = React.useState("daily");
   const completed = quest?.completed ?? 0;
   const target = quest?.target ?? activities.length;
@@ -23,9 +24,9 @@ export const QuestSection: React.FC<Props> = ({ quest, activities, onStart }) =>
   return (
     <section id="kid-quests" className="mt-6 scroll-mt-24">
       <header>
-        <h1 className="text-base font-black text-[#27334A] sm:text-lg dark:text-white">Quests</h1>
+        <h1 className="text-base font-black text-[#27334A] sm:text-lg dark:text-white">{subjectName} quests</h1>
         <p className="mt-0.5 text-[10px] font-bold text-[#8792A5] sm:text-[11px] dark:text-[#8F99AD]">
-          Complete activities, build your streak, and earn rewards.
+          Complete {subjectName} activities. Your XP, streak, and rewards stay together across every subject.
         </p>
       </header>
 

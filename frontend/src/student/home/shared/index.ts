@@ -2,6 +2,7 @@
 export { ActivityCard, type ActivityState } from "./ActivityCard";
 export { AppToolbar } from "./AppToolbar";
 export { CelebrationEffects, type CelebrationTone } from "./CelebrationEffects";
+export { CurriculumCompletionCard } from "./CurriculumCompletionCard";
 export { LearningPathSkillCard } from "./LearningPathSkillCard";
 export { MedallionCard, type MedallionTone } from "./MedallionCard";
 export { MascotFigure, type MascotTone } from "./MascotFigure";
