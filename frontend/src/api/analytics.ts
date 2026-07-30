@@ -6,6 +6,26 @@ export interface AnalyticsStudent {
   avatar?: string | null;
 }
 
+export interface AnalyticsSummary {
+  studentId: string;
+  totalEvents: number;
+  totalAttempts: number;
+  correct: number;
+  incorrect: number;
+  accuracy: number | null;
+  firstTryAccuracy: number | null;
+  independenceRate: number | null;
+  hints: number;
+  lessonsCompleted: number;
+  xpEarned: number;
+  timeOnTaskMs: number;
+  currentStreakDays: number;
+  longestStreakDays: number;
+  activeDays: number;
+  weeklyActivity: Array<{ date: string; day: string; count: number }>;
+  rank: MasterySnapshot["rank"];
+}
+
 export interface MasterySkill {
   curriculumId: string;
   skillId: string;
@@ -143,6 +163,8 @@ const params = (values: Record<string, string | number | undefined>) => {
 
 export const analyticsApi = {
   roster: () => api.get<{ students: AnalyticsStudent[] }>("/analytics/students"),
+  summary: (studentId: string) =>
+    api.get<AnalyticsSummary>(`/analytics/summary${params({ student_id: studentId })}`),
   mastery: (
     studentId: string,
     filters: { subjectId?: string; gradeId?: string; assignmentId?: string } = {},

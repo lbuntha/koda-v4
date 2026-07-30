@@ -13,10 +13,10 @@
  */
 
 import React, { Suspense, lazy, useState } from "react";
-import { Crown, Loader2 } from "lucide-react";
 import { useAuth } from "./AuthContext";
 import { ThemeProvider } from "../theme/appTheme";
 import { ErrorBoundary } from "../components/ErrorBoundary";
+import { Spinner } from "../components/ui";
 
 /**
  * Every role gets a different surface, and no session needs more than one of them. Loading
@@ -43,11 +43,32 @@ const StudentCurriculumPlayer = named(
 const App = lazy(() => import("../App"));
 
 const Splash: React.FC = () => (
-  <div className="min-h-screen w-full flex flex-col items-center justify-center gap-4 bg-gradient-to-br from-indigo-50 via-white to-violet-50">
-    <div className="w-14 h-14 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-600/20">
-      <Crown size={26} />
+  <div className="flex min-h-screen w-full flex-col items-center justify-center gap-3 overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-violet-50">
+    <div className="relative h-24 w-24" aria-label="Koda is getting ready" role="status">
+      <span className="absolute inset-3 animate-pulse rounded-[1.8rem] bg-violet-400/30 blur-xl motion-reduce:animate-none" aria-hidden="true" />
+
+      <span className="absolute inset-0 animate-[spin_3.2s_linear_infinite] rounded-full motion-reduce:animate-none" aria-hidden="true">
+        <span className="absolute left-1/2 top-0 h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-[#F9C846] shadow-[0_0_12px_rgba(249,200,70,0.65)]" />
+        <span className="absolute bottom-2 left-2 h-2 w-2 rounded-full bg-[#55B9F3] shadow-[0_0_10px_rgba(85,185,243,0.55)]" />
+        <span className="absolute bottom-2 right-2 h-2 w-2 rounded-full bg-[#F378B8] shadow-[0_0_10px_rgba(243,120,184,0.55)]" />
+      </span>
+
+      <span className="absolute inset-0 flex items-center justify-center">
+        <span className="animate-[bounce_2.2s_ease-in-out_infinite] motion-reduce:animate-none">
+          <img
+            src="/favicon.svg"
+            alt="Koda"
+            className="h-14 w-14 rounded-2xl shadow-[0_12px_28px_-10px_rgba(88,58,190,0.65)]"
+          />
+        </span>
+      </span>
+
+      <span className="absolute bottom-1 left-1/2 h-2 w-11 -translate-x-1/2 animate-pulse rounded-full bg-violet-500/20 blur-sm motion-reduce:animate-none" aria-hidden="true" />
     </div>
-    <Loader2 size={20} className="animate-spin text-indigo-400" />
+    <div className="flex items-center gap-2 text-[#7252D8]">
+      <Spinner size="sm" />
+      <span className="text-xs font-extrabold tracking-wide">Getting things ready…</span>
+    </div>
   </div>
 );
 

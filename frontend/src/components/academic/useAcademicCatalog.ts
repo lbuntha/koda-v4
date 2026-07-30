@@ -9,6 +9,14 @@ export interface AcademicCatalogState {
 }
 
 let cachedCatalog: { grades: GradeCatalogItem[]; subjects: SubjectCatalogItem[] } | null = null;
+let catalogRequest: ReturnType<typeof academicApi.list> | null = null;
+
+const loadCatalog = () => {
+  catalogRequest ??= academicApi.list().finally(() => {
+    catalogRequest = null;
+  });
+  return catalogRequest;
+};
 
 export function useAcademicCatalog() {
   const [state, setState] = useState<AcademicCatalogState>({
@@ -20,8 +28,7 @@ export function useAcademicCatalog() {
 
   useEffect(() => {
     let isMounted = true;
-    academicApi
-      .list()
+    loadCatalog()
       .then((res) => {
         if (!isMounted) return;
         const activeGrades = (res.grades || []).filter((g) => g.active);

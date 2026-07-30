@@ -39,7 +39,7 @@ export const FamilyCodeCard: React.FC<{ code: string }> = ({ code }) => {
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl bg-indigo-50/70 px-4 py-3 sm:px-5 dark:bg-indigo-400/10">
+    <div className="flex flex-wrap items-center gap-x-5 gap-y-3 rounded-3xl bg-indigo-50/70 px-5 py-4 sm:px-6 sm:py-5 dark:bg-indigo-400/10">
       <ShieldMark />
 
       <div className="min-w-0">

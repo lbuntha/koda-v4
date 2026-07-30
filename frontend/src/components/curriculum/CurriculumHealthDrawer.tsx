@@ -27,6 +27,7 @@ const LEVEL_LABEL: Record<CurriculumIssue["level"], string> = {
   unit: "Unit",
   skill: "Skill",
   question: "Question",
+  rewards: "Rewards",
 };
 
 export const CurriculumHealthDrawer: React.FC<CurriculumHealthDrawerProps> = ({ isOpen, onClose, issues, onJumpToIssue }) => {

@@ -313,7 +313,7 @@ export function computeSkillCoverage(tree: CurriculumTree, questionSkillIds: (st
  * a teacher notices a skill quietly has 3 questions instead of 10.
  */
 export interface CurriculumIssue {
-  level: "grade" | "subject" | "unit" | "skill" | "question";
+  level: "grade" | "subject" | "unit" | "skill" | "question" | "rewards";
   id: string;
   severity: "error" | "warning";
   message: string;
@@ -349,6 +349,70 @@ export function auditCurriculum(tree: CurriculumTree, questionSkillIds: (string 
   questionSkillIds.forEach((id, i) => {
     if (id && !skillIds.has(id)) {
       issues.push({ level: "question", id: `question[${i}]`, severity: "error", message: `assigned to missing skill "${id}"` });
+    }
+  });
+
+  issues.push(...auditRewards(tree));
+
+  return issues;
+}
+
+/**
+ * Rewards that are absent, inert, or impossible for *this* curriculum.
+ *
+ * A curriculum with no rewards block awards nothing, by design — the engine refuses to mint
+ * XP nobody authored. But that failure is invisible: no error, no warning, just a counter
+ * that never moves while a child keeps playing. It is only discoverable by reading the
+ * database, which is how it was found.
+ *
+ * The reachability check is the part that has to know the curriculum: a badge asking for more
+ * proficient skills than the curriculum contains can never be earned, and a child chasing it
+ * has no way to know that.
+ */
+export function auditRewards(tree: CurriculumTree): CurriculumIssue[] {
+  const issues: CurriculumIssue[] = [];
+  const rewards = tree.rewards;
+
+  if (!rewards) {
+    issues.push({
+      level: "rewards", id: "rewards", severity: "warning",
+      message: "no rewards are configured — learners earn 0 XP and never level up",
+    });
+    return issues;
+  }
+
+  const xp = rewards.xp ?? ({} as CurriculumRewards["xp"]);
+  const perActivity =
+    (xp.correctAnswer ?? 0) + (xp.firstTryBonus ?? 0) + (xp.activityCompletion ?? 0);
+  if (perActivity <= 0) {
+    issues.push({
+      level: "rewards", id: "rewards.xp", severity: "warning",
+      message: "every XP award is 0 — playing earns nothing",
+    });
+  }
+
+  if (!rewards.level?.xpPerLevel) {
+    issues.push({
+      level: "rewards", id: "rewards.level", severity: "warning",
+      message: "no XP-per-level threshold — learners never level up",
+    });
+  }
+
+  // What this curriculum can actually produce, so an unreachable badge is caught here rather
+  // than by a child who keeps trying.
+  const skillCount = tree.skills.length;
+  const ceilings: Partial<Record<AchievementMetric, { max: number; noun: string }>> = {
+    proficientSkills: { max: skillCount, noun: "skills" },
+    masteredSkills: { max: skillCount, noun: "skills" },
+  };
+
+  (rewards.achievements ?? []).forEach(achievement => {
+    const ceiling = ceilings[achievement.metric];
+    if (ceiling && achievement.target > ceiling.max) {
+      issues.push({
+        level: "rewards", id: achievement.id, severity: "warning",
+        message: `"${achievement.label}" needs ${achievement.target} ${ceiling.noun} but this curriculum only has ${ceiling.max} — it can never be earned`,
+      });
     }
   });
 

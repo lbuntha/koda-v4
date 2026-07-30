@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { AlertTriangle, Trash2, Loader2 } from "lucide-react";
+import { AlertTriangle, Trash2 } from "lucide-react";
 import { Dialog } from "./Dialog";
 import { Button } from "./Button";
+import { Spinner } from "./Spinner";
 
 export interface ConfirmModalProps {
   isOpen: boolean;
@@ -89,7 +90,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
                 : "bg-[#5C46DF] hover:bg-[#4C36CF] dark:bg-[#BEACFF] dark:text-[#191338] dark:hover:bg-[#AF9CFF]"
             }`}
           >
-            {loading ? <Loader2 size={16} className="animate-spin" /> : confirmText}
+            {loading ? <Spinner size="sm" label="Working" /> : confirmText}
           </Button>
         </div>
       </div>

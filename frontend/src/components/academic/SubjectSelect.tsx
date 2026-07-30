@@ -24,17 +24,21 @@ export const SubjectSelect: React.FC<SubjectSelectProps> = ({
   disabled,
   ...props
 }) => {
-  const { subjects, loading } = useAcademicCatalog();
+  const { subjects, loading, error } = useAcademicCatalog();
 
   const matchingSubjects = gradeId
     ? subjects.filter((s) => !s.grade_id || s.grade_id === gradeId || s.grade_id === "all")
     : subjects;
 
-  const options = matchingSubjects.length > 0
+  const catalogOptions = matchingSubjects.length > 0
     ? Array.from(
         new Map(matchingSubjects.map((s) => [s.key, { value: s.key, label: s.name }])).values()
       )
-    : fallbackOptions;
+    : [];
+  const options = catalogOptions.length > 0 ? catalogOptions : error ? fallbackOptions : [];
+  const currentOption = value && !options.some(option => option.value === value)
+    ? { value, label: `${value.replace(/[_-]/g, " ")} (currently assigned)` }
+    : null;
 
   return (
     <Select
@@ -44,6 +48,9 @@ export const SubjectSelect: React.FC<SubjectSelectProps> = ({
       className={className}
       {...props}
     >
+      {loading && options.length === 0 && <option value="">Loading subjects…</option>}
+      {!loading && options.length === 0 && !currentOption && <option value="">No subjects configured for this grade</option>}
+      {currentOption && <option value={currentOption.value}>{currentOption.label}</option>}
       {options.map((s) => (
         <option key={s.value} value={s.value}>
           {s.label}

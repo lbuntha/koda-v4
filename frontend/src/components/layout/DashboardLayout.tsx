@@ -13,14 +13,14 @@
 
 import React, { useState } from "react";
 import { PanelLeft } from "lucide-react";
-import { AppSidebar, NavItem, NavSection } from "./AppSidebar";
+import { AppSidebar, AppBrand, NavItem, NavSection } from "./AppSidebar";
 
-export type { NavItem, NavSection };
+export type { AppBrand, NavItem, NavSection };
 
 const COLLAPSE_KEY = "koda_sidebar_collapsed";
 
 interface Props {
-  brand: { name: string; icon: React.ElementType };
+  brand: AppBrand;
   sections: NavSection[];
   active: string;
   onNavigate: (id: string) => void;
@@ -64,21 +64,21 @@ export const DashboardLayout: React.FC<Props> = ({
     });
 
   return (
-    <div className="flex h-dvh min-h-0 flex-col overflow-hidden bg-slate-50 font-sans md:flex-row">
+    <div className="flex h-dvh min-h-0 flex-col overflow-hidden bg-slate-50 font-sans md:flex-row dark:bg-[#0E1020]">
       <AppSidebar brand={brand} sections={sections} active={active} onNavigate={onNavigate} user={user} collapsed={collapsed} />
 
       <main className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="h-16 bg-white border-b border-slate-200/70 flex items-center gap-3 px-5 shrink-0">
+        <header className="flex h-16 shrink-0 items-center gap-3 border-b border-slate-200/70 bg-white px-5 dark:border-white/10 dark:bg-[#111329]">
           <button
             onClick={toggle}
             title="Toggle sidebar"
-            className="hidden md:inline-flex w-8 h-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors cursor-pointer shrink-0"
+            className="hidden h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 md:inline-flex dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
           >
             <PanelLeft size={18} />
           </button>
           <div className="flex-1 min-w-0">
-            <h1 className="text-base font-black text-slate-900 leading-tight truncate">{title}</h1>
-            {subtitle && <p className="text-xs text-slate-500 truncate">{subtitle}</p>}
+            <h1 className="truncate text-base font-black leading-tight text-slate-900 dark:text-white">{title}</h1>
+            {subtitle && <p className="truncate text-xs text-slate-500 dark:text-slate-400">{subtitle}</p>}
           </div>
           {actions}
         </header>

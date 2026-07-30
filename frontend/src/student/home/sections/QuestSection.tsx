@@ -29,14 +29,14 @@ export const QuestSection: React.FC<Props> = ({ quest, activities, onStart }) =>
         </p>
       </header>
 
-      <Tabs value={tab} onValueChange={setTab} className="mt-4">
-        <TabsList className="h-auto w-full justify-stretch rounded-xl border border-[#E7EBF2] bg-[#FAFBFD] p-1 dark:border-white/10 dark:bg-white/[0.025]">
-          <TabsTrigger value="daily" className="h-9 flex-1 rounded-lg px-3 text-[11px] font-extrabold sm:px-4">Daily</TabsTrigger>
-          <TabsTrigger value="weekly" className="h-9 flex-1 gap-1.5 rounded-lg px-3 text-[11px] font-extrabold sm:px-4">
-            Weekly <span className="hidden rounded-full bg-[#EEE9FF] px-1.5 py-0.5 text-[8px] font-black uppercase text-[#7252D8] sm:inline dark:bg-violet-400/15 dark:text-[#CDBEFF]">Soon</span>
+      <Tabs value={tab} onValueChange={setTab} variant="learner" className="mt-4">
+        <TabsList>
+          <TabsTrigger value="daily">Daily</TabsTrigger>
+          <TabsTrigger value="weekly">
+            Weekly <span className="hidden rounded-full bg-[#EEE9FF] px-1.5 py-0.5 text-[8px] font-black uppercase text-[#7252D8] group-aria-selected:bg-white/20 group-aria-selected:text-white sm:inline dark:bg-violet-400/15 dark:text-[#CDBEFF]">Soon</span>
           </TabsTrigger>
-          <TabsTrigger value="challenges" className="h-9 flex-1 gap-1.5 rounded-lg px-3 text-[11px] font-extrabold sm:px-4">
-            Challenges <span className="hidden rounded-full bg-[#EEE9FF] px-1.5 py-0.5 text-[8px] font-black uppercase text-[#7252D8] sm:inline dark:bg-violet-400/15 dark:text-[#CDBEFF]">Soon</span>
+          <TabsTrigger value="challenges">
+            Challenges <span className="hidden rounded-full bg-[#EEE9FF] px-1.5 py-0.5 text-[8px] font-black uppercase text-[#7252D8] group-aria-selected:bg-white/20 group-aria-selected:text-white sm:inline dark:bg-violet-400/15 dark:text-[#CDBEFF]">Soon</span>
           </TabsTrigger>
         </TabsList>
 

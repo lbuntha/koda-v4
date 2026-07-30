@@ -21,25 +21,26 @@ export const ChildFormModal: React.FC<Props> = ({ isOpen, onClose, onSubmit, ini
   const [primarySubject, setPrimarySubject] = useState("math");
   const [pin, setPin] = useState("");
 
-  const { grades, subjects } = useAcademicCatalog();
+  const { grades, subjects, loading: catalogLoading, error: catalogError } = useAcademicCatalog();
 
   useEffect(() => {
     if (!isOpen) return;
     setName(initial?.name ?? "");
     setAvatar(initial?.avatar ?? AVATARS[0]);
-    setGradeLevel(initial?.grade_level ?? "grade_1");
-    setPrimarySubject(initial?.primary_subject ?? "math");
+    const nextGrade = initial?.grade_level ?? grades[0]?.key ?? "grade_1";
+    const subjectsForGrade = subjects.filter(subject => !subject.grade_id || subject.grade_id === nextGrade || subject.grade_id === "all");
+    setGradeLevel(nextGrade);
+    setPrimarySubject(initial?.primary_subject ?? subjectsForGrade[0]?.key ?? "math");
     setPin("");
-
-    if (!initial) {
-      if (grades.length > 0 && !initial?.grade_level) {
-        setGradeLevel(grades[0].key);
-      }
-      if (subjects.length > 0 && !initial?.primary_subject) {
-        setPrimarySubject(subjects[0].key);
-      }
-    }
   }, [isOpen, initial, grades, subjects]);
+
+  const changeGrade = (nextGrade: string) => {
+    setGradeLevel(nextGrade);
+    const matchingSubjects = subjects.filter(subject => !subject.grade_id || subject.grade_id === nextGrade || subject.grade_id === "all");
+    if (!matchingSubjects.some(subject => subject.key === primarySubject)) {
+      setPrimarySubject(matchingSubjects[0]?.key ?? "");
+    }
+  };
 
   const submit = async () => {
     if (pin && !/^\d{4,8}$/.test(pin)) throw new Error("PIN must be 4–8 digits.");
@@ -118,16 +119,21 @@ export const ChildFormModal: React.FC<Props> = ({ isOpen, onClose, onSubmit, ini
         >
           <GradeSelect
             value={gradeLevel}
-            onChange={(e) => setGradeLevel(e.target.value)}
+            onChange={(e) => changeGrade(e.target.value)}
             className="h-11 rounded-xl text-sm font-bold"
           />
         </FormField>
 
-        <FormField label="Subject Focus">
+        <FormField
+          label="Subject Focus"
+          hint={catalogError ? "Using fallback subjects because admin settings could not be loaded." : "Loaded from the subjects configured in Admin Settings."}
+        >
           <SubjectSelect
             value={primarySubject}
             onChange={(e) => setPrimarySubject(e.target.value)}
             gradeId={gradeLevel}
+            disabled={catalogLoading}
+            required
             className="h-11 rounded-xl text-sm font-bold"
           />
         </FormField>

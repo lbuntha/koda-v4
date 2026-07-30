@@ -1,6 +1,6 @@
 import React from "react";
-import { Loader2 } from "lucide-react";
 import { cn } from "../../lib/utils";
+import { Spinner } from "./Spinner";
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "default" | "secondary" | "outline" | "ghost" | "link" | "destructive";
@@ -11,6 +11,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "default", size = "md", loading = false, loadingText, disabled, children, ...props }, ref) => {
+    const spinnerSize = size === "xs" ? "xs" : size === "lg" ? "md" : "sm";
     return (
       <button
         ref={ref}
@@ -37,7 +38,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {loading ? (
           <>
-            <Loader2 size={14} className="shrink-0 animate-spin" />
+            <Spinner size={spinnerSize} label={loadingText ? undefined : "Loading"} />
             {loadingText && <span>{loadingText}</span>}
           </>
         ) : children}

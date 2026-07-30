@@ -24,8 +24,15 @@ export interface NavSection {
   items: NavItem[];
 }
 
+export interface AppBrand {
+  name: string;
+  icon?: React.ElementType;
+  logoSrc?: string;
+  logoAlt?: string;
+}
+
 interface Props {
-  brand: { name: string; icon: React.ElementType };
+  brand: AppBrand;
   sections: NavSection[];
   active: string;
   onNavigate: (id: string) => void;
@@ -59,17 +66,24 @@ export const AppSidebar: React.FC<Props> = ({ brand, sections, active, onNavigat
   return (
     <aside
       className={cn(
-        "flex shrink-0 flex-col border-b border-slate-200/70 bg-white transition-[width] duration-200 md:h-full md:min-h-0 md:border-b-0 md:border-r",
+        "flex shrink-0 flex-col border-b border-slate-200/70 bg-white transition-[width] duration-200 md:h-full md:min-h-0 md:border-b-0 md:border-r dark:border-white/10 dark:bg-[#111329]",
         collapsed ? "md:w-16" : "md:w-56"
       )}
     >
       {/* Brand */}
       <div className="px-4 h-16 flex items-center gap-2.5 shrink-0 overflow-hidden">
-        <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-sm shadow-indigo-600/20 shrink-0">
-          <BrandIcon size={17} />
+        <div className={cn(
+          "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
+          brand.logoSrc ? "bg-transparent" : "bg-indigo-600 text-white shadow-sm shadow-indigo-600/20"
+        )}>
+          {brand.logoSrc ? (
+            <img src={brand.logoSrc} alt={brand.logoAlt ?? brand.name} className="h-8 w-8 rounded-lg object-contain" />
+          ) : BrandIcon ? (
+            <BrandIcon size={17} />
+          ) : null}
         </div>
         {!collapsed && (
-          <span className="text-base font-black tracking-tight text-slate-900 whitespace-nowrap">{brand.name}</span>
+          <span className="whitespace-nowrap text-base font-black tracking-tight text-slate-900 dark:text-white">{brand.name}</span>
         )}
       </div>
 
@@ -85,12 +99,12 @@ export const AppSidebar: React.FC<Props> = ({ brand, sections, active, onNavigat
                 onClick={() => toggleGroup(section.id)}
                 className="hidden md:flex w-full items-center justify-between px-2 mb-1 group cursor-pointer"
               >
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-slate-600 transition-colors">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 transition-colors group-hover:text-slate-600 dark:text-slate-500 dark:group-hover:text-slate-300">
                   {section.label}
                 </span>
                 <ChevronDown
                   size={13}
-                  className={cn("text-slate-300 group-hover:text-slate-500 transition-transform", groupCollapsed && "-rotate-90")}
+                  className={cn("text-slate-300 transition-transform group-hover:text-slate-500 dark:text-slate-600 dark:group-hover:text-slate-300", groupCollapsed && "-rotate-90")}
                 />
               </button>
             )}
@@ -111,14 +125,14 @@ export const AppSidebar: React.FC<Props> = ({ brand, sections, active, onNavigat
                       "relative flex items-center gap-3 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap py-2",
                       collapsed ? "px-2.5 md:px-0 md:justify-center" : "px-2.5",
                       isActive
-                        ? "bg-indigo-50 text-indigo-600 font-semibold"
-                        : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
+                        ? "bg-indigo-50 text-indigo-600 font-semibold dark:bg-violet-400/15 dark:text-[#CDBEFF]"
+                        : "text-slate-500 hover:bg-slate-50 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
                     )}
                   >
-                    <Icon size={18} className={cn("shrink-0", isActive ? "text-indigo-600" : "text-slate-400")} />
+                    <Icon size={18} className={cn("shrink-0", isActive ? "text-indigo-600 dark:text-[#BDA9FF]" : "text-slate-400 dark:text-slate-500")} />
                     {!collapsed && <span>{label}</span>}
                     {isActive && !collapsed && (
-                      <span className="hidden md:block absolute -right-3 top-1/2 -translate-y-1/2 h-6 w-1 rounded-l-full bg-indigo-600" />
+                      <span className="absolute -right-3 top-1/2 hidden h-6 w-1 -translate-y-1/2 rounded-l-full bg-indigo-600 md:block dark:bg-[#9A7CFF]" />
                     )}
                   </button>
                 );
@@ -133,17 +147,17 @@ export const AppSidebar: React.FC<Props> = ({ brand, sections, active, onNavigat
       {user && (
         <div
           className={cn(
-            "mt-auto py-4 hidden md:flex items-center gap-2.5 border-t border-slate-100",
+            "mt-auto hidden items-center gap-2.5 border-t border-slate-100 py-4 md:flex dark:border-white/10",
             collapsed ? "px-0 justify-center" : "px-4"
           )}
         >
-          <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-black text-indigo-700 shrink-0">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-black text-indigo-700 dark:bg-violet-400/20 dark:text-[#D6CAFF]">
             {(user.name ?? "?").charAt(0).toUpperCase()}
           </div>
           {!collapsed && (
             <div className="min-w-0">
-              <div className="text-xs font-bold text-slate-800 truncate">{user.name}</div>
-              <div className="text-[10px] text-slate-400 truncate">{user.email}</div>
+              <div className="truncate text-xs font-bold text-slate-800 dark:text-white">{user.name}</div>
+              <div className="truncate text-[10px] text-slate-400 dark:text-slate-500">{user.email}</div>
             </div>
           )}
         </div>

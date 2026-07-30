@@ -1,7 +1,7 @@
 import React from "react";
 import { cn } from "../../lib/utils";
 
-export type TabsVariant = "default" | "admin" | "underline";
+export type TabsVariant = "default" | "admin" | "learner" | "underline";
 
 interface TabsProps extends React.HTMLAttributes<HTMLDivElement> {
   value: string;
@@ -42,6 +42,8 @@ export const TabsList = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HT
           "flex max-w-full items-center overflow-x-auto overscroll-x-contain",
           context?.variant === "admin"
             ? "w-full gap-1 rounded-2xl border border-[#E7E3F6] bg-white p-1.5 shadow-[0_4px_18px_rgba(83,74,183,0.04)] sm:w-fit dark:border-white/10 dark:bg-[#161B2E]"
+            : context?.variant === "learner"
+              ? "w-full justify-stretch gap-1 rounded-xl bg-white/80 p-1 shadow-[0_1px_4px_rgba(39,51,74,0.06)] dark:bg-white/[0.055] dark:shadow-none"
             : context?.variant === "underline"
               ? "w-full gap-3.5 border-b border-[#E7E3F6] bg-transparent px-0.5 dark:border-b-white/10"
               : "justify-start rounded-xl bg-slate-100 p-1 text-slate-500 dark:bg-white/10 dark:text-slate-400",
@@ -96,14 +98,18 @@ export const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>
         }}
         onKeyDown={handleKeyDown}
         className={cn(
-          "inline-flex min-w-fit cursor-pointer select-none items-center justify-center whitespace-nowrap transition-all focus-visible:outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50",
+          "group inline-flex min-w-fit cursor-pointer select-none items-center justify-center whitespace-nowrap transition-all focus-visible:outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50",
           context.variant === "admin"
             ? "flex-1 gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold text-[#6D6997] hover:bg-[#F5F2FF] hover:text-[#0E0B55] dark:text-[#9A94B8] dark:hover:bg-white/10 dark:hover:text-white sm:flex-none"
+            : context.variant === "learner"
+              ? "h-10 flex-1 gap-1.5 rounded-lg px-3 text-[11px] font-extrabold text-[#697386] hover:bg-[#F6F3FF] hover:text-[#6844EA] dark:text-[#A8B0C1] dark:hover:bg-white/[0.07] dark:hover:text-white sm:px-4 sm:text-xs"
             : context.variant === "underline"
               ? "-mb-px gap-1.5 rounded-none border-b-2 border-transparent px-1 py-1.5 text-xs font-extrabold text-[#6D6997] hover:text-[#0E0B55] dark:text-[#9A94B8] dark:hover:text-[#EDECF8]"
               : "rounded-lg px-2.5 py-1 text-xs font-bold text-slate-500 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white",
           isActive && (context.variant === "admin"
             ? "bg-[#534AB7] text-white shadow-sm hover:bg-[#453DA0] hover:text-white dark:bg-[#BEACFF] dark:text-[#191338]"
+            : context.variant === "learner"
+              ? "bg-[#7252D8] text-white shadow-sm shadow-violet-900/10 hover:bg-[#6546CC] hover:text-white dark:bg-[#8066DC] dark:text-white"
             : context.variant === "underline"
               ? "border-[#534AB7] text-[#0E0B55] dark:border-[#BEACFF] dark:text-[#EDECF8]"
               : "bg-white font-extrabold text-slate-900 shadow-sm dark:bg-white/15 dark:text-white"),

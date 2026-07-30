@@ -7,6 +7,7 @@ export { Textarea } from "./Textarea";
 export { Select } from "./Select";
 export { Switch } from "./Switch";
 export { Skeleton, SkeletonText, SkeletonCard } from "./Skeleton";
+export { Spinner } from "./Spinner";
 export { Tabs, TabsList, TabsTrigger, TabsContent } from "./Tabs";
 export { Badge } from "./Badge";
 export { Dialog } from "./Dialog";

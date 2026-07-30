@@ -1,7 +1,7 @@
 import React from "react";
 import { CheckCircle2, ChevronDown, Lock, Play, RotateCcw } from "lucide-react";
 import type { CurriculumPath, PathUnit } from "../../../api/course";
-import { Button, Card, CardContent } from "../../../components/ui";
+import { Button, Card, CardContent, Tabs, TabsList, TabsTrigger } from "../../../components/ui";
 import { unitAccentTone, unitIcon } from "../../../curriculum/unitPresentation";
 
 interface Props {
@@ -65,33 +65,22 @@ export const SkillsExplorerSection: React.FC<Props> = ({
         </p>
       </header>
 
-      <div className="mt-4 flex overflow-x-auto rounded-xl border border-[#E7EBF2] bg-[#FAFBFD] p-1 [scrollbar-width:none] dark:border-white/10 dark:bg-white/[0.025]" role="tablist" aria-label="Subjects">
-        {subjects.map(subject => {
-          const active = subject === activeSubject;
-          return (
-            <Button
-              key={subject}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setActiveSubject(subject);
-                setExpandedUnitId(null);
-                setShowAllSkills(false);
-              }}
-              className={`h-9 min-w-24 flex-1 rounded-lg px-4 text-[11px] font-extrabold shadow-none ${
-                active
-                  ? "bg-[#7252D8] text-white hover:bg-[#6546CC] dark:bg-[#7252D8] dark:text-white"
-                  : "text-[#667085] hover:bg-white hover:text-[#5D43BD] dark:text-[#A8B0C1] dark:hover:bg-white/5 dark:hover:text-white"
-              }`}
-            >
-              {subject}
-            </Button>
-          );
-        })}
-      </div>
+      <Tabs
+        value={activeSubject}
+        variant="learner"
+        className="mt-4"
+        onValueChange={subject => {
+          setActiveSubject(subject);
+          setExpandedUnitId(null);
+          setShowAllSkills(false);
+        }}
+      >
+        <TabsList aria-label="Subjects" className="[scrollbar-width:none]">
+          {subjects.map(subject => (
+            <TabsTrigger key={subject} value={subject}>{subject}</TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       <div className="mt-4 space-y-2.5">
         {visibleUnits.map(entry => {

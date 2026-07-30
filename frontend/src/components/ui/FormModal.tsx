@@ -14,11 +14,11 @@
  */
 
 import React, { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { Dialog } from "./Dialog";
 import { Button } from "./Button";
 import { Label } from "./Label";
+import { Spinner } from "./Spinner";
 
 interface FormModalProps {
   isOpen: boolean;
@@ -85,7 +85,7 @@ export const FormModal: React.FC<FormModalProps> = ({
             Cancel
           </Button>
           <Button type="submit" className="flex-1" disabled={busy || submitDisabled}>
-            {busy ? <Loader2 size={16} className="animate-spin" /> : submitLabel}
+            {busy ? <Spinner size="sm" label="Saving" /> : submitLabel}
           </Button>
         </div>
       </form>
