@@ -22,6 +22,24 @@ export function isApiConfigured(): boolean {
   return typeof API_URL === "string" && API_URL.length > 0;
 }
 
+/** Server routes that serve a *file* the browser loads directly, e.g. via `<img src>`. */
+const API_FILE_PREFIX = "/learning/assets/";
+
+/**
+ * Resolve an artwork reference to something an `<img>` can load.
+ *
+ * The API returns published release artwork as an API-relative path
+ * (`/learning/assets/{release}/{asset}`), which has to be joined with the API base — under
+ * Docker that yields `/api/learning/...` on the same origin, in development
+ * `http://localhost:8000/learning/...`. Everything else is passed through untouched: an
+ * authored HTTP URL, or a `/assets/...` path shipped with the frontend, both of which would
+ * break if they were pointed at the API.
+ */
+export function apiFileUrl(url: string | null | undefined): string | null | undefined {
+  if (!url || !url.startsWith(API_FILE_PREFIX) || !isApiConfigured()) return url;
+  return `${API_URL}${url}`;
+}
+
 export const tokenStore = {
   get access(): string | null {
     return localStorage.getItem(ACCESS_KEY);
@@ -38,7 +56,22 @@ export const tokenStore = {
     localStorage.removeItem(REFRESH_KEY);
   },
   // ── Guardian stash (parent → kid play) ──
+  /**
+   * Put the adult's session aside so a child's can take its place.
+   *
+   * Only the *first* call stashes. A second one would overwrite the adult's tokens with
+   * whatever is active now — which, once play has started, is the child's. That destroyed the
+   * parent's session with no way back: `restoreGuardian` would hand back a student token, and
+   * the adult was silently signed out and had to enter their password again.
+   *
+   * It is easy to reach. Tapping a profile twice does it, and so does picking a second child
+   * while already playing as the first — both things children do constantly.
+   *
+   * The stash is only cleared by `restoreGuardian`, which is the explicit "the adult is back"
+   * moment, so "a stash exists" is exactly the right test for "we are already inside play".
+   */
   stashGuardian() {
+    if (this.hasGuardianStash()) return;
     const a = this.access, r = this.refresh;
     if (a && r) {
       localStorage.setItem(GUARDIAN_ACCESS_KEY, a);

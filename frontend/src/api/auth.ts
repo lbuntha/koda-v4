@@ -51,6 +51,17 @@ export const authApi = {
   launchChild: (student_id: string) =>
     api.post<TokenPair>("/auth/student/launch", { student_id }).then(store),
 
+  /**
+   * Ask for a reset link. Always resolves the same way — the server deliberately does not
+   * say whether the address has an account, and the UI must not imply otherwise.
+   */
+  requestPasswordReset: (email: string) =>
+    api.post<{ detail: string }>("/auth/password-reset/request", { email }),
+
+  /** Spend a reset link. Signs the parent straight in on success. */
+  confirmPasswordReset: (token: string, password: string) =>
+    api.post<TokenPair>("/auth/password-reset/confirm", { token, password }).then(store),
+
   me: () => api.get<Account>("/auth/me"),
 
   logout: () => tokenStore.clear(),

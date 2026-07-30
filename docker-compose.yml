@@ -1,4 +1,4 @@
-# Runs the whole stack: MongoDB + FastAPI backend + Vite frontend (nginx).
+# Runs the whole development stack: MongoDB + FastAPI backend + Vite frontend with HMR.
 #
 #   make up      # build + start (detached)
 #   make logs    # follow logs
@@ -21,33 +21,61 @@ services:
       timeout: 5s
       retries: 12
 
+  # Local mail sink: a real SMTP server on 1025 with a web inbox on 8025. Reset emails are
+  # delivered and readable at http://localhost:8025 without anything leaving the machine.
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+
   api:
     build: ./backend
     restart: unless-stopped
     environment:
       MONGO_URI: mongodb://mongo:27017
       MONGO_DB: koda_v4
+      # No production fallback on purpose: with ENVIRONMENT=production the app refuses to
+      # start unless JWT_SECRET is a real value (see core/config.py).
+      ENVIRONMENT: ${ENVIRONMENT:-development}
       JWT_SECRET: ${JWT_SECRET:-dev-only-insecure-secret-change-me-0000000000000000}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      CORS_ORIGINS: '["http://localhost:3000"]'
+      # Delivered to Mailpit locally; point MAIL_TRANSPORT/SMTP_* at a provider to send for real.
+      MAIL_TRANSPORT: ${MAIL_TRANSPORT:-smtp}
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      MAIL_FROM: ${MAIL_FROM:-Koda <no-reply@koda.local>}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:3000}
+      # Development origins for the Docker and local Vite servers. A deployment must
+      # override this with its real origins — production refuses localhost entries.
+      CORS_ORIGINS: '${CORS_ORIGINS:-["http://localhost:3000","http://localhost:3001","http://localhost:5173"]}'
     ports:
       - "8000:8000"
     depends_on:
       mongo:
         condition: service_healthy
+      mailpit:
+        condition: service_started
 
   web:
     build:
       context: ./frontend
-      args:
-        VITE_API_URL: /api
+      target: dev
     restart: unless-stopped
+    environment:
+      VITE_API_URL: http://localhost:8000
+      # Docker Desktop can coalesce host filesystem events; polling keeps HMR reliable.
+      CHOKIDAR_USEPOLLING: "true"
+      CHOKIDAR_INTERVAL: "200"
     ports:
-      - "3000:80"
+      - "3000:3000"
     volumes:
-      - ./frontend/dist:/usr/share/nginx/html
+      - ./frontend:/app
+      # Keep Linux dependencies inside Docker instead of exposing host node_modules.
+      - web_node_modules:/app/node_modules
     depends_on:
       - api
 
 volumes:
   mongo_data:
+  web_node_modules:

@@ -36,6 +36,8 @@ interface AuthState {
   startChildPlay: (childId: string, childName: string) => Promise<void>;
   endChildPlay: () => Promise<void>;
   logout: () => void;
+  /** Re-reads the account for tokens obtained outside a login call (e.g. a password reset). */
+  refreshSession: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -94,6 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setPlaySession(null);
       await loadMe();
     },
+    refreshSession: loadMe,
     logout: () => {
       authApi.logout();
       tokenStore.restoreGuardian(); // clear any stash too

@@ -1,7 +1,9 @@
-"""Authentication: adult register/login/refresh + the two kid sign-in flows."""
+"""Authentication: adult register/login/refresh/reset + the two kid sign-in flows."""
+
+from datetime import datetime, timezone
 
 from beanie import PydanticObjectId
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from ...models.user import User, Role
@@ -17,7 +19,17 @@ from ...core.security import (
     create_refresh_token,
     decode_token,
 )
-from .schemas import TokenPair, RegisterIn, RefreshIn, StudentLoginIn, LaunchIn
+from ...core.throttle import ADULT_LOGIN, STUDENT_PIN
+from .guard import address_scope, clear, enforce, note_failure
+from . import reset as reset_service
+from .schemas import (
+    TokenPair, RegisterIn, RefreshIn, StudentLoginIn, LaunchIn,
+    PasswordResetRequestIn, PasswordResetConfirmIn,
+)
+
+#: Verified against nothing, purely to spend the same time as a real check when an account
+#: does not exist. Without it, a fast rejection tells an attacker the address is unknown.
+_DUMMY_HASH = hash_secret("timing-equalisation-placeholder")
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -49,12 +61,20 @@ async def register(body: RegisterIn):
 
 
 @router.post("/login", response_model=TokenPair)
-async def login(form: OAuth2PasswordRequestForm = Depends()):
+async def login(request: Request, form: OAuth2PasswordRequestForm = Depends()):
+    scopes = [(f"adult:{form.username.strip().lower()}", ADULT_LOGIN), address_scope(request)]
+    await enforce(scopes)
+
     user = await User.find_one(User.email == form.username)
-    if not user or not verify_secret(form.password, user.password_hash):
+    # Always verify something: skipping the hash for an unknown address returns in a fraction
+    # of the time and turns the endpoint into a way to discover who has an account.
+    correct = verify_secret(form.password, user.password_hash if user else _DUMMY_HASH)
+    if not user or not correct:
+        await note_failure(scopes)
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect email or password")
     if user.disabled_at is not None:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Account is disabled")
+    await clear([key for key, _ in scopes])
     return _issue(str(user.id), user.role)
 
 
@@ -66,6 +86,18 @@ async def refresh(body: RefreshIn):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid refresh token")
     if payload.get("type") != "refresh":
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Not a refresh token")
+    # A valid signature was previously enough, so a disabled account — or one whose password
+    # had just been reset — could refresh indefinitely.
+    if payload.get("role") != Role.student.value:
+        user = await User.get(payload["sub"])
+        if not user or user.disabled_at is not None:
+            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid refresh token")
+        issued_at = datetime.fromtimestamp(payload.get("iat", 0), tz=timezone.utc)
+        changed_at = user.credentials_changed_at
+        if changed_at:
+            changed_at = changed_at if changed_at.tzinfo else changed_at.replace(tzinfo=timezone.utc)
+            if issued_at < changed_at:
+                raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid refresh token")
     return _issue(payload["sub"], payload["role"])
 
 
@@ -115,19 +147,69 @@ async def me(principal: Principal = Depends(get_principal)):
 # ── Kid sign-in ──────────────────────────────────────────────────────────────
 
 @router.post("/student/login", response_model=TokenPair)
-async def student_login(body: StudentLoginIn):
+async def student_login(request: Request, body: StudentLoginIn):
     """Independent flow: kid signs in with the family code + their name + PIN."""
+    family_code = body.family_code.upper()
+    # Counted per family + child name, so guessing one child's PIN cannot be spread across
+    # siblings, and a locked child does not lock the whole household out.
+    scopes = [
+        (f"pin:{family_code}:{body.name.strip().lower()}", STUDENT_PIN),
+        address_scope(request),
+    ]
+    await enforce(scopes)
+
     parent = await User.find_one(
-        User.family_code == body.family_code.upper(), User.role == Role.parent
+        User.family_code == family_code, User.role == Role.parent
     )
-    if not parent:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Unknown family code")
     student = await Student.find_one(
         Student.guardian_parent_ids == str(parent.id), Student.name == body.name
-    )
-    if not student or not student.pin_hash or not verify_secret(body.pin, student.pin_hash):
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect name or PIN")
+    ) if parent else None
+    correct = verify_secret(body.pin, student.pin_hash if student and student.pin_hash else _DUMMY_HASH)
+    if not student or not student.pin_hash or not correct:
+        await note_failure(scopes)
+        # One message for every failure: an unknown family code, a wrong name and a wrong PIN
+        # must be indistinguishable, or the endpoint enumerates households and children.
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect family code, name, or PIN")
+    await clear([key for key, _ in scopes])
     return _issue(str(student.id), Role.student.value)
+
+
+@router.post("/password-reset/request", status_code=status.HTTP_202_ACCEPTED)
+async def request_password_reset(request: Request, body: PasswordResetRequestIn):
+    """Email a reset link, if that address has an account.
+
+    Always answers the same way. Saying "no such account" here would turn the endpoint into a
+    way to find out who is a customer, and the throttle keeps it from being swept.
+    """
+    address = body.email.strip().lower()
+    scopes = [(f"reset:{address}", ADULT_LOGIN), address_scope(request)]
+    await enforce(scopes)
+    await note_failure(scopes)
+
+    user = await User.find_one(User.email == address)
+    if user and user.disabled_at is None:
+        await reset_service.issue(user)
+    return {"detail": "If that email has an account, a reset link is on its way."}
+
+
+@router.post("/password-reset/confirm", response_model=TokenPair)
+async def confirm_password_reset(request: Request, body: PasswordResetConfirmIn):
+    scopes = [address_scope(request)]
+    await enforce(scopes)
+
+    user = await reset_service.consume(body.token)
+    if not user:
+        await note_failure(scopes)
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, "This reset link is invalid or has expired."
+        )
+    user.password_hash = hash_secret(body.password)
+    # Evicts every session issued before now, including whoever else knew the old password.
+    user.credentials_changed_at = datetime.now(timezone.utc)
+    await user.save()
+    # A locked-out parent who resets should be able to sign in straight away.
+    await clear([f"adult:{str(user.email).lower()}", f"reset:{str(user.email).lower()}"])
+    return _issue(str(user.id), user.role)
 
 
 @router.post("/student/launch", response_model=TokenPair)

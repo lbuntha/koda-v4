@@ -33,3 +33,13 @@ class StudentLoginIn(BaseModel):
 
 class LaunchIn(BaseModel):
     student_id: str
+
+
+class PasswordResetRequestIn(BaseModel):
+    email: EmailStr
+
+
+class PasswordResetConfirmIn(BaseModel):
+    token: str = Field(min_length=16, max_length=200)
+    #: Same floor as registration — a reset must not be a way to weaken a password.
+    password: str = Field(min_length=8, max_length=200)
