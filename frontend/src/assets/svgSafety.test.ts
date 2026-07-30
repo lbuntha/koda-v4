@@ -2,15 +2,22 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { isSafeSvgMarkup, normalizeSvgDocumentMarkup, sanitizeSvgMarkup } from "./svgSafety";
 
-test("accepts ordinary SVG markup", () => {
-  const markup = '<svg viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" /></svg>';
-  assert.equal(isSafeSvgMarkup(markup), true);
-  assert.equal(sanitizeSvgMarkup(markup), markup);
+test("the quick check accepts ordinary SVG markup", () => {
+  assert.equal(isSafeSvgMarkup('<svg viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" /></svg>'), true);
 });
 
-test("rejects executable SVG content", () => {
+test("the quick check rejects obviously executable content", () => {
   assert.equal(isSafeSvgMarkup("<svg><script>alert(1)</script></svg>"), false);
   assert.equal(isSafeSvgMarkup('<svg><path onload="alert(1)" /></svg>'), false);
+});
+
+test("sanitizing without a DOM fails closed", () => {
+  // The real sanitizer rebuilds the tree with the browser's own parser (see svgPolicy.ts for
+  // why an allowlist and not a regex). Under `node --test` there is no DOMParser, and the
+  // contract in that case is to return nothing rather than hand back unchecked markup — a
+  // missing image is an acceptable failure, an executed one is not.
+  assert.equal(typeof DOMParser, "undefined");
+  assert.equal(sanitizeSvgMarkup('<svg viewBox="0 0 10 10"><circle r="4" /></svg>'), "");
   assert.equal(sanitizeSvgMarkup('<svg><a href="javascript:alert(1)" /></svg>'), "");
 });
 

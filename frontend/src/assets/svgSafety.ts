@@ -1,12 +1,58 @@
-const UNSAFE_SVG = /<\s*(script|foreignobject|iframe|object|embed)\b|\bon[a-z]+\s*=|javascript\s*:|data\s*:\s*text\/html/i;
+import { isAllowedAttribute, isAllowedElement, isAllowedStyleSheet } from "./svgPolicy";
+
+/**
+ * A cheap first pass, kept only to reject obvious junk before parsing and to give the
+ * designer an immediate "this won't work" while typing. It is *not* the security boundary —
+ * `sanitizeSvgMarkup` is. A blocklist cannot be trusted as one; see svgPolicy.ts.
+ */
+const OBVIOUSLY_UNSAFE = /<\s*(script|foreignobject|iframe|object|embed)\b|\bon[a-z]+\s*=|javascript\s*:|data\s*:\s*text\/html/i;
 
 export function isSafeSvgMarkup(markup: string): boolean {
   const cleaned = markup.trim();
-  return cleaned.toLowerCase().startsWith("<svg") && !UNSAFE_SVG.test(cleaned);
+  return cleaned.toLowerCase().startsWith("<svg") && !OBVIOUSLY_UNSAFE.test(cleaned);
 }
 
+/**
+ * Rebuild the markup keeping only what svgPolicy allows, and return "" if it cannot be
+ * parsed. This is what must run before any `dangerouslySetInnerHTML`.
+ *
+ * The browser's own parser does the parsing, so there is no second implementation of HTML
+ * quirks to get wrong — the tree that gets inspected is exactly the tree that would render.
+ */
 export function sanitizeSvgMarkup(markup: string): string {
-  return isSafeSvgMarkup(markup) ? markup.trim() : "";
+  const cleaned = markup.trim();
+  if (!cleaned.toLowerCase().startsWith("<svg")) return "";
+
+  // No DOMParser (server render, unit test): refuse rather than pass markup through
+  // unchecked. Failing closed here costs a missing image, never an execution.
+  if (typeof DOMParser === "undefined") return "";
+
+  const parsed = new DOMParser().parseFromString(cleaned, "image/svg+xml");
+  if (parsed.getElementsByTagName("parsererror").length > 0) return "";
+
+  const root = parsed.documentElement;
+  if (!root || !isAllowedElement(root.nodeName)) return "";
+  prune(root);
+  return new XMLSerializer().serializeToString(root);
+}
+
+/** Depth-first, and iterated over a static copy because the walk removes as it goes. */
+function prune(element: Element): void {
+  for (const attribute of [...element.attributes]) {
+    if (!isAllowedAttribute(attribute.name, attribute.value)) {
+      element.removeAttribute(attribute.name);
+    }
+  }
+  for (const child of [...element.children]) {
+    if (!isAllowedElement(child.nodeName)) {
+      child.remove();
+    } else if (child.nodeName.toLowerCase() === "style") {
+      // Admitted for real artwork, but only when its text stays inside the document.
+      if (!isAllowedStyleSheet(child.textContent || "")) child.remove();
+    } else {
+      prune(child);
+    }
+  }
 }
 
 const SVG_NS = "http://www.w3.org/2000/svg";
