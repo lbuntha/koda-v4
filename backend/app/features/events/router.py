@@ -9,6 +9,7 @@ from ...models.event import LearningEvent
 from ...models.content import CurriculumRelease
 from ...models.recommendation import RecommendationRun, StudentSession
 from ...models.assignment import Assignment, ProgressionState
+from ...core.logging import get_logger
 from ...core.runtime_settings import get_system_settings
 from ..learning.progression import advance_frontier
 from ..learning.skips import record_recommendation_skip
@@ -24,6 +25,8 @@ from .contract import (
     validate_release_binding,
 )
 from .schemas import EventsIn, RecommendationSkipEventIn
+
+logger = get_logger("events")
 
 # camelCase source keys consumed into canonical columns — removed from the
 # diagnostic bag so they aren't stored twice (and can't collide as kwargs).
@@ -311,6 +314,15 @@ async def ingest_events(body: EventsIn, student: Student = Depends(get_current_s
         )
     await _verify_lesson_completions(student_id, docs, release_cache)
     unverified = sum(not doc.verified for doc in docs)
+    if unverified:
+        # A rejected event is kept but excluded from mastery, so a client sending malformed
+        # events fails silently from the learner's side: they play, and nothing counts. The
+        # reasons are the diagnostic — a sudden run of one reason means a client regression.
+        reasons = sorted({doc.verification_error for doc in docs if not doc.verified and doc.verification_error})
+        logger.warning(
+            "events rejected student_id=%s rejected=%s of=%s reasons=%s",
+            student_id, unverified, len(docs), reasons,
+        )
     if docs:
         await LearningEvent.insert_many(docs)
         by_session: dict[str, int] = {}

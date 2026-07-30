@@ -11,6 +11,7 @@ from uuid import uuid4
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
 from ...core.deps import get_current_student, get_current_user
+from ...core.logging import get_logger
 from ...core.permissions import authorize_guardian_read
 from ...core.runtime_settings import get_system_settings
 from ...models.assignment import Assignment, ProgressionState
@@ -21,13 +22,25 @@ from ...models.recommendation import RecommendationRun, StudentSession
 from ...models.student import Student
 from ...models.user import User
 from ..content.placement import ordered_skills
+from .path import build_path
 from .recommendation import ENGINE_REVISION, recommend
 from .rewards import available_xp, calculate_xp, reward_config, skill_metadata
 from .skips import record_recommendation_skip
 from .schemas import RecommendationSkipIn, SessionEndIn, SessionStartIn
 
+logger = get_logger("learning")
+
 
 router = APIRouter(tags=["learning"])
+
+
+def _assignment_release_bindings(assignments: list[Any]) -> list[str]:
+    return [f"{row.id}:{row.release_id}" for row in assignments]
+
+
+def _run_matches_assignments(run: RecommendationRun, assignments: list[Any]) -> bool:
+    """A cached session plan is valid only for the exact releases learners use now."""
+    return set(run.assignment_release_ids) == set(_assignment_release_bindings(assignments))
 
 
 def _now() -> datetime:
@@ -39,12 +52,19 @@ def _utc(value: datetime) -> datetime:
 
 
 def _thumbnail_url(presentation: dict[str, Any], release_id: str) -> str | None:
+    """Authored URL, or an **API-relative** path to the release's own artwork.
+
+    The path is deliberately relative to this API's root, not to the browser's origin: the
+    routers carry no global `/api` mount, and the client knows where the API lives (its own
+    origin behind a proxy, a different port in development). The frontend joins it with the
+    configured API base — see `apiFileUrl` in `api/client.ts`.
+    """
     if presentation.get("thumbnailUrl"):
         return presentation["thumbnailUrl"]
     asset_id = presentation.get("thumbnailAssetId")
     if not asset_id:
         return None
-    return f"/api/learning/assets/{quote(release_id, safe='')}/{quote(asset_id, safe='')}"
+    return f"/learning/assets/{quote(release_id, safe='')}/{quote(asset_id, safe='')}"
 
 
 SVG_NAMESPACE = "http://www.w3.org/2000/svg"
@@ -172,6 +192,9 @@ async def _course_inputs(student_id: str) -> tuple[list[dict[str, Any]], list[As
             "id": str(assignment.id),
             "release_id": assignment.release_id,
             "curriculum_id": assignment.curriculum_id,
+            # The grade the adult anchored this assignment to. A release may span several
+            # grades, so the path walk narrows an "all" scope down to this one.
+            "grade_id": assignment.grade_id,
             "priority": assignment.priority,
             "scope": assignment.scope,
             "schedule": assignment.schedule,
@@ -417,6 +440,13 @@ async def _build_today(
             RecommendationRun.session_id == session.session_id,
             RecommendationRun.invalidated_at == None,
         )
+        if latest and not _run_matches_assignments(latest, assignments):
+            # Publishing can move an active assignment while the learner still has an open
+            # session. Retiring its cached plan lets this request rebuild against the new
+            # release instead of serving stale artwork/content or mismatched release ids.
+            latest.invalidated_at = datetime.now(timezone.utc)
+            await latest.save()
+            latest = None
         if latest:
             quest = await _quest_payload(
                 student_id=student_id,
@@ -462,6 +492,15 @@ async def _build_today(
             if value == "completed"
         },
     )
+    if not result["served_items"]:
+        # An empty queue is the learner's whole session: they open the app and there is
+        # nothing to do. It is never a normal state — it means every skill is filtered out by
+        # eligibility, cooldown or completion, and no adult would otherwise find out.
+        logger.warning(
+            "recommendation starved student_id=%s assignments=%s candidates=%s",
+            student_id, len(assignment_inputs), len(result["candidates"]),
+        )
+
     run = None
     if persist:
         last = await RecommendationRun.find(
@@ -473,7 +512,7 @@ async def _build_today(
             student_id=student_id,
             session_id=session.session_id,
             sequence=(last.sequence + 1) if last else 1,
-            assignment_release_ids=[f"{row.id}:{row.release_id}" for row in assignments],
+            assignment_release_ids=_assignment_release_bindings(assignments),
             scoring_revision=settings_doc.scoring_revision,
             engine_revision=result["engine_revision"],
             candidates=result["candidates"],
@@ -511,6 +550,33 @@ async def learning_today(
     student_id = str(student.id)
     session = await _open_session(student_id)
     return await _build_today(student_id=student_id, session=session, mode=mode, persist=True)
+
+
+@router.get("/learning/path")
+async def learning_path(student: Student = Depends(get_current_student)):
+    """The whole assigned road, A→Z, with every skill's state.
+
+    Complements `/learning/today`: that returns a short prioritised session plan, this returns
+    the curriculum walk the plan sits inside — so a learner sees where they are, and which
+    skills are done, in progress, overdue, unlocked, or still waiting on an earlier one.
+    """
+    student_id = str(student.id)
+    assignment_inputs, assignments, _releases = await _course_inputs(student_id)
+    if not assignment_inputs:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "No placement-ready assignment is available")
+    mastery = await _mastery_inputs(student_id)
+    progressions = await _progression_inputs(student_id, [str(row.id) for row in assignments])
+    by_assignment = {row.get("assignment_id"): row for row in progressions}
+    return {
+        "paths": [
+            build_path(
+                assignment=assignment,
+                mastery_states=mastery,
+                progression=by_assignment.get(assignment["id"]),
+            )
+            for assignment in assignment_inputs
+        ],
+    }
 
 
 @router.post("/learning/recommendations/{run_id}/skip")

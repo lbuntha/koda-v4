@@ -7,6 +7,7 @@ from pymongo.errors import DuplicateKeyError
 
 from ...core.audit import record_audit
 from ...core.deps import get_current_student, get_current_user
+from ...core.logging import get_logger
 from ...core.permissions import authorize_guardian_read
 from ...core.runtime_settings import get_system_settings
 from ...models.assignment import Assignment, Placement, ProgressionState
@@ -15,6 +16,8 @@ from ...models.student import Student
 from ...models.user import Role, User
 from ..content.placement import PlacementError, build_placement, compute_placement
 from .schemas import AssignmentIn, AssignmentStatusIn, PlacementSubmitIn
+
+logger = get_logger("placement")
 
 router = APIRouter(tags=["placement"])
 
@@ -176,18 +179,35 @@ async def get_assignment(assignment_id: str, user: User = Depends(get_current_us
 @router.patch("/assignments/{assignment_id}")
 async def update_assignment(assignment_id: str, body: AssignmentStatusIn, user: User = Depends(get_current_user)):
     assignment = await _owned_assignment_or_404(assignment_id, user)
-    before = assignment.status
-    assignment.status = body.status
+    before = {"status": assignment.status, "release_id": assignment.release_id}
+
+    if body.release_id and body.release_id != assignment.release_id:
+        release = await CurriculumRelease.find_one(CurriculumRelease.release_id == body.release_id)
+        if not release:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Release not found")
+        # A release from another curriculum would silently repoint the learner at unrelated
+        # skills, orphaning their placement, progression, and mastery for this assignment.
+        if release.curriculum_id != assignment.curriculum_id:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                "That release belongs to a different curriculum",
+            )
+        assignment.release_id = body.release_id
+
+    if body.status:
+        assignment.status = body.status
+
     assignment.updated_at = datetime.now(timezone.utc)
     await assignment.save()
+    after = {"status": assignment.status, "release_id": assignment.release_id}
     await record_audit(
         actor=user,
         owner_id=assignment.owner_id,
         resource_type="assignment",
-        action="status_changed",
+        action="release_upgraded" if before["release_id"] != after["release_id"] else "status_changed",
         curriculum_id=assignment.curriculum_id,
-        before={"status": before},
-        after={"status": assignment.status},
+        before=before,
+        after=after,
     )
     return _assignment_out(assignment)
 
@@ -234,6 +254,18 @@ async def _get_or_create_placement(assignment: Assignment) -> tuple[Placement, C
     placement_config = (settings_doc.scoring or {}).get("placement") or {}
     seed = f"{assignment.student_id}:{assignment.id}:{assignment.release_id}"
     generated = build_placement(_release_dict(release), assignment.scope, placement_config, seed)
+    # A checkpoint skill with no authored questions contributes no items, so the learner is
+    # placed on thinner evidence than the design assumes — silently, and the placement then
+    # governs everything they are shown. Sparse authoring is the usual cause and is fixable,
+    # but only if someone knows.
+    covered = len({item["skill_id"] for item in generated["item_manifest"]})
+    expected = int(placement_config.get("checkpoint_cap", 8))
+    if covered < expected:
+        logger.warning(
+            "placement sparse student_id=%s release_id=%s skills_covered=%s expected=%s items=%s",
+            assignment.student_id, assignment.release_id, covered, expected,
+            len(generated["item_manifest"]),
+        )
     placement = Placement(
         student_id=assignment.student_id,
         assignment_id=str(assignment.id),
