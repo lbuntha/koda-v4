@@ -16,6 +16,8 @@ class Student(Document):
     avatar: str | None = None
     grade_level: str | None = "grade_1"
     primary_subject: str | None = "math"
+    profile_gender: str | None = None
+    learning_goals: list[str] = Field(default_factory=list)
     # Optional 4-digit PIN (hashed). Required for independent sign-in; a
     # parent-launched session doesn't need it.
     pin_hash: str | None = None

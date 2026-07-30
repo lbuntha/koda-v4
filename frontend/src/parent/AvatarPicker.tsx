@@ -13,6 +13,11 @@ export interface AvatarCategory {
 
 const DICEBEAR_BASE = "https://api.dicebear.com/7.x";
 
+export const LEARNER_PROFILE_IMAGES = {
+  boy: `${DICEBEAR_BASE}/adventurer/svg?seed=Felix`,
+  girl: `${DICEBEAR_BASE}/adventurer/svg?seed=Zoe`,
+} as const;
+
 export const AVATAR_CATEGORIES: AvatarCategory[] = [
   {
     id: "adventurer",
@@ -34,8 +39,8 @@ export const AVATAR_CATEGORIES: AvatarCategory[] = [
     label: "Avataaars",
     icon: "🧑",
     avatars: [
-      `${DICEBEAR_BASE}/avataaars/svg?seed=Alexander`,
-      `${DICEBEAR_BASE}/avataaars/svg?seed=Sophia`,
+      LEARNER_PROFILE_IMAGES.boy,
+      LEARNER_PROFILE_IMAGES.girl,
       `${DICEBEAR_BASE}/avataaars/svg?seed=Lucas`,
       `${DICEBEAR_BASE}/avataaars/svg?seed=Emma`,
       `${DICEBEAR_BASE}/avataaars/svg?seed=Mason`,

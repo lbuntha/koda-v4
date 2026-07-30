@@ -13,6 +13,9 @@ export interface Child {
   avatar: string | null;
   grade_level?: string | null;
   primary_subject?: string | null;
+  profile_gender?: "boy" | "girl" | null;
+  learning_goals?: string[];
+  birth_year?: number | null;
   has_pin: boolean;
   /** ISO timestamp while too many wrong PINs have locked this child out; null otherwise. */
   pin_locked_until?: string | null;
@@ -23,6 +26,10 @@ export interface ChildInput {
   avatar?: string | null;
   grade_level?: string | null;
   primary_subject?: string | null;
+  profile_gender?: "boy" | "girl" | null;
+  learning_goals?: string[];
+  placement_required?: boolean;
+  birth_year?: number | null;
   pin?: string | null;
 }
 

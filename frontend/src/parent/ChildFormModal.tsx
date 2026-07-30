@@ -5,6 +5,7 @@ import { AvatarPicker, AVATARS } from "./AvatarPicker";
 import { KidAvatar } from "../components/KidAvatar";
 import { Child, ChildInput } from "../api/family";
 import { GradeSelect, SubjectSelect, useAcademicCatalog } from "../components/academic";
+import { KidOnboardingWizard } from "./onboarding/KidOnboardingWizard";
 
 interface Props {
   isOpen: boolean;
@@ -72,6 +73,10 @@ export const ChildFormModal: React.FC<Props> = ({ isOpen, onClose, onSubmit, ini
   const selectedGradeLabel = selectedGrade ? selectedGrade.name : gradeLevel;
   const selectedSubject = subjects.find((s) => s.key === primarySubject);
   const selectedSubjectLabel = selectedSubject ? selectedSubject.name : primarySubject;
+
+  if (!editing) {
+    return <KidOnboardingWizard isOpen={isOpen} onClose={onClose} onSubmit={onSubmit} />;
+  }
 
   return (
     <FormModal

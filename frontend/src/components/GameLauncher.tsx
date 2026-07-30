@@ -31,6 +31,7 @@ import { AnalyticsViewerModal } from "./AnalyticsViewerModal";
 import { analyticsLogger } from "../services/analyticsLogger";
 import { getTaxonomy, AttemptOutcome } from "../services/logSchema";
 import { solvedSelection } from "../student/answerSelection";
+import { useThemeMode } from "../theme/appTheme";
 
 interface GameLauncherProps {
   questions: CountingQuestion[];
@@ -73,7 +74,8 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
   const [confetti, setConfetti] = useState<ConfettiParticle[]>([]);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(() => !sounds.isEnabled());
-  const [isDark, setIsDark] = useState<boolean>(true);
+  const [theme, toggleTheme] = useThemeMode();
+  const isDark = theme === "dark";
   const [showAnalyticsModal, setShowAnalyticsModal] = useState<boolean>(false);
   const correctAttemptLogged = useRef(false);
 
@@ -368,7 +370,7 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
                 <span className="hidden sm:inline">JSON Logs</span>
               </button>
               <button
-                onClick={() => { setIsDark(d => !d); sounds.playPop(); }}
+                onClick={() => { toggleTheme(); sounds.playPop(); }}
                 className={`${iconBtn} ${isDark ? iconBtnDark : iconBtnLight}`}
                 title={isDark ? "Light Mode" : "Dark Mode"}
               >

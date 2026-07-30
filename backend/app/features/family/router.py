@@ -46,6 +46,9 @@ def _out(s: Student, pin_locked_until: datetime | None = None) -> ChildOut:
         avatar=s.avatar,
         grade_level=s.grade_level or "grade_1",
         primary_subject=s.primary_subject or "math",
+        profile_gender=s.profile_gender,
+        learning_goals=s.learning_goals,
+        birth_year=s.birth_year,
         has_pin=s.pin_hash is not None,
         pin_locked_until=pin_locked_until,
     )
@@ -74,6 +77,9 @@ async def add_child(body: ChildIn, parent: User = Depends(get_current_parent)):
         avatar=body.avatar,
         grade_level=body.grade_level or "grade_1",
         primary_subject=body.primary_subject or "math",
+        profile_gender=body.profile_gender,
+        learning_goals=body.learning_goals,
+        birth_year=body.birth_year,
         pin_hash=hash_secret(body.pin) if body.pin else None,
         guardian_parent_ids=[str(parent.id)],
     )
@@ -93,7 +99,7 @@ async def add_child(body: ChildIn, parent: User = Depends(get_current_parent)):
                 release_id=release.release_id,
                 grade_id=student.grade_level or "grade_1",
                 priority=100,
-                placement_required=True,
+                placement_required=body.placement_required,
                 status="active",
             )
             await assignment.insert()
@@ -114,6 +120,12 @@ async def update_child(student_id: str, body: ChildUpdate, parent: User = Depend
         student.grade_level = body.grade_level
     if body.primary_subject is not None:
         student.primary_subject = body.primary_subject
+    if body.profile_gender is not None:
+        student.profile_gender = body.profile_gender
+    if body.learning_goals is not None:
+        student.learning_goals = body.learning_goals
+    if body.birth_year is not None:
+        student.birth_year = body.birth_year
     if body.pin is not None:
         student.pin_hash = hash_secret(body.pin)
     await student.save()

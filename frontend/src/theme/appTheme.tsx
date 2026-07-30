@@ -3,8 +3,9 @@
  *
  * `index.css` drives Tailwind's `dark:` variant from an explicit `.dark` class rather than
  * the OS setting, so a page opts in by putting `dark` on its own root element. That
- * keeps the theme scoped: admin screens and the game canvases (which take their own `isDark`
- * prop) are unaffected by what a learner or parent picks here.
+ * keeps the theme scoped to surfaces that consume the shared preference. GameLauncher passes
+ * that preference through the standard CanvasProps `isDark` field, so every activity follows
+ * the learner or parent's chosen theme without owning a second theme state.
  *
  * First visit follows the OS and keeps following it live; once the learner chooses, that
  * choice is remembered and wins.
