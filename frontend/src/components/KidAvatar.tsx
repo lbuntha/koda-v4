@@ -18,6 +18,7 @@
 import React from "react";
 import { cn } from "../lib/utils";
 import { AVATAR_FALLBACK } from "../parent/AvatarPicker";
+import { isKodaKidAvatar, LearnerPortrait } from "../parent/onboarding/LearnerPortrait";
 
 /** Eyes, noses, stripes. */
 const INK = "#2A2350";
@@ -239,6 +240,10 @@ interface Props {
 export const KidAvatar: React.FC<Props> = ({ avatar, className }) => {
   if (!avatar) {
     return <span className={className} aria-hidden>{AVATAR_FALLBACK}</span>;
+  }
+
+  if (isKodaKidAvatar(avatar)) {
+    return <LearnerPortrait avatarId={avatar} className={className} />;
   }
 
   // Case 1: Avatar is a stored data URL (data:image/svg+xml...) or HTTP(S) URL

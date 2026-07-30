@@ -3,6 +3,7 @@ import { Check } from "lucide-react";
 import { KidAvatar } from "../components/KidAvatar";
 import { cn } from "../lib/utils";
 import { useSvgLibrary } from "../assets/SvgLibraryContext";
+import { KODA_KID_AVATARS } from "./onboarding/LearnerPortrait";
 
 export interface AvatarCategory {
   id: string;
@@ -13,12 +14,13 @@ export interface AvatarCategory {
 
 const DICEBEAR_BASE = "https://api.dicebear.com/7.x";
 
-export const LEARNER_PROFILE_IMAGES = {
-  boy: `${DICEBEAR_BASE}/adventurer/svg?seed=Felix`,
-  girl: `${DICEBEAR_BASE}/adventurer/svg?seed=Zoe`,
-} as const;
-
 export const AVATAR_CATEGORIES: AvatarCategory[] = [
+  {
+    id: "koda_kids",
+    label: "Koda Kids",
+    icon: "🌟",
+    avatars: [...KODA_KID_AVATARS],
+  },
   {
     id: "adventurer",
     label: "Adventurers",
@@ -39,8 +41,8 @@ export const AVATAR_CATEGORIES: AvatarCategory[] = [
     label: "Avataaars",
     icon: "🧑",
     avatars: [
-      LEARNER_PROFILE_IMAGES.boy,
-      LEARNER_PROFILE_IMAGES.girl,
+      `${DICEBEAR_BASE}/avataaars/svg?seed=Alexander`,
+      `${DICEBEAR_BASE}/avataaars/svg?seed=Sophia`,
       `${DICEBEAR_BASE}/avataaars/svg?seed=Lucas`,
       `${DICEBEAR_BASE}/avataaars/svg?seed=Emma`,
       `${DICEBEAR_BASE}/avataaars/svg?seed=Mason`,
@@ -112,7 +114,7 @@ interface AvatarPickerProps {
 }
 
 export const AvatarPicker: React.FC<AvatarPickerProps> = ({ value, onChange, className }) => {
-  const [activeTab, setActiveTab] = useState<string>("adventurer");
+  const [activeTab, setActiveTab] = useState<string>("koda_kids");
 
   let customSvgAvatars: string[] = [];
   try {

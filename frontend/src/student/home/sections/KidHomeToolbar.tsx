@@ -1,7 +1,9 @@
 import React from "react";
-import { BookOpen, CheckCircle2, Flame, Gift, Home, LogOut, Map, Star, Zap } from "lucide-react";
+import { BookOpen, CheckCircle2, Flame, Gift, Home, LogOut, Map, Palette, Star, Zap } from "lucide-react";
 import { KidAvatar } from "../../../components/KidAvatar";
-import { Button } from "../../../components/ui";
+import { KodaAvatarPicker } from "../../../components/KodaAvatarPicker";
+import { Button, Dialog, Spinner } from "../../../components/ui";
+import type { KodaKidAvatarId } from "../../../parent/onboarding/LearnerPortrait";
 import type { ThemeMode } from "../../../theme/appTheme";
 import { ThemeToggle } from "../../../theme/ThemeToggle";
 import type { KidStats } from "../kidHomeModel";
@@ -15,6 +17,7 @@ interface Props {
   activeDestination: KidHomeDestination;
   onNavigate: (destination: KidHomeDestination) => void;
   onToggleTheme: () => void;
+  onAvatarChange: (avatar: KodaKidAvatarId) => Promise<void>;
   onExit: () => void;
 }
 
@@ -35,10 +38,15 @@ export const KidHomeToolbar: React.FC<Props> = ({
   activeDestination,
   onNavigate,
   onToggleTheme,
+  onAvatarChange,
   onExit,
 }) => {
   const [rewardsOpen, setRewardsOpen] = React.useState(false);
   const [profileOpen, setProfileOpen] = React.useState(false);
+  const [avatarOpen, setAvatarOpen] = React.useState(false);
+  const [selectedAvatar, setSelectedAvatar] = React.useState<string | null>(studentAvatar ?? null);
+  const [avatarSaving, setAvatarSaving] = React.useState(false);
+  const [avatarError, setAvatarError] = React.useState<string | null>(null);
   const rewardsRef = React.useRef<HTMLDivElement>(null);
   const profileRef = React.useRef<HTMLDivElement>(null);
 
@@ -72,8 +80,25 @@ export const KidHomeToolbar: React.FC<Props> = ({
     };
   }, [profileOpen]);
 
+  React.useEffect(() => setSelectedAvatar(studentAvatar ?? null), [studentAvatar]);
+
+  const saveAvatar = async () => {
+    if (!selectedAvatar?.startsWith("koda-kid:")) return;
+    setAvatarSaving(true);
+    setAvatarError(null);
+    try {
+      await onAvatarChange(selectedAvatar as KodaKidAvatarId);
+      setAvatarOpen(false);
+    } catch (reason) {
+      setAvatarError(reason instanceof Error ? reason.message : "Could not save your avatar yet.");
+    } finally {
+      setAvatarSaving(false);
+    }
+  };
+
   return (
-    <AppToolbar
+    <>
+      <AppToolbar
       wide
       nav={
         <>
@@ -198,6 +223,21 @@ export const KidHomeToolbar: React.FC<Props> = ({
                   variant="ghost"
                   size="sm"
                   role="menuitem"
+                  onClick={() => {
+                    setSelectedAvatar(studentAvatar ?? null);
+                    setAvatarError(null);
+                    setAvatarOpen(true);
+                    setProfileOpen(false);
+                  }}
+                  className="mt-1 w-full justify-start rounded-xl px-2.5 text-[#6E6480] hover:bg-[#F5F7FB] dark:text-[#CDBEFF] dark:hover:bg-white/10"
+                >
+                  <Palette size={15} /> Change avatar
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  role="menuitem"
                   onClick={onExit}
                   className="mt-1 w-full justify-start rounded-xl px-2.5 text-[#6E6480] hover:bg-[#F5F7FB] dark:text-[#CDBEFF] dark:hover:bg-white/10"
                 >
@@ -208,6 +248,21 @@ export const KidHomeToolbar: React.FC<Props> = ({
           </div>
         </>
       }
-    />
+      />
+      <Dialog isOpen={avatarOpen} onClose={() => !avatarSaving && setAvatarOpen(false)} maxWidthClassName="max-w-lg">
+        <div className="pr-8">
+          <p className="text-lg font-black text-[#27334A] dark:text-white">Choose your Koda avatar</p>
+          <p className="mt-1 text-xs font-semibold text-[#8792A5] dark:text-[#9AA3B5]">Pick a character that feels like you.</p>
+        </div>
+        <KodaAvatarPicker value={selectedAvatar} onChange={setSelectedAvatar} className="mt-5" />
+        {avatarError && <p className="mt-3 rounded-xl bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 dark:bg-rose-400/10 dark:text-rose-300">{avatarError}</p>}
+        <div className="mt-5 flex justify-end gap-2">
+          <Button type="button" variant="ghost" onClick={() => setAvatarOpen(false)} disabled={avatarSaving}>Cancel</Button>
+          <Button type="button" onClick={() => void saveAvatar()} disabled={avatarSaving || !selectedAvatar?.startsWith("koda-kid:")} className="bg-[#7252D8] hover:bg-[#6546CC]">
+            {avatarSaving ? <Spinner size="sm" label="Saving avatar" /> : "Use this avatar"}
+          </Button>
+        </div>
+      </Dialog>
+    </>
   );
 };

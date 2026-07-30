@@ -10,7 +10,7 @@ from ...models.user import User, Role
 from ...models.student import Student
 from ...models.assignment import Assignment
 from ...models.academic import Grade, resolve_layout_band
-from ...core.deps import Principal, get_principal, get_current_parent
+from ...core.deps import Principal, get_principal, get_current_parent, get_current_student
 from ...core.codes import unique_family_code
 from ...core.security import (
     hash_secret,
@@ -23,7 +23,7 @@ from ...core.throttle import ADULT_LOGIN, STUDENT_PIN
 from .guard import address_scope, clear, enforce, note_failure
 from . import reset as reset_service
 from .schemas import (
-    TokenPair, RegisterIn, RefreshIn, StudentLoginIn, LaunchIn,
+    TokenPair, RegisterIn, RefreshIn, StudentLoginIn, StudentAvatarIn, LaunchIn,
     PasswordResetRequestIn, PasswordResetConfirmIn,
 )
 
@@ -142,6 +142,14 @@ async def me(principal: Principal = Depends(get_principal)):
         "family_code": user.family_code,
         "menu_ids": user.menu_ids,
     }
+
+
+@router.patch("/student/avatar")
+async def update_student_avatar(body: StudentAvatarIn, student: Student = Depends(get_current_student)):
+    """Let a signed-in learner choose from the safe, local Koda avatar collection."""
+    student.avatar = body.avatar
+    await student.save()
+    return {"avatar": student.avatar}
 
 
 # ── Kid sign-in ──────────────────────────────────────────────────────────────

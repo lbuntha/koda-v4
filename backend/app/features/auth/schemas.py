@@ -31,6 +31,19 @@ class StudentLoginIn(BaseModel):
     pin: str
 
 
+class StudentAvatarIn(BaseModel):
+    avatar: Literal[
+        "koda-kid:boy-sky",
+        "koda-kid:boy-mint",
+        "koda-kid:boy-sun",
+        "koda-kid:boy-violet",
+        "koda-kid:girl-rose",
+        "koda-kid:girl-mint",
+        "koda-kid:girl-sun",
+        "koda-kid:girl-violet",
+    ]
+
+
 class LaunchIn(BaseModel):
     student_id: str
 

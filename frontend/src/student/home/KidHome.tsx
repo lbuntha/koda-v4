@@ -1,5 +1,7 @@
 import React from "react";
 import { Sparkles } from "lucide-react";
+import { authApi } from "../../api/auth";
+import { useAuth } from "../../auth/AuthContext";
 import { apiFileUrl } from "../../api/client";
 import type { CompletedCourseItem, CourseQueueItem } from "../../api/course";
 import { FreePlaySwitch } from "./FreePlaySwitch";
@@ -65,6 +67,7 @@ export const KidHome: React.FC<StudentHomeProps> = ({
   onDismissLevelUp,
   onExit,
 }) => {
+  const { refreshSession } = useAuth();
   const [theme, toggleTheme] = useThemeMode();
   const [activeDestination, setActiveDestination] = React.useState<KidHomeDestination>(() => {
     if (typeof window === "undefined") return "home";
@@ -139,6 +142,10 @@ export const KidHome: React.FC<StudentHomeProps> = ({
         activeDestination={activeDestination}
         onNavigate={navigate}
         onToggleTheme={toggleTheme}
+        onAvatarChange={async avatar => {
+          await authApi.updateStudentAvatar(avatar);
+          await refreshSession();
+        }}
         onExit={onExit}
       />
 
