@@ -11,12 +11,18 @@ export interface Child {
   id: string;
   name: string;
   avatar: string | null;
+  grade_level?: string | null;
+  primary_subject?: string | null;
   has_pin: boolean;
+  /** ISO timestamp while too many wrong PINs have locked this child out; null otherwise. */
+  pin_locked_until?: string | null;
 }
 
 export interface ChildInput {
   name: string;
   avatar?: string | null;
+  grade_level?: string | null;
+  primary_subject?: string | null;
   pin?: string | null;
 }
 
@@ -25,4 +31,5 @@ export const familyApi = {
   add: (body: ChildInput) => api.post<Child>("/family/children", body),
   update: (id: string, body: Partial<ChildInput>) => api.patch<Child>(`/family/children/${id}`, body),
   remove: (id: string) => api.del<void>(`/family/children/${id}`),
+  unlockPin: (id: string) => api.post<Child>(`/family/children/${id}/unlock-pin`, {}),
 };

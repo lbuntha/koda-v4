@@ -1,15 +1,10 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- *
- * Add or edit a kid: name, avatar, and an optional PIN. On edit, leaving the PIN
- * blank keeps the existing one.
- */
-
 import React, { useEffect, useState } from "react";
+import { Sparkles } from "lucide-react";
 import { Input, FormModal, FormField } from "../components/ui";
 import { AvatarPicker, AVATARS } from "./AvatarPicker";
+import { KidAvatar } from "../components/KidAvatar";
 import { Child, ChildInput } from "../api/family";
+import { GradeSelect, SubjectSelect, useAcademicCatalog } from "../components/academic";
 
 interface Props {
   isOpen: boolean;
@@ -22,47 +17,138 @@ export const ChildFormModal: React.FC<Props> = ({ isOpen, onClose, onSubmit, ini
   const editing = !!initial;
   const [name, setName] = useState("");
   const [avatar, setAvatar] = useState(AVATARS[0]);
+  const [gradeLevel, setGradeLevel] = useState("grade_1");
+  const [primarySubject, setPrimarySubject] = useState("math");
   const [pin, setPin] = useState("");
+
+  const { grades, subjects } = useAcademicCatalog();
 
   useEffect(() => {
     if (!isOpen) return;
     setName(initial?.name ?? "");
     setAvatar(initial?.avatar ?? AVATARS[0]);
+    setGradeLevel(initial?.grade_level ?? "grade_1");
+    setPrimarySubject(initial?.primary_subject ?? "math");
     setPin("");
-  }, [isOpen, initial]);
+
+    if (!initial) {
+      if (grades.length > 0 && !initial?.grade_level) {
+        setGradeLevel(grades[0].key);
+      }
+      if (subjects.length > 0 && !initial?.primary_subject) {
+        setPrimarySubject(subjects[0].key);
+      }
+    }
+  }, [isOpen, initial, grades, subjects]);
 
   const submit = async () => {
     if (pin && !/^\d{4,8}$/.test(pin)) throw new Error("PIN must be 4–8 digits.");
-    const data: ChildInput = { name: name.trim(), avatar };
+
+    let finalAvatar = avatar;
+    if (avatar.startsWith("http://") || avatar.startsWith("https://")) {
+      try {
+        const res = await fetch(avatar);
+        if (res.ok) {
+          const svgText = await res.text();
+          finalAvatar = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgText)}`;
+        }
+      } catch (err) {
+        console.warn("Could not fetch SVG for offline saving, fallback to URL:", err);
+      }
+    }
+
+    const data: ChildInput = {
+      name: name.trim(),
+      avatar: finalAvatar,
+      grade_level: gradeLevel,
+      primary_subject: primarySubject,
+    };
     if (pin.trim()) data.pin = pin.trim();
     await onSubmit(data);
   };
+
+  const selectedGrade = grades.find((g) => g.key === gradeLevel);
+  const selectedGradeLabel = selectedGrade ? selectedGrade.name : gradeLevel;
+  const selectedSubject = subjects.find((s) => s.key === primarySubject);
+  const selectedSubjectLabel = selectedSubject ? selectedSubject.name : primarySubject;
 
   return (
     <FormModal
       isOpen={isOpen}
       onClose={onClose}
-      title={editing ? "Edit child" : "Add a child"}
-      submitLabel={editing ? "Save" : "Add child"}
+      title={editing ? "Edit Student Profile" : "Add Student"}
+      description={editing ? "Update avatar, grade, and profile details." : "Create a new kid profile with personalized grade placement recommendations."}
+      submitLabel={editing ? "Save Profile" : "Add Student"}
       onSubmit={submit}
+      maxWidthClassName="max-w-md sm:max-w-lg"
     >
-      <FormField label="Name">
-        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ada" required autoFocus />
+      {/* Live Profile Header Preview */}
+      <div className="mb-4 flex flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-[#F5F2FF] to-[#EBE4FF] p-3.5 text-center dark:from-white/10 dark:to-white/5 border border-indigo-100/70 dark:border-white/10">
+        <div className="relative flex h-18 w-18 items-center justify-center rounded-full bg-white shadow-lg shadow-indigo-500/20 ring-4 ring-[#5C46DF]/20 dark:bg-[#191338]">
+          <KidAvatar avatar={avatar} className="h-12 w-12" />
+          <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#5C46DF] text-white shadow dark:bg-[#BEACFF] dark:text-[#191338]">
+            <Sparkles size={11} />
+          </span>
+        </div>
+        <h4 className="mt-2 text-sm font-black text-[#1E1538] dark:text-[#F2EEFF]">
+          {name.trim() || (editing ? "Student Profile" : "New Student")}
+        </h4>
+        <div className="mt-1 flex items-center gap-1.5 text-[11px] font-extrabold text-[#5C46DF] dark:text-[#BEACFF]">
+          <span>{selectedGradeLabel}</span>
+          <span>•</span>
+          <span className="capitalize">{selectedSubjectLabel}</span>
+        </div>
+      </div>
+
+      <FormField label="Child's Name">
+        <Input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="e.g. Ada, Thana, Jutta"
+          required
+          autoFocus
+          className="h-11 rounded-xl text-sm font-extrabold"
+        />
       </FormField>
-      <FormField label="Avatar">
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <FormField
+          label="Grade Model"
+          hint="Loaded from Curriculum models catalog."
+        >
+          <GradeSelect
+            value={gradeLevel}
+            onChange={(e) => setGradeLevel(e.target.value)}
+            className="h-11 rounded-xl text-sm font-bold"
+          />
+        </FormField>
+
+        <FormField label="Subject Focus">
+          <SubjectSelect
+            value={primarySubject}
+            onChange={(e) => setPrimarySubject(e.target.value)}
+            gradeId={gradeLevel}
+            className="h-11 rounded-xl text-sm font-bold"
+          />
+        </FormField>
+      </div>
+
+      <FormField label="Select Avatar">
         <AvatarPicker value={avatar} onChange={setAvatar} />
       </FormField>
+
       <FormField
         label={editing ? "New PIN (optional)" : "PIN (optional)"}
-        hint="A PIN lets your child sign in on their own device."
+        hint="A 4–8 digit PIN allows your child to sign in independently."
       >
         <Input
           type="password"
           inputMode="numeric"
           value={pin}
           onChange={(e) => setPin(e.target.value)}
-          placeholder={editing ? "Leave blank to keep current" : "4–8 digits"}
+          placeholder={editing ? "Leave blank to keep current PIN" : "4–8 digits"}
           maxLength={8}
+          className="h-11 rounded-xl font-mono text-sm"
         />
       </FormField>
     </FormModal>

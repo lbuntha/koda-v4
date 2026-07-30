@@ -68,6 +68,18 @@ async def get_current_admin(user: User = Depends(get_current_user)) -> User:
     return user
 
 
+async def get_current_author(user: User = Depends(get_current_user)) -> User:
+    """Admin or teacher — the roles that author content.
+
+    Distinct from `get_current_admin` because teachers author too, and distinct from
+    `get_current_user` because authoring tools must not be reachable from a parent's or a
+    child's token. A learner's device is the least trusted place a token lives.
+    """
+    if user.role not in (Role.admin, Role.teacher):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Authoring account required")
+    return user
+
+
 async def get_current_student(principal: Principal = Depends(get_principal)) -> Student:
     if principal.role != Role.student.value:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Student account required")

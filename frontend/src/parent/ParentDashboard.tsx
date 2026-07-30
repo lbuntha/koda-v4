@@ -10,7 +10,7 @@
 
 import React, { useState } from "react";
 import { Check, LogOut, Loader2, Pencil, UserPlus } from "lucide-react";
-import { Button, Card } from "../components/ui";
+import { Button, Card, ConfirmModal } from "../components/ui";
 import { useAuth } from "../auth/AuthContext";
 import { useFamily } from "./useFamily";
 import { FamilyCodeCard } from "./FamilyCodeCard";
@@ -25,10 +25,11 @@ import { useThemeMode } from "../theme/appTheme";
 export const ParentDashboard: React.FC = () => {
   const [theme, toggleTheme] = useThemeMode();
   const { account, logout, startChildPlay } = useAuth();
-  const { children, loading, error, addChild, updateChild, removeChild } = useFamily();
+  const { children, loading, error, addChild, updateChild, removeChild, unlockPin } = useFamily();
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Child | null>(null);
   const [progressChild, setProgressChild] = useState<Child | null>(null);
+  const [deletingChild, setDeletingChild] = useState<Child | null>(null);
   const [managing, setManaging] = useState(false);
 
   const openAdd = () => {
@@ -43,8 +44,8 @@ export const ParentDashboard: React.FC = () => {
     if (editing) await updateChild(editing.id, data);
     else await addChild(data);
   };
-  const remove = async (c: Child) => {
-    if (window.confirm(`Remove ${c.name}? This deletes their progress.`)) await removeChild(c.id);
+  const remove = (c: Child) => {
+    setDeletingChild(c);
   };
 
   return (
@@ -67,12 +68,6 @@ export const ParentDashboard: React.FC = () => {
               <span className="text-2xl font-black tracking-tight text-[#5B48D6] dark:text-[#BEACFF]">
                 Koda
               </span>
-            </div>
-            <div className="min-w-0">
-              <h1 className="truncate text-[15px] font-extrabold leading-tight text-slate-900 dark:text-[#EDECF8]">
-                Hi, {account?.name} 👋
-              </h1>
-              <p className="text-xs font-medium text-slate-500 dark:text-[#9A94B8]">Your family</p>
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2 sm:gap-4">
@@ -137,6 +132,7 @@ export const ParentDashboard: React.FC = () => {
                   onEdit={() => openEdit(c)}
                   onRemove={() => remove(c)}
                   onProgress={() => setProgressChild(c)}
+                  onUnlockPin={() => void unlockPin(c.id)}
                 />
               ))}
               <AddProfileTile onClick={openAdd} />
@@ -168,6 +164,20 @@ export const ParentDashboard: React.FC = () => {
 
       <ChildFormModal isOpen={formOpen} onClose={() => setFormOpen(false)} onSubmit={submit} initial={editing} />
       <ChildAnalyticsDrawer student={progressChild} onClose={() => setProgressChild(null)} />
+      <ConfirmModal
+        isOpen={Boolean(deletingChild)}
+        onClose={() => setDeletingChild(null)}
+        onConfirm={async () => {
+          if (deletingChild) {
+            await removeChild(deletingChild.id);
+          }
+        }}
+        title={`Remove ${deletingChild?.name}?`}
+        description="This deletes their profile and learning progress."
+        confirmText="Remove"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   );
 };

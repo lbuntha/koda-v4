@@ -9,10 +9,10 @@
  */
 
 import React from "react";
-import { BarChart3, Lock, Pencil, Trash2 } from "lucide-react";
+import { BarChart3, Lock, LockOpen, Pencil, Trash2 } from "lucide-react";
 import { Button } from "../components/ui";
 import { Child } from "../api/family";
-import { KidAvatar } from "./KidAvatar";
+import { KidAvatar } from "../components/KidAvatar";
 import { PROFILE_TONE_CLASS, profileToneFor } from "./profileTone";
 
 interface Props {
@@ -22,6 +22,8 @@ interface Props {
   onEdit: () => void;
   onRemove: () => void;
   onProgress: () => void;
+  /** Clears a PIN lockout. Absent means the caller doesn't support unlocking. */
+  onUnlockPin?: () => void;
 }
 
 export const KidProfileTile: React.FC<Props> = ({
@@ -31,8 +33,14 @@ export const KidProfileTile: React.FC<Props> = ({
   onEdit,
   onRemove,
   onProgress,
+  onUnlockPin,
 }) => {
   const tone = PROFILE_TONE_CLASS[profileToneFor(child.id)];
+  // A lock the parent can't see makes a locked child look like a broken app. Recomputed on
+  // render rather than stored, so an expired lock stops showing without a refetch.
+  const pinLocked = Boolean(
+    child.pin_locked_until && new Date(child.pin_locked_until).getTime() > Date.now(),
+  );
   return (
     <div className="flex w-28 flex-col items-center gap-2.5 sm:w-32 lg:w-36">
       <button
@@ -52,7 +60,7 @@ export const KidProfileTile: React.FC<Props> = ({
         {child.has_pin && !managing && (
           <span
             aria-hidden
-            className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-black/25 text-white backdrop-blur-[2px]"
+            className={`absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full text-white backdrop-blur-[2px] ${pinLocked ? "bg-rose-500/90" : "bg-black/25"}`}
           >
             <Lock size={12} />
           </span>
@@ -71,12 +79,28 @@ export const KidProfileTile: React.FC<Props> = ({
         <p className="w-full truncate text-sm font-bold text-slate-700 dark:text-[#DEDCF0]">
           {child.name}
         </p>
+        <span className="mt-0.5 inline-block rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-extrabold capitalize text-indigo-600 dark:bg-white/10 dark:text-[#CDBEFF]">
+          {(child.grade_level || "grade_1").replace("_", " ")}
+        </span>
         {managing && (
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-[#8B85A6]">
+          <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-[#8B85A6]">
             {child.has_pin ? "PIN protected" : "No PIN"}
           </p>
         )}
+        {pinLocked && (
+          <p className="mt-1 rounded-lg bg-rose-50 px-2 py-1 text-[10px] font-bold leading-tight text-rose-700 dark:bg-rose-500/15 dark:text-rose-200">
+            Locked after too many wrong PINs
+          </p>
+        )}
       </div>
+
+      {/* Offered outside `managing`: a locked-out child is a problem to solve now, not one
+          that should require finding a management toggle first. */}
+      {pinLocked && onUnlockPin && (
+        <Button variant="outline" size="xs" onClick={onUnlockPin} className="border-rose-200 text-rose-700 dark:border-rose-400/30 dark:text-rose-200">
+          <LockOpen size={12} /> Unlock
+        </Button>
+      )}
 
       {managing && (
         <div className="flex flex-wrap justify-center gap-1">

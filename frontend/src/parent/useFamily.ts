@@ -46,5 +46,9 @@ export function useFamily() {
       await familyApi.remove(id);
       await refresh();
     },
+    unlockPin: async (id: string) => {
+      await familyApi.unlockPin(id);
+      await refresh();
+    },
   };
 }
