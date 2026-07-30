@@ -7,6 +7,7 @@ import { Button } from "../components/ui";
 import { useThemeMode } from "../theme/appTheme";
 import type { CountingQuestion } from "../types";
 import { placementBandPresentation } from "./placementBand";
+import { CelebrationEffects } from "./home/shared";
 
 interface Props {
   quiz: PlacementQuiz;
@@ -57,35 +58,38 @@ export const PlacementWarmup: React.FC<Props> = ({ quiz, band, onComplete, onExi
             ? "bg-[linear-gradient(145deg,#F8F3FF,#FFF8FC,#EFF5FF)] text-[#21183D]"
             : "bg-[#F6F5FA] text-[#1B2130]"
       }`} data-band={band}>
+        <CelebrationEffects tone="party" className="fixed inset-0" />
         <div className={`pointer-events-none absolute left-1/3 top-0 h-[420px] w-[520px] rounded-full blur-3xl ${
           isDark ? "bg-indigo-600/15" : "bg-violet-300/25"
         }`} />
-        <div className={`relative w-full text-center backdrop-blur-xl ${
+        <div className={`koda-celebration-card relative w-full text-center backdrop-blur-xl ${
           isKid
             ? "max-w-xl rounded-[2.5rem] border-2 border-white bg-white/80 p-8 shadow-[0_28px_80px_-35px_rgba(86,62,162,0.5)] sm:p-10"
             : isDark
               ? "max-w-lg rounded-3xl border border-white/10 bg-slate-900/90 p-7 shadow-2xl shadow-black/50"
               : "max-w-lg rounded-3xl border border-[#E1DDF0] bg-white/90 p-7 shadow-xl shadow-violet-200/30"
         }`}>
-          <span className={`mx-auto flex items-center justify-center ${
+          <span className={`koda-celebration-icon mx-auto flex items-center justify-center ${
             isKid
               ? "h-24 w-24 rounded-[2rem] bg-amber-100 text-5xl"
               : "h-16 w-16 rounded-2xl bg-emerald-500/15 text-emerald-500"
           }`}>
-            {isKid ? "🎉" : <CheckCircle2 size={32} />}
+            {isKid ? <span className="koda-celebration-icon-art">🎉</span> : <CheckCircle2 className="koda-celebration-icon-art" size={32} />}
           </span>
-          <p className={`mt-5 text-[10px] font-bold uppercase tracking-[0.18em] ${
-            isDark ? "text-indigo-400" : isKid ? "text-[#7059C8]" : "text-[#6B57D8]"
-          }`}>{presentation.completionEyebrow}</p>
-          <h1 className={isKid ? "mt-2 text-3xl font-black" : "mt-2 text-2xl font-extrabold"}>
-            {presentation.completionTitle}
-          </h1>
-          <p className={`mx-auto mt-3 max-w-sm text-sm leading-relaxed ${isDark ? "text-slate-400" : "text-[#766D88]"}`}>
-            {presentation.completionBody}{" "}
-            {!isKid && (
-              <>We’ll begin with <strong className={isDark ? "text-white" : "text-[#21183D]"}>{frontierItem?.title || "your assigned skill"}</strong>.</>
-            )}
-          </p>
+          <div className="koda-celebration-copy">
+            <p className={`mt-5 text-[10px] font-bold uppercase tracking-[0.18em] ${
+              isDark ? "text-indigo-400" : isKid ? "text-[#7059C8]" : "text-[#6B57D8]"
+            }`}>{presentation.completionEyebrow}</p>
+            <h1 className={isKid ? "mt-2 text-3xl font-black" : "mt-2 text-2xl font-extrabold"}>
+              {presentation.completionTitle}
+            </h1>
+            <p className={`mx-auto mt-3 max-w-sm text-sm leading-relaxed ${isDark ? "text-slate-400" : "text-[#766D88]"}`}>
+              {presentation.completionBody}{" "}
+              {!isKid && (
+                <>We’ll begin with <strong className={isDark ? "text-white" : "text-[#21183D]"}>{frontierItem?.title || "your assigned skill"}</strong>.</>
+              )}
+            </p>
+          </div>
           {presentation.showCompletionMetrics && (
             <div className="mt-6 grid grid-cols-2 gap-3 text-left">
               <div className={`rounded-2xl border p-4 ${isDark ? "border-white/10 bg-white/5" : "border-[#E1DDF0] bg-[#F8F7FC]"}`}>
@@ -100,7 +104,7 @@ export const PlacementWarmup: React.FC<Props> = ({ quiz, band, onComplete, onExi
           )}
           <Button
             size={isKid ? "lg" : "md"}
-            className={`mt-6 w-full ${isKid ? "h-15 rounded-full text-lg font-black" : ""}`}
+            className={`koda-celebration-cta mt-6 w-full ${isKid ? "h-15 rounded-full text-lg font-black" : ""}`}
             onClick={onComplete}
           >
             {presentation.continueLabel} <ChevronRight size={16} />
