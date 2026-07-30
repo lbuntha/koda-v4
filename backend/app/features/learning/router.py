@@ -246,6 +246,7 @@ def _item_out(
     item: dict[str, Any],
     releases: dict[str, CurriculumRelease],
     status_value: str = "not_completed",
+    system_rewards: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     release = releases[item["release_id"]]
     questions = []
@@ -268,7 +269,7 @@ def _item_out(
         "thumbnailUrl": _thumbnail_url(presentation, release.release_id),
         "accent": presentation["accent"],
         "estimatedMinutes": presentation.get("estimatedMinutes"),
-        "xpAvailable": available_xp(release.tree, item["skill_id"], len(questions)),
+        "xpAvailable": available_xp(release.tree, item["skill_id"], len(questions), system_rewards),
         "unitId": item.get("unit_id"),
         "subjectId": item.get("subject_id"),
         "kind": item["kind"],
@@ -279,7 +280,11 @@ def _item_out(
     }
 
 
-def _free_items(assignments: list[dict[str, Any]], releases: dict[str, CurriculumRelease]) -> list[dict[str, Any]]:
+def _free_items(
+    assignments: list[dict[str, Any]],
+    releases: dict[str, CurriculumRelease],
+    system_rewards: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
     items: list[dict[str, Any]] = []
     for assignment in assignments:
         release = releases[assignment["release_id"]]
@@ -300,7 +305,7 @@ def _free_items(assignments: list[dict[str, Any]], releases: dict[str, Curriculu
                 "kind": "free",
                 "reason": "Choose any assigned skill",
                 "optional": True,
-            }, releases))
+            }, releases, system_rewards=system_rewards))
     return items
 
 
@@ -309,6 +314,7 @@ async def _session_completion(
     student_id: str,
     session_id: str,
     releases: dict[str, CurriculumRelease],
+    system_rewards: dict[str, Any] | None = None,
 ) -> tuple[dict[tuple[str, str], str], list[dict[str, Any]], dict[str, Any]]:
     rows = await LearningEvent.find(
         LearningEvent.student_id == student_id,
@@ -348,7 +354,10 @@ async def _session_completion(
             "status": "completed",
             "completedAt": row.occurred_at or row.received_at.isoformat(),
         }
-    xp = calculate_xp(rows, {release_id: release.tree for release_id, release in releases.items()})
+    xp = calculate_xp(
+        rows, {release_id: release.tree for release_id, release in releases.items()},
+        system_rewards,
+    )
     for item in completed_by_key.values():
         item["xpEarned"] = sum(
             row["totalXp"]
@@ -411,19 +420,25 @@ async def _build_today(
     assignment_inputs, assignments, releases = await _course_inputs(student_id)
     if not assignment_inputs:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "No placement-ready assignment is available")
+    # Loaded once here and threaded down: what playing is worth is an admin setting, so every
+    # figure on this payload — available XP, earned XP, the quest — has to resolve against the
+    # same document, not just the ones whose curriculum happened to author its own.
+    settings_doc = await get_system_settings()
+    system_rewards = dict((settings_doc.scoring or {}).get("rewards") or {})
     statuses, completed_items, xp = await _session_completion(
         student_id=student_id,
         session_id=session.session_id,
         releases=releases,
+        system_rewards=system_rewards,
     )
     primary_release = releases[assignments[0].release_id]
-    authored_rewards = reward_config(primary_release.tree)
+    authored_rewards = reward_config(primary_release.tree, system_rewards)
     if mode == "free":
         return {
             "mode": "free",
             "sessionId": session.session_id,
             "recommendationRunId": None,
-            "queue": _annotate_queue(_free_items(assignment_inputs, releases), statuses),
+            "queue": _annotate_queue(_free_items(assignment_inputs, releases, system_rewards), statuses),
             "completedItems": completed_items,
             "completedCount": len(completed_items),
             "quest": {
@@ -461,7 +476,7 @@ async def _build_today(
                 "sessionId": session.session_id,
                 "recommendationRunId": latest.run_id,
                 "queue": _annotate_queue(
-                    [_item_out(item, releases) for item in latest.served_items],
+                    [_item_out(item, releases, system_rewards=system_rewards) for item in latest.served_items],
                     statuses,
                 ),
                 "completedItems": completed_items,
@@ -469,7 +484,6 @@ async def _build_today(
                 "quest": quest,
             }
 
-    settings_doc = await get_system_settings()
     config = dict((settings_doc.scoring or {}).get("recommendation") or {})
     config["skills_per_session"] = authored_rewards["quest"]["activitiesPerSession"]
     highest_priority = assignments[0]
@@ -533,7 +547,7 @@ async def _build_today(
         "recommendationRunId": run.run_id if run else None,
         "engineRevision": ENGINE_REVISION,
         "queue": _annotate_queue(
-            [_item_out(item, releases) for item in result["served_items"]],
+            [_item_out(item, releases, system_rewards=system_rewards) for item in result["served_items"]],
             statuses,
         ),
         "completedItems": completed_items,

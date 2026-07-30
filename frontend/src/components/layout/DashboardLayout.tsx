@@ -76,10 +76,13 @@ export const DashboardLayout: React.FC<Props> = ({
           >
             <PanelLeft size={18} />
           </button>
-          <div className="flex-1 min-w-0">
-            <h1 className="truncate text-base font-black leading-tight text-slate-900 dark:text-white">{title}</h1>
-            {subtitle && <p className="truncate text-xs text-slate-500 dark:text-slate-400">{subtitle}</p>}
-          </div>
+          {(title || subtitle) && (
+            <div className="min-w-0 flex-1">
+              {title && <h1 className="truncate text-base font-black leading-tight text-slate-900 dark:text-white">{title}</h1>}
+              {subtitle && <p className="truncate text-xs text-slate-500 dark:text-slate-400">{subtitle}</p>}
+            </div>
+          )}
+          {!title && !subtitle && <div className="flex-1" />}
           {actions}
         </header>
 

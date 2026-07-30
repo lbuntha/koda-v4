@@ -21,8 +21,8 @@ interface Props {
 }
 
 const AddChildCard: React.FC<{ onAdd: () => void }> = ({ onAdd }) => (
-  <Card className="min-h-64 rounded-3xl border border-dashed border-[#D9DDEA] bg-white/45 shadow-none dark:border-white/10 dark:bg-white/[0.02]">
-    <CardContent className="flex h-full min-h-64 flex-col items-center justify-center p-6 text-center">
+  <Card className="min-h-56 rounded-3xl border border-dashed border-[#D9DDEA] bg-white/45 shadow-none dark:border-white/10 dark:bg-white/[0.02]">
+    <CardContent className="flex h-full min-h-56 flex-col items-center justify-center p-5 text-center">
       <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F0EBFF] text-[#7252D8] dark:bg-violet-400/15 dark:text-[#CDBEFF]"><Plus size={25} /></span>
       <p className="mt-4 text-sm font-black text-[#344057] dark:text-white">Add a child</p>
       <p className="mt-1.5 text-xs font-bold text-[#8A95A8] dark:text-[#8F99AD]">Create another learner profile.</p>
@@ -49,7 +49,7 @@ export const ParentChildrenGrid: React.FC<Props> = ({
   if (error) return <div className="rounded-xl bg-rose-50 px-4 py-3 text-xs font-bold text-rose-700 dark:bg-rose-400/10 dark:text-rose-300">{error}</div>;
 
   return (
-    <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {profiles.map(child => (
         <ParentChildCard
           key={child.id}

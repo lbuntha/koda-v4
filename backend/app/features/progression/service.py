@@ -445,6 +445,9 @@ async def build_progress(student_id: str) -> dict[str, Any]:
             # `settings` is the same document the home chip reads, so the achievement and
             # the chip agree on what a streak day is.
             dict((settings.scoring or {}).get("streak") or {}),
+            # Same document again: what playing is worth is an admin setting, so a
+            # curriculum that authored none still awards the configured amount.
+            dict((settings.scoring or {}).get("rewards") or {}),
         ),
         "skills": skills,
     }

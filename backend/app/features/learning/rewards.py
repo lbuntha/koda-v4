@@ -8,22 +8,45 @@ from typing import Any
 from .streak import longest_run, streak_days
 
 
+#: The floor, used only when nothing else is configured at all. Zero on purpose: XP that
+#: nobody chose is XP the product invented. In practice the system settings always supply
+#: real values (see DEFAULT_SCORING_CONFIG["rewards"]), so this is the last resort rather
+#: than the normal case it used to be.
 DEFAULT_REWARDS = {
     "quest": {"label": "Today’s quest", "activitiesPerSession": 3},
-    # Legacy curricula without admin-authored rewards must not mint XP.
     "xp": {"correctAnswer": 0, "firstTryBonus": 0, "activityCompletion": 0},
     "level": {},
     "achievements": [],
 }
 
 
-def reward_config(tree: dict[str, Any]) -> dict[str, Any]:
+def reward_config(
+    tree: dict[str, Any],
+    system: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Resolve what playing is worth for one curriculum.
+
+    Three layers, each overriding the one before: the floor above, the admin's system-wide
+    settings, then whatever this curriculum authored. A course that says nothing inherits
+    working values instead of silently awarding nothing, and a course with unusual economics
+    can still say so.
+
+    Achievements are not merged field-by-field — a curriculum either defines its own ladder
+    or uses the shared one, because half of one ladder and half of another is not a ladder.
+    """
+    system = system or {}
     authored = tree.get("rewards") or {}
     return {
-        "quest": {**DEFAULT_REWARDS["quest"], **(authored.get("quest") or {})},
-        "xp": {**DEFAULT_REWARDS["xp"], **(authored.get("xp") or {})},
-        "level": {**DEFAULT_REWARDS["level"], **(authored.get("level") or {})},
-        "achievements": authored.get("achievements") or [],
+        "quest": {
+            **DEFAULT_REWARDS["quest"], **(system.get("quest") or {}), **(authored.get("quest") or {}),
+        },
+        "xp": {
+            **DEFAULT_REWARDS["xp"], **(system.get("xp") or {}), **(authored.get("xp") or {}),
+        },
+        "level": {
+            **DEFAULT_REWARDS["level"], **(system.get("level") or {}), **(authored.get("level") or {}),
+        },
+        "achievements": authored.get("achievements") or system.get("achievements") or [],
     }
 
 
@@ -41,8 +64,11 @@ def skill_metadata(tree: dict[str, Any], skill_id: str) -> dict[str, Any]:
     }
 
 
-def available_xp(tree: dict[str, Any], skill_id: str, question_count: int) -> int:
-    config = reward_config(tree)["xp"]
+def available_xp(
+    tree: dict[str, Any], skill_id: str, question_count: int,
+    system: dict[str, Any] | None = None,
+) -> int:
+    config = reward_config(tree, system)["xp"]
     skill = skill_metadata(tree, skill_id)
     completion = (
         skill["completionXp"]
@@ -55,6 +81,7 @@ def available_xp(tree: dict[str, Any], skill_id: str, question_count: int) -> in
 def calculate_xp(
     events: list[Any],
     release_trees: dict[str, dict[str, Any]],
+    system: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Replay verified events into XP; duplicate question/completion awards collapse."""
     correct: dict[tuple, Any] = {}
@@ -80,7 +107,7 @@ def calculate_xp(
         tree = release_trees.get(event.release_id)
         if not tree:
             continue
-        config = reward_config(tree)["xp"]
+        config = reward_config(tree, system)["xp"]
         key = (event.release_id, event.curriculum_skill_id)
         row = breakdown.setdefault(key, {
             "releaseId": event.release_id,
@@ -98,7 +125,7 @@ def calculate_xp(
         tree = release_trees.get(event.release_id)
         if not tree:
             continue
-        config = reward_config(tree)["xp"]
+        config = reward_config(tree, system)["xp"]
         skill = skill_metadata(tree, event.curriculum_skill_id)
         value = skill["completionXp"]
         if value is None:
@@ -128,11 +155,14 @@ def achievement_profile(
     active_curricula: list[tuple[str, dict[str, Any]]],
     mastery_states: list[Any],
     streak_config: dict[str, Any] | None = None,
+    system_rewards: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build level and badge progress from verified, replayable learning state."""
     verified = [event for event in events if event.verified]
-    all_xp = calculate_xp(verified, release_trees)
-    primary_config = reward_config(active_curricula[0][1]) if active_curricula else reward_config({})
+    all_xp = calculate_xp(verified, release_trees, system_rewards)
+    primary_config = reward_config(
+        active_curricula[0][1] if active_curricula else {}, system_rewards,
+    )
     xp_per_level = int(primary_config["level"].get("xpPerLevel") or 0)
     total_xp = int(all_xp["totalXp"])
     current_xp = total_xp % xp_per_level if xp_per_level else 0
@@ -145,7 +175,7 @@ def achievement_profile(
             event for event in verified
             if event.curriculum_id == curriculum_id
         ]
-        curriculum_xp = calculate_xp(curriculum_events, release_trees)["totalXp"]
+        curriculum_xp = calculate_xp(curriculum_events, release_trees, system_rewards)["totalXp"]
         completions = {
             (
                 event.session_id,
@@ -189,7 +219,7 @@ def achievement_profile(
             # Same day rule as the learner's home chip; longest run rather than current.
             "streakDays": longest_run(streak_days(curriculum_events, streak_config)),
         }
-        for definition in reward_config(tree)["achievements"]:
+        for definition in reward_config(tree, system_rewards)["achievements"]:
             key = (curriculum_id, definition["id"])
             if key in seen:
                 continue

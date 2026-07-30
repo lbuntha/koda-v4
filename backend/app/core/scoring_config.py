@@ -54,6 +54,22 @@ DEFAULT_SCORING_CONFIG: dict[str, Any] = {
         "min_events_per_day": 1,      # qualifying events a day needs to count
         "grace_days": 1,              # how stale the newest active day may be before it resets
     },
+    # What playing is worth, for every curriculum that does not say otherwise.
+    #
+    # These used to be authored per curriculum with a zero fallback, so a curriculum whose
+    # author never filled the form awarded nothing — silently, with no error and a counter
+    # that never moved. Two of three curricula on the first real database were in that state.
+    # Rewards now work the same way as the streak and recommendation settings above: set once
+    # here, inherited everywhere, overridable per curriculum when a course genuinely needs
+    # different economics.
+    #
+    # Sized against a real Grade 1 course: 5 questions per skill at 4 + 2, plus 12 for
+    # finishing, is 42 XP a skill and 126 for a three-activity session — so 120 per level is
+    # one level per completed quest, and about ten levels across a thirty-skill year.
+    "rewards": {
+        "xp": {"correctAnswer": 4, "firstTryBonus": 2, "activityCompletion": 12},
+        "level": {"xpPerLevel": 120},
+    },
 }
 
 

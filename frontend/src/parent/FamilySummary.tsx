@@ -5,6 +5,7 @@ import type { AnalyticsSummary } from "../api/analytics";
 interface Props {
   summaries: AnalyticsSummary[];
   loading?: boolean;
+  className?: string;
 }
 
 const learningTime = (milliseconds: number) => {
@@ -13,7 +14,7 @@ const learningTime = (milliseconds: number) => {
   return `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
 };
 
-export const FamilySummary: React.FC<Props> = ({ summaries, loading }) => {
+export const FamilySummary: React.FC<Props> = ({ summaries, loading, className = "mt-8" }) => {
   const totals = summaries.reduce((value, summary) => ({
     lessons: value.lessons + summary.lessonsCompleted,
     xp: value.xp + summary.xpEarned,
@@ -30,7 +31,7 @@ export const FamilySummary: React.FC<Props> = ({ summaries, loading }) => {
   ];
 
   return (
-    <section className="mt-8">
+    <section className={className}>
       <div className="flex items-end justify-between gap-3">
         <div>
           <h2 className="text-lg font-black text-[#27334A] dark:text-white">Family summary</h2>
@@ -38,9 +39,9 @@ export const FamilySummary: React.FC<Props> = ({ summaries, loading }) => {
         </div>
         {totals.streak > 0 && <span className="text-xs font-black text-orange-600 dark:text-orange-300">{totals.streak} day best streak</span>}
       </div>
-      <div className="mt-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {items.map(item => (
-          <div key={item.label} className="flex min-h-28 items-center gap-4 rounded-3xl bg-white p-5 dark:bg-white/[0.045]">
+          <div key={item.label} className="flex min-h-24 items-center gap-3 rounded-3xl bg-white p-4 dark:bg-white/[0.045]">
             <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${item.tone}`}><item.icon size={21} /></span>
             <div className="min-w-0">
               <p className="text-[10px] font-extrabold uppercase tracking-wide text-[#8A95A8] dark:text-[#8F99AD]">{item.label}</p>

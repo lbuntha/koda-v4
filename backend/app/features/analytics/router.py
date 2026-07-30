@@ -64,12 +64,25 @@ async def roster(user: User = Depends(get_current_user)):
 @router.get("/summary")
 async def summary(student_id: str, user: User = Depends(get_current_user)):
     await authorize_guardian_read(student_id, user)
-    activity = await activity_snapshot(student_id, limit=1)
+    activity = await activity_snapshot(student_id, limit=50)
     progress = await build_progress(student_id)
+    recent_events = []
+    represented_sessions: set[tuple[str | None, str | None]] = set()
+    for event in activity["events"]:
+        if not event.get("verified") or event.get("eventType") not in {"lesson_complete", "attempt"}:
+            continue
+        session_key = (event.get("sessionId"), event.get("skillId"))
+        if session_key in represented_sessions:
+            continue
+        recent_events.append(event)
+        represented_sessions.add(session_key)
+        if len(recent_events) == 3:
+            break
     return {
         "studentId": student_id,
         **activity["summary"],
         "rank": progress["rank"],
+        "recentEvents": recent_events,
     }
 
 

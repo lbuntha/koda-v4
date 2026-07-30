@@ -24,6 +24,27 @@ export interface AnalyticsSummary {
   activeDays: number;
   weeklyActivity: Array<{ date: string; day: string; count: number }>;
   rank: MasterySnapshot["rank"];
+  recentEvents: ActivityEvent[];
+}
+
+export interface ActivityEvent {
+  id: string;
+  sessionId?: string | null;
+  occurredAt: string;
+  eventType?: string | null;
+  outcome?: string | null;
+  attemptNumber?: number | null;
+  questionId?: string | null;
+  skillId?: string | null;
+  skillLabel?: string | null;
+  assignmentId?: string | null;
+  technique?: string | null;
+  hintUsed?: boolean | null;
+  timeOnTaskMs?: number | null;
+  slideNumber?: number | null;
+  totalSlides?: number | null;
+  verified: boolean;
+  summary?: string | null;
 }
 
 export interface MasterySkill {
@@ -104,20 +125,7 @@ export interface ActivitySnapshot {
     endedAt?: string | null;
     eventsCount: number;
   }>;
-  events: Array<{
-    id: string;
-    occurredAt: string;
-    eventType?: string | null;
-    outcome?: string | null;
-    questionId?: string | null;
-    skillId?: string | null;
-    assignmentId?: string | null;
-    technique?: string | null;
-    hintUsed?: boolean | null;
-    timeOnTaskMs?: number | null;
-    verified: boolean;
-    summary?: string | null;
-  }>;
+  events: ActivityEvent[];
 }
 
 export interface RecommendationSnapshot {

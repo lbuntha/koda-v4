@@ -61,20 +61,29 @@ async def authorized_students(user: User) -> list[Student]:
     return []
 
 
-def _event_out(event: LearningEvent) -> dict[str, Any]:
+def _event_out(
+    event: LearningEvent,
+    release_trees: dict[str, dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    tree = (release_trees or {}).get(event.release_id, {})
+    presentation = skill_metadata(tree, event.curriculum_skill_id) if event.curriculum_skill_id else {}
     return {
         "id": event.client_id or str(event.id),
+        "sessionId": event.session_id,
         "occurredAt": event.occurred_at or event.received_at.isoformat(),
         "eventType": event.event_type,
         "outcome": event.outcome,
         "questionId": event.question_id,
         "skillId": event.curriculum_skill_id,
+        "skillLabel": presentation.get("title"),
         "curriculumId": event.curriculum_id,
         "assignmentId": event.assignment_id,
         "technique": event.technique,
         "attemptNumber": event.attempt_number,
         "hintUsed": event.hint_used_before_attempt,
         "timeOnTaskMs": event.time_on_task_ms,
+        "slideNumber": event.slide_index + 1 if event.slide_index is not None else None,
+        "totalSlides": event.total_slides,
         "verified": event.verified,
         "summary": getattr(event, "actionSummary", None),
     }
@@ -147,7 +156,7 @@ async def activity_snapshot(
         {"release_id": {"$in": release_ids}}
     ).to_list() if release_ids else []
     release_trees = {row.release_id: row.tree for row in release_rows}
-    xp = calculate_xp(events, release_trees)
+    xp = calculate_xp(events, release_trees, dict((settings_doc.scoring or {}).get("rewards") or {}))
     xp_breakdown = []
     for row in xp["breakdown"]:
         presentation = skill_metadata(
@@ -197,7 +206,7 @@ async def activity_snapshot(
             }
             for row in sessions
         ],
-        "events": [_event_out(event) for event in events[:min(max(limit, 1), 500)]],
+        "events": [_event_out(event, release_trees) for event in events[:min(max(limit, 1), 500)]],
     }
 
 

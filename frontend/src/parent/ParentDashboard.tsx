@@ -68,8 +68,6 @@ export const ParentDashboard: React.FC = () => {
   }, [childIds]);
 
   const familySummaries = useMemo(() => Object.values(summaries), [summaries]);
-  const firstName = account?.name?.trim().split(/\s+/)[0] || "there";
-
   const openAdd = () => {
     setEditing(null);
     setFormOpen(true);
@@ -108,9 +106,8 @@ export const ParentDashboard: React.FC = () => {
         active={activeView}
         onNavigate={view => setActiveView(view as ParentView)}
         user={{ name: account?.name, email: account?.email }}
-        title={activeView === "dashboard" ? "Parent Dashboard" : "Children"}
-        subtitle="Your family learning space"
-        contentClassName="flex-1 overflow-auto bg-[#F6F8FC] px-5 py-7 sm:px-8 sm:py-9 lg:px-10 dark:bg-[#0E1020]"
+        title=""
+        contentClassName="flex-1 overflow-auto bg-[#F6F8FC] px-5 py-5 sm:px-7 sm:py-6 lg:px-8 dark:bg-[#0E1020]"
         actions={
           <div className="flex items-center gap-1">
             <ThemeToggle theme={theme} onToggle={toggleTheme} variant="round" />
@@ -123,18 +120,20 @@ export const ParentDashboard: React.FC = () => {
         <div className="mx-auto w-full max-w-7xl">
           {activeView === "dashboard" ? (
             <ParentOverview
-              firstName={firstName}
               childCount={children.length}
               summaries={familySummaries}
+              summariesByChild={summaries}
+              profiles={children}
               summariesLoading={summariesLoading}
               showSummary={!loading && !error}
               onAdd={openAdd}
+              onOpenProgress={setProgressChild}
               childrenGrid={childrenGrid}
             />
           ) : (
             <ParentChildrenPage onAdd={openAdd} childrenGrid={childrenGrid} />
           )}
-          {account?.family_code && <div className="mt-8"><FamilyCodeCard code={account.family_code} /></div>}
+          {account?.family_code && <div className="mt-6"><FamilyCodeCard code={account.family_code} /></div>}
         </div>
       </DashboardLayout>
 
