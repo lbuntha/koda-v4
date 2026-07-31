@@ -1,6 +1,9 @@
 import { api } from "./client";
 
-export type PromotionStatus = "pending" | "deferred" | "completed";
+/** `withdrawn`: detected once, but the learner no longer meets the configured
+ *  requirement (it was raised, or a re-score lowered their mastery). Kept out of the
+ *  actionable list below, and restored to `pending` by the server if they qualify again. */
+export type PromotionStatus = "pending" | "deferred" | "completed" | "withdrawn";
 
 export interface CurriculumPromotion {
   id: string;

@@ -45,12 +45,16 @@ export const LearningPathSection: React.FC<Props> = ({
         </Button>
       </header>
 
+      {/* Swipeable row on a phone, where a path reads naturally left-to-right and there is
+          no width to spare. From `sm` up it becomes a wrapping grid instead: fixed-width
+          cards in a flex row left a wide empty gutter on a desktop, and `auto-fill` lets
+          the cards claim that space and reflow at any width without new breakpoints. */}
       <div className="relative mt-4">
         <ol
-          className="relative flex snap-x gap-4 overflow-x-auto px-1 pb-2 pt-1 [scrollbar-color:#CBD3E0_transparent] [scrollbar-width:thin] sm:gap-5"
+          className="relative flex snap-x gap-4 overflow-x-auto px-1 pb-2 pt-1 [scrollbar-color:#CBD3E0_transparent] [scrollbar-width:thin] sm:grid sm:grid-cols-[repeat(auto-fill,minmax(9.5rem,1fr))] sm:gap-5 sm:overflow-x-visible"
         >
           {skills.map(skill => (
-            <li key={skill.skillId} className="snap-start">
+            <li key={skill.skillId} className="w-36 shrink-0 snap-start sm:w-auto">
               <LearningPathSkillCard
                 skill={skill}
                 artUrl={thumbnailBySkillId.get(skill.skillId)}

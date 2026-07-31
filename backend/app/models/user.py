@@ -31,6 +31,7 @@ class User(Document):
     email: EmailStr
     password_hash: str
     name: str
+    avatar: str | None = None
     # Parents get a short shareable code kids use for independent sign-in.
     family_code: str | None = None
     # Set to disable an account: it can no longer authenticate.

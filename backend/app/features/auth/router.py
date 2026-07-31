@@ -26,7 +26,7 @@ from .guard import address_scope, clear, enforce, note_failure
 from . import reset as reset_service
 from .schemas import (
     TokenPair, RegisterIn, RefreshIn, StudentLoginIn, StudentAvatarIn, LaunchIn,
-    PasswordResetRequestIn, PasswordResetConfirmIn,
+    PasswordResetRequestIn, PasswordResetConfirmIn, ProfileUpdateIn,
 )
 
 #: Verified against nothing, purely to spend the same time as a real check when an account
@@ -142,11 +142,39 @@ async def me(principal: Principal = Depends(get_principal)):
         "role": user.role,
         "name": user.name,
         "email": user.email,
+        "avatar": getattr(user, "avatar", None),
         "family_code": user.family_code,
         "menu_ids": user.menu_ids,
         "email_digest_enabled": user.email_digest_enabled,
         "email_inactivity_enabled": user.email_inactivity_enabled,
         "email_announcements_enabled": user.email_announcements_enabled,
+    }
+
+
+@router.patch("/profile")
+async def update_profile(body: ProfileUpdateIn, parent: User = Depends(get_current_parent)):
+    if body.name is not None:
+        parent.name = body.name.strip()
+    if body.avatar is not None:
+        parent.avatar = body.avatar
+    if body.email is not None and body.email.strip().lower() != parent.email.lower():
+        new_email = body.email.strip().lower()
+        if await User.find_one(User.email == new_email):
+            raise HTTPException(status.HTTP_409_CONFLICT, "Email already registered")
+        parent.email = new_email
+    if body.new_password:
+        if not body.current_password or not verify_secret(body.current_password, parent.password_hash):
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "Current password is incorrect")
+        parent.password_hash = hash_secret(body.new_password)
+        parent.credentials_changed_at = datetime.now(timezone.utc)
+    await parent.save()
+    return {
+        "id": str(parent.id),
+        "role": parent.role,
+        "name": parent.name,
+        "email": parent.email,
+        "avatar": parent.avatar,
+        "family_code": parent.family_code,
     }
 
 

@@ -9,6 +9,7 @@
 import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "../../lib/utils";
+import { KidAvatar } from "../KidAvatar";
 
 const GROUPS_KEY = "koda_sidebar_groups"; // collapsed group ids
 
@@ -31,14 +32,37 @@ export interface AppBrand {
   logoAlt?: string;
 }
 
+export interface AppUser {
+  name?: string;
+  email?: string;
+  avatar?: string | null;
+}
+
 interface Props {
   brand: AppBrand;
   sections: NavSection[];
   active: string;
   onNavigate: (id: string) => void;
-  user?: { name?: string; email?: string };
+  user?: AppUser;
   collapsed: boolean;
 }
+
+const AVATAR_EMOJI_MAP: Record<string, string> = {
+  "parent:owl": "🦉",
+  "parent:crown": "👑",
+  "parent:sparkles": "✨",
+  "parent:star": "⭐",
+  "parent:rocket": "🚀",
+  "parent:shield": "🛡️",
+  "parent:heart": "💖",
+  "parent:light": "💡",
+};
+
+const resolveAvatarDisplay = (avatar?: string | null, name?: string) => {
+  if (avatar && AVATAR_EMOJI_MAP[avatar]) return AVATAR_EMOJI_MAP[avatar];
+  if (avatar && avatar.length <= 4) return avatar;
+  return (name ?? "?").charAt(0).toUpperCase();
+};
 
 export const AppSidebar: React.FC<Props> = ({ brand, sections, active, onNavigate, user, collapsed }) => {
   const BrandIcon = brand.icon;
@@ -145,22 +169,29 @@ export const AppSidebar: React.FC<Props> = ({ brand, sections, active, onNavigat
 
       {/* Footer user */}
       {user && (
-        <div
+        <button
+          type="button"
+          onClick={() => onNavigate("profile")}
+          title="View & Edit Profile"
           className={cn(
-            "mt-auto hidden items-center gap-2.5 border-t border-slate-100 py-4 md:flex dark:border-white/10",
+            "mt-auto hidden items-center gap-2.5 border-t border-slate-100 py-4 text-left transition-colors hover:bg-slate-50 md:flex dark:border-white/10 dark:hover:bg-white/5 cursor-pointer w-full",
             collapsed ? "px-0 justify-center" : "px-4"
           )}
         >
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-black text-indigo-700 dark:bg-violet-400/20 dark:text-[#D6CAFF]">
-            {(user.name ?? "?").charAt(0).toUpperCase()}
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-indigo-100 text-sm font-black text-indigo-700 dark:bg-violet-400/20 dark:text-[#D6CAFF]">
+            {user.avatar ? (
+              <KidAvatar avatar={user.avatar} className="h-full w-full object-contain" />
+            ) : (
+              (user.name ?? "?").charAt(0).toUpperCase()
+            )}
           </div>
           {!collapsed && (
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="truncate text-xs font-bold text-slate-800 dark:text-white">{user.name}</div>
               <div className="truncate text-[10px] text-slate-400 dark:text-slate-500">{user.email}</div>
             </div>
           )}
-        </div>
+        </button>
       )}
     </aside>
   );

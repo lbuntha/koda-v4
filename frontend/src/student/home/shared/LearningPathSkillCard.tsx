@@ -68,7 +68,20 @@ const STATE: Record<SkillPathStatus, VisualState> = {
   },
 };
 
-/** One reusable node on the learner's curriculum path. */
+/**
+ * One reusable node on the learner's curriculum path.
+ *
+ * Sizing notes, because two of these look arbitrary and are not:
+ *  - `min-h` rather than a fixed height. A two-line title in a fixed 9rem box was
+ *    clipped horizontally through the second line ("Living or Nonliving?"), and any
+ *    fixed height just moves that failure to the next longer label or larger font.
+ *  - `gap-0`. Button's default `md` size carries `gap-2`, which added 8px between all
+ *    three children on top of the explicit `mt-3`/`mt-auto` spacing below — roughly
+ *    3px more than the card had room for, which is what did the clipping.
+ *
+ * Width is the parent's to set, so the same card works in a scrolling row and in a
+ * grid cell that fills the available space.
+ */
 export const LearningPathSkillCard: React.FC<Props> = ({ skill, artUrl, isNext = false, onStart }) => {
   const status = isNext && skill.status !== "completed" ? "in_progress" : skill.status;
   const visual = STATE[status];
@@ -85,7 +98,7 @@ export const LearningPathSkillCard: React.FC<Props> = ({ skill, artUrl, isNext =
       disabled={!canStart}
       onClick={() => canStart && onStart?.(skill.skillId)}
       aria-label={`${visual.label}: ${skill.skillLabel}`}
-      className={`relative h-36 w-36 shrink-0 flex-col items-stretch justify-start rounded-2xl border-2 px-3.5 py-3.5 text-left shadow-none transition-all sm:w-40 ${
+      className={`relative flex h-full min-h-36 w-full flex-col items-stretch justify-start gap-0 rounded-2xl border-2 px-3.5 py-3.5 text-left shadow-none transition-all ${
         visual.card
       } ${canStart ? "hover:-translate-y-1 hover:shadow-md" : "cursor-default opacity-100"}`}
     >

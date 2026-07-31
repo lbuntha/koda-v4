@@ -122,12 +122,14 @@ export const AcademicCatalogSettings: React.FC = () => {
   const [grades, setGrades] = useState<GradeCatalogItem[]>([]);
   const [subjects, setSubjects] = useState<SubjectCatalogItem[]>([]);
   const [offerings, setOfferings] = useState<CurriculumOffering[]>([]);
+  /** Last state the server confirmed, so Save can tell a real edit from an untouched
+   *  panel and skip a needless write (each one bumps `revision` and writes an audit row). */
+  const [savedOfferings, setSavedOfferings] = useState<CurriculumOffering[]>([]);
   const [gradeDraft, setGradeDraft] = useState<GradeCatalogInput>(emptyGrade);
   const [subjectDraft, setSubjectDraft] = useState<SubjectCatalogInput>(() => emptySubject(catalogSelection.gradeId));
   const [loading, setLoading] = useState(true);
   const [savingGrade, setSavingGrade] = useState(false);
   const [savingSubject, setSavingSubject] = useState(false);
-  const [savingProgression, setSavingProgression] = useState(false);
   const [deletingGradeKey, setDeletingGradeKey] = useState<string | null>(null);
   const [deletingSubjectKey, setDeletingSubjectKey] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -150,6 +152,7 @@ export const AcademicCatalogSettings: React.FC = () => {
       setGrades(sortGrades(catalog.grades));
       setSubjects(sortSubjects(catalog.subjects));
       setOfferings(offeringResponse.offerings);
+      setSavedOfferings(offeringResponse.offerings);
       setGradeDraft(current => current.key ? (catalog.grades.find(item => item.key === current.key) ? gradeInput(catalog.grades.find(item => item.key === current.key)!) : emptyGrade()) : current);
       setSubjectDraft(current => {
         const remembered = catalogSelectionRef.current;
@@ -174,6 +177,13 @@ export const AcademicCatalogSettings: React.FC = () => {
   const selectedOffering = offerings.find(item =>
     item.grade_id === subjectDraft.grade_id && item.subject_id === subjectDraft.key
   );
+  // Compared against the server's own copy, so switching between subjects with unsaved
+  // edits can never make Save write the wrong offering.
+  const progressionChanged = Boolean(selectedOffering) && JSON.stringify(selectedOffering) !== JSON.stringify(
+    savedOfferings.find(item =>
+      item.grade_id === selectedOffering?.grade_id && item.subject_id === selectedOffering?.subject_id
+    )
+  );
   const progressionChoices = subjects.filter(subject =>
     offerings.some(offering =>
       offering.active && offering.grade_id === subject.grade_id && offering.subject_id === subject.key
@@ -197,6 +207,15 @@ export const AcademicCatalogSettings: React.FC = () => {
     } finally { setSavingGrade(false); }
   };
 
+  /**
+   * Saves the subject and, in the same action, its completion-and-promotion settings.
+   *
+   * These used to be two buttons. The promotion panel sits inside the subject form but had
+   * its own small "Save progression", so editing a promotion rule and then clicking the
+   * prominent "Save subject" below discarded the change — and because local state kept the
+   * edited value, the screen went on showing it until a reload. One button now saves
+   * everything on the panel, which is what its position already implied.
+   */
   const saveSubject = async () => {
     if (!subjectDraft.grade_id || !subjectDraft.name.trim() || !subjectDraft.code.trim()) return setError("Subject grade, name, and code are required.");
     const payload = { ...subjectDraft, key: subjectDraft.key || `${subjectDraft.grade_id}-${slugify(subjectDraft.name)}`, code: codeify(subjectDraft.code) };
@@ -207,7 +226,22 @@ export const AcademicCatalogSettings: React.FC = () => {
       const savedDraft = subjectInput(saved);
       setSubjectDraft(savedDraft);
       rememberCatalogSelection({ gradeId: savedDraft.grade_id, subjectId: savedDraft.key });
-      setMessage(`${saved.name} saved.`);
+
+      // Only written when something actually changed: an untouched panel would otherwise
+      // bump the offering's revision and log an audit entry on every subject save.
+      let savedProgression = false;
+      if (selectedOffering && progressionChanged) {
+        const { updated_at: _updatedAt, ...offeringPayload } = selectedOffering;
+        const savedOffering = await academicApi.putOffering(offeringPayload);
+        const replace = (list: CurriculumOffering[]) => list.map(item =>
+          item.grade_id === savedOffering.grade_id && item.subject_id === savedOffering.subject_id
+            ? savedOffering : item
+        );
+        setOfferings(replace);
+        setSavedOfferings(replace);
+        savedProgression = true;
+      }
+      setMessage(savedProgression ? `${saved.name} and its promotion path saved.` : `${saved.name} saved.`);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Unable to save subject");
     } finally { setSavingSubject(false); }
@@ -222,20 +256,6 @@ export const AcademicCatalogSettings: React.FC = () => {
     ));
   };
 
-  const saveProgression = async () => {
-    if (!selectedOffering) return;
-    setSavingProgression(true); setError(null); setMessage(null);
-    try {
-      const { updated_at: _updatedAt, ...payload } = selectedOffering;
-      const saved = await academicApi.putOffering(payload);
-      setOfferings(current => current.map(item =>
-        item.grade_id === saved.grade_id && item.subject_id === saved.subject_id ? saved : item
-      ));
-      setMessage("Curriculum promotion path saved.");
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Unable to save the promotion path");
-    } finally { setSavingProgression(false); }
-  };
 
   const removeGrade = async (item: GradeCatalogItem) => {
     if (!window.confirm(`Delete ${item.name}? Referenced grades cannot be deleted.`)) return;
@@ -385,18 +405,18 @@ export const AcademicCatalogSettings: React.FC = () => {
                           />
                           Run placement when the parent promotes
                         </label>
-                        <div className="flex justify-end">
-                          <Button size="xs" onClick={() => void saveProgression()} loading={savingProgression} loadingText="Saving...">
-                            Save progression
-                          </Button>
-                        </div>
+                        <p className="text-[10px] font-medium text-[#8D89AE]">
+                          {progressionChanged
+                            ? "Unsaved — use Save subject below."
+                            : "Saved with the subject below."}
+                        </p>
                       </div>
                     ) : (
                       <p className="mt-3 text-[10px] font-medium text-[#8D89AE]">Publish and activate this subject’s curriculum before configuring its successor.</p>
                     )}
                   </div>
                 )}
-                <div className="flex flex-wrap justify-end gap-2">{subjectDraft.revision > 0 && <Button variant="destructive" size="sm" onClick={() => void removeSubject(subjectDraft as SubjectCatalogItem)} loading={deletingSubjectKey === subjectDraft.key} loadingText="Deleting..."><Trash2 size={13} /> Delete</Button>}<Button size="sm" onClick={() => void saveSubject()} loading={savingSubject} loadingText="Saving..."><Pencil size={13} /> {subjectDraft.revision ? "Save subject" : "Create subject"}</Button></div>
+                <div className="flex flex-wrap justify-end gap-2">{subjectDraft.revision > 0 && <Button variant="destructive" size="sm" onClick={() => void removeSubject(subjectDraft as SubjectCatalogItem)} loading={deletingSubjectKey === subjectDraft.key} loadingText="Deleting..."><Trash2 size={13} /> Delete</Button>}<Button size="sm" onClick={() => void saveSubject()} loading={savingSubject} loadingText="Saving..."><Pencil size={13} /> {subjectDraft.revision ? "Save subject" : "Create subject"}{progressionChanged ? " + promotion" : ""}</Button></div>
               </div>
             </div>
           </div>

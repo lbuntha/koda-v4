@@ -14,7 +14,7 @@ import { KidAvatar } from "../components/KidAvatar";
 const th = "px-5 py-2.5 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400";
 const td = "px-5 py-3 align-middle";
 
-export const KidsTable: React.FC<{ students: AdminStudent[]; onChanged: () => void }> = ({ students, onChanged }) => {
+export const KidsTable: React.FC<{ students?: AdminStudent[]; onChanged: () => void }> = ({ students = [], onChanged }) => {
   const [selected, setSelected] = useState<AdminStudent | null>(null);
   const [deletingStudent, setDeletingStudent] = useState<AdminStudent | null>(null);
   const [clearingLogsStudent, setClearingLogsStudent] = useState<AdminStudent | null>(null);
@@ -55,10 +55,10 @@ export const KidsTable: React.FC<{ students: AdminStudent[]; onChanged: () => vo
             <tr key={s.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/60 transition-colors">
               <td className={td}>
                 <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center p-0.5 text-base shrink-0 overflow-hidden">
-                    <KidAvatar avatar={s.avatar ?? undefined} className="h-full w-full object-contain" />
+                  <div className="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-500/20 border border-violet-200 dark:border-violet-500/30 flex items-center justify-center p-0.5 shrink-0 overflow-hidden shadow-2xs">
+                    <KidAvatar avatar={s.avatar ?? undefined} className="h-full w-full object-contain flex items-center justify-center" />
                   </div>
-                  <span className="font-semibold text-slate-800">{s.name}</span>
+                  <span className="font-bold text-slate-800 dark:text-white">{s.name}</span>
                 </div>
               </td>
               <td className={`${td} text-slate-500 hidden sm:table-cell`}>{s.guardians.join(", ") || "—"}</td>

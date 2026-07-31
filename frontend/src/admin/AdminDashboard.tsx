@@ -58,10 +58,10 @@ interface AdminCtx {
 
 /** menu id → content. Menus not listed here render the placeholder below. */
 const CONTENT: Record<string, (ctx: AdminCtx) => React.ReactNode> = {
-  overview: (c) => <AdminOverview users={c.users} students={c.students} />,
+  overview: (c) => <AdminOverview users={c.users ?? []} students={c.students ?? []} />,
   users: (c) => (
     <SectionCard
-      title={`All accounts (${c.users.length})`}
+      title={`All accounts (${c.users?.length ?? 0})`}
       action={
         c.canCreateUsers ? (
           <Button size="sm" onClick={c.openCreate}>
@@ -70,12 +70,12 @@ const CONTENT: Record<string, (ctx: AdminCtx) => React.ReactNode> = {
         ) : undefined
       }
     >
-      <UsersTable users={c.users} selfId={c.account?.id} onChanged={c.reload} />
+      <UsersTable users={c.users ?? []} students={c.students ?? []} selfId={c.account?.id} onChanged={c.reload} />
     </SectionCard>
   ),
   kids: (c) => (
-    <SectionCard title={`All kids (${c.students.length})`}>
-      <KidsTable students={c.students} onChanged={c.reload} />
+    <SectionCard title={`All kids (${c.students?.length ?? 0})`}>
+      <KidsTable students={c.students ?? []} onChanged={c.reload} />
     </SectionCard>
   ),
   access: () => <MenusAccess />,
@@ -85,7 +85,7 @@ const CONTENT: Record<string, (ctx: AdminCtx) => React.ReactNode> = {
   curriculum: (c) => <CurriculumAdminPage onOpenAssets={() => c.navigate("assets")} />,
   assignments: () => <AssignmentsPage />,
   analytics: () => <AnalyticsRosterPage />,
-  notifications: (c) => <NotificationsPage users={c.users} students={c.students} />,
+  notifications: (c) => <NotificationsPage users={c.users ?? []} students={c.students ?? []} />,
   settings: () => <SettingsPage />,
 };
 
@@ -112,9 +112,10 @@ export const AdminDashboard: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const [u, s] = await Promise.all([adminApi.listUsers(), adminApi.listStudents()]);
-      setUsers(u);
-      setStudents(s);
+      const [uRes, s] = await Promise.all([adminApi.listUsers({ page: 1, limit: 100 }), adminApi.listStudents()]);
+      const userList = Array.isArray(uRes) ? uRes : (uRes as any)?.items ?? [];
+      setUsers(userList);
+      setStudents(s ?? []);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load");
     } finally {

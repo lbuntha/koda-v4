@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from "react";
-import { LayoutDashboard, LogOut, Settings, Users } from "lucide-react";
+import { LayoutDashboard, LogOut, Settings, User as UserIcon, Users } from "lucide-react";
 import type { AnalyticsSummary } from "../api/analytics";
 import { analyticsApi } from "../api/analytics";
 import type { Child, ChildInput } from "../api/family";
@@ -21,10 +21,11 @@ import { FamilyCodeCard } from "./FamilyCodeCard";
 import { ParentChildrenGrid } from "./ParentChildrenGrid";
 import { ParentChildrenPage, ParentOverview } from "./ParentDashboardSections";
 import { ParentSettingsPage } from "./ParentSettingsPage";
+import { ParentProfilePage } from "./ParentProfilePage";
 import { useFamily } from "./useFamily";
 import { CurriculumPromotion, promotionsApi } from "../api/promotions";
 
-type ParentView = "dashboard" | "children" | "settings";
+type ParentView = "dashboard" | "children" | "settings" | "profile";
 
 const PARENT_NAV: NavSection[] = [{
   id: "parent",
@@ -139,6 +140,8 @@ export const ParentDashboard: React.FC = () => {
       onProgress={setProgressChild}
       onRemove={setDeletingChild}
       onUnlockPin={child => void unlockPin(child.id)}
+      promotions={promotions}
+      onApprovePromotion={item => void approvePromotion(item)}
     />
   );
 
@@ -149,7 +152,7 @@ export const ParentDashboard: React.FC = () => {
         sections={PARENT_NAV}
         active={activeView}
         onNavigate={view => setActiveView(view as ParentView)}
-        user={{ name: account?.name, email: account?.email }}
+        user={{ name: account?.name, email: account?.email, avatar: account?.avatar }}
         title=""
         contentClassName="flex-1 overflow-auto bg-[#F6F8FC] px-5 py-5 sm:px-7 sm:py-6 lg:px-8 dark:bg-[#0E1020]"
         actions={
@@ -174,19 +177,15 @@ export const ParentDashboard: React.FC = () => {
               onAdd={openAdd}
               onOpenProgress={setProgressChild}
               childrenGrid={childrenGrid}
-              promotions={promotions}
-              promotionsLoading={promotionsLoading}
-              updatingPromotionId={updatingPromotionId}
-              promotionError={promotionError}
-              onApprovePromotion={item => void approvePromotion(item)}
-              onDeferPromotion={item => void deferPromotion(item)}
             />
           ) : activeView === "children" ? (
             <ParentChildrenPage onAdd={openAdd} childrenGrid={childrenGrid} />
-          ) : (
+          ) : activeView === "settings" ? (
             <ParentSettingsPage />
+          ) : (
+            <ParentProfilePage />
           )}
-          {activeView !== "settings" && account?.family_code && (
+          {activeView !== "settings" && activeView !== "profile" && account?.family_code && (
             <div className="mt-6"><FamilyCodeCard code={account.family_code} /></div>
           )}
         </div>

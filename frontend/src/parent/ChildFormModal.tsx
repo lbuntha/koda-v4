@@ -7,6 +7,7 @@ import { Child, ChildInput } from "../api/family";
 import { GradeSelect, useAcademicCatalog } from "../components/academic";
 import { KidOnboardingWizard } from "./onboarding/KidOnboardingWizard";
 import { SubjectChoiceGrid } from "./SubjectChoiceGrid";
+import { inlineRemoteAvatar } from "../lib/avatar";
 
 interface Props {
   isOpen: boolean;
@@ -61,18 +62,7 @@ export const ChildFormModal: React.FC<Props> = ({ isOpen, onClose, onSubmit, ini
     const unavailable = selectedSubjects.filter(key => !subjects.find(subject => subject.key === key)?.content_ready);
     if (unavailable.length) throw new Error("Remove subjects marked as unavailable before saving.");
 
-    let finalAvatar = avatar;
-    if (avatar.startsWith("http://") || avatar.startsWith("https://")) {
-      try {
-        const res = await fetch(avatar);
-        if (res.ok) {
-          const svgText = await res.text();
-          finalAvatar = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgText)}`;
-        }
-      } catch (err) {
-        console.warn("Could not fetch SVG for offline saving, fallback to URL:", err);
-      }
-    }
+    const finalAvatar = await inlineRemoteAvatar(avatar);
 
     const orderedSubjects = [primarySubject, ...selectedSubjects.filter(key => key !== primarySubject)];
     const data: ChildInput = {

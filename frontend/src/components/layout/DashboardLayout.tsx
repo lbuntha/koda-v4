@@ -24,7 +24,7 @@ interface Props {
   sections: NavSection[];
   active: string;
   onNavigate: (id: string) => void;
-  user?: { name?: string; email?: string };
+  user?: { name?: string; email?: string; avatar?: string | null };
   title: string;
   subtitle?: string;
   actions?: React.ReactNode;

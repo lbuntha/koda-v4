@@ -35,8 +35,11 @@ const Tile: React.FC<{ label: string; value: number; icon: React.ElementType; to
   </Card>
 );
 
-export const AdminOverview: React.FC<{ users: AdminUser[]; students: AdminStudent[] }> = ({ users, students }) => {
-  const count = (role: string) => users.filter((u) => u.role === role).length;
+export const AdminOverview: React.FC<{ users?: AdminUser[]; students?: AdminStudent[] }> = ({
+  users = [],
+  students = [],
+}) => {
+  const count = (role: string) => users.filter((u) => u?.role === role).length;
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
       <Tile label="Accounts" value={users.length} icon={Users} tone="indigo" />

@@ -4,7 +4,7 @@ path (besides seed.py) that can create an admin account."""
 from datetime import datetime, timezone
 
 from beanie import PydanticObjectId
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from ...models.user import User, Role
 from ...models.student import Student
@@ -13,7 +13,14 @@ from ...core.deps import get_current_admin
 from ...core.codes import unique_family_code
 from ...core.security import hash_secret
 from ...core.audit import record_audit
-from .schemas import CreateUserIn, UpdateUserIn, ResetPinIn, AdminUserOut, AdminStudentOut
+from .schemas import (
+    CreateUserIn,
+    UpdateUserIn,
+    ResetPinIn,
+    AdminUserOut,
+    AdminStudentOut,
+    PaginatedUsersOut,
+)
 from ..analytics.service import purge_learning_data
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -41,20 +48,64 @@ async def _student_or_404(student_id: str) -> Student:
 
 # ── Users (adults) ───────────────────────────────────────────────────────────
 
-@router.get("/users", response_model=list[AdminUserOut])
-async def list_users(_: User = Depends(get_current_admin)):
-    users = await User.find_all().to_list()
-    out: list[AdminUserOut] = []
-    for u in users:
-        child_count = 0
-        if u.role == Role.parent:
-            child_count = await Student.find(Student.guardian_parent_ids == str(u.id)).count()
-        out.append(AdminUserOut(
-            id=str(u.id), role=u.role, name=u.name, email=u.email,
-            disabled=u.disabled_at is not None, family_code=u.family_code,
-            child_count=child_count, menu_ids=u.menu_ids,
-        ))
-    return out
+@router.get("/users", response_model=PaginatedUsersOut)
+async def list_users(
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=20, ge=1, le=100),
+    search: str | None = None,
+    role: str | None = None,
+    _: User = Depends(get_current_admin),
+):
+    filters = []
+    if role and role != "all":
+        filters.append(User.role == role)
+    if search and search.strip():
+        q = search.strip()
+        filters.append({"$or": [{"name": {"$regex": q, "$options": "i"}}, {"email": {"$regex": q, "$options": "i"}}]})
+
+    query = User.find(*filters) if filters else User.find_all()
+
+    total = await query.count()
+    total_pages = max(1, (total + limit - 1) // limit)
+    skip = (page - 1) * limit
+
+    users = await query.skip(skip).limit(limit).to_list()
+
+    # 1 DB aggregation query to calculate child counts for all returned parents
+    parent_ids = [str(u.id) for u in users if u.role == Role.parent]
+    child_count_map: dict[str, int] = {}
+    if parent_ids:
+        pipeline = [
+            {"$match": {"guardian_parent_ids": {"$in": parent_ids}}},
+            {"$unwind": "$guardian_parent_ids"},
+            {"$match": {"guardian_parent_ids": {"$in": parent_ids}}},
+            {"$group": {"_id": "$guardian_parent_ids", "count": {"$sum": 1}}},
+        ]
+        counts = await Student.get_motor_collection().aggregate(pipeline).to_list(length=None)
+        child_count_map = {item["_id"]: item["count"] for item in counts}
+
+    items = [
+        AdminUserOut(
+            id=str(u.id),
+            role=u.role,
+            name=u.name,
+            email=u.email,
+            avatar=u.avatar,
+            disabled=u.disabled_at is not None,
+            family_code=u.family_code,
+            child_count=child_count_map.get(str(u.id), 0),
+            menu_ids=u.menu_ids,
+        )
+        for u in users
+    ]
+
+    return PaginatedUsersOut(
+        items=items,
+        total=total,
+        page=page,
+        limit=limit,
+        total_pages=total_pages,
+    )
 
 
 @router.post("/users", response_model=AdminUserOut, status_code=status.HTTP_201_CREATED)
@@ -69,12 +120,13 @@ async def create_user(body: CreateUserIn, _: User = Depends(get_current_admin)):
         email=body.email,
         password_hash=hash_secret(body.password),
         name=body.name,
+        avatar=body.avatar,
     )
     if user.role == Role.parent:
         user.family_code = await unique_family_code()
     await user.insert()
     return AdminUserOut(
-        id=str(user.id), role=user.role, name=user.name, email=user.email,
+        id=str(user.id), role=user.role, name=user.name, email=user.email, avatar=user.avatar,
         disabled=False, family_code=user.family_code, child_count=0, menu_ids=user.menu_ids,
     )
 
@@ -88,12 +140,14 @@ async def update_user(user_id: str, body: UpdateUserIn, admin: User = Depends(ge
         user.disabled_at = datetime.now(timezone.utc) if body.disabled else None
     if body.password is not None:
         user.password_hash = hash_secret(body.password)
+    if body.avatar is not None:
+        user.avatar = body.avatar
     if body.menu_ids is not None:
         user.menu_ids = body.menu_ids
     await user.save()
     child_count = await Student.find(Student.guardian_parent_ids == str(user.id)).count() if user.role == Role.parent else 0
     return AdminUserOut(
-        id=str(user.id), role=user.role, name=user.name, email=user.email,
+        id=str(user.id), role=user.role, name=user.name, email=user.email, avatar=user.avatar,
         disabled=user.disabled_at is not None, family_code=user.family_code,
         child_count=child_count, menu_ids=user.menu_ids,
     )
@@ -119,6 +173,7 @@ async def list_students(_: User = Depends(get_current_admin)):
         AdminStudentOut(
             id=str(s.id), name=s.name, avatar=s.avatar, has_pin=s.pin_hash is not None,
             guardians=[name_by_id.get(gid, "—") for gid in s.guardian_parent_ids],
+            guardian_parent_ids=[str(gid) for gid in s.guardian_parent_ids],
         )
         for s in students
     ]

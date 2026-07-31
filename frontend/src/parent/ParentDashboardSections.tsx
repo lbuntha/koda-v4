@@ -5,8 +5,6 @@ import type { Child } from "../api/family";
 import { Button } from "../components/ui";
 import { FamilySummary } from "./FamilySummary";
 import { RecentActivity } from "./RecentActivity";
-import type { CurriculumPromotion } from "../api/promotions";
-import { PromotionSection } from "./PromotionSection";
 
 interface OverviewProps {
   childCount: number;
@@ -18,15 +16,9 @@ interface OverviewProps {
   onAdd: () => void;
   onOpenProgress: (child: Child) => void;
   childrenGrid: React.ReactNode;
-  promotions: CurriculumPromotion[];
-  promotionsLoading: boolean;
-  updatingPromotionId: string | null;
-  promotionError: string | null;
-  onApprovePromotion: (item: CurriculumPromotion) => void;
-  onDeferPromotion: (item: CurriculumPromotion) => void;
 }
 
-export const ParentOverview: React.FC<OverviewProps> = ({ childCount, summaries, summariesByChild, profiles, summariesLoading, showSummary, onAdd, onOpenProgress, childrenGrid, promotions, promotionsLoading, updatingPromotionId, promotionError, onApprovePromotion, onDeferPromotion }) => (
+export const ParentOverview: React.FC<OverviewProps> = ({ childCount, summaries, summariesByChild, profiles, summariesLoading, showSummary, onAdd, onOpenProgress, childrenGrid }) => (
   <>
     <section>
       <div className="mb-4 flex items-center justify-between gap-4">
@@ -38,14 +30,6 @@ export const ParentOverview: React.FC<OverviewProps> = ({ childCount, summaries,
       </div>
       {childrenGrid}
     </section>
-    <PromotionSection
-      promotions={promotions}
-      loading={promotionsLoading}
-      updatingId={updatingPromotionId}
-      error={promotionError}
-      onApprove={onApprovePromotion}
-      onDefer={onDeferPromotion}
-    />
     {showSummary && (
       <div className="mt-6 grid items-start gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(21rem,0.75fr)]">
         <FamilySummary summaries={summaries} loading={summariesLoading} expectedProfiles={childCount} className="mt-0" />

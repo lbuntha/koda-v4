@@ -2,6 +2,7 @@ import React from "react";
 import { Plus } from "lucide-react";
 import type { AnalyticsSummary } from "../api/analytics";
 import type { Child } from "../api/family";
+import type { CurriculumPromotion } from "../api/promotions";
 import { useAcademicCatalog } from "../components/academic";
 import { Spinner } from "../components/ui";
 import { ParentChildCard } from "./ParentChildCard";
@@ -19,6 +20,8 @@ interface Props {
   onProgress: (child: Child) => void;
   onRemove: (child: Child) => void;
   onUnlockPin: (child: Child) => void;
+  promotions?: CurriculumPromotion[];
+  onApprovePromotion?: (item: CurriculumPromotion) => void;
 }
 
 const AddChildCard: React.FC<{ onAdd: () => void }> = ({ onAdd }) => (
@@ -42,6 +45,8 @@ export const ParentChildrenGrid: React.FC<Props> = ({
   onProgress,
   onRemove,
   onUnlockPin,
+  promotions = [],
+  onApprovePromotion,
 }) => {
   const { subjects } = useAcademicCatalog();
   if (loading) return <div className="flex justify-center py-20"><Spinner label="Loading children" className="text-[#7252D8]" /></div>;
@@ -62,6 +67,8 @@ export const ParentChildrenGrid: React.FC<Props> = ({
           onProgress={() => onProgress(child)}
           onRemove={() => onRemove(child)}
           onUnlockPin={() => onUnlockPin(child)}
+          promotions={promotions.filter(p => p.studentId === child.id)}
+          onApprovePromotion={onApprovePromotion}
         />
       ))}
       <AddChildCard onAdd={onAdd} />

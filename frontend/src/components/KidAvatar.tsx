@@ -274,7 +274,13 @@ export const KidAvatar: React.FC<Props> = ({ avatar, className }) => {
 
   // Case 4: Fallback to rendering avatar character or emoji
   return (
-    <span className={className} aria-hidden>
+    <span
+      className={cn(
+        "inline-flex items-center justify-center text-center select-none leading-none text-base w-full h-full",
+        className
+      )}
+      aria-hidden
+    >
       {avatar}
     </span>
   );

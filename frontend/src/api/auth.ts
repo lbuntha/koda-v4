@@ -68,6 +68,9 @@ export const authApi = {
 
   me: () => api.get<Account>("/auth/me"),
 
+  updateProfile: (body: { name?: string; email?: string; avatar?: string; current_password?: string; new_password?: string }) =>
+    api.patch<Account>("/auth/profile", body),
+
   updateStudentAvatar: (avatar: string) => api.patch<{ avatar: string }>("/auth/student/avatar", { avatar }),
 
   logout: () => tokenStore.clear(),

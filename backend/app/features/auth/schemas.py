@@ -56,3 +56,11 @@ class PasswordResetConfirmIn(BaseModel):
     token: str = Field(min_length=16, max_length=200)
     #: Same floor as registration — a reset must not be a way to weaken a password.
     password: str = Field(min_length=8, max_length=200)
+
+
+class ProfileUpdateIn(BaseModel):
+    name: str | None = None
+    email: EmailStr | None = None
+    avatar: str | None = None
+    current_password: str | None = None
+    new_password: str | None = Field(default=None, min_length=8)

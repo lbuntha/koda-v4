@@ -16,7 +16,7 @@ import React from "react";
 import { ParentNotificationSettings } from "./ParentNotificationSettings";
 
 export const ParentSettingsPage: React.FC = () => (
-  <div className="flex w-full max-w-4xl flex-col gap-6">
+  <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
     <div>
       <h1 className="text-lg font-bold text-[#0E0B55] dark:text-[#E7E5F7]">Settings</h1>
       <p className="mt-0.5 text-xs text-[#6D6997]">Notifications and account preferences.</p>

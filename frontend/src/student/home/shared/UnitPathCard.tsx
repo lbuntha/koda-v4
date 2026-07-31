@@ -50,9 +50,12 @@ export const UnitPathCard: React.FC<Props> = ({
         {skills.length > 1 && (
           <span aria-hidden className="absolute left-20 right-20 top-0 border-t-2 border-dashed border-[#D9DFEA] dark:border-white/10" />
         )}
+        {/* Deliberately stays a fixed-width scrolling row at every size, unlike the
+            standalone path section: the dashed connector above draws one line across the
+            row, and a wrapping grid would leave it dangling. */}
         <ol className="relative flex snap-x gap-5 overflow-x-auto px-1 pb-2 pt-7 [scrollbar-width:thin] sm:gap-6">
           {skills.map(skill => (
-            <li key={skill.skillId} className="snap-start">
+            <li key={skill.skillId} className="w-36 shrink-0 snap-start sm:w-40">
               <LearningPathSkillCard
                 skill={skill}
                 isNext={skill.skillId === nextSkillId}

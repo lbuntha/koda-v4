@@ -49,8 +49,15 @@ services:
       # Development origins for the Docker and local Vite servers. A deployment must
       # override this with its real origins — production refuses localhost entries.
       CORS_ORIGINS: '${CORS_ORIGINS:-["http://localhost:3000","http://localhost:3001","http://localhost:5173"]}'
+    # ./backend is bind-mounted below, but the image CMD runs uvicorn without --reload,
+    # so edits only reached the process on a manual restart — a container started before
+    # a schema change kept serving the old response models (and hid an import error that
+    # made the app unbootable). Reload in dev so the running API matches the source.
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     ports:
       - "8000:8000"
+    volumes:
+      - ./backend:/app
     depends_on:
       mongo:
         condition: service_healthy

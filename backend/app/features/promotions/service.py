@@ -61,6 +61,69 @@ def completion_snapshot(
     }
 
 
+async def assignment_completion(
+    assignment: Assignment,
+    *,
+    mastery_levels: dict[str, str] | None = None,
+    completed_skill_ids: set[str] | None = None,
+) -> dict[str, Any] | None:
+    """Completion for one assignment, judged against its offering's configured rule.
+
+    The single place that answers "does this learner qualify right now?", so detection
+    and approval cannot drift apart and so every rule — activities, proficient, master —
+    is evaluated the same way. Returns None when the assignment cannot be judged at all
+    (no subject, or a release that has gone missing), which is not the same as "no".
+
+    The pre-loaded arguments let the sync pass reuse one batched read across a whole
+    family; approval passes nothing and this loads what it needs for the one assignment.
+    """
+    if not assignment.subject_id:
+        return None
+    release = await CurriculumRelease.find_one(
+        CurriculumRelease.release_id == assignment.release_id,
+    )
+    if not release:
+        return None
+    if mastery_levels is None:
+        mastery_levels = {
+            row.skill_id: row.level
+            for row in await MasteryState.find(
+                MasteryState.student_id == assignment.student_id,
+                MasteryState.curriculum_id == assignment.curriculum_id,
+            ).to_list()
+        }
+    if completed_skill_ids is None:
+        completed_skill_ids = {
+            row.curriculum_skill_id
+            for row in await LearningEvent.find(
+                LearningEvent.student_id == assignment.student_id,
+                LearningEvent.assignment_id == str(assignment.id),
+                LearningEvent.event_type == "lesson_complete",
+                LearningEvent.verified == True,
+            ).to_list()
+            if row.curriculum_skill_id
+        }
+    offering = await CurriculumOffering.find_one(
+        CurriculumOffering.grade_id == assignment.grade_id,
+        CurriculumOffering.subject_id == assignment.subject_id,
+    )
+    return completion_snapshot(
+        tree=release.tree,
+        scope=assignment.scope,
+        grade_id=assignment.grade_id,
+        available_skill_ids={
+            str(item.get("skill_id"))
+            for item in release.question_manifest
+            if item.get("skill_id")
+        },
+        mastery_levels=mastery_levels,
+        completed_skill_ids=completed_skill_ids,
+        completion_rule=(
+            offering.promotion_completion_rule if offering else "activities_completed"
+        ),
+    )
+
+
 async def sync_promotions_for_parent(parent_id: str) -> list[CurriculumPromotion]:
     students = await Student.find(Student.guardian_parent_ids == parent_id).to_list()
     student_ids = [str(item.id) for item in students]
@@ -94,35 +157,31 @@ async def sync_promotions_for_parent(parent_id: str) -> list[CurriculumPromotion
             )
 
     for assignment in assignments:
-        release = await CurriculumRelease.find_one(
-            CurriculumRelease.release_id == assignment.release_id,
-        )
-        if not release or not assignment.subject_id:
-            continue
-        available = {
-            str(item.get("skill_id"))
-            for item in release.question_manifest
-            if item.get("skill_id")
-        }
-        offering = await CurriculumOffering.find_one(
-            CurriculumOffering.grade_id == assignment.grade_id,
-            CurriculumOffering.subject_id == assignment.subject_id,
-        )
-        snapshot = completion_snapshot(
-            tree=release.tree,
-            scope=assignment.scope,
-            grade_id=assignment.grade_id,
-            available_skill_ids=available,
+        snapshot = await assignment_completion(
+            assignment,
             mastery_levels=mastery_by_student_curriculum.get(
                 (assignment.student_id, assignment.curriculum_id), {},
             ),
             completed_skill_ids=completed_by_assignment.get(str(assignment.id), set()),
-            completion_rule=(
-                offering.promotion_completion_rule
-                if offering else "activities_completed"
-            ),
+        )
+        if snapshot is None:
+            continue
+        offering = await CurriculumOffering.find_one(
+            CurriculumOffering.grade_id == assignment.grade_id,
+            CurriculumOffering.subject_id == assignment.subject_id,
         )
         if not snapshot["complete"]:
+            # A learner who qualified before can stop qualifying: an admin raises the
+            # requirement, or a scoring-config change triggers a re-score that lowers
+            # mastery. Leaving the card up would let a parent promote someone the new
+            # rule was written to hold back, so it is withdrawn rather than left live.
+            # The row survives so the same card returns if they qualify again.
+            stale = await CurriculumPromotion.find_one(
+                CurriculumPromotion.from_assignment_id == str(assignment.id),
+            )
+            if stale and stale.status in {"pending", "deferred"}:
+                stale.status = "withdrawn"
+                await stale.save()
             continue
         successor = None
         if offering and offering.successor_grade_id and offering.successor_subject_id:
@@ -135,6 +194,14 @@ async def sync_promotions_for_parent(parent_id: str) -> list[CurriculumPromotion
             CurriculumPromotion.from_assignment_id == str(assignment.id),
         )
         if existing:
+            # Withdrawn earlier for failing the rule, and qualifying again now — a lowered
+            # requirement, or practice that lifted mastery back. Restore the card rather
+            # than stranding a learner who has since met the bar.
+            if existing.status == "withdrawn":
+                existing.status = "pending"
+                existing.decided_at = None
+                existing.decided_by = None
+                await existing.save()
             # A learner may finish before an admin configures the successor. Keep a pending
             # card current so publishing Grade 2 later immediately enables the same card.
             if existing.status in {"pending", "deferred"}:
@@ -229,6 +296,20 @@ async def approve_promotion(item: CurriculumPromotion, parent_id: str) -> Curric
     source = await Assignment.get(item.from_assignment_id)
     if not source:
         raise ValueError("The completed assignment is no longer available")
+    # Re-judged here, not taken from the stored row. Completion is derived state: the
+    # requirement can be raised, or a re-score can lower mastery, long after the row was
+    # written. Trusting it would promote exactly the learners a tightened rule was meant
+    # to hold back. Checked before any assignment is touched so a refusal changes nothing.
+    # Skipped once the transition has already committed (handled just below), where the
+    # source is no longer active and re-judging would wrongly block an idempotent retry.
+    if source.status == "active":
+        snapshot = await assignment_completion(source)
+        if snapshot is not None and not snapshot["complete"]:
+            raise ValueError(
+                "This learner no longer meets the promotion requirement "
+                f"({snapshot['qualified']} of {snapshot['required']} skills qualify "
+                f"under “{snapshot['completionRule']}”)"
+            )
     offering = await CurriculumOffering.find_one(
         CurriculumOffering.grade_id == item.to_grade_id,
         CurriculumOffering.subject_id == item.to_subject_id,

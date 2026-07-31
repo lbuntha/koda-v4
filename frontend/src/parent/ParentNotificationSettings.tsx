@@ -18,6 +18,7 @@ import { Bell, CalendarDays, Lock, Megaphone, ShieldAlert, UserRoundCheck } from
 import { Card, Switch } from "../components/ui";
 import { useAuth } from "../auth/AuthContext";
 import { notificationsApi, type NotificationPreferenceKey } from "../api/notifications";
+import { useAppSettings } from "../settings/AppSettingsContext";
 
 interface FeatureRow {
   /** Absent for a feature that always sends. */
@@ -90,6 +91,14 @@ const SECTIONS: FeatureSection[] = [
 
 export const ParentNotificationSettings: React.FC = () => {
   const { account, refreshSession } = useAuth();
+  const { settings } = useAppSettings();
+
+  const systemKillSwitches: Record<NotificationPreferenceKey, boolean> = {
+    email_digest_enabled: settings.scoring.notifications?.auto_weekly_digest_enabled ?? true,
+    email_inactivity_enabled: settings.scoring.notifications?.auto_inactivity_enabled ?? true,
+    email_announcements_enabled: true,
+  };
+
   const [prefs, setPrefs] = useState<Record<NotificationPreferenceKey, boolean>>({
     email_digest_enabled: account?.email_digest_enabled ?? true,
     email_inactivity_enabled: account?.email_inactivity_enabled ?? true,
@@ -98,9 +107,6 @@ export const ParentNotificationSettings: React.FC = () => {
   const [saving, setSaving] = useState<NotificationPreferenceKey | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // The initial state above reads `account` once; this keeps the switches honest if it
-  // arrives or changes later. A toggle showing "on" for something someone turned off is
-  // a bad enough failure to be worth not assuming.
   useEffect(() => {
     setPrefs({
       email_digest_enabled: account?.email_digest_enabled ?? true,
@@ -122,8 +128,6 @@ export const ParentNotificationSettings: React.FC = () => {
       await refreshSession();
     } catch (cause) {
       setPrefs((current) => ({ ...current, [key]: !next }));
-      // Not `cause.message`: none of these failures are actionable by a parent, and a raw
-      // API detail is worse than useless — a stale server once put "Not Found" on this card.
       setError("Couldn’t save that change. Please try again.");
       console.error("notification preference save failed", cause);
     } finally {
@@ -165,6 +169,7 @@ export const ParentNotificationSettings: React.FC = () => {
             {section.rows.map((row) => {
               const Icon = row.icon;
               const alwaysOn = row.key === undefined;
+              const systemDisabled = Boolean(row.key && systemKillSwitches[row.key] === false);
               return (
                 <div key={row.label} className="flex items-start gap-3.5 px-5 py-4">
                   <Icon size={16} className="mt-0.5 shrink-0 text-[#534AB7]" />
@@ -176,14 +181,21 @@ export const ParentNotificationSettings: React.FC = () => {
                           <Lock size={9} /> Always on
                         </span>
                       )}
+                      {systemDisabled && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">
+                          Paused by Admin
+                        </span>
+                      )}
                     </div>
                     <p className="mt-1 text-xs leading-relaxed text-[#6D6997]">{row.detail}</p>
-                    <p className="mt-1 text-[11px] font-medium text-slate-400">{row.frequency}</p>
+                    <p className="mt-1 text-[11px] font-medium text-slate-400">
+                      {systemDisabled ? "Currently paused system-wide by administrator" : row.frequency}
+                    </p>
                   </div>
                   <Switch
-                    checked={alwaysOn ? true : prefs[row.key!]}
-                    disabled={alwaysOn || saving === row.key}
-                    onCheckedChange={(next) => { if (row.key) void toggle(row.key, next); }}
+                    checked={alwaysOn ? true : systemDisabled ? false : prefs[row.key!]}
+                    disabled={alwaysOn || systemDisabled || saving === row.key}
+                    onCheckedChange={(next) => { if (row.key && !systemDisabled) void toggle(row.key, next); }}
                     aria-label={alwaysOn ? `${row.label} (always on)` : `Email me: ${row.label}`}
                   />
                 </div>
