@@ -22,6 +22,7 @@ import {
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import { Celebration } from "./Celebration";
 import { surfaceClass } from "./canvasTheme";
+import { GoodsAsset } from "../../assets/goods-sort";
 import {
   GOODS_SORT_LEVELS,
   getGoodsLevel,
@@ -851,8 +852,6 @@ export const GoodsSortCanvas: React.FC<CanvasProps> = ({
     };
   })();
 
-  const svgSize = { width: itemStyles.size, height: itemStyles.size };
-
   return (
     <SharedCanvasLayout
       isPlayMode={isPlayMode}
@@ -994,7 +993,12 @@ export const GoodsSortCanvas: React.FC<CanvasProps> = ({
                     : "border-slate-200 bg-white/80 text-slate-600"
                 }`}
               >
-                <span className="text-[11px] leading-none sm:text-sm">{item.emoji}</span>
+                <GoodsAsset
+                  typeKey={item.typeKey}
+                  size={16}
+                  className="drop-shadow-sm"
+                  fallback={<span className="text-[11px] leading-none sm:text-sm">{item.emoji}</span>}
+                />
                 {done ? (
                   <Check size={10} strokeWidth={4} />
                 ) : (
@@ -1270,50 +1274,19 @@ export const GoodsSortCanvas: React.FC<CanvasProps> = ({
 
                             {/* Clean Standalone Object (No Background Card Box) */}
                             <div className="flex items-center justify-center relative p-0.5 group">
-                              {(() => {
-                                switch (item.svgType) {
-                                  case "chips":
-                                    return (
-                                      <svg viewBox="0 0 64 64" style={svgSize} className="filter drop-shadow-md">
-                                        <path d="M16 12 L48 8 L52 54 L12 56 Z" fill="#EF4444" />
-                                        <path d="M16 12 L48 8 L46 22 L18 24 Z" fill="#F59E0B" opacity="0.9" />
-                                        <polygon points="26,30 38,30 42,46 22,46" fill="#FBBF24" />
-                                        <text x="32" y="42" textAnchor="middle" fontSize="9" fontWeight="bold" fill="#78350F">CHIPS</text>
-                                      </svg>
-                                    );
-                                  // The catalog's key is "cola"; this arm was written as
-                                  // "soda" and so never matched — every cola fell through
-                                  // to the emoji while chips and milk drew their SVG.
-                                  case "cola":
-                                    return (
-                                      <svg viewBox="0 0 64 64" style={svgSize} className="filter drop-shadow-md">
-                                        <rect x="20" y="10" width="24" height="46" rx="4" fill="#DC2626" />
-                                        <rect x="22" y="12" width="20" height="6" fill="#9CA3AF" />
-                                        <ellipse cx="32" cy="32" rx="9" ry="12" fill="#FBBF24" />
-                                        <text x="32" y="30" textAnchor="middle" fontSize="6" fontWeight="extrabold" fill="#78350F">CHII</text>
-                                        <text x="32" y="37" textAnchor="middle" fontSize="6" fontWeight="extrabold" fill="#78350F">COLA</text>
-                                      </svg>
-                                    );
-                                  case "milk":
-                                    return (
-                                      <svg viewBox="0 0 64 64" style={svgSize} className="filter drop-shadow-md">
-                                        <path d="M22 20 L32 10 L42 20 L42 54 L22 54 Z" fill="#2563EB" />
-                                        <path d="M24 22 L40 22 L40 52 L24 52 Z" fill="#FFFFFF" />
-                                        <path d="M24 32 L40 32 L40 42 L24 42 Z" fill="#60A5FA" opacity="0.4" />
-                                        <text x="32" y="48" textAnchor="middle" fontSize="7" fontWeight="bold" fill="#1E3A8A">MILK</text>
-                                      </svg>
-                                    );
-                                  default:
-                                    return (
-                                      <span
-                                        style={{ fontSize: itemStyles.size, lineHeight: 1 }}
-                                        className="select-none filter drop-shadow-md transition-transform hover:scale-105"
-                                      >
-                                        {item.emoji}
-                                      </span>
-                                    );
-                                }
-                              })()}
+                              <GoodsAsset
+                                typeKey={item.typeKey}
+                                size={itemStyles.size}
+                                className="drop-shadow-md transition-transform group-hover:scale-105"
+                                fallback={(
+                                  <span
+                                    style={{ fontSize: itemStyles.size, lineHeight: 1 }}
+                                    className="select-none filter drop-shadow-md transition-transform hover:scale-105"
+                                  >
+                                    {item.emoji}
+                                  </span>
+                                )}
+                              />
                             </div>
                           </motion.div>
                         );

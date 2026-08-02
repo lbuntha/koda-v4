@@ -17,6 +17,9 @@ import {
   StudentProgress,
   TodayCourse,
 } from "../api/course";
+import { apiFileUrl, isOfflineError } from "../api/client";
+import { courseKey, progressKey, readCache, writeCache } from "../api/offlineCache";
+import { warmAssetCache } from "../pwa/warmAssetCache";
 import { PlacementWarmup } from "./PlacementWarmup";
 import { SaveIssueDialog } from "./home/SaveIssueDialog";
 import { StudentTodayHome } from "./StudentTodayHome";
@@ -54,6 +57,28 @@ export const StudentCurriculumPlayer: React.FC = () => {
   // it, so the dialog stops offering a retry that will not work.
   const [saveIssue, setSaveIssue] = useState<CourseQueueItem | null>(null);
   const [retriedSkillId, setRetriedSkillId] = useState<string | null>(null);
+  /** Showing the last saved plan because the server was unreachable. */
+  const [usingCachedPlan, setUsingCachedPlan] = useState(false);
+
+  /**
+   * Put today's plan back on screen from the last successful read.
+   *
+   * Only ever called when the server could not be reached: a cached plan must never
+   * shadow a live one. The queue carries its questions inline and every canvas is
+   * precached, so this is a playable session rather than a placeholder.
+   */
+  const hydrateFromCache = (): boolean => {
+    if (!account?.id) return false;
+    const cachedCourse = readCache<TodayCourse>(courseKey(account.id));
+    if (!cachedCourse) return false;
+    setUsingCachedPlan(true);
+    setCourse(cachedCourse.data);
+    if (cachedCourse.data.subjectId) setActiveSubjectId(cachedCourse.data.subjectId);
+    const cachedProgress = readCache<StudentProgress>(progressKey(account.id));
+    if (cachedProgress) setProgress(cachedProgress.data);
+    setError(null);
+    return true;
+  };
 
   const loadCourse = async (mode: CourseMode, subjectId: string | null = activeSubjectId) => {
     setLoadingMode(mode);
@@ -77,6 +102,7 @@ export const StudentCurriculumPlayer: React.FC = () => {
           : Promise.resolve(null),
         courseApi.path(subjectId).catch(() => null),
       ]);
+      setUsingCachedPlan(false);
       setCourse(nextCourse);
       if (nextCourse.subjectId) setActiveSubjectId(nextCourse.subjectId);
       if (nextPaths) setPaths(nextPaths.paths);
@@ -84,9 +110,22 @@ export const StudentCurriculumPlayer: React.FC = () => {
       if (mode === "free") setReplayItems(nextCourse.queue);
       else if (kidCatalog) setReplayItems(kidCatalog.queue);
       if (nextActivitySignal) setActivitySignal(nextActivitySignal);
+      // Keep the scheduled plan (not a browse listing) as the copy to fall back on, and
+      // pull its artwork down now so the same session survives losing the network.
+      if (mode === "scheduled" && account?.id) {
+        writeCache(courseKey(account.id), nextCourse);
+        if (nextProgress) writeCache(progressKey(account.id), nextProgress);
+        void warmAssetCache(nextCourse.queue.map(item => apiFileUrl(item.thumbnailUrl)));
+      }
       return nextCourse;
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Unable to load today’s learning plan");
+      // An unreachable server is the one failure a cached plan can answer.
+      if (isOfflineError(reason) && hydrateFromCache()) return null;
+      setError(
+        isOfflineError(reason)
+          ? "You’re offline, and today’s plan hasn’t been downloaded yet. Reconnect to start."
+          : reason instanceof Error ? reason.message : "Unable to load today’s learning plan",
+      );
       return null;
     } finally {
       setLoadingMode(null);
@@ -100,6 +139,21 @@ export const StudentCurriculumPlayer: React.FC = () => {
     setActiveSubjectId(subjectId);
     return loadCourse("scheduled", subjectId);
   };
+
+  /**
+   * A cached plan is a stand-in, so it gives way as soon as there is a real one to read.
+   * The listener is only attached while the stand-in is on screen — an online learner has
+   * nothing to resync, and `online` fires on every transient reconnect.
+   *
+   * `loadSubjectsAndCourse` is deliberately absent from the dependency array: it is
+   * rebuilt every render, and it re-reads the subject list from the server anyway.
+   */
+  useEffect(() => {
+    if (!usingCachedPlan || !account?.id) return;
+    const resync = () => void loadSubjectsAndCourse();
+    window.addEventListener("online", resync);
+    return () => window.removeEventListener("online", resync);
+  }, [usingCachedPlan, account?.id]);
 
   useEffect(() => {
     if (!account?.id) return;
@@ -120,10 +174,20 @@ export const StudentCurriculumPlayer: React.FC = () => {
           await loadSubjectsAndCourse();
         }
       } catch (reason) {
-        if (!cancelled) {
-          setError(reason instanceof Error ? reason.message : "Unable to start learning session");
+        if (cancelled) return;
+        // Offline, the server can neither open a session nor say whether a placement is
+        // due. The learner still gets their last plan; the analytics logger falls back to
+        // its own client session id, and its outbox carries the attempts back later.
+        if (isOfflineError(reason) && hydrateFromCache()) {
           setLoadingMode(null);
+          return;
         }
+        setError(
+          isOfflineError(reason)
+            ? "You’re offline, and today’s plan hasn’t been downloaded yet. Reconnect to start."
+            : reason instanceof Error ? reason.message : "Unable to start learning session",
+        );
+        setLoadingMode(null);
       }
     })();
     return () => {

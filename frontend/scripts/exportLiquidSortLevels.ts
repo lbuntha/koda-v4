@@ -60,12 +60,18 @@ const levels = LIQUID_SORT_CURRICULUM_LEVELS.map(level => {
     (total, bottle) => total + bottle.layers.filter(layer => layer.hidden).length,
     0,
   );
-  // Each colour has to fill exactly one bottle, so its layer count must equal a bottle's
-  // capacity. Anything else cannot be sorted no matter how well the puzzle is played.
-  const capacity = level.bottles[0]?.capacity ?? 0;
-  const unbalanced = Object.entries(layers)
-    .filter(([, count]) => count !== capacity)
-    .map(([colour, count]) => `${colour}x${count}`);
+  // Each colour has to fill exactly one bottle. Most boards use one capacity throughout;
+  // tower challenges deliberately pair one eight-layer colour with an eight-slot bottle.
+  const capacities = level.bottles.map(bottle => bottle.capacity).sort((a, b) => b - a);
+  const unbalanced: string[] = [];
+  for (const [colour, count] of Object.entries(layers).sort(([, a], [, b]) => b - a)) {
+    const matchingBottle = capacities.indexOf(count);
+    if (matchingBottle === -1) {
+      unbalanced.push(`${colour}x${count}`);
+    } else {
+      capacities.splice(matchingBottle, 1);
+    }
+  }
 
   return {
     id: level.id,

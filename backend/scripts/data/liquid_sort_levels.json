@@ -423,5 +423,236 @@
     },
     "solvable": true,
     "unbalancedColours": []
+  },
+  {
+    "id": "level_25",
+    "name": "Level 25: Shelf Shuffle",
+    "description": "Eight bright colours arranged in varied shelf-style bands with two spare tubes.",
+    "difficultyTier": "grandmaster",
+    "bottles": 10,
+    "colours": 8,
+    "hiddenLayers": 0,
+    "layers": {
+      "cyan": 4,
+      "gold": 4,
+      "magenta": 4,
+      "emerald": 4,
+      "violet": 4,
+      "orange": 4,
+      "blue": 4,
+      "tan": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_26",
+    "name": "Level 26: Paired Passages",
+    "description": "Deceptive matching pairs hide a longer eight-colour sorting route.",
+    "difficultyTier": "grandmaster",
+    "bottles": 10,
+    "colours": 8,
+    "hiddenLayers": 0,
+    "layers": {
+      "cyan": 4,
+      "violet": 4,
+      "blue": 4,
+      "magenta": 4,
+      "orange": 4,
+      "tan": 4,
+      "gold": 4,
+      "emerald": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_27",
+    "name": "Level 27: Cross-Shelf Current",
+    "description": "Every shelf band crosses another, leaving no obvious colour to finish first.",
+    "difficultyTier": "grandmaster",
+    "bottles": 10,
+    "colours": 8,
+    "hiddenLayers": 0,
+    "layers": {
+      "cyan": 4,
+      "emerald": 4,
+      "tan": 4,
+      "orange": 4,
+      "magenta": 4,
+      "gold": 4,
+      "blue": 4,
+      "violet": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_28",
+    "name": "Level 28: Hidden Shelf Lock",
+    "description": "Four concealed base colours turn a staggered shelf arrangement into a memory challenge.",
+    "difficultyTier": "grandmaster",
+    "bottles": 10,
+    "colours": 8,
+    "hiddenLayers": 4,
+    "layers": {
+      "cyan": 4,
+      "orange": 4,
+      "blue": 4,
+      "gold": 4,
+      "magenta": 4,
+      "emerald": 4,
+      "tan": 4,
+      "violet": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_29",
+    "name": "Level 29: Stacked Reels",
+    "description": "Bold double bands echo the reel shelf while demanding careful spare-tube timing.",
+    "difficultyTier": "grandmaster",
+    "bottles": 10,
+    "colours": 8,
+    "hiddenLayers": 0,
+    "layers": {
+      "cyan": 4,
+      "magenta": 4,
+      "tan": 4,
+      "blue": 4,
+      "gold": 4,
+      "emerald": 4,
+      "orange": 4,
+      "violet": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_30",
+    "name": "Level 30: Midnight Reels",
+    "description": "A deep two-layer mystery across all eight colours closes the extended shelf challenge.",
+    "difficultyTier": "grandmaster",
+    "bottles": 10,
+    "colours": 8,
+    "hiddenLayers": 16,
+    "layers": {
+      "cyan": 4,
+      "violet": 4,
+      "gold": 4,
+      "blue": 4,
+      "magenta": 4,
+      "orange": 4,
+      "emerald": 4,
+      "tan": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_31",
+    "name": "Level 31: Tower Collector",
+    "description": "Sort the shelf bottles and collect all eight magenta layers in the central tower.",
+    "difficultyTier": "grandmaster",
+    "bottles": 11,
+    "colours": 8,
+    "hiddenLayers": 0,
+    "layers": {
+      "cyan": 4,
+      "magenta": 8,
+      "gold": 4,
+      "emerald": 4,
+      "violet": 4,
+      "orange": 4,
+      "tan": 4,
+      "blue": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_32",
+    "name": "Level 32: Blue Tower",
+    "description": "Build an eight-layer blue tower while untangling the surrounding shelf bands.",
+    "difficultyTier": "grandmaster",
+    "bottles": 11,
+    "colours": 8,
+    "hiddenLayers": 0,
+    "layers": {
+      "cyan": 4,
+      "blue": 8,
+      "gold": 4,
+      "emerald": 4,
+      "violet": 4,
+      "orange": 4,
+      "tan": 4,
+      "magenta": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_33",
+    "name": "Level 33: Rising Rose",
+    "description": "The magenta tower starts with two layers; find and add the six scattered above it.",
+    "difficultyTier": "grandmaster",
+    "bottles": 11,
+    "colours": 8,
+    "hiddenLayers": 0,
+    "layers": {
+      "magenta": 8,
+      "cyan": 4,
+      "gold": 4,
+      "emerald": 4,
+      "violet": 4,
+      "orange": 4,
+      "tan": 4,
+      "blue": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_34",
+    "name": "Level 34: Violet Fog Tower",
+    "description": "Collect eight violet layers in the tower while hidden shelf bases reveal themselves.",
+    "difficultyTier": "grandmaster",
+    "bottles": 11,
+    "colours": 8,
+    "hiddenLayers": 5,
+    "layers": {
+      "cyan": 4,
+      "violet": 8,
+      "gold": 4,
+      "emerald": 4,
+      "magenta": 4,
+      "orange": 4,
+      "tan": 4,
+      "blue": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_35",
+    "name": "Level 35: Sunset Tower",
+    "description": "Thread paired shelf bands together and finish the long bottle with eight orange layers.",
+    "difficultyTier": "grandmaster",
+    "bottles": 11,
+    "colours": 8,
+    "hiddenLayers": 0,
+    "layers": {
+      "orange": 8,
+      "cyan": 4,
+      "magenta": 4,
+      "gold": 4,
+      "emerald": 4,
+      "violet": 4,
+      "tan": 4,
+      "blue": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
   }
 ]

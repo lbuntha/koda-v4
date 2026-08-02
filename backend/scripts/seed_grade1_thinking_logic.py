@@ -240,7 +240,7 @@ def logic_questions(levels: list[dict]) -> list[dict]:
 
 
 def _sort_skills(levels: list[dict]) -> list[dict]:
-    """One skill per level, all in a single unit, ordered level 1 → 20.
+    """One skill per level, all in a single unit, ordered from the first pour onward.
 
     Deliberately no `prerequisiteSkillIds`. The recommendation engine only counts a
     prerequisite as met once the earlier skill reaches *developing* — score >= 0.6 with
@@ -248,7 +248,7 @@ def _sort_skills(levels: list[dict]) -> list[dict]:
     chain would mean replaying one board six times before the next level could ever be
     offered; in practice nothing qualified as `new` and the engine fell through to its
     stretch fallback, which serves the *last* skill — handing a Grade 1 learner the
-    10-bottle grandmaster board straight after level 1.
+    grandmaster tower board straight after level 1.
 
     Ordering is carried by the frontier instead: it advances past any skill that has
     mastery, so finishing level N makes level N+1 the next `new` item.
@@ -362,7 +362,7 @@ def load_goods_levels() -> list[dict]:
 
     # Grade 1 only gets the boards that sit inside the Liquid Sort ladder's envelope.
     #
-    # Measured, not guessed. Liquid tops out at 10 bottles, 32 units of liquid and ~36
+    # Measured, not guessed. Liquid tops out at 11 bottles, 36 units of liquid and ~39
     # pours — that is the hardest thing a Grade 1 learner is asked for anywhere in this
     # subject. The goods ladder runs a long way past it: its last board is 20 compartments
     # and 72 items, more than twice the objects, on a 4x5 grid where each one draws about
@@ -487,7 +487,7 @@ def _interleave_ladders(*ladders: list[dict]) -> list[dict]:
     """Weave the ladders together by difficulty tier, and stamp `order`.
 
     Appending one ladder after the other is the obvious thing and it is wrong: it made a
-    Grade 1 learner finish the ten-bottle grandmaster liquid board — the hardest thing in
+    Grade 1 learner finish the grandmaster liquid tower — the hardest thing in
     the subject — before being shown the two-kind goods shelf that is its gentlest. The
     frontier walks `order`, so `order` has to express difficulty across the whole subject,
     not within one game.

@@ -60,14 +60,14 @@ order 2  Liquid · First Pour         beginner    2 colours, 3 bottles
 order 3  Goods · Three Aisles        beginner    3 kinds, 6 spare
 order 4  Liquid · Dual Swap          beginner    …
 …
-order 45 Liquid · Ultimate Master Apex  grandmaster 10 bottles
+order 56 Liquid · Sunset Tower         grandmaster 11 bottles, 8-slot tower
 ```
 
 The goods ladder stops at *master* and liquid carries on into *grandmaster*, so the last
 few rungs are liquid alone. That is the shape of §3.1, not an oversight.
 
 Two reasons, and the first is a bug this fixed. Appending one ladder after the other made a
-learner finish the **ten-bottle grandmaster liquid board — the hardest thing in the
+learner finish the **grandmaster liquid tower board — the hardest thing in the
 subject — before being shown the two-kind goods shelf that is its gentlest.** The frontier
 walks `order`, so `order` has to express difficulty across the whole subject rather than
 within one game.
@@ -94,9 +94,9 @@ items ≤ 40   and   compartments ≤ 12          (GRADE1_MAX_ITEMS / GRADE1_MAX
 
 | | Liquid, hardest board | Goods, hardest board | Goods, hardest at Grade 1 |
 |---|---|---|---|
-| containers | 10 bottles | 20 compartments | 12 compartments |
-| objects | 32 units | 72 items | 40 items |
-| moves to finish | ~36 | 200+ | ~21 floor |
+| containers | 11 bottles | 20 compartments | 12 compartments |
+| objects | 36 units | 72 items | 40 items |
+| moves to finish | ~39 | 200+ | ~21 floor |
 
 Liquid's hardest board is the most this subject asks of a Grade 1 learner anywhere. The
 goods ladder runs a long way past it — more than twice the objects, drawn at about 20px
@@ -115,7 +115,7 @@ numbers. `load_goods_levels` prints each one it holds back, with the reason.
 | apprentice | 5–8 kinds, 2–3 spare | more colours | keep a compartment clear |
 | advanced | 8–13 kinds, 1–2 spare | 5–6 bottles | plan several moves ahead |
 | master | 4-slot compartments | 7–8 bottles | the same skills, longer sets |
-| grandmaster | *(beyond Grade 1 — held back)* | 10 bottles, hidden layers | everything at once |
+| grandmaster | *(beyond Grade 1 — held back)* | 10–11 bottles, hidden layers and tower | everything at once |
 
 Every level carries a one-line `teaches` string. It is the **coach line shown while they
 play**, not the question's instruction: the instruction says what to do ("Move the goods
@@ -163,7 +163,7 @@ met only once the earlier skill reaches *developing* — score ≥ 0.6 over at l
 level here is a single puzzle, so a chain would mean replaying one board six times before
 the next could be offered. In practice nothing qualified as `new`, the engine fell through
 to its stretch fallback, and that serves the *last* skill — handing a Grade 1 learner the
-ten-bottle grandmaster board straight after level 1. Order is carried by the frontier
+grandmaster tower board straight after level 1. Order is carried by the frontier
 instead: it advances past any skill with mastery, so finishing level N makes N+1 the next
 `new` item.
 

@@ -60,7 +60,7 @@ export const LiquidSortPanel: React.FC<PanelProps> = ({ question, update }) => {
         <input
           type="range"
           min={3}
-          max={10}
+          max={12}
           value={question.targetCount || selectedLevel.targetCount}
           onChange={(e) => update({ targetCount: parseInt(e.target.value, 10) })}
           className="w-full accent-indigo-600 cursor-pointer"
@@ -86,4 +86,3 @@ export const LiquidSortPanel: React.FC<PanelProps> = ({ question, update }) => {
     </div>
   );
 };
-

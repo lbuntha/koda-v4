@@ -7,7 +7,7 @@ export const liquidSortSchema: ComponentSchema = {
   name: "Liquid Color Sort",
   description: "A liquid color sorting bottle puzzle with glass pouring animation and curated curriculum levels.",
   promptSummary: "Liquid color sorting puzzle. The child pours colors between bottles to sort each color into its own bottle.",
-  topLevelFields: { targetCount: { min: 3, max: 10, default: 3 } },
+  topLevelFields: { targetCount: { min: 3, max: 12, default: 3 } },
   configFields: [
     {
       key: "levelId",
@@ -62,4 +62,3 @@ export const liquidSortSchema: ComponentSchema = {
     };
   }
 };
-

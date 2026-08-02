@@ -59,6 +59,37 @@ interface SplashDroplet {
   life: number;
 }
 
+type ClientRectLike = Pick<DOMRect, "left" | "top" | "width" | "height">;
+
+/** Map a point in this bottle's 100x240 viewBox to its real screen position. */
+export const bottleViewBoxPoint = (
+  rect: ClientRectLike,
+  x: number,
+  y: number,
+  viewBoxHeight = 240
+) => {
+  // SVG's default preserveAspectRatio is xMidYMid meet. The mobile bottle is a
+  // slightly different aspect ratio, so width / 100 alone is not sufficient.
+  const scale = Math.min(rect.width / 100, rect.height / viewBoxHeight);
+  const insetX = (rect.width - 100 * scale) / 2;
+  const insetY = (rect.height - viewBoxHeight * scale) / 2;
+  return {
+    x: rect.left + insetX + x * scale,
+    y: rect.top + insetY + y * scale,
+    scale,
+  };
+};
+
+const bottleSvgScreenPoint = (svg: SVGSVGElement, x: number, y: number) => {
+  const matrix = svg.getScreenCTM();
+  if (!matrix) return null;
+  const point = svg.createSVGPoint();
+  point.x = x;
+  point.y = y;
+  const screenPoint = point.matrixTransform(matrix);
+  return { x: screenPoint.x, y: screenPoint.y };
+};
+
 /**
  * Solver behind the hint button: returns a first move that leads to a solved board.
  *
@@ -184,6 +215,7 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
     return level.bottles.map((b) => ({
       id: b.id,
       capacity: b.capacity,
+      isTower: b.isTower,
       layers: b.layers.map((l) => ({ ...l })),
     }));
   };
@@ -215,6 +247,8 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
     isRight: boolean;
     streamX: number;
     streamY: number;
+    targetMouthX: number;
+    targetMouthY: number;
   } | null>(null);
 
   const [pourProgress, setPourProgress] = useState(0);
@@ -222,6 +256,7 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
 
   // Bottle DOM element refs
   const bottleRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const bottleSvgRefs = useRef<Record<string, SVGSVGElement | null>>({});
 
   // Physics animation clock & slosh states (damped harmonic oscillator)
   const [animTime, setAnimTime] = useState(0);
@@ -355,11 +390,12 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
         setSloshAngles({ ...sloshRef.current });
 
         if (Math.random() < 0.7) {
+          const targetBottle = bottles.find((b) => b.id === pouringInfo.targetId);
           const newBubble: BuoyantBubble = {
             id: Math.random(),
             bottleId: pouringInfo.targetId,
             x: 50 + (Math.random() - 0.5) * 36,
-            y: 215,
+            y: targetBottle?.isTower ? 415 : 215,
             size: Math.random() * 3 + 2,
             alpha: 0.85,
             speed: Math.random() * 2 + 3,
@@ -371,8 +407,8 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
           const color = COLOR_PALETTE[pouringInfo.colorKey]?.glow || "#06B6D4";
           const newSplash: SplashDroplet = {
             id: Math.random(),
-            x: pouringInfo.streamX + (Math.random() - 0.5) * 16,
-            y: pouringInfo.streamY + 140,
+            x: pouringInfo.targetMouthX + (Math.random() - 0.5) * 10,
+            y: pouringInfo.targetMouthY + 3,
             vx: (Math.random() - 0.5) * 5,
             vy: -(Math.random() * 5 + 3),
             color,
@@ -529,40 +565,67 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
         let isRight = true;
         let streamX = 0;
         let streamY = 0;
+        let targetMouthX = 0;
+        let targetMouthY = 0;
 
         if (sourceEl && targetEl) {
+          const sourceSvg = bottleSvgRefs.current[selectedId];
+          const targetSvg = bottleSvgRefs.current[clickedId];
           const sRect = sourceEl.getBoundingClientRect();
           const tRect = targetEl.getBoundingClientRect();
           const stageRect = stageRef.current?.getBoundingClientRect();
 
           isRight = tRect.left >= sRect.left;
-          const scale = sRect.width / 100;
+          if (sourceSvg && targetSvg && stageRect) {
+            const sourceSvgRect = sourceSvg.getBoundingClientRect();
+            const targetSvgRect = targetSvg.getBoundingClientRect();
+            const sourceLip = bottleViewBoxPoint(
+              sourceSvgRect,
+              isRight ? 65 : 35,
+              10,
+              source.isTower ? 440 : 240
+            );
+            const targetMouth = bottleViewBoxPoint(
+              targetSvgRect,
+              50,
+              10,
+              target.isTower ? 440 : 240
+            );
 
-          // Un-rotated pivot of source bottle in Stage space
-          const sourcePivotX = sRect.left + sRect.width / 2;
-          const sourcePivotY = sRect.top + 15 * scale;
+            // Framer Motion's y value replaces the selected lift; it is not added to
+            // it. Read the transform that is actually on screen so even a very quick
+            // second tap produces the same final alignment.
+            const transform = window.getComputedStyle(sourceEl).transform;
+            const matrix = transform && transform !== "none"
+              ? new DOMMatrixReadOnly(transform)
+              : null;
+            const currentTranslateX = matrix?.m41 ?? 0;
+            const currentTranslateY = matrix?.m42 ?? 0;
 
-          // Target mouth entry point: hover 28px ABOVE and slightly to side of target mouth rim
-          const targetMouthX = tRect.left + (isRight ? -8 * scale : tRect.width + 8 * scale);
-          const targetMouthY = tRect.top - 28 * scale;
+            // The CSS rotation pivots 15 rendered pixels below the wrapper's top.
+            const sourcePivotX = sRect.left + sRect.width / 2;
+            const sourcePivotY = sRect.top + 15;
+            const lipOffsetX = sourceLip.x - sourcePivotX;
+            const lipOffsetY = sourceLip.y - sourcePivotY;
+            const angle = (isRight ? 72 : -72) * (Math.PI / 180);
+            const rotatedLipX =
+              sourcePivotX + lipOffsetX * Math.cos(angle) - lipOffsetY * Math.sin(angle);
+            const rotatedLipY =
+              sourcePivotY + lipOffsetX * Math.sin(angle) + lipOffsetY * Math.cos(angle);
 
-          // Rotated 2D offset of source mouth rim lip when tilted by 72deg
-          const tiltAngle = 72;
-          const rad = (isRight ? tiltAngle : -tiltAngle) * (Math.PI / 180);
-          const localLipX = isRight ? 65 : 35;
-          const localLipY = 10;
-          const dx = (localLipX - 50) * scale;
-          const dy = (localLipY - 15) * scale;
+            // Keep a short visible air gap, then terminate the jet at the exact centre
+            // of the receiving mouth. This remains accurate at every responsive size.
+            const pourGap = Math.max(14, targetMouth.scale * 28);
+            const desiredLipX = targetMouth.x + (isRight ? -3 : 3) * targetMouth.scale;
+            const desiredLipY = targetMouth.y - pourGap;
+            deltaX = currentTranslateX + desiredLipX - rotatedLipX;
+            deltaY = currentTranslateY + desiredLipY - rotatedLipY;
 
-          const lipRotatedOffsetX = dx * Math.cos(rad) - dy * Math.sin(rad);
-          const lipRotatedOffsetY = dx * Math.sin(rad) + dy * Math.cos(rad);
-
-          // Exact deltaX & deltaY so tilted bottle mouth lip hovers gracefully above target bottle
-          deltaX = targetMouthX - sourcePivotX - lipRotatedOffsetX;
-          deltaY = targetMouthY - sourcePivotY - lipRotatedOffsetY;
-
-          streamX = targetMouthX - (stageRect?.left || 0);
-          streamY = targetMouthY - (stageRect?.top || 0);
+            streamX = desiredLipX - stageRect.left;
+            streamY = desiredLipY - stageRect.top;
+            targetMouthX = targetMouth.x - stageRect.left;
+            targetMouthY = targetMouth.y - stageRect.top;
+          }
         }
 
         let transferCount = 0;
@@ -599,6 +662,8 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
           isRight,
           streamX,
           streamY,
+          targetMouthX,
+          targetMouthY,
         });
 
         sounds.playPop();
@@ -685,6 +750,7 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
         ? initialBottlesRef.current.map((b) => ({
             id: b.id,
             capacity: b.capacity,
+            isTower: b.isTower,
             layers: b.layers.map((l) => ({ ...l })),
           }))
         : loadLevelBottles(lvl);
@@ -702,7 +768,7 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
   };
 
   const handleAddBottle = () => {
-    if (bottles.length >= 10 || isWon || pouringInfo) return;
+    if (bottles.length >= 12 || isWon || pouringInfo) return;
     setBottles((prev) => [
       ...prev,
       {
@@ -763,11 +829,13 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
     const isSourcePouring = pouringInfo?.sourceId === bottle.id;
     const isTargetPouring = pouringInfo?.targetId === bottle.id;
 
-    const segmentHeight = 160 / bottle.capacity;
-    const yBottom = 235 - index * segmentHeight;
+    const bottleBottom = bottle.isTower ? 435 : 235;
+    const liquidHeight = bottle.isTower ? 360 : 160;
+    const segmentHeight = liquidHeight / bottle.capacity;
+    const yBottom = bottleBottom - index * segmentHeight;
 
     // Fluid height recession for source bottle & rising height for target bottle
-    let effectiveYTop = 235 - (index + 1) * segmentHeight;
+    let effectiveYTop = bottleBottom - (index + 1) * segmentHeight;
 
     if (isSourcePouring && isTopLayer && pourProgress > 0) {
       // Top layer recedes downward as it pours out
@@ -928,7 +996,7 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
         <button
           type="button"
           onClick={handleAddBottle}
-          disabled={bottles.length >= 10 || pouringInfo !== null}
+          disabled={bottles.length >= 12 || pouringInfo !== null}
           className={btnPill("indigo")}
         >
           <Plus size={14} /> Tube
@@ -936,6 +1004,8 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
       )}
     </div>
   );
+
+  const hasTower = bottles.some((bottle) => bottle.isTower);
 
   return (
     <SharedCanvasLayout
@@ -961,12 +1031,22 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
       isDark={isDark}
       compact={compact}
       hintDurationMs={compact ? 1800 : undefined}
-      className={compact ? "!h-full !min-h-0 gap-1 p-0" : undefined}
+      className={
+        compact
+          ? "!h-full !min-h-0 gap-1 p-0"
+          : hasTower
+          ? "!h-full !min-h-0"
+          : undefined
+      }
     >
       <div
         ref={stageRef}
         className={`flex w-full flex-col items-center justify-between select-none rounded-3xl relative overflow-hidden transition-colors duration-300 ${
-          compact ? "h-full min-h-0 px-2 py-1" : "min-h-[580px] p-3 sm:p-6"
+          compact
+            ? "h-full min-h-0 px-2 py-1"
+            : hasTower
+            ? "h-full min-h-0 p-2 sm:p-4"
+            : "min-h-[580px] p-3 sm:p-6"
         } ${
           isDark
             ? `${surfaceClass(isDark)} text-white`
@@ -1056,33 +1136,41 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
 
         {/* Parabolic Liquid Pour Stream & Spout Meniscus SVG Overlay */}
         {pouringInfo && (() => {
-          const target = bottles.find((b) => b.id === pouringInfo.targetId);
-          const targetCapacity = target ? target.capacity : 4;
-          const initialFillCount = target ? target.layers.length : 0;
-          const currentFillCount = initialFillCount + pouringInfo.transferCount * pourProgress;
-
-          const targetEl = bottleRefs.current[pouringInfo.targetId];
+          const sourceSvg = bottleSvgRefs.current[pouringInfo.sourceId];
+          const targetSvg = bottleSvgRefs.current[pouringInfo.targetId];
           const stageRect = stageRef.current?.getBoundingClientRect();
-          const tRect = targetEl ? targetEl.getBoundingClientRect() : null;
-
           const isRight = pouringInfo.isRight;
-          const scale = tRect ? tRect.width / 100 : 0.96;
 
-          const tLeft = tRect && stageRect ? tRect.left - stageRect.left : 0;
-          const tTop = tRect && stageRect ? tRect.top - stageRect.top : 0;
-          const targetCenterX = tLeft + (tRect ? tRect.width / 2 : 48);
+          // getScreenCTM includes the in-progress Framer transform. The stream therefore
+          // remains attached to the source lip throughout the lift, tilt and spring.
+          const liveSourceLip = sourceSvg && stageRect
+            ? bottleSvgScreenPoint(sourceSvg, isRight ? 65 : 35, 10)
+            : null;
+          const liveTargetMouth = targetSvg && stageRect
+            ? bottleSvgScreenPoint(targetSvg, 50, 10)
+            : null;
+          const liveTargetMouthLeft = targetSvg && stageRect
+            ? bottleSvgScreenPoint(targetSvg, 35, 10)
+            : null;
+          const liveTargetMouthRight = targetSvg && stageRect
+            ? bottleSvgScreenPoint(targetSvg, 65, 10)
+            : null;
+          const startX = liveSourceLip
+            ? liveSourceLip.x - stageRect!.left
+            : pouringInfo.streamX;
+          const startY = liveSourceLip
+            ? liveSourceLip.y - stageRect!.top
+            : pouringInfo.streamY;
+          const endX = liveTargetMouth
+            ? liveTargetMouth.x - stageRect!.left
+            : pouringInfo.targetMouthX;
+          const endY = liveTargetMouth
+            ? liveTargetMouth.y - stageRect!.top
+            : pouringInfo.targetMouthY;
 
-          const segmentHeight = 160 / targetCapacity;
-          const landingY = tTop + (235 - currentFillCount * segmentHeight) * scale;
-
-          const startX = pouringInfo.streamX;
-          const startY = pouringInfo.streamY;
-          const endX = targetCenterX;
-          const endY = landingY;
-
-          // Parabolic jet flow arc control point
-          const arcControlX = (startX + endX) / 2 + (isRight ? 14 : -14);
-          const arcControlY = startY + Math.max(20, (endY - startY) * 0.4);
+          // A compact gravity arc connects the pouring lip directly to the receiving lip.
+          const arcControlX = (startX + endX) / 2 + (isRight ? 2 : -2);
+          const arcControlY = startY + Math.max(7, (endY - startY) * 0.58);
           const parabolicPath = `M ${startX} ${startY} Q ${arcControlX} ${arcControlY} ${endX} ${endY}`;
 
           const color = COLOR_PALETTE[pouringInfo.colorKey] || COLOR_PALETTE.cyan;
@@ -1144,6 +1232,25 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
                 opacity="0.8"
               />
 
+              {/* Foreground mouth rim: the jet passes behind this near glass edge. */}
+              {liveTargetMouthLeft && liveTargetMouthRight && stageRect && (
+                <line
+                  x1={liveTargetMouthLeft.x - stageRect.left}
+                  y1={liveTargetMouthLeft.y - stageRect.top}
+                  x2={liveTargetMouthRight.x - stageRect.left}
+                  y2={liveTargetMouthRight.y - stageRect.top}
+                  stroke={isDark ? "#475569" : "#64748B"}
+                  strokeWidth={Math.max(
+                    1.5,
+                    (Math.hypot(
+                      liveTargetMouthRight.x - liveTargetMouthLeft.x,
+                      liveTargetMouthRight.y - liveTargetMouthLeft.y
+                    ) / 30) * 2.5
+                  )}
+                  strokeLinecap="round"
+                />
+              )}
+
               {/* Target Water Splash Ellipse Ring */}
               <motion.ellipse
                 initial={{ rx: 3, ry: 1.5, opacity: 0 }}
@@ -1175,8 +1282,12 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
         <div
           className={`z-10 my-auto grid w-full justify-items-center ${
             compact ? "translate-y-4 gap-3 py-1" : "gap-3 py-6 sm:gap-6"
-          } ${
-            compact
+          } ${hasTower ? "h-full min-h-0 grid-rows-2" : ""} ${
+            hasTower
+              ? compact
+                ? "grid-cols-6 max-w-md"
+                : "grid-cols-6 max-w-4xl"
+              : compact
               ? bottles.length <= 5
                 ? "grid-cols-5 max-w-sm"
                 : "grid-cols-6 max-w-md"
@@ -1184,6 +1295,7 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
           }`}
         >
           {bottles.map((bottle) => {
+            const isTower = bottle.isTower === true;
             const isSelected = selectedId === bottle.id;
             const isPouring = pouringInfo?.sourceId === bottle.id;
             const isHintSrc = hintMove?.from === bottle.id;
@@ -1195,6 +1307,10 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
               );
 
             const rotationAngle = isPouring ? (pouringInfo.isRight ? 72 : -72) : 0;
+            const bodyEnd = isTower ? 420 : 220;
+            const bottleBottom = isTower ? 435 : 235;
+            const viewBoxHeight = isTower ? 440 : 240;
+            const bottlePath = `M 35 10 H 65 V 35 L 85 70 V ${bodyEnd} C 85 ${bodyEnd + 10} 75 ${bottleBottom} 50 ${bottleBottom} C 25 ${bottleBottom} 15 ${bodyEnd + 10} 15 ${bodyEnd} V 70 L 35 35 Z`;
 
             return (
               <motion.div
@@ -1226,6 +1342,12 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
                 }
                 className={`relative flex flex-col items-center cursor-pointer ${
                   isSelected || isPouring ? "z-20" : "z-10"
+                } ${
+                  hasTower
+                    ? isTower
+                      ? "col-start-3 row-start-1 row-span-2 h-full min-h-0 w-full self-center"
+                      : "h-full min-h-0 w-full self-center"
+                    : ""
                 }`}
               >
                 {/* Target Bottle 'POUR HERE 🎯' Floating Badge */}
@@ -1255,16 +1377,27 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
 
                 {/* SVG Glass Bottle Container */}
                 <svg
-                  viewBox="0 0 100 240"
+                  ref={(el) => {
+                    bottleSvgRefs.current[bottle.id] = el;
+                  }}
+                  viewBox={`0 0 100 ${viewBoxHeight}`}
                   className={
-                    compact
+                    isTower
+                      ? compact
+                        ? "h-full max-h-[268px] w-full max-w-14 drop-shadow-xl"
+                        : "h-full max-h-[472px] w-full max-w-16 drop-shadow-2xl sm:max-w-24"
+                      : hasTower
+                      ? compact
+                        ? "h-full max-h-32 w-full max-w-14 drop-shadow-md"
+                        : "h-full max-h-44 w-full max-w-16 drop-shadow-xl sm:max-h-56 sm:max-w-24"
+                      : compact
                       ? "h-32 w-14 drop-shadow-md"
                       : "h-44 w-16 drop-shadow-xl sm:h-56 sm:w-24"
                   }
                 >
                   <defs>
                     <clipPath id={`clip-${bottle.id}`}>
-                      <path d="M 35 10 H 65 V 35 L 85 70 V 220 C 85 230 75 235 50 235 C 25 235 15 230 15 220 V 70 L 35 35 Z" />
+                      <path d={bottlePath} />
                     </clipPath>
                     <linearGradient id={`glass-${bottle.id}`} x1="0" y1="0" x2="1" y2="0">
                       <stop offset="0%" stopColor={isDark ? "#94A3B8" : "#CBD5E1"} stopOpacity="0.34" />
@@ -1297,9 +1430,9 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
                   </defs>
 
                   {/* Ground and glass volume create the dimensional bottle silhouette. */}
-                  <ellipse cx="51" cy="234" rx="31" ry="5" fill="#0F172A" opacity={isDark ? "0.28" : "0.13"} />
+                  <ellipse cx="51" cy={bottleBottom - 1} rx="31" ry="5" fill="#0F172A" opacity={isDark ? "0.28" : "0.13"} />
                   <path
-                    d="M 35 10 H 65 V 35 L 85 70 V 220 C 85 230 75 235 50 235 C 25 235 15 230 15 220 V 70 L 35 35 Z"
+                    d={bottlePath}
                     fill={`url(#glass-${bottle.id})`}
                   />
 
@@ -1335,12 +1468,12 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
                       ))}
 
                     {/* A translucent side-to-side sheen unifies glass and liquid. */}
-                    <rect x="12" y="8" width="76" height="228" fill={`url(#sheen-${bottle.id})`} />
+                    <rect x="12" y="8" width="76" height={bottleBottom - 7} fill={`url(#sheen-${bottle.id})`} />
                   </g>
 
                   {/* Glass Highlights */}
                   <path
-                    d="M 22 75 V 215 C 22 222 28 227 34 227"
+                    d={`M 22 75 V ${bodyEnd - 5} C 22 ${bodyEnd + 2} 28 ${bottleBottom - 8} 34 ${bottleBottom - 8}`}
                     fill="none"
                     stroke="white"
                     strokeWidth="4"
@@ -1348,7 +1481,7 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
                     opacity={isDark ? "0.3" : "0.55"}
                   />
                   <path
-                    d="M 73 72 V 216 C 73 224 68 228 61 230"
+                    d={`M 73 72 V ${bodyEnd - 4} C 73 ${bodyEnd + 4} 68 ${bottleBottom - 7} 61 ${bottleBottom - 5}`}
                     fill="none"
                     stroke={isDark ? "#0F172A" : "#475569"}
                     strokeWidth="3"
@@ -1357,7 +1490,7 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
                   />
                   <ellipse
                     cx="50"
-                    cy="222"
+                    cy={bodyEnd + 2}
                     rx="29"
                     ry="9"
                     fill="none"
@@ -1368,7 +1501,7 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
 
                   {/* Outer Contour */}
                   <path
-                    d="M 35 10 H 65 V 35 L 85 70 V 220 C 85 230 75 235 50 235 C 25 235 15 230 15 220 V 70 L 35 35 Z"
+                    d={bottlePath}
                     fill="none"
                     stroke={
                       isHintSrc

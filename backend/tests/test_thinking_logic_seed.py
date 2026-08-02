@@ -50,7 +50,7 @@ def test_goods_answer_keys_never_reach_the_client(subject):
 
 
 def test_grade_1_only_gets_boards_inside_the_liquid_ladders_envelope(subject):
-    """Liquid tops out at 32 units of liquid across 10 bottles — the hardest thing this
+    """Liquid tops out at 36 units across 11 bottles, including the eight-slot tower — the hardest thing this
     subject asks of a Grade 1 learner. The goods ladder runs to 72 items across 20
     compartments, more than twice the objects, drawn at about 20px each on a 4x5 grid.
     Interleaving the ladders by tier only aligns them if the tiers mean comparable things.
@@ -63,7 +63,7 @@ def test_grade_1_only_gets_boards_inside_the_liquid_ladders_envelope(subject):
 
 
 def test_the_two_ladders_interleave_rather_than_run_end_to_end(subject):
-    """Appending one ladder after the other made a learner finish the ten-bottle
+    """Appending one ladder after the other made a learner finish the grandmaster
     grandmaster liquid board — the hardest in the subject — before being shown the
     two-kind goods shelf that is its gentlest. The frontier walks `order`, so `order` has
     to express difficulty across the whole subject rather than within one game.
@@ -74,10 +74,17 @@ def test_the_two_ladders_interleave_rather_than_run_end_to_end(subject):
     assert [skill["order"] for skill in ordered] == list(range(1, len(ordered) + 1))
     assert len({skill["id"] for skill in ordered}) == len(ordered)
 
-    # Both games appear in the opening pair, and neither owns a long unbroken run early on.
+    # Both games appear in the opening pair, and neither owns a long unbroken run while
+    # both ladders still have levels. Once the shorter goods ladder is exhausted, the
+    # remaining liquid-only grandmaster tail is expected (see sorting-games-flow.md).
     assert {skill["unitId"] for skill in ordered[:2]} == {seed.UNIT_SORT, seed.UNIT_GOODS}
+    last_by_unit = {
+        unit_id: max(index for index, skill in enumerate(ordered) if skill["unitId"] == unit_id)
+        for unit_id in (seed.UNIT_SORT, seed.UNIT_GOODS)
+    }
+    interleaved = ordered[: min(last_by_unit.values()) + 1]
     longest_run = run = 1
-    for earlier, later in zip(ordered, ordered[1:]):
+    for earlier, later in zip(interleaved, interleaved[1:]):
         run = run + 1 if later["unitId"] == earlier["unitId"] else 1
         longest_run = max(longest_run, run)
     assert longest_run <= 5, f"one game runs {longest_run} rungs unbroken"

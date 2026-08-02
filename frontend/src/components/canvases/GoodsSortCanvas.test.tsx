@@ -61,6 +61,18 @@ const tapShelf = (container: HTMLElement, shelfId: string) => {
 };
 
 describe("Goods Sort canvas", () => {
+  test("uses the offline gradient SVG collection in the shelf and goal rail", () => {
+    const { container } = render(
+      <GoodsSortCanvas isPlayMode={true} question={question({ levelId: "level_2" })} />,
+    );
+
+    for (const typeKey of ["chips", "cola", "milk"]) {
+      const artwork = container.querySelectorAll(`[data-goods-art="${typeKey}"]`);
+      // One small copy in the goal rail plus the copies being sorted on the shelf.
+      expect(artwork.length, `${typeKey} did not use the SVG collection`).toBeGreaterThan(1);
+    }
+  });
+
   test("renders the level's own board, not a regenerated one", () => {
     // Exactly what the studio panel writes when a curated level is chosen: the grid
     // fields travel with the selection, and used to be read as "make something up".

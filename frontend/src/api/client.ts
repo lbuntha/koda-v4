@@ -97,14 +97,37 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * The request never reached the server — the device is offline, the host is unresolvable,
+ * or the API is down. Distinct from `ApiError` on purpose: an `ApiError(401)` means the
+ * server rejected this session and it should be cleared, while an unreachable server says
+ * nothing about the session's validity. Conflating the two signed a child out of an
+ * installed app the moment they opened it on a train.
+ */
+export class OfflineError extends Error {
+  constructor(path: string, options?: { cause?: unknown }) {
+    super(`Cannot reach the Koda server (${path})`, options);
+    this.name = "OfflineError";
+  }
+}
+
+export const isOfflineError = (reason: unknown): reason is OfflineError =>
+  reason instanceof OfflineError;
+
 async function tryRefresh(): Promise<boolean> {
   const refresh = tokenStore.refresh;
   if (!refresh) return false;
-  const res = await fetch(`${API_URL}/auth/refresh`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refresh_token: refresh }),
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}/auth/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh_token: refresh }),
+    });
+  } catch (cause) {
+    // Losing the network mid-refresh must not cost the learner their tokens.
+    throw new OfflineError("/auth/refresh", { cause });
+  }
   if (!res.ok) {
     tokenStore.clear();
     return false;
@@ -140,7 +163,13 @@ async function request<T>(path: string, opts: RequestOptions = {}, allowRetry = 
     headers.Authorization = `Bearer ${tokenStore.access}`;
   }
 
-  const res = await fetch(`${API_URL}${path}`, { method: opts.method ?? "GET", headers, body });
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, { method: opts.method ?? "GET", headers, body });
+  } catch (cause) {
+    // `fetch` rejects only when no response was produced at all.
+    throw new OfflineError(path, { cause });
+  }
 
   if (res.status === 401 && allowRetry && tokenStore.refresh) {
     if (await tryRefresh()) return request<T>(path, opts, false);

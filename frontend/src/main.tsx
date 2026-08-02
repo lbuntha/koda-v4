@@ -4,6 +4,7 @@ import {AuthProvider} from './auth/AuthContext';
 import {RoleRouter} from './auth/RoleRouter';
 import {SvgLibraryProvider} from './assets/SvgLibraryContext';
 import {AppSettingsProvider} from './settings/AppSettingsContext';
+import {PwaPrompts} from './pwa/PwaPrompts';
 import {ComponentPreview} from './student/home/shared/ComponentPreview';
 import {GoodsSortPreview} from './components/canvases/GoodsSortPreview';
 import {CountCratesPreview} from './components/canvases/CountCratesPreview';
@@ -29,6 +30,9 @@ createRoot(document.getElementById('root')!).render(
       <AppSettingsProvider>
         <SvgLibraryProvider>
           <RoleRouter />
+          {/* Service worker registration + update/install/offline notices. Mounted outside
+              the role screens so it survives every role switch. */}
+          <PwaPrompts />
         </SvgLibraryProvider>
       </AppSettingsProvider>
     </AuthProvider>

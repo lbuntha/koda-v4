@@ -14,7 +14,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { LIQUID_SORT_CURRICULUM_LEVELS, type BottleState } from "./liquidSortLevels";
-import { solveLiquidSort } from "./LiquidSortCanvas";
+import { bottleViewBoxPoint, solveLiquidSort } from "./LiquidSortCanvas";
 
 const clone = (bottles: BottleState[]): BottleState[] =>
   bottles.map(b => ({ id: b.id, capacity: b.capacity, layers: b.layers.map(l => ({ ...l })) }));
@@ -59,6 +59,37 @@ const KNOWN_UNSOLVABLE = new Set<string>([]);
 
 const playable = LIQUID_SORT_CURRICULUM_LEVELS.filter(level => !KNOWN_UNSOLVABLE.has(level.id));
 
+test("mobile bottle mouth coordinates honor SVG aspect-ratio letterboxing", () => {
+  // compact mode renders the 100x240 viewBox into a 56x128 CSS box. The content is
+  // 53.33px wide and centred, rather than stretched to the full 56px width.
+  const mouth = bottleViewBoxPoint(
+    { left: 20, top: 40, width: 56, height: 128 },
+    50,
+    10,
+  );
+
+  assert.equal(mouth.scale, 128 / 240);
+  assert.equal(mouth.x, 48);
+  assert.ok(Math.abs(mouth.y - 45.3333333333) < 0.0001);
+});
+
+test("every tower challenge has one real eight-layer goal bottle", () => {
+  const towerLevels = LIQUID_SORT_CURRICULUM_LEVELS.filter(level =>
+    level.bottles.some(bottle => bottle.isTower)
+  );
+  assert.equal(towerLevels.length, 5);
+  for (const level of towerLevels) {
+    const towers = level.bottles.filter(bottle => bottle.isTower);
+    assert.equal(towers.length, 1, level.id);
+    assert.equal(towers[0].capacity, 8, level.id);
+    assert.equal(
+      Object.values(colourCounts(level)).filter(count => count === 8).length,
+      1,
+      `${level.id} must have exactly one tower-sized colour`,
+    );
+  }
+});
+
 test("every playable level can actually be finished", () => {
   for (const level of playable) {
     assert.equal(playOut(level), true, `${level.id} (${level.name}) cannot be solved`);
@@ -67,12 +98,17 @@ test("every playable level can actually be finished", () => {
 
 test("every playable level's colours each fill exactly one bottle", () => {
   for (const level of playable) {
-    const capacity = level.bottles[0].capacity;
-    for (const [colour, count] of Object.entries(colourCounts(level))) {
-      assert.equal(
-        count, capacity,
-        `${level.id}: ${colour} appears ${count} times but a bottle holds ${capacity}`,
+    const availableCapacities = level.bottles
+      .map(bottle => bottle.capacity)
+      .sort((a, b) => b - a);
+    const counts = Object.entries(colourCounts(level)).sort(([, a], [, b]) => b - a);
+    for (const [colour, count] of counts) {
+      const matchingBottle = availableCapacities.indexOf(count);
+      assert.notEqual(
+        matchingBottle, -1,
+        `${level.id}: ${colour} appears ${count} times but no bottle holds ${count}`,
       );
+      availableCapacities.splice(matchingBottle, 1);
     }
   }
 });

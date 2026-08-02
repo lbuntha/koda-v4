@@ -13,7 +13,8 @@
  */
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { isApiConfigured, tokenStore } from "../api/client";
+import { isApiConfigured, isOfflineError, tokenStore } from "../api/client";
+import { accountKey, clearAllOfflineCache, readCache, writeCache } from "../api/offlineCache";
 import { authApi, Account, Role } from "../api/auth";
 
 type Status = "loading" | "offline" | "authenticated" | "anonymous";
@@ -30,6 +31,8 @@ interface AuthState {
   isStudent: boolean;
   /** Non-null while a parent is playing as one of their kids. */
   playSession: PlaySession | null;
+  /** The account came from the offline cache because the server could not be reached. */
+  offlineSession: boolean;
   login: (email: string, password: string) => Promise<void>;
   registerAdult: (body: { role: "parent" | "teacher"; email: string; password: string; name: string }) => Promise<void>;
   studentLogin: (familyCode: string, name: string, pin: string) => Promise<void>;
@@ -47,14 +50,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [account, setAccount] = useState<Account | null>(null);
   const [playSession, setPlaySession] = useState<PlaySession | null>(null);
 
+  const [offlineSession, setOfflineSession] = useState(false);
+
   const loadMe = useCallback(async () => {
     try {
       const me = await authApi.me();
+      writeCache(accountKey(), me); // Last known good identity, for an offline launch.
       setAccount(me);
+      setOfflineSession(false);
       setStatus("authenticated");
-    } catch {
+    } catch (reason) {
+      // An unreachable server says nothing about whether this session is still valid, so
+      // the tokens stay and the learner keeps the identity they had. Only a server that
+      // actually answered — a 401 from a revoked or expired session — signs them out.
+      const cached = isOfflineError(reason) && tokenStore.access
+        ? readCache<Account>(accountKey())
+        : null;
+      if (cached) {
+        setAccount(cached.data);
+        setOfflineSession(true);
+        setStatus("authenticated");
+        return;
+      }
       tokenStore.clear();
+      clearAllOfflineCache();
       setAccount(null);
+      setOfflineSession(false);
       setStatus("anonymous");
     }
   }, []);
@@ -73,6 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     role: account?.role ?? null,
     isStudent: account?.role === "student",
     playSession,
+    offlineSession,
     login: async (email, password) => {
       await authApi.login(email, password);
       await loadMe();
@@ -100,8 +122,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logout: () => {
       authApi.logout();
       tokenStore.restoreGuardian(); // clear any stash too
+      clearAllOfflineCache();       // and no cached plan left for the next person
       setAccount(null);
       setPlaySession(null);
+      setOfflineSession(false);
       setStatus("anonymous");
     },
   };
