@@ -85,22 +85,43 @@ export const CurriculumLibraryPage: React.FC<CurriculumLibraryPageProps> = ({ on
 
   useEffect(() => { void load(); }, []);
 
+  const activeGrades = catalog.grades.filter(item => item.active);
+  const activeSubjects = catalog.subjects.filter(item => item.active);
+  const uniqueSubjectOptions = useMemo(() => {
+    const subjectsToUse = grade
+      ? activeSubjects.filter(item => item.grade_id === grade)
+      : activeSubjects;
+    const map = new Map<string, { key: string; name: string }>();
+    subjectsToUse.forEach(item => {
+      const normName = item.name.trim();
+      if (!map.has(normName.toLowerCase())) {
+        map.set(normName.toLowerCase(), { key: normName.toLowerCase(), name: normName });
+      }
+    });
+    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [activeSubjects, grade]);
+
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase();
+    const selectedSubject = subject.trim().toLowerCase();
     return curricula.filter(item => (
       (!normalized || `${item.title} ${item.description}`.toLowerCase().includes(normalized))
       && (!grade || item.grades.some(value => value.id === grade))
-      && (!subject || item.subjects.some(value => value.id === subject))
+      && (!selectedSubject || item.subjects.some(value => value.id.toLowerCase() === selectedSubject || value.label.toLowerCase() === selectedSubject || value.id.toLowerCase().includes(selectedSubject)))
       && (!status || item.status === status)
     ));
   }, [curricula, query, grade, subject, status]);
 
   useEffect(() => { setPage(1); }, [query, grade, subject, status]);
 
+  useEffect(() => {
+    if (subject && !uniqueSubjectOptions.some(item => item.key === subject.toLowerCase())) {
+      setSubject("");
+    }
+  }, [grade, uniqueSubjectOptions, subject]);
+
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const visible = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const activeGrades = catalog.grades.filter(item => item.active);
-  const activeSubjects = catalog.subjects.filter(item => item.active);
   const gradeOne = activeGrades.find(item => item.key === "grade-1" || item.code.toLowerCase() === "g1" || item.name.toLowerCase() === "grade 1");
   const gradeOneMath = gradeOne && activeSubjects.find(item => item.grade_id === gradeOne.key && (item.code.toLowerCase() === "math" || item.name.toLowerCase().includes("math")));
   const createSubjects = activeSubjects.filter(item => item.grade_id === draft.gradeId);
@@ -187,8 +208,8 @@ export const CurriculumLibraryPage: React.FC<CurriculumLibraryPageProps> = ({ on
   const clearFilters = () => { setQuery(""); setGrade(""); setSubject(""); setStatus(""); };
 
   return (
-    <div className="h-full overflow-y-auto bg-[#FBFAFF] p-4 md:p-6">
-      <div className="mx-auto max-w-[1440px]">
+    <div className="h-full overflow-y-auto bg-[#FBFAFF] p-4 md:p-5 dark:bg-[#0E1020]">
+      <div className="w-full">
         <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div><h1 className="koda-admin-page-title">Curricula</h1><p className="mt-1 text-xs text-[#6D6997]">Manage learning programs across multiple grades and subjects.</p></div>
           <Button onClick={openCreate}><Plus size={14} /> New curriculum</Button>
@@ -206,7 +227,7 @@ export const CurriculumLibraryPage: React.FC<CurriculumLibraryPageProps> = ({ on
           <div className="grid gap-2 rounded-2xl border border-[#E7E3F6] bg-white p-3 shadow-[0_4px_18px_rgba(83,74,183,0.04)] sm:grid-cols-2 lg:grid-cols-[minmax(220px,1fr)_160px_180px_150px_auto]">
             <div className="relative sm:col-span-2 lg:col-span-1"><Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#8D89AE]" /><Input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search curricula…" className="h-10 pl-9" /></div>
             <Select value={grade} onChange={event => setGrade(event.target.value)} className="h-10 text-xs"><option value="">All grades</option>{activeGrades.map(item => <option key={item.key} value={item.key}>{item.name}</option>)}</Select>
-            <Select value={subject} onChange={event => setSubject(event.target.value)} className="h-10 text-xs"><option value="">All subjects</option>{activeSubjects.map(item => <option key={item.key} value={item.key}>{item.name}</option>)}</Select>
+            <Select value={subject} onChange={event => setSubject(event.target.value)} className="h-10 text-xs"><option value="">All subjects</option>{uniqueSubjectOptions.map(item => <option key={item.key} value={item.key}>{item.name}</option>)}</Select>
             <Select value={status} onChange={event => setStatus(event.target.value as "" | CurriculumStatus)} className="h-10 text-xs"><option value="">All statuses</option><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></Select>
             <Button variant="ghost" size="sm" onClick={clearFilters} disabled={!query && !grade && !subject && !status}>Clear</Button>
           </div>

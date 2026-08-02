@@ -1,5 +1,5 @@
 import React from "react";
-import { LearnerPortrait } from "./LearnerPortrait";
+import { LearnerPortrait } from "../../components/LearnerPortrait";
 import { OnboardingStep } from "./OnboardingStep";
 import type { LearnerGender } from "./types";
 

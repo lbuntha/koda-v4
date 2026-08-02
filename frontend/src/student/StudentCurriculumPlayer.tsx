@@ -18,6 +18,7 @@ import {
   TodayCourse,
 } from "../api/course";
 import { PlacementWarmup } from "./PlacementWarmup";
+import { SaveIssueDialog } from "./home/SaveIssueDialog";
 import { StudentTodayHome } from "./StudentTodayHome";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { useThemeMode } from "../theme/appTheme";
@@ -48,6 +49,11 @@ export const StudentCurriculumPlayer: React.FC = () => {
   const [loadingMode, setLoadingMode] = useState<CourseMode | null>("scheduled");
   const [skippingSkillId, setSkippingSkillId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // A finished activity that did not register as complete, plus the skill the learner has
+  // already replayed once. A second failure for the same skill means retrying cannot fix
+  // it, so the dialog stops offering a retry that will not work.
+  const [saveIssue, setSaveIssue] = useState<CourseQueueItem | null>(null);
+  const [retriedSkillId, setRetriedSkillId] = useState<string | null>(null);
 
   const loadCourse = async (mode: CourseMode, subjectId: string | null = activeSubjectId) => {
     setLoadingMode(mode);
@@ -210,7 +216,9 @@ export const StudentCurriculumPlayer: React.FC = () => {
         && item.skillId === completed.skillId
       )
     ) {
-      setError("This activity is not completed yet because the server could not verify every answer.");
+      // The learner solved it; the save is what failed. A red banner reads as "you got it
+      // wrong", so this goes to a dialog that credits the work and offers one clear action.
+      setSaveIssue(completed);
     }
   };
 
@@ -351,6 +359,20 @@ export const StudentCurriculumPlayer: React.FC = () => {
           onExit={() => void exit()}
         />
       </LearnerSubjectProvider>
+      <div className={dark}>
+        <SaveIssueDialog
+          skillLabel={saveIssue?.skillLabel ?? null}
+          retried={saveIssue !== null && retriedSkillId === saveIssue.skillId}
+          onRetry={() => {
+            if (!saveIssue) return;
+            setRetriedSkillId(saveIssue.skillId);
+            setSaveIssue(null);
+            startItem(saveIssue);
+          }}
+          onDismiss={() => setSaveIssue(null)}
+        />
+      </div>
+
       {error && (
         <div className={dark}>
           <div className="fixed bottom-5 left-1/2 z-50 -translate-x-1/2 rounded-xl border border-rose-200 bg-white px-4 py-2 text-xs font-semibold text-rose-700 shadow-lg dark:border-rose-400/25 dark:bg-[#2A1620] dark:text-rose-300">

@@ -1,7 +1,7 @@
 import React from "react";
 import { Check } from "lucide-react";
 import { cn } from "../lib/utils";
-import { KODA_KID_AVATARS, type KodaKidAvatarId } from "../parent/onboarding/LearnerPortrait";
+import { KODA_KID_AVATARS, type KodaKidAvatarId } from "./LearnerPortrait";
 import { KidAvatar } from "./KidAvatar";
 
 interface Props {

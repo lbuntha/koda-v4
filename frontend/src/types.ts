@@ -27,9 +27,11 @@ export enum CountingTechnique {
   MULTIPLICATION_COLUMN = "MULTIPLICATION_COLUMN",
   LIQUID_SORT = "LIQUID_SORT",
   GOODS_SORT = "GOODS_SORT",
+  HARVEST_SORT = "HARVEST_SORT",
   NUMBER_PATH = "NUMBER_PATH",
   STORY_PROBLEM_MAT = "STORY_PROBLEM_MAT",
-  PLACE_VALUE_LAB = "PLACE_VALUE_LAB"
+  PLACE_VALUE_LAB = "PLACE_VALUE_LAB",
+  COUNT_CRATES = "COUNT_CRATES"
 }
 
 export interface CountableObject {
@@ -106,6 +108,9 @@ export interface CountingQuestion {
   config: {
     /** Authored curriculum level used by multi-level game canvases such as Liquid Sort. */
     levelId?: string;
+    weather?: string;
+    showItemCardBox?: boolean;
+    allowDrag?: boolean;
     assetType?: string;
     customSvgMarkup?: string;
     customSvgAssetId?: string;

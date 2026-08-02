@@ -1,4 +1,7 @@
-export type LearnerGender = "boy" | "girl" | null;
+// Defined alongside the portrait art it selects; re-exported here so onboarding
+// code keeps importing its types from one place.
+import type { LearnerGender } from "../../components/LearnerPortrait";
+export type { LearnerGender };
 export type PlacementChoice = "beginning" | "check";
 export type LevelChoice = "age" | "grade";
 

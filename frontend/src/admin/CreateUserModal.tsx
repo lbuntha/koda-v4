@@ -9,9 +9,9 @@ import React, { useEffect, useState } from "react";
 import { Input, Select, FormModal, FormField } from "../components/ui";
 import { adminApi } from "../api/admin";
 import { menusApi, RoleDef } from "../api/menus";
-import { AvatarPicker } from "../parent/AvatarPicker";
+import { AvatarPicker } from "../components/AvatarPicker";
 import { KidAvatar } from "../components/KidAvatar";
-import { KODA_KID_AVATARS } from "../parent/onboarding/LearnerPortrait";
+import { KODA_KID_AVATARS } from "../components/LearnerPortrait";
 import { inlineRemoteAvatar } from "../lib/avatar";
 
 export const CreateUserModal: React.FC<{ isOpen: boolean; onClose: () => void; onCreated: () => void }> = ({

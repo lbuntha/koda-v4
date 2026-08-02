@@ -29,8 +29,8 @@ import { adminApi, AdminStudent, AdminUser } from "../api/admin";
 import { analyticsApi } from "../api/analytics";
 import { ChildAnalyticsDrawer } from "../analytics/ChildAnalyticsDrawer";
 import { KidAvatar } from "../components/KidAvatar";
-import { AvatarPicker } from "../parent/AvatarPicker";
-import { KODA_KID_AVATARS } from "../parent/onboarding/LearnerPortrait";
+import { AvatarPicker } from "../components/AvatarPicker";
+import { KODA_KID_AVATARS } from "../components/LearnerPortrait";
 import { inlineRemoteAvatar } from "../lib/avatar";
 
 const roleBadge: Record<string, "default" | "secondary" | "success" | "warning"> = {

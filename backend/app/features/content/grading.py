@@ -227,6 +227,181 @@ def grade_sudoku(entry: dict, selection: Any) -> GradeOutcome:
     return "partial"
 
 
+# ── Liquid sort (solved-state check) ─────────────────────────────────────────────
+
+@register("LIQUID_SORT")
+def grade_liquid_sort(entry: dict, selection: Any) -> GradeOutcome:
+    """Grade the bottles the learner ended with, not their claim to have solved it.
+
+    The puzzle is solved when every bottle holds a single colour. That is checkable
+    from the submitted state alone, but only against the colours the level actually
+    started with — otherwise an empty board would grade as a perfect sort. So the
+    authored layer counts travel with the release as the private `liquidSortLayers`
+    key, and a submission has to account for every unit of every colour.
+
+    `selection` is one list per bottle, each a list of colour keys bottom-to-top.
+    """
+    expected = _keys(entry).get("liquidSortLayers")
+    if not isinstance(expected, dict) or not expected:
+        raise GradingError("liquid sort question has no layer key")
+    if not isinstance(selection, list) or not all(isinstance(bottle, list) for bottle in selection):
+        raise GradingError("liquid sort selection must be a list of bottles")
+
+    counts: dict[str, int] = {}
+    for bottle in selection:
+        for layer in bottle:
+            key = _norm(layer)
+            counts[key] = counts.get(key, 0) + 1
+
+    # A board that no longer holds the level's liquid was not sorted — it was replaced.
+    if counts != {_norm(colour): int(total) for colour, total in expected.items()}:
+        return "incorrect"
+
+    # A colour is done when it sits alone in one bottle. Checking "every bottle holds one
+    # colour" is not enough: magenta split across two single-colour bottles passes that
+    # test while the puzzle is plainly unsolved.
+    done = 0
+    for colour in counts:
+        holding = [bottle for bottle in selection if any(_norm(layer) == colour for layer in bottle)]
+        if len(holding) == 1 and len({_norm(layer) for layer in holding[0]}) == 1:
+            done += 1
+    if done == len(counts):
+        return "correct"
+    if done == 0:
+        return "incorrect"
+    return "partial"
+
+
+# ── Goods sort (solved-state check) ──────────────────────────────────────────────
+
+@register("GOODS_SORT")
+def grade_goods_sort(entry: dict, selection: Any) -> GradeOutcome:
+    """Grade the shelf the learner ended with, not their claim to have tidied it.
+
+    The board is sorted when every compartment that holds anything is full and holds a
+    single kind of goods. That is checkable from the submitted state alone, but only
+    against the goods the level actually started with — otherwise an empty shelf would
+    grade as a perfect sort. So the authored counts travel with the release as the
+    private `goodsSortCounts` key, and a submission has to account for every item.
+
+    `selection` is one list per compartment, each a list of goods type keys front to back.
+
+    Same shape as `grade_liquid_sort`, deliberately: both games end in "every container
+    holds one kind", and a child who half-sorts should read as `partial` in both.
+    """
+    expected = _keys(entry).get("goodsSortCounts")
+    if not isinstance(expected, dict) or not expected:
+        raise GradingError("goods sort question has no goods key")
+    if not isinstance(selection, list) or not all(isinstance(shelf, list) for shelf in selection):
+        raise GradingError("goods sort selection must be a list of compartments")
+
+    counts: dict[str, int] = {}
+    for shelf in selection:
+        for item in shelf:
+            key = _norm(item)
+            counts[key] = counts.get(key, 0) + 1
+
+    # A shelf that no longer holds the level's goods was not sorted — it was restocked.
+    if counts != {_norm(typeKey): int(total) for typeKey, total in expected.items()}:
+        return "incorrect"
+
+    # A kind is done when it sits alone in one compartment. "Every compartment holds one
+    # kind" is not enough: three donuts split across two compartments passes that test
+    # while the board is plainly unsorted.
+    done = 0
+    for typeKey in counts:
+        holding = [shelf for shelf in selection if any(_norm(item) == typeKey for item in shelf)]
+        if len(holding) == 1 and len({_norm(item) for item in holding[0]}) == 1:
+            done += 1
+    if done == len(counts):
+        return "correct"
+    if done == 0:
+        return "incorrect"
+    return "partial"
+
+
+# ── Counting crates (derived answer) ─────────────────────────────────────────────
+
+CRATE_UNITS = (100, 10, 5, 1)
+
+
+@register("COUNT_CRATES")
+def grade_count_crates(entry: dict, selection: Any) -> GradeOutcome:
+    """Re-add the tray the learner packed, and re-check the level's constraint.
+
+    A *derived-answer* technique, in this module's own terms: everything needed to grade is
+    already in the playable config, so nothing secret travels with the release and
+    GRADING_KEY_FIELDS is untouched. The client having the same numbers does not matter —
+    it does not have the authority, and a tray that does not add up cannot be talked into
+    adding up.
+
+    `selection` is the crate sizes in the tray, e.g. [10, 10, 1, 1, 1].
+    """
+    cfg = _config(entry)
+    order = cfg.get("orderTotal")
+    if order is None:
+        order = _playable(entry).get("targetCount")
+    if order is None:
+        raise GradingError("counting crates question has no order total")
+    order = _to_int(order)
+
+    if not isinstance(selection, list):
+        raise GradingError("counting crates selection must be a list of crate sizes")
+    crates = [_to_int(item) for item in selection]
+    if any(crate not in CRATE_UNITS for crate in crates):
+        raise GradingError(f"counting crates selection has a crate size that does not exist: {crates}")
+
+    total = sum(crates)
+    if total != order:
+        # Nothing partial about it: a tray is either the order or it is not.
+        return "incorrect"
+
+    # The crate count is a goal, not a gate — deliberately, and it was the other way round
+    # first. Requiring an exact count meant a child who had counted correctly was marked
+    # wrong for packing it differently, and an audit of the ladder found the taught
+    # strategy failing two levels outright and a single first crate stranding three more.
+    # Packing tightly earns a star in the client; it does not decide correctness here.
+    return "correct"
+
+
+def _fewest_crates(order: int, stock: dict, opens_allowed: int) -> int | None:
+    """The fewest crates that can fill this order, given the shelf and the opening budget.
+
+    Mirrors `fewestCrates` in countCratesModel.ts. Opening only ever turns one crate into
+    several smaller ones, so it can never reduce the count — but it can be the only way to
+    reach the total at all, which is why the budget is searched rather than ignored.
+    """
+    shelf = {int(unit): _to_int(count) for unit, count in stock.items()}
+    opens_into = {100: (10, 10), 10: (1, 10), 5: (1, 5)}
+
+    def openings(index: int, used: int, current: dict):
+        units = list(opens_into)
+        if index == len(units):
+            yield current
+            return
+        unit = units[index]
+        most = min(current.get(unit, 0), opens_allowed - used)
+        for count in range(most + 1):
+            nxt = dict(current)
+            if count:
+                into, per = opens_into[unit]
+                nxt[unit] = nxt.get(unit, 0) - count
+                nxt[into] = nxt.get(into, 0) + per * count
+            yield from openings(index + 1, used + count, nxt)
+
+    best: int | None = None
+    for shelf_after in openings(0, 0, shelf):
+        for a in range(min(shelf_after.get(100, 0), order // 100) + 1):
+            for b in range(min(shelf_after.get(10, 0), (order - 100 * a) // 10) + 1):
+                for c in range(min(shelf_after.get(5, 0), (order - 100 * a - 10 * b) // 5) + 1):
+                    ones = order - 100 * a - 10 * b - 5 * c
+                    if 0 <= ones <= shelf_after.get(1, 0):
+                        count = a + b + c + ones
+                        if best is None or count < best:
+                            best = count
+    return best
+
+
 # ── Flexible canvas (answer key) ─────────────────────────────────────────────────
 
 @register("FLEXIBLE_CANVAS")

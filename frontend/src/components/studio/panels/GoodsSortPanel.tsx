@@ -5,8 +5,24 @@
 
 import React, { useState } from "react";
 import { PanelProps } from "../panelKit";
-import { GOODS_SORT_LEVELS, GOODS_CATALOG, PRESET_THEMES, getGoodsLevel } from "../../canvases/goodsSortLevels";
+import {
+  GOODS_SORT_LEVELS,
+  GOODS_CATALOG,
+  PRESET_THEMES,
+  getGoodsLevel,
+  spareShelves,
+  type GoodsDifficultyTier,
+} from "../../canvases/goodsSortLevels";
 import { Sparkles, RefreshCw, Plus, Check } from "lucide-react";
+
+/** The curated ladder, in the order it is meant to be climbed. */
+const TIER_GROUPS: Array<{ tier: GoodsDifficultyTier; label: string }> = [
+  { tier: "beginner", label: "🟢 Beginner — learn the move" },
+  { tier: "apprentice", label: "🔵 Apprentice — keep a compartment clear" },
+  { tier: "advanced", label: "🟣 Advanced — plan ahead" },
+  { tier: "master", label: "🟠 Master — four to a compartment" },
+  { tier: "grandmaster", label: "🔴 Grandmaster — the whole store" },
+];
 
 export const GoodsSortPanel: React.FC<PanelProps> = ({ question, update }) => {
   const config = (question.config as any) || {};
@@ -175,13 +191,21 @@ export const GoodsSortPanel: React.FC<PanelProps> = ({ question, update }) => {
               </option>
             ))}
           </optgroup>
-          <optgroup label="📚 Standard Curriculum Levels">
-            {GOODS_SORT_LEVELS.map((lvl) => (
-              <option key={lvl.id} value={lvl.id}>
-                {lvl.name} ({lvl.rows}x{lvl.cols})
-              </option>
-            ))}
-          </optgroup>
+          {/* Grouped by tier rather than listed flat: thirty levels in one list is a
+              wall, and the tier is the thing an author is actually choosing between. */}
+          {TIER_GROUPS.map(({ tier, label }) => {
+            const levels = GOODS_SORT_LEVELS.filter((lvl) => lvl.difficultyTier === tier);
+            if (!levels.length) return null;
+            return (
+              <optgroup key={tier} label={label}>
+                {levels.map((lvl) => (
+                  <option key={lvl.id} value={lvl.id}>
+                    {lvl.name} — {lvl.targetCount} kinds, {lvl.rows}x{lvl.cols}
+                  </option>
+                ))}
+              </optgroup>
+            );
+          })}
           <optgroup label="⚙️ Custom Studio Builder">
             <option value="custom">🛠️ Fully Blank Custom Puzzle</option>
           </optgroup>
@@ -326,14 +350,23 @@ export const GoodsSortPanel: React.FC<PanelProps> = ({ question, update }) => {
         </div>
       </div>
 
-      {/* Target Summary */}
-      <div className="p-3 bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-between gap-2">
-        <span className="text-xs font-extrabold text-slate-700 dark:text-slate-300 truncate">
-          Target Sets to Match:
-        </span>
-        <span className="text-xs font-extrabold uppercase px-2.5 py-1 bg-indigo-600 text-white rounded-md shadow-sm shrink-0">
-          {selectedLevel.targetCount} MATCHING SETS
-        </span>
+      {/* Target Summary — what this board asks of a learner, in the ladder's own terms. */}
+      <div className="p-3 bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-xs font-extrabold text-slate-700 dark:text-slate-300 truncate">
+            Target Sets to Match:
+          </span>
+          <span className="text-xs font-extrabold uppercase px-2.5 py-1 bg-indigo-600 text-white rounded-md shadow-sm shrink-0">
+            {selectedLevel.targetCount} MATCHING SETS
+          </span>
+        </div>
+        <p className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 leading-snug">
+          {selectedLevel.teaches}
+        </p>
+        <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          {selectedLevel.difficultyTier} · {selectedLevel.compartmentCapacity} per compartment ·{" "}
+          {spareShelves(selectedLevel)} spare
+        </p>
       </div>
     </div>
   );

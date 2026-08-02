@@ -21,23 +21,27 @@ import { FamilyCodeCard } from "./FamilyCodeCard";
 import { ParentChildrenGrid } from "./ParentChildrenGrid";
 import { ParentChildrenPage, ParentOverview } from "./ParentDashboardSections";
 import { ParentSettingsPage } from "./ParentSettingsPage";
-import { ParentProfilePage } from "./ParentProfilePage";
+import { ProfilePage } from "../account/ProfilePage";
 import { useFamily } from "./useFamily";
 import { CurriculumPromotion, promotionsApi } from "../api/promotions";
 
-type ParentView = "dashboard" | "children" | "settings" | "profile";
+import { useMenus } from "../nav/useMenus";
+
+type ParentView = "dashboard" | "children" | "parent_settings" | "settings" | "profile";
 
 const PARENT_NAV: NavSection[] = [{
   id: "parent",
-  label: "Parent space",
+  label: "",
   items: [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "children", label: "Children", icon: Users },
-    { id: "settings", label: "Settings", icon: Settings },
+    { id: "parent_settings", label: "Settings", icon: Settings },
   ],
 }];
 
 export const ParentDashboard: React.FC = () => {
+  const { sections: dynamicSections } = useMenus();
+  const navSections = dynamicSections.length > 0 ? dynamicSections : PARENT_NAV;
   const [theme, toggleTheme] = useThemeMode();
   const { account, logout, startChildPlay } = useAuth();
   const { children, loading, error, addChild, updateChild, removeChild, unlockPin } = useFamily();
@@ -149,12 +153,12 @@ export const ParentDashboard: React.FC = () => {
     <div className={theme === "dark" ? "dark" : ""}>
       <DashboardLayout
         brand={{ name: "Koda Parent", logoSrc: "/favicon.svg", logoAlt: "Koda" }}
-        sections={PARENT_NAV}
+        sections={navSections}
         active={activeView}
         onNavigate={view => setActiveView(view as ParentView)}
         user={{ name: account?.name, email: account?.email, avatar: account?.avatar }}
         title=""
-        contentClassName="flex-1 overflow-auto bg-[#F6F8FC] px-5 py-5 sm:px-7 sm:py-6 lg:px-8 dark:bg-[#0E1020]"
+        contentClassName="flex-1 overflow-auto bg-[#F6F8FC] p-5 dark:bg-[#0E1020]"
         actions={
           <div className="flex items-center gap-1">
             <NotificationBell recipientType="user" />
@@ -165,7 +169,7 @@ export const ParentDashboard: React.FC = () => {
           </div>
         }
       >
-        <div className="mx-auto w-full max-w-7xl">
+        <div className="w-full">
           {activeView === "dashboard" ? (
             <ParentOverview
               childCount={children.length}
@@ -180,12 +184,12 @@ export const ParentDashboard: React.FC = () => {
             />
           ) : activeView === "children" ? (
             <ParentChildrenPage onAdd={openAdd} childrenGrid={childrenGrid} />
-          ) : activeView === "settings" ? (
+          ) : activeView === "settings" || activeView === "parent_settings" ? (
             <ParentSettingsPage />
           ) : (
-            <ParentProfilePage />
+            <ProfilePage />
           )}
-          {activeView !== "settings" && activeView !== "profile" && account?.family_code && (
+          {activeView !== "settings" && activeView !== "parent_settings" && activeView !== "profile" && account?.family_code && (
             <div className="mt-6"><FamilyCodeCard code={account.family_code} /></div>
           )}
         </div>

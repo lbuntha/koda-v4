@@ -1,0 +1,427 @@
+[
+  {
+    "id": "level_1",
+    "name": "Level 1: First Pour",
+    "description": "Gentle starter puzzle with 2 liquid colors across 3 bottles.",
+    "difficultyTier": "beginner",
+    "bottles": 3,
+    "colours": 2,
+    "hiddenLayers": 0,
+    "layers": {
+      "cyan": 3,
+      "magenta": 3
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_2",
+    "name": "Level 2: Dual Swap",
+    "description": "Beginner puzzle for learning empty-bottle double moves.",
+    "difficultyTier": "beginner",
+    "bottles": 3,
+    "colours": 2,
+    "hiddenLayers": 0,
+    "layers": {
+      "gold": 3,
+      "cyan": 3
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_21",
+    "name": "Level 3: Two Tubes",
+    "description": "Two colours and one spare bottle — the gentlest first win.",
+    "difficultyTier": "beginner",
+    "bottles": 3,
+    "colours": 2,
+    "hiddenLayers": 0,
+    "layers": {
+      "cyan": 3,
+      "gold": 3
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_22",
+    "name": "Level 4: Triple Tip",
+    "description": "Three colours in three bottles, with one spare to think in.",
+    "difficultyTier": "beginner",
+    "bottles": 4,
+    "colours": 3,
+    "hiddenLayers": 0,
+    "layers": {
+      "blue": 3,
+      "emerald": 3,
+      "magenta": 3
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_3",
+    "name": "Level 5: Color Steps",
+    "description": "A three-color warm-up puzzle with generous space.",
+    "difficultyTier": "apprentice",
+    "bottles": 4,
+    "colours": 3,
+    "hiddenLayers": 0,
+    "layers": {
+      "cyan": 4,
+      "magenta": 4,
+      "gold": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_4",
+    "name": "Level 6: Tiny Vials",
+    "description": "A compact puzzle requiring multi-step layer transfer.",
+    "difficultyTier": "apprentice",
+    "bottles": 4,
+    "colours": 3,
+    "hiddenLayers": 0,
+    "layers": {
+      "emerald": 4,
+      "violet": 4,
+      "blue": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_23",
+    "name": "Level 7: Steady Pour",
+    "description": "Three colours across four bottles — plan before you tip.",
+    "difficultyTier": "apprentice",
+    "bottles": 5,
+    "colours": 3,
+    "hiddenLayers": 0,
+    "layers": {
+      "gold": 4,
+      "violet": 4,
+      "cyan": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_24",
+    "name": "Level 8: First Fog",
+    "description": "One hidden layer to meet the mystery bottles gently.",
+    "difficultyTier": "apprentice",
+    "bottles": 5,
+    "colours": 3,
+    "hiddenLayers": 1,
+    "layers": {
+      "emerald": 4,
+      "blue": 4,
+      "orange": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_5",
+    "name": "Level 9: Potion Practice",
+    "description": "Four colors across five bottles requiring strategic empty space.",
+    "difficultyTier": "apprentice",
+    "bottles": 5,
+    "colours": 4,
+    "hiddenLayers": 0,
+    "layers": {
+      "cyan": 4,
+      "magenta": 4,
+      "gold": 4,
+      "emerald": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_11",
+    "name": "Level 10: Rainbow Cascade",
+    "description": "Vibrant four-color cascade across 6 tubes for mid-tier warm-up.",
+    "difficultyTier": "apprentice",
+    "bottles": 6,
+    "colours": 4,
+    "hiddenLayers": 0,
+    "layers": {
+      "cyan": 4,
+      "gold": 4,
+      "magenta": 4,
+      "emerald": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_7",
+    "name": "Level 11: Starter Shelf",
+    "description": "Five colors with two spare empty bottles.",
+    "difficultyTier": "advanced",
+    "bottles": 6,
+    "colours": 4,
+    "hiddenLayers": 0,
+    "layers": {
+      "violet": 4,
+      "tan": 4,
+      "orange": 4,
+      "blue": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_6",
+    "name": "Level 12: Foggy Forest (Mystery)",
+    "description": "Introduces Mystery Fog Layers (❓) hidden under top liquid.",
+    "difficultyTier": "advanced",
+    "bottles": 6,
+    "colours": 4,
+    "hiddenLayers": 2,
+    "layers": {
+      "emerald": 4,
+      "cyan": 4,
+      "magenta": 4,
+      "gold": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_12",
+    "name": "Level 13: Dual Mystery Chamber",
+    "description": "Four colors with hidden mystery bottom layers across 6 tubes.",
+    "difficultyTier": "advanced",
+    "bottles": 6,
+    "colours": 4,
+    "hiddenLayers": 4,
+    "layers": {
+      "cyan": 4,
+      "magenta": 4,
+      "gold": 4,
+      "emerald": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_13",
+    "name": "Level 14: Neon Prism",
+    "description": "Five neon colors across 7 tubes requiring tactical layer buffering.",
+    "difficultyTier": "advanced",
+    "bottles": 7,
+    "colours": 5,
+    "hiddenLayers": 0,
+    "layers": {
+      "cyan": 4,
+      "violet": 4,
+      "magenta": 4,
+      "gold": 4,
+      "emerald": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_14",
+    "name": "Level 15: Deep Sea Mystery",
+    "description": "Five ocean colors with hidden mystery layers across 7 tubes.",
+    "difficultyTier": "advanced",
+    "bottles": 7,
+    "colours": 5,
+    "hiddenLayers": 5,
+    "layers": {
+      "blue": 4,
+      "cyan": 4,
+      "emerald": 4,
+      "tan": 4,
+      "violet": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_8",
+    "name": "Level 16: Bright Batch",
+    "description": "Six colours across six bottles, with two spares to work in.",
+    "difficultyTier": "master",
+    "bottles": 8,
+    "colours": 6,
+    "hiddenLayers": 0,
+    "layers": {
+      "emerald": 4,
+      "violet": 4,
+      "magenta": 4,
+      "blue": 4,
+      "gold": 4,
+      "tan": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_15",
+    "name": "Level 17: Alchemy Lab",
+    "description": "Six alchemy colors across 8 tubes testing multi-layer sorting skill.",
+    "difficultyTier": "master",
+    "bottles": 8,
+    "colours": 6,
+    "hiddenLayers": 0,
+    "layers": {
+      "cyan": 4,
+      "magenta": 4,
+      "gold": 4,
+      "emerald": 4,
+      "violet": 4,
+      "orange": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_9",
+    "name": "Level 18: Mystery Cavern",
+    "description": "6 colors with 4 hidden Mystery Fog layers.",
+    "difficultyTier": "master",
+    "bottles": 8,
+    "colours": 6,
+    "hiddenLayers": 4,
+    "layers": {
+      "tan": 4,
+      "violet": 4,
+      "magenta": 4,
+      "blue": 4,
+      "emerald": 4,
+      "gold": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_16",
+    "name": "Level 19: Shadow Vault",
+    "description": "Six colors with 6 hidden mystery layers across 8 tubes.",
+    "difficultyTier": "master",
+    "bottles": 8,
+    "colours": 6,
+    "hiddenLayers": 6,
+    "layers": {
+      "cyan": 4,
+      "magenta": 4,
+      "gold": 4,
+      "emerald": 4,
+      "violet": 4,
+      "orange": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_17",
+    "name": "Level 20: Crystal Palace",
+    "description": "Seven sparkling gemstone colors across 9 tubes.",
+    "difficultyTier": "master",
+    "bottles": 9,
+    "colours": 7,
+    "hiddenLayers": 0,
+    "layers": {
+      "cyan": 4,
+      "tan": 4,
+      "orange": 4,
+      "violet": 4,
+      "magenta": 4,
+      "gold": 4,
+      "emerald": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_18",
+    "name": "Level 21: Phantom Labyrinth",
+    "description": "Seven colors with mystery fog layers across 9 tubes.",
+    "difficultyTier": "grandmaster",
+    "bottles": 9,
+    "colours": 7,
+    "hiddenLayers": 7,
+    "layers": {
+      "cyan": 4,
+      "tan": 4,
+      "orange": 4,
+      "violet": 4,
+      "magenta": 4,
+      "gold": 4,
+      "emerald": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_10",
+    "name": "Level 22: Grandmaster Vault",
+    "description": "Full spectrum 8 colors across 10 bottles.",
+    "difficultyTier": "grandmaster",
+    "bottles": 10,
+    "colours": 8,
+    "hiddenLayers": 0,
+    "layers": {
+      "cyan": 4,
+      "magenta": 4,
+      "gold": 4,
+      "emerald": 4,
+      "violet": 4,
+      "orange": 4,
+      "tan": 4,
+      "blue": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_19",
+    "name": "Level 23: Spectrum Challenge",
+    "description": "Eight full spectrum colors across 10 tubes for true grandmasters.",
+    "difficultyTier": "grandmaster",
+    "bottles": 10,
+    "colours": 8,
+    "hiddenLayers": 0,
+    "layers": {
+      "cyan": 4,
+      "blue": 4,
+      "tan": 4,
+      "orange": 4,
+      "magenta": 4,
+      "gold": 4,
+      "emerald": 4,
+      "violet": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_20",
+    "name": "Level 24: Ultimate Master Apex",
+    "description": "The ultimate 8-color master puzzle with deep mystery fog layers.",
+    "difficultyTier": "grandmaster",
+    "bottles": 10,
+    "colours": 8,
+    "hiddenLayers": 16,
+    "layers": {
+      "cyan": 4,
+      "blue": 4,
+      "tan": 4,
+      "orange": 4,
+      "magenta": 4,
+      "gold": 4,
+      "emerald": 4,
+      "violet": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  }
+]

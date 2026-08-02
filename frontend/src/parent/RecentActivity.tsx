@@ -3,7 +3,7 @@ import { BookOpenCheck, CheckCircle2 } from "lucide-react";
 import type { ActivityEvent, AnalyticsSummary } from "../api/analytics";
 import type { Child } from "../api/family";
 import { KidAvatar } from "../components/KidAvatar";
-import { Button, Skeleton } from "../components/ui";
+import { Button, Card, Skeleton } from "../components/ui";
 import { PROFILE_TONE_CLASS, profileToneFor } from "./profileTone";
 
 interface Props {
@@ -58,6 +58,7 @@ const activityCopy = (event: ActivityEvent) => {
       detail: `${result}${event.hintUsed ? " · Used a hint" : ""} · ${position}`,
     };
   }
+
   return {
     title: `worked on ${skill}`,
     detail: `Ready for another try · ${position}`,
@@ -73,17 +74,17 @@ export const RecentActivity: React.FC<Props> = ({ profiles, summaries, loading, 
   return (
     <section>
       <div>
-        <h2 className="text-lg font-black text-[#27334A] dark:text-white">Recent activity</h2>
-        <p className="mt-1 text-xs font-bold text-[#8792A5] dark:text-[#8F99AD]">Latest verified learning across your family.</p>
+        <h2 className="text-lg font-black text-[#0E0B55] dark:text-white">Recent activity</h2>
+        <p className="mt-1 text-xs font-bold text-[#6D6997] dark:text-[#8F99AD]">Latest verified learning across your family.</p>
       </div>
 
-      <div className="mt-4 min-h-28 rounded-3xl bg-white p-2.5 dark:bg-white/[0.045]">
+      <Card className="mt-4 min-h-28 overflow-hidden border-[#E7E3F6] bg-white p-2.5 shadow-[0_6px_24px_rgba(83,74,183,0.06)] dark:border-white/10 dark:bg-[#161B2E]">
         {loading ? (
           <div className="space-y-3 p-2">
             {Array.from({ length: 3 }, (_, index) => <Skeleton key={index} className="h-12 w-full rounded-xl" />)}
           </div>
         ) : items.length > 0 ? (
-          <div className="divide-y divide-[#EEF0F5] dark:divide-white/10">
+          <div className="divide-y divide-[#EEEAF8] dark:divide-white/10">
             {items.map(({ child, event }) => {
               const tone = PROFILE_TONE_CLASS[profileToneFor(child.id)];
               const copy = activityCopy(event);
@@ -93,33 +94,33 @@ export const RecentActivity: React.FC<Props> = ({ profiles, summaries, loading, 
                   type="button"
                   variant="ghost"
                   onClick={() => onOpenProgress(child)}
-                  className="h-auto w-full justify-start gap-3 rounded-xl px-2 py-2.5 text-left hover:bg-[#F8F7FF] dark:hover:bg-white/5"
+                  className="h-auto w-full justify-start gap-3 rounded-xl px-2 py-2.5 text-left hover:bg-[#F3F0FF] dark:hover:bg-white/5"
                 >
                   <span className={`flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br ${tone}`}>
                     <KidAvatar avatar={child.avatar ?? undefined} className="h-9 w-9 text-2xl" />
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="flex items-center gap-1.5 text-xs font-black text-[#334057] dark:text-white">
+                    <span className="flex items-center gap-1.5 text-xs font-black text-[#0E0B55] dark:text-white">
                       {event.eventType === "lesson_complete" ? <BookOpenCheck size={14} className="text-emerald-500" /> : <CheckCircle2 size={14} className="text-blue-500" />}
                       <span className="truncate">{child.name} {copy.title}</span>
                     </span>
-                    <span className="mt-1 block truncate text-[11px] font-bold text-[#8A95A8] dark:text-[#8F99AD]">
+                    <span className="mt-1 block truncate text-[11px] font-bold text-[#6D6997] dark:text-[#8F99AD]">
                       {copy.detail}
                     </span>
                   </span>
-                  <span className="shrink-0 text-[10px] font-bold text-[#A0A8B6] dark:text-[#778196]">{relativeTime(event.occurredAt)}</span>
+                  <span className="shrink-0 text-[10px] font-bold text-[#8D89AE] dark:text-[#778196]">{relativeTime(event.occurredAt)}</span>
                 </Button>
               );
             })}
           </div>
         ) : (
           <div className="flex min-h-36 flex-col items-center justify-center px-5 text-center">
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F0EBFF] text-[#7252D8] dark:bg-violet-400/15 dark:text-[#CDBEFF]"><BookOpenCheck size={20} /></span>
-            <p className="mt-3 text-sm font-black text-[#344057] dark:text-white">No activity yet</p>
-            <p className="mt-1 text-xs font-bold text-[#8A95A8] dark:text-[#8F99AD]">Completed lessons and verified practice will appear here.</p>
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F3F0FF] text-[#534AB7] dark:bg-violet-400/15 dark:text-[#CDBEFF]"><BookOpenCheck size={20} /></span>
+            <p className="mt-3 text-sm font-black text-[#0E0B55] dark:text-white">No activity yet</p>
+            <p className="mt-1 text-xs font-bold text-[#6D6997] dark:text-[#8F99AD]">Completed lessons and verified practice will appear here.</p>
           </div>
         )}
-      </div>
+      </Card>
     </section>
   );
 };

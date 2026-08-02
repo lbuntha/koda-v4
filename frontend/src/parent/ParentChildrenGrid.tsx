@@ -25,10 +25,10 @@ interface Props {
 }
 
 const AddChildCard: React.FC<{ onAdd: () => void }> = ({ onAdd }) => (
-  <button type="button" onClick={onAdd} className="group flex min-h-48 w-full flex-col items-center justify-center rounded-3xl border border-dashed border-[#D9DDEA] bg-white/45 p-4 text-center transition-all hover:border-[#A997F3] hover:bg-white/75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7252D8]/30 dark:border-white/10 dark:bg-white/[0.02] dark:hover:border-violet-300/35 dark:hover:bg-white/[0.045]">
-    <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F0EBFF] text-[#7252D8] transition-transform group-hover:scale-105 dark:bg-violet-400/15 dark:text-[#CDBEFF]"><Plus size={22} /></span>
-    <p className="mt-3 text-sm font-black text-[#344057] dark:text-white">New learner profile</p>
-    <p className="mt-1 text-xs font-bold text-[#8A95A8] dark:text-[#8F99AD]">Set up another child.</p>
+  <button type="button" onClick={onAdd} className="group flex min-h-48 w-full flex-col items-center justify-center rounded-2xl border border-dashed border-[#DCD5FA] bg-white/60 p-4 text-center transition-all hover:border-[#7C6DD8] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7252D8]/30 dark:border-white/10 dark:bg-white/[0.02] dark:hover:border-violet-300/35 dark:hover:bg-white/[0.045]">
+    <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F3F0FF] text-[#534AB7] transition-transform group-hover:scale-105 dark:bg-violet-400/15 dark:text-[#CDBEFF]"><Plus size={22} /></span>
+    <p className="mt-3 text-sm font-black text-[#0E0B55] dark:text-white">New learner profile</p>
+    <p className="mt-1 text-xs font-bold text-[#6D6997] dark:text-[#8F99AD]">Set up another child.</p>
   </button>
 );
 

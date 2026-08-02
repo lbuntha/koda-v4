@@ -1,6 +1,7 @@
 import React from "react";
 import { BookOpen, Clock3, Flame, Trophy, Zap } from "lucide-react";
 import type { AnalyticsSummary } from "../api/analytics";
+import { Card } from "../components/ui";
 
 interface Props {
   summaries: AnalyticsSummary[];
@@ -25,7 +26,7 @@ export const FamilySummary: React.FC<Props> = ({ summaries, loading, className =
   }), { lessons: 0, xp: 0, time: 0, mastered: 0, streak: 0 });
 
   const items = [
-    { label: "Lessons", value: totals.lessons, detail: "completed", icon: BookOpen, tone: "bg-emerald-50 text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-300" },
+    { label: "Lessons", value: totals.lessons, detail: "completed", icon: BookOpen, tone: "bg-[#F3F0FF] text-[#534AB7] dark:bg-emerald-400/10 dark:text-emerald-300" },
     { label: "XP earned", value: totals.xp, detail: "across the family", icon: Zap, tone: "bg-amber-50 text-amber-600 dark:bg-amber-400/10 dark:text-amber-300" },
     { label: "Practice time", value: learningTime(totals.time), detail: "active answering", icon: Clock3, tone: "bg-blue-50 text-blue-600 dark:bg-blue-400/10 dark:text-blue-300" },
     { label: "Skills", value: totals.mastered, detail: "mastered", icon: Trophy, tone: "bg-violet-50 text-violet-600 dark:bg-violet-400/10 dark:text-violet-300" },
@@ -35,8 +36,8 @@ export const FamilySummary: React.FC<Props> = ({ summaries, loading, className =
     <section className={className}>
       <div className="flex items-end justify-between gap-3">
         <div>
-          <h2 className="text-lg font-black text-[#27334A] dark:text-white">Family summary</h2>
-          <p className="mt-1 text-xs font-bold text-[#8792A5] dark:text-[#8F99AD]">Learning progress across every child profile.</p>
+          <h2 className="text-lg font-black text-[#0E0B55] dark:text-white">Family summary</h2>
+          <p className="mt-1 text-xs font-bold text-[#6D6997] dark:text-[#8F99AD]">Learning progress across every child profile.</p>
         </div>
         {totals.streak > 0 && <span className="inline-flex items-center gap-1 text-xs font-black text-orange-600 dark:text-orange-300"><Flame size={14} className="fill-current" /> Best streak · {totals.streak} day{totals.streak === 1 ? "" : "s"}</span>}
       </div>
@@ -45,14 +46,14 @@ export const FamilySummary: React.FC<Props> = ({ summaries, loading, className =
       )}
       <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {items.map(item => (
-          <div key={item.label} className="flex min-h-24 items-center gap-3 rounded-3xl bg-white p-4 dark:bg-white/[0.045]">
+          <Card key={item.label} className="flex min-h-24 items-center gap-3 border-[#E7E3F6] bg-white p-4 shadow-[0_6px_24px_rgba(83,74,183,0.06)] dark:border-white/10 dark:bg-[#161B2E]">
             <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${item.tone}`}><item.icon size={21} /></span>
             <div className="min-w-0">
-              <p className="text-[10px] font-extrabold uppercase tracking-wide text-[#8A95A8] dark:text-[#8F99AD]">{item.label}</p>
-              <p className="mt-1 truncate text-xl font-black text-[#28334A] dark:text-white">{loading ? "—" : item.value}</p>
-              <p className="text-[10px] font-bold text-[#A0A8B6] dark:text-[#7F899D]">{item.detail}</p>
+              <p className="text-[10px] font-extrabold uppercase tracking-wide text-[#6D6997] dark:text-[#8F99AD]">{item.label}</p>
+              <p className="mt-1 truncate text-xl font-black text-[#0E0B55] dark:text-white">{loading ? "—" : item.value}</p>
+              <p className="text-[10px] font-bold text-[#8D89AE] dark:text-[#7F899D]">{item.detail}</p>
             </div>
-          </div>
+          </Card>
         ))}
       </div>
     </section>

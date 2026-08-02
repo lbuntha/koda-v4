@@ -1,6 +1,9 @@
 import React from "react";
-import { cn } from "../../lib/utils";
-import type { LearnerGender } from "./types";
+import { cn } from "../lib/utils";
+
+/** The portrait art comes in these variants, so the type lives with the art rather
+ *  than in the parent onboarding wizard that also happens to collect it. */
+export type LearnerGender = "boy" | "girl" | null;
 
 export const KODA_KID_AVATARS = [
   "koda-kid:boy-sky",

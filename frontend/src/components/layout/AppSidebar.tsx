@@ -117,7 +117,7 @@ export const AppSidebar: React.FC<Props> = ({ brand, sections, active, onNavigat
           const groupCollapsed = collapsedGroups.has(section.id);
           return (
           <div key={section.id} className="md:mb-3 last:mb-0">
-            {section.label && !collapsed && (
+            {Boolean(section.label && section.label.trim()) && !collapsed && (
               <button
                 type="button"
                 onClick={() => toggleGroup(section.id)}

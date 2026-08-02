@@ -10,7 +10,13 @@ from ...models.user import User, Role
 from ...models.student import Student
 from ...models.assignment import Assignment
 from ...models.academic import Grade, resolve_layout_band
-from ...core.deps import Principal, get_principal, get_current_parent, get_current_student
+from ...core.deps import (
+    Principal,
+    get_principal,
+    get_current_parent,
+    get_current_student,
+    get_current_user,
+)
 from ...core.codes import unique_family_code
 from ...core.security import (
     hash_secret,
@@ -152,7 +158,10 @@ async def me(principal: Principal = Depends(get_principal)):
 
 
 @router.patch("/profile")
-async def update_profile(body: ProfileUpdateIn, parent: User = Depends(get_current_parent)):
+async def update_profile(body: ProfileUpdateIn, parent: User = Depends(get_current_user)):
+    """Any signed-in adult edits their own record — admins and teachers have the same
+    name/email/avatar/password needs as parents, and the dependency scopes every write
+    to the caller, so this cannot touch another account."""
     if body.name is not None:
         parent.name = body.name.strip()
     if body.avatar is not None:

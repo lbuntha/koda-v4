@@ -5,6 +5,8 @@ import {RoleRouter} from './auth/RoleRouter';
 import {SvgLibraryProvider} from './assets/SvgLibraryContext';
 import {AppSettingsProvider} from './settings/AppSettingsContext';
 import {ComponentPreview} from './student/home/shared/ComponentPreview';
+import {GoodsSortPreview} from './components/canvases/GoodsSortPreview';
+import {CountCratesPreview} from './components/canvases/CountCratesPreview';
 import './index.css';
 
 // Unlinked design gallery: /?preview=learner-cards renders the real learner cards on their own,
@@ -13,13 +15,16 @@ import './index.css';
 // Development only. `import.meta.env.DEV` is statically false in a production build, so the
 // branch and the gallery it imports are dropped by the bundler rather than merely hidden —
 // a query string cannot reach it on a deployment.
-const previewing =
+// `?preview=goods-sort` does the same for the Goods Sort ladder: the real canvas, all
+// thirty levels, no sign-in — the only practical way to watch its motion frame by frame.
+const preview =
   Boolean((import.meta as any).env?.DEV)
-  && new URLSearchParams(window.location.search).get('preview') === 'learner-cards';
+    ? new URLSearchParams(window.location.search).get('preview')
+    : null;
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    {previewing ? <ComponentPreview /> : (
+    {preview === 'learner-cards' ? <ComponentPreview /> : preview === 'goods-sort' ? <GoodsSortPreview /> : preview === 'count-crates' ? <CountCratesPreview /> : (
     <AuthProvider>
       <AppSettingsProvider>
         <SvgLibraryProvider>

@@ -25,14 +25,25 @@ async def lifespan(app: FastAPI):
         "starting environment=%s db=%s origins=%d",
         settings.environment, settings.mongo_db, len(settings.cors_origins),
     )
-    await init_db()
-    await ensure_seed()  # idempotent: seed default menus + roles if missing
-    await ensure_academic_catalogs()  # lift legacy embedded grade/subject data into canonical catalogs
+    try:
+        await init_db()
+        await ensure_seed()  # idempotent: seed default menus + roles if missing
+        await ensure_academic_catalogs()  # lift legacy embedded grade/subject data into canonical catalogs
+    except Exception as e:
+        logger.error("DB connection deferred during container boot: %s", e)
     yield
-    await close_db()
+    try:
+        await close_db()
+    except Exception:
+        pass
 
 
 app = FastAPI(title="Koda API", version="0.1.0", lifespan=lifespan)
+
+@app.get("/")
+@app.get("/health")
+async def health_check():
+    return {"status": "ok", "service": "koda-backend"}
 
 app.add_middleware(
     CORSMiddleware,

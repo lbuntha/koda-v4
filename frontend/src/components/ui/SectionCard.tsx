@@ -20,8 +20,8 @@ interface SectionCardProps {
 export const SectionCard: React.FC<SectionCardProps> = ({ title, action, className, bodyClassName, children }) => (
   <Card className={cn("overflow-hidden", className)}>
     {(title || action) && (
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100">
-        {typeof title === "string" ? <h3 className="text-sm font-bold text-slate-800">{title}</h3> : title}
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100 dark:border-white/10">
+        {typeof title === "string" ? <h3 className="text-sm font-bold text-slate-800 dark:text-[#E2E0F2]">{title}</h3> : title}
         {action}
       </div>
     )}

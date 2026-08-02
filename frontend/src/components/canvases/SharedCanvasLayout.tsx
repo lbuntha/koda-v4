@@ -291,8 +291,16 @@ export const SharedCanvasLayout = forwardRef<HTMLDivElement, SharedCanvasLayoutP
             </div>
           </div>
 
-          <div className={`flex items-center gap-1.5 sm:gap-2 flex-shrink-0 ${
-            compact ? "w-full justify-center" : ""
+          {/*
+            `flex-shrink-0` used to be here, and it made a toolbar that cannot fit simply
+            not fit: on a narrow card the controls held this row at their full width, the
+            row held the canvas wider than its container, and `overflow-hidden` on the root
+            cut the last buttons off — Reset and Shuffle were unreachable on a phone rather
+            than merely cramped. Letting the row shrink lets its controls wrap onto a
+            second line instead, which is what `flex-wrap` was always for.
+          */}
+          <div className={`flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2 ${
+            compact ? "w-full justify-center" : "justify-end"
           }`}>
             {readAloudText && <SpeechReadAloudButton text={readAloudText} />}
             {headerActions}

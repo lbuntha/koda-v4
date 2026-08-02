@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import type { ChildInput } from "../../api/family";
 import { useAcademicCatalog } from "../../components/academic";
 import { Button, Dialog, Spinner } from "../../components/ui";
-import { AVATARS } from "../AvatarPicker";
+import { AVATARS } from "../../components/AvatarPicker";
 import { AvatarStep } from "./AvatarStep";
 import { FinishStep } from "./FinishStep";
 import { GoalsStep } from "./GoalsStep";

@@ -126,6 +126,130 @@ def test_sudoku_grid_compare():
     assert grade(e, [["2", "1"], ["1", "2"]]) == "incorrect"
 
 
+# ── Liquid sort ──────────────────────────────────────────────────────────────────
+
+def _sort_entry():
+    return _entry("LIQUID_SORT", {"liquidSortLayers": {"cyan": 3, "magenta": 3}})
+
+
+def test_liquid_sort_solved_board():
+    e = _sort_entry()
+    assert grade(e, [["cyan", "cyan", "cyan"], ["magenta", "magenta", "magenta"], []]) == "correct"
+    # Which bottle holds which colour is not part of the puzzle.
+    assert grade(e, [[], ["magenta", "magenta", "magenta"], ["cyan", "cyan", "cyan"]]) == "correct"
+
+
+def test_liquid_sort_colour_split_across_bottles_is_not_solved():
+    # Every bottle holds one colour here, yet magenta sits in two of them.
+    e = _sort_entry()
+    assert grade(e, [["cyan", "cyan", "cyan"], ["magenta", "magenta"], ["magenta"]]) == "partial"
+
+
+def test_liquid_sort_untouched_board_is_incorrect():
+    e = _sort_entry()
+    assert grade(e, [["cyan", "cyan", "magenta"], ["magenta", "magenta", "cyan"], []]) == "incorrect"
+
+
+def test_liquid_sort_rejects_a_board_that_lost_or_gained_liquid():
+    e = _sort_entry()
+    assert grade(e, [[], [], []]) == "incorrect"
+    assert grade(e, [["cyan"] * 3, ["magenta"] * 3, ["gold"] * 3]) == "incorrect"
+    assert grade(e, [["gold"] * 3, ["lime"] * 3, []]) == "incorrect"
+
+
+def test_liquid_sort_requires_a_key_and_a_board():
+    with pytest.raises(GradingError, match="no layer key"):
+        grade(_entry("LIQUID_SORT", {}), [["cyan"]])
+    with pytest.raises(GradingError, match="list of bottles"):
+        grade(_sort_entry(), "level_1")
+
+
+# ── Goods sort ───────────────────────────────────────────────────────────────────
+
+def _goods_entry():
+    return _entry("GOODS_SORT", {"goodsSortCounts": {"chips": 3, "cola": 3}})
+
+
+def test_goods_sort_sorted_shelf():
+    e = _goods_entry()
+    # the counts are the answer key — never in the playable snapshot
+    assert "goodsSortCounts" not in e["playable"]["config"]
+    assert grade(e, [["chips", "chips", "chips"], ["cola", "cola", "cola"], []]) == "correct"
+    # Which compartment holds which goods is not part of the puzzle.
+    assert grade(e, [[], ["cola", "cola", "cola"], ["chips", "chips", "chips"]]) == "correct"
+
+
+def test_goods_sort_kind_split_across_compartments_is_not_sorted():
+    # Every compartment holds one kind here, yet cola sits in two of them.
+    e = _goods_entry()
+    assert grade(e, [["chips", "chips", "chips"], ["cola", "cola"], ["cola"]]) == "partial"
+
+
+def test_goods_sort_untouched_shelf_is_incorrect():
+    e = _goods_entry()
+    assert grade(e, [["chips", "cola", "chips"], ["cola", "chips", "cola"], []]) == "incorrect"
+
+
+def test_goods_sort_rejects_a_shelf_that_lost_or_gained_goods():
+    e = _goods_entry()
+    assert grade(e, [[], [], []]) == "incorrect"
+    assert grade(e, [["chips"] * 3, ["cola"] * 3, ["milk"] * 3]) == "incorrect"
+    assert grade(e, [["chips"] * 2, ["cola"] * 3]) == "incorrect"
+
+
+def test_goods_sort_requires_a_key_and_a_shelf():
+    with pytest.raises(GradingError, match="no goods key"):
+        grade(_entry("GOODS_SORT", {}), [["chips"]])
+    with pytest.raises(GradingError, match="list of compartments"):
+        grade(_goods_entry(), "level_1")
+
+
+# ── Counting crates ──────────────────────────────────────────────────────────────
+
+def _crates_entry(**config):
+    base = {"orderTotal": 23, "cratesStock": {"10": 3, "5": 2, "1": 9}, "cratesOpensAllowed": 0}
+    return _entry("COUNT_CRATES", {**base, **config})
+
+
+def test_count_crates_adds_the_tray_up():
+    e = _crates_entry()
+    assert grade(e, [10, 10, 1, 1, 1]) == "correct"
+    assert grade(e, [10, 5, 5, 1, 1, 1]) == "correct"   # a longer way to the same number
+    assert grade(e, [10, 10, 1, 1]) == "incorrect"      # 22
+    assert grade(e, [10, 10, 5]) == "incorrect"         # 25
+
+
+def test_count_crates_nothing_secret_travels_with_the_release():
+    """A derived-answer technique: the config the client already has is what grades it, so
+    there is no key to leak and GRADING_KEY_FIELDS stays untouched."""
+    e = _crates_entry()
+    assert e["playable"]["config"]["orderTotal"] == 23
+    assert e["grading"]["keys"] == {}
+
+
+def test_count_crates_never_marks_a_correct_count_wrong_for_its_packing():
+    """The change that mattered most: the crate count is a goal, not a gate.
+
+    It gated correctness first, and the ladder audit showed what that cost — the
+    biggest-crate-first strategy the levels teach failed two of them outright, one opening
+    permanently stranded two more, and on the hundred level any first crate but the hundred
+    killed the board. A child who counts 23 has counted 23, however they packed it.
+    """
+    for constraint in ("none", "fewest", "exactly"):
+        e = _crates_entry(cratesConstraint=constraint, cratesExactly=6)
+        assert grade(e, [10, 10, 1, 1, 1]) == "correct", constraint
+        assert grade(e, [10, 5, 5, 1, 1, 1]) == "correct", constraint
+        # The total is still the whole of it.
+        assert grade(e, [10, 10, 1, 1]) == "incorrect", constraint
+
+
+def test_count_crates_rejects_crates_that_do_not_exist():
+    with pytest.raises(GradingError, match="does not exist"):
+        grade(_crates_entry(), [10, 10, 3])
+    with pytest.raises(GradingError, match="list of crate sizes"):
+        grade(_crates_entry(), 23)
+
+
 # ── Flexible ─────────────────────────────────────────────────────────────────────
 
 def test_flexible_multichoice():

@@ -18,7 +18,6 @@ import { adminApi, AdminUser, AdminStudent } from "../api/admin";
 import { Account } from "../api/auth";
 import { AdminOverview } from "./AdminOverview";
 import { UsersTable } from "./UsersTable";
-import { KidsTable } from "./KidsTable";
 import { MenusAccess } from "./MenusAccess";
 import { MenusManager } from "./MenusManager";
 import { CreateUserModal } from "./CreateUserModal";
@@ -28,12 +27,19 @@ import { InteractiveStudioPage } from "./InteractiveStudioPage";
 import { CurriculumAdminPage } from "./CurriculumAdminPage";
 import { AssignmentsPage } from "./AssignmentsPage";
 import { AnalyticsRosterPage } from "../analytics/AnalyticsRosterPage";
+import { ProfilePage } from "../account/ProfilePage";
 import App from "../App";
+
+/**
+ * Sections reachable without a menu entry. The sidebar footer navigates here for every
+ * dashboard, but "profile" is not a seeded menu key, so it must be exempt from the
+ * allowed-menu guard below or the admin is bounced straight back to the first menu.
+ */
+const MENULESS_SECTIONS = new Set(["profile"]);
 
 const SUBTITLES: Record<string, string> = {
   overview: "Accounts and kids at a glance",
-  users: "Parents, teachers, and admins",
-  kids: "Every child across all families",
+  users: "Parents, teachers, admins, and their children",
   access: "Which role can see which menu",
   menus: "Add, edit, and reorder menus",
   studio: "Build and preview interactive math activities",
@@ -59,6 +65,7 @@ interface AdminCtx {
 /** menu id → content. Menus not listed here render the placeholder below. */
 const CONTENT: Record<string, (ctx: AdminCtx) => React.ReactNode> = {
   overview: (c) => <AdminOverview users={c.users ?? []} students={c.students ?? []} />,
+  profile: () => <ProfilePage />,
   users: (c) => (
     <SectionCard
       title={`All accounts (${c.users?.length ?? 0})`}
@@ -73,11 +80,6 @@ const CONTENT: Record<string, (ctx: AdminCtx) => React.ReactNode> = {
       <UsersTable users={c.users ?? []} students={c.students ?? []} selfId={c.account?.id} onChanged={c.reload} />
     </SectionCard>
   ),
-  kids: (c) => (
-    <SectionCard title={`All kids (${c.students?.length ?? 0})`}>
-      <KidsTable students={c.students ?? []} onChanged={c.reload} />
-    </SectionCard>
-  ),
   access: () => <MenusAccess />,
   menus: () => <MenusManager />,
   studio: (c) => <InteractiveStudioPage onExit={() => c.navigate("overview")} />,
@@ -90,7 +92,7 @@ const CONTENT: Record<string, (ctx: AdminCtx) => React.ReactNode> = {
 };
 
 /** Content screens that need the admin users/students load. */
-const DATA_SECTIONS = new Set(["overview", "users", "kids", "notifications"]);
+const DATA_SECTIONS = new Set(["overview", "users", "notifications"]);
 
 export const AdminDashboard: React.FC = () => {
   const { account, logout } = useAuth();
@@ -128,14 +130,16 @@ export const AdminDashboard: React.FC = () => {
   }, [load]);
 
   useEffect(() => {
-    if (allowedIds.size > 0 && !allowedIds.has(section)) {
+    if (allowedIds.size > 0 && !allowedIds.has(section) && !MENULESS_SECTIONS.has(section)) {
       const first = sections.flatMap(group => group.items)[0];
       if (first) setSection(first.id);
     }
   }, [allowedIds, sections, section]);
 
   const activeMenu = sections.flatMap((s) => s.items).find((i) => i.id === section);
-  const title = activeMenu?.label ?? section;
+  // Menu-less sections own their in-page identity, so the toolbar stays empty for them
+  // rather than falling back to the raw section id.
+  const title = activeMenu?.label ?? (MENULESS_SECTIONS.has(section) ? "" : section);
   const subtitle = SUBTITLES[section] ?? "";
 
   const ctx: AdminCtx = {
@@ -175,7 +179,7 @@ export const AdminDashboard: React.FC = () => {
       sections={sections}
       active={section}
       onNavigate={setSection}
-      user={{ name: account?.name, email: account?.email }}
+      user={{ name: account?.name, email: account?.email, avatar: account?.avatar }}
       title={title}
       subtitle={subtitle}
       contentClassName={section === "studio" || section === "assets" || section === "curriculum" ? "flex-1 overflow-hidden" : undefined}

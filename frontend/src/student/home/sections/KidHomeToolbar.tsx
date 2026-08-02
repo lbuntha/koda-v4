@@ -3,7 +3,7 @@ import { BookOpen, CheckCircle2, Flame, Gift, Home, LogOut, Map, Palette, Star, 
 import { KidAvatar } from "../../../components/KidAvatar";
 import { KodaAvatarPicker } from "../../../components/KodaAvatarPicker";
 import { Button, Dialog, Spinner } from "../../../components/ui";
-import type { KodaKidAvatarId } from "../../../parent/onboarding/LearnerPortrait";
+import type { KodaKidAvatarId } from "../../../components/LearnerPortrait";
 import type { ThemeMode } from "../../../theme/appTheme";
 import { ThemeToggle } from "../../../theme/ThemeToggle";
 import type { KidStats } from "../kidHomeModel";

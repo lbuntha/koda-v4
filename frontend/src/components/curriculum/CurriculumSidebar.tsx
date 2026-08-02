@@ -17,7 +17,7 @@
 import React, { useState } from "react";
 import { BookOpen, Plus, Pencil, AlertTriangle, Search, Cloud, CloudOff, Loader2, Send } from "lucide-react";
 import { Select, Input, Badge, Button } from "../ui";
-import { CurriculumTree, Grade, Subject, Unit, Skill, SkillCoverage, subjectHasQuestionSupport, sumSkillMinutes } from "../../curriculum/types";
+import { CurriculumTree, Grade, Subject, Unit, Skill, SkillCoverage, sumSkillMinutes } from "../../curriculum/types";
 import { CurriculumPersistenceStatus } from "../../curriculum/useCurriculumTree";
 
 interface CurriculumSidebarProps {
@@ -80,8 +80,6 @@ export const CurriculumSidebar: React.FC<CurriculumSidebarProps> = ({
 
   const subjects = tree.subjects.filter(s => s.gradeId === selectedGradeId);
   const units = tree.units.filter(u => u.subjectId === selectedSubjectId).sort((a, b) => a.order - b.order);
-  const selectedSubject = tree.subjects.find(s => s.id === selectedSubjectId);
-  const subjectHasTechniques = selectedSubject ? subjectHasQuestionSupport(selectedSubject) : true;
 
   const matchesQuery = (label: string) => !query.trim() || label.toLowerCase().includes(query.trim().toLowerCase());
 
@@ -144,15 +142,6 @@ export const CurriculumSidebar: React.FC<CurriculumSidebarProps> = ({
           ))}
         </Select>
       </div>
-
-      {!subjectHasTechniques && (
-        <div className="mx-3 mt-3 p-2.5 rounded-lg bg-amber-50 border border-amber-200 flex items-start gap-2">
-          <AlertTriangle size={13} className="text-amber-600 flex-shrink-0 mt-0.5" />
-          <p className="text-[10.5px] text-amber-800 leading-snug">
-            No question types support <strong>{selectedSubject?.label}</strong> yet — every technique today is a counting interaction.
-          </p>
-        </div>
-      )}
 
       {/* Search */}
       <div className="px-2.5 py-2 border-b border-slate-100">

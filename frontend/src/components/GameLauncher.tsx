@@ -222,7 +222,15 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
     triggerConfetti();
     if (!correctAttemptLogged.current) {
       const selected = solvedSelection(activeQuestion);
-      handleAttempt("correct", selected == null ? undefined : { selected });
+      // Canvases that can report the solved state themselves call onAttempt straight
+      // after onSuccess, in this same tick. Logging the bridge attempt synchronously
+      // would claim the first-writer guard below and discard that richer report —
+      // leaving the server with no selection to grade. Yield one microtask so a canvas
+      // that has real detail always wins, and only bridge when none arrives.
+      queueMicrotask(() => {
+        if (correctAttemptLogged.current) return;
+        handleAttempt("correct", selected == null ? undefined : { selected });
+      });
     }
   };
 

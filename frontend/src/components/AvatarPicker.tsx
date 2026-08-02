@@ -1,14 +1,26 @@
 import React, { useState } from "react";
-import { Check } from "lucide-react";
-import { KidAvatar } from "../components/KidAvatar";
+import {
+  Bot,
+  Check,
+  Compass,
+  LayoutGrid,
+  Palette,
+  PawPrint,
+  PenTool,
+  Smile,
+  Star,
+  UserRound,
+} from "lucide-react";
+import { KidAvatar } from "./KidAvatar";
 import { cn } from "../lib/utils";
 import { useSvgLibrary } from "../assets/SvgLibraryContext";
-import { KODA_KID_AVATARS } from "./onboarding/LearnerPortrait";
+import { KODA_KID_AVATARS } from "./LearnerPortrait";
 
 export interface AvatarCategory {
   id: string;
   label: string;
-  icon: string;
+  /** A lucide icon component, matching how the sidebar and the rest of the app draw nav icons. */
+  icon: React.ElementType;
   avatars: string[];
 }
 
@@ -18,13 +30,13 @@ export const AVATAR_CATEGORIES: AvatarCategory[] = [
   {
     id: "koda_kids",
     label: "Koda Kids",
-    icon: "🌟",
+    icon: Star,
     avatars: [...KODA_KID_AVATARS],
   },
   {
     id: "adventurer",
     label: "Adventurers",
-    icon: "✨",
+    icon: Compass,
     avatars: [
       `${DICEBEAR_BASE}/adventurer/svg?seed=Felix`,
       `${DICEBEAR_BASE}/adventurer/svg?seed=Zoe`,
@@ -39,7 +51,7 @@ export const AVATAR_CATEGORIES: AvatarCategory[] = [
   {
     id: "avataaars",
     label: "Avataaars",
-    icon: "🧑",
+    icon: UserRound,
     avatars: [
       `${DICEBEAR_BASE}/avataaars/svg?seed=Alexander`,
       `${DICEBEAR_BASE}/avataaars/svg?seed=Sophia`,
@@ -54,7 +66,7 @@ export const AVATAR_CATEGORIES: AvatarCategory[] = [
   {
     id: "bottts",
     label: "Robots",
-    icon: "🤖",
+    icon: Bot,
     avatars: [
       `${DICEBEAR_BASE}/bottts/svg?seed=Sparky`,
       `${DICEBEAR_BASE}/bottts/svg?seed=Gizmo`,
@@ -69,7 +81,7 @@ export const AVATAR_CATEGORIES: AvatarCategory[] = [
   {
     id: "emoji",
     label: "Fun Emoji",
-    icon: "😄",
+    icon: Smile,
     avatars: [
       `${DICEBEAR_BASE}/fun-emoji/svg?seed=Happy`,
       `${DICEBEAR_BASE}/fun-emoji/svg?seed=Cool`,
@@ -84,7 +96,7 @@ export const AVATAR_CATEGORIES: AvatarCategory[] = [
   {
     id: "lorelei",
     label: "Lorelei",
-    icon: "🎨",
+    icon: Palette,
     avatars: [
       `${DICEBEAR_BASE}/lorelei/svg?seed=Luna`,
       `${DICEBEAR_BASE}/lorelei/svg?seed=Milo`,
@@ -99,7 +111,7 @@ export const AVATAR_CATEGORIES: AvatarCategory[] = [
   {
     id: "wild",
     label: "Animals",
-    icon: "🐾",
+    icon: PawPrint,
     avatars: ["🦊", "🐼", "🐯", "🦁", "🐨", "🐻", "🐘", "🐵", "🐧", "🐳", "🐙", "🐬", "🦉", "🐝", "🐰", "🐮"],
   },
 ];
@@ -131,7 +143,7 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({ value, onChange, cla
           {
             id: "custom_library",
             label: "Custom SVG Assets",
-            icon: "⭐",
+            icon: PenTool,
             avatars: customSvgAvatars,
           },
         ]
@@ -148,32 +160,27 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({ value, onChange, cla
     <div className={cn("space-y-3", className)}>
       {/* Category Tabs */}
       <div className="flex flex-wrap gap-1.5 border-b border-slate-100 dark:border-white/10 pb-2.5">
-        <button
-          type="button"
-          onClick={() => setActiveTab("all")}
-          className={`rounded-full px-3 py-1 text-xs font-extrabold transition-all cursor-pointer ${
-            activeTab === "all"
-              ? "bg-[#5C46DF] text-white shadow-md shadow-indigo-500/20 dark:bg-[#BEACFF] dark:text-[#191338]"
-              : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10"
-          }`}
-        >
-          All ({allAvatars.length})
-        </button>
-        {allCategories.map((cat) => (
-          <button
-            key={cat.id}
-            type="button"
-            onClick={() => setActiveTab(cat.id)}
-            className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-extrabold transition-all cursor-pointer ${
-              activeTab === cat.id
-                ? "bg-[#5C46DF] text-white shadow-md shadow-indigo-500/20 dark:bg-[#BEACFF] dark:text-[#191338]"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10"
-            }`}
-          >
-            <span>{cat.icon}</span>
-            <span>{cat.label}</span>
-          </button>
-        ))}
+        {[{ id: "all", label: `All (${allAvatars.length})`, icon: LayoutGrid }, ...allCategories].map(
+          ({ id, label, icon: Icon }) => {
+            const isActive = activeTab === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setActiveTab(id)}
+                className={cn(
+                  "inline-flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-colors",
+                  isActive
+                    ? "bg-indigo-600 text-white dark:bg-[#BEACFF] dark:text-[#191338]"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10"
+                )}
+              >
+                <Icon size={13} className="shrink-0" />
+                <span>{label}</span>
+              </button>
+            );
+          }
+        )}
       </div>
 
       {/* Interactive Avatar Grid */}

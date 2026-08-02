@@ -7,6 +7,7 @@ validation (foreign keys, prerequisite DAG, checkpoint flags).
 
 import pytest
 
+from app.features.content.grading import supported_techniques
 from app.features.content.release import (
     GRADING_KEY_FIELDS,
     ReleaseValidationError,
@@ -148,6 +149,26 @@ def test_build_release_payload_produces_manifests_and_hashes():
     assert all(m["content_hash"].startswith("sha256:") for m in payload["question_manifest"])
     assert set(payload["content_hashes"]) == {"tree", "questions", "assets"}
     assert len(payload["asset_manifest"]) == 1
+
+
+def test_build_release_payload_rejects_a_technique_no_grader_can_score():
+    """Publishing is the last point where this is an author's problem rather than a
+    child's: an ungraded question yields unverified attempts, and progression and XP
+    both skip those, so the activity can never complete."""
+    tree = _tree([_skill("s1")])
+    questions = [{"id": "q1", "technique": "A_TECHNIQUE_WITH_NO_GRADER", "skillId": "s1", "config": {}}]
+    with pytest.raises(ReleaseValidationError, match="no server-side grader"):
+        build_release_payload(tree=tree, questions=questions)
+
+
+def test_build_release_payload_accepts_every_registered_technique():
+    """Guards the gate itself: it must key off the grader registry, never a literal
+    list, so techniques added later pass without editing release.py."""
+    tree = _tree([_skill("s1")])
+    for technique in supported_techniques():
+        questions = [{"id": "q1", "technique": technique, "skillId": "s1", "config": {}}]
+        payload = build_release_payload(tree=tree, questions=questions)
+        assert payload["question_manifest"][0]["playable"]["technique"] == technique
 
 
 def test_build_release_payload_rejects_bad_prerequisites():

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { Input, FormModal, FormField, Select } from "../components/ui";
-import { AvatarPicker, AVATARS } from "./AvatarPicker";
+import { AvatarPicker, AVATARS } from "../components/AvatarPicker";
 import { KidAvatar } from "../components/KidAvatar";
 import { Child, ChildInput } from "../api/family";
 import { GradeSelect, useAcademicCatalog } from "../components/academic";

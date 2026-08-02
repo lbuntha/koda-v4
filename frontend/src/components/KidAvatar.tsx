@@ -17,8 +17,8 @@
 
 import React from "react";
 import { cn } from "../lib/utils";
-import { AVATAR_FALLBACK } from "../parent/AvatarPicker";
-import { isKodaKidAvatar, LearnerPortrait } from "../parent/onboarding/LearnerPortrait";
+import { AVATAR_FALLBACK } from "./AvatarPicker";
+import { isKodaKidAvatar, LearnerPortrait } from "./LearnerPortrait";
 
 /** Eyes, noses, stripes. */
 const INK = "#2A2350";

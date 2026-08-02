@@ -31,6 +31,8 @@ import json
 import re
 from typing import Any
 
+from .grading import supported_techniques
+
 # Config fields that are answer keys / solutions — they must be stripped from the
 # playable snapshot a client receives and kept in the private grading blob. This
 # is the closed set the studio's question schemas can produce today; adding a new
@@ -40,6 +42,8 @@ GRADING_KEY_FIELDS: frozenset[str] = frozenset(
         "patternAnswer",
         "patternAnswers",
         "sudokuSolution",
+        "liquidSortLayers",
+        "goodsSortCounts",
         "flexibleCorrectAnswer",
     }
 )
@@ -280,6 +284,36 @@ def validate_release_structure(tree: dict) -> None:
 
 # ── Assembly ────────────────────────────────────────────────────────────────────
 
+def validate_gradeable(question_manifest: list[dict]) -> None:
+    """Refuse to release a question the server cannot grade.
+
+    An unregistered technique is not caught at publish time; it surfaces as a child
+    finishing an activity that silently never completes, because the attempt is stored
+    unverified and progression and XP both skip unverified events. Failing here turns
+    that into an error the author sees while publishing.
+
+    The set of graders comes from the `@register` decorators in `grading.py`, so a new
+    technique is covered the moment it has one — there is no list here to keep in sync.
+    """
+    graded = supported_techniques()
+    ungraded = {
+        (entry["playable"].get("technique"), entry.get("question_id"))
+        for entry in question_manifest
+        if entry["playable"].get("technique") not in graded
+    }
+    if ungraded:
+        detail = ", ".join(
+            f"{question_id!r} ({technique!r})" for technique, question_id in sorted(
+                ungraded, key=lambda pair: (str(pair[0]), str(pair[1]))
+            )
+        )
+        raise ReleaseValidationError(
+            "no server-side grader is registered for: " + detail
+            + ". Register one in app/features/content/grading.py, or remove the question "
+            "from this curriculum — an ungraded activity can never be completed."
+        )
+
+
 def build_release_payload(
     *,
     tree: dict,
@@ -297,6 +331,7 @@ def build_release_payload(
 
     skill_ids = set(_skill_index(tree))
     question_manifest = build_question_manifest(questions, skill_ids)
+    validate_gradeable(question_manifest)
     available_asset_ids = {
         asset.get("id")
         for asset in (assets or [])

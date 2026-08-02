@@ -18,7 +18,6 @@ import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import { Celebration } from "./Celebration";
 import { surfaceClass } from "./canvasTheme";
 import {
-  LIQUID_SORT_CURRICULUM_LEVELS,
   getCurriculumLevel,
   BottleState,
   LiquidLayer,
@@ -61,7 +60,16 @@ interface SplashDroplet {
 }
 
 /**
- * BFS Solver Algorithm to calculate the next optimal move
+ * Solver behind the hint button: returns a first move that leads to a solved board.
+ *
+ * Depth-first with a visited set, not breadth-first. A real board takes 20-32 pours to
+ * finish, and BFS at this branching factor exhausts any sane budget around depth 3 — the
+ * previous 1500-iteration BFS returned null (no hint at all) on 7 of the 20 curated
+ * levels, every one of them solvable. DFS reaches a solved state in 22-38 explored
+ * states on those same levels.
+ *
+ * The trade is that the move is *a* route to a win rather than the shortest one, which
+ * is what a hint needs. Returns null only when the board genuinely cannot be finished.
  */
 export function solveLiquidSort(
   bottles: BottleState[]
@@ -93,13 +101,13 @@ export function solveLiquidSort(
   if (isSolved(initialBottles)) return null;
 
   const visited = new Set<string>();
-  const queue: StateNode[] = [{ bottles: initialBottles }];
+  const stack: StateNode[] = [{ bottles: initialBottles }];
   visited.add(stateKey(initialBottles));
 
   let iterations = 0;
-  while (queue.length > 0 && iterations < 1500) {
+  while (stack.length > 0 && iterations < 200000) {
     iterations++;
-    const current = queue.shift()!;
+    const current = stack.pop()!;
 
     for (let i = 0; i < current.bottles.length; i++) {
       const src = current.bottles[i];
@@ -146,7 +154,7 @@ export function solveLiquidSort(
             if (isSolved(nextBottles)) {
               return firstMove;
             }
-            queue.push({ bottles: nextBottles, firstMove });
+            stack.push({ bottles: nextBottles, firstMove });
           }
         }
       }
@@ -187,6 +195,10 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
   const [history, setHistory] = useState<BottleState[][]>([]);
   const [isWon, setIsWon] = useState(false);
   const [moveCount, setMoveCount] = useState(0);
+  // Pours the puzzle refused (full bottle, mismatched colour). Trying one is how the
+  // game is played, not a wrong answer, so it is reported as detail on the solve rather
+  // than as an attempt — see the note where the solve is reported.
+  const invalidPours = useRef(0);
   const [seconds, setSeconds] = useState(0);
 
   // Hint state
@@ -256,6 +268,7 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
     setSelectedId(null);
     setIsWon(false);
     setMoveCount(0);
+    invalidPours.current = 0;
     setSeconds(0);
     setHintMove(null);
     setPouringInfo(null);
@@ -415,14 +428,19 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
       sounds.playWin();
       if (onSuccess) onSuccess();
       if (onAttempt) {
+        // Report the bottles themselves, not just "I solved level_1": the server
+        // re-checks that every bottle is single-coloured and still holds the level's
+        // liquid, so a claim of success is worth nothing without the board behind it.
         onAttempt("correct", {
-          expected: selectedLevelId,
-          selected: selectedLevelId,
+          selected: bottles.map(bottle => bottle.layers.map(layer => layer.colorKey)),
           details: {
             levelId: selectedLevelId,
             moveCount,
             seconds,
             stars: calculateStars(),
+            // How much probing it took — the difficulty signal the discarded
+            // "incorrect" attempts used to carry, without distorting mastery.
+            invalidPours: invalidPours.current,
           },
         });
       }
@@ -638,16 +656,12 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
         triggerSlosh(selectedId, -10);
         setSelectedId(null);
         sounds.playFailure();
-        if (onAttempt) {
-          onAttempt("incorrect", {
-            expected: topSourceColor,
-            selected: topTargetColor,
-            details: {
-              levelId: selectedLevelId,
-              reason: target.layers.length >= target.capacity ? "bottle_full" : "mismatched_color",
-            },
-          });
-        }
+        // Deliberately not an `onAttempt("incorrect")`. Probing a bottle is ordinary play
+        // in a sort puzzle, but the scoring engine reads every attempt as an answer:
+        // firstTry and accuracy carry 0.65 of the mastery score, so a handful of probes
+        // dropped a perfect solve from 1.00 to ~0.26 and pinned the skill at `beginner`
+        // for good. The count still reaches analytics, on the solve below.
+        invalidPours.current += 1;
       }
     }
   };
@@ -680,6 +694,7 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
     setSelectedId(null);
     setIsWon(false);
     setMoveCount(0);
+    invalidPours.current = 0;
     setSeconds(0);
     setHintMove(null);
     setPouringInfo(null);
@@ -690,7 +705,15 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
     if (bottles.length >= 10 || isWon || pouringInfo) return;
     setBottles((prev) => [
       ...prev,
-      { id: `b_extra_${Date.now()}`, layers: [], capacity: 4 },
+      {
+        id: `b_extra_${Date.now()}`,
+        layers: [],
+        // Match the board. Levels 1 and 2 hold three layers, and a hardcoded 4 made the
+        // spare tube unfillable: winning needs every bottle full or empty, so a colour
+        // poured into an oversized tube could never complete it — one tap turned the two
+        // easiest levels into dead ends.
+        capacity: prev[0]?.capacity ?? 4,
+      },
     ]);
     sounds.playPop();
   };

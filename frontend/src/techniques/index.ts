@@ -34,9 +34,11 @@ import { multiRowColumnSubtraction } from "./multiRowColumnSubtraction";
 import { columnMultiplication } from "./columnMultiplication";
 import { liquidSort } from "./liquidSort";
 import { goodsSort } from "./goodsSort";
+import { harvestSort } from "./harvestSort";
 import { numberPath } from "./numberPath";
 import { storyProblemMat } from "./storyProblemMat";
 import { placeValueLab } from "./placeValueLab";
+import { countCrates } from "./countCrates";
 
 /** Ordered exactly as the Studio picker lists them (1..16). */
 export const ALL_TECHNIQUES: TechniqueManifest[] = [
@@ -63,9 +65,11 @@ export const ALL_TECHNIQUES: TechniqueManifest[] = [
   columnMultiplication,
   liquidSort,
   goodsSort,
+  harvestSort,
   numberPath,
   storyProblemMat,
   placeValueLab,
+  countCrates,
 ];
 
 // Loud in dev / logged in prod if a game is missing or double-registered.

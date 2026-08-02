@@ -5,8 +5,8 @@ import { ParsedSlideConfig } from "../types";
 export const goodsSortSchema: ComponentSchema = {
   technique: CountingTechnique.GOODS_SORT,
   name: "Goods Shelf Sort",
-  description: "A goods shelf sorting puzzle where matching 3 identical items in a compartment clears them.",
-  promptSummary: "Goods shelf sorting puzzle. Player moves goods between wooden shelf compartments to clear triplets.",
+  description: "A goods shelf sorting puzzle: gather every kind of goods into a compartment of its own.",
+  promptSummary: "Goods shelf sorting puzzle. Player moves goods between wooden shelf compartments until each compartment holds a single kind.",
   topLevelFields: { targetCount: { min: 3, max: 8, default: 3 } },
   configFields: [
     {
@@ -14,21 +14,21 @@ export const goodsSortSchema: ComponentSchema = {
       label: "Curriculum Level",
       type: "string",
       defaultValue: "level_1",
-      description: "Selected system level (level_1 to level_6 or custom)",
+      description: "Selected curriculum level (level_1 to level_30, a preset_ theme, or custom)",
     },
     {
       key: "gridRows",
       label: "Grid Rows",
       type: "number",
       defaultValue: 3,
-      description: "Number of rows in cabinet (2-5)",
+      description: "Number of rows in cabinet (2-6), used for custom boards",
     },
     {
       key: "gridCols",
       label: "Grid Columns",
       type: "number",
       defaultValue: 3,
-      description: "Number of columns in cabinet (2-5)",
+      description: "Number of columns in cabinet (2-6), used for custom boards",
     },
     {
       key: "compartmentCapacity",
@@ -44,7 +44,7 @@ export const goodsSortSchema: ComponentSchema = {
     id: "q-ai-goods-sort",
     technique: "GOODS_SORT",
     title: "Goods Shelf Sort",
-    instruction: "Organize items on the wooden shelves to match 3 identical items!",
+    instruction: "Sort the shelves until every kind of goods has a compartment of its own!",
     targetCount: 3,
     config: {
       levelId: "custom",
@@ -77,7 +77,7 @@ export const goodsSortSchema: ComponentSchema = {
       id: raw.id || `q-goods-sort-${index}`,
       technique: CountingTechnique.GOODS_SORT,
       title: raw.title || "Goods Shelf Sort",
-      instruction: raw.instruction || "Organize items on the wooden shelves to match 3 identical items!",
+      instruction: raw.instruction || "Sort the shelves until every kind of goods has a compartment of its own!",
       targetCount: typeof raw.targetCount === "number" ? raw.targetCount : 3,
       objectId: raw.objectId || "chips",
       config: {

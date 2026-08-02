@@ -1,5 +1,5 @@
 import React from "react";
-import { AvatarPicker } from "../AvatarPicker";
+import { AvatarPicker } from "../../components/AvatarPicker";
 import { OnboardingStep } from "./OnboardingStep";
 
 interface Props { value: string; onChange: (value: string) => void; }

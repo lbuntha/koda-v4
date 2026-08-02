@@ -187,25 +187,22 @@ export const curriculumRewards = (tree: CurriculumTree): CurriculumRewards => ({
   achievements: tree.rewards?.achievements ?? [],
 });
 
-/**
- * Curriculum subjects that at least one question type can actually serve.
- * Every technique in logSchema.ts's TECHNIQUE_TAXONOMY is a counting/math
- * interaction today, so only Math is served — a Language Arts or Art skill can
- * be authored in the tree but has no playable question type behind it yet.
+/*
+ * There was a `SUBJECT_KEYS_WITH_QUESTION_SUPPORT = new Set(["math"])` allow-list here,
+ * behind a studio warning that no question type could serve the selected subject.
  *
- * This is the ONE place the studio checks. When a non-math technique lands
- * (a phonics game, say), add that subject's code (or label) here — don't
- * re-hardcode the check at the call site. Entries are matched
- * case-insensitively against a Subject's stable `code` first, then its `label`,
- * so renaming a subject's display label alone won't silently break coverage.
+ * Its premise ("every technique is a counting interaction") stopped being true: the
+ * taxonomy in services/logSchema.ts gives KODA_SUDOKU `logic_puzzle`, KODA_PATTERN
+ * `pattern_recognition`, and LIQUID_SORT / FLEXIBLE_CANVAS `sorting_classification`.
+ * The list then warned on four of five real subjects — including Science and
+ * Thinking & Logic, both of which ship published, playable, server-graded questions.
+ *
+ * It is deliberately not replaced with a longer list: any new subject would inherit
+ * the same false warning until someone remembered to edit it. Whether a subject can
+ * actually be played is already answered by data rather than a constant — `content_ready`
+ * on the subject (an active offering exists) and the per-skill question counts the
+ * studio sidebar already renders.
  */
-export const SUBJECT_KEYS_WITH_QUESTION_SUPPORT = new Set(["math"]);
-
-export function subjectHasQuestionSupport(subject: Pick<Subject, "code" | "label">): boolean {
-  const code = subject.code?.trim().toLowerCase();
-  if (code && SUBJECT_KEYS_WITH_QUESTION_SUPPORT.has(code)) return true;
-  return SUBJECT_KEYS_WITH_QUESTION_SUPPORT.has(subject.label.trim().toLowerCase());
-}
 
 // ── Authored duration ─────────────────────────────────────────────────────
 
