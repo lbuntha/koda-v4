@@ -418,7 +418,7 @@ export const ColumnMultiplicationCanvas: React.FC<CanvasProps> = ({
     </div>
   );
 
-  function AnswerRow({ item, operator = "" }: { item: MultiplicationStage; operator?: string }) {
+  function AnswerRow({ item, operator = "" }: { item: MultiplicationStage; operator?: string; key?: React.Key }) {
     const offset = maxAnswerDigits - item.answerDigits.length;
     return (
       <div className="flex justify-end">
@@ -453,7 +453,7 @@ export const ColumnMultiplicationCanvas: React.FC<CanvasProps> = ({
     );
   }
 
-  function FutureRow({ item, operator = "" }: { item: MultiplicationStage; operator?: string }) {
+  function FutureRow({ item, operator = "" }: { item: MultiplicationStage; operator?: string; key?: React.Key }) {
     const offset = maxAnswerDigits - item.answerDigits.length;
     return (
       <div className="flex justify-end" aria-label={`${item.label}, waiting`}>
@@ -469,7 +469,7 @@ export const ColumnMultiplicationCanvas: React.FC<CanvasProps> = ({
     );
   }
 
-  function GuideRow({ item, operator = "" }: { item: MultiplicationStage; operator?: string }) {
+  function GuideRow({ item, operator = "" }: { item: MultiplicationStage; operator?: string; key?: React.Key }) {
     const offset = maxAnswerDigits - item.answerDigits.length;
     const activeStepIndex = guideStep.kind === "final" ? -1 : guideStep.stepIndex;
 

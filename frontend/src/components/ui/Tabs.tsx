@@ -71,7 +71,7 @@ export const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>
       onKeyDown?.(event);
       if (event.defaultPrevented || !["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
       const list = event.currentTarget.closest('[role="tablist"]');
-      const tabs = Array.from(list?.querySelectorAll<HTMLButtonElement>('[role="tab"]:not(:disabled)') ?? []);
+      const tabs = Array.from(list?.querySelectorAll('[role="tab"]:not(:disabled)') ?? []) as HTMLElement[];
       if (!tabs.length) return;
       const currentIndex = tabs.indexOf(event.currentTarget);
       const nextIndex = event.key === "Home" ? 0

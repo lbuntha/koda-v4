@@ -34,7 +34,7 @@ export const KodaPatternCanvas: React.FC<CanvasProps> = ({
 
   // Every blank slot in the sequence is a fillable gap, filled left-to-right.
   const blankIndices = React.useMemo(
-    () => sequence.reduce<number[]>((acc, v, i) => (isBlankSlot(v) ? [...acc, i] : acc), []),
+    () => (sequence as string[]).reduce((acc: number[], v: string, i: number) => (isBlankSlot(v) ? [...acc, i] : acc), []),
     [sequence]
   );
 

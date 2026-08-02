@@ -201,7 +201,7 @@ export const KodaActor: React.FC<KodaActorProps> = ({
 
   const reduceMotion = usePrefersReducedMotion();
   // One resolved level drives every animation decision below.
-  const level: KodaAnimation = reduceMotion ? "none" : animation;
+  const level: KodaAnimation = reduceMotion ? "none" as const : animation;
   const loops = level === "full";
   const reveals = level !== "none";
 
@@ -236,7 +236,7 @@ export const KodaActor: React.FC<KodaActorProps> = ({
 
   const tokens = tokenize(text);
   const speaking = voice.isSpeaking;
-  const activeMood: KodaMood = speaking && mood === "idle" ? "talking" : mood;
+  const activeMood: KodaMood = (speaking && mood === "idle" ? "talking" : mood) as KodaMood;
   const badge = MOOD_BADGE[activeMood];
   const glow = MOOD_GLOW[activeMood];
 

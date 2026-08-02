@@ -133,7 +133,7 @@ export const ProgressionSettings: React.FC = () => {
   const dirty = useMemo(() => JSON.stringify(draft) !== JSON.stringify(settings.scoring), [draft, settings.scoring]);
   const atDefaults = useMemo(() => JSON.stringify(draft) === JSON.stringify(DEFAULT_SCORING), [draft]);
   const validation = useMemo(() => {
-    const weightSum = Object.values(draft.weights).reduce((sum, value) => sum + value, 0);
+    const weightSum = (Object.values(draft.weights) as number[]).reduce((sum, value) => sum + value, 0);
     if (Math.abs(weightSum - 1) > 0.000001) return `Evidence weights must total 100% (currently ${Math.round(weightSum * 100)}%).`;
     if (!(draft.developingScore <= draft.proficientScore && draft.proficientScore <= draft.masterScore)) {
       return "Mastery thresholds must increase from Developing to Proficient to Master.";

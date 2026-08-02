@@ -95,7 +95,7 @@ export const FlexibleTargetBin: React.FC<FlexibleTargetBinProps> = ({
           if (expected.length > 0) {
             return (
               <div className="flex items-center justify-center gap-1.5 opacity-25 grayscale-[15%] select-none pointer-events-none">
-                {expected.map(i => (
+                {(expected as any[]).map(i => (
                   <CountingAsset key={i.id} type={(i.type || "emoji") as any} emoji={i.emoji} size={26} />
                 ))}
               </div>

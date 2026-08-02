@@ -87,14 +87,20 @@ export const CANVAS_ACCENTS: Record<CanvasAccent, AccentTokens> = {
   }
 };
 
-export const accentIconClass = (accent: CanvasAccent, isDark: boolean) =>
-  isDark ? CANVAS_ACCENTS[accent].iconDark : CANVAS_ACCENTS[accent].iconLight;
+export const accentIconClass = (accent: CanvasAccent | string = "indigo", isDark: boolean = false) => {
+  const valid = CANVAS_ACCENTS[accent as CanvasAccent] ? (accent as CanvasAccent) : "indigo";
+  return isDark ? CANVAS_ACCENTS[valid].iconDark : CANVAS_ACCENTS[valid].iconLight;
+};
 
-export const accentChipClass = (accent: CanvasAccent, isDark: boolean) =>
-  isDark ? CANVAS_ACCENTS[accent].chipDark : CANVAS_ACCENTS[accent].chipLight;
+export const accentChipClass = (accent: CanvasAccent | string = "indigo", isDark: boolean = false) => {
+  const valid = CANVAS_ACCENTS[accent as CanvasAccent] ? (accent as CanvasAccent) : "indigo";
+  return isDark ? CANVAS_ACCENTS[valid].chipDark : CANVAS_ACCENTS[valid].chipLight;
+};
 
-export const accentTextClass = (accent: CanvasAccent, isDark: boolean) =>
-  isDark ? CANVAS_ACCENTS[accent].textDark : CANVAS_ACCENTS[accent].textLight;
+export const accentTextClass = (accent: CanvasAccent | string = "indigo", isDark: boolean = false) => {
+  const valid = CANVAS_ACCENTS[accent as CanvasAccent] ? (accent as CanvasAccent) : "indigo";
+  return isDark ? CANVAS_ACCENTS[valid].textDark : CANVAS_ACCENTS[valid].textLight;
+};
 
 /**
  * Container surfaces.

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Component } from "react";
 import { RefreshCw } from "lucide-react";
 import { reportClientError } from "../api/telemetry";
 
@@ -29,7 +29,7 @@ interface State {
  * The report goes to the server because the boundary only helps the person looking at the
  * screen; without it the failure never reaches anyone who can fix it.
  */
-export class ErrorBoundary extends React.Component<Props, State> {
+export class ErrorBoundary extends Component<Props, State> {
   state: State = { failed: false, reference: null };
 
   static getDerivedStateFromError(): Partial<State> {
