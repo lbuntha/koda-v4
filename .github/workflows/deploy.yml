@@ -66,3 +66,4 @@ jobs:
           firebaseServiceAccount: '${{ secrets.GCP_SA_KEY }}'
           channelId: live
           projectId: learn-with-koda
+          entryPoint: ./frontend
