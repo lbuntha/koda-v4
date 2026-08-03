@@ -18,7 +18,7 @@ import { additionTutorSchema } from "../components/studio/ai-generator/schemas/a
 export const additionTutor = defineTechnique({
   technique: CountingTechnique.ADDITION_TUTOR,
   defaultThumbnailUrl: "/assets/components/addition-tutor.svg",
-  label: "16. Addition Tutor",
+  label: "Addition Tutor",
   icon: <Layers size={14} className="text-violet-650" />,
   defaultTargetCount: 5,
   component: React.lazy(() =>

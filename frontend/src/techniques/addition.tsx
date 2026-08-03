@@ -18,7 +18,7 @@ import { additionSchema } from "../components/studio/ai-generator/schemas/additi
 export const addition = defineTechnique({
   technique: CountingTechnique.ADDITION_SANDBOX,
   defaultThumbnailUrl: "/assets/components/addition-sandbox.svg",
-  label: "10. Koda Addition",
+  label: "Koda Addition",
   icon: <PlusSquare size={14} className="text-indigo-600" />,
   defaultTargetCount: 5,
   component: React.lazy(() =>

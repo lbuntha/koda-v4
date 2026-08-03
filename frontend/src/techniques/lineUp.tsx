@@ -18,7 +18,7 @@ import { lineUpSchema } from "../components/studio/ai-generator/schemas/lineUp.s
 export const lineUp = defineTechnique({
   technique: CountingTechnique.LINE_UP_AND_COUNT,
   defaultThumbnailUrl: "/assets/components/line-up-and-count.svg",
-  label: "3. Line Up",
+  label: "Line Up",
   icon: <ListOrdered size={14} className="text-cyan-500" />,
   defaultTargetCount: 5,
   component: React.lazy(() =>

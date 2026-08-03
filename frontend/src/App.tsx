@@ -91,7 +91,8 @@ import {
   TabsTrigger,
   Badge,
   Dialog,
-  Sidebar
+  Sidebar,
+  KodaLogoSpinner
 } from "./components/ui";
 
 // Confetti Particle Interface
@@ -707,27 +708,11 @@ export default function App({ embedded = false, initialAdminTab = "dashboard", o
           <div className={`flex-1 flex flex-col overflow-hidden bg-slate-100/60 ${adminTab === "studio" || adminTab === "assets" ? "p-0" : "p-6"}`}>
             {isTabChanging ? (
               <div className="flex-1 flex flex-col items-center justify-center p-8 font-sans select-none bg-slate-50/50">
-                <div className="bg-white border border-slate-200/80 p-8 rounded-3xl shadow-xl flex flex-col items-center gap-5 text-center max-w-sm">
-                  {/* Glowing Spinner */}
-                  <div className="relative w-16 h-16">
-                    {/* Ring background */}
-                    <div className="absolute inset-0 rounded-full border-4 border-slate-100" />
-                    {/* Gradient Spinning Ring */}
-                    <div className="absolute inset-0 rounded-full border-4 border-t-indigo-650 border-r-indigo-400 border-b-transparent border-l-transparent animate-spin" />
-                    {/* Center Icon Pulse */}
-                    <div className="absolute inset-3.5 bg-indigo-50 border border-indigo-150 rounded-full flex items-center justify-center animate-pulse">
-                      <Sparkles size={16} className="text-indigo-600 animate-pulse" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="text-sm font-black text-slate-800 tracking-tight leading-none mb-1.5">
-                      Booting {adminTab === "dashboard" ? "Dashboard" : adminTab === "studio" ? "Interactive Studio" : adminTab === "slides" ? "Slides Deck Manager" : adminTab === "curriculum" ? "Curriculum Studio" : "Workshop Settings"}...
-                    </h4>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest font-mono animate-pulse">
-                      Loading Koda Workspace
-                    </p>
-                  </div>
+                <div className="flex max-w-sm flex-col items-center gap-5 rounded-3xl border border-slate-200/80 bg-white p-8 text-center shadow-xl">
+                  <KodaLogoSpinner
+                    size="lg"
+                    label={`Opening ${adminTab === "dashboard" ? "Dashboard" : adminTab === "studio" ? "Interactive Studio" : adminTab === "slides" ? "Slides Deck Manager" : adminTab === "curriculum" ? "Curriculum Studio" : "Workshop Settings"}`}
+                  />
                 </div>
               </div>
             ) : (
@@ -1856,7 +1841,7 @@ export default function App({ embedded = false, initialAdminTab = "dashboard", o
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  {TECHNIQUE_OPTIONS.map((tech) => {
+                  {TECHNIQUE_OPTIONS.map((tech, index) => {
                     const isSelected = activeQuestion?.technique === tech.id;
                     return (
                       // Two independent actions — pick this component, or change its artwork —
@@ -1904,7 +1889,10 @@ export default function App({ embedded = false, initialAdminTab = "dashboard", o
                               isSelected ? "text-indigo-700" : "text-slate-600"
                             }`}
                           >
-                            {tech.name}
+                            {/* Numbered by position, never in the label. Half the components
+                                carried a hardcoded "12." and half carried none, so retiring one
+                                left a gap and adding one needed every later label renamed. */}
+                            <span className="text-slate-400">{index + 1}.</span> {tech.name}
                           </span>
                         </button>
                         <button

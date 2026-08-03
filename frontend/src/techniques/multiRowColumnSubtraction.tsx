@@ -7,7 +7,7 @@ import { defineTechnique } from "./manifest";
 export const multiRowColumnSubtraction = defineTechnique({
   technique: CountingTechnique.SUBTRACTION_COLUMN_MULTI,
   defaultThumbnailUrl: "/assets/components/subtraction-column-multi.svg",
-  label: "20. Multi-Row Column Subtraction",
+  label: "Multi-Row Column Subtraction",
   icon: <Rows3 size={14} className="text-rose-600" />,
   defaultTargetCount: 198,
   component: React.lazy(() =>

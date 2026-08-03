@@ -73,7 +73,6 @@ export const TECHNIQUE_TAXONOMY: Record<CountingTechnique, { subjectArea: Subjec
   [CountingTechnique.MULTIPLICATION_COLUMN]: { subjectArea: "multiplication", skillTags: ["partial_products", "multi_digit_column_multiplication"] },
   [CountingTechnique.LIQUID_SORT]: { subjectArea: "sorting_classification", skillTags: ["sorting", "classification"] },
   [CountingTechnique.GOODS_SORT]: { subjectArea: "sorting_classification", skillTags: ["goods_sorting", "classification", "logical_thinking", "planning_ahead"] },
-  [CountingTechnique.HARVEST_SORT]: { subjectArea: "sorting_classification", skillTags: ["crop_sorting", "classification", "pattern_recognition", "logical_thinking"] },
   [CountingTechnique.NUMBER_PATH]: { subjectArea: "number_recognition", skillTags: ["count_to_120", "count_on", "numeral_recognition", "ten_more_ten_less"] },
   [CountingTechnique.STORY_PROBLEM_MAT]: { subjectArea: "addition", skillTags: ["addition_subtraction_stories", "word_problems", "unknown_quantities", "compare_problems"] },
   [CountingTechnique.PLACE_VALUE_LAB]: { subjectArea: "place_value", skillTags: ["tens_and_ones", "base_ten_blocks", "compose_decompose", "regroup_ten_ones"] },

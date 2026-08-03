@@ -18,7 +18,7 @@ import { arrangementsSchema } from "../components/studio/ai-generator/schemas/ar
 export const arrangements = defineTechnique({
   technique: CountingTechnique.DIFFERENT_ARRANGEMENTS,
   defaultThumbnailUrl: "/assets/components/different-arrangements.svg",
-  label: "7. Arrangements",
+  label: "Arrangements",
   icon: <LayoutGrid size={14} className="text-teal-500" />,
   defaultTargetCount: 5,
   component: React.lazy(() =>

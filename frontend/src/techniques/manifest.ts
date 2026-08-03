@@ -74,16 +74,39 @@ export function byTechnique<T>(
 }
 
 /**
+ * Techniques that keep their identity but no longer ship a game.
+ *
+ * A retired technique is deliberately absent from `ALL_TECHNIQUES`: its manifest is not
+ * imported, so its canvas, panel and schema are never bundled — which is the whole point,
+ * since every chunk is precached by the service worker whether or not a child opens it.
+ *
+ * The enum entry stays. Published releases are immutable and some still contain questions
+ * authored on these, and `getTaxonomy` still has to answer for events already logged. Dropping
+ * the enum would turn old, valid data into a lookup miss.
+ *
+ * Retiring is not deleting: to bring one back, re-add its line to `ALL_TECHNIQUES` and remove
+ * it here. To delete one properly, remove the enum entry and every reference too — only safe
+ * when no release and no logged event mentions it.
+ */
+export const RETIRED_TECHNIQUES: ReadonlySet<CountingTechnique> = new Set([
+  CountingTechnique.KODA_SUDOKU,
+  CountingTechnique.KODA_PATTERN,
+  CountingTechnique.MULTIPLICATION_ARRAY,
+  CountingTechnique.MULTIPLICATION_COLUMN,
+]);
+
+/**
  * The safety net that replaces TypeScript's exhaustive-Record check. Every
- * CountingTechnique must have exactly one manifest. A missing one throws at
- * app-load in dev (loud, like the old compile error) and logs in prod (so a
+ * CountingTechnique must have exactly one manifest, unless it is retired above. A missing one
+ * throws at app-load in dev (loud, like the old compile error) and logs in prod (so a
  * single mis-registered game can't blank the whole app for a student).
  */
 export function assertComplete(list: TechniqueManifest[]): void {
   const seen = new Map<CountingTechnique, number>();
   for (const m of list) seen.set(m.technique, (seen.get(m.technique) ?? 0) + 1);
 
-  const missing = Object.values(CountingTechnique).filter((t) => !seen.has(t));
+  const missing = Object.values(CountingTechnique)
+    .filter((t) => !seen.has(t) && !RETIRED_TECHNIQUES.has(t));
   const duplicated = [...seen.entries()].filter(([, n]) => n > 1).map(([t]) => t);
 
   const problems: string[] = [];

@@ -22,19 +22,14 @@ import { magnets } from "./magnets";
 import { subitize } from "./subitize";
 import { addition } from "./addition";
 import { subtraction } from "./subtraction";
-import { multiplication } from "./multiplication";
-import { kodaSudoku } from "./kodaSudoku";
-import { kodaPattern } from "./kodaPattern";
 import { flexibleCanvas } from "./flexibleCanvas";
 import { additionTutor } from "./additionTutor";
 import { columnAddition } from "./columnAddition";
 import { columnSubtraction } from "./columnSubtraction";
 import { multiRowColumnAddition } from "./multiRowColumnAddition";
 import { multiRowColumnSubtraction } from "./multiRowColumnSubtraction";
-import { columnMultiplication } from "./columnMultiplication";
 import { liquidSort } from "./liquidSort";
 import { goodsSort } from "./goodsSort";
-import { harvestSort } from "./harvestSort";
 import { numberPath } from "./numberPath";
 import { storyProblemMat } from "./storyProblemMat";
 import { placeValueLab } from "./placeValueLab";
@@ -53,19 +48,14 @@ export const ALL_TECHNIQUES: TechniqueManifest[] = [
   subitize,
   addition,
   subtraction,
-  multiplication,
-  kodaSudoku,
-  kodaPattern,
   flexibleCanvas,
   additionTutor,
   columnAddition,
   columnSubtraction,
   multiRowColumnAddition,
   multiRowColumnSubtraction,
-  columnMultiplication,
   liquidSort,
   goodsSort,
-  harvestSort,
   numberPath,
   storyProblemMat,
   placeValueLab,

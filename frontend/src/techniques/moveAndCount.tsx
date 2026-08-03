@@ -17,7 +17,7 @@ import { moveAndCountSchema } from "../components/studio/ai-generator/schemas/mo
 
 export const moveAndCount = defineTechnique({
   technique: CountingTechnique.MOVE_AND_COUNT,
-  label: "2. Move & Count",
+  label: "Move & Count",
   icon: <ArrowRightLeft size={14} className="text-emerald-500" />,
   defaultTargetCount: 5,
   defaultThumbnailUrl: "/assets/components/move-and-count.svg",
