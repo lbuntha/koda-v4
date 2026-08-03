@@ -4,8 +4,8 @@
  *
  * Universal SVG Asset Studio & Interactive SVG Editor:
  * Allows authors to inspect, customize, edit gradients/colors/strokes,
- * edit raw SVG source, and export/save SVG assets for Goods Sort and
- * all interactive learning components.
+ * edit raw SVG source, classify SVG vs Emoji assets, and export/save
+ * SVG assets for Goods Sort and all interactive learning components.
  */
 
 import React, { useState, useMemo } from "react";
@@ -20,6 +20,11 @@ import {
   Trash2,
   Package,
   Save,
+  Smile,
+  Sparkles,
+  Info,
+  Layers,
+  CheckCircle2,
 } from "lucide-react";
 import { GOODS_ASSET_KEYS } from "../../assets/goods-sort/GoodsAsset";
 import { GoodsAssetLibrary } from "../../assets/goods-sort/GoodsAssetLibrary";
@@ -28,6 +33,7 @@ import type { CustomSvgAsset } from "../../types";
 import { Button, Card, Input, Label, Badge } from "../ui";
 
 export type AssetCategoryTab = "goods_sort" | "custom_svg";
+export type AssetFormatFilter = "all" | "svg" | "emoji";
 
 export interface SvgStyleConfig {
   primaryColor: string;
@@ -131,9 +137,26 @@ const GOODS_CATEGORIES: Record<string, string[]> = {
   Badges: ["gem", "crown", "star", "gift", "palette", "trophy", "diamond"],
 };
 
+// System Emoji reference list for classification comparison
+const EMOJI_CATALOG: Array<{ key: string; emoji: string; label: string; category: string }> = [
+  { key: "emoji_apple", emoji: "🍎", label: "Apple Emoji", category: "Snacks" },
+  { key: "emoji_pizza", emoji: "🍕", label: "Pizza Emoji", category: "Snacks" },
+  { key: "emoji_burger", emoji: "🍔", label: "Burger Emoji", category: "Snacks" },
+  { key: "emoji_donut", emoji: "🍩", label: "Donut Emoji", category: "Snacks" },
+  { key: "emoji_car", emoji: "🚗", label: "Car Emoji", category: "Toys" },
+  { key: "emoji_robot", emoji: "🤖", label: "Robot Emoji", category: "Toys" },
+  { key: "emoji_duck", emoji: "🦆", label: "Duck Emoji", category: "Toys" },
+  { key: "emoji_bear", emoji: "🧸", label: "Bear Emoji", category: "Toys" },
+  { key: "emoji_star", emoji: "⭐", label: "Star Emoji", category: "Badges" },
+  { key: "emoji_crown", emoji: "👑", label: "Crown Emoji", category: "Badges" },
+  { key: "emoji_gem", emoji: "💎", label: "Gem Emoji", category: "Badges" },
+  { key: "emoji_trophy", emoji: "🏆", label: "Trophy Emoji", category: "Badges" },
+];
+
 export const SvgAssetEditor: React.FC = () => {
   const { assets, setAssets } = useSvgLibrary();
   const [activeTab, setActiveTab] = useState<AssetCategoryTab>("goods_sort");
+  const [formatFilter, setFormatFilter] = useState<AssetFormatFilter>("all");
   const [selectedKey, setSelectedKey] = useState<string>("donut");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
@@ -150,14 +173,16 @@ export const SvgAssetEditor: React.FC = () => {
   const [customLabel, setCustomLabel] = useState<string>("Custom Star");
   const [svgError, setSvgError] = useState<string | null>(null);
 
+  // Filter Goods Sort keys based on Category, Search Query, and Format Filter (SVG vs Emoji)
   const filteredGoodsKeys = useMemo(() => {
     return GOODS_ASSET_KEYS.filter((key) => {
       const matchesSearch = key.toLowerCase().includes(searchQuery.toLowerCase());
-      if (selectedCategory === "All") return matchesSearch;
-      const categoryKeys = GOODS_CATEGORIES[selectedCategory] || [];
-      return matchesSearch && categoryKeys.includes(key);
+      const matchesCategory = selectedCategory === "All" || (GOODS_CATEGORIES[selectedCategory] || []).includes(key);
+      const isSvg = GOODS_ASSET_KEYS.includes(key);
+      const matchesFormat = formatFilter === "all" || (formatFilter === "svg" && isSvg) || (formatFilter === "emoji" && !isSvg);
+      return matchesSearch && matchesCategory && matchesFormat;
     });
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery, selectedCategory, formatFilter]);
 
   const copyAssetKey = () => {
     navigator.clipboard.writeText(selectedKey);
@@ -199,6 +224,8 @@ export const SvgAssetEditor: React.FC = () => {
     setAssets((prev) => prev.filter((item) => item.id !== id));
   };
 
+  const isCurrentAssetSvg = GOODS_ASSET_KEYS.includes(selectedKey as any) || activeTab === "custom_svg";
+
   return (
     <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-slate-50 font-sans text-slate-900 dark:bg-[#090C1B] dark:text-slate-100 select-none">
       <GoodsAssetLibrary />
@@ -210,9 +237,14 @@ export const SvgAssetEditor: React.FC = () => {
             <Palette size={20} />
           </div>
           <div>
-            <h1 className="text-base font-black text-slate-900 dark:text-white">SVG Asset Studio</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-base font-black text-slate-900 dark:text-white">SVG Asset Studio</h1>
+              <Badge variant="secondary" className="bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 text-[10px] font-black">
+                SVG &amp; Emoji Classified
+              </Badge>
+            </div>
             <p className="text-xs font-semibold text-slate-400 dark:text-slate-400">
-              Interactive SVG customization &amp; Goods Sort asset editor
+              Interactive SVG vector customization &amp; Emoji asset classifier
             </p>
           </div>
         </div>
@@ -246,15 +278,51 @@ export const SvgAssetEditor: React.FC = () => {
 
       {/* ── Main Studio Layout ── */}
       <div className="flex min-h-0 flex-1 overflow-hidden">
-        {/* Left Column: Asset Explorer */}
+        {/* Left Column: Asset Explorer & Classification Filter */}
         <aside className="flex h-full w-full max-w-sm shrink-0 flex-col border-r border-slate-200/80 bg-white dark:border-white/10 dark:bg-[#11162B]">
-          {/* Controls Bar */}
+          {/* Format Classification Selector (SVG Vector vs Emoji) */}
+          <div className="border-b border-slate-200/80 p-3 bg-slate-50/60 dark:border-white/10 dark:bg-white/[0.02] space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+              Asset Format Classifier
+            </label>
+            <div className="grid grid-cols-3 gap-1 rounded-xl bg-slate-200/70 p-1 dark:bg-white/10">
+              <button
+                type="button"
+                onClick={() => setFormatFilter("all")}
+                className={`py-1 text-[11px] font-black rounded-lg transition-all ${
+                  formatFilter === "all" ? "bg-white text-slate-900 shadow-sm dark:bg-violet-600 dark:text-white" : "text-slate-600 dark:text-slate-400"
+                }`}
+              >
+                All
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormatFilter("svg")}
+                className={`flex items-center justify-center gap-1 py-1 text-[11px] font-black rounded-lg transition-all ${
+                  formatFilter === "svg" ? "bg-white text-indigo-700 shadow-sm dark:bg-violet-600 dark:text-white" : "text-slate-600 dark:text-slate-400"
+                }`}
+              >
+                <Code size={12} /> SVG Vector
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormatFilter("emoji")}
+                className={`flex items-center justify-center gap-1 py-1 text-[11px] font-black rounded-lg transition-all ${
+                  formatFilter === "emoji" ? "bg-white text-amber-700 shadow-sm dark:bg-amber-600 dark:text-white" : "text-slate-600 dark:text-slate-400"
+                }`}
+              >
+                <Smile size={12} /> Emoji
+              </button>
+            </div>
+          </div>
+
+          {/* Search Bar & Category Filter Pills */}
           <div className="space-y-2.5 border-b border-slate-200/80 p-3.5 dark:border-white/10">
             <div className="relative">
               <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search SVG assets..."
+                placeholder="Search SVG &amp; Emoji assets..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 py-1.5 text-xs font-bold text-slate-900 outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 dark:border-white/10 dark:bg-white/5 dark:text-white"
@@ -280,7 +348,7 @@ export const SvgAssetEditor: React.FC = () => {
             </div>
           </div>
 
-          {/* Grid of Assets */}
+          {/* Grid of Assets with Format Badges */}
           <div className="flex-1 overflow-y-auto p-3 [scrollbar-width:thin]">
             {activeTab === "goods_sort" ? (
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
@@ -297,7 +365,12 @@ export const SvgAssetEditor: React.FC = () => {
                           : "border-slate-200/80 bg-white hover:border-indigo-300 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
                       }`}
                     >
-                      <svg width="44" height="44" viewBox="0 0 64 64" className="transition-transform group-hover:scale-110">
+                      {/* Format Classifier Badge */}
+                      <span className="absolute top-1 right-1 text-[8px] font-black uppercase px-1 py-0.2 rounded bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300">
+                        SVG
+                      </span>
+
+                      <svg width="44" height="44" viewBox="0 0 64 64" className="transition-transform group-hover:scale-110 mt-1">
                         <use href={`#goods-asset-${key}`} width="64" height="64" />
                       </svg>
                       <span className="mt-1.5 truncate text-[10px] font-black text-slate-700 dark:text-slate-300">
@@ -328,7 +401,12 @@ export const SvgAssetEditor: React.FC = () => {
                       }`}
                     >
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-xs font-black text-slate-900 dark:text-white">{asset.label || asset.id}</p>
+                        <div className="flex items-center gap-1.5">
+                          <p className="truncate text-xs font-black text-slate-900 dark:text-white">{asset.label || asset.id}</p>
+                          <span className="text-[8px] font-black uppercase px-1 py-0.2 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+                            Custom SVG
+                          </span>
+                        </div>
                         <p className="text-[10px] text-slate-400">{asset.id}</p>
                       </div>
                       <Button
@@ -353,6 +431,58 @@ export const SvgAssetEditor: React.FC = () => {
         {/* Center & Right Column: Interactive Editor Workspace */}
         <main className="flex min-w-0 flex-1 flex-col overflow-y-auto p-4 sm:p-6">
           <div className="mx-auto w-full max-w-4xl space-y-6">
+            {/* Classification Comparison Info Card */}
+            <Card className="border-indigo-100 bg-gradient-to-r from-indigo-50/80 to-purple-50/80 p-4 dark:border-white/10 dark:bg-gradient-to-r dark:from-indigo-950/40 dark:to-purple-950/40">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm">
+                    <Info size={18} />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-black text-indigo-950 dark:text-indigo-100 uppercase tracking-wider">
+                      SVG Vector Asset vs. System Emoji Classification
+                    </h3>
+                    <p className="mt-0.5 text-xs font-medium text-slate-600 dark:text-slate-300 leading-relaxed">
+                      All Goods Sort items are <strong>high-resolution inline SVG Vector assets</strong> with customizable gradient fills, stroke paths, and resolution independence.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <Badge variant="secondary" className="bg-indigo-600 text-white text-[10px] font-black">
+                    🎨 Selected: {isCurrentAssetSvg ? "Vector SVG Graphic" : "Unicode Emoji"}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Classification Comparison Grid */}
+              <div className="mt-3.5 grid grid-cols-2 gap-3 pt-3 border-t border-indigo-200/60 dark:border-indigo-800/60 text-xs">
+                <div className="p-2.5 bg-white/80 dark:bg-slate-900/60 rounded-xl border border-indigo-100 dark:border-white/10">
+                  <div className="flex items-center gap-1.5 font-black text-indigo-900 dark:text-indigo-200 mb-1">
+                    <Code size={14} className="text-indigo-600 dark:text-indigo-400" />
+                    <span>🎨 SVG Vector Assets</span>
+                  </div>
+                  <ul className="space-y-1 text-[11px] font-medium text-slate-600 dark:text-slate-300">
+                    <li className="flex items-center gap-1"><CheckCircle2 size={12} className="text-emerald-500" /> 100% Crisp at any scale (24px to 512px)</li>
+                    <li className="flex items-center gap-1"><CheckCircle2 size={12} className="text-emerald-500" /> Custom linear &amp; radial gradients</li>
+                    <li className="flex items-center gap-1"><CheckCircle2 size={12} className="text-emerald-500" /> Bundled offline in PWA sprite library</li>
+                  </ul>
+                </div>
+
+                <div className="p-2.5 bg-white/80 dark:bg-slate-900/60 rounded-xl border border-amber-100 dark:border-white/10">
+                  <div className="flex items-center gap-1.5 font-black text-amber-900 dark:text-amber-200 mb-1">
+                    <Smile size={14} className="text-amber-600 dark:text-amber-400" />
+                    <span>😀 System Emojis</span>
+                  </div>
+                  <ul className="space-y-1 text-[11px] font-medium text-slate-600 dark:text-slate-300">
+                    <li className="flex items-center gap-1"><CheckCircle2 size={12} className="text-amber-500" /> Native OS font characters (Apple/Android)</li>
+                    <li className="flex items-center gap-1"><CheckCircle2 size={12} className="text-amber-500" /> Fixed color appearance per OS font</li>
+                    <li className="flex items-center gap-1"><CheckCircle2 size={12} className="text-amber-500" /> Ideal for text badges &amp; quick labels</li>
+                  </ul>
+                </div>
+              </div>
+            </Card>
+
             {/* Live Preview Display Card */}
             <Card className="relative flex flex-col items-center justify-center overflow-hidden border-slate-200/80 bg-white p-8 shadow-sm dark:border-white/10 dark:bg-[#11162B]">
               <div className="absolute left-4 top-4 flex items-center gap-2">
