@@ -19,11 +19,13 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { CountingTechnique, type CountingQuestion } from "../../types";
 import { GoodsSortCanvas, solveGoodsSort } from "./GoodsSortCanvas";
 import {
+  GOODS_CATALOG,
   GOODS_SORT_LEVELS,
   goodsCounts,
   isGoodsBoardSolved,
   type ShelfCompartment,
 } from "./goodsSortLevels";
+import { hasGradientGoodsAsset } from "../../assets/goods-sort";
 
 vi.mock("../../sound", () => ({
   sounds: {
@@ -70,6 +72,16 @@ describe("Goods Sort canvas", () => {
       const artwork = container.querySelectorAll(`[data-goods-art="${typeKey}"]`);
       // One small copy in the goal rail plus the copies being sorted on the shelf.
       expect(artwork.length, `${typeKey} did not use the SVG collection`).toBeGreaterThan(1);
+    }
+
+    // Definitions live once in the shared sprite, never once per visible product.
+    expect(container.querySelectorAll("#goods-red")).toHaveLength(1);
+    expect(container.querySelectorAll("filter")).toHaveLength(0);
+  });
+
+  test("has offline SVG artwork for the complete curated goods catalog", () => {
+    for (const typeKey of Object.keys(GOODS_CATALOG)) {
+      expect(hasGradientGoodsAsset(typeKey), `${typeKey} is missing SVG artwork`).toBe(true);
     }
   });
 

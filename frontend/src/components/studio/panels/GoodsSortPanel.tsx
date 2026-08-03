@@ -13,7 +13,7 @@ import {
   spareShelves,
   type GoodsDifficultyTier,
 } from "../../canvases/goodsSortLevels";
-import { Sparkles, RefreshCw, Plus, Check } from "lucide-react";
+import { Sparkles, RefreshCw, Plus, Check, Palette } from "lucide-react";
 
 /** The curated ladder, in the order it is meant to be climbed. */
 const TIER_GROUPS: Array<{ tier: GoodsDifficultyTier; label: string }> = [
@@ -319,9 +319,18 @@ export const GoodsSortPanel: React.FC<PanelProps> = ({ question, update }) => {
           </div>
         </div>
 
-        {/* Custom Emoji Goods Creator */}
-        <div className="pt-2.5 border-t border-indigo-200 dark:border-indigo-800/60">
-          <label className="text-[10px] font-bold text-slate-600 dark:text-slate-300 block mb-1.5">
+        {/* SVG Asset Studio Link & Custom Emoji Creator */}
+        <div className="pt-2.5 border-t border-indigo-200 dark:border-indigo-800/60 space-y-2.5">
+          <div className="flex items-center justify-between p-2 bg-indigo-100/70 dark:bg-indigo-900/50 rounded-lg">
+            <span className="text-[11px] font-extrabold text-indigo-900 dark:text-indigo-200 flex items-center gap-1.5">
+              <Palette size={13} className="text-indigo-600 dark:text-indigo-400" /> SVG Asset Studio
+            </span>
+            <span className="text-[9px] font-bold px-2 py-0.5 bg-indigo-600 text-white rounded-md">
+              32 Gradient SVGs Active
+            </span>
+          </div>
+
+          <label className="text-[10px] font-bold text-slate-600 dark:text-slate-300 block mb-1">
             Add Custom Emoji Good
           </label>
           <div className="flex flex-wrap sm:flex-nowrap gap-2 items-center">

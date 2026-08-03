@@ -22,7 +22,7 @@ import {
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import { Celebration } from "./Celebration";
 import { surfaceClass } from "./canvasTheme";
-import { GoodsAsset } from "../../assets/goods-sort";
+import { GoodsAsset, GoodsAssetLibrary } from "../../assets/goods-sort";
 import {
   GOODS_SORT_LEVELS,
   getGoodsLevel,
@@ -887,6 +887,8 @@ export const GoodsSortCanvas: React.FC<CanvasProps> = ({
             : "text-stone-900"
         }`}
       >
+        {/* One offline sprite serves every product on the board and in the goal rail. */}
+        <GoodsAssetLibrary />
         {/* Soft Natural Ambient Light Drop */}
         <div className="pointer-events-none absolute -top-20 -left-20 h-96 w-96 rounded-full bg-amber-400/10 blur-[110px]" />
         <div className="pointer-events-none absolute -bottom-20 -right-20 h-96 w-96 rounded-full bg-orange-400/10 blur-[110px]" />
@@ -996,7 +998,6 @@ export const GoodsSortCanvas: React.FC<CanvasProps> = ({
                 <GoodsAsset
                   typeKey={item.typeKey}
                   size={16}
-                  className="drop-shadow-sm"
                   fallback={<span className="text-[11px] leading-none sm:text-sm">{item.emoji}</span>}
                 />
                 {done ? (
@@ -1277,7 +1278,7 @@ export const GoodsSortCanvas: React.FC<CanvasProps> = ({
                               <GoodsAsset
                                 typeKey={item.typeKey}
                                 size={itemStyles.size}
-                                className="drop-shadow-md transition-transform group-hover:scale-105"
+                                className="transition-transform group-hover:scale-105"
                                 fallback={(
                                   <span
                                     style={{ fontSize: itemStyles.size, lineHeight: 1 }}

@@ -73,6 +73,7 @@ import { SvgLibraryAsset } from "./assets/SvgLibraryAsset";
 import { useQuestionDeck } from "./studio/useQuestionDeck";
 import { createQuestionId } from "./studio/questionIds";
 import { SkillDeckPanel, StudioSkillFilter } from "./components/studio/SkillDeckPanel";
+import { SvgAssetEditor } from "./components/studio/SvgAssetEditor";
 import {
   Button,
   Card,
@@ -1200,13 +1201,11 @@ export default function App({ embedded = false, initialAdminTab = "dashboard", o
               </div>
             )}
 
-            {/* TAB CONTENT: assets (Custom SVG Maker) */}
+            {/* TAB CONTENT: assets (SVG Asset Studio) */}
             {adminTab === "assets" && (
-              <SvgDesigner 
-                questions={questions}
-                setQuestions={setQuestions}
-                flush={embedded}
-              />
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                <SvgAssetEditor />
+              </div>
             )}
             {adminTab === "studio" && (
               <div className="flex min-h-0 flex-1 flex-col bg-[#FBFAFF]">
