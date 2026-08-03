@@ -27,7 +27,8 @@ import { EditQuestionDrawer } from "./EditQuestionDrawer";
 import { spliceReordered, filterAndSortBySkill } from "./questionOps";
 import { CurriculumStudioSkeleton } from "./CurriculumStudioSkeleton";
 import { CurriculumDetailsDrawer, CurriculumDetailsTab } from "./CurriculumDetailsDrawer";
-import { curriculumApi, CurriculumReleaseImpact, CurriculumRolloutStrategy } from "../../api/curriculum";
+import { curriculumApi, CurriculumDrift, CurriculumReleaseImpact, CurriculumRolloutStrategy } from "../../api/curriculum";
+import { isApiConfigured } from "../../api/client";
 import { Badge, Button } from "../ui";
 import { PublishRolloutDialog } from "./PublishRolloutDialog";
 
@@ -114,7 +115,38 @@ export const CurriculumStudioPage: React.FC<CurriculumStudioPageProps> = ({ curr
     coverage.forEach(c => map.set(c.skill.id, c));
     return map;
   }, [coverage]);
-  const issues = useMemo(() => auditCurriculum(tree, questionSkillIds), [tree, questionSkillIds]);
+  /**
+   * Drift is the one health question the browser cannot answer on its own: it needs the
+   * published release's hashes. Re-read whenever the draft is saved (`revision` bumps), so
+   * the warning appears as soon as an edit takes the draft away from what learners play.
+   */
+  const [drift, setDrift] = useState<CurriculumDrift | null>(null);
+  useEffect(() => {
+    if (!curriculumId || !isApiConfigured()) return;
+    let cancelled = false;
+    void curriculumApi.drift(curriculumId)
+      .then(result => { if (!cancelled) setDrift(result); })
+      .catch(() => { /* health degrades to the local checks; not worth an error banner */ });
+    return () => { cancelled = true; };
+  }, [curriculumId, revision, published]);
+
+  const issues = useMemo(() => {
+    const found = auditCurriculum(tree, questionSkillIds);
+    if (drift?.hasRelease && drift.drifted.length > 0) {
+      const parts = drift.drifted
+        .map(part => ({ tree: "structure", questions: "questions", assets: "artwork" }[part]))
+        .join(", ");
+      found.unshift({
+        level: "rewards",
+        id: `release-v${drift.revision}`,
+        severity: "warning",
+        message:
+          `Draft ${parts} differ${drift.drifted.length === 1 ? "s" : ""} from release v${drift.revision} — `
+          + "learners keep playing the release until you publish.",
+      });
+    }
+    return found;
+  }, [tree, questionSkillIds, drift]);
 
   const selectedUnit = tree.units.find(u => u.id === selectedUnitId) ?? null;
   const selectedSkill = tree.skills.find(s => s.id === selectedSkillId) ?? null;

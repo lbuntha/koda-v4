@@ -29,6 +29,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import re
 from typing import Any
 
 from .grading import supported_techniques
@@ -204,6 +205,40 @@ def validate_checkpoints(tree: dict) -> None:
             )
 
 
+CONCEPT_ID_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*(?:\.[a-z0-9]+(?:-[a-z0-9]+)*)*$")
+
+
+def validate_concept_ids(tree: dict) -> None:
+    """`conceptId`, when present, must be a dotted lowercase name and unique in the tree.
+
+    A concept id is the one identifier meant to mean the same thing in every grade that
+    teaches the idea, so it is what a later release, a sibling curriculum, or a cross-grade
+    review will resolve against. Releases are immutable: a duplicate or a typo published once
+    is wrong for as long as anyone is assigned to that release. Both are cheap to catch here.
+
+    Absence is not an error. Existing content predates the field.
+    """
+    seen: dict[str, str] = {}
+    for skill in tree.get("skills", []):
+        if not isinstance(skill, dict):
+            continue
+        raw = skill.get("conceptId")
+        if raw is None:
+            continue
+        if not isinstance(raw, str) or not CONCEPT_ID_PATTERN.match(raw.strip()):
+            raise ReleaseValidationError(
+                f"skill {skill.get('id')!r}: conceptId {raw!r} must be a dotted lowercase "
+                'name, e.g. "number.counting.to-20"'
+            )
+        concept_id = raw.strip()
+        if concept_id in seen:
+            raise ReleaseValidationError(
+                f"skill {skill.get('id')!r}: conceptId {concept_id!r} is already used by "
+                f"skill {seen[concept_id]!r}"
+            )
+        seen[concept_id] = skill.get("id")
+
+
 def validate_reward_metadata(tree: dict) -> None:
     rewards = tree.get("rewards") or {}
     quest = rewards.get("quest") or {}
@@ -279,6 +314,7 @@ def validate_release_structure(tree: dict) -> None:
     """
     validate_prerequisites(tree)
     validate_checkpoints(tree)
+    validate_concept_ids(tree)
     validate_reward_metadata(tree)
 
 
@@ -352,9 +388,29 @@ def build_release_payload(
         "tree": tree,
         "question_manifest": question_manifest,
         "asset_manifest": asset_manifest,
-        "content_hashes": {
-            "tree": content_hash(tree),
-            "questions": content_hash([m["content_hash"] for m in question_manifest]),
-            "assets": content_hash([m["content_hash"] for m in asset_manifest]),
-        },
+        "content_hashes": content_hashes(
+            tree=tree,
+            question_manifest=question_manifest,
+            asset_manifest=asset_manifest,
+        ),
+    }
+
+
+def content_hashes(
+    *,
+    tree: dict,
+    question_manifest: list[dict],
+    asset_manifest: list[dict],
+) -> dict[str, str]:
+    """The three digests that identify a release's content.
+
+    Split out of `build_release_payload` so the drift check can hash a *draft* the same way
+    without validating it: an author whose draft cannot publish yet still needs to be told it
+    no longer matches what their learners are playing. If these two ever computed hashes
+    differently, drift would report changes that publishing does not make, or miss ones it does.
+    """
+    return {
+        "tree": content_hash(tree),
+        "questions": content_hash([entry["content_hash"] for entry in question_manifest]),
+        "assets": content_hash([entry["content_hash"] for entry in asset_manifest]),
     }

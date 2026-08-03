@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { CountingQuestion, CustomSvgAsset } from "../../types";
 import {
+  CONCEPT_ID_PATTERN,
   CurriculumTree,
   Skill,
   SkillCoverage,
@@ -89,6 +90,8 @@ export const SkillDetail: React.FC<SkillDetailProps> = ({
   );
   const minutesLabel = formatSkillMinutes(skill);
   const estimatedMinutesInvalid = !isValidSkillMinutes(skill.presentation?.estimatedMinutes);
+  // Matches the check the release runs; publishing a malformed one is refused server-side.
+  const conceptIdInvalid = Boolean(skill.conceptId) && !CONCEPT_ID_PATTERN.test(skill.conceptId!);
 
   const skillQuestions = filterAndSortBySkill(questions, skill.id);
   const coverageLabel = coverage.shortfall === 0
@@ -290,6 +293,28 @@ export const SkillDetail: React.FC<SkillDetailProps> = ({
 
         {showPresentationFields && (
         <div className="grid gap-3 border-t border-[#EEEAF8] p-3 md:grid-cols-2">
+          <div className="space-y-1.5 md:col-span-2">
+            <Label htmlFor="skill-concept-id">Concept id</Label>
+            <Input
+              id="skill-concept-id"
+              maxLength={120}
+              className="font-mono"
+              value={skill.conceptId ?? ""}
+              placeholder="number.place-value.make-a-ten"
+              onChange={event => onUpdateSkill({ conceptId: event.target.value.trim() || undefined })}
+              aria-invalid={conceptIdInvalid || undefined}
+            />
+            <p className="text-[10px] leading-relaxed text-[#6D6997]">
+              What this skill teaches, named the same way in every grade that touches it. Lets a
+              later grade name this as a prerequisite and review it. Optional, but a published
+              release keeps whatever it was given — releases are immutable.
+            </p>
+            {conceptIdInvalid && (
+              <p className="text-[10px] font-medium text-rose-600">
+                Use dotted lowercase words, e.g. <span className="font-mono">number.counting.to-20</span>.
+              </p>
+            )}
+          </div>
           <div className="space-y-1.5">
             <Label htmlFor="skill-student-title">Student title</Label>
             <Input

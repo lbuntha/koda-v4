@@ -11,10 +11,12 @@ from app.features.content.grading import supported_techniques
 from app.features.content.release import (
     GRADING_KEY_FIELDS,
     ReleaseValidationError,
+    build_question_manifest,
     build_release_payload,
     content_hash,
     normalize_difficulty,
     split_question,
+    content_hashes,
     validate_prerequisites,
 )
 
@@ -233,3 +235,106 @@ def test_build_release_payload_rejects_invalid_skill_completion_xp():
     skill["completionXp"] = 101
     with pytest.raises(ReleaseValidationError, match="completionXp"):
         build_release_payload(tree=_tree([skill]), questions=[])
+
+
+# ── Concept ids ─────────────────────────────────────────────────────────────────
+#
+# A concept id is the only identifier meant to outlive the curriculum that defines it:
+# `number.place-value.make-a-ten` is the same string in Grade 1 and in Grade 5, which is
+# what lets a later grade name it as a prerequisite or schedule a review of it. Releases
+# are immutable, so a duplicate or a typo published once is wrong for everyone assigned
+# to that release, for as long as they are assigned to it.
+
+
+def test_release_carries_concept_ids_into_the_snapshot():
+    skill = _skill("s1")
+    skill["conceptId"] = "number.counting.to-20"
+    payload = build_release_payload(tree=_tree([skill]), questions=[])
+    assert payload["tree"]["skills"][0]["conceptId"] == "number.counting.to-20"
+
+
+def test_release_allows_skills_without_a_concept_id():
+    """Every skill authored before the field existed has none; that is not an error."""
+    build_release_payload(tree=_tree([_skill("s1")]), questions=[])
+
+
+@pytest.mark.parametrize(
+    "concept_id",
+    ["Number.Counting", "number counting", "number..counting", "number.", "-number", 7],
+)
+def test_release_rejects_a_malformed_concept_id(concept_id):
+    skill = _skill("s1")
+    skill["conceptId"] = concept_id
+    with pytest.raises(ReleaseValidationError, match="conceptId"):
+        build_release_payload(tree=_tree([skill]), questions=[])
+
+
+def test_release_rejects_two_skills_claiming_one_concept():
+    first, second = _skill("s1"), _skill("s2", order=2)
+    first["conceptId"] = second["conceptId"] = "number.counting.to-20"
+    with pytest.raises(ReleaseValidationError, match="already used by skill 's1'"):
+        build_release_payload(tree=_tree([first, second]), questions=[])
+
+
+# ── Drift ───────────────────────────────────────────────────────────────────────
+#
+# Editing a published curriculum changes nothing for anyone assigned to it — only
+# publishing does. That silence has cost real time twice: Grade 1 Mathematics carried
+# rewards its only release never had, and a sorting ladder sat at 40 authored levels
+# while learners played the 24 that were released. The studio now compares hashes, so
+# these tests pin that a draft and the release it came from agree, and that each part
+# is detected independently.
+
+
+def _draft_hashes(tree, questions, assets=()):
+    skill_ids = {skill["id"] for skill in tree["skills"]}
+    return content_hashes(
+        tree=tree,
+        question_manifest=build_question_manifest(questions, skill_ids),
+        asset_manifest=[{"content_hash": content_hash(asset)} for asset in assets],
+    )
+
+
+def _drifted(before, after):
+    return sorted(part for part, digest in after.items() if before.get(part) != digest)
+
+
+def test_an_unedited_draft_has_not_drifted_from_its_release():
+    tree = _tree([_skill("s1")])
+    questions = [_question("q1", "s1", targetCount=3)]
+    released = build_release_payload(tree=tree, questions=questions)["content_hashes"]
+
+    assert _drifted(released, _draft_hashes(tree, questions)) == []
+
+
+def test_editing_the_tree_drifts_only_the_tree():
+    tree = _tree([_skill("s1")])
+    questions = [_question("q1", "s1", targetCount=3)]
+    released = build_release_payload(tree=tree, questions=questions)["content_hashes"]
+
+    edited = _tree([_skill("s1")])
+    edited["skills"][0]["label"] = "Count objects to 10"
+
+    assert _drifted(released, _draft_hashes(edited, questions)) == ["tree"]
+
+
+def test_adding_a_question_drifts_only_the_questions():
+    tree = _tree([_skill("s1")])
+    questions = [_question("q1", "s1", targetCount=3)]
+    released = build_release_payload(tree=tree, questions=questions)["content_hashes"]
+
+    added = questions + [_question("q2", "s1", targetCount=4)]
+
+    assert _drifted(released, _draft_hashes(tree, added)) == ["questions"]
+
+
+def test_a_question_for_another_curriculum_is_not_drift():
+    """Only questions whose skill is in this tree are released, so one tagged elsewhere
+    must not make an untouched curriculum look changed."""
+    tree = _tree([_skill("s1")])
+    questions = [_question("q1", "s1", targetCount=3)]
+    released = build_release_payload(tree=tree, questions=questions)["content_hashes"]
+
+    unrelated = questions + [_question("q9", "some-other-skill", targetCount=2)]
+
+    assert _drifted(released, _draft_hashes(tree, unrelated)) == []

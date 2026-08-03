@@ -70,6 +70,20 @@ export interface Skill {
   description?: string;
   /** Optional standards alignment, e.g. Common Core "1.NBT.A.1" — purely informational, nothing reads it yet. */
   standardRef?: string;
+  /**
+   * What this skill teaches, named so it survives the curriculum that teaches it:
+   * `number.place-value.make-a-ten`.
+   *
+   * `id` is unique to one curriculum, so mastery keyed on it stops at the grade boundary —
+   * Grade 2 cannot state a prerequisite on Grade 1's "make a ten", review it, or see that the
+   * learner already knows it. A concept id is the same string in every grade that touches the
+   * idea, which is what makes twelve grades one path instead of twelve islands.
+   *
+   * Recorded now, read later. Nothing consumes it yet — but releases are immutable, so a skill
+   * published without one carries that gap forever, and the only later fix is a mapping table
+   * that grows with every release ever cut.
+   */
+  conceptId?: string;
   order: number;
   /** "at least 10 questions" — configurable per skill since not every skill needs the same depth. */
   minQuestions: number;
@@ -340,6 +354,44 @@ export interface CurriculumIssue {
   message: string;
 }
 
+/** Dotted lowercase segments: `number.place-value.make-a-ten`. */
+export const CONCEPT_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*(?:\.[a-z0-9]+(?:-[a-z0-9]+)*)*$/;
+
+/**
+ * Concept ids are only useful if they mean the same thing everywhere, so the two ways of
+ * breaking that are checked — and nothing else.
+ *
+ * Deliberately silent about skills that have no concept id at all. Most existing content has
+ * none, and a warning on every one of them would bury the issues worth reading.
+ */
+export function auditConceptIds(tree: CurriculumTree): CurriculumIssue[] {
+  const issues: CurriculumIssue[] = [];
+  const seen = new Map<string, string>();
+
+  tree.skills.forEach(skill => {
+    const conceptId = skill.conceptId?.trim();
+    if (!conceptId) return;
+    if (!CONCEPT_ID_PATTERN.test(conceptId)) {
+      issues.push({
+        level: "skill", id: skill.id, severity: "warning",
+        message: `concept id "${conceptId}" is not a dotted lowercase name, e.g. "number.counting.to-20"`,
+      });
+    }
+    const owner = seen.get(conceptId);
+    if (owner) {
+      // Two skills claiming one concept makes the learner's history for it ambiguous.
+      issues.push({
+        level: "skill", id: skill.id, severity: "error",
+        message: `concept id "${conceptId}" is already used by skill "${owner}"`,
+      });
+    } else {
+      seen.set(conceptId, skill.id);
+    }
+  });
+
+  return issues;
+}
+
 export function auditCurriculum(tree: CurriculumTree, questionSkillIds: (string | undefined)[]): CurriculumIssue[] {
   const issues: CurriculumIssue[] = [];
 
@@ -366,6 +418,8 @@ export function auditCurriculum(tree: CurriculumTree, questionSkillIds: (string 
       });
     }
   });
+
+  issues.push(...auditConceptIds(tree));
 
   const orphanCounts = new Map<string, number>();
   questionSkillIds.forEach(id => {

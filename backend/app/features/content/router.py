@@ -18,7 +18,13 @@ from ...models.assignment import Assignment, CurriculumOffering, Placement, Prog
 from ...models.mastery import MasteryState
 from .offerings import release_includes
 from .placement import select_delivery_skill_ids
-from .release import ReleaseValidationError, build_release_payload
+from .release import (
+    ReleaseValidationError,
+    build_question_manifest,
+    build_release_payload,
+    content_hash,
+    content_hashes,
+)
 from .schemas import CurriculumArchiveIn, CurriculumCreateIn, CurriculumIn, CurriculumRolloutIn, QuestionsIn, SvgLibraryIn
 
 logger = get_logger("content")
@@ -723,6 +729,56 @@ async def publish_release(curriculum_id: str, user: User = Depends(get_current_u
         raise HTTPException(status.HTTP_409_CONFLICT, "Restore this curriculum before publishing")
     release = await _publish_release(doc, user)
     return _release_out(release)
+
+
+@router.get("/curricula/{curriculum_id}/drift")
+async def get_release_drift(curriculum_id: str, user: User = Depends(get_current_user)):
+    """Does the draft still say what the newest release says?
+
+    Editing a published curriculum changes nothing for anyone assigned to it — only
+    publishing does — and until now nothing said so. That silence has cost real time twice:
+    Grade 1 Mathematics carried rewards its only release never had, and a sorting ladder sat
+    at 40 authored levels while learners played the 24 in the release.
+
+    Compared by the release's own content hashes, so "different" here means exactly what it
+    will mean when the next release is cut. Deliberately does not validate the draft: a draft
+    that cannot publish yet is still worth telling the author has drifted.
+    """
+    doc = await Curriculum.find_one({"curriculum_id": curriculum_id, "owner_id": str(user.id)})
+    if not doc:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Curriculum not found")
+
+    latest = (
+        await CurriculumRelease.find(CurriculumRelease.curriculum_id == curriculum_id)
+        .sort("-revision")
+        .first_or_none()
+    )
+    if not latest:
+        return {"hasRelease": False, "revision": None, "drifted": [], "publishedAt": None}
+
+    resolved_tree = await _resolved_tree(doc.tree)
+    deck = await QuestionDeck.find_one(QuestionDeck.owner_id == doc.owner_id)
+    svg = await SvgLibrary.find_one(SvgLibrary.owner_id == doc.owner_id)
+    skill_ids = {
+        skill.get("id") for skill in resolved_tree.get("skills", []) if isinstance(skill, dict)
+    }
+    draft_hashes = content_hashes(
+        tree=resolved_tree,
+        question_manifest=build_question_manifest(deck.questions if deck else [], skill_ids),
+        asset_manifest=[
+            {"content_hash": content_hash(asset)} for asset in (svg.assets if svg else [])
+        ],
+    )
+    drifted = [
+        part for part, digest in draft_hashes.items()
+        if latest.content_hashes.get(part) != digest
+    ]
+    return {
+        "hasRelease": True,
+        "revision": latest.revision,
+        "drifted": drifted,
+        "publishedAt": latest.published_at,
+    }
 
 
 @router.get("/curricula/{curriculum_id}/releases")

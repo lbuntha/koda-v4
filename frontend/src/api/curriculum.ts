@@ -70,6 +70,19 @@ export interface CurriculumImpactItem {
   fields?: string[];
 }
 
+/**
+ * Whether the draft still says what learners are actually playing.
+ *
+ * `drifted` names the parts that differ from the newest release — any of "tree", "questions",
+ * "assets". Empty means published and draft agree.
+ */
+export interface CurriculumDrift {
+  hasRelease: boolean;
+  revision: number | null;
+  drifted: Array<"tree" | "questions" | "assets">;
+  publishedAt: string | null;
+}
+
 export interface CurriculumReleaseImpact {
   level: CurriculumImpactLevel;
   addedSkills: CurriculumImpactItem[];
@@ -104,6 +117,9 @@ export const curriculumApi = {
     api.get<{ events: CurriculumAuditEvent[] }>(`/content-audit?resource_type=curriculum&limit=${limit}${curriculumId ? `&curriculum_id=${encodeURIComponent(curriculumId)}` : ""}`),
   releases: (curriculumId: string) =>
     api.get<{ releases: import("./assignments").ReleaseSummary[] }>("/curricula/" + curriculumId + "/releases"),
+  /** Which parts of the draft no longer match the newest release. Empty when nothing changed. */
+  drift: (curriculumId: string) =>
+    api.get<CurriculumDrift>("/curricula/" + curriculumId + "/drift"),
   publishRelease: (curriculumId: string) =>
     api.post<import("./assignments").ReleaseSummary>("/curricula/" + curriculumId + "/releases"),
   releaseImpact: (curriculumId: string, gradeId: string, subjectId: string) => {
