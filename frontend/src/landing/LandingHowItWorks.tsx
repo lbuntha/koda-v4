@@ -118,7 +118,7 @@ export const LandingHowItWorks: React.FC<{ isDark?: boolean }> = ({ isDark = fal
           A simple path to stronger skills.
         </h2>
         <p className="mt-3 text-sm font-medium leading-relaxed text-slate-500 dark:text-slate-400">
-          Template preview — the activities and progress below are examples only. Connect these cards to your learner data when implementing the flow.
+          Step by step, children build foundational math skills, unlock new challenges, and celebrate progress with confidence.
         </p>
       </div>
 
@@ -129,7 +129,7 @@ export const LandingHowItWorks: React.FC<{ isDark?: boolean }> = ({ isDark = fal
             1
           </div>
           <Badge variant="secondary" className="mb-3 text-[9px] uppercase tracking-wider dark:bg-white/10 dark:text-slate-300">
-            Template
+            Personalized
           </Badge>
           <h3 className="text-base font-black text-slate-900 dark:text-white">Choose a profile</h3>
 
@@ -146,7 +146,7 @@ export const LandingHowItWorks: React.FC<{ isDark?: boolean }> = ({ isDark = fal
             2
           </div>
           <Badge variant="secondary" className="mx-auto mb-3 text-[9px] uppercase tracking-wider dark:bg-white/10 dark:text-slate-300">
-            Example recommendations
+            Adaptive Queue
           </Badge>
           <h3 className="text-center text-base font-black text-slate-900 dark:text-white">Play the right activity</h3>
 
@@ -169,7 +169,7 @@ export const LandingHowItWorks: React.FC<{ isDark?: boolean }> = ({ isDark = fal
           </Card>
 
           <p className="mt-auto pt-4 text-center text-xs font-medium leading-relaxed text-slate-500 dark:text-slate-400">
-            Populate this list from your recommendation service and the learner’s current level.
+            Activities automatically adjust to every learner’s pace and mastery level.
           </p>
         </Card>
 
@@ -179,7 +179,7 @@ export const LandingHowItWorks: React.FC<{ isDark?: boolean }> = ({ isDark = fal
             3
           </div>
           <Badge variant="secondary" className="mx-auto mb-3 text-[9px] uppercase tracking-wider dark:bg-white/10 dark:text-slate-300">
-            Example progress layout
+            Real-time Mastery
           </Badge>
           <h3 className="text-center text-base font-black text-slate-900 dark:text-white">Watch skills grow</h3>
 

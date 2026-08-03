@@ -9,7 +9,7 @@ export const LandingClosingCta: React.FC<{ isDark?: boolean; onStart: () => void
         alt=""
         className="absolute inset-0 h-full w-full object-cover"
       />
-      <div className="relative z-10 mx-auto w-[52%] min-w-[230px] text-center">
+      <div className="relative z-10 mx-auto w-[90%] sm:w-[52%] min-w-[240px] text-center">
         <h2 className="text-xl font-black leading-tight text-slate-950 drop-shadow-[0_1px_0_rgba(255,255,255,0.7)] dark:text-white dark:drop-shadow-none sm:text-2xl lg:text-3xl">
           Ready to make learning<br className="hidden sm:block" /> their favorite adventure?
         </h2>
