@@ -30,6 +30,9 @@ interface State {
  * screen; without it the failure never reaches anyone who can fix it.
  */
 export class ErrorBoundary extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+  }
   state: State = { failed: false, reference: null };
 
   static getDerivedStateFromError(): Partial<State> {

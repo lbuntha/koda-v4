@@ -201,7 +201,7 @@ export const KodaActor: React.FC<KodaActorProps> = ({
 
   const reduceMotion = usePrefersReducedMotion();
   // One resolved level drives every animation decision below.
-  const level: KodaAnimation = reduceMotion ? "none" as const : animation;
+  const level: KodaAnimation = (reduceMotion ? "none" : animation) as KodaAnimation;
   const loops = level === "full";
   const reveals = level !== "none";
 

@@ -30,7 +30,7 @@ export const SubjectSelect: React.FC<SubjectSelectProps> = ({
     ? subjects.filter((s) => !s.grade_id || s.grade_id === gradeId || s.grade_id === "all")
     : subjects;
 
-  const catalogOptions = matchingSubjects.length > 0
+  const catalogOptions: { value: string; label: string }[] = matchingSubjects.length > 0
     ? Array.from(
         new Map(matchingSubjects.map((s) => [s.key, { value: s.key, label: s.name }])).values()
       )
