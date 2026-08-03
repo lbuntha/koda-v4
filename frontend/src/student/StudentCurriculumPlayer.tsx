@@ -19,6 +19,7 @@ import {
 } from "../api/course";
 import { apiFileUrl, isOfflineError } from "../api/client";
 import { courseKey, progressKey, readCache, writeCache } from "../api/offlineCache";
+import { ensurePersistentStorage } from "../pwa/persistentStorage";
 import { warmAssetCache } from "../pwa/warmAssetCache";
 import { PlacementWarmup } from "./PlacementWarmup";
 import { SaveIssueDialog } from "./home/SaveIssueDialog";
@@ -116,6 +117,10 @@ export const StudentCurriculumPlayer: React.FC = () => {
         writeCache(courseKey(account.id), nextCourse);
         if (nextProgress) writeCache(progressKey(account.id), nextProgress);
         void warmAssetCache(nextCourse.queue.map(item => apiFileUrl(item.thumbnailUrl)));
+        // Now that a plan and its artwork are on the device, ask for them not to be
+        // evicted. Deliberately here rather than at app start: a signed-in learner with
+        // a saved lesson is the point at which the ask is justified.
+        void ensurePersistentStorage();
       }
       return nextCourse;
     } catch (reason) {

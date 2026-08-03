@@ -133,7 +133,13 @@ export default defineConfig(() => {
       }),
     ],
     build: {
-      emptyOutDir: false,
+      // Must stay true now that a service worker reads this directory. Leftover chunks from
+      // a previous build are swept into the precache manifest, so the worker downloads and
+      // stores two generations of the app: one build with this off took the precache from
+      // 154 entries / 2.7 MB to 254 / 4.5 MB, half of it dead code that would then be
+      // served offline. (If this was set to protect a root-owned dist from failing deletes,
+      // that tree has been moved aside — see the note in the PWA section of AGENTS.md.)
+      emptyOutDir: true,
       rollupOptions: {
         output: {
           // React changes on its own schedule, not ours. Splitting it out means an app

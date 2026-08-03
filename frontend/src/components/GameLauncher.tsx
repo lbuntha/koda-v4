@@ -32,6 +32,7 @@ import { analyticsLogger } from "../services/analyticsLogger";
 import { getTaxonomy, AttemptOutcome } from "../services/logSchema";
 import { solvedSelection } from "../student/answerSelection";
 import { useThemeMode } from "../theme/appTheme";
+import { useZoomLock } from "../hooks/useZoomLock";
 
 interface GameLauncherProps {
   questions: CountingQuestion[];
@@ -82,6 +83,7 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
   learningContext,
   assessment,
 }) => {
+  const zoomLockRef = useZoomLock<HTMLDivElement>();
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const [confetti, setConfetti] = useState<ConfettiParticle[]>([]);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
@@ -350,6 +352,9 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
 
   return (
     <div
+      // Two fingers on a ten-frame drag read as a pinch; the activity surface is the one
+      // place that has to stay put. Everything outside it keeps browser zoom.
+      ref={zoomLockRef}
       className={`fixed inset-0 z-50 flex flex-col overflow-hidden font-sans select-none transition-colors duration-500
         ${isDark
           ? 'bg-[#0B0F1A]'
@@ -366,117 +371,112 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
       )}
 
       {/* ══════════════════ TOP NAVBAR ═══════════════════ */}
-      <div className={`flex-shrink-0 flex items-center justify-between px-4 md:px-6 h-14 border-b z-20 transition-colors duration-500
-        ${isDark ? 'bg-white/[0.03] border-white/[0.06]' : 'bg-white/60 border-black/[0.06] backdrop-blur-md'}
+      <header className={`flex min-h-[3.75rem] shrink-0 items-center justify-between gap-2 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2.5 sm:px-5 md:px-6 z-20 border-b transition-colors duration-300 backdrop-blur-xl [-webkit-backdrop-filter:blur(16px)] [-webkit-tap-highlight-color:transparent]
+        ${isDark ? 'bg-[#111329]/95 border-white/10' : 'bg-white/95 border-slate-200/70 shadow-sm'}
       `}>
-        {/* Left – branding */}
-        <div className="flex items-center gap-3">
-          <div className="relative">
+        {/* Left – branding & title */}
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+          <div className="relative shrink-0">
             <div className="absolute inset-0 rounded-xl bg-indigo-600 blur-sm opacity-40" />
-            <div className="relative bg-indigo-600 p-2 rounded-xl text-white shadow-md">
-              <Gamepad2 size={17} />
+            <div className="relative bg-indigo-600 p-1.5 sm:p-2 rounded-xl text-white shadow-md">
+              <Gamepad2 size={16} className="sm:w-[17px] sm:h-[17px]" />
             </div>
           </div>
-          <div className="hidden sm:block">
-            {/* The eyebrow is set in 9px tracked-out monospace — a tool's voice, aimed at
-                someone scanning a dense authoring UI. An early reader cannot read it, and it
-                sits directly above the activity name they need. Learners get the name alone,
-                at a size meant to be read. */}
+          <div className="min-w-0 flex-1">
             {assessment ? (
-              <p className={`text-[9px] font-bold uppercase tracking-[0.16em] leading-none mb-0.5
+              <p className={`text-[8px] sm:text-[9px] font-bold uppercase tracking-[0.16em] leading-none mb-0.5 truncate
                 ${isDark ? 'text-indigo-400' : 'text-indigo-600'}
               `}>{assessment.eyebrow ?? "Placement check"}</p>
             ) : !kidMode && (
-              <p className={`text-[9px] font-bold uppercase tracking-[0.2em] font-mono leading-none mb-0.5
+              <p className={`hidden sm:block text-[9px] font-bold uppercase tracking-[0.2em] font-mono leading-none mb-0.5 truncate
                 ${isDark ? 'text-slate-500' : 'text-slate-400'}
               `}>Worksheet Game</p>
             )}
-            <h1 className={`font-extrabold leading-none ${kidMode ? 'text-base sm:text-lg' : 'text-sm'}
-              ${isDark ? 'text-white' : 'text-slate-800'}
+            <h1 className={`font-extrabold leading-tight truncate text-xs sm:text-sm md:text-base max-w-[140px] xs:max-w-[220px] sm:max-w-none
+              ${isDark ? 'text-white' : 'text-slate-900'}
             `}>{activeQuestion?.title || "Learning Time"}</h1>
           </div>
         </div>
 
-        {/* Center – progress bar.
-            Hidden on narrow screens for an adult, who still has the dot rail and Back/Next
-            below. A learner has neither — this is their only sense of how far through they
-            are, so it stays visible at every width. */}
-        <div className={`flex-1 max-w-xs mx-3 md:mx-6 ${kidMode ? "block" : "hidden md:block"}`}>
-          <div className={`flex mb-1 ${kidMode ? "justify-center" : "justify-between"}`}>
-            {!kidMode && (
-              <span className={`text-[9px] font-mono font-bold uppercase tracking-widest ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
-                Progress
+        {/* Center – progress bar / pill (only rendered when there is more than 1 question/level) */}
+        {questions.length > 1 && (
+          <div className={`flex-1 max-w-[160px] sm:max-w-xs mx-1 sm:mx-4 ${kidMode ? "block" : "hidden md:block"}`}>
+            <div className={`flex mb-1 ${kidMode ? "justify-center" : "justify-between"}`}>
+              {!kidMode && (
+                <span className={`text-[9px] font-mono font-bold uppercase tracking-widest ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                  Progress
+                </span>
+              )}
+              <span className={`font-bold ${kidMode ? 'text-xs sm:text-sm' : 'text-[9px] font-mono'} ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`}>
+                {currentIdx + 1} / {questions.length}
               </span>
-            )}
-            <span className={`font-bold ${kidMode ? 'text-xs sm:text-sm' : 'text-[9px] font-mono'} ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`}>
-              {currentIdx + 1} / {questions.length}
-            </span>
+            </div>
+            <div className={`h-1.5 rounded-full overflow-hidden ${isDark ? 'bg-white/10' : 'bg-black/10'}`}>
+              <div
+                className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-500 ease-out"
+                style={{ width: `${((currentIdx + 1) / questions.length) * 100}%` }}
+              />
+            </div>
           </div>
-          <div className={`h-1.5 rounded-full overflow-hidden ${isDark ? 'bg-white/10' : 'bg-black/10'}`}>
-            <div
-              className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${((currentIdx + 1) / questions.length) * 100}%` }}
-            />
-          </div>
-        </div>
+        )}
 
-        {/* Right – controls */}
-        <div className="flex items-center gap-1.5">
+        {/* Right – compact mobile controls */}
+        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
           {!kidMode && !assessment && (
             <>
               <button
                 onClick={() => { setShowAnalyticsModal(true); sounds.playPop(); }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all cursor-pointer ${
+                className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all active:scale-95 cursor-pointer ${
                   isDark
                     ? "bg-indigo-500/20 hover:bg-indigo-500/30 border-indigo-500/40 text-indigo-300"
                     : "bg-indigo-50 hover:bg-indigo-100 border-indigo-200 text-indigo-700 shadow-sm"
                 }`}
-                title="View & Export Interactive JSON Logs (FastAPI ready)"
+                title="View & Export Interactive JSON Logs"
               >
                 <Activity size={13} className="animate-pulse text-indigo-400" />
-                <span className="hidden sm:inline">JSON Logs</span>
+                <span>JSON Logs</span>
               </button>
               <button
                 onClick={() => { toggleTheme(); sounds.playPop(); }}
-                className={`${iconBtn} ${isDark ? iconBtnDark : iconBtnLight}`}
+                className={`${iconBtn} h-8 w-8 sm:h-9 sm:w-9 active:scale-95 ${isDark ? iconBtnDark : iconBtnLight}`}
                 title={isDark ? "Light Mode" : "Dark Mode"}
               >
-                {isDark ? <Sun size={15} /> : <Moon size={15} />}
+                {isDark ? <Sun size={14} /> : <Moon size={14} />}
               </button>
               <button
                 onClick={resetSlide}
-                className={`${iconBtn} ${isDark ? iconBtnDark : iconBtnLight}`}
+                className={`${iconBtn} h-8 w-8 sm:h-9 sm:w-9 active:scale-95 ${isDark ? iconBtnDark : iconBtnLight}`}
                 title="Reset Challenge"
               >
-                <RotateCcw size={15} />
+                <RotateCcw size={14} />
               </button>
             </>
           )}
-          <button onClick={toggleMute} className={`${iconBtn} ${isDark ? iconBtnDark : iconBtnLight}`} title="Toggle sound">
-            {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+          <button onClick={toggleMute} className={`${iconBtn} h-8 w-8 sm:h-9 sm:w-9 active:scale-95 ${isDark ? iconBtnDark : iconBtnLight}`} title="Toggle sound">
+            {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
           </button>
           <button
             onClick={toggleBrowserFullscreen}
-            className={`${iconBtn} ${isDark ? iconBtnDark : iconBtnLight}`}
+            className={`${iconBtn} hidden xs:flex h-8 w-8 sm:h-9 sm:w-9 active:scale-95 ${isDark ? iconBtnDark : iconBtnLight}`}
             title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
             aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
           >
-            {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+            {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
           </button>
           {(!assessment || onExit) && (
             <>
               <div className={`w-px h-5 mx-0.5 ${isDark ? 'bg-white/10' : 'bg-black/10'}`} />
               <button
                 onClick={() => { (onExit ?? onClose)(); sounds.playPop(); }}
-                className="flex items-center gap-1.5 px-3 py-2 bg-rose-500 hover:bg-rose-400 text-white rounded-xl text-[11px] font-bold transition-all shadow-md shadow-rose-500/20 cursor-pointer"
+                className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-rose-500 hover:bg-rose-400 active:scale-95 text-white rounded-xl text-[11px] font-bold transition-all shadow-sm shadow-rose-500/20 cursor-pointer shrink-0"
               >
-                <X size={13} />
-                <span className="hidden sm:inline">Exit</span>
+                <X size={14} />
+                <span className="inline">Exit</span>
               </button>
             </>
           )}
         </div>
-      </div>
+      </header>
 
       {/* ══════════════════ MAIN CONTENT AREA ═══════════════════ */}
       <div className="flex-1 flex flex-col md:flex-row gap-4 p-4 md:p-5 min-h-0 overflow-hidden">

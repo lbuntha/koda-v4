@@ -64,6 +64,19 @@
   --color-slate-950: #020617;
 }
 
+/* Installed-app display cutouts.
+   `viewport-fit=cover` lets the page paint edge to edge, which is what the bottom
+   toolbars want — but in landscape it also runs content under a notch or a rounded
+   corner, and an activity's leftmost bin ends up half hidden. The side insets are 0
+   in portrait and on every device without a cutout, so this costs nothing elsewhere.
+   Scoped to standalone: in a browser tab the surrounding chrome already handles it. */
+@media (display-mode: standalone) {
+  body {
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+}
+
 /* Custom Playful Keyframe Animations */
 @keyframes scaleIn {
   from {

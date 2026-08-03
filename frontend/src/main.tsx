@@ -10,19 +10,9 @@ import {GoodsSortPreview} from './components/canvases/GoodsSortPreview';
 import {CountCratesPreview} from './components/canvases/CountCratesPreview';
 import './index.css';
 
-// Prevent pinch-zoom, gesture scaling, and Ctrl/Cmd+wheel zoom for native PWA app feel
-if (typeof window !== "undefined") {
-  document.addEventListener("gesturestart", (e) => e.preventDefault());
-  document.addEventListener("gesturechange", (e) => e.preventDefault());
-  document.addEventListener("gestureend", (e) => e.preventDefault());
-  window.addEventListener(
-    "wheel",
-    (e) => {
-      if (e.ctrlKey || e.metaKey) e.preventDefault();
-    },
-    { passive: false }
-  );
-}
+// Zoom is held still inside an activity only — see `useZoomLock`, applied to the
+// GameLauncher surface. Registering the same handlers here took ⌘/Ctrl-scroll zoom away
+// from the parent, admin and studio screens too, which adults need on a laptop.
 
 // Unlinked design gallery: /?preview=learner-cards renders the real learner cards on their own,
 // so a design can be checked against a reference before a page is rebuilt around it.

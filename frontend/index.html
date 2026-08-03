@@ -13,7 +13,10 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <!-- iOS reads its own tags rather than the manifest for standalone launch + icon. -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- "default", not "black-translucent": translucent makes the web view start *behind*
+         the status bar, and every top header here is `sticky top-0` with no top inset, so
+         the clock and the header's first row shared the same pixels on a notched iPhone. -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Koda" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
   </head>
