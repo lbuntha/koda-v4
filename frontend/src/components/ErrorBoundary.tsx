@@ -29,11 +29,14 @@ interface State {
  * The report goes to the server because the boundary only helps the person looking at the
  * screen; without it the failure never reaches anyone who can fix it.
  */
-export class ErrorBoundary extends Component<Props, State> {
+export class ErrorBoundary extends React.Component<Props, State> {
+  override props: Props;
+  override state: State = { failed: false, reference: null };
+
   constructor(props: Props) {
     super(props);
+    this.props = props;
   }
-  state: State = { failed: false, reference: null };
 
   static getDerivedStateFromError(): Partial<State> {
     return { failed: true };

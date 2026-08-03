@@ -31,9 +31,9 @@ export const SubjectSelect: React.FC<SubjectSelectProps> = ({
     : subjects;
 
   const catalogOptions: { value: string; label: string }[] = matchingSubjects.length > 0
-    ? Array.from(
+    ? (Array.from(
         new Map(matchingSubjects.map((s) => [s.key, { value: s.key, label: s.name }])).values()
-      )
+      ) as { value: string; label: string }[])
     : [];
   const options: { value: string; label: string }[] = catalogOptions.length > 0 ? catalogOptions : error ? fallbackOptions : [];
   const currentOption = value && !options.some(option => option.value === value)
