@@ -26,6 +26,42 @@ interface Props {
 const label = (value?: string | null) =>
   (value || "Not set").replace(/_/g, " ").replace(/\b\w/g, character => character.toUpperCase());
 
+/** Skeleton card placeholder for progressive loading */
+export const ParentChildCardSkeleton: React.FC = () => (
+  <Card className="overflow-hidden border-[#E7E3F6] bg-white shadow-[0_6px_24px_rgba(83,74,183,0.06)] dark:border-white/10 dark:bg-[#161B2E]">
+    <CardContent className="flex min-h-48 flex-col p-4 sm:p-5">
+      <div className="flex items-start gap-3">
+        <Skeleton className="h-14 w-14 shrink-0" shape="circle" />
+        <div className="min-w-0 flex-1 space-y-2">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-4 w-32" shape="line" />
+            <div className="flex gap-1">
+              <Skeleton className="h-8 w-8" shape="block" />
+              <Skeleton className="h-8 w-8" shape="block" />
+            </div>
+          </div>
+          <Skeleton className="h-3 w-20" shape="line" />
+        </div>
+      </div>
+
+      <div className="mt-3 flex gap-1.5">
+        <Skeleton className="h-6 w-20" shape="line" />
+        <Skeleton className="h-6 w-24" shape="line" />
+      </div>
+
+      <div className="mt-4 space-y-2">
+        <div className="flex justify-between">
+          <Skeleton className="h-3 w-24" shape="line" />
+          <Skeleton className="h-3 w-12" shape="line" />
+        </div>
+        <Skeleton className="h-2 w-full" shape="line" />
+      </div>
+
+      <Skeleton className="mt-4 h-11 w-full" shape="block" />
+    </CardContent>
+  </Card>
+);
+
 export const ParentChildCard: React.FC<Props> = ({
   child,
   subjects = [],
@@ -55,7 +91,7 @@ export const ParentChildCard: React.FC<Props> = ({
   const latestPending = pendingPromotions[0];
 
   return (
-    <Card className="overflow-hidden border-[#E7E3F6] bg-white shadow-[0_6px_24px_rgba(83,74,183,0.06)] dark:border-white/10 dark:bg-[#161B2E]">
+    <Card className="overflow-hidden border-[#E7E3F6] bg-white shadow-[0_6px_24px_rgba(83,74,183,0.06)] transition-all hover:shadow-[0_8px_30px_rgba(83,74,183,0.12)] dark:border-white/10 dark:bg-[#161B2E]">
       <CardContent className="flex min-h-48 flex-col p-4 sm:p-5">
         <div className="flex items-start gap-3">
           <div className="relative shrink-0">
@@ -86,16 +122,37 @@ export const ParentChildCard: React.FC<Props> = ({
                   )}
                 </div>
               </div>
-              <div className="flex shrink-0 gap-0.5">
-                <Button type="button" variant="ghost" size="icon" onClick={onProgress} aria-label={`View ${child.name}'s progress`} className="h-8 w-8 rounded-xl text-[#6D6997] hover:bg-[#F3F0FF] hover:text-[#534AB7] dark:text-[#AFA6C8] dark:hover:bg-white/10">
-                  <BarChart3 size={16} />
+              <div className="flex shrink-0 gap-1">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={onProgress}
+                  aria-label={`View ${child.name}'s progress`}
+                  className="h-10 w-10 min-h-[40px] min-w-[40px] touch-manipulation rounded-xl text-[#6D6997] hover:bg-[#F3F0FF] hover:text-[#534AB7] active:scale-95 dark:text-[#AFA6C8] dark:hover:bg-white/10"
+                >
+                  <BarChart3 size={18} />
                 </Button>
-                <Button type="button" variant="ghost" size="icon" onClick={onEdit} aria-label={`Edit ${child.name}`} className="h-8 w-8 rounded-xl text-[#6D6997] hover:bg-[#F3F0FF] hover:text-[#534AB7] dark:text-[#AFA6C8] dark:hover:bg-white/10">
-                  <Pencil size={15} />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={onEdit}
+                  aria-label={`Edit ${child.name}`}
+                  className="h-10 w-10 min-h-[40px] min-w-[40px] touch-manipulation rounded-xl text-[#6D6997] hover:bg-[#F3F0FF] hover:text-[#534AB7] active:scale-95 dark:text-[#AFA6C8] dark:hover:bg-white/10"
+                >
+                  <Pencil size={17} />
                 </Button>
                 {showRemove && (
-                  <Button type="button" variant="ghost" size="icon" onClick={onRemove} aria-label={`Remove ${child.name}`} className="h-8 w-8 rounded-xl text-[#8D89AE] hover:bg-rose-50 hover:text-rose-600 dark:text-[#AFA6C8] dark:hover:bg-rose-400/10 dark:hover:text-rose-300">
-                    <Trash2 size={15} />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={onRemove}
+                    aria-label={`Remove ${child.name}`}
+                    className="h-10 w-10 min-h-[40px] min-w-[40px] touch-manipulation rounded-xl text-[#8D89AE] hover:bg-rose-50 hover:text-rose-600 active:scale-95 dark:text-[#AFA6C8] dark:hover:bg-rose-400/10 dark:hover:text-rose-300"
+                  >
+                    <Trash2 size={17} />
                   </Button>
                 )}
               </div>
@@ -118,16 +175,16 @@ export const ParentChildCard: React.FC<Props> = ({
         )}
 
         {latestPending && (
-          <div className="mt-2.5 flex items-center justify-between gap-2 rounded-xl bg-amber-500/10 px-3 py-1.5 border border-amber-500/25 dark:border-amber-400/25 dark:bg-amber-400/10">
+          <div className="mt-2.5 flex items-center justify-between gap-2 rounded-xl bg-amber-500/10 px-3 py-2 border border-amber-500/25 dark:border-amber-400/25 dark:bg-amber-400/10">
             <span className="truncate text-xs font-extrabold text-amber-900 dark:text-amber-200">
               ⭐ Ready for {latestPending.toGradeName || "Next Grade"}
             </span>
             {onApprovePromotion && (
               <Button
                 type="button"
-                size="xs"
+                size="sm"
                 onClick={() => onApprovePromotion(latestPending)}
-                className="shrink-0 rounded-lg bg-[#534AB7] text-xs font-black text-white hover:bg-[#453DA0] px-3 h-7 shadow-sm"
+                className="shrink-0 min-h-[36px] touch-manipulation rounded-lg bg-[#534AB7] text-xs font-black text-white hover:bg-[#453DA0] active:scale-95 px-3 h-8 shadow-sm"
               >
                 Approve
               </Button>
@@ -137,15 +194,18 @@ export const ParentChildCard: React.FC<Props> = ({
 
         <div className="mt-3">
           {loadingSummary ? (
-            <div className="space-y-2"><Skeleton shape="line" className="w-2/3" /><Skeleton shape="line" className="h-1.5" /></div>
+            <div className="space-y-2">
+              <Skeleton shape="line" className="w-2/3" />
+              <Skeleton shape="line" className="h-2" />
+            </div>
           ) : (
             <>
               <div className="flex items-center justify-between gap-3 text-xs font-extrabold">
                 <span className="text-[#6D6997] dark:text-[#B3BBC9]">Skills mastered</span>
                 <span className="text-[#534AB7] dark:text-[#CDBEFF]">{mastered}/{assigned}</span>
               </div>
-              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[#EEEAF8] dark:bg-white/10">
-                <div className="h-full rounded-full bg-gradient-to-r from-[#7C6DD8] to-[#534AB7]" style={{ width: `${progress}%` }} />
+              <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-[#EEEAF8] dark:bg-white/10">
+                <div className="h-full rounded-full bg-gradient-to-r from-[#7C6DD8] to-[#534AB7] transition-all duration-500" style={{ width: `${progress}%` }} />
               </div>
               <div className="mt-1.5 flex items-center justify-between gap-3 text-[11px] font-bold text-[#6D6997] dark:text-[#8F99AD]">
                 <span>{summary?.lessonsCompleted ?? 0} completed</span>
@@ -156,23 +216,29 @@ export const ParentChildCard: React.FC<Props> = ({
         </div>
 
         {pinLocked && onUnlockPin && (
-          <Button type="button" variant="ghost" size="xs" onClick={onUnlockPin} className="mt-3 w-full text-rose-600 dark:text-rose-300">
-            <LockOpen size={12} /> Unlock child PIN
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={onUnlockPin}
+            className="mt-3 w-full min-h-[40px] touch-manipulation text-rose-600 dark:text-rose-300 active:scale-98"
+          >
+            <LockOpen size={14} /> Unlock child PIN
           </Button>
         )}
 
         <button
           type="button"
           onClick={onPlay}
-          className="group mt-3 flex items-center justify-between rounded-xl bg-[#F3F0FF]/80 px-3 py-2 text-xs font-extrabold text-[#534AB7] transition-all hover:bg-[#F3F0FF] dark:bg-violet-400/10 dark:text-[#CDBEFF] dark:hover:bg-violet-400/20 cursor-pointer"
+          className="group mt-4 flex min-h-[46px] w-full touch-manipulation cursor-pointer items-center justify-between rounded-xl bg-[#F3F0FF] px-4 py-2.5 text-xs font-extrabold text-[#534AB7] shadow-sm transition-all hover:bg-[#EAE4FE] active:scale-[0.98] active:bg-[#E2DAFE] dark:bg-violet-400/15 dark:text-[#CDBEFF] dark:hover:bg-violet-400/25 dark:active:bg-violet-400/30"
         >
-          <span className="flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#534AB7] text-white transition-transform group-hover:scale-105 dark:bg-[#6844EA]">
-              <Play size={10} className="fill-current ml-0.5" />
+          <span className="flex items-center gap-2.5">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#534AB7] text-white shadow-sm transition-transform group-hover:scale-105 dark:bg-[#6844EA]">
+              <Play size={12} className="ml-0.5 fill-current" />
             </span>
-            <span>Continue learning</span>
+            <span className="text-sm font-black">Continue learning</span>
           </span>
-          <ArrowRight size={14} className="transition-transform group-hover:translate-x-1 text-[#534AB7] dark:text-[#CDBEFF]" />
+          <ArrowRight size={16} className="transition-transform group-hover:translate-x-1 text-[#534AB7] dark:text-[#CDBEFF]" />
         </button>
       </CardContent>
     </Card>

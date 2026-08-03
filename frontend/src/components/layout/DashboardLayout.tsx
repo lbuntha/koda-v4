@@ -63,11 +63,13 @@ export const DashboardLayout: React.FC<Props> = ({
       return next;
     });
 
+  const navItems = sections.flatMap(section => section.items);
+
   return (
     <div className="flex h-dvh min-h-0 flex-col overflow-hidden bg-slate-50 font-sans md:flex-row dark:bg-[#0E1020]">
       <AppSidebar brand={brand} sections={sections} active={active} onNavigate={onNavigate} user={user} collapsed={collapsed} />
 
-      <main className="flex min-h-0 min-w-0 flex-1 flex-col">
+      <main className="flex min-h-0 min-w-0 flex-1 flex-col pb-16 md:pb-0">
         <header className="flex h-16 shrink-0 items-center gap-3 border-b border-slate-200/70 bg-white px-5 dark:border-white/10 dark:bg-[#111329]">
           <button
             onClick={toggle}
@@ -86,8 +88,40 @@ export const DashboardLayout: React.FC<Props> = ({
           {actions}
         </header>
 
-        <div className={contentClassName ?? "flex-1 overflow-auto p-5"}>{children}</div>
+        <div className={contentClassName ?? "flex-1 overflow-auto p-5 pb-20 md:pb-5"}>{children}</div>
       </main>
+
+      {/* Mobile & Tablet Bottom Navigation Bar */}
+      {navItems.length > 0 && (
+        <nav
+          aria-label="Mobile navigation"
+          className="fixed bottom-0 inset-x-0 z-50 flex items-center justify-around border-t border-slate-200/80 bg-white/95 backdrop-blur-lg px-2 py-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg shadow-black/10 md:hidden dark:border-white/10 dark:bg-[#111329]/95"
+        >
+          {navItems.map(item => {
+            const Icon = item.icon;
+            const isActive = item.id === active;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onNavigate(item.id)}
+                className={`flex min-h-[44px] flex-1 touch-manipulation cursor-pointer flex-col items-center justify-center gap-0.5 rounded-xl py-1 text-[11px] font-extrabold transition-all active:scale-95 ${
+                  isActive
+                    ? "text-[#534AB7] dark:text-[#CDBEFF]"
+                    : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                }`}
+              >
+                <span className={`flex h-7 w-7 items-center justify-center rounded-xl transition-colors ${
+                  isActive ? "bg-[#F3F0FF] dark:bg-violet-400/20" : "bg-transparent"
+                }`}>
+                  <Icon size={18} />
+                </span>
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+      )}
     </div>
   );
 };

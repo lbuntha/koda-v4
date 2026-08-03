@@ -1,7 +1,7 @@
 import React from "react";
 import { BookOpen, Clock3, Flame, Trophy, Zap } from "lucide-react";
 import type { AnalyticsSummary } from "../api/analytics";
-import { Card } from "../components/ui";
+import { Card, Skeleton } from "../components/ui";
 
 interface Props {
   summaries: AnalyticsSummary[];
@@ -48,9 +48,13 @@ export const FamilySummary: React.FC<Props> = ({ summaries, loading, className =
         {items.map(item => (
           <Card key={item.label} className="flex min-h-24 items-center gap-3 border-[#E7E3F6] bg-white p-4 shadow-[0_6px_24px_rgba(83,74,183,0.06)] dark:border-white/10 dark:bg-[#161B2E]">
             <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${item.tone}`}><item.icon size={21} /></span>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="text-[10px] font-extrabold uppercase tracking-wide text-[#6D6997] dark:text-[#8F99AD]">{item.label}</p>
-              <p className="mt-1 truncate text-xl font-black text-[#0E0B55] dark:text-white">{loading ? "—" : item.value}</p>
+              {loading ? (
+                <Skeleton className="mt-1 h-6 w-16" shape="line" />
+              ) : (
+                <p className="mt-1 truncate text-xl font-black text-[#0E0B55] dark:text-white">{item.value}</p>
+              )}
               <p className="text-[10px] font-bold text-[#8D89AE] dark:text-[#7F899D]">{item.detail}</p>
             </div>
           </Card>
