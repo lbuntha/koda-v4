@@ -14,7 +14,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { LIQUID_SORT_CURRICULUM_LEVELS, type BottleState } from "./liquidSortLevels";
-import { bottleViewBoxPoint, solveLiquidSort } from "./LiquidSortCanvas";
+import {
+  bottleViewBoxPoint,
+  parseCssTransform,
+  solveLiquidSort,
+  transformedLayoutPoint,
+} from "./LiquidSortCanvas";
 
 const clone = (bottles: BottleState[]): BottleState[] =>
   bottles.map(b => ({ id: b.id, capacity: b.capacity, layers: b.layers.map(l => ({ ...l })) }));
@@ -71,6 +76,27 @@ test("mobile bottle mouth coordinates honor SVG aspect-ratio letterboxing", () =
   assert.equal(mouth.scale, 128 / 240);
   assert.equal(mouth.x, 48);
   assert.ok(Math.abs(mouth.y - 45.3333333333) < 0.0001);
+});
+
+test("pour geometry reads Safari matrix3d transforms without SVG getScreenCTM", () => {
+  const matrix = parseCssTransform(
+    "matrix3d(0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1, 0, 20, 30, 0, 1)",
+  );
+  assert.deepEqual(matrix, { a: 0, b: 1, c: -1, d: 0, e: 20, f: 30 });
+
+  // Rotate the right lip (65,10) 90 degrees around the CSS origin (50,15), then
+  // translate it. This is the same operation Framer applies to the bottle wrapper.
+  assert.deepEqual(
+    transformedLayoutPoint(100, 200, 65, 10, 50, 15, matrix),
+    { x: 175, y: 260 },
+  );
+});
+
+test("pour geometry also reads Chrome's 2D computed matrix", () => {
+  assert.deepEqual(
+    parseCssTransform("matrix(1, 0, 0, 1, -12.5, 24)"),
+    { a: 1, b: 0, c: 0, d: 1, e: -12.5, f: 24 },
+  );
 });
 
 test("every tower challenge has one real eight-layer goal bottle", () => {

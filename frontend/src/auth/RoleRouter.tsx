@@ -16,7 +16,7 @@ import React, { Suspense, lazy, useState } from "react";
 import { useAuth } from "./AuthContext";
 import { ThemeProvider } from "../theme/appTheme";
 import { ErrorBoundary } from "../components/ErrorBoundary";
-import { Spinner } from "../components/ui";
+import { Spinner, TopProgressBar } from "../components/ui";
 
 /**
  * Every role gets a different surface, and no session needs more than one of them. Loading
@@ -43,14 +43,15 @@ const StudentCurriculumPlayer = named(
 const App = lazy(() => import("../App"));
 
 const Splash: React.FC = () => (
-  <div className="flex min-h-screen w-full flex-col items-center justify-center gap-3 overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-violet-50">
-    <div className="relative h-24 w-24" aria-label="Koda is getting ready" role="status">
-      <span className="absolute inset-3 animate-pulse rounded-[1.8rem] bg-violet-400/30 blur-xl motion-reduce:animate-none" aria-hidden="true" />
+  <div className="flex min-h-screen w-full flex-col items-center justify-center gap-4 overflow-hidden bg-gradient-to-br from-indigo-50/80 via-white to-violet-50/80 p-4">
+    <TopProgressBar loading={true} />
+    <div className="relative h-28 w-28" aria-label="Koda is getting ready" role="status">
+      <span className="absolute inset-3 animate-pulse rounded-[2rem] bg-violet-500/25 blur-2xl motion-reduce:animate-none" aria-hidden="true" />
 
-      <span className="absolute inset-0 animate-[spin_3.2s_linear_infinite] rounded-full motion-reduce:animate-none" aria-hidden="true">
-        <span className="absolute left-1/2 top-0 h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-[#F9C846] shadow-[0_0_12px_rgba(249,200,70,0.65)]" />
-        <span className="absolute bottom-2 left-2 h-2 w-2 rounded-full bg-[#55B9F3] shadow-[0_0_10px_rgba(85,185,243,0.55)]" />
-        <span className="absolute bottom-2 right-2 h-2 w-2 rounded-full bg-[#F378B8] shadow-[0_0_10px_rgba(243,120,184,0.55)]" />
+      <span className="absolute inset-0 animate-[spin_3s_linear_infinite] rounded-full motion-reduce:animate-none" aria-hidden="true">
+        <span className="absolute left-1/2 top-0 h-3 w-3 -translate-x-1/2 rounded-full bg-[#F9C846] shadow-[0_0_14px_rgba(249,200,70,0.85)]" />
+        <span className="absolute bottom-2 left-2 h-2.5 w-2.5 rounded-full bg-[#55B9F3] shadow-[0_0_12px_rgba(85,185,243,0.75)]" />
+        <span className="absolute bottom-2 right-2 h-2.5 w-2.5 rounded-full bg-[#F378B8] shadow-[0_0_12px_rgba(243,120,184,0.75)]" />
       </span>
 
       <span className="absolute inset-0 flex items-center justify-center">
@@ -58,16 +59,16 @@ const Splash: React.FC = () => (
           <img
             src="/favicon.svg"
             alt="Koda"
-            className="h-14 w-14 rounded-2xl shadow-[0_12px_28px_-10px_rgba(88,58,190,0.65)]"
+            className="h-16 w-16 rounded-2xl shadow-[0_12px_32px_-8px_rgba(88,58,190,0.65)]"
           />
         </span>
       </span>
 
-      <span className="absolute bottom-1 left-1/2 h-2 w-11 -translate-x-1/2 animate-pulse rounded-full bg-violet-500/20 blur-sm motion-reduce:animate-none" aria-hidden="true" />
+      <span className="absolute -bottom-1 left-1/2 h-2 w-14 -translate-x-1/2 animate-pulse rounded-full bg-violet-500/20 blur-sm motion-reduce:animate-none" aria-hidden="true" />
     </div>
-    <div className="flex items-center gap-2 text-[#7252D8]">
-      <Spinner size="sm" />
-      <span className="text-xs font-extrabold tracking-wide">Getting things ready…</span>
+    <div className="flex items-center gap-2.5 text-[#7252D8]">
+      <Spinner size="md" variant="rainbow" glow />
+      <span className="text-xs font-black tracking-wide">Getting things ready…</span>
     </div>
   </div>
 );

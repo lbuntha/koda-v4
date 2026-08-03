@@ -26,10 +26,35 @@ export default defineConfig(() => {
           start_url: '/',
           scope: '/',
           display: 'standalone',
+          display_override: ['standalone', 'minimal-ui'],
+          orientation: 'any',
           background_color: '#F3F0FC',
           theme_color: '#6B46C1',
           lang: 'en',
           categories: ['education', 'kids'],
+          shortcuts: [
+            {
+              name: 'Student Learn',
+              short_name: 'Learn',
+              description: 'Open student learning player',
+              url: '/?role=student',
+              icons: [{ src: '/icons/icon-192.png', sizes: '192x192' }],
+            },
+            {
+              name: 'Parent Dashboard',
+              short_name: 'Parent',
+              description: 'View child progress and achievements',
+              url: '/?role=parent',
+              icons: [{ src: '/icons/icon-192.png', sizes: '192x192' }],
+            },
+            {
+              name: 'Curriculum Studio',
+              short_name: 'Studio',
+              description: 'Design and preview learning canvases',
+              url: '/?role=teacher',
+              icons: [{ src: '/icons/icon-192.png', sizes: '192x192' }],
+            },
+          ],
           icons: [
             {src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any'},
             {src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any'},
@@ -74,18 +99,39 @@ export default defineConfig(() => {
               handler: 'CacheFirst',
               options: {
                 cacheName: 'koda-images',
-                expiration: {maxEntries: 300, maxAgeSeconds: 60 * 60 * 24 * 30},
+                expiration: {maxEntries: 400, maxAgeSeconds: 60 * 60 * 24 * 60},
+                cacheableResponse: {statuses: [0, 200]},
+              },
+            },
+            {
+              // Audio effects & speech sound files: cache for complete offline gameplay
+              urlPattern: ({request, sameOrigin, url}) =>
+                sameOrigin && (request.destination === 'audio' || /\.(mp3|wav|ogg|aac|m4a)$/i.test(url.pathname)),
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'koda-audio',
+                expiration: {maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 90},
                 cacheableResponse: {statuses: [0, 200]},
               },
             },
             {
               // Published release artwork served *by the API* (`/learning/assets/...`).
-              // These are files, not data — the rest of the API stays uncached.
+              // These are files, not data — cached for offline play.
               urlPattern: ({url}) => url.pathname.includes('/learning/assets/'),
               handler: 'CacheFirst',
               options: {
-                cacheName: 'koda-images',
-                expiration: {maxEntries: 300, maxAgeSeconds: 60 * 60 * 24 * 30},
+                cacheName: 'koda-learning-assets',
+                expiration: {maxEntries: 300, maxAgeSeconds: 60 * 60 * 24 * 60},
+                cacheableResponse: {statuses: [0, 200]},
+              },
+            },
+            {
+              // Curriculum & student API data endpoints: StaleWhileRevalidate for instant offline loading
+              urlPattern: ({url}) => url.pathname.includes('/api/v1/learning/') || url.pathname.includes('/api/v1/curriculum/'),
+              handler: 'StaleWhileRevalidate',
+              options: {
+                cacheName: 'koda-api-data',
+                expiration: {maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 7},
                 cacheableResponse: {statuses: [0, 200]},
               },
             },

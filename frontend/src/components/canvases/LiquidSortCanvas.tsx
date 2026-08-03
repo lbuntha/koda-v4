@@ -80,14 +80,46 @@ export const bottleViewBoxPoint = (
   };
 };
 
-const bottleSvgScreenPoint = (svg: SVGSVGElement, x: number, y: number) => {
-  const matrix = svg.getScreenCTM();
-  if (!matrix) return null;
-  const point = svg.createSVGPoint();
-  point.x = x;
-  point.y = y;
-  const screenPoint = point.matrixTransform(matrix);
-  return { x: screenPoint.x, y: screenPoint.y };
+export interface CssTransform2D {
+  a: number;
+  b: number;
+  c: number;
+  d: number;
+  e: number;
+  f: number;
+}
+
+/** Parse the computed 2D portion of either `matrix()` or Safari's `matrix3d()`. */
+export const parseCssTransform = (transform: string): CssTransform2D => {
+  const identity = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
+  if (!transform || transform === "none") return identity;
+  const body = transform.slice(transform.indexOf("(") + 1, transform.lastIndexOf(")"));
+  const values = body.match(/-?\d*\.?\d+(?:e[-+]?\d+)?/gi)?.map(Number) ?? [];
+  if (transform.startsWith("matrix3d(") && values.length === 16) {
+    return { a: values[0], b: values[1], c: values[4], d: values[5], e: values[12], f: values[13] };
+  }
+  if (transform.startsWith("matrix(") && values.length === 6) {
+    return { a: values[0], b: values[1], c: values[2], d: values[3], e: values[4], f: values[5] };
+  }
+  return identity;
+};
+
+/** Apply an element's CSS transform around its transform-origin to a local point. */
+export const transformedLayoutPoint = (
+  baseLeft: number,
+  baseTop: number,
+  pointX: number,
+  pointY: number,
+  originX: number,
+  originY: number,
+  matrix: CssTransform2D
+) => {
+  const x = pointX - originX;
+  const y = pointY - originY;
+  return {
+    x: baseLeft + originX + matrix.a * x + matrix.c * y + matrix.e,
+    y: baseTop + originY + matrix.b * x + matrix.d * y + matrix.f,
+  };
 };
 
 /**
@@ -249,6 +281,12 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
     streamY: number;
     targetMouthX: number;
     targetMouthY: number;
+    sourceBaseX: number;
+    sourceBaseY: number;
+    sourceLipX: number;
+    sourceLipY: number;
+    sourceOriginX: number;
+    sourceOriginY: number;
   } | null>(null);
 
   const [pourProgress, setPourProgress] = useState(0);
@@ -567,6 +605,12 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
         let streamY = 0;
         let targetMouthX = 0;
         let targetMouthY = 0;
+        let sourceBaseX = 0;
+        let sourceBaseY = 0;
+        let sourceLipX = 0;
+        let sourceLipY = 0;
+        let sourceOriginX = 0;
+        const sourceOriginY = 15;
 
         if (sourceEl && targetEl) {
           const sourceSvg = bottleSvgRefs.current[selectedId];
@@ -596,15 +640,13 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
             // it. Read the transform that is actually on screen so even a very quick
             // second tap produces the same final alignment.
             const transform = window.getComputedStyle(sourceEl).transform;
-            const matrix = transform && transform !== "none"
-              ? new DOMMatrixReadOnly(transform)
-              : null;
-            const currentTranslateX = matrix?.m41 ?? 0;
-            const currentTranslateY = matrix?.m42 ?? 0;
+            const matrix = parseCssTransform(transform);
+            const currentTranslateX = matrix.e;
+            const currentTranslateY = matrix.f;
 
             // The CSS rotation pivots 15 rendered pixels below the wrapper's top.
             const sourcePivotX = sRect.left + sRect.width / 2;
-            const sourcePivotY = sRect.top + 15;
+            const sourcePivotY = sRect.top + sourceOriginY;
             const lipOffsetX = sourceLip.x - sourcePivotX;
             const lipOffsetY = sourceLip.y - sourcePivotY;
             const angle = (isRight ? 72 : -72) * (Math.PI / 180);
@@ -625,6 +667,11 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
             streamY = desiredLipY - stageRect.top;
             targetMouthX = targetMouth.x - stageRect.left;
             targetMouthY = targetMouth.y - stageRect.top;
+            sourceBaseX = sRect.left - stageRect.left - currentTranslateX;
+            sourceBaseY = sRect.top - stageRect.top - currentTranslateY;
+            sourceLipX = sourceLip.x - sRect.left;
+            sourceLipY = sourceLip.y - sRect.top;
+            sourceOriginX = sRect.width / 2;
           }
         }
 
@@ -664,6 +711,12 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
           streamY,
           targetMouthX,
           targetMouthY,
+          sourceBaseX,
+          sourceBaseY,
+          sourceLipX,
+          sourceLipY,
+          sourceOriginX,
+          sourceOriginY,
         });
 
         sounds.playPop();
@@ -1136,24 +1189,37 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
 
         {/* Parabolic Liquid Pour Stream & Spout Meniscus SVG Overlay */}
         {pouringInfo && (() => {
-          const sourceSvg = bottleSvgRefs.current[pouringInfo.sourceId];
+          const sourceEl = bottleRefs.current[pouringInfo.sourceId];
           const targetSvg = bottleSvgRefs.current[pouringInfo.targetId];
           const stageRect = stageRef.current?.getBoundingClientRect();
           const isRight = pouringInfo.isRight;
 
-          // getScreenCTM includes the in-progress Framer transform. The stream therefore
-          // remains attached to the source lip throughout the lift, tilt and spring.
-          const liveSourceLip = sourceSvg && stageRect
-            ? bottleSvgScreenPoint(sourceSvg, isRight ? 65 : 35, 10)
+          // Safari does not consistently include an HTML ancestor's animated CSS transform
+          // in SVG getScreenCTM(). Apply the wrapper's computed CSS matrix ourselves so the
+          // stream follows the lip identically in Safari, Chrome and installed PWA mode.
+          const sourceMatrix = sourceEl
+            ? parseCssTransform(window.getComputedStyle(sourceEl).transform)
             : null;
+          const liveSourceLip = sourceMatrix && stageRect
+            ? transformedLayoutPoint(
+                stageRect.left + pouringInfo.sourceBaseX,
+                stageRect.top + pouringInfo.sourceBaseY,
+                pouringInfo.sourceLipX,
+                pouringInfo.sourceLipY,
+                pouringInfo.sourceOriginX,
+                pouringInfo.sourceOriginY,
+                sourceMatrix
+              )
+            : null;
+          const targetViewBoxHeight = targetSvg?.viewBox.baseVal.height || 240;
           const liveTargetMouth = targetSvg && stageRect
-            ? bottleSvgScreenPoint(targetSvg, 50, 10)
+            ? bottleViewBoxPoint(targetSvg.getBoundingClientRect(), 50, 10, targetViewBoxHeight)
             : null;
           const liveTargetMouthLeft = targetSvg && stageRect
-            ? bottleSvgScreenPoint(targetSvg, 35, 10)
+            ? bottleViewBoxPoint(targetSvg.getBoundingClientRect(), 35, 10, targetViewBoxHeight)
             : null;
           const liveTargetMouthRight = targetSvg && stageRect
-            ? bottleSvgScreenPoint(targetSvg, 65, 10)
+            ? bottleViewBoxPoint(targetSvg.getBoundingClientRect(), 65, 10, targetViewBoxHeight)
             : null;
           const startX = liveSourceLip
             ? liveSourceLip.x - stageRect!.left
