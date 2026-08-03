@@ -20,3 +20,11 @@ export { Sidebar } from "./Sidebar";
 export { FieldHint } from "./FieldHint";
 export { ConfirmModal } from "./ConfirmModal";
 export { DataTable, type DataTableColumn, type DataTableProps } from "./DataTable";
+export {
+  NotificationItemCard,
+  NotificationEmptyState,
+  NotificationSkeletonList,
+  CATEGORY_CONFIG,
+  timeAgo,
+} from "./NotificationUI";
+export { NotificationBell } from "../../notifications/NotificationBell";

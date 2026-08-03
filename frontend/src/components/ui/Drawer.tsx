@@ -15,7 +15,7 @@ import { createPortal } from "react-dom";
 interface DrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  title?: string;
+  title?: React.ReactNode;
   /** Defaults to a comfortable reading width; override for wider content (e.g. an AI batch review list). */
   widthClassName?: string;
   /**
