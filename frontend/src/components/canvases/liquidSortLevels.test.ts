@@ -103,7 +103,8 @@ test("every tower challenge has one real eight-layer goal bottle", () => {
   const towerLevels = LIQUID_SORT_CURRICULUM_LEVELS.filter(level =>
     level.bottles.some(bottle => bottle.isTower)
   );
-  assert.equal(towerLevels.length, 5);
+  // Bump when a tower board is added — the count is here to catch one going missing.
+  assert.equal(towerLevels.length, 7);
   for (const level of towerLevels) {
     const towers = level.bottles.filter(bottle => bottle.isTower);
     assert.equal(towers.length, 1, level.id);

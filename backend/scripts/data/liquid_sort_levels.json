@@ -654,5 +654,110 @@
     },
     "solvable": true,
     "unbalancedColours": []
+  },
+  {
+    "id": "level_36",
+    "name": "Level 36: Clouded Shelf",
+    "description": "Eight colours, three spare bottles, and four bases you cannot see until you empty what sits on them.",
+    "difficultyTier": "grandmaster",
+    "bottles": 11,
+    "colours": 8,
+    "hiddenLayers": 4,
+    "layers": {
+      "tan": 4,
+      "violet": 4,
+      "blue": 4,
+      "gold": 4,
+      "cyan": 4,
+      "magenta": 4,
+      "emerald": 4,
+      "orange": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_37",
+    "name": "Level 37: Six Mysteries",
+    "description": "Six hidden bases across eight bottles — plan the order you uncover them in.",
+    "difficultyTier": "grandmaster",
+    "bottles": 11,
+    "colours": 8,
+    "hiddenLayers": 6,
+    "layers": {
+      "orange": 4,
+      "magenta": 4,
+      "blue": 4,
+      "tan": 4,
+      "emerald": 4,
+      "cyan": 4,
+      "gold": 4,
+      "violet": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_38",
+    "name": "Level 38: Cyan Spire",
+    "description": "Nine full shelves and a single spare: gather eight cyan layers in the tall bottle.",
+    "difficultyTier": "grandmaster",
+    "bottles": 11,
+    "colours": 8,
+    "hiddenLayers": 0,
+    "layers": {
+      "violet": 4,
+      "magenta": 4,
+      "gold": 4,
+      "blue": 4,
+      "tan": 4,
+      "cyan": 8,
+      "emerald": 4,
+      "orange": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_39",
+    "name": "Level 39: Fogged Spire",
+    "description": "The tall bottle again, this time with four hidden bases and only one spare shelf.",
+    "difficultyTier": "grandmaster",
+    "bottles": 11,
+    "colours": 8,
+    "hiddenLayers": 4,
+    "layers": {
+      "emerald": 4,
+      "cyan": 8,
+      "orange": 4,
+      "tan": 4,
+      "violet": 4,
+      "gold": 4,
+      "magenta": 4,
+      "blue": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
+  },
+  {
+    "id": "level_40",
+    "name": "Level 40: The Long Sort",
+    "description": "The last board: six hidden bases, four spare bottles, and every colour in play.",
+    "difficultyTier": "grandmaster",
+    "bottles": 12,
+    "colours": 8,
+    "hiddenLayers": 6,
+    "layers": {
+      "tan": 4,
+      "emerald": 4,
+      "orange": 4,
+      "cyan": 4,
+      "gold": 4,
+      "magenta": 4,
+      "blue": 4,
+      "violet": 4
+    },
+    "solvable": true,
+    "unbalancedColours": []
   }
 ]
