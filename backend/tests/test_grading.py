@@ -301,3 +301,110 @@ def test_grade_reads_real_manifest_from_build_question_manifest():
     )
     assert grade(manifest[0], 25) == "correct"
     assert grade(manifest[0], 24) == "incorrect"
+
+
+# ── Number path & place value lab ────────────────────────────────────────────────
+#
+# These two grade against the question's `targetCount` rather than re-deriving from the
+# authored config, because the canvases normalize before play: a "10 more" board's target
+# is start + 10 whatever the author typed, and a count-forward board clamps the end to
+# within nine of the start. Both authoring paths write that normalized answer to
+# targetCount, so it is the number the child is actually asked for.
+
+
+def _numeric_entry(technique, target, config=None):
+    manifest = build_question_manifest(
+        [{
+            "id": "q-n", "technique": technique, "skillId": "s1",
+            "targetCount": target, "config": config or {},
+        }],
+        {"s1"},
+    )
+    return manifest[0]
+
+
+@pytest.mark.parametrize("technique", ["NUMBER_PATH", "PLACE_VALUE_LAB"])
+def test_numeric_target_grades_against_the_normalized_answer(technique):
+    entry = _numeric_entry(technique, 44)
+    assert grade(entry, 44) == "correct"
+    assert grade(entry, "44") == "correct"
+    assert grade(entry, 45) == "incorrect"
+
+
+def test_number_path_ignores_an_authored_end_that_the_canvas_would_override():
+    """A "10 more" board asks for start + 10; whatever `numberChartEnd` says, the child sees
+    44 and must be graded on 44."""
+    entry = _numeric_entry(
+        "NUMBER_PATH", 44,
+        {"numberChartTask": "ten_more", "numberChartStart": 34, "numberChartEnd": 99},
+    )
+    assert grade(entry, 44) == "correct"
+    assert grade(entry, 99) == "incorrect"
+
+
+def test_numeric_target_without_a_target_fails_loudly():
+    entry = {"question_id": "q", "playable": {"technique": "NUMBER_PATH", "config": {}}, "grading": {}}
+    with pytest.raises(GradingError, match="targetCount"):
+        grade(entry, 5)
+
+
+# ── Story problem mat ────────────────────────────────────────────────────────────
+
+
+def _story(**config):
+    return _entry("STORY_PROBLEM_MAT", {"storyProblemType": "add_to", **config})
+
+
+@pytest.mark.parametrize(
+    "config,answer",
+    [
+        ({"storyProblemType": "add_to", "storyUnknown": "result", "storyStart": 5, "storyPart2": 4}, 9),
+        ({"storyProblemType": "add_to", "storyUnknown": "change", "storyStart": 5, "storyPart2": 4}, 4),
+        ({"storyProblemType": "add_to", "storyUnknown": "start", "storyStart": 5, "storyPart2": 4}, 5),
+        ({"storyProblemType": "take_from", "storyUnknown": "result", "storyStart": 12, "storyPart2": 5}, 7),
+        ({"storyProblemType": "take_from", "storyUnknown": "change", "storyStart": 12, "storyPart2": 5}, 5),
+        ({"storyProblemType": "put_together", "storyUnknown": "result", "storyStart": 6, "storyPart2": 3}, 9),
+        ({"storyProblemType": "put_together", "storyUnknown": "part", "storyStart": 6, "storyPart2": 3}, 3),
+        ({"storyProblemType": "take_apart", "storyStart": 10, "storyPart2": 4}, 6),
+        ({"storyProblemType": "compare", "storyStart": 12, "storyPart2": 5}, 7),
+        ({"storyProblemType": "three_addends", "storyStart": 2, "storyPart2": 3, "storyPart3": 4}, 9),
+    ],
+)
+def test_story_answer_depends_on_which_quantity_is_unknown(config, answer):
+    """The same three numbers ask three different questions. Grading the total every time
+    would mark a correct "how many arrived?" wrong."""
+    entry = _entry("STORY_PROBLEM_MAT", config)
+    assert grade(entry, answer) == "correct"
+    assert grade(entry, answer + 1) == "incorrect"
+
+
+def test_story_accepts_the_legacy_change_field():
+    entry = _entry("STORY_PROBLEM_MAT", {
+        "storyProblemType": "add_to", "storyUnknown": "result",
+        "storyStart": 5, "storyChange": 4,
+    })
+    assert grade(entry, 9) == "correct"
+
+
+def test_story_falls_back_to_target_count_when_the_story_is_incomplete():
+    manifest = build_question_manifest(
+        [{"id": "q-s", "technique": "STORY_PROBLEM_MAT", "skillId": "s1",
+          "targetCount": 9, "config": {}}],
+        {"s1"},
+    )
+    assert grade(manifest[0], 9) == "correct"
+    assert grade(manifest[0], 8) == "incorrect"
+
+
+def test_story_with_an_unknown_type_fails_loudly():
+    entry = _entry("STORY_PROBLEM_MAT", {
+        "storyProblemType": "teleporting", "storyStart": 5, "storyPart2": 4,
+    })
+    with pytest.raises(GradingError, match="unknown story type"):
+        grade(entry, 9)
+
+
+def test_every_picker_component_can_now_be_graded():
+    """The three that blocked Grade 1 Maths: a release containing them used to be refused."""
+    for technique in ("NUMBER_PATH", "PLACE_VALUE_LAB", "STORY_PROBLEM_MAT"):
+        assert technique in supported_techniques()

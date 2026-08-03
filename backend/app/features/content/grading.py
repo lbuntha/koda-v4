@@ -182,6 +182,82 @@ def _reduce(operation: str, nums: list[int]) -> int:
     raise GradingError(f"unknown arithmetic operation {operation!r}")
 
 
+# ── Number path & place value lab (answer authored as targetCount) ───────────────
+
+# Both canvases normalize their authored config before play — a "10 more" board derives its
+# target as start + 10 whatever the author typed, and a count-forward board clamps the end to
+# within nine of the start. Re-deriving that here would mean a second copy of the rules in a
+# second language, and a child would be marked wrong the first time the two drifted.
+#
+# Both authoring paths already write the normalized answer to the question's `targetCount`:
+# the AI schema does it in `validate()` and the studio panel does it on every edit, from the
+# same normalizer the canvas plays with. That single value is what the child is asked for, so
+# it is what the server grades against.
+NUMERIC_TARGET = frozenset({"NUMBER_PATH", "PLACE_VALUE_LAB"})
+
+
+@register(*NUMERIC_TARGET)
+def grade_numeric_target(entry: dict, selection: Any) -> GradeOutcome:
+    playable = _playable(entry)
+    target = playable.get("targetCount")
+    if target is None:
+        target = _config(entry).get("targetCount")
+    if target is None:
+        raise GradingError(f"{_technique(entry)}: question has no targetCount to grade against")
+    return "correct" if _to_int(selection) == _to_int(target) else "incorrect"
+
+
+# ── Story problem mat (answer derived from the story) ────────────────────────────
+
+@register("STORY_PROBLEM_MAT")
+def grade_story_problem(entry: dict, selection: Any) -> GradeOutcome:
+    """Derived from the story, because the story is what the child is answering.
+
+    Unlike the two above there is no clamping to duplicate — `storyAnswer` is six branches of
+    plain arithmetic — and which quantity is unknown changes the answer completely: the same
+    three numbers ask for the total, the change, or the starting amount. Deriving keeps the
+    grade tied to the story actually shown; `targetCount` is the fallback for a question
+    authored before the fields existed.
+    """
+    config = _config(entry)
+    story_type = config.get("storyProblemType")
+    unknown = config.get("storyUnknown")
+    first, second, third = (
+        config.get("storyStart"),
+        config.get("storyPart2", config.get("storyChange")),
+        config.get("storyPart3"),
+    )
+
+    if story_type is None or first is None or second is None:
+        target = _playable(entry).get("targetCount")
+        if target is None:
+            raise GradingError("STORY_PROBLEM_MAT: incomplete story and no targetCount")
+        expected = _to_int(target)
+    else:
+        expected = _story_answer(story_type, unknown, _to_int(first), _to_int(second), third)
+
+    return "correct" if _to_int(selection) == expected else "incorrect"
+
+
+def _story_answer(story_type: str, unknown: Any, first: int, second: int, third: Any) -> int:
+    """Mirrors `storyAnswer` in frontend/src/components/canvases/storyProblemModel.ts."""
+    if story_type == "add_to":
+        if unknown == "start":
+            return first
+        return second if unknown == "change" else first + second
+    if story_type == "take_from":
+        if unknown == "start":
+            return first
+        return second if unknown == "change" else first - second
+    if story_type == "put_together":
+        return second if unknown == "part" else first + second
+    if story_type in ("take_apart", "compare"):
+        return first - second
+    if story_type == "three_addends":
+        return first + second + (_to_int(third) if third is not None else 0)
+    raise GradingError(f"STORY_PROBLEM_MAT: unknown story type {story_type!r}")
+
+
 # ── Pattern (answer key) ─────────────────────────────────────────────────────────
 
 @register("KODA_PATTERN")
