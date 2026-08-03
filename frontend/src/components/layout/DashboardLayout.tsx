@@ -70,7 +70,7 @@ export const DashboardLayout: React.FC<Props> = ({
       <AppSidebar brand={brand} sections={sections} active={active} onNavigate={onNavigate} user={user} collapsed={collapsed} />
 
       <main className="flex min-h-0 min-w-0 flex-1 flex-col pb-16 md:pb-0">
-        <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-slate-200/70 bg-white px-4 sm:px-5 dark:border-white/10 dark:bg-[#111329]">
+        <header className="flex min-h-[4rem] shrink-0 items-center justify-between gap-3 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl [-webkit-backdrop-filter:blur(16px)] [-webkit-tap-highlight-color:transparent] px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 sm:px-5 md:pt-3 dark:border-white/10 dark:bg-[#111329]/90">
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <button
               onClick={toggle}
