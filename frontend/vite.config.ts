@@ -32,29 +32,10 @@ export default defineConfig(() => {
           theme_color: '#6B46C1',
           lang: 'en',
           categories: ['education', 'kids'],
-          shortcuts: [
-            {
-              name: 'Student Learn',
-              short_name: 'Learn',
-              description: 'Open student learning player',
-              url: '/?role=student',
-              icons: [{ src: '/icons/icon-192.png', sizes: '192x192' }],
-            },
-            {
-              name: 'Parent Dashboard',
-              short_name: 'Parent',
-              description: 'View child progress and achievements',
-              url: '/?role=parent',
-              icons: [{ src: '/icons/icon-192.png', sizes: '192x192' }],
-            },
-            {
-              name: 'Curriculum Studio',
-              short_name: 'Studio',
-              description: 'Design and preview learning canvases',
-              url: '/?role=teacher',
-              icons: [{ src: '/icons/icon-192.png', sizes: '192x192' }],
-            },
-          ],
+          // No `shortcuts` yet: a long-press shortcut has to land somewhere different from
+          // the app icon, and nothing reads a `?role=` parameter — RoleRouter keys on the
+          // signed-in account, so all three previous shortcuts opened the same screen.
+          // Add them back once there are real destinations to route to.
           icons: [
             {src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any'},
             {src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any'},
@@ -68,7 +49,14 @@ export default defineConfig(() => {
           // Precache the shell only. `public/assets/` alone is ~12 MB of artwork, and
           // precaching downloads everything before the app is usable; the images are
           // picked up by the runtime cache below as a child actually meets them.
-          globPatterns: ['**/*.{js,css,html,woff2}', 'favicon.svg', 'icons/*.png'],
+          // SVG is in, PNG is not, and the split is by weight rather than by type: the 32
+          // vector thumbnails total 132 kB, while the 11 photographic assets total 14 MB —
+          // five of them 2.1 MB landing/auth banners a signed-in child never sees. Adding
+          // PNG here took a first install from 2.6 MB to 14.2 MB, all of it downloaded
+          // before the app can be used, and precache is all-or-nothing: one failed file and
+          // the worker never installs. The artwork is cached at runtime instead, and
+          // warmAssetCache pulls today's queue down in advance.
+          globPatterns: ['**/*.{js,css,html,woff2,svg,ico}', 'icons/*.png'],
           // `icon-*-v3.png` are unreferenced duplicates of the icons above; precaching
           // them cost ~108 kB of a first install for files nothing ever requests.
           globIgnores: ['**/icons/*-v3.png'],
@@ -104,17 +92,6 @@ export default defineConfig(() => {
               },
             },
             {
-              // Audio effects & speech sound files: cache for complete offline gameplay
-              urlPattern: ({request, sameOrigin, url}) =>
-                sameOrigin && (request.destination === 'audio' || /\.(mp3|wav|ogg|aac|m4a)$/i.test(url.pathname)),
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'koda-audio',
-                expiration: {maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 90},
-                cacheableResponse: {statuses: [0, 200]},
-              },
-            },
-            {
               // Published release artwork served *by the API* (`/learning/assets/...`).
               // These are files, not data — cached for offline play.
               urlPattern: ({url}) => url.pathname.includes('/learning/assets/'),
@@ -125,16 +102,11 @@ export default defineConfig(() => {
                 cacheableResponse: {statuses: [0, 200]},
               },
             },
-            {
-              // Curriculum & student API data endpoints: StaleWhileRevalidate for instant offline loading
-              urlPattern: ({url}) => url.pathname.includes('/api/v1/learning/') || url.pathname.includes('/api/v1/curriculum/'),
-              handler: 'StaleWhileRevalidate',
-              options: {
-                cacheName: 'koda-api-data',
-                expiration: {maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 7},
-                cacheableResponse: {statuses: [0, 200]},
-              },
-            },
+            // NOTE: do not add a runtime cache for API *data* here. Cache Storage keys on
+            // the URL alone and ignores the Authorization header, so on a shared family
+            // tablet one child's `/learning/today` would be replayed to their sibling
+            // after a profile switch. Offline data is handled in `src/api/offlineCache.ts`,
+            // which is keyed per student, versioned, expiring and cleared on logout.
             {
               urlPattern: ({url}) => url.origin === 'https://fonts.googleapis.com',
               handler: 'StaleWhileRevalidate',
@@ -161,6 +133,7 @@ export default defineConfig(() => {
       }),
     ],
     build: {
+      emptyOutDir: false,
       rollupOptions: {
         output: {
           // React changes on its own schedule, not ours. Splitting it out means an app
