@@ -70,32 +70,47 @@ export const DashboardLayout: React.FC<Props> = ({
       <AppSidebar brand={brand} sections={sections} active={active} onNavigate={onNavigate} user={user} collapsed={collapsed} />
 
       <main className="flex min-h-0 min-w-0 flex-1 flex-col pb-16 md:pb-0">
-        <header className="flex h-16 shrink-0 items-center gap-3 border-b border-slate-200/70 bg-white px-5 dark:border-white/10 dark:bg-[#111329]">
-          <button
-            onClick={toggle}
-            title="Toggle sidebar"
-            className="hidden h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 md:inline-flex dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
-          >
-            <PanelLeft size={18} />
-          </button>
-          {(title || subtitle) && (
-            <div className="min-w-0 flex-1">
-              {title && <h1 className="truncate text-base font-black leading-tight text-slate-900 dark:text-white">{title}</h1>}
-              {subtitle && <p className="truncate text-xs text-slate-500 dark:text-slate-400">{subtitle}</p>}
+        <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-slate-200/70 bg-white px-4 sm:px-5 dark:border-white/10 dark:bg-[#111329]">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <button
+              onClick={toggle}
+              title="Toggle sidebar"
+              className="hidden h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 md:inline-flex dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
+            >
+              <PanelLeft size={18} />
+            </button>
+
+            {/* Mobile Brand Title */}
+            <div className="flex items-center gap-2 md:hidden shrink-0">
+              {brand.logoSrc && (
+                <img src={brand.logoSrc} alt={brand.logoAlt ?? brand.name} className="h-7 w-7 rounded-lg object-contain" />
+              )}
+              <span className="text-base font-black tracking-tight text-slate-900 dark:text-white">
+                {brand.name}
+              </span>
             </div>
-          )}
-          {!title && !subtitle && <div className="flex-1" />}
-          {actions}
+
+            {(title || subtitle) && (
+              <div className="hidden sm:block min-w-0 flex-1">
+                {title && <h1 className="truncate text-base font-black leading-tight text-slate-900 dark:text-white">{title}</h1>}
+                {subtitle && <p className="truncate text-xs text-slate-500 dark:text-slate-400">{subtitle}</p>}
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1 shrink-0">
+            {actions}
+          </div>
         </header>
 
         <div className={contentClassName ?? "flex-1 overflow-auto p-5 pb-20 md:pb-5"}>{children}</div>
       </main>
 
-      {/* Mobile & Tablet Bottom Navigation Bar */}
+      {/* Native PWA Mobile & Tablet Bottom Navigation Bar */}
       {navItems.length > 0 && (
         <nav
           aria-label="Mobile navigation"
-          className="fixed bottom-0 inset-x-0 z-50 flex items-center justify-around border-t border-slate-200/80 bg-white/95 backdrop-blur-lg px-2 py-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg shadow-black/10 md:hidden dark:border-white/10 dark:bg-[#111329]/95"
+          className="fixed bottom-0 inset-x-0 z-50 flex items-center justify-around border-t border-slate-200/80 bg-white/95 backdrop-blur-xl px-2 pt-1.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.06)] md:hidden dark:border-white/10 dark:bg-[#111329]/95 dark:shadow-[0_-4px_20px_rgba(0,0,0,0.4)] select-none"
         >
           {navItems.map(item => {
             const Icon = item.icon;
@@ -105,16 +120,18 @@ export const DashboardLayout: React.FC<Props> = ({
                 key={item.id}
                 type="button"
                 onClick={() => onNavigate(item.id)}
-                className={`flex min-h-[44px] flex-1 touch-manipulation cursor-pointer flex-col items-center justify-center gap-0.5 rounded-xl py-1 text-[11px] font-extrabold transition-all active:scale-95 ${
+                className={`flex min-h-[48px] flex-1 touch-manipulation cursor-pointer flex-col items-center justify-center gap-1 rounded-2xl py-1 text-[11px] font-black transition-all active:scale-90 select-none [-webkit-tap-highlight-color:transparent] ${
                   isActive
                     ? "text-[#534AB7] dark:text-[#CDBEFF]"
-                    : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                    : "text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
                 }`}
               >
-                <span className={`flex h-7 w-7 items-center justify-center rounded-xl transition-colors ${
-                  isActive ? "bg-[#F3F0FF] dark:bg-violet-400/20" : "bg-transparent"
+                <span className={`flex h-7 w-12 items-center justify-center rounded-full transition-all duration-200 ${
+                  isActive
+                    ? "bg-[#534AB7] text-white shadow-sm shadow-[#534AB7]/40 dark:bg-[#6844EA]"
+                    : "bg-transparent text-slate-400 dark:text-slate-500"
                 }`}>
-                  <Icon size={18} />
+                  <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
                 </span>
                 <span>{item.label}</span>
               </button>

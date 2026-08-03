@@ -62,7 +62,7 @@ export const AppToolbar: React.FC<Props> = ({ title, subtitle, nav, subnav, acti
     {nav && (
       <nav
         aria-label="Mobile section navigation"
-        className="fixed bottom-0 inset-x-0 z-50 flex items-center justify-around border-t border-[#E9E3F6] bg-white/95 backdrop-blur-lg px-2 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg md:hidden dark:border-white/10 dark:bg-[#111329]/95"
+        className="fixed bottom-0 inset-x-0 z-50 flex items-center justify-around border-t border-slate-200/80 bg-white/95 backdrop-blur-xl px-2 pt-1.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.06)] md:hidden dark:border-white/10 dark:bg-[#111329]/95 dark:shadow-[0_-4px_20px_rgba(0,0,0,0.4)] select-none [-webkit-tap-highlight-color:transparent]"
       >
         {nav}
       </nav>

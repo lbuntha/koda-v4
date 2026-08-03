@@ -160,7 +160,7 @@ export const KidHome: React.FC<StudentHomeProps> = ({
       />
 
       {activeDestination === "skills" ? (
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-8 sm:px-6">
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-24 sm:px-6 md:pb-8">
           <SkillsExplorerSection
             paths={paths}
             subjectName={subjects.find(subject => subject.id === activeSubjectId)?.name ?? "Learning"}
@@ -173,7 +173,7 @@ export const KidHome: React.FC<StudentHomeProps> = ({
           />
         </main>
       ) : activeDestination === "quests" ? (
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-8 sm:px-6">
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-24 sm:px-6 md:pb-8">
           <QuestSection
             quest={course.quest}
             activities={course.queue}
@@ -182,7 +182,7 @@ export const KidHome: React.FC<StudentHomeProps> = ({
           />
         </main>
       ) : (
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-8 sm:px-6">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-24 sm:px-6 md:pb-8">
         {subjectComplete ? (
           <CurriculumCompletionCard
             subjectName={activeSubjectName}

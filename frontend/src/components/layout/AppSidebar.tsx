@@ -90,7 +90,7 @@ export const AppSidebar: React.FC<Props> = ({ brand, sections, active, onNavigat
   return (
     <aside
       className={cn(
-        "flex shrink-0 flex-col border-b border-slate-200/70 bg-white transition-[width] duration-200 md:h-full md:min-h-0 md:border-b-0 md:border-r dark:border-white/10 dark:bg-[#111329]",
+        "hidden md:flex shrink-0 flex-col border-r border-slate-200/70 bg-white transition-[width] duration-200 md:h-full md:min-h-0 dark:border-white/10 dark:bg-[#111329]",
         collapsed ? "md:w-16" : "md:w-56"
       )}
     >
