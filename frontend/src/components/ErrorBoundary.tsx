@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import * as React from "react";
 import { RefreshCw } from "lucide-react";
 import { reportClientError } from "../api/telemetry";
 
@@ -30,13 +30,7 @@ interface State {
  * screen; without it the failure never reaches anyone who can fix it.
  */
 export class ErrorBoundary extends React.Component<Props, State> {
-  override props: Props;
-  override state: State = { failed: false, reference: null };
-
-  constructor(props: Props) {
-    super(props);
-    this.props = props;
-  }
+  state: State = { failed: false, reference: null };
 
   static getDerivedStateFromError(): Partial<State> {
     return { failed: true };
