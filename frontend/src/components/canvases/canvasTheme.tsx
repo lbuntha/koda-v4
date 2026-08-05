@@ -7,12 +7,16 @@ import React from "react";
  * chrome element — header icon, objective chip, status footer — tints from it,
  * so all canvases read as one component family.
  */
+/**
+ * No amber/yellow. On a light worksheet it is at once low-contrast against the page and
+ * high-glare, which is tiring for a child looking at it for a whole lesson. Leaving it out of
+ * the union makes that structural: a canvas cannot pick it back up by accident.
+ */
 export type CanvasAccent =
   | "rose"
   | "violet"
   | "indigo"
   | "emerald"
-  | "amber"
   | "purple"
   | "slate";
 
@@ -60,14 +64,6 @@ export const CANVAS_ACCENTS: Record<CanvasAccent, AccentTokens> = {
     chipDark: "bg-emerald-500/30 text-emerald-100 border-emerald-400/50",
     textLight: "text-emerald-600",
     textDark: "text-emerald-400"
-  },
-  amber: {
-    iconLight: "bg-amber-50 text-amber-600",
-    iconDark: "bg-amber-500/15 text-amber-400",
-    chipLight: "bg-amber-50 text-amber-700 border-amber-200",
-    chipDark: "bg-amber-500/30 text-amber-100 border-amber-400/50",
-    textLight: "text-amber-600",
-    textDark: "text-amber-400"
   },
   purple: {
     iconLight: "bg-purple-50 text-purple-600",

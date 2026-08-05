@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "motion/react";
-import { CountingQuestion, CountingTechnique, COUNT_OBJECTS, SVG_OBJECTS, EMOJI_OBJECTS, CUSTOM_SVG_OBJECT_PLACEHOLDER } from "./types";
+import { CountingQuestion, CountingTechnique } from "./types";
 import { CountingAsset } from "./components/Assets";
 import { SvgDesigner } from "./components/SvgDesigner";
 import { DEFAULT_QUESTIONS } from "./templates";
@@ -69,6 +69,9 @@ import { TECHNIQUE_OPTIONS, defaultTargetCountForTechnique } from "./components/
 import { CANVAS_BY_TECHNIQUE } from "./components/studio/canvasRegistry";
 import { AiGeneratorPanel } from "./components/studio/ai-generator";
 import { useSvgLibrary } from "./assets/SvgLibraryContext";
+import { QuestionAssetProvider } from "./assets/questionAsset";
+import { assetQuestionPatch } from "./assets/assetCatalog";
+import { AssetPicker } from "./components/studio/AssetPicker";
 import { SvgLibraryAsset } from "./assets/SvgLibraryAsset";
 import { useQuestionDeck } from "./studio/useQuestionDeck";
 import { createQuestionId } from "./studio/questionIds";
@@ -157,14 +160,6 @@ export default function App({ embedded = false, initialAdminTab = "dashboard", o
   const [isTabChanging, setIsTabChanging] = useState<boolean>(false);
   // Find active question
   const activeQuestion = questions.find(q => q.id === activeId) || questions[0];
-
-  useEffect(() => {
-    if (activeQuestion?.config?.assetType === "custom_svg") {
-      CUSTOM_SVG_OBJECT_PLACEHOLDER.emoji = activeQuestion.config.customSvgMarkup || "";
-      CUSTOM_SVG_OBJECT_PLACEHOLDER.label = activeQuestion.config.customSvgLabel || "Custom Shape";
-      CUSTOM_SVG_OBJECT_PLACEHOLDER.scale = activeQuestion.config.customSvgScale || 1.0;
-    }
-  }, [activeId, activeQuestion?.config?.assetType, activeQuestion?.config?.customSvgMarkup, activeQuestion?.config?.customSvgLabel, activeQuestion?.config?.customSvgScale]);
 
   const toggleBrowserFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -569,9 +564,13 @@ export default function App({ embedded = false, initialAdminTab = "dashboard", o
 
     const Canvas = CANVAS_BY_TECHNIQUE[activeQuestion.technique] || OneToOneCanvas;
     return (
-      <LazyBoundary>
-        <Canvas key={activeQuestion.id} {...canvasProps} />
-      </LazyBoundary>
+      // Tells every canvas below which library artwork this question chose, so none of them
+      // needs a prop for it — see `questionAsset.tsx`.
+      <QuestionAssetProvider asset={activeQuestion.config}>
+        <LazyBoundary>
+          <Canvas key={activeQuestion.id} {...canvasProps} />
+        </LazyBoundary>
+      </QuestionAssetProvider>
     );
   };
 
@@ -1678,137 +1677,16 @@ export default function App({ embedded = false, initialAdminTab = "dashboard", o
                   />
                 </div>
 
-                {/* SVG Assets picker */}
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex justify-between items-center">
-                    <Label>SVG Assets</Label>
-                    <span className="text-[9px] bg-violet-50 text-violet-600 font-mono font-bold px-1.5 py-0.5 rounded border border-violet-100 uppercase tracking-wider">Vector</span>
-                  </div>
-                  <div className="grid grid-cols-4 gap-1.5">
-                    {SVG_OBJECTS.map((item) => {
-                      const isSelected = activeQuestion?.objectId === item.id;
-                      return (
-                        <button
-                          key={item.id}
-                          onClick={() => {
-                            sounds.playPop();
-                            const updates: Partial<CountingQuestion> = { objectId: item.id };
-                            if (item.assetType) {
-                              updates.config = {
-                                ...activeQuestion.config,
-                                assetType: item.assetType
-                              };
-                            }
-                            updateActiveQuestion(updates);
-                          }}
-                          className={`h-11 flex items-center justify-center rounded-lg border transition-all cursor-pointer ${
-                            isSelected 
-                              ? "bg-indigo-50 border-indigo-500 ring-2 ring-indigo-500/25 scale-105" 
-                              : "bg-slate-50 border-slate-200 hover:bg-slate-100"
-                          }`}
-                          title={item.label}
-                        >
-                          <CountingAsset type={item.assetType as any} size={28} />
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* My Custom Library SVGs listing */}
-                  <div className="flex flex-col gap-1.5 mt-3 border-t border-slate-100 pt-3">
-                    <div className="flex justify-between items-center">
-                      <Label className="text-[10px] text-slate-400 uppercase font-black">My Custom Library</Label>
-                      <span className="text-[9px] bg-indigo-50 text-indigo-600 font-mono font-bold px-1.5 py-0.5 rounded border border-indigo-100 uppercase tracking-wider">Library</span>
-                    </div>
-
-                    {customSvgs.length > 0 ? (
-                      <div className="grid grid-cols-4 gap-1.5">
-                        {customSvgs.map((asset) => {
-                          const isSelected = activeQuestion?.objectId === "custom_svg" && (
-                            activeQuestion.config?.customSvgAssetId === asset.id || activeQuestion.config?.customSvgMarkup === asset.markup
-                          );
-                          return (
-                            <button
-                              key={asset.id}
-                              onClick={() => {
-                                sounds.playPop();
-                                updateActiveQuestion({
-                                  objectId: "custom_svg",
-                                  config: {
-                                    ...activeQuestion.config,
-                                    assetType: "custom_svg",
-                                    customSvgAssetId: asset.id,
-                                    customSvgMarkup: asset.markup,
-                                    customSvgLabel: asset.label,
-                                    customSvgScale: asset.scale
-                                  }
-                                });
-                              }}
-                              className={`h-11 flex items-center justify-center rounded-lg border transition-all cursor-pointer ${
-                                isSelected 
-                                  ? "bg-indigo-50 border-indigo-500 ring-2 ring-indigo-500/25 scale-105" 
-                                  : "bg-slate-50 border-slate-200 hover:bg-slate-100"
-                              }`}
-                              title={asset.label}
-                            >
-                              <CountingAsset type="custom_svg" customSvgMarkup={asset.markup} size={28} />
-                            </button>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <div className="text-center p-3 border border-dashed border-slate-200 rounded-xl bg-slate-50/50">
-                        <p className="text-[10px] text-slate-500 font-bold">No custom SVGs built yet</p>
-                        <button
-                          onClick={() => {
-                            setAdminTab("assets");
-                            sounds.playPop();
-                          }}
-                          className="mt-1 text-[9px] text-indigo-600 hover:text-indigo-800 font-black underline cursor-pointer"
-                        >
-                          Create Custom SVG &rarr;
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Emoji Assets picker */}
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex justify-between items-center">
-                    <Label>Emoji Assets</Label>
-                    <span className="text-[9px] bg-amber-50 text-amber-600 font-mono font-bold px-1.5 py-0.5 rounded border border-amber-100 uppercase tracking-wider">Emoji</span>
-                  </div>
-                  <div className="grid grid-cols-5 gap-1.5">
-                    {EMOJI_OBJECTS.map((item) => {
-                      const isSelected = activeQuestion?.objectId === item.id;
-                      return (
-                        <button
-                          key={item.id}
-                          onClick={() => {
-                            sounds.playPop();
-                            const updates: Partial<CountingQuestion> = { objectId: item.id };
-                            if (item.assetType) {
-                              updates.config = {
-                                ...activeQuestion.config,
-                                assetType: item.assetType
-                              };
-                            }
-                            updateActiveQuestion(updates);
-                          }}
-                          className={`text-2xl h-11 flex items-center justify-center rounded-lg border transition-all cursor-pointer ${
-                            isSelected 
-                              ? "bg-indigo-50 border-indigo-500 ring-2 ring-indigo-500/25 scale-105" 
-                              : "bg-slate-50 border-slate-200 hover:bg-slate-100"
-                          }`}
-                          title={item.label}
-                        >
-                          {item.emoji}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
+                {/* Every asset in one grid — shapes, Goods Sort sprites, emoji and the
+                    account's own SVG library. See `assets/assetCatalog.ts`. */}
+                <AssetPicker
+                  question={activeQuestion}
+                  onOpenSvgMaker={() => setAdminTab("assets")}
+                  onSelectAsset={(asset) => {
+                    sounds.playPop();
+                    updateActiveQuestion(assetQuestionPatch(activeQuestion.config, asset));
+                  }}
+                />
 
                 {/* Target goal slider */}
                 <div className="flex flex-col gap-1.5">
@@ -2234,7 +2112,6 @@ export default function App({ embedded = false, initialAdminTab = "dashboard", o
               <CurriculumStudioPage
                 questions={questions}
                 saveQuestions={saveQuestions}
-                customSvgs={customSvgs}
                 onOpenSvgMaker={() => setAdminTab("assets")}
               />
             )}

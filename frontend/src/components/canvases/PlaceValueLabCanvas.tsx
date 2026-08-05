@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowRight, Boxes, Check, RefreshCw, RotateCcw } from "lucide-react";
 import { sounds } from "../../sound";
+import { hasAssetRef } from "../../assets/assetRef";
 import { Button } from "../ui";
 import { Base10Scale, OneUnit, TenRod } from "./Base10Blocks";
 import { CanvasChip, captionClass, surfaceClass } from "./canvasTheme";
@@ -51,7 +52,8 @@ export const PlaceValueLabCanvas: React.FC<CanvasProps> = ({
   const solvedRef = useRef(false);
   const reduceMotion = useReducedMotion();
   const requestedAssetType = question.config.assetType || question.objectId || "star";
-  const assetType = requestedAssetType === "custom_svg" && !question.config.customSvgMarkup ? "star" : requestedAssetType;
+  // "custom_svg" with nothing to draw would render empty blocks, so fall back to a shape.
+  const assetType = requestedAssetType === "custom_svg" && !hasAssetRef(question.config) ? "star" : requestedAssetType;
   const instruction = question.instruction || placeValueInstruction(config);
   const choices = placeValueChoices(config.target);
   const currentNumber = representedNumber(blocks);

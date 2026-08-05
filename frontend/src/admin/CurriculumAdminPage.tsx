@@ -35,7 +35,6 @@ const CurriculumStudioHost: React.FC<CurriculumStudioHostProps> = ({ curriculumI
       curriculumId={curriculumId}
       questions={questions}
       saveQuestions={setQuestions}
-      customSvgs={assets}
       onOpenSvgMaker={onOpenAssets}
       onBack={onBack}
     />

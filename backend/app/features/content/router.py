@@ -975,6 +975,14 @@ async def get_published_curriculum(student: Student = Depends(get_current_studen
         "revision": release.revision,
         "tree": release.tree,
         "questions": questions,
+        # A question names its artwork by id rather than carrying a copy of the markup, and a
+        # student never loads an editable SVG library. These frozen snapshots are what the
+        # player resolves those ids against — the same immutable copies `/learning/assets`
+        # serves one at a time for skill thumbnails.
+        "assets": [
+            row["snapshot"] for row in release.asset_manifest
+            if isinstance(row.get("snapshot"), dict)
+        ],
         "frontierSkillId": progression.frontier_skill_id if progression else delivery_skill_ids[0],
         "eligibleSkillIds": progression.eligible_skill_ids if progression else [],
         "deliverySkillIds": delivery_skill_ids,
@@ -1037,8 +1045,9 @@ async def get_svg_assets(user: User = Depends(get_current_user)):
     doc = await SvgLibrary.find_one(SvgLibrary.owner_id == str(user.id))
     if not doc:
         return {"exists": False, "assets": [], "overrides": {},
-                "techniqueThumbnails": {}, "revision": 0}
+                "deletedSystemAssetIds": [], "techniqueThumbnails": {}, "revision": 0}
     return {"exists": True, "assets": doc.assets, "overrides": doc.overrides,
+            "deletedSystemAssetIds": doc.deleted_system_asset_ids,
             "techniqueThumbnails": doc.technique_thumbnails, "revision": doc.revision}
 
 
@@ -1079,6 +1088,7 @@ async def put_svg_assets(body: SvgLibraryIn, user: User = Depends(get_current_us
             raise HTTPException(status.HTTP_409_CONFLICT, "SVG library changed in another session; reload before saving")
         doc.assets = assets
         doc.overrides = overrides
+        doc.deleted_system_asset_ids = body.deleted_system_asset_ids
         doc.technique_thumbnails = body.technique_thumbnails
         doc.revision += 1
         doc.updated_at = datetime.now(timezone.utc)
@@ -1087,6 +1097,7 @@ async def put_svg_assets(body: SvgLibraryIn, user: User = Depends(get_current_us
         if body.revision != 0:
             raise HTTPException(status.HTTP_409_CONFLICT, "SVG library revision is stale")
         doc = SvgLibrary(owner_id=owner_id, assets=assets, overrides=overrides,
+                         deleted_system_asset_ids=body.deleted_system_asset_ids,
                          technique_thumbnails=body.technique_thumbnails, revision=1)
         await doc.insert()
     return {"ok": True, "revision": doc.revision}

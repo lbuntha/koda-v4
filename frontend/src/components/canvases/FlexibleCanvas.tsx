@@ -558,14 +558,24 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
       showRulers={question.config.showLayoutRulers ?? true}
       accent="indigo"
       headerIcon={<Sparkles size={15} />}
-      headerTitle="Classroom Sorting Detective"
+      // The activity name must follow the mode — a true/false question headed
+      // "Classroom Sorting Detective" tells the child to do something else.
+      headerTitle={
+        mode === "dragmatch"
+          ? "Classroom Sorting Detective"
+          : mode === "multichoice"
+            ? "Pick the Answer"
+            : mode === "tapcount"
+              ? "Tap to Count"
+              : "Type the Answer"
+      }
       headerSubtitle={
-        mode === "dragmatch" 
-          ? "Sort items into bins" 
-          : mode === "multichoice" 
-            ? "Pick the correct answer" 
-            : mode === "tapcount" 
-              ? "Tap to count" 
+        mode === "dragmatch"
+          ? "Sort items into bins"
+          : mode === "multichoice"
+            ? "Pick the correct answer"
+            : mode === "tapcount"
+              ? "Tap to count"
               : "Solve the counting challenge"
       }
       readAloudText={getInstructionText()}
@@ -690,8 +700,9 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
           );
         })}
 
-        {/* Prompt Instruction overlay if empty */}
-        {localItems.length === 0 && (
+        {/* Authoring placeholder — design mode only. A child was being told to
+            "switch to Design Mode" on any question authored without items. */}
+        {localItems.length === 0 && !isPlayMode && (
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 bg-slate-100/5 border-2 border-dashed border-slate-300/30 rounded-xl m-4 pointer-events-none">
             <HelpCircle className="text-slate-400 mb-2 animate-bounce" size={24} />
             <h4 className="text-sm font-bold text-slate-400">Empty Flexible Canvas</h4>

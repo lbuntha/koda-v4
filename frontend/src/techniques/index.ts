@@ -33,7 +33,14 @@ import { goodsSort } from "./goodsSort";
 import { numberPath } from "./numberPath";
 import { storyProblemMat } from "./storyProblemMat";
 import { placeValueLab } from "./placeValueLab";
+import { equationMat } from "./equationMat";
+import { compareNumbers } from "./compareNumbers";
+import { clockRead } from "./clockRead";
+import { measureLength } from "./measureLength";
+import { dataChart } from "./dataChart";
+import { shapeLab } from "./shapeLab";
 import { countCrates } from "./countCrates";
+import { xtraMath } from "./xtraMath";
 
 /** Ordered exactly as the Studio picker lists them (1..16). */
 export const ALL_TECHNIQUES: TechniqueManifest[] = [
@@ -59,7 +66,14 @@ export const ALL_TECHNIQUES: TechniqueManifest[] = [
   numberPath,
   storyProblemMat,
   placeValueLab,
+  equationMat,
+  compareNumbers,
+  clockRead,
+  measureLength,
+  dataChart,
+  shapeLab,
   countCrates,
+  xtraMath,
 ];
 
 // Loud in dev / logged in prod if a game is missing or double-registered.

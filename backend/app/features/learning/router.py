@@ -247,6 +247,31 @@ async def _recent_skips(student_id: str, cooldown_sessions: int, current_session
     return output
 
 
+def _referenced_assets(
+    release: CurriculumRelease,
+    questions: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """The release's frozen artwork for the assets these questions name.
+
+    A question references artwork by id rather than carrying a copy of the markup, and a
+    student never loads the editable SVG library those ids live in — so the snapshots have to
+    travel with the questions. Only the referenced ones: the whole library would otherwise be
+    repeated in every queue item.
+    """
+    wanted = {
+        question.get("config", {}).get("customSvgAssetId")
+        for question in questions
+        if isinstance(question.get("config"), dict)
+    }
+    wanted.discard(None)
+    if not wanted:
+        return []
+    return [
+        row["snapshot"] for row in release.asset_manifest
+        if row.get("asset_id") in wanted and isinstance(row.get("snapshot"), dict)
+    ]
+
+
 def _item_out(
     item: dict[str, Any],
     releases: dict[str, CurriculumRelease],
@@ -282,6 +307,7 @@ def _item_out(
         "optional": item["optional"],
         "status": status_value,
         "questions": questions,
+        "assets": _referenced_assets(release, questions),
     }
 
 

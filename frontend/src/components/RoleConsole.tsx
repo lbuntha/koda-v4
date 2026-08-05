@@ -9,7 +9,7 @@
 
 import React, { useEffect, useState } from "react";
 import { LayoutDashboard, LogOut, Loader2, Inbox } from "lucide-react";
-import { Button, Card } from "./ui";
+import { Button, Card, KodaLogoSpinner } from "./ui";
 import { DashboardLayout } from "./layout/DashboardLayout";
 import { ContentPlaceholder } from "./ContentPlaceholder";
 import { useAuth } from "../auth/AuthContext";
@@ -46,7 +46,7 @@ export const RoleConsole: React.FC = () => {
     >
       {loading ? (
         <div className="flex justify-center py-20">
-          <Loader2 size={22} className="animate-spin text-indigo-400" />
+          <KodaLogoSpinner size="lg" label="Loading role console..." />
         </div>
       ) : sections.length === 0 ? (
         <Card className="p-12 flex flex-col items-center text-center gap-3">

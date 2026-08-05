@@ -7,6 +7,7 @@ import { CanvasChip } from "./canvasTheme";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import {
   arrangedPathNumbers,
+  pathColumnCount,
   mazeNumbers,
   normalizeNumberPathConfig,
   numberPathInstruction,
@@ -49,6 +50,7 @@ export const NumberPathCanvas: React.FC<CanvasProps> = ({
   ]);
   const required = useMemo(() => requiredNumbers(config), [config]);
   const path = useMemo(() => arrangedPathNumbers(config), [config]);
+  const pathColumns = useMemo(() => pathColumnCount(path.length), [path.length]);
   const maze = useMemo(() => mazeNumbers(config), [config]);
   const [selected, setSelected] = useState<number[]>([]);
   const [errorNumber, setErrorNumber] = useState<number | null>(null);
@@ -119,7 +121,9 @@ export const NumberPathCanvas: React.FC<CanvasProps> = ({
     }
     if (isError) return "bg-rose-500 text-white animate-shake";
     if (isAnchor) return isDark ? "bg-violet-400 text-violet-950" : "bg-violet-600 text-white";
-    if (showTarget) return isDark ? "bg-amber-400/20 text-amber-200 ring-2 ring-amber-400" : "bg-amber-50 text-amber-700 ring-2 ring-amber-400";
+    // Fuchsia, not amber: this ring has to stand out from the indigo board without the glare
+    // of yellow, and rose is reserved for the error state two lines up.
+    if (showTarget) return isDark ? "bg-fuchsia-400/20 text-fuchsia-200 ring-2 ring-fuchsia-400" : "bg-fuchsia-50 text-fuchsia-700 ring-2 ring-fuchsia-500";
     if (guidedHint) return isDark ? "bg-indigo-400/25 text-indigo-100 ring-2 ring-indigo-300 animate-pulse" : "bg-indigo-50 text-indigo-700 ring-2 ring-indigo-400 animate-pulse";
     return isDark
       ? "bg-white/[0.09] text-slate-100 hover:bg-indigo-400/25 focus-visible:ring-indigo-300"
@@ -160,7 +164,7 @@ export const NumberPathCanvas: React.FC<CanvasProps> = ({
       headerActions={(
         <>
           <CanvasChip accent="indigo" isDark={isDark}>{viewLabel}</CanvasChip>
-          <CanvasChip accent={config.difficulty === "challenge" ? "amber" : "indigo"} isDark={isDark}>{config.difficulty}</CanvasChip>
+          <CanvasChip accent={config.difficulty === "challenge" ? "rose" : "indigo"} isDark={isDark}>{config.difficulty}</CanvasChip>
           <Button variant="ghost" size="icon" onClick={reset} className="h-8 w-8" aria-label="Reset activity"><RotateCcw size={14} /></Button>
         </>
       )}
@@ -215,14 +219,34 @@ export const NumberPathCanvas: React.FC<CanvasProps> = ({
             ))}
           </div>
         ) : (
-          <div className="w-full overflow-x-auto px-1 py-6 touch-pan-x">
-            <div className="mx-auto flex min-w-max items-center justify-center gap-1.5 sm:gap-2">
-              {path.map((number, index) => (
-                <React.Fragment key={number}>
-                  {renderNumber(number)}
-                  {index < path.length - 1 && <span aria-hidden="true" className={isDark ? "h-1 w-3 rounded-full bg-white/15 sm:w-5" : "h-1 w-3 rounded-full bg-indigo-100 sm:w-5"} />}
-                </React.Fragment>
-              ))}
+          /* Wrapped into rows, never scrolled sideways. A path of ten tiles overflowed its
+             card, which put the number the child is counting *towards* off-screen — so the
+             one thing they need to see to know when they are finished was the thing hidden.
+             Asking a six-year-old to scroll to find it is not a fix.
+
+             The column count is fixed rather than left to `flex-wrap` so the wrap points are
+             known: a connector is then drawn only between tiles that really are side by side,
+             instead of dangling off the end of a row. */
+          <div className="w-full px-1 py-4">
+            <div
+              className="mx-auto grid w-fit max-w-full justify-center gap-y-2 sm:gap-y-3"
+              style={{ gridTemplateColumns: `repeat(${pathColumns}, auto)` }}
+            >
+              {path.map((number, index) => {
+                const endOfRow = (index + 1) % pathColumns === 0;
+                const isLast = index === path.length - 1;
+                return (
+                  <div key={number} className="flex items-center">
+                    {renderNumber(number)}
+                    {!endOfRow && !isLast && (
+                      <span
+                        aria-hidden="true"
+                        className={`h-1 w-2 rounded-full sm:w-4 ${isDark ? "bg-white/15" : "bg-indigo-100"}`}
+                      />
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

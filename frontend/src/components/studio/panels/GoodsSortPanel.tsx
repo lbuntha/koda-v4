@@ -14,6 +14,7 @@ import {
   type GoodsDifficultyTier,
 } from "../../canvases/goodsSortLevels";
 import { Sparkles, RefreshCw, Plus, Check, Palette } from "lucide-react";
+import { AssetSelectionModal } from "../../ui";
 
 /** The curated ladder, in the order it is meant to be climbed. */
 const TIER_GROUPS: Array<{ tier: GoodsDifficultyTier; label: string }> = [
@@ -35,6 +36,7 @@ export const GoodsSortPanel: React.FC<PanelProps> = ({ question, update }) => {
 
   const [customEmoji, setCustomEmoji] = useState("");
   const [customLabel, setCustomLabel] = useState("");
+  const [isAssetModalOpen, setIsAssetModalOpen] = useState(false);
 
   const handleLevelSelect = (levelId: string) => {
     // Check preset themes
@@ -287,41 +289,61 @@ export const GoodsSortPanel: React.FC<PanelProps> = ({ question, update }) => {
           </div>
         </div>
 
-        {/* Catalog Goods Multi-Select */}
+        {/* Catalog Goods Asset Selection & Modal Launcher */}
         <div>
-          <label className="text-[10px] font-bold text-slate-600 dark:text-slate-300 block mb-2">
-            Select Goods to Include ({selectedTypes.length} Types Selected)
-          </label>
-          <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 gap-1.5 max-h-48 overflow-y-auto pr-1">
-            {Object.entries(GOODS_CATALOG).map(([key, item]) => {
-              const isSelected = selectedTypes.includes(key);
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => toggleGoodsType(key)}
-                  className={`relative p-1.5 sm:p-2 rounded-lg border flex flex-col items-center justify-center transition-all min-w-0 ${
-                    isSelected
-                      ? "bg-indigo-100 dark:bg-indigo-900/60 border-indigo-600 text-indigo-950 dark:text-indigo-100 font-extrabold ring-2 ring-indigo-600"
-                      : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300"
-                  }`}
-                >
-                  {isSelected && (
-                    <div className="absolute top-1 right-1 w-3.5 h-3.5 bg-indigo-600 text-white rounded-full flex items-center justify-center shadow-sm">
-                      <Check size={9} strokeWidth={3} />
-                    </div>
-                  )}
-                  <span className="text-lg sm:text-xl leading-none mb-1">{item.emoji}</span>
-                  <span className="text-[9px] font-bold truncate w-full text-center">{item.label}</span>
-                </button>
-              );
-            })}
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <label className="text-[10px] font-bold text-slate-600 dark:text-slate-300 block">
+              Goods Assets ({selectedTypes.length} Types Selected)
+            </label>
+            <button
+              type="button"
+              onClick={() => setIsAssetModalOpen(true)}
+              className="text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 hover:underline"
+            >
+              Open Full Picker &rarr;
+            </button>
+          </div>
+
+          {/* Interactive Selected Asset Pills (Click any to open modal) */}
+          <div
+            onClick={() => setIsAssetModalOpen(true)}
+            className="group cursor-pointer p-2.5 rounded-xl border border-indigo-200/80 bg-white/90 dark:border-indigo-800/60 dark:bg-slate-800/80 hover:border-indigo-500 hover:shadow-md transition-all space-y-2"
+          >
+            <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto pr-1">
+              {selectedTypes.map(key => {
+                const item = GOODS_CATALOG[key];
+                return (
+                  <span
+                    key={key}
+                    className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs font-bold dark:bg-indigo-950/80 dark:border-indigo-700 dark:text-indigo-200 group-hover:scale-105 transition-transform"
+                  >
+                    <span>{item?.emoji || "📦"}</span>
+                    <span>{item?.label || key}</span>
+                  </span>
+                );
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsAssetModalOpen(true);
+              }}
+              className="w-full py-2 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-extrabold flex items-center justify-center gap-2 shadow-sm transition-colors"
+            >
+              <Palette size={14} />
+              <span>Select & Edit SVG / Emoji Assets...</span>
+            </button>
           </div>
         </div>
 
         {/* SVG Asset Studio Link & Custom Emoji Creator */}
         <div className="pt-2.5 border-t border-indigo-200 dark:border-indigo-800/60 space-y-2.5">
-          <div className="flex items-center justify-between p-2 bg-indigo-100/70 dark:bg-indigo-900/50 rounded-lg">
+          <div
+            onClick={() => setIsAssetModalOpen(true)}
+            className="cursor-pointer flex items-center justify-between p-2 bg-indigo-100/70 hover:bg-indigo-100 dark:bg-indigo-900/50 dark:hover:bg-indigo-900/80 rounded-lg transition-colors"
+          >
             <span className="text-[11px] font-extrabold text-indigo-900 dark:text-indigo-200 flex items-center gap-1.5">
               <Palette size={13} className="text-indigo-600 dark:text-indigo-400" /> SVG Asset Studio
             </span>
@@ -358,6 +380,25 @@ export const GoodsSortPanel: React.FC<PanelProps> = ({ question, update }) => {
           </div>
         </div>
       </div>
+
+      {/* Asset Selection Modal Dialog */}
+      <AssetSelectionModal
+        isOpen={isAssetModalOpen}
+        onClose={() => setIsAssetModalOpen(false)}
+        selectedTypes={selectedTypes}
+        onApplySelection={(nextTypes) => {
+          update({
+            targetCount: nextTypes.length,
+            config: {
+              ...config,
+              goodsTypes: nextTypes,
+              gridRows: rows,
+              gridCols: cols,
+              compartmentCapacity: capacity,
+            },
+          });
+        }}
+      />
 
       {/* Target Summary — what this board asks of a learner, in the ladder's own terms. */}
       <div className="p-3 bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl space-y-2">

@@ -158,10 +158,8 @@ export function applyCustomAssetSelection(
     config: {
       ...validated.config,
       assetType: "custom_svg",
+      // A reference, not a copy — see `assets/assetRef.ts`.
       customSvgAssetId: asset.id,
-      customSvgMarkup: asset.markup,
-      customSvgLabel: asset.label,
-      customSvgScale: asset.scale,
     },
   };
 }

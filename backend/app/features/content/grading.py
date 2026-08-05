@@ -258,6 +258,154 @@ def _story_answer(story_type: str, unknown: Any, first: int, second: int, third:
     raise GradingError(f"STORY_PROBLEM_MAT: unknown story type {story_type!r}")
 
 
+# ── Equation mat (derived from the equation) ─────────────────────────────────────
+
+#: An Equation Mat `judge` verdict, carried as a number so every grader stays numeric.
+#: Mirrors JUDGE_TRUE / JUDGE_FALSE in EquationMatCanvas.tsx.
+JUDGE_TRUE = 1
+JUDGE_FALSE = 0
+
+
+@register("EQUATION_MAT")
+def grade_equation_mat(entry: dict, selection: Any) -> GradeOutcome:
+    """Which quantity is hidden decides the answer, so the equation is re-derived here.
+
+    `8 + 3 = 11` asks for 11, 3, or 8 depending on whether the result, the second term or the
+    first is hidden — from identical config. Grading the total every time would mark a correct
+    missing-addend answer wrong, which is the entire skill this canvas exists for. Mirrors
+    `equationAnswer` in frontend/src/components/canvases/EquationMatCanvas.tsx.
+
+    `judge` hides nothing: the child answers True (1) or False (0) about the equation as
+    written, so the grade compares the two sides rather than reading a term off the config.
+    """
+    config = _config(entry)
+    unknown = config.get("equationUnknown", "result")
+    first, second = config.get("equationFirst"), config.get("equationSecond")
+
+    if first is None or second is None:
+        target = _playable(entry).get("targetCount")
+        if target is None:
+            raise GradingError("EQUATION_MAT: incomplete equation and no targetCount")
+        expected = _to_int(target)
+    elif unknown == "first":
+        expected = _to_int(first)
+    elif unknown == "second":
+        expected = _to_int(second)
+    else:
+        operation = config.get("equationOperation", "add")
+        if operation not in ("add", "subtract"):
+            raise GradingError(f"EQUATION_MAT: unknown operation {operation!r}")
+        result = (_to_int(first) + _to_int(second)) if operation == "add" else (_to_int(first) - _to_int(second))
+        if unknown == "judge":
+            claim = _to_int(config.get("equationClaimFirst", 0)) + _to_int(config.get("equationClaimSecond", 0))
+            expected = JUDGE_TRUE if result == claim else JUDGE_FALSE
+        else:
+            expected = result
+
+    return "correct" if _to_int(selection) == expected else "incorrect"
+
+
+# ── Grade 1 measurement, data, geometry and comparison ───────────────────────────
+#
+# All four derive their answer from the same config the canvas draws from, so a forged
+# selection cannot pass and an authored typo cannot make a question ungradable.
+
+@register("COMPARE_NUMBERS")
+def grade_compare_numbers(entry: dict, selection: Any) -> GradeOutcome:
+    """The answer is a symbol, not a number — >, < or =, derived from the two values."""
+    config = _config(entry)
+    first, second = config.get("compareFirst"), config.get("compareSecond")
+    if first is None or second is None:
+        raise GradingError("COMPARE_NUMBERS: needs compareFirst and compareSecond")
+    first, second = _to_int(first), _to_int(second)
+    expected = ">" if first > second else "<" if first < second else "="
+    return "correct" if str(_norm(selection)) == expected else "incorrect"
+
+
+@register("CLOCK_READ")
+def grade_clock(entry: dict, selection: Any) -> GradeOutcome:
+    """Compared as "H:MM" so "3:00" and "3:0" both read as three o'clock."""
+    config = _config(entry)
+    hour, minute = config.get("clockHour"), config.get("clockMinute")
+    if hour is None:
+        raise GradingError("CLOCK_READ: needs clockHour")
+    expected = f"{_to_int(hour)}:{'30' if _to_int(minute or 0) == 30 else '00'}"
+    submitted = str(_norm(selection))
+    if ":" in submitted:
+        left, _, right = submitted.partition(":")
+        submitted = f"{_to_int(left)}:{'30' if _to_int(right) == 30 else '00'}"
+    return "correct" if submitted == expected else "incorrect"
+
+
+@register("MEASURE_LENGTH")
+def grade_measure_length(entry: dict, selection: Any) -> GradeOutcome:
+    """`measure` answers a unit count; the compare tasks answer a bar's 1-based position."""
+    config = _config(entry)
+    task = config.get("measureTask", "measure")
+    lengths = config.get("measureLengths") or []
+    if not lengths:
+        raise GradingError("MEASURE_LENGTH: needs measureLengths")
+    values = [_to_int(value) for value in lengths]
+    if task == "measure":
+        expected = values[0]
+    elif task in ("longest", "shortest"):
+        target = max(values) if task == "longest" else min(values)
+        expected = values.index(target) + 1
+    else:
+        raise GradingError(f"MEASURE_LENGTH: unknown task {task!r}")
+    return "correct" if _to_int(selection) == expected else "incorrect"
+
+
+@register("DATA_CHART")
+def grade_data_chart(entry: dict, selection: Any) -> GradeOutcome:
+    config = _config(entry)
+    kind = config.get("dataKind", "count")
+    counts = [_to_int(value) for value in (config.get("dataCounts") or [])]
+    if not counts:
+        raise GradingError("DATA_CHART: needs dataCounts")
+    focus = _to_int(config.get("dataFocus", 0))
+    against = _to_int(config.get("dataAgainst", 1))
+    if kind == "total":
+        expected = sum(counts)
+    elif kind == "more":
+        expected = counts[focus] - counts[against]
+    elif kind == "most":
+        expected = counts.index(max(counts)) + 1
+    elif kind == "count":
+        expected = counts[focus]
+    else:
+        raise GradingError(f"DATA_CHART: unknown question kind {kind!r}")
+    return "correct" if _to_int(selection) == expected else "incorrect"
+
+
+SHAPE_SIDES = {"triangle": 3, "square": 4, "rectangle": 4, "pentagon": 5, "hexagon": 6, "circle": 0}
+#: Which shape the target is composed of. The canvas also tracks how many pieces it takes
+#: (2 triangles for a square, 6 for a hexagon) because the prompt says so; the answer is the
+#: part's identity either way, which is all grading needs.
+COMPOSED_FROM = {"square": "triangle", "rectangle": "square", "hexagon": "triangle"}
+SHAPE_ORDER = ["triangle", "square", "rectangle", "pentagon", "hexagon", "circle"]
+
+
+@register("SHAPE_LAB")
+def grade_shape_lab(entry: dict, selection: Any) -> GradeOutcome:
+    """Mirrors `shapeAnswer` in ShapeLabCanvas.tsx: sides and corners are counts, compose is a
+    1-based index into the shape list, shares is the number of equal parts."""
+    config = _config(entry)
+    task = config.get("shapeTask", "sides")
+    shape = config.get("shapeName", "triangle")
+    if shape not in SHAPE_SIDES:
+        raise GradingError(f"SHAPE_LAB: unknown shape {shape!r}")
+    if task == "shares":
+        expected = 4 if _to_int(config.get("shapeShares", 2)) == 4 else 2
+    elif task == "compose":
+        expected = SHAPE_ORDER.index(COMPOSED_FROM.get(shape, "triangle")) + 1
+    elif task in ("sides", "corners"):
+        expected = SHAPE_SIDES[shape]
+    else:
+        raise GradingError(f"SHAPE_LAB: unknown task {task!r}")
+    return "correct" if _to_int(selection) == expected else "incorrect"
+
+
 # ── Pattern (answer key) ─────────────────────────────────────────────────────────
 
 @register("KODA_PATTERN")

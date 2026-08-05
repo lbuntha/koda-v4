@@ -25,13 +25,11 @@ test("joins an AI-selected MongoDB SVG onto the validated slide", () => {
   const result = applyCustomAssetSelection({ objectId: asset.id }, validated, [asset]);
 
   assert.equal(result.objectId, "custom_svg");
+  // A reference only: no copy of the markup, label or scale — see `assets/assetRef.ts`.
   assert.deepEqual(result.config, {
     frameColor: "indigo",
     assetType: "custom_svg",
     customSvgAssetId: asset.id,
-    customSvgMarkup: asset.markup,
-    customSvgLabel: asset.label,
-    customSvgScale: asset.scale,
   });
 });
 

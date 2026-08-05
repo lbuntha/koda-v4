@@ -408,3 +408,55 @@ def test_every_picker_component_can_now_be_graded():
     """The three that blocked Grade 1 Maths: a release containing them used to be refused."""
     for technique in ("NUMBER_PATH", "PLACE_VALUE_LAB", "STORY_PROBLEM_MAT"):
         assert technique in supported_techniques()
+
+
+# ── Equation mat ─────────────────────────────────────────────────────────────────
+
+@pytest.mark.parametrize(
+    "config,answer",
+    [
+        ({"equationOperation": "add", "equationFirst": 8, "equationSecond": 3, "equationUnknown": "result"}, 11),
+        ({"equationOperation": "add", "equationFirst": 8, "equationSecond": 3, "equationUnknown": "second"}, 3),
+        ({"equationOperation": "add", "equationFirst": 8, "equationSecond": 3, "equationUnknown": "first"}, 8),
+        ({"equationOperation": "subtract", "equationFirst": 13, "equationSecond": 5, "equationUnknown": "result"}, 8),
+    ],
+)
+def test_equation_answer_depends_on_which_term_is_hidden(config, answer):
+    entry = _entry("EQUATION_MAT", config)
+    assert grade(entry, answer) == "correct"
+    assert grade(entry, answer + 1) == "incorrect"
+
+
+@pytest.mark.parametrize(
+    "config,verdict",
+    [
+        # 5 + 2 = 3 + 4 — both sides make 7, so True.
+        ({"equationOperation": "add", "equationFirst": 5, "equationSecond": 2,
+          "equationUnknown": "judge", "equationClaimFirst": 3, "equationClaimSecond": 4}, 1),
+        # 8 − 2 = 5 — the left side makes 6, so False.
+        ({"equationOperation": "subtract", "equationFirst": 8, "equationSecond": 2,
+          "equationUnknown": "judge", "equationClaimFirst": 5}, 0),
+        # 6 + 3 = 9 — a plain true statement, right side a single number.
+        ({"equationOperation": "add", "equationFirst": 6, "equationSecond": 3,
+          "equationUnknown": "judge", "equationClaimFirst": 9}, 1),
+    ],
+)
+def test_judge_grades_the_verdict_not_the_total(config, verdict):
+    """`judge` asks whether the equation is true, so the graded value is 1/0 — never the sum.
+
+    Grading the total here would mark every True/False answer wrong, and a child who
+    correctly spotted that 8 − 2 = 5 is false would be told they were mistaken.
+    """
+    entry = _entry("EQUATION_MAT", config)
+    assert grade(entry, verdict) == "correct"
+    assert grade(entry, 1 - verdict) == "incorrect"
+
+
+def test_judge_is_false_when_the_claim_does_not_match_even_though_the_terms_are_valid():
+    """The claim is what makes it judgeable — ignoring it would make every equation true."""
+    entry = _entry("EQUATION_MAT", {
+        "equationOperation": "add", "equationFirst": 5, "equationSecond": 2,
+        "equationUnknown": "judge", "equationClaimFirst": 3, "equationClaimSecond": 5,
+    })
+    assert grade(entry, 0) == "correct"
+    assert grade(entry, 1) == "incorrect"

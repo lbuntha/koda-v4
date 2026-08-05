@@ -3,6 +3,7 @@ import { questionsApi } from "../api/questions";
 import { useAuth } from "../auth/AuthContext";
 import { mayPersistRemotely } from "../api/persistenceGuard";
 import type { CountingQuestion } from "../types";
+import { deduplicateQuestions } from "../components/curriculum/questionOps";
 
 const LEGACY_KEY = "counting_studio_questions";
 const MIGRATION_OWNER_KEY = "koda_question_migration_owner";
@@ -12,7 +13,7 @@ export type QuestionPersistenceStatus = "local" | "loading" | "saving" | "saved"
 function readQuestions(key: string): CountingQuestion[] {
   try {
     const value = JSON.parse(localStorage.getItem(key) || "[]");
-    return Array.isArray(value) ? value : [];
+    return Array.isArray(value) ? deduplicateQuestions(value) : [];
   } catch {
     return [];
   }
@@ -20,7 +21,8 @@ function readQuestions(key: string): CountingQuestion[] {
 
 function writeQuestions(key: string, questions: CountingQuestion[]): void {
   try {
-    localStorage.setItem(key, JSON.stringify(questions));
+    const clean = deduplicateQuestions(questions);
+    localStorage.setItem(key, JSON.stringify(clean));
   } catch {
     // MongoDB remains authoritative when browser storage is unavailable.
   }
@@ -28,11 +30,22 @@ function writeQuestions(key: string, questions: CountingQuestion[]): void {
 
 export function useQuestionDeck(defaultQuestions: CountingQuestion[]) {
   const { status, account } = useAuth();
-  const [questions, setQuestions] = useState<CountingQuestion[]>(() => {
+  const [questions, setQuestionsState] = useState<CountingQuestion[]>(() => {
     const legacy = readQuestions(LEGACY_KEY);
-    return legacy.length > 0 ? legacy : defaultQuestions;
+    const initial = legacy.length > 0 ? legacy : defaultQuestions;
+    return deduplicateQuestions(initial);
   });
-  const [persistenceStatus, setPersistenceStatus] = useState<QuestionPersistenceStatus>("local");
+
+  const setQuestions = (action: CountingQuestion[] | ((prev: CountingQuestion[]) => CountingQuestion[])) => {
+    setQuestionsState(prev => {
+      const next = typeof action === "function" ? action(prev) : action;
+      return deduplicateQuestions(next);
+    });
+  };
+
+  const persistenceStatusState = useState<QuestionPersistenceStatus>("local");
+  const [persistenceStatus, setPersistenceStatus] = persistenceStatusState;
+
   // Why the last save failed. Without it the UI could only guess, and it guessed wrong: a 400
   // from the server ("questions reference missing curriculum skills") was reported to the
   // author as "MongoDB unavailable", sending them to look at the database instead of the
@@ -62,10 +75,10 @@ export function useQuestionDeck(defaultQuestions: CountingQuestion[]) {
         const accountCache = readQuestions(cacheKey);
         const legacy = readQuestions(LEGACY_KEY);
         const local = accountCache.length > 0 ? accountCache : legacy;
-        let next = remote.questions;
+        let next = deduplicateQuestions(remote.questions);
 
         if (!remote.exists || (remote.questions.length === 0 && local.length > 0)) {
-          next = local.length > 0 ? local : defaultQuestions;
+          next = deduplicateQuestions(local.length > 0 ? local : defaultQuestions);
           const saved = await questionsApi.put(next, remote.revision);
           remoteRevisionRef.current = saved.revision;
           if (local.length > 0) {
@@ -75,8 +88,8 @@ export function useQuestionDeck(defaultQuestions: CountingQuestion[]) {
         }
 
         if (cancelled) return;
-        if (next.length === 0) next = defaultQuestions;
-        setQuestions(next);
+        if (next.length === 0) next = deduplicateQuestions(defaultQuestions);
+        setQuestionsState(next);
         writeQuestions(cacheKey, next);
         hydratedRef.current = true;
         setPersistenceStatus("saved");
@@ -86,7 +99,7 @@ export function useQuestionDeck(defaultQuestions: CountingQuestion[]) {
         // the cache is empty `questions` keeps the starter deck, which is emphatically not
         // this account's bank. Saving is blocked below until a load succeeds.
         const cached = readQuestions(cacheKey);
-        if (cached.length > 0) setQuestions(cached);
+        if (cached.length > 0) setQuestionsState(deduplicateQuestions(cached));
         hydratedRef.current = true;
         hydrationFailedRef.current = true;
         setPersistenceStatus("error");

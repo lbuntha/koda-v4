@@ -224,12 +224,7 @@ export const SkillDetail: React.FC<SkillDetailProps> = ({
         <div className="flex items-center gap-2.5 p-2.5">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[#E7E3F6] bg-[#FBFAFF]">
             {selectedLibraryAsset ? (
-              <CountingAsset
-                type="custom_svg"
-                customSvgMarkup={selectedLibraryAsset.markup}
-                size={38}
-                scale={1}
-              />
+              <CountingAsset type="custom_svg" assetId={selectedLibraryAsset.id} size={38} scale={1} />
             ) : (
               <img
                 src={thumbnail.url}
@@ -677,12 +672,7 @@ export const SkillDetail: React.FC<SkillDetailProps> = ({
                       </span>
                     )}
                     <span className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-lg bg-white">
-                      <CountingAsset
-                        type="custom_svg"
-                        customSvgMarkup={asset.markup}
-                        size={56}
-                        scale={1}
-                      />
+                      <CountingAsset type="custom_svg" assetId={asset.id} size={56} scale={1} />
                     </span>
                     <span className="koda-admin-label line-clamp-2 text-[#0E0B55]">{asset.label}</span>
                   </button>

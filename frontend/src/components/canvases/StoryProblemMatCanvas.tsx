@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { BookOpen, Check, RotateCcw, X } from "lucide-react";
-import { COUNT_OBJECTS } from "../../types";
+import { COUNT_OBJECTS, CountingQuestion, CustomSvgAsset } from "../../types";
 import { sounds } from "../../sound";
+import { findAsset } from "../../assets/assetCatalog";
+import { useAssetLibrary } from "../../assets/questionAsset";
 import { AssetType, CountingAsset } from "../Assets";
 import { Button } from "../ui";
 import { CanvasProps } from "./types";
@@ -39,20 +41,41 @@ interface GroupProps {
   hidden?: boolean;
   revealValue?: number;
   crossed?: boolean;
-  tone: "violet" | "sky" | "amber";
+  tone: "violet" | "sky" | "rose";
   assetType: AssetType;
   emoji: string;
-  customSvgMarkup?: string;
   compact: boolean;
   isDark: boolean;
 }
 
-const ObjectGroup: React.FC<GroupProps> = ({ label, count, hidden, revealValue, crossed, tone, assetType, emoji, customSvgMarkup, compact, isDark }) => {
+/**
+ * What the story should call the things on the mat.
+ *
+ * The counters are drawn from `config.assetType` when it is set, but the story text was taken
+ * from `objectId`'s label — so choosing a different asset in the Studio picker gave a mat full
+ * of butterflies above a story about apples. The picture is what the child can see, so the
+ * picture wins and the words follow it.
+ */
+export function storyObjectLabel(question: CountingQuestion, assets: CustomSvgAsset[] = []): string {
+  const byId = COUNT_OBJECTS.find(item => item.id === question.objectId) || COUNT_OBJECTS[0];
+  const assetType = question.config.assetType;
+  if (!assetType || assetType === byId.assetType) return byId.label;
+  // The catalog covers the Goods Sort sprites and the account's own artwork, neither of which
+  // COUNT_OBJECTS knows about — without it a mat of donuts told a story about apples.
+  const custom = question.config.customSvgAssetId
+    ? findAsset(question.config.customSvgAssetId, assets)
+    : undefined;
+  return (custom ?? findAsset(assetType, assets))?.label
+    ?? COUNT_OBJECTS.find(item => item.assetType === assetType)?.label
+    ?? byId.label;
+}
+
+const ObjectGroup: React.FC<GroupProps> = ({ label, count, hidden, revealValue, crossed, tone, assetType, emoji, compact, isDark }) => {
   const reduceMotion = useReducedMotion();
   const toneClass = tone === "sky"
     ? isDark ? "bg-sky-400/10 ring-sky-300/20" : "bg-sky-50 ring-sky-100"
-    : tone === "amber"
-      ? isDark ? "bg-amber-400/10 ring-amber-300/20" : "bg-amber-50 ring-amber-100"
+    : tone === "rose"
+      ? isDark ? "bg-rose-400/10 ring-rose-300/20" : "bg-rose-50 ring-rose-100"
       : isDark ? "bg-violet-400/10 ring-violet-300/20" : "bg-violet-50 ring-violet-100";
 
   return (
@@ -95,7 +118,7 @@ const ObjectGroup: React.FC<GroupProps> = ({ label, count, hidden, revealValue, 
               transition={{ delay: reduceMotion ? 0 : index * 0.045, type: "spring", stiffness: 280, damping: 20 }}
               className="relative"
             >
-              <CountingAsset type={assetType} emoji={emoji} customSvgMarkup={customSvgMarkup} size={compact ? 24 : 30} />
+              <CountingAsset type={assetType} emoji={emoji} size={compact ? 24 : 30} />
               {crossed && <X aria-hidden="true" className="absolute inset-0 m-auto text-rose-500" size={compact ? 21 : 26} strokeWidth={3} />}
             </motion.div>
           ))}
@@ -133,9 +156,22 @@ export const StoryProblemMatCanvas: React.FC<CanvasProps> = ({
     question.config.storyCharacterName,
   ]);
   const object = COUNT_OBJECTS.find(item => item.id === question.objectId) || COUNT_OBJECTS[0];
+  const assetLibrary = useAssetLibrary();
   const answer = storyAnswer(config);
   const choices = answerChoices(answer, question.config.storyChoices);
-  const prompt = question.instruction || storyText(config, object.label);
+  /**
+   * The story is the question, so it is always derived and always shown.
+   *
+   * This used to be `question.instruction || storyText(...)`, which let an authored
+   * instruction *replace* the story — and the seeded questions all carry the generic
+   * "Read the story, then choose the number that answers it." So the mat displayed an
+   * instruction to read a story that was nowhere on screen, and the child was left doing
+   * bare arithmetic on two groups of counters. That is the entire skill, missing.
+   *
+   * The instruction is now what it says it is: a hint about the task, shown as the hint.
+   */
+  const story = storyText(config, storyObjectLabel(question, assetLibrary));
+  const hint = question.instruction || "Read the story, then choose the number that answers it.";
   const [selected, setSelected] = useState<number | null>(null);
   const [solved, setSolved] = useState(false);
   const reduceMotion = useReducedMotion();
@@ -177,7 +213,6 @@ export const StoryProblemMatCanvas: React.FC<CanvasProps> = ({
       crossed={crossed}
       assetType={assetType}
       emoji={object.emoji}
-      customSvgMarkup={question.config.customSvgMarkup}
       compact={compact}
       isDark={isDark}
     />
@@ -193,7 +228,7 @@ export const StoryProblemMatCanvas: React.FC<CanvasProps> = ({
       headerIcon={<BookOpen size={17} />}
       headerTitle="Story Problem Mat"
       headerSubtitle={storyEquation(config)}
-      readAloudText={prompt}
+      readAloudText={story}
       headerActions={(
         <>
           <CanvasChip accent="purple" isDark={isDark}>{SCENE_META[config.scene].emoji} {TYPE_LABELS[config.type]}</CanvasChip>
@@ -201,13 +236,13 @@ export const StoryProblemMatCanvas: React.FC<CanvasProps> = ({
         </>
       )}
       designerHint="Choose the story structure, unknown, quantities, scene, and learning object in Studio."
-      playHint={prompt}
+      playHint={hint}
       footerStatus={solved ? `Yes — the answer is ${answer}!` : selected !== null ? "Not yet. Use the groups to check your thinking." : undefined}
       footerSolved={solved}
     >
       <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-transparent p-2.5 sm:p-4">
         <motion.div
-          key={prompt}
+          key={story}
           initial={reduceMotion ? false : { opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           className={`mb-3 flex items-start gap-2.5 px-1 py-2 sm:px-2 ${isDark ? "text-slate-100" : "text-slate-700"}`}
@@ -221,8 +256,8 @@ export const StoryProblemMatCanvas: React.FC<CanvasProps> = ({
           >
             {SCENE_META[config.scene].emoji}
           </motion.span>
-          <p className="text-sm font-medium leading-relaxed sm:text-base md:text-lg" aria-label={prompt}>
-            {prompt.split(/\s+/).map((word, index) => (
+          <p className="text-sm font-medium leading-relaxed sm:text-base md:text-lg" aria-label={story}>
+            {story.split(/\s+/).map((word, index) => (
               <motion.span
                 key={`${word}-${index}`}
                 aria-hidden="true"
@@ -231,7 +266,7 @@ export const StoryProblemMatCanvas: React.FC<CanvasProps> = ({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.22, delay: reduceMotion ? 0 : Math.min(index * 0.025, 0.65) }}
               >
-                {word}{index < prompt.split(/\s+/).length - 1 ? "\u00a0" : ""}
+                {word}{index < story.split(/\s+/).length - 1 ? "\u00a0" : ""}
               </motion.span>
             ))}
           </p>
@@ -249,7 +284,7 @@ export const StoryProblemMatCanvas: React.FC<CanvasProps> = ({
                 {group(config.type === "take_apart" ? "Whole" : "First", config.first, "violet", firstHidden)}
                 {config.type !== "three_addends" && <div className={`flex items-center justify-center text-xl font-semibold ${isDark ? "text-slate-500" : "text-slate-300"}`}>{config.type === "take_from" || config.type === "take_apart" ? "−" : "+"}</div>}
                 {group(config.type === "take_from" ? "Went away" : config.type === "take_apart" ? "Known part" : "Next", config.second, "sky", secondHidden, config.type === "take_from" && !secondHidden)}
-                {config.type === "three_addends" && group("Last", config.third, "amber")}
+                {config.type === "three_addends" && group("Last", config.third, "rose")}
               </div>
             )}
 

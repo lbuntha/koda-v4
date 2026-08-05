@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { COUNT_OBJECTS } from "../../types";
 import { CountingAsset } from "../Assets";
@@ -7,7 +7,9 @@ import { RotateCcw, ListOrdered, Check, Calculator, AlertCircle, Delete } from "
 import { CanvasProps } from "./types";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import { GhostGuideOverlay, useGhostGuide } from "../../pedagogy";
-import { CanvasChip, CanvasAccent, surfaceClass, captionClass, accentChipClass, emptySlotClass } from "./canvasTheme";
+import { CanvasChip, CanvasAccent, surfaceClass, accentChipClass, emptySlotClass } from "./canvasTheme";
+import { CanvasBin } from "./CanvasBin";
+import { OBJECT_SIZE } from "./objectLayout";
 import { Button } from "../ui";
 
 interface LineUpItem {
@@ -49,7 +51,11 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
   const onSuccessRef = useRef(onSuccess);
   onSuccessRef.current = onSuccess;
 
-  const [dimensions, setDimensions] = useState({ width: 480, height: 280 });
+  /** `null` until measured — nothing is placed against a guessed stage. */
+  const [dimensions, setDimensions] = useState<{ width: number; height: number } | null>(null);
+  /** Height the answer panel takes off the bottom, once it is open. */
+  const [panelHeight, setPanelHeight] = useState(0);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   const isLinedUpComplete = items.length > 0 && items.every(i => i.snappedSlotIndex !== null);
   const solvedForGuide = count > 0 && isLinedUpComplete && (requireAnswerInput ? answerStatus === "correct" : true);
@@ -60,9 +66,12 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
     idleThresholdMs: 10000
   });
 
-  // Measure container
-  useEffect(() => {
-    if (!containerRef.current) return;
+  // Measure before paint, then keep following the container.
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const seed = container.getBoundingClientRect();
+    setDimensions({ width: seed.width || 480, height: seed.height || 280 });
     const ro = new ResizeObserver((entries) => {
       for (const entry of entries) {
         setDimensions({
@@ -71,33 +80,60 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
         });
       }
     });
-    ro.observe(containerRef.current);
+    ro.observe(container);
     return () => ro.disconnect();
   }, []);
 
+  const stageWidth = dimensions?.width ?? 480;
+  const stageHeightAvailable = dimensions?.height ?? 280;
+
+  const answerPanelOpen = isPlayMode && requireAnswerInput && isLinedUpComplete;
+  /**
+   * The answer box gets its own space at the bottom rather than floating over the
+   * line-up: the child is being asked how many they lined up, so the line-up has
+   * to stay in view while they answer.
+   */
+  const layoutHeight = Math.max(160, stageHeightAvailable - (answerPanelOpen ? panelHeight + 12 : 0));
+
+  /**
+   * Both rows sized from the space, not from a breakpoint.
+   *
+   * The old rule capped an object at 64px whatever the screen, which left a
+   * classroom display showing a thin line of tiny objects across an empty band.
+   * The width has to carry a row of `count` objects and the height has to carry
+   * two bands of one, so the object is whichever of those two allows less —
+   * bounded by the same limits every other canvas uses.
+   */
   const geometry = useMemo(() => {
-    const w = dimensions.width;
-    const h = dimensions.height;
+    const w = stageWidth;
+    const h = layoutHeight;
     const isCompact = w < 640;
-    const sideInset = isCompact ? 8 : 16;
+    const sideInset = isCompact ? 10 : 20;
+    const captionH = isCompact ? 22 : 28;
+    const zonePad = isCompact ? 12 : 16;
+    const zoneGap = isCompact ? 10 : 16;
     const minGap = isCompact ? 6 : 10;
 
-    const widthPerItem = (w - sideInset * 2 - minGap * Math.max(0, count - 1)) / Math.max(1, count);
-    const unit = Math.max(34, Math.min(isCompact ? 56 : 64, Math.floor(widthPerItem)));
+    const usableWidth = Math.max(OBJECT_SIZE.min, w - sideInset * 2);
+    const widthCap = usableWidth / Math.max(1, count) / 1.16;      // one row, ~16% of an object between
+    const heightCap = (h - zoneGap - 2 * (captionH + zonePad * 2)) / 2;   // two bands, one object tall each
+    const unit = Math.round(
+      Math.max(OBJECT_SIZE.min, Math.min(OBJECT_SIZE.max, Math.min(widthCap, heightCap)))
+    );
 
-    const captionH = isCompact ? 18 : 22;
-    const trayHeight = Math.round(unit + captionH + (isCompact ? 20 : 28));
-    const stageTop = trayHeight + (isCompact ? 10 : 16);
-    const stageHeight = Math.max(unit + captionH + 28, h - stageTop);
+    const trayHeight = Math.round(unit + captionH + zonePad * 2);
+    const stageTop = trayHeight + zoneGap;
+    const stageHeight = Math.max(unit + captionH + zonePad * 2, h - stageTop);
 
     const rowWidth = (gap: number) => count * unit + gap * Math.max(0, count - 1);
     const gapFor = (maxGap: number) => {
-      const available = w - sideInset * 2 - count * unit;
+      const available = usableWidth - count * unit;
       return Math.max(minGap, Math.min(maxGap, available / Math.max(1, count - 1)));
     };
 
-    const trayGap = gapFor(isCompact ? 10 : 16);
-    const slotGap = gapFor(isCompact ? 12 : 24);
+    // Gaps scale with the object, so a big object is not laid out on small-object spacing.
+    const trayGap = gapFor(unit * 0.28);
+    const slotGap = gapFor(unit * 0.45);
 
     return {
       isCompact,
@@ -114,7 +150,7 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
       slotGap,
       snapRadius: Math.max(48, unit * 1.15)
     };
-  }, [dimensions.width, dimensions.height, count]);
+  }, [stageWidth, layoutHeight, count]);
 
   const getShelfX = useCallback(
     (idx: number) => Math.round(geometry.trayStartX + idx * (geometry.unit + geometry.trayGap)),
@@ -128,6 +164,24 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
     }),
     [geometry]
   );
+
+  /**
+   * Measure the answer panel instead of guessing: it grows by about half again
+   * when the number pad opens, and the line-up above it moves up by exactly that.
+   */
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!answerPanelOpen || !panel) {
+      setPanelHeight(0);
+      return;
+    }
+    const observer = new ResizeObserver(entries => {
+      for (const entry of entries) setPanelHeight(entry.contentRect.height);
+    });
+    observer.observe(panel);
+    setPanelHeight(panel.getBoundingClientRect().height);
+    return () => observer.disconnect();
+  }, [answerPanelOpen, showNumberPad]);
 
   // Reset answer state on question change
   useEffect(() => {
@@ -385,8 +439,9 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
   const isSolved = solvedForGuide;
   const draggedItem = draggedItemId ? items.find(i => i.id === draggedItemId) : null;
 
-  const zoneClass = `absolute rounded-3xl transition-colors duration-300 ${surfaceClass(isDark)}`;
-  const zoneLabelClass = `absolute left-4 top-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.18em] pointer-events-none ${captionClass(isDark)}`;
+  // Slot numbers and ordinal badges track the object, like every other canvas.
+  const badgeSize = Math.round(Math.max(18, Math.min(32, geometry.unit * 0.3)));
+  const slotNumberSize = Math.round(Math.max(11, Math.min(28, geometry.unit * 0.26)));
 
   return (
     <SharedCanvasLayout
@@ -427,7 +482,7 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
     >
       <div
         ref={containerRef}
-        className="relative flex-1 w-full min-h-[240px] touch-none select-none overscroll-none"
+        className="relative flex-1 w-full min-h-[260px] sm:min-h-[300px] md:min-h-[340px] touch-none select-none overscroll-none"
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
@@ -460,15 +515,18 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
           </>
         )}
 
-        {/* Zone 1 — unordered tray */}
-        <div
-          className={`${zoneClass} left-0 right-0 pointer-events-none`}
-          style={{ top: 0, height: `${geometry.trayHeight}px` }}
-        >
-          <span className={zoneLabelClass}>
-            {question.config.sourceBinLabel || "Tray"}
-          </span>
-        </div>
+        {/* Zone 1 — the tray the objects start in */}
+        <CanvasBin
+          label={question.config.sourceBinLabel || "Tray"}
+          tally={isPlayMode ? remaining : undefined}
+          accent={accent}
+          isDark={isDark}
+          complete={isPlayMode && remaining === 0}
+          className="left-0 right-0 pointer-events-none"
+          /* Position inline: the bin's own `relative` class would otherwise win over
+             an `absolute` utility, and these two bands are placed by measurement. */
+          style={{ position: "absolute", top: 0, height: `${geometry.trayHeight}px` }}
+        />
 
         {/* Idle hint — highlights the slot row after 10s of inactivity */}
         <GhostGuideOverlay
@@ -483,15 +541,17 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
           style={{ top: geometry.stageTop, left: 0, right: 0, height: geometry.stageHeight }}
         />
 
-        {/* Zone 2 — ordered line-up stage */}
-        <div
-          className={`${zoneClass} left-0 right-0 pointer-events-none`}
-          style={{ top: `${geometry.stageTop}px`, height: `${geometry.stageHeight}px` }}
-        >
-          <span className={zoneLabelClass}>
-            {question.config.destinationBinLabel || "Line-up"}
-          </span>
-        </div>
+        {/* Zone 2 — the numbered line-up */}
+        <CanvasBin
+          label={question.config.destinationBinLabel || "Line-up"}
+          tally={isPlayMode ? `${linedUp} / ${count}` : undefined}
+          accent={accent}
+          isDark={isDark}
+          active={hoveredSlotIndex !== null}
+          complete={isLinedUpComplete}
+          className="left-0 right-0 pointer-events-none"
+          style={{ position: "absolute", top: `${geometry.stageTop}px`, height: `${geometry.stageHeight}px` }}
+        />
 
         {/* Numbered slots — the one place an outline is functional */}
         {Array.from({ length: count }).map((_, idx) => {
@@ -509,7 +569,8 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
                 width: `${geometry.unit}px`,
                 height: `${geometry.unit}px`
               }}
-              className={`rounded-2xl border-2 ${borderStyle} flex items-center justify-center transition-all duration-200 font-mono font-bold
+              className={`border-2 ${borderStyle} flex items-center justify-center transition-all duration-200 font-mono font-bold
+                ${geometry.unit > 88 ? "rounded-3xl" : "rounded-2xl"}
                 ${isHovered
                   ? `${accentChipClass(accent, isDark)} border-solid scale-110`
                   : isFilled
@@ -518,7 +579,12 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
                 }`}
             >
               {(question.config.showNumbersInSlots ?? true) && (
-                <span className={`text-xs ${isFilled ? "opacity-0" : ""}`}>{idx + 1}</span>
+                <span
+                  className={isFilled ? "opacity-0" : ""}
+                  style={{ fontSize: `${slotNumberSize}px` }}
+                >
+                  {idx + 1}
+                </span>
               )}
             </div>
           );
@@ -531,7 +597,7 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
           const hasFrame = question.config.showItemFrame ?? true;
           const isPlaced = item.snappedSlotIndex !== null;
 
-          let itemClassName = "flex items-center justify-center rounded-2xl select-none touch-none cursor-grab active:cursor-grabbing transition-transform";
+          let itemClassName = `flex items-center justify-center select-none touch-none cursor-grab active:cursor-grabbing transition-transform ${geometry.unit > 88 ? "rounded-3xl" : "rounded-2xl"}`;
           if (hasFrame) {
             itemClassName += ` ${isPlaced ? accentChipClass(accent, isDark) : surfaceClass(isDark, "raised")} ${isPlaced ? "border-2" : "border-0"}`;
           }
@@ -558,7 +624,14 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
             >
               {/* Ordinal badge once placed — reinforces the 1..n counting order */}
               {isPlaced && (
-                <div className={`absolute -top-2 left-1/2 -translate-x-1/2 font-mono font-bold text-[9px] w-5 h-5 flex items-center justify-center rounded-full animate-scale-in z-10 ${accentChipClass(accent, isDark)}`}>
+                <div
+                  className={`absolute -top-2 left-1/2 -translate-x-1/2 font-mono font-bold flex items-center justify-center rounded-full animate-scale-in z-10 ${accentChipClass(accent, isDark)}`}
+                  style={{
+                    width: `${badgeSize}px`,
+                    height: `${badgeSize}px`,
+                    fontSize: `${Math.round(badgeSize * 0.52)}px`
+                  }}
+                >
                   {(item.snappedSlotIndex ?? 0) + 1}
                 </div>
               )}
@@ -570,7 +643,7 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
                 </div>
               )}
 
-              <CountingAsset type={assetType as any} emoji={item.emoji} size={Math.round(geometry.unit * 0.7)} />
+              <CountingAsset type={assetType as any} emoji={item.emoji} size={Math.round(geometry.unit * (hasFrame ? 0.7 : 0.92))} />
             </div>
           );
         })}
@@ -579,11 +652,13 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
         <AnimatePresence>
           {isPlayMode && requireAnswerInput && isLinedUpComplete && (
             <motion.div
+              ref={panelRef}
               initial={{ opacity: 0, y: 30, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.95 }}
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              className="absolute inset-x-2 bottom-2 z-50 flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl backdrop-blur-md border shadow-2xl transition-all max-w-lg mx-auto"
+              className="absolute inset-x-2 bottom-2 z-50 flex flex-col items-center justify-center p-3 sm:p-4 md:p-5
+                rounded-2xl md:rounded-3xl backdrop-blur-md border shadow-2xl max-w-lg md:max-w-xl mx-auto"
               style={{
                 backgroundColor: isDark ? "rgba(15, 23, 42, 0.94)" : "rgba(255, 255, 255, 0.96)",
                 borderColor: answerStatus === "error" 
@@ -593,9 +668,9 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
                   : isDark ? "#334155" : "#cbd5e1"
               }}
             >
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">🎉</span>
-                <span className={`text-xs sm:text-sm font-extrabold tracking-tight ${
+              <div className="flex items-center gap-2 mb-2 md:mb-3">
+                <span className="text-xl md:text-2xl">🎉</span>
+                <span className={`text-xs sm:text-sm md:text-base lg:text-lg font-extrabold tracking-tight ${
                   isDark ? "text-slate-100" : "text-slate-800"
                 }`}>
                   How many {obj.label}{count === 1 ? "" : "s"} did you line up in total?
@@ -603,7 +678,7 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
               </div>
 
               {/* Answer Input Controls */}
-              <div className="flex items-center gap-2 w-full justify-center max-w-xs">
+              <div className="flex items-center gap-2 md:gap-3 w-full justify-center max-w-xs md:max-w-sm">
                 <div className="relative flex-1">
                   <input
                     ref={inputRef}
@@ -623,7 +698,7 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
                     }}
                     placeholder="Total..."
                     disabled={answerStatus === "correct"}
-                    className={`w-full h-11 px-3 text-center text-lg sm:text-xl font-bold font-mono rounded-xl border-2 transition-all outline-none ${
+                    className={`w-full h-11 md:h-14 px-3 text-center text-lg sm:text-xl md:text-2xl font-bold font-mono rounded-xl border-2 transition-all outline-none ${
                       answerStatus === "error"
                         ? "border-red-500 bg-red-50/50 text-red-700 animate-shake dark:bg-red-950/40 dark:text-red-300"
                         : answerStatus === "correct"
@@ -638,7 +713,7 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
                 <Button
                   onClick={() => handleCheckAnswer()}
                   disabled={answerStatus === "correct" || !answerInput.trim()}
-                  className={`h-11 px-4 text-sm font-bold flex items-center gap-1.5 rounded-xl shadow-md transition-all active:scale-95 ${
+                  className={`h-11 md:h-14 px-4 md:px-6 text-sm md:text-base font-bold flex items-center gap-1.5 rounded-xl shadow-md transition-all active:scale-95 ${
                     answerStatus === "correct"
                       ? "bg-emerald-600 hover:bg-emerald-600 text-white"
                       : "bg-indigo-600 hover:bg-indigo-700 text-white"
@@ -650,7 +725,7 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
                 <button
                   type="button"
                   onClick={() => setShowNumberPad(prev => !prev)}
-                  className={`h-11 w-11 flex items-center justify-center rounded-xl border transition-all ${
+                  className={`h-11 w-11 md:h-14 md:w-14 flex-shrink-0 flex items-center justify-center rounded-xl border transition-all ${
                     showNumberPad
                       ? "bg-indigo-100 border-indigo-400 text-indigo-700 dark:bg-indigo-950 dark:border-indigo-600 dark:text-indigo-300"
                       : isDark
@@ -680,13 +755,13 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
                     exit={{ opacity: 0, height: 0 }}
                     className="w-full mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 flex flex-col items-center gap-2 overflow-hidden"
                   >
-                    <div className="grid grid-cols-5 gap-1.5 w-full max-w-xs">
+                    <div className="grid grid-cols-5 gap-1.5 md:gap-2 w-full max-w-xs md:max-w-sm">
                       {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((num) => (
                         <button
                           key={num}
                           type="button"
                           onClick={() => handleDigitPress(String(num))}
-                          className={`h-9 font-mono text-base font-extrabold rounded-lg border shadow-sm transition-all active:scale-95 ${
+                          className={`h-9 md:h-12 font-mono text-base md:text-xl font-extrabold rounded-lg md:rounded-xl border shadow-sm transition-all active:scale-95 ${
                             isDark
                               ? "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"
                               : "bg-white border-slate-200 text-slate-800 hover:bg-slate-50"
@@ -696,11 +771,11 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
                         </button>
                       ))}
                     </div>
-                    <div className="flex items-center justify-between gap-2 w-full max-w-xs">
+                    <div className="flex items-center justify-between gap-2 w-full max-w-xs md:max-w-sm">
                       <button
                         type="button"
                         onClick={handleBackspacePress}
-                        className={`flex-1 h-8 text-xs font-extrabold rounded-lg border flex items-center justify-center gap-1 transition-all ${
+                        className={`flex-1 h-8 md:h-10 text-xs md:text-sm font-extrabold rounded-lg border flex items-center justify-center gap-1 transition-all ${
                           isDark
                             ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
                             : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200"
@@ -711,7 +786,7 @@ export const LineUpCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, show
                       <button
                         type="button"
                         onClick={() => setAnswerInput("")}
-                        className={`px-3 h-8 text-xs font-extrabold rounded-lg border transition-all ${
+                        className={`px-3 md:px-5 h-8 md:h-10 text-xs md:text-sm font-extrabold rounded-lg border transition-all ${
                           isDark
                             ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
                             : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200"

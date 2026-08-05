@@ -1,646 +1,354 @@
 /**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- *
- * Universal SVG Asset Studio & Interactive SVG Editor:
- * Allows authors to inspect, customize, edit gradients/colors/strokes,
- * edit raw SVG source, classify SVG vs Emoji assets, and filter by Category Tabs.
+ * SVG Asset Studio — one compact place to find, preview, create, and edit artwork.
+ * Custom artwork is always previewed from the live draft, then persisted by stable id.
  */
 
-import React, { useState, useMemo } from "react";
-import {
-  Search,
-  Palette,
-  Sliders,
-  Code,
-  Copy,
-  Check,
-  RotateCcw,
-  Trash2,
-  Package,
-  Save,
-  Smile,
-  Sparkles,
-  Info,
-  Layers,
-  CheckCircle2,
-  Utensils,
-  Gamepad2,
-  Box,
-  Award,
-  Plus,
-} from "lucide-react";
-import { GOODS_ASSET_KEYS } from "../../assets/goods-sort/GoodsAsset";
-import { GoodsAssetLibrary } from "../../assets/goods-sort/GoodsAssetLibrary";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Check, Code2, Copy, FilePlus2, Image, Save, ShieldCheck, Trash2 } from "lucide-react";
+import { isSpriteId, spriteKey, BUILT_IN_ASSETS, customAsset, type CatalogAsset } from "../../assets/assetCatalog";
 import { useSvgLibrary } from "../../assets/SvgLibraryContext";
+import { createSvgAssetId } from "../../assets/svgIds";
+import { preprocessSvgMarkup } from "../../assets/svgPreprocess";
+import { isSafeSvgMarkup, sanitizeSvgMarkup } from "../../assets/svgSafety";
+import { svgAssetsApi, type SvgAssetUse } from "../../api/svgAssets";
 import type { CustomSvgAsset } from "../../types";
-import { Button, Card, Input, Label, Badge } from "../ui";
+import { PARENT_NAV_ASSETS } from "../../parent/parentNavAssets";
+import { KID_NAV_ASSETS } from "../../student/home/kidNavAssets";
+import { ASSET_CATEGORY_ICONS } from "../../assets/assetCategoryAssets";
+import { XTRAMATH_OWL_ASSET, XTRAMATH_OWL_ASSET_ID } from "../../assets/xtraMathOwlAsset";
+import { CountingTechnique } from "../../types";
+import { CountingAsset } from "../Assets";
+import { AssetGrid, CatalogAssetView } from "../ui/AssetGrid";
+import { Badge, Button, Card, ConfirmModal, Input, Label, Textarea } from "../ui";
 
-export type AssetCategoryTab = "All" | "Snacks" | "Toys" | "Objects" | "Badges" | "Custom";
-export type AssetFormatFilter = "all" | "svg" | "emoji";
+const SYSTEM_ASSETS = [...PARENT_NAV_ASSETS, ...KID_NAV_ASSETS, ...ASSET_CATEGORY_ICONS, XTRAMATH_OWL_ASSET];
+const SYSTEM_ASSET_IDS = new Set(SYSTEM_ASSETS.map(asset => asset.id));
+const NEW_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <circle cx="50" cy="50" r="38" fill="#7C6DD8" />
+</svg>`;
 
-export interface SvgStyleConfig {
-  primaryColor: string;
-  secondaryColor: string;
-  gradientAngle: number;
-  strokeColor: string;
-  strokeWidth: number;
-  scale: number;
-  shadow: boolean;
-  opacity: number;
-}
-
-const DEFAULT_STYLE: SvgStyleConfig = {
-  primaryColor: "#6844EA",
-  secondaryColor: "#9A7CFF",
-  gradientAngle: 135,
-  strokeColor: "#432DBA",
-  strokeWidth: 0,
-  scale: 1,
-  shadow: true,
-  opacity: 1,
+const draftErrorFor = (markup: string): string | null => {
+  const value = markup.trim();
+  if (!value) return "Paste SVG markup to continue.";
+  if (!value.toLowerCase().startsWith("<svg")) return "SVG source must start with an <svg> element.";
+  if (!isSafeSvgMarkup(value)) return "Remove scripts, event handlers, or embedded content.";
+  const processed = preprocessSvgMarkup(value);
+  if (!sanitizeSvgMarkup(processed)) return "The SVG could not be parsed. Check its tags and attributes.";
+  return null;
 };
-
-const PRESET_STYLES: Array<{ name: string; icon: string; config: SvgStyleConfig }> = [
-  {
-    name: "Vibrant Indigo",
-    icon: "🔮",
-    config: {
-      primaryColor: "#6844EA",
-      secondaryColor: "#9A7CFF",
-      gradientAngle: 135,
-      strokeColor: "#432DBA",
-      strokeWidth: 0,
-      scale: 1,
-      shadow: true,
-      opacity: 1,
-    },
-  },
-  {
-    name: "Golden Luxe",
-    icon: "👑",
-    config: {
-      primaryColor: "#F59E0B",
-      secondaryColor: "#FDE047",
-      gradientAngle: 45,
-      strokeColor: "#B45309",
-      strokeWidth: 1,
-      scale: 1.05,
-      shadow: true,
-      opacity: 1,
-    },
-  },
-  {
-    name: "Neon Cyber",
-    icon: "⚡",
-    config: {
-      primaryColor: "#06B6D4",
-      secondaryColor: "#EC4899",
-      gradientAngle: 90,
-      strokeColor: "#0891B2",
-      strokeWidth: 2,
-      scale: 1,
-      shadow: true,
-      opacity: 1,
-    },
-  },
-  {
-    name: "Pastel Dream",
-    icon: "🌸",
-    config: {
-      primaryColor: "#F472B6",
-      secondaryColor: "#A78BFA",
-      gradientAngle: 160,
-      strokeColor: "#DB2777",
-      strokeWidth: 0,
-      scale: 1,
-      shadow: false,
-      opacity: 0.95,
-    },
-  },
-  {
-    name: "Emerald Glow",
-    icon: "🌿",
-    config: {
-      primaryColor: "#10B981",
-      secondaryColor: "#34D399",
-      gradientAngle: 120,
-      strokeColor: "#047857",
-      strokeWidth: 1,
-      scale: 1,
-      shadow: true,
-      opacity: 1,
-    },
-  },
-];
-
-const GOODS_CATEGORIES: Record<string, string[]> = {
-  Snacks: ["chips", "cola", "milk", "donut", "popsicle", "apple", "burger", "pizza", "icecream", "cookie", "candy"],
-  Toys: ["teddy", "duck", "car", "robot", "ball", "controller", "rocket"],
-  Objects: ["plant", "clock", "pencil", "book", "guitar", "camera", "key"],
-  Badges: ["gem", "crown", "star", "gift", "palette", "trophy", "diamond"],
-};
-
-const CATEGORY_TABS: Array<{ id: AssetCategoryTab; label: string; icon: string; count: number }> = [
-  { id: "All", label: "All Assets", icon: "🛍️", count: GOODS_ASSET_KEYS.length },
-  { id: "Snacks", label: "Snacks", icon: "🍿", count: GOODS_CATEGORIES.Snacks.length },
-  { id: "Toys", label: "Toys", icon: "🧸", count: GOODS_CATEGORIES.Toys.length },
-  { id: "Objects", label: "Objects", icon: "📦", count: GOODS_CATEGORIES.Objects.length },
-  { id: "Badges", label: "Badges", icon: "💎", count: GOODS_CATEGORIES.Badges.length },
-  { id: "Custom", label: "Custom SVG", icon: "🎨", count: 0 },
-];
 
 export const SvgAssetEditor: React.FC = () => {
-  const { assets, setAssets } = useSvgLibrary();
-  const [activeCategoryTab, setActiveCategoryTab] = useState<AssetCategoryTab>("All");
-  const [formatFilter, setFormatFilter] = useState<AssetFormatFilter>("all");
-  const [selectedKey, setSelectedKey] = useState<string>("donut");
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [previewSize, setPreviewSize] = useState<number>(64);
-  const [style, setStyle] = useState<SvgStyleConfig>(DEFAULT_STYLE);
-  const [copiedKey, setCopiedKey] = useState<boolean>(false);
-  const [copiedSvg, setCopiedSvg] = useState<boolean>(false);
+  const {
+    assets,
+    setAssets,
+    deletedSystemAssetIds,
+    setDeletedSystemAssetIds,
+    techniqueThumbnails,
+    setTechniqueThumbnails,
+    persistenceStatus,
+  } = useSvgLibrary();
+  const [selected, setSelected] = useState<CatalogAsset | null>(() => BUILT_IN_ASSETS[0] ?? null);
+  const [label, setLabel] = useState("");
+  const [markup, setMarkup] = useState(NEW_SVG);
+  const [scale, setScale] = useState(1);
+  const [previewSize, setPreviewSize] = useState(96);
+  const [showErrors, setShowErrors] = useState(false);
+  const [copied, setCopied] = useState<"key" | "usage" | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<CustomSvgAsset | null>(null);
+  const [assetUsage, setAssetUsage] = useState<Record<string, SvgAssetUse[]> | null>(null);
+  const seededAdminLibrary = useRef(false);
 
-  // Raw SVG Editor state
-  const [rawSvg, setRawSvg] = useState<string>(
-    `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">\n  <defs>\n    <linearGradient id="customGrad" x1="0%" y1="0%" x2="100%" y2="100%">\n      <stop offset="0%" stop-color="#6844EA"/>\n      <stop offset="100%" stop-color="#9A7CFF"/>\n    </linearGradient>\n  </defs>\n  <circle cx="50" cy="50" r="40" fill="url(#customGrad)" stroke="#432DBA" stroke-width="4"/>\n</svg>`
+  useEffect(() => {
+    if (persistenceStatus !== "saved" || seededAdminLibrary.current) return;
+    seededAdminLibrary.current = true;
+    const ids = new Set(assets.map(asset => asset.id));
+    const deletedIds = new Set(deletedSystemAssetIds);
+    const missing = SYSTEM_ASSETS.filter(asset => !ids.has(asset.id) && !deletedIds.has(asset.id));
+    if (missing.length > 0) setAssets(current => [...current, ...missing]);
+    if (
+      missing.some(asset => asset.id === XTRAMATH_OWL_ASSET_ID)
+      && !techniqueThumbnails[CountingTechnique.XTRA_MATH]
+    ) {
+      setTechniqueThumbnails(current => ({
+        ...current,
+        [CountingTechnique.XTRA_MATH]: XTRAMATH_OWL_ASSET_ID,
+      }));
+    }
+  }, [
+    assets,
+    deletedSystemAssetIds,
+    persistenceStatus,
+    setAssets,
+    setTechniqueThumbnails,
+    techniqueThumbnails,
+  ]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void svgAssetsApi.usage()
+      .then(response => { if (!cancelled) setAssetUsage(response.usage); })
+      .catch(() => { if (!cancelled) setAssetUsage(null); });
+    return () => { cancelled = true; };
+  }, [assets.length]);
+
+  const selectedCustom = selected?.kind === "custom"
+    ? assets.find(asset => asset.id === selected.id) ?? null
+    : null;
+  const editingDraft = selected === null || selected?.kind === "custom";
+  const isSystemAsset = Boolean(selectedCustom && SYSTEM_ASSET_IDS.has(selectedCustom.id));
+  const draftError = useMemo(() => draftErrorFor(markup), [markup]);
+  const processedDraft = useMemo(
+    () => editingDraft && !draftError ? preprocessSvgMarkup(markup) : "",
+    [draftError, editingDraft, markup],
   );
-  const [customKeyName, setCustomKeyName] = useState<string>("custom_star");
-  const [customLabel, setCustomLabel] = useState<string>("Custom Star");
-  const [svgError, setSvgError] = useState<string | null>(null);
+  const usage = selectedCustom ? assetUsage?.[selectedCustom.id] ?? [] : [];
+  const previewLabel = selected?.label || label.trim() || "New SVG draft";
 
-  // Filter Goods Sort keys based on Category Tab, Search Query, and Format Filter
-  const filteredGoodsKeys = useMemo(() => {
-    if (activeCategoryTab === "Custom") return [];
-    return GOODS_ASSET_KEYS.filter((key) => {
-      const matchesSearch = key.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = activeCategoryTab === "All" || (GOODS_CATEGORIES[activeCategoryTab] || []).includes(key);
-      const isSvg = GOODS_ASSET_KEYS.includes(key as any);
-      const matchesFormat = formatFilter === "all" || (formatFilter === "svg" && isSvg) || (formatFilter === "emoji" && !isSvg);
-      return matchesSearch && matchesCategory && matchesFormat;
-    });
-  }, [searchQuery, activeCategoryTab, formatFilter]);
-
-  const copyAssetKey = () => {
-    navigator.clipboard.writeText(selectedKey);
-    setCopiedKey(true);
-    setTimeout(() => setCopiedKey(false), 2000);
+  const notify = (message: string) => {
+    setNotice(message);
+    window.setTimeout(() => setNotice(null), 2200);
   };
 
-  const copySvgCode = () => {
-    const symbolCode = `<use href="#goods-asset-${selectedKey}" width="${previewSize}" height="${previewSize}" />`;
-    navigator.clipboard.writeText(symbolCode);
-    setCopiedSvg(true);
-    setTimeout(() => setCopiedSvg(false), 2000);
+  const beginNew = () => {
+    setSelected(null);
+    setLabel("");
+    setMarkup(NEW_SVG);
+    setScale(1);
+    setShowErrors(false);
   };
 
-  const handleSaveCustomSvg = () => {
-    const id = customKeyName.trim();
-    if (!id) {
-      setSvgError("Please provide a valid key name.");
-      return;
+  const chooseAsset = (asset: CatalogAsset) => {
+    setSelected(asset);
+    setShowErrors(false);
+    if (asset.kind !== "custom") return;
+    const saved = assets.find(candidate => candidate.id === asset.id);
+    if (!saved) return;
+    setLabel(saved.label);
+    setMarkup(saved.markup);
+    setScale(saved.scale ?? 1);
+  };
+
+  const save = () => {
+    setShowErrors(true);
+    if (!label.trim() || draftError) return;
+
+    const existingId = selectedCustom?.id;
+    const next: CustomSvgAsset = {
+      id: existingId ?? createSvgAssetId(),
+      label: label.trim(),
+      markup: preprocessSvgMarkup(markup),
+      scale,
+    };
+    setAssets(current => existingId
+      ? current.map(asset => asset.id === existingId ? next : asset)
+      : [...current, next]);
+    if (existingId) {
+      setDeletedSystemAssetIds(current => current.filter(id => id !== existingId));
     }
-    if (!rawSvg.includes("<svg")) {
-      setSvgError("SVG source must contain a valid <svg> tag.");
-      return;
+    setSelected(customAsset(next));
+    setShowErrors(false);
+    notify(existingId ? "Asset updated" : "Asset added to the library");
+  };
+
+  const saveCopy = () => {
+    setShowErrors(true);
+    if (!label.trim() || draftError) return;
+    const copy: CustomSvgAsset = {
+      id: createSvgAssetId(),
+      label: `${label.trim()} Copy`,
+      markup: preprocessSvgMarkup(markup),
+      scale,
+    };
+    setAssets(current => [...current, copy]);
+    setSelected(customAsset(copy));
+    setLabel(copy.label);
+    setShowErrors(false);
+    notify("Copy added to the library");
+  };
+
+  const copyText = async (type: "key" | "usage") => {
+    if (!selected) return;
+    const text = type === "key"
+      ? selected.id
+      : selected.kind === "custom"
+        ? `<SvgLibraryAsset assetId="${selected.id}" size={${previewSize}} />`
+        : isSpriteId(selected.id)
+          ? `<use href="#goods-${spriteKey(selected.id)}" width="${previewSize}" height="${previewSize}" />`
+          : `<CountingAsset type="${selected.id}" size={${previewSize}} />`;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(type);
+      window.setTimeout(() => setCopied(null), 1600);
+    } catch {
+      notify("Clipboard access is unavailable");
     }
-    setSvgError(null);
-    setAssets((prev) => {
-      const existingIndex = prev.findIndex((item) => item.id === id);
-      const newItem: CustomSvgAsset = { id, label: customLabel.trim() || id, markup: rawSvg, scale: 1 };
-      if (existingIndex >= 0) {
-        const next = [...prev];
-        next[existingIndex] = newItem;
-        return next;
-      }
-      return [...prev, newItem];
-    });
   };
 
-  const handleDeleteCustomSvg = (id: string) => {
-    setAssets((prev) => prev.filter((item) => item.id !== id));
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
+    setAssets(current => current.filter(asset => asset.id !== deleteTarget.id));
+    if (SYSTEM_ASSET_IDS.has(deleteTarget.id)) {
+      setDeletedSystemAssetIds(current => current.includes(deleteTarget.id)
+        ? current
+        : [...current, deleteTarget.id]);
+    }
+    setTechniqueThumbnails(current => Object.fromEntries(
+      Object.entries(current).filter(([, assetId]) => assetId !== deleteTarget.id),
+    ));
+    setDeleteTarget(null);
+    beginNew();
+    notify("Asset deleted");
   };
-
-  const isCurrentAssetSvg = GOODS_ASSET_KEYS.includes(selectedKey as any) || activeCategoryTab === "Custom";
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-slate-50 font-sans text-slate-900 dark:bg-[#090C1B] dark:text-slate-100 select-none">
-      <GoodsAssetLibrary />
-
-      {/* ── Studio Header ── */}
-      <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 bg-white px-4 py-3 dark:border-white/10 dark:bg-[#11162B]">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-md shadow-indigo-600/30">
-            <Palette size={20} />
-          </div>
-          <div>
+    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#FBFAFF] text-[#0E0B55] dark:bg-[#090C1B] dark:text-white">
+      <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-[#E7E3F6] bg-white px-4 py-3 md:px-5 dark:border-white/10 dark:bg-[#11162B]">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#F3F0FF] text-[#534AB7] dark:bg-violet-400/15 dark:text-[#CDBEFF]"><Image size={19} /></span>
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h1 className="text-base font-black text-slate-900 dark:text-white">SVG Asset Studio</h1>
-              <Badge variant="secondary" className="bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 text-[10px] font-black">
-                Category Tabs Active
-              </Badge>
+              <h1 className="koda-admin-page-title truncate">SVG Asset Studio</h1>
+              <Badge variant="secondary">{assets.length} custom</Badge>
             </div>
-            <p className="text-xs font-semibold text-slate-400 dark:text-slate-400">
-              Interactive SVG vector customization &amp; category asset manager
-            </p>
+            <p className="mt-0.5 truncate text-xs text-[#6D6997] dark:text-[#9A94B8]">Find, preview, and safely edit reusable artwork.</p>
           </div>
         </div>
-
-        {/* Format Classifier Selector (SVG Vector vs Emoji) */}
-        <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1 dark:bg-white/5 text-xs font-bold">
-          <button
-            type="button"
-            onClick={() => setFormatFilter("all")}
-            className={`rounded-lg px-2.5 py-1 transition-all ${
-              formatFilter === "all" ? "bg-white text-slate-900 shadow-sm dark:bg-violet-600 dark:text-white" : "text-slate-500"
-            }`}
-          >
-            All Formats
-          </button>
-          <button
-            type="button"
-            onClick={() => setFormatFilter("svg")}
-            className={`flex items-center gap-1 rounded-lg px-2.5 py-1 transition-all ${
-              formatFilter === "svg" ? "bg-white text-indigo-700 shadow-sm dark:bg-violet-600 dark:text-white" : "text-slate-500"
-            }`}
-          >
-            <Code size={12} /> SVG Vector
-          </button>
-          <button
-            type="button"
-            onClick={() => setFormatFilter("emoji")}
-            className={`flex items-center gap-1 rounded-lg px-2.5 py-1 transition-all ${
-              formatFilter === "emoji" ? "bg-white text-amber-700 shadow-sm dark:bg-amber-600 dark:text-white" : "text-slate-500"
-            }`}
-          >
-            <Smile size={12} /> Emoji
-          </button>
+        <div className="flex items-center gap-2">
+          <Badge variant={persistenceStatus === "error" ? "destructive" : persistenceStatus === "saved" ? "success" : "secondary"}>
+            {persistenceStatus === "saving" ? "Saving" : persistenceStatus === "saved" ? "Saved" : persistenceStatus === "error" ? "Local cache" : persistenceStatus}
+          </Badge>
+          <Button type="button" size="sm" onClick={beginNew}><FilePlus2 size={14} /> New SVG</Button>
         </div>
       </header>
 
-      {/* ── Category Tabs Bar ── */}
-      <div className="flex shrink-0 border-b border-slate-200/80 bg-white px-4 pt-2 overflow-x-auto dark:border-white/10 dark:bg-[#11162B] [scrollbar-width:none]">
-        <div className="flex gap-2">
-          {CATEGORY_TABS.map((tab) => {
-            const isCustomTab = tab.id === "Custom";
-            const count = isCustomTab ? assets.length : tab.count;
-            const isActive = activeCategoryTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveCategoryTab(tab.id)}
-                className={`flex items-center gap-2 border-b-2 px-3.5 py-2.5 text-xs font-black transition-all whitespace-nowrap ${
-                  isActive
-                    ? "border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-300"
-                    : "border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
-                }`}
-              >
-                <span className="text-base leading-none">{tab.icon}</span>
-                <span>{tab.label}</span>
-                <span
-                  className={`rounded-full px-2 py-0.5 text-[10px] font-black ${
-                    isActive
-                      ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300"
-                      : "bg-slate-100 text-slate-500 dark:bg-white/10 dark:text-slate-400"
-                  }`}
-                >
-                  {count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ── Main Studio Layout ── */}
-      <div className="flex min-h-0 flex-1 overflow-hidden">
-        {/* Left Column: Asset Explorer */}
-        <aside className="flex h-full w-full max-w-sm shrink-0 flex-col border-r border-slate-200/80 bg-white dark:border-white/10 dark:bg-[#11162B]">
-          {/* Search Bar */}
-          <div className="border-b border-slate-200/80 p-3.5 dark:border-white/10">
-            <div className="relative">
-              <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
-              <input
-                type="text"
-                placeholder={`Search in ${activeCategoryTab}...`}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 py-1.5 text-xs font-bold text-slate-900 outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 dark:border-white/10 dark:bg-white/5 dark:text-white"
-              />
-            </div>
+      <div className="grid min-h-0 flex-1 lg:grid-cols-[19rem_minmax(0,1fr)]">
+        <aside className="max-h-[22rem] min-h-0 overflow-y-auto border-b border-[#E7E3F6] bg-white p-4 lg:max-h-none lg:border-b-0 lg:border-r dark:border-white/10 dark:bg-[#11162B]">
+          <div className="mb-3">
+            <h2 className="koda-admin-section-title">Asset library</h2>
+            <p className="mt-1 text-xs text-[#6D6997] dark:text-[#9A94B8]">Search all built-in and saved artwork.</p>
           </div>
-
-          {/* Grid of Assets with Category Format Badges */}
-          <div className="flex-1 overflow-y-auto p-3 [scrollbar-width:thin]">
-            {activeCategoryTab !== "Custom" ? (
-              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-                {filteredGoodsKeys.map((key) => {
-                  const isSelected = selectedKey === key;
-                  return (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => setSelectedKey(key)}
-                      className={`group relative flex flex-col items-center justify-center rounded-2xl border p-2.5 transition-all cursor-pointer ${
-                        isSelected
-                          ? "border-indigo-600 bg-indigo-50/80 shadow-md ring-2 ring-indigo-600/30 dark:border-indigo-400 dark:bg-indigo-950/60"
-                          : "border-slate-200/80 bg-white hover:border-indigo-300 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
-                      }`}
-                    >
-                      {/* Format Badge */}
-                      <span className="absolute top-1 right-1 text-[8px] font-black uppercase px-1 py-0.2 rounded bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300">
-                        SVG
-                      </span>
-
-                      <svg width="44" height="44" viewBox="0 0 64 64" className="transition-transform group-hover:scale-110 mt-1">
-                        <use href={`#goods-asset-${key}`} width="64" height="64" />
-                      </svg>
-                      <span className="mt-1.5 truncate text-[10px] font-black text-slate-700 dark:text-slate-300">
-                        {key}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {assets.length === 0 ? (
-                  <div className="py-12 text-center text-xs font-bold text-slate-400 space-y-2">
-                    <p>No custom SVG assets saved yet.</p>
-                    <p className="text-[10px] text-slate-400">Use the Custom SVG Creator on the right to build one!</p>
-                  </div>
-                ) : (
-                  assets.map((asset) => (
-                    <div
-                      key={asset.id}
-                      onClick={() => {
-                        setSelectedKey(asset.id);
-                        setCustomKeyName(asset.id);
-                        setCustomLabel(asset.label);
-                        setRawSvg(asset.markup);
-                      }}
-                      className={`flex items-center justify-between rounded-xl border p-3 cursor-pointer ${
-                        selectedKey === asset.id ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950/50" : "border-slate-200 bg-white dark:border-white/10 dark:bg-white/5"
-                      }`}
-                    >
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5">
-                          <p className="truncate text-xs font-black text-slate-900 dark:text-white">{asset.label || asset.id}</p>
-                          <span className="text-[8px] font-black uppercase px-1 py-0.2 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
-                            Custom SVG
-                          </span>
-                        </div>
-                        <p className="text-[10px] text-slate-400">{asset.id}</p>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="xs"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteCustomSvg(asset.id);
-                        }}
-                        className="text-rose-500 hover:bg-rose-50"
-                      >
-                        <Trash2 size={13} />
-                      </Button>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
-          </div>
+          <AssetGrid selectedIds={selected ? [selected.id] : []} onSelect={chooseAsset} columns={2} showLabels />
         </aside>
 
-        {/* Center & Right Column: Interactive Editor Workspace */}
-        <main className="flex min-w-0 flex-1 flex-col overflow-y-auto p-4 sm:p-6">
-          <div className="mx-auto w-full max-w-4xl space-y-6">
-            {/* Live Preview Display Card */}
-            <Card className="relative flex flex-col items-center justify-center overflow-hidden border-slate-200/80 bg-white p-8 shadow-sm dark:border-white/10 dark:bg-[#11162B]">
-              <div className="absolute left-4 top-4 flex items-center gap-2">
-                <Badge variant="secondary" className="text-[10px] font-black uppercase">
-                  Live Studio Preview
-                </Badge>
-                <span className="text-xs font-bold text-slate-400">({previewSize}px)</span>
+        <main className="min-h-0 overflow-y-auto p-4 md:p-5">
+          <div className="mx-auto grid w-full max-w-6xl items-start gap-5 xl:grid-cols-[minmax(0,1fr)_23rem]">
+            <Card className="overflow-hidden rounded-3xl border-[#E7E3F6] bg-white shadow-[0_8px_30px_rgba(83,74,183,0.06)] dark:border-white/10 dark:bg-[#14182A]">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#EEEAF8] px-5 py-4 dark:border-white/10">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="koda-admin-section-title">Preview</h2>
+                    {isSystemAsset && <Badge variant="default"><ShieldCheck size={10} /> System asset</Badge>}
+                  </div>
+                  <p className="mt-1 text-xs text-[#6D6997] dark:text-[#9A94B8]">{previewLabel}</p>
+                </div>
+                <div className="flex rounded-xl bg-[#F3F0FF] p-1 dark:bg-white/5">
+                  {[32, 64, 96, 128].map(size => (
+                    <button key={size} type="button" onClick={() => setPreviewSize(size)} className={`rounded-lg px-2.5 py-1.5 text-[10px] font-medium ${previewSize === size ? "bg-white text-[#534AB7] shadow-sm dark:bg-violet-500 dark:text-white" : "text-[#8D89AE]"}`}>{size}px</button>
+                  ))}
+                </div>
               </div>
 
-              {/* Size Controls */}
-              <div className="absolute right-4 top-4 flex rounded-xl bg-slate-100 p-1 dark:bg-white/5">
-                {[32, 48, 64, 96, 128].map((size) => (
-                  <button
-                    key={size}
-                    type="button"
-                    onClick={() => setPreviewSize(size)}
-                    className={`rounded-lg px-2.5 py-1 text-[10px] font-black transition-all ${
-                      previewSize === size ? "bg-white text-slate-900 shadow-sm dark:bg-violet-600 dark:text-white" : "text-slate-400"
-                    }`}
-                  >
-                    {size}px
-                  </button>
-                ))}
-              </div>
-
-              {/* Canvas Render Area */}
-              <div className="my-8 flex h-48 w-48 items-center justify-center rounded-3xl bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)]">
-                <div
-                  style={{
-                    transform: `scale(${style.scale})`,
-                    opacity: style.opacity,
-                    filter: style.shadow ? "drop-shadow(0 12px 20px rgba(83,74,183,0.25))" : "none",
-                    transition: "all 0.2s ease-out",
-                  }}
-                >
-                  {activeCategoryTab !== "Custom" ? (
-                    <svg width={previewSize} height={previewSize} viewBox="0 0 64 64">
-                      <use href={`#goods-asset-${selectedKey}`} width={previewSize} height={previewSize} />
-                    </svg>
+              <div className="flex min-h-[360px] items-center justify-center bg-[radial-gradient(#E7E3F6_1px,transparent_1px)] p-8 [background-size:18px_18px] dark:bg-[radial-gradient(#272A42_1px,transparent_1px)]">
+                {editingDraft ? (
+                  processedDraft ? (
+                    <CountingAsset type="custom_svg" customSvgMarkup={processedDraft} size={previewSize} scale={scale} />
                   ) : (
-                    <div
-                      dangerouslySetInnerHTML={{ __html: rawSvg }}
-                      className="flex items-center justify-center"
-                    />
+                    <div className="max-w-sm rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-center text-xs font-medium text-rose-700 dark:border-rose-400/20 dark:bg-rose-400/10 dark:text-rose-300">{draftError}</div>
+                  )
+                ) : selected ? (
+                  <CatalogAssetView asset={selected} size={previewSize} />
+                ) : null}
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#EEEAF8] px-5 py-4 dark:border-white/10">
+                <div className="min-w-0">
+                  <p className="koda-admin-card-title truncate text-sm">{previewLabel}</p>
+                  <p className="mt-0.5 truncate text-[10px] text-[#8D89AE]">{selected?.id ?? "A stable asset ID will be created when saved."}</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" size="sm" onClick={() => void copyText("key")} disabled={!selected}>{copied === "key" ? <Check size={13} /> : <Copy size={13} />} Key</Button>
+                  <Button type="button" variant="outline" size="sm" onClick={() => void copyText("usage")} disabled={!selected}>{copied === "usage" ? <Check size={13} /> : <Code2 size={13} />} Usage</Button>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="rounded-3xl border-[#E7E3F6] bg-white p-5 shadow-[0_8px_30px_rgba(83,74,183,0.06)] dark:border-white/10 dark:bg-[#14182A]">
+              <div className="mb-4">
+                <h2 className="koda-admin-section-title">{selectedCustom ? "Edit SVG code" : selected ? "Asset details" : "Create SVG"}</h2>
+                <p className="mt-1 text-xs text-[#6D6997] dark:text-[#9A94B8]">{editingDraft ? "Changes appear in Preview before you save." : "Built-in artwork is preview-only."}</p>
+              </div>
+
+              {editingDraft ? (
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="svg-label" className="koda-admin-label">Asset label</Label>
+                    <Input id="svg-label" value={label} onChange={event => setLabel(event.target.value)} placeholder="Example: Golden mastery medal" className="mt-1.5" />
+                    {showErrors && !label.trim() && <p className="mt-1 text-xs text-rose-600">Enter a clear asset label.</p>}
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between gap-3">
+                      <Label htmlFor="svg-scale" className="koda-admin-label">Default scale</Label>
+                      <span className="koda-admin-chip text-[#534AB7]">{Math.round(scale * 100)}%</span>
+                    </div>
+                    <input id="svg-scale" type="range" min="0.5" max="2" step="0.05" value={scale} onChange={event => setScale(Number(event.target.value))} className="mt-2 w-full accent-[#534AB7]" />
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between gap-3">
+                      <Label htmlFor="svg-source" className="koda-admin-label">SVG source</Label>
+                      <Badge variant={draftError ? "warning" : "success"}>{draftError ? "Needs attention" : "Valid SVG"}</Badge>
+                    </div>
+                    <Textarea id="svg-source" value={markup} onChange={event => setMarkup(event.target.value)} spellCheck={false} className="mt-1.5 min-h-64 resize-y font-mono text-xs leading-5" />
+                    {(showErrors || markup.trim()) && draftError && <p className="mt-1.5 text-xs text-rose-600">{draftError}</p>}
+                  </div>
+
+                  {selectedCustom && (
+                    <div className="rounded-2xl bg-[#F7F6FB] px-3 py-2.5 text-xs text-[#6D6997] dark:bg-white/5 dark:text-[#9A94B8]">
+                      {usage.length > 0 ? `Used by ${usage.length} curriculum skill${usage.length === 1 ? "" : "s"}. Changes update every reference.` : "Not currently linked to a curriculum skill."}
+                    </div>
                   )}
-                </div>
-              </div>
 
-              {/* Action Bar */}
-              <div className="flex flex-wrap items-center justify-center gap-3 border-t border-slate-100 pt-4 dark:border-white/10">
-                <Button variant="outline" size="sm" onClick={copyAssetKey} className="gap-1.5 text-xs font-extrabold">
-                  {copiedKey ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
-                  {copiedKey ? "Copied Key!" : `Copy Key ("${selectedKey}")`}
-                </Button>
-                <Button variant="outline" size="sm" onClick={copySvgCode} className="gap-1.5 text-xs font-extrabold">
-                  {copiedSvg ? <Check size={14} className="text-emerald-500" /> : <Code size={14} />}
-                  {copiedSvg ? "Copied SVG Tag!" : "Copy SVG Symbol"}
-                </Button>
-              </div>
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#EEEAF8] pt-4 dark:border-white/10">
+                    <div>
+                      {selectedCustom && <Button type="button" variant="destructive" size="sm" onClick={() => setDeleteTarget(selectedCustom)}><Trash2 size={13} /> Delete SVG</Button>}
+                    </div>
+                    <div className="flex gap-2">
+                      {selectedCustom && <Button type="button" variant="outline" size="sm" onClick={saveCopy}><Copy size={13} /> Save copy</Button>}
+                      <Button type="button" size="sm" onClick={save} loading={persistenceStatus === "saving"} loadingText="Saving..."><Save size={13} /> {selectedCustom ? "Save changes" : "Add to library"}</Button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="rounded-2xl border border-[#E7E3F6] bg-[#FBFAFF] p-4 dark:border-white/10 dark:bg-white/5">
+                    <p className="koda-admin-card-title text-sm">{selected?.label}</p>
+                    <p className="mt-1 break-all text-xs text-[#6D6997] dark:text-[#9A94B8]">{selected?.id}</p>
+                    <p className="mt-3 text-xs leading-5 text-[#6D6997] dark:text-[#9A94B8]">This asset ships with Koda. You can preview and copy its key or usage snippet, but its source is maintained in code.</p>
+                  </div>
+                  <Button type="button" variant="outline" size="sm" onClick={beginNew} className="w-full"><FilePlus2 size={13} /> Create a custom SVG</Button>
+                </div>
+              )}
             </Card>
-
-            {/* Presets Bar */}
-            <Card className="border-slate-200/80 bg-white p-4 dark:border-white/10 dark:bg-[#11162B]">
-              <div className="mb-3 flex items-center justify-between">
-                <span className="text-xs font-black uppercase tracking-wider text-slate-400">
-                  Color &amp; Theme Presets
-                </span>
-                <Button
-                  variant="ghost"
-                  size="xs"
-                  onClick={() => setStyle(DEFAULT_STYLE)}
-                  className="text-xs font-bold text-slate-400 hover:text-slate-600"
-                >
-                  <RotateCcw size={13} /> Reset
-                </Button>
-              </div>
-              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-5">
-                {PRESET_STYLES.map((preset) => (
-                  <button
-                    key={preset.name}
-                    type="button"
-                    onClick={() => setStyle(preset.config)}
-                    className="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-slate-50 p-2 text-left transition-all hover:border-indigo-500 hover:bg-indigo-50/50 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
-                  >
-                    <span className="text-lg">{preset.icon}</span>
-                    <span className="truncate text-xs font-extrabold text-slate-800 dark:text-white">
-                      {preset.name}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </Card>
-
-            {/* Controls Panel */}
-            <Card className="space-y-4 border-slate-200/80 bg-white p-5 dark:border-white/10 dark:bg-[#11162B]">
-              <h3 className="flex items-center gap-2 text-sm font-black text-slate-900 dark:text-white">
-                <Sliders size={16} className="text-indigo-600 dark:text-indigo-400" />
-                Live Style &amp; Geometry Modifiers
-              </h3>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                {/* Primary Color */}
-                <div>
-                  <Label className="text-xs font-bold text-slate-600 dark:text-slate-300">Primary Color</Label>
-                  <div className="mt-1 flex items-center gap-2">
-                    <input
-                      type="color"
-                      value={style.primaryColor}
-                      onChange={(e) => setStyle({ ...style, primaryColor: e.target.value })}
-                      className="h-9 w-12 cursor-pointer rounded-lg border border-slate-200 p-0.5"
-                    />
-                    <Input
-                      type="text"
-                      value={style.primaryColor}
-                      onChange={(e) => setStyle({ ...style, primaryColor: e.target.value })}
-                      className="h-9 font-mono text-xs font-bold"
-                    />
-                  </div>
-                </div>
-
-                {/* Secondary Gradient Color */}
-                <div>
-                  <Label className="text-xs font-bold text-slate-600 dark:text-slate-300">Secondary Gradient</Label>
-                  <div className="mt-1 flex items-center gap-2">
-                    <input
-                      type="color"
-                      value={style.secondaryColor}
-                      onChange={(e) => setStyle({ ...style, secondaryColor: e.target.value })}
-                      className="h-9 w-12 cursor-pointer rounded-lg border border-slate-200 p-0.5"
-                    />
-                    <Input
-                      type="text"
-                      value={style.secondaryColor}
-                      onChange={(e) => setStyle({ ...style, secondaryColor: e.target.value })}
-                      className="h-9 font-mono text-xs font-bold"
-                    />
-                  </div>
-                </div>
-
-                {/* Scale Slider */}
-                <div>
-                  <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-300">
-                    <span>Scale Modifier</span>
-                    <span>{style.scale.toFixed(2)}x</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0.5"
-                    max="2"
-                    step="0.05"
-                    value={style.scale}
-                    onChange={(e) => setStyle({ ...style, scale: Number(e.target.value) })}
-                    className="mt-2 w-full accent-indigo-600"
-                  />
-                </div>
-
-                {/* Gradient Angle */}
-                <div>
-                  <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-300">
-                    <span>Gradient Angle</span>
-                    <span>{style.gradientAngle}°</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="360"
-                    step="5"
-                    value={style.gradientAngle}
-                    onChange={(e) => setStyle({ ...style, gradientAngle: Number(e.target.value) })}
-                    className="mt-2 w-full accent-indigo-600"
-                  />
-                </div>
-              </div>
-            </Card>
-
-            {/* Raw SVG Source Editor */}
-            {activeCategoryTab === "Custom" && (
-              <Card className="space-y-4 border-slate-200/80 bg-white p-5 dark:border-white/10 dark:bg-[#11162B]">
-                <div className="flex items-center justify-between">
-                  <h3 className="flex items-center gap-2 text-sm font-black text-slate-900 dark:text-white">
-                    <Code size={16} className="text-indigo-600 dark:text-indigo-400" />
-                    Raw SVG Source &amp; Custom Asset Creator
-                  </h3>
-                  <Button size="sm" onClick={handleSaveCustomSvg} className="bg-indigo-600 hover:bg-indigo-700">
-                    <Save size={14} /> Save to Asset Library
-                  </Button>
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div>
-                    <Label className="text-xs font-bold text-slate-600 dark:text-slate-300">Asset Key Identifier</Label>
-                    <Input
-                      type="text"
-                      placeholder="e.g. custom_star_v1"
-                      value={customKeyName}
-                      onChange={(e) => setCustomKeyName(e.target.value)}
-                      className="mt-1 h-9 font-mono text-xs"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs font-bold text-slate-600 dark:text-slate-300">Asset Label</Label>
-                    <Input
-                      type="text"
-                      placeholder="e.g. Golden Star"
-                      value={customLabel}
-                      onChange={(e) => setCustomLabel(e.target.value)}
-                      className="mt-1 h-9 text-xs"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="text-xs font-bold text-slate-600 dark:text-slate-300">SVG XML Markup</Label>
-                  <textarea
-                    rows={8}
-                    value={rawSvg}
-                    onChange={(e) => setRawSvg(e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-900 p-3 font-mono text-xs text-emerald-400 outline-none focus:ring-2 focus:ring-indigo-600"
-                  />
-                  {svgError && <p className="mt-1 text-xs font-bold text-rose-500">{svgError}</p>}
-                </div>
-              </Card>
-            )}
           </div>
         </main>
       </div>
+
+      {notice && <div className="fixed bottom-5 right-5 z-[9999] rounded-2xl border border-[#DCD5FA] bg-white px-4 py-3 text-xs font-medium text-[#0E0B55] shadow-xl dark:border-white/10 dark:bg-[#1A1D32] dark:text-white">{notice}</div>}
+
+      <ConfirmModal
+        isOpen={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        title={`Delete ${deleteTarget?.label ?? "this asset"}?`}
+        description={deleteTarget && (assetUsage?.[deleteTarget.id]?.length ?? 0) > 0
+          ? "This SVG is currently referenced by curriculum content. Deleting it will leave those references without artwork."
+          : deleteTarget && SYSTEM_ASSET_IDS.has(deleteTarget.id)
+            ? "This removes the seeded Koda SVG from your collection and it will not be added back automatically."
+            : "This removes the SVG from the library. This action cannot be undone."}
+        confirmText="Delete asset"
+      />
     </div>
   );
 };

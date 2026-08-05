@@ -26,7 +26,7 @@ const ShieldMark: React.FC = () => (
   </svg>
 );
 
-export const FamilyCodeCard: React.FC<{ code: string }> = ({ code }) => {
+export const FamilyCodeCard: React.FC<{ code: string; compact?: boolean }> = ({ code, compact = false }) => {
   const [copied, setCopied] = useState(false);
   const copy = async () => {
     try {
@@ -39,7 +39,7 @@ export const FamilyCodeCard: React.FC<{ code: string }> = ({ code }) => {
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-3xl bg-indigo-50/70 px-5 py-3.5 sm:px-6 sm:py-4 dark:bg-indigo-400/10">
+    <div className={`flex flex-wrap items-center gap-x-5 gap-y-2 rounded-3xl bg-indigo-50/70 px-5 py-3.5 sm:px-6 sm:py-4 dark:bg-indigo-400/10 ${compact ? "border border-[#DCD5FA] bg-white shadow-[0_6px_24px_rgba(83,74,183,0.05)] dark:border-white/10 dark:bg-[#14182A]" : ""}`}>
       <ShieldMark />
 
       <div className="min-w-0">
@@ -51,7 +51,7 @@ export const FamilyCodeCard: React.FC<{ code: string }> = ({ code }) => {
         </p>
       </div>
 
-      <p className="hidden items-center gap-1.5 text-[11px] font-medium text-slate-500 md:flex dark:text-[#9A94B8]">
+      <p className={`${compact ? "flex w-full" : "hidden md:flex"} items-center gap-1.5 text-[11px] font-medium text-slate-500 dark:text-[#9A94B8]`}>
         <Lock size={12} className="shrink-0" />
         Kids sign in with this on their own device — share it only with people you trust.
       </p>

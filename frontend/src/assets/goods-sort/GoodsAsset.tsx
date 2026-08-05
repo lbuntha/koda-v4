@@ -12,6 +12,8 @@ export const GOODS_ASSET_KEYS = [
   "burger", "plant", "clock", "pencil", "gem", "crown", "star", "gift",
   "pizza", "icecream", "cookie", "candy", "car", "robot", "ball", "palette",
   "book", "guitar", "camera", "trophy", "diamond", "key", "rocket", "controller",
+  "bottle_water", "bottle_juice", "bottle_soda", "bottle_potion",
+  "bottle_milk", "bottle_boba", "bottle_honey", "bottle_energy",
 ] as const;
 
 const ASSET_KEYS = new Set<string>(GOODS_ASSET_KEYS);

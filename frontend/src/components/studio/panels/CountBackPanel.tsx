@@ -31,7 +31,7 @@ export const CountBackPanel: React.FC<PanelProps> = ({ question, update, updateC
                       <input
                         type="range"
                         min={3}
-                        max={10}
+                        max={15}
                         value={question.config.totalCount || 8}
                         onChange={(e) => {
                           const tot = parseInt(e.target.value);
@@ -55,7 +55,7 @@ export const CountBackPanel: React.FC<PanelProps> = ({ question, update, updateC
                       <input
                         type="range"
                         min={1}
-                        max={5}
+                        max={Math.max(1, (question.config.totalCount || 8) - 1)}
                         value={question.config.removeCount || 3}
                         onChange={(e) => {
                           const rem = parseInt(e.target.value);

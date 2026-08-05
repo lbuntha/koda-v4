@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { COUNT_OBJECTS } from "../../types";
 import { CountingAsset } from "../Assets";
 import { sounds } from "../../sound";
@@ -8,6 +8,20 @@ import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import { GhostGuideOverlay, useGhostGuide } from "../../pedagogy";
 import { CanvasChip, CanvasAccent, surfaceClass, captionClass, accentTextClass } from "./canvasTheme";
 import { Button } from "../ui";
+import { objectStyle } from "./objectMotion";
+import { oneToOneLayout, type OneToOnePattern } from "./oneToOneLayout";
+
+/**
+ * Arrangements a flash may use.
+ *
+ * These are the shared pattern layouts, not a second copy: the dice faces here
+ * used to be a table of pixel offsets (±65, ±40) that meant one thing on the
+ * 440 × 220 box they were tuned against and something else everywhere else —
+ * a six spilling off a phone, a two lost in the middle of a projector.
+ */
+const SUBITIZE_PATTERNS: OneToOnePattern[] = [
+  "dice", "ring", "circle", "grid", "columns", "pairs", "line", "wave", "scatter"
+];
 
 /** Teacher-facing frameColor values map onto the shared accent palette. */
 const FRAME_ACCENTS: Record<string, CanvasAccent> = {
@@ -22,12 +36,15 @@ export const SubitizeCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, is
   const obj = COUNT_OBJECTS.find(o => o.id === question.objectId) || COUNT_OBJECTS[0];
   const count = question.targetCount;
   const duration = question.config.flashDurationMs || 1500;
-  const pattern = question.config.pattern || "dice";
+  const pattern: OneToOnePattern = SUBITIZE_PATTERNS.includes(question.config.pattern as OneToOnePattern)
+    ? (question.config.pattern as OneToOnePattern)
+    : "dice";
 
   const [stage, setStage] = useState<"idle" | "showing" | "hidden" | "correct" | "incorrect">("idle");
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [options, setOptions] = useState<number[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
+  const flashTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [dimensions, setDimensions] = useState({ width: 440, height: 220 });
 
   useEffect(() => {
@@ -50,7 +67,19 @@ export const SubitizeCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, is
     reset();
   }, [question]);
 
+  /*
+    A flash that is still in flight when the slide changes used to land on the
+    next question and blank it — the child saw nothing to count.
+  */
+  useEffect(() => () => {
+    if (flashTimeout.current) clearTimeout(flashTimeout.current);
+  }, []);
+
   const reset = () => {
+    if (flashTimeout.current) {
+      clearTimeout(flashTimeout.current);
+      flashTimeout.current = null;
+    }
     setStage("idle");
     setSelectedOption(null);
     
@@ -72,8 +101,10 @@ export const SubitizeCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, is
     setStage("showing");
     setSelectedOption(null);
 
-    setTimeout(() => {
+    if (flashTimeout.current) clearTimeout(flashTimeout.current);
+    flashTimeout.current = setTimeout(() => {
       setStage("hidden");
+      flashTimeout.current = null;
     }, duration);
   };
 
@@ -91,54 +122,22 @@ export const SubitizeCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, is
     }
   };
 
-  // Centered, responsive coordinate calculation inside the Subitize Stage Container
-  const getCoordinates = (index: number, total: number, arenaW: number, arenaH: number) => {
-    const itemSize = 60;
-    const usableW = Math.max(160, arenaW - 60);
-    const usableH = Math.max(100, arenaH - 80);
-    const centerX = (arenaW - itemSize) / 2;
-    const centerY = 36 + (usableH - itemSize) / 2;
-
-    if (pattern === "dice" && total <= 6) {
-      const diceSlots: { [key: number]: { dx: number; dy: number }[] } = {
-        1: [{ dx: 0, dy: 0 }],
-        2: [{ dx: -60, dy: -35 }, { dx: 60, dy: 35 }],
-        3: [{ dx: -65, dy: -40 }, { dx: 0, dy: 0 }, { dx: 65, dy: 40 }],
-        4: [{ dx: -65, dy: -40 }, { dx: 65, dy: -40 }, { dx: -65, dy: 40 }, { dx: 65, dy: 40 }],
-        5: [{ dx: -65, dy: -40 }, { dx: 65, dy: -40 }, { dx: 0, dy: 0 }, { dx: -65, dy: 40 }, { dx: 65, dy: 40 }],
-        6: [{ dx: -70, dy: -40 }, { dx: 70, dy: -40 }, { dx: -70, dy: 0 }, { dx: 70, dy: 0 }, { dx: -70, dy: 40 }, { dx: 70, dy: 40 }]
-      };
-      const slots = diceSlots[total] || diceSlots[1];
-      const slot = slots[index % slots.length];
-      return { x: Math.round(centerX + slot.dx), y: Math.round(centerY + slot.dy) };
-    }
-
-    if (pattern === "ring") {
-      const radius = Math.min(usableW, usableH) * 0.38;
-      const angle = (index / total) * Math.PI * 2 - Math.PI / 2;
-      return {
-        x: Math.round(centerX + radius * Math.cos(angle)),
-        y: Math.round(centerY + radius * Math.sin(angle))
-      };
-    }
-
-    // Grid / Scatter fallback inside stage bounds
-    const cols = total <= 4 ? 2 : Math.ceil(Math.sqrt(total));
-    const rows = Math.ceil(total / cols);
-    const stepX = Math.min(68, usableW / cols);
-    const stepY = Math.min(68, usableH / rows);
-    const gridW = (cols - 1) * stepX;
-    const gridH = (rows - 1) * stepY;
-    const startX = centerX - gridW / 2;
-    const startY = centerY - gridH / 2;
-
-    const col = index % cols;
-    const row = Math.floor(index / cols);
-    return {
-      x: Math.round(startX + col * stepX),
-      y: Math.round(startY + row * stepY)
-    };
-  };
+  /**
+   * Where the objects sit, and how big they are.
+   *
+   * `oneToOneLayout` places the pattern's centres in the arena first and lets the
+   * tightest gap between any two of them decide the object size, so a flash reads
+   * the same on a phone and on a projector. `dimensions` is the observer's
+   * content box, so it is already the arena the objects are rendered into —
+   * the card's padding is not in it and must not be taken off twice.
+   */
+  const layout = useMemo(() => oneToOneLayout({
+    count,
+    width: Math.max(120, dimensions.width),
+    height: Math.max(100, dimensions.height),
+    pattern,
+    padding: 10
+  }), [count, dimensions.width, dimensions.height, pattern]);
 
   const accent: CanvasAccent = FRAME_ACCENTS[question.config.frameColor || "indigo"] || "indigo";
   const isSolved = stage === "correct";
@@ -217,21 +216,16 @@ export const SubitizeCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, is
 
         {(stage === "showing" || !isPlayMode || stage === "correct" || stage === "incorrect") && (
           <div className="relative w-full h-full flex items-center justify-center animate-scale-in">
-            {Array.from({ length: count }).map((_, idx) => {
-              const pos = getCoordinates(idx, count, dimensions.width || 440, dimensions.height || 220);
+            {layout.positions.map((pos, idx) => {
               const assetType = question.config?.assetType || "emoji";
 
               return (
                 <div
                   key={idx}
-                  style={{
-                    position: "absolute",
-                    left: `${pos.x}px`,
-                    top: `${pos.y}px`
-                  }}
-                  className={`w-14 h-14 rounded-2xl flex items-center justify-center pointer-events-none animate-scale-in drop-shadow-sm ${surfaceClass(isDark, "raised")}`}
+                  style={objectStyle({ x: pos.x, y: pos.y, size: layout.size, z: 10 })}
+                  className={`rounded-2xl flex items-center justify-center pointer-events-none animate-scale-in drop-shadow-sm ${surfaceClass(isDark, "raised")}`}
                 >
-                  <CountingAsset type={assetType as any} emoji={obj.emoji} size={40} />
+                  <CountingAsset type={assetType as any} emoji={obj.emoji} size={Math.round(layout.size * 0.7)} />
                 </div>
               );
             })}

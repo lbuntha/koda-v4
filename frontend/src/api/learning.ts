@@ -1,6 +1,6 @@
 import { api } from "./client";
 import type { CurriculumTree } from "../curriculum/types";
-import type { CountingQuestion } from "../types";
+import type { CountingQuestion, CustomSvgAsset } from "../types";
 import type { LearningEvent } from "../services/logSchema";
 
 export interface PublishedCurriculum {
@@ -10,6 +10,11 @@ export interface PublishedCurriculum {
   revision: number;
   tree: CurriculumTree;
   questions: CountingQuestion[];
+  /**
+   * Artwork frozen into this release, which the questions above reference by id. A student
+   * has no editable SVG library to look them up in — see `assets/questionAsset.tsx`.
+   */
+  assets?: CustomSvgAsset[];
   frontierSkillId: string | null;
   eligibleSkillIds: string[];
   deliverySkillIds: string[];

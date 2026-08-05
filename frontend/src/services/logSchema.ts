@@ -39,7 +39,11 @@ export type SubjectArea =
   | "multiplication"
   | "pattern_recognition"
   | "logic_puzzle"
-  | "sorting_classification";
+  | "sorting_classification"
+  | "algebraic_thinking"
+  | "measurement"
+  | "data_analysis"
+  | "geometry";
 
 /**
  * Fine-grained skill identifiers. Free-form strings (not an enum) because new
@@ -76,7 +80,14 @@ export const TECHNIQUE_TAXONOMY: Record<CountingTechnique, { subjectArea: Subjec
   [CountingTechnique.NUMBER_PATH]: { subjectArea: "number_recognition", skillTags: ["count_to_120", "count_on", "numeral_recognition", "ten_more_ten_less"] },
   [CountingTechnique.STORY_PROBLEM_MAT]: { subjectArea: "addition", skillTags: ["addition_subtraction_stories", "word_problems", "unknown_quantities", "compare_problems"] },
   [CountingTechnique.PLACE_VALUE_LAB]: { subjectArea: "place_value", skillTags: ["tens_and_ones", "base_ten_blocks", "compose_decompose", "regroup_ten_ones"] },
+  [CountingTechnique.EQUATION_MAT]: { subjectArea: "algebraic_thinking", skillTags: ["missing_addend", "equation_reasoning", "inverse_operations", "number_bonds"] },
+  [CountingTechnique.COMPARE_NUMBERS]: { subjectArea: "place_value", skillTags: ["compare_two_digit", "tens_and_ones", "greater_less_equal"] },
+  [CountingTechnique.CLOCK_READ]: { subjectArea: "measurement", skillTags: ["tell_time_hour", "tell_time_half_hour", "analog_clock"] },
+  [CountingTechnique.MEASURE_LENGTH]: { subjectArea: "measurement", skillTags: ["length_units", "compare_lengths", "iterate_units"] },
+  [CountingTechnique.DATA_CHART]: { subjectArea: "data_analysis", skillTags: ["organize_categories", "interpret_chart", "compare_counts"] },
+  [CountingTechnique.SHAPE_LAB]: { subjectArea: "geometry", skillTags: ["shape_attributes", "compose_shapes", "equal_shares"] },
   [CountingTechnique.COUNT_CRATES]: { subjectArea: "counting", skillTags: ["count_out_a_number", "unitizing", "count_on", "compose_decompose", "regroup_ten_ones"] },
+  [CountingTechnique.XTRA_MATH]: { subjectArea: "addition", skillTags: ["xtramath", "speed_math", "fluency", "math_facts"] },
 };
 
 

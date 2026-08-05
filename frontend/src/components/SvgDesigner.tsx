@@ -363,14 +363,10 @@ const STARTER_TEMPLATES = [
 export { preprocessSvgMarkup } from "../assets/svgPreprocess";
 
 interface SvgDesignerProps {
-  questions?: CountingQuestion[];
-  setQuestions?: (qs: CountingQuestion[]) => void;
   flush?: boolean;
 }
 
-export const SvgDesigner: React.FC<SvgDesignerProps> = ({ 
-  questions,
-  setQuestions,
+export const SvgDesigner: React.FC<SvgDesignerProps> = ({
   flush = false,
 }) => {
   const {
@@ -434,40 +430,13 @@ export const SvgDesigner: React.FC<SvgDesignerProps> = ({
       triggerNotification(`✅ Overrode built-in ${labelInput}!`);
     } else if (selectedAssetId) {
       // Editing existing custom asset
-      const oldAsset = customSvgs.find(a => a.id === selectedAssetId);
-      const updated = customSvgs.map(a => 
+      const updated = customSvgs.map(a =>
         a.id === selectedAssetId 
           ? { ...a, label: labelInput.trim(), markup: processedMarkup, scale: scaleInput } 
           : a
       );
       setCustomSvgs(updated);
-
-      // Propagate edits to any slide using this custom SVG in the workspace
-      if (questions && setQuestions && oldAsset) {
-        const updatedQuestions = questions.map(q => {
-          const isMatch = q.objectId === "custom_svg" && (
-            q.config?.customSvgAssetId === oldAsset.id ||
-            q.config?.customSvgLabel === oldAsset.label ||
-            q.config?.customSvgMarkup === oldAsset.markup
-          );
-          if (isMatch) {
-            return {
-              ...q,
-              config: {
-                ...q.config,
-                customSvgAssetId: oldAsset.id,
-                customSvgLabel: labelInput.trim(),
-                customSvgMarkup: processedMarkup,
-                customSvgScale: scaleInput
-              }
-            };
-          }
-          return q;
-        });
-        setQuestions(updatedQuestions);
-        localStorage.setItem("counting_studio_questions", JSON.stringify(updatedQuestions));
-      }
-
+      // Nothing to propagate: questions reference this asset by id, so they follow the edit.
       triggerNotification("✨ Asset updated successfully!");
     } else {
       // Creating new custom asset

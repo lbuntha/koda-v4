@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { BookOpen, Loader2 } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import { GameLauncher } from "../components/GameLauncher";
-import { Button } from "../components/ui";
+import { PublishedAssetsProvider } from "../assets/questionAsset";
+import { Button, KodaLogoSpinner } from "../components/ui";
 import { analyticsLogger } from "../services/analyticsLogger";
 import { sounds } from "../sound";
 import { placementApi, PlacementQuiz } from "../api/placement";
@@ -360,6 +361,9 @@ export const StudentCurriculumPlayer: React.FC = () => {
       // A single malformed question must not take down the learner's whole session — the
       // boundary keeps the failure to the activity and offers a way back.
       <ErrorBoundary surface="game-launcher">
+      {/* A learner has no editable SVG library; the artwork their questions reference travels
+          frozen in the release — see `assets/questionAsset.tsx`. */}
+      <PublishedAssetsProvider assets={selected.assets}>
       <GameLauncher
         questions={selected.questions}
         activeId={activeId}
@@ -376,6 +380,7 @@ export const StudentCurriculumPlayer: React.FC = () => {
           skillId: selected.skillId,
         }}
       />
+      </PublishedAssetsProvider>
       </ErrorBoundary>
     );
   }
@@ -396,7 +401,7 @@ export const StudentCurriculumPlayer: React.FC = () => {
   if (!course || loadingMode && !course) {
     return (
       <div className={`flex min-h-screen items-center justify-center bg-[#FBFAFF] dark:bg-[#0E0A20] ${dark}`}>
-        <Loader2 className="animate-spin text-[#534AB7] dark:text-[#B6A6FF]" />
+        <KodaLogoSpinner size="xl" label="Loading curriculum plan…" />
       </div>
     );
   }

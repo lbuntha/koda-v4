@@ -4,6 +4,8 @@ import { CountingAsset } from "../Assets";
 import { Button, Dialog, Select } from "../ui";
 import { COUNT_OBJECTS, CountingQuestion, CountingTechnique } from "../../types";
 import { TECHNIQUE_OPTIONS } from "./techniqueOptions";
+import { deduplicateQuestions, ensureExactlyOneSamplePerComponent } from "../curriculum/questionOps";
+import { Sparkles, Layers } from "lucide-react";
 
 export type StudioSkillFilter = "all" | CountingTechnique;
 
@@ -27,10 +29,18 @@ export const SkillDeckPanel: React.FC<SkillDeckPanelProps> = ({
   onDeleteQuestion,
 }) => {
   const [deleteCandidate, setDeleteCandidate] = useState<CountingQuestion | null>(null);
+  const [oneSampleOnly, setOneSampleOnly] = useState<boolean>(false);
+  
+  // Deduplicate question deck and ensure 1 sample per component when toggled
+  const uniqueQuestions = useMemo(() => {
+    const clean = deduplicateQuestions(questions);
+    return oneSampleOnly ? ensureExactlyOneSamplePerComponent(clean) : clean;
+  }, [questions, oneSampleOnly]);
+
   const visibleQuestions = useMemo(() => {
-    if (selectedSkillId === "all") return questions;
-    return questions.filter((question) => question.technique === selectedSkillId);
-  }, [questions, selectedSkillId]);
+    if (selectedSkillId === "all") return uniqueQuestions;
+    return uniqueQuestions.filter((question) => question.technique === selectedSkillId);
+  }, [uniqueQuestions, selectedSkillId]);
   const selectedTechnique = selectedSkillId === "all" ? undefined : selectedSkillId;
 
   return (
@@ -46,6 +56,21 @@ export const SkillDeckPanel: React.FC<SkillDeckPanelProps> = ({
               <p className="text-[10px] text-[#8D89AE]">{visibleQuestions.length} of {questions.length} cards</p>
             </div>
           </div>
+
+          {/* 1 Sample / Component Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setOneSampleOnly(!oneSampleOnly)}
+            title={oneSampleOnly ? "Showing 1 sample card per component. Click to show all." : "Click to show only 1 sample card per component."}
+            className={`flex items-center gap-1 rounded-lg px-2 py-1 text-[10px] font-bold transition-all ${
+              oneSampleOnly
+                ? "bg-indigo-600 text-white shadow-sm"
+                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            }`}
+          >
+            <Layers size={11} />
+            <span>{oneSampleOnly ? "1 / Component" : "Show All"}</span>
+          </button>
         </div>
 
         <Select

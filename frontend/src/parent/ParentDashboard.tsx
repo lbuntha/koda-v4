@@ -5,11 +5,12 @@
  */
 
 import React, { useEffect, useMemo, useState } from "react";
-import { LayoutDashboard, LogOut, Settings, User as UserIcon, Users } from "lucide-react";
+import { LogOut } from "lucide-react";
 import type { AnalyticsSummary } from "../api/analytics";
 import { analyticsApi } from "../api/analytics";
 import type { Child, ChildInput } from "../api/family";
 import { ChildAnalyticsDrawer } from "../analytics/ChildAnalyticsDrawer";
+import { useSvgLibrary } from "../assets/SvgLibraryContext";
 import { useAuth } from "../auth/AuthContext";
 import { DashboardLayout, type NavSection } from "../components/layout/DashboardLayout";
 import { Button, ConfirmModal } from "../components/ui";
@@ -25,7 +26,10 @@ import { ProfilePage } from "../account/ProfilePage";
 import { useFamily } from "./useFamily";
 import { CurriculumPromotion, promotionsApi } from "../api/promotions";
 
+import { resolveIcon } from "../nav/icons";
 import { useMenus } from "../nav/useMenus";
+import { PARENT_NAV_ASSETS, PARENT_NAV_ASSET_REFS } from "./parentNavAssets";
+import { KID_NAV_ASSETS } from "../student/home/kidNavAssets";
 
 type ParentView = "dashboard" | "children" | "parent_settings" | "settings" | "profile";
 
@@ -33,15 +37,46 @@ const PARENT_NAV: NavSection[] = [{
   id: "parent",
   label: "",
   items: [
-    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { id: "children", label: "Children", icon: Users },
-    { id: "parent_settings", label: "Settings", icon: Settings },
+    { id: "dashboard", label: "Dashboard", icon: resolveIcon(PARENT_NAV_ASSET_REFS.dashboard) },
+    { id: "children", label: "Children", icon: resolveIcon(PARENT_NAV_ASSET_REFS.children) },
+    { id: "parent_settings", label: "Settings", icon: resolveIcon(PARENT_NAV_ASSET_REFS.settings) },
   ],
 }];
 
+const PARENT_NAV_ICONS: Record<string, React.ElementType> = {
+  dashboard: resolveIcon(PARENT_NAV_ASSET_REFS.dashboard),
+  parent_dashboard: resolveIcon(PARENT_NAV_ASSET_REFS.dashboard),
+  children: resolveIcon(PARENT_NAV_ASSET_REFS.children),
+  parent_children: resolveIcon(PARENT_NAV_ASSET_REFS.children),
+  settings: resolveIcon(PARENT_NAV_ASSET_REFS.settings),
+  parent_settings: resolveIcon(PARENT_NAV_ASSET_REFS.settings),
+};
+
+const NAV_ASSETS = [...PARENT_NAV_ASSETS, ...KID_NAV_ASSETS];
+
+const VIEW_TITLES: Record<ParentView, string> = {
+  dashboard: "Family learning",
+  children: "Children",
+  parent_settings: "Settings",
+  settings: "Settings",
+  profile: "Profile",
+};
+
 export const ParentDashboard: React.FC = () => {
+  const {
+    assets: svgAssets,
+    setAssets: setSvgAssets,
+    deletedSystemAssetIds,
+    persistenceStatus: svgPersistenceStatus,
+  } = useSvgLibrary();
   const { sections: dynamicSections } = useMenus();
-  const navSections = dynamicSections.length > 0 ? dynamicSections : PARENT_NAV;
+  const navSections = useMemo(() => {
+    const sections = dynamicSections.length > 0 ? dynamicSections : PARENT_NAV;
+    return sections.map(section => ({
+      ...section,
+      items: section.items.map(item => ({ ...item, icon: PARENT_NAV_ICONS[item.id] ?? item.icon })),
+    }));
+  }, [dynamicSections]);
   const [theme, toggleTheme] = useThemeMode();
   const { account, logout, startChildPlay } = useAuth();
   const { children, loading, error, addChild, updateChild, removeChild, unlockPin } = useFamily();
@@ -57,6 +92,14 @@ export const ParentDashboard: React.FC = () => {
   const [updatingPromotionId, setUpdatingPromotionId] = useState<string | null>(null);
   const [promotionError, setPromotionError] = useState<string | null>(null);
   const childIds = children.map(child => child.id).join("|");
+
+  useEffect(() => {
+    if (svgPersistenceStatus !== "saved") return;
+    const existingIds = new Set(svgAssets.map(asset => asset.id));
+    const deletedIds = new Set(deletedSystemAssetIds);
+    const missingAssets = NAV_ASSETS.filter(asset => !existingIds.has(asset.id) && !deletedIds.has(asset.id));
+    if (missingAssets.length > 0) setSvgAssets(current => [...current, ...missingAssets]);
+  }, [deletedSystemAssetIds, setSvgAssets, svgAssets, svgPersistenceStatus]);
 
   useEffect(() => {
     if (!childIds) {
@@ -157,19 +200,23 @@ export const ParentDashboard: React.FC = () => {
         active={activeView}
         onNavigate={view => setActiveView(view as ParentView)}
         user={{ name: account?.name, email: account?.email, avatar: account?.avatar }}
-        title=""
-        contentClassName="flex-1 overflow-auto bg-[#F6F8FC] p-5 dark:bg-[#0E1020]"
+        title={VIEW_TITLES[activeView]}
+        appearance="parent"
+        onProfile={() => setActiveView("profile")}
+        onSettings={() => setActiveView("parent_settings")}
+        onLogout={logout}
+        contentClassName="flex-1 overflow-auto bg-[#FBFAFF] p-4 pb-20 sm:p-5 md:p-7 md:pb-7 dark:bg-[#0E1020]"
         actions={
           <div className="flex items-center gap-1">
             <NotificationBell recipientType="user" />
             <ThemeToggle theme={theme} onToggle={toggleTheme} variant="round" />
-            <Button variant="ghost" size="sm" onClick={logout} className="text-slate-500 dark:text-slate-300">
-              <LogOut size={14} /> <span className="hidden sm:inline">Sign out</span>
+            <Button variant="ghost" size="icon" onClick={logout} aria-label="Sign out" className="h-9 w-9 rounded-xl text-slate-500 md:hidden dark:text-slate-300">
+              <LogOut size={16} />
             </Button>
           </div>
         }
       >
-        <div className="w-full">
+        <div className="mx-auto w-full max-w-[1440px]">
           {activeView === "dashboard" ? (
             <ParentOverview
               childCount={children.length}
@@ -181,6 +228,7 @@ export const ParentDashboard: React.FC = () => {
               onAdd={openAdd}
               onOpenProgress={setProgressChild}
               childrenGrid={childrenGrid}
+              familyCode={account?.family_code}
             />
           ) : activeView === "children" ? (
             <ParentChildrenPage onAdd={openAdd} childrenGrid={childrenGrid} />
@@ -189,7 +237,7 @@ export const ParentDashboard: React.FC = () => {
           ) : (
             <ProfilePage />
           )}
-          {activeView !== "settings" && activeView !== "parent_settings" && activeView !== "profile" && account?.family_code && (
+          {activeView !== "dashboard" && activeView !== "settings" && activeView !== "parent_settings" && activeView !== "profile" && account?.family_code && (
             <div className="mt-6"><FamilyCodeCard code={account.family_code} /></div>
           )}
         </div>

@@ -36,24 +36,24 @@ export const FamilySummary: React.FC<Props> = ({ summaries, loading, className =
     <section className={className}>
       <div className="flex items-end justify-between gap-3">
         <div>
-          <h2 className="text-lg font-black text-[#0E0B55] dark:text-white">Family summary</h2>
-          <p className="mt-1 text-xs font-bold text-[#6D6997] dark:text-[#8F99AD]">Learning progress across every child profile.</p>
+          <h2 className="text-lg font-semibold text-[#0E0B55] dark:text-white">Family summary</h2>
+          <p className="mt-1 text-xs font-medium text-[#6D6997] dark:text-[#8F99AD]">Learning progress across every child profile.</p>
         </div>
-        {totals.streak > 0 && <span className="inline-flex items-center gap-1 text-xs font-black text-orange-600 dark:text-orange-300"><Flame size={14} className="fill-current" /> Best streak · {totals.streak} day{totals.streak === 1 ? "" : "s"}</span>}
+        {totals.streak > 0 && <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-3 py-1.5 text-xs font-semibold text-orange-600 dark:bg-orange-400/10 dark:text-orange-300"><Flame size={14} className="fill-current" /> Best streak · {totals.streak} day{totals.streak === 1 ? "" : "s"}</span>}
       </div>
       {!loading && summaries.length < expectedProfiles && (
         <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-bold text-amber-700 dark:bg-amber-400/10 dark:text-amber-300">Some learner activity is temporarily unavailable. Totals may be incomplete.</p>
       )}
       <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {items.map(item => (
-          <Card key={item.label} className="flex min-h-24 items-center gap-3 border-[#E7E3F6] bg-white p-4 shadow-[0_6px_24px_rgba(83,74,183,0.06)] dark:border-white/10 dark:bg-[#161B2E]">
+          <Card key={item.label} className="flex min-h-24 items-center gap-3 rounded-3xl border-[#E7E3F6] bg-white p-4 shadow-[0_6px_24px_rgba(83,74,183,0.06)] dark:border-white/10 dark:bg-[#161B2E]">
             <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${item.tone}`}><item.icon size={21} /></span>
             <div className="min-w-0 flex-1">
               <p className="text-[10px] font-extrabold uppercase tracking-wide text-[#6D6997] dark:text-[#8F99AD]">{item.label}</p>
               {loading ? (
                 <Skeleton className="mt-1 h-6 w-16" shape="line" />
               ) : (
-                <p className="mt-1 truncate text-xl font-black text-[#0E0B55] dark:text-white">{item.value}</p>
+                <p className="mt-1 truncate text-xl font-semibold text-[#0E0B55] dark:text-white">{item.value}</p>
               )}
               <p className="text-[10px] font-bold text-[#8D89AE] dark:text-[#7F899D]">{item.detail}</p>
             </div>

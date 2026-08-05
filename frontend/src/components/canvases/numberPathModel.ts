@@ -75,6 +75,23 @@ export function arrangedPathNumbers(config: NumberPathConfig): number[] {
   return anchor === null ? scrambled : [anchor, ...scrambled];
 }
 
+/**
+ * How many tiles the path lays out per row.
+ *
+ * The path used to be a single row that scrolled sideways, which hid the target number off the
+ * right-hand edge — the child could not see what they were counting towards. Wrapping fixes
+ * that, but the wrap points have to be known so a connector is never drawn dangling off the
+ * end of a row, hence a column count rather than `flex-wrap`.
+ *
+ * Six is the ceiling: a tile is 3rem, so seven across no longer fits a narrow phone, which is
+ * the sideways scroll coming back by another route.
+ */
+export function pathColumnCount(total: number): number {
+  if (total <= 6) return Math.max(1, total);
+  // Split into two rows where that fits, so the sequence reads as two tidy lines.
+  return Math.min(6, Math.ceil(total / 2));
+}
+
 export const MAZE_ROUTE_INDICES = [20, 16, 12, 8, 4, 3, 7, 11, 15, 21] as const;
 
 /** Build a stable 5×5 maze with the real route embedded among unique distractors. */

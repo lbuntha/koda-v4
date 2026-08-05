@@ -217,5 +217,19 @@ export const DEFAULT_QUESTIONS: CountingQuestion[] = [
       assetType: "apple",
       frameColor: "indigo"
     }
+  },
+  {
+    id: "q-xtra-math",
+    technique: CountingTechnique.XTRA_MATH,
+    title: "17. XtraMath Speed Fluency",
+    instruction: "Solve the math facts quickly and accurately to build fluency!",
+    objectId: "star",
+    targetCount: 10,
+    config: {
+      levelId: "xm_level_1",
+      themeId: "classic",
+      timeLimitSec: 6,
+      defaultVsComputer: false
+    }
   }
 ];

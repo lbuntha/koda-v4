@@ -82,6 +82,8 @@ class SvgLibrary(Document):
     assets: list[dict[str, Any]] = Field(default_factory=list)
     #: Countable object type ("apple", "star") -> replacement markup + scale.
     overrides: dict[str, dict[str, Any]] = Field(default_factory=dict)
+    #: Stable seeded asset ids the owner intentionally removed. Seeders must respect these.
+    deleted_system_asset_ids: list[str] = Field(default_factory=list)
     #: Counting technique ("MOVE_AND_COUNT") -> an id in `assets`. Chooses the artwork the
     #: studio shows for that component, replacing the static file its manifest ships with.
     #: A reference rather than markup, so one library asset can front several techniques and

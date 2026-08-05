@@ -11,6 +11,7 @@ interface Props {
   summaries: Record<string, AnalyticsSummary>;
   loading?: boolean;
   onOpenProgress: (child: Child) => void;
+  compact?: boolean;
 }
 
 interface FeedItem {
@@ -65,20 +66,20 @@ const activityCopy = (event: ActivityEvent) => {
   };
 };
 
-export const RecentActivity: React.FC<Props> = ({ profiles, summaries, loading, onOpenProgress }) => {
+export const RecentActivity: React.FC<Props> = ({ profiles, summaries, loading, onOpenProgress, compact = false }) => {
   const items = useMemo(() => profiles
     .flatMap(child => (summaries[child.id]?.recentEvents ?? []).map(event => ({ child, event })))
     .sort((left, right) => new Date(right.event.occurredAt).getTime() - new Date(left.event.occurredAt).getTime())
     .slice(0, 4), [profiles, summaries]);
 
   return (
-    <section>
+    <section className={compact ? "rounded-3xl border border-[#E7E3F6] bg-white p-4 shadow-[0_6px_24px_rgba(83,74,183,0.05)] dark:border-white/10 dark:bg-[#14182A]" : ""}>
       <div>
-        <h2 className="text-lg font-black text-[#0E0B55] dark:text-white">Recent activity</h2>
-        <p className="mt-1 text-xs font-bold text-[#6D6997] dark:text-[#8F99AD]">Latest verified learning across your family.</p>
+        <h2 className="text-lg font-semibold text-[#0E0B55] dark:text-white">Recent activity</h2>
+        <p className="mt-1 text-xs font-medium text-[#6D6997] dark:text-[#8F99AD]">Latest verified learning across your family.</p>
       </div>
 
-      <Card className="mt-4 min-h-28 overflow-hidden border-[#E7E3F6] bg-white p-2.5 shadow-[0_6px_24px_rgba(83,74,183,0.06)] dark:border-white/10 dark:bg-[#161B2E]">
+      <Card className={`mt-4 min-h-28 overflow-hidden bg-white p-2.5 dark:bg-[#161B2E] ${compact ? "border-0 bg-[#FBFAFF] shadow-none dark:bg-white/[0.03]" : "border-[#E7E3F6] shadow-[0_6px_24px_rgba(83,74,183,0.06)] dark:border-white/10"}`}>
         {loading ? (
           <div className="space-y-3 p-2">
             {Array.from({ length: 3 }, (_, index) => <Skeleton key={index} className="h-12 w-full rounded-xl" />)}

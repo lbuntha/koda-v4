@@ -14,6 +14,8 @@ export interface SvgOverride {
 export interface SvgLibraryPayload {
   assets: CustomSvgAsset[];
   overrides: Record<string, SvgOverride>;
+  /** Seeded Koda assets intentionally removed by this owner. */
+  deletedSystemAssetIds: string[];
   /**
    * Counting technique -> an id in `assets`. Overrides the static artwork a component's
    * manifest ships with. A reference, not markup, so editing the asset updates every

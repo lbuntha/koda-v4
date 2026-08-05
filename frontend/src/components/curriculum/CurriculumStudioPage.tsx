@@ -12,7 +12,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, FileText, History } from "lucide-react";
-import { CountingQuestion, CustomSvgAsset } from "../../types";
+import { CountingQuestion } from "../../types";
 import { useCurriculumTree } from "../../curriculum/useCurriculumTree";
 import { computeSkillCoverage, auditCurriculum, questionSkillIdsForCurriculum, SkillCoverage, CurriculumIssue } from "../../curriculum/types";
 import * as mutations from "../../curriculum/mutations";
@@ -36,12 +36,11 @@ interface CurriculumStudioPageProps {
   curriculumId?: string;
   questions: CountingQuestion[];
   saveQuestions: (next: CountingQuestion[]) => void;
-  customSvgs: CustomSvgAsset[];
   onOpenSvgMaker: () => void;
   onBack?: () => void;
 }
 
-export const CurriculumStudioPage: React.FC<CurriculumStudioPageProps> = ({ curriculumId, questions, saveQuestions, customSvgs, onOpenSvgMaker, onBack }) => {
+export const CurriculumStudioPage: React.FC<CurriculumStudioPageProps> = ({ curriculumId, questions, saveQuestions, onOpenSvgMaker, onBack }) => {
   const { tree, setTree, published, setPublished, persistenceStatus, loadError, owner, createdAt, updatedAt, revision } = useCurriculumTree(curriculumId);
 
   const [selectedGradeId, setSelectedGradeId] = useState(tree.primaryGradeId || tree.grades[0]?.id || "");
@@ -426,7 +425,6 @@ export const CurriculumStudioPage: React.FC<CurriculumStudioPageProps> = ({ curr
         onClose={() => setEditingQuestion(null)}
         onSave={handleEditQuestionSave}
         questions={questions}
-        customSvgs={customSvgs}
         onOpenSvgMaker={onOpenSvgMaker}
       />
 

@@ -74,10 +74,30 @@ export function storyEquation(config: StoryProblemConfig): string {
   return `${config.first} + ${config.second} + ${config.third} = ?`;
 }
 
+/**
+ * The plural of the thing being counted, for the story sentence.
+ *
+ * `${label}s` is wrong for a third of the asset catalogue: "butterfly" became "butterflys",
+ * which is a spelling mistake shown to a six-year-old who is still learning to read, in an app
+ * teaching them to read. The rules here are the small set English actually needs for these
+ * labels — a consonant before a final "y", the sibilant endings, and the unchanged plurals.
+ */
+export function pluralise(label: string): string {
+  const word = label.toLowerCase().trim();
+  if (!word) return word;
+  const unchanged = ["fish", "sheep", "deer"];
+  if (unchanged.includes(word) || word.endsWith("s")) return word;
+  // "butterfly" -> "butterflies", but "duckey"-style vowel+y just takes an s.
+  if (word.endsWith("y") && !"aeiou".includes(word[word.length - 2])) {
+    return `${word.slice(0, -1)}ies`;
+  }
+  if (/(sh|ch|x|z)$/.test(word)) return `${word}es`;
+  return `${word}s`;
+}
+
 export function storyText(config: StoryProblemConfig, objectLabel = "apples"): string {
   const name = config.characterName;
-  const lowerLabel = objectLabel.toLowerCase();
-  const item = lowerLabel === "fish" || lowerLabel.endsWith("s") ? lowerLabel : `${lowerLabel}s`;
+  const item = pluralise(objectLabel);
   if (config.type === "add_to") {
     if (config.unknown === "start") return `${name} had some ${item}. ${config.second} more arrived. Now there are ${config.first + config.second}. How many were there at the start?`;
     if (config.unknown === "change") return `${name} had ${config.first} ${item}. Some more arrived. Now there are ${config.first + config.second}. How many arrived?`;

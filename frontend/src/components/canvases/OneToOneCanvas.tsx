@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { COUNT_OBJECTS } from "../../types";
 import { CountingAsset } from "../Assets";
@@ -7,7 +7,8 @@ import { Sparkles, Hand, RotateCcw, Check, Calculator, AlertCircle, Delete } fro
 import { CanvasProps, Sparkle } from "./types";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import { GhostGuideOverlay, useGhostGuide } from "../../pedagogy";
-import { CanvasChip } from "./canvasTheme";
+import { CanvasChip, accentChipClass, surfaceClass } from "./canvasTheme";
+import { oneToOneLayout, sizeForCentres, STAGE_PADDING, type OneToOnePattern } from "./oneToOneLayout";
 import { Button } from "../ui";
 
 interface OneToOneItem {
@@ -40,7 +41,16 @@ export const OneToOneCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sh
   const [showNumberPad, setShowNumberPad] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const [dimensions, setDimensions] = useState({ width: 480, height: 260 });
+  /**
+   * `null` until the stage has been measured.
+   *
+   * Objects are placed in stage pixels, so laying them out against a guessed
+   * size and correcting afterwards puts them somewhere they never belonged.
+   */
+  const [dimensions, setDimensions] = useState<{ width: number; height: number } | null>(null);
+  /** Height the answer panel takes off the bottom of the stage, once it is open. */
+  const [panelHeight, setPanelHeight] = useState(0);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   const isCountComplete = count > 0 && tapOrder.length === count;
   const solvedForGuide = count > 0 && (requireAnswerInput ? answerStatus === "correct" : isCountComplete);
@@ -57,18 +67,21 @@ export const OneToOneCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sh
   const customPositionKey = JSON.stringify(question.config.customPositions || []);
   onSuccessRef.current = onSuccess;
 
-  // Measure container dimensions dynamically
-  useEffect(() => {
-    if (!stageRef.current) return;
+  // Measure the stage before paint, then keep following it.
+  useLayoutEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const seed = stage.getBoundingClientRect();
+    setDimensions({ width: seed.width || 480, height: seed.height || 260 });
     const resizeObserver = new ResizeObserver((entries) => {
-      for (let entry of entries) {
+      for (const entry of entries) {
         setDimensions({
           width: entry.contentRect.width || 480,
           height: entry.contentRect.height || 260
         });
       }
     });
-    resizeObserver.observe(stageRef.current);
+    resizeObserver.observe(stage);
     return () => resizeObserver.disconnect();
   }, []);
 
@@ -91,140 +104,122 @@ export const OneToOneCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sh
     if (successTimeoutRef.current) clearTimeout(successTimeoutRef.current);
   }, []);
 
-  // Responsive card size calculation based on container dimensions and object count
-  const width = dimensions.width;
-  const height = dimensions.height;
-  const isMobile = width < 640;
-  const isCompact = width < 460;
+  const width = dimensions?.width ?? 480;
+  const height = dimensions?.height ?? 260;
+  const pattern = (question.config.pattern || "grid") as OneToOnePattern;
 
-  let targetItemSize = isCompact ? 50 : isMobile ? 58 : 74;
-  if (width < 540) {
-    const usableW = Math.max(160, width - 32);
-    if (count > 8) {
-      targetItemSize = Math.max(36, Math.floor((usableW - 40) / 4));
-    } else if (count > 5) {
-      targetItemSize = Math.max(42, Math.floor((usableW - 32) / Math.min(count, 5)));
-    }
-  }
-  const itemSize = Math.min(78, Math.max(34, targetItemSize));
-  const assetSize = Math.max(20, Math.round(itemSize * 0.7));
-  const offsetValue = itemSize / 2;
+  /**
+   * The answer box takes the bottom of the stage, so the objects are laid out in
+   * what is left of it. Reserving the space rather than floating the box over it
+   * means the child can still see and count what they are being asked about.
+   */
+  const answerPanelOpen = isPlayMode && requireAnswerInput && isCountComplete;
+  const layoutHeight = Math.max(120, height - (answerPanelOpen ? panelHeight + 12 : 0));
 
-  // Compute item layout positions dynamically whenever dimensions or layout config changes
-  useEffect(() => {
-    const customPositions = question.config.customPositions || [];
-    const layoutReference = question.config.layoutReference;
-    const pattern = question.config.pattern || "grid";
-    const scaleX = layoutReference?.width ? width / layoutReference.width : 1;
-    const scaleY = layoutReference?.height ? height / layoutReference.height : 1;
-
-    const safePadding = Math.max(12, Math.min(gridSize, 24));
-    const minX = Math.min(safePadding, Math.max(0, (width - itemSize) / 2));
-    const minY = Math.min(safePadding, Math.max(0, (height - itemSize) / 2));
-    const maxX = Math.max(minX, width - itemSize - safePadding);
-    const maxY = Math.max(minY, height - itemSize - safePadding);
-    const usableWidth = Math.max(0, maxX - minX);
-    const usableHeight = Math.max(0, maxY - minY);
-
-    const hasCompleteCustomLayout = customPositions.length === count
-      && Array.from({ length: count }).every((_, idx) =>
-        customPositions.some(position => position.id === `item-1to1-${idx}`)
-      );
-    const clampX = (value: number) => Math.max(minX, Math.min(maxX, value));
-    const clampY = (value: number) => Math.max(minY, Math.min(maxY, value));
-
-    const newItems = Array.from({ length: count }).map((_, idx) => {
-      const savedPos = customPositions.find(p => p.id === `item-1to1-${idx}`);
-      
-      let defaultX = 0;
-      let defaultY = 0;
-
-      if (pattern === "circle") {
-        const startAngle = Math.PI * 0.85;
-        const endAngle = Math.PI * 0.15;
-        const deltaAngle = count > 1 ? (startAngle - endAngle) / (count - 1) : 0;
-        const angle = startAngle - idx * deltaAngle;
-        
-        const rx = width > 200 ? Math.min(130, usableWidth * 0.44) : 0;
-        const ry = height > 120 ? Math.min(75, usableHeight * 0.44) : 0;
-        
-        defaultX = (width - itemSize) / 2 + rx * Math.cos(angle);
-        defaultY = (height - itemSize) / 2 + (height > 150 ? 16 : 0) - ry * Math.sin(angle);
-      } else if (pattern === "wave") {
-        const rx = usableWidth;
-        const spacingX = count > 1 ? rx / (count - 1) : 0;
-        defaultX = minX + idx * spacingX;
-        defaultY = (height - itemSize) / 2 + Math.min(22, usableHeight * 0.25) * Math.sin((idx / Math.max(1, count)) * Math.PI * 2);
-      } else if (pattern === "scatter") {
-        const xPercent = [0.05, 0.4, 0.75, 0.15, 0.5, 0.8, 0.25, 0.6, 0.1, 0.45];
-        const yPercent = [0.1, 0.5, 0.15, 0.45, 0.1, 0.5, 0.2, 0.4, 0.5, 0.2];
-        defaultX = minX + xPercent[idx % xPercent.length] * usableWidth;
-        defaultY = minY + yPercent[idx % yPercent.length] * usableHeight;
-      } else if (pattern === "grid" || pattern === "columns" || pattern === "pairs") {
-        const configuredCols = question.config.gridColumns || (pattern === "pairs" ? 2 : 0);
-        const maxColsPossible = Math.max(1, Math.floor((usableWidth + 8) / (itemSize + 6)));
-        const cols = Math.max(1, Math.min(count, configuredCols || Math.min(maxColsPossible, Math.ceil(Math.sqrt(count)))));
-        const rows = Math.ceil(count / cols);
-        const colIdx = idx % cols;
-        const rowIdx = Math.floor(idx / cols);
-        
-        const colSpacing = cols > 1 ? Math.min(itemSize + 16, usableWidth / (cols - 1)) : 0;
-        const rowSpacing = rows > 1 ? Math.min(itemSize + 14, usableHeight / (rows - 1)) : 0;
-        
-        const gridW = (cols - 1) * colSpacing;
-        const gridH = (rows - 1) * rowSpacing;
-        
-        defaultX = (width - itemSize) / 2 - gridW / 2 + colIdx * colSpacing;
-        defaultY = (height - itemSize) / 2 - gridH / 2 + rowIdx * rowSpacing;
-      } else {
-        // Line layout: Wrap into 2 rows if items exceed container width on mobile
-        const maxItemsSingleRow = Math.max(1, Math.floor((usableWidth + 8) / (itemSize + 8)));
-        if (count <= maxItemsSingleRow) {
-          const spacingX = count > 1 ? Math.min(itemSize + 20, usableWidth / (count - 1)) : 0;
-          const totalW = (count - 1) * spacingX;
-          defaultX = Math.max(minX, (width - itemSize) / 2 - totalW / 2 + idx * spacingX);
-          defaultY = Math.max(0, (height - itemSize) / 2);
-        } else {
-          const cols = Math.min(count, Math.max(2, Math.ceil(count / 2)));
-          const rows = Math.ceil(count / cols);
-          const colIdx = idx % cols;
-          const rowIdx = Math.floor(idx / cols);
-          const itemsInThisRow = rowIdx === rows - 1 ? count - rowIdx * cols : cols;
-          const spacingX = itemsInThisRow > 1 ? Math.min(itemSize + 16, usableWidth / (itemsInThisRow - 1)) : 0;
-          const spacingY = rows > 1 ? Math.min(itemSize + 14, usableHeight / (rows - 1)) : 0;
-          const rowW = (itemsInThisRow - 1) * spacingX;
-          const totalH = (rows - 1) * spacingY;
-          defaultX = (width - itemSize) / 2 - rowW / 2 + colIdx * spacingX;
-          defaultY = (height - itemSize) / 2 - totalH / 2 + rowIdx * spacingY;
-        }
-      }
-
-      const scaledSavedX = savedPos ? savedPos.x * scaleX : defaultX;
-      const scaledSavedY = savedPos ? savedPos.y * scaleY : defaultY;
-
-      return {
-        id: `item-1to1-${idx}`,
-        x: Math.round(clampX(hasCompleteCustomLayout ? scaledSavedX : defaultX)),
-        y: Math.round(clampY(hasCompleteCustomLayout ? scaledSavedY : defaultY))
-      };
+  /**
+   * Positions and object size, derived together — see `oneToOneLayout`.
+   *
+   * A layout the teacher arranged by hand wins on positions, but still sets the
+   * size from how close together they put things, so hand-placed objects grow on
+   * a big screen too instead of staying at their authoring size.
+   */
+  const { items: laidOut, itemSize } = useMemo(() => {
+    const auto = oneToOneLayout({
+      count,
+      width,
+      height: layoutHeight,
+      pattern,
+      gridColumns: question.config.gridColumns
     });
-    setItems(newItems);
-  }, [question.id, count, question.config.pattern, question.config.gridColumns, question.config.layoutReference?.width, question.config.layoutReference?.height, customPositionKey, gridSize, width, height, itemSize]);
+
+    const customPositions = question.config.customPositions || [];
+    const authored = Array.from({ length: count }).map((_, idx) =>
+      customPositions.find(position => position.id === `item-1to1-${idx}`)
+    );
+    const hasCompleteCustomLayout = count > 0 && authored.every(Boolean);
+
+    if (!hasCompleteCustomLayout) {
+      return {
+        itemSize: auto.size,
+        items: auto.positions.map((position, idx) => ({ id: `item-1to1-${idx}`, ...position }))
+      };
+    }
+
+    const reference = question.config.layoutReference;
+    const scaleX = reference?.width ? width / reference.width : 1;
+    const scaleY = reference?.height ? layoutHeight / reference.height : 1;
+    const centres = authored.map(position => ({
+      x: position!.x * scaleX,
+      y: position!.y * scaleY
+    }));
+    const size = Math.min(
+      auto.size,
+      sizeForCentres(centres, { width: width - STAGE_PADDING * 2, height: layoutHeight - STAGE_PADDING * 2 })
+    );
+
+    return {
+      itemSize: size,
+      items: centres.map((centre, idx) => ({
+        id: `item-1to1-${idx}`,
+        x: Math.round(Math.max(0, Math.min(width - size, centre.x))),
+        y: Math.round(Math.max(0, Math.min(layoutHeight - size, centre.y)))
+      }))
+    };
+  }, [
+    count,
+    width,
+    layoutHeight,
+    pattern,
+    question.config.gridColumns,
+    question.config.layoutReference?.width,
+    question.config.layoutReference?.height,
+    customPositionKey
+  ]);
+
+  const assetSize = Math.round(itemSize * 0.7);
+  const badgeSize = Math.round(Math.max(18, Math.min(32, itemSize * 0.3)));
+  const offsetValue = itemSize / 2;
+  // The counting trail is drawn between objects, so it is measured in objects too.
+  const linkRadius = Math.round(Math.max(9, Math.min(20, itemSize * 0.17)));
+  const linkStroke = Math.max(2, Math.round(itemSize * 0.035));
+
+  // A drag in Design Mode moves an item from under the computed layout; the
+  // layout takes over again whenever the question, the stage or the saved
+  // positions change.
+  useEffect(() => {
+    setItems(laidOut);
+  }, [laidOut]);
+
+  /**
+   * Measure the answer panel rather than guessing at its height — it grows by
+   * about half again when the child opens the number pad, and the objects above
+   * it have to move out of the way by exactly that much.
+   */
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!answerPanelOpen || !panel) {
+      setPanelHeight(0);
+      return;
+    }
+    const observer = new ResizeObserver(entries => {
+      for (const entry of entries) setPanelHeight(entry.contentRect.height);
+    });
+    observer.observe(panel);
+    setPanelHeight(panel.getBoundingClientRect().height);
+    return () => observer.disconnect();
+  }, [answerPanelOpen, showNumberPad]);
 
   const dragOffset = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
-  const reset = () => {
-    if (successTimeoutRef.current) {
-      clearTimeout(successTimeoutRef.current);
-      successTimeoutRef.current = null;
-    }
-    tapOrderRef.current = [];
-    setTapOrder([]);
-    setSparkles([]);
-    setAnswerInput("");
-    setAnswerStatus("idle");
-    setErrorMessage("");
-    setShowNumberPad(false);
+  /**
+   * Hand the layout back to the chosen pattern.
+   *
+   * Dropping the authored positions is the whole reset: with nothing saved, the
+   * pattern computes positions and size for whatever stage it lands on, which is
+   * what a teacher wants after dragging objects into a corner.
+   */
+  const resetLayout = () => {
+    onUpdateQuestionConfig?.({ customPositions: undefined, layoutReference: undefined });
   };
 
   const getStagePointer = (e: React.PointerEvent) => {
@@ -296,8 +291,8 @@ export const OneToOneCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sh
     setItems(prev => {
       const currentStage = stageRef.current;
       const safePadding = Math.max(12, Math.min(gridSize, 24));
-      const maxX = Math.max(safePadding, (currentStage?.clientWidth || dimensions.width) - itemSize - safePadding);
-      const maxY = Math.max(safePadding, (currentStage?.clientHeight || dimensions.height) - itemSize - safePadding);
+      const maxX = Math.max(safePadding, (currentStage?.clientWidth || width) - itemSize - safePadding);
+      const maxY = Math.max(safePadding, (currentStage?.clientHeight || height) - itemSize - safePadding);
       const updated = prev.map(item => {
         if (item.id !== releasedId) return item;
         const snappedX = showGrid ? Math.round(item.x / gridSize) * gridSize : item.x;
@@ -310,8 +305,8 @@ export const OneToOneCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sh
       onUpdateQuestionConfig?.({
         customPositions: updated.map(item => ({ id: item.id, x: item.x, y: item.y })),
         layoutReference: {
-          width: currentStage?.clientWidth || dimensions.width,
-          height: currentStage?.clientHeight || dimensions.height
+          width: currentStage?.clientWidth || width,
+          height: currentStage?.clientHeight || height
         }
       });
 
@@ -431,10 +426,26 @@ export const OneToOneCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sh
           : `${count} ${obj.label}${count === 1 ? "" : "s"} • tap each object once`
       }
       readAloudText={question.instruction || `Count ${count} ${obj.label}${count === 1 ? "" : "s"} one by one.`}
-      headerActions={
+      headerActions={isPlayMode ? (
         <CanvasChip accent="emerald" isDark={isDark}>
-          {countedText}
+          {solvedForGuide ? "All counted" : countedText}
         </CanvasChip>
+      ) : (
+        <>
+          <CanvasChip accent="emerald" isDark={isDark}>{countedText}</CanvasChip>
+          <Button type="button" variant="outline" size="xs" onClick={resetLayout} title="Reset to the chosen pattern">
+            <RotateCcw size={12} />
+            Reset
+          </Button>
+        </>
+      )}
+      footerSolved={solvedForGuide}
+      footerStatus={
+        solvedForGuide
+          ? `All ${count} counted!`
+          : isPlayMode
+            ? undefined
+            : "Design Mode · Drag objects to place them, or Reset to the pattern"
       }
       designerHint="Drag objects smoothly, then release to align to the grid."
     >
@@ -443,9 +454,13 @@ export const OneToOneCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sh
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
-        className={`relative flex-1 w-full min-h-[260px] sm:min-h-[300px] rounded-[2rem] border-2 shadow-inner overflow-hidden select-none ${
-          isDark ? "bg-slate-950/40 border-slate-700/80" : "bg-white/70 border-slate-200/80"
-        }`}
+        /*
+          One stage, sized like the bins in Move & Count: `flex-1` fills the
+          launcher, and the floors stay modest so a short window cannot push the
+          stage past the hint line. Elevation, not a border, marks the surface —
+          the rule the rest of the canvases follow.
+        */
+        className={`relative flex-1 w-full min-h-[260px] sm:min-h-[300px] md:min-h-[340px] rounded-3xl overflow-hidden select-none ${surfaceClass(isDark)}`}
       >
         <GhostGuideOverlay
           show={showGhostGuide && !solvedForGuide}
@@ -457,7 +472,6 @@ export const OneToOneCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sh
           isDark={isDark}
           labelPlacement="top"
         />
-        <div className="absolute inset-0 bg-radial from-slate-100/50 via-transparent to-transparent pointer-events-none" />
 
         {!isPlayMode && draggedItem && (
           <>
@@ -493,32 +507,34 @@ export const OneToOneCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sh
             const dy = endY - startY;
             const dist = Math.hypot(dx, dy);
 
-            // Perpendicular curved offset upward
-            const offset = Math.min(30, dist * 0.35);
+            // Perpendicular curved offset upward, scaled to the objects it links.
+            const offset = Math.min(itemSize * 0.5, dist * 0.35);
             const controlX = midX - (dy / (dist || 1)) * offset;
-            const controlY = midY + (dx / (dist || 1)) * offset - Math.min(12, dist * 0.1);
+            const controlY = midY + (dx / (dist || 1)) * offset - Math.min(itemSize * 0.2, dist * 0.1);
 
             return (
               <g key={idx} className="animate-fade-in">
                 <path
                   d={`M ${startX} ${startY} Q ${controlX} ${controlY} ${endX} ${endY}`}
                   fill="none"
-                  stroke="#3b82f6"
-                  strokeWidth="2.5"
-                  strokeDasharray="4 3"
+                  strokeWidth={linkStroke}
+                  strokeDasharray={`${linkStroke * 1.8} ${linkStroke * 1.3}`}
+                  strokeLinecap="round"
                   className="stroke-indigo-400"
                 />
                 <circle
                   cx={controlX}
                   cy={controlY}
-                  r={itemSize < 48 ? 8 : 10}
+                  r={linkRadius}
                   className="fill-indigo-500 stroke-white stroke-2"
                 />
                 <text
                   x={controlX}
-                  y={controlY + (itemSize < 48 ? 3 : 3.5)}
+                  y={controlY}
                   textAnchor="middle"
-                  className={`fill-white font-mono font-bold ${itemSize < 48 ? "text-[8px]" : "text-[10px]"}`}
+                  dominantBaseline="central"
+                  style={{ fontSize: `${Math.round(linkRadius * 1.1)}px` }}
+                  className="fill-white font-mono font-bold"
                 >
                   {idx + 1}
                 </text>
@@ -534,9 +550,10 @@ export const OneToOneCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sh
           const assetType = question.config?.assetType || "emoji";
           
           return (
-            <motion.button
+            <button
               key={item.id}
               id={item.id}
+              type="button"
               onPointerDown={(e) => {
                 if (isPlayMode) {
                   e.preventDefault();
@@ -545,55 +562,70 @@ export const OneToOneCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sh
                 }
                 handlePointerDown(e, item.id);
               }}
-              initial={false}
-              animate={{
-                x: item.x,
-                y: item.y,
-                scale: draggedItemId === item.id ? 1.06 : 1
-              }}
-              transition={{
-                x: isPlayMode ? { type: "spring", stiffness: 650, damping: 38 } : { type: "tween", duration: 0.12 },
-                y: isPlayMode ? { type: "spring", stiffness: 650, damping: 38 } : { type: "tween", duration: 0.12 },
-                scale: { type: "tween", duration: 0.12 }
-              }}
               onClick={(e) => {
                 if (e.detail === 0) handleTap(idx);
               }}
               disabled={isPlayMode && isTapped}
               aria-pressed={isTapped}
+              aria-label={`${obj.label} ${idx + 1}${isTapped ? `, counted ${tapSeq + 1}` : ", not counted yet"}`}
+              /*
+                Positioned with left/top and a CSS transition, the way the other
+                counting canvases do it. A motion `animate` target was silently
+                dropped when the layout was recomputed during mount — the state
+                held the new position and the element stayed at the old one.
+              */
               style={{
                 position: "absolute",
+                left: `${item.x}px`,
+                top: `${item.y}px`,
                 width: `${itemSize}px`,
-                height: `${itemSize}px`
+                height: `${itemSize}px`,
+                zIndex: draggedItemId === item.id ? 50 : 10,
+                transition: draggedItemId === item.id
+                  ? "none"
+                  : "left 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), top 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.15s ease"
               }}
-              className={`flex flex-col items-center justify-center rounded-2xl border-2 select-none touch-manipulation pointer-events-auto will-change-transform transition-[border-color,background-color,box-shadow] duration-150
+              /* Untapped objects are raised surfaces, tapped ones take the accent —
+                 the same two states, and the same theme tokens, as the other canvases. */
+              className={`flex flex-col items-center justify-center select-none touch-manipulation pointer-events-auto
+                will-change-transform transition-[border-color,background-color,box-shadow] duration-150
+                ${itemSize > 88 ? "rounded-3xl" : "rounded-2xl"}
                 ${isPlayMode ? "cursor-pointer" : "cursor-grab active:cursor-grabbing"}
-                ${draggedItemId === item.id ? "z-50 shadow-xl ring-2 ring-indigo-400/40" : "z-10"}
-                ${isTapped 
-                  ? "border-emerald-400 bg-emerald-50/50 shadow-md" 
-                  : "border-slate-200 bg-white shadow-sm hover:border-indigo-400 hover:shadow-md active:border-indigo-500"
+                ${draggedItemId === item.id ? "scale-105 shadow-xl ring-2 ring-indigo-400/40" : ""}
+                ${isTapped
+                  ? `${accentChipClass("emerald", isDark)} border-2 shadow-md`
+                  : `${surfaceClass(isDark, "raised")} border-0 shadow-sm hover:shadow-md`
                 }
               `}
             >
               {/* Ordinal number indicator */}
               {isTapped && (question.config.showNumbersOnTap ?? true) && (
-                <div className={`absolute left-1/2 -translate-x-1/2 bg-emerald-500 text-white font-bold font-mono rounded-full shadow-sm animate-scale-in ${
-                  itemSize < 48 ? "-top-2 px-1.5 py-0 text-[9px]" : "-top-3 px-2 py-0.5 text-xs"
-                }`}>
+                <div
+                  className="absolute -top-2 left-1/2 -translate-x-1/2 bg-emerald-500 text-white font-bold font-mono
+                    rounded-full shadow-sm animate-scale-in flex items-center justify-center"
+                  style={{
+                    width: `${badgeSize}px`,
+                    height: `${badgeSize}px`,
+                    fontSize: `${Math.round(badgeSize * 0.52)}px`
+                  }}
+                >
                   {tapSeq + 1}
                 </div>
               )}
-              
+
               {/* Object Asset */}
               <CountingAsset type={assetType as any} emoji={obj.emoji} size={assetSize} />
 
               {/* Hand icon invitation */}
               {isPlayMode && !isTapped && tapSeq === -1 && tapOrder.length === 0 && idx === 0 && (
-                <div className="absolute -bottom-2 -right-2 bg-indigo-500 text-white p-1 rounded-full animate-bounce">
-                  <Hand size={12} className="rotate-12" />
+                <div
+                  className="absolute -bottom-2 -right-2 bg-indigo-500 text-white rounded-full animate-bounce flex items-center justify-center"
+                  style={{ width: `${badgeSize}px`, height: `${badgeSize}px` }}
+                >
+                  <Hand size={Math.round(badgeSize * 0.6)} className="rotate-12" />
                 </div>
               )}
-            </motion.button>
+            </button>
           );
         })}
 
@@ -612,11 +644,13 @@ export const OneToOneCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sh
         <AnimatePresence>
           {isPlayMode && requireAnswerInput && isCountComplete && (
             <motion.div
+              ref={panelRef}
               initial={{ opacity: 0, y: 30, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.95 }}
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              className="absolute inset-x-2 bottom-2 z-50 flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl backdrop-blur-md border shadow-2xl transition-all max-w-lg mx-auto"
+              className="absolute inset-x-2 bottom-2 z-50 flex flex-col items-center justify-center p-3 sm:p-4 md:p-5
+                rounded-2xl md:rounded-3xl backdrop-blur-md border shadow-2xl max-w-lg md:max-w-xl mx-auto"
               style={{
                 backgroundColor: isDark ? "rgba(15, 23, 42, 0.92)" : "rgba(255, 255, 255, 0.95)",
                 borderColor: answerStatus === "error" 
@@ -626,9 +660,9 @@ export const OneToOneCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sh
                   : isDark ? "#334155" : "#cbd5e1"
               }}
             >
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">🎉</span>
-                <span className={`text-xs sm:text-sm font-extrabold tracking-tight ${
+              <div className="flex items-center gap-2 mb-2 md:mb-3">
+                <span className="text-xl md:text-2xl">🎉</span>
+                <span className={`text-xs sm:text-sm md:text-base lg:text-lg font-extrabold tracking-tight ${
                   isDark ? "text-slate-100" : "text-slate-800"
                 }`}>
                   How many {obj.label}{count === 1 ? "" : "s"} did you count in total?
@@ -636,7 +670,7 @@ export const OneToOneCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sh
               </div>
 
               {/* Answer Input Controls */}
-              <div className="flex items-center gap-2 w-full justify-center max-w-xs">
+              <div className="flex items-center gap-2 md:gap-3 w-full justify-center max-w-xs md:max-w-sm">
                 <div className="relative flex-1">
                   <input
                     ref={inputRef}
@@ -656,7 +690,7 @@ export const OneToOneCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sh
                     }}
                     placeholder="Total..."
                     disabled={answerStatus === "correct"}
-                    className={`w-full h-11 px-3 text-center text-lg sm:text-xl font-bold font-mono rounded-xl border-2 transition-all outline-none ${
+                    className={`w-full h-11 md:h-14 px-3 text-center text-lg sm:text-xl md:text-2xl font-bold font-mono rounded-xl border-2 transition-all outline-none ${
                       answerStatus === "error"
                         ? "border-red-500 bg-red-50/50 text-red-700 animate-shake dark:bg-red-950/40 dark:text-red-300"
                         : answerStatus === "correct"
@@ -671,7 +705,7 @@ export const OneToOneCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sh
                 <Button
                   onClick={() => handleCheckAnswer()}
                   disabled={answerStatus === "correct" || !answerInput.trim()}
-                  className={`h-11 px-4 text-sm font-bold flex items-center gap-1.5 rounded-xl shadow-md transition-all active:scale-95 ${
+                  className={`h-11 md:h-14 px-4 md:px-6 text-sm md:text-base font-bold flex items-center gap-1.5 rounded-xl shadow-md transition-all active:scale-95 ${
                     answerStatus === "correct"
                       ? "bg-emerald-600 hover:bg-emerald-600 text-white"
                       : "bg-indigo-600 hover:bg-indigo-700 text-white"
@@ -683,7 +717,7 @@ export const OneToOneCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sh
                 <button
                   type="button"
                   onClick={() => setShowNumberPad(prev => !prev)}
-                  className={`h-11 w-11 flex items-center justify-center rounded-xl border transition-all ${
+                  className={`h-11 w-11 md:h-14 md:w-14 flex-shrink-0 flex items-center justify-center rounded-xl border transition-all ${
                     showNumberPad
                       ? "bg-indigo-100 border-indigo-400 text-indigo-700 dark:bg-indigo-950 dark:border-indigo-600 dark:text-indigo-300"
                       : isDark
@@ -713,13 +747,13 @@ export const OneToOneCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sh
                     exit={{ opacity: 0, height: 0 }}
                     className="w-full mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 flex flex-col items-center gap-2 overflow-hidden"
                   >
-                    <div className="grid grid-cols-5 gap-1.5 w-full max-w-xs">
+                    <div className="grid grid-cols-5 gap-1.5 md:gap-2 w-full max-w-xs md:max-w-sm">
                       {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((num) => (
                         <button
                           key={num}
                           type="button"
                           onClick={() => handleDigitPress(String(num))}
-                          className={`h-9 font-mono text-base font-extrabold rounded-lg border shadow-sm transition-all active:scale-95 ${
+                          className={`h-9 md:h-12 font-mono text-base md:text-xl font-extrabold rounded-lg md:rounded-xl border shadow-sm transition-all active:scale-95 ${
                             isDark
                               ? "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"
                               : "bg-white border-slate-200 text-slate-800 hover:bg-slate-50"
@@ -729,11 +763,11 @@ export const OneToOneCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sh
                         </button>
                       ))}
                     </div>
-                    <div className="flex items-center justify-between gap-2 w-full max-w-xs">
+                    <div className="flex items-center justify-between gap-2 w-full max-w-xs md:max-w-sm">
                       <button
                         type="button"
                         onClick={handleBackspacePress}
-                        className={`flex-1 h-8 text-xs font-extrabold rounded-lg border flex items-center justify-center gap-1 transition-all ${
+                        className={`flex-1 h-8 md:h-10 text-xs md:text-sm font-extrabold rounded-lg border flex items-center justify-center gap-1 transition-all ${
                           isDark
                             ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
                             : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200"
@@ -744,7 +778,7 @@ export const OneToOneCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sh
                       <button
                         type="button"
                         onClick={() => setAnswerInput("")}
-                        className={`px-3 h-8 text-xs font-extrabold rounded-lg border transition-all ${
+                        className={`px-3 md:px-5 h-8 md:h-10 text-xs md:text-sm font-extrabold rounded-lg border transition-all ${
                           isDark
                             ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
                             : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200"

@@ -1,5 +1,7 @@
 import React from "react";
 import { Zap } from "lucide-react";
+import { SvgLibraryAsset } from "../../../assets/SvgLibraryAsset";
+import { KID_NAV_ASSET_IDS } from "../kidNavAssets";
 
 interface Props {
   value: number;
@@ -13,8 +15,8 @@ export const AnimatedXpPill: React.FC<Props> = ({ value }) => (
     aria-label={`${value} experience points`}
     title="XP earned"
   >
-    <span className="kid-xp-bolt relative z-10 flex h-4 w-4 items-center justify-center rounded-full bg-[#FFC928] text-white shadow-sm shadow-amber-400/40">
-      <Zap size={9} className="fill-current" />
+    <span className="kid-xp-bolt relative z-10 flex h-5 w-5 items-center justify-center drop-shadow-[0_2px_3px_rgba(242,155,24,0.3)]">
+      <SvgLibraryAsset assetId={KID_NAV_ASSET_IDS.xp} size={20} fallback={<Zap size={14} className="fill-current text-[#FFC928]" />} />
     </span>
     <span className="relative z-10 tabular-nums">{value}</span>
   </span>

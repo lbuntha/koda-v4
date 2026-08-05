@@ -3,6 +3,17 @@ import { Label, Input } from "../../ui";
 import { CPASwitcherPill } from "../../../pedagogy";
 import { PanelProps } from "../panelKit";
 
+/**
+ * The range the canvas and the AI schema both accept (`addition.schema.ts` clamps to 1–9).
+ *
+ * This panel used to stop at 6, which is narrower than the component it edits: opening
+ * "9 + 8" from Grade 1's make-a-ten skill and touching either field rewrote it to 6 and
+ * silently changed the answer. A panel must never be stricter than the thing it authors.
+ */
+const ADDEND_MIN = 1;
+const ADDEND_MAX = 9;
+const clampAddend = (value: number) => Math.max(ADDEND_MIN, Math.min(ADDEND_MAX, value));
+
 export const AdditionSandboxPanel: React.FC<PanelProps> = ({ question, update, updateConfig }) => (
 
                   <div className="space-y-4 bg-sky-50/60 p-3.5 rounded-xl">
@@ -14,11 +25,11 @@ export const AdditionSandboxPanel: React.FC<PanelProps> = ({ question, update, u
                         <Label>Group 1 (Addend 1)</Label>
                         <Input
                           type="number"
-                          min={1}
-                          max={6}
+                          min={ADDEND_MIN}
+                          max={ADDEND_MAX}
                           value={question.config.addend1 ?? 3}
                           onChange={(e) => {
-                            const val = Math.max(1, Math.min(6, parseInt(e.target.value) || 1));
+                            const val = clampAddend(parseInt(e.target.value) || ADDEND_MIN);
                             update({
                               targetCount: val + (question.config.addend2 ?? 2),
                               config: { ...question.config, addend1: val }
@@ -30,11 +41,11 @@ export const AdditionSandboxPanel: React.FC<PanelProps> = ({ question, update, u
                         <Label>Group 2 (Addend 2)</Label>
                         <Input
                           type="number"
-                          min={1}
-                          max={6}
+                          min={ADDEND_MIN}
+                          max={ADDEND_MAX}
                           value={question.config.addend2 ?? 2}
                           onChange={(e) => {
-                            const val = Math.max(1, Math.min(6, parseInt(e.target.value) || 1));
+                            const val = clampAddend(parseInt(e.target.value) || ADDEND_MIN);
                             update({
                               targetCount: (question.config.addend1 ?? 3) + val,
                               config: { ...question.config, addend2: val }

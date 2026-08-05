@@ -243,9 +243,14 @@ class SvgOverrideIn(BaseModel):
 class SvgLibraryIn(BaseModel):
     assets: list[SvgAssetIn] = Field(default_factory=list, max_length=500)
     overrides: dict[str, SvgOverrideIn] = Field(default_factory=dict, max_length=100)
+    deleted_system_asset_ids: list[str] = Field(
+        default_factory=list, max_length=200, alias="deletedSystemAssetIds"
+    )
     #: technique id -> asset id. Validated against `assets` so a saved reference can never
     #: dangle; a technique with no entry keeps its manifest's static artwork.
-    technique_thumbnails: dict[str, str] = Field(default_factory=dict, max_length=100)
+    technique_thumbnails: dict[str, str] = Field(
+        default_factory=dict, max_length=100, alias="techniqueThumbnails"
+    )
     revision: int = Field(default=0, ge=0)
 
     @model_validator(mode="after")

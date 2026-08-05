@@ -1,5 +1,6 @@
 import React from "react";
 import { Spinner } from "./Spinner";
+import { KodaLogoSpinner } from "./KodaLogoSpinner";
 
 export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
@@ -52,11 +53,8 @@ export const CanvasSkeleton: React.FC<{ label?: string }> = ({ label = "Loading 
 
     {/* Canvas Body Playground Skeleton */}
     <div className="my-6 flex flex-1 flex-col items-center justify-center gap-5">
-      <div className="flex items-center gap-3">
-        <Spinner size="lg" variant="rainbow" glow />
-        <span className="text-xs font-black tracking-wide text-indigo-600 dark:text-indigo-400 animate-pulse">
-          {label}
-        </span>
+      <div className="flex flex-col items-center gap-3">
+        <KodaLogoSpinner size="lg" label={label} />
       </div>
 
       <div className="grid w-full max-w-lg grid-cols-4 gap-3 px-4">

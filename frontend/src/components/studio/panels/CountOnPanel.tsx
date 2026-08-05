@@ -3,19 +3,19 @@ import { PanelProps } from "../panelKit";
 
 export const CountOnPanel: React.FC<PanelProps> = ({ question, update, updateConfig }) => (
 
-                  <div className="space-y-4 bg-amber-50/40 border border-amber-100 p-3.5 rounded-xl">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 font-mono block">
+                  <div className="space-y-4 bg-violet-50/40 border border-violet-100 p-3.5 rounded-xl">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-violet-800 font-mono block">
                       Closed Container Style
                     </span>
                     
                     <div>
-                      <label className="text-[9px] font-bold text-amber-700 uppercase tracking-wider block mb-1">Shape Variant</label>
+                      <label className="text-[9px] font-bold text-violet-700 uppercase tracking-wider block mb-1">Shape Variant</label>
                       <select
                         value={question.config.containerShape || "box"}
                         onChange={(e) => update({
                           config: { ...question.config, containerShape: e.target.value as any }
                         })}
-                        className="w-full text-xs p-2 border border-amber-200 rounded-md bg-white font-medium outline-none"
+                        className="w-full text-xs p-2 border border-violet-200 rounded-md bg-white font-medium outline-none"
                       >
                         <option value="box">📦 Cardboard Box</option>
                         <option value="chest">🪙 Treasure Chest</option>
@@ -25,14 +25,14 @@ export const CountOnPanel: React.FC<PanelProps> = ({ question, update, updateCon
                     </div>
 
                     <div>
-                      <div className="flex justify-between items-center text-xs text-amber-900 font-medium mb-1">
+                      <div className="flex justify-between items-center text-xs text-violet-900 font-medium mb-1">
                         <span>Items Inside:</span>
-                        <b className="font-mono bg-white px-1.5 py-0.5 rounded border border-amber-200">{question.config.baseCount || 5}</b>
+                        <b className="font-mono bg-white px-1.5 py-0.5 rounded border border-violet-200">{question.config.baseCount || 5}</b>
                       </div>
                       <input
                         type="range"
                         min={1}
-                        max={8}
+                        max={10}
                         value={question.config.baseCount || 5}
                         onChange={(e) => {
                           const base = parseInt(e.target.value);
@@ -42,19 +42,19 @@ export const CountOnPanel: React.FC<PanelProps> = ({ question, update, updateCon
                             config: { ...question.config, baseCount: base }
                           });
                         }}
-                        className="w-full h-1 bg-amber-200 rounded appearance-none cursor-pointer accent-amber-500"
+                        className="w-full h-1 bg-violet-200 rounded appearance-none cursor-pointer accent-violet-500"
                       />
                     </div>
                     
                     <div>
-                      <div className="flex justify-between items-center text-xs text-amber-900 font-medium mb-1">
+                      <div className="flex justify-between items-center text-xs text-violet-900 font-medium mb-1">
                         <span>Extra Dots Outside:</span>
-                        <b className="font-mono bg-white px-1.5 py-0.5 rounded border border-amber-200">{question.config.extraCount || 3}</b>
+                        <b className="font-mono bg-white px-1.5 py-0.5 rounded border border-violet-200">{question.config.extraCount || 3}</b>
                       </div>
                       <input
                         type="range"
                         min={1}
-                        max={5}
+                        max={8}
                         value={question.config.extraCount || 3}
                         onChange={(e) => {
                           const ext = parseInt(e.target.value);
@@ -64,7 +64,7 @@ export const CountOnPanel: React.FC<PanelProps> = ({ question, update, updateCon
                             config: { ...question.config, extraCount: ext }
                           });
                         }}
-                        className="w-full h-1 bg-amber-200 rounded appearance-none cursor-pointer accent-amber-500"
+                        className="w-full h-1 bg-violet-200 rounded appearance-none cursor-pointer accent-violet-500"
                       />
                     </div>
 
@@ -76,7 +76,7 @@ export const CountOnPanel: React.FC<PanelProps> = ({ question, update, updateCon
                         onChange={(e) => update({
                           config: { ...question.config, showItemFrame: e.target.checked }
                         })}
-                        className="w-4 h-4 text-amber-600 accent-amber-600 cursor-pointer"
+                        className="w-4 h-4 text-violet-600 accent-violet-600 cursor-pointer"
                       />
                     </div>
 
@@ -88,7 +88,7 @@ export const CountOnPanel: React.FC<PanelProps> = ({ question, update, updateCon
                         onChange={(e) => update({
                           config: { ...question.config, requireAnswerInput: e.target.checked }
                         })}
-                        className="w-4 h-4 text-amber-600 accent-amber-600 cursor-pointer"
+                        className="w-4 h-4 text-violet-600 accent-violet-600 cursor-pointer"
                       />
                     </div>
                   </div>

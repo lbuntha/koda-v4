@@ -1,81 +1,60 @@
 import React from "react";
-import { PanelProps } from "../panelKit";
+import { PanelProps, PanelSection, SelectField, TextField, ToggleField } from "../panelKit";
 
-export const CountMagnetsPanel: React.FC<PanelProps> = ({ question, update, updateConfig }) => (
+const CONTAINER_PLACEHOLDER: Record<string, string> = {
+  jar: "Star Magnet Jar",
+  basket: "Star Basket",
+  box: "Star Box"
+};
 
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Container Shape</label>
-                      <select
-                        value={question.config.containerShape || "jar"}
-                        onChange={(e) => update({
-                          config: { ...question.config, containerShape: e.target.value as any }
-                        })}
-                        className="w-full text-xs p-2.5 border border-slate-200 rounded-md bg-white font-medium outline-none"
-                      >
-                        <option value="jar">🍯 Kawaii Glass Jar</option>
-                        <option value="basket">🧺 Kawaii Woven Basket</option>
-                        <option value="box">📦 Kawaii Cardboard Box</option>
-                      </select>
-                    </div>
+export const CountMagnetsPanel: React.FC<PanelProps> = ({ question, updateConfig }) => {
+  const shape = question.config.containerShape || "jar";
 
-                    <div>
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">
-                        {question.config.containerShape === "basket" 
-                          ? "Basket Label" 
-                          : question.config.containerShape === "box" 
-                          ? "Box Label" 
-                          : "Magnetic Jar Label"}
-                      </label>
-                      <input
-                        type="text"
-                        value={question.config.jarLabel || ""}
-                        placeholder={question.config.containerShape === "basket" ? "Star Basket" : question.config.containerShape === "box" ? "Star Box" : "Star Magnet Jar"}
-                        onChange={(e) => update({
-                          config: { ...question.config, jarLabel: e.target.value }
-                        })}
-                        className="w-full text-xs p-2.5 border border-slate-200 rounded-md bg-white font-medium"
-                      />
-                    </div>
+  return (
+    <PanelSection>
+      <SelectField
+        label="Container Shape"
+        value={shape}
+        onChange={(value) => updateConfig({ containerShape: value as any })}
+        options={[
+          { value: "jar", label: "🍯 Kawaii Glass Jar" },
+          { value: "basket", label: "🧺 Kawaii Woven Basket" },
+          { value: "box", label: "📦 Kawaii Cardboard Box" }
+        ]}
+      />
 
-                    <div>
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Theme Color</label>
-                      <select
-                        value={question.config.jarColorAccent || "blue"}
-                        onChange={(e) => update({
-                          config: { ...question.config, jarColorAccent: e.target.value as any }
-                        })}
-                        className="w-full text-xs p-2.5 border border-slate-200 rounded-md bg-white font-medium outline-none"
-                      >
-                        <option value="blue">Electric Indigo (Blue)</option>
-                        <option value="rose">Sunset Crimson (Rose)</option>
-                        <option value="amber">Warm Gold (Amber)</option>
-                        <option value="emerald">Forest Meadow (Emerald)</option>
-                      </select>
-                    </div>
+      <TextField
+        label="Container Label"
+        value={question.config.jarLabel || ""}
+        placeholder={CONTAINER_PLACEHOLDER[shape] || CONTAINER_PLACEHOLDER.jar}
+        onChange={(value) => updateConfig({ jarLabel: value })}
+      />
 
-                    <div className="flex items-center justify-between p-1 bg-slate-50/50 rounded-lg">
-                      <span className="text-xs font-bold text-slate-600">Show card frame on magnet objects</span>
-                      <input
-                        type="checkbox"
-                        checked={question.config.showItemFrame ?? true}
-                        onChange={(e) => update({
-                          config: { ...question.config, showItemFrame: e.target.checked }
-                        })}
-                        className="w-4 h-4 text-indigo-600 accent-indigo-600 cursor-pointer"
-                      />
-                    </div>
+      {/* Warm yellow is the one thing the canvas palette rules out, so the old
+          "Warm Gold" option is gone; slides that chose it read as violet. */}
+      <SelectField
+        label="Theme Colour"
+        value={question.config.jarColorAccent === "amber" ? "violet" : (question.config.jarColorAccent || "blue")}
+        onChange={(value) => updateConfig({ jarColorAccent: value as any })}
+        options={[
+          { value: "blue", label: "Electric Indigo" },
+          { value: "violet", label: "Deep Violet" },
+          { value: "rose", label: "Sunset Crimson" },
+          { value: "emerald", label: "Forest Meadow" }
+        ]}
+      />
 
-                    <div className="flex items-center justify-between p-1 bg-slate-50/50 rounded-lg">
-                      <span className="text-xs font-bold text-slate-600">Require answer input after collecting</span>
-                      <input
-                        type="checkbox"
-                        checked={question.config.requireAnswerInput ?? true}
-                        onChange={(e) => update({
-                          config: { ...question.config, requireAnswerInput: e.target.checked }
-                        })}
-                        className="w-4 h-4 text-indigo-600 accent-indigo-600 cursor-pointer"
-                      />
-                    </div>
-                  </div>
-);
+      <ToggleField
+        label="Show card frame on magnet objects"
+        checked={question.config.showItemFrame ?? true}
+        onChange={(checked) => updateConfig({ showItemFrame: checked })}
+      />
+
+      <ToggleField
+        label="Require answer input after collecting"
+        checked={question.config.requireAnswerInput ?? true}
+        onChange={(checked) => updateConfig({ requireAnswerInput: checked })}
+      />
+    </PanelSection>
+  );
+};

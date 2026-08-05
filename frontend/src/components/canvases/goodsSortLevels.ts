@@ -109,6 +109,16 @@ export const GOODS_CATALOG: Record<string, { label: string; emoji: string; color
   key: { label: "Golden Key", emoji: "🔑", color: "#F59E0B", svgType: "key" },
   rocket: { label: "Space Rocket", emoji: "🚀", color: "#DC2626", svgType: "rocket" },
   controller: { label: "Game Controller", emoji: "🎮", color: "#4F46E5", svgType: "controller" },
+
+  // 8 Gradient Bottle Collection
+  bottle_water: { label: "Mineral Water", emoji: "🧴", color: "#0EA5E9", svgType: "bottle_water" },
+  bottle_juice: { label: "Orange Juice", emoji: "🍊", color: "#F97316", svgType: "bottle_juice" },
+  bottle_soda: { label: "Berry Fizz Soda", emoji: "🍾", color: "#E11D48", svgType: "bottle_soda" },
+  bottle_potion: { label: "Magic Elixir", emoji: "🧪", color: "#8B5CF6", svgType: "bottle_potion" },
+  bottle_milk: { label: "Glass Milk Bottle", emoji: "🥛", color: "#0284C7", svgType: "bottle_milk" },
+  bottle_boba: { label: "Boba Milk Tea", emoji: "🧋", color: "#D97706", svgType: "bottle_boba" },
+  bottle_honey: { label: "Honey Nectar", emoji: "🍯", color: "#F59E0B", svgType: "bottle_honey" },
+  bottle_energy: { label: "Volt Energy", emoji: "⚡", color: "#10B981", svgType: "bottle_energy" },
 };
 
 /**
@@ -713,6 +723,16 @@ export const PRESET_THEMES: GoodsPresetTheme[] = [
     compartmentCapacity: 4,
     goodsTypes: ["chips", "cola", "milk", "donut"],
     description: "3x4 quad sort puzzle where each shelf holds 4 items.",
+  },
+  {
+    id: "preset_bottles",
+    name: "Juice & Beverage Bottle Shop",
+    emoji: "🧴",
+    rows: 3,
+    cols: 4,
+    compartmentCapacity: 3,
+    goodsTypes: ["bottle_water", "bottle_juice", "bottle_soda", "bottle_potion", "bottle_milk", "bottle_boba", "bottle_honey", "bottle_energy"],
+    description: "3x4 bottle shop featuring mineral water, citrus juice, fizz soda, magic elixirs, milk, boba, honey, and energy bottles.",
   },
 ];
 

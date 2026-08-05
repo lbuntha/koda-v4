@@ -1,14 +1,19 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { COUNT_OBJECTS } from "../../types";
 import { CountingAsset } from "../Assets";
 import { sounds } from "../../sound";
-import { RotateCcw, Grid2X2, Move, Maximize2, Check, Calculator, AlertCircle, Delete } from "lucide-react";
+import { RotateCcw, Grid2X2, Check, Calculator, AlertCircle, Delete, PartyPopper } from "lucide-react";
 import { CanvasProps } from "./types";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import { GhostGuideOverlay, useGhostGuide } from "../../pedagogy";
-import { CanvasChip, CanvasAccent, surfaceClass, captionClass, accentChipClass, emptySlotClass } from "./canvasTheme";
+import { CanvasChip, CanvasAccent, surfaceClass, accentChipClass, emptySlotClass } from "./canvasTheme";
+import { CanvasBin } from "./CanvasBin";
+import { useCanvasAudience } from "./presentation";
 import { Button } from "../ui";
+
+import { OBJECT_SIZE, Rect, contentZone, relativeRect, slotPosition } from "./objectLayout";
+import { objectStyle } from "./objectMotion";
 
 interface TenFrameDot {
   id: string;
@@ -18,15 +23,10 @@ interface TenFrameDot {
   snappedCell: { frameIdx: number; cellIdx: number } | null;
 }
 
-interface LayoutRect {
-  left: number;
-  top: number;
-  width: number;
-  height: number;
+interface CellRef {
+  frameIdx: number;
+  cellIdx: number;
 }
-
-// Layout constants
-const CELL_SIZE = 40; // w-10 h-10
 
 /** Teacher-facing frameColor values map onto the shared accent palette. */
 const FRAME_ACCENTS: Record<string, CanvasAccent> = {
@@ -36,7 +36,7 @@ const FRAME_ACCENTS: Record<string, CanvasAccent> = {
   pink: "rose",
   rose: "rose"
 };
-const TRAY_HEIGHT = 110;
+
 const GRID_STEP = 20;
 
 export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, showGrid, isDark = false, onSuccess, onUpdateQuestionConfig }) => {
@@ -47,9 +47,18 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
   const [dots, setDots] = useState<TenFrameDot[]>([]);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const [dragPos, setDragPos] = useState<{ x: number; y: number } | null>(null);
+  /** Which bin the drag is currently over — `-1` is the shelf, otherwise a frame index. */
+  const [activeZone, setActiveZone] = useState<number | null>(null);
+  const [hoveredCell, setHoveredCell] = useState<CellRef | null>(null);
   const dragOffset = useRef({ x: 0, y: 0 });
+  /** The stage box, taken once per drag: measuring it every move forces a reflow. */
+  const stageBox = useRef<DOMRect | null>(null);
+  /** Where the pointer went down, and whether it has travelled far enough to be a drag. */
+  const pressOrigin = useRef<{ x: number; y: number } | null>(null);
+  const dragMoved = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const shelfRef = useRef<HTMLDivElement>(null);
+  const frameRefs = useRef<(HTMLDivElement | null)[]>([]);
   const cellRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   // Answer Input State
@@ -62,25 +71,37 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
   const onSuccessRef = useRef(onSuccess);
   onSuccessRef.current = onSuccess;
 
-  const [dimensions, setDimensions] = useState({ width: 480, height: 320 });
+  /**
+   * `null` until the stage has actually been measured.
+   *
+   * Dots are positioned in stage pixels, so laying them out against a guessed
+   * size and correcting later drops them outside the shelf.
+   */
+  const [dimensions, setDimensions] = useState<{ width: number; height: number } | null>(null);
+  const stageWidth = dimensions?.width ?? 480;
+  const stageHeight = dimensions?.height ?? 320;
+  const isCompact = stageWidth < 640;
 
   const snappedList = dots.filter(d => d.snappedCell !== null);
   const isGroupTensComplete = snappedList.length === count && count > 0;
   const solvedForGuide = isGroupTensComplete && (requireAnswerInput ? answerStatus === "correct" : true);
-  
+
   const { showGhostGuide, reportActivity } = useGhostGuide({
     isPlayMode,
     isSolved: solvedForGuide,
     idleThresholdMs: 10000
   });
-  const [shelfLayout, setShelfLayout] = useState<LayoutRect>({ left: 0, top: 0, width: 0, height: 0 });
-  const [shelfDrag, setShelfDrag] = useState<'move' | 'resize' | null>(null);
-  const shelfDragStart = useRef({ mx: 0, my: 0 });
-  const shelfDragStartLayout = useRef<LayoutRect>({ left: 0, top: 0, width: 0, height: 0 });
+  const { learnerMode } = useCanvasAudience();
 
-  // Measure container
-  useEffect(() => {
-    if (!containerRef.current) return;
+  // Measure the stage before paint so the first layout is the real one.
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const seed = container.getBoundingClientRect();
+    setDimensions({
+      width: seed.width || 480,
+      height: seed.height || 320
+    });
     const ro = new ResizeObserver((entries) => {
       for (const entry of entries) {
         setDimensions({
@@ -89,12 +110,102 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
         });
       }
     });
-    ro.observe(containerRef.current);
+    ro.observe(container);
     return () => ro.disconnect();
   }, []);
 
-  const w = dimensions.width;
-  const h = dimensions.height;
+  const frameCount = count > 10 ? 2 : 1;
+
+  /**
+   * Every size on this canvas comes from the room the stage actually has.
+   *
+   * The dot is sized *first*, from what all three of its masters can afford — a
+   * ten-frame cell, a row on the shelf, and the height left over once both bands
+   * have paid for their own chrome — and the shelf is then sized to hold it.
+   * Handing the shelf a flat share of the stage instead is what left it with a
+   * content area a few pixels tall, and every dot at the minimum size.
+   */
+  const geometry = useMemo(() => {
+    const gap = isCompact ? 10 : 16;
+    const captionH = isCompact ? 26 : 32;
+    const pad = isCompact ? 12 : 18;
+    /** What a band spends on its own caption and padding before an object fits. */
+    const chrome = captionH + pad * 2;
+    const framesStacked = isCompact && frameCount > 1;
+
+    const usableWidth = Math.max(OBJECT_SIZE.min, stageWidth - pad * 2);
+    const frameWidth = framesStacked || frameCount === 1 ? usableWidth : (usableWidth - gap) / 2;
+
+    // A ten-frame is always 5 × 2, so its cell is not a `bestGrid` question.
+    const widthCap = frameWidth / 5 / 1.16;
+    // A narrow stage lets the shelf run to two rows rather than shrinking every
+    // dot to fit one — `slotPosition` wraps them there anyway.
+    const shelfWidthCap = usableWidth / Math.ceil(count / (isCompact ? 2 : 1)) / 1.28;
+    // Two cell rows per frame — twice over when the frames stack — plus one row
+    // of loose dots on the shelf, plus each band's chrome.
+    const heightCap = framesStacked
+      ? (stageHeight - 3 * chrome - 2 * gap) / 6.2
+      : (stageHeight - 2 * chrome - gap) / 3.6;
+
+    const dotSize = Math.round(
+      Math.max(OBJECT_SIZE.min, Math.min(OBJECT_SIZE.max, widthCap, shelfWidthCap, heightCap))
+    );
+
+    // Below the floor a single row stops fitting, so the dots wrap — and the
+    // shelf has to be tall enough for the rows `slotPosition` will actually make.
+    const columns = Math.max(1, Math.min(count, Math.floor(usableWidth / (dotSize * 1.28))));
+    const rows = Math.ceil(count / columns);
+    const shelfHeight = Math.round(
+      Math.min(stageHeight * 0.42, dotSize + (rows - 1) * dotSize * 1.28 + chrome)
+    );
+
+    return {
+      gap,
+      captionH,
+      framesStacked,
+      shelfHeight,
+      dotSize,
+      cellSize: Math.round(dotSize * 1.16),
+      snapRadius: Math.max(40, dotSize * 0.9)
+    };
+  }, [stageWidth, stageHeight, isCompact, frameCount, count]);
+
+  const { dotSize, cellSize } = geometry;
+  const hasFrame = question.config.showItemFrame ?? true;
+  const assetSize = Math.round(dotSize * (hasFrame ? 0.7 : 0.92));
+  const customPositionKey = JSON.stringify(question.config.customPositions || []);
+
+  /** The shelf's content area, in stage pixels. Measured, with a sane fallback. */
+  const shelfZone = useCallback((): Rect => {
+    const stageRect = containerRef.current?.getBoundingClientRect();
+    if (stageRect && shelfRef.current) {
+      return contentZone(relativeRect(shelfRef.current, stageRect), dotSize, geometry.captionH);
+    }
+    return {
+      left: 0,
+      top: Math.max(0, stageHeight - geometry.shelfHeight) + geometry.captionH,
+      width: Math.max(dotSize, stageWidth),
+      height: Math.max(dotSize, geometry.shelfHeight - geometry.captionH - 12)
+    };
+  }, [dotSize, geometry.shelfHeight, geometry.captionH, stageWidth, stageHeight]);
+
+  /** Where the `order`-th loose dot sits on the shelf. */
+  const shelfSlot = useCallback(
+    (order: number) => slotPosition(order, count, shelfZone(), dotSize),
+    [count, shelfZone, dotSize]
+  );
+
+  /** Top-left a dot needs to sit centred in a ten-frame cell. */
+  const cellOrigin = useCallback((cell: CellRef) => {
+    const target = cellRefs.current[`${cell.frameIdx}-${cell.cellIdx}`];
+    const stageRect = containerRef.current?.getBoundingClientRect();
+    if (!target || !stageRect) return null;
+    const rect = target.getBoundingClientRect();
+    return {
+      x: Math.round(rect.left - stageRect.left + rect.width / 2 - dotSize / 2),
+      y: Math.round(rect.top - stageRect.top + rect.height / 2 - dotSize / 2)
+    };
+  }, [dotSize]);
 
   // Reset answer state on question change
   useEffect(() => {
@@ -108,155 +219,84 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
     }
   }, [question.id, count]);
 
-  // Measure shelf layout in play mode on mobile to place dots correctly
+  const prevQuestionId = useRef(question.id);
+  const prevObjectId = useRef(question.objectId);
+  const prevCount = useRef(count);
+
+  /** Stage the current dot coordinates were laid out against. */
+  const laidOutAt = useRef<{ width: number; height: number; stacked: boolean } | null>(null);
+
+  // Responsive dot placement & rescaling on resize / orientation change
   useEffect(() => {
-    const isMobile = dimensions.width < 640;
-    if (!isPlayMode || !isMobile || !shelfRef.current || !containerRef.current) return;
-    const measure = () => {
-      const parentRect = containerRef.current!.getBoundingClientRect();
-      const shelfRect = shelfRef.current!.getBoundingClientRect();
-      if (shelfRect.width > 0 && parentRect.width > 0) {
-        setShelfLayout({
-          left: Math.round(shelfRect.left - parentRect.left),
-          top: Math.round(shelfRect.top - parentRect.top),
-          width: Math.round(shelfRect.width),
-          height: Math.round(shelfRect.height)
-        });
-      }
-    };
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(shelfRef.current);
-    return () => ro.disconnect();
-  }, [dimensions.width, isPlayMode]);
+    if (!dimensions) return;
 
-  const dotSize = w < 640 ? 38 : 48; // responsive dot size
+    const previous = laidOutAt.current;
+    laidOutAt.current = { width: stageWidth, height: stageHeight, stacked: geometry.framesStacked };
 
-  // Sync or initialize shelf layout
-  useEffect(() => {
-    if (w > 0 && h > 0) {
-      const isMobile = w < 640;
-      const framesStacked = isMobile && count > 10;
-      const minFramesHeight = framesStacked ? 328 : 160;
+    // Frames that flip from side-by-side to stacked have moved somewhere a
+    // proportional nudge cannot follow, so loose dots are re-slotted onto the
+    // shelf. An ordinary resize only scales them.
+    const flipped = previous ? previous.stacked !== geometry.framesStacked : false;
+    const resizeX = previous?.width ? stageWidth / previous.width : 1;
+    const resizeY = previous?.height ? stageHeight / previous.height : 1;
+    const resized = !flipped && (resizeX !== 1 || resizeY !== 1);
 
-      const useSaved = !isPlayMode;
-      const saved = useSaved ? question.config.containerPositions?.['shelf'] : null;
-      const savedDim = useSaved ? (question.config as any).shelfDimensions : null;
-      if (saved && savedDim) {
-        const effectiveW = Math.min(savedDim.width, Math.max(160, w - 16));
-        const effectiveH = Math.min(savedDim.height, Math.max(80, h - 36 - 16));
-        const effectiveX = Math.min(saved.x, Math.max(8, w - effectiveW - 8));
-        const effectiveY = Math.min(saved.y, Math.max(8, h - effectiveH - 8));
-        setShelfLayout({ left: effectiveX, top: effectiveY, width: effectiveW, height: effectiveH });
-      } else {
-        const defaultW = isMobile ? (w - 24) : Math.round(w * 0.5);
-        const gapX = isMobile ? 36 : (count > 16 ? 38 : count > 10 ? 44 : 48);
-        const maxItemsFit = Math.floor((defaultW - 16) / gapX);
-        const itemsPerRow = Math.max(4, Math.min(maxItemsFit, count));
-        const totalRows = Math.ceil(count / itemsPerRow);
-        const defaultH = isMobile && totalRows > 2 ? 140 : TRAY_HEIGHT;
-
-        const defaultX = isMobile ? 12 : Math.round((w - defaultW) / 2);
-        const defaultY = Math.max(minFramesHeight + 16, h - 12 - defaultH);
-        setShelfLayout({ left: defaultX, top: defaultY, width: defaultW, height: defaultH });
-      }
-    }
-  }, [w, h, question.id, count, isPlayMode]);
-
-  // Helper: get default tray position for an item index
-  const getTrayPos = useCallback((idx: number, w: number, h: number) => {
-    const isMobile = w < 640;
-    const sLeft = shelfLayout.width > 0 ? shelfLayout.left : 12;
-    const sTop = shelfLayout.width > 0 ? shelfLayout.top : Math.max(180, h - 12 - TRAY_HEIGHT);
-    const sWidth = shelfLayout.width > 0 ? shelfLayout.width : w - 24;
-    const sHeight = shelfLayout.width > 0 ? shelfLayout.height : TRAY_HEIGHT;
-
-    const availableHeight = sHeight - 36;
-    
-    const gapX = isMobile ? 36 : (count > 16 ? 38 : count > 10 ? 44 : 48);
-    const maxItemsFit = Math.floor((sWidth - 16) / gapX);
-    const itemsPerRow = Math.max(4, Math.min(maxItemsFit, count));
-    const totalRows = Math.ceil(count / itemsPerRow);
-    
-    const spacingY = totalRows > 1 ? Math.min(24, (availableHeight - dotSize) / (totalRows - 1)) : 0;
-    const totalHeight = dotSize + (totalRows - 1) * spacingY;
-    const yOffset = (availableHeight - totalHeight) / 2;
-    
-    const row = Math.floor(idx / itemsPerRow);
-    const col = idx % itemsPerRow;
-    
-    const itemsInThisRow = Math.min(itemsPerRow, count - row * itemsPerRow);
-    const rowWidth = itemsInThisRow * gapX;
-    const startX = (sWidth - rowWidth) / 2;
-    
-    return {
-      x: Math.round(sLeft + startX + col * gapX + (gapX - dotSize) / 2),
-      y: Math.round(sTop + 36 + yOffset + row * spacingY)
-    };
-  }, [count, shelfLayout, dotSize]);
-
-  // Reset or update positions based on questions or dimensions
-  useEffect(() => {
-    const isMobile = dimensions.width < 640;
-    const customPositions = (isMobile && isPlayMode) ? [] : (question.config.customPositions || []);
     setDots(prev => {
-      return Array.from({ length: count }).map((_, idx) => {
-        const savedPos = customPositions.find(p => p.id === `tenframe-dot-${idx}`);
-        const defaultPos = getTrayPos(idx, dimensions.width, dimensions.height);
-        const existing = prev.find(d => d.id === `tenframe-dot-${idx}`);
+      const customPositions = (isCompact && isPlayMode) ? [] : (question.config.customPositions || []);
+      const layoutReference = question.config.layoutReference;
+      const scaleX = layoutReference?.width ? stageWidth / layoutReference.width : 1;
+      const scaleY = layoutReference?.height ? stageHeight / layoutReference.height : 1;
 
-        if (existing) {
+      const questionChanged = prevQuestionId.current !== question.id || prevObjectId.current !== question.objectId || prevCount.current !== count;
+
+      // Re-slotting reads the child's progress, not the dot index: loose dots
+      // close up on the shelf rather than leaving a hole where a grouped one was.
+      let looseSeen = 0;
+
+      const newDots: TenFrameDot[] = Array.from({ length: count }).map((_, idx) => {
+        const itemId = `tenframe-dot-${idx}`;
+        const existing = prev.find(d => d.id === itemId);
+
+        if (existing && !questionChanged) {
           if (existing.snappedCell !== null) {
-            const key = `${existing.snappedCell.frameIdx}-${existing.snappedCell.cellIdx}`;
-            const cell = cellRefs.current[key];
-            const parentRect = containerRef.current?.getBoundingClientRect();
-            if (cell && parentRect) {
-              const cellRect = cell.getBoundingClientRect();
-              const cellCenterX = cellRect.left - parentRect.left + cellRect.width / 2;
-              const cellCenterY = cellRect.top - parentRect.top + cellRect.height / 2;
-              return {
-                ...existing,
-                x: Math.round(cellCenterX - dotSize / 2),
-                y: Math.round(cellCenterY - dotSize / 2)
-              };
-            }
-            return existing;
+            const origin = cellOrigin(existing.snappedCell);
+            return origin ? { ...existing, ...origin } : existing;
           }
-          if (savedPos) return { ...existing, x: savedPos.x, y: savedPos.y };
-          return { ...existing, x: defaultPos.x, y: defaultPos.y };
+
+          looseSeen += 1;
+          if (flipped) return { ...existing, ...shelfSlot(looseSeen) };
+          if (!resized) return existing;
+          return {
+            ...existing,
+            x: Math.round(Math.max(0, Math.min(stageWidth - dotSize, existing.x * resizeX))),
+            y: Math.round(Math.max(0, Math.min(stageHeight - dotSize, existing.y * resizeY)))
+          };
         }
 
+        const savedPos = customPositions.find(p => p.id === itemId);
+        looseSeen += 1;
+        const defaultPos = shelfSlot(looseSeen);
+
         return {
-          id: `tenframe-dot-${idx}`,
+          id: itemId,
           emoji: obj.emoji,
-          x: savedPos ? savedPos.x : defaultPos.x,
-          y: savedPos ? savedPos.y : defaultPos.y,
+          x: savedPos ? Math.round(savedPos.x * scaleX) : defaultPos.x,
+          y: savedPos ? Math.round(savedPos.y * scaleY) : defaultPos.y,
           snappedCell: null
         };
       });
+
+      if (questionChanged) {
+        prevQuestionId.current = question.id;
+        prevObjectId.current = question.objectId;
+        prevCount.current = count;
+      }
+
+      return newDots;
     });
-  }, [question, count, dimensions.width, dimensions.height, getTrayPos, dotSize, obj.emoji, isPlayMode]);
+  }, [question.id, question.objectId, count, customPositionKey, question.config.layoutReference?.width, question.config.layoutReference?.height, dimensions, isPlayMode, isCompact, geometry.framesStacked, dotSize, shelfSlot, cellOrigin, obj.emoji, stageWidth, stageHeight]);
 
-  const handleAutoLayout = () => {
-    const isMobile = dimensions.width < 640;
-    const defaultW = isMobile ? (dimensions.width - 24) : Math.round(dimensions.width * 0.5);
-    const gapX = isMobile ? 36 : (count > 16 ? 38 : count > 10 ? 44 : 48);
-    const maxItemsFit = Math.floor((defaultW - 16) / gapX);
-    const itemsPerRow = Math.max(4, Math.min(maxItemsFit, count));
-    const totalRows = Math.ceil(count / itemsPerRow);
-    const defaultH = isMobile && totalRows > 2 ? 140 : TRAY_HEIGHT;
-
-    const defaultX = isMobile ? 12 : Math.round((dimensions.width - defaultW) / 2);
-    const defaultY = Math.max(180, dimensions.height - 12 - defaultH);
-    setShelfLayout({ left: defaultX, top: defaultY, width: defaultW, height: defaultH });
-
-    setDots(prev => prev.map((d, idx) => {
-      const pos = getTrayPos(idx, dimensions.width, dimensions.height);
-      return { ...d, x: pos.x, y: pos.y, snappedCell: null };
-    }));
-  };
-
-  const handleResetLayout = () => {
+  const reset = () => {
     if (successTimeoutRef.current) {
       clearTimeout(successTimeoutRef.current);
       successTimeoutRef.current = null;
@@ -265,196 +305,178 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
     setAnswerStatus("idle");
     setErrorMessage("");
     setShowNumberPad(false);
-
     sounds.playPop();
-    handleAutoLayout();
+
+    const updated = dots.map((dot, idx) => ({
+      ...dot,
+      ...shelfSlot(idx + 1),
+      snappedCell: null
+    }));
+    setDots(updated);
+
+    if (!isPlayMode && onUpdateQuestionConfig) {
+      onUpdateQuestionConfig({
+        customPositions: updated.map(dot => ({ id: dot.id, x: dot.x, y: dot.y })),
+        layoutReference: {
+          width: containerRef.current?.clientWidth || stageWidth,
+          height: containerRef.current?.clientHeight || stageHeight
+        }
+      });
+    }
   };
 
   const handlePointerDown = (e: React.PointerEvent, id: string) => {
+    if (e.button !== 0) return;
     reportActivity();
     sounds.playPop();
     setActiveDragId(id);
 
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const parentRect = containerRef.current?.getBoundingClientRect();
-    if (!parentRect) return;
+    if (!containerRef.current) return;
 
     dragOffset.current = {
       x: e.clientX - rect.left,
       y: e.clientY - rect.top
     };
+    stageBox.current = containerRef.current.getBoundingClientRect();
+    pressOrigin.current = { x: e.clientX, y: e.clientY };
+    dragMoved.current = false;
 
-    containerRef.current?.setPointerCapture(e.pointerId);
+    containerRef.current.setPointerCapture(e.pointerId);
   };
 
-  const handleShelfMoveDown = (e: React.PointerEvent) => {
-    if (isPlayMode) return;
-    e.stopPropagation();
-    setShelfDrag('move');
-    shelfDragStart.current = { mx: e.clientX, my: e.clientY };
-    shelfDragStartLayout.current = { ...shelfLayout };
-    containerRef.current?.setPointerCapture(e.pointerId);
-  };
+  /** The free cell a dot at this position would snap into, if any. */
+  const nearestFreeCell = useCallback((x: number, y: number, dragId: string, current: TenFrameDot[]): CellRef | null => {
+    const stageRect = containerRef.current?.getBoundingClientRect();
+    if (!stageRect) return null;
 
-  const handleShelfResizeDown = (e: React.PointerEvent) => {
-    if (isPlayMode) return;
-    e.stopPropagation();
-    setShelfDrag('resize');
-    shelfDragStart.current = { mx: e.clientX, my: e.clientY };
-    shelfDragStartLayout.current = { ...shelfLayout };
-    containerRef.current?.setPointerCapture(e.pointerId);
-  };
+    const centerX = x + dotSize / 2;
+    const centerY = y + dotSize / 2;
+    let closest: CellRef | null = null;
+    let minDistance = geometry.snapRadius;
 
-  const handleContainerPointerMove = (e: React.PointerEvent) => {
-    const parentRect = containerRef.current?.getBoundingClientRect();
-    if (!parentRect) return;
+    for (const key in cellRefs.current) {
+      const cell = cellRefs.current[key];
+      if (!cell) continue;
 
-    if (!isPlayMode && shelfDrag) {
-      const dx = e.clientX - shelfDragStart.current.mx;
-      const dy = e.clientY - shelfDragStart.current.my;
-      const orig = shelfDragStartLayout.current;
+      const cellRect = cell.getBoundingClientRect();
+      const cellCenterX = cellRect.left - stageRect.left + cellRect.width / 2;
+      const cellCenterY = cellRect.top - stageRect.top + cellRect.height / 2;
+      const dist = Math.hypot(centerX - cellCenterX, centerY - cellCenterY);
+      if (dist >= minDistance) continue;
 
-      if (shelfDrag === 'move') {
-        let newX = orig.left + dx;
-        let newY = orig.top + dy;
-        if (showGrid) {
-          newX = Math.round(newX / GRID_STEP) * GRID_STEP;
-          newY = Math.round(newY / GRID_STEP) * GRID_STEP;
-        }
-        newX = Math.max(4, Math.min(parentRect.width - orig.width - 4, newX));
-        newY = Math.max(4, Math.min(parentRect.height - orig.height - 4, newY));
-        setShelfLayout(prev => ({ ...prev, left: newX, top: newY }));
-      } else if (shelfDrag === 'resize') {
-        let newW = orig.width + dx;
-        let newH = orig.height + dy;
-        if (showGrid) {
-          newW = Math.round(newW / GRID_STEP) * GRID_STEP;
-          newH = Math.round(newH / GRID_STEP) * GRID_STEP;
-        }
-        newW = Math.max(160, Math.min(parentRect.width - orig.left - 4, newW));
-        newH = Math.max(80, Math.min(parentRect.height - orig.top - 4, newH));
-        setShelfLayout(prev => ({ ...prev, width: newW, height: newH }));
-      }
-      return;
+      const [frameIdxStr, cellIdxStr] = key.split("-");
+      const frameIdx = parseInt(frameIdxStr, 10);
+      const cellIdx = parseInt(cellIdxStr, 10);
+
+      const isOccupied = current.some(
+        d => d.id !== dragId && d.snappedCell?.frameIdx === frameIdx && d.snappedCell?.cellIdx === cellIdx
+      );
+      if (isOccupied) continue;
+
+      minDistance = dist;
+      closest = { frameIdx, cellIdx };
     }
 
+    return closest;
+  }, [dotSize, geometry.snapRadius]);
+
+  const handleContainerPointerMove = (e: React.PointerEvent) => {
     if (!activeDragId) return;
+    const stageRect = stageBox.current;
+    if (!stageRect) return;
 
-    let x = e.clientX - parentRect.left - dragOffset.current.x;
-    let y = e.clientY - parentRect.top - dragOffset.current.y;
+    // A tap is not a drag: a child pressing a dot to hear it should not have it
+    // slide anywhere, and 4px of hand tremor is a press.
+    if (!dragMoved.current && pressOrigin.current) {
+      const travelled = Math.hypot(e.clientX - pressOrigin.current.x, e.clientY - pressOrigin.current.y);
+      if (travelled > 4) dragMoved.current = true;
+    }
 
-    x = Math.max(0, Math.min(parentRect.width - dotSize, x));
-    y = Math.max(0, Math.min(parentRect.height - dotSize, y));
+    let x = e.clientX - stageRect.left - dragOffset.current.x;
+    let y = e.clientY - stageRect.top - dragOffset.current.y;
+
+    x = Math.max(0, Math.min(stageRect.width - dotSize, x));
+    y = Math.max(0, Math.min(stageRect.height - dotSize, y));
 
     if (!isPlayMode && showGrid) {
       x = Math.round(x / GRID_STEP) * GRID_STEP;
       y = Math.round(y / GRID_STEP) * GRID_STEP;
     }
 
-    setDragPos({ x: Math.round(x), y: Math.round(y) });
+    x = Math.round(x);
+    y = Math.round(y);
+    setDragPos({ x, y });
+
+    if (isPlayMode) {
+      const centerX = x + dotSize / 2;
+      const centerY = y + dotSize / 2;
+      const inZone = (element: HTMLElement | null | undefined) => {
+        if (!element) return false;
+        const zone = relativeRect(element, stageRect);
+        return (
+          centerX >= zone.left &&
+          centerX <= zone.left + zone.width &&
+          centerY >= zone.top &&
+          centerY <= zone.top + zone.height
+        );
+      };
+
+      const frameIdx = frameRefs.current.findIndex((frame, idx) => idx < frameCount && inZone(frame));
+      setActiveZone(frameIdx >= 0 ? frameIdx : inZone(shelfRef.current) ? -1 : null);
+      setHoveredCell(nearestFreeCell(x, y, activeDragId, dots));
+    }
 
     setDots(prev => prev.map(item =>
-      item.id === activeDragId ? { ...item, x: Math.round(x), y: Math.round(y), snappedCell: null } : item
+      item.id === activeDragId ? { ...item, x, y, snappedCell: null } : item
     ));
   };
 
   const handleContainerPointerUp = (e: React.PointerEvent) => {
-    if (!isPlayMode && shelfDrag) {
-      if (onUpdateQuestionConfig) {
-        onUpdateQuestionConfig({
-          containerPositions: {
-            ...question.config.containerPositions,
-            shelf: { x: shelfLayout.left, y: shelfLayout.top }
-          },
-          shelfDimensions: { width: shelfLayout.width, height: shelfLayout.height }
-        } as any);
-      }
-      setShelfDrag(null);
-      if (containerRef.current?.hasPointerCapture(e.pointerId)) {
-        containerRef.current.releasePointerCapture(e.pointerId);
-      }
-      return;
-    }
-
     if (!activeDragId) return;
     const dragId = activeDragId;
-    const parentRect = containerRef.current?.getBoundingClientRect();
-    if (!parentRect) return;
 
     if (isPlayMode) {
       setDots(prev => {
         const item = prev.find(d => d.id === dragId);
         if (!item) return prev;
 
-        const dotCenterX = item.x + dotSize / 2;
-        const dotCenterY = item.y + dotSize / 2;
+        const target = nearestFreeCell(item.x, item.y, dragId, prev);
+        const origin = target ? cellOrigin(target) : null;
 
-        let closestCell: { frameIdx: number; cellIdx: number } | null = null;
-        let minDistance = 40;
-
-        for (const key in cellRefs.current) {
-          const cell = cellRefs.current[key];
-          if (!cell) continue;
-
-          const cellRect = cell.getBoundingClientRect();
-          const cellCenterX = cellRect.left - parentRect.left + cellRect.width / 2;
-          const cellCenterY = cellRect.top - parentRect.top + cellRect.height / 2;
-
-          const dist = Math.hypot(dotCenterX - cellCenterX, dotCenterY - cellCenterY);
-
-          if (dist < minDistance) {
-            const [fIdxStr, cIdxStr] = key.split("-");
-            const fIdx = parseInt(fIdxStr);
-            const cIdx = parseInt(cIdxStr);
-
-            const isOccupied = prev.some(
-              d => d.id !== dragId && d.snappedCell?.frameIdx === fIdx && d.snappedCell?.cellIdx === cIdx
-            );
-
-            if (!isOccupied) {
-              minDistance = dist;
-              closestCell = { frameIdx: fIdx, cellIdx: cIdx };
-            }
-          }
+        if (target && origin) {
+          sounds.playTick(target.frameIdx * 10 + target.cellIdx + 1);
+        } else if (dragMoved.current) {
+          // Missed the frames. A tap that went nowhere gets no sound at all.
+          sounds.playSlide();
         }
 
-        return prev.map(d => {
+        const settled = prev.map(d => {
           if (d.id !== dragId) return d;
-          if (closestCell !== null) {
-            const key = `${closestCell.frameIdx}-${closestCell.cellIdx}`;
-            const cell = cellRefs.current[key];
-            if (cell) {
-              const cellRect = cell.getBoundingClientRect();
-              const cellCenterX = cellRect.left - parentRect.left + cellRect.width / 2;
-              const cellCenterY = cellRect.top - parentRect.top + cellRect.height / 2;
+          return target && origin ? { ...d, ...origin, snappedCell: target } : { ...d, snappedCell: null };
+        });
 
-              sounds.playTick(closestCell.frameIdx * 10 + closestCell.cellIdx + 1);
-              return {
-                ...d,
-                snappedCell: closestCell,
-                x: Math.round(cellCenterX - dotSize / 2),
-                y: Math.round(cellCenterY - dotSize / 2)
-              };
-            }
-          }
-          if (d.snappedCell !== null) {
-            sounds.playSlide();
-          }
-          const itemIdx = parseInt(dragId.split("-").pop() || "0");
-          const defaultPos = getTrayPos(itemIdx, dimensions.width, dimensions.height);
-          return {
-            ...d,
-            snappedCell: null,
-            x: defaultPos.x,
-            y: defaultPos.y
-          };
+        /*
+          Re-flow the whole shelf, not just the dot that was released: placing it
+          on its own left it on top of whichever dot already sat at that slot, and
+          left holes in the group a child is supposed to be able to count.
+        */
+        let rank = 0;
+        return settled.map(d => {
+          if (d.snappedCell !== null) return d;
+          rank += 1;
+          return { ...d, ...shelfSlot(rank) };
         });
       });
     } else {
       setDots(prev => {
         if (onUpdateQuestionConfig) {
           onUpdateQuestionConfig({
-            customPositions: prev.map(item => ({ id: item.id, x: item.x, y: item.y }))
+            customPositions: prev.map(item => ({ id: item.id, x: item.x, y: item.y })),
+            layoutReference: {
+              width: containerRef.current?.clientWidth || stageWidth,
+              height: containerRef.current?.clientHeight || stageHeight
+            }
           });
         }
         return prev;
@@ -463,21 +485,28 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
 
     setActiveDragId(null);
     setDragPos(null);
-    containerRef.current?.releasePointerCapture(e.pointerId);
+    setActiveZone(null);
+    setHoveredCell(null);
+    pressOrigin.current = null;
+    dragMoved.current = false;
+    stageBox.current = null;
+    if (containerRef.current?.hasPointerCapture(e.pointerId)) {
+      containerRef.current.releasePointerCapture(e.pointerId);
+    }
   };
 
   const handleContainerPointerCancel = (e: React.PointerEvent) => {
-    if (!isPlayMode && shelfDrag) {
-      setShelfDrag(null);
-      if (containerRef.current?.hasPointerCapture(e.pointerId)) {
-        containerRef.current.releasePointerCapture(e.pointerId);
-      }
-      return;
-    }
     if (!activeDragId) return;
-    containerRef.current?.releasePointerCapture(e.pointerId);
+    if (containerRef.current?.hasPointerCapture(e.pointerId)) {
+      containerRef.current.releasePointerCapture(e.pointerId);
+    }
     setActiveDragId(null);
     setDragPos(null);
+    setActiveZone(null);
+    setHoveredCell(null);
+    pressOrigin.current = null;
+    dragMoved.current = false;
+    stageBox.current = null;
   };
 
   const handleCheckAnswer = (overrideValue?: string) => {
@@ -554,35 +583,55 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
   const remaining = count - snappedList.length;
   const tens = frame1Count === 10 ? 1 : 0;
   const ones = snappedList.length - tens * 10;
+  const answerPanelOpen = isPlayMode && requireAnswerInput && isGroupTensComplete;
 
-  const zoneClass = `rounded-2xl sm:rounded-3xl p-2.5 sm:p-3.5 flex flex-col justify-between transition-colors duration-300 ${surfaceClass(isDark)}`;
-  const zoneLabelClass = `font-mono text-[9px] font-bold uppercase tracking-[0.18em] ${captionClass(isDark)}`;
-  const renderFrame = (frameIdx: number, label: string, filled: number, numberBase: number) => (
-    <div className={zoneClass}>
-      <div className="flex items-center justify-between gap-3 mb-2">
-        <span className={zoneLabelClass}>{label}</span>
-        <span className={`font-mono text-[10px] font-bold ${captionClass(isDark)}`}>{filled} / 10</span>
-      </div>
+  // Bin names come from the slide when a teacher set them; the fallbacks are the
+  // instruction itself, so a child who cannot yet read "shelf" still knows which
+  // box is which.
+  const shelfLabel = question.config.sourceBinLabel || (learnerMode ? "Group these" : "Shelf");
 
-      <div className="grid grid-cols-5 gap-1 sm:gap-1.5">
-        {Array.from({ length: 10 }).map((_, cellIdx) => {
-          const key = `${frameIdx}-${cellIdx}`;
-          const isCellFilled = dots.some(d => d.snappedCell?.frameIdx === frameIdx && d.snappedCell?.cellIdx === cellIdx);
-          return (
-            <div
-              key={key}
-              ref={el => { cellRefs.current[key] = el; }}
-              className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl border-2 flex items-center justify-center transition-all duration-200 relative
-                ${isCellFilled ? "border-transparent" : `border-dashed ${emptySlotClass(isDark)}`}`}
-            >
-              {!isCellFilled && (question.config.showNumbersInSlots ?? true) && (
-                <span className="font-mono text-[9px] font-bold select-none opacity-60">{numberBase + cellIdx}</span>
-              )}
-            </div>
-          );
-        })}
+  const renderFrame = (frameIdx: number, label: string, filled: number, numberBase: number, capacity: number) => (
+    <CanvasBin
+      ref={el => { frameRefs.current[frameIdx] = el; }}
+      label={frameIdx === 0 ? (question.config.destinationBinLabel || label) : label}
+      tally={isPlayMode ? `${filled} / 10` : undefined}
+      accent={accent}
+      isDark={isDark}
+      active={activeZone === frameIdx}
+      complete={filled >= capacity}
+      className="pointer-events-none"
+    >
+      {/*
+        The cells are the invitation here, so the bin gets no empty hint — a
+        dashed ten-frame already says "one object per box" better than a caption.
+      */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="grid grid-cols-5 gap-1 sm:gap-1.5">
+          {Array.from({ length: 10 }).map((_, cellIdx) => {
+            const key = `${frameIdx}-${cellIdx}`;
+            const isCellFilled = dots.some(d => d.snappedCell?.frameIdx === frameIdx && d.snappedCell?.cellIdx === cellIdx);
+            const isHovered = hoveredCell?.frameIdx === frameIdx && hoveredCell?.cellIdx === cellIdx;
+            return (
+              <div
+                key={key}
+                ref={el => { cellRefs.current[key] = el; }}
+                style={{ width: `${cellSize}px`, height: `${cellSize}px` }}
+                className={`rounded-xl border-2 flex items-center justify-center transition-all duration-200 relative
+                  ${isCellFilled
+                    ? "border-transparent"
+                    : isHovered
+                      ? `border-solid scale-105 ${accentChipClass(accent, isDark)}`
+                      : `border-dashed ${emptySlotClass(isDark)}`}`}
+              >
+                {!isCellFilled && (question.config.showNumbersInSlots ?? true) && (
+                  <span className="font-mono text-[9px] font-bold select-none opacity-60">{numberBase + cellIdx}</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </CanvasBin>
   );
 
   return (
@@ -591,6 +640,8 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
       playHint={question.instruction}
       isDark={isDark}
       showGrid={showGrid}
+      gridSize={GRID_STEP}
+      showRulers={question.config.showLayoutRulers ?? true}
       accent={accent}
       headerIcon={<Grid2X2 size={16} />}
       headerTitle="Group Tens"
@@ -600,22 +651,17 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
           : `${tens} ten + ${ones} ${ones === 1 ? "one" : "ones"} = ${snappedList.length}`
       }
       readAloudText={question.instruction || `Group ${count} ${obj.label} into tens. Fill the ten-frame first, then place the extra ones.`}
+      designerHint="Drag objects freely. Grid snapping is applied when you release."
       headerActions={
         isPlayMode ? (
           <CanvasChip accent={isSolved ? "emerald" : accent} isDark={isDark}>
             {isSolved ? "All grouped" : `${remaining} to group`}
           </CanvasChip>
         ) : (
-          <div className="flex items-center gap-1.5">
-            <Button type="button" variant="outline" size="xs" onClick={handleAutoLayout} title="Auto-arrange the shelf">
-              <Grid2X2 size={12} />
-              Auto Layout
-            </Button>
-            <Button type="button" variant="outline" size="xs" onClick={handleResetLayout} title="Reset layout">
-              <RotateCcw size={12} />
-              Reset
-            </Button>
-          </div>
+          <Button type="button" variant="outline" size="xs" onClick={reset} title="Reset object positions">
+            <RotateCcw size={12} />
+            Reset
+          </Button>
         )
       }
       footerStatus={
@@ -623,48 +669,42 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
           ? `${tens} ten and ${ones} ${ones === 1 ? "one" : "ones"} makes ${count}!`
           : isPlayMode
             ? undefined
-            : "Design Mode · Drag the shelf to move · Resize corner \u2198"
+            : "Design Mode · Drag objects to set their starting positions"
       }
       footerSolved={isSolved}
-      designerHint="Drag the shelf to reposition, or use the handles to resize."
     >
       <div
         ref={containerRef}
         onPointerMove={handleContainerPointerMove}
         onPointerUp={handleContainerPointerUp}
         onPointerCancel={handleContainerPointerCancel}
-        className="relative flex-1 w-full min-h-[300px] flex flex-col justify-between overflow-hidden touch-none select-none overscroll-none"
+        /*
+          `flex-1` is what makes this fill a launcher, so the shelf below stays
+          modest on purpose: a taller shelf than the window can give overflows
+          the layout's `min-h-0` parent and pushes the frames off the stage.
+        */
+        className="relative flex-1 w-full flex flex-col items-stretch min-h-[280px] sm:min-h-[320px] md:min-h-[360px] touch-none select-none overscroll-none"
+        style={{ gap: `${geometry.gap}px` }}
       >
-        {/* Grid overlay in design mode */}
-        {!isPlayMode && showGrid && (
-          <div className="absolute inset-0 pointer-events-none z-0 opacity-[0.15]">
-            <svg width="100%" height="100%">
-              <defs>
-                <pattern id="gtens-grid" width={GRID_STEP} height={GRID_STEP} patternUnits="userSpaceOnUse">
-                  <path d={`M ${GRID_STEP} 0 L 0 0 0 ${GRID_STEP}`} fill="none" stroke="#6366f1" strokeWidth="0.5" />
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#gtens-grid)" />
-            </svg>
-          </div>
-        )}
-
         {/* Crosshair alignment guides on active drag */}
-        {!isPlayMode && draggedDot && (
+        {!isPlayMode && draggedDot && dragPos && (
           <>
             <div
-              className="absolute left-0 right-0 border-t border-dashed border-rose-400/40 pointer-events-none z-40"
+              className="absolute left-0 right-0 border-t border-dashed border-rose-400/50 pointer-events-none z-40"
               style={{ top: `${draggedDot.y + dotSize / 2}px` }}
             />
             <div
-              className="absolute top-0 bottom-0 border-l border-dashed border-rose-400/40 pointer-events-none z-40"
+              className="absolute top-0 bottom-0 border-l border-dashed border-rose-400/50 pointer-events-none z-40"
               style={{ left: `${draggedDot.x + dotSize / 2}px` }}
             />
           </>
         )}
 
-        {/* Ten-frames — stacked on mobile, side-by-side above */}
-        <div className="relative flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch z-0">
+        {/* Ten-frames — stacked on a narrow stage, side-by-side above */}
+        <div
+          className={`relative flex ${geometry.framesStacked ? "flex-col" : "flex-row"} items-stretch min-h-0 flex-1`}
+          style={{ gap: `${geometry.gap}px` }}
+        >
           <GhostGuideOverlay
             show={showGhostGuide && !isSolved}
             label={
@@ -675,97 +715,33 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
             isDark={isDark}
             labelPlacement="top"
           />
-          {renderFrame(0, "Tens", frame1Count, 1)}
-          {count > 10 && renderFrame(1, "Ones", frame2Count, 11)}
+          {renderFrame(0, "Tens", frame1Count, 1, Math.min(10, count))}
+          {frameCount > 1 && renderFrame(1, "Ones", frame2Count, 11, count - 10)}
         </div>
 
-        {/* Spacer so the flex column never overlaps the absolutely positioned shelf */}
-        {(!isPlayMode || w >= 640) && (
-          <div style={{ height: `${shelfLayout.height || 110}px` }} className="w-full shrink-0 pointer-events-none" />
-        )}
-
-        {/* Shelf — uncounted items */}
-        <div
+        {/* Shelf — the objects still to group */}
+        <CanvasBin
           ref={shelfRef}
-          className={`rounded-3xl p-3.5 transition-colors duration-300 flex flex-col ${surfaceClass(isDark)}`}
-          style={(isPlayMode && w < 640) ? {
-            position: "relative",
-            width: "100%",
-            minHeight: `${count > 16 ? 140 : 110}px`,
-            zIndex: 10
-          } : {
-            position: "absolute",
-            left: `${shelfLayout.left}px`,
-            top: `${shelfLayout.top}px`,
-            width: `${shelfLayout.width}px`,
-            height: `${shelfLayout.height}px`,
-            zIndex: 10
-          }}
-        >
-          {/* Grab-bar drag handle */}
-          {!isPlayMode && (
-            <div
-              onPointerDown={handleShelfMoveDown}
-              className={`absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2
-                flex items-center gap-1.5 px-3 py-1 rounded-full shadow-md border cursor-grab active:cursor-grabbing z-20 select-none
-                transition-all duration-150
-                ${shelfDrag === 'move'
-                  ? 'bg-indigo-600 border-indigo-600 text-white scale-105 shadow-lg'
-                  : isDark
-                    ? 'bg-slate-800 border-violet-500/50 text-violet-300 hover:bg-slate-700'
-                    : 'bg-white border-violet-300 text-violet-600 hover:bg-violet-50'
-                }
-              `}
-            >
-              <Move size={11} />
-              <span className="text-[9px] font-bold font-mono uppercase tracking-wider whitespace-nowrap">
-                {shelfDrag === 'move' ? `X:${shelfLayout.left} Y:${shelfLayout.top}` : 'Drag to move'}
-              </span>
-            </div>
-          )}
-
-          {/* Resize handle */}
-          {!isPlayMode && (
-            <div
-              onPointerDown={handleShelfResizeDown}
-              style={{ touchAction: 'none' }}
-              className={`absolute -bottom-2 -right-2 w-8 h-8 cursor-se-resize z-20 flex items-center justify-center rounded-full shadow-md border transition-all duration-150 select-none
-                ${shelfDrag === 'resize'
-                  ? 'bg-violet-600 border-violet-600 text-white scale-110 shadow-lg'
-                  : isDark
-                    ? 'bg-slate-700 border-slate-500 text-indigo-300 hover:bg-slate-600 hover:border-indigo-400'
-                    : 'bg-white border-indigo-300 text-indigo-500 hover:bg-indigo-50 hover:border-indigo-500'
-                }
-              `}
-            >
-              <Maximize2 size={11} className="rotate-90" />
-            </div>
-          )}
-
-          {/* Size tooltip on resize */}
-          {!isPlayMode && shelfDrag === 'resize' && (
-            <div className="absolute -bottom-9 left-1/2 -translate-x-1/2 bg-slate-900/90 text-white font-mono text-[9px] px-2 py-0.5 rounded shadow z-50 pointer-events-none whitespace-nowrap">
-              W: {shelfLayout.width}px · H: {shelfLayout.height}px
-            </div>
-          )}
-
-          <span className={`${zoneLabelClass} pointer-events-none`}>
-            {question.config.sourceBinLabel || "Shelf"}
-          </span>
-        </div>
+          label={shelfLabel}
+          tally={isPlayMode ? remaining : undefined}
+          accent={accent}
+          isDark={isDark}
+          active={activeZone === -1}
+          complete={isPlayMode && remaining === 0}
+          isEmpty={isPlayMode && remaining === 0}
+          emptyIcon={<PartyPopper size={22} />}
+          // Suppressed once the answer panel docks here, or the two would stack up.
+          emptyHint={isPlayMode && !answerPanelOpen ? "All grouped!" : undefined}
+          style={{ flex: `0 0 ${geometry.shelfHeight}px` }}
+        />
 
         {/* Draggable dots */}
         {dots.map(dot => {
           const assetType = question.config?.assetType || "emoji";
           const isDragging = activeDragId === dot.id;
-          const hasFrame = question.config.showItemFrame ?? true;
           const isSnapped = dot.snappedCell !== null;
 
-          const transitionStyle = isDragging
-            ? "none"
-            : "left 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), top 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.15s ease";
-
-          let dotClassName = "flex items-center justify-center rounded-full cursor-grab active:cursor-grabbing select-none touch-none transition-transform";
+          let dotClassName = "flex items-center justify-center rounded-full cursor-grab active:cursor-grabbing select-none touch-none transition-transform outline-none focus-visible:ring-4 focus-visible:ring-indigo-400/40";
           if (hasFrame) {
             dotClassName += isSnapped
               ? ` ${accentChipClass(accent, isDark)} border-2`
@@ -776,16 +752,11 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
           return (
             <div
               key={dot.id}
+              role="button"
+              tabIndex={0}
+              aria-label={`${isSnapped ? "Grouped" : "Loose"} ${obj.label}. Drag into the ten-frame.`}
               onPointerDown={(e) => handlePointerDown(e, dot.id)}
-              style={{
-                position: "absolute",
-                left: `${dot.x}px`,
-                top: `${dot.y}px`,
-                width: `${dotSize}px`,
-                height: `${dotSize}px`,
-                zIndex: isDragging ? 50 : 20,
-                transition: transitionStyle
-              }}
+              style={objectStyle({ x: dot.x, y: dot.y, size: dotSize, dragging: isDragging })}
               className={dotClassName}
             >
               {/* Coordinate tooltip when dragging in design mode */}
@@ -794,160 +765,169 @@ export const GroupTensCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, s
                   {dot.x}, {dot.y}
                 </div>
               )}
-              <CountingAsset type={assetType as any} emoji={dot.emoji} size={w < 640 ? 26 : 32} />
+              <CountingAsset type={assetType as any} emoji={dot.emoji} size={assetSize} />
             </div>
           );
         })}
 
         {/* ── Answer Input Box Overlay after grouping all items ── */}
         <AnimatePresence>
-          {isPlayMode && requireAnswerInput && isGroupTensComplete && (
-            <motion.div
-              initial={{ opacity: 0, y: 30, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              className="absolute inset-x-2 bottom-2 z-50 flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl backdrop-blur-md border shadow-2xl transition-all max-w-lg mx-auto"
-              style={{
-                backgroundColor: isDark ? "rgba(15, 23, 42, 0.94)" : "rgba(255, 255, 255, 0.96)",
-                borderColor: answerStatus === "error" 
-                  ? "#ef4444" 
-                  : answerStatus === "correct" 
-                  ? "#10b981" 
-                  : isDark ? "#334155" : "#cbd5e1"
-              }}
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">🎉</span>
-                <span className={`text-xs sm:text-sm font-extrabold tracking-tight ${
-                  isDark ? "text-slate-100" : "text-slate-800"
-                }`}>
-                  How many {obj.label}{count === 1 ? "" : "s"} did you group in total?
-                </span>
-              </div>
+          {answerPanelOpen && (
+            /*
+              Docked over the shelf the objects just left, never over the frames:
+              the question is "how many did you group in total", so the child has
+              to be able to see the tens and ones while they answer. That bin is
+              empty by the time this appears.
+            */
+            <div className="absolute z-50 inset-x-2 bottom-2 pointer-events-none flex justify-center">
+              <motion.div
+                initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                className="w-full pointer-events-auto flex flex-col items-center justify-center p-3 sm:p-4 md:p-5
+                  rounded-2xl md:rounded-3xl backdrop-blur-md border shadow-2xl sm:max-w-md md:max-w-lg"
+                style={{
+                  backgroundColor: isDark ? "rgba(15, 23, 42, 0.94)" : "rgba(255, 255, 255, 0.96)",
+                  borderColor: answerStatus === "error"
+                    ? "#ef4444"
+                    : answerStatus === "correct"
+                      ? "#10b981"
+                      : isDark ? "#334155" : "#cbd5e1"
+                }}
+              >
+                <div className="flex items-center gap-2 mb-2 md:mb-3">
+                  <span className="text-xl md:text-2xl">🎉</span>
+                  <span className={`text-xs sm:text-sm md:text-base lg:text-lg font-extrabold tracking-tight ${
+                    isDark ? "text-slate-100" : "text-slate-800"
+                  }`}>
+                    How many {obj.label}{count === 1 ? "" : "s"} did you group in total?
+                  </span>
+                </div>
 
-              {/* Answer Input Controls */}
-              <div className="flex items-center gap-2 w-full justify-center max-w-xs">
-                <div className="relative flex-1">
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    value={answerInput}
-                    onChange={(e) => {
-                      setAnswerInput(e.target.value);
-                      if (answerStatus === "error") {
-                        setAnswerStatus("idle");
-                        setErrorMessage("");
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleCheckAnswer();
-                    }}
-                    placeholder="Total..."
-                    disabled={answerStatus === "correct"}
-                    className={`w-full h-11 px-3 text-center text-lg sm:text-xl font-bold font-mono rounded-xl border-2 transition-all outline-none ${
-                      answerStatus === "error"
-                        ? "border-red-500 bg-red-50/50 text-red-700 animate-shake dark:bg-red-950/40 dark:text-red-300"
-                        : answerStatus === "correct"
-                        ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
-                        : isDark
-                        ? "bg-slate-900 border-slate-700 text-white focus:border-indigo-500"
-                        : "bg-white border-slate-300 text-slate-900 focus:border-indigo-500"
+                {/* Answer Input Controls */}
+                <div className="flex items-center gap-2 md:gap-3 w-full justify-center max-w-xs md:max-w-sm">
+                  <div className="relative flex-1">
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={answerInput}
+                      onChange={(e) => {
+                        setAnswerInput(e.target.value);
+                        if (answerStatus === "error") {
+                          setAnswerStatus("idle");
+                          setErrorMessage("");
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleCheckAnswer();
+                      }}
+                      placeholder="Total..."
+                      disabled={answerStatus === "correct"}
+                      className={`w-full h-11 md:h-14 px-3 text-center text-lg sm:text-xl md:text-2xl font-bold font-mono rounded-xl border-2 transition-all outline-none ${
+                        answerStatus === "error"
+                          ? "border-red-500 bg-red-50/50 text-red-700 animate-shake dark:bg-red-950/40 dark:text-red-300"
+                          : answerStatus === "correct"
+                            ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+                            : isDark
+                              ? "bg-slate-900 border-slate-700 text-white focus:border-indigo-500"
+                              : "bg-white border-slate-300 text-slate-900 focus:border-indigo-500"
+                      }`}
+                    />
+                  </div>
+
+                  <Button
+                    onClick={() => handleCheckAnswer()}
+                    disabled={answerStatus === "correct" || !answerInput.trim()}
+                    className={`h-11 md:h-14 px-4 md:px-6 text-sm md:text-base font-bold flex items-center gap-1.5 rounded-xl shadow-md transition-all active:scale-95 ${
+                      answerStatus === "correct"
+                        ? "bg-emerald-600 hover:bg-emerald-600 text-white"
+                        : "bg-indigo-600 hover:bg-indigo-700 text-white"
                     }`}
-                  />
-                </div>
-
-                <Button
-                  onClick={() => handleCheckAnswer()}
-                  disabled={answerStatus === "correct" || !answerInput.trim()}
-                  className={`h-11 px-4 text-sm font-bold flex items-center gap-1.5 rounded-xl shadow-md transition-all active:scale-95 ${
-                    answerStatus === "correct"
-                      ? "bg-emerald-600 hover:bg-emerald-600 text-white"
-                      : "bg-indigo-600 hover:bg-indigo-700 text-white"
-                  }`}
-                >
-                  {answerStatus === "correct" ? <Check size={18} /> : "Check"}
-                </Button>
-
-                <button
-                  type="button"
-                  onClick={() => setShowNumberPad(prev => !prev)}
-                  className={`h-11 w-11 flex items-center justify-center rounded-xl border transition-all ${
-                    showNumberPad
-                      ? "bg-indigo-100 border-indigo-400 text-indigo-700 dark:bg-indigo-950 dark:border-indigo-600 dark:text-indigo-300"
-                      : isDark
-                      ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
-                      : "bg-slate-100 border-slate-300 text-slate-600 hover:bg-slate-200"
-                  }`}
-                  title="Toggle Number Pad"
-                >
-                  <Calculator size={18} />
-                </button>
-              </div>
-
-              {/* Error feedback banner */}
-              {answerStatus === "error" && errorMessage && (
-                <div className="flex items-center gap-1.5 text-xs text-red-500 dark:text-red-400 font-bold mt-2 animate-fade-in text-center">
-                  <AlertCircle size={14} className="flex-shrink-0" />
-                  <span>{errorMessage}</span>
-                </div>
-              )}
-
-              {/* On-screen Number Keypad for Kids / Mobile / Tablets */}
-              <AnimatePresence>
-                {showNumberPad && answerStatus !== "correct" && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="w-full mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 flex flex-col items-center gap-2 overflow-hidden"
                   >
-                    <div className="grid grid-cols-5 gap-1.5 w-full max-w-xs">
-                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((num) => (
+                    {answerStatus === "correct" ? <Check size={18} /> : "Check"}
+                  </Button>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowNumberPad(prev => !prev)}
+                    className={`h-11 w-11 md:h-14 md:w-14 flex-shrink-0 flex items-center justify-center rounded-xl border transition-all ${
+                      showNumberPad
+                        ? "bg-indigo-100 border-indigo-400 text-indigo-700 dark:bg-indigo-950 dark:border-indigo-600 dark:text-indigo-300"
+                        : isDark
+                          ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
+                          : "bg-slate-100 border-slate-300 text-slate-600 hover:bg-slate-200"
+                    }`}
+                    title="Toggle Number Pad"
+                  >
+                    <Calculator size={18} />
+                  </button>
+                </div>
+
+                {/* Error feedback banner */}
+                {answerStatus === "error" && errorMessage && (
+                  <div className="flex items-center gap-1.5 text-xs text-red-500 dark:text-red-400 font-bold mt-2 animate-fade-in text-center">
+                    <AlertCircle size={14} className="flex-shrink-0" />
+                    <span>{errorMessage}</span>
+                  </div>
+                )}
+
+                {/* On-screen Number Keypad for Kids / Mobile / Tablets */}
+                <AnimatePresence>
+                  {showNumberPad && answerStatus !== "correct" && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="w-full mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 flex flex-col items-center gap-2 overflow-hidden"
+                    >
+                      <div className="grid grid-cols-5 gap-1.5 md:gap-2 w-full max-w-xs md:max-w-sm">
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((num) => (
+                          <button
+                            key={num}
+                            type="button"
+                            onClick={() => handleDigitPress(String(num))}
+                            className={`h-9 md:h-12 font-mono text-base md:text-xl font-extrabold rounded-lg md:rounded-xl border shadow-sm transition-all active:scale-95 ${
+                              isDark
+                                ? "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"
+                                : "bg-white border-slate-200 text-slate-800 hover:bg-slate-50"
+                            }`}
+                          >
+                            {num}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="flex items-center justify-between gap-2 w-full max-w-xs md:max-w-sm">
                         <button
-                          key={num}
                           type="button"
-                          onClick={() => handleDigitPress(String(num))}
-                          className={`h-9 font-mono text-base font-extrabold rounded-lg border shadow-sm transition-all active:scale-95 ${
+                          onClick={handleBackspacePress}
+                          className={`flex-1 h-8 md:h-10 text-xs md:text-sm font-extrabold rounded-lg border flex items-center justify-center gap-1 transition-all ${
                             isDark
-                              ? "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"
-                              : "bg-white border-slate-200 text-slate-800 hover:bg-slate-50"
+                              ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
+                              : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200"
                           }`}
                         >
-                          {num}
+                          <Delete size={14} /> Backspace
                         </button>
-                      ))}
-                    </div>
-                    <div className="flex items-center justify-between gap-2 w-full max-w-xs">
-                      <button
-                        type="button"
-                        onClick={handleBackspacePress}
-                        className={`flex-1 h-8 text-xs font-extrabold rounded-lg border flex items-center justify-center gap-1 transition-all ${
-                          isDark
-                            ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
-                            : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200"
-                        }`}
-                      >
-                        <Delete size={14} /> Backspace
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setAnswerInput("")}
-                        className={`px-3 h-8 text-xs font-extrabold rounded-lg border transition-all ${
-                          isDark
-                            ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
-                            : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200"
-                        }`}
-                      >
-                        Clear
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
+                        <button
+                          type="button"
+                          onClick={() => setAnswerInput("")}
+                          className={`px-3 md:px-5 h-8 md:h-10 text-xs md:text-sm font-extrabold rounded-lg border transition-all ${
+                            isDark
+                              ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
+                              : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200"
+                          }`}
+                        >
+                          Clear
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            </div>
           )}
         </AnimatePresence>
       </div>

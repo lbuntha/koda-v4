@@ -55,8 +55,14 @@ export const GoodsAssetLibrary: React.FC = React.memo(() => (
       <radialGradient id="goods-glass" cx=".32" cy=".24" r=".78">
         <stop stopColor="#DFFAFF" /><stop offset=".38" stopColor="#5CDAF4" /><stop offset=".76" stopColor="#5578E8" /><stop offset="1" stopColor="#5632A8" />
       </radialGradient>
-      <radialGradient id="goods-cookie" cx=".3" cy=".24" r=".8">
-        <stop stopColor="#FFD58C" /><stop offset=".6" stopColor="#D58A43" /><stop offset="1" stopColor="#8D4B29" />
+      <radialGradient id="goods-cookie-dough" cx=".3" cy=".22" r=".82">
+        <stop stopColor="#FFE8A8" /><stop offset=".42" stopColor="#F4BA62" /><stop offset=".78" stopColor="#D47A31" /><stop offset="1" stopColor="#9A4E25" />
+      </radialGradient>
+      <linearGradient id="goods-cookie-edge" x1="13" y1="10" x2="50" y2="57" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#EFA451" /><stop offset=".58" stopColor="#B85C2B" /><stop offset="1" stopColor="#71351F" />
+      </linearGradient>
+      <radialGradient id="goods-cookie-chip" cx=".3" cy=".2" r=".9">
+        <stop stopColor="#8A4B2E" /><stop offset=".52" stopColor="#542A20" /><stop offset="1" stopColor="#291716" />
       </radialGradient>
 
       <symbol id="goods-chips" viewBox="0 0 64 64">
@@ -78,7 +84,7 @@ export const GoodsAssetLibrary: React.FC = React.memo(() => (
         <rect x="20" y="29" width="24" height="17" rx="5" fill="#FFF" opacity=".9" /><path d="M25 38q2-7 7-3 5-5 8 3-3 7-8 3-5 4-7-3Z" fill="#62BDF4" />
       </symbol>
       <symbol id="goods-donut" viewBox="0 0 64 64">
-        <ellipse cx="32" cy="36" rx="24" ry="20" fill="url(#goods-cookie)" stroke="#8E4A27" strokeWidth="1.4" />
+        <ellipse cx="32" cy="36" rx="24" ry="20" fill="url(#goods-cookie-dough)" stroke="#8E4A27" strokeWidth="1.4" />
         <path d="M10 32q3-17 21-18 20 0 24 17-4 9-8 4-3 9-9 3-6 7-11 0-7 6-9-3-5 5-8-3Z" fill="url(#goods-pink)" />
         <ellipse cx="32" cy="33" rx="7" ry="6" fill="#8E4A27" /><path d="m17 26 5-3m20-1 5 3M20 35l5 2m15-2 5-3m-16-12 2 4" stroke="#FFF1A4" strokeWidth="2" strokeLinecap="round" />
       </symbol>
@@ -145,7 +151,22 @@ export const GoodsAssetLibrary: React.FC = React.memo(() => (
         <path d="M18 30q-3-10 7-13-1-10 8-11 9 1 8 11 10 3 6 13Z" fill="url(#goods-pink)" stroke="#AA276E" strokeWidth="1.4" /><path d="M23 20q3-8 9-8" stroke="#FFF" strokeWidth="3" strokeLinecap="round" opacity=".55" />
       </symbol>
       <symbol id="goods-cookie" viewBox="0 0 64 64">
-        <circle cx="32" cy="32" r="25" fill="url(#goods-cookie)" stroke="#844326" strokeWidth="1.5" /><g fill="#523025"><circle cx="22" cy="20" r="3"/><circle cx="39" cy="17" r="3.5"/><circle cx="45" cy="34" r="3"/><circle cx="30" cy="38" r="3.5"/><circle cx="18" cy="42" r="2.5"/></g><path d="M16 18q6-7 12-7" stroke="#FFF0C0" strokeWidth="3" strokeLinecap="round" opacity=".5" />
+        <path d="M32 7c15 0 26 11 26 25S47 58 32 58 6 47 6 32 17 7 32 7Z" fill="url(#goods-cookie-edge)" />
+        <path d="M32 5c15 0 25 11 25 25S47 55 32 55 7 45 7 30 17 5 32 5Z" fill="url(#goods-cookie-dough)" stroke="#8A4422" strokeWidth="1.4" />
+        <path d="M14 20c4-8 12-12 20-11-10 3-16 10-18 20-3-2-4-5-2-9Z" fill="#FFF4C7" opacity=".62" />
+        <path d="M12 36c4 10 13 16 24 15 7-1 13-5 17-11-3 10-11 15-21 15-10 0-18-5-20-19Z" fill="#8D4525" opacity=".2" />
+        <g fill="#D68B42" opacity=".42">
+          <circle cx="26" cy="14" r="1.5" /><circle cx="47" cy="25" r="1.8" /><circle cx="15" cy="31" r="1.7" />
+          <circle cx="39" cy="44" r="1.6" /><circle cx="22" cy="47" r="1.3" />
+        </g>
+        <g fill="url(#goods-cookie-chip)" stroke="#3B2019" strokeWidth=".6">
+          <circle cx="20" cy="21" r="3.6" /><circle cx="39" cy="17" r="4" /><circle cx="47" cy="33" r="3.4" />
+          <circle cx="31" cy="35" r="4.2" /><circle cx="18" cy="42" r="3.1" /><circle cx="40" cy="47" r="2.6" />
+        </g>
+        <g fill="#C98255" opacity=".55">
+          <circle cx="18.8" cy="19.8" r="1" /><circle cx="37.7" cy="15.7" r="1.1" /><circle cx="29.5" cy="33.2" r="1.1" />
+          <circle cx="45.8" cy="31.8" r=".9" />
+        </g>
       </symbol>
       <symbol id="goods-candy" viewBox="0 0 64 64">
         <path d="m17 24-11-9 4 14-4 14 12-8m29-11 11-9-4 14 4 14-12-8" fill="url(#goods-purple)" stroke="#4D34A1" strokeLinejoin="round" />
@@ -196,6 +217,77 @@ export const GoodsAssetLibrary: React.FC = React.memo(() => (
       <symbol id="goods-controller" viewBox="0 0 64 64">
         <path d="M17 20h30q9 1 12 20 2 14-8 15-7 1-13-10H26Q20 56 13 55 3 54 5 40q3-19 12-20Z" fill="url(#goods-purple)" stroke="#49339B" strokeWidth="1.5" />
         <path d="M19 30v14m-7-7h14" stroke="#E9E4FF" strokeWidth="4" strokeLinecap="round" /><circle cx="45" cy="33" r="3" fill="#FFCF42" /><circle cx="51" cy="40" r="3" fill="#58D6A0" /><circle cx="31" cy="39" r="2" fill="#D7CBFF" /><circle cx="37" cy="39" r="2" fill="#D7CBFF" />
+      </symbol>
+
+      {/* ── 8 Gradient Bottle Collection ── */}
+      <symbol id="goods-bottle_water" viewBox="0 0 64 64">
+        <rect x="26" y="8" width="12" height="7" rx="2" fill="url(#goods-cyan)" stroke="#0E7490" strokeWidth="1.2" />
+        <path d="M28 15h8v5l6 7v27a4 4 0 0 1-4 4H26a4 4 0 0 1-4-4V27l6-7Z" fill="url(#goods-blue)" stroke="#1D4ED8" strokeWidth="1.4" />
+        <path d="M22 34q10-4 20 0v16a4 4 0 0 1-4 4H26a4 4 0 0 1-4-4Z" fill="url(#goods-cyan)" opacity=".85" />
+        <path d="M25 20v30" stroke="#FFF" strokeWidth="2.5" strokeLinecap="round" opacity=".5" />
+        <ellipse cx="32" cy="11.5" rx="5" ry="1.5" fill="#E0F2FE" />
+      </symbol>
+
+      <symbol id="goods-bottle_juice" viewBox="0 0 64 64">
+        <rect x="25" y="8" width="14" height="6" rx="2" fill="url(#goods-green)" stroke="#15803D" strokeWidth="1.2" />
+        <path d="M27 14h10v6l7 8v25a4 4 0 0 1-4 4H24a4 4 0 0 1-4-4V28l7-8Z" fill="url(#goods-orange)" stroke="#C2410C" strokeWidth="1.4" />
+        <circle cx="32" cy="37" r="8" fill="url(#goods-yellow)" opacity=".9" />
+        <path d="M32 31c4 0 6 3 6 6s-2 6-6 6-6-3-6-6 2-6 6-6Z" fill="#FFF" opacity=".4" />
+        <path d="M37 11q6-5 9 1-3 5-9-1Z" fill="url(#goods-green)" stroke="#15803D" strokeWidth="1" />
+        <path d="M23 22v26" stroke="#FFF" strokeWidth="2.5" strokeLinecap="round" opacity=".45" />
+      </symbol>
+
+      <symbol id="goods-bottle_soda" viewBox="0 0 64 64">
+        <rect x="27" y="7" width="10" height="5" rx="1.5" fill="url(#goods-metal)" stroke="#475569" strokeWidth="1.2" />
+        <path d="M29 12h6v8l7 7v25a4 4 0 0 1-4 4H26a4 4 0 0 1-4-4V27l7-7Z" fill="url(#goods-red)" stroke="#9F1239" strokeWidth="1.4" />
+        <path d="M22 32q10-6 20 0v20a4 4 0 0 1-4 4H26a4 4 0 0 1-4-4Z" fill="url(#goods-pink)" opacity=".8" />
+        <circle cx="27" cy="38" r="1.8" fill="#FFF" opacity=".8" />
+        <circle cx="34" cy="44" r="1.4" fill="#FFF" opacity=".8" />
+        <circle cx="30" cy="48" r="1.2" fill="#FFF" opacity=".7" />
+        <path d="M25 18v31" stroke="#FFF" strokeWidth="2.5" strokeLinecap="round" opacity=".4" />
+      </symbol>
+
+      <symbol id="goods-bottle_potion" viewBox="0 0 64 64">
+        <path d="M27 9h10v4rx2" fill="url(#goods-brown)" stroke="#78350F" strokeWidth="1.2" />
+        <rect x="28" y="7" width="8" height="6" rx="2" fill="url(#goods-yellow)" stroke="#B45309" />
+        <path d="M28 13h8v10l12 12a16 16 0 1 1-32 0l12-12Z" fill="url(#goods-purple)" stroke="#581C87" strokeWidth="1.4" />
+        <path d="M16 35a16 16 0 0 0 32 0q-16 4-32 0Z" fill="url(#goods-pink)" opacity=".7" />
+        <polygon points="32,30 34,34 38,34 35,37 36,41 32,38 28,41 29,37 26,34 30,34" fill="#FFF" opacity=".85" />
+        <path d="M22 24q-3 8 0 20" stroke="#FFF" strokeWidth="2" strokeLinecap="round" opacity=".4" />
+      </symbol>
+
+      <symbol id="goods-bottle_milk" viewBox="0 0 64 64">
+        <rect x="25" y="7" width="14" height="6" rx="2" fill="url(#goods-red)" stroke="#991B1B" strokeWidth="1.2" />
+        <path d="M27 13h10v6l6 6v27a4 4 0 0 1-4 4H25a4 4 0 0 1-4-4V25l6-6Z" fill="url(#goods-white)" stroke="#0284C7" strokeWidth="1.4" />
+        <rect x="21" y="30" width="22" height="15" rx="3" fill="url(#goods-cyan)" opacity=".9" />
+        <path d="M26 37q5-4 12 0" stroke="#FFF" strokeWidth="2" strokeLinecap="round" />
+        <path d="M24 18v31" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round" opacity=".35" />
+      </symbol>
+
+      <symbol id="goods-bottle_boba" viewBox="0 0 64 64">
+        <line x1="38" y1="5" x2="33" y2="24" stroke="url(#goods-pink)" strokeWidth="4" strokeLinecap="round" />
+        <rect x="22" y="16" width="20" height="38" rx="6" fill="url(#goods-yellow)" stroke="#B45309" strokeWidth="1.4" />
+        <path d="M22 42h20v6a6 6 0 0 1-6 6H28a6 6 0 0 1-6-6Z" fill="url(#goods-brown)" />
+        <circle cx="27" cy="47" r="2.2" fill="#291810" />
+        <circle cx="32" cy="49" r="2.2" fill="#291810" />
+        <circle cx="37" cy="47" r="2.2" fill="#291810" />
+        <circle cx="29" cy="51" r="2" fill="#291810" />
+        <path d="M25 22v26" stroke="#FFF" strokeWidth="2.5" strokeLinecap="round" opacity=".4" />
+      </symbol>
+
+      <symbol id="goods-bottle_honey" viewBox="0 0 64 64">
+        <rect x="26" y="8" width="12" height="6" rx="2" fill="url(#goods-brown)" stroke="#78350F" strokeWidth="1.2" />
+        <path d="M27 14h10v4l7 7v23a7 7 0 0 1-7 7H27a7 7 0 0 1-7-7V25l7-7Z" fill="url(#goods-gold)" stroke="#B45309" strokeWidth="1.4" />
+        <polygon points="32,30 37,33 37,39 32,42 27,39 27,33" fill="#FFF" opacity=".85" stroke="#D97706" strokeWidth="1" />
+        <path d="M30 35h4m-5 3h6" stroke="#D97706" strokeWidth="1.2" strokeLinecap="round" />
+        <path d="M23 22v24" stroke="#FFF" strokeWidth="2.5" strokeLinecap="round" opacity=".45" />
+      </symbol>
+
+      <symbol id="goods-bottle_energy" viewBox="0 0 64 64">
+        <rect x="26" y="7" width="12" height="7" rx="2" fill="url(#goods-cyan)" stroke="#0E7490" strokeWidth="1.2" />
+        <path d="M28 14h8v5l6 6v27a4 4 0 0 1-4 4H26a4 4 0 0 1-4-4V25l6-6Z" fill="url(#goods-green)" stroke="#047857" strokeWidth="1.4" />
+        <polygon points="33,26 27,37 32,37 30,48 38,35 33,35" fill="url(#goods-yellow)" stroke="#D97706" strokeWidth="1" />
+        <path d="M25 18v32" stroke="#FFF" strokeWidth="2.5" strokeLinecap="round" opacity=".45" />
       </symbol>
     </defs>
   </svg>

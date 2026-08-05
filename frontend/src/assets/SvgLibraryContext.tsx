@@ -24,6 +24,8 @@ interface SvgLibraryContextValue {
   setAssets: React.Dispatch<React.SetStateAction<CustomSvgAsset[]>>;
   overrides: Record<string, SvgOverride>;
   setOverrides: React.Dispatch<React.SetStateAction<Record<string, SvgOverride>>>;
+  deletedSystemAssetIds: string[];
+  setDeletedSystemAssetIds: React.Dispatch<React.SetStateAction<string[]>>;
   /** Counting technique -> SVG asset id, replacing that component's static artwork. */
   techniqueThumbnails: Record<string, string>;
   setTechniqueThumbnails: React.Dispatch<React.SetStateAction<Record<string, string>>>;
@@ -36,6 +38,7 @@ export const SvgLibraryProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const { status, account } = useAuth();
   const [assets, setAssets] = useState<CustomSvgAsset[]>(() => readJson(LEGACY_ASSETS_KEY, []));
   const [overrides, setOverrides] = useState<Record<string, SvgOverride>>(() => readJson(LEGACY_OVERRIDES_KEY, {}));
+  const [deletedSystemAssetIds, setDeletedSystemAssetIds] = useState<string[]>([]);
   const [techniqueThumbnails, setTechniqueThumbnails] = useState<Record<string, string>>({});
   const [persistenceStatus, setPersistenceStatus] = useState<SvgPersistenceStatus>("local");
   const hydratedRef = useRef(false);
@@ -90,6 +93,7 @@ export const SvgLibraryProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           const created = await svgAssetsApi.put({
             assets: nextAssets,
             overrides: nextOverrides,
+            deletedSystemAssetIds: [],
             techniqueThumbnails: {},
             revision: remote.revision,
           });
@@ -106,10 +110,15 @@ export const SvgLibraryProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         if (cancelled) return;
         setAssets(nextAssets);
         setOverrides(nextOverrides);
+        const nextDeletedSystemAssetIds = remote.deletedSystemAssetIds || [];
+        setDeletedSystemAssetIds(nextDeletedSystemAssetIds);
         const nextThumbnails = remote.techniqueThumbnails || {};
         setTechniqueThumbnails(nextThumbnails);
         writeCache(ownerId, {
-          assets: nextAssets, overrides: nextOverrides, techniqueThumbnails: nextThumbnails,
+          assets: nextAssets,
+          overrides: nextOverrides,
+          deletedSystemAssetIds: nextDeletedSystemAssetIds,
+          techniqueThumbnails: nextThumbnails,
         });
         hydratedRef.current = true;
         setPersistenceStatus("saved");
@@ -121,6 +130,7 @@ export const SvgLibraryProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         const cached = readCache(ownerId);
         setAssets(cached.assets);
         setOverrides(cached.overrides);
+        setDeletedSystemAssetIds(cached.deletedSystemAssetIds);
         setTechniqueThumbnails(cached.techniqueThumbnails);
         hydratedRef.current = true;
         hydrationFailedRef.current = true;
@@ -143,7 +153,7 @@ export const SvgLibraryProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
 
     const ownerId = account.id;
-    writeCache(ownerId, { assets, overrides, techniqueThumbnails });
+    writeCache(ownerId, { assets, overrides, deletedSystemAssetIds, techniqueThumbnails });
 
     // Local cache updated either way; the remote write is what a failed load forfeits.
     //
@@ -162,7 +172,13 @@ export const SvgLibraryProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setPersistenceStatus("saving");
 
     const timeout = window.setTimeout(() => {
-      const save = () => svgAssetsApi.put({ assets, overrides, techniqueThumbnails, revision: remoteRevisionRef.current });
+      const save = () => svgAssetsApi.put({
+        assets,
+        overrides,
+        deletedSystemAssetIds,
+        techniqueThumbnails,
+        revision: remoteRevisionRef.current,
+      });
       // Swallows only the *previous* save's rejection, so one failure doesn't poison the
       // queue for every later save. This save's own outcome is handled below.
       saveQueueRef.current = saveQueueRef.current.catch(() => undefined).then(save);
@@ -179,14 +195,15 @@ export const SvgLibraryProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }, 350);
 
     return () => window.clearTimeout(timeout);
-  }, [assets, overrides, techniqueThumbnails, status, account?.id, account?.role]);
+  }, [assets, overrides, deletedSystemAssetIds, techniqueThumbnails, status, account?.id, account?.role]);
 
   const value = useMemo<SvgLibraryContextValue>(
     () => ({
       assets, setAssets, overrides, setOverrides,
+      deletedSystemAssetIds, setDeletedSystemAssetIds,
       techniqueThumbnails, setTechniqueThumbnails, persistenceStatus,
     }),
-    [assets, overrides, techniqueThumbnails, persistenceStatus]
+    [assets, overrides, deletedSystemAssetIds, techniqueThumbnails, persistenceStatus]
   );
 
   return <SvgLibraryContext.Provider value={value}>{children}</SvgLibraryContext.Provider>;
@@ -196,4 +213,9 @@ export function useSvgLibrary(): SvgLibraryContextValue {
   const context = useContext(SvgLibraryContext);
   if (!context) throw new Error("useSvgLibrary must be used inside SvgLibraryProvider");
   return context;
+}
+
+/** For reusable artwork with a built-in fallback, including isolated component tests. */
+export function useOptionalSvgLibrary(): SvgLibraryContextValue | null {
+  return useContext(SvgLibraryContext);
 }

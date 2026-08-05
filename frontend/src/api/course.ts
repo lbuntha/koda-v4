@@ -1,5 +1,5 @@
 import { api } from "./client";
-import type { CountingQuestion } from "../types";
+import type { CountingQuestion, CustomSvgAsset } from "../types";
 import type { UnitAccent, UnitIcon } from "../curriculum/types";
 
 export type CourseMode = "scheduled" | "free";
@@ -31,6 +31,11 @@ export interface CourseQueueItem {
   optional: boolean;
   status?: ActivityStatus;
   questions: CountingQuestion[];
+  /**
+   * Artwork frozen into the release, which the questions above reference by id. A student has
+   * no editable SVG library to resolve those ids against — see `assets/questionAsset.tsx`.
+   */
+  assets?: CustomSvgAsset[];
 }
 
 export interface CompletedCourseItem {

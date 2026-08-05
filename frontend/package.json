@@ -14,7 +14,9 @@
     "test:dom": "vitest run",
     "export:liquid-sort-levels": "tsx scripts/exportLiquidSortLevels.ts",
     "export:goods-sort-levels": "tsx scripts/exportGoodsSortLevels.ts",
-    "export:count-crates-levels": "tsx scripts/exportCountCratesLevels.ts"
+    "export:count-crates-levels": "tsx scripts/exportCountCratesLevels.ts",
+    "export:count-levels": "tsx scripts/exportCountLevels.ts",
+    "export:grade1-math": "tsx scripts/exportGrade1Math.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

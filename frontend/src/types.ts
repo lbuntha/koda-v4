@@ -30,7 +30,14 @@ export enum CountingTechnique {
   NUMBER_PATH = "NUMBER_PATH",
   STORY_PROBLEM_MAT = "STORY_PROBLEM_MAT",
   PLACE_VALUE_LAB = "PLACE_VALUE_LAB",
-  COUNT_CRATES = "COUNT_CRATES"
+  EQUATION_MAT = "EQUATION_MAT",
+  COMPARE_NUMBERS = "COMPARE_NUMBERS",
+  CLOCK_READ = "CLOCK_READ",
+  MEASURE_LENGTH = "MEASURE_LENGTH",
+  DATA_CHART = "DATA_CHART",
+  SHAPE_LAB = "SHAPE_LAB",
+  COUNT_CRATES = "COUNT_CRATES",
+  XTRA_MATH = "XTRA_MATH"
 }
 
 export interface CountableObject {
@@ -105,15 +112,28 @@ export interface CountingQuestion {
    */
   difficulty?: "easy" | "medium" | "hard";
   config: {
+    /**
+     * Why the answer is the answer, in one sentence a six-year-old can follow.
+     * Shown only after the child has solved the card, so it teaches rather than
+     * gives away — see the success panel in `GameLauncher`.
+     */
+    explanation?: string;
     /** Authored curriculum level used by multi-level game canvases such as Liquid Sort. */
     levelId?: string;
     weather?: string;
     showItemCardBox?: boolean;
     allowDrag?: boolean;
     assetType?: string;
-    customSvgMarkup?: string;
+    /**
+     * The library asset this question draws. A reference, not a copy, so editing the asset
+     * updates every question pointing at it — see `assets/assetRef.ts`.
+     */
     customSvgAssetId?: string;
+    /** @deprecated Inlined snapshot from before `customSvgAssetId`. Read, never written. */
+    customSvgMarkup?: string;
+    /** @deprecated Snapshot of the asset's label. See `customSvgMarkup`. */
     customSvgLabel?: string;
+    /** @deprecated Snapshot of the asset's scale. See `customSvgMarkup`. */
     customSvgScale?: number;
     baseCount?: number;
     extraCount?: number;
@@ -155,6 +175,44 @@ export interface CountingQuestion {
     multiplicand?: number;
     multiplier?: number;
     minuend?: number;
+    // Equation Mat — the true terms plus which one is hidden from the child.
+    equationOperation?: "add" | "subtract";
+    equationFirst?: number;
+    equationSecond?: number;
+    /**
+     * Which quantity the child supplies. `judge` is the odd one out: nothing is
+     * hidden, and the child decides whether the whole equation is true — the
+     * "the equal sign means the same as" half of 1.OA.D.7.
+     */
+    equationUnknown?: "result" | "first" | "second" | "judge";
+    /**
+     * `judge` only: what the right-hand side claims. One value states a total
+     * (`8 − 2 = 5`); two state a second sum (`5 + 2 = 3 + 4`).
+     */
+    equationClaimFirst?: number;
+    equationClaimSecond?: number;
+    // Compare Numbers
+    compareFirst?: number;
+    compareSecond?: number;
+    compareAnswer?: string;
+    // Clock
+    clockHour?: number;
+    clockMinute?: number;
+    clockLabel?: string;
+    // Measure Length
+    measureTask?: "measure" | "longest" | "shortest";
+    measureLengths?: number[];
+    measureLabels?: string[];
+    // Data Chart
+    dataKind?: "count" | "total" | "more" | "most";
+    dataCounts?: number[];
+    dataCategories?: string[];
+    dataFocus?: number;
+    dataAgainst?: number;
+    // Shape Lab
+    shapeTask?: "sides" | "corners" | "compose" | "shares";
+    shapeName?: "triangle" | "square" | "rectangle" | "pentagon" | "hexagon" | "circle";
+    shapeShares?: number;
     rows?: number;
     cols?: number;
     patternSequence?: string[]; // E.g. ["🍎", "🧁", "🍎", "🧁", ""] — every blank slot ("", "?" or "_") is a fillable gap
@@ -169,6 +227,10 @@ export interface CountingQuestion {
     num1?: number;
     num2?: number;
     num3?: number;
+    tier?: string;
+    defaultVsComputer?: boolean;
+    timeLimitSec?: number;
+    themeId?: string;
     /**
      * Addition Tutor: author-defined fluency problems for the final phase.
      * When omitted the canvas derives three problems that match the taught

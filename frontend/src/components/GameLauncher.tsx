@@ -4,8 +4,9 @@
  */
 
 import React, { useState, useEffect, useRef } from "react";
-import { CountingQuestion, CUSTOM_SVG_OBJECT_PLACEHOLDER } from "../types";
+import { CountingQuestion } from "../types";
 import { sounds } from "../sound";
+import { QuestionAssetProvider } from "../assets/questionAsset";
 import { CanvasAudienceProvider } from "./canvases/presentation";
 import { OneToOneCanvas } from "./canvases/OneToOneCanvas";
 import { CANVAS_BY_TECHNIQUE } from "./studio/canvasRegistry";
@@ -181,14 +182,6 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
     analyticsLogger.logHintRequested(slideContext(activeQuestion, currentIdx), details);
   };
 
-  // Synchronize dynamic CUSTOM_SVG_OBJECT_PLACEHOLDER for the slide player canvas
-  useEffect(() => {
-    if (activeQuestion?.config?.assetType === "custom_svg") {
-      CUSTOM_SVG_OBJECT_PLACEHOLDER.emoji = activeQuestion.config.customSvgMarkup || "";
-      CUSTOM_SVG_OBJECT_PLACEHOLDER.label = activeQuestion.config.customSvgLabel || "Custom Shape";
-    }
-  }, [activeId, activeQuestion?.config?.assetType, activeQuestion?.config?.customSvgMarkup, activeQuestion?.config?.customSvgLabel]);
-
   // Fullscreen support
   const toggleBrowserFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -339,9 +332,12 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
       // Every canvas shares one layout; this tells that layout who is looking, so none of
       // the twenty-six need a prop for it.
       <CanvasAudienceProvider learnerMode={kidMode}>
-        <LazyBoundary>
-          <Canvas key={activeQuestion.id} {...canvasProps} />
-        </LazyBoundary>
+        {/* Likewise for the artwork this question chose — see `questionAsset.tsx`. */}
+        <QuestionAssetProvider asset={activeQuestion.config}>
+          <LazyBoundary>
+            <Canvas key={activeQuestion.id} {...canvasProps} />
+          </LazyBoundary>
+        </QuestionAssetProvider>
       </CanvasAudienceProvider>
     );
   };
@@ -529,6 +525,15 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
                         </p>
                       </div>
                     </div>
+                    {/* Why it was the answer — authored per question, and shown only here,
+                        after it has been solved, so it teaches without giving it away. */}
+                    {activeQuestion?.config?.explanation && (
+                      <p className={`rounded-2xl px-3 py-2 text-xs font-semibold leading-snug ${
+                        isDark ? "bg-slate-800/70 text-slate-200" : "bg-white/20 text-white"
+                      }`}>
+                        {activeQuestion.config.explanation}
+                      </p>
+                    )}
                     {kidMode ? (
                       <div className={`h-2 overflow-hidden rounded-full ${isDark ? "bg-white/10" : "bg-white/25"}`}>
                         <div className="h-full w-full animate-pulse rounded-full bg-amber-300" />

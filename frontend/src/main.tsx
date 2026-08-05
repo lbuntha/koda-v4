@@ -3,11 +3,13 @@ import {createRoot} from 'react-dom/client';
 import {AuthProvider} from './auth/AuthContext';
 import {RoleRouter} from './auth/RoleRouter';
 import {SvgLibraryProvider} from './assets/SvgLibraryContext';
+import {GoodsAssetLibrary} from './assets/goods-sort/GoodsAssetLibrary';
 import {AppSettingsProvider} from './settings/AppSettingsContext';
 import {PwaPrompts} from './pwa/PwaPrompts';
 import {ComponentPreview} from './student/home/shared/ComponentPreview';
 import {GoodsSortPreview} from './components/canvases/GoodsSortPreview';
 import {CountCratesPreview} from './components/canvases/CountCratesPreview';
+import {CountLadderPreview} from './components/canvases/CountLadderPreview';
 import './index.css';
 
 // Zoom is held still inside an activity only — see `useZoomLock`, applied to the
@@ -29,10 +31,14 @@ const preview =
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    {preview === 'learner-cards' ? <ComponentPreview /> : preview === 'goods-sort' ? <GoodsSortPreview /> : preview === 'count-crates' ? <CountCratesPreview /> : (
+    {preview === 'learner-cards' ? <ComponentPreview /> : preview === 'goods-sort' ? <GoodsSortPreview /> : preview === 'count-crates' ? <CountCratesPreview /> : preview === 'count-ladder' ? <CountLadderPreview /> : (
     <AuthProvider>
       <AppSettingsProvider>
         <SvgLibraryProvider>
+          {/* The zero-size sprite sheet behind every `goods:` asset id. Mounted once here
+              rather than per canvas, because any activity may now draw that artwork —
+              see `assetCatalog.ts`. */}
+          <GoodsAssetLibrary />
           <RoleRouter />
           {/* Service worker registration + update/install/offline notices. Mounted outside
               the role screens so it survives every role switch. */}

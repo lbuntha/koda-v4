@@ -31,6 +31,7 @@ function fakeLocalStorage() {
 const LIBRARY = {
   assets: [{ id: "svg-apple", label: "Apple" }] as any,
   overrides: { "cherry": { assetId: "svg-apple" } } as any,
+  deletedSystemAssetIds: ["kid-nav-home"],
   techniqueThumbnails: { count_on: "svg-apple", subitize: "svg-pear" },
 };
 
@@ -53,7 +54,7 @@ describe("the cache round-trips every part of the library", () => {
 
   test("a missing cache reads as empty rather than throwing", () => {
     assert.deepEqual(readCache("never-seen"), {
-      assets: [], overrides: {}, techniqueThumbnails: {},
+      assets: [], overrides: {}, deletedSystemAssetIds: [], techniqueThumbnails: {},
     });
   });
 

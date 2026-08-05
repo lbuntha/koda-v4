@@ -29,6 +29,10 @@ interface Props {
   subtitle?: string;
   actions?: React.ReactNode;
   contentClassName?: string;
+  appearance?: "default" | "parent";
+  onProfile?: () => void;
+  onSettings?: () => void;
+  onLogout?: () => void;
   children: React.ReactNode;
 }
 
@@ -42,6 +46,10 @@ export const DashboardLayout: React.FC<Props> = ({
   subtitle,
   actions,
   contentClassName,
+  appearance = "default",
+  onProfile,
+  onSettings,
+  onLogout,
   children,
 }) => {
   const [collapsed, setCollapsed] = useState<boolean>(() => {
@@ -67,10 +75,21 @@ export const DashboardLayout: React.FC<Props> = ({
 
   return (
     <div className="flex h-dvh min-h-0 flex-col overflow-hidden bg-slate-50 font-sans md:flex-row dark:bg-[#0E1020]">
-      <AppSidebar brand={brand} sections={sections} active={active} onNavigate={onNavigate} user={user} collapsed={collapsed} />
+      <AppSidebar
+        brand={brand}
+        sections={sections}
+        active={active}
+        onNavigate={onNavigate}
+        user={user}
+        collapsed={collapsed}
+        appearance={appearance}
+        onProfile={onProfile}
+        onSettings={onSettings}
+        onLogout={onLogout}
+      />
 
       <main className="flex min-h-0 min-w-0 flex-1 flex-col pb-16 md:pb-0">
-        <header className="flex min-h-[4rem] shrink-0 items-center justify-between gap-3 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl [-webkit-backdrop-filter:blur(16px)] [-webkit-tap-highlight-color:transparent] px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 sm:px-5 md:pt-3 dark:border-white/10 dark:bg-[#111329]/90">
+        <header className={`flex min-h-[4rem] shrink-0 items-center justify-between gap-3 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl [-webkit-backdrop-filter:blur(16px)] [-webkit-tap-highlight-color:transparent] px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 sm:px-5 md:pt-3 dark:border-white/10 dark:bg-[#111329]/90 ${appearance === "parent" ? "md:min-h-[4.5rem] md:px-7" : ""}`}>
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <button
               onClick={toggle}
@@ -92,7 +111,7 @@ export const DashboardLayout: React.FC<Props> = ({
 
             {(title || subtitle) && (
               <div className="hidden sm:block min-w-0 flex-1">
-                {title && <h1 className="truncate text-base font-black leading-tight text-slate-900 dark:text-white">{title}</h1>}
+                {title && <h1 className={`truncate text-base leading-tight dark:text-white ${appearance === "parent" ? "font-semibold text-[#0E0B55]" : "font-black text-slate-900"}`}>{title}</h1>}
                 {subtitle && <p className="truncate text-xs text-slate-500 dark:text-slate-400">{subtitle}</p>}
               </div>
             )}

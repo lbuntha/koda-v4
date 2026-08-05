@@ -30,6 +30,7 @@ const VARIANT_STROKE: Record<NonNullable<SpinnerProps["variant"]>, { primary: st
 export const Spinner = React.forwardRef<HTMLSpanElement, SpinnerProps>(
   ({ size = "md", variant = "violet", glow = false, label, className, ...props }, ref) => {
     const stroke = VARIANT_STROKE[variant];
+    const gradientId = React.useId().replace(/:/g, "");
 
     return (
       <span
@@ -45,13 +46,13 @@ export const Spinner = React.forwardRef<HTMLSpanElement, SpinnerProps>(
         )}
         <svg
           viewBox="0 0 32 32"
-          className="h-full w-full animate-[spin_1.4s_linear_infinite] overflow-visible motion-reduce:animate-none"
+          className="absolute inset-0 h-full w-full animate-[spin_1.15s_cubic-bezier(0.55,0.15,0.45,0.85)_infinite] overflow-visible motion-reduce:animate-none"
           fill="none"
           aria-hidden="true"
         >
           {variant === "rainbow" && (
             <defs>
-              <linearGradient id="koda-spinner-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#8B5CF6" />
                 <stop offset="50%" stopColor="#EC4899" />
                 <stop offset="100%" stopColor="#F59E0B" />
@@ -72,8 +73,8 @@ export const Spinner = React.forwardRef<HTMLSpanElement, SpinnerProps>(
           {/* Active arc */}
           <path
             d="M 16 4 A 12 12 0 0 1 28 16"
-            stroke={stroke.primary}
-            strokeWidth="3.5"
+            stroke={variant === "rainbow" ? `url(#${gradientId})` : stroke.primary}
+            strokeWidth="3"
             strokeLinecap="round"
           />
 
@@ -81,10 +82,19 @@ export const Spinner = React.forwardRef<HTMLSpanElement, SpinnerProps>(
           <circle
             cx="16"
             cy="4"
-            r="2.5"
+            r="2"
             fill="#F9C846"
             className="drop-shadow-[0_0_6px_rgba(249,200,70,0.8)]"
           />
+        </svg>
+
+        {/* Keep the brand mark still while the progress orbit moves around it. */}
+        <svg viewBox="0 0 32 32" className="relative h-full w-full" fill="none" aria-hidden="true">
+          <g fill="none" stroke={stroke.primary} strokeLinecap="round" strokeLinejoin="round" opacity="0.95">
+            <line x1="12" y1="9" x2="12" y2="23" strokeWidth="3" />
+            <line x1="14" y1="16" x2="22" y2="9" strokeWidth="2.8" />
+            <line x1="14" y1="16" x2="22" y2="23" strokeWidth="2.8" />
+          </g>
         </svg>
       </span>
     );

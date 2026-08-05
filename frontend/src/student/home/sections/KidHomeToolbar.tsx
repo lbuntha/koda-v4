@@ -1,5 +1,5 @@
 import React from "react";
-import { BookOpen, CheckCircle2, Flame, Gift, Home, LogOut, Map, Palette, Star, Zap } from "lucide-react";
+import { BookOpen, CheckCircle2, Gift, Home, LogOut, Map, Palette, Star, Zap } from "lucide-react";
 import { KidAvatar } from "../../../components/KidAvatar";
 import { KodaAvatarPicker } from "../../../components/KodaAvatarPicker";
 import { Button, Dialog, Spinner } from "../../../components/ui";
@@ -11,6 +11,9 @@ import type { LearnerSubject } from "../../../api/course";
 import { SubjectSwitcher } from "../SubjectSwitcher";
 import { AnimatedXpPill } from "../shared/AnimatedXpPill";
 import { AppToolbar } from "../shared";
+import { useSvgLibrary } from "../../../assets/SvgLibraryContext";
+import { SvgLibraryAsset } from "../../../assets/SvgLibraryAsset";
+import { KID_NAV_ASSETS, KID_NAV_ASSET_IDS } from "../kidNavAssets";
 
 interface Props {
   stats: KidStats;
@@ -31,9 +34,9 @@ interface Props {
 export type KidHomeDestination = "home" | "skills" | "quests";
 
 const ALL_SECTIONS = [
-  { label: "Home", icon: Home, destination: "home" },
-  { label: "Skills", icon: BookOpen, destination: "skills" },
-  { label: "Quests", icon: Map, destination: "quests" },
+  { label: "Home", fallback: Home, assetId: KID_NAV_ASSET_IDS.home, destination: "home" },
+  { label: "Skills", fallback: BookOpen, assetId: KID_NAV_ASSET_IDS.skills, destination: "skills" },
+  { label: "Quests", fallback: Map, assetId: KID_NAV_ASSET_IDS.quests, destination: "quests" },
 ] as const;
 
 /** Sticky learner navigation with live section highlighting and account actions. */
@@ -52,6 +55,7 @@ export const KidHomeToolbar: React.FC<Props> = ({
   switchingSubject,
   onSubjectChange,
 }) => {
+  const { assets: svgAssets, setAssets: setSvgAssets, deletedSystemAssetIds } = useSvgLibrary();
   const [rewardsOpen, setRewardsOpen] = React.useState(false);
   const [profileOpen, setProfileOpen] = React.useState(false);
   const [avatarOpen, setAvatarOpen] = React.useState(false);
@@ -60,6 +64,13 @@ export const KidHomeToolbar: React.FC<Props> = ({
   const [avatarError, setAvatarError] = React.useState<string | null>(null);
   const rewardsRef = React.useRef<HTMLDivElement>(null);
   const profileRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const existingIds = new Set(svgAssets.map(asset => asset.id));
+    const deletedIds = new Set(deletedSystemAssetIds);
+    const missingAssets = KID_NAV_ASSETS.filter(asset => !existingIds.has(asset.id) && !deletedIds.has(asset.id));
+    if (missingAssets.length > 0) setSvgAssets(current => [...current, ...missingAssets]);
+  }, [deletedSystemAssetIds, setSvgAssets, svgAssets]);
 
   React.useEffect(() => {
     if (!rewardsOpen) return;
@@ -126,19 +137,19 @@ export const KidHomeToolbar: React.FC<Props> = ({
                 onClick={() => isAvailable && onNavigate(section.destination)}
                 disabled={!isAvailable}
                 aria-current={isActive ? "page" : undefined}
-                className={`h-12 min-w-12 flex-1 flex-col gap-1 rounded-xl px-2 text-[10px] font-extrabold leading-none sm:min-w-16 sm:max-w-20 sm:px-3 sm:text-[11px] md:min-w-20 md:max-w-24 lg:min-w-24 lg:max-w-28 lg:text-xs ${
+                className={`h-14 min-w-12 flex-1 flex-col gap-1 rounded-2xl px-2 text-[10px] font-extrabold leading-none sm:min-w-16 sm:px-3 md:h-12 md:min-w-20 md:max-w-24 lg:min-w-24 lg:max-w-28 lg:text-xs ${
                   isActive
                     ? "bg-[#F0EBFF] text-[#6844EA] hover:bg-[#E9E1FF] dark:bg-violet-400/15 dark:text-[#CDBEFF]"
                     : "text-[#7B8496] hover:bg-[#F5F1FF] hover:text-[#6844EA] dark:text-[#A79FC4] dark:hover:bg-white/10"
                 }`}
               >
-                <section.icon size={19} strokeWidth={2.2} className="lg:h-5 lg:w-5" />
-                <span>{section.label}</span>
+                <SvgLibraryAsset assetId={section.assetId} size={30} fallback={<section.fallback size={27} strokeWidth={2.2} />} />
+                <span className="hidden md:inline">{section.label}</span>
               </Button>
             );
           })}
 
-          <div ref={rewardsRef} className="relative">
+          <div ref={rewardsRef} className="relative flex flex-1 md:block md:flex-none">
             <Button
               type="button"
               variant="ghost"
@@ -148,30 +159,30 @@ export const KidHomeToolbar: React.FC<Props> = ({
               }}
               aria-expanded={rewardsOpen}
               aria-controls="kid-rewards-summary"
-              className={`h-12 min-w-12 flex-1 flex-col gap-1 rounded-xl px-2 text-[10px] font-extrabold leading-none sm:min-w-16 sm:max-w-20 sm:px-3 sm:text-[11px] md:min-w-20 md:max-w-24 lg:min-w-24 lg:max-w-28 lg:text-xs ${
+              className={`h-14 min-w-12 w-full flex-1 flex-col gap-1 rounded-2xl px-2 text-[10px] font-extrabold leading-none sm:min-w-16 sm:px-3 md:h-12 md:min-w-20 md:max-w-24 lg:min-w-24 lg:max-w-28 lg:text-xs ${
                 rewardsOpen
                   ? "bg-[#F0EBFF] text-[#6844EA] dark:bg-violet-400/15 dark:text-[#CDBEFF]"
                   : "text-[#7B8496] hover:bg-[#F5F1FF] hover:text-[#6844EA] dark:text-[#A79FC4] dark:hover:bg-white/10"
               }`}
             >
-              <Gift size={19} strokeWidth={2.2} className="lg:h-5 lg:w-5" />
-              <span>Rewards</span>
+              <SvgLibraryAsset assetId={KID_NAV_ASSET_IDS.rewards} size={30} fallback={<Gift size={27} strokeWidth={2.2} />} />
+              <span className="hidden md:inline">Rewards</span>
             </Button>
             {rewardsOpen && (
               <div
                 id="kid-rewards-summary"
                 role="dialog"
                 aria-label="Rewards summary"
-                className="absolute right-0 top-14 z-50 w-64 rounded-2xl border border-[#E7EAF2] bg-white p-3 shadow-xl shadow-slate-950/10 dark:border-white/10 dark:bg-[#1B1737] dark:shadow-black/30"
+                className="absolute bottom-16 right-0 top-auto z-50 w-64 rounded-2xl border border-[#E7EAF2] bg-white p-3 shadow-xl shadow-slate-950/10 md:bottom-auto md:top-14 dark:border-white/10 dark:bg-[#1B1737] dark:shadow-black/30"
               >
                 <p className="px-1 text-xs font-black text-[#332750] dark:text-[#F2EEFF]">Your rewards</p>
                 <div className="mt-2 grid grid-cols-2 gap-2">
                   <span className="rounded-xl bg-[#FFF9DE] p-2 text-[10px] font-bold text-[#7B650E] dark:bg-amber-400/10 dark:text-amber-300">
-                    <Zap size={14} className="mb-1 fill-current text-[#F2B829]" />
+                    <span className="mb-1 block"><SvgLibraryAsset assetId={KID_NAV_ASSET_IDS.xp} size={20} fallback={<Zap size={14} className="fill-current text-[#F2B829]" />} /></span>
                     <strong className="block text-sm">{stats.totalXp}</strong> XP earned
                   </span>
                   <span className="rounded-xl bg-[#F0EBFF] p-2 text-[10px] font-bold text-[#6551BD] dark:bg-violet-400/10 dark:text-[#CDBEFF]">
-                    <Star size={14} className="mb-1 fill-current" />
+                    <span className="mb-1 block"><SvgLibraryAsset assetId={KID_NAV_ASSET_IDS.mastery} size={20} fallback={<Star size={14} className="fill-current" />} /></span>
                     <strong className="block text-sm">{stats.mastered}</strong> mastered
                   </span>
                   <span className="rounded-xl bg-emerald-50 p-2 text-[10px] font-bold text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300">
@@ -179,7 +190,7 @@ export const KidHomeToolbar: React.FC<Props> = ({
                     <strong className="block text-sm">{stats.activitiesDone}</strong> completed
                   </span>
                   <span className="rounded-xl bg-[#FFF1E8] p-2 text-[10px] font-bold text-[#D65F21] dark:bg-orange-400/10 dark:text-orange-300">
-                    <Flame size={14} className="mb-1 fill-current" />
+                    <span className="mb-1 block"><SvgLibraryAsset assetId={KID_NAV_ASSET_IDS.streak} size={20} fallback={<Star size={14} className="fill-current" />} /></span>
                     <strong className="block text-sm">{stats.streakDays}</strong> day streak
                   </span>
                 </div>
@@ -200,6 +211,16 @@ export const KidHomeToolbar: React.FC<Props> = ({
       actions={
         <>
           <AnimatedXpPill value={stats.totalXp} />
+          {stats.streakDays > 0 && (
+            <span
+              className="inline-flex h-8 items-center gap-1.5 rounded-full bg-[#FFF7E8] px-2.5 text-[10px] font-black tabular-nums text-[#C75A25] ring-1 ring-[#FFE1BD] sm:px-3 sm:text-xs dark:bg-orange-400/10 dark:text-orange-300 dark:ring-orange-300/15"
+              aria-label={`${stats.streakDays} day streak`}
+              title="Learning streak"
+            >
+              <SvgLibraryAsset assetId={KID_NAV_ASSET_IDS.streak} size={20} fallback={<Star size={14} className="fill-current" />} />
+              {stats.streakDays}
+            </span>
+          )}
           <div ref={profileRef} className="relative">
             <Button
               type="button"
@@ -227,7 +248,7 @@ export const KidHomeToolbar: React.FC<Props> = ({
                 </div>
                 {stats.streakDays > 0 && (
                   <p className="mx-1 flex items-center gap-2 rounded-xl bg-[#FFF1E8] px-2.5 py-2 text-[11px] font-extrabold text-[#D65F21] dark:bg-orange-400/10 dark:text-orange-300">
-                    <Flame size={14} className="fill-current" /> {stats.streakDays} day streak
+                    <SvgLibraryAsset assetId={KID_NAV_ASSET_IDS.streak} size={18} fallback={<Star size={14} className="fill-current" />} /> {stats.streakDays} day streak
                   </p>
                 )}
                 <Button

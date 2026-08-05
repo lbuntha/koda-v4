@@ -35,9 +35,76 @@ export function createBlankSkillQuestion(technique: CountingTechnique, skillId: 
   };
 }
 
+/**
+ * Deduplicate questions array by unique ID and content signature.
+ * Prevents duplicated cards from growing or accumulating on skill worksheets.
+ */
+export function deduplicateQuestions(questions: CountingQuestion[]): CountingQuestion[] {
+  if (!Array.isArray(questions)) return [];
+  const seenIds = new Set<string>();
+  const seenSignatures = new Set<string>();
+  const unique: CountingQuestion[] = [];
+
+  for (const q of questions) {
+    if (!q || !q.id) continue;
+    // Check ID uniqueness
+    if (seenIds.has(q.id)) continue;
+
+    // Check Signature uniqueness (skillId + technique + title + objectId + config)
+    const configStr = JSON.stringify(q.config || {});
+    const signature = `${q.skillId || ""}:${q.technique}:${q.title}:${q.objectId || ""}:${configStr}`;
+    if (seenSignatures.has(signature)) continue;
+
+    seenIds.add(q.id);
+    seenSignatures.add(signature);
+    unique.push(q);
+  }
+
+  return unique;
+}
+
+/**
+ * Normalizes question deck so EVERY registered component has EXACTLY 1 sample question card:
+ * 1. If a component has 0 questions, seeds 1 new sample question for it.
+ * 2. If a component has > 1 questions, removes extra records so only 1 remains.
+ */
+export function ensureExactlyOneSamplePerComponent(questions: CountingQuestion[]): CountingQuestion[] {
+  const byTechniqueMap = new Map<string, CountingQuestion>();
+
+  // Collect the first question for each technique present in existing questions
+  if (Array.isArray(questions)) {
+    for (const q of questions) {
+      if (q && q.technique && !byTechniqueMap.has(q.technique)) {
+        byTechniqueMap.set(q.technique, q);
+      }
+    }
+  }
+
+  // Ensure every registered technique in ALL_TECHNIQUES has a sample card
+  const result: CountingQuestion[] = [];
+  for (const manifest of ALL_TECHNIQUES) {
+    const existing = byTechniqueMap.get(manifest.technique);
+    if (existing) {
+      result.push(existing);
+    } else {
+      // Seed 1 new sample card for zero-count component
+      try {
+        const seeded = createBlankSkillQuestion(manifest.technique, "");
+        seeded.title = `${formatTechniqueLabel(manifest.technique)} Sample`;
+        result.push(seeded);
+      } catch {
+        // Fallback if schema generation fails
+      }
+    }
+  }
+
+  return result;
+}
+
 /** Preserves the deck's own ordering — a skill's questions are just the subsequence of the full deck that points at it. */
 export function filterAndSortBySkill(questions: CountingQuestion[], skillId: string): CountingQuestion[] {
-  return questions.filter(q => q.skillId === skillId);
+  const unique = deduplicateQuestions(questions);
+  return unique.filter(q => q.skillId === skillId);
 }
 
 /**

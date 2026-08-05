@@ -1,0 +1,211 @@
+[
+  {
+    "id": "count_1",
+    "label": "Three in a row",
+    "rationale": "The first win. A short line removes every tracking problem so the count is the only task.",
+    "tier": "starter",
+    "technique": "ONE_TO_ONE",
+    "targetCount": 3,
+    "config": {
+      "pattern": "line",
+      "showNumbersOnTap": true,
+      "requireAnswerInput": false
+    },
+    "usable": true,
+    "problems": []
+  },
+  {
+    "id": "count_2",
+    "label": "Five in a row",
+    "rationale": "Same layout, one hand's worth — the count children meet first outside school.",
+    "tier": "starter",
+    "technique": "ONE_TO_ONE",
+    "targetCount": 5,
+    "config": {
+      "pattern": "line",
+      "showNumbersOnTap": true,
+      "requireAnswerInput": false
+    },
+    "usable": true,
+    "problems": []
+  },
+  {
+    "id": "count_3",
+    "label": "Six in pairs",
+    "rationale": "Pairs break the line into groups, the first hint that counting need not be one at a time.",
+    "tier": "starter",
+    "technique": "ONE_TO_ONE",
+    "targetCount": 6,
+    "config": {
+      "pattern": "pairs",
+      "showNumbersOnTap": true,
+      "requireAnswerInput": false
+    },
+    "usable": true,
+    "problems": []
+  },
+  {
+    "id": "count_4",
+    "label": "Eight in a line, no numbers",
+    "rationale": "The tap numbers come off. The child now has to hold the running count themselves.",
+    "tier": "starter",
+    "technique": "ONE_TO_ONE",
+    "targetCount": 8,
+    "config": {
+      "pattern": "line",
+      "showNumbersOnTap": false,
+      "requireAnswerInput": true
+    },
+    "usable": true,
+    "problems": []
+  },
+  {
+    "id": "count_5",
+    "label": "Seven in a circle",
+    "rationale": "A circle has no first or last object, so the child must choose a start and remember it.",
+    "tier": "developing",
+    "technique": "DIFFERENT_ARRANGEMENTS",
+    "targetCount": 7,
+    "config": {
+      "pattern": "circle",
+      "requireAnswerInput": true
+    },
+    "usable": true,
+    "problems": []
+  },
+  {
+    "id": "count_6",
+    "label": "Nine in a grid",
+    "rationale": "A grid rewards counting by rows — the first arrangement where a strategy beats one-by-one.",
+    "tier": "developing",
+    "technique": "DIFFERENT_ARRANGEMENTS",
+    "targetCount": 9,
+    "config": {
+      "pattern": "grid",
+      "requireAnswerInput": true
+    },
+    "usable": true,
+    "problems": []
+  },
+  {
+    "id": "count_7",
+    "label": "Ten scattered",
+    "rationale": "Scatter is the real test of one-to-one: nothing on screen says which have been counted.",
+    "tier": "developing",
+    "technique": "DIFFERENT_ARRANGEMENTS",
+    "targetCount": 10,
+    "config": {
+      "pattern": "scatter",
+      "requireAnswerInput": true
+    },
+    "usable": true,
+    "problems": []
+  },
+  {
+    "id": "count_8",
+    "label": "Twelve scattered",
+    "rationale": "The top of what tracking alone can carry — and the reason the next tier changes strategy.",
+    "tier": "developing",
+    "technique": "DIFFERENT_ARRANGEMENTS",
+    "targetCount": 12,
+    "config": {
+      "pattern": "scatter",
+      "requireAnswerInput": true
+    },
+    "usable": true,
+    "problems": []
+  },
+  {
+    "id": "count_9",
+    "label": "Count on from five",
+    "rationale": "Five are already in the jar. Recounting them is the habit this level is built to break.",
+    "tier": "secure",
+    "technique": "COUNT_ON",
+    "targetCount": 8,
+    "config": {
+      "baseCount": 5,
+      "extraCount": 3,
+      "containerShape": "jar",
+      "requireAnswerInput": true
+    },
+    "usable": true,
+    "problems": []
+  },
+  {
+    "id": "count_10",
+    "label": "Count on from ten",
+    "rationale": "Counting on from a ten is the bridge to teen numbers, which the next tier depends on.",
+    "tier": "secure",
+    "technique": "COUNT_ON",
+    "targetCount": 14,
+    "config": {
+      "baseCount": 10,
+      "extraCount": 4,
+      "containerShape": "jar",
+      "requireAnswerInput": true
+    },
+    "usable": true,
+    "problems": []
+  },
+  {
+    "id": "count_11",
+    "label": "Count back from twelve",
+    "rationale": "The same move in reverse. Counting back is where addition-only counting comes apart.",
+    "tier": "secure",
+    "technique": "COUNT_BACK",
+    "targetCount": 12,
+    "config": {
+      "totalCount": 12,
+      "removeCount": 4,
+      "crossOutStyle": "strike",
+      "requireAnswerInput": true
+    },
+    "usable": true,
+    "problems": []
+  },
+  {
+    "id": "count_12",
+    "label": "Make a ten from thirteen",
+    "rationale": "First level where counting one-by-one is the wrong answer: ten and three is faster and truer.",
+    "tier": "extending",
+    "technique": "GROUP_IN_TENS",
+    "targetCount": 13,
+    "config": {
+      "sourceBinLabel": "Loose beads",
+      "showNumbersInSlots": true,
+      "requireAnswerInput": true
+    },
+    "usable": true,
+    "problems": []
+  },
+  {
+    "id": "count_13",
+    "label": "Make a ten from seventeen",
+    "rationale": "A fuller second group, so the ten is held while the ones are counted.",
+    "tier": "extending",
+    "technique": "GROUP_IN_TENS",
+    "targetCount": 17,
+    "config": {
+      "sourceBinLabel": "Loose beads",
+      "showNumbersInSlots": false,
+      "requireAnswerInput": true
+    },
+    "usable": true,
+    "problems": []
+  },
+  {
+    "id": "count_14",
+    "label": "Make a ten from twenty",
+    "rationale": "Two full tens — the top of this ladder, and the doorway to place value.",
+    "tier": "extending",
+    "technique": "GROUP_IN_TENS",
+    "targetCount": 20,
+    "config": {
+      "sourceBinLabel": "Loose beads",
+      "showNumbersInSlots": false,
+      "requireAnswerInput": true
+    },
+    "usable": true,
+    "problems": []
+  }
+]

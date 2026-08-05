@@ -4,6 +4,7 @@ import type { AnalyticsSummary } from "../api/analytics";
 import type { Child } from "../api/family";
 import { Button } from "../components/ui";
 import { FamilySummary } from "./FamilySummary";
+import { FamilyCodeCard } from "./FamilyCodeCard";
 import { RecentActivity } from "./RecentActivity";
 
 interface OverviewProps {
@@ -16,31 +17,37 @@ interface OverviewProps {
   onAdd: () => void;
   onOpenProgress: (child: Child) => void;
   childrenGrid: React.ReactNode;
+  familyCode?: string;
 }
 
-export const ParentOverview: React.FC<OverviewProps> = ({ childCount, summaries, summariesByChild, profiles, summariesLoading, showSummary, onAdd, onOpenProgress, childrenGrid }) => (
-  <div className="space-y-6">
+export const ParentOverview: React.FC<OverviewProps> = ({ childCount, summaries, summariesByChild, profiles, summariesLoading, showSummary, onAdd, onOpenProgress, childrenGrid, familyCode }) => (
+  <div className="space-y-5">
     {/* 1st Row: Family Summary */}
     {showSummary && (
       <FamilySummary summaries={summaries} loading={summariesLoading} expectedProfiles={childCount} className="mt-0" />
     )}
 
-    {/* 2nd Row: My Children */}
-    <section>
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-black text-[#0E0B55] dark:text-white">My children</h2>
-          <p className="mt-1 text-xs font-bold text-[#6D6997] dark:text-[#8F99AD]">{childCount} learner profile{childCount === 1 ? "" : "s"}</p>
+    <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+      {/* Primary learning area */}
+      <section className="min-w-0 rounded-3xl border border-[#E7E3F6] bg-white p-4 shadow-[0_6px_24px_rgba(83,74,183,0.05)] sm:p-5 dark:border-white/10 dark:bg-[#14182A]">
+        <div className="mb-4 flex items-center justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-semibold text-[#0E0B55] dark:text-white">My children</h2>
+            <p className="mt-1 text-xs font-medium text-[#6D6997] dark:text-[#8F99AD]">{childCount} learner profile{childCount === 1 ? "" : "s"}</p>
+          </div>
+          <Button type="button" variant="ghost" size="sm" onClick={onAdd} className="rounded-full text-xs font-semibold text-[#534AB7] dark:text-[#CDBEFF]"><Plus size={15} /> Add child</Button>
         </div>
-        <Button type="button" variant="ghost" size="sm" onClick={onAdd} className="rounded-full text-xs font-extrabold text-[#534AB7] dark:text-[#CDBEFF]"><Plus size={15} /> Add child</Button>
-      </div>
-      {childrenGrid}
-    </section>
+        {childrenGrid}
+      </section>
 
-    {/* 3rd Row: Recent Activity */}
-    {showSummary && (
-      <RecentActivity profiles={profiles} summaries={summariesByChild} loading={summariesLoading} onOpenProgress={onOpenProgress} />
-    )}
+      {/* Activity rail */}
+      <aside className="min-w-0 space-y-5 xl:sticky xl:top-0">
+        {showSummary && (
+          <RecentActivity profiles={profiles} summaries={summariesByChild} loading={summariesLoading} onOpenProgress={onOpenProgress} compact />
+        )}
+        {familyCode && <FamilyCodeCard code={familyCode} compact />}
+      </aside>
+    </div>
   </div>
 );
 

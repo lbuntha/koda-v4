@@ -3,9 +3,12 @@ import { Plus, Wand2 } from "lucide-react";
 import { Button } from "../../ui";
 import { Label, Input } from "../../ui";
 import { sounds } from "../../../sound";
-import { ASSET_SHAPES } from "../../Assets";
+import { BUILT_IN_ASSETS } from "../../../assets/assetCatalog";
 import { autoArrangeLayout } from "../../canvases/flexible/layout";
 import { PanelProps } from "../panelKit";
+
+/** Vector artwork only — a flexible item falls back to its emoji when no type is chosen. */
+const DRAWABLE_ASSETS = BUILT_IN_ASSETS.filter((asset) => asset.kind !== "emoji");
 
 export const FlexibleCanvasPanel: React.FC<PanelProps> = ({ question, update, updateConfig }) => {
   const [newItemEmoji, setNewItemEmoji] = useState<string>("🍎");
@@ -336,9 +339,11 @@ export const FlexibleCanvasPanel: React.FC<PanelProps> = ({ question, update, up
                                     className="text-[10px] border border-slate-200 rounded px-1.5 py-0.5 bg-slate-50 font-bold text-slate-600 cursor-pointer outline-none focus:border-indigo-500 w-[75px] truncate"
                                   >
                                     <option value="">Emoji / Text</option>
-                                    {ASSET_SHAPES.map(shape => (
-                                      <option key={shape.type} value={shape.type}>
-                                        {shape.emoji} {shape.label}
+                                    {/* Shapes and Goods Sort sprites alike — any artwork
+                                        `CountingAsset` can draw. See `assetCatalog.ts`. */}
+                                    {DRAWABLE_ASSETS.map(asset => (
+                                      <option key={asset.id} value={asset.id}>
+                                        {asset.label}
                                       </option>
                                     ))}
                                   </select>

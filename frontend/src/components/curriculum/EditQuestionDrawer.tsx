@@ -14,18 +14,18 @@
 
 import React, { useState, useEffect } from "react";
 import { Eye, Sliders, Wand2 } from "lucide-react";
-import { CountingQuestion, CustomSvgAsset } from "../../types";
+import { CountingQuestion } from "../../types";
 import { Drawer, Button, Label, Input, Textarea, Tabs, TabsList, TabsTrigger, TabsContent } from "../ui";
 import { TECHNIQUE_PANELS } from "../studio/panels";
 import { CanvasPreview } from "../studio/CanvasPreview";
 import { LazyBoundary } from "../LazyBoundary";
 import { AssetPicker } from "../studio/AssetPicker";
+import { assetQuestionPatch } from "../../assets/assetCatalog";
 import { AiGeneratorPanel } from "../studio/ai-generator";
 
 interface EditQuestionDrawerProps {
   question: CountingQuestion | null;
   questions: CountingQuestion[];
-  customSvgs: CustomSvgAsset[];
   onClose: () => void;
   onSave: (question: CountingQuestion) => void;
   onOpenSvgMaker?: () => void;
@@ -34,7 +34,6 @@ interface EditQuestionDrawerProps {
 export const EditQuestionDrawer: React.FC<EditQuestionDrawerProps> = ({
   question,
   questions,
-  customSvgs,
   onClose,
   onSave,
   onOpenSvgMaker,
@@ -100,28 +99,8 @@ export const EditQuestionDrawer: React.FC<EditQuestionDrawerProps> = ({
 
               <AssetPicker
                 question={draft}
-                customSvgs={customSvgs}
                 onOpenSvgMaker={onOpenSvgMaker}
-                onSelectObject={(item) => {
-                  const patch: Partial<CountingQuestion> = { objectId: item.id };
-                  if (item.assetType) {
-                    patch.config = { ...draft.config, assetType: item.assetType };
-                  }
-                  update(patch);
-                }}
-                onSelectCustomSvg={(asset) => {
-                  update({
-                    objectId: "custom_svg",
-                    config: {
-                      ...draft.config,
-                      assetType: "custom_svg",
-                      customSvgAssetId: asset.id,
-                      customSvgMarkup: asset.markup,
-                      customSvgLabel: asset.label,
-                      customSvgScale: asset.scale,
-                    },
-                  });
-                }}
+                onSelectAsset={(asset) => update(assetQuestionPatch(draft.config, asset))}
               />
             </TabsContent>
 

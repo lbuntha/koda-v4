@@ -1,28 +1,39 @@
 import React from "react";
-import { PanelProps } from "../panelKit";
+import { PanelProps, PanelSection, SelectField, SliderField } from "../panelKit";
 
-export const SubitizePanel: React.FC<PanelProps> = ({ question, update, updateConfig }) => (
+export const SubitizePanel: React.FC<PanelProps> = ({ question, updateConfig }) => {
+  const count = question.targetCount || 0;
 
-                  <div className="space-y-4 bg-indigo-50/30 border border-indigo-100 p-3.5 rounded-xl">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-800 font-mono block">
-                      Subitize Flash Card Speed
-                    </span>
-                    <div>
-                      <div className="flex justify-between items-center text-xs text-indigo-900 font-medium mb-1.5">
-                        <span>Flash Duration:</span>
-                        <b className="font-mono bg-white px-1.5 py-0.5 rounded border border-indigo-150">{((question.config.flashDurationMs || 1500) / 1000).toFixed(1)}s</b>
-                      </div>
-                      <input
-                        type="range"
-                        min={500}
-                        max={3500}
-                        step={250}
-                        value={question.config.flashDurationMs || 1500}
-                        onChange={(e) => update({
-                          config: { ...question.config, flashDurationMs: parseInt(e.target.value) }
-                        })}
-                        className="w-full h-1 bg-indigo-200 rounded appearance-none cursor-pointer accent-indigo-500"
-                      />
-                    </div>
-                  </div>
-);
+  return (
+    <PanelSection>
+      <SliderField
+        label="Flash Duration"
+        value={question.config.flashDurationMs || 1500}
+        min={500}
+        max={3500}
+        step={250}
+        format={(value) => `${(value / 1000).toFixed(1)}s`}
+        onChange={(value) => updateConfig({ flashDurationMs: value })}
+      />
+
+      {/*
+        The canvas has always read `config.pattern`, but nothing here ever set it,
+        so every flash came out as a dice face whatever the slide was for. A
+        different arrangement of the same quantity is the exercise.
+      */}
+      <SelectField
+        label="Flash Arrangement"
+        value={question.config.pattern || "dice"}
+        onChange={(value) => updateConfig({ pattern: value as any })}
+        options={[
+          { value: "dice", label: count > 6 ? "Dice Face (grid above 6)" : "Dice Face" },
+          { value: "pairs", label: "Pairs — two columns" },
+          { value: "ring", label: "Closed Ring" },
+          { value: "line", label: "Straight Line" },
+          { value: "grid", label: "Neat Grid" },
+          { value: "scatter", label: "Scattered (hardest)" }
+        ]}
+      />
+    </PanelSection>
+  );
+};

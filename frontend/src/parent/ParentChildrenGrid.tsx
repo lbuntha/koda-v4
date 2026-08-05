@@ -57,7 +57,7 @@ export const ParentChildrenGrid: React.FC<Props> = ({
 
   if (loading) {
     return (
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         <ParentChildCardSkeleton />
         <ParentChildCardSkeleton />
         <ParentChildCardSkeleton />
@@ -74,7 +74,7 @@ export const ParentChildrenGrid: React.FC<Props> = ({
   }
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid gap-3 sm:grid-cols-2">
       {profiles.map(child => (
         <ParentChildCard
           key={child.id}

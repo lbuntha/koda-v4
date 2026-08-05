@@ -1,0 +1,69 @@
+import type { CustomSvgAsset } from "../types";
+
+export const XTRAMATH_OWL_ASSET_ID = "koda_xtramath_owl";
+
+export const XTRAMATH_OWL_ASSET: CustomSvgAsset = {
+  id: XTRAMATH_OWL_ASSET_ID,
+  label: "Koda XtraMath Owl",
+  scale: 1,
+  markup: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none">
+  <defs>
+    <linearGradient id="owl-body" x1="24" y1="13" x2="72" y2="87" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C4B5FD"/>
+      <stop offset=".46" stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#5B21B6"/>
+    </linearGradient>
+    <linearGradient id="owl-wing" x1="16" y1="38" x2="78" y2="79" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A78BFA"/>
+      <stop offset="1" stop-color="#6D28D9"/>
+    </linearGradient>
+    <radialGradient id="owl-belly" cx=".35" cy=".2" r=".9">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset=".65" stop-color="#F1EAFE"/>
+      <stop offset="1" stop-color="#D8CCF8"/>
+    </radialGradient>
+    <linearGradient id="owl-beak" x1="40" y1="46" x2="55" y2="64" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFD66B"/>
+      <stop offset="1" stop-color="#F59E0B"/>
+    </linearGradient>
+    <linearGradient id="owl-badge" x1="38" y1="65" x2="57" y2="83" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF59D"/>
+      <stop offset="1" stop-color="#FBBF24"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="48" cy="88" rx="27" ry="4" fill="#35147A" opacity=".16"/>
+  <path d="m25 27 2-17 14 13Zm46 0-2-17-14 13Z" fill="#5B21B6"/>
+  <path d="m28 23 1-8 7 7Zm40 0-1-8-7 7Z" fill="#F0ABFC" opacity=".7"/>
+
+  <path d="M48 16c-23 0-36 17-34 40 1 21 14 33 34 33s33-12 34-33c2-23-11-40-34-40Z" fill="#4C1D95" opacity=".28" transform="translate(0 2)"/>
+  <path d="M48 14c-23 0-36 17-34 40 1 21 14 33 34 33s33-12 34-33c2-23-11-40-34-40Z" fill="url(#owl-body)"/>
+
+  <path d="M18 48c-7 9-7 24 2 31 6 5 13-2 15-13 2-12-10-27-17-18Zm60 0c7 9 7 24-2 31-6 5-13-2-15-13-2-12 10-27 17-18Z" fill="url(#owl-wing)"/>
+  <path d="M21 53c-3 7-2 14 2 18m52-18c3 7 2 14-2 18" stroke="#DDD6FE" stroke-width="2.2" stroke-linecap="round" opacity=".5"/>
+
+  <ellipse cx="48" cy="65" rx="22" ry="20" fill="url(#owl-belly)"/>
+  <path d="M32 65c6 3 10 3 16 0 6 3 10 3 16 0" stroke="#C4B5FD" stroke-width="1.6" stroke-linecap="round" opacity=".65"/>
+
+  <path d="M18 40c5-14 18-18 30-8-7 15-20 21-30 8Zm60 0c-5-14-18-18-30-8 7 15 20 21 30 8Z" fill="#EDE9FE" opacity=".95"/>
+  <circle cx="33.5" cy="40" r="14" fill="#FFFFFF"/>
+  <circle cx="62.5" cy="40" r="14" fill="#FFFFFF"/>
+  <circle cx="34" cy="42" r="7.5" fill="#2E1065"/>
+  <circle cx="62" cy="42" r="7.5" fill="#2E1065"/>
+  <circle cx="36.5" cy="39" r="2.8" fill="#FFFFFF"/>
+  <circle cx="64.5" cy="39" r="2.8" fill="#FFFFFF"/>
+  <circle cx="32" cy="45.5" r="1.3" fill="#A78BFA"/>
+  <circle cx="60" cy="45.5" r="1.3" fill="#A78BFA"/>
+
+  <ellipse cx="23" cy="54" rx="6" ry="3" fill="#F9A8D4" opacity=".55"/>
+  <ellipse cx="73" cy="54" rx="6" ry="3" fill="#F9A8D4" opacity=".55"/>
+  <path d="m48 49 8 8-8 7-8-7Z" fill="url(#owl-beak)"/>
+
+  <circle cx="48" cy="72" r="10" fill="#6D28D9" opacity=".14"/>
+  <circle cx="48" cy="70" r="9" fill="url(#owl-badge)" stroke="#D97706" stroke-width="1"/>
+  <path d="m51 62-8 10h5l-3 7 9-11h-5Z" fill="#7C3AED" stroke="#5B21B6" stroke-width=".7" stroke-linejoin="round"/>
+  <path d="M36 85v5m-5-2h10m19-3v5m-5-2h10" stroke="#F59E0B" stroke-width="4" stroke-linecap="round"/>
+
+  <path d="M23 28c5-7 12-9 18-7" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" opacity=".38"/>
+</svg>`,
+};

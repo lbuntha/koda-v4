@@ -15,6 +15,7 @@ import { CountingQuestion } from "../../types";
 import { CANVAS_BY_TECHNIQUE } from "./canvasRegistry";
 import { OneToOneCanvas } from "../canvases/OneToOneCanvas";
 import { LazyBoundary } from "../LazyBoundary";
+import { QuestionAssetProvider } from "../../assets/questionAsset";
 
 interface CanvasPreviewProps {
   question: CountingQuestion;
@@ -42,17 +43,20 @@ export const CanvasPreview: React.FC<CanvasPreviewProps> = ({
 
   return (
     <div className={className ?? "w-full min-h-[320px] rounded-2xl border border-slate-200 bg-white p-2 overflow-hidden"}>
-      <LazyBoundary>
-        <Canvas
-          key={`${question.id}-${question.technique}`}
-          question={question}
-          isPlayMode={isPlayMode}
-          isDark={isDark}
-          onSuccess={onSuccess ?? (() => {})}
-          onAttempt={onAttempt}
-          onHint={onHint}
-        />
-      </LazyBoundary>
+      {/* Same artwork the real player would draw — see `questionAsset.tsx`. */}
+      <QuestionAssetProvider asset={question.config}>
+        <LazyBoundary>
+          <Canvas
+            key={`${question.id}-${question.technique}`}
+            question={question}
+            isPlayMode={isPlayMode}
+            isDark={isDark}
+            onSuccess={onSuccess ?? (() => {})}
+            onAttempt={onAttempt}
+            onHint={onHint}
+          />
+        </LazyBoundary>
+      </QuestionAssetProvider>
     </div>
   );
 };
