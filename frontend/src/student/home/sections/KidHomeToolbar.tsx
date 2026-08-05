@@ -137,13 +137,15 @@ export const KidHomeToolbar: React.FC<Props> = ({
                 onClick={() => isAvailable && onNavigate(section.destination)}
                 disabled={!isAvailable}
                 aria-current={isActive ? "page" : undefined}
-                className={`h-14 min-w-12 flex-1 flex-col gap-1 rounded-2xl px-2 text-[10px] font-extrabold leading-none sm:min-w-16 sm:px-3 md:h-12 md:min-w-20 md:max-w-24 lg:min-w-24 lg:max-w-28 lg:text-xs ${
+                className={`h-16 min-w-14 flex-1 flex-col gap-1 rounded-2xl px-2 text-[10px] font-extrabold leading-none sm:min-w-16 sm:px-3 md:h-12 md:min-w-20 md:max-w-24 lg:min-w-24 lg:max-w-28 lg:text-xs ${
                   isActive
                     ? "bg-[#F0EBFF] text-[#6844EA] hover:bg-[#E9E1FF] dark:bg-violet-400/15 dark:text-[#CDBEFF]"
                     : "text-[#7B8496] hover:bg-[#F5F1FF] hover:text-[#6844EA] dark:text-[#A79FC4] dark:hover:bg-white/10"
                 }`}
               >
-                <SvgLibraryAsset assetId={section.assetId} size={30} fallback={<section.fallback size={27} strokeWidth={2.2} />} />
+                <span className="inline-flex scale-[1.16] md:scale-100">
+                  <SvgLibraryAsset assetId={section.assetId} size={30} fallback={<section.fallback size={27} strokeWidth={2.2} />} />
+                </span>
                 <span className="hidden md:inline">{section.label}</span>
               </Button>
             );
@@ -159,13 +161,15 @@ export const KidHomeToolbar: React.FC<Props> = ({
               }}
               aria-expanded={rewardsOpen}
               aria-controls="kid-rewards-summary"
-              className={`h-14 min-w-12 w-full flex-1 flex-col gap-1 rounded-2xl px-2 text-[10px] font-extrabold leading-none sm:min-w-16 sm:px-3 md:h-12 md:min-w-20 md:max-w-24 lg:min-w-24 lg:max-w-28 lg:text-xs ${
+              className={`h-16 min-w-14 w-full flex-1 flex-col gap-1 rounded-2xl px-2 text-[10px] font-extrabold leading-none sm:min-w-16 sm:px-3 md:h-12 md:min-w-20 md:max-w-24 lg:min-w-24 lg:max-w-28 lg:text-xs ${
                 rewardsOpen
                   ? "bg-[#F0EBFF] text-[#6844EA] dark:bg-violet-400/15 dark:text-[#CDBEFF]"
                   : "text-[#7B8496] hover:bg-[#F5F1FF] hover:text-[#6844EA] dark:text-[#A79FC4] dark:hover:bg-white/10"
               }`}
             >
-              <SvgLibraryAsset assetId={KID_NAV_ASSET_IDS.rewards} size={30} fallback={<Gift size={27} strokeWidth={2.2} />} />
+              <span className="inline-flex scale-[1.16] md:scale-100">
+                <SvgLibraryAsset assetId={KID_NAV_ASSET_IDS.rewards} size={30} fallback={<Gift size={27} strokeWidth={2.2} />} />
+              </span>
               <span className="hidden md:inline">Rewards</span>
             </Button>
             {rewardsOpen && (
@@ -173,7 +177,7 @@ export const KidHomeToolbar: React.FC<Props> = ({
                 id="kid-rewards-summary"
                 role="dialog"
                 aria-label="Rewards summary"
-                className="absolute bottom-16 right-0 top-auto z-50 w-64 rounded-2xl border border-[#E7EAF2] bg-white p-3 shadow-xl shadow-slate-950/10 md:bottom-auto md:top-14 dark:border-white/10 dark:bg-[#1B1737] dark:shadow-black/30"
+                className="absolute bottom-[4.75rem] right-0 top-auto z-50 w-64 rounded-2xl border border-[#E7EAF2] bg-white p-3 shadow-xl shadow-slate-950/10 md:bottom-auto md:top-14 dark:border-white/10 dark:bg-[#1B1737] dark:shadow-black/30"
               >
                 <p className="px-1 text-xs font-black text-[#332750] dark:text-[#F2EEFF]">Your rewards</p>
                 <div className="mt-2 grid grid-cols-2 gap-2">

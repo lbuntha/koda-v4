@@ -88,7 +88,7 @@ export const DashboardLayout: React.FC<Props> = ({
         onLogout={onLogout}
       />
 
-      <main className="flex min-h-0 min-w-0 flex-1 flex-col pb-16 md:pb-0">
+      <main className={`flex min-h-0 min-w-0 flex-1 flex-col md:pb-0 ${appearance === "parent" ? "pb-20" : "pb-16"}`}>
         <header className={`flex min-h-[4rem] shrink-0 items-center justify-between gap-3 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl [-webkit-backdrop-filter:blur(16px)] [-webkit-tap-highlight-color:transparent] px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 sm:px-5 md:pt-3 dark:border-white/10 dark:bg-[#111329]/90 ${appearance === "parent" ? "md:min-h-[4.5rem] md:px-7" : ""}`}>
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <button
@@ -129,7 +129,10 @@ export const DashboardLayout: React.FC<Props> = ({
       {navItems.length > 0 && (
         <nav
           aria-label="Mobile navigation"
-          className="fixed bottom-0 inset-x-0 z-50 flex items-center justify-around border-t border-slate-200/80 bg-white/95 backdrop-blur-xl px-2 pt-1.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.06)] md:hidden dark:border-white/10 dark:bg-[#111329]/95 dark:shadow-[0_-4px_20px_rgba(0,0,0,0.4)] select-none"
+          className={`fixed inset-x-0 bottom-0 z-50 flex items-center justify-around border-t border-slate-200/80 bg-white/95 backdrop-blur-xl md:hidden dark:border-white/10 dark:bg-[#111329]/95 select-none ${appearance === "parent"
+            ? "min-h-[4.75rem] px-3 pt-2 pb-[max(0.875rem,env(safe-area-inset-bottom))] shadow-[0_-6px_24px_rgba(67,52,120,0.09)] dark:shadow-[0_-6px_24px_rgba(0,0,0,0.4)]"
+            : "px-2 pt-1.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.4)]"
+          }`}
         >
           {navItems.map(item => {
             const Icon = item.icon;
@@ -139,20 +142,26 @@ export const DashboardLayout: React.FC<Props> = ({
                 key={item.id}
                 type="button"
                 onClick={() => onNavigate(item.id)}
-                className={`flex min-h-[48px] flex-1 touch-manipulation cursor-pointer flex-col items-center justify-center gap-1 rounded-2xl py-1 text-[11px] font-black transition-all active:scale-90 select-none [-webkit-tap-highlight-color:transparent] ${
+                aria-label={item.label}
+                title={item.label}
+                className={`flex flex-1 touch-manipulation cursor-pointer flex-col items-center justify-center rounded-2xl font-black transition-all active:scale-90 select-none [-webkit-tap-highlight-color:transparent] ${appearance === "parent" ? "mx-1 min-h-14 py-1.5" : "min-h-[48px] gap-1 py-1 text-[11px]"} ${
                   isActive
-                    ? "text-[#534AB7] dark:text-[#CDBEFF]"
+                    ? appearance === "parent"
+                      ? "bg-[#F3F0FF] text-[#534AB7] ring-1 ring-[#DCD5FA] shadow-[0_4px_14px_rgba(83,74,183,0.12)] dark:bg-violet-400/15 dark:text-[#CDBEFF] dark:ring-violet-300/20"
+                      : "text-[#534AB7] dark:text-[#CDBEFF]"
                     : "text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
                 }`}
               >
-                <span className={`flex h-7 w-12 items-center justify-center rounded-full transition-all duration-200 ${
+                <span className={`flex items-center justify-center rounded-full transition-all duration-200 ${appearance === "parent" ? "h-11 w-14" : "h-7 w-12"} ${
                   isActive
-                    ? "bg-[#534AB7] text-white shadow-sm shadow-[#534AB7]/40 dark:bg-[#6844EA]"
+                    ? appearance === "parent"
+                      ? "bg-transparent text-[#534AB7] dark:text-[#CDBEFF]"
+                      : "bg-[#534AB7] text-white shadow-sm shadow-[#534AB7]/40 dark:bg-[#6844EA]"
                     : "bg-transparent text-slate-400 dark:text-slate-500"
                 }`}>
-                  <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
+                  <Icon size={appearance === "parent" ? 32 : 18} strokeWidth={isActive ? 2.5 : 2} />
                 </span>
-                <span>{item.label}</span>
+                {appearance !== "parent" && <span>{item.label}</span>}
               </button>
             );
           })}
