@@ -258,6 +258,17 @@ export interface CountingQuestion {
     storyScene?: "park" | "picnic" | "pond" | "space" | "classroom";
     storyCharacterName?: string;
     storyChoices?: number[];
+    /**
+     * The picture in front of the story sentence.
+     *
+     * The scene used to pick it, and only from five hardcoded emoji. These three
+     * let it be anything: an emoji typed by a teacher or an AI, one of the built-in
+     * vector assets, or a drawing from the account's own SVG library. Unset, the
+     * scene's emoji is still the default, so existing slides are unchanged.
+     */
+    storySceneEmoji?: string;
+    storySceneAssetType?: string;
+    storySceneAssetId?: string;
     placeValueTask?: "build_number" | "read_number" | "regroup_ones";
     placeValueDifficulty?: "guided" | "independent";
     placeValueTarget?: number;

@@ -26,6 +26,7 @@ export const storyProblemMatSchema: ComponentSchema = {
     { key: "storyPart3", label: "Third Quantity", type: "number", defaultValue: 2, description: "Third addend, used only by three-addend stories." },
     { key: "storyScene", label: "Scene", type: "enum", enumValues: ["park", "picnic", "pond", "space", "classroom"], defaultValue: "park", description: "A light visual context that does not change the mathematics." },
     { key: "storyCharacterName", label: "Character", type: "string", defaultValue: "Koda", description: "A short, child-friendly character name." },
+    { key: "storySceneEmoji", label: "Story Icon", type: "string", defaultValue: "", description: "One emoji shown in front of the story sentence. Leave empty to use the scene's own icon. A teacher can swap this for artwork from their SVG library in the Studio." },
     assetTypeField("apple"),
   ],
   assets: ALL_ASSETS,
@@ -42,6 +43,7 @@ export const storyProblemMatSchema: ComponentSchema = {
   presets: PRESETS,
   tip: "Try: ‘Make a take-from pond story with the change unknown.’",
   validate(raw: any, index: number): ParsedSlideConfig {
+    const sceneEmoji = String(raw.config?.storySceneEmoji || "").trim().slice(0, 4);
     const config = normalizeStoryProblemConfig({
       type: raw.config?.storyProblemType,
       unknown: raw.config?.storyUnknown,
@@ -69,6 +71,8 @@ export const storyProblemMatSchema: ComponentSchema = {
         storyPart3: config.third,
         storyScene: config.scene,
         storyCharacterName: config.characterName,
+        // One emoji, or nothing — never a sentence in the icon slot.
+        ...(sceneEmoji ? { storySceneEmoji: sceneEmoji } : {}),
         assetType: resolveAssetType(objectId),
       },
     };

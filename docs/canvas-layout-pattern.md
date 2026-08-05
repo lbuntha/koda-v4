@@ -6,7 +6,7 @@ Read it, then read the reference canvas, then port.
 
 Already on the pattern: `MoveAndCountCanvas`, `LineUpCanvas`, `GroupTensCanvas`, `CountOnCanvas`,
 `CountBackCanvas`, `ArrangementsCanvas`, `MagnetsCanvas`, `SubitizeCanvas`, `AdditionCanvas`,
-`SubtractionCanvas`, `FlexibleCanvas`.
+`SubtractionCanvas`, `FlexibleCanvas`, `StoryProblemMatCanvas`, `PlaceValueLabCanvas`.
 
 ---
 
@@ -186,6 +186,16 @@ const { x, y } = slotPosition(order, count, zone, itemSize);
 - Fallback zone when a ref has not measured yet — never lay out against a guessed stage.
   `dimensions` starts `null` and nothing is placed until a real `ResizeObserver` measurement
   lands (seeded in `useLayoutEffect`, before paint).
+
+**Base-ten blocks size themselves too.** `Base10Blocks` owns the rule — one unit is the module,
+a rod is ten of them — and ships `useFittedUnitSize` / `RodFit` / `fitRodGrid` so a block fits the
+box it is in. Never pass `Base10Scale` a hardcoded size: Place Value Lab had six different ones,
+and the bank's rod at unit 18 is ~220px wide in a card that was not, so it hung out over both
+edges. Note the floor: a rod is read as a length, so fitting beats `UNIT_MIN` — clamping a rod
+*up* to the readable-unit floor is what makes nine of them overflow their zone. `fitRodGrid`
+also picks the rod's **orientation**: a rod is a 12:1.4 sliver, so the answer flips with the
+shape of the box. Wide desktop zone → lying down, reading left to right. A phone's ~110px place
+column → standing up, which fits at more than twice the unit size. Never hardcode `orientation`.
 
 **Objects arranged in a shape** — a line, a ring, a wave, a dice face, a deliberate scatter —
 do not hand-roll the formula. `oneToOneLayout.ts` places a pattern's *centres* first and lets

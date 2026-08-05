@@ -39,6 +39,62 @@ const PAD_RATIO = 0.18;
 
 /** Width of a horizontal ten-rod, measured in units (cells + gaps + padding). */
 export const ROD_WIDTH_UNITS = 10 + 9 * GAP_RATIO + 2 * PAD_RATIO;
+/** Height of a horizontal ten-rod, in units — one cell plus its padding. */
+export const ROD_HEIGHT_UNITS = 1 + 2 * PAD_RATIO;
+
+/** Absolute floor for a rod's unit — see `fitRodGrid`. */
+export const ROD_UNIT_FLOOR = 10;
+
+/**
+ * The largest unit size that fits `count` rods into a box — and how to arrange
+ * them to get it: how many columns, and **which way up**.
+ *
+ * A rod is a 12:1.4 sliver, so how many fit is a two-dimensional question and
+ * the answer flips with the shape of the box. A wide desktop zone wants rods
+ * lying down, reading left to right the way children count. A phone's place
+ * column is ~110px wide and tall — laid down, a rod there is forced under 10px
+ * a unit and still hangs over both edges, which is exactly what it did. Stood
+ * up, the same rod fits at more than twice the unit size.
+ *
+ * So both orientations are tried, at every column count, and the arrangement
+ * that makes the unit biggest wins. Quantity is size here, so a bigger honest
+ * unit is always the better answer.
+ */
+export const fitRodGrid = (
+  { width, height, count, gap = 6, min = ROD_UNIT_FLOOR }:
+    { width: number; height: number; count: number; gap?: number; min?: number }
+) => {
+  const total = Math.max(1, count);
+  let best = { unit: 0, columns: 1, orientation: "horizontal" as "horizontal" | "vertical" };
+
+  for (const orientation of ["horizontal", "vertical"] as const) {
+    const acrossUnits = orientation === "horizontal" ? ROD_WIDTH_UNITS : ROD_HEIGHT_UNITS;
+    const downUnits = orientation === "horizontal" ? ROD_HEIGHT_UNITS : ROD_WIDTH_UNITS;
+
+    for (let columns = 1; columns <= total; columns++) {
+      const rows = Math.ceil(total / columns);
+      const perRodWidth = (width - gap * (columns - 1)) / columns;
+      const perRodHeight = (height - gap * (rows - 1)) / rows;
+      const unit = Math.min(perRodWidth / acrossUnits, perRodHeight / downUnits);
+      if (unit > best.unit) best = { unit, columns, orientation };
+    }
+  }
+
+  /*
+    Floored well below `UNIT_MIN`, and deliberately.
+
+    `UNIT_MIN` is the size below which a *single* unit stops being readable, and
+    raising a rod to it when the room is not there does not make anything more
+    readable — it makes the rods overflow the box they were measured into, which
+    is worse. A rod is read as a length, so fitting wins; the floor here only
+    guards against absurd values.
+  */
+  return {
+    unit: Math.max(min, Math.min(UNIT_MAX, Math.floor(best.unit))),
+    columns: best.columns,
+    orientation: best.orientation
+  };
+};
 
 const UnitSizeContext = createContext<number>(UNIT_FALLBACK);
 export const useUnitSize = () => useContext(UnitSizeContext);

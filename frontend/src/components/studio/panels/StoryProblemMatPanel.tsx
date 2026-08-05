@@ -9,7 +9,8 @@ import {
   storyAnswer,
   storyText,
 } from "../../canvases/storyProblemModel";
-import { COUNT_OBJECTS } from "../../../types";
+import { COUNT_OBJECTS, SVG_OBJECTS } from "../../../types";
+import { useAssetLibrary } from "../../../assets/questionAsset";
 
 const UNKNOWN_LABELS: Record<StoryUnknown, string> = {
   result: "Result · what happens at the end",
@@ -29,6 +30,18 @@ export const StoryProblemMatPanel: React.FC<PanelProps> = ({ question, update })
     characterName: question.config.storyCharacterName,
   });
   const object = COUNT_OBJECTS.find(item => item.id === question.objectId) || COUNT_OBJECTS[0];
+  const library = useAssetLibrary();
+
+  /** Patch config directly — the story icon changes no mathematics. */
+  const setIcon = (patch: Record<string, unknown>) =>
+    update({ config: { ...question.config, ...patch } });
+
+  /** "" means the scene's own emoji, which is what an unset slide has always used. */
+  const iconChoice = question.config.storySceneAssetId
+    ? `library:${question.config.storySceneAssetId}`
+    : question.config.storySceneAssetType && question.config.storySceneAssetType !== "emoji"
+      ? `vector:${question.config.storySceneAssetType}`
+      : "";
 
   const apply = (patch: Partial<typeof current>) => {
     const next = normalizeStoryProblemConfig({ ...current, ...patch });
@@ -91,6 +104,35 @@ export const StoryProblemMatPanel: React.FC<PanelProps> = ({ question, update })
         ]}
       />
       <TextField label="Character name" value={current.characterName} placeholder="Koda" onChange={characterName => apply({ characterName })} />
+
+      {/*
+        The picture in front of the story sentence. It used to be whichever of
+        five emoji the scene carried, with no way to change it.
+      */}
+      <SelectField
+        label="Story icon"
+        value={iconChoice}
+        onChange={value => {
+          if (!value) return setIcon({ storySceneAssetType: undefined, storySceneAssetId: undefined });
+          const [kind, id] = value.split(/:(.+)/);
+          return kind === "library"
+            ? setIcon({ storySceneAssetType: "custom_svg", storySceneAssetId: id })
+            : setIcon({ storySceneAssetType: id, storySceneAssetId: undefined });
+        }}
+        options={[
+          { value: "", label: "Scene emoji (default)" },
+          ...SVG_OBJECTS.map(item => ({ value: `vector:${item.id}`, label: `${item.label} · built-in artwork` })),
+          ...library.map(asset => ({ value: `library:${asset.id}`, label: `${asset.label} · my library` })),
+        ]}
+      />
+      {!iconChoice && (
+        <TextField
+          label="Story icon emoji"
+          value={question.config.storySceneEmoji || ""}
+          placeholder={`Scene default · e.g. ${current.scene === "space" ? "🚀" : "🍎"}`}
+          onChange={value => setIcon({ storySceneEmoji: value.trim() || undefined })}
+        />
+      )}
     </PanelSection>
   );
 };

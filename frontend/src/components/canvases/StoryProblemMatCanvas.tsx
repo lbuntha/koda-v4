@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { BookOpen, Check, RotateCcw, X } from "lucide-react";
 import { COUNT_OBJECTS, CountingQuestion, CustomSvgAsset } from "../../types";
@@ -8,8 +8,11 @@ import { useAssetLibrary } from "../../assets/questionAsset";
 import { AssetType, CountingAsset } from "../Assets";
 import { Button } from "../ui";
 import { CanvasProps } from "./types";
-import { CanvasChip } from "./canvasTheme";
+import { CanvasChip, CanvasAccent } from "./canvasTheme";
+import { CanvasBin } from "./CanvasBin";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
+import { GhostGuideOverlay, useGhostGuide } from "../../pedagogy";
+import { bestGrid, fitObjectSize } from "./objectLayout";
 import {
   answerChoices,
   normalizeStoryProblemConfig,
@@ -41,10 +44,11 @@ interface GroupProps {
   hidden?: boolean;
   revealValue?: number;
   crossed?: boolean;
-  tone: "violet" | "sky" | "rose";
+  tone: CanvasAccent;
   assetType: AssetType;
   emoji: string;
-  compact: boolean;
+  /** Counter edge length, decided by the mat from the room a group actually has. */
+  size: number;
   isDark: boolean;
 }
 
@@ -70,27 +74,27 @@ export function storyObjectLabel(question: CountingQuestion, assets: CustomSvgAs
     ?? byId.label;
 }
 
-const ObjectGroup: React.FC<GroupProps> = ({ label, count, hidden, revealValue, crossed, tone, assetType, emoji, compact, isDark }) => {
+const ObjectGroup: React.FC<GroupProps> = ({ label, count, hidden, revealValue, crossed, tone, assetType, emoji, size, isDark }) => {
   const reduceMotion = useReducedMotion();
-  const toneClass = tone === "sky"
-    ? isDark ? "bg-sky-400/10 ring-sky-300/20" : "bg-sky-50 ring-sky-100"
-    : tone === "rose"
-      ? isDark ? "bg-rose-400/10 ring-rose-300/20" : "bg-rose-50 ring-rose-100"
-      : isDark ? "bg-violet-400/10 ring-violet-300/20" : "bg-violet-50 ring-violet-100";
+  const columns = Math.max(1, bestGrid(Math.max(1, count), 5, 3).columns);
 
   return (
-    <div className={`relative flex min-h-[104px] min-w-0 flex-1 flex-col rounded-2xl p-2.5 ring-1 sm:min-h-[126px] sm:p-3 ${toneClass}`}>
-      <div className={`mb-2 flex items-center justify-between text-[10px] font-bold uppercase tracking-wider ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-        <span>{label}</span>
-        {!hidden && <span className={isDark ? "text-slate-200" : "text-slate-700"}>{count}</span>}
-      </div>
+    <CanvasBin
+      label={label}
+      tally={hidden ? undefined : count}
+      accent={tone}
+      isDark={isDark}
+      complete={hidden && revealValue !== undefined}
+      className="min-h-[96px]"
+    >
       {hidden ? (
         <motion.div
           key={revealValue ?? "unknown"}
           initial={reduceMotion ? false : { scale: 0.72, rotate: -5, opacity: 0 }}
           animate={{ scale: 1, rotate: 0, opacity: 1 }}
           transition={{ type: "spring", stiffness: 340, damping: 20 }}
-          className={`m-auto flex h-14 w-14 items-center justify-center rounded-2xl border-2 text-3xl font-semibold transition-colors ${revealValue !== undefined
+          style={{ width: `${size}px`, height: `${size}px`, fontSize: `${Math.round(size * 0.5)}px` }}
+          className={`absolute inset-0 m-auto flex items-center justify-center rounded-2xl border-2 font-semibold transition-colors ${revealValue !== undefined
             ? "border-emerald-500 bg-emerald-500 text-white shadow-lg shadow-emerald-500/20"
             : isDark
               ? "border-dashed border-violet-400/50 bg-violet-400/10 text-violet-200"
@@ -109,7 +113,10 @@ const ObjectGroup: React.FC<GroupProps> = ({ label, count, hidden, revealValue, 
           </AnimatePresence>
         </motion.div>
       ) : (
-        <div className={`m-auto grid max-w-[190px] grid-cols-5 place-items-center gap-1 ${crossed ? "opacity-55" : ""}`}>
+        <div
+          className={`absolute inset-0 m-auto grid place-content-center place-items-center gap-1 ${crossed ? "opacity-55" : ""}`}
+          style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
+        >
           {Array.from({ length: count }, (_, index) => (
             <motion.div
               key={index}
@@ -118,15 +125,21 @@ const ObjectGroup: React.FC<GroupProps> = ({ label, count, hidden, revealValue, 
               transition={{ delay: reduceMotion ? 0 : index * 0.045, type: "spring", stiffness: 280, damping: 20 }}
               className="relative"
             >
-              <CountingAsset type={assetType} emoji={emoji} size={compact ? 24 : 30} />
-              {crossed && <X aria-hidden="true" className="absolute inset-0 m-auto text-rose-500" size={compact ? 21 : 26} strokeWidth={3} />}
+              <CountingAsset type={assetType} emoji={emoji} size={size} />
+              {crossed && <X aria-hidden="true" className="absolute inset-0 m-auto text-rose-500" size={Math.round(size * 0.85)} strokeWidth={3} />}
             </motion.div>
           ))}
         </div>
       )}
-    </div>
+    </CanvasBin>
   );
 };
+
+const Operator: React.FC<{ symbol: string; isDark: boolean }> = ({ symbol, isDark }) => (
+  <div className={`flex items-center justify-center px-1 text-xl font-semibold sm:text-2xl ${isDark ? "text-slate-500" : "text-slate-300"}`}>
+    {symbol}
+  </div>
+);
 
 export const StoryProblemMatCanvas: React.FC<CanvasProps> = ({
   question,
@@ -175,6 +188,33 @@ export const StoryProblemMatCanvas: React.FC<CanvasProps> = ({
   const [selected, setSelected] = useState<number | null>(null);
   const [solved, setSolved] = useState(false);
   const reduceMotion = useReducedMotion();
+  const { showGhostGuide, reportActivity } = useGhostGuide({ isPlayMode, isSolved: solved, idleThresholdMs: 10000 });
+
+  /**
+   * The row of groups, measured — counters are sized from the room a group
+   * actually has, the way every other canvas sizes its objects. They used to be
+   * a flat 24 or 30px in a box capped at 190px across, so a story about 18
+   * apples drew four rows of tiny fruit that overflowed the group it was in,
+   * and the same story on a projector left three quarters of the mat empty.
+   */
+  const rowRef = useRef<HTMLDivElement>(null);
+  const [rowSize, setRowSize] = useState<{ width: number; height: number } | null>(null);
+  useLayoutEffect(() => {
+    const row = rowRef.current;
+    if (!row) return;
+    const seed = row.getBoundingClientRect();
+    setRowSize({ width: seed.width || 640, height: seed.height || 160 });
+    const observer = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        setRowSize({
+          width: entry.contentRect.width || 640,
+          height: entry.contentRect.height || 160
+        });
+      }
+    });
+    observer.observe(row);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     setSelected(null);
@@ -202,8 +242,40 @@ export const StoryProblemMatCanvas: React.FC<CanvasProps> = ({
 
   const assetType = (question.config.assetType || object.assetType || "emoji") as AssetType;
   const firstHidden = config.unknown === "start";
-  const secondHidden = config.unknown === "change" || config.unknown === "part";
-  const group = (label: string, count: number, tone: GroupProps["tone"], hidden = false, crossed = false) => (
+  /*
+    `take_apart` asks for the *missing* part, so the part the story tells the
+    child — "3 are in one group" — is the one piece of evidence they have. It
+    was being hidden behind a "?" on every take-apart question, under a label
+    reading "Known part", contradicting both the story and the equation.
+  */
+  const secondHidden = config.unknown === "change"
+    || (config.unknown === "part" && config.type === "put_together");
+
+  const groupCount = config.type === "three_addends" ? 3 : 2;
+  const biggestGroup = Math.max(config.first, config.second, config.type === "three_addends" ? config.third : 0);
+  /** Counter size: the largest that still fits the fullest group on this mat. */
+  const counterSize = useMemo(() => {
+    const width = rowSize?.width ?? 640;
+    const height = rowSize?.height ?? 160;
+    const laneWidth = compact ? 22 : 34;
+    const groupWidth = Math.max(72, (width - laneWidth * (groupCount - 1) - 8 * groupCount) / groupCount);
+    return Math.max(
+      16,
+      Math.min(
+        compact ? 34 : 56,
+        fitObjectSize({
+          width: groupWidth,
+          height,
+          count: Math.max(1, biggestGroup),
+          padding: compact ? 8 : 12,
+          captionInset: compact ? 22 : 28,
+          min: 16
+        })
+      )
+    );
+  }, [rowSize?.width, rowSize?.height, groupCount, biggestGroup, compact]);
+
+  const group = (label: string, count: number, tone: CanvasAccent, hidden = false, crossed = false) => (
     <ObjectGroup
       label={label}
       count={count}
@@ -213,10 +285,33 @@ export const StoryProblemMatCanvas: React.FC<CanvasProps> = ({
       crossed={crossed}
       assetType={assetType}
       emoji={object.emoji}
-      compact={compact}
+      size={counterSize}
       isDark={isDark}
     />
   );
+
+  const accent: CanvasAccent = (["indigo", "violet", "emerald", "purple", "rose"] as CanvasAccent[])
+    .includes(question.config.frameColor as CanvasAccent)
+    ? (question.config.frameColor as CanvasAccent)
+    : "purple";
+
+  /**
+   * The picture in front of the story.
+   *
+   * A teacher or the AI can override the scene's emoji, or point at any vector
+   * asset or drawing in the account's library; unset, the scene still picks.
+   */
+  const sceneAssetType = question.config.storySceneAssetType;
+  const sceneIcon = sceneAssetType && sceneAssetType !== "emoji"
+    ? (
+      <CountingAsset
+        type={sceneAssetType as AssetType}
+        assetId={question.config.storySceneAssetId}
+        emoji={question.config.storySceneEmoji || SCENE_META[config.scene].emoji}
+        size={compact ? 26 : 34}
+      />
+    )
+    : question.config.storySceneEmoji || SCENE_META[config.scene].emoji;
 
   return (
     <SharedCanvasLayout
@@ -224,14 +319,15 @@ export const StoryProblemMatCanvas: React.FC<CanvasProps> = ({
       showGrid={showGrid}
       isDark={isDark}
       compact={compact}
-      accent="purple"
+      accent={accent}
+      showRulers={question.config.showLayoutRulers ?? false}
       headerIcon={<BookOpen size={17} />}
       headerTitle="Story Problem Mat"
       headerSubtitle={storyEquation(config)}
       readAloudText={story}
       headerActions={(
         <>
-          <CanvasChip accent="purple" isDark={isDark}>{SCENE_META[config.scene].emoji} {TYPE_LABELS[config.type]}</CanvasChip>
+          <CanvasChip accent={solved ? "emerald" : accent} isDark={isDark}>{TYPE_LABELS[config.type]}</CanvasChip>
           <Button variant="ghost" size="icon" onClick={reset} className="h-8 w-8 dark:text-slate-300 dark:hover:bg-white/10" aria-label="Reset story"><RotateCcw size={14} /></Button>
         </>
       )}
@@ -240,7 +336,13 @@ export const StoryProblemMatCanvas: React.FC<CanvasProps> = ({
       footerStatus={solved ? `Yes — the answer is ${answer}!` : selected !== null ? "Not yet. Use the groups to check your thinking." : undefined}
       footerSolved={solved}
     >
-      <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-transparent p-2.5 sm:p-4">
+      <div className="relative flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-transparent p-2.5 sm:p-4">
+        <GhostGuideOverlay
+          show={showGhostGuide && !solved && isPlayMode}
+          label="Read the story, then tap the number that answers it!"
+          isDark={isDark}
+          labelPlacement="top"
+        />
         <motion.div
           key={story}
           initial={reduceMotion ? false : { opacity: 0, y: -8 }}
@@ -251,10 +353,10 @@ export const StoryProblemMatCanvas: React.FC<CanvasProps> = ({
             initial={reduceMotion ? false : { scale: 0.65, rotate: -8, opacity: 0 }}
             animate={{ scale: 1, rotate: 0, opacity: 1 }}
             transition={{ type: "spring", stiffness: 320, damping: 18 }}
-            className="text-xl"
+            className="flex-shrink-0 text-xl leading-none"
             aria-hidden="true"
           >
-            {SCENE_META[config.scene].emoji}
+            {sceneIcon}
           </motion.span>
           <p className="text-sm font-medium leading-relaxed sm:text-base md:text-lg" aria-label={story}>
             {story.split(/\s+/).map((word, index) => (
@@ -275,15 +377,20 @@ export const StoryProblemMatCanvas: React.FC<CanvasProps> = ({
         <div className="flex min-h-0 flex-1 items-center justify-center">
           <div className="w-full max-w-3xl">
             {config.type === "compare" ? (
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <div ref={rowRef} className="grid min-h-[110px] grid-cols-1 gap-2 sm:grid-cols-2">
                 {group(config.characterName, config.first, "violet")}
-                {group("Friend", config.second, "sky")}
+                {group("Friend", config.second, "indigo")}
               </div>
             ) : (
-              <div className={`grid items-stretch gap-2 ${config.type === "three_addends" ? "grid-cols-3" : "grid-cols-[1fr_auto_1fr]"}`}>
+              <div
+                ref={rowRef}
+                className={`grid min-h-[110px] items-stretch gap-2 ${config.type === "three_addends" ? "grid-cols-[1fr_auto_1fr_auto_1fr]" : "grid-cols-[1fr_auto_1fr]"}`}
+              >
                 {group(config.type === "take_apart" ? "Whole" : "First", config.first, "violet", firstHidden)}
-                {config.type !== "three_addends" && <div className={`flex items-center justify-center text-xl font-semibold ${isDark ? "text-slate-500" : "text-slate-300"}`}>{config.type === "take_from" || config.type === "take_apart" ? "−" : "+"}</div>}
-                {group(config.type === "take_from" ? "Went away" : config.type === "take_apart" ? "Known part" : "Next", config.second, "sky", secondHidden, config.type === "take_from" && !secondHidden)}
+                <Operator symbol={config.type === "take_from" || config.type === "take_apart" ? "−" : "+"} isDark={isDark} />
+                {group(config.type === "take_from" ? "Went away" : config.type === "take_apart" ? "Known part" : "Next", config.second, "indigo", secondHidden, config.type === "take_from" && !secondHidden)}
+                {/* Three groups need their operators too — they were simply missing. */}
+                {config.type === "three_addends" && <Operator symbol="+" isDark={isDark} />}
                 {config.type === "three_addends" && group("Last", config.third, "rose")}
               </div>
             )}
@@ -302,26 +409,51 @@ export const StoryProblemMatCanvas: React.FC<CanvasProps> = ({
           </div>
         </div>
 
-        <div className="mt-3 flex flex-wrap justify-center gap-2" aria-label="Answer choices">
+        {/*
+          The answer choices.
+
+          They were default outline buttons at text size — the smallest thing on
+          a mat built for six-year-olds, and the only thing they have to hit.
+          These are proper targets: one row, mono digits at reading size, and a
+          state a child can read from across a table.
+        */}
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-2 sm:gap-3" role="group" aria-label="Answer choices">
           {choices.map(value => {
             const wrong = selected === value && value !== answer;
             const correct = solved && value === answer;
+            const dimmed = solved && value !== answer;
+
             return (
-              <Button
+              <button
                 key={value}
                 type="button"
-                variant="outline"
-                size={compact ? "sm" : "md"}
                 disabled={!isPlayMode || solved}
-                onClick={() => choose(value)}
+                onClick={() => { reportActivity(); choose(value); }}
                 aria-pressed={selected === value}
-                className={`min-w-14 text-base font-semibold tabular-nums dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-100 ${wrong ? "border-rose-400 bg-rose-50 text-rose-700 animate-shake dark:bg-rose-400/15 dark:text-rose-200" : ""} ${correct ? "border-emerald-500 bg-emerald-500 text-white dark:bg-emerald-500 dark:text-white" : ""}`}
+                aria-label={`Answer ${value}`}
+                className={`flex items-center justify-center gap-1.5 rounded-2xl border-2 font-mono font-black tabular-nums
+                  outline-none transition-[transform,background-color,border-color,opacity] duration-150
+                  focus-visible:ring-4 focus-visible:ring-indigo-400/40
+                  ${compact ? "h-11 min-w-[3rem] px-3 text-lg" : "h-14 min-w-[4rem] px-4 text-2xl sm:h-16 sm:min-w-[4.5rem] sm:text-3xl"}
+                  ${isPlayMode && !solved ? "cursor-pointer hover:-translate-y-0.5 active:scale-95" : "cursor-default"}
+                  ${correct
+                    ? "border-emerald-500 bg-emerald-500 text-white shadow-lg shadow-emerald-500/25"
+                    : wrong
+                      ? "animate-shake border-rose-400 bg-rose-50 text-rose-700 dark:bg-rose-400/15 dark:text-rose-200"
+                      : isDark
+                        ? "border-white/10 bg-white/[0.08] text-slate-100 hover:border-white/25 hover:bg-white/[0.14]"
+                        : "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300 hover:shadow-md"}
+                  ${dimmed ? "opacity-40" : ""}`}
               >
                 <AnimatePresence mode="popLayout">
-                  {correct && <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }}><Check size={15} /></motion.span>}
+                  {correct && (
+                    <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }}>
+                      <Check size={compact ? 16 : 22} strokeWidth={3} />
+                    </motion.span>
+                  )}
                 </AnimatePresence>
                 {value}
-              </Button>
+              </button>
             );
           })}
         </div>
