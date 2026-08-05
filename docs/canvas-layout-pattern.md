@@ -6,7 +6,7 @@ Read it, then read the reference canvas, then port.
 
 Already on the pattern: `MoveAndCountCanvas`, `LineUpCanvas`, `GroupTensCanvas`, `CountOnCanvas`,
 `CountBackCanvas`, `ArrangementsCanvas`, `MagnetsCanvas`, `SubitizeCanvas`, `AdditionCanvas`,
-`SubtractionCanvas`.
+`SubtractionCanvas`, `FlexibleCanvas`.
 
 ---
 
@@ -93,6 +93,12 @@ what a drop is tested against, and the drawing sits centred inside it, sized fro
 that land in it are slotted into an interior rect expressed as fractions of the drawing's box
 (`CONTAINER_INTERIOR`) so every shape and every stage size holds its objects in the right place
 — not by a hardcoded pixel inset and a magic `hypot(...) < 110` radius.
+
+**Teacher-authored coordinates are the one exception to flowed bins.** Flexible lets a teacher
+place items and bins anywhere on a fixed 480 × 320 design grid, which is then scaled to fill the
+stage — so its bins cannot flow. They still *are* `CanvasBin`s: the wrapper carries the authored
+position and the bin fills it, so a basket reads the same there as everywhere else. What is
+forbidden is a canvas inventing its own bin chrome, not a canvas positioning one.
 
 **A canvas with no second bin still gets one.** Count Back has nothing to drag between bins,
 so it is one bin for the set plus a short band for the countdown readout — same chrome, same

@@ -1,33 +1,29 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { COUNT_OBJECTS, CountingQuestion } from "../../types";
 import { CountingAsset } from "../Assets";
 import { sounds } from "../../sound";
-import { 
-  Sparkles, 
-  HelpCircle, 
-  ArrowRight, 
-  Plus, 
-  Trash2, 
-  Settings, 
-  Gamepad2, 
-  Check, 
-  Type, 
-  Layers, 
-  Grid, 
-  Move,
-  RotateCcw,
-  PlusCircle,
-  FolderPlus
-} from "lucide-react";
+import { Sparkles, HelpCircle, RotateCcw } from "lucide-react";
 import { CanvasProps, Sparkle } from "./types";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import { GhostGuideOverlay, useGhostGuide } from "../../pedagogy";
-import { CanvasChip, surfaceClass, emptySlotClass, accentChipClass } from "./canvasTheme";
+import { CanvasChip, CanvasAccent, surfaceClass } from "./canvasTheme";
+import { CanvasBin } from "./CanvasBin";
 import { FlexibleItem, FlexibleTarget } from "./flexible/types";
 import { FlexibleTargetBin } from "./flexible/FlexibleTargetBin";
 import { FlexibleDraggableItem } from "./flexible/FlexibleDraggableItem";
 import { FlexibleStudentControls } from "./flexible/FlexibleStudentControls";
-import { STAGE_W, STAGE_H, ITEM_SIZE } from "./flexible/layout";
+import { STAGE_W, STAGE_H, ITEM_SIZE, autoArrangeLayout } from "./flexible/layout";
+import { Button } from "../ui";
+
+/** Teacher-facing frameColor values map onto the shared accent palette. */
+const FRAME_ACCENTS: Record<string, CanvasAccent> = {
+  indigo: "indigo",
+  violet: "violet",
+  emerald: "emerald",
+  purple: "purple",
+  pink: "rose",
+  rose: "rose"
+};
 
 export const FlexibleCanvas: React.FC<CanvasProps> = ({ 
   question, 
@@ -101,22 +97,66 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
   const w = dimensions.width || 800;
   const h = dimensions.height || 500;
   const containerRef = useRef<HTMLDivElement>(null);
+  /** The bin's content area — what the authored layout is actually scaled into. */
+  const hostRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const dragOffset = useRef({ x: 0, y: 0 });
+  /** The stage box, taken once per drag: measuring it every move forces a reflow. */
+  const stageBox = useRef<DOMRect | null>(null);
+  /** Where the pointer went down, and whether it has travelled far enough to be a drag. */
+  const pressOrigin = useRef<{ x: number; y: number } | null>(null);
+  const dragMoved = useRef(false);
 
   /**
-   * Items and bins are authored on a fixed STAGE_W x STAGE_H design grid. The
-   * stage is scaled uniformly to fill the available area, so the same layout
-   * fills a phone and a projector without re-authoring — and design mode shows
-   * exactly what play mode shows.
+   * Items and bins are authored on a fixed STAGE_W x STAGE_H design grid, which
+   * is then scaled uniformly — the same layout fills a phone and a projector
+   * without re-authoring.
+   *
+   * What is scaled differs by mode, and that is the whole difference between an
+   * apple a child can see and the one they could not. Scaling the nominal 3:2
+   * grid into a wide, short card letterboxes it to the height: a 480 × 320 grid
+   * in a 930 × 210 box renders at 315 × 210, so five apples authored near the
+   * middle came out tiny in a card that was two-thirds empty. In play the grid
+   * is not the point — the authored *content* is, so the content's own bounding
+   * box is what gets zoomed to fit, which keeps every relative position exactly
+   * as authored and spends the whole card on it. Design mode still shows the
+   * full grid, because a teacher has to be able to place things in it.
    */
-  const stageScale = Math.max(0.35, Math.min(w / STAGE_W, h / STAGE_H));
-  const stageLeft = Math.max(0, (w - STAGE_W * stageScale) / 2);
-  const stageTop = Math.max(0, (h - STAGE_H * stageScale) / 2);
+  const contentBox = useMemo(() => {
+    const boxes = [
+      ...localItems.map(item => ({
+        left: item.x, top: item.y, right: item.x + ITEM_SIZE, bottom: item.y + ITEM_SIZE
+      })),
+      ...((mode === "dragmatch" || !isPlayMode) ? localTargets.map(target => ({
+        left: target.x, top: target.y, right: target.x + target.width, bottom: target.y + target.height
+      })) : [])
+    ];
+    if (boxes.length === 0) return { left: 0, top: 0, width: STAGE_W, height: STAGE_H };
+
+    const left = Math.min(...boxes.map(b => b.left));
+    const top = Math.min(...boxes.map(b => b.top));
+    return {
+      left,
+      top,
+      width: Math.max(ITEM_SIZE, Math.max(...boxes.map(b => b.right)) - left),
+      height: Math.max(ITEM_SIZE, Math.max(...boxes.map(b => b.bottom)) - top)
+    };
+  }, [localItems, localTargets, mode, isPlayMode]);
+
+  const fitBox = isPlayMode ? contentBox : { left: 0, top: 0, width: STAGE_W, height: STAGE_H };
+  /** Small inset only — the bin around the stage already provides the padding. */
+  const STAGE_INSET = 4;
+  const availableW = Math.max(ITEM_SIZE, w - STAGE_INSET * 2);
+  const availableH = Math.max(ITEM_SIZE, h - STAGE_INSET * 2);
+  /* Capped at 3: `ITEM_SIZE` × 3 is the same 132px ceiling every other canvas
+     tops out at, so a slide holding one object does not fill the room with it. */
+  const stageScale = Math.max(0.35, Math.min(3, Math.min(availableW / fitBox.width, availableH / fitBox.height)));
+  const stageLeft = STAGE_INSET + (availableW - fitBox.width * stageScale) / 2 - fitBox.left * stageScale;
+  const stageTop = STAGE_INSET + (availableH - fitBox.height * stageScale) / 2 - fitBox.top * stageScale;
 
   /** Pointer position (client px) → design-grid coordinates. */
   const toStageCoords = (clientX: number, clientY: number) => {
-    const rect = stageRef.current?.getBoundingClientRect();
+    const rect = stageBox.current || stageRef.current?.getBoundingClientRect();
     if (!rect) return null;
     return {
       x: (clientX - rect.left) / stageScale,
@@ -126,7 +166,7 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
 
   // Measure the exact container coordinates space
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!hostRef.current) return;
     const ro = new ResizeObserver((entries) => {
       for (const entry of entries) {
         setDimensions({
@@ -135,7 +175,7 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
         });
       }
     });
-    ro.observe(containerRef.current);
+    ro.observe(hostRef.current);
     return () => ro.disconnect();
   }, []);
 
@@ -181,6 +221,9 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
       x: (e.clientX - rect.left) / stageScale,
       y: (e.clientY - rect.top) / stageScale
     };
+    stageBox.current = stageRef.current?.getBoundingClientRect() || null;
+    pressOrigin.current = { x: e.clientX, y: e.clientY };
+    dragMoved.current = false;
 
     containerRef.current?.setPointerCapture(e.pointerId);
   };
@@ -200,12 +243,22 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
       x: (e.clientX - rect.left) / stageScale,
       y: (e.clientY - rect.top) / stageScale
     };
+    stageBox.current = stageRef.current?.getBoundingClientRect() || null;
+    pressOrigin.current = { x: e.clientX, y: e.clientY };
+    dragMoved.current = false;
 
     containerRef.current?.setPointerCapture(e.pointerId);
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!draggedItemId && !draggedTargetId) return;
+
+    // A tap is not a drag: a child pressing an item to hear it should not have
+    // it slide, and 4px of hand tremor is a press.
+    if (!dragMoved.current && pressOrigin.current) {
+      const travelled = Math.hypot(e.clientX - pressOrigin.current.x, e.clientY - pressOrigin.current.y);
+      if (travelled > 4) dragMoved.current = true;
+    }
 
     const stagePoint = toStageCoords(e.clientX, e.clientY);
     if (!stagePoint) return;
@@ -300,11 +353,28 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
               sounds.playTick(localItems.filter(i => isItemInTarget(i, target)).length + 1);
               triggerSparkle(e.clientX, e.clientY);
             } else {
-              // Pop back to design preset coordinate
+              // Pop back to where the slide put it.
               const original = items.find(i => i.id === draggedItemId);
               if (original) {
                 setLocalItems(prev => prev.map(item => item.id === draggedItemId ? { ...item, x: original.x, y: original.y } : item));
-                sounds.playSlide();
+                if (dragMoved.current) sounds.playSlide();
+              }
+              /*
+                Landing in the wrong basket is a wrong answer and has to be
+                reported as one — it used to pop back in silence, so a child
+                could sort everything into the wrong bins and the attempt log
+                would show nothing at all. Letting go over open space is not an
+                answer, so it stays unreported.
+              */
+              const wrongBin = dragMoved.current
+                ? localTargets.find(bin =>
+                  bin.id !== targetBinId
+                  && itemCenterX >= bin.x && itemCenterX <= bin.x + bin.width
+                  && itemCenterY >= bin.y && itemCenterY <= bin.y + bin.height)
+                : undefined;
+              if (wrongBin) {
+                sounds.playFailure();
+                onAttempt?.("incorrect", { selected: { [droppedItem.id]: wrongBin.id } });
               }
             }
           } else {
@@ -322,7 +392,28 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
 
     setDraggedItemId(null);
     setDraggedTargetId(null);
-    containerRef.current?.releasePointerCapture(e.pointerId);
+    pressOrigin.current = null;
+    dragMoved.current = false;
+    stageBox.current = null;
+    if (containerRef.current?.hasPointerCapture(e.pointerId)) {
+      containerRef.current.releasePointerCapture(e.pointerId);
+    }
+  };
+
+  /*
+    Without this a cancelled pointer — a touch interrupted by a call, a
+    right-click mid-drag — left the item stuck to the finger for good.
+  */
+  const handlePointerCancel = (e: React.PointerEvent) => {
+    if (!draggedItemId && !draggedTargetId) return;
+    setDraggedItemId(null);
+    setDraggedTargetId(null);
+    pressOrigin.current = null;
+    dragMoved.current = false;
+    stageBox.current = null;
+    if (containerRef.current?.hasPointerCapture(e.pointerId)) {
+      containerRef.current.releasePointerCapture(e.pointerId);
+    }
   };
 
   const isItemInTarget = (item: FlexibleItem, target: FlexibleTarget) => {
@@ -506,6 +597,28 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
    * they keep their art — but the coloured frames are gone, and "clean" falls
    * through to the standard neutral surface.
    */
+  /** Put the authored layout back to the tidy default the studio also uses. */
+  const handleAutoArrange = () => {
+    sounds.playPop();
+    const arranged = autoArrangeLayout(localItems, localTargets);
+    setLocalItems(arranged.items);
+    setLocalTargets(arranged.targets);
+    onUpdateQuestionConfig?.({
+      flexibleItems: arranged.items,
+      flexibleTargets: arranged.targets
+    });
+  };
+
+  const accent: CanvasAccent = FRAME_ACCENTS[question.config.frameColor || "indigo"] || "indigo";
+
+  /** How much is left to do, in the mode's own terms. */
+  const sortedCount = localItems.filter(item => {
+    if (!item.targetBin) return false;
+    const bin = localTargets.find(candidate => candidate.id === item.targetBin);
+    return bin ? isItemInTarget(item, bin) : false;
+  }).length;
+  const toSort = localItems.filter(item => item.targetBin).length - sortedCount;
+
   const getBgClass = () => {
     switch (bgStyle) {
       case "board":
@@ -556,7 +669,7 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
       isDark={isDark}
       gridSize={20}
       showRulers={question.config.showLayoutRulers ?? true}
-      accent="indigo"
+      accent={accent}
       headerIcon={<Sparkles size={15} />}
       // The activity name must follow the mode — a true/false question headed
       // "Classroom Sorting Detective" tells the child to do something else.
@@ -580,20 +693,63 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
       }
       readAloudText={getInstructionText()}
       headerActions={
-        <CanvasChip accent="indigo" isDark={isDark}>
-          {mode === "dragmatch" ? "Classroom Sorting" : mode === "multichoice" ? "Multiple Choice" : "Tap to Count"}
-        </CanvasChip>
+        isPlayMode ? (
+          <CanvasChip accent={guideSolved ? "emerald" : accent} isDark={isDark}>
+            {guideSolved
+              ? "All done"
+              : mode === "dragmatch"
+                ? `${Math.max(0, toSort)} to sort`
+                : mode === "tapcount"
+                  ? `${Math.max(0, localItems.length - tappedItemIds.length)} to tap`
+                  : mode === "multichoice" ? "Multiple Choice" : "Type the Answer"}
+          </CanvasChip>
+        ) : (
+          <Button type="button" variant="outline" size="xs" onClick={handleAutoArrange} title="Tidy the items and bins back to the default layout">
+            <RotateCcw size={12} />
+            Auto-arrange
+          </Button>
+        )
       }
+      footerStatus={
+        guideSolved
+          ? feedbackMsg || "Nicely done!"
+          : isPlayMode
+            ? undefined
+            : "Design Mode · Drag items and bins to place them"
+      }
+      footerSolved={guideSolved}
       designerHint="Switch to Design Mode to add elements, bins, and edit properties."
     >
-      <div 
+      <div
         ref={containerRef}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        className={`flex-1 min-h-[280px] relative rounded-[2.4rem] transition-all overflow-hidden p-4 my-1 z-10 touch-none select-none overscroll-none ${getBgClass()} ${
-          errorFlash ? "ring-4 ring-rose-500/50" : ""
-        }`}
+        onPointerCancel={handlePointerCancel}
+        className="relative flex-1 min-h-[280px] w-full flex my-1 z-10 touch-none select-none overscroll-none"
       >
+      <CanvasBin
+        className={`w-full h-full ${errorFlash ? "ring-4 ring-rose-500/50" : ""}`}
+        label={
+          mode === "dragmatch" ? "Sort these" : mode === "tapcount" ? "Tap every one" : "How many?"
+        }
+        /* No tally in multiple-choice or type-the-answer: the count *is* the
+           answer, and a bin that displays it hands the question away. */
+        tally={
+          !isPlayMode ? undefined
+            : mode === "dragmatch" ? `${sortedCount} / ${localItems.filter(i => i.targetBin).length}`
+              : mode === "tapcount" ? `${tappedItemIds.length} / ${localItems.length}`
+                : undefined
+        }
+        accent={accent}
+        isDark={isDark}
+        complete={guideSolved}
+      >
+        <div ref={hostRef} className="absolute inset-0">
+        {/* The scene the teacher picked — illustration, inside the bin's frame */}
+        {bgStyle !== "clean" && (
+          <div className={`absolute inset-0 rounded-2xl overflow-hidden pointer-events-none ${getBgClass()}`} />
+        )}
+
         {/* Background Decorative Accents */}
         {bgStyle === "grid" && (
           <div className="absolute inset-0 pointer-events-none opacity-20" style={{
@@ -668,7 +824,7 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
             target={t}
             isPlayMode={isPlayMode}
             isDark={isDark}
-            bgStyle={bgStyle}
+            accent={accent}
             localItems={localItems}
             draggedTargetId={draggedTargetId}
             isActiveDropTarget={isActiveDropTarget(t)}
@@ -690,6 +846,8 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
               item={item}
               isPlayMode={isPlayMode}
               mode={mode}
+              accent={accent}
+              isDark={isDark}
               isDragged={isDragged}
               isTapped={isTapped}
               tapIndex={tapIndex}
@@ -710,6 +868,8 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
           </div>
         )}
         </div>
+        </div>
+      </CanvasBin>
       </div>
 
       {/* Student Interaction Controls below the canvas */}
