@@ -367,11 +367,11 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
       )}
 
       {/* ══════════════════ TOP NAVBAR ═══════════════════ */}
-      <header className={`flex min-h-[3.75rem] shrink-0 items-center justify-between gap-2 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2.5 sm:px-5 md:px-6 z-20 border-b transition-colors duration-300 backdrop-blur-xl [-webkit-backdrop-filter:blur(16px)] [-webkit-tap-highlight-color:transparent]
+      <header className={`relative flex min-h-[3.75rem] shrink-0 items-center justify-between gap-2 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2.5 sm:px-5 md:px-6 z-20 border-b transition-colors duration-300 backdrop-blur-xl [-webkit-backdrop-filter:blur(16px)] [-webkit-tap-highlight-color:transparent]
         ${isDark ? 'bg-[#111329]/95 border-white/10' : 'bg-white/95 border-slate-200/70 shadow-sm'}
       `}>
         {/* Left – branding & title */}
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 justify-start">
           <div className="relative shrink-0">
             <div className="absolute inset-0 rounded-xl bg-indigo-600 blur-sm opacity-40" />
             <div className="relative bg-indigo-600 p-1.5 sm:p-2 rounded-xl text-white shadow-md">
@@ -396,8 +396,8 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
 
         {/* Center – progress bar / pill (only rendered when there is more than 1 question/level) */}
         {questions.length > 1 && (
-          <div className={`flex-1 max-w-[160px] sm:max-w-xs mx-1 sm:mx-4 ${kidMode ? "block" : "hidden md:block"}`}>
-            <div className={`flex mb-1 ${kidMode ? "justify-center" : "justify-between"}`}>
+          <div className={`flex-1 flex flex-col items-center justify-center max-w-[160px] sm:max-w-xs md:max-w-md mx-2 ${kidMode ? "flex" : "hidden sm:flex"}`}>
+            <div className={`flex w-full items-center mb-1 ${kidMode ? "justify-center" : "justify-between"}`}>
               {!kidMode && (
                 <span className={`text-[9px] font-mono font-bold uppercase tracking-widest ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
                   Progress
@@ -407,7 +407,7 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
                 {currentIdx + 1} / {questions.length}
               </span>
             </div>
-            <div className={`h-1.5 rounded-full overflow-hidden ${isDark ? 'bg-white/10' : 'bg-black/10'}`}>
+            <div className={`w-full h-1.5 sm:h-2 rounded-full overflow-hidden ${isDark ? 'bg-white/10' : 'bg-black/10'}`}>
               <div
                 className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${((currentIdx + 1) / questions.length) * 100}%` }}
@@ -417,7 +417,7 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
         )}
 
         {/* Right – compact mobile controls */}
-        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+        <div className="flex items-center justify-end gap-1 sm:gap-1.5 flex-1 min-w-0 shrink-0">
           {!kidMode && !assessment && (
             <>
               <button
