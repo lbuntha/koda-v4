@@ -19,6 +19,7 @@ export const dataChartSchema: ComponentSchema = {
     { key: "dataKind", label: "Question", type: "enum", enumValues: ["count", "total", "more", "most"], defaultValue: "count", description: "What the child is asked to read from the chart.", promptHint: "count, total, more, or most" },
     { key: "dataCounts", label: "Counts", type: "json", defaultValue: [6, 2, 4], description: "Two or three category counts, each 0 to 10." },
     { key: "dataCategories", label: "Category Names", type: "json", defaultValue: ["Apples", "Pears", "Plums"], description: "One label per count." },
+    { key: "dataAssets", label: "Category Artwork", type: "json", defaultValue: [], description: "Optional artwork per category, one asset id per count (e.g. [\"apple\", \"butterfly\", \"fish\"]). Empty entries fall back to the built-in fruit, so a chart's columns can always be told apart." },
     { key: "dataFocus", label: "Asked About", type: "number", defaultValue: 0, description: "Index of the category the question is about." },
     { key: "dataAgainst", label: "Compared With", type: "number", defaultValue: 1, description: "Index of the category compared against, for 'how many more'." },
     assetTypeField("star"),
@@ -34,7 +35,7 @@ export const dataChartSchema: ComponentSchema = {
   validate(raw: any, index: number): ParsedSlideConfig {
     const config = normalizeDataConfig({
       kind: raw.config?.dataKind, counts: raw.config?.dataCounts, categories: raw.config?.dataCategories,
-      focus: raw.config?.dataFocus, against: raw.config?.dataAgainst,
+      focus: raw.config?.dataFocus, against: raw.config?.dataAgainst, assets: raw.config?.dataAssets,
     });
     const objectId = VALID_ASSET_IDS.includes(raw.objectId) ? raw.objectId : "star";
     return {
@@ -46,7 +47,8 @@ export const dataChartSchema: ComponentSchema = {
       targetCount: dataAnswer(config),
       config: {
         dataKind: config.kind, dataCounts: config.counts, dataCategories: config.categories,
-        dataFocus: config.focus, dataAgainst: config.against, assetType: resolveAssetType(objectId),
+        dataFocus: config.focus, dataAgainst: config.against, dataAssets: config.assets,
+        assetType: resolveAssetType(objectId),
       },
     };
   },

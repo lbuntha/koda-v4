@@ -26,6 +26,7 @@ import {
 } from "./placeValueModel";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import { CanvasProps } from "./types";
+import { balancedChoiceOrder } from "./choiceOrder";
 
 const TASK_LABELS = {
   build_number: "Build",
@@ -65,7 +66,7 @@ export const PlaceValueLabCanvas: React.FC<CanvasProps> = ({
   // "custom_svg" with nothing to draw would render empty blocks, so fall back to a shape.
   const assetType = requestedAssetType === "custom_svg" && !hasAssetRef(question.config) ? "star" : requestedAssetType;
   const instruction = question.instruction || placeValueInstruction(config);
-  const choices = placeValueChoices(config.target);
+  const choices = balancedChoiceOrder(placeValueChoices(config.target), config.target, question.config.answerChoiceSlot);
   const currentNumber = representedNumber(blocks);
 
   useEffect(() => {

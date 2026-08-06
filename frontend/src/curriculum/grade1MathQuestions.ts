@@ -111,6 +111,7 @@ const addition = (
   technique: CountingTechnique,
   pairs: Array<[number, number]>,
   explain?: (a: number, b: number) => string,
+  object = "apple",
 ): GeneratedQuestion[] =>
   pairs.map(([a, b], index) => ({
     id: qid(skillId),
@@ -119,7 +120,7 @@ const addition = (
     technique,
     skillId,
     difficulty: band(index, pairs.length),
-    objectId: "apple",
+    objectId: object,
     targetCount: a + b,
     config: {
       ...(technique === CountingTechnique.ADDITION_COLUMN
@@ -136,6 +137,7 @@ const subtraction = (
   technique: CountingTechnique,
   pairs: Array<[number, number]>,
   explain?: (minuend: number, subtrahend: number) => string,
+  object = "apple",
 ): GeneratedQuestion[] =>
   pairs.map(([minuend, subtrahend], index) => ({
     id: qid(skillId),
@@ -144,7 +146,7 @@ const subtraction = (
     technique,
     skillId,
     difficulty: band(index, pairs.length),
-    objectId: "apple",
+    objectId: object,
     targetCount: minuend - subtrahend,
     config: {
       minuend,
@@ -156,7 +158,7 @@ const subtraction = (
   }));
 
 /** Count on from a number already in the jar, or back from a total. */
-const countOn = (skillId: string, rows: Array<[number, number]>): GeneratedQuestion[] =>
+const countOn = (skillId: string, rows: Array<[number, number]>, object = "apple"): GeneratedQuestion[] =>
   rows.map(([baseCount, extraCount], index) => ({
     id: qid(skillId),
     title: `Count on from ${baseCount}`,
@@ -164,7 +166,7 @@ const countOn = (skillId: string, rows: Array<[number, number]>): GeneratedQuest
     technique: CountingTechnique.COUNT_ON,
     skillId,
     difficulty: band(index, rows.length),
-    objectId: "apple",
+    objectId: object,
     targetCount: baseCount + extraCount,
     config: {
       baseCount,
@@ -175,7 +177,7 @@ const countOn = (skillId: string, rows: Array<[number, number]>): GeneratedQuest
     },
   }));
 
-const countBack = (skillId: string, rows: Array<[number, number]>): GeneratedQuestion[] =>
+const countBack = (skillId: string, rows: Array<[number, number]>, object = "apple"): GeneratedQuestion[] =>
   rows.map(([totalCount, removeCount], index) => ({
     id: qid(skillId),
     title: `Count back from ${totalCount}`,
@@ -183,7 +185,7 @@ const countBack = (skillId: string, rows: Array<[number, number]>): GeneratedQue
     technique: CountingTechnique.COUNT_BACK,
     skillId,
     difficulty: band(index, rows.length),
-    objectId: "apple",
+    objectId: object,
     targetCount: totalCount - removeCount,
     config: {
       totalCount,
@@ -195,16 +197,16 @@ const countBack = (skillId: string, rows: Array<[number, number]>): GeneratedQue
   }));
 
 /** Bundle loose ones into tens. */
-const groupTens = (skillId: string, counts: number[]): GeneratedQuestion[] =>
+const groupTens = (skillId: string, counts: number[], object = "apple"): GeneratedQuestion[] =>
   counts.map((count, index) => ({
     id: qid(skillId),
     // The count is what the child works out by grouping, so it stays out of the heading.
     title: `Make tens`,
-    instruction: `Fill a ten-frame first, then count what is left over.`,
+    instruction: `Move the loose objects into groups of ten. Then count the full tens and the leftover ones.`,
     technique: CountingTechnique.GROUP_IN_TENS,
     skillId,
     difficulty: band(index, counts.length),
-    objectId: "apple",
+    objectId: object,
     targetCount: count,
     config: {
       sourceBinLabel: "Loose beads",
@@ -218,6 +220,7 @@ const placeValue = (
   skillId: string,
   task: "build_number" | "read_number" | "regroup_ones",
   targets: number[],
+  object = "apple",
 ): GeneratedQuestion[] =>
   targets.map((target, index) => ({
     id: qid(skillId),
@@ -230,7 +233,7 @@ const placeValue = (
     technique: CountingTechnique.PLACE_VALUE_LAB,
     skillId,
     difficulty: band(index, targets.length),
-    objectId: "apple",
+    objectId: object,
     targetCount: target,
     config: {
       placeValueTask: task,
@@ -303,18 +306,18 @@ const storyReasoning = (
 
 const story = (
   skillId: string,
-  rows: Array<{ type: StoryType; unknown?: StoryUnknown; first: number; second: number; third?: number; answer: number; who: string }>,
+  rows: Array<{ type: StoryType; unknown?: StoryUnknown; first: number; second: number; third?: number; answer: number; who: string; object?: string }>,
 ): GeneratedQuestion[] =>
   rows.map((row, index) => {
     const unknown = row.unknown ?? "result";
     return {
       id: qid(skillId),
       title: `${row.who}'s story`,
-      instruction: `Read the story, then choose the number that answers it.`,
+      instruction: `Read the whole story. Decide which number is missing, then choose it.`,
       technique: CountingTechnique.STORY_PROBLEM_MAT,
       skillId,
       difficulty: band(index, rows.length),
-      objectId: "apple",
+      objectId: row.object ?? "apple",
       targetCount: row.answer,
       config: {
         storyProblemType: row.type,
@@ -469,8 +472,8 @@ const measure = (
       // Not `Measure ${lengths[0]} units` — that was the answer in the heading.
       title: row.task === "measure" ? `How long is the bar?` : `Find the ${row.task}`,
       instruction: row.task === "measure"
-        ? "Count the units under the bar. How long is it?"
-        : `Tap the ${row.task} bar.`,
+        ? "Count every equal unit under the bar. How many units long is it?"
+        : `Compare all three bars, then tap the ${row.task} one.`,
       technique: CountingTechnique.MEASURE_LENGTH,
       skillId,
       difficulty: band(index, rows.length),
@@ -486,9 +489,25 @@ const measure = (
     };
   });
 
+/**
+ * What each chart is a chart *of*.
+ *
+ * Ten charts of the same three fruits is ten times the same picture, and a child
+ * reading "how many more Apples than Pears" for the fifth time is reading a
+ * layout, not a chart. Each set names its columns and gives each one its own
+ * artwork — which the canvas can draw now that a chart is no longer three
+ * hardcoded fruit emoji.
+ */
+const CHART_SETS = [
+  { names: ["Apples", "Pears", "Plums"], assets: ["apple", "flower", "heart"] },
+  { names: ["Cars", "Rockets", "Boats"], assets: ["car", "rocket", "fish"] },
+  { names: ["Bears", "Dinos", "Butterflies"], assets: ["bear", "dino", "butterfly"] },
+  { names: ["Stars", "Suns", "Flowers"], assets: ["star", "sun", "flower"] },
+] as const;
+
 const chart = (
   skillId: string,
-  rows: Array<{ kind: "count" | "total" | "more" | "most"; counts: number[]; focus?: number; against?: number }>,
+  rows: Array<{ kind: "count" | "total" | "more" | "most"; counts: number[]; focus?: number; against?: number; set?: number }>,
 ): GeneratedQuestion[] =>
   rows.map((row, index) => {
     const focus = row.focus ?? 0;
@@ -497,7 +516,8 @@ const chart = (
       : row.kind === "more" ? row.counts[focus] - row.counts[against]
       : row.kind === "most" ? row.counts.indexOf(Math.max(...row.counts)) + 1
       : row.counts[focus];
-    const names = ["Apples", "Pears", "Plums"];
+    const theme = CHART_SETS[(row.set ?? index) % CHART_SETS.length];
+    const names = [...theme.names];
     const prompt = row.kind === "total" ? "How many altogether?"
       : row.kind === "more" ? `How many more ${names[focus]} than ${names[against]}?`
       : row.kind === "most" ? "Which group has the most?"
@@ -520,7 +540,9 @@ const chart = (
       targetCount: answer,
       config: {
         dataKind: row.kind, dataCounts: row.counts,
-        dataCategories: names.slice(0, row.counts.length), dataFocus: focus, dataAgainst: against,
+        dataCategories: names.slice(0, row.counts.length),
+        dataAssets: theme.assets.slice(0, row.counts.length),
+        dataFocus: focus, dataAgainst: against,
         explanation,
       },
     };
@@ -593,7 +615,7 @@ export const GRADE_1_MATH_QUESTIONS: SkillQuestions[] = [
     skillId: "count-on-any-number",
     conceptId: "number.counting.count-on",
     questions: [
-      ...countOn("count-on-any-number", [[5, 3], [8, 4], [10, 5]]),
+      ...countOn("count-on-any-number", [[5, 3], [8, 4], [10, 5]], "car"),
       ...numberPath("count-on-any-number", "count_forward", [
         { start: 36, end: 42 }, { start: 87, end: 93 },
       ]),
@@ -603,11 +625,18 @@ export const GRADE_1_MATH_QUESTIONS: SkillQuestions[] = [
     skillId: "represent-quantities",
     conceptId: "number.counting.represent-quantity",
     questions: [
+      // Stated rather than left to the default: subitising *is* recognising an
+      // arrangement, so which one it is belongs in the question, not in a
+      // fallback. A dice face is the canonical one; a ring is the same quantity
+      // in a shape with no beginning, which is the harder step.
       ...counting("represent-quantities", CountingTechnique.SUBITIZE, [
-        { count: 3 }, { count: 5 },
+        { count: 3, pattern: "dice", object: "star" },
+        { count: 5, pattern: "ring", object: "butterfly" },
       ]),
       ...counting("represent-quantities", CountingTechnique.DIFFERENT_ARRANGEMENTS, [
-        { count: 7, pattern: "circle" }, { count: 9, pattern: "grid" }, { count: 12, pattern: "scatter" },
+        { count: 7, pattern: "circle", object: "flower" },
+        { count: 9, pattern: "grid", object: "car" },
+        { count: 12, pattern: "scatter", object: "fish" },
       ]),
     ],
   },
@@ -617,46 +646,46 @@ export const GRADE_1_MATH_QUESTIONS: SkillQuestions[] = [
     skillId: "add-take-stories",
     conceptId: "operations.story.add-to-take-from",
     questions: story("add-take-stories", [
-      { type: "add_to", unknown: "result", first: 4, second: 3, answer: 7, who: "Koda" },
-      { type: "add_to", unknown: "change", first: 5, second: 4, answer: 4, who: "Mia" },
-      { type: "take_from", unknown: "result", first: 9, second: 3, answer: 6, who: "Ben" },
-      { type: "take_from", unknown: "change", first: 12, second: 5, answer: 5, who: "Ada" },
-      { type: "add_to", unknown: "start", first: 6, second: 5, answer: 6, who: "Sam" },
+      { type: "add_to", unknown: "result", first: 4, second: 3, answer: 7, who: "Koda", object: "apple" },
+      { type: "add_to", unknown: "change", first: 5, second: 4, answer: 4, who: "Mia", object: "flower" },
+      { type: "take_from", unknown: "result", first: 9, second: 3, answer: 6, who: "Ben", object: "fish" },
+      { type: "take_from", unknown: "change", first: 12, second: 5, answer: 5, who: "Ada", object: "star" },
+      { type: "add_to", unknown: "start", first: 6, second: 5, answer: 6, who: "Sam", object: "car" },
     ]),
   },
   {
     skillId: "part-whole-stories",
     conceptId: "operations.story.part-whole",
     questions: story("part-whole-stories", [
-      { type: "put_together", unknown: "result", first: 3, second: 4, answer: 7, who: "Koda" },
-      { type: "put_together", unknown: "part", first: 6, second: 3, answer: 3, who: "Mia" },
+      { type: "put_together", unknown: "result", first: 3, second: 4, answer: 7, who: "Koda", object: "bear" },
+      { type: "put_together", unknown: "part", first: 6, second: 3, answer: 3, who: "Mia", object: "heart" },
       // `take_apart` only ever has a part unknown — the mat rejects anything else, so say so
       // here rather than letting a silent normalization decide what the question asks.
-      { type: "take_apart", unknown: "part", first: 10, second: 4, answer: 6, who: "Ben" },
-      { type: "put_together", unknown: "result", first: 8, second: 5, answer: 13, who: "Ada" },
-      { type: "take_apart", unknown: "part", first: 15, second: 7, answer: 8, who: "Sam" },
+      { type: "take_apart", unknown: "part", first: 10, second: 4, answer: 6, who: "Ben", object: "butterfly" },
+      { type: "put_together", unknown: "result", first: 8, second: 5, answer: 13, who: "Ada", object: "sun" },
+      { type: "take_apart", unknown: "part", first: 15, second: 7, answer: 8, who: "Sam", object: "dino" },
     ]),
   },
   {
     skillId: "compare-stories",
     conceptId: "operations.story.compare",
     questions: story("compare-stories", [
-      { type: "compare", first: 7, second: 4, answer: 3, who: "Koda" },
-      { type: "compare", first: 9, second: 5, answer: 4, who: "Mia" },
-      { type: "compare", first: 12, second: 8, answer: 4, who: "Ben" },
-      { type: "compare", first: 14, second: 6, answer: 8, who: "Ada" },
-      { type: "compare", first: 18, second: 11, answer: 7, who: "Sam" },
+      { type: "compare", first: 7, second: 4, answer: 3, who: "Koda", object: "rocket" },
+      { type: "compare", first: 9, second: 5, answer: 4, who: "Mia", object: "car" },
+      { type: "compare", first: 12, second: 8, answer: 4, who: "Ben", object: "dino" },
+      { type: "compare", first: 14, second: 6, answer: 8, who: "Ada", object: "apple" },
+      { type: "compare", first: 18, second: 11, answer: 7, who: "Sam", object: "sun" },
     ]),
   },
   {
     skillId: "add-three-numbers",
     conceptId: "operations.addition.three-addends",
     questions: story("add-three-numbers", [
-      { type: "three_addends", first: 2, second: 3, third: 4, answer: 9, who: "Koda" },
-      { type: "three_addends", first: 5, second: 2, third: 3, answer: 10, who: "Mia" },
-      { type: "three_addends", first: 4, second: 4, third: 6, answer: 14, who: "Ben" },
-      { type: "three_addends", first: 6, second: 5, third: 5, answer: 16, who: "Ada" },
-      { type: "three_addends", first: 7, second: 6, third: 6, answer: 19, who: "Sam" },
+      { type: "three_addends", first: 2, second: 3, third: 4, answer: 9, who: "Koda", object: "bear" },
+      { type: "three_addends", first: 5, second: 2, third: 3, answer: 10, who: "Mia", object: "star" },
+      { type: "three_addends", first: 4, second: 4, third: 6, answer: 14, who: "Ben", object: "apple" },
+      { type: "three_addends", first: 6, second: 5, third: 5, answer: 16, who: "Ada", object: "flower" },
+      { type: "three_addends", first: 7, second: 6, third: 6, answer: 19, who: "Sam", object: "fish" },
     ]),
   },
 
@@ -668,7 +697,8 @@ export const GRADE_1_MATH_QUESTIONS: SkillQuestions[] = [
       // Deliberate pairs: the same two addends both ways round, so the child meets the property.
       ...addition("addition-properties", CountingTechnique.ADDITION_SANDBOX,
         [[3, 6], [6, 3], [2, 8], [8, 2], [4, 5]],
-        (a, b) => `${a} + ${b} = ${a + b}, and so does ${b} + ${a}. Swapping the two groups round never changes how many there are altogether — so learning one fact gives you two.`),
+        (a, b) => `${a} + ${b} = ${a + b}, and so does ${b} + ${a}. Swapping the two groups round never changes how many there are altogether — so learning one fact gives you two.`,
+        "flower"),
     ],
   },
   {
@@ -691,8 +721,8 @@ export const GRADE_1_MATH_QUESTIONS: SkillQuestions[] = [
     skillId: "counting-operation-connection",
     conceptId: "operations.counting.connect",
     questions: [
-      ...countOn("counting-operation-connection", [[6, 3], [9, 4]]),
-      ...countBack("counting-operation-connection", [[11, 3], [14, 5], [15, 6]]),
+      ...countOn("counting-operation-connection", [[6, 3], [9, 4]], "fish"),
+      ...countBack("counting-operation-connection", [[11, 3], [14, 5], [15, 6]], "bear"),
     ],
   },
   {
@@ -708,8 +738,8 @@ export const GRADE_1_MATH_QUESTIONS: SkillQuestions[] = [
     skillId: "fluency-within-10",
     conceptId: "operations.fluency.within-10",
     questions: [
-      ...addition("fluency-within-10", CountingTechnique.ADDITION_SANDBOX, [[3, 4], [5, 2], [6, 3]]),
-      ...subtraction("fluency-within-10", CountingTechnique.SUBTRACTION_SANDBOX, [[9, 4], [10, 7]]),
+      ...addition("fluency-within-10", CountingTechnique.ADDITION_SANDBOX, [[3, 4], [5, 2], [6, 3]], undefined, "heart"),
+      ...subtraction("fluency-within-10", CountingTechnique.SUBTRACTION_SANDBOX, [[9, 4], [10, 7]], undefined, "rocket"),
     ],
   },
 
@@ -748,24 +778,24 @@ export const GRADE_1_MATH_QUESTIONS: SkillQuestions[] = [
   {
     skillId: "bundle-ten",
     conceptId: "number.place-value.make-a-ten",
-    questions: groupTens("bundle-ten", [11, 12, 13, 15, 20]),
+    questions: groupTens("bundle-ten", [11, 12, 13, 15, 20], "star"),
   },
   {
     skillId: "teen-numbers",
     conceptId: "number.place-value.teen-numbers",
     questions: [
-      ...groupTens("teen-numbers", [14, 16, 18]),
+      ...groupTens("teen-numbers", [14, 16, 18], "butterfly"),
       // `read_number` rather than `build_number`: a child who can only build 17 when told
       // "17" has not shown they can read one ten and seven ones as seventeen.
-      ...placeValue("teen-numbers", "read_number", [17, 19]),
+      ...placeValue("teen-numbers", "read_number", [17, 19], "butterfly"),
     ],
   },
   {
     skillId: "multiples-of-ten",
     conceptId: "number.place-value.multiples-of-ten",
     questions: [
-      ...placeValue("multiples-of-ten", "build_number", [30, 40, 60]),
-      ...placeValue("multiples-of-ten", "read_number", [80, 90]),
+      ...placeValue("multiples-of-ten", "build_number", [30, 40, 60], "rocket"),
+      ...placeValue("multiples-of-ten", "read_number", [80, 90], "rocket"),
     ],
   },
   {
@@ -800,15 +830,16 @@ export const GRADE_1_MATH_QUESTIONS: SkillQuestions[] = [
       (m, s) => `${m} − ${s} = ${m - s}. Think in tens: ${m / 10} tens take away ${s / 10} tens leaves ${(m - s) / 10} tens. The ones column is all zeros, so there is nothing to regroup.`),
   },
 
-  // ── Units 8-11: no manipulative yet. Choice questions until the canvases exist. ──
+  // ── Units 8-11: measurement, time, data, and geometry manipulatives. ──
   {
     skillId: "compare-order-length",
     conceptId: "measurement.length.compare",
     questions: measure("compare-order-length", [
-      { task: "longest", lengths: [3, 6, 4] },
+      // Correct bars rotate first, second, third, first, second instead of clustering on B.
+      { task: "longest", lengths: [6, 3, 4] },
       { task: "shortest", lengths: [5, 2, 7] },
-      { task: "longest", lengths: [8, 4, 6] },
-      { task: "shortest", lengths: [9, 3, 5] },
+      { task: "longest", lengths: [6, 4, 8] },
+      { task: "shortest", lengths: [3, 9, 5] },
       { task: "longest", lengths: [2, 11, 7] },
     ]),
   },
@@ -850,7 +881,7 @@ export const GRADE_1_MATH_QUESTIONS: SkillQuestions[] = [
       { kind: "more", counts: [7, 3, 5], focus: 0, against: 1 },
       { kind: "more", counts: [9, 5, 2], focus: 0, against: 2 },
       { kind: "total", counts: [8, 4, 3] },
-      { kind: "most", counts: [4, 9, 6] },
+      { kind: "most", counts: [9, 4, 6] },
     ]),
   },
   {

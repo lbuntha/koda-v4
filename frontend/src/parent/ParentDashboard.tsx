@@ -243,7 +243,12 @@ export const ParentDashboard: React.FC = () => {
         </div>
       </DashboardLayout>
 
-      <ChildFormModal isOpen={formOpen} onClose={() => setFormOpen(false)} onSubmit={submit} initial={editing} />
+      <ChildFormModal
+        isOpen={formOpen}
+        onClose={() => setFormOpen(false)}
+        onSubmit={submit}
+        initial={editing}
+      />
       <ChildAnalyticsDrawer student={progressChild} onClose={() => setProgressChild(null)} />
       <ConfirmModal
         isOpen={Boolean(deletingChild)}

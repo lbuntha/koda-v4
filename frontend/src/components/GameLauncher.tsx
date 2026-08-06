@@ -599,9 +599,10 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
                 <span className="hidden sm:inline">Back</span>
               </button>
 
-            {/* Progress dots */}
+            {/* Adult previews can jump between cards. Placement uses only the top
+                question counter, so its footer stays clear and non-navigable. */}
             <div className="flex-1 flex items-center justify-center gap-1.5 overflow-hidden">
-              {questions.length <= 20 ? (
+              {!assessment && (questions.length <= 20 ? (
                 questions.map((q, idx) => (
                   <button
                     key={q.id}
@@ -628,7 +629,7 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
                 <span className={`text-xs font-mono font-bold ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                   {currentIdx + 1} / {questions.length}
                 </span>
-              )}
+              ))}
             </div>
 
             {/* Next */}
@@ -657,17 +658,9 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
               </button>
           </div>
           )}
-          {assessment && (
-            <div className={`-mt-1 text-center text-xs font-semibold ${
-              assessmentError
-                ? "text-rose-500"
-                : assessmentAnswered
-                  ? "text-emerald-500"
-                  : isDark ? "text-slate-500" : "text-slate-400"
-            }`} role={assessmentError ? "alert" : "status"}>
-              {assessmentError ?? (assessmentAnswered
-                ? "Response recorded"
-                : kidMode ? "Have a go to keep moving" : "Check an answer to continue")}
+          {assessmentError && (
+            <div className="-mt-1 text-center text-xs font-semibold text-rose-500" role="alert">
+              {assessmentError}
             </div>
           )}
         </div>

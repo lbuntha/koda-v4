@@ -19,6 +19,7 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: ChildInput) => Promise<void>;
+  firstRun?: boolean;
 }
 
 const initialDraft = (gradeLevel: string, primarySubject: string): KidOnboardingDraft => ({
@@ -44,7 +45,7 @@ const persistableAvatar = async (avatar: string) => {
   }
 };
 
-export const KidOnboardingWizard: React.FC<Props> = ({ isOpen, onClose, onSubmit }) => {
+export const KidOnboardingWizard: React.FC<Props> = ({ isOpen, onClose, onSubmit, firstRun = false }) => {
   const { grades, subjects, loading: catalogLoading } = useAcademicCatalog();
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState<KidOnboardingDraft>(() => initialDraft("grade_1", "math"));
@@ -152,8 +153,14 @@ export const KidOnboardingWizard: React.FC<Props> = ({ isOpen, onClose, onSubmit
     <Dialog isOpen={isOpen} onClose={onClose} maxWidthClassName="max-w-4xl">
       <div className="flex min-h-[32rem] flex-col">
         <div className="pr-8">
-          <p className="text-sm font-black text-[#27334A] dark:text-white">Add child</p>
-          <p className="mt-0.5 text-xs font-semibold text-[#8792A5] dark:text-[#9AA3B5]">A simple setup for a personalized learning path.</p>
+          <p className="text-sm font-black text-[#27334A] dark:text-white">
+            {firstRun ? "Welcome to your family home" : "Add child"}
+          </p>
+          <p className="mt-0.5 text-xs font-semibold text-[#8792A5] dark:text-[#9AA3B5]">
+            {firstRun
+              ? "Create your first kid account before starting their learning journey."
+              : "A simple setup for a personalized learning path."}
+          </p>
         </div>
         <div className="mt-4"><OnboardingProgress currentStep={step} onStepSelect={nextStep => { setError(null); setStep(nextStep); }} /></div>
 

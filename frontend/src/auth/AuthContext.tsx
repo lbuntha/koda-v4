@@ -33,6 +33,9 @@ interface AuthState {
   playSession: PlaySession | null;
   /** The account came from the offline cache because the server could not be reached. */
   offlineSession: boolean;
+  /** True only during the session transition immediately after a parent signs up. */
+  parentOnboardingPending: boolean;
+  completeParentOnboarding: () => void;
   login: (email: string, password: string) => Promise<void>;
   registerAdult: (body: { role: "parent" | "teacher"; email: string; password: string; name: string }) => Promise<void>;
   studentLogin: (familyCode: string, name: string, pin: string) => Promise<void>;
@@ -44,6 +47,7 @@ interface AuthState {
 }
 
 const AuthContext = createContext<AuthState | null>(null);
+const PARENT_ONBOARDING_KEY = "koda_parent_onboarding_pending";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [status, setStatus] = useState<Status>(isApiConfigured() ? "loading" : "offline");
@@ -51,6 +55,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [playSession, setPlaySession] = useState<PlaySession | null>(null);
 
   const [offlineSession, setOfflineSession] = useState(false);
+  const [parentOnboardingPending, setParentOnboardingPending] = useState(() => {
+    try {
+      return sessionStorage.getItem(PARENT_ONBOARDING_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
+
+  const updateParentOnboarding = useCallback((pending: boolean) => {
+    setParentOnboardingPending(pending);
+    try {
+      if (pending) sessionStorage.setItem(PARENT_ONBOARDING_KEY, "1");
+      else sessionStorage.removeItem(PARENT_ONBOARDING_KEY);
+    } catch {
+      // The in-memory state still provides the correct flow when storage is unavailable.
+    }
+  }, []);
 
   const loadMe = useCallback(async () => {
     try {
@@ -95,12 +116,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isStudent: account?.role === "student",
     playSession,
     offlineSession,
+    parentOnboardingPending,
+    completeParentOnboarding: () => updateParentOnboarding(false),
     login: async (email, password) => {
+      updateParentOnboarding(false);
       await authApi.login(email, password);
       await loadMe();
     },
     registerAdult: async (body) => {
       await authApi.registerAdult(body);
+      updateParentOnboarding(body.role === "parent");
       await loadMe();
     },
     studentLogin: async (familyCode, name, pin) => {
@@ -126,6 +151,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setAccount(null);
       setPlaySession(null);
       setOfflineSession(false);
+      updateParentOnboarding(false);
       setStatus("anonymous");
     },
   };

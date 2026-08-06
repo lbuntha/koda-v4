@@ -6,7 +6,8 @@ Read it, then read the reference canvas, then port.
 
 Already on the pattern: `MoveAndCountCanvas`, `LineUpCanvas`, `GroupTensCanvas`, `CountOnCanvas`,
 `CountBackCanvas`, `ArrangementsCanvas`, `MagnetsCanvas`, `SubitizeCanvas`, `AdditionCanvas`,
-`SubtractionCanvas`, `FlexibleCanvas`, `StoryProblemMatCanvas`, `PlaceValueLabCanvas`.
+`SubtractionCanvas`, `FlexibleCanvas`, `StoryProblemMatCanvas`, `PlaceValueLabCanvas`,
+`DataChartCanvas`, `MeasureLengthCanvas`.
 
 ---
 
@@ -156,6 +157,10 @@ band above sits half empty. Instead, in one `useMemo`:
 With three bins sharing one stage (Addition: two addend groups over a basket) solve it directly
 instead — walk `candidate` down from `OBJECT_SIZE.max` and take the first size whose rows in
 *every* bin still fit the stage height. Band heights fall out of the answer.
+
+**Floor a fit, never round it.** `Math.round` on a computed size rounds *up* half the time, which
+overflows the box the size was measured into by a pixel or two — and stacking that per object
+across a column is visible. This has bitten three canvases now.
 
 A narrow stage should let a tray run to two rows (`count / 2` in the width cap) rather than
 shrinking every object to fit one — `slotPosition` wraps them anyway.

@@ -52,4 +52,16 @@ export const assignmentsApi = {
    */
   setRelease: (id: string, releaseId: string) =>
     api.patch<Assignment>("/assignments/" + id, { release_id: releaseId }),
+  /**
+   * Take an assignment off a learner for good.
+   *
+   * Pausing only stops it being served. This removes it, along with the
+   * placement and progression that exist only because of it. Play history is
+   * kept — XP and streaks are replayed from events, so deleting those would
+   * silently rewrite what a child has done.
+   */
+  remove: (id: string) =>
+    api.del<{ deleted: boolean; placements: number; progressions: number; promotions: number; eventsKept: number }>(
+      "/assignments/" + id,
+    ),
 };

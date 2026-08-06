@@ -32,6 +32,7 @@ import { sounds } from "../../sound";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import { CanvasChip, CanvasAccent } from "./canvasTheme";
 import type { CanvasProps } from "./types";
+import { balancedChoiceOrder } from "./choiceOrder";
 
 type Operation = "add" | "subtract";
 type Unknown = "result" | "first" | "second" | "judge";
@@ -151,8 +152,12 @@ export const EquationMatCanvas: React.FC<CanvasProps> = ({
   const result = equationResult(config);
   const isJudge = config.unknown === "judge";
   const choices = useMemo(
-    () => (isJudge ? [JUDGE_TRUE, JUDGE_FALSE] : answerChoices(answer)),
-    [answer, isJudge],
+    () => balancedChoiceOrder(
+      isJudge ? [JUDGE_TRUE, JUDGE_FALSE] : answerChoices(answer),
+      answer,
+      question.config.answerChoiceSlot,
+    ),
+    [answer, isJudge, question.config.answerChoiceSlot],
   );
   const object = COUNT_OBJECTS.find(o => o.id === question.objectId) || COUNT_OBJECTS[0];
 

@@ -13,8 +13,8 @@ DEFAULT_SCORING_CONFIG: dict[str, Any] = {
     "masterScore": 0.92,
     "successfulReviewScore": 0.8,
     "gates": {
-        "developing": {"minPlays": 6},
-        "proficient": {"minPlays": 10, "minSessions": 2, "minHardPlays": 3},
+        "developing": {"minPlays": 5},
+        "proficient": {"minPlays": 10, "minSessions": 2, "minHardPlays": 2},
         "master": {
             "minPlays": 15,
             "minDistinctDays": 3,

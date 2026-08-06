@@ -25,6 +25,7 @@ import { sounds } from "../../sound";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import { CanvasChip, CanvasAccent, captionClass } from "./canvasTheme";
 import type { CanvasProps } from "./types";
+import { balancedChoiceOrder } from "./choiceOrder";
 
 export type ShapeTask = "sides" | "corners" | "compose" | "shares";
 export type ShapeName = "triangle" | "square" | "rectangle" | "pentagon" | "hexagon" | "circle";
@@ -141,16 +142,16 @@ export const ShapeLabCanvas: React.FC<CanvasProps> = ({
 
   const shapeNames = Object.keys(SHAPE_SIDES) as ShapeName[];
   const choices = useMemo(() => {
-    if (config.task === "compose") return [1, 2, 3];
-    if (config.task === "shares") return [2, 3, 4];
+    if (config.task === "compose") return balancedChoiceOrder([1, 2, 3], answer, question.config.answerChoiceSlot);
+    if (config.task === "shares") return balancedChoiceOrder([2, 3, 4], answer, question.config.answerChoiceSlot);
     const options = new Set<number>([answer]);
     for (const delta of [1, -1, 2]) {
       if (options.size >= 4) break;
       const candidate = answer + delta;
       if (candidate >= 0 && candidate <= 8) options.add(candidate);
     }
-    return [...options].sort((a, b) => a - b);
-  }, [answer, config.task]);
+    return balancedChoiceOrder([...options].sort((a, b) => a - b), answer, question.config.answerChoiceSlot);
+  }, [answer, config.task, question.config.answerChoiceSlot]);
 
   const accent: CanvasAccent = "purple";
   const stroke = isDark ? "#f0abfc" : "#a21caf";

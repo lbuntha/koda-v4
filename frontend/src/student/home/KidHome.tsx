@@ -80,6 +80,11 @@ export const KidHome: React.FC<StudentHomeProps> = ({
   const canSkip = course.mode === "scheduled" && Boolean(course.recommendationRunId);
   const completedItems = course.completedItems ?? [];
   const stats = kidStats(progress, activitySignal?.currentStreakDays ?? 0);
+  const isFirstVisit = completedItems.length === 0
+    && stats.activitiesDone === 0
+    && stats.totalXp === 0
+    && !course.queue.some(item => item.status === "in_progress")
+    && !(progress?.skills.some(skill => skill.plays > 0) ?? false);
   const hasActivities = rest.length + completedItems.length > 0;
   const pathThumbnailBySkillId = new Map(
     [...course.queue, ...replayItems].map(item => [item.skillId, activityThumbnail(item)] as const),
@@ -193,6 +198,7 @@ export const KidHome: React.FC<StudentHomeProps> = ({
           <WelcomeMissionSection
             mode={course.mode}
             studentName={studentName}
+            isFirstVisit={isFirstVisit}
             hero={hero}
             artUrl={hero ? activityThumbnail(hero) : undefined}
             badge={hero ? kidReason(hero) : undefined}
@@ -252,6 +258,8 @@ export const KidHome: React.FC<StudentHomeProps> = ({
         <LearningPathSection
           units={unitCards}
           subtitle={roadSubtitle}
+          subjectId={activeSubjectId}
+          subjectName={activeSubjectName}
           thumbnailBySkillId={pathThumbnailBySkillId}
           nextSkillId={roadNextSkillId}
           onStartSkill={skillId => {

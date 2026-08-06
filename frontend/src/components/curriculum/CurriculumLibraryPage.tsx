@@ -3,7 +3,7 @@ import { Archive, BookOpen, ChevronLeft, ChevronRight, Plus, RotateCcw, Search }
 import { academicApi, AcademicCatalog } from "../../api/academic";
 import { curriculumApi, CurriculumStatus, CurriculumSummary } from "../../api/curriculum";
 import { createGrade1MathTemplate, GRADE_1_MATH_TEMPLATE_COUNTS } from "../../curriculum/grade1MathTemplate";
-import { Badge, Button, Card, Dialog, Input, Label, Select, Skeleton, Textarea } from "../ui";
+import { Badge, Button, Card, ConfirmModal, Dialog, Input, Label, Select, Skeleton, Textarea } from "../ui";
 
 interface CurriculumLibraryPageProps {
   onOpen: (curriculumId: string) => void;
@@ -67,6 +67,8 @@ export const CurriculumLibraryPage: React.FC<CurriculumLibraryPageProps> = ({ on
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [archivingId, setArchivingId] = useState<string | null>(null);
+  /** The curriculum awaiting an archive confirmation, if any. */
+  const [confirmArchive, setConfirmArchive] = useState<CurriculumSummary | null>(null);
   const [draft, setDraft] = useState<CreateDraft>({ startingPoint: "blank", title: "", description: "", version: "1.0", gradeId: "", subjectId: "" });
 
   const load = async () => {
@@ -190,9 +192,22 @@ export const CurriculumLibraryPage: React.FC<CurriculumLibraryPageProps> = ({ on
     }
   };
 
+  /*
+    Archiving asks first; restoring does not, because restoring undoes rather
+    than destroys. The prompt used to be `window.confirm`, which the browser
+    draws itself — a system alert headed "localhost:3000 says", in the OS font,
+    outside the product. It also blocks the main thread, so nothing behind it
+    can even repaint while it is open.
+  */
   const toggleArchive = async (item: CurriculumSummary) => {
-    const archived = item.status !== "archived";
-    if (archived && !window.confirm(`Archive “${item.title}”? It will become read-only until restored.`)) return;
+    if (item.status !== "archived") {
+      setConfirmArchive(item);
+      return;
+    }
+    await applyArchive(item, false);
+  };
+
+  const applyArchive = async (item: CurriculumSummary, archived: boolean) => {
     setArchivingId(item.id);
     setError(null);
     try {
@@ -286,6 +301,19 @@ export const CurriculumLibraryPage: React.FC<CurriculumLibraryPageProps> = ({ on
           <div className="flex justify-end gap-2 border-t border-[#EEEAF8] pt-4"><Button type="button" variant="outline" onClick={() => setCreateOpen(false)} disabled={creating}>Cancel</Button><Button type="submit" loading={creating} loadingText="Creating..." disabled={!draft.title.trim() || !draft.gradeId || !draft.subjectId}>{draft.startingPoint === "grade1-math" ? "Create Grade 1 draft" : "Create curriculum"}</Button></div>
         </form>
       </Dialog>
+
+      <ConfirmModal
+        isOpen={confirmArchive !== null}
+        onClose={() => setConfirmArchive(null)}
+        onConfirm={async () => {
+          if (confirmArchive) await applyArchive(confirmArchive, true);
+        }}
+        variant="warning"
+        icon={<Archive size={22} />}
+        title={`Archive “${confirmArchive?.title ?? ""}”?`}
+        description="It becomes read-only until you restore it. Learners already assigned to a release of it keep playing; nothing is deleted."
+        confirmText="Archive"
+      />
     </div>
   );
 };

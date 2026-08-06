@@ -85,6 +85,9 @@ const STATE: Record<SkillPathStatus, VisualState> = {
 export const LearningPathSkillCard: React.FC<Props> = ({ skill, artUrl, isNext = false, onStart }) => {
   const status = isNext && skill.status !== "completed" ? "in_progress" : skill.status;
   const visual = STATE[status];
+  const actionLabel = skill.status === "overdue" && (skill.level === "beginner" || skill.level === "developing")
+    ? "Keep practicing"
+    : visual.label;
   const Icon = visual.icon;
   const canStart = Boolean(onStart) && skill.playable && skill.status !== "pending";
   const [artFailed, setArtFailed] = React.useState(false);
@@ -97,7 +100,7 @@ export const LearningPathSkillCard: React.FC<Props> = ({ skill, artUrl, isNext =
       variant="ghost"
       disabled={!canStart}
       onClick={() => canStart && onStart?.(skill.skillId)}
-      aria-label={`${visual.label}: ${skill.skillLabel}`}
+      aria-label={`${actionLabel}: ${skill.skillLabel}`}
       className={`relative flex h-full min-h-36 w-full flex-col items-stretch justify-start gap-0 rounded-2xl border-2 px-3.5 py-3.5 text-left shadow-none transition-all ${
         visual.card
       } ${canStart ? "hover:-translate-y-1 hover:shadow-md" : "cursor-default opacity-100"}`}
@@ -121,7 +124,7 @@ export const LearningPathSkillCard: React.FC<Props> = ({ skill, artUrl, isNext =
         {skill.skillLabel}
       </span>
       <span className={`mt-auto text-[10px] font-extrabold sm:text-[11px] ${visual.status}`}>
-        {skill.playable ? visual.label : "No activity"}
+        {skill.playable ? actionLabel : "No activity"}
       </span>
     </Button>
   );

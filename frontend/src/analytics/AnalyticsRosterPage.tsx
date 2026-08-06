@@ -1,13 +1,15 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { BarChart3, Search } from "lucide-react";
+import { BarChart3, Search, Trash2 } from "lucide-react";
 import { analyticsApi, AnalyticsStudent } from "../api/analytics";
-import { Button, Input, SkeletonCard } from "../components/ui";
+import { adminApi } from "../api/admin";
+import { Button, ConfirmModal, Input, SkeletonCard } from "../components/ui";
 import { ChildAnalyticsDrawer } from "./ChildAnalyticsDrawer";
 import { KidAvatar } from "../components/KidAvatar";
 
 export const AnalyticsRosterPage: React.FC = () => {
   const [students, setStudents] = useState<AnalyticsStudent[]>([]);
   const [selected, setSelected] = useState<AnalyticsStudent | null>(null);
+  const [deleting, setDeleting] = useState<AnalyticsStudent | null>(null);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,6 +25,17 @@ export const AnalyticsRosterPage: React.FC = () => {
     const query = search.trim().toLowerCase();
     return students.filter(student => !query || student.name.toLowerCase().includes(query));
   }, [search, students]);
+
+  const deleteLearner = async (student: AnalyticsStudent) => {
+    try {
+      await adminApi.deleteStudent(student.id);
+      setStudents(current => current.filter(item => item.id !== student.id));
+      if (selected?.id === student.id) setSelected(null);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Learner could not be deleted.");
+      throw caught;
+    }
+  };
 
   if (loading) {
     return <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{Array.from({ length: 6 }, (_, index) => <SkeletonCard key={index} className="h-28" />)}</div>;
@@ -46,15 +59,36 @@ export const AnalyticsRosterPage: React.FC = () => {
                 <p className="truncate text-xs font-extrabold text-[#0E0B55] dark:text-[#EDECF8]">{student.name}</p>
                 <p className="truncate text-[10px] font-medium text-[#6D6997] dark:text-[#9A94B8]">Mastery, activity, and next steps</p>
               </div>
-              <Button size="xs" variant="outline" onClick={() => setSelected(student)} className="shrink-0 rounded-lg px-2 py-1 text-[11px] font-bold dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/10">
-                <BarChart3 size={12} /> View
-              </Button>
+              <div className="flex shrink-0 items-center gap-1">
+                <Button size="xs" variant="outline" onClick={() => setSelected(student)} className="rounded-lg px-2 py-1 text-[11px] font-bold dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/10">
+                  <BarChart3 size={12} /> View
+                </Button>
+                <Button
+                  size="xs"
+                  variant="ghost"
+                  onClick={() => setDeleting(student)}
+                  className="rounded-lg px-2 py-1 text-[11px] text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:text-rose-400 dark:hover:bg-rose-500/10"
+                  aria-label={`Delete ${student.name}`}
+                >
+                  <Trash2 size={12} /> Delete
+                </Button>
+              </div>
             </div>
           ))}
         </div>
         {filtered.length === 0 && <div className="rounded-2xl border border-dashed border-[#DCD6F2] bg-white/60 p-10 text-center koda-admin-secondary">No learners found.</div>}
       </div>
       <ChildAnalyticsDrawer student={selected} onClose={() => setSelected(null)} />
+      <ConfirmModal
+        isOpen={Boolean(deleting)}
+        onClose={() => setDeleting(null)}
+        onConfirm={() => (deleting ? deleteLearner(deleting) : Promise.resolve())}
+        title={`Delete ${deleting?.name ?? "this learner"}?`}
+        description="This permanently deletes the learner profile, learning history, XP, mastery, and assignments. This action cannot be undone."
+        confirmText="Delete learner"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </>
   );
 };

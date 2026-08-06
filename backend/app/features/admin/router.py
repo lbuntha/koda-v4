@@ -158,6 +158,34 @@ async def delete_user(user_id: str, admin: User = Depends(get_current_admin)):
     user = await _user_or_404(user_id)
     if str(user.id) == str(admin.id):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "You cannot delete your own account")
+
+    # A parent's learner profiles must not become invisible orphans. Children shared
+    # with another guardian stay intact; sole-guardian children are removed together
+    # with all of their learning data through the same audited purge as manual deletion.
+    if user.role == Role.parent:
+        parent_id = str(user.id)
+        children = await Student.find(Student.guardian_parent_ids == parent_id).to_list()
+        for student in children:
+            remaining_guardians = [
+                guardian_id
+                for guardian_id in student.guardian_parent_ids
+                if guardian_id != parent_id
+            ]
+            if remaining_guardians:
+                student.guardian_parent_ids = remaining_guardians
+                await student.save()
+                continue
+
+            student_id = str(student.id)
+            counts = await purge_learning_data(student_id, include_student=True)
+            await record_audit(
+                actor=admin,
+                resource_type="student_data",
+                action="child_profile_deleted_with_parent",
+                owner_id=student_id,
+                reason="Administrator deleted the learner's sole guardian account",
+                summary={"studentId": student_id, "parentId": parent_id, "deletedCounts": counts},
+            )
     await user.delete()
 
 

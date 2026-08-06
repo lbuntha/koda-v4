@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 from typing import Any
 
-from .grading import ARITHMETIC, COUNTING, GradingError, grade
+from .grading import GradingError, grade, supported_techniques
 
 
 GENERATOR_REVISION = 1
@@ -112,8 +112,15 @@ def build_placement(release: dict, scope: dict[str, Any] | None, config: dict[st
         if skill_id not in checkpoint_ids:
             continue
         technique = (entry.get("playable") or {}).get("technique")
-        if technique not in COUNTING and technique not in ARITHMETIC:
+        # Anything the release can grade can be placed on. This used to name
+        # COUNTING and ARITHMETIC directly, from when those were the only two
+        # families with a grader — which quietly left 20 of Grade 1 Maths' 30
+        # skills with no placement items at all: every story mat, equation mat,
+        # number path, place-value, compare, clock, measurement, data and shape
+        # skill. A child could only ever be placed by counting and column sums.
+        if technique not in supported_techniques():
             continue
+        # A question still has to be well-formed enough to grade a wrong answer.
         try:
             grade(entry, 0)
         except GradingError as exc:

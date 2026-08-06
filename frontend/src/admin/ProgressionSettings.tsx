@@ -12,8 +12,8 @@ const DEFAULT_SCORING: ScoringConfig = {
   masterScore: 0.92,
   successfulReviewScore: 0.8,
   gates: {
-    developing: { minPlays: 6 },
-    proficient: { minPlays: 10, minSessions: 2, minHardPlays: 3 },
+    developing: { minPlays: 5 },
+    proficient: { minPlays: 10, minSessions: 2, minHardPlays: 2 },
     master: { minPlays: 15, minDistinctDays: 3, minHardPlays: 3, minRecentScore: 0.9 },
   },
   speedBaselineMs: 8000,

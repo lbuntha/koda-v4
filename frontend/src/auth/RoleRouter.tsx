@@ -35,6 +35,7 @@ const AuthScreen = named(() => import("./AuthScreen"), "AuthScreen");
 const ResetPasswordScreen = named(() => import("./ResetPasswordScreen"), "ResetPasswordScreen");
 const LandingPage = named(() => import("../landing/LandingPage"), "LandingPage");
 const ParentDashboard = named(() => import("../parent/ParentDashboard"), "ParentDashboard");
+const ParentFirstRunScreen = named(() => import("../parent/ParentFirstRunScreen"), "ParentFirstRunScreen");
 const AdminDashboard = named(() => import("../admin/AdminDashboard"), "AdminDashboard");
 const RoleConsole = named(() => import("../components/RoleConsole"), "RoleConsole");
 const StudentCurriculumPlayer = named(
@@ -50,7 +51,7 @@ const Splash: React.FC = () => (
 );
 
 const RoleScreen: React.FC = () => {
-  const { status, role, refreshSession } = useAuth();
+  const { status, role, refreshSession, parentOnboardingPending } = useAuth();
   const [authMode, setAuthMode] = useState<"signin" | "signup" | null>(null);
   // An emailed reset link lands on a path this app can't otherwise reach. It is read before
   // auth status is considered: a locked-out parent is anonymous by definition, and one who
@@ -87,7 +88,7 @@ const RoleScreen: React.FC = () => {
 
   if (status === "authenticated") {
     if (role === "admin" || role === "teacher") return <AdminDashboard />;
-    if (role === "parent") return <ParentDashboard />;
+    if (role === "parent") return parentOnboardingPending ? <ParentFirstRunScreen /> : <ParentDashboard />;
     if (role === "student") return <StudentCurriculumPlayer />;
     // any other role (custom) → generic menu-driven console.
     return <RoleConsole />;

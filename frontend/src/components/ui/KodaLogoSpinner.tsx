@@ -17,7 +17,7 @@ const SIZE_CLASSES = {
   fullscreen: "h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24",
 };
 
-/** A calm, brand-led loader for page and canvas transitions. */
+/** Lightweight branded loader for page and canvas transitions. */
 export const KodaLogoSpinner: React.FC<KodaLogoSpinnerProps> = ({
   size = "md",
   label,
@@ -41,73 +41,68 @@ export const KodaLogoSpinner: React.FC<KodaLogoSpinnerProps> = ({
     >
       {glow && (
         <span
-          className="pointer-events-none absolute top-0 aspect-square w-3/4 animate-pulse rounded-full bg-indigo-400/20 blur-2xl motion-reduce:animate-none dark:bg-violet-500/20"
+          className="pointer-events-none absolute top-1/2 aspect-square w-2/3 -translate-y-1/2 rounded-full bg-indigo-400/15 blur-xl dark:bg-violet-500/15"
           aria-hidden="true"
         />
       )}
 
       <div className={cn("relative isolate shrink-0 overflow-visible", SIZE_CLASSES[size])} aria-hidden="true">
-        <span className="absolute inset-[9%] rounded-full bg-white/95 shadow-[0_8px_24px_-10px_rgba(79,70,229,0.55)] ring-1 ring-indigo-100/90 dark:bg-slate-900 dark:ring-white/10" />
-
-        {/* The ring moves while the logo remains still and easy to recognize. */}
         <svg
           viewBox="0 0 100 100"
-          className="absolute inset-0 h-full w-full animate-[spin_1.2s_cubic-bezier(0.55,0.15,0.45,0.85)_infinite] overflow-visible motion-reduce:animate-none"
+          className="h-full w-full overflow-visible drop-shadow-[0_6px_12px_rgba(83,74,183,0.16)]"
         >
           <defs>
             <linearGradient id={gradientId} x1="12%" y1="8%" x2="88%" y2="92%">
-              <stop offset="0%" stopColor="#7252D8" />
-              <stop offset="52%" stopColor="#A78BFA" />
-              <stop offset="100%" stopColor="#55B9F3" />
+              <stop offset="0%" stopColor="#8B5CF6" />
+              <stop offset="55%" stopColor="#534AB7" />
+              <stop offset="100%" stopColor="#38BDF8" />
             </linearGradient>
           </defs>
+
+          <circle cx="50" cy="50" r="43" fill="#FFFFFF" className="dark:fill-[#14182A]" />
           <circle
             cx="50"
             cy="50"
-            r="45"
+            r="42"
             fill="none"
-            stroke="currentColor"
-            strokeWidth="3.5"
+            strokeWidth="6"
             className="text-indigo-100 dark:text-white/10"
+            stroke="currentColor"
           />
-          <path
-            d="M 50 5 A 45 45 0 0 1 94 40"
+
+          <g className="origin-center animate-[spin_.8s_linear_infinite] motion-reduce:animate-none">
+            <circle
+              cx="50"
+              cy="50"
+              r="42"
+              fill="none"
+              stroke={`url(#${gradientId})`}
+              strokeWidth="6"
+              strokeLinecap="round"
+              strokeDasharray="178 86"
+            />
+            <circle cx="85.5" cy="27.5" r="4" fill="#F9C846" />
+          </g>
+
+          <g
             fill="none"
             stroke={`url(#${gradientId})`}
-            strokeWidth="5"
+            strokeWidth="9"
             strokeLinecap="round"
-          />
-          <circle cx="94" cy="40" r="3.8" fill="#F9C846" className="drop-shadow-[0_0_5px_rgba(249,200,70,0.85)]" />
-        </svg>
-
-        <span className="absolute inset-[3%] animate-[spin_2.8s_linear_infinite_reverse] rounded-full motion-reduce:animate-none">
-          <span className="absolute bottom-[13%] left-[8%] h-[8%] w-[8%] rounded-full bg-rose-400 shadow-[0_0_7px_rgba(251,113,133,0.55)]" />
-        </span>
-
-        <div className="absolute inset-[24%] flex items-center justify-center">
-          <svg
-            viewBox="0 0 512 512"
-            className="h-full w-full drop-shadow-[0_2px_5px_rgba(114,82,216,0.28)]"
+            strokeLinejoin="round"
           >
-            <defs>
-              <linearGradient id={`${gradientId}-mark`} x1="10%" y1="5%" x2="90%" y2="95%">
-                <stop offset="0%" stopColor="#7252D8" />
-                <stop offset="100%" stopColor="#534AB7" />
-              </linearGradient>
-            </defs>
-            <g fill="none" stroke={`url(#${gradientId}-mark)`} strokeLinecap="round" strokeLinejoin="round">
-              <line x1="156" y1="100" x2="156" y2="412" strokeWidth="68" />
-              <line x1="188" y1="256" x2="368" y2="100" strokeWidth="64" />
-              <line x1="188" y1="266" x2="368" y2="412" strokeWidth="64" />
-            </g>
-          </svg>
-        </div>
+            <path d="M37 30v40" />
+            <path d="m42 50 20-19" />
+            <path d="m42 51 20 18" />
+          </g>
+          <circle cx="66" cy="28" r="2.5" fill="#F9C846" opacity=".9" />
+        </svg>
       </div>
 
       {label && (
         <span
           aria-hidden="true"
-          className="max-w-[min(18rem,80vw)] text-balance text-[11px] font-semibold tracking-wide text-slate-600 sm:text-xs dark:text-slate-300"
+          className="max-w-[min(18rem,80vw)] text-balance text-[11px] font-medium text-slate-600 sm:text-xs dark:text-slate-300"
         >
           {label}
         </span>

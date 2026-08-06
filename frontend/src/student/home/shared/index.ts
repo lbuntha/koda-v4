@@ -4,6 +4,7 @@ export { AppToolbar } from "./AppToolbar";
 export { CelebrationEffects, type CelebrationTone } from "./CelebrationEffects";
 export { CurriculumCompletionCard } from "./CurriculumCompletionCard";
 export { LearningPathSkillCard } from "./LearningPathSkillCard";
+export { LearningUnitBanner } from "./LearningUnitBanner";
 export { MedallionCard, type MedallionTone } from "./MedallionCard";
 export { MascotFigure, type MascotTone } from "./MascotFigure";
 export { NextUpCard, type NextUpCardDifficulty } from "./NextUpCard";

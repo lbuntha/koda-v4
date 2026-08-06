@@ -248,7 +248,7 @@ export const GoodsAssetLibrary: React.FC = React.memo(() => (
       </symbol>
 
       <symbol id="goods-bottle_potion" viewBox="0 0 64 64">
-        <path d="M27 9h10v4rx2" fill="url(#goods-brown)" stroke="#78350F" strokeWidth="1.2" />
+        <rect x="27" y="9" width="10" height="4" rx="2" fill="url(#goods-brown)" stroke="#78350F" strokeWidth="1.2" />
         <rect x="28" y="7" width="8" height="6" rx="2" fill="url(#goods-yellow)" stroke="#B45309" />
         <path d="M28 13h8v10l12 12a16 16 0 1 1-32 0l12-12Z" fill="url(#goods-purple)" stroke="#581C87" strokeWidth="1.4" />
         <path d="M16 35a16 16 0 0 0 32 0q-16 4-32 0Z" fill="url(#goods-pink)" opacity=".7" />

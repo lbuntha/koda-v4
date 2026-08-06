@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { ArrowUpCircle, ChevronLeft, ChevronRight, ClipboardList, Plus, Users } from "lucide-react";
+import { ArrowUpCircle, ChevronLeft, ChevronRight, ClipboardList, Plus, Trash2, Users } from "lucide-react";
 import { assignmentsApi, Assignment, AssignableStudent, ReleaseSummary } from "../api/assignments";
 import { curriculumApi, CurriculumSummary } from "../api/curriculum";
-import { Badge, Button, Dialog, Label, Select, SectionCard, Skeleton } from "../components/ui";
+import { Badge, Button, ConfirmModal, Dialog, Label, Select, SectionCard, Skeleton } from "../components/ui";
 import { CurriculumPromotion, promotionsApi } from "../api/promotions";
 import { KidAvatar } from "../components/KidAvatar";
 
@@ -24,6 +24,8 @@ export const AssignmentsPage: React.FC = () => {
   const [publishing, setPublishing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [updating, setUpdating] = useState<string | null>(null);
+  /** The assignment awaiting a remove confirmation, if any. */
+  const [confirmRemove, setConfirmRemove] = useState<Assignment | null>(null);
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
@@ -150,6 +152,20 @@ export const AssignmentsPage: React.FC = () => {
     }
   };
 
+  const removeAssignment = async (item: Assignment) => {
+    setUpdating(item.id);
+    try {
+      await assignmentsApi.remove(item.id);
+      setAssignments(current => current.filter(row => row.id !== item.id));
+      setPromotions(current => current.filter(row => row.fromAssignmentId !== item.id));
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Unable to remove assignment");
+      throw cause;
+    } finally {
+      setUpdating(null);
+    }
+  };
+
   const upgradeRelease = async (item: Assignment, releaseSummary: ReleaseSummary) => {
     setUpdating(item.id);
     setError(null);
@@ -271,15 +287,28 @@ export const AssignmentsPage: React.FC = () => {
                           </div>
                         </td>
                         <td className="px-4 py-2.5 align-middle text-right">
-                          <Button
-                            variant={item.status === "active" ? "outline" : "default"}
-                            size="xs"
-                            loading={updating === item.id}
-                            onClick={() => void changeStatus(item)}
-                            className="cursor-pointer"
-                          >
-                            {item.status === "active" ? "Pause" : "Resume"}
-                          </Button>
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant={item.status === "active" ? "outline" : "default"}
+                              size="xs"
+                              loading={updating === item.id}
+                              onClick={() => void changeStatus(item)}
+                              className="cursor-pointer"
+                            >
+                              {item.status === "active" ? "Pause" : "Resume"}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="xs"
+                              disabled={updating === item.id}
+                              onClick={() => setConfirmRemove(item)}
+                              className="cursor-pointer text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-500/10"
+                              title="Remove this assignment"
+                            >
+                              <Trash2 size={12} />
+                              <span>Remove</span>
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -332,6 +361,18 @@ export const AssignmentsPage: React.FC = () => {
           <div className="flex justify-end gap-2 border-t border-[#EEEAF8] pt-4"><Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={saving}>Cancel</Button><Button type="submit" loading={saving} loadingText="Assigning..." disabled={!studentId || !curriculumId || !releaseId || !gradeId}>Assign student</Button></div>
         </form>
       </Dialog>
+
+      <ConfirmModal
+        isOpen={confirmRemove !== null}
+        onClose={() => setConfirmRemove(null)}
+        onConfirm={async () => {
+          if (confirmRemove) await removeAssignment(confirmRemove);
+        }}
+        variant="danger"
+        title={`Remove ${studentName(confirmRemove?.studentId ?? "")}’s assignment?`}
+        description="Their placement result and progress position for this assignment go with it. Completed work stays in their history, so XP and streaks are unaffected. This cannot be undone — pause it instead if you only want to stop it for now."
+        confirmText="Remove"
+      />
     </>
   );
 };

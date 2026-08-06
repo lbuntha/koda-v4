@@ -14,12 +14,15 @@
  * misconception the lesson is meant to prevent.
  */
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Ruler } from "lucide-react";
 import { sounds } from "../../sound";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import { CanvasChip, CanvasAccent } from "./canvasTheme";
+import { CanvasBin } from "./CanvasBin";
+import { GhostGuideOverlay, useGhostGuide } from "../../pedagogy";
 import type { CanvasProps } from "./types";
+import { balancedChoiceOrder } from "./choiceOrder";
 
 export type MeasureTask = "measure" | "longest" | "shortest";
 
@@ -99,8 +102,6 @@ export function measureAnswer(config: MeasureConfig): number {
   return config.lengths.indexOf(target) + 1;
 }
 
-const UNIT = 26;
-
 export const MeasureLengthCanvas: React.FC<CanvasProps> = ({
   question,
   isPlayMode,
@@ -118,16 +119,90 @@ export const MeasureLengthCanvas: React.FC<CanvasProps> = ({
   const answer = measureAnswer(config);
   const [picked, setPicked] = useState<number | null>(null);
   const [solved, setSolved] = useState(false);
+  const { showGhostGuide, reportActivity } = useGhostGuide({ isPlayMode, isSolved: solved, idleThresholdMs: 10000 });
+
+  /**
+   * The unit, sized from the room the board has.
+   *
+   * It was a flat 26px inside a `max-w-md` column, so a twelve-unit bar was
+   * 312px whatever it was drawn on: it ran off a phone and sat as a thin ribbon
+   * in the middle of a projector. Length is the whole subject here, so the unit
+   * has to be as big as the board can honestly carry — and the units under the
+   * bar must stay touching at every size, since "no gaps or overlaps" is the
+   * misconception this activity exists to prevent.
+   */
+  const boardRef = useRef<HTMLDivElement>(null);
+  const [board, setBoard] = useState<{ width: number; height: number } | null>(null);
+  useLayoutEffect(() => {
+    const node = boardRef.current;
+    if (!node) return;
+    const seed = node.getBoundingClientRect();
+    setBoard({ width: seed.width || 520, height: seed.height || 220 });
+    const observer = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        setBoard({ width: entry.contentRect.width || 520, height: entry.contentRect.height || 220 });
+      }
+    });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  const geometry = useMemo(() => {
+    const width = board?.width ?? 520;
+    const height = board?.height ?? 220;
+    const isCompact = width < 480;
+    const rows = Math.max(1, config.lengths.length);
+    const longest = Math.max(1, ...config.lengths);
+
+    const labelWidth = config.task === "measure" ? 0 : isCompact ? 52 : 72;
+    const rowGap = isCompact ? 8 : 12;
+    const rowPadding = isCompact ? 12 : 20;
+    const trackWidth = Math.max(60, width - labelWidth - rowPadding);
+
+    /* Every row must fit: the bar, and in the measure task the ruler under it. */
+    const rowHeight = (height - rowGap * (rows - 1)) / rows;
+    const stacked = config.task === "measure" ? 2.35 : 1.5;
+
+    // Floored, never rounded: rounding a fit up is how the last unit falls off
+    // the end of the board.
+    const unit = Math.floor(Math.max(
+      10,
+      // Capped at 72: past that a unit cube stops reading as a unit and starts
+      // reading as the object being measured.
+      Math.min(72, trackWidth / longest, (rowHeight - 8) / stacked)
+    ));
+
+    return {
+      isCompact,
+      unit,
+      labelWidth,
+      rowGap,
+      barHeight: Math.max(10, Math.round(unit * 0.78)),
+      unitHeight: Math.max(8, Math.round(unit * 0.62))
+    };
+  }, [board?.width, board?.height, config.lengths, config.task]);
 
   useEffect(() => {
     setPicked(null);
     setSolved(false);
   }, [question.id, config.task, config.lengths.join(","), config.labels.join(",")]);
 
+  /**
+   * A tap is right if it names a bar of the right *length*, not the one index
+   * `measureAnswer` happened to return first. Two bars of equal length are both
+   * "the longest", and marking the second one wrong is a lie a child can see.
+   */
+  const isCorrectChoice = (value: number) => {
+    if (value === answer) return true;
+    if (config.task === "measure") return false;
+    const chosen = config.lengths[value - 1];
+    return chosen !== undefined && chosen === config.lengths[answer - 1];
+  };
+
   const choose = (value: number) => {
     if (!isPlayMode || solved) return;
     setPicked(value);
-    if (value !== answer) {
+    if (!isCorrectChoice(value)) {
       sounds.playFail();
       onAttempt?.("incorrect", { expected: answer, selected: value, details: { task: config.task } });
       return;
@@ -141,7 +216,7 @@ export const MeasureLengthCanvas: React.FC<CanvasProps> = ({
   /** A bar drawn to scale. In `measure` the units sit beneath it, touching. */
   const bar = (length: number, label: string, index: number) => {
     const selectable = config.task !== "measure";
-    const isRight = solved && index + 1 === answer;
+    const isRight = solved && isCorrectChoice(index + 1);
     const isWrong = picked === index + 1 && !isRight;
     return (
       <button
@@ -149,7 +224,8 @@ export const MeasureLengthCanvas: React.FC<CanvasProps> = ({
         type="button"
         disabled={!selectable || !isPlayMode || solved}
         onClick={() => selectable && choose(index + 1)}
-        className={`flex w-full items-center gap-3 rounded-2xl border p-2 text-left transition-all duration-200 disabled:cursor-default ${
+        className={`flex w-full items-center rounded-2xl border text-left outline-none transition-all duration-200 disabled:cursor-default
+          focus-visible:ring-4 focus-visible:ring-indigo-400/40 ${geometry.isCompact ? "gap-2 p-1.5" : "gap-3 p-2"} ${
           isRight
             ? "border-emerald-400 bg-emerald-500/10"
             : isWrong
@@ -164,32 +240,35 @@ export const MeasureLengthCanvas: React.FC<CanvasProps> = ({
         {/* One unnamed bar has nothing to be told apart from, so the placeholder label is not
             drawn at all — but an author who named the thing being measured keeps their name. */}
         {!(config.task === "measure" && label === UNNAMED) && (
-          <span className={`w-14 shrink-0 text-[10px] font-black uppercase tracking-[0.12em] ${
+          <span
+            style={{ width: `${geometry.labelWidth}px` }}
+            className={`shrink-0 truncate text-[10px] font-black uppercase tracking-[0.12em] sm:text-xs ${
             config.task === "measure"
               ? isDark ? "text-emerald-300" : "text-emerald-600"
               : labelColour(index, isDark)
-          }`}>
+          }`}
+          >
             {label}
           </span>
         )}
         <span className="flex flex-col gap-1">
           <span
-            className={`block h-5 rounded-full ${
+            style={{ width: length * geometry.unit, height: geometry.barHeight }}
+            className={`block rounded-full ${
               // The measure task draws one unnamed bar, so it keeps the activity's own accent;
               // the compare tasks draw named bars, which must match the name.
               config.task === "measure" ? (isDark ? "bg-emerald-400/85" : "bg-emerald-500/85") : barColour(index, isDark)
             }`}
-            style={{ width: length * UNIT }}
           />
           {config.task === "measure" && (
             <span className="flex" aria-label={`${length} units`}>
               {Array.from({ length }).map((_, unit) => (
                 <span
                   key={unit}
-                  style={{ width: UNIT }}
+                  style={{ width: geometry.unit, height: geometry.unitHeight }}
                   // Violet against the emerald bar: two distinct hues so the units read as a
                   // separate ruler, without the glare of yellow on a white worksheet.
-                  className={`h-4 border-y border-r first:rounded-l-md first:border-l last:rounded-r-md ${
+                  className={`border-y border-r first:rounded-l-md first:border-l last:rounded-r-md ${
                     isDark ? "border-violet-300/70 bg-violet-400/25" : "border-violet-500/60 bg-violet-300/35"
                   }`}
                 />
@@ -208,10 +287,17 @@ export const MeasureLengthCanvas: React.FC<CanvasProps> = ({
       const candidate = answer + delta;
       if (candidate >= 1 && candidate <= 12) options.add(candidate);
     }
-    return [...options].sort((a, b) => a - b);
+    return balancedChoiceOrder(
+      [...options].sort((a, b) => a - b),
+      answer,
+      question.config.answerChoiceSlot,
+    );
   })();
 
-  const accent: CanvasAccent = "emerald";
+  const accent: CanvasAccent = (["indigo", "violet", "emerald", "purple", "rose"] as CanvasAccent[])
+    .includes(question.config.frameColor as CanvasAccent)
+    ? (question.config.frameColor as CanvasAccent)
+    : "emerald";
 
   return (
     <SharedCanvasLayout
@@ -234,33 +320,58 @@ export const MeasureLengthCanvas: React.FC<CanvasProps> = ({
       footerStatus={solved ? (config.task === "measure" ? `Spot on! ${answer} units end to end.` : `Spot on! ${config.labels[answer - 1]} is the ${config.task}.`) : picked !== null ? "Not quite \u2014 check again, counting every unit." : undefined}
       footerSolved={solved}
     >
-      {/* Open stage — each element brings its own outline, and a frame around a frame
-          misrepresents what a child sees. */}
-      <div className="relative flex w-full flex-1 flex-col items-center justify-center gap-5 py-2">
-        <div className="flex w-full max-w-md flex-col gap-2">
-          {config.lengths.map((length, index) => bar(length, config.labels[index], index))}
-        </div>
+      <div className="relative flex w-full flex-1 flex-col items-stretch gap-3 py-1">
+        <GhostGuideOverlay
+          show={showGhostGuide && !solved && isPlayMode}
+          label={config.task === "measure" ? "Count the units under the bar — no gaps!" : `Tap the ${config.task} bar!`}
+          isDark={isDark}
+          labelPlacement="top"
+        />
+
+        <CanvasBin
+          label={config.task === "measure" ? "How long is it?" : `Find the ${config.task}`}
+          accent={accent}
+          isDark={isDark}
+          complete={solved}
+          className="flex-1"
+        >
+          {/* The board fills its bin, so the unit is as big as the room honestly allows. */}
+          <div
+            ref={boardRef}
+            className="absolute inset-0 flex flex-col justify-center"
+            style={{ gap: `${geometry.rowGap}px` }}
+          >
+            {config.lengths.map((length, index) => bar(length, config.labels[index], index))}
+          </div>
+        </CanvasBin>
 
         {config.task === "measure" && (
-          <div className="flex flex-wrap items-center justify-center gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3" role="group" aria-label="Answer choices">
             {numberChoices.map(choice => {
               const isPicked = picked === choice;
               const isRight = solved && choice === answer;
+              const dimmed = solved && choice !== answer;
               return (
                 <button
                   key={choice}
                   type="button"
                   disabled={!isPlayMode || solved}
-                  onClick={() => choose(choice)}
-                  className={`h-12 w-12 rounded-2xl border font-mono text-lg font-black transition-all duration-200 disabled:cursor-default ${
-                    isRight
-                      ? "border-emerald-400 bg-emerald-500/15 text-emerald-600 dark:text-emerald-300"
+                  onClick={() => { reportActivity(); choose(choice); }}
+                  aria-pressed={isPicked}
+                  aria-label={`Answer ${choice}`}
+                  className={`flex items-center justify-center rounded-2xl border-2 font-mono font-black tabular-nums
+                    outline-none transition-[transform,background-color,border-color,opacity] duration-150
+                    focus-visible:ring-4 focus-visible:ring-indigo-400/40
+                    h-14 min-w-[4rem] px-4 text-2xl sm:h-16 sm:min-w-[4.5rem] sm:text-3xl
+                    ${isPlayMode && !solved ? "cursor-pointer hover:-translate-y-0.5 active:scale-95" : "cursor-default"}
+                    ${isRight
+                      ? "border-emerald-500 bg-emerald-500 text-white shadow-lg shadow-emerald-500/25"
                       : isPicked
-                        ? "border-rose-400 bg-rose-500/10 text-rose-600 dark:text-rose-300"
+                        ? "animate-shake border-rose-400 bg-rose-50 text-rose-700 dark:bg-rose-400/15 dark:text-rose-200"
                         : isDark
-                          ? "border-white/10 bg-white/5 text-slate-200 hover:scale-105 hover:border-emerald-400/60"
-                          : "border-slate-200/80 bg-white text-slate-700 shadow-sm hover:scale-105 hover:border-emerald-400/60"
-                  }`}
+                          ? "border-white/10 bg-white/[0.08] text-slate-100 hover:border-white/25 hover:bg-white/[0.14]"
+                          : "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300 hover:shadow-md"}
+                    ${dimmed ? "opacity-40" : ""}`}
                 >
                   {choice}
                 </button>

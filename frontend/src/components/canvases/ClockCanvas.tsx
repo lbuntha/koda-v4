@@ -18,6 +18,7 @@ import { sounds } from "../../sound";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import { CanvasChip, CanvasAccent } from "./canvasTheme";
 import type { CanvasProps } from "./types";
+import { balancedChoiceOrder } from "./choiceOrder";
 
 export interface ClockConfig {
   hour: number;   // 1-12
@@ -63,7 +64,10 @@ export const ClockCanvas: React.FC<CanvasProps> = ({
   }), [question.config.clockHour, question.config.clockMinute]);
 
   const answer = clockLabel(config);
-  const choices = useMemo(() => clockChoices(config), [config]);
+  const choices = useMemo(
+    () => balancedChoiceOrder(clockChoices(config), answer, question.config.answerChoiceSlot),
+    [answer, config, question.config.answerChoiceSlot],
+  );
   const [picked, setPicked] = useState<string | null>(null);
   const [solved, setSolved] = useState(false);
 

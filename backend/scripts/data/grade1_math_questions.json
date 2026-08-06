@@ -14,7 +14,8 @@
       "numberChartDifficulty": "guided",
       "numberChartStart": 6,
       "numberChartEnd": 11,
-      "explanation": "After 6 the numbers keep going up by one — 7, 8, and on to 11. Counting always works the same way, wherever you start."
+      "explanation": "After 6 the numbers keep going up by one — 7, 8, and on to 11. Counting always works the same way, wherever you start.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "number.counting.to-120",
     "needsCanvas": false,
@@ -36,7 +37,8 @@
       "numberChartDifficulty": "independent",
       "numberChartStart": 27,
       "numberChartEnd": 33,
-      "explanation": "After 27 the numbers keep going up by one — 28, 29, and on to 33. Counting always works the same way, wherever you start."
+      "explanation": "After 27 the numbers keep going up by one — 28, 29, and on to 33. Counting always works the same way, wherever you start.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "number.counting.to-120",
     "needsCanvas": false,
@@ -58,7 +60,8 @@
       "numberChartDifficulty": "independent",
       "numberChartStart": 48,
       "numberChartEnd": 54,
-      "explanation": "After 48 the numbers keep going up by one — 49, 50, and on to 54. Counting always works the same way, wherever you start."
+      "explanation": "After 48 the numbers keep going up by one — 49, 50, and on to 54. Counting always works the same way, wherever you start.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "number.counting.to-120",
     "needsCanvas": false,
@@ -80,7 +83,8 @@
       "numberChartDifficulty": "guided",
       "numberChartStart": 73,
       "numberChartEnd": 73,
-      "explanation": "73 is 7 tens and 3 ones, which is what tells you where it sits on the chart."
+      "explanation": "73 is 7 tens and 3 ones, which is what tells you where it sits on the chart.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "number.counting.to-120",
     "needsCanvas": false,
@@ -102,7 +106,8 @@
       "numberChartDifficulty": "independent",
       "numberChartStart": 108,
       "numberChartEnd": 108,
-      "explanation": "108 is 10 tens and 8 ones, which is what tells you where it sits on the chart."
+      "explanation": "108 is 10 tens and 8 ones, which is what tells you where it sits on the chart.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "number.counting.to-120",
     "needsCanvas": false,
@@ -116,14 +121,15 @@
     "technique": "COUNT_ON",
     "skillId": "g1-math-skill-count-on-any-number",
     "difficulty": "easy",
-    "objectId": "apple",
+    "objectId": "car",
     "targetCount": 8,
     "config": {
       "baseCount": 5,
       "extraCount": 3,
       "containerShape": "jar",
       "requireAnswerInput": true,
-      "explanation": "Say \"5\", then count on 3 more to reach 8. You never have to start again at 1."
+      "explanation": "Say \"5\", then count on 3 more to reach 8. You never have to start again at 1.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "number.counting.count-on",
     "needsCanvas": false,
@@ -137,14 +143,15 @@
     "technique": "COUNT_ON",
     "skillId": "g1-math-skill-count-on-any-number",
     "difficulty": "medium",
-    "objectId": "apple",
+    "objectId": "car",
     "targetCount": 12,
     "config": {
       "baseCount": 8,
       "extraCount": 4,
       "containerShape": "jar",
       "requireAnswerInput": true,
-      "explanation": "Say \"8\", then count on 4 more to reach 12. You never have to start again at 1."
+      "explanation": "Say \"8\", then count on 4 more to reach 12. You never have to start again at 1.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "number.counting.count-on",
     "needsCanvas": false,
@@ -158,14 +165,15 @@
     "technique": "COUNT_ON",
     "skillId": "g1-math-skill-count-on-any-number",
     "difficulty": "hard",
-    "objectId": "apple",
+    "objectId": "car",
     "targetCount": 15,
     "config": {
       "baseCount": 10,
       "extraCount": 5,
       "containerShape": "jar",
       "requireAnswerInput": true,
-      "explanation": "Say \"10\", then count on 5 more to reach 15. You never have to start again at 1."
+      "explanation": "Say \"10\", then count on 5 more to reach 15. You never have to start again at 1.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "number.counting.count-on",
     "needsCanvas": false,
@@ -187,7 +195,8 @@
       "numberChartDifficulty": "guided",
       "numberChartStart": 36,
       "numberChartEnd": 42,
-      "explanation": "After 36 the numbers keep going up by one — 37, 38, and on to 42. Counting always works the same way, wherever you start."
+      "explanation": "After 36 the numbers keep going up by one — 37, 38, and on to 42. Counting always works the same way, wherever you start.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "number.counting.count-on",
     "needsCanvas": false,
@@ -209,7 +218,8 @@
       "numberChartDifficulty": "independent",
       "numberChartStart": 87,
       "numberChartEnd": 93,
-      "explanation": "After 87 the numbers keep going up by one — 88, 89, and on to 93. Counting always works the same way, wherever you start."
+      "explanation": "After 87 the numbers keep going up by one — 88, 89, and on to 93. Counting always works the same way, wherever you start.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "number.counting.count-on",
     "needsCanvas": false,
@@ -223,11 +233,13 @@
     "technique": "SUBITIZE",
     "skillId": "g1-math-skill-represent-quantities",
     "difficulty": "easy",
-    "objectId": "apple",
+    "objectId": "star",
     "targetCount": 3,
     "config": {
       "requireAnswerInput": true,
-      "explanation": "There are 3. However they are arranged, moving them around never changes how many there are."
+      "explanation": "There are 3. However they are arranged, moving them around never changes how many there are.",
+      "pattern": "dice",
+      "answerChoiceSlot": 2
     },
     "conceptId": "number.counting.represent-quantity",
     "needsCanvas": false,
@@ -241,11 +253,13 @@
     "technique": "SUBITIZE",
     "skillId": "g1-math-skill-represent-quantities",
     "difficulty": "medium",
-    "objectId": "apple",
+    "objectId": "butterfly",
     "targetCount": 5,
     "config": {
       "requireAnswerInput": true,
-      "explanation": "There are 5. However they are arranged, moving them around never changes how many there are."
+      "explanation": "There are 5. However they are arranged, moving them around never changes how many there are.",
+      "pattern": "ring",
+      "answerChoiceSlot": 3
     },
     "conceptId": "number.counting.represent-quantity",
     "needsCanvas": false,
@@ -259,12 +273,13 @@
     "technique": "DIFFERENT_ARRANGEMENTS",
     "skillId": "g1-math-skill-represent-quantities",
     "difficulty": "easy",
-    "objectId": "apple",
+    "objectId": "flower",
     "targetCount": 7,
     "config": {
       "requireAnswerInput": true,
       "explanation": "There are 7. However they are arranged, moving them around never changes how many there are.",
-      "pattern": "circle"
+      "pattern": "circle",
+      "answerChoiceSlot": 0
     },
     "conceptId": "number.counting.represent-quantity",
     "needsCanvas": false,
@@ -278,12 +293,13 @@
     "technique": "DIFFERENT_ARRANGEMENTS",
     "skillId": "g1-math-skill-represent-quantities",
     "difficulty": "medium",
-    "objectId": "apple",
+    "objectId": "car",
     "targetCount": 9,
     "config": {
       "requireAnswerInput": true,
       "explanation": "There are 9. However they are arranged, moving them around never changes how many there are.",
-      "pattern": "grid"
+      "pattern": "grid",
+      "answerChoiceSlot": 1
     },
     "conceptId": "number.counting.represent-quantity",
     "needsCanvas": false,
@@ -297,12 +313,13 @@
     "technique": "DIFFERENT_ARRANGEMENTS",
     "skillId": "g1-math-skill-represent-quantities",
     "difficulty": "hard",
-    "objectId": "apple",
+    "objectId": "fish",
     "targetCount": 12,
     "config": {
       "requireAnswerInput": true,
       "explanation": "There are 12. However they are arranged, moving them around never changes how many there are.",
-      "pattern": "scatter"
+      "pattern": "scatter",
+      "answerChoiceSlot": 2
     },
     "conceptId": "number.counting.represent-quantity",
     "needsCanvas": false,
@@ -312,7 +329,7 @@
   {
     "id": "seed-g1-math-q-add-take-stories-16",
     "title": "Koda's story",
-    "instruction": "Read the story, then choose the number that answers it.",
+    "instruction": "Read the whole story. Decide which number is missing, then choose it.",
     "technique": "STORY_PROBLEM_MAT",
     "skillId": "g1-math-skill-add-take-stories",
     "difficulty": "easy",
@@ -325,7 +342,8 @@
       "storyPart2": 3,
       "storyCharacterName": "Koda",
       "storyScene": "park",
-      "explanation": "4 + 3 = 7. More arriving means the group grows."
+      "explanation": "4 + 3 = 7. More arriving means the group grows.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "operations.story.add-to-take-from",
     "needsCanvas": false,
@@ -335,11 +353,11 @@
   {
     "id": "seed-g1-math-q-add-take-stories-17",
     "title": "Mia's story",
-    "instruction": "Read the story, then choose the number that answers it.",
+    "instruction": "Read the whole story. Decide which number is missing, then choose it.",
     "technique": "STORY_PROBLEM_MAT",
     "skillId": "g1-math-skill-add-take-stories",
     "difficulty": "easy",
-    "objectId": "apple",
+    "objectId": "flower",
     "targetCount": 4,
     "config": {
       "storyProblemType": "add_to",
@@ -348,7 +366,8 @@
       "storyPart2": 4,
       "storyCharacterName": "Mia",
       "storyScene": "park",
-      "explanation": "5 + ? = 9, so ? is 4. \"Some more arrived\" means adding, even though you are finding the part that was added."
+      "explanation": "5 + ? = 9, so ? is 4. \"Some more arrived\" means adding, even though you are finding the part that was added.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "operations.story.add-to-take-from",
     "needsCanvas": false,
@@ -358,11 +377,11 @@
   {
     "id": "seed-g1-math-q-add-take-stories-18",
     "title": "Ben's story",
-    "instruction": "Read the story, then choose the number that answers it.",
+    "instruction": "Read the whole story. Decide which number is missing, then choose it.",
     "technique": "STORY_PROBLEM_MAT",
     "skillId": "g1-math-skill-add-take-stories",
     "difficulty": "medium",
-    "objectId": "apple",
+    "objectId": "fish",
     "targetCount": 6,
     "config": {
       "storyProblemType": "take_from",
@@ -371,7 +390,8 @@
       "storyPart2": 3,
       "storyCharacterName": "Ben",
       "storyScene": "park",
-      "explanation": "9 − 3 = 6. Things going away means the group shrinks."
+      "explanation": "9 − 3 = 6. Things going away means the group shrinks.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "operations.story.add-to-take-from",
     "needsCanvas": false,
@@ -381,11 +401,11 @@
   {
     "id": "seed-g1-math-q-add-take-stories-19",
     "title": "Ada's story",
-    "instruction": "Read the story, then choose the number that answers it.",
+    "instruction": "Read the whole story. Decide which number is missing, then choose it.",
     "technique": "STORY_PROBLEM_MAT",
     "skillId": "g1-math-skill-add-take-stories",
     "difficulty": "medium",
-    "objectId": "apple",
+    "objectId": "star",
     "targetCount": 5,
     "config": {
       "storyProblemType": "take_from",
@@ -394,7 +414,8 @@
       "storyPart2": 5,
       "storyCharacterName": "Ada",
       "storyScene": "park",
-      "explanation": "12 − ? = 7, so ? is 5. The gap between what was there and what is left is what went away."
+      "explanation": "12 − ? = 7, so ? is 5. The gap between what was there and what is left is what went away.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "operations.story.add-to-take-from",
     "needsCanvas": false,
@@ -404,11 +425,11 @@
   {
     "id": "seed-g1-math-q-add-take-stories-20",
     "title": "Sam's story",
-    "instruction": "Read the story, then choose the number that answers it.",
+    "instruction": "Read the whole story. Decide which number is missing, then choose it.",
     "technique": "STORY_PROBLEM_MAT",
     "skillId": "g1-math-skill-add-take-stories",
     "difficulty": "hard",
-    "objectId": "apple",
+    "objectId": "car",
     "targetCount": 6,
     "config": {
       "storyProblemType": "add_to",
@@ -417,7 +438,8 @@
       "storyPart2": 5,
       "storyCharacterName": "Sam",
       "storyScene": "park",
-      "explanation": "? + 5 = 11, so ? is 6. Working backwards from the total finds the amount you started with."
+      "explanation": "? + 5 = 11, so ? is 6. Working backwards from the total finds the amount you started with.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "operations.story.add-to-take-from",
     "needsCanvas": false,
@@ -427,11 +449,11 @@
   {
     "id": "seed-g1-math-q-part-whole-stories-21",
     "title": "Koda's story",
-    "instruction": "Read the story, then choose the number that answers it.",
+    "instruction": "Read the whole story. Decide which number is missing, then choose it.",
     "technique": "STORY_PROBLEM_MAT",
     "skillId": "g1-math-skill-part-whole-stories",
     "difficulty": "easy",
-    "objectId": "apple",
+    "objectId": "bear",
     "targetCount": 7,
     "config": {
       "storyProblemType": "put_together",
@@ -440,7 +462,8 @@
       "storyPart2": 4,
       "storyCharacterName": "Koda",
       "storyScene": "park",
-      "explanation": "3 + 4 = 7. Nothing moved — two parts are simply counted as one whole."
+      "explanation": "3 + 4 = 7. Nothing moved — two parts are simply counted as one whole.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "operations.story.part-whole",
     "needsCanvas": false,
@@ -450,11 +473,11 @@
   {
     "id": "seed-g1-math-q-part-whole-stories-22",
     "title": "Mia's story",
-    "instruction": "Read the story, then choose the number that answers it.",
+    "instruction": "Read the whole story. Decide which number is missing, then choose it.",
     "technique": "STORY_PROBLEM_MAT",
     "skillId": "g1-math-skill-part-whole-stories",
     "difficulty": "easy",
-    "objectId": "apple",
+    "objectId": "heart",
     "targetCount": 3,
     "config": {
       "storyProblemType": "put_together",
@@ -463,7 +486,8 @@
       "storyPart2": 3,
       "storyCharacterName": "Mia",
       "storyScene": "park",
-      "explanation": "6 + ? = 9, so ? is 3. One part and the whole are known, so the other part is what is missing."
+      "explanation": "6 + ? = 9, so ? is 3. One part and the whole are known, so the other part is what is missing.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "operations.story.part-whole",
     "needsCanvas": false,
@@ -473,11 +497,11 @@
   {
     "id": "seed-g1-math-q-part-whole-stories-23",
     "title": "Ben's story",
-    "instruction": "Read the story, then choose the number that answers it.",
+    "instruction": "Read the whole story. Decide which number is missing, then choose it.",
     "technique": "STORY_PROBLEM_MAT",
     "skillId": "g1-math-skill-part-whole-stories",
     "difficulty": "medium",
-    "objectId": "apple",
+    "objectId": "butterfly",
     "targetCount": 6,
     "config": {
       "storyProblemType": "take_apart",
@@ -486,7 +510,8 @@
       "storyPart2": 4,
       "storyCharacterName": "Ben",
       "storyScene": "park",
-      "explanation": "10 − 4 = 6. The whole is 10; take away the part you can see and the rest is the other part."
+      "explanation": "10 − 4 = 6. The whole is 10; take away the part you can see and the rest is the other part.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "operations.story.part-whole",
     "needsCanvas": false,
@@ -496,11 +521,11 @@
   {
     "id": "seed-g1-math-q-part-whole-stories-24",
     "title": "Ada's story",
-    "instruction": "Read the story, then choose the number that answers it.",
+    "instruction": "Read the whole story. Decide which number is missing, then choose it.",
     "technique": "STORY_PROBLEM_MAT",
     "skillId": "g1-math-skill-part-whole-stories",
     "difficulty": "medium",
-    "objectId": "apple",
+    "objectId": "sun",
     "targetCount": 13,
     "config": {
       "storyProblemType": "put_together",
@@ -509,7 +534,8 @@
       "storyPart2": 5,
       "storyCharacterName": "Ada",
       "storyScene": "park",
-      "explanation": "8 + 5 = 13. Nothing moved — two parts are simply counted as one whole."
+      "explanation": "8 + 5 = 13. Nothing moved — two parts are simply counted as one whole.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "operations.story.part-whole",
     "needsCanvas": false,
@@ -519,11 +545,11 @@
   {
     "id": "seed-g1-math-q-part-whole-stories-25",
     "title": "Sam's story",
-    "instruction": "Read the story, then choose the number that answers it.",
+    "instruction": "Read the whole story. Decide which number is missing, then choose it.",
     "technique": "STORY_PROBLEM_MAT",
     "skillId": "g1-math-skill-part-whole-stories",
     "difficulty": "hard",
-    "objectId": "apple",
+    "objectId": "dino",
     "targetCount": 8,
     "config": {
       "storyProblemType": "take_apart",
@@ -532,7 +558,8 @@
       "storyPart2": 7,
       "storyCharacterName": "Sam",
       "storyScene": "park",
-      "explanation": "15 − 7 = 8. The whole is 15; take away the part you can see and the rest is the other part."
+      "explanation": "15 − 7 = 8. The whole is 15; take away the part you can see and the rest is the other part.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "operations.story.part-whole",
     "needsCanvas": false,
@@ -542,11 +569,11 @@
   {
     "id": "seed-g1-math-q-compare-stories-26",
     "title": "Koda's story",
-    "instruction": "Read the story, then choose the number that answers it.",
+    "instruction": "Read the whole story. Decide which number is missing, then choose it.",
     "technique": "STORY_PROBLEM_MAT",
     "skillId": "g1-math-skill-compare-stories",
     "difficulty": "easy",
-    "objectId": "apple",
+    "objectId": "rocket",
     "targetCount": 3,
     "config": {
       "storyProblemType": "compare",
@@ -555,7 +582,8 @@
       "storyPart2": 4,
       "storyCharacterName": "Koda",
       "storyScene": "park",
-      "explanation": "7 − 4 = 3. Comparing is subtracting: match them up in pairs and 3 are left over."
+      "explanation": "7 − 4 = 3. Comparing is subtracting: match them up in pairs and 3 are left over.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "operations.story.compare",
     "needsCanvas": false,
@@ -565,11 +593,11 @@
   {
     "id": "seed-g1-math-q-compare-stories-27",
     "title": "Mia's story",
-    "instruction": "Read the story, then choose the number that answers it.",
+    "instruction": "Read the whole story. Decide which number is missing, then choose it.",
     "technique": "STORY_PROBLEM_MAT",
     "skillId": "g1-math-skill-compare-stories",
     "difficulty": "easy",
-    "objectId": "apple",
+    "objectId": "car",
     "targetCount": 4,
     "config": {
       "storyProblemType": "compare",
@@ -578,7 +606,8 @@
       "storyPart2": 5,
       "storyCharacterName": "Mia",
       "storyScene": "park",
-      "explanation": "9 − 5 = 4. Comparing is subtracting: match them up in pairs and 4 are left over."
+      "explanation": "9 − 5 = 4. Comparing is subtracting: match them up in pairs and 4 are left over.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "operations.story.compare",
     "needsCanvas": false,
@@ -588,11 +617,11 @@
   {
     "id": "seed-g1-math-q-compare-stories-28",
     "title": "Ben's story",
-    "instruction": "Read the story, then choose the number that answers it.",
+    "instruction": "Read the whole story. Decide which number is missing, then choose it.",
     "technique": "STORY_PROBLEM_MAT",
     "skillId": "g1-math-skill-compare-stories",
     "difficulty": "medium",
-    "objectId": "apple",
+    "objectId": "dino",
     "targetCount": 4,
     "config": {
       "storyProblemType": "compare",
@@ -601,7 +630,8 @@
       "storyPart2": 8,
       "storyCharacterName": "Ben",
       "storyScene": "park",
-      "explanation": "12 − 8 = 4. Comparing is subtracting: match them up in pairs and 4 are left over."
+      "explanation": "12 − 8 = 4. Comparing is subtracting: match them up in pairs and 4 are left over.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "operations.story.compare",
     "needsCanvas": false,
@@ -611,7 +641,7 @@
   {
     "id": "seed-g1-math-q-compare-stories-29",
     "title": "Ada's story",
-    "instruction": "Read the story, then choose the number that answers it.",
+    "instruction": "Read the whole story. Decide which number is missing, then choose it.",
     "technique": "STORY_PROBLEM_MAT",
     "skillId": "g1-math-skill-compare-stories",
     "difficulty": "medium",
@@ -624,7 +654,8 @@
       "storyPart2": 6,
       "storyCharacterName": "Ada",
       "storyScene": "park",
-      "explanation": "14 − 6 = 8. Comparing is subtracting: match them up in pairs and 8 are left over."
+      "explanation": "14 − 6 = 8. Comparing is subtracting: match them up in pairs and 8 are left over.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "operations.story.compare",
     "needsCanvas": false,
@@ -634,11 +665,11 @@
   {
     "id": "seed-g1-math-q-compare-stories-30",
     "title": "Sam's story",
-    "instruction": "Read the story, then choose the number that answers it.",
+    "instruction": "Read the whole story. Decide which number is missing, then choose it.",
     "technique": "STORY_PROBLEM_MAT",
     "skillId": "g1-math-skill-compare-stories",
     "difficulty": "hard",
-    "objectId": "apple",
+    "objectId": "sun",
     "targetCount": 7,
     "config": {
       "storyProblemType": "compare",
@@ -647,7 +678,8 @@
       "storyPart2": 11,
       "storyCharacterName": "Sam",
       "storyScene": "park",
-      "explanation": "18 − 11 = 7. Comparing is subtracting: match them up in pairs and 7 are left over."
+      "explanation": "18 − 11 = 7. Comparing is subtracting: match them up in pairs and 7 are left over.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "operations.story.compare",
     "needsCanvas": false,
@@ -657,11 +689,11 @@
   {
     "id": "seed-g1-math-q-add-three-numbers-31",
     "title": "Koda's story",
-    "instruction": "Read the story, then choose the number that answers it.",
+    "instruction": "Read the whole story. Decide which number is missing, then choose it.",
     "technique": "STORY_PROBLEM_MAT",
     "skillId": "g1-math-skill-add-three-numbers",
     "difficulty": "easy",
-    "objectId": "apple",
+    "objectId": "bear",
     "targetCount": 9,
     "config": {
       "storyProblemType": "three_addends",
@@ -671,7 +703,8 @@
       "storyPart3": 4,
       "storyCharacterName": "Koda",
       "storyScene": "park",
-      "explanation": "2 + 3 + 4 = 9. Add any two first, then add the last one to that total."
+      "explanation": "2 + 3 + 4 = 9. Add any two first, then add the last one to that total.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "operations.addition.three-addends",
     "needsCanvas": false,
@@ -681,11 +714,11 @@
   {
     "id": "seed-g1-math-q-add-three-numbers-32",
     "title": "Mia's story",
-    "instruction": "Read the story, then choose the number that answers it.",
+    "instruction": "Read the whole story. Decide which number is missing, then choose it.",
     "technique": "STORY_PROBLEM_MAT",
     "skillId": "g1-math-skill-add-three-numbers",
     "difficulty": "easy",
-    "objectId": "apple",
+    "objectId": "star",
     "targetCount": 10,
     "config": {
       "storyProblemType": "three_addends",
@@ -695,7 +728,8 @@
       "storyPart3": 3,
       "storyCharacterName": "Mia",
       "storyScene": "park",
-      "explanation": "5 + 2 + 3 = 10. Add any two first, then add the last one to that total."
+      "explanation": "5 + 2 + 3 = 10. Add any two first, then add the last one to that total.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "operations.addition.three-addends",
     "needsCanvas": false,
@@ -705,7 +739,7 @@
   {
     "id": "seed-g1-math-q-add-three-numbers-33",
     "title": "Ben's story",
-    "instruction": "Read the story, then choose the number that answers it.",
+    "instruction": "Read the whole story. Decide which number is missing, then choose it.",
     "technique": "STORY_PROBLEM_MAT",
     "skillId": "g1-math-skill-add-three-numbers",
     "difficulty": "medium",
@@ -719,7 +753,8 @@
       "storyPart3": 6,
       "storyCharacterName": "Ben",
       "storyScene": "park",
-      "explanation": "4 + 4 + 6 = 14. Add any two first, then add the last one to that total."
+      "explanation": "4 + 4 + 6 = 14. Add any two first, then add the last one to that total.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "operations.addition.three-addends",
     "needsCanvas": false,
@@ -729,11 +764,11 @@
   {
     "id": "seed-g1-math-q-add-three-numbers-34",
     "title": "Ada's story",
-    "instruction": "Read the story, then choose the number that answers it.",
+    "instruction": "Read the whole story. Decide which number is missing, then choose it.",
     "technique": "STORY_PROBLEM_MAT",
     "skillId": "g1-math-skill-add-three-numbers",
     "difficulty": "medium",
-    "objectId": "apple",
+    "objectId": "flower",
     "targetCount": 16,
     "config": {
       "storyProblemType": "three_addends",
@@ -743,7 +778,8 @@
       "storyPart3": 5,
       "storyCharacterName": "Ada",
       "storyScene": "park",
-      "explanation": "6 + 5 + 5 = 16. Add any two first, then add the last one to that total."
+      "explanation": "6 + 5 + 5 = 16. Add any two first, then add the last one to that total.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "operations.addition.three-addends",
     "needsCanvas": false,
@@ -753,11 +789,11 @@
   {
     "id": "seed-g1-math-q-add-three-numbers-35",
     "title": "Sam's story",
-    "instruction": "Read the story, then choose the number that answers it.",
+    "instruction": "Read the whole story. Decide which number is missing, then choose it.",
     "technique": "STORY_PROBLEM_MAT",
     "skillId": "g1-math-skill-add-three-numbers",
     "difficulty": "hard",
-    "objectId": "apple",
+    "objectId": "fish",
     "targetCount": 19,
     "config": {
       "storyProblemType": "three_addends",
@@ -767,7 +803,8 @@
       "storyPart3": 6,
       "storyCharacterName": "Sam",
       "storyScene": "park",
-      "explanation": "7 + 6 + 6 = 19. Add any two first, then add the last one to that total."
+      "explanation": "7 + 6 + 6 = 19. Add any two first, then add the last one to that total.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "operations.addition.three-addends",
     "needsCanvas": false,
@@ -781,13 +818,14 @@
     "technique": "ADDITION_SANDBOX",
     "skillId": "g1-math-skill-addition-properties",
     "difficulty": "easy",
-    "objectId": "apple",
+    "objectId": "flower",
     "targetCount": 9,
     "config": {
       "addend1": 3,
       "addend2": 6,
       "requireAnswerInput": true,
-      "explanation": "3 + 6 = 9, and so does 6 + 3. Swapping the two groups round never changes how many there are altogether — so learning one fact gives you two."
+      "explanation": "3 + 6 = 9, and so does 6 + 3. Swapping the two groups round never changes how many there are altogether — so learning one fact gives you two.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "operations.addition.commutative",
     "needsCanvas": false,
@@ -801,13 +839,14 @@
     "technique": "ADDITION_SANDBOX",
     "skillId": "g1-math-skill-addition-properties",
     "difficulty": "easy",
-    "objectId": "apple",
+    "objectId": "flower",
     "targetCount": 9,
     "config": {
       "addend1": 6,
       "addend2": 3,
       "requireAnswerInput": true,
-      "explanation": "6 + 3 = 9, and so does 3 + 6. Swapping the two groups round never changes how many there are altogether — so learning one fact gives you two."
+      "explanation": "6 + 3 = 9, and so does 3 + 6. Swapping the two groups round never changes how many there are altogether — so learning one fact gives you two.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "operations.addition.commutative",
     "needsCanvas": false,
@@ -821,13 +860,14 @@
     "technique": "ADDITION_SANDBOX",
     "skillId": "g1-math-skill-addition-properties",
     "difficulty": "medium",
-    "objectId": "apple",
+    "objectId": "flower",
     "targetCount": 10,
     "config": {
       "addend1": 2,
       "addend2": 8,
       "requireAnswerInput": true,
-      "explanation": "2 + 8 = 10, and so does 8 + 2. Swapping the two groups round never changes how many there are altogether — so learning one fact gives you two."
+      "explanation": "2 + 8 = 10, and so does 8 + 2. Swapping the two groups round never changes how many there are altogether — so learning one fact gives you two.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "operations.addition.commutative",
     "needsCanvas": false,
@@ -841,13 +881,14 @@
     "technique": "ADDITION_SANDBOX",
     "skillId": "g1-math-skill-addition-properties",
     "difficulty": "medium",
-    "objectId": "apple",
+    "objectId": "flower",
     "targetCount": 10,
     "config": {
       "addend1": 8,
       "addend2": 2,
       "requireAnswerInput": true,
-      "explanation": "8 + 2 = 10, and so does 2 + 8. Swapping the two groups round never changes how many there are altogether — so learning one fact gives you two."
+      "explanation": "8 + 2 = 10, and so does 2 + 8. Swapping the two groups round never changes how many there are altogether — so learning one fact gives you two.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "operations.addition.commutative",
     "needsCanvas": false,
@@ -861,13 +902,14 @@
     "technique": "ADDITION_SANDBOX",
     "skillId": "g1-math-skill-addition-properties",
     "difficulty": "hard",
-    "objectId": "apple",
+    "objectId": "flower",
     "targetCount": 9,
     "config": {
       "addend1": 4,
       "addend2": 5,
       "requireAnswerInput": true,
-      "explanation": "4 + 5 = 9, and so does 5 + 4. Swapping the two groups round never changes how many there are altogether — so learning one fact gives you two."
+      "explanation": "4 + 5 = 9, and so does 5 + 4. Swapping the two groups round never changes how many there are altogether — so learning one fact gives you two.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "operations.addition.commutative",
     "needsCanvas": false,
@@ -888,7 +930,8 @@
       "equationFirst": 5,
       "equationSecond": 3,
       "equationUnknown": "second",
-      "explanation": "5 + ? = 8, so ? is 3 — which also answers 8 − 5. Subtraction asks what is missing, so an addition fact you already know can answer it."
+      "explanation": "5 + ? = 8, so ? is 3 — which also answers 8 − 5. Subtraction asks what is missing, so an addition fact you already know can answer it.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "operations.subtraction.think-addition",
     "needsCanvas": false,
@@ -909,7 +952,8 @@
       "equationFirst": 6,
       "equationSecond": 4,
       "equationUnknown": "second",
-      "explanation": "6 + ? = 10, so ? is 4 — which also answers 10 − 6. Every pair that makes 10 answers a subtraction from 10."
+      "explanation": "6 + ? = 10, so ? is 4 — which also answers 10 − 6. Every pair that makes 10 answers a subtraction from 10.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "operations.subtraction.think-addition",
     "needsCanvas": false,
@@ -930,7 +974,8 @@
       "equationFirst": 9,
       "equationSecond": 3,
       "equationUnknown": "second",
-      "explanation": "9 + ? = 12, so ? is 3 — which also answers 12 − 9. Counting up from 9 to 12 is quicker than counting back."
+      "explanation": "9 + ? = 12, so ? is 3 — which also answers 12 − 9. Counting up from 9 to 12 is quicker than counting back.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "operations.subtraction.think-addition",
     "needsCanvas": false,
@@ -951,7 +996,8 @@
       "equationFirst": 8,
       "equationSecond": 7,
       "equationUnknown": "second",
-      "explanation": "8 + ? = 15, so ? is 7 — which also answers 15 − 8. Adding on from the smaller number keeps the count short."
+      "explanation": "8 + ? = 15, so ? is 7 — which also answers 15 − 8. Adding on from the smaller number keeps the count short.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "operations.subtraction.think-addition",
     "needsCanvas": false,
@@ -972,7 +1018,8 @@
       "equationFirst": 9,
       "equationSecond": 8,
       "equationUnknown": "second",
-      "explanation": "9 + ? = 17, so ? is 8 — which also answers 17 − 9. Add 1 to reach 10, then 7 more to reach 17: that is 8."
+      "explanation": "9 + ? = 17, so ? is 8 — which also answers 17 − 9. Add 1 to reach 10, then 7 more to reach 17: that is 8.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "operations.subtraction.think-addition",
     "needsCanvas": false,
@@ -986,14 +1033,15 @@
     "technique": "COUNT_ON",
     "skillId": "g1-math-skill-counting-operation-connection",
     "difficulty": "easy",
-    "objectId": "apple",
+    "objectId": "fish",
     "targetCount": 9,
     "config": {
       "baseCount": 6,
       "extraCount": 3,
       "containerShape": "jar",
       "requireAnswerInput": true,
-      "explanation": "Say \"6\", then count on 3 more to reach 9. You never have to start again at 1."
+      "explanation": "Say \"6\", then count on 3 more to reach 9. You never have to start again at 1.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "operations.counting.connect",
     "needsCanvas": false,
@@ -1007,14 +1055,15 @@
     "technique": "COUNT_ON",
     "skillId": "g1-math-skill-counting-operation-connection",
     "difficulty": "medium",
-    "objectId": "apple",
+    "objectId": "fish",
     "targetCount": 13,
     "config": {
       "baseCount": 9,
       "extraCount": 4,
       "containerShape": "jar",
       "requireAnswerInput": true,
-      "explanation": "Say \"9\", then count on 4 more to reach 13. You never have to start again at 1."
+      "explanation": "Say \"9\", then count on 4 more to reach 13. You never have to start again at 1.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "operations.counting.connect",
     "needsCanvas": false,
@@ -1028,14 +1077,15 @@
     "technique": "COUNT_BACK",
     "skillId": "g1-math-skill-counting-operation-connection",
     "difficulty": "easy",
-    "objectId": "apple",
+    "objectId": "bear",
     "targetCount": 8,
     "config": {
       "totalCount": 11,
       "removeCount": 3,
       "crossOutStyle": "strike",
       "requireAnswerInput": true,
-      "explanation": "Start at 11 and count back 3: 8 are left. Counting back is the same as taking away."
+      "explanation": "Start at 11 and count back 3: 8 are left. Counting back is the same as taking away.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "operations.counting.connect",
     "needsCanvas": false,
@@ -1049,14 +1099,15 @@
     "technique": "COUNT_BACK",
     "skillId": "g1-math-skill-counting-operation-connection",
     "difficulty": "medium",
-    "objectId": "apple",
+    "objectId": "bear",
     "targetCount": 9,
     "config": {
       "totalCount": 14,
       "removeCount": 5,
       "crossOutStyle": "strike",
       "requireAnswerInput": true,
-      "explanation": "Start at 14 and count back 5: 9 are left. Counting back is the same as taking away."
+      "explanation": "Start at 14 and count back 5: 9 are left. Counting back is the same as taking away.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "operations.counting.connect",
     "needsCanvas": false,
@@ -1070,14 +1121,15 @@
     "technique": "COUNT_BACK",
     "skillId": "g1-math-skill-counting-operation-connection",
     "difficulty": "hard",
-    "objectId": "apple",
+    "objectId": "bear",
     "targetCount": 9,
     "config": {
       "totalCount": 15,
       "removeCount": 6,
       "crossOutStyle": "strike",
       "requireAnswerInput": true,
-      "explanation": "Start at 15 and count back 6: 9 are left. Counting back is the same as taking away."
+      "explanation": "Start at 15 and count back 6: 9 are left. Counting back is the same as taking away.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "operations.counting.connect",
     "needsCanvas": false,
@@ -1097,7 +1149,8 @@
       "addend1": 8,
       "addend2": 4,
       "requireAnswerInput": true,
-      "explanation": "Make a ten first: move 2 from the 4 across to turn 8 into 10, and 2 are left. 10 + 2 = 12, which is much easier than counting on 4 times."
+      "explanation": "Make a ten first: move 2 from the 4 across to turn 8 into 10, and 2 are left. 10 + 2 = 12, which is much easier than counting on 4 times.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "operations.addition.make-ten",
     "needsCanvas": false,
@@ -1117,7 +1170,8 @@
       "addend1": 9,
       "addend2": 5,
       "requireAnswerInput": true,
-      "explanation": "Make a ten first: move 1 from the 5 across to turn 9 into 10, and 4 are left. 10 + 4 = 14, which is much easier than counting on 5 times."
+      "explanation": "Make a ten first: move 1 from the 5 across to turn 9 into 10, and 4 are left. 10 + 4 = 14, which is much easier than counting on 5 times.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "operations.addition.make-ten",
     "needsCanvas": false,
@@ -1137,7 +1191,8 @@
       "addend1": 7,
       "addend2": 6,
       "requireAnswerInput": true,
-      "explanation": "Make a ten first: move 3 from the 6 across to turn 7 into 10, and 3 are left. 10 + 3 = 13, which is much easier than counting on 6 times."
+      "explanation": "Make a ten first: move 3 from the 6 across to turn 7 into 10, and 3 are left. 10 + 3 = 13, which is much easier than counting on 6 times.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "operations.addition.make-ten",
     "needsCanvas": false,
@@ -1157,7 +1212,8 @@
       "addend1": 8,
       "addend2": 7,
       "requireAnswerInput": true,
-      "explanation": "Make a ten first: move 2 from the 7 across to turn 8 into 10, and 5 are left. 10 + 5 = 15, which is much easier than counting on 7 times."
+      "explanation": "Make a ten first: move 2 from the 7 across to turn 8 into 10, and 5 are left. 10 + 5 = 15, which is much easier than counting on 7 times.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "operations.addition.make-ten",
     "needsCanvas": false,
@@ -1177,7 +1233,8 @@
       "addend1": 9,
       "addend2": 8,
       "requireAnswerInput": true,
-      "explanation": "Make a ten first: move 1 from the 8 across to turn 9 into 10, and 7 are left. 10 + 7 = 17, which is much easier than counting on 8 times."
+      "explanation": "Make a ten first: move 1 from the 8 across to turn 9 into 10, and 7 are left. 10 + 7 = 17, which is much easier than counting on 8 times.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "operations.addition.make-ten",
     "needsCanvas": false,
@@ -1191,13 +1248,14 @@
     "technique": "ADDITION_SANDBOX",
     "skillId": "g1-math-skill-fluency-within-10",
     "difficulty": "easy",
-    "objectId": "apple",
+    "objectId": "heart",
     "targetCount": 7,
     "config": {
       "addend1": 3,
       "addend2": 4,
       "requireAnswerInput": true,
-      "explanation": "3 + 4 = 7. Joining a group of 3 and a group of 4 makes one group of 7."
+      "explanation": "3 + 4 = 7. Joining a group of 3 and a group of 4 makes one group of 7.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "operations.fluency.within-10",
     "needsCanvas": false,
@@ -1211,13 +1269,14 @@
     "technique": "ADDITION_SANDBOX",
     "skillId": "g1-math-skill-fluency-within-10",
     "difficulty": "medium",
-    "objectId": "apple",
+    "objectId": "heart",
     "targetCount": 7,
     "config": {
       "addend1": 5,
       "addend2": 2,
       "requireAnswerInput": true,
-      "explanation": "5 + 2 = 7. Joining a group of 5 and a group of 2 makes one group of 7."
+      "explanation": "5 + 2 = 7. Joining a group of 5 and a group of 2 makes one group of 7.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "operations.fluency.within-10",
     "needsCanvas": false,
@@ -1231,13 +1290,14 @@
     "technique": "ADDITION_SANDBOX",
     "skillId": "g1-math-skill-fluency-within-10",
     "difficulty": "hard",
-    "objectId": "apple",
+    "objectId": "heart",
     "targetCount": 9,
     "config": {
       "addend1": 6,
       "addend2": 3,
       "requireAnswerInput": true,
-      "explanation": "6 + 3 = 9. Joining a group of 6 and a group of 3 makes one group of 9."
+      "explanation": "6 + 3 = 9. Joining a group of 6 and a group of 3 makes one group of 9.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "operations.fluency.within-10",
     "needsCanvas": false,
@@ -1251,13 +1311,14 @@
     "technique": "SUBTRACTION_SANDBOX",
     "skillId": "g1-math-skill-fluency-within-10",
     "difficulty": "easy",
-    "objectId": "apple",
+    "objectId": "rocket",
     "targetCount": 5,
     "config": {
       "minuend": 9,
       "subtrahend": 4,
       "requireAnswerInput": true,
-      "explanation": "9 − 4 = 5. Taking 4 away from 9 leaves 5."
+      "explanation": "9 − 4 = 5. Taking 4 away from 9 leaves 5.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "operations.fluency.within-10",
     "needsCanvas": false,
@@ -1271,13 +1332,14 @@
     "technique": "SUBTRACTION_SANDBOX",
     "skillId": "g1-math-skill-fluency-within-10",
     "difficulty": "medium",
-    "objectId": "apple",
+    "objectId": "rocket",
     "targetCount": 3,
     "config": {
       "minuend": 10,
       "subtrahend": 7,
       "requireAnswerInput": true,
-      "explanation": "10 − 7 = 3. Taking 7 away from 10 leaves 3."
+      "explanation": "10 − 7 = 3. Taking 7 away from 10 leaves 3.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "operations.fluency.within-10",
     "needsCanvas": false,
@@ -1298,7 +1360,8 @@
       "equationFirst": 6,
       "equationSecond": 3,
       "equationUnknown": "result",
-      "explanation": "6 + 3 = 9. Start at 6 and count on 3 more — you never have to go back to 1."
+      "explanation": "6 + 3 = 9. Start at 6 and count on 3 more — you never have to go back to 1.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "algebra.equality.equal-sign",
     "needsCanvas": false,
@@ -1319,7 +1382,8 @@
       "equationFirst": 4,
       "equationSecond": 5,
       "equationUnknown": "result",
-      "explanation": "4 + 5 = 9. Start at 4 and count on 5 more — you never have to go back to 1."
+      "explanation": "4 + 5 = 9. Start at 4 and count on 5 more — you never have to go back to 1.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "algebra.equality.equal-sign",
     "needsCanvas": false,
@@ -1340,7 +1404,8 @@
       "equationFirst": 9,
       "equationSecond": 4,
       "equationUnknown": "result",
-      "explanation": "9 − 4 = 5. Start at 9 and take 4 away; what is left is 5."
+      "explanation": "9 − 4 = 5. Start at 9 and take 4 away; what is left is 5.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "algebra.equality.equal-sign",
     "needsCanvas": false,
@@ -1363,7 +1428,8 @@
       "equationUnknown": "judge",
       "equationClaimFirst": 3,
       "equationClaimSecond": 4,
-      "explanation": "True. This side makes 7, and 3 + 4 also makes 7 — \"=\" means the two sides are the same amount, not \"here comes the answer\"."
+      "explanation": "True. This side makes 7, and 3 + 4 also makes 7 — \"=\" means the two sides are the same amount, not \"here comes the answer\".",
+      "answerChoiceSlot": 3
     },
     "conceptId": "algebra.equality.equal-sign",
     "needsCanvas": false,
@@ -1386,7 +1452,8 @@
       "equationUnknown": "judge",
       "equationClaimFirst": 5,
       "equationClaimSecond": 0,
-      "explanation": "False. This side makes 6, but the other side says 5. Both sides have to be the same amount before you can write \"=\"."
+      "explanation": "False. This side makes 6, but the other side says 5. Both sides have to be the same amount before you can write \"=\".",
+      "answerChoiceSlot": 0
     },
     "conceptId": "algebra.equality.equal-sign",
     "needsCanvas": false,
@@ -1407,7 +1474,8 @@
       "equationFirst": 8,
       "equationSecond": 3,
       "equationUnknown": "second",
-      "explanation": "8 + ? = 11 is only true when ? is 3, because 8 + 3 = 11. Finding a hidden part means working backwards from what you know."
+      "explanation": "8 + ? = 11 is only true when ? is 3, because 8 + 3 = 11. Finding a hidden part means working backwards from what you know.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "algebra.equality.unknown-number",
     "needsCanvas": false,
@@ -1428,7 +1496,8 @@
       "equationFirst": 5,
       "equationSecond": 4,
       "equationUnknown": "first",
-      "explanation": "? + 4 = 9 is only true when ? is 5, because 5 + 4 = 9. Finding a hidden part means working backwards from what you know."
+      "explanation": "? + 4 = 9 is only true when ? is 5, because 5 + 4 = 9. Finding a hidden part means working backwards from what you know.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "algebra.equality.unknown-number",
     "needsCanvas": false,
@@ -1449,7 +1518,8 @@
       "equationFirst": 13,
       "equationSecond": 5,
       "equationUnknown": "second",
-      "explanation": "13 − ? = 8 is only true when ? is 5, because 13 − 5 = 8. Finding a hidden part means working backwards from what you know."
+      "explanation": "13 − ? = 8 is only true when ? is 5, because 13 − 5 = 8. Finding a hidden part means working backwards from what you know.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "algebra.equality.unknown-number",
     "needsCanvas": false,
@@ -1470,7 +1540,8 @@
       "equationFirst": 6,
       "equationSecond": 8,
       "equationUnknown": "second",
-      "explanation": "6 + ? = 14 is only true when ? is 8, because 6 + 8 = 14. Finding a hidden part means working backwards from what you know."
+      "explanation": "6 + ? = 14 is only true when ? is 8, because 6 + 8 = 14. Finding a hidden part means working backwards from what you know.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "algebra.equality.unknown-number",
     "needsCanvas": false,
@@ -1491,7 +1562,8 @@
       "equationFirst": 12,
       "equationSecond": 5,
       "equationUnknown": "first",
-      "explanation": "? − 5 = 7 is only true when ? is 12, because 12 − 5 = 7. Finding a hidden part means working backwards from what you know."
+      "explanation": "? − 5 = 7 is only true when ? is 12, because 12 − 5 = 7. Finding a hidden part means working backwards from what you know.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "algebra.equality.unknown-number",
     "needsCanvas": false,
@@ -1501,17 +1573,18 @@
   {
     "id": "seed-g1-math-q-bundle-ten-71",
     "title": "Make tens",
-    "instruction": "Fill a ten-frame first, then count what is left over.",
+    "instruction": "Move the loose objects into groups of ten. Then count the full tens and the leftover ones.",
     "technique": "GROUP_IN_TENS",
     "skillId": "g1-math-skill-bundle-ten",
     "difficulty": "easy",
-    "objectId": "apple",
+    "objectId": "star",
     "targetCount": 11,
     "config": {
       "sourceBinLabel": "Loose beads",
       "showNumbersInSlots": true,
       "requireAnswerInput": true,
-      "explanation": "11 is 1 ten and 1 one. A full ten-frame is worth one ten, so you only have to count the leftovers."
+      "explanation": "11 is 1 ten and 1 one. A full ten-frame is worth one ten, so you only have to count the leftovers.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "number.place-value.make-a-ten",
     "needsCanvas": false,
@@ -1521,17 +1594,18 @@
   {
     "id": "seed-g1-math-q-bundle-ten-72",
     "title": "Make tens",
-    "instruction": "Fill a ten-frame first, then count what is left over.",
+    "instruction": "Move the loose objects into groups of ten. Then count the full tens and the leftover ones.",
     "technique": "GROUP_IN_TENS",
     "skillId": "g1-math-skill-bundle-ten",
     "difficulty": "easy",
-    "objectId": "apple",
+    "objectId": "star",
     "targetCount": 12,
     "config": {
       "sourceBinLabel": "Loose beads",
       "showNumbersInSlots": false,
       "requireAnswerInput": true,
-      "explanation": "12 is 1 ten and 2 ones. A full ten-frame is worth one ten, so you only have to count the leftovers."
+      "explanation": "12 is 1 ten and 2 ones. A full ten-frame is worth one ten, so you only have to count the leftovers.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "number.place-value.make-a-ten",
     "needsCanvas": false,
@@ -1541,17 +1615,18 @@
   {
     "id": "seed-g1-math-q-bundle-ten-73",
     "title": "Make tens",
-    "instruction": "Fill a ten-frame first, then count what is left over.",
+    "instruction": "Move the loose objects into groups of ten. Then count the full tens and the leftover ones.",
     "technique": "GROUP_IN_TENS",
     "skillId": "g1-math-skill-bundle-ten",
     "difficulty": "medium",
-    "objectId": "apple",
+    "objectId": "star",
     "targetCount": 13,
     "config": {
       "sourceBinLabel": "Loose beads",
       "showNumbersInSlots": false,
       "requireAnswerInput": true,
-      "explanation": "13 is 1 ten and 3 ones. A full ten-frame is worth one ten, so you only have to count the leftovers."
+      "explanation": "13 is 1 ten and 3 ones. A full ten-frame is worth one ten, so you only have to count the leftovers.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "number.place-value.make-a-ten",
     "needsCanvas": false,
@@ -1561,17 +1636,18 @@
   {
     "id": "seed-g1-math-q-bundle-ten-74",
     "title": "Make tens",
-    "instruction": "Fill a ten-frame first, then count what is left over.",
+    "instruction": "Move the loose objects into groups of ten. Then count the full tens and the leftover ones.",
     "technique": "GROUP_IN_TENS",
     "skillId": "g1-math-skill-bundle-ten",
     "difficulty": "medium",
-    "objectId": "apple",
+    "objectId": "star",
     "targetCount": 15,
     "config": {
       "sourceBinLabel": "Loose beads",
       "showNumbersInSlots": false,
       "requireAnswerInput": true,
-      "explanation": "15 is 1 ten and 5 ones. A full ten-frame is worth one ten, so you only have to count the leftovers."
+      "explanation": "15 is 1 ten and 5 ones. A full ten-frame is worth one ten, so you only have to count the leftovers.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "number.place-value.make-a-ten",
     "needsCanvas": false,
@@ -1581,17 +1657,18 @@
   {
     "id": "seed-g1-math-q-bundle-ten-75",
     "title": "Make tens",
-    "instruction": "Fill a ten-frame first, then count what is left over.",
+    "instruction": "Move the loose objects into groups of ten. Then count the full tens and the leftover ones.",
     "technique": "GROUP_IN_TENS",
     "skillId": "g1-math-skill-bundle-ten",
     "difficulty": "hard",
-    "objectId": "apple",
+    "objectId": "star",
     "targetCount": 20,
     "config": {
       "sourceBinLabel": "Loose beads",
       "showNumbersInSlots": false,
       "requireAnswerInput": true,
-      "explanation": "20 is 2 tens and no ones. A full ten-frame is worth one ten, so you only have to count the leftovers."
+      "explanation": "20 is 2 tens and no ones. A full ten-frame is worth one ten, so you only have to count the leftovers.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "number.place-value.make-a-ten",
     "needsCanvas": false,
@@ -1601,17 +1678,18 @@
   {
     "id": "seed-g1-math-q-teen-numbers-76",
     "title": "Make tens",
-    "instruction": "Fill a ten-frame first, then count what is left over.",
+    "instruction": "Move the loose objects into groups of ten. Then count the full tens and the leftover ones.",
     "technique": "GROUP_IN_TENS",
     "skillId": "g1-math-skill-teen-numbers",
     "difficulty": "easy",
-    "objectId": "apple",
+    "objectId": "butterfly",
     "targetCount": 14,
     "config": {
       "sourceBinLabel": "Loose beads",
       "showNumbersInSlots": true,
       "requireAnswerInput": true,
-      "explanation": "14 is 1 ten and 4 ones. A full ten-frame is worth one ten, so you only have to count the leftovers."
+      "explanation": "14 is 1 ten and 4 ones. A full ten-frame is worth one ten, so you only have to count the leftovers.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "number.place-value.teen-numbers",
     "needsCanvas": false,
@@ -1621,17 +1699,18 @@
   {
     "id": "seed-g1-math-q-teen-numbers-77",
     "title": "Make tens",
-    "instruction": "Fill a ten-frame first, then count what is left over.",
+    "instruction": "Move the loose objects into groups of ten. Then count the full tens and the leftover ones.",
     "technique": "GROUP_IN_TENS",
     "skillId": "g1-math-skill-teen-numbers",
     "difficulty": "medium",
-    "objectId": "apple",
+    "objectId": "butterfly",
     "targetCount": 16,
     "config": {
       "sourceBinLabel": "Loose beads",
       "showNumbersInSlots": false,
       "requireAnswerInput": true,
-      "explanation": "16 is 1 ten and 6 ones. A full ten-frame is worth one ten, so you only have to count the leftovers."
+      "explanation": "16 is 1 ten and 6 ones. A full ten-frame is worth one ten, so you only have to count the leftovers.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "number.place-value.teen-numbers",
     "needsCanvas": false,
@@ -1641,17 +1720,18 @@
   {
     "id": "seed-g1-math-q-teen-numbers-78",
     "title": "Make tens",
-    "instruction": "Fill a ten-frame first, then count what is left over.",
+    "instruction": "Move the loose objects into groups of ten. Then count the full tens and the leftover ones.",
     "technique": "GROUP_IN_TENS",
     "skillId": "g1-math-skill-teen-numbers",
     "difficulty": "hard",
-    "objectId": "apple",
+    "objectId": "butterfly",
     "targetCount": 18,
     "config": {
       "sourceBinLabel": "Loose beads",
       "showNumbersInSlots": false,
       "requireAnswerInput": true,
-      "explanation": "18 is 1 ten and 8 ones. A full ten-frame is worth one ten, so you only have to count the leftovers."
+      "explanation": "18 is 1 ten and 8 ones. A full ten-frame is worth one ten, so you only have to count the leftovers.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "number.place-value.teen-numbers",
     "needsCanvas": false,
@@ -1665,12 +1745,13 @@
     "technique": "PLACE_VALUE_LAB",
     "skillId": "g1-math-skill-teen-numbers",
     "difficulty": "easy",
-    "objectId": "apple",
+    "objectId": "butterfly",
     "targetCount": 17,
     "config": {
       "placeValueTask": "read_number",
       "placeValueTarget": 17,
-      "explanation": "17 is 1 ten and 7 ones. The left digit counts the tens and the right digit counts the ones."
+      "explanation": "17 is 1 ten and 7 ones. The left digit counts the tens and the right digit counts the ones.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "number.place-value.teen-numbers",
     "needsCanvas": false,
@@ -1684,12 +1765,13 @@
     "technique": "PLACE_VALUE_LAB",
     "skillId": "g1-math-skill-teen-numbers",
     "difficulty": "medium",
-    "objectId": "apple",
+    "objectId": "butterfly",
     "targetCount": 19,
     "config": {
       "placeValueTask": "read_number",
       "placeValueTarget": 19,
-      "explanation": "19 is 1 ten and 9 ones. The left digit counts the tens and the right digit counts the ones."
+      "explanation": "19 is 1 ten and 9 ones. The left digit counts the tens and the right digit counts the ones.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "number.place-value.teen-numbers",
     "needsCanvas": false,
@@ -1703,12 +1785,13 @@
     "technique": "PLACE_VALUE_LAB",
     "skillId": "g1-math-skill-multiples-of-ten",
     "difficulty": "easy",
-    "objectId": "apple",
+    "objectId": "rocket",
     "targetCount": 30,
     "config": {
       "placeValueTask": "build_number",
       "placeValueTarget": 30,
-      "explanation": "30 is 3 tens and no ones. The left digit counts the tens and the right digit counts the ones."
+      "explanation": "30 is 3 tens and no ones. The left digit counts the tens and the right digit counts the ones.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "number.place-value.multiples-of-ten",
     "needsCanvas": false,
@@ -1722,12 +1805,13 @@
     "technique": "PLACE_VALUE_LAB",
     "skillId": "g1-math-skill-multiples-of-ten",
     "difficulty": "medium",
-    "objectId": "apple",
+    "objectId": "rocket",
     "targetCount": 40,
     "config": {
       "placeValueTask": "build_number",
       "placeValueTarget": 40,
-      "explanation": "40 is 4 tens and no ones. The left digit counts the tens and the right digit counts the ones."
+      "explanation": "40 is 4 tens and no ones. The left digit counts the tens and the right digit counts the ones.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "number.place-value.multiples-of-ten",
     "needsCanvas": false,
@@ -1741,12 +1825,13 @@
     "technique": "PLACE_VALUE_LAB",
     "skillId": "g1-math-skill-multiples-of-ten",
     "difficulty": "hard",
-    "objectId": "apple",
+    "objectId": "rocket",
     "targetCount": 60,
     "config": {
       "placeValueTask": "build_number",
       "placeValueTarget": 60,
-      "explanation": "60 is 6 tens and no ones. The left digit counts the tens and the right digit counts the ones."
+      "explanation": "60 is 6 tens and no ones. The left digit counts the tens and the right digit counts the ones.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "number.place-value.multiples-of-ten",
     "needsCanvas": false,
@@ -1760,12 +1845,13 @@
     "technique": "PLACE_VALUE_LAB",
     "skillId": "g1-math-skill-multiples-of-ten",
     "difficulty": "easy",
-    "objectId": "apple",
+    "objectId": "rocket",
     "targetCount": 80,
     "config": {
       "placeValueTask": "read_number",
       "placeValueTarget": 80,
-      "explanation": "80 is 8 tens and no ones. The left digit counts the tens and the right digit counts the ones."
+      "explanation": "80 is 8 tens and no ones. The left digit counts the tens and the right digit counts the ones.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "number.place-value.multiples-of-ten",
     "needsCanvas": false,
@@ -1779,12 +1865,13 @@
     "technique": "PLACE_VALUE_LAB",
     "skillId": "g1-math-skill-multiples-of-ten",
     "difficulty": "medium",
-    "objectId": "apple",
+    "objectId": "rocket",
     "targetCount": 90,
     "config": {
       "placeValueTask": "read_number",
       "placeValueTarget": 90,
-      "explanation": "90 is 9 tens and no ones. The left digit counts the tens and the right digit counts the ones."
+      "explanation": "90 is 9 tens and no ones. The left digit counts the tens and the right digit counts the ones.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "number.place-value.multiples-of-ten",
     "needsCanvas": false,
@@ -1803,7 +1890,8 @@
     "config": {
       "compareFirst": 42,
       "compareSecond": 24,
-      "explanation": "4 tens is more than 2 tens, so 42 > 24. The tens decide it before you ever look at the ones."
+      "explanation": "4 tens is more than 2 tens, so 42 > 24. The tens decide it before you ever look at the ones.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "number.place-value.compare-two-digit",
     "needsCanvas": false,
@@ -1822,7 +1910,8 @@
     "config": {
       "compareFirst": 57,
       "compareSecond": 75,
-      "explanation": "5 tens is less than 7 tens, so 57 < 75. The tens decide it before you ever look at the ones."
+      "explanation": "5 tens is less than 7 tens, so 57 < 75. The tens decide it before you ever look at the ones.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "number.place-value.compare-two-digit",
     "needsCanvas": false,
@@ -1841,7 +1930,8 @@
     "config": {
       "compareFirst": 38,
       "compareSecond": 83,
-      "explanation": "3 tens is less than 8 tens, so 38 < 83. The tens decide it before you ever look at the ones."
+      "explanation": "3 tens is less than 8 tens, so 38 < 83. The tens decide it before you ever look at the ones.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "number.place-value.compare-two-digit",
     "needsCanvas": false,
@@ -1860,7 +1950,8 @@
     "config": {
       "compareFirst": 61,
       "compareSecond": 16,
-      "explanation": "6 tens is more than 1 tens, so 61 > 16. The tens decide it before you ever look at the ones."
+      "explanation": "6 tens is more than 1 tens, so 61 > 16. The tens decide it before you ever look at the ones.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "number.place-value.compare-two-digit",
     "needsCanvas": false,
@@ -1879,7 +1970,8 @@
     "config": {
       "compareFirst": 45,
       "compareSecond": 45,
-      "explanation": "45 and 45 have the same tens and the same ones, so they are equal."
+      "explanation": "45 and 45 have the same tens and the same ones, so they are equal.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "number.place-value.compare-two-digit",
     "needsCanvas": false,
@@ -1899,7 +1991,8 @@
       "num1": 23,
       "num2": 4,
       "requireAnswerInput": true,
-      "explanation": "23 + 4 = 27. Adding ones only changes the ones: 3 + 4 = 7, and the 2 tens stay exactly as they were."
+      "explanation": "23 + 4 = 27. Adding ones only changes the ones: 3 + 4 = 7, and the 2 tens stay exactly as they were.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "number.place-value.add-within-100",
     "needsCanvas": false,
@@ -1919,7 +2012,8 @@
       "num1": 35,
       "num2": 20,
       "requireAnswerInput": true,
-      "explanation": "35 + 20 = 55. Adding whole tens only changes the tens: 3 tens plus 2 tens is 5 tens, and the 5 ones never move."
+      "explanation": "35 + 20 = 55. Adding whole tens only changes the tens: 3 tens plus 2 tens is 5 tens, and the 5 ones never move.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "number.place-value.add-within-100",
     "needsCanvas": false,
@@ -1939,7 +2033,8 @@
       "num1": 47,
       "num2": 30,
       "requireAnswerInput": true,
-      "explanation": "47 + 30 = 77. Adding whole tens only changes the tens: 4 tens plus 3 tens is 7 tens, and the 7 ones never move."
+      "explanation": "47 + 30 = 77. Adding whole tens only changes the tens: 4 tens plus 3 tens is 7 tens, and the 7 ones never move.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "number.place-value.add-within-100",
     "needsCanvas": false,
@@ -1959,7 +2054,8 @@
       "num1": 52,
       "num2": 6,
       "requireAnswerInput": true,
-      "explanation": "52 + 6 = 58. Adding ones only changes the ones: 2 + 6 = 8, and the 5 tens stay exactly as they were."
+      "explanation": "52 + 6 = 58. Adding ones only changes the ones: 2 + 6 = 8, and the 5 tens stay exactly as they were.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "number.place-value.add-within-100",
     "needsCanvas": false,
@@ -1979,7 +2075,8 @@
       "num1": 64,
       "num2": 20,
       "requireAnswerInput": true,
-      "explanation": "64 + 20 = 84. Adding whole tens only changes the tens: 6 tens plus 2 tens is 8 tens, and the 4 ones never move."
+      "explanation": "64 + 20 = 84. Adding whole tens only changes the tens: 6 tens plus 2 tens is 8 tens, and the 4 ones never move.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "number.place-value.add-within-100",
     "needsCanvas": false,
@@ -2001,7 +2098,8 @@
       "numberChartDifficulty": "guided",
       "numberChartStart": 34,
       "numberChartEnd": 44,
-      "explanation": "34 + 10 = 44. Ten more moves you one whole row down the chart: the tens digit goes up by one and the ones digit stays the same."
+      "explanation": "34 + 10 = 44. Ten more moves you one whole row down the chart: the tens digit goes up by one and the ones digit stays the same.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "number.place-value.ten-more-ten-less",
     "needsCanvas": false,
@@ -2023,7 +2121,8 @@
       "numberChartDifficulty": "independent",
       "numberChartStart": 57,
       "numberChartEnd": 67,
-      "explanation": "57 + 10 = 67. Ten more moves you one whole row down the chart: the tens digit goes up by one and the ones digit stays the same."
+      "explanation": "57 + 10 = 67. Ten more moves you one whole row down the chart: the tens digit goes up by one and the ones digit stays the same.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "number.place-value.ten-more-ten-less",
     "needsCanvas": false,
@@ -2045,7 +2144,8 @@
       "numberChartDifficulty": "guided",
       "numberChartStart": 64,
       "numberChartEnd": 54,
-      "explanation": "64 − 10 = 54. Ten less moves you one whole row up the chart: the tens digit goes down by one and the ones digit stays the same."
+      "explanation": "64 − 10 = 54. Ten less moves you one whole row up the chart: the tens digit goes down by one and the ones digit stays the same.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "number.place-value.ten-more-ten-less",
     "needsCanvas": false,
@@ -2067,7 +2167,8 @@
       "numberChartDifficulty": "independent",
       "numberChartStart": 82,
       "numberChartEnd": 72,
-      "explanation": "82 − 10 = 72. Ten less moves you one whole row up the chart: the tens digit goes down by one and the ones digit stays the same."
+      "explanation": "82 − 10 = 72. Ten less moves you one whole row up the chart: the tens digit goes down by one and the ones digit stays the same.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "number.place-value.ten-more-ten-less",
     "needsCanvas": false,
@@ -2089,7 +2190,8 @@
       "numberChartDifficulty": "independent",
       "numberChartStart": 45,
       "numberChartEnd": 35,
-      "explanation": "45 − 10 = 35. Ten less moves you one whole row up the chart: the tens digit goes down by one and the ones digit stays the same."
+      "explanation": "45 − 10 = 35. Ten less moves you one whole row up the chart: the tens digit goes down by one and the ones digit stays the same.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "number.place-value.ten-more-ten-less",
     "needsCanvas": false,
@@ -2109,7 +2211,8 @@
       "minuend": 50,
       "subtrahend": 20,
       "requireAnswerInput": true,
-      "explanation": "50 − 20 = 30. Think in tens: 5 tens take away 2 tens leaves 3 tens. The ones column is all zeros, so there is nothing to regroup."
+      "explanation": "50 − 20 = 30. Think in tens: 5 tens take away 2 tens leaves 3 tens. The ones column is all zeros, so there is nothing to regroup.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "number.place-value.subtract-multiples-of-ten",
     "needsCanvas": false,
@@ -2129,7 +2232,8 @@
       "minuend": 70,
       "subtrahend": 30,
       "requireAnswerInput": true,
-      "explanation": "70 − 30 = 40. Think in tens: 7 tens take away 3 tens leaves 4 tens. The ones column is all zeros, so there is nothing to regroup."
+      "explanation": "70 − 30 = 40. Think in tens: 7 tens take away 3 tens leaves 4 tens. The ones column is all zeros, so there is nothing to regroup.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "number.place-value.subtract-multiples-of-ten",
     "needsCanvas": false,
@@ -2149,7 +2253,8 @@
       "minuend": 60,
       "subtrahend": 40,
       "requireAnswerInput": true,
-      "explanation": "60 − 40 = 20. Think in tens: 6 tens take away 4 tens leaves 2 tens. The ones column is all zeros, so there is nothing to regroup."
+      "explanation": "60 − 40 = 20. Think in tens: 6 tens take away 4 tens leaves 2 tens. The ones column is all zeros, so there is nothing to regroup.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "number.place-value.subtract-multiples-of-ten",
     "needsCanvas": false,
@@ -2169,7 +2274,8 @@
       "minuend": 90,
       "subtrahend": 50,
       "requireAnswerInput": true,
-      "explanation": "90 − 50 = 40. Think in tens: 9 tens take away 5 tens leaves 4 tens. The ones column is all zeros, so there is nothing to regroup."
+      "explanation": "90 − 50 = 40. Think in tens: 9 tens take away 5 tens leaves 4 tens. The ones column is all zeros, so there is nothing to regroup.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "number.place-value.subtract-multiples-of-ten",
     "needsCanvas": false,
@@ -2189,7 +2295,8 @@
       "minuend": 80,
       "subtrahend": 60,
       "requireAnswerInput": true,
-      "explanation": "80 − 60 = 20. Think in tens: 8 tens take away 6 tens leaves 2 tens. The ones column is all zeros, so there is nothing to regroup."
+      "explanation": "80 − 60 = 20. Think in tens: 8 tens take away 6 tens leaves 2 tens. The ones column is all zeros, so there is nothing to regroup.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "number.place-value.subtract-multiples-of-ten",
     "needsCanvas": false,
@@ -2199,20 +2306,21 @@
   {
     "id": "seed-g1-math-q-compare-order-length-106",
     "title": "Find the longest",
-    "instruction": "Tap the longest bar.",
+    "instruction": "Compare all three bars, then tap the longest one.",
     "technique": "MEASURE_LENGTH",
     "skillId": "g1-math-skill-compare-order-length",
     "difficulty": "easy",
     "objectId": "star",
-    "targetCount": 2,
+    "targetCount": 1,
     "config": {
       "measureTask": "longest",
       "measureLengths": [
-        3,
         6,
+        3,
         4
       ],
-      "explanation": "Blue is the longest: it covers 6 units, more than the others. Comparing lengths is comparing how many units fit."
+      "explanation": "Red is the longest: it covers 6 units, more than the others. Comparing lengths is comparing how many units fit.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "measurement.length.compare",
     "needsCanvas": false,
@@ -2222,7 +2330,7 @@
   {
     "id": "seed-g1-math-q-compare-order-length-107",
     "title": "Find the shortest",
-    "instruction": "Tap the shortest bar.",
+    "instruction": "Compare all three bars, then tap the shortest one.",
     "technique": "MEASURE_LENGTH",
     "skillId": "g1-math-skill-compare-order-length",
     "difficulty": "easy",
@@ -2235,7 +2343,8 @@
         2,
         7
       ],
-      "explanation": "Blue is the shortest: it covers 2 units, fewer than the others. Comparing lengths is comparing how many units fit."
+      "explanation": "Blue is the shortest: it covers 2 units, fewer than the others. Comparing lengths is comparing how many units fit.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "measurement.length.compare",
     "needsCanvas": false,
@@ -2245,20 +2354,21 @@
   {
     "id": "seed-g1-math-q-compare-order-length-108",
     "title": "Find the longest",
-    "instruction": "Tap the longest bar.",
+    "instruction": "Compare all three bars, then tap the longest one.",
     "technique": "MEASURE_LENGTH",
     "skillId": "g1-math-skill-compare-order-length",
     "difficulty": "medium",
     "objectId": "star",
-    "targetCount": 1,
+    "targetCount": 3,
     "config": {
       "measureTask": "longest",
       "measureLengths": [
-        8,
+        6,
         4,
-        6
+        8
       ],
-      "explanation": "Red is the longest: it covers 8 units, more than the others. Comparing lengths is comparing how many units fit."
+      "explanation": "Green is the longest: it covers 8 units, more than the others. Comparing lengths is comparing how many units fit.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "measurement.length.compare",
     "needsCanvas": false,
@@ -2268,20 +2378,21 @@
   {
     "id": "seed-g1-math-q-compare-order-length-109",
     "title": "Find the shortest",
-    "instruction": "Tap the shortest bar.",
+    "instruction": "Compare all three bars, then tap the shortest one.",
     "technique": "MEASURE_LENGTH",
     "skillId": "g1-math-skill-compare-order-length",
     "difficulty": "medium",
     "objectId": "star",
-    "targetCount": 2,
+    "targetCount": 1,
     "config": {
       "measureTask": "shortest",
       "measureLengths": [
-        9,
         3,
+        9,
         5
       ],
-      "explanation": "Blue is the shortest: it covers 3 units, fewer than the others. Comparing lengths is comparing how many units fit."
+      "explanation": "Red is the shortest: it covers 3 units, fewer than the others. Comparing lengths is comparing how many units fit.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "measurement.length.compare",
     "needsCanvas": false,
@@ -2291,7 +2402,7 @@
   {
     "id": "seed-g1-math-q-compare-order-length-110",
     "title": "Find the longest",
-    "instruction": "Tap the longest bar.",
+    "instruction": "Compare all three bars, then tap the longest one.",
     "technique": "MEASURE_LENGTH",
     "skillId": "g1-math-skill-compare-order-length",
     "difficulty": "hard",
@@ -2304,7 +2415,8 @@
         11,
         7
       ],
-      "explanation": "Blue is the longest: it covers 11 units, more than the others. Comparing lengths is comparing how many units fit."
+      "explanation": "Blue is the longest: it covers 11 units, more than the others. Comparing lengths is comparing how many units fit.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "measurement.length.compare",
     "needsCanvas": false,
@@ -2314,7 +2426,7 @@
   {
     "id": "seed-g1-math-q-measure-length-units-111",
     "title": "How long is the bar?",
-    "instruction": "Count the units under the bar. How long is it?",
+    "instruction": "Count every equal unit under the bar. How many units long is it?",
     "technique": "MEASURE_LENGTH",
     "skillId": "g1-math-skill-measure-length-units",
     "difficulty": "easy",
@@ -2325,7 +2437,8 @@
       "measureLengths": [
         3
       ],
-      "explanation": "3 units. Length is a count of units laid end to end with no gaps and no overlaps — so measuring is just careful counting."
+      "explanation": "3 units. Length is a count of units laid end to end with no gaps and no overlaps — so measuring is just careful counting.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "measurement.length.units",
     "needsCanvas": false,
@@ -2335,7 +2448,7 @@
   {
     "id": "seed-g1-math-q-measure-length-units-112",
     "title": "How long is the bar?",
-    "instruction": "Count the units under the bar. How long is it?",
+    "instruction": "Count every equal unit under the bar. How many units long is it?",
     "technique": "MEASURE_LENGTH",
     "skillId": "g1-math-skill-measure-length-units",
     "difficulty": "easy",
@@ -2346,7 +2459,8 @@
       "measureLengths": [
         5
       ],
-      "explanation": "5 units. Length is a count of units laid end to end with no gaps and no overlaps — so measuring is just careful counting."
+      "explanation": "5 units. Length is a count of units laid end to end with no gaps and no overlaps — so measuring is just careful counting.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "measurement.length.units",
     "needsCanvas": false,
@@ -2356,7 +2470,7 @@
   {
     "id": "seed-g1-math-q-measure-length-units-113",
     "title": "How long is the bar?",
-    "instruction": "Count the units under the bar. How long is it?",
+    "instruction": "Count every equal unit under the bar. How many units long is it?",
     "technique": "MEASURE_LENGTH",
     "skillId": "g1-math-skill-measure-length-units",
     "difficulty": "medium",
@@ -2367,7 +2481,8 @@
       "measureLengths": [
         6
       ],
-      "explanation": "6 units. Length is a count of units laid end to end with no gaps and no overlaps — so measuring is just careful counting."
+      "explanation": "6 units. Length is a count of units laid end to end with no gaps and no overlaps — so measuring is just careful counting.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "measurement.length.units",
     "needsCanvas": false,
@@ -2377,7 +2492,7 @@
   {
     "id": "seed-g1-math-q-measure-length-units-114",
     "title": "How long is the bar?",
-    "instruction": "Count the units under the bar. How long is it?",
+    "instruction": "Count every equal unit under the bar. How many units long is it?",
     "technique": "MEASURE_LENGTH",
     "skillId": "g1-math-skill-measure-length-units",
     "difficulty": "medium",
@@ -2388,7 +2503,8 @@
       "measureLengths": [
         8
       ],
-      "explanation": "8 units. Length is a count of units laid end to end with no gaps and no overlaps — so measuring is just careful counting."
+      "explanation": "8 units. Length is a count of units laid end to end with no gaps and no overlaps — so measuring is just careful counting.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "measurement.length.units",
     "needsCanvas": false,
@@ -2398,7 +2514,7 @@
   {
     "id": "seed-g1-math-q-measure-length-units-115",
     "title": "How long is the bar?",
-    "instruction": "Count the units under the bar. How long is it?",
+    "instruction": "Count every equal unit under the bar. How many units long is it?",
     "technique": "MEASURE_LENGTH",
     "skillId": "g1-math-skill-measure-length-units",
     "difficulty": "hard",
@@ -2409,7 +2525,8 @@
       "measureLengths": [
         10
       ],
-      "explanation": "10 units. Length is a count of units laid end to end with no gaps and no overlaps — so measuring is just careful counting."
+      "explanation": "10 units. Length is a count of units laid end to end with no gaps and no overlaps — so measuring is just careful counting.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "measurement.length.units",
     "needsCanvas": false,
@@ -2428,7 +2545,8 @@
     "config": {
       "clockHour": 3,
       "clockMinute": 0,
-      "explanation": "3 o'clock. The long hand points straight up at 12, which means no minutes have gone by yet, and the short hand points right at the 3."
+      "explanation": "3 o'clock. The long hand points straight up at 12, which means no minutes have gone by yet, and the short hand points right at the 3.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "measurement.time.hour",
     "needsCanvas": false,
@@ -2447,7 +2565,8 @@
     "config": {
       "clockHour": 7,
       "clockMinute": 0,
-      "explanation": "7 o'clock. The long hand points straight up at 12, which means no minutes have gone by yet, and the short hand points right at the 7."
+      "explanation": "7 o'clock. The long hand points straight up at 12, which means no minutes have gone by yet, and the short hand points right at the 7.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "measurement.time.hour",
     "needsCanvas": false,
@@ -2466,7 +2585,8 @@
     "config": {
       "clockHour": 9,
       "clockMinute": 0,
-      "explanation": "9 o'clock. The long hand points straight up at 12, which means no minutes have gone by yet, and the short hand points right at the 9."
+      "explanation": "9 o'clock. The long hand points straight up at 12, which means no minutes have gone by yet, and the short hand points right at the 9.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "measurement.time.hour",
     "needsCanvas": false,
@@ -2485,7 +2605,8 @@
     "config": {
       "clockHour": 11,
       "clockMinute": 0,
-      "explanation": "11 o'clock. The long hand points straight up at 12, which means no minutes have gone by yet, and the short hand points right at the 11."
+      "explanation": "11 o'clock. The long hand points straight up at 12, which means no minutes have gone by yet, and the short hand points right at the 11.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "measurement.time.hour",
     "needsCanvas": false,
@@ -2504,7 +2625,8 @@
     "config": {
       "clockHour": 5,
       "clockMinute": 0,
-      "explanation": "5 o'clock. The long hand points straight up at 12, which means no minutes have gone by yet, and the short hand points right at the 5."
+      "explanation": "5 o'clock. The long hand points straight up at 12, which means no minutes have gone by yet, and the short hand points right at the 5.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "measurement.time.hour",
     "needsCanvas": false,
@@ -2523,7 +2645,8 @@
     "config": {
       "clockHour": 2,
       "clockMinute": 30,
-      "explanation": "Half past 2. The long hand on 6 means half an hour has gone by, and the short hand has moved half way past the 2 — it does not wait on the 2 until the hour is over."
+      "explanation": "Half past 2. The long hand on 6 means half an hour has gone by, and the short hand has moved half way past the 2 — it does not wait on the 2 until the hour is over.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "measurement.time.half-hour",
     "needsCanvas": false,
@@ -2542,7 +2665,8 @@
     "config": {
       "clockHour": 4,
       "clockMinute": 30,
-      "explanation": "Half past 4. The long hand on 6 means half an hour has gone by, and the short hand has moved half way past the 4 — it does not wait on the 4 until the hour is over."
+      "explanation": "Half past 4. The long hand on 6 means half an hour has gone by, and the short hand has moved half way past the 4 — it does not wait on the 4 until the hour is over.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "measurement.time.half-hour",
     "needsCanvas": false,
@@ -2561,7 +2685,8 @@
     "config": {
       "clockHour": 8,
       "clockMinute": 30,
-      "explanation": "Half past 8. The long hand on 6 means half an hour has gone by, and the short hand has moved half way past the 8 — it does not wait on the 8 until the hour is over."
+      "explanation": "Half past 8. The long hand on 6 means half an hour has gone by, and the short hand has moved half way past the 8 — it does not wait on the 8 until the hour is over.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "measurement.time.half-hour",
     "needsCanvas": false,
@@ -2580,7 +2705,8 @@
     "config": {
       "clockHour": 1,
       "clockMinute": 30,
-      "explanation": "Half past 1. The long hand on 6 means half an hour has gone by, and the short hand has moved half way past the 1 — it does not wait on the 1 until the hour is over."
+      "explanation": "Half past 1. The long hand on 6 means half an hour has gone by, and the short hand has moved half way past the 1 — it does not wait on the 1 until the hour is over.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "measurement.time.half-hour",
     "needsCanvas": false,
@@ -2599,7 +2725,8 @@
     "config": {
       "clockHour": 10,
       "clockMinute": 30,
-      "explanation": "Half past 10. The long hand on 6 means half an hour has gone by, and the short hand has moved half way past the 10 — it does not wait on the 10 until the hour is over."
+      "explanation": "Half past 10. The long hand on 6 means half an hour has gone by, and the short hand has moved half way past the 10 — it does not wait on the 10 until the hour is over.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "measurement.time.half-hour",
     "needsCanvas": false,
@@ -2627,9 +2754,15 @@
         "Pears",
         "Plums"
       ],
+      "dataAssets": [
+        "apple",
+        "flower",
+        "heart"
+      ],
       "dataFocus": 0,
       "dataAgainst": 1,
-      "explanation": "3 Apples. Count up that one column only — the chart keeps each group in its own column so they never get mixed up."
+      "explanation": "3 Apples. Count up that one column only — the chart keeps each group in its own column so they never get mixed up.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "data.categories.organize",
     "needsCanvas": false,
@@ -2639,7 +2772,7 @@
   {
     "id": "seed-g1-math-q-organize-data-127",
     "title": "Read the chart",
-    "instruction": "How many Plums?",
+    "instruction": "How many Boats?",
     "technique": "DATA_CHART",
     "skillId": "g1-math-skill-organize-data",
     "difficulty": "easy",
@@ -2653,13 +2786,19 @@
         6
       ],
       "dataCategories": [
-        "Apples",
-        "Pears",
-        "Plums"
+        "Cars",
+        "Rockets",
+        "Boats"
+      ],
+      "dataAssets": [
+        "car",
+        "rocket",
+        "fish"
       ],
       "dataFocus": 2,
       "dataAgainst": 1,
-      "explanation": "6 Plums. Count up that one column only — the chart keeps each group in its own column so they never get mixed up."
+      "explanation": "6 Boats. Count up that one column only — the chart keeps each group in its own column so they never get mixed up.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "data.categories.organize",
     "needsCanvas": false,
@@ -2683,13 +2822,19 @@
         1
       ],
       "dataCategories": [
-        "Apples",
-        "Pears",
-        "Plums"
+        "Bears",
+        "Dinos",
+        "Butterflies"
+      ],
+      "dataAssets": [
+        "bear",
+        "dino",
+        "butterfly"
       ],
       "dataFocus": 0,
       "dataAgainst": 1,
-      "explanation": "3 + 5 + 1 = 9. \"Altogether\" means every column, so none of them can be left out."
+      "explanation": "3 + 5 + 1 = 9. \"Altogether\" means every column, so none of them can be left out.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "data.categories.organize",
     "needsCanvas": false,
@@ -2713,13 +2858,19 @@
         2
       ],
       "dataCategories": [
-        "Apples",
-        "Pears",
-        "Plums"
+        "Stars",
+        "Suns",
+        "Flowers"
+      ],
+      "dataAssets": [
+        "star",
+        "sun",
+        "flower"
       ],
       "dataFocus": 0,
       "dataAgainst": 1,
-      "explanation": "4 + 4 + 2 = 10. \"Altogether\" means every column, so none of them can be left out."
+      "explanation": "4 + 4 + 2 = 10. \"Altogether\" means every column, so none of them can be left out.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "data.categories.organize",
     "needsCanvas": false,
@@ -2747,9 +2898,15 @@
         "Pears",
         "Plums"
       ],
+      "dataAssets": [
+        "apple",
+        "flower",
+        "heart"
+      ],
       "dataFocus": 0,
       "dataAgainst": 1,
-      "explanation": "Pears, with 6. The tallest column is the biggest number because every column counts one object per square."
+      "explanation": "Pears, with 6. The tallest column is the biggest number because every column counts one object per square.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "data.categories.organize",
     "needsCanvas": false,
@@ -2777,9 +2934,15 @@
         "Pears",
         "Plums"
       ],
+      "dataAssets": [
+        "apple",
+        "flower",
+        "heart"
+      ],
       "dataFocus": 0,
       "dataAgainst": 1,
-      "explanation": "6 − 2 = 4. \"How many more\" is a comparison, and comparing is subtracting — pair them off and 4 are left over."
+      "explanation": "6 − 2 = 4. \"How many more\" is a comparison, and comparing is subtracting — pair them off and 4 are left over.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "data.categories.interpret",
     "needsCanvas": false,
@@ -2789,7 +2952,7 @@
   {
     "id": "seed-g1-math-q-interpret-data-132",
     "title": "Read the chart",
-    "instruction": "How many more Apples than Pears?",
+    "instruction": "How many more Cars than Rockets?",
     "technique": "DATA_CHART",
     "skillId": "g1-math-skill-interpret-data",
     "difficulty": "easy",
@@ -2803,13 +2966,19 @@
         5
       ],
       "dataCategories": [
-        "Apples",
-        "Pears",
-        "Plums"
+        "Cars",
+        "Rockets",
+        "Boats"
+      ],
+      "dataAssets": [
+        "car",
+        "rocket",
+        "fish"
       ],
       "dataFocus": 0,
       "dataAgainst": 1,
-      "explanation": "7 − 3 = 4. \"How many more\" is a comparison, and comparing is subtracting — pair them off and 4 are left over."
+      "explanation": "7 − 3 = 4. \"How many more\" is a comparison, and comparing is subtracting — pair them off and 4 are left over.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "data.categories.interpret",
     "needsCanvas": false,
@@ -2819,7 +2988,7 @@
   {
     "id": "seed-g1-math-q-interpret-data-133",
     "title": "Read the chart",
-    "instruction": "How many more Apples than Plums?",
+    "instruction": "How many more Bears than Butterflies?",
     "technique": "DATA_CHART",
     "skillId": "g1-math-skill-interpret-data",
     "difficulty": "medium",
@@ -2833,13 +3002,19 @@
         2
       ],
       "dataCategories": [
-        "Apples",
-        "Pears",
-        "Plums"
+        "Bears",
+        "Dinos",
+        "Butterflies"
+      ],
+      "dataAssets": [
+        "bear",
+        "dino",
+        "butterfly"
       ],
       "dataFocus": 0,
       "dataAgainst": 2,
-      "explanation": "9 − 2 = 7. \"How many more\" is a comparison, and comparing is subtracting — pair them off and 7 are left over."
+      "explanation": "9 − 2 = 7. \"How many more\" is a comparison, and comparing is subtracting — pair them off and 7 are left over.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "data.categories.interpret",
     "needsCanvas": false,
@@ -2863,13 +3038,19 @@
         3
       ],
       "dataCategories": [
-        "Apples",
-        "Pears",
-        "Plums"
+        "Stars",
+        "Suns",
+        "Flowers"
+      ],
+      "dataAssets": [
+        "star",
+        "sun",
+        "flower"
       ],
       "dataFocus": 0,
       "dataAgainst": 1,
-      "explanation": "8 + 4 + 3 = 15. \"Altogether\" means every column, so none of them can be left out."
+      "explanation": "8 + 4 + 3 = 15. \"Altogether\" means every column, so none of them can be left out.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "data.categories.interpret",
     "needsCanvas": false,
@@ -2884,12 +3065,12 @@
     "skillId": "g1-math-skill-interpret-data",
     "difficulty": "hard",
     "objectId": "star",
-    "targetCount": 2,
+    "targetCount": 1,
     "config": {
       "dataKind": "most",
       "dataCounts": [
-        4,
         9,
+        4,
         6
       ],
       "dataCategories": [
@@ -2897,9 +3078,15 @@
         "Pears",
         "Plums"
       ],
+      "dataAssets": [
+        "apple",
+        "flower",
+        "heart"
+      ],
       "dataFocus": 0,
       "dataAgainst": 1,
-      "explanation": "Pears, with 9. The tallest column is the biggest number because every column counts one object per square."
+      "explanation": "Apples, with 9. The tallest column is the biggest number because every column counts one object per square.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "data.categories.interpret",
     "needsCanvas": false,
@@ -2919,7 +3106,8 @@
       "shapeTask": "sides",
       "shapeName": "triangle",
       "shapeShares": 2,
-      "explanation": "A triangle has 3 sides and 3 corners — a shape with straight sides always has as many corners as sides. That is true of every triangle, fat or thin, whichever way it is turned."
+      "explanation": "A triangle has 3 sides and 3 corners — a shape with straight sides always has as many corners as sides. That is true of every triangle, fat or thin, whichever way it is turned.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "geometry.shapes.attributes",
     "needsCanvas": false,
@@ -2939,7 +3127,8 @@
       "shapeTask": "corners",
       "shapeName": "square",
       "shapeShares": 2,
-      "explanation": "A square has 4 sides and 4 corners — a shape with straight sides always has as many corners as sides. That is true of every square, fat or thin, whichever way it is turned."
+      "explanation": "A square has 4 sides and 4 corners — a shape with straight sides always has as many corners as sides. That is true of every square, fat or thin, whichever way it is turned.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "geometry.shapes.attributes",
     "needsCanvas": false,
@@ -2959,7 +3148,8 @@
       "shapeTask": "sides",
       "shapeName": "pentagon",
       "shapeShares": 2,
-      "explanation": "A pentagon has 5 sides and 5 corners — a shape with straight sides always has as many corners as sides. That is true of every pentagon, fat or thin, whichever way it is turned."
+      "explanation": "A pentagon has 5 sides and 5 corners — a shape with straight sides always has as many corners as sides. That is true of every pentagon, fat or thin, whichever way it is turned.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "geometry.shapes.attributes",
     "needsCanvas": false,
@@ -2979,7 +3169,8 @@
       "shapeTask": "sides",
       "shapeName": "hexagon",
       "shapeShares": 2,
-      "explanation": "A hexagon has 6 sides and 6 corners — a shape with straight sides always has as many corners as sides. That is true of every hexagon, fat or thin, whichever way it is turned."
+      "explanation": "A hexagon has 6 sides and 6 corners — a shape with straight sides always has as many corners as sides. That is true of every hexagon, fat or thin, whichever way it is turned.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "geometry.shapes.attributes",
     "needsCanvas": false,
@@ -2999,7 +3190,8 @@
       "shapeTask": "corners",
       "shapeName": "rectangle",
       "shapeShares": 2,
-      "explanation": "A rectangle has 4 sides and 4 corners — a shape with straight sides always has as many corners as sides. That is true of every rectangle, fat or thin, whichever way it is turned."
+      "explanation": "A rectangle has 4 sides and 4 corners — a shape with straight sides always has as many corners as sides. That is true of every rectangle, fat or thin, whichever way it is turned.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "geometry.shapes.attributes",
     "needsCanvas": false,
@@ -3019,7 +3211,8 @@
       "shapeTask": "compose",
       "shapeName": "square",
       "shapeShares": 2,
-      "explanation": "Each piece is a triangle — 2 of them fit together exactly to make a square, with no gaps and nothing sticking out."
+      "explanation": "Each piece is a triangle — 2 of them fit together exactly to make a square, with no gaps and nothing sticking out.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "geometry.shapes.compose",
     "needsCanvas": false,
@@ -3039,7 +3232,8 @@
       "shapeTask": "compose",
       "shapeName": "rectangle",
       "shapeShares": 2,
-      "explanation": "Each piece is a square — 2 of them fit together exactly to make a rectangle, with no gaps and nothing sticking out."
+      "explanation": "Each piece is a square — 2 of them fit together exactly to make a rectangle, with no gaps and nothing sticking out.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "geometry.shapes.compose",
     "needsCanvas": false,
@@ -3059,7 +3253,8 @@
       "shapeTask": "compose",
       "shapeName": "hexagon",
       "shapeShares": 2,
-      "explanation": "Each piece is a triangle — 6 of them fit together exactly to make a hexagon, with no gaps and nothing sticking out."
+      "explanation": "Each piece is a triangle — 6 of them fit together exactly to make a hexagon, with no gaps and nothing sticking out.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "geometry.shapes.compose",
     "needsCanvas": false,
@@ -3079,7 +3274,8 @@
       "shapeTask": "sides",
       "shapeName": "square",
       "shapeShares": 2,
-      "explanation": "A square has 4 sides and 4 corners — a shape with straight sides always has as many corners as sides. That is true of every square, fat or thin, whichever way it is turned."
+      "explanation": "A square has 4 sides and 4 corners — a shape with straight sides always has as many corners as sides. That is true of every square, fat or thin, whichever way it is turned.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "geometry.shapes.compose",
     "needsCanvas": false,
@@ -3099,7 +3295,8 @@
       "shapeTask": "corners",
       "shapeName": "hexagon",
       "shapeShares": 2,
-      "explanation": "A hexagon has 6 sides and 6 corners — a shape with straight sides always has as many corners as sides. That is true of every hexagon, fat or thin, whichever way it is turned."
+      "explanation": "A hexagon has 6 sides and 6 corners — a shape with straight sides always has as many corners as sides. That is true of every hexagon, fat or thin, whichever way it is turned.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "geometry.shapes.compose",
     "needsCanvas": false,
@@ -3119,7 +3316,8 @@
       "shapeTask": "shares",
       "shapeName": "circle",
       "shapeShares": 2,
-      "explanation": "2 equal parts are called halves. They only count as halves if the parts are the same size."
+      "explanation": "2 equal parts are called halves. They only count as halves if the parts are the same size.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "geometry.fractions.equal-shares",
     "needsCanvas": false,
@@ -3139,7 +3337,8 @@
       "shapeTask": "shares",
       "shapeName": "circle",
       "shapeShares": 4,
-      "explanation": "4 equal parts are called fourths. They only count as fourths if the parts are the same size."
+      "explanation": "4 equal parts are called fourths. They only count as fourths if the parts are the same size.",
+      "answerChoiceSlot": 2
     },
     "conceptId": "geometry.fractions.equal-shares",
     "needsCanvas": false,
@@ -3159,7 +3358,8 @@
       "shapeTask": "shares",
       "shapeName": "rectangle",
       "shapeShares": 2,
-      "explanation": "2 equal parts are called halves. They only count as halves if the parts are the same size."
+      "explanation": "2 equal parts are called halves. They only count as halves if the parts are the same size.",
+      "answerChoiceSlot": 3
     },
     "conceptId": "geometry.fractions.equal-shares",
     "needsCanvas": false,
@@ -3179,7 +3379,8 @@
       "shapeTask": "shares",
       "shapeName": "square",
       "shapeShares": 4,
-      "explanation": "4 equal parts are called fourths. They only count as fourths if the parts are the same size."
+      "explanation": "4 equal parts are called fourths. They only count as fourths if the parts are the same size.",
+      "answerChoiceSlot": 0
     },
     "conceptId": "geometry.fractions.equal-shares",
     "needsCanvas": false,
@@ -3199,7 +3400,8 @@
       "shapeTask": "shares",
       "shapeName": "rectangle",
       "shapeShares": 4,
-      "explanation": "4 equal parts are called fourths. They only count as fourths if the parts are the same size."
+      "explanation": "4 equal parts are called fourths. They only count as fourths if the parts are the same size.",
+      "answerChoiceSlot": 1
     },
     "conceptId": "geometry.fractions.equal-shares",
     "needsCanvas": false,

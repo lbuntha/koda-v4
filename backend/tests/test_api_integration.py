@@ -16,10 +16,12 @@ from datetime import datetime, timedelta, timezone
 import pytest
 import pytest_asyncio
 
-from app.models.assignment import Assignment, ProgressionState
+from app.models.assignment import Assignment, Placement, ProgressionState
 from app.models.content import CurriculumRelease
+from app.models.event import LearningEvent
 from app.models.mastery import MasteryState
-from app.models.user import Role
+from app.models.user import Role, User
+from app.core.security import hash_secret
 
 from .conftest import auth
 
@@ -187,6 +189,73 @@ async def test_an_assignment_can_be_moved_to_a_newer_release(api, assigned, adul
     )
     assert response.status_code == 200
     assert (await Assignment.get(assigned.id)).release_id == "r-int-2"
+
+
+# ── removing an assignment ──────────────────────────────────────────────────────
+
+async def test_removing_an_assignment_takes_its_placement_and_progression_with_it(
+    api, assigned, adult, learner, database,
+):
+    """Pausing only stops an assignment being served; there was no way to remove one at all.
+
+    Placement and progression are keyed uniquely on (student, assignment) and mean nothing
+    without it, so they go too — otherwise they linger as rows answering a question about an
+    assignment that no longer exists.
+    """
+    # The fixture already carries a completed progression; this adds the placement
+    # result that produced it.
+    await Placement(
+        student_id=str(learner.id), assignment_id=str(assigned.id), grade_id="g1",
+        curriculum_id=CURRICULUM, release_id=RELEASE, generator_revision=1, scoring_revision=1,
+    ).insert()
+
+    response = await api.delete(
+        f"/assignments/{assigned.id}",
+        headers=auth(str(adult.id), Role.parent.value),
+    )
+    assert response.status_code == 200
+    assert response.json()["placements"] == 1
+    assert response.json()["progressions"] == 1
+
+    assert await Assignment.get(assigned.id) is None
+    assert await Placement.find(Placement.assignment_id == str(assigned.id)).count() == 0
+    assert await ProgressionState.find(ProgressionState.assignment_id == str(assigned.id)).count() == 0
+
+
+async def test_removing_an_assignment_keeps_the_play_history(api, assigned, adult, learner, database):
+    """XP, levels and streaks are replayed from events rather than stored.
+
+    Deleting them with the assignment would silently rewrite what a child has done — the work
+    happened, so the record stays.
+    """
+    await LearningEvent(
+        student_id=str(learner.id), assignment_id=str(assigned.id), owner_id=str(adult.id),
+        curriculum_id=CURRICULUM, release_id=RELEASE, skill_id="s1", question_id="q1",
+        event_type="attempt", outcome="correct",
+    ).insert()
+
+    response = await api.delete(
+        f"/assignments/{assigned.id}",
+        headers=auth(str(adult.id), Role.parent.value),
+    )
+    assert response.status_code == 200
+    assert response.json()["eventsKept"] == 1
+    assert await LearningEvent.find(LearningEvent.assignment_id == str(assigned.id)).count() == 1
+
+
+async def test_another_familys_assignment_cannot_be_removed(api, assigned, database):
+    stranger = User(
+        email="stranger@example.com", name="Stranger",
+        password_hash=hash_secret("correct-horse-battery"), role=Role.parent.value,
+    )
+    await stranger.insert()
+
+    response = await api.delete(
+        f"/assignments/{assigned.id}",
+        headers=auth(str(stranger.id), Role.parent.value),
+    )
+    assert response.status_code == 404
+    assert await Assignment.get(assigned.id) is not None
 
 
 async def test_a_release_from_another_curriculum_is_refused(api, assigned, adult, database):

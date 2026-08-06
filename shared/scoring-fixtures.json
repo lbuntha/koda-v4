@@ -925,12 +925,12 @@
         "successfulReviewScore": 0.8,
         "gates": {
           "developing": {
-            "minPlays": 6
+            "minPlays": 5
           },
           "proficient": {
             "minPlays": 10,
             "minSessions": 2,
-            "minHardPlays": 3
+            "minHardPlays": 2
           },
           "master": {
             "minPlays": 15,
@@ -954,6 +954,45 @@
           "checkpoints_only": true,
           "generator_revision": 1,
           "rapid_confirmation_plays": 2
+        },
+        "recommendation": {
+          "skills_per_session": 3,
+          "max_non_new": 2,
+          "skip_cooldown_sessions": 1,
+          "reinforce_threshold": 0.6
+        },
+        "streak": {
+          "counts": "attempt",
+          "min_events_per_day": 1,
+          "grace_days": 1
+        },
+        "rewards": {
+          "xp": {
+            "correctAnswer": 4,
+            "firstTryBonus": 2,
+            "activityCompletion": 12
+          },
+          "level": {
+            "xpPerLevel": 120
+          }
+        },
+        "notifications": {
+          "auto_achievement_enabled": true,
+          "auto_streak_enabled": true,
+          "auto_weekly_digest_enabled": true,
+          "weekly_digest_day": "sun",
+          "streak_milestones": [
+            3,
+            7,
+            14,
+            30,
+            60,
+            100
+          ],
+          "auto_review_enabled": true,
+          "auto_inactivity_enabled": true,
+          "inactivity_days": 7,
+          "auto_pin_lockout_enabled": true
         }
       },
       "expected": {

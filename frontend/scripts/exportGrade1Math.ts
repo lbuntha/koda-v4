@@ -88,6 +88,9 @@ function problemsWith(question: GeneratedQuestion, conceptId: string): string[] 
   }
 
   const config = question.config as Record<string, any>;
+  if (!Number.isInteger(config.answerChoiceSlot) || config.answerChoiceSlot < 0 || config.answerChoiceSlot > 3) {
+    problems.push("answerChoiceSlot must be an integer from 0 to 3");
+  }
   if (config.flexibleMode === "multichoice") {
     const options: string[] = config.flexibleOptions ?? [];
     if (options.length < 2) problems.push("multichoice question has fewer than two options");
@@ -123,9 +126,19 @@ function problemsWith(question: GeneratedQuestion, conceptId: string): string[] 
   return problems;
 }
 
-const rows = GRADE_1_MATH_QUESTIONS.flatMap(skill =>
-  skill.questions.map(raw => {
-    const question = { ...raw, skillId: resolveSkillId(raw.skillId) };
+const rows = GRADE_1_MATH_QUESTIONS.flatMap((skill, skillIndex) =>
+  skill.questions.map((raw, questionIndex) => {
+    const question = {
+      ...raw,
+      skillId: resolveSkillId(raw.skillId),
+      config: {
+        ...raw.config,
+        // Every skill rotates A/B/C/D, while the duplicated slot in a five-question bank
+        // shifts to the next letter for the next skill. This balances the whole curriculum,
+        // not merely each individual activity.
+        answerChoiceSlot: (questionIndex + skillIndex) % 4,
+      },
+    };
     return {
     ...question,
     conceptId: skill.conceptId,
@@ -161,10 +174,22 @@ for (const row of rows) {
 
 const shortfalls: string[] = [];
 for (const [skillId, skill] of skillsById) {
-  const authored = rows.filter(row => row.skillId === skillId && row.problems.length === 0).length;
+  const skillRows = rows.filter(row => row.skillId === skillId);
+  const authored = skillRows.filter(row => row.problems.length === 0).length;
   if (authored < skill.minQuestions) {
     shortfalls.push(`${skillId}: ${authored}/${skill.minQuestions} usable questions`);
   }
+  const slots = new Set(skillRows.map(row => row.config.answerChoiceSlot));
+  if (skillRows.length >= 4 && slots.size < 4) {
+    shortfalls.push(`${skillId}: correct answers do not cover all four choice slots`);
+  }
+}
+
+const slotCounts = [0, 1, 2, 3].map(slot =>
+  rows.filter(row => row.config.answerChoiceSlot === slot).length,
+);
+if (Math.max(...slotCounts) - Math.min(...slotCounts) > 1) {
+  shortfalls.push(`curriculum answer slots are imbalanced: ${slotCounts.join("/")}`);
 }
 
 // The tree travels with the questions so the seed has one source of truth for both. Concept

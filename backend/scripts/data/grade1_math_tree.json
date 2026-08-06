@@ -157,6 +157,7 @@
       "standardRef": "1.NBT.A.1",
       "order": 1,
       "minQuestions": 5,
+      "placementCheckpoint": true,
       "presentation": {
         "title": "Count, read, and write to 120",
         "description": "Count to 120 and connect spoken numbers to written numerals.",
@@ -207,6 +208,7 @@
       "standardRef": "1.OA.A.1",
       "order": 1,
       "minQuestions": 5,
+      "placementCheckpoint": true,
       "presentation": {
         "title": "Add-to and take-from stories",
         "description": "Solve stories where a quantity grows or becomes smaller.",
@@ -387,6 +389,7 @@
       "standardRef": "1.NBT.B.2a",
       "order": 1,
       "minQuestions": 5,
+      "placementCheckpoint": true,
       "presentation": {
         "title": "Make a ten from ten ones",
         "description": "Understand ten ones as one bundle called a ten.",
@@ -454,6 +457,7 @@
       "standardRef": "1.NBT.C.4",
       "order": 1,
       "minQuestions": 5,
+      "placementCheckpoint": true,
       "presentation": {
         "title": "Add within 100",
         "description": "Add a two-digit number to a one-digit number or a multiple of ten.",
@@ -639,5 +643,102 @@
       },
       "conceptId": "geometry.fractions.equal-shares"
     }
-  ]
+  ],
+  "rewards": {
+    "quest": {
+      "label": "Today’s maths quest",
+      "activitiesPerSession": 3
+    },
+    "xp": {
+      "correctAnswer": 4,
+      "firstTryBonus": 2,
+      "activityCompletion": 12
+    },
+    "level": {
+      "xpPerLevel": 120
+    },
+    "achievements": [
+      {
+        "id": "first-activity",
+        "label": "First Steps",
+        "description": "Finish your first activity.",
+        "metric": "lessonsCompleted",
+        "target": 1,
+        "icon": "star",
+        "accent": "purple"
+      },
+      {
+        "id": "ten-activities",
+        "label": "Getting Going",
+        "description": "Finish 10 activities.",
+        "metric": "lessonsCompleted",
+        "target": 10,
+        "icon": "award",
+        "accent": "blue"
+      },
+      {
+        "id": "every-skill",
+        "label": "Every Skill Tried",
+        "description": "Finish an activity in every skill.",
+        "metric": "lessonsCompleted",
+        "target": 30,
+        "icon": "trophy",
+        "accent": "pink"
+      },
+      {
+        "id": "sharp-start",
+        "label": "Sharp Start",
+        "description": "Get 25 answers right on the first try.",
+        "metric": "firstTryCorrect",
+        "target": 25,
+        "icon": "medal",
+        "accent": "green"
+      },
+      {
+        "id": "confident",
+        "label": "Confident",
+        "description": "Reach Proficient in 10 skills.",
+        "metric": "proficientSkills",
+        "target": 10,
+        "icon": "medal",
+        "accent": "amber"
+      },
+      {
+        "id": "halfway",
+        "label": "Halfway There",
+        "description": "Reach Proficient in 15 skills.",
+        "metric": "proficientSkills",
+        "target": 15,
+        "icon": "trophy",
+        "accent": "purple"
+      },
+      {
+        "id": "skill-master",
+        "label": "Skill Master",
+        "description": "Master 10 skills.",
+        "metric": "masteredSkills",
+        "target": 10,
+        "icon": "trophy",
+        "accent": "blue"
+      },
+      {
+        "id": "gem-collector",
+        "label": "Gem Collector",
+        "description": "Earn 500 XP from practice.",
+        "metric": "xpEarned",
+        "target": 500,
+        "icon": "gem",
+        "accent": "blue"
+      },
+      {
+        "id": "streak-star",
+        "label": "Streak Star",
+        "description": "Practise five days in a row.",
+        "metric": "streakDays",
+        "target": 5,
+        "icon": "flame",
+        "accent": "amber"
+      }
+    ]
+  }
 }

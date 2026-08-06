@@ -116,8 +116,10 @@ export interface CountingQuestion {
      * Why the answer is the answer, in one sentence a six-year-old can follow.
      * Shown only after the child has solved the card, so it teaches rather than
      * gives away — see the success panel in `GameLauncher`.
-     */
+    */
     explanation?: string;
+    /** Preferred zero-based slot for the correct option; distractors fill the other slots. */
+    answerChoiceSlot?: number;
     /** Authored curriculum level used by multi-level game canvases such as Liquid Sort. */
     levelId?: string;
     weather?: string;
@@ -207,6 +209,8 @@ export interface CountingQuestion {
     dataKind?: "count" | "total" | "more" | "most";
     dataCounts?: number[];
     dataCategories?: string[];
+    /** Artwork per chart category — an asset type id, or empty for the built-in fruit. */
+    dataAssets?: string[];
     dataFocus?: number;
     dataAgainst?: number;
     // Shape Lab

@@ -54,6 +54,7 @@ export const UsersTable: React.FC<{
   // Track expanded parent rows
   const [expandedParents, setExpandedParents] = useState<Record<string, boolean>>({});
   const [selectedStudent, setSelectedStudent] = useState<AdminStudent | null>(null);
+  const [deletingUser, setDeletingUser] = useState<AdminUser | null>(null);
   const [deletingStudent, setDeletingStudent] = useState<AdminStudent | null>(null);
   const [clearingLogsStudent, setClearingLogsStudent] = useState<AdminStudent | null>(null);
 
@@ -89,12 +90,12 @@ export const UsersTable: React.FC<{
   };
 
   const removeUser = async (u: AdminUser) => {
-    if (!window.confirm(`Delete ${u.email}?`)) return;
     try {
       await adminApi.deleteUser(u.id);
       onChanged();
     } catch (e) {
       alert(e instanceof Error ? e.message : "Delete failed");
+      throw e;
     }
   };
 
@@ -220,7 +221,14 @@ export const UsersTable: React.FC<{
                   {u.disabled ? <CheckCircle2 size={12} /> : <Ban size={12} />}
                   {u.disabled ? "Enable" : "Disable"}
                 </Button>
-                <Button variant="ghost" size="xs" onClick={() => removeUser(u)} className="text-slate-400 hover:text-rose-600">
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  onClick={() => setDeletingUser(u)}
+                  className="text-slate-400 hover:text-rose-600"
+                  aria-label={`Delete ${u.name}`}
+                  title={`Delete ${u.name}`}
+                >
                   <Trash2 size={12} />
                 </Button>
               </>
@@ -358,6 +366,22 @@ export const UsersTable: React.FC<{
         </div>
         <AvatarPicker value={pendingAvatar} onChange={setPendingAvatar} />
       </FormModal>
+      <ConfirmModal
+        isOpen={Boolean(deletingUser)}
+        onClose={() => setDeletingUser(null)}
+        onConfirm={() => (deletingUser ? removeUser(deletingUser) : Promise.resolve())}
+        title={`Delete ${deletingUser?.name ?? "this account"}?`}
+        description={
+          deletingUser
+            ? deletingUser.role === "parent" && deletingUser.child_count > 0
+              ? `This permanently deletes the account for ${deletingUser.email}. Its ${deletingUser.child_count} linked learner ${deletingUser.child_count === 1 ? "profile" : "profiles"} will also be deleted unless another guardian is linked. This action cannot be undone.`
+              : `This permanently deletes the account for ${deletingUser.email}. This action cannot be undone.`
+            : undefined
+        }
+        confirmText="Delete account"
+        cancelText="Cancel"
+        variant="danger"
+      />
       <ConfirmModal
         isOpen={Boolean(clearingLogsStudent)}
         onClose={() => setClearingLogsStudent(null)}

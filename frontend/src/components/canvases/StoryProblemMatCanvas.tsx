@@ -13,6 +13,7 @@ import { CanvasBin } from "./CanvasBin";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import { GhostGuideOverlay, useGhostGuide } from "../../pedagogy";
 import { bestGrid, fitObjectSize } from "./objectLayout";
+import { balancedChoiceOrder } from "./choiceOrder";
 import {
   answerChoices,
   normalizeStoryProblemConfig,
@@ -171,7 +172,11 @@ export const StoryProblemMatCanvas: React.FC<CanvasProps> = ({
   const object = COUNT_OBJECTS.find(item => item.id === question.objectId) || COUNT_OBJECTS[0];
   const assetLibrary = useAssetLibrary();
   const answer = storyAnswer(config);
-  const choices = answerChoices(answer, question.config.storyChoices);
+  const choices = balancedChoiceOrder(
+    answerChoices(answer, question.config.storyChoices),
+    answer,
+    question.config.answerChoiceSlot,
+  );
   /**
    * The story is the question, so it is always derived and always shown.
    *

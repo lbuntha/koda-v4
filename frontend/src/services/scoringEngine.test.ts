@@ -82,8 +82,8 @@ test("a couple of shaky attempts → beginner", () => {
   assert.ok(r.toNextLevel.length > 0);
 });
 
-test("6 clean plays clears the Developing gate", () => {
-  const r = scoreSkill("stu-1", "count-to-10", cleanRun(6));
+test("5 clean plays clears the Developing gate", () => {
+  const r = scoreSkill("stu-1", "count-to-10", cleanRun(5));
   assert.ok(r.score >= DEVELOPING_SCORE);
   assert.equal(r.level, "developing");
 });
@@ -108,14 +108,14 @@ test("Proficient needs the hard band when difficulty is tagged", () => {
   assert.equal(blocked.level, "developing");
   assert.ok(blocked.toNextLevel.some(x => /hard/.test(x)));
 
-  // same volume/sessions but with 3 hard plays → Proficient
+  // 10 plays across 2 sessions with 2 hard plays → Proficient
   const withHard = [
-    ...cleanRun(4, { session: "s1", day: "2026-07-20", difficulty: "easy" }),
-    ...cleanRun(3, { session: "s1", day: "2026-07-20", difficulty: "hard" }),
-    ...cleanRun(5, { session: "s2", day: "2026-07-21", difficulty: "medium" }),
+    ...cleanRun(5, { session: "s1", day: "2026-07-20", difficulty: "easy" }),
+    ...cleanRun(2, { session: "s1", day: "2026-07-20", difficulty: "hard" }),
+    ...cleanRun(3, { session: "s2", day: "2026-07-21", difficulty: "medium" }),
   ];
   const r = scoreSkill("stu-1", "count-to-10", withHard);
-  assert.equal(r.hardPlays, 3);
+  assert.equal(r.hardPlays, 2);
   assert.equal(r.level, "proficient");
 });
 

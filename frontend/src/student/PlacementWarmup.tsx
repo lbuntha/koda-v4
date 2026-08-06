@@ -82,14 +82,19 @@ export const PlacementWarmup: React.FC<Props> = ({ quiz, band, onComplete, onExi
         }`} />
         <div className={`koda-celebration-card relative w-full text-center backdrop-blur-xl ${
           isKid
-            ? "max-w-xl rounded-[2.5rem] border-2 border-white bg-white/80 p-8 shadow-[0_28px_80px_-35px_rgba(86,62,162,0.5)] sm:p-10"
+            ? isDark
+              ? "max-w-xl rounded-[2.5rem] border-2 border-white/10 bg-[#15182A]/95 p-8 shadow-[0_28px_80px_-30px_rgba(0,0,0,0.75)] sm:p-10"
+              : "max-w-xl rounded-[2.5rem] border-2 border-white bg-white/90 p-8 shadow-[0_28px_80px_-35px_rgba(86,62,162,0.5)] sm:p-10"
             : isDark
               ? "max-w-lg rounded-3xl border border-white/10 bg-slate-900/90 p-7 shadow-2xl shadow-black/50"
               : "max-w-lg rounded-3xl border border-[#E1DDF0] bg-white/90 p-7 shadow-xl shadow-violet-200/30"
         }`}>
           <span className={`koda-celebration-icon mx-auto flex items-center justify-center ${
             isKid
-              ? "h-24 w-24 rounded-[2rem] bg-amber-100 text-5xl"
+              ? `h-24 w-24 rounded-[2rem] text-5xl ${isDark
+                ? "border border-amber-300/15 bg-amber-300/10 shadow-lg shadow-black/20"
+                : "bg-amber-100 shadow-sm shadow-amber-200/50"
+              }`
               : "h-16 w-16 rounded-2xl bg-emerald-500/15 text-emerald-500"
           }`}>
             {isKid ? <span className="koda-celebration-icon-art">🎉</span> : <CheckCircle2 className="koda-celebration-icon-art" size={32} />}

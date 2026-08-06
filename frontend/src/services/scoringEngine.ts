@@ -77,8 +77,8 @@ export const MASTER_SCORE = 0.92;
 
 /** Volume + spacing gates. "plays" = questions answered (first-attempt events). */
 export const GATES = {
-  developing: { minPlays: 6 },
-  proficient: { minPlays: 10, minSessions: 2, minHardPlays: 3 },
+  developing: { minPlays: 5 },
+  proficient: { minPlays: 10, minSessions: 2, minHardPlays: 2 },
   master: { minPlays: 15, minDistinctDays: 3, minHardPlays: 3, minRecentScore: 0.9 },
 } as const;
 

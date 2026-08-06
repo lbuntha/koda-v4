@@ -32,6 +32,21 @@ type UnitSeed = Omit<Unit, "id" | "subjectId" | "order"> & {
   skills: SkillSeed[];
 };
 
+/*
+  Placement checkpoints — four, deliberately.
+
+  A diagnostic exists to find where a child starts, not to test them: with
+  `checkpoints_only` on, placement draws only from the skills flagged here, so
+  every flag is questions a six-year-old sits through before they play anything.
+  Unflagged, it falls back to the first skill of every unit — eleven of them,
+  capped at eight, two questions each: a sixteen-question exam.
+
+  These four step along the ladder the rest of the subject is built on — count
+  to 120, then operate within 20, then tens and ones, then two digits. Length,
+  time, data and shape are separate strands that do not gate that ladder, so
+  testing them here would lengthen the sitting without moving where the child
+  begins.
+*/
 const units: UnitSeed[] = [
   {
     id: "counting-to-120",
@@ -39,7 +54,7 @@ const units: UnitSeed[] = [
     description: "Build a reliable counting sequence and connect quantities, spoken numbers, and written numerals.",
     learningObjectives: ["Count to 120", "Start counting from any number", "Read, write, and represent numerals"],
     skills: [
-      { id: "count-read-write-120", label: "Count, read, and write to 120", standardRef: "1.NBT.A.1", description: "Count to 120 and connect spoken numbers to written numerals.", thumbnailUrl: "/assets/components/number-path.svg" },
+      { id: "count-read-write-120", placementCheckpoint: true, label: "Count, read, and write to 120", standardRef: "1.NBT.A.1", description: "Count to 120 and connect spoken numbers to written numerals.", thumbnailUrl: "/assets/components/number-path.svg" },
       { id: "count-on-any-number", label: "Count on from any number", standardRef: "1.NBT.A.1", description: "Continue the counting sequence from a number other than one.", thumbnailUrl: "/assets/components/number-path.svg" },
       { id: "represent-quantities", label: "Represent quantities with numerals", standardRef: "1.NBT.A.1", description: "Match a set of objects to the numeral that tells how many." },
     ],
@@ -50,7 +65,7 @@ const units: UnitSeed[] = [
     description: "Model the major Grade 1 addition and subtraction situations with objects, drawings, and equations.",
     learningObjectives: ["Model story problems", "Choose addition or subtraction", "Solve three-addend problems"],
     skills: [
-      { id: "add-take-stories", label: "Add-to and take-from stories", standardRef: "1.OA.A.1", description: "Solve stories where a quantity grows or becomes smaller.", thumbnailUrl: "/assets/components/story-problem-mat.svg" },
+      { id: "add-take-stories", placementCheckpoint: true, label: "Add-to and take-from stories", standardRef: "1.OA.A.1", description: "Solve stories where a quantity grows or becomes smaller.", thumbnailUrl: "/assets/components/story-problem-mat.svg" },
       { id: "part-whole-stories", label: "Put-together and take-apart stories", standardRef: "1.OA.A.1", description: "Find a whole or a missing part using objects, drawings, or equations.", thumbnailUrl: "/assets/components/story-problem-mat.svg" },
       { id: "compare-stories", label: "Compare story problems", standardRef: "1.OA.A.1", description: "Find how many more or fewer one quantity has than another.", thumbnailUrl: "/assets/components/story-problem-mat.svg" },
       { id: "add-three-numbers", label: "Add three numbers within 20", standardRef: "1.OA.A.2", description: "Combine three whole-number groups with a total no greater than 20.", thumbnailUrl: "/assets/components/story-problem-mat.svg" },
@@ -93,7 +108,7 @@ const units: UnitSeed[] = [
     description: "Build place-value understanding by composing, decomposing, and comparing two-digit numbers.",
     learningObjectives: ["Bundle ten ones", "Build teen numbers", "Compare two-digit numbers"],
     skills: [
-      { id: "bundle-ten", label: "Make a ten from ten ones", standardRef: "1.NBT.B.2a", description: "Understand ten ones as one bundle called a ten.", thumbnailUrl: "/assets/components/place-value-lab.svg" },
+      { id: "bundle-ten", placementCheckpoint: true, label: "Make a ten from ten ones", standardRef: "1.NBT.B.2a", description: "Understand ten ones as one bundle called a ten.", thumbnailUrl: "/assets/components/place-value-lab.svg" },
       { id: "teen-numbers", label: "Build teen numbers", standardRef: "1.NBT.B.2b", description: "Represent 11–19 as one ten and some ones.", thumbnailUrl: "/assets/components/place-value-lab.svg" },
       { id: "multiples-of-ten", label: "Understand multiples of ten", standardRef: "1.NBT.B.2c", description: "Represent 10–90 as groups of tens with zero ones.", thumbnailUrl: "/assets/components/place-value-lab.svg" },
       { id: "compare-two-digit", label: "Compare two-digit numbers", standardRef: "1.NBT.B.3", description: "Compare tens and ones using greater than, equal to, and less than." },
@@ -105,7 +120,7 @@ const units: UnitSeed[] = [
     description: "Use tens, ones, drawings, and operation properties to work with numbers within 100.",
     learningObjectives: ["Add within 100", "Find ten more or less", "Subtract tens"],
     skills: [
-      { id: "add-within-100", label: "Add within 100", standardRef: "1.NBT.C.4", description: "Add a two-digit number to a one-digit number or a multiple of ten." },
+      { id: "add-within-100", placementCheckpoint: true, label: "Add within 100", standardRef: "1.NBT.C.4", description: "Add a two-digit number to a one-digit number or a multiple of ten." },
       { id: "ten-more-less", label: "Find 10 more or 10 less", standardRef: "1.NBT.C.5", description: "Mentally find ten more or ten less than a two-digit number.", thumbnailUrl: "/assets/components/number-path.svg" },
       { id: "subtract-tens", label: "Subtract multiples of ten", standardRef: "1.NBT.C.6", description: "Subtract a multiple of ten from another multiple of ten." },
     ],
@@ -175,6 +190,7 @@ export function createGrade1MathTemplate(context: Grade1MathTemplateContext): Cu
     standardRef: skill.standardRef,
     order: skillIndex + 1,
     minQuestions: 5,
+    ...(skill.placementCheckpoint ? { placementCheckpoint: true } : {}),
     presentation: {
       title: skill.label,
       description: skill.description,
@@ -203,6 +219,22 @@ export function createGrade1MathTemplate(context: Grade1MathTemplateContext): Cu
     }],
     units: curriculumUnits,
     skills,
+    rewards: {
+      quest: { label: "Today’s maths quest", activitiesPerSession: 3 },
+      xp: { correctAnswer: 4, firstTryBonus: 2, activityCompletion: 12 },
+      level: { xpPerLevel: 120 },
+      achievements: [
+        { id: "first-activity", label: "First Steps", description: "Finish your first activity.", metric: "lessonsCompleted", target: 1, icon: "star", accent: "purple" },
+        { id: "ten-activities", label: "Getting Going", description: "Finish 10 activities.", metric: "lessonsCompleted", target: 10, icon: "award", accent: "blue" },
+        { id: "every-skill", label: "Every Skill Tried", description: "Finish an activity in every skill.", metric: "lessonsCompleted", target: skills.length, icon: "trophy", accent: "pink" },
+        { id: "sharp-start", label: "Sharp Start", description: "Get 25 answers right on the first try.", metric: "firstTryCorrect", target: 25, icon: "medal", accent: "green" },
+        { id: "confident", label: "Confident", description: "Reach Proficient in 10 skills.", metric: "proficientSkills", target: 10, icon: "medal", accent: "amber" },
+        { id: "halfway", label: "Halfway There", description: "Reach Proficient in 15 skills.", metric: "proficientSkills", target: 15, icon: "trophy", accent: "purple" },
+        { id: "skill-master", label: "Skill Master", description: "Master 10 skills.", metric: "masteredSkills", target: 10, icon: "trophy", accent: "blue" },
+        { id: "gem-collector", label: "Gem Collector", description: "Earn 500 XP from practice.", metric: "xpEarned", target: 500, icon: "gem", accent: "blue" },
+        { id: "streak-star", label: "Streak Star", description: "Practise five days in a row.", metric: "streakDays", target: 5, icon: "flame", accent: "amber" },
+      ],
+    },
   };
 }
 

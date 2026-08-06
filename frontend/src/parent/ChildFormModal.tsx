@@ -14,9 +14,10 @@ interface Props {
   onClose: () => void;
   onSubmit: (data: ChildInput) => Promise<void>;
   initial?: Child | null;
+  firstRun?: boolean;
 }
 
-export const ChildFormModal: React.FC<Props> = ({ isOpen, onClose, onSubmit, initial }) => {
+export const ChildFormModal: React.FC<Props> = ({ isOpen, onClose, onSubmit, initial, firstRun = false }) => {
   const editing = !!initial;
   const [name, setName] = useState("");
   const [avatar, setAvatar] = useState(AVATARS[0]);
@@ -82,7 +83,7 @@ export const ChildFormModal: React.FC<Props> = ({ isOpen, onClose, onSubmit, ini
   const selectedSubjectLabel = selectedSubject ? selectedSubject.name : primarySubject;
 
   if (!editing) {
-    return <KidOnboardingWizard isOpen={isOpen} onClose={onClose} onSubmit={onSubmit} />;
+    return <KidOnboardingWizard isOpen={isOpen} onClose={onClose} onSubmit={onSubmit} firstRun={firstRun} />;
   }
 
   return (

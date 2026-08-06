@@ -10,7 +10,8 @@ from ...core.deps import get_current_student, get_current_user
 from ...core.logging import get_logger
 from ...core.permissions import authorize_guardian_read
 from ...core.runtime_settings import get_system_settings
-from ...models.assignment import Assignment, Placement, ProgressionState
+from ...models.assignment import Assignment, CurriculumPromotion, Placement, ProgressionState
+from ...models.event import LearningEvent
 from ...models.content import CurriculumRelease
 from ...models.student import Student
 from ...models.user import Role, User
@@ -218,6 +219,64 @@ async def update_assignment(assignment_id: str, body: AssignmentStatusIn, user: 
         after=after,
     )
     return _assignment_out(assignment)
+
+
+@router.delete("/assignments/{assignment_id}", status_code=status.HTTP_200_OK)
+async def delete_assignment(assignment_id: str, user: User = Depends(get_current_user)):
+    """Remove an assignment and the state that only exists because of it.
+
+    Pausing stops an assignment being served; it does not take it off the list,
+    and there was no way to do that at all — a mis-assigned learner stayed on the
+    admin screen for good.
+
+    What goes with it is deliberate:
+
+    - **Placement and ProgressionState** are deleted. Both are keyed uniquely on
+      (student, assignment) and mean nothing without it — a placement result is
+      an answer to "where does this child start *in this assignment*".
+    - **Promotions** raised from it are deleted, because their unique index on
+      `from_assignment_id` would otherwise block the learner ever being promoted
+      out of a re-created assignment.
+    - **LearningEvents are kept.** XP, levels and streaks are replayed from
+      events rather than stored, so deleting them would silently rewrite a
+      child's history. They keep a dangling `assignment_id`, which is the honest
+      record: the work happened.
+    """
+    assignment = await _owned_assignment_or_404(assignment_id, user)
+    before = {
+        "student_id": assignment.student_id,
+        "curriculum_id": assignment.curriculum_id,
+        "release_id": assignment.release_id,
+        "status": assignment.status,
+    }
+
+    placements = await Placement.find(Placement.assignment_id == assignment_id).to_list()
+    progressions = await ProgressionState.find(ProgressionState.assignment_id == assignment_id).to_list()
+    promotions = await CurriculumPromotion.find(
+        CurriculumPromotion.from_assignment_id == assignment_id
+    ).to_list()
+    kept_events = await LearningEvent.find(LearningEvent.assignment_id == assignment_id).count()
+
+    for row in (*placements, *progressions, *promotions):
+        await row.delete()
+    await assignment.delete()
+
+    await record_audit(
+        actor=user,
+        owner_id=assignment.owner_id,
+        resource_type="assignment",
+        action="deleted",
+        curriculum_id=assignment.curriculum_id,
+        before=before,
+        after=None,
+    )
+    return {
+        "deleted": True,
+        "placements": len(placements),
+        "progressions": len(progressions),
+        "promotions": len(promotions),
+        "eventsKept": kept_events,
+    }
 
 
 def _placement_items(placement: Placement, release: CurriculumRelease) -> list[dict]:

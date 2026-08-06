@@ -18,6 +18,7 @@ import { sounds } from "../../sound";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import { CanvasChip, CanvasAccent } from "./canvasTheme";
 import type { CanvasProps } from "./types";
+import { balancedChoiceOrder } from "./choiceOrder";
 
 export type CompareSymbol = ">" | "<" | "=";
 
@@ -62,6 +63,10 @@ export const CompareNumbersCanvas: React.FC<CanvasProps> = ({
   }), [question.config.compareFirst, question.config.compareSecond]);
 
   const answer = compareAnswer(config);
+  const symbols = useMemo(
+    () => balancedChoiceOrder(SYMBOLS, answer, question.config.answerChoiceSlot),
+    [answer, question.config.answerChoiceSlot],
+  );
   const [picked, setPicked] = useState<CompareSymbol | null>(null);
   const [solved, setSolved] = useState(false);
 
@@ -148,7 +153,7 @@ export const CompareNumbersCanvas: React.FC<CanvasProps> = ({
         </div>
 
         <div className="flex items-center justify-center gap-3">
-          {SYMBOLS.map(symbol => {
+          {symbols.map(symbol => {
             const isPicked = picked === symbol;
             const isRight = solved && symbol === answer;
             return (

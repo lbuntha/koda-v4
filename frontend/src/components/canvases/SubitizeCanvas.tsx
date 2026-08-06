@@ -10,6 +10,7 @@ import { CanvasChip, CanvasAccent, surfaceClass, captionClass, accentTextClass }
 import { Button } from "../ui";
 import { objectStyle } from "./objectMotion";
 import { oneToOneLayout, type OneToOnePattern } from "./oneToOneLayout";
+import { balancedChoiceOrder } from "./choiceOrder";
 
 /**
  * Arrangements a flash may use.
@@ -93,7 +94,11 @@ export const SubitizeCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, is
         opts.add(candidate);
       }
     }
-    setOptions(Array.from(opts).sort((a, b) => a - b));
+    setOptions(balancedChoiceOrder(
+      Array.from(opts).sort((a, b) => a - b),
+      count,
+      question.config.answerChoiceSlot,
+    ));
   };
 
   const handleStartFlash = () => {
