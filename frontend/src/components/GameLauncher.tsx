@@ -33,6 +33,7 @@ import { analyticsLogger } from "../services/analyticsLogger";
 import { getTaxonomy, AttemptOutcome } from "../services/logSchema";
 import { solvedSelection } from "../student/answerSelection";
 import { useThemeMode } from "../theme/appTheme";
+import { DotProgressIndicator } from "./ui";
 import { useZoomLock } from "../hooks/useZoomLock";
 
 interface GameLauncherProps {
@@ -395,51 +396,7 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
         </div>
 
         {/* Center – dot progress indicators (rendered when there is more than 1 question/level) */}
-        {questions.length > 1 && (
-          <div className="flex-1 flex flex-col items-center justify-center mx-2 min-w-0">
-            <div className="flex items-center gap-1.5 sm:gap-2 max-w-full overflow-x-auto py-0.5 scrollbar-none">
-              {questions.length <= 15 ? (
-                questions.map((_, i) => {
-                  const isCompleted = i < currentIdx;
-                  const isCurrent = i === currentIdx;
-                  return (
-                    <div
-                      key={i}
-                      className={`transition-all duration-300 ${
-                        isCurrent
-                          ? "w-6 sm:w-7 h-2.5 sm:h-3 bg-gradient-to-r from-indigo-500 to-violet-600 rounded-full shadow-md shadow-indigo-500/30 ring-2 ring-indigo-400/40"
-                          : isCompleted
-                          ? "w-2.5 sm:w-3 h-2.5 sm:h-3 bg-indigo-500 dark:bg-violet-400 rounded-full"
-                          : "w-2.5 sm:w-3 h-2.5 sm:h-3 bg-slate-200 dark:bg-white/15 rounded-full"
-                      }`}
-                      title={`Question ${i + 1} of ${questions.length}`}
-                    />
-                  );
-                })
-              ) : (
-                /* Fallback for > 15 questions: compact dots */
-                <div className="flex items-center gap-1.5">
-                  {Array.from({ length: 5 }).map((_, i) => {
-                    const active = Math.floor((currentIdx / questions.length) * 5) === i;
-                    return (
-                      <div
-                        key={i}
-                        className={`h-2.5 rounded-full transition-all duration-300 ${
-                          active
-                            ? "w-6 bg-gradient-to-r from-indigo-500 to-violet-600 shadow-sm"
-                            : "w-2.5 bg-slate-200 dark:bg-white/15"
-                        }`}
-                      />
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-            <span className={`text-[10px] sm:text-[11px] font-black font-mono tracking-tight ${isDark ? "text-indigo-400" : "text-indigo-600"}`}>
-              {currentIdx + 1} / {questions.length}
-            </span>
-          </div>
-        )}
+        <DotProgressIndicator current={currentIdx} total={questions.length} isDark={isDark} className="flex-1 mx-2" />
 
         {/* Right – compact mobile controls */}
         <div className="flex items-center justify-end gap-1 sm:gap-1.5 flex-1 min-w-0 shrink-0">

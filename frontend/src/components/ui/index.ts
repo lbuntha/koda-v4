@@ -10,6 +10,7 @@ export { Skeleton, SkeletonText, SkeletonCard } from "./Skeleton";
 export { CanvasSkeleton, CardSkeleton } from "./ProgressiveSkeleton";
 export { ProgressiveImage } from "./ProgressiveImage";
 export { TopProgressBar } from "./TopProgressBar";
+export { DotProgressIndicator, type DotProgressIndicatorProps } from "./DotProgressIndicator";
 export { Spinner } from "./Spinner";
 export { KodaLogoSpinner } from "./KodaLogoSpinner";
 export { Tabs, TabsList, TabsTrigger, TabsContent } from "./Tabs";
