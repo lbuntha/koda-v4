@@ -30,6 +30,7 @@ import { resolveIcon } from "../nav/icons";
 import { useMenus } from "../nav/useMenus";
 import { PARENT_NAV_ASSETS, PARENT_NAV_ASSET_REFS } from "./parentNavAssets";
 import { KID_NAV_ASSETS } from "../student/home/kidNavAssets";
+import { FAMILY_SUMMARY_ASSETS } from "./familySummaryAssets";
 
 type ParentView = "dashboard" | "children" | "parent_settings" | "settings" | "profile";
 
@@ -52,7 +53,7 @@ const PARENT_NAV_ICONS: Record<string, React.ElementType> = {
   parent_settings: resolveIcon(PARENT_NAV_ASSET_REFS.settings),
 };
 
-const NAV_ASSETS = [...PARENT_NAV_ASSETS, ...KID_NAV_ASSETS];
+const NAV_ASSETS = [...PARENT_NAV_ASSETS, ...KID_NAV_ASSETS, ...FAMILY_SUMMARY_ASSETS];
 
 const VIEW_TITLES: Record<ParentView, string> = {
   dashboard: "Family learning",

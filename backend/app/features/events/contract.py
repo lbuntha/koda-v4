@@ -78,7 +78,12 @@ def to_canonical(raw: dict) -> dict:
     out = {snake: _read(raw, camel, snake) for camel, snake in FIELD_MAP.items()}
     difficulty = raw.get("difficulty")
     if difficulty is None:
-        difficulty = (raw.get("details") or {}).get("difficulty")
+        # Older clients stored the standard mastery band in details. Preserve that
+        # compatibility, but do not mistake a canvas's own mode (for example Number
+        # Path's "guided" / "independent") for a curriculum difficulty. A malformed
+        # explicit top-level value is still rejected below.
+        legacy_difficulty = (raw.get("details") or {}).get("difficulty")
+        difficulty = legacy_difficulty if legacy_difficulty in DIFFICULTIES else None
     out["difficulty"] = difficulty
     return out
 

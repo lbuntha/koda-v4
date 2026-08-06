@@ -12,6 +12,7 @@ import { preprocessSvgMarkup } from "../../assets/svgPreprocess";
 import { isSafeSvgMarkup, sanitizeSvgMarkup } from "../../assets/svgSafety";
 import { svgAssetsApi, type SvgAssetUse } from "../../api/svgAssets";
 import type { CustomSvgAsset } from "../../types";
+import { FAMILY_SUMMARY_ASSETS } from "../../parent/familySummaryAssets";
 import { PARENT_NAV_ASSETS } from "../../parent/parentNavAssets";
 import { KID_NAV_ASSETS } from "../../student/home/kidNavAssets";
 import { ASSET_CATEGORY_ICONS } from "../../assets/assetCategoryAssets";
@@ -21,7 +22,7 @@ import { CountingAsset } from "../Assets";
 import { AssetGrid, CatalogAssetView } from "../ui/AssetGrid";
 import { Badge, Button, Card, ConfirmModal, Input, Label, Textarea } from "../ui";
 
-const SYSTEM_ASSETS = [...PARENT_NAV_ASSETS, ...KID_NAV_ASSETS, ...ASSET_CATEGORY_ICONS, XTRAMATH_OWL_ASSET];
+const SYSTEM_ASSETS = [...PARENT_NAV_ASSETS, ...FAMILY_SUMMARY_ASSETS, ...KID_NAV_ASSETS, ...ASSET_CATEGORY_ICONS, XTRAMATH_OWL_ASSET];
 const SYSTEM_ASSET_IDS = new Set(SYSTEM_ASSETS.map(asset => asset.id));
 const NEW_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
   <circle cx="50" cy="50" r="38" fill="#7C6DD8" />

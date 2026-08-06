@@ -192,7 +192,7 @@ export interface ComputeOptions {
 type Difficulty = "easy" | "medium" | "hard";
 
 function difficultyOf(e: LearningEvent): Difficulty | null {
-  const d = e.details?.difficulty;
+  const d = e.difficulty ?? e.details?.difficulty;
   return d === "easy" || d === "medium" || d === "hard" ? d : null;
 }
 

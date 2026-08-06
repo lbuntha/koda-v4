@@ -147,6 +147,8 @@ export interface LearningEvent {
   assignmentId?: string;
   /** Recommendation decision that selected this skill for the session. */
   recommendationRunId?: string;
+  /** Standard curriculum difficulty. Technique-specific modes belong in `details`. */
+  difficulty?: "easy" | "medium" | "hard";
   slideIndex: number;
   totalSlides: number;
 

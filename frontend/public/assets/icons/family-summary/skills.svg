@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+  <defs>
+    <linearGradient id="trophyCup" x1="7" y1="3" x2="17" y2="15" gradientUnits="userSpaceOnUse"><stop stop-color="#D292FF"/><stop offset=".48" stop-color="#8B4CF5"/><stop offset="1" stop-color="#5523C8"/></linearGradient>
+    <linearGradient id="trophyBase" x1="8" y1="16" x2="17" y2="22" gradientUnits="userSpaceOnUse"><stop stop-color="#A86CFF"/><stop offset="1" stop-color="#5B2AD1"/></linearGradient>
+    <linearGradient id="trophyShine" x1="9" y1="4" x2="13" y2="12" gradientUnits="userSpaceOnUse"><stop stop-color="#FFFFFF" stop-opacity=".9"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></linearGradient>
+  </defs>
+  <g>
+    <path d="M7.25 5.1H3.8v2.1a4.65 4.65 0 0 0 4.65 4.65V9.9A2.7 2.7 0 0 1 5.75 7.2v-.15h1.5V5.1ZM16.75 5.1h3.45v2.1a4.65 4.65 0 0 1-4.65 4.65V9.9a2.7 2.7 0 0 0 2.7-2.7v-.15h-1.5V5.1Z" fill="#7040D8"/>
+    <path d="M7 3.2h10v5.1a5 5 0 0 1-10 0V3.2Z" fill="url(#trophyCup)"/>
+    <path d="M8.45 4.25h2.5c-.8 2.2-.75 5.35 1.15 7.45-2.45.05-3.65-1.65-3.65-3.6V4.25Z" fill="url(#trophyShine)" opacity=".65"/>
+    <path d="M11 12.9h2v4.25h-2z" fill="#7440DB"/>
+    <rect x="8.35" y="16.3" width="7.3" height="2.25" rx="1.1" fill="url(#trophyBase)"/>
+    <rect x="6.75" y="18.35" width="10.5" height="2.55" rx="1.25" fill="url(#trophyBase)"/>
+    <path d="M8.35 19.15h7.3" stroke="white" stroke-width=".7" stroke-linecap="round" opacity=".42"/>
+    <circle cx="15.8" cy="4.55" r=".75" fill="#F6C8FF" opacity=".9"/>
+  </g>
+</svg>

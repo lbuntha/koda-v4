@@ -99,10 +99,16 @@ def test_missing_timestamp_is_unverified():
     assert n["verified"] is False
 
 
-def test_bad_difficulty_is_unverified():
-    n = normalize_event(_attempt(details={"difficulty": "spicy"}))
+def test_bad_explicit_difficulty_is_unverified():
+    n = normalize_event(_attempt(difficulty="spicy"))
     assert n["verified"] is False
     assert "difficulty" in n["verification_error"]
+
+
+def test_technique_specific_detail_is_not_mistaken_for_curriculum_difficulty():
+    n = normalize_event(_attempt(details={"difficulty": "guided"}))
+    assert n["verified"] is True
+    assert n["difficulty"] is None
 
 
 def test_bad_attempt_number_is_unverified():

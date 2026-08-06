@@ -379,6 +379,7 @@ interface SlideContext {
   releaseId?: string;
   assignmentId?: string;
   recommendationRunId?: string;
+  difficulty?: "easy" | "medium" | "hard";
   details?: Record<string, any>;
   slideIndex: number;
   totalSlides: number;

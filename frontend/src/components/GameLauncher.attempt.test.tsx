@@ -17,6 +17,7 @@ import React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { CountingTechnique, type CountingQuestion } from "../types";
+import { GameLauncher } from "./GameLauncher";
 
 const logAttempt = vi.fn();
 
@@ -78,7 +79,6 @@ const question = (technique: CountingTechnique, config: Record<string, any> = {}
 
 /** Mount the launcher on one activity, then solve it the way a learner would. */
 const solveActivity = async (q: CountingQuestion) => {
-  const { GameLauncher } = await import("./GameLauncher");
   render(
     <GameLauncher questions={[q]} activeId={q.id} setActiveId={() => {}} onClose={() => {}} />,
   );
@@ -115,5 +115,15 @@ describe("solved-activity reporting", () => {
     await waitFor(() => expect(correctAttempts()).toHaveLength(1));
     await new Promise(resolve => setTimeout(resolve, 20));
     expect(correctAttempts()).toHaveLength(1);
+  });
+
+  test("curriculum difficulty is logged separately from canvas presentation modes", async () => {
+    const authored = question(CountingTechnique.ONE_TO_ONE);
+    authored.difficulty = "hard";
+    await solveActivity(authored);
+
+    await waitFor(() => expect(correctAttempts()).toHaveLength(1));
+    const [context] = correctAttempts()[0];
+    expect(context.difficulty).toBe("hard");
   });
 });

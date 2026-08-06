@@ -130,6 +130,9 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
       releaseId: learningContext?.releaseId,
       assignmentId: learningContext?.assignmentId,
       recommendationRunId: learningContext?.recommendationRunId,
+      // Keep curriculum difficulty in its canonical field. Canvas modes such as
+      // "guided" or "independent" are presentation details, not mastery bands.
+      difficulty: q.difficulty,
       details: {
         objectId: q.objectId,
         ...(q.config?.customSvgAssetId ? { customSvgAssetId: q.config.customSvgAssetId } : {}),
