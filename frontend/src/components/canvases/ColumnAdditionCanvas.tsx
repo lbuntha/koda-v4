@@ -138,7 +138,7 @@ export const ColumnAdditionCanvas: React.FC<CanvasProps> = ({
   // Which answer column the on-screen keypad types into (ones-first index).
   const [focusedPlace, setFocusedPlace] = useState(0);
 
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const answerCellRefs = useRef<(HTMLButtonElement | null)[]>([]);
   // A targeted guide has two beats for one problem column. The full guide
   // keeps the original ones-to-left sequence.
   const beats = useMemo(() => {
@@ -166,7 +166,7 @@ export const ColumnAdditionCanvas: React.FC<CanvasProps> = ({
     setGuideUsed(false);
     setFocusedPlace(0);
     if (isPlayMode) {
-      const id = requestAnimationFrame(() => inputRefs.current[0]?.focus());
+      const id = requestAnimationFrame(() => answerCellRefs.current[0]?.focus({ preventScroll: true }));
       return () => cancelAnimationFrame(id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -241,7 +241,7 @@ export const ColumnAdditionCanvas: React.FC<CanvasProps> = ({
     setOfferGuide(false);
     setHintLevel(0);
     setFocusedPlace(resumePlace);
-    requestAnimationFrame(() => inputRefs.current[resumePlace]?.focus());
+    requestAnimationFrame(() => answerCellRefs.current[resumePlace]?.focus({ preventScroll: true }));
   }, [answers, columns, guideTarget, stuckCol]);
 
   const requestProgressiveHint = () => {
@@ -249,7 +249,7 @@ export const ColumnAdditionCanvas: React.FC<CanvasProps> = ({
     const nextLevel = Math.min(2, hintLevel + 1);
     setHintLevel(nextLevel);
     setFocusedPlace(stuckCol);
-    requestAnimationFrame(() => inputRefs.current[stuckCol]?.focus());
+    requestAnimationFrame(() => answerCellRefs.current[stuckCol]?.focus({ preventScroll: true }));
     onHint?.({
       component: componentName,
       hintLevel: nextLevel,
@@ -268,8 +268,11 @@ export const ColumnAdditionCanvas: React.FC<CanvasProps> = ({
     setWrongCells(prev => (prev[place] ? prev.map((w, i) => (i === place ? false : w)) : prev));
     // Auto-advance leftward (ones → tens → …) so a child keeps a natural flow.
     if (digit && place < columns.length - 1) {
-      inputRefs.current[place + 1]?.focus();
-      setFocusedPlace(place + 1);
+      const nextPlace = place + 1;
+      setFocusedPlace(nextPlace);
+      // Let the keypad's tap/click finish before restoring focus to the answer
+      // row. Mobile browsers otherwise leave focus on the keypad button.
+      requestAnimationFrame(() => answerCellRefs.current[nextPlace]?.focus({ preventScroll: true }));
     }
   };
 
@@ -277,12 +280,12 @@ export const ColumnAdditionCanvas: React.FC<CanvasProps> = ({
   const keypadBackspace = () => {
     if (answers[focusedPlace]) {
       setAnswers(prev => prev.map((a, i) => (i === focusedPlace ? "" : a)));
-      inputRefs.current[focusedPlace]?.focus();
+      requestAnimationFrame(() => answerCellRefs.current[focusedPlace]?.focus({ preventScroll: true }));
     } else if (focusedPlace > 0) {
       const p = focusedPlace - 1;
       setAnswers(prev => prev.map((a, i) => (i === p ? "" : a)));
-      inputRefs.current[p]?.focus();
       setFocusedPlace(p);
+      requestAnimationFrame(() => answerCellRefs.current[p]?.focus({ preventScroll: true }));
     }
   };
 
@@ -351,7 +354,10 @@ export const ColumnAdditionCanvas: React.FC<CanvasProps> = ({
     window.setTimeout(() => {
       setWrongCells(columns.map(() => false));
       setAnswers(prev => prev.map((a, i) => (wrong[i] ? "" : a)));
-      if (firstWrong >= 0) inputRefs.current[firstWrong]?.focus();
+      if (firstWrong >= 0) {
+        setFocusedPlace(firstWrong);
+        answerCellRefs.current[firstWrong]?.focus({ preventScroll: true });
+      }
     }, 750);
   };
 
@@ -724,24 +730,20 @@ export const ColumnAdditionCanvas: React.FC<CanvasProps> = ({
     if (!showStatic && phase === "solve") {
       return (
         <div key={`a-${place}`} className={`${CELL} h-12 sm:h-14`}>
-          <input
-            ref={el => { inputRefs.current[place] = el; }}
-            value={answers[place] ?? ""}
-            onChange={e => setAnswerDigit(place, e.target.value)}
-            onKeyDown={e => {
-              if (e.key === "Enter" && allFilled) checkAnswer();
-              if (e.key === "Backspace" && !answers[place] && place > 0) inputRefs.current[place - 1]?.focus();
-            }}
-            onFocus={e => { e.target.select(); setFocusedPlace(place); }}
-            inputMode="none"
-            maxLength={1}
-            aria-label={`Answer digit for the ${columns[place].placeLabel}`}
+          <button
+            ref={element => { answerCellRefs.current[place] = element; }}
+            type="button"
+            onClick={() => setFocusedPlace(place)}
+            onFocus={() => setFocusedPlace(place)}
+            aria-label={`Answer digit for the ${columns[place].placeLabel}${answers[place] ? `: ${answers[place]}` : ""}`}
             className={`w-8 min-[380px]:w-9 sm:w-10 h-10 min-[380px]:h-11 sm:h-12 text-center text-2xl min-[380px]:text-3xl sm:text-4xl font-mono font-black rounded-xl border-2 outline-none transition-colors focus:ring-4 ${
               wrong
                 ? "border-rose-400 bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-300"
                 : `border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white ${accent.ring}`
             }`}
-          />
+          >
+            {answers[place]}
+          </button>
         </div>
       );
     }

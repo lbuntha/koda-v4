@@ -79,7 +79,7 @@ export const ColumnSubtractionCanvas: React.FC<CanvasProps> = ({
   const voice = useKodaVoice("koda_column_subtraction_muted");
   const mutedRef = useRef(voice.muted);
   const containerRef = useRef<HTMLDivElement>(null);
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const answerCellRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const rawMinuend = question.config?.minuend ?? 432;
   const rawSubtrahend = question.config?.subtrahend ?? 178;
   const isMultiRow = question.technique === CountingTechnique.SUBTRACTION_COLUMN_MULTI;
@@ -144,9 +144,14 @@ export const ColumnSubtractionCanvas: React.FC<CanvasProps> = ({
     setGuidePlaying(false);
     setGuideUsed(false);
     setBeatIndex(-1);
-    setFocusedPlace(requiredPlaces[0] ?? 0);
+    const firstPlace = requiredPlaces[0] ?? 0;
+    setFocusedPlace(firstPlace);
     setOfferFullGuide(false);
-  }, [columns, requiredPlaces]);
+    if (isPlayMode) {
+      const id = requestAnimationFrame(() => answerCellRefs.current[firstPlace]?.focus({ preventScroll: true }));
+      return () => cancelAnimationFrame(id);
+    }
+  }, [columns, isPlayMode, requiredPlaces]);
 
   useEffect(() => {
     if (phase !== "guide" || !guidePlaying || beatIndex < 0 || beatIndex >= beats.length) return;
@@ -198,7 +203,7 @@ export const ColumnSubtractionCanvas: React.FC<CanvasProps> = ({
     setPhase("solve");
     setHintLevel(0);
     setFocusedPlace(resumePlace);
-    requestAnimationFrame(() => inputRefs.current[resumePlace]?.focus());
+    requestAnimationFrame(() => answerCellRefs.current[resumePlace]?.focus({ preventScroll: true }));
   };
 
   const setAnswerDigit = (place: number, raw: string) => {
@@ -210,7 +215,9 @@ export const ColumnSubtractionCanvas: React.FC<CanvasProps> = ({
     const nextPlace = requiredPlaces[position + 1];
     if (nextPlace !== undefined) {
       setFocusedPlace(nextPlace);
-      inputRefs.current[nextPlace]?.focus();
+      // Run after the keypad click finishes so mobile browsers do not retain
+      // focus on the tapped digit key.
+      requestAnimationFrame(() => answerCellRefs.current[nextPlace]?.focus({ preventScroll: true }));
     }
   };
 
@@ -219,6 +226,7 @@ export const ColumnSubtractionCanvas: React.FC<CanvasProps> = ({
   const keypadBackspace = () => {
     if (answers[focusedPlace]) {
       setAnswerDigit(focusedPlace, "");
+      requestAnimationFrame(() => answerCellRefs.current[focusedPlace]?.focus({ preventScroll: true }));
       return;
     }
     const position = requiredPlaces.indexOf(focusedPlace);
@@ -226,7 +234,7 @@ export const ColumnSubtractionCanvas: React.FC<CanvasProps> = ({
     if (previous !== undefined) {
       setFocusedPlace(previous);
       setAnswerDigit(previous, "");
-      inputRefs.current[previous]?.focus();
+      requestAnimationFrame(() => answerCellRefs.current[previous]?.focus({ preventScroll: true }));
     }
   };
 
@@ -291,7 +299,7 @@ export const ColumnSubtractionCanvas: React.FC<CanvasProps> = ({
       setAnswers(previous => previous.map((answer, place) => wrong[place] ? "" : answer));
       if (firstWrong >= 0) {
         setFocusedPlace(firstWrong);
-        inputRefs.current[firstWrong]?.focus();
+        answerCellRefs.current[firstWrong]?.focus({ preventScroll: true });
       }
     }, 750);
   };
@@ -553,13 +561,12 @@ export const ColumnSubtractionCanvas: React.FC<CanvasProps> = ({
     }
     return (
       <div key={`answer-${place}`} className={CELL}>
-        <input
-          ref={element => { inputRefs.current[place] = element; }}
-          value={answers[place] ?? ""}
+        <button
+          ref={element => { answerCellRefs.current[place] = element; }}
+          type="button"
+          onClick={() => setFocusedPlace(place)}
           onFocus={() => setFocusedPlace(place)}
-          onChange={event => setAnswerDigit(place, event.target.value)}
-          inputMode="numeric"
-          aria-label={`Answer for ${column.placeLabel}`}
+          aria-label={`Answer for ${column.placeLabel}${answers[place] ? `: ${answers[place]}` : ""}`}
           className={`h-10 w-8 rounded-xl border-2 bg-white text-center text-xl font-black outline-none transition sm:h-12 sm:w-10 sm:text-3xl ${
             wrongCells[place]
               ? "border-rose-400 text-rose-500 ring-4 ring-rose-100"
@@ -569,7 +576,9 @@ export const ColumnSubtractionCanvas: React.FC<CanvasProps> = ({
                   ? "border-emerald-300 text-emerald-600"
                   : "border-slate-200 text-slate-800"
           }`}
-        />
+        >
+          {answers[place]}
+        </button>
       </div>
     );
   }
