@@ -39,8 +39,8 @@ from pathlib import Path
 from app.core.db import close_db, init_db
 from app.features.content.release import build_release_payload
 from app.models.academic import Grade, Subject
-from app.models.assignment import CurriculumOffering
-from app.models.content import Curriculum, CurriculumRelease, QuestionDeck
+from app.models.assignment import Assignment, CurriculumOffering, ProgressionState
+from app.models.content import Curriculum, CurriculumRelease, QuestionDeck, SvgLibrary
 from app.models.user import User
 
 CURRICULUM_ID = "seed-grade1-math"
@@ -178,7 +178,9 @@ async def main() -> None:
         else:
             await QuestionDeck(owner_id=owner_id, questions=questions, revision=1).insert()
 
-        payload = build_release_payload(tree=tree, questions=questions, assets=[])
+        svg = await SvgLibrary.find_one(SvgLibrary.owner_id == owner_id)
+        assets = svg.assets if svg else []
+        payload = build_release_payload(tree=tree, questions=questions, assets=assets)
         existing = await CurriculumRelease.find(
             CurriculumRelease.curriculum_id == CURRICULUM_ID
         ).sort("-revision").to_list()
@@ -224,6 +226,25 @@ async def main() -> None:
                 created_by=owner_id,
                 updated_by=owner_id,
             ).insert()
+
+        # Update any active assignments and progression states to the published release
+        active_assignments = await Assignment.find({
+            "curriculum_id": CURRICULUM_ID,
+            "status": "active",
+        }).to_list()
+        for assignment in active_assignments:
+            if assignment.release_id != release.release_id:
+                assignment.release_id = release.release_id
+                assignment.updated_at = now()
+                await assignment.save()
+                prog = await ProgressionState.find_one(
+                    ProgressionState.student_id == assignment.student_id,
+                    ProgressionState.assignment_id == str(assignment.id),
+                )
+                if prog:
+                    prog.release_id = release.release_id
+                    prog.updated_at = now()
+                    await prog.save()
 
         from app.features.content.grading import supported_techniques
 
