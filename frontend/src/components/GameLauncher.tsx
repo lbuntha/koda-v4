@@ -33,17 +33,22 @@ import { analyticsLogger } from "../services/analyticsLogger";
 import { getTaxonomy, AttemptOutcome } from "../services/logSchema";
 import { solvedSelection } from "../student/answerSelection";
 import { useThemeMode } from "../theme/appTheme";
-import { DotProgressIndicator } from "./ui";
+import { DotProgressIndicator, Spinner } from "./ui";
 import { useZoomLock } from "../hooks/useZoomLock";
 
 interface GameLauncherProps {
   questions: CountingQuestion[];
   activeId: string;
   setActiveId: (id: string) => void;
-  /** Called only after the last card has been solved. */
-  onClose: () => void;
-  /** Leaves an unfinished player without reporting lesson completion. */
-  onExit?: () => void;
+  /**
+   * Called only after the last card has been solved.
+   *
+   * May return a promise — saving the lesson is several round trips, and the launcher stays
+   * on screen showing that it is working until it settles.
+   */
+  onClose: () => void | Promise<void>;
+  /** Leaves an unfinished player without reporting lesson completion. May be async, like `onClose`. */
+  onExit?: () => void | Promise<void>;
   /** Simplified, non-skippable practice flow for early learners. */
   kidMode?: boolean;
   learningContext?: {
@@ -66,6 +71,23 @@ interface GameLauncherProps {
     onComplete: (responses: Array<{ questionId: string; selection: string }>) => Promise<void> | void;
   };
 }
+
+/**
+ * How long a way out waits for the outbox before going anyway.
+ *
+ * Long enough for a slow phone to land the save, short enough that a child is never stuck
+ * looking at a spinner because the network stalled. Nothing is lost either way — the events
+ * are on disk and retry on the next open.
+ */
+const SAVE_WAIT_MS = 5000;
+
+/** Ring spinner for coloured buttons, where the brand mark's own palette would disappear. */
+const ButtonSpinner: React.FC<{ className?: string }> = ({ className = "" }) => (
+  <span
+    aria-hidden="true"
+    className={`inline-block h-3.5 w-3.5 shrink-0 animate-spin rounded-full border-2 border-current/30 border-t-current motion-reduce:animate-none ${className}`}
+  />
+);
 
 interface ConfettiParticle {
   id: number;
@@ -96,6 +118,9 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
   const [assessmentResponses, setAssessmentResponses] = useState<Record<string, string>>({});
   const [assessmentSaving, setAssessmentSaving] = useState(false);
   const [assessmentError, setAssessmentError] = useState<string | null>(null);
+  /** Which way out is being saved, so the whole header and footer can wait as one. */
+  const [leaving, setLeaving] = useState<"finish" | "exit" | null>(null);
+  const [leaveWarning, setLeaveWarning] = useState<string | null>(null);
   const correctAttemptLogged = useRef(false);
 
   const activeQuestion = questions.find(q => q.id === activeId) || questions[0];
@@ -268,7 +293,35 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
     setTimeout(() => setActiveId(currentId), 30);
   };
 
+  /**
+   * Hand control back to whoever opened the launcher — but only once the work is saved.
+   *
+   * Events reach the server through a debounced outbox, so tearing this screen down the instant
+   * a child taps Finish or Exit races the last batch out of the buffer. On a phone that race is
+   * usually lost: backgrounding freezes the tab and cancels the request in flight, and the
+   * lesson looked unsaved when they came back. Flush first, show that it is happening, and cap
+   * the wait so a stalled network cannot trap anyone here.
+   */
+  const leaveWith = async (reason: "finish" | "exit", handoff: () => void | Promise<void>) => {
+    if (leaving) return; // a second tap must never run the handoff twice
+    setLeaving(reason);
+    setLeaveWarning(null);
+    try {
+      const saved = await analyticsLogger.flushWithin(SAVE_WAIT_MS);
+      if (!saved) {
+        // Kept on the device and sent on the next open, so this is a delay, not a loss.
+        setLeaveWarning("Still saving — this will finish next time you're online.");
+      }
+      await handoff();
+    } catch (cause) {
+      setLeaveWarning(cause instanceof Error ? cause.message : "We could not finish saving just now.");
+    } finally {
+      setLeaving(null);
+    }
+  };
+
   const handleNextSlide = async () => {
+    if (leaving) return;
     if (assessment && !assessmentAnswered) return;
     setIsSuccess(false);
     setAssessmentError(null);
@@ -300,7 +353,9 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
         curriculumSkillId: learningContext?.skillId ?? activeQuestion?.skillId,
       });
       sounds.playSuccess();
-      onClose();
+      // lesson_complete is the event that credits the work, and it was just written this tick —
+      // it is exactly the one that used to be lost on the way out.
+      await leaveWith("finish", onClose);
     }
   };
 
@@ -448,11 +503,13 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
             <>
               <div className={`w-px h-5 mx-0.5 ${isDark ? 'bg-white/10' : 'bg-black/10'}`} />
               <button
-                onClick={() => { (onExit ?? onClose)(); sounds.playPop(); }}
-                className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-rose-500 hover:bg-rose-400 active:scale-95 text-white rounded-xl text-[11px] font-bold transition-all shadow-sm shadow-rose-500/20 cursor-pointer shrink-0"
+                onClick={() => { sounds.playPop(); void leaveWith("exit", onExit ?? onClose); }}
+                disabled={Boolean(leaving)}
+                aria-busy={leaving === "exit"}
+                className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-rose-500 hover:bg-rose-400 active:scale-95 disabled:cursor-wait disabled:opacity-70 disabled:active:scale-100 text-white rounded-xl text-[11px] font-bold transition-all shadow-sm shadow-rose-500/20 cursor-pointer shrink-0"
               >
-                <X size={14} />
-                <span className="inline">Exit</span>
+                {leaving === "exit" ? <ButtonSpinner /> : <X size={14} />}
+                <span className="inline">{leaving === "exit" ? "Saving…" : "Exit"}</span>
               </button>
             </>
           )}
@@ -520,8 +577,15 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
                       </p>
                     )}
                     {kidMode ? (
-                      <div className={`h-2 overflow-hidden rounded-full ${isDark ? "bg-white/10" : "bg-white/25"}`}>
-                        <div className="h-full w-full animate-pulse rounded-full bg-amber-300" />
+                      <div className="flex flex-col gap-1.5">
+                        <div className={`h-2 overflow-hidden rounded-full ${isDark ? "bg-white/10" : "bg-white/25"}`}>
+                          <div className="h-full w-full animate-pulse rounded-full bg-amber-300" />
+                        </div>
+                        {leaving === "finish" && (
+                          <p className="flex items-center justify-center gap-1.5 text-[11px] font-bold">
+                            <ButtonSpinner /> Saving your work…
+                          </p>
+                        )}
                       </div>
                     ) : (
                       <div className="flex gap-2">
@@ -538,13 +602,17 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
                         </button>
                         <button
                           onClick={() => void handleNextSlide()}
-                          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-extrabold rounded-2xl transition-all shadow-md cursor-pointer ${
+                          disabled={Boolean(leaving)}
+                          aria-busy={leaving === "finish"}
+                          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-extrabold rounded-2xl transition-all shadow-md cursor-pointer disabled:cursor-wait disabled:opacity-80 ${
                             isDark
                               ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-500/20'
                               : 'bg-yellow-400 hover:bg-yellow-300 text-indigo-950 shadow-yellow-400/20'
                           }`}
                         >
-                          {currentIdx < questions.length - 1 ? (
+                          {leaving === "finish" ? (
+                            <><ButtonSpinner /><span>Saving…</span></>
+                          ) : currentIdx < questions.length - 1 ? (
                             <><span>Next Card</span><ArrowRight size={13} /></>
                           ) : (
                             <span>Finish Lesson 🎊</span>
@@ -620,9 +688,9 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
             {/* Next */}
             <button
                 onClick={() => void handleNextSlide()}
-                disabled={(assessment && !assessmentAnswered) || assessmentSaving}
+                disabled={(assessment && !assessmentAnswered) || assessmentSaving || Boolean(leaving)}
                 className={`flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-bold transition-all shadow-md
-                  ${(assessment && !assessmentAnswered) || assessmentSaving
+                  ${(assessment && !assessmentAnswered) || assessmentSaving || leaving
                     ? isDark
                       ? 'cursor-not-allowed border border-white/5 bg-white/[0.04] text-slate-600 shadow-none'
                       : 'cursor-not-allowed border border-slate-200 bg-slate-100 text-slate-300 shadow-none'
@@ -633,13 +701,13 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
                 `}
               >
                 <span className="hidden sm:inline">
-                  {assessmentSaving
+                  {assessmentSaving || leaving === "finish"
                     ? "Saving…"
                     : currentIdx === questions.length - 1
                       ? assessment?.finishLabel ?? "Finish"
                       : "Next"}
                 </span>
-                <ChevronRight size={16} />
+                {leaving === "finish" ? <ButtonSpinner /> : <ChevronRight size={16} />}
               </button>
           </div>
           )}
@@ -648,8 +716,39 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
               {assessmentError}
             </div>
           )}
+          {/* Survives the curtain: if the handoff failed, the child is still here and needs to
+              know the work is kept rather than gone. */}
+          {leaveWarning && !leaving && (
+            <div className="-mt-1 text-center text-xs font-semibold text-sky-500" role="status">
+              {leaveWarning}
+            </div>
+          )}
         </div>
       </div>
+
+      {/* ── Saving curtain ──
+          A phone is where this matters: taps land on the canvas while the save is in flight,
+          and without a scrim a child re-solves or re-taps Exit into a screen that is already
+          leaving. It also answers "did my work count?" while the round trips finish. */}
+      {leaving && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="absolute inset-0 z-40 flex items-center justify-center bg-slate-950/35 px-6 backdrop-blur-[2px] animate-fade-in"
+        >
+          <div className={`flex flex-col items-center gap-3 rounded-3xl px-7 py-6 text-center shadow-2xl ${
+            isDark ? "bg-[#151A2B] text-slate-100 shadow-black/60" : "bg-white text-slate-800"
+          }`}>
+            <Spinner size="lg" variant="violet" />
+            <p className="text-sm font-extrabold">
+              {leaving === "finish" ? "Saving your progress…" : "Saving before you go…"}
+            </p>
+            <p className={`max-w-[16rem] text-xs font-semibold ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+              {leaveWarning ?? "Keep this open for a moment."}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* ── Interactive Logs / JSON Analytics Modal ── */}
       {!kidMode && !assessment && (

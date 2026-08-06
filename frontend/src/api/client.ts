@@ -143,6 +143,16 @@ interface RequestOptions {
   /** Send as application/x-www-form-urlencoded (OAuth2 login expects this). */
   form?: Record<string, string>;
   auth?: boolean;
+  /**
+   * Hand the request to the browser to finish even if this page goes away.
+   *
+   * A phone freezes a backgrounded tab: switch apps, lock the screen, or hit Home mid-save
+   * and an ordinary fetch is cancelled where it stands. `keepalive` outlives the page, which
+   * is the only way a save started on the way out actually lands. The body must stay under
+   * 64KB — callers batch for that — and no retry-on-401 is attempted, because by then there
+   * may be no page left to retry from.
+   */
+  keepalive?: boolean;
 }
 
 async function request<T>(path: string, opts: RequestOptions = {}, allowRetry = true): Promise<T> {
@@ -165,7 +175,12 @@ async function request<T>(path: string, opts: RequestOptions = {}, allowRetry = 
 
   let res: Response;
   try {
-    res = await fetch(`${API_URL}${path}`, { method: opts.method ?? "GET", headers, body });
+    res = await fetch(`${API_URL}${path}`, {
+      method: opts.method ?? "GET",
+      headers,
+      body,
+      ...(opts.keepalive ? { keepalive: true } : {}),
+    });
   } catch (cause) {
     // `fetch` rejects only when no response was produced at all.
     throw new OfflineError(path, { cause });
@@ -193,6 +208,9 @@ async function request<T>(path: string, opts: RequestOptions = {}, allowRetry = 
 export const api = {
   get: <T>(path: string) => request<T>(path),
   post: <T>(path: string, body?: unknown) => request<T>(path, { method: "POST", body }),
+  /** POST that survives the page being backgrounded or closed. See RequestOptions.keepalive. */
+  postKeepalive: <T>(path: string, body?: unknown) =>
+    request<T>(path, { method: "POST", body, keepalive: true }, false),
   put: <T>(path: string, body?: unknown) => request<T>(path, { method: "PUT", body }),
   patch: <T>(path: string, body?: unknown) => request<T>(path, { method: "PATCH", body }),
   del: <T>(path: string, body?: unknown) => request<T>(path, { method: "DELETE", body }),

@@ -22,6 +22,8 @@ const STORAGE_KEY = "koda_learning_events_v1";
 const SESSION_KEY = "koda_session_id_v1";
 const MAX_LOG_HISTORY = 1000;
 const OUTBOX_PREFIX = "koda_learning_event_outbox_v1";
+/** `keepalive` requests share a 64KB browser budget; stay well under it. */
+const HIDE_FLUSH_BYTE_BUDGET = 50_000;
 
 type LogSubscriber = (events: LearningEvent[]) => void;
 
@@ -116,6 +118,62 @@ class AnalyticsLoggerService {
     });
     return this.flushPromise;
   }
+
+  /**
+   * Wait for the outbox to drain, but never longer than `ms`.
+   *
+   * A screen a child is waiting on cannot be hostage to a stalled phone network: `fetch` has
+   * no timeout of its own and a flaky mobile connection can hang for a minute. Giving up on the
+   * *wait* costs nothing — the outbox is on disk and the same events retry on the next open, so
+   * the choice is only between "the child stares at a spinner" and "the child moves on".
+   *
+   * Resolves `true` when everything reached the server, `false` when the wait ran out.
+   */
+  public async flushWithin(ms: number): Promise<boolean> {
+    let timer: number | undefined;
+    const expired = new Promise<false>(resolve => {
+      timer = window.setTimeout(() => resolve(false), ms);
+    });
+    try {
+      return await Promise.race([this.flush().then(() => this.outbox.length === 0), expired]);
+    } finally {
+      if (timer !== undefined) window.clearTimeout(timer);
+    }
+  }
+
+  /** Events still waiting to reach the server — the "did it save?" question, answered locally. */
+  public pendingCount(): number {
+    return this.outbox.length;
+  }
+
+  /**
+   * Send what is queued while the page is being backgrounded or closed.
+   *
+   * This is the mobile case: a child taps Home, the screen locks, or the browser is swapped
+   * out, and iOS/Android freeze the tab — `beforeunload` never fires there, and an in-flight
+   * ordinary fetch is dropped. `pagehide` and the hidden transition are the only reliable
+   * signals, and `keepalive` is the only send that outlives the page.
+   */
+  private flushOnHide() {
+    if (!this.serverSyncStudentId || this.outbox.length === 0) return;
+    const batch: LearningEvent[] = [];
+    let bytes = 0;
+    for (const event of this.outbox) {
+      const size = JSON.stringify(event).length;
+      if (batch.length > 0 && bytes + size > HIDE_FLUSH_BYTE_BUDGET) break;
+      batch.push(event);
+      bytes += size;
+    }
+    // Entries stay in the outbox until the send is confirmed. If the page dies first the
+    // browser may still deliver it, and the retry on next open is deduplicated server-side.
+    void learningApi.ingestEventsOnHide(batch)
+      .then(() => {
+        const sentIds = new Set(batch.map(event => event.id));
+        this.outbox = this.outbox.filter(event => !sentIds.has(event.id));
+        this.saveOutbox();
+      })
+      .catch(() => { /* retried on the next open from the persisted outbox */ });
+  }
   /** slideIndex -> ms timestamp the slide was opened, for timeOnTaskMs. */
   private slideOpenedAt = new Map<number, number>();
   /** slideIndex -> attempt count so far this visit, resets on slide_view. */
@@ -126,6 +184,13 @@ class AnalyticsLoggerService {
     this.loadFromStorage();
     if (typeof window !== "undefined") {
       window.addEventListener("online", () => void this.flush());
+      // Both signals, on purpose: `pagehide` covers navigation away and tab close, the hidden
+      // transition covers app switching and screen lock, which is how phones actually leave.
+      window.addEventListener("pagehide", () => this.flushOnHide());
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "hidden") this.flushOnHide();
+        else void this.flush(); // back in the foreground: retry whatever the exit could not send
+      });
     }
   }
 

@@ -13,6 +13,8 @@ interface Props {
   loadingSummaries: boolean;
   error: string | null;
   allowRemove?: boolean;
+  /** Id of the child whose session is being launched, so that card can show its own spinner. */
+  playingChildId?: string | null;
   onAdd: () => void;
   onPlay: (child: Child) => void;
   onEdit: (child: Child) => void;
@@ -44,6 +46,7 @@ export const ParentChildrenGrid: React.FC<Props> = ({
   loadingSummaries,
   error,
   allowRemove,
+  playingChildId,
   onAdd,
   onPlay,
   onEdit,
@@ -83,6 +86,7 @@ export const ParentChildrenGrid: React.FC<Props> = ({
           summary={summaries[child.id]}
           loadingSummary={loadingSummaries}
           showRemove={allowRemove}
+          playing={playingChildId === child.id}
           onPlay={() => onPlay(child)}
           onEdit={() => onEdit(child)}
           onProgress={() => onProgress(child)}

@@ -352,7 +352,9 @@ export const StoryProblemMatCanvas: React.FC<CanvasProps> = ({
           key={story}
           initial={reduceMotion ? false : { opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`mb-3 flex items-start gap-2.5 px-1 py-2 sm:px-2 ${isDark ? "text-slate-100" : "text-slate-700"}`}
+          // Same centred `max-w-3xl` column as the mat below, so the story sits over the groups
+          // it describes instead of trailing off at the far left of a wide canvas.
+          className={`mx-auto mb-3 flex w-full max-w-3xl items-center justify-center gap-2.5 px-1 py-2 text-center sm:px-2 ${isDark ? "text-slate-100" : "text-slate-700"}`}
         >
           <motion.span
             initial={reduceMotion ? false : { scale: 0.65, rotate: -8, opacity: 0 }}
@@ -363,7 +365,7 @@ export const StoryProblemMatCanvas: React.FC<CanvasProps> = ({
           >
             {sceneIcon}
           </motion.span>
-          <p className="text-sm font-medium leading-relaxed sm:text-base md:text-lg" aria-label={story}>
+          <p className="text-balance text-sm font-medium leading-relaxed sm:text-base md:text-lg" aria-label={story}>
             {story.split(/\s+/).map((word, index) => (
               <motion.span
                 key={`${word}-${index}`}

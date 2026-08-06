@@ -5,7 +5,7 @@ import type { Child } from "../api/family";
 import type { SubjectCatalogItem } from "../api/academic";
 import type { CurriculumPromotion } from "../api/promotions";
 import { KidAvatar } from "../components/KidAvatar";
-import { Button, Card, CardContent, Skeleton } from "../components/ui";
+import { Button, Card, CardContent, Skeleton, Spinner } from "../components/ui";
 import { PROFILE_TONE_CLASS, profileToneFor } from "./profileTone";
 
 interface Props {
@@ -14,6 +14,8 @@ interface Props {
   summary?: AnalyticsSummary;
   loadingSummary?: boolean;
   showRemove?: boolean;
+  /** Launching a child session is two round trips, so the button owns the wait. */
+  playing?: boolean;
   onPlay: () => void;
   onEdit: () => void;
   onProgress: () => void;
@@ -68,6 +70,7 @@ export const ParentChildCard: React.FC<Props> = ({
   summary,
   loadingSummary,
   showRemove,
+  playing = false,
   onPlay,
   onEdit,
   onProgress,
@@ -230,15 +233,26 @@ export const ParentChildCard: React.FC<Props> = ({
         <button
           type="button"
           onClick={onPlay}
-          className="group mt-4 flex min-h-[46px] w-full touch-manipulation cursor-pointer items-center justify-between rounded-xl bg-[#F3F0FF] px-4 py-2.5 text-xs font-extrabold text-[#534AB7] shadow-sm transition-all hover:bg-[#EAE4FE] active:scale-[0.98] active:bg-[#E2DAFE] dark:bg-violet-400/15 dark:text-[#CDBEFF] dark:hover:bg-violet-400/25 dark:active:bg-violet-400/30"
+          disabled={playing}
+          aria-busy={playing}
+          className="group mt-4 flex min-h-[46px] w-full touch-manipulation cursor-pointer items-center justify-between rounded-xl bg-[#F3F0FF] px-4 py-2.5 text-xs font-extrabold text-[#534AB7] shadow-sm transition-all hover:bg-[#EAE4FE] active:scale-[0.98] active:bg-[#E2DAFE] disabled:cursor-wait disabled:active:scale-100 dark:bg-violet-400/15 dark:text-[#CDBEFF] dark:hover:bg-violet-400/25 dark:active:bg-violet-400/30"
         >
           <span className="flex items-center gap-2.5">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#534AB7] text-white shadow-sm transition-transform group-hover:scale-105 dark:bg-[#6844EA]">
-              <Play size={12} className="ml-0.5 fill-current" />
+            {/* Same 28px footprint either way, so the row does not jump when the wait starts. */}
+            <span className="flex h-7 w-7 items-center justify-center">
+              {playing ? (
+                <Spinner size="md" variant="violet" label={`Opening ${child.name}'s lesson`} />
+              ) : (
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#534AB7] text-white shadow-sm transition-transform group-hover:scale-105 dark:bg-[#6844EA]">
+                  <Play size={12} className="ml-0.5 fill-current" />
+                </span>
+              )}
             </span>
-            <span className="text-sm font-black">Continue learning</span>
+            <span className="text-sm font-black">{playing ? "Opening lesson…" : "Continue learning"}</span>
           </span>
-          <ArrowRight size={16} className="transition-transform group-hover:translate-x-1 text-[#534AB7] dark:text-[#CDBEFF]" />
+          {playing
+            ? null
+            : <ArrowRight size={16} className="transition-transform group-hover:translate-x-1 text-[#534AB7] dark:text-[#CDBEFF]" />}
         </button>
       </CardContent>
     </Card>

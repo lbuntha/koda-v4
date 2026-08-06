@@ -20,8 +20,28 @@ export interface PublishedCurriculum {
   deliverySkillIds: string[];
 }
 
+export interface IngestResult {
+  inserted: number;
+  duplicates: number;
+  unverified: number;
+  masteryUpdates: Array<{
+    skillId: string;
+    curriculumId: string | null;
+    previousLevel: string;
+    level: string;
+    promoted: boolean;
+  }>;
+}
+
 export const learningApi = {
   curriculum: () => api.get<PublishedCurriculum>("/learning/curriculum"),
+  /**
+   * Last-gasp send for a page that is being backgrounded or closed. Ingest is idempotent on
+   * event id, so an outbox entry stays put until this resolves — a send the browser cut short
+   * simply retries on the next open and the server reports it as a duplicate.
+   */
+  ingestEventsOnHide: (events: LearningEvent[]) =>
+    api.postKeepalive<IngestResult>("/events", { events }),
   ingestEvents: (events: LearningEvent[]) => api.post<{
     inserted: number;
     duplicates: number;

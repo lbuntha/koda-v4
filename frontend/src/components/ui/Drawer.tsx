@@ -24,6 +24,11 @@ interface DrawerProps {
    * visibly past its gutters.
    */
   subHeader?: React.ReactNode;
+  /**
+   * A fixed row below the scrolling body — where a bottom toolbar belongs on small screens.
+   * Rendered unstyled so the caller can hide it by breakpoint without leaving an empty band.
+   */
+  footer?: React.ReactNode;
   children: React.ReactNode;
 }
 
@@ -33,6 +38,7 @@ export const Drawer: React.FC<DrawerProps> = ({
   title,
   widthClassName = "w-full sm:w-[440px]",
   subHeader,
+  footer,
   children
 }) => {
   useEffect(() => {
@@ -82,6 +88,7 @@ export const Drawer: React.FC<DrawerProps> = ({
         <div className="flex-1 overflow-y-auto p-5">
           {children}
         </div>
+        {footer && <div className="shrink-0">{footer}</div>}
       </div>
     </div>,
     document.body,

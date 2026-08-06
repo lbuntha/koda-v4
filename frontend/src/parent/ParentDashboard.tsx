@@ -92,6 +92,8 @@ export const ParentDashboard: React.FC = () => {
   const [promotionsLoading, setPromotionsLoading] = useState(true);
   const [updatingPromotionId, setUpdatingPromotionId] = useState<string | null>(null);
   const [promotionError, setPromotionError] = useState<string | null>(null);
+  const [playingChildId, setPlayingChildId] = useState<string | null>(null);
+  const [playError, setPlayError] = useState<string | null>(null);
   const childIds = children.map(child => child.id).join("|");
 
   useEffect(() => {
@@ -160,6 +162,23 @@ export const ParentDashboard: React.FC = () => {
     }
   };
 
+  /**
+   * Launching a child session is two round trips (token swap, then reload of "me"), so the tapped
+   * card stays in a waiting state until one of them settles — silent seconds read as a dead button.
+   */
+  const launchChild = async (child: Child) => {
+    if (playingChildId) return;
+    setPlayingChildId(child.id);
+    setPlayError(null);
+    try {
+      await startChildPlay(child.id, child.name);
+    } catch (cause) {
+      setPlayError(cause instanceof Error ? cause.message : `Could not open ${child.name}'s lesson. Please try again.`);
+    } finally {
+      setPlayingChildId(null);
+    }
+  };
+
   const familySummaries = useMemo(() => Object.values(summaries), [summaries]);
   const openAdd = () => {
     setEditing(null);
@@ -175,22 +194,30 @@ export const ParentDashboard: React.FC = () => {
   };
 
   const childrenGrid = (
-    <ParentChildrenGrid
-      profiles={children}
-      summaries={summaries}
-      loading={loading}
-      loadingSummaries={summariesLoading}
-      error={error}
-      allowRemove={activeView === "children"}
-      onAdd={openAdd}
-      onPlay={child => void startChildPlay(child.id, child.name)}
-      onEdit={openEdit}
-      onProgress={setProgressChild}
-      onRemove={setDeletingChild}
-      onUnlockPin={child => void unlockPin(child.id)}
-      promotions={promotions}
-      onApprovePromotion={item => void approvePromotion(item)}
-    />
+    <>
+      {playError && (
+        <div role="alert" className="mb-3 rounded-xl bg-rose-50 px-4 py-3 text-xs font-bold text-rose-700 dark:bg-rose-400/10 dark:text-rose-300">
+          {playError}
+        </div>
+      )}
+      <ParentChildrenGrid
+        profiles={children}
+        summaries={summaries}
+        loading={loading}
+        loadingSummaries={summariesLoading}
+        error={error}
+        allowRemove={activeView === "children"}
+        onAdd={openAdd}
+        playingChildId={playingChildId}
+        onPlay={child => void launchChild(child)}
+        onEdit={openEdit}
+        onProgress={setProgressChild}
+        onRemove={setDeletingChild}
+        onUnlockPin={child => void unlockPin(child.id)}
+        promotions={promotions}
+        onApprovePromotion={item => void approvePromotion(item)}
+      />
+    </>
   );
 
   return (

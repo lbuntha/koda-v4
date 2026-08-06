@@ -133,8 +133,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await loadMe();
     },
     startChildPlay: async (childId, childName) => {
+      const alreadyInPlay = tokenStore.hasGuardianStash();
       tokenStore.stashGuardian();          // keep the parent's session
-      await authApi.launchChild(childId);  // activate the kid's token
+      try {
+        await authApi.launchChild(childId);  // activate the kid's token
+      } catch (cause) {
+        // The swap never happened, so a stash this call created is dead weight that would make
+        // the next refresh think play is in progress. Only unwind our own.
+        if (!alreadyInPlay) tokenStore.restoreGuardian();
+        throw cause;
+      }
       setPlaySession({ childId, childName });
       await loadMe();                      // role becomes "student"
     },
