@@ -6,7 +6,6 @@ import { defineTechnique } from "./manifest";
 
 export const placeValueLab = defineTechnique({
   technique: CountingTechnique.PLACE_VALUE_LAB,
-  defaultThumbnailUrl: "/assets/components/place-value-lab.svg",
   label: "Place Value Lab",
   icon: <Blocks size={14} className="text-indigo-600" />,
   defaultTargetCount: 34,

@@ -17,7 +17,6 @@ import { groupTensSchema } from "../components/studio/ai-generator/schemas/group
 
 export const groupTens = defineTechnique({
   technique: CountingTechnique.GROUP_IN_TENS,
-  defaultThumbnailUrl: "/assets/components/group-in-tens.svg",
   label: "Group Tens",
   icon: <Boxes size={14} className="text-amber-500" />,
   defaultTargetCount: 14,

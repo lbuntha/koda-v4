@@ -182,7 +182,12 @@ async def main() -> None:
 
         svg = await SvgLibrary.find_one(SvgLibrary.owner_id == owner_id)
         assets = svg.assets if svg else []
-        payload = build_release_payload(tree=tree, questions=questions, assets=assets)
+        payload = build_release_payload(
+            tree=tree,
+            questions=questions,
+            assets=assets,
+            technique_thumbnails=svg.technique_thumbnails if svg else {},
+        )
         existing = await CurriculumRelease.find(
             CurriculumRelease.curriculum_id == CURRICULUM_ID
         ).sort("-revision").to_list()

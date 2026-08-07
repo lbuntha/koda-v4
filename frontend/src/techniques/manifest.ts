@@ -4,7 +4,9 @@
  *
  * TechniqueManifest — the single source of truth for one counting game.
  *
- * Each game (technique) is described in ONE file under src/techniques/. The
+ * Each game (technique) is described in ONE file under src/techniques/. Shared
+ * learner-thumbnail defaults live in `shared/technique-thumbnails.json` so release
+ * publishing and the frontend cannot drift. The
  * four registries the app used to hand-maintain separately are now DERIVED
  * from these manifests, so adding a game means adding one file, never editing
  * a shared list:
@@ -20,6 +22,9 @@ import { CountingTechnique } from "../types";
 import { CanvasProps } from "../components/canvases/types";
 import { PanelProps } from "../components/studio/panelKit";
 import { ComponentSchema } from "../components/studio/ai-generator/schemas/types";
+import techniqueThumbnails from "../../../shared/technique-thumbnails.json";
+
+const DEFAULT_THUMBNAILS = techniqueThumbnails as Partial<Record<CountingTechnique, string>>;
 
 export interface TechniqueManifest {
   /** Enum value that identifies this game everywhere. */
@@ -34,11 +39,7 @@ export interface TechniqueManifest {
   /** Target count a teacher gets when first selecting this game. */
   defaultTargetCount: number;
 
-  /**
-   * Static learner-facing fallback used when a curriculum skill has no
-   * authored thumbnail. Keeping it in the technique manifest makes the
-   * component the owner of its default presentation.
-   */
+  /** Static learner-facing fallback supplied by the shared presentation catalog. */
   defaultThumbnailUrl?: string;
 
   /**
@@ -55,9 +56,9 @@ export interface TechniqueManifest {
   schema: ComponentSchema;
 }
 
-/** Identity helper — its only job is to type-check the manifest shape. */
+/** Type-check the manifest and attach its shared learner-presentation default. */
 export function defineTechnique(m: TechniqueManifest): TechniqueManifest {
-  return m;
+  return { ...m, defaultThumbnailUrl: DEFAULT_THUMBNAILS[m.technique] };
 }
 
 /**

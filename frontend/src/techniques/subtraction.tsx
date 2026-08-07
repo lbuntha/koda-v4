@@ -17,7 +17,6 @@ import { subtractionSchema } from "../components/studio/ai-generator/schemas/sub
 
 export const subtraction = defineTechnique({
   technique: CountingTechnique.SUBTRACTION_SANDBOX,
-  defaultThumbnailUrl: "/assets/components/subtraction-sandbox.svg",
   label: "Koda Subtraction",
   icon: <MinusSquare size={14} className="text-pink-600" />,
   defaultTargetCount: 5,

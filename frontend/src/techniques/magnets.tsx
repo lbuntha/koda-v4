@@ -17,7 +17,6 @@ import { magnetsSchema } from "../components/studio/ai-generator/schemas/magnets
 
 export const magnets = defineTechnique({
   technique: CountingTechnique.COUNT_MAGNETS,
-  defaultThumbnailUrl: "/assets/components/count-magnets.svg",
   label: "Magnet Jar",
   icon: <Magnet size={14} className="text-red-500" />,
   defaultTargetCount: 5,

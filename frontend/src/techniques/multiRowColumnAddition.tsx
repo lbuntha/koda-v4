@@ -6,7 +6,6 @@ import { defineTechnique } from "./manifest";
 
 export const multiRowColumnAddition = defineTechnique({
   technique: CountingTechnique.ADDITION_COLUMN_MULTI,
-  defaultThumbnailUrl: "/assets/components/addition-column-multi.svg",
   label: "Multi-Row Column Addition",
   icon: <Rows3 size={14} className="text-indigo-600" />,
   defaultTargetCount: 792,

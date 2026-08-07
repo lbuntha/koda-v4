@@ -14,7 +14,6 @@ import { compareNumbersSchema } from "../components/studio/ai-generator/schemas/
 
 export const compareNumbers = defineTechnique({
   technique: CountingTechnique.COMPARE_NUMBERS,
-  defaultThumbnailUrl: "/assets/components/flexible-canvas.svg",
   label: "Compare Numbers",
   icon: <Scale size={14} className="text-sky-600" />,
   defaultTargetCount: 42,

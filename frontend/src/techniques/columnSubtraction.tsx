@@ -6,7 +6,6 @@ import { defineTechnique } from "./manifest";
 
 export const columnSubtraction = defineTechnique({
   technique: CountingTechnique.SUBTRACTION_COLUMN,
-  defaultThumbnailUrl: "/assets/components/subtraction-column.svg",
   label: "Column Subtraction",
   icon: <Columns3 size={14} className="text-rose-600" />,
   defaultTargetCount: 254,

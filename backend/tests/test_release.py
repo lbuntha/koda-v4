@@ -151,6 +151,55 @@ def test_build_release_payload_produces_manifests_and_hashes():
     assert all(m["content_hash"].startswith("sha256:") for m in payload["question_manifest"])
     assert set(payload["content_hashes"]) == {"tree", "questions", "assets"}
     assert len(payload["asset_manifest"]) == 1
+    assert payload["question_manifest"][0]["thumbnail"] == {
+        "source": "component",
+        "url": "/assets/components/one-to-one.svg",
+    }
+
+
+def test_question_thumbnail_prefers_skill_art_over_component_default():
+    skill = _skill("s1")
+    skill["presentation"] = {"thumbnailUrl": "/assets/custom-skill.svg"}
+
+    payload = build_release_payload(
+        tree=_tree([skill]),
+        questions=[_question("q1", "s1")],
+    )
+
+    assert payload["question_manifest"][0]["thumbnail"] == {
+        "source": "skill",
+        "url": "/assets/custom-skill.svg",
+    }
+
+
+def test_question_thumbnail_snapshots_account_component_override():
+    asset = {
+        "id": "custom-one-to-one",
+        "label": "Custom one-to-one art",
+        "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>",
+        "scale": 1,
+    }
+
+    payload = build_release_payload(
+        tree=_tree([_skill("s1")]),
+        questions=[_question("q1", "s1")],
+        assets=[asset],
+        technique_thumbnails={"ONE_TO_ONE": asset["id"]},
+    )
+
+    assert payload["question_manifest"][0]["thumbnail"] == {
+        "source": "component_override",
+        "assetId": asset["id"],
+    }
+
+
+def test_release_rejects_dangling_component_thumbnail_override():
+    with pytest.raises(ReleaseValidationError, match="technique thumbnails reference missing assets"):
+        build_release_payload(
+            tree=_tree([_skill("s1")]),
+            questions=[_question("q1", "s1")],
+            technique_thumbnails={"ONE_TO_ONE": "missing"},
+        )
 
 
 def test_build_release_payload_rejects_a_technique_no_grader_can_score():
@@ -171,6 +220,7 @@ def test_build_release_payload_accepts_every_registered_technique():
         questions = [{"id": "q1", "technique": technique, "skillId": "s1", "config": {}}]
         payload = build_release_payload(tree=tree, questions=questions)
         assert payload["question_manifest"][0]["playable"]["technique"] == technique
+        assert payload["question_manifest"][0].get("thumbnail"), f"{technique} has no shared thumbnail"
 
 
 def test_build_release_payload_rejects_bad_prerequisites():

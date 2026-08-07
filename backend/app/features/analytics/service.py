@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from datetime import date, datetime, timedelta, timezone
 from typing import Any
+from urllib.parse import quote
 
 from ...core.logging import get_logger
 from ...core.runtime_settings import get_system_settings
+from ...core.technique_thumbnails import default_thumbnail_for_technique
 from ...models.assignment import Assignment, Placement, ProgressionState
 from ...models.classroom import ClassEnrollment, Classroom
 from ...models.event import LearningEvent
@@ -23,6 +25,32 @@ logger = get_logger("analytics")
 #: Ceiling on events loaded for one activity snapshot. Chosen to be unreachable in normal use
 #: while still bounding the worst case; crossing it is logged rather than silently truncating.
 MAX_SNAPSHOT_EVENTS = 25_000
+
+
+def _thumbnail_ref_url(thumbnail: dict[str, Any] | None, release_id: str | None) -> str | None:
+    if not thumbnail:
+        return None
+    if thumbnail.get("url"):
+        return thumbnail["url"]
+    asset_id = thumbnail.get("assetId")
+    if not asset_id or not release_id:
+        return None
+    return f"/learning/assets/{quote(release_id, safe='')}/{quote(asset_id, safe='')}"
+
+
+def _skill_thumbnail_url(
+    presentation: dict[str, Any],
+    release_id: str | None,
+    technique: str | None = None,
+) -> str | None:
+    """Backward-compatible resolver for releases published before thumbnail snapshots."""
+    authored_url = presentation.get("thumbnailUrl")
+    if authored_url and "owl-mascot" not in authored_url:
+        return authored_url
+    asset_id = presentation.get("thumbnailAssetId")
+    if asset_id and release_id:
+        return f"/learning/assets/{quote(release_id, safe='')}/{quote(asset_id, safe='')}"
+    return default_thumbnail_for_technique(technique)
 
 
 def _role(user: User) -> str:
@@ -64,9 +92,21 @@ async def authorized_students(user: User) -> list[Student]:
 def _event_out(
     event: LearningEvent,
     release_trees: dict[str, dict[str, Any]] | None = None,
+    question_thumbnails: dict[tuple[str, str], str] | None = None,
+    skill_technique_thumbnails: dict[tuple[str, str, str], str] | None = None,
 ) -> dict[str, Any]:
     tree = (release_trees or {}).get(event.release_id, {})
     presentation = skill_metadata(tree, event.curriculum_skill_id) if event.curriculum_skill_id else {}
+    thumbnail_url = None
+    if event.release_id and event.question_id:
+        thumbnail_url = (question_thumbnails or {}).get((event.release_id, event.question_id))
+    if not thumbnail_url and event.release_id and event.curriculum_skill_id and event.technique:
+        thumbnail_url = (skill_technique_thumbnails or {}).get(
+            (event.release_id, event.curriculum_skill_id, event.technique)
+        )
+    if not thumbnail_url:
+        thumbnail_url = _skill_thumbnail_url(presentation, event.release_id, event.technique)
+
     return {
         "id": event.client_id or str(event.id),
         "sessionId": event.session_id,
@@ -76,6 +116,7 @@ def _event_out(
         "questionId": event.question_id,
         "skillId": event.curriculum_skill_id,
         "skillLabel": presentation.get("title"),
+        "thumbnailUrl": thumbnail_url,
         "curriculumId": event.curriculum_id,
         "assignmentId": event.assignment_id,
         "technique": event.technique,
@@ -156,6 +197,18 @@ async def activity_snapshot(
         {"release_id": {"$in": release_ids}}
     ).to_list() if release_ids else []
     release_trees = {row.release_id: row.tree for row in release_rows}
+    question_thumbnails: dict[tuple[str, str], str] = {}
+    skill_technique_thumbnails: dict[tuple[str, str, str], str] = {}
+    for release in release_rows:
+        for entry in release.question_manifest:
+            thumbnail_url = _thumbnail_ref_url(entry.get("thumbnail"), release.release_id)
+            question_id = entry.get("question_id")
+            skill_id = entry.get("skill_id")
+            technique = (entry.get("playable") or {}).get("technique")
+            if thumbnail_url and question_id:
+                question_thumbnails[(release.release_id, question_id)] = thumbnail_url
+            if thumbnail_url and skill_id and technique:
+                skill_technique_thumbnails[(release.release_id, skill_id, technique)] = thumbnail_url
     xp = calculate_xp(events, release_trees, dict((settings_doc.scoring or {}).get("rewards") or {}))
     xp_breakdown = []
     for row in xp["breakdown"]:
@@ -216,7 +269,10 @@ async def activity_snapshot(
             }
             for row in sessions
         ],
-        "events": [_event_out(event, release_trees) for event in events[:min(max(limit, 1), 500)]],
+        "events": [
+            _event_out(event, release_trees, question_thumbnails, skill_technique_thumbnails)
+            for event in events[:min(max(limit, 1), 500)]
+        ],
     }
 
 

@@ -487,6 +487,7 @@ async def _publish_release(doc: Curriculum, user: User) -> CurriculumRelease:
             tree=resolved_tree,
             questions=deck.questions if deck else [],
             assets=svg.assets if svg else [],
+            technique_thumbnails=svg.technique_thumbnails if svg else {},
         )
     except ReleaseValidationError as exc:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Cannot publish release: {exc}")
@@ -556,6 +557,7 @@ async def _release_impact(
             tree=resolved_tree,
             questions=deck.questions if deck else [],
             assets=svg.assets if svg else [],
+            technique_thumbnails=svg.technique_thumbnails if svg else {},
         )
     except ReleaseValidationError as exc:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Cannot publish release: {exc}")
@@ -759,12 +761,19 @@ async def get_release_drift(curriculum_id: str, user: User = Depends(get_current
     resolved_tree = await _resolved_tree(doc.tree)
     deck = await QuestionDeck.find_one(QuestionDeck.owner_id == doc.owner_id)
     svg = await SvgLibrary.find_one(SvgLibrary.owner_id == doc.owner_id)
-    skill_ids = {
-        skill.get("id") for skill in resolved_tree.get("skills", []) if isinstance(skill, dict)
+    skills_by_id = {
+        skill.get("id"): skill
+        for skill in resolved_tree.get("skills", [])
+        if isinstance(skill, dict) and skill.get("id")
     }
     draft_hashes = content_hashes(
         tree=resolved_tree,
-        question_manifest=build_question_manifest(deck.questions if deck else [], skill_ids),
+        question_manifest=build_question_manifest(
+            deck.questions if deck else [],
+            set(skills_by_id),
+            skills_by_id=skills_by_id,
+            technique_thumbnails=svg.technique_thumbnails if svg else {},
+        ),
         asset_manifest=[
             {"content_hash": content_hash(asset)} for asset in (svg.assets if svg else [])
         ],

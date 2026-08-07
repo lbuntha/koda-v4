@@ -17,7 +17,6 @@ import { additionTutorSchema } from "../components/studio/ai-generator/schemas/a
 
 export const additionTutor = defineTechnique({
   technique: CountingTechnique.ADDITION_TUTOR,
-  defaultThumbnailUrl: "/assets/components/addition-tutor.svg",
   label: "Addition Tutor",
   icon: <Layers size={14} className="text-violet-650" />,
   defaultTargetCount: 5,

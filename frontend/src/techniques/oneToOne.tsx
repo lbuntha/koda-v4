@@ -17,7 +17,6 @@ import { oneToOneSchema } from "../components/studio/ai-generator/schemas/oneToO
 
 export const oneToOne = defineTechnique({
   technique: CountingTechnique.ONE_TO_ONE,
-  defaultThumbnailUrl: "/assets/components/one-to-one.svg",
   label: "One-to-One",
   icon: <Fingerprint size={14} className="text-indigo-500" />,
   defaultTargetCount: 5,

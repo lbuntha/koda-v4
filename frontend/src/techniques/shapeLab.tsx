@@ -14,7 +14,6 @@ import { shapeLabSchema } from "../components/studio/ai-generator/schemas/shapeL
 
 export const shapeLab = defineTechnique({
   technique: CountingTechnique.SHAPE_LAB,
-  defaultThumbnailUrl: "/assets/components/flexible-canvas.svg",
   label: "Shape Lab",
   icon: <Shapes size={14} className="text-fuchsia-600" />,
   defaultTargetCount: 3,

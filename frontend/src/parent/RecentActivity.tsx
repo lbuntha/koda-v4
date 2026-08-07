@@ -1,10 +1,9 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { BookOpenCheck, CheckCircle2 } from "lucide-react";
 import type { ActivityEvent, AnalyticsSummary } from "../api/analytics";
+import { apiFileUrl } from "../api/client";
 import type { Child } from "../api/family";
-import { KidAvatar } from "../components/KidAvatar";
 import { Button, Card, Skeleton } from "../components/ui";
-import { PROFILE_TONE_CLASS, profileToneFor } from "./profileTone";
 
 interface Props {
   profiles: Child[];
@@ -66,6 +65,26 @@ const activityCopy = (event: ActivityEvent) => {
   };
 };
 
+const ActivityArtwork: React.FC<{ event: ActivityEvent }> = ({ event }) => {
+  const thumbnail = apiFileUrl(event.thumbnailUrl);
+  const [failed, setFailed] = useState(false);
+  const lessonComplete = event.eventType === "lesson_complete";
+
+  useEffect(() => setFailed(false), [thumbnail]);
+
+  return (
+    <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#F0EDFF] text-[#6844EA] dark:bg-violet-400/15 dark:text-[#CDBEFF]">
+      {thumbnail && !failed ? (
+        <img src={thumbnail} alt="" onError={() => setFailed(true)} className="h-full w-full object-contain p-1" />
+      ) : lessonComplete ? (
+        <BookOpenCheck size={21} strokeWidth={2.2} />
+      ) : (
+        <CheckCircle2 size={21} strokeWidth={2.2} />
+      )}
+    </span>
+  );
+};
+
 export const RecentActivity: React.FC<Props> = ({ profiles, summaries, loading, onOpenProgress, compact = false }) => {
   const items = useMemo(() => profiles
     .flatMap(child => (summaries[child.id]?.recentEvents ?? []).map(event => ({ child, event })))
@@ -87,7 +106,6 @@ export const RecentActivity: React.FC<Props> = ({ profiles, summaries, loading, 
         ) : items.length > 0 ? (
           <div className="divide-y divide-[#EEEAF8] dark:divide-white/10">
             {items.map(({ child, event }) => {
-              const tone = PROFILE_TONE_CLASS[profileToneFor(child.id)];
               const copy = activityCopy(event);
               return (
                 <Button
@@ -97,9 +115,7 @@ export const RecentActivity: React.FC<Props> = ({ profiles, summaries, loading, 
                   onClick={() => onOpenProgress(child)}
                   className="h-auto w-full justify-start gap-3 rounded-xl px-2 py-2.5 text-left hover:bg-[#F3F0FF] dark:hover:bg-white/5"
                 >
-                  <span className={`flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br ${tone}`}>
-                    <KidAvatar avatar={child.avatar ?? undefined} className="h-9 w-9 text-2xl" />
-                  </span>
+                  <ActivityArtwork event={event} />
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-1.5 text-xs font-black text-[#0E0B55] dark:text-white">
                       {event.eventType === "lesson_complete" ? <BookOpenCheck size={14} className="text-emerald-500" /> : <CheckCircle2 size={14} className="text-blue-500" />}

@@ -14,7 +14,6 @@ import { measureLengthSchema } from "../components/studio/ai-generator/schemas/m
 
 export const measureLength = defineTechnique({
   technique: CountingTechnique.MEASURE_LENGTH,
-  defaultThumbnailUrl: "/assets/components/flexible-canvas.svg",
   label: "Measure Length",
   icon: <Ruler size={14} className="text-teal-600" />,
   defaultTargetCount: 5,

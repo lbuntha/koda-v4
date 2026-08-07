@@ -37,6 +37,7 @@ export interface ActivityEvent {
   questionId?: string | null;
   skillId?: string | null;
   skillLabel?: string | null;
+  thumbnailUrl?: string | null;
   assignmentId?: string | null;
   technique?: string | null;
   hintUsed?: boolean | null;

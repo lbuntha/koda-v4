@@ -14,7 +14,6 @@ export const xtraMath = defineTechnique({
   label: "XtraMath Speed Fluency",
   icon: <Zap className="text-amber-500" />,
   defaultTargetCount: 10,
-  defaultThumbnailUrl: "/assets/owl-mascot.svg",
   component: React.lazy(() =>
     import("../components/canvases/XtraMathCanvas").then((module) => ({ default: module.XtraMathCanvas }))),
   panel: React.lazy(() =>

@@ -642,6 +642,7 @@ async def main() -> None:
                 tree=tree,
                 questions=deck.questions,
                 assets=svg_library.assets,
+                technique_thumbnails=svg_library.technique_thumbnails,
             )
             release = CurriculumRelease(
                 release_id=RELEASE_ID,

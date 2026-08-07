@@ -14,7 +14,6 @@ import { countCratesSchema } from "../components/studio/ai-generator/schemas/cou
 
 export const countCrates = defineTechnique({
   technique: CountingTechnique.COUNT_CRATES,
-  defaultThumbnailUrl: "/assets/components/count-crates.svg",
   label: "Counting Crates",
   icon: <PackageCheck size={14} className="text-emerald-500" />,
   defaultTargetCount: 10,

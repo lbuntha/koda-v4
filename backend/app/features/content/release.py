@@ -29,9 +29,9 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-import re
 from typing import Any
 
+from ...core.technique_thumbnails import default_thumbnail_for_technique
 from .grading import supported_techniques
 
 # Config fields that are answer keys / solutions — they must be stripped from the
@@ -100,7 +100,38 @@ def split_question(question: dict) -> tuple[dict, dict]:
     return playable, grading
 
 
-def build_question_manifest(questions: list[dict], skill_ids: set[str]) -> list[dict]:
+def _question_thumbnail(
+    question: dict,
+    skill: dict,
+    technique_thumbnails: dict[str, str],
+) -> dict[str, str] | None:
+    """Snapshot the effective artwork reference for one published question."""
+    presentation = skill.get("presentation") or {}
+    authored_url = presentation.get("thumbnailUrl")
+    if isinstance(authored_url, str) and authored_url.strip() and "owl-mascot" not in authored_url:
+        return {"source": "skill", "url": authored_url.strip()}
+    authored_asset_id = presentation.get("thumbnailAssetId")
+    if isinstance(authored_asset_id, str) and authored_asset_id:
+        return {"source": "skill", "assetId": authored_asset_id}
+
+    technique = question.get("technique")
+    override_asset_id = technique_thumbnails.get(technique) if isinstance(technique, str) else None
+    if override_asset_id:
+        return {"source": "component_override", "assetId": override_asset_id}
+
+    component_url = default_thumbnail_for_technique(technique if isinstance(technique, str) else None)
+    if component_url:
+        return {"source": "component", "url": component_url}
+    return None
+
+
+def build_question_manifest(
+    questions: list[dict],
+    skill_ids: set[str],
+    *,
+    skills_by_id: dict[str, dict] | None = None,
+    technique_thumbnails: dict[str, str] | None = None,
+) -> list[dict]:
     """Build the release's question manifest — one entry per in-curriculum question.
 
     Only questions whose `skillId` is part of this curriculum are released. Each
@@ -113,16 +144,22 @@ def build_question_manifest(questions: list[dict], skill_ids: set[str]) -> list[
         if skill_id not in skill_ids:
             continue
         playable, grading = split_question(question)
-        manifest.append(
-            {
-                "question_id": question.get("id"),
-                "skill_id": skill_id,
-                "difficulty": normalize_difficulty(question),
-                "playable": playable,
-                "grading": grading,
-                "content_hash": content_hash(question),
-            }
+        entry = {
+            "question_id": question.get("id"),
+            "skill_id": skill_id,
+            "difficulty": normalize_difficulty(question),
+            "playable": playable,
+            "grading": grading,
+            "content_hash": content_hash(question),
+        }
+        thumbnail = _question_thumbnail(
+            question,
+            (skills_by_id or {}).get(skill_id, {}),
+            technique_thumbnails or {},
         )
+        if thumbnail:
+            entry["thumbnail"] = thumbnail
+        manifest.append(entry)
     return manifest
 
 
@@ -355,6 +392,7 @@ def build_release_payload(
     tree: dict,
     questions: list[dict],
     assets: list[dict] | None = None,
+    technique_thumbnails: dict[str, str] | None = None,
 ) -> dict:
     """Assemble (and validate) the immutable parts of a release.
 
@@ -365,14 +403,25 @@ def build_release_payload(
     """
     validate_release_structure(tree)
 
-    skill_ids = set(_skill_index(tree))
-    question_manifest = build_question_manifest(questions, skill_ids)
+    skills_by_id = _skill_index(tree)
+    skill_ids = set(skills_by_id)
+    question_manifest = build_question_manifest(
+        questions,
+        skill_ids,
+        skills_by_id=skills_by_id,
+        technique_thumbnails=technique_thumbnails,
+    )
     validate_gradeable(question_manifest)
     available_asset_ids = {
         asset.get("id")
         for asset in (assets or [])
         if isinstance(asset.get("id"), str)
     }
+    unknown_technique_assets = sorted(set((technique_thumbnails or {}).values()) - available_asset_ids)
+    if unknown_technique_assets:
+        raise ReleaseValidationError(
+            "technique thumbnails reference missing assets: " + ", ".join(unknown_technique_assets)
+        )
     for skill in tree.get("skills", []):
         thumbnail_asset_id = (skill.get("presentation") or {}).get("thumbnailAssetId")
         if thumbnail_asset_id and thumbnail_asset_id not in available_asset_ids:

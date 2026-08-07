@@ -17,7 +17,6 @@ import { columnAdditionSchema } from "../components/studio/ai-generator/schemas/
 
 export const columnAddition = defineTechnique({
   technique: CountingTechnique.ADDITION_COLUMN,
-  defaultThumbnailUrl: "/assets/components/addition-column.svg",
   label: "Column Addition",
   icon: <Columns3 size={14} className="text-indigo-600" />,
   defaultTargetCount: 31,

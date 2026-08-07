@@ -6,7 +6,6 @@ import { defineTechnique } from "./manifest";
 
 export const numberPath = defineTechnique({
   technique: CountingTechnique.NUMBER_PATH,
-  defaultThumbnailUrl: "/assets/components/number-path.svg",
   label: "Number Path & 120 Chart",
   icon: <Grid3X3 size={14} className="text-indigo-600" />,
   defaultTargetCount: 42,

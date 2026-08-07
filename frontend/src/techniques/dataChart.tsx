@@ -14,7 +14,6 @@ import { dataChartSchema } from "../components/studio/ai-generator/schemas/dataC
 
 export const dataChart = defineTechnique({
   technique: CountingTechnique.DATA_CHART,
-  defaultThumbnailUrl: "/assets/components/flexible-canvas.svg",
   label: "Data Chart",
   icon: <BarChart3 size={14} className="text-rose-600" />,
   defaultTargetCount: 6,

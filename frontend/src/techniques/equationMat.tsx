@@ -14,7 +14,6 @@ import { equationMatSchema } from "../components/studio/ai-generator/schemas/equ
 
 export const equationMat = defineTechnique({
   technique: CountingTechnique.EQUATION_MAT,
-  defaultThumbnailUrl: "/assets/components/flexible-canvas.svg",
   label: "Equation Mat",
   icon: <Equal size={14} className="text-indigo-600" />,
   defaultTargetCount: 3,

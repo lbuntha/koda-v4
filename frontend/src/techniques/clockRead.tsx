@@ -14,7 +14,6 @@ import { clockSchema } from "../components/studio/ai-generator/schemas/clock.sch
 
 export const clockRead = defineTechnique({
   technique: CountingTechnique.CLOCK_READ,
-  defaultThumbnailUrl: "/assets/components/flexible-canvas.svg",
   label: "Clock",
   icon: <Clock size={14} className="text-violet-600" />,
   defaultTargetCount: 3,
