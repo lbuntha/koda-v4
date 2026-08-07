@@ -3,6 +3,7 @@ import { ArrowRight, ShieldCheck, Sparkles, UserPlus } from "lucide-react";
 import type { ChildInput } from "../api/family";
 import { useAuth } from "../auth/AuthContext";
 import { Button } from "../components/ui";
+import { AppToolbar } from "../student/home/shared";
 import { ThemeToggle } from "../theme/ThemeToggle";
 import { useThemeMode } from "../theme/appTheme";
 import { ChildFormModal } from "./ChildFormModal";
@@ -26,24 +27,22 @@ export const ParentFirstRunScreen: React.FC = () => {
 
   return (
     <div className={theme === "dark" ? "dark" : ""}>
-      <div className="min-h-dvh bg-[#FBFAFF] px-4 py-4 font-sans text-[#0E0B55] dark:bg-[#0E1020] dark:text-white sm:px-6">
-        <header className="mx-auto flex w-full max-w-6xl items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <img src="/favicon.svg" alt="Koda" className="h-9 w-9 rounded-xl" />
-            <div>
-              <p className="text-base font-black leading-tight">Koda Parent</p>
-              <p className="text-[11px] font-medium text-[#6D6997] dark:text-[#9A94B8]">Your family home is ready</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <ThemeToggle theme={theme} onToggle={toggleTheme} variant="round" />
-            <Button variant="ghost" size="sm" onClick={logout} className="text-[#6D6997] dark:text-slate-300">
-              Sign out
-            </Button>
-          </div>
-        </header>
+      <div className="min-h-dvh bg-[#FBFAFF] font-sans text-[#0E0B55] dark:bg-[#0E1020] dark:text-white">
+        <AppToolbar
+          wide
+          title="Koda Parent"
+          subtitle="Your family home is ready"
+          actions={
+            <>
+              <ThemeToggle theme={theme} onToggle={toggleTheme} variant="round" />
+              <Button variant="ghost" size="sm" onClick={logout} className="text-[#6D6997] dark:text-slate-300">
+                Sign out
+              </Button>
+            </>
+          }
+        />
 
-        <main className="mx-auto flex min-h-[calc(100dvh-5rem)] w-full max-w-3xl items-center justify-center py-8">
+        <main className="mx-auto flex min-h-[calc(100dvh-5.5rem)] w-full max-w-3xl items-center justify-center px-4 py-8 sm:px-6">
           <section className="relative w-full overflow-hidden rounded-[2rem] border border-[#E3DDF8] bg-white px-6 py-10 text-center shadow-[0_18px_50px_rgba(83,74,183,0.10)] sm:px-12 sm:py-14 dark:border-white/10 dark:bg-[#15182A]">
             <div className="pointer-events-none absolute -left-16 -top-20 h-52 w-52 rounded-full bg-violet-200/40 blur-3xl dark:bg-violet-500/10" />
             <div className="pointer-events-none absolute -bottom-24 -right-12 h-56 w-56 rounded-full bg-cyan-100/60 blur-3xl dark:bg-cyan-500/10" />
