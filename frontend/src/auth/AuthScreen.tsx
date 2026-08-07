@@ -9,14 +9,14 @@ import {
   KeyRound,
   Lock,
   Mail,
-  Moon,
   ShieldCheck,
   Sparkles,
-  Sun,
   User,
 } from "lucide-react";
 import { Button, Card, Input, Label } from "../components/ui";
 import { useThemeMode } from "../theme/appTheme";
+import { ThemeToggle } from "../theme/ThemeToggle";
+import { AppToolbar } from "../student/home/shared";
 import { useAuth } from "./AuthContext";
 
 type Audience = "adult" | "kid";
@@ -121,24 +121,22 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onBack, onForgotPassword
   const adultSubtitle = mode === "signup" ? "Add a learner profile after you sign up." : "Sign in to continue learning with Koda.";
 
   return (
-    <div className={`min-h-screen bg-[#FCFBFF] px-4 py-3 font-sans text-slate-900 transition-colors dark:bg-[#080B18] dark:text-white sm:px-6 ${theme === "dark" ? "dark" : ""}`}>
-      <header className="mx-auto flex max-w-6xl items-center justify-between py-1.5 sm:py-2">
-        <button type="button" onClick={onBack} className="flex items-center gap-2.5 rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30">
-          <img src="/favicon.svg" alt="" className="h-8 w-8 rounded-lg" />
-          <span className="text-lg font-black tracking-tight text-slate-950 dark:text-white">Koda</span>
-        </button>
-        <div className="flex items-center gap-2 sm:gap-4">
-          <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label={theme === "dark" ? "Use light mode" : "Use dark mode"} className="h-9 w-9 text-slate-500 dark:text-slate-300 dark:hover:bg-white/10">
-            {theme === "dark" ? <Sun size={17} className="text-amber-300" /> : <Moon size={17} />}
-          </Button>
-          <span className="hidden text-xs font-medium text-slate-500 dark:text-slate-400 sm:block">{mode === "signup" ? "Already have an account?" : "New to Koda?"}</span>
-          <Button variant="outline" size="sm" onClick={() => switchAdultMode(mode === "signup" ? "signin" : "signup")} className="border-indigo-200 text-indigo-600 dark:border-indigo-400/30 dark:bg-white/5 dark:text-indigo-200">
-            {mode === "signup" ? "Sign in" : "Create account"}
-          </Button>
-        </div>
-      </header>
+    <div className={`min-h-screen bg-[#FCFBFF] font-sans text-slate-900 transition-colors dark:bg-[#080B18] dark:text-white ${theme === "dark" ? "dark" : ""}`}>
+      <AppToolbar
+        wide
+        onBrandClick={onBack}
+        actions={
+          <>
+            <ThemeToggle theme={theme} onToggle={toggleTheme} variant="round" />
+            <span className="hidden text-xs font-medium text-slate-500 dark:text-slate-400 sm:block">{mode === "signup" ? "Already have an account?" : "New to Koda?"}</span>
+            <Button variant="outline" size="sm" onClick={() => switchAdultMode(mode === "signup" ? "signin" : "signup")} className="border-indigo-200 text-indigo-600 dark:border-indigo-400/30 dark:bg-white/5 dark:text-indigo-200">
+              {mode === "signup" ? "Sign in" : "Create account"}
+            </Button>
+          </>
+        }
+      />
 
-      <main className="mx-auto mt-2 grid min-h-[calc(100vh-72px)] max-w-6xl items-start gap-4 lg:grid-cols-[0.96fr_1.04fr]">
+      <main className="mx-auto mt-4 grid min-h-[calc(100vh-88px)] max-w-6xl items-start gap-4 px-4 pb-4 sm:px-6 lg:grid-cols-[0.96fr_1.04fr]">
         <section className="relative hidden h-[540px] overflow-hidden rounded-[1.5rem] bg-violet-100 p-7 dark:bg-[#11172B] lg:block">
           <img
             src={theme === "dark" ? "/assets/koda-auth-learning-dark.png" : "/assets/koda-auth-learning-light.png"}

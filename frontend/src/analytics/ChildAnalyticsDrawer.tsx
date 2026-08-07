@@ -17,6 +17,7 @@ import {
   Target,
   Trash2,
   TrendingUp,
+  X,
 } from "lucide-react";
 import {
   analyticsApi,
@@ -40,6 +41,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "../components/ui";
+import { AppToolbar } from "../student/home/shared";
 
 type Tab = "overview" | "skills" | "activity" | "recommendations" | "data";
 
@@ -292,15 +294,24 @@ export const ChildAnalyticsDrawer: React.FC<Props> = ({ student, onClose, onData
   })();
 
   const visibleSections = SECTIONS.filter(section => section.value !== "data" || canManageData);
+  const progressTitle = student
+    ? `${student.avatar && student.avatar.length <= 4 ? `${student.avatar} ` : ""}${student.name}'s learning progress`
+    : "Learning progress";
 
   return (
     <Drawer
       isOpen={Boolean(student)}
       onClose={onClose}
-      title={
-        student
-          ? `${student.avatar && student.avatar.length <= 4 ? `${student.avatar} ` : ""}${student.name}'s learning progress`
-          : undefined
+      header={
+        <AppToolbar
+          title={progressTitle}
+          showBrand={false}
+          actions={
+            <Button type="button" variant="ghost" size="icon" onClick={onClose} aria-label="Close learning progress" className="h-9 w-9 text-slate-500 dark:text-slate-300">
+              <X size={20} strokeWidth={2.2} />
+            </Button>
+          }
+        />
       }
       widthClassName="w-full sm:w-[620px] lg:w-[760px]"
       footer={

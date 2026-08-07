@@ -137,14 +137,14 @@ export const KidHomeToolbar: React.FC<Props> = ({
                 onClick={() => isAvailable && onNavigate(section.destination)}
                 disabled={!isAvailable}
                 aria-current={isActive ? "page" : undefined}
-                className={`h-16 min-w-14 flex-1 flex-col gap-1 rounded-2xl px-2 text-[10px] font-extrabold leading-none sm:min-w-16 sm:px-3 md:h-12 md:min-w-20 md:max-w-24 lg:min-w-24 lg:max-w-28 lg:text-xs ${
+                className={`h-16 min-w-14 flex-1 flex-col gap-1 rounded-2xl px-2 text-[10px] font-extrabold leading-none sm:min-w-16 sm:px-3 md:h-12 md:min-w-20 md:max-w-24 md:gap-0.5 lg:min-w-24 lg:max-w-28 lg:text-xs ${
                   isActive
                     ? "bg-[#F0EBFF] text-[#6844EA] hover:bg-[#E9E1FF] dark:bg-violet-400/15 dark:text-[#CDBEFF]"
                     : "text-[#7B8496] hover:bg-[#F5F1FF] hover:text-[#6844EA] dark:text-[#A79FC4] dark:hover:bg-white/10"
                 }`}
               >
-                <span className="inline-flex scale-[1.16] md:scale-100">
-                  <SvgLibraryAsset assetId={section.assetId} size={30} fallback={<section.fallback size={27} strokeWidth={2.2} />} />
+                <span className="inline-flex scale-[1.28] md:scale-100">
+                  <SvgLibraryAsset assetId={section.assetId} size={27} fallback={<section.fallback size={25} strokeWidth={2.2} />} />
                 </span>
                 <span className="hidden md:inline">{section.label}</span>
               </Button>
@@ -161,14 +161,14 @@ export const KidHomeToolbar: React.FC<Props> = ({
               }}
               aria-expanded={rewardsOpen}
               aria-controls="kid-rewards-summary"
-              className={`h-16 min-w-14 w-full flex-1 flex-col gap-1 rounded-2xl px-2 text-[10px] font-extrabold leading-none sm:min-w-16 sm:px-3 md:h-12 md:min-w-20 md:max-w-24 lg:min-w-24 lg:max-w-28 lg:text-xs ${
+              className={`h-16 min-w-14 w-full flex-1 flex-col gap-1 rounded-2xl px-2 text-[10px] font-extrabold leading-none sm:min-w-16 sm:px-3 md:h-12 md:min-w-20 md:max-w-24 md:gap-0.5 lg:min-w-24 lg:max-w-28 lg:text-xs ${
                 rewardsOpen
                   ? "bg-[#F0EBFF] text-[#6844EA] dark:bg-violet-400/15 dark:text-[#CDBEFF]"
                   : "text-[#7B8496] hover:bg-[#F5F1FF] hover:text-[#6844EA] dark:text-[#A79FC4] dark:hover:bg-white/10"
               }`}
             >
-              <span className="inline-flex scale-[1.16] md:scale-100">
-                <SvgLibraryAsset assetId={KID_NAV_ASSET_IDS.rewards} size={30} fallback={<Gift size={27} strokeWidth={2.2} />} />
+              <span className="inline-flex scale-[1.28] md:scale-100">
+                <SvgLibraryAsset assetId={KID_NAV_ASSET_IDS.rewards} size={27} fallback={<Gift size={25} strokeWidth={2.2} />} />
               </span>
               <span className="hidden md:inline">Rewards</span>
             </Button>

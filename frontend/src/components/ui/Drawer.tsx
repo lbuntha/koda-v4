@@ -16,6 +16,8 @@ interface DrawerProps {
   isOpen: boolean;
   onClose: () => void;
   title?: React.ReactNode;
+  /** Replaces the default title row when a screen needs a shared application toolbar. */
+  header?: React.ReactNode;
   /** Defaults to a comfortable reading width; override for wider content (e.g. an AI batch review list). */
   widthClassName?: string;
   /**
@@ -36,6 +38,7 @@ export const Drawer: React.FC<DrawerProps> = ({
   isOpen,
   onClose,
   title,
+  header,
   widthClassName = "w-full sm:w-[440px]",
   subHeader,
   footer,
@@ -71,7 +74,7 @@ export const Drawer: React.FC<DrawerProps> = ({
 
       {/* Panel */}
       <div className={`relative h-full bg-white border-l border-slate-200 shadow-2xl z-10 flex flex-col animate-slide-in-right dark:bg-[#151A2B] dark:border-white/10 ${widthClassName}`}>
-        {title && (
+        {header ?? (title && (
           <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-slate-100 flex-shrink-0 dark:border-white/10">
             <h2 className="text-sm font-bold text-slate-800 truncate dark:text-[#E2E0F2]">{title}</h2>
             <button
@@ -83,7 +86,7 @@ export const Drawer: React.FC<DrawerProps> = ({
               </svg>
             </button>
           </div>
-        )}
+        ))}
         {subHeader && <div className="shrink-0 px-5">{subHeader}</div>}
         <div className="flex-1 overflow-y-auto p-5">
           {children}

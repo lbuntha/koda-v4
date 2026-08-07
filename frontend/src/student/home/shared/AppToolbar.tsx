@@ -12,6 +12,10 @@ interface Props {
   /** Right slot: streak, theme toggle, Exit. */
   actions?: React.ReactNode;
   wide?: boolean;
+  /** Optional navigation action for the Koda mark, used by public account screens. */
+  onBrandClick?: () => void;
+  /** Keeps the shared toolbar shell while omitting the Koda mark in focused panels. */
+  showBrand?: boolean;
 }
 
 /**
@@ -19,19 +23,27 @@ interface Props {
  * background with no band or rule, and the Koda mark comes from `favicon.svg` so the tab icon
  * and the header can never drift apart.
  */
-export const AppToolbar: React.FC<Props> = ({ title, subtitle, nav, subnav, actions, wide = false }) => (
+export const AppToolbar: React.FC<Props> = ({ title, subtitle, nav, subnav, actions, wide = false, onBrandClick, showBrand = true }) => (
   <>
     <header className="sticky top-0 z-40 w-full border-b border-[#E9E3F6] bg-white/90 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2.5 shadow-[0_8px_24px_-20px_rgba(77,58,139,0.5)] backdrop-blur-xl [-webkit-backdrop-filter:blur(16px)] [-webkit-tap-highlight-color:transparent] sm:px-5 md:px-6 md:py-2.5 lg:px-8 dark:border-white/10 dark:bg-[#111329]/90 dark:shadow-none">
       <div className={cn("mx-auto flex h-12 items-center justify-between gap-2 sm:gap-4", wide ? "max-w-6xl" : "max-w-6xl")}>
-        <div className="flex min-w-0 shrink-0 items-center gap-2">
-          <img
-            src="/favicon.svg"
-            alt="Koda"
-            className="h-8 w-8 shrink-0 rounded-lg shadow-sm"
-          />
-          <div className="hidden shrink-0 sm:block">
-            <span className="text-base font-black tracking-tight text-[#5B48D6] dark:text-[#BEACFF]">Koda</span>
-          </div>
+        <div className={cn("flex min-w-0 items-center gap-2", title ? "flex-1 md:flex-initial" : "shrink-0")}>
+          {showBrand && (onBrandClick ? (
+            <button
+              type="button"
+              onClick={onBrandClick}
+              className="flex shrink-0 items-center gap-2 rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30"
+              aria-label="Back to Koda"
+            >
+              <img src="/favicon.svg" alt="" className="h-8 w-8 shrink-0 rounded-lg shadow-sm" />
+              <span className="hidden text-base font-black tracking-tight text-[#5B48D6] sm:block dark:text-[#BEACFF]">Koda</span>
+            </button>
+          ) : (
+            <>
+              <img src="/favicon.svg" alt="Koda" className="h-8 w-8 shrink-0 rounded-lg shadow-sm" />
+              <span className="hidden shrink-0 text-base font-black tracking-tight text-[#5B48D6] sm:block dark:text-[#BEACFF]">Koda</span>
+            </>
+          ))}
           {title && (
             <div className="min-w-0">
               <p className="truncate text-[15px] font-extrabold leading-tight text-slate-900 dark:text-[#EDECF8]">
