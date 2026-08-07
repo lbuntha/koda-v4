@@ -39,6 +39,7 @@ from pathlib import Path
 from app.core.db import close_db, init_db
 from app.features.content.release import build_release_payload
 from app.models.academic import Grade, Subject
+from app.core.subject_icons import MATH_SUBJECT_ICON
 from app.models.assignment import Assignment, CurriculumOffering, ProgressionState
 from app.models.content import Curriculum, CurriculumRelease, QuestionDeck, SvgLibrary
 from app.models.user import User
@@ -130,7 +131,8 @@ async def _ensure_catalog(owner_id: str) -> Subject:
             grade_id=GRADE_ID,
             name="Mathematics",
             code="MATH",
-            icon="Calculator",
+            icon=MATH_SUBJECT_ICON["id"],
+            icon_asset=dict(MATH_SUBJECT_ICON),
             color="#6B46C1",
             order=1,
             created_by=owner_id,

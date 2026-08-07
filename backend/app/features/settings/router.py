@@ -285,6 +285,7 @@ def _subject_out(item: Subject, ready_subject_ids: set[str] | None = None) -> di
         "name": item.name,
         "description": item.description,
         "icon": item.icon,
+        "icon_asset": item.icon_asset,
         "color": item.color,
         "order": item.order,
         "active": item.active,

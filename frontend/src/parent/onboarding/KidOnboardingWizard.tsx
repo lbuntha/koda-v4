@@ -4,6 +4,7 @@ import type { ChildInput } from "../../api/family";
 import { useAcademicCatalog } from "../../components/academic";
 import { Button, Dialog, Spinner } from "../../components/ui";
 import { AVATARS } from "../../components/AvatarPicker";
+import { persistableAvatar } from "../../components/avatarPersistence";
 import { AvatarStep } from "./AvatarStep";
 import { FinishStep } from "./FinishStep";
 import { GoalsStep } from "./GoalsStep";
@@ -33,17 +34,6 @@ const initialDraft = (gradeLevel: string, primarySubject: string): KidOnboarding
   avatar: AVATARS[0],
   pin: "",
 });
-
-const persistableAvatar = async (avatar: string) => {
-  if (!avatar.startsWith("http://") && !avatar.startsWith("https://")) return avatar;
-  try {
-    const response = await fetch(avatar);
-    if (!response.ok) return avatar;
-    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(await response.text())}`;
-  } catch {
-    return avatar;
-  }
-};
 
 export const KidOnboardingWizard: React.FC<Props> = ({ isOpen, onClose, onSubmit, firstRun = false }) => {
   const { grades, subjects, loading: catalogLoading } = useAcademicCatalog();

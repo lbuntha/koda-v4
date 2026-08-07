@@ -51,6 +51,7 @@ from pathlib import Path
 from app.core.db import close_db, init_db
 from app.features.content.release import build_release_payload
 from app.models.academic import Grade, Subject
+from app.core.subject_icons import THINKING_LOGIC_SUBJECT_ICON
 from app.models.assignment import CurriculumOffering
 from app.models.content import Curriculum, CurriculumRelease, QuestionDeck
 from app.models.user import User
@@ -557,7 +558,8 @@ async def _ensure_catalog(owner_id: str) -> Subject:
                 "Sequencing and planning: pour the bottles until every colour stands "
                 "alone, and sort the shelves until every kind of goods has its own."
             ),
-            icon="Brain",
+            icon=THINKING_LOGIC_SUBJECT_ICON["id"],
+            icon_asset=dict(THINKING_LOGIC_SUBJECT_ICON),
             color="#7C3AED",
             order=3,
             created_by=owner_id,

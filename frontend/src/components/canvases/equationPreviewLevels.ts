@@ -44,7 +44,9 @@ export const EQUATION_PREVIEW_LEVELS: CountLevel[] = [
     id: "data_more", label: "How many more?", tier: "secure",
     rationale: "Data Chart — counted objects with a tally beneath, the bridge to the abstract form.",
     technique: CountingTechnique.DATA_CHART, targetCount: 4,
-    config: { dataKind: "more", dataCounts: [6, 2, 4], dataCategories: ["Apples", "Pears", "Plums"], dataFocus: 0, dataAgainst: 1 },
+    // Labels the built-in shapes can actually draw — a column of flowers called "Pears" is the
+    // one thing a chart must never do.
+    config: { dataKind: "more", dataCounts: [6, 2, 4], dataCategories: ["Apples", "Flowers", "Hearts"], dataAssets: ["apple", "flower", "heart"], dataFocus: 0, dataAgainst: 1 },
   },
   {
     id: "shape_hexagon", label: "Hexagon sides", tier: "extending",

@@ -53,7 +53,7 @@ export const AppToolbar: React.FC<Props> = ({ title, subtitle, nav, subnav, acti
         {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
       </div>
       {subnav && (
-        <div className={cn("mx-auto border-t border-[#EEEAF7] pt-1.5 dark:border-white/[0.07]", wide ? "max-w-6xl" : "max-w-6xl")}>
+        <div className={cn("mx-auto border-t border-[#EEEAF7] pt-1.5 md:mt-2 dark:border-white/[0.07]", wide ? "max-w-6xl" : "max-w-6xl")}>
           {subnav}
         </div>
       )}

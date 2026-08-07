@@ -48,6 +48,48 @@ export const ASSET_SHAPES = [
 
 export type ShapeAssetType = (typeof ASSET_SHAPES)[number]["type"];
 
+/**
+ * What to call a group of one shape — the word that goes under a chart column.
+ *
+ * A data chart is a word and a picture of the same thing, and storing those as two independent
+ * choices is exactly how a column labelled "Pears" came to be drawn with flowers. Naming is a
+ * lookup from the artwork, not a second thing to author, so the two cannot drift apart. Kept
+ * beside `ASSET_SHAPES` so adding a shape without its plural fails to type-check.
+ */
+export const ASSET_PLURAL: Record<ShapeAssetType, string> = {
+  apple: "Apples",
+  star: "Stars",
+  dino: "Dinos",
+  car: "Cars",
+  butterfly: "Butterflies",
+  fish: "Fish",
+  rocket: "Rockets",
+  bear: "Bears",
+  sun: "Suns",
+  flower: "Flowers",
+  heart: "Hearts",
+};
+
+const LABEL_TO_SHAPE = new Map<string, ShapeAssetType>(
+  ASSET_SHAPES.flatMap(shape => [
+    [shape.label.toLowerCase(), shape.type],
+    [ASSET_PLURAL[shape.type].toLowerCase(), shape.type],
+    [shape.type, shape.type],
+  ] as Array<[string, ShapeAssetType]>),
+);
+
+/**
+ * The artwork that draws what a label names — "Apples" → `apple`, "Butterfly" → `butterfly`.
+ *
+ * Returns null for anything the built-in shapes cannot draw ("Pears", "Boats"), which is the
+ * useful answer: it says "do not pretend", so a caller can pick a neutral counter or refuse the
+ * pairing outright rather than reaching for whichever picture happened to be next in a list.
+ */
+export function shapeForLabel(label: string | undefined | null): ShapeAssetType | null {
+  const key = String(label ?? "").trim().toLowerCase();
+  return key ? LABEL_TO_SHAPE.get(key) ?? null : null;
+}
+
 export type AssetKind = "shape" | "sprite" | "emoji" | "custom";
 
 export type AssetCategory =
@@ -189,6 +231,53 @@ export function assetQuestionPatch(
       customSvgScale: undefined,
     },
   };
+}
+
+/**
+ * The props `CountingAsset` needs to draw a stored catalog id.
+ *
+ * Callers that hold a *single* id — one column of a chart, say — had no way to draw a library
+ * asset from it: custom artwork needs `type="custom_svg"` plus the id in `assetId`, which only
+ * the multi-field `assetSelection` path produced. This is the one-id equivalent, so any surface
+ * that stores a bare catalog id can offer the whole catalog, the account's own SVGs included.
+ *
+ * Returns null for an id this viewer cannot draw — unknown, or a library asset that was deleted
+ * or never published with the release — so the caller can fall back rather than draw nothing.
+ */
+export function assetDrawProps(
+  id: string | undefined | null,
+  customAssets: CustomSvgAsset[] = [],
+): { type: string; assetId?: string; emoji?: string } | null {
+  if (!id) return null;
+  const asset = findAsset(id, customAssets);
+  if (!asset) return null;
+  if (asset.kind === "custom") return { type: "custom_svg", assetId: asset.id };
+  if (asset.kind === "emoji") return { type: "emoji", emoji: asset.emoji };
+  return { type: asset.id };
+}
+
+/**
+ * The catalog entry a word names — "Apples" → the apple shape, "Ladybird" → the account's
+ * SVG of that name.
+ *
+ * `shapeForLabel` answers the same question for built-in shapes only, which is what seeded
+ * content is checked against. This is the authoring-time version: it can see the account's own
+ * artwork, so a studio panel can tell an author that the word over a column does not name the
+ * picture under it, whatever kind of picture it is.
+ */
+export function assetForLabel(
+  label: string | undefined | null,
+  customAssets: CustomSvgAsset[] = [],
+): CatalogAsset | undefined {
+  const key = String(label ?? "").trim().toLowerCase();
+  if (!key) return undefined;
+  const shape = shapeForLabel(key);
+  if (shape) return BY_ID.get(shape);
+  const singular = key.replace(/ies$/, "y").replace(/(?:es|s)$/, "");
+  return buildCatalog(customAssets).find((asset) => {
+    const candidate = asset.label.toLowerCase();
+    return candidate === key || candidate === singular || asset.id.toLowerCase() === key;
+  });
 }
 
 /** Category tabs in display order, with the count each would show. */

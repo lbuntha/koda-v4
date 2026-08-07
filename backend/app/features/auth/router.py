@@ -189,7 +189,7 @@ async def update_profile(body: ProfileUpdateIn, parent: User = Depends(get_curre
 
 @router.patch("/student/avatar")
 async def update_student_avatar(body: StudentAvatarIn, student: Student = Depends(get_current_student)):
-    """Let a signed-in learner choose from the safe, local Koda avatar collection."""
+    """Let a signed-in learner use the same avatar choices offered during signup."""
     student.avatar = body.avatar
     await student.save()
     return {"avatar": student.avatar}

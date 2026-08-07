@@ -72,6 +72,7 @@ export interface LearnerSubject {
   id: string;
   name: string;
   icon?: string;
+  iconAsset?: import("../types").CustomSvgAsset | null;
   color: string;
   assignmentId: string;
   ready: boolean;

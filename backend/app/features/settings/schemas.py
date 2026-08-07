@@ -3,6 +3,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from ..content.schemas import SvgAssetIn
+
 
 ALLOWED_AI_MODELS = {"gpt-4o-mini", "gpt-4o"}
 
@@ -208,6 +210,10 @@ class SubjectIn(BaseModel):
     name: str = Field(min_length=1, max_length=100)
     description: str = Field(default="", max_length=1000)
     icon: str = Field(default="", max_length=60)
+    # A snapshot makes the chosen library artwork available to learners, whose accounts do
+    # not have access to the admin's editable SVG library. `icon` remains the stable asset id
+    # for existing integrations and older rows.
+    icon_asset: SvgAssetIn | None = None
     color: str = Field(default="#534AB7", pattern=r"^#[0-9A-Fa-f]{6}$")
     order: int = Field(default=1, ge=0, le=1000)
     active: bool = True

@@ -69,6 +69,7 @@ class Subject(Document):
     name: str
     description: str = ""
     icon: str = ""
+    icon_asset: dict | None = None
     color: str = "#534AB7"
     order: int = 1
     active: bool = True

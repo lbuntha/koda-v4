@@ -1,5 +1,6 @@
 import { api } from "./client";
 import type { GradeBand } from "./auth";
+import type { CustomSvgAsset } from "../types";
 
 export interface GradeCatalogItem {
   key: string;
@@ -24,6 +25,8 @@ export interface SubjectCatalogItem {
   name: string;
   description: string;
   icon: string;
+  /** Frozen copy of the selected library SVG so every learner account can render it. */
+  icon_asset: CustomSvgAsset | null;
   color: string;
   order: number;
   active: boolean;

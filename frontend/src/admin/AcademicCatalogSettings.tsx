@@ -1,6 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowRight, BookOpen, GraduationCap, Pencil, Plus, Trash2 } from "lucide-react";
 import { academicApi, CurriculumOffering, GradeCatalogInput, GradeCatalogItem, SubjectCatalogInput, SubjectCatalogItem } from "../api/academic";
+import { useSvgLibrary } from "../assets/SvgLibraryContext";
+import { CountingAsset } from "../components/Assets";
+import { AssetGrid } from "../components/ui/AssetGrid";
 import type { GradeBand } from "../api/auth";
 import { Button, Card, Input, Label, Select, Skeleton, SkeletonCard, SkeletonText, Textarea } from "../components/ui";
 
@@ -10,7 +13,7 @@ const slugify = (value: string) => value.toLowerCase().trim().replace(/[^a-z0-9]
 const codeify = (value: string) => value.toUpperCase().trim().replace(/[^A-Z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 30);
 
 const emptyGrade = (): GradeCatalogInput => ({ key: "", code: "", name: "", description: "", age_range: "", order: 1, layout_band: null, active: true, revision: 0 });
-const emptySubject = (gradeId = ""): SubjectCatalogInput => ({ key: "", grade_id: gradeId, code: "", name: "", description: "", icon: "", color: "#534AB7", order: 1, active: true, revision: 0 });
+const emptySubject = (gradeId = ""): SubjectCatalogInput => ({ key: "", grade_id: gradeId, code: "", name: "", description: "", icon: "", icon_asset: null, color: "#534AB7", order: 1, active: true, revision: 0 });
 // Catalog rows can predate newer optional fields. Normalize every server response before it
 // enters form state so React inputs never move from a controlled value to `undefined` after save.
 const gradeInput = (item: Partial<GradeCatalogItem>): GradeCatalogInput => ({
@@ -31,6 +34,7 @@ const subjectInput = (item: Partial<SubjectCatalogItem>): SubjectCatalogInput =>
   name: item.name ?? "",
   description: item.description ?? "",
   icon: item.icon ?? "",
+  icon_asset: item.icon_asset ?? null,
   color: item.color ?? "#534AB7",
   order: Number.isFinite(item.order) ? Number(item.order) : 1,
   active: item.active ?? true,
@@ -117,6 +121,7 @@ const CatalogCardSkeleton: React.FC = () => (
 );
 
 export const AcademicCatalogSettings: React.FC = () => {
+  const { assets: svgAssets } = useSvgLibrary();
   const [catalogSelection, setCatalogSelection] = useState<CatalogSelection>(readCatalogSelection);
   const catalogSelectionRef = React.useRef(catalogSelection);
   const [grades, setGrades] = useState<GradeCatalogItem[]>([]);
@@ -130,6 +135,7 @@ export const AcademicCatalogSettings: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [savingGrade, setSavingGrade] = useState(false);
   const [savingSubject, setSavingSubject] = useState(false);
+  const [choosingSubjectIcon, setChoosingSubjectIcon] = useState(false);
   const [deletingGradeKey, setDeletingGradeKey] = useState<string | null>(null);
   const [deletingSubjectKey, setDeletingSubjectKey] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -192,6 +198,15 @@ export const AcademicCatalogSettings: React.FC = () => {
 
   const updateGrade = (patch: Partial<GradeCatalogInput>) => setGradeDraft(current => ({ ...current, ...patch }));
   const updateSubject = (patch: Partial<SubjectCatalogInput>) => setSubjectDraft(current => ({ ...current, ...patch }));
+
+  const chooseSubjectIcon = (assetId: string) => {
+    const asset = svgAssets.find(item => item.id === assetId);
+    if (!asset) return;
+    // Store both the library id and a validated snapshot. Student accounts cannot read the
+    // admin-owned library, so the snapshot travels with the subject itself.
+    updateSubject({ icon: asset.id, icon_asset: { ...asset } });
+    setChoosingSubjectIcon(false);
+  };
 
   const saveGrade = async () => {
     if (!gradeDraft.name.trim() || !gradeDraft.code.trim()) return setError("Grade name and code are required.");
@@ -345,7 +360,34 @@ export const AcademicCatalogSettings: React.FC = () => {
                 <div className="grid grid-cols-2 gap-3"><div><Label>Name</Label><Input value={subjectDraft.name} onChange={e => updateSubject({ name: e.target.value })} placeholder="Mathematics" /></div><div><Label>Code</Label><Input value={subjectDraft.code} onChange={e => updateSubject({ code: e.target.value })} placeholder="MATH" /></div></div>
                 <div><Label>Stable key</Label><Input value={subjectDraft.key || (subjectDraft.grade_id && subjectDraft.name ? `${subjectDraft.grade_id}-${slugify(subjectDraft.name)}` : "")} disabled={subjectDraft.revision > 0} onChange={e => updateSubject({ key: slugify(e.target.value) })} placeholder="grade-1-math" /></div>
                 <div><Label>Description</Label><Textarea rows={3} value={subjectDraft.description} onChange={e => updateSubject({ description: e.target.value })} placeholder="Subject scope and learning focus" /></div>
-                <div className="grid grid-cols-3 gap-3"><div><Label>Icon</Label><Input value={subjectDraft.icon} onChange={e => updateSubject({ icon: e.target.value })} placeholder="Calculator" /></div><div><Label>Color</Label><Input type="color" value={subjectDraft.color} onChange={e => updateSubject({ color: e.target.value })} className="p-1" /></div><div><Label>Order</Label><Input type="number" min={0} value={subjectDraft.order} onChange={e => updateSubject({ order: Number(e.target.value) })} /></div></div>
+                <div>
+                  <Label>SVG icon</Label>
+                  <div className="flex min-h-14 items-center gap-3 rounded-xl border border-[#E7E3F6] bg-[#FBFAFF] p-2.5">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white text-[#534AB7] ring-1 ring-[#E7E3F6]">
+                      {subjectDraft.icon_asset ? (
+                        <CountingAsset type="custom_svg" customSvgMarkup={subjectDraft.icon_asset.markup} size={28} scale={subjectDraft.icon_asset.scale} />
+                      ) : <BookOpen size={18} />}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-xs font-medium text-[#0E0B55]">{subjectDraft.icon_asset?.label || "Default subject icon"}</p>
+                      <p className="mt-0.5 truncate text-[10px] text-[#6D6997]">{subjectDraft.icon_asset ? "Saved with this subject" : "Choose artwork from your SVG library"}</p>
+                    </div>
+                    {subjectDraft.icon_asset && <Button type="button" variant="ghost" size="xs" onClick={() => updateSubject({ icon: "", icon_asset: null })}>Remove</Button>}
+                    <Button type="button" variant="outline" size="xs" onClick={() => setChoosingSubjectIcon(open => !open)}>{choosingSubjectIcon ? "Close" : subjectDraft.icon_asset ? "Change" : "Choose"}</Button>
+                  </div>
+                  {choosingSubjectIcon && (
+                    <div className="mt-2 rounded-xl border border-[#E7E3F6] bg-white p-3">
+                      <AssetGrid
+                        kinds={["custom"]}
+                        selectedIds={subjectDraft.icon ? [subjectDraft.icon] : []}
+                        onSelect={asset => chooseSubjectIcon(asset.id)}
+                        columns={3}
+                        showLabels
+                      />
+                    </div>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-3"><div><Label>Color</Label><Input type="color" value={subjectDraft.color} onChange={e => updateSubject({ color: e.target.value })} className="p-1" /></div><div><Label>Order</Label><Input type="number" min={0} value={subjectDraft.order} onChange={e => updateSubject({ order: Number(e.target.value) })} /></div></div>
                 <label className="flex items-center gap-2 text-xs text-[#6D6997]"><input type="checkbox" checked={subjectDraft.active} onChange={e => updateSubject({ active: e.target.checked })} className="accent-[#534AB7]" /> Available for curriculum design</label>
                 {subjectDraft.revision > 0 && (
                   <div className="rounded-2xl bg-[#F7F5FF] p-3">

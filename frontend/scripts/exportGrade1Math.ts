@@ -33,6 +33,7 @@ import { createGrade1MathTemplate } from "../src/curriculum/grade1MathTemplate";
 import { CONCEPT_ID_PATTERN } from "../src/curriculum/types";
 import { SCHEMA_REGISTRY } from "../src/components/studio/ai-generator/schemas";
 import { solvedSelection } from "../src/student/answerSelection";
+import { shapeForLabel } from "../src/assets/assetCatalog";
 import type { CountingQuestion } from "../src/types";
 
 const OUTPUT = resolve(import.meta.dirname, "../../backend/scripts/data/grade1_math_questions.json");
@@ -111,6 +112,25 @@ function problemsWith(question: GeneratedQuestion, conceptId: string): string[] 
       problems.push(`title "${question.title}" contains the answer ${question.targetCount}`);
     }
   }
+
+  // A data chart column is a word and a picture of the same thing. When the two were authored
+  // separately they drifted: "Pears" over flowers, "Plums" over hearts, "Boats" over fish — and
+  // the question then asked a child to count pears in a column that had none.
+  const categories: string[] = config.dataCategories ?? [];
+  const assets: string[] = config.dataAssets ?? [];
+  categories.forEach((name, index) => {
+    const drawn = assets[index];
+    const named = shapeForLabel(name);
+    if (!drawn || drawn === "emoji") {
+      if (!named) problems.push(`chart column "${name}" has no artwork and no shape draws it`);
+      return;
+    }
+    if (!named) {
+      problems.push(`chart column "${name}" is drawn with ${drawn} artwork, which is not a ${name.toLowerCase()}`);
+    } else if (named !== drawn) {
+      problems.push(`chart column "${name}" is drawn with ${drawn} artwork`);
+    }
+  });
 
   const explanation = String(config.explanation ?? "").trim();
   if (!explanation) {

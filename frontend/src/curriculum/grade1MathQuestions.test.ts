@@ -25,6 +25,7 @@ import { normalizeShapeConfig, shapeAnswer, shapePrompt, composition } from "../
 import { normalizeMeasureConfig, measureAnswer } from "../components/canvases/MeasureLengthCanvas";
 import { normalizeDataConfig, dataAnswer, dataPrompt } from "../components/canvases/DataChartCanvas";
 import { normalizeClockConfig } from "../components/canvases/ClockCanvas";
+import { shapeForLabel } from "../assets/assetCatalog";
 
 const questions = GRADE_1_MATH_QUESTIONS.flatMap(skill =>
   skill.questions.map(question => ({ ...question, config: question.config as Record<string, any> })),
@@ -170,6 +171,26 @@ test("data chart questions solve to the answer, and the instruction is the canva
     });
     assert.equal(dataAnswer(config), question.targetCount, `${question.id} chart answer`);
     assert.equal(dataPrompt(config), question.instruction, `${question.id} prompt drift`);
+  }
+});
+
+/**
+ * The column labelled "Pears" was drawn with flowers, and "Plums" with hearts, because the word
+ * and the picture were authored as two independent lists. "How many Pears?" over a column
+ * containing no pears is not a hard question, it is an unanswerable one.
+ */
+test("every chart column is drawn as the thing its label names", () => {
+  for (const question of of("DATA_CHART")) {
+    const categories: string[] = question.config.dataCategories ?? [];
+    const assets: string[] = question.config.dataAssets ?? [];
+    assert.ok(categories.length > 0, `${question.id} has no chart columns`);
+    categories.forEach((name, index) => {
+      assert.equal(
+        assets[index],
+        shapeForLabel(name),
+        `${question.id} column "${name}" is drawn with ${assets[index] ?? "no"} artwork`,
+      );
+    });
   }
 });
 

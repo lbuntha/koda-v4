@@ -2751,8 +2751,8 @@
       ],
       "dataCategories": [
         "Apples",
-        "Pears",
-        "Plums"
+        "Flowers",
+        "Hearts"
       ],
       "dataAssets": [
         "apple",
@@ -2772,7 +2772,7 @@
   {
     "id": "seed-g1-math-q-organize-data-127",
     "title": "Read the chart",
-    "instruction": "How many Boats?",
+    "instruction": "How many Fish?",
     "technique": "DATA_CHART",
     "skillId": "g1-math-skill-organize-data",
     "difficulty": "easy",
@@ -2788,7 +2788,7 @@
       "dataCategories": [
         "Cars",
         "Rockets",
-        "Boats"
+        "Fish"
       ],
       "dataAssets": [
         "car",
@@ -2797,7 +2797,7 @@
       ],
       "dataFocus": 2,
       "dataAgainst": 1,
-      "explanation": "6 Boats. Count up that one column only — the chart keeps each group in its own column so they never get mixed up.",
+      "explanation": "6 Fish. Count up that one column only — the chart keeps each group in its own column so they never get mixed up.",
       "answerChoiceSlot": 2
     },
     "conceptId": "data.categories.organize",
@@ -2895,8 +2895,8 @@
       ],
       "dataCategories": [
         "Apples",
-        "Pears",
-        "Plums"
+        "Flowers",
+        "Hearts"
       ],
       "dataAssets": [
         "apple",
@@ -2905,7 +2905,7 @@
       ],
       "dataFocus": 0,
       "dataAgainst": 1,
-      "explanation": "Pears, with 6. The tallest column is the biggest number because every column counts one object per square.",
+      "explanation": "Flowers, with 6. The tallest column is the biggest number because every column counts one object per square.",
       "answerChoiceSlot": 1
     },
     "conceptId": "data.categories.organize",
@@ -2916,7 +2916,7 @@
   {
     "id": "seed-g1-math-q-interpret-data-131",
     "title": "Read the chart",
-    "instruction": "How many more Apples than Pears?",
+    "instruction": "How many more Apples than Flowers?",
     "technique": "DATA_CHART",
     "skillId": "g1-math-skill-interpret-data",
     "difficulty": "easy",
@@ -2931,8 +2931,8 @@
       ],
       "dataCategories": [
         "Apples",
-        "Pears",
-        "Plums"
+        "Flowers",
+        "Hearts"
       ],
       "dataAssets": [
         "apple",
@@ -2968,7 +2968,7 @@
       "dataCategories": [
         "Cars",
         "Rockets",
-        "Boats"
+        "Fish"
       ],
       "dataAssets": [
         "car",
@@ -3075,8 +3075,8 @@
       ],
       "dataCategories": [
         "Apples",
-        "Pears",
-        "Plums"
+        "Flowers",
+        "Hearts"
       ],
       "dataAssets": [
         "apple",

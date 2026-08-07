@@ -1,9 +1,11 @@
 """Idempotently migrate legacy embedded grade/subject metadata to catalogs."""
 
 import re
+from datetime import datetime, timezone
 
 from ..models.academic import Grade, Subject
-from ..models.content import Curriculum
+from ..models.content import Curriculum, SvgLibrary
+from .subject_icons import SUBJECT_ICON_ASSETS, default_subject_icon
 
 
 def _code(value: str, fallback: str) -> str:
@@ -64,3 +66,39 @@ async def ensure_academic_catalogs() -> None:
         if compact_grades != curriculum.tree.get("grades", []) or compact_subjects != curriculum.tree.get("subjects", []):
             curriculum.tree = {**curriculum.tree, "grades": compact_grades, "subjects": compact_subjects}
             await curriculum.save()
+
+    # Upgrade only legacy/default subject icons. A subject with a saved SVG snapshot is an
+    # intentional admin choice and must never be replaced during application startup.
+    subjects = await Subject.find_all().to_list()
+    for subject in subjects:
+        asset = default_subject_icon(subject.key, subject.code, subject.name)
+        if not asset:
+            continue
+
+        legacy_icon = not subject.icon_asset and subject.icon in {"", "Calculator", "Brain"}
+        if legacy_icon:
+            subject.icon = asset["id"]
+            subject.icon_asset = dict(asset)
+            subject.revision += 1
+            subject.updated_at = datetime.now(timezone.utc)
+            await subject.save()
+
+    # Keep both first-party icons available in Settings -> SVG Library for every catalog
+    # owner. This lets a subject seeded later attach its icon immediately. Deleting a system
+    # asset is respected, while an existing frozen subject snapshot continues to render.
+    for owner_id in {subject.created_by for subject in subjects}:
+        library = await SvgLibrary.find_one(SvgLibrary.owner_id == owner_id)
+        if not library:
+            library = SvgLibrary(owner_id=owner_id, assets=[dict(asset) for asset in SUBJECT_ICON_ASSETS])
+            await library.insert()
+            continue
+        existing_ids = {item.get("id") for item in library.assets}
+        missing_assets = [
+            dict(asset) for asset in SUBJECT_ICON_ASSETS
+            if asset["id"] not in existing_ids and asset["id"] not in library.deleted_system_asset_ids
+        ]
+        if missing_assets:
+            library.assets = [*library.assets, *missing_assets]
+            library.revision += 1
+            library.updated_at = datetime.now(timezone.utc)
+            await library.save()

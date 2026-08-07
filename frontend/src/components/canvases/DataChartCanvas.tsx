@@ -21,6 +21,9 @@ import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import { CanvasChip, CanvasAccent, captionClass } from "./canvasTheme";
 import { CanvasBin } from "./CanvasBin";
 import { CountingAsset, AssetType } from "../Assets";
+import { ASSET_PLURAL, assetDrawProps, shapeForLabel, type ShapeAssetType } from "../../assets/assetCatalog";
+import { useAssetLibrary } from "../../assets/questionAsset";
+import { COUNT_OBJECTS } from "../../types";
 import { GhostGuideOverlay, useGhostGuide } from "../../pedagogy";
 import { OBJECT_SIZE } from "./objectLayout";
 import type { CanvasProps } from "./types";
@@ -46,8 +49,24 @@ export interface DataChartConfig {
   assets: string[];
 }
 
-const DEFAULT_CATEGORIES = ["Apples", "Pears", "Plums"];
-const EMOJI = ["🍎", "🍐", "🍇"];
+/**
+ * Defaults a chart can actually draw.
+ *
+ * These used to be "Apples, Pears, Plums" against a positional fruit fallback of 🍎🍐🍇 — three
+ * words paired with three pictures by nothing more than list order. Nothing kept them together:
+ * a chart about cars drew pears, and the seeded Grade 1 set labelled flowers "Pears" and hearts
+ * "Plums". Every default here is a shape the catalog owns, and its label is read back from that
+ * shape, so the word under a column always names the picture above it.
+ */
+const DEFAULT_SHAPES: ShapeAssetType[] = ["apple", "flower", "heart"];
+const DEFAULT_CATEGORIES = DEFAULT_SHAPES.map(shape => ASSET_PLURAL[shape]);
+
+/**
+ * Last resort when a category is named something no built-in shape draws — an author's own
+ * "Ladybirds", say. Neutral counters, distinct enough to tell the columns apart, and honest:
+ * a plain disc contradicts no label, where a pear drawn under the word "Plums" does.
+ */
+const NEUTRAL_MARKERS = ["⬤", "▲", "■"];
 
 export function normalizeDataConfig(input: Partial<DataChartConfig>): DataChartConfig {
   const kind: DataQuestionKind =
@@ -154,6 +173,8 @@ export const DataChartCanvas: React.FC<CanvasProps> = ({
     ? (question.config.frameColor as CanvasAccent)
     : "rose";
   const { showGhostGuide, reportActivity } = useGhostGuide({ isPlayMode, isSolved: solved, idleThresholdMs: 10000 });
+  /** An adult's live SVG library, or the frozen copy published with a learner's release. */
+  const library = useAssetLibrary();
 
   /**
    * The chart, sized from the room it has.
@@ -205,8 +226,30 @@ export const DataChartCanvas: React.FC<CanvasProps> = ({
     return { gap, columnWidth, size, footer };
   }, [chart?.width, chart?.height, config.counts]);
 
-  /** A category's artwork: the slide's choice, then the built-in fruit. */
-  const assetFor = (index: number) => config.assets[index] || "emoji";
+  /**
+   * A category's artwork, in the order that keeps the picture honest: what the slide chose,
+   * then whatever draws the word under the column, then a neutral counter.
+   *
+   * The middle step is the one that matters. A chart is read by telling the columns apart, and
+   * a child who is told a column of flowers is "Pears" is being taught to distrust the chart.
+   */
+  const artworkFor = (index: number): { type: AssetType; assetId?: string; emoji: string } => {
+    const authored = config.assets[index];
+    // "emoji" means "whatever object this slide picked" — without its character it would render
+    // `CountingAsset`'s own apple default, putting apples under all three labels.
+    if (authored === "emoji") {
+      const picked = COUNT_OBJECTS.find(item => item.id === question.objectId);
+      return { type: "emoji", emoji: picked?.emoji || NEUTRAL_MARKERS[index] || NEUTRAL_MARKERS[0] };
+    }
+    // Any catalog id: a drawable shape, a Goods Sort sprite, an emoji object, or one of the
+    // account's own SVGs. A library asset that this viewer cannot see — deleted, or never
+    // published with the release a learner is playing — falls through rather than drawing a gap.
+    const drawn = assetDrawProps(authored, library);
+    if (drawn) return { type: drawn.type as AssetType, assetId: drawn.assetId, emoji: drawn.emoji ?? "" };
+    const named = shapeForLabel(config.categories[index]);
+    if (named) return { type: named as AssetType, emoji: "" };
+    return { type: "emoji", emoji: NEUTRAL_MARKERS[index] ?? NEUTRAL_MARKERS[0] };
+  };
 
   return (
     <SharedCanvasLayout
@@ -251,14 +294,18 @@ export const DataChartCanvas: React.FC<CanvasProps> = ({
               >
                 {/* The column, counted from the baseline up, the way a child reads it. */}
                 <div className="flex flex-1 flex-col-reverse items-center justify-start" style={{ gap: "2px" }}>
-                  {Array.from({ length: count }).map((_, item) => (
-                    <CountingAsset
-                      key={item}
-                      type={assetFor(index) as AssetType}
-                      emoji={EMOJI[index] ?? "\u2b24"}
-                      size={geometry.size}
-                    />
-                  ))}
+                  {Array.from({ length: count }).map((_, item) => {
+                    const artwork = artworkFor(index);
+                    return (
+                      <CountingAsset
+                        key={item}
+                        type={artwork.type}
+                        assetId={artwork.assetId}
+                        emoji={artwork.emoji}
+                        size={geometry.size}
+                      />
+                    );
+                  })}
                 </div>
                 <span className={`h-0.5 w-full rounded ${isDark ? "bg-slate-600" : "bg-slate-300"}`} />
                 <span className={`w-full truncate text-center text-[10px] font-black uppercase tracking-[0.1em] sm:text-xs ${isDark ? "text-slate-300" : "text-slate-600"}`}>

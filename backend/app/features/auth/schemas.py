@@ -1,8 +1,11 @@
 """Request/response models for the auth feature."""
 
 from typing import Literal
+from urllib.parse import unquote
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
+
+from ..content.schemas import _validated_svg
 
 
 class TokenPair(BaseModel):
@@ -32,16 +35,26 @@ class StudentLoginIn(BaseModel):
 
 
 class StudentAvatarIn(BaseModel):
-    avatar: Literal[
-        "koda-kid:boy-sky",
-        "koda-kid:boy-mint",
-        "koda-kid:boy-sun",
-        "koda-kid:boy-violet",
-        "koda-kid:girl-rose",
-        "koda-kid:girl-mint",
-        "koda-kid:girl-sun",
-        "koda-kid:girl-violet",
-    ]
+    # Same values as signup: local ids, emoji, SVG-library artwork, and frozen remote art.
+    avatar: str = Field(min_length=1, max_length=1_500_000)
+
+    @field_validator("avatar")
+    @classmethod
+    def validate_signup_avatar(cls, avatar: str) -> str:
+        if avatar.startswith("https://api.dicebear.com/7.x/"):
+            return avatar
+        if avatar.startswith("data:image/svg+xml"):
+            if "," not in avatar:
+                raise ValueError("SVG avatar data is malformed")
+            _validated_svg(unquote(avatar.split(",", 1)[1]))
+            return avatar
+        if avatar.lstrip().lower().startswith("<svg"):
+            _validated_svg(avatar)
+            return avatar
+        # Koda ids, legacy art keys, and emoji are short plain-text values rendered by React.
+        if len(avatar) <= 64 and "://" not in avatar:
+            return avatar
+        raise ValueError("Avatar must be one of the supported signup choices")
 
 
 class LaunchIn(BaseModel):

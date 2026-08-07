@@ -39,6 +39,7 @@
  */
 
 import { CountingTechnique } from "../types";
+import { ASSET_PLURAL, type ShapeAssetType } from "../assets/assetCatalog";
 
 export interface GeneratedQuestion {
   id: string;
@@ -494,16 +495,21 @@ const measure = (
  *
  * Ten charts of the same three fruits is ten times the same picture, and a child
  * reading "how many more Apples than Pears" for the fifth time is reading a
- * layout, not a chart. Each set names its columns and gives each one its own
- * artwork — which the canvas can draw now that a chart is no longer three
- * hardcoded fruit emoji.
+ * layout, not a chart. So each set draws its own three things.
+ *
+ * A set names *artwork*, and the column labels are read back from it. Naming the
+ * two separately is what produced the bug this replaces: the first set said
+ * "Apples, Pears, Plums" over apples, flowers and hearts, and the second called a
+ * fish a boat. The child was asked to count pears in a column of flowers — the one
+ * thing a chart must never do is disagree with its own labels. Only shapes the
+ * catalogue can actually draw can appear here, which is why there are no pears.
  */
-const CHART_SETS = [
-  { names: ["Apples", "Pears", "Plums"], assets: ["apple", "flower", "heart"] },
-  { names: ["Cars", "Rockets", "Boats"], assets: ["car", "rocket", "fish"] },
-  { names: ["Bears", "Dinos", "Butterflies"], assets: ["bear", "dino", "butterfly"] },
-  { names: ["Stars", "Suns", "Flowers"], assets: ["star", "sun", "flower"] },
-] as const;
+const CHART_SETS: ShapeAssetType[][] = [
+  ["apple", "flower", "heart"],
+  ["car", "rocket", "fish"],
+  ["bear", "dino", "butterfly"],
+  ["star", "sun", "flower"],
+];
 
 const chart = (
   skillId: string,
@@ -517,7 +523,7 @@ const chart = (
       : row.kind === "most" ? row.counts.indexOf(Math.max(...row.counts)) + 1
       : row.counts[focus];
     const theme = CHART_SETS[(row.set ?? index) % CHART_SETS.length];
-    const names = [...theme.names];
+    const names = theme.map(shape => ASSET_PLURAL[shape]);
     const prompt = row.kind === "total" ? "How many altogether?"
       : row.kind === "more" ? `How many more ${names[focus]} than ${names[against]}?`
       : row.kind === "most" ? "Which group has the most?"
@@ -541,7 +547,7 @@ const chart = (
       config: {
         dataKind: row.kind, dataCounts: row.counts,
         dataCategories: names.slice(0, row.counts.length),
-        dataAssets: theme.assets.slice(0, row.counts.length),
+        dataAssets: theme.slice(0, row.counts.length),
         dataFocus: focus, dataAgainst: against,
         explanation,
       },

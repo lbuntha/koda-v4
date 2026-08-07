@@ -652,6 +652,7 @@ async def learning_subjects(student: Student = Depends(get_current_student)):
             "id": assignment.subject_id,
             "name": item.name if item else assignment.subject_id,
             "icon": item.icon if item else "",
+            "iconAsset": item.icon_asset if item else None,
             "color": item.color if item else "#7252D8",
             "assignmentId": str(assignment.id),
             "ready": ready,
