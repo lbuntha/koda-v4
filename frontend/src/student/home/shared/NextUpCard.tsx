@@ -1,6 +1,6 @@
 import React from "react";
 import { Clock3, Play, Sparkles, Zap } from "lucide-react";
-import { Button } from "../../../components/ui";
+import { Button, Card } from "../../../components/ui";
 
 interface Props {
   title: string;
@@ -66,9 +66,9 @@ export const NextUpCard: React.FC<Props> = ({
 
   return (
     <section className="group relative mx-auto w-full max-w-5xl pb-3 sm:pr-32 lg:pr-44">
-      <article className="relative min-h-60 overflow-hidden rounded-[1.65rem] border-2 border-[#D7CCFF] bg-white p-5 shadow-[0_16px_38px_-34px_rgba(71,54,135,0.5)] transition-transform duration-300 sm:-rotate-[1.1deg] sm:p-6 sm:group-hover:rotate-0 lg:min-h-64 dark:border-violet-400/25 dark:bg-[#17162F] dark:shadow-none">
+      <Card variant="activity" className="relative min-h-[20rem] overflow-hidden p-5 sm:min-h-60 sm:p-6 lg:min-h-64">
         <div className="max-w-[68%] sm:max-w-[66%]">
-          <span className="inline-flex max-w-full items-center gap-1.5 rounded-full bg-[linear-gradient(90deg,#7551F4,#623DDF)] px-3 py-1.5 text-[10px] font-black text-white shadow-md shadow-violet-500/20 sm:text-xs">
+          <span className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-[#7C3AED] bg-[#7C3AED] px-3 py-1.5 text-[10px] font-black text-white shadow-[0_3px_0_#5421B8] sm:text-xs">
             <Sparkles size={13} className="shrink-0 fill-current" />
             <span className="truncate">{badge}</span>
           </span>
@@ -96,7 +96,7 @@ export const NextUpCard: React.FC<Props> = ({
           )}
         </div>
 
-        <div className="absolute inset-x-5 bottom-5 flex items-end justify-between gap-4 sm:inset-x-6 sm:bottom-6">
+        <div className="absolute inset-x-5 bottom-5 flex flex-col items-stretch gap-3 sm:inset-x-6 sm:bottom-6 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
           <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2 text-xs font-black text-[#665D7B] sm:text-sm dark:text-[#BBB4CF]">
             {difficulty && <DifficultyDots difficulty={difficulty} />}
             {typeof minutes === "number" && (
@@ -116,14 +116,15 @@ export const NextUpCard: React.FC<Props> = ({
 
           <Button
             type="button"
+            size="lg"
             onClick={onStart}
-            className="h-11 shrink-0 rounded-full border-[#6844EA] bg-[#6844EA] px-5 text-sm font-black text-white shadow-lg shadow-violet-500/25 hover:border-[#5734D2] hover:bg-[#5734D2] sm:px-6"
+            className="w-full shrink-0 sm:w-auto"
           >
             <Play size={16} className="fill-current" />
             {inProgress || hasProgress ? "Continue" : "Play"}
           </Button>
         </div>
-      </article>
+      </Card>
 
       <img
         src="/assets/koda-bear-mascot.png"

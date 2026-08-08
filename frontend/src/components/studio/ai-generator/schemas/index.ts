@@ -2,7 +2,7 @@
  * Schemas barrel export
  */
 export type { ComponentSchema, SchemaField, SchemaAsset } from "./types";
-export { moveAndCountSchema } from "./moveAndCount.schema";
+export { countSchema } from "./count.schema";
 export { additionTutorSchema } from "./additionTutor.schema";
 export {
   SCHEMA_REGISTRY,

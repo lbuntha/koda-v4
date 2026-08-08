@@ -1,11 +1,16 @@
 # Canvas layout pattern — "the Move & Count design"
 
-**The reference implementation is `frontend/src/components/canvases/MoveAndCountCanvas.tsx`.**
+**The reference implementation is `frontend/src/components/canvases/CountCanvas.tsx`.**
 When the ask is *"make canvas X look/behave like Move & Count"*, this file is the spec.
 Read it, then read the reference canvas, then port.
 
-Already on the pattern: `MoveAndCountCanvas`, `LineUpCanvas`, `GroupTensCanvas`, `CountOnCanvas`,
-`CountBackCanvas`, `ArrangementsCanvas`, `MagnetsCanvas`, `SubitizeCanvas`, `AdditionCanvas`,
+> **Move & Count is no longer a component.** It is a *staging* of `CountCanvas` — see §10.
+> `MoveAndCountCanvas`, `OneToOneCanvas`, `LineUpCanvas` and `MagnetsCanvas` were four copies
+> of one activity and were merged; their technique ids still resolve, so released content is
+> untouched. Do not re-create them.
+
+Already on the pattern: `CountCanvas`, `GroupTensCanvas`, `CountOnCanvas`,
+`CountBackCanvas`, `ArrangementsCanvas`, `SubitizeCanvas`, `AdditionCanvas`,
 `SubtractionCanvas`, `FlexibleCanvas`, `StoryProblemMatCanvas`, `PlaceValueLabCanvas`,
 `DataChartCanvas`, `MeasureLengthCanvas`.
 
@@ -178,8 +183,8 @@ const { x, y } = slotPosition(order, count, zone, itemSize);
 
 - `order` is **progress, not index**: the n-th object *in that bin*. Slotting by array index
   leaves a hole where a moved object used to be, which a child reads as "one is missing".
-- **Re-flow the whole source bin on release, never just the object that was let go.** Placing
-  the released object alone — at `others still loose + 1`, the end of the queue — drops it on
+- **Re-flow *every* bin on release, never just the object that was let go.** Placing the
+  released object alone — at `others still loose + 1`, the end of the queue — drops it on
   top of whichever sibling already sits there. Where the activity is ordinal (Count On: only
   the front object may move) it also leaves a *locked* object at the head of the queue, and a
   child reads that as the object refusing to be dragged. Map over the bin and re-rank:
@@ -188,6 +193,13 @@ const { x, y } = slotPosition(order, count, zone, itemSize);
   let rank = 0;
   return settled.map(d => (d.placed ? d : { ...d, ...trayPos(++rank) }));
   ```
+
+  **This applies to the destination bin too, and that is the half everyone forgets.** Numbering
+  an arrival `counted.length + 1` assumes the orders already in the bin are contiguous. Pull the
+  2nd of three back out and the next drop computes 3 — landing exactly on the object already
+  badged 3, with the tally reading 3 while the child can see two. Sort the bin by its existing
+  order (the arrival carries `null`, which sorts last), renumber 1..n, and re-slot. Badges are a
+  count: they must always read 1..n, with no gaps and no repeats.
 - Fallback zone when a ref has not measured yet — never lay out against a guessed stage.
   `dimensions` starts `null` and nothing is placed until a real `ResizeObserver` measurement
   lands (seeded in `useLayoutEffect`, before paint).
@@ -254,6 +266,10 @@ A question change (`question.id`, `objectId`, `targetCount`) rebuilds from scrat
 - **A tap is not a drag.** Record the press origin and only treat the gesture as a drag once
   the pointer has travelled >4px; a press that goes nowhere must leave the board untouched and
   make no slide sound. Children tap objects constantly — to hear them, to point at them.
+  Gate three things on it, not one: the object must not move until the threshold is crossed,
+  the pick-up sound belongs at the crossing rather than at `pointerdown`, and `pointerup`
+  below the threshold must return without touching item state at all. Addition and Magnets
+  only ever gated the sound, so a tap there still nudges the board.
 - `handlePointerUp`, design mode: snap to grid and persist via `onUpdateQuestionConfig`:
 
 ```ts
@@ -317,18 +333,74 @@ Tests that assert object positions must read `style.translate`, not `style.left`
 
 ## 8. The answer panel
 
-When `config.requireAnswerInput` (default true) and the activity is complete:
+**One implementation: `CanvasAnswerPanel.tsx`.** Never hand-roll this again — it was copied
+into ten canvases and drifted in all of them.
 
-- Dock it **over the bin the objects just left** — never over the objects being counted.
-  The question is "how many in total", so the evidence has to stay visible.
-- Positioning lives on a wrapper `div`; the panel itself animates with transforms, which
-  would fight a centring transform.
-- `pointer-events-none` on the wrapper, `pointer-events-auto` on the panel.
-- Contents, in order: 🎉 + question, input + **Check** + calculator toggle, error banner,
-  collapsible 5-column number pad (digits 1–9, 0, then Backspace / Clear).
-- Border colour carries the state: red `#ef4444` error, emerald `#10b981` correct, else the
-  neutral slate hairline. Correct → `sounds.playSuccess()` then `onSuccess()` after 500ms.
-- Autofocus the input ~350ms after completion.
+```tsx
+const answer = useCanvasAnswer({
+  expected: count,
+  resetKey: `${question.id}:${count}`,     // a new question clears a stale "correct"
+  wrongMessage: `Not quite! You moved ${count} ${obj.label}s. Enter ${count}!`,
+  onSuccess,
+  open: answerPanelOpen                    // isPlayMode && requireAnswerInput && isComplete
+});
+
+<CanvasAnswerPanel
+  answer={answer} open={answerPanelOpen} isDark={isDark}
+  dock="left"
+  prompt={`How many ${obj.label}s did you move in total?`}
+/>
+```
+
+The split is deliberate: `useCanvasAnswer` is the state machine (typing, checking, the
+success hand-off, reset), `CanvasAnswerPanel` is the chrome. A canvas supplies only what is
+genuinely its own — the expected number, the wording, where it docks.
+
+- It takes **plain props, not `question.config`**. Where the settings come from — a teacher's
+  panel today, a prebuilt template later — is the host's business.
+- `dock` is `"bottom"` (most), `"top"` (Addition), or `"left"` — over the bin the objects just
+  left, never over the objects being counted. The question is "how many in total", so the
+  evidence has to stay visible. Positioning lives on the panel's own wrapper `div`; the panel
+  animates with a spring transform and a centring `mx-auto` on the same element fights it.
+  Multiplication, One-to-One and Line Up each got this wrong before the extraction.
+- `onHeightChange` reports the measured height, for canvases that shrink their play area to
+  make room (One-to-One, Line Up). It grows by about half again when the pad opens.
+- `solvedForGuide` reads `answer.solved`, and the canvas's own success effect handles only
+  the `!requireAnswerInput` case — the panel owns the hand-off when an answer is required.
+- The pad here is the 5-column counting one (digits 1–9, 0, then Backspace / Clear).
+  `NumberPad.tsx` is a different pad for a different job: digits into a column-arithmetic grid.
+- Behaviour is locked by `CanvasAnswerPanel.test.tsx`. Extend those, not a per-canvas copy.
+
+Still on their own copies, to migrate: Addition, Arrangements, CountBack, CountOn,
+Multiplication, GroupTens.
+
+---
+
+## 10. The Count engine and its stagings
+
+Nine components taught *count these objects* and differed in one thing: what counting
+physically is. They are now **one engine plus a staging per way of counting**.
+
+- `CountCanvas.tsx` — the engine. Stage measurement, item state, ranking, drag, tap, keyboard,
+  badges, sounds, CPA, ghost guide, answer panel, resize.
+- `countStaging/` — one file per staging: `move`, `tap`, `lineup`, `container`. Each owns
+  `zones`, `layout`, `resolve`, `isComplete`, and nothing else.
+
+**The rule that keeps it honest: if a change needs `if (staging.id === …)` in the engine, it
+belongs in the staging.** Capabilities are declared, not sniffed — `movesOnCount`,
+`ordersByPlacement`, `orientation`, optional `slots()` and `Decoration`.
+
+Two invariants the engine owns for every staging, because both were bugs before:
+
+- **Re-ranking is the engine's.** A staging never assigns a count order. Numbering an arrival
+  `counted.length + 1` assumes contiguity; pull the 2nd of three out and the next drop collides
+  with the object already badged 3. The exception is declared, not improvised: `ordersByPlacement`
+  says the staging owns the ordinal (Line Up, where the slot *is* the number).
+- **A tap is not a drag.** Threshold, sound and state change are all gated in one place.
+
+Adding a staging is a file plus a ladder row in `countLevels.ts`. Never an engine edit.
+Still to fold in: `tens` (Count Crates / Group in Tens), which needs a staging that can say
+"ten ones become one ten" rather than one object one count.
 
 ---
 

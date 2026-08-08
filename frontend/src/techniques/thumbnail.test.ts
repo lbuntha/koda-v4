@@ -17,6 +17,12 @@ test("every technique now owns component artwork", () => {
     .filter(manifest => !manifest.defaultThumbnailUrl)
     .map(manifest => manifest.technique);
   assert.deepEqual(missing, []);
+});
+
+test("a technique that outlived its manifest keeps its artwork", () => {
+  // ONE_TO_ONE was absorbed into Count, so it has no manifest to carry a thumbnail. Its
+  // questions are still inside published releases, and a child's card should keep the picture
+  // it always had instead of dropping to the generic mascot.
   assert.equal(
     defaultThumbnailForTechnique(CountingTechnique.ONE_TO_ONE),
     "/assets/components/one-to-one.svg",

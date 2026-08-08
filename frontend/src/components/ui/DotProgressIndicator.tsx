@@ -21,7 +21,7 @@ export const DotProgressIndicator: React.FC<DotProgressIndicatorProps> = ({
 
   return (
     <div className={`flex flex-col items-center justify-center min-w-0 ${className}`}>
-      <div className="flex items-center gap-1.5 sm:gap-2 max-w-full overflow-x-auto py-0.5 scrollbar-none">
+      <div className="flex max-w-full items-center gap-1.5 overflow-x-auto px-1.5 py-1 sm:gap-2 scrollbar-none">
         {total <= maxDots ? (
           Array.from({ length: total }).map((_, i) => {
             const isCompleted = i < current;

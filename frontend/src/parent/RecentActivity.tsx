@@ -92,7 +92,7 @@ export const RecentActivity: React.FC<Props> = ({ profiles, summaries, loading, 
     .slice(0, 4), [profiles, summaries]);
 
   return (
-    <section className={compact ? "rounded-3xl border border-[#E7E3F6] bg-white p-4 shadow-[0_6px_24px_rgba(83,74,183,0.05)] dark:border-white/10 dark:bg-[#14182A]" : ""}>
+    <Card variant="activity" className={compact ? "p-4" : "border-0 bg-transparent shadow-none dark:bg-transparent dark:shadow-none"}>
       <div>
         <h2 className="text-lg font-semibold text-[#0E0B55] dark:text-white">Recent activity</h2>
         <p className="mt-1 text-xs font-medium text-[#6D6997] dark:text-[#8F99AD]">Latest verified learning across your family.</p>
@@ -138,6 +138,6 @@ export const RecentActivity: React.FC<Props> = ({ profiles, summaries, loading, 
           </div>
         )}
       </Card>
-    </section>
+    </Card>
   );
 };

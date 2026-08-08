@@ -2,7 +2,7 @@
  * Subtraction Sandbox — Component Schema
  *
  * Single source of truth for what the AI knows about the Subtraction canvas.
- * Replicated from moveAndCount.schema.ts following the README recipe.
+ * Replicated from count.schema.ts following the README recipe.
  */
 
 import { CountingTechnique } from "../../../../types";

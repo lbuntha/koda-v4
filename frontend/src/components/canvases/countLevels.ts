@@ -15,8 +15,12 @@
  * bottles to 12 without changing what the child does. Counting does not work that way, and
  * the authored ranges say so — every counting canvas is validated to a band:
  *
- *     ONE_TO_ONE 1-12   LINE_UP_AND_COUNT 2-10   DIFFERENT_ARRANGEMENTS 3-12
- *     SUBITIZE 2-6      COUNT_ON 2-15            GROUP_IN_TENS 11-20
+ *     MOVE_AND_COUNT 1-12   DIFFERENT_ARRANGEMENTS 3-12
+ *     SUBITIZE 2-6          COUNT_ON 2-15            GROUP_IN_TENS 11-20
+ *
+ * The first four rows used to say ONE_TO_ONE. That technique was absorbed into Count, so they
+ * now say MOVE_AND_COUNT and carry `staging: "tap"` — the same activity, named by what the
+ * child does rather than by a component that no longer exists on its own.
  *
  * Past twelve, "tap each object once" stops being the skill — grouping into tens is. So the
  * ladder hands off between canvases as the number grows, and the difficulty dimensions are
@@ -54,36 +58,36 @@ export const COUNT_CURRICULUM_LEVELS: CountLevel[] = [
     label: "Three in a row",
     rationale: "The first win. A short line removes every tracking problem so the count is the only task.",
     tier: "starter",
-    technique: CountingTechnique.ONE_TO_ONE,
+    technique: CountingTechnique.MOVE_AND_COUNT,
     targetCount: 3,
-    config: { pattern: "line", showNumbersOnTap: true, requireAnswerInput: false },
+    config: { staging: "tap", pattern: "line", showNumbersOnTap: true, requireAnswerInput: false },
   },
   {
     id: "count_2",
     label: "Five in a row",
     rationale: "Same layout, one hand's worth — the count children meet first outside school.",
     tier: "starter",
-    technique: CountingTechnique.ONE_TO_ONE,
+    technique: CountingTechnique.MOVE_AND_COUNT,
     targetCount: 5,
-    config: { pattern: "line", showNumbersOnTap: true, requireAnswerInput: false },
+    config: { staging: "tap", pattern: "line", showNumbersOnTap: true, requireAnswerInput: false },
   },
   {
     id: "count_3",
     label: "Six in pairs",
     rationale: "Pairs break the line into groups, the first hint that counting need not be one at a time.",
     tier: "starter",
-    technique: CountingTechnique.ONE_TO_ONE,
+    technique: CountingTechnique.MOVE_AND_COUNT,
     targetCount: 6,
-    config: { pattern: "pairs", showNumbersOnTap: true, requireAnswerInput: false },
+    config: { staging: "tap", pattern: "pairs", showNumbersOnTap: true, requireAnswerInput: false },
   },
   {
     id: "count_4",
     label: "Eight in a line, no numbers",
     rationale: "The tap numbers come off. The child now has to hold the running count themselves.",
     tier: "starter",
-    technique: CountingTechnique.ONE_TO_ONE,
+    technique: CountingTechnique.MOVE_AND_COUNT,
     targetCount: 8,
-    config: { pattern: "line", showNumbersOnTap: false, requireAnswerInput: true },
+    config: { staging: "tap", pattern: "line", showNumbersOnTap: false, requireAnswerInput: true },
   },
 
   // ── Developing: the layout stops helping ───────────────────────────────────────

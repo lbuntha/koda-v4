@@ -8,7 +8,7 @@ import { CountingQuestion } from "../types";
 import { sounds } from "../sound";
 import { QuestionAssetProvider } from "../assets/questionAsset";
 import { CanvasAudienceProvider } from "./canvases/presentation";
-import { OneToOneCanvas } from "./canvases/OneToOneCanvas";
+import { CountCanvas } from "./canvases/CountCanvas";
 import { CANVAS_BY_TECHNIQUE } from "./studio/canvasRegistry";
 import { LazyBoundary } from "./LazyBoundary";
 import {
@@ -33,7 +33,7 @@ import { analyticsLogger } from "../services/analyticsLogger";
 import { getTaxonomy, AttemptOutcome } from "../services/logSchema";
 import { solvedSelection } from "../student/answerSelection";
 import { useThemeMode } from "../theme/appTheme";
-import { DotProgressIndicator, Spinner } from "./ui";
+import { Button, DotProgressIndicator, Spinner } from "./ui";
 import { useZoomLock } from "../hooks/useZoomLock";
 
 interface GameLauncherProps {
@@ -386,7 +386,7 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
       onHint: handleHint,
     };
 
-    const Canvas = CANVAS_BY_TECHNIQUE[activeQuestion.technique] || OneToOneCanvas;
+    const Canvas = CANVAS_BY_TECHNIQUE[activeQuestion.technique] || CountCanvas;
     return (
       // Every canvas shares one layout; this tells that layout who is looking, so none of
       // the twenty-six need a prop for it.
@@ -401,22 +401,14 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
     );
   };
 
-  const iconBtn = `p-2.5 rounded-xl border transition-all duration-200 cursor-pointer flex items-center justify-center`;
-  const iconBtnDark = `bg-white/5 hover:bg-white/10 border-white/10 text-slate-300 hover:text-white`;
-  const iconBtnLight = `bg-black/5 hover:bg-black/10 border-black/10 text-slate-500 hover:text-slate-800`;
-
   return (
     <div
       // Two fingers on a ten-frame drag read as a pinch; the activity surface is the one
       // place that has to stay put. Everything outside it keeps browser zoom.
       ref={zoomLockRef}
-      className={`fixed inset-0 z-50 flex flex-col overflow-hidden font-sans select-none transition-colors duration-500
-        ${isDark
-          ? 'bg-[#0B0F1A]'
-          : 'bg-gradient-to-br from-indigo-50 via-white to-violet-50'
-        }
-      `}
+      className={`fixed inset-0 z-50 flex items-center justify-center overflow-hidden font-sans select-none transition-colors duration-500 md:p-4 lg:p-5 ${isDark ? "bg-[#070A12]" : "bg-white"}`}
     >
+      <div className={`relative flex h-full w-full flex-col overflow-hidden transition-colors duration-500 md:w-[92vw] md:rounded-[2rem] lg:w-[80vw] lg:max-w-[1600px] ${isDark ? "bg-[#0B0F1A]" : "bg-white"}`}>
       {/* ── Ambient glow blobs (dark mode only) ──────────── */}
       {isDark && (
         <>
@@ -426,98 +418,111 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
       )}
 
       {/* ══════════════════ TOP NAVBAR ═══════════════════ */}
-      <header className={`relative flex min-h-[3.75rem] shrink-0 items-center justify-between gap-2 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2.5 sm:px-5 md:px-6 z-20 border-b transition-colors duration-300 backdrop-blur-xl [-webkit-backdrop-filter:blur(16px)] [-webkit-tap-highlight-color:transparent]
-        ${isDark ? 'bg-[#111329]/95 border-white/10' : 'bg-white/95 border-slate-200/70 shadow-sm'}
+      <header className={`relative z-20 flex min-h-[4.5rem] shrink-0 items-center justify-between gap-3 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 transition-colors duration-300 [-webkit-tap-highlight-color:transparent] sm:px-6 md:min-h-[5.25rem] md:px-8 md:py-4 lg:px-12
+        ${isDark ? 'bg-[#0B0F1A]' : 'bg-white'}
       `}>
         {/* Left – branding & title */}
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 justify-start">
-          <div className="relative shrink-0">
-            <div className="absolute inset-0 rounded-xl bg-indigo-600 blur-sm opacity-40" />
-            <div className="relative bg-indigo-600 p-1.5 sm:p-2 rounded-xl text-white shadow-md">
-              <Gamepad2 size={16} className="sm:w-[17px] sm:h-[17px]" />
-            </div>
-          </div>
-          <div className="min-w-0 flex-1">
-            {assessment ? (
-              <p className={`text-[8px] sm:text-[9px] font-bold uppercase tracking-[0.16em] leading-none mb-0.5 truncate
-                ${isDark ? 'text-indigo-400' : 'text-indigo-600'}
-              `}>{assessment.eyebrow ?? "Placement check"}</p>
-            ) : !kidMode && (
-              <p className={`hidden sm:block text-[9px] font-bold uppercase tracking-[0.2em] font-mono leading-none mb-0.5 truncate
-                ${isDark ? 'text-slate-500' : 'text-slate-400'}
-              `}>Worksheet Game</p>
-            )}
-            <h1 className={`font-extrabold leading-tight truncate text-xs sm:text-sm md:text-base max-w-[140px] xs:max-w-[220px] sm:max-w-none
-              ${isDark ? 'text-white' : 'text-slate-900'}
-            `}>{activeQuestion?.title || "Learning Time"}</h1>
-          </div>
+        <div className="flex min-w-0 flex-1 items-center justify-start gap-2 sm:gap-3">
+          {(!assessment || onExit) && (
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => { sounds.playPop(); void leaveWith("exit", onExit ?? onClose); }}
+              loading={leaving === "exit"}
+              loadingText="Saving…"
+              aria-label="Exit activity"
+              title="Exit activity"
+              className={`h-11 w-11 shrink-0 rounded-2xl border-2 shadow-none ${isDark ? "border-white/10 bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white" : "border-[#E1E3EA] bg-white text-[#9CA3AF] hover:border-[#D4D6DF] hover:text-[#707784]"}`}
+            >
+              <X size={20} />
+              <span className="sr-only">Exit</span>
+            </Button>
+          )}
+          {!kidMode && (
+            <>
+              <div className="relative hidden shrink-0 sm:block">
+                <div className="absolute inset-0 rounded-xl bg-indigo-600 opacity-30 blur-sm" />
+                <div className="relative rounded-xl bg-indigo-600 p-2 text-white shadow-md">
+                  <Gamepad2 size={17} />
+                </div>
+              </div>
+              <div className="hidden min-w-0 flex-1 sm:block">
+                {assessment ? (
+                  <p className={`mb-0.5 truncate text-[9px] font-bold uppercase leading-none tracking-[0.16em] ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`}>{assessment.eyebrow ?? "Placement check"}</p>
+                ) : (
+                  <p className={`mb-0.5 truncate font-mono text-[9px] font-bold uppercase leading-none tracking-[0.2em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Worksheet Game</p>
+                )}
+                <h1 className={`max-w-[14rem] truncate text-sm font-extrabold leading-tight lg:text-base ${isDark ? 'text-white' : 'text-slate-900'}`}>{activeQuestion?.title || "Learning Time"}</h1>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Center – dot progress indicators (rendered when there is more than 1 question/level) */}
-        <DotProgressIndicator current={currentIdx} total={questions.length} isDark={isDark} className="flex-1 mx-2" />
+        <DotProgressIndicator
+          current={currentIdx}
+          total={questions.length}
+          isDark={isDark}
+          className="mx-1 min-w-[5rem] max-w-3xl flex-[1.7] sm:mx-4"
+        />
 
         {/* Right – compact mobile controls */}
         <div className="flex items-center justify-end gap-1 sm:gap-1.5 flex-1 min-w-0 shrink-0">
           {!kidMode && !assessment && (
             <>
-              <button
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => { setShowAnalyticsModal(true); sounds.playPop(); }}
-                className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all active:scale-95 cursor-pointer ${
-                  isDark
-                    ? "bg-indigo-500/20 hover:bg-indigo-500/30 border-indigo-500/40 text-indigo-300"
-                    : "bg-indigo-50 hover:bg-indigo-100 border-indigo-200 text-indigo-700 shadow-sm"
-                }`}
+                className={`hidden rounded-xl sm:inline-flex ${isDark ? "border-indigo-400/30 bg-indigo-400/10 text-indigo-300 hover:bg-indigo-400/20" : "border-[#DDD5FA] bg-[#F7F4FF] text-[#5B48D6] hover:bg-[#EFEAFF]"}`}
                 title="View & Export Interactive JSON Logs"
               >
                 <Activity size={13} className="animate-pulse text-indigo-400" />
                 <span>JSON Logs</span>
-              </button>
-              <button
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
                 onClick={() => { toggleTheme(); sounds.playPop(); }}
-                className={`${iconBtn} h-8 w-8 sm:h-9 sm:w-9 active:scale-95 ${isDark ? iconBtnDark : iconBtnLight}`}
+                className={`hidden h-10 w-10 rounded-xl border-2 shadow-none sm:inline-flex ${isDark ? "border-white/10 bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white" : "border-[#E1E3EA] text-[#7D8491]"}`}
                 title={isDark ? "Light Mode" : "Dark Mode"}
               >
                 {isDark ? <Sun size={14} /> : <Moon size={14} />}
-              </button>
-              <button
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
                 onClick={resetSlide}
-                className={`${iconBtn} h-8 w-8 sm:h-9 sm:w-9 active:scale-95 ${isDark ? iconBtnDark : iconBtnLight}`}
+                className={`hidden h-10 w-10 rounded-xl border-2 shadow-none sm:inline-flex ${isDark ? "border-white/10 bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white" : "border-[#E1E3EA] text-[#7D8491]"}`}
                 title="Reset Challenge"
               >
                 <RotateCcw size={14} />
-              </button>
+              </Button>
             </>
           )}
-          <button onClick={toggleMute} className={`${iconBtn} h-8 w-8 sm:h-9 sm:w-9 active:scale-95 ${isDark ? iconBtnDark : iconBtnLight}`} title="Toggle sound">
+          <Button type="button" variant="outline" size="icon" onClick={toggleMute} className={`h-10 w-10 rounded-xl border-2 shadow-none ${isDark ? "border-white/10 bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white" : "border-[#E1E3EA] text-[#7D8491]"}`} title="Toggle sound" aria-label="Toggle sound">
             {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-          </button>
-          <button
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
             onClick={toggleBrowserFullscreen}
-            className={`${iconBtn} hidden xs:flex h-8 w-8 sm:h-9 sm:w-9 active:scale-95 ${isDark ? iconBtnDark : iconBtnLight}`}
+            className={`hidden h-10 w-10 rounded-xl border-2 shadow-none xs:inline-flex ${isDark ? "border-white/10 bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white" : "border-[#E1E3EA] text-[#7D8491]"}`}
             title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
             aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
           >
             {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-          </button>
-          {(!assessment || onExit) && (
-            <>
-              <div className={`w-px h-5 mx-0.5 ${isDark ? 'bg-white/10' : 'bg-black/10'}`} />
-              <button
-                onClick={() => { sounds.playPop(); void leaveWith("exit", onExit ?? onClose); }}
-                disabled={Boolean(leaving)}
-                aria-busy={leaving === "exit"}
-                className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-rose-500 hover:bg-rose-400 active:scale-95 disabled:cursor-wait disabled:opacity-70 disabled:active:scale-100 text-white rounded-xl text-[11px] font-bold transition-all shadow-sm shadow-rose-500/20 cursor-pointer shrink-0"
-              >
-                {leaving === "exit" ? <ButtonSpinner /> : <X size={14} />}
-                <span className="inline">{leaving === "exit" ? "Saving…" : "Exit"}</span>
-              </button>
-            </>
-          )}
+          </Button>
         </div>
       </header>
 
       {/* ══════════════════ MAIN CONTENT AREA ═══════════════════ */}
-      <div className="flex-1 flex flex-col md:flex-row gap-4 p-4 md:p-5 min-h-0 overflow-hidden">
+      <div className="mx-auto flex min-h-0 w-full max-w-[1440px] flex-1 flex-col gap-4 overflow-hidden p-2 sm:p-4 md:flex-row md:p-6 lg:px-10">
 
         {/* ── CENTER: main canvas stage ── */}
         <div className="flex-1 flex flex-col min-h-0 min-w-0 gap-3">
@@ -766,6 +771,7 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
           className={`fixed -top-10 rounded-full opacity-0 animate-confetti z-[9999] pointer-events-none ${p.color}`}
         />
       ))}
+      </div>
     </div>
   );
 };

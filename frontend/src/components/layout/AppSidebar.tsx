@@ -107,18 +107,21 @@ export const AppSidebar: React.FC<Props> = ({
   return (
     <aside
       className={cn(
-        "relative hidden shrink-0 flex-col border-r border-slate-200/70 bg-white transition-[width] duration-200 md:flex md:h-full md:min-h-0 dark:border-white/10 dark:bg-[#111329]",
-        collapsed ? "md:w-16" : appearance === "parent" ? "md:w-60" : "md:w-56"
+        "relative hidden shrink-0 flex-col transition-[width] duration-200 md:flex md:h-full md:min-h-0 dark:bg-[#111329]",
+        appearance === "parent"
+          ? "border-r-2 border-[#E7E3F6] bg-transparent dark:border-white/10"
+          : "border-r border-slate-200/70 bg-white dark:border-white/10",
+        collapsed ? "md:w-16" : appearance === "parent" ? "md:w-52" : "md:w-56"
       )}
     >
       {/* Brand */}
-      <div className={cn("flex h-16 shrink-0 items-center gap-2.5 overflow-hidden px-4", appearance === "parent" && "h-[4.5rem] px-5")}>
+      <div className={cn("flex h-16 shrink-0 items-center gap-2.5 overflow-hidden px-4", appearance === "parent" && "h-[4.5rem] px-4.5")}>
         <div className={cn(
           "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
           brand.logoSrc ? "bg-transparent" : "bg-indigo-600 text-white shadow-sm shadow-indigo-600/20"
         )}>
           {brand.logoSrc ? (
-            <img src={brand.logoSrc} alt={brand.logoAlt ?? brand.name} className="h-8 w-8 rounded-lg object-contain" />
+            <img src={brand.logoSrc} alt={brand.logoAlt ?? brand.name} className={cn("h-8 w-8 rounded-lg object-contain", appearance === "parent" && "shadow-[0_3px_0_#D8CCFF] dark:shadow-[0_3px_0_#332A5C]")} />
           ) : BrandIcon ? (
             <BrandIcon size={17} />
           ) : null}
@@ -129,7 +132,7 @@ export const AppSidebar: React.FC<Props> = ({
       </div>
 
       {/* Nav — grouped by main menu, each group collapsible on desktop */}
-      <div className={cn("flex gap-1 px-3 md:mt-1 md:block", appearance === "parent" && "px-3.5 md:mt-3")}>
+      <div className={cn("flex gap-1 px-3 md:mt-1 md:block", appearance === "parent" && "px-3 md:mt-3")}>
         {sections.map((section) => {
           const groupCollapsed = collapsedGroups.has(section.id);
           return (
@@ -164,13 +167,15 @@ export const AppSidebar: React.FC<Props> = ({
                     title={collapsed ? label : undefined}
                     className={cn(
                       "relative flex w-full items-center gap-3 whitespace-nowrap text-sm font-medium transition-all cursor-pointer",
-                      appearance === "parent" ? "min-h-12 rounded-xl py-2.5" : "rounded-lg py-2",
+                      appearance === "parent" ? "min-h-12 rounded-2xl border-2 py-2.5" : "rounded-lg py-2",
                       collapsed ? "px-2.5 md:px-0 md:justify-center" : "px-2.5",
                       isActive
                         ? appearance === "parent"
-                          ? "bg-[#F3F0FF] text-[#534AB7] ring-1 ring-[#DCD5FA] shadow-[0_3px_12px_rgba(83,74,183,0.08)] dark:bg-violet-400/15 dark:text-[#CDBEFF] dark:ring-violet-300/20"
+                          ? "border-[#DCD5FA] bg-[#F3F0FF] text-[#534AB7] shadow-[0_6px_18px_-14px_rgba(83,74,183,0.38)] dark:border-violet-300/20 dark:bg-violet-400/15 dark:text-[#CDBEFF] dark:shadow-[0_6px_18px_-14px_rgba(0,0,0,0.58)]"
                           : "bg-indigo-50 text-indigo-600 font-semibold dark:bg-violet-400/15 dark:text-[#CDBEFF]"
-                        : "text-slate-500 hover:bg-slate-50 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
+                        : appearance === "parent"
+                          ? "border-transparent text-slate-500 hover:border-[#EEE9FA] hover:bg-[#F8F5FF] hover:text-slate-800 dark:text-slate-400 dark:hover:border-white/10 dark:hover:bg-white/5 dark:hover:text-white"
+                          : "text-slate-500 hover:bg-slate-50 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
                     )}
                   >
                     <Icon size={appearance === "parent" ? 24 : 18} className={cn("shrink-0", isActive ? "text-indigo-600 dark:text-[#BDA9FF]" : "text-slate-400 dark:text-slate-500")} />
@@ -208,7 +213,7 @@ export const AppSidebar: React.FC<Props> = ({
             title="Account menu"
             className={cn(
               "flex w-full cursor-pointer items-center gap-2.5 text-left transition-colors hover:bg-slate-50 dark:hover:bg-white/5",
-              appearance === "parent" ? "rounded-2xl border border-[#E7E3F6] bg-[#FBFAFF] p-2.5 hover:bg-[#F3F0FF] dark:border-white/10 dark:bg-white/[0.04]" : "py-4",
+              appearance === "parent" ? "rounded-2xl border-2 border-[#E7E3F6] bg-[#FBFAFF] p-2.5 shadow-[0_3px_0_#E7E3F6] hover:border-[#DCD5F2] hover:bg-[#F3F0FF] dark:border-white/10 dark:bg-white/[0.04] dark:shadow-[0_3px_0_#292D45]" : "py-4",
               collapsed ? "justify-center px-0" : appearance === "parent" ? "px-2.5" : "px-4"
             )}
           >

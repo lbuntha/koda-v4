@@ -233,7 +233,7 @@ export const ParentDashboard: React.FC = () => {
         onProfile={() => setActiveView("profile")}
         onSettings={() => setActiveView("parent_settings")}
         onLogout={logout}
-        contentClassName="flex-1 overflow-auto bg-[#FBFAFF] p-4 pb-24 sm:p-5 md:p-7 md:pb-7 dark:bg-[#0E1020]"
+        contentClassName="flex-1 overflow-auto bg-transparent p-4 pb-24 sm:p-5 md:p-5 md:pb-8"
         actions={
           <div className="flex items-center gap-1">
             <NotificationBell recipientType="user" />

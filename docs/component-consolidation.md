@@ -79,6 +79,30 @@ COUNT_MAGNETS  COUNT_CRATES  SUBITIZE  COUNT_ON  COUNT_BACK
 
 Under the ladder model these are not nine components. They are **levels of two or three**:
 
+> **Status (2026-08-08): the Count merge is done except for crates.** `CountCanvas` +
+> `countStaging/{move,tap,lineup,container}` replaced `MoveAndCountCanvas`, `OneToOneCanvas`,
+> `LineUpCanvas` and `MagnetsCanvas` — four files totalling ~3,600 lines, now ~900 including
+> the contract. All four technique ids still resolve to the right staging via
+> `STAGING_BY_TECHNIQUE`, so released content plays unchanged. Crates still has its own
+> component: it needs a staging that can express "ten ones become one ten".
+>
+> **The picker followed (2026-08-08).** Four entries collapsed to one, **Count**
+> (`techniques/count.tsx`), carrying one panel and one AI schema (`count.schema.ts`) in place
+> of four of each. The staging is now an authored setting — a "Counting Action" dropdown in the
+> Property Studio and a `staging` field the generator fills — rather than a choice of game.
+>
+> `ONE_TO_ONE`, `LINE_UP_AND_COUNT` and `COUNT_MAGNETS` are **absorbed**, a state distinct from
+> retired and recorded in `ABSORBED_TECHNIQUES` (`techniques/manifest.ts`): they leave the
+> picker, the catalog and the schema registry, but keep a Property Studio panel so a question
+> already published on one can still be opened and edited. Rendering needs no entry — a
+> `CANVAS_BY_TECHNIQUE` miss falls back to `CountCanvas`, which asks `STAGING_BY_TECHNIQUE`
+> what the old id always meant. Artwork survives the same way: `defaultThumbnailForTechnique`
+> falls back to the shared catalog when a technique outlives its manifest.
+>
+> Picker: 30 entries → 27. `countLevels.ts` rows 1–4 were re-authored from `ONE_TO_ONE` onto
+> `MOVE_AND_COUNT` + `staging: "tap"`; re-running `npm run export:count-levels` will emit them
+> that way. The already-seeded `backend/scripts/data/count_levels.json` was left alone.
+
 | Component | Absorbs | Ladder runs from |
 |---|---|---|
 | **Count** | one-to-one, move & count, line up, magnets, crates | tap 3 in a row → arrange 12 scattered → move between containers |
@@ -100,6 +124,12 @@ it is why this is sequenced before Phase 2 rather than during it.
 releases that learners are assigned to. **Their technique ids must keep resolving forever** —
 a merge changes what the studio offers, never what an old release means. Keep the enum entries
 and their graders; retire them from the picker only.
+
+This is also why **Count kept `MOVE_AND_COUNT` as its id** rather than taking a new `COUNT`
+one. The backend grader accepts a fixed list of technique ids (`content/grading.py`), so a new
+id would need a grader deployed before anything authored on it could be published — and the
+160 questions already published under `MOVE_AND_COUNT` would have needed migrating. Keeping the
+id makes the merge a frontend-only change with no backend edit at all.
 
 ---
 

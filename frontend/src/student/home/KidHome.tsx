@@ -140,7 +140,7 @@ export const KidHome: React.FC<StudentHomeProps> = ({
 
   return (
     <div
-      className={`flex min-h-screen w-full flex-col bg-[#F7F9FE] bg-[url('/assets/kid-home-learning-bg-light.svg')] bg-[length:1600px_auto] bg-top bg-repeat-y text-[#1C2B4A] dark:bg-[#0E1020] dark:bg-[url('/assets/kid-home-learning-bg-dark.svg')] dark:text-[#EDE9FF] ${
+      className={`flex min-h-screen w-full flex-col bg-white text-[#1C2B4A] dark:bg-[#0E1020] dark:text-[#EDE9FF] ${
         theme === "dark" ? "dark" : ""
       }`}
       data-band="kid"

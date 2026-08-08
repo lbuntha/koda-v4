@@ -10,6 +10,7 @@ import {ComponentPreview} from './student/home/shared/ComponentPreview';
 import {GoodsSortPreview} from './components/canvases/GoodsSortPreview';
 import {CountCratesPreview} from './components/canvases/CountCratesPreview';
 import {CountLadderPreview} from './components/canvases/CountLadderPreview';
+import {PuzzleKitSandbox} from './puzzles/PuzzleKitSandbox';
 import './index.css';
 
 // Zoom is held still inside an activity only — see `useZoomLock`, applied to the
@@ -24,6 +25,8 @@ import './index.css';
 // a query string cannot reach it on a deployment.
 // `?preview=goods-sort` does the same for the Goods Sort ladder: the real canvas, all
 // thirty levels, no sign-in — the only practical way to watch its motion frame by frame.
+// `?preview=puzzle-kit` is the bench for the shared puzzle engine — two puzzles built on
+// it, plus the certification report that proves every generated level can be finished.
 const preview =
   Boolean((import.meta as any).env?.DEV)
     ? new URLSearchParams(window.location.search).get('preview')
@@ -31,7 +34,7 @@ const preview =
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    {preview === 'learner-cards' ? <ComponentPreview /> : preview === 'goods-sort' ? <GoodsSortPreview /> : preview === 'count-crates' ? <CountCratesPreview /> : preview === 'count-ladder' ? <CountLadderPreview /> : (
+    {preview === 'learner-cards' ? <ComponentPreview /> : preview === 'goods-sort' ? <GoodsSortPreview /> : preview === 'count-crates' ? <CountCratesPreview /> : preview === 'count-ladder' ? <CountLadderPreview /> : preview === 'puzzle-kit' ? <PuzzleKitSandbox /> : (
     <AuthProvider>
       <AppSettingsProvider>
         <SvgLibraryProvider>

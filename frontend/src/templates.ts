@@ -6,14 +6,20 @@
 import { CountingQuestion, CountingTechnique } from "./types";
 
 export const DEFAULT_QUESTIONS: CountingQuestion[] = [
+  /*
+    The four counting starters are one game now — same technique, different
+    `staging`. Each still opens on the action it was named for, so the starter
+    deck demonstrates all four without four picker entries behind it.
+  */
   {
     id: "q-one-to-one",
-    technique: CountingTechnique.ONE_TO_ONE,
+    technique: CountingTechnique.MOVE_AND_COUNT,
     title: "1. One-to-One Correspondence",
     instruction: "Touch or point to each object once. Count them in order from 1 to 5!",
     objectId: "apple",
     targetCount: 5,
     config: {
+      staging: "tap",
       assetType: "apple",
       pattern: "grid",
       gridColumns: 3
@@ -26,16 +32,16 @@ export const DEFAULT_QUESTIONS: CountingQuestion[] = [
     instruction: "Move the objects one at a time to their new place while counting them: 1, 2, 3!",
     objectId: "duck",
     targetCount: 3,
-    config: {}
+    config: { staging: "move" }
   },
   {
     id: "q-line-up",
-    technique: CountingTechnique.LINE_UP_AND_COUNT,
+    technique: CountingTechnique.MOVE_AND_COUNT,
     title: "3. Line Up and Count",
     instruction: "Arrange the objects in a straight horizontal line, then count them from left to right!",
     objectId: "cupcake",
     targetCount: 4,
-    config: {}
+    config: { staging: "lineup" }
   },
   {
     id: "q-group-tens",
@@ -88,12 +94,14 @@ export const DEFAULT_QUESTIONS: CountingQuestion[] = [
   },
   {
     id: "q-magnets",
-    technique: CountingTechnique.COUNT_MAGNETS,
+    technique: CountingTechnique.MOVE_AND_COUNT,
     title: "8. Count Using Magnets",
     instruction: "Drag the star magnets into the jar, and watch the count display update!",
     objectId: "star",
     targetCount: 5,
     config: {
+      staging: "container",
+      containerShape: "jar",
       assetType: "star"
     }
   },

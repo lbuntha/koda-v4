@@ -10,15 +10,13 @@
  * only shared line to touch — everything else is your own new file.
  */
 
-import { TechniqueManifest, assertComplete } from "./manifest";
-import { oneToOne } from "./oneToOne";
-import { moveAndCount } from "./moveAndCount";
-import { lineUp } from "./lineUp";
+import { TechniqueManifest, assertComplete, DEFAULT_THUMBNAILS } from "./manifest";
+import { CountingTechnique } from "../types";
+import { count } from "./count";
 import { groupTens } from "./groupTens";
 import { countOn } from "./countOn";
 import { countBack } from "./countBack";
 import { arrangements } from "./arrangements";
-import { magnets } from "./magnets";
 import { subitize } from "./subitize";
 import { addition } from "./addition";
 import { subtraction } from "./subtraction";
@@ -42,16 +40,13 @@ import { shapeLab } from "./shapeLab";
 import { countCrates } from "./countCrates";
 import { xtraMath } from "./xtraMath";
 
-/** Ordered exactly as the Studio picker lists them (1..16). */
+/** Ordered exactly as the Studio picker lists them. */
 export const ALL_TECHNIQUES: TechniqueManifest[] = [
-  oneToOne,
-  moveAndCount,
-  lineUp,
+  count,
   groupTens,
   countOn,
   countBack,
   arrangements,
-  magnets,
   subitize,
   addition,
   subtraction,
@@ -79,12 +74,19 @@ export const ALL_TECHNIQUES: TechniqueManifest[] = [
 // Loud in dev / logged in prod if a game is missing or double-registered.
 assertComplete(ALL_TECHNIQUES);
 
-/** Resolve component-owned learner artwork without mounting the game canvas. */
+/**
+ * Resolve component-owned learner artwork without mounting the game canvas.
+ *
+ * Falls back to the shared catalog for a technique with no manifest: an id that was retired
+ * or absorbed still names questions inside immutable releases, and a child's card should keep
+ * showing the picture it always showed rather than dropping to the generic mascot.
+ */
 export function defaultThumbnailForTechnique(
   technique: string | null | undefined,
 ): string | null {
   if (!technique) return null;
-  return ALL_TECHNIQUES.find(manifest => manifest.technique === technique)?.defaultThumbnailUrl ?? null;
+  const fromManifest = ALL_TECHNIQUES.find(manifest => manifest.technique === technique)?.defaultThumbnailUrl;
+  return fromManifest ?? DEFAULT_THUMBNAILS[technique as CountingTechnique] ?? null;
 }
 
 export type TechniqueThumbnailSource = "curriculum" | "component" | "generic";

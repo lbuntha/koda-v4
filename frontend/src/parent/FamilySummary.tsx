@@ -48,7 +48,7 @@ export const FamilySummary: React.FC<Props> = ({ summaries, loading, className =
       )}
       <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {items.map(item => (
-          <Card key={item.label} className="flex min-h-24 items-center gap-3 rounded-3xl border-[#E7E3F6] bg-white p-4 shadow-[0_6px_24px_rgba(83,74,183,0.06)] dark:border-white/10 dark:bg-[#161B2E]">
+          <Card key={item.label} variant="standard" className="flex min-h-24 items-center gap-3 p-4">
             <span className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${item.tone}`}>{item.icon}</span>
             <div className="min-w-0 flex-1">
               <p className="text-[10px] font-extrabold uppercase tracking-wide text-[#6D6997] dark:text-[#8F99AD]">{item.label}</p>

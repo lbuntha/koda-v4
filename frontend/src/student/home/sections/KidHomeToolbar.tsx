@@ -122,6 +122,7 @@ export const KidHomeToolbar: React.FC<Props> = ({
     <>
       <AppToolbar
       wide
+      className="md:py-3"
       nav={
         <>
           {ALL_SECTIONS.map(section => {
@@ -137,10 +138,10 @@ export const KidHomeToolbar: React.FC<Props> = ({
                 onClick={() => isAvailable && onNavigate(section.destination)}
                 disabled={!isAvailable}
                 aria-current={isActive ? "page" : undefined}
-                className={`h-16 min-w-14 flex-1 flex-col gap-1 rounded-2xl px-2 text-[10px] font-extrabold leading-none sm:min-w-16 sm:px-3 md:h-12 md:min-w-20 md:max-w-24 md:gap-0.5 lg:min-w-24 lg:max-w-28 lg:text-xs ${
+                className={`h-16 min-w-14 flex-1 flex-col gap-1 rounded-2xl border-2 px-2 text-[10px] font-extrabold leading-none sm:min-w-16 sm:px-3 md:h-12 md:min-w-20 md:max-w-24 md:gap-0.5 lg:min-w-24 lg:max-w-28 lg:text-xs ${
                   isActive
-                    ? "bg-[#F0EBFF] text-[#6844EA] hover:bg-[#E9E1FF] dark:bg-violet-400/15 dark:text-[#CDBEFF]"
-                    : "text-[#7B8496] hover:bg-[#F5F1FF] hover:text-[#6844EA] dark:text-[#A79FC4] dark:hover:bg-white/10"
+                    ? "border-[#DED4FF] bg-[#F3EFFF] text-[#6844EA] shadow-[0_3px_0_#DED4FF] hover:border-[#D5C9FF] hover:bg-[#ECE6FF] dark:border-violet-400/20 dark:bg-violet-400/15 dark:text-[#CDBEFF] dark:shadow-[0_3px_0_#302852]"
+                    : "border-transparent text-[#7B8496] hover:border-[#EEE9FA] hover:bg-[#F8F5FF] hover:text-[#6844EA] dark:text-[#A79FC4] dark:hover:border-white/10 dark:hover:bg-white/10"
                 }`}
               >
                 <span className="inline-flex scale-[1.28] md:scale-100">
@@ -161,10 +162,10 @@ export const KidHomeToolbar: React.FC<Props> = ({
               }}
               aria-expanded={rewardsOpen}
               aria-controls="kid-rewards-summary"
-              className={`h-16 min-w-14 w-full flex-1 flex-col gap-1 rounded-2xl px-2 text-[10px] font-extrabold leading-none sm:min-w-16 sm:px-3 md:h-12 md:min-w-20 md:max-w-24 md:gap-0.5 lg:min-w-24 lg:max-w-28 lg:text-xs ${
+              className={`h-16 min-w-14 w-full flex-1 flex-col gap-1 rounded-2xl border-2 px-2 text-[10px] font-extrabold leading-none sm:min-w-16 sm:px-3 md:h-12 md:min-w-20 md:max-w-24 md:gap-0.5 lg:min-w-24 lg:max-w-28 lg:text-xs ${
                 rewardsOpen
-                  ? "bg-[#F0EBFF] text-[#6844EA] dark:bg-violet-400/15 dark:text-[#CDBEFF]"
-                  : "text-[#7B8496] hover:bg-[#F5F1FF] hover:text-[#6844EA] dark:text-[#A79FC4] dark:hover:bg-white/10"
+                  ? "border-[#DED4FF] bg-[#F3EFFF] text-[#6844EA] shadow-[0_3px_0_#DED4FF] dark:border-violet-400/20 dark:bg-violet-400/15 dark:text-[#CDBEFF] dark:shadow-[0_3px_0_#302852]"
+                  : "border-transparent text-[#7B8496] hover:border-[#EEE9FA] hover:bg-[#F8F5FF] hover:text-[#6844EA] dark:text-[#A79FC4] dark:hover:border-white/10 dark:hover:bg-white/10"
               }`}
             >
               <span className="inline-flex scale-[1.28] md:scale-100">
@@ -217,7 +218,7 @@ export const KidHomeToolbar: React.FC<Props> = ({
           <AnimatedXpPill value={stats.totalXp} />
           {stats.streakDays > 0 && (
             <span
-              className="inline-flex h-8 items-center gap-1.5 rounded-full bg-[#FFF7E8] px-2.5 text-[10px] font-black tabular-nums text-[#C75A25] ring-1 ring-[#FFE1BD] sm:px-3 sm:text-xs dark:bg-orange-400/10 dark:text-orange-300 dark:ring-orange-300/15"
+              className="inline-flex h-8 items-center gap-1.5 rounded-full border-2 border-[#FFE1BD] bg-[#FFF9EE] px-2.5 text-[10px] font-black tabular-nums text-[#C75A25] shadow-[0_3px_0_#FFE1BD] sm:px-3 sm:text-xs dark:border-orange-300/15 dark:bg-orange-400/10 dark:text-orange-300 dark:shadow-[0_3px_0_#3A2929]"
               aria-label={`${stats.streakDays} day streak`}
               title="Learning streak"
             >
@@ -236,7 +237,7 @@ export const KidHomeToolbar: React.FC<Props> = ({
               aria-label="Open learner menu"
               aria-expanded={profileOpen}
               aria-controls="kid-profile-menu"
-              className="h-9 w-9 rounded-full bg-[linear-gradient(145deg,#9A85FF,#5B43DD)] p-0 ring-2 ring-[#EEE9FF] hover:scale-105 hover:bg-[linear-gradient(145deg,#9A85FF,#5B43DD)] dark:ring-white/10"
+              className="h-9 w-9 rounded-full border-2 border-[#CFC2FF] bg-[linear-gradient(145deg,#9A85FF,#5B43DD)] p-0 shadow-[0_3px_0_#5B43DD] hover:-translate-y-px hover:bg-[linear-gradient(145deg,#A38FFF,#684CE6)] dark:border-white/15"
             >
               <KidAvatar avatar={studentAvatar ?? undefined} className="h-7 w-7 text-lg" />
             </Button>

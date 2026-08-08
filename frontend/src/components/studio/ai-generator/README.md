@@ -19,8 +19,8 @@ schemas/
   assets.ts        ── shared asset catalogue + helpers (resolveAssetType, clampInt, resolveFrameColor, ...)
   registry.ts      ── SCHEMA_REGISTRY + prompt detection + prompt builder
   *.schema.ts      ── ONE file per canvas: everything the AI knows about it
-presets.ts        ── Move & Count preset chips, referenced by its schema (not by UI)
-promptParser.ts   ── Move & Count offline fallback, wired via its schema
+presets.ts        ── arithmetic preset chips, referenced by their schemas (not by UI)
+promptParser.ts   ── Count offline fallback, wired via its schema
 ```
 
 The schema is the single source of truth per component. The panel, service and
@@ -30,9 +30,9 @@ the teacher currently has open (see `AiGeneratorPanel`'s `contextPresets`).
 
 ## Adding a new component (the replication recipe)
 
-1. Copy the closest existing schema (`moveAndCount.schema.ts` for a
-   drag-and-drop canvas, `kodaSudoku.schema.ts` if your canvas has structured
-   layout/grid content) → `schemas/yourCanvas.schema.ts`.
+1. Copy the closest existing schema (`count.schema.ts` for a drag-and-drop
+   canvas, `kodaSudoku.schema.ts` if your canvas has structured layout/grid
+   content) → `schemas/yourCanvas.schema.ts`.
 2. Fill in:
    - `promptSummary` — 1–2 lines, written for the model
    - `configFields` — mark derivable/teacher-only fields `exposeToAI: false`

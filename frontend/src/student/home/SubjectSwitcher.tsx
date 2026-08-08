@@ -50,7 +50,7 @@ export const SubjectSwitcher: React.FC<Props> = ({ subjects, activeSubjectId, lo
             aria-selected={active}
             disabled={!subject.ready || loading}
             onClick={() => onChange(subject.id)}
-            className={`h-9 shrink-0 rounded-full px-3 text-xs font-extrabold ${active ? "bg-[#EEE9FF] text-[#6844EA] hover:bg-[#E8E0FF] dark:bg-violet-400/15 dark:text-[#CDBEFF]" : "bg-white/75 text-[#657086] hover:bg-white hover:text-[#6844EA] dark:bg-white/[0.055] dark:text-[#B3BBC9] dark:hover:bg-white/10"}`}
+            className={`h-9 shrink-0 rounded-full border-2 px-3 text-xs font-extrabold ${active ? "border-[#DED4FF] bg-[#F3EFFF] text-[#6844EA] shadow-[0_3px_0_#DED4FF] hover:bg-[#ECE6FF] dark:border-violet-400/20 dark:bg-violet-400/15 dark:text-[#CDBEFF] dark:shadow-[0_3px_0_#302852]" : "border-transparent bg-transparent text-[#657086] hover:border-[#EEE9FA] hover:bg-[#FAF8FF] hover:text-[#6844EA] dark:bg-transparent dark:text-[#B3BBC9] dark:hover:border-white/10 dark:hover:bg-white/10"}`}
           >
             {loading && active ? <LoaderCircle size={14} className="animate-spin" /> : <SubjectIcon subject={subject} active={active} />}
             {subject.name}

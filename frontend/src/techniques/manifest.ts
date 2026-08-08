@@ -24,7 +24,12 @@ import { PanelProps } from "../components/studio/panelKit";
 import { ComponentSchema } from "../components/studio/ai-generator/schemas/types";
 import techniqueThumbnails from "../../../shared/technique-thumbnails.json";
 
-const DEFAULT_THUMBNAILS = techniqueThumbnails as Partial<Record<CountingTechnique, string>>;
+/**
+ * Shared learner artwork, keyed by technique. Exported because a technique can outlive its
+ * manifest — a retired or absorbed id still has released questions whose cards need a picture,
+ * and those look artwork up here rather than through `ALL_TECHNIQUES`.
+ */
+export const DEFAULT_THUMBNAILS = techniqueThumbnails as Partial<Record<CountingTechnique, string>>;
 
 export interface TechniqueManifest {
   /** Enum value that identifies this game everywhere. */
@@ -97,17 +102,38 @@ export const RETIRED_TECHNIQUES: ReadonlySet<CountingTechnique> = new Set([
 ]);
 
 /**
+ * Techniques merged into another game rather than parked.
+ *
+ * Retiring and absorbing look identical from the picker — one fewer entry — and are
+ * opposites underneath. A retired technique no longer ships a game at all. An absorbed one
+ * still ships the game it always did; it just reaches it through the technique that now owns
+ * it, because what separated them turned out to be a setting rather than a component.
+ *
+ * So an absorbed id keeps a Property Studio panel — an author can still open and edit a
+ * question published on it — where a retired id keeps nothing. Neither needs a canvas entry:
+ * a `CANVAS_BY_TECHNIQUE` miss falls back to `CountCanvas`, which asks `countStaging`'s
+ * `STAGING_BY_TECHNIQUE` what the old id always meant.
+ *
+ * Maps absorbed id → the technique that now owns it.
+ */
+export const ABSORBED_TECHNIQUES: ReadonlyMap<CountingTechnique, CountingTechnique> = new Map([
+  [CountingTechnique.ONE_TO_ONE, CountingTechnique.MOVE_AND_COUNT],
+  [CountingTechnique.LINE_UP_AND_COUNT, CountingTechnique.MOVE_AND_COUNT],
+  [CountingTechnique.COUNT_MAGNETS, CountingTechnique.MOVE_AND_COUNT],
+]);
+
+/**
  * The safety net that replaces TypeScript's exhaustive-Record check. Every
- * CountingTechnique must have exactly one manifest, unless it is retired above. A missing one
- * throws at app-load in dev (loud, like the old compile error) and logs in prod (so a
- * single mis-registered game can't blank the whole app for a student).
+ * CountingTechnique must have exactly one manifest, unless it is retired or absorbed above.
+ * A missing one throws at app-load in dev (loud, like the old compile error) and logs in prod
+ * (so a single mis-registered game can't blank the whole app for a student).
  */
 export function assertComplete(list: TechniqueManifest[]): void {
   const seen = new Map<CountingTechnique, number>();
   for (const m of list) seen.set(m.technique, (seen.get(m.technique) ?? 0) + 1);
 
   const missing = Object.values(CountingTechnique)
-    .filter((t) => !seen.has(t) && !RETIRED_TECHNIQUES.has(t));
+    .filter((t) => !seen.has(t) && !RETIRED_TECHNIQUES.has(t) && !ABSORBED_TECHNIQUES.has(t));
   const duplicated = [...seen.entries()].filter(([, n]) => n > 1).map(([t]) => t);
 
   const problems: string[] = [];

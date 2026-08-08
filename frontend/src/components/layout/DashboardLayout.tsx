@@ -74,7 +74,7 @@ export const DashboardLayout: React.FC<Props> = ({
   const navItems = sections.flatMap(section => section.items);
 
   return (
-    <div className="flex h-dvh min-h-0 flex-col overflow-hidden bg-slate-50 font-sans md:flex-row dark:bg-[#0E1020]">
+    <div className={`flex h-dvh min-h-0 flex-col overflow-hidden font-sans md:flex-row dark:bg-[#0E1020] ${appearance === "parent" ? "bg-transparent" : "bg-slate-50"}`}>
       <AppSidebar
         brand={brand}
         sections={sections}
@@ -88,8 +88,8 @@ export const DashboardLayout: React.FC<Props> = ({
         onLogout={onLogout}
       />
 
-      <main className={`flex min-h-0 min-w-0 flex-1 flex-col md:pb-0 ${appearance === "parent" ? "pb-20" : "pb-16"}`}>
-        <header className={`flex min-h-[4rem] shrink-0 items-center justify-between gap-3 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl [-webkit-backdrop-filter:blur(16px)] [-webkit-tap-highlight-color:transparent] px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 sm:px-5 md:pt-3 dark:border-white/10 dark:bg-[#111329]/90 ${appearance === "parent" ? "md:min-h-[4.5rem] md:px-7" : ""}`}>
+      <main className={`flex min-h-0 min-w-0 flex-1 flex-col md:pb-0 ${appearance === "parent" ? "bg-transparent pb-20" : "pb-16"}`}>
+        <header className={`flex min-h-[4rem] shrink-0 items-center justify-between gap-3 bg-white/95 backdrop-blur-xl [-webkit-backdrop-filter:blur(16px)] [-webkit-tap-highlight-color:transparent] px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 sm:px-5 md:pt-3 dark:bg-[#111329]/95 ${appearance === "parent" ? "border-b-2 border-[#E7E3F6] shadow-[0_10px_24px_-22px_rgba(83,74,183,0.3)] md:min-h-[4.5rem] md:px-5 dark:border-white/10 dark:shadow-[0_10px_24px_-22px_rgba(0,0,0,0.6)]" : "border-b border-slate-200/70 dark:border-white/10"}`}>
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <button
               onClick={toggle}
@@ -129,9 +129,9 @@ export const DashboardLayout: React.FC<Props> = ({
       {navItems.length > 0 && (
         <nav
           aria-label="Mobile navigation"
-          className={`fixed inset-x-0 bottom-0 z-50 flex items-center justify-around border-t border-slate-200/80 bg-white/95 backdrop-blur-xl md:hidden dark:border-white/10 dark:bg-[#111329]/95 select-none ${appearance === "parent"
-            ? "min-h-[4.75rem] px-3 pt-2 pb-[max(0.875rem,env(safe-area-inset-bottom))] shadow-[0_-6px_24px_rgba(67,52,120,0.09)] dark:shadow-[0_-6px_24px_rgba(0,0,0,0.4)]"
-            : "px-2 pt-1.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.4)]"
+          className={`fixed inset-x-0 bottom-0 z-50 flex items-center justify-around bg-white/95 backdrop-blur-xl md:hidden dark:bg-[#111329]/95 select-none ${appearance === "parent"
+            ? "min-h-[4.75rem] border-t-2 border-[#E7E3F6] px-3 pt-2 pb-[max(0.875rem,env(safe-area-inset-bottom))] shadow-[0_-8px_26px_-18px_rgba(67,52,120,0.32)] dark:border-white/10 dark:shadow-[0_-6px_24px_rgba(0,0,0,0.4)]"
+            : "border-t border-slate-200/80 px-2 pt-1.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:border-white/10 dark:shadow-[0_-4px_20px_rgba(0,0,0,0.4)]"
           }`}
         >
           {navItems.map(item => {
@@ -147,9 +147,11 @@ export const DashboardLayout: React.FC<Props> = ({
                 className={`flex flex-1 touch-manipulation cursor-pointer flex-col items-center justify-center rounded-2xl font-black transition-all active:scale-90 select-none [-webkit-tap-highlight-color:transparent] ${appearance === "parent" ? "mx-1 min-h-14 py-1.5" : "min-h-[48px] gap-1 py-1 text-[11px]"} ${
                   isActive
                     ? appearance === "parent"
-                      ? "bg-[#F3F0FF] text-[#534AB7] ring-1 ring-[#DCD5FA] shadow-[0_4px_14px_rgba(83,74,183,0.12)] dark:bg-violet-400/15 dark:text-[#CDBEFF] dark:ring-violet-300/20"
+                      ? "border-2 border-[#DCD5FA] bg-[#F3F0FF] text-[#534AB7] shadow-[0_6px_18px_-14px_rgba(83,74,183,0.38)] dark:border-violet-300/20 dark:bg-violet-400/15 dark:text-[#CDBEFF] dark:shadow-[0_6px_18px_-14px_rgba(0,0,0,0.58)]"
                       : "text-[#534AB7] dark:text-[#CDBEFF]"
-                    : "text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
+                    : appearance === "parent"
+                      ? "border-2 border-transparent text-slate-400 hover:border-[#EEE9FA] hover:bg-[#F8F5FF] hover:text-slate-600 dark:text-slate-500 dark:hover:border-white/10 dark:hover:text-slate-300"
+                      : "text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
                 }`}
               >
                 <span className={`flex items-center justify-center rounded-full transition-all duration-200 ${appearance === "parent" ? "h-11 w-14" : "h-7 w-12"} ${

@@ -2,18 +2,22 @@ import React from "react";
 import { cn } from "../../lib/utils";
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** Standard information containers or richer activity/action surfaces. */
+  variant?: "standard" | "activity";
   /** Adds a subtle hover lift — use for clickable cards. */
   interactive?: boolean;
 }
 
 export const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, interactive, ...props }, ref) => (
+  ({ className, variant = "standard", interactive, ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
-        // Border-led surface with a barely-there shadow (matches the reference).
-        "rounded-2xl border border-slate-200/70 bg-white text-slate-950 shadow-[0_1px_2px_rgba(16,24,40,0.04)] dark:border-white/10 dark:bg-[#171B2E] dark:text-[#E2E0F2] dark:shadow-none",
-        interactive && "transition-all hover:border-slate-300 hover:shadow-[0_2px_8px_rgba(16,24,40,0.06)] cursor-pointer",
+        // Uniform borders with ambient shadows only—neither variant has a heavy lower edge.
+        "rounded-3xl border-2 border-[#E7E3F6] bg-white text-[#0E0B55] dark:border-white/10 dark:bg-[#171B2E] dark:text-[#E2E0F2]",
+        variant === "standard" && "shadow-[0_6px_24px_rgba(83,74,183,0.06)] dark:shadow-none",
+        variant === "activity" && "shadow-[0_10px_30px_-20px_rgba(83,74,183,0.28)] dark:shadow-[0_10px_30px_-20px_rgba(0,0,0,0.5)]",
+        interactive && "cursor-pointer transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-[#DCD5F2] hover:shadow-[0_12px_32px_-20px_rgba(83,74,183,0.34)] dark:hover:border-white/15 dark:hover:shadow-[0_12px_32px_-20px_rgba(0,0,0,0.56)]",
         className
       )}
       {...props}

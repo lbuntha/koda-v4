@@ -101,7 +101,7 @@ export const LearningPathSkillCard: React.FC<Props> = ({ skill, artUrl, isNext =
       disabled={!canStart}
       onClick={() => canStart && onStart?.(skill.skillId)}
       aria-label={`${actionLabel}: ${skill.skillLabel}`}
-      className={`relative flex h-full min-h-36 w-full flex-col items-stretch justify-start gap-0 rounded-2xl border-2 px-3.5 py-3.5 text-left shadow-none transition-all ${
+      className={`relative flex h-full min-h-36 w-full flex-col items-stretch justify-start gap-0 rounded-2xl border-2 px-3.5 py-3.5 text-left normal-case tracking-normal shadow-none transition-all ${
         visual.card
       } ${canStart ? "hover:-translate-y-1 hover:shadow-md" : "cursor-default opacity-100"}`}
     >
@@ -120,7 +120,7 @@ export const LearningPathSkillCard: React.FC<Props> = ({ skill, artUrl, isNext =
           )}
         </span>
       </span>
-      <span className={`mt-3 line-clamp-2 text-xs font-black leading-tight sm:text-sm ${visual.title}`}>
+      <span className={`mt-3 line-clamp-2 text-xs font-black uppercase leading-tight sm:text-sm ${visual.title}`}>
         {skill.skillLabel}
       </span>
       <span className={`mt-auto text-[10px] font-extrabold sm:text-[11px] ${visual.status}`}>

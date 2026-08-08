@@ -26,7 +26,7 @@ export const AnimatedXpPill: React.FC<Props> = ({ value }) => {
   return (
     <span
       key={exactValue}
-      className="kid-xp-pill inline-flex h-8 items-center gap-1.5 overflow-hidden rounded-full bg-[#F8FAFD] px-2.5 text-[10px] font-black text-[#3F4654] ring-1 ring-[#EDF0F5] sm:px-3 sm:text-xs dark:bg-white/5 dark:text-[#E4DEFF] dark:ring-white/10"
+      className="kid-xp-pill inline-flex h-8 items-center gap-1.5 overflow-hidden rounded-full border-2 border-[#ECEEF3] bg-white px-2.5 text-[10px] font-black text-[#3F4654] shadow-[0_3px_0_#ECEEF3] sm:px-3 sm:text-xs dark:border-white/10 dark:bg-white/5 dark:text-[#E4DEFF] dark:shadow-[0_3px_0_#23263A]"
       aria-label={`${exactValue} experience points`}
       title={`${exactValue.toLocaleString()} XP earned`}
     >

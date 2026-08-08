@@ -11,7 +11,7 @@ import { SvgDesigner } from "./components/SvgDesigner";
 import { DEFAULT_QUESTIONS } from "./templates";
 import { sounds } from "./sound";
 import { useAuth } from "./auth/AuthContext";
-import { OneToOneCanvas } from "./components/canvases/OneToOneCanvas";
+import { CountCanvas } from "./components/canvases/CountCanvas";
 import { LazyBoundary } from "./components/LazyBoundary";
 import {
   Sparkles,
@@ -300,7 +300,7 @@ export default function App({ embedded = false, initialAdminTab = "dashboard", o
   };
 
   // Add a new blank question
-  const addNewQuestion = (technique: CountingTechnique = CountingTechnique.ONE_TO_ONE) => {
+  const addNewQuestion = (technique: CountingTechnique = CountingTechnique.MOVE_AND_COUNT) => {
     sounds.playPop();
     const newId = createQuestionId();
     const newQ: CountingQuestion = {
@@ -562,7 +562,7 @@ export default function App({ embedded = false, initialAdminTab = "dashboard", o
       }
     };
 
-    const Canvas = CANVAS_BY_TECHNIQUE[activeQuestion.technique] || OneToOneCanvas;
+    const Canvas = CANVAS_BY_TECHNIQUE[activeQuestion.technique] || CountCanvas;
     return (
       // Tells every canvas below which library artwork this question chose, so none of them
       // needs a prop for it — see `questionAsset.tsx`.
@@ -1951,7 +1951,11 @@ export default function App({ embedded = false, initialAdminTab = "dashboard", o
                   </p>
                 </div>
 
-                {/* ONE_TO_ONE specific settings */}
+                {/*
+                  Whatever panel the active question's technique registers, from the manifest
+                  catalog. What used to sit here was one commented placeholder per technique,
+                  left over from when this file held every game's settings inline.
+                */}
                 {activeQuestion && (() => {
                   const TechniquePanel = TECHNIQUE_PANELS[activeQuestion.technique];
                   return TechniquePanel ? (
@@ -1964,34 +1968,6 @@ export default function App({ embedded = false, initialAdminTab = "dashboard", o
                     </LazyBoundary>
                   ) : null;
                 })()}
-
-                {/* MOVE_AND_COUNT specific settings */}
-
-                {/* LINE_UP_AND_COUNT specific settings */}
-
-                {/* GROUP_IN_TENS specific settings */}
-
-                {/* COUNT_ON specific settings */}
-
-                {/* COUNT_BACK specific settings */}
-
-                {/* DIFFERENT_ARRANGEMENTS specific settings */}
-
-                {/* COUNT_MAGNETS specific settings */}
-
-                {/* SUBITIZE specific settings */}
-
-                {/* ADDITION specific settings */}
-
-                {/* SUBTRACTION specific settings */}
-
-                {/* MULTIPLICATION specific settings */}
-
-                {/* SUDOKU specific settings */}
-
-                {/* PATTERN specific settings */}
-
-                {/* FLEXIBLE_CANVAS specific settings */}
 
                 {/* Global Reset Custom Layouts button in Rules panel */}
                 {(activeQuestion?.config?.customPositions || 

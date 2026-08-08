@@ -142,6 +142,12 @@ export interface CountingQuestion {
     totalCount?: number;
     removeCount?: number;
     pattern?: "grid" | "circle" | "scatter" | "line" | "dice" | "pairs" | "columns" | "wave" | "ring";
+    /**
+     * Which staging the unified Count canvas should use — what counting
+     * physically is on this slide. See `canvases/countStaging/`. Absent means
+     * `move`, which is what every released MOVE_AND_COUNT question expects.
+     */
+    staging?: "tap" | "move" | "lineup" | "container" | "tens";
     flashDurationMs?: number;
     customPositions?: { id: string; x: number; y: number }[];
     layoutReference?: { width: number; height: number };
@@ -163,7 +169,11 @@ export interface CountingQuestion {
     // runtime (found via curriculum/seedExample.ts triggering a strict check
     // this loosely-typed field never got before).
     frameColor?: "indigo" | "slate" | "emerald" | "purple" | "pink" | "rose";
-    containerShape?: "mystery" | "basket" | "box" | "chest";
+    // Two canvases draw vessels from their own catalogue, so the field is the
+    // union of both: Count On owns mystery/chest, Count's `container` staging
+    // owns jar (see ContainerArt.CONTAINER_SHAPES), and both draw basket/box.
+    // Each canvas falls back to its own default for a shape it cannot draw.
+    containerShape?: "jar" | "mystery" | "basket" | "box" | "chest";
     crossOutStyle?: "red_x" | "slash" | "fade";
     gridColumns?: number;
     jarLabel?: string;

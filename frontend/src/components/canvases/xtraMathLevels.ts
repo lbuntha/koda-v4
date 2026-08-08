@@ -246,16 +246,51 @@ export function generateDynamicMathFact(level: XtraMathLevel, index: number): Dy
     autoGuideHint = `How many groups of ${n2} fit into ${n1}? The answer is ${ans}.`;
   }
 
-  // Generate 4 plausible choice options including the correct answer
-  const optionsSet = new Set<number>([ans]);
-  const offsets = [-2, -1, 1, 2, 3, -3];
-  for (const offset of offsets) {
-    if (optionsSet.size >= 4) break;
-    const cand = ans + offset;
-    if (cand >= 0) optionsSet.add(cand);
+  // Generate 4 plausible choice options including the correct answer with realistic distractors
+  const candidates: number[] = [];
+  if (op === "add") {
+    candidates.push(ans - 1, ans + 1, ans - 2, ans + 2, ans + 10, ans - 10, n1 * n2, Math.abs(n1 - n2));
+  } else if (op === "subtract") {
+    candidates.push(ans - 1, ans + 1, ans - 2, ans + 2, n1 + n2, ans + 10, ans - 10);
+  } else if (op === "multiply") {
+    candidates.push(
+      (n1 - 1) * n2,
+      (n1 + 1) * n2,
+      n1 * (n2 - 1),
+      n1 * (n2 + 1),
+      n1 + n2,
+      ans - 1,
+      ans + 1,
+      ans - 2,
+      ans + 2,
+      ans + 10,
+      ans - 10
+    );
+  } else {
+    candidates.push(ans - 1, ans + 1, ans - 2, ans + 2, (ans - 1) * n2, (ans + 1) * n2, Math.abs(n1 - n2));
   }
 
-  const options = Array.from(optionsSet).sort((a, b) => a - b);
+  const optionsSet = new Set<number>([ans]);
+  for (const cand of candidates) {
+    if (optionsSet.size >= 4) break;
+    if (cand >= 0 && cand !== ans) {
+      optionsSet.add(cand);
+    }
+  }
+
+  let offset = 1;
+  while (optionsSet.size < 4) {
+    if (ans - offset >= 0) optionsSet.add(ans - offset);
+    if (optionsSet.size < 4) optionsSet.add(ans + offset);
+    offset++;
+  }
+
+  // Randomly shuffle choices so the answer position varies across options
+  const options = Array.from(optionsSet);
+  for (let i = options.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [options[i], options[j]] = [options[j], options[i]];
+  }
 
   return {
     id: `fact_${op}_${n1}_${n2}_${index}`,

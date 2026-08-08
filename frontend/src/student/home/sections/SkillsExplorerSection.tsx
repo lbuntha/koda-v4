@@ -76,7 +76,7 @@ export const SkillsExplorerSection: React.FC<Props> = ({
             : entry.unit.skills.slice(0, 6);
           const displayedSkills = showAllSkills && expanded ? entry.unit.skills : collapsedSkills;
           return (
-            <Card key={entry.id} className={`overflow-hidden rounded-2xl border-0 bg-white shadow-none transition-colors dark:bg-white/[0.035] ${expanded ? "bg-[#FCFBFF] dark:bg-white/[0.05]" : ""}`}>
+            <Card key={entry.id} variant="standard" interactive className={`overflow-hidden transition-colors ${expanded ? "bg-[#FCFBFF] dark:bg-white/[0.05]" : ""}`}>
               <Button
                 type="button"
                 variant="ghost"
@@ -86,7 +86,7 @@ export const SkillsExplorerSection: React.FC<Props> = ({
                   setExpandedUnitId(current => current === entry.id ? null : entry.id);
                   setShowAllSkills(false);
                 }}
-                className="grid h-auto w-full items-center gap-3 rounded-none px-3.5 py-3 text-left shadow-none hover:bg-[#FBFAFF] sm:grid-cols-[3rem_minmax(0,1fr)_minmax(13rem,18rem)] sm:px-4 dark:hover:bg-white/[0.04]"
+                className="grid h-auto w-full items-center gap-3 rounded-none px-3.5 py-3 text-left normal-case tracking-normal shadow-none hover:bg-[#FBFAFF] sm:grid-cols-[3rem_minmax(0,1fr)_minmax(13rem,18rem)] sm:px-4 dark:hover:bg-white/[0.04]"
               >
                 <span className={`flex h-11 w-11 items-center justify-center rounded-xl ${unitAccentTone(entry.unit.unitAccent ?? undefined, fallbackSeed)}`}>
                   <Icon size={22} strokeWidth={2.3} />
@@ -94,7 +94,7 @@ export const SkillsExplorerSection: React.FC<Props> = ({
 
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                    <h3 className="truncate text-sm font-black text-[#28334A] sm:text-base dark:text-[#F2EEFF]">{entry.unit.unitLabel}</h3>
+                    <h3 className="truncate text-sm font-black uppercase text-[#28334A] sm:text-base dark:text-[#F2EEFF]">{entry.unit.unitLabel}</h3>
                   </div>
                   {summary && <p className="mt-0.5 truncate text-[10px] font-semibold text-[#8A95A8] sm:text-[11px] dark:text-[#8F99AD]">{summary}</p>}
                   <p className="mt-1 text-[10px] font-extrabold text-[#68758A] dark:text-[#A8B0C1]">
@@ -120,7 +120,7 @@ export const SkillsExplorerSection: React.FC<Props> = ({
               </Button>
 
               {expanded && (
-                <CardContent id={`unit-skills-${entry.id}`} className="bg-[#F5F2FF] p-3 sm:p-4 dark:bg-violet-400/[0.06]">
+                <CardContent id={`unit-skills-${entry.id}`} className="border-t-2 border-[#E7E3F6] bg-[#F5F2FF] p-3 sm:p-4 dark:border-white/10 dark:bg-violet-400/[0.06]">
                   <div className="grid gap-2 sm:grid-cols-2">
                     {displayedSkills.map(skill => {
                       const playable = playableSkillIds.has(skill.skillId);
@@ -136,7 +136,7 @@ export const SkillsExplorerSection: React.FC<Props> = ({
                           variant="ghost"
                           disabled={!playable}
                           onClick={() => onStartSkill(skill.skillId)}
-                          className={`h-auto min-h-16 justify-start gap-3 rounded-xl border-0 px-3 py-2.5 text-left shadow-none ${
+                          className={`h-auto min-h-16 justify-start gap-3 rounded-xl border-0 px-3 py-2.5 text-left normal-case tracking-normal shadow-none ${
                             recommended
                               ? "bg-[#E7DFFF] hover:bg-[#DED3FF] dark:bg-violet-400/20 dark:hover:bg-violet-400/25"
                               : "bg-white/80 hover:bg-white dark:bg-white/[0.035] dark:hover:bg-white/[0.08]"
@@ -159,7 +159,7 @@ export const SkillsExplorerSection: React.FC<Props> = ({
                           <span className="min-w-0 flex-1">
                             <span className="flex flex-wrap items-center gap-1.5">
                               <span className="truncate text-[11px] font-black text-[#313B52] sm:text-xs dark:text-[#F2EEFF]">{skill.skillLabel}</span>
-                              {recommended && <span className="rounded-full bg-[#7252D8] px-2 py-0.5 text-[8px] font-black uppercase tracking-wide text-white">Recommended</span>}
+                              {recommended && <span className="rounded-full bg-[#7252D8] px-2 py-0.5 text-[8px] font-black text-white">Recommended</span>}
                             </span>
                             <span className="mt-0.5 block text-[9px] font-extrabold text-[#7C7390] dark:text-[#9F97B5]">{playable ? action : "Not available yet"}</span>
                           </span>
@@ -171,7 +171,7 @@ export const SkillsExplorerSection: React.FC<Props> = ({
 
                   {entry.total > 6 && (
                     <div className="mt-3 flex justify-center">
-                      <Button type="button" variant="ghost" size="sm" onClick={() => setShowAllSkills(value => !value)} className="rounded-full px-4 text-[10px] font-extrabold text-[#6844EA] dark:text-[#CDBEFF]">
+                      <Button type="button" variant="ghost" size="sm" onClick={() => setShowAllSkills(value => !value)} className="rounded-full px-4 text-[10px] font-extrabold normal-case tracking-normal text-[#6844EA] dark:text-[#CDBEFF]">
                         {showAllSkills ? "Show fewer skills" : `Show all ${entry.total} skills`}
                       </Button>
                     </div>

@@ -13,7 +13,7 @@
 import React from "react";
 import { CountingQuestion } from "../../types";
 import { CANVAS_BY_TECHNIQUE } from "./canvasRegistry";
-import { OneToOneCanvas } from "../canvases/OneToOneCanvas";
+import { CountCanvas } from "../canvases/CountCanvas";
 import { LazyBoundary } from "../LazyBoundary";
 import { QuestionAssetProvider } from "../../assets/questionAsset";
 
@@ -39,7 +39,7 @@ export const CanvasPreview: React.FC<CanvasPreviewProps> = ({
   onAttempt,
   onHint,
 }) => {
-  const Canvas = CANVAS_BY_TECHNIQUE[question.technique] || OneToOneCanvas;
+  const Canvas = CANVAS_BY_TECHNIQUE[question.technique] || CountCanvas;
 
   return (
     <div className={className ?? "w-full min-h-[320px] rounded-2xl border border-slate-200 bg-white p-2 overflow-hidden"}>

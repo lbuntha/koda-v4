@@ -24,13 +24,13 @@ export const StudentFooter: React.FC<StudentFooterProps> = ({
   };
 
   return (
-    <footer className="bg-[#F4F2FC]/80 px-5 py-5 sm:px-8 dark:bg-[#141827]/80">
+    <footer className="border-t-2 border-[#E7E3F6] bg-[#F8F6FF] px-5 py-6 shadow-[0_-8px_28px_-24px_rgba(83,74,183,0.38)] sm:px-8 dark:border-white/10 dark:bg-[#141827] dark:shadow-[0_-8px_28px_-24px_rgba(0,0,0,0.7)]">
       <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
         <div>
-          <p className="text-xs font-extrabold text-[#332750] dark:text-[#D6D2EC]">
+          <p className="text-sm font-extrabold text-[#332750] dark:text-[#D6D2EC]">
             © {new Date().getFullYear()} {brand}
           </p>
-          <p className="mt-1 text-[10px] font-bold text-[#6E6480] dark:text-[#8B85A6]">{tagline}</p>
+          <p className="mt-1 text-[11px] font-semibold text-[#6E6480] dark:text-[#9B95B5]">{tagline}</p>
         </div>
 
         {links.length > 0 && (
@@ -42,7 +42,7 @@ export const StudentFooter: React.FC<StudentFooterProps> = ({
                 variant="ghost"
                 size="xs"
                 onClick={() => navigate(link.targetId)}
-                className="rounded-full text-[#655A78] dark:text-[#B6B0CE] dark:hover:bg-white/10"
+                className="h-8 rounded-xl border-2 border-[#E2DCF3] bg-white px-3 text-[#655A78] shadow-[0_3px_0_#E2DCF3] hover:border-[#D7CFF0] hover:bg-[#FDFBFF] hover:text-[#534AB7] dark:border-white/10 dark:bg-white/5 dark:text-[#C8C1DC] dark:shadow-[0_3px_0_#292D45] dark:hover:bg-white/10"
               >
                 {link.label}
               </Button>
@@ -50,8 +50,8 @@ export const StudentFooter: React.FC<StudentFooterProps> = ({
           </nav>
         )}
 
-        <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100/70 px-3 py-1.5 text-[10px] font-extrabold text-emerald-800 dark:bg-emerald-400/10 dark:text-emerald-300">
-          <ShieldCheck size={13} /> Safe learner space
+        <div className="inline-flex h-9 items-center gap-1.5 rounded-xl border-2 border-emerald-200 bg-emerald-50 px-3 text-[10px] font-extrabold text-emerald-800 shadow-[0_3px_0_#A7F3D0] dark:border-emerald-400/15 dark:bg-emerald-400/10 dark:text-emerald-300 dark:shadow-[0_3px_0_#183B35]">
+          <ShieldCheck size={14} /> Safe learner space
         </div>
       </div>
     </footer>

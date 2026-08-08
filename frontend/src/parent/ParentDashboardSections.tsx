@@ -2,7 +2,7 @@ import React from "react";
 import { Plus } from "lucide-react";
 import type { AnalyticsSummary } from "../api/analytics";
 import type { Child } from "../api/family";
-import { Button } from "../components/ui";
+import { Button, Card } from "../components/ui";
 import { FamilySummary } from "./FamilySummary";
 import { FamilyCodeCard } from "./FamilyCodeCard";
 import { RecentActivity } from "./RecentActivity";
@@ -29,7 +29,7 @@ export const ParentOverview: React.FC<OverviewProps> = ({ childCount, summaries,
 
     <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
       {/* Primary learning area */}
-      <section className="min-w-0 rounded-3xl border border-[#E7E3F6] bg-white p-4 shadow-[0_6px_24px_rgba(83,74,183,0.05)] sm:p-5 dark:border-white/10 dark:bg-[#14182A]">
+      <Card variant="standard" className="min-w-0 p-4 sm:p-5">
         <div className="mb-4 flex items-center justify-between gap-4">
           <div>
             <h2 className="text-lg font-semibold text-[#0E0B55] dark:text-white">My children</h2>
@@ -38,7 +38,7 @@ export const ParentOverview: React.FC<OverviewProps> = ({ childCount, summaries,
           <Button type="button" variant="ghost" size="sm" onClick={onAdd} className="rounded-full text-xs font-semibold text-[#534AB7] dark:text-[#CDBEFF]"><Plus size={15} /> Add child</Button>
         </div>
         {childrenGrid}
-      </section>
+      </Card>
 
       {/* Activity rail */}
       <aside className="min-w-0 space-y-5 xl:sticky xl:top-0">

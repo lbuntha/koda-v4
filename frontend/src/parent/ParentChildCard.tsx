@@ -30,7 +30,7 @@ const label = (value?: string | null) =>
 
 /** Skeleton card placeholder for progressive loading */
 export const ParentChildCardSkeleton: React.FC = () => (
-  <Card className="overflow-hidden border-[#E7E3F6] bg-white shadow-[0_6px_24px_rgba(83,74,183,0.06)] dark:border-white/10 dark:bg-[#161B2E]">
+  <Card className="overflow-hidden">
     <CardContent className="flex min-h-48 flex-col p-4 sm:p-5">
       <div className="flex items-start gap-3">
         <Skeleton className="h-14 w-14 shrink-0" shape="circle" />
@@ -94,7 +94,7 @@ export const ParentChildCard: React.FC<Props> = ({
   const latestPending = pendingPromotions[0];
 
   return (
-    <Card className="overflow-hidden border-[#E7E3F6] bg-white shadow-[0_6px_24px_rgba(83,74,183,0.06)] transition-all hover:shadow-[0_8px_30px_rgba(83,74,183,0.12)] dark:border-white/10 dark:bg-[#161B2E]">
+    <Card className="overflow-hidden">
       <CardContent className="flex min-h-48 flex-col p-4 sm:p-5">
         <div className="flex items-start gap-3">
           <div className="relative shrink-0">

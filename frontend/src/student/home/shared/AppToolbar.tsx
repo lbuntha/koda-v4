@@ -16,6 +16,8 @@ interface Props {
   onBrandClick?: () => void;
   /** Keeps the shared toolbar shell while omitting the Koda mark in focused panels. */
   showBrand?: boolean;
+  /** Optional page-specific sizing or positioning adjustments for the toolbar shell. */
+  className?: string;
 }
 
 /**
@@ -23,9 +25,9 @@ interface Props {
  * background with no band or rule, and the Koda mark comes from `favicon.svg` so the tab icon
  * and the header can never drift apart.
  */
-export const AppToolbar: React.FC<Props> = ({ title, subtitle, nav, subnav, actions, wide = false, onBrandClick, showBrand = true }) => (
+export const AppToolbar: React.FC<Props> = ({ title, subtitle, nav, subnav, actions, wide = false, onBrandClick, showBrand = true, className }) => (
   <>
-    <header className="sticky top-0 z-40 w-full border-b border-[#E9E3F6] bg-white/90 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2.5 shadow-[0_8px_24px_-20px_rgba(77,58,139,0.5)] backdrop-blur-xl [-webkit-backdrop-filter:blur(16px)] [-webkit-tap-highlight-color:transparent] sm:px-5 md:px-6 md:py-2.5 lg:px-8 dark:border-white/10 dark:bg-[#111329]/90 dark:shadow-none">
+    <header className={cn("sticky top-0 z-40 w-full border-b-2 border-[#ECE8F7] bg-white/95 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2.5 backdrop-blur-xl [-webkit-backdrop-filter:blur(16px)] [-webkit-tap-highlight-color:transparent] sm:px-5 md:px-6 md:py-2.5 lg:px-8 dark:border-white/10 dark:bg-[#111329]/95", className)}>
       <div className={cn("mx-auto flex h-12 items-center justify-between gap-2 sm:gap-4", wide ? "max-w-6xl" : "max-w-6xl")}>
         <div className={cn("flex min-w-0 items-center gap-2", title ? "flex-1 md:flex-initial" : "shrink-0")}>
           {showBrand && (onBrandClick ? (
@@ -35,12 +37,12 @@ export const AppToolbar: React.FC<Props> = ({ title, subtitle, nav, subnav, acti
               className="flex shrink-0 items-center gap-2 rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30"
               aria-label="Back to Koda"
             >
-              <img src="/favicon.svg" alt="" className="h-8 w-8 shrink-0 rounded-lg shadow-sm" />
+              <img src="/favicon.svg" alt="" className="h-8 w-8 shrink-0 rounded-lg shadow-[0_3px_0_#D8CCFF] dark:shadow-[0_3px_0_#332A5C]" />
               <span className="hidden text-base font-black tracking-tight text-[#5B48D6] sm:block dark:text-[#BEACFF]">Koda</span>
             </button>
           ) : (
             <>
-              <img src="/favicon.svg" alt="Koda" className="h-8 w-8 shrink-0 rounded-lg shadow-sm" />
+              <img src="/favicon.svg" alt="Koda" className="h-8 w-8 shrink-0 rounded-lg shadow-[0_3px_0_#D8CCFF] dark:shadow-[0_3px_0_#332A5C]" />
               <span className="hidden shrink-0 text-base font-black tracking-tight text-[#5B48D6] sm:block dark:text-[#BEACFF]">Koda</span>
             </>
           ))}
@@ -74,7 +76,7 @@ export const AppToolbar: React.FC<Props> = ({ title, subtitle, nav, subnav, acti
     {nav && (
       <nav
         aria-label="Mobile section navigation"
-        className="fixed inset-x-0 bottom-0 z-50 flex min-h-[4.75rem] items-center justify-around border-t border-slate-200/80 bg-white/95 px-3 pt-2 pb-[max(0.875rem,env(safe-area-inset-bottom))] shadow-[0_-6px_24px_rgba(67,52,120,0.09)] backdrop-blur-xl md:hidden dark:border-white/10 dark:bg-[#111329]/95 dark:shadow-[0_-6px_24px_rgba(0,0,0,0.4)] select-none [-webkit-tap-highlight-color:transparent]"
+        className="fixed inset-x-0 bottom-0 z-50 flex min-h-[4.75rem] items-center justify-around border-t-2 border-[#ECE8F7] bg-white/95 px-3 pt-2 pb-[max(0.875rem,env(safe-area-inset-bottom))] shadow-[0_-8px_28px_-18px_rgba(67,52,120,0.35)] backdrop-blur-xl md:hidden dark:border-white/10 dark:bg-[#111329]/95 dark:shadow-[0_-6px_24px_rgba(0,0,0,0.4)] select-none [-webkit-tap-highlight-color:transparent]"
       >
         {nav}
       </nav>

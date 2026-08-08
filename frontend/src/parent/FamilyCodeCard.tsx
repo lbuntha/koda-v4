@@ -9,7 +9,7 @@
 
 import React, { useState } from "react";
 import { Check, Copy, Lock } from "lucide-react";
-import { Button } from "../components/ui";
+import { Button, Card } from "../components/ui";
 
 /** Simple gradient shield: a mark, not an illustration. */
 const ShieldMark: React.FC = () => (
@@ -39,7 +39,7 @@ export const FamilyCodeCard: React.FC<{ code: string; compact?: boolean }> = ({ 
   };
 
   return (
-    <div className={`flex flex-wrap items-center gap-x-5 gap-y-2 rounded-3xl bg-indigo-50/70 px-5 py-3.5 sm:px-6 sm:py-4 dark:bg-indigo-400/10 ${compact ? "border border-[#DCD5FA] bg-white shadow-[0_6px_24px_rgba(83,74,183,0.05)] dark:border-white/10 dark:bg-[#14182A]" : ""}`}>
+    <Card className="flex flex-wrap items-center gap-x-5 gap-y-2 px-5 py-3.5 sm:px-6 sm:py-4">
       <ShieldMark />
 
       <div className="min-w-0">
@@ -65,6 +65,6 @@ export const FamilyCodeCard: React.FC<{ code: string; compact?: boolean }> = ({ 
         {copied ? <Check size={14} /> : <Copy size={14} />}
         {copied ? "Copied" : "Copy"}
       </Button>
-    </div>
+    </Card>
   );
 };

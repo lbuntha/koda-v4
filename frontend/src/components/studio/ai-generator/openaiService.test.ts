@@ -14,7 +14,7 @@ test("joins an AI-selected MongoDB SVG onto the validated slide", () => {
   };
   const validated: ParsedSlideConfig = {
     id: "generated-1",
-    technique: CountingTechnique.ONE_TO_ONE,
+    technique: CountingTechnique.MOVE_AND_COUNT,
     title: "Count the jars",
     instruction: "Count each jar.",
     objectId: "apple",
@@ -36,7 +36,7 @@ test("joins an AI-selected MongoDB SVG onto the validated slide", () => {
 test("keeps schema validation output when AI selects no MongoDB asset", () => {
   const validated: ParsedSlideConfig = {
     id: "generated-2",
-    technique: CountingTechnique.ONE_TO_ONE,
+    technique: CountingTechnique.MOVE_AND_COUNT,
     title: "Count apples",
     instruction: "Count each apple.",
     objectId: "apple",
@@ -50,7 +50,7 @@ test("keeps schema validation output when AI selects no MongoDB asset", () => {
 test("does not match a component keyword inside another word", () => {
   assert.equal(
     detectTechniqueFromPrompt("Create one counting question with 5 stars").technique,
-    CountingTechnique.ONE_TO_ONE,
+    CountingTechnique.MOVE_AND_COUNT,
   );
   assert.equal(
     detectTechniqueFromPrompt("Let the child eat 2 cookies").technique,
@@ -59,7 +59,7 @@ test("does not match a component keyword inside another word", () => {
 });
 
 test("normalizes question wrappers and replaces duplicate ids before Apply", () => {
-  const schema = getSchemaByTechnique(CountingTechnique.ONE_TO_ONE);
+  const schema = getSchemaByTechnique(CountingTechnique.MOVE_AND_COUNT);
   assert.ok(schema);
 
   const slides = normalizeGeneratedSlides({
@@ -76,7 +76,7 @@ test("normalizes question wrappers and replaces duplicate ids before Apply", () 
 });
 
 test("rejects response wrappers that contain no question", () => {
-  const schema = getSchemaByTechnique(CountingTechnique.ONE_TO_ONE);
+  const schema = getSchemaByTechnique(CountingTechnique.MOVE_AND_COUNT);
   assert.ok(schema);
   assert.throws(
     () => normalizeGeneratedSlides({ result: "done" }, schema),

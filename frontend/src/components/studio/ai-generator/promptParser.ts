@@ -1,9 +1,13 @@
 /**
- * Rule-based offline generator for MOVE_AND_COUNT.
+ * Rule-based offline generator for MOVE_AND_COUNT — the Count family.
  *
- * Wired into moveAndCount.schema.ts as `offlineFallback` — the panel never
- * imports this directly. A new component that wants offline support ships its
- * own parser (or none) and wires it the same way.
+ * Wired into count.schema.ts as `offlineFallback` — the panel never imports
+ * this directly. A new component that wants offline support ships its own
+ * parser (or none) and wires it the same way.
+ *
+ * It only ever produces the `move` staging, which is the default the canvas
+ * falls back to anyway. Offline is the no-API-key path, so a sensible single
+ * shape beats guessing which of four the teacher meant.
  */
 
 import { CountingTechnique } from "../../../types";
