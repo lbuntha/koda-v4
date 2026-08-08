@@ -1,4 +1,5 @@
 import React from "react";
+import { Badge } from "../ui/Badge";
 
 /**
  * Shared visual language for every canvas.
@@ -164,13 +165,12 @@ export const CanvasChip: React.FC<CanvasChipProps> = ({
   children,
   ...rest
 }) => (
-  <div
+  <Badge
+    variant={accent as any}
+    icon={icon}
+    className={`${mono ? "font-mono tracking-widest" : "font-extrabold"} ${className}`}
     {...rest}
-    className={`inline-flex items-center gap-1.5 h-7 px-3 rounded-full border flex-shrink-0 whitespace-nowrap
-      ${mono ? "font-mono text-[10px] font-black uppercase tracking-widest" : "text-[11px] font-bold"}
-      ${accentChipClass(accent, isDark)} ${className}`}
   >
-    {icon}
     {children}
-  </div>
+  </Badge>
 );

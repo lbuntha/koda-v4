@@ -22,6 +22,8 @@ export interface SvgLibraryPayload {
    * technique pointing at it.
    */
   techniqueThumbnails: Record<string, string>;
+  /** Mastery level -> an id in `assets`. */
+  masteryGateAssets: Partial<Record<"beginner" | "developing" | "proficient" | "master", string>>;
   revision: number;
 }
 

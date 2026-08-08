@@ -1,4 +1,5 @@
 import { api } from "./client";
+import type { CustomSvgAsset } from "../types";
 
 export interface AppSettings {
   sound_enabled: boolean;
@@ -15,6 +16,7 @@ export interface AppSettings {
   smtp_password_hint: string | null;
   scoring: ScoringConfig;
   scoring_revision: number;
+  mastery_gate_assets: Partial<Record<"beginner" | "developing" | "proficient" | "master", CustomSvgAsset>>;
 }
 
 export interface AppSettingsUpdate {

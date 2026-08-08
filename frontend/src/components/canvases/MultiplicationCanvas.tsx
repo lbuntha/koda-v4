@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import { CanvasProps } from "./types";
 import { COUNT_OBJECTS } from "../../types";
 import { CountingAsset } from "../Assets";
 import { sounds } from "../../sound";
-import { Grid, RotateCcw, Check, Calculator, AlertCircle, Delete } from "lucide-react";
+import { Grid, RotateCcw } from "lucide-react";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import { GhostGuideOverlay, useGhostGuide } from "../../pedagogy";
 import { CanvasChip, surfaceClass, accentChipClass, emptySlotClass } from "./canvasTheme";
+import { CanvasAnswerPanel, useCanvasAnswer } from "./CanvasAnswerPanel";
 import { Button } from "../ui";
 
 interface ArrayItem {
@@ -38,12 +38,19 @@ export const MultiplicationCanvas: React.FC<CanvasProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const centerRef = useRef<HTMLDivElement>(null);
 
-  // Answer Input State
-  const [answerInput, setAnswerInput] = useState<string>("");
-  const [answerStatus, setAnswerStatus] = useState<"idle" | "error" | "correct">("idle");
-  const [errorMessage, setErrorMessage] = useState<string>("");
-  const [showNumberPad, setShowNumberPad] = useState<boolean>(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const activeCount = items.filter(it => it.isActive).length;
+  const isArrayComplete = activeCount === targetCount;
+  const answerPanelOpen = isPlayMode && requireAnswerInput && isArrayComplete;
+
+  // Typing, checking and the success hand-off all live in the shared panel.
+  const answer = useCanvasAnswer({
+    expected: targetCount,
+    resetKey: `${question.id}:${rows}x${cols}`,
+    wrongMessage: `Not quite! ${rows} rows of ${cols} makes ${targetCount} ${obj.label}${targetCount === 1 ? "" : "s"}. Enter ${targetCount}!`,
+    onSuccess,
+    open: answerPanelOpen
+  });
+
   const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onSuccessRef = useRef(onSuccess);
   onSuccessRef.current = onSuccess;
@@ -72,12 +79,9 @@ export const MultiplicationCanvas: React.FC<CanvasProps> = ({
   const w = centerDimensions.width || 440;
   const h = centerDimensions.height || 200;
 
-  // Reset answer state on question change
+  /* The answer clears itself from its `resetKey`; all this has to drop is a
+     pending hand-off from the no-answer-needed path below. */
   useEffect(() => {
-    setAnswerInput("");
-    setAnswerStatus("idle");
-    setErrorMessage("");
-    setShowNumberPad(false);
     if (successTimeoutRef.current) {
       clearTimeout(successTimeoutRef.current);
       successTimeoutRef.current = null;
@@ -133,64 +137,14 @@ export const MultiplicationCanvas: React.FC<CanvasProps> = ({
     );
     setItems(updated);
 
-    const activeCount = updated.filter(it => it.isActive).length;
-    if (activeCount === targetCount) {
-      if (!requireAnswerInput) {
-        successTimeoutRef.current = setTimeout(() => {
-          sounds.playSuccess();
-          onSuccessRef.current?.();
-          successTimeoutRef.current = null;
-        }, 300);
-      } else {
-        setTimeout(() => {
-          inputRef.current?.focus();
-        }, 350);
-      }
-    }
-  };
-
-  const handleCheckAnswer = (overrideValue?: string) => {
-    const valueToTest = overrideValue !== undefined ? overrideValue : answerInput;
-    const parsed = parseInt(valueToTest.trim(), 10);
-
-    if (isNaN(parsed) || valueToTest.trim() === "") {
-      setAnswerStatus("error");
-      setErrorMessage("Please enter a number!");
-      sounds.playFailure();
-      return;
-    }
-
-    if (parsed === targetCount) {
-      setAnswerStatus("correct");
-      setErrorMessage("");
-      sounds.playSuccess();
+    // With an answer required, the panel takes over — including focusing itself.
+    if (updated.filter(it => it.isActive).length === targetCount && !requireAnswerInput) {
       successTimeoutRef.current = setTimeout(() => {
+        sounds.playSuccess();
         onSuccessRef.current?.();
         successTimeoutRef.current = null;
-      }, 500);
-    } else {
-      setAnswerStatus("error");
-      setErrorMessage(`Not quite! ${rows} rows of ${cols} makes ${targetCount} ${obj.label}${targetCount === 1 ? "" : "s"}. Enter ${targetCount}!`);
-      sounds.playFailure();
+      }, 300);
     }
-  };
-
-  const handleDigitPress = (digit: string) => {
-    if (answerStatus === "correct") return;
-    if (answerStatus === "error") {
-      setAnswerStatus("idle");
-      setErrorMessage("");
-    }
-    setAnswerInput(prev => (prev.length < 3 ? prev + digit : prev));
-  };
-
-  const handleBackspacePress = () => {
-    if (answerStatus === "correct") return;
-    if (answerStatus === "error") {
-      setAnswerStatus("idle");
-      setErrorMessage("");
-    }
-    setAnswerInput(prev => prev.slice(0, -1));
   };
 
   const handleBoxPointerDown = (e: React.PointerEvent) => {
@@ -319,10 +273,7 @@ export const MultiplicationCanvas: React.FC<CanvasProps> = ({
       clearTimeout(successTimeoutRef.current);
       successTimeoutRef.current = null;
     }
-    setAnswerInput("");
-    setAnswerStatus("idle");
-    setErrorMessage("");
-    setShowNumberPad(false);
+    answer.reset();
 
     sounds.playPop();
     if (onUpdateQuestionConfig) {
@@ -333,9 +284,7 @@ export const MultiplicationCanvas: React.FC<CanvasProps> = ({
     setBoxState({ x: 0, y: 0, width: 0, height: 0 });
   };
 
-  const activeCount = items.filter(it => it.isActive).length;
-  const isArrayComplete = activeCount === targetCount;
-  const solvedForGuide = isArrayComplete && (requireAnswerInput ? answerStatus === "correct" : true);
+  const solvedForGuide = isArrayComplete && (requireAnswerInput ? answer.solved : true);
   const isSolved = solvedForGuide;
 
   const { showGhostGuide, reportActivity } = useGhostGuide({
@@ -511,157 +460,13 @@ export const MultiplicationCanvas: React.FC<CanvasProps> = ({
           )}
         </div>
 
-        {/* ── Answer Input Box Overlay after filling array ── */}
-        <AnimatePresence>
-          {isPlayMode && requireAnswerInput && isArrayComplete && (
-            <motion.div
-              initial={{ opacity: 0, y: 30, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              className="absolute inset-x-2 bottom-2 z-50 flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl backdrop-blur-md border shadow-2xl transition-all max-w-lg mx-auto"
-              style={{
-                backgroundColor: isDark ? "rgba(15, 23, 42, 0.94)" : "rgba(255, 255, 255, 0.96)",
-                borderColor: answerStatus === "error" 
-                  ? "#ef4444" 
-                  : answerStatus === "correct" 
-                  ? "#10b981" 
-                  : isDark ? "#334155" : "#cbd5e1"
-              }}
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">🎉</span>
-                <span className={`text-xs sm:text-sm font-extrabold tracking-tight ${
-                  isDark ? "text-slate-100" : "text-slate-800"
-                }`}>
-                  What is {rows} × {cols}? Enter the total number of {obj.label}{targetCount === 1 ? "" : "s"}!
-                </span>
-              </div>
-
-              {/* Answer Input Controls */}
-              <div className="flex items-center gap-2 w-full justify-center max-w-xs">
-                <div className="relative flex-1">
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    value={answerInput}
-                    onChange={(e) => {
-                      setAnswerInput(e.target.value);
-                      if (answerStatus === "error") {
-                        setAnswerStatus("idle");
-                        setErrorMessage("");
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleCheckAnswer();
-                    }}
-                    placeholder="Product..."
-                    disabled={answerStatus === "correct"}
-                    className={`w-full h-11 px-3 text-center text-lg sm:text-xl font-bold font-mono rounded-xl border-2 transition-all outline-none ${
-                      answerStatus === "error"
-                        ? "border-red-500 bg-red-50/50 text-red-700 animate-shake dark:bg-red-950/40 dark:text-red-300"
-                        : answerStatus === "correct"
-                        ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
-                        : isDark
-                        ? "bg-slate-900 border-slate-700 text-white focus:border-indigo-500"
-                        : "bg-white border-slate-300 text-slate-900 focus:border-indigo-500"
-                    }`}
-                  />
-                </div>
-
-                <Button
-                  onClick={() => handleCheckAnswer()}
-                  disabled={answerStatus === "correct" || !answerInput.trim()}
-                  className={`h-11 px-4 text-sm font-bold flex items-center gap-1.5 rounded-xl shadow-md transition-all active:scale-95 ${
-                    answerStatus === "correct"
-                      ? "bg-emerald-600 hover:bg-emerald-600 text-white"
-                      : "bg-emerald-600 hover:bg-emerald-700 text-white"
-                  }`}
-                >
-                  {answerStatus === "correct" ? <Check size={18} /> : "Check"}
-                </Button>
-
-                <button
-                  type="button"
-                  onClick={() => setShowNumberPad(prev => !prev)}
-                  className={`h-11 w-11 flex items-center justify-center rounded-xl border transition-all ${
-                    showNumberPad
-                      ? "bg-emerald-100 border-emerald-400 text-emerald-700 dark:bg-emerald-950 dark:border-emerald-600 dark:text-emerald-300"
-                      : isDark
-                      ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
-                      : "bg-slate-100 border-slate-300 text-slate-600 hover:bg-slate-200"
-                  }`}
-                  title="Toggle Number Pad"
-                >
-                  <Calculator size={18} />
-                </button>
-              </div>
-
-              {/* Error feedback banner */}
-              {answerStatus === "error" && errorMessage && (
-                <div className="flex items-center gap-1.5 text-xs text-red-500 dark:text-red-400 font-bold mt-2 animate-fade-in text-center">
-                  <AlertCircle size={14} className="flex-shrink-0" />
-                  <span>{errorMessage}</span>
-                </div>
-              )}
-
-              {/* On-screen Number Keypad for Kids / Mobile / Tablets */}
-              <AnimatePresence>
-                {showNumberPad && answerStatus !== "correct" && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="w-full mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 flex flex-col items-center gap-2 overflow-hidden"
-                  >
-                    <div className="grid grid-cols-5 gap-1.5 w-full max-w-xs">
-                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((num) => (
-                        <button
-                          key={num}
-                          type="button"
-                          onClick={() => handleDigitPress(String(num))}
-                          className={`h-9 font-mono text-base font-extrabold rounded-lg border shadow-sm transition-all active:scale-95 ${
-                            isDark
-                              ? "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"
-                              : "bg-white border-slate-200 text-slate-800 hover:bg-slate-50"
-                          }`}
-                        >
-                          {num}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="flex items-center justify-between gap-2 w-full max-w-xs">
-                      <button
-                        type="button"
-                        onClick={handleBackspacePress}
-                        className={`flex-1 h-8 text-xs font-extrabold rounded-lg border flex items-center justify-center gap-1 transition-all ${
-                          isDark
-                            ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
-                            : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200"
-                        }`}
-                      >
-                        <Delete size={14} /> Backspace
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setAnswerInput("")}
-                        className={`px-3 h-8 text-xs font-extrabold rounded-lg border transition-all ${
-                          isDark
-                            ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
-                            : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200"
-                        }`}
-                      >
-                        Clear
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <CanvasAnswerPanel
+          answer={answer}
+          open={answerPanelOpen}
+          isDark={isDark}
+          placeholder="Product…"
+          prompt={`What is ${rows} × ${cols}? Enter the total number of ${obj.label}${targetCount === 1 ? "" : "s"}!`}
+        />
 
       </div>
     </SharedCanvasLayout>

@@ -28,19 +28,22 @@ const Host: React.FC<{
   onSuccess?: () => void;
   open?: boolean;
   resetKey?: string;
-}> = ({ expected, onSuccess, open = true, resetKey = "q1" }) => {
+  numberPadDefault?: boolean;
+}> = ({ expected, onSuccess, open = true, resetKey = "q1", numberPadDefault }) => {
   const answer = useCanvasAnswer({
     expected,
     resetKey,
     wrongMessage: `Not quite! Enter ${expected}!`,
     onSuccess,
-    open
+    open,
+    numberPadDefault
   });
   return <CanvasAnswerPanel answer={answer} open={open} prompt="How many in total?" />;
 };
 
 const input = () => screen.getByLabelText("Your answer") as HTMLInputElement;
-const openPad = () => fireEvent.click(screen.getByTitle("Toggle Number Pad"));
+const togglePad = () => fireEvent.click(screen.getByTitle("Toggle Number Pad"));
+const padToggle = () => screen.getByTitle("Toggle Number Pad");
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -120,7 +123,6 @@ describe("useCanvasAnswer + CanvasAnswerPanel", () => {
 
   it("caps entry at three digits", () => {
     render(<Host expected={999} />);
-    openPad();
 
     for (const digit of ["1", "2", "3", "4"]) {
       fireEvent.click(screen.getByLabelText(`Enter ${digit}`));
@@ -130,7 +132,6 @@ describe("useCanvasAnswer + CanvasAnswerPanel", () => {
 
   it("backspace and clear work from the pad", () => {
     render(<Host expected={999} />);
-    openPad();
 
     fireEvent.click(screen.getByLabelText("Enter 4"));
     fireEvent.click(screen.getByLabelText("Enter 2"));
@@ -189,5 +190,42 @@ describe("useCanvasAnswer + CanvasAnswerPanel", () => {
   it("renders nothing while closed", () => {
     render(<Host expected={5} open={false} />);
     expect(screen.queryByLabelText("Your answer")).toBeNull();
+  });
+
+  /*
+    The pad is the way in on a tablet, not an accessory: a child who has to find
+    a calculator button first is a child typing on the OS keyboard instead.
+  */
+  it("shows the number pad without being asked", () => {
+    render(<Host expected={5} />);
+
+    expect(screen.getByLabelText("Enter 7")).toBeTruthy();
+    expect(padToggle().getAttribute("aria-pressed")).toBe("true");
+    // And the OS keyboard is kept out of the way of the keys it duplicates.
+    expect(input().getAttribute("inputmode")).toBe("none");
+  });
+
+  it("hides the pad on request, and hands the OS keyboard back", () => {
+    render(<Host expected={5} />);
+    togglePad();
+
+    expect(padToggle().getAttribute("aria-pressed")).toBe("false");
+    expect(input().getAttribute("inputmode")).toBe("numeric");
+  });
+
+  it("a canvas with no room for the pad can start without it", () => {
+    render(<Host expected={5} numberPadDefault={false} />);
+
+    expect(padToggle().getAttribute("aria-pressed")).toBe("false");
+    expect(screen.queryByLabelText("Enter 7")).toBeNull();
+  });
+
+  it("restores the pad to its default on the next question", () => {
+    const { rerender } = render(<Host expected={5} resetKey="q1" />);
+    togglePad();
+    expect(padToggle().getAttribute("aria-pressed")).toBe("false");
+
+    rerender(<Host expected={8} resetKey="q2" />);
+    expect(padToggle().getAttribute("aria-pressed")).toBe("true");
   });
 });

@@ -46,6 +46,7 @@ export const SvgAssetEditor: React.FC = () => {
     setDeletedSystemAssetIds,
     techniqueThumbnails,
     setTechniqueThumbnails,
+    setMasteryGateAssets,
     persistenceStatus,
   } = useSvgLibrary();
   const [selected, setSelected] = useState<CatalogAsset | null>(() => BUILT_IN_ASSETS[0] ?? null);
@@ -195,6 +196,9 @@ export const SvgAssetEditor: React.FC = () => {
         : [...current, deleteTarget.id]);
     }
     setTechniqueThumbnails(current => Object.fromEntries(
+      Object.entries(current).filter(([, assetId]) => assetId !== deleteTarget.id),
+    ));
+    setMasteryGateAssets(current => Object.fromEntries(
       Object.entries(current).filter(([, assetId]) => assetId !== deleteTarget.id),
     ));
     setDeleteTarget(null);

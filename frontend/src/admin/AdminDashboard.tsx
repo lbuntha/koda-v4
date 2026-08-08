@@ -182,9 +182,12 @@ export const AdminDashboard: React.FC = () => {
       user={{ name: account?.name, email: account?.email, avatar: account?.avatar }}
       title={title}
       subtitle={subtitle}
+      onProfile={() => setSection("profile")}
+      onSettings={() => setSection("settings")}
+      onLogout={logout}
       contentClassName={section === "studio" || section === "assets" || section === "curriculum" ? "flex-1 overflow-hidden" : undefined}
       actions={
-        <Button variant="ghost" size="sm" onClick={logout} className="text-slate-500">
+        <Button variant="ghost" size="sm" onClick={logout} className="text-slate-500 md:hidden">
           <LogOut size={14} /> <span className="hidden sm:inline">Sign out</span>
         </Button>
       }

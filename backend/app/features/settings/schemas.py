@@ -141,6 +141,7 @@ class SettingsOut(BaseModel):
     smtp_password_hint: str | None = None
     scoring: ScoringConfigIn
     scoring_revision: int
+    mastery_gate_assets: dict[str, dict] = Field(default_factory=dict)
 
 
 class SettingsUpdate(BaseModel):

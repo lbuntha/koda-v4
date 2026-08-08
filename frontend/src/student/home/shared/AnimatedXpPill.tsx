@@ -26,14 +26,12 @@ export const AnimatedXpPill: React.FC<Props> = ({ value }) => {
   return (
     <span
       key={exactValue}
-      className="kid-xp-pill inline-flex h-8 items-center gap-1.5 overflow-hidden rounded-full border-2 border-[#ECEEF3] bg-white px-2.5 text-[10px] font-black text-[#3F4654] shadow-[0_3px_0_#ECEEF3] sm:px-3 sm:text-xs dark:border-white/10 dark:bg-white/5 dark:text-[#E4DEFF] dark:shadow-[0_3px_0_#23263A]"
+      className="inline-flex h-8 items-center gap-1.5 rounded-full border-2 border-[#FFE1BD] bg-[#FFF9EE] px-2.5 text-[10px] font-black tabular-nums text-[#C75A25] shadow-[0_3px_0_#FFE1BD] sm:px-3 sm:text-xs dark:border-orange-300/15 dark:bg-orange-400/10 dark:text-orange-300 dark:shadow-[0_3px_0_#3A2929]"
       aria-label={`${exactValue} experience points`}
       title={`${exactValue.toLocaleString()} XP earned`}
     >
-      <span className="kid-xp-bolt relative z-10 flex h-5 w-5 items-center justify-center drop-shadow-[0_2px_3px_rgba(242,155,24,0.3)]">
-        <SvgLibraryAsset assetId={KID_NAV_ASSET_IDS.xp} size={20} fallback={<Zap size={14} className="fill-current text-[#FFC928]" />} />
-      </span>
-      <span className="relative z-10 tabular-nums">{formatCompactXp(exactValue)}</span>
+      <SvgLibraryAsset assetId={KID_NAV_ASSET_IDS.xp} size={20} fallback={<Zap size={14} className="fill-current" />} />
+      {formatCompactXp(exactValue)}
     </span>
   );
 };

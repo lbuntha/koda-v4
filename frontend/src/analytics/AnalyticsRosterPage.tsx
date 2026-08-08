@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { BarChart3, Search, Trash2 } from "lucide-react";
 import { analyticsApi, AnalyticsStudent } from "../api/analytics";
 import { adminApi } from "../api/admin";
-import { Button, ConfirmModal, Input, SkeletonCard } from "../components/ui";
+import { Button, Card, ConfirmModal, Input, SkeletonCard } from "../components/ui";
 import { ChildAnalyticsDrawer } from "./ChildAnalyticsDrawer";
 import { KidAvatar } from "../components/KidAvatar";
 
@@ -49,31 +49,31 @@ export const AnalyticsRosterPage: React.FC = () => {
           <Search size={16} className="pointer-events-none absolute left-3.5 top-3.5 text-[#9893B6]" />
           <Input value={search} onChange={event => setSearch(event.target.value)} placeholder="Find a learner…" className="pl-10" />
         </div>
-        <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {filtered.map(student => (
-            <div key={student.id} className="flex items-center gap-2.5 rounded-xl border border-[#E7E3F6] bg-white p-2.5 shadow-[0_2px_10px_rgba(83,74,183,0.04)] transition-all hover:border-[#D0C7F7] hover:shadow-[0_4px_14px_rgba(83,74,183,0.08)] dark:border-white/10 dark:bg-[#161B2E]">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#F1EDFF] p-1 text-lg dark:bg-white/10">
+            <Card key={student.id} variant="standard" className="flex items-center gap-3 p-3.5 rounded-2xl border-2">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F1EDFF] p-1 text-lg dark:bg-white/10">
                 <KidAvatar avatar={student.avatar ?? undefined} className="h-full w-full object-contain" />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-xs font-extrabold text-[#0E0B55] dark:text-[#EDECF8]">{student.name}</p>
                 <p className="truncate text-[10px] font-medium text-[#6D6997] dark:text-[#9A94B8]">Mastery, activity, and next steps</p>
               </div>
-              <div className="flex shrink-0 items-center gap-1">
-                <Button size="xs" variant="outline" onClick={() => setSelected(student)} className="rounded-lg px-2 py-1 text-[11px] font-bold dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/10">
+              <div className="flex shrink-0 items-center gap-1.5">
+                <Button size="xs" variant="outline" onClick={() => setSelected(student)} className="rounded-xl px-2.5 py-1 text-[11px] font-extrabold border-2">
                   <BarChart3 size={12} /> View
                 </Button>
                 <Button
                   size="xs"
                   variant="ghost"
                   onClick={() => setDeleting(student)}
-                  className="rounded-lg px-2 py-1 text-[11px] text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:text-rose-400 dark:hover:bg-rose-500/10"
+                  className="rounded-xl px-2 py-1 text-[11px] font-extrabold text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:text-rose-400 dark:hover:bg-rose-500/10"
                   aria-label={`Delete ${student.name}`}
                 >
                   <Trash2 size={12} /> Delete
                 </Button>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
         {filtered.length === 0 && <div className="rounded-2xl border border-dashed border-[#DCD6F2] bg-white/60 p-10 text-center koda-admin-secondary">No learners found.</div>}

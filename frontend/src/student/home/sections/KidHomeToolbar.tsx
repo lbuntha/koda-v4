@@ -140,7 +140,7 @@ export const KidHomeToolbar: React.FC<Props> = ({
                 aria-current={isActive ? "page" : undefined}
                 className={`h-16 min-w-14 flex-1 flex-col gap-1 rounded-2xl border-2 px-2 text-[10px] font-extrabold leading-none sm:min-w-16 sm:px-3 md:h-12 md:min-w-20 md:max-w-24 md:gap-0.5 lg:min-w-24 lg:max-w-28 lg:text-xs ${
                   isActive
-                    ? "border-[#DED4FF] bg-[#F3EFFF] text-[#6844EA] shadow-[0_3px_0_#DED4FF] hover:border-[#D5C9FF] hover:bg-[#ECE6FF] dark:border-violet-400/20 dark:bg-violet-400/15 dark:text-[#CDBEFF] dark:shadow-[0_3px_0_#302852]"
+                    ? "border-[#DED4FF] bg-[#F3EFFF] text-[#6844EA] hover:border-[#D5C9FF] hover:bg-[#ECE6FF] dark:border-violet-400/20 dark:bg-violet-400/15 dark:text-[#CDBEFF]"
                     : "border-transparent text-[#7B8496] hover:border-[#EEE9FA] hover:bg-[#F8F5FF] hover:text-[#6844EA] dark:text-[#A79FC4] dark:hover:border-white/10 dark:hover:bg-white/10"
                 }`}
               >
@@ -164,7 +164,7 @@ export const KidHomeToolbar: React.FC<Props> = ({
               aria-controls="kid-rewards-summary"
               className={`h-16 min-w-14 w-full flex-1 flex-col gap-1 rounded-2xl border-2 px-2 text-[10px] font-extrabold leading-none sm:min-w-16 sm:px-3 md:h-12 md:min-w-20 md:max-w-24 md:gap-0.5 lg:min-w-24 lg:max-w-28 lg:text-xs ${
                 rewardsOpen
-                  ? "border-[#DED4FF] bg-[#F3EFFF] text-[#6844EA] shadow-[0_3px_0_#DED4FF] dark:border-violet-400/20 dark:bg-violet-400/15 dark:text-[#CDBEFF] dark:shadow-[0_3px_0_#302852]"
+                  ? "border-[#DED4FF] bg-[#F3EFFF] text-[#6844EA] dark:border-violet-400/20 dark:bg-violet-400/15 dark:text-[#CDBEFF]"
                   : "border-transparent text-[#7B8496] hover:border-[#EEE9FA] hover:bg-[#F8F5FF] hover:text-[#6844EA] dark:text-[#A79FC4] dark:hover:border-white/10 dark:hover:bg-white/10"
               }`}
             >

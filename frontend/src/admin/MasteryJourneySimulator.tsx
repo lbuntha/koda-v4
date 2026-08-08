@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Award, Check, Circle, Crown, Sprout, TrendingUp } from "lucide-react";
 import { ScoringConfig } from "../api/settings";
+import { SvgLibraryAsset } from "../assets/SvgLibraryAsset";
+import { useSvgLibrary } from "../assets/SvgLibraryContext";
 import { Badge, Button, Card } from "../components/ui";
 
 interface Props {
@@ -22,6 +24,7 @@ interface Requirement {
 }
 
 export const MasteryJourneySimulator: React.FC<Props> = ({ config }) => {
+  const { masteryGateAssets } = useSvgLibrary();
   const [step, setStep] = useState(0);
 
   useEffect(() => {
@@ -114,6 +117,7 @@ export const MasteryJourneySimulator: React.FC<Props> = ({ config }) => {
         <div className="flex min-w-[520px] items-center">
           {LEVELS.map((level, index) => {
             const Icon = level.icon;
+            const assetId = level.key === "not_started" ? undefined : masteryGateAssets[level.key];
             const complete = index < step;
             const active = index === step;
             return (
@@ -126,7 +130,7 @@ export const MasteryJourneySimulator: React.FC<Props> = ({ config }) => {
                   }`}
                 >
                   <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${complete ? "bg-emerald-500 text-white" : `${level.well} ${level.color}`}`}>
-                    {complete ? <Check size={13} /> : <Icon size={13} />}
+                    {complete ? <Check size={13} /> : assetId ? <SvgLibraryAsset assetId={assetId} size={18} fallback={<Icon size={13} />} /> : <Icon size={13} />}
                   </span>
                   <span className={`text-[11px] ${active ? "font-semibold text-[#17143D]" : "font-medium text-[#6D6997]"}`}>{level.label}</span>
                 </button>
@@ -143,7 +147,9 @@ export const MasteryJourneySimulator: React.FC<Props> = ({ config }) => {
         <div className="rounded-lg bg-[#FAF9FF] p-3">
           <div className="flex items-start gap-2.5">
             <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${LEVELS[step].well} ${LEVELS[step].color}`}>
-              <CurrentIcon size={17} />
+              {LEVELS[step].key !== "not_started" && masteryGateAssets[LEVELS[step].key]
+                ? <SvgLibraryAsset assetId={masteryGateAssets[LEVELS[step].key]!} size={24} fallback={<CurrentIcon size={17} />} />
+                : <CurrentIcon size={17} />}
             </span>
             <div className="min-w-0">
               <p className="text-sm font-semibold text-[#17143D]">{stage.title}</p>

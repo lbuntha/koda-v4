@@ -16,11 +16,14 @@ export interface CachedLibrary {
   deletedSystemAssetIds: string[];
   /** Counting technique -> SVG asset id. */
   techniqueThumbnails: Record<string, string>;
+  /** Mastery level -> SVG asset id. */
+  masteryGateAssets: Partial<Record<"beginner" | "developing" | "proficient" | "master", string>>;
 }
 
 export const ASSETS_KEY = "koda_custom_svg_assets";
 export const OVERRIDES_KEY = "koda_svg_overrides";
 export const THUMBNAILS_KEY = "koda_technique_thumbnails";
+export const MASTERY_GATE_ASSETS_KEY = "koda_mastery_gate_assets";
 export const DELETED_SYSTEM_ASSETS_KEY = "koda_deleted_system_svg_assets";
 
 /** Keys are per account: two adults sharing a browser must not see each other's library. */
@@ -58,6 +61,7 @@ export function readCache(ownerId: string): CachedLibrary {
     overrides: readJson<Record<string, SvgOverride>>(accountKey(OVERRIDES_KEY, ownerId), {}),
     deletedSystemAssetIds: readJson<string[]>(accountKey(DELETED_SYSTEM_ASSETS_KEY, ownerId), []),
     techniqueThumbnails: readJson<Record<string, string>>(accountKey(THUMBNAILS_KEY, ownerId), {}),
+    masteryGateAssets: readJson<CachedLibrary["masteryGateAssets"]>(accountKey(MASTERY_GATE_ASSETS_KEY, ownerId), {}),
   };
 }
 
@@ -66,4 +70,5 @@ export function writeCache(ownerId: string, library: CachedLibrary): void {
   writeJson(accountKey(OVERRIDES_KEY, ownerId), library.overrides);
   writeJson(accountKey(DELETED_SYSTEM_ASSETS_KEY, ownerId), library.deletedSystemAssetIds);
   writeJson(accountKey(THUMBNAILS_KEY, ownerId), library.techniqueThumbnails);
+  writeJson(accountKey(MASTERY_GATE_ASSETS_KEY, ownerId), library.masteryGateAssets);
 }

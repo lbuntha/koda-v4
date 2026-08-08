@@ -251,6 +251,9 @@ class SvgLibraryIn(BaseModel):
     technique_thumbnails: dict[str, str] = Field(
         default_factory=dict, max_length=100, alias="techniqueThumbnails"
     )
+    mastery_gate_assets: dict[str, str] = Field(
+        default_factory=dict, max_length=4, alias="masteryGateAssets"
+    )
     revision: int = Field(default=0, ge=0)
 
     @model_validator(mode="after")
@@ -262,6 +265,14 @@ class SvgLibraryIn(BaseModel):
         if unknown:
             raise ValueError(
                 f"Technique thumbnails reference assets that are not in the library: {', '.join(unknown)}"
+            )
+        unknown_levels = sorted(set(self.mastery_gate_assets) - {"beginner", "developing", "proficient", "master"})
+        if unknown_levels:
+            raise ValueError(f"Unknown mastery levels: {', '.join(unknown_levels)}")
+        unknown_mastery_assets = sorted(set(self.mastery_gate_assets.values()) - set(ids))
+        if unknown_mastery_assets:
+            raise ValueError(
+                f"Mastery gates reference assets that are not in the library: {', '.join(unknown_mastery_assets)}"
             )
         total_bytes = sum(len(asset.markup.encode("utf-8")) for asset in self.assets)
         total_bytes += sum(len(override.markup.encode("utf-8")) for override in self.overrides.values())

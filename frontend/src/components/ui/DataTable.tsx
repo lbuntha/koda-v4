@@ -93,7 +93,7 @@ export function DataTable<T>({
                   value={searchValue}
                   onChange={(e) => onSearchChange?.(e.target.value)}
                   placeholder={searchPlaceholder}
-                  className="h-9 w-full !pl-9 pr-3 text-xs font-bold"
+                  className="h-9 w-full !pl-9 pr-3 text-xs font-bold border-2 border-slate-200 dark:border-white/15"
                 />
               </div>
             )}
@@ -189,7 +189,7 @@ export function DataTable<T>({
               <select
                 value={pageSize}
                 onChange={(e) => onPageSizeChange(Number(e.target.value))}
-                className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold dark:border-white/10 dark:bg-white/5 dark:text-slate-200"
+                className="rounded-lg border-2 border-slate-200 bg-white px-2 py-1 text-xs font-bold dark:border-white/15 dark:bg-white/5 dark:text-slate-200"
               >
                 {pageSizeOptions.map((opt) => (
                   <option key={opt} value={opt}>

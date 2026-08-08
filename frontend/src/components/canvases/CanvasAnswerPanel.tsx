@@ -22,15 +22,43 @@
  * business, not the panel's.
  *
  * The pad here is the 5-column one the pattern doc specifies for counting
- * (digits, then Backspace / Clear). `NumberPad.tsx` is a different pad for a
- * different job: entering digits into a column-arithmetic grid.
+ * (digits, then Backspace / Clear), and it is **open by default**: on the tablets
+ * this runs on it is the primary way in, not an accessory, and a child who has
+ * to find a calculator button first is a child typing on the OS keyboard over
+ * the top of the activity. `NumberPad.tsx` is a different pad for a different
+ * job: entering digits into a column-arithmetic grid.
+ *
+ * ## Theming
+ *
+ * Every colour here is driven by the `isDark` prop, never by Tailwind's `dark:`
+ * variant. `index.css` scopes that variant to an explicit `.dark` ancestor, and
+ * GameLauncher — the only host that renders a canvas in play mode — themes
+ * itself with `isDark` and never mounts one. `dark:` classes inside a canvas are
+ * therefore dead, which is exactly how this panel stayed light-on-light in dark
+ * mode. The root still carries `dark` when dark so anything nested that does
+ * reach for the variant resolves correctly.
+ *
+ * The surface comes from `theme/surfaces.ts`, shared with the success card, the
+ * saving curtain and the placement finish screen, so every card that floats over
+ * an activity is the same card. The panel briefly took a per-canvas accent; it
+ * now wears the brand primary like the rest of them. An accent that changed with
+ * the activity meant the Check button changed colour between two slides of one
+ * lesson, and it competed with the primary button waiting underneath. Colour
+ * that varies here should mean *state* — wrong, right — and nothing else.
  */
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { AlertCircle, Calculator, Check, Delete } from "lucide-react";
+import { AlertCircle, Calculator, Check, ChevronDown, Delete } from "lucide-react";
 import { sounds } from "../../sound";
-import { Button } from "../ui";
+import { Button, Input } from "../ui";
+import { hairlineClass } from "./canvasTheme";
+import {
+  overlayCardBaseClass,
+  overlayCardBorderClass,
+  primaryFocusClass,
+  primaryToggleOnClass
+} from "../../theme/surfaces";
 
 export type AnswerStatus = "idle" | "error" | "correct";
 
@@ -49,6 +77,12 @@ export interface UseCanvasAnswerOptions {
   onSuccess?: () => void;
   /** True once the activity is complete and the panel is on screen. */
   open: boolean;
+  /**
+   * Whether the pad starts open. Defaults to true — see the note above. A canvas
+   * with no room for it (a short stage, a dock that would cover the objects) can
+   * opt out, and the toggle still brings it back.
+   */
+  numberPadDefault?: boolean;
 }
 
 export interface CanvasAnswer {
@@ -75,17 +109,23 @@ export function useCanvasAnswer({
   resetKey,
   wrongMessage,
   onSuccess,
-  open
+  open,
+  numberPadDefault = true
 }: UseCanvasAnswerOptions): CanvasAnswer {
   const [value, setValue] = useState("");
   const [status, setStatus] = useState<AnswerStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
-  const [showNumberPad, setShowNumberPad] = useState(false);
+  const [showNumberPad, setShowNumberPad] = useState(numberPadDefault);
   const inputRef = useRef<HTMLInputElement>(null);
   const successTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const onSuccessRef = useRef(onSuccess);
   onSuccessRef.current = onSuccess;
+
+  /* Read inside `reset`, which a new question calls — without the ref, changing
+     the default would not survive to the next slide. */
+  const padDefaultRef = useRef(numberPadDefault);
+  padDefaultRef.current = numberPadDefault;
 
   const clearSuccessTimeout = () => {
     if (successTimeout.current) {
@@ -99,7 +139,7 @@ export function useCanvasAnswer({
     setValue("");
     setStatus("idle");
     setErrorMessage("");
-    setShowNumberPad(false);
+    setShowNumberPad(padDefaultRef.current);
   }, []);
 
   useEffect(() => {
@@ -227,6 +267,46 @@ const DOCK_CLASS: Record<AnswerPanelDock, string> = {
     "sm:bottom-0 sm:w-[calc(50%-1.5rem)] sm:flex sm:items-center"
 };
 
+/**
+ * State lives on the border, and nothing else in the panel changes colour.
+ *
+ * Idle takes the brand primary, the same trim the success card and the placement
+ * finish screen wear, so every card that floats over an activity is one family.
+ * Wrong and right override it, because at that moment the border IS the feedback.
+ */
+const panelBorder = (status: AnswerStatus, isDark: boolean) => {
+  if (status === "error") return isDark ? "border-rose-400" : "border-rose-500";
+  if (status === "correct") return isDark ? "border-emerald-400" : "border-emerald-500";
+  return overlayCardBorderClass(isDark, "primary");
+};
+
+const inputClass = (status: AnswerStatus, isDark: boolean) => {
+  if (status === "error") {
+    return isDark
+      ? "border-rose-400 bg-rose-500/15 text-rose-200 placeholder:text-rose-300/50 animate-shake"
+      : "border-rose-500 bg-rose-50 text-rose-700 placeholder:text-rose-400/60 animate-shake";
+  }
+  if (status === "correct") {
+    return isDark
+      ? "border-emerald-400 bg-emerald-500/15 text-emerald-200"
+      : "border-emerald-500 bg-emerald-50 text-emerald-700";
+  }
+  return isDark
+    ? `bg-white/[0.06] border-white/15 text-white placeholder:text-slate-500 ${primaryFocusClass}`
+    : `bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 ${primaryFocusClass}`;
+};
+
+/** Keypad keys and the Backspace / Clear row — elevation, not colour. */
+const keyClass = (isDark: boolean) =>
+  isDark
+    ? "bg-white/[0.08] border-white/10 text-white hover:bg-white/[0.16] active:bg-white/20"
+    : "bg-white border-slate-200 text-slate-800 hover:bg-slate-50 active:bg-slate-100";
+
+const utilityKeyClass = (isDark: boolean) =>
+  isDark
+    ? "bg-white/[0.05] border-white/10 text-slate-300 hover:bg-white/[0.12]"
+    : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200";
+
 export interface CanvasAnswerPanelProps {
   answer: CanvasAnswer;
   /** Render the panel. Wrap in nothing — the component brings its own AnimatePresence. */
@@ -235,6 +315,8 @@ export interface CanvasAnswerPanelProps {
   prompt: React.ReactNode;
   isDark?: boolean;
   dock?: AnswerPanelDock;
+  /** What the empty input reads. "Total…" unless the activity asks for something else. */
+  placeholder?: string;
   /**
    * The panel's measured height, whenever it changes.
    *
@@ -251,6 +333,7 @@ export const CanvasAnswerPanel: React.FC<CanvasAnswerPanelProps> = ({
   prompt,
   isDark = false,
   dock = "bottom",
+  placeholder = "Total…",
   onHeightChange
 }) => {
   const panelRef = useRef<HTMLDivElement>(null);
@@ -288,20 +371,10 @@ export const CanvasAnswerPanel: React.FC<CanvasAnswerPanelProps> = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="w-full pointer-events-auto flex flex-col items-center justify-center p-3 sm:p-4 md:p-5
-              rounded-2xl md:rounded-3xl backdrop-blur-md border shadow-2xl sm:max-w-md md:max-w-lg"
-            style={{
-              backgroundColor: isDark ? "rgba(15, 23, 42, 0.94)" : "rgba(255, 255, 255, 0.96)",
-              // The border carries the state; nothing else in the panel changes colour.
-              borderColor:
-                status === "error"
-                  ? "#ef4444"
-                  : status === "correct"
-                    ? "#10b981"
-                    : isDark
-                      ? "#334155"
-                      : "#cbd5e1"
-            }}
+            className={`w-full pointer-events-auto flex flex-col items-center justify-center p-3 sm:p-4 md:p-5
+              rounded-2xl md:rounded-3xl border-2 sm:max-w-md md:max-w-lg
+              ${overlayCardBaseClass(isDark, "primary")} ${panelBorder(status, isDark)}
+              ${isDark ? "dark" : ""}`}
           >
             <div className="flex items-center gap-2 mb-2 md:mb-3">
               <span className="text-xl md:text-2xl">🎉</span>
@@ -316,65 +389,72 @@ export const CanvasAnswerPanel: React.FC<CanvasAnswerPanelProps> = ({
 
             <div className="flex items-center gap-2 md:gap-3 w-full justify-center max-w-xs md:max-w-sm">
               <div className="relative flex-1">
-                <input
+                <Input
                   ref={inputRef}
-                  type="text"
-                  inputMode="numeric"
+                  /*
+                    With the pad up, the OS keyboard would slide over the very
+                    keys it duplicates. `none` suppresses it on touch devices and
+                    has no effect on a physical keyboard, so typing still works.
+                  */
+                  inputMode={showNumberPad ? "none" : "numeric"}
                   pattern="[0-9]*"
                   value={value}
                   onChange={e => answer.setValue(e.target.value)}
                   onKeyDown={e => {
                     if (e.key === "Enter") answer.check();
                   }}
-                  placeholder="Total..."
+                  placeholder={placeholder}
                   disabled={status === "correct"}
                   aria-label="Your answer"
                   aria-invalid={status === "error"}
-                  className={`w-full h-11 md:h-14 px-3 text-center text-lg sm:text-xl md:text-2xl font-bold font-mono rounded-xl border-2 transition-all outline-none ${
-                    status === "error"
-                      ? "border-red-500 bg-red-50/50 text-red-700 animate-shake dark:bg-red-950/40 dark:text-red-300"
-                      : status === "correct"
-                        ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
-                        : isDark
-                          ? "bg-slate-900 border-slate-700 text-white focus:border-indigo-500"
-                          : "bg-white border-slate-300 text-slate-900 focus:border-indigo-500"
-                  }`}
+                  className={`h-11 md:h-14 px-3 text-center text-lg sm:text-xl md:text-2xl font-bold font-mono
+                    ${inputClass(status, isDark)}`}
                 />
               </div>
 
+              {/*
+                The default variant already IS the brand primary, so an idle Check
+                restates nothing. Solved is the one state that overrides it — green
+                is the answer, not the brand.
+              */}
               <Button
                 onClick={() => answer.check()}
                 disabled={status === "correct" || !value.trim()}
-                className={`h-11 md:h-14 px-4 md:px-6 text-sm md:text-base font-bold flex items-center gap-1.5 rounded-xl shadow-md transition-all active:scale-95 ${
-                  status === "correct"
-                    ? "bg-emerald-600 hover:bg-emerald-600 text-white"
-                    : "bg-indigo-600 hover:bg-indigo-700 text-white"
-                }`}
+                className={`h-11 md:h-14 px-4 md:px-6 text-sm md:text-base font-bold flex items-center gap-1.5
+                  rounded-xl active:scale-95 ${
+                    status === "correct"
+                      ? "border-emerald-600 bg-emerald-600 text-white shadow-[0_4px_0_#047857] hover:border-emerald-600 hover:bg-emerald-600"
+                      : ""
+                  }`}
               >
                 {status === "correct" ? <Check size={18} /> : "Check"}
               </Button>
 
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 onClick={answer.toggleNumberPad}
                 aria-pressed={showNumberPad}
-                className={`h-11 w-11 md:h-14 md:w-14 flex-shrink-0 flex items-center justify-center rounded-xl border transition-all ${
+                className={`h-11 w-11 md:h-14 md:w-14 flex-shrink-0 rounded-xl border ${
                   showNumberPad
-                    ? "bg-indigo-100 border-indigo-400 text-indigo-700 dark:bg-indigo-950 dark:border-indigo-600 dark:text-indigo-300"
+                    ? primaryToggleOnClass(isDark)
                     : isDark
-                      ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
+                      ? "bg-white/[0.06] border-white/10 text-slate-300 hover:bg-white/[0.12]"
                       : "bg-slate-100 border-slate-300 text-slate-600 hover:bg-slate-200"
                 }`}
                 title="Toggle Number Pad"
               >
-                <Calculator size={18} />
-              </button>
+                {showNumberPad ? <ChevronDown size={18} /> : <Calculator size={18} />}
+              </Button>
             </div>
 
             {status === "error" && errorMessage && (
               <div
                 role="alert"
-                className="flex items-center gap-1.5 text-xs text-red-500 dark:text-red-400 font-bold mt-2 animate-fade-in text-center"
+                className={`flex items-center gap-1.5 text-xs font-bold mt-2 animate-fade-in text-center ${
+                  isDark ? "text-rose-300" : "text-rose-600"
+                }`}
               >
                 <AlertCircle size={14} className="flex-shrink-0" />
                 <span>{errorMessage}</span>
@@ -388,48 +468,44 @@ export const CanvasAnswerPanel: React.FC<CanvasAnswerPanelProps> = ({
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="w-full mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 flex flex-col items-center gap-2 overflow-hidden"
+                  className={`w-full mt-3 pt-3 border-t flex flex-col items-center gap-2 overflow-hidden ${hairlineClass(
+                    isDark
+                  )}`}
                 >
                   <div className="grid grid-cols-5 gap-1.5 md:gap-2 w-full max-w-xs md:max-w-sm">
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map(num => (
-                      <button
+                      <Button
                         key={num}
                         type="button"
+                        variant="ghost"
                         onClick={() => answer.pressDigit(String(num))}
                         aria-label={`Enter ${num}`}
-                        className={`h-9 md:h-12 font-mono text-base md:text-xl font-extrabold rounded-lg md:rounded-xl border shadow-sm transition-all active:scale-95 ${
-                          isDark
-                            ? "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"
-                            : "bg-white border-slate-200 text-slate-800 hover:bg-slate-50"
-                        }`}
+                        className={`h-10 md:h-12 px-0 font-mono text-base md:text-xl font-extrabold tracking-normal
+                          rounded-lg md:rounded-xl border shadow-sm active:scale-95 ${keyClass(isDark)}`}
                       >
                         {num}
-                      </button>
+                      </Button>
                     ))}
                   </div>
                   <div className="flex items-center justify-between gap-2 w-full max-w-xs md:max-w-sm">
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
                       onClick={answer.pressBackspace}
-                      className={`flex-1 h-8 md:h-10 text-xs md:text-sm font-extrabold rounded-lg border flex items-center justify-center gap-1 transition-all ${
-                        isDark
-                          ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
-                          : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200"
-                      }`}
+                      className={`flex-1 h-8 md:h-10 px-2 text-xs md:text-sm font-extrabold gap-1
+                        rounded-lg border ${utilityKeyClass(isDark)}`}
                     >
                       <Delete size={14} /> Backspace
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
+                      variant="ghost"
                       onClick={answer.clear}
-                      className={`px-3 md:px-5 h-8 md:h-10 text-xs md:text-sm font-extrabold rounded-lg border transition-all ${
-                        isDark
-                          ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
-                          : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200"
-                      }`}
+                      className={`px-3 md:px-5 h-8 md:h-10 text-xs md:text-sm font-extrabold
+                        rounded-lg border ${utilityKeyClass(isDark)}`}
                     >
                       Clear
-                    </button>
+                    </Button>
                   </div>
                 </motion.div>
               )}

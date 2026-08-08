@@ -80,12 +80,12 @@ export const QuestSection: React.FC<Props> = ({ quest, activities, subjectName, 
               const thumbnail = apiFileUrl(item.thumbnailUrl);
               return (
                 <Card key={`${item.assignmentId}:${item.skillId}`} variant="standard" interactive className="overflow-hidden">
-                  <CardContent className="flex flex-wrap items-center gap-3 p-3.5 sm:flex-nowrap sm:px-5 sm:py-4">
+                  <CardContent className="flex items-center justify-between gap-3 p-3.5 sm:px-5 sm:py-4">
                     <span className={`relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl ${done ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-400/15 dark:text-emerald-300" : "bg-[#F0EBFF] text-[#6844EA] dark:bg-violet-400/15 dark:text-[#CDBEFF]"}`}>
                       {thumbnail ? <img src={thumbnail} alt="" className="h-9 w-9 object-contain" /> : done ? <Check size={19} strokeWidth={3} /> : <span className="text-sm font-black">{index + 1}</span>}
                       {done && thumbnail && <span className="absolute bottom-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-white ring-2 ring-white dark:ring-[#222039]"><Check size={10} strokeWidth={3} /></span>}
                     </span>
-                    <div className="min-w-[10rem] flex-1">
+                    <div className="min-w-0 flex-1">
                       <h3 className="truncate text-xs font-black text-[#28334A] sm:text-sm dark:text-[#F2EEFF]">{item.skillLabel}</h3>
                       <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-bold text-[#8792A5] dark:text-[#8F99AD]">
                         {item.estimatedMinutes != null && <span className="flex items-center gap-1"><Clock3 size={12} /> {item.estimatedMinutes} min</span>}
@@ -93,7 +93,7 @@ export const QuestSection: React.FC<Props> = ({ quest, activities, subjectName, 
                         {done && <span className="text-emerald-600 dark:text-emerald-300">Completed</span>}
                       </div>
                     </div>
-                    <Button type="button" size="sm" variant={done ? "outline" : "default"} onClick={() => onStart(item)} className={`w-full min-w-20 text-[11px] sm:w-auto sm:min-w-24 ${done ? "border-emerald-200 text-emerald-600 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 dark:border-emerald-400/20 dark:bg-transparent dark:text-emerald-300" : ""}`}>
+                    <Button type="button" size="sm" variant={done ? "outline" : "default"} onClick={() => onStart(item)} className={`shrink-0 min-w-20 text-[11px] sm:min-w-24 ${done ? "border-emerald-200 text-emerald-600 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 dark:border-emerald-400/20 dark:bg-transparent dark:text-emerald-300" : ""}`}>
                       {done ? "Practice" : item.status === "in_progress" ? "Continue" : "Start"}
                       {done ? <ChevronRight size={14} /> : <Play size={13} className="fill-current" />}
                     </Button>

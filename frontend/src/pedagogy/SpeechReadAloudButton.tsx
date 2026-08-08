@@ -6,6 +6,7 @@
 import React from "react";
 import { Volume2, VolumeX } from "lucide-react";
 import { useSpeechVoiceover } from "./useSpeechVoiceover";
+import { Button } from "../components/ui";
 
 export interface SpeechReadAloudButtonProps {
   text: string;
@@ -26,23 +27,24 @@ export const SpeechReadAloudButton: React.FC<SpeechReadAloudButtonProps> = ({
 
   if (!isSupported) return null;
 
-  const btnSize = size === "sm" ? "h-7 px-2.5 text-[10px]" : "h-8 px-3 text-xs";
   const iconSize = size === "sm" ? 13 : 15;
 
   return (
-    <button
+    <Button
       type="button"
+      variant={isSpeaking ? "default" : isDark ? "secondary" : "outline"}
+      size={size === "sm" ? "xs" : "sm"}
       onClick={(e) => {
         e.stopPropagation();
         toggle(text);
       }}
       title={isSpeaking ? "Stop listening" : "Listen to question instructions"}
-      className={`rounded-full border font-bold font-mono tracking-wide flex items-center gap-1.5 shadow-sm transition-all duration-200 cursor-pointer select-none active:scale-95 group ${btnSize} ${
+      className={`h-9 rounded-full border-2 font-extrabold tracking-wide transition-all cursor-pointer ${
         isSpeaking
-          ? "bg-violet-600 text-white border-violet-400 ring-2 ring-violet-400/40 shadow-md animate-pulse"
+          ? "bg-violet-600 border-violet-500 text-white shadow-md animate-pulse"
           : isDark
-            ? "bg-slate-800/90 hover:bg-slate-700 text-violet-300 border-violet-500/40 shadow-black/30"
-            : "bg-violet-500/10 hover:bg-violet-500/20 text-violet-700 border-violet-500/30"
+            ? "border-violet-500/40 bg-slate-800/90 text-violet-300 hover:bg-slate-700 hover:text-violet-200"
+            : "border-violet-300 bg-violet-50 text-violet-700 hover:bg-violet-100 hover:text-violet-800"
       } ${className}`}
     >
       {isSpeaking ? (
@@ -56,10 +58,10 @@ export const SpeechReadAloudButton: React.FC<SpeechReadAloudButtonProps> = ({
         </>
       ) : (
         <>
-          <Volume2 size={iconSize} className="group-hover:scale-110 transition-transform" />
+          <Volume2 size={iconSize} className="transition-transform group-hover:scale-110" />
           <span>{label}</span>
         </>
       )}
-    </button>
+    </Button>
   );
 };

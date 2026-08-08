@@ -367,12 +367,35 @@ genuinely its own — the expected number, the wording, where it docks.
   make room (One-to-One, Line Up). It grows by about half again when the pad opens.
 - `solvedForGuide` reads `answer.solved`, and the canvas's own success effect handles only
   the `!requireAnswerInput` case — the panel owns the hand-off when an answer is required.
-- The pad here is the 5-column counting one (digits 1–9, 0, then Backspace / Clear).
+- The pad here is the 5-column counting one (digits 1–9, 0, then Backspace / Clear), and it
+  is **open by default**. On a tablet it is the way in, not an accessory: a child who has to
+  find the calculator button first is a child typing on the OS keyboard over the activity.
+  While it is up the input asks for `inputMode="none"`, so the OS keyboard stays out of the
+  way of the keys it duplicates. A canvas with no room passes `numberPadDefault: false` to the
+  hook; the toggle still brings the pad back, and a new question restores the default.
   `NumberPad.tsx` is a different pad for a different job: digits into a column-arithmetic grid.
+- **The panel has no accent prop.** It wears the brand primary — trim, focus ring, pad toggle
+  and Check button — the same as every other card that floats over an activity. It briefly
+  took the canvas's own accent, which meant the Check button changed colour between two slides
+  of one lesson and competed with the primary button waiting underneath it. Colour that varies
+  here means *state*: rose for wrong, emerald for right, and nothing else.
+- `placeholder` defaults to `"Total…"`; override it where the activity asks for something
+  else ("Sum…", "Product…", "Remaining…").
+- The input and every button come from the shared kit (`components/ui`'s `Input` and
+  `Button`), so the panel inherits the app's control sizing, focus rings and disabled states
+  rather than restating them. An idle Check is just `<Button>` with no colour override at
+  all — the default variant already *is* the primary.
+- The card surface comes from `theme/surfaces.ts`, shared with the lesson success card, the
+  saving curtain and the placement finish screen. Borders on all of them are 2px: a hairline
+  disappears on a high-DPI tablet.
+- **Colour comes from the `isDark` prop, never from Tailwind's `dark:` variant.** `index.css`
+  scopes that variant to an explicit `.dark` ancestor and `GameLauncher` never mounts one, so
+  `dark:` classes inside a canvas silently do nothing — which is how this panel used to render
+  light-on-light in dark mode. Same rule for any new canvas chrome.
 - Behaviour is locked by `CanvasAnswerPanel.test.tsx`. Extend those, not a per-canvas copy.
 
-Still on their own copies, to migrate: Addition, Arrangements, CountBack, CountOn,
-Multiplication, GroupTens.
+Every canvas that asks for a typed answer is on it — Count, Addition, Arrangements, CountBack,
+CountOn, GroupTens and Multiplication. Nothing hand-rolls this any more; keep it that way.
 
 ---
 

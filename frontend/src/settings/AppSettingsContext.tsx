@@ -17,6 +17,7 @@ const DEFAULTS: AppSettings = {
   smtp_use_tls: null,
   smtp_password_hint: null,
   scoring_revision: 1,
+  mastery_gate_assets: {},
   scoring: {
     weights: { firstTry: 0.45, accuracy: 0.2, independence: 0.2, speed: 0.15 },
     developingScore: 0.6,
@@ -82,7 +83,7 @@ export const AppSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
-    if (status !== "authenticated" || !account || account.role === "student") return;
+    if (status !== "authenticated" || !account) return;
     let active = true;
     setLoading(true);
     setLoadError(false);

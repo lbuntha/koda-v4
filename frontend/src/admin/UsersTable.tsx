@@ -259,7 +259,7 @@ export const UsersTable: React.FC<{
               setRoleFilter(e.target.value);
               setPage(1);
             }}
-            className="h-9 text-xs font-bold"
+            className="h-9 text-xs font-bold border-2 border-slate-200 dark:border-white/15"
           >
             <option value="all">All Roles</option>
             <option value="parent">Parents</option>

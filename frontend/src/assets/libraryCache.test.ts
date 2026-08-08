@@ -33,6 +33,7 @@ const LIBRARY = {
   overrides: { "cherry": { assetId: "svg-apple" } } as any,
   deletedSystemAssetIds: ["kid-nav-home"],
   techniqueThumbnails: { count_on: "svg-apple", subitize: "svg-pear" },
+  masteryGateAssets: { beginner: "svg-apple", developing: "svg-pear" },
 };
 
 beforeEach(() => {
@@ -50,11 +51,12 @@ describe("the cache round-trips every part of the library", () => {
     const other = readCache("owner-2");
     assert.deepEqual(other.assets, []);
     assert.deepEqual(other.techniqueThumbnails, {});
+    assert.deepEqual(other.masteryGateAssets, {});
   });
 
   test("a missing cache reads as empty rather than throwing", () => {
     assert.deepEqual(readCache("never-seen"), {
-      assets: [], overrides: {}, deletedSystemAssetIds: [], techniqueThumbnails: {},
+      assets: [], overrides: {}, deletedSystemAssetIds: [], techniqueThumbnails: {}, masteryGateAssets: {},
     });
   });
 

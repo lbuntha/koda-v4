@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import { COUNT_OBJECTS } from "../../types";
 import { CountingAsset } from "../Assets";
 import { sounds } from "../../sound";
-import { RotateCcw, ArrowRightCircle, Check, Calculator, AlertCircle, Delete, PartyPopper } from "lucide-react";
+import { RotateCcw, ArrowRightCircle, PartyPopper } from "lucide-react";
 import { CanvasProps } from "./types";
+import { CanvasAnswerPanel, useCanvasAnswer } from "./CanvasAnswerPanel";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import { GhostGuideOverlay, useGhostGuide } from "../../pedagogy";
 import { CanvasChip, CanvasAccent, surfaceClass, captionClass, accentChipClass, emptySlotClass } from "./canvasTheme";
@@ -72,12 +72,6 @@ export const CountOnCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sho
   const dragMoved = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Answer Input State
-  const [answerInput, setAnswerInput] = useState<string>("");
-  const [answerStatus, setAnswerStatus] = useState<"idle" | "error" | "correct">("idle");
-  const [errorMessage, setErrorMessage] = useState<string>("");
-  const [showNumberPad, setShowNumberPad] = useState<boolean>(false);
-  const inputRef = useRef<HTMLInputElement>(null);
   const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onSuccessRef = useRef(onSuccess);
   onSuccessRef.current = onSuccess;
@@ -89,7 +83,18 @@ export const CountOnCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sho
   const isCompact = stageWidth < 640;
 
   const isCountOnComplete = dots.length > 0 && dots.every(d => d.snappedSlotIndex !== null);
-  const solvedForGuide = extraCount > 0 && isCountOnComplete && (requireAnswerInput ? answerStatus === "correct" : true);
+  const answerPanelOpen = isPlayMode && requireAnswerInput && isCountOnComplete;
+
+  // Typing, checking and the success hand-off all live in the shared panel.
+  const answer = useCanvasAnswer({
+    expected: expectedAnswer,
+    resetKey: `${question.id}:${baseCount}:${extraCount}`,
+    wrongMessage: `Not quite! ${baseCount} plus ${extraCount} more makes ${expectedAnswer} ${obj.label}${expectedAnswer === 1 ? "" : "s"}. Enter ${expectedAnswer}!`,
+    onSuccess,
+    open: answerPanelOpen
+  });
+
+  const solvedForGuide = extraCount > 0 && isCountOnComplete && (requireAnswerInput ? answer.solved : true);
 
   const { showGhostGuide, reportActivity } = useGhostGuide({
     isPlayMode,
@@ -213,10 +218,6 @@ export const CountOnCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sho
 
   // Reset answer state on question change
   useEffect(() => {
-    setAnswerInput("");
-    setAnswerStatus("idle");
-    setErrorMessage("");
-    setShowNumberPad(false);
     if (successTimeoutRef.current) {
       clearTimeout(successTimeoutRef.current);
       successTimeoutRef.current = null;
@@ -308,10 +309,7 @@ export const CountOnCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sho
       clearTimeout(successTimeoutRef.current);
       successTimeoutRef.current = null;
     }
-    setAnswerInput("");
-    setAnswerStatus("idle");
-    setErrorMessage("");
-    setShowNumberPad(false);
+    answer.reset();
     sounds.playPop();
 
     const updated = Array.from({ length: extraCount }).map((_, idx) => ({
@@ -489,49 +487,6 @@ export const CountOnCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sho
     sounds.playTick(baseCount);
   };
 
-  const handleCheckAnswer = (overrideValue?: string) => {
-    const valueToTest = overrideValue !== undefined ? overrideValue : answerInput;
-    const parsed = parseInt(valueToTest.trim(), 10);
-
-    if (isNaN(parsed) || valueToTest.trim() === "") {
-      setAnswerStatus("error");
-      setErrorMessage("Please enter a number!");
-      sounds.playFailure();
-      return;
-    }
-
-    if (parsed === expectedAnswer) {
-      setAnswerStatus("correct");
-      setErrorMessage("");
-      sounds.playSuccess();
-      successTimeoutRef.current = setTimeout(() => {
-        onSuccessRef.current?.();
-        successTimeoutRef.current = null;
-      }, 500);
-    } else {
-      setAnswerStatus("error");
-      setErrorMessage(`Not quite! ${baseCount} plus ${extraCount} more makes ${expectedAnswer} ${obj.label}${expectedAnswer === 1 ? "" : "s"}. Enter ${expectedAnswer}!`);
-      sounds.playFailure();
-    }
-  };
-
-  const handleDigitPress = (digit: string) => {
-    if (answerStatus === "correct") return;
-    if (answerStatus === "error") {
-      setAnswerStatus("idle");
-      setErrorMessage("");
-    }
-    setAnswerInput(prev => (prev.length < 3 ? prev + digit : prev));
-  };
-
-  const handleBackspacePress = () => {
-    if (answerStatus === "correct") return;
-    if (answerStatus === "error") {
-      setAnswerStatus("idle");
-      setErrorMessage("");
-    }
-    setAnswerInput(prev => prev.slice(0, -1));
-  };
 
   const hasTriggeredSuccess = useRef(false);
 
@@ -544,10 +499,6 @@ export const CountOnCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sho
           sounds.playSuccess();
           if (onSuccess) onSuccess();
         }
-      } else {
-        setTimeout(() => {
-          inputRef.current?.focus();
-        }, 350);
       }
     } else {
       hasTriggeredSuccess.current = false;
@@ -562,7 +513,6 @@ export const CountOnCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sho
   const remaining = extraCount - placed;
   const isSolved = solvedForGuide;
   const total = baseCount + placed;
-  const answerPanelOpen = isPlayMode && requireAnswerInput && isCountOnComplete;
 
   const shape = CONTAINER_SHAPES[question.config.containerShape || "box"] || CONTAINER_SHAPES.box;
 
@@ -833,165 +783,12 @@ export const CountOnCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, sho
           );
         })}
 
-        {/* ── Answer Input Box Overlay after counting on ── */}
-        <AnimatePresence>
-          {answerPanelOpen && (
-            /*
-              Docked over the tray the objects just left, never over the counting
-              band: the question is "how many in total", so the steps the child
-              counted have to stay in view while they answer.
-            */
-            <div className="absolute z-50 inset-x-2 bottom-2 pointer-events-none flex justify-center">
-              <motion.div
-                initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                className="w-full pointer-events-auto flex flex-col items-center justify-center p-3 sm:p-4 md:p-5
-                  rounded-2xl md:rounded-3xl backdrop-blur-md border shadow-2xl sm:max-w-md md:max-w-lg"
-                style={{
-                  backgroundColor: isDark ? "rgba(15, 23, 42, 0.94)" : "rgba(255, 255, 255, 0.96)",
-                  borderColor: answerStatus === "error"
-                    ? "#ef4444"
-                    : answerStatus === "correct"
-                      ? "#10b981"
-                      : isDark ? "#334155" : "#cbd5e1"
-                }}
-              >
-                <div className="flex items-center gap-2 mb-2 md:mb-3">
-                  <span className="text-xl md:text-2xl">🎉</span>
-                  <span className={`text-xs sm:text-sm md:text-base lg:text-lg font-extrabold tracking-tight ${
-                    isDark ? "text-slate-100" : "text-slate-800"
-                  }`}>
-                    How many {obj.label}{expectedAnswer === 1 ? "" : "s"} are there in total?
-                  </span>
-                </div>
-
-                {/* Answer Input Controls */}
-                <div className="flex items-center gap-2 md:gap-3 w-full justify-center max-w-xs md:max-w-sm">
-                  <div className="relative flex-1">
-                    <input
-                      ref={inputRef}
-                      type="text"
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      value={answerInput}
-                      onChange={(e) => {
-                        setAnswerInput(e.target.value);
-                        if (answerStatus === "error") {
-                          setAnswerStatus("idle");
-                          setErrorMessage("");
-                        }
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleCheckAnswer();
-                      }}
-                      placeholder="Total..."
-                      disabled={answerStatus === "correct"}
-                      className={`w-full h-11 md:h-14 px-3 text-center text-lg sm:text-xl md:text-2xl font-bold font-mono rounded-xl border-2 transition-all outline-none ${
-                        answerStatus === "error"
-                          ? "border-red-500 bg-red-50/50 text-red-700 animate-shake dark:bg-red-950/40 dark:text-red-300"
-                          : answerStatus === "correct"
-                            ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
-                            : isDark
-                              ? "bg-slate-900 border-slate-700 text-white focus:border-indigo-500"
-                              : "bg-white border-slate-300 text-slate-900 focus:border-indigo-500"
-                      }`}
-                    />
-                  </div>
-
-                  <Button
-                    onClick={() => handleCheckAnswer()}
-                    disabled={answerStatus === "correct" || !answerInput.trim()}
-                    className={`h-11 md:h-14 px-4 md:px-6 text-sm md:text-base font-bold flex items-center gap-1.5 rounded-xl shadow-md transition-all active:scale-95 ${
-                      answerStatus === "correct"
-                        ? "bg-emerald-600 hover:bg-emerald-600 text-white"
-                        : "bg-indigo-600 hover:bg-indigo-700 text-white"
-                    }`}
-                  >
-                    {answerStatus === "correct" ? <Check size={18} /> : "Check"}
-                  </Button>
-
-                  <button
-                    type="button"
-                    onClick={() => setShowNumberPad(prev => !prev)}
-                    className={`h-11 w-11 md:h-14 md:w-14 flex-shrink-0 flex items-center justify-center rounded-xl border transition-all ${
-                      showNumberPad
-                        ? "bg-indigo-100 border-indigo-400 text-indigo-700 dark:bg-indigo-950 dark:border-indigo-600 dark:text-indigo-300"
-                        : isDark
-                          ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
-                          : "bg-slate-100 border-slate-300 text-slate-600 hover:bg-slate-200"
-                    }`}
-                    title="Toggle Number Pad"
-                  >
-                    <Calculator size={18} />
-                  </button>
-                </div>
-
-                {/* Error feedback banner */}
-                {answerStatus === "error" && errorMessage && (
-                  <div className="flex items-center gap-1.5 text-xs text-red-500 dark:text-red-400 font-bold mt-2 animate-fade-in text-center">
-                    <AlertCircle size={14} className="flex-shrink-0" />
-                    <span>{errorMessage}</span>
-                  </div>
-                )}
-
-                {/* On-screen Number Keypad for Kids / Mobile / Tablets */}
-                <AnimatePresence>
-                  {showNumberPad && answerStatus !== "correct" && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="w-full mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 flex flex-col items-center gap-2 overflow-hidden"
-                    >
-                      <div className="grid grid-cols-5 gap-1.5 md:gap-2 w-full max-w-xs md:max-w-sm">
-                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((num) => (
-                          <button
-                            key={num}
-                            type="button"
-                            onClick={() => handleDigitPress(String(num))}
-                            className={`h-9 md:h-12 font-mono text-base md:text-xl font-extrabold rounded-lg md:rounded-xl border shadow-sm transition-all active:scale-95 ${
-                              isDark
-                                ? "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"
-                                : "bg-white border-slate-200 text-slate-800 hover:bg-slate-50"
-                            }`}
-                          >
-                            {num}
-                          </button>
-                        ))}
-                      </div>
-                      <div className="flex items-center justify-between gap-2 w-full max-w-xs md:max-w-sm">
-                        <button
-                          type="button"
-                          onClick={handleBackspacePress}
-                          className={`flex-1 h-8 md:h-10 text-xs md:text-sm font-extrabold rounded-lg border flex items-center justify-center gap-1 transition-all ${
-                            isDark
-                              ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
-                              : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200"
-                          }`}
-                        >
-                          <Delete size={14} /> Backspace
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setAnswerInput("")}
-                          className={`px-3 md:px-5 h-8 md:h-10 text-xs md:text-sm font-extrabold rounded-lg border transition-all ${
-                            isDark
-                              ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
-                              : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200"
-                          }`}
-                        >
-                          Clear
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
+        <CanvasAnswerPanel
+          answer={answer}
+          open={answerPanelOpen}
+          isDark={isDark}
+          prompt={`How many ${obj.label}${expectedAnswer === 1 ? "" : "s"} are there in total?`}
+        />
       </div>
     </SharedCanvasLayout>
   );

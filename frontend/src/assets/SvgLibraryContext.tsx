@@ -29,6 +29,8 @@ interface SvgLibraryContextValue {
   /** Counting technique -> SVG asset id, replacing that component's static artwork. */
   techniqueThumbnails: Record<string, string>;
   setTechniqueThumbnails: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  masteryGateAssets: Partial<Record<"beginner" | "developing" | "proficient" | "master", string>>;
+  setMasteryGateAssets: React.Dispatch<React.SetStateAction<Partial<Record<"beginner" | "developing" | "proficient" | "master", string>>>>;
   persistenceStatus: SvgPersistenceStatus;
 }
 
@@ -40,6 +42,7 @@ export const SvgLibraryProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [overrides, setOverrides] = useState<Record<string, SvgOverride>>(() => readJson(LEGACY_OVERRIDES_KEY, {}));
   const [deletedSystemAssetIds, setDeletedSystemAssetIds] = useState<string[]>([]);
   const [techniqueThumbnails, setTechniqueThumbnails] = useState<Record<string, string>>({});
+  const [masteryGateAssets, setMasteryGateAssets] = useState<SvgLibraryContextValue["masteryGateAssets"]>({});
   const [persistenceStatus, setPersistenceStatus] = useState<SvgPersistenceStatus>("local");
   const hydratedRef = useRef(false);
   /**
@@ -95,6 +98,7 @@ export const SvgLibraryProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             overrides: nextOverrides,
             deletedSystemAssetIds: [],
             techniqueThumbnails: {},
+            masteryGateAssets: {},
             revision: remote.revision,
           });
           remoteRevisionRef.current = created.revision;
@@ -114,11 +118,14 @@ export const SvgLibraryProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         setDeletedSystemAssetIds(nextDeletedSystemAssetIds);
         const nextThumbnails = remote.techniqueThumbnails || {};
         setTechniqueThumbnails(nextThumbnails);
+        const nextMasteryGateAssets = remote.masteryGateAssets || {};
+        setMasteryGateAssets(nextMasteryGateAssets);
         writeCache(ownerId, {
           assets: nextAssets,
           overrides: nextOverrides,
           deletedSystemAssetIds: nextDeletedSystemAssetIds,
           techniqueThumbnails: nextThumbnails,
+          masteryGateAssets: nextMasteryGateAssets,
         });
         hydratedRef.current = true;
         setPersistenceStatus("saved");
@@ -132,6 +139,7 @@ export const SvgLibraryProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         setOverrides(cached.overrides);
         setDeletedSystemAssetIds(cached.deletedSystemAssetIds);
         setTechniqueThumbnails(cached.techniqueThumbnails);
+        setMasteryGateAssets(cached.masteryGateAssets);
         hydratedRef.current = true;
         hydrationFailedRef.current = true;
         setPersistenceStatus("error");
@@ -153,7 +161,7 @@ export const SvgLibraryProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
 
     const ownerId = account.id;
-    writeCache(ownerId, { assets, overrides, deletedSystemAssetIds, techniqueThumbnails });
+    writeCache(ownerId, { assets, overrides, deletedSystemAssetIds, techniqueThumbnails, masteryGateAssets });
 
     // Local cache updated either way; the remote write is what a failed load forfeits.
     //
@@ -177,6 +185,7 @@ export const SvgLibraryProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         overrides,
         deletedSystemAssetIds,
         techniqueThumbnails,
+        masteryGateAssets,
         revision: remoteRevisionRef.current,
       });
       // Swallows only the *previous* save's rejection, so one failure doesn't poison the
@@ -195,15 +204,16 @@ export const SvgLibraryProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }, 350);
 
     return () => window.clearTimeout(timeout);
-  }, [assets, overrides, deletedSystemAssetIds, techniqueThumbnails, status, account?.id, account?.role]);
+  }, [assets, overrides, deletedSystemAssetIds, techniqueThumbnails, masteryGateAssets, status, account?.id, account?.role]);
 
   const value = useMemo<SvgLibraryContextValue>(
     () => ({
       assets, setAssets, overrides, setOverrides,
       deletedSystemAssetIds, setDeletedSystemAssetIds,
       techniqueThumbnails, setTechniqueThumbnails, persistenceStatus,
+      masteryGateAssets, setMasteryGateAssets,
     }),
-    [assets, overrides, deletedSystemAssetIds, techniqueThumbnails, persistenceStatus]
+    [assets, overrides, deletedSystemAssetIds, techniqueThumbnails, masteryGateAssets, persistenceStatus]
   );
 
   return <SvgLibraryContext.Provider value={value}>{children}</SvgLibraryContext.Provider>;

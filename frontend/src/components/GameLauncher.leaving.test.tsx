@@ -79,7 +79,7 @@ describe("leaving an activity saves first", () => {
     mount({ onClose });
 
     fireEvent.click(await screen.findByTestId("solve"));
-    fireEvent.click(await screen.findByText("Finish Lesson 🎊"));
+    fireEvent.click(await screen.findByText("Finish Lesson"));
 
     // The save is in flight: the child sees it, and the lesson has not been handed back yet.
     await screen.findByText("Saving your progress…");

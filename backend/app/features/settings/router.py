@@ -56,6 +56,7 @@ def _out(doc, api_key: str | None) -> SettingsOut:
         smtp_password_hint=f"••••{smtp_password[-4:]}" if smtp_password else None,
         scoring=scoring,
         scoring_revision=doc.scoring_revision,
+        mastery_gate_assets=doc.mastery_gate_assets,
     )
 
 

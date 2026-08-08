@@ -24,6 +24,7 @@ import { useSvgLibrary } from "../../assets/SvgLibraryContext";
 import { ASSET_CATEGORY_ICON_IDS } from "../../assets/assetCategoryAssets";
 import { SvgLibraryAsset } from "../../assets/SvgLibraryAsset";
 import { CountingAsset } from "../Assets";
+import { Input } from "./Input";
 
 const CATEGORY_ICONS: Record<Exclude<AssetCategory, "Emoji"> | "All", string> = ASSET_CATEGORY_ICON_IDS;
 
@@ -89,13 +90,13 @@ export const AssetGrid: React.FC<AssetGridProps> = ({
   return (
     <div className={`flex flex-col gap-2.5 ${className}`}>
       <div className="relative">
-        <Search size={14} className="pointer-events-none absolute left-2.5 top-2.5 text-slate-400" />
-        <input
+        <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+        <Input
           type="text"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Search assets..."
-          className="w-full rounded-lg border border-slate-200 bg-slate-50 py-1.5 pl-8 pr-2.5 text-xs font-bold text-slate-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-white/5 dark:text-white"
+          className="h-10 w-full !pl-9.5 pr-3 text-xs font-bold border-2 border-slate-200 dark:border-white/15"
         />
       </div>
 

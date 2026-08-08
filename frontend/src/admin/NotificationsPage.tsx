@@ -351,19 +351,19 @@ export const NotificationsPage: React.FC<Props> = ({ users = [], students = [] }
           {/* Search & Filter Bar */}
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             <div className="relative">
-              <Search size={14} className="absolute left-2.5 top-2.5 text-slate-400" />
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <Input
                 value={searchQuery}
                 onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
                 placeholder="Search log..."
-                className="h-8 pl-8 text-xs font-bold"
+                className="h-9.5 pl-8.5 text-xs font-bold"
               />
             </div>
 
             <Select
               value={filterKind}
               onChange={(e) => { setFilterKind(e.target.value); setCurrentPage(1); }}
-              className="h-8 text-xs font-bold"
+              className="h-9.5 text-xs font-bold"
             >
               <option value="all">All Types</option>
               {Object.keys(KIND_CONFIG).map((k) => (
@@ -374,7 +374,7 @@ export const NotificationsPage: React.FC<Props> = ({ users = [], students = [] }
             <Select
               value={filterAudience}
               onChange={(e) => { setFilterAudience(e.target.value); setCurrentPage(1); }}
-              className="h-8 text-xs font-bold"
+              className="h-9.5 text-xs font-bold"
             >
               <option value="all">All Audiences</option>
               {(Object.keys(AUDIENCE_LABEL) as NotificationAudience[]).map((k) => (

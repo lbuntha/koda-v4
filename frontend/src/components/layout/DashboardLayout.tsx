@@ -89,7 +89,7 @@ export const DashboardLayout: React.FC<Props> = ({
       />
 
       <main className={`flex min-h-0 min-w-0 flex-1 flex-col md:pb-0 ${appearance === "parent" ? "bg-transparent pb-20" : "pb-16"}`}>
-        <header className={`flex min-h-[4rem] shrink-0 items-center justify-between gap-3 bg-white/95 backdrop-blur-xl [-webkit-backdrop-filter:blur(16px)] [-webkit-tap-highlight-color:transparent] px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 sm:px-5 md:pt-3 dark:bg-[#111329]/95 ${appearance === "parent" ? "border-b-2 border-[#E7E3F6] shadow-[0_10px_24px_-22px_rgba(83,74,183,0.3)] md:min-h-[4.5rem] md:px-5 dark:border-white/10 dark:shadow-[0_10px_24px_-22px_rgba(0,0,0,0.6)]" : "border-b border-slate-200/70 dark:border-white/10"}`}>
+        <header className={`flex min-h-[4rem] shrink-0 items-center justify-between gap-3 bg-white/95 backdrop-blur-xl [-webkit-backdrop-filter:blur(16px)] [-webkit-tap-highlight-color:transparent] px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 sm:px-5 md:pt-3 dark:bg-[#111329]/95 ${appearance === "parent" ? "border-b-2 border-[#E7E3F6] shadow-[0_10px_24px_-22px_rgba(83,74,183,0.3)] md:min-h-[4.5rem] md:px-5 dark:border-white/10 dark:shadow-[0_10px_24px_-22px_rgba(0,0,0,0.6)]" : "border-b-2 border-[#E7E3F6] dark:border-white/10"}`}>
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <button
               onClick={toggle}

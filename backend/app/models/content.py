@@ -89,6 +89,10 @@ class SvgLibrary(Document):
     #: A reference rather than markup, so one library asset can front several techniques and
     #: editing the asset updates all of them.
     technique_thumbnails: dict[str, str] = Field(default_factory=dict)
+    #: Mastery level (beginner/developing/proficient/master) -> an id in `assets`.
+    #: Kept with the SVG library because changing presentation must not trigger a scoring
+    #: revision or re-score every learner.
+    mastery_gate_assets: dict[str, str] = Field(default_factory=dict)
     revision: int = 0
     updated_at: datetime = Field(default_factory=_now)
 
@@ -114,6 +118,9 @@ class SystemSettings(Document):
     mail_from_override: str | None = None
     scoring: dict[str, Any] = Field(default_factory=default_scoring_config)
     scoring_revision: int = 1
+    #: Learner-safe snapshots of the SVGs selected for mastery celebrations. These are
+    #: presentation settings, kept outside `scoring` so artwork edits never trigger a re-score.
+    mastery_gate_assets: dict[str, dict[str, Any]] = Field(default_factory=dict)
     updated_at: datetime = Field(default_factory=_now)
 
     class Settings:

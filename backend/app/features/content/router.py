@@ -7,12 +7,13 @@ from uuid import uuid4
 from beanie import PydanticObjectId
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from ...models.user import User
+from ...models.user import Role, User
 from ...models.content import Curriculum, CurriculumRelease, QuestionDeck, SvgLibrary
 from ...models.academic import Grade, Subject
 from ...models.audit import ContentAuditEvent
 from ...core.logging import get_logger
 from ...core.deps import get_current_admin, get_current_student, get_current_user
+from ...core.runtime_settings import get_system_settings
 from ...models.student import Student
 from ...models.assignment import Assignment, CurriculumOffering, Placement, ProgressionState
 from ...models.mastery import MasteryState
@@ -1054,10 +1055,12 @@ async def get_svg_assets(user: User = Depends(get_current_user)):
     doc = await SvgLibrary.find_one(SvgLibrary.owner_id == str(user.id))
     if not doc:
         return {"exists": False, "assets": [], "overrides": {},
-                "deletedSystemAssetIds": [], "techniqueThumbnails": {}, "revision": 0}
+                "deletedSystemAssetIds": [], "techniqueThumbnails": {},
+                "masteryGateAssets": {}, "revision": 0}
     return {"exists": True, "assets": doc.assets, "overrides": doc.overrides,
             "deletedSystemAssetIds": doc.deleted_system_asset_ids,
-            "techniqueThumbnails": doc.technique_thumbnails, "revision": doc.revision}
+            "techniqueThumbnails": doc.technique_thumbnails,
+            "masteryGateAssets": doc.mastery_gate_assets, "revision": doc.revision}
 
 
 @router.get("/svg-assets/usage")
@@ -1099,6 +1102,7 @@ async def put_svg_assets(body: SvgLibraryIn, user: User = Depends(get_current_us
         doc.overrides = overrides
         doc.deleted_system_asset_ids = body.deleted_system_asset_ids
         doc.technique_thumbnails = body.technique_thumbnails
+        doc.mastery_gate_assets = body.mastery_gate_assets
         doc.revision += 1
         doc.updated_at = datetime.now(timezone.utc)
         await doc.save()
@@ -1107,6 +1111,18 @@ async def put_svg_assets(body: SvgLibraryIn, user: User = Depends(get_current_us
             raise HTTPException(status.HTTP_409_CONFLICT, "SVG library revision is stale")
         doc = SvgLibrary(owner_id=owner_id, assets=assets, overrides=overrides,
                          deleted_system_asset_ids=body.deleted_system_asset_ids,
-                         technique_thumbnails=body.technique_thumbnails, revision=1)
+                         technique_thumbnails=body.technique_thumbnails,
+                         mastery_gate_assets=body.mastery_gate_assets, revision=1)
         await doc.insert()
+    if user.role == Role.admin:
+        # Students cannot read an admin's editable library. Publish only the four selected,
+        # already-sanitized asset records through global settings for learner celebrations.
+        assets_by_id = {asset["id"]: asset for asset in assets}
+        system_settings = await get_system_settings()
+        system_settings.mastery_gate_assets = {
+            level: assets_by_id[asset_id]
+            for level, asset_id in body.mastery_gate_assets.items()
+        }
+        system_settings.updated_at = datetime.now(timezone.utc)
+        await system_settings.save()
     return {"ok": True, "revision": doc.revision}

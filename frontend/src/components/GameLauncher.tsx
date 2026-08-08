@@ -33,6 +33,17 @@ import { analyticsLogger } from "../services/analyticsLogger";
 import { getTaxonomy, AttemptOutcome } from "../services/logSchema";
 import { solvedSelection } from "../student/answerSelection";
 import { useThemeMode } from "../theme/appTheme";
+import { accentIconClass } from "./canvases/canvasTheme";
+import {
+  bodyTextClass,
+  insetPanelClass,
+  overlayCardClass,
+  overlayCardPadding,
+  overlayScrimClass,
+  secondaryButtonClass,
+  titleTextClass,
+  type SurfaceScale
+} from "../theme/surfaces";
 import { Button, DotProgressIndicator, Spinner } from "./ui";
 import { useZoomLock } from "../hooks/useZoomLock";
 
@@ -125,6 +136,9 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
 
   const activeQuestion = questions.find(q => q.id === activeId) || questions[0];
   const currentIdx = questions.findIndex(q => q.id === activeId);
+  const isLastCard = currentIdx === questions.length - 1;
+  /** Grade-band ramp for the overlay cards — a six-year-old needs bigger everything. */
+  const cardScale: SurfaceScale = kidMode ? "kid" : "standard";
   const responseIdFor = (question: CountingQuestion) => assessment?.responseId?.(question) ?? question.id;
   const activeResponseId = activeQuestion ? responseIdFor(activeQuestion) : "";
   const assessmentAnswered = Boolean(activeResponseId && assessmentResponses[activeResponseId]);
@@ -546,83 +560,104 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
 
             {/* ── Success overlay ── */}
             {isSuccess && !assessment && (
-              <div className="absolute inset-0 flex items-end justify-center pb-6 z-30 pointer-events-none">
-                <div className="pointer-events-auto w-full max-w-md mx-4">
-                  <div className={`p-5 rounded-3xl flex flex-col gap-4 animate-scale-in border shadow-2xl transition-all duration-300 ${
-                    isDark
-                      ? 'bg-slate-900/95 border-emerald-500/30 text-emerald-100 shadow-black/80 backdrop-blur-xl'
-                      : 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-emerald-400/40 shadow-emerald-500/25'
-                  }`}>
+              /*
+                Centred, not docked to the bottom edge. Once the card is the moment —
+                the answer is already solved and the only thing left is which way out —
+                the middle is where the eye already is, and it stays clear of both the
+                header and the footer nav on a short landscape tablet.
+
+                The wash is what lets a centred card sit over a busy canvas: no scrim
+                and it reads as debris floating on the activity. It is `pointer-events-none`,
+                so nothing underneath becomes unclickable.
+              */
+              <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none
+                overflow-y-auto px-3 py-4 sm:px-4 sm:py-6">
+                <div className={`absolute inset-0 animate-fade-in ${isDark ? "bg-slate-950/45" : "bg-slate-900/15"}`} />
+                <div className="pointer-events-auto relative my-auto w-full max-w-md">
+                  {/*
+                    Success is carried by an ACCENT — the trophy tile, a 2px trim, a tinted
+                    lift — never by a fill. The old full-bleed emerald gradient outweighed
+                    the card it congratulated and left the brand button nowhere to stand out.
+                    The accent is the brand primary, so the trim, the tile and the button
+                    below are all one colour. Tokens are shared with the curtain and the
+                    placement finish screen so all three agree — see `theme/surfaces.ts`.
+                  */}
+                  <div className={`flex flex-col animate-scale-in
+                    ${overlayCardClass(isDark, "primary")} ${overlayCardPadding(cardScale)}`}>
                     <div className="flex items-center gap-3">
-                      <div className={`p-2.5 rounded-2xl flex-shrink-0 transition-colors ${
-                        isDark ? 'bg-emerald-950/80 border border-emerald-500/30 text-amber-300' : 'bg-white/20 text-amber-100'
-                      }`}>
-                        <Trophy size={22} />
+                      {/* The accent tile the canvases already use for their headers, in the
+                          brand primary so it agrees with the trim and the button below. */}
+                      <div className={`flex-shrink-0 rounded-2xl p-2 sm:p-2.5 transition-colors ${accentIconClass("violet", isDark)}`}>
+                        <Trophy className="h-5 w-5 sm:h-[22px] sm:w-[22px]" />
                       </div>
-                      <div>
-                        <h3 className="font-extrabold text-base leading-tight">
-                          {kidMode ? "Great job! 🎉" : "Breathtaking! Correct! 🎉"}
+                      {/* min-w-0 so a long explanation title can ellipsize instead of
+                          forcing the card wider than its column. */}
+                      <div className="min-w-0">
+                        <h3 className={titleTextClass(isDark, cardScale)}>
+                          {kidMode ? "Great job! 🎉" : isLastCard ? "Lesson complete! 🎊" : "Breathtaking! Correct! 🎉"}
                         </h3>
-                        <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-300' : 'text-emerald-100'}`}>
+                        <p className={`mt-0.5 ${bodyTextClass(isDark, cardScale)}`}>
                           {kidMode
-                            ? currentIdx < questions.length - 1
-                              ? "Next question coming up…"
-                              : "You finished this practice!"
-                            : "You solved the counting challenge!"}
+                            ? isLastCard
+                              ? "You finished this practice!"
+                              : "Next question coming up…"
+                            : isLastCard
+                              ? "That was the last card — your work is saved as you go."
+                              : "You solved the counting challenge!"}
                         </p>
                       </div>
                     </div>
                     {/* Why it was the answer — authored per question, and shown only here,
-                        after it has been solved, so it teaches without giving it away. */}
+                        after it has been solved, so it teaches without giving it away.
+                        Neutral, not tinted: it is teaching copy, not more celebration. */}
                     {activeQuestion?.config?.explanation && (
-                      <p className={`rounded-2xl px-3 py-2 text-xs font-semibold leading-snug ${
-                        isDark ? "bg-slate-800/70 text-slate-200" : "bg-white/20 text-white"
-                      }`}>
+                      <p className={`px-3 py-2 text-[11px] sm:text-xs font-semibold leading-snug ${insetPanelClass(isDark)}`}>
                         {activeQuestion.config.explanation}
                       </p>
                     )}
                     {kidMode ? (
                       <div className="flex flex-col gap-1.5">
-                        <div className={`h-2 overflow-hidden rounded-full ${isDark ? "bg-white/10" : "bg-white/25"}`}>
-                          <div className="h-full w-full animate-pulse rounded-full bg-amber-300" />
+                        <div className={`h-2 overflow-hidden rounded-full ${isDark ? "bg-white/10" : "bg-slate-100"}`}>
+                          <div className="h-full w-full animate-pulse rounded-full bg-[#7C3AED] motion-reduce:animate-none" />
                         </div>
                         {leaving === "finish" && (
-                          <p className="flex items-center justify-center gap-1.5 text-[11px] font-bold">
+                          <p className={`flex items-center justify-center gap-1.5 ${bodyTextClass(isDark, cardScale)}`}>
                             <ButtonSpinner /> Saving your work…
                           </p>
                         )}
                       </div>
                     ) : (
+                      /*
+                        Both labels fit side by side down to a 320px viewport; `min-w-0`
+                        lets them shrink rather than push the card past its column.
+                      */
                       <div className="flex gap-2">
-                        <button
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
                           onClick={resetSlide}
-                          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold rounded-2xl transition-colors cursor-pointer ${
-                            isDark
-                              ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60'
-                              : 'bg-white/20 hover:bg-white/30 text-white'
-                          }`}
+                          className={`min-w-0 flex-1 rounded-2xl font-bold ${secondaryButtonClass(isDark)}`}
                         >
-                          <RotateCcw size={12} />
-                          Play Again
-                        </button>
-                        <button
+                          <RotateCcw size={12} className="shrink-0" />
+                          <span className="truncate">Play Again</span>
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="default"
+                          size="sm"
                           onClick={() => void handleNextSlide()}
                           disabled={Boolean(leaving)}
-                          aria-busy={leaving === "finish"}
-                          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-extrabold rounded-2xl transition-all shadow-md cursor-pointer disabled:cursor-wait disabled:opacity-80 ${
-                            isDark
-                              ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-500/20'
-                              : 'bg-yellow-400 hover:bg-yellow-300 text-indigo-950 shadow-yellow-400/20'
-                          }`}
+                          loading={leaving === "finish"}
+                          loadingText="Saving…"
+                          className="min-w-0 flex-1 rounded-2xl font-extrabold"
                         >
-                          {leaving === "finish" ? (
-                            <><ButtonSpinner /><span>Saving…</span></>
-                          ) : currentIdx < questions.length - 1 ? (
-                            <><span>Next Card</span><ArrowRight size={13} /></>
+                          {isLastCard ? (
+                            <span className="truncate">Finish Lesson</span>
                           ) : (
-                            <span>Finish Lesson 🎊</span>
+                            <><span className="truncate">Next Card</span><ArrowRight size={13} className="shrink-0" /></>
                           )}
-                        </button>
+                        </Button>
                       </div>
                     )}
                   </div>
@@ -639,23 +674,21 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
           {(!kidMode || assessment) && (
           <div className="flex-shrink-0 flex items-center gap-3">
             {/* Prev */}
-            <button
-                onClick={handlePrevSlide}
-                disabled={currentIdx === 0}
-                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-bold transition-all cursor-pointer border
-                  ${currentIdx === 0
-                    ? isDark
-                      ? 'bg-white/[0.03] border-white/[0.05] text-slate-600 cursor-not-allowed'
-                      : 'bg-slate-100 border-slate-200 text-slate-300 cursor-not-allowed'
-                    : isDark
-                      ? 'bg-white/[0.07] border-white/[0.1] text-slate-300 hover:bg-white/10 hover:text-white hover:scale-105'
-                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:scale-105 shadow-sm'
-                  }
-                `}
-              >
-                <ChevronLeft size={16} />
-                <span className="hidden sm:inline">Back</span>
-              </button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handlePrevSlide}
+              disabled={currentIdx === 0}
+              className={`rounded-2xl border-2 px-4 py-2.5 font-bold transition-all ${
+                isDark
+                  ? "border-white/10 bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
+                  : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+              }`}
+            >
+              <ChevronLeft size={16} />
+              <span>Back</span>
+            </Button>
 
             {/* Adult previews can jump between cards. Placement uses only the top
                 question counter, so its footer stays clear and non-navigable. */}
@@ -691,29 +724,23 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
             </div>
 
             {/* Next */}
-            <button
-                onClick={() => void handleNextSlide()}
-                disabled={(assessment && !assessmentAnswered) || assessmentSaving || Boolean(leaving)}
-                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-bold transition-all shadow-md
-                  ${(assessment && !assessmentAnswered) || assessmentSaving || leaving
-                    ? isDark
-                      ? 'cursor-not-allowed border border-white/5 bg-white/[0.04] text-slate-600 shadow-none'
-                      : 'cursor-not-allowed border border-slate-200 bg-slate-100 text-slate-300 shadow-none'
-                    : currentIdx === questions.length - 1
-                    ? 'bg-emerald-500 hover:bg-emerald-400 border border-emerald-400/30 text-white shadow-emerald-500/20 hover:scale-105'
-                    : 'bg-indigo-600 hover:bg-indigo-500 border border-indigo-500/30 text-white shadow-indigo-600/20 hover:scale-105'
-                  }
-                `}
-              >
-                <span className="hidden sm:inline">
-                  {assessmentSaving || leaving === "finish"
-                    ? "Saving…"
-                    : currentIdx === questions.length - 1
-                      ? assessment?.finishLabel ?? "Finish"
-                      : "Next"}
-                </span>
-                {leaving === "finish" ? <ButtonSpinner /> : <ChevronRight size={16} />}
-              </button>
+            <Button
+              type="button"
+              variant="default"
+              size="sm"
+              onClick={() => void handleNextSlide()}
+              disabled={(assessment && !assessmentAnswered) || assessmentSaving || Boolean(leaving)}
+              loading={assessmentSaving || leaving === "finish"}
+              loadingText="Saving…"
+              className="rounded-2xl px-4 font-bold"
+            >
+              <span>
+                {currentIdx === questions.length - 1
+                  ? assessment?.finishLabel ?? "Finish"
+                  : "Next"}
+              </span>
+              <ChevronRight size={16} />
+            </Button>
           </div>
           )}
           {assessmentError && (
@@ -739,16 +766,17 @@ export const GameLauncher: React.FC<GameLauncherProps> = ({
         <div
           role="status"
           aria-live="polite"
-          className="absolute inset-0 z-40 flex items-center justify-center bg-slate-950/35 px-6 backdrop-blur-[2px] animate-fade-in"
+          className={`absolute inset-0 z-40 flex items-center justify-center px-5 animate-fade-in sm:px-6 ${overlayScrimClass}`}
         >
-          <div className={`flex flex-col items-center gap-3 rounded-3xl px-7 py-6 text-center shadow-2xl ${
-            isDark ? "bg-[#151A2B] text-slate-100 shadow-black/60" : "bg-white text-slate-800"
-          }`}>
+          {/* Same card as the success overlay, in its neutral accent: this is
+              reassurance, not celebration. */}
+          <div className={`flex w-full max-w-xs flex-col items-center text-center
+            ${overlayCardClass(isDark, "primary")} ${overlayCardPadding(cardScale)}`}>
             <Spinner size="lg" variant="violet" />
-            <p className="text-sm font-extrabold">
+            <p className={titleTextClass(isDark, cardScale)}>
               {leaving === "finish" ? "Saving your progress…" : "Saving before you go…"}
             </p>
-            <p className={`max-w-[16rem] text-xs font-semibold ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+            <p className={bodyTextClass(isDark, cardScale)}>
               {leaveWarning ?? "Keep this open for a moment."}
             </p>
           </div>

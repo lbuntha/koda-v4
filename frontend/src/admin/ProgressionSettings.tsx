@@ -1,7 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, Beaker, CheckCircle2, Flame, Gauge, RefreshCcw, RotateCcw, Route, Save, Scale, SlidersHorizontal, TrendingDown, TrendingUp, Users } from "lucide-react";
+import { AlertTriangle, Award, Beaker, CheckCircle2, Crown, Flame, Gauge, Image, RefreshCcw, RotateCcw, Route, Save, Scale, SlidersHorizontal, Sprout, TrendingDown, TrendingUp, Users } from "lucide-react";
 import { RescoreJob, ScoringConfig, ScoringPreview, settingsApi } from "../api/settings";
 import { Badge, Button, Card, FieldHint, Input, Label, SkeletonCard, Switch } from "../components/ui";
+import { AssetGrid } from "../components/ui/AssetGrid";
+import { SvgLibraryAsset } from "../assets/SvgLibraryAsset";
+import { useSvgLibrary } from "../assets/SvgLibraryContext";
 import { useAppSettings } from "../settings/AppSettingsContext";
 import { MasteryJourneySimulator } from "./MasteryJourneySimulator";
 
@@ -53,6 +56,14 @@ const DEFAULT_SCORING: ScoringConfig = {
 const clone = (value: ScoringConfig): ScoringConfig => JSON.parse(JSON.stringify(value)) as ScoringConfig;
 const percent = (value: number) => Math.round(value * 100);
 
+const MASTERY_ASSET_LEVELS = [
+  { key: "beginner", label: "Beginner", icon: Sprout, tone: "bg-sky-50 text-sky-600" },
+  { key: "developing", label: "Developing", icon: TrendingUp, tone: "bg-[#F1EDFF] text-[#6D55D8]" },
+  { key: "proficient", label: "Proficient", icon: Award, tone: "bg-emerald-50 text-emerald-600" },
+  { key: "master", label: "Master", icon: Crown, tone: "bg-amber-50 text-amber-600" },
+] as const;
+type MasteryAssetLevel = typeof MASTERY_ASSET_LEVELS[number]["key"];
+
 interface NumberFieldProps {
   label: string;
   value: number;
@@ -103,6 +114,7 @@ const SectionHeader: React.FC<{ icon: React.ElementType; title: string }> = ({ i
 
 export const ProgressionSettings: React.FC = () => {
   const { settings, loading, save } = useAppSettings();
+  const { masteryGateAssets, setMasteryGateAssets, persistenceStatus: svgPersistenceStatus } = useSvgLibrary();
   const [draft, setDraft] = useState<ScoringConfig>(() => clone(settings.scoring));
   const [saving, setSaving] = useState(false);
   const [acknowledged, setAcknowledged] = useState(false);
@@ -111,6 +123,7 @@ export const ProgressionSettings: React.FC = () => {
   const [job, setJob] = useState<RescoreJob | null>(null);
   const [simulating, setSimulating] = useState(false);
   const [preview, setPreview] = useState<ScoringPreview | null>(null);
+  const [choosingMasteryAsset, setChoosingMasteryAsset] = useState<MasteryAssetLevel | null>(null);
 
   useEffect(() => {
     setDraft(clone(settings.scoring));
@@ -158,6 +171,19 @@ export const ProgressionSettings: React.FC = () => {
     ...current,
     gates: { ...current.gates, [level]: { ...current.gates[level], [key]: value } },
   }));
+
+  const chooseMasteryAsset = (level: MasteryAssetLevel, assetId: string) => {
+    setMasteryGateAssets(current => ({ ...current, [level]: assetId }));
+    setChoosingMasteryAsset(null);
+  };
+
+  const clearMasteryAsset = (level: MasteryAssetLevel) => {
+    setMasteryGateAssets(current => {
+      const next = { ...current };
+      delete next[level];
+      return next;
+    });
+  };
 
   const handleSave = async () => {
     if (!dirty || validation || !acknowledged) return;
@@ -233,6 +259,57 @@ export const ProgressionSettings: React.FC = () => {
         <Card className="border-[#E7E3F6] p-4">
           <SectionHeader icon={SlidersHorizontal} title="Mastery gates" />
           <div className="space-y-3">
+            <div className="rounded-xl border-2 border-[#E7E3F6] bg-[#FBFAFF] p-3">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div>
+                  <p className="koda-admin-label text-[#17143D]">Mastery SVG assets</p>
+                  <p className="mt-0.5 text-[10px] text-[#6D6997]">Attached to SVG Assets by ID. Artwork changes update these gates automatically.</p>
+                </div>
+                <span className={`koda-admin-chip rounded-full px-2 py-1 ${
+                  svgPersistenceStatus === "error" ? "bg-rose-50 text-rose-600"
+                    : svgPersistenceStatus === "saving" || svgPersistenceStatus === "loading" ? "bg-amber-50 text-amber-700"
+                      : "bg-emerald-50 text-emerald-700"
+                }`}>
+                  {svgPersistenceStatus === "saving" ? "Saving SVG links…" : svgPersistenceStatus === "loading" ? "Loading SVG assets…" : svgPersistenceStatus === "error" ? "SVG links not saved" : "SVG links saved"}
+                </span>
+              </div>
+
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                {MASTERY_ASSET_LEVELS.map(level => {
+                  const assetId = masteryGateAssets[level.key];
+                  const Icon = level.icon;
+                  return (
+                    <div key={level.key} className="flex min-w-0 items-center gap-2.5 rounded-xl border-2 border-[#E7E3F6] bg-white p-2.5">
+                      <span className={`flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl ${level.tone}`}>
+                        {assetId ? <SvgLibraryAsset assetId={assetId} size={28} fallback={<Icon size={18} />} /> : <Icon size={18} />}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-xs font-semibold text-[#17143D]">{level.label}</p>
+                        <p className="mt-0.5 truncate text-[9px] text-[#8D89AE]">{assetId || "Default icon"}</p>
+                      </div>
+                      {assetId && <Button type="button" variant="ghost" size="xs" onClick={() => clearMasteryAsset(level.key)} className="normal-case tracking-normal">Remove</Button>}
+                      <Button type="button" variant="outline" size="xs" onClick={() => setChoosingMasteryAsset(current => current === level.key ? null : level.key)}>
+                        {choosingMasteryAsset === level.key ? "Close" : assetId ? "Change" : "Choose"}
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {choosingMasteryAsset && (
+                <div className="mt-3 rounded-xl border-2 border-[#E7E3F6] bg-white p-3">
+                  <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-[#17143D]"><Image size={14} className="text-[#534AB7]" /> Choose {MASTERY_ASSET_LEVELS.find(level => level.key === choosingMasteryAsset)?.label} SVG</div>
+                  <AssetGrid
+                    kinds={["custom"]}
+                    selectedIds={masteryGateAssets[choosingMasteryAsset] ? [masteryGateAssets[choosingMasteryAsset]!] : []}
+                    onSelect={asset => chooseMasteryAsset(choosingMasteryAsset, asset.id)}
+                    columns={3}
+                    showLabels
+                    emptyCustomHint={<span className="text-[9px] text-[#8D89AE]">Create artwork in SVG Assets first.</span>}
+                  />
+                </div>
+              )}
+            </div>
             <div>
               <p className="koda-admin-label mb-1.5">Developing</p>
               <NumberField label="Minimum plays" help="Minimum verified question attempts required before a skill can reach Developing." value={draft.gates.developing.minPlays} onChange={value => setGate("developing", "minPlays", value)} min={1} />
