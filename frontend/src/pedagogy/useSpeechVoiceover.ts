@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { kodaUtterance } from "../components/canvases/kodaVoice";
 
 export interface SpeechVoiceoverState {
   isSpeaking: boolean;
@@ -14,8 +15,13 @@ export interface SpeechVoiceoverState {
 }
 
 /**
- * Custom hook to provide native browser Text-to-Speech (speechSynthesis)
- * with child-friendly speech rate and pitch adjustments for Koda early learners.
+ * The read-aloud button on a canvas.
+ *
+ * How Koda *sounds* is not this hook's decision — `kodaUtterance` owns rate,
+ * pitch, language, voice choice and the spoken form of the text. This hook owns
+ * only when to start and stop. They were separate before, set to different
+ * numbers, so pressing "Listen" and hearing Koda speak in the same activity were
+ * audibly two different readers.
  */
 export function useSpeechVoiceover(defaultText: string = ""): SpeechVoiceoverState {
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
@@ -47,26 +53,8 @@ export function useSpeechVoiceover(defaultText: string = ""): SpeechVoiceoverSta
     // Stop any current utterance
     window.speechSynthesis.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    const utterance = kodaUtterance(textToSpeak);
     utteranceRef.current = utterance;
-
-    // Child-friendly voice settings: slightly slower rate, slightly higher pitch
-    utterance.rate = 0.92;
-    utterance.pitch = 1.08;
-    utterance.volume = 1.0;
-
-    // Attempt to pick a natural-sounding English voice if available
-    const voices = window.speechSynthesis.getVoices();
-    if (voices && voices.length > 0) {
-      const preferredVoice = voices.find(
-        (v) =>
-          (v.lang.includes("en") && (v.name.includes("Samantha") || v.name.includes("Google") || v.name.includes("Karen") || v.name.includes("Natural"))) ||
-          v.lang.startsWith("en")
-      );
-      if (preferredVoice) {
-        utterance.voice = preferredVoice;
-      }
-    }
 
     utterance.onstart = () => {
       setIsSpeaking(true);
@@ -85,6 +73,20 @@ export function useSpeechVoiceover(defaultText: string = ""): SpeechVoiceoverSta
     };
 
     window.speechSynthesis.speak(utterance);
+    /*
+      Optimistic, and deliberately.
+
+      `onstart` is the honest signal and an unreliable one: Chrome will not fire
+      it until the voice list has loaded, and a queued utterance can sit silent
+      for hundreds of milliseconds first. Anything keyed off this state — the
+      button's own speaking look, and now Koda stepping in — then does nothing
+      at all on the press that asked for it, which reads as a dead button.
+
+      So the press turns it on and only the *end* turns it off. The failure mode
+      flips from "nothing happened" to "it stopped a moment late", and `onend`
+      and `onerror` both clear it.
+    */
+    setIsSpeaking(true);
   }, [defaultText]);
 
   const toggle = useCallback((customText?: string) => {

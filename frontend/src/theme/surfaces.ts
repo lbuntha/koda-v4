@@ -75,7 +75,16 @@ const DARK_SHADOW = "shadow-[0_24px_60px_-20px_rgba(0,0,0,0.85)]";
  */
 export const overlayCardBaseClass = (isDark: boolean, accent: SurfaceAccent = "primary") =>
   [
-    "backdrop-blur-xl transition-colors duration-300",
+    /*
+      Deliberately NO `backdrop-blur`. The fill is 95–97% opaque, so a blur behind
+      it is invisible — but `-webkit-backdrop-filter` establishes a containing
+      block that WebKit then draws text carets against, and on iOS Safari the
+      caret for a focused input inside one lands somewhere else entirely. It
+      showed up on the answer panel as a caret blinking inside a number-pad key.
+      It also costs a real compositing pass on the phones this runs on. Nothing
+      here is translucent enough to earn either.
+    */
+    "transition-colors duration-300",
     isDark ? DARK_FILL : LIGHT_FILL,
     isDark ? DARK_SHADOW : ACCENT_SHADOW[accent]
   ].join(" ");

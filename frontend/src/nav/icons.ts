@@ -24,6 +24,7 @@ import {
   PenTool,
   ClipboardList,
   BookOpen,
+  Sparkles,
   Circle,
 } from "lucide-react";
 import type { ElementType } from "react";
@@ -50,6 +51,7 @@ export const ICON_MAP: Record<string, ElementType> = {
   PenTool,
   ClipboardList,
   BookOpen,
+  Sparkles,
 };
 
 /** Icon names offered when designing a menu. */

@@ -19,7 +19,12 @@ const PALETTES: Record<ShapeAssetType, { light: string; mid: string; dark: strin
   sun: { light: "#FFF38A", mid: "#FBBF24", dark: "#F59E0B", accent: "#FFF7C2" },
   flower: { light: "#F9A8D4", mid: "#EC4899", dark: "#BE185D", accent: "#FDE047" },
   heart: { light: "#FB7185", mid: "#F43F5E", dark: "#BE123C", accent: "#FFE4E6" },
+  // Indigo, to match the base-ten blocks the place-value canvases already draw.
+  tenrod: { light: "#C7D2FE", mid: "#818CF8", dark: "#4338CA", accent: "#EEF2FF" },
 };
+
+/** Geometry of the ten-rod, in the shared 48-unit viewBox. See its `case` below. */
+const ROD = { top: 4, bottom: 46, left: 15, right: 27, depth: 3.4 };
 
 /**
  * Cohesive soft-3D artwork for Koda's original eleven countable shapes.
@@ -154,6 +159,50 @@ export const BuiltinShapeAsset: React.FC<BuiltinShapeAssetProps> = ({ type, size
           <path d="M24 40 8 25C-1 16 4 4 14 4c5 0 8 3 10 7 2-4 5-7 10-7 10 0 15 12 6 21Z" fill={`url(#${main})`} />
           <path d="M9 10c4-5 10-3 13 2-5-2-9 1-11 6-3-2-4-5-2-8Z" fill={`url(#${shine})`} opacity=".8" />
         </>;
+      /*
+        A base-ten rod: ten cubes stacked into one stick, standing up.
+
+        Standing rather than lying down because that is how a child meets a rod
+        on paper and in a tray of blocks — a row of upright sticks reads as
+        "how many tens", where a row of lying ones reads as one long ruler.
+
+        The ten divisions are the artwork. A plain bar wearing a "10" is a
+        numeral with a box around it; the child has to be able to *see* the ten,
+        and to check it by counting the cubes if they do not believe it yet. So
+        the divisions are drawn on both visible faces, at the pitch the cubes
+        actually have, and the rod's length is ten of them by construction.
+      */
+      case "tenrod": {
+        const { top, bottom, left, right, depth } = ROD;
+        const cell = (bottom - top) / 10;
+        return <>
+          <ellipse cx="24" cy="46.6" rx="8.5" ry="1.3" fill="#312E81" opacity=".16" />
+          {/* The two faces that make it a solid rather than a stripe. */}
+          <path d={`M${right} ${top}l${depth} ${-depth}v${bottom - top}l${-depth} ${depth}Z`} fill={palette.dark} />
+          <path d={`M${left} ${top}l${depth} ${-depth}h${right - left}l${-depth} ${depth}Z`} fill={`url(#${accent})`} />
+          <rect x={left} y={top} width={right - left} height={bottom - top} fill={`url(#${main})`} />
+          {Array.from({ length: 9 }, (_, i) => {
+            const y = top + cell * (i + 1);
+            return <path
+              key={i}
+              d={`M${left} ${y}h${right - left}l${depth} ${-depth}`}
+              fill="none"
+              stroke={palette.dark}
+              strokeWidth=".8"
+              opacity=".45"
+            />;
+          })}
+          <path d={`M${left + 1.6} ${top + 1.6}v${bottom - top - 3.2}`} stroke="#FFFFFF" strokeWidth="1.6" strokeLinecap="round" opacity=".4" />
+          <path
+            d={`M${left} ${top}l${depth} ${-depth}h${right - left}v${bottom - top}l${-depth} ${depth}h${left - right}Z`}
+            fill="none"
+            stroke={palette.dark}
+            strokeWidth="1.1"
+            strokeLinejoin="round"
+          />
+          <path d={`M${right} ${top}v${bottom - top}m0 ${top - bottom}l${depth} ${-depth}`} stroke={palette.dark} strokeWidth="1.1" strokeLinejoin="round" />
+        </>;
+      }
     }
   })();
 

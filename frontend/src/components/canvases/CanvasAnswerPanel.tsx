@@ -407,8 +407,15 @@ export const CanvasAnswerPanel: React.FC<CanvasAnswerPanelProps> = ({
                   disabled={status === "correct"}
                   aria-label="Your answer"
                   aria-invalid={status === "error"}
+                  /*
+                    No caret while the pad is up. It is not the input method — the
+                    keys are — so a blinking bar is noise, and it is the artefact
+                    iOS Safari misplaces when this card animates in on a transform.
+                    (The `backdrop-filter` that caused the worst of it is gone; see
+                    `overlayCardBaseClass`.) Focus is still shown by the ring.
+                  */
                   className={`h-11 md:h-14 px-3 text-center text-lg sm:text-xl md:text-2xl font-bold font-mono
-                    ${inputClass(status, isDark)}`}
+                    ${showNumberPad ? "caret-transparent" : ""} ${inputClass(status, isDark)}`}
                 />
               </div>
 

@@ -28,8 +28,8 @@ import { CurriculumPromotion, promotionsApi } from "../api/promotions";
 
 import { resolveIcon } from "../nav/icons";
 import { useMenus } from "../nav/useMenus";
-import { PARENT_NAV_ASSETS, PARENT_NAV_ASSET_REFS } from "./parentNavAssets";
-import { KID_NAV_ASSETS } from "../student/home/kidNavAssets";
+import { PARENT_NAV_ASSETS, PARENT_NAV_ASSET_IDS, PARENT_NAV_ASSET_REFS } from "./parentNavAssets";
+import { KID_NAV_ASSETS, KID_NAV_ASSET_IDS } from "../student/home/kidNavAssets";
 import { FAMILY_SUMMARY_ASSETS } from "./familySummaryAssets";
 
 type ParentView = "dashboard" | "children" | "parent_settings" | "settings" | "profile";
@@ -228,16 +228,26 @@ export const ParentDashboard: React.FC = () => {
         active={activeView}
         onNavigate={view => setActiveView(view as ParentView)}
         user={{ name: account?.name, email: account?.email, avatar: account?.avatar }}
-        title={VIEW_TITLES[activeView]}
+        title={activeView === "dashboard" ? "" : VIEW_TITLES[activeView]}
         appearance="parent"
         onProfile={() => setActiveView("profile")}
         onSettings={() => setActiveView("parent_settings")}
         onLogout={logout}
+        profileMenuIconAssetIds={{
+          profile: PARENT_NAV_ASSET_IDS.profile,
+          settings: PARENT_NAV_ASSET_IDS.settings,
+          logout: PARENT_NAV_ASSET_IDS.logout,
+        }}
         contentClassName="flex-1 overflow-auto bg-transparent p-4 pb-24 sm:p-5 md:p-5 md:pb-8"
         actions={
           <div className="flex items-center gap-1">
-            <NotificationBell recipientType="user" />
-            <ThemeToggle theme={theme} onToggle={toggleTheme} variant="round" />
+            <NotificationBell recipientType="user" iconAssetId={KID_NAV_ASSET_IDS.notification} />
+            <ThemeToggle
+              theme={theme}
+              onToggle={toggleTheme}
+              variant="round"
+              iconAssetId={theme === "light" ? KID_NAV_ASSET_IDS.themeDark : KID_NAV_ASSET_IDS.themeLight}
+            />
             <Button variant="ghost" size="icon" onClick={logout} aria-label="Sign out" className="h-9 w-9 rounded-xl text-slate-500 md:hidden dark:text-slate-300">
               <LogOut size={16} />
             </Button>

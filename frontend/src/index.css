@@ -162,6 +162,14 @@
   animation: shake 0.25s ease-in-out;
 }
 
+/* A refused object still has to say "no" without motion — the shake becomes a
+   brief hold, so the answer is the same one and only the delivery is quieter. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-shake {
+    animation: none;
+  }
+}
+
 .animate-confetti {
   animation: confettiRain 3.5s linear forwards;
 }

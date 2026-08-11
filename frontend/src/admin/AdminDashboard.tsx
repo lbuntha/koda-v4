@@ -24,6 +24,7 @@ import { CreateUserModal } from "./CreateUserModal";
 import { NotificationsPage } from "./NotificationsPage";
 import { SettingsPage } from "./SettingsPage";
 import { InteractiveStudioPage } from "./InteractiveStudioPage";
+import { MascotStudioPage } from "./mascot-studio/MascotStudioPage";
 import { CurriculumAdminPage } from "./CurriculumAdminPage";
 import { AssignmentsPage } from "./AssignmentsPage";
 import { AnalyticsRosterPage } from "../analytics/AnalyticsRosterPage";
@@ -84,6 +85,7 @@ const CONTENT: Record<string, (ctx: AdminCtx) => React.ReactNode> = {
   menus: () => <MenusManager />,
   studio: (c) => <InteractiveStudioPage onExit={() => c.navigate("overview")} />,
   assets: () => <App embedded initialAdminTab="assets" />,
+  mascots: (c) => <MascotStudioPage onOpenSvgAssets={() => c.navigate("assets")} />,
   curriculum: (c) => <CurriculumAdminPage onOpenAssets={() => c.navigate("assets")} />,
   assignments: () => <AssignmentsPage />,
   analytics: () => <AnalyticsRosterPage />,
@@ -185,7 +187,7 @@ export const AdminDashboard: React.FC = () => {
       onProfile={() => setSection("profile")}
       onSettings={() => setSection("settings")}
       onLogout={logout}
-      contentClassName={section === "studio" || section === "assets" || section === "curriculum" ? "flex-1 overflow-hidden" : undefined}
+      contentClassName={section === "studio" || section === "assets" || section === "mascots" || section === "curriculum" ? "flex-1 overflow-hidden" : undefined}
       actions={
         <Button variant="ghost" size="sm" onClick={logout} className="text-slate-500 md:hidden">
           <LogOut size={14} /> <span className="hidden sm:inline">Sign out</span>

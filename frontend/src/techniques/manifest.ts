@@ -120,6 +120,10 @@ export const ABSORBED_TECHNIQUES: ReadonlyMap<CountingTechnique, CountingTechniq
   [CountingTechnique.ONE_TO_ONE, CountingTechnique.MOVE_AND_COUNT],
   [CountingTechnique.LINE_UP_AND_COUNT, CountingTechnique.MOVE_AND_COUNT],
   [CountingTechnique.COUNT_MAGNETS, CountingTechnique.MOVE_AND_COUNT],
+  [CountingTechnique.GROUP_IN_TENS, CountingTechnique.MOVE_AND_COUNT],
+  [CountingTechnique.COUNT_ON, CountingTechnique.MOVE_AND_COUNT],
+  [CountingTechnique.COUNT_BACK, CountingTechnique.MOVE_AND_COUNT],
+  [CountingTechnique.DIFFERENT_ARRANGEMENTS, CountingTechnique.MOVE_AND_COUNT],
 ]);
 
 /**

@@ -60,7 +60,9 @@ export const SVG_OBJECTS: CountableObject[] = [
   { id: "butterfly", emoji: "🦋", label: "Butterfly", colorClass: "bg-purple-50 hover:bg-purple-100 border-purple-200 text-purple-600", assetType: "butterfly" },
   { id: "sun", emoji: "☀️", label: "Sun", colorClass: "bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-600", assetType: "sun" },
   { id: "flower", emoji: "🌸", label: "Flower", colorClass: "bg-pink-50 hover:bg-pink-100 border-pink-200 text-pink-600", assetType: "flower" },
-  { id: "heart", emoji: "❤️", label: "Heart", colorClass: "bg-rose-50 hover:bg-rose-100 border-rose-200 text-rose-600", assetType: "heart" }
+  { id: "heart", emoji: "❤️", label: "Heart", colorClass: "bg-rose-50 hover:bg-rose-100 border-rose-200 text-rose-600", assetType: "heart" },
+  // A picture of ten, not of a thing — see `assets/assetGroups.ts` for what that costs the answer panel.
+  { id: "tenrod", emoji: "🟦", label: "Ten Rod", colorClass: "bg-indigo-50 hover:bg-indigo-100 border-indigo-200 text-indigo-600", assetType: "tenrod" }
 ];
 
 export const EMOJI_OBJECTS: CountableObject[] = [
@@ -87,6 +89,8 @@ export interface CustomSvgAsset {
   label: string;
   markup: string;
   scale: number;
+  /** Makes this shared SVG available as a composable Mascot Studio part. */
+  mascotCategory?: "body" | "head" | "eyes" | "pupil" | "mouth" | "pattern" | "accessory";
 }
 
 export interface CountingQuestion {
@@ -141,13 +145,30 @@ export interface CountingQuestion {
     extraCount?: number;
     totalCount?: number;
     removeCount?: number;
+    /** Bundle size for the `skipcount` staging — the child counts by this. */
+    skipStep?: number;
+    /**
+     * Which Mascot Studio style presents this question — a style name.
+     *
+     * Absent means the default actor. A name that no longer exists falls back to
+     * the built-in Koda, so deleting a style never leaves a slide guideless.
+     */
+    mascotStyle?: string;
+    /**
+     * Per-moment casting: which style plays reading, waiting, wrong and right.
+     *
+     * Absent, or a moment left out, resolves automatically — a style named for
+     * that moment, else `mascotStyle`, else the built-in cast. Only real choices
+     * are stored, so the common slide carries nothing here at all.
+     */
+    mascotStyles?: Partial<Record<"talking" | "waiting" | "oops" | "celebrating", string>>;
     pattern?: "grid" | "circle" | "scatter" | "line" | "dice" | "pairs" | "columns" | "wave" | "ring";
     /**
      * Which staging the unified Count canvas should use — what counting
      * physically is on this slide. See `canvases/countStaging/`. Absent means
      * `move`, which is what every released MOVE_AND_COUNT question expects.
      */
-    staging?: "tap" | "move" | "lineup" | "container" | "tens";
+    staging?: "tap" | "move" | "lineup" | "container" | "tens" | "counton" | "countback" | "arrangements" | "skipcount";
     flashDurationMs?: number;
     customPositions?: { id: string; x: number; y: number }[];
     layoutReference?: { width: number; height: number };

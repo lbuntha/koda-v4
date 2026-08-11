@@ -1,0 +1,12 @@
+export { KodaMascot } from "./KodaMascot";
+export type { KodaMascotProps, KodaMotionLevel, KodaPhysicsLevel } from "./KodaMascot";
+export { KodaSvgRenderer, KodaSvgLayer } from "./KodaSvgRenderer";
+export { getBuiltinKodaDocument, BUILTIN_KODA_DOCUMENTS } from "./fallbackKoda";
+export { useStudioMascot, useActor, useActorChoices, refreshStudioMascots, DEFAULT_ACTOR_STYLE, ACTOR_ROLES } from "./useStudioMascot";
+export type { ActorChoice, ActorRole, GuideCast } from "./useStudioMascot";
+export { guidePropsFor, readGuideCast, readLegacyActor, writeGuideCast, clearLegacyActor } from "./casting";
+export type { CastableQuestion, GuideProps } from "./casting";
+export { nextKodaMascotState, ONE_SHOT_STATE_DURATION_MS } from "./stateMachine";
+export { applyMascotClipAtTime, captureMascotKeyframe, resolveMascotClip, sampleKeyframes } from "./clips";
+export type { KodaMascotEvent, KodaMascotState } from "./stateMachine";
+export type { MascotAnchor, MascotAnimationClip, MascotDocument, MascotGradient, MascotGroup, MascotKeyframe, MascotLayer, MascotPalette } from "./types";

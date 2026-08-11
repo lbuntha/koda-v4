@@ -378,7 +378,7 @@ export const MultiplicationCanvas: React.FC<CanvasProps> = ({
             <div
               onPointerDown={handleBoxPointerDown}
               style={boxStyle}
-              className={`rounded-[2.4rem] flex flex-col items-center justify-center p-4 z-10 transition-colors duration-200 overflow-hidden ${surfaceClass(isDark)}
+              className={`rounded-[2.4rem] flex flex-col items-center justify-center p-4 z-10 transition-colors duration-200 overflow-hidden ${surfaceClass(isDark, "panel")}
                 ${!hasCustomLayout ? "m-auto" : ""}
                 ${!isPlayMode ? "border-2 border-dashed border-indigo-400/60 cursor-grab" : ""}
                 ${draggedPart === 'move' ? "border-solid border-indigo-500 cursor-grabbing" : ""}

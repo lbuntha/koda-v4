@@ -9,6 +9,7 @@
 import React, { useState } from "react";
 import { ChevronDown, LogOut, Settings, UserRound } from "lucide-react";
 import { cn } from "../../lib/utils";
+import { SvgLibraryAsset } from "../../assets/SvgLibraryAsset";
 import { KidAvatar } from "../KidAvatar";
 
 const GROUPS_KEY = "koda_sidebar_groups"; // collapsed group ids
@@ -38,6 +39,12 @@ export interface AppUser {
   avatar?: string | null;
 }
 
+export interface ProfileMenuIconAssetIds {
+  profile?: string;
+  settings?: string;
+  logout?: string;
+}
+
 interface Props {
   brand: AppBrand;
   sections: NavSection[];
@@ -49,6 +56,7 @@ interface Props {
   onProfile?: () => void;
   onSettings?: () => void;
   onLogout?: () => void;
+  profileMenuIconAssetIds?: ProfileMenuIconAssetIds;
 }
 
 const AVATAR_EMOJI_MAP: Record<string, string> = {
@@ -79,6 +87,7 @@ export const AppSidebar: React.FC<Props> = ({
   onProfile,
   onSettings,
   onLogout,
+  profileMenuIconAssetIds,
 }) => {
   const BrandIcon = brand.icon;
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
@@ -197,9 +206,9 @@ export const AppSidebar: React.FC<Props> = ({
               "absolute bottom-full z-30 mb-2 overflow-hidden rounded-2xl border border-[#E7E3F6] bg-white p-1.5 shadow-[0_14px_40px_rgba(44,36,90,0.16)] dark:border-white/10 dark:bg-[#1A1D32]",
               collapsed ? "left-2 w-48" : "inset-x-3"
             )} role="menu">
-              {onProfile && <button type="button" role="menuitem" onClick={() => { setProfileMenuOpen(false); onProfile(); }} className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-xs font-medium text-[#0E0B55] hover:bg-[#F3F0FF] dark:text-white dark:hover:bg-white/10"><UserRound size={15} className="text-[#7C6DD8]" /> Profile</button>}
-              {onSettings && <button type="button" role="menuitem" onClick={() => { setProfileMenuOpen(false); onSettings(); }} className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-xs font-medium text-[#0E0B55] hover:bg-[#F3F0FF] dark:text-white dark:hover:bg-white/10"><Settings size={15} className="text-[#7C6DD8]" /> Settings</button>}
-              {onLogout && <button type="button" role="menuitem" onClick={() => { setProfileMenuOpen(false); onLogout(); }} className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-xs font-medium text-rose-600 hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-400/10"><LogOut size={15} /> Log out</button>}
+              {onProfile && <button type="button" role="menuitem" onClick={() => { setProfileMenuOpen(false); onProfile(); }} className="koda-admin-nav-label flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-[#0E0B55] hover:bg-[#F3F0FF] dark:text-white dark:hover:bg-white/10"><SvgLibraryAsset assetId={profileMenuIconAssetIds?.profile ?? ""} size={20} fallback={<UserRound size={17} className="text-[#7C6DD8]" />} /> Profile</button>}
+              {onSettings && <button type="button" role="menuitem" onClick={() => { setProfileMenuOpen(false); onSettings(); }} className="koda-admin-nav-label flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-[#0E0B55] hover:bg-[#F3F0FF] dark:text-white dark:hover:bg-white/10"><SvgLibraryAsset assetId={profileMenuIconAssetIds?.settings ?? ""} size={20} fallback={<Settings size={17} className="text-[#7C6DD8]" />} /> Settings</button>}
+              {onLogout && <button type="button" role="menuitem" onClick={() => { setProfileMenuOpen(false); onLogout(); }} className="koda-admin-nav-label flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-rose-600 hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-400/10"><SvgLibraryAsset assetId={profileMenuIconAssetIds?.logout ?? ""} size={20} fallback={<LogOut size={17} />} /> Log out</button>}
             </div>
           )}
           <button

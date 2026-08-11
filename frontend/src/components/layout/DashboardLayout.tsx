@@ -13,7 +13,7 @@
 
 import React, { useState } from "react";
 import { PanelLeft } from "lucide-react";
-import { AppSidebar, AppBrand, NavItem, NavSection } from "./AppSidebar";
+import { AppSidebar, AppBrand, NavItem, NavSection, type ProfileMenuIconAssetIds } from "./AppSidebar";
 
 export type { AppBrand, NavItem, NavSection };
 
@@ -33,6 +33,7 @@ interface Props {
   onProfile?: () => void;
   onSettings?: () => void;
   onLogout?: () => void;
+  profileMenuIconAssetIds?: ProfileMenuIconAssetIds;
   children: React.ReactNode;
 }
 
@@ -50,6 +51,7 @@ export const DashboardLayout: React.FC<Props> = ({
   onProfile,
   onSettings,
   onLogout,
+  profileMenuIconAssetIds,
   children,
 }) => {
   const [collapsed, setCollapsed] = useState<boolean>(() => {
@@ -86,6 +88,7 @@ export const DashboardLayout: React.FC<Props> = ({
         onProfile={onProfile}
         onSettings={onSettings}
         onLogout={onLogout}
+        profileMenuIconAssetIds={profileMenuIconAssetIds}
       />
 
       <main className={`flex min-h-0 min-w-0 flex-1 flex-col md:pb-0 ${appearance === "parent" ? "bg-transparent pb-20" : "pb-16"}`}>

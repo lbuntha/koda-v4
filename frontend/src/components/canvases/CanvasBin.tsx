@@ -71,7 +71,7 @@ export const CanvasBin = forwardRef<HTMLDivElement, CanvasBinProps>(({
       ref={ref}
       style={style}
       className={`flex-1 basis-0 min-w-0 min-h-0 relative flex flex-col rounded-3xl p-3 sm:p-4 md:p-5
-        transition-[background-color,box-shadow] duration-200 ${surfaceClass(isDark)}
+        transition-[background-color,box-shadow] duration-200 ${surfaceClass(isDark, "panel")}
         ${active ? `ring-4 ${accentChipClass(tone, isDark)}` : ""} ${className}`}
     >
       <div className="flex items-center justify-between gap-2 flex-shrink-0">

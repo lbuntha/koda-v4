@@ -89,7 +89,7 @@ export const RecentActivity: React.FC<Props> = ({ profiles, summaries, loading, 
   const items = useMemo(() => profiles
     .flatMap(child => (summaries[child.id]?.recentEvents ?? []).map(event => ({ child, event })))
     .sort((left, right) => new Date(right.event.occurredAt).getTime() - new Date(left.event.occurredAt).getTime())
-    .slice(0, 4), [profiles, summaries]);
+    .slice(0, compact ? 4 : 12), [compact, profiles, summaries]);
 
   return (
     <Card variant="activity" className={compact ? "p-4" : "border-0 bg-transparent shadow-none dark:bg-transparent dark:shadow-none"}>

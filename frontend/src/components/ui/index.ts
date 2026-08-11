@@ -15,6 +15,7 @@ export { Spinner } from "./Spinner";
 export { KodaLogoSpinner } from "./KodaLogoSpinner";
 export { Tabs, TabsList, TabsTrigger, TabsContent } from "./Tabs";
 export { Badge } from "./Badge";
+export { SpeechBubble, type SpeechBubbleProps, type SpeechBubbleTail, type SpeechBubbleAlign } from "./SpeechBubble";
 export { Dialog } from "./Dialog";
 export { AssetSelectionModal } from "./AssetSelectionModal";
 export { FormModal, FormField, FormRow } from "./FormModal";

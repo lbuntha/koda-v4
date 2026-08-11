@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { AlertTriangle, Trash2 } from "lucide-react";
 import { Dialog } from "./Dialog";
 import { Button } from "./Button";
-import { Spinner } from "./Spinner";
 
 export interface ConfirmModalProps {
   isOpen: boolean;
@@ -14,6 +13,9 @@ export interface ConfirmModalProps {
   cancelText?: string;
   variant?: "danger" | "warning" | "default";
   icon?: React.ReactNode;
+  children?: React.ReactNode;
+  confirmDisabled?: boolean;
+  loadingText?: string;
 }
 
 export const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -26,6 +28,9 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   cancelText = "Cancel",
   variant = "danger",
   icon,
+  children,
+  confirmDisabled = false,
+  loadingText = "Working...",
 }) => {
   const [loading, setLoading] = useState(false);
 
@@ -44,6 +49,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   };
 
   const isDanger = variant === "danger";
+  const isWarning = variant === "warning";
 
   return (
     <Dialog isOpen={isOpen} onClose={loading ? () => {} : onClose} maxWidthClassName="max-w-sm">
@@ -53,7 +59,9 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
           className={`flex h-12 w-12 items-center justify-center rounded-2xl mb-3.5 ${
             isDanger
               ? "bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400"
-              : "bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400"
+              : isWarning
+                ? "bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400"
+                : "bg-violet-100 text-[#534AB7] dark:bg-violet-500/20 dark:text-violet-300"
           }`}
         >
           {icon ?? (isDanger ? <Trash2 size={22} /> : <AlertTriangle size={22} />)}
@@ -68,6 +76,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
             {description}
           </p>
         )}
+        {children && <div className="mt-4 w-full text-left">{children}</div>}
 
         {/* Actions */}
         <div className="mt-6 flex w-full gap-2.5">
@@ -83,14 +92,16 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
           <Button
             type="button"
             onClick={handleConfirm}
-            disabled={loading}
+            loading={loading}
+            loadingText={loadingText}
+            disabled={confirmDisabled}
             className={`flex-1 rounded-xl font-extrabold text-white shadow-sm ${
               isDanger
                 ? "bg-rose-600 hover:bg-rose-700 dark:bg-rose-600 dark:hover:bg-rose-500"
                 : "bg-[#5C46DF] hover:bg-[#4C36CF] dark:bg-[#BEACFF] dark:text-[#191338] dark:hover:bg-[#AF9CFF]"
             }`}
           >
-            {loading ? <Spinner size="sm" label="Working" /> : confirmText}
+            {confirmText}
           </Button>
         </div>
       </div>

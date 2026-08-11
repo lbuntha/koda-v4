@@ -14,6 +14,7 @@ import { AppToolbar } from "../shared";
 import { useSvgLibrary } from "../../../assets/SvgLibraryContext";
 import { SvgLibraryAsset } from "../../../assets/SvgLibraryAsset";
 import { KID_NAV_ASSETS, KID_NAV_ASSET_IDS } from "../kidNavAssets";
+import { NotificationBell } from "../../../notifications/NotificationBell";
 
 interface Props {
   stats: KidStats;
@@ -226,6 +227,7 @@ export const KidHomeToolbar: React.FC<Props> = ({
               {stats.streakDays}
             </span>
           )}
+          <NotificationBell recipientType="student" iconAssetId={KID_NAV_ASSET_IDS.notification} />
           <div ref={profileRef} className="relative">
             <Button
               type="button"
@@ -249,7 +251,12 @@ export const KidHomeToolbar: React.FC<Props> = ({
               >
                 <div className="flex items-center justify-between gap-3 rounded-xl px-2 py-1.5">
                   <span className="text-xs font-extrabold text-[#4B5262] dark:text-[#D6D0E8]">Theme</span>
-                  <ThemeToggle theme={theme} onToggle={onToggleTheme} variant="round" />
+                  <ThemeToggle
+                    theme={theme}
+                    onToggle={onToggleTheme}
+                    variant="round"
+                    iconAssetId={theme === "light" ? KID_NAV_ASSET_IDS.themeDark : KID_NAV_ASSET_IDS.themeLight}
+                  />
                 </div>
                 {stats.streakDays > 0 && (
                   <p className="mx-1 flex items-center gap-2 rounded-xl bg-[#FFF1E8] px-2.5 py-2 text-[11px] font-extrabold text-[#D65F21] dark:bg-orange-400/10 dark:text-orange-300">

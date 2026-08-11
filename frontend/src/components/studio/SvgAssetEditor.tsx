@@ -20,7 +20,10 @@ import { XTRAMATH_OWL_ASSET, XTRAMATH_OWL_ASSET_ID } from "../../assets/xtraMath
 import { CountingTechnique } from "../../types";
 import { CountingAsset } from "../Assets";
 import { AssetGrid, CatalogAssetView } from "../ui/AssetGrid";
-import { Badge, Button, Card, ConfirmModal, Input, Label, Textarea } from "../ui";
+import { Badge, Button, Card, ConfirmModal, Input, Label, Select, Textarea } from "../ui";
+
+const MASCOT_CATEGORIES = ["body", "head", "eyes", "pupil", "mouth", "pattern", "accessory"] as const;
+type MascotSvgCategory = typeof MASCOT_CATEGORIES[number];
 
 const SYSTEM_ASSETS = [...PARENT_NAV_ASSETS, ...FAMILY_SUMMARY_ASSETS, ...KID_NAV_ASSETS, ...ASSET_CATEGORY_ICONS, XTRAMATH_OWL_ASSET];
 const SYSTEM_ASSET_IDS = new Set(SYSTEM_ASSETS.map(asset => asset.id));
@@ -53,6 +56,7 @@ export const SvgAssetEditor: React.FC = () => {
   const [label, setLabel] = useState("");
   const [markup, setMarkup] = useState(NEW_SVG);
   const [scale, setScale] = useState(1);
+  const [mascotCategory, setMascotCategory] = useState<MascotSvgCategory | "">("");
   const [previewSize, setPreviewSize] = useState(96);
   const [showErrors, setShowErrors] = useState(false);
   const [copied, setCopied] = useState<"key" | "usage" | null>(null);
@@ -117,6 +121,7 @@ export const SvgAssetEditor: React.FC = () => {
     setLabel("");
     setMarkup(NEW_SVG);
     setScale(1);
+    setMascotCategory("");
     setShowErrors(false);
   };
 
@@ -129,6 +134,7 @@ export const SvgAssetEditor: React.FC = () => {
     setLabel(saved.label);
     setMarkup(saved.markup);
     setScale(saved.scale ?? 1);
+    setMascotCategory(saved.mascotCategory ?? "");
   };
 
   const save = () => {
@@ -141,6 +147,7 @@ export const SvgAssetEditor: React.FC = () => {
       label: label.trim(),
       markup: preprocessSvgMarkup(markup),
       scale,
+      mascotCategory: mascotCategory || undefined,
     };
     setAssets(current => existingId
       ? current.map(asset => asset.id === existingId ? next : asset)
@@ -161,6 +168,7 @@ export const SvgAssetEditor: React.FC = () => {
       label: `${label.trim()} Copy`,
       markup: preprocessSvgMarkup(markup),
       scale,
+      mascotCategory: mascotCategory || undefined,
     };
     setAssets(current => [...current, copy]);
     setSelected(customAsset(copy));
@@ -290,6 +298,15 @@ export const SvgAssetEditor: React.FC = () => {
                     <Label htmlFor="svg-label" className="koda-admin-label">Asset label</Label>
                     <Input id="svg-label" value={label} onChange={event => setLabel(event.target.value)} placeholder="Example: Golden mastery medal" className="mt-1.5" />
                     {showErrors && !label.trim() && <p className="mt-1 text-xs text-rose-600">Enter a clear asset label.</p>}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="svg-mascot-category" className="koda-admin-label">Mascot part category</Label>
+                    <Select id="svg-mascot-category" value={mascotCategory} onChange={event => setMascotCategory(event.target.value as MascotSvgCategory | "")} className="mt-1.5">
+                      <option value="">General SVG</option>
+                      {MASCOT_CATEGORIES.map(category => <option key={category} value={category}>{category.charAt(0).toUpperCase() + category.slice(1)}</option>)}
+                    </Select>
+                    <p className="mt-1 text-xs text-[#6D6997] dark:text-[#9A94B8]">Categorized SVGs appear automatically in Mascot Studio.</p>
                   </div>
 
                   <div>

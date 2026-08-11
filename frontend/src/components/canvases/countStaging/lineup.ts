@@ -14,7 +14,7 @@
  * place, and be told so, is the point of lining up.
  */
 
-import { contentZone, OBJECT_SIZE } from "../objectLayout";
+import { contentZone, rowSlotPosition, OBJECT_SIZE } from "../objectLayout";
 import type { Point } from "../oneToOneLayout";
 import {
   allCounted,
@@ -26,25 +26,6 @@ import {
 
 export const TRAY: string = "tray";
 export const LINE: string = "line";
-
-/** Row geometry, shared by layout, slot markers and the drop test. */
-const geometry = (count: number, size: number, area: { left: number; top: number; width: number; height: number }) => {
-  const gap = Math.max(
-    size * 0.16,
-    Math.min(size * 0.45, (area.width - count * size) / Math.max(1, count - 1))
-  );
-  const rowWidth = count * size + gap * Math.max(0, count - 1);
-  return {
-    gap,
-    startX: area.left + (area.width - rowWidth) / 2,
-    y: area.top + (area.height - size) / 2
-  };
-};
-
-const slotAt = (index: number, count: number, size: number, area: ReturnType<typeof contentZone>): Point => {
-  const g = geometry(count, size, area);
-  return { x: Math.floor(g.startX + index * (size + g.gap)), y: Math.floor(g.y) };
-};
 
 export const lineupStaging: CountStaging = {
   id: "lineup",
@@ -94,10 +75,10 @@ export const lineupStaging: CountStaging = {
     let waiting = 0;
     for (const item of items) {
       if (item.counted && item.order !== null) {
-        if (line) positions[item.id] = slotAt(item.order - 1, count, size, line);
+        if (line) positions[item.id] = rowSlotPosition(item.order - 1, count, line, size);
       } else {
         // The tray compacts as objects leave, so what is left reads as "four left".
-        if (tray) positions[item.id] = slotAt(waiting, count, size, tray);
+        if (tray) positions[item.id] = rowSlotPosition(waiting, count, tray, size);
         waiting += 1;
       }
     }
@@ -111,7 +92,7 @@ export const lineupStaging: CountStaging = {
     const line = contentZone(lineRect, size);
     return Array.from({ length: count }, (_, index) => ({
       index,
-      ...slotAt(index, count, size, line),
+      ...rowSlotPosition(index, count, line, size),
       label: String(index + 1)
     }));
   },
@@ -130,18 +111,19 @@ export const lineupStaging: CountStaging = {
     const snapRadius = Math.max(48, size * 1.15);
     let best: { index: number; distance: number } | null = null;
     for (let index = 0; index < count; index++) {
-      const slot = slotAt(index, count, size, line);
+      const slot = rowSlotPosition(index, count, line, size);
       const centre = { x: slot.x + size / 2, y: slot.y + size / 2 };
       const distance = Math.hypot(point.x - centre.x, point.y - centre.y);
       if (distance > snapRadius) continue;
       if (!best || distance < best.distance) best = { index, distance };
     }
-    if (!best) return null;
+    if (!best) return "refused";
 
     const occupied = items.some(
       other => other.id !== item.id && other.counted && other.order === best!.index + 1
     );
-    if (occupied) return null;
+    // A slot that already holds one is a rule, and the child should see it.
+    if (occupied) return "refused";
 
     return { counted: true, at: best.index + 1 };
   },

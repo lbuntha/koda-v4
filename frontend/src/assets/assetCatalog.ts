@@ -44,6 +44,14 @@ export const ASSET_SHAPES = [
   { type: "sun", label: "Sun", emoji: "☀️" },
   { type: "flower", label: "Flower", emoji: "🌸" },
   { type: "heart", label: "Heart", emoji: "❤️" },
+  /*
+    The odd one out, and deliberately so: a picture of ten, not a picture of a
+    thing. It is here rather than in a base-ten module of its own because an
+    author picks it from the same grid they pick an apple from — the whole point
+    is that "count these" can be asked about tens without a second activity. What
+    it is *worth* lives in `assetGroups.ts`, which the answer panel reads.
+  */
+  { type: "tenrod", label: "Ten Rod", emoji: "🟦" },
 ] as const;
 
 export type ShapeAssetType = (typeof ASSET_SHAPES)[number]["type"];
@@ -68,6 +76,7 @@ export const ASSET_PLURAL: Record<ShapeAssetType, string> = {
   sun: "Suns",
   flower: "Flowers",
   heart: "Hearts",
+  tenrod: "Ten Rods",
 };
 
 const LABEL_TO_SHAPE = new Map<string, ShapeAssetType>(

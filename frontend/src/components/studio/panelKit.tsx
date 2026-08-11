@@ -17,6 +17,14 @@ export interface PanelProps {
   updateConfig: (patch: Partial<CountingQuestion["config"]>) => void;
 }
 
+/*
+  Casting is a panel field like the rest, so it is handed out from here — a
+  panel picks it up in the same import as `SelectField`. It lives in its own
+  file because it is the one primitive that knows about Mascot Studio.
+*/
+export { ActorCastField } from "./ActorCastField";
+export type { ActorCastFieldProps } from "./ActorCastField";
+
 /** Titled group of related fields. */
 export const PanelSection: React.FC<{ title?: string; children: React.ReactNode }> = ({ title, children }) => (
   <div className="space-y-4">

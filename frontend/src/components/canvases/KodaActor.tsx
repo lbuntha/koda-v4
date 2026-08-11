@@ -17,8 +17,9 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { motion, TargetAndTransition } from "motion/react";
+import { motion } from "motion/react";
 import { Volume2, VolumeX, RotateCcw, Move } from "lucide-react";
+import { KodaMascot, type KodaMascotState } from "../../features/koda-mascot";
 import { KodaVoice, toSpeech } from "./kodaVoice";
 import { tokenize, sentenceShape } from "./kodaText";
 
@@ -54,32 +55,6 @@ const MOTION = {
   glow: { duration: 1.8, from: 0.5, to: 0.9, still: 0.7 },
 } as const;
 
-/** Looping body language per mood. Only applied at the "full" animation level. */
-const MASCOT_LOOP: Record<KodaMood, TargetAndTransition> = {
-  idle: {
-    y: [0, -3, 0],
-    transition: { duration: 2.4, repeat: Infinity, ease: "easeInOut" },
-  },
-  talking: {
-    y: [0, -5, 0],
-    scaleY: [1, 0.94, 1],
-    transition: { duration: 0.6, repeat: Infinity, ease: "easeInOut" },
-  },
-  cheer: {
-    y: [0, -10, 0],
-    rotate: [0, -12, 12, 0],
-    transition: { duration: 0.8, repeat: Infinity, ease: "easeInOut" },
-  },
-  oops: {
-    x: [0, -4, 4, -3, 3, 0],
-    transition: { duration: 0.5, repeat: 2, ease: "easeInOut" },
-  },
-  think: {
-    rotate: [0, -8, 0],
-    transition: { duration: 2.2, repeat: Infinity, ease: "easeInOut" },
-  },
-};
-
 /**
  * Mood reads as a soft glow behind the mascot rather than a bordered tile —
  * colour without adding another hard edge to the bubble.
@@ -98,6 +73,14 @@ const MOOD_BADGE: Record<KodaMood, string | null> = {
   cheer: "🎉",
   oops: "💭",
   think: "💡",
+};
+
+const MOOD_STATE: Record<KodaMood, KodaMascotState> = {
+  idle: "idle",
+  talking: "talking",
+  cheer: "excited",
+  oops: "oops",
+  think: "thinking",
 };
 
 /**
@@ -303,12 +286,13 @@ export const KodaActor: React.FC<KodaActorProps> = ({
             />
           )}
 
-          <motion.span
-            className="relative text-3xl leading-none select-none"
-            animate={loops ? MASCOT_LOOP[activeMood] : undefined}
-          >
-            👾
-          </motion.span>
+          <KodaMascot
+            state={MOOD_STATE[activeMood]}
+            size={48}
+            motionLevel={level}
+            physics={level === "none" ? "none" : "secondary"}
+            className="relative select-none"
+          />
 
           {badge && (
             <motion.span

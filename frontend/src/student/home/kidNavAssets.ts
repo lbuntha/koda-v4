@@ -8,6 +8,9 @@ export const KID_NAV_ASSET_IDS = {
   xp: "koda_kid_stat_xp",
   streak: "koda_kid_stat_streak_star",
   mastery: "koda_kid_stat_mastery",
+  notification: "koda_kid_action_notification",
+  themeDark: "koda_kid_action_theme_dark",
+  themeLight: "koda_kid_action_theme_light",
 } as const;
 
 /** Learner navigation artwork stored in the shared SVG Library by stable id. */
@@ -53,5 +56,23 @@ export const KID_NAV_ASSETS: CustomSvgAsset[] = [
     label: "Learner stat — Mastery",
     scale: 1,
     markup: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none"><defs><linearGradient id="kidMasteryMedal" x1="7" y1="4" x2="25" y2="29" gradientUnits="userSpaceOnUse"><stop stop-color="#C8A9FF"/><stop offset=".46" stop-color="#8A62EC"/><stop offset="1" stop-color="#5335C9"/></linearGradient><linearGradient id="kidMasteryCrown" x1="10" y1="8" x2="23" y2="20" gradientUnits="userSpaceOnUse"><stop stop-color="#FFF47A"/><stop offset="1" stop-color="#FFB52E"/></linearGradient></defs><path d="m10.2 20.6-2.1 8 7.9-3 7.9 3-2.1-8H10.2Z" fill="#5DD1EF"/><circle cx="16" cy="14.2" r="11.2" fill="url(#kidMasteryMedal)"/><circle cx="16" cy="14.2" r="8.65" stroke="white" stroke-opacity=".58" stroke-width="1.3"/><path d="M9.8 11.25 13 13.2l3-5.55 3 5.55 3.2-1.95-.95 7.1h-10.5l-.95-7.1Z" fill="url(#kidMasteryCrown)"/><path d="M11.2 20.25h9.6" stroke="#FFF1A7" stroke-width="1.8" stroke-linecap="round"/><circle cx="16" cy="7.65" r="1.3" fill="#FF8FB9"/><circle cx="9.8" cy="11.2" r="1.1" fill="#6FE1BE"/><circle cx="22.2" cy="11.2" r="1.1" fill="#72D8F6"/></svg>`,
+  },
+  {
+    id: KID_NAV_ASSET_IDS.notification,
+    label: "Learner action — Notifications",
+    scale: 1,
+    markup: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none"><defs><linearGradient id="kidNotificationBell" x1="7" y1="4" x2="25" y2="27" gradientUnits="userSpaceOnUse"><stop stop-color="#B99BFF"/><stop offset=".52" stop-color="#7C5CEA"/><stop offset="1" stop-color="#5140CE"/></linearGradient><linearGradient id="kidNotificationClapper" x1="13" y1="24" x2="19" y2="29" gradientUnits="userSpaceOnUse"><stop stop-color="#FFD966"/><stop offset="1" stop-color="#FF9D3D"/></linearGradient></defs><path d="M7.15 22.5c1.8-2.15 2.45-4.25 2.45-7.65 0-3.85 2.02-6.66 5.15-7.35V6.35a1.25 1.25 0 0 1 2.5 0V7.5c3.13.69 5.15 3.5 5.15 7.35 0 3.4.65 5.5 2.45 7.65.9 1.08.13 2.75-1.28 2.75H8.43c-1.41 0-2.18-1.67-1.28-2.75Z" fill="url(#kidNotificationBell)"/><path d="M11.1 14.65c0-2.96 1.58-5.04 4.05-5.62" stroke="#FFF" stroke-opacity=".58" stroke-width="1.45" stroke-linecap="round"/><path d="M12.65 25.25a3.45 3.45 0 0 0 6.7 0h-6.7Z" fill="url(#kidNotificationClapper)"/><circle cx="24.1" cy="7.4" r="3.35" fill="#FF6F9F"/><circle cx="24.1" cy="7.4" r="1.45" fill="#FFF" fill-opacity=".92"/></svg>`,
+  },
+  {
+    id: KID_NAV_ASSET_IDS.themeDark,
+    label: "Learner action — Dark theme",
+    scale: 1,
+    markup: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none"><defs><linearGradient id="kidThemeMoon" x1="7" y1="5" x2="25" y2="27" gradientUnits="userSpaceOnUse"><stop stop-color="#BFA9FF"/><stop offset=".48" stop-color="#8068ED"/><stop offset="1" stop-color="#4C3AC5"/></linearGradient><linearGradient id="kidThemeStar" x1="21" y1="5" x2="27" y2="12" gradientUnits="userSpaceOnUse"><stop stop-color="#FFF57A"/><stop offset="1" stop-color="#FFB62F"/></linearGradient></defs><path d="M24.88 20.6A11.25 11.25 0 0 1 10.9 6.1a11.25 11.25 0 1 0 13.98 14.5Z" fill="url(#kidThemeMoon)"/><path d="M11.15 9.2a8.9 8.9 0 0 0 10.9 11.3" stroke="#FFF" stroke-opacity=".52" stroke-width="1.35" stroke-linecap="round"/><path d="m23.6 4.2 1.05 2.17 2.38.34-1.72 1.68.4 2.37-2.11-1.12-2.12 1.12.4-2.37-1.72-1.68 2.39-.34L23.6 4.2Z" fill="url(#kidThemeStar)"/><circle cx="26.8" cy="15" r="1.45" fill="#69D9F3"/></svg>`,
+  },
+  {
+    id: KID_NAV_ASSET_IDS.themeLight,
+    label: "Learner action — Light theme",
+    scale: 1,
+    markup: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none"><defs><linearGradient id="kidThemeSun" x1="8" y1="6" x2="24" y2="26" gradientUnits="userSpaceOnUse"><stop stop-color="#FFF27A"/><stop offset=".5" stop-color="#FFC13D"/><stop offset="1" stop-color="#FF7C59"/></linearGradient><radialGradient id="kidThemeSunGlow" cx="0" cy="0" r="1" gradientTransform="translate(16 16) rotate(90) scale(8.2)" gradientUnits="userSpaceOnUse"><stop stop-color="#FFF9C7"/><stop offset="1" stop-color="#FFD34D"/></radialGradient></defs><g stroke="url(#kidThemeSun)" stroke-width="2.4" stroke-linecap="round"><path d="M16 3.5v3.1M16 25.4v3.1M3.5 16h3.1M25.4 16h3.1M7.15 7.15l2.2 2.2M22.65 22.65l2.2 2.2M24.85 7.15l-2.2 2.2M9.35 22.65l-2.2 2.2"/></g><circle cx="16" cy="16" r="7.1" fill="url(#kidThemeSun)"/><circle cx="14.3" cy="14.1" r="3.75" fill="url(#kidThemeSunGlow)" fill-opacity=".76"/><circle cx="22.8" cy="8.1" r="1.4" fill="#A886FF"/></svg>`,
   },
 ];

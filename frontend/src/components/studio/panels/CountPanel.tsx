@@ -12,8 +12,9 @@
 
 import React from "react";
 import { CPASwitcherPill } from "../../../pedagogy";
-import { PanelProps } from "../panelKit";
+import { ActorCastField, PanelProps } from "../panelKit";
 import { stagingFor } from "../../canvases/countStaging";
+import { assetGroupSize } from "../../../assets/assetGroups";
 
 const LABEL = "text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2";
 const FIELD = "w-full text-xs p-2.5 border border-slate-200 rounded-md bg-white font-medium";
@@ -26,6 +27,11 @@ const STAGING_ONE_LINER: Record<string, string> = {
   tap: "Nothing moves. The child touches each object once, which is the harder skill.",
   lineup: "The slot decides the number, so the child has to place them in sequence.",
   container: "Free placement into one vessel — the count is all that matters, not where it lands.",
+  tens: "Ten-frames. The cell is the number, and a full frame is a ten — place value by position.",
+  counton: "Some are already counted. The child counts on from there instead of starting at one.",
+  countback: "Crossing out, from the end. The answer is what is left, not what was touched.",
+  arrangements: "Same objects, a new shape each slide — the lesson is that the number does not change.",
+  skipcount: "Objects come in bundles. One tap counts a whole bundle, so the child says 5, 10, 15.",
 };
 
 export const CountPanel: React.FC<PanelProps> = ({ question, update }) => {
@@ -34,6 +40,8 @@ export const CountPanel: React.FC<PanelProps> = ({ question, update }) => {
   const setConfig = (patch: Record<string, unknown>) =>
     update({ config: { ...config, ...patch } });
 
+  /** Set when the chosen artwork is itself a group — a base-ten rod is ten. */
+  const groupedStep = assetGroupSize(config.assetType);
   const zones = staging.zones(config as Record<string, unknown>);
   const home = zones.find(zone => zone.role === "home");
   const target = zones.find(zone => zone.role === "target");
@@ -57,11 +65,19 @@ export const CountPanel: React.FC<PanelProps> = ({ question, update }) => {
           <option value="tap">Tap — touch each object where it lies</option>
           <option value="lineup">Line up — drop into numbered slots, in order</option>
           <option value="container">Container — drop into one jar, basket or box</option>
+          <option value="tens">Group in tens — fill ten-frames, one ten at a time</option>
+          <option value="counton">Count on — start from a group, add more to it</option>
+          <option value="countback">Count back — cross out from the end, say what is left</option>
+          <option value="arrangements">Arrangements — count the same set in a new shape</option>
+          <option value="skipcount">Skip count — count bundles, by 2s, 5s or 10s</option>
         </select>
         <p className="text-[10px] text-slate-400 mt-1.5 leading-relaxed">
           {STAGING_ONE_LINER[staging.id] ?? ""}
         </p>
       </div>
+
+      {/* Who plays each moment of the question. */}
+      <ActorCastField config={config} updateConfig={setConfig} />
 
       {/*
         Placeholders, not values: showing a name in an empty field claimed a
@@ -94,7 +110,7 @@ export const CountPanel: React.FC<PanelProps> = ({ question, update }) => {
       )}
 
       {/* Only where objects lie loose does an arrangement mean anything. */}
-      {staging.id === "tap" && (
+      {(staging.id === "tap" || staging.id === "arrangements") && (
         <div>
           <label className={LABEL}>Arrangement</label>
           <select
@@ -108,6 +124,9 @@ export const CountPanel: React.FC<PanelProps> = ({ question, update }) => {
             <option value="scatter">Scatter</option>
             <option value="wave">Wave</option>
             <option value="pairs">Pairs</option>
+            <option value="columns">Columns</option>
+            <option value="circle">Curve</option>
+            <option value="dice">Dice</option>
           </select>
         </div>
       )}
@@ -124,6 +143,107 @@ export const CountPanel: React.FC<PanelProps> = ({ question, update }) => {
             <option value="basket">Basket</option>
             <option value="box">Toy Box</option>
           </select>
+        </div>
+      )}
+
+      {/*
+        Two actions whose board is not the slide's target count — Count On adds
+        its two together, Count Back takes its goal off its total. Both are
+        edited here, and the target count field above does nothing for either.
+      */}
+      {staging.id === "skipcount" && (
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className={LABEL}>Objects in all</label>
+            <input
+              type="number"
+              min={2}
+              max={100}
+              value={Number(config.totalCount ?? 20)}
+              onChange={e => setConfig({ totalCount: Math.max(2, Number(e.target.value) || 2) })}
+              className={`${FIELD} outline-none`}
+            />
+          </div>
+          <div>
+            <label className={LABEL}>Count by</label>
+            {/*
+              Artwork that is already a group settles this, and the field has to
+              show that rather than argue with it: a base-ten rod is ten, so a
+              panel still reading "Fives" would describe a board that does not
+              exist. Disabled rather than hidden, so the author can see what the
+              picture decided and why the choice has gone away.
+            */}
+            <select
+              value={String(groupedStep ?? config.skipStep ?? 5)}
+              onChange={e => setConfig({ skipStep: Number(e.target.value) })}
+              disabled={groupedStep !== null}
+              className={`${FIELD} outline-none ${groupedStep !== null ? "opacity-60 cursor-not-allowed" : ""}`}
+            >
+              <option value="2">Twos</option>
+              <option value="5">Fives</option>
+              <option value="10">Tens</option>
+            </select>
+          </div>
+          {groupedStep !== null && (
+            <p className="col-span-2 text-[11px] text-slate-500">
+              This artwork is already a group of {groupedStep}, so the board counts in {groupedStep}s
+              whatever this says. Pick a single object to choose your own bundle.
+            </p>
+          )}
+        </div>
+      )}
+
+      {staging.id === "countback" && (
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className={LABEL}>Start with</label>
+            <input
+              type="number"
+              min={1}
+              max={20}
+              value={Number(config.totalCount ?? 8)}
+              onChange={e => setConfig({ totalCount: Math.max(1, Number(e.target.value) || 1) })}
+              className={`${FIELD} outline-none`}
+            />
+          </div>
+          <div>
+            <label className={LABEL}>Cross out</label>
+            <input
+              type="number"
+              min={1}
+              max={20}
+              value={Number(config.removeCount ?? 3)}
+              onChange={e => setConfig({ removeCount: Math.max(1, Number(e.target.value) || 1) })}
+              className={`${FIELD} outline-none`}
+            />
+          </div>
+        </div>
+      )}
+
+      {staging.id === "counton" && (
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className={LABEL}>Start with</label>
+            <input
+              type="number"
+              min={0}
+              max={20}
+              value={Number(config.baseCount ?? 5)}
+              onChange={e => setConfig({ baseCount: Math.max(0, Number(e.target.value) || 0) })}
+              className={`${FIELD} outline-none`}
+            />
+          </div>
+          <div>
+            <label className={LABEL}>Count on</label>
+            <input
+              type="number"
+              min={1}
+              max={20}
+              value={Number(config.extraCount ?? 3)}
+              onChange={e => setConfig({ extraCount: Math.max(1, Number(e.target.value) || 1) })}
+              className={`${FIELD} outline-none`}
+            />
+          </div>
         </div>
       )}
 

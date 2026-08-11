@@ -1,4 +1,5 @@
 import type { CountingQuestion } from "../types";
+import { boardTotalsForTechnique } from "../components/canvases/countStaging/boardTotals";
 
 const COUNTING = new Set([
   "ONE_TO_ONE", "MOVE_AND_COUNT", "LINE_UP_AND_COUNT", "GROUP_IN_TENS",
@@ -13,14 +14,17 @@ const COUNTING = new Set([
 export const solvedSelection = (question: CountingQuestion): string | null => {
   const config = question.config ?? {};
   if (COUNTING.has(question.technique)) {
-    if (question.targetCount != null) return String(question.targetCount);
-    if (config.baseCount != null && config.extraCount != null) {
-      return String(config.baseCount + config.extraCount);
-    }
-    if (config.totalCount != null && config.removeCount != null) {
-      return String(config.totalCount - config.removeCount);
-    }
-    if (config.totalCount != null) return String(config.totalCount);
+    /*
+      The board's own answer, not the slide's `targetCount`.
+
+      These used to be guessed here from the shape of `config`, with
+      `targetCount` checked first — so a Count Back board whose answer was "eight
+      left of twelve" reported twelve, and the child was right while the record
+      was wrong. `boardTotals` is the same derivation the canvas checks against,
+      so the two cannot disagree.
+    */
+    const { expected } = boardTotalsForTechnique(question.technique, config, question.targetCount);
+    if (Number.isFinite(expected)) return String(expected);
   }
 
   switch (question.technique) {

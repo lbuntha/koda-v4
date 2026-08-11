@@ -241,3 +241,32 @@ export const slotPosition = (
     y: Math.round(zone.top + (zone.height - contentHeight) / 2 + row * gapY)
   };
 };
+
+/**
+ * Where the `index`-th of `total` objects sits in a single centred row.
+ *
+ * The arrangement behind every "line them up" board: one row across, gap
+ * proportional to the object, the whole row centred in its zone. Distinct from
+ * `slotPosition`, which wraps into a grid — a row that wraps stops being a
+ * number line, and the position a child aimed at stops matching the number.
+ *
+ * Shared by Line Up and Count On so the drop test and the drawn slots are
+ * computed from one place. They were the same eleven lines twice, and that is
+ * exactly the pair that drifts.
+ */
+export const rowSlotPosition = (
+  index: number,
+  total: number,
+  zone: Rect,
+  objectSize: number
+): { x: number; y: number } => {
+  const gap = Math.max(
+    objectSize * 0.16,
+    Math.min(objectSize * 0.45, (zone.width - total * objectSize) / Math.max(1, total - 1))
+  );
+  const rowWidth = total * objectSize + gap * Math.max(0, total - 1);
+  return {
+    x: Math.floor(zone.left + (zone.width - rowWidth) / 2 + index * (objectSize + gap)),
+    y: Math.floor(zone.top + (zone.height - objectSize) / 2)
+  };
+};

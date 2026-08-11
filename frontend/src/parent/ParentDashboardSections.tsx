@@ -27,7 +27,7 @@ export const ParentOverview: React.FC<OverviewProps> = ({ childCount, summaries,
       <FamilySummary summaries={summaries} loading={summariesLoading} expectedProfiles={childCount} className="mt-0" />
     )}
 
-    <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+    <div className="grid items-start gap-5">
       {/* Primary learning area */}
       <Card variant="standard" className="min-w-0 p-4 sm:p-5">
         <div className="mb-4 flex items-center justify-between gap-4">
@@ -40,14 +40,16 @@ export const ParentOverview: React.FC<OverviewProps> = ({ childCount, summaries,
         {childrenGrid}
       </Card>
 
-      {/* Activity rail */}
-      <aside className="min-w-0 space-y-5 xl:sticky xl:top-0">
-        {showSummary && (
-          <RecentActivity profiles={profiles} summaries={summariesByChild} loading={summariesLoading} onOpenProgress={onOpenProgress} compact />
-        )}
-        {familyCode && <FamilyCodeCard code={familyCode} compact />}
-      </aside>
     </div>
+
+    {(showSummary || familyCode) && (
+      <div className="grid items-start gap-5">
+        {showSummary && (
+          <RecentActivity profiles={profiles} summaries={summariesByChild} loading={summariesLoading} onOpenProgress={onOpenProgress} />
+        )}
+        {familyCode && <FamilyCodeCard code={familyCode} />}
+      </div>
+    )}
   </div>
 );
 

@@ -14,6 +14,8 @@ import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 
 import { COUNT_CURRICULUM_LEVELS, TIER_ORDER, levelsForTier, type CountLevel } from "./countLevels";
+import { STAGINGS } from "./countStaging";
+import { boardTotals } from "./countStaging/boardTotals";
 import { SCHEMA_REGISTRY } from "../studio/ai-generator/schemas";
 import { solvedSelection } from "../../student/answerSelection";
 import type { CountingQuestion } from "../../types";
@@ -23,13 +25,23 @@ const asQuestion = (level: CountLevel): CountingQuestion => ({
   technique: level.technique,
   title: level.label,
   instruction: "Count them all.",
-  objectId: "apple",
+  objectId: level.objectId ?? "apple",
   targetCount: level.targetCount,
   config: { ...level.config },
 } as CountingQuestion);
 
 const schemaFor = (technique: string) =>
   SCHEMA_REGISTRY.find(schema => schema.technique === technique);
+
+/**
+ * What actually distinguishes one level from the next.
+ *
+ * It used to be `technique`, back when each way of counting was its own canvas.
+ * Those ids are absorbed now and every counting level is `MOVE_AND_COUNT`, so a
+ * check written against technique compares nine levels to themselves and passes
+ * while proving nothing.
+ */
+const stagingOf = (level: CountLevel) => String(level.config.staging ?? "move");
 
 describe("the counting ladder", () => {
   test("every level asks a count its canvas actually accepts", () => {
@@ -40,6 +52,26 @@ describe("the counting ladder", () => {
       assert.ok(
         level.targetCount >= min && level.targetCount <= max,
         `${level.id}: count ${level.targetCount} outside ${level.technique} range ${min}-${max}`,
+      );
+    }
+  });
+
+  test("every staging the engine offers is somewhere on the ladder", () => {
+    // A staging with no level is one no learner ever reaches, however well it works.
+    const used = new Set(COUNT_CURRICULUM_LEVELS.map(stagingOf));
+    for (const id of Object.keys(STAGINGS)) {
+      assert.ok(used.has(id), `no level uses the "${id}" staging`);
+    }
+  });
+
+  test("every level's targetCount is the answer its own board produces", () => {
+    // `targetCount` is what a solved slide reports; the board decides what that
+    // is. Count Back claimed twelve on a board whose answer was eight.
+    for (const level of COUNT_CURRICULUM_LEVELS) {
+      const { expected } = boardTotals(level.config, level.targetCount);
+      assert.equal(
+        level.targetCount, expected,
+        `${level.id}: claims ${level.targetCount}, board produces ${expected}`,
       );
     }
   });
@@ -67,10 +99,10 @@ describe("the counting ladder", () => {
     }
   });
 
-  test("counts climb within a technique, and tiers never go backwards", () => {
+  test("counts climb within a staging, and tiers never go backwards", () => {
     for (const tier of TIER_ORDER) {
-      for (const technique of new Set(COUNT_CURRICULUM_LEVELS.map(l => l.technique))) {
-        const run = COUNT_CURRICULUM_LEVELS.filter(l => l.tier === tier && l.technique === technique);
+      for (const staging of new Set(COUNT_CURRICULUM_LEVELS.map(stagingOf))) {
+        const run = COUNT_CURRICULUM_LEVELS.filter(l => l.tier === tier && stagingOf(l) === staging);
         for (let i = 1; i < run.length; i++) {
           assert.ok(
             run[i].targetCount >= run[i - 1].targetCount,
@@ -96,12 +128,12 @@ describe("the counting ladder", () => {
     }
   });
 
-  test("the ladder hands off between canvases as the count grows", () => {
-    // The property that makes this ladder different from Liquid Sort's: no counting canvas
-    // spans the whole range, so past twelve the strategy — not just the number — has to change.
+  test("the ladder changes strategy as the count grows, not just the number", () => {
+    // The property that makes this ladder different from Liquid Sort's: no single way of
+    // counting spans the whole range, so past twelve the *act* has to change too.
     const smallest = COUNT_CURRICULUM_LEVELS[0];
     const largest = COUNT_CURRICULUM_LEVELS[COUNT_CURRICULUM_LEVELS.length - 1];
-    assert.notEqual(smallest.technique, largest.technique);
+    assert.notEqual(stagingOf(smallest), stagingOf(largest));
     assert.ok(largest.targetCount > 12, "the ladder should climb past one-to-one's ceiling");
   });
 });

@@ -2,6 +2,7 @@ import React from "react";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "../components/ui";
 import { cn } from "../lib/utils";
+import { SvgLibraryAsset } from "../assets/SvgLibraryAsset";
 import type { ThemeMode } from "./appTheme";
 
 interface Props {
@@ -13,10 +14,12 @@ interface Props {
    */
   variant?: "default" | "kid" | "round";
   className?: string;
+  /** Optional shared-library artwork; the Lucide icon remains the safe fallback. */
+  iconAssetId?: string;
 }
 
 /** Light/dark switch for learner and parent pages. Icon shows the mode you get by pressing it. */
-export const ThemeToggle: React.FC<Props> = ({ theme, onToggle, variant = "default", className }) => {
+export const ThemeToggle: React.FC<Props> = ({ theme, onToggle, variant = "default", className, iconAssetId }) => {
   const goingDark = theme === "light";
   return (
     <Button
@@ -40,7 +43,15 @@ export const ThemeToggle: React.FC<Props> = ({ theme, onToggle, variant = "defau
       )}
     >
       <span key={theme} className="flex items-center justify-center">
-        {goingDark
+        {iconAssetId ? (
+          <SvgLibraryAsset
+            assetId={iconAssetId}
+            size={22}
+            fallback={goingDark
+              ? <Moon size={18} strokeWidth={2} />
+              : <Sun size={18} strokeWidth={2} className="text-amber-500 dark:text-amber-300" />}
+          />
+        ) : goingDark
           ? <Moon size={18} strokeWidth={2} />
           : <Sun size={18} strokeWidth={2} className="text-amber-500 dark:text-amber-300" />}
       </span>

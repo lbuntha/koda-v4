@@ -102,24 +102,47 @@ export const accentTextClass = (accent: CanvasAccent | string = "indigo", isDark
 /**
  * Container surfaces.
  *
- * Zones (trays, stages, plates) are separated by ELEVATION, never by coloured
- * borders: one neutral translucent fill that reads identically in both themes.
- * Colour is reserved for state — active drop target, filled slot, solved — so
- * that when something does light up, it means something.
+ * A zone (tray, stage, plate) is a **near-white panel with a hairline edge**,
+ * not a grey wash. A 4.5% black fill is the same thing as painting the page
+ * grey: it reads as a hole rather than as a surface, and it drags every object
+ * sitting on it down with it. Holding the fill at the page's own brightness and
+ * letting a single-pixel edge do the separating is what makes a board look
+ * light — the edge costs nothing and carries no colour.
  *
- * The dark values run higher than the light ones on purpose: these sit on a
- * near-black stage, where a few percent of white is invisible, while the same
- * few percent of black reads clearly on a white page. Each level roughly
- * doubles the one below so a raised item never dissolves into its tray.
+ * Colour is still reserved for state — active drop target, filled slot, solved —
+ * so that when something does light up, it means something. A hairline is not
+ * colour; it is a boundary.
+ *
+ * `raised` stays a fill, because something sitting *on* a panel is separated by
+ * elevation rather than by another edge. It runs dark enough to read against the
+ * near-white panel and light enough not to compete with the objects on it.
+ *
+ * The dark values sit above their background rather than below it: on a
+ * near-black stage a few percent of white is what "raised" looks like, where the
+ * same few percent of black is invisible.
  */
-export const surfaceClass = (isDark: boolean, level: "flat" | "raised" = "flat") =>
-  isDark
-    ? level === "raised"
-      ? "bg-white/[0.16]"
-      : "bg-white/[0.08]"
-    : level === "raised"
-      ? "bg-slate-900/[0.09]"
-      : "bg-slate-900/[0.045]";
+export const surfaceClass = (
+  isDark: boolean,
+  level: "flat" | "raised" | "panel" = "flat"
+) => {
+  if (level === "panel") {
+    /*
+      A `panel` is a region a child looks *into* — a bin, a stage, a plate. It is
+      the only level that draws an edge, and the only one big enough to need one:
+      at this size a fill pale enough to keep the board light is also too pale to
+      find, so the hairline does the separating instead.
+
+      Not applied to every surface: a 6px progress track and a dashed empty slot
+      already own their border, and giving them a second one is how a dashed 2px
+      outline quietly becomes a solid 1px one.
+    */
+    return isDark
+      ? "bg-white/[0.045] border border-white/[0.07]"
+      : "bg-[#FAFAFC] border border-[#ECECF3]";
+  }
+  if (level === "raised") return isDark ? "bg-white/[0.14]" : "bg-slate-900/[0.07]";
+  return isDark ? "bg-white/[0.06]" : "bg-slate-900/[0.035]";
+};
 
 /**
  * Empty drop-target outline (numbered slots, ten-frame cells, array cells).
@@ -155,6 +178,20 @@ export interface CanvasChipProps {
  * The one chip used across canvases: objectives ("Cross out 3"), counters
  * ("3 of 8 counted"), and mode labels. Same height, radius and type ramp
  * everywhere so headers line up between activities.
+ *
+ * ## Lighter than a button, on purpose
+ *
+ * It used to take `Badge` as it comes — `h-9`, `border-2`, `rounded-full` —
+ * which is, to the pixel, the read-aloud button standing next to it in the
+ * question header. Two identical pills, one you press and one you read, and
+ * nothing in the shape saying which is which: the row read as two buttons and
+ * sat heavy under the heading it belongs to.
+ *
+ * So a chip is now visibly not a button. Shorter, no ring, a softer fill and a
+ * step down the type ramp — it still carries the accent, and it still lines up
+ * with its siblings, but the only bordered pill in the header is the one a
+ * child can press. `tracking-wider` rather than `widest` for the same reason:
+ * a counter is read at a glance, not scanned like a label.
  */
 export const CanvasChip: React.FC<CanvasChipProps> = ({
   accent = "indigo",
@@ -168,7 +205,9 @@ export const CanvasChip: React.FC<CanvasChipProps> = ({
   <Badge
     variant={accent as any}
     icon={icon}
-    className={`${mono ? "font-mono tracking-widest" : "font-extrabold"} ${className}`}
+    className={`h-7 border-0 px-2.5 text-[11px] ${
+      mono ? "font-mono tracking-wider" : "font-extrabold"
+    } ${className}`}
     {...rest}
   >
     {children}

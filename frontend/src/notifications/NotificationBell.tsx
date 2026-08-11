@@ -15,8 +15,15 @@ import {
   NotificationSkeletonList,
 } from "../components/ui";
 import { useNotifications } from "./useNotifications";
+import { SvgLibraryAsset } from "../assets/SvgLibraryAsset";
 
-export const NotificationBell: React.FC<{ recipientType: "user" | "student" }> = ({ recipientType }) => {
+interface NotificationBellProps {
+  recipientType: "user" | "student";
+  /** Optional shared-library artwork; the Lucide bell remains the safe fallback. */
+  iconAssetId?: string;
+}
+
+export const NotificationBell: React.FC<NotificationBellProps> = ({ recipientType, iconAssetId }) => {
   const { inbox, loading, markRead, markAllRead } = useNotifications(recipientType);
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<"all" | "unread">("all");
@@ -31,7 +38,9 @@ export const NotificationBell: React.FC<{ recipientType: "user" | "student" }> =
         aria-label={inbox.unread_count > 0 ? `Notifications, ${inbox.unread_count} unread` : "Notifications"}
         className="relative flex h-10 w-10 touch-manipulation cursor-pointer items-center justify-center rounded-2xl text-slate-600 transition-all hover:bg-slate-100 active:scale-90 dark:text-slate-300 dark:hover:bg-white/10"
       >
-        <Bell size={20} className="transition-transform group-hover:rotate-12" />
+        {iconAssetId
+          ? <SvgLibraryAsset assetId={iconAssetId} size={25} fallback={<Bell size={20} />} />
+          : <Bell size={20} className="transition-transform group-hover:rotate-12" />}
         {inbox.unread_count > 0 && (
           <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9.5px] font-black text-white shadow-md ring-2 ring-white dark:ring-[#111329]">
             <span className="absolute inset-0 animate-ping rounded-full bg-rose-400 opacity-75" />
@@ -45,8 +54,13 @@ export const NotificationBell: React.FC<{ recipientType: "user" | "student" }> =
         onClose={() => setOpen(false)}
         title={
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#534AB7] text-white shadow-sm shadow-[#534AB7]/30">
-              <Bell size={16} />
+            <div className={iconAssetId
+              ? "flex h-8 w-8 items-center justify-center rounded-xl bg-violet-50 shadow-sm ring-1 ring-violet-100 dark:bg-white/10 dark:ring-white/10"
+              : "flex h-8 w-8 items-center justify-center rounded-xl bg-[#534AB7] text-white shadow-sm shadow-[#534AB7]/30"
+            }>
+              {iconAssetId
+                ? <SvgLibraryAsset assetId={iconAssetId} size={21} fallback={<Bell size={16} />} />
+                : <Bell size={16} />}
             </div>
             <span className="text-base font-black text-slate-900 dark:text-white">Notifications</span>
             {inbox.unread_count > 0 && (

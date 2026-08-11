@@ -13,10 +13,6 @@
 import { TechniqueManifest, assertComplete, DEFAULT_THUMBNAILS } from "./manifest";
 import { CountingTechnique } from "../types";
 import { count } from "./count";
-import { groupTens } from "./groupTens";
-import { countOn } from "./countOn";
-import { countBack } from "./countBack";
-import { arrangements } from "./arrangements";
 import { subitize } from "./subitize";
 import { addition } from "./addition";
 import { subtraction } from "./subtraction";
@@ -43,10 +39,6 @@ import { xtraMath } from "./xtraMath";
 /** Ordered exactly as the Studio picker lists them. */
 export const ALL_TECHNIQUES: TechniqueManifest[] = [
   count,
-  groupTens,
-  countOn,
-  countBack,
-  arrangements,
   subitize,
   addition,
   subtraction,

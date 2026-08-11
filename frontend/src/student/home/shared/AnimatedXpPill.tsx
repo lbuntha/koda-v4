@@ -26,11 +26,11 @@ export const AnimatedXpPill: React.FC<Props> = ({ value }) => {
   return (
     <span
       key={exactValue}
-      className="inline-flex h-8 items-center gap-1.5 rounded-full border-2 border-[#FFE1BD] bg-[#FFF9EE] px-2.5 text-[10px] font-black tabular-nums text-[#C75A25] shadow-[0_3px_0_#FFE1BD] sm:px-3 sm:text-xs dark:border-orange-300/15 dark:bg-orange-400/10 dark:text-orange-300 dark:shadow-[0_3px_0_#3A2929]"
+      className="inline-flex h-8 items-center gap-1.5 rounded-full border-2 border-[#FFE8A3] bg-[#FFF9DE] px-2.5 text-[10px] font-black tabular-nums text-[#7B650E] shadow-[0_3px_0_#FFE8A3] sm:px-3 sm:text-xs dark:border-amber-300/15 dark:bg-amber-400/10 dark:text-amber-300 dark:shadow-[0_3px_0_#3A2B15]"
       aria-label={`${exactValue} experience points`}
       title={`${exactValue.toLocaleString()} XP earned`}
     >
-      <SvgLibraryAsset assetId={KID_NAV_ASSET_IDS.xp} size={20} fallback={<Zap size={14} className="fill-current" />} />
+      <SvgLibraryAsset assetId={KID_NAV_ASSET_IDS.xp} size={20} fallback={<Zap size={14} className="fill-current text-[#F2B829]" />} />
       {formatCompactXp(exactValue)}
     </span>
   );

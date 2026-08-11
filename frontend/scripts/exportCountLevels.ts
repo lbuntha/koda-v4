@@ -28,6 +28,7 @@ import { dirname, resolve } from "node:path";
 import { COUNT_CURRICULUM_LEVELS, TIER_ORDER, type CountLevel } from "../src/components/canvases/countLevels";
 import { SCHEMA_REGISTRY } from "../src/components/studio/ai-generator/schemas";
 import { solvedSelection } from "../src/student/answerSelection";
+import { STAGINGS } from "../src/components/canvases/countStaging";
 import type { CountingQuestion } from "../src/types";
 
 const OUTPUT = resolve(import.meta.dirname, "../../backend/scripts/data/count_levels.json");
@@ -39,7 +40,7 @@ function toQuestion(level: CountLevel): CountingQuestion {
     technique: level.technique,
     title: level.label,
     instruction: "Count them all, then tell me how many.",
-    objectId: "apple",
+    objectId: level.objectId ?? "apple",
     targetCount: level.targetCount,
     config: { ...level.config },
   } as CountingQuestion;
@@ -47,6 +48,16 @@ function toQuestion(level: CountLevel): CountingQuestion {
 
 const schemaFor = (technique: string) =>
   SCHEMA_REGISTRY.find(schema => schema.technique === technique);
+
+/**
+ * What actually distinguishes one level from the next.
+ *
+ * It was `technique`, back when each way of counting was its own canvas. Those
+ * ids are absorbed into Count now and every counting level is `MOVE_AND_COUNT`,
+ * so grouping by technique compares a run of levels to itself and proves
+ * nothing. Mirrors `countLevels.test.ts`, which must agree with this file.
+ */
+const stagingOf = (level: CountLevel) => String(level.config.staging ?? "move");
 
 function problemsWith(level: CountLevel): string[] {
   const problems: string[] = [];
@@ -82,6 +93,7 @@ const levels = COUNT_CURRICULUM_LEVELS.map(level => ({
   tier: level.tier,
   technique: level.technique,
   targetCount: level.targetCount,
+  objectId: level.objectId ?? "apple",
   config: level.config,
   problems: problemsWith(level),
 }));
@@ -96,21 +108,30 @@ for (const level of levels) {
   else seen.set(fingerprint, level.id);
 }
 
-// Counts must climb within one technique, not across the whole tier. Counting *back* from
+// Counts must climb within one staging, not across the whole tier. Counting *back* from
 // twelve is harder than counting *on* to fourteen, so comparing their raw counts across a
 // change of strategy flags a ladder that is actually ordered correctly. Within a single
-// technique the count is the difficulty, and there the rule holds.
+// staging the count is the difficulty, and there the rule holds.
 for (const tier of TIER_ORDER) {
-  for (const technique of new Set(levels.map(level => level.technique))) {
-    const run = levels.filter(level => level.tier === tier && level.technique === technique);
+  for (const staging of new Set(COUNT_CURRICULUM_LEVELS.map(stagingOf))) {
+    const run = COUNT_CURRICULUM_LEVELS
+      .map((level, index) => ({ level, index }))
+      .filter(({ level }) => level.tier === tier && stagingOf(level) === staging);
     for (let i = 1; i < run.length; i++) {
-      if (run[i].targetCount < run[i - 1].targetCount) {
-        run[i].problems.push(
-          `ladder goes backwards within ${technique}: ${run[i].targetCount} follows ${run[i - 1].targetCount}`,
+      if (run[i].level.targetCount < run[i - 1].level.targetCount) {
+        levels[run[i].index].problems.push(
+          `ladder goes backwards within ${staging}: ` +
+          `${run[i].level.targetCount} follows ${run[i - 1].level.targetCount}`,
         );
       }
     }
   }
+}
+
+// A staging with no level is one no learner ever reaches, however well it works.
+const staged = new Set(COUNT_CURRICULUM_LEVELS.map(stagingOf));
+for (const id of Object.keys(STAGINGS)) {
+  if (!staged.has(id)) console.warn(`  NOTE     no level uses the "${id}" staging`);
 }
 
 const tierRank = (tier: string) => TIER_ORDER.indexOf(tier as any);

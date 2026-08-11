@@ -14,6 +14,16 @@ export interface SpeechReadAloudButtonProps {
   className?: string;
   label?: string;
   size?: "sm" | "md";
+  /**
+   * Called as speech starts and stops, so the surrounding page can react.
+   *
+   * The voice belongs to a character, and a character that stays perfectly
+   * still while a voice comes out of them is unsettling — so whoever draws Koda
+   * needs to know when Koda is talking. Reported rather than exposed as shared
+   * state because `useSpeechVoiceover` is per-instance: a second call here would
+   * be a second, disagreeing copy of "is speech running".
+   */
+  onSpeakingChange?: (speaking: boolean) => void;
 }
 
 export const SpeechReadAloudButton: React.FC<SpeechReadAloudButtonProps> = ({
@@ -21,9 +31,21 @@ export const SpeechReadAloudButton: React.FC<SpeechReadAloudButtonProps> = ({
   isDark = false,
   className = "",
   label = "Listen",
-  size = "md"
+  size = "md",
+  onSpeakingChange
 }) => {
   const { isSpeaking, isSupported, toggle } = useSpeechVoiceover(text);
+
+  const report = React.useRef(onSpeakingChange);
+  React.useEffect(() => {
+    report.current = onSpeakingChange;
+  });
+  React.useEffect(() => {
+    report.current?.(isSpeaking);
+    // Unmounting mid-sentence stops the voice, so it must also clear the flag —
+    // otherwise a canvas swap leaves Koda talking to nobody.
+    return () => report.current?.(false);
+  }, [isSpeaking]);
 
   if (!isSupported) return null;
 
@@ -39,7 +61,15 @@ export const SpeechReadAloudButton: React.FC<SpeechReadAloudButtonProps> = ({
         toggle(text);
       }}
       title={isSpeaking ? "Stop listening" : "Listen to question instructions"}
-      className={`h-9 rounded-full border-2 font-extrabold tracking-wide transition-all cursor-pointer ${
+      /*
+        `h-8`, not `h-9`. A 36px pill with a 2px ring is a lot of furniture to
+        hang under a question — and it was setting the height of the whole row,
+        so the sentence a child has to read arrived with a bar of chrome beneath
+        it. 32px still clears the 24px touch-target floor by a wide margin, and
+        the ring stays: this is the one thing in the header that is pressed, and
+        it should look it.
+      */
+      className={`h-8 rounded-full border-2 font-extrabold tracking-wide transition-all cursor-pointer ${
         isSpeaking
           ? "bg-violet-600 border-violet-500 text-white shadow-md animate-pulse"
           : isDark
