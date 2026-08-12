@@ -8,6 +8,7 @@ import { CanvasProps } from "./types";
 import { sounds } from "../../sound";
 import { Sparkles, HelpCircle, Package } from "lucide-react";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
+import { guidePropsFor } from "../../features/koda-mascot";
 import { GhostGuideOverlay, useGhostGuide } from "../../pedagogy";
 import { CanvasChip } from "./canvasTheme";
 
@@ -99,8 +100,15 @@ export const KodaPatternCanvas: React.FC<CanvasProps> = ({
       playHint={question.instruction}
       isDark={isDark}
       accent="purple"
-      headerIcon={<Sparkles size={16} />}
-      headerTitle="Pattern Completion Detective"
+      /*
+        The question leads — see `CountCanvas` for the standard. The activity's
+        own name and its meta line move out of the prominent slot; what a child
+        has to do takes it, and does not change while they work.
+      */
+      questionText={question.instruction?.trim() || "Complete the pattern."}
+      /* The four moments, cast from Mascot Studio — see `casting.ts`. */
+      guideRole={isSolved ? "celebrating" : "waiting"}
+      {...guidePropsFor(question)}
       readAloudText={question.instruction || "Examine the pattern sequence and complete the empty box."}
       headerActions={
         <CanvasChip accent={isSolved ? "emerald" : "purple"} isDark={isDark}>

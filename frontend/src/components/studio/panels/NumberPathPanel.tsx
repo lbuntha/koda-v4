@@ -1,5 +1,5 @@
 import React from "react";
-import { PanelProps, PanelSection, SelectField, SliderField } from "../panelKit";
+import { ActorCastField, PanelProps, PanelSection, SelectField, SliderField } from "../panelKit";
 import {
   normalizeNumberPathConfig,
   numberPathInstruction,
@@ -8,7 +8,7 @@ import {
   NumberChartView,
 } from "../../canvases/numberPathModel";
 
-export const NumberPathPanel: React.FC<PanelProps> = ({ question, update }) => {
+export const NumberPathPanel: React.FC<PanelProps> = ({ question, update, updateConfig }) => {
   const current = normalizeNumberPathConfig({
     view: question.config.numberChartView,
     task: question.config.numberChartTask,
@@ -90,6 +90,9 @@ export const NumberPathPanel: React.FC<PanelProps> = ({ question, update }) => {
           onChange={target => apply({ target })}
         />
       )}
+
+      {/* Who plays each moment of the question. */}
+      <ActorCastField config={question.config} updateConfig={updateConfig} />
     </PanelSection>
   );
 };

@@ -8,6 +8,7 @@ import { sounds } from "../../sound";
 import { RotateCcw, PlusCircle, Check, PartyPopper } from "lucide-react";
 import { GhostGuideOverlay, useGhostGuide, useCPASwitcher, FactFamilyCelebrationCard } from "../../pedagogy";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
+import { guidePropsFor } from "../../features/koda-mascot";
 import { CanvasChip, CanvasAccent, accentChipClass, emptySlotClass } from "./canvasTheme";
 import { CanvasBin } from "./CanvasBin";
 import { useCanvasAudience } from "./presentation";
@@ -517,19 +518,31 @@ export const AdditionCanvas: React.FC<CanvasProps> = ({
       gridSize={GRID_STEP}
       showRulers={question.config.showLayoutRulers ?? true}
       accent={accent}
-      headerIcon={<PlusCircle size={16} />}
       headerTitle="Koda Addition"
-      headerSubtitle={
-        isAdditionComplete && requireAnswerInput
-          ? "All objects added! Enter the sum answer below."
-          : `${a1} + ${a2} = ${basketCount}`
-      }
+      /*
+        The Count header, and for the same reasons — see `CountCanvas`.
+
+        The question is the heading and does not change while the board runs;
+        the running equation is the chip beside it; Koda plays each moment of it
+        and is cast from the Studio. This canvas used to lead with "Koda
+        Addition" and give the prominent line to `a1 + a2 = basketCount`, so a
+        child arrived at an equation with a blank in it and had to work out from
+        that what they were being asked to do.
+      */
+      questionText={question.instruction?.trim() || `Drag the objects into the basket to make ${targetSum}.`}
       readAloudText={`Addition. ${a1} plus ${a2} equals ${targetSum}. Drag the objects into the basket!`}
+      /*
+        The four moments, as Count maps them. `answer.status` is the panel's own
+        record of the last check, so the character and the panel border can never
+        disagree about whether that answer was wrong.
+      */
+      guideRole={answer.status === "error" ? "oops" : isSolved ? "celebrating" : "waiting"}
+      {...guidePropsFor(question)}
       designerHint="Drag objects freely. Grid snapping is applied when you release."
       headerActions={
         isPlayMode ? (
           <CanvasChip accent={isSolved ? "emerald" : accent} isDark={isDark} aria-label={`Target sum: ${targetSum}`}>
-            {isSolved ? `∑ ${targetSum}` : `${remaining} to add`}
+            {isSolved ? `∑ ${targetSum}` : `${a1} + ${a2} · ${remaining} to add`}
           </CanvasChip>
         ) : (
           <Button type="button" variant="outline" size="xs" onClick={reset} title="Reset object positions">
@@ -572,6 +585,7 @@ export const AdditionCanvas: React.FC<CanvasProps> = ({
         {/* The two addends, with the `+` between them */}
         <div className="flex items-stretch" style={{ height: `${geometry.groupHeight}px`, gap: `${geometry.gap}px` }}>
           <CanvasBin
+            surface={false}
             label={question.config.sourceBinLabel || (learnerMode ? "First group" : "Group 1")}
             tally={isPlayMode ? leftHome : a1}
             accent={GROUP_TONE[1]}
@@ -600,6 +614,7 @@ export const AdditionCanvas: React.FC<CanvasProps> = ({
           </div>
 
           <CanvasBin
+            surface={false}
             label={question.config.destinationBinLabel || (learnerMode ? "Second group" : "Group 2")}
             tally={isPlayMode ? rightHome : a2}
             accent={GROUP_TONE[2]}
@@ -623,6 +638,7 @@ export const AdditionCanvas: React.FC<CanvasProps> = ({
 
         {/* The basket — where the sum is made */}
         <CanvasBin
+            surface={false}
           label={question.config.jarLabel || (learnerMode ? "Put them together here" : "Basket")}
           tally={isPlayMode ? `${basketCount} / ${targetSum}` : undefined}
           accent={accent}

@@ -2,10 +2,11 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import { COUNT_OBJECTS } from "../../types";
 import { CountingAsset } from "../Assets";
 import { sounds } from "../../sound";
-import { Play, HelpCircle, Check, RotateCcw, Eye } from "lucide-react";
+import { Play, HelpCircle, Check, RotateCcw } from "lucide-react";
 import { CanvasProps } from "./types";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import { GhostGuideOverlay, useGhostGuide } from "../../pedagogy";
+import { guidePropsFor } from "../../features/koda-mascot";
 import { CanvasChip, CanvasAccent, surfaceClass, captionClass, accentTextClass } from "./canvasTheme";
 import { Button } from "../ui";
 import { objectStyle } from "./objectMotion";
@@ -158,22 +159,49 @@ export const SubitizeCanvas: React.FC<CanvasProps> = ({ question, isPlayMode, is
       playHint={question.instruction}
       isDark={isDark}
       accent={accent}
-      headerIcon={<Eye size={16} />}
+      /*
+        No `headerIcon`. It only renders on the header this canvas no longer
+        takes — `questionText` below always resolves to a sentence, so the
+        icon-and-title row is unreachable here and leaving it set would suggest
+        otherwise. `headerTitle` stays: on the question header it becomes the
+        eyebrow, and only for an author.
+      */
       headerTitle="Subitize"
-      headerSubtitle={
-        stage === "showing"
-          ? "Look carefully…"
-          : stage === "hidden"
-            ? "How many did you see?"
-            : isSolved
-              ? `Yes — ${count}!`
-              : "Flash, then count"
-      }
+      /*
+        The question is the heading, and the stage is a chip beside it — the
+        same shape Count uses.
+
+        This canvas used to lead with "Subitize" and give the prominent line to
+        whatever it was doing that second ("Look carefully…", "Yes — 5!"), so a
+        child arrived at a status and had to work out the task from it. The task
+        is one sentence and it does not change while the flash runs, which is
+        exactly what a heading is for; what *does* change every second is the
+        stage, and that is what a chip is for.
+
+        Stable across stages on purpose. A heading that rewrites itself mid-
+        exercise is a second thing to track at the moment a child is trying to
+        hold a quantity in their head.
+      */
+      questionText={question.instruction?.trim() || "How many did you see?"}
       readAloudText={question.instruction || `Watch carefully. The objects will flash for ${duration / 1000} seconds. How many did you see?`}
+      /*
+        Which of Koda's four the board is asking for. `showing` deliberately
+        reads as waiting rather than talking: the whole point of the flash is
+        that a child looks at the objects, and a character moving beside them is
+        the one thing on screen that must not pull the eye during it.
+      */
+      guideRole={stage === "incorrect" ? "oops" : isSolved ? "celebrating" : "waiting"}
+      {...guidePropsFor(question)}
       headerActions={
         isPlayMode ? (
           <CanvasChip accent={isSolved ? "emerald" : accent} isDark={isDark}>
-            {stage === "showing" ? `${duration / 1000}s flash` : pattern.toUpperCase()}
+            {stage === "showing"
+              ? `Look carefully · ${duration / 1000}s`
+              : stage === "hidden"
+                ? "How many?"
+                : isSolved
+                  ? `Yes — ${count}`
+                  : `${pattern.toUpperCase()} · flash then count`}
           </CanvasChip>
         ) : (
           <Button type="button" variant="outline" size="xs" onClick={reset} title="Reset">

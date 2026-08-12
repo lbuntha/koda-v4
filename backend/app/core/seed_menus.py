@@ -14,8 +14,9 @@ DEFAULT_MENUS = [
     {"key": "menus", "section": "system", "section_label": "System", "label": "Menu Designer", "icon": "ListTree", "order": 5},
     {"key": "studio", "section": "studio", "section_label": "Studio", "label": "Interactive Studio", "icon": "Palette", "order": 6},
     {"key": "assets", "section": "studio", "section_label": "Studio", "label": "SVG Assets", "icon": "PenTool", "order": 7},
-    {"key": "curriculum", "section": "studio", "section_label": "Studio", "label": "Curriculum", "icon": "BookOpen", "order": 8},
-    {"key": "assignments", "section": "studio", "section_label": "Studio", "label": "Assignments", "icon": "ClipboardList", "order": 9},
+    {"key": "mascots", "section": "studio", "section_label": "Studio", "label": "Mascot Studio", "icon": "Sparkles", "order": 8},
+    {"key": "curriculum", "section": "studio", "section_label": "Studio", "label": "Curriculum", "icon": "BookOpen", "order": 9},
+    {"key": "assignments", "section": "studio", "section_label": "Studio", "label": "Assignments", "icon": "ClipboardList", "order": 10},
     {"key": "analytics", "section": "people", "section_label": "People", "label": "Learning progress", "icon": "BarChart3", "order": 9},
     {"key": "notifications", "section": "people", "section_label": "People", "label": "Notifications", "icon": "Bell", "order": 11},
     {"key": "settings", "section": "system", "section_label": "System", "label": "System Settings", "icon": "Settings", "order": 10},
@@ -24,7 +25,7 @@ DEFAULT_MENUS = [
 # Roles and the menu keys each may access. ["*"] = all (admin default).
 DEFAULT_ROLES = [
     {"key": "admin", "label": "Admin", "menu_keys": ["*"]},
-    {"key": "teacher", "label": "Teacher", "menu_keys": ["analytics", "studio", "assets", "curriculum", "assignments"]},
+    {"key": "teacher", "label": "Teacher", "menu_keys": ["analytics", "studio", "assets", "mascots", "curriculum", "assignments"]},
     {"key": "parent", "label": "Parent", "menu_keys": ["dashboard", "children", "parent_settings"]},
     {"key": "student", "label": "Student", "menu_keys": []},
 ]
@@ -38,6 +39,13 @@ async def ensure_seed() -> None:
         existing = await RoleDef.find_one(RoleDef.key == r["key"])
         if not existing:
             await RoleDef(**r).insert()
+        elif r["key"] == "admin":
+            # Older installations may have an explicit admin menu list instead of
+            # the current "*" wildcard. Preserve that customized list, but make
+            # newly seeded management screens reachable by existing admins.
+            if "*" not in existing.menu_keys and "mascots" not in existing.menu_keys:
+                existing.menu_keys.append("mascots")
+                await existing.save()
         elif r["key"] == "parent":
             if "parent_settings" not in existing.menu_keys:
                 existing.menu_keys.append("parent_settings")

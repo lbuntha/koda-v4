@@ -3,6 +3,7 @@ import { CanvasProps } from "./types";
 import { sounds } from "../../sound";
 import { Sparkles, Trash2, Edit, Hash, Smile } from "lucide-react";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
+import { guidePropsFor } from "../../features/koda-mascot";
 import { CanvasChip, surfaceClass, captionClass, accentChipClass, emptySlotClass } from "./canvasTheme";
 import { GhostGuideOverlay, useGhostGuide } from "../../pedagogy";
 
@@ -416,9 +417,15 @@ export const KodaSudokuCanvas: React.FC<CanvasProps> = ({
       playHint={question.instruction}
       isDark={isDark}
       accent="indigo"
-      headerIcon={<Sparkles size={16} />}
-      headerTitle="Visual Mini Sudoku"
-      headerSubtitle="4×4 Logic Grid"
+      /*
+        The question leads — see `CountCanvas` for the standard. The activity's
+        own name and its meta line move out of the prominent slot; what a child
+        has to do takes it, and does not change while they work.
+      */
+      questionText={question.instruction?.trim() || "Fill the grid — no repeats in any row, column or box."}
+      /* The four moments, cast from Mascot Studio — see `casting.ts`. */
+      guideRole={isCorrect ? "celebrating" : "waiting"}
+      {...guidePropsFor(question)}
       readAloudText={question.instruction || "Drag numbers or emojis from the tray to complete the grid. No repeats in any row, column, or 2x2 box!"}
       headerActions={
         isPlayMode ? (

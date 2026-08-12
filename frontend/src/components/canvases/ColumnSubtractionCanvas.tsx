@@ -16,6 +16,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import { CanvasProps } from "./types";
+import { guidePropsFor } from "../../features/koda-mascot";
+import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import { CountingTechnique } from "../../types";
 import { KodaActor, KodaMood, useKodaVoice } from "./KodaActor";
 import { NumberPad } from "./NumberPad";
@@ -360,15 +362,46 @@ export const ColumnSubtractionCanvas: React.FC<CanvasProps> = ({
   })();
   const mood: KodaMood = solved || guideDone ? "cheer" : inGuide ? "think" : fails ? "oops" : "idle";
 
+  /*
+    The running state, as the header chip every other board carries. Lifted out
+    of the old centred header row so the layout can place it — see
+    `ColumnAdditionCanvas` for why it is a component rather than a fragment.
+  */
+  const ColumnBadges: React.FC = () => (
+    <>
+        <Badge>{describeSubtractionMode(model.digitMode)}</Badge>
+        <Badge className={model.anyBorrow ? "border-rose-100 bg-rose-50 text-rose-600" : "border-emerald-100 bg-emerald-50 text-emerald-600"}>
+          {model.anyBorrow ? "Regrouping" : "No regrouping"}
+        </Badge>
+        {solved && <Badge className="border-emerald-100 bg-emerald-50 text-emerald-600"><Check size={10} /> Solved</Badge>}
+    </>
+  );
+
+  /*
+    The standard card — see `ColumnAdditionCanvas` for why, and for why Koda
+    stays as `KodaActor` rather than becoming the layout's guide.
+  */
   return (
-    <div
+    <SharedCanvasLayout
+      isPlayMode={isPlayMode}
+      isDark={isDark}
       ref={containerRef}
-      className={`@container relative flex h-full w-full flex-col overflow-hidden rounded-2xl border shadow-sm ${
-        isDark ? "dark border-slate-800 bg-slate-900 text-slate-100" : "border-slate-200 bg-slate-50 text-slate-800"
-      }`}
+      className="@container"
+      questionText={question.instruction?.trim() || "Subtract, one column at a time."}
+      readAloudText={question.instruction?.trim() || "Subtract, one column at a time."}
+      footerStatus="Start at the ones on the right, then move one place left."
+      headerActions={<ColumnBadges />}
     >
       {isPlayMode && (
-        <KodaActor text={kodaText} mood={mood} voice={voice} isDark={isDark} dragConstraints={containerRef} />
+        <KodaActor
+          text={kodaText}
+          mood={mood}
+          voice={voice}
+          isDark={isDark}
+          dragConstraints={containerRef}
+          // The character the author cast in the Studio, per moment.
+          {...guidePropsFor(question)}
+        />
       )}
       {isPlayMode && phase === "solve" && (
         <button
@@ -379,16 +412,6 @@ export const ColumnSubtractionCanvas: React.FC<CanvasProps> = ({
         </button>
       )}
 
-      <div className="flex shrink-0 flex-wrap items-center justify-center gap-1.5 px-4 pt-3">
-        <Badge>{describeSubtractionMode(model.digitMode)}</Badge>
-        <Badge className={model.anyBorrow ? "border-rose-100 bg-rose-50 text-rose-600" : "border-emerald-100 bg-emerald-50 text-emerald-600"}>
-          {model.anyBorrow ? "Regrouping" : "No regrouping"}
-        </Badge>
-        {solved && <Badge className="border-emerald-100 bg-emerald-50 text-emerald-600"><Check size={10} /> Solved</Badge>}
-      </div>
-      <p className="shrink-0 px-4 pt-1 text-center text-[10px] font-medium text-slate-500">
-        Start at the ones on the right, then move one place left.
-      </p>
 
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-7 overflow-y-auto px-3 py-3 @7xl:flex-row @7xl:gap-10 @7xl:overflow-hidden">
         <div className="max-w-full shrink-0 overflow-x-auto px-1 pb-1">
@@ -491,7 +514,7 @@ export const ColumnSubtractionCanvas: React.FC<CanvasProps> = ({
           )}
         </div>
       )}
-    </div>
+    </SharedCanvasLayout>
   );
 
   function renderBorrow(place: number) {

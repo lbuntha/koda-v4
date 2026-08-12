@@ -1,5 +1,5 @@
 import React from "react";
-import { PanelProps, PanelSection, SelectField, SliderField, TextField } from "../panelKit";
+import { ActorCastField, PanelProps, PanelSection, SelectField, SliderField, TextField } from "../panelKit";
 import {
   allowedUnknowns,
   normalizeStoryProblemConfig,
@@ -19,7 +19,7 @@ const UNKNOWN_LABELS: Record<StoryUnknown, string> = {
   part: "Part · one group is missing",
 };
 
-export const StoryProblemMatPanel: React.FC<PanelProps> = ({ question, update }) => {
+export const StoryProblemMatPanel: React.FC<PanelProps> = ({ question, update, updateConfig }) => {
   const current = normalizeStoryProblemConfig({
     type: question.config.storyProblemType,
     unknown: question.config.storyUnknown,
@@ -133,6 +133,9 @@ export const StoryProblemMatPanel: React.FC<PanelProps> = ({ question, update })
           onChange={value => setIcon({ storySceneEmoji: value.trim() || undefined })}
         />
       )}
+
+      {/* Who plays each moment of the question. */}
+      <ActorCastField config={question.config} updateConfig={updateConfig} />
     </PanelSection>
   );
 };

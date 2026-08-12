@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from "react";
-import { PanelProps } from "../panelKit";
+import { ActorCastField, PanelProps } from "../panelKit";
 import {
   GOODS_SORT_LEVELS,
   GOODS_CATALOG,
@@ -25,7 +25,7 @@ const TIER_GROUPS: Array<{ tier: GoodsDifficultyTier; label: string }> = [
   { tier: "grandmaster", label: "🔴 Grandmaster — the whole store" },
 ];
 
-export const GoodsSortPanel: React.FC<PanelProps> = ({ question, update }) => {
+export const GoodsSortPanel: React.FC<PanelProps> = ({ question, update, updateConfig }) => {
   const config = (question.config as any) || {};
   const currentLevelId = config.levelId || "level_1";
 
@@ -418,6 +418,9 @@ export const GoodsSortPanel: React.FC<PanelProps> = ({ question, update }) => {
           {spareShelves(selectedLevel)} spare
         </p>
       </div>
+
+      {/* Who plays each moment of the question. */}
+      <ActorCastField config={question.config} updateConfig={updateConfig} />
     </div>
   );
 };

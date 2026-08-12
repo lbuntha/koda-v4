@@ -259,12 +259,25 @@ export function useCanvasAnswer({
  */
 export type AnswerPanelDock = "bottom" | "top" | "left";
 
+/*
+  Every dock spans the board and pins the panel to its own edge, rather than
+  being a strip the height of whatever is in it.
+
+  The difference only shows when the panel outgrows the space: `max-h-full` on
+  the card resolves against this element, so a wrapper that is exactly as tall
+  as its contents can never bound anything and the overflow goes over the edge
+  to be clipped. Given the full box to measure against, the card stops at the
+  board's edge and scrolls inside itself instead.
+
+  `items-end` / `items-start` are what keep the panel where it was: the box grew,
+  the panel did not move.
+*/
 const DOCK_CLASS: Record<AnswerPanelDock, string> = {
-  bottom: "absolute z-50 inset-x-2 bottom-2 pointer-events-none flex justify-center",
-  top: "absolute z-50 inset-x-2 top-2 pointer-events-none flex justify-center",
+  bottom: "absolute z-50 inset-2 pointer-events-none flex justify-center items-end",
+  top: "absolute z-50 inset-2 pointer-events-none flex justify-center items-start",
   left:
-    "absolute z-50 pointer-events-none inset-x-2 top-2 sm:inset-x-auto sm:left-3 sm:top-0 " +
-    "sm:bottom-0 sm:w-[calc(50%-1.5rem)] sm:flex sm:items-center"
+    "absolute z-50 pointer-events-none inset-2 flex justify-center items-start " +
+    "sm:inset-x-auto sm:left-3 sm:top-0 sm:bottom-0 sm:w-[calc(50%-1.5rem)] sm:items-center"
 };
 
 /**
@@ -337,22 +350,61 @@ export const CanvasAnswerPanel: React.FC<CanvasAnswerPanelProps> = ({
   onHeightChange
 }) => {
   const panelRef = useRef<HTMLDivElement>(null);
+  const dockRef = useRef<HTMLDivElement>(null);
   const { status, errorMessage, showNumberPad, value, inputRef } = answer;
 
   const heightCallback = useRef(onHeightChange);
   heightCallback.current = onHeightChange;
 
+  /*
+    ── Fitting the panel to the board ──────────────────────────────────────
+
+    The panel's height is set by its contents and the board's is set by the
+    window, and neither knows about the other. Trimming padding narrows the gap
+    and never closes it: with the pad open this card wants around 270px, and a
+    board on a short window can offer 200. What the child saw was the Backspace
+    and Clear keys sliced off by the card's own bottom edge — the two keys they
+    need *after* mistyping, gone precisely when they are needed.
+
+    `overflow-y-auto` catches it, but a keypad you have to scroll to reach Clear
+    on is a keypad that failed. So the panel measures both boxes and scales
+    itself down to fit, which keeps every key on screen and in proportion.
+
+    Three things this deliberately does:
+
+    - **Measures `scrollHeight`, not the painted box.** A transform changes what
+      `getBoundingClientRect` reports, so measuring that and then scaling by it
+      is a loop that settles wherever it likes. Layout height is what the scale
+      is derived from, and layout height does not move when the panel scales.
+    - **Stops at 0.72.** Past that the digits stop being comfortable targets, and
+      a board that short is better served by the scroll fallback than by a
+      keypad rendered too small to hit.
+    - **Never scales up.** A panel with room to spare is already the right size.
+  */
+  const [fitScale, setFitScale] = useState(1);
+
   useEffect(() => {
     const panel = panelRef.current;
-    if (!open || !panel || typeof ResizeObserver === "undefined") {
+    const box = dockRef.current;
+    if (!open || !panel || !box || typeof ResizeObserver === "undefined") {
       heightCallback.current?.(0);
+      setFitScale(1);
       return;
     }
-    const observer = new ResizeObserver(entries => {
-      for (const entry of entries) heightCallback.current?.(entry.contentRect.height);
-    });
+
+    const measure = () => {
+      const natural = panel.scrollHeight;
+      const available = box.clientHeight;
+      const next = natural > 0 && available > 0 ? Math.min(1, available / natural) : 1;
+      setFitScale(Math.max(0.72, next));
+      // The visual height, which is what a canvas reserves space against.
+      heightCallback.current?.(panel.getBoundingClientRect().height);
+    };
+
+    const observer = new ResizeObserver(measure);
     observer.observe(panel);
-    heightCallback.current?.(panel.getBoundingClientRect().height);
+    observer.observe(box);
+    measure();
     return () => observer.disconnect();
   }, [open, showNumberPad]);
 
@@ -364,22 +416,50 @@ export const CanvasAnswerPanel: React.FC<CanvasAnswerPanelProps> = ({
           animates with a spring transform, and a centring `mx-auto` on the same
           element fights it.
         */
-        <div className={DOCK_CLASS[dock]}>
+        <div ref={dockRef} className={DOCK_CLASS[dock]}>
           <motion.div
             ref={panelRef}
             initial={{ opacity: 0, y: 30, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
+            animate={{ opacity: 1, y: 0, scale: fitScale }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className={`w-full pointer-events-auto flex flex-col items-center justify-center p-3 sm:p-4 md:p-5
+            // Scaled about the edge it is docked to, so shrinking pulls the panel
+            // away from the board's edge rather than off it.
+            style={{ transformOrigin: dock === "top" ? "center top" : dock === "bottom" ? "center bottom" : "center" }}
+            /*
+              Never taller than the board it floats over.
+
+              The card is sized by its contents, and its contents grow: opening
+              the number pad adds a 5×2 grid plus a Backspace/Clear row, which on
+              a short canvas made the panel taller than the stage it is docked
+              into. The canvas clips — it has to, or a dragged object would
+              escape the card — so the bottom of the pad was simply cut off, and
+              the two keys that got cut are the ones a child needs after typing
+              the wrong digit.
+
+              `max-h-full` bounds it to the dock box and `overflow-y-auto` gives
+              the overflow somewhere to go, so a cramped board scrolls the pad
+              instead of hiding it. `justify-start` because a scrolling column
+              centred on its own overflow starts halfway down itself.
+            */
+            className={`w-full pointer-events-auto flex flex-col items-center justify-start max-h-full overflow-y-auto p-3 md:p-4
               rounded-2xl md:rounded-3xl border-2 sm:max-w-md md:max-w-lg
               ${overlayCardBaseClass(isDark, "primary")} ${panelBorder(status, isDark)}
               ${isDark ? "dark" : ""}`}
           >
-            <div className="flex items-center gap-2 mb-2 md:mb-3">
-              <span className="text-xl md:text-2xl">🎉</span>
+            {/*
+              The prompt, kept to one line's worth of height.
+
+              It ran to `lg:text-lg` beside a `text-2xl` emoji, which on a wide
+              screen made the panel's first row taller than the input under it —
+              a caption outgrowing the control it captions. The question is
+              already the heading of the whole board; down here it is a reminder,
+              so it stops at `text-base`.
+            */}
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-lg md:text-xl">🎉</span>
               <span
-                className={`text-xs sm:text-sm md:text-base lg:text-lg font-extrabold tracking-tight ${
+                className={`text-xs sm:text-sm md:text-base font-extrabold tracking-tight ${
                   isDark ? "text-slate-100" : "text-slate-800"
                 }`}
               >
@@ -414,7 +494,7 @@ export const CanvasAnswerPanel: React.FC<CanvasAnswerPanelProps> = ({
                     (The `backdrop-filter` that caused the worst of it is gone; see
                     `overlayCardBaseClass`.) Focus is still shown by the ring.
                   */
-                  className={`h-11 md:h-14 px-3 text-center text-lg sm:text-xl md:text-2xl font-bold font-mono
+                  className={`h-11 md:h-12 px-3 text-center text-lg sm:text-xl md:text-2xl font-bold font-mono
                     ${showNumberPad ? "caret-transparent" : ""} ${inputClass(status, isDark)}`}
                 />
               </div>
@@ -427,7 +507,7 @@ export const CanvasAnswerPanel: React.FC<CanvasAnswerPanelProps> = ({
               <Button
                 onClick={() => answer.check()}
                 disabled={status === "correct" || !value.trim()}
-                className={`h-11 md:h-14 px-4 md:px-6 text-sm md:text-base font-bold flex items-center gap-1.5
+                className={`h-11 md:h-12 px-4 md:px-6 text-sm md:text-base font-bold flex items-center gap-1.5
                   rounded-xl active:scale-95 ${
                     status === "correct"
                       ? "border-emerald-600 bg-emerald-600 text-white shadow-[0_4px_0_#047857] hover:border-emerald-600 hover:bg-emerald-600"
@@ -468,14 +548,24 @@ export const CanvasAnswerPanel: React.FC<CanvasAnswerPanelProps> = ({
               </div>
             )}
 
-            {/* On-screen keypad: children on a tablet shouldn't need the OS keyboard. */}
+            {/*
+              On-screen keypad: children on a tablet shouldn't need the OS
+              keyboard.
+
+              Every measurement in here was cut once, because the panel it lives
+              in is docked over a board and has to fit *inside* it. Scrolling was
+              the safety net for when it does not — but a keypad you have to
+              scroll to reach the Clear key on is a keypad that failed, so the
+              net should almost never be needed. The keys stayed well over the
+              24px touch floor; what came off was the air between them.
+            */}
             <AnimatePresence>
               {showNumberPad && status !== "correct" && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
-                  className={`w-full mt-3 pt-3 border-t flex flex-col items-center gap-2 overflow-hidden ${hairlineClass(
+                  className={`w-full mt-2 pt-2 border-t flex flex-col items-center gap-1.5 overflow-hidden ${hairlineClass(
                     isDark
                   )}`}
                 >
@@ -487,7 +577,7 @@ export const CanvasAnswerPanel: React.FC<CanvasAnswerPanelProps> = ({
                         variant="ghost"
                         onClick={() => answer.pressDigit(String(num))}
                         aria-label={`Enter ${num}`}
-                        className={`h-10 md:h-12 px-0 font-mono text-base md:text-xl font-extrabold tracking-normal
+                        className={`h-9 md:h-11 px-0 font-mono text-base md:text-xl font-extrabold tracking-normal
                           rounded-lg md:rounded-xl border shadow-sm active:scale-95 ${keyClass(isDark)}`}
                       >
                         {num}
@@ -499,7 +589,7 @@ export const CanvasAnswerPanel: React.FC<CanvasAnswerPanelProps> = ({
                       type="button"
                       variant="ghost"
                       onClick={answer.pressBackspace}
-                      className={`flex-1 h-8 md:h-10 px-2 text-xs md:text-sm font-extrabold gap-1
+                      className={`flex-1 h-8 md:h-9 px-2 text-xs md:text-sm font-extrabold gap-1
                         rounded-lg border ${utilityKeyClass(isDark)}`}
                     >
                       <Delete size={14} /> Backspace
@@ -508,7 +598,7 @@ export const CanvasAnswerPanel: React.FC<CanvasAnswerPanelProps> = ({
                       type="button"
                       variant="ghost"
                       onClick={answer.clear}
-                      className={`px-3 md:px-5 h-8 md:h-10 text-xs md:text-sm font-extrabold
+                      className={`px-3 md:px-5 h-8 md:h-9 text-xs md:text-sm font-extrabold
                         rounded-lg border ${utilityKeyClass(isDark)}`}
                     >
                       Clear

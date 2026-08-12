@@ -77,6 +77,40 @@ describe("one-to-one layout", () => {
     expect(new Set(cramped.map(c => Math.round(c.y))).size).toBeGreaterThan(1);
   });
 
+  /*
+    How many rows a layout really used.
+
+    Counting distinct `y` values cannot answer this for scatter, because jitter
+    moves every object a little: eight objects on one wobbly row have eight
+    different `y`s and still read as a line. What separates a row from rows is
+    whether the vertical spread clears an object — jitter never does, and a
+    second row always does.
+  */
+  const spansMoreThanOneRow = (layout: ReturnType<typeof oneToOneLayout>) => {
+    const ys = centresOf(layout).map(c => c.y);
+    return Math.max(...ys) - Math.min(...ys) > layout.size;
+  };
+
+  it("scatters over rows in a wide bin, where a grid would take one row", () => {
+    /*
+      The bin a Count slide actually gets: much wider than it is tall. The
+      biggest-fit grid puts twelve objects in a single row there, and scatter
+      inherited it — so "count the scattered ones" arrived already laid out in
+      order, which is the easier exercise the teacher did not pick.
+    */
+    const wide = { count: 12, width: 1600, height: 260 } as const;
+
+    expect(spansMoreThanOneRow(oneToOneLayout({ ...wide, pattern: "grid" }))).toBe(false);
+    expect(spansMoreThanOneRow(oneToOneLayout({ ...wide, pattern: "scatter" }))).toBe(true);
+  });
+
+  it("still lays scatter on one row when a second will not fit", () => {
+    // A tray or a countdown strip. Two rows of the smallest object we draw do
+    // not fit, and a cramped second row is worse than an honest single one.
+    const strip = oneToOneLayout({ count: 8, width: 1200, height: 70, pattern: "scatter" });
+    expect(spansMoreThanOneRow(strip)).toBe(false);
+  });
+
   it("closes a ring, where a circle only arcs", () => {
     const area = { left: 0, top: 0, width: 600, height: 400 };
     const ring = patternCentres("ring", 8, area);

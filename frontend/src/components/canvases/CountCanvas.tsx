@@ -28,8 +28,8 @@ import { guidePropsFor } from "../../features/koda-mascot";
 import {
   CanvasChip,
   CanvasAccent,
-  surfaceClass,
   accentChipClass,
+  accentTileClass,
   emptySlotClass
 } from "./canvasTheme";
 import { CanvasBin } from "./CanvasBin";
@@ -684,7 +684,6 @@ export const CountCanvas: React.FC<CanvasProps> = ({
       gridSize={gridSize}
       showRulers={question.config.showLayoutRulers ?? true}
       accent={accent}
-      headerIcon={<ArrowRightLeft size={16} />}
       headerTitle="Count"
       /*
         The question is the heading, and the running count is not.
@@ -699,12 +698,25 @@ export const CountCanvas: React.FC<CanvasProps> = ({
         `playHint` goes with it. It carried the same sentence, so leaving it on
         would print the question twice — once at 28px and once in 11px grey.
       */
+      /*
+        The question, and only the question — it does not change mid-board.
+
+        Finishing the objects used to swap the heading for "Counting complete!
+        Enter the total answer below.", which is a status pretending to be a
+        question. The thing a child was asked has not changed at all at that
+        moment — it is "how many bottle bobas?" before the last drag and after
+        it, and the answer panel that just opened is the part that is new. A
+        heading that rewrites itself takes the one fixed point on the board away
+        exactly when the child needs to look back at it to answer.
+
+        Saying it is not lost, and never was: the panel prompts in its own
+        header, and `footerStatus` below reports the state. Both are places a
+        status belongs.
+      */
       questionText={
-        isComplete && requireAnswerInput
-          ? "Counting complete! Enter the total answer below."
-          : // A slide authored without an instruction still has to say something,
-            // and the staging's own guidance is the sentence it would have said.
-            question.instruction?.trim() || guidance
+        // A slide authored without an instruction still has to say something,
+        // and the staging's own guidance is the sentence it would have said.
+        question.instruction?.trim() || guidance
       }
       /*
         Which of Koda's four actors the board is asking for.
@@ -765,7 +777,21 @@ export const CountCanvas: React.FC<CanvasProps> = ({
           and no coordinate has to be corrected anywhere else.
         */
         style={stagePadding}
-        className={`relative flex-1 w-full flex items-stretch gap-3 sm:gap-4 my-2 min-h-[260px] sm:min-h-[300px] md:min-h-[340px] touch-none select-none overscroll-none transition-[padding] duration-300 ${
+        /*
+          The floor is capped by how tall the window actually is.
+
+          `min-h-[260px] sm:min-h-[300px] md:min-h-[340px]` asked the viewport's
+          *width* how much vertical room to insist on, which on a wide, short
+          window is the worst possible question: the board claimed 340px, the
+          header took its own, and the total came out past the bottom of a card
+          that clips — so the second zone, the one a child drags *into*, was cut
+          off the screen. A stacked staging lost the whole "counted so far" band
+          that way, and nothing about it looked broken; it looked absent.
+
+          One floor now, capped at 40svh, so a tall window gets the full board
+          and a short one gets a smaller board rather than a hidden one.
+        */
+        className={`relative flex-1 w-full flex items-stretch gap-3 sm:gap-4 my-2 min-h-[min(340px,40svh)] touch-none select-none overscroll-none transition-[padding] duration-300 ${
           staging.orientation === "column" ? "flex-col" : "flex-col sm:flex-row"
         }`}
       >
@@ -792,6 +818,22 @@ export const CountCanvas: React.FC<CanvasProps> = ({
             }
             accent={accent}
             isDark={isDark}
+            /*
+              No box drawn around the zones.
+
+              Count's board is already a set of enclosures: a card, two panels
+              inside it, a frame behind every object, and — with the Container
+              staging — a drawn jar inside the panel that is itself the thing
+              objects go into. A tinted rectangle around that jar is a box around
+              a box, and it is the one nobody needed: the label says what the
+              region is for, the tally says how it is going, the dashed target
+              says where to drop, and the ring says a drag is over it. All four
+              survive; only the rectangle goes.
+
+              The region does not: the element, its padding and its measurements
+              are untouched, which is why the objects still land where they did.
+            */
+            surface={false}
             style={spec.flex ? { flex: spec.flex } : undefined}
             className={readout ? "pointer-events-none" : undefined}
             active={!readout && activeZone === spec.id}
@@ -906,7 +948,16 @@ export const CountCanvas: React.FC<CanvasProps> = ({
           const at = dragging && dragPos ? dragPos : home;
           const assetType = (question.config?.assetType || "emoji") as AssetType;
           const size = sizeOf(item.id);
-          const assetSize = Math.floor(size * (hasFrame ? 0.7 : 0.92));
+          /*
+            The artwork, not the card, is the thing being counted.
+
+            The framed object was drawn at 70% of its tile, so nearly half the
+            area a child sees was padding — a small fish adrift in a large
+            rounded square. 82% keeps a visible margin on all four sides (the
+            card still reads as a card, and the counted ring still has somewhere
+            to sit) while giving the object back the space it is there to fill.
+          */
+          const assetSize = Math.floor(size * (hasFrame ? 0.82 : 0.92));
           const badgeSize = Math.floor(Math.max(18, Math.min(32, size * 0.3)));
 
           let className = `flex flex-col items-center justify-center select-none touch-none outline-none ${
@@ -916,11 +967,22 @@ export const CountCanvas: React.FC<CanvasProps> = ({
           // A counter and a numeral are already round and carry their own fill;
           // putting them on a card as well reads as an object on a tile.
           if (hasFrame && representation === "concrete") {
-            className += item.counted
-              ? struck
-                ? ` ${surfaceClass(isDark, "raised")} border-0`
-                : ` ${accentChipClass(accent, isDark)} border-2`
-              : ` ${surfaceClass(isDark, "raised")} border-0`;
+            /*
+              The card wears the slide's palette, not grey.
+
+              A resting object sat on `surfaceClass("raised")` — 7% black — which
+              is the one element on the board that ignored the colour the teacher
+              picked, and under a coloured object a grey tile reads as a dead
+              cell in a table rather than as something the object is resting on.
+
+              Three states, one hue, increasing in weight: resting is the soft
+              tile, counted is the full chip with a ring, and struck goes back to
+              the soft tile because a crossed-out object is on its way to not
+              counting — it should recede, not turn a different colour.
+            */
+            className += item.counted && !struck
+              ? ` ${accentChipClass(accent, isDark)} border-2`
+              : ` ${accentTileClass(accent, isDark)} border-0`;
             if (dragging) className += " scale-110 drop-shadow-xl z-50";
           } else {
             className += item.counted

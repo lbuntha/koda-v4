@@ -15,6 +15,18 @@ export interface CanvasBinProps {
   complete?: boolean;
   /** Nothing in the bin yet — shows the drop target instead of empty space. */
   isEmpty?: boolean;
+  /**
+   * Draw the panel fill and hairline. Off puts the objects on the open board.
+   *
+   * A bin is two things stacked: a *region* (label, tally, drop maths, the ring
+   * that says a drag is over it) and a *box drawn around that region*. Only the
+   * second is optional, and this turns off only the second — every measurement
+   * a canvas makes against this element is unchanged, because the padding stays.
+   * That is not a detail: `BIN_PADDING` in `objectLayout.ts` is a copy of this
+   * component's `p-3 sm:p-4 md:p-5`, so dropping the padding along with the fill
+   * would silently resize every object on the board.
+   */
+  surface?: boolean;
   /** Centred invitation shown while the bin is empty, e.g. "Drop apples here". */
   emptyHint?: React.ReactNode;
   /** Icon above the empty hint. */
@@ -61,6 +73,7 @@ export const CanvasBin = forwardRef<HTMLDivElement, CanvasBinProps>(({
   emptyIcon,
   children,
   className = "",
+  surface = true,
   style
 }, ref) => {
   const { learnerMode } = useCanvasAudience();
@@ -70,8 +83,13 @@ export const CanvasBin = forwardRef<HTMLDivElement, CanvasBinProps>(({
     <div
       ref={ref}
       style={style}
+      /*
+        The padding is not decoration and stays whether the fill does or not —
+        see `surface`. Without a fill the box simply stops being painted; it is
+        still exactly the same box the stage measures objects into.
+      */
       className={`flex-1 basis-0 min-w-0 min-h-0 relative flex flex-col rounded-3xl p-3 sm:p-4 md:p-5
-        transition-[background-color,box-shadow] duration-200 ${surfaceClass(isDark, "panel")}
+        transition-[background-color,box-shadow] duration-200 ${surface ? surfaceClass(isDark, "panel") : ""}
         ${active ? `ring-4 ${accentChipClass(tone, isDark)}` : ""} ${className}`}
     >
       <div className="flex items-center justify-between gap-2 flex-shrink-0">

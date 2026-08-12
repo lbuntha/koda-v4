@@ -18,6 +18,7 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "re
 import { BarChart3 } from "lucide-react";
 import { sounds } from "../../sound";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
+import { guidePropsFor } from "../../features/koda-mascot";
 import { CanvasChip, CanvasAccent, captionClass } from "./canvasTheme";
 import { CanvasBin } from "./CanvasBin";
 import { CountingAsset, AssetType } from "../Assets";
@@ -258,9 +259,15 @@ export const DataChartCanvas: React.FC<CanvasProps> = ({
       showGrid={showGrid}
       isDark={isDark}
       accent={accent}
-      headerIcon={<BarChart3 size={16} />}
-      headerTitle="Data Chart"
-      headerSubtitle={dataPrompt(config)}
+      /*
+        The question leads — see `CountCanvas` for the standard. The activity's
+        own name and its meta line move out of the prominent slot; what a child
+        has to do takes it, and does not change while they work.
+      */
+      questionText={question.instruction?.trim() || dataPrompt(config)}
+      /* The four moments, cast from Mascot Studio — see `casting.ts`. */
+      guideRole={solved ? "celebrating" : picked !== null ? "oops" : "waiting"}
+      {...guidePropsFor(question)}
       readAloudText={dataPrompt(config)}
       headerActions={
         <CanvasChip accent={solved ? "emerald" : accent} isDark={isDark}>

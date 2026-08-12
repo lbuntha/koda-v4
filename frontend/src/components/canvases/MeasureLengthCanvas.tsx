@@ -18,6 +18,7 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "re
 import { Ruler } from "lucide-react";
 import { sounds } from "../../sound";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
+import { guidePropsFor } from "../../features/koda-mascot";
 import { CanvasChip, CanvasAccent } from "./canvasTheme";
 import { CanvasBin } from "./CanvasBin";
 import { GhostGuideOverlay, useGhostGuide } from "../../pedagogy";
@@ -306,11 +307,18 @@ export const MeasureLengthCanvas: React.FC<CanvasProps> = ({
       showGrid={showGrid}
       isDark={isDark}
       accent={accent}
-      headerIcon={<Ruler size={16} />}
       headerTitle="Measure Length"
       // Never the unit count here — for the measure task that IS the answer, printed above a
       // question asking the child to work it out.
-      headerSubtitle={config.task === "measure" ? "count the units" : `find the ${config.task}`}
+      /*
+        The question leads — see `CountCanvas` for the standard. The activity's
+        own name and its meta line move out of the prominent slot; what a child
+        has to do takes it, and does not change while they work.
+      */
+      questionText={question.instruction?.trim() || (config.task === "measure" ? "How long is the bar?" : `Tap the ${config.task} bar.`)}
+      /* The four moments, cast from Mascot Studio — see `casting.ts`. */
+      guideRole={solved ? "celebrating" : picked !== null ? "oops" : "waiting"}
+      {...guidePropsFor(question)}
       readAloudText={config.task === "measure" ? "Count the units under the bar. How long is it?" : `Tap the ${config.task} bar.`}
       headerActions={
         <CanvasChip accent={solved ? "emerald" : accent} isDark={isDark}>

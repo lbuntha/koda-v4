@@ -20,6 +20,7 @@ import {
   Layers,
 } from "lucide-react";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
+import { guidePropsFor } from "../../features/koda-mascot";
 import { Celebration } from "./Celebration";
 import { surfaceClass } from "./canvasTheme";
 import { GoodsAsset, GoodsAssetLibrary } from "../../assets/goods-sort";
@@ -856,7 +857,15 @@ export const GoodsSortCanvas: React.FC<CanvasProps> = ({
     <SharedCanvasLayout
       isPlayMode={isPlayMode}
       headerTitle={question.title || "Goods Shelf Sort"}
-      headerSubtitle={(question as any).subtitle || `${currentLevel.name}`}
+      /*
+        The question leads — see `CountCanvas` for the standard. The level's own
+        name moves to the chip row; what the child has to do takes the heading.
+      */
+      questionText={question.instruction?.trim() || `Gather all ${currentLevel.compartmentCapacity} of a kind into one compartment.`}
+      readAloudText={question.instruction?.trim() || `Gather all ${currentLevel.compartmentCapacity} of a kind into one compartment.`}
+      /* The four moments, cast from Mascot Studio — see `casting.ts`. */
+      guideRole={isWon ? "celebrating" : "waiting"}
+      {...guidePropsFor(question)}
       playHint={
         currentLevel.teaches ||
         `Gather all ${currentLevel.compartmentCapacity} of a kind into one compartment.`

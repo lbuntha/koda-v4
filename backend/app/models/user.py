@@ -49,6 +49,10 @@ class User(Document):
     email_digest_enabled: bool = True
     email_inactivity_enabled: bool = True
     email_announcements_enabled: bool = True
+    # Built-in Mascot Studio starting points that this author has removed from
+    # their picker. The presets remain shipped with the app, so keeping a
+    # per-owner tombstone makes removal durable without mutating source data.
+    hidden_mascot_preset_ids: list[str] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=_now)
 
     class Settings:

@@ -19,6 +19,7 @@ import { CrateFace } from "./CrateFace";
 import { CountingStrip } from "./CountingStrip";
 import { sounds } from "../../sound";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
+import { guidePropsFor } from "../../features/koda-mascot";
 import { Celebration } from "./Celebration";
 import {
   CRATE_UNITS,
@@ -338,7 +339,14 @@ export const CountCratesCanvas: React.FC<CanvasProps> = ({
     <SharedCanvasLayout
       isPlayMode={isPlayMode}
       headerTitle={question.title || "Counting Crates"}
-      headerSubtitle={level.name}
+      /*
+        The question leads — see `CountCanvas` for the standard.
+      */
+      questionText={question.instruction?.trim() || "Load the crates in the right order."}
+      /* The four moments, cast from Mascot Studio — see `casting.ts`. */
+      guideRole={isWon ? "celebrating" : "waiting"}
+      {...guidePropsFor(question)}
+      readAloudText={question.instruction?.trim() || "Load the crates in the right order."}
       playHint={level.teaches}
       designerHint="Tap a crate to load it into the tray. The order must match exactly."
       headerActions={headerControls}

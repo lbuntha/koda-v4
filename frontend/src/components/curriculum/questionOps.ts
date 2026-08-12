@@ -11,6 +11,7 @@
 
 import { CountingQuestion, CountingTechnique } from "../../types";
 import { ALL_TECHNIQUES } from "../../techniques";
+import { ABSORBED_TECHNIQUES } from "../../techniques/manifest";
 import { createQuestionId } from "../../studio/questionIds";
 
 /**
@@ -20,7 +21,25 @@ import { createQuestionId } from "../../studio/questionIds";
  * One-to-One placeholder.
  */
 export function createBlankSkillQuestion(technique: CountingTechnique, skillId: string): CountingQuestion {
-  const manifest = ALL_TECHNIQUES.find(item => item.technique === technique);
+  /*
+    An absorbed technique is built from the component that absorbed it.
+
+    Absorbed ids have no manifest of their own — that is what absorbed means —
+    and this threw on them, which is not a theoretical edge: `FillWithAiDrawer`
+    seeds its placeholder with `ONE_TO_ONE`, absorbed into Move & Count, so
+    opening "Fill with AI" on a skill with no questions yet crashed outright.
+    The same trap now exists for `SUBTRACTION_SANDBOX`.
+
+    Resolving through the map is what the panel and canvas registries already
+    do, and it means an id that renders and edits can also be *created* — the
+    three were inconsistent, and this was the one that threw.
+
+    The question is built under its owner's technique on purpose. A blank slide
+    tagged with an absorbed id would be a new question written in a spelling the
+    product no longer uses; only the ones already saved need to keep theirs.
+  */
+  const owner = ABSORBED_TECHNIQUES.get(technique) ?? technique;
+  const manifest = ALL_TECHNIQUES.find(item => item.technique === owner);
   if (!manifest) throw new Error(`Question component is not registered: ${technique}`);
   const defaults = manifest.schema.validate({
     targetCount: manifest.defaultTargetCount,

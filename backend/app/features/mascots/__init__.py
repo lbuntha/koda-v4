@@ -1,0 +1,2 @@
+"""Mascot authoring feature."""
+

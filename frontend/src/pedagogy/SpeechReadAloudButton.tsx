@@ -12,7 +12,16 @@ export interface SpeechReadAloudButtonProps {
   text: string;
   isDark?: boolean;
   className?: string;
-  label?: string;
+  /**
+   * The word beside the icon. Pass `null` for the icon alone.
+   *
+   * Icon-only is what the question header uses: the speaker sits in front of the
+   * sentence it reads, where the word "Listen" would be a label for a control
+   * standing next to the thing it acts on — and one more line of chrome under a
+   * question that has quite enough already. A speaker icon is not ambiguous, and
+   * the `title` still says it in words for anyone who hovers.
+   */
+  label?: string | null;
   size?: "sm" | "md";
   /**
    * Called as speech starts and stops, so the surrounding page can react.
@@ -89,7 +98,7 @@ export const SpeechReadAloudButton: React.FC<SpeechReadAloudButtonProps> = ({
       ) : (
         <>
           <Volume2 size={iconSize} className="transition-transform group-hover:scale-110" />
-          <span>{label}</span>
+          {label !== null && <span>{label}</span>}
         </>
       )}
     </Button>

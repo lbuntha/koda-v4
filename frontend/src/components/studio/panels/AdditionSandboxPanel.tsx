@@ -1,7 +1,7 @@
 import React from "react";
 import { Label, Input } from "../../ui";
 import { CPASwitcherPill } from "../../../pedagogy";
-import { PanelProps } from "../panelKit";
+import { ActorCastField, PanelProps } from "../panelKit";
 
 /**
  * The range the canvas and the AI schema both accept (`addition.schema.ts` clamps to 1–9).
@@ -76,5 +76,7 @@ export const AdditionSandboxPanel: React.FC<PanelProps> = ({ question, update, u
                         className="w-4 h-4 text-sky-600 accent-sky-600 cursor-pointer"
                       />
                     </div>
+                    {/* Who plays each moment of the question. */}
+                    <ActorCastField config={question.config} updateConfig={updateConfig} />
                   </div>
 );

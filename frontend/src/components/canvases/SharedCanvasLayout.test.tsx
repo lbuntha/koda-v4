@@ -191,9 +191,14 @@ describe("the question display", () => {
     expect(eyebrow.className).toContain("uppercase");
   });
 
-  test("a canvas that says nothing better falls back to its own name", () => {
+  test("a canvas with nothing to say gets no eyebrow, not its own name", () => {
+    /*
+      This used to fall back to `headerTitle`, printing "COUNT" over a counting
+      board — nothing a child could use and nothing an author did not know, in
+      the most prominent colour on the card. An eyebrow now has to be given.
+    */
     const { container } = ask({ questionEyebrow: undefined });
-    expect(container.textContent).toContain("Count");
+    expect(container.textContent).not.toContain("Count");
   });
 
   /*

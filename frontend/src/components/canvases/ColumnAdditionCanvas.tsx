@@ -18,6 +18,8 @@
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { CanvasProps } from "./types";
+import { guidePropsFor } from "../../features/koda-mascot";
+import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import { CountingTechnique } from "../../types";
 import { sounds } from "../../sound";
 import { RotateCcw, Check, ChevronLeft, ChevronRight, HelpCircle, Pause, Play, Sparkles } from "lucide-react";
@@ -453,8 +455,75 @@ export const ColumnAdditionCanvas: React.FC<CanvasProps> = ({
   })();
   const kodaMood: KodaMood = solved || guideDone ? "cheer" : inGuide ? "think" : fails > 0 ? "oops" : "idle";
 
+  /*
+    The running state, as the header chip every other board carries.
+
+    Lifted out of the old centred header row so the layout can place it, and a
+    component rather than an inline fragment because `headerActions` is a prop:
+    the chips close over `model`, `solved` and the guide beat, and threading five
+    values through as props to say the same thing would be worse than closing
+    over them here.
+  */
+  const ColumnBadges: React.FC = () => (
+    <>
+    <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+      {describeColumnMode(model.digitMode)}
+    </span>
+    {solved ? (
+      <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/50 inline-flex items-center gap-1">
+        <Check size={10} /> Solved
+      </span>
+    ) : (
+      <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+        model.anyCarry
+          ? "bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 border-rose-100 dark:border-rose-900/50"
+          : "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/50"
+      }`}>
+        {model.anyCarry ? "Carries" : "No carrying"}
+      </span>
+    )}
+    {showStatic && (
+      <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-white dark:bg-slate-900 text-slate-400 border border-slate-200 dark:border-slate-700">
+        Preview
+      </span>
+    )}
+    {inGuide && !guideDone && (
+      <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900/50">
+        {currentBeat.kind === "add" ? "Add" : "Write"}: {columns[currentBeat.col].placeLabel}
+      </span>
+    )}
+    </>
+  );
+
   return (
-    <BoardShell isDark={isDark} innerRef={containerRef}>
+    /*
+      The standard card, not a shell of its own.
+
+      This canvas drew its own `BoardShell`: a grey bordered box with a centred
+      row of meta chips where every other board has a white card, a question and
+      a status chip. It looked like a different product, and the difference was
+      not a design decision — it was a component written before the shared
+      layout existed and never brought across.
+
+      Koda stays as `KodaActor` rather than becoming the layout's guide. The two
+      are the same character now (both resolve the Studio cast — see
+      `KodaActor`), but they are not the same *job*: the layout's guide waits to
+      be asked, while this one narrates a walkthrough step by step and speaks
+      each new step aloud on its own. So `guideRole` is deliberately not passed —
+      a second character would stand beside the first — and `readAloudText`
+      carries the question, which is the header speaker's job, leaving the
+      step-by-step to Koda.
+    */
+    <SharedCanvasLayout
+      isPlayMode={isPlayMode}
+      isDark={isDark}
+      ref={containerRef}
+      className="@container"
+      questionText={question.instruction?.trim() || "Add, one column at a time."}
+      readAloudText={question.instruction?.trim() || "Add, one column at a time."}
+      footerStatus="Start at the ones on the right, then move one place left."
+      headerActions={<ColumnBadges />}
+    >
       {/* ── KODA, THE GUIDE ── */}
       {isPlayMode && (
         <KodaActor
@@ -463,6 +532,9 @@ export const ColumnAdditionCanvas: React.FC<CanvasProps> = ({
           voice={voice}
           isDark={isDark}
           dragConstraints={containerRef}
+          // The character the author cast in the Studio, per moment. One line,
+          // the same one every other canvas uses — see `casting.ts`.
+          {...guidePropsFor(question)}
         />
       )}
 
@@ -478,38 +550,6 @@ export const ColumnAdditionCanvas: React.FC<CanvasProps> = ({
         </button>
       )}
 
-      {/* Header: what shape of problem this is */}
-      <div className="shrink-0 px-4 pt-3 flex items-center justify-center gap-1.5 flex-wrap">
-        <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
-          {describeColumnMode(model.digitMode)}
-        </span>
-        {solved ? (
-          <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/50 inline-flex items-center gap-1">
-            <Check size={10} /> Solved
-          </span>
-        ) : (
-          <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border ${
-            model.anyCarry
-              ? "bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 border-rose-100 dark:border-rose-900/50"
-              : "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/50"
-          }`}>
-            {model.anyCarry ? "Carries" : "No carrying"}
-          </span>
-        )}
-        {showStatic && (
-          <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-white dark:bg-slate-900 text-slate-400 border border-slate-200 dark:border-slate-700">
-            Preview
-          </span>
-        )}
-        {inGuide && !guideDone && (
-          <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900/50">
-            {currentBeat.kind === "add" ? "Add" : "Write"}: {columns[currentBeat.col].placeLabel}
-          </span>
-        )}
-      </div>
-      <p className="shrink-0 px-4 pt-1 text-center text-[10px] font-medium text-slate-500 dark:text-slate-400">
-        Start at the ones on the right, then move one place left.
-      </p>
 
       {/* ── THE BOARD + KEYPAD ──
           Stack in compact canvases; use the desktop width beside the board so
@@ -671,7 +711,7 @@ export const ColumnAdditionCanvas: React.FC<CanvasProps> = ({
           ) : null}
         </div>
       )}
-    </BoardShell>
+    </SharedCanvasLayout>
   );
 
   // ── cell renderers (closures over state) ──
@@ -771,15 +811,6 @@ export const ColumnAdditionCanvas: React.FC<CanvasProps> = ({
     );
   }
 };
-
-// ── Shared shell — matches the other canvases' rounded/bordered frame ──
-const BoardShell: React.FC<{ isDark: boolean; innerRef?: React.Ref<HTMLDivElement>; children: React.ReactNode }> = ({ isDark, innerRef, children }) => (
-  <div ref={innerRef} className={`@container relative w-full h-full flex flex-col overflow-hidden rounded-2xl border shadow-sm ${
-    isDark ? "dark bg-slate-900 border-slate-800 text-slate-100" : "bg-slate-50 border-slate-200 text-slate-800"
-  }`}>
-    {children}
-  </div>
-);
 
 const StaticCarry: React.FC<{ accent: Accent; children: React.ReactNode }> = ({ accent, children }) => (
   <span className={`w-6 h-6 rounded-full text-xs font-black flex items-center justify-center border-2 border-white dark:border-slate-900 shadow ${accent.badge}`}>

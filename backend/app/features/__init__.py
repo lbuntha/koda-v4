@@ -16,6 +16,8 @@ from .progression.router import router as progression_router
 from .telemetry.router import router as telemetry_router
 from .notifications.router import router as notifications_router
 from .promotions.router import router as promotions_router
+from .mascots.router import router as mascots_router
+from .mascots.style_router import router as mascot_styles_router
 
 ALL_ROUTERS = [
     auth_router,
@@ -33,4 +35,6 @@ ALL_ROUTERS = [
     telemetry_router,
     notifications_router,
     promotions_router,
+    mascots_router,
+    mascot_styles_router,
 ]

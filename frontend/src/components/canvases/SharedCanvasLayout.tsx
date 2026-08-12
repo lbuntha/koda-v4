@@ -196,42 +196,85 @@ const WORD_REVEAL_S = 0.055;
  * though — it gets the whole sentence in one live region instead, so it is not
  * read fifteen times as fifteen spans.
  */
-const Bubble: React.FC<{ text: string; reduce: boolean; guideSize: number }> = ({ text, reduce, guideSize }) => {
+const Bubble: React.FC<{
+  text: string;
+  /** Reveal the words in time with the voice. Off is the resting sentence. */
+  speaking: boolean;
+  reduce: boolean;
+  compact: boolean;
+  isDark: boolean;
+}> = ({ text, speaking, reduce, compact, isDark }) => {
   let wordIndex = 0;
   /*
-    The tail has to find Koda, and "near the right end" does not.
+    A bubble beside Koda, tail pointing back at them.
 
-    The bubble is ~320px wide and the character is ~124px, both right-aligned to
-    the same edge — so a tail parked 24px from the right corner pointed at the
-    air beside Koda's shoulder. It is placed at the character's centre instead,
-    measured from the shared right edge, and the bubble grows out of that same
-    point so the whole thing unfolds from under their chin.
+    It was briefly plain text in a row, on the reasoning that a bubble is chrome.
+    That holds where the row has a background of its own to sit on; this row
+    floats over the board, and floating text over counting objects is a caption
+    lying on the artwork with nothing to separate the two. The bubble is what
+    makes the sentence a thing Koda is *saying* rather than a label printed on
+    the board — and its surface is what keeps it readable over whatever the slide
+    happens to have drawn underneath.
 
-    `-mt-1` closes the last of the gap: a mascot's artwork does not reach the
-    bottom of its own box, so a bubble spaced politely below that box sits a
-    visible distance away from the character it belongs to. Overlapping by a
-    hair is what makes the two read as one object.
+    `tail="left"`, centred: Koda stands to the left of it, always, so the tail
+    has one job and can be pinned rather than measured.
+
+    Speaking and resting are the same bubble, differing only in whether the words
+    arrive one at a time. Swapping the contents rather than opening a second
+    surface is what stops the row resizing when the voice starts, and what
+    guarantees a child never sees the line twice.
   */
-  const tailFromRight = guideSize / 2;
-
   return (
     <motion.div
       variants={bubbleVariants}
-      style={{ transformOrigin: `calc(100% - ${tailFromRight}px) 0px` }}
-      className="absolute top-full right-0 -mt-1 z-30 w-[min(20rem,72vw)]"
+      // Its own state machine. It used to inherit `initial`/`animate` from the
+      // guide it hung inside; standing beside them, it has to drive itself.
+      initial="hidden"
+      animate="visible"
+      exit="gone"
+      /*
+        Pulled in until the tail touches Koda.
+
+        Three separate gaps sat between the two and only one of them was a real
+        margin. The row's own `gap`; the tail, which sticks out ~6px past the
+        bubble's box, so any gap measured between boxes is bigger than the one
+        you see; and the mascot's artwork, which does not reach the edges of its
+        own square. Netting them out takes a negative margin — a bubble whose
+        tail stops short points at empty air beside a character rather than at
+        the character, and the two stop reading as one thing.
+      */
+      className={`-ml-4 max-w-[42ch] ${compact ? "text-xs" : "text-sm"}`}
     >
-      <SpeechBubble tail="top" align="end" tailOffset={tailFromRight}>
-        <span className="sr-only" role="status" aria-live="polite">
-          {text}
-        </span>
-        <p aria-hidden="true">
+      <SpeechBubble tail="left" align="center">
+        {/*
+          A live region only while the voice is running.
+
+          The bubble stays on the board now, so a `role="status"` inside it would
+          be a permanent live region — and a live region that never closes
+          re-announces its contents on any change near it, which is a screen
+          reader talking over the child's own work. While speaking it is the
+          right thing: one region carrying the whole sentence, rather than
+          fifteen spans read one at a time. At rest the words below simply stop
+          being `aria-hidden` and are read as ordinary text.
+        */}
+        {speaking && (
+          <span className="sr-only" role="status" aria-live="polite">
+            {text}
+          </span>
+        )}
+        <p
+          aria-hidden={speaking || undefined}
+          className={`text-left font-semibold tracking-tight leading-snug ${
+            isDark ? "text-slate-100" : "text-slate-700"
+          }`}
+        >
           {tokenize(text).map((token, index) => {
             if (token.isSpace) return <span key={index}> </span>;
-            const delay = reduce ? 0 : 0.42 + wordIndex++ * WORD_REVEAL_S;
+            const delay = !speaking || reduce ? 0 : 0.42 + wordIndex++ * WORD_REVEAL_S;
             return (
               <motion.span
                 key={index}
-                initial={reduce ? false : { opacity: 0, y: 3 }}
+                initial={!speaking || reduce ? false : { opacity: 0, y: 3 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay, duration: 0.18 }}
                 className={
@@ -267,9 +310,7 @@ const Guide: React.FC<{
   style?: string | null;
   reduce: boolean;
   size: number;
-  /** The line being spoken, shown as Koda's bubble. */
-  script?: string;
-}> = ({ role, cast, component, style, reduce, size, script }) => {
+}> = ({ role, cast, component, style, reduce, size }) => {
   const { document, state } = useActor(role, style, cast?.[role], component);
   /*
     The artwork alone — no card, no nameplate.
@@ -304,7 +345,6 @@ const Guide: React.FC<{
         style={{ width: size }}
       >
         <KodaMascot state={state} document={document} size={size} motionLevel="none" />
-        {script && <Bubble text={script} reduce guideSize={size} />}
       </motion.div>
     );
   }
@@ -340,13 +380,6 @@ const Guide: React.FC<{
         <KodaMascot state={state} document={document} size={size} motionLevel="full" />
       </motion.div>
 
-      {/*
-        Outside the jumping element on purpose: a bubble that squashed and
-        stretched with the landing would be a speech bubble made of rubber. It
-        is anchored to the frame, which never moves, and opens once Koda is
-        down.
-      */}
-      {script && <Bubble text={script} reduce={false} guideSize={size} />}
     </motion.div>
   );
 };
@@ -559,6 +592,33 @@ export const SharedCanvasLayout = forwardRef<HTMLDivElement, SharedCanvasLayoutP
   }, []);
 
   const isCompact = compact || narrow;
+
+  /*
+    Koda can be sent away, and asked back.
+
+    Dragging moves the guide off the object it is covering; dismissing is for the
+    child who does not want a character on the board at all — or the teacher on a
+    projector who needs the artwork clean. It is deliberately *not* sticky across
+    slides: the next question re-reads itself, and a guide dismissed on a board
+    about apples should not be missing from the next one about sharing.
+
+    Hidden leaves a small speaker-shaped way back rather than nothing, because a
+    control that removes itself along with the thing it removed is a control a
+    child cannot undo.
+  */
+  const [guideHidden, setGuideHidden] = useState(false);
+
+  /*
+    A drag is not a tap.
+
+    Koda is dismissed by tapping the character, and the character is also the
+    drag handle — so a drag that ends over the same spot would otherwise fire the
+    dismiss and make the guide vanish when a child only meant to move it. Motion
+    calls `onDragStart` once a drag genuinely begins, past its own threshold,
+    which is exactly the signal needed: anything that dragged is not a tap.
+  */
+  const guideDragged = useRef(false);
+
   const safeGridSize = Math.max(8, Math.min(80, Math.round(gridSize)));
   const majorGridSize = safeGridSize * Math.max(2, majorGridEvery);
   const rulerMarks = Array.from({ length: 12 }).map((_, idx) => idx * majorGridSize);
@@ -587,7 +647,22 @@ export const SharedCanvasLayout = forwardRef<HTMLDivElement, SharedCanvasLayoutP
         toolbar cannot retroactively make the floor too tall.
       */
       data-canvas-root=""
-      className={`relative w-full h-full rounded-3xl transition-colors duration-300 overflow-hidden select-none flex flex-col justify-between bg-transparent border-0 shadow-none text-slate-800 dark:text-slate-100 ${
+      /*
+        The board paints its own white.
+
+        `bg-transparent` meant the canvas had no colour of its own and took
+        whichever surface it was dropped onto — white in the launcher, the
+        Studio's `#FBFAFF` in the authoring panel — so the same slide was a
+        different colour depending on who was looking at it, and the one it
+        borrowed most often was a grey wash under artwork drawn to sit on white.
+        A board is a sheet of paper; it should be the same sheet everywhere.
+
+        Light only. In dark mode the launcher's near-black is the intended
+        ground and painting over it would put a slab behind the objects.
+      */
+      className={`relative w-full h-full rounded-3xl transition-colors duration-300 overflow-hidden select-none flex flex-col justify-between border-0 shadow-none text-slate-800 dark:text-slate-100 ${
+        isDark ? "bg-transparent" : "bg-white"
+      } ${
         isCompact ? "min-h-[min(350px,70svh)] gap-1 p-0" : "min-h-[min(460px,70svh)] gap-3 p-1"
       } ${className}`}
       {...restProps}
@@ -686,8 +761,24 @@ export const SharedCanvasLayout = forwardRef<HTMLDivElement, SharedCanvasLayoutP
             `sm:gap-5` fired while the card was measuring itself as narrow. One
             width decides the whole header, and it is the card's own.
           */
-          className={`relative z-20 flex items-start border-b transition-all ${
-            isCompact ? "gap-3 pb-2 px-0.5" : "gap-5 pb-2.5 px-1"
+          /*
+            One column, ranged left, with a rail under it that holds both edges.
+
+            Two arrangements were tried and neither balanced. Koda pinned to the
+            far right of a left-aligned question put the character and the
+            sentence they are saying at opposite ends of a metre of empty space.
+            Centring the stack fixed that pairing and broke everything else: a
+            centred sentence over a left-aligned board has no edge to line up
+            with, so the header floated free of the thing it introduces, and
+            every line started in a different place — a ragged left margin is
+            the hardest kind of text for an emergent reader to track down.
+
+            So: everything ranged left against the board's own margin, and the
+            balance comes from the rail below, which is pushed out to both edges
+            rather than from centring anything.
+          */
+          className={`relative z-20 flex flex-col border-b transition-all ${
+            isCompact ? "pb-2 px-0.5" : "pb-2.5 px-1"
           } ${isDark ? "text-slate-100 border-white/[0.07]" : "text-slate-800 border-black/[0.06]"}`}
         >
           {/*
@@ -696,22 +787,23 @@ export const SharedCanvasLayout = forwardRef<HTMLDivElement, SharedCanvasLayoutP
             with the row crowding the sentence it serves. `gap-1` above, `mt-2.5`
             below: label and heading are one object, the controls answer to it.
           */}
-          <div className="min-w-0 flex-1 flex flex-col gap-1">
+          <div className="min-w-0 w-full flex flex-col gap-1">
             {/*
-              Dropped for a learner, and only for a learner.
+              A real eyebrow only — never the component's name.
 
-              This canvas does not sit alone: the launcher wraps it, and its
-              navbar already carries the slide's name a hundred pixels above.
-              With no `questionEyebrow` of its own a canvas falls back to its
-              activity name, so a Count slide titled "Count" printed the word
-              twice on one screen — and the second one is the row a child cannot
-              read and does not need. An author keeps it, because for them it is
-              the label that says which component they are looking at.
+              This used to fall back to `headerTitle` when a canvas had nothing
+              better, which printed "COUNT" over a counting board. It said
+              nothing a child could use and nothing an author did not already
+              know: the launcher's navbar carries the slide's name, the Studio's
+              panel names the component twice over, and the board itself is
+              plainly a counting board. It was a row of chrome asserting the
+              obvious in the most prominent colour on the card.
 
-              A canvas with a real eyebrow — a unit, a skill — keeps it either
-              way. That is context, not a repeated title.
+              A unit, a skill, "Lesson 4 · Place value" — that is context, and it
+              still shows, for learner and author alike. The difference is that
+              it has to be *given*, not derived from what the component is called.
             */}
-            {(questionEyebrow || (headerTitle && !learnerMode)) && (
+            {questionEyebrow && (
               <div
                 className={`font-black uppercase tracking-[0.16em] truncate leading-none ${
                   isCompact ? "text-[10px]" : "text-[11px]"
@@ -722,9 +814,24 @@ export const SharedCanvasLayout = forwardRef<HTMLDivElement, SharedCanvasLayoutP
             )}
 
             {/*
-              Sized to be read from the back of a room, and weighted below the
-              eyebrow's black so the sentence reads as prose rather than as a
-              banner.
+              Read from across a room, but still a sentence — set well below the
+              eyebrow's black so it reads as prose rather than as a banner.
+
+              `font-medium`, not `semibold`. The display face this ships with is
+              already dense at 24px, so 600 gave a heading that shouted a line a
+              child is meant to read calmly and then work under. Size carries the
+              hierarchy here; the weight does not have to as well.
+
+              24px on a wide card, down from 28. At 28 a full-width board gave
+              the question the presence of a page title, and it is not one: it
+              is the line a child reads once and then works under, sharing the
+              header with a button, a chip and Koda. 24 still carries the row
+              without flattening everything beside it.
+
+              One size per branch, no `sm:`/`md:` ramp inside it. The card
+              already measured itself to pick the branch — asking the viewport a
+              second question inside that answer is how a 600px card in a wide
+              window ended up with the full-width type.
 
               Two lines on a wide card, three on a narrow one. The clamp was
               flat at two on the argument that truncating beats pushing the
@@ -736,66 +843,225 @@ export const SharedCanvasLayout = forwardRef<HTMLDivElement, SharedCanvasLayoutP
               guidance, not the question. Wide cards keep two, because at
               1.75rem a third line is a banner.
             */}
-            <h2
-              className={`font-semibold tracking-tight leading-[1.15] ${
-                isCompact ? "text-lg line-clamp-3" : "text-xl sm:text-2xl md:text-[1.75rem] line-clamp-2"
-              } ${isDark ? "text-slate-50" : "text-slate-900"}`}
-            >
-              {questionText}
-            </h2>
-
             {/*
-              No top padding. Three stacked rows plus a 124px guide was spending
-              close to a third of the launcher's height on chrome, and the thing
-              that height is *for* is the board — the objects a child has to
-              count are what the screen is on loan to. The gaps are the cheapest
-              place to give it back.
+              The speaker sits in front of the sentence it reads.
+
+              It was a "Listen" pill on its own row beneath the question, which
+              cost a line of height and read as a control standing next to the
+              thing it acts on rather than part of it. In front of the first
+              word it is unambiguous — press the speaker, hear this — and the
+              row it used to occupy goes back to the board.
+
+              `items-baseline` so the icon sits on the sentence's own baseline
+              rather than in the middle of a block that may run to three lines,
+              and `shrink-0` so a long question never squeezes it.
             */}
-            {(readAloudText || headerActions) && (
-              <div className={`flex flex-wrap items-center mt-1.5 ${isCompact ? "gap-1.5" : "gap-2"}`}>
-                {readAloudText && (
-                  <SpeechReadAloudButton text={readAloudText} isDark={isDark} onSpeakingChange={onSpeakingChange} />
-                )}
-                {headerActions}
-              </div>
-            )}
+            {/*
+              One row: speaker, question, state.
+
+              The chip had a line to itself under the question, which on a wide
+              card left a band of empty space with a small pill adrift at the far
+              end of it — and pushed the board down by a row to do it. Up here it
+              holds the right margin against the question holding the left, on
+              the line they share.
+
+              `items-start` and not `items-center`: the question is the tall
+              element and may run to two or three lines, and a chip centred
+              against a three-line heading floats in the middle of nowhere. Level
+              with the first line is where the eye already is.
+
+              `flex-1` on the question so it takes the room left over and wraps
+              inside it, `shrink-0` on the chip so a long question shortens the
+              sentence rather than squeezing the number.
+            */}
+            <div className={`flex items-start ${isCompact ? "gap-1.5" : "gap-2"}`}>
+              {readAloudText && (
+                <SpeechReadAloudButton
+                  text={readAloudText}
+                  isDark={isDark}
+                  onSpeakingChange={onSpeakingChange}
+                  label={null}
+                  size="sm"
+                  className="shrink-0 px-0 w-8"
+                />
+              )}
+              <h2
+                className={`min-w-0 flex-1 font-medium tracking-tight leading-[1.2] ${
+                  isCompact ? "text-lg line-clamp-3" : "text-2xl line-clamp-2"
+                } ${isDark ? "text-slate-50" : "text-slate-900"}`}
+              >
+                {questionText}
+              </h2>
+              {headerActions && (
+                <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">{headerActions}</div>
+              )}
+            </div>
           </div>
 
           {/*
-            Koda stands to the side of the question, never over the board.
+            The floating guide, hanging below the header rule.
 
-            Arrival is tied to the voice — the character jumps in the first time
-            the question is read — and after that they stay, changing role as the
-            question moves. Leaving on the last syllable was the wrong instinct:
-            a guide who vanishes the moment they stop talking is never around to
-            react to the answer, which is most of what a guide is for.
+            `absolute … top-full` rather than a row in the flow: the character is
+            transient — it arrives with the voice, changes with the answer, and
+            can be dismissed outright — and a transient thing that owns permanent
+            layout spends the board's height whether or not anybody is standing
+            there. On this canvas that height is the whole point; it was the
+            difference between a keypad that fits and one that gets cut off.
+
+            Anchored to `top-full` so it starts *below* the rule instead of
+            straddling it, and `pointer-events-none` so the board underneath
+            stays reachable — the guide itself takes them back, since it is
+            draggable and carries its own dismiss.
+
+            Arrival is still tied to the voice — the character jumps in the first
+            time the question is read, and an answer brings them in too — and
+            after that they stay, changing role as the question moves.
 
             A narrow card shrinks the guide rather than dropping it. Suppressing
             it on `isCompact` looked reasonable and was wrong in the place this
             is most often looked at: the Studio's canvas panel is ~530px, under
             the compact threshold, so an author pressed Listen and no character
             ever appeared — the feature was invisible exactly where it is
-            authored. 64px still reads as a face, which is all it has to do.
+            authored.
           */}
-          <AnimatePresence>
-            {guideRole && hasSpoken && (
-              <Guide
-                key="guide"
-                // Speaking wins: the layout owns its own read-aloud button, so
-                // it knows better than the canvas whether a sentence is running.
-                role={speaking ? "talking" : guideRole}
-                cast={guideCast}
-                component={guideComponent}
-                style={guideStyle}
-                reduce={!!reduceMotion}
-                size={isCompact ? 64 : 124}
-                // The line the voice is reading, written down beside the reader.
-                // Only while it is actually being read — a bubble left open over
-                // a board a child is working on is a sticky note in the way.
-                script={speaking ? readAloudText : undefined}
-              />
-            )}
-          </AnimatePresence>
+          <div className="absolute inset-x-0 top-full z-30 flex items-start pt-1 pointer-events-none">
+            <AnimatePresence>
+              {guideRole && hasSpoken && guideHidden && (
+                /* The way back. See `guideHidden`. */
+                <motion.button
+                  key="guide-recall"
+                  type="button"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  onClick={() => setGuideHidden(false)}
+                  title="Show Koda"
+                  aria-label="Show Koda"
+                  className={`mt-1 flex h-8 w-8 items-center justify-center rounded-full border-2 pointer-events-auto transition-colors ${
+                    isDark
+                      ? "border-violet-500/40 bg-slate-800/90 text-violet-300 hover:bg-slate-700"
+                      : "border-violet-200 bg-violet-50 text-violet-600 hover:bg-violet-100"
+                  }`}
+                >
+                  <Sparkles size={14} />
+                </motion.button>
+              )}
+
+              {guideRole && hasSpoken && !guideHidden && (
+                /*
+                  Koda can be moved out of the way.
+
+                  A guide that floats over the board will sometimes float over
+                  the one object a child is reaching for, and no default position
+                  is right for every slide, every count and every screen. Rather
+                  than guess, the whole group — character and bubble together —
+                  picks up and puts down wherever it is dropped.
+
+                  `dragConstraints={selfRef}` is the card itself, so Koda cannot
+                  be dragged off the board and stranded outside it.
+                  `dragMomentum={false}` because a thrown mascot that keeps
+                  sliding after the finger lifts is a toy, not a control, and a
+                  child will chase it. `pointer-events-auto` is granted here and
+                  nowhere else on the rail: this is the one part of it that is
+                  meant to be touched.
+                */
+                <motion.div
+                  key="guide-row"
+                  drag
+                  dragConstraints={selfRef}
+                  dragMomentum={false}
+                  dragElastic={0.04}
+                  whileDrag={{ scale: 1.03 }}
+                  /*
+                    Tight. The bubble's tail is what joins it to Koda, and a tail
+                    with a gap in front of it points across empty space at a
+                    character standing somewhere else — the two stop reading as
+                    one object. `-ml-1` on the bubble closes the last of it: the
+                    tail sticks out past the bubble's own box, so a gap measured
+                    between the boxes is bigger than the gap you see.
+                  */
+                  className="flex min-w-0 items-center pt-1 gap-0 pointer-events-auto touch-none cursor-grab active:cursor-grabbing"
+                  onPointerDown={() => {
+                    guideDragged.current = false;
+                  }}
+                  onDragStart={() => {
+                    guideDragged.current = true;
+                  }}
+                >
+                {/*
+                  Tapping the character sends it away.
+
+                  There was a small × floating beside the bubble, and it was the
+                  wrong control twice over: a close button is adult chrome on a
+                  board whose entire vocabulary is "touch the thing you mean",
+                  and hung off a character with no card behind it, it had nothing
+                  to belong to — it read as a stray mark on the board. The
+                  character is the affordance. A child who wants Koda gone pushes
+                  Koda, which is what they would try first anyway.
+                */}
+                <div
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Hide Koda"
+                  title="Hide Koda"
+                  onClick={() => {
+                    if (!guideDragged.current) setGuideHidden(true);
+                  }}
+                  onKeyDown={e => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setGuideHidden(true);
+                    }
+                  }}
+                  className="rounded-full outline-none focus-visible:ring-4 focus-visible:ring-violet-400/40"
+                >
+                  <Guide
+                    // Speaking wins: the layout owns its own read-aloud button,
+                    // so it knows better than the canvas whether a sentence is
+                    // running.
+                    role={speaking ? "talking" : guideRole}
+                    cast={guideCast}
+                    component={guideComponent}
+                    style={guideStyle}
+                    reduce={!!reduceMotion}
+                    /*
+                      Bigger again, now that the guide costs the board nothing.
+
+                      It was cut to 76 when it sat in the layout flow and every
+                      pixel of it pushed the board down. Floating, it spends no
+                      height at all — so the character can be a character. The
+                      face is what carries the mood, and at 76 in a wide card it
+                      was a coloured blob with a bubble next to it.
+                    */
+                    size={isCompact ? 72 : 112}
+                  />
+                </div>
+
+                {/*
+                  What Koda is saying — one bubble, whether or not it is being
+                  read out. See `Bubble` for why the two states share a surface.
+
+                  Suppressed where it would only repeat the heading: a slide with
+                  no instruction of its own falls back to this very sentence for
+                  `questionText`, and the guide should not stand there saying the
+                  thing printed above them in 24px. Speaking overrides that,
+                  because then the bubble is the read-along and its job is to
+                  show *which word* is being said, not which sentence.
+                */}
+                {readAloudText && (speaking || readAloudText.trim() !== String(questionText).trim()) && (
+                  <Bubble
+                    text={readAloudText}
+                    speaking={speaking}
+                    reduce={!!reduceMotion}
+                    compact={isCompact}
+                    isDark={!!isDark}
+                  />
+                )}
+
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       ) : (headerTitle || headerActions || readAloudText) && (
         <div className={`relative z-20 flex flex-wrap justify-between border-b transition-all ${

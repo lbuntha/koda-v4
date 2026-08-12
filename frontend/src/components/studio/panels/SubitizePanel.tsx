@@ -1,5 +1,5 @@
 import React from "react";
-import { PanelProps, PanelSection, SelectField, SliderField } from "../panelKit";
+import { ActorCastField, PanelProps, PanelSection, SelectField, SliderField } from "../panelKit";
 
 export const SubitizePanel: React.FC<PanelProps> = ({ question, updateConfig }) => {
   const count = question.targetCount || 0;
@@ -34,6 +34,9 @@ export const SubitizePanel: React.FC<PanelProps> = ({ question, updateConfig }) 
           { value: "scatter", label: "Scattered (hardest)" }
         ]}
       />
+
+      {/* Who plays each moment of the question. */}
+      <ActorCastField config={question.config} updateConfig={updateConfig} />
     </PanelSection>
   );
 };

@@ -8,7 +8,7 @@
  */
 
 import React from "react";
-import { PanelProps } from "../panelKit";
+import { ActorCastField, PanelProps } from "../panelKit";
 import { Sparkles, Bot, Palette, Pencil, Zap, Compass, Shield } from "lucide-react";
 import { Button, Label, Select, Switch } from "../../ui";
 import {
@@ -34,7 +34,7 @@ const THEME_ICONS: Record<string, React.ReactElement> = {
   shield: <Shield size={14} className="text-emerald-500" />,
 };
 
-export const XtraMathPanel: React.FC<PanelProps> = ({ question, update }) => {
+export const XtraMathPanel: React.FC<PanelProps> = ({ question, update, updateConfig }) => {
   const config = question.config || {};
   const currentLevelId = config.levelId || "xm_level_1";
   const currentThemeId = config.themeId || "classic";
@@ -193,6 +193,9 @@ export const XtraMathPanel: React.FC<PanelProps> = ({ question, update }) => {
         </div>
       </div>
 
+
+      {/* Who plays each moment of the question. */}
+      <ActorCastField config={question.config} updateConfig={updateConfig} />
     </div>
   );
 };

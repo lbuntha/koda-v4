@@ -486,6 +486,25 @@ async def delete_grade(key: str, user: User = Depends(get_current_admin)):
     await _catalog_audit(user, "grade", "deleted", item.revision, {"key": key, "before": _grade_out(item)})
 
 
+def _subject_fields(body: SubjectIn, exclude: set[str]) -> dict:
+    """A subject's stored fields, with its icon snapshot in the client's shape.
+
+    A plain `model_dump()` writes the *field* names of the nested asset, and one
+    of them is aliased: `mascot_category` on the way out, `mascotCategory` on the
+    way in and everywhere in the frontend. So a round trip renamed the field and
+    a subject icon marked as a mascot part came back without its category — plus
+    every subject saved since carried a `mascot_category: null` the client never
+    sent and cannot read.
+
+    `by_alias` and `exclude_none` are what the SVG library endpoint already uses
+    for the same model. This makes the two agree.
+    """
+    values = body.model_dump(exclude=exclude)
+    if "icon_asset" not in exclude:
+        values["icon_asset"] = body.icon_asset.model_dump(by_alias=True, exclude_none=True) if body.icon_asset else None
+    return values
+
+
 @router.post("/subjects", status_code=status.HTTP_201_CREATED)
 async def create_subject(body: SubjectIn, user: User = Depends(get_current_admin)):
     if body.revision != 0:
@@ -493,7 +512,7 @@ async def create_subject(body: SubjectIn, user: User = Depends(get_current_admin
     if not await Grade.find_one(Grade.key == body.grade_id):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Selected grade does not exist")
     item = Subject(
-        **body.model_dump(exclude={"revision"}),
+        **_subject_fields(body, {"revision"}),
         revision=1,
         created_by=str(user.id),
         updated_by=str(user.id),
@@ -518,7 +537,7 @@ async def update_subject(key: str, body: SubjectIn, user: User = Depends(get_cur
     if body.revision != item.revision:
         raise HTTPException(status.HTTP_409_CONFLICT, "Subject changed in another session; reload before saving")
     before = _subject_out(item)
-    for field, value in body.model_dump(exclude={"revision", "key", "grade_id"}).items():
+    for field, value in _subject_fields(body, {"revision", "key", "grade_id"}).items():
         setattr(item, field, value)
     item.revision += 1
     item.updated_by = str(user.id)

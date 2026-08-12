@@ -124,6 +124,14 @@ export const ABSORBED_TECHNIQUES: ReadonlyMap<CountingTechnique, CountingTechniq
   [CountingTechnique.COUNT_ON, CountingTechnique.MOVE_AND_COUNT],
   [CountingTechnique.COUNT_BACK, CountingTechnique.MOVE_AND_COUNT],
   [CountingTechnique.DIFFERENT_ARRANGEMENTS, CountingTechnique.MOVE_AND_COUNT],
+  /*
+    Koda Subtraction, absorbed into Koda Add & Subtract. It was a second picker
+    entry for the same activity with the operation reversed — see `SumCanvas`.
+    Absorbed rather than retired, because every subtraction slide already
+    written still opens: the id routes here and `operationFor` reads it back as
+    the mechanic the slide was authored for, with nothing to migrate.
+  */
+  [CountingTechnique.SUBTRACTION_SANDBOX, CountingTechnique.ADDITION_SANDBOX],
 ]);
 
 /**

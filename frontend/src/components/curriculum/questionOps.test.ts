@@ -19,13 +19,24 @@ const live = Object.values(CountingTechnique)
 test("Curriculum Add Question exposes every registered component", () => {
   assert.equal(ALL_TECHNIQUES.length, live.length);
   assert.deepEqual(new Set(TECHNIQUE_OPTIONS.map(option => option.id)), new Set(live));
-  assert.deepEqual(new Set(Object.keys(CANVAS_BY_TECHNIQUE)), new Set(live));
   assert.deepEqual(new Set(SCHEMA_REGISTRY.map(schema => schema.technique)), new Set(live));
-  // Panels are the one registry an absorbed technique stays in — see below.
-  assert.deepEqual(
-    new Set(Object.keys(TECHNIQUE_PANELS)),
-    new Set([...live, ...ABSORBED_TECHNIQUES.keys()]),
-  );
+
+  /*
+    Panels *and canvases* keep the absorbed ids; only the picker and the AI
+    schemas drop them. A question published on an absorbed id still has to open
+    and still has to render, and it renders as the game that absorbed it.
+
+    The canvas half used to be `live` alone, with the hosts falling back to
+    `CountCanvas` on a miss. That was safe only while every absorbed technique
+    was a counting one: Koda Subtraction being absorbed into Koda Add & Subtract
+    would have opened every saved subtraction slide as a counting board.
+  */
+  for (const registry of [TECHNIQUE_PANELS, CANVAS_BY_TECHNIQUE]) {
+    assert.deepEqual(
+      new Set(Object.keys(registry)),
+      new Set([...live, ...ABSORBED_TECHNIQUES.keys()]),
+    );
+  }
 });
 
 /**
@@ -66,6 +77,20 @@ test("a retired or absorbed component keeps its identity for released content", 
   // them. The enum entry is what keeps that old data resolvable.
   for (const technique of [...RETIRED_TECHNIQUES, ...ABSORBED_TECHNIQUES.keys()]) {
     assert.ok(Object.values(CountingTechnique).includes(technique), `${technique} left the enum`);
+  }
+});
+
+test("an absorbed technique is built from the component that absorbed it", () => {
+  /*
+    Not theoretical: `FillWithAiDrawer` seeds its placeholder with `ONE_TO_ONE`,
+    absorbed into Move & Count, so opening "Fill with AI" on a skill with no
+    questions yet threw "component is not registered" and took the drawer with
+    it. Absorbed ids already render and already edit; only creation threw.
+  */
+  for (const [absorbed, owner] of ABSORBED_TECHNIQUES) {
+    const question = createBlankSkillQuestion(absorbed, "skill-test");
+    assert.equal(question.technique, owner, `${absorbed} should be built as ${owner}`);
+    assert.ok(question.instruction.trim(), `${absorbed} must have an instruction`);
   }
 });
 

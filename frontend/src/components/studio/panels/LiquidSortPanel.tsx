@@ -1,8 +1,8 @@
 import React from "react";
-import { PanelProps } from "../panelKit";
+import { ActorCastField, PanelProps } from "../panelKit";
 import { LIQUID_SORT_CURRICULUM_LEVELS, getCurriculumLevel } from "../../canvases/liquidSortLevels";
 
-export const LiquidSortPanel: React.FC<PanelProps> = ({ question, update }) => {
+export const LiquidSortPanel: React.FC<PanelProps> = ({ question, update, updateConfig }) => {
   const currentLevelId = (question.config as any)?.levelId || "level_1";
   const selectedLevel = getCurriculumLevel(currentLevelId);
 
@@ -83,6 +83,9 @@ export const LiquidSortPanel: React.FC<PanelProps> = ({ question, update }) => {
           className="w-full text-xs p-2.5 border border-slate-200 rounded-md bg-white font-medium"
         />
       </div>
+
+      {/* Who plays each moment of the question. */}
+      <ActorCastField config={question.config} updateConfig={updateConfig} />
     </div>
   );
 };

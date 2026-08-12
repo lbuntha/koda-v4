@@ -1,9 +1,9 @@
 import React from "react";
-import { PanelProps, PanelSection, SliderField } from "../panelKit";
+import { ActorCastField, PanelProps, PanelSection, SliderField } from "../panelKit";
 import { compareAnswer, normalizeCompareConfig } from "../../canvases/CompareNumbersCanvas";
 
 /** targetCount holds the larger number so the question sorts sensibly; the answer is the symbol. */
-export const CompareNumbersPanel: React.FC<PanelProps> = ({ question, update }) => {
+export const CompareNumbersPanel: React.FC<PanelProps> = ({ question, update, updateConfig }) => {
   const current = normalizeCompareConfig({
     first: question.config.compareFirst,
     second: question.config.compareSecond,
@@ -23,6 +23,9 @@ export const CompareNumbersPanel: React.FC<PanelProps> = ({ question, update }) 
     <PanelSection title={`Compare - answer is "${compareAnswer(current)}"`}>
       <SliderField label="First number" value={current.first} min={0} max={99} onChange={first => apply({ first })} />
       <SliderField label="Second number" value={current.second} min={0} max={99} onChange={second => apply({ second })} />
+
+      {/* Who plays each moment of the question. */}
+      <ActorCastField config={question.config} updateConfig={updateConfig} />
     </PanelSection>
   );
 };

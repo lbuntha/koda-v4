@@ -1092,7 +1092,7 @@ async def get_svg_asset_usage(user: User = Depends(get_current_user)):
 @router.put("/svg-assets")
 async def put_svg_assets(body: SvgLibraryIn, user: User = Depends(get_current_user)):
     owner_id = str(user.id)
-    assets = [asset.model_dump() for asset in body.assets]
+    assets = [asset.model_dump(by_alias=True, exclude_none=True) for asset in body.assets]
     overrides = {key: value.model_dump() for key, value in body.overrides.items()}
     doc = await SvgLibrary.find_one(SvgLibrary.owner_id == owner_id)
     if doc:

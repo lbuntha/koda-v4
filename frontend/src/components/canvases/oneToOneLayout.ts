@@ -105,7 +105,32 @@ const gridColumnsFor = (
     const perRow = Math.max(1, Math.floor(area.width / (OBJECT_SIZE.min * 1.15)));
     return Math.max(1, Math.min(count, perRow));
   }
-  return bestGrid(count, area.width, area.height).columns;
+
+  const best = bestGrid(count, area.width, area.height);
+
+  /*
+    Scatter needs more than one row, or it is not scatter.
+
+    Every other pattern wants `bestGrid`, which picks whatever arrangement makes
+    each object biggest — and in a bin that is wide and short, that is always a
+    single row. For a grid that is the right answer. For scatter it destroys the
+    thing: jitter along one row is a wobbly line, and "count the scattered ones"
+    becomes "count the ones already laid out in order", which is the easier
+    exercise the teacher deliberately did not pick.
+
+    So scatter takes a second row as soon as one will fit — two rows of the
+    smallest object we would ever draw — and only falls back to the biggest-fit
+    grid when the bin is genuinely too short to hold two. Objects come out
+    smaller than `bestGrid` would have made them; that is the trade, and it is
+    the right way round, because a scatter that reads as a line is not a smaller
+    version of the exercise, it is a different one.
+  */
+  if (pattern === "scatter" && best.rows === 1 && count >= 4) {
+    const twoRowsFit = area.height >= OBJECT_SIZE.min * 2 * 1.15;
+    if (twoRowsFit) return Math.ceil(count / 2);
+  }
+
+  return best.columns;
 };
 
 /** Object centres for a pattern, independent of how big the objects end up. */

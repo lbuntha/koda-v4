@@ -52,9 +52,15 @@ test("does not match a component keyword inside another word", () => {
     detectTechniqueFromPrompt("Create one counting question with 5 stars").technique,
     CountingTechnique.MOVE_AND_COUNT,
   );
+  /*
+    "eat" is a subtraction keyword, and subtraction is Koda Add & Subtract now —
+    one component, both operations, routed by `operation` in the config it
+    generates. It used to answer SUBTRACTION_SANDBOX, which no longer has a
+    manifest of its own to route to.
+  */
   assert.equal(
     detectTechniqueFromPrompt("Let the child eat 2 cookies").technique,
-    CountingTechnique.SUBTRACTION_SANDBOX,
+    CountingTechnique.ADDITION_SANDBOX,
   );
 });
 

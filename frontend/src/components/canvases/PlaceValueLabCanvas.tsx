@@ -25,6 +25,7 @@ import {
   targetPlaces,
 } from "./placeValueModel";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
+import { guidePropsFor } from "../../features/koda-mascot";
 import { CanvasProps } from "./types";
 import { balancedChoiceOrder } from "./choiceOrder";
 
@@ -239,9 +240,15 @@ export const PlaceValueLabCanvas: React.FC<CanvasProps> = ({
       isDark={isDark}
       compact={compact}
       accent={accent}
-      headerIcon={<Boxes size={17} />}
-      headerTitle="Place Value Lab"
-      headerSubtitle={config.task === "read_number" ? "What number do the blocks show?" : `${TASK_LABELS[config.task]} ${config.target}`}
+      /*
+        The question leads — see `CountCanvas` for the standard. The activity's
+        own name and its meta line move out of the prominent slot; what a child
+        has to do takes it, and does not change while they work.
+      */
+      questionText={question.instruction?.trim() || instruction}
+      /* The four moments, cast from Mascot Studio — see `casting.ts`. */
+      guideRole={solved ? "celebrating" : selected !== null ? "oops" : "waiting"}
+      {...guidePropsFor(question)}
       readAloudText={instruction}
       headerActions={(
         <>

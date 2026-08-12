@@ -1,6 +1,6 @@
 import React from "react";
 import { Input, Label } from "../../ui";
-import { PanelProps } from "../panelKit";
+import { ActorCastField, PanelProps } from "../panelKit";
 import {
   MULTIPLICAND_MAX,
   MULTIPLICAND_MIN,
@@ -12,7 +12,7 @@ import {
   describeMultiplicationMode,
 } from "../../canvases/columnMultiplicationModel";
 
-export const ColumnMultiplicationPanel: React.FC<PanelProps> = ({ question, update }) => {
+export const ColumnMultiplicationPanel: React.FC<PanelProps> = ({ question, update, updateConfig }) => {
   const model = buildColumnMultiplicationModel(
     question.config?.multiplicand ?? 234,
     question.config?.multiplier ?? 56,
@@ -84,6 +84,9 @@ export const ColumnMultiplicationPanel: React.FC<PanelProps> = ({ question, upda
           Optional. Leave blank for an instruction generated from the two factors.
         </p>
       </div>
+
+      {/* Who plays each moment of the question. */}
+      <ActorCastField config={question.config} updateConfig={updateConfig} />
     </div>
   );
 };

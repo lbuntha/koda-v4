@@ -19,7 +19,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { Volume2, VolumeX, RotateCcw, Move } from "lucide-react";
-import { KodaMascot, type KodaMascotState } from "../../features/koda-mascot";
+import {
+  KodaMascot,
+  useActor,
+  type ActorRole,
+  type GuideCast,
+  type KodaMascotState,
+} from "../../features/koda-mascot";
 import { KodaVoice, toSpeech } from "./kodaVoice";
 import { tokenize, sentenceShape } from "./kodaText";
 
@@ -155,7 +161,44 @@ export interface KodaActorProps {
   /** Liveliness. Default "full"; OS reduce-motion always wins. */
   animation?: KodaAnimation;
   className?: string;
+
+  /*
+    ── Casting ─────────────────────────────────────────────────────────────
+
+    These three are the same trio `SharedCanvasLayout` takes, with the same
+    names, so a canvas spreads `guidePropsFor(question)` here exactly as it does
+    there and the two paths cannot drift.
+
+    Until this existed, `KodaActor` drew `KodaMascot` with no document at all —
+    which meant the built-in starter, always. A school could draw its own Koda
+    in Mascot Studio, cast it per moment on a counting board, and then open a
+    column-addition slide and be met by the stock character with no way to
+    change it. The feature simply stopped at the edge of the canvases that use
+    this component.
+  */
+  /** The slide's actor, by saved-style name or built-in preset id. */
+  guideStyle?: string | null;
+  /** Per-moment casting from the Studio. Wins over `guideStyle`. */
+  guideCast?: GuideCast;
+  /** Which activity is asking, so a component can have its own house cast. */
+  guideComponent?: string;
 }
+
+/**
+ * Mood → the moment being cast.
+ *
+ * `KodaActor` has finer moods than a question has moments: "think" and "idle"
+ * are both a guide waiting on a child, and both are cast from the waiting
+ * style. The mood still drives the *body language* below — this only decides
+ * whose face is doing it.
+ */
+const MOOD_ROLE: Record<KodaMood, ActorRole> = {
+  idle: "waiting",
+  think: "waiting",
+  talking: "talking",
+  cheer: "celebrating",
+  oops: "oops",
+};
 
 /** Icon buttons are borderless — background only appears on hover. */
 const ghostButton =
@@ -175,6 +218,9 @@ export const KodaActor: React.FC<KodaActorProps> = ({
   autoSpeak = true,
   animation = "full",
   className = "",
+  guideStyle,
+  guideCast,
+  guideComponent,
 }) => {
   const containerWidth = useContainerWidth(dragConstraints);
   // Until the container is measured, assume roomy so the bubble does not
@@ -222,6 +268,20 @@ export const KodaActor: React.FC<KodaActorProps> = ({
   const activeMood: KodaMood = (speaking && mood === "idle" ? "talking" : mood) as KodaMood;
   const badge = MOOD_BADGE[activeMood];
   const glow = MOOD_GLOW[activeMood];
+
+  /*
+    Whose face. Resolved through the same hook the counting boards use, so a
+    style saved in Mascot Studio shows up here without this component knowing
+    anything about styles, ids or fetching. `undefined` — nothing saved, or a
+    learner, whose token cannot read the endpoint — is `KodaMascot`'s cue to
+    draw the built-in starter, which is what this always did.
+  */
+  const { document: actorDocument } = useActor(
+    MOOD_ROLE[activeMood],
+    guideStyle,
+    guideCast?.[MOOD_ROLE[activeMood]],
+    guideComponent,
+  );
 
   // Outer element owns placement and dragging; it must never carry an `animate`
   // transform, or re-renders (which happen on every tap) would yank a bubble
@@ -288,6 +348,7 @@ export const KodaActor: React.FC<KodaActorProps> = ({
 
           <KodaMascot
             state={MOOD_STATE[activeMood]}
+            document={actorDocument}
             size={48}
             motionLevel={level}
             physics={level === "none" ? "none" : "secondary"}

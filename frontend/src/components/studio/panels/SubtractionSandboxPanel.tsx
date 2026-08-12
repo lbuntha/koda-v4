@@ -1,7 +1,7 @@
 import React from "react";
 import { Label, Input } from "../../ui";
 import { CPASwitcherPill } from "../../../pedagogy";
-import { PanelProps } from "../panelKit";
+import { ActorCastField, PanelProps } from "../panelKit";
 
 export const SubtractionSandboxPanel: React.FC<PanelProps> = ({ question, update, updateConfig }) => (
 
@@ -55,5 +55,7 @@ export const SubtractionSandboxPanel: React.FC<PanelProps> = ({ question, update
                         })}
                       />
                     </div>
+                    {/* Who plays each moment of the question. */}
+                    <ActorCastField config={question.config} updateConfig={updateConfig} />
                   </div>
 );

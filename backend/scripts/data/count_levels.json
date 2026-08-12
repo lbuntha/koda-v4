@@ -4,9 +4,11 @@
     "label": "Three in a row",
     "rationale": "The first win. A short line removes every tracking problem so the count is the only task.",
     "tier": "starter",
-    "technique": "ONE_TO_ONE",
+    "technique": "MOVE_AND_COUNT",
     "targetCount": 3,
+    "objectId": "apple",
     "config": {
+      "staging": "tap",
       "pattern": "line",
       "showNumbersOnTap": true,
       "requireAnswerInput": false
@@ -19,9 +21,11 @@
     "label": "Five in a row",
     "rationale": "Same layout, one hand's worth — the count children meet first outside school.",
     "tier": "starter",
-    "technique": "ONE_TO_ONE",
+    "technique": "MOVE_AND_COUNT",
     "targetCount": 5,
+    "objectId": "apple",
     "config": {
+      "staging": "tap",
       "pattern": "line",
       "showNumbersOnTap": true,
       "requireAnswerInput": false
@@ -34,9 +38,11 @@
     "label": "Six in pairs",
     "rationale": "Pairs break the line into groups, the first hint that counting need not be one at a time.",
     "tier": "starter",
-    "technique": "ONE_TO_ONE",
+    "technique": "MOVE_AND_COUNT",
     "targetCount": 6,
+    "objectId": "apple",
     "config": {
+      "staging": "tap",
       "pattern": "pairs",
       "showNumbersOnTap": true,
       "requireAnswerInput": false
@@ -49,12 +55,30 @@
     "label": "Eight in a line, no numbers",
     "rationale": "The tap numbers come off. The child now has to hold the running count themselves.",
     "tier": "starter",
-    "technique": "ONE_TO_ONE",
+    "technique": "MOVE_AND_COUNT",
     "targetCount": 8,
+    "objectId": "apple",
     "config": {
+      "staging": "tap",
       "pattern": "line",
       "showNumbersOnTap": false,
       "requireAnswerInput": true
+    },
+    "usable": true,
+    "problems": []
+  },
+  {
+    "id": "count_15",
+    "label": "Five into the jar",
+    "rationale": "Nothing to line up and nowhere wrong to put it — the count is the only thing being asked for.",
+    "tier": "starter",
+    "technique": "MOVE_AND_COUNT",
+    "targetCount": 5,
+    "objectId": "apple",
+    "config": {
+      "staging": "container",
+      "containerShape": "jar",
+      "requireAnswerInput": false
     },
     "usable": true,
     "problems": []
@@ -64,9 +88,11 @@
     "label": "Seven in a circle",
     "rationale": "A circle has no first or last object, so the child must choose a start and remember it.",
     "tier": "developing",
-    "technique": "DIFFERENT_ARRANGEMENTS",
+    "technique": "MOVE_AND_COUNT",
     "targetCount": 7,
+    "objectId": "apple",
     "config": {
+      "staging": "arrangements",
       "pattern": "circle",
       "requireAnswerInput": true
     },
@@ -78,9 +104,11 @@
     "label": "Nine in a grid",
     "rationale": "A grid rewards counting by rows — the first arrangement where a strategy beats one-by-one.",
     "tier": "developing",
-    "technique": "DIFFERENT_ARRANGEMENTS",
+    "technique": "MOVE_AND_COUNT",
     "targetCount": 9,
+    "objectId": "apple",
     "config": {
+      "staging": "arrangements",
       "pattern": "grid",
       "requireAnswerInput": true
     },
@@ -92,9 +120,11 @@
     "label": "Ten scattered",
     "rationale": "Scatter is the real test of one-to-one: nothing on screen says which have been counted.",
     "tier": "developing",
-    "technique": "DIFFERENT_ARRANGEMENTS",
+    "technique": "MOVE_AND_COUNT",
     "targetCount": 10,
+    "objectId": "apple",
     "config": {
+      "staging": "arrangements",
       "pattern": "scatter",
       "requireAnswerInput": true
     },
@@ -106,10 +136,88 @@
     "label": "Twelve scattered",
     "rationale": "The top of what tracking alone can carry — and the reason the next tier changes strategy.",
     "tier": "developing",
-    "technique": "DIFFERENT_ARRANGEMENTS",
+    "technique": "MOVE_AND_COUNT",
     "targetCount": 12,
+    "objectId": "apple",
     "config": {
+      "staging": "arrangements",
       "pattern": "scatter",
+      "requireAnswerInput": true
+    },
+    "usable": true,
+    "problems": []
+  },
+  {
+    "id": "count_16",
+    "label": "Nine into the basket",
+    "rationale": "The same free placement at a count where the child has to keep track of what already went in.",
+    "tier": "developing",
+    "technique": "MOVE_AND_COUNT",
+    "targetCount": 9,
+    "objectId": "apple",
+    "config": {
+      "staging": "container",
+      "containerShape": "basket",
+      "requireAnswerInput": true
+    },
+    "usable": true,
+    "problems": []
+  },
+  {
+    "id": "count_17",
+    "label": "Eight moved across",
+    "rationale": "Moving each one is its own record: what is left in the first bin is what is still to count.",
+    "tier": "developing",
+    "technique": "MOVE_AND_COUNT",
+    "targetCount": 8,
+    "objectId": "apple",
+    "config": {
+      "staging": "move",
+      "requireAnswerInput": true
+    },
+    "usable": true,
+    "problems": []
+  },
+  {
+    "id": "count_18",
+    "label": "Twelve moved across",
+    "rationale": "Past what tracking alone carries, so the act of moving is doing the remembering.",
+    "tier": "developing",
+    "technique": "MOVE_AND_COUNT",
+    "targetCount": 12,
+    "objectId": "apple",
+    "config": {
+      "staging": "move",
+      "requireAnswerInput": true
+    },
+    "usable": true,
+    "problems": []
+  },
+  {
+    "id": "count_19",
+    "label": "Six onto numbered places",
+    "rationale": "The first level where the slot is the number — being fifth is not the same as there being five.",
+    "tier": "developing",
+    "technique": "MOVE_AND_COUNT",
+    "targetCount": 6,
+    "objectId": "apple",
+    "config": {
+      "staging": "lineup",
+      "requireAnswerInput": true
+    },
+    "usable": true,
+    "problems": []
+  },
+  {
+    "id": "count_20",
+    "label": "Ten onto numbered places",
+    "rationale": "Ordinality at a count that spans two hands, which is where the numbered places start to earn it.",
+    "tier": "secure",
+    "technique": "MOVE_AND_COUNT",
+    "targetCount": 10,
+    "objectId": "apple",
+    "config": {
+      "staging": "lineup",
       "requireAnswerInput": true
     },
     "usable": true,
@@ -120,12 +228,13 @@
     "label": "Count on from five",
     "rationale": "Five are already in the jar. Recounting them is the habit this level is built to break.",
     "tier": "secure",
-    "technique": "COUNT_ON",
+    "technique": "MOVE_AND_COUNT",
     "targetCount": 8,
+    "objectId": "apple",
     "config": {
+      "staging": "counton",
       "baseCount": 5,
       "extraCount": 3,
-      "containerShape": "jar",
       "requireAnswerInput": true
     },
     "usable": true,
@@ -136,12 +245,13 @@
     "label": "Count on from ten",
     "rationale": "Counting on from a ten is the bridge to teen numbers, which the next tier depends on.",
     "tier": "secure",
-    "technique": "COUNT_ON",
+    "technique": "MOVE_AND_COUNT",
     "targetCount": 14,
+    "objectId": "apple",
     "config": {
+      "staging": "counton",
       "baseCount": 10,
       "extraCount": 4,
-      "containerShape": "jar",
       "requireAnswerInput": true
     },
     "usable": true,
@@ -152,26 +262,45 @@
     "label": "Count back from twelve",
     "rationale": "The same move in reverse. Counting back is where addition-only counting comes apart.",
     "tier": "secure",
-    "technique": "COUNT_BACK",
-    "targetCount": 12,
+    "technique": "MOVE_AND_COUNT",
+    "targetCount": 8,
+    "objectId": "apple",
     "config": {
+      "staging": "countback",
       "totalCount": 12,
       "removeCount": 4,
-      "crossOutStyle": "strike",
       "requireAnswerInput": true
     },
     "usable": true,
     "problems": []
   },
   {
-    "id": "count_12",
-    "label": "Make a ten from thirteen",
-    "rationale": "First level where counting one-by-one is the wrong answer: ten and three is faster and truer.",
-    "tier": "extending",
-    "technique": "GROUP_IN_TENS",
-    "targetCount": 13,
+    "id": "count_21",
+    "label": "Twelve socks, counted in twos",
+    "rationale": "Pairs are the first bundle a child already believes in, so twos is where skip counting starts.",
+    "tier": "secure",
+    "technique": "MOVE_AND_COUNT",
+    "targetCount": 12,
+    "objectId": "apple",
     "config": {
-      "sourceBinLabel": "Loose beads",
+      "staging": "skipcount",
+      "totalCount": 12,
+      "skipStep": 2,
+      "requireAnswerInput": true
+    },
+    "usable": true,
+    "problems": []
+  },
+  {
+    "id": "count_25",
+    "label": "Fill one ten",
+    "rationale": "What a ten is, before anything is left over. One frame, exactly full — the child sees ten ones become one thing, which every later rung assumes and none of them taught.",
+    "tier": "extending",
+    "technique": "MOVE_AND_COUNT",
+    "targetCount": 10,
+    "objectId": "apple",
+    "config": {
+      "staging": "tens",
       "showNumbersInSlots": true,
       "requireAnswerInput": true
     },
@@ -179,14 +308,31 @@
     "problems": []
   },
   {
-    "id": "count_13",
-    "label": "Make a ten from seventeen",
-    "rationale": "A fuller second group, so the ten is held while the ones are counted.",
+    "id": "count_12",
+    "label": "One ten and three",
+    "rationale": "The first leftover. Counting one-by-one is now the wrong answer — the full frame is read as ten and the three are counted on from it.",
     "tier": "extending",
-    "technique": "GROUP_IN_TENS",
-    "targetCount": 17,
+    "technique": "MOVE_AND_COUNT",
+    "targetCount": 13,
+    "objectId": "apple",
     "config": {
-      "sourceBinLabel": "Loose beads",
+      "staging": "tens",
+      "showNumbersInSlots": false,
+      "requireAnswerInput": true
+    },
+    "usable": true,
+    "problems": []
+  },
+  {
+    "id": "count_13",
+    "label": "One ten and seven",
+    "rationale": "A leftover too big to take in at a glance, so the ten has to be held while the ones are counted — the point at which the frame is doing real work.",
+    "tier": "extending",
+    "technique": "MOVE_AND_COUNT",
+    "targetCount": 17,
+    "objectId": "apple",
+    "config": {
+      "staging": "tens",
       "showNumbersInSlots": false,
       "requireAnswerInput": true
     },
@@ -195,14 +341,68 @@
   },
   {
     "id": "count_14",
-    "label": "Make a ten from twenty",
-    "rationale": "Two full tens — the top of this ladder, and the doorway to place value.",
+    "label": "Two full tens",
+    "rationale": "Two tens and no ones: the answer is read off the frames alone, which is the doorway to place value and the top of this ladder.",
     "tier": "extending",
-    "technique": "GROUP_IN_TENS",
+    "technique": "MOVE_AND_COUNT",
     "targetCount": 20,
+    "objectId": "apple",
     "config": {
-      "sourceBinLabel": "Loose beads",
+      "staging": "tens",
       "showNumbersInSlots": false,
+      "requireAnswerInput": true
+    },
+    "usable": true,
+    "problems": []
+  },
+  {
+    "id": "count_22",
+    "label": "Twenty counted in fives",
+    "rationale": "Fives past ten: the point where counting one at a time is visibly the slower way to be right.",
+    "tier": "extending",
+    "technique": "MOVE_AND_COUNT",
+    "targetCount": 20,
+    "objectId": "apple",
+    "config": {
+      "staging": "skipcount",
+      "totalCount": 20,
+      "skipStep": 5,
+      "requireAnswerInput": true
+    },
+    "usable": true,
+    "problems": []
+  },
+  {
+    "id": "count_23",
+    "label": "Forty counted in tens",
+    "rationale": "The first board where a single object is worth ten. Four rods, forty blocks — the child says the tens and reads the total off them, which is counting turning into place value.",
+    "tier": "extending",
+    "technique": "MOVE_AND_COUNT",
+    "targetCount": 40,
+    "objectId": "tenrod",
+    "config": {
+      "staging": "skipcount",
+      "totalCount": 40,
+      "skipStep": 10,
+      "assetType": "tenrod",
+      "requireAnswerInput": true
+    },
+    "usable": true,
+    "problems": []
+  },
+  {
+    "id": "count_24",
+    "label": "Ninety counted in tens",
+    "rationale": "Same act, past the point where one-at-a-time is even tempting: nine rods is nine words, ninety cubes is not something a child will ever count twice.",
+    "tier": "extending",
+    "technique": "MOVE_AND_COUNT",
+    "targetCount": 90,
+    "objectId": "tenrod",
+    "config": {
+      "staging": "skipcount",
+      "totalCount": 90,
+      "skipStep": 10,
+      "assetType": "tenrod",
       "requireAnswerInput": true
     },
     "usable": true,

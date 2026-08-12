@@ -1,6 +1,6 @@
 import React from "react";
 import { Label, Input } from "../../ui";
-import { PanelProps } from "../panelKit";
+import { ActorCastField, PanelProps } from "../panelKit";
 
 export const MultiplicationArrayPanel: React.FC<PanelProps> = ({ question, update, updateConfig }) => (
 
@@ -56,5 +56,8 @@ export const MultiplicationArrayPanel: React.FC<PanelProps> = ({ question, updat
                         className="w-4 h-4 text-emerald-600 accent-emerald-600 cursor-pointer"
                       />
                     </div>
-                  </div>
+                
+    {/* Who plays each moment of the question. */}
+    <ActorCastField config={question.config} updateConfig={updateConfig} />
+  </div>
 );

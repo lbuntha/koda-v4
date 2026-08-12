@@ -5,12 +5,12 @@ When the ask is *"make canvas X look/behave like Move & Count"*, this file is th
 Read it, then read the reference canvas, then port.
 
 > **Move & Count is no longer a component.** It is a *staging* of `CountCanvas` — see §10.
-> `MoveAndCountCanvas`, `OneToOneCanvas`, `LineUpCanvas` and `MagnetsCanvas` were four copies
-> of one activity and were merged; their technique ids still resolve, so released content is
-> untouched. Do not re-create them.
+> `MoveAndCountCanvas`, `OneToOneCanvas`, `LineUpCanvas`, `MagnetsCanvas`, `GroupTensCanvas`,
+> `CountOnCanvas`, `CountBackCanvas` and `ArrangementsCanvas` were eight copies of one activity
+> and were merged; their technique ids still resolve, so released content is untouched. Do not
+> re-create them.
 
-Already on the pattern: `CountCanvas`, `GroupTensCanvas`, `CountOnCanvas`,
-`CountBackCanvas`, `ArrangementsCanvas`, `SubitizeCanvas`, `AdditionCanvas`,
+Already on the pattern: `CountCanvas`, `SubitizeCanvas`, `AdditionCanvas`,
 `SubtractionCanvas`, `FlexibleCanvas`, `StoryProblemMatCanvas`, `PlaceValueLabCanvas`,
 `DataChartCanvas`, `MeasureLengthCanvas`.
 
@@ -106,10 +106,11 @@ stage — so its bins cannot flow. They still *are* `CanvasBin`s: the wrapper ca
 position and the bin fills it, so a basket reads the same there as everywhere else. What is
 forbidden is a canvas inventing its own bin chrome, not a canvas positioning one.
 
-**A canvas with no second bin still gets one.** Count Back has nothing to drag between bins,
-so it is one bin for the set plus a short band for the countdown readout — same chrome, same
-tally, same `complete` state. The rule is not "two bins"; it is "every region a child looks at
-is a `CanvasBin`".
+**A canvas with no second bin still gets one.** Count Back has nothing to drag between bins, so
+it is one bin for the set plus a short band for the countdown readout — same chrome, same
+`complete` state. The rule is not "two bins"; it is "every region a child looks at is a
+`CanvasBin`". That band is a `readout` zone (§10): it takes a `flex` slice rather than half the
+stage, draws its own content, and is never a drop target.
 
 ---
 
@@ -406,12 +407,24 @@ physically is. They are now **one engine plus a staging per way of counting**.
 
 - `CountCanvas.tsx` — the engine. Stage measurement, item state, ranking, drag, tap, keyboard,
   badges, sounds, CPA, ghost guide, answer panel, resize.
-- `countStaging/` — one file per staging: `move`, `tap`, `lineup`, `container`. Each owns
-  `zones`, `layout`, `resolve`, `isComplete`, and nothing else.
+- `countStaging/` — one file per staging: `move`, `tap`, `lineup`, `container`, `tens`,
+  `counton`, `countback`, `arrangements`. Each owns `zones`, `layout`, `resolve`, `isComplete`,
+  and nothing else.
 
 **The rule that keeps it honest: if a change needs `if (staging.id === …)` in the engine, it
 belongs in the staging.** Capabilities are declared, not sniffed — `movesOnCount`,
-`ordersByPlacement`, `orientation`, optional `slots()` and `Decoration`.
+`ordersByPlacement`, `orientation`, `objectCount()`, `seedCounted()`, optional `slots()` and
+`Decoration`.
+
+Two of those exist only because Count On does not start at one:
+
+- `objectCount(config, targetCount)` — the board is `baseCount + extraCount`, and these slides
+  carry no `targetCount` at all, so the engine cannot derive it from the question.
+- `seedCounted(config, count)` — the first *n* objects begin counted and ranked. They are the
+  group the child counts *on* from, so the engine seeds them, `reset` returns to them rather
+  than to an empty board, and a new question rebuilds them.
+
+Both default to the plain behaviour, so the other four stagings never mention them.
 
 Two invariants the engine owns for every staging, because both were bugs before:
 
@@ -421,9 +434,86 @@ Two invariants the engine owns for every staging, because both were bugs before:
   says the staging owns the ordinal (Line Up, where the slot *is* the number).
 - **A tap is not a drag.** Threshold, sound and state change are all gated in one place.
 
-Adding a staging is a file plus a ladder row in `countLevels.ts`. Never an engine edit.
-Still to fold in: `tens` (Count Crates / Group in Tens), which needs a staging that can say
-"ten ones become one ten" rather than one object one count.
+**Teacher-authored positions are the engine's, not a staging's.** Design mode writes
+`config.customPositions` + `layoutReference` on every drag, and the engine replays them over
+whatever the staging arranged, rescaled from the stage they were authored on. A stacked stage in
+play mode ignores them: a layout composed across a wide board does not fold onto a phone. Between
+the nine-into-one merge and the Arrangements merge nothing read them back, so authored layouts
+were saved and silently discarded — locked now by tests in `CountCanvas.test.tsx`.
+
+Adding a staging is a file plus a ladder row in `countLevels.ts`, plus one line in
+`ABSORBED_TECHNIQUES` if it is replacing a published technique. Never an engine edit — the two
+capabilities above are the only ones added since the first four, and both are declared with
+defaults rather than branched on.
+
+`tens` did **not** need the "ten ones become one ten" model this section used to say it was
+waiting for. A ten-frame cell already *is* a numbered place, so grouping is `ordersByPlacement`
+— the same decision Line Up makes — and the tens are expressed by where the cells sit.
+
+`arrangements` needed **no contract change at all** — the first merge where that was true of a
+non-trivial staging. It is `tap`'s act and `tap`'s `oneToOneLayout` placement, plus an arena
+`home` zone named for the arrangement and a number-track `readout`. It stayed a separate staging
+rather than a setting on `tap` because giving `tap` an arena would change how published
+`ONE_TO_ONE` questions look; same act, different lesson — One to One teaches "one number per
+object", Arrangements teaches "moving them does not change how many".
+
+### Motion
+
+One rule: **movement means something, and the same movement always means the same thing.**
+
+- **Settle is a real spring**, not an ease that resembles one. `objectMotion.ts` samples a
+  damped harmonic oscillator (unit mass, stiffness 380, damping 26 → ζ ≈ 0.67) into a CSS
+  `linear()` easing: 6% overshoot, ~308ms. An object a child let go of has been *put down*, and
+  what reads as putting something down is mass. It stays a CSS transition on `translate` so a
+  board of twenty objects costs one compositor pass, not twenty JS springs.
+- **A refusal is not a no-op.** `resolve` returns an object, `"refused"`, or `null`. `null` is
+  "nothing happened" — tapping an already-counted object, which is a child checking their own
+  work, and shaking at them for it would be telling them off. `"refused"` is a rule being
+  broken — a taken slot, a place out of turn, the wrong object — and the engine shakes it and
+  plays the failure sound. Both used to be `null`, so "no" and "nothing" looked identical.
+- **An accepted count lands** (`animate-drop-pop`), so the eye is drawn to what changed.
+- **Readouts fade and pop, they do not spring.** A number appearing is information, not an
+  object with mass; bouncing Count Back's countdown would fight the thing being read.
+- **`prefers-reduced-motion` keeps the travel and drops the overshoot.** An object that
+  teleports between two places is *harder* to follow, which is the opposite of what the setting
+  is for — so the settle becomes a short ease and the shake becomes a hold.
+
+Regenerate the spring from the constants in `objectMotion.ts` rather than hand-tuning the
+`linear()` stops; the physical parameters are the source, the samples are the output.
+
+### Count Back, and the three numbers it separated
+
+Count Back was held out at first, on the grounds that every staging counts *toward* `count` and
+the engine leaned on that in six places. Folding it in meant admitting that "how many objects",
+"how many acts finish it" and "what the answer is" were three different numbers the engine had
+been treating as one — true of Count Back obviously, and quietly true of Count On already.
+
+So the engine now names all three, and each defaults to the old behaviour:
+
+| | means | default |
+|---|---|---|
+| `count` | objects on the board | `targetCount`, or `objectCount()` |
+| `goal` | acts that finish it | `count` |
+| `expected` | what the answer panel checks | `count` |
+
+For Count Back those are 8, 3 and 5. For every other staging they are the same number, which is
+why none of them mention `goal` or `expectedAnswer`.
+
+Three smaller capabilities came with it, all defaulted, none branched on:
+
+- `copy` — what a staging calls what the child is doing. The engine said "counted" in five
+  places; that is right for six stagings and wrong for the one that crosses out. Spread over
+  `COUNTING_COPY`, so a staging overrides only the lines that would otherwise lie about it.
+- `countedAppearance: "struck"` — a crossed-out object is struck through and dimmed, and wears
+  no number, because it is not the seventh of anything.
+- `emphasise()` — names the object to act on next. Counting back is a sequence: the last one
+  goes first. A board that accepts any tap teaches the opposite of the skill, and one that
+  silently refuses the wrong tap teaches nothing, so the engine rings the one that is next.
+
+And one new zone role: **`readout`**. A band that reports the activity back and never holds an
+object — Count Back's countdown, "8 → 7 → 6", the numbers being said out loud. It wears the same
+`CanvasBin` chrome as every other zone, draws its own `Content`, and is excluded from the drop
+test entirely, so a release over it is a release over nothing.
 
 ---
 

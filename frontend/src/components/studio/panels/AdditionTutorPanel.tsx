@@ -1,6 +1,6 @@
 import React from "react";
 import { Label, Input, Button } from "../../ui";
-import { PanelProps } from "../panelKit";
+import { ActorCastField, PanelProps } from "../panelKit";
 import { Plus, Trash2, Wand2, AlertTriangle } from "lucide-react";
 import {
   buildTutorModel,
@@ -222,6 +222,9 @@ export const AdditionTutorPanel: React.FC<PanelProps> = ({ question, update, upd
           )}
         </div>
       </div>
+
+      {/* Who plays each moment of the question. */}
+      <ActorCastField config={question.config} updateConfig={updateConfig} />
     </div>
   );
 };

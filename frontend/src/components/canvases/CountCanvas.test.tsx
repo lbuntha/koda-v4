@@ -651,7 +651,11 @@ describe("Count Back", () => {
     }
     expect(objects(container).filter(isActed)).toHaveLength(3);
     expect(objects(container)).toHaveLength(8);
-    expect(container.textContent).toContain("Enter the total answer below");
+    // Finished, which the answer panel opening is the visible proof of. This
+    // used to look for the heading changing to "Enter the total answer below";
+    // the heading is the question now and does not change, so the panel is what
+    // says the board is done.
+    expect(container.querySelector('input[aria-label="Your answer"]')).not.toBeNull();
   });
 
   test("counting back is ordinal — the last one goes first", () => {
@@ -957,10 +961,21 @@ describe("the question leads", () => {
     expect(container.querySelector("h2")!.textContent).toBe("Count 5 apples");
   });
 
-  test("finishing replaces it with what to do next, once", () => {
+  test("finishing does not rewrite the question", () => {
+    /*
+      The heading used to swap to "Counting complete! Enter the total answer
+      below." — a status wearing the question's clothes. What the child was
+      asked has not changed at that moment; the panel that just opened is what
+      is new. Rewriting the heading takes away the one fixed point on the board
+      exactly when they need to look back at it to answer.
+    */
     const { container, stage } = mount("move", 2, { requireAnswerInput: true });
+    const asked = container.querySelector("h2")!.textContent;
+
     for (const object of objects(container)) drag(object, stage, IN_TARGET);
-    expect(container.querySelector("h2")!.textContent).toContain("Enter the total answer");
+
+    expect(container.querySelector("h2")!.textContent).toBe(asked);
+    expect(container.querySelector('input[aria-label="Your answer"]')).not.toBeNull();
   });
 
   test("Koda is not parked beside the board", () => {

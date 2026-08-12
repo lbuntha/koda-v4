@@ -13,9 +13,9 @@
  */
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Clock } from "lucide-react";
 import { sounds } from "../../sound";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
+import { guidePropsFor } from "../../features/koda-mascot";
 import { CanvasChip, CanvasAccent } from "./canvasTheme";
 import type { CanvasProps } from "./types";
 import { balancedChoiceOrder } from "./choiceOrder";
@@ -112,10 +112,24 @@ export const ClockCanvas: React.FC<CanvasProps> = ({
       showGrid={showGrid}
       isDark={isDark}
       accent={accent}
-      headerIcon={<Clock size={16} />}
       headerTitle="Clock"
-      headerSubtitle={config.minute === 30 ? `half past ${config.hour}` : `${config.hour} o\u2019clock`}
+      /*
+        The question leads — and the old prominent line was the answer.
+
+        `headerSubtitle` printed "half past 3" above a board asking a child what
+        time it is. The one thing they were there to work out was written across
+        the top of it, larger than anything else on the card, before they had
+        looked at the hands. The chip below already reports the time once it is
+        solved, which is where an answer belongs.
+      */
+      questionText={question.instruction?.trim() || "What time is it?"}
       readAloudText={"What time is it? The short hand is the hour."}
+      /*
+        The four moments. `picked !== null` without `solved` is a wrong guess —
+        the same condition the footer uses to say "not quite".
+      */
+      guideRole={solved ? "celebrating" : picked !== null ? "oops" : "waiting"}
+      {...guidePropsFor(question)}
       headerActions={
         <CanvasChip accent={solved ? "emerald" : accent} isDark={isDark}>
           {solved ? answer : config.minute === 30 ? "Half hour" : "O\u2019clock"}

@@ -31,6 +31,17 @@ interface AccentTokens {
   /** Text-only emphasis */
   textLight: string;
   textDark: string;
+  /**
+   * The card an object sits on.
+   *
+   * Softer than `chip`, which an object's *counted* state uses: the two are seen
+   * side by side on one board, so the resting card has to be the quieter of the
+   * pair or being counted stops looking like anything. Tinted rather than grey —
+   * a grey tile under a coloured object reads as a dead cell in a table, and it
+   * was the one piece of the board that ignored the palette the teacher chose.
+   */
+  tileLight: string;
+  tileDark: string;
 }
 
 export const CANVAS_ACCENTS: Record<CanvasAccent, AccentTokens> = {
@@ -40,7 +51,9 @@ export const CANVAS_ACCENTS: Record<CanvasAccent, AccentTokens> = {
     chipLight: "bg-rose-50 text-rose-700 border-rose-200",
     chipDark: "bg-rose-500/30 text-rose-100 border-rose-400/50",
     textLight: "text-rose-600",
-    textDark: "text-rose-400"
+    textDark: "text-rose-400",
+    tileLight: "bg-rose-50/70",
+    tileDark: "bg-rose-500/10"
   },
   violet: {
     iconLight: "bg-violet-50 text-violet-600",
@@ -48,7 +61,9 @@ export const CANVAS_ACCENTS: Record<CanvasAccent, AccentTokens> = {
     chipLight: "bg-violet-50 text-violet-700 border-violet-200",
     chipDark: "bg-violet-500/30 text-violet-100 border-violet-400/50",
     textLight: "text-violet-600",
-    textDark: "text-violet-400"
+    textDark: "text-violet-400",
+    tileLight: "bg-violet-50/70",
+    tileDark: "bg-violet-500/10"
   },
   indigo: {
     iconLight: "bg-indigo-50 text-indigo-600",
@@ -56,7 +71,9 @@ export const CANVAS_ACCENTS: Record<CanvasAccent, AccentTokens> = {
     chipLight: "bg-indigo-50 text-indigo-700 border-indigo-200",
     chipDark: "bg-indigo-500/30 text-indigo-100 border-indigo-400/50",
     textLight: "text-indigo-600",
-    textDark: "text-indigo-400"
+    textDark: "text-indigo-400",
+    tileLight: "bg-indigo-50/70",
+    tileDark: "bg-indigo-500/10"
   },
   emerald: {
     iconLight: "bg-emerald-50 text-emerald-600",
@@ -64,7 +81,9 @@ export const CANVAS_ACCENTS: Record<CanvasAccent, AccentTokens> = {
     chipLight: "bg-emerald-50 text-emerald-700 border-emerald-200",
     chipDark: "bg-emerald-500/30 text-emerald-100 border-emerald-400/50",
     textLight: "text-emerald-600",
-    textDark: "text-emerald-400"
+    textDark: "text-emerald-400",
+    tileLight: "bg-emerald-50/70",
+    tileDark: "bg-emerald-500/10"
   },
   purple: {
     iconLight: "bg-purple-50 text-purple-600",
@@ -72,7 +91,9 @@ export const CANVAS_ACCENTS: Record<CanvasAccent, AccentTokens> = {
     chipLight: "bg-purple-50 text-purple-700 border-purple-200",
     chipDark: "bg-purple-500/30 text-purple-100 border-purple-400/50",
     textLight: "text-purple-600",
-    textDark: "text-purple-400"
+    textDark: "text-purple-400",
+    tileLight: "bg-purple-50/70",
+    tileDark: "bg-purple-500/10"
   },
   slate: {
     iconLight: "bg-slate-100 text-slate-600",
@@ -80,7 +101,9 @@ export const CANVAS_ACCENTS: Record<CanvasAccent, AccentTokens> = {
     chipLight: "bg-slate-100 text-slate-600 border-slate-200",
     chipDark: "bg-white/10 text-slate-300 border-white/15",
     textLight: "text-slate-600",
-    textDark: "text-slate-300"
+    textDark: "text-slate-300",
+    tileLight: "bg-slate-100/70",
+    tileDark: "bg-white/[0.07]"
   }
 };
 
@@ -92,6 +115,12 @@ export const accentIconClass = (accent: CanvasAccent | string = "indigo", isDark
 export const accentChipClass = (accent: CanvasAccent | string = "indigo", isDark: boolean = false) => {
   const valid = CANVAS_ACCENTS[accent as CanvasAccent] ? (accent as CanvasAccent) : "indigo";
   return isDark ? CANVAS_ACCENTS[valid].chipDark : CANVAS_ACCENTS[valid].chipLight;
+};
+
+/** The soft accent card an object rests on. See `AccentTokens.tileLight`. */
+export const accentTileClass = (accent: CanvasAccent | string = "indigo", isDark: boolean = false) => {
+  const valid = CANVAS_ACCENTS[accent as CanvasAccent] ? (accent as CanvasAccent) : "indigo";
+  return isDark ? CANVAS_ACCENTS[valid].tileDark : CANVAS_ACCENTS[valid].tileLight;
 };
 
 export const accentTextClass = (accent: CanvasAccent | string = "indigo", isDark: boolean = false) => {

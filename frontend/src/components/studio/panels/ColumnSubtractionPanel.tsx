@@ -1,6 +1,6 @@
 import React from "react";
 import { Input, Label } from "../../ui";
-import { PanelProps } from "../panelKit";
+import { ActorCastField, PanelProps } from "../panelKit";
 import {
   buildColumnSubtractionModel,
   normalizeSubtractionOperands,
@@ -9,7 +9,7 @@ import {
   describeSubtractionMode,
 } from "../../canvases/columnSubtractionModel";
 
-export const ColumnSubtractionPanel: React.FC<PanelProps> = ({ question, update }) => {
+export const ColumnSubtractionPanel: React.FC<PanelProps> = ({ question, update, updateConfig }) => {
   const model = buildColumnSubtractionModel(
     question.config?.minuend ?? 432,
     question.config?.subtrahend ?? 178,
@@ -85,6 +85,9 @@ export const ColumnSubtractionPanel: React.FC<PanelProps> = ({ question, update 
           Optional. Leave blank to use a clear instruction generated from the two numbers.
         </p>
       </div>
+
+      {/* Who plays each moment of the question. */}
+      <ActorCastField config={question.config} updateConfig={updateConfig} />
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React from "react";
 import { Input, Label } from "../../ui";
-import { PanelProps } from "../panelKit";
+import { ActorCastField, PanelProps } from "../panelKit";
 import {
   ADDEND_MAX,
   ADDEND_MIN,
@@ -9,7 +9,7 @@ import {
   describeColumnMode,
 } from "../../canvases/columnAdditionModel";
 
-export const MultiRowColumnAdditionPanel: React.FC<PanelProps> = ({ question, update }) => {
+export const MultiRowColumnAdditionPanel: React.FC<PanelProps> = ({ question, update, updateConfig }) => {
   const model = buildColumnAdditionModel(
     question.config?.num1 ?? 268,
     question.config?.num2 ?? 175,
@@ -82,6 +82,9 @@ export const MultiRowColumnAdditionPanel: React.FC<PanelProps> = ({ question, up
           Optional. Leave blank to generate a clear instruction from the three rows.
         </p>
       </div>
+
+      {/* Who plays each moment of the question. */}
+      <ActorCastField config={question.config} updateConfig={updateConfig} />
     </div>
   );
 };

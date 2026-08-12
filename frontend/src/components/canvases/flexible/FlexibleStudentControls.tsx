@@ -30,7 +30,23 @@ export const FlexibleStudentControls: React.FC<FlexibleStudentControlsProps> = (
   onTextSubmit
 }) => {
   return (
-    <div className="mt-4 w-full flex flex-col items-center justify-center gap-3 animate-fade-in transition-colors duration-300 border-0 bg-transparent shadow-none p-0">
+    /*
+      Above the stage, and never squeezed by it.
+
+      Two things conspired to make these unclickable. The stage above is
+      `flex-1` *and* carries a pixel `min-h`, so when the card is short it wins
+      the height fight and grows over the row it is supposed to sit above — and
+      it is positioned with `z-10`, while this row was unpositioned at `z-auto`.
+      A positioned ancestor beats a later sibling regardless of document order,
+      so the stage's own box painted on top of the answer buttons and swallowed
+      every click aimed at them. Nothing looked wrong: the buttons were fully
+      visible underneath it.
+
+      `shrink-0` keeps the row at its natural height whatever the stage wants,
+      and `relative z-20` puts it back above. Both are needed — either alone
+      leaves the other half of the bug in place.
+    */
+    <div className="relative z-20 shrink-0 mt-4 w-full flex flex-col items-center justify-center gap-3 animate-fade-in transition-colors duration-300 border-0 bg-transparent shadow-none p-0">
       {/* Multiple Choice Mode */}
       {mode === "multichoice" && (
         <div className="w-full text-center">

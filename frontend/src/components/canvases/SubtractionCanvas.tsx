@@ -7,6 +7,7 @@ import { sounds } from "../../sound";
 import { RotateCcw, MinusCircle } from "lucide-react";
 import { GhostGuideOverlay, useGhostGuide, useCPASwitcher, CPASwitcherPill, FactFamilyCelebrationCard } from "../../pedagogy";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
+import { guidePropsFor } from "../../features/koda-mascot";
 import { CanvasChip, CanvasAccent, surfaceClass, accentChipClass, accentTextClass, emptySlotClass } from "./canvasTheme";
 import { CanvasBin } from "./CanvasBin";
 import { useCanvasAudience } from "./presentation";
@@ -375,23 +376,17 @@ export const SubtractionCanvas: React.FC<CanvasProps> = ({
       gridSize={GRID_STEP}
       showRulers={question.config.showLayoutRulers ?? true}
       accent={accent}
-      headerIcon={<MinusCircle size={16} />}
       headerTitle="Koda Subtraction"
-      headerSubtitle={
-        <span className="font-mono tracking-tight">
-          <span>{minuend}</span>
-          <span className={isDark ? "text-slate-500" : "text-slate-400"}> − </span>
-          <span className={crossedCount > 0 ? accentTextClass(accent, isDark) : (isDark ? "text-slate-500" : "text-slate-400")}>{crossedCount}</span>
-          <span className={isDark ? "text-slate-500" : "text-slate-400"}> = </span>
-          <span className={isSolved ? (isDark ? "text-emerald-400" : "text-emerald-600") : undefined}>{remainingCount}</span>
-        </span>
-      }
+      /* The Count header — see `CountCanvas`, and `AdditionCanvas` for the pair. */
+      questionText={question.instruction?.trim() || `Cross out ${subtrahend}. How many are left?`}
       readAloudText={`Subtraction. ${minuend} minus ${subtrahend} equals ${targetRemaining}. Tap items to cross out ${subtrahend} ${obj.label}!`}
+      guideRole={isSolved ? "celebrating" : "waiting"}
+      {...guidePropsFor(question)}
       designerHint="Drag objects freely. Grid snapping is applied when you release."
       headerActions={
         isPlayMode ? (
           <CanvasChip accent={isSolved ? "emerald" : accent} isDark={isDark} aria-label={`Crossed out ${crossedCount} of ${subtrahend}`}>
-            {isSolved ? `${targetRemaining} left` : `${toCross} to cross out`}
+            {isSolved ? `${minuend} − ${subtrahend} = ${targetRemaining}` : `${toCross} to cross out`}
           </CanvasChip>
         ) : (
           <Button type="button" variant="outline" size="xs" onClick={reset} title="Reset object positions">
@@ -433,6 +428,7 @@ export const SubtractionCanvas: React.FC<CanvasProps> = ({
 
         {/* The plate — everything the child starts with */}
         <CanvasBin
+            surface={false}
           label={plateLabel}
           tally={isPlayMode ? remainingCount : minuend}
           accent={accent}
@@ -451,6 +447,7 @@ export const SubtractionCanvas: React.FC<CanvasProps> = ({
 
         {/* The equation, filling in as the child crosses objects out */}
         <CanvasBin
+            surface={false}
           label={learnerMode ? "How many are left" : "Equation"}
           tally={isPlayMode ? remainingCount : undefined}
           accent={accent}

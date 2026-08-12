@@ -15,6 +15,7 @@ import {
   Layers,
 } from "lucide-react";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
+import { guidePropsFor } from "../../features/koda-mascot";
 import { Celebration } from "./Celebration";
 import { surfaceClass } from "./canvasTheme";
 import {
@@ -1064,10 +1065,15 @@ export const LiquidSortCanvas: React.FC<CanvasProps> = ({
     <SharedCanvasLayout
       isPlayMode={isPlayMode}
       headerTitle={compact ? undefined : question.title || "Liquid Color Sort"}
-      headerSubtitle={
-        (question as any).subtitle ||
-        `${compact ? currentLevel.name.replace(/^Level \d+:\s*/, "") : currentLevel.name} (${currentLevel.targetCount} Tubes)`
-      }
+      /*
+        The question leads — see `CountCanvas` for the standard. The level's own
+        name moves to the chip row; what the child has to do takes the heading.
+      */
+      questionText={question.instruction?.trim() || "Sort the colors so each tube holds just one."}
+      readAloudText={question.instruction?.trim() || "Sort the colors so each tube holds just one."}
+      /* The four moments, cast from Mascot Studio — see `casting.ts`. */
+      guideRole={isWon ? "celebrating" : "waiting"}
+      {...guidePropsFor(question)}
       playHint="Sort all liquid colors so each tube contains a single solid color."
       designerHint="Tap a tube to pick up its top liquid color, then tap a destination tube to pour."
       headerActions={headerControls}

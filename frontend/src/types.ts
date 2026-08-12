@@ -201,6 +201,13 @@ export interface CountingQuestion {
     jarColorAccent?: "blue" | "amber" | "emerald" | "rose";
     subitizePatternStyle?: "dice" | "scatter" | "pairs";
     // Scale features (Addition, Subtraction, Multiplication, Sudoku, Patterns)
+    /**
+     * Which mechanic Koda Add & Subtract runs: bring objects together, or cross
+     * some off. Unset falls back to the technique the slide was authored under,
+     * which is what keeps pre-merge subtraction slides working — see
+     * `operationFor` in `SumCanvas`.
+     */
+    operation?: "add" | "subtract";
     addend1?: number;
     addend2?: number;
     subtrahend?: number;

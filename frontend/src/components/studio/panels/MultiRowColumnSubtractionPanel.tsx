@@ -1,6 +1,6 @@
 import React from "react";
 import { Input, Label } from "../../ui";
-import { PanelProps } from "../panelKit";
+import { ActorCastField, PanelProps } from "../panelKit";
 import {
   buildColumnSubtractionModel,
   normalizeMultiRowSubtractionOperands,
@@ -9,7 +9,7 @@ import {
   describeSubtractionMode,
 } from "../../canvases/columnSubtractionModel";
 
-export const MultiRowColumnSubtractionPanel: React.FC<PanelProps> = ({ question, update }) => {
+export const MultiRowColumnSubtractionPanel: React.FC<PanelProps> = ({ question, update, updateConfig }) => {
   const model = buildColumnSubtractionModel(
     question.config?.minuend ?? 432,
     question.config?.subtrahend ?? 178,
@@ -101,6 +101,9 @@ export const MultiRowColumnSubtractionPanel: React.FC<PanelProps> = ({ question,
           Optional. Leave blank to generate an instruction from all three rows.
         </p>
       </div>
+
+      {/* Who plays each moment of the question. */}
+      <ActorCastField config={question.config} updateConfig={updateConfig} />
     </div>
   );
 };

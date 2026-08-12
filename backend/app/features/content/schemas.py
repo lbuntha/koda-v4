@@ -229,6 +229,9 @@ class SvgAssetIn(BaseModel):
     label: str = Field(min_length=1, max_length=160)
     markup: str = Field(min_length=1, max_length=1_000_000)
     scale: float = Field(default=1.0, ge=0.1, le=10.0)
+    mascot_category: Literal["body", "head", "eyes", "pupil", "mouth", "pattern", "accessory"] | None = Field(
+        default=None, alias="mascotCategory"
+    )
 
     _validate_markup = field_validator("markup")(_validated_svg)
 

@@ -15,7 +15,6 @@ import { CountingTechnique } from "../types";
 import { count } from "./count";
 import { subitize } from "./subitize";
 import { addition } from "./addition";
-import { subtraction } from "./subtraction";
 import { flexibleCanvas } from "./flexibleCanvas";
 import { additionTutor } from "./additionTutor";
 import { columnAddition } from "./columnAddition";
@@ -41,7 +40,6 @@ export const ALL_TECHNIQUES: TechniqueManifest[] = [
   count,
   subitize,
   addition,
-  subtraction,
   flexibleCanvas,
   additionTutor,
   columnAddition,

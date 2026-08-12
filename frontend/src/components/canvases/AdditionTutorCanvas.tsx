@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { CanvasProps } from "./types";
+import { guidePropsFor } from "../../features/koda-mascot";
 import { sounds } from "../../sound";
 import {
   RotateCcw, ArrowRight, Check, ChevronRight,
@@ -571,6 +572,8 @@ export const AdditionTutorCanvas: React.FC<CanvasProps> = ({
           voice={voice}
           isDark={isDark}
           dragConstraints={containerRef}
+          // The character the author cast in the Studio, per moment.
+          {...guidePropsFor(question)}
         />
       )}
 

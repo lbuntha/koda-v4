@@ -14,11 +14,13 @@ from .mastery import MasteryState, ProjectionJob
 from .assignment import Assignment, CurriculumOffering, CurriculumPromotion, Placement, ProgressionState
 from .recommendation import RecommendationRun, StudentSession
 from .notification import Notification, NotificationReceipt
+from .mascot import Mascot
+from .mascot_style import MascotStyle
 
-ALL_MODELS = [LoginThrottle, PasswordResetToken, User, Student, Curriculum, CurriculumRelease, QuestionDeck, SvgLibrary, SystemSettings, LearningEvent, ContentAuditEvent, Menu, RoleDef, Grade, Subject, Classroom, ClassEnrollment, MasteryState, ProjectionJob, Assignment, CurriculumOffering, CurriculumPromotion, Placement, ProgressionState, RecommendationRun, StudentSession, Notification, NotificationReceipt]
+ALL_MODELS = [LoginThrottle, PasswordResetToken, User, Student, Curriculum, CurriculumRelease, QuestionDeck, SvgLibrary, SystemSettings, LearningEvent, ContentAuditEvent, Menu, RoleDef, Grade, Subject, Classroom, ClassEnrollment, MasteryState, ProjectionJob, Assignment, CurriculumOffering, CurriculumPromotion, Placement, ProgressionState, RecommendationRun, StudentSession, Notification, NotificationReceipt, Mascot, MascotStyle]
 
 __all__ = [
     "LoginThrottle", "PasswordResetToken", "User", "Student", "Curriculum", "CurriculumRelease", "QuestionDeck", "SvgLibrary", "SystemSettings", "LearningEvent", "ContentAuditEvent",
     "Menu", "RoleDef", "Grade", "Subject", "Classroom", "ClassEnrollment", "MasteryState", "ProjectionJob", "Assignment", "CurriculumOffering", "CurriculumPromotion", "Placement", "ProgressionState", "RecommendationRun", "StudentSession",
-    "Notification", "NotificationReceipt", "ALL_MODELS",
+    "Notification", "NotificationReceipt", "Mascot", "MascotStyle", "ALL_MODELS",
 ]

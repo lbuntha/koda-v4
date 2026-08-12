@@ -12,6 +12,28 @@ import React from "react";
 import { CountingTechnique } from "../../types";
 import { CanvasProps } from "../canvases/types";
 import { ALL_TECHNIQUES, byTechnique } from "../../techniques";
+import { ABSORBED_TECHNIQUES } from "../../techniques/manifest";
 
-export const CANVAS_BY_TECHNIQUE: Record<CountingTechnique, React.ComponentType<CanvasProps>> =
-  byTechnique(ALL_TECHNIQUES, (m) => m.component);
+const live = byTechnique(ALL_TECHNIQUES, (m) => m.component);
+
+/**
+ * Absorbed ids resolve to the canvas that absorbed them.
+ *
+ * This used to be `live` alone, and the hosts covered the gap by falling back to
+ * `CountCanvas` on a miss — which was right only for as long as every absorbed
+ * technique was a counting one. The moment Koda Subtraction was absorbed into
+ * Koda Add & Subtract, that fallback would have opened every saved subtraction
+ * slide as a counting board: no minuend, no crossing out, the wrong answer
+ * expected, and nothing anywhere reporting an error.
+ *
+ * Derived from the map rather than listed, so absorbing the next one stays a
+ * one-line change in `manifest.ts` — same as `TECHNIQUE_PANELS` does for panels.
+ */
+export const CANVAS_BY_TECHNIQUE: Record<CountingTechnique, React.ComponentType<CanvasProps>> = {
+  ...live,
+  ...Object.fromEntries(
+    [...ABSORBED_TECHNIQUES]
+      .filter(([, owner]) => live[owner])
+      .map(([absorbed, owner]) => [absorbed, live[owner]]),
+  ),
+};

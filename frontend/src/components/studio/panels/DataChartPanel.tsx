@@ -13,7 +13,7 @@
 
 import React, { useState } from "react";
 import { Palette } from "lucide-react";
-import { PanelProps, PanelSection, SelectField, SliderField, TextField } from "../panelKit";
+import { ActorCastField, PanelProps, PanelSection, SelectField, SliderField, TextField } from "../panelKit";
 import { dataAnswer, dataPrompt, normalizeDataConfig, type DataQuestionKind } from "../../canvases/DataChartCanvas";
 import {
   ASSET_PLURAL,
@@ -31,7 +31,7 @@ import { Button, Dialog, Label } from "../../ui";
 const labelForAsset = (asset: CatalogAsset): string =>
   ASSET_PLURAL[asset.id as ShapeAssetType] ?? asset.label;
 
-export const DataChartPanel: React.FC<PanelProps> = ({ question, update }) => {
+export const DataChartPanel: React.FC<PanelProps> = ({ question, update, updateConfig }) => {
   const { assets: customAssets } = useSvgLibrary();
   const [pickerFor, setPickerFor] = useState<number | null>(null);
 
@@ -263,6 +263,9 @@ export const DataChartPanel: React.FC<PanelProps> = ({ question, update }) => {
           <Button type="button" variant="outline" onClick={() => setPickerFor(null)}>Done</Button>
         </div>
       </Dialog>
+
+      {/* Who plays each moment of the question. */}
+      <ActorCastField config={question.config} updateConfig={updateConfig} />
     </PanelSection>
   );
 };

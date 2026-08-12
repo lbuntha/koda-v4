@@ -1,5 +1,5 @@
 import React from "react";
-import { PanelProps, PanelSection, SelectField, SliderField } from "../panelKit";
+import { ActorCastField, PanelProps, PanelSection, SelectField, SliderField } from "../panelKit";
 import {
   equationAnswer,
   equationText,
@@ -17,7 +17,7 @@ import {
  * the config without it makes the two sides match by definition, and every equation would be
  * authored as "true" no matter what it says.
  */
-export const EquationMatPanel: React.FC<PanelProps> = ({ question, update }) => {
+export const EquationMatPanel: React.FC<PanelProps> = ({ question, update, updateConfig }) => {
   const current = normalizeEquationConfig({
     operation: question.config.equationOperation,
     first: question.config.equationFirst,
@@ -98,6 +98,9 @@ export const EquationMatPanel: React.FC<PanelProps> = ({ question, update }) => 
           />
         </>
       )}
+
+      {/* Who plays each moment of the question. */}
+      <ActorCastField config={question.config} updateConfig={updateConfig} />
     </PanelSection>
   );
 };

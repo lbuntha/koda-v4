@@ -13,9 +13,9 @@
  */
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Scale } from "lucide-react";
 import { sounds } from "../../sound";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
+import { guidePropsFor } from "../../features/koda-mascot";
 import { CanvasChip, CanvasAccent } from "./canvasTheme";
 import type { CanvasProps } from "./types";
 import { balancedChoiceOrder } from "./choiceOrder";
@@ -127,10 +127,21 @@ export const CompareNumbersCanvas: React.FC<CanvasProps> = ({
       showGrid={showGrid}
       isDark={isDark}
       accent={accent}
-      headerIcon={<Scale size={16} />}
       headerTitle="Compare Numbers"
-      headerSubtitle={`${config.first} ? ${config.second}`}
+      /*
+        The question leads — see `CountCanvas` for the standard. The pair being
+        compared is already set out in 4xl numerals on the board below, so the
+        header repeating it as `12 ? 30` spent the most prominent line on the one
+        thing a child cannot miss.
+      */
+      questionText={question.instruction?.trim() || "Which sign belongs between them?"}
       readAloudText={"Which sign belongs between them? Compare the tens first."}
+      /*
+        The four moments. `picked !== null` without `solved` is a wrong guess —
+        the same condition the footer uses to say "not quite".
+      */
+      guideRole={solved ? "celebrating" : picked !== null ? "oops" : "waiting"}
+      {...guidePropsFor(question)}
       headerActions={
         <CanvasChip accent={solved ? "emerald" : accent} isDark={isDark}>
           {solved ? answer : "Pick one"}

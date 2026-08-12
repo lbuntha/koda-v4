@@ -30,6 +30,7 @@ import { CountingAsset } from "../Assets";
 import { COUNT_OBJECTS } from "../../types";
 import { sounds } from "../../sound";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
+import { guidePropsFor } from "../../features/koda-mascot";
 import { CanvasChip, CanvasAccent } from "./canvasTheme";
 import type { CanvasProps } from "./types";
 import { balancedChoiceOrder } from "./choiceOrder";
@@ -234,9 +235,15 @@ export const EquationMatCanvas: React.FC<CanvasProps> = ({
       showGrid={showGrid}
       isDark={isDark}
       accent={accent}
-      headerIcon={<Equal size={16} />}
-      headerTitle="Equation Mat"
-      headerSubtitle={equation}
+      /*
+        The question leads — see `CountCanvas` for the standard. The activity's
+        own name and its meta line move out of the prominent slot; what a child
+        has to do takes it, and does not change while they work.
+      */
+      questionText={question.instruction?.trim() || (isJudge ? "Is this true or false?" : "Find the missing number.")}
+      /* The four moments, cast from Mascot Studio — see `casting.ts`. */
+      guideRole={solved ? "celebrating" : picked !== null ? "oops" : "waiting"}
+      {...guidePropsFor(question)}
       readAloudText={isJudge ? `${equation}. Is this true or false?` : `${equation}. Find the missing number.`}
       headerActions={
         <CanvasChip accent={solved ? "emerald" : accent} isDark={isDark}>

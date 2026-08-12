@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import { sounds } from "../../sound";
 import { CanvasProps } from "./types";
+import { guidePropsFor } from "../../features/koda-mascot";
+import { SharedCanvasLayout } from "./SharedCanvasLayout";
 import { KodaActor, KodaMood, useKodaVoice } from "./KodaActor";
 import { NumberPad } from "./NumberPad";
 import {
@@ -299,14 +301,49 @@ export const ColumnMultiplicationCanvas: React.FC<CanvasProps> = ({
   })();
   const mood: KodaMood = phase === "solved" || guideDone ? "cheer" : phase === "guide" ? "think" : fails ? "oops" : "idle";
 
+  /*
+    The running state, as the header chip every other board carries. Lifted out
+    of the old centred header row so the layout can place it — see
+    `ColumnAdditionCanvas` for why it is a component rather than a fragment.
+  */
+  const ColumnBadges: React.FC = () => (
+    <>
+        <Badge>{describeMultiplicationMode(model.digitMode)}</Badge>
+        <Badge>{partialRows.length} partial {partialRows.length === 1 ? "row" : "rows"}</Badge>
+        <Badge className={model.anyCarry ? "border-rose-100 bg-rose-50 text-rose-600" : "border-emerald-100 bg-emerald-50 text-emerald-600"}>
+          {model.anyCarry ? "Carrying" : "No carrying"}
+        </Badge>
+    </>
+  );
+
+  /*
+    The standard card — see `ColumnAdditionCanvas` for why, and for why Koda
+    stays as `KodaActor` rather than becoming the layout's guide.
+  */
   return (
-    <div
+    <SharedCanvasLayout
+      isPlayMode={isPlayMode}
+      isDark={isDark}
       ref={containerRef}
-      className={`@container relative flex h-full w-full flex-col overflow-hidden rounded-2xl border shadow-sm ${
-        isDark ? "dark border-slate-800 bg-slate-900 text-slate-100" : "border-slate-200 bg-slate-50 text-slate-800"
-      }`}
+      className="@container"
+      questionText={question.instruction?.trim() || "Multiply, one place at a time."}
+      readAloudText={question.instruction?.trim() || "Multiply, one place at a time."}
+      /* Which pass of the algorithm the child is on — the footer's own job. */
+      footerStatus={phase === "solved" ? "Solved" : `${stageIndex + 1} of ${stages.length}: ${stage.label}`}
+      footerSolved={phase === "solved"}
+      headerActions={<ColumnBadges />}
     >
-      {isPlayMode && <KodaActor text={currentNarration} mood={mood} voice={voice} isDark={isDark} dragConstraints={containerRef} />}
+      {isPlayMode && (
+        <KodaActor
+          text={currentNarration}
+          mood={mood}
+          voice={voice}
+          isDark={isDark}
+          dragConstraints={containerRef}
+          // The character the author cast in the Studio, per moment.
+          {...guidePropsFor(question)}
+        />
+      )}
       {isPlayMode && phase === "solve" && (
         <button
           type="button"
@@ -316,17 +353,6 @@ export const ColumnMultiplicationCanvas: React.FC<CanvasProps> = ({
           <HelpCircle size={14} /><span className="hidden sm:inline">Show me how</span>
         </button>
       )}
-      <div className="flex shrink-0 flex-wrap items-center justify-center gap-1.5 px-4 pt-3">
-        <Badge>{describeMultiplicationMode(model.digitMode)}</Badge>
-        <Badge>{partialRows.length} partial {partialRows.length === 1 ? "row" : "rows"}</Badge>
-        <Badge className={model.anyCarry ? "border-rose-100 bg-rose-50 text-rose-600" : "border-emerald-100 bg-emerald-50 text-emerald-600"}>
-          {model.anyCarry ? "Carrying" : "No carrying"}
-        </Badge>
-      </div>
-      <p className="shrink-0 px-4 pt-1 text-center text-[10px] font-medium text-slate-500">
-        {phase === "solved" ? "Solved" : `${stageIndex + 1} of ${stages.length}: ${stage.label}`}
-      </p>
-
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-6 overflow-y-auto px-3 py-3 @7xl:flex-row @7xl:gap-10 @7xl:overflow-hidden">
         <div className="max-w-full overflow-x-auto px-1">
           <div className="inline-flex min-w-max flex-col">
@@ -415,7 +441,7 @@ export const ColumnMultiplicationCanvas: React.FC<CanvasProps> = ({
           )}
         </div>
       )}
-    </div>
+    </SharedCanvasLayout>
   );
 
   function AnswerRow({ item, operator = "" }: { item: MultiplicationStage; operator?: string; key?: React.Key }) {

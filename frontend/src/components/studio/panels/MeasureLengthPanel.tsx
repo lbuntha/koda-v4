@@ -1,5 +1,5 @@
 import React from "react";
-import { PanelProps, PanelSection, SelectField, SliderField, TextField } from "../panelKit";
+import { ActorCastField, PanelProps, PanelSection, SelectField, SliderField, TextField } from "../panelKit";
 import {
   UNNAMED,
   isPlaceholderLabel,
@@ -8,7 +8,7 @@ import {
   type MeasureTask,
 } from "../../canvases/MeasureLengthCanvas";
 
-export const MeasureLengthPanel: React.FC<PanelProps> = ({ question, update }) => {
+export const MeasureLengthPanel: React.FC<PanelProps> = ({ question, update, updateConfig }) => {
   const current = normalizeMeasureConfig({
     task: question.config.measureTask as MeasureTask,
     lengths: question.config.measureLengths as number[],
@@ -76,6 +76,9 @@ export const MeasureLengthPanel: React.FC<PanelProps> = ({ question, update }) =
           onChange={value => setLength(index, value)}
         />
       ))}
+
+      {/* Who plays each moment of the question. */}
+      <ActorCastField config={question.config} updateConfig={updateConfig} />
     </PanelSection>
   );
 };

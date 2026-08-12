@@ -37,7 +37,13 @@ def test_progress_contract_explains_next_level_and_due_state():
     )
     assert output["level"] == "beginner"
     assert output["nextLevel"] == "developing"
-    assert "4 more strong tries" in output["toNextLevel"]
+    # Counted from the gate rather than written out, because the gate moves. This
+    # asserted "4 more strong tries" against a minPlays of 6; 7c4fa02 lowered it
+    # to 5 and the test went red without anything being wrong with the code.
+    # What is worth pinning is that the shortfall is reported truthfully, not
+    # what today's shortfall happens to be.
+    short_by = DEFAULT_SCORING_CONFIG["gates"]["developing"]["minPlays"] - state.plays
+    assert f"{short_by} more strong tries" in output["toNextLevel"]
     assert output["isDue"] is True
     assert output["projectionStatus"] == "current"
 

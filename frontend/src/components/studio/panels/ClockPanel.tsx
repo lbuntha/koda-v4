@@ -1,8 +1,8 @@
 import React from "react";
-import { PanelProps, PanelSection, SelectField, SliderField } from "../panelKit";
+import { ActorCastField, PanelProps, PanelSection, SelectField, SliderField } from "../panelKit";
 import { clockLabel, normalizeClockConfig } from "../../canvases/ClockCanvas";
 
-export const ClockPanel: React.FC<PanelProps> = ({ question, update }) => {
+export const ClockPanel: React.FC<PanelProps> = ({ question, update, updateConfig }) => {
   const current = normalizeClockConfig({
     hour: question.config.clockHour,
     minute: question.config.clockMinute as 0 | 30,
@@ -32,6 +32,9 @@ export const ClockPanel: React.FC<PanelProps> = ({ question, update }) => {
           { value: "30", label: "Half past - hand between numbers" },
         ]}
       />
+
+      {/* Who plays each moment of the question. */}
+      <ActorCastField config={question.config} updateConfig={updateConfig} />
     </PanelSection>
   );
 };

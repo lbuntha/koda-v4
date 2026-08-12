@@ -1,7 +1,7 @@
 import React from "react";
 import { FlexibleItem } from "./types";
 import { CountingAsset } from "../../Assets";
-import { accentChipClass, CanvasAccent } from "../canvasTheme";
+import { accentChipClass, accentTileClass, CanvasAccent } from "../canvasTheme";
 import { objectStyle } from "../objectMotion";
 import { ITEM_SIZE } from "./layout";
 
@@ -15,6 +15,14 @@ interface FlexibleDraggableItemProps {
   isTapped: boolean;
   tapIndex: number;
   assetType: string;
+  /**
+   * Draw the card behind the object, the way a Count board does.
+   *
+   * Off is the historical look — artwork alone on the background. On, the object
+   * rests on the slide's accent, and being counted takes the fuller chip with a
+   * ring, so the two states differ in weight rather than only in opacity.
+   */
+  hasFrame: boolean;
   onPointerDown: (e: React.PointerEvent) => void;
   onRemove: () => void;
 }
@@ -29,10 +37,22 @@ export const FlexibleDraggableItem: React.FC<FlexibleDraggableItemProps> = ({
   isTapped,
   tapIndex,
   assetType,
+  hasFrame,
   onPointerDown,
   onRemove
 }) => {
   const isTapCount = mode === "tapcount" && isPlayMode;
+  /*
+    Counted objects wear the ring; everything else wears the soft tile. Matches
+    `CountCanvas` exactly, because a child moving between the two boards should
+    not have to learn that "counted" looks like one thing here and another
+    there.
+  */
+  const frame = !hasFrame
+    ? ""
+    : isTapped
+      ? `${accentChipClass(accent, isDark)} border-2`
+      : `${accentTileClass(accent, isDark)} border-0`;
 
   return (
     <div
@@ -49,7 +69,7 @@ export const FlexibleDraggableItem: React.FC<FlexibleDraggableItemProps> = ({
          stage above it carries a `scale()`, which composes with this because the
          position rides on `translate` rather than on `transform`. */
       style={objectStyle({ x: item.x, y: item.y, size: ITEM_SIZE, dragging: isDragged })}
-      className={`flex items-center justify-center select-none rounded-xl
+      className={`flex items-center justify-center select-none rounded-xl ${frame}
         outline-none focus-visible:ring-4 focus-visible:ring-indigo-400/40
         ${isDragged ? "scale-125 drop-shadow-xl cursor-grabbing" : "cursor-grab"}
         ${isTapCount ? "cursor-pointer hover:scale-110 active:scale-95" : ""}
@@ -59,7 +79,7 @@ export const FlexibleDraggableItem: React.FC<FlexibleDraggableItemProps> = ({
         <CountingAsset
           type={(item.type || assetType) as any}
           emoji={item.emoji}
-          size={Math.round(ITEM_SIZE * 0.82)}
+          size={Math.round(ITEM_SIZE * (hasFrame ? 0.82 : 0.92))}
         />
       </span>
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { Label, Input } from "../../ui";
-import { PanelProps } from "../panelKit";
+import { ActorCastField, PanelProps } from "../panelKit";
 
 export const KodaPatternPanel: React.FC<PanelProps> = ({ question, update, updateConfig }) => (
 
@@ -71,5 +71,8 @@ export const KodaPatternPanel: React.FC<PanelProps> = ({ question, update, updat
                         }}
                       />
                     </div>
-                  </div>
+                
+    {/* Who plays each moment of the question. */}
+    <ActorCastField config={question.config} updateConfig={updateConfig} />
+  </div>
 );

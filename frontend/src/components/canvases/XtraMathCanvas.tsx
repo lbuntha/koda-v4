@@ -13,6 +13,7 @@ import { useOptionalSvgLibrary } from "../../assets/SvgLibraryContext";
 import { XTRAMATH_OWL_ASSET, XTRAMATH_OWL_ASSET_ID } from "../../assets/xtraMathOwlAsset";
 import { CanvasAccent, CanvasChip, accentTextClass, surfaceClass } from "./canvasTheme";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
+import { guidePropsFor } from "../../features/koda-mascot";
 import { CanvasProps } from "./types";
 import {
   DynamicMathFact,
@@ -338,7 +339,15 @@ export const XtraMathCanvas: React.FC<CanvasProps> = ({
         />
       )}
       headerTitle="XtraMath"
-      headerSubtitle={`Fact ${Math.min(currentIndex + 1, targetCount)} of ${targetCount}`}
+      /*
+        The question leads — see `CountCanvas` for the standard. The activity's
+        own name and its meta line move out of the prominent slot; what a child
+        has to do takes it, and does not change while they work.
+      */
+      questionText={question.instruction?.trim() || `${problem.num1} ${problem.operator} ${problem.num2} = ?`}
+      /* The four moments, cast from Mascot Studio — see `casting.ts`. */
+      guideRole={isSolved ? "celebrating" : selectedOption !== null ? "oops" : "waiting"}
+      {...guidePropsFor(question)}
       readAloudText={`${problem.num1} ${problem.operator} ${problem.num2}. Choose the correct answer.`}
       footerStatus={footerStatus}
       footerSolved={isSolved}

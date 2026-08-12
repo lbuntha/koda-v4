@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { PanelProps } from "../panelKit";
+import { ActorCastField, PanelProps } from "../panelKit";
 import {
   COUNT_CRATES_LEVELS,
   CRATE_UNITS,
@@ -24,7 +24,7 @@ const TIER_GROUPS: Array<{ tier: CountingTier; label: string }> = [
   { tier: "grandmaster", label: "🔴 Grandmaster — hundreds" },
 ];
 
-export const CountCratesPanel: React.FC<PanelProps> = ({ question, update }) => {
+export const CountCratesPanel: React.FC<PanelProps> = ({ question, update, updateConfig }) => {
   const config = (question.config as any) || {};
   const isCustom = !!config.cratesCustom;
   const stock: Partial<Record<CrateUnit, number>> = config.cratesStock || { 10: 3, 5: 2, 1: 9 };
@@ -179,6 +179,9 @@ export const CountCratesPanel: React.FC<PanelProps> = ({ question, update }) => 
           {solvable ? "✓ this order can be filled" : "✗ no way to fill this order — adjust the shelf"}
         </p>
       </div>
+
+      {/* Who plays each moment of the question. */}
+      <ActorCastField config={question.config} updateConfig={updateConfig} />
     </div>
   );
 };

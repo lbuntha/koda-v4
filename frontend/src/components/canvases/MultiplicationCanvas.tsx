@@ -5,6 +5,7 @@ import { CountingAsset } from "../Assets";
 import { sounds } from "../../sound";
 import { Grid, RotateCcw } from "lucide-react";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
+import { guidePropsFor } from "../../features/koda-mascot";
 import { GhostGuideOverlay, useGhostGuide } from "../../pedagogy";
 import { CanvasChip, surfaceClass, accentChipClass, emptySlotClass } from "./canvasTheme";
 import { CanvasAnswerPanel, useCanvasAnswer } from "./CanvasAnswerPanel";
@@ -329,13 +330,14 @@ export const MultiplicationCanvas: React.FC<CanvasProps> = ({
       isDark={isDark}
       showGrid={showGrid}
       accent="emerald"
-      headerIcon={<Grid size={16} />}
       headerTitle="Equal Groups"
-      headerSubtitle={
-        isArrayComplete && requireAnswerInput
-          ? "Array complete! Enter the total product answer below."
-          : `${rows} × ${cols} = ${activeCount}`
-      }
+      /*
+        The question leads — see `CountCanvas` for the standard.
+      */
+      questionText={question.instruction?.trim() || `How many altogether in ${rows} rows of ${cols}?`}
+      /* The four moments, cast from Mascot Studio — see `casting.ts`. */
+      guideRole={answer.status === "error" ? "oops" : isSolved ? "celebrating" : "waiting"}
+      {...guidePropsFor(question)}
       readAloudText={question.instruction || `Equal groups. ${rows} rows of ${cols} makes ${targetCount}. Tap each placeholder to build the array.`}
       headerActions={
         isPlayMode ? (

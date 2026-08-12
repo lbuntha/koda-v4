@@ -1,8 +1,8 @@
 import React from "react";
-import { PanelProps, PanelSection, SelectField } from "../panelKit";
+import { ActorCastField, PanelProps, PanelSection, SelectField } from "../panelKit";
 import { normalizeShapeConfig, shapeAnswer, shapePrompt, SHAPE_SIDES, type ShapeName, type ShapeTask } from "../../canvases/ShapeLabCanvas";
 
-export const ShapeLabPanel: React.FC<PanelProps> = ({ question, update }) => {
+export const ShapeLabPanel: React.FC<PanelProps> = ({ question, update, updateConfig }) => {
   const current = normalizeShapeConfig({
     task: question.config.shapeTask as ShapeTask,
     shape: question.config.shapeName as ShapeName,
@@ -55,6 +55,9 @@ export const ShapeLabPanel: React.FC<PanelProps> = ({ question, update }) => {
           options={[{ value: "2", label: "Halves" }, { value: "4", label: "Fourths" }]}
         />
       )}
+
+      {/* Who plays each moment of the question. */}
+      <ActorCastField config={question.config} updateConfig={updateConfig} />
     </PanelSection>
   );
 };

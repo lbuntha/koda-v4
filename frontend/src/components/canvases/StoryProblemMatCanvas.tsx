@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { BookOpen, Check, RotateCcw, X } from "lucide-react";
+import { Check, RotateCcw, X } from "lucide-react";
 import { COUNT_OBJECTS, CountingQuestion, CustomSvgAsset } from "../../types";
 import { sounds } from "../../sound";
 import { findAsset } from "../../assets/assetCatalog";
@@ -11,6 +11,7 @@ import { CanvasProps } from "./types";
 import { CanvasChip, CanvasAccent } from "./canvasTheme";
 import { CanvasBin } from "./CanvasBin";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
+import { guidePropsFor } from "../../features/koda-mascot";
 import { GhostGuideOverlay, useGhostGuide } from "../../pedagogy";
 import { bestGrid, fitObjectSize } from "./objectLayout";
 import { balancedChoiceOrder } from "./choiceOrder";
@@ -81,6 +82,7 @@ const ObjectGroup: React.FC<GroupProps> = ({ label, count, hidden, revealValue, 
 
   return (
     <CanvasBin
+      surface={false}
       label={label}
       tally={hidden ? undefined : count}
       accent={tone}
@@ -326,13 +328,32 @@ export const StoryProblemMatCanvas: React.FC<CanvasProps> = ({
       compact={compact}
       accent={accent}
       showRulers={question.config.showLayoutRulers ?? false}
-      headerIcon={<BookOpen size={17} />}
       headerTitle="Story Problem Mat"
-      headerSubtitle={storyEquation(config)}
+      /*
+        The story is the question — see `CountCanvas` for the standard.
+
+        This board led with "Story Problem Mat" and gave the prominent line to
+        the equation (`3 + ? = 8`), which is the one thing the child is meant to
+        work out for themselves: the header printed the answer's shape before
+        they had read the story. The story is what they are being asked, so it is
+        the heading; the equation joins the chips as the running state, where an
+        adult can still see it at a glance.
+      */
+      questionText={story}
       readAloudText={story}
+      /*
+        The four moments. A wrong pick is a real moment here — the child taps a
+        number and it is not the answer — and it went unremarked by the guide
+        until now. `selected !== null && !solved` is exactly that state, and it
+        is the same condition the footer already uses to say "not yet".
+      */
+      guideRole={solved ? "celebrating" : selected !== null ? "oops" : "waiting"}
+      {...guidePropsFor(question)}
       headerActions={(
         <>
           <CanvasChip accent={solved ? "emerald" : accent} isDark={isDark}>{TYPE_LABELS[config.type]}</CanvasChip>
+          {/* The shape of the sum, demoted from the heading to a readout. */}
+          <CanvasChip accent={accent} isDark={isDark}>{storyEquation(config)}</CanvasChip>
           <Button variant="ghost" size="icon" onClick={reset} className="h-8 w-8 dark:text-slate-300 dark:hover:bg-white/10" aria-label="Reset story"><RotateCcw size={14} /></Button>
         </>
       )}

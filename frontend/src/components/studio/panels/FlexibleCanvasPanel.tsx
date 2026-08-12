@@ -5,7 +5,7 @@ import { Label, Input } from "../../ui";
 import { sounds } from "../../../sound";
 import { BUILT_IN_ASSETS } from "../../../assets/assetCatalog";
 import { autoArrangeLayout } from "../../canvases/flexible/layout";
-import { PanelProps } from "../panelKit";
+import { ActorCastField, PanelProps } from "../panelKit";
 
 /** Vector artwork only — a flexible item falls back to its emoji when no type is chosen. */
 const DRAWABLE_ASSETS = BUILT_IN_ASSETS.filter((asset) => asset.kind !== "emoji");
@@ -394,6 +394,20 @@ export const FlexibleCanvasPanel: React.FC<PanelProps> = ({ question, update, up
                         </div>
                       </div>
                     )}
+
+                    {/* The same toggle, and the same default, as the Count panel. */}
+                    <div className="flex items-center justify-between p-1 bg-slate-50/50 rounded-lg">
+                      <span className="text-xs font-bold text-slate-600">Show card frame on objects</span>
+                      <input
+                        type="checkbox"
+                        checked={question.config.showItemFrame ?? true}
+                        onChange={(e) => updateConfig({ showItemFrame: e.target.checked })}
+                        className="w-4 h-4 text-indigo-600 accent-indigo-600 cursor-pointer"
+                      />
+                    </div>
+
+                    {/* Who plays each moment of the question. */}
+                    <ActorCastField config={question.config} updateConfig={updateConfig} />
                   </div>
   );
 };

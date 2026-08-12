@@ -1,6 +1,6 @@
 import React from "react";
 import { Label, Input } from "../../ui";
-import { PanelProps } from "../panelKit";
+import { ActorCastField, PanelProps } from "../panelKit";
 import {
   buildColumnAdditionModel,
   describeColumnMode,
@@ -9,7 +9,7 @@ import {
   ADDEND_MAX,
 } from "../../canvases/columnAdditionModel";
 
-export const ColumnAdditionPanel: React.FC<PanelProps> = ({ question, update }) => {
+export const ColumnAdditionPanel: React.FC<PanelProps> = ({ question, update, updateConfig }) => {
   const model = buildColumnAdditionModel(question.config?.num1 ?? 18, question.config?.num2 ?? 13);
   const { num1, num2, sum, anyCarry, carryCount, digitMode } = model;
 
@@ -80,6 +80,9 @@ export const ColumnAdditionPanel: React.FC<PanelProps> = ({ question, update }) 
           override it — a leftover counting line ("Tap each item to count…") is ignored so the greeting stays relevant.
         </p>
       </div>
+
+      {/* Who plays each moment of the question. */}
+      <ActorCastField config={question.config} updateConfig={updateConfig} />
     </div>
   );
 };

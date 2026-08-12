@@ -5,6 +5,7 @@ import { sounds } from "../../sound";
 import { Sparkles, HelpCircle, RotateCcw } from "lucide-react";
 import { CanvasProps, Sparkle } from "./types";
 import { SharedCanvasLayout } from "./SharedCanvasLayout";
+import { guidePropsFor } from "../../features/koda-mascot";
 import { GhostGuideOverlay, useGhostGuide } from "../../pedagogy";
 import { CanvasChip, CanvasAccent, surfaceClass } from "./canvasTheme";
 import { CanvasBin } from "./CanvasBin";
@@ -375,6 +376,16 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
               if (wrongBin) {
                 sounds.playFailure();
                 onAttempt?.("incorrect", { selected: { [droppedItem.id]: wrongBin.id } });
+                /*
+                  Sorting into the wrong bin is a wrong answer, and it used to be
+                  the one wrong answer that only made a noise: the multichoice
+                  and typed paths both flashed, and this one did not, so a child
+                  sorting with the sound off got nothing back at all. Now it
+                  reaches the same flag the others do, which is also what moves
+                  Koda to the oops face.
+                */
+                setErrorFlash(true);
+                setTimeout(() => setErrorFlash(false), 800);
               }
             }
           } else {
@@ -670,7 +681,6 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
       gridSize={20}
       showRulers={question.config.showLayoutRulers ?? true}
       accent={accent}
-      headerIcon={<Sparkles size={15} />}
       // The activity name must follow the mode — a true/false question headed
       // "Classroom Sorting Detective" tells the child to do something else.
       headerTitle={
@@ -682,16 +692,34 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
               ? "Tap to Count"
               : "Type the Answer"
       }
-      headerSubtitle={
-        mode === "dragmatch"
-          ? "Sort items into bins"
+      /*
+        The Count header — see `CountCanvas`. The question leads and does not
+        change; the mode's own words are the fallback for a slide that was never
+        given an instruction, and the running state is the chip beside it.
+      */
+      questionText={
+        question.instruction?.trim() ||
+        (mode === "dragmatch"
+          ? "Sort each item into the bin it belongs in."
           : mode === "multichoice"
-            ? "Pick the correct answer"
+            ? "Pick the correct answer."
             : mode === "tapcount"
-              ? "Tap to count"
-              : "Solve the counting challenge"
+              ? "Tap each one to count it."
+              : "Type the answer.")
       }
       readAloudText={getInstructionText()}
+      /*
+        The four moments, mapped the way Count maps them — read out, waited on,
+        got wrong, got right. `errorFlash` is the wrong-answer signal this canvas
+        already kept for its own shake, and the guide reads the same flag rather
+        than a second copy of "was that wrong": one source, so the character and
+        the board can never disagree about what just happened.
+
+        `talking` is not passed on purpose: the layout owns the read-aloud button
+        and knows when a sentence is actually running.
+      */
+      guideRole={errorFlash ? "oops" : guideSolved ? "celebrating" : "waiting"}
+      {...guidePropsFor(question)}
       headerActions={
         isPlayMode ? (
           <CanvasChip accent={guideSolved ? "emerald" : accent} isDark={isDark}>
@@ -725,9 +753,15 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
-        className="relative flex-1 min-h-[280px] w-full flex my-1 z-10 touch-none select-none overscroll-none"
+        /*
+          Floor capped by the window's height, as on Count: a fixed pixel
+          minimum on a wide, short screen pushes the stage past the bottom of a
+          card that clips, and what gets clipped is the bins along its foot.
+        */
+        className="relative flex-1 min-h-[min(280px,38svh)] w-full flex my-1 z-10 touch-none select-none overscroll-none"
       >
       <CanvasBin
+            surface={false}
         className={`w-full h-full ${errorFlash ? "ring-4 ring-rose-500/50" : ""}`}
         label={
           mode === "dragmatch" ? "Sort these" : mode === "tapcount" ? "Tap every one" : "How many?"
@@ -852,6 +886,9 @@ export const FlexibleCanvas: React.FC<CanvasProps> = ({
               isTapped={isTapped}
               tapIndex={tapIndex}
               assetType={question.config.assetType || "emoji"}
+              // Same switch and same default as Count's "Show card frame on
+              // objects", so one setting means one thing across the product.
+              hasFrame={question.config.showItemFrame ?? true}
               onPointerDown={(e) => handlePointerDownItem(e, item.id)}
               onRemove={() => handleRemoveItem(item.id)}
             />
