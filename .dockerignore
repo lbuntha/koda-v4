@@ -5,6 +5,12 @@ dev-dist
 .DS_Store
 coverage
 *.log
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
 server/.venv
 server/__pycache__
 **/__pycache__

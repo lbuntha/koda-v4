@@ -4,7 +4,6 @@
 # Ports are overridable so a container can run beside a host `npm run dev`:
 #   APP_PORT=3002 make dev-local
 
-
 services:
   app:
     build:
@@ -12,14 +11,14 @@ services:
       target: dev
     # Watch mode in the container: server.ts and its imports restart the Node
     # process, while everything under src/ reaches the browser as Vite HMR.
-    command: ["npm", "run", "dev:watch"]
+    command: ['npm', 'run', 'dev:watch']
     ports:
-      - "${APP_PORT:-3001}:3001"
+      - '${APP_PORT:-3001}:3001'
     environment:
-      PORT: "3001"
+      PORT: '3001'
       # Where the Node process proxies /v1. Inside compose that is a service
       # name, not localhost — the API is a different container.
-      API_URL: "http://api:8000"
+      API_URL: 'http://api:8000'
     env_file:
       - path: .env
         required: false
@@ -41,17 +40,18 @@ services:
   mailpit:
     image: axllent/mailpit
     ports:
-      - "${MAILPIT_UI_PORT:-8025}:8025"
-      - "${MAILPIT_SMTP_PORT:-1025}:1025"
+      - '${MAILPIT_UI_PORT:-8025}:8025'
+      - '${MAILPIT_SMTP_PORT:-1025}:1025'
 
   mongo:
     image: mongo:7
     ports:
-      - "${MONGO_PORT:-27017}:27017"
+      - '${MONGO_PORT:-27017}:27017'
     volumes:
       - mongo-data:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      test:
+        ['CMD', 'mongosh', '--quiet', '--eval', "db.adminCommand('ping').ok"]
       interval: 5s
       timeout: 5s
       retries: 12
@@ -60,30 +60,40 @@ services:
   api:
     build:
       context: ./server
+    command:
+      [
+        'uvicorn',
+        'app.main:app',
+        '--host',
+        '0.0.0.0',
+        '--port',
+        '8000',
+        '--reload',
+      ]
     ports:
-      - "${API_PORT:-8000}:8000"
+      - '${API_PORT:-8000}:8000'
     environment:
-      MONGODB_URI: "mongodb://mongo:27017"
-      MONGODB_DB: "koda"
+      MONGODB_URI: 'mongodb://mongo:27017'
+      MONGODB_DB: 'koda'
       # `console` by default so nothing depends on the mail container being up.
       # Set MAIL_DRIVER=smtp in .env to watch messages arrive in Mailpit.
-      MAIL_DRIVER: "${MAIL_DRIVER:-console}"
-      SMTP_HOST: "${SMTP_HOST:-mailpit}"
-      SMTP_PORT: "${SMTP_PORT:-1025}"
-      SMTP_STARTTLS: "${SMTP_STARTTLS:-false}"
-      SMTP_USER: "${SMTP_USER:-}"
-      SMTP_PASSWORD: "${SMTP_PASSWORD:-}"
-      MAIL_FROM: "${MAIL_FROM:-Koda <no-reply@koda.local>}"
-      APP_BASE_URL: "${APP_BASE_URL:-http://localhost:3001}"
+      MAIL_DRIVER: '${MAIL_DRIVER:-console}'
+      SMTP_HOST: '${SMTP_HOST:-mailpit}'
+      SMTP_PORT: '${SMTP_PORT:-1025}'
+      SMTP_STARTTLS: '${SMTP_STARTTLS:-false}'
+      SMTP_USER: '${SMTP_USER:-}'
+      SMTP_PASSWORD: '${SMTP_PASSWORD:-}'
+      MAIL_FROM: '${MAIL_FROM:-Koda <no-reply@koda.local>}'
+      APP_BASE_URL: '${APP_BASE_URL:-http://localhost:3001}'
       # Development only. Production supplies a real one, and the service
       # refuses to start while this value is in place.
-      JWT_SECRET: "${JWT_SECRET:-dev-only-change-me-not-a-real-secret-32b}"
-      ENVIRONMENT: "development"
+      JWT_SECRET: '${JWT_SECRET:-dev-only-change-me-not-a-real-secret-32b}'
+      ENVIRONMENT: 'development'
       # The credential the tutor server presents to read a stored API key.
       # Interpolated from the root .env, which the app service already reads —
       # so the secret lives in one file and both containers agree on it.
       # Unset means keys saved in Admin → API keys can never be fetched.
-      TUTOR_SERVICE_TOKEN: "${TUTOR_SERVICE_TOKEN:-}"
+      TUTOR_SERVICE_TOKEN: '${TUTOR_SERVICE_TOKEN:-}'
     env_file:
       - path: server/.env
         required: false
