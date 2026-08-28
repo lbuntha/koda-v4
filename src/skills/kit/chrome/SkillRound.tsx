@@ -164,7 +164,7 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
       </main>
 
       {round.feedback && (
-        <div className="sticky bottom-0 left-0 right-0 z-30 p-3 sm:p-4 bg-canvas/95 backdrop-blur-sm">
+        <div className="sticky bottom-0 left-0 right-0 z-30 p-3 sm:p-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-[calc(1rem+env(safe-area-inset-bottom))] bg-canvas/95 backdrop-blur-sm">
           <UIKidMessage
             tone={round.feedback.status === "correct" ? "correct" : "tryAgain"}
             title={round.feedback.title}

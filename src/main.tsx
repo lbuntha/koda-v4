@@ -4,7 +4,12 @@ import {MotionConfig} from 'motion/react';
 import App from './App.tsx';
 import { ThemeProvider } from './context/ThemeContext';
 import { PwaStatus } from './components/PwaStatus';
+import { blockPinchZoom } from './pwa/blockPinchZoom';
 import './index.css';
+
+/* Before the first render: a child can pinch the splash screen too. Never torn
+   down — it lives as long as the document does. */
+blockPinchZoom();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

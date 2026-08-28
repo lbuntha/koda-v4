@@ -3,10 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <!-- viewport-fit=cover so a standalone window can paint into the safe areas
-         on a notched device; the layout pads itself back off them in CSS. -->
+         on a notched device; the layout pads itself back off them in CSS.
+
+         Zoom is locked at 1. Every screen here is already laid out for a phone,
+         and the interactions are drags on a play area: pinching mid-drag left a
+         child looking at a corner of a counting grid with no obvious way back,
+         which for a five-year-old is a broken app. Android honours
+         `user-scalable=no`; iOS has ignored it since iOS 10, so `touch-action`
+         in index.css and the `gesturestart` guard in blockPinchZoom.ts do the
+         real work there. All three together, because each covers a gap the
+         others leave. -->
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <title>Koda Tutor</title>
     <meta

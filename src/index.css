@@ -146,16 +146,24 @@
   /*
    * Safe areas, required because the viewport is declared `viewport-fit=cover`.
    *
-   * An installed app draws edge to edge, so without this the sidebar slides
-   * under a notch and the bottom row sits beneath the home indicator. The insets
-   * are zero in a normal browser tab and on hardware that has none, so this
-   * costs nothing where it is not needed.
+   * An installed app draws edge to edge, so without this a page slides under a
+   * notch and the bottom row sits beneath the home indicator. The insets are
+   * zero in a normal browser tab and on hardware that has none, so this costs
+   * nothing where it is not needed.
+   *
+   * Only the sides are paid here. The top and bottom insets belong to the bars
+   * that actually touch those edges — `appShell.bar`, `appShell.tabBar`, the
+   * round's toolbar — because both of those bars are `sticky`/`fixed`, and
+   * neither honours padding on the body: a sticky bar sticks to the top of the
+   * viewport, not to the body's padding box, so the moment the page scrolled it
+   * slid straight under the status bar while the body's padding sat uselessly
+   * above it. Paying the inset twice — once here, once in the bar — was the
+   * other half of the same bug: the dead band above the toolbar on a page that
+   * had not scrolled yet.
    */
   body {
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
   }
 
   /*
@@ -163,11 +171,24 @@
    *
    * A counting game is a grid of things a child taps repeatedly, and double-tap
    * zoom turns the second tap of a fast pair into a zoom instead of a count.
-   * `manipulation` keeps panning and pinch-zoom while dropping the 300ms
-   * double-tap wait.
+   * `pan-x pan-y` keeps scrolling in both directions and drops the rest: the
+   * double-tap wait, and the pinch. It was `manipulation`, which drops only the
+   * first — so a pinch that started on a draggable block still zoomed the page,
+   * and a child was left looking at a corner of the grid with no idea how to get
+   * back. This is the rule browsers actually honour; the viewport meta's
+   * `user-scalable=no` is ignored on iOS.
+   *
+   * On <html> as well as <body>, because a gesture that begins on the document
+   * background never reaches the body's box.
+   *
+   * A child can still zoom with the OS accessibility zoom, which is where a
+   * setting this app has no business overriding belongs.
    */
+  html, body {
+    touch-action: pan-x pan-y;
+  }
+
   body {
-    touch-action: manipulation;
     /* Stops the whole app rubber-banding when a child drags on a play area. */
     overscroll-behavior-y: none;
   }

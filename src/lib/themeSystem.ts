@@ -467,7 +467,7 @@ export const themeSystem = {
    */
   sidebar: {
     aside:
-      "hidden rail:flex sticky top-0 z-30 h-screen shrink-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800/90 text-slate-900 dark:text-slate-100 transition-[width] duration-300 flex-col justify-between p-3.5 sm:p-4",
+      "hidden rail:flex sticky top-0 z-30 h-screen shrink-0 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800/90 text-slate-900 dark:text-slate-100 transition-[width] duration-300 flex-col justify-between p-3.5 sm:p-4",
     widthExpanded: "w-64",
     widthCollapsed: "w-20",
     brandBar:
@@ -610,10 +610,23 @@ export const themeSystem = {
        where the thumb expects the OS to hand the bar over — and a floating
        dock from `sm` up, because a 1440px-wide strip of five icons is not a
        navigation bar, it is a horizon. Same tabs, same order, same code. */
-    tabBarWrap:
-      "rail:hidden fixed inset-x-0 bottom-0 z-40 pointer-events-none pb-[env(safe-area-inset-bottom)]",
+    tabBarWrap: "rail:hidden fixed inset-x-0 bottom-0 z-40 pointer-events-none",
+    /* The home indicator's inset is padding *inside* the bar, not a gap under
+       it. On the wrapper it was an unpainted strip the page scrolled through,
+       so a phone with gesture navigation showed a finger-thick band of moving
+       content below the tabs — the bar looked like it was floating over a hole.
+       Opaque, too: `bg-surface/75` under a blur let whatever card happened to be
+       passing tint the tabs, and a navigation bar that changes colour as you
+       scroll reads as a rendering fault rather than as depth. `bg-surface` is
+       the colour `column` paints the page, so the bar is the page's own ground
+       rather than a second surface laid on top of it.
+
+       All four insets are paid here for the same reason: `fixed` positions
+       against the viewport, so the body's side padding never reached this bar
+       either. It only shows on a phone narrow enough to keep the tabs in
+       landscape, but that is exactly where the notch is on the side. */
     tabBar:
-      "pointer-events-auto flex items-stretch gap-1 bg-surface/90 backdrop-blur-xl supports-[backdrop-filter]:bg-surface/75 border-t border-line px-1.5 pt-1.5 pb-1",
+      "pointer-events-auto flex items-stretch gap-1 bg-surface border-t border-line pl-[calc(0.375rem+env(safe-area-inset-left))] pr-[calc(0.375rem+env(safe-area-inset-right))] pt-1.5 pb-[calc(0.25rem+env(safe-area-inset-bottom))]",
 
     /* Each tab owns an equal share of the bar so the targets stay predictable
        under a thumb that is not looking. */
