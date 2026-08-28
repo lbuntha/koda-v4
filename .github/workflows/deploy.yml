@@ -72,7 +72,7 @@ jobs:
         working-directory: server
         env:
           MONGODB_URI: mongodb://127.0.0.1:27017
-          JWT_SECRET: ci-only-secret
+          JWT_SECRET: ci-only-secret-at-least-32-characters
         run: pytest -q
 
   deploy-api:

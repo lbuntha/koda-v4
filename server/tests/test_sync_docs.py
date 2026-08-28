@@ -5,9 +5,9 @@ from datetime import timedelta
 import pytest
 
 from app.models.common import now
+from app.plan_defaults import DEFAULT_PLANS
 from app.repos import plans as plans_repo
 from app.repos import subscriptions as subs_repo
-from app.plan_defaults import DEFAULT_PLANS
 
 
 async def _room_for_siblings(db, family_id: str) -> None:

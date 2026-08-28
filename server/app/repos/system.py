@@ -12,7 +12,6 @@ from pymongo import ReturnDocument
 
 from app.models.common import now
 
-
 #: Fields that describe a setting rather than record a decision about it.
 #:
 #: These come from the code and are refreshed on every boot: renaming a label or

@@ -15,15 +15,16 @@ from app import errors
 from app.art_defaults import load_defaults as load_art_defaults
 from app.indexes import ensure_indexes
 from app.menu_defaults import DEFAULT_MENU
-from app.plan_defaults import DEFAULT_PLANS
 from app.middleware.requests import RequestContextMiddleware
+from app.persona_defaults import DEFAULT_PERSONAS
+from app.plan_defaults import DEFAULT_PLANS
 from app.repos import art as art_repo
 from app.repos import defaults as defaults_repo
 from app.repos import menu as menu_repo
+from app.repos import personas as personas_repo
 from app.repos import plans as plans_repo
 from app.repos import platform_roles as platform_roles_repo
 from app.repos import skills as skills_repo
-from app.repos import personas as personas_repo
 from app.repos import system as system_repo
 from app.role_defaults import DEFAULT_PLATFORM_ROLES
 from app.routers import (
@@ -47,7 +48,6 @@ from app.routers import (
 )
 from app.settings import settings
 from app.skill_defaults import load_defaults as load_skill_defaults
-from app.persona_defaults import DEFAULT_PERSONAS
 from app.system_defaults import DEFAULT_SETTINGS
 
 log = logging.getLogger("koda.api")

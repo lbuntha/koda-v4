@@ -23,8 +23,8 @@ async def _operator(client, db, role: str = "developer") -> dict[str, str]:
 
 async def test_bundled_art_seeds_once_and_survives_edits(db):
     defaults = load_defaults()
-    assert len(defaults) == 11
-    assert sum([await art_repo.seed_default(db, item) for item in defaults]) == 11
+    assert len(defaults) == 21
+    assert sum([await art_repo.seed_default(db, item) for item in defaults]) == len(defaults)
 
     await art_repo.put(db, "apple", "food", "<svg><circle r='4'/></svg>", "developer")
     assert sum([await art_repo.seed_default(db, item) for item in defaults]) == 0

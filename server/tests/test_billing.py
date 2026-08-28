@@ -13,8 +13,8 @@ from app.models.common import now
 from app.plan_defaults import DEFAULT_PLANS
 from app.repos import plans as plans_repo
 from app.repos import platform_roles as platform_roles_repo
-from app.role_defaults import DEFAULT_PLATFORM_ROLES
 from app.repos import subscriptions as subs_repo
+from app.role_defaults import DEFAULT_PLATFORM_ROLES
 from app.services.entitlements import entitlements, has_feature
 
 

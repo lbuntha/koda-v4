@@ -16,7 +16,7 @@ see `plan_defaults` for why that is the design and not an omission.
 """
 
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, Query
@@ -28,7 +28,6 @@ from app.models.auth import Principal
 from app.models.common import Model, now
 from app.plan_defaults import FEATURE_IDS, FREE_PLAN, PLAN_FEATURES
 from app.repos import families as families_repo
-from app.repos import learners as learners_repo
 from app.repos import plans as plans_repo
 from app.repos import subscriptions as subs_repo
 from app.security import principal_can

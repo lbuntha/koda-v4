@@ -15,9 +15,9 @@ from app.errors import Conflict, Forbidden, NotFound, Unauthorized
 from app.models.auth import (
     AvatarIn,
     AvatarOut,
+    ForgotIn,
     JoinIn,
     LoginIn,
-    ForgotIn,
     MeOut,
     PasswordChangeIn,
     PasswordChangeOut,
@@ -33,7 +33,6 @@ from app.repos import devices, families, learners, memberships, platform_roles, 
 from app.repos import system as system_repo
 from app.security import passwords, tokens
 from app.security import policy as rbac
-from app.services import mail
 from app.security.rate_limit import (
     FORGOT_PER_ACCOUNT,
     FORGOT_PER_IP,
@@ -44,6 +43,7 @@ from app.security.rate_limit import (
     SIGNUP_PER_IP,
     limiter,
 )
+from app.services import mail
 from app.services.codes import hash_code
 from app.settings import settings
 
