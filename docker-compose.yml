@@ -1,93 +1,99 @@
-# Runs the whole development stack: MongoDB + FastAPI backend + Vite frontend with HMR.
+# Local stack. `make dev-local` runs the app and Mongo; the FastAPI service
+# joins the same network once it exists (`make dev-local-api`).
 #
-#   make up      # build + start (detached)
-#   make logs    # follow logs
-#   make down    # stop
-#
-# Secrets: set JWT_SECRET and OPENAI_API_KEY in a root `.env` (compose reads it),
-# or export them in your shell. Defaults below are for local dev only.
+# Ports are overridable so a container can run beside a host `npm run dev`:
+#   APP_PORT=3002 make dev-local
+
 
 services:
+  app:
+    build:
+      context: .
+      target: dev
+    # Watch mode in the container: server.ts and its imports restart the Node
+    # process, while everything under src/ reaches the browser as Vite HMR.
+    command: ["npm", "run", "dev:watch"]
+    ports:
+      - "${APP_PORT:-3001}:3001"
+    environment:
+      PORT: "3001"
+      # Where the Node process proxies /v1. Inside compose that is a service
+      # name, not localhost — the API is a different container.
+      API_URL: "http://api:8000"
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      # The working tree, so an edit on the host reloads in the container.
+      - .:/app
+      # …except node_modules, which stays the Linux copy built into the image
+      # rather than whatever the host installed for its own platform.
+      - /app/node_modules
+    depends_on:
+      api:
+        condition: service_started
+      mongo:
+        condition: service_healthy
+
+  # Catches every mail the API sends and shows it at http://localhost:8025.
+  # Nothing leaves the machine, so a wrong address cannot reach a real person
+  # and a test reset does not spend a Gmail quota.
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - "${MAILPIT_UI_PORT:-8025}:8025"
+      - "${MAILPIT_SMTP_PORT:-1025}:1025"
+
   mongo:
     image: mongo:7
-    restart: unless-stopped
     ports:
-      - "27017:27017"
+      - "${MONGO_PORT:-27017}:27017"
     volumes:
-      - mongo_data:/data/db
+      - mongo-data:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand('ping').ok"]
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
       interval: 5s
       timeout: 5s
       retries: 12
-
-  # Local mail sink: a real SMTP server on 1025 with a web inbox on 8025. Reset emails are
-  # delivered and readable at http://localhost:8025 without anything leaving the machine.
-  mailpit:
-    image: axllent/mailpit:latest
-    restart: unless-stopped
-    ports:
-      - "8025:8025"
+      start_period: 10s
 
   api:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
-    restart: unless-stopped
-    environment:
-      MONGO_URI: mongodb://mongo:27017
-      MONGO_DB: koda_v4
-      # No production fallback on purpose: with ENVIRONMENT=production the app refuses to
-      # start unless JWT_SECRET is a real value (see core/config.py).
-      ENVIRONMENT: ${ENVIRONMENT:-development}
-      JWT_SECRET: ${JWT_SECRET:-dev-only-insecure-secret-change-me-0000000000000000}
-      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      # Delivered to Mailpit locally; point MAIL_TRANSPORT/SMTP_* at a provider to send for real.
-      MAIL_TRANSPORT: ${MAIL_TRANSPORT:-smtp}
-      SMTP_HOST: ${SMTP_HOST:-mailpit}
-      SMTP_PORT: ${SMTP_PORT:-1025}
-      MAIL_FROM: ${MAIL_FROM:-Koda <no-reply@koda.local>}
-      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:3000}
-      # Development origins for the Docker and local Vite servers. A deployment must
-      # override this with its real origins — production refuses localhost entries.
-      CORS_ORIGINS: '${CORS_ORIGINS:-["http://localhost:3000","http://localhost:3001","http://localhost:5173"]}'
-    # ./backend is bind-mounted below, but the image CMD runs uvicorn without --reload,
-    # so edits only reached the process on a manual restart — a container started before
-    # a schema change kept serving the old response models (and hid an import error that
-    # made the app unbootable). Reload in dev so the running API matches the source.
-    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+      context: ./server
     ports:
-      - "8000:8000"
+      - "${API_PORT:-8000}:8000"
+    environment:
+      MONGODB_URI: "mongodb://mongo:27017"
+      MONGODB_DB: "koda"
+      # `console` by default so nothing depends on the mail container being up.
+      # Set MAIL_DRIVER=smtp in .env to watch messages arrive in Mailpit.
+      MAIL_DRIVER: "${MAIL_DRIVER:-console}"
+      SMTP_HOST: "${SMTP_HOST:-mailpit}"
+      SMTP_PORT: "${SMTP_PORT:-1025}"
+      SMTP_STARTTLS: "${SMTP_STARTTLS:-false}"
+      SMTP_USER: "${SMTP_USER:-}"
+      SMTP_PASSWORD: "${SMTP_PASSWORD:-}"
+      MAIL_FROM: "${MAIL_FROM:-Koda <no-reply@koda.local>}"
+      APP_BASE_URL: "${APP_BASE_URL:-http://localhost:3001}"
+      # Development only. Production supplies a real one, and the service
+      # refuses to start while this value is in place.
+      JWT_SECRET: "${JWT_SECRET:-dev-only-change-me-not-a-real-secret-32b}"
+      ENVIRONMENT: "development"
+      # The credential the tutor server presents to read a stored API key.
+      # Interpolated from the root .env, which the app service already reads —
+      # so the secret lives in one file and both containers agree on it.
+      # Unset means keys saved in Admin → API keys can never be fetched.
+      TUTOR_SERVICE_TOKEN: "${TUTOR_SERVICE_TOKEN:-}"
+    env_file:
+      - path: server/.env
+        required: false
     volumes:
-      - ./backend:/app
-      - ./shared:/app/shared:ro
+      # Source only — installed packages stay in the image.
+      - ./server/app:/srv/app
+      - ./server/tests:/srv/tests
     depends_on:
       mongo:
         condition: service_healthy
-      mailpit:
-        condition: service_started
-
-  web:
-    build:
-      context: .
-      dockerfile: frontend/Dockerfile
-      target: dev
-    restart: unless-stopped
-    environment:
-      VITE_API_URL: http://localhost:8000
-      # Docker Desktop can coalesce host filesystem events; polling keeps HMR reliable.
-      CHOKIDAR_USEPOLLING: "true"
-      CHOKIDAR_INTERVAL: "200"
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app/frontend
-      - ./shared:/app/shared:ro
-      # Keep Linux dependencies inside Docker instead of exposing host node_modules.
-      - web_node_modules:/app/frontend/node_modules
-    depends_on:
-      - api
 
 volumes:
-  mongo_data:
-  web_node_modules:
+  mongo-data:

@@ -1,1 +1,0 @@
-{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"owner_id":{"$numberInt":"1"}},"name":"owner_id_1","unique":true}],"uuid":"45f4c2a7b63c42c5b190d5b53fed35d9","collectionName":"question_decks","type":"collection"}

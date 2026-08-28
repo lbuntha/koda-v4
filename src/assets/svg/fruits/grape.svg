@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 100 100">
+  <defs>
+    <!-- Grape Radial Gradient (Creates 3D effect) -->
+    <radialGradient id="grapeGrad" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#B388FF" />    <!-- Light purple highlight -->
+      <stop offset="50%" stop-color="#7C4DFF" />   <!-- Main purple -->
+      <stop offset="100%" stop-color="#4A148C" />  <!-- Deep purple shadow -->
+    </radialGradient>
+
+    <!-- Leaf Linear Gradient -->
+    <linearGradient id="grapeLeafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#81C784" />   <!-- Bright green -->
+      <stop offset="100%" stop-color="#2E7D32" />  <!-- Dark green -->
+    </linearGradient>
+  </defs>
+
+  <!-- Left Leaf -->
+  <path 
+    d="M 50,22 C 30,12 25,30 38,36 C 45,30 50,22 50,22 Z" 
+    fill="url(#grapeLeafGrad)" 
+  />
+
+  <!-- Right Leaf -->
+  <path 
+    d="M 50,22 C 70,12 75,30 62,36 C 55,30 50,22 50,22 Z" 
+    fill="url(#grapeLeafGrad)" 
+  />
+
+  <!-- Stem -->
+  <path 
+    d="M 50,22 Q 48,12 55,8" 
+    stroke="#4E342E" 
+    stroke-width="3" 
+    stroke-linecap="round" 
+    fill="none" 
+  />
+
+  <!-- Grape Cluster (Arranged in layers from back to front) -->
+  <!-- Top Row (4 grapes) -->
+  <circle cx="34" cy="36" r="10" fill="url(#grapeGrad)" />
+  <circle cx="45" cy="33" r="10" fill="url(#grapeGrad)" />
+  <circle cx="55" cy="33" r="10" fill="url(#grapeGrad)" />
+  <circle cx="66" cy="36" r="10" fill="url(#grapeGrad)" />
+
+  <!-- Second Row (3 grapes) -->
+  <circle cx="39" cy="48" r="10" fill="url(#grapeGrad)" />
+  <circle cx="50" cy="46" r="10" fill="url(#grapeGrad)" />
+  <circle cx="61" cy="48" r="10" fill="url(#grapeGrad)" />
+
+  <!-- Third Row (2 grapes) -->
+  <circle cx="44" cy="61" r="10" fill="url(#grapeGrad)" />
+  <circle cx="56" cy="61" r="10" fill="url(#grapeGrad)" />
+
+  <!-- Bottom Grape -->
+  <circle cx="50" cy="74" r="10" fill="url(#grapeGrad)" />
+</svg>

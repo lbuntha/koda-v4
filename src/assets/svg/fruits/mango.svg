@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 128 128">
+  <defs>
+    <!-- Soft drop shadow under the mango -->
+    <radialGradient id="shadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Main mango gradient: Red/Pink blush to Golden Yellow to Green base -->
+    <linearGradient id="mangoSkin" x1="20%" y1="10%" x2="80%" y2="90%">
+      <stop offset="0%" stop-color="#EF4444"/>   <!-- Warm Red top blush -->
+      <stop offset="25%" stop-color="#F97316"/>  <!-- Coral Orange transition -->
+      <stop offset="65%" stop-color="#FBBF24"/>  <!-- Rich Mango Yellow -->
+      <stop offset="90%" stop-color="#A3E635"/>  <!-- Fresh Lime green tint -->
+      <stop offset="100%" stop-color="#84CC16"/>
+    </linearGradient>
+
+    <!-- Ambient 3D shading -->
+    <radialGradient id="innerShade" cx="40%" cy="35%" r="60%">
+      <stop offset="60%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="90%" stop-color="#7C2D12" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#365314" stop-opacity="0.4"/>
+    </radialGradient>
+
+    <!-- Stem gradient -->
+    <linearGradient id="stemGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#A16207"/>
+      <stop offset="100%" stop-color="#451A03"/>
+    </linearGradient>
+
+    <!-- Leaf 1 gradient (Main front leaf) -->
+    <linearGradient id="leafGradMain" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4ADE80"/>
+      <stop offset="50%" stop-color="#16A34A"/>
+      <stop offset="100%" stop-color="#14532D"/>
+    </linearGradient>
+
+    <!-- Leaf 2 gradient (Smaller back leaf) -->
+    <linearGradient id="leafGradBack" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22C55E"/>
+      <stop offset="100%" stop-color="#15803D"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Ground Shadow -->
+  <ellipse cx="64" cy="116" rx="38" ry="7" fill="url(#shadow)"/>
+
+  <!-- Back Leaf -->
+  <g>
+    <path d="M 52 28 C 42 16 26 14 18 18 C 22 28 34 34 48 31 Z" fill="url(#leafGradBack)"/>
+    <path d="M 50 28 C 40 23 28 20 18 18" stroke="#15803D" stroke-width="1" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- Main Mango Body (Kidney/Teardrop shape) -->
+  <path d="M 64 24 
+           C 86 24 104 38 104 62 
+           C 104 88 84 112 62 112 
+           C 42 112 28 98 28 80 
+           C 28 58 42 24 64 24 Z" 
+        fill="url(#mangoSkin)"/>
+
+  <!-- 3D Shadow Overlay -->
+  <path d="M 64 24 
+           C 86 24 104 38 104 62 
+           C 104 88 84 112 62 112 
+           C 42 112 28 98 28 80 
+           C 28 58 42 24 64 24 Z" 
+        fill="url(#innerShade)"/>
+
+  <!-- Stem -->
+  <path d="M 61 25 C 59 18 60 12 65 6 C 67 4 65 3 63 5 C 57 11 56 18 58 25 Z" fill="url(#stemGrad)"/>
+  <!-- Stem Base / Indentation -->
+  <ellipse cx="60" cy="25" rx="3" ry="1.5" fill="#451A03" opacity="0.6"/>
+
+  <!-- Main Leaf -->
+  <g>
+    <!-- Leaf Body -->
+    <path d="M 62 23 C 78 14 96 16 108 24 C 98 38 78 40 60 27 Z" fill="url(#leafGradMain)"/>
+    <!-- Leaf Center Vein -->
+    <path d="M 61 24 C 75 23 88 23 108 24" stroke="#86EFAC" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.8"/>
+    <!-- Leaf Side Veins -->
+    <path d="M 72 23 Q 76 20 80 18 M 82 23 Q 87 21 92 19 M 92 24 Q 97 23 101 22 
+             M 70 25 Q 74 29 78 31 M 80 26 Q 85 30 90 31" 
+          stroke="#86EFAC" stroke-width="0.75" fill="none" opacity="0.4" stroke-linecap="round"/>
+  </g>
+
+  <!-- Specular Highlights (Glow) -->
+  <!-- Primary curved soft highlight -->
+  <path d="M 52 34 C 64 30 76 34 82 40 C 74 37 60 36 48 48 C 47 42 49 37 52 34 Z" 
+        fill="#FFFFFF" fill-opacity="0.4"/>
+        
+  <!-- Secondary small intense highlight spot -->
+  <ellipse cx="54" cy="42" rx="4" ry="7" fill="#FFFFFF" fill-opacity="0.3" transform="rotate(-30 54 42)"/>
+
+  <!-- Subtle Rim Light on Bottom Curve -->
+  <path d="M 34 76 C 32 86 40 102 54 108" fill="none" stroke="#FEF08A" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+</svg>

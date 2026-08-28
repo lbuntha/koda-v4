@@ -1,0 +1,55 @@
+{
+  "units": [
+    {
+      "id": "u1",
+      "unitNumber": 1,
+      "title": "Unit 1: Subitizing & Dot Matrix",
+      "description": "Master instant sight counting, 1-to-1 correspondence & 5-anchor arrays",
+      "icon": "🌱",
+      "lessons": [
+        "counting/count-in-a-row",
+        "counting/count-scattered-objects",
+        "counting/comparing-two-groups",
+        "counting/quick-dice-patterns"
+      ]
+    },
+    {
+      "id": "u2",
+      "unitNumber": 2,
+      "title": "Unit 2: Ten-Frames & Place Value",
+      "description": "Build mental anchors of 5 and 10 with interactive frames & grouped rods",
+      "icon": "⚡",
+      "lessons": [
+        "counting/quick-dot-groups",
+        "counting/two-color-groups",
+        "counting/ten-frame-5-and-more",
+        "counting/making-10"
+      ]
+    },
+    {
+      "id": "u3",
+      "unitNumber": 3,
+      "title": "Unit 3: Quantity Comparison & Number Line",
+      "description": "Compare sets, estimate spatial magnitudes, and explore sequences",
+      "icon": "🔮",
+      "lessons": [
+        "counting/teen-numbers",
+        "counting/skip-counting-by-2s-and-5s",
+        "counting/count-by-10s-up-to-100",
+        "counting/find-the-missing-number"
+      ]
+    },
+    {
+      "id": "u4",
+      "unitNumber": 4,
+      "title": "Unit 4: 100-Chart & Skip Counting",
+      "description": "Pattern recognition in 2s, 5s, and 10s up to 100 with master speed drills",
+      "icon": "👑",
+      "lessons": [
+        "counting/make-a-ten",
+        "counting/make-a-hundred",
+        "counting/build-numbers-with-hundreds-tens-ones"
+      ]
+    }
+  ]
+}

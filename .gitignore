@@ -1,10 +1,17 @@
-node_modules/
-build/
-dist/
-dist_trash/
-dist-*/
-coverage/
+node_modules
+dist
+# The dev service worker, regenerated on every `npm run dev`.
+dev-dist
+coverage
 .DS_Store
-*.log
-.env*
+*.local
+.env
+.env.*
 !.env.example
+
+# Python service
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/

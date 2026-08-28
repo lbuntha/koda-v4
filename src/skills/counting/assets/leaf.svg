@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <radialGradient id="leafGround" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.24"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="leafBlade" x1="10%" y1="0%" x2="90%" y2="100%">
+      <stop offset="0%" stop-color="#86EFAC"/>
+      <stop offset="45%" stop-color="#22C55E"/>
+      <stop offset="100%" stop-color="#14532D"/>
+    </linearGradient>
+    <linearGradient id="leafStem" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A16207"/>
+      <stop offset="100%" stop-color="#4A2A0B"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="64" cy="116" rx="26" ry="5" fill="url(#leafGround)"/>
+
+  <path d="M 30 106 C 26 96 24 86 26 76" stroke="url(#leafStem)" stroke-width="6" stroke-linecap="round" fill="none"/>
+
+  <path d="M 106 16 C 62 16 26 44 26 82 C 26 100 38 110 54 106 C 92 96 112 58 106 16 Z" fill="url(#leafBlade)"/>
+
+  <path d="M 102 20 C 74 44 52 74 38 104" stroke="#DCFCE7" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.65"/>
+  <path d="M 88 32 Q 78 30 70 24 M 74 46 Q 62 45 54 40 M 62 60 Q 50 60 42 56
+           M 90 36 Q 92 48 90 58 M 76 51 Q 78 64 76 74 M 63 66 Q 65 78 62 88"
+        stroke="#DCFCE7" stroke-width="1.8" stroke-linecap="round" fill="none" opacity="0.4"/>
+
+  <path d="M 96 22 C 78 26 66 34 58 44" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.3"/>
+</svg>

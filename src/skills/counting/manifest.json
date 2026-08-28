@@ -1,0 +1,163 @@
+{
+  "id": "counting",
+  "name": "Counting Quest",
+  "version": "1.0.0",
+  "description": "One-to-one correspondence, subitizing and quantity comparison.",
+  "category": "core",
+  "author": "Koda Math Lab",
+  "iconName": "Sparkles",
+  "tagline": "Count, compare and see small amounts at a glance.",
+  "thumbnail": "counting-quest",
+  "status": "published",
+  "audience": {
+    "ages": [
+      5,
+      7
+    ],
+    "category": "number-sense"
+  },
+  "teaches": [
+    "corresponder",
+    "counter",
+    "comparer",
+    "perceptual-subitizer",
+    "conceptual-subitizer",
+    "part-whole-decomposer",
+    "five-benchmark",
+    "make-ten",
+    "teen-composer",
+    "skip-counter",
+    "pattern-continuer",
+    "unitiser-ten",
+    "unitiser-hundred",
+    "place-value-builder"
+  ],
+  "requires": [],
+  "features": [
+    {
+      "id": "tactile_pop",
+      "name": "Tactile bounce & pop",
+      "description": "Elastic scale animation when a countable item is touched.",
+      "isEnabled": true,
+      "tag": "Visual"
+    },
+    {
+      "id": "haptic_feedback",
+      "name": "Haptic vibration",
+      "description": "Vibration pulse synchronised with the tap animation.",
+      "isEnabled": true,
+      "tag": "Haptic"
+    },
+    {
+      "id": "audio_speech",
+      "name": "Spoken counter",
+      "description": "Speaks 'one, two, three' aloud as items are touched.",
+      "isEnabled": true,
+      "tag": "Audio"
+    },
+    {
+      "id": "counting_badges",
+      "name": "1-to-1 badges",
+      "description": "Numbers each touched item so a child cannot double-count.",
+      "isEnabled": true,
+      "tag": "Cognitive"
+    },
+    {
+      "id": "step_context_tags",
+      "name": "Step framing tags",
+      "description": "Labels each step — warm-up, guided challenge, final milestone — beside the step counter.",
+      "isEnabled": true,
+      "tag": "Cognitive"
+    },
+    {
+      "id": "sound_chimes",
+      "name": "Sound chimes",
+      "description": "Pop and success chimes during a round.",
+      "isEnabled": true,
+      "tag": "Audio"
+    }
+  ],
+  "settings": {
+    "warmupLabel": "",
+    "activityLabel": "",
+    "guidedLabel": "",
+    "milestoneLabel": "",
+    "speechRate": 1.0,
+    "hapticIntensity": "crisp",
+    "popScaleFactor": 1.2
+  },
+  "settingsSchema": [
+    {
+      "key": "warmupLabel",
+      "label": "Warm-up tag",
+      "help": "Wording for step 1. Leave blank to use the default.",
+      "type": "text",
+      "placeholder": "Warm-up Exercise 🌱",
+      "maxLength": 32
+    },
+    {
+      "key": "activityLabel",
+      "label": "Activity tag",
+      "help": "Wording for even-numbered steps. Leave blank to use the default.",
+      "type": "text",
+      "placeholder": "Interactive Activity 🚀",
+      "maxLength": 32
+    },
+    {
+      "key": "guidedLabel",
+      "label": "Guided tag",
+      "help": "Wording for odd-numbered steps. Leave blank to use the default.",
+      "type": "text",
+      "placeholder": "Guided Challenge 🌟",
+      "maxLength": 32
+    },
+    {
+      "key": "milestoneLabel",
+      "label": "Final tag",
+      "help": "Wording for the last step. Leave blank to use the default.",
+      "type": "text",
+      "placeholder": "Final Milestone 🏆",
+      "maxLength": 32
+    },
+    {
+      "key": "speechRate",
+      "label": "Speech rate",
+      "help": "How fast the counter is spoken.",
+      "type": "number",
+      "min": 0.5,
+      "max": 2.0,
+      "step": 0.1,
+      "unit": "x"
+    },
+    {
+      "key": "hapticIntensity",
+      "label": "Haptic intensity",
+      "help": "Strength of the vibration on each tap.",
+      "type": "choice",
+      "options": [
+        {
+          "value": "subtle",
+          "label": "Subtle"
+        },
+        {
+          "value": "crisp",
+          "label": "Crisp"
+        },
+        {
+          "value": "strong",
+          "label": "Strong"
+        }
+      ]
+    },
+    {
+      "key": "popScaleFactor",
+      "label": "Tap pop scale",
+      "help": "How much an item grows when touched.",
+      "type": "number",
+      "min": 1.0,
+      "max": 1.6,
+      "step": 0.1,
+      "unit": "x"
+    }
+  ]
+}

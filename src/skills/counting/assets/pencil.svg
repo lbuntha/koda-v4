@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <radialGradient id="pencilGround" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.26"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="pencilBarrel" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#B45309"/>
+      <stop offset="22%" stop-color="#FCD34D"/>
+      <stop offset="60%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#92400E"/>
+    </linearGradient>
+    <linearGradient id="pencilWood" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FDE8C8"/>
+      <stop offset="55%" stop-color="#E9C08A"/>
+      <stop offset="100%" stop-color="#A16207"/>
+    </linearGradient>
+    <linearGradient id="pencilFerrule" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#94A3B8"/>
+      <stop offset="35%" stop-color="#F1F5F9"/>
+      <stop offset="70%" stop-color="#CBD5E1"/>
+      <stop offset="100%" stop-color="#64748B"/>
+    </linearGradient>
+    <linearGradient id="pencilEraser" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FDA4AF"/>
+      <stop offset="50%" stop-color="#F43F5E"/>
+      <stop offset="100%" stop-color="#9F1239"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="64" cy="116" rx="30" ry="5" fill="url(#pencilGround)"/>
+
+  <g transform="rotate(-38 64 64)">
+    <path d="M 64 6 L 82 40 L 46 40 Z" fill="url(#pencilWood)"/>
+    <path d="M 64 6 L 71 20 L 57 20 Z" fill="#334155"/>
+    <rect x="46" y="40" width="36" height="52" fill="url(#pencilBarrel)"/>
+    <rect x="46" y="92" width="36" height="12" fill="url(#pencilFerrule)"/>
+    <path d="M 46 104 L 82 104 L 82 112 C 82 118 75 121 64 121 C 53 121 46 118 46 112 Z" fill="url(#pencilEraser)"/>
+    <path d="M 53 44 L 53 88" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" fill="none" opacity="0.45"/>
+    <path d="M 46 95 L 82 95 M 46 100 L 82 100" stroke="#64748B" stroke-width="1.4" fill="none" opacity="0.6"/>
+  </g>
+</svg>

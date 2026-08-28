@@ -1,63 +1,78 @@
-# Koda — dev & container tasks. Run `make` (or `make help`) to list targets.
+# Koda — local development.
+#
+#   make dev-local       the whole stack in Docker: app + Mongo
+#   make dev-local-api   …and the FastAPI service, once server/ exists
+#   make down            stop it
+#
+# Run it beside a host `npm run dev` by moving the port:
+#   APP_PORT=3002 make dev-local
+
+COMPOSE ?= docker compose
+APP_PORT ?= 3001
+export APP_PORT
 
 .DEFAULT_GOAL := help
-.PHONY: help dev-local up down build logs restart clean api-shell mongo-shell seed seed-grade1 seed-grade1-missed seed-grade1-local seed-grade1-missed-local seed-grade2-science seed-grade2-science-local seed-docker
 
-help: ## List available targets
-	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
-	  | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
+## help: list the targets
+help:
+	@grep -E '^## ' $(MAKEFILE_LIST) | sed 's/## //' | awk -F': ' '{printf "  \033[1m%-16s\033[0m %s\n", $$1, $$2}'
 
-# ── Local (no containers) ─────────────────────────────────────────────────────
-dev-local: ## Run MongoDB + backend + frontend as local processes (Ctrl+C stops all)
-	@bash scripts/dev.sh
+## dev-local: build and run the whole stack — app, API and Mongo
+dev-local:
+	# --renew-anon-volumes: node_modules lives in an anonymous volume, and a
+	# stale one would shadow a dependency added since the last build.
+	$(COMPOSE) up --build -d --renew-anon-volumes
+	@echo
+	@echo "  Koda        http://localhost:$(APP_PORT)"
+	@echo "  API         http://localhost:$${API_PORT:-8000}/v1/health"
+	@echo "  API docs    http://localhost:$${API_PORT:-8000}/v1/docs"
+	@echo "  Mongo       mongodb://localhost:$${MONGO_PORT:-27017}"
+	@echo "  Logs        make logs · make logs-api"
+	@echo
 
-seed: ## Seed/reset the initial admin account (local venv)
-	@cd backend && ./.venv/bin/python seed.py
+## logs-api: follow the API's output
+logs-api:
+	$(COMPOSE) logs -f api
 
-seed-grade1: ## Seed/reset Grade 1 fixture in the running Docker stack
-	docker compose exec -T api python scripts/seed_phase1_grade1.py
+## test-api: run the API's tests against the compose Mongo
+test-api:
+	$(COMPOSE) run --rm api pytest -q
 
-seed-grade1-missed: ## Seed Grade 1 with overdue retry/review recommendations in Docker
-	docker compose exec -T -e SEED_GRADE1_SCENARIO=missed api python scripts/seed_phase1_grade1.py
+## lint-api: ruff over the service
+lint-api:
+	$(COMPOSE) run --rm api ruff check app tests
 
-seed-grade1-local: ## Seed/reset Grade 1 fixture for make dev-local
-	@cd backend && ./.venv/bin/python scripts/seed_phase1_grade1.py
+## migrate: apply every index
+migrate:
+	$(COMPOSE) exec api python -m app.cli migrate
 
-seed-grade1-missed-local: ## Seed Grade 1 with overdue retry/review recommendations locally
-	@cd backend && SEED_GRADE1_SCENARIO=missed ./.venv/bin/python scripts/seed_phase1_grade1.py
+## prod-local: build the production image and serve the built app
+prod-local:
+	$(COMPOSE) -f docker-compose.yml run --rm --build --service-ports \
+		-e NODE_ENV=production app node dist/server.cjs
 
-seed-grade2-science: ## Seed Grade 2 Science and its Grade 1 promotion path in Docker
-	docker compose exec -T api python -m scripts.seed_grade2_science
+## logs: follow the app's output
+logs:
+	$(COMPOSE) logs -f app
 
-seed-grade2-science-local: ## Seed Grade 2 Science for make dev-local
-	@cd backend && ./.venv/bin/python -m scripts.seed_grade2_science
+## ps: what is running
+ps:
+	$(COMPOSE) ps
 
-seed-docker: ## Seed/reset the initial admin account (in Docker)
-	docker compose run --rm api python seed.py
+## shell: a shell inside the app container
+shell:
+	$(COMPOSE) exec app sh
 
-# ── Docker Compose (mongo + api + web) ────────────────────────────────────────
-up: ## Build + start the full stack in Docker (detached)
-	docker compose up --build -d
-	@echo "  App : http://localhost:3000"
-	@echo "  API : http://localhost:8000/docs"
+## mongo-shell: a mongosh session against the local database
+mongo-shell:
+	$(COMPOSE) exec mongo mongosh koda
 
-build: ## Build the Docker images without starting
-	docker compose build
+## down: stop the stack, keep the database
+down:
+	$(COMPOSE) down
 
-logs: ## Follow logs from all containers
-	docker compose logs -f
+## clean: stop the stack and delete the database volume
+clean:
+	$(COMPOSE) down -v
 
-restart: ## Recreate containers
-	docker compose up -d --force-recreate
-
-down: ## Stop and remove the containers
-	docker compose down
-
-clean: ## Stop containers AND delete the Mongo volume (wipes local DB data)
-	docker compose down -v
-
-api-shell: ## Open a shell in the running backend container
-	docker compose exec api bash
-
-mongo-shell: ## Open a mongosh shell in the running mongo container
-	docker compose exec mongo mongosh
+.PHONY: help dev-local prod-local logs logs-api test-api lint-api migrate ps shell mongo-shell down clean

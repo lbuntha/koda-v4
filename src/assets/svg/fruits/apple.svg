@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 128 128">
+  <defs>
+    <!-- Soft Ground Shadow -->
+    <radialGradient id="groundShadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Main Red Apple Skin Gradient -->
+    <radialGradient id="appleSkin" cx="40%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#FF4D4D"/>
+      <stop offset="50%" stop-color="#E60000"/>
+      <stop offset="85%" stop-color="#990000"/>
+      <stop offset="100%" stop-color="#5B0000"/>
+    </radialGradient>
+
+    <!-- Stem Indentation Cavity Shadow -->
+    <radialGradient id="cavityShadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#3A0000" stop-opacity="0.9"/>
+      <stop offset="50%" stop-color="#660000" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#990000" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Stem Gradient -->
+    <linearGradient id="stemGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#8B5A2B"/>
+      <stop offset="50%" stop-color="#5C3A21"/>
+      <stop offset="100%" stop-color="#362215"/>
+    </linearGradient>
+
+    <!-- Leaf Gradient -->
+    <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4ADE80"/>
+      <stop offset="50%" stop-color="#16A34A"/>
+      <stop offset="100%" stop-color="#14532D"/>
+    </linearGradient>
+
+    <!-- Speckle Pattern for Natural Skin Texture -->
+    <pattern id="speckles" width="20" height="20" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="5" r="0.4" fill="#FFC04D" opacity="0.4"/>
+      <circle cx="8" cy="14" r="0.5" fill="#FFC04D" opacity="0.5"/>
+      <circle cx="15" cy="3" r="0.3" fill="#FFC04D" opacity="0.3"/>
+      <circle cx="12" cy="9" r="0.4" fill="#FFC04D" opacity="0.4"/>
+      <circle cx="17" cy="16" r="0.5" fill="#FFC04D" opacity="0.3"/>
+      <circle cx="5" cy="18" r="0.3" fill="#FFC04D" opacity="0.4"/>
+    </pattern>
+  </defs>
+
+  <!-- Ground Drop Shadow -->
+  <ellipse cx="64" cy="116" rx="36" ry="6" fill="url(#groundShadow)"/>
+
+  <!-- Stem (Behind the leaf & front skin fold) -->
+  <path d="M 64 34 C 62 20 56 12 58 10 C 60 8 63 9 61 11 C 59 13 65 20 67 34 Z" fill="url(#stemGrad)"/>
+
+  <!-- Leaf -->
+  <g>
+    <!-- Leaf Body -->
+    <path d="M 64 24 C 76 14 96 8 108 14 C 98 28 80 36 64 24 Z" fill="url(#leafGrad)"/>
+    <!-- Leaf Main Vein -->
+    <path d="M 64 24 C 80 18 94 15 108 14" stroke="#86EFAC" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.7"/>
+    <!-- Leaf Side Veins -->
+    <path d="M 74 21 Q 78 17 83 15 M 85 19 Q 90 16 96 14 
+             M 74 23 Q 78 26 83 27 M 84 21 Q 89 24 95 24" 
+          stroke="#86EFAC" stroke-width="0.75" fill="none" opacity="0.4" stroke-linecap="round"/>
+  </g>
+
+  <!-- Main Apple Body -->
+  <path d="M 64 34 
+           C 54 26 34 26 24 40 
+           C 12 56 14 86 36 108 
+           C 48 120 58 116 64 110 
+           C 70 116 80 120 92 108 
+           C 114 86 116 56 104 40 
+           C 94 26 74 26 64 34 Z" 
+        fill="url(#appleSkin)"/>
+
+  <!-- Natural Skin Speckles Layer -->
+  <path d="M 64 34 
+           C 54 26 34 26 24 40 
+           C 12 56 14 86 36 108 
+           C 48 120 58 116 64 110 
+           C 70 116 80 120 92 108 
+           C 114 86 116 56 104 40 
+           C 94 26 74 26 64 34 Z" 
+        fill="url(#speckles)"/>
+
+  <!-- Top Stem Cavity Deep Shadow -->
+  <ellipse cx="64" cy="34" rx="14" ry="5" fill="url(#cavityShadow)"/>
+
+  <!-- Specular Highlights (Glossy Reflections) -->
+  <!-- Primary Large Gloss -->
+  <path d="M 32 42 C 46 32 58 38 60 48 C 52 42 42 42 34 52 C 32 48 31 44 32 42 Z" 
+        fill="#FFFFFF" fill-opacity="0.45"/>
+
+  <!-- Crisp Secondary Spot Highlight -->
+  <ellipse cx="49" cy="42" rx="3.5" ry="5.5" fill="#FFFFFF" fill-opacity="0.6" transform="rotate(-30 49 42)"/>
+  <ellipse cx="44" cy="50" rx="1.5" ry="2" fill="#FFFFFF" fill-opacity="0.8"/>
+
+  <!-- Subtle Bottom Rim Light -->
+  <path d="M 28 84 C 30 96 40 106 52 110" fill="none" stroke="#FFAAAA" stroke-width="1.5" stroke-linecap="round" opacity="0.3"/>
+</svg>

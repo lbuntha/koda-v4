@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <radialGradient id="frogGround" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.26"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="frogBody" cx="38%" cy="30%" r="72%">
+      <stop offset="0%" stop-color="#A7F3D0"/>
+      <stop offset="45%" stop-color="#34D399"/>
+      <stop offset="80%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#065F46"/>
+    </radialGradient>
+    <radialGradient id="frogLimb" cx="40%" cy="35%" r="70%">
+      <stop offset="0%" stop-color="#6EE7B7"/>
+      <stop offset="70%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </radialGradient>
+    <linearGradient id="frogBelly" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FEF3C7" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#FDE68A" stop-opacity="0.7"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="64" cy="116" rx="30" ry="5" fill="url(#frogGround)"/>
+
+  <!-- Back legs, tucked for a hop -->
+  <path d="M 26 78 C 14 84 12 98 22 104 C 30 108 40 102 42 92 Z" fill="url(#frogLimb)"/>
+  <path d="M 102 78 C 114 84 116 98 106 104 C 98 108 88 102 86 92 Z" fill="url(#frogLimb)"/>
+  <!-- Front feet -->
+  <ellipse cx="44" cy="103" rx="12" ry="7" fill="url(#frogLimb)"/>
+  <ellipse cx="84" cy="103" rx="12" ry="7" fill="url(#frogLimb)"/>
+
+  <!-- Body -->
+  <ellipse cx="64" cy="72" rx="38" ry="31" fill="url(#frogBody)"/>
+  <ellipse cx="64" cy="82" rx="24" ry="17" fill="url(#frogBelly)"/>
+
+  <!-- Eye domes -->
+  <circle cx="43" cy="41" r="17" fill="url(#frogBody)"/>
+  <circle cx="85" cy="41" r="17" fill="url(#frogBody)"/>
+  <circle cx="43" cy="39" r="11" fill="#FFFFFF"/>
+  <circle cx="85" cy="39" r="11" fill="#FFFFFF"/>
+  <circle cx="45" cy="41" r="6" fill="#0F172A"/>
+  <circle cx="83" cy="41" r="6" fill="#0F172A"/>
+  <circle cx="42.5" cy="38" r="2.2" fill="#FFFFFF"/>
+  <circle cx="80.5" cy="38" r="2.2" fill="#FFFFFF"/>
+
+  <!-- Smile -->
+  <path d="M 44 74 Q 64 90 84 74" stroke="#065F46" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+  <!-- Cheek shine -->
+  <ellipse cx="36" cy="60" rx="7" ry="5" fill="#FFFFFF" fill-opacity="0.32" transform="rotate(-25 36 60)"/>
+</svg>

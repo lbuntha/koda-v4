@@ -1,0 +1,871 @@
+{
+  "lessons": [
+    {
+      "id": "count-in-a-row",
+      "title": "Count the Row",
+      "concept": "One-to-One Correspondence & Total Amount",
+      "conceptKey": "corresponder",
+      "requires": [],
+      "activity": "counting/orbit",
+      "params": {
+        "level": 1,
+        "question": {
+          "countRange": [
+            3,
+            6
+          ],
+          "questionsPerRound": 5,
+          "mode": "row"
+        },
+        "play": {
+          "mode": "touch_orbit",
+          "tier": "beginner",
+          "difficultyColor": "emerald",
+          "category": "1-to-1 Counting",
+          "shortDesc": "Tap objects in a straight line from left to right to find the total count",
+          "targetObjective": "Touch each one. The last number tells how many.",
+          "stepByStep": [
+            "Touch each item once from left to right in order.",
+            "Listen as the numbers count up: 1, 2, 3...",
+            "The last number tells you how many there are in all."
+          ],
+          "kidTip": "Say one number for each one you touch.",
+          "audioPrompt": "Count in a row! Touch each item in order to find the total.",
+          "prompts": {
+            "default": "Touch each {item}. Count as you go!"
+          }
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "⭐",
+      "iconName": "star",
+      "iconTone": "amber",
+      "pedagogyTip": "The last number named represents the whole group (cardinality). Keep your finger taps in sync with the numbers!",
+      "standards": [
+        "CCSS.K.CC.B.4a",
+        "CCSS.K.CC.B.4b",
+        "CCSS.K.CC.B.5"
+      ],
+      "trajectoryLevel": "corresponder",
+      "ageBand": [
+        4,
+        6
+      ]
+    },
+    {
+      "id": "count-scattered-objects",
+      "title": "Count Them All",
+      "concept": "Tracking Scattered Objects",
+      "conceptKey": "counter",
+      "requires": [
+        "corresponder"
+      ],
+      "activity": "counting/orbit",
+      "params": {
+        "level": 2,
+        "question": {
+          "countRange": [
+            5,
+            8
+          ],
+          "scatter": {
+            "top": [
+              15,
+              70
+            ],
+            "left": [
+              12,
+              80
+            ],
+            "rotate": [
+              -18,
+              18
+            ],
+            "minDistance": 16
+          },
+          "questionsPerRound": 5,
+          "mode": "scatter"
+        },
+        "play": {
+          "mode": "touch_orbit",
+          "tier": "intermediate",
+          "difficultyColor": "emerald",
+          "category": "Scattered Counting",
+          "shortDesc": "Touch all scattered objects across the screen without skipping or double-counting",
+          "targetObjective": "Touch every one. Do not miss any!",
+          "stepByStep": [
+            "Look across the screen from top to bottom.",
+            "Tap each uncounted item once to give it a number tag.",
+            "Make sure every item is counted without skipping any."
+          ],
+          "kidTip": "Go in order so you do not miss any.",
+          "audioPrompt": "Count scattered objects! Tap each one once until all are counted.",
+          "prompts": {
+            "default": "Touch every {item}. Do not miss any!"
+          }
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "✨",
+      "iconName": "sparkles",
+      "iconTone": "cyan",
+      "pedagogyTip": "Scanning in an orderly way (like top to bottom) helps count scattered items accurately.",
+      "standards": [
+        "CCSS.K.CC.B.5"
+      ],
+      "trajectoryLevel": "counter",
+      "ageBand": [
+        5,
+        6
+      ]
+    },
+    {
+      "id": "comparing-two-groups",
+      "title": "Which Group Has More?",
+      "concept": "Conservation of Quantity",
+      "conceptKey": "comparer",
+      "requires": [
+        "counter"
+      ],
+      "activity": "counting/orbit",
+      "params": {
+        "level": 3,
+        "question": {
+          "countRange": [
+            3,
+            8
+          ],
+          "compareModes": [
+            "SAME",
+            "SAME",
+            "A_MORE",
+            "B_MORE"
+          ],
+          "biasedRange": [
+            4,
+            8
+          ],
+          "diffRange": [
+            1,
+            2
+          ],
+          "questionsPerRound": 5,
+          "mode": "compare"
+        },
+        "play": {
+          "mode": "touch_orbit",
+          "tier": "master",
+          "difficultyColor": "emerald",
+          "category": "Comparing Amounts",
+          "shortDesc": "See that spreading items out or grouping them does not change the total count",
+          "targetObjective": "Count both groups. Which one has more?",
+          "stepByStep": [
+            "Look at Group A (clustered) and Group B (spread out in a line).",
+            "Count the items in both groups.",
+            "Confirm that both groups have the exact same count."
+          ],
+          "kidTip": "Spreading things out does not make more!",
+          "audioPrompt": "Compare both groups! Do they have the same number of items?",
+          "prompts": {
+            "same": "Count both groups. Do they have the same?",
+            "different": "Count both groups. Which one has more?"
+          }
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "⚖️",
+      "iconName": "scale",
+      "iconTone": "indigo",
+      "pedagogyTip": "Spreading items out might make a group look bigger, but the actual count stays exactly the same!",
+      "standards": [
+        "CCSS.K.CC.C.6"
+      ],
+      "trajectoryLevel": "comparer",
+      "ageBand": [
+        5,
+        6
+      ]
+    },
+    {
+      "id": "quick-dice-patterns",
+      "title": "Dice Dots",
+      "concept": "Instant Recognition of Dot Patterns",
+      "conceptKey": "perceptual-subitizer",
+      "requires": [],
+      "activity": "counting/subitize",
+      "params": {
+        "level": 4,
+        "question": {
+          "countRange": [
+            2,
+            6
+          ],
+          "flashMs": 1200,
+          "questionsPerRound": 5,
+          "display": "grid"
+        },
+        "play": {
+          "mode": "subitizing_rush",
+          "tier": "beginner",
+          "difficultyColor": "cyan",
+          "category": "Quick Dot Patterns",
+          "shortDesc": "Recognize dice dot patterns in a quick flash without counting one by one",
+          "targetObjective": "Look fast! How many dots did you see?",
+          "stepByStep": [
+            "Look at the center when the dots flash.",
+            "Recognize the dot pattern right away.",
+            "Tap the matching number on the keypad."
+          ],
+          "kidTip": "Try to see the pattern without counting.",
+          "audioPrompt": "Quick Dice Flash! Look at the dots and tap the number right away.",
+          "prompts": {
+            "default": "Look fast! How many did you see?"
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🎲",
+      "iconName": "dice",
+      "iconTone": "purple",
+      "pedagogyTip": "Recognizing dot patterns right away (subitizing) builds strong mental number pictures.",
+      "standards": [
+        "CCSS.K.CC.B.4"
+      ],
+      "trajectoryLevel": "perceptual-subitizer",
+      "ageBand": [
+        4,
+        6
+      ]
+    },
+    {
+      "id": "quick-dot-groups",
+      "title": "How Many Dots?",
+      "concept": "Seeing Amounts at a Glance",
+      "conceptKey": "conceptual-subitizer",
+      "requires": [
+        "perceptual-subitizer"
+      ],
+      "activity": "counting/subitize",
+      "params": {
+        "level": 5,
+        "question": {
+          "countRange": [
+            3,
+            7
+          ],
+          "flashMs": 900,
+          "jitterRange": [
+            15,
+            85
+          ],
+          "questionsPerRound": 5,
+          "display": "scatter"
+        },
+        "play": {
+          "mode": "subitizing_rush",
+          "tier": "intermediate",
+          "difficultyColor": "cyan",
+          "category": "Quick Dot Groups",
+          "shortDesc": "Recognize scattered dot amounts in a fast flash without one-by-one counting",
+          "targetObjective": "Look fast! How many dots?",
+          "stepByStep": [
+            "Look at the dot group as a whole.",
+            "Feel how many dots are there without counting each one.",
+            "Tap your answer on the number pad."
+          ],
+          "kidTip": "Look for small groups inside the big group.",
+          "audioPrompt": "Quick Dot Groups! Look quickly and tap the count.",
+          "prompts": {
+            "default": "Look fast! How many did you see?"
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "⚡",
+      "iconName": "zap",
+      "iconTone": "amber",
+      "pedagogyTip": "Seeing dot groups at a glance helps you think of numbers as solid quantities.",
+      "standards": [
+        "CCSS.K.CC.B.4"
+      ],
+      "trajectoryLevel": "conceptual-subitizer",
+      "ageBand": [
+        5,
+        6
+      ]
+    },
+    {
+      "id": "two-color-groups",
+      "title": "Two Colours, One Total",
+      "concept": "Seeing Parts and Total Amount",
+      "conceptKey": "part-whole-decomposer",
+      "requires": [
+        "conceptual-subitizer",
+        "counter"
+      ],
+      "activity": "counting/subitize",
+      "params": {
+        "level": 6,
+        "question": {
+          "partRange": [
+            2,
+            4
+          ],
+          "flashMs": 1000,
+          "questionsPerRound": 5,
+          "display": "twoColor"
+        },
+        "play": {
+          "mode": "subitizing_rush",
+          "tier": "master",
+          "difficultyColor": "cyan",
+          "category": "Combining Groups",
+          "shortDesc": "See two colored groups in a flash and combine them together (e.g. 3 + 4 = 7)",
+          "targetObjective": "Two colours. How many all together?",
+          "stepByStep": [
+            "Look at the two different color groups in the flash.",
+            "Notice how many in Color 1 and how many in Color 2.",
+            "Add both parts together in your head to find the total."
+          ],
+          "kidTip": "Count one colour, then keep going with the other.",
+          "audioPrompt": "Combine Two Colors! Add both color groups in your head and tap the total.",
+          "prompts": {
+            "default": "Look fast! How many did you see?"
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🔮",
+      "iconName": "circleDot",
+      "iconTone": "pink",
+      "pedagogyTip": "Seeing numbers as two parts (like 5 is 3 and 2) makes mental addition fast and easy.",
+      "standards": [
+        "CCSS.K.OA.A.3"
+      ],
+      "trajectoryLevel": "part-whole-decomposer",
+      "ageBand": [
+        5,
+        6
+      ]
+    },
+    {
+      "id": "ten-frame-5-and-more",
+      "title": "Five and Some More",
+      "concept": "Using 5 as an Anchor Benchmark",
+      "conceptKey": "five-benchmark",
+      "requires": [
+        "conceptual-subitizer"
+      ],
+      "activity": "counting/tenframe",
+      "params": {
+        "level": 7,
+        "question": {
+          "targetRange": [
+            5,
+            9
+          ],
+          "questionsPerRound": 5,
+          "mode": "fill"
+        },
+        "play": {
+          "mode": "tenframe_rocket",
+          "tier": "beginner",
+          "difficultyColor": "purple",
+          "category": "Ten-Frame Anchors",
+          "shortDesc": "Fill the top 5 first as your anchor, then add more on the bottom row",
+          "targetObjective": "Fill the top row first. Then add more.",
+          "stepByStep": [
+            "Look at your target number (like 7 or 8).",
+            "Fill all 5 cells in the top row first.",
+            "Add the remaining dots in the bottom row (7 is 5 + 2).",
+            "Tap Launch when your ten-frame is complete."
+          ],
+          "kidTip": "Fill the top row to 5 first. That makes it easy!",
+          "audioPrompt": "Ten-Frame! Fill 5 on top first, then add the rest on the bottom.",
+          "prompts": {
+            "default": "Make {target} dots. Fill the top row first."
+          }
+        }
+      },
+      "difficulty": "Challenging",
+      "icon": "🛸",
+      "iconName": "rocket",
+      "iconTone": "cyan",
+      "pedagogyTip": "Seeing numbers using 5 (like 8 is 5 + 3) makes mental math simple.",
+      "standards": [
+        "CCSS.K.CC.B.4",
+        "CCSS.K.OA.A.3"
+      ],
+      "trajectoryLevel": "five-benchmark",
+      "ageBand": [
+        5,
+        6
+      ]
+    },
+    {
+      "id": "making-10",
+      "title": "Friends of Ten",
+      "concept": "Number Pairs that Make 10",
+      "conceptKey": "make-ten",
+      "requires": [
+        "five-benchmark",
+        "part-whole-decomposer"
+      ],
+      "activity": "counting/tenframe",
+      "params": {
+        "level": 8,
+        "question": {
+          "initialRange": [
+            2,
+            8
+          ],
+          "questionsPerRound": 5,
+          "mode": "complement"
+        },
+        "play": {
+          "mode": "tenframe_rocket",
+          "tier": "intermediate",
+          "difficultyColor": "purple",
+          "category": "Making 10",
+          "shortDesc": "Find how many empty spaces are needed to make a full ten-frame of 10",
+          "targetObjective": "How many more to make 10?",
+          "stepByStep": [
+            "Look at the dots already placed in the ten-frame.",
+            "Count the empty spaces needed to reach 10.",
+            "Select the missing number that makes 10 with the dots."
+          ],
+          "kidTip": "Count the empty boxes. That is how many more.",
+          "audioPrompt": "Making 10! Find how many more dots are needed to reach 10.",
+          "prompts": {
+            "default": "You have {have}. How many more to make 10?"
+          }
+        }
+      },
+      "difficulty": "Challenging",
+      "icon": "🔋",
+      "iconName": "battery",
+      "iconTone": "emerald",
+      "pedagogyTip": "Pairs that make 10 (like 7 + 3 and 6 + 4) are key building blocks for all math!",
+      "standards": [
+        "CCSS.K.OA.A.4"
+      ],
+      "trajectoryLevel": "make-ten",
+      "ageBand": [
+        5,
+        6
+      ]
+    },
+    {
+      "id": "teen-numbers",
+      "title": "Teen Numbers",
+      "concept": "Place Value for Numbers 11 to 19",
+      "conceptKey": "teen-composer",
+      "requires": [
+        "make-ten"
+      ],
+      "activity": "counting/tenframe",
+      "params": {
+        "level": 9,
+        "question": {
+          "teenRange": [
+            11,
+            19
+          ],
+          "questionsPerRound": 5,
+          "mode": "teen"
+        },
+        "play": {
+          "mode": "tenframe_rocket",
+          "tier": "master",
+          "difficultyColor": "purple",
+          "category": "Teen Numbers",
+          "shortDesc": "Build numbers from 11 to 19 using 1 full ten-frame plus extra ones",
+          "targetObjective": "Fill one frame to make 10. Then add more.",
+          "stepByStep": [
+            "Notice the first ten-frame is full with 10.",
+            "Add dots to the second frame for the ones digit.",
+            "See that 10 and ones make the teen number (10 + 4 = 14)."
+          ],
+          "kidTip": "One full frame is 10. Then count the extra ones.",
+          "audioPrompt": "Teen Numbers! Combine one full ten with extra ones.",
+          "prompts": {
+            "default": "Make {target}. Fill one frame with 10, then add more."
+          }
+        }
+      },
+      "difficulty": "Challenging",
+      "icon": "🛰️",
+      "iconName": "boxes",
+      "iconTone": "indigo",
+      "pedagogyTip": "Every teen number is simply 'one ten and some ones'. Double ten-frames show this clearly.",
+      "standards": [
+        "CCSS.K.NBT.A.1"
+      ],
+      "trajectoryLevel": "teen-composer",
+      "ageBand": [
+        5,
+        6
+      ]
+    },
+    {
+      "id": "skip-counting-by-2s-and-5s",
+      "title": "Hop by 2s and 5s",
+      "concept": "Equal-Step Linear Counting",
+      "conceptKey": "skip-counter",
+      "requires": [
+        "counter"
+      ],
+      "activity": "counting/numberline",
+      "params": {
+        "level": 10,
+        "question": {
+          "steps": [
+            2,
+            5
+          ],
+          "hopRangeByStep": {
+            "2": [
+              4,
+              6
+            ],
+            "5": [
+              3,
+              5
+            ]
+          },
+          "questionsPerRound": 5,
+          "mode": "hop"
+        },
+        "play": {
+          "mode": "froggy_skip",
+          "tier": "beginner",
+          "difficultyColor": "amber",
+          "category": "Skip Counting",
+          "shortDesc": "Hop along the path by equal steps of 2 or 5 to reach the goal",
+          "targetObjective": "Hop the same size steps. Count as you go!",
+          "stepByStep": [
+            "Check the step size (+2 or +5) on the path.",
+            "Tap Hop to jump forward by equal amounts.",
+            "Chant the numbers aloud as you hop all the way to the goal."
+          ],
+          "kidTip": "Say the numbers out loud as you hop.",
+          "audioPrompt": "Skip Counting! Hop forward by equal steps of 2 or 5.",
+          "prompts": {
+            "default": "Hop by {step} to get to {target}!"
+          }
+        }
+      },
+      "difficulty": "Advanced",
+      "icon": "🐸",
+      "iconName": "footprints",
+      "iconTone": "emerald",
+      "pedagogyTip": "Skip counting creates equal steps in your mind and prepares you for multiplication.",
+      "standards": [
+        "CCSS.2.NBT.A.2",
+        "CCSS.1.OA.C.5"
+      ],
+      "trajectoryLevel": "skip-counter",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "count-by-10s-up-to-100",
+      "title": "Big Hops of Ten",
+      "concept": "Decade Jumps and Patterns up to 100",
+      "conceptKey": "skip-counter",
+      "requires": [
+        "counter"
+      ],
+      "activity": "counting/numberline",
+      "params": {
+        "level": 11,
+        "question": {
+          "steps": [
+            10
+          ],
+          "hopRange": [
+            4,
+            6
+          ],
+          "questionsPerRound": 5,
+          "mode": "hop"
+        },
+        "play": {
+          "mode": "froggy_skip",
+          "tier": "intermediate",
+          "difficultyColor": "amber",
+          "category": "Counting by 10s",
+          "shortDesc": "Take big leaps of 10 to move smoothly along the path up to 100",
+          "targetObjective": "Big hops of 10! Count up to 100.",
+          "stepByStep": [
+            "Check the starting number and the +10 step size.",
+            "Notice how the tens digit increases with every hop.",
+            "Hop all the way across the path to the target."
+          ],
+          "kidTip": "Every hop adds 10. Listen to the pattern!",
+          "audioPrompt": "Count by 10s! Take leaps of 10 to move across the path.",
+          "prompts": {
+            "default": "Hop by 10 all the way to {target}!"
+          }
+        }
+      },
+      "difficulty": "Advanced",
+      "icon": "🌊",
+      "iconName": "waves",
+      "iconTone": "cyan",
+      "pedagogyTip": "Counting by 10s (10, 20, 30... 100) helps you navigate place value with ease.",
+      "standards": [
+        "CCSS.K.CC.A.1",
+        "CCSS.1.NBT.A.1"
+      ],
+      "trajectoryLevel": "skip-counter",
+      "ageBand": [
+        5,
+        7
+      ]
+    },
+    {
+      "id": "find-the-missing-number",
+      "title": "Find the Missing Number",
+      "concept": "Number Sequences & Pattern Rules",
+      "conceptKey": "pattern-continuer",
+      "requires": [
+        "skip-counter"
+      ],
+      "activity": "counting/numberline",
+      "params": {
+        "level": 12,
+        "question": {
+          "steps": [
+            2,
+            5,
+            10
+          ],
+          "seqLength": 5,
+          "startRange": [
+            5,
+            20
+          ],
+          "reverseStartRange": [
+            25,
+            45
+          ],
+          "missingIndexRange": [
+            1,
+            3
+          ],
+          "distractorJitter": [
+            -4,
+            4
+          ],
+          "questionsPerRound": 5,
+          "mode": "missing"
+        },
+        "play": {
+          "mode": "froggy_skip",
+          "tier": "master",
+          "difficultyColor": "amber",
+          "category": "Pattern Detective",
+          "shortDesc": "Discover the step rule in the sequence and fill in the missing number",
+          "targetObjective": "Which number is missing?",
+          "stepByStep": [
+            "Check the difference between the numbers shown.",
+            "See if the numbers are counting up (+) or down (-).",
+            "Choose the correct missing number to complete the line."
+          ],
+          "kidTip": "Look at how much it grows each hop.",
+          "audioPrompt": "Missing Number! Look at the pattern and pick the missing step.",
+          "prompts": {
+            "default": "Which number is missing?"
+          }
+        }
+      },
+      "difficulty": "Advanced",
+      "icon": "🔍",
+      "iconName": "search",
+      "iconTone": "amber",
+      "pedagogyTip": "Finding missing numbers in a line helps you understand how all numbers connect.",
+      "standards": [
+        "CCSS.1.OA.C.5"
+      ],
+      "trajectoryLevel": "pattern-continuer",
+      "ageBand": [
+        6,
+        7
+      ]
+    },
+    {
+      "id": "make-a-ten",
+      "title": "Make a Ten",
+      "concept": "Grouping: 10 Ones Become 1 Ten",
+      "conceptKey": "unitiser-ten",
+      "requires": [
+        "teen-composer",
+        "skip-counter"
+      ],
+      "activity": "counting/base10",
+      "params": {
+        "level": 13,
+        "question": {
+          "questionsPerRound": 5,
+          "targetRange": [
+            11,
+            35
+          ],
+          "bundleOnes": true
+        },
+        "play": {
+          "mode": "base10_foundry",
+          "tier": "beginner",
+          "difficultyColor": "rose",
+          "category": "Making Tens",
+          "shortDesc": "Gather 10 loose single blocks and group them into 1 solid Ten-Rod",
+          "targetObjective": "Put 10 ones together. They make 1 ten!",
+          "stepByStep": [
+            "Look at your loose single blocks.",
+            "Gather 10 single blocks together.",
+            "Group 10 ones into 1 solid Ten-Rod."
+          ],
+          "kidTip": "10 ones make 1 ten. Put them together!",
+          "audioPrompt": "Make a Ten! Gather 10 single blocks and group them into 1 Ten-Rod.",
+          "prompts": {
+            "add": "Make {target}. You have {have}. Add {diff} more!",
+            "remove": "Make {target}. You have {have}. Take away {diff}!",
+            "bundle": "You made {target}! Now put 10 ones together to make a ten.",
+            "ready": "You made {target}! Press Check."
+          }
+        }
+      },
+      "difficulty": "Master",
+      "icon": "💎",
+      "iconName": "gem",
+      "iconTone": "purple",
+      "pedagogyTip": "10 loose ones can be grouped together and treated as 1 single 'Ten'.",
+      "standards": [
+        "CCSS.1.NBT.B.2a"
+      ],
+      "trajectoryLevel": "unitiser-ten",
+      "ageBand": [
+        6,
+        7
+      ]
+    },
+    {
+      "id": "make-a-hundred",
+      "title": "Make a Hundred",
+      "concept": "Place Value: Hundreds, Tens, and Ones",
+      "conceptKey": "unitiser-hundred",
+      "requires": [
+        "unitiser-ten"
+      ],
+      "activity": "counting/base10",
+      "params": {
+        "level": 14,
+        "question": {
+          "questionsPerRound": 5,
+          "targetRange": [
+            105,
+            245
+          ],
+          "bundleTens": true,
+          "hundreds": true
+        },
+        "play": {
+          "mode": "base10_foundry",
+          "tier": "intermediate",
+          "difficultyColor": "rose",
+          "category": "Making Hundreds",
+          "shortDesc": "Group 10 Ten-Rods into 1 Hundred-Flat and see numbers in expanded form",
+          "targetObjective": "Put 10 tens together. They make 100!",
+          "stepByStep": [
+            "Group Ten-Rods into a 100-Flat whenever you have 10 tens.",
+            "Watch the place value counter show Hundreds, Tens, and Ones.",
+            "See that the total amount stays the same when grouped."
+          ],
+          "kidTip": "10 tens make 1 hundred. Put them together!",
+          "audioPrompt": "Make a Hundred! Group 10 Ten-Rods into 100-Flats.",
+          "prompts": {
+            "add": "Make {target}. You have {have}. Add {diff} more!",
+            "remove": "Make {target}. You have {have}. Take away {diff}!",
+            "bundle": "You reached {target}! Now fuse 10 Tens into a Hundred to bundle your numbers. Click \"Fuse 10 Tens\" below!",
+            "ready": "Excellent! You built {target} in the most bundled way. Click \"Check\" to complete this step!"
+          }
+        }
+      },
+      "difficulty": "Master",
+      "icon": "🌌",
+      "iconName": "layers",
+      "iconTone": "indigo",
+      "pedagogyTip": "Expanded form (100 + 30 + 5 = 135) connects physical blocks directly to written numbers.",
+      "standards": [
+        "CCSS.2.NBT.A.1a"
+      ],
+      "trajectoryLevel": "unitiser-hundred",
+      "ageBand": [
+        7,
+        8
+      ]
+    },
+    {
+      "id": "build-numbers-with-hundreds-tens-ones",
+      "title": "Build Big Numbers",
+      "concept": "Building Numbers up to 100 and Beyond",
+      "conceptKey": "place-value-builder",
+      "requires": [
+        "unitiser-hundred"
+      ],
+      "activity": "counting/base10",
+      "params": {
+        "level": 15,
+        "question": {
+          "questionsPerRound": 5,
+          "targetRange": [
+            115,
+            385
+          ],
+          "bundleOnes": true,
+          "bundleTens": true,
+          "hundreds": true
+        },
+        "play": {
+          "mode": "base10_foundry",
+          "tier": "master",
+          "difficultyColor": "rose",
+          "category": "Place Value Master",
+          "shortDesc": "Build any given number using hundreds, tens, and single ones blocks",
+          "targetObjective": "Build the number with the blocks.",
+          "stepByStep": [
+            "Look at your target number.",
+            "Use blocks (+), group (⚡), and break apart (🔄) to make the exact amount.",
+            "Tap Check Number to test your build."
+          ],
+          "kidTip": "Use big blocks first, then the small ones.",
+          "audioPrompt": "Place Value Master! Build the target number using hundreds, tens, and ones.",
+          "prompts": {
+            "add": "Build {target}: You have {have} blocks. Add {diff} more using the (+) buttons!",
+            "remove": "Build {target}: You have {have} blocks. Remove {diff} using the (-) buttons!",
+            "bundleOnes": "You reached {target}! Make a Ten into a Ten to bundle your numbers. Click \"Make a Ten\" below!",
+            "bundle": "You reached {target}! Fuse 10 Tens into a Hundred to bundle your numbers. Click \"Fuse 10 Tens\" below!",
+            "ready": "Congratulations! You built exactly {target} in standard bundled form. Click \"Check\" to finish!"
+          }
+        }
+      },
+      "difficulty": "Master",
+      "icon": "👑",
+      "iconName": "crown",
+      "iconTone": "amber",
+      "pedagogyTip": "Breaking a Ten into 10 Ones is the physical secret behind subtraction regrouping.",
+      "standards": [
+        "CCSS.2.NBT.A.1",
+        "CCSS.2.NBT.A.3"
+      ],
+      "trajectoryLevel": "place-value-builder",
+      "ageBand": [
+        7,
+        8
+      ]
+    }
+  ]
+}

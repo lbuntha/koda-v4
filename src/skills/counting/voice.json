@@ -1,0 +1,185 @@
+{
+  "_comment": [
+    "What this skill says out loud, declared so it can be recorded ahead of time.",
+    "",
+    "Lesson prompts are NOT listed here — generate-voice.mjs collects those from",
+    "this skill's lessons.json, so authoring a lesson never means editing this file.",
+    "",
+    "What belongs here is speech that lives in the skill's code: numbers, and the",
+    "fixed or templated lines an activity says. Anything missing is not broken, only",
+    "slower: an unrecorded phrase falls back to server TTS and then to the browser."
+  ],
+  "numberWords": [
+    "one",
+    "two",
+    "three",
+    "four",
+    "five",
+    "six",
+    "seven",
+    "eight",
+    "nine",
+    "ten",
+    "eleven",
+    "twelve",
+    "thirteen",
+    "fourteen",
+    "fifteen",
+    "sixteen",
+    "seventeen",
+    "eighteen",
+    "nineteen",
+    "twenty"
+  ],
+  "_numberRangeComment": "FroggySkip speaks every pad it lands on. `count-by-10s-up-to-100` hops by 10 up to six times, so it says 60 — the range was 0-50 and that last hop fell through to the browser's voice. Derived from the numberline lessons' steps and hop ranges; widen this if either grows.",
+  "numberRange": [
+    0,
+    60
+  ],
+  "phrases": [
+    "10 ones make 1 ten",
+    "10 tens make 1 hundred"
+  ],
+  "_templateComment": [
+    "A template is expanded into one recorded line per value.",
+    "",
+    "A bare string uses `subjects` — the countable objects TouchOrbit names.",
+    "The object form carries its own `values`, which is how a prompt containing a",
+    "number gets recorded: the ten-frame says 'Make 19. Fill one frame with 10,",
+    "then add more.' and that is nine fixed sentences, not one dynamic one.",
+    "",
+    "Only worth it where the range is small and matches the lesson. Base10's",
+    "prompts interpolate three values over hundreds of targets — not a list, and",
+    "they stay on live TTS. Ranges here must track lessons.json: ten-frame fill",
+    "5-9, making-10 initial 2-8, teen 11-19."
+  ],
+  "templates": [
+    "Touch each {value}. Count as you go!",
+    "Touch every {value}. Do not miss any!",
+    {
+      "text": "Make {value} dots. Fill the top row first.",
+      "values": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "text": "You have {value}. How many more to make 10?",
+      "values": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "text": "Make {value}. Fill one frame with 10, then add more.",
+      "values": [
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
+      ]
+    }
+  ],
+  "subjects": [
+    "rocket",
+    "butterfly",
+    "fish",
+    "sun",
+    "leaf",
+    "gift",
+    "pencil",
+    "crown"
+  ],
+  "_groupsComment": [
+    "Reactions to an answer, picked at random so a child does not hear the same",
+    "clip forty times in a session — which is how praise stops meaning anything.",
+    "",
+    "`voices` rotates across the phrases, so the variants differ in who is speaking",
+    "as well as in wording. Names are Gemini's prebuilt voices; Charon and Fenrir",
+    "are deliberately left out as too grave for a five-year-old being congratulated.",
+    "",
+    "The `incorrect` lines never say wrong, bad or no. A child at this age reads a",
+    "flat 'incorrect' as a verdict on themselves, and the round already lets them",
+    "try again — the voice's job is to keep them in it, not to grade them."
+  ],
+  "groups": {
+    "correct": {
+      "voices": [
+        "Kore",
+        "Puck",
+        "Zephyr"
+      ],
+      "phrases": [
+        "Yes! You got it!",
+        "Brilliant counting!",
+        "Nice work!",
+        "That's right!",
+        "You did it!",
+        "Perfect!",
+        "Wonderful!",
+        "Great job!"
+      ]
+    },
+    "incorrect": {
+      "voices": [
+        "Kore",
+        "Zephyr",
+        "Puck"
+      ],
+      "phrases": [
+        "Not quite. Let's try again!",
+        "So close! Have another go.",
+        "Almost! Try once more.",
+        "Good try! Let's count again.",
+        "Hmm, let's look again.",
+        "Nearly there! One more try."
+      ]
+    }
+  },
+  "_phrasesComment": [
+    "Lines an activity says in passing — not the question itself.",
+    "",
+    "Base10 says these when ten ones become a ten, mid-drag. They are commentary",
+    "on what just happened, which is why they are not prompts."
+  ],
+  "_promptsComment": [
+    "What an activity says as the question — the thing being asked.",
+    "",
+    "Kept apart from `phrases` so the folder on disk says what a clip is: every",
+    "file in audio/prompts is a question, every file in audio/phrases is an aside.",
+    "Moving a line between these lists moves its recording; it is not re-recorded."
+  ],
+  "prompts": [
+    "Look fast! How many did you see?",
+    "How many dots did you see?",
+    "Count both groups. Do they have the same?",
+    "Count both groups. Which one has more?",
+    "Which number is missing?",
+    "Hop by 2 to get to 8!",
+    "Hop by 2 to get to 10!",
+    "Hop by 2 to get to 12!",
+    "Hop by 5 to get to 15!",
+    "Hop by 5 to get to 20!",
+    "Hop by 5 to get to 25!",
+    "Hop by 10 to get to 30!",
+    "Hop by 10 to get to 40!",
+    "Hop by 10 to get to 50!",
+    "Hop by 10 to get to 60!",
+    "Add more blocks to make the number.",
+    "Take some blocks away.",
+    "That's the number! Press Check."
+  ]
+}

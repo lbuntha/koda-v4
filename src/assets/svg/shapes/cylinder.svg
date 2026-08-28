@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 100 120">
+  <defs>
+    <!-- Top Oval Gradient (Light Source) -->
+    <radialGradient id="topCapGrad" cx="40%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#80DEEA" />    <!-- Soft light reflection -->
+      <stop offset="70%" stop-color="#00ACC1" />   <!-- Main cyan body -->
+      <stop offset="100%" stop-color="#00838F" />  <!-- Outer rim edge -->
+    </radialGradient>
+
+    <!-- Side Body Gradient (Simulates Curved Surface) -->
+    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00838F" />    <!-- Shadow on left edge -->
+      <stop offset="25%" stop-color="#26C6DA" />   <!-- Highlight peak -->
+      <stop offset="70%" stop-color="#00ACC1" />   <!-- Main body shade -->
+      <stop offset="100%" stop-color="#006064" />  <!-- Deep shadow on right edge -->
+    </linearGradient>
+  </defs>
+
+  <!-- Ground Shadow -->
+  <ellipse cx="50" cy="100" rx="32" ry="10" fill="#2C3E50" opacity="0.2" />
+
+  <!-- Cylinder Body (Middle Section + Bottom Curved Cap) -->
+  <path 
+    d="M 20,30 L 20,90 A 30 10 0 0 0 80,90 L 80,30 Z" 
+    fill="url(#bodyGrad)" 
+  />
+
+  <!-- Top Oval Cap -->
+  <ellipse 
+    cx="50" 
+    cy="30" 
+    rx="30" 
+    ry="10" 
+    fill="url(#topCapGrad)" 
+    stroke="#80DEEA" 
+    stroke-width="0.5" 
+  />
+</svg>

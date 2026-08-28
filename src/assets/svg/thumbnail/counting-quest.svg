@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 400 200">
+  <defs>
+    <!-- Background Shield Gradient (Dark Indigo to Deep Purple) -->
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2E1065" />
+      <stop offset="100%" stop-color="#1E1B4B" />
+    </linearGradient>
+
+    <!-- Golden Purple Metallic Rim Gradient -->
+    <linearGradient id="purpleGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E9D5FF" />
+      <stop offset="50%" stop-color="#A855F7" />
+      <stop offset="100%" stop-color="#581C87" />
+    </linearGradient>
+
+    <!-- Number Gradients (Vibrant Purple Spectrum) -->
+    <!-- Number 1: Light Lavender / Orchid -->
+    <linearGradient id="num1Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#F472B6" />
+      <stop offset="100%" stop-color="#C084FC" />
+    </linearGradient>
+
+    <!-- Number 2: Bright Electric Violet -->
+    <linearGradient id="num2Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#E879F9" />
+      <stop offset="100%" stop-color="#A855F7" />
+    </linearGradient>
+
+    <!-- Number 3: Neon Indigo/Violet -->
+    <linearGradient id="num3Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#A855F7" />
+      <stop offset="100%" stop-color="#6366F1" />
+    </linearGradient>
+
+    <!-- Banner Ribbon Gradient (Royal Purple) -->
+    <linearGradient id="bannerGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#7E22CE" />
+      <stop offset="100%" stop-color="#3B0764" />
+    </linearGradient>
+
+    <!-- Soft Drop Shadows -->
+    <filter id="dropShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-opacity="0.4" />
+    </filter>
+  </defs>
+
+  <!-- SHIELD BACKGROUND -->
+  <!-- Outer Purple Metallic Rim -->
+  <path d="M 200,15 L 310,40 C 310,120 200,165 200,165 C 200,165 90,120 90,40 Z" 
+        fill="url(#purpleGoldGrad)" filter="url(#dropShadow)" />
+        
+  <!-- Inner Shield Body -->
+  <path d="M 200,22 L 300,45 C 300,115 200,155 200,155 C 200,155 100,115 100,45 Z" 
+        fill="url(#shieldGrad)" />
+
+  <!-- DECORATIVE STARS & SPARKLING ACCENTS -->
+  <path d="M 200,32 L 203,40 L 211,40 L 204,45 L 207,53 L 200,48 L 193,53 L 196,45 L 189,40 L 197,40 Z" fill="#F472B6" />
+  <circle cx="140" cy="55" r="3" fill="#E9D5FF" opacity="0.8" />
+  <circle cx="260" cy="55" r="3" fill="#E9D5FF" opacity="0.8" />
+
+  <!-- PLAYFUL NUMBERS (1, 2, 3) -->
+  <!-- Number 1 -->
+  <text x="145" y="110" font-family="'Arial Black', sans-serif" font-size="48" font-weight="900" 
+        fill="url(#num1Grad)" stroke="#3B0764" stroke-width="2" text-anchor="middle" filter="url(#dropShadow)">1</text>
+  
+  <!-- Number 2 -->
+  <text x="200" y="105" font-family="'Arial Black', sans-serif" font-size="56" font-weight="900" 
+        fill="url(#num2Grad)" stroke="#3B0764" stroke-width="2" text-anchor="middle" filter="url(#dropShadow)">2</text>
+  
+  <!-- Number 3 -->
+  <text x="255" y="110" font-family="'Arial Black', sans-serif" font-size="48" font-weight="900" 
+        fill="url(#num3Grad)" stroke="#1E1B4B" stroke-width="2" text-anchor="middle" filter="url(#dropShadow)">3</text>
+
+  <!-- BANNER RIBBON & TEXT -->
+  <!-- Left Banner Tail -->
+  <polygon points="65,145 85,130 85,160" fill="#2E1065" />
+  <!-- Right Banner Tail -->
+  <polygon points="335,145 315,130 315,160" fill="#2E1065" />
+
+  <!-- Main Banner Body -->
+  <rect x="75" y="130" width="250" height="36" rx="6" fill="url(#bannerGrad)" stroke="#E9D5FF" stroke-width="1.5" filter="url(#dropShadow)" />
+
+  <!-- "COUNTING QUEST" TEXT -->
+  <text x="200" y="154" font-family="'Arial Black', sans-serif" font-size="20" font-weight="900" 
+        fill="#FFFFFF" text-anchor="middle" letter-spacing="2" filter="url(#dropShadow)">COUNTING QUEST</text>
+</svg>

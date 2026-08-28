@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <radialGradient id="sunGround" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="sunDisc" cx="36%" cy="32%" r="72%">
+      <stop offset="0%" stop-color="#FEF9C3"/>
+      <stop offset="45%" stop-color="#FBBF24"/>
+      <stop offset="85%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#B45309"/>
+    </radialGradient>
+    <linearGradient id="sunRay" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FDE047"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="64" cy="120" rx="22" ry="4" fill="url(#sunGround)"/>
+
+  <g fill="url(#sunRay)">
+    <path d="M 64 10 L 58 33 L 70 33 Z"/>
+    <path d="M 64 10 L 58 33 L 70 33 Z" transform="rotate(30 64 64)"/>
+    <path d="M 64 10 L 58 33 L 70 33 Z" transform="rotate(60 64 64)"/>
+    <path d="M 64 10 L 58 33 L 70 33 Z" transform="rotate(90 64 64)"/>
+    <path d="M 64 10 L 58 33 L 70 33 Z" transform="rotate(120 64 64)"/>
+    <path d="M 64 10 L 58 33 L 70 33 Z" transform="rotate(150 64 64)"/>
+    <path d="M 64 10 L 58 33 L 70 33 Z" transform="rotate(180 64 64)"/>
+    <path d="M 64 10 L 58 33 L 70 33 Z" transform="rotate(210 64 64)"/>
+    <path d="M 64 10 L 58 33 L 70 33 Z" transform="rotate(240 64 64)"/>
+    <path d="M 64 10 L 58 33 L 70 33 Z" transform="rotate(270 64 64)"/>
+    <path d="M 64 10 L 58 33 L 70 33 Z" transform="rotate(300 64 64)"/>
+    <path d="M 64 10 L 58 33 L 70 33 Z" transform="rotate(330 64 64)"/>
+  </g>
+
+  <circle cx="64" cy="64" r="31" fill="url(#sunDisc)"/>
+  <path d="M 44 47 C 52 40 62 39 70 42" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.55"/>
+  <circle cx="50" cy="52" r="3" fill="#FFFFFF" fill-opacity="0.7"/>
+</svg>

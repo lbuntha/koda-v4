@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <radialGradient id="fishGround" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.24"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="fishBody" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FDBA74"/>
+      <stop offset="45%" stop-color="#F97316"/>
+      <stop offset="100%" stop-color="#B45309"/>
+    </linearGradient>
+    <linearGradient id="fishFin" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCD34D"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="64" cy="112" rx="30" ry="5" fill="url(#fishGround)"/>
+
+  <path d="M 92 64 C 100 53 111 39 118 34 C 121 48 119 57 117 64 C 119 71 121 80 118 94 C 111 89 100 75 92 64 Z" fill="url(#fishFin)"/>
+  <path d="M 54 36 C 52 22 60 14 70 16 C 66 22 64 28 64 36 Z" fill="url(#fishFin)"/>
+  <path d="M 50 92 C 44 100 46 108 54 110 C 54 104 56 98 60 94 Z" fill="url(#fishFin)"/>
+
+  <path d="M 96 64 C 96 44 76 32 56 32 C 32 32 12 46 12 64 C 12 82 32 96 56 96 C 76 96 96 84 96 64 Z" fill="url(#fishBody)"/>
+
+  <path d="M 62 34 C 54 46 54 82 62 94" stroke="#FFFFFF" stroke-width="2.5" fill="none" opacity="0.35" stroke-linecap="round"/>
+  <path d="M 74 39 C 68 50 68 78 74 89" stroke="#FFFFFF" stroke-width="2" fill="none" opacity="0.25" stroke-linecap="round"/>
+  <path d="M 20 56 C 34 50 46 50 58 54" stroke="#FFFFFF" stroke-width="3" fill="none" opacity="0.45" stroke-linecap="round"/>
+
+  <circle cx="32" cy="56" r="8" fill="#FFFFFF"/>
+  <circle cx="30" cy="57" r="4" fill="#1C1917"/>
+  <circle cx="28.5" cy="55" r="1.5" fill="#FFFFFF"/>
+</svg>

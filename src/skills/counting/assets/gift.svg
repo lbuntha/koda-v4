@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <radialGradient id="giftGround" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="giftBox" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2DD4BF"/>
+      <stop offset="45%" stop-color="#0D9488"/>
+      <stop offset="100%" stop-color="#134E4A"/>
+    </linearGradient>
+    <linearGradient id="giftLid" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#5EEAD4"/>
+      <stop offset="45%" stop-color="#14B8A6"/>
+      <stop offset="100%" stop-color="#115E59"/>
+    </linearGradient>
+    <linearGradient id="giftRibbon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE047"/>
+      <stop offset="50%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#B45309"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="64" cy="118" rx="34" ry="5" fill="url(#giftGround)"/>
+
+  <rect x="26" y="56" width="76" height="58" rx="5" fill="url(#giftBox)"/>
+  <rect x="18" y="42" width="92" height="18" rx="5" fill="url(#giftLid)"/>
+
+  <rect x="57" y="56" width="14" height="58" fill="url(#giftRibbon)"/>
+  <rect x="57" y="42" width="14" height="18" fill="url(#giftRibbon)"/>
+
+  <path d="M 62 42 C 50 40 34 34 34 24 C 34 14 48 14 56 24 C 60 29 62 36 62 42 Z" fill="url(#giftRibbon)"/>
+  <path d="M 66 42 C 78 40 94 34 94 24 C 94 14 80 14 72 24 C 68 29 66 36 66 42 Z" fill="url(#giftRibbon)"/>
+  <circle cx="64" cy="40" r="7" fill="url(#giftRibbon)"/>
+  <circle cx="61.5" cy="37.5" r="2.2" fill="#FFFFFF" fill-opacity="0.65"/>
+
+  <path d="M 32 62 L 32 108" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.3"/>
+  <path d="M 24 47 L 24 55" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.35"/>
+</svg>

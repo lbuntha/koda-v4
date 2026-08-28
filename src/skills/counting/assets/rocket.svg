@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <radialGradient id="rocketGround" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rocketBody" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8FA0B6"/>
+      <stop offset="32%" stop-color="#F8FAFC"/>
+      <stop offset="68%" stop-color="#DCE3EC"/>
+      <stop offset="100%" stop-color="#8FA0B6"/>
+    </linearGradient>
+    <linearGradient id="rocketNose" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FB7185"/>
+      <stop offset="55%" stop-color="#E11D48"/>
+      <stop offset="100%" stop-color="#9F1239"/>
+    </linearGradient>
+    <linearGradient id="rocketFin" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#F43F5E"/>
+      <stop offset="100%" stop-color="#881337"/>
+    </linearGradient>
+    <radialGradient id="rocketPort" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#BAE6FD"/>
+      <stop offset="55%" stop-color="#0EA5E9"/>
+      <stop offset="100%" stop-color="#0C4A6E"/>
+    </radialGradient>
+    <linearGradient id="rocketFlame" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FEF3C7"/>
+      <stop offset="40%" stop-color="#FB923C"/>
+      <stop offset="100%" stop-color="#EA580C" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="64" cy="118" rx="27" ry="5" fill="url(#rocketGround)"/>
+
+  <path d="M 55 96 Q 64 124 73 96 Q 64 104 55 96 Z" fill="url(#rocketFlame)"/>
+
+  <path d="M 46 64 C 29 77 25 92 27 103 C 38 101 45 94 49 85 Z" fill="url(#rocketFin)"/>
+  <path d="M 82 64 C 99 77 103 92 101 103 C 90 101 83 94 79 85 Z" fill="url(#rocketFin)"/>
+
+  <path d="M 64 10 C 78 27 84 50 84 70 L 84 97 L 44 97 L 44 70 C 44 50 50 27 64 10 Z" fill="url(#rocketBody)"/>
+
+  <path d="M 64 10 C 74 23 80 38 82 51 L 46 51 C 48 38 54 23 64 10 Z" fill="url(#rocketNose)"/>
+
+  <circle cx="64" cy="67" r="13.5" fill="#64748B"/>
+  <circle cx="64" cy="67" r="10.5" fill="url(#rocketPort)"/>
+  <ellipse cx="59" cy="62" rx="3.6" ry="2.4" fill="#FFFFFF" fill-opacity="0.8" transform="rotate(-35 59 62)"/>
+
+  <rect x="44" y="90" width="40" height="7" rx="2" fill="url(#rocketFin)"/>
+  <path d="M 53 30 C 49 46 48 62 48 88" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.6"/>
+</svg>

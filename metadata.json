@@ -1,0 +1,6 @@
+{
+  "name": "Koda Tutor",
+  "description": "App Store & Play Store educational gaming hub featuring 'Counting Quest: Number Master' with 15 flowing levels, dedicated 'Counting to 100 with Techniques' Lab, interactive pedagogical Specs Book, and Real-Time Gemini Live Voice with low-latency Socratic conversational audio.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

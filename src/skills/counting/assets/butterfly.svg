@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <radialGradient id="bflyGround" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.24"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="bflyUpper" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7DD3FC"/>
+      <stop offset="50%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#3730A3"/>
+    </linearGradient>
+    <linearGradient id="bflyLower" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F0ABFC"/>
+      <stop offset="55%" stop-color="#C026D3"/>
+      <stop offset="100%" stop-color="#701A75"/>
+    </linearGradient>
+    <linearGradient id="bflyBody" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#57534E"/>
+      <stop offset="45%" stop-color="#1C1917"/>
+      <stop offset="100%" stop-color="#44403C"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="64" cy="116" rx="24" ry="4.5" fill="url(#bflyGround)"/>
+
+  <path d="M 60 58 C 46 26 22 18 14 32 C 6 48 24 68 58 70 Z" fill="url(#bflyUpper)"/>
+  <path d="M 68 58 C 82 26 106 18 114 32 C 122 48 104 68 70 70 Z" fill="url(#bflyUpper)"/>
+  <path d="M 60 68 C 46 76 28 84 30 98 C 32 110 51 106 61 86 Z" fill="url(#bflyLower)"/>
+  <path d="M 68 68 C 82 76 100 84 98 98 C 96 110 77 106 67 86 Z" fill="url(#bflyLower)"/>
+
+  <circle cx="36" cy="42" r="6" fill="#FFFFFF" fill-opacity="0.55"/>
+  <circle cx="92" cy="42" r="6" fill="#FFFFFF" fill-opacity="0.55"/>
+  <circle cx="45" cy="92" r="4" fill="#FDE68A" fill-opacity="0.8"/>
+  <circle cx="83" cy="92" r="4" fill="#FDE68A" fill-opacity="0.8"/>
+
+  <ellipse cx="64" cy="70" rx="5.5" ry="23" fill="url(#bflyBody)"/>
+  <circle cx="64" cy="45" r="6.5" fill="url(#bflyBody)"/>
+
+  <path d="M 61 40 C 54 28 46 22 40 21" stroke="#1C1917" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+  <path d="M 67 40 C 74 28 82 22 88 21" stroke="#1C1917" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+  <circle cx="39" cy="20" r="3" fill="#1C1917"/>
+  <circle cx="89" cy="20" r="3" fill="#1C1917"/>
+</svg>

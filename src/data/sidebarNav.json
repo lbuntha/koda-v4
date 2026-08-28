@@ -1,0 +1,101 @@
+{
+ "brand": {
+  "title": "KODA",
+  "logoUrl": "/favicon.svg"
+ },
+ "sections": [
+  {
+   "id": "main",
+   "items": [
+    {
+     "id": "home",
+     "label": "Home",
+     "icon": "home"
+    },
+    {
+     "id": "game",
+     "label": "Learn",
+     "icon": "game"
+    },
+    {
+     "id": "profile",
+     "label": "Profile",
+     "icon": "user"
+    },
+    {
+     "id": "skills",
+     "label": "Skills",
+     "icon": "brain",
+     "badge": "Manage",
+     "requires": "content:write"
+    },
+    {
+     "id": "assets",
+     "label": "Art",
+     "icon": "shapes",
+     "badge": "{art} SVG",
+     "requires": "content:write"
+    },
+    {
+     "id": "users",
+     "label": "Users",
+     "icon": "users",
+     "badge": "Manage",
+     "requires": "user:manage"
+    },
+    {
+     "id": "roles",
+     "label": "Roles",
+     "icon": "shield",
+     "badge": "Access",
+     "requires": "role:manage"
+    },
+    {
+     "id": "children",
+     "label": "Children",
+     "icon": "baby",
+     "badge": "Family",
+     "requires": "learner:create"
+    },
+    {
+     "id": "devices",
+     "label": "Devices",
+     "icon": "key",
+     "badge": "Family",
+     "requires": "device:list"
+    },
+    {
+     "id": "menu",
+     "label": "Menu",
+     "icon": "list",
+     "badge": "Sidebar",
+     "requires": "menu:manage"
+    },
+    {
+     "id": "koda",
+     "label": "Ask Koda",
+     "icon": "sparkles",
+     "badge": "Assistant",
+     "requires": "system:write"
+    },
+    {
+     "id": "admin",
+     "label": "Admin",
+     "icon": "sliders",
+     "badge": "Manage",
+     "requires": "system:write"
+    },
+    {
+     "id": "settings",
+     "label": "Settings",
+     "icon": "settings"
+    }
+   ]
+  }
+ ],
+ "profile": {
+  "name": "Alex Rivera",
+  "role": "Level 3 Explorer",
+  "initials": "AR"
+ }
+}
