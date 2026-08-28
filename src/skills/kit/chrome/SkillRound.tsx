@@ -163,8 +163,14 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
         </div>
       </main>
 
+      {/* `bg-surface` on the strip below, which is what `MainLayout`'s column
+          paints the page — not `bg-canvas`. The two differ by a shade (#FFFFFF
+          against #F8FAFC), so the sticky strip drew a second, greyer background
+          in a band around the message card and the feedback read as two stacked
+          panels rather than one. Opaque, so the blur it carried has nothing left
+          to do. */}
       {round.feedback && (
-        <div className="sticky bottom-0 left-0 right-0 z-30 p-3 sm:p-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-[calc(1rem+env(safe-area-inset-bottom))] bg-canvas/95 backdrop-blur-sm">
+        <div className="sticky bottom-0 left-0 right-0 z-30 p-3 sm:p-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-[calc(1rem+env(safe-area-inset-bottom))] bg-surface">
           <UIKidMessage
             tone={round.feedback.status === "correct" ? "correct" : "tryAgain"}
             title={round.feedback.title}

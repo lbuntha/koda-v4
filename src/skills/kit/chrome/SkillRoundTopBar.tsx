@@ -194,8 +194,11 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
           lesson title and the leave button were drawn straight through the
           clock and the battery. Opaque rather than translucent for the same
           reason the tab bar is: at this width the strip behind the OS clock is
-          the one part of the page that must not shimmer. */}
-      <header className="px-2.5 sm:px-4 pt-[calc(0.5rem+env(safe-area-inset-top))] sm:pt-[calc(0.625rem+env(safe-area-inset-top))] pb-2 sm:pb-2.5 bg-canvas sticky top-0 z-30">
+          the one part of the page that must not shimmer. `bg-surface` and not
+          `bg-canvas` for the same reason the feedback bar below uses it — the
+          column paints the page `bg-surface`, and a bar a shade off it reads as
+          a second background rather than as the top of this one. */}
+      <header className="px-2.5 sm:px-4 pt-[calc(0.5rem+env(safe-area-inset-top))] sm:pt-[calc(0.625rem+env(safe-area-inset-top))] pb-2 sm:pb-2.5 bg-surface sticky top-0 z-30">
         <div className="max-w-5xl mx-auto flex flex-col gap-1.5 sm:gap-3 sm:flex-row sm:items-center sm:justify-between">
           {/* Top row on narrow screens: which lesson, and the way out */}
           <div className="flex items-center justify-between gap-2 min-w-0 sm:flex-initial sm:justify-start">
