@@ -220,7 +220,28 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
     >
       {question.mode === "hop" ? (
         <div className="space-y-4">
-          <div className={`flex items-center justify-center gap-3 overflow-x-auto px-4 py-7 ${SCENE}`}>
+          {/*
+            * The line wraps; it never scrolls.
+            *
+            * It was `justify-center` on an `overflow-x-auto` strip, which hides
+            * pads outright: a centred flex row that overflows spills by the same
+            * amount off *both* ends, and the left spill cannot be reached,
+            * because `scrollLeft` is already 0 there. On a 390px phone a
+            * five-hop line put pad "0" at -39px with nowhere to scroll to, so a
+            * child began the question looking at a frog that was not on screen.
+            *
+            * Wrapping rather than a scroll that works: a horizontal scroll a
+            * five-year-old has to discover, mid-question, is a scroll that does
+            * not exist. `flex-wrap` costs nothing while the line fits — the
+            * pads stay in one row — and only folds when the alternative was
+            * hiding something. The pads also drop to 48px below `sm`, which is
+            * what keeps the common four-to-six-pad line on a single row — at
+            * 56px only five fit across a 390px phone, so a six-pad question
+            * stranded one pad alone on a second row.
+            */}
+          <div
+            className={`flex flex-wrap items-center justify-center gap-x-2 gap-y-4 sm:gap-3 px-4 py-7 ${SCENE}`}
+          >
             {(question.pads ?? []).map((val, idx) => {
               const reached = idx <= hop;
               const here = idx === hop;
@@ -238,13 +259,13 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
                       /* The frog is the skill's own artwork now. An emoji is a
                          different picture on every platform, and this one is the
                          character a child follows along the whole number line. */
-                      className="w-16 h-16 flex items-center justify-center drop-shadow-[0_4px_10px_rgba(0,0,0,0.2)]"
+                      className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center drop-shadow-[0_4px_10px_rgba(0,0,0,0.2)]"
                     >
                       <SvgAsset id="counting-frog" size="100%" title="Froggy" />
                     </motion.div>
                   ) : (
                     <div
-                      className={`w-16 h-16 flex items-center justify-center transition-[filter,opacity] duration-200 ${
+                      className={`w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center transition-[filter,opacity] duration-200 ${
                         reached ? "" : "opacity-70 saturate-[0.65]"
                       }`}
                     >
@@ -264,7 +285,9 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.9, x: 4 }}
               transition={SPRING.tap}
-              className={themeSystem.button("primary", "sm")}
+              /* The move this whole screen exists for, at `sm`: 27px tall and
+                 12px type, smaller than the numbers it moves between. */
+              className={themeSystem.button("primary", "lg")}
             >
               Hop Forward (+{question.step})
               <ArrowRight />
@@ -273,13 +296,18 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
         </div>
       ) : (
         <div className="space-y-4">
-          <div className={`flex items-center justify-center gap-3 overflow-x-auto px-4 py-7 ${SCENE}`}>
+          {/* Same centred-overflow trap as the hop strip above, and the same
+              fix: a six-tile sequence is wider than a phone, and the tile the
+              child has to fill can be the one clipped off the left. */}
+          <div
+            className={`flex flex-wrap items-center justify-center gap-x-2 gap-y-3 sm:gap-3 px-4 py-7 ${SCENE}`}
+          >
             {(question.sequence ?? []).map((val, idx) => (
               <motion.div
                 key={idx}
                 animate={val === null ? { scale: [1, 1.04, 1] } : {}}
                 transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-                className={`w-[72px] h-[72px] rounded-2xl border-2 flex flex-col items-center justify-center font-black text-lg shrink-0 ${
+                className={`w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-2xl border-2 flex flex-col items-center justify-center font-black text-lg shrink-0 ${
                   val === null
                     ? "bg-amber-400/20 border-amber-400 text-slate-800 dark:text-amber-300"
                     : "bg-surface border-line text-ink"

@@ -6,7 +6,7 @@ export type ButtonVariant =
   | "warning"
   | "ghost"
   | "outline";
-export type ButtonSize = "sm" | "md" | "lg" | "icon" | "choice";
+export type ButtonSize = "sm" | "md" | "lg" | "icon" | "step" | "choice";
 
 export type CardVariant = "default" | "glass" | "bordered" | "interactive";
 export type BadgeVariant = "primary" | "success" | "warning" | "danger" | "info" | "neutral";
@@ -63,6 +63,13 @@ export const themeSystem = {
       md: "px-4 py-2.5 text-sm gap-2 [&>svg]:w-4 [&>svg]:h-4",
       lg: "px-6 py-3.5 text-base gap-2.5 [&>svg]:w-5 [&>svg]:h-5",
       icon: "p-2.5 gap-0 [&>svg]:w-4 [&>svg]:h-4",
+      /* A stepper's + and −, which `icon` was never the right size for: it is
+         built around a 16px glyph and lands at 36px square, so on a phone two
+         of them sat a thumb's width apart and neither could be hit reliably.
+         48px clears the 44px target floor with the glyph scaled to match, and
+         stops there — a stepper is a control beside the number it changes, not
+         the thing on screen a child is meant to look at. */
+      step: "w-12 h-12 sm:w-14 sm:h-14 text-2xl leading-none gap-0 p-0 [&>svg]:w-5 [&>svg]:h-5",
       /* Answer tiles a child taps: square, large type, a comfortable target. */
       choice: "w-14 h-14 sm:w-16 sm:h-16 text-xl sm:text-2xl gap-0 p-0",
     };

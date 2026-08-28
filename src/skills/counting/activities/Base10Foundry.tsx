@@ -514,7 +514,7 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
 
                 {/* The same moves without a pointer: keyboard, switch, screen
                     reader. Dragging is the teaching, not the only way in. */}
-                <div className="flex items-center justify-center gap-2">
+                <div className="flex items-center justify-center gap-3">
                   <motion.button
                     onClick={() => adjust(place.key, -1, place.max)}
                     disabled={built[place.key] === 0}
@@ -522,7 +522,7 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
                     whileTap={{ scale: 0.85 }}
                     transition={SPRING.tap}
                     aria-label={`One fewer ${place.label}`}
-                    className={themeSystem.button("secondary", "icon")}
+                    className={themeSystem.button("secondary", "step")}
                   >
                     −
                   </motion.button>
@@ -533,7 +533,7 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
                     whileTap={{ scale: 0.85 }}
                     transition={SPRING.tap}
                     aria-label={`One more ${place.label}`}
-                    className={themeSystem.button("secondary", "icon")}
+                    className={themeSystem.button("secondary", "step")}
                   >
                     +
                   </motion.button>
@@ -549,6 +549,21 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
           <strong className="text-emerald-700 dark:text-emerald-400 text-base">{value}</strong>
         </div>
 
+        {/*
+          * One wrapping row, at `lg`.
+          *
+          * These were `sm`: a 27px-tall button with 12px type, which is a
+          * toolbar control, not something a five-year-old aims a thumb at. `lg`
+          * is 54px and reads at arm's length. It is also the ceiling — a full
+          * width block was worse, not better: it made Check the largest object
+          * on a screen whose subject is the blocks being counted.
+          *
+          * Left wrapping rather than forced into rows or columns. On the widest
+          * lesson all three appear, and "Make a Ten" + "Make a Hundred" fill
+          * 330px of the 342px a 390px phone has between its gutters — so they
+          * hold one line and Check drops below them on its own, without a
+          * breakpoint having to guess which lesson is running.
+          */}
         <div className="flex flex-wrap items-center justify-center gap-3">
           {setup.bundleOnes && (
             <motion.button
@@ -557,7 +572,7 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.92 }}
               transition={SPRING.tap}
-              className={themeSystem.button("secondary", "sm")}
+              className={themeSystem.button("secondary", "lg")}
             >
               Make a Ten
             </motion.button>
@@ -569,7 +584,7 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.92 }}
               transition={SPRING.tap}
-              className={themeSystem.button("secondary", "sm")}
+              className={themeSystem.button("secondary", "lg")}
             >
               Make a Hundred
             </motion.button>
@@ -579,7 +594,7 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.92 }}
             transition={SPRING.tap}
-            className={themeSystem.button("primary", "sm")}
+            className={themeSystem.button("primary", "lg")}
           >
             Check
           </motion.button>
