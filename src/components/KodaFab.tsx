@@ -42,7 +42,15 @@ export const KodaFab: React.FC<{ onAsk: (mode: KodaAskMode) => void }> = ({ onAs
 
   return (
     <KodaBuddy
-      storageKey="koda.fab.place"
+      /*
+       * `.v2` because the remembered spot is an *offset from the anchor*, and
+       * the anchor just moved from the right edge to the left. An offset saved
+       * against the old corner means something else against the new one — a
+       * child who had dragged Koda to the left would have it restored a full
+       * screen further left, which the clamp would then flatten against the
+       * edge. Retiring the key drops those offsets instead of misreading them.
+       */
+      storageKey="koda.fab.place.v2"
       onPress={() => {
         playSound("pop");
         // One line, and the plan, the wording and the dialog are handled. Asked
@@ -53,7 +61,11 @@ export const KodaFab: React.FC<{ onAsk: (mode: KodaAskMode) => void }> = ({ onAs
       className={[
         // Above the page, below every modal — a dialog must never have to argue
         // with a button for the top of the screen.
-        "fixed right-4 sm:right-6 z-40",
+        //
+        // Bottom-left, and the face follows on its own: `KodaBuddy` mirrors
+        // whatever side of the middle it is on, so from here it looks right,
+        // back across the page, rather than off the edge of the screen.
+        "fixed left-4 sm:left-6 z-40",
         // Where it starts, not where it stays. Sits above the tab bar rather
         // than on it, and clears the iOS home indicator with it. One token, so
         // moving the dock moves this too.
