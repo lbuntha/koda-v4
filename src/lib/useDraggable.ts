@@ -70,6 +70,41 @@ interface Spot {
   y: number;
 }
 
+/**
+ * Where CSS put the element, ignoring any drag offset on it.
+ *
+ * `offsetLeft`/`offsetTop` are layout metrics: a transform does not move them,
+ * which is the whole point of using them here. Deriving the same thing as
+ * `rect - transform` looks equivalent and is not — the rect and the motion
+ * value are written at different times, so any read that happens between them
+ * pairs an old position with a new offset and lands a screen-width out. That is
+ * survivable right up until StrictMode double-invokes the effect, at which
+ * point the error compounds instead of cancelling.
+ *
+ * The walk up `offsetParent` is for the case where an ancestor transform makes
+ * itself the containing block; with none, `offsetParent` is null on a fixed
+ * element and the loop is a single step.
+ */
+const anchorOf = (el: HTMLElement): { left: number; top: number } => {
+  let left = 0;
+  let top = 0;
+  let node: HTMLElement | null = el;
+  while (node) {
+    left += node.offsetLeft;
+    top += node.offsetTop;
+    node = node.offsetParent as HTMLElement | null;
+  }
+  return { left, top };
+};
+
+/** How far the element may travel from where CSS put it, per edge. */
+interface Bounds {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+}
+
 const readSpot = (key: string | undefined): Spot | null => {
   if (!key) return null;
   try {
@@ -109,41 +144,89 @@ export function useDraggable<T extends HTMLElement>({
    * How far it may travel from where CSS put it. Subtracting the live transform
    * recovers the untouched position, which is what the limits are relative to.
    */
-  const measure = useCallback(() => {
+  const measure = useCallback((): Bounds | null => {
     const el = ref.current;
-    if (!el) return;
-    const box = el.getBoundingClientRect();
-    const baseLeft = box.left - x.get();
-    const baseTop = box.top - y.get();
+    if (!el) return null;
+    const { left: baseLeft, top: baseTop } = anchorOf(el);
+    const width = el.offsetWidth;
+    const height = el.offsetHeight;
+
+    /*
+     * The visual viewport, not `innerWidth`/`innerHeight`.
+     *
+     * On a phone those two are not the same thing: the layout is built against
+     * `100dvh` while `innerHeight` follows the browser's chrome, so they
+     * disagree by the height of the URL bar for as long as it is on screen.
+     */
+    const vw = window.visualViewport?.width ?? window.innerWidth;
+    const vh = window.visualViewport?.height ?? window.innerHeight;
+
+    /*
+     * The resting place is always legal.
+     *
+     * Each edge is widened to include zero, and that one line is the whole fix
+     * for a bug worth spelling out: while the two viewport heights disagreed,
+     * `bottom` came out *negative* — the CSS anchor was, arithmetically, below
+     * the floor. The clamp below then dutifully pulled a control that was
+     * sitting exactly where it belonged up the screen, and did it again on
+     * every resize the URL bar caused, walking Koda to the top of a phone.
+     *
+     * A limit that forbids the position CSS chose is a limit that is wrong, not
+     * a position that is. Zero stays reachable and the clamp can only ever
+     * rescue something genuinely stranded.
+     */
     const next = {
-      left: margin - baseLeft,
-      right: window.innerWidth - margin - box.width - baseLeft,
-      top: margin - baseTop,
-      bottom: window.innerHeight - margin - box.height - baseTop,
+      left: Math.min(margin - baseLeft, 0),
+      right: Math.max(vw - margin - width - baseLeft, 0),
+      top: Math.min(margin - baseTop, 0),
+      bottom: Math.max(vh - margin - height - baseTop, 0),
     };
     setLimits(next);
-    setAnchor({ left: baseLeft, top: baseTop, width: box.width, height: box.height });
-    baseCentreX.set(baseLeft + box.width / 2);
-    baseCentreY.set(baseTop + box.height / 2);
+    setAnchor({ left: baseLeft, top: baseTop, width, height });
+    baseCentreX.set(baseLeft + width / 2);
+    baseCentreY.set(baseTop + height / 2);
     /* A phone that rotated, or a window that shrank, can leave this outside the
        screen it is now on. Pull it back rather than stranding a control that is
        meant to be always reachable. */
     x.set(Math.min(Math.max(x.get(), next.left), next.right));
     y.set(Math.min(Math.max(y.get(), next.top), next.bottom));
+    return next;
   }, [baseCentreX, baseCentreY, margin, x, y]);
 
   useEffect(() => {
+    /*
+     * Measure *before* restoring, then restore already clamped.
+     *
+     * The anchor is derived as `rect - transform`, so both have to come from
+     * the same moment. Setting the offset first and measuring after cannot be
+     * made reliable: the write reaches the DOM on Motion's own animation frame,
+     * so reading the rect in this tick — or even in a frame of our own — can
+     * pair the untransformed rect with the restored offset and put the anchor a
+     * screen-width away. Every limit computed from it was then nonsense, which
+     * is why a position saved on a larger screen was never pulled back at all.
+     *
+     * At mount `x`/`y` are still zero, so the rect *is* the anchor. Measuring
+     * here needs no synchronisation, and the stored spot is clamped against
+     * limits that are already known to be right.
+     */
+    const bounds = measure();
     const spot = readSpot(storageKey);
-    if (spot) {
-      x.set(spot.x);
-      y.set(spot.y);
+    if (spot && bounds) {
+      x.set(Math.min(Math.max(spot.x, bounds.left), bounds.right));
+      y.set(Math.min(Math.max(spot.y, bounds.top), bounds.bottom));
     }
-    measure();
     window.addEventListener("resize", measure);
     window.addEventListener("orientationchange", measure);
+    /* The visual viewport moves without a `resize` — a URL bar collapsing, a
+       keyboard opening — and those are exactly the moments the limits go
+       stale. */
+    window.visualViewport?.addEventListener("resize", measure);
+    window.visualViewport?.addEventListener("scroll", measure);
     return () => {
       window.removeEventListener("resize", measure);
       window.removeEventListener("orientationchange", measure);
+      window.visualViewport?.removeEventListener("resize", measure);
+      window.visualViewport?.removeEventListener("scroll", measure);
     };
   }, [measure, storageKey, x, y]);
 
