@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     mongodb_uri: str = "mongodb://localhost:27017"
-    mongodb_db: str = "koda"
+    mongodb_db: str = "koda_v4"
 
     # Dev default so `make dev-local` works out of the box. Production supplies
     # a real one; `main.py` refuses to start with this value outside dev.

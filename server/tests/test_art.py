@@ -23,7 +23,13 @@ async def _operator(client, db, role: str = "developer") -> dict[str, str]:
 
 async def test_bundled_art_seeds_once_and_survives_edits(db):
     defaults = load_defaults()
-    assert len(defaults) == 21
+    # Not a fixed count. Dropping a new .svg into src/assets/svg is a normal
+    # thing to do — the README invites it — so an exact number here fails on
+    # every new drawing, and a test that must be edited each time is a test that
+    # gets edited without being read. What this one is actually about is in its
+    # name: the seed runs once and does not overwrite an edit. The guard worth
+    # keeping is that the file is populated at all.
+    assert defaults, "art_defaults.json is empty — did generate-art-seed.mjs run?"
     assert sum([await art_repo.seed_default(db, item) for item in defaults]) == len(defaults)
 
     await art_repo.put(db, "apple", "food", "<svg><circle r='4'/></svg>", "developer")

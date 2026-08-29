@@ -74,7 +74,12 @@ services:
       - '${API_PORT:-8000}:8000'
     environment:
       MONGODB_URI: 'mongodb://mongo:27017'
-      MONGODB_DB: 'koda'
+      # Named to match production (`deploy.yml` sets the same), so a query that
+      # works against one names the same collections on the other. They are
+      # different servers — this one is the compose `mongo` service, reachable
+      # from the host on ${MONGO_PORT} — so the shared name is a convenience,
+      # never a route between them.
+      MONGODB_DB: 'koda_v4'
       # `console` by default so nothing depends on the mail container being up.
       # Set MAIL_DRIVER=smtp in .env to watch messages arrive in Mailpit.
       MAIL_DRIVER: '${MAIL_DRIVER:-console}'
