@@ -108,8 +108,20 @@ const LAYOUTS: Layout[] = ["cluster", "line", "circle", "pairs", "scattered", "c
  * clear the object — the number clips run about a second, and the word itself
  * sits at the front of that. Shorter and the final item is not counted; much
  * longer and the praise stops feeling like a response to the tap.
+ *
+ * A floor, not the whole wait: the round also waits for the word itself to
+ * finish. See `settleThenFinish`.
  */
 const COUNT_SETTLE_MS = 900;
+
+/**
+ * The longest the round will hold on for the last number word.
+ *
+ * A clip that never reports back — blocked autoplay, a file that will not load
+ * — must not strand a child on a finished scene, so the wait is capped and the
+ * round goes on without it.
+ */
+const COUNT_SETTLE_CAP_MS = 2600;
 
 const randomInt = (lo: number, hi: number) => lo + Math.floor(Math.random() * (hi - lo + 1));
 const rangeOr = (range: [number, number] | undefined, lo: number, hi: number) =>
@@ -328,6 +340,9 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
   const motionOK = useMotionOK();
   /** Pending finish, so leaving mid-count cannot submit for an unmounted round. */
   const finishTimer = useRef<number | null>(null);
+  /** Bumped whenever the scene resets, so a late clip cannot finish a question
+      that is no longer on screen. */
+  const questionToken = useRef(0);
 
   const round = useSkillRound({
     koda,
@@ -346,6 +361,7 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
   const question = round.question as OrbitQuestion;
 
   useEffect(() => {
+    questionToken.current += 1;
     setTapped([]);
     setTappedA([]);
     setTappedB([]);
@@ -359,6 +375,7 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
 
   useEffect(
     () => () => {
+      questionToken.current += 1;
       if (finishTimer.current !== null) window.clearTimeout(finishTimer.current);
     },
     [],
@@ -368,13 +385,17 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
     if (koda.config.isEnabled("sound_chimes", true)) koda.sound.play(type);
   };
 
-  /** Say the running count aloud — the number word is the point of the tap. */
-  const countAloud = (n: number) => {
-    if (koda.config.isEnabled("audio_speech", true)) {
-      void koda.speech.say(NUMBER_WORDS[n] ?? String(n), {
-        rate: koda.config.get("speechRate", 1.0),
-      });
-    }
+  /**
+   * Say the running count aloud — the number word is the point of the tap.
+   *
+   * Resolves when the word has been said, so the last tap can wait for it. A
+   * rejection resolves too: a round must not stall on a sound.
+   */
+  const countAloud = (n: number): Promise<void> => {
+    if (!koda.config.isEnabled("audio_speech", true)) return Promise.resolve();
+    return koda.speech
+      .say(NUMBER_WORDS[n] ?? String(n), { rate: koda.config.get("speechRate", 1.0) })
+      .catch(() => {});
   };
 
   const tap = (index: number) => {
@@ -383,7 +404,7 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
     setTapped(next);
     koda.haptics.tap();
     chime(question.mode === "scatter" ? "clink" : "pop");
-    countAloud(next.length);
+    const spoken = countAloud(next.length);
     /*
      * The number the child just reached, tied to the object they just touched.
      *
@@ -407,10 +428,53 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
        * eighth rocket and got congratulated *instead of* being told it was
        * eight — losing the one repetition that closes the count.
        */
-      const settle = setup.settleMs ?? COUNT_SETTLE_MS;
-      if (settle <= 0) finish(next.length);
-      else finishTimer.current = window.setTimeout(() => finish(next.length), settle);
+      settleThenFinish(spoken, next.length);
     }
+  };
+
+  /**
+   * Hold the round open until the last number has been *heard*.
+   *
+   * A fixed 900ms was a guess at how long "eight" takes, and on a phone the
+   * guess was wrong: a clip there can take a few hundred milliseconds to even
+   * begin, so the praise clip — which stops whatever is speaking — cut the final
+   * number off before any of it came out. The child tapped the last rocket and
+   * was congratulated without ever being told the total, which is the one
+   * repetition the whole lesson exists for.
+   *
+   * So: wait for the word to finish, keep the old delay as a floor so the float
+   * still clears the object, and cap the whole thing so silence cannot stall.
+   */
+  const settleThenFinish = (spoken: Promise<void>, counted: number) => {
+    const settle = setup.settleMs ?? COUNT_SETTLE_MS;
+    if (settle <= 0) {
+      finish(counted);
+      return;
+    }
+
+    const startedAt = Date.now();
+    // The question this count belongs to. Leaving mid-count, or moving on,
+    // must not let a late-resolving clip submit into the next question.
+    const token = questionToken.current;
+    let done = false;
+
+    const submitNow = () => {
+      if (done || questionToken.current !== token) return;
+      done = true;
+      finishTimer.current = null;
+      finish(counted);
+    };
+    const submitIn = (ms: number) => {
+      if (finishTimer.current !== null) window.clearTimeout(finishTimer.current);
+      finishTimer.current = window.setTimeout(submitNow, Math.max(0, ms));
+    };
+
+    // The cap goes on first, so a word that never reports back still lands.
+    submitIn(COUNT_SETTLE_CAP_MS);
+    void spoken.then(() => {
+      if (done || questionToken.current !== token) return;
+      submitIn(settle - (Date.now() - startedAt));
+    });
   };
 
   /** The round's own reaction, once the count has been seen and heard. */
@@ -433,7 +497,7 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
     const next = on ? list.filter((i) => i !== index) : [...list, index];
     set(next);
     chime("pop");
-    if (!on) countAloud(next.length);
+    if (!on) void countAloud(next.length);
   };
 
   const answerCompare = (choice: "A" | "B" | "SAME") => {

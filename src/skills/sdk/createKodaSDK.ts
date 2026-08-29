@@ -134,6 +134,17 @@ export function createKodaSDK(
     },
 
     speech: {
+      /**
+       * Say a line, and resolve once it has been *said*.
+       *
+       * The promise used to resolve as soon as playback was started, which is
+       * fine for a caller that only fires and forgets — but counting waits for
+       * the last number before it congratulates the child, and a caller cannot
+       * wait on "started". Resolving at the end of the line lets it.
+       *
+       * Interrupted counts as the end: whatever spoke next has the floor, and a
+       * waiter must not be left holding a promise for a clip that has stopped.
+       */
       async say(text: string, opts?: { rate?: number }) {
         if (!text) return;
 
@@ -141,18 +152,32 @@ export function createKodaSDK(
         // Counting speaks a number on every tap, and asking Gemini for "three"
         // each time put a network round trip between a child's finger and the
         // word. Authored phrases are recorded by `scripts/generate-voice.mjs`.
-        if (playClip(text, opts?.rate ?? 1)) return;
+        //
+        // The resolver is made before the call so `playClip` still runs in the
+        // same tick as the tap — a mobile browser only lets audio start from
+        // inside the gesture that asked for it.
+        let spoken!: () => void;
+        const finished = new Promise<void>((resolve) => {
+          spoken = resolve;
+        });
+        if (playClip(text, opts?.rate ?? 1, spoken)) {
+          await finished;
+          return;
+        }
 
         const data = await postJson<{ audio?: string }>("/api/tutor/speech", {
           text,
           voice: "Kore",
         });
         if (data?.audio) {
-          playBase64Pcm(data.audio);
+          const source = playBase64Pcm(data.audio);
+          if (source) await new Promise<void>((resolve) => (source.onended = () => resolve()));
           return;
         }
         // Server unavailable or no key configured — the browser still speaks.
-        speakWebSpeech(text, opts?.rate);
+        await new Promise<void>((resolve) => {
+          speakWebSpeech(text, opts?.rate, resolve);
+        });
       },
       stop() {
         stopClip();

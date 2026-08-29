@@ -194,3 +194,48 @@ describe("counting activities report a wrong answer", () => {
     h.unmount();
   });
 });
+
+/**
+ * The last number of a count is the answer, so it has to be *heard*.
+ *
+ * The round used to wait a flat 900ms after the final tap and then submit,
+ * which starts the praise clip — and a clip starts by stopping whatever is
+ * speaking. On a phone a number word can take a few hundred milliseconds just
+ * to begin, so the guess ran out first and the final number was cut off before
+ * any of it came out: the child tapped the last rocket and got congratulated
+ * instead of being told the total.
+ */
+describe("counting waits for the last number to be said", () => {
+  const tapAll = async (h: ActivityHarness, count: number) => {
+    for (let i = 1; i <= count; i += 1) await h.press(new RegExp(`^[a-z]+ ${i}\\b`, "i"));
+  };
+
+  it("orbit: does not submit while the final number is still playing", async () => {
+    const h = renderActivity(orbit, {
+      params: { mode: "row", countRange: [4, 4], questionsPerRound: 1 },
+      holdSpeech: true,
+    });
+
+    await tapAll(h, 4);
+    // Well past the old fixed hold, and the word has not finished.
+    await h.settle(1400);
+    expect(h.koda.count("learning.answered"), "submitted mid-word").toBe(0);
+
+    h.koda.finishSpeaking();
+    await h.settle(50);
+    expect(h.koda.count("learning.answered"), "submitted once the word ended").toBe(1);
+  });
+
+  it("orbit: a word that never ends still lets the round move on", async () => {
+    const h = renderActivity(orbit, {
+      params: { mode: "row", countRange: [4, 4], questionsPerRound: 1 },
+      holdSpeech: true,
+    });
+
+    await tapAll(h, 4);
+    // Blocked autoplay, a clip that will not load: silence must not strand the
+    // child on a finished scene.
+    await h.settle(2800);
+    expect(h.koda.count("learning.answered")).toBe(1);
+  });
+});

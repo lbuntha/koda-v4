@@ -145,6 +145,23 @@ export const clipCount = (): number => clips.size;
 let playing: HTMLAudioElement | null = null;
 
 /**
+ * What to run when the current clip stops being audible.
+ *
+ * A caller sometimes has to wait for a word to be *heard*, not merely started —
+ * counting submits the answer only once the last number has been said, and a
+ * fixed delay guessed wrong on a phone, where a clip can take a few hundred
+ * milliseconds to begin. Cleared before it runs, so it fires exactly once
+ * whether the clip ended, failed, or was cut off by the next line.
+ */
+let playingDone: (() => void) | null = null;
+
+const settle = (): void => {
+  const done = playingDone;
+  playingDone = null;
+  done?.();
+};
+
+/**
  * Start one clip, replacing whatever was speaking.
  *
  * Nothing here may throw. This is called from inside `useSkillRound.submit`,
@@ -157,27 +174,36 @@ let playing: HTMLAudioElement | null = null;
  * does in jsdom. A bare `.catch()` misses that case entirely, so the call is
  * wrapped rather than only chained.
  */
-const play = (url: string, rate: number): boolean => {
+const play = (url: string, rate: number, onEnd?: () => void): boolean => {
   try {
+    // Ends the previous line before this one takes the slot, so whoever was
+    // waiting on it is told rather than left waiting on a clip that stopped.
     stopClip();
     const audio = new Audio(url);
     audio.playbackRate = Math.max(0.5, Math.min(2, rate));
     playing = audio;
-    audio.addEventListener("ended", () => {
-      if (playing === audio) playing = null;
-    });
+    playingDone = onEnd ?? null;
+    const done = () => {
+      if (playing !== audio) return;
+      playing = null;
+      settle();
+    };
+    audio.addEventListener("ended", done);
+    // A clip that fails to load never ends, and a caller waiting on it would
+    // wait forever. Treat the failure as the end of the line.
+    audio.addEventListener("error", done);
     const started = audio.play();
     // A browser that blocks autoplay before the first gesture rejects here. The
     // line is already lost by then, so there is nothing to fall back to — but it
     // must not surface as an unhandled rejection.
     if (started && typeof started.catch === "function") {
-      void started.catch(() => {
-        if (playing === audio) playing = null;
-      });
+      void started.catch(done);
     }
     return true;
   } catch {
     playing = null;
+    playingDone = null;
+    onEnd?.();
     return false;
   }
 };
@@ -186,6 +212,7 @@ export const stopClip = (): void => {
   if (!playing) return;
   playing.pause();
   playing = null;
+  settle();
 };
 
 const { lastPlayed } = registry;
@@ -225,7 +252,8 @@ export const playReaction = (name: string, rate = 1): boolean => {
  * `rate` is applied with `playbackRate`, which shifts timing without shifting
  * pitch, so a skill's `speechRate` setting still does something for a recording.
  */
-export const playClip = (text: string, rate = 1): boolean => {
+export const playClip = (text: string, rate = 1, onEnd?: () => void): boolean => {
   const url = clipUrl(text);
-  return url ? play(url, rate) : false;
+  if (!url) return false;
+  return play(url, rate, onEnd);
 };

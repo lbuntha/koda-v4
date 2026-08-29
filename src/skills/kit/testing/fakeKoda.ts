@@ -38,6 +38,8 @@ export interface FakeKoda {
   completed: SkillResult[];
   /** Total XP awarded through `progress.awardXp`. */
   xpAwarded: number;
+  /** End every line `holdSpeech` is holding, as a finished clip would. */
+  finishSpeaking(): void;
   reset(): void;
 }
 
@@ -51,6 +53,15 @@ export interface FakeKodaOptions {
   theme?: "light" | "dark";
   /** The learner's voice preference, as `speech.isEnabled()` reports it. */
   voiceEnabled?: boolean;
+  /**
+   * Leave `speech.say()` unresolved until `finishSpeaking()` is called.
+   *
+   * A real `say()` resolves when the line has finished playing, and an activity
+   * may wait on that — counting holds the round open until the last number has
+   * been said. Resolving instantly hides whether the wait is honoured, so a test
+   * about that timing takes the clip's end into its own hands.
+   */
+  holdSpeech?: boolean;
 }
 
 const EMPTY_SNAPSHOT: LearnerSnapshot = {
@@ -67,6 +78,8 @@ export function createFakeKoda(options: FakeKodaOptions = {}): FakeKoda {
   const actions: FakeKoda["actions"] = [];
   const completed: SkillResult[] = [];
   let xpAwarded = 0;
+  /** Resolvers for lines still being "spoken" under `holdSpeech`. */
+  const speaking: (() => void)[] = [];
 
   const record = (name: string, ...args: unknown[]) => {
     calls.push({ name, args });
@@ -88,8 +101,10 @@ export function createFakeKoda(options: FakeKodaOptions = {}): FakeKoda {
     },
 
     speech: {
-      say: async (text: string, opts?: { rate?: number }) => {
+      say: (text: string, opts?: { rate?: number }) => {
         record("speech.say", text, opts);
+        if (!options.holdSpeech) return Promise.resolve();
+        return new Promise<void>((resolve) => speaking.push(resolve));
       },
       stop: () => record("speech.stop"),
       isEnabled: () => options.voiceEnabled ?? true,
@@ -153,11 +168,15 @@ export function createFakeKoda(options: FakeKodaOptions = {}): FakeKoda {
     },
     only: (name: string) => calls.filter((c) => c.name === name),
     count: (name: string) => calls.filter((c) => c.name === name).length,
+    finishSpeaking: () => {
+      speaking.splice(0).forEach((resolve) => resolve());
+    },
     reset: () => {
       calls.length = 0;
       actions.length = 0;
       completed.length = 0;
       xpAwarded = 0;
+      speaking.splice(0).forEach((resolve) => resolve());
     },
   };
 }
