@@ -28,13 +28,25 @@ interface HomeProps {
 const SUBJECTS_SHOWN = 6;
 
 /** One line of the progress card: an icon well, a label and its number. */
+/**
+ * The rail's icon slot: a drawn mark at 48px, standing on nothing.
+ *
+ * Shared by the stats and the next badge so the two cannot drift apart — they
+ * sit one above the other in the same column, and a badge in a bordered tile
+ * beside a bare streak flame read as two designs stacked rather than one rail.
+ * The `[&>svg]` sizes are for the lucide fallbacks; the drawn artwork takes its
+ * own `size`.
+ */
+const RAIL_ICON =
+  "w-12 h-12 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 [&>svg]:w-9 [&>svg]:h-9";
+
 const RailStat: React.FC<{
   icon: React.ReactNode;
   label: string;
   value: string;
 }> = ({ icon, label, value }) => (
   <div className="flex items-center gap-3">
-    <span className="w-12 h-12 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 [&>svg]:w-9 [&>svg]:h-9">
+    <span className={RAIL_ICON}>
       {icon}
     </span>
     <span className="text-sm font-bold text-muted flex-1 min-w-0 truncate">{label}</span>
@@ -81,8 +93,13 @@ const NextBadge: React.FC<{ userProgress: UserProgress; starsEarned: number }> =
         Next badge
       </h2>
       <div className="mt-3 flex items-center gap-3">
-        <span className="w-11 h-11 rounded-xl border border-line bg-surface-muted text-amber-500 flex items-center justify-center shrink-0">
-          <BadgeIcon icon={next.rule.icon} />
+        {/* No tile, and the mark at the same 50px the streak and the points
+            wear directly above it. It was a 20px glyph adrift in a bordered
+            44px box: the badge is the reason to look at this card and it was
+            the smallest thing on it, while the box itself was packaging no
+            other row in the rail has. */}
+        <span className={RAIL_ICON}>
+          <BadgeIcon icon={next.rule.icon} size={50} />
         </span>
         <div className="min-w-0 flex-1">
           <p className="font-bold text-sm text-ink truncate">{next.rule.label}</p>
@@ -92,8 +109,11 @@ const NextBadge: React.FC<{ userProgress: UserProgress; starsEarned: number }> =
         </div>
       </div>
       <div className="mt-3 h-2 rounded-full bg-surface-muted overflow-hidden">
+        {/* Indigo, like the level bar it sits under. Amber was the only one of
+            its colour in the column, which made "how close am I" look like two
+            unrelated measures rather than one rail. */}
         <div
-          className="h-full rounded-full bg-amber-400 transition-all"
+          className="h-full rounded-full bg-indigo-500 transition-all"
           style={{ width: `${Math.round(next.progress * 100)}%` }}
         />
       </div>
