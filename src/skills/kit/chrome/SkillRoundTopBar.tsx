@@ -2,8 +2,6 @@ import React, { Suspense, lazy, useEffect, useState } from "react";
 import {
   Flame,
   Maximize2,
-  MessageCircle,
-  Mic,
   Minimize2,
   MoreHorizontal,
   ScrollText,
@@ -11,6 +9,7 @@ import {
   Zap,
 } from "lucide-react";
 import { UILessonIcon, UIMenu, UIMenuItem, UISpinner } from "../../../components/ui";
+import { KodaFace } from "../../../components/KodaFace";
 import { KodaAskModal } from "../../../components/KodaAskModal";
 import { LiveVoiceCoachModal } from "../../../components/LiveVoiceCoachModal";
 import { useKoda } from "../../../lib/useKoda";
@@ -243,15 +242,22 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
                     playChrome(koda, "pop");
                     askKoda();
                   }}
-                  className="p-2 min-w-[44px] min-h-[44px] rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center shrink-0 cursor-pointer"
+                  /*
+                   * On a phone the character is the whole button — no tile.
+                   *
+                   * It was an amber square, which on this bar was the loudest
+                   * thing on a screen whose subject is the question, and amber
+                   * is the tone this product uses for "try again". A 390px
+                   * toolbar has room for the character or for packaging round
+                   * it, not both, and the character is the part a child reads.
+                   * The 44px box stays: the target does not shrink with the
+                   * chrome.
+                   */
+                  className="min-w-[44px] min-h-[44px] grid place-items-center shrink-0 cursor-pointer rounded-xl transition active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                   title="Ask Koda about this question"
                   aria-label="Ask Koda about this question"
                 >
-                  {mode === "voice" ? (
-                    <Mic className="w-4 h-4 animate-pulse" />
-                  ) : (
-                    <MessageCircle className="w-4 h-4" />
-                  )}
+                  <KodaFace size={34} />
                 </button>
               )}
               <button
@@ -336,15 +342,17 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
                 }}
                 /* Amber-on-white was the loudest thing on a screen whose subject is the
    question. Help should be findable, not the focal point. */
-              className="flex items-center gap-1.5 px-3 py-2 min-h-[40px] rounded-xl bg-surface-muted hover:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 font-bold text-sm transition active:scale-95 shrink-0 cursor-pointer"
+                className="flex items-center gap-2 pl-1.5 pr-3 py-1.5 min-h-[40px] rounded-xl bg-surface-muted hover:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 font-bold text-sm transition active:scale-95 shrink-0 cursor-pointer"
                 title="Ask Koda about this question"
                 aria-label="Ask Koda about this question"
               >
-                {mode === "voice" ? (
-                  <Mic className="w-3.5 h-3.5 text-slate-950 animate-pulse" />
-                ) : (
-                  <MessageCircle className="w-3.5 h-3.5 text-slate-950" />
-                )}
+                {/* The same character the floating buddy is, and the same one a
+                    tablet sees — one Koda across every width, which is what
+                    makes it read as somebody rather than as three icons. The
+                    mode is no longer drawn: a mic and a speech bubble asked a
+                    child to know which kind of conversation they were about to
+                    have, which is not a choice they make or care about. */}
+                <KodaFace size={26} />
                 <span className="hidden md:inline">Ask Koda</span>
               </button>
             )}

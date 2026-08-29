@@ -1,19 +1,9 @@
 import React from "react";
 import { motion, useReducedMotion, useSpring, useTransform } from "motion/react";
 
-import { FALLBACK_CHARACTER } from "../lib/personas";
 import { useDraggable } from "../lib/useDraggable";
-import { KodaMascot, type MascotPalette, type MascotState } from "./KodaMascot";
-
-/**
- * Koda's colour when it is standing in for the product rather than for a
- * teacher.
- *
- * Literal hexes because DiceBear needs a concrete colour to draw with; they are
- * `--color-indigo-600` and `--color-indigo-400` from `index.css`, which are
- * brand constants and the same in both themes.
- */
-export const KODA_BRAND: MascotPalette = { head: "#6B46C1", accent: "#9F7AEA" };
+import { KodaFace, KODA_BRAND } from "./KodaFace";
+import { type MascotPalette, type MascotState } from "./KodaMascot";
 
 export interface KodaBuddyProps {
   /** What a tap does. Never fired at the end of a drag. */
@@ -24,8 +14,6 @@ export interface KodaBuddyProps {
   storageKey?: string;
   size?: number;
   palette?: MascotPalette;
-  /** DiceBear seed for the face. One fixed Koda by default, not this child's. */
-  avatarSeed?: string;
   state?: MascotState;
   /** Placement. Where it *starts*; the drag takes it from there. */
   className?: string;
@@ -66,7 +54,6 @@ export const KodaBuddy: React.FC<KodaBuddyProps> = ({
   storageKey,
   size = 64,
   palette = KODA_BRAND,
-  avatarSeed = FALLBACK_CHARACTER.avatarSeed,
   state = "idle",
   className = "",
 }) => {
@@ -129,13 +116,7 @@ export const KodaBuddy: React.FC<KodaBuddyProps> = ({
         className="pointer-events-none"
         style={still ? { scaleX: facing, rotate: tilt } : { scaleX: facingSmooth, rotate: tiltSmooth }}
       >
-        <KodaMascot
-          state={state}
-          personaId={FALLBACK_CHARACTER.personaId}
-          avatarSeed={avatarSeed}
-          palette={palette}
-          size={size}
-        />
+        <KodaFace state={state} palette={palette} size={size} />
       </motion.div>
     </motion.button>
   );
