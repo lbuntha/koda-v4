@@ -8,8 +8,18 @@
 #   APP_PORT=3002 make dev-local
 
 COMPOSE ?= docker compose
+
+# Read for the URLs printed below, and for nothing else — compose reads .env
+# by itself. Deliberately *not* exported: an environment variable outranks
+# .env in compose's own precedence, so exporting a default here is what made
+# `make dev-local` bind 3001 no matter what .env said. A value passed on the
+# command line (`APP_PORT=3002 make dev-local`) is already in the environment
+# and still reaches compose, which is the override that was wanted.
+-include .env
+
 APP_PORT ?= 3001
-export APP_PORT
+API_PORT ?= 8000
+MONGO_PORT ?= 27017
 
 .DEFAULT_GOAL := help
 
@@ -24,9 +34,9 @@ dev-local:
 	$(COMPOSE) up --build -d --renew-anon-volumes
 	@echo
 	@echo "  Koda        http://localhost:$(APP_PORT)"
-	@echo "  API         http://localhost:$${API_PORT:-8000}/v1/health"
-	@echo "  API docs    http://localhost:$${API_PORT:-8000}/v1/docs"
-	@echo "  Mongo       mongodb://localhost:$${MONGO_PORT:-27017}"
+	@echo "  API         http://localhost:$(API_PORT)/v1/health"
+	@echo "  API docs    http://localhost:$(API_PORT)/v1/docs"
+	@echo "  Mongo       mongodb://localhost:$(MONGO_PORT)"
 	@echo "  Logs        make logs · make logs-api"
 	@echo
 
