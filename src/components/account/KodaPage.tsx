@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { KeyRound, MessageCircle, Mic, PenTool, ShieldCheck, Sparkles, Volume2 } from "lucide-react";
+import { KeyRound, MessageCircle, Mic, PenTool, ShieldCheck, Volume2 } from "lucide-react";
 
 import { ApiError, accessToken, refreshSystem, request, usePermissions } from "../../lib/sync";
 import { AI_FEATURE } from "../../lib/billing";
 import { KODA_MASTER, KODA_SETTINGS, type KodaCapability } from "../../lib/koda";
 import { themeSystem } from "../../lib/themeSystem";
+import { KodaFace } from "../KodaFace";
 import { playSound } from "../../utils/audio";
 import { UIBadge, UIButton, UISectionHeader, UIToggle, UIToggleRow } from "../ui";
 import { KodaCharacters } from "./KodaCharacters";
@@ -184,7 +185,10 @@ export const KodaPage: React.FC<{ embedded?: boolean }> = ({ embedded = false })
         <UISectionHeader
           title="Ask Koda"
           subtitle="The assistant every family on this deployment shares: what it can do, who it is, what it calls with, and who may use it."
-          icon={<Sparkles className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
+          /* The character, because this page is about Koda itself. Sparkles is
+             the glyph half the industry uses for "AI"; the child using this
+             product knows Koda by its face. */
+          icon={<KodaFace size={26} />}
         />
       )}
 
@@ -202,9 +206,10 @@ export const KodaPage: React.FC<{ embedded?: boolean }> = ({ embedded = false })
           >
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex min-w-0 items-start gap-3">
-                <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-indigo-600/10 text-indigo-600 dark:text-indigo-400">
-                  <Sparkles className="h-5 w-5" />
-                </span>
+                {/* The character, and no tile behind it: `KodaMascot` is a
+                    cut-out head drawn to sit on nothing, and the tinted square
+                    was packaging that made it a glyph again. */}
+                <KodaFace size={40} className="mt-0.5 shrink-0" />
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="font-mono text-base font-bold text-ink">Ask Koda</h3>
@@ -238,7 +243,11 @@ export const KodaPage: React.FC<{ embedded?: boolean }> = ({ embedded = false })
             <UISectionHeader
               title="What Koda can do"
               subtitle="Each one is a separate bill, so each is a separate switch"
-              icon={<MessageCircle className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
+              /* Koda for the group heading. The four rows underneath keep their
+                 own icons: a mic, a speech bubble, a speaker and a pen tell the
+                 capabilities apart, and four identical Koda heads would say
+                 only that all four are Koda — which the heading already says. */
+              icon={<KodaFace size={26} />}
             />
             <div className="space-y-3">
               {CAPABILITIES.map(({ capability, title, blurb, icon }) => {

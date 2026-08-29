@@ -1,5 +1,6 @@
 import React from "react";
-import { Mic, Moon, Sun, Volume2, VolumeX } from "lucide-react";
+import { Moon, Sun, Volume2, VolumeX } from "lucide-react";
+import { KodaFace } from "./KodaFace";
 import { useTheme } from "../context/ThemeContext";
 import { playSound } from "../utils/audio";
 import { themeSystem } from "../lib/themeSystem";
@@ -188,7 +189,11 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
           }
         />
         <SettingRow
-          icon={<Mic className={voiceEnabled ? "text-indigo-600 dark:text-indigo-400" : ""} />}
+          /* Koda, not a microphone. The row switches whether Koda *speaks*, and
+             a mic is the input side of sound — it was pointing at the wrong
+             half of the thing it controls. Greyed out when the switch is off,
+             so the row still reads as inactive at a glance. */
+          icon={<KodaFace size={22} className={voiceEnabled ? "" : "opacity-40 saturate-0"} />}
           title="Koda’s voice"
           control={
             <UIToggle checked={voiceEnabled} onChange={handleToggleVoice} label="Voice speech" />
