@@ -23,8 +23,6 @@ export interface AppNavProps {
   activeTab: TabId;
   onSelectTab: (tab: TabId) => void;
   userProgress: UserProgress;
-  onOpenWhiteboard: () => void;
-  onOpenLexicon: () => void;
 }
 
 /**
@@ -53,8 +51,6 @@ export const AppNav: React.FC<AppNavProps> = ({
   activeTab,
   onSelectTab,
   userProgress,
-  onOpenWhiteboard,
-  onOpenLexicon,
 }) => {
   const session = useSession();
   const streak = useStreak(userProgress);

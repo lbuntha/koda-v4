@@ -14,7 +14,6 @@ import {
   Cpu,
   Award,
   Flame,
-  PenTool,
   Brain,
   Map,
   Volume2,
@@ -70,7 +69,7 @@ import { DevicesPage } from "./components/account/DevicesPage";
 import { ProfilePage } from "./components/account/ProfilePage";
 import { KodaAskModal } from "./components/KodaAskModal";
 import type { KodaContext } from "./lib/tutorApi";
-import { Personas, currentPersonaId } from "./lib/personas";
+import { Personas } from "./lib/personas";
 import { useKoda } from "./lib/useKoda";
 import { SettingsPage } from "./components/SettingsPage";
 import {
@@ -83,8 +82,6 @@ import {
   useSession,
   useSystem,
 } from "./lib/sync";
-import { WhiteboardModal } from "./components/WhiteboardModal";
-import { MathConceptsModal } from "./components/MathConceptsModal";
 import { DailyStudyGoal } from "./components/DailyStudyGoal";
 import { DayDoneScreen } from "./components/DayDoneScreen";
 import { QuickMathPanel } from "./components/QuickMathPanel";
@@ -388,10 +385,6 @@ export default function App() {
     setIsKodaAskOpen(true);
   };
   const [soraState, setSoraState] = useState<"thinking" | "speaking" | "listening" | "cheering" | "idle">("idle");
-  const [isWhiteboardOpen, setIsWhiteboardOpen] = useState(false);
-  const [isConceptsOpen, setIsConceptsOpen] = useState(false);
-  const [whiteboardLoading, setWhiteboardLoading] = useState(false);
-  const [whiteboardFeedback, setWhiteboardFeedback] = useState<string | null>(null);
 
   const [userProgress, setUserProgress] = useState<UserProgress>(loadProgress);
   // The record says what the run reached; this says what it reads as today, so
@@ -639,38 +632,6 @@ export default function App() {
     );
   };
 
-  // Action: Whiteboard Drawing Analysis
-  const handleAnalyzeDrawing = async (imageBase64: string) => {
-    setWhiteboardLoading(true);
-    try {
-      const res = await fetch("/api/tutor/analyze-drawing", {
-        method: "POST",
-        headers: await tutorHeaders(),
-        body: JSON.stringify({
-          imageBase64,
-          currentProblem,
-          personaId: currentPersonaId(),
-        }),
-      });
-      const data = await res.json();
-      setWhiteboardFeedback(data.feedback);
-
-      // Add feedback to chat as well
-      const soraMsg: ChatMessage = {
-        id: Math.random().toString(),
-        sender: "sora",
-        text: `🎨 Whiteboard Work Analysis:\n${data.feedback}`,
-        timestamp: new Date(),
-      };
-      setChatMessages((prev) => [...prev, soraMsg]);
-      speakText("I reviewed your scratchpad drawing!");
-    } catch (e) {
-      setWhiteboardFeedback("Could not analyze drawing. Try drawing clearly with the pen!");
-    } finally {
-      setWhiteboardLoading(false);
-    }
-  };
-
   // The lesson at this position decides which skill runs. Hardcoding
   // "counting/quest" here worked while counting was the only skill and sent
   // every other skill's lessons into the counting game the moment a second one
@@ -773,8 +734,6 @@ export default function App() {
           <SidebarNav
             activeTab={activeTab}
             onSelectTab={(tab) => setActiveTab(tab)}
-            onOpenWhiteboard={() => setIsWhiteboardOpen(true)}
-            onOpenLexicon={() => setIsConceptsOpen(true)}
           />
         )
       }
@@ -784,8 +743,6 @@ export default function App() {
             activeTab={activeTab}
             onSelectTab={(tab) => setActiveTab(tab)}
             userProgress={userProgress}
-            onOpenWhiteboard={() => setIsWhiteboardOpen(true)}
-            onOpenLexicon={() => setIsConceptsOpen(true)}
           />
         )
       }
@@ -939,27 +896,9 @@ export default function App() {
                  all and the section hides itself. */
               activeTab={activeTab}
               onSelectTab={(tab) => setActiveTab(tab)}
-              onOpenWhiteboard={() => setIsWhiteboardOpen(true)}
-              onOpenLexicon={() => setIsConceptsOpen(true)}
             />
           )}
       </>
-
-      {/* Whiteboard Modal Scratchpad */}
-      <WhiteboardModal
-        isOpen={isWhiteboardOpen}
-        onClose={() => setIsWhiteboardOpen(false)}
-        currentProblemTitle={currentProblem.title}
-        onAnalyzeDrawing={handleAnalyzeDrawing}
-        isLoading={whiteboardLoading}
-        aiFeedback={whiteboardFeedback}
-      />
-
-      {/* Math Concepts Lexicon Modal */}
-      <MathConceptsModal
-        isOpen={isConceptsOpen}
-        onClose={() => setIsConceptsOpen(false)}
-      />
 
       {/*
         * Ask Koda, floating bottom-right on every screen except a running round

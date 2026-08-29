@@ -29,8 +29,6 @@ interface SettingsPageProps {
    */
   activeTab?: TabId;
   onSelectTab?: (tab: TabId) => void;
-  onOpenWhiteboard?: () => void;
-  onOpenLexicon?: () => void;
 }
 
 /**
@@ -104,8 +102,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   embedded = false,
   activeTab,
   onSelectTab,
-  onOpenWhiteboard,
-  onOpenLexicon,
 }) => {
   const { theme, toggleTheme } = useTheme();
   const { can } = usePermissions();
@@ -233,12 +229,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
       {/* Last on the page on purpose: it is a way *out* of Settings, and a list
           of doors above the switches somebody opened Settings to reach would
           make this page look like a menu. */}
-      {activeTab && onSelectTab && onOpenWhiteboard && onOpenLexicon && (
+      {activeTab && onSelectTab && (
         <NavShortcuts
           activeTab={activeTab}
           onSelectTab={onSelectTab}
-          onOpenWhiteboard={onOpenWhiteboard}
-          onOpenLexicon={onOpenLexicon}
         />
       )}
     </div>

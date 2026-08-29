@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Mic, MicOff, Volume2, VolumeX, Lightbulb, PenTool, Sparkles } from "lucide-react";
+import { Send, Mic, MicOff, Volume2, VolumeX, Lightbulb, Sparkles } from "lucide-react";
 import { ChatMessage } from "../types";
 import { playSound, playBase64Pcm } from "../utils/audio";
 
@@ -7,7 +7,6 @@ interface SocraticChatPanelProps {
   messages: ChatMessage[];
   onSendMessage: (text: string) => void;
   onRequestHint: () => void;
-  onOpenWhiteboard: () => void;
   isLoading: boolean;
   voiceEnabled: boolean;
   onToggleVoice: () => void;
@@ -17,7 +16,6 @@ export const SocraticChatPanel: React.FC<SocraticChatPanelProps> = ({
   messages,
   onSendMessage,
   onRequestHint,
-  onOpenWhiteboard,
   isLoading,
   voiceEnabled,
   onToggleVoice,
@@ -99,14 +97,6 @@ export const SocraticChatPanel: React.FC<SocraticChatPanelProps> = ({
           >
             {voiceEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
             <span>{voiceEnabled ? "Voice ON" : "Voice OFF"}</span>
-          </button>
-
-          <button
-            onClick={onOpenWhiteboard}
-            className="flex items-center gap-1 px-2 py-1 bg-purple-950/60 hover:bg-purple-900/80 text-purple-300 border border-purple-800/50 rounded-lg text-[11px] font-semibold transition"
-          >
-            <PenTool className="w-3.5 h-3.5 text-purple-400" />
-            Scratchpad
           </button>
         </div>
       </div>

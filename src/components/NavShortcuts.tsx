@@ -1,17 +1,13 @@
 import React from "react";
-import { BookOpen, PenTool } from "lucide-react";
 import { playSound } from "../utils/audio";
 import { SidebarIcon, UINavTile } from "./ui";
 import { themeSystem } from "../lib/themeSystem";
-import { useKoda } from "../lib/useKoda";
 import { splitTabs, useNavItems } from "./navRecord";
 import type { TabId } from "./navTabs";
 
 export interface NavShortcutsProps {
   activeTab: TabId;
   onSelectTab: (tab: TabId) => void;
-  onOpenWhiteboard: () => void;
-  onOpenLexicon: () => void;
 }
 
 /**
@@ -34,14 +30,9 @@ export interface NavShortcutsProps {
 export const NavShortcuts: React.FC<NavShortcutsProps> = ({
   activeTab,
   onSelectTab,
-  onOpenWhiteboard,
-  onOpenLexicon,
 }) => {
   const items = useNavItems();
   const { overflow } = splitTabs(items);
-  // One gate for every Koda surface — see `lib/koda.ts`. `offered` is the
-  // deployment's answer, `ask` composes it with the plan and the parent.
-  const koda = useKoda();
 
   return (
     <section className="rail:hidden">
@@ -59,33 +50,6 @@ export const NavShortcuts: React.FC<NavShortcutsProps> = ({
             }}
           />
         ))}
-
-        {/*
-          * The scratchpad and the lexicon, beside the destinations rather than
-          * in a section of their own — three tools in a row of their own would
-          * be a heading for a shorter list than the heading. Each opens over
-          * whatever is already on screen instead of replacing it, which is why
-          * neither is ever the "active" tile.
-          */}
-        {koda.access("whiteboard").offered && (
-          <UINavTile
-            icon={<PenTool />}
-            label="Scratchpad"
-            onClick={() => {
-              playSound("pop");
-              koda.ask("whiteboard", onOpenWhiteboard);
-            }}
-          />
-        )}
-        {/* No feature flag: the lexicon is bundled text, not a model call. */}
-        <UINavTile
-          icon={<BookOpen />}
-          label="Math words"
-          onClick={() => {
-            playSound("pop");
-            onOpenLexicon();
-          }}
-        />
       </div>
     </section>
   );
