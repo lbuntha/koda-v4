@@ -295,6 +295,7 @@ async function reopenChild(target: Session): Promise<Session | null> {
     const pair = await request<TokenPair>(`/auth/switch/${target.learnerId}`, {
       method: "POST",
       token,
+      body: { deviceName: deviceName(), installId: installId() },
     });
     return fromPair(pair, {
       learnerId: target.learnerId,
@@ -465,6 +466,10 @@ export const SessionAPI = {
     const pair = await request<TokenPair>(`/auth/switch/${learnerId}`, {
       method: "POST",
       token,
+      // The install goes with a switch as much as with a sign-in: opening a
+      // child on the family tablet happens every day, and a switch that named
+      // no install wrote a fresh device row each of those times.
+      body: { deviceName: deviceName(), installId: installId() },
     });
     const session = fromPair(pair, { learnerId, learnerName });
     activate(session, false);

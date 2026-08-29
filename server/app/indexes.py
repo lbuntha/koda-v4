@@ -6,7 +6,7 @@ Creating an index that already exists is a no-op, which is what makes that safe.
 """
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
-from pymongo import ASCENDING, IndexModel
+from pymongo import ASCENDING, DESCENDING, IndexModel
 from pymongo.errors import OperationFailure
 
 INDEXES: dict[str, list[IndexModel]] = {
@@ -53,7 +53,13 @@ INDEXES: dict[str, list[IndexModel]] = {
             name="refresh_unique",
             partialFilterExpression={"refreshHash": {"$type": "string"}},
         ),
-        IndexModel([("familyId", ASCENDING)], name="by_family"),
+        # Compound, because the device list is always read in one order —
+        # most recently used first — and paging an unindexed sort makes the
+        # server sort the whole family for every page.
+        IndexModel(
+            [("familyId", ASCENDING), ("lastSeenAt", DESCENDING)],
+            name="by_family",
+        ),
         # Finding the row an install already owns, so signing in again rotates
         # it rather than writing another "This device".
         IndexModel([("installId", ASCENDING), ("revokedAt", ASCENDING)], name="by_install"),

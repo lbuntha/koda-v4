@@ -5,12 +5,26 @@ cannot be replayed as a session. Rotation replaces the hash in place, which is
 also how "sign out that tablet" works: clear the hash and the token is dead.
 """
 
+from datetime import datetime, timedelta
 from typing import Any
 from uuid import uuid4
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
+from pymongo import DESCENDING
 
 from app.models.common import now
+from app.settings import settings
+
+
+def stale_before() -> datetime:
+    """The moment a session stops counting as live.
+
+    A refresh rotates `lastSeenAt`, so a row untouched for longer than the
+    refresh token's own lifetime is one nothing can present any more. That is
+    what makes it safe for the device list to stop showing it: the row is not
+    being hidden, it is being retired.
+    """
+    return now() - timedelta(days=settings().refresh_ttl_days)
 
 
 async def register(
@@ -98,9 +112,61 @@ async def revoke_all_for_user(
     return result.modified_count
 
 
-async def for_family(db: AsyncIOMotorDatabase, family_id: str) -> list[dict[str, Any]]:
-    cursor = db.devices.find({"familyId": family_id}, {"refreshHash": 0})
-    return await cursor.to_list(length=100)
+async def for_family(
+    db: AsyncIOMotorDatabase, family_id: str, *, page: int = 1, page_size: int = 10
+) -> tuple[list[dict[str, Any]], int]:
+    """One page of a family's live sessions, and how many there are in all.
+
+    Most recently used first, because that is the order the list is read in:
+    the machine in your hand is at the top, and the tablet that has not been
+    touched in a month is the one you are looking for when you came here to
+    sign something out.
+
+    Revoked rows never appear. They are history, and a list that carries its
+    own history is the list this page started as — mostly dead entries with the
+    live one buried among them.
+    """
+    mongo_filter = {"familyId": family_id, "revokedAt": None}
+    total = await db.devices.count_documents(mongo_filter)
+    cursor = (
+        db.devices.find(mongo_filter, {"refreshHash": 0})
+        .sort("lastSeenAt", DESCENDING)
+        .skip((page - 1) * page_size)
+        .limit(page_size)
+    )
+    return await cursor.to_list(length=page_size), total
+
+
+async def expire_stale(db: AsyncIOMotorDatabase, family_id: str) -> int:
+    """Retire the family's rows that have aged past the refresh lifetime.
+
+    Swept when the list is read rather than on a timer: this is the moment the
+    count has to be true, and a family's device list is small enough that the
+    sweep costs one indexed update. The rows are revoked rather than deleted,
+    so `revokedAt` still answers "when did this stop being a session?".
+    """
+    result = await db.devices.update_many(
+        {"familyId": family_id, "revokedAt": None, "lastSeenAt": {"$lt": stale_before()}},
+        {"$set": {"revokedAt": now()}, "$unset": {"refreshHash": ""}},
+    )
+    return result.modified_count
+
+
+async def revoke_others_in_family(
+    db: AsyncIOMotorDatabase, family_id: str, except_device_id: str
+) -> int:
+    """Sign out everything in this family but the device asking.
+
+    The gesture for a list that has got away from somebody — a lost tablet
+    among twenty rows they no longer recognise. Sparing the caller is the whole
+    point: signing yourself out along with the rest would leave a parent at the
+    sign-in screen with no way to see whether it worked.
+    """
+    result = await db.devices.update_many(
+        {"familyId": family_id, "revokedAt": None, "_id": {"$ne": except_device_id}},
+        {"$set": {"revokedAt": now()}, "$unset": {"refreshHash": ""}},
+    )
+    return result.modified_count
 
 
 async def reassign_family(db: AsyncIOMotorDatabase, user_id: str, family_id: str) -> int:

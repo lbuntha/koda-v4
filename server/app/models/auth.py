@@ -84,6 +84,19 @@ class JoinIn(Model):
     install_id: str | None = Field(default=None, max_length=64, alias="installId")
 
 
+class SwitchIn(Model):
+    """Opening a child on this device.
+
+    Carries the same two fields a sign-in does, and for the same reason: a
+    switch issues a session, so it must be able to recognise the install it is
+    issuing it on. Every field has a default — an older client sends no body at
+    all, and gets the old behaviour rather than a 422.
+    """
+
+    device_name: str = Field(default="This device", max_length=60, alias="deviceName")
+    install_id: str | None = Field(default=None, max_length=64, alias="installId")
+
+
 class RefreshIn(Model):
     refresh_token: str = Field(alias="refreshToken")
 

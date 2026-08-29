@@ -26,6 +26,7 @@ from app.models.auth import (
     RefreshIn,
     ResetIn,
     SignupIn,
+    SwitchIn,
     TokenPair,
 )
 from app.models.common import now
@@ -157,18 +158,26 @@ async def join(body: JoinIn, db: Db, request: Request) -> TokenPair:
 
 
 @router.post("/switch/{learner_id}")
-async def switch_to_learner(learner_id: str, db: Db, p: CanSwitchLearner) -> TokenPair:
+async def switch_to_learner(
+    learner_id: str, db: Db, p: CanSwitchLearner, body: SwitchIn | None = None
+) -> TokenPair:
     if p.family_id is None or p.learner_id:
         raise Forbidden("Only a family account can switch to a child.", "child_switch_forbidden")
     learner = await learners.by_id(db, learner_id, p.family_id)
     if not learner:
         raise NotFound("No such child.")
+    # The install matters here as much as it does at sign-in, and for longer:
+    # a parent opening their child on the family tablet does this every day, so
+    # a switch that identified nothing wrote a fresh "This device" row every
+    # time — the single largest source of the rows this list drowned in.
+    body = body or SwitchIn()
     return await _issue(
         db,
         p.family_id,
         "child",
         learner_id=learner_id,
-        device_name="This device",
+        device_name=body.device_name,
+        install_id=body.install_id,
     )
 
 
@@ -350,6 +359,16 @@ async def refresh(body: RefreshIn, db: Db) -> TokenPair:
     device = await devices.by_refresh_hash(db, tokens.hash_refresh(body.refresh_token))
     if not device:
         raise Unauthorized("Please sign in again.", "refresh_invalid")
+
+    # A refresh token is opaque, so its lifetime cannot live inside it the way
+    # an access token's does — the only record of its age is when the row it
+    # rotates was last seen. Checked here because this is the sole place one is
+    # spent: without it `refresh_ttl_days` was a setting nothing read, sessions
+    # never ended on their own, and a device list was a list of forever.
+    last_seen = device.get("lastSeenAt")
+    if last_seen and last_seen < devices.stale_before():
+        await devices.revoke(db, device["_id"])
+        raise Unauthorized("That session has expired. Sign in again.", "refresh_expired")
 
     role = "child"
     platform_role = "none"

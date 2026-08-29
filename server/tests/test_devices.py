@@ -5,6 +5,8 @@ that was true, one laptop signed into a dozen times filled the list with a dozen
 identical entries and a lost tablet could not be found among them.
 """
 
+from datetime import UTC, datetime, timedelta
+
 import pytest
 
 
@@ -119,3 +121,106 @@ async def test_a_child_cannot_sign_out_a_parents_device(client, parent):
         headers={"Authorization": f"Bearer {child['accessToken']}"},
     )
     assert r.status_code == 404, "not theirs, and not even acknowledged as existing"
+
+
+# ---- The list a family actually reads ------------------------------------
+
+
+async def test_the_list_comes_a_page_at_a_time(client, parent):
+    """Twenty-six rows on one screen is a wall, not a list."""
+    for n in range(14):
+        await _login(client, f"i_{n}")
+
+    first = (await client.get("/devices?pageSize=10", headers=parent)).json()
+    assert len(first["devices"]) == 10
+    assert first["total"] == 15, "the count is the family's, not the page's"
+    assert first["pages"] == 2
+
+    second = (await client.get("/devices?page=2&pageSize=10", headers=parent)).json()
+    assert len(second["devices"]) == 5
+    ids = {r["id"] for r in first["devices"]} | {r["id"] for r in second["devices"]}
+    assert len(ids) == 15, "the two pages do not overlap"
+
+
+async def test_the_most_recently_used_device_is_first(client, parent):
+    await _login(client, "i_phone")
+    await _login(client, "i_laptop")
+
+    rows = (await client.get("/devices", headers=parent)).json()["devices"]
+    assert rows[0]["lastSeenAt"] >= rows[-1]["lastSeenAt"]
+
+
+async def test_a_session_that_has_aged_out_stops_working(client, parent, db):
+    """`refresh_ttl_days` was a setting nothing read: sessions never ended."""
+    other = await _login(client, "i_phone")
+    row = next(r for r in await _live(client, parent) if not r["current"])
+    await db.devices.update_one(
+        {"_id": row["id"]}, {"$set": {"lastSeenAt": datetime.now(UTC) - timedelta(days=400)}}
+    )
+
+    spent = await client.post("/auth/refresh", json={"refreshToken": other["refreshToken"]})
+    assert spent.status_code == 401
+    assert spent.json()["error"]["code"] == "refresh_expired"
+
+
+async def test_an_aged_out_row_leaves_the_list(client, parent, db):
+    """Retired on read, so the count a parent is shown is a count of live ones."""
+    await _login(client, "i_phone")
+    row = next(r for r in await _live(client, parent) if not r["current"])
+    await db.devices.update_one(
+        {"_id": row["id"]}, {"$set": {"lastSeenAt": datetime.now(UTC) - timedelta(days=400)}}
+    )
+
+    listing = (await client.get("/devices", headers=parent)).json()
+    assert listing["total"] == 1
+    assert row["id"] not in {r["id"] for r in listing["devices"]}
+
+
+async def test_signing_out_the_rest_spares_the_device_asking(client, parent):
+    kept = (await client.get("/devices", headers=parent)).json()["devices"]
+    mine = next(r["id"] for r in kept if r["current"])
+    for n in range(3):
+        await _login(client, f"i_{n}")
+
+    result = await client.delete("/devices", headers=parent)
+    assert result.status_code == 200
+    assert result.json()["signedOut"] == 3
+
+    rows = (await client.get("/devices", headers=parent)).json()["devices"]
+    assert [r["id"] for r in rows] == [mine], "the one you are holding survives"
+
+
+async def test_signing_out_the_rest_really_ends_them(client, parent):
+    other = await _login(client, "i_phone")
+    await client.delete("/devices", headers=parent)
+
+    assert (
+        await client.post("/auth/refresh", json={"refreshToken": other["refreshToken"]})
+    ).status_code == 401
+
+
+async def test_a_child_cannot_sign_out_the_rest(client, parent):
+    learner = (
+        await client.post("/learners", headers=parent, json={"displayName": "Mia"})
+    ).json()
+    child = (await client.post(f"/auth/switch/{learner['id']}", headers=parent)).json()
+
+    r = await client.delete(
+        "/devices", headers={"Authorization": f"Bearer {child['accessToken']}"}
+    )
+    assert r.status_code == 403
+
+
+async def test_switching_to_a_child_twice_reuses_the_row(client, parent):
+    """The daily gesture on a family tablet, and the largest source of the
+    duplicate rows this list used to drown in."""
+    learner = (
+        await client.post("/learners", headers=parent, json={"displayName": "Mia"})
+    ).json()
+    body = {"installId": "i_laptop", "deviceName": "Mac"}
+    for _ in range(3):
+        await client.post(f"/auth/switch/{learner['id']}", headers=parent, json=body)
+
+    child_rows = [r for r in await _live(client, parent) if r["kind"] == "child"]
+    assert len(child_rows) == 1, "one tablet opening one child is one device"
+    assert child_rows[0]["name"] == "Mac"

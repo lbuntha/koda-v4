@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Baby, Laptop, LogOut, RefreshCw } from "lucide-react";
+import { Baby, ChevronLeft, ChevronRight, Laptop, LogOut, RefreshCw } from "lucide-react";
 
 import { ApiError, accessToken, request, usePermissions, useSession } from "../../lib/sync";
 import { themeSystem } from "../../lib/themeSystem";
@@ -14,8 +14,17 @@ interface Device {
   learnerId: string | null;
   learnerName: string | null;
   lastSeenAt: string | null;
+  createdAt: string | null;
   revokedAt: string | null;
   current: boolean;
+}
+
+interface DevicePage {
+  devices: Device[];
+  page: number;
+  pageSize: number;
+  total: number;
+  pages: number;
 }
 
 /**
@@ -26,11 +35,19 @@ interface Device {
  * identical entries, and the tablet somebody had actually lost was buried in
  * them. A stable install id from the client is what makes a row mean a machine.
  *
- * A child's session sees exactly one row — their own — because the route filters
- * to it. They are shown it and not offered the button: signing their own tablet
- * out would take a parent and a fresh join code to undo, which is a hole to fall
- * into rather than a feature.
+ * Three things keep the list readable now that a family can still accumulate
+ * rows: the server retires sessions that have aged past the refresh lifetime,
+ * hands back one page at a time newest-used first, and offers the one gesture
+ * that resolves a list somebody has lost track of entirely — sign the rest out
+ * and let the machines still in use come back.
+ *
+ * A child's session sees exactly one row — their own — because the route asks
+ * for it directly. They are shown it and not offered the button: signing their
+ * own tablet out would take a parent and a fresh join code to undo, which is a
+ * hole to fall into rather than a feature.
  */
+
+const PAGE_SIZE = 10;
 
 const whenSeen = (iso: string | null): string => {
   if (!iso) return "never";
@@ -52,12 +69,14 @@ export const DevicesPage: React.FC = () => {
   const canList = can("device:list");
   const canRevoke = can("device:revoke");
   const isChild = Boolean(session?.learnerId);
-  const [devices, setDevices] = useState<Device[]>([]);
+  const [result, setResult] = useState<DevicePage | null>(null);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [signingOut, setSigningOut] = useState<Device | null>(null);
+  const [signingOutRest, setSigningOutRest] = useState(false);
 
   const load = useCallback(async () => {
     if (!canList) return;
@@ -65,18 +84,20 @@ export const DevicesPage: React.FC = () => {
     setError(null);
     try {
       const token = await accessToken();
-      const response = await request<{ devices: Device[] }>("/devices", { token });
-      // Revoked rows are history, not devices. Keeping them would put the list
-      // back where it started: mostly dead entries.
-      setDevices(response.devices.filter((device) => !device.revokedAt));
+      const params = new URLSearchParams({ page: String(page), pageSize: String(PAGE_SIZE) });
+      setResult(await request<DevicePage>(`/devices?${params}`, { token }));
     } catch (err) {
       setError((err as ApiError).message);
     } finally {
       setLoading(false);
     }
-  }, [canList]);
+  }, [canList, page]);
 
   useEffect(() => void load(), [load]);
+
+  const devices = result?.devices ?? [];
+  const total = result?.total ?? 0;
+  const pages = result?.pages ?? 1;
 
   const revoke = async (device: Device) => {
     setBusy(device.id);
@@ -84,14 +105,44 @@ export const DevicesPage: React.FC = () => {
     try {
       const token = await accessToken();
       await request(`/devices/${device.id}`, { method: "DELETE", token });
-      setDevices((current) => current.filter((item) => item.id !== device.id));
       setNotice(`${device.learnerName ?? device.name} was signed out.`);
       playSound("pop");
+      // Reloaded rather than spliced out of the list held here: a row leaving
+      // pulls one up from the next page, and a page that quietly shrinks by
+      // one every time is how a list stops matching the count above it. The
+      // last page emptying is the one case that has to move the cursor.
+      if (devices.length === 1 && page > 1) setPage((value) => value - 1);
+      else await load();
     } catch (err) {
       setError((err as ApiError).message);
     } finally {
       setBusy(null);
       setSigningOut(null);
+    }
+  };
+
+  const revokeRest = async () => {
+    setBusy("rest");
+    setError(null);
+    try {
+      const token = await accessToken();
+      const { signedOut } = await request<{ signedOut: number }>("/devices", {
+        method: "DELETE",
+        token,
+      });
+      setNotice(
+        signedOut === 0
+          ? "Nothing else was signed in."
+          : `${signedOut} ${signedOut === 1 ? "session was" : "sessions were"} signed out.`,
+      );
+      playSound("pop");
+      if (page === 1) await load();
+      else setPage(1);
+    } catch (err) {
+      setError((err as ApiError).message);
+    } finally {
+      setBusy(null);
+      setSigningOutRest(false);
     }
   };
 
@@ -116,9 +167,27 @@ export const DevicesPage: React.FC = () => {
               should no longer have it.
             </p>
           </div>
-          <UIButton variant="secondary" size="sm" icon={<RefreshCw />} onClick={() => void load()}>
-            Refresh
-          </UIButton>
+          <div className="flex shrink-0 items-center gap-2">
+            {canRevoke && !isChild && total > 1 && (
+              <UIButton
+                variant="secondary"
+                size="sm"
+                icon={<LogOut />}
+                isLoading={busy === "rest"}
+                onClick={() => setSigningOutRest(true)}
+              >
+                Sign out the rest
+              </UIButton>
+            )}
+            <UIButton
+              variant="secondary"
+              size="sm"
+              icon={<RefreshCw />}
+              onClick={() => void load()}
+            >
+              Refresh
+            </UIButton>
+          </div>
         </header>
 
         {error && <p className={themeSystem.flash("error")}>{error}</p>}
@@ -130,7 +199,9 @@ export const DevicesPage: React.FC = () => {
             subtitle={
               loading
                 ? "Reading…"
-                : `${devices.length} ${devices.length === 1 ? "device" : "devices"}`
+                : `${total} ${total === 1 ? "device" : "devices"}${
+                    pages > 1 ? ` · page ${result?.page ?? page} of ${pages}` : ""
+                  }`
             }
             icon={<Laptop className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
           />
@@ -190,12 +261,40 @@ export const DevicesPage: React.FC = () => {
               })}
             </ul>
           )}
+
+          {pages > 1 && (
+            <div className="flex flex-col gap-2 border-t border-line pt-3 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
+              <span>
+                {total} devices · page {result?.page ?? page} of {pages}
+              </span>
+              <div className="flex items-center gap-2">
+                <UIButton
+                  variant="secondary"
+                  size="sm"
+                  icon={<ChevronLeft />}
+                  disabled={page <= 1 || loading}
+                  onClick={() => setPage((value) => value - 1)}
+                >
+                  Previous
+                </UIButton>
+                <UIButton
+                  variant="secondary"
+                  size="sm"
+                  iconRight={<ChevronRight />}
+                  disabled={page >= pages || loading}
+                  onClick={() => setPage((value) => value + 1)}
+                >
+                  Next
+                </UIButton>
+              </div>
+            </div>
+          )}
         </section>
 
         <p className="text-xs text-muted">
           A device listed here is one install — a browser or an app — not one sign-in. Signing one
           out ends its session immediately; getting back in needs the password, or a fresh child
-          code for a tablet.
+          code for a tablet. A device that has not been used in a long time signs itself out.
         </p>
       </div>
 
@@ -213,6 +312,18 @@ export const DevicesPage: React.FC = () => {
         onConfirm={() => {
           if (signingOut) void revoke(signingOut);
         }}
+      />
+
+      <UIDialog
+        isOpen={signingOutRest}
+        onClose={() => setSigningOutRest(false)}
+        title="Sign out every other device?"
+        description={`Everything except the one you are using now will be signed out straight away — ${
+          total - 1
+        } ${total - 1 === 1 ? "session" : "sessions"}. Each will need to sign in again, and a child's tablet will need a fresh join code.`}
+        confirmText="Sign them out"
+        variant="danger"
+        onConfirm={() => void revokeRest()}
       />
     </div>
   );
