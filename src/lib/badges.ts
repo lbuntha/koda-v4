@@ -77,7 +77,7 @@ export const BADGE_DEFAULTS: BadgeRule[] = [
     id: "first-steps",
     label: "First Steps",
     description: "Earned your first 50 XP.",
-    icon: "sparkles",
+    icon: "art:badge-first-steps",
     metric: "xp",
     threshold: 50,
   },
@@ -85,7 +85,7 @@ export const BADGE_DEFAULTS: BadgeRule[] = [
     id: "bright-spark",
     label: "Bright Spark",
     description: "Reached 250 XP.",
-    icon: "zap",
+    icon: "art:badge-bright-spark",
     metric: "xp",
     threshold: 250,
   },
@@ -93,7 +93,7 @@ export const BADGE_DEFAULTS: BadgeRule[] = [
     id: "three-in-a-row",
     label: "Three in a Row",
     description: "Practised three days running.",
-    icon: "flame",
+    icon: "art:badge-three-in-a-row",
     metric: "streak",
     threshold: 3,
   },
@@ -101,7 +101,7 @@ export const BADGE_DEFAULTS: BadgeRule[] = [
     id: "week-warrior",
     label: "Week Warrior",
     description: "Practised seven days running.",
-    icon: "trophy",
+    icon: "art:badge-week-warrior",
     metric: "streak",
     threshold: 7,
   },
@@ -109,7 +109,7 @@ export const BADGE_DEFAULTS: BadgeRule[] = [
     id: "star-collector",
     label: "Star Collector",
     description: "Collected 10 stars.",
-    icon: "star",
+    icon: "art:badge-star-collector",
     metric: "stars",
     threshold: 10,
   },
@@ -117,7 +117,7 @@ export const BADGE_DEFAULTS: BadgeRule[] = [
     id: "star-champion",
     label: "Star Champion",
     description: "Collected 50 stars.",
-    icon: "award",
+    icon: "art:badge-star-champion",
     metric: "stars",
     threshold: 50,
   },
@@ -183,11 +183,41 @@ const sanitise = (raw: unknown): BadgeRule[] => {
   return rules;
 };
 
+/**
+ * The lucide name each default badge used to carry, before the six were drawn.
+ *
+ * Rules live in `localStorage`, so every device that has already opened Koda
+ * has the old names stored and would keep drawing a 20px outline icon forever —
+ * shipping artwork nobody would ever see. Bumping the storage key would fix
+ * that by throwing away a family's own badges with it, which is a worse trade.
+ *
+ * So the upgrade is narrow on purpose: a stored rule moves to the artwork only
+ * if it still has the default id *and* the exact icon that default shipped
+ * with. A family who chose a different picture for "First Steps" has said what
+ * they want it to look like, and this leaves it alone.
+ */
+const RETIRED_DEFAULT_ICONS: Record<string, string> = {
+  "first-steps": "sparkles",
+  "bright-spark": "zap",
+  "three-in-a-row": "flame",
+  "week-warrior": "trophy",
+  "star-collector": "star",
+  "star-champion": "award",
+};
+
+const adoptDrawnBadges = (stored: BadgeRule[]): BadgeRule[] =>
+  stored.map((rule) => {
+    const retired = RETIRED_DEFAULT_ICONS[rule.id];
+    if (!retired || rule.icon !== retired) return rule;
+    const drawn = BADGE_DEFAULTS.find((entry) => entry.id === rule.id);
+    return drawn ? { ...rule, icon: drawn.icon } : rule;
+  });
+
 const load = (): BadgeRule[] => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return BADGE_DEFAULTS.map((rule) => ({ ...rule }));
-    return sanitise((JSON.parse(raw) as { rules?: unknown }).rules);
+    return adoptDrawnBadges(sanitise((JSON.parse(raw) as { rules?: unknown }).rules));
   } catch {
     return BADGE_DEFAULTS.map((rule) => ({ ...rule }));
   }

@@ -165,8 +165,13 @@ export const BadgesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false 
                 className="flex items-center justify-between gap-4 rounded-2xl border border-line bg-surface-muted p-4"
               >
                 <div className="flex min-w-0 items-center gap-3">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line bg-surface text-amber-500">
-                    <BadgeIcon icon={rule.icon} />
+                  {/* No tile: the badges are drawn artwork now, with their own
+                      rim and drop shadow, and a bordered box around a thing
+                      that already has an edge reads as two frames. 44px so the
+                      art is the size it was drawn to be rather than a 20px
+                      thumbnail of itself. */}
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center text-amber-500 [&>svg]:h-9 [&>svg]:w-9">
+                    <BadgeIcon icon={rule.icon} size={44} />
                   </span>
                   <div className="min-w-0">
                     <h4 className="truncate font-mono text-sm font-bold text-ink">{rule.label}</h4>
@@ -176,7 +181,10 @@ export const BadgesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false 
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
-                  <span className="font-mono text-sm font-black tabular-nums text-amber-600 dark:text-amber-400">
+                  {/* Ink, not amber. Amber-600 on this pale row is the weakest
+                      contrast on the page, and it is the one figure an adult
+                      actually reads here — what the badge costs. */}
+                  <span className="font-mono text-sm font-black tabular-nums text-ink">
                     {badgeRequirement(rule)}
                   </span>
                   <button

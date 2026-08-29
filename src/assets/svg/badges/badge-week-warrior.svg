@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 100 100">
+  <title>Week Warrior badge</title>
+  <defs>
+    <linearGradient id="gold" x1="18%" y1="0%" x2="82%" y2="100%">
+      <stop offset="0%" stop-color="#FFF6D2" />
+      <stop offset="34%" stop-color="#F9CE4B" />
+      <stop offset="72%" stop-color="#E0A210" />
+      <stop offset="100%" stop-color="#B87503" />
+    </linearGradient>
+    <linearGradient id="sheen" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.72" />
+      <stop offset="42%" stop-color="#FFFFFF" stop-opacity="0.10" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+    </linearGradient>
+    <filter id="lift" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#7C4A02" flood-opacity="0.42" />
+    </filter>
+  </defs>
+
+  <g filter="url(#lift)">
+    <!-- Handles first, so the cup overlaps them and reads as being in front. -->
+    <!-- Stroked with the ramp, not a flat mid-gold: a handle painted one solid
+         colour beside a bevelled cup is the one part that looks printed on. -->
+    <path d="M31,24 C17,24 12,34 18,43 C21,48 26,50 32,50" fill="none"
+      stroke="#8A5A05" stroke-width="9" stroke-linecap="round" />
+    <path d="M69,24 C83,24 88,34 82,43 C79,48 74,50 68,50" fill="none"
+      stroke="#8A5A05" stroke-width="9" stroke-linecap="round" />
+    <path d="M31,24 C17,24 12,34 18,43 C21,48 26,50 32,50" fill="none"
+      stroke="url(#gold)" stroke-width="5.5" stroke-linecap="round" />
+    <path d="M69,24 C83,24 88,34 82,43 C79,48 74,50 68,50" fill="none"
+      stroke="url(#gold)" stroke-width="5.5" stroke-linecap="round" />
+
+    <path d="M46,58 H54 V72 H46 Z" fill="url(#gold)" stroke="#8A5A05" stroke-width="2.2" stroke-linejoin="round" />
+    <path d="M31,72 H69 V81 H31 Z" fill="url(#gold)" stroke="#8A5A05" stroke-width="2.2" stroke-linejoin="round" />
+    <path d="M25,81 H75 V92 H25 Z" fill="url(#gold)" stroke="#8A5A05" stroke-width="2.2" stroke-linejoin="round" />
+
+    <path d="M30,14 H70 V40 C70,54 61,62 50,62 C39,62 30,54 30,40 Z"
+      fill="url(#gold)" stroke="#8A5A05" stroke-width="2.4" stroke-linejoin="round" />
+    <path d="M30,14 H70 V40 C70,54 61,62 50,62 C39,62 30,54 30,40 Z" fill="url(#sheen)" />
+    <ellipse cx="41" cy="26" rx="5.5" ry="9" fill="#FFFFFF" fill-opacity="0.42" transform="rotate(-12 41 26)" />
+  </g>
+</svg>

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 100 100">
+  <title>Bright Spark badge</title>
+  <defs>
+    <linearGradient id="gold" x1="18%" y1="0%" x2="82%" y2="100%">
+      <stop offset="0%" stop-color="#FFF6D2" />
+      <stop offset="34%" stop-color="#F9CE4B" />
+      <stop offset="72%" stop-color="#E0A210" />
+      <stop offset="100%" stop-color="#B87503" />
+    </linearGradient>
+    <linearGradient id="sheen" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.72" />
+      <stop offset="42%" stop-color="#FFFFFF" stop-opacity="0.10" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+    </linearGradient>
+    <filter id="lift" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#7C4A02" flood-opacity="0.42" />
+    </filter>
+  </defs>
+
+  <g filter="url(#lift)">
+    <path d="M60,5 L23,55 L45,55 L38,95 L79,41 L55,41 Z"
+      fill="url(#gold)" stroke="#8A5A05" stroke-width="2.4" stroke-linejoin="round" />
+    <path d="M60,5 L23,55 L45,55 L38,95 L79,41 L55,41 Z" fill="url(#sheen)" />
+    <ellipse cx="46" cy="26" rx="6" ry="3.4" fill="#FFFFFF" fill-opacity="0.55" transform="rotate(-52 46 26)" />
+  </g>
+</svg>

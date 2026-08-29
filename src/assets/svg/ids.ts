@@ -3,6 +3,12 @@
 
 export const SVG_ASSET_IDS = [
   "apple",
+  "badge-bright-spark",
+  "badge-first-steps",
+  "badge-star-champion",
+  "badge-star-collector",
+  "badge-three-in-a-row",
+  "badge-week-warrior",
   "counting-quest",
   "cube",
   "cylinder",
@@ -20,6 +26,12 @@ export type SvgAssetId = (typeof SVG_ASSET_IDS)[number];
 /** Folder each asset lives in. "uncategorised" means it sits at the top level. */
 export const SVG_ASSET_CATEGORIES: Record<string, string> = {
   "apple": "fruits",
+  "badge-bright-spark": "badges",
+  "badge-first-steps": "badges",
+  "badge-star-champion": "badges",
+  "badge-star-collector": "badges",
+  "badge-three-in-a-row": "badges",
+  "badge-week-warrior": "badges",
   "counting-quest": "thumbnail",
   "cube": "shapes",
   "cylinder": "shapes",
@@ -33,6 +45,7 @@ export const SVG_ASSET_CATEGORIES: Record<string, string> = {
 };
 
 export const SVG_CATEGORIES = [
+  "badges",
   "flowers",
   "fruits",
   "manipulatives",
