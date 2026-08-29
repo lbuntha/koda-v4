@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useMotionValue, type MotionValue } from "motion/react";
+import { useMotionValue, useTransform, type MotionValue } from "motion/react";
 
 /**
  * Make one thing draggable anywhere in the window, and keep it there.
@@ -33,10 +33,18 @@ export interface Draggable<T extends HTMLElement> {
   x: MotionValue<number>;
   y: MotionValue<number>;
   /**
-   * Where CSS parked it, before any drag, plus its measured size. Combine with
-   * `x`/`y` to get a position on the glass — which is what anything reacting to
-   * *where* the element is needs.
+   * Where the element's centre actually is on the glass, live.
+   *
+   * Motion values rather than numbers, and derived here rather than left to the
+   * caller to add up. A consumer that reacted to position by reading `anchor`
+   * out of React state got the *first* render's value — zeros, before anything
+   * had been measured — and a `useTransform` built on it never recomputed when
+   * the real measurement arrived, because its own input had not changed. The
+   * result looked right or wrong purely by where the element happened to start.
    */
+  centreX: MotionValue<number>;
+  centreY: MotionValue<number>;
+  /** Where CSS parked it, before any drag, plus its measured size. */
   anchor: { left: number; top: number; width: number; height: number };
   /**
    * Whether the gesture that just ended was a drag rather than a tap. Check it
@@ -90,6 +98,12 @@ export function useDraggable<T extends HTMLElement>({
   const dragged = useRef(false);
   const [limits, setLimits] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
   const [anchor, setAnchor] = useState({ left: 0, top: 0, width: 0, height: 0 });
+  /* The untransformed centre, as motion values, so anything derived from
+     position recomputes the moment a measurement lands. */
+  const baseCentreX = useMotionValue(0);
+  const baseCentreY = useMotionValue(0);
+  const centreX = useTransform([x, baseCentreX], ([dx, cx]: number[]) => cx + dx);
+  const centreY = useTransform([y, baseCentreY], ([dy, cy]: number[]) => cy + dy);
 
   /*
    * How far it may travel from where CSS put it. Subtracting the live transform
@@ -109,12 +123,14 @@ export function useDraggable<T extends HTMLElement>({
     };
     setLimits(next);
     setAnchor({ left: baseLeft, top: baseTop, width: box.width, height: box.height });
+    baseCentreX.set(baseLeft + box.width / 2);
+    baseCentreY.set(baseTop + box.height / 2);
     /* A phone that rotated, or a window that shrank, can leave this outside the
        screen it is now on. Pull it back rather than stranding a control that is
        meant to be always reachable. */
     x.set(Math.min(Math.max(x.get(), next.left), next.right));
     y.set(Math.min(Math.max(y.get(), next.top), next.bottom));
-  }, [margin, x, y]);
+  }, [baseCentreX, baseCentreY, margin, x, y]);
 
   useEffect(() => {
     const spot = readSpot(storageKey);
@@ -134,6 +150,8 @@ export function useDraggable<T extends HTMLElement>({
   return {
     x,
     y,
+    centreX,
+    centreY,
     anchor,
     wasDragged: () => dragged.current,
     dragProps: {

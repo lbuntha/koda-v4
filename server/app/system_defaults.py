@@ -78,6 +78,22 @@ DEFAULT_SETTINGS: list[dict] = [
         "order": 40,
     },
     {
+        # Appearance, not a capability — nothing is switched off here, Koda just
+        # stops wearing its tile. It sits in this group because an operator
+        # looking for it will look under the button it belongs to, not under a
+        # "theming" heading that would exist for this one row.
+        "settingId": "ui.kodaBackdrop",
+        "group": "Ask Koda",
+        "label": "Koda sits on a tile",
+        "description": (
+            "A soft rounded panel behind the floating Koda. On a busy page it is "
+            "what keeps the character readable; off, Koda stands on the page itself."
+        ),
+        "type": "bool",
+        "value": True,
+        "order": 44,
+    },
+    {
         "settingId": "ai.geminiApiKey",
         "group": "Ask Koda",
         "label": "Gemini API key",

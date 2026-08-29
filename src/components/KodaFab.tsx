@@ -2,6 +2,7 @@ import React from "react";
 
 import { askKoda, type KodaAskMode } from "../lib/koda";
 import { useKoda } from "../lib/useKoda";
+import { useSystem } from "../lib/sync";
 import { playSound } from "../utils/audio";
 import { themeSystem } from "../lib/themeSystem";
 import { KodaBuddy } from "./KodaBuddy";
@@ -38,19 +39,25 @@ import { KodaBuddy } from "./KodaBuddy";
 export const KodaFab: React.FC<{ onAsk: (mode: KodaAskMode) => void }> = ({ onAsk }) => {
   const koda = useKoda();
   const mode = koda.mode;
+  /* Appearance, so it is asked of the switchboard rather than of the plan: an
+     operator turning the tile off is a look, not an entitlement. Unknown ids
+     read as allowed, so a deployment that has never heard of this setting gets
+     the tile — which is the intended default. */
+  const { allows } = useSystem();
   if (!mode) return null;
 
   return (
     <KodaBuddy
       /*
-       * `.v2` because the remembered spot is an *offset from the anchor*, and
-       * the anchor just moved from the right edge to the left. An offset saved
-       * against the old corner means something else against the new one — a
-       * child who had dragged Koda to the left would have it restored a full
-       * screen further left, which the clamp would then flatten against the
-       * edge. Retiring the key drops those offsets instead of misreading them.
+       * The key is retired whenever the anchor moves, which is why this is at
+       * `.v3` for a control that has only ever sat in two corners. What is
+       * remembered is an *offset from the anchor*, so an offset saved against
+       * one corner is a different place against another — restoring it would
+       * fling Koda a screen-width away and leave the clamp to flatten it
+       * against an edge. Dropping the old offsets is the honest reading.
        */
-      storageKey="koda.fab.place.v2"
+      storageKey="koda.fab.place.v3"
+      backdrop={allows("ui.kodaBackdrop")}
       onPress={() => {
         playSound("pop");
         // One line, and the plan, the wording and the dialog are handled. Asked
@@ -62,10 +69,11 @@ export const KodaFab: React.FC<{ onAsk: (mode: KodaAskMode) => void }> = ({ onAs
         // Above the page, below every modal — a dialog must never have to argue
         // with a button for the top of the screen.
         //
-        // Bottom-left, and the face follows on its own: `KodaBuddy` mirrors
-        // whatever side of the middle it is on, so from here it looks right,
-        // back across the page, rather than off the edge of the screen.
-        "fixed left-4 sm:left-6 z-40",
+        // Bottom-right, at every width — one class, not three rules, so the
+        // phone, the tablet and the laptop cannot drift apart. `KodaBuddy`
+        // mirrors on whichever side of the middle it sits, so from this corner
+        // it turns to look back across the page.
+        "fixed right-4 sm:right-6 z-40",
         // Where it starts, not where it stays. Sits above the tab bar rather
         // than on it, and clears the iOS home indicator with it. One token, so
         // moving the dock moves this too.

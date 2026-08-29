@@ -12,15 +12,27 @@
       <stop offset="42%" stop-color="#FFFFFF" stop-opacity="0.10" />
       <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
     </linearGradient>
+    <!-- The hot core, the same device the flame uses: a second, brighter shape
+         inside the silhouette is what stops a flat gold cut-out reading as a
+         sticker. -->
+    <linearGradient id="core" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#FFFDF0" />
+      <stop offset="100%" stop-color="#FFD34E" />
+    </linearGradient>
     <filter id="lift" x="-30%" y="-30%" width="160%" height="170%">
       <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#7C4A02" flood-opacity="0.42" />
     </filter>
   </defs>
 
   <g filter="url(#lift)">
-    <path d="M60,5 L23,55 L45,55 L38,95 L79,41 L55,41 Z"
+    <!-- Chunkier than a signage bolt: the thin zig-zag of the icon it replaces
+         lost its shape the moment it was drawn at 20px. -->
+    <path d="M62,4 L26,53 L46,53 L38,96 L76,43 L55,43 Z"
       fill="url(#gold)" stroke="#8A5A05" stroke-width="2.4" stroke-linejoin="round" />
-    <path d="M60,5 L23,55 L45,55 L38,95 L79,41 L55,41 Z" fill="url(#sheen)" />
-    <ellipse cx="46" cy="26" rx="6" ry="3.4" fill="#FFFFFF" fill-opacity="0.55" transform="rotate(-52 46 26)" />
+    <path d="M62,4 L26,53 L46,53 L38,96 L76,43 L55,43 Z" fill="url(#sheen)" />
+    <path d="M57,17 L38,47 L51,47 L45,80 L65,49 L53,49 Z" fill="url(#core)" fill-opacity="0.9" />
+    <!-- Two sparks, so "spark" is in the drawing and not only in the name. -->
+    <circle cx="82" cy="20" r="4" fill="url(#gold)" stroke="#8A5A05" stroke-width="1.6" />
+    <circle cx="19" cy="78" r="3.2" fill="url(#gold)" stroke="#8A5A05" stroke-width="1.4" />
   </g>
 </svg>
