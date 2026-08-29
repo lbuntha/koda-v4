@@ -141,9 +141,14 @@ export const KodaBuddy: React.FC<KodaBuddyProps> = ({
               colour that reads as a rendering artefact; dropped to the bottom
               edge it is a character standing *in* something, with room above it
               to be a character in. */}
+          {/* Mirrored inside the tile, but never tilted in it. The lean is a
+              head turning to look up or down; inside a square frame it is just
+              a picture hanging crooked, and the frame is the thing the eye
+              levels against. The tile keeps the turn — which is the part that
+              actually reads — and drops the lean. */}
           <motion.div
             className="pointer-events-none self-end justify-self-center"
-            style={still ? { scaleX: facing, rotate: tilt } : { scaleX: facingSmooth, rotate: tiltSmooth }}
+            style={still ? { scaleX: facing } : { scaleX: facingSmooth }}
           >
             <KodaFace state={state} palette={palette} size={Math.round(size * 0.82)} />
           </motion.div>
