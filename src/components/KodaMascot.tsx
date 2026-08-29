@@ -218,6 +218,15 @@ export const KodaMascot: React.FC<{
    * and for a written conversation, where there is no voice to follow.
    */
   energy?: number;
+  /**
+   * Overrides the colour `personaId` would have picked.
+   *
+   * For a character that has to match the product rather than the roster — the
+   * floating Ask Koda button is the app's own control, so it wears the brand
+   * indigo, while the same character inside a lesson stays the colour the
+   * roster gave it.
+   */
+  palette?: MascotPalette;
   size?: number;
   className?: string;
 }> = ({
@@ -225,10 +234,11 @@ export const KodaMascot: React.FC<{
   personaId = "koda",
   avatarSeed,
   energy,
+  palette,
   size = 160,
   className = "",
 }) => {
-  const skin = paletteFor(personaId);
+  const skin = palette ?? paletteFor(personaId);
   const tilt = tiltFor(personaId);
   const seed = avatarSeed || personaId;
 
