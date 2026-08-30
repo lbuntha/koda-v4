@@ -13,8 +13,14 @@ from app.models.events import LearningEvent
 
 def increments_for(event: LearningEvent, *, family_id: str) -> dict[str, Any] | None:
     """What one event adds to its concept's totals, or None if it adds nothing."""
+    # No concept, nothing to roll up into: a conversation held on the home page
+    # is a real record, but it is not evidence about any one concept and must
+    # not invent a bucket to land in.
+    if not event.concept_key:
+        return None
+
     inc: dict[str, int] = {}
-    add: dict[str, list[str]] = {"skillIds": [event.skill_id]}
+    add: dict[str, list[str]] = {"skillIds": [event.skill_id] if event.skill_id else []}
 
     if event.type == "answer_submitted":
         # First attempts only — the client's rule, mirrored deliberately: a

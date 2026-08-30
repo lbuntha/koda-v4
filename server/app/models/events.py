@@ -75,10 +75,14 @@ class LearningEvent(Model):
     seq: int = 0
 
     # What the work was.
-    skill_id: str = Field(alias="skillId")
+    # Optional since `koda_conversation`: a child can ask Koda something on the
+    # home page, belonging to no skill and often to no concept either. Every
+    # lesson event still carries both — the client has them and sends them — so
+    # this loosens the schema without loosening what a lesson reports.
+    skill_id: str | None = Field(default=None, alias="skillId")
     activity_id: str | None = Field(default=None, alias="activityId")
     lesson_id: str | None = Field(default=None, alias="lessonId")
-    concept_key: str = Field(alias="conceptKey")
+    concept_key: str | None = Field(default=None, alias="conceptKey")
     level_number: int | None = Field(default=None, alias="levelNumber")
     standards: list[str] = Field(default_factory=list)
 

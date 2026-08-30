@@ -256,6 +256,10 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
         sessionRef.current.stop();
         sessionRef.current = null;
       }
+      // Stopping the session ends the conversation, exactly as closing the
+      // panel does. This was the one way out that recorded nothing.
+      conversationRef.current?.end();
+      conversationRef.current = null;
       setSessionStatus("disconnected");
     } else {
       // Connect

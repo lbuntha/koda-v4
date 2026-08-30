@@ -187,12 +187,19 @@ async def test_a_koda_conversation_lands_with_the_words_the_child_used(client, p
     the server does not know is rejected outright, and an extra the repo drops
     is lost silently. Both are asserted here rather than assumed.
     """
+    # The shape the client really sends: no skillId, because a conversation on
+    # the home page belongs to no skill. The first version of this test reused
+    # the lesson fixture, which always supplies one — so it passed while the
+    # real client got 422 "skillId: Field required" on every push.
     body = {
         "schemaVersion": 1,
         "events": [
             event(
                 "kc_1",
                 type="koda_conversation",
+                skillId=None,
+                activityId=None,
+                lessonId=None,
                 mode="voice",
                 personaId="puck",
                 turns=3,
@@ -224,3 +231,37 @@ async def test_an_unknown_event_type_is_still_refused(client, parent):
     r = await client.post("/sync/push", json=body, headers=parent)
 
     assert r.status_code == 422, r.text
+
+
+async def test_a_conversation_with_no_concept_is_kept_but_rolls_up_into_nothing(client, parent, db):
+    """A conversation on the home page belongs to no concept.
+
+    It is still a record worth keeping — it is what the child asked — but it is
+    not evidence about any one concept, and folding it into a bucket it does not
+    belong to would move a child's mastery on the strength of a question.
+    """
+    body = {
+        "schemaVersion": 1,
+        "events": [
+            event(
+                "kc_loose",
+                type="koda_conversation",
+                skillId=None,
+                activityId=None,
+                lessonId=None,
+                conceptKey=None,
+                mode="chat",
+                turns=1,
+                asked=["what is a number"],
+            )
+        ],
+    }
+    r = await client.post("/sync/push", json=body, headers=parent)
+    assert r.status_code == 200, r.text
+    assert r.json()["accepted"] == 1
+
+    # Kept...
+    assert await db.events.find_one({"eventId": "kc_loose"}) is not None
+    # ...and rolled up into no concept at all.
+    profile = (await client.get("/sync/profile/l_mia", headers=parent)).json()
+    assert all(c.get("conceptKey") for c in profile["concepts"])
