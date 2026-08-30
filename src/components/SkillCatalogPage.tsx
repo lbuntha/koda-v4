@@ -151,7 +151,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
           }}
           placeholder="Search skills"
           aria-label="Search skills"
-          className="w-full rounded-2xl border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-3 pl-11 pr-4 text-sm text-ink outline-none focus:border-indigo-500"
+          className={themeSystem.field("lg", "w-full rounded-2xl py-3 pl-11 pr-4")}
         />
       </div>
 

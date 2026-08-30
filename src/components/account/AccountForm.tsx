@@ -10,20 +10,11 @@ type SignupType = "parent" | "student";
 type LoginMethod = "email" | "childCode";
 
 /**
- * One input, drawn from the theme rather than from slate shades.
- *
- * The old rule hardcoded `bg-white dark:bg-slate-800 border-slate-200 …`, which
- * is the thing `index.css` asks components not to do: it is a second definition
- * of the surface, and it drifts the moment the palette moves. Tokens make the
- * field theme-correct without a `dark:` variant per property.
- *
- * Taller than it was (h-12): this is the one screen a parent types a password
- * into, often on a phone, and 40px targets are where mis-taps come from.
+ * The 48px row, because this is the one screen a parent types a password into,
+ * often on a phone, and 40px targets are where mis-taps come from. The rule
+ * itself is `themeSystem.field` — this screen was where it was first written.
  */
-const field =
-  "w-full h-12 bg-surface border-2 border-line rounded-xl px-3.5 text-[15px] text-ink " +
-  "placeholder:text-muted/70 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 " +
-  "outline-none transition disabled:opacity-60";
+const field = themeSystem.field("md");
 
 const labelClass = "block text-sm font-bold text-ink mb-1.5";
 

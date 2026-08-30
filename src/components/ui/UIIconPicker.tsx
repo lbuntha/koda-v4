@@ -3,8 +3,9 @@ import { Search, X } from "lucide-react";
 import { svgAssetIds } from "../../assets/svg";
 import { ART_ICON_PREFIX, SidebarIcon } from "./sidebarIcon";
 import { sidebarIcons } from "./sidebarIcons";
+import { themeSystem } from "../../lib/themeSystem";
 
-const FIELD = "bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm font-mono text-slate-900 dark:text-white disabled:opacity-60";
+const FIELD = themeSystem.field("lg", "font-mono");
 
 export interface UIIconPickerProps {
   value: string;

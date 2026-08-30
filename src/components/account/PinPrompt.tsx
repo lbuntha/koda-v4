@@ -4,6 +4,7 @@ import { Lock } from "lucide-react";
 import { ApiError } from "../../lib/sync";
 import { PIN_LENGTH, isWellFormed } from "../../lib/familyPin";
 import { UIButton, UIModal } from "../ui";
+import { themeSystem } from "../../lib/themeSystem";
 
 export interface PinPromptProps {
   isOpen: boolean;
@@ -112,7 +113,7 @@ export const PinPrompt: React.FC<PinPromptProps> = ({
             onKeyDown={(event) => {
               if (event.key === "Enter") void submit();
             }}
-            className="mx-auto w-40 rounded-xl border-2 border-slate-200 bg-white px-3 py-2.5 text-center font-mono text-2xl tracking-[0.5em] text-slate-900 outline-none focus:border-indigo-400 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            className={themeSystem.field("lg", "mx-auto w-40 text-center font-mono !text-2xl tracking-[0.5em]")}
           />
         </label>
 

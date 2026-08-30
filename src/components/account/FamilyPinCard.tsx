@@ -77,7 +77,7 @@ export const FamilyPinCard: React.FC = () => {
   if (!mayChange) return null;
 
   const field =
-    "w-32 rounded-xl border-2 border-slate-200 bg-white px-3 py-2 text-center font-mono text-xl tracking-[0.4em] text-slate-900 outline-none focus:border-indigo-400 dark:border-slate-700 dark:bg-slate-800 dark:text-white";
+    themeSystem.field("lg", "w-32 text-center font-mono !text-xl tracking-[0.4em]");
 
   return (
     <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>

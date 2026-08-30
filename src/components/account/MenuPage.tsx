@@ -98,7 +98,7 @@ const groupsForItem = (item: Item, matrix: Matrix): string[] => {
 
 /** One grid for the header and every row — the reason the columns line up. */
 const FIELD =
-  "bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm font-mono text-slate-900 dark:text-white disabled:opacity-60";
+  themeSystem.field("lg", "font-mono");
 
 /**
  * A capability in the fewest words that stay true.
@@ -598,7 +598,7 @@ const Visibility: React.FC<{
           onChange={(e) =>
             onSave(item, e.target.value ? { requires: e.target.value } : { clearRequires: true })
           }
-          className="bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-mono text-slate-900 dark:text-white"
+          className={themeSystem.field("sm", "font-mono")}
         >
           <option value="">— anything —</option>
           {matrix.permissions.map((permission) => (

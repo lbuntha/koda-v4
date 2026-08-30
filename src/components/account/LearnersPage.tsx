@@ -31,7 +31,7 @@ interface JoinCodeResult {
 }
 
 const field =
-  "w-full rounded-xl border-2 border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-indigo-400 dark:border-slate-700 dark:bg-slate-800 dark:text-white";
+  themeSystem.field("lg", "w-full");
 
 const formatDate = (value: string) =>
   new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", year: "numeric" }).format(

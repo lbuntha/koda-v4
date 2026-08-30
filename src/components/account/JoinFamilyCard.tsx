@@ -77,7 +77,7 @@ export const JoinFamilyCard: React.FC<{ hasChildren: boolean; onJoined?: () => v
               autoCapitalize="characters"
               placeholder="ABCD2345"
               onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z2-9]/g, ""))}
-              className="w-44 rounded-xl border-2 border-slate-200 bg-white px-3 py-2.5 text-center font-mono tracking-[0.25em] text-slate-900 outline-none focus:border-indigo-400 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              className={themeSystem.field("lg", "w-44 text-center font-mono tracking-[0.25em]")}
             />
           </label>
           <UIButton

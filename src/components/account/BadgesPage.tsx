@@ -24,7 +24,7 @@ import {
 import { NoAccess } from "./NoAccess";
 
 const field =
-  "w-full rounded-xl border-2 border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-indigo-400 dark:border-slate-700 dark:bg-slate-800 dark:text-white";
+  themeSystem.field("lg", "w-full");
 
 /** One picture to choose from, built-in or drawn by the family. */
 const IconChoice: React.FC<{

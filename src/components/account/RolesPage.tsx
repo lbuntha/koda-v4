@@ -324,7 +324,7 @@ export const RolesPage: React.FC = () => {
                         disabled={busy}
                         onChange={(e) => void changeRole(member, e.target.value)}
                         aria-label={`Role for ${member.email}`}
-                        className="bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm font-mono text-slate-900 dark:text-white disabled:opacity-60"
+                        className={themeSystem.field("lg", "font-mono")}
                       >
                         {matrix.assignableRoles.map((role) => (
                           <option key={role} value={role}>

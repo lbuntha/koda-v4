@@ -73,7 +73,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({ token,
   };
 
   const field =
-    "w-full rounded-xl border-2 border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-indigo-400 dark:border-slate-700 dark:bg-slate-800 dark:text-white";
+    themeSystem.field("lg", "w-full");
 
   return (
     <div className="flex min-h-[70vh] items-center justify-center px-4 py-10">

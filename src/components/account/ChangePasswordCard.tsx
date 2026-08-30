@@ -72,7 +72,7 @@ export const ChangePasswordCard: React.FC = () => {
   };
 
   const field =
-    "w-full rounded-xl border-2 border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-indigo-400 dark:border-slate-700 dark:bg-slate-800 dark:text-white";
+    themeSystem.field("lg", "w-full");
 
   return (
     <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-3`)}>

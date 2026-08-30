@@ -137,7 +137,7 @@ const SettingControl: React.FC<{
           placeholder={field.placeholder}
           onChange={(e) => onChange(e.target.value)}
           aria-label={field.label}
-          className="w-48 shrink-0 px-3 py-1.5 rounded-xl text-xs font-mono bg-white dark:bg-slate-800 text-slate-900 dark:text-white border-2 border-slate-200 dark:border-slate-700 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-indigo-400 dark:focus:border-indigo-500/60 outline-none transition disabled:opacity-40"
+          className={themeSystem.field("sm", "w-48 shrink-0 font-mono")}
         />
       </div>
     );
@@ -338,7 +338,7 @@ const ListingEditor: React.FC<{
             }
             setDraftTag(null);
           }}
-          className="w-full bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-indigo-400 dark:focus:border-indigo-500/60 outline-none transition"
+          className={themeSystem.field("lg", "w-full")}
         />
       </label>
 
@@ -359,7 +359,7 @@ const ListingEditor: React.FC<{
             }
             setDraftThumb(null);
           }}
-          className="w-full bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm font-mono text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-indigo-400 dark:focus:border-indigo-500/60 outline-none transition"
+          className={themeSystem.field("lg", "w-full font-mono")}
         />
         <span className="block text-[11px] text-slate-500 dark:text-slate-400">
           {describeThumbnail(draftThumb ?? thumbnail, isArt, firstLessonIcon)}
@@ -885,7 +885,7 @@ const ContentField: React.FC<{
     setDraft(null);
   };
   const className =
-    "w-full bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-indigo-400 dark:focus:border-indigo-500/60 outline-none transition";
+    themeSystem.field("lg", "w-full");
 
   return (
     <label className="block space-y-1">
@@ -1236,7 +1236,7 @@ export const SkillManagerPage: React.FC = () => {
                 max={12}
                 value={viewer.age}
                 onChange={(e) => setViewer({ age: Number(e.target.value) })}
-                className="w-16 px-2 py-1 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono font-bold"
+                className={themeSystem.field("sm", "w-16 font-mono font-bold")}
               />
             </label>
 

@@ -17,6 +17,7 @@ export type SurfaceVariant = "default" | "glass" | "bordered" | "interactive";
 export type FeatureVariant = "default" | "accent" | "subtle";
 export type PathNodeState = "completed" | "current" | "available" | "locked";
 export type KidMessageTone = "correct" | "tryAgain" | "hint" | "celebrate";
+export type FieldSize = "sm" | "md" | "lg";
 
 /**
  * Central Theme & Design System Function/Utility Engine
@@ -35,6 +36,41 @@ export const themeSystem = {
     cardSm: "p-3 sm:p-4",
     stack: "space-y-2.5",
     row: "gap-3",
+  },
+
+  /**
+   * One typed-in field, drawn from the theme rather than from slate shades.
+   *
+   * Nine screens had each written their own copy of
+   * `bg-white … dark:bg-slate-800 border-slate-200 dark:border-slate-700`, which
+   * is exactly what `index.css` asks components not to do: a second definition
+   * of the surface, drifting the moment the palette moves. It showed: on a phone
+   * in dark mode every input was a grey box sitting on a surface that was not
+   * grey — the PIN prompt worst of all, because it is four big digits in the
+   * middle of an otherwise empty dialog.
+   *
+   * The fill is transparent rather than `bg-surface`, so a field takes the
+   * colour of whatever it is drawn on — a card, a modal, a muted well — instead
+   * of asserting one and being wrong on two of the three.
+   *
+   * `size` is the target, not the type scale: `md` is the 48px row a parent taps
+   * on a phone, `sm` the compact control that belongs inside a dense admin row.
+   */
+  field: (size: FieldSize = "md", className: string = "") => {
+    const sizes: Record<FieldSize, string> = {
+      sm: "px-3 py-1.5 text-xs",
+      md: "w-full h-12 px-3.5 text-[15px]",
+      lg: "w-full px-3 py-2.5 text-sm",
+    };
+    return [
+      "bg-transparent border-2 border-line rounded-xl text-ink placeholder:text-muted/70",
+      "outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10",
+      "disabled:opacity-60",
+      sizes[size],
+      className,
+    ]
+      .filter(Boolean)
+      .join(" ");
   },
 
   /* Light-first with `dark:` overrides. Solid variants keep the same fill in both

@@ -5,6 +5,7 @@ import { diceBearAvatar, newAvatarSeed } from "../../lib/avatar";
 import { ApiError } from "../../lib/sync";
 import { copyText } from "../../utils/clipboard";
 import { UIAvatar, UIButton, UIModal } from "../ui";
+import { themeSystem } from "../../lib/themeSystem";
 
 export interface ProfileEditModalProps {
   isOpen: boolean;
@@ -18,7 +19,7 @@ export interface ProfileEditModalProps {
 }
 
 const field =
-  "w-full rounded-xl border-2 border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-indigo-400 dark:border-slate-700 dark:bg-slate-800 dark:text-white";
+  themeSystem.field("lg", "w-full");
 
 const choices = (current?: string): string[] => [
   ...(current ? [current] : []),
