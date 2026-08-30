@@ -3,6 +3,8 @@ import { AlertTriangle, Mic, Send, Sparkles } from "lucide-react";
 
 import { SvgAsset } from "../assets/svg";
 import { askKodaInWriting, type KodaContext, type KodaTurn } from "../lib/tutorApi";
+import { KodaConversation } from "../lib/koda/conversationLog";
+import { currentPersonaId } from "../lib/personas";
 import { themeSystem } from "../lib/themeSystem";
 import { useKoda } from "../lib/useKoda";
 import { usePersona } from "../lib/usePersona";
@@ -43,11 +45,32 @@ export const KodaAskModal: React.FC<{
   const [thinking, setThinking] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
+  /**
+   * What this conversation is recording.
+   *
+   * Opened on the first question rather than on mount: a panel opened and shut
+   * without a word is not a conversation, and should not become a row.
+   */
+  const conversationRef = useRef<KodaConversation | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isOpen) inputRef.current?.focus();
+    // Closing the panel ends the conversation, which is when it is written.
+    if (!isOpen) {
+      conversationRef.current?.end();
+      conversationRef.current = null;
+    }
   }, [isOpen]);
+
+  // And when the panel goes away entirely, mid-sentence or not.
+  useEffect(
+    () => () => {
+      conversationRef.current?.end();
+      conversationRef.current = null;
+    },
+    [],
+  );
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -58,6 +81,13 @@ export const KodaAskModal: React.FC<{
   const send = async (question: string) => {
     if (!question.trim() || thinking) return;
     playSound("pop");
+    conversationRef.current ??= new KodaConversation({
+      mode: "chat",
+      personaId: currentPersonaId(),
+      conceptKey: context?.topic,
+    });
+    // The child's own words. Koda's replies are deliberately not recorded.
+    conversationRef.current.said(question);
     const asked = [...turns, { sender: "student" as const, text: question.trim() }];
     setTurns(asked);
     setDraft("");

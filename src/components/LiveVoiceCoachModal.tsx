@@ -25,6 +25,7 @@ import { GeminiLiveVoiceSession, LiveVoiceConfig } from "../utils/geminiLiveAudi
 import { usePersona } from "../lib/usePersona";
 import { KodaMascot } from "./KodaMascot";
 import { liveCaption, mascotStateFor } from "../lib/kodaLive";
+import { KodaConversation } from "../lib/koda/conversationLog";
 
 interface LiveVoiceCoachModalProps {
   isOpen: boolean;
@@ -205,6 +206,8 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
   const [activeSubtitle, setActiveSubtitle] = useState<string | null>(null);
 
   const sessionRef = useRef<GeminiLiveVoiceSession | null>(null);
+  /** What this conversation is recording. Written when the coach closes. */
+  const conversationRef = useRef<KodaConversation | null>(null);
   const transcriptEndRef = useRef<HTMLDivElement | null>(null);
   const lastNextQuestionTimeRef = useRef<number>(0);
 
@@ -311,6 +314,8 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
           });
         },
         onUserText: (text) => {
+          // The child's own words. Koda's replies are deliberately not recorded.
+          conversationRef.current?.said(text);
           setTranscript((prev) => [
             ...prev,
             {
@@ -349,6 +354,22 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
       });
 
       sessionRef.current = session;
+      /*
+       * The record of this conversation, opened with the session.
+       *
+       * Its own object rather than something the session owns: what is worth
+       * recording is a property of the exchange, not of the socket, and the
+       * socket already has enough to do. Written once, when the coach closes.
+       */
+      conversationRef.current = new KodaConversation({
+        mode: "voice",
+        personaId: character.personaId,
+        // What this coach is given. It is opened from anywhere — including
+        // screens with no lesson at all — so the topic is often all there is,
+        // and the event's fields are optional for exactly that reason.
+        conceptKey: currentTopic,
+        levelNumber: currentLevel,
+      });
       await session.start();
     }
   };
@@ -358,6 +379,8 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
     if (!isOpen && sessionRef.current) {
       sessionRef.current.stop();
       sessionRef.current = null;
+      conversationRef.current?.end();
+      conversationRef.current = null;
       setSessionStatus("disconnected");
     }
   }, [isOpen]);
@@ -374,6 +397,8 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
   useEffect(() => {
     return () => {
       sessionRef.current?.stop();
+      conversationRef.current?.end();
+      conversationRef.current = null;
       sessionRef.current = null;
     };
   }, []);

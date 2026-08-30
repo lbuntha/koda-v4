@@ -148,11 +148,40 @@ function planRequired(res: {
  * Quiet on every failure: no key set, or no service token configured, falls
  * back to `GEMINI_API_KEY` in this process's own environment.
  */
+/**
+ * Why a key could not be fetched. Never "the key is missing" unless it is.
+ *
+ * Every failure used to collapse into `undefined`, and every caller then told
+ * the operator the same thing: *"GEMINI_API_KEY is not configured. Set it in
+ * Settings > Secrets."* That sentence is wrong for three of the four ways this
+ * can fail, and it is expensive: a whole afternoon went into replacing a key
+ * that was correctly set, because an expired session token reported itself as a
+ * missing credential. A wrong diagnosis printed confidently is worse than none.
+ */
+type KeyFailure = "auth" | "service" | "unset" | "unreachable";
+
+interface KeyLookup {
+  key?: string;
+  reason?: KeyFailure;
+}
+
+/** What to tell a grown-up, per reason. Said plainly, and never blaming a key
+ *  that is fine. */
+const KEY_FAILURE_MESSAGE: Record<KeyFailure, string> = {
+  auth: "This session has expired. Sign in again and ask Koda once more.",
+  service: "Koda cannot prove who it is to the settings service. Check TUTOR_SERVICE_TOKEN matches on both services.",
+  unset: "No Gemini key is set on this deployment. Add one in Settings → Secrets.",
+  unreachable: "Koda cannot reach the settings service right now.",
+};
+
 async function systemApiKey(
   authorization?: string,
   settingId: string = "ai.geminiApiKey",
-): Promise<string | undefined> {
-  if (!TUTOR_SERVICE_TOKEN || !authorization) return undefined;
+): Promise<KeyLookup> {
+  // No service token means this process cannot ask at all — a configuration
+  // fault of the deployment, not a missing key.
+  if (!TUTOR_SERVICE_TOKEN) return { reason: "service" };
+  if (!authorization) return { reason: "auth" };
   try {
     const res = await fetch(`${API_URL}/v1/system/settings/${settingId}/resolve`, {
       method: "POST",
@@ -161,17 +190,26 @@ async function systemApiKey(
         "X-Service-Token": TUTOR_SERVICE_TOKEN,
       },
     });
-    if (!res.ok) return undefined;
+    if (!res.ok) {
+      // The API's own vocabulary, kept: 401 is the caller's token, 403 is this
+      // process's, 404 is a secret nobody has set.
+      if (res.status === 401) return { reason: "auth" };
+      if (res.status === 403) return { reason: "service" };
+      if (res.status === 404) return { reason: "unset" };
+      return { reason: "unreachable" };
+    }
     const body = (await res.json()) as { value?: string };
-    return body.value?.trim() || undefined;
+    const key = body.value?.trim();
+    return key ? { key } : { reason: "unset" };
   } catch {
-    return undefined;
+    return { reason: "unreachable" };
   }
 }
 
 // Lazy initialize Gemini client
-function getGeminiClient(familyKey?: string) {
-  const apiKey = (familyKey && familyKey.trim().length > 0) ? familyKey.trim() : process.env.GEMINI_API_KEY;
+function getGeminiClient(lookup?: KeyLookup | string) {
+  const found = typeof lookup === "string" ? lookup : lookup?.key;
+  const apiKey = found && found.trim().length > 0 ? found.trim() : process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return null;
   }
@@ -230,15 +268,20 @@ app.post("/api/tutor/respond", async (req, res) => {
     if (!(await planAllows("ai.koda", req.headers.authorization))) {
       return planRequired(res);
     }
-    const ai = getGeminiClient(await systemApiKey(req.headers.authorization));
+    const lookup = await systemApiKey(req.headers.authorization);
+    const ai = getGeminiClient(lookup);
 
     if (!ai) {
-      // No key configured. Still answer — a child mid-question should not hit a
-      // dead end — but say so with `degraded`, because a canned nudge dressed as
-      // Koda's own reply is how a broken deployment goes unnoticed for weeks:
-      // every answer looks plausible and none of them is Koda.
+      // Still answer — a child mid-question should not hit a dead end — but say
+      // so with `degraded`, because a canned nudge dressed as Koda's own reply
+      // is how a broken deployment goes unnoticed for weeks: every answer looks
+      // plausible and none of them is Koda.
+      //
+      // `reason` names which failure it was. It used to always say "no_key",
+      // which is a confident wrong answer three times out of four.
       return res.json({
-        degraded: "no_key",
+        degraded: lookup.reason ?? "no_key",
+        reason: lookup.reason ? KEY_FAILURE_MESSAGE[lookup.reason] : undefined,
         replyText: `Let's work through this step together! Look closely at the visual interactive model for "${problem?.title || "this problem"}". What happens when you test your next move?`,
         hintType: "question",
         isCorrect: null,
@@ -718,13 +761,13 @@ app.post("/api/art/generate", async (req, res) => {
 
     if (provider === "chatgpt" || provider === "openai" || provider === "codex") {
       const key =
-        (await systemApiKey(req.headers.authorization, "ai.openaiApiKey")) ??
+        (await systemApiKey(req.headers.authorization, "ai.openaiApiKey")).key ??
         process.env.OPENAI_API_KEY;
       if (!key) return res.status(503).json(noKey("ChatGPT"));
       text = await drawWithChatGPT(key, instruction, brief);
     } else if (provider === "claude" || provider === "anthropic") {
       const key =
-        (await systemApiKey(req.headers.authorization, "ai.anthropicApiKey")) ??
+        (await systemApiKey(req.headers.authorization, "ai.anthropicApiKey")).key ??
         process.env.ANTHROPIC_API_KEY;
       if (!key) return res.status(503).json(noKey("Claude"));
       text = await drawWithClaude(key, instruction, brief);
@@ -866,14 +909,16 @@ async function startServer() {
       return;
     }
 
-    const ai = getGeminiClient(await systemApiKey(authorization));
+    const lookup = await systemApiKey(authorization);
+    const ai = getGeminiClient(lookup);
 
     if (!ai) {
+      // Named, not guessed. This message used to blame the key for an expired
+      // session token, and an operator who believes it goes and replaces a
+      // credential that was never wrong.
+      const reason = lookup.reason ?? "unset";
       clientWs.send(
-        JSON.stringify({
-          type: "error",
-          error: "GEMINI_API_KEY is not configured on the server. Please set it in Settings > Secrets.",
-        })
+        JSON.stringify({ type: "error", code: reason, error: KEY_FAILURE_MESSAGE[reason] }),
       );
       clientWs.close();
       return;

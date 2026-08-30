@@ -25,6 +25,12 @@ EventType = Literal[
     "support_used",
     "lesson_completed",
     "lesson_abandoned",
+    # A child talked to Koda. Produced by `lib/koda/conversationLog.ts`, which is
+    # its own producer rather than part of the lesson tracker — a conversation
+    # can happen with no lesson open. Carries the child's own questions, which no
+    # other event does, so it is the one type worth reading the client's note on
+    # before changing what is stored.
+    "koda_conversation",
 ]
 
 # The fields the rollup reads. Everything else is carried but not interpreted.

@@ -229,13 +229,65 @@ export interface LessonAbandonedEvent extends LearningEventBase {
   durationMs: number;
 }
 
+/**
+ * A child talked to Koda, and what they asked.
+ *
+ * **This is the first event that stores a child's own words.** Every other one
+ * carries authored copy — a lesson's prompt, an expected answer — which is why
+ * `QuestionPresentedEvent.prompt` can say it holds no personal data. This one
+ * cannot say that, and the difference is deliberate: a recommendation worth
+ * making needs the misconception in the child's own phrasing. "Why is it
+ * thirteen and not threeteen" is the finding; "asked 6 questions about teen
+ * numbers" is not.
+ *
+ * So it is bounded on purpose. Koda's replies are **not** stored — only what the
+ * child asked — and the questions are capped and truncated (`MAX_ASKED`,
+ * `MAX_ASKED_CHARS`) so a long session cannot turn into an unbounded transcript.
+ *
+ * Only a subscribed family can produce one: Ask Koda is gated on the `ai.koda`
+ * plan and on the parent's per-child switch, so a child whose grown-up has not
+ * turned Koda on never reaches this code at all.
+ *
+ * Independent of the lesson tracker. A conversation can happen with no lesson
+ * open — on the home page, mid-way through nothing — so `lessonId` and
+ * `conceptKey` are optional here in a way they are not elsewhere.
+ */
+export interface KodaConversationEvent extends LearningEventBase {
+  type: "koda_conversation";
+  /** Typed, or spoken to the live coach. */
+  mode: "chat" | "voice";
+  /**
+   * Which character answered — `personaId`, not "Koda".
+   *
+   * A deployment runs several teachers and a parent picks one per child. Two
+   * children asking the same thing of Aoede and of Puck are not having the same
+   * conversation, and a recommendation that cannot tell them apart is averaging
+   * over the one variable the family chose.
+   */
+  personaId?: string;
+  /** How many times the child said something. Koda's turns are not counted. */
+  turns: number;
+  /** Wall-clock length of the conversation. */
+  durationMs: number;
+  /** What the child asked, in their words. Capped and truncated. */
+  asked: string[];
+  /** Whether this began straight after a wrong answer — a help-seeking signal. */
+  afterWrongAnswer?: boolean;
+}
+
+/** How many of a child's questions one conversation keeps. */
+export const MAX_ASKED = 12;
+/** How much of any one question is kept. */
+export const MAX_ASKED_CHARS = 240;
+
 export type LearningEvent =
   | LessonStartedEvent
   | QuestionPresentedEvent
   | AnswerSubmittedEvent
   | SupportUsedEvent
   | LessonCompletedEvent
-  | LessonAbandonedEvent;
+  | LessonAbandonedEvent
+  | KodaConversationEvent;
 
 export type LearningEventType = LearningEvent["type"];
 
