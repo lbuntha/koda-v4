@@ -65,3 +65,28 @@ async def insert_many(
 
 async def count_for_learner(db: AsyncIOMotorDatabase, family_id: str, learner_id: str) -> int:
     return await db.events.count_documents({"familyId": family_id, "learnerId": learner_id})
+
+
+async def conversations_for_learner(
+    db: AsyncIOMotorDatabase, family_id: str, learner_id: str, *, limit: int = 100
+) -> list[dict[str, Any]]:
+    """A learner's conversations with Koda, newest first.
+
+    Read from the server's copy rather than the device's, because the device
+    keeps a capped ring and the point of these is the long view: "she has asked
+    about teen numbers on four different days" is not a question a single
+    tablet's recent history can answer.
+
+    Scoped to the family as every read here is — tenancy is a filter, not a
+    permission, so a query that forgot it returns another family's children.
+    """
+    rows = await (
+        db.events.find(
+            {"familyId": family_id, "learnerId": learner_id, "type": "koda_conversation"},
+            {"_id": 0, "familyId": 0},
+        )
+        .sort("ts", -1)
+        .limit(max(1, min(limit, 500)))
+        .to_list(length=500)
+    )
+    return rows

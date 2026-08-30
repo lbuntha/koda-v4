@@ -30,13 +30,95 @@ const LEARNER_KEY = "koda_learner_id_v1";
 export const APP_VERSION = "1.0.0";
 
 /**
- * How many events to keep locally.
+ * How many events to keep locally, **per learner**.
  *
- * A round is roughly 30 events, so this is ~65 rounds of full detail — far more
- * than any recommendation looks at, and small enough to stay well inside a
- * localStorage quota alongside everything else the app stores.
+ * A round is roughly 30 events, so this is ~40 rounds of full detail — far more
+ * than any recommendation looks at.
+ *
+ * Per learner, not per device, and that is the whole point. This used to be one
+ * ring of 2000 trimmed oldest-first across everybody, which on a shared family
+ * tablet meant a busy sibling silently evicted a quieter child's history — and
+ * the quiet child is exactly the one whose few records matter most. A cap that
+ * one user can spend on behalf of another is not a retention rule, it is a race.
  */
-const MAX_EVENTS = 2000;
+const MAX_EVENTS_PER_LEARNER = 1200;
+
+/**
+ * The ceiling for the whole device, whatever the split.
+ *
+ * Fairness first, quota second: the per-learner cap decides who keeps what, and
+ * this only ever bites when several children share one tablet heavily. When it
+ * does, it takes from whoever holds the most rather than from whoever is
+ * oldest, so trimming still cannot fall entirely on one child.
+ */
+const MAX_EVENTS_DEVICE = 4000;
+
+/**
+ * Trim to the caps above without letting one learner's volume cost another's
+ * history.
+ *
+ * Exported for the tests, which are the only thing that can demonstrate the
+ * fairness property — it is invisible until a second child uses the tablet.
+ */
+/**
+ * How many of a learner's days of history the device keeps.
+ *
+ * Seven, and counted in *days that learner actually practised* rather than as a
+ * calendar window ending today. For a child who plays daily the two are the
+ * same thing; for one who plays on Saturdays a rolling seven-day window would
+ * hold an empty log every Friday, and the screens that read it would show a
+ * child with no history at all.
+ *
+ * The device is not the record. The server keeps everything — that is what a
+ * recommendation is built from, and why this can be small without losing
+ * anything. This cap is about a tablet's storage, not about what is known.
+ */
+const MAX_DAYS_PER_LEARNER = 7;
+
+export function trimPerLearner(events: LearningEvent[]): LearningEvent[] {
+  const byLearner = new Map<string, LearningEvent[]>();
+  for (const event of events) {
+    const key = event.learnerId || "unknown";
+    const list = byLearner.get(key);
+    if (list) list.push(event);
+    else byLearner.set(key, [event]);
+  }
+
+  for (const [key, list] of byLearner) {
+    // Their seven most recent days of practice, whenever those days were.
+    const days = [...new Set(list.map((e) => e.localDay).filter(Boolean))].sort();
+    const keepFrom = days.length > MAX_DAYS_PER_LEARNER
+      ? days[days.length - MAX_DAYS_PER_LEARNER]
+      : null;
+    // An event with no day recorded is kept: dropping it would be a silent loss
+    // during an upgrade, and it is the one case the date cannot judge.
+    let kept = keepFrom ? list.filter((e) => !e.localDay || e.localDay >= keepFrom) : list;
+
+    // And their own most recent within that, independent of anyone else's volume.
+    if (kept.length > MAX_EVENTS_PER_LEARNER) kept = kept.slice(-MAX_EVENTS_PER_LEARNER);
+    byLearner.set(key, kept);
+  }
+
+  // Then, only if the device as a whole is over, take from the largest holder
+  // one at a time. Taking the globally-oldest instead would put the whole cost
+  // on whoever had been using the tablet longest.
+  let total = [...byLearner.values()].reduce((n, list) => n + list.length, 0);
+  while (total > MAX_EVENTS_DEVICE) {
+    let biggest: string | null = null;
+    let size = 0;
+    for (const [key, list] of byLearner) {
+      if (list.length > size) {
+        size = list.length;
+        biggest = key;
+      }
+    }
+    if (!biggest || size === 0) break;
+    byLearner.set(biggest, byLearner.get(biggest)!.slice(1));
+    total -= 1;
+  }
+
+  return [...byLearner.values()].flat();
+}
 
 /** Cumulative per-concept counters. Survives event trimming. */
 export interface ConceptTotals {
@@ -429,7 +511,11 @@ export const LearningLog = {
       // where two events can share a millisecond.
       a.ts === b.ts ? a.seq - b.seq : a.ts < b.ts ? -1 : 1,
     );
-    if (events.length > MAX_EVENTS) events = events.slice(-MAX_EVENTS);
+    // Per learner, so no child's history is spent on another's. Re-sorted
+    // because trimming rebuilds the array learner by learner.
+    events = trimPerLearner(events).sort((a, b) =>
+      a.ts === b.ts ? a.seq - b.seq : a.ts < b.ts ? -1 : 1,
+    );
 
     // Same hazard for the rollup, and worse: counters cannot be de-duplicated
     // after the fact, so the current state is re-read before incrementing.

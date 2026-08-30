@@ -265,3 +265,66 @@ async def test_a_conversation_with_no_concept_is_kept_but_rolls_up_into_nothing(
     # ...and rolled up into no concept at all.
     profile = (await client.get("/sync/profile/l_mia", headers=parent)).json()
     assert all(c.get("conceptKey") for c in profile["concepts"])
+
+
+async def test_a_learner_s_conversations_can_be_read_back(client, parent):
+    """The point of storing these is reading them later.
+
+    The device keeps a capped ring, so the long view — "she has asked about teen
+    numbers on four different days" — only exists on the server. A recommendation
+    that cannot fetch it cannot be made.
+    """
+    await client.post(
+        "/sync/push",
+        json={
+            "schemaVersion": 1,
+            "events": [
+                event(
+                    "kc_a", type="koda_conversation", skillId=None, lessonId=None,
+                    ts="2026-08-19T09:00:00.000Z", mode="chat", personaId="aoede",
+                    turns=2, asked=["why is it thirteen not threeteen"],
+                ),
+                event(
+                    "kc_b", type="koda_conversation", skillId=None, lessonId=None,
+                    ts="2026-08-20T09:00:00.000Z", mode="voice", personaId="puck",
+                    turns=1, asked=["is 14 more than 20"],
+                ),
+            ],
+        },
+        headers=parent,
+    )
+
+    r = await client.get("/sync/conversations/l_mia", headers=parent)
+    assert r.status_code == 200, r.text
+    rows = r.json()["conversations"]
+
+    assert len(rows) == 2
+    # Newest first, so a recommender reads the most recent thinking first.
+    assert rows[0]["asked"] == ["is 14 more than 20"]
+    assert rows[0]["personaId"] == "puck"
+    assert rows[1]["asked"] == ["why is it thirteen not threeteen"]
+    # Never leaks the tenancy key back out.
+    assert "familyId" not in rows[0]
+
+
+async def test_conversations_are_scoped_to_the_family_that_had_them(client, parent, signup_body):
+    """A child's questions are the last thing that may cross a family boundary."""
+    await client.post(
+        "/sync/push",
+        json={
+            "schemaVersion": 1,
+            "events": [
+                event("kc_mine", type="koda_conversation", skillId=None, lessonId=None,
+                      mode="chat", turns=1, asked=["a private question"])
+            ],
+        },
+        headers=parent,
+    )
+
+    other = (await client.post("/auth/signup", json=signup_body(email="other@example.com"))).json()
+    other_auth = {"Authorization": f"Bearer {other['accessToken']}"}
+
+    r = await client.get("/sync/conversations/l_mia", headers=other_auth)
+
+    assert r.status_code == 200
+    assert r.json()["conversations"] == []

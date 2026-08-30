@@ -59,6 +59,23 @@ async def changes(
     return await sync_service.changes(db, p, cursor=since, limit=min(limit, 500), kinds=wanted)
 
 
+@router.get("/conversations/{learner_id}")
+async def conversations(learner_id: str, db: Db, p: CanRead, limit: int = 100) -> dict:
+    """What this learner has asked Koda, for a report or a recommendation.
+
+    The same tenancy rule as `profile`: a learner device reads its own record
+    and nobody else's, and a parent reads their own family. These carry a
+    child's own words, so the rule matters more here than anywhere else in this
+    file.
+    """
+    family_id = _family_of(p)
+    if p.learner_id and learner_id != p.learner_id:
+        raise Forbidden("That is not this device's learner.", "not_your_learner")
+
+    rows = await events_repo.conversations_for_learner(db, family_id, learner_id, limit=limit)
+    return {"learnerId": learner_id, "conversations": rows}
+
+
 @router.get("/profile/{learner_id}")
 async def profile(learner_id: str, db: Db, p: CanRead) -> ProfileOut:
     family_id = _family_of(p)
