@@ -904,7 +904,16 @@ export default function App() {
         * panel on the question being answered, and a floating one over the
         * activity would sit on top of what the child is working on.
         */}
-      {!inLesson && (
+      {/*
+        * And not while Koda is already on screen talking.
+        *
+        * The button *is* Koda — so with the voice coach open there were two of
+        * them in the same corner, one listening and one waiting to be asked. A
+        * child tapping the wrong one is the least of it: two copies of the same
+        * character, in two different states, is the app disagreeing with itself
+        * about where Koda is.
+        */}
+      {!inLesson && !isLiveVoiceOpen && !isKodaAskOpen && (
         <KodaFab
           onAsk={(mode) => (mode === "voice" ? setIsLiveVoiceOpen(true) : setIsKodaAskOpen(true))}
         />

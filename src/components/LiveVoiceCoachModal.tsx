@@ -485,14 +485,6 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
             transform: translateY(-8px);
           }
         }
-        @keyframes kodaHoloFlash {
-          0%, 100% {
-            filter: brightness(1) contrast(1) drop-shadow(0 0 10px rgba(245, 158, 11, 0.2));
-          }
-          50% {
-            filter: brightness(1.25) contrast(1.1) drop-shadow(0 0 25px rgba(34, 211, 238, 0.7));
-          }
-        }
         @keyframes ringPulse {
           0% {
             transform: scale(0.95);
@@ -505,9 +497,6 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
         }
         .animate-kodaFloat {
           animation: kodaFloat 4s ease-in-out infinite;
-        }
-        .animate-kodaHoloFlash {
-          animation: kodaHoloFlash 3s ease-in-out infinite;
         }
         .animate-ringPulse {
           animation: ringPulse 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
@@ -665,32 +654,40 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                   </button>
                 </div>
 
-                {/* Status Badge */}
+                {/*
+                  * Only what the face cannot say.
+                  *
+                  * The pill used to narrate "Koda is speaking", "Listening…",
+                  * "Thinking…" — beside a character that was already speaking,
+                  * listening and thinking. Two things saying the same thing, and
+                  * a child reads the animation first.
+                  *
+                  * What is left is the three states an animation genuinely
+                  * cannot express: a session that failed, a session that has not
+                  * started, and a microphone that is off. A mascot with a closed
+                  * mouth cannot tell a child which of those is true, and "tap me
+                  * to start" is the one instruction on this screen.
+                  *
+                  * The live state stays in an aria-live region, because a face is
+                  * not available to a screen reader at all.
+                  */}
                 <div className="mt-3 text-center">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-surface-muted/90 border border-line/80 shadow-sm">
-                    {/* The pill reads from the same `liveState` the face does,
-                        so it cannot say "Listening…" beside a moving mouth. */}
-                    <span
-                      className={`w-2 h-2 rounded-full ${
-                        liveState === "speaking"
-                          ? "bg-cyan-400 animate-ping"
-                          : liveState === "listening"
-                          ? "bg-emerald-400 animate-pulse"
-                          : liveState === "thinking"
-                          ? "bg-violet-500 animate-pulse"
-                          : "bg-muted/40"
-                      }`}
-                    />
-                    <span className="text-[11px] font-bold text-ink">
-                      {sessionStatus === "error"
-                        ? "Connection Error"
-                        : sessionStatus === "disconnected"
-                        ? `Tap ${character.name} to start`
-                        : isMuted && liveState !== "speaking"
-                        ? "Microphone off"
-                        : liveCaption(liveState, character.name)}
-                    </span>
-                  </div>
+                  <span className="sr-only" aria-live="polite">
+                    {liveCaption(liveState, character.name)}
+                  </span>
+                  {(sessionStatus === "error" ||
+                    sessionStatus === "disconnected" ||
+                    (isMuted && liveState !== "speaking")) && (
+                    <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-surface-muted/90 border border-line/80 shadow-sm">
+                      <span className="text-[11px] font-bold text-ink">
+                        {sessionStatus === "error"
+                          ? "Connection Error"
+                          : sessionStatus === "disconnected"
+                            ? `Tap ${character.name} to start`
+                            : "Microphone off"}
+                      </span>
+                    </div>
+                  )}
                   {errorMessage && (
                     <p className="mt-1.5 text-[11px] text-rose-400 bg-rose-950/40 border border-rose-800/60 rounded-xl px-2.5 py-1 max-w-xs mx-auto">
                       {errorMessage}
@@ -851,7 +848,7 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
             <div 
               onMouseDown={handleDragStart}
               onTouchStart={handleDragStart}
-              className="relative group flex items-center justify-center w-28 h-28 cursor-grab active:cursor-grabbing select-none animate-kodaHoloFlash"
+              className="relative group flex items-center justify-center w-28 h-28 cursor-grab active:cursor-grabbing select-none"
               title="Click and drag to move Koda anywhere!"
             >
               {/*
@@ -897,15 +894,12 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                 <Sparkles className="absolute top-1.5 right-1.5 w-2 h-2 text-violet-500 opacity-80" />
               </div>
 
-              {/* Status Dot */}
-              <span className="absolute bottom-2 right-2 flex h-3 w-3 z-20">
-                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                  isKodaSpeaking ? "bg-cyan-400" : sessionStatus === "listening" ? "bg-emerald-400" : isLiveActive ? "bg-violet-500" : "bg-muted/60"
-                }`}></span>
-                <span className={`relative inline-flex rounded-full h-3 w-3 border border-surface ${
-                  isKodaSpeaking ? "bg-cyan-400" : sessionStatus === "listening" ? "bg-emerald-400" : isLiveActive ? "bg-violet-500" : "bg-muted/60"
-                }`}></span>
-              </span>
+              {/*
+                * No status dot. It pulsed a colour for speaking, listening and
+                * connected — three things the character beside it is already
+                * doing, on a shape small enough that the dot was competing with
+                * the face for the same 80 pixels.
+                */}
             </div>
 
             {/* Float Menu Controls Pill (Mouth/Chin area capsule) */}

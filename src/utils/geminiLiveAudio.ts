@@ -159,6 +159,8 @@ export class GeminiLiveVoiceSession {
   private activeAudioSources: AudioBufferSourceNode[] = [];
   /** While Koda talks, how long the child's current burst keeps the gate open. */
   private bargeInHoldUntil: number = 0;
+  /** Last reported talking state, so a change is announced once. */
+  private wasSpeaking: boolean = false;
   private callbacks: LiveVoiceCallbacks;
   private config: LiveVoiceConfig;
 
@@ -292,7 +294,7 @@ export class GeminiLiveVoiceSession {
       // talking. See `shouldSendMicFrame` for why this is not just a filter.
       const gate = shouldSendMicFrame({
         rms,
-        kodaSpeaking: this.activeAudioSources.length > 0,
+        kodaSpeaking: this.isSpeaking(),
         holdUntil: this.bargeInHoldUntil,
         now: Date.now(),
       });
@@ -356,7 +358,8 @@ export class GeminiLiveVoiceSession {
     if (!this.outputAudioCtx) return;
 
     try {
-      this.callbacks.onStatusChange("speaking");
+      // No status change here: the schedule decides, in the loop above. Setting
+      // it per chunk is what made the mouth stutter between bursts.
       this.modelEnergyMeter = 0.8;
 
       const audioBuffer = base64ToAudioBuffer(this.outputAudioCtx, base64, 24000);
@@ -374,13 +377,10 @@ export class GeminiLiveVoiceSession {
 
       source.onended = () => {
         const idx = this.activeAudioSources.indexOf(source);
-        if (idx > -1) {
-          this.activeAudioSources.splice(idx, 1);
-        }
-        if (this.activeAudioSources.length === 0) {
-          this.modelEnergyMeter = 0;
-          this.callbacks.onStatusChange("listening");
-        }
+        if (idx > -1) this.activeAudioSources.splice(idx, 1);
+        // Energy only. Whether Koda is still talking is the schedule's answer,
+        // not this chunk's — the next one may already be queued behind it.
+        if (this.activeAudioSources.length === 0) this.modelEnergyMeter = 0;
       };
     } catch (e) {
       console.error("Error playing audio chunk:", e);
@@ -400,6 +400,29 @@ export class GeminiLiveVoiceSession {
       this.nextPlayTime = this.outputAudioCtx.currentTime;
     }
     this.modelEnergyMeter = 0;
+    // Cut short: the schedule is empty now, so the next tick must report
+    // "listening" rather than compare against a state that no longer exists.
+    this.wasSpeaking = false;
+  }
+
+  /**
+   * Whether Koda is talking, according to the audio itself.
+   *
+   * Chunks are scheduled ahead onto `nextPlayTime`, so the honest question is
+   * "is there sound still to come out of the speaker", not "is a buffer node
+   * alive". The state used to be flipped per chunk — `speaking` on arrival,
+   * `listening` from `onended` whenever the queue happened to be empty — and
+   * chunks arrive in bursts, so between two bursts of one sentence the mouth
+   * stopped, the pill said "Listening…", and the character twitched through
+   * every sentence Koda spoke.
+   *
+   * The tail is why this is a comparison rather than a boolean: the last chunk
+   * is scheduled before it is heard, and dropping the state the instant the
+   * queue drains would cut the mouth off a beat before the voice.
+   */
+  public isSpeaking(): boolean {
+    if (!this.outputAudioCtx) return false;
+    return this.nextPlayTime - this.outputAudioCtx.currentTime > 0.05;
   }
 
   private startEnergyMonitoring(): void {
@@ -407,6 +430,15 @@ export class GeminiLiveVoiceSession {
       // Decay energy smoothly
       this.userEnergyMeter = Math.max(0, this.userEnergyMeter * 0.85);
       this.modelEnergyMeter = Math.max(0, this.modelEnergyMeter * 0.85);
+
+      // One place decides whether Koda is talking, and it only says so when the
+      // answer changes — a status pushed every 50ms re-renders the character
+      // twenty times a second to tell it nothing new.
+      const speaking = this.isSpeaking();
+      if (speaking !== this.wasSpeaking) {
+        this.wasSpeaking = speaking;
+        this.callbacks.onStatusChange(speaking ? "speaking" : "listening");
+      }
 
       this.callbacks.onAudioEnergy?.(this.userEnergyMeter, this.modelEnergyMeter);
     }, 50);

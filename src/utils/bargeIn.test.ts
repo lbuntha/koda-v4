@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { BARGE_IN_FLOOR, BARGE_IN_HOLD_MS, shouldSendMicFrame } from "./geminiLiveAudio";
+import {
+  BARGE_IN_FLOOR,
+  BARGE_IN_HOLD_MS,
+  GeminiLiveVoiceSession,
+  shouldSendMicFrame,
+} from "./geminiLiveAudio";
 
 /**
  * When the microphone is worth listening to.
@@ -56,5 +61,55 @@ describe("while Koda is silent", () => {
 
   it("forgets any hold, so the next turn starts clean", () => {
     expect(frame({ kodaSpeaking: false, holdUntil: 9_999 }).holdUntil).toBe(0);
+  });
+});
+
+/**
+ * When Koda counts as talking.
+ *
+ * The state used to be flipped per audio chunk — `speaking` on arrival,
+ * `listening` from `onended` whenever the queue happened to be empty. Chunks
+ * arrive in bursts, so between two bursts of a single sentence the mouth
+ * stopped, the pill said "Listening…", and the character twitched its way
+ * through everything Koda said.
+ *
+ * The schedule is the honest answer: sound is queued up to `nextPlayTime`, so
+ * Koda is talking while that is still ahead of the clock.
+ */
+describe("whether Koda is talking", () => {
+  // The real method, on a stand-in holding just the two fields it reads. A test
+  // that reimplemented the comparison could not fail when the rule changed.
+  const isSpeaking = (nextPlayTime: number, currentTime: number) =>
+    (GeminiLiveVoiceSession.prototype.isSpeaking as () => boolean).call({
+      outputAudioCtx: { currentTime },
+      nextPlayTime,
+    });
+
+  it("is talking while sound is still scheduled ahead of the clock", () => {
+    expect(isSpeaking(10.5, 10.0)).toBe(true);
+  });
+
+  it("keeps talking across the gap between two bursts of one sentence", () => {
+    // The old rule looked at whether any buffer was alive and said no here.
+    expect(isSpeaking(10.2, 10.0)).toBe(true);
+  });
+
+  it("stops once the last chunk has actually been heard", () => {
+    expect(isSpeaking(10.0, 10.0)).toBe(false);
+    expect(isSpeaking(10.0, 10.4)).toBe(false);
+  });
+
+  it("does not stop a beat early on the final chunk", () => {
+    // The tail: the last chunk is scheduled before it is heard.
+    expect(isSpeaking(10.06, 10.0)).toBe(true);
+  });
+
+  it("is not talking when there is no audio context at all", () => {
+    expect(
+      (GeminiLiveVoiceSession.prototype.isSpeaking as () => boolean).call({
+        outputAudioCtx: null,
+        nextPlayTime: 99,
+      }),
+    ).toBe(false);
   });
 });
