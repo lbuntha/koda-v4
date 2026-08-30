@@ -307,3 +307,96 @@ describe("a standing refusal is not re-litigated on every event", () => {
     expect(Outbox.size(), "the work is kept for whoever signs in next").toBe(11);
   });
 });
+
+/**
+ * A refusal the session already predicts, sent before it is asked for.
+ *
+ * The console showed `POST /v1/sync/push 403 (Forbidden)` on a platform admin
+ * account. The engine handled it correctly *afterwards* — one refusal, no
+ * retry loop — but the request itself was certain to fail before it was sent:
+ * the session says `familyId: null`, and the server refuses any family-less
+ * account outright because a support account that could push would start owning
+ * a child's record.
+ *
+ * So the answer is not to absorb the 403 more quietly. It is not to ask.
+ *
+ * The dangerous half is the other direction: an ordinary family token often
+ * carries no `permissions` array at all, and reading that absence as "may not"
+ * would silently stop syncing a child's record. Unknown must still try.
+ */
+const signInAs = (over: Record<string, unknown>) =>
+  localStorage.setItem(
+    SESSION_KEY,
+    JSON.stringify({
+      accessToken: "access-token",
+      refreshToken: "refresh-token",
+      expiresAt: Date.now() + 10 * 60 * 1000,
+      deviceId: "d_1",
+      familyId: "f_1",
+      role: "owner",
+      ...over,
+    }),
+  );
+
+const pushCalls = (fetchMock: ReturnType<typeof vi.fn>) =>
+  fetchMock.mock.calls.filter(([url]) => String(url).includes("/sync/"));
+
+describe("an account that could never sync", () => {
+  it("does not ask at all when there is no family to write into", async () => {
+    // The exact account from the report: platform admin, familyId null.
+    signInAs({ familyId: null, role: "admin", platformRole: "admin" });
+    const fetchMock = okPush();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { SyncEngine, Outbox } = await load();
+    SyncEngine.record([event("e_1")]);
+
+    await vi.waitFor(() => expect(SyncEngine.status().state).toBe("refused"));
+    expect(SyncEngine.status().reason).toBe("no_family");
+    // Not one 403 — no request at all.
+    expect(pushCalls(fetchMock)).toHaveLength(0);
+    // And the work is kept: signing in as a family member sends it.
+    expect(Outbox.size()).toBe(1);
+  });
+
+  it("does not ask when the token's own permissions exclude appending", async () => {
+    signInAs({
+      permissions: ["content:write", "scoring:write", "settings:write", "system:write"],
+    });
+    const fetchMock = okPush();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { SyncEngine, Outbox } = await load();
+    SyncEngine.record([event("e_1")]);
+
+    await vi.waitFor(() => expect(SyncEngine.status().state).toBe("refused"));
+    expect(SyncEngine.status().reason).toBe("forbidden");
+    expect(pushCalls(fetchMock)).toHaveLength(0);
+    expect(Outbox.size()).toBe(1);
+  });
+
+  it("still asks when the token simply does not say — unknown is not a refusal", async () => {
+    // The ordinary family token: a real family, and no permissions array. This
+    // is the case that must NOT be silently refused.
+    signInAs({});
+    const fetchMock = okPush();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { SyncEngine, Outbox } = await load();
+    SyncEngine.record([event("e_1")]);
+
+    await vi.waitFor(() => expect(Outbox.size()).toBe(0));
+    expect(pushCalls(fetchMock).length).toBeGreaterThan(0);
+  });
+
+  it("still asks for an account that holds the permission explicitly", async () => {
+    signInAs({ permissions: ["learner_data:append", "learner_data:read"] });
+    const fetchMock = okPush();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { SyncEngine, Outbox } = await load();
+    SyncEngine.record([event("e_1")]);
+
+    await vi.waitFor(() => expect(Outbox.size()).toBe(0));
+  });
+});

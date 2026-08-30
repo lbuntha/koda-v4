@@ -96,6 +96,31 @@ let status: SyncStatus = {
 const PERMANENT_REFUSALS = new Set(["no_family", "not_your_learner", "forbidden"]);
 
 /**
+ * A refusal this account is already known to be owed, without asking.
+ *
+ * The engine used to learn that a staff account cannot write learner data by
+ * *being told* — one POST, one 403, one red line in the console — and only then
+ * set the standing refusal. But the session already carries the answer: an
+ * account with no family has nowhere to write, and a token whose own permission
+ * list omits `learner_data:append` will be refused by the route that requires
+ * it. Asking anyway logs a failure that was certain before it was sent.
+ *
+ * **Positive evidence only.** An absent `permissions` array is *unknown*, not
+ * "no": that is the ordinary shape of a family token, and treating unknown as a
+ * refusal would silently stop syncing a child's record — a far worse failure
+ * than a console line. Unknown still tries, and still learns from the 403.
+ */
+function refusalOwedTo(session: { familyId?: string | null; permissions?: string[] }): string | null {
+  // The server refuses any family-less account outright: a support account that
+  // could push would start owning a child's record.
+  if (!session.familyId) return "no_family";
+  if (session.permissions?.length && !session.permissions.includes("learner_data:append")) {
+    return "forbidden";
+  }
+  return null;
+}
+
+/**
  * Which account earned the standing refusal.
  *
  * A refusal is a fact about an account, not about this device: the family
@@ -160,6 +185,22 @@ export async function flush(): Promise<void> {
 
   // Still the account that was refused, so the answer is still no.
   if (status.state === "refused" && refusedFor === accountKey(session)) return;
+
+  // Refused before asking, where the session already says so. The queue is kept
+  // exactly as it is for a 403 — signing in as a family member sends it.
+  const owed = refusalOwedTo(session);
+  if (owed) {
+    refusedFor = accountKey(session);
+    setStatus({
+      state: "refused",
+      reason: owed,
+      lastError:
+        owed === "no_family"
+          ? "This account is not part of a family, so there is nothing to sync into."
+          : "This account may not write learner data.",
+    });
+    return;
+  }
 
   inFlight = true;
   setStatus({ state: "sending" });
@@ -256,6 +297,8 @@ export async function pull(): Promise<number> {
    * a few minutes, none of which could ever have succeeded.
    */
   if (session && status.state === "refused" && refusedFor === accountKey(session)) return 0;
+  // And the same standing refusal, before the first ask rather than after it.
+  if (session && refusalOwedTo(session)) return 0;
 
   const token = await accessToken();
   if (!token) return 0;
