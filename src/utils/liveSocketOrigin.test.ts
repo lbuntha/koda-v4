@@ -70,3 +70,35 @@ describe("the live socket's origin", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });
+
+/**
+ * The session token must never reach the URL.
+ *
+ * It used to: a WebSocket handshake cannot carry an Authorization header, so
+ * the token travelled as a query parameter. Every proxy, CDN and load balancer
+ * on the path writes URLs to a log, and full admin and child JWTs were sitting
+ * in plaintext in Cloud Run's request log — readable by anyone with log access,
+ * for as long as logs are retained. "It expires in fifteen minutes" is not the
+ * same as harmless.
+ *
+ * This is a source-level test on purpose. The leak is not a behaviour anybody
+ * observes at runtime — the socket works perfectly either way — so the only
+ * thing that can catch its return is the shape of the URL being built.
+ */
+describe("the live socket URL", () => {
+  it("never carries the session token", async () => {
+    const source = await import("./geminiLiveAudio?raw").then((m) => m.default as string);
+    const urlLine = source
+      .split("\n")
+      .find((line) => line.includes("/api/live?voice="));
+
+    expect(urlLine, "the live socket URL is built somewhere else now").toBeTruthy();
+    expect(urlLine).not.toMatch(/token=/);
+  });
+
+  it("sends the token as the socket's first frame instead", async () => {
+    const source = await import("./geminiLiveAudio?raw").then((m) => m.default as string);
+
+    expect(source).toContain('JSON.stringify({ type: "auth", token })');
+  });
+});

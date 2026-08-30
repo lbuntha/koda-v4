@@ -175,29 +175,29 @@ export class GeminiLiveVoiceSession {
       const question = encodeURIComponent(this.config.question || "");
       const persona = encodeURIComponent(currentPersonaId());
 
-      // The session's token, not the Gemini key — a socket cannot carry a
-      // header, and this one at least expires. The tutor server resolves the
-      // family's key behind it.
+      /*
+       * The token is NOT in this URL, deliberately.
+       *
+       * It used to be, because a WebSocket handshake cannot carry an
+       * Authorization header — and every proxy, CDN and load balancer on the
+       * path writes URLs to a log. Full admin and child JWTs ended up sitting
+       * in plaintext in Cloud Run's request log. It goes in the socket's first
+       * frame instead, inside TLS, where nothing on the path records it.
+       */
       const token = await tutorSocketToken();
       const base = origin || `${protocol}//${host}`;
-      const wsUrl = `${base}/api/live?voice=${voice}&topic=${topic}&level=${level}&context=${context}&question=${question}&persona=${persona}${token ? `&token=${encodeURIComponent(token)}` : ""}`;
+      const wsUrl = `${base}/api/live?voice=${voice}&topic=${topic}&level=${level}&context=${context}&question=${question}&persona=${persona}`;
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
         this.isConnected = true;
         this.callbacks.onStatusChange("connected");
-        this.startMicProcessing();
-        this.startEnergyMonitoring();
-
-        // Proactively send initial prompt targeting the active question so Koda speaks immediately
-        setTimeout(() => {
-          if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            const contextText = this.config.context || this.config.topic || "this math problem";
-            this.sendTextMessage(
-              `Hi Koda! I am struggling with this active question right now: "${contextText}". Can you greet me warmly and give me a gentle Socratic hint to help me solve it?`
-            );
-          }
-        }, 350);
+        // Who this is, before anything else. The server reads nothing until it
+        // has this, and disconnects a socket that never sends it.
+        this.ws?.send(JSON.stringify({ type: "auth", token }));
+        // The microphone waits for `ready`: until the server has a Gemini
+        // session there is nothing to send audio to, and frames sent before it
+        // are simply dropped.
       };
 
       this.ws.onmessage = (event) => {
@@ -266,7 +266,19 @@ export class GeminiLiveVoiceSession {
 
   private handleServerMessage(msg: any): void {
     if (msg.type === "ready") {
+      // Authenticated, gated, and connected to Gemini. Only now is there
+      // anywhere for the microphone's audio to go.
+      this.startMicProcessing();
+      this.startEnergyMonitoring();
       this.callbacks.onStatusChange("listening");
+      window.setTimeout(() => {
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+          const contextText = this.config.context || this.config.topic || "this math problem";
+          this.sendTextMessage(
+            `Hi Koda! I am struggling with this active question right now: "${contextText}". Can you greet me warmly and give me a gentle Socratic hint to help me solve it?`,
+          );
+        }
+      }, 350);
     } else if (msg.type === "audio" && msg.audio) {
       this.playAudioChunk(msg.audio);
     } else if (msg.type === "modelText" && msg.text) {

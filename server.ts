@@ -797,12 +797,52 @@ async function startServer() {
   wss.on("connection", async (clientWs: WebSocket, req) => {
     console.log("Client connected to /api/live WebSocket");
     const urlObj = new URL(req.url || "", `http://${req.headers.host || "localhost"}`);
-    // A WebSocket handshake from a browser carries no Authorization header, so
-    // the access token comes as a query parameter. It is the same token the
-    // page already holds and it expires in minutes — unlike the API key that
-    // used to be here, which was neither.
-    const token = urlObj.searchParams.get("token");
-    const authorization = token ? `Bearer ${token}` : undefined;
+    /*
+     * The session token, as the socket's first frame — never in the URL.
+     *
+     * A WebSocket handshake carries no Authorization header, so the token used
+     * to travel as a query parameter. That put a live credential somewhere every
+     * proxy, CDN and load balancer writes down: full admin and child JWTs were
+     * sitting in plaintext in Cloud Run's request log, readable by anyone with
+     * log access, for as long as logs are retained. Short-lived is not the same
+     * as harmless.
+     *
+     * A frame is inside the TLS session and is not logged by anything on the
+     * path. So the socket opens carrying nothing, and the first thing the client
+     * must say is who it is. Nothing else is read until it does, and a client
+     * that stays silent is disconnected rather than served.
+     */
+    const authorization = await new Promise<string | undefined>((resolve) => {
+      let settled = false;
+      const done = (value: string | undefined) => {
+        if (settled) return;
+        settled = true;
+        clientWs.off("message", onFirstFrame);
+        clearTimeout(timer);
+        resolve(value);
+      };
+      const onFirstFrame = (raw: unknown) => {
+        try {
+          const message = JSON.parse(String(raw)) as { type?: string; token?: unknown };
+          const token = typeof message?.token === "string" ? message.token.trim() : "";
+          done(message?.type === "auth" && token ? `Bearer ${token}` : undefined);
+        } catch {
+          done(undefined);
+        }
+      };
+      // A socket that never identifies itself is a socket holding a Gemini
+      // connection open for nobody.
+      const timer = setTimeout(() => done(undefined), 10_000);
+      clientWs.on("message", onFirstFrame);
+    });
+
+    if (!authorization) {
+      clientWs.send(
+        JSON.stringify({ type: "error", code: "auth_required", error: "Sign in to talk to Koda." }),
+      );
+      clientWs.close();
+      return;
+    }
     // Which teacher this child has been given. An id, never prose — the manner
     // behind it is resolved from the roster below.
     const personaId = urlObj.searchParams.get("persona") || undefined;
