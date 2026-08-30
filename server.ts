@@ -976,34 +976,37 @@ async function startServer() {
               );
             }
 
-            // Check for model text transcription
-            const modelParts = message.serverContent?.modelTurn?.parts;
-            if (modelParts) {
-              for (const part of modelParts) {
-                if (part.text && clientWs.readyState === WebSocket.OPEN) {
-                  clientWs.send(
-                    JSON.stringify({
-                      type: "modelText",
-                      text: part.text,
-                    })
-                  );
-                }
+            /*
+             * What Koda said, and what the child said.
+             *
+             * Both come from `serverContent.*Transcription`, and neither used to
+             * be read. The code looked for Koda's words in `modelTurn.parts` —
+             * which in an AUDIO session holds `inlineData`, the sound itself,
+             * and never any text — and for the child's in `clientContent`, a
+             * field the server sends *to* the model rather than receives from
+             * it. Both are configured on the session (`inputAudioTranscription`,
+             * `outputAudioTranscription`); nothing was reading their output.
+             *
+             * The visible cost was a transcript with a child's questions in it
+             * and not one of Koda's answers — the coach looked broken while the
+             * audio played perfectly. The quiet cost was that the conversation
+             * log recorded a voice session as zero turns, because `userText`
+             * never fired.
+             *
+             * Kept alongside `modelTurn.parts` rather than replacing it: a text
+             * session, or a future mixed mode, still puts text there.
+             */
+            const say = (type: "modelText" | "userText", text?: string) => {
+              if (text && clientWs.readyState === WebSocket.OPEN) {
+                clientWs.send(JSON.stringify({ type, text }));
               }
-            }
+            };
 
-            // Check for user input transcription if available
-            const inputParts = (message as any).clientContent?.turns?.[0]?.parts;
-            if (inputParts) {
-              for (const part of inputParts) {
-                if (part.text && clientWs.readyState === WebSocket.OPEN) {
-                  clientWs.send(
-                    JSON.stringify({
-                      type: "userText",
-                      text: part.text,
-                    })
-                  );
-                }
-              }
+            say("modelText", message.serverContent?.outputTranscription?.text);
+            say("userText", message.serverContent?.inputTranscription?.text);
+
+            for (const part of message.serverContent?.modelTurn?.parts ?? []) {
+              say("modelText", part.text);
             }
 
             // Interruption handling (student spoke over model)

@@ -20,6 +20,10 @@ import {
   Minimize2,
   GripHorizontal,
   Keyboard,
+  Lightbulb,
+  Wrench,
+  Brain,
+  ArrowRight,
 } from "lucide-react";
 import { GeminiLiveVoiceSession, LiveVoiceConfig } from "../utils/geminiLiveAudio";
 import { usePersona } from "../lib/usePersona";
@@ -203,7 +207,6 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
 
   // Text input for hybrid typing
   const [textInput, setTextInput] = useState<string>("");
-  const [activeSubtitle, setActiveSubtitle] = useState<string | null>(null);
 
   const sessionRef = useRef<GeminiLiveVoiceSession | null>(null);
   /** What this conversation is recording. Written when the coach closes. */
@@ -231,22 +234,6 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
       );
     }
   }, [currentQuestionIndex, currentQuestionText]);
-
-  // Track Koda's speech to show subtitles in floating speech bubble
-  useEffect(() => {
-    const lastKodaMsg = [...transcript].reverse().find((msg) => msg.sender === "koda");
-    if (lastKodaMsg) {
-      setActiveSubtitle(lastKodaMsg.text);
-      if (sessionStatus !== "speaking") {
-        const timer = setTimeout(() => {
-          setActiveSubtitle(null);
-        }, 5000);
-        return () => clearTimeout(timer);
-      }
-    } else {
-      setActiveSubtitle(null);
-    }
-  }, [transcript, sessionStatus]);
 
   // Handle Start / Stop Live Session
   const handleToggleLiveSession = async () => {
@@ -483,8 +470,8 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
   const orbGlow = isLiveActive
     ? isKodaSpeaking
       ? "shadow-[0_0_60px_rgba(34,211,238,0.8)] ring-4 ring-cyan-400/60"
-      : "shadow-[0_0_50px_rgba(251,191,36,0.7)] ring-4 ring-amber-400/50"
-    : "shadow-[0_0_25px_rgba(100,116,139,0.3)] ring-2 ring-slate-700";
+      : "shadow-[0_0_50px_rgba(251,191,36,0.7)] ring-4 ring-violet-500/50"
+    : "shadow-[0_0_25px_rgba(100,116,139,0.3)] ring-2 ring-line";
 
   return (
     <>
@@ -532,11 +519,11 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
         /* EXPANDED FULL COACHING DASHBOARD                            */
         /* ============================================================ */
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-5 bg-black/75 backdrop-blur-md animate-fadeIn">
-          <div className="relative w-full max-w-2xl bg-slate-900 border-2 border-amber-500/40 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] pointer-events-auto">
+          <div className="relative w-full max-w-2xl bg-surface border-2 border-violet-600/40 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] pointer-events-auto">
             {/* Header */}
-            <div className="px-3.5 sm:px-4 py-2.5 bg-gradient-to-r from-slate-900 via-amber-950/30 to-slate-900 border-b border-amber-500/20 flex items-center justify-between gap-2 shrink-0 select-none">
+            <div className="px-3.5 sm:px-4 py-2.5 bg-gradient-to-r from-surface via-violet-500/10 to-surface border-b border-violet-500/20 flex items-center justify-between gap-2 shrink-0 select-none">
               <div className="flex items-center gap-2 min-w-0">
-                <div className="relative flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-br from-amber-400 via-orange-400 to-amber-500 text-slate-950 shadow-md shrink-0">
+                <div className="relative flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-br from-violet-500 via-orange-400 to-violet-600 text-white shadow-md shrink-0">
                   <Bot className="w-4 h-4" />
                   {isLiveActive && (
                     <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
@@ -546,10 +533,10 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                   )}
                 </div>
                 <div className="flex items-center gap-1.5 min-w-0">
-                  <h2 className="text-xs sm:text-sm font-black text-white tracking-wide truncate">
-                    {character.emoji} {character.name}
+                  <h2 className="text-xs sm:text-sm font-black text-ink tracking-wide truncate">
+                    {character.name}
                   </h2>
-                  <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-400/20 text-amber-300 border border-amber-400/30 shrink-0">
+                  <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-violet-500/15 text-violet-700 dark:text-violet-300 border border-violet-500/30 shrink-0">
                     Live
                   </span>
                 </div>
@@ -560,7 +547,7 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                   value={selectedVoice}
                   disabled={isLiveActive}
                   onChange={(e) => setSelectedVoice(e.target.value as any)}
-                  className="bg-slate-800/90 border border-slate-700 text-slate-200 text-[11px] font-medium rounded-lg px-2 py-1 focus:outline-none focus:border-amber-400 cursor-pointer max-w-[130px] truncate"
+                  className="bg-surface-muted/90 border border-line text-ink text-[11px] font-medium rounded-lg px-2 py-1 focus:outline-none focus:border-violet-500 cursor-pointer max-w-[130px] truncate"
                   title="Select Koda Voice"
                 >
                   <option value="Aoede">Aoede (Warm)</option>
@@ -573,7 +560,7 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                 {onSwitchToText && (
                   <button
                     onClick={onSwitchToText}
-                    className="p-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition cursor-pointer"
+                    className="p-1.5 rounded-xl bg-surface-muted/80 hover:bg-surface-muted text-muted hover:text-ink transition cursor-pointer"
                     title="Type to Koda instead"
                     aria-label="Type to Koda instead"
                   >
@@ -582,14 +569,14 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                 )}
                 <button
                   onClick={() => setIsExpanded(false)}
-                  className="p-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition cursor-pointer"
+                  className="p-1.5 rounded-xl bg-surface-muted/80 hover:bg-surface-muted text-muted hover:text-ink transition cursor-pointer"
                   title="Floating Pop-up Mode"
                 >
                   <Minimize2 className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={onClose}
-                  className="p-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition cursor-pointer"
+                  className="p-1.5 rounded-xl bg-surface-muted/80 hover:bg-surface-muted text-muted hover:text-ink transition cursor-pointer"
                   title="Close Voice Coach"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -600,24 +587,24 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
             {/* Scrollable Main Container */}
             <div className="flex-1 overflow-y-auto flex flex-col min-h-0">
               {/* Active Question Context Card */}
-              <div className="mx-3 sm:mx-4 my-2.5 p-3 bg-slate-950/90 border border-amber-500/30 rounded-2xl shadow-md flex items-start gap-2.5 shrink-0">
-                <div className="w-7 h-7 rounded-lg bg-amber-400/15 border border-amber-400/30 flex items-center justify-center shrink-0 text-amber-400 mt-0.5">
+              <div className="mx-3 sm:mx-4 my-2.5 p-3 bg-canvas/90 border border-violet-500/30 rounded-2xl shadow-md flex items-start gap-2.5 shrink-0">
+                <div className="w-7 h-7 rounded-lg bg-violet-500/15 border border-violet-400/30 flex items-center justify-center shrink-0 text-violet-500 mt-0.5">
                   <HelpCircle className="w-3.5 h-3.5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400">
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-violet-500">
                       Question {currentQuestionIndex ? `${currentQuestionIndex}/${totalQuestions}` : ""}
                     </span>
                   </div>
-                  <p className="text-xs sm:text-sm font-bold text-white mt-0.5 leading-snug">
+                  <p className="text-xs sm:text-sm font-bold text-ink mt-0.5 leading-snug">
                     {currentQuestionText}
                   </p>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0 self-center">
                   <button
                     onClick={() => handleQuickPrompt(`Hi ${character.name}! Can you give me a hint to help me solve this question: "${currentQuestionText}"?`)}
-                    className="px-2 py-1 rounded-xl bg-amber-400/20 hover:bg-amber-400/30 border border-amber-400/40 text-[10px] font-mono font-bold text-amber-300 hover:text-white transition cursor-pointer"
+                    className="px-2 py-1 rounded-xl bg-violet-400/20 hover:bg-violet-400/30 border border-violet-500/40 text-[10px] font-mono font-bold text-violet-500 hover:text-violet-700 transition cursor-pointer"
                   >
                     Ask Hint
                   </button>
@@ -627,18 +614,18 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                         onNextQuestion();
                         handleQuickPrompt(`Let's move to the next question!`);
                       }}
-                      className="px-2 py-1 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-[10px] font-mono font-bold text-cyan-300 hover:text-white transition cursor-pointer flex items-center gap-1"
+                      className="px-2 py-1 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-[10px] font-mono font-bold text-cyan-600 hover:text-cyan-800 transition cursor-pointer flex items-center gap-1"
                       title="Move to the next question"
                     >
                       <span>Next Question</span>
-                      <span>➔</span>
+                      <ArrowRight className="h-3 w-3" aria-hidden="true" />
                     </button>
                   )}
                 </div>
               </div>
 
               {/* Central Koda Avatar Stage */}
-              <div className="relative py-4 px-4 bg-gradient-to-b from-slate-900 via-slate-900/90 to-slate-950 flex flex-col items-center justify-center border-b border-slate-800/80 shrink-0">
+              <div className="relative py-4 px-4 bg-gradient-to-b from-surface via-surface to-canvas flex flex-col items-center justify-center border-b border-line/80 shrink-0">
                 {/* Audio Wave Frequency Rings */}
                 <div className="relative flex items-center justify-center">
                   {isLiveActive && (
@@ -646,13 +633,13 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                       <div
                         style={{ transform: `scale(${1 + (isKodaSpeaking ? modelEnergy * 0.8 : userEnergy * 0.6)})` }}
                         className={`absolute -inset-3 rounded-full transition duration-75 opacity-30 ${
-                          isKodaSpeaking ? "bg-cyan-400" : "bg-amber-400"
+                          isKodaSpeaking ? "bg-cyan-400" : "bg-violet-500"
                         }`}
                       />
                       <div
                         style={{ transform: `scale(${1 + (isKodaSpeaking ? modelEnergy * 0.5 : userEnergy * 0.3)})` }}
                         className={`absolute -inset-1.5 rounded-full transition duration-75 opacity-40 ${
-                          isKodaSpeaking ? "bg-cyan-400" : "bg-amber-400"
+                          isKodaSpeaking ? "bg-cyan-400" : "bg-violet-500"
                         }`}
                       />
                     </>
@@ -672,7 +659,7 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                     type="button"
                     onClick={handleToggleLiveSession}
                     aria-label={isLiveActive ? "End the voice session" : "Start the voice session"}
-                    className="relative z-10 cursor-pointer rounded-2xl transition-transform active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+                    className="relative z-10 cursor-pointer rounded-2xl transition-transform active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
                     style={{ transform: `scale(${orbScale})`, transition: "transform 0.08s ease-out" }}
                   >
                     <KodaMascot
@@ -687,7 +674,7 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
 
                 {/* Status Badge */}
                 <div className="mt-3 text-center">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-slate-800/90 border border-slate-700/80 shadow-sm">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-surface-muted/90 border border-line/80 shadow-sm">
                     {/* The pill reads from the same `liveState` the face does,
                         so it cannot say "Listening…" beside a moving mouth. */}
                     <span
@@ -697,11 +684,11 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                           : liveState === "listening"
                           ? "bg-emerald-400 animate-pulse"
                           : liveState === "thinking"
-                          ? "bg-amber-400 animate-pulse"
-                          : "bg-slate-600"
+                          ? "bg-violet-500 animate-pulse"
+                          : "bg-muted/40"
                       }`}
                     />
-                    <span className="text-[11px] font-bold text-slate-200">
+                    <span className="text-[11px] font-bold text-ink">
                       {sessionStatus === "error"
                         ? "Connection Error"
                         : sessionStatus === "disconnected"
@@ -725,7 +712,7 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                     className={`px-4 py-2 rounded-xl font-black text-xs flex items-center gap-1.5 shadow-md transition transform active:scale-95 cursor-pointer ${
                       isLiveActive
                         ? "bg-rose-500 hover:bg-rose-600 text-white"
-                        : "bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950"
+                        : "bg-gradient-to-r from-violet-500 to-orange-500 hover:from-violet-400 hover:to-orange-400 text-white"
                     }`}
                   >
                     {isLiveActive ? (
@@ -752,7 +739,7 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                       className={`p-2 rounded-xl border transition cursor-pointer ${
                         isMuted
                           ? "bg-rose-950/60 border-rose-500/50 text-rose-300"
-                          : "bg-slate-800/80 border-slate-700 text-slate-300 hover:text-white"
+                          : "bg-surface-muted/80 border-line text-muted hover:text-ink"
                       }`}
                       title={isMuted ? "Unmute Microphone" : "Mute Microphone"}
                     >
@@ -763,35 +750,38 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
               </div>
 
               {/* Quick Socratic Prompts */}
-              <div className="px-3 py-2 bg-slate-950/50 border-b border-slate-800/80 shrink-0">
+              <div className="px-3 py-2 bg-canvas/50 border-b border-line/80 shrink-0">
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
                   <button
                     onClick={() => handleQuickPrompt(`Can you give me a hint for Question ${currentQuestionIndex}?`)}
-                    className="px-2.5 py-1 rounded-full bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-[11px] text-slate-300 hover:text-amber-300 transition whitespace-nowrap cursor-pointer shrink-0"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-muted/80 hover:bg-surface-muted border border-line text-[11px] font-medium text-muted hover:text-violet-500 hover:border-violet-400 transition whitespace-nowrap cursor-pointer shrink-0"
                   >
-                    💡 Hint Q{currentQuestionIndex}
+                    <Lightbulb className="h-3.5 w-3.5" aria-hidden="true" />
+                    Hint Q{currentQuestionIndex}
                   </button>
                   <button
                     onClick={() => handleQuickPrompt(`How do I use the visual tools on screen?`)}
-                    className="px-2.5 py-1 rounded-full bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-[11px] text-slate-300 hover:text-amber-300 transition whitespace-nowrap cursor-pointer shrink-0"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-muted/80 hover:bg-surface-muted border border-line text-[11px] font-medium text-muted hover:text-violet-500 hover:border-violet-400 transition whitespace-nowrap cursor-pointer shrink-0"
                   >
-                    🛠️ Visual Tools
+                    <Wrench className="h-3.5 w-3.5" aria-hidden="true" />
+                    Visual Tools
                   </button>
                   <button
                     onClick={() => handleQuickPrompt(`Can you explain the main math concept here?`)}
-                    className="px-2.5 py-1 rounded-full bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-[11px] text-slate-300 hover:text-amber-300 transition whitespace-nowrap cursor-pointer shrink-0"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-muted/80 hover:bg-surface-muted border border-line text-[11px] font-medium text-muted hover:text-violet-500 hover:border-violet-400 transition whitespace-nowrap cursor-pointer shrink-0"
                   >
-                    🧠 Concept
+                    <Brain className="h-3.5 w-3.5" aria-hidden="true" />
+                    Concept
                   </button>
                 </div>
               </div>
 
               {/* Live Conversation Transcript */}
-              <div className="flex-1 p-3 overflow-y-auto min-h-[100px] max-h-[180px] space-y-2 bg-slate-900/60">
+              <div className="flex-1 p-3 overflow-y-auto min-h-[100px] max-h-[180px] space-y-2 bg-surface/60">
                 {transcript.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-center py-4 text-slate-500">
-                    <MessageSquare className="w-6 h-6 mb-1 opacity-40 text-amber-400" />
-                    <p className="text-[11px] font-medium text-slate-400">Live Voice Transcripts</p>
+                  <div className="h-full flex flex-col items-center justify-center text-center py-4 text-muted">
+                    <MessageSquare className="w-6 h-6 mb-1 opacity-40 text-violet-500" />
+                    <p className="text-[11px] font-medium text-muted">Live Voice Transcripts</p>
                   </div>
                 ) : (
                   transcript.map((msg) => (
@@ -802,16 +792,16 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                       }`}
                     >
                       <div className="flex items-center gap-1 mb-0.5 px-1">
-                        <span className="text-[9px] font-bold text-slate-400">
+                        <span className="text-[9px] font-bold text-muted">
                           {msg.sender === "user" ? studentName : "Koda"}
                         </span>
-                        <span className="text-[8px] text-slate-600">{msg.time}</span>
+                        <span className="text-[8px] text-muted">{msg.time}</span>
                       </div>
                       <div
                         className={`max-w-[88%] rounded-xl px-3 py-2 text-xs leading-relaxed shadow-sm ${
                           msg.sender === "user"
-                            ? "bg-amber-400 text-slate-950 font-medium rounded-tr-none"
-                            : "bg-slate-800 border border-slate-700 text-slate-100 rounded-tl-none"
+                            ? "bg-violet-600 text-white font-medium rounded-tr-none"
+                            : "bg-surface-muted border border-line text-ink rounded-tl-none"
                         }`}
                       >
                         {msg.text}
@@ -826,19 +816,19 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
             {/* Text Input Footer */}
             <form
               onSubmit={handleSendText}
-              className="p-3 bg-slate-950 border-t border-slate-800 flex items-center gap-2"
+              className="p-3 bg-canvas border-t border-line flex items-center gap-2"
             >
               <input
                 type="text"
                 value={textInput}
                 onChange={(e) => setTextInput(e.target.value)}
                 placeholder="Type or speak a question to Koda..."
-                className="flex-1 bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none"
+                className="flex-1 bg-surface border border-line focus:border-violet-500 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-ink placeholder:text-muted focus:outline-none"
               />
               <button
                 type="submit"
                 disabled={!textInput.trim()}
-                className="px-4 py-2 bg-amber-400 hover:bg-amber-300 disabled:opacity-40 text-slate-950 font-bold rounded-xl text-xs sm:text-sm transition cursor-pointer"
+                className="px-4 py-2 bg-violet-500 hover:bg-violet-400 disabled:opacity-40 text-white font-bold rounded-xl text-xs sm:text-sm transition cursor-pointer"
               >
                 Send
               </button>
@@ -857,14 +847,13 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
             }}
             className="pointer-events-auto relative flex flex-col items-center justify-center animate-kodaFloat"
           >
-            {/* Dynamic Subtitle Speech Bubble */}
-            {activeSubtitle && (
-              <div className="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 w-[250px] sm:w-[290px] bg-slate-950/95 border border-cyan-400/40 backdrop-blur-md rounded-2xl p-3 shadow-[0_12px_30px_rgba(0,0,0,0.8)] pointer-events-none select-none text-left text-[11px] text-cyan-200 animate-fadeIn font-semibold leading-relaxed">
-                <div className="absolute bottom-[-6px] left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-950 border-r border-b border-cyan-400/40 rotate-45" />
-                <p className="max-h-[110px] overflow-y-auto no-scrollbar">{activeSubtitle}</p>
-              </div>
-            )}
-
+            {/*
+              * No speech bubble. Koda is talking — the words are already in the
+              * room, and a caption of them was a 290px panel of low-contrast
+              * text floating over whatever the child was meant to be looking
+              * at. The transcript in the open panel is where anyone who wants
+              * the words can read them.
+              */}
             {/* Drag Handle & Hover Area Wrapper */}
             <div 
               onMouseDown={handleDragStart}
@@ -878,13 +867,13 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                   <div
                     style={{ transform: `scale(${1.15 + (isKodaSpeaking ? modelEnergy * 0.9 : userEnergy * 0.7)})` }}
                     className={`absolute inset-2 rounded-full transition duration-75 opacity-20 ${
-                      isKodaSpeaking ? "bg-cyan-500" : "bg-amber-500"
+                      isKodaSpeaking ? "bg-cyan-500" : "bg-violet-600"
                     }`}
                   />
                   <div
                     style={{ transform: `scale(${1 + (isKodaSpeaking ? modelEnergy * 0.6 : userEnergy * 0.4)})` }}
                     className={`absolute inset-4 rounded-full transition duration-75 opacity-30 ${
-                      isKodaSpeaking ? "bg-cyan-400" : "bg-amber-400"
+                      isKodaSpeaking ? "bg-cyan-400" : "bg-violet-500"
                     }`}
                   />
                 </>
@@ -896,87 +885,58 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                   transform: `scale(${orbScale})`,
                   transition: "transform 0.08s ease-out",
                 }}
-                className={`relative z-10 flex flex-col items-center justify-center w-20 h-20 rounded-full bg-slate-950 border-3 ${
+                className={`relative z-10 flex flex-col items-center justify-center w-20 h-20 rounded-full bg-canvas border-3 ${
                   isLiveActive
                     ? isKodaSpeaking
-                      ? "border-cyan-400 bg-gradient-to-b from-cyan-950/80 via-slate-950 to-slate-950 shadow-[0_0_30px_rgba(34,211,238,0.5)]"
-                      : "border-amber-400 bg-gradient-to-b from-amber-950/80 via-slate-950 to-slate-950 shadow-[0_0_25px_rgba(245,158,11,0.4)]"
-                    : "border-slate-700 bg-slate-950 shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
-                } transition-all duration-300 hover:border-amber-400/90`}
+                      ? "border-cyan-400 bg-gradient-to-b from-cyan-500/15 via-surface to-canvas shadow-[0_0_30px_rgba(34,211,238,0.5)]"
+                      : "border-violet-500 bg-gradient-to-b from-violet-500/15 via-surface to-canvas shadow-[0_0_25px_rgba(139,92,246,0.35)]"
+                    : "border-line bg-canvas shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
+                } transition-all duration-300 hover:border-violet-500/90`}
                 onClick={handleToggleLiveSession}
                 title={isLiveActive ? "Voice is ACTIVE! Click to pause/disconnect." : "Voice is offline. Click to connect!"}
               >
-                {/* Face Components */}
-                <div className="flex flex-col items-center justify-center space-y-1.5">
-                  {/* Antennas */}
-                  <div className="flex items-center gap-4 -mt-1">
-                    <div className={`w-1 h-1 rounded-full ${isLiveActive ? "bg-cyan-400 animate-ping" : "bg-slate-600"}`} />
-                    <div className={`w-1 h-1 rounded-full ${isLiveActive ? "bg-cyan-400 animate-ping" : "bg-slate-600"}`} />
-                  </div>
+                {/*
+                  * The character, not a drawing of one.
+                  *
+                  * This used to be a face built here out of divs — two dots, a
+                  * bar for a mouth, a pair of antennas — with its own idea of
+                  * which colour meant talking. So the floating coach and the
+                  * panel showed two different Kodas, and the small one was the
+                  * one a child looks at most.
+                  *
+                  * `KodaMascot` is the same character the panel draws, on the
+                  * same `mascotStateFor` reading, so talking, listening,
+                  * thinking and waiting look identical in both places.
+                  */}
+                <KodaMascot
+                  state={liveState}
+                  personaId={character.personaId}
+                  avatarSeed={character.avatarSeed}
+                  energy={isKodaSpeaking ? modelEnergy : undefined}
+                  size={68}
+                />
 
-                  {/* Eyes */}
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={`w-3 h-3 rounded-full transition-all flex items-center justify-center ${
-                        isKodaSpeaking
-                          ? "bg-cyan-300 shadow-[0_0_10px_rgba(34,211,238,1)] animate-pulse"
-                          : sessionStatus === "listening"
-                          ? "bg-emerald-300 shadow-[0_0_10px_rgba(52,211,153,1)]"
-                          : isLiveActive
-                          ? "bg-amber-300 shadow-[0_0_8px_rgba(251,191,36,0.8)]"
-                          : "bg-slate-500"
-                      }`}
-                    >
-                      <div className="w-1 h-1 bg-slate-950 rounded-full" />
-                    </div>
-                    <div
-                      className={`w-3 h-3 rounded-full transition-all flex items-center justify-center ${
-                        isKodaSpeaking
-                          ? "bg-cyan-300 shadow-[0_0_10px_rgba(34,211,238,1)] animate-pulse"
-                          : sessionStatus === "listening"
-                          ? "bg-emerald-300 shadow-[0_0_10px_rgba(52,211,153,1)]"
-                          : isLiveActive
-                          ? "bg-amber-300 shadow-[0_0_8px_rgba(251,191,36,0.8)]"
-                          : "bg-slate-500"
-                      }`}
-                    >
-                      <div className="w-1 h-1 bg-slate-950 rounded-full" />
-                    </div>
-                  </div>
-
-                  {/* Mouth */}
-                  {isKodaSpeaking ? (
-                    <div className="w-4 h-1.5 bg-cyan-300 rounded-full animate-bounce shadow-[0_0_8px_rgba(34,211,238,0.9)]" />
-                  ) : sessionStatus === "listening" ? (
-                    <div className="w-3.5 h-0.5 border-b-2 border-emerald-300 rounded-full" />
-                  ) : isLiveActive ? (
-                    <div className="w-2.5 h-0.5 bg-amber-300/90 rounded-full" />
-                  ) : (
-                    <div className="w-2.5 h-0.5 bg-slate-600 rounded-full" />
-                  )}
-                </div>
-
-                <Sparkles className="absolute top-1.5 right-1.5 w-2 h-2 text-amber-400 opacity-80" />
+                <Sparkles className="absolute top-1.5 right-1.5 w-2 h-2 text-violet-500 opacity-80" />
               </div>
 
               {/* Status Dot */}
               <span className="absolute bottom-2 right-2 flex h-3 w-3 z-20">
                 <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                  isKodaSpeaking ? "bg-cyan-400" : sessionStatus === "listening" ? "bg-emerald-400" : isLiveActive ? "bg-amber-400" : "bg-slate-500"
+                  isKodaSpeaking ? "bg-cyan-400" : sessionStatus === "listening" ? "bg-emerald-400" : isLiveActive ? "bg-violet-500" : "bg-muted/60"
                 }`}></span>
-                <span className={`relative inline-flex rounded-full h-3 w-3 border border-slate-950 ${
-                  isKodaSpeaking ? "bg-cyan-400" : sessionStatus === "listening" ? "bg-emerald-400" : isLiveActive ? "bg-amber-400" : "bg-slate-500"
+                <span className={`relative inline-flex rounded-full h-3 w-3 border border-surface ${
+                  isKodaSpeaking ? "bg-cyan-400" : sessionStatus === "listening" ? "bg-emerald-400" : isLiveActive ? "bg-violet-500" : "bg-muted/60"
                 }`}></span>
               </span>
             </div>
 
             {/* Float Menu Controls Pill (Mouth/Chin area capsule) */}
-            <div className="absolute -bottom-8 flex items-center gap-1.5 bg-slate-950/90 border border-amber-500/30 rounded-full px-2 py-1 shadow-lg pointer-events-auto shrink-0 opacity-80 hover:opacity-100 transition-opacity">
+            <div className="absolute -bottom-8 flex items-center gap-1.5 bg-canvas/90 border border-violet-500/30 rounded-full px-2 py-1 shadow-lg pointer-events-auto shrink-0 opacity-80 hover:opacity-100 transition-opacity">
               {/* Mic Status */}
               <button
                 onClick={handleToggleLiveSession}
                 className={`p-1.5 rounded-full transition transform active:scale-90 cursor-pointer ${
-                  isLiveActive ? "text-cyan-400 hover:text-cyan-300" : "text-slate-400 hover:text-amber-400"
+                  isLiveActive ? "text-cyan-400 hover:text-cyan-300" : "text-muted hover:text-violet-500"
                 }`}
                 title={isLiveActive ? "Disconnect Session" : "Connect Session"}
               >
@@ -992,7 +952,7 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                     }
                   }}
                   className={`p-1.5 rounded-full transition transform active:scale-90 cursor-pointer ${
-                    isMuted ? "text-rose-400 hover:text-rose-300" : "text-slate-300 hover:text-white"
+                    isMuted ? "text-rose-400 hover:text-rose-300" : "text-muted hover:text-ink"
                   }`}
                   title={isMuted ? "Unmute Mic" : "Mute Mic"}
                 >
@@ -1003,7 +963,7 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
               {/* Expand Chat Option */}
               <button
                 onClick={() => setIsExpanded(true)}
-                className="p-1.5 text-amber-400 hover:text-amber-300 rounded-full transition transform active:scale-90 cursor-pointer"
+                className="p-1.5 text-violet-500 hover:text-violet-400 rounded-full transition transform active:scale-90 cursor-pointer"
                 title="Expand Socratic Chat Box"
               >
                 <MessageSquare className="w-3.5 h-3.5" />
@@ -1012,7 +972,7 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
               {onSwitchToText && (
                 <button
                   onClick={onSwitchToText}
-                  className="p-1.5 text-slate-300 hover:text-white rounded-full transition transform active:scale-90 cursor-pointer"
+                  className="p-1.5 text-muted hover:text-ink rounded-full transition transform active:scale-90 cursor-pointer"
                   title="Type to Koda instead"
                   aria-label="Type to Koda instead"
                 >
