@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 
 import { StreakAPI, dayKey } from "./streak";
 import { currentLearnerId } from "./learnerProgress";
+import { ChildSettingsAPI } from "./childSettings";
 
 /**
  * How long a child has been playing today.
@@ -108,7 +109,7 @@ export const SessionTimeAPI = {
 };
 
 /** How often the clock is written down while a round runs. */
-const TICK_MS = 15_000;
+export const TICK_MS = 15_000;
 
 /**
  * Count the time a round is open.
@@ -131,4 +132,38 @@ export function useSessionClock(active: boolean): void {
     }, TICK_MS);
     return () => window.clearInterval(timer);
   }, [active]);
+}
+
+/**
+ * Today's study time, as one reading.
+ *
+ * The parent's cap and the child's spent minutes live in two stores, on two
+ * different schedules — the cap arrives by sync from a grown-up's phone, the
+ * clock moves while a round runs — and the rule is the pair of them read
+ * together. This is that reading, in one place, subscribed to both.
+ *
+ * A hook rather than four lines in `App`, because those four lines *were* the
+ * rule and nothing could test them: they sat inside a component that mounts
+ * sign-in, sync and the whole nav shell. Here the rule is reachable on its own.
+ */
+export interface StudyGate {
+  /** Minutes a day the grown-up allowed, or `null` for no cap. */
+  cap: number | null;
+  /** Minutes played today, on this device. */
+  spent: number;
+  /** Minutes still available, or `null` when there is no cap. */
+  left: number | null;
+  /** Whether today's study time is spent, and a new round must be refused. */
+  dayDone: boolean;
+}
+
+export function useStudyGate(): StudyGate {
+  // Both stores, because either one moving changes the answer: a parent
+  // raising the cap from their phone must reopen the tab a child is sitting on.
+  useSyncExternalStore(ChildSettingsAPI.subscribe, ChildSettingsAPI.version);
+  useSyncExternalStore(SessionTimeAPI.subscribe, SessionTimeAPI.version);
+
+  const cap = ChildSettingsAPI.current().sessionMinutes;
+  const spent = SessionTimeAPI.spentToday();
+  return { cap, spent, left: minutesLeft(spent, cap), dayDone: capReached(spent, cap) };
 }

@@ -46,8 +46,7 @@ import {
   subscribeLearnerRecord,
 } from "./lib/learnerProgress";
 import { recordPractice, useStreak } from "./lib/streak";
-import { ChildSettingsAPI } from "./lib/childSettings";
-import { SessionTimeAPI, capReached, useSessionClock } from "./lib/sessionTime";
+import { useSessionClock, useStudyGate } from "./lib/sessionTime";
 import { levelFromXp } from "./lib/level";
 import { publishLearnerFigures } from "./lib/profileStats";
 import { Billing } from "./lib/billing";
@@ -304,11 +303,8 @@ export default function App() {
    * round is actually open, so a child reading the Learn page is not spending
    * their afternoon.
    */
-  useSyncExternalStore(ChildSettingsAPI.subscribe, ChildSettingsAPI.version);
-  useSyncExternalStore(SessionTimeAPI.subscribe, SessionTimeAPI.version);
   useSessionClock(inRound);
-  const sessionCap = ChildSettingsAPI.current().sessionMinutes;
-  const dayDone = capReached(SessionTimeAPI.spentToday(), sessionCap);
+  const { cap: sessionCap, dayDone } = useStudyGate();
 
   /**
    * Open a lesson, unless today's time is gone.
