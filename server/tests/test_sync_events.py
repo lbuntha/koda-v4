@@ -176,3 +176,51 @@ async def test_a_correct_answer_after_a_hint_is_not_first_try(client, parent):
     totals = (await client.get("/sync/profile/l_mia", headers=parent)).json()["concepts"][0]
     assert totals["questionsAnswered"] == 1
     assert totals["correctFirstTry"] == 0
+
+
+async def test_a_koda_conversation_lands_with_the_words_the_child_used(client, parent, db):
+    """A conversation reaches Mongo, fields and all.
+
+    The event carries things no other event does — the child's own questions,
+    which character answered, how many turns — and none of them are in
+    `KNOWN_FIELDS`, so they travel as extras. That is the fragile part: a type
+    the server does not know is rejected outright, and an extra the repo drops
+    is lost silently. Both are asserted here rather than assumed.
+    """
+    body = {
+        "schemaVersion": 1,
+        "events": [
+            event(
+                "kc_1",
+                type="koda_conversation",
+                mode="voice",
+                personaId="puck",
+                turns=3,
+                durationMs=94000,
+                asked=["why is it thirteen not threeteen", "is 14 more than 20"],
+                afterWrongAnswer=True,
+            )
+        ],
+    }
+    r = await client.post("/sync/push", json=body, headers=parent)
+    assert r.status_code == 200, r.text
+    assert r.json()["accepted"] == 1
+
+    stored = await db.events.find_one({"eventId": "kc_1"})
+    assert stored is not None, "the conversation never reached the database"
+    assert stored["type"] == "koda_conversation"
+    # The parts a recommendation is actually made from.
+    assert stored["asked"] == ["why is it thirteen not threeteen", "is 14 more than 20"]
+    assert stored["personaId"] == "puck"
+    assert stored["mode"] == "voice"
+    assert stored["turns"] == 3
+    assert stored["afterWrongAnswer"] is True
+
+
+async def test_an_unknown_event_type_is_still_refused(client, parent):
+    """Adding one type must not turn the allowlist into a free-for-all."""
+    body = {"schemaVersion": 1, "events": [event("x_1", type="koda_daydream")]}
+
+    r = await client.post("/sync/push", json=body, headers=parent)
+
+    assert r.status_code == 422, r.text
