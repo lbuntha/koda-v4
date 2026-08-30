@@ -190,3 +190,60 @@ describe("a note sent while Koda is talking", () => {
     vi.useRealTimers();
   });
 });
+
+/**
+ * How loud Koda is, and why it is measured rather than asserted.
+ *
+ * The mouth used to be driven by chunk *arrival*: energy jumped as each packet
+ * landed and decayed between them. Audio arrives far faster than it plays — a
+ * measured answer delivered ten seconds of speech in a burst under three
+ * seconds long — so the energy was gone while seven seconds of Koda was still
+ * coming out of the speaker, and the mouth stopped most of the way through
+ * every sentence.
+ *
+ * Reading the output means the mouth runs exactly as long as the sound does.
+ */
+describe("the level driving Koda's mouth", () => {
+  const measure = (samples: number[]) =>
+    (
+      GeminiLiveVoiceSession.prototype as unknown as {
+        measureOutputLevel: () => number;
+      }
+    ).measureOutputLevel.call({
+      outputAnalyser: {
+        getFloatTimeDomainData: (buf: Float32Array) => buf.set(samples),
+      },
+      analyserBuffer: new Float32Array(samples.length),
+    });
+
+  it("is silent when nothing is playing", () => {
+    expect(measure(new Array(64).fill(0))).toBe(0);
+  });
+
+  it("rises with the sound", () => {
+    const quiet = measure(new Array(64).fill(0.02));
+    const loud = measure(new Array(64).fill(0.2));
+
+    expect(quiet).toBeGreaterThan(0);
+    expect(loud).toBeGreaterThan(quiet);
+  });
+
+  it("opens the mouth fully at an ordinary speaking level", () => {
+    // A face that only opens on a shout looks shut for most of a sentence.
+    expect(measure(new Array(64).fill(0.2))).toBe(1);
+  });
+
+  it("never exceeds one, whatever the signal", () => {
+    expect(measure(new Array(64).fill(1))).toBe(1);
+  });
+
+  it("is silent when there is no analyser to read", () => {
+    expect(
+      (
+        GeminiLiveVoiceSession.prototype as unknown as {
+          measureOutputLevel: () => number;
+        }
+      ).measureOutputLevel.call({ outputAnalyser: null, analyserBuffer: null }),
+    ).toBe(0);
+  });
+});

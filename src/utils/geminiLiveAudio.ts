@@ -169,6 +169,21 @@ export class GeminiLiveVoiceSession {
 
   private userEnergyMeter: number = 0;
   private modelEnergyMeter: number = 0;
+  /**
+   * Taps what is actually leaving the speaker.
+   *
+   * The mouth used to be driven by chunk *arrival*: energy jumped to 0.8 as each
+   * packet landed and decayed away between them. Audio arrives far faster than
+   * it plays — a measured answer delivered ten seconds of speech in a burst
+   * under three seconds long — so the energy had decayed to nothing while seven
+   * seconds of Koda was still coming out of the speaker. The mouth stopped
+   * moving most of the way through every sentence.
+   *
+   * An analyser asks the only question that matches what a child hears: how
+   * loud is the sound right now. It runs to the end because the sound does.
+   */
+  private outputAnalyser: AnalyserNode | null = null;
+  private analyserBuffer: Float32Array | null = null;
   private energyInterval: any = null;
 
   constructor(config: LiveVoiceConfig, callbacks: LiveVoiceCallbacks) {
@@ -196,6 +211,13 @@ export class GeminiLiveVoiceSession {
       this.inputAudioCtx = new AudioCtxClass({ sampleRate: 16000 });
       // Output Audio Context (24kHz for Gemini Live output)
       this.outputAudioCtx = new AudioCtxClass({ sampleRate: 24000 });
+      // Everything Koda says goes through here on its way out, so the meter and
+      // the speaker can never disagree about whether he is still talking.
+      this.outputAnalyser = this.outputAudioCtx.createAnalyser();
+      this.outputAnalyser.fftSize = 1024;
+      this.outputAnalyser.smoothingTimeConstant = 0.4;
+      this.analyserBuffer = new Float32Array(this.outputAnalyser.fftSize);
+      this.outputAnalyser.connect(this.outputAudioCtx.destination);
 
       // Resume in case browser suspended audio
       if (this.inputAudioCtx.state === "suspended") {
@@ -359,14 +381,14 @@ export class GeminiLiveVoiceSession {
     if (!this.outputAudioCtx) return;
 
     try {
-      // No status change here: the schedule decides, in the loop above. Setting
-      // it per chunk is what made the mouth stutter between bursts.
-      this.modelEnergyMeter = 0.8;
+      // No status change here, and no energy either: the schedule decides one
+      // and the analyser measures the other. Setting energy per chunk is what
+      // made the mouth stop seconds before the voice did.
 
       const audioBuffer = base64ToAudioBuffer(this.outputAudioCtx, base64, 24000);
       const source = this.outputAudioCtx.createBufferSource();
       source.buffer = audioBuffer;
-      source.connect(this.outputAudioCtx.destination);
+      source.connect(this.outputAnalyser ?? this.outputAudioCtx.destination);
 
       const currentTime = this.outputAudioCtx.currentTime;
       // Schedule audio precisely for gapless continuous playback
@@ -381,7 +403,7 @@ export class GeminiLiveVoiceSession {
         if (idx > -1) this.activeAudioSources.splice(idx, 1);
         // Energy only. Whether Koda is still talking is the schedule's answer,
         // not this chunk's — the next one may already be queued behind it.
-        if (this.activeAudioSources.length === 0) this.modelEnergyMeter = 0;
+        // Energy is measured, not asserted — nothing to reset here.
       };
     } catch (e) {
       console.error("Error playing audio chunk:", e);
@@ -426,11 +448,29 @@ export class GeminiLiveVoiceSession {
     return this.nextPlayTime - this.outputAudioCtx.currentTime > 0.05;
   }
 
+  /**
+   * How loud Koda is, right now, from the sound itself.
+   *
+   * Scaled so an ordinary speaking level lands near the top of the range: the
+   * mouth is a mouth, not a VU meter, and a face that only opens fully on a
+   * shout looks closed for most of a sentence.
+   */
+  private measureOutputLevel(): number {
+    if (!this.outputAnalyser || !this.analyserBuffer) return 0;
+    this.outputAnalyser.getFloatTimeDomainData(this.analyserBuffer);
+    let sumSquares = 0;
+    for (let i = 0; i < this.analyserBuffer.length; i++) {
+      sumSquares += this.analyserBuffer[i] * this.analyserBuffer[i];
+    }
+    const rms = Math.sqrt(sumSquares / this.analyserBuffer.length);
+    return Math.min(1, rms * 6);
+  }
+
   private startEnergyMonitoring(): void {
     this.energyInterval = setInterval(() => {
       // Decay energy smoothly
       this.userEnergyMeter = Math.max(0, this.userEnergyMeter * 0.85);
-      this.modelEnergyMeter = Math.max(0, this.modelEnergyMeter * 0.85);
+      this.modelEnergyMeter = this.measureOutputLevel();
 
       // One place decides whether Koda is talking, and it only says so when the
       // answer changes — a status pushed every 50ms re-renders the character
