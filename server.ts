@@ -188,6 +188,33 @@ function getGeminiClient(familyKey?: string) {
 // The SVG collection, read and written as files under src/assets/svg.
 
 // 1. Socratic Tutor Conversational API
+/**
+ * Where the browser should open the live-voice socket.
+ *
+ * Normally nowhere: an empty value means "same origin as this page", which is
+ * right for a dev box and for any deployment that serves the app from the
+ * process holding the socket.
+ *
+ * It is not right behind Firebase Hosting. Hosting rewrites every path to Cloud
+ * Run but does not perform the WebSocket upgrade — the handshake arrives as an
+ * ordinary request and is answered 200 instead of 101, so `wss.on("connection")`
+ * never fires and the coach simply never connects. Nothing in the logs says
+ * "WebSocket": the request looks served. Setting this to the Cloud Run URL lets
+ * the page keep loading from Hosting's CDN while the socket goes straight to
+ * the process that can actually hold it.
+ */
+const LIVE_WS_ORIGIN = (process.env.LIVE_WS_ORIGIN ?? "").trim();
+
+/**
+ * The handful of facts the client cannot know until it asks.
+ *
+ * Public by design — an origin is not a secret, and it is needed before there is
+ * a session to authenticate with.
+ */
+app.get("/api/config", (_req, res) => {
+  res.json({ liveWsOrigin: LIVE_WS_ORIGIN });
+});
+
 app.post("/api/tutor/respond", async (req, res) => {
   try {
     const { problem, state, userMessage, history, topic, personaId } = req.body;

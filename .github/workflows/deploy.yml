@@ -167,10 +167,27 @@ jobs:
           test -n "$api_url"
           echo "url=$api_url" >> "$GITHUB_OUTPUT"
 
+      # Where the browser may open the live-voice WebSocket.
+      #
+      # Firebase Hosting proxies every path to Cloud Run but does not perform
+      # the upgrade, so a handshake through learn-with-koda.web.app is answered
+      # 200 instead of 101 and the coach never connects. The page still loads
+      # from Hosting; only the socket goes straight to Cloud Run.
+      #
+      # Empty on the very first deploy, because the service has no URL until it
+      # exists — the app then falls back to same-origin, and the next deploy
+      # fills it in.
+      - name: Resolve this service's own public URL
+        id: appurl
+        run: |
+          app_url="$(gcloud run services describe "$APP_SERVICE" --project "$GCP_PROJECT_ID" --region "$GCP_REGION" --format='value(status.url)' 2>/dev/null || true)"
+          echo "url=$app_url" >> "$GITHUB_OUTPUT"
+
       - name: Deploy app to Cloud Run
         env:
           IMAGE: ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY }}/koda-app:${{ github.sha }}
           API_URL: ${{ steps.api.outputs.url }}
+          LIVE_WS_ORIGIN: ${{ steps.appurl.outputs.url }}
         run: |
           gcloud run deploy "$APP_SERVICE" \
             --project "$GCP_PROJECT_ID" \
@@ -179,7 +196,7 @@ jobs:
             --platform managed \
             --port 3001 \
             --allow-unauthenticated \
-            --set-env-vars "^|^NODE_ENV=production|API_URL=${API_URL}|TUTOR_SERVICE_TOKEN=${TUTOR_SERVICE_TOKEN}"
+            --set-env-vars "^|^NODE_ENV=production|API_URL=${API_URL}|TUTOR_SERVICE_TOKEN=${TUTOR_SERVICE_TOKEN}|LIVE_WS_ORIGIN=${LIVE_WS_ORIGIN}"
 
       - name: Verify app health
         run: |

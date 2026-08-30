@@ -77,6 +77,36 @@ export function base64ToAudioBuffer(
   return buffer;
 }
 
+/**
+ * The origin to open the live-voice socket against.
+ *
+ * Same origin as the page, unless the server names another one. It has to,
+ * behind Firebase Hosting: Hosting proxies every path to Cloud Run but does not
+ * perform the WebSocket upgrade, so the handshake comes back 200 rather than
+ * 101 and the socket never opens. Pointing the socket straight at Cloud Run
+ * fixes that without moving the page off Hosting's CDN.
+ *
+ * Asked once per load and cached — including the failure, because a deployment
+ * that cannot answer is a deployment with no override, which is the same as
+ * same-origin. Never throws: a coach that cannot reach its config should still
+ * try the obvious address rather than refuse to start.
+ */
+let cachedWsOrigin: string | null = null;
+
+export async function liveSocketOrigin(): Promise<string> {
+  if (cachedWsOrigin !== null) return cachedWsOrigin;
+  try {
+    const res = await fetch("/api/config");
+    const body = (await res.json()) as { liveWsOrigin?: unknown };
+    const value = typeof body?.liveWsOrigin === "string" ? body.liveWsOrigin.trim() : "";
+    // http(s) is what an operator will paste; the socket needs ws(s).
+    cachedWsOrigin = value.replace(/^http/, "ws");
+  } catch {
+    cachedWsOrigin = "";
+  }
+  return cachedWsOrigin;
+}
+
 export class GeminiLiveVoiceSession {
   private ws: WebSocket | null = null;
   private inputAudioCtx: AudioContext | null = null;
@@ -133,6 +163,9 @@ export class GeminiLiveVoiceSession {
       // 3. Connect WebSocket to backend proxy
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
       const host = window.location.host;
+      // Where the socket may actually be opened. Same origin unless the
+      // deployment says otherwise — see `liveSocketOrigin`.
+      const origin = await liveSocketOrigin();
       // No voice default here any more: an empty `voice` lets the server use
       // the character's, which is the only place that knows which one it is.
       const voice = encodeURIComponent(this.config.voice || "");
@@ -146,7 +179,8 @@ export class GeminiLiveVoiceSession {
       // header, and this one at least expires. The tutor server resolves the
       // family's key behind it.
       const token = await tutorSocketToken();
-      const wsUrl = `${protocol}//${host}/api/live?voice=${voice}&topic=${topic}&level=${level}&context=${context}&question=${question}&persona=${persona}${token ? `&token=${encodeURIComponent(token)}` : ""}`;
+      const base = origin || `${protocol}//${host}`;
+      const wsUrl = `${base}/api/live?voice=${voice}&topic=${topic}&level=${level}&context=${context}&question=${question}&persona=${persona}${token ? `&token=${encodeURIComponent(token)}` : ""}`;
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
