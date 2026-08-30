@@ -349,3 +349,70 @@ async def test_an_operator_can_add_a_plan_and_reprice_one(db, client, signup_bod
     # Every feature a plan can carry is declared in code, so the editor can only
     # ever offer things something enforces.
     assert [f["featureId"] for f in catalogue["features"]] == ["ai.koda"]
+
+
+@pytest.mark.asyncio
+async def test_user_management_shows_the_plan_the_family_was_granted(db, client, signup_body):
+    """The plan an operator grants is the plan User Management shows.
+
+    It showed "Free" for every family however they had been granted. The
+    subscriptions collection is keyed by `_id`, and the admin listing had its
+    own copy of the lookup that queried a `familyId` field the documents do not
+    have — so it matched nothing, and an empty result is indistinguishable from
+    "nobody is paying". Silent, and wrong on every row.
+
+    Asserted against `/billing/subscriptions` in the same test, because the real
+    fault was two endpoints disagreeing about one family: billing said Family,
+    user management said Free.
+    """
+    await _seed_plans(db)
+    admin = await _operator(db, client)
+    _, family_id = await _family(client, signup_body, email="granted@example.com")
+
+    granted = await client.put(
+        f"/billing/subscriptions/{family_id}",
+        headers=admin,
+        json={"planId": "family", "months": 1, "status": "active"},
+    )
+    assert granted.status_code == 200, granted.text
+
+    listed = await client.get("/admin/users?q=granted", headers=admin)
+    assert listed.status_code == 200, listed.text
+    memberships = listed.json()["users"][0]["memberships"]
+    assert memberships[0]["planId"] == "family"
+    assert memberships[0]["planName"] == "Family"
+    assert memberships[0]["live"] is True
+
+    # The two endpoints must not disagree about the same family.
+    subs = (await client.get("/billing/subscriptions", headers=admin)).json()
+    row = next(r for r in subs["subscriptions"] if r["familyId"] == family_id)
+    assert row["planId"] == memberships[0]["planId"]
+    assert row["live"] == memberships[0]["live"]
+
+
+@pytest.mark.asyncio
+async def test_a_lapsed_grant_reads_as_free_in_user_management(db, client, signup_body):
+    """And the fix must not make every family look paid.
+
+    A grant whose period has passed is not honoured, so the list has to say
+    Free — the same lapse rule the tutor proxy applies, not a second copy of it.
+    """
+    await _seed_plans(db)
+    admin = await _operator(db, client)
+    _, family_id = await _family(client, signup_body, email="lapsed@example.com")
+
+    await client.put(
+        f"/billing/subscriptions/{family_id}",
+        headers=admin,
+        json={"planId": "family", "months": 1, "status": "active"},
+    )
+    # Wind the grant back past its end date, the way time would.
+    await db.subscriptions.update_one(
+        {"_id": family_id},
+        {"$set": {"currentPeriodEnd": now() - timedelta(days=1)}},
+    )
+
+    listed = await client.get("/admin/users?q=lapsed", headers=admin)
+    membership = listed.json()["users"][0]["memberships"][0]
+    assert membership["planId"] == "free"
+    assert membership["live"] is False

@@ -17,6 +17,7 @@ from app.models.auth import Principal
 from app.models.common import Model
 from app.repos import devices, memberships, platform_roles, users
 from app.security import passwords
+from app.services.entitlements import plans_for_families
 
 router = APIRouter(prefix="/admin/users", tags=["admin users"], dependencies=[AUTHENTICATED])
 
@@ -139,11 +140,17 @@ async def _full_user(db: Db, user_id: str) -> dict | None:
         if family_ids else []
     )
     names = {item["_id"]: item.get("name", "") for item in family_rows}
+    # The plan too, so a row refreshed after an edit does not fall back to the
+    # schema's "Free" default and contradict the list it was opened from.
+    plan_of = await plans_for_families(db, family_ids)
     row["memberships"] = [
         {
             "familyId": item["familyId"],
             "familyName": names.get(item["familyId"], ""),
             "role": item["role"],
+            **plan_of.get(
+                item["familyId"], {"planId": "free", "planName": "Free", "live": False}
+            ),
         }
         for item in member_rows
     ]

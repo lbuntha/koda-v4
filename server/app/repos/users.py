@@ -7,7 +7,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from pymongo import ReturnDocument
 
 from app.models.common import now
-from app.services.entitlements import is_live
+from app.services.entitlements import plans_for_families
 
 
 async def by_email(db: AsyncIOMotorDatabase, email: str) -> dict[str, Any] | None:
@@ -137,27 +137,14 @@ async def list_for_admin(
 
     # What each family is actually on, so the operator running this page can see
     # who is paying without opening Billing and searching for them by name.
-    # Batched: one query for the page, then the shared lapse rule per row —
-    # `is_live` rather than a second copy of it, because a page that disagreed
-    # with the tutor proxy about who has Koda is worse than a page with no plan
-    # on it at all.
-    sub_rows = (
-        await db.subscriptions.find({"familyId": {"$in": family_ids}}).to_list(length=500)
-        if family_ids else []
-    )
-    plan_names = {
-        row["_id"]: row.get("name", row["_id"])
-        for row in await db.plans.find({}).to_list(length=50)
-    }
-    plan_of: dict[str, dict[str, Any]] = {}
-    for sub in sub_rows:
-        live = is_live(sub)
-        plan_id = sub.get("planId", "free") if live else "free"
-        plan_of[sub["familyId"]] = {
-            "planId": plan_id,
-            "planName": plan_names.get(plan_id, "Free"),
-            "live": live and plan_id != "free",
-        }
+    #
+    # Through the entitlement service, not a query written here. This page had
+    # its own copy that looked for a `familyId` field on the subscriptions
+    # collection — which is keyed by `_id` and has no such field, so the lookup
+    # matched nothing and every family read as Free however they had been
+    # granted. It failed silently, because "no rows" and "nobody is paying"
+    # are the same empty dict.
+    plan_of = await plans_for_families(db, family_ids)
 
     memberships_by_user: dict[str, list[dict[str, Any]]] = {user_id: [] for user_id in user_ids}
     for member in member_rows:

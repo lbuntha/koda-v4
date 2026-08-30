@@ -64,6 +64,45 @@ def is_live(row: dict[str, Any] | None) -> bool:
     return ends is None or ends > now()
 
 
+async def plans_for_families(
+    db: AsyncIOMotorDatabase, family_ids: list[str]
+) -> dict[str, dict[str, Any]]:
+    """What each of these families is on, keyed by family id.
+
+    For a page of families at once: an admin list cannot call `effective_plan`
+    per row without a query each. Every row comes back — a family with no
+    subscription is on the free plan, which is the whole point of a missing row.
+
+    **The subscriptions collection is keyed by `_id`, not by a `familyId`
+    field.** `repos.users.list_for_admin` had its own copy of this lookup that
+    queried `{"familyId": {"$in": ...}}`, which matches nothing at all, so User
+    Management showed *every* family as Free however they had been granted —
+    silently, because an empty result is indistinguishable from "nobody is
+    paying". That is the second copy `is_live` warns about, so there is now one
+    implementation and both callers use it.
+    """
+    if not family_ids:
+        return {}
+
+    rows = await subs_repo.listing(db, family_ids)
+    names = {
+        plan["_id"]: plan.get("name", plan["_id"])
+        for plan in await plans_repo.listing(db)
+    }
+
+    out: dict[str, dict[str, Any]] = {}
+    for family_id in family_ids:
+        sub = rows.get(family_id)
+        live = is_live(sub)
+        plan_id = sub.get("planId", FREE_PLAN) if live and sub else FREE_PLAN
+        out[family_id] = {
+            "planId": plan_id,
+            "planName": names.get(plan_id, "Free"),
+            "live": live and plan_id != FREE_PLAN,
+        }
+    return out
+
+
 async def effective_plan(
     db: AsyncIOMotorDatabase, family_id: str | None
 ) -> tuple[dict[str, Any], dict[str, Any] | None]:
