@@ -54,6 +54,28 @@ const showTab = (state: "visible" | "hidden") => {
   Object.defineProperty(document, "visibilityState", { value: state, configurable: true });
 };
 
+/**
+ * Start a fake clock at a fixed, boring moment.
+ *
+ * Vitest's fake timers move `Date` along with them, and these tests advance the
+ * clock by up to half an hour. Run late enough in the real day, that crosses the
+ * learning-day boundary mid-test: the tally is written against one day and read
+ * against the next, and comes back zero.
+ *
+ * It is not hypothetical. CI ran at 23:30:54Z, the "tablet lying face down" test
+ * advanced 31 minutes into the next day, and a green suite went red on a change
+ * that had nothing to do with it — the flake was in the test, and it had been
+ * waiting since the test was written for CI to run late enough to find it.
+ *
+ * Mid-morning, mid-month: no boundary within reach of anything here.
+ */
+const FIXED_NOW = new Date("2026-05-14T09:00:00.000Z");
+
+const useClock = () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(FIXED_NOW);
+};
+
 /** Play for `minutes`, the way the clock actually banks it: one tick at a time. */
 const play = (mod: Loaded, minutes: number) => {
   const ticks = Math.round((minutes * 60_000) / mod.TICK_MS);
@@ -73,7 +95,7 @@ describe("the clock only counts time a child actually spends playing", () => {
 
   it("spends nothing while no round is open", async () => {
     const mod = await load();
-    vi.useFakeTimers();
+    useClock();
     render(<Round open={false} clock={mod.useSessionClock} />);
 
     play(mod, 30);
@@ -84,7 +106,7 @@ describe("the clock only counts time a child actually spends playing", () => {
 
   it("banks the minutes a round is open", async () => {
     const mod = await load();
-    vi.useFakeTimers();
+    useClock();
     render(<Round open clock={mod.useSessionClock} />);
 
     play(mod, 5);
@@ -94,7 +116,7 @@ describe("the clock only counts time a child actually spends playing", () => {
 
   it("stops the moment the round closes", async () => {
     const mod = await load();
-    vi.useFakeTimers();
+    useClock();
     const view = render(<Round open clock={mod.useSessionClock} />);
 
     play(mod, 2);
@@ -106,7 +128,7 @@ describe("the clock only counts time a child actually spends playing", () => {
 
   it("does not spend a child's day on a tablet lying face down", async () => {
     const mod = await load();
-    vi.useFakeTimers();
+    useClock();
     render(<Round open clock={mod.useSessionClock} />);
 
     play(mod, 1);
@@ -213,7 +235,7 @@ describe("the gate reads the parent's cap against that clock", () => {
 describe("a parent's twenty minutes, from the setting to the child's screen", () => {
   it("plays out end to end", async () => {
     const mod = await load();
-    vi.useFakeTimers();
+    useClock();
 
     // 1. The grown-up sets it, on the Learners page.
     mod.ChildSettingsAPI.set("l_mia", { sessionMinutes: 20 });
