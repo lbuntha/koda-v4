@@ -626,24 +626,17 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
 
               {/* Central Koda Avatar Stage */}
               <div className="relative py-4 px-4 bg-gradient-to-b from-surface via-surface to-canvas flex flex-col items-center justify-center border-b border-line/80 shrink-0">
-                {/* Audio Wave Frequency Rings */}
+                {/*
+                  * No disc behind the character.
+                  *
+                  * There were two, scaling with the audio — a coloured circle
+                  * pulsing under a face that is already breathing, blinking and
+                  * moving its mouth. Two things animating the same signal read
+                  * as decoration fighting the character, and the circle won
+                  * because it was bigger. The mascot carries the state on its
+                  * own; the pill underneath names it in words.
+                  */}
                 <div className="relative flex items-center justify-center">
-                  {isLiveActive && (
-                    <>
-                      <div
-                        style={{ transform: `scale(${1 + (isKodaSpeaking ? modelEnergy * 0.8 : userEnergy * 0.6)})` }}
-                        className={`absolute -inset-3 rounded-full transition duration-75 opacity-30 ${
-                          isKodaSpeaking ? "bg-cyan-400" : "bg-violet-500"
-                        }`}
-                      />
-                      <div
-                        style={{ transform: `scale(${1 + (isKodaSpeaking ? modelEnergy * 0.5 : userEnergy * 0.3)})` }}
-                        className={`absolute -inset-1.5 rounded-full transition duration-75 opacity-40 ${
-                          isKodaSpeaking ? "bg-cyan-400" : "bg-violet-500"
-                        }`}
-                      />
-                    </>
-                  )}
 
                   {/*
                     * The character the family chose, driven by the session.
@@ -861,37 +854,22 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
               className="relative group flex items-center justify-center w-28 h-28 cursor-grab active:cursor-grabbing select-none animate-kodaHoloFlash"
               title="Click and drag to move Koda anywhere!"
             >
-              {/* Outer Energy Pulse Rings */}
-              {isLiveActive && (
-                <>
-                  <div
-                    style={{ transform: `scale(${1.15 + (isKodaSpeaking ? modelEnergy * 0.9 : userEnergy * 0.7)})` }}
-                    className={`absolute inset-2 rounded-full transition duration-75 opacity-20 ${
-                      isKodaSpeaking ? "bg-cyan-500" : "bg-violet-600"
-                    }`}
-                  />
-                  <div
-                    style={{ transform: `scale(${1 + (isKodaSpeaking ? modelEnergy * 0.6 : userEnergy * 0.4)})` }}
-                    className={`absolute inset-4 rounded-full transition duration-75 opacity-30 ${
-                      isKodaSpeaking ? "bg-cyan-400" : "bg-violet-500"
-                    }`}
-                  />
-                </>
-              )}
-
-              {/* Core Koda Avatar Head Circle */}
+              {/*
+                * The character, with nothing drawn around it.
+                *
+                * This was a bordered, gradient-filled disc that changed colour
+                * with the session — a second, cruder status indicator wrapped
+                * around a face that already shows the same thing by talking,
+                * listening or waiting. Cutting it out leaves the character
+                * sitting on the page rather than in a badge, which is also what
+                * the mascot's transparent background was designed for.
+                */}
               <div
                 style={{
                   transform: `scale(${orbScale})`,
                   transition: "transform 0.08s ease-out",
                 }}
-                className={`relative z-10 flex flex-col items-center justify-center w-20 h-20 rounded-full bg-canvas border-3 ${
-                  isLiveActive
-                    ? isKodaSpeaking
-                      ? "border-cyan-400 bg-gradient-to-b from-cyan-500/15 via-surface to-canvas shadow-[0_0_30px_rgba(34,211,238,0.5)]"
-                      : "border-violet-500 bg-gradient-to-b from-violet-500/15 via-surface to-canvas shadow-[0_0_25px_rgba(139,92,246,0.35)]"
-                    : "border-line bg-canvas shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
-                } transition-all duration-300 hover:border-violet-500/90`}
+                className="relative z-10 flex flex-col items-center justify-center w-20 h-20 rounded-full transition-transform duration-300"
                 onClick={handleToggleLiveSession}
                 title={isLiveActive ? "Voice is ACTIVE! Click to pause/disconnect." : "Voice is offline. Click to connect!"}
               >

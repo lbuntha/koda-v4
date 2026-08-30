@@ -107,6 +107,44 @@ export async function liveSocketOrigin(): Promise<string> {
   return cachedWsOrigin;
 }
 
+/**
+ * Whether a frame of microphone audio is worth sending.
+ *
+ * Always, unless Koda is talking. While Koda talks the microphone is still
+ * open — that is deliberate, a child must be able to cut in — but every frame
+ * of it was being uploaded, silence and room noise included, and the model's
+ * voice-activity detector treats "audio arriving" as "someone is speaking" and
+ * stops Koda mid-sentence. On a laptop it stops him mid-sentence with his own
+ * voice coming back through the speakers, which echo cancellation reduces but
+ * does not remove.
+ *
+ * So while Koda is speaking a frame has to clear a floor: somebody actually
+ * talking near the microphone, not a room. Once it clears, a hold keeps the
+ * gate open through the gaps between words, or an interruption arrives as a
+ * stutter of half-frames and the model hears a stammer rather than a sentence.
+ *
+ * When Koda is silent the gate is wide open, so a child's first word is never
+ * the one that gets clipped.
+ */
+export const BARGE_IN_FLOOR = 0.04;
+export const BARGE_IN_HOLD_MS = 700;
+
+export function shouldSendMicFrame(input: {
+  rms: number;
+  kodaSpeaking: boolean;
+  /** When the current burst of speech stops counting, from a previous frame. */
+  holdUntil: number;
+  now: number;
+}): { send: boolean; holdUntil: number } {
+  const { rms, kodaSpeaking, holdUntil, now } = input;
+
+  if (!kodaSpeaking) return { send: true, holdUntil: 0 };
+  if (rms >= BARGE_IN_FLOOR) return { send: true, holdUntil: now + BARGE_IN_HOLD_MS };
+  // Mid-sentence gap in a burst that already cleared the floor.
+  if (now < holdUntil) return { send: true, holdUntil };
+  return { send: false, holdUntil: 0 };
+}
+
 export class GeminiLiveVoiceSession {
   private ws: WebSocket | null = null;
   private inputAudioCtx: AudioContext | null = null;
@@ -119,6 +157,8 @@ export class GeminiLiveVoiceSession {
   private isMuted: boolean = false;
   private nextPlayTime: number = 0;
   private activeAudioSources: AudioBufferSourceNode[] = [];
+  /** While Koda talks, how long the child's current burst keeps the gate open. */
+  private bargeInHoldUntil: number = 0;
   private callbacks: LiveVoiceCallbacks;
   private config: LiveVoiceConfig;
 
@@ -248,7 +288,17 @@ export class GeminiLiveVoiceSession {
       const rms = Math.sqrt(sumSquares / inputBuffer.length);
       this.userEnergyMeter = Math.min(1.0, rms * 5.0);
 
-      // Only send if not interrupted
+      // While Koda is talking, only forward audio that is actually somebody
+      // talking. See `shouldSendMicFrame` for why this is not just a filter.
+      const gate = shouldSendMicFrame({
+        rms,
+        kodaSpeaking: this.activeAudioSources.length > 0,
+        holdUntil: this.bargeInHoldUntil,
+        now: Date.now(),
+      });
+      this.bargeInHoldUntil = gate.holdUntil;
+      if (!gate.send) return;
+
       const base64Pcm = pcm16ToBase64(inputBuffer);
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
         this.ws.send(
