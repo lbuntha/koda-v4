@@ -161,6 +161,9 @@ export class GeminiLiveVoiceSession {
   private bargeInHoldUntil: number = 0;
   /** Last reported talking state, so a change is announced once. */
   private wasSpeaking: boolean = false;
+  /** A note waiting for Koda to stop talking. Superseded, never queued up. */
+  private pendingIdleText: string | null = null;
+  private idleSendTimer: number | null = null;
   private callbacks: LiveVoiceCallbacks;
   private config: LiveVoiceConfig;
 
@@ -342,12 +345,10 @@ export class GeminiLiveVoiceSession {
       this.callbacks.onInterrupted?.();
       this.callbacks.onStatusChange("listening");
     } else if (msg.type === "turnComplete") {
-      // Model finished speaking turn
-      setTimeout(() => {
-        if (this.activeAudioSources.length === 0) {
-          this.callbacks.onStatusChange("listening");
-        }
-      }, 500);
+      // Nothing to do. The model has stopped *sending*, which is not the same as
+      // having stopped *speaking* — there is usually seconds of audio still
+      // queued. `isSpeaking()` reports the end, once, when it actually happens;
+      // this used to push a second "listening" half a second later regardless.
     } else if (msg.type === "error") {
       this.callbacks.onError?.(msg.error);
       this.callbacks.onStatusChange("error");
@@ -448,6 +449,43 @@ export class GeminiLiveVoiceSession {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify({ type: "text", text }));
     }
+  }
+
+  /**
+   * Say this to Koda, but not over the top of him.
+   *
+   * A new turn makes the model abandon the one it is in the middle of, so a
+   * note sent while Koda is talking cuts him off mid-sentence — and the app
+   * sends one every time the child moves to the next question, which is
+   * precisely when Koda is most likely to be saying something about the last
+   * one. The child hears him stop halfway through a word for no reason they
+   * can see.
+   *
+   * So it waits for the sentence to land. Capped, because a session that never
+   * stops speaking must not silently swallow the note, and superseding, because
+   * two questions in quick succession should leave Koda addressing the second
+   * rather than working through a backlog of stale ones.
+   */
+  public sendTextWhenIdle(text: string, waitMs: number = 12_000): void {
+    this.pendingIdleText = text;
+
+    if (this.idleSendTimer !== null) return;
+    const startedAt = Date.now();
+
+    const attempt = () => {
+      const expired = Date.now() - startedAt > waitMs;
+      if (!this.isSpeaking() || expired) {
+        this.idleSendTimer = null;
+        const queued = this.pendingIdleText;
+        this.pendingIdleText = null;
+        if (queued) this.sendTextMessage(queued);
+        return;
+      }
+      this.idleSendTimer = window.setTimeout(attempt, 250);
+    };
+    // A tick rather than an immediate call, so two changes in the same frame
+    // collapse into one send.
+    this.idleSendTimer = window.setTimeout(attempt, 0);
   }
 
   public updateContext(context: string): void {

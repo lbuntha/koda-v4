@@ -229,7 +229,10 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
   // Dynamically update Koda when active question changes on screen
   useEffect(() => {
     if (sessionRef.current && sessionStatus !== "disconnected" && currentQuestionText) {
-      sessionRef.current.sendTextMessage(
+      // Not over the top of him: a new turn makes the model abandon the one it
+      // is in, and this fires exactly when Koda is most likely mid-sentence
+      // about the question the child has just left.
+      sessionRef.current.sendTextWhenIdle(
         `[SYSTEM NOTE: Student moved to Question ${currentQuestionIndex} of ${totalQuestions}: "${currentQuestionText}". Address this new question for the student now!]`
       );
     }

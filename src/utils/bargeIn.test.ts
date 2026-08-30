@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   BARGE_IN_FLOOR,
@@ -111,5 +111,82 @@ describe("whether Koda is talking", () => {
         nextPlayTime: 99,
       }),
     ).toBe(false);
+  });
+});
+
+/**
+ * Notes that must not land on top of Koda.
+ *
+ * A new turn makes the model abandon the one it is in the middle of. The app
+ * sends a note every time the child moves to the next question — which is
+ * exactly when Koda is most likely to be saying something about the last one —
+ * so the note cut him off mid-word, for no reason a child could see.
+ */
+describe("a note sent while Koda is talking", () => {
+  const harness = () => {
+    const sent: string[] = [];
+    let speaking = true;
+    const self = {
+      pendingIdleText: null as string | null,
+      idleSendTimer: null as number | null,
+      isSpeaking: () => speaking,
+      sendTextMessage: (t: string) => sent.push(t),
+      sendTextWhenIdle: GeminiLiveVoiceSession.prototype.sendTextWhenIdle,
+    };
+    return { self, sent, stop: () => (speaking = false) };
+  };
+
+  it("waits for the sentence to land instead of cutting it off", async () => {
+    vi.useFakeTimers();
+    const { self, sent, stop } = harness();
+
+    self.sendTextWhenIdle("next question");
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(sent, "sent while Koda was still talking").toEqual([]);
+
+    stop();
+    await vi.advanceTimersByTimeAsync(300);
+    expect(sent).toEqual(["next question"]);
+    vi.useRealTimers();
+  });
+
+  it("keeps only the latest note, not a backlog of stale ones", async () => {
+    // Two questions in quick succession should leave Koda addressing the
+    // second, not working through the first.
+    vi.useFakeTimers();
+    const { self, sent, stop } = harness();
+
+    self.sendTextWhenIdle("question 2");
+    self.sendTextWhenIdle("question 3");
+    await vi.advanceTimersByTimeAsync(500);
+    stop();
+    await vi.advanceTimersByTimeAsync(300);
+
+    expect(sent).toEqual(["question 3"]);
+    vi.useRealTimers();
+  });
+
+  it("gives up waiting rather than swallowing the note", async () => {
+    // A session that never stops speaking must not silently lose it.
+    vi.useFakeTimers();
+    const { self, sent } = harness();
+
+    self.sendTextWhenIdle("eventually", 2000);
+    await vi.advanceTimersByTimeAsync(3000);
+
+    expect(sent).toEqual(["eventually"]);
+    vi.useRealTimers();
+  });
+
+  it("sends straight away when Koda is not talking", async () => {
+    vi.useFakeTimers();
+    const { self, sent, stop } = harness();
+    stop();
+
+    self.sendTextWhenIdle("now");
+    await vi.advanceTimersByTimeAsync(10);
+
+    expect(sent).toEqual(["now"]);
+    vi.useRealTimers();
   });
 });
