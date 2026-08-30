@@ -1,4 +1,10 @@
-# Build plan — the first plugin
+# Build plan — the first skill
+
+> **Historical.** This plan is finished: counting shipped, and the folder it describes as
+> `src/plugins/` is now `src/skills/`. Paths and type names below are as they were written,
+> not as they are — kept as the record of how the first skill was built. For building a new
+> skill today, read [NEW_SKILL_PROMPT.md](./NEW_SKILL_PROMPT.md) and
+> [PLUGINS.md](./PLUGINS.md), which are current.
 
 Companion to [PLUGINS.md](./PLUGINS.md). That document is the contract; this one is
 **a complete worked skill, file by file**, then the order to build it in.
@@ -239,7 +245,7 @@ export const PLUGINS: SkillPlugin[] = [counting];
 ```
 
 ```ts
-// src/curriculum/course.ts
+// src/curriculum/course.json
 export const COURSE: Unit[] = [
   {
     id: "u1", title: "Unit 1: Subitizing & Dot Matrix", icon: "🌱",

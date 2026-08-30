@@ -18,6 +18,17 @@ import { ScoringAPI } from "../../../lib/scoring";
 export interface RoundScore {
   stars: 1 | 2 | 3;
   xp: number;
+  /** Questions answered right first time, and how many there were. */
+  correctFirstTry: number;
+  total: number;
+  /**
+   * Every question right, first time, with no help.
+   *
+   * Not the same as three stars: the three-star band is a share a family can
+   * lower, so a round can be worth three stars and still have had a wrong
+   * answer in it. Praise that says "perfect" has to mean it.
+   */
+  perfect: boolean;
 }
 
 export interface RoundOutcome {
@@ -41,5 +52,8 @@ export function scoreRound({ correctFirstTry, total }: RoundOutcome): RoundScore
   return {
     stars,
     xp: Math.round(xpPerLevel * share),
+    correctFirstTry,
+    total,
+    perfect: total > 0 && correctFirstTry === total,
   };
 }

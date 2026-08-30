@@ -59,7 +59,7 @@ import { SidebarNav } from "./components/SidebarNav";
 import { MainLayout } from "./components/layout/MainLayout";
 import { UIPageLoader } from "./components/ui";
 import { SkillHost } from "./skills/host/SkillHost";
-import { getCourseLessons, getLessonByLevel } from "./curriculum";
+import { getCourseLessons, getLessonByLevel, totalLessonCount } from "./curriculum";
 import { useAudienceViewer } from "./skills/viewer";
 import { SignInScreen } from "./components/account/SignInScreen";
 import { ResetPasswordScreen, resetTokenFromUrl } from "./components/account/ResetPasswordScreen";
@@ -651,6 +651,7 @@ export default function App() {
               ageBand: activeLesson.ageBand,
               title: activeLesson.title,
               concept: activeLesson.concept,
+              totalLessons: totalLessonCount(viewer),
             }
           : undefined
       }
@@ -658,6 +659,7 @@ export default function App() {
         ...userProgress,
         level: levelFromXp(userProgress.xp),
         streakDays: streak.days,
+        streakCadence: streak.cadence,
         dailySolved: streak.solvedToday,
       }}
       onExit={() => setInRound(false)}

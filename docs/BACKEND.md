@@ -635,7 +635,7 @@ place of a working thing.
 **Existing stores opt in with one line** in the function that already saves:
 
 ```ts
-// src/lib/pluginStore.ts
+// src/lib/skillStore.ts
 function saveStoredPlugins(plugins: LearningPlugin[]) {
   localStorage.setItem(STORAGE_KEY_PLUGINS, JSON.stringify(plugins));
   Sync.record("plugin", plugins.map(...));   // ← the only new line

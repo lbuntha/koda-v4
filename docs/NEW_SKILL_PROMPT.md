@@ -3,15 +3,17 @@
 Paste the block below into Claude Code, fill the four bracketed fields, and it produces a
 registered, playable skill.
 
-It is written from the two skills that exist. Every rule in it is something one of them
-either needed or got wrong first — a bespoke top bar, a non-standard feedback message, XP
-that never reached the learner. Keep it in sync with the contract: if `plugins/types.ts` or
-`plugins/kit/` changes, this changes.
+Every rule in it is something a skill either needed or got wrong first — a bespoke top bar,
+a non-standard feedback message, XP that never reached the learner. Keep it in sync with the
+contract: if `src/skills/types.ts` or `src/skills/kit/` changes, this changes.
+
+> **Counting is the reference skill.** It runs every one of its five activities on the kit's
+> round loop, and its structural test file is two lines. Copy its shape.
 
 ---
 
 ```
-Build a new Koda skill plugin.
+Build a new Koda skill.
 
 SKILL: [name, e.g. "Subtraction Steps"]
 TEACHES: [what a child can do afterwards, in one sentence]
@@ -19,12 +21,13 @@ AGES: [e.g. 5-7]
 LESSONS: [2-4 lesson titles, easiest first]
 
 Read these first — they are the contract, not documentation:
-- src/plugins/types.ts                    SkillPlugin, KodaSDK, ActivityProps, Lesson
-- src/plugins/kit/                        the shared round: chrome, loop, scoring
-- src/plugins/addition/                   the reference skill — copy its shape exactly
+- src/skills/types.ts                     Skill, KodaSDK, ActivityProps, Lesson
+- src/skills/kit/                         the shared round: chrome, loop, scoring, praise
+- src/skills/counting/                    the reference skill — copy its shape exactly
+- src/skills/counting/counting.test.ts     what your test file should look like (2 lines)
 - docs/PLUGINS.md §7                      adding a skill, and the standards rule
 
-Create src/plugins/<id>/ containing:
+Create src/skills/<id>/ containing:
   manifest.json   id, name, version, description, tagline, thumbnail, category,
                   author, iconName, status, audience {ages, category}, teaches[],
                   requires[], features[], settings{}, settingsSchema[]
@@ -35,11 +38,12 @@ Create src/plugins/<id>/ containing:
                   params, icon, iconName, iconTone, difficulty, pedagogyTip,
                   standards[], trajectoryLevel, ageBand
   activities/<Name>.tsx   the playable component
-  index.ts        export const plugin: SkillPlugin — copy addition/index.ts
+  index.ts        export const skill: Skill — copy counting/index.ts
+  <id>.test.ts    describeSkillContract(skill); describeActivitySmoke(skill);
   internal/       optional, and private: nothing outside the folder may import it
 
 Then register it in TWO places and nowhere else:
-  src/plugins/registry.ts     one import, one entry in PLUGINS
+  src/skills/registry.ts      one import, one entry in SKILLS
   src/curriculum/course.json  a unit holding "<id>/<lesson-id>" refs, appended last
                               so existing level numbers do not shift
 
@@ -60,7 +64,7 @@ skills one product:
 
   The hook owns the question index, attempts, first-try count, feedback, the five
   learning calls in the right order, scoring and XP. The shell owns the top bar,
-  step header, feedback message and completion modal. Report an answer with
+  step header, feedback message and completion screen. Report an answer with
   `round.submit({ correct, given, expected, title, message })` — a wrong answer
   keeps the same question, which is what makes "right on the second try"
   different from "right first time" in the log.
@@ -68,47 +72,58 @@ skills one product:
 RULES — these are what the architecture is for:
 
 1. Metadata and curriculum are JSON. Only the activity is code.
-2. Import nothing from another plugin folder. Reuse goes through
-   "otherPlugin/activity" from a lesson, or through `kit/`. A cross-folder import
+2. Import nothing from another skill folder. Reuse goes through
+   "otherSkill/activity" from a lesson, or through `kit/`. A cross-folder import
    is the one failure that ends modularity.
 3. Touch the host only through the injected `koda` — including sound, haptics and
    speech. Never import from `utils/`. `themeSystem`, `components/ui` and
    `lucide-react` are fine.
 4. Reuse an existing conceptKey when the skill teaches something an existing lesson
    already teaches — grep every lessons.json first. Mastery aggregates on conceptKey
-   across plugins, so a new name for an old idea splits a child's record in two.
+   across skills, so a new name for an old idea splits a child's record in two.
 5. No XP anywhere in your skill. Not per question, not per lesson. One rate lives in
    Settings and `scoreRound` applies it; stars come from first-try accuracy.
-6. Style through themeSystem tokens only. Check light AND dark. Never encode state in
-   colour alone.
+6. Style through themeSystem tokens only — `themeSystem.field()` for any input,
+   `bg-surface` / `text-ink` / `border-line` for surfaces. Never a raw slate shade:
+   that is a second definition of the surface and it is wrong in one theme.
+   Check light AND dark. Never encode state in colour alone.
 7. Every feature declared in the manifest must actually be read with
    koda.config.isEnabled(); every setting with koda.config.get(). A flag nothing
-   reads is a lie in Plugin Lab.
+   reads is a lie in the Skill Manager.
 8. Standards: copy published codes exactly, most-relevant first, only what the lesson
    is assessed on. Empty is a real answer when no code exists — then trajectoryLevel
    must be set. See docs/PLUGINS.md §7.
 
 WHAT THE HOST GIVES YOU — `{ params, level, koda, lesson }`:
   params  the lesson's params merged over the activity's defaultParams
-  lesson  { id, title, concept, levelNumber } — display only, for the chrome
+  lesson  { id, title, concept, levelNumber, totalLessons } — display only
   koda    sound, haptics, speech, progress, config, learning, log, ui
 
-  Gotchas that cost time in the two skills that exist:
+  Gotchas that have each cost a day:
   - XP reaches the learner only through `koda.progress.awardXp`. `onComplete`
     records the result; it awards nothing. The hook does both for you.
-  - koda.config is read at mount, not reactive. A Plugin Lab toggle applies on the
-    next round; do not build for live updates.
+  - koda.config is read at mount, not reactive. A Skill Manager toggle applies on
+    the next round; do not build for live updates.
   - Pass `expected` on the answer, or a slip is classified `unknown` instead of
     `off_by_one`.
+  - `koda.speech.say()` resolves when the line has FINISHED, not when it started.
+    If your activity says something the child must hear before the round reacts,
+    await it — a fixed delay is a guess, and it was wrong on mobile.
+  - A lesson with no conceptKey records no telemetry at all: the SDK refuses
+    events it cannot attribute, so the learning log stays silently empty.
 
 VERIFY before saying it is done:
-  npx tsc --noEmit -p tsconfig.json   clean
+  npx tsc --noEmit                     clean
+  npm test                             clean — your two contract lines run here
   npm run build                        clean
-  - Plugin Lab lists the skill, its features toggle, its settings render
-  - Every lesson opens from the Learn page and from a Plugin Lab preview
+  - The Skill Manager lists the skill, its features toggle, its settings render
+  - Every lesson opens from the Learn page and from a Skill Manager preview
   - A perfect round shows three gold stars; a round with one mistake shows two
     gold and one hollow, and pays the two-star share of the XP in Settings
-  - The Activity trail in Plugin Lab shows this skill's rows
+  - The finish screen names the right thing: a perfect round says so, a round
+    that crossed a level says "Level N!", and the lesson line reads
+    "Lesson 3 of 15" — "Level" on that screen means the learner's XP level
+  - The Activity trail in the Skill Manager shows this skill's rows
   - Disabling the skill removes its lessons from the Learn page
   - Correct in light and dark, and on a narrow window
 ```
@@ -120,17 +135,29 @@ VERIFY before saying it is done:
 | Piece | What it owns |
 |---|---|
 | `useSkillRound` | index, attempts, first-try count, feedback, the five learning calls, scoring, XP |
-| `SkillRound` | top bar, step header, feedback message, completion modal |
+| `SkillRound` | top bar, step header, feedback message, finish screen, the learner's standing |
 | `SkillRoundTopBar` | identity, progress, standing, voice, settings, fullscreen, sound, exit |
-| `scoreRound` | stars from first-try accuracy, XP and coins from Settings |
+| `scoreRound` | stars from first-try accuracy, XP from Settings, and whether the round was perfect |
+| `roundPraise` | which achievement the finish screen congratulates — level, streak, perfect, goal, stars |
 | `PracticeStepHeader` | "Step 2 of 5", the framing tag, read-aloud and hint buttons |
-| `PracticeRoundCompleteModal` | stars earned, rewards, what to do next |
+| `PracticeRoundCompleteModal` | stars, XP won, streak, today's goal, level progress, what to do next |
+| `playAnswerSound` | the recorded reaction to a right or wrong answer, behind the learner's own switches |
+| `SPRING`, `stagger`, `idleFloat`, `useMotionOK` | the shared motion vocabulary — do not hand-tune a spring |
+| `describeSkillContract`, `describeActivitySmoke` | the whole structural suite, inherited in two lines |
 
-A skill that writes any of these itself has gone wrong. Addition is 209 lines because it
-writes none of them.
+A skill that writes any of these itself has gone wrong.
 
-## The one skill that does not follow this
+## Voice
 
-`counting` predates the kit. It uses the top bar, the step header, the completion modal and
-`scoreRound`, but still runs its own round loop across fifteen level types. Read `addition`
-for the pattern, not counting.
+A skill's authored phrases are recorded once and played from disk — a child taps and hears
+the word with no network in between. Put them in `audio/` with `npm run voice:record`, and
+register them from `index.ts` the way counting does. An unrecorded phrase still speaks, just
+slower, through live TTS; nothing breaks if you ship none.
+
+## Why counting is the reference
+
+It was the first skill and it once ran its own round loop across fifteen level types. It no
+longer does: all five activities are on `useSkillRound`, its structural tests are the kit's
+two lines, and its behaviour tests drive every activity through `expectStandardRound`. That
+migration is what the kit is for, and it is why the pattern is worth copying rather than
+described.

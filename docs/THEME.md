@@ -28,7 +28,7 @@ and shared UI primitives instead of copying hex values into feature code.
 | Border        | `border-koda-border`    | `#E7E2F1` | Cards and controls                   |
 | Divider       | `border-koda-divider`   | `#EEE9FA` | Quiet separators                     |
 
-Tokens are defined once in `src/styles/index.css` under Tailwind's `@theme` block.
+Tokens are defined once in `src/index.css` under Tailwind's `@theme` block.
 Change them there to update all plugins.
 
 ## Typography roles
@@ -113,8 +113,8 @@ Each `AppPlugin` supplies `id`, `name`, `description`, `version`, and `component
 The home page renders enabled plugin components and wraps each with
 `data-plugin-id` for inspection and testing.
 
-1. Create `src/plugins/<plugin-name>/index.tsx` and its component.
+1. Create `src/skills/<skill-id>/index.ts` and its activities.
 2. Export an object implementing `AppPlugin`.
-3. Register it in `src/core/plugins/registry.ts`.
+3. Register it in `src/skills/registry.ts`.
 4. Open **Plugin Lab** in the app and toggle it to test mount/unmount behavior.
 5. Run `npm test`, `npm run lint`, and `npm run build`.

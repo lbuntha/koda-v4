@@ -29,6 +29,15 @@ export interface LearnerSnapshot {
   xp: number;
   level: number;
   streakDays: number;
+  /**
+   * Whether `streakDays` counts days or weeks.
+   *
+   * A family may set the flame to count weeks — for a child who does not choose
+   * when they get the tablet, a daily streak is a punishment mechanic. Anything
+   * that puts the number into a sentence has to know which word to use, or it
+   * tells a weekly learner they have practised "4 days in a row".
+   */
+  streakCadence?: "daily" | "weekly";
   problemsSolved: number;
   dailyGoal: number;
   dailySolved: number;
@@ -193,8 +202,18 @@ export interface ActivityLesson {
   id: string;
   title: string;
   concept?: string;
-  /** Position in the course — what the learner calls "level N". */
+  /**
+   * Position in the course.
+   *
+   * A *lesson* number, and the chrome says so. It used to be shown as "Level 7",
+   * which collided with the learner's XP level — the finish screen ended up
+   * saying "Level 11!" (XP) directly above "Level 1 · Count the Row" (lesson),
+   * two different numbers under one word. "Level" now only ever means the XP
+   * one, the way Home already uses it.
+   */
   levelNumber: number;
+  /** How many lessons the course has, so a position can be read as one. */
+  totalLessons?: number;
 }
 
 export interface ActivityProps<P = Record<string, unknown>> {

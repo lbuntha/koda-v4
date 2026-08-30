@@ -1,10 +1,13 @@
 import React, { useEffect } from "react";
-import { Star, RotateCcw, ArrowRight, Trophy, Sparkles } from "lucide-react";
+import { Star, RotateCcw, ArrowRight, Trophy, Sparkles, Flame, Zap, Target } from "lucide-react";
 import { playSound } from "../../../utils/audio";
+import { levelBar, roundPraise, type PraiseFacts } from "../round/roundPraise";
 
 interface PracticeRoundCompleteModalProps {
   levelNumber: number;
   levelTitle: string;
+  /** How many lessons the course has, so the position reads as "3 of 15". */
+  totalLessons?: number;
   /** Stars earned, 1–3. */
   stars: number;
   xpWon: number;
@@ -20,18 +23,60 @@ interface PracticeRoundCompleteModalProps {
    * the measurement changes what happens.
    */
   recommendation?: { kind: string; kidMessage: string };
+  /**
+   * Where this round left the learner: lifetime XP, streak, today's count.
+   *
+   * Optional, and everything below degrades to what it drew before when it is
+   * absent — a preview, or a mount with telemetry off, still gets a complete
+   * screen rather than a row of zeroes claiming a broken streak.
+   */
+  standing?: {
+    xpAfter: number;
+    streakDays: number;
+    cadence?: "daily" | "weekly";
+    dailySolved: number;
+    dailyGoal: number;
+  };
+  /** Every question right first time. Earns its own headline. */
+  perfect?: boolean;
 }
 
 export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProps> = ({
   levelNumber,
   levelTitle,
+  totalLessons,
   stars,
   xpWon,
   nextLevelNumber,
   onNextLevel,
   onPracticeAgain,
   recommendation,
+  standing,
+  perfect = false,
 }) => {
+  /*
+   * What this round is congratulated for.
+   *
+   * The rule lives in `roundPraise` rather than here: which achievement wins is
+   * a decision about what a child is told, and it is worth being able to test
+   * that "the round that made Level 5" beats "a perfect round" without mounting
+   * a modal to find out.
+   */
+  const facts: PraiseFacts = {
+    stars: (stars as 1 | 2 | 3) ?? 1,
+    perfect,
+    xpWon,
+    xpAfter: standing?.xpAfter ?? 0,
+    streakDays: standing?.streakDays ?? 0,
+    cadence: standing?.cadence,
+    dailySolved: standing?.dailySolved ?? 0,
+    dailyGoal: standing?.dailyGoal ?? 0,
+  };
+  const praise = roundPraise(facts);
+  const bar = standing ? levelBar(standing.xpAfter) : null;
+  const streak = standing?.streakDays ?? 0;
+  const unit = standing?.cadence === "weekly" ? "week" : "day";
+
   // Play dynamic complete/cheer audio when this modal renders
   useEffect(() => {
     try {
@@ -48,10 +93,21 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
     >
       <div
         id="practice-round-complete-container"
-        className="relative bg-slate-900 border-2 border-amber-500/30 rounded-[32px] max-w-md w-full p-8 text-center shadow-2xl space-y-6 overflow-hidden md:max-w-lg"
+        /*
+         * Scrolls rather than clips.
+         *
+         * The card grew when the streak, the goal and the level bar joined
+         * the XP, and on a short viewport — a laptop with the browser
+         * chrome up, a phone in landscape — the trophy was cut off the top
+         * and the buttons fell off the bottom. `items-center` centres a box
+         * taller than its parent by hanging it off both ends, so the fix is
+         * a ceiling and somewhere for the overflow to go, not a shorter
+         * screen: every line here is something a child earned.
+         */
+        className="relative bg-slate-900 border-2 border-amber-500/30 rounded-[32px] max-w-md w-full p-6 sm:p-8 text-center shadow-2xl space-y-5 max-h-[92dvh] overflow-y-auto md:max-w-lg"
       >
         {/* Soft background ambient glows */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-amber-500/10 rounded-full filter blur-3xl pointer-events-none" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-amber-500/10 rounded-full filter blur-3xl pointer-events-none -z-10" />
 
         {/* 1. Golden Trophy Badge with Soft Glow */}
         <div className="relative mx-auto flex items-center justify-center w-24 h-24">
@@ -67,13 +123,20 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
         {/* 2. Headline Information */}
         <div className="space-y-1">
           <span className="text-[11px] font-mono font-black text-amber-400 uppercase tracking-widest block">
-            Round Complete
+            {praise.tag}
           </span>
           <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Level {levelNumber} Mastered!
+            {praise.headline}
           </h2>
-          <p className="text-xs sm:text-sm text-slate-400 font-medium">
-            {levelTitle}
+          <p className="text-xs sm:text-sm text-slate-300 font-medium">{praise.note}</p>
+          {/* Which lesson this was, kept small: the child knows what they just
+              played, and the headline is now the news.
+
+              "Lesson", not "Level" — the level bar below is the learner's XP
+              level, and one word cannot mean both on one card. */}
+          <p className="text-[11px] text-slate-500 font-medium pt-1">
+            Lesson {levelNumber}
+            {totalLessons ? ` of ${totalLessons}` : ""} · {levelTitle}
           </p>
         </div>
 
@@ -111,13 +174,90 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
         </div>
         <span className="sr-only">{stars} out of 3 stars</span>
 
-        {/* 4. Rewards Capsule Box */}
-        <div className="bg-slate-950/80 border border-slate-800/80 rounded-full px-6 py-3.5 flex items-center justify-between gap-4 max-w-xs mx-auto text-xs font-mono">
-          <div className="flex items-center gap-1.5">
-            <span className="text-cyan-400 font-black">+{xpWon}</span>
-            <span className="text-slate-200">⚡</span>
-            <span className="text-cyan-400 font-bold uppercase tracking-wider">XP</span>
+        {/*
+          4. What the round was worth.
+
+          Three figures, because a round pays into three different things and a
+          capsule showing only XP made the other two invisible: the flame a child
+          is keeping alive, and the goal they were actually aiming at today.
+          Each is drawn only when there is something true to say.
+        */}
+        <div className="space-y-3 max-w-xs mx-auto">
+          <div className="bg-slate-950/80 border border-slate-800/80 rounded-2xl px-3 py-3 grid grid-cols-3 items-start divide-x divide-slate-800/80 text-center font-mono">
+            <div className="px-1">
+              <div className="flex items-center justify-center gap-1 text-cyan-400">
+                <Zap className="w-3.5 h-3.5 fill-cyan-400" aria-hidden="true" />
+                <span className="text-lg font-black leading-none">+{xpWon}</span>
+              </div>
+              <span className="mt-1 block text-[10px] font-bold uppercase leading-tight tracking-wider text-slate-500">
+                XP won
+              </span>
+            </div>
+
+            <div className="px-1">
+              <div
+                className={`flex items-center justify-center gap-1 ${
+                  streak > 0 ? "text-orange-400" : "text-slate-600"
+                }`}
+              >
+                <Flame
+                  className={`w-3.5 h-3.5 ${streak > 0 ? "fill-orange-400" : ""}`}
+                  aria-hidden="true"
+                />
+                <span className="text-lg font-black leading-none">{streak}</span>
+              </div>
+              <span className="mt-1 block text-[10px] font-bold uppercase leading-tight tracking-wider text-slate-500">
+                {streak === 1 ? unit : `${unit}s`} in a row
+              </span>
+            </div>
+
+            <div className="px-1">
+              <div
+                className={`flex items-center justify-center gap-1 ${
+                  standing && standing.dailySolved >= standing.dailyGoal
+                    ? "text-emerald-400"
+                    : "text-slate-300"
+                }`}
+              >
+                <Target className="w-3.5 h-3.5" aria-hidden="true" />
+                <span className="text-lg font-black leading-none">
+                  {standing ? `${standing.dailySolved}/${standing.dailyGoal}` : "—"}
+                </span>
+              </div>
+              <span className="mt-1 block text-[10px] font-bold uppercase leading-tight tracking-wider text-slate-500">
+                today
+              </span>
+            </div>
           </div>
+
+          {/*
+            The level bar: where that XP actually went.
+
+            "+40 XP" on its own is a number with no scale behind it. This is the
+            answer to "how much more?" — and it is the reason XP still means
+            something after the last badge has been won.
+          */}
+          {bar && (
+            <div className="space-y-1.5">
+              <div className="flex items-baseline justify-between font-mono text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                <span>Level {bar.level}</span>
+                <span>{bar.toNext} XP to Level {bar.level + 1}</span>
+              </div>
+              <div
+                className="h-2 w-full overflow-hidden rounded-full bg-slate-800"
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={bar.per}
+                aria-valuenow={bar.into}
+                aria-label={`Level ${bar.level} progress`}
+              >
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-indigo-400 transition-[width] duration-700 ease-out"
+                  style={{ width: `${Math.round((bar.into / bar.per) * 100)}%` }}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 5. What the log says to do next */}
@@ -145,7 +285,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
               onClick={onNextLevel}
               className="w-full py-3.5 px-6 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-mono font-black text-sm tracking-wide shadow-lg hover:shadow-orange-500/20 active:scale-[0.98] transition-all transform flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>NEXT LEVEL ({nextLevelNumber})</span>
+              <span>NEXT LESSON ({nextLevelNumber})</span>
               <ArrowRight className="w-4 h-4 stroke-[3]" />
             </button>
           )}
@@ -162,7 +302,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
             <RotateCcw className="w-3.5 h-3.5" />
             <span>
               {recommendation?.kind === "practise" || recommendation?.kind === "review"
-                ? `Skip to Level ${nextLevelNumber}`
+                ? `Skip to Lesson ${nextLevelNumber}`
                 : "Practice Again"}
             </span>
           </button>

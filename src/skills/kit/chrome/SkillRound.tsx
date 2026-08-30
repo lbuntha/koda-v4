@@ -122,6 +122,55 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
     return () => window.clearTimeout(timer);
   }, [correctFeedback, round.index, koda]);
 
+  /*
+   * Where this round left the learner — XP, streak, today's count.
+   *
+   * Read once the round is scored rather than on mount, because the round is
+   * what changes it: the host records the practice and the XP as it hears the
+   * result, so a snapshot taken at the start would show the streak the child had
+   * *before* the round that extended it, and congratulate them on yesterday.
+   *
+   * Undefined until it arrives, and the modal draws a complete screen without
+   * it — a preview with telemetry off is not shown a broken streak.
+   */
+  const [standing, setStanding] = React.useState<
+    | {
+        xpAfter: number;
+        streakDays: number;
+        cadence?: "daily" | "weekly";
+        dailySolved: number;
+        dailyGoal: number;
+      }
+    | undefined
+  >();
+
+  const scored = Boolean(round.score);
+  useEffect(() => {
+    if (!scored) {
+      setStanding(undefined);
+      return;
+    }
+    let live = true;
+    void koda.progress
+      .snapshot()
+      .then((snap) => {
+        if (!live) return;
+        setStanding({
+          xpAfter: snap.xp,
+          streakDays: snap.streakDays,
+          cadence: snap.streakCadence,
+          dailySolved: snap.dailySolved,
+          dailyGoal: snap.dailyGoal,
+        });
+      })
+      // A host that cannot answer leaves the screen as it was before this
+      // existed. Nothing a child sees may depend on a figure arriving.
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [scored, koda]);
+
   return (
     <div className="flex-1 flex flex-col min-h-0">
       <SkillRoundTopBar
@@ -194,8 +243,11 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
         <PracticeRoundCompleteModal
           levelNumber={levelNumber}
           levelTitle={title}
+          totalLessons={lesson?.totalLessons}
           stars={round.score.stars}
           xpWon={round.score.xp}
+          perfect={round.score.perfect}
+          standing={standing}
           nextLevelNumber={levelNumber + 1}
           recommendation={recommendation}
           onNextLevel={onNextLevel ?? onExit}

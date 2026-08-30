@@ -36,6 +36,8 @@ export interface SkillHostProps {
     /** Display only — passed through to the activity for its chrome. */
     title?: string;
     concept?: string;
+    /** How many lessons the course has. Shown as "Lesson 3 of 15". */
+    totalLessons?: number;
   };
   /** How the learner got here. `"preview"` also disables telemetry. */
   entry?: LessonEntry;
@@ -179,6 +181,7 @@ export const SkillHost: React.FC<SkillHostProps> = ({
             title: lesson.title ?? lesson.lessonId,
             concept: lesson.concept,
             levelNumber: level,
+            totalLessons: lesson.totalLessons,
           }
         }
       />
