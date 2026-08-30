@@ -120,6 +120,35 @@ export const STATE_ANIMATION: Record<MascotState, StateAnimation> = {
 };
 
 /**
+ * The expression a state is wearing on a given frame.
+ *
+ * Looked up through here rather than by indexing twice at the call site, because
+ * the frame index outlives the state it was counted for. The states have
+ * different frame counts — speaking has five, idle has two — and the index lives
+ * in React state while the state prop changes in a render *before* the effect
+ * that resets it. So a character that stops speaking renders once as "idle,
+ * frame 4", `frames[4]` is undefined, and `EXPRESSIONS[undefined]` is undefined:
+ * the mascot then took the whole tree down with
+ * `Cannot read properties of undefined (reading 'eyes')`.
+ *
+ * Wrapping rather than clamping, so a stale index still lands on a real frame of
+ * the new animation. And a face is decoration — nothing it does may throw, so an
+ * unknown state or a mouth nobody defined falls back to a neutral face instead
+ * of crashing the page it was drawn on.
+ */
+export function expressionFor(state: MascotState, frame: number): KodaExpression {
+  const animation = STATE_ANIMATION[state] ?? STATE_ANIMATION.idle;
+  const names = animation.frames;
+  const index = Number.isFinite(frame) ? ((frame % names.length) + names.length) % names.length : 0;
+  return EXPRESSIONS[names[index]] ?? EXPRESSIONS.neutral;
+}
+
+/** One named expression, or a neutral face when the name is not one. */
+export function expressionNamed(name: string): KodaExpression {
+  return EXPRESSIONS[name as ExpressionName] ?? EXPRESSIONS.neutral;
+}
+
+/**
  * One rendered face, as a data URI.
  *
  * Cached by every input that changes the picture. A talking character cycles

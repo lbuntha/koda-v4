@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { EXPRESSIONS, STATE_ANIMATION, kodaFace } from "./kodaFace";
+import {
+  EXPRESSIONS,
+  STATE_ANIMATION,
+  expressionFor,
+  expressionNamed,
+  kodaFace,
+} from "./kodaFace";
 
 /**
  * The face, as data.
@@ -64,5 +70,59 @@ describe("a character's expressions", () => {
     const resting = Math.max(...STATE_ANIMATION.idle.ms);
     expect(fastest).toBeLessThan(300);
     expect(resting).toBeGreaterThan(1000);
+  });
+});
+
+/**
+ * The frame index outlives the state it was counted for.
+ *
+ * Each state has its own number of frames — speaking has five, idle has two —
+ * and the index lives in React state while the state prop changes in a render
+ * *before* the effect that resets it. A character that stopped speaking
+ * therefore rendered once as "idle, frame 4", and `frames[4]` on a two-frame
+ * animation is undefined. That reached `kodaFace`, which read `.eyes` off it,
+ * and the whole page came down with the mascot:
+ *
+ *   Uncaught TypeError: Cannot read properties of undefined (reading 'eyes')
+ *
+ * A face is decoration. Nothing it does may throw.
+ */
+describe("the expression a state wears on a frame", () => {
+  it("survives an index left over from a longer animation", () => {
+    // The exact crash: speaking runs five frames, idle has two.
+    expect(STATE_ANIMATION.speaking.frames).toHaveLength(5);
+    expect(STATE_ANIMATION.idle.frames).toHaveLength(2);
+
+    const face = expressionFor("idle", 4);
+
+    expect(face).toBeDefined();
+    expect(face.eyes).toBeTruthy();
+    expect(face.mouth).toBeTruthy();
+  });
+
+  it("lands on a real frame of the new animation, whatever the index", () => {
+    // Wrapped, not clamped: a stale index still picks a frame that belongs to
+    // the animation now playing.
+    const named = Object.values(EXPRESSIONS);
+    for (const state of Object.keys(STATE_ANIMATION) as (keyof typeof STATE_ANIMATION)[]) {
+      for (const frame of [0, 1, 2, 3, 4, 9, 40]) {
+        expect(named, `${state}/${frame}`).toContain(expressionFor(state, frame));
+      }
+    }
+  });
+
+  it("falls back to a neutral face rather than throwing on nonsense", () => {
+    // Every one of these has reached this function from somewhere: a state a
+    // caller invented, an index that was NaN before a timer had run.
+    expect(expressionFor("idle", Number.NaN)).toEqual(EXPRESSIONS.neutral);
+    expect(expressionFor("idle", -1)).toBeDefined();
+    expect(expressionFor("cheering" as never, 0)).toBeDefined();
+    expect(expressionNamed("talkOpen")).toEqual(EXPRESSIONS.talkOpen);
+    expect(expressionNamed("a mouth nobody defined")).toEqual(EXPRESSIONS.neutral);
+  });
+
+  it("still draws a face from whatever it returns", () => {
+    // The end of the chain, and the line that actually threw.
+    expect(() => kodaFace(SEED, expressionFor("idle", 4), BG)).not.toThrow();
   });
 });

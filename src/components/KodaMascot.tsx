@@ -9,8 +9,9 @@ import {
 } from "motion/react";
 
 import {
-  EXPRESSIONS,
   STATE_ANIMATION,
+  expressionFor,
+  expressionNamed,
   kodaFace,
   warmFaces,
   type ExpressionName,
@@ -183,7 +184,7 @@ const useFaceFrame = (state: MascotState, still: boolean): number => {
     setFrame(0);
     if (still) return;
 
-    const { frames, ms } = STATE_ANIMATION[state];
+    const { frames, ms } = STATE_ANIMATION[state] ?? STATE_ANIMATION.idle;
     let index = 0;
     const step = () => {
       index = (index + 1) % frames.length;
@@ -254,9 +255,10 @@ export const KodaMascot: React.FC<{
   const lipSync = state === "speaking" && typeof energy === "number" && !still;
   const { mouth, level } = useLipSync(energy, lipSync);
   const frame = useFaceFrame(state, still || lipSync);
-  const expression = lipSync
-    ? EXPRESSIONS[mouth]
-    : EXPRESSIONS[STATE_ANIMATION[state].frames[frame]];
+  // Both looked up through `kodaFace`, which never returns undefined: the frame
+  // index outlives the state it was counted for, and a face is decoration that
+  // must not be able to take the page down. See `expressionFor`.
+  const expression = lipSync ? expressionNamed(mouth) : expressionFor(state, frame);
 
   /*
    * The body's own physics.
@@ -359,6 +361,11 @@ export const KodaMascot: React.FC<{
               width="3"
               rx="1.5"
               fill={skin.accent}
+              /* The first keyframe, as real attributes. Without them the bar has
+                 no height to animate *from*, and motion's first write was
+                 height="undefined" — which SVG rejects outright. */
+              height={5}
+              y={88}
               animate={{ height: [5, 17, 9, 14, 5], y: [88, 76, 84, 79, 88] }}
               transition={{ repeat: Infinity, duration: 0.75, delay: bar * 0.1 }}
             />
