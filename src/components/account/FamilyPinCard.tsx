@@ -83,7 +83,7 @@ export const FamilyPinCard: React.FC = () => {
     <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
       <UISectionHeader
         title="Family PIN"
-        subtitle="Asked for when a child's tablet switches back to a grown-up's account"
+        subtitle="Asked when a child switches back to a grown-up's account"
         icon={<ShieldCheck className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
         action={
           isSet === null ? undefined : isSet ? (
@@ -167,9 +167,7 @@ export const FamilyPinCard: React.FC = () => {
         * device — for that, the answer is not a PIN.
         */}
       <p className="text-xs text-muted">
-        Four digits, asked for when a child&rsquo;s session opens a grown-up&rsquo;s account. It
-        is a doorstop for a curious child, not a lock — anyone who knows their way around the
-        tablet can still get past it.
+        Four digits. It stops a curious child, not someone who knows their way around the tablet.
       </p>
 
       <UIDialog

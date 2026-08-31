@@ -29,8 +29,11 @@ DEFAULT_MENU: list[dict] = [
      "requires": "role:manage", "order": 50},
     {"itemId": "children", "label": "Children", "icon": "baby", "badge": "Family",
      "requires": "learner:create", "order": 52},
-    {"itemId": "devices", "label": "Devices", "icon": "key", "badge": "Family",
-     "requires": "device:list", "order": 53},
+    # No Devices row. The device list is a section of Settings now — it is read
+    # once when a tablet goes missing, not navigated to, and a permanent sidebar
+    # row for it cost more attention than it was worth. `prune_orphans` deletes
+    # the seeded row (and any family's override of it) on the next boot, which
+    # is why removing it from this list is the whole change.
     {"itemId": "menu", "label": "Menu", "icon": "list", "badge": "Sidebar",
      "requires": "menu:manage", "order": 55},
     # Two rows, and the split is by *whose decision it is* rather than by

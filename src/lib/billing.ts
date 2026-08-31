@@ -35,6 +35,31 @@ export interface Entitlements {
 /** Koda's AI help. The one feature that is sold today. */
 export const AI_FEATURE = "ai.koda";
 
+/** A plan as the catalogue describes it — what a family is choosing between. */
+export interface Plan {
+  planId: string;
+  name: string;
+  description: string;
+  priceCents: number;
+  currency: string;
+  learnerLimit: number;
+  features: string[];
+  order: number;
+}
+
+/**
+ * A plan this family has asked for and not yet been given.
+ *
+ * Not an entitlement, and deliberately kept apart from one: `Entitlements` is
+ * what the app may *do*, and a want must never be mistaken for a grant. Nothing
+ * unlocks because this is set.
+ */
+export interface UpgradeRequest {
+  planId: string;
+  planName: string;
+  requestedAt: string;
+}
+
 /**
  * What a device shows before it has heard, and when it never will.
  *
@@ -138,6 +163,53 @@ export const Billing = {
   clear(): void {
     current = null;
     notify();
+  },
+
+  /** Every plan on offer, cheapest first. Not cached: read when a card opens. */
+  async plans(): Promise<Plan[]> {
+    const token = await accessToken();
+    if (!token) return [];
+    const body = await request<{ plans: Plan[] }>("/billing/plans", { token });
+    return [...body.plans].sort((a, b) => a.order - b.order || a.priceCents - b.priceCents);
+  },
+
+  /** What this family has already asked for, if anything. */
+  async upgradeRequest(): Promise<UpgradeRequest | null> {
+    try {
+      const token = await accessToken();
+      if (!token) return null;
+      const body = await request<{ request: UpgradeRequest | null }>("/billing/upgrade", { token });
+      return body.request;
+    } catch (error) {
+      // A card that cannot read the ask should still draw the plan. Failing
+      // quietly here shows an Upgrade button; failing loudly shows an error
+      // where a parent expected their plan.
+      void (error as ApiError);
+      return null;
+    }
+  },
+
+  /**
+   * Ask to be moved onto a plan.
+   *
+   * Records the want — it does not move the plan, and the entitlement is
+   * untouched until somebody grants it. Throws, unlike the read above: a
+   * parent who pressed a button has to be told if it did not land.
+   */
+  async requestUpgrade(planId: string): Promise<UpgradeRequest | null> {
+    const token = await accessToken();
+    const body = await request<{ request: UpgradeRequest | null }>("/billing/upgrade", {
+      method: "POST",
+      token,
+      body: { planId },
+    });
+    return body.request;
+  },
+
+  /** Withdraw the ask. */
+  async cancelUpgrade(): Promise<void> {
+    const token = await accessToken();
+    await request("/billing/upgrade", { method: "DELETE", token });
   },
 };
 

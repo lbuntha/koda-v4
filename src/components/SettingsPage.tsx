@@ -9,6 +9,7 @@ import { PersonaPicker } from "./account/PersonaPicker";
 import { ChildSettingsAPI } from "../lib/childSettings";
 import { usePersona, usePersonaRoster } from "../lib/usePersona";
 import { PlanCard } from "./account/PlanCard";
+import { DevicesPage } from "./account/DevicesPage";
 import { usePermissions, useSession } from "../lib/sync";
 import { NavShortcuts } from "./NavShortcuts";
 import type { TabId } from "./navTabs";
@@ -123,6 +124,15 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   // Shown to whoever runs the family, not to a child: a seven-year-old has no
   // use for a renewal date, and "not included" reads as a scolding.
   const showsPlan = can("learner:create");
+  /*
+   * The device list, which used to be a sidebar row of its own.
+   *
+   * It belongs here: it is read when something goes wrong — a lost tablet, a
+   * device somebody should no longer have — rather than navigated to, and a
+   * permanent row for it cost more attention than it earned. Same right the
+   * page itself checks, so this never draws a heading over a "no access" card.
+   */
+  const showsDevices = can("device:list");
 
   const handleToggleSound = () => {
     // Toggle first so switching sound back on is confirmed by the pop itself.
@@ -230,6 +240,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
       )}
 
       {showsPlan && <PlanCard />}
+
+      {showsDevices && <DevicesPage embedded />}
 
       {/* Last on the page on purpose: it is a way *out* of Settings, and a list
           of doors above the switches somebody opened Settings to reach would

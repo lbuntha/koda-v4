@@ -239,7 +239,7 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
     <div className="min-h-full bg-white dark:bg-canvas">
       <div className="mx-auto max-w-5xl space-y-5">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div><h1 className="koda-admin-page-title">Children</h1><p className="mt-1 text-sm text-[#6D6997] dark:text-muted">Every child gets their own learning space, signed in on their own device.</p></div>
+          <div><h1 className="koda-admin-page-title">Children</h1><p className="mt-1 text-sm text-[#6D6997] dark:text-muted">Each child learns on their own device.</p></div>
           {canCreate && (
             <div className="flex flex-wrap items-center gap-3">
               <UIButton
@@ -266,12 +266,6 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
 
         {error && <p className={themeSystem.flash("error")}>{error}</p>}
         {notice && <p className={themeSystem.flash("success")}>{notice}</p>}
-
-        <section className="grid gap-3 rounded-2xl border border-indigo-100 bg-white p-4 shadow-sm dark:border-line dark:bg-surface md:grid-cols-3" aria-label="Child setup steps">
-          {["Add a child — just a name, no email", "Tap Get device code on their card", "They enter it under Child code on their device"].map((step, index) => <div key={step} className="flex items-center gap-3"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">{index + 1}</span><span className="text-sm font-medium text-slate-700 dark:text-slate-200">{step}</span></div>)}
-        </section>
-
-        <FamilyPinCard />
 
         {loading ? <div className="rounded-2xl border border-line bg-white p-8 text-center text-sm text-muted dark:bg-surface">Loading children…</div> : learners.length === 0 ? <section className={themeSystem.card("default", "p-8 text-center")}><UserRound className="mx-auto h-10 w-10 text-indigo-300" /><h2 className="mt-3 text-lg font-semibold text-ink">No child profiles yet</h2><p className="mx-auto mt-1 max-w-md text-sm text-muted">Add a child to create their learning space and pair their tablet with a secure one-time code.</p>{canCreate && <UIButton className="mt-4" icon={<Plus />} disabled={atLimit} onClick={() => setCreateOpen(true)}>Add first child</UIButton>}</section> : <div className="grid gap-4 sm:grid-cols-2">{learners.map((learner) => (
           <article key={learner.id} className={themeSystem.card("default", "p-5")}>
@@ -341,6 +335,8 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
             </div>
           </article>
         ))}</div>}
+
+        <FamilyPinCard />
       </div>
 
       <UIModal isOpen={createOpen} onClose={() => setCreateOpen(false)} title="Add child" footer={<><UIButton variant="secondary" onClick={() => setCreateOpen(false)}>Cancel</UIButton><UIButton variant="primary" isLoading={busy === "create"} disabled={!name.trim()} onClick={() => void createLearner()}>Create and get code</UIButton></>}><div className="space-y-4"><p className="rounded-xl bg-indigo-50 p-3 text-sm text-indigo-900 dark:bg-indigo-950/40 dark:text-indigo-200">The child does not need an email or password. You will receive a one-time code after creating this profile.</p><label className="block space-y-1.5"><span className="koda-admin-label text-ink">Child's name</span><input className={field} autoFocus value={name} onChange={(event) => setName(event.target.value)} placeholder="Mia" /></label><label className="block space-y-1.5"><span className="koda-admin-label text-ink">Birth year <span className="font-normal text-muted">(optional)</span></span><input className={field} type="number" min="1900" max={new Date().getFullYear()} value={birthYear} onChange={(event) => setBirthYear(event.target.value)} placeholder="2017" /></label></div></UIModal>

@@ -416,3 +416,149 @@ async def test_a_lapsed_grant_reads_as_free_in_user_management(db, client, signu
     membership = listed.json()["users"][0]["memberships"][0]
     assert membership["planId"] == "free"
     assert membership["live"] is False
+
+
+# ---- Asking for a plan ---------------------------------------------------
+#
+# The rule every one of these is circling: asking is not buying. Until a card
+# is charged or an operator agrees, a family that pressed Upgrade must be on
+# exactly the plan they were on before they pressed it.
+
+
+@pytest.mark.asyncio
+async def test_asking_for_a_plan_does_not_grant_it(db, client, signup_body):
+    """The whole safety property of an upgrade button with no checkout behind it."""
+    await _seed_plans(db)
+    auth, _ = await _family(client, signup_body, email="asks@example.com")
+
+    asked = await client.post("/billing/upgrade", headers=auth, json={"planId": "family"})
+    assert asked.status_code == 200
+    assert asked.json()["request"]["planName"] == "Family"
+
+    # Nothing moved: still free, still one child, still no Ask Koda.
+    mine = (await client.get("/billing/me", headers=auth)).json()
+    assert mine["planId"] == "free"
+    assert mine["features"] == []
+    assert mine["learnerLimit"] == 1
+
+
+@pytest.mark.asyncio
+async def test_a_family_reads_back_the_plan_it_asked_for(db, client, signup_body):
+    """So a second parent sees the ask instead of an Upgrade button."""
+    await _seed_plans(db)
+    auth, _ = await _family(client, signup_body, email="reads@example.com")
+
+    assert (await client.get("/billing/upgrade", headers=auth)).json()["request"] is None
+
+    await client.post("/billing/upgrade", headers=auth, json={"planId": "family"})
+    again = (await client.get("/billing/upgrade", headers=auth)).json()["request"]
+    assert again["planId"] == "family"
+
+    await client.delete("/billing/upgrade", headers=auth)
+    assert (await client.get("/billing/upgrade", headers=auth)).json()["request"] is None
+
+
+@pytest.mark.asyncio
+async def test_asking_twice_replaces_the_ask_rather_than_stacking_one(db, client, signup_body):
+    """An operator answers one want per family, not a queue of them."""
+    await _seed_plans(db)
+    await plans_repo.seed_default(
+        db,
+        {
+            "planId": "school",
+            "name": "School",
+            "description": "",
+            "priceCents": 2000,
+            "currency": "USD",
+            "learnerLimit": 30,
+            "features": ["ai.koda"],
+            "order": 30,
+        },
+    )
+    auth, family_id = await _family(client, signup_body, email="twice@example.com")
+
+    await client.post("/billing/upgrade", headers=auth, json={"planId": "family"})
+    await client.post("/billing/upgrade", headers=auth, json={"planId": "school"})
+
+    assert await db.upgrade_requests.count_documents({"_id": family_id}) == 1
+    assert (await client.get("/billing/upgrade", headers=auth)).json()["request"]["planId"] == "school"
+
+
+@pytest.mark.asyncio
+async def test_asking_for_free_or_for_the_plan_already_held_is_refused(db, client, signup_body):
+    """Neither is an upgrade, and both would leave an operator a no-op to action."""
+    await _seed_plans(db)
+    admin = await _operator(db, client)
+    auth, family_id = await _family(client, signup_body, email="silly@example.com")
+
+    free = await client.post("/billing/upgrade", headers=auth, json={"planId": "free"})
+    assert free.status_code == 409
+    assert free.json()["error"]["code"] == "free_plan"
+
+    missing = await client.post("/billing/upgrade", headers=auth, json={"planId": "nope"})
+    assert missing.status_code == 404
+
+    await client.put(
+        f"/billing/subscriptions/{family_id}",
+        headers=admin,
+        json={"planId": "family", "months": 1, "status": "active"},
+    )
+    same = await client.post("/billing/upgrade", headers=auth, json={"planId": "family"})
+    assert same.status_code == 409
+    assert same.json()["error"]["code"] == "already_on_plan"
+
+
+@pytest.mark.asyncio
+async def test_an_operator_sees_the_ask_and_granting_it_clears_it(db, client, signup_body):
+    """The delivery mechanism, until a card processor is the one answering."""
+    await _seed_plans(db)
+    admin = await _operator(db, client)
+    auth, family_id = await _family(client, signup_body, email="wants@example.com")
+
+    await client.post("/billing/upgrade", headers=auth, json={"planId": "family"})
+
+    listed = (await client.get("/billing/subscriptions", headers=admin)).json()["subscriptions"]
+    row = next(item for item in listed if item["familyId"] == family_id)
+    assert row["wantsPlanId"] == "family"
+    assert row["wantsPlanName"] == "Family"
+
+    await client.put(
+        f"/billing/subscriptions/{family_id}",
+        headers=admin,
+        json={"planId": "family", "months": 1, "status": "active"},
+    )
+
+    # Answered: the family is on the plan and nothing is still outstanding.
+    assert (await client.get("/billing/me", headers=auth)).json()["planId"] == "family"
+    assert (await client.get("/billing/upgrade", headers=auth)).json()["request"] is None
+
+
+@pytest.mark.asyncio
+async def test_granting_a_different_plan_leaves_the_ask_standing(db, client, signup_body):
+    """It is the record of what the family wanted, and they did not get it."""
+    await _seed_plans(db)
+    await plans_repo.seed_default(
+        db,
+        {
+            "planId": "school",
+            "name": "School",
+            "description": "",
+            "priceCents": 2000,
+            "currency": "USD",
+            "learnerLimit": 30,
+            "features": ["ai.koda"],
+            "order": 30,
+        },
+    )
+    admin = await _operator(db, client)
+    auth, family_id = await _family(client, signup_body, email="other@example.com")
+
+    await client.post("/billing/upgrade", headers=auth, json={"planId": "school"})
+    await client.put(
+        f"/billing/subscriptions/{family_id}",
+        headers=admin,
+        json={"planId": "family", "months": 1, "status": "active"},
+    )
+
+    still = (await client.get("/billing/upgrade", headers=auth)).json()["request"]
+    assert still["planId"] == "school"

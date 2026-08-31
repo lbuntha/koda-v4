@@ -38,6 +38,9 @@ interface Subscription {
   learnersUsed: number;
   learnerLimit: number;
   live: boolean;
+  /** A plan this family asked for and has not been given. */
+  wantsPlanId: string | null;
+  wantsPlanName: string | null;
 }
 
 const field =
@@ -337,13 +340,28 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
                   {!sub.live && sub.planId !== "free" && (
                     <UIBadge variant="warning">lapsed</UIBadge>
                   )}
+                  {/*
+                    * A family has asked for this and is waiting on a person.
+                    * Until checkout exists, this badge is the whole delivery
+                    * mechanism for an upgrade — a request nobody can see is a
+                    * parent pressing a button into nothing.
+                    */}
+                  {sub.wantsPlanName && (
+                    <UIBadge variant="primary">wants {sub.wantsPlanName}</UIBadge>
+                  )}
                   <UIButton
                     variant="secondary"
                     size="sm"
                     isLoading={busy === `grant:${sub.familyId}`}
                     onClick={() => {
                       setGranting(sub);
-                      setGrantPlan(plans.find((p) => p.priceCents > 0)?.planId ?? "family");
+                      // What they asked for, when they asked for something.
+                      // An operator opening this row is usually answering the
+                      // request, and re-picking it by hand is how the wrong
+                      // plan gets granted.
+                      setGrantPlan(
+                        sub.wantsPlanId ?? plans.find((p) => p.priceCents > 0)?.planId ?? "family",
+                      );
                       setGrantMonths(1);
                     }}
                   >
@@ -523,6 +541,16 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
         }
       >
         <div className="space-y-4">
+          {/* What the family actually asked for, beside the control that
+              answers it — so an operator granting something else is doing it
+              on purpose rather than because the row did not say. */}
+          {granting?.wantsPlanName && (
+            <p className="rounded-xl bg-indigo-50 p-3 text-sm text-indigo-900 dark:bg-indigo-950/40 dark:text-indigo-200">
+              This family asked for <strong>{granting.wantsPlanName}</strong>. Granting it clears
+              the request.
+            </p>
+          )}
+
           <label className="block space-y-1.5">
             <span className="koda-admin-label text-ink">Plan</span>
             <select className={field} value={grantPlan} onChange={(e) => setGrantPlan(e.target.value)}>

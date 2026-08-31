@@ -63,7 +63,19 @@ const whenSeen = (iso: string | null): string => {
   return new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short" }).format(then);
 };
 
-export const DevicesPage: React.FC = () => {
+export interface DevicesPageProps {
+  /**
+   * Drawn inside another page rather than as a page of its own.
+   *
+   * Settings owns the heading and the gutters when this is set, so both are
+   * dropped here — a second `<h1>` under the Settings title, and a second set
+   * of page margins inside them, is what embedding one whole page in another
+   * usually looks like.
+   */
+  embedded?: boolean;
+}
+
+export const DevicesPage: React.FC<DevicesPageProps> = ({ embedded = false }) => {
   const { can } = usePermissions();
   const session = useSession();
   const canList = can("device:list");
@@ -157,14 +169,18 @@ export const DevicesPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-full bg-white p-4 dark:bg-canvas md:p-8">
-      <div className="mx-auto max-w-4xl space-y-5">
+    <div className={embedded ? "" : "min-h-full bg-white p-4 dark:bg-canvas md:p-8"}>
+      <div className={embedded ? "space-y-5" : "mx-auto max-w-4xl space-y-5"}>
         <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h1 className="koda-admin-page-title">Devices</h1>
+            {embedded ? (
+              <h2 className={themeSystem.list.groupLabel}>Devices</h2>
+            ) : (
+              <h1 className="koda-admin-page-title">Devices</h1>
+            )}
             <p className="mt-1 text-sm text-[#6D6997] dark:text-muted">
-              Everything signed into this family. Sign one out if it is lost, or if somebody
-              should no longer have it.
+              Everything signed into this family. Sign out anything lost, or in the wrong
+              hands.
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -292,9 +308,8 @@ export const DevicesPage: React.FC = () => {
         </section>
 
         <p className="text-xs text-muted">
-          A device listed here is one install — a browser or an app — not one sign-in. Signing one
-          out ends its session immediately; getting back in needs the password, or a fresh child
-          code for a tablet. A device that has not been used in a long time signs itself out.
+          Each row is one browser or app. Signing out ends that session at once — getting back
+          in needs the password, or a new child code. Unused devices sign out on their own.
         </p>
       </div>
 

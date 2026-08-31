@@ -11,8 +11,11 @@ Three audiences, three shapes of route:
 * **The tutor proxy** asks whether a family may use a feature. It holds the
   caller's own token, so it is answered by the same route the family uses.
 
-There is no payment here. A grant has an end date and lapses when it passes —
-see `plan_defaults` for why that is the design and not an omission.
+There is no card processor here. A grant has an end date and lapses when it
+passes — see `plan_defaults` for why that is the design and not an omission.
+What a family *can* do is ask: `/billing/upgrade` records the plan they want, an
+operator answers it with a grant, and when checkout exists it answers the same
+request in the same place.
 """
 
 import re
@@ -30,12 +33,18 @@ from app.plan_defaults import FEATURE_IDS, FREE_PLAN, PLAN_FEATURES
 from app.repos import families as families_repo
 from app.repos import plans as plans_repo
 from app.repos import subscriptions as subs_repo
+from app.repos import upgrade_requests as wants_repo
 from app.security import principal_can
 from app.services.entitlements import entitlements
 
 router = APIRouter(prefix="/billing", tags=["billing"], dependencies=[AUTHENTICATED])
 
 CanOperate = Annotated[Principal, Depends(require("system:write"))]
+#: Asking to change the family's plan is a family-level act, so it sits with the
+#: right that renames the family rather than with a billing right of its own. An
+#: owner and a parent hold it; a caregiver and a child do not, which is correct
+#: — a grandparent minding the tablet should not be able to order a plan.
+CanBuy = Annotated[Principal, Depends(require("family:update"))]
 
 
 class FeatureOut(Model):
@@ -85,6 +94,16 @@ class EntitlementsOut(Model):
     source: str | None = None
 
 
+class UpgradeRequestOut(Model):
+    plan_id: str = Field(alias="planId")
+    plan_name: str = Field(alias="planName")
+    requested_at: str = Field(alias="requestedAt")
+
+
+class UpgradeIn(Model):
+    plan_id: str = Field(alias="planId")
+
+
 class SubscriptionRow(Model):
     family_id: str = Field(alias="familyId")
     family_name: str = Field(alias="familyName")
@@ -103,6 +122,11 @@ class SubscriptionRow(Model):
     learner_limit: int = Field(alias="learnerLimit")
     #: What is being honoured, which an expired row's `status` does not say.
     live: bool
+    #: A plan this family has asked for and not been given. The reason an
+    #: operator opens this screen at all, so it belongs on the row rather than
+    #: behind a second call.
+    wants_plan_id: str | None = Field(default=None, alias="wantsPlanId")
+    wants_plan_name: str | None = Field(default=None, alias="wantsPlanName")
 
 
 class GrantIn(Model):
@@ -162,6 +186,73 @@ async def plan_catalogue(db: Db, p: CurrentPrincipal) -> dict[str, Any]:
             for feature in sorted(PLAN_FEATURES, key=lambda f: f["order"])
         ],
     }
+
+
+# ---- Asking for a plan ---------------------------------------------------
+
+
+async def _want_out(db: Any, family_id: str) -> UpgradeRequestOut | None:
+    """This family's outstanding ask, named rather than as a plan id."""
+    row = await wants_repo.for_family(db, family_id)
+    if not row:
+        return None
+    plan = await plans_repo.by_id(db, row["planId"])
+    return UpgradeRequestOut(
+        planId=row["planId"],
+        # A plan deleted out from under a request still has to render, so the
+        # id stands in for a name rather than blanking the card.
+        planName=(plan or {}).get("name", row["planId"]),
+        requestedAt=row["requestedAt"].isoformat(),
+    )
+
+
+@router.get("/upgrade")
+async def my_upgrade_request(db: Db, p: CurrentPrincipal) -> dict[str, Any]:
+    """What this family has asked for, if anything.
+
+    Read by anyone signed into the family rather than only by whoever asked: a
+    second parent opening the plan card should see the ask already in flight,
+    not an Upgrade button that would quietly overwrite it.
+    """
+    if not p.family_id:
+        return {"request": None}
+    return {"request": await _want_out(db, p.family_id)}
+
+
+@router.post("/upgrade")
+async def request_upgrade(body: UpgradeIn, db: Db, p: CanBuy) -> dict[str, Any]:
+    """Ask to be put on a plan.
+
+    Records the want and nothing else — no entitlement moves here. That is the
+    point: until a card is charged or an operator agrees, a family asking for
+    the Family plan must not be *on* the Family plan, and a route that both
+    took the request and granted it would be one refactor away from being free
+    Ask Koda for anybody who clicks.
+    """
+    if not p.family_id:
+        raise Conflict("An operator account has no family to put on a plan.", "no_family")
+
+    plan = await plans_repo.by_id(db, body.plan_id)
+    if not plan:
+        raise NotFound("No such plan.")
+    if body.plan_id == FREE_PLAN:
+        # Free is where a lapsed subscription lands by itself, so there is
+        # nothing to ask for. Cancelling is `DELETE` on the grant, not this.
+        raise Conflict("Free is what a plan falls back to; there is nothing to ask for.", "free_plan")
+
+    state = await entitlements(db, p.family_id)
+    if state["planId"] == body.plan_id:
+        raise Conflict(f"This family is already on {plan.get('name', body.plan_id)}.", "already_on_plan")
+
+    await wants_repo.want(db, p.family_id, plan_id=body.plan_id, actor_id=p.subject_id)
+    return {"request": await _want_out(db, p.family_id)}
+
+
+@router.delete("/upgrade", status_code=204)
+async def withdraw_upgrade(db: Db, p: CanBuy) -> None:
+    """Changed their mind. Deleting an ask nobody made is not an error."""
+    if p.family_id:
+        await wants_repo.clear(db, p.family_id)
 
 
 # ---- Running the catalogue ----------------------------------------------
@@ -253,6 +344,7 @@ async def subscription_listing(
 
     family_rows = await db.families.find(selector).sort("createdAt", -1).to_list(length=limit)
     plans = {row["_id"]: row for row in await plans_repo.listing(db)}
+    wants = await wants_repo.listing(db, [row["_id"] for row in family_rows])
 
     # One query for every owner rather than one per row: this list is fifty
     # families wide and a lookup inside the loop would be fifty round trips.
@@ -272,6 +364,7 @@ async def subscription_listing(
         row = await subs_repo.for_family(db, family["_id"])
         named = plans.get((row or {}).get("planId", FREE_PLAN), {})
         ends = (row or {}).get("currentPeriodEnd")
+        want = wants.get(family["_id"]) or {}
         out.append(
             SubscriptionRow(
                 familyId=family["_id"],
@@ -287,6 +380,12 @@ async def subscription_listing(
                 learnersUsed=state["learnersUsed"],
                 learnerLimit=state["learnerLimit"],
                 live=state["planId"] != FREE_PLAN,
+                wantsPlanId=want.get("planId"),
+                wantsPlanName=(
+                    plans.get(want.get("planId"), {}).get("name", want.get("planId"))
+                    if want
+                    else None
+                ),
             )
         )
     return {"subscriptions": out}
@@ -317,6 +416,14 @@ async def grant(family_id: str, body: GrantIn, db: Db, p: CanOperate) -> Subscri
         actor_id=p.subject_id,
         note=body.note,
     )
+    # An operator putting the family on the plan they asked for has answered the
+    # request, so it stops being outstanding. A grant onto some *other* plan is
+    # left alone: that is a different conversation, and the ask is the record of
+    # what the family actually wanted.
+    asked = await wants_repo.for_family(db, family_id)
+    if asked and asked.get("planId") == body.plan_id:
+        await wants_repo.clear(db, family_id)
+
     state = await entitlements(db, family_id)
     return SubscriptionRow(
         familyId=family_id,
