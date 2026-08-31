@@ -5,6 +5,8 @@ import type { ActivityProps } from "../../types";
 import {
   SkillRound,
   SPRING,
+  composeHints,
+  playCopy,
   useSkillRound,
   useSpokenFinish,
   type RoundQuestion,
@@ -46,7 +48,7 @@ export interface FroggySkipParams extends FroggySetup {
   question?: FroggySetup;
 }
 
-interface LineQuestion extends RoundQuestion {
+export interface LineQuestion extends RoundQuestion {
   mode: NumberLineMode;
   step: number;
   /** `hop`: the pads to land on, in order. */
@@ -117,6 +119,61 @@ const buildQuestion = (setup: FroggySetup, index: number): LineQuestion => {
   return { ...base, mode, step, pads, expected: String(pads[hops]) };
 };
 
+/**
+ * What to say to a child stuck on the number line.
+ *
+ * Both modes are the same idea — equal steps — so both ladders end at the same
+ * place: the size of one jump, applied from a number that is actually on the
+ * screen. For the missing number that stops one step short of the answer,
+ * because choosing the answer is the question; for the hop it goes all the way,
+ * because the answer is produced by hopping rather than by naming a number.
+ *
+ * Pure and exported: the arithmetic in a hint has to be tested, and a hint that
+ * says "the jump is +5" about a line that steps by 2 is a lie a child will
+ * trust over their own eyes.
+ */
+export function numberLineHints(
+  question: LineQuestion,
+  state: { hop: number; kidTip?: string },
+): string[] {
+  if (question.mode === "missing") {
+    const sequence = question.sequence ?? [];
+    const gap = sequence.indexOf(null);
+    const before = gap > 0 ? sequence[gap - 1] : null;
+    const after = gap >= 0 && gap < sequence.length - 1 ? sequence[gap + 1] : null;
+    // The line may run backwards, and half of them do — read the direction off
+    // the sequence rather than assuming a child is counting up.
+    const shown = sequence.filter((n): n is number => n !== null);
+    const down = shown.length > 1 && shown[1] < shown[0];
+    const jump = `${down ? "down" : "up"} by ${question.step}`;
+
+    return composeHints(
+      state.kidTip ?? "Look at how much it grows each hop.",
+      `Look at two numbers that sit next to each other and work out the jump between them. Every hop on this line is the same size: it goes ${jump}.`,
+      before !== null
+        ? `The gap comes straight after ${before}. Start at ${before} and go ${jump} — that number belongs in the empty pad.`
+        : after !== null
+          ? `The gap comes straight before ${after}. Go back ${question.step} from ${after} — that is the number that belongs in the empty pad.`
+          : `Count ${jump} along the line, pad by pad, until you reach the empty one.`,
+    );
+  }
+
+  const pads = question.pads ?? [];
+  const goal = pads[pads.length - 1] ?? 0;
+  const here = pads[state.hop] ?? 0;
+  const next = pads[state.hop + 1];
+
+  return composeHints(
+    state.kidTip ?? "Say the numbers out loud as you hop.",
+    next === undefined
+      ? `The frog is on ${here}, the last pad. That is the number you counted to.`
+      : `The frog is on ${here}. Every hop adds ${question.step}, so the next pad is ${here} + ${question.step} = ${next}. Press Hop and say it out loud.`,
+    // Saying the whole chant is the point of skip counting: the pattern is
+    // heard before it is understood, and the pads are on screen anyway.
+    `Keep hopping and chant the pads as you land: ${pads.join(", ")}. The last one, ${goal}, is where the frog is going.`,
+  );
+}
+
 export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
   params,
   koda,
@@ -125,10 +182,11 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
 }) => {
   const setup: FroggySetup = { ...params, ...params.question };
   const total = setup.questionsPerRound ?? 5;
+  /** The lesson's own child-facing copy: the spoken intro, and hint rung one. */
+  const copy = playCopy(params);
 
   const [hop, setHop] = useState(0);
   const [guess, setGuess] = useState<number | null>(null);
-  const [showTip, setShowTip] = useState(false);
   const [nextStep, setNextStep] = useState<{ kind: string; kidMessage: string } | undefined>();
 
   const round = useSkillRound({
@@ -136,7 +194,7 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
     totalQuestions: total,
     levelNumber: lesson?.levelNumber ?? 1,
     // The lesson's own spoken instruction, said once as the round opens.
-    intro: (params as { play?: { audioPrompt?: string } }).play?.audioPrompt,
+    intro: copy.audioPrompt,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     nextQuestion: useCallback((index: number) => buildQuestion(setup, index), [params]),
     onComplete: (result) => {
@@ -161,7 +219,6 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
     finishing.cancel();
     setHop(0);
     setGuess(null);
-    setShowTip(false);
   }, [question.id, finishing]);
 
   const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
@@ -234,12 +291,8 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
       prompt={prompt}
       iconName="footprints"
       iconTone="emerald"
-      showTip={showTip}
+      hints={numberLineHints(question, { hop, kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
-      onToggleTip={() => {
-        if (!showTip) round.useSupport("hint", 1);
-        setShowTip((v) => !v);
-      }}
       onReadAloud={() => {
         round.useSupport("audio_replay");
         void koda.speech.say(prompt);

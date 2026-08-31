@@ -4,7 +4,9 @@ import type { ActivityProps } from "../../types";
 import {
   SkillRound,
   SPRING,
+  composeHints,
   idleFloat,
+  playCopy,
   stagger,
   useMotionOK,
   useSkillRound,
@@ -291,6 +293,68 @@ const TapGroup: React.FC<{
   </div>
 );
 
+/**
+ * What to say to a child who is stuck on this question.
+ *
+ * Pure and exported so the wording can be tested against the question it is
+ * about — a hint that says "you have touched 3" when four are tagged is worse
+ * than no hint, and that is exactly the kind of drift a rendered test misses.
+ *
+ * Written off live tap counts rather than off the question alone: the second
+ * rung's job is to tell the child what to do *next*, and next depends on what
+ * they have already done.
+ */
+export function orbitHints(
+  question: OrbitQuestion,
+  state: { tapped: number; tappedA: number; tappedB: number; kidTip?: string },
+): string[] {
+  const one = singular(question.asset.name);
+  const many = question.asset.name.toLowerCase();
+
+  if (question.mode === "compare") {
+    const c = question.compare!;
+    const counted = state.tappedA > 0 || state.tappedB > 0;
+    return composeHints(
+      state.kidTip ?? "Spreading things out does not make more. Count them, do not guess.",
+      counted
+        ? `So far you have counted ${state.tappedA} on the left and ${state.tappedB} on the right. Finish touching both groups, then compare the two numbers.`
+        : "Do not go by how much room a group takes up. Touch the left group one at a time and watch the number under it, then do the same on the right.",
+      // The counts, not the verdict: counting the two groups is the work, and
+      // deciding which number is bigger is the question. A hint that answered
+      // it would leave nothing to answer.
+      `Counted one at a time, the left group has ${c.countA} and the right group has ${c.countB}. Which of those two numbers is bigger — or are they the same?`,
+    );
+  }
+
+  const left = question.count - state.tapped;
+
+  if (question.mode === "scatter") {
+    return composeHints(
+      state.kidTip ?? "Go in order so you do not miss any.",
+      state.tapped === 0
+        ? `Start at the top of the screen and work down. Touch a ${one} and it keeps the number you said, so you can see which ones are done.`
+        : `${
+            state.tapped === 1
+              ? `One ${one} has a number on it already`
+              : `${state.tapped} of the ${many} have a number on them already`
+          }. The ones still plain have not been counted — touch those.`,
+      // Reaching the total is the answer here — the round is scored by touching
+      // every one, not by naming a number — so the last rung may say it.
+      left === 1
+        ? `There are ${question.count} ${many} altogether and just one left plain. Touch it and say ${question.count} — that is how many there are.`
+        : `There are ${question.count} ${many} altogether, and ${left} still need a number. Touch the next plain one and say ${state.tapped + 1}, then keep counting on to ${question.count}.`,
+    );
+  }
+
+  return composeHints(
+    state.kidTip ?? "Say one number for each one you touch.",
+    state.tapped === 0
+      ? `Start with the ${one} on the far left. Touch it and say "one".`
+      : `You have touched ${state.tapped}. The next ${one} to the right is ${state.tapped + 1} — touch it and say that number out loud.`,
+    `There are ${question.count} ${many} in the row. Touch every one from left to right, and the last number you say — ${question.count} — is how many there are.`,
+  );
+}
+
 export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
   params,
   koda,
@@ -299,11 +363,12 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
 }) => {
   const setup: OrbitSetup = { ...params, ...params.question };
   const total = setup.questionsPerRound ?? 5;
+  /** The lesson's own child-facing copy: the spoken intro, and hint rung one. */
+  const copy = playCopy(params);
 
   const [tapped, setTapped] = useState<number[]>([]);
   const [tappedA, setTappedA] = useState<number[]>([]);
   const [tappedB, setTappedB] = useState<number[]>([]);
-  const [showTip, setShowTip] = useState(false);
   const [nextStep, setNextStep] = useState<{ kind: string; kidMessage: string } | undefined>();
 
   /**
@@ -330,7 +395,7 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
     totalQuestions: total,
     levelNumber: lesson?.levelNumber ?? 1,
     // The lesson's own spoken instruction, said once as the round opens.
-    intro: (params as { play?: { audioPrompt?: string } }).play?.audioPrompt,
+    intro: copy.audioPrompt,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     nextQuestion: useCallback((index: number) => buildQuestion(setup, index), [params]),
     onComplete: (result) => {
@@ -346,7 +411,6 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
     setTapped([]);
     setTappedA([]);
     setTappedB([]);
-    setShowTip(false);
     setLastTap(null);
   }, [question.id, finishing]);
 
@@ -473,12 +537,13 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
       prompt={prompt}
       iconName={question.mode === "compare" ? "scale" : "star"}
       iconTone="amber"
-      showTip={showTip}
+      hints={orbitHints(question, {
+        tapped: tapped.length,
+        tappedA: tappedA.length,
+        tappedB: tappedB.length,
+        kidTip: copy.kidTip,
+      })}
       onExit={koda.ui.exit}
-      onToggleTip={() => {
-        if (!showTip) round.useSupport("hint", 1);
-        setShowTip((v) => !v);
-      }}
       onReadAloud={() => {
         round.useSupport("audio_replay");
         void koda.speech.say(prompt);

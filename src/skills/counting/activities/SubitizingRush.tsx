@@ -1,7 +1,14 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import type { ActivityProps } from "../../types";
-import { SkillRound, SPRING, useSkillRound, type RoundQuestion } from "../../kit";
+import {
+  SkillRound,
+  SPRING,
+  composeHints,
+  playCopy,
+  useSkillRound,
+  type RoundQuestion,
+} from "../../kit";
 import { SCENE } from "../internal/data/countingLayout";
 import { themeSystem } from "../../../lib/themeSystem";
 import { DUAL_COLOR_PAIRS } from "../internal/data/countingAssets";
@@ -40,7 +47,7 @@ export interface SubitizingRushParams extends SubitizingSetup {
   question?: SubitizingSetup;
 }
 
-interface SubitizingQuestion extends RoundQuestion {
+export interface SubitizingQuestion extends RoundQuestion {
   total: number;
   /** Set for `twoColor`: the two groups the total is made of. */
   parts?: { a: number; b: number; colors: (typeof DUAL_COLOR_PAIRS)[number] };
@@ -97,6 +104,72 @@ const choicesFor = (total: number, params: SubitizingSetup): number[] => {
 };
 
 /**
+ * What to say to a child who did not catch the flash.
+ *
+ * Subitizing is seeing a quantity without counting it, so a hint cannot simply
+ * say "count them" — the set is not on screen to count. Each rung instead gives
+ * the child a *structure* to look for on the next flash, which is the skill
+ * itself: three in a row, two small groups, one colour then the other.
+ *
+ * Pure and exported, so the wording is tested against the set it describes.
+ */
+export function subitizeHints(
+  question: SubitizingQuestion,
+  state: { seen: boolean; kidTip?: string },
+): string[] {
+  const again = state.seen
+    ? 'Press "Show me again" and'
+    : 'Press "Show me" and';
+
+  if (question.parts) {
+    const { a, b } = question.parts;
+    return composeHints(
+      state.kidTip ?? "Count one colour, then keep going with the other.",
+      `${again} look at one colour at a time. Take in the first colour as a group, then the second — you never have to count the whole lot at once.`,
+      // The two parts, not the total: putting them together is the question.
+      `There were ${a} of one colour and ${b} of the other. Start at ${a} and count on ${b} more to get the total.`,
+    );
+  }
+
+  const total = question.total;
+
+  if (question.points) {
+    // The split is read off where the dots actually were, not invented. A hint
+    // that describes a grouping the child did not see is a hint that teaches
+    // them their eyes were wrong.
+    const left = question.points.filter((pt) => pt.x < 50).length;
+    const right = total - left;
+    return composeHints(
+      state.kidTip ?? "Look for small groups inside the big group.",
+      `${again} do not chase every dot. Take in one little clump, see how many it holds, then count on for the rest.`,
+      left === 0 || right === 0
+        ? `They were all bunched on one side. Look again and split them into two smaller groups — then put the two numbers together.`
+        : `There ${left === 1 ? "was" : "were"} ${left} on the left side and ${right} on the right. Start at ${left} and count on ${right} more.`,
+    );
+  }
+
+  // The grid is drawn three to a row, so "rows of three" is what was on screen.
+  const rows = Math.floor(total / 3);
+  const spare = total % 3;
+  const threes = Array.from({ length: rows }, (_, i) => (i + 1) * 3).join(", ");
+  return composeHints(
+    state.kidTip ?? "Try to see the pattern without counting.",
+    `${again} look at the middle of the box, not at one dot. A dice pattern is made to be read in one glance.`,
+    rows === 0
+      ? `They sat in one short row of ${total}. Look again and take the whole row in at once, the way you would read a domino.`
+      : rows === 1
+        ? `They filled one row of three${
+            spare > 0 ? `, with ${spare} more underneath — that is 3, and then ${spare} more.` : " and nothing else."
+          }`
+        : `They filled ${rows} rows of three${
+            spare > 0 ? `, with ${spare} more underneath` : ""
+          }. Count the rows in threes — ${threes} — ${
+            spare > 0 ? `then count on ${spare} more.` : "and that is the total."
+          }`,
+  );
+}
+
+/**
  * One dot. Deliberately plain, and deliberately large.
  *
  * Subitizing is reading a pattern at a glance, so the mark carries no detail of
@@ -117,8 +190,9 @@ export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
   const setup: SubitizingSetup = { ...params, ...params.question };
   const total = setup.questionsPerRound ?? 5;
   const flashMs = setup.flashMs ?? 1000;
+  /** The lesson's own child-facing copy: the spoken intro, and hint rung one. */
+  const copy = playCopy(params);
 
-  const [showTip, setShowTip] = useState(false);
   const [nextStep, setNextStep] = useState<{ kind: string; kidMessage: string } | undefined>();
   /** The set is shown only after the child asks, so their eyes are on it. */
   const [phase, setPhase] = useState<"waiting" | "flashing" | "answering">("waiting");
@@ -129,7 +203,7 @@ export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
     totalQuestions: total,
     levelNumber: lesson?.levelNumber ?? 1,
     // The lesson's own spoken instruction, said once as the round opens.
-    intro: (params as { play?: { audioPrompt?: string } }).play?.audioPrompt,
+    intro: copy.audioPrompt,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     nextQuestion: useCallback((index: number) => buildQuestion(setup, index), [params]),
     onComplete: (result) => {
@@ -150,7 +224,6 @@ export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
   // A new question starts hidden again, and a pending flash must not land on it.
   useEffect(() => {
     setPhase("waiting");
-    setShowTip(false);
     return () => {
       if (timer.current) window.clearTimeout(timer.current);
     };
@@ -184,12 +257,8 @@ export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
       prompt="Look fast! How many did you see?"
       iconName="dice"
       iconTone="purple"
-      showTip={showTip}
+      hints={subitizeHints(question, { seen: phase !== "waiting", kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
-      onToggleTip={() => {
-        if (!showTip) round.useSupport("hint", 1);
-        setShowTip((v) => !v);
-      }}
       onReadAloud={() => {
         round.useSupport("audio_replay");
         void koda.speech.say("Look fast! How many did you see?");

@@ -2,7 +2,14 @@ import React, { useCallback, useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { Rocket } from "lucide-react";
 import type { ActivityProps } from "../../types";
-import { SkillRound, SPRING, useSkillRound, type RoundQuestion } from "../../kit";
+import {
+  SkillRound,
+  SPRING,
+  composeHints,
+  playCopy,
+  useSkillRound,
+  type RoundQuestion,
+} from "../../kit";
 import { FRAME_CELL, SCENE } from "../internal/data/countingLayout";
 import { themeSystem } from "../../../lib/themeSystem";
 
@@ -32,7 +39,7 @@ export interface TenFrameRocketParams extends TenFrameSetup {
   question?: TenFrameSetup;
 }
 
-interface FrameQuestion extends RoundQuestion {
+export interface FrameQuestion extends RoundQuestion {
   mode: TenFrameMode;
   /** What the child is aiming for: cells to fill, ones to add, or the total. */
   target: number;
@@ -60,6 +67,77 @@ const buildQuestion = (setup: TenFrameSetup, index: number): FrameQuestion => {
   const target = rangeOr(setup.targetRange, 5, 9);
   return { ...base, mode, target, expected: String(target), itemCount: target };
 };
+
+/**
+ * What to say to a child stuck on a ten-frame.
+ *
+ * The ten-frame teaches by its shape — five on top, five below, ten in all — so
+ * every rung here is said in terms of that shape rather than in arithmetic. "7
+ * is a full top row and 2 more" is the thing being taught; "7 minus 5 is 2" is
+ * the thing a child who already understood it would say.
+ *
+ * The middle rung reads the frame as it stands, so a child who has filled four
+ * is told what to do from four. Pure and exported, so the arithmetic in the
+ * wording is tested rather than eyeballed.
+ */
+export function tenFrameHints(
+  question: FrameQuestion,
+  state: { filled: number; kidTip?: string },
+): string[] {
+  const { filled } = state;
+
+  if (question.mode === "complement") {
+    const empty = 10 - (question.initial ?? 0);
+    return composeHints(
+      state.kidTip ?? "Count the empty boxes. That is how many more.",
+      `The frame holds 10 when every box is full. ${question.initial} ${
+        question.initial === 1 ? "box is" : "boxes are"
+      } already filled, so what you need is however many boxes are still empty.`,
+      // Not "the answer is 6": pointing at the empty boxes and counting them is
+      // the whole method, and it is one the child can carry to the next frame.
+      empty === 1
+        ? "Only one box still has a question mark in it, so one more counter fills the frame. Tap 1 below."
+        : `Count the boxes with a question mark in them, one at a time — 1, 2, 3 — right to the end of the frame. There are ${empty} of them, and that number is how many more make 10. Tap it below.`,
+    );
+  }
+
+  if (question.mode === "teen") {
+    const ones = question.target - 10;
+    const built = 10 + filled;
+    return composeHints(
+      state.kidTip ?? "One full frame is 10. Then count the extra ones.",
+      `Every teen number is 10 and some more. ${question.target} is 10 and ${ones} more, so the first frame fills right up and the ones go in the second frame.`,
+      filled === ones
+        ? `The second frame has ${filled}, so you have 10 and ${filled} — that is ${built}. Press "Check Teen Number".`
+        : `You have 10 in the full frame and ${filled} in the second one, which makes ${built}. ${question.target} needs ${ones} in the second frame, so ${
+            filled < ones
+              ? `tap ${ones - filled} more.`
+              : `take ${filled - ones} back out.`
+          }`,
+    );
+  }
+
+  const extra = question.target - 5;
+  return composeHints(
+    state.kidTip ?? "Fill the top row to 5 first. That makes it easy!",
+    question.target <= 5
+      ? `${question.target} fits inside the top row on its own. Fill ${question.target} ${
+          question.target === 1 ? "box" : "boxes"
+        } along the top and stop there.`
+      : `${question.target} is a full top row of 5 and ${extra} more. Fill all five along the top first, then put ${extra} in the bottom row.`,
+    filled === question.target
+      ? `The frame holds ${filled} now, which is exactly ${question.target}. Press Check.`
+      : filled === 0
+        ? `The frame is still empty and you need ${question.target}. Tap ${question.target} ${
+            question.target === 1 ? "box" : "boxes"
+          }${question.target > 5 ? " — five along the top first" : ", starting along the top row"}, then press Check.`
+        : `Count the lit boxes: there ${filled === 1 ? "is 1" : `are ${filled}`}, and you need ${question.target}. ${
+            filled < question.target
+              ? `Tap ${question.target - filled} more, then press Check.`
+              : `Tap ${filled - question.target} of them off again, then press Check.`
+          }`,
+  );
+}
 
 const EMPTY_FRAME = () => Array<boolean>(10).fill(false);
 
@@ -130,9 +208,10 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
 }) => {
   const setup: TenFrameSetup = { ...params, ...params.question };
   const total = setup.questionsPerRound ?? 5;
+  /** The lesson's own child-facing copy: the spoken intro, and hint rung one. */
+  const copy = playCopy(params);
 
   const [frame, setFrame] = useState<boolean[]>(EMPTY_FRAME);
-  const [showTip, setShowTip] = useState(false);
   const [nextStep, setNextStep] = useState<{ kind: string; kidMessage: string } | undefined>();
 
   const round = useSkillRound({
@@ -140,7 +219,7 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
     totalQuestions: total,
     levelNumber: lesson?.levelNumber ?? 1,
     // The lesson's own spoken instruction, said once as the round opens.
-    intro: (params as { play?: { audioPrompt?: string } }).play?.audioPrompt,
+    intro: copy.audioPrompt,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     nextQuestion: useCallback((index: number) => buildQuestion(setup, index), [params]),
     onComplete: (result) => {
@@ -155,7 +234,6 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
   // Each question starts from an empty frame.
   useEffect(() => {
     setFrame(EMPTY_FRAME());
-    setShowTip(false);
   }, [question.id]);
 
   const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
@@ -262,12 +340,8 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
       prompt={prompt}
       iconName="rocket"
       iconTone="purple"
-      showTip={showTip}
+      hints={tenFrameHints(question, { filled, kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
-      onToggleTip={() => {
-        if (!showTip) round.useSupport("hint", 1);
-        setShowTip((v) => !v);
-      }}
       onReadAloud={() => {
         round.useSupport("audio_replay");
         void koda.speech.say(prompt);

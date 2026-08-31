@@ -315,11 +315,13 @@ src/skills/kit/
 │   ├── scoreRound.ts      stars from first-try accuracy, XP from Settings, `perfect`
 │   ├── roundPraise.ts     what the finish screen congratulates: level, streak,
 │   │                      perfect round, daily goal, or stars — most notable wins
+│   ├── hints.ts           the hint ladder: the lesson's own copy, composeHints
 │   └── answerSound.ts     the recorded reaction, behind the learner's own switches
 ├── chrome/
 │   ├── SkillRound.tsx             the shell: bar, header, feedback, finish screen
 │   ├── SkillRoundTopBar.tsx       identity, progress, voice, settings, exit
-│   ├── PracticeStepHeader.tsx     "Step 2 of 5", read-aloud, hint
+│   ├── PracticeStepHeader.tsx     the question, read-aloud, hint
+│   ├── SkillHint.tsx              the hint panel, shown and read aloud
 │   ├── RoundCompleteModal.tsx     stars, XP, streak, goal, level progress
 │   └── ActivityErrorBoundary.tsx  a throw costs the round, not the app
 ├── motion.ts   SPRING, stagger, idleFloat, useMotionOK — the shared vocabulary

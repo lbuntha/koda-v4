@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import type { ActivityLesson, KodaSDK } from "../../types";
 import { UIKidMessage } from "../../../components/ui";
 import { PracticeStepHeader, type StepTagLabels } from "./PracticeStepHeader";
+import { SkillHint } from "./SkillHint";
 import { PracticeRoundCompleteModal } from "./RoundCompleteModal";
 import { SkillRoundTopBar, type SkillVoiceContext } from "./SkillRoundTopBar";
 import type { RoundController } from "../round/useSkillRound";
@@ -15,6 +16,9 @@ import type { RoundController } from "../round/useSkillRound";
  */
 const PRAISE_MS = 2300;
 
+/** One round is on screen at a time, so the panel can have a fixed name. */
+const HINT_PANEL_ID = "skill-round-hint";
+
 export interface SkillRoundProps {
   koda: KodaSDK;
   /** Which lesson is running, for the bar and the completion modal. */
@@ -27,8 +31,16 @@ export interface SkillRoundProps {
   prompt: string;
   onExit(): void;
   onReadAloud(): void;
-  onToggleTip(): void;
-  showTip: boolean;
+  /**
+   * This question's hint ladder, gentlest first — usually built with
+   * `composeHints`. Empty (or omitted) takes the Hint button off the header.
+   *
+   * Rebuilt on every render on purpose: a hint that describes what the child
+   * has already done — "you have filled four of the ten" — has to be read off
+   * live state, not off the question. Which rung is showing lives on
+   * `round.hint`, so a skill supplies the words and nothing else.
+   */
+  hints?: string[];
   /** What the child is answering. The only part a skill draws itself. */
   children: React.ReactNode;
   iconName?: string;
@@ -62,8 +74,7 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
   prompt,
   onExit,
   onReadAloud,
-  onToggleTip,
-  showTip,
+  hints = [],
   children,
   iconName,
   iconTone,
@@ -201,13 +212,20 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
             stepNumber={round.index}
             totalSteps={totalQuestions}
             title={prompt}
-            showTip={showTip}
-            onToggleTip={onToggleTip}
+            showTip={round.hint.open}
+            onToggleTip={round.hint.toggle}
+            hintCount={hints.length}
+            hintPanelId={HINT_PANEL_ID}
             onReadAloud={onReadAloud}
             levelNumber={levelNumber}
             contextTag={contextTag}
             tagLabels={tagLabels}
           />
+          {/* Above the play area, under the question it is a hint about. A
+              child looking for help looks where the question is, and a panel
+              below the scene would be off-screen on a phone exactly when it is
+              wanted. */}
+          <SkillHint koda={koda} hints={hints} hint={round.hint} id={HINT_PANEL_ID} />
           {children}
         </div>
       </main>

@@ -1,7 +1,14 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { motion } from "motion/react";
 import type { ActivityProps } from "../../types";
-import { SkillRound, SPRING, useSkillRound, type RoundQuestion } from "../../kit";
+import {
+  SkillRound,
+  SPRING,
+  composeHints,
+  playCopy,
+  useSkillRound,
+  type RoundQuestion,
+} from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 
 /**
@@ -39,7 +46,7 @@ export interface Base10FoundryParams extends Base10Setup {
   question?: Base10Setup;
 }
 
-interface BuildQuestion extends RoundQuestion {
+export interface BuildQuestion extends RoundQuestion {
   target: number;
 }
 
@@ -113,6 +120,86 @@ export function resolveDrop(
   return { built, accepted: true };
 }
 
+/** A number split the way the columns split it. */
+function placesOf(n: number, hundreds: boolean): Built {
+  if (!hundreds) return { hundreds: 0, tens: Math.floor(n / 10), ones: n % 10 };
+  return {
+    hundreds: Math.floor(n / 100),
+    tens: Math.floor((n % 100) / 10),
+    ones: n % 10,
+  };
+}
+
+/** "1 hundred, 2 tens and 3 ones" — empty places left unsaid. */
+function saidAsPlaces(parts: Built): string {
+  const said = [
+    parts.hundreds > 0 && `${parts.hundreds} hundred${parts.hundreds === 1 ? "" : "s"}`,
+    parts.tens > 0 && `${parts.tens} ten${parts.tens === 1 ? "" : "s"}`,
+    parts.ones > 0 && `${parts.ones} one${parts.ones === 1 ? "" : "s"}`,
+  ].filter((part): part is string => typeof part === "string");
+  if (said.length === 0) return "nothing at all";
+  if (said.length === 1) return said[0];
+  return `${said.slice(0, -1).join(", ")} and ${said[said.length - 1]}`;
+}
+
+/**
+ * What to say to a child stuck building a number.
+ *
+ * Place value is the lesson, so the hints are said in places rather than in
+ * totals: "23 is 2 tens and 3 ones" is the idea, and "you need 5 more" is a
+ * shopping list. The last rung reads the columns as they stand and names the
+ * one move to make next — including the bundling move, which is the part
+ * children skip and the part `check` refuses the answer for.
+ *
+ * Pure and exported so the place-value arithmetic in the wording is tested.
+ */
+export function base10Hints(
+  question: BuildQuestion,
+  state: {
+    built: Built;
+    setup: Pick<Base10Setup, "bundleOnes" | "bundleTens" | "hundreds">;
+    kidTip?: string;
+  },
+): string[] {
+  const { built, setup } = state;
+  const value = built.hundreds * 100 + built.tens * 10 + built.ones;
+  const showHundreds = Boolean(setup.hundreds);
+  const want = placesOf(question.target, showHundreds);
+  const short = question.target - value;
+
+  /*
+   * The move to make right now.
+   *
+   * Bundling comes first when it is owed, because that is what `check` will
+   * refuse: a child holding 13 ones has the right total and the wrong number,
+   * and being told to add more blocks would send them further from the answer.
+   */
+  const nextMove =
+    setup.bundleOnes && built.ones >= 10
+      ? `You have ${built.ones} single ones. Ten of those are worth exactly one ten, so press "Make a Ten" — the total does not change, it just gets written properly.`
+      : setup.bundleTens && built.tens >= 10
+        ? `You have ${built.tens} ten rods. Ten of those are worth one hundred, so press "Make a Hundred" — the total stays the same, it is only tidied up.`
+        : short === 0
+          ? `The columns hold ${saidAsPlaces(built)}, which is ${question.target}. Press Check.`
+          : short > 0
+            ? value === 0
+              ? `The columns are still empty. Drag in ${saidAsPlaces(
+                  placesOf(question.target, showHundreds),
+                )} to make ${question.target}.`
+              : `You have built ${value} so far, which is ${saidAsPlaces(built)}. Drag in ${saidAsPlaces(
+                  placesOf(short, showHundreds),
+                )} more to reach ${question.target}.`
+            : `You have built ${value}, which is ${Math.abs(short)} too many. Drag ${saidAsPlaces(
+                placesOf(Math.abs(short), showHundreds),
+              )} back out of the columns.`;
+
+  return composeHints(
+    state.kidTip ?? "Use the big blocks first, then the small ones.",
+    `Read ${question.target} in places: it is ${saidAsPlaces(want)}. Each column takes one kind of block, and a block only goes in its own column.`,
+    nextMove,
+  );
+}
+
 interface Place {
   key: PlaceKey;
   label: string;
@@ -176,10 +263,11 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
 }) => {
   const setup: Base10Setup = { ...params, ...params.question };
   const total = setup.questionsPerRound ?? 5;
+  /** The lesson's own child-facing copy: the spoken intro, and hint rung one. */
+  const copy = playCopy(params);
   const places = PLACES.filter((p) => p.key !== "hundreds" || setup.hundreds);
 
   const [built, setBuilt] = useState({ hundreds: 0, tens: 0, ones: 0 });
-  const [showTip, setShowTip] = useState(false);
   const [nextStep, setNextStep] = useState<{ kind: string; kidMessage: string } | undefined>();
 
   const round = useSkillRound({
@@ -187,7 +275,7 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
     totalQuestions: total,
     levelNumber: lesson?.levelNumber ?? 1,
     // The lesson's own spoken instruction, said once as the round opens.
-    intro: (params as { play?: { audioPrompt?: string } }).play?.audioPrompt,
+    intro: copy.audioPrompt,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     nextQuestion: useCallback((index: number) => buildQuestion(setup, index), [params]),
     onComplete: (result) => {
@@ -201,7 +289,6 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
 
   useEffect(() => {
     setBuilt({ hundreds: 0, tens: 0, ones: 0 });
-    setShowTip(false);
   }, [question.id]);
 
   const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
@@ -385,12 +472,8 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
       prompt={prompt}
       iconName="boxes"
       iconTone="emerald"
-      showTip={showTip}
+      hints={base10Hints(question, { built, setup, kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
-      onToggleTip={() => {
-        if (!showTip) round.useSupport("hint", 1);
-        setShowTip((v) => !v);
-      }}
       onReadAloud={() => {
         round.useSupport("audio_replay");
         void koda.speech.say(spokenPrompt);

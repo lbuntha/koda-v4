@@ -79,6 +79,35 @@ export interface UseSkillRoundOptions {
   deferPresent?: boolean;
 }
 
+/**
+ * Where the child is on this question's hint ladder.
+ *
+ * The rungs themselves are not here: their wording depends on what the child
+ * has built on screen — which cells are lit, how many objects are tagged — and
+ * that lives in the activity. This owns only how far up the ladder they have
+ * climbed, which is the part every skill was re-implementing as a `showTip`
+ * boolean and the part the learning log needs reported.
+ */
+export interface HintController {
+  /** 0 while the hint is closed; otherwise the rung showing. 1 is gentlest. */
+  level: number;
+  open: boolean;
+  /**
+   * The deepest rung reached on this question, open or not.
+   *
+   * Re-opening returns here rather than to rung 1: a child who has already read
+   * the nudge and asked for more should not have to climb past it again, and
+   * the log should not record a second first-rung hint for the same question.
+   */
+  deepest: number;
+  /** Open at the deepest rung seen, or close. What the header button does. */
+  toggle(): void;
+  /** Climb one rung. The caller checks there is one to climb to. */
+  more(): void;
+  /** Close, keeping what has been seen. */
+  hide(): void;
+}
+
 export interface RoundController {
   /** 1-based. */
   index: number;
@@ -96,6 +125,8 @@ export interface RoundController {
   advance(): void;
   /** A hint, replay or reveal was taken. */
   useSupport(kind: SupportKind, hintLevel?: number): void;
+  /** The hint ladder for the open question. Reset by `advance` and `restart`. */
+  hint: HintController;
   /** Start again at question 1. */
   restart(): void;
   /** Only with `deferPresent`: report the question, once it can be described. */
@@ -118,6 +149,11 @@ export function useSkillRound({
   const [firstTryCount, setFirstTryCount] = useState(0);
   const [feedback, setFeedback] = useState<RoundFeedback | null>(null);
   const [score, setScore] = useState<RoundScore | null>(null);
+  /** Which hint rung is showing on the open question. 0 is closed. */
+  const [hintRung, setHintRung] = useState(0);
+
+  /** The deepest rung reached on the open question, so re-opening is free. */
+  const deepestHintRef = useRef(0);
 
   /** Whether the open question has already been answered wrongly once. */
   const missedRef = useRef(false);
@@ -270,6 +306,12 @@ export function useSkillRound({
     const n = index + 1;
     const q = fns.current.nextQuestion(n);
     missedRef.current = false;
+    // A new question starts with the hint closed and the ladder back at the
+    // bottom. Every activity used to do this itself, in an effect on the
+    // question id, and one that forgot would have carried the last question's
+    // hint onto the next one.
+    deepestHintRef.current = 0;
+    setHintRung(0);
     setAttempt(1);
     setIndex(n);
     setQuestion(q);
@@ -290,9 +332,40 @@ export function useSkillRound({
     [koda, levelNumber, index],
   );
 
+  /**
+   * Climb to a rung, reporting it the first time it is reached.
+   *
+   * Reported once per rung per question, not once per tap: a child who closes
+   * the hint to look at the screen and re-opens it has not taken a second hint,
+   * and counting it twice would understate their unaided work — `supports === 0`
+   * is what decides whether a correct first attempt was unaided.
+   */
+  const showHint = useCallback(
+    (level: number) => {
+      const next = Math.max(1, level);
+      setHintRung(next);
+      if (next > deepestHintRef.current) {
+        deepestHintRef.current = next;
+        useSupport("hint", next);
+      }
+    },
+    [useSupport],
+  );
+
+  const hint: HintController = {
+    level: hintRung,
+    open: hintRung > 0,
+    deepest: deepestHintRef.current,
+    toggle: () => (hintRung > 0 ? setHintRung(0) : showHint(deepestHintRef.current || 1)),
+    more: () => showHint(hintRung + 1),
+    hide: () => setHintRung(0),
+  };
+
   const restart = useCallback(() => {
     const q = fns.current.nextQuestion(1);
     missedRef.current = false;
+    deepestHintRef.current = 0;
+    setHintRung(0);
     setIndex(1);
     setQuestion(q);
     setAttempt(1);
@@ -313,6 +386,7 @@ export function useSkillRound({
     submit,
     advance,
     useSupport,
+    hint,
     restart,
     describeQuestion,
   };
