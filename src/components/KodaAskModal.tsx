@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { AlertTriangle, Mic, Send, Sparkles, X } from "lucide-react";
+import { AlertTriangle, MessageCircle, Mic, Send, X } from "lucide-react";
 
-import { SvgAsset } from "../assets/svg";
 import { KodaMascot } from "./KodaMascot";
 import { askKodaInWriting, type KodaContext, type KodaTurn } from "../lib/tutorApi";
 import { KodaConversation } from "../lib/koda/conversationLog";
@@ -162,7 +161,7 @@ export const KodaAskModal: React.FC<{
     >
       <div className="flex shrink-0 items-center justify-between gap-3 border-b border-line px-4 py-3">
         <h3 className="flex items-center gap-2 font-mono text-sm font-black text-ink">
-          <Sparkles className="h-4 w-4 text-indigo-500" aria-hidden="true" />
+          <MessageCircle className="h-4 w-4 text-indigo-500" aria-hidden="true" />
           Ask {character.name}
         </h3>
         <div className="flex items-center gap-0.5">
@@ -213,7 +212,16 @@ export const KodaAskModal: React.FC<{
               {turns.length === 0 && !thinking && (
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-sm text-muted">
-                    <SvgAsset id="koda-ask" size={28} fallback={<Sparkles className="h-5 w-5" />} />
+                    {/* Koda introducing itself, so it is Koda's face rather
+                        than a sparkle — the same avatar its answers carry, and
+                        turned the same way toward its own words. */}
+                    <KodaMascot
+                      state="idle"
+                      personaId={character.personaId}
+                      avatarSeed={character.avatarSeed}
+                      size={28}
+                      facing="right"
+                    />
                     <p>
                       I'm {character.name}. Ask me anything about what you're working on.
                     </p>
@@ -364,11 +372,16 @@ export const KodaAskModal: React.FC<{
              rather than a route. It says what Koda can still do here instead of
              showing an input the server would refuse. */
           <div className="space-y-4 py-2 text-center">
-            <SvgAsset
-              id="koda-ask"
-              size={56}
-              fallback={<Sparkles className="mx-auto h-10 w-10 text-indigo-500" />}
-            />
+            {/* Koda's own face here too, for the same reason: every place this
+                panel points at Koda should point at the same character. */}
+            <span className="mx-auto block w-fit">
+              <KodaMascot
+                state="idle"
+                personaId={character.personaId}
+                avatarSeed={character.avatarSeed}
+                size={56}
+              />
+            </span>
             <p className="text-sm text-muted">
               {character.name} listens and answers out loud here. Written help is switched off.
             </p>
