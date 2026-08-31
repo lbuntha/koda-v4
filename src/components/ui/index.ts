@@ -16,7 +16,6 @@ export * from "./navConfig";
 export * from "./UIAppShell";
 export * from "./UISidebar";
 export * from "./UISkillPath";
-export * from "./UISubjectRow";
 export * from "./UISkillThumbnail";
 export * from "./UIUnitHeader";
 export * from "./UISkillCard";

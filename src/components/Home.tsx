@@ -13,7 +13,7 @@ import { levelFromXp, levelProgress, xpToNextLevel } from "../lib/level";
 import { BadgeIcon } from "./account/BadgeVisuals";
 import type { UserProgress } from "../types";
 import { playSound } from "../utils/audio";
-import { UIButton, UILessonCard, UISubjectRow } from "./ui";
+import { UIButton, UILessonCard, UISkillCard } from "./ui";
 import { SvgAsset } from "../assets/svg";
 
 interface HomeProps {
@@ -388,16 +388,17 @@ export const Home: React.FC<HomeProps> = ({
 
               <div className="mt-3 space-y-2.5">
                 {visibleSubjects.map(({ skill, ready }) => (
-                  <UISubjectRow
+                  <UISkillCard
                     key={skill.id}
-                    name={skill.name}
+                    size="sm"
+                    title={skill.name}
                     thumbnail={skill.thumbnail}
                     fallbackIconName={skill.iconName}
                     category={skill.category}
                     completedLessons={skill.completedLessons}
-                    totalLessons={skill.lessons.length}
+                    lessonCount={skill.lessons.length}
                     readyCount={ready}
-                    onClick={() => open(skill.id)}
+                    onOpen={() => open(skill.id)}
                   />
                 ))}
               </div>

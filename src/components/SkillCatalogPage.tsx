@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { ArrowRight, BookOpen, CheckCircle2, RefreshCw, Search, Sparkles } from "lucide-react";
+import { BookOpen, CheckCircle2, RefreshCw, Search, Sparkles } from "lucide-react";
 import {
   filterSkillCatalog,
   recommendedSkills,
@@ -9,7 +9,7 @@ import { useSkillRegistrations } from "../lib/skillRegistrationApi";
 import { refreshSkillRegistry } from "../lib/skillRegistryApi";
 import { playSound } from "../utils/audio";
 import { themeSystem } from "../lib/themeSystem";
-import { UIBadge, UIButton, UIPageHeader, UISkillCard, UISkillThumbnail, skillArtFor } from "./ui";
+import { UIBadge, UIButton, UIPageHeader, UISkillCard, skillArtFor } from "./ui";
 
 export interface SkillCatalogPageProps {
   activeLevelNumber: number;
@@ -165,7 +165,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
               setVisibleLimit(PAGE_SIZE);
             }}
             aria-pressed={category === value}
-            className={`shrink-0 rounded-full px-4 py-2 text-xs font-mono font-black border-2 transition ${
+            className={`shrink-0 rounded-full px-4 py-2 text-xs font-mono font-black border-2 transition pointer-coarse:min-h-11 ${
               category === value
                 ? "bg-indigo-600 border-indigo-700 text-white"
                 : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-muted hover:border-indigo-300"
@@ -178,38 +178,24 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
 
       {registrationError && <p className={themeSystem.flash("error")}>{registrationError}</p>}
 
+      {/* The same card the grid below uses, one size up — this was thirty-five
+          lines of hand-built banner with its own progress bar, which is exactly
+          the duplication the size scale exists to remove. */}
       {!query && category === "all" && resume && (
-        <section className={`${themeSystem.card("default")} p-4 sm:p-5`}>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <UISkillThumbnail
-              thumbnail={resume.thumbnail}
-              fallbackIconName={resume.iconName}
-              category={resume.category}
-              size="lg"
-            />
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-mono font-black uppercase tracking-widest text-indigo-600">
-                Continue learning
-              </p>
-              <h2 className="mt-1 text-xl sm:text-2xl font-black text-ink">{resume.name}</h2>
-              <p className="mt-1 text-sm text-muted">{resume.tagline}</p>
-              <div className="mt-3 flex items-center gap-3">
-                <div className="h-2 rounded-full bg-surface-muted overflow-hidden flex-1 max-w-md">
-                  <div
-                    className="h-full rounded-full bg-indigo-600"
-                    style={{ width: `${resume.progressPercent}%` }}
-                  />
-                </div>
-                <span className="text-xs font-mono font-bold text-muted">
-                  {resume.completedLessons}/{resume.lessons.length}
-                </span>
-              </div>
-            </div>
-            <UIButton iconRight={<ArrowRight />} onClick={() => open(resume.id)}>
-              Open skill
-            </UIButton>
-          </div>
-        </section>
+        <UISkillCard
+          size="lg"
+          eyebrow="Continue learning"
+          title={resume.name}
+          tagline={resume.tagline}
+          thumbnail={resume.thumbnail}
+          fallbackIconName={resume.iconName}
+          category={resume.category}
+          lessonCount={resume.lessons.length}
+          completedLessons={resume.completedLessons}
+          progressPercent={resume.progressPercent}
+          actionLabel="Open skill"
+          onOpen={() => open(resume.id)}
+        />
       )}
 
       {!query && category === "all" && recommended.length > 0 && (
@@ -287,17 +273,18 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
           <div className={`${themeSystem.card("default")} p-8 text-center`}>
             <p className="font-mono font-black text-ink">No matching skills</p>
             <p className="mt-1 text-sm text-muted">Try another search or category.</p>
-            <button
-              type="button"
+            <UIButton
+              className="mt-3"
+              variant="secondary"
+              size="sm"
               onClick={() => {
                 setQuery("");
                 setCategory("all");
                 setVisibleLimit(PAGE_SIZE);
               }}
-              className="mt-3 text-sm font-bold text-indigo-600 hover:text-indigo-500"
             >
               Clear filters
-            </button>
+            </UIButton>
           </div>
         )}
         {visible.length > visiblePage.length && (

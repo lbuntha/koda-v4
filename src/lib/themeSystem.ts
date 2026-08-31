@@ -94,11 +94,33 @@ export const themeSystem = {
     const base =
       "inline-flex items-center justify-center font-black tracking-tight transition-all duration-100 rounded-2xl cursor-pointer border-2 border-b-4 active:border-b-2 active:translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:translate-y-0 disabled:active:border-b-4 [&>svg]:shrink-0";
 
+    /*
+     * The size scale, and what each one is for.
+     *
+     *   sm     a secondary action beside something else — Back, Cancel, a filter
+     *   md     the default: any action that is the point of the block it is in
+     *   lg     one per screen at most, the thing the page exists to do
+     *   icon   a square control whose glyph is the whole label
+     *   step   a stepper's + and −
+     *   choice an answer tile a child taps
+     *
+     * `pointer-coarse:min-h-11` is the touch-target floor, and it is on the
+     * scale rather than on the pages because a control that is 34px high on a
+     * tablet is a bug wherever it appears. `sm` is 34px and `icon` 42px from
+     * padding alone — both under the 44px a finger needs, and `sm` is by far
+     * the most-used size in the app, so every dialog's Cancel and every list
+     * row's action missed the floor at once. The variant keys off the *input
+     * device*, not the viewport: a tablet is a wide screen with fat fingers,
+     * and a breakpoint would have left it at 34px. On a mouse nothing moves.
+     *
+     * `step` and `choice` already set their own heights above the floor, and
+     * `md`/`lg` clear it on padding, so this is only needed on the two.
+     */
     const sizes = {
-      sm: "px-3 py-1.5 text-xs gap-1.5 [&>svg]:w-3.5 [&>svg]:h-3.5",
+      sm: "px-3 py-1.5 text-xs gap-1.5 pointer-coarse:min-h-11 [&>svg]:w-3.5 [&>svg]:h-3.5",
       md: "px-4 py-2.5 text-sm gap-2 [&>svg]:w-4 [&>svg]:h-4",
       lg: "px-6 py-3.5 text-base gap-2.5 [&>svg]:w-5 [&>svg]:h-5",
-      icon: "p-2.5 gap-0 [&>svg]:w-4 [&>svg]:h-4",
+      icon: "p-2.5 gap-0 pointer-coarse:min-h-11 pointer-coarse:min-w-11 [&>svg]:w-4 [&>svg]:h-4",
       /* A stepper's + and −, which `icon` was never the right size for: it is
          built around a 16px glyph and lands at 36px square, so on a phone two
          of them sat a thumb's width apart and neither could be hit reliably.

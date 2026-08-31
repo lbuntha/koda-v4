@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { ArrowLeft, BookOpen, CheckCircle2, Play, Sparkles } from "lucide-react";
+import { ArrowLeft, BookOpen, CheckCircle2, Sparkles } from "lucide-react";
 import { getCourseUnits, getSkillLessons, isUnlocked, resumeLesson } from "../curriculum";
 import { SkillRegistryAPI } from "../lib/skillRegistryApi";
 import { useSkillRegistrations } from "../lib/skillRegistrationApi";
@@ -11,8 +11,8 @@ import { themeSystem } from "../lib/themeSystem";
 import {
   UIBadge,
   UIButton,
+  UISkillCard,
   UISkillPath,
-  UISkillThumbnail,
   UIUnitHeader,
   skillArtFor,
   unitColor,
@@ -84,7 +84,6 @@ export const LearnPage: React.FC<LearnPageProps> = ({
   const server = SkillRegistryAPI.get(skillId);
   const starsFor = (lesson: { levelNumber: number }) => completedLevels[lesson.levelNumber] ?? 0;
   const done = lessons.filter((lesson) => starsFor(lesson) > 0).length;
-  const percent = Math.round((done / lessons.length) * 100);
   const finished = done === lessons.length;
 
   /*
@@ -127,90 +126,62 @@ export const LearnPage: React.FC<LearnPageProps> = ({
 
   return (
     <div className={themeSystem.spacing.section}>
-      <button
-        type="button"
-        onClick={onBack}
-        className="inline-flex items-center gap-2 text-sm font-bold text-muted hover:text-indigo-600 transition"
-      >
-        <ArrowLeft className="w-4 h-4" /> All skills
-      </button>
+      {/* The shared button, not a hand-rolled text link. It used to be an
+          `inline-flex` with no padding at all: about 20px high, which is fine
+          under a mouse and not a target a thumb can hit. `ghost` keeps the
+          light look it had; the size token brings the padding, the focus ring
+          and the touch floor with it. */}
+      <UIButton variant="ghost" size="sm" icon={<ArrowLeft />} onClick={onBack}>
+        All skills
+      </UIButton>
 
-      <section className={`${themeSystem.card("default")} overflow-hidden`}>
-        <div className="p-5 sm:p-7 flex flex-col md:flex-row md:items-center gap-5">
-          <UISkillThumbnail
-            thumbnail={listing?.thumbnail ?? skill.manifest.thumbnail}
-            fallbackIconName={skill.manifest.iconName}
-            category={category}
-            size="lg"
-          />
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <UIBadge variant="primary">{art.label}</UIBadge>
-              <UIBadge variant="neutral">
-                Ages {skill.manifest.audience.ages[0]}–{skill.manifest.audience.ages[1]}
-              </UIBadge>
-              {server?.status === "draft" && <UIBadge variant="warning">Draft preview</UIBadge>}
-            </div>
-            <h1 className="mt-3 text-3xl sm:text-4xl font-black tracking-tight text-ink">
-              {skill.manifest.name}
-            </h1>
-            <p className="mt-2 text-base text-muted max-w-2xl">
-              {listing?.tagline ?? skill.manifest.tagline ?? skill.manifest.description}
-            </p>
-            <p className="mt-2 text-xs font-mono font-bold text-muted">
-              by {skill.manifest.author} · v{skill.manifest.version} · {lessons.length} lessons
-            </p>
-
-            <div className="mt-5 max-w-xl">
-              <div className="flex justify-between text-xs font-mono font-bold text-muted mb-1.5">
-                <span>{done ? `${done} of ${lessons.length} lessons complete` : "Ready to begin"}</span>
-                <span>{percent}%</span>
-              </div>
-              <div
-                className="h-2 rounded-full bg-surface-muted overflow-hidden"
-                role="progressbar"
-                aria-valuenow={percent}
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-label={`${skill.manifest.name} progress`}
-              >
-                <div
-                  className="h-full rounded-full bg-indigo-600 transition-all"
-                  style={{ width: `${percent}%` }}
-                />
-              </div>
-              {/* Which lesson the button opens. "Continue" on its own says
-                  nothing, and a learner juggling several skills cannot tell
-                  from the label alone where any one of them left off. */}
-              {registered && (
-                <p className="mt-2 text-xs text-muted">
-                  {next ? (
-                    <>
-                      Up next: <span className="font-bold text-ink">{next.title}</span>
-                    </>
-                  ) : (
-                    <>Every lesson complete — play any of them again.</>
-                  )}
-                </p>
-              )}
-            </div>
-          </div>
-          <UIButton
-            size="lg"
-            icon={<Play />}
-            isLoading={registering}
-            onClick={registered ? () => start(resume.levelNumber) : () => void add()}
-          >
-            {!registered
-              ? "Register skill"
-              : finished
-                ? "Review"
-                : done
-                  ? "Continue"
-                  : "Start learning"}
-          </UIButton>
-        </div>
-      </section>
+      {/*
+        * The shared skill card at `lg`, not a fifth hand-built header.
+        *
+        * What is genuinely this page's own — the age band, the author and
+        * version line, and which lesson Continue opens — arrives through the
+        * card's slots. Everything the four surfaces had in common, and had each
+        * rebuilt slightly differently, now comes from one place: the artwork
+        * frame, the title scale, the progress bar and the action button.
+        */}
+      <UISkillCard
+        size="lg"
+        title={skill.manifest.name}
+        tagline={listing?.tagline ?? skill.manifest.tagline ?? skill.manifest.description}
+        thumbnail={listing?.thumbnail ?? skill.manifest.thumbnail}
+        fallbackIconName={skill.manifest.iconName}
+        category={category}
+        lessonCount={lessons.length}
+        completedLessons={done}
+        registered={registered}
+        registering={registering}
+        badges={
+          <>
+            <UIBadge variant="primary">{art.label}</UIBadge>
+            <UIBadge variant="neutral">
+              Ages {skill.manifest.audience.ages[0]}–{skill.manifest.audience.ages[1]}
+            </UIBadge>
+            {server?.status === "draft" && <UIBadge variant="warning">Draft preview</UIBadge>}
+          </>
+        }
+        meta={`by ${skill.manifest.author} · v${skill.manifest.version} · ${lessons.length} lessons`}
+        footnote={
+          registered ? (
+            next ? (
+              <>
+                Up next: <span className="font-bold text-ink">{next.title}</span>
+              </>
+            ) : (
+              <>Every lesson complete — play any of them again.</>
+            )
+          ) : undefined
+        }
+        actionLabel={
+          !registered ? "Register skill" : finished ? "Review" : done ? "Continue" : "Start learning"
+        }
+        onOpen={() => start(resume.levelNumber)}
+        onRegister={() => void add()}
+      />
 
       {registrationError && <p className={themeSystem.flash("error")}>{registrationError}</p>}
 
