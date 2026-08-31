@@ -6,6 +6,22 @@ from app.security import passwords
 from app.skill_defaults import load_defaults
 
 
+def _bundled(skill_id: str) -> dict:
+    """One bundled skill, by name.
+
+    These tests are about counting specifically — its fifteen lessons, its
+    feature list, its id in every URL below — so they have to name it. They took
+    `load_defaults()[0]`, which meant the same thing only while counting was the
+    only skill in the build: the seed file is sorted by id, so the day a skill
+    sorting before it shipped, four tests seeded one skill and then asked the API
+    about another.
+    """
+    for item in load_defaults():
+        if item["id"] == skill_id:
+            return item
+    raise AssertionError(f"no bundled skill {skill_id!r} in skill_defaults.json")
+
+
 async def _operator(client, db) -> dict[str, str]:
     await users.create(
         db,
@@ -24,8 +40,12 @@ async def _operator(client, db) -> dict[str, str]:
 
 async def test_deployment_registers_bundled_skills_in_mongo(db):
     defaults = load_defaults()
-    assert {item["id"] for item in defaults} == {"counting"}
-    assert sum([await skills_repo.seed_default(db, item) for item in defaults]) == 1
+    # Every skill in the build is registered, not merely the first one — and the
+    # count is not pinned, or shipping a skill fails the API's tests.
+    assert defaults, "skill_defaults.json is empty; run `npm run skills:seed`"
+    assert "counting" in {item["id"] for item in defaults}
+    seeded = sum([await skills_repo.seed_default(db, item) for item in defaults])
+    assert seeded == len(defaults)
 
     registered = await skills_repo.get(db, "counting")
     assert registered is not None
@@ -36,7 +56,7 @@ async def test_deployment_registers_bundled_skills_in_mongo(db):
 
 
 async def test_operator_publishes_on_server_and_every_reader_sees_it(client, db, signup_body):
-    default = load_defaults()[0]
+    default = _bundled("counting")
     await skills_repo.seed_default(db, {**default, "status": "draft"})
     operator = await _operator(client, db)
 
@@ -71,7 +91,7 @@ async def test_operator_publishes_on_server_and_every_reader_sees_it(client, db,
 
 
 async def test_deploy_refreshes_metadata_without_overwriting_publication(db):
-    default = load_defaults()[0]
+    default = _bundled("counting")
     await skills_repo.seed_default(db, {**default, "status": "draft"})
     await skills_repo.set_status(
         db, "counting", "published", {"id": "developer", "displayName": "Developer"}
@@ -109,7 +129,7 @@ async def test_deploy_refreshes_metadata_without_overwriting_publication(db):
 
 
 async def test_family_can_read_but_cannot_publish(client, db, signup_body):
-    await skills_repo.seed_default(db, load_defaults()[0])
+    await skills_repo.seed_default(db, _bundled("counting"))
     family = (await client.post("/auth/signup", json=signup_body())).json()
     auth = {"Authorization": f"Bearer {family['accessToken']}"}
 
@@ -127,7 +147,7 @@ async def test_family_can_read_but_cannot_publish(client, db, signup_body):
 
 
 async def test_operator_saves_the_complete_skill_manager_configuration(client, db):
-    await skills_repo.seed_default(db, load_defaults()[0])
+    await skills_repo.seed_default(db, _bundled("counting"))
     operator = await _operator(client, db)
     configuration = {
         "isEnabled": False,
