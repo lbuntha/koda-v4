@@ -119,6 +119,17 @@ export interface UIModalProps {
    * of `RAIL_WIDTH`.
    */
   maxWidth?: string;
+  /**
+   * `"default"` gives the footer its own muted band and rules the header off
+   * with a grey hairline — right for a form with a lot in it, where the bands
+   * say which part is content and which part is controls.
+   *
+   * `"plain"` drops both: one white sheet from title to buttons. For a short
+   * dialog that is one sentence and one field, the bands are dividing nothing,
+   * and the grey is the only cold colour in a window that is otherwise white
+   * and indigo.
+   */
+  tone?: "default" | "plain";
 }
 
 /**
@@ -157,8 +168,10 @@ const RAIL_WIDTH: Record<string, string> = {
   "max-w-3xl": "rail:max-w-3xl",
 };
 
-export const UIModal: React.FC<UIModalProps> = ({ isOpen, onClose, title, children, footer, maxWidth = "max-w-lg" }) => {
+export const UIModal: React.FC<UIModalProps> = ({ isOpen, onClose, title, children, footer, maxWidth = "max-w-lg", tone = "default" }) => {
   if (!isOpen) return null;
+
+  const plain = tone === "plain";
 
   return overlay(
     <div className={themeSystem.modal.overlay} onClick={onClose}>
@@ -167,14 +180,14 @@ export const UIModal: React.FC<UIModalProps> = ({ isOpen, onClose, title, childr
         onClick={(e) => e.stopPropagation()}
       >
         <div className={themeSystem.modal.grabber} aria-hidden="true" />
-        <div className={themeSystem.modal.header}>
+        <div className={plain ? themeSystem.modal.headerPlain : themeSystem.modal.header}>
           <h3 className={themeSystem.typography("h3", themeSystem.modal.headerTitle)}>{title}</h3>
           <button onClick={onClose} className={themeSystem.modal.close} aria-label="Close">
             <X />
           </button>
         </div>
         <div className={themeSystem.modal.body}>{children}</div>
-        {footer && <div className={themeSystem.modal.footer}>{footer}</div>}
+        {footer && <div className={plain ? themeSystem.modal.footerPlain : themeSystem.modal.footer}>{footer}</div>}
       </div>
     </div>,
   );

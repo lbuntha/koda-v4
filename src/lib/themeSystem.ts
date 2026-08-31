@@ -239,12 +239,20 @@ export const themeSystem = {
     header:
       "px-5 py-3.5 rail:px-6 rail:py-4 border-b border-line flex items-center justify-between gap-3 shrink-0",
     headerTitle: "min-w-0 text-balance",
+    /* The same header without the rule under it, for a `tone="plain"` dialog
+       that is one white sheet from the title to the buttons. */
+    headerPlain:
+      "px-5 pt-3.5 pb-1 rail:px-6 rail:pt-4 flex items-center justify-between gap-3 shrink-0",
     /* A real target, not a 12px glyph: on a phone this is the way out. */
     close:
       "shrink-0 w-9 h-9 flex items-center justify-center rounded-full text-muted hover:text-ink hover:bg-surface-muted transition cursor-pointer [&>svg]:w-5 [&>svg]:h-5",
     body: "px-5 py-4 rail:p-6 overflow-y-auto overscroll-contain",
     footer:
       "px-5 py-4 rail:px-6 bg-surface-muted border-t border-line flex items-center justify-end gap-3 shrink-0",
+    /* Buttons on the sheet itself: no band, no rule. The dialog carries one
+       fill, so nothing in it reads as a second, colder panel. */
+    footerPlain:
+      "px-5 pb-5 pt-2 rail:px-6 rail:pb-6 flex items-center justify-end gap-3 shrink-0",
   },
 
 
