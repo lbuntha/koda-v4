@@ -1,6 +1,8 @@
 import { accessToken, request } from "./sync";
 import { localDayOf, type ConceptTotals } from "./learning/learningLog";
 import {
+  MASTERY_ACCURACY,
+  MASTERY_DAYS,
   MIN_EVIDENCE,
   masteryFrom,
   type ConceptMastery,
@@ -198,50 +200,140 @@ export async function fetchChildReport(
  * It is the most useful thing on the page: everything else says *how much* a
  * child has practised, and only this says *what is going wrong*.
  */
-export const ERROR_COPY: Record<ErrorKind, { label: string; detail: string }> = {
+export const ERROR_COPY: Record<ErrorKind, { label: string; detail: string; fix: string }> = {
   off_by_one: {
     label: "Off by one",
     detail: "Lands next to the right answer — the idea is there, the count slips at the end.",
+    fix: "Count out loud together and touch each thing once. The last word said is the answer.",
   },
   off_by_more: {
     label: "Not close",
     detail: "The answer is far from the target, which usually means the method was not used.",
+    fix: "Drop to smaller numbers for a round or two, until the method is being used again.",
   },
   reversed: {
     label: "The wrong way round",
     detail: "Right numbers, wrong direction — comparing or ordering the opposite way.",
+    fix: "Say it as a sentence before answering: “six is more than four”.",
   },
   guessed_fast: {
     label: "Guessing",
     detail: "Answering faster than the thinking takes. Often boredom, sometimes avoidance.",
+    fix: "Ask them to say the answer out loud before they tap it.",
   },
   timed_out: {
     label: "Ran out of time",
     detail: "No answer given. Worth watching whether the question is hard or just long.",
+    fix: "Sit alongside for one round and see where the pause comes.",
   },
   miscounted_items: {
     label: "Lost count",
     detail: "Counted more or fewer things than were there — one-to-one matching is not secure yet.",
+    fix: "Move each thing aside as it is counted, so nothing is counted twice or missed.",
   },
   sequence_slip: {
     label: "Broke the pattern",
     detail: "Wrong next term in a sequence: the rule, rather than the arithmetic.",
+    fix: "Say the run aloud from the start — 2, 4, 6 — and ask what comes next.",
   },
   place_value: {
     label: "Tens and ones",
     detail: "Reading tens and ones the wrong way round — 15 for 51, or 3 tens read as 3.",
+    fix: "Build the number with ten-sticks and single ones before writing it down.",
   },
   unknown: {
     label: "Not classified",
     detail: "A mistake the activity could not put a name to.",
+    fix: "Watch one round to see what is actually happening.",
   },
 };
 
-/** Words for each status, aimed at the adult reading them. */
+/**
+ * Words for each status, aimed at the adult reading them.
+ *
+ * `detail` says what the group *is*; the sentence a parent acts on is
+ * `nextStep`, per concept, because the useful instruction differs between two
+ * children sitting in the same band.
+ */
 export const STATUS_COPY: Record<MasteryStatus, { label: string; detail: string }> = {
-  mastered: { label: "Secure", detail: "Right first time, unaided, on more than one day." },
-  practising: { label: "Getting there", detail: "Going well, not yet steady enough to call done." },
-  learning: { label: "Just started", detail: "Too few answers so far to judge either way." },
-  struggling: { label: "Stuck", detail: "Going wrong more often than not. Worth sitting with." },
+  mastered: { label: "Secure", detail: "Done. Worth one round each in a week or two so it stays." },
+  practising: { label: "Getting there", detail: "A round or two from finished. Best use of the next session." },
+  learning: { label: "Just started", detail: "Too new to read. More rounds is the only thing that helps." },
+  struggling: { label: "Stuck", detail: "Going wrong more often than right. Start here." },
   "not-started": { label: "Not met yet", detail: "No rounds on this one." },
+};
+
+/**
+ * How many days a week of practice is the bar worth aiming for.
+ *
+ * Spacing is the single strongest thing a family controls: `mastery.ts` will
+ * not call anything secure until it has been practised on more than one day,
+ * for exactly this reason. Three short sessions is the number the page asks
+ * for, because it is reachable — a bar nobody hits is a bar nobody reads twice.
+ */
+export const GOOD_WEEK_DAYS = 3;
+
+/**
+ * This week's practice, said as a verdict rather than a number.
+ *
+ * "3 of 7" is a fact, and a parent has to already know what good looks like to
+ * read it. The tile keeps the fact; this says whether it is enough, and what to
+ * do when it is not. Every branch names a concrete next action, never "practise
+ * more".
+ */
+export const rhythmVerdict = (rhythm: Rhythm, name: string): string => {
+  const days = rhythm.daysThisWeek;
+  if (days === 0) {
+    return `${name} has not played this week. Ten minutes today is worth more than an hour on Sunday.`;
+  }
+  if (days >= 5) return `Practising most days. This is the thing that makes it stick — keep it.`;
+  if (days >= GOOD_WEEK_DAYS) {
+    return `${days} days this week. Three or more is the bar, and ${name} is over it.`;
+  }
+  return `${days} ${days === 1 ? "day" : "days"} this week. Aim for ${GOOD_WEEK_DAYS} short sessions rather than one long one — spacing is what makes it stay.`;
+};
+
+/**
+ * The one thing to do about this concept next, in a sentence.
+ *
+ * The point of the whole page. A status badge tells a parent where a child is;
+ * it does not tell them what to do on Tuesday evening, and "practising" is the
+ * band most children spend most of their time in, so a page that stops at the
+ * badge says nothing actionable about almost everything on it.
+ *
+ * Every branch names the *actual* missing ingredient rather than offering
+ * encouragement. A concept sits at "practising" for exactly one of four
+ * reasons, and `mastery.ts` knows which: help still being taken, only one day
+ * of practice, first-try accuracy under the bar, or no finished round yet.
+ * Saying which one is what turns a report into an instruction — "one round on
+ * another day" is something a parent can do; "keep practising" is not.
+ */
+export const nextStep = (concept: ConceptMastery): string => {
+  const gap = evidenceGap(concept);
+  if (concept.questionsAnswered === 0) return "Not played yet.";
+  // Said before the status, because below MIN_EVIDENCE the status is a
+  // placeholder and any advice drawn from it would be advice about noise.
+  if (gap > 0) {
+    return `About ${gap} more ${gap === 1 ? "answer" : "answers"} before this can say anything.`;
+  }
+
+  switch (concept.status) {
+    case "struggling":
+      return "Sit with them for one round of this — more is going wrong than right.";
+    case "practising":
+      if (concept.supportRate >= LEANING_ON_HELP) {
+        return "Right most times, but with a hint. Try one round with hints closed.";
+      }
+      if (concept.daysPractised < MASTERY_DAYS) {
+        return "Going well. One more round on a different day settles it.";
+      }
+      if (concept.firstTryAccuracy < MASTERY_ACCURACY) {
+        return "Close. A round with fewer first-try slips will finish it.";
+      }
+      return "One finished round away from secure — a round left part-done does not count.";
+    case "mastered":
+      return "Secure. Come back in a week or two so it stays that way.";
+    default:
+      return "Nothing to do here yet.";
+  }
 };

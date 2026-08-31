@@ -44,6 +44,13 @@ const totals = (patch: Partial<ConceptTotals> = {}): ConceptTotals => ({
   ...patch,
 });
 
+/** A local day string `n` days back — `practisedOn` is keyed by local date. */
+const localDay = (back: number): string => {
+  const d = new Date();
+  d.setDate(d.getDate() - back);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+
 const report = async (rows: ConceptTotals[]) => {
   const { buildReport } = await vi.importActual<typeof import("../../lib/childReport")>(
     "../../lib/childReport",
@@ -83,17 +90,61 @@ describe("a child's report, mounted", () => {
   it("draws the rhythm and the concept for a child who has", async () => {
     await show([totals()]);
 
-    expect(await screen.findByText("Rhythm")).toBeTruthy();
+    expect(await screen.findByText("How often")).toBeTruthy();
     expect(screen.getByText(/Where Mia is/)).toBeTruthy();
     // Named from the lesson that teaches it, not by its machine key. The title
     // is child-facing copy and may be reworded, so this asserts that the report
     // resolved *a* lesson title rather than pinning today's wording.
     expect(screen.getByText("Friends of Ten")).toBeTruthy();
     expect(screen.queryByText("make-ten"), "shows the title, not the key").toBeNull();
-    // Twice: the group is headed "Secure" and each concept in it carries the
-    // same badge. Redundant rather than wrong — a row still has to read on its
-    // own when a parent scans past the heading.
-    expect(screen.getAllByText("Secure")).toHaveLength(2);
+    // Once, on the group heading. The row inside used to repeat the same badge
+    // on its right-hand side; that column now carries the thing a parent can
+    // act on instead.
+    expect(screen.getAllByText("Secure")).toHaveLength(1);
+  });
+
+  it("says whether the week was enough practice, not just how many days", async () => {
+    cleanup();
+    // Two days, so under the bar — and the sentence says what to aim for
+    // instead of leaving "2 of 7" to be interpreted.
+    await show([totals({ practisedOn: [localDay(0), localDay(1)] })]);
+
+    expect(await screen.findByText(/Aim for 3 short sessions/)).toBeTruthy();
+  });
+
+  it("tells a parent what to do about a concept, not just where it sits", async () => {
+    cleanup();
+    // Right most times, on two days, but a hint taken on three quarters of the
+    // questions: the missing ingredient is working alone, and the page says so.
+    await show([
+      totals({ questionsAnswered: 20, correctFirstTry: 16, supportsUsed: 15, lessonsCompleted: 0 }),
+    ]);
+
+    // Matched on the diagnosis rather than the instruction: the Nearly solo
+    // section gives the same advice in its own subtitle, and both appearing is
+    // the point rather than an ambiguity to work around.
+    expect(await screen.findByText(/Right most times, but with a hint/)).toBeTruthy();
+  });
+
+  it("names the missing day when that is the only thing left", async () => {
+    cleanup();
+    // Accurate, unaided, a finished round — and all of it on one afternoon.
+    await show([
+      totals({ practisedOn: ["2026-08-21"], lastSeenTs: "2026-08-21T10:00:00.000Z" }),
+    ]);
+
+    expect(await screen.findByText(/round on a different day/i)).toBeTruthy();
+  });
+
+  it("keeps the groups a parent cannot act on shut, and says how many they hold", async () => {
+    cleanup();
+    await show([totals()]);
+
+    // "Secure" is finished work: present, counted, but not opened over the top
+    // of anything that still needs doing.
+    const group = screen.getByText("Secure").closest("details");
+    expect(group).toBeTruthy();
+    expect(group!.open, "a finished group opens on a tap, not on load").toBe(false);
   });
 
   it("says what is going wrong, in a sentence rather than a code", async () => {
@@ -111,7 +162,7 @@ describe("a child's report, mounted", () => {
     await show([totals({ questionsAnswered: 3, correctFirstTry: 1, practisedOn: ["2026-08-21"] })]);
 
     expect(await screen.findByText(/Still getting to know Mia/)).toBeTruthy();
-    expect(screen.getByText(/about 5 more before this says anything/)).toBeTruthy();
+    expect(screen.getByText(/About 5 more answers before this can say anything/)).toBeTruthy();
     // No percentage, because three answers cannot support one.
     expect(screen.queryByText(/33%/)).toBeNull();
   });
