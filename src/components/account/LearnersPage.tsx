@@ -14,6 +14,7 @@ import { playSound } from "../../utils/audio";
 import { UIAvatar, UIBadge, UIButton, UIDialog, UIMenu, UIMenuItem, UIMenuSeparator, UIModal } from "../ui";
 import { ChildReportPage } from "./ChildReportPage";
 import { NoAccess } from "./NoAccess";
+import { useIsCompact } from "../../lib/useBreakpoint";
 
 interface Learner {
   id: string;
@@ -55,6 +56,7 @@ export interface LearnersPageProps {
 export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, onOpenReport }) => {
   useSyncExternalStore(DailyGoalAPI.subscribe, DailyGoalAPI.version);
   const plan = useBilling();
+  const isCompact = useIsCompact();
   const { can } = usePermissions();
   const session = useSession();
   const canRead = can("learner:read");
@@ -238,8 +240,23 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
   return (
     <div className="min-h-full bg-white dark:bg-canvas">
       <div className="mx-auto max-w-5xl space-y-5">
-        <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        {/*
+          * On a phone the toolbar already says "Children" a couple of
+          * centimetres higher up, so printing the heading and its line again
+          * spends the top of a 390px screen repeating what the reader just
+          * read. Above `rail:` the rail carries the nav and nothing names the
+          * page, so the heading is the only label and it stays.
+          *
+          * Left out of the tree rather than hidden, because `space-y-5` still
+          * spaces a child it cannot see: a hidden header would leave 20px of
+          * nothing under the toolbar. When there is no "Add child" button
+          * either, the whole header goes.
+          */}
+        {(!isCompact || canCreate) && (
+        <header className={isCompact ? "flex justify-end" : "flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"}>
+          {!isCompact && (
           <div><h1 className="koda-admin-page-title">Children</h1><p className="mt-1 text-sm text-[#6D6997] dark:text-muted">Each child learns on their own device.</p></div>
+          )}
           {canCreate && (
             <div className="flex flex-wrap items-center gap-3">
               <UIButton
@@ -263,6 +280,7 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
             </div>
           )}
         </header>
+        )}
 
         {error && <p className={themeSystem.flash("error")}>{error}</p>}
         {notice && <p className={themeSystem.flash("success")}>{notice}</p>}
