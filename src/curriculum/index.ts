@@ -174,3 +174,42 @@ export function isUnlocked(
   const satisfied = satisfiedConcepts(completed, viewer, startingPoint);
   return lesson.requires.every((key) => satisfied.has(key));
 }
+
+/**
+ * The lesson "Continue" should open, out of a set the learner is looking at.
+ *
+ * `lessons` is whatever list is on screen — usually one skill's, in course
+ * order — while `completed` stays the whole course's record, because a
+ * prerequisite may live in a skill this page is not showing.
+ *
+ * The rule is "the first unplayed lesson after the furthest one finished". Two
+ * cases make it that rather than simply "the first unplayed one":
+ *
+ *  - A grown-up who placed a child mid-course leaves every lesson before the
+ *    starting point open but unplayed. Resuming at the earliest of those would
+ *    send a child eight lessons in back to lesson one.
+ *  - Lessons do not have to be finished in order: `requires` describes a graph,
+ *    so a learner can legitimately be past a lesson they skipped.
+ *
+ * When nothing is left after the furthest finished lesson it falls back to the
+ * earliest playable one — that skipped lesson is then genuinely what is next.
+ * Returns undefined when there is nothing open and unplayed at all, which is
+ * both "finished" and "everything remaining is locked"; the caller decides what
+ * to offer instead, and must not fall back to the first lesson in the list.
+ */
+export function resumeLesson(
+  lessons: ResolvedLesson[],
+  completed: Record<number, number>,
+  viewer?: Viewer,
+  startingPoint?: number | null,
+): ResolvedLesson | undefined {
+  const played = (lesson: ResolvedLesson) => (completed[lesson.levelNumber] ?? 0) > 0;
+  const open = (lesson: ResolvedLesson) =>
+    !played(lesson) &&
+    (startingPoint === undefined
+      ? isUnlocked(lesson, completed, viewer)
+      : isUnlocked(lesson, completed, viewer, startingPoint));
+
+  const lastPlayed = lessons.reduce((at, lesson, i) => (played(lesson) ? i : at), -1);
+  return lessons.slice(lastPlayed + 1).find(open) ?? lessons.find(open);
+}

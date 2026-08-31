@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { ArrowLeft, BookOpen, CheckCircle2, Play, Sparkles } from "lucide-react";
-import { getCourseUnits, getSkillLessons, isUnlocked } from "../curriculum";
+import { getCourseUnits, getSkillLessons, isUnlocked, resumeLesson } from "../curriculum";
 import { SkillRegistryAPI } from "../lib/skillRegistryApi";
 import { useSkillRegistrations } from "../lib/skillRegistrationApi";
 import { useInstalledSkills } from "../lib/skillStore";
@@ -21,7 +21,7 @@ import {
 
 export interface LearnPageProps {
   skillId: string;
-  activeLevelNumber: number;
+  /** Star counts for the whole course, keyed by level — not just this skill. */
   completedLevels: Record<number, number>;
   onBack(): void;
   onStartLesson(levelNumber: number): void;
@@ -36,7 +36,6 @@ const unitTitle = (title: string): string => title.replace(/^Unit\s*\d+\s*[:.\-\
 
 export const LearnPage: React.FC<LearnPageProps> = ({
   skillId,
-  activeLevelNumber,
   completedLevels,
   onBack,
   onStartLesson,
@@ -83,11 +82,27 @@ export const LearnPage: React.FC<LearnPageProps> = ({
 
   const listing = installed.find((entry) => entry.id === skillId);
   const server = SkillRegistryAPI.get(skillId);
-  const done = lessons.filter((lesson) => (completedLevels[lesson.levelNumber] ?? 0) > 0).length;
+  const starsFor = (lesson: { levelNumber: number }) => completedLevels[lesson.levelNumber] ?? 0;
+  const done = lessons.filter((lesson) => starsFor(lesson) > 0).length;
   const percent = Math.round((done / lessons.length) * 100);
-  const next =
-    lessons.find((lesson) => (completedLevels[lesson.levelNumber] ?? 0) === 0) ??
-    lessons[lessons.length - 1];
+  const finished = done === lessons.length;
+
+  /*
+   * Where "Continue" goes — and, on the path below, which stone wears the
+   * bubble. Both used to read the app's `activeLevelNumber`, which is the level
+   * the Learn tab last opened and starts life at 1. On a page for a skill the
+   * learner is eight lessons into, and on every page for a skill that is not
+   * the one they last played, that pointed the bubble at lesson 1: "Continue"
+   * on something already finished. A learner with several skills on the go got
+   * that on all but one of them.
+   *
+   * Answered from this skill's own progress instead — `resumeLesson` states the
+   * rule, and shares it with anything else that has to ask.
+   */
+  const next = resumeLesson(lessons, completedLevels, viewer);
+  /* The button always has somewhere to go, even when the path has nothing left
+     to unlock: a finished skill reopens its last lesson as revision. */
+  const resume = next ?? lessons[lessons.length - 1];
   const category = skill.manifest.audience.category;
   const art = skillArtFor(category);
   const registered = viewer.showAllSkills || registeredIds.has(skillId);
@@ -151,23 +166,44 @@ export const LearnPage: React.FC<LearnPageProps> = ({
                 <span>{done ? `${done} of ${lessons.length} lessons complete` : "Ready to begin"}</span>
                 <span>{percent}%</span>
               </div>
-              <div className="h-2 rounded-full bg-surface-muted overflow-hidden">
+              <div
+                className="h-2 rounded-full bg-surface-muted overflow-hidden"
+                role="progressbar"
+                aria-valuenow={percent}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label={`${skill.manifest.name} progress`}
+              >
                 <div
                   className="h-full rounded-full bg-indigo-600 transition-all"
                   style={{ width: `${percent}%` }}
                 />
               </div>
+              {/* Which lesson the button opens. "Continue" on its own says
+                  nothing, and a learner juggling several skills cannot tell
+                  from the label alone where any one of them left off. */}
+              {registered && (
+                <p className="mt-2 text-xs text-muted">
+                  {next ? (
+                    <>
+                      Up next: <span className="font-bold text-ink">{next.title}</span>
+                    </>
+                  ) : (
+                    <>Every lesson complete — play any of them again.</>
+                  )}
+                </p>
+              )}
             </div>
           </div>
           <UIButton
             size="lg"
             icon={<Play />}
             isLoading={registering}
-            onClick={registered ? () => start(next.levelNumber) : () => void add()}
+            onClick={registered ? () => start(resume.levelNumber) : () => void add()}
           >
             {!registered
               ? "Register skill"
-              : percent === 100
+              : finished
                 ? "Review"
                 : done
                   ? "Continue"
@@ -194,11 +230,10 @@ export const LearnPage: React.FC<LearnPageProps> = ({
 
           <div className="mt-4 space-y-6">
             {units.map((unit) => {
+              const unitDone = unit.lessons.filter((lesson) => starsFor(lesson) > 0).length;
               const items: UISkillPathItem[] = unit.lessons.map((lesson) => {
-                const stars = completedLevels[lesson.levelNumber] ?? 0;
-                const isCurrent = lesson.levelNumber === activeLevelNumber;
-                const locked =
-                  !registered || (!isCurrent && !isUnlocked(lesson, completedLevels, viewer));
+                const stars = starsFor(lesson);
+                const locked = !registered || !isUnlocked(lesson, completedLevels, viewer);
                 return {
                   id: lesson.ref,
                   title: lesson.title,
@@ -206,7 +241,7 @@ export const LearnPage: React.FC<LearnPageProps> = ({
                   stars,
                   state: locked
                     ? "locked"
-                    : isCurrent
+                    : lesson.ref === next?.ref
                       ? "current"
                       : stars > 0
                         ? "completed"
@@ -216,14 +251,21 @@ export const LearnPage: React.FC<LearnPageProps> = ({
 
               return (
                 <section key={unit.id}>
+                  {/* The count rides in the eyebrow rather than as a badge on
+                      the right: it is the same fact the bar at the top of the
+                      page states, and a second pill on every unit is clutter
+                      once a course runs to four or five of them. Units are
+                      counted over this skill's lessons only — a unit may also
+                      hold lessons from skills the learner has not registered,
+                      and those are not this page's to report on. */}
                   <UIUnitHeader
-                    eyebrow={`Unit ${unit.unitNumber}`}
+                    eyebrow={`Unit ${unit.unitNumber} · ${unitDone}/${unit.lessons.length} done`}
                     title={unitTitle(unit.title)}
                     color={unitColor(unit.unitNumber)}
                   />
                   <UISkillPath
                     items={items}
-                    startLabel="Continue"
+                    startLabel={done ? "Continue" : "Start"}
                     onSelect={(ref) => {
                       const lesson = unit.lessons.find((l) => l.ref === ref);
                       if (lesson) start(lesson.levelNumber);

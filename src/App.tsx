@@ -769,7 +769,6 @@ export default function App() {
           ) : selectedLearnSkillId ? (
             <LearnPage
               skillId={selectedLearnSkillId}
-              activeLevelNumber={activeLevelNumber}
               completedLevels={completedGameLevels}
               onBack={() => setSelectedLearnSkillId(null)}
               onStartLesson={startLesson}

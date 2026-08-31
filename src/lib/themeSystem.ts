@@ -309,7 +309,10 @@ export const themeSystem = {
       const press = "active:border-b-2 active:translate-y-0.5 cursor-pointer";
       const states = {
         completed: `bg-indigo-400 dark:bg-indigo-600 hover:bg-indigo-300 dark:hover:bg-indigo-500 text-white border-indigo-600 dark:border-indigo-900 ${press}`,
-        current: `bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-500 dark:hover:bg-indigo-400 text-white border-indigo-800 dark:border-indigo-800 ${press}`,
+        /* The one node the learner is meant to hit, so it carries a halo as
+           well as the bubble above it — findable in a peripheral glance down a
+           long path. */
+        current: `bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-500 dark:hover:bg-indigo-400 text-white border-indigo-800 dark:border-indigo-800 ring-4 ring-indigo-500/20 dark:ring-indigo-400/25 ${press}`,
         available: `bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-400 dark:text-slate-300 border-slate-300 dark:border-slate-900 ${press}`,
         locked:
           "bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border-slate-300 dark:border-slate-700 cursor-not-allowed",
@@ -344,6 +347,21 @@ export const themeSystem = {
     },
 
     subtitle: "text-[10px] text-slate-500 dark:text-slate-400 hidden sm:block truncate",
+
+    /* The name under a stepping stone on the winding path. Narrow and clamped
+       to two lines on purpose: the column has to stay narrower than the wave's
+       amplitude or neighbouring labels collide as the path swings. */
+    pathLabel: (state: PathNodeState = "available") => {
+      const base =
+        "max-w-[8.5rem] sm:max-w-[10rem] text-center text-[11px] font-bold leading-tight line-clamp-2 text-balance";
+      const states = {
+        completed: "text-slate-600 dark:text-slate-300",
+        current: "text-indigo-700 dark:text-indigo-300",
+        available: "text-slate-700 dark:text-slate-300",
+        locked: "text-slate-400 dark:text-slate-500",
+      };
+      return `${base} ${states[state]}`;
+    },
   },
 
   sectionHeader: {

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { AlertTriangle, Mic, Send, Sparkles } from "lucide-react";
+import { AlertTriangle, Mic, Send, Sparkles, X } from "lucide-react";
 
 import { SvgAsset } from "../assets/svg";
 import { askKodaInWriting, type KodaContext, type KodaTurn } from "../lib/tutorApi";
@@ -9,7 +9,7 @@ import { themeSystem } from "../lib/themeSystem";
 import { useKoda } from "../lib/useKoda";
 import { usePersona } from "../lib/usePersona";
 import { playSound } from "../utils/audio";
-import { UIButton, UIModal } from "./ui";
+import { UIButton } from "./ui";
 
 /**
  * Ask Koda in writing, and the door back to talking.
@@ -53,6 +53,17 @@ export const KodaAskModal: React.FC<{
    */
   const conversationRef = useRef<KodaConversation | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Escape closes, as it did when this was a dialog. A panel a child cannot
+  // dismiss from the keyboard is one they have to hunt for the mouse to shut.
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen, onClose]);
 
   useEffect(() => {
     if (isOpen) inputRef.current?.focus();
@@ -125,13 +136,44 @@ export const KodaAskModal: React.FC<{
   ];
 
   return (
-    <UIModal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={`${character.emoji} Ask ${character.name}`}
-      maxWidth="max-w-xl"
+    /*
+     * A chatbox, not a dialog.
+     *
+     * This was a centred modal over a dimmed page, which is the wrong shape for
+     * what it does: a child asks Koda about the question they are looking at,
+     * and the panel was covering the question. They had to close Koda to read
+     * the thing they were asking about, then reopen it to read the answer.
+     *
+     * Docked bottom-right on a screen with room, so the work stays visible and
+     * the page stays usable behind it — no backdrop, nothing to dismiss. On a
+     * phone there is no "beside", so it becomes a bottom sheet and takes the
+     * width, which is the most of the screen it can leave alone.
+     *
+     * Below the voice coach's z-index and above the page: the two are never
+     * open together, but if they ever are, the one holding a microphone wins.
+     */
+    <div
+      role="dialog"
+      aria-label={`Ask ${character.name}`}
+      className="fixed z-[90] flex flex-col overflow-hidden rounded-3xl border border-line bg-surface shadow-2xl
+                 inset-x-3 bottom-3 max-h-[80dvh]
+                 sm:inset-x-auto sm:right-5 sm:bottom-5 sm:w-[380px] sm:max-h-[min(560px,78dvh)]"
     >
-      <div className="space-y-4">
+      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-line px-4 py-3">
+        <h3 className="flex items-center gap-2 font-mono text-sm font-black text-ink">
+          <Sparkles className="h-4 w-4 text-indigo-500" aria-hidden="true" />
+          Ask {character.name}
+        </h3>
+        <button
+          onClick={onClose}
+          aria-label="Close"
+          className="rounded-xl p-1.5 text-muted transition-colors hover:bg-surface-muted hover:text-ink"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+
+      <div className="flex min-h-0 flex-1 flex-col gap-3 p-4">
         {/* The way back. Kept at the top because talking is what a tap opens
             everywhere else — a child who came here to type should still be one
             control away from the thing they started with. */}
@@ -161,7 +203,11 @@ export const KodaAskModal: React.FC<{
         {canWrite ? (
           <>
             <div
-              className="max-h-[45vh] min-h-[12rem] space-y-3 overflow-y-auto rounded-2xl border border-line bg-surface-muted p-4"
+              /* The only scroller. Its height comes from the panel rather than
+                 a viewport fraction — a `45vh` cap inside a panel that is
+                 already capped fights it, and on a phone produced a transcript
+                 taller than the sheet holding it. */
+              className="min-h-[8rem] flex-1 space-y-3 overflow-y-auto rounded-2xl border border-line bg-surface-muted p-4"
               aria-live="polite"
             >
               {turns.length === 0 && !thinking && (
@@ -291,6 +337,6 @@ export const KodaAskModal: React.FC<{
           </div>
         )}
       </div>
-    </UIModal>
+    </div>
   );
 };

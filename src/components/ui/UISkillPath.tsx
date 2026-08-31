@@ -5,10 +5,10 @@ import { type PathNodeState, themeSystem } from "../../lib/themeSystem";
 export interface UISkillPathItem {
   id: string;
   title: string;
-  /** Emoji or icon shown on a node that is neither completed nor locked. */
+  /** Emoji or icon for the lesson. Shown on every node that is not locked. */
   icon?: React.ReactNode;
   state: PathNodeState;
-  /** Star count on a completed node. Omitted or 0 hides the badge. */
+  /** Star count on a completed node. Omitted or 0 falls back to a tick. */
   stars?: number;
 }
 
@@ -29,10 +29,13 @@ export interface UISkillPathProps {
  * itself carries the sense of a route, which is how the apps that do this well
  * handle it.
  *
- * Nodes carry no visible label. At this size a title either wraps to three
- * lines or truncates to nothing useful, so the name travels as the accessible
- * name and the hover tooltip instead. Use `UIPathNode` where the lesson names
- * matter — that is the labelled version, for a full page.
+ * Each node keeps its lesson's emoji at every state, and names itself
+ * underneath. An earlier version dropped both once a lesson was finished, which
+ * turned a completed unit into a column of identical purple discs: nothing on
+ * screen said which one was the dice game and which one was the ten-frame, and
+ * the only way to find out was to hover — a gesture that does not exist on the
+ * tablet this is mostly read on. The label is clamped to two lines and the
+ * column is narrow, so the wave still reads as a path rather than a list.
  */
 
 /*
@@ -69,7 +72,7 @@ export const UISkillPath: React.FC<UISkillPathProps> = ({
 
   return (
     <div
-      className={`flex flex-col items-center gap-5 sm:gap-6 ${
+      className={`flex flex-col items-center gap-4 sm:gap-5 ${
         hasStart ? "pt-16" : "pt-6"
       } ${className}`}
       role="list"
@@ -77,8 +80,13 @@ export const UISkillPath: React.FC<UISkillPathProps> = ({
     >
       {items.map((item, index) => {
         const locked = item.state === "locked";
+        const stars = item.stars ?? 0;
         return (
-          <div key={item.id} role="listitem" className={WAVE[index % WAVE.length]}>
+          <div
+            key={item.id}
+            role="listitem"
+            className={`flex flex-col items-center gap-1.5 ${WAVE[index % WAVE.length]}`}
+          >
             <button
               type="button"
               disabled={locked}
@@ -87,18 +95,23 @@ export const UISkillPath: React.FC<UISkillPathProps> = ({
               aria-label={`${item.title}${locked ? " (locked)" : ""}`}
               className={s.circle(item.state)}
             >
-              {item.state === "completed" ? (
-                <Star className="w-8 h-8 sm:w-9 sm:h-9 fill-current" />
-              ) : locked ? (
+              {locked ? (
                 <Lock className="w-6 h-6" />
               ) : item.icon ? (
                 <span className="text-2xl sm:text-3xl">{item.icon}</span>
+              ) : item.state === "completed" ? (
+                <Star className="w-8 h-8 sm:w-9 sm:h-9 fill-current" />
               ) : (
                 <Check className="w-7 h-7" />
               )}
 
-              {item.state === "completed" && (item.stars ?? 0) > 0 && (
-                <span className={s.starBadge}>&#9733;{item.stars}</span>
+              {/* A finished lesson always says so, whether or not it earned a
+                  star: the fill alone is the only other difference between
+                  "done" and "open", and colour on its own is not a signal. */}
+              {item.state === "completed" && (
+                <span className={s.starBadge}>
+                  {stars > 0 ? <>&#9733;{stars}</> : <>&#10003;</>}
+                </span>
               )}
 
               {item.state === "current" && (
@@ -108,6 +121,8 @@ export const UISkillPath: React.FC<UISkillPathProps> = ({
                 </span>
               )}
             </button>
+
+            <span className={s.pathLabel(item.state)}>{item.title}</span>
           </div>
         );
       })}
