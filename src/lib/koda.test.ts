@@ -95,9 +95,28 @@ describe("what a capability is allowed to do", () => {
 });
 
 describe("which way of asking a tap opens", () => {
-  it("opens the spoken coach wherever the deployment runs it", async () => {
+  /*
+   * The two panels cost very different amounts. The written one is a request
+   * and a reply; the voice coach holds a socket open and streams audio both
+   * ways for as long as it is on screen. A tap used to open the expensive one
+   * unconditionally, so a child who only wanted to type paid for a spoken
+   * session before saying a word.
+   *
+   * Which is *first* is therefore an operator's decision, and `ai.voiceFirst`
+   * is where they make it. Neither is out of reach: each panel is one tap from
+   * the other.
+   */
+  it("opens the written panel by default, and voice is one tap in", async () => {
+    allows.mockImplementation((id: string) => id !== "ai.voiceFirst");
     const { preferredKodaMode } = await mod();
-    // Koda is a coach a child talks to; typing is the other half, one tap in.
+
+    expect(preferredKodaMode()).toBe("chat");
+  });
+
+  it("opens the spoken coach when the operator asks for it", async () => {
+    allows.mockReturnValue(true);
+    const { preferredKodaMode } = await mod();
+
     expect(preferredKodaMode()).toBe("voice");
   });
 
@@ -107,6 +126,16 @@ describe("which way of asking a tap opens", () => {
     expect(preferredKodaMode()).toBe("chat");
   });
 
+  it("still opens the voice coach when writing is the switched-off one", async () => {
+    // The preference only chooses between two open doors. With chat off there
+    // is nothing to choose, and honouring it would offer a panel that is not
+    // running.
+    allows.mockImplementation((id: string) => id !== "ai.chat" && id !== "ai.voiceFirst");
+    const { preferredKodaMode } = await mod();
+
+    expect(preferredKodaMode()).toBe("voice");
+  });
+
   it("offers nothing at all when the deployment runs neither", async () => {
     allows.mockImplementation((id: string) => id !== "ai.liveVoice" && id !== "ai.chat");
     const { preferredKodaMode } = await mod();
@@ -114,6 +143,7 @@ describe("which way of asking a tap opens", () => {
   });
 
   it("is the deployment's answer alone — an unpaid plan still opens a panel", async () => {
+    allows.mockReturnValue(true);
     has.mockReturnValue(false);
     aiHelpEnabled.mockReturnValue(false);
     const { preferredKodaMode } = await mod();

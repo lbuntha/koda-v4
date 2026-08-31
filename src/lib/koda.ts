@@ -95,23 +95,40 @@ export function kodaAccess(capability: KodaCapability): KodaAccess {
 export const kodaAllows = (capability: KodaCapability): boolean =>
   kodaAccess(capability).allowed;
 
+/** The operator's answer to "which panel does one tap open". */
+const VOICE_FIRST = "ai.voiceFirst";
+
 /**
  * Which way of asking a single tap opens, or `null` for "do not offer Koda".
  *
- * **Voice, wherever this deployment runs it.** Koda is a coach a child talks
- * to; typing is the fallback for a deployment that does not run the voice coach
- * — or for a child who would rather write, which is one tap further in from
- * either panel. Deciding it here rather than at each button is what keeps the
- * floating button, the round's top bar, and anything added later opening the
- * same thing: a tap that means one thing on the home screen and another
- * mid-question is a tap nobody learns.
+ * **Writing, unless the operator says otherwise.** The two panels cost very
+ * different amounts: the written one is a request and a reply, while the voice
+ * coach holds a socket open and streams audio both ways for as long as it is
+ * on screen — and it used to be what a single tap opened, so a child who only
+ * wanted to type paid for a spoken session before saying a word.
+ *
+ * Voice is one tap further in from the written panel, and the written one is a
+ * tap from the voice panel, so neither is out of reach. Which one is *first* is
+ * a deployment decision because it is a cost decision, and only an operator
+ * sees the bill.
+ *
+ * Decided here rather than at each button, so the floating button, the round's
+ * top bar and anything added later all open the same thing: a tap that means
+ * one thing on the home screen and another mid-question is a tap nobody learns.
  *
  * Only the deployment's answer is consulted. The plan and the parent decide
  * whether the panel *opens*, never which one was going to.
  */
 export function preferredKodaMode(): KodaAskMode | null {
-  if (deploymentAllows("voice")) return "voice";
-  if (deploymentAllows("chat")) return "chat";
+  const voice = deploymentAllows("voice");
+  const chat = deploymentAllows("chat");
+
+  // The preference only chooses between two doors that are both open. With one
+  // capability switched off there is nothing to choose, and honouring a stale
+  // preference would offer a panel this deployment does not run.
+  if (voice && chat) return System.allows(VOICE_FIRST) ? "voice" : "chat";
+  if (voice) return "voice";
+  if (chat) return "chat";
   return null;
 }
 

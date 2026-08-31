@@ -69,6 +69,20 @@ DEFAULT_SETTINGS: list[dict] = [
         "order": 30,
     },
     {
+        "settingId": "ai.voiceFirst",
+        "group": "Ask Koda",
+        "label": "A tap on Ask Koda opens the voice coach",
+        "description": (
+            "On, a tap opens the spoken conversation, which streams audio both ways and is"
+            " the most expensive call in the app. Off, it opens the written panel and voice"
+            " is one tap further in — the same help, paid for only when a child wants to"
+            " talk. Off by default: most questions are typed."
+        ),
+        "type": "bool",
+        "value": False,
+        "order": 35,
+    },
+    {
         "settingId": "ai.whiteboard",
         "group": "Ask Koda",
         "label": "Whiteboard analysis",
