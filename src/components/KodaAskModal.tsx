@@ -165,42 +165,41 @@ export const KodaAskModal: React.FC<{
           <Sparkles className="h-4 w-4 text-indigo-500" aria-hidden="true" />
           Ask {character.name}
         </h3>
-        <button
-          onClick={onClose}
-          aria-label="Close"
-          className="rounded-xl p-1.5 text-muted transition-colors hover:bg-surface-muted hover:text-ink"
-        >
-          <X className="h-4 w-4" />
-        </button>
+        <div className="flex items-center gap-0.5">
+          {/*
+            * The way back to talking, as an icon.
+            *
+            * It was a full-width card explaining that Koda can speak — a third
+            * of a 380px panel spent on a thing a child either wants or does
+            * not, and if they do want it they are one tap from it either way.
+            * The label lives in the tooltip and the accessible name, where an
+            * explanation costs nothing.
+            */}
+          {canTalk && canWrite && (
+            <button
+              onClick={() => {
+                playSound("pop");
+                onClose();
+                onStartVoice();
+              }}
+              title={`Talk to ${character.name} out loud`}
+              aria-label={`Talk to ${character.name} out loud instead of typing`}
+              className="rounded-xl p-1.5 text-muted transition-colors hover:bg-surface-muted hover:text-indigo-500"
+            >
+              <Mic className="h-4 w-4" />
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="rounded-xl p-1.5 text-muted transition-colors hover:bg-surface-muted hover:text-ink"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col gap-3 p-4">
-        {/* The way back. Kept at the top because talking is what a tap opens
-            everywhere else — a child who came here to type should still be one
-            control away from the thing they started with. */}
-        {canTalk && canWrite && (
-          <button
-            onClick={() => {
-              playSound("pop");
-              onClose();
-              onStartVoice();
-            }}
-            className="flex w-full items-center gap-3 rounded-2xl border border-indigo-200 bg-indigo-50 p-3 text-left transition-colors hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/50"
-          >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-white">
-              <Mic className="h-4 w-4" />
-            </span>
-            <span className="min-w-0">
-              <span className="block font-mono text-sm font-bold text-ink">
-                Talk to {character.name}
-              </span>
-              <span className="block text-xs text-muted">
-                Say it out loud and Koda answers in a real voice.
-              </span>
-            </span>
-          </button>
-        )}
-
         {canWrite ? (
           <>
             <div
@@ -262,6 +261,7 @@ export const KodaAskModal: React.FC<{
                           personaId={character.personaId}
                           avatarSeed={character.avatarSeed}
                           size={28}
+                          facing="right"
                         />
                       )}
                     </span>
@@ -309,6 +309,7 @@ export const KodaAskModal: React.FC<{
                       personaId={character.personaId}
                       avatarSeed={character.avatarSeed}
                       size={28}
+                      facing="right"
                     />
                   </span>
                   <span

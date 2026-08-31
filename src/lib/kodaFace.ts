@@ -39,6 +39,22 @@ type EyesVariant = NonNullable<ThumbsOptions["eyes"]>[number];
 type MouthVariant = NonNullable<ThumbsOptions["mouth"]>[number];
 
 /** The five states the app actually has. See `KodaMascot`. */
+/**
+ * Which way the drawn face looks, before anything mirrors it.
+ *
+ * **Left.** The eyes and the smile sit in the upper-left of the head and the
+ * squared-off back of the skull is bottom-right, so the character is looking to
+ * its own left as drawn.
+ *
+ * Stated here because it cannot be read from any markup — the face is generated
+ * by DiceBear, so the only way to know is to render it and look. `KodaBuddy`
+ * carried a comment claiming the opposite for months, and every caller that
+ * trusted it put Koda facing away from whatever it was meant to be looking at.
+ * If the artwork is ever swapped, change this one constant and every caller
+ * follows.
+ */
+export const FACE_LOOKS: "left" | "right" = "left";
+
 export type MascotState = "idle" | "listening" | "speaking" | "thinking" | "celebrating";
 
 /**

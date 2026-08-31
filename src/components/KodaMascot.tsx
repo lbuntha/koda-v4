@@ -9,6 +9,7 @@ import {
 } from "motion/react";
 
 import {
+  FACE_LOOKS,
   STATE_ANIMATION,
   expressionFor,
   expressionNamed,
@@ -230,6 +231,20 @@ export const KodaMascot: React.FC<{
   palette?: MascotPalette;
   size?: number;
   className?: string;
+  /**
+   * Which way Koda should look.
+   *
+   * Left as drawn unless a caller says otherwise, so nothing changes for the
+   * places that never thought about it. A caller that puts Koda beside
+   * something — an avatar to the left of a chat bubble — should say which way,
+   * because a character looking away from the thing it is attached to reads as
+   * having lost interest.
+   *
+   * The component owns the mirroring rather than each caller writing its own
+   * `scaleX(-1)`: which way the artwork already points is one fact
+   * (`FACE_LOOKS`), and it belongs next to the artwork, not in nine call sites.
+   */
+  facing?: "left" | "right";
 }> = ({
   state = "idle",
   personaId = "koda",
@@ -238,7 +253,10 @@ export const KodaMascot: React.FC<{
   palette,
   size = 160,
   className = "",
+  facing,
 }) => {
+  // Only mirror when the caller asked for the side the art is not already on.
+  const mirrored = facing !== undefined && facing !== FACE_LOOKS;
   const skin = palette ?? paletteFor(personaId);
   const tilt = tiltFor(personaId);
   const seed = avatarSeed || personaId;
@@ -329,7 +347,7 @@ export const KodaMascot: React.FC<{
           className="h-full w-full select-none"
           animate={MOTION[state]}
           transition={{ repeat: Infinity, ease: "easeInOut", duration: DURATION[state] }}
-          style={{ transformOrigin: "50% 85%", rotate: tilt }}
+          style={{ transformOrigin: "50% 85%", rotate: tilt, scaleX: mirrored ? -1 : 1 }}
         />
       </motion.div>
 
