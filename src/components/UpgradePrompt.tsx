@@ -3,6 +3,7 @@ import { Sparkles } from "lucide-react";
 
 import { formatPrice } from "../lib/billing";
 import { FeatureGate } from "../lib/featureGate";
+import { usePermissions } from "../lib/sync";
 import { useBilling } from "../lib/useBilling";
 import { themeSystem } from "../lib/themeSystem";
 import { UIButton, UIModal } from "./ui";
@@ -14,6 +15,11 @@ import { UIButton, UIModal } from "./ui";
  * dialog rather than one per button, because the wording is the product
  * decision here — a child should get a plain sentence and a way to tell their
  * grown-up, and every surface should give them the same one.
+ *
+ * Two audiences reach the same gate, and they are told different things. An
+ * adult who may change the plan is shown the way to it; a child is told to ask
+ * their grown-up, because a seven-year-old cannot act on a price and offering
+ * them one is how a tablet ends up ordering a subscription.
  */
 
 /** What each sellable feature is, in words a seven-year-old can read. */
@@ -25,9 +31,23 @@ const FEATURE_COPY: Record<string, { title: string; blurb: string }> = {
   },
 };
 
-export const UpgradePrompt: React.FC = () => {
+export interface UpgradePromptProps {
+  /**
+   * The way to the plan card, for an adult who can act on this.
+   *
+   * Optional: without it the dialog still tells the truth, it just cannot
+   * offer the shortcut — which is what a shell with no tab of its own wants.
+   */
+  onOpenPlan?: () => void;
+}
+
+export const UpgradePrompt: React.FC<UpgradePromptProps> = ({ onOpenPlan }) => {
   useSyncExternalStore(FeatureGate.subscribe, FeatureGate.version, FeatureGate.version);
   const plan = useBilling();
+  const { can } = usePermissions();
+  // The same right the upgrade route checks, so this never offers a button
+  // whose press comes back refused.
+  const mayBuy = can("family:update");
   const feature = FeatureGate.pending();
   const withheld = FeatureGate.withheld();
 
@@ -76,9 +96,26 @@ export const UpgradePrompt: React.FC = () => {
       onClose={() => FeatureGate.dismiss()}
       title={copy.title}
       footer={
-        <UIButton variant="primary" onClick={() => FeatureGate.dismiss()}>
-          Got it
-        </UIButton>
+        mayBuy && onOpenPlan ? (
+          <>
+            <UIButton variant="secondary" onClick={() => FeatureGate.dismiss()}>
+              Not now
+            </UIButton>
+            <UIButton
+              variant="primary"
+              onClick={() => {
+                FeatureGate.dismiss();
+                onOpenPlan();
+              }}
+            >
+              See plans
+            </UIButton>
+          </>
+        ) : (
+          <UIButton variant="primary" onClick={() => FeatureGate.dismiss()}>
+            Got it
+          </UIButton>
+        )
       }
     >
       <div className="space-y-4">
@@ -92,12 +129,16 @@ export const UpgradePrompt: React.FC = () => {
 
         <p className="text-sm text-muted">
           Everything else is still yours: every lesson, every star, your streak and your badges.
-          Ask whoever set up your Koda if you would like Koda to start answering.
+          {mayBuy
+            ? " Your plan is under Settings, and you can ask to move to one that includes it."
+            : " Ask your grown-up if you would like Koda to start answering."}
         </p>
 
         {/*
-          * No checkout button. There is no payment flow yet, and a button that
-          * goes nowhere is worse than a sentence that tells the truth.
+          * Still no checkout here. "See plans" goes to the plan card, which
+          * records a request — the price is named on that screen beside the
+          * sentence saying no card is taken, and repeating half of that here
+          * would make this dialog read like a till.
           */}
         <p className={themeSystem.typography("body-sm")}>
           <span className="font-mono text-ink">

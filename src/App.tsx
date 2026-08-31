@@ -926,7 +926,7 @@ export default function App() {
       />
 
       {/* Mounted once. Any `requireFeature` call anywhere in the app shows it. */}
-      <UpgradePrompt />
+      <UpgradePrompt onOpenPlan={() => setActiveTab("settings")} />
 
       {/* Global Gemini Live Voice Coach Modal */}
       <LiveVoiceCoachModal
