@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <radialGradient id="blockGround" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.26"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="blockTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#BAE6FD"/>
+      <stop offset="100%" stop-color="#38BDF8"/>
+    </linearGradient>
+    <linearGradient id="blockLeft" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0EA5E9"/>
+      <stop offset="100%" stop-color="#075985"/>
+    </linearGradient>
+    <linearGradient id="blockRight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0284C7"/>
+      <stop offset="100%" stop-color="#0C4A6E"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="64" cy="117" rx="30" ry="5" fill="url(#blockGround)"/>
+
+  <path d="M 64 18 L 107 42 L 64 66 L 21 42 Z" fill="url(#blockTop)"/>
+  <path d="M 21 42 L 64 66 L 64 112 L 21 88 Z" fill="url(#blockLeft)"/>
+  <path d="M 107 42 L 64 66 L 64 112 L 107 88 Z" fill="url(#blockRight)"/>
+
+  <path d="M 64 18 L 107 42 L 64 66 L 21 42 Z" fill="none" stroke="#E0F2FE" stroke-width="2" stroke-linejoin="round" opacity="0.7"/>
+  <path d="M 30 47 L 30 84" stroke="#E0F2FE" stroke-width="2.5" stroke-linecap="round" opacity="0.25"/>
+</svg>

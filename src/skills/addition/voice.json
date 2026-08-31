@@ -1,0 +1,100 @@
+{
+  "_comment": [
+    "What this skill says out loud, declared so it can be recorded ahead of time.",
+    "",
+    "Lesson intros are NOT listed here — generate-voice.mjs collects every",
+    "lessons.json `params.play.audioPrompt` itself, so authoring a lesson never",
+    "means editing this file.",
+    "",
+    "What belongs here is speech that lives in the skill's code, and the rule is",
+    "the same one that governs feature flags: declare only what something",
+    "actually says. Every line below is spoken by CountTray, and a phrase nothing",
+    "says is a clip nobody hears and an API call somebody paid for.",
+    "",
+    "This is the Phase 1 script — levels 1 to 7. Each later phase adds the lines",
+    "its own engine speaks. Nothing is recorded yet: until `npm run voice:record`",
+    "is run, every line takes the live TTS path, which is slower and never silent."
+  ],
+
+  "_numberComment": [
+    "CountTray counts aloud in words — `say(n)` returns 'seven', not '7' — so the",
+    "words are what get recorded. Levels 1-7 reach 12 at most; the list runs to",
+    "twenty because Phase 2's ten-frames and Phase 3's number path will use all of",
+    "it, and a word costs one clip whether or not it is a round number.",
+    "",
+    "There is deliberately no `numberRange` here. That records the *digits* '0'",
+    "to '20', and nothing in this skill speaks a digit yet — JumpLine will, in",
+    "Phase 3, when it names positions past twenty. Adding it now would buy 21",
+    "clips no screen plays."
+  ],
+  "numberWords": [
+    "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
+    "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
+    "sixteen", "seventeen", "eighteen", "nineteen", "twenty"
+  ],
+
+  "_promptsComment": [
+    "The question itself, as the Read-aloud button says it.",
+    "",
+    "Only the fixed ones. A lesson's `prompts.default` is not collected — the",
+    "activity interpolates it, so 'What is {a} plus {b}?' could never match a",
+    "recording — and for adding zero and adding one that is right: those two vary",
+    "over more than a hundred pairs and belong on live TTS."
+  ],
+  "prompts": [
+    "Count them all. How many altogether?",
+    "Put the groups together, then count them all.",
+    "Start with the bigger number, then count on."
+  ],
+
+  "_templateComment": [
+    "A template is expanded into one recorded line per value, which is how a",
+    "prompt containing a number gets recorded at all.",
+    "",
+    "Worth it only where the range is small and matches the lesson: Count On",
+    "draws its first addend from 4 to 9, so this is six fixed sentences rather",
+    "than one dynamic one. Keep these values tracking lessons.json — count-on's",
+    "`aRange` is [4, 9]."
+  ],
+  "templates": [
+    {
+      "text": "Start at {value} and count on.",
+      "values": [4, 5, 6, 7, 8, 9]
+    }
+  ],
+
+  "_phrasesComment": "Everything else CountTray says in passing. One line, so far.",
+  "phrases": [
+    "Put them together!"
+  ],
+
+  "_groupsComment": [
+    "Several ways of saying the same thing, so praise does not become wallpaper.",
+    "`playAnswerSound` picks one on every answer, which is why these are recorded",
+    "rather than spoken live: a network round trip between a child and their next",
+    "question is worse than saying nothing."
+  ],
+  "groups": {
+    "correct": {
+      "voices": ["Kore", "Puck", "Zephyr"],
+      "phrases": [
+        "That is the total!",
+        "Yes — you added it!",
+        "Great adding!",
+        "That's right!",
+        "You put them together!",
+        "Perfect!"
+      ]
+    },
+    "incorrect": {
+      "voices": ["Kore", "Zephyr", "Puck"],
+      "phrases": [
+        "Not quite. Count once more.",
+        "So close! Try counting again.",
+        "Almost! Have another go.",
+        "Good try. Let's count them together.",
+        "Hmm, let's look again."
+      ]
+    }
+  }
+}

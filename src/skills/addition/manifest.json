@@ -1,0 +1,130 @@
+{
+  "id": "addition",
+  "name": "Addition Quest",
+  "version": "1.0.0",
+  "description": "Fifty-two ways to add, from counting two groups to the strategies that make counting unnecessary.",
+  "category": "core",
+  "author": "Koda Math Lab",
+  "iconName": "Boxes",
+  "tagline": "Put groups together, then learn the shortcuts.",
+  "thumbnail": "boxes",
+  "status": "draft",
+  "audience": {
+    "ages": [5, 9],
+    "category": "operations"
+  },
+  "teaches": [
+    "count-all",
+    "combiner",
+    "count-on",
+    "count-on-from-larger",
+    "additive-identity",
+    "next-number-adder",
+    "finger-adder"
+  ],
+  "requires": [
+    "counter",
+    "corresponder",
+    "make-ten",
+    "five-benchmark",
+    "part-whole-decomposer",
+    "place-value-builder",
+    "unitiser-ten",
+    "unitiser-hundred"
+  ],
+  "features": [
+    {
+      "id": "audio_speech",
+      "name": "Spoken counter",
+      "description": "Says each number aloud as a child counts, and reads every hint.",
+      "isEnabled": true,
+      "tag": "Audio"
+    },
+    {
+      "id": "sound_chimes",
+      "name": "Sound chimes",
+      "description": "Pop and success chimes as objects are touched.",
+      "isEnabled": true,
+      "tag": "Audio"
+    },
+    {
+      "id": "haptic_feedback",
+      "name": "Haptic vibration",
+      "description": "A vibration pulse on each tap and each completed group.",
+      "isEnabled": true,
+      "tag": "Haptic"
+    },
+    {
+      "id": "counting_badges",
+      "name": "1-to-1 badges",
+      "description": "Numbers each touched object, so nothing is counted twice.",
+      "isEnabled": true,
+      "tag": "Cognitive"
+    },
+    {
+      "id": "running_total_badge",
+      "name": "Running total",
+      "description": "Shows the count so far beside the groups, as it grows.",
+      "isEnabled": true,
+      "tag": "Cognitive"
+    },
+    {
+      "id": "step_context_tags",
+      "name": "Step framing tags",
+      "description": "Labels each step — warm-up, guided challenge, final milestone — beside the step counter.",
+      "isEnabled": true,
+      "tag": "Cognitive"
+    }
+  ],
+  "settings": {
+    "warmupLabel": "",
+    "activityLabel": "",
+    "guidedLabel": "",
+    "milestoneLabel": "",
+    "speechRate": 0.95
+  },
+  "settingsSchema": [
+    {
+      "key": "warmupLabel",
+      "label": "Warm-up tag",
+      "help": "Wording for step 1. Leave blank to use the default.",
+      "type": "text",
+      "placeholder": "Warm-up Exercise 🌱",
+      "maxLength": 32
+    },
+    {
+      "key": "activityLabel",
+      "label": "Activity tag",
+      "help": "Wording for even-numbered steps. Leave blank to use the default.",
+      "type": "text",
+      "placeholder": "Interactive Activity 🚀",
+      "maxLength": 32
+    },
+    {
+      "key": "guidedLabel",
+      "label": "Guided tag",
+      "help": "Wording for odd-numbered steps. Leave blank to use the default.",
+      "type": "text",
+      "placeholder": "Guided Challenge 🌟",
+      "maxLength": 32
+    },
+    {
+      "key": "milestoneLabel",
+      "label": "Final tag",
+      "help": "Wording for the last step. Leave blank to use the default.",
+      "type": "text",
+      "placeholder": "Final Milestone 🏆",
+      "maxLength": 32
+    },
+    {
+      "key": "speechRate",
+      "label": "Speech rate",
+      "help": "How fast the counter and the hints are spoken.",
+      "type": "number",
+      "min": 0.5,
+      "max": 2.0,
+      "step": 0.05,
+      "unit": "x"
+    }
+  ]
+}
