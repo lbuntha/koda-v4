@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { AlertTriangle, Mic, Send, Sparkles, X } from "lucide-react";
 
 import { SvgAsset } from "../assets/svg";
+import { KodaMascot } from "./KodaMascot";
 import { askKodaInWriting, type KodaContext, type KodaTurn } from "../lib/tutorApi";
 import { KodaConversation } from "../lib/koda/conversationLog";
 import { currentPersonaId } from "../lib/personas";
@@ -235,8 +236,36 @@ export const KodaAskModal: React.FC<{
               {turns.map((turn, index) => (
                 <div
                   key={`${index}-${turn.sender}`}
-                  className={turn.sender === "student" ? "flex justify-end" : "flex justify-start"}
+                  className={
+                    turn.sender === "student"
+                      ? "flex justify-end"
+                      : "flex items-end justify-start gap-2"
+                  }
                 >
+                  {/*
+                    * Koda's face beside Koda's words.
+                    *
+                    * Only on Koda's side, and only on the last of a run: a
+                    * column of identical avatars down a conversation is noise,
+                    * and the child already knows which side they are. The
+                    * child's own turns carry no avatar at all — they know who
+                    * they are, and a chat that labels both sides reads as a
+                    * transcript rather than a conversation.
+                    */}
+                  {turn.sender !== "student" && (
+                    <span className="mb-0.5 shrink-0" aria-hidden="true">
+                      {turns[index + 1]?.sender === "koda" ? (
+                        <span className="block h-7 w-7" />
+                      ) : (
+                        <KodaMascot
+                          state="idle"
+                          personaId={character.personaId}
+                          avatarSeed={character.avatarSeed}
+                          size={28}
+                        />
+                      )}
+                    </span>
+                  )}
                   <div className="max-w-[85%] space-y-1">
                     <p
                       className={[
@@ -264,19 +293,38 @@ export const KodaAskModal: React.FC<{
                 </div>
               ))}
 
+              {/*
+                * Thinking, in the shape a reply will arrive in.
+                *
+                * The dots sit in a bubble on Koda's side with Koda's face
+                * beside them, so the wait occupies the space the answer will
+                * fill rather than a line of grey text somewhere else — the
+                * layout does not jump when the answer lands.
+                */}
               {thinking && (
-                <p className="flex items-center gap-2 text-sm text-muted">
-                  <span className="flex gap-1">
+                <div className="flex items-end justify-start gap-2">
+                  <span className="mb-0.5 shrink-0" aria-hidden="true">
+                    <KodaMascot
+                      state="thinking"
+                      personaId={character.personaId}
+                      avatarSeed={character.avatarSeed}
+                      size={28}
+                    />
+                  </span>
+                  <span
+                    className="flex items-center gap-1 rounded-2xl border border-line bg-surface px-3.5 py-3"
+                    role="status"
+                    aria-label={`${character.name} is thinking`}
+                  >
                     {[0, 1, 2].map((dot) => (
                       <span
                         key={dot}
                         className="h-1.5 w-1.5 animate-bounce rounded-full bg-indigo-500"
-                        style={{ animationDelay: `${dot * 120}ms` }}
+                        style={{ animationDelay: `${dot * 140}ms` }}
                       />
                     ))}
                   </span>
-                  Koda is thinking…
-                </p>
+                </div>
               )}
               <div ref={endRef} />
             </div>
