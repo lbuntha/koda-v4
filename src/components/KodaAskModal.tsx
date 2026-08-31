@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { AlertTriangle, MessageCircle, Mic, Send, X } from "lucide-react";
 
 import { KodaMascot } from "./KodaMascot";
+import { KODA_BRAND } from "./KodaFace";
 import { askKodaInWriting, type KodaContext, type KodaTurn } from "../lib/tutorApi";
 import { KodaConversation } from "../lib/koda/conversationLog";
 import { currentPersonaId } from "../lib/personas";
@@ -219,6 +220,7 @@ export const KodaAskModal: React.FC<{
                       state="idle"
                       personaId={character.personaId}
                       avatarSeed={character.avatarSeed}
+                      palette={KODA_BRAND}
                       size={28}
                       facing="right"
                     />
@@ -268,6 +270,7 @@ export const KodaAskModal: React.FC<{
                           state="idle"
                           personaId={character.personaId}
                           avatarSeed={character.avatarSeed}
+                          palette={KODA_BRAND}
                           size={28}
                           facing="right"
                         />
@@ -316,6 +319,7 @@ export const KodaAskModal: React.FC<{
                       state="thinking"
                       personaId={character.personaId}
                       avatarSeed={character.avatarSeed}
+                      palette={KODA_BRAND}
                       size={28}
                       facing="right"
                     />
@@ -379,6 +383,7 @@ export const KodaAskModal: React.FC<{
                 state="idle"
                 personaId={character.personaId}
                 avatarSeed={character.avatarSeed}
+                palette={KODA_BRAND}
                 size={56}
               />
             </span>

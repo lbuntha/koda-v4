@@ -27,7 +27,7 @@ describe("building a character's prompt", () => {
   it("carries the rules every teacher obeys, whoever they are", () => {
     for (const character of [FALLBACK_CHARACTER, vega]) {
       const prompt = kodaSystemPrompt(character, { mode: "chat" });
-      expect(prompt).toContain("Never give the raw answer");
+      expect(prompt).toContain("NEVER give the answer");
       expect(prompt).toContain("One idea per reply");
     }
   });
@@ -80,5 +80,68 @@ describe("building a character's prompt", () => {
     const full = kodaSystemPrompt(vega, { mode: "chat", topic: "Counting", level: 3 });
     expect(full).toContain("Topic: Counting");
     expect(full).toContain("Level: 3");
+  });
+});
+
+/**
+ * The rule the whole assistant exists to keep.
+ *
+ * Koda is a tutor, not an answer key: a child who is handed the result has
+ * skipped the part that was the lesson. The old wording — "never give the raw
+ * answer to a question the child is still working on" — read as a rule about
+ * the question on screen, which left the home page, and anything a child simply
+ * typed, outside it.
+ *
+ * Two carve-outs are deliberate and worth protecting, because a rule that
+ * over-reaches gets ignored: Koda may say whether the child's *own* answer is
+ * right, and may explain what a word or a tool means. Withholding either makes
+ * a worse tutor, not a stricter one.
+ */
+describe("never giving the answer", () => {
+  const prompt = () => kodaSystemPrompt(FALLBACK_CHARACTER, { mode: "chat" });
+
+  it("forbids it outright, not only for the question on screen", () => {
+    const text = prompt();
+
+    expect(text).toContain("NEVER give the answer");
+    // The loophole: no question on screen used to mean no rule.
+    expect(text).not.toContain("a question the child is still working on");
+  });
+
+  it("closes the ways a child talks their way around it", () => {
+    const text = prompt();
+
+    const flat = text.replace(/\s+/g, " ");
+    expect(flat).toMatch(/ask you directly/i);
+    expect(flat).toMatch(/grown-up said so/i);
+    expect(flat).toMatch(/only want to check/i);
+    expect(text.replace(/\s+/g, " ")).toMatch(/There is no phrasing that unlocks it/i);
+  });
+
+  it("names the two ways of giving it away that do not look like it", () => {
+    const text = prompt();
+
+    // Reasoning aloud to the number, and confirming a number Koda supplied.
+    const flat = text.replace(/\s+/g, " ");
+    expect(flat).toMatch(/arriving at the number is still giving the answer/i);
+    expect(flat).toMatch(/confirming a number you supplied yourself/i);
+  });
+
+  it("still lets Koda mark the child's own answer", () => {
+    // A child who can never find out whether they were right is worse off.
+    expect(prompt().replace(/\s+/g, " ")).toMatch(/their own\* answer is right or wrong/i);
+  });
+
+  it("still lets Koda explain what something means", () => {
+    expect(prompt().replace(/\s+/g, " ")).toMatch(/explain a word, a symbol or how a tool/i);
+  });
+
+  it("carries the rule in every mode, because a child can switch panels", () => {
+    for (const mode of ["chat", "voice", "whiteboard"] as const) {
+      expect(
+        kodaSystemPrompt(FALLBACK_CHARACTER, { mode }),
+        `${mode} lost the rule`,
+      ).toContain("NEVER give the answer");
+    }
   });
 });

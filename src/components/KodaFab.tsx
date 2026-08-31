@@ -6,8 +6,6 @@ import { useSystem } from "../lib/sync";
 import { playSound } from "../utils/audio";
 import { themeSystem } from "../lib/themeSystem";
 import { KodaBuddy } from "./KodaBuddy";
-import { paletteFor } from "./KodaMascot";
-import { usePersona } from "../lib/usePersona";
 
 /**
  * Ask Koda, floating where a child can always find it — and draggable to
@@ -41,8 +39,6 @@ import { usePersona } from "../lib/usePersona";
 export const KodaFab: React.FC<{ onAsk: (mode: KodaAskMode) => void }> = ({ onAsk }) => {
   const koda = useKoda();
   const mode = koda.mode;
-  // Whose Koda this is. The button and the conversation must agree.
-  const character = usePersona();
   /* Appearance, so it is asked of the switchboard rather than of the plan: an
      operator turning the tile off is a look, not an entitlement. Unknown ids
      read as allowed, so a deployment that has never heard of this setting gets
@@ -60,19 +56,6 @@ export const KodaFab: React.FC<{ onAsk: (mode: KodaAskMode) => void }> = ({ onAs
        * fling Koda a screen-width away and leave the clamp to flatten it
        * against an edge. Dropping the old offsets is the honest reading.
        */
-      /*
-       * The character the child will actually meet, not the brand one.
-       *
-       * The button drew `KODA_BRAND` purple while the conversation behind it
-       * drew the family's chosen teacher — so a child tapped a purple Koda and
-       * a green one answered. Two colours for one character is the app telling
-       * a child there are two of them.
-       *
-       * The brand face still exists for places that point at Koda as a product
-       * — a toolbar, a marketing tile — where no teacher has been chosen yet.
-       * This is not one of those: it opens the conversation.
-       */
-      palette={paletteFor(character.personaId)}
       storageKey="koda.fab.place.v3"
       backdrop={allows("ui.kodaBackdrop")}
       onPress={() => {

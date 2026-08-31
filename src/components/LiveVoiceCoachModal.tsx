@@ -28,6 +28,7 @@ import {
 import { GeminiLiveVoiceSession, LiveVoiceConfig } from "../utils/geminiLiveAudio";
 import { usePersona } from "../lib/usePersona";
 import { KodaMascot } from "./KodaMascot";
+import { KODA_BRAND } from "./KodaFace";
 import { liveCaption, mascotStateFor } from "../lib/kodaLive";
 import { KodaConversation } from "../lib/koda/conversationLog";
 
@@ -651,6 +652,7 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                       state={liveState}
                       personaId={character.personaId}
                       avatarSeed={character.avatarSeed}
+                      palette={KODA_BRAND}
                       energy={liveState === "speaking" ? modelEnergy : undefined}
                       size={96}
                     />
@@ -890,6 +892,7 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                   state={liveState}
                   personaId={character.personaId}
                   avatarSeed={character.avatarSeed}
+                  palette={KODA_BRAND}
                   energy={isKodaSpeaking ? modelEnergy : undefined}
                   size={68}
                 />
