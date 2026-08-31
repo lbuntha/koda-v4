@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { KeyRound, MessageCircle, Mic, PenTool, ShieldCheck, Volume2 } from "lucide-react";
 
 import { ApiError, accessToken, refreshSystem, request, usePermissions } from "../../lib/sync";
-import { AI_FEATURE } from "../../lib/billing";
 import { KODA_MASTER, KODA_SETTINGS, type KodaCapability } from "../../lib/koda";
 import { themeSystem } from "../../lib/themeSystem";
 import { KodaFace } from "../KodaFace";
@@ -184,7 +183,7 @@ export const KodaPage: React.FC<{ embedded?: boolean }> = ({ embedded = false })
       {!embedded && (
         <UISectionHeader
           title="Ask Koda"
-          subtitle="The assistant every family on this deployment shares: what it can do, who it is, what it calls with, and who may use it."
+          subtitle="What Koda can do on this deployment, who it is, and the key it answers with."
           /* The character, because this page is about Koda itself. Sparkles is
              the glyph half the industry uses for "AI"; the child using this
              product knows Koda by its face. */
@@ -242,7 +241,7 @@ export const KodaPage: React.FC<{ embedded?: boolean }> = ({ embedded = false })
           >
             <UISectionHeader
               title="What Koda can do"
-              subtitle="Each one is a separate bill, so each is a separate switch"
+              subtitle="Each is a separate bill, so each is a separate switch"
               /* Koda for the group heading. The four rows underneath keep their
                  own icons: a mic, a speech bubble, a speaker and a pen tell the
                  capabilities apart, and four identical Koda heads would say
@@ -296,7 +295,7 @@ export const KodaPage: React.FC<{ embedded?: boolean }> = ({ embedded = false })
             >
               <UISectionHeader
                 title="What Koda calls with"
-                subtitle="The Gemini key this deployment answers on. Also in Admin → API keys, which is the same value"
+                subtitle="The key Koda answers with. The same value as Admin → API keys."
                 icon={<KeyRound className="h-5 w-5 text-amber-500" />}
               />
               <div className="space-y-3 rounded-2xl border border-line bg-surface-muted p-4">
@@ -308,15 +307,20 @@ export const KodaPage: React.FC<{ embedded?: boolean }> = ({ embedded = false })
                     <UIBadge variant="warning">Not set</UIBadge>
                   )}
                 </div>
-                <p className="text-xs text-muted">
-                  {geminiKey.isSet
-                    ? "Koda answers with this key. Replacing it takes effect on the next question asked."
-                    : "Without a key Koda falls back to this server's own GEMINI_API_KEY, and to canned encouragement if there is none."}
-                </p>
+                {/* Only the case that needs saying. When the key is set the
+                    badge above already says so and the section says what it is
+                    for; a paragraph repeating both is noise on a settings page.
+                    When it is missing, that is a fault an operator must act on. */}
+                {!geminiKey.isSet && (
+                  <p className="text-xs text-muted">
+                    Without one Koda falls back to this server's{" "}
+                    <code className="font-mono">GEMINI_API_KEY</code>, then to canned
+                    encouragement.
+                  </p>
+                )}
                 <p className="flex items-start gap-1.5 text-xs text-muted">
                   <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                  Stored on the server and never sent back, so this can replace it but not show it.
-                  Save an empty field to remove it.
+                  Stored on the server and never sent back. Save an empty field to remove it.
                 </p>
                 <div className="flex items-center gap-2">
                   <input
@@ -341,33 +345,6 @@ export const KodaPage: React.FC<{ embedded?: boolean }> = ({ embedded = false })
             </section>
           )}
 
-          {/* 5. The half this page does not decide, said out loud so nobody
-              hunts for a switch that is not here. */}
-          <section
-            className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-3`)}
-          >
-            <UISectionHeader
-              title="Who may use it"
-              subtitle="Three people have to agree, and only the first of them is on this page"
-              icon={<ShieldCheck className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
-            />
-            <ol className="space-y-2 text-xs text-muted">
-              <li>
-                <strong className="text-ink">This page.</strong> Whether Koda runs on this
-                deployment at all. A ceiling — nothing below can raise it.
-              </li>
-              <li>
-                <strong className="text-ink">The family's plan.</strong> The{" "}
-                <code className="font-mono">{AI_FEATURE}</code> feature, sold per family on the
-                Billing tab. Staff accounts hold it without buying it, so you can test Koda here.
-              </li>
-              <li>
-                <strong className="text-ink">The parent.</strong> A per-child switch on the
-                Children page, so a family that pays for Koda can still keep it away from one
-                child.
-              </li>
-            </ol>
-          </section>
         </>
       )}
     </div>
