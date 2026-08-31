@@ -938,15 +938,6 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                 </button>
               )}
 
-              {/* Expand Chat Option */}
-              <button
-                onClick={() => setIsExpanded(true)}
-                className="p-1.5 text-violet-500 hover:text-violet-400 rounded-full transition transform active:scale-90 cursor-pointer"
-                title="Expand Socratic Chat Box"
-              >
-                <MessageSquare className="w-3.5 h-3.5" />
-              </button>
-
               {onSwitchToText && (
                 <button
                   onClick={onSwitchToText}

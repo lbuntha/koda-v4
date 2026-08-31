@@ -67,18 +67,40 @@ const Eye: React.FC<{
   /** Where the pupil sits inside the eye, in units of the eye's own radius. */
   look?: [number, number];
   pupil?: number;
-}> = ({ cx, cy, rx = 4.6, ry = 5.8, look = [0, 0], pupil = 2.6 }) => (
-  <>
-    <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill="#FFFFFF" stroke="none" />
-    <circle
-      cx={cx + look[0] * rx * 0.42}
-      cy={cy + look[1] * ry * 0.42}
-      r={pupil}
-      fill="#1B1533"
-      stroke="none"
-    />
-  </>
-);
+}> = ({ cx, cy, rx = 5.4, ry = 6.6, look = [0, 0], pupil = 3.6 }) => {
+  const px = cx + look[0] * rx * 0.34;
+  const py = cy + look[1] * ry * 0.34;
+  return (
+    <>
+      <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill="#FFFFFF" stroke="none" />
+      <circle cx={px} cy={py} r={pupil} fill="#1B1533" stroke="none" />
+      {/*
+        * The catchlight, and it is doing most of the work.
+        *
+        * A flat dark disc is a dot; the same disc with a highlight off its upper
+        * left is an eye with something wet in it, which is the whole difference
+        * between a face that looks drawn and one that looks alive. Two of them,
+        * the second much smaller and low on the opposite side, because a single
+        * highlight reads as a sticker and a pair reads as a curved surface.
+        */}
+      <circle
+        cx={px - pupil * 0.36}
+        cy={py - pupil * 0.4}
+        r={pupil * 0.38}
+        fill="#FFFFFF"
+        stroke="none"
+      />
+      <circle
+        cx={px + pupil * 0.34}
+        cy={py + pupil * 0.42}
+        r={pupil * 0.17}
+        fill="#FFFFFF"
+        fillOpacity={0.8}
+        stroke="none"
+      />
+    </>
+  );
+};
 
 /** A closed lid. A curve, never a straight bar — a bar reads as a scowl. */
 const Lid: React.FC<{ cx: number; cy: number; lift?: number }> = ({ cx, cy, lift = 5 }) => (
@@ -107,8 +129,8 @@ const EYES: Record<ExpressionName, React.ReactNode> = {
   ),
   surprised: (
     <>
-      <Eye cx={38} cy={44} rx={6} ry={7.4} pupil={3.1} />
-      <Eye cx={62} cy={44} rx={6} ry={7.4} pupil={3.1} />
+      <Eye cx={38} cy={43} rx={6.6} ry={8} pupil={4.4} />
+      <Eye cx={62} cy={43} rx={6.6} ry={8} pupil={4.4} />
     </>
   ),
   // Thinking happens somewhere other than at you: the pupils go up and away.
@@ -132,8 +154,8 @@ const EYES: Record<ExpressionName, React.ReactNode> = {
   ),
   talkWide: (
     <>
-      <Eye cx={38} cy={44} rx={4.8} ry={6.2} />
-      <Eye cx={62} cy={44} rx={4.8} ry={6.2} />
+      <Eye cx={38} cy={43} rx={5.6} ry={7} />
+      <Eye cx={62} cy={43} rx={5.6} ry={7} />
     </>
   ),
   // Delight is eyes shut and smiling, so the lids arch up rather than down.
@@ -150,7 +172,15 @@ const MOUTHS: Record<ExpressionName, React.ReactNode> = {
   neutral: <path d="M40 63 Q50 72 60 63" fill="none" strokeWidth="3.4" strokeLinecap="round" />,
   blink: <path d="M40 63 Q50 72 60 63" fill="none" strokeWidth="3.4" strokeLinecap="round" />,
   surprised: <ellipse cx="50" cy="66" rx="5" ry="6" />,
-  pondering: <path d="M43 66 Q50 63 57 67" fill="none" strokeWidth="3.2" strokeLinecap="round" />,
+  /*
+   * Thinking, not unhappy.
+   *
+   * This was "M43 66 Q50 63 57 67" — the control point above both ends, so in
+   * SVG's downward-y the curve bowed up into a frown. A character that pulls a
+   * sad face every time it thinks is telling a stuck child the wrong thing.
+   * Now a small mouth, tipped slightly, which reads as considering.
+   */
+  pondering: <path d="M43 65 Q50 68.5 57 64" fill="none" strokeWidth="3.2" strokeLinecap="round" />,
   talkClosed: <path d="M43 65 Q50 69 57 65" fill="none" strokeWidth="3.4" strokeLinecap="round" />,
   talkOpen: <ellipse cx="50" cy="66" rx="6" ry="5.5" />,
   talkWide: <ellipse cx="50" cy="66" rx="7" ry="8.5" />,
