@@ -35,7 +35,9 @@ import { playReaction } from "../../../lib/voiceClips";
 export const playAnswerSound = (koda: KodaSDK, correct: boolean): boolean => {
   if (!koda.speech.isEnabled()) return false;
   if (!koda.config.isEnabled("audio_speech", true)) return false;
-  return playReaction(correct ? "correct" : "incorrect");
+  // Scoped to this skill: a reaction is written for one subject and does not
+  // travel. See `registerSkillVoice`.
+  return playReaction(correct ? "correct" : "incorrect", 1, koda.skillId);
 };
 
 /**

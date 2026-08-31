@@ -700,13 +700,21 @@ text. It is not scoped per skill, and that cuts both ways:
   told *"Brilliant counting!"* — and once addition is recorded, the pool becomes fourteen
   and **counting** starts saying *"You put them together!"*
 
-The fix is to scope groups by skill id: `registerSkillVoice(..., skillId)` files them as
-`` `${skillId}:${name}` ``, `playReaction` tries the scoped key then the bare one, and
-`playAnswerSound` passes `koda.skillId` — which is already on the SDK. Four small edits,
-behaviour-preserving for counting, and addition then goes honestly silent until recorded,
-which is what `answerSound.ts` already documents as correct.
+**Fixed, 1 Sep 2026.** Groups are filed under the skill that declared them:
+`registerSkillVoice(..., skillId)` writes `` `${skillId}:${name}` ``, `playReaction` takes
+the skill and tries the scoped key first, and `playAnswerSound` passes `koda.skillId` —
+already on the SDK. Counting keeps its own eight and is otherwise untouched; addition now
+stays **silent** until it is recorded, rather than borrowing counting's words, which is
+what `answerSound.ts` already documents as the correct fallback for a reaction.
 
-**Not yet applied** — it changes a shared module that counting also uses.
+Clips stay shared on purpose — `"seven"` is `"seven"`, and a second skill saying it should
+not pay to record it again. Only reactions are scoped, because a reaction is written for
+one subject and does not travel. Four tests in `lib/voiceClips.test.ts` hold the line,
+including the one that matters most: a skill that has *declared* a group but recorded none
+of it stays silent instead of falling through to a skill that did.
+
+A bare, unscoped pool still answers a caller that registers without a skill id. Nothing in
+the build does; it is there so an unscoped registration is not a silent failure.
 
 ### 7.2c Duplicate number words are the price of owning your own voice
 

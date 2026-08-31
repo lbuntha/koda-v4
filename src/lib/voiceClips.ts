@@ -72,6 +72,15 @@ const { clips, groups } = registry;
 const key = (text: string): string => text.trim().replace(/\s+/g, " ");
 
 /**
+ * Where a skill's reactions are filed.
+ *
+ * A bare name is the unscoped pool, which only a caller that registered without
+ * a skill id can reach. Every skill in the build passes one.
+ */
+const groupKey = (name: string, skillId?: string): string =>
+  skillId ? `${skillId}:${name}` : name;
+
+/**
  * Register one skill's recordings.
  *
  * `manifest` maps phrase to filename — written by the recorder into the skill's
@@ -93,6 +102,7 @@ export const registerSkillVoice = (
   manifest: Record<string, string>,
   files: Record<string, string>,
   declaredGroups: Record<string, { phrases?: string[] }> = {},
+  skillId?: string,
 ): number => {
   // Glob keys are paths relative to the skill ("./audio/numbers/three.wav");
   // the manifest names them relative to `audio/` ("numbers/three.wav"). Matched
@@ -112,20 +122,30 @@ export const registerSkillVoice = (
     registered += 1;
   }
 
-  // Only variants that actually recorded join a group, so a half-recorded group
-  // still works — it just has fewer ways of saying it.
-  //
-  // Appended, because two skills may both contribute to "correct" — but deduped,
-  // because a module can register more than once (HMR re-executes it, and so
-  // does a second import of the same skill). Without the Set those repeats
-  // stack: one dev session showed 32 variants of an 8-clip group, which still
-  // plays but quietly skews which praise a child hears.
+  /*
+   * Only variants that actually recorded join a group, so a half-recorded group
+   * still works — it just has fewer ways of saying it.
+   *
+   * Filed under the skill that declared them. Clips are deliberately shared —
+   * "seven" is "seven", and a second skill saying it should not pay to record it
+   * again — but a *reaction* is written for one subject and does not travel.
+   * Unscoped, counting's eight praise clips answered addition's rounds, so a
+   * child who added 7 and 3 was told "Brilliant counting!"; recording addition
+   * would then have put "You put them together!" into counting's rounds. The
+   * pool is per skill for the same reason a skill ships its own artwork.
+   *
+   * Still appended and deduped within a skill, because a module can register
+   * more than once — HMR re-executes it, and so does a second import. Without
+   * the Set those repeats stack: one dev session showed 32 variants of an
+   * 8-clip group, which plays fine but quietly skews which praise a child hears.
+   */
   for (const [name, group] of Object.entries(declaredGroups)) {
     const urls = (group.phrases ?? [])
       .map((phrase) => clips.get(key(phrase)))
       .filter((url): url is string => Boolean(url));
     if (urls.length > 0) {
-      groups.set(name, [...new Set([...(groups.get(name) ?? []), ...urls])]);
+      const scoped = groupKey(name, skillId);
+      groups.set(scoped, [...new Set([...(groups.get(scoped) ?? []), ...urls])]);
     }
   }
 
@@ -133,7 +153,8 @@ export const registerSkillVoice = (
 };
 
 /** How many variants a reaction can draw on. Zero means it stays silent. */
-export const groupSize = (name: string): number => groups.get(name)?.length ?? 0;
+export const groupSize = (name: string, skillId?: string): number =>
+  groups.get(groupKey(name, skillId))?.length ?? groups.get(name)?.length ?? 0;
 
 /** The clip URL for a phrase, or undefined when it was never recorded. */
 export const clipUrl = (text: string): string | undefined => clips.get(key(text));
@@ -229,14 +250,23 @@ const { lastPlayed } = registry;
  * chance repeats about as often as a coin lands twice — often enough that a
  * child notices, which is exactly what having variants was meant to avoid.
  */
-export const playReaction = (name: string, rate = 1): boolean => {
-  const urls = groups.get(name);
+export const playReaction = (name: string, rate = 1, skillId?: string): boolean => {
+  /*
+   * This skill's own reactions, or the unscoped pool if it has none.
+   *
+   * The fallback is for a caller that registered without a skill id; a skill
+   * that has declared a group but recorded none of it stays silent rather than
+   * borrowing another skill's words, which is the whole point of scoping.
+   */
+  const scoped = groupKey(name, skillId);
+  const groupName = (groups.get(scoped)?.length ?? 0) > 0 ? scoped : name;
+  const urls = groups.get(groupName);
   if (!urls || urls.length === 0) return false;
 
-  const previous = lastPlayed.get(name);
+  const previous = lastPlayed.get(groupName);
   const choices = urls.length > 1 ? urls.filter((url) => url !== previous) : urls;
   const url = choices[Math.floor(Math.random() * choices.length)];
-  lastPlayed.set(name, url);
+  lastPlayed.set(groupName, url);
 
   return play(url, rate);
 };

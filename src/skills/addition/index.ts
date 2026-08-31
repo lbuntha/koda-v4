@@ -49,6 +49,7 @@ registerSkillVoice(
     eager: true,
   }) as Record<string, string>,
   voiceJson.groups,
+  manifestFields.id,
 );
 
 export const skill: Skill = {
