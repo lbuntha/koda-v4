@@ -106,8 +106,11 @@ describe("counting activities play a standard round", () => {
           if (!h.buttons().some((b) => /^Hop Forward/i.test(b))) break;
           await h.press(/^Hop Forward/i);
         }
+        // The last hop holds while its number is said, the same as a count
+        // does; `settleMs: 0` below skips the wait for the same reason.
+        await h.settle();
       },
-      { params: { mode: "hop", steps: [2], hopRange: [3, 3] }, level: 10 },
+      { params: { mode: "hop", steps: [2], hopRange: [3, 3], settleMs: 0 }, level: 10 },
     );
   });
 
@@ -235,6 +238,38 @@ describe("counting waits for the last number to be said", () => {
     await tapAll(h, 4);
     // Blocked autoplay, a clip that will not load: silence must not strand the
     // child on a finished scene.
+    await h.settle(2800);
+    expect(h.koda.count("learning.answered")).toBe(1);
+  });
+
+  /*
+   * The number line had the same bug and it was worse there: the frog's last
+   * hop *is* the skip count — "5, 10, 15, 20" — and the praise clip landed on
+   * top of the final number every time, so the one number the lesson is named
+   * after was the only one never heard.
+   */
+  it("numberline: does not congratulate over the last hop's number", async () => {
+    const h = renderActivity(numberline, {
+      params: { mode: "hop", steps: [5], hopRange: [3, 3], questionsPerRound: 1 },
+      holdSpeech: true,
+    });
+
+    for (let i = 0; i < 3; i += 1) await h.press(/^Hop Forward/i);
+    await h.settle(1400);
+    expect(h.koda.count("learning.answered"), "congratulated over the last number").toBe(0);
+
+    h.koda.finishSpeaking();
+    await h.settle(50);
+    expect(h.koda.count("learning.answered"), "submitted once the number ended").toBe(1);
+  });
+
+  it("numberline: a number that never ends still lets the round move on", async () => {
+    const h = renderActivity(numberline, {
+      params: { mode: "hop", steps: [5], hopRange: [3, 3], questionsPerRound: 1 },
+      holdSpeech: true,
+    });
+
+    for (let i = 0; i < 3; i += 1) await h.press(/^Hop Forward/i);
     await h.settle(2800);
     expect(h.koda.count("learning.answered")).toBe(1);
   });

@@ -2,7 +2,13 @@ import React, { useCallback, useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { ArrowRight } from "lucide-react";
 import type { ActivityProps } from "../../types";
-import { SkillRound, SPRING, useSkillRound, type RoundQuestion } from "../../kit";
+import {
+  SkillRound,
+  SPRING,
+  useSkillRound,
+  useSpokenFinish,
+  type RoundQuestion,
+} from "../../kit";
 import { SvgAsset } from "../../../assets/svg";
 import { SCENE } from "../internal/data/countingLayout";
 import { themeSystem } from "../../../lib/themeSystem";
@@ -24,6 +30,8 @@ export interface FroggySetup {
   /** `hop`: how many pads, overall or per step size. */
   hopRange?: [number, number];
   hopRangeByStep?: Record<string, [number, number]>;
+  /** How long the last hop's number is given before the round reacts. */
+  settleMs?: number;
   /** `missing`: how long the sequence is and where it can start. */
   seqLength?: number;
   startRange?: [number, number];
@@ -139,14 +147,33 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
 
   const question = round.question as LineQuestion;
 
+  /*
+   * The last hop's number has to be *heard* before the round congratulates.
+   *
+   * See `useSpokenFinish`: the praise clip stops whatever is speaking, so
+   * submitting in the same tick as the final number cut it off mid-word. The
+   * child hopped onto the last pad and was told "well done" instead of being
+   * told the number they had counted to — which is the whole point of the hop.
+   */
+  const finishing = useSpokenFinish({ floorMs: setup.settleMs });
+
   useEffect(() => {
+    finishing.cancel();
     setHop(0);
     setGuess(null);
     setShowTip(false);
-  }, [question.id]);
+  }, [question.id, finishing]);
 
   const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
     if (koda.config.isEnabled("sound_chimes", true)) koda.sound.play(type);
+  };
+
+  /** Say the pad the frog just landed on, resolving once it has been said. */
+  const sayPad = (value: number): Promise<void> => {
+    if (!koda.config.isEnabled("audio_speech", true)) return Promise.resolve();
+    return koda.speech
+      .say(String(value), { rate: koda.config.get("speechRate", 1.0) })
+      .catch(() => {});
   };
 
   const hopForward = () => {
@@ -157,20 +184,21 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
     setHop(next);
     chime("clink");
     koda.haptics.tap();
-    if (koda.config.isEnabled("audio_speech", true)) {
-      void koda.speech.say(String(pads[next]), { rate: koda.config.get("speechRate", 1.0) });
-    }
+    const spoken = sayPad(pads[next]);
 
     if (next === pads.length - 1) {
       chime("success");
       koda.haptics.success();
-      round.submit({
-        correct: true,
-        given: String(pads[next]),
-        expected: String(pads[next]),
-        title: "Great counting!",
-        message: `Ribbit! The frog leaped by +${question.step} each pad all the way to ${pads[next]}!`,
-      });
+      // The number the child counted to comes first; the praise waits for it.
+      finishing.after(spoken, () =>
+        round.submit({
+          correct: true,
+          given: String(pads[next]),
+          expected: String(pads[next]),
+          title: "Great counting!",
+          message: `Ribbit! The frog leaped by +${question.step} each pad all the way to ${pads[next]}!`,
+        }),
+      );
     }
   };
 

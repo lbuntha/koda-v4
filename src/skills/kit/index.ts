@@ -31,3 +31,12 @@ export {
   type RoundController,
   type UseSkillRoundOptions,
 } from "./round/useSkillRound";
+/** Hold a round open until the last spoken number has been heard, so the
+ *  praise clip cannot cut the answer off mid-word. */
+export {
+  useSpokenFinish,
+  SPOKEN_FLOOR_MS,
+  SPOKEN_CAP_MS,
+  type SpokenFinish,
+  type SpokenFinishOptions,
+} from "./round/useSpokenFinish";
