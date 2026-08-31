@@ -11,14 +11,14 @@ import {
 import {
   FACE_LOOKS,
   STATE_ANIMATION,
-  expressionFor,
-  expressionNamed,
+  expressionNameFor,
+  expressionNameOf,
   kodaFace,
-  warmFaces,
   type ExpressionName,
   type MascotState,
 } from "../lib/kodaFace";
 import { EnvelopeFollower, beatMs, talkingMouth } from "../lib/kodaLive";
+import { KodaVectorFace } from "./KodaVectorFace";
 
 export type { MascotState };
 
@@ -276,7 +276,7 @@ export const KodaMascot: React.FC<{
   // Both looked up through `kodaFace`, which never returns undefined: the frame
   // index outlives the state it was counted for, and a face is decoration that
   // must not be able to take the page down. See `expressionFor`.
-  const expression = lipSync ? expressionNamed(mouth) : expressionFor(state, frame);
+  const expression = lipSync ? expressionNameOf(mouth) : expressionNameFor(state, frame);
 
   /*
    * The body's own physics.
@@ -296,7 +296,6 @@ export const KodaMascot: React.FC<{
 
   // Every frame of every state, built before it is needed: a face that pops on
   // its opening blink undoes the effect it was there to create.
-  useEffect(() => warmFaces(seed, skin.head), [seed, skin.head]);
 
   return (
     <div
@@ -340,15 +339,27 @@ export const KodaMascot: React.FC<{
         className="absolute inset-0"
         style={{ y: lipSync ? voiceLift : 0, scale: lipSync ? voiceSwell : 1 }}
       >
-        <motion.img
-          src={kodaFace(seed, expression, skin.head)}
-          alt=""
-          draggable={false}
+        {/*
+          * Drawn, not generated. See `KodaVectorFace` for why the outline had to
+          * become ours: the shape it replaced had a hard diagonal down one side
+          * and a flat bottom edge, and no amount of colour or mirroring fixes a
+          * silhouette nobody chose.
+          */}
+        <motion.div
           className="h-full w-full select-none"
           animate={MOTION[state]}
           transition={{ repeat: Infinity, ease: "easeInOut", duration: DURATION[state] }}
           style={{ transformOrigin: "50% 85%", rotate: tilt, scaleX: mirrored ? -1 : 1 }}
-        />
+        >
+          <KodaVectorFace
+            expression={expression}
+            color={skin.head}
+            /* `energy`, not the spring: the mouth wants the level the
+               voice is at, and `lipSync` is only true when that is a number. */
+            openness={lipSync ? energy : undefined}
+            className="h-full w-full"
+          />
+        </motion.div>
       </motion.div>
 
       {/* Thinking dots, rising where a thought goes. */}

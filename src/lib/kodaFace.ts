@@ -159,6 +159,27 @@ export function expressionFor(state: MascotState, frame: number): KodaExpression
   return EXPRESSIONS[names[index]] ?? EXPRESSIONS.neutral;
 }
 
+/**
+ * The *name* of the expression a state wears on a frame.
+ *
+ * The same rule as `expressionFor`, one step earlier: the face is drawn from a
+ * name now rather than from a pair of generated-artwork variant ids, and a name
+ * is what a drawing can switch on. Wrapping and falling back exactly as that
+ * function does, and for the same reason — the frame index outlives the state
+ * it was counted for.
+ */
+export function expressionNameFor(state: MascotState, frame: number): ExpressionName {
+  const animation = STATE_ANIMATION[state] ?? STATE_ANIMATION.idle;
+  const names = animation.frames;
+  const index = Number.isFinite(frame) ? ((frame % names.length) + names.length) % names.length : 0;
+  return expressionNameOf(names[index]);
+}
+
+/** A name, checked. Anything unrecognised is a neutral face, never a crash. */
+export function expressionNameOf(name: string): ExpressionName {
+  return (name in EXPRESSIONS ? name : "neutral") as ExpressionName;
+}
+
 /** One named expression, or a neutral face when the name is not one. */
 export function expressionNamed(name: string): KodaExpression {
   return EXPRESSIONS[name as ExpressionName] ?? EXPRESSIONS.neutral;
