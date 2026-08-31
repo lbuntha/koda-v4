@@ -225,7 +225,7 @@ const HomeRail: React.FC<{
           Daily goal
         </h2>
         <div className="mt-3 flex items-center gap-3">
-          <span className="w-11 h-11 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+          <span className="w-11 h-11 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
             <SvgAsset
               id="daily-goal"
               size={50}
@@ -240,9 +240,13 @@ const HomeRail: React.FC<{
             {percent >= 100 ? "Goal met today" : "lessons today"}
           </p>
         </div>
+        {/* Indigo, for the reason the badge bar below already gives: amber was
+            the only one of its colour in this column, which made "how close am
+            I" look like two unrelated measures rather than one rail. That fix
+            reached the badge bar and stopped there. */}
         <div className="mt-3 h-2 rounded-full bg-surface-muted overflow-hidden">
           <div
-            className="h-full rounded-full bg-amber-500 transition-all"
+            className="h-full rounded-full bg-indigo-600 transition-all"
             style={{ width: `${percent}%` }}
           />
         </div>

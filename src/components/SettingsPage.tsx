@@ -158,9 +158,12 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
       <SettingGroup label="Appearance">
         <SettingRow
-          icon={
-            isDark ? <Moon className="text-indigo-400" /> : <Sun className="text-amber-500" />
-          }
+          /* `text-ink`, not amber and not indigo: the icon reads as the row's
+             own mark rather than as a third accent colour in a card that has
+             only a title and a switch. Ink flips with the theme, so it stays
+             black on white and white on the dark canvas — a literal black
+             would disappear the moment the switch it sits beside is on. */
+          icon={isDark ? <Moon className="text-ink" /> : <Sun className="text-ink" />}
           title="Dark mode"
           control={
             <UIToggle
