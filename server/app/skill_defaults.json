@@ -2011,6 +2011,216 @@
           8,
           9
         ]
+      },
+      {
+        "id": "exchange-ten-ones",
+        "title": "Trade Ten Ones",
+        "concept": "Ten Ones Become One Ten",
+        "conceptKey": "unitiser-ten",
+        "requires": [
+          "base-ten-adder"
+        ],
+        "activity": "addition/base10",
+        "params": {
+          "level": 36,
+          "question": {
+            "mode": "trade_ones",
+            "addendRange": [
+              15,
+              89
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "base10_play",
+            "tier": "master",
+            "difficultyColor": "violet",
+            "category": "Place Value",
+            "shortDesc": "Bundle ten loose ones into a single ten-rod",
+            "targetObjective": "Ten of one block always becomes one of the next block up.",
+            "stepByStep": [
+              "Both numbers are already tipped into the yard.",
+              "The ones column holds more than nine — that cannot stay.",
+              "Bundle ten of them into one rod, then read the answer."
+            ],
+            "kidTip": "Ten of one block always becomes one of the next block up.",
+            "audioPrompt": "Trade ten ones! Ten loose ones become a single ten.",
+            "prompts": {
+              "default": "{a} plus {b}. Bundle ten ones into a ten, then read the answer."
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "🔁",
+        "iconName": "boxes",
+        "iconTone": "purple",
+        "pedagogyTip": "The exchange comes before the algorithm on purpose: carrying is this move written small, and a child who has done it can read the little one.",
+        "standards": [
+          "CCSS.1.NBT.C.4",
+          "CCSS.2.NBT.B.7"
+        ],
+        "trajectoryLevel": "unitiser-ten",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "exchange-ten-tens",
+        "title": "Trade Ten Tens",
+        "concept": "Ten Tens Become One Hundred",
+        "conceptKey": "unitiser-hundred",
+        "requires": [
+          "unitiser-ten"
+        ],
+        "activity": "addition/base10",
+        "params": {
+          "level": 37,
+          "question": {
+            "mode": "trade_tens",
+            "addendRange": [
+              150,
+              890
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "base10_play",
+            "tier": "master",
+            "difficultyColor": "violet",
+            "category": "Place Value",
+            "shortDesc": "Bundle ten ten-rods into a single hundred-flat",
+            "targetObjective": "Ten of one block always becomes one of the next block up.",
+            "stepByStep": [
+              "The tens column holds more than nine rods.",
+              "Bundle ten rods into one flat.",
+              "Then read what the yard holds."
+            ],
+            "kidTip": "Ten of one block always becomes one of the next block up.",
+            "audioPrompt": "Trade ten tens! Ten rods become a single hundred.",
+            "prompts": {
+              "default": "{a} plus {b}. Bundle ten tens into a hundred, then read the answer."
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "🔂",
+        "iconName": "boxes",
+        "iconTone": "indigo",
+        "pedagogyTip": "The same move one place up. A child who sees it as the same move will not be surprised when a column carries twice.",
+        "standards": [
+          "CCSS.2.NBT.B.7"
+        ],
+        "trajectoryLevel": "unitiser-hundred",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "cascading-regrouping",
+        "title": "Two Carries",
+        "concept": "A Carry That Makes Another Carry",
+        "conceptKey": "cascading-regrouper",
+        "requires": [
+          "unitiser-hundred"
+        ],
+        "activity": "addition/column",
+        "params": {
+          "level": 38,
+          "question": {
+            "mode": "cascade",
+            "addendRange": [
+              111,
+              889
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "column_play",
+            "tier": "master",
+            "difficultyColor": "violet",
+            "category": "Written Strategies",
+            "shortDesc": "Work a column sum where the carry itself causes a second carry",
+            "targetObjective": "Start at the ones. When a column makes ten or more, write the carry above the next one.",
+            "stepByStep": [
+              "Add the ones. Write the carry above the tens.",
+              "Add the tens — including the carry — and it reaches ten as well.",
+              "Write that carry above the hundreds and finish."
+            ],
+            "kidTip": "Start at the ones. When a column makes ten or more, write the carry above the next one.",
+            "audioPrompt": "Two carries! One column carries, and that makes the next one carry too.",
+            "prompts": {
+              "default": "{a} plus {b}. Two columns carry — write each one down."
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "⛓️",
+        "iconName": "layers",
+        "iconTone": "indigo",
+        "pedagogyTip": "The carry that causes another carry is where children lose the thread. Meeting it as its own lesson beats meeting it by accident.",
+        "standards": [
+          "CCSS.3.NBT.A.2"
+        ],
+        "trajectoryLevel": "standard-algorithm",
+        "ageBand": [
+          8,
+          9
+        ]
+      },
+      {
+        "id": "standard-algorithm",
+        "title": "The Written Method",
+        "concept": "The Compact Form of Everything Before It",
+        "conceptKey": "standard-algorithm",
+        "requires": [
+          "unitiser-ten"
+        ],
+        "activity": "addition/column",
+        "params": {
+          "level": 39,
+          "question": {
+            "mode": "standard",
+            "addendRange": [
+              15,
+              89
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "column_play",
+            "tier": "master",
+            "difficultyColor": "violet",
+            "category": "Written Strategies",
+            "shortDesc": "Add in columns with a single carry, the way it is written down",
+            "targetObjective": "Start at the ones. When a column makes ten or more, write the carry above the next one.",
+            "stepByStep": [
+              "Add the ones column first.",
+              "If it reaches ten, write the small one above the tens.",
+              "Add the tens, including the carry."
+            ],
+            "kidTip": "Start at the ones. When a column makes ten or more, write the carry above the next one.",
+            "audioPrompt": "The written method! Start at the ones and write the carry above the next column.",
+            "prompts": {
+              "default": "{a} plus {b}. Add each column, and write the carry."
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "✍️",
+        "iconName": "layers",
+        "iconTone": "indigo",
+        "pedagogyTip": "Everything earlier folded into one procedure. The only thing kept on paper is the carry, which is why it is not optional here.",
+        "standards": [
+          "CCSS.2.NBT.B.7",
+          "CCSS.3.NBT.A.2"
+        ],
+        "trajectoryLevel": "standard-algorithm",
+        "ageBand": [
+          7,
+          9
+        ]
       }
     ]
   },

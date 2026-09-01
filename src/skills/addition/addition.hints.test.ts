@@ -34,6 +34,11 @@ import {
 } from "./activities/PlaceValueDesk";
 import { buildQuestion as buildChain, chainHints } from "./activities/ChainBoard";
 import {
+  buildQuestion as buildColumn,
+  columnHints,
+  specFor as columnSpec,
+} from "./activities/ColumnPad";
+import {
   buildQuestion as buildFact,
   factHints,
   specFor as factSpec,
@@ -579,6 +584,54 @@ describe("left to right is not partial sums under another name", () => {
     const q = buildDesk({ mode: "left_right", addendRange: [47, 47] }, 1, seen);
     const [, second] = deskHints(q, { entries: { "run-1": "80" } });
     expect(second).toContain("holding 80");
+  });
+});
+
+describe("the column pad keeps each mode's shape", () => {
+  it("gives the standard method exactly one carry", () => {
+    // Two carries is a different lesson. The sum ceiling is what stops the tens
+    // carrying as well, so it is worth checking it actually does.
+    const seen = new Set<string>();
+    for (let i = 0; i < 40; i += 1) {
+      const q = buildColumn({ mode: "standard" }, i + 1, seen);
+      expect(carriesIn(q.a, q.b), `${q.a} + ${q.b}`).toEqual(["ones"]);
+      expect(q.carryInto).toEqual(["tens"]);
+      expect(q.sum).toBeLessThan(100);
+    }
+  });
+
+  it("gives cascading two carries, and never needs a fourth column", () => {
+    const seen = new Set<string>();
+    for (let i = 0; i < 40; i += 1) {
+      const q = buildColumn({ mode: "cascade" }, i + 1, seen);
+      expect(carriesIn(q.a, q.b), `${q.a} + ${q.b}`).toEqual(["ones", "tens"]);
+      expect(q.carryInto).toEqual(["tens", "hundreds"]);
+      expect(q.sum).toBeLessThan(1000);
+      expect(q.places).toEqual(["hundreds", "tens", "ones"]);
+    }
+  });
+
+  it("keeps a column for a digit that happens to be nought", () => {
+    // Reading the columns off the digits dropped one whenever a nought turned
+    // up: a sum of 80 came out with no ones column, so the last digit had
+    // nowhere to go.
+    const seen = new Set<string>();
+    const q = buildColumn({ mode: "standard", aRange: [47, 47], bRange: [33, 33] }, 1, seen);
+    expect(q.sum).toBe(80);
+    expect(q.places).toEqual(["tens", "ones"]);
+    expect(q.answerDigits).toEqual([8, 0]);
+  });
+
+  it("will not let a lesson widen a mode past its columns", () => {
+    expect(columnSpec("standard", { addendRange: [15, 400], sumMax: 5000 }).sumMax).toBe(99);
+    expect(columnSpec("cascade", { sumMax: 5000 }).regroup).toBe("both");
+  });
+
+  it("asks for the carry that is missing, by name", () => {
+    const seen = new Set<string>();
+    const q = buildColumn({ mode: "standard" }, 1, seen);
+    const [, second] = columnHints(q, { digits: { ones: "5" }, carries: {} });
+    expect(second).toContain("carry to go above the tens");
   });
 });
 

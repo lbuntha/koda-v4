@@ -166,6 +166,19 @@
         "addition/partial-sums",
         "addition/left-to-right"
       ]
+    },
+    {
+      "id": "u14",
+      "unitNumber": 14,
+      "title": "Unit 14: Trading Up",
+      "description": "Ten becomes one, and the carry that writes it down",
+      "icon": "⛓️",
+      "lessons": [
+        "addition/exchange-ten-ones",
+        "addition/exchange-ten-tens",
+        "addition/cascading-regrouping",
+        "addition/standard-algorithm"
+      ]
     }
   ]
 }

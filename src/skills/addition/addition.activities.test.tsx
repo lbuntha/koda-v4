@@ -17,7 +17,8 @@ import { skill } from ".";
  * missing `expected` fails here instead of passing quietly.
  */
 
-const { tray, frames, bonds, numberline, base10, chart, facts, multi } = skill.activities;
+const { tray, frames, bonds, numberline, base10, chart, facts, multi, column } =
+  skill.activities;
 
 const expected = (h: ActivityHarness): string => {
   const last = h.koda.only("learning.present").at(-1);
@@ -565,6 +566,70 @@ describe("the chain board plays a standard round", () => {
       },
       { params: { mode: "running", count: 4, addendRange: [2, 9], totalMax: 40 }, level: 42 },
     );
+  });
+});
+
+describe("the column pad plays a standard round", () => {
+  const setBox = (h: ActivityHarness, label: RegExp, value: string) => {
+    const box = h.screen.getByLabelText(label) as HTMLInputElement;
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!;
+    setter.call(box, value);
+    box.dispatchEvent(new Event("input", { bubbles: true }));
+  };
+
+  /** Fill every answer column, and every carry the sum actually needs. */
+  const workTheColumns = async (h: ActivityHarness) => {
+    const total = expected(h);
+    const answerBoxes = h.screen.getAllByLabelText(/^Answer, /) as HTMLInputElement[];
+    const digits = total.padStart(answerBoxes.length, "0").split("");
+    for (const [i, box] of answerBoxes.entries()) {
+      const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!;
+      setter.call(box, digits[i]);
+      box.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+    for (const carry of h.screen.queryAllByLabelText(/^Carry into /) as HTMLInputElement[]) {
+      const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!;
+      setter.call(carry, "1");
+      carry.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+    await h.settle();
+    await h.press("Check");
+  };
+
+  it("standard: one carry, written down", async () => {
+    await expectStandardRound(column, workTheColumns, {
+      params: { mode: "standard" },
+      level: 39,
+    });
+  });
+
+  it("cascading: two carries, one caused by the other", async () => {
+    await expectStandardRound(column, workTheColumns, {
+      params: { mode: "cascade" },
+      level: 38,
+    });
+  });
+
+  it("the right answer without the carry written is refused, not scored", async () => {
+    // A child who added the ones and kept the ten in their head has the right
+    // sum and has skipped the step the lesson is about. Marking that wrong
+    // would tell them their arithmetic failed, when it did not.
+    const h = renderActivity(column, { params: { mode: "standard" }, level: 39 });
+    const total = (h.koda.only("learning.present").at(-1)!.args[0] as { expected: string }).expected;
+    const boxes = h.screen.getAllByLabelText(/^Answer, /) as HTMLInputElement[];
+    const digits = total.padStart(boxes.length, "0").split("");
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!;
+    for (const [i, box] of boxes.entries()) {
+      setter.call(box, digits[i]);
+      box.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+    await h.settle();
+
+    const before = h.koda.count("learning.answered");
+    await h.press("Check");
+    expect(h.koda.count("learning.answered"), "a missing carry was scored").toBe(before);
+    expect(h.text()).toContain("Write its carry");
+    h.unmount();
   });
 });
 

@@ -9,6 +9,7 @@ import { BlockYard } from "./activities/BlockYard";
 import { PlaceValueDesk } from "./activities/PlaceValueDesk";
 import { FactDeck } from "./activities/FactDeck";
 import { ChainBoard } from "./activities/ChainBoard";
+import { ColumnPad } from "./activities/ColumnPad";
 import { registerSkillArt } from "../../assets/svg/skillArt";
 import { registerSkillVoice } from "../../lib/voiceClips";
 import audioManifest from "./audio/manifest.json";
@@ -137,6 +138,12 @@ export const skill: Skill = {
       name: "Chains and Pairs",
       defaultParams: { mode: "pairs", questionsPerRound: 5 },
       component: ChainBoard,
+    },
+    column: {
+      id: "column",
+      name: "Column Add",
+      defaultParams: { mode: "standard", questionsPerRound: 5 },
+      component: ColumnPad,
     },
   },
 };
