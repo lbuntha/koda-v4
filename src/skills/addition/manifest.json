@@ -10,7 +10,10 @@
   "thumbnail": "boxes",
   "status": "draft",
   "audience": {
-    "ages": [5, 9],
+    "ages": [
+      5,
+      9
+    ],
     "category": "operations"
   },
   "teaches": [
@@ -35,8 +38,8 @@
   "features": [
     {
       "id": "audio_speech",
-      "name": "Spoken counter",
-      "description": "Says each number aloud as a child counts, and reads every hint.",
+      "name": "Spoken voice",
+      "description": "Reads the question aloud when it opens, counts along as a child taps, and speaks every hint. Turn off for a silent lesson.",
       "isEnabled": true,
       "tag": "Audio"
     },

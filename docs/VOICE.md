@@ -53,7 +53,32 @@ So there is one rule:
 
 > **While the voice coach is live, a skill says nothing.**
 
+### Three switches before a line is spoken
+
+`koda.speech.say()` is the one place that decides whether a skill talks. It
+returns without speaking when any of these is true:
+
+| Switch | Who sets it | Where |
+|---|---|---|
+| The voice coach holds the floor | Koda, while a live session runs | automatic |
+| **Koda's Voice** is off | the learner or their family | Settings, beside Sound FX |
+| **Spoken voice** is off for this skill | a parent, per skill | Skill Manager → the skill's features (`audio_speech`) |
+
+All three live in `say()` rather than in each activity, because in the
+activities they were checked inconsistently. The count-along honoured the
+per-skill feature and the Read-aloud button did not, so a lesson with its voice
+switched off went quiet only until a child pressed the speaker. And the
+learner's own preference was read by praise alone — so turning Koda's Voice off
+in Settings silenced "Nice work!" while the lesson carried on counting out loud,
+and **opening a question still read the prompt aloud every time**, which is the
+one line a child hears on every single question.
+
+A skill that declares no `audio_speech` feature has not opted out of talking, so
+the default is on.
+
 ### How it works
+
+
 
 One flag, held on the same global registry the clips use:
 

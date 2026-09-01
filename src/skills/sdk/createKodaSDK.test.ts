@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createKodaSDK, type KodaHost } from "./createKodaSDK";
+import { PreferencesAPI } from "../../lib/preferences";
 import { holdVoiceFloor } from "../../lib/voiceClips";
 
 /**
@@ -40,6 +41,8 @@ beforeEach(() => {
   delete (globalThis as Record<symbol, unknown>)[Symbol.for("koda.voiceClips")];
   spoken = [];
   fetched = [];
+
+  PreferencesAPI.update({ voiceEnabled: true });
 
   vi.stubGlobal(
     "fetch",
@@ -118,3 +121,53 @@ describe("a skill's voice yields to the voice coach", () => {
     expect(spoken).toEqual(["heard"]);
   });
 });
+
+/**
+ * The two switches a family actually turns.
+ *
+ * Both were read somewhere before this, and neither was read everywhere: the
+ * count-along honoured the per-skill feature and the Read-aloud button did not,
+ * and the learner's own voice preference was consulted by praise alone. So a
+ * lesson with its voice switched off still read the question aloud the moment it
+ * opened, which is the one line a child hears on every single question.
+ */
+describe("whether a skill may speak at all", () => {
+  const withFeature = (isEnabled: boolean) =>
+    createKodaSDK("addition", host, {
+      features: [
+        {
+          id: "audio_speech",
+          name: "Spoken voice",
+          description: "",
+          isEnabled,
+        },
+      ],
+      settings: {},
+    });
+
+  it("speaks with both switches on", async () => {
+    await withFeature(true).speech.say("Count them all.");
+    expect(spoken).toEqual(["Count them all."]);
+  });
+
+  it("says nothing when the skill's voice feature is off", async () => {
+    // Including the line the round speaks the instant a question opens, which
+    // is what a parent turning this off is actually trying to stop.
+    await withFeature(false).speech.say("Count them all.");
+    expect(spoken).toHaveLength(0);
+    expect(fetched, "a silenced line still cost a round trip").toHaveLength(0);
+  });
+
+  it("says nothing when the learner has turned Koda's voice off", async () => {
+    PreferencesAPI.update({ voiceEnabled: false });
+    await withFeature(true).speech.say("Count them all.");
+    expect(spoken).toHaveLength(0);
+  });
+
+  it("defaults to speaking for a skill that declares no such feature", async () => {
+    // A skill that never mentions `audio_speech` has not opted out of talking.
+    await createKodaSDK("some-skill", host).speech.say("Hello.");
+    expect(spoken).toEqual(["Hello."]);
+  });
+});
+

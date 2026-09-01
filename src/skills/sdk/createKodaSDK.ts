@@ -97,6 +97,20 @@ export function createKodaSDK(
 ): KodaSDK {
   const knownToStore = () => SkillStoreAPI.getSkill(skillId) !== undefined;
 
+  /**
+   * Whether one of this skill's declared features is on.
+   *
+   * Lifted out of `config` because `speech` needs it too. Whether a skill may
+   * speak is a question about a feature, and asking it in two places is exactly
+   * how the count-along ended up honouring the switch while the Read-aloud
+   * button ignored it.
+   */
+  const featureEnabled = (featureId: string, fallback = false): boolean => {
+    if (knownToStore()) return SkillStoreAPI.isFeatureEnabled(skillId, featureId, fallback);
+    const declared = defaults.features.find((f) => f.id === featureId);
+    return declared ? declared.isEnabled : fallback;
+  };
+
   // Bound to this mount's lesson, so a skill cannot log against another
   // lesson's concept any more than it can read another skill's settings.
   // Without a context the host is running the skill outside a lesson (a demo,
@@ -161,6 +175,27 @@ export function createKodaSDK(
          * submits an answer, and a round must never stall on a sound.
          */
         if (voiceFloorHeld()) return;
+
+        /*
+         * The two switches that decide whether a skill may talk at all.
+         *
+         * `isVoiceEnabled()` is the learner's own: Settings shows "Sound FX"
+         * and "Koda's Voice" as separate switches, and anything a skill *says*
+         * belongs to the second. `audio_speech` is the per-skill one a parent
+         * flips in the Skill Manager, so a family can keep one lesson's voice
+         * and silence another.
+         *
+         * Both are checked here rather than in each activity, because in the
+         * activities they were checked inconsistently: the count-along honoured
+         * the feature and the Read-aloud button did not, so a lesson with its
+         * voice switched off stayed quiet only until a child pressed the
+         * speaker. The learner's own preference was read by praise alone — so
+         * turning the voice off in Settings silenced "Nice work!" while the
+         * lesson carried on counting out loud, and opening a question still
+         * read the prompt aloud every time.
+         */
+        if (!isVoiceEnabled()) return;
+        if (!featureEnabled("audio_speech", true)) return;
 
         // A recorded line first, and synchronously: this is the whole point.
         // Counting speaks a number on every tap, and asking Gemini for "three"
@@ -251,11 +286,7 @@ export function createKodaSDK(
         const declared = defaults.settings[key];
         return (declared === undefined ? fallback : declared) as T;
       },
-      isEnabled(featureId: string, fallback = false) {
-        if (knownToStore()) return SkillStoreAPI.isFeatureEnabled(skillId, featureId, fallback);
-        const declared = defaults.features.find((f) => f.id === featureId);
-        return declared ? declared.isEnabled : fallback;
-      },
+      isEnabled: featureEnabled,
     },
 
     learning: {

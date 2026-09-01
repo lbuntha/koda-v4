@@ -39,8 +39,8 @@
     "features": [
       {
         "id": "audio_speech",
-        "name": "Spoken counter",
-        "description": "Says each number aloud as a child counts, and reads every hint.",
+        "name": "Spoken voice",
+        "description": "Reads the question aloud when it opens, counts along as a child taps, and speaks every hint. Turn off for a silent lesson.",
         "isEnabled": true,
         "tag": "Audio"
       },
@@ -564,8 +564,8 @@
       },
       {
         "id": "audio_speech",
-        "name": "Spoken counter",
-        "description": "Speaks 'one, two, three' aloud as items are touched.",
+        "name": "Spoken voice",
+        "description": "Reads the question aloud when it opens, counts along as a child taps, and speaks every hint. Turn off for a silent lesson.",
         "isEnabled": true,
         "tag": "Audio"
       },
