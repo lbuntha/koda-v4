@@ -179,6 +179,10 @@ export function frameHints(
  * Labelled exactly as counting's ten-frame labels its cells, so a test driver
  * written for one works on the other and a child moving between the two skills
  * meets the same control.
+ *
+ * An empty cell takes a counter; a counter the child put in gives it back when
+ * tapped again. The counters that arrive with the question are not the child's
+ * to remove, so those cells stay inert.
  */
 const Cell: React.FC<{
   position: number;
@@ -284,16 +288,31 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
   };
 
 
+  /** Say where the frame stands now — the point of every tap, either way. */
+  const settle = (next: number, sound: Parameters<typeof koda.sound.play>[0]) => {
+    setFilled(next);
+    nudge.clear();
+    if (vibrates) koda.haptics.tap();
+    chime(sound);
+    if (speaks) void koda.speech.say(numberWord(next), speechRate(koda));
+  };
+
   const fillNext = () => {
     if (round.feedback || filled >= question.size) return;
-    const next = filled + 1;
-    setFilled(next);
-    if (vibrates) koda.haptics.tap();
-    chime("pop");
-    if (speaks) {
-      // The number the counter just made, which is the whole point of the tap.
-      void koda.speech.say(numberWord(next), speechRate(koda));
-    }
+    settle(filled + 1, "pop");
+  };
+
+  /**
+   * Take a counter back out.
+   *
+   * A frame is read as a shape, so it fills from the front with no holes in it.
+   * Tapping a counter therefore clears it and anything placed after it, which
+   * for the counter just laid down — the tap this is really for — is simply
+   * undoing it.
+   */
+  const takeBackTo = (position: number) => {
+    if (round.feedback || position < question.given) return;
+    settle(position, "clink");
   };
 
   const check = () => {
@@ -376,7 +395,15 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
                   key={i}
                   position={i + 1}
                   state={state}
-                  onTap={state === "empty" && !round.feedback ? fillNext : undefined}
+                  onTap={
+                    round.feedback
+                      ? undefined
+                      : state === "empty"
+                        ? fillNext
+                        : state === "added"
+                          ? () => takeBackTo(i)
+                          : undefined
+                  }
                   delay={stagger(i)}
                 />
               );
@@ -407,7 +434,7 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
           )}
         </div>
 
-        <div className="flex justify-center">
+        <div className="flex items-center justify-center gap-2.5">
           <motion.button
             type="button"
             onClick={check}
@@ -418,6 +445,20 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
           >
             Check
           </motion.button>
+          {filled > question.given && !round.feedback && (
+            /* The way out of a mis-tap that does not need the child to work out
+               which counter was theirs. */
+            <motion.button
+              type="button"
+              onClick={() => takeBackTo(filled - 1)}
+              whileTap={{ scale: 0.92 }}
+              transition={SPRING.tap}
+              aria-label="Take back the last counter"
+              className={themeSystem.button("ghost", "sm")}
+            >
+              Undo
+            </motion.button>
+          )}
         </div>
       </div>
     </SkillRound>

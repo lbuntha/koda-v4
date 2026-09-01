@@ -203,6 +203,40 @@ describe("the frame plays a standard round", () => {
     );
   });
 
+  it("a counter the child put in comes back out when tapped again", async () => {
+    // A mis-tap must be undoable in the frame itself, and the counters the
+    // question supplied must not be.
+    const h = renderActivity(frames, { params: { mode: "ten", addendRange: [3, 3] }, level: 9 });
+    const given = filledSpaces(h);
+    await h.press(emptySpaces(h)[0]);
+    expect(filledSpaces(h)).toBe(given + 1);
+
+    await h.press(`Space ${given + 1}, filled`);
+    expect(filledSpaces(h), "the counter did not come back out").toBe(given);
+
+    // What arrived with the question stays: tapping it changes nothing.
+    await h.press(`Space ${given}, filled`);
+    expect(filledSpaces(h), "a given counter was removed").toBe(given);
+    h.unmount();
+  });
+
+  it("Undo takes back the last counter, and goes away with nothing to take", async () => {
+    const h = renderActivity(frames, { params: { mode: "ten", addendRange: [3, 3] }, level: 9 });
+    const given = filledSpaces(h);
+    expect(h.buttons(), "Undo was offered before anything was placed").not.toContain(
+      "Take back the last counter",
+    );
+
+    await h.press(emptySpaces(h)[0]);
+    await h.press(emptySpaces(h)[0]);
+    await h.press("Take back the last counter");
+    expect(filledSpaces(h)).toBe(given + 1);
+    await h.press("Take back the last counter");
+    expect(filledSpaces(h)).toBe(given);
+    expect(h.buttons()).not.toContain("Take back the last counter");
+    h.unmount();
+  });
+
   it("checking an untouched frame is refused, not scored", async () => {
     // Pinned, so the wording the refusal is checked against does not change
     // with the draw.

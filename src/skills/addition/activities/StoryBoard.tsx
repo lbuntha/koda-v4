@@ -510,11 +510,9 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
       recommendation={nextStep}
     >
       <div className="space-y-4">
+        {/* The story is the prompt above; the scene is the bar it turns into,
+            and printing the words twice only makes the child read them twice. */}
         <div className={`${SCENE} p-5 sm:p-7 space-y-5`}>
-          <p className="text-center text-lg sm:text-xl font-semibold text-ink leading-relaxed max-w-2xl mx-auto">
-            {question.text}
-          </p>
-
           <div className="space-y-3">
             {question.rows.map((row, r) => (
               <div key={r} className="space-y-1">
