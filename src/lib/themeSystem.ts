@@ -16,7 +16,7 @@ export type StatTone = "primary" | "streak" | "success" | "danger";
 export type SurfaceVariant = "default" | "glass" | "bordered" | "interactive";
 export type FeatureVariant = "default" | "accent" | "subtle";
 export type PathNodeState = "completed" | "current" | "available" | "locked";
-export type KidMessageTone = "correct" | "tryAgain" | "hint" | "celebrate";
+export type KidMessageTone = "correct" | "tryAgain" | "hint" | "celebrate" | "nudge";
 export type FieldSize = "sm" | "md" | "lg";
 
 /**
@@ -417,16 +417,28 @@ export const themeSystem = {
   },
 
   /* Feedback shown to a learner. Large type and a big single action, because
-     the reader is five. Tone carries an icon as well as a colour. */
+     the reader is five. Tone carries an icon as well as a colour.
+
+     Five tones, and `nudge` is the one worth explaining. It is not `tryAgain`,
+     because nothing was got wrong — the child has not answered yet — and it is
+     not `hint`, because they did not ask for help. It reads as Koda speaking
+     rather than as a verdict, which is why it carries the app's own violet
+     rather than the amber that means "that was not right".
+
+     The shadow is on the base, so every tone sits as a raised surface rather
+     than a flat box. It matters most on the sticky strip along the bottom,
+     where the card needs to read as being *over* the question. */
   kidMessage: {
     wrap: (tone: KidMessageTone = "correct") => {
       const base =
-        "flex items-start gap-3 p-4 sm:p-5 rounded-2xl border-2 w-full max-w-3xl mx-auto";
+        "flex items-start gap-3 p-4 sm:p-5 rounded-2xl border-2 w-full max-w-3xl mx-auto " +
+        "shadow-lg shadow-slate-900/5 dark:shadow-black/40";
       return `${base} ${{
         correct: "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800",
         celebrate: "bg-indigo-50 dark:bg-indigo-950/40 border-indigo-300 dark:border-indigo-800",
         tryAgain: "bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-800",
         hint: "bg-slate-50 dark:bg-slate-800/60 border-slate-300 dark:border-slate-700",
+        nudge: "bg-violet-50 dark:bg-violet-950/40 border-violet-300 dark:border-violet-800",
       }[tone]}`;
     },
 
@@ -438,6 +450,7 @@ export const themeSystem = {
         celebrate: "bg-indigo-600 text-white",
         tryAgain: "bg-amber-400 text-slate-900",
         hint: "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200",
+        nudge: "bg-violet-600 text-white",
       }[tone]}`;
     },
 
@@ -453,6 +466,7 @@ export const themeSystem = {
         celebrate: "bg-indigo-600 hover:bg-indigo-500 border-indigo-800",
         tryAgain: "bg-amber-500 hover:bg-amber-400 border-amber-700 !text-slate-900",
         hint: "bg-slate-600 hover:bg-slate-500 border-slate-800",
+        nudge: "bg-violet-600 hover:bg-violet-500 border-violet-800",
       }[tone]}`;
     },
   },

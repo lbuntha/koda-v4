@@ -12,7 +12,7 @@ import {
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B, TOTAL } from "../internal/data/additionPalette";
 import { SCENE } from "../internal/data/additionLayout";
-import { NudgeLine, useNudge } from "../internal/ui/useNudge";
+import { useNudge } from "../internal/ui/useNudge";
 import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
 import { isPractice, modeAt, type PracticeSetup } from "../../kit";
 import { STRATEGIES, byId, fittingFor, type Strategy } from "../internal/data/strategyCards";
@@ -316,6 +316,7 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({
       iconTone="purple"
       contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
+      nudge={nudge.message}
       hints={practising ? [] : strategyHints(question, { kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
       onReadAloud={
@@ -382,8 +383,6 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({
             )
           )}
         </div>
-
-        <NudgeLine nudge={nudge} />
 
         {question.step === 1 && (
           <div className="grid gap-2.5 sm:grid-cols-2">
