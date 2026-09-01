@@ -4,6 +4,7 @@ import lessonsJson from "./lessons.json";
 import { CountTray } from "./activities/CountTray";
 import { FrameFill } from "./activities/FrameFill";
 import { BondTree } from "./activities/BondTree";
+import { JumpLine } from "./activities/JumpLine";
 import { registerSkillArt } from "../../assets/svg/skillArt";
 import { registerSkillVoice } from "../../lib/voiceClips";
 import audioManifest from "./audio/manifest.json";
@@ -100,6 +101,14 @@ export const skill: Skill = {
       name: "Number Bonds",
       defaultParams: { mode: "whole_unknown", questionsPerRound: 5 },
       component: BondTree,
+    },
+    numberline: {
+      id: "numberline",
+      name: "Number Line Jumps",
+      /* Six modes across two kinds of line. `bridge_ten` onwards wait eight
+         levels for their lessons and arrive as JSON. */
+      defaultParams: { mode: "path", questionsPerRound: 5 },
+      component: JumpLine,
     },
   },
 };

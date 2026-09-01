@@ -85,7 +85,9 @@
       "icon": "💎",
       "lessons": [
         "addition/ten-frame",
-        "addition/number-bonds"
+        "addition/number-bonds",
+        "addition/number-path",
+        "addition/open-number-line"
       ]
     }
   ]

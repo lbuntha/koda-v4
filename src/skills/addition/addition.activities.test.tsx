@@ -17,7 +17,7 @@ import { skill } from ".";
  * missing `expected` fails here instead of passing quietly.
  */
 
-const { tray, frames, bonds } = skill.activities;
+const { tray, frames, bonds, numberline } = skill.activities;
 
 const expected = (h: ActivityHarness): string => {
   const last = h.koda.only("learning.present").at(-1);
@@ -247,6 +247,81 @@ describe("the bond plays a standard round", () => {
     expect(h.koda.count("learning.answered")).toBe(before);
     expect(h.text()).toContain("Tap a box");
     h.unmount();
+  });
+});
+
+/** Type a number into the pad, digit by digit. */
+const typeNumber = async (h: ActivityHarness, value: string) => {
+  for (const digit of value) await h.press(`Digit ${digit}`);
+};
+
+describe("the number line plays a standard round", () => {
+  it("path: hopping one square at a time until it arrives", async () => {
+    await expectStandardRound(
+      numberline,
+      async (h) => {
+        // A ticked line answers by arriving — the tile disables itself once the
+        // marker lands, so the driver stops when the move is gone.
+        for (let guard = 0; guard < 25; guard += 1) {
+          if (!h.buttons().includes("Jump forward 1")) break;
+          await h.press("Jump forward 1");
+        }
+      },
+      { params: { mode: "path", aRange: [2, 4], bRange: [2, 3] }, level: 11 },
+    );
+  });
+
+  it("open: taking the jump, then saying where it landed", async () => {
+    await expectStandardRound(
+      numberline,
+      async (h) => {
+        const total = expected(h);
+        const tile = h.buttons().find((b) => /^Jump forward \d+$/.test(b));
+        expect(tile, "no jump was offered").toBeTruthy();
+        await h.press(tile!);
+        await typeNumber(h, total);
+        await h.press("Check");
+      },
+      { params: { mode: "open", aRange: [10, 20], bRange: [3, 6] }, level: 12 },
+    );
+  });
+
+  it("open: answering before jumping is refused, not scored", async () => {
+    // The jump is the working. Checking without it is not a wrong answer, it is
+    // an unfinished one.
+    const h = renderActivity(numberline, { params: { mode: "open" }, level: 12 });
+    const before = h.koda.count("learning.answered");
+    await h.press("Check");
+    expect(h.koda.count("learning.answered")).toBe(before);
+    expect(h.text()).toContain("Take the jumps first");
+    h.unmount();
+  });
+
+  it("bridging a ten: choosing the jump is the answer", async () => {
+    await expectStandardRound(
+      numberline,
+      async (h) => {
+        await h.press(`Jump forward ${expected(h)}`);
+      },
+      { params: { mode: "bridge_ten" }, level: 20 },
+    );
+  });
+
+  it("tens then ones: two jumps in either order, one answer", async () => {
+    await expectStandardRound(
+      numberline,
+      async (h) => {
+        const total = expected(h);
+        // Taken in whatever order the tiles happen to be shuffled into, which
+        // is the point: either order lands on the same number.
+        for (const tile of h.buttons().filter((b) => /^Jump forward \d+$/.test(b))) {
+          await h.press(tile);
+        }
+        await typeNumber(h, total);
+        await h.press("Check");
+      },
+      { params: { mode: "jump_tens_ones" }, level: 31 },
+    );
   });
 });
 

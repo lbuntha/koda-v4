@@ -536,6 +536,119 @@
         5,
         7
       ]
+    },
+    {
+      "id": "number-path",
+      "title": "The Number Path",
+      "concept": "Counting On Along a Path",
+      "conceptKey": "number-path",
+      "requires": [
+        "count-on"
+      ],
+      "activity": "addition/numberline",
+      "params": {
+        "level": 11,
+        "question": {
+          "mode": "path",
+          "aRange": [
+            1,
+            10
+          ],
+          "bRange": [
+            1,
+            5
+          ],
+          "sumMax": 20,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "jump_line",
+          "tier": "beginner",
+          "difficultyColor": "violet",
+          "category": "Number Line",
+          "shortDesc": "Hop forward one square at a time and land on the answer",
+          "targetObjective": "One hop is one number.",
+          "stepByStep": [
+            "The marker starts on the first number.",
+            "Each hop moves it forward one square.",
+            "Say the number you land on. The last one is the answer."
+          ],
+          "kidTip": "One hop is one number. Say each number as you land on it.",
+          "audioPrompt": "The number path! Hop forward one square at a time and see where you land.",
+          "prompts": {
+            "default": "Start at {a} and hop forward {b}."
+          }
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "👣",
+      "iconName": "footprints",
+      "iconTone": "cyan",
+      "pedagogyTip": "A path has one square per number, so hopping is counting made visible — this is where counting on stops being invisible mental work.",
+      "standards": [
+        "CCSS.1.OA.C.5"
+      ],
+      "trajectoryLevel": "counting-strategies",
+      "ageBand": [
+        5,
+        7
+      ]
+    },
+    {
+      "id": "open-number-line",
+      "title": "The Open Number Line",
+      "concept": "Jumping Without Marked Numbers",
+      "conceptKey": "open-number-line",
+      "requires": [
+        "number-path"
+      ],
+      "activity": "addition/numberline",
+      "params": {
+        "level": 12,
+        "question": {
+          "mode": "open",
+          "aRange": [
+            10,
+            40
+          ],
+          "bRange": [
+            2,
+            9
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "jump_line",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Number Line",
+          "shortDesc": "Take one jump on a line with no numbers, and work out where you landed",
+          "targetObjective": "Nothing on this line tells you where you are.",
+          "stepByStep": [
+            "Only the starting number is marked.",
+            "Take the jump — the arc stays on screen.",
+            "Work out where you landed and type it in."
+          ],
+          "kidTip": "There are no numbers on this line, so keep the count in your head.",
+          "audioPrompt": "The open number line! Take the jump, then work out where you landed.",
+          "prompts": {
+            "default": "Start at {a} and jump {b}. Where do you land?"
+          }
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "➰",
+      "iconName": "waves",
+      "iconTone": "indigo",
+      "pedagogyTip": "An open line carries no answers, so it stops being a counting aid and becomes a place to record thinking — which is what makes it work for numbers too big to draw.",
+      "standards": [
+        "CCSS.2.NBT.B.5"
+      ],
+      "trajectoryLevel": "jump-strategy",
+      "ageBand": [
+        7,
+        9
+      ]
     }
   ]
 }

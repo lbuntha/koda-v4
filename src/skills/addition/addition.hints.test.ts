@@ -292,3 +292,72 @@ describe("the bond keeps each mode's shape", () => {
   });
 });
 
+import {
+  buildQuestion as buildJump,
+  jumpHints,
+  specFor as jumpSpec,
+} from "./activities/JumpLine";
+
+describe("the number line keeps each mode's shape", () => {
+  it("never starts a bridging question already on the round number", () => {
+    // There would be nothing to reach for, and the right jump would be zero.
+    const seen = new Set<string>();
+    for (let i = 0; i < 60; i += 1) {
+      const q = buildJump({ mode: "bridge_ten" }, i + 1, seen);
+      expect(q.a % 10, `${q.a}`).not.toBe(0);
+      expect(q.required[0]).toBe(10 - (q.a % 10));
+      expect(q.a + q.required[0]).toBe(Math.ceil((q.a + 1) / 10) * 10);
+    }
+  });
+
+  it("offers the right jump beside its two near misses", () => {
+    const seen = new Set<string>();
+    const q = buildJump({ mode: "bridge_ten", aRange: [37, 37] }, 1, seen);
+    expect(q.offered).toContain(3);
+    expect(q.offered).toHaveLength(3);
+    expect(new Set(q.offered).size, "a choice was offered twice").toBe(3);
+  });
+
+  it("always gives compensation an addend worth rounding", () => {
+    const seen = new Set<string>();
+    for (let i = 0; i < 40; i += 1) {
+      const q = buildJump({ mode: "compensate" }, i + 1, seen);
+      expect([8, 9]).toContain(q.b % 10);
+      // Jump the round number, then give back the difference.
+      expect(q.required[0] % 10).toBe(0);
+      expect(q.required[0] + q.required[1]).toBe(q.b);
+      expect(q.required[1]).toBeLessThan(0);
+    }
+  });
+
+  it("splits the second number into tens and ones, and needs both", () => {
+    const seen = new Set<string>();
+    const q = buildJump({ mode: "jump_tens_ones", addendRange: [34, 34] }, 1, seen);
+    expect(q.required.slice().sort((x, y) => y - x)).toEqual([30, 4]);
+    expect(q.required.reduce((t, n) => t + n, 0)).toBe(q.b);
+  });
+
+  it("marks the ticks on a path and leaves an open line bare", () => {
+    const seen = new Set<string>();
+    expect(buildJump({ mode: "path" }, 1, seen).ticks).toBe(1);
+    expect(buildJump({ mode: "open" }, 2, seen).ticks).toBe(0);
+    // Which line it is decides how the child answers.
+    expect(buildJump({ mode: "path" }, 3, seen).answerKind).toBe("arrival");
+    expect(buildJump({ mode: "open" }, 4, seen).answerKind).toBe("landing");
+    expect(buildJump({ mode: "bridge_ten" }, 5, seen).answerKind).toBe("jump");
+  });
+
+  it("will not let a lesson take the rounding out of compensation", () => {
+    expect(jumpSpec("compensate", { bRange: [11, 40] }).endsIn).toEqual([8, 9]);
+    expect(jumpSpec("jump_tens_ones", {}).regroup).toBe("never");
+  });
+
+  it("says how far is left, from where the child actually is", () => {
+    const seen = new Set<string>();
+    const q = buildJump({ mode: "path", aRange: [3, 3], bRange: [4, 4] }, 1, seen);
+    const [, second] = jumpHints(q, { at: 5, made: [1, 1], entry: "" });
+    expect(second).toContain("You are on 5");
+    expect(second).toContain("2 more hops");
+  });
+});
+
