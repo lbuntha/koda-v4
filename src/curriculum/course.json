@@ -50,6 +50,31 @@
         "counting/make-a-hundred",
         "counting/build-numbers-with-hundreds-tens-ones"
       ]
+    },
+    {
+      "id": "u5",
+      "unitNumber": 5,
+      "title": "Unit 5: Putting Groups Together",
+      "description": "Join two groups and count them — all of them, then on from the first",
+      "icon": "🧺",
+      "lessons": [
+        "addition/count-all",
+        "addition/put-groups-together",
+        "addition/count-on",
+        "addition/start-with-larger"
+      ]
+    },
+    {
+      "id": "u6",
+      "unitNumber": 6,
+      "title": "Unit 6: Zero, One and Fingers",
+      "description": "The two rules that need no counting, and the manipulative every child owns",
+      "icon": "🖐️",
+      "lessons": [
+        "addition/add-zero",
+        "addition/add-one",
+        "addition/use-fingers"
+      ]
     }
   ]
 }

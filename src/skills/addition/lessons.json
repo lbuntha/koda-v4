@@ -1,0 +1,291 @@
+{
+  "lessons": [
+    {
+      "id": "count-all",
+      "title": "Count Them All",
+      "concept": "Joining Two Groups by Counting Every One",
+      "conceptKey": "count-all",
+      "requires": ["counter"],
+      "activity": "addition/tray",
+      "params": {
+        "level": 1,
+        "question": {
+          "mode": "count_all",
+          "addendRange": [1, 5],
+          "sumMax": 10,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "count_tray",
+          "tier": "beginner",
+          "difficultyColor": "violet",
+          "category": "Counting to Add",
+          "shortDesc": "Touch every object in both groups to find how many there are altogether",
+          "targetObjective": "Count both groups, one object at a time.",
+          "stepByStep": [
+            "Look at the two groups.",
+            "Touch every object in the first group, then keep going into the second.",
+            "The last number you say is how many there are altogether."
+          ],
+          "kidTip": "Do not start again at the second group. Keep counting on.",
+          "audioPrompt": "Count them all! Touch every one in both groups to find how many altogether.",
+          "prompts": { "default": "Count them all. How many altogether?" }
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "🧺",
+      "iconName": "boxes",
+      "iconTone": "purple",
+      "pedagogyTip": "Counting all is where addition starts: a child who counts both groups from one is not behind, they are building the idea the shortcuts will later replace.",
+      "standards": ["CCSS.K.OA.A.1", "CCSS.K.OA.A.2"],
+      "trajectoryLevel": "find-result",
+      "ageBand": [5, 6]
+    },
+    {
+      "id": "put-groups-together",
+      "title": "Put Them Together",
+      "concept": "Two Groups Becoming One",
+      "conceptKey": "combiner",
+      "requires": ["count-all"],
+      "activity": "addition/tray",
+      "params": {
+        "level": 2,
+        "question": {
+          "mode": "combine",
+          "addendRange": [1, 5],
+          "sumMax": 10,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "count_tray",
+          "tier": "beginner",
+          "difficultyColor": "violet",
+          "category": "Counting to Add",
+          "shortDesc": "Slide two groups into one pile, then count the pile",
+          "targetObjective": "Put the two groups together, then count them.",
+          "stepByStep": [
+            "Look at the two groups on their own.",
+            "Tap Put them together to make one pile.",
+            "Touch every object in the pile to count it."
+          ],
+          "kidTip": "Adding means putting groups together. Then you count once.",
+          "audioPrompt": "Put the two groups together, then count how many you have.",
+          "prompts": { "default": "Put the groups together, then count them all." }
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "🤝",
+      "iconName": "layers",
+      "iconTone": "purple",
+      "pedagogyTip": "Seeing two sets physically become one is what makes the plus sign mean something later.",
+      "standards": ["CCSS.K.OA.A.1"],
+      "trajectoryLevel": "find-result",
+      "ageBand": [5, 6]
+    },
+    {
+      "id": "count-on",
+      "title": "Count On",
+      "concept": "Starting from a Number Instead of from One",
+      "conceptKey": "count-on",
+      "requires": ["count-all"],
+      "activity": "addition/tray",
+      "params": {
+        "level": 3,
+        "question": {
+          "mode": "count_on",
+          "aRange": [4, 9],
+          "bRange": [1, 3],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "count_tray",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Counting to Add",
+          "shortDesc": "Hold the first number in your head and count on for the rest",
+          "targetObjective": "Say the first number, then count on.",
+          "stepByStep": [
+            "The first group is closed. Its number is written on the lid.",
+            "Say that number to yourself — you do not need to count it.",
+            "Touch the objects in the second group, counting on from there."
+          ],
+          "kidTip": "The closed box is already counted. Start from its number.",
+          "audioPrompt": "Count on! The first group is already counted, so start from its number.",
+          "prompts": { "default": "Start at {a} and count on." }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "👣",
+      "iconName": "footprints",
+      "iconTone": "cyan",
+      "pedagogyTip": "Counting on is the first real strategy: it treats the first number as a quantity rather than as something to be re-counted.",
+      "standards": ["CCSS.1.OA.C.5"],
+      "trajectoryLevel": "counting-strategies",
+      "ageBand": [5, 7]
+    },
+    {
+      "id": "start-with-larger",
+      "title": "Start with the Bigger Number",
+      "concept": "Counting On from the Larger Addend",
+      "conceptKey": "count-on-from-larger",
+      "requires": ["count-on"],
+      "activity": "addition/tray",
+      "params": {
+        "level": 4,
+        "question": {
+          "mode": "count_on_larger",
+          "aRange": [1, 3],
+          "bRange": [5, 9],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "count_tray",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Counting to Add",
+          "shortDesc": "Choose the bigger number to start from, so there is less to count",
+          "targetObjective": "Start from the bigger number. It is less work.",
+          "stepByStep": [
+            "Look at both numbers before you start.",
+            "Tap the bigger one to start from it.",
+            "Count on the smaller group — there are fewer to touch."
+          ],
+          "kidTip": "You can add in any order, so start from the bigger number.",
+          "audioPrompt": "Start with the bigger number! Then you have fewer to count on.",
+          "prompts": { "default": "Start with the bigger number, then count on." }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "⚖️",
+      "iconName": "scale",
+      "iconTone": "cyan",
+      "pedagogyTip": "3 + 8 and 8 + 3 give the same total, and one of them takes three counts instead of eight. That choice is the lesson.",
+      "standards": ["CCSS.1.OA.B.3", "CCSS.1.OA.C.5"],
+      "trajectoryLevel": "counting-strategies",
+      "ageBand": [6, 7]
+    },
+    {
+      "id": "add-zero",
+      "title": "Adding Zero",
+      "concept": "Adding Nothing Changes Nothing",
+      "conceptKey": "additive-identity",
+      "requires": ["count-all"],
+      "activity": "addition/tray",
+      "params": {
+        "level": 5,
+        "question": {
+          "mode": "add_zero",
+          "aRange": [1, 10],
+          "flipChance": 0.5,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "count_tray",
+          "tier": "beginner",
+          "difficultyColor": "violet",
+          "category": "Number Rules",
+          "shortDesc": "See that an empty group leaves the total exactly as it was",
+          "targetObjective": "Adding zero leaves the number alone.",
+          "stepByStep": [
+            "One group has objects. The other group is empty.",
+            "Nothing is being added, so nothing changes.",
+            "Choose the number you started with."
+          ],
+          "kidTip": "Zero means none. The number stays the same.",
+          "audioPrompt": "Adding zero! One group is empty, so what happens to the total?",
+          "prompts": { "default": "What is {a} plus {b}?" }
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "⭕",
+      "iconName": "circleDot",
+      "iconTone": "indigo",
+      "pedagogyTip": "Children who have only ever counted find zero genuinely strange — an empty group is still a group, and it still gets added.",
+      "standards": ["CCSS.1.OA.C.6"],
+      "trajectoryLevel": "find-result",
+      "ageBand": [5, 7]
+    },
+    {
+      "id": "add-one",
+      "title": "Adding One",
+      "concept": "One More Is the Next Number",
+      "conceptKey": "next-number-adder",
+      "requires": ["count-all"],
+      "activity": "addition/tray",
+      "params": {
+        "level": 6,
+        "question": {
+          "mode": "add_one",
+          "aRange": [1, 15],
+          "flipChance": 0.4,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "count_tray",
+          "tier": "beginner",
+          "difficultyColor": "violet",
+          "category": "Number Rules",
+          "shortDesc": "Recognise that adding one just moves you to the next counting number",
+          "targetObjective": "One more is the very next number.",
+          "stepByStep": [
+            "Look at how many are in the big group.",
+            "One more is being added.",
+            "Say the next counting number — that is the answer."
+          ],
+          "kidTip": "Adding one is just saying the next number.",
+          "audioPrompt": "Adding one! One more is the next number you say when you count.",
+          "prompts": { "default": "What is {a} plus {b}?" }
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "➕",
+      "iconName": "zap",
+      "iconTone": "indigo",
+      "pedagogyTip": "This is where the counting sequence stops being a song and starts being arithmetic: the number after seven *is* seven and one more.",
+      "standards": ["CCSS.1.OA.C.5", "CCSS.1.OA.C.6"],
+      "trajectoryLevel": "counting-strategies",
+      "ageBand": [5, 7]
+    },
+    {
+      "id": "use-fingers",
+      "title": "Use Your Fingers",
+      "concept": "Modelling Both Addends on Two Hands",
+      "conceptKey": "finger-adder",
+      "requires": ["count-all"],
+      "activity": "addition/tray",
+      "params": {
+        "level": 7,
+        "question": {
+          "mode": "fingers",
+          "addendRange": [1, 5],
+          "sumMax": 10,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "count_tray",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Counting to Add",
+          "shortDesc": "Put one number on each hand, then count all the raised fingers",
+          "targetObjective": "One number on each hand, then count them all.",
+          "stepByStep": [
+            "Raise the first number of fingers on the left hand.",
+            "Raise the second number on the right hand.",
+            "Count every raised finger to find the total."
+          ],
+          "kidTip": "One number on each hand. Then count every finger that is up.",
+          "audioPrompt": "Use your fingers! Put one number on each hand, then count them all.",
+          "prompts": { "default": "Show {a} on one hand and {b} on the other. How many fingers altogether?" }
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "🖐️",
+      "iconName": "sparkles",
+      "iconTone": "pink",
+      "pedagogyTip": "Fingers are a manipulative a child always has. Discouraging them removes the model before the fact is known, which is what produces guessing.",
+      "standards": [],
+      "trajectoryLevel": "counting-strategies",
+      "ageBand": [5, 7]
+    }
+  ]
+}

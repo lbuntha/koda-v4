@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <radialGradient id="appleGround" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.26"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="appleSkin" cx="34%" cy="28%" r="78%">
+      <stop offset="0%" stop-color="#FDA4AF"/>
+      <stop offset="42%" stop-color="#F43F5E"/>
+      <stop offset="100%" stop-color="#881337"/>
+    </radialGradient>
+    <linearGradient id="appleLeaf" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#15803D"/>
+      <stop offset="100%" stop-color="#4ADE80"/>
+    </linearGradient>
+    <linearGradient id="appleStem" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#78350F"/>
+      <stop offset="100%" stop-color="#3F2109"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="64" cy="117" rx="28" ry="5" fill="url(#appleGround)"/>
+
+  <path d="M 64 34 C 50 26 30 34 26 56 C 22 82 40 111 55 111 C 60 111 62 107 64 107
+           C 66 107 68 111 73 111 C 88 111 106 82 102 56 C 98 34 78 26 64 34 Z"
+        fill="url(#appleSkin)"/>
+
+  <path d="M 64 36 C 65 26 68 19 75 14" stroke="url(#appleStem)" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M 68 28 C 80 16 97 17 101 23 C 96 35 79 39 68 28 Z" fill="url(#appleLeaf)"/>
+  <path d="M 72 27 C 82 22 92 22 98 24" stroke="#DCFCE7" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.55"/>
+
+  <ellipse cx="46" cy="55" rx="9" ry="13" fill="#FFFFFF" fill-opacity="0.4" transform="rotate(-24 46 55)"/>
+</svg>

@@ -29,8 +29,19 @@ export {
   type RoundFeedback,
   type RoundQuestion,
   type RoundController,
+  type HintController,
   type UseSkillRoundOptions,
 } from "./round/useSkillRound";
+/** The hint ladder: the lesson's own copy, the words a skill adds for the
+ *  question on screen, and the panel that reads them out. */
+export {
+  composeHints,
+  hintAt,
+  playCopy,
+  MAX_HINTS,
+  type LessonPlayCopy,
+} from "./round/hints";
+export { SkillHint, type SkillHintProps } from "./chrome/SkillHint";
 /** Hold a round open until the last spoken number has been heard, so the
  *  praise clip cannot cut the answer off mid-word. */
 export {

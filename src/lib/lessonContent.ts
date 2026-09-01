@@ -18,6 +18,14 @@ export interface LessonContentOverride {
   title?: string;
   concept?: string;
   pedagogyTip?: string;
+  /**
+   * The first rung of the round's hint ladder, in the lesson's own words.
+   *
+   * Editable for the same reason the prompts are: it is copy a child reads —
+   * and now hears — and the person who can tell whether it lands is the one
+   * watching them get stuck, not the one who wrote the JSON.
+   */
+  kidTip?: string;
   /** Keyed the same way the lesson's own `params.play.prompts` is. */
   prompts?: Record<string, string>;
 }
@@ -72,6 +80,7 @@ const clean = (patch: LessonContentOverride): LessonContentOverride => {
   if (patch.title?.trim()) out.title = patch.title.trim();
   if (patch.concept?.trim()) out.concept = patch.concept.trim();
   if (patch.pedagogyTip?.trim()) out.pedagogyTip = patch.pedagogyTip.trim();
+  if (patch.kidTip?.trim()) out.kidTip = patch.kidTip.trim();
   if (patch.prompts) {
     const prompts: Record<string, string> = {};
     for (const [key, text] of Object.entries(patch.prompts)) {
@@ -127,17 +136,28 @@ export function withLessonEdits<T extends Lesson>(skillId: string, lesson: T): T
   const edit = LessonContentAPI.get(skillId, lesson.id);
   if (!edit) return lesson;
 
-  const params = lesson.params as { play?: { prompts?: Record<string, string> } } | undefined;
+  const params = lesson.params as
+    | { play?: { kidTip?: string; prompts?: Record<string, string> } }
+    | undefined;
+  const play = params?.play;
   return {
     ...lesson,
     title: edit.title ?? lesson.title,
     concept: edit.concept ?? lesson.concept,
     pedagogyTip: edit.pedagogyTip ?? lesson.pedagogyTip,
-    ...(edit.prompts && params?.play
+    // The round reads its hint and its prompts off `params.play`, so an edit to
+    // either has to land there rather than beside it — a lesson resolved with
+    // an edited tip that the activity cannot see is an edit that silently did
+    // nothing.
+    ...(edit.kidTip || edit.prompts
       ? {
           params: {
             ...lesson.params,
-            play: { ...params.play, prompts: { ...params.play.prompts, ...edit.prompts } },
+            play: {
+              ...play,
+              ...(edit.kidTip ? { kidTip: edit.kidTip } : {}),
+              ...(edit.prompts ? { prompts: { ...play?.prompts, ...edit.prompts } } : {}),
+            },
           },
         }
       : {}),
@@ -163,7 +183,14 @@ export function editsAsLessonJson(skillId: string, lessonId: string): string | n
   if (edit.concept) out.concept = edit.concept;
   if (edit.pedagogyTip) out.pedagogyTip = edit.pedagogyTip;
   // Nested exactly as the lesson file nests it, so the paste target is obvious.
-  if (edit.prompts) out.params = { play: { prompts: edit.prompts } };
+  if (edit.kidTip || edit.prompts) {
+    out.params = {
+      play: {
+        ...(edit.kidTip ? { kidTip: edit.kidTip } : {}),
+        ...(edit.prompts ? { prompts: edit.prompts } : {}),
+      },
+    };
+  }
 
   return JSON.stringify(out, null, 2);
 }

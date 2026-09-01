@@ -24,8 +24,20 @@ interface PracticeStepHeaderProps {
   stepNumber: number;
   totalSteps: number;
   title: string;
+  /** Whether the hint panel below is open. */
   showTip: boolean;
   onToggleTip: () => void;
+  /**
+   * How many rungs this question's hint ladder has.
+   *
+   * Zero hides the button entirely. A control that opens an empty panel is
+   * worse than no control — which is what this was until the ladder existed:
+   * the button toggled a boolean nothing rendered, so a child who asked for
+   * help got a highlighted button and silence.
+   */
+  hintCount: number;
+  /** The panel the button opens, named so a screen reader can follow it. */
+  hintPanelId?: string;
   onReadAloud: () => void;
   levelNumber?: number;
   /**
@@ -49,6 +61,8 @@ export const PracticeStepHeader: React.FC<PracticeStepHeaderProps> = ({
   title,
   showTip,
   onToggleTip,
+  hintCount,
+  hintPanelId,
   onReadAloud,
   levelNumber,
   contextTag,
@@ -109,14 +123,17 @@ export const PracticeStepHeader: React.FC<PracticeStepHeaderProps> = ({
           <Volume2 />
         </button>
 
-        <button
-          onClick={onToggleTip}
-          className={themeSystem.button(showTip ? "primary" : "secondary", "md", "min-h-[44px]")}
-          aria-pressed={showTip}
-        >
-          <Lightbulb />
-          <span>{showTip ? "Hide hint" : "Hint"}</span>
-        </button>
+        {hintCount > 0 && (
+          <button
+            onClick={onToggleTip}
+            className={themeSystem.button(showTip ? "primary" : "secondary", "md", "min-h-[44px]")}
+            aria-expanded={showTip}
+            aria-controls={hintPanelId}
+          >
+            <Lightbulb />
+            <span>{showTip ? "Hide hint" : "Hint"}</span>
+          </button>
+        )}
       </div>
     </div>
   );

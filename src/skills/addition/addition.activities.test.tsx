@@ -1,0 +1,154 @@
+import { describe, expect, it } from "vitest";
+import { expectStandardRound, renderActivity, type ActivityHarness } from "../kit/testing";
+import { skill } from ".";
+
+/**
+ * Addition's behaviour tests — one driver per engine.
+ *
+ * The kit drives the round and asserts everything that is the same for every
+ * skill: the lesson opens before the first question, every answer is reported,
+ * the log closes once, XP is awarded once through the SDK, and a clean round is
+ * three stars. All a skill writes is how a child answers correctly, because
+ * only the skill knows what its buttons mean.
+ *
+ * Answers are read out of the telemetry rather than recomputed. The activity
+ * already tells the host what it expects via `learning.present`, so a test that
+ * reads it cannot drift from the activity's own idea of the answer — and a
+ * missing `expected` fails here instead of passing quietly.
+ */
+
+const { tray } = skill.activities;
+
+const expected = (h: ActivityHarness): string => {
+  const last = h.koda.only("learning.present").at(-1);
+  const question = last?.args[0] as { expected?: string } | undefined;
+  expect(question?.expected, "activity presented a question with no expected answer").toBeTruthy();
+  return String(question!.expected);
+};
+
+/** Every object still waiting for a number, in the order they are on screen. */
+const nextUncounted = (h: ActivityHarness): string | undefined =>
+  h.buttons().find((name) => /^(First group|Second group|Pile) /.test(name) && !name.endsWith(", counted"));
+
+/** Touch every object there is to touch. How all four counting modes answer. */
+const countEverything = async (h: ActivityHarness) => {
+  for (let guard = 0; guard < 40; guard += 1) {
+    const next = nextUncounted(h);
+    if (!next) break;
+    await h.press(next);
+  }
+  // `settleMs: 0` below: the activity holds after the last tap so the final
+  // number is heard, and waiting a real second per question for a sound this
+  // test does not assert on is a slow suite for no cover.
+  await h.settle();
+};
+
+describe("the tray plays a standard round", () => {
+  it("count all: touching every object in both groups", async () => {
+    await expectStandardRound(tray, countEverything, {
+      params: { mode: "count_all", addendRange: [2, 4], sumMax: 8, settleMs: 0 },
+    });
+  });
+
+  it("combine: putting the groups together, then counting the pile", async () => {
+    await expectStandardRound(
+      tray,
+      async (h) => {
+        await h.press("Put them together");
+        await countEverything(h);
+      },
+      { params: { mode: "combine", addendRange: [2, 3], settleMs: 0 }, level: 2 },
+    );
+  });
+
+  it("count on: the first group is closed, so only the second is touchable", async () => {
+    await expectStandardRound(
+      tray,
+      async (h) => {
+        // The closed bin is disabled, so `buttons()` never offers it — which is
+        // the interaction working: there is nothing there to re-count.
+        expect(h.buttons().some((b) => b.startsWith("First group"))).toBe(false);
+        await countEverything(h);
+      },
+      { params: { mode: "count_on", aRange: [5, 7], bRange: [2, 3], settleMs: 0 }, level: 3 },
+    );
+  });
+
+  it("count on from the larger: the smaller start is refused, not scored", async () => {
+    await expectStandardRound(
+      tray,
+      async (h) => {
+        const starts = h
+          .buttons()
+          .filter((b) => b.startsWith("Start from "))
+          .map((b) => Number(b.replace("Start from ", "")));
+        expect(starts).toHaveLength(2);
+
+        // Tapping the smaller number is a wrong *route*, not a wrong answer:
+        // the child has not said what the total is yet, so nothing may be filed
+        // against them for it — and they never asked for help, so no support
+        // may be filed either. What they get is a sentence saying why.
+        const answers = h.koda.count("learning.answered");
+        const supports = h.koda.count("learning.supportUsed");
+        await h.press(`Start from ${Math.min(...starts)}`);
+        expect(h.koda.count("learning.answered"), "a refused route was scored").toBe(answers);
+        expect(h.koda.count("learning.supportUsed"), "a refusal was logged as a hint").toBe(supports);
+        expect(h.text(), "a refused move said nothing").toContain("Start at");
+
+        await h.press(`Start from ${Math.max(...starts)}`);
+        await countEverything(h);
+      },
+      { params: { mode: "count_on_larger", aRange: [1, 3], bRange: [6, 8], settleMs: 0 }, level: 4 },
+    );
+  });
+
+  it("add zero: choosing the number it started with", async () => {
+    await expectStandardRound(
+      tray,
+      async (h) => {
+        await h.press(expected(h));
+      },
+      { params: { mode: "add_zero", aRange: [3, 9] }, level: 5 },
+    );
+  });
+
+  it("add one: choosing the next counting number", async () => {
+    await expectStandardRound(
+      tray,
+      async (h) => {
+        await h.press(expected(h));
+      },
+      { params: { mode: "add_one", aRange: [4, 12] }, level: 6 },
+    );
+  });
+
+  it("a group too big to draw is shown as its number", async () => {
+    // Fourteen objects beside one object is a blob beside a thing: a child
+    // cannot see "fourteen" in it, so the shapes buy nothing and cost clarity.
+    const h = renderActivity(tray, {
+      params: { mode: "add_one", aRange: [14, 14], flipChance: 0 },
+      level: 6,
+    });
+    // Stated as a number, and not as a control: there is nothing to do to it.
+    expect(h.screen.getByLabelText(/^A group of 14/)).toBeTruthy();
+    expect(h.buttons().some((b) => /group .* 12/.test(b)), "fourteen objects were drawn").toBe(false);
+    h.unmount();
+  });
+
+  it("fingers: raising both hands, then checking", async () => {
+    await expectStandardRound(
+      tray,
+      async (h) => {
+        // Scored on the total, so the split may be any that reaches it — a hand
+        // holds five, which is why the left one is filled first.
+        const sum = Number(expected(h));
+        const left = Math.min(5, sum);
+        const right = sum - left;
+        if (left > 0) await h.press(`Left finger ${left}`);
+        if (right > 0) await h.press(`Right finger ${right}`);
+        await h.press("Check");
+      },
+      { params: { mode: "fingers", addendRange: [2, 5], sumMax: 10 }, level: 7 },
+    );
+  });
+});

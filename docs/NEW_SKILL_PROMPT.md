@@ -139,13 +139,43 @@ VERIFY before saying it is done:
 | `SkillRoundTopBar` | identity, progress, standing, voice, settings, fullscreen, sound, exit |
 | `scoreRound` | stars from first-try accuracy, XP from Settings, and whether the round was perfect |
 | `roundPraise` | which achievement the finish screen congratulates — level, streak, perfect, goal, stars |
-| `PracticeStepHeader` | "Step 2 of 5", the framing tag, read-aloud and hint buttons |
+| `PracticeStepHeader` | the question, the framing tag, read-aloud and hint buttons |
+| `composeHints`, `playCopy`, `SkillHint` | the hint ladder: the lesson's own tip, your rungs, the panel that reads them out |
 | `PracticeRoundCompleteModal` | stars, XP won, streak, today's goal, level progress, what to do next |
 | `playAnswerSound` | the recorded reaction to a right or wrong answer, behind the learner's own switches |
 | `SPRING`, `stagger`, `idleFloat`, `useMotionOK` | the shared motion vocabulary — do not hand-tune a spring |
 | `describeSkillContract`, `describeActivitySmoke` | the whole structural suite, inherited in two lines |
 
 A skill that writes any of these itself has gone wrong.
+
+## Hints
+
+Pass `hints` to `SkillRound` and the Hint button appears; pass none and it does not. Three
+rungs, gentlest first, built fresh on every render so they can describe what the child has
+actually done:
+
+```tsx
+hints={composeHints(
+  playCopy(params).kidTip,                    // 1. the lesson's own strategy
+  `You have tapped ${tapped}. The next one is ${tapped + 1}.`,  // 2. this question, now
+  `There are ${count} in the row — the last number you say is how many.`, // 3. worked
+)}
+```
+
+`round.hint` owns which rung is showing, resets itself on the next question, and reports
+each rung once as `supportUsed("hint", level)` — so the log can tell a nudge from a
+walkthrough. Blank rungs are dropped, so a rung that only applies sometimes can be written
+as an expression that is `undefined` the rest of the time.
+
+Two rules the copy has to keep. **Say what is on screen**: the numbers in a hint come from
+the live question and the child's own progress, never from an average case — build the
+rungs in an exported pure function and test them, the way counting does. **Stop one step
+short** where the child is choosing between answers, and go all the way where the answer is
+produced by doing rather than by choosing.
+
+The first rung is the lesson's `params.play.kidTip`, which means it is content: it ships in
+`lessons.json`, is editable in the Skill Manager, and is read aloud, so write it to be
+heard.
 
 ## Voice
 

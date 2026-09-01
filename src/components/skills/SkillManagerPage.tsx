@@ -951,9 +951,9 @@ const LessonContentEditor: React.FC<{ skillId: string; lesson: Lesson }> = ({
     }
   };
 
-  const filePrompts =
-    (lesson.params as { play?: { prompts?: Record<string, string> } } | undefined)?.play?.prompts ??
-    {};
+  const play = (lesson.params as { play?: { kidTip?: string; prompts?: Record<string, string> } } | undefined)
+    ?.play;
+  const filePrompts = play?.prompts ?? {};
 
   return (
     <div className={themeSystem.card("default", "p-4 sm:p-5 space-y-4")}>
@@ -1002,6 +1002,17 @@ const LessonContentEditor: React.FC<{ skillId: string; lesson: Lesson }> = ({
         value={edit.pedagogyTip ?? ""}
         placeholder={lesson.pedagogyTip ?? "For the adult watching, not the child."}
         onCommit={(pedagogyTip) => LessonContentAPI.set(skillId, lesson.id, { pedagogyTip })}
+      />
+      {/* The first thing a stuck child is told, and the only rung of the hint
+          ladder a lesson writes: the rest are built by the activity out of the
+          numbers on screen. Shown to the child and read aloud, so it is written
+          to be heard — a short sentence, the strategy, no numbers. */}
+      <ContentField
+        label="Hint (first tap)"
+        multiline
+        value={edit.kidTip ?? ""}
+        placeholder={play?.kidTip ?? "The strategy, in a child's words. Said out loud."}
+        onCommit={(kidTip) => LessonContentAPI.set(skillId, lesson.id, { kidTip })}
       />
 
       {edited && (

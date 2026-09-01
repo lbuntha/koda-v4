@@ -175,3 +175,72 @@ describe("voiceClips", () => {
     expect(playClip("three")).toBe(false);
   });
 });
+
+/**
+ * A reaction is written for one subject and does not travel.
+ *
+ * Clips are deliberately shared — "seven" is "seven", and a second skill saying
+ * it should not pay to record it again. Reactions are not: unscoped, counting's
+ * eight praise clips answered addition's rounds, so a child who added 7 and 3
+ * was told "Brilliant counting!" — and recording addition would have put "You
+ * put them together!" into counting's rounds in return.
+ */
+describe("reactions belong to the skill that recorded them", () => {
+  type VoiceModule = typeof import("./voiceClips");
+
+  const registerCounting = (mod: VoiceModule) =>
+    mod.registerSkillVoice(
+      { "Brilliant counting!": "correct/brilliant.wav" },
+      { "./audio/correct/brilliant.wav": "/a/brilliant.wav" },
+      { correct: { phrases: ["Brilliant counting!"] } },
+      "counting",
+    );
+
+  const registerAddition = (mod: VoiceModule) =>
+    mod.registerSkillVoice(
+      { "You put them together!": "correct/together.wav" },
+      { "./audio/correct/together.wav": "/a/together.wav" },
+      { correct: { phrases: ["You put them together!"] } },
+      "addition",
+    );
+
+  it("plays each skill's own praise and never the other's", async () => {
+    const mod = await import("./voiceClips");
+    registerCounting(mod);
+    registerAddition(mod);
+
+    expect(mod.playReaction("correct", 1, "counting")).toBe(true);
+    expect(played.at(-1)!.src).toBe("/a/brilliant.wav");
+
+    expect(mod.playReaction("correct", 1, "addition")).toBe(true);
+    expect(played.at(-1)!.src).toBe("/a/together.wav");
+  });
+
+  it("stays silent rather than borrowing words from a skill that did record", async () => {
+    const mod = await import("./voiceClips");
+    registerCounting(mod);
+    // Addition declares the same group and has recorded none of it — which is
+    // the normal state before anyone runs the recorder.
+    mod.registerSkillVoice({}, {}, { correct: { phrases: ["You put them together!"] } }, "addition");
+
+    expect(mod.playReaction("correct", 1, "addition")).toBe(false);
+    expect(played).toHaveLength(0);
+    // The skill that did record is unaffected.
+    expect(mod.playReaction("correct", 1, "counting")).toBe(true);
+  });
+
+  it("still answers a caller that registered without a skill", async () => {
+    // The unscoped pool: back-compat for a registration that names no skill.
+    const { registerSkillVoice, playReaction } = await withClips();
+    expect(playReaction("correct")).toBe(true);
+    expect(registerSkillVoice).toBeTypeOf("function");
+  });
+
+  it("counts a skill's own variants, not the whole pool", async () => {
+    const mod = await import("./voiceClips");
+    registerCounting(mod);
+    registerAddition(mod);
+    expect(mod.groupSize("correct", "counting")).toBe(1);
+    expect(mod.groupSize("correct", "addition")).toBe(1);
+  });
+});
