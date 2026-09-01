@@ -110,7 +110,34 @@
       "description": "Facts worth knowing by heart, and the ones that sit beside them",
       "icon": "👯",
       "lessons": [
-        "addition/near-doubles-one-less"
+        "addition/near-doubles-one-less",
+        "addition/make-5",
+        "addition/make-10",
+        "addition/next-multiple-of-10"
+      ]
+    },
+    {
+      "id": "u10",
+      "unitNumber": 10,
+      "title": "Unit 10: Making Friendly Numbers",
+      "description": "Reach a round number, and split a number so you can",
+      "icon": "🎯",
+      "lessons": [
+        "addition/next-multiple-of-100",
+        "addition/break-apart-an-addend",
+        "addition/decompose-both-addends",
+        "addition/use-a-known-fact"
+      ]
+    },
+    {
+      "id": "u11",
+      "unitNumber": 11,
+      "title": "Unit 11: Facts That Help",
+      "description": "Families of facts, and the freedom to add in either order",
+      "icon": "💡",
+      "lessons": [
+        "addition/fact-families",
+        "addition/switch-the-addends"
       ]
     }
   ]

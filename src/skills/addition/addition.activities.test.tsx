@@ -464,14 +464,16 @@ describe("the fact deck plays a standard round", () => {
 
   it("a wrong helper fact is refused, not scored", async () => {
     // Pinned, so the unhelpful fact is known rather than hunted for: with
-    // 4 + 7 the helper is the double 4 + 4, and 7 + 7 is a real fact that does
+    // 5 + 7 the helper is the double 5 + 5, and 7 + 7 is a real fact that does
     // not help. Every option being real is the point — a child cannot pick
-    // correctly by spotting the silly one.
+    // correctly by spotting the silly one. The gap of two is deliberate: the
+    // generator refuses a wider one, because a helper that far away helps with
+    // nothing.
     const h = renderActivity(facts, {
-      params: { mode: "known_fact", aRange: [4, 4], bRange: [7, 7] },
+      params: { mode: "known_fact", aRange: [5, 5], bRange: [7, 7] },
       level: 24,
     });
-    expect(h.buttons()).toContain("Helper fact 4 plus 4");
+    expect(h.buttons()).toContain("Helper fact 5 plus 5");
 
     const answers = h.koda.count("learning.answered");
     await h.press("Helper fact 7 plus 7");

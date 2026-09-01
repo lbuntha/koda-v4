@@ -85,7 +85,10 @@ const DEFAULT_SPEC: Record<FactMode, PairSpec> = {
   doubles: { addendRange: [1, 10] },
   near_up: { addendRange: [1, 9] },
   near_down: { addendRange: [2, 10] },
-  known_fact: { addendRange: [3, 9], sumMax: 18 },
+  /* The helper has to be near the target or it helps with nothing: 3 + 9 beside
+     the double 3 + 3 is six steps away, and a lesson full of those teaches that
+     the strategy does not work. */
+  known_fact: { addendRange: [3, 9], sumMax: 18, maxGap: 2 },
   family: { addendRange: [1, 9], sumMax: 18, distinct: true },
   // A gap worth switching for: 2 + 9 is worth reordering, 4 + 5 is not.
   commute: { aRange: [1, 4], bRange: [6, 9], minGap: 3 },
@@ -104,6 +107,8 @@ export const specFor = (mode: FactMode, setup: FactSetup): PairSpec => {
   const spec: PairSpec = { ...DEFAULT_SPEC[mode], ...declared(setup) };
   if (mode === "commute") spec.minGap = DEFAULT_SPEC.commute.minGap;
   if (mode === "family") spec.distinct = true;
+  // A helper fact that is not close is not a helper.
+  if (mode === "known_fact") spec.maxGap = DEFAULT_SPEC.known_fact.maxGap;
   return spec;
 };
 

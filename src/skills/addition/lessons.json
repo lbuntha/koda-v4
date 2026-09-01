@@ -909,6 +909,485 @@
         6,
         8
       ]
+    },
+    {
+      "id": "make-5",
+      "title": "Make Five",
+      "concept": "Filling a Frame of Five",
+      "conceptKey": "five-benchmark",
+      "requires": [
+        "five-benchmark"
+      ],
+      "activity": "addition/frames",
+      "params": {
+        "level": 18,
+        "question": {
+          "mode": "make_five",
+          "aRange": [
+            1,
+            4
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "frames_play",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Frames",
+          "shortDesc": "Say how many more counters a five-frame needs",
+          "targetObjective": "Fill the frame right up. Count only the ones you put in.",
+          "stepByStep": [
+            "Some counters are already in the frame.",
+            "Tap empty spaces until the frame is full.",
+            "The answer is how many you had to add — not the whole frame."
+          ],
+          "kidTip": "Fill the frame right up. Count only the ones you put in.",
+          "audioPrompt": "Make five! How many more counters does the frame need?",
+          "prompts": {
+            "default": "You have {a}. How many more to make {size}?"
+          }
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "🖐️",
+      "iconName": "layers",
+      "iconTone": "purple",
+      "pedagogyTip": "The answer is the part added, not the total. A child who says five has read the frame rather than the question.",
+      "standards": [
+        "CCSS.K.OA.A.4"
+      ],
+      "trajectoryLevel": "part-whole",
+      "ageBand": [
+        5,
+        7
+      ]
+    },
+    {
+      "id": "make-10",
+      "title": "Make Ten",
+      "concept": "Filling a Frame of Ten",
+      "conceptKey": "make-ten",
+      "requires": [
+        "ten-frame-adder"
+      ],
+      "activity": "addition/frames",
+      "params": {
+        "level": 19,
+        "question": {
+          "mode": "make_ten",
+          "aRange": [
+            1,
+            9
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "frames_play",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Frames",
+          "shortDesc": "Say how many more counters a ten-frame needs",
+          "targetObjective": "Fill the frame right up. Count only the ones you put in.",
+          "stepByStep": [
+            "Some counters are already in the frame.",
+            "Tap empty spaces until both rows are full.",
+            "The answer is how many you had to add."
+          ],
+          "kidTip": "Fill the frame right up. Count only the ones you put in.",
+          "audioPrompt": "Make ten! How many more counters does the frame need?",
+          "prompts": {
+            "default": "You have {a}. How many more to make {size}?"
+          }
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "🔟",
+      "iconName": "boxes",
+      "iconTone": "purple",
+      "pedagogyTip": "Friends of ten are the facts every bridging strategy stands on. Known instantly, they turn 8 + 5 into 10 + 3.",
+      "standards": [
+        "CCSS.K.OA.A.4"
+      ],
+      "trajectoryLevel": "part-whole",
+      "ageBand": [
+        5,
+        7
+      ]
+    },
+    {
+      "id": "next-multiple-of-10",
+      "title": "Reach the Next Ten",
+      "concept": "Jumping to a Round Number",
+      "conceptKey": "bridging-ten",
+      "requires": [
+        "make-ten"
+      ],
+      "activity": "addition/numberline",
+      "params": {
+        "level": 20,
+        "question": {
+          "mode": "bridge_ten",
+          "aRange": [
+            11,
+            89
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "numberline_play",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Number Line",
+          "shortDesc": "Choose the jump that lands exactly on the next ten",
+          "targetObjective": "Jump to the round number, not past it.",
+          "stepByStep": [
+            "Find the two tens your number sits between.",
+            "Work out how far it is to the one above.",
+            "Choose that jump — landing past it does not count."
+          ],
+          "kidTip": "Jump to the round number, not past it.",
+          "audioPrompt": "Reach the next ten! Which jump lands exactly on the round number?",
+          "prompts": {
+            "default": "Which jump takes {a} to the next ten?"
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🎯",
+      "iconName": "footprints",
+      "iconTone": "cyan",
+      "pedagogyTip": "Reaching the round number is the move inside every make-ten strategy. Practised alone, it stops being the hard part of 47 + 8.",
+      "standards": [
+        "CCSS.2.NBT.B.5"
+      ],
+      "trajectoryLevel": "jump-strategy",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "next-multiple-of-100",
+      "title": "Reach the Next Hundred",
+      "concept": "Jumping to a Round Hundred",
+      "conceptKey": "bridging-hundred",
+      "requires": [
+        "bridging-ten"
+      ],
+      "activity": "addition/numberline",
+      "params": {
+        "level": 21,
+        "question": {
+          "mode": "bridge_hundred",
+          "aRange": [
+            110,
+            890
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "numberline_play",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Number Line",
+          "shortDesc": "Choose the jump that lands exactly on the next hundred",
+          "targetObjective": "Jump to the round hundred, not past it.",
+          "stepByStep": [
+            "Find the two hundreds your number sits between.",
+            "Work out how far it is to the one above.",
+            "Choose that jump."
+          ],
+          "kidTip": "Jump to the round hundred, not past it.",
+          "audioPrompt": "Reach the next hundred! Which jump lands exactly on the round number?",
+          "prompts": {
+            "default": "Which jump takes {a} to the next hundred?"
+          }
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "💯",
+      "iconName": "footprints",
+      "iconTone": "indigo",
+      "pedagogyTip": "The same move one place up. A child who sees it as the same move has generalised; one who meets it as a new fact has not.",
+      "standards": [
+        "CCSS.2.NBT.B.7"
+      ],
+      "trajectoryLevel": "jump-strategy",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "break-apart-an-addend",
+      "title": "Break One Number Apart",
+      "concept": "Splitting an Addend to Reach Ten",
+      "conceptKey": "addend-decomposer",
+      "requires": [
+        "make-ten"
+      ],
+      "activity": "addition/bonds",
+      "params": {
+        "level": 22,
+        "question": {
+          "mode": "split_one",
+          "aRange": [
+            6,
+            9
+          ],
+          "bRange": [
+            3,
+            9
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "bonds_play",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Parts and Wholes",
+          "shortDesc": "Split the second number so the first can reach ten",
+          "targetObjective": "Give the first number just enough to reach ten, then add what is left.",
+          "stepByStep": [
+            "Work out what the first number needs to reach ten.",
+            "Take that much out of the second number.",
+            "Whatever is left over is the other part."
+          ],
+          "kidTip": "Give the first number just enough to reach ten, then add what is left.",
+          "audioPrompt": "Break a number apart! Give the first one just enough to reach ten.",
+          "prompts": {
+            "default": "Break {b} apart so {a} can reach ten."
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "✂️",
+      "iconName": "gem",
+      "iconTone": "emerald",
+      "pedagogyTip": "This is where make-ten becomes a strategy rather than a fact: the child chooses the split, and the split is the thinking.",
+      "standards": [
+        "CCSS.1.OA.C.6"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "decompose-both-addends",
+      "title": "Split Both Numbers",
+      "concept": "Tens and Ones, Taken Apart",
+      "conceptKey": "addend-decomposer",
+      "requires": [
+        "place-value-builder"
+      ],
+      "activity": "addition/bonds",
+      "params": {
+        "level": 23,
+        "question": {
+          "mode": "split_both",
+          "addendRange": [
+            11,
+            88
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "bonds_play",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Parts and Wholes",
+          "shortDesc": "Break each two-digit number into its tens and its ones",
+          "targetObjective": "Every two-digit number is some tens and some ones.",
+          "stepByStep": [
+            "Look at the first number's tens and ones.",
+            "Write each part in its box — the tens as a whole ten.",
+            "Do the same for the second number."
+          ],
+          "kidTip": "Every two-digit number is some tens and some ones.",
+          "audioPrompt": "Split both numbers! Each one is some tens and some ones.",
+          "prompts": {
+            "default": "Split each number into its tens and its ones."
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🔀",
+      "iconName": "gem",
+      "iconTone": "emerald",
+      "pedagogyTip": "Splitting both is what makes adding by place possible. Writing forty rather than four is the part that has to be right.",
+      "standards": [
+        "CCSS.1.NBT.C.4"
+      ],
+      "trajectoryLevel": "place-value-builder",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "use-a-known-fact",
+      "title": "Use a Fact You Know",
+      "concept": "Deriving from a Fact You Hold",
+      "conceptKey": "known-fact-user",
+      "requires": [
+        "doubles-knower"
+      ],
+      "activity": "addition/facts",
+      "params": {
+        "level": 24,
+        "question": {
+          "mode": "known_fact",
+          "addendRange": [
+            3,
+            9
+          ],
+          "sumMax": 18,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "facts_play",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Facts",
+          "shortDesc": "Pick the nearby fact that helps, then use it",
+          "targetObjective": "Pick a fact you already know that is close to this one.",
+          "stepByStep": [
+            "Look at the fact you have been given.",
+            "Choose the nearby fact you already know — a double is usually closest.",
+            "Count on or back from it to reach the answer."
+          ],
+          "kidTip": "Pick a fact you already know that is close to this one.",
+          "audioPrompt": "Use a fact you know! Which one is closest to this?",
+          "prompts": {
+            "default": "{a} plus {b}. Which fact would help?"
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "💡",
+      "iconName": "zap",
+      "iconTone": "pink",
+      "pedagogyTip": "Choosing the helper is the lesson. Every option offered is a real fact, so a child cannot pick well by spotting the silly one.",
+      "standards": [
+        "CCSS.1.OA.C.6"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "fact-families",
+      "title": "Fact Families",
+      "concept": "Three Numbers, Four Facts",
+      "conceptKey": "fact-family",
+      "requires": [
+        "part-whole-decomposer"
+      ],
+      "activity": "addition/facts",
+      "params": {
+        "level": 25,
+        "question": {
+          "mode": "family",
+          "addendRange": [
+            1,
+            9
+          ],
+          "sumMax": 18,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "facts_play",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Facts",
+          "shortDesc": "Write all four facts that three numbers make together",
+          "targetObjective": "The same three numbers make four different facts.",
+          "stepByStep": [
+            "Look at the three numbers in the family.",
+            "Two facts add them together, in either order.",
+            "Two facts take one part away from the whole."
+          ],
+          "kidTip": "The same three numbers make four different facts.",
+          "audioPrompt": "Fact families! The same three numbers make four different facts.",
+          "prompts": {
+            "default": "{a}, {b} and {sum} make a family. Fill in all four."
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "👨‍👩‍👧",
+      "iconName": "gem",
+      "iconTone": "emerald",
+      "pedagogyTip": "Seeing addition and subtraction as one family is what later makes a missing addend a question a child can answer.",
+      "standards": [
+        "CCSS.1.OA.B.4",
+        "CCSS.1.OA.D.8"
+      ],
+      "trajectoryLevel": "part-whole",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "switch-the-addends",
+      "title": "Switch the Numbers",
+      "concept": "Order Does Not Change the Total",
+      "conceptKey": "commutativity",
+      "requires": [
+        "count-on-from-larger"
+      ],
+      "activity": "addition/facts",
+      "params": {
+        "level": 26,
+        "question": {
+          "mode": "commute",
+          "aRange": [
+            1,
+            4
+          ],
+          "bRange": [
+            6,
+            9
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "facts_play",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Facts",
+          "shortDesc": "Say the same fact the other way round",
+          "targetObjective": "You can add in either order and the total does not change.",
+          "stepByStep": [
+            "Read the fact you are given.",
+            "Say it the other way round — it starts with the other number.",
+            "The total is exactly the same."
+          ],
+          "kidTip": "You can add in either order and the total does not change.",
+          "audioPrompt": "Switch the numbers! The same fact the other way round makes the same total.",
+          "prompts": {
+            "default": "{a} plus {b}. Which is the same fact the other way round?"
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🔁",
+      "iconName": "scale",
+      "iconTone": "cyan",
+      "pedagogyTip": "Commutativity is what makes starting from the larger number allowed. Stated as its own idea, it stops being a trick.",
+      "standards": [
+        "CCSS.1.OA.B.3"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        6,
+        8
+      ]
     }
   ]
 }
