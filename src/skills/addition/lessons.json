@@ -1388,6 +1388,114 @@
         6,
         8
       ]
+    },
+    {
+      "id": "friendly-pairs",
+      "title": "Friendly Pairs",
+      "concept": "Finding Two That Make Ten",
+      "conceptKey": "friendly-pairs",
+      "requires": [
+        "make-ten"
+      ],
+      "activity": "addition/multi",
+      "params": {
+        "level": 27,
+        "question": {
+          "mode": "pairs",
+          "count": 4,
+          "target": 10,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "chain_board",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Chains",
+          "shortDesc": "Spot the two numbers that make ten and add those first",
+          "targetObjective": "Look for two that make ten and put those together first.",
+          "stepByStep": [
+            "Look across all the numbers, not just the first two.",
+            "Find the two that make ten and tap them together.",
+            "Add what is left to the ten."
+          ],
+          "kidTip": "Look for two that make ten and put those together first.",
+          "audioPrompt": "Friendly pairs! Two of these make ten. Find them first.",
+          "prompts": {
+            "default": "Two of these make {target}. Put those together first."
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🤝",
+      "iconName": "waves",
+      "iconTone": "cyan",
+      "pedagogyTip": "Order is a choice once there are more than two numbers, and finding the ten first is what makes the rest easy. This is commutativity put to work.",
+      "standards": [
+        "CCSS.1.OA.A.2",
+        "CCSS.1.OA.B.3"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "compensation",
+      "title": "Give and Take Back",
+      "concept": "Rounding Up, Then Adjusting",
+      "conceptKey": "compensator",
+      "requires": [
+        "bridging-ten"
+      ],
+      "activity": "addition/numberline",
+      "params": {
+        "level": 28,
+        "question": {
+          "mode": "compensate",
+          "aRange": [
+            21,
+            79
+          ],
+          "bRange": [
+            11,
+            89
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "jump_line",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Number Line",
+          "shortDesc": "Add an easy round number, then give back what you took too much of",
+          "targetObjective": "Jump a round number, then give back what you took too much of.",
+          "stepByStep": [
+            "Notice the second number is nearly a round one.",
+            "Jump the round number instead — it is much easier.",
+            "Then jump back the little bit you overshot by."
+          ],
+          "kidTip": "Jump a round number, then give back what you took too much of.",
+          "audioPrompt": "Give and take back! Add the easy round number, then give back the extra.",
+          "prompts": {
+            "default": "{a} plus {b}. Jump a round number, then give back what you overshot."
+          }
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "↩️",
+      "iconName": "footprints",
+      "iconTone": "indigo",
+      "pedagogyTip": "Compensation is the first strategy that makes a problem temporarily wrong on purpose. Seeing the overshoot on the line is what makes that safe.",
+      "standards": [
+        "CCSS.2.NBT.B.5",
+        "CCSS.2.NBT.B.9"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        7,
+        9
+      ]
     }
   ]
 }

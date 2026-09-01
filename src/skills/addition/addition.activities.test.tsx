@@ -17,7 +17,7 @@ import { skill } from ".";
  * missing `expected` fails here instead of passing quietly.
  */
 
-const { tray, frames, bonds, numberline, base10, chart, facts } = skill.activities;
+const { tray, frames, bonds, numberline, base10, chart, facts, multi } = skill.activities;
 
 const expected = (h: ActivityHarness): string => {
   const last = h.koda.only("learning.present").at(-1);
@@ -480,6 +480,88 @@ describe("the fact deck plays a standard round", () => {
     expect(h.koda.count("learning.answered"), "a wrong route was scored").toBe(answers);
     expect(h.text()).toContain("Look for a double");
     h.unmount();
+  });
+});
+
+describe("the chain board plays a standard round", () => {
+  /** Merge every chip into one, two taps at a time. */
+  const mergeAll = async (h: ActivityHarness) => {
+    for (let guard = 0; guard < 10; guard += 1) {
+      const chips = h.buttons().filter((b) => /^Chip \d+$/.test(b));
+      if (chips.length < 2) break;
+      await h.press(chips[0]);
+      await h.press(chips[1]);
+    }
+  };
+
+  it("pairs: merging chips until one number is left", async () => {
+    await expectStandardRound(
+      multi,
+      async (h) => {
+        await mergeAll(h);
+        await h.press("Check");
+      },
+      { params: { mode: "pairs", count: 4, target: 10 }, level: 27 },
+    );
+  });
+
+  it("checking a board that is still in pieces is refused, not scored", async () => {
+    const h = renderActivity(multi, { params: { mode: "pairs", count: 4 }, level: 27 });
+    const before = h.koda.count("learning.answered");
+    await h.press("Check");
+    expect(h.koda.count("learning.answered")).toBe(before);
+    expect(h.text()).toContain("still on the board");
+    h.unmount();
+  });
+
+  it("two chips become one that says what it became", async () => {
+    const h = renderActivity(multi, { params: { mode: "pairs", count: 4 } }, );
+    const before = h.buttons().filter((b) => /^Chip \d+$/.test(b));
+    expect(before).toHaveLength(4);
+    const [first, second] = before;
+    const merged = Number(first.replace("Chip ", "")) + Number(second.replace("Chip ", ""));
+
+    await h.press(first);
+    await h.press(second);
+
+    const after = h.buttons().filter((b) => /^Chip \d+$/.test(b));
+    expect(after).toHaveLength(3);
+    expect(after).toContain(`Chip ${merged}`);
+    // The ten is the reason the pair was worth finding, so it is heard too.
+    expect(h.koda.only("speech.say").map((c) => c.args[0])).toContain(
+      ["zero","one","two","three","four","five","six","seven","eight","nine","ten",
+       "eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen",
+       "eighteen","nineteen","twenty"][merged] ?? String(merged),
+    );
+    h.unmount();
+  });
+
+  it("running total: every step checked, one answer reported", async () => {
+    await expectStandardRound(
+      multi,
+      async (h) => {
+        const totals: number[] = [];
+        const values = (h.koda.only("learning.present").at(-1)!.args[0] as { itemCount?: number });
+        expect(values.itemCount).toBeGreaterThan(1);
+        // Read the chain off the screen, then fill each running total in turn.
+        const boxes = h.screen.getAllByLabelText(/^Total after adding \d+$/) as HTMLInputElement[];
+        const chain = boxes.map((b) => Number(/adding (\d+)/.exec(b.getAttribute("aria-label")!)![1]));
+        const start = Number(expected(h)) - chain.reduce((t, n) => t + n, 0);
+        let running = start;
+        for (const n of chain) {
+          running += n;
+          totals.push(running);
+        }
+        const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!;
+        for (const [i, box] of boxes.entries()) {
+          setter.call(box, String(totals[i]));
+          box.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+        await h.settle();
+        await h.press("Check");
+      },
+      { params: { mode: "running", count: 4, addendRange: [2, 9], totalMax: 40 }, level: 42 },
+    );
   });
 });
 

@@ -12,6 +12,8 @@ import {
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_B, CHANGE } from "../internal/data/additionPalette";
 import { SCENE } from "../internal/data/additionLayout";
+import { NudgeLine, useNudge } from "../internal/ui/useNudge";
+import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
 import { NumberPad } from "../internal/ui/NumberPad";
 import {
   digitsOf,
@@ -381,8 +383,7 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
   const [at, setAt] = useState(0);
   const [made, setMade] = useState<number[]>([]);
   const [entry, setEntry] = useState("");
-  const [nudge, setNudge] = useState<string | null>(null);
-  const nudgeTimer = useRef<number | null>(null);
+  const nudge = useNudge(koda);
   const [nextStep, setNextStep] = useState<{ kind: string; kidMessage: string } | undefined>();
 
   const round = useSkillRound({
@@ -407,13 +408,9 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
     setAt(question.from);
     setMade([]);
     setEntry("");
-    setNudge(null);
-    if (nudgeTimer.current !== null) window.clearTimeout(nudgeTimer.current);
+    nudge.clear();
   }, [question.id, question.from]);
 
-  useEffect(() => () => {
-    if (nudgeTimer.current !== null) window.clearTimeout(nudgeTimer.current);
-  }, []);
 
   const speaks = koda.config.isEnabled("audio_speech", true);
   const chimes = koda.config.isEnabled("sound_chimes", true);
@@ -423,12 +420,6 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
 
   const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
     if (chimes) koda.sound.play(type);
-  };
-  const refuse = (why: string) => {
-    chime("hint");
-    setNudge(why);
-    if (nudgeTimer.current !== null) window.clearTimeout(nudgeTimer.current);
-    nudgeTimer.current = window.setTimeout(() => setNudge(null), 4000);
   };
 
   const x = (value: number) =>
@@ -481,7 +472,7 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
     chime(size < 0 ? "clink" : "pop");
     // A ticked line names where you land; an open one deliberately does not.
     if (speaks && question.ticks > 0) {
-      void koda.speech.say(numberWord(next), { rate: koda.config.get("speechRate", 0.95) });
+      void koda.speech.say(numberWord(next), speechRate(koda));
     }
 
     if (question.answerKind === "arrival" && next === question.sum) {
@@ -507,7 +498,7 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
   const check = () => {
     if (round.feedback) return;
     if (made.length < question.required.length) {
-      refuse(
+      nudge.refuse(
         made.length === 0
           ? "Take the jumps first, then say where you landed."
           : `One more jump to take before you answer.`,
@@ -515,7 +506,7 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
       return;
     }
     if (entry === "") {
-      refuse("Type where you landed, using the numbers below.");
+      nudge.refuse("Type where you landed, using the numbers below.");
       return;
     }
     submitTotal(Number(entry));
@@ -543,17 +534,12 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
       iconName="footprints"
       iconTone="cyan"
       contextTag={framesSteps ? undefined : null}
-      tagLabels={{
-        warmup: koda.config.get("warmupLabel", "") || undefined,
-        activity: koda.config.get("activityLabel", "") || undefined,
-        guided: koda.config.get("guidedLabel", "") || undefined,
-        milestone: koda.config.get("milestoneLabel", "") || undefined,
-      }}
+      tagLabels={tagLabelsFrom(koda)}
       hints={jumpHints(question, { at, made, entry, kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
       onReadAloud={() => {
         round.useSupport("audio_replay");
-        void koda.speech.say(prompt, { rate: koda.config.get("speechRate", 0.95) });
+        void koda.speech.say(prompt, speechRate(koda));
       }}
       recommendation={nextStep}
     >
@@ -616,17 +602,7 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
           )}
         </div>
 
-        {nudge && (
-          <motion.p
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={SPRING.enter}
-            role="status"
-            className="text-center text-sm font-semibold text-ink/70 px-4"
-          >
-            {nudge}
-          </motion.p>
-        )}
+        <NudgeLine nudge={nudge} />
 
         <div className="flex flex-wrap items-center justify-center gap-2.5">
           {question.offered.map((size, i) => {

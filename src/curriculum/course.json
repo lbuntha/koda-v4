@@ -137,7 +137,9 @@
       "icon": "💡",
       "lessons": [
         "addition/fact-families",
-        "addition/switch-the-addends"
+        "addition/switch-the-addends",
+        "addition/friendly-pairs",
+        "addition/compensation"
       ]
     }
   ]

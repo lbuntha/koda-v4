@@ -12,6 +12,8 @@ import {
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B, CHANGE, TOTAL } from "../internal/data/additionPalette";
 import { SCENE } from "../internal/data/additionLayout";
+import { NudgeLine, useNudge } from "../internal/ui/useNudge";
+import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
 import { NumberPad } from "../internal/ui/NumberPad";
 import {
   digitsOf,
@@ -318,8 +320,7 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
 
   const [entries, setEntries] = useState<Record<string, string>>({});
   const [active, setActive] = useState<string | null>(null);
-  const [nudge, setNudge] = useState<string | null>(null);
-  const nudgeTimer = useRef<number | null>(null);
+  const nudge = useNudge(koda);
   const [nextStep, setNextStep] = useState<{ kind: string; kidMessage: string } | undefined>();
 
   const round = useSkillRound({
@@ -345,13 +346,9 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
   useEffect(() => {
     setEntries({});
     setActive(question.blanks[0] ?? null);
-    setNudge(null);
-    if (nudgeTimer.current !== null) window.clearTimeout(nudgeTimer.current);
+    nudge.clear();
   }, [question.id, question.blanks]);
 
-  useEffect(() => () => {
-    if (nudgeTimer.current !== null) window.clearTimeout(nudgeTimer.current);
-  }, []);
 
   const chimes = koda.config.isEnabled("sound_chimes", true);
   const vibrates = koda.config.isEnabled("haptic_feedback", true);
@@ -361,12 +358,6 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
     if (chimes) koda.sound.play(type);
   };
 
-  const refuse = (why: string) => {
-    chime("hint");
-    setNudge(why);
-    if (nudgeTimer.current !== null) window.clearTimeout(nudgeTimer.current);
-    nudgeTimer.current = window.setTimeout(() => setNudge(null), 4000);
-  };
 
   const typeDigit = (digit: string) => {
     if (!active || round.feedback) return;
@@ -387,7 +378,7 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
     if (round.feedback) return;
     const missing = question.blanks.filter((id) => (entries[id] ?? "") === "");
     if (missing.length > 0) {
-      refuse(
+      nudge.refuse(
         missing.length === question.blanks.length
           ? "Tap a box, then use the numbers below to fill it in."
           : `${missing.length} ${missing.length === 1 ? "box is" : "boxes are"} still empty.`,
@@ -433,17 +424,12 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
       iconName="gem"
       iconTone="emerald"
       contextTag={framesSteps ? undefined : null}
-      tagLabels={{
-        warmup: koda.config.get("warmupLabel", "") || undefined,
-        activity: koda.config.get("activityLabel", "") || undefined,
-        guided: koda.config.get("guidedLabel", "") || undefined,
-        milestone: koda.config.get("milestoneLabel", "") || undefined,
-      }}
+      tagLabels={tagLabelsFrom(koda)}
       hints={bondHints(question, { entries, kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
       onReadAloud={() => {
         round.useSupport("audio_replay");
-        void koda.speech.say(prompt, { rate: koda.config.get("speechRate", 0.95) });
+        void koda.speech.say(prompt, speechRate(koda));
       }}
       recommendation={nextStep}
     >
@@ -463,17 +449,7 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
           ))}
         </div>
 
-        {nudge && (
-          <motion.p
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={SPRING.enter}
-            role="status"
-            className="text-center text-sm font-semibold text-ink/70 px-4"
-          >
-            {nudge}
-          </motion.p>
-        )}
+        <NudgeLine nudge={nudge} />
 
         <NumberPad onDigit={typeDigit} onDelete={deleteDigit} disabled={!active || Boolean(round.feedback)} />
 

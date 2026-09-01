@@ -8,6 +8,7 @@ import { JumpLine } from "./activities/JumpLine";
 import { BlockYard } from "./activities/BlockYard";
 import { PlaceValueDesk } from "./activities/PlaceValueDesk";
 import { FactDeck } from "./activities/FactDeck";
+import { ChainBoard } from "./activities/ChainBoard";
 import { registerSkillArt } from "../../assets/svg/skillArt";
 import { registerSkillVoice } from "../../lib/voiceClips";
 import audioManifest from "./audio/manifest.json";
@@ -130,6 +131,12 @@ export const skill: Skill = {
       name: "Fact Deck",
       defaultParams: { mode: "doubles", questionsPerRound: 5 },
       component: FactDeck,
+    },
+    multi: {
+      id: "multi",
+      name: "Chains and Pairs",
+      defaultParams: { mode: "pairs", questionsPerRound: 5 },
+      component: ChainBoard,
     },
   },
 };

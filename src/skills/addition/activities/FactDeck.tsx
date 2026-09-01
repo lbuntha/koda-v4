@@ -12,6 +12,8 @@ import {
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B, CHANGE, TOTAL } from "../internal/data/additionPalette";
 import { SCENE } from "../internal/data/additionLayout";
+import { NudgeLine, useNudge } from "../internal/ui/useNudge";
+import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
 import { NumberPad } from "../internal/ui/NumberPad";
 import {
   drawDouble,
@@ -297,8 +299,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
   const [revealed, setRevealed] = useState(false);
   const [entry, setEntry] = useState("");
   const [members, setMembers] = useState<Record<number, string>>({});
-  const [nudge, setNudge] = useState<string | null>(null);
-  const nudgeTimer = useRef<number | null>(null);
+  const nudge = useNudge(koda);
   const [nextStep, setNextStep] = useState<{ kind: string; kidMessage: string } | undefined>();
 
   const round = useSkillRound({
@@ -323,13 +324,9 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
     setRevealed(false);
     setEntry("");
     setMembers({});
-    setNudge(null);
-    if (nudgeTimer.current !== null) window.clearTimeout(nudgeTimer.current);
+    nudge.clear();
   }, [question.id]);
 
-  useEffect(() => () => {
-    if (nudgeTimer.current !== null) window.clearTimeout(nudgeTimer.current);
-  }, []);
 
   const chimes = koda.config.isEnabled("sound_chimes", true);
   const vibrates = koda.config.isEnabled("haptic_feedback", true);
@@ -341,12 +338,6 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
 
   const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
     if (chimes) koda.sound.play(type);
-  };
-  const refuse = (why: string) => {
-    chime("hint");
-    setNudge(why);
-    if (nudgeTimer.current !== null) window.clearTimeout(nudgeTimer.current);
-    nudgeTimer.current = window.setTimeout(() => setNudge(null), 4000);
   };
 
   /**
@@ -368,7 +359,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
     if (!sameFact(fact, question.helper!)) {
       // A wrong route, not a wrong answer: the child has not said what the
       // total is, so nothing may be filed against them for it.
-      refuse(
+      nudge.refuse(
         `${fact.a} and ${fact.b} is a real fact, but it is not close to ${question.a} plus ${question.b}. Look for a double.`,
       );
       return;
@@ -419,7 +410,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
     if (round.feedback) return;
     const missing = question.members!.filter((_, i) => (members[i] ?? "") === "");
     if (missing.length > 0) {
-      refuse(`${missing.length} ${missing.length === 1 ? "fact is" : "facts are"} still empty.`);
+      nudge.refuse(`${missing.length} ${missing.length === 1 ? "fact is" : "facts are"} still empty.`);
       return;
     }
     const given = question.members!.map((_, i) => members[i] ?? "");
@@ -450,17 +441,12 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
       iconName={question.mode === "family" ? "gem" : "zap"}
       iconTone="pink"
       contextTag={framesSteps ? undefined : null}
-      tagLabels={{
-        warmup: koda.config.get("warmupLabel", "") || undefined,
-        activity: koda.config.get("activityLabel", "") || undefined,
-        guided: koda.config.get("guidedLabel", "") || undefined,
-        milestone: koda.config.get("milestoneLabel", "") || undefined,
-      }}
+      tagLabels={tagLabelsFrom(koda)}
       hints={factHints(question, { revealed, kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
       onReadAloud={() => {
         round.useSupport("audio_replay");
-        void koda.speech.say(prompt, { rate: koda.config.get("speechRate", 0.95) });
+        void koda.speech.say(prompt, speechRate(koda));
       }}
       recommendation={nextStep}
     >
@@ -555,17 +541,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
           )}
         </div>
 
-        {nudge && (
-          <motion.p
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={SPRING.enter}
-            role="status"
-            className="text-center text-sm font-semibold text-ink/70 px-4"
-          >
-            {nudge}
-          </motion.p>
-        )}
+        <NudgeLine nudge={nudge} />
 
         {question.answerShape === "fact" && (
           <div className="flex flex-wrap items-center justify-center gap-2.5">
@@ -638,7 +614,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
               <div className="flex justify-center">
                 <motion.button
                   type="button"
-                  onClick={() => (entry === "" ? refuse("Type your answer first.") : submitNumber(Number(entry)))}
+                  onClick={() => (entry === "" ? nudge.refuse("Type your answer first.") : submitNumber(Number(entry)))}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.94 }}
                   transition={SPRING.tap}

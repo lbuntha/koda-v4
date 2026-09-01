@@ -16,6 +16,8 @@ import { SvgAsset } from "../../../assets/svg";
 import { COUNTABLES, type Countable } from "../internal/data/additionAssets";
 import { ADDEND_A, ADDEND_B, TOTAL } from "../internal/data/additionPalette";
 import { BIN, COUNT_BADGE, SCENE, TOKEN_COMPACT } from "../internal/data/additionLayout";
+import { NudgeLine, useNudge } from "../internal/ui/useNudge";
+import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
 import {
   drawPair,
   numberWord as say,
@@ -511,8 +513,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
    * lesson's generic tip — rather than at the sentence that explains this
    * particular no. So it is its own line, and the log stays honest.
    */
-  const [nudge, setNudge] = useState<string | null>(null);
-  const nudgeTimer = useRef<number | null>(null);
+  const nudge = useNudge(koda);
   const [nextStep, setNextStep] = useState<{ kind: string; kidMessage: string } | undefined>();
 
   /* The last number has to be *heard* before the round reacts to it — the
@@ -544,14 +545,10 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
     setMerged(false);
     setStartSide(null);
     setFingers({ left: 0, right: 0 });
-    setNudge(null);
-    if (nudgeTimer.current !== null) window.clearTimeout(nudgeTimer.current);
+    nudge.clear();
   }, [question.id, finishing]);
 
   // A pending nudge must not outlive the activity.
-  useEffect(() => () => {
-    if (nudgeTimer.current !== null) window.clearTimeout(nudgeTimer.current);
-  }, []);
 
   /* Every feature the manifest declares is read here. A flag nothing checks is
      a lie in the Skill Manager. */
@@ -566,13 +563,6 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
     if (chimes) koda.sound.play(type);
   };
 
-  /** Say why a move did not happen. Not an answer, and not a hint. */
-  const refuse = (why: string) => {
-    chime("hint");
-    setNudge(why);
-    if (nudgeTimer.current !== null) window.clearTimeout(nudgeTimer.current);
-    nudgeTimer.current = window.setTimeout(() => setNudge(null), 4000);
-  };
   const buzz = (kind: "tap" | "success") => {
     if (!vibrates) return;
     if (kind === "success") koda.haptics.success();
@@ -583,7 +573,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
   const countAloud = (n: number): Promise<void> => {
     if (!speaks) return Promise.resolve();
     return koda.speech
-      .say(say(n), { rate: koda.config.get("speechRate", 0.95) })
+      .say(say(n), speechRate(koda))
       .catch(() => {});
   };
 
@@ -647,7 +637,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
     if (value < bigger) {
       /* Not a wrong answer — a wrong *route*. The child has not said what the
          total is yet, so scoring this would file an answer they never gave. */
-      refuse(
+      nudge.refuse(
         `Starting at ${value} means counting ${bigger} more. Start at ${bigger} and there are only ${value} to count.`,
       );
       return;
@@ -681,7 +671,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
     if (round.feedback) return;
     const raised = fingers.left + fingers.right;
     if (raised === 0) {
-      refuse(`No fingers are up yet. Put ${question.a} on one hand and ${question.b} on the other.`);
+      nudge.refuse(`No fingers are up yet. Put ${question.a} on one hand and ${question.b} on the other.`);
       return;
     }
     const correct = raised === question.sum;
@@ -700,19 +690,13 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
     setMerged(true);
     chime("clink");
     buzz("tap");
-    if (speaks) void koda.speech.say("Put them together!", { rate: koda.config.get("speechRate", 0.95) });
+    if (speaks) void koda.speech.say("Put them together!", speechRate(koda));
   };
 
   const prompt = promptFor(question, copy.prompts?.default);
 
   /* The framing chip's wording, which a family may reword in Settings. Blank
      means "no opinion", so the kit's default applies. */
-  const tagLabels = {
-    warmup: koda.config.get("warmupLabel", "") || undefined,
-    activity: koda.config.get("activityLabel", "") || undefined,
-    guided: koda.config.get("guidedLabel", "") || undefined,
-    milestone: koda.config.get("milestoneLabel", "") || undefined,
-  };
 
   const tapsAllowed = !round.feedback;
   /** The bin a child counts on from stays closed; the other one opens. */
@@ -768,7 +752,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
       iconName={ICONS[question.mode]}
       iconTone="purple"
       contextTag={framesSteps ? undefined : null}
-      tagLabels={tagLabels}
+      tagLabels={tagLabelsFrom(koda)}
       hints={trayHints(question, {
         counted: counted.length,
         merged,
@@ -779,7 +763,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
       onExit={koda.ui.exit}
       onReadAloud={() => {
         round.useSupport("audio_replay");
-        void koda.speech.say(prompt, { rate: koda.config.get("speechRate", 0.95) });
+        void koda.speech.say(prompt, speechRate(koda));
       }}
       recommendation={nextStep}
     >
@@ -874,17 +858,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
           )}
         </div>
 
-        {nudge && (
-          <motion.p
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={SPRING.enter}
-            role="status"
-            className="text-center text-sm font-semibold text-ink/70 px-4"
-          >
-            {nudge}
-          </motion.p>
-        )}
+        <NudgeLine nudge={nudge} />
 
         {question.mode === "combine" && !merged && (
           <div className="flex justify-center">

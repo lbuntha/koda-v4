@@ -13,6 +13,8 @@ import {
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B } from "../internal/data/additionPalette";
 import { FRAME_CELL, SCENE } from "../internal/data/additionLayout";
+import { NudgeLine, useNudge } from "../internal/ui/useNudge";
+import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
 import {
   drawPair,
   numberWord,
@@ -227,8 +229,7 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
   const seen = useRef(new Set<string>());
 
   const [filled, setFilled] = useState(0);
-  const [nudge, setNudge] = useState<string | null>(null);
-  const nudgeTimer = useRef<number | null>(null);
+  const nudge = useNudge(koda);
   const [nextStep, setNextStep] = useState<{ kind: string; kidMessage: string } | undefined>();
 
   const round = useSkillRound({
@@ -252,13 +253,9 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
   // Each question arrives with its given counters already in the frame.
   useEffect(() => {
     setFilled(question.given);
-    setNudge(null);
-    if (nudgeTimer.current !== null) window.clearTimeout(nudgeTimer.current);
+    nudge.clear();
   }, [question.id, question.given]);
 
-  useEffect(() => () => {
-    if (nudgeTimer.current !== null) window.clearTimeout(nudgeTimer.current);
-  }, []);
 
   const speaks = koda.config.isEnabled("audio_speech", true);
   const chimes = koda.config.isEnabled("sound_chimes", true);
@@ -271,13 +268,6 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
     if (chimes) koda.sound.play(type);
   };
 
-  /** Say why a move did not happen. Not an answer, and not a hint. */
-  const refuse = (why: string) => {
-    chime("hint");
-    setNudge(why);
-    if (nudgeTimer.current !== null) window.clearTimeout(nudgeTimer.current);
-    nudgeTimer.current = window.setTimeout(() => setNudge(null), 4000);
-  };
 
   const fillNext = () => {
     if (round.feedback || filled >= question.size) return;
@@ -287,7 +277,7 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
     chime("pop");
     if (speaks) {
       // The number the counter just made, which is the whole point of the tap.
-      void koda.speech.say(numberWord(next), { rate: koda.config.get("speechRate", 0.95) });
+      void koda.speech.say(numberWord(next), speechRate(koda));
     }
   };
 
@@ -295,7 +285,7 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
     if (round.feedback) return;
     const added = filled - question.given;
     if (added <= 0) {
-      refuse(
+      nudge.refuse(
         question.asks === "added"
           ? `Nothing has been added yet. Tap the empty spaces until the frame is full.`
           : `Tap ${question.added} empty spaces to add them to the frame.`,
@@ -342,17 +332,12 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
       iconName={question.size === 5 ? "layers" : "boxes"}
       iconTone="purple"
       contextTag={framesSteps ? undefined : null}
-      tagLabels={{
-        warmup: koda.config.get("warmupLabel", "") || undefined,
-        activity: koda.config.get("activityLabel", "") || undefined,
-        guided: koda.config.get("guidedLabel", "") || undefined,
-        milestone: koda.config.get("milestoneLabel", "") || undefined,
-      }}
+      tagLabels={tagLabelsFrom(koda)}
       hints={frameHints(question, { filled, kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
       onReadAloud={() => {
         round.useSupport("audio_replay");
-        void koda.speech.say(prompt, { rate: koda.config.get("speechRate", 0.95) });
+        void koda.speech.say(prompt, speechRate(koda));
       }}
       recommendation={nextStep}
     >
@@ -402,17 +387,7 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
           )}
         </div>
 
-        {nudge && (
-          <motion.p
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={SPRING.enter}
-            role="status"
-            className="text-center text-sm font-semibold text-ink/70 px-4"
-          >
-            {nudge}
-          </motion.p>
-        )}
+        <NudgeLine nudge={nudge} />
 
         <div className="flex justify-center">
           <motion.button

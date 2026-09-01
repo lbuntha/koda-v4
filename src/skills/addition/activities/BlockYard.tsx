@@ -12,6 +12,8 @@ import {
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B, CHANGE, TOTAL } from "../internal/data/additionPalette";
 import { BLOCK_FLAT, BLOCK_ROD, BLOCK_UNIT, SCENE } from "../internal/data/additionLayout";
+import { NudgeLine, useNudge } from "../internal/ui/useNudge";
+import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
 import {
   digitsOf,
   drawPair,
@@ -282,8 +284,7 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
   const seen = useRef(new Set<string>());
 
   const [built, setBuilt] = useState<Built>(EMPTY);
-  const [nudge, setNudge] = useState<string | null>(null);
-  const nudgeTimer = useRef<number | null>(null);
+  const nudge = useNudge(koda);
   const [nextStep, setNextStep] = useState<{ kind: string; kidMessage: string } | undefined>();
 
   const round = useSkillRound({
@@ -306,13 +307,9 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
 
   useEffect(() => {
     setBuilt(question.start);
-    setNudge(null);
-    if (nudgeTimer.current !== null) window.clearTimeout(nudgeTimer.current);
+    nudge.clear();
   }, [question.id, question.start]);
 
-  useEffect(() => () => {
-    if (nudgeTimer.current !== null) window.clearTimeout(nudgeTimer.current);
-  }, []);
 
   const speaks = koda.config.isEnabled("audio_speech", true);
   const chimes = koda.config.isEnabled("sound_chimes", true);
@@ -323,12 +320,6 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
 
   const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
     if (chimes) koda.sound.play(type);
-  };
-  const refuse = (why: string) => {
-    chime("hint");
-    setNudge(why);
-    if (nudgeTimer.current !== null) window.clearTimeout(nudgeTimer.current);
-    nudgeTimer.current = window.setTimeout(() => setNudge(null), 4500);
   };
 
   const place = (p: Place) => {
@@ -357,7 +348,7 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
     if (speaks) {
       void koda.speech.say(
         ready === "ones" ? "10 ones make 1 ten" : "10 tens make 1 hundred",
-        { rate: koda.config.get("speechRate", 0.95) },
+        speechRate(koda),
       );
     }
   };
@@ -372,7 +363,7 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
        * the thing the lesson is about, and scoring it would say they got the
        * arithmetic wrong when they got the exchange unfinished.
        */
-      refuse(
+      nudge.refuse(
         ready === "ones"
           ? `There are ${built.ones} ones in the yard. Bundle ten of them into a ten first.`
           : `There are ${built.tens} tens in the yard. Bundle ten of them into a hundred first.`,
@@ -382,7 +373,7 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
 
     const have = valueOf(built);
     if (have === 0) {
-      refuse("The yard is empty. Tap blocks in the tray to build the answer.");
+      nudge.refuse("The yard is empty. Tap blocks in the tray to build the answer.");
       return;
     }
 
@@ -422,17 +413,12 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
       iconName="boxes"
       iconTone="purple"
       contextTag={framesSteps ? undefined : null}
-      tagLabels={{
-        warmup: koda.config.get("warmupLabel", "") || undefined,
-        activity: koda.config.get("activityLabel", "") || undefined,
-        guided: koda.config.get("guidedLabel", "") || undefined,
-        milestone: koda.config.get("milestoneLabel", "") || undefined,
-      }}
+      tagLabels={tagLabelsFrom(koda)}
       hints={blockHints(question, { built, kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
       onReadAloud={() => {
         round.useSupport("audio_replay");
-        void koda.speech.say(prompt, { rate: koda.config.get("speechRate", 0.95) });
+        void koda.speech.say(prompt, speechRate(koda));
       }}
       recommendation={nextStep}
     >
@@ -489,17 +475,7 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
           )}
         </div>
 
-        {nudge && (
-          <motion.p
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={SPRING.enter}
-            role="status"
-            className="text-center text-sm font-semibold text-ink/70 px-4"
-          >
-            {nudge}
-          </motion.p>
-        )}
+        <NudgeLine nudge={nudge} />
 
         {/* The tray. An exchange lesson has nothing to add — its blocks are
             already in the yard, and the work is turning ten into one. */}

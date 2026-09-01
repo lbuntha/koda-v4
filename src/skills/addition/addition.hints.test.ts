@@ -7,8 +7,37 @@ import {
   trayHints,
   type TrayQuestion,
 } from "./activities/CountTray";
+import {
+  buildQuestion as buildFrame,
+  frameHints,
+  specFor as frameSpec,
+} from "./activities/FrameFill";
+import {
+  buildQuestion as buildBond,
+  bondHints,
+  specFor as bondSpec,
+} from "./activities/BondTree";
+import {
+  buildQuestion as buildJump,
+  jumpHints,
+  specFor as jumpSpec,
+} from "./activities/JumpLine";
+import {
+  buildQuestion as buildBlocks,
+  readyToBundle,
+  specFor as blockSpec,
+} from "./activities/BlockYard";
+import { buildQuestion as buildDesk, specFor as deskSpec } from "./activities/PlaceValueDesk";
+import { buildQuestion as buildChain, chainHints } from "./activities/ChainBoard";
+import {
+  buildQuestion as buildFact,
+  factHints,
+  specFor as factSpec,
+} from "./activities/FactDeck";
 import { COUNTABLES } from "./internal/data/additionAssets";
-
+import { isBridging, isRegrouping, carriesIn,
+  friendlyPairCount,
+} from "./internal/data/additionNumbers";
 /**
  * The hint ladder, tested against the state it claims to describe.
  *
@@ -192,17 +221,6 @@ describe("a lesson narrows a mode without erasing it", () => {
   });
 });
 
-import {
-  buildQuestion as buildFrame,
-  frameHints,
-  specFor as frameSpec,
-} from "./activities/FrameFill";
-import {
-  buildQuestion as buildBond,
-  bondHints,
-  specFor as bondSpec,
-} from "./activities/BondTree";
-import { isBridging, isRegrouping } from "./internal/data/additionNumbers";
 
 describe("the frame asks one of two different questions", () => {
   it("asks for the total when counters are added to a frame", () => {
@@ -292,11 +310,6 @@ describe("the bond keeps each mode's shape", () => {
   });
 });
 
-import {
-  buildQuestion as buildJump,
-  jumpHints,
-  specFor as jumpSpec,
-} from "./activities/JumpLine";
 
 describe("the number line keeps each mode's shape", () => {
   it("never starts a bridging question already on the round number", () => {
@@ -361,16 +374,6 @@ describe("the number line keeps each mode's shape", () => {
   });
 });
 
-import {
-  buildQuestion as buildBlocks,
-  readyToBundle,
-  specFor as blockSpec,
-} from "./activities/BlockYard";
-import {
-  buildQuestion as buildDesk,
-  specFor as deskSpec,
-} from "./activities/PlaceValueDesk";
-import { carriesIn } from "./internal/data/additionNumbers";
 
 describe("the block yard keeps each mode's shape", () => {
   it("starts an exchange lesson holding ten of something", () => {
@@ -441,11 +444,6 @@ describe("the chart keeps each mode's shape", () => {
   });
 });
 
-import {
-  buildQuestion as buildFact,
-  factHints,
-  specFor as factSpec,
-} from "./activities/FactDeck";
 
 describe("the fact deck keeps each mode's shape", () => {
   it("makes a double out of one number twice", () => {
@@ -512,6 +510,47 @@ describe("the fact deck keeps each mode's shape", () => {
     expect(before).toContain("Tap the double first");
     const [, after] = factHints(q, { revealed: true });
     expect(after).toContain("6 and 6 is 12");
+  });
+});
+
+describe("the chain board keeps each mode's shape", () => {
+  it("hides exactly one pair that makes ten", () => {
+    // A second hidden ten would make a child's correct answer look wrong.
+    const seen = new Set<string>();
+    for (let i = 0; i < 40; i += 1) {
+      const q = buildChain({ mode: "pairs", count: 4, target: 10 }, i + 1, seen);
+      expect(q.values).toHaveLength(4);
+      expect(friendlyPairCount(q.values, 10), q.values.join(" + ")).toBe(1);
+      expect(q.sum).toBe(q.values.reduce((t, n) => t + n, 0));
+    }
+  });
+
+  it("hides two pairs when the lesson asks for two", () => {
+    const seen = new Set<string>();
+    for (let i = 0; i < 30; i += 1) {
+      const q = buildChain({ mode: "compatible", count: 5, target: 10, pairsWanted: 2 }, i + 1, seen);
+      expect(friendlyPairCount(q.values, 10), q.values.join(" + ")).toBe(2);
+    }
+  });
+
+  it("keeps a free chain inside its ceiling", () => {
+    const seen = new Set<string>();
+    for (let i = 0; i < 30; i += 1) {
+      const q = buildChain({ mode: "chain", count: 4, addendRange: [2, 15], totalMax: 40 }, i + 1, seen);
+      expect(q.sum).toBeLessThanOrEqual(40);
+      expect(q.values).toHaveLength(4);
+    }
+  });
+
+  it("counts the pairs still on the board, not the ones it started with", () => {
+    const seen = new Set<string>();
+    const q = buildChain({ mode: "pairs", count: 4, target: 10 }, 1, seen);
+    const chips = q.values.map((value, i) => ({ id: `c${i}`, value, merged: false }));
+    const [, before] = chainHints(q, { chips, step: 0 });
+    expect(before).toContain("make 10");
+    // Once the pair is gone the hint has to stop promising one.
+    const [, after] = chainHints(q, { chips: [{ id: "m", value: q.sum, merged: true }], step: 0 });
+    expect(after).toContain("One chip left");
   });
 });
 

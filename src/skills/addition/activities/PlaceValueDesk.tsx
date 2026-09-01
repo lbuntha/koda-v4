@@ -12,6 +12,8 @@ import {
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B, TOTAL } from "../internal/data/additionPalette";
 import { SCENE } from "../internal/data/additionLayout";
+import { NudgeLine, useNudge } from "../internal/ui/useNudge";
+import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
 import {
   digitsOf,
   drawPair,
@@ -275,8 +277,7 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
   const seen = useRef(new Set<string>());
 
   const [entries, setEntries] = useState<Record<string, string>>({});
-  const [nudge, setNudge] = useState<string | null>(null);
-  const nudgeTimer = useRef<number | null>(null);
+  const nudge = useNudge(koda);
   const [nextStep, setNextStep] = useState<{ kind: string; kidMessage: string } | undefined>();
 
   const round = useSkillRound({
@@ -299,13 +300,9 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
 
   useEffect(() => {
     setEntries({});
-    setNudge(null);
-    if (nudgeTimer.current !== null) window.clearTimeout(nudgeTimer.current);
+    nudge.clear();
   }, [question.id]);
 
-  useEffect(() => () => {
-    if (nudgeTimer.current !== null) window.clearTimeout(nudgeTimer.current);
-  }, []);
 
   const chimes = koda.config.isEnabled("sound_chimes", true);
   const vibrates = koda.config.isEnabled("haptic_feedback", true);
@@ -314,18 +311,12 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
   const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
     if (chimes) koda.sound.play(type);
   };
-  const refuse = (why: string) => {
-    chime("hint");
-    setNudge(why);
-    if (nudgeTimer.current !== null) window.clearTimeout(nudgeTimer.current);
-    nudgeTimer.current = window.setTimeout(() => setNudge(null), 4000);
-  };
 
   const check = () => {
     if (round.feedback) return;
     const missing = question.blanks.filter((id) => (entries[id] ?? "") === "");
     if (missing.length > 0) {
-      refuse(
+      nudge.refuse(
         missing.length === question.blanks.length
           ? "Fill in the boxes, then check."
           : `${missing.length} ${missing.length === 1 ? "box is" : "boxes are"} still empty.`,
@@ -369,17 +360,12 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
       iconName="layers"
       iconTone="indigo"
       contextTag={framesSteps ? undefined : null}
-      tagLabels={{
-        warmup: koda.config.get("warmupLabel", "") || undefined,
-        activity: koda.config.get("activityLabel", "") || undefined,
-        guided: koda.config.get("guidedLabel", "") || undefined,
-        milestone: koda.config.get("milestoneLabel", "") || undefined,
-      }}
+      tagLabels={tagLabelsFrom(koda)}
       hints={deskHints(question, { entries, kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
       onReadAloud={() => {
         round.useSupport("audio_replay");
-        void koda.speech.say(prompt, { rate: koda.config.get("speechRate", 0.95) });
+        void koda.speech.say(prompt, speechRate(koda));
       }}
       recommendation={nextStep}
     >
@@ -442,17 +428,7 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
           </table>
         </div>
 
-        {nudge && (
-          <motion.p
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={SPRING.enter}
-            role="status"
-            className="text-center text-sm font-semibold text-ink/70 px-4"
-          >
-            {nudge}
-          </motion.p>
-        )}
+        <NudgeLine nudge={nudge} />
 
         <div className="flex justify-center">
           <motion.button
