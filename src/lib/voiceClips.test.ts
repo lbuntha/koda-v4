@@ -244,3 +244,58 @@ describe("reactions belong to the skill that recorded them", () => {
     expect(mod.groupSize("correct", "addition")).toBe(1);
   });
 });
+
+/**
+ * Who has the speaker.
+ *
+ * A skill talks at a child; the voice coach talks with them, over an open
+ * microphone. Counting "four, five, six" over the top of Koda is not just rude
+ * — the mic hears the count and answers it as though the child had spoken.
+ */
+describe("the voice floor", () => {
+  it("silences a skill's praise while Koda has the floor", async () => {
+    const { playReaction, holdVoiceFloor } = await withClips();
+
+    expect(playReaction("correct")).toBe(true);
+    played = [];
+
+    const release = holdVoiceFloor("voice-coach");
+    expect(playReaction("correct"), "a skill spoke over the coach").toBe(false);
+    expect(played).toHaveLength(0);
+
+    release();
+    expect(playReaction("correct")).toBe(true);
+  });
+
+  it("cuts off the line already playing when the floor is taken", async () => {
+    // A child taps Koda mid-count, which is exactly when this happens: the
+    // number in flight has to stop rather than finish over the greeting.
+    const { playClip, holdVoiceFloor } = await withClips();
+    expect(playClip("three")).toBe(true);
+    const stopped = played.at(-1)!.pause;
+
+    holdVoiceFloor("voice-coach");
+    expect(stopped).toHaveBeenCalled();
+  });
+
+  it("tells the caller the speaker is taken", async () => {
+    const { holdVoiceFloor, voiceFloorHeld } = await withClips();
+    expect(voiceFloorHeld()).toBe(false);
+    const release = holdVoiceFloor("voice-coach");
+    expect(voiceFloorHeld()).toBe(true);
+    release();
+    expect(voiceFloorHeld()).toBe(false);
+  });
+
+  it("a stale release cannot hand the speaker back under a live holder", async () => {
+    // A modal that has been replaced still runs its cleanup. If that cleared
+    // the floor, the skill would start talking over the conversation that
+    // replaced it.
+    const { holdVoiceFloor, voiceFloorHeld } = await withClips();
+    const releaseFirst = holdVoiceFloor("first");
+    holdVoiceFloor("second");
+    releaseFirst();
+    expect(voiceFloorHeld(), "a stale cleanup released a live floor").toBe(true);
+  });
+});
+

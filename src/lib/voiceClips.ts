@@ -38,6 +38,21 @@ interface VoiceRegistry {
   /** phrase -> URL of its recording. */
   clips: Map<string, string>;
   /**
+   * Who currently has the speaker, or null when it is free.
+   *
+   * A skill talks *at* a child — a number on every tap, a word of praise on
+   * every answer. The voice coach talks *with* them, over a live microphone.
+   * Those cannot share a speaker: counting "four, five, six" over the top of
+   * Koda mid-sentence is unusable, and because the coach's mic is open it also
+   * feeds the count straight back into the conversation as if the child had
+   * said it.
+   *
+   * So the coach takes the floor for as long as it is live, and the skill
+   * yields. One flag rather than a per-skill setting: a child talking to Koda
+   * wants Koda, whichever lesson they happen to be inside.
+   */
+  floor: string | null;
+  /**
    * group name -> the URLs that can answer it.
    *
    * A reaction is several recordings of the same intent, so that "correct" is
@@ -55,6 +70,7 @@ type GlobalWithRegistry = typeof globalThis & { [REGISTRY]?: VoiceRegistry };
 
 const registry: VoiceRegistry = ((globalThis as GlobalWithRegistry)[REGISTRY] ??= {
   clips: new Map(),
+  floor: null,
   groups: new Map(),
   lastPlayed: new Map(),
 });
@@ -236,6 +252,33 @@ export const stopClip = (): void => {
   settle();
 };
 
+/**
+ * Take the speaker, and silence whatever a skill was saying.
+ *
+ * Returns the release. Held here rather than in React state because the two
+ * things that have to agree are not components: a modal decides the coach is
+ * live, and an SDK method several trees away decides whether to speak. Passing
+ * that down as a prop would mean every activity threading a flag it never
+ * reads, and forgetting it would be silent.
+ *
+ * Re-entrant by owner: releasing only clears the floor if you are still the one
+ * holding it, so a late cleanup from a modal that has already been replaced
+ * cannot hand the speaker back while the new one is talking.
+ */
+export const holdVoiceFloor = (owner: string): (() => void) => {
+  registry.floor = owner;
+  // Mid-word is exactly when this happens — a child taps Koda while a count is
+  // still being spoken — so the line in flight stops rather than finishing over
+  // the top of the greeting.
+  stopClip();
+  return () => {
+    if (registry.floor === owner) registry.floor = null;
+  };
+};
+
+/** Whether something other than a skill currently owns the speaker. */
+export const voiceFloorHeld = (): boolean => registry.floor !== null;
+
 const { lastPlayed } = registry;
 
 /**
@@ -251,6 +294,10 @@ const { lastPlayed } = registry;
  * child notices, which is exactly what having variants was meant to avoid.
  */
 export const playReaction = (name: string, rate = 1, skillId?: string): boolean => {
+  // Praise is the most interrupting thing a skill says, and the least missed:
+  // it lands on every answer, and a child mid-conversation with Koda has not
+  // asked for it.
+  if (voiceFloorHeld()) return false;
   /*
    * This skill's own reactions, or the unscoped pool if it has none.
    *

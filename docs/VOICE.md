@@ -38,6 +38,97 @@ it.
 
 ---
 
+## Who has the speaker
+
+Two things in this app talk. A skill talks **at** a child — a number on every
+tap, a word of praise on every answer. The voice coach (Ask Koda, the live
+session) talks **with** them, over an open microphone.
+
+They cannot share a speaker, and the reason is not politeness. The coach's
+microphone is live, so a lesson counting *"four, five, six"* over the top of it
+is picked up and answered **as though the child had said it**. The conversation
+derails and nobody can see why.
+
+So there is one rule:
+
+> **While the voice coach is live, a skill says nothing.**
+
+### How it works
+
+One flag, held on the same global registry the clips use:
+
+```ts
+import { holdVoiceFloor, voiceFloorHeld } from "lib/voiceClips";
+
+const release = holdVoiceFloor("voice-coach");  // take it; returns the release
+voiceFloorHeld();                               // is someone else talking?
+release();                                      // give it back
+```
+
+Three places implement the rule, and that is all of them:
+
+| Where | What it does |
+|---|---|
+| `LiveVoiceCoachModal` | Holds the floor while its session is live; the effect cleanup releases it, so closing the modal, leaving the round or unmounting all give it back |
+| `createKodaSDK.speech.say()` | Returns early — **every** line **every** skill speaks goes through here |
+| `playReaction` | Yields too, because praise bypasses `say()` and fires on every answer |
+
+`holdVoiceFloor` also calls `stopClip()`, because mid-word is exactly when this
+happens: a child taps Koda while a number is still being spoken.
+
+### What a skill author has to do
+
+**Nothing.** That is the point of putting the gate in the SDK. Counting,
+addition and every skill after them inherit it by calling `koda.speech.say()`,
+which they already do.
+
+What *would* break it is going around the SDK. A skill must never:
+
+- import `playClip` or `playReaction` from `lib/voiceClips` directly,
+- call `window.speechSynthesis` or `new Audio()` itself,
+- or fetch `/api/tutor/speech` on its own.
+
+`docs/PLUGINS.md` already forbids all three — "touch the host only through the
+injected `koda`, including sound, haptics and speech" — and this is one of the
+things that rule was protecting.
+
+### Two deliberate boundaries
+
+**Chimes and haptics still fire.** `koda.sound.play()` is a pop, not a sentence,
+and silencing every tap would make a lesson feel dead while a child is reading
+the screen mid-conversation. If a live mic picking up pops turns out to matter,
+the gate goes in `playSound` and nowhere else — one line, same flag.
+
+**`say()` resolves, it does not reject.** `useSkillRound` awaits the last spoken
+number before submitting an answer. A suppressed line that threw, or never
+settled, would leave a round stuck behind a sound that was never going to play.
+
+### Adding another holder
+
+Anything else that takes over the speaker — a video, a read-aloud story, a
+second live mode — holds the floor the same way, with its own owner name:
+
+```ts
+useEffect(() => {
+  if (!playing) return;
+  return holdVoiceFloor("story-player");
+}, [playing]);
+```
+
+Release only clears the floor if you are still the one holding it, so a stale
+cleanup from a component that has already been replaced cannot hand the speaker
+back while a newer holder is talking.
+
+### Testing it
+
+`src/skills/sdk/createKodaSDK.test.ts` holds the rule for every skill at once —
+a skill speaks when the floor is free, says nothing while it is held, does not
+even reach the network for a line nobody will hear, and speaks again on release.
+`src/lib/voiceClips.test.ts` covers the floor itself, including the stale-release
+case. A new skill needs no test of its own for this.
+
+---
+
 ## Recording
 
 The key goes in `.env`, beside the one the server already reads:

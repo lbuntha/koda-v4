@@ -448,7 +448,14 @@ objects become a numeral tile. Fourteen shapes beside one shape is a blob beside
 thing: a child cannot see "fourteen" in it, so the shapes buy nothing and invite
 counting where the lesson is a rule.
 
-**6. Recorded speech is shared, so praise must be scoped.** The clip registry is one
+**6. A skill goes quiet while a child is talking to Koda.** Automatic — every
+engine gets it by calling `koda.speech.say()`, which they all do. The only way to
+break it is to reach past the SDK to `playClip`, `new Audio()` or
+`window.speechSynthesis`. `docs/VOICE.md` § "Who has the speaker" is the rule;
+`createKodaSDK.test.ts` holds it for every skill at once, so a new engine needs no
+test of its own for it.
+
+**7. Recorded speech is shared, so praise must be scoped.** The clip registry is one
 global `Map<phrase, url>`, keyed by phrase text and not by skill. Two consequences:
 addition's number words already play from counting's recordings, and addition's rounds
 currently play counting's praise — *"Brilliant counting!"* after 7 + 3. See §7.5.

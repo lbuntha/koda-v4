@@ -8,7 +8,7 @@ import {
   setSoundEnabled,
   speakWebSpeech,
 } from "../../utils/audio";
-import { playClip, stopClip } from "../../lib/voiceClips";
+import { playClip, stopClip, voiceFloorHeld } from "../../lib/voiceClips";
 import { triggerHaptic, triggerTapPopHaptic } from "../../utils/haptics";
 import type {
   KodaSDK,
@@ -147,6 +147,20 @@ export function createKodaSDK(
        */
       async say(text: string, opts?: { rate?: number }) {
         if (!text) return;
+
+        /*
+         * Yield to Koda.
+         *
+         * While the voice coach is live, the child is in a conversation over an
+         * open microphone. A skill counting "four, five, six" over the top of it
+         * is not merely rude — the count is picked up by the mic and answered as
+         * though the child had said it. Every line a skill speaks goes through
+         * here, so this is the one place the rule has to hold.
+         *
+         * Resolves rather than rejects: a caller may be awaiting this before it
+         * submits an answer, and a round must never stall on a sound.
+         */
+        if (voiceFloorHeld()) return;
 
         // A recorded line first, and synchronously: this is the whole point.
         // Counting speaks a number on every tap, and asking Gemini for "three"
