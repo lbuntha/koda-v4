@@ -39,6 +39,7 @@ import {
   specFor as columnSpec,
 } from "./activities/ColumnPad";
 import { buildQuestion as buildEstimate, estimateHints } from "./activities/EstimateDial";
+import { buildQuestion as buildStory, type StoryMemory } from "./activities/StoryBoard";
 import {
   buildQuestion as buildFact,
   factHints,
@@ -686,6 +687,91 @@ describe("estimating asks for an estimate, not the answer", () => {
     const q = buildEstimate({ mode: "reasonable", digits: 3 }, 1, seen);
     const rungs = estimateHints(q, { rounded: [] });
     expect(rungs.at(-1)).toContain("Is it close, far too big, or far too small?");
+  });
+});
+
+describe("story problems put the empty box where the type says", () => {
+  const memory = () => ({ current: null as StoryMemory | null });
+
+  it("asks for the whole when both parts are given", () => {
+    const q = buildStory({ mode: "join" }, 1, new Set(), memory());
+    const slots = q.rows.flatMap((r) => r.slots);
+    expect(slots.filter((s) => s.value === undefined)).toHaveLength(0);
+    expect(q.chips).toHaveLength(2);
+    expect(q.answer).toBe(q.chips[0] + q.chips[1]);
+  });
+
+  it("tells change-unknown and start-unknown apart by which box is empty", () => {
+    // The same three numbers and the same arithmetic. Which box is empty is the
+    // entire difference, and it is the only thing a child has to read.
+    const change = buildStory({ mode: "change_unknown" }, 1, new Set(), memory());
+    const start = buildStory({ mode: "start_unknown" }, 1, new Set(), memory());
+
+    const emptyOf = (q: typeof change) =>
+      q.rows.flatMap((r) => r.slots).find((s) => s.value === undefined)!.id;
+
+    expect(emptyOf(change)).toBe("change");
+    expect(emptyOf(start)).toBe("start");
+    // Both know the whole, and both hand the child exactly one number.
+    for (const q of [change, start]) {
+      expect(q.rows[0].whole).toBeDefined();
+      expect(q.chips).toHaveLength(1);
+    }
+  });
+
+  it("draws a comparison as two bars, lined up", () => {
+    const q = buildStory({ mode: "compare" }, 1, new Set(), memory());
+    expect(q.rows).toHaveLength(2);
+    expect(q.rows[0].slots).toHaveLength(1);
+    expect(q.rows[1].slots).toHaveLength(2);
+    // The longer bar starts by matching the shorter one.
+    expect(q.rows[1].slots[0].value).toBe(q.rows[0].slots[0].value);
+    expect(q.answer).toBe(q.rows[1].slots[0].value! + q.rows[1].slots[1].value!);
+  });
+
+  it("carries a multi-step story across two questions", () => {
+    const mem = memory();
+    const seen = new Set<string>();
+    const first = buildStory({ mode: "multi_step" }, 1, seen, mem);
+    const second = buildStory({ mode: "multi_step" }, 2, seen, mem);
+
+    expect(first.step).toBe(1);
+    expect(second.step).toBe(2);
+    // Same story, and the second step starts from the first step's answer.
+    expect(second.text).toBe(first.text);
+    expect(second.chips).toContain(first.answer);
+    expect(second.answer).toBeGreaterThan(first.answer);
+    expect(first.taskKind).toBe("story_multi_step_step1");
+    expect(second.taskKind).toBe("story_multi_step_step2");
+
+    // A third question starts a fresh story rather than repeating the second.
+    const third = buildStory({ mode: "multi_step" }, 3, seen, mem);
+    expect(third.step).toBe(1);
+  });
+
+  it("uses the lesson's own sentence, and fills it in", () => {
+    // Code fills the placeholders; code never writes a sentence. The wording of
+    // a word problem is curriculum and belongs where a teacher can edit it.
+    const q = buildStory(
+      { mode: "join", stories: ["{name} had {a} {thing} and got {b} more."], startRange: [4, 4], changeRange: [3, 3] },
+      1,
+      new Set(),
+      memory(),
+    );
+    expect(q.text).toMatch(/^\w+ had 4 \w+ and got 3 more\.$/);
+    expect(q.text).not.toContain("{");
+  });
+});
+
+describe("controls stay tellable apart when two numbers match", () => {
+  it("gives each rounding dial its own name", () => {
+    // 47 + 47 is a perfectly good question, and it produced two dials whose
+    // buttons read identically — so both taps landed on the first one and the
+    // second addend was never rounded.
+    const seen = new Set<string>();
+    const q = buildEstimate({ mode: "round_estimate", digits: 2 }, 1, seen);
+    expect(q.around).toHaveLength(2);
+    expect(q.around[0]).not.toBe(q.around[1]);
   });
 });
 

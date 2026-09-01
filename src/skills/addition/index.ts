@@ -11,6 +11,7 @@ import { FactDeck } from "./activities/FactDeck";
 import { ChainBoard } from "./activities/ChainBoard";
 import { ColumnPad } from "./activities/ColumnPad";
 import { EstimateDial } from "./activities/EstimateDial";
+import { StoryBoard } from "./activities/StoryBoard";
 import { registerSkillArt } from "../../assets/svg/skillArt";
 import { registerSkillVoice } from "../../lib/voiceClips";
 import audioManifest from "./audio/manifest.json";
@@ -151,6 +152,12 @@ export const skill: Skill = {
       name: "Estimate and Check",
       defaultParams: { mode: "round_estimate", digits: 2, questionsPerRound: 5 },
       component: EstimateDial,
+    },
+    story: {
+      id: "story",
+      name: "Story Problems",
+      defaultParams: { mode: "join", questionsPerRound: 5 },
+      component: StoryBoard,
     },
   },
 };

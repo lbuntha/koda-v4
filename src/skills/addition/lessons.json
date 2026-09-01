@@ -2383,6 +2383,367 @@
         6,
         8
       ]
+    },
+    {
+      "id": "join-problems",
+      "title": "Getting More",
+      "concept": "A Quantity That Grows",
+      "conceptKey": "join-modeler",
+      "requires": [
+        "running-total"
+      ],
+      "activity": "addition/story",
+      "params": {
+        "level": 46,
+        "question": {
+          "mode": "join",
+          "startRange": [
+            3,
+            20
+          ],
+          "changeRange": [
+            2,
+            15
+          ],
+          "stories": [
+            "{name} had {a} {thing}. Then {name} found {b} more. How many {thing} now?",
+            "{name} picked {a} {thing} on Monday and {b} more on Tuesday. How many altogether?",
+            "There were {a} {thing} in the box. {other} put in {b} more. How many now?"
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "story_board",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Story Problems",
+          "shortDesc": "Model a story where something is added, then find the new total",
+          "targetObjective": "Both parts are known. The bar asks for the whole.",
+          "stepByStep": [
+            "Read the story — or tap the speaker to hear it.",
+            "Put each number the story gives you into its box.",
+            "The empty box is what you are asked for."
+          ],
+          "kidTip": "Both parts are known. The bar asks for the whole.",
+          "audioPrompt": "Getting more! Something is added — how many are there now?",
+          "prompts": {
+            "default": "{text}"
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "📖",
+      "iconName": "search",
+      "iconTone": "pink",
+      "pedagogyTip": "The simplest story type, and the one that makes the bar model worth trusting before the harder types need it.",
+      "standards": [
+        "CCSS.1.OA.A.1"
+      ],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "part-part-whole",
+      "title": "Two Kinds, One Total",
+      "concept": "Parts That Make a Whole",
+      "conceptKey": "part-part-whole",
+      "requires": [
+        "join-modeler"
+      ],
+      "activity": "addition/story",
+      "params": {
+        "level": 47,
+        "question": {
+          "mode": "ppw",
+          "partRange": [
+            3,
+            25
+          ],
+          "stories": [
+            "{name} has {a} red {thing} and {b} blue {thing}. How many {thing} altogether?",
+            "There are {a} big {thing} and {b} small {thing} in the jar. How many is that?",
+            "{name} has {a} {thing} and {other} has {b}. How many do they have together?"
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "story_board",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Story Problems",
+          "shortDesc": "Model a story where two groups are counted together",
+          "targetObjective": "Nothing changes here — two groups are simply counted together.",
+          "stepByStep": [
+            "Read the story.",
+            "Put each group into its own box.",
+            "The whole is what you are asked for."
+          ],
+          "kidTip": "Nothing changes here — two groups are simply counted together.",
+          "audioPrompt": "Two kinds, one total! Two groups counted together.",
+          "prompts": {
+            "default": "{text}"
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🧺",
+      "iconName": "search",
+      "iconTone": "pink",
+      "pedagogyTip": "Nothing moves in a part-part-whole story, which is what makes it different from a join even though the arithmetic is identical.",
+      "standards": [
+        "CCSS.1.OA.A.1"
+      ],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "change-unknown",
+      "title": "How Many More?",
+      "concept": "The Change Is Missing",
+      "conceptKey": "change-unknown",
+      "requires": [
+        "join-modeler"
+      ],
+      "activity": "addition/story",
+      "params": {
+        "level": 48,
+        "question": {
+          "mode": "change_unknown",
+          "startRange": [
+            5,
+            30
+          ],
+          "changeRange": [
+            2,
+            20
+          ],
+          "stories": [
+            "{name} had {a} {thing}. Now {name} has {b}. How many more did {name} get?",
+            "There were {a} {thing} in the box. Now there are {b}. How many were put in?",
+            "{name} started with {a} {thing} and ended with {b}. How many did {name} collect?"
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "story_board",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Story Problems",
+          "shortDesc": "Model a story where the total is known but the change is not",
+          "targetObjective": "You know where it started and where it ended. The middle is missing.",
+          "stepByStep": [
+            "Read the story — the total is already known.",
+            "Put the starting number in its box.",
+            "The empty box is how many were added."
+          ],
+          "kidTip": "You know where it started and where it ended. The middle is missing.",
+          "audioPrompt": "How many more? You know the start and the end — find what was added.",
+          "prompts": {
+            "default": "{text}"
+          }
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "❓",
+      "iconName": "search",
+      "iconTone": "pink",
+      "pedagogyTip": "The same three numbers as a join, with a different one missing. Which box is empty is the entire difficulty.",
+      "standards": [
+        "CCSS.1.OA.A.1",
+        "CCSS.2.OA.A.1"
+      ],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "start-unknown",
+      "title": "Where Did It Start?",
+      "concept": "The Beginning Is Missing",
+      "conceptKey": "start-unknown",
+      "requires": [
+        "change-unknown"
+      ],
+      "activity": "addition/story",
+      "params": {
+        "level": 49,
+        "question": {
+          "mode": "start_unknown",
+          "changeRange": [
+            3,
+            20
+          ],
+          "startRange": [
+            5,
+            40
+          ],
+          "stories": [
+            "{name} found {a} more {thing}. Now {name} has {b}. How many {thing} did {name} start with?",
+            "{other} gave {name} {a} {thing}. Now {name} has {b}. How many did {name} have before?",
+            "{a} {thing} were added to the box. Now there are {b}. How many were there first?"
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "story_board",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Story Problems",
+          "shortDesc": "Model a story where the ending is known but the beginning is not",
+          "targetObjective": "You know what was added and where it ended. The start is missing.",
+          "stepByStep": [
+            "Read the story — the total is known.",
+            "Put the number that was added into its box.",
+            "The empty box is what there was to begin with."
+          ],
+          "kidTip": "You know what was added and where it ended. The start is missing.",
+          "audioPrompt": "Where did it start? You know what was added and what there is now.",
+          "prompts": {
+            "default": "{text}"
+          }
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🔎",
+      "iconName": "search",
+      "iconTone": "pink",
+      "pedagogyTip": "The hardest of the addition types: the story runs forward and the thinking runs backward, and only the bar makes that safe.",
+      "standards": [
+        "CCSS.2.OA.A.1"
+      ],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "comparison-problems",
+      "title": "How Many Altogether?",
+      "concept": "Comparing Two Amounts",
+      "conceptKey": "compare-modeler",
+      "requires": [
+        "start-unknown"
+      ],
+      "activity": "addition/story",
+      "params": {
+        "level": 50,
+        "question": {
+          "mode": "compare",
+          "partRange": [
+            4,
+            30
+          ],
+          "differenceRange": [
+            2,
+            15
+          ],
+          "stories": [
+            "{name} has {a} {thing}. {other} has {b} more than {name}. How many does {other} have?",
+            "{name} collected {a} {thing}. {other} collected {b} more. How many did {other} collect?"
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "story_board",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Story Problems",
+          "shortDesc": "Model a story where one person has a number more than another",
+          "targetObjective": "Two bars, lined up. The longer one is the smaller amount plus the difference.",
+          "stepByStep": [
+            "Read the story — someone has more than someone else.",
+            "Build the shorter bar, then match it on the longer one.",
+            "Add the extra to find the bigger amount."
+          ],
+          "kidTip": "Two bars, lined up. The longer one is the smaller amount plus the difference.",
+          "audioPrompt": "How many altogether? One has more than the other — how many is that?",
+          "prompts": {
+            "default": "{text}"
+          }
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "⚖️",
+      "iconName": "scale",
+      "iconTone": "pink",
+      "pedagogyTip": "A comparison is two bars rather than one, and lining them up is what turns 'more than' from words into a length.",
+      "standards": [
+        "CCSS.2.OA.A.1"
+      ],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "multi-step-problems",
+      "title": "Two Steps",
+      "concept": "A Story with Two Changes",
+      "conceptKey": "multi-step-solver",
+      "requires": [
+        "compare-modeler"
+      ],
+      "activity": "addition/story",
+      "params": {
+        "level": 51,
+        "question": {
+          "mode": "multi_step",
+          "partRange": [
+            3,
+            40
+          ],
+          "changeRange": [
+            3,
+            20
+          ],
+          "stories": [
+            "{name} had {a} {thing}. {other} gave {name} {b} more, and then {c} more. How many now?",
+            "There were {a} {thing} in the jar. {name} added {b}, then {other} added {c}. How many now?"
+          ],
+          "questionsPerRound": 6
+        },
+        "play": {
+          "mode": "story_board",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Story Problems",
+          "shortDesc": "Work a story that changes twice, one step at a time",
+          "targetObjective": "Answer the first change, then carry that answer into the second.",
+          "stepByStep": [
+            "Read the whole story before you start.",
+            "Work out where things stood after the first change.",
+            "Then carry that number into the second change."
+          ],
+          "kidTip": "Answer the first change, then carry that answer into the second.",
+          "audioPrompt": "Two steps! Something changes twice — take it one change at a time.",
+          "prompts": {
+            "default": "{text}"
+          }
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🪜",
+      "iconName": "search",
+      "iconTone": "pink",
+      "pedagogyTip": "Two steps is where children stop and answer the first question as if it were the last. Asking for the middle number on purpose is what stops that.",
+      "standards": [
+        "CCSS.3.OA.D.8"
+      ],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        8,
+        9
+      ]
     }
   ]
 }

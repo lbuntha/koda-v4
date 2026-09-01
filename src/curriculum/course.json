@@ -201,7 +201,22 @@
       "icon": "🤔",
       "lessons": [
         "addition/is-it-reasonable",
-        "addition/missing-addend"
+        "addition/missing-addend",
+        "addition/join-problems",
+        "addition/part-part-whole"
+      ]
+    },
+    {
+      "id": "u17",
+      "unitNumber": 17,
+      "title": "Unit 17: Stories with Something Missing",
+      "description": "When the change, the start or the comparison is what you are after",
+      "icon": "📖",
+      "lessons": [
+        "addition/change-unknown",
+        "addition/start-unknown",
+        "addition/comparison-problems",
+        "addition/multi-step-problems"
       ]
     }
   ]

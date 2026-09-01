@@ -17,7 +17,7 @@ import { skill } from ".";
  * missing `expected` fails here instead of passing quietly.
  */
 
-const { tray, frames, bonds, numberline, base10, chart, facts, multi, column, estimate } =
+const { tray, frames, bonds, numberline, base10, chart, facts, multi, column, estimate, story } =
   skill.activities;
 
 const expected = (h: ActivityHarness): string => {
@@ -640,8 +640,8 @@ describe("estimating plays a standard round", () => {
       async (h) => {
         // Every rounding button says what it rounds, so the driver can pick the
         // nearer one the same way a child reads it.
-        for (const label of h.buttons().filter((b) => /^Round \d+ to \d+$/.test(b))) {
-          const [, value, to] = /^Round (\d+) to (\d+)$/.exec(label)!;
+        for (const label of h.buttons().filter((b) => /number: round \d+ to \d+$/.test(b))) {
+          const [, value, to] = /round (\d+) to (\d+)$/.exec(label)!;
           const lower = Math.floor(Number(value) / 10) * 10;
           const nearer = Number(value) - lower < 5 ? lower : lower + 10;
           if (Number(to) === nearer) await h.press(label);
@@ -654,13 +654,13 @@ describe("estimating plays a standard round", () => {
 
   it("rounding the wrong way is refused, not scored", async () => {
     const h = renderActivity(estimate, { params: { mode: "round_estimate", digits: 2 }, level: 43 });
-    const [label] = h.buttons().filter((b) => /^Round \d+ to \d+$/.test(b));
-    const [, value, to] = /^Round (\d+) to (\d+)$/.exec(label)!;
+    const [label] = h.buttons().filter((b) => /^First number: round \d+ to \d+$/.test(b));
+    const [, value] = /round (\d+) to (\d+)$/.exec(label)!;
     const lower = Math.floor(Number(value) / 10) * 10;
     const nearer = Number(value) - lower < 5 ? lower : lower + 10;
     const wrong = h
       .buttons()
-      .find((b) => b.startsWith(`Round ${value} to `) && !b.endsWith(String(nearer)))!;
+      .find((b) => b.startsWith("First number: round ") && !b.endsWith(String(nearer)))!;
 
     const before = h.koda.count("learning.answered");
     await h.press(wrong);
@@ -680,6 +680,102 @@ describe("estimating plays a standard round", () => {
       },
       { params: { mode: "reasonable", digits: 3 }, level: 44 },
     );
+  });
+});
+
+describe("story problems play a standard round", () => {
+  /** Put every number the story states into the box it belongs in. */
+  const buildTheBar = async (h: ActivityHarness) => {
+    for (let guard = 0; guard < 8; guard += 1) {
+      const chips = h.buttons().filter((b) => /^Number \d+ from the story, \d+$/.test(b));
+      const boxes = h.buttons().filter((b) => /^Bar box for .*, empty$/.test(b));
+      if (chips.length === 0 || boxes.length === 0) break;
+      // Try each box for the held chip; the wrong one is refused, which is the
+      // behaviour, so the driver simply moves on to the next.
+      await h.press(chips[0]);
+      for (const box of boxes) {
+        await h.press(box);
+        if (!h.buttons().includes(chips[0])) break;
+      }
+      if (h.buttons().includes(chips[0])) {
+        // Chip still held and no box took it — release and stop rather than spin.
+        await h.press(chips[0]);
+        break;
+      }
+    }
+  };
+
+  const answerWith = async (h: ActivityHarness, value: string) => {
+    for (const digit of value) await h.press(`Digit ${digit}`);
+    await h.press("Check");
+  };
+
+  it("join: building the bar, then answering", async () => {
+    await expectStandardRound(
+      story,
+      async (h) => {
+        await buildTheBar(h);
+        await answerWith(h, expected(h));
+      },
+      { params: { mode: "join", startRange: [3, 9], changeRange: [2, 6] }, level: 46 },
+    );
+  });
+
+  it("start unknown: the empty box is at the other end", async () => {
+    await expectStandardRound(
+      story,
+      async (h) => {
+        await buildTheBar(h);
+        await answerWith(h, expected(h));
+      },
+      { params: { mode: "start_unknown" }, level: 49 },
+    );
+  });
+
+  it("a number put in the wrong box is refused, not scored", async () => {
+    const h = renderActivity(story, {
+      params: { mode: "join", startRange: [5, 5], changeRange: [3, 3] },
+      level: 46,
+    });
+    const before = h.koda.count("learning.answered");
+    await h.press("Number 1 from the story, 5");
+    // 5 belongs in "to start with"; the other box wants 3.
+    const wrong = h.buttons().find((b) => /^Bar box for what was added/.test(b));
+    if (wrong) await h.press(wrong);
+    expect(h.koda.count("learning.answered"), "a misplaced number was scored").toBe(before);
+    expect(h.text()).toContain("is not");
+    h.unmount();
+  });
+
+  it("answering before the bar is built is refused", async () => {
+    const h = renderActivity(story, { params: { mode: "join" }, level: 46 });
+    const before = h.koda.count("learning.answered");
+    await h.press("Check");
+    expect(h.koda.count("learning.answered")).toBe(before);
+    expect(h.text()).toContain("Build the bar first");
+    h.unmount();
+  });
+
+  it("multi-step asks two questions, not one question with two answers", async () => {
+    // A child can get the first change right and the second wrong, and that is
+    // worth two rows in the log rather than one verdict.
+    const h = await expectStandardRound(
+      story,
+      async (h2) => {
+        await buildTheBar(h2);
+        await answerWith(h2, expected(h2));
+      },
+      { params: { mode: "multi_step" }, level: 51, questions: 4 },
+    );
+    const kinds = h.koda.only("learning.present").map(
+      (c) => (c.args[0] as { taskKind: string }).taskKind,
+    );
+    expect(kinds).toEqual([
+      "story_multi_step_step1",
+      "story_multi_step_step2",
+      "story_multi_step_step1",
+      "story_multi_step_step2",
+    ]);
   });
 });
 

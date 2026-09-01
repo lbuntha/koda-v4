@@ -167,8 +167,9 @@ const Dial: React.FC<{
   tone: string;
   onPick(v: number): void;
   disabled: boolean;
-  label: string;
-}> = ({ around, chosen, tone, onPick, disabled, label }) => {
+  /** "First" or "Second" — the two addends can be the same number. */
+  which: string;
+}> = ({ around, chosen, tone, onPick, disabled, which }) => {
   const pct = ((around.value - around.below) / (around.above - around.below)) * 100;
   return (
     <div className="flex-1 min-w-[13rem] space-y-2">
@@ -190,7 +191,11 @@ const Dial: React.FC<{
             disabled={disabled}
             whileTap={disabled ? undefined : { scale: 0.93 }}
             transition={SPRING.tap}
-            aria-label={`Round ${label} to ${v}`}
+            /* Named by which addend as well as by its value: 47 + 47 is a
+               perfectly good question, and "Round 47 to 50" twice leaves a
+               screen-reader user unable to say which dial they mean — or to
+               reach the second one at all. */
+            aria-label={`${which} number: round ${around.value} to ${v}`}
             aria-pressed={chosen === v}
             className={themeSystem.button(
               chosen === v ? "success" : "secondary",
@@ -351,7 +356,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
                     tone={i === 0 ? ADDEND_A.text : ADDEND_B.text}
                     onPick={(v) => roundOne(i, v)}
                     disabled={Boolean(round.feedback)}
-                    label={String(around.value)}
+                    which={i === 0 ? "First" : "Second"}
                   />
                 ))}
               </div>
