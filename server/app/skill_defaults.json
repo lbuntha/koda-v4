@@ -509,6 +509,165 @@
           5,
           7
         ]
+      },
+      {
+        "id": "five-frame",
+        "title": "Five Frame",
+        "concept": "Adding Inside a Frame of Five",
+        "conceptKey": "five-benchmark",
+        "requires": [
+          "count-on"
+        ],
+        "activity": "addition/frames",
+        "params": {
+          "level": 8,
+          "question": {
+            "mode": "five",
+            "addendRange": [
+              1,
+              4
+            ],
+            "sumMax": 5,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "frame_fill",
+            "tier": "beginner",
+            "difficultyColor": "violet",
+            "category": "Frames",
+            "shortDesc": "Add counters to a row of five and read the total without counting from one",
+            "targetObjective": "Fill the frame, then read how many.",
+            "stepByStep": [
+              "Some counters are already in the frame.",
+              "Tap empty spaces to add the rest.",
+              "The frame shows the total — you do not have to start again at one."
+            ],
+            "kidTip": "The frame is already counted. Count on from the number in it.",
+            "audioPrompt": "Five frame! Add counters to the row, then say how many there are.",
+            "prompts": {
+              "default": "Fill in {b} more. How many are there altogether?"
+            }
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "🖐️",
+        "iconName": "layers",
+        "iconTone": "purple",
+        "pedagogyTip": "Five is the first benchmark. A child who sees four as 'one less than five' has stopped counting one at a time.",
+        "standards": [
+          "CCSS.K.OA.A.5"
+        ],
+        "trajectoryLevel": "find-result",
+        "ageBand": [
+          5,
+          6
+        ]
+      },
+      {
+        "id": "ten-frame",
+        "title": "Ten Frame",
+        "concept": "Adding Inside a Frame of Ten",
+        "conceptKey": "ten-frame-adder",
+        "requires": [
+          "five-benchmark"
+        ],
+        "activity": "addition/frames",
+        "params": {
+          "level": 9,
+          "question": {
+            "mode": "ten",
+            "addendRange": [
+              1,
+              9
+            ],
+            "sumMax": 10,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "frame_fill",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Frames",
+            "shortDesc": "Add counters to two rows of five and read the total at a glance",
+            "targetObjective": "Fill the frame, then read how many.",
+            "stepByStep": [
+              "The top row holds five. The bottom row holds five more.",
+              "Tap empty spaces to add counters.",
+              "A full row of five helps you see the total without counting."
+            ],
+            "kidTip": "A full top row is five. Count on from there.",
+            "audioPrompt": "Ten frame! Add counters to the frame, then say how many altogether.",
+            "prompts": {
+              "default": "Fill in {b} more. How many are there altogether?"
+            }
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "🔟",
+        "iconName": "boxes",
+        "iconTone": "purple",
+        "pedagogyTip": "Two rows of five is what makes ten readable at a glance, and it is the structure every make-ten strategy later leans on.",
+        "standards": [
+          "CCSS.1.OA.C.6"
+        ],
+        "trajectoryLevel": "find-result",
+        "ageBand": [
+          5,
+          7
+        ]
+      },
+      {
+        "id": "number-bonds",
+        "title": "Number Bonds",
+        "concept": "Parts and Wholes",
+        "conceptKey": "part-whole-decomposer",
+        "requires": [
+          "count-all"
+        ],
+        "activity": "addition/bonds",
+        "params": {
+          "level": 10,
+          "question": {
+            "mode": "whole_unknown",
+            "addendRange": [
+              1,
+              9
+            ],
+            "sumMax": 10,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "bond_tree",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Parts and Wholes",
+            "shortDesc": "Read a bond diagram and give the whole that its two parts make",
+            "targetObjective": "Two parts underneath make the whole on top.",
+            "stepByStep": [
+              "The two boxes at the bottom are the parts.",
+              "The box at the top is the whole they make together.",
+              "Tap the empty box and type the whole."
+            ],
+            "kidTip": "The two parts underneath make the whole on top.",
+            "audioPrompt": "Number bonds! The two parts at the bottom make the whole at the top.",
+            "prompts": {
+              "default": "What do {a} and {b} make altogether?"
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "💎",
+        "iconName": "gem",
+        "iconTone": "emerald",
+        "pedagogyTip": "A bond is the picture behind every later decomposition — breaking an addend, finding a missing part, and fact families are all this diagram with a different box blank.",
+        "standards": [
+          "CCSS.K.OA.A.3"
+        ],
+        "trajectoryLevel": "part-whole",
+        "ageBand": [
+          5,
+          7
+        ]
       }
     ]
   },

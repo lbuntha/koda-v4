@@ -18,6 +18,7 @@ import { ADDEND_A, ADDEND_B, TOTAL } from "../internal/data/additionPalette";
 import { BIN, COUNT_BADGE, SCENE, TOKEN_COMPACT } from "../internal/data/additionLayout";
 import {
   drawPair,
+  numberWord as say,
   pairKey,
   pick,
   withoutRepeat,
@@ -88,15 +89,6 @@ export interface TrayQuestion extends RoundQuestion {
    */
   asset: Countable;
 }
-
-/** Numbers this activity says out loud. Matches the clips in `audio/numbers`. */
-const NUMBER_WORDS = [
-  "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
-  "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen",
-  "seventeen", "eighteen", "nineteen", "twenty",
-];
-
-const say = (n: number): string => NUMBER_WORDS[n] ?? String(n);
 
 /**
  * The numbers each mode is made of, before a lesson says anything.

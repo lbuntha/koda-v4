@@ -73,7 +73,19 @@
       "lessons": [
         "addition/add-zero",
         "addition/add-one",
-        "addition/use-fingers"
+        "addition/use-fingers",
+        "addition/five-frame"
+      ]
+    },
+    {
+      "id": "u7",
+      "unitNumber": 7,
+      "title": "Unit 7: Frames and Bonds",
+      "description": "Add inside a frame of ten, and read what a number is made of",
+      "icon": "💎",
+      "lessons": [
+        "addition/ten-frame",
+        "addition/number-bonds"
       ]
     }
   ]

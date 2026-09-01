@@ -52,6 +52,26 @@ export function shuffle<T>(items: readonly T[]): T[] {
 export const total = (values: readonly number[]): number =>
   values.reduce((acc, n) => acc + n, 0);
 
+/**
+ * A number as it is spoken.
+ *
+ * Words, not digits: the recorded clips are `numbers/seven.wav`, so a screen
+ * that said `String(7)` would miss the recording and take the slow path to live
+ * TTS on every single tap — the exact cost the recordings exist to remove.
+ * Shared because two engines count aloud and a second copy is a second chance
+ * to drift from the folder on disk.
+ *
+ * Past twenty it falls back to the digits, which is honest: nothing above that
+ * is recorded, and a lesson that counts that high should say so in `voice.json`.
+ */
+const NUMBER_WORDS = [
+  "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+  "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen",
+  "seventeen", "eighteen", "nineteen", "twenty",
+];
+
+export const numberWord = (n: number): string => NUMBER_WORDS[n] ?? String(n);
+
 /* -------------------------------------------------------------------------- */
 /* Place value — what "regrouping" actually means                              */
 /* -------------------------------------------------------------------------- */

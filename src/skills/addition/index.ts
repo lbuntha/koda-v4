@@ -2,6 +2,8 @@ import type { Lesson, SkillFeature, SkillManifest, Skill } from "../types";
 import manifestJson from "./manifest.json";
 import lessonsJson from "./lessons.json";
 import { CountTray } from "./activities/CountTray";
+import { FrameFill } from "./activities/FrameFill";
+import { BondTree } from "./activities/BondTree";
 import { registerSkillArt } from "../../assets/svg/skillArt";
 import { registerSkillVoice } from "../../lib/voiceClips";
 import audioManifest from "./audio/manifest.json";
@@ -83,6 +85,21 @@ export const skill: Skill = {
        */
       defaultParams: { mode: "count_all", questionsPerRound: 5 },
       component: CountTray,
+    },
+    frames: {
+      id: "frames",
+      name: "Five and Ten Frames",
+      /* All four modes ship now; `make_five` and `make_ten` wait nine levels
+         for their lessons. Writing an engine complete is what lets those two
+         arrive as JSON rather than as code. */
+      defaultParams: { mode: "ten", questionsPerRound: 5 },
+      component: FrameFill,
+    },
+    bonds: {
+      id: "bonds",
+      name: "Number Bonds",
+      defaultParams: { mode: "whole_unknown", questionsPerRound: 5 },
+      component: BondTree,
     },
   },
 };

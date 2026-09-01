@@ -17,7 +17,7 @@ import { skill } from ".";
  * missing `expected` fails here instead of passing quietly.
  */
 
-const { tray } = skill.activities;
+const { tray, frames, bonds } = skill.activities;
 
 const expected = (h: ActivityHarness): string => {
   const last = h.koda.only("learning.present").at(-1);
@@ -152,3 +152,101 @@ describe("the tray plays a standard round", () => {
     );
   });
 });
+
+/** Cells still waiting for a counter, in the order they sit in the frame. */
+const emptySpaces = (h: ActivityHarness): string[] =>
+  h.buttons().filter((name) => /^Space \d+, empty$/.test(name));
+
+const filledSpaces = (h: ActivityHarness): number =>
+  h.screen.queryAllByLabelText(/^Space \d+, filled$/).length;
+
+describe("the frame plays a standard round", () => {
+  it("ten frame: adding counters and reading the total", async () => {
+    await expectStandardRound(
+      frames,
+      async (h) => {
+        // The counters that arrive are already counted — the child adds the
+        // rest, and the answer is the whole frame.
+        const total = Number(expected(h));
+        for (let guard = 0; guard < 20 && filledSpaces(h) < total; guard += 1) {
+          const next = emptySpaces(h)[0];
+          if (!next) break;
+          await h.press(next);
+        }
+        await h.press("Check");
+      },
+      { params: { mode: "ten", addendRange: [2, 4], sumMax: 8 }, level: 9 },
+    );
+  });
+
+  it("make ten: the answer is what was added, not what is in the frame", async () => {
+    // The distinction this engine exists to teach, and the likeliest thing to
+    // get backwards: the child fills the frame to ten, and is asked how many
+    // that took — never for the ten.
+    await expectStandardRound(
+      frames,
+      async (h) => {
+        const added = Number(expected(h));
+        for (let guard = 0; guard < 20; guard += 1) {
+          const next = emptySpaces(h)[0];
+          if (!next) break;
+          await h.press(next);
+        }
+        expect(filledSpaces(h), "the frame was not filled").toBe(10);
+        expect(added, "the answer was the whole frame, not the part added").toBeLessThan(10);
+        await h.press("Check");
+      },
+      { params: { mode: "make_ten" }, level: 19 },
+    );
+  });
+
+  it("checking an untouched frame is refused, not scored", async () => {
+    const h = renderActivity(frames, { params: { mode: "ten" }, level: 9 });
+    const before = h.koda.count("learning.answered");
+    await h.press("Check");
+    expect(h.koda.count("learning.answered"), "an empty check was scored").toBe(before);
+    expect(h.text()).toContain("empty spaces");
+    h.unmount();
+  });
+});
+
+describe("the bond plays a standard round", () => {
+  it("whole unknown: typing what the two parts make", async () => {
+    await expectStandardRound(
+      bonds,
+      async (h) => {
+        for (const digit of expected(h)) await h.press(`Digit ${digit}`);
+        await h.press("Check");
+      },
+      { params: { mode: "whole_unknown", addendRange: [2, 5], sumMax: 10 }, level: 10 },
+    );
+  });
+
+  it("splitting an addend: four boxes, one answer", async () => {
+    // Two blanks and a single Check. One submit per box would file two answers
+    // for one question and wreck first-try accuracy.
+    await expectStandardRound(
+      bonds,
+      async (h) => {
+        const parts = expected(h).split(",");
+        const ids = ["p1", "p2"];
+        for (const [i, part] of parts.entries()) {
+          await h.press(new RegExp(`^Box ${ids[i]},`));
+          for (const digit of part) await h.press(`Digit ${digit}`);
+        }
+        await h.press("Check");
+      },
+      { params: { mode: "split_one" }, level: 22 },
+    );
+  });
+
+  it("checking an empty bond is refused, not scored", async () => {
+    const h = renderActivity(bonds, { params: { mode: "whole_unknown" }, level: 10 });
+    const before = h.koda.count("learning.answered");
+    await h.press("Check");
+    expect(h.koda.count("learning.answered")).toBe(before);
+    expect(h.text()).toContain("Tap a box");
+    h.unmount();
+  });
+});
+

@@ -191,3 +191,104 @@ describe("a lesson narrows a mode without erasing it", () => {
     expect(highest).toBeGreaterThan(10);
   });
 });
+
+import {
+  buildQuestion as buildFrame,
+  frameHints,
+  specFor as frameSpec,
+} from "./activities/FrameFill";
+import {
+  buildQuestion as buildBond,
+  bondHints,
+  specFor as bondSpec,
+} from "./activities/BondTree";
+import { isBridging, isRegrouping } from "./internal/data/additionNumbers";
+
+describe("the frame asks one of two different questions", () => {
+  it("asks for the total when counters are added to a frame", () => {
+    const seen = new Set<string>();
+    const q = buildFrame({ mode: "ten", aRange: [3, 3], bRange: [4, 4] }, 1, seen);
+    expect(q.asks).toBe("total");
+    expect(q.expected).toBe("7");
+  });
+
+  it("asks for what was added when the frame is being filled up", () => {
+    // The likeliest bug in this engine: `make_ten` means "how many more", and
+    // an `expected` of ten would mark every correct answer wrong.
+    const seen = new Set<string>();
+    const q = buildFrame({ mode: "make_ten", aRange: [6, 6] }, 1, seen);
+    expect(q.asks).toBe("added");
+    expect(q.expected).toBe("4");
+    expect(q.given + q.added).toBe(10);
+  });
+
+  it("always fills the frame exactly, over many draws", () => {
+    const seen = new Set<string>();
+    for (let i = 0; i < 60; i += 1) {
+      const five = buildFrame({ mode: "make_five" }, i + 1, seen);
+      expect(five.given + five.added).toBe(5);
+      const ten = buildFrame({ mode: "make_ten" }, i + 1, new Set());
+      expect(ten.given + ten.added).toBe(10);
+    }
+  });
+
+  it("will not let a lesson turn a make-question into something else", () => {
+    expect(frameSpec("make_ten", { sumMax: 6 })).toMatchObject({ sumMin: 10, sumMax: 10 });
+    expect(frameSpec("ten", {}).sumMax).toBe(10);
+  });
+
+  it("tells a child what is still empty, and stops short of the answer", () => {
+    const seen = new Set<string>();
+    const q = buildFrame({ mode: "make_ten", aRange: [6, 6] }, 1, seen);
+    const rungs = frameHints(q, { filled: 8 });
+    expect(rungs[1]).toContain("2 spaces");
+    expect(rungs.at(-1)).not.toContain(" 4");
+  });
+});
+
+describe("the bond keeps each mode's shape", () => {
+  it("always gives split_one a pair that crosses ten", () => {
+    const seen = new Set<string>();
+    for (let i = 0; i < 60; i += 1) {
+      const q = buildBond({ mode: "split_one" }, i + 1, seen);
+      expect(isBridging(q.a, q.b), `${q.a} + ${q.b}`).toBe(true);
+      // b breaks into what completes the ten, and the remainder.
+      expect(q.answers[0]).toBe(10 - q.a);
+      expect(q.answers[0] + q.answers[1]).toBe(q.b);
+    }
+  });
+
+  it("never gives split_both a pair that regroups", () => {
+    const seen = new Set<string>();
+    for (let i = 0; i < 60; i += 1) {
+      const q = buildBond({ mode: "split_both" }, i + 1, seen);
+      expect(isRegrouping(q.a, q.b), `${q.a} + ${q.b}`).toBe(false);
+      expect(q.blanks).toHaveLength(4);
+      expect(q.answers[0] % 10, "the tens box wants a whole ten").toBe(0);
+    }
+  });
+
+  it("hides either part, so a child cannot learn a position", () => {
+    const seen = new Set<string>();
+    const sides = new Set(
+      Array.from({ length: 60 }, (_, i) =>
+        buildBond({ mode: "part_unknown" }, i + 1, seen).bonds[0].parts[0].blank ? "left" : "right",
+      ),
+    );
+    expect(sides).toEqual(new Set(["left", "right"]));
+  });
+
+  it("reports every box as one answer", () => {
+    const seen = new Set<string>();
+    const q = buildBond({ mode: "split_both", addendRange: [23, 23] }, 1, seen);
+    expect(q.expected.split(",")).toHaveLength(4);
+  });
+
+  it("names the ten a bridging pair is reaching for", () => {
+    const seen = new Set<string>();
+    const q = buildBond({ mode: "split_one", aRange: [8, 8], bRange: [5, 5] }, 1, seen);
+    const [, second] = bondHints(q, { entries: {} });
+    expect(second).toContain("8 needs 2 more");
+  });
+});
+
