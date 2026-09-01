@@ -14,6 +14,7 @@ import { ADDEND_A, ADDEND_B, TOTAL } from "../internal/data/additionPalette";
 import { SCENE } from "../internal/data/additionLayout";
 import { NudgeLine, useNudge } from "../internal/ui/useNudge";
 import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
+import { isPractice, modeAt, type PracticeSetup } from "../internal/data/practice";
 import {
   digitsOf,
   drawPair,
@@ -39,7 +40,7 @@ import {
 export type DeskMode = "chart_add" | "chart_three" | "expanded" | "partial_sums" | "left_right";
 export type Place = "hundreds" | "tens" | "ones";
 
-export interface DeskSetup {
+export interface DeskSetup extends PracticeSetup {
   mode?: DeskMode;
   addendRange?: [number, number];
   aRange?: [number, number];
@@ -117,7 +118,7 @@ export const buildQuestion = (
   index: number,
   seen: Set<string>,
 ): DeskQuestion => {
-  const mode = setup.mode ?? "chart_add";
+  const mode = modeAt<DeskMode>(setup, index, "chart_add");
   const { a, b, sum } = withoutRepeat(() => drawPair(specFor(mode, setup)), pairKey, seen);
   const base = { id: `q${index}-${Date.now().toString(36)}`, taskKind: `desk_${mode}`, mode, a, b, sum };
   const threeDigit = mode === "chart_three" || mode === "expanded";
@@ -314,6 +315,8 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
   const setup: DeskSetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const copy = playCopy(params);
+  /** Practice takes the scaffolding away: no hints, no explanation, no voice. */
+  const practising = isPractice(setup);
   const seen = useRef(new Set<string>());
 
   const [entries, setEntries] = useState<Record<string, string>>({});
@@ -324,7 +327,7 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
     koda,
     totalQuestions,
     levelNumber: lesson?.levelNumber ?? 1,
-    intro: copy.audioPrompt,
+    intro: practising ? undefined : copy.audioPrompt,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     nextQuestion: useCallback(
       (index: number) => buildQuestion(setup, index, seen.current),
@@ -337,6 +340,16 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
   });
 
   const question = round.question as DeskQuestion;
+
+  /**
+   * Report an answer.
+   *
+   * In practice the verdict stands on its own — a child working unaided is not
+   * being walked through what happened, and an explanation after every question
+   * would put the scaffolding back one sentence at a time.
+   */
+  const submit = (outcome: Parameters<typeof round.submit>[0]) =>
+    round.submit(practising ? { ...outcome, message: undefined } : outcome);
 
   useEffect(() => {
     setEntries({});
@@ -374,7 +387,7 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
     const rightDigitsWrongOrder =
       given.slice().sort().join(",") === question.answers.map(String).slice().sort().join(",");
 
-    round.submit({
+    submit({
       correct,
       given: given.join(","),
       errorKind: correct ? undefined : rightDigitsWrongOrder ? "place_value" : "off_by_more",
@@ -401,12 +414,16 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
       iconTone="indigo"
       contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
-      hints={deskHints(question, { entries, kidTip: copy.kidTip })}
+      hints={practising ? [] : deskHints(question, { entries, kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
-      onReadAloud={() => {
-        round.useSupport("audio_replay");
-        void koda.speech.say(prompt, speechRate(koda));
-      }}
+      onReadAloud={
+        practising
+          ? undefined
+          : () => {
+            round.useSupport("audio_replay");
+            void koda.speech.say(prompt, speechRate(koda));
+            }
+      }
       recommendation={nextStep}
     >
       <div className="space-y-4">

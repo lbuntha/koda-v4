@@ -2797,6 +2797,609 @@
         8,
         9
       ]
+    },
+    {
+      "id": "practice-frames",
+      "title": "Practice: Frames",
+      "concept": "Practice Without Help",
+      "conceptKey": "five-benchmark",
+      "requires": [
+        "five-benchmark"
+      ],
+      "activity": "addition/frames",
+      "params": {
+        "level": 53,
+        "question": {
+          "practice": true,
+          "modes": [
+            "five",
+            "ten",
+            "make_five",
+            "make_ten"
+          ],
+          "questionsPerRound": 8
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Practice",
+          "shortDesc": "Four frame techniques mixed together, with nothing to lean on.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🖐️",
+      "iconName": "layers",
+      "iconTone": "purple",
+      "pedagogyTip": "Practice is retrieval, not instruction. The help is removed on purpose — recalling a technique unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        5,
+        7
+      ]
+    },
+    {
+      "id": "practice-tray",
+      "title": "Practice: Counting Trays",
+      "concept": "Practice Without Help",
+      "conceptKey": "count-all",
+      "requires": [
+        "count-all"
+      ],
+      "activity": "addition/tray",
+      "params": {
+        "level": 54,
+        "question": {
+          "practice": true,
+          "modes": [
+            "count_all",
+            "combine",
+            "count_on",
+            "count_on_larger",
+            "add_zero",
+            "add_one",
+            "fingers"
+          ],
+          "questionsPerRound": 14
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Practice",
+          "shortDesc": "Every way of counting two groups, one after another.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🧺",
+      "iconName": "boxes",
+      "iconTone": "purple",
+      "pedagogyTip": "Practice is retrieval, not instruction. The help is removed on purpose — recalling a technique unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        5,
+        7
+      ]
+    },
+    {
+      "id": "practice-bonds",
+      "title": "Practice: Number Bonds",
+      "concept": "Practice Without Help",
+      "conceptKey": "part-whole-decomposer",
+      "requires": [
+        "part-whole-decomposer"
+      ],
+      "activity": "addition/bonds",
+      "params": {
+        "level": 55,
+        "question": {
+          "practice": true,
+          "modes": [
+            "whole_unknown",
+            "split_one",
+            "split_both",
+            "part_unknown"
+          ],
+          "questionsPerRound": 8
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Practice",
+          "shortDesc": "Wholes, parts, splits and missing parts, in turn.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "💎",
+      "iconName": "gem",
+      "iconTone": "emerald",
+      "pedagogyTip": "Practice is retrieval, not instruction. The help is removed on purpose — recalling a technique unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "practice-numberline",
+      "title": "Practice: The Number Line",
+      "concept": "Practice Without Help",
+      "conceptKey": "jump-strategy",
+      "requires": [
+        "jump-strategy"
+      ],
+      "activity": "addition/numberline",
+      "params": {
+        "level": 56,
+        "question": {
+          "practice": true,
+          "modes": [
+            "path",
+            "open",
+            "bridge_ten",
+            "bridge_hundred",
+            "compensate",
+            "jump_tens_ones"
+          ],
+          "questionsPerRound": 12
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Practice",
+          "shortDesc": "Every kind of jump this skill has taught.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "👣",
+      "iconName": "footprints",
+      "iconTone": "cyan",
+      "pedagogyTip": "Practice is retrieval, not instruction. The help is removed on purpose — recalling a technique unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "practice-base10",
+      "title": "Practice: Base-Ten Blocks",
+      "concept": "Practice Without Help",
+      "conceptKey": "base-ten-adder",
+      "requires": [
+        "base-ten-adder"
+      ],
+      "activity": "addition/base10",
+      "params": {
+        "level": 57,
+        "question": {
+          "practice": true,
+          "modes": [
+            "build_add",
+            "multiples_ten",
+            "multiples_hundred",
+            "trade_ones",
+            "trade_tens"
+          ],
+          "questionsPerRound": 10
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Practice",
+          "shortDesc": "Building and trading, across all three places.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🧱",
+      "iconName": "boxes",
+      "iconTone": "purple",
+      "pedagogyTip": "Practice is retrieval, not instruction. The help is removed on purpose — recalling a technique unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "practice-chart",
+      "title": "Practice: Written Strategies",
+      "concept": "Practice Without Help",
+      "conceptKey": "place-value-builder",
+      "requires": [
+        "place-value-builder"
+      ],
+      "activity": "addition/chart",
+      "params": {
+        "level": 58,
+        "question": {
+          "practice": true,
+          "modes": [
+            "chart_add",
+            "chart_three",
+            "expanded",
+            "partial_sums",
+            "left_right"
+          ],
+          "questionsPerRound": 10
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Practice",
+          "shortDesc": "Five ways of writing an addition down, mixed.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🧾",
+      "iconName": "layers",
+      "iconTone": "indigo",
+      "pedagogyTip": "Practice is retrieval, not instruction. The help is removed on purpose — recalling a technique unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "practice-facts",
+      "title": "Practice: Facts",
+      "concept": "Practice Without Help",
+      "conceptKey": "doubles-knower",
+      "requires": [
+        "doubles-knower"
+      ],
+      "activity": "addition/facts",
+      "params": {
+        "level": 59,
+        "question": {
+          "practice": true,
+          "modes": [
+            "doubles",
+            "near_up",
+            "near_down",
+            "known_fact",
+            "family",
+            "commute"
+          ],
+          "questionsPerRound": 12
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Practice",
+          "shortDesc": "Doubles, near doubles, helpers, families and switching.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "⚡",
+      "iconName": "zap",
+      "iconTone": "pink",
+      "pedagogyTip": "Practice is retrieval, not instruction. The help is removed on purpose — recalling a technique unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "practice-multi",
+      "title": "Practice: Chains",
+      "concept": "Practice Without Help",
+      "conceptKey": "multi-addend",
+      "requires": [
+        "multi-addend"
+      ],
+      "activity": "addition/multi",
+      "params": {
+        "level": 60,
+        "question": {
+          "practice": true,
+          "modes": [
+            "pairs",
+            "chain",
+            "compatible",
+            "running"
+          ],
+          "questionsPerRound": 8
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Practice",
+          "shortDesc": "Whole lists of numbers, four ways.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🧮",
+      "iconName": "waves",
+      "iconTone": "cyan",
+      "pedagogyTip": "Practice is retrieval, not instruction. The help is removed on purpose — recalling a technique unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "practice-column",
+      "title": "Practice: The Written Method",
+      "concept": "Practice Without Help",
+      "conceptKey": "standard-algorithm",
+      "requires": [
+        "standard-algorithm"
+      ],
+      "activity": "addition/column",
+      "params": {
+        "level": 61,
+        "question": {
+          "practice": true,
+          "modes": [
+            "standard",
+            "cascade"
+          ],
+          "questionsPerRound": 6
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Practice",
+          "shortDesc": "One carry and two, alternating.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "✍️",
+      "iconName": "layers",
+      "iconTone": "indigo",
+      "pedagogyTip": "Practice is retrieval, not instruction. The help is removed on purpose — recalling a technique unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "practice-estimate",
+      "title": "Practice: Estimating",
+      "concept": "Practice Without Help",
+      "conceptKey": "rounding-estimator",
+      "requires": [
+        "rounding-estimator"
+      ],
+      "activity": "addition/estimate",
+      "params": {
+        "level": 62,
+        "question": {
+          "practice": true,
+          "modes": [
+            "round_estimate",
+            "reasonable"
+          ],
+          "questionsPerRound": 6
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Practice",
+          "shortDesc": "Rounding, and judging someone else's answer.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "📏",
+      "iconName": "scale",
+      "iconTone": "emerald",
+      "pedagogyTip": "Practice is retrieval, not instruction. The help is removed on purpose — recalling a technique unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        8,
+        9
+      ]
+    },
+    {
+      "id": "practice-story",
+      "title": "Practice: Story Problems",
+      "concept": "Practice Without Help",
+      "conceptKey": "join-modeler",
+      "requires": [
+        "join-modeler"
+      ],
+      "activity": "addition/story",
+      "params": {
+        "level": 63,
+        "question": {
+          "practice": true,
+          "modes": [
+            "join",
+            "ppw",
+            "change_unknown",
+            "start_unknown",
+            "compare"
+          ],
+          "questionsPerRound": 10
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Practice",
+          "shortDesc": "Five problem types, told apart by which box is empty.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "📖",
+      "iconName": "search",
+      "iconTone": "pink",
+      "pedagogyTip": "Practice is retrieval, not instruction. The help is removed on purpose — recalling a technique unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "practice-strategy",
+      "title": "Practice: Choosing",
+      "concept": "Practice Without Help",
+      "conceptKey": "strategy-chooser",
+      "requires": [
+        "strategy-chooser"
+      ],
+      "activity": "addition/strategy",
+      "params": {
+        "level": 64,
+        "question": {
+          "practice": true,
+          "modes": [
+            "compare_paths"
+          ],
+          "questionsPerRound": 6
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Practice",
+          "shortDesc": "Choose a route, then see which route was shorter.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🧭",
+      "iconName": "sparkles",
+      "iconTone": "purple",
+      "pedagogyTip": "Practice is retrieval, not instruction. The help is removed on purpose — recalling a technique unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        8,
+        9
+      ]
     }
   ]
 }

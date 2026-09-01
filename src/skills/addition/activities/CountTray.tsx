@@ -18,6 +18,7 @@ import { ADDEND_A, ADDEND_B, TOTAL } from "../internal/data/additionPalette";
 import { BIN, COUNT_BADGE, SCENE, TOKEN_COMPACT } from "../internal/data/additionLayout";
 import { NudgeLine, useNudge } from "../internal/ui/useNudge";
 import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
+import { isPractice, modeAt, type PracticeSetup } from "../internal/data/practice";
 import {
   drawPair,
   numberWord as say,
@@ -52,7 +53,7 @@ export type TrayMode =
   | "add_one"
   | "fingers";
 
-export interface TraySetup {
+export interface TraySetup extends PracticeSetup {
   mode?: TrayMode;
   /** Bounds for both addends, unless overridden per side. */
   addendRange?: [number, number];
@@ -147,7 +148,7 @@ export const buildQuestion = (
   index: number,
   seen: Set<string>,
 ): TrayQuestion => {
-  const mode = setup.mode ?? "count_all";
+  const mode = modeAt<TrayMode>(setup, index, "count_all");
   const spec = specFor(mode, setup);
   const flip = setup.flipChance ?? 0;
 
@@ -496,6 +497,8 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
   const totalQuestions = setup.questionsPerRound ?? 5;
   /** The lesson's own child-facing copy: the spoken intro, and hint rung one. */
   const copy = playCopy(params);
+  /** Practice takes the scaffolding away: no hints, no explanation, no voice. */
+  const practising = isPractice(setup);
 
   /** Questions already asked this round, so five of them are five questions. */
   const seen = useRef(new Set<string>());
@@ -525,7 +528,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
     koda,
     totalQuestions,
     levelNumber: lesson?.levelNumber ?? 1,
-    intro: copy.audioPrompt,
+    intro: practising ? undefined : copy.audioPrompt,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     nextQuestion: useCallback(
       (index: number) => buildQuestion(setup, index, seen.current),
@@ -538,6 +541,16 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
   });
 
   const question = round.question as TrayQuestion;
+
+  /**
+   * Report an answer.
+   *
+   * In practice the verdict stands on its own — a child working unaided is not
+   * being walked through what happened, and an explanation after every question
+   * would put the scaffolding back one sentence at a time.
+   */
+  const submit = (outcome: Parameters<typeof round.submit>[0]) =>
+    round.submit(practising ? { ...outcome, message: undefined } : outcome);
 
   useEffect(() => {
     finishing.cancel();
@@ -552,7 +565,8 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
 
   /* Every feature the manifest declares is read here. A flag nothing checks is
      a lie in the Skill Manager. */
-  const speaks = koda.config.isEnabled("audio_speech", true);
+  // Practice says nothing at all, on top of the family's own voice switch.
+  const speaks = !practising && koda.config.isEnabled("audio_speech", true);
   const chimes = koda.config.isEnabled("sound_chimes", true);
   const vibrates = koda.config.isEnabled("haptic_feedback", true);
   const badges = koda.config.isEnabled("counting_badges", true);
@@ -596,7 +610,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
   const running = base + counted.length;
 
   const submitTotal = (given: number, correct: boolean, message: string) => {
-    round.submit({
+    submit({
       correct,
       given: String(given),
       expected: String(question.sum),
@@ -653,7 +667,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
     const correct = value === question.sum;
     chime(correct ? "success" : "error");
     buzz(correct ? "success" : "tap");
-    round.submit({
+    submit({
       correct,
       given: String(value),
       expected: String(question.sum),
@@ -753,7 +767,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
       iconTone="purple"
       contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
-      hints={trayHints(question, {
+      hints={practising ? [] : trayHints(question, {
         counted: counted.length,
         merged,
         startPicked,
@@ -761,10 +775,14 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
         kidTip: copy.kidTip,
       })}
       onExit={koda.ui.exit}
-      onReadAloud={() => {
-        round.useSupport("audio_replay");
-        void koda.speech.say(prompt, speechRate(koda));
-      }}
+      onReadAloud={
+        practising
+          ? undefined
+          : () => {
+            round.useSupport("audio_replay");
+            void koda.speech.say(prompt, speechRate(koda));
+            }
+      }
       recommendation={nextStep}
     >
       <div className="space-y-4">

@@ -14,6 +14,7 @@ import { ADDEND_A, ADDEND_B, CHANGE, TOTAL } from "../internal/data/additionPale
 import { SCENE } from "../internal/data/additionLayout";
 import { NudgeLine, useNudge } from "../internal/ui/useNudge";
 import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
+import { isPractice, modeAt, type PracticeSetup } from "../internal/data/practice";
 import {
   drawRoundingPair,
   pairKey,
@@ -39,7 +40,7 @@ export type EstimateMode = "round_estimate" | "reasonable";
 /** What a child says about a claimed answer. */
 export type Verdict = "right" | "too_big" | "too_small";
 
-export interface EstimateSetup {
+export interface EstimateSetup extends PracticeSetup {
   mode?: EstimateMode;
   /** How many digits the numbers have, which is also what they round to. */
   digits?: 2 | 3;
@@ -77,7 +78,7 @@ export const buildQuestion = (
   index: number,
   seen: Set<string>,
 ): EstimateQuestion => {
-  const mode = setup.mode ?? "round_estimate";
+  const mode = modeAt<EstimateMode>(setup, index, "round_estimate");
   const digits = setup.digits ?? (mode === "reasonable" ? 3 : 2);
   const unit: 10 | 100 = digits === 3 ? 100 : 10;
   const { a, b, sum } = withoutRepeat(() => drawRoundingPair(digits), pairKey, seen);
@@ -226,6 +227,8 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
   const setup: EstimateSetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const copy = playCopy(params);
+  /** Practice takes the scaffolding away: no hints, no explanation, no voice. */
+  const practising = isPractice(setup);
   const seen = useRef(new Set<string>());
   const nudge = useNudge(koda);
 
@@ -236,7 +239,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
     koda,
     totalQuestions,
     levelNumber: lesson?.levelNumber ?? 1,
-    intro: copy.audioPrompt,
+    intro: practising ? undefined : copy.audioPrompt,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     nextQuestion: useCallback(
       (index: number) => buildQuestion(setup, index, seen.current),
@@ -249,6 +252,16 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
   });
 
   const question = round.question as EstimateQuestion;
+
+  /**
+   * Report an answer.
+   *
+   * In practice the verdict stands on its own — a child working unaided is not
+   * being walked through what happened, and an explanation after every question
+   * would put the scaffolding back one sentence at a time.
+   */
+  const submit = (outcome: Parameters<typeof round.submit>[0]) =>
+    round.submit(practising ? { ...outcome, message: undefined } : outcome);
 
   useEffect(() => {
     setRounded([null, null]);
@@ -289,7 +302,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
     const correct = String(value) === question.expected;
     chime(correct ? "success" : "error");
     if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
-    round.submit({
+    submit({
       correct,
       given: String(value),
       errorKind: correct ? undefined : "off_by_more",
@@ -306,7 +319,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
     const near = roundTo(question.a, question.unit) + roundTo(question.b, question.unit);
     chime(correct ? "success" : "error");
     if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
-    round.submit({
+    submit({
       correct,
       given: verdict,
       errorKind: correct ? undefined : "off_by_more",
@@ -335,12 +348,16 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
       iconTone="emerald"
       contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
-      hints={estimateHints(question, { rounded, kidTip: copy.kidTip })}
+      hints={practising ? [] : estimateHints(question, { rounded, kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
-      onReadAloud={() => {
-        round.useSupport("audio_replay");
-        void koda.speech.say(prompt, speechRate(koda));
-      }}
+      onReadAloud={
+        practising
+          ? undefined
+          : () => {
+            round.useSupport("audio_replay");
+            void koda.speech.say(prompt, speechRate(koda));
+            }
+      }
       recommendation={nextStep}
     >
       <div className="space-y-4">

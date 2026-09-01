@@ -14,6 +14,7 @@ import { ADDEND_A, ADDEND_B, CHANGE, TOTAL } from "../internal/data/additionPale
 import { BLOCK_FLAT, BLOCK_ROD, BLOCK_UNIT, SCENE } from "../internal/data/additionLayout";
 import { NudgeLine, useNudge } from "../internal/ui/useNudge";
 import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
+import { isPractice, modeAt, type PracticeSetup } from "../internal/data/practice";
 import {
   digitsOf,
   drawPair,
@@ -52,7 +53,7 @@ export interface Built {
   ones: number;
 }
 
-export interface BlockSetup {
+export interface BlockSetup extends PracticeSetup {
   mode?: BlockMode;
   addendRange?: [number, number];
   aRange?: [number, number];
@@ -124,7 +125,7 @@ export const buildQuestion = (
   index: number,
   seen: Set<string>,
 ): BlockQuestion => {
-  const mode = setup.mode ?? "build_add";
+  const mode = modeAt<BlockMode>(setup, index, "build_add");
   const { a, b, sum } = withoutRepeat(() => drawPair(specFor(mode, setup)), pairKey, seen);
   const trades = mode === "trade_ones" || mode === "trade_tens";
   const da = digitsOf(a);
@@ -281,6 +282,8 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
   const setup: BlockSetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const copy = playCopy(params);
+  /** Practice takes the scaffolding away: no hints, no explanation, no voice. */
+  const practising = isPractice(setup);
   const seen = useRef(new Set<string>());
 
   const [built, setBuilt] = useState<Built>(EMPTY);
@@ -291,7 +294,7 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
     koda,
     totalQuestions,
     levelNumber: lesson?.levelNumber ?? 1,
-    intro: copy.audioPrompt,
+    intro: practising ? undefined : copy.audioPrompt,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     nextQuestion: useCallback(
       (index: number) => buildQuestion(setup, index, seen.current),
@@ -305,13 +308,24 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
 
   const question = round.question as BlockQuestion;
 
+  /**
+   * Report an answer.
+   *
+   * In practice the verdict stands on its own — a child working unaided is not
+   * being walked through what happened, and an explanation after every question
+   * would put the scaffolding back one sentence at a time.
+   */
+  const submit = (outcome: Parameters<typeof round.submit>[0]) =>
+    round.submit(practising ? { ...outcome, message: undefined } : outcome);
+
   useEffect(() => {
     setBuilt(question.start);
     nudge.clear();
   }, [question.id, question.start]);
 
 
-  const speaks = koda.config.isEnabled("audio_speech", true);
+  // Practice says nothing at all, on top of the family's own voice switch.
+  const speaks = !practising && koda.config.isEnabled("audio_speech", true);
   const chimes = koda.config.isEnabled("sound_chimes", true);
   const vibrates = koda.config.isEnabled("haptic_feedback", true);
   const showsTotal = koda.config.isEnabled("running_total_badge", true);
@@ -380,7 +394,7 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
     const correct = have === question.sum;
     chime(correct ? "success" : "error");
     if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
-    round.submit({
+    submit({
       correct,
       given: String(have),
       errorKind: correct
@@ -414,12 +428,16 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
       iconTone="purple"
       contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
-      hints={blockHints(question, { built, kidTip: copy.kidTip })}
+      hints={practising ? [] : blockHints(question, { built, kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
-      onReadAloud={() => {
-        round.useSupport("audio_replay");
-        void koda.speech.say(prompt, speechRate(koda));
-      }}
+      onReadAloud={
+        practising
+          ? undefined
+          : () => {
+            round.useSupport("audio_replay");
+            void koda.speech.say(prompt, speechRate(koda));
+            }
+      }
       recommendation={nextStep}
     >
       <div className="space-y-4">

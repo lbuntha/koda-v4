@@ -15,6 +15,7 @@ import { ADDEND_A, CHANGE, TOTAL } from "../internal/data/additionPalette";
 import { CHIP, SCENE } from "../internal/data/additionLayout";
 import { NudgeLine, useNudge } from "../internal/ui/useNudge";
 import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
+import { isPractice, modeAt, type PracticeSetup } from "../internal/data/practice";
 import { NumberPad } from "../internal/ui/NumberPad";
 import {
   drawChain,
@@ -40,7 +41,7 @@ import {
 
 export type ChainMode = "pairs" | "chain" | "compatible" | "running";
 
-export interface ChainSetup {
+export interface ChainSetup extends PracticeSetup {
   mode?: ChainMode;
   /** How many numbers to start with. */
   count?: number;
@@ -83,7 +84,7 @@ export const buildQuestion = (
   index: number,
   seen: Set<string>,
 ): ChainQuestion => {
-  const mode = setup.mode ?? "pairs";
+  const mode = modeAt<ChainMode>(setup, index, "pairs");
   const target = setup.target ?? 10;
   const count = setup.count ?? (mode === "compatible" ? 5 : mode === "running" ? 4 : 4);
   const base = { id: `q${index}-${Date.now().toString(36)}`, taskKind: `chain_${mode}` };
@@ -224,6 +225,8 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
   const setup: ChainSetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const copy = playCopy(params);
+  /** Practice takes the scaffolding away: no hints, no explanation, no voice. */
+  const practising = isPractice(setup);
   const seen = useRef(new Set<string>());
   const nudge = useNudge(koda);
 
@@ -239,7 +242,7 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
     koda,
     totalQuestions,
     levelNumber: lesson?.levelNumber ?? 1,
-    intro: copy.audioPrompt,
+    intro: practising ? undefined : copy.audioPrompt,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     nextQuestion: useCallback(
       (index: number) => buildQuestion(setup, index, seen.current),
@@ -253,6 +256,16 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
 
   const question = round.question as ChainQuestion;
 
+  /**
+   * Report an answer.
+   *
+   * In practice the verdict stands on its own — a child working unaided is not
+   * being walked through what happened, and an explanation after every question
+   * would put the scaffolding back one sentence at a time.
+   */
+  const submit = (outcome: Parameters<typeof round.submit>[0]) =>
+    round.submit(practising ? { ...outcome, message: undefined } : outcome);
+
   useEffect(() => {
     setChips(chipsFrom(question.values));
     setHeld(null);
@@ -264,7 +277,8 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [question.id, question.values]);
 
-  const speaks = koda.config.isEnabled("audio_speech", true);
+  // Practice says nothing at all, on top of the family's own voice switch.
+  const speaks = !practising && koda.config.isEnabled("audio_speech", true);
   const chimes = koda.config.isEnabled("sound_chimes", true);
   const vibrates = koda.config.isEnabled("haptic_feedback", true);
   const framesSteps = koda.config.isEnabled("step_context_tags", true);
@@ -311,7 +325,7 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
     const correct = given === question.sum;
     chime(correct ? "success" : "error");
     if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
-    round.submit({
+    submit({
       correct,
       given: String(given),
       errorKind: correct ? undefined : Math.abs(given - question.sum) === 1 ? "off_by_one" : "off_by_more",
@@ -346,7 +360,7 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
     chime(correct ? "success" : "error");
     if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
     const firstWrong = entries.findIndex((e, i) => e !== String(wanted[i]));
-    round.submit({
+    submit({
       correct,
       // Every step, so the log holds where a long chain actually went wrong.
       given: entries.join(","),
@@ -373,12 +387,16 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
       iconTone="cyan"
       contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
-      hints={chainHints(question, { chips, step, kidTip: copy.kidTip })}
+      hints={practising ? [] : chainHints(question, { chips, step, kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
-      onReadAloud={() => {
-        round.useSupport("audio_replay");
-        void koda.speech.say(prompt, speechRate(koda));
-      }}
+      onReadAloud={
+        practising
+          ? undefined
+          : () => {
+            round.useSupport("audio_replay");
+            void koda.speech.say(prompt, speechRate(koda));
+            }
+      }
       recommendation={nextStep}
     >
       <div className="space-y-4">

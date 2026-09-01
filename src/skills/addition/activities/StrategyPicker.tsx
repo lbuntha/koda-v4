@@ -14,6 +14,7 @@ import { ADDEND_A, ADDEND_B, TOTAL } from "../internal/data/additionPalette";
 import { SCENE } from "../internal/data/additionLayout";
 import { NudgeLine, useNudge } from "../internal/ui/useNudge";
 import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
+import { isPractice, modeAt, type PracticeSetup } from "../internal/data/practice";
 import { STRATEGIES, byId, fittingFor, type Strategy } from "../internal/data/strategyCards";
 import { drawPair, pairKey, shuffle, withoutRepeat, type PairSpec } from "../internal/data/additionNumbers";
 
@@ -35,7 +36,7 @@ import { drawPair, pairKey, shuffle, withoutRepeat, type PairSpec } from "../int
 
 export type StrategyMode = "compare_paths";
 
-export interface StrategySetup {
+export interface StrategySetup extends PracticeSetup {
   mode?: StrategyMode;
   addendRange?: [number, number];
   aRange?: [number, number];
@@ -212,6 +213,8 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({
   const setup: StrategySetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 6;
   const copy = playCopy(params);
+  /** Practice takes the scaffolding away: no hints, no explanation, no voice. */
+  const practising = isPractice(setup);
   const seen = useRef(new Set<string>());
   const memory = useRef<ProblemMemory | null>(null);
   const nudge = useNudge(koda);
@@ -222,7 +225,7 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({
     koda,
     totalQuestions,
     levelNumber: lesson?.levelNumber ?? 1,
-    intro: copy.audioPrompt,
+    intro: practising ? undefined : copy.audioPrompt,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     nextQuestion: useCallback(
       (index: number) => buildQuestion(setup, index, seen.current, memory),
@@ -235,6 +238,16 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({
   });
 
   const question = round.question as StrategyQuestion;
+
+  /**
+   * Report an answer.
+   *
+   * In practice the verdict stands on its own — a child working unaided is not
+   * being walked through what happened, and an explanation after every question
+   * would put the scaffolding back one sentence at a time.
+   */
+  const submit = (outcome: Parameters<typeof round.submit>[0]) =>
+    round.submit(practising ? { ...outcome, message: undefined } : outcome);
 
   useEffect(() => {
     nudge.clear();
@@ -258,7 +271,7 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({
     if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
 
     const others = question.fitting.filter((id) => id !== s.id).map(byId);
-    round.submit({
+    submit({
       correct,
       given: s.id,
       errorKind: correct ? undefined : "unknown",
@@ -280,7 +293,7 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({
     const long = question.paths!.find((p) => p.id !== question.shorter)!;
     chime(correct ? "success" : "error");
     if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
-    round.submit({
+    submit({
       correct,
       given: id,
       errorKind: correct ? undefined : "unknown",
@@ -303,12 +316,16 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({
       iconTone="purple"
       contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
-      hints={strategyHints(question, { kidTip: copy.kidTip })}
+      hints={practising ? [] : strategyHints(question, { kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
-      onReadAloud={() => {
-        round.useSupport("audio_replay");
-        void koda.speech.say(prompt, speechRate(koda));
-      }}
+      onReadAloud={
+        practising
+          ? undefined
+          : () => {
+            round.useSupport("audio_replay");
+            void koda.speech.say(prompt, speechRate(koda));
+            }
+      }
       recommendation={nextStep}
     >
       <div className="space-y-4">

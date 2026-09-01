@@ -14,6 +14,7 @@ import { ADDEND_A, ADDEND_B, CHANGE } from "../internal/data/additionPalette";
 import { SCENE } from "../internal/data/additionLayout";
 import { NudgeLine, useNudge } from "../internal/ui/useNudge";
 import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
+import { isPractice, modeAt, type PracticeSetup } from "../internal/data/practice";
 import {
   carriesIn,
   digitsOf,
@@ -47,7 +48,7 @@ const HEADING: Record<Place, string> = { hundreds: "H", tens: "T", ones: "O" };
 /** Where a carry out of this column lands. */
 const CARRIES_INTO: Partial<Record<Place, Place>> = { ones: "tens", tens: "hundreds" };
 
-export interface ColumnSetup {
+export interface ColumnSetup extends PracticeSetup {
   mode?: ColumnMode;
   addendRange?: [number, number];
   aRange?: [number, number];
@@ -133,7 +134,7 @@ export const buildQuestion = (
   index: number,
   seen: Set<string>,
 ): ColumnQuestion => {
-  const mode = setup.mode ?? "standard";
+  const mode = modeAt<ColumnMode>(setup, index, "standard");
   const { a, b, sum } = withoutRepeat(() => drawPair(specFor(mode, setup)), pairKey, seen);
   const places = placesFor(Math.max(a, b, sum));
   const d = digitsOf(sum);
@@ -226,6 +227,8 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({
   const setup: ColumnSetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const copy = playCopy(params);
+  /** Practice takes the scaffolding away: no hints, no explanation, no voice. */
+  const practising = isPractice(setup);
   const seen = useRef(new Set<string>());
   const nudge = useNudge(koda);
 
@@ -237,7 +240,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({
     koda,
     totalQuestions,
     levelNumber: lesson?.levelNumber ?? 1,
-    intro: copy.audioPrompt,
+    intro: practising ? undefined : copy.audioPrompt,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     nextQuestion: useCallback(
       (index: number) => buildQuestion(setup, index, seen.current),
@@ -250,6 +253,16 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({
   });
 
   const question = round.question as ColumnQuestion;
+
+  /**
+   * Report an answer.
+   *
+   * In practice the verdict stands on its own — a child working unaided is not
+   * being walked through what happened, and an explanation after every question
+   * would put the scaffolding back one sentence at a time.
+   */
+  const submit = (outcome: Parameters<typeof round.submit>[0]) =>
+    round.submit(practising ? { ...outcome, message: undefined } : outcome);
 
   useEffect(() => {
     setDigits({});
@@ -304,7 +317,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({
     const shuffledDigits =
       given !== wanted && given.split("").sort().join("") === wanted.split("").sort().join("");
 
-    round.submit({
+    submit({
       correct,
       given,
       // A right digit in the wrong column is the mistake this layout exists to
@@ -336,12 +349,16 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({
       iconTone="indigo"
       contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
-      hints={columnHints(question, { digits, carries, kidTip: copy.kidTip })}
+      hints={practising ? [] : columnHints(question, { digits, carries, kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
-      onReadAloud={() => {
-        round.useSupport("audio_replay");
-        void koda.speech.say(prompt, speechRate(koda));
-      }}
+      onReadAloud={
+        practising
+          ? undefined
+          : () => {
+            round.useSupport("audio_replay");
+            void koda.speech.say(prompt, speechRate(koda));
+            }
+      }
       recommendation={nextStep}
     >
       <div className="space-y-4">

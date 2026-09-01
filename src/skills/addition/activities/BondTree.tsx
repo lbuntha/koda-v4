@@ -14,6 +14,7 @@ import { ADDEND_A, ADDEND_B, CHANGE, TOTAL } from "../internal/data/additionPale
 import { SCENE } from "../internal/data/additionLayout";
 import { NudgeLine, useNudge } from "../internal/ui/useNudge";
 import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
+import { isPractice, modeAt, type PracticeSetup } from "../internal/data/practice";
 import { NumberPad } from "../internal/ui/NumberPad";
 import {
   digitsOf,
@@ -38,7 +39,7 @@ import {
 
 export type BondMode = "whole_unknown" | "split_one" | "split_both" | "part_unknown";
 
-export interface BondSetup {
+export interface BondSetup extends PracticeSetup {
   mode?: BondMode;
   addendRange?: [number, number];
   aRange?: [number, number];
@@ -110,7 +111,7 @@ export const buildQuestion = (
   index: number,
   seen: Set<string>,
 ): BondQuestion => {
-  const mode = setup.mode ?? "whole_unknown";
+  const mode = modeAt<BondMode>(setup, index, "whole_unknown");
   const { a, b, sum } = withoutRepeat(() => drawPair(specFor(mode, setup)), pairKey, seen);
   const base = { id: `q${index}-${Date.now().toString(36)}`, taskKind: `bond_${mode}`, mode, a, b, sum };
 
@@ -316,6 +317,8 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
   const setup: BondSetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const copy = playCopy(params);
+  /** Practice takes the scaffolding away: no hints, no explanation, no voice. */
+  const practising = isPractice(setup);
   const seen = useRef(new Set<string>());
 
   const [entries, setEntries] = useState<Record<string, string>>({});
@@ -327,7 +330,7 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
     koda,
     totalQuestions,
     levelNumber: lesson?.levelNumber ?? 1,
-    intro: copy.audioPrompt,
+    intro: practising ? undefined : copy.audioPrompt,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     nextQuestion: useCallback(
       (index: number) => buildQuestion(setup, index, seen.current),
@@ -340,6 +343,16 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
   });
 
   const question = round.question as BondQuestion;
+
+  /**
+   * Report an answer.
+   *
+   * In practice the verdict stands on its own — a child working unaided is not
+   * being walked through what happened, and an explanation after every question
+   * would put the scaffolding back one sentence at a time.
+   */
+  const submit = (outcome: Parameters<typeof round.submit>[0]) =>
+    round.submit(practising ? { ...outcome, message: undefined } : outcome);
 
   // A new question starts blank, with its first box already chosen so the pad
   // has somewhere to type without a child having to discover that it needs one.
@@ -396,7 +409,7 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
     const swapped =
       given.length === 2 && given.slice().reverse().join(",") === question.answers.join(",");
 
-    round.submit({
+    submit({
       correct,
       given: given.join(","),
       errorKind: correct ? undefined : swapped ? "reversed" : "off_by_more",
@@ -425,12 +438,16 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
       iconTone="emerald"
       contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
-      hints={bondHints(question, { entries, kidTip: copy.kidTip })}
+      hints={practising ? [] : bondHints(question, { entries, kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
-      onReadAloud={() => {
-        round.useSupport("audio_replay");
-        void koda.speech.say(prompt, speechRate(koda));
-      }}
+      onReadAloud={
+        practising
+          ? undefined
+          : () => {
+            round.useSupport("audio_replay");
+            void koda.speech.say(prompt, speechRate(koda));
+            }
+      }
       recommendation={nextStep}
     >
       <div className="space-y-4">

@@ -14,6 +14,7 @@ import { ADDEND_B, CHANGE } from "../internal/data/additionPalette";
 import { SCENE } from "../internal/data/additionLayout";
 import { NudgeLine, useNudge } from "../internal/ui/useNudge";
 import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
+import { isPractice, modeAt, type PracticeSetup } from "../internal/data/practice";
 import { NumberPad } from "../internal/ui/NumberPad";
 import {
   digitsOf,
@@ -58,7 +59,7 @@ export type JumpMode =
 /** How a mode is answered. Follows from the line, not from the mode's name. */
 type AnswerKind = "arrival" | "jump" | "landing";
 
-export interface JumpSetup {
+export interface JumpSetup extends PracticeSetup {
   mode?: JumpMode;
   aRange?: [number, number];
   bRange?: [number, number];
@@ -148,7 +149,7 @@ export const buildQuestion = (
   index: number,
   seen: Set<string>,
 ): JumpQuestion => {
-  const mode = setup.mode ?? "path";
+  const mode = modeAt<JumpMode>(setup, index, "path");
   const spec = specFor(mode, setup);
   const pair = withoutRepeat(() => drawPair(spec), pairKey, seen);
   const { a, b, sum } = pair;
@@ -378,6 +379,8 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
   const setup: JumpSetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const copy = playCopy(params);
+  /** Practice takes the scaffolding away: no hints, no explanation, no voice. */
+  const practising = isPractice(setup);
   const seen = useRef(new Set<string>());
 
   const [at, setAt] = useState(0);
@@ -390,7 +393,7 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
     koda,
     totalQuestions,
     levelNumber: lesson?.levelNumber ?? 1,
-    intro: copy.audioPrompt,
+    intro: practising ? undefined : copy.audioPrompt,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     nextQuestion: useCallback(
       (index: number) => buildQuestion(setup, index, seen.current),
@@ -404,6 +407,16 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
 
   const question = round.question as JumpQuestion;
 
+  /**
+   * Report an answer.
+   *
+   * In practice the verdict stands on its own — a child working unaided is not
+   * being walked through what happened, and an explanation after every question
+   * would put the scaffolding back one sentence at a time.
+   */
+  const submit = (outcome: Parameters<typeof round.submit>[0]) =>
+    round.submit(practising ? { ...outcome, message: undefined } : outcome);
+
   useEffect(() => {
     setAt(question.from);
     setMade([]);
@@ -412,7 +425,8 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
   }, [question.id, question.from]);
 
 
-  const speaks = koda.config.isEnabled("audio_speech", true);
+  // Practice says nothing at all, on top of the family's own voice switch.
+  const speaks = !practising && koda.config.isEnabled("audio_speech", true);
   const chimes = koda.config.isEnabled("sound_chimes", true);
   const vibrates = koda.config.isEnabled("haptic_feedback", true);
   const framesSteps = koda.config.isEnabled("step_context_tags", true);
@@ -429,7 +443,7 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
     const correct = given === question.sum;
     chime(correct ? "success" : "error");
     if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
-    round.submit({
+    submit({
       correct,
       given: String(given),
       errorKind: correct ? undefined : Math.abs(given - question.sum) === 1 ? "off_by_one" : "off_by_more",
@@ -453,7 +467,7 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
       if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
       const unit = question.mode === "bridge_ten" ? 10 : 100;
       const target = nextMultiple(question.a, unit);
-      round.submit({
+      submit({
         correct,
         given: String(size),
         errorKind: correct ? undefined : "off_by_more",
@@ -478,7 +492,7 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
     if (question.answerKind === "arrival" && next === question.sum) {
       chime("success");
       if (vibrates) koda.haptics.success();
-      round.submit({
+      submit({
         correct: true,
         given: String(next),
         title: "You landed on it!",
@@ -535,12 +549,16 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
       iconTone="cyan"
       contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
-      hints={jumpHints(question, { at, made, entry, kidTip: copy.kidTip })}
+      hints={practising ? [] : jumpHints(question, { at, made, entry, kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
-      onReadAloud={() => {
-        round.useSupport("audio_replay");
-        void koda.speech.say(prompt, speechRate(koda));
-      }}
+      onReadAloud={
+        practising
+          ? undefined
+          : () => {
+            round.useSupport("audio_replay");
+            void koda.speech.say(prompt, speechRate(koda));
+            }
+      }
       recommendation={nextStep}
     >
       <div className="space-y-4">

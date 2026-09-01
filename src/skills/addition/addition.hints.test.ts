@@ -42,6 +42,7 @@ import { buildQuestion as buildEstimate, estimateHints } from "./activities/Esti
 import { buildQuestion as buildStory, type StoryMemory } from "./activities/StoryBoard";
 import { buildQuestion as buildStrategy, type ProblemMemory } from "./activities/StrategyPicker";
 import { STRATEGIES, fittingFor } from "./internal/data/strategyCards";
+import { isPractice, modeAt } from "./internal/data/practice";
 import {
   buildQuestion as buildFact,
   factHints,
@@ -828,6 +829,35 @@ describe("choosing a strategy is judged on what suits the numbers", () => {
     // The shorter path is the one with fewer lines, and that is the answer.
     const shortest = second.paths!.reduce((best, p) => (p.lines.length < best.lines.length ? p : best));
     expect(second.expected).toBe(shortest.id);
+  });
+});
+
+describe("practice cycles the modes it is given", () => {
+  it("returns them in order, and wraps", () => {
+    const setup = { modes: ["a", "b", "c"] };
+    expect([1, 2, 3, 4, 5, 6, 7].map((i) => modeAt(setup, i, "z"))).toEqual([
+      "a", "b", "c", "a", "b", "c", "a",
+    ]);
+  });
+
+  it("covers every mode inside one run of a practice lesson", () => {
+    // Ten questions over four modes has to reach all four. Sampling would not
+    // guarantee it, which is the reason this cycles.
+    const modes = ["five", "ten", "make_five", "make_ten"];
+    const seen = new Set(
+      Array.from({ length: 8 }, (_, i) => modeAt({ modes }, i + 1, "ten")),
+    );
+    expect(seen).toEqual(new Set(modes));
+  });
+
+  it("leaves a teaching lesson on its single mode", () => {
+    expect([1, 2, 3].map((i) => modeAt({ mode: "ten" }, i, "five"))).toEqual(["ten", "ten", "ten"]);
+    expect(modeAt({}, 1, "five")).toBe("five");
+  });
+
+  it("is off unless a lesson asks for it", () => {
+    expect(isPractice({})).toBe(false);
+    expect(isPractice({ practice: true })).toBe(true);
   });
 });
 

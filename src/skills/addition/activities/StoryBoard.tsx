@@ -14,6 +14,7 @@ import { ADDEND_A, ADDEND_B, CHANGE, TOTAL } from "../internal/data/additionPale
 import { SCENE } from "../internal/data/additionLayout";
 import { NudgeLine, useNudge } from "../internal/ui/useNudge";
 import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
+import { isPractice, modeAt, type PracticeSetup } from "../internal/data/practice";
 import { NumberPad } from "../internal/ui/NumberPad";
 import { THINGS, twoNames, type Thing } from "../internal/data/storyCast";
 import { drawStory, pick, type StoryKind, type StoryNumbers } from "../internal/data/additionNumbers";
@@ -56,7 +57,7 @@ export interface StoryRow {
   whole?: number;
 }
 
-export interface StorySetup {
+export interface StorySetup extends PracticeSetup {
   mode?: StoryMode;
   startRange?: [number, number];
   changeRange?: [number, number];
@@ -215,6 +216,8 @@ const barFor = (
 
 /** Carried between the two halves of a multi-step story. */
 export interface StoryMemory {
+  /** Which kind of story this is, so a cycle cannot resume the wrong one. */
+  mode: StoryMode;
   numbers: StoryNumbers;
   names: [string, string];
   thing: Thing;
@@ -227,7 +230,7 @@ export const buildQuestion = (
   seen: Set<string>,
   memory: { current: StoryMemory | null },
 ): StoryQuestion => {
-  const mode = setup.mode ?? "join";
+  const mode = modeAt<StoryMode>(setup, index, "join");
   /*
    * A multi-step story is two questions of the round, not two answers to one.
    *
@@ -236,10 +239,20 @@ export const buildQuestion = (
    * honest record, because a child can get the first step right and the second
    * wrong and that is worth knowing.
    */
-  const step: 1 | 2 = mode === "multi_step" && index % 2 === 0 ? 2 : 1;
+  /*
+   * Step two is only ever the second half of a story that has just had its
+   * first half asked.
+   *
+   * Read off the memory rather than off the index. A practice run cycles
+   * modes, so an even-numbered question is not reliably the second half of
+   * anything — decided by parity alone it would carry a story from a different
+   * mode, or resume one that had never been started.
+   */
+  const resuming = mode === "multi_step" && memory.current?.mode === "multi_step" && index % 2 === 0;
+  const step: 1 | 2 = resuming ? 2 : 1;
 
-  let memo = memory.current;
-  if (step === 1 || !memo) {
+  let memo = resuming ? memory.current : null;
+  if (!memo) {
     const numbers = drawStory(mode, {
       startRange: setup.startRange,
       changeRange: setup.changeRange,
@@ -250,6 +263,7 @@ export const buildQuestion = (
     const thing = pick(THINGS);
     const template = setup.stories?.length ? pick(setup.stories) : FALLBACK[mode];
     memo = {
+      mode,
       numbers,
       names,
       thing,
@@ -350,6 +364,8 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
   const setup: StorySetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const copy = playCopy(params);
+  /** Practice takes the scaffolding away: no hints, no explanation, no voice. */
+  const practising = isPractice(setup);
   const seen = useRef(new Set<string>());
   const memory = useRef<StoryMemory | null>(null);
   const nudge = useNudge(koda);
@@ -364,7 +380,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
     koda,
     totalQuestions,
     levelNumber: lesson?.levelNumber ?? 1,
-    intro: copy.audioPrompt,
+    intro: practising ? undefined : copy.audioPrompt,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     nextQuestion: useCallback(
       (index: number) => buildQuestion(setup, index, seen.current, memory),
@@ -378,6 +394,16 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
 
   const question = round.question as StoryQuestion;
 
+  /**
+   * Report an answer.
+   *
+   * In practice the verdict stands on its own — a child working unaided is not
+   * being walked through what happened, and an explanation after every question
+   * would put the scaffolding back one sentence at a time.
+   */
+  const submit = (outcome: Parameters<typeof round.submit>[0]) =>
+    round.submit(practising ? { ...outcome, message: undefined } : outcome);
+
   useEffect(() => {
     setPlaced({});
     setUsedChips([]);
@@ -387,7 +413,8 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [question.id]);
 
-  const speaks = koda.config.isEnabled("audio_speech", true);
+  // Practice says nothing at all, on top of the family's own voice switch.
+  const speaks = !practising && koda.config.isEnabled("audio_speech", true);
   const chimes = koda.config.isEnabled("sound_chimes", true);
   const vibrates = koda.config.isEnabled("haptic_feedback", true);
   const framesSteps = koda.config.isEnabled("step_context_tags", true);
@@ -441,7 +468,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
     const correct = given === question.answer;
     chime(correct ? "success" : "error");
     if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
-    round.submit({
+    submit({
       correct,
       given: entry,
       errorKind: correct ? undefined : Math.abs(given - question.answer) === 1 ? "off_by_one" : "off_by_more",
@@ -466,14 +493,18 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
       iconTone="pink"
       contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
-      hints={storyHints(question, { placed, kidTip: copy.kidTip })}
+      hints={practising ? [] : storyHints(question, { placed, kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
-      onReadAloud={() => {
-        round.useSupport("audio_replay");
-        // These children cannot read the problem: a story they can only read is
-        // a story they do not get.
-        void koda.speech.say(question.text, speechRate(koda));
-      }}
+      onReadAloud={
+        practising
+          ? undefined
+          : () => {
+            round.useSupport("audio_replay");
+            // These children cannot read the problem: a story they can only read is
+            // a story they do not get.
+            void koda.speech.say(question.text, speechRate(koda));
+            }
+      }
       recommendation={nextStep}
     >
       <div className="space-y-4">

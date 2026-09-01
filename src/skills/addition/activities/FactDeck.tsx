@@ -14,6 +14,7 @@ import { ADDEND_A, ADDEND_B, CHANGE, TOTAL } from "../internal/data/additionPale
 import { SCENE } from "../internal/data/additionLayout";
 import { NudgeLine, useNudge } from "../internal/ui/useNudge";
 import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
+import { isPractice, modeAt, type PracticeSetup } from "../internal/data/practice";
 import { NumberPad } from "../internal/ui/NumberPad";
 import {
   drawDouble,
@@ -48,7 +49,7 @@ export interface Fact {
   sum: number;
 }
 
-export interface FactSetup {
+export interface FactSetup extends PracticeSetup {
   mode?: FactMode;
   /** `doubles` and the near doubles: which n to build the fact from. */
   nRange?: [number, number];
@@ -119,7 +120,7 @@ export const buildQuestion = (
   index: number,
   seen: Set<string>,
 ): FactQuestion => {
-  const mode = setup.mode ?? "doubles";
+  const mode = modeAt<FactMode>(setup, index, "doubles");
   const nRange = setup.nRange ?? (DEFAULT_SPEC[mode].addendRange as [number, number]);
   const base = { id: `q${index}-${Date.now().toString(36)}`, taskKind: `fact_${mode}`, mode };
 
@@ -294,6 +295,8 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
   const setup: FactSetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const copy = playCopy(params);
+  /** Practice takes the scaffolding away: no hints, no explanation, no voice. */
+  const practising = isPractice(setup);
   const seen = useRef(new Set<string>());
 
   const [revealed, setRevealed] = useState(false);
@@ -306,7 +309,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
     koda,
     totalQuestions,
     levelNumber: lesson?.levelNumber ?? 1,
-    intro: copy.audioPrompt,
+    intro: practising ? undefined : copy.audioPrompt,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     nextQuestion: useCallback(
       (index: number) => buildQuestion(setup, index, seen.current),
@@ -319,6 +322,16 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
   });
 
   const question = round.question as FactQuestion;
+
+  /**
+   * Report an answer.
+   *
+   * In practice the verdict stands on its own — a child working unaided is not
+   * being walked through what happened, and an explanation after every question
+   * would put the scaffolding back one sentence at a time.
+   */
+  const submit = (outcome: Parameters<typeof round.submit>[0]) =>
+    round.submit(practising ? { ...outcome, message: undefined } : outcome);
 
   useEffect(() => {
     setRevealed(false);
@@ -374,7 +387,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
     const correct = value === question.sum;
     chime(correct ? "success" : "error");
     if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
-    round.submit({
+    submit({
       correct,
       given: String(value),
       errorKind: correct ? undefined : Math.abs(value - question.sum) === 1 ? "off_by_one" : "off_by_more",
@@ -393,7 +406,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
     const restated = fact.a === question.a && fact.b === question.b;
     chime(correct ? "success" : "error");
     if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
-    round.submit({
+    submit({
       correct,
       given: `${fact.a}+${fact.b}`,
       errorKind: correct ? undefined : restated ? "reversed" : "off_by_more",
@@ -417,7 +430,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
     const correct = given.join(",") === question.members!.map((m) => String(m.answer)).join(",");
     chime(correct ? "success" : "error");
     if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
-    round.submit({
+    submit({
       correct,
       given: given.join(","),
       errorKind: correct ? undefined : "off_by_more",
@@ -442,12 +455,16 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
       iconTone="pink"
       contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
-      hints={factHints(question, { revealed, kidTip: copy.kidTip })}
+      hints={practising ? [] : factHints(question, { revealed, kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
-      onReadAloud={() => {
-        round.useSupport("audio_replay");
-        void koda.speech.say(prompt, speechRate(koda));
-      }}
+      onReadAloud={
+        practising
+          ? undefined
+          : () => {
+            round.useSupport("audio_replay");
+            void koda.speech.say(prompt, speechRate(koda));
+            }
+      }
       recommendation={nextStep}
     >
       <div className="space-y-4">

@@ -30,7 +30,8 @@ export interface SkillRoundProps {
   /** The question, in words. Read aloud and shown in the step header. */
   prompt: string;
   onExit(): void;
-  onReadAloud(): void;
+  /** Read the question aloud. Omitted hides the button — see the header. */
+  onReadAloud?(): void;
   /**
    * This question's hint ladder, gentlest first — usually built with
    * `composeHints`. Empty (or omitted) takes the Hint button off the header.

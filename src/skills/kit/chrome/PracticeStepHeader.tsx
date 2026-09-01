@@ -38,7 +38,14 @@ interface PracticeStepHeaderProps {
   hintCount: number;
   /** The panel the button opens, named so a screen reader can follow it. */
   hintPanelId?: string;
-  onReadAloud: () => void;
+  /**
+   * Read the question aloud. Omitted hides the button.
+   *
+   * A practice round says nothing on purpose, and a speaker that does nothing
+   * when a child presses it is worse than no speaker — the hint button already
+   * disappears at zero hints for the same reason.
+   */
+  onReadAloud?: () => void;
   levelNumber?: number;
   /**
    * The chip beside "Step n of m", owned by the skill rather than by this
@@ -114,14 +121,16 @@ export const PracticeStepHeader: React.FC<PracticeStepHeaderProps> = ({
         * the button shows its own state rather than relying on the label alone.
         */}
       <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
-        <button
-          onClick={onReadAloud}
-          className={themeSystem.button("secondary", "icon", "min-w-[44px] min-h-[44px]")}
-          title="Read question aloud"
-          aria-label="Read question aloud"
-        >
-          <Volume2 />
-        </button>
+        {onReadAloud && (
+          <button
+            onClick={onReadAloud}
+            className={themeSystem.button("secondary", "icon", "min-w-[44px] min-h-[44px]")}
+            title="Read question aloud"
+            aria-label="Read question aloud"
+          >
+            <Volume2 />
+          </button>
+        )}
 
         {hintCount > 0 && (
           <button

@@ -15,6 +15,7 @@ import { ADDEND_A, ADDEND_B } from "../internal/data/additionPalette";
 import { FRAME_CELL, SCENE } from "../internal/data/additionLayout";
 import { NudgeLine, useNudge } from "../internal/ui/useNudge";
 import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
+import { isPractice, modeAt, type PracticeSetup } from "../internal/data/practice";
 import {
   drawPair,
   numberWord,
@@ -40,7 +41,7 @@ import {
 
 export type FrameMode = "five" | "ten" | "make_five" | "make_ten";
 
-export interface FrameSetup {
+export interface FrameSetup extends PracticeSetup {
   mode?: FrameMode;
   /** How many arrive already in the frame. */
   aRange?: [number, number];
@@ -112,7 +113,7 @@ export const buildQuestion = (
   index: number,
   seen: Set<string>,
 ): FrameQuestion => {
-  const mode = setup.mode ?? "ten";
+  const mode = modeAt<FrameMode>(setup, index, "ten");
   const pair = withoutRepeat(() => drawPair(specFor(mode, setup)), pairKey, seen);
   const asks = mode === "make_five" || mode === "make_ten" ? "added" : "total";
 
@@ -226,6 +227,8 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
   const setup: FrameSetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const copy = playCopy(params);
+  /** Practice takes the scaffolding away: no hints, no explanation, no voice. */
+  const practising = isPractice(setup);
   const seen = useRef(new Set<string>());
 
   const [filled, setFilled] = useState(0);
@@ -236,7 +239,7 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
     koda,
     totalQuestions,
     levelNumber: lesson?.levelNumber ?? 1,
-    intro: copy.audioPrompt,
+    intro: practising ? undefined : copy.audioPrompt,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     nextQuestion: useCallback(
       (index: number) => buildQuestion(setup, index, seen.current),
@@ -250,6 +253,16 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
 
   const question = round.question as FrameQuestion;
 
+  /**
+   * Report an answer.
+   *
+   * In practice the verdict stands on its own — a child working unaided is not
+   * being walked through what happened, and an explanation after every question
+   * would put the scaffolding back one sentence at a time.
+   */
+  const submit = (outcome: Parameters<typeof round.submit>[0]) =>
+    round.submit(practising ? { ...outcome, message: undefined } : outcome);
+
   // Each question arrives with its given counters already in the frame.
   useEffect(() => {
     setFilled(question.given);
@@ -257,7 +270,8 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
   }, [question.id, question.given]);
 
 
-  const speaks = koda.config.isEnabled("audio_speech", true);
+  // Practice says nothing at all, on top of the family's own voice switch.
+  const speaks = !practising && koda.config.isEnabled("audio_speech", true);
   const chimes = koda.config.isEnabled("sound_chimes", true);
   const vibrates = koda.config.isEnabled("haptic_feedback", true);
   const showsTotal = koda.config.isEnabled("running_total_badge", true);
@@ -298,7 +312,7 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
     chime(correct ? "success" : "error");
     if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
 
-    round.submit({
+    submit({
       correct,
       given: String(given),
       errorKind: correct
@@ -333,12 +347,16 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
       iconTone="purple"
       contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
-      hints={frameHints(question, { filled, kidTip: copy.kidTip })}
+      hints={practising ? [] : frameHints(question, { filled, kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
-      onReadAloud={() => {
-        round.useSupport("audio_replay");
-        void koda.speech.say(prompt, speechRate(koda));
-      }}
+      onReadAloud={
+        practising
+          ? undefined
+          : () => {
+            round.useSupport("audio_replay");
+            void koda.speech.say(prompt, speechRate(koda));
+            }
+      }
       recommendation={nextStep}
     >
       <div className="space-y-4">

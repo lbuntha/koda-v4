@@ -219,6 +219,45 @@
         "addition/multi-step-problems",
         "addition/explain-and-compare"
       ]
+    },
+    {
+      "id": "u18",
+      "unitNumber": 18,
+      "title": "Unit 18: Practice — Counting and Frames",
+      "description": "The early techniques, mixed together with nothing to lean on",
+      "icon": "🧺",
+      "lessons": [
+        "addition/practice-frames",
+        "addition/practice-tray",
+        "addition/practice-bonds",
+        "addition/practice-numberline"
+      ]
+    },
+    {
+      "id": "u19",
+      "unitNumber": 19,
+      "title": "Unit 19: Practice — Place Value and Facts",
+      "description": "Blocks, charts and facts, unaided",
+      "icon": "⚡",
+      "lessons": [
+        "addition/practice-base10",
+        "addition/practice-chart",
+        "addition/practice-facts",
+        "addition/practice-multi"
+      ]
+    },
+    {
+      "id": "u20",
+      "unitNumber": 20,
+      "title": "Unit 20: Practice — Written Work and Problems",
+      "description": "The written method, estimating, stories and choosing",
+      "icon": "✍️",
+      "lessons": [
+        "addition/practice-column",
+        "addition/practice-estimate",
+        "addition/practice-story",
+        "addition/practice-strategy"
+      ]
     }
   ]
 }
