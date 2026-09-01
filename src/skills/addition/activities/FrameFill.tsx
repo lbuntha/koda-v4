@@ -167,7 +167,7 @@ export function frameHints(
   return composeHints(
     state.kidTip ?? "The frame is already counted. Count on from the number in it.",
     state.filled <= q.given
-      ? `There ${q.given === 1 ? "is 1 counter" : `are ${q.given} counters`} in the frame. Tap ${q.added} more empty spaces.`
+      ? `There ${q.given === 1 ? "is 1 counter" : `are ${q.given} counters`} in the frame. Tap ${q.added} more empty ${q.added === 1 ? "space" : "spaces"}.`
       : `You have added ${placed} of ${q.added}. Do not count the frame again — carry on from ${q.given}.`,
     `Start at ${q.given} and count on ${q.added}: ${Array.from({ length: q.added }, (_, i) => q.given + i + 1).join(", ")}.`,
   );
