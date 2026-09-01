@@ -8,6 +8,8 @@ import {
   playCopy,
   useSkillRound,
   type RoundQuestion,
+  isPractice,
+  modeAt,
 } from "../../kit";
 import { SCENE } from "../internal/data/countingLayout";
 import { themeSystem } from "../../../lib/themeSystem";
@@ -63,8 +65,12 @@ const rangeOr = (range: [number, number] | undefined, lo: number, hi: number) =>
 const sample = <T,>(items: readonly T[]): T => items[Math.floor(Math.random() * items.length)];
 
 const buildQuestion = (params: SubitizingSetup, index: number): SubitizingQuestion => {
-  const display = params.display ?? "grid";
-  const base = { id: `q${index}-${Date.now().toString(36)}`, taskKind: "subitize_set" };
+  const display = modeAt<SubitizingDisplay>(
+    { mode: params.display, modes: (params as { modes?: SubitizingDisplay[] }).modes },
+    index,
+    "grid",
+  );
+  const base = { id: `q${index}-${Date.now().toString(36)}`, taskKind: `subitize_${display}` };
 
   if (display === "twoColor") {
     const a = rangeOr(params.partRange, 2, 4);
@@ -192,6 +198,8 @@ export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
   const flashMs = setup.flashMs ?? 1000;
   /** The lesson's own child-facing copy: the spoken intro, and hint rung one. */
   const copy = playCopy(params);
+  /** Practice takes the scaffolding away: no hints, no explanation, no voice. */
+  const practising = isPractice(setup as { practice?: boolean });
 
   const [nextStep, setNextStep] = useState<{ kind: string; kidMessage: string } | undefined>();
   /** The set is shown only after the child asks, so their eyes are on it. */
@@ -203,7 +211,7 @@ export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
     totalQuestions: total,
     levelNumber: lesson?.levelNumber ?? 1,
     // The lesson's own spoken instruction, said once as the round opens.
-    intro: copy.audioPrompt,
+    intro: practising ? undefined : copy.audioPrompt,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     nextQuestion: useCallback((index: number) => buildQuestion(setup, index), [params]),
     onComplete: (result) => {
@@ -213,6 +221,16 @@ export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
   });
 
   const question = round.question as SubitizingQuestion;
+
+  /**
+   * Report an answer.
+   *
+   * In practice the verdict stands on its own — a child working unaided is not
+   * being walked through what happened, and an explanation after every question
+   * would put the scaffolding back one sentence at a time.
+   */
+  const submit = (outcome: Parameters<typeof round.submit>[0]) =>
+    round.submit(practising ? { ...outcome, message: undefined } : outcome);
 
   const flash = useCallback(() => {
     if (koda.config.isEnabled("sound_chimes", true)) koda.sound.play("pop");
@@ -234,7 +252,7 @@ export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
     if (koda.config.isEnabled("sound_chimes", true)) koda.sound.play(correct ? "success" : "error");
     correct ? koda.haptics.success() : koda.haptics.tap();
 
-    round.submit({
+    submit({
       correct,
       given: String(choice),
       expected: String(question.total),
@@ -257,12 +275,16 @@ export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
       prompt="Look fast! How many did you see?"
       iconName="dice"
       iconTone="purple"
-      hints={subitizeHints(question, { seen: phase !== "waiting", kidTip: copy.kidTip })}
+      hints={practising ? [] : subitizeHints(question, { seen: phase !== "waiting", kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
-      onReadAloud={() => {
-        round.useSupport("audio_replay");
-        void koda.speech.say("Look fast! How many did you see?");
-      }}
+      onReadAloud={
+        practising
+          ? undefined
+          : () => {
+            round.useSupport("audio_replay");
+            void koda.speech.say("Look fast! How many did you see?");
+            }
+      }
       recommendation={nextStep}
     >
       <div className="space-y-4 text-center">

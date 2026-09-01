@@ -52,6 +52,26 @@ export function shuffle<T>(items: readonly T[]): T[] {
 export const total = (values: readonly number[]): number =>
   values.reduce((acc, n) => acc + n, 0);
 
+/**
+ * A number as it is spoken.
+ *
+ * Words, not digits: the recorded clips are `numbers/seven.wav`, so a screen
+ * that said `String(7)` would miss the recording and take the slow path to live
+ * TTS on every single tap — the exact cost the recordings exist to remove.
+ * Shared because two engines count aloud and a second copy is a second chance
+ * to drift from the folder on disk.
+ *
+ * Past twenty it falls back to the digits, which is honest: nothing above that
+ * is recorded, and a lesson that counts that high should say so in `voice.json`.
+ */
+const NUMBER_WORDS = [
+  "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+  "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen",
+  "seventeen", "eighteen", "nineteen", "twenty",
+];
+
+export const numberWord = (n: number): string => NUMBER_WORDS[n] ?? String(n);
+
 /* -------------------------------------------------------------------------- */
 /* Place value — what "regrouping" actually means                              */
 /* -------------------------------------------------------------------------- */
@@ -134,6 +154,17 @@ export interface PairSpec {
   distinct?: boolean;
   /** `|a - b| >= minGap` — what makes switching the addends worth doing. */
   minGap?: number;
+  /**
+   * `|a - b| <= maxGap` — what keeps a helper fact close enough to help.
+   *
+   * The other half of `minGap`, and it was missing. "Use a known fact" leans on
+   * a double near the target, so 3 + 9 beside the double 3 + 3 is six steps away
+   * and helps with nothing — the lesson would be teaching that the strategy does
+   * not work. Declared rather than arranged by giving the two addends narrow
+   * overlapping ranges, which produces the same pairs today and silently stops
+   * doing so the moment someone widens one of them.
+   */
+  maxGap?: number;
   /** `a < 10 < a + b`, both single digits. The make-ten shape. */
   bridging?: boolean;
   /** Last digit of `b` comes from this list — 8 or 9, for compensation. */
@@ -160,6 +191,7 @@ export function satisfiesPair(p: Pair, spec: PairSpec): boolean {
   if (spec.sumMin !== undefined && p.sum < spec.sumMin) return false;
   if (spec.distinct && p.a === p.b) return false;
   if (spec.minGap !== undefined && Math.abs(p.a - p.b) < spec.minGap) return false;
+  if (spec.maxGap !== undefined && Math.abs(p.a - p.b) > spec.maxGap) return false;
   if (spec.multipleOf && (p.a % spec.multipleOf !== 0 || p.b % spec.multipleOf !== 0)) return false;
   if (spec.endsIn && !spec.endsIn.includes(p.b % 10)) return false;
   if (spec.bridging && !isBridging(p.a, p.b)) return false;

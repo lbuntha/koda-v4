@@ -38,6 +38,122 @@ it.
 
 ---
 
+## Who has the speaker
+
+Two things in this app talk. A skill talks **at** a child — a number on every
+tap, a word of praise on every answer. The voice coach (Ask Koda, the live
+session) talks **with** them, over an open microphone.
+
+They cannot share a speaker, and the reason is not politeness. The coach's
+microphone is live, so a lesson counting *"four, five, six"* over the top of it
+is picked up and answered **as though the child had said it**. The conversation
+derails and nobody can see why.
+
+So there is one rule:
+
+> **While the voice coach is live, a skill says nothing.**
+
+### Three switches before a line is spoken
+
+`koda.speech.say()` is the one place that decides whether a skill talks. It
+returns without speaking when any of these is true:
+
+| Switch | Who sets it | Where |
+|---|---|---|
+| The voice coach holds the floor | Koda, while a live session runs | automatic |
+| **Koda's Voice** is off | the learner or their family | Settings, beside Sound FX |
+| **Spoken voice** is off for this skill | a parent, per skill | Skill Manager → the skill's features (`audio_speech`) |
+
+All three live in `say()` rather than in each activity, because in the
+activities they were checked inconsistently. The count-along honoured the
+per-skill feature and the Read-aloud button did not, so a lesson with its voice
+switched off went quiet only until a child pressed the speaker. And the
+learner's own preference was read by praise alone — so turning Koda's Voice off
+in Settings silenced "Nice work!" while the lesson carried on counting out loud,
+and **opening a question still read the prompt aloud every time**, which is the
+one line a child hears on every single question.
+
+A skill that declares no `audio_speech` feature has not opted out of talking, so
+the default is on.
+
+### How it works
+
+
+
+One flag, held on the same global registry the clips use:
+
+```ts
+import { holdVoiceFloor, voiceFloorHeld } from "lib/voiceClips";
+
+const release = holdVoiceFloor("voice-coach");  // take it; returns the release
+voiceFloorHeld();                               // is someone else talking?
+release();                                      // give it back
+```
+
+Three places implement the rule, and that is all of them:
+
+| Where | What it does |
+|---|---|
+| `LiveVoiceCoachModal` | Holds the floor while its session is live; the effect cleanup releases it, so closing the modal, leaving the round or unmounting all give it back |
+| `createKodaSDK.speech.say()` | Returns early — **every** line **every** skill speaks goes through here |
+| `playReaction` | Yields too, because praise bypasses `say()` and fires on every answer |
+
+`holdVoiceFloor` also calls `stopClip()`, because mid-word is exactly when this
+happens: a child taps Koda while a number is still being spoken.
+
+### What a skill author has to do
+
+**Nothing.** That is the point of putting the gate in the SDK. Counting,
+addition and every skill after them inherit it by calling `koda.speech.say()`,
+which they already do.
+
+What *would* break it is going around the SDK. A skill must never:
+
+- import `playClip` or `playReaction` from `lib/voiceClips` directly,
+- call `window.speechSynthesis` or `new Audio()` itself,
+- or fetch `/api/tutor/speech` on its own.
+
+`docs/PLUGINS.md` already forbids all three — "touch the host only through the
+injected `koda`, including sound, haptics and speech" — and this is one of the
+things that rule was protecting.
+
+### Two deliberate boundaries
+
+**Chimes and haptics still fire.** `koda.sound.play()` is a pop, not a sentence,
+and silencing every tap would make a lesson feel dead while a child is reading
+the screen mid-conversation. If a live mic picking up pops turns out to matter,
+the gate goes in `playSound` and nowhere else — one line, same flag.
+
+**`say()` resolves, it does not reject.** `useSkillRound` awaits the last spoken
+number before submitting an answer. A suppressed line that threw, or never
+settled, would leave a round stuck behind a sound that was never going to play.
+
+### Adding another holder
+
+Anything else that takes over the speaker — a video, a read-aloud story, a
+second live mode — holds the floor the same way, with its own owner name:
+
+```ts
+useEffect(() => {
+  if (!playing) return;
+  return holdVoiceFloor("story-player");
+}, [playing]);
+```
+
+Release only clears the floor if you are still the one holding it, so a stale
+cleanup from a component that has already been replaced cannot hand the speaker
+back while a newer holder is talking.
+
+### Testing it
+
+`src/skills/sdk/createKodaSDK.test.ts` holds the rule for every skill at once —
+a skill speaks when the floor is free, says nothing while it is held, does not
+even reach the network for a line nobody will hear, and speaks again on release.
+`src/lib/voiceClips.test.ts` covers the floor itself, including the stale-release
+case. A new skill needs no test of its own for this.
+
+---
+
 ## Recording
 
 The key goes in `.env`, beside the one the server already reads:
@@ -58,6 +174,47 @@ Clips land in **the skill's own folder** — `src/skills/counting/audio/` — as
 named by a hash of the phrase, alongside a `manifest.json` mapping phrase to
 file. Beside `assets/`, for the same reason: a skill is what it teaches, what it
 draws with, and what it says, and removing it should take all three.
+
+### Seeing the plan before you spend anything
+
+```bash
+npm run voice:plan                      # every skill
+npm run voice:plan -- --skill addition  # one of them
+```
+
+No key needed. It prints the file each line will land in, the voice that will
+read it, and the line itself:
+
+```
+addition: 49 phrases, 49 missing
+  numbers/seven.wav                              Kore    "seven"
+  prompts/start-at-6-and-count-on.wav            Kore    "Start at 6 and count on."
+  correct/you-put-them-together.wav              Puck    "You put them together!"
+  incorrect/hmm-lets-look-again.wav              Zephyr  "Hmm, let's look again."
+  lessons/count-them-all-touch-every-one-in-bo…  Kore    "Count them all! Touch every one…"
+```
+
+`voice:plan` is `voice:record --dry-run`; the same flags apply.
+
+### What each folder is, and when a child hears it
+
+The folder is the clip's job, which is why the names are readable rather than
+hashes — you can find a bad recording and replace it without resolving the
+manifest by hand.
+
+| Folder | What it holds | When it plays |
+|---|---|---|
+| `numbers/` | number words, `"one"`–`"twenty"` | the count-along, on every tap |
+| `lessons/` | each lesson's `audioPrompt` | once, as the round opens |
+| `prompts/` | fixed question wording, and expanded templates | the Read-aloud button |
+| `phrases/` | fixed lines an activity says in passing | in play — "Put them together!" |
+| `correct/` | praise variants | every right answer |
+| `incorrect/` | encouragement variants | every wrong answer |
+
+`correct/` and `incorrect/` are the reaction groups, and they rotate voices
+across their phrases rather than recording each line in every voice — same
+variety for a fraction of the calls. They are also **scoped per skill**, so
+counting's praise never answers an addition round.
 
 ### How many files
 

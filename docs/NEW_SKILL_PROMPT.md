@@ -77,7 +77,10 @@ RULES — these are what the architecture is for:
    is the one failure that ends modularity.
 3. Touch the host only through the injected `koda` — including sound, haptics and
    speech. Never import from `utils/`. `themeSystem`, `components/ui` and
-   `lucide-react` are fine.
+   `lucide-react` are fine. In particular, never call `playClip`, `playReaction`,
+   `window.speechSynthesis` or `new Audio()` yourself: `koda.speech.say()` is
+   what makes your skill go quiet while a child is talking to Koda, and a skill
+   that goes around it talks over the conversation and into the open microphone.
 4. Reuse an existing conceptKey when the skill teaches something an existing lesson
    already teaches — grep every lessons.json first. Mastery aggregates on conceptKey
    across skills, so a new name for an old idea splits a child's record in two.
@@ -178,6 +181,14 @@ The first rung is the lesson's `params.play.kidTip`, which means it is content: 
 heard.
 
 ## Voice
+
+**Your skill yields to Ask Koda automatically.** While the live voice coach is
+running, `koda.speech.say()` returns without speaking and recorded praise stays
+silent — the coach holds an open microphone, so anything your skill says is fed
+back into the conversation as if the child had said it. You do not opt in and
+there is nothing to wire; you only have to not go around the SDK. `docs/VOICE.md`
+§ "Who has the speaker" has the mechanism and how to add another holder.
+
 
 A skill's authored phrases are recorded once and played from disk — a child taps and hears
 the word with no network in between. Put them in `audio/` with `npm run voice:record`, and

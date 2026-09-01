@@ -9,6 +9,8 @@ import {
   playCopy,
   useSkillRound,
   type RoundQuestion,
+  isPractice,
+  modeAt,
 } from "../../kit";
 import { FRAME_CELL, SCENE } from "../internal/data/countingLayout";
 import { themeSystem } from "../../../lib/themeSystem";
@@ -53,7 +55,11 @@ const rangeOr = (range: [number, number] | undefined, lo: number, hi: number) =>
 };
 
 const buildQuestion = (setup: TenFrameSetup, index: number): FrameQuestion => {
-  const mode = setup.mode ?? "fill";
+  const mode = modeAt<TenFrameMode>(
+    { mode: setup.mode, modes: (setup as { modes?: TenFrameMode[] }).modes },
+    index,
+    "fill",
+  );
   const base = { id: `q${index}-${Date.now().toString(36)}`, taskKind: `tenframe_${mode}` };
 
   if (mode === "complement") {
@@ -210,6 +216,8 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
   const total = setup.questionsPerRound ?? 5;
   /** The lesson's own child-facing copy: the spoken intro, and hint rung one. */
   const copy = playCopy(params);
+  /** Practice takes the scaffolding away: no hints, no explanation, no voice. */
+  const practising = isPractice(setup as { practice?: boolean });
 
   const [frame, setFrame] = useState<boolean[]>(EMPTY_FRAME);
   const [nextStep, setNextStep] = useState<{ kind: string; kidMessage: string } | undefined>();
@@ -219,7 +227,7 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
     totalQuestions: total,
     levelNumber: lesson?.levelNumber ?? 1,
     // The lesson's own spoken instruction, said once as the round opens.
-    intro: copy.audioPrompt,
+    intro: practising ? undefined : copy.audioPrompt,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     nextQuestion: useCallback((index: number) => buildQuestion(setup, index), [params]),
     onComplete: (result) => {
@@ -229,6 +237,16 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
   });
 
   const question = round.question as FrameQuestion;
+
+  /**
+   * Report an answer.
+   *
+   * In practice the verdict stands on its own — a child working unaided is not
+   * being walked through what happened, and an explanation after every question
+   * would put the scaffolding back one sentence at a time.
+   */
+  const report = (outcome: Parameters<typeof round.submit>[0]) =>
+    round.submit(practising ? { ...outcome, message: undefined } : outcome);
   const filled = frame.filter(Boolean).length;
 
   // Each question starts from an empty frame.
@@ -254,7 +272,7 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
        * a counter is a correction, not a count.
        */
       const count = next.filter(Boolean).length;
-      if (count > prev.filter(Boolean).length && koda.config.isEnabled("audio_speech", true)) {
+      if (count > prev.filter(Boolean).length && !practising && koda.config.isEnabled("audio_speech", true)) {
         void koda.speech.say(NUMBER_WORDS[count] ?? String(count), {
           rate: koda.config.get("speechRate", 1.0),
         });
@@ -266,7 +284,7 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
   const submit = (given: number, correct: boolean, title: string, message: string) => {
     chime(correct ? "success" : "error");
     correct ? koda.haptics.success() : koda.haptics.tap();
-    round.submit({
+    report({
       correct,
       given: String(given),
       expected: String(question.mode === "teen" ? question.target : question.target),
@@ -340,12 +358,16 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
       prompt={prompt}
       iconName="rocket"
       iconTone="purple"
-      hints={tenFrameHints(question, { filled, kidTip: copy.kidTip })}
+      hints={practising ? [] : tenFrameHints(question, { filled, kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
-      onReadAloud={() => {
-        round.useSupport("audio_replay");
-        void koda.speech.say(prompt);
-      }}
+      onReadAloud={
+        practising
+          ? undefined
+          : () => {
+            round.useSupport("audio_replay");
+            void koda.speech.say(prompt);
+            }
+      }
       recommendation={nextStep}
     >
       {question.mode === "fill" && (

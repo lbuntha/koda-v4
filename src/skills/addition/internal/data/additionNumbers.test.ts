@@ -74,6 +74,7 @@ describe("drawPair honours every constraint it is given", () => {
     "ten frame (L9)": { addendRange: [1, 9], sumMax: 10 },
     "break apart an addend (L22)": { aRange: [6, 9], bRange: [3, 9], bridging: true },
     "switch the addends (L26)": { aRange: [1, 4], bRange: [6, 9], minGap: 3 },
+    "use a known fact (L24)": { addendRange: [3, 9], sumMax: 18, maxGap: 2 },
     "compensation (L28)": { aRange: [21, 79], bRange: [11, 89], endsIn: [8, 9] },
     "multiples of ten (L29)": { addendRange: [10, 90], multipleOf: 10, sumMax: 100 },
     "multiples of a hundred (L30)": { addendRange: [100, 900], multipleOf: 100, sumMax: 1000 },
@@ -263,3 +264,22 @@ describe("withoutRepeat", () => {
     expect(() => times(5, () => withoutRepeat(draw, pairKey, seen))).not.toThrow();
   });
 });
+
+describe("a helper fact stays close enough to help", () => {
+  it("keeps the two addends within maxGap", () => {
+    times(DRAWS, () => {
+      const { a, b } = drawPair({ addendRange: [3, 9], maxGap: 2 });
+      expect(Math.abs(a - b), `${a} + ${b}`).toBeLessThanOrEqual(2);
+    });
+  });
+
+  it("holds both ends at once", () => {
+    times(DRAWS, () => {
+      const { a, b } = drawPair({ addendRange: [1, 12], minGap: 2, maxGap: 4 });
+      const gap = Math.abs(a - b);
+      expect(gap).toBeGreaterThanOrEqual(2);
+      expect(gap).toBeLessThanOrEqual(4);
+    });
+  });
+});
+

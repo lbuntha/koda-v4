@@ -2,6 +2,17 @@ import type { Lesson, SkillFeature, SkillManifest, Skill } from "../types";
 import manifestJson from "./manifest.json";
 import lessonsJson from "./lessons.json";
 import { CountTray } from "./activities/CountTray";
+import { FrameFill } from "./activities/FrameFill";
+import { BondTree } from "./activities/BondTree";
+import { JumpLine } from "./activities/JumpLine";
+import { BlockYard } from "./activities/BlockYard";
+import { PlaceValueDesk } from "./activities/PlaceValueDesk";
+import { FactDeck } from "./activities/FactDeck";
+import { ChainBoard } from "./activities/ChainBoard";
+import { ColumnPad } from "./activities/ColumnPad";
+import { EstimateDial } from "./activities/EstimateDial";
+import { StoryBoard } from "./activities/StoryBoard";
+import { StrategyPicker } from "./activities/StrategyPicker";
 import { registerSkillArt } from "../../assets/svg/skillArt";
 import { registerSkillVoice } from "../../lib/voiceClips";
 import audioManifest from "./audio/manifest.json";
@@ -83,6 +94,79 @@ export const skill: Skill = {
        */
       defaultParams: { mode: "count_all", questionsPerRound: 5 },
       component: CountTray,
+    },
+    frames: {
+      id: "frames",
+      name: "Five and Ten Frames",
+      /* All four modes ship now; `make_five` and `make_ten` wait nine levels
+         for their lessons. Writing an engine complete is what lets those two
+         arrive as JSON rather than as code. */
+      defaultParams: { mode: "ten", questionsPerRound: 5 },
+      component: FrameFill,
+    },
+    bonds: {
+      id: "bonds",
+      name: "Number Bonds",
+      defaultParams: { mode: "whole_unknown", questionsPerRound: 5 },
+      component: BondTree,
+    },
+    numberline: {
+      id: "numberline",
+      name: "Number Line Jumps",
+      /* Six modes across two kinds of line. `bridge_ten` onwards wait eight
+         levels for their lessons and arrive as JSON. */
+      defaultParams: { mode: "path", questionsPerRound: 5 },
+      component: JumpLine,
+    },
+    base10: {
+      id: "base10",
+      name: "Base-Ten Blocks",
+      defaultParams: { mode: "build_add", questionsPerRound: 5 },
+      component: BlockYard,
+    },
+    chart: {
+      id: "chart",
+      name: "Place-Value Chart",
+      defaultParams: { mode: "chart_add", questionsPerRound: 5 },
+      component: PlaceValueDesk,
+    },
+    facts: {
+      id: "facts",
+      name: "Fact Deck",
+      defaultParams: { mode: "doubles", questionsPerRound: 5 },
+      component: FactDeck,
+    },
+    multi: {
+      id: "multi",
+      name: "Chains and Pairs",
+      defaultParams: { mode: "pairs", questionsPerRound: 5 },
+      component: ChainBoard,
+    },
+    column: {
+      id: "column",
+      name: "Column Add",
+      defaultParams: { mode: "standard", questionsPerRound: 5 },
+      component: ColumnPad,
+    },
+    estimate: {
+      id: "estimate",
+      name: "Estimate and Check",
+      defaultParams: { mode: "round_estimate", digits: 2, questionsPerRound: 5 },
+      component: EstimateDial,
+    },
+    story: {
+      id: "story",
+      name: "Story Problems",
+      defaultParams: { mode: "join", questionsPerRound: 5 },
+      component: StoryBoard,
+    },
+    strategy: {
+      id: "strategy",
+      name: "Which Strategy?",
+      /* Six questions, because each problem is asked twice: choose a route,
+         then compare it with another. */
+      defaultParams: { mode: "compare_paths", questionsPerRound: 6 },
+      component: StrategyPicker,
     },
   },
 };

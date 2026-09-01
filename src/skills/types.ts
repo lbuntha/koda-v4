@@ -291,7 +291,7 @@ export interface Lesson {
    *
    * Authored by the skill, not validated by the host. Empty is a legitimate
    * answer, not a gap — subitizing is a research construct Common Core never
-   * numbered. `docs/SKILLS.md` §7 carries the rules a new skill follows.
+   * numbered. `docs/PLUGINS.md` §7 carries the rules a new skill follows.
    */
   standards?: string[];
 

@@ -2,6 +2,7 @@
 // Add artwork by dropping a .svg into a category folder here, then run `npm run svg:ids`.
 
 export const SVG_ASSET_IDS = [
+  "addition-quest",
   "apple",
   "badge-bright-spark",
   "badge-first-steps",
@@ -25,6 +26,7 @@ export type SvgAssetId = (typeof SVG_ASSET_IDS)[number];
 
 /** Folder each asset lives in. "uncategorised" means it sits at the top level. */
 export const SVG_ASSET_CATEGORIES: Record<string, string> = {
+  "addition-quest": "thumbnail",
   "apple": "fruits",
   "badge-bright-spark": "badges",
   "badge-first-steps": "badges",

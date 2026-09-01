@@ -313,13 +313,31 @@ describe("hint copy describes the question on screen", () => {
     expect(done[2]).toContain("Press Check");
   });
 
-  it("every lesson writes the first rung itself", () => {
+  it("every teaching lesson writes the first rung itself", () => {
     // Rung one is the lesson's own words, so a lesson with no `kidTip` quietly
     // hands the child the activity's generic fallback instead of the strategy
     // this lesson is teaching.
+    //
+    // Practice is the exception, and deliberately so: it shows no hints at all,
+    // so there is no rung one for it to write. A `kidTip` there would be copy
+    // nothing can ever display.
     for (const lesson of skill.lessons) {
-      const play = (lesson.params as { play?: { kidTip?: string } } | undefined)?.play;
+      const play = (lesson.params as { play?: { kidTip?: string; mode?: string } } | undefined)?.play;
+      if (play?.mode === "practice") continue;
       expect(play?.kidTip?.trim(), `${lesson.id} has no kidTip`).toBeTruthy();
+    }
+  });
+
+  it("practice lessons show no hints, so they author none", () => {
+    const practices = skill.lessons.filter((l) => l.id.startsWith("practice-"));
+    expect(practices.length).toBeGreaterThan(0);
+    for (const lesson of practices) {
+      const params = lesson.params as { question: { practice?: boolean }; play: { kidTip: string } };
+      expect(params.question.practice, `${lesson.id} is not marked as practice`).toBe(true);
+      expect(params.play.kidTip).toBe("");
+      // Open from the start: a child who already knows the technique should not
+      // have to sit through the lesson to reach the questions.
+      expect(lesson.requires ?? []).toEqual([]);
     }
   });
 });

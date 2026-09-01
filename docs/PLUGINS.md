@@ -419,6 +419,10 @@ here. No skill folder is touched.
 
 ## 7. Adding a new skill
 
+> **`docs/SKILL_DEVELOPMENT.md` is the end-to-end walkthrough** — build order, the
+> house rules, the traps, and the definition of done. This section stays the
+> contract it all has to satisfy.
+
 1. **Start from the reference skill.** `counting/` is the worked example — manifest,
    lessons, five activities all built on the kit, registered in two places, and a test
    file that is two inherited lines. `docs/NEW_SKILL_PROMPT.md` is the standard prompt

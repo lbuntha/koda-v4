@@ -5,13 +5,18 @@
       "title": "Count Them All",
       "concept": "Joining Two Groups by Counting Every One",
       "conceptKey": "count-all",
-      "requires": ["counter"],
+      "requires": [
+        "counter"
+      ],
       "activity": "addition/tray",
       "params": {
         "level": 1,
         "question": {
           "mode": "count_all",
-          "addendRange": [1, 5],
+          "addendRange": [
+            1,
+            5
+          ],
           "sumMax": 10,
           "questionsPerRound": 5
         },
@@ -29,7 +34,9 @@
           ],
           "kidTip": "Do not start again at the second group. Keep counting on.",
           "audioPrompt": "Count them all! Touch every one in both groups to find how many altogether.",
-          "prompts": { "default": "Count them all. How many altogether?" }
+          "prompts": {
+            "default": "Count them all. How many altogether?"
+          }
         }
       },
       "difficulty": "Easy",
@@ -37,22 +44,33 @@
       "iconName": "boxes",
       "iconTone": "purple",
       "pedagogyTip": "Counting all is where addition starts: a child who counts both groups from one is not behind, they are building the idea the shortcuts will later replace.",
-      "standards": ["CCSS.K.OA.A.1", "CCSS.K.OA.A.2"],
+      "standards": [
+        "CCSS.K.OA.A.1",
+        "CCSS.K.OA.A.2"
+      ],
       "trajectoryLevel": "find-result",
-      "ageBand": [5, 6]
+      "ageBand": [
+        5,
+        6
+      ]
     },
     {
       "id": "put-groups-together",
       "title": "Put Them Together",
       "concept": "Two Groups Becoming One",
       "conceptKey": "combiner",
-      "requires": ["count-all"],
+      "requires": [
+        "count-all"
+      ],
       "activity": "addition/tray",
       "params": {
         "level": 2,
         "question": {
           "mode": "combine",
-          "addendRange": [1, 5],
+          "addendRange": [
+            1,
+            5
+          ],
           "sumMax": 10,
           "questionsPerRound": 5
         },
@@ -70,7 +88,9 @@
           ],
           "kidTip": "Adding means putting groups together. Then you count once.",
           "audioPrompt": "Put the two groups together, then count how many you have.",
-          "prompts": { "default": "Put the groups together, then count them all." }
+          "prompts": {
+            "default": "Put the groups together, then count them all."
+          }
         }
       },
       "difficulty": "Easy",
@@ -78,23 +98,36 @@
       "iconName": "layers",
       "iconTone": "purple",
       "pedagogyTip": "Seeing two sets physically become one is what makes the plus sign mean something later.",
-      "standards": ["CCSS.K.OA.A.1"],
+      "standards": [
+        "CCSS.K.OA.A.1"
+      ],
       "trajectoryLevel": "find-result",
-      "ageBand": [5, 6]
+      "ageBand": [
+        5,
+        6
+      ]
     },
     {
       "id": "count-on",
       "title": "Count On",
       "concept": "Starting from a Number Instead of from One",
       "conceptKey": "count-on",
-      "requires": ["count-all"],
+      "requires": [
+        "count-all"
+      ],
       "activity": "addition/tray",
       "params": {
         "level": 3,
         "question": {
           "mode": "count_on",
-          "aRange": [4, 9],
-          "bRange": [1, 3],
+          "aRange": [
+            4,
+            9
+          ],
+          "bRange": [
+            1,
+            3
+          ],
           "questionsPerRound": 5
         },
         "play": {
@@ -111,7 +144,9 @@
           ],
           "kidTip": "The closed box is already counted. Start from its number.",
           "audioPrompt": "Count on! The first group is already counted, so start from its number.",
-          "prompts": { "default": "Start at {a} and count on." }
+          "prompts": {
+            "default": "Start at {a} and count on."
+          }
         }
       },
       "difficulty": "Medium",
@@ -119,23 +154,36 @@
       "iconName": "footprints",
       "iconTone": "cyan",
       "pedagogyTip": "Counting on is the first real strategy: it treats the first number as a quantity rather than as something to be re-counted.",
-      "standards": ["CCSS.1.OA.C.5"],
+      "standards": [
+        "CCSS.1.OA.C.5"
+      ],
       "trajectoryLevel": "counting-strategies",
-      "ageBand": [5, 7]
+      "ageBand": [
+        5,
+        7
+      ]
     },
     {
       "id": "start-with-larger",
       "title": "Start with the Bigger Number",
       "concept": "Counting On from the Larger Addend",
       "conceptKey": "count-on-from-larger",
-      "requires": ["count-on"],
+      "requires": [
+        "count-on"
+      ],
       "activity": "addition/tray",
       "params": {
         "level": 4,
         "question": {
           "mode": "count_on_larger",
-          "aRange": [1, 3],
-          "bRange": [5, 9],
+          "aRange": [
+            1,
+            3
+          ],
+          "bRange": [
+            5,
+            9
+          ],
           "questionsPerRound": 5
         },
         "play": {
@@ -152,7 +200,9 @@
           ],
           "kidTip": "You can add in any order, so start from the bigger number.",
           "audioPrompt": "Start with the bigger number! Then you have fewer to count on.",
-          "prompts": { "default": "Start with the bigger number, then count on." }
+          "prompts": {
+            "default": "Start with the bigger number, then count on."
+          }
         }
       },
       "difficulty": "Medium",
@@ -160,22 +210,33 @@
       "iconName": "scale",
       "iconTone": "cyan",
       "pedagogyTip": "3 + 8 and 8 + 3 give the same total, and one of them takes three counts instead of eight. That choice is the lesson.",
-      "standards": ["CCSS.1.OA.B.3", "CCSS.1.OA.C.5"],
+      "standards": [
+        "CCSS.1.OA.B.3",
+        "CCSS.1.OA.C.5"
+      ],
       "trajectoryLevel": "counting-strategies",
-      "ageBand": [6, 7]
+      "ageBand": [
+        6,
+        7
+      ]
     },
     {
       "id": "add-zero",
       "title": "Adding Zero",
       "concept": "Adding Nothing Changes Nothing",
       "conceptKey": "additive-identity",
-      "requires": ["count-all"],
+      "requires": [
+        "count-all"
+      ],
       "activity": "addition/tray",
       "params": {
         "level": 5,
         "question": {
           "mode": "add_zero",
-          "aRange": [1, 10],
+          "aRange": [
+            1,
+            10
+          ],
           "flipChance": 0.5,
           "questionsPerRound": 5
         },
@@ -193,7 +254,9 @@
           ],
           "kidTip": "Zero means none. The number stays the same.",
           "audioPrompt": "Adding zero! One group is empty, so what happens to the total?",
-          "prompts": { "default": "What is {a} plus {b}?" }
+          "prompts": {
+            "default": "What is {a} plus {b}?"
+          }
         }
       },
       "difficulty": "Easy",
@@ -201,22 +264,32 @@
       "iconName": "circleDot",
       "iconTone": "indigo",
       "pedagogyTip": "Children who have only ever counted find zero genuinely strange — an empty group is still a group, and it still gets added.",
-      "standards": ["CCSS.1.OA.C.6"],
+      "standards": [
+        "CCSS.1.OA.C.6"
+      ],
       "trajectoryLevel": "find-result",
-      "ageBand": [5, 7]
+      "ageBand": [
+        5,
+        7
+      ]
     },
     {
       "id": "add-one",
       "title": "Adding One",
       "concept": "One More Is the Next Number",
       "conceptKey": "next-number-adder",
-      "requires": ["count-all"],
+      "requires": [
+        "count-all"
+      ],
       "activity": "addition/tray",
       "params": {
         "level": 6,
         "question": {
           "mode": "add_one",
-          "aRange": [1, 15],
+          "aRange": [
+            1,
+            15
+          ],
           "flipChance": 0.4,
           "questionsPerRound": 5
         },
@@ -234,7 +307,9 @@
           ],
           "kidTip": "Adding one is just saying the next number.",
           "audioPrompt": "Adding one! One more is the next number you say when you count.",
-          "prompts": { "default": "What is {a} plus {b}?" }
+          "prompts": {
+            "default": "What is {a} plus {b}?"
+          }
         }
       },
       "difficulty": "Easy",
@@ -242,22 +317,33 @@
       "iconName": "zap",
       "iconTone": "indigo",
       "pedagogyTip": "This is where the counting sequence stops being a song and starts being arithmetic: the number after seven *is* seven and one more.",
-      "standards": ["CCSS.1.OA.C.5", "CCSS.1.OA.C.6"],
+      "standards": [
+        "CCSS.1.OA.C.5",
+        "CCSS.1.OA.C.6"
+      ],
       "trajectoryLevel": "counting-strategies",
-      "ageBand": [5, 7]
+      "ageBand": [
+        5,
+        7
+      ]
     },
     {
       "id": "use-fingers",
       "title": "Use Your Fingers",
       "concept": "Modelling Both Addends on Two Hands",
       "conceptKey": "finger-adder",
-      "requires": ["count-all"],
+      "requires": [
+        "count-all"
+      ],
       "activity": "addition/tray",
       "params": {
         "level": 7,
         "question": {
           "mode": "fingers",
-          "addendRange": [1, 5],
+          "addendRange": [
+            1,
+            5
+          ],
           "sumMax": 10,
           "questionsPerRound": 5
         },
@@ -275,7 +361,9 @@
           ],
           "kidTip": "One number on each hand. Then count every finger that is up.",
           "audioPrompt": "Use your fingers! Put one number on each hand, then count them all.",
-          "prompts": { "default": "Show {a} on one hand and {b} on the other. How many fingers altogether?" }
+          "prompts": {
+            "default": "Show {a} on one hand and {b} on the other. How many fingers altogether?"
+          }
         }
       },
       "difficulty": "Easy",
@@ -285,7 +373,3009 @@
       "pedagogyTip": "Fingers are a manipulative a child always has. Discouraging them removes the model before the fact is known, which is what produces guessing.",
       "standards": [],
       "trajectoryLevel": "counting-strategies",
-      "ageBand": [5, 7]
+      "ageBand": [
+        5,
+        7
+      ]
+    },
+    {
+      "id": "five-frame",
+      "title": "Five Frame",
+      "concept": "Adding Inside a Frame of Five",
+      "conceptKey": "five-benchmark",
+      "requires": [
+        "count-on"
+      ],
+      "activity": "addition/frames",
+      "params": {
+        "level": 8,
+        "question": {
+          "mode": "five",
+          "addendRange": [
+            1,
+            4
+          ],
+          "sumMax": 5,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "frame_fill",
+          "tier": "beginner",
+          "difficultyColor": "violet",
+          "category": "Frames",
+          "shortDesc": "Add counters to a row of five and read the total without counting from one",
+          "targetObjective": "Fill the frame, then read how many.",
+          "stepByStep": [
+            "Some counters are already in the frame.",
+            "Tap empty spaces to add the rest.",
+            "The frame shows the total — you do not have to start again at one."
+          ],
+          "kidTip": "The frame is already counted. Count on from the number in it.",
+          "audioPrompt": "Five frame! Add counters to the row, then say how many there are.",
+          "prompts": {
+            "default": "Fill in {b} more. How many are there altogether?"
+          }
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "🖐️",
+      "iconName": "layers",
+      "iconTone": "purple",
+      "pedagogyTip": "Five is the first benchmark. A child who sees four as 'one less than five' has stopped counting one at a time.",
+      "standards": [
+        "CCSS.K.OA.A.5"
+      ],
+      "trajectoryLevel": "find-result",
+      "ageBand": [
+        5,
+        6
+      ]
+    },
+    {
+      "id": "ten-frame",
+      "title": "Ten Frame",
+      "concept": "Adding Inside a Frame of Ten",
+      "conceptKey": "ten-frame-adder",
+      "requires": [
+        "five-benchmark"
+      ],
+      "activity": "addition/frames",
+      "params": {
+        "level": 9,
+        "question": {
+          "mode": "ten",
+          "addendRange": [
+            1,
+            9
+          ],
+          "sumMax": 10,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "frame_fill",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Frames",
+          "shortDesc": "Add counters to two rows of five and read the total at a glance",
+          "targetObjective": "Fill the frame, then read how many.",
+          "stepByStep": [
+            "The top row holds five. The bottom row holds five more.",
+            "Tap empty spaces to add counters.",
+            "A full row of five helps you see the total without counting."
+          ],
+          "kidTip": "A full top row is five. Count on from there.",
+          "audioPrompt": "Ten frame! Add counters to the frame, then say how many altogether.",
+          "prompts": {
+            "default": "Fill in {b} more. How many are there altogether?"
+          }
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "🔟",
+      "iconName": "boxes",
+      "iconTone": "purple",
+      "pedagogyTip": "Two rows of five is what makes ten readable at a glance, and it is the structure every make-ten strategy later leans on.",
+      "standards": [
+        "CCSS.1.OA.C.6"
+      ],
+      "trajectoryLevel": "find-result",
+      "ageBand": [
+        5,
+        7
+      ]
+    },
+    {
+      "id": "number-bonds",
+      "title": "Number Bonds",
+      "concept": "Parts and Wholes",
+      "conceptKey": "part-whole-decomposer",
+      "requires": [
+        "count-all"
+      ],
+      "activity": "addition/bonds",
+      "params": {
+        "level": 10,
+        "question": {
+          "mode": "whole_unknown",
+          "addendRange": [
+            1,
+            9
+          ],
+          "sumMax": 10,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "bond_tree",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Parts and Wholes",
+          "shortDesc": "Read a bond diagram and give the whole that its two parts make",
+          "targetObjective": "Two parts underneath make the whole on top.",
+          "stepByStep": [
+            "The two boxes at the bottom are the parts.",
+            "The box at the top is the whole they make together.",
+            "Tap the empty box and type the whole."
+          ],
+          "kidTip": "The two parts underneath make the whole on top.",
+          "audioPrompt": "Number bonds! The two parts at the bottom make the whole at the top.",
+          "prompts": {
+            "default": "What do {a} and {b} make altogether?"
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "💎",
+      "iconName": "gem",
+      "iconTone": "emerald",
+      "pedagogyTip": "A bond is the picture behind every later decomposition — breaking an addend, finding a missing part, and fact families are all this diagram with a different box blank.",
+      "standards": [
+        "CCSS.K.OA.A.3"
+      ],
+      "trajectoryLevel": "part-whole",
+      "ageBand": [
+        5,
+        7
+      ]
+    },
+    {
+      "id": "number-path",
+      "title": "The Number Path",
+      "concept": "Counting On Along a Path",
+      "conceptKey": "number-path",
+      "requires": [
+        "count-on"
+      ],
+      "activity": "addition/numberline",
+      "params": {
+        "level": 11,
+        "question": {
+          "mode": "path",
+          "aRange": [
+            1,
+            10
+          ],
+          "bRange": [
+            1,
+            5
+          ],
+          "sumMax": 20,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "jump_line",
+          "tier": "beginner",
+          "difficultyColor": "violet",
+          "category": "Number Line",
+          "shortDesc": "Hop forward one square at a time and land on the answer",
+          "targetObjective": "One hop is one number.",
+          "stepByStep": [
+            "The marker starts on the first number.",
+            "Each hop moves it forward one square.",
+            "Say the number you land on. The last one is the answer."
+          ],
+          "kidTip": "One hop is one number. Say each number as you land on it.",
+          "audioPrompt": "The number path! Hop forward one square at a time and see where you land.",
+          "prompts": {
+            "default": "Start at {a} and hop forward {b}."
+          }
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "👣",
+      "iconName": "footprints",
+      "iconTone": "cyan",
+      "pedagogyTip": "A path has one square per number, so hopping is counting made visible — this is where counting on stops being invisible mental work.",
+      "standards": [
+        "CCSS.1.OA.C.5"
+      ],
+      "trajectoryLevel": "counting-strategies",
+      "ageBand": [
+        5,
+        7
+      ]
+    },
+    {
+      "id": "open-number-line",
+      "title": "The Open Number Line",
+      "concept": "Jumping Without Marked Numbers",
+      "conceptKey": "open-number-line",
+      "requires": [
+        "number-path"
+      ],
+      "activity": "addition/numberline",
+      "params": {
+        "level": 12,
+        "question": {
+          "mode": "open",
+          "aRange": [
+            10,
+            40
+          ],
+          "bRange": [
+            2,
+            9
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "jump_line",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Number Line",
+          "shortDesc": "Take one jump on a line with no numbers, and work out where you landed",
+          "targetObjective": "Nothing on this line tells you where you are.",
+          "stepByStep": [
+            "Only the starting number is marked.",
+            "Take the jump — the arc stays on screen.",
+            "Work out where you landed and type it in."
+          ],
+          "kidTip": "There are no numbers on this line, so keep the count in your head.",
+          "audioPrompt": "The open number line! Take the jump, then work out where you landed.",
+          "prompts": {
+            "default": "Start at {a} and jump {b}. Where do you land?"
+          }
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "➰",
+      "iconName": "waves",
+      "iconTone": "indigo",
+      "pedagogyTip": "An open line carries no answers, so it stops being a counting aid and becomes a place to record thinking — which is what makes it work for numbers too big to draw.",
+      "standards": [
+        "CCSS.2.NBT.B.5"
+      ],
+      "trajectoryLevel": "jump-strategy",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "base-ten-blocks",
+      "title": "Base-Ten Blocks",
+      "concept": "Adding with Tens and Ones You Can See",
+      "conceptKey": "base-ten-adder",
+      "requires": [
+        "part-whole-decomposer"
+      ],
+      "activity": "addition/base10",
+      "params": {
+        "level": 13,
+        "question": {
+          "mode": "build_add",
+          "addendRange": [
+            11,
+            88
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "block_yard",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Place Value",
+          "shortDesc": "Build a two-digit answer out of ten-rods and one-units",
+          "targetObjective": "Build the answer out of tens and ones.",
+          "stepByStep": [
+            "Look at the two numbers you are adding.",
+            "Tap rods and units in the tray to drop them into the yard.",
+            "When the yard holds the answer, check it."
+          ],
+          "kidTip": "Build each number out of blocks, then read what you have.",
+          "audioPrompt": "Base-ten blocks! Build the answer out of ten-rods and one-units.",
+          "prompts": {
+            "default": "Build {a} plus {b} out of blocks."
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🧱",
+      "iconName": "boxes",
+      "iconTone": "purple",
+      "pedagogyTip": "A rod is worth ten because it is visibly ten units. A child who can check that is holding place value rather than remembering it.",
+      "standards": [
+        "CCSS.1.NBT.C.4"
+      ],
+      "trajectoryLevel": "base-ten-adder",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "place-value-chart",
+      "title": "The Place-Value Chart",
+      "concept": "Adding One Column at a Time",
+      "conceptKey": "place-value-builder",
+      "requires": [
+        "base-ten-adder"
+      ],
+      "activity": "addition/chart",
+      "params": {
+        "level": 14,
+        "question": {
+          "mode": "chart_add",
+          "addendRange": [
+            11,
+            88
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "place_value_desk",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Place Value",
+          "shortDesc": "Write two numbers in tens and ones columns and add each column",
+          "targetObjective": "Ones go under ones. Tens go under tens.",
+          "stepByStep": [
+            "Each number sits in its columns: tens on the left, ones on the right.",
+            "Add the ones column, then the tens column.",
+            "Write each answer in the column it belongs to."
+          ],
+          "kidTip": "Add each column on its own. Ones with ones, tens with tens.",
+          "audioPrompt": "The place-value chart! Add the ones column, then the tens column.",
+          "prompts": {
+            "default": "{a} plus {b}. Fill in the total, one column at a time."
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "📊",
+      "iconName": "layers",
+      "iconTone": "indigo",
+      "pedagogyTip": "Writing the digit in the right column is the skill. A chart that placed it for the child would be teaching something else.",
+      "standards": [
+        "CCSS.1.NBT.C.4"
+      ],
+      "trajectoryLevel": "place-value-builder",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "doubles",
+      "title": "Doubles",
+      "concept": "The Same Number Twice",
+      "conceptKey": "doubles-knower",
+      "requires": [
+        "ten-frame-adder"
+      ],
+      "activity": "addition/facts",
+      "params": {
+        "level": 15,
+        "question": {
+          "mode": "doubles",
+          "nRange": [
+            1,
+            10
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "fact_deck",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Facts",
+          "shortDesc": "The Same Number Twice",
+          "targetObjective": "A double is the same number twice.",
+          "stepByStep": [
+            "Read the fact on the card.",
+            "Look at the two equal rows.",
+            "Type the total and check it."
+          ],
+          "kidTip": "A double is the same number twice.",
+          "audioPrompt": "Doubles! The same number twice — these are the facts to know by heart.",
+          "prompts": {
+            "default": "Double {a}. What is the total?"
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "👯",
+      "iconName": "zap",
+      "iconTone": "pink",
+      "pedagogyTip": "Doubles are learned as pictures rather than counted, and they are the anchor every near-double leans on afterwards.",
+      "standards": [
+        "CCSS.1.OA.C.6"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "near-doubles-one-more",
+      "title": "Near Doubles: One More",
+      "concept": "A Double, and One More",
+      "conceptKey": "near-doubles",
+      "requires": [
+        "doubles-knower"
+      ],
+      "activity": "addition/facts",
+      "params": {
+        "level": 16,
+        "question": {
+          "mode": "near_up",
+          "nRange": [
+            1,
+            9
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "fact_deck",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Facts",
+          "shortDesc": "A Double, and One More",
+          "targetObjective": "A near double is one step from a double you already know.",
+          "stepByStep": [
+            "Read the fact on the card.",
+            "Use the double it sits beside.",
+            "Type the total and check it."
+          ],
+          "kidTip": "A near double is one step from a double you already know.",
+          "audioPrompt": "Near doubles! This fact is one more than a double you know.",
+          "prompts": {
+            "default": "{a} plus {b}. It is one away from a double you know."
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "➕",
+      "iconName": "zap",
+      "iconTone": "pink",
+      "pedagogyTip": "Naming the double first is the strategy. A child who jumps straight to the answer has not used it, even when they are right.",
+      "standards": [
+        "CCSS.1.OA.C.6"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "near-doubles-one-less",
+      "title": "Near Doubles: One Less",
+      "concept": "A Double, and One Less",
+      "conceptKey": "near-doubles",
+      "requires": [
+        "doubles-knower"
+      ],
+      "activity": "addition/facts",
+      "params": {
+        "level": 17,
+        "question": {
+          "mode": "near_down",
+          "nRange": [
+            2,
+            10
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "fact_deck",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Facts",
+          "shortDesc": "A Double, and One Less",
+          "targetObjective": "A near double is one step from a double you already know.",
+          "stepByStep": [
+            "Read the fact on the card.",
+            "Use the double it sits beside.",
+            "Type the total and check it."
+          ],
+          "kidTip": "A near double is one step from a double you already know.",
+          "audioPrompt": "Near doubles! This fact is one less than a double you know.",
+          "prompts": {
+            "default": "{a} plus {b}. It is one away from a double you know."
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "➖",
+      "iconName": "zap",
+      "iconTone": "pink",
+      "pedagogyTip": "Going down from a double is harder than going up, and worth its own lesson: the same relationship, the other direction.",
+      "standards": [
+        "CCSS.1.OA.C.6"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "make-5",
+      "title": "Make Five",
+      "concept": "Filling a Frame of Five",
+      "conceptKey": "five-benchmark",
+      "requires": [
+        "five-benchmark"
+      ],
+      "activity": "addition/frames",
+      "params": {
+        "level": 18,
+        "question": {
+          "mode": "make_five",
+          "aRange": [
+            1,
+            4
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "frames_play",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Frames",
+          "shortDesc": "Say how many more counters a five-frame needs",
+          "targetObjective": "Fill the frame right up. Count only the ones you put in.",
+          "stepByStep": [
+            "Some counters are already in the frame.",
+            "Tap empty spaces until the frame is full.",
+            "The answer is how many you had to add — not the whole frame."
+          ],
+          "kidTip": "Fill the frame right up. Count only the ones you put in.",
+          "audioPrompt": "Make five! How many more counters does the frame need?",
+          "prompts": {
+            "default": "You have {a}. How many more to make {size}?"
+          }
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "🖐️",
+      "iconName": "layers",
+      "iconTone": "purple",
+      "pedagogyTip": "The answer is the part added, not the total. A child who says five has read the frame rather than the question.",
+      "standards": [
+        "CCSS.K.OA.A.4"
+      ],
+      "trajectoryLevel": "part-whole",
+      "ageBand": [
+        5,
+        7
+      ]
+    },
+    {
+      "id": "make-10",
+      "title": "Make Ten",
+      "concept": "Filling a Frame of Ten",
+      "conceptKey": "make-ten",
+      "requires": [
+        "ten-frame-adder"
+      ],
+      "activity": "addition/frames",
+      "params": {
+        "level": 19,
+        "question": {
+          "mode": "make_ten",
+          "aRange": [
+            1,
+            9
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "frames_play",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Frames",
+          "shortDesc": "Say how many more counters a ten-frame needs",
+          "targetObjective": "Fill the frame right up. Count only the ones you put in.",
+          "stepByStep": [
+            "Some counters are already in the frame.",
+            "Tap empty spaces until both rows are full.",
+            "The answer is how many you had to add."
+          ],
+          "kidTip": "Fill the frame right up. Count only the ones you put in.",
+          "audioPrompt": "Make ten! How many more counters does the frame need?",
+          "prompts": {
+            "default": "You have {a}. How many more to make {size}?"
+          }
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "🔟",
+      "iconName": "boxes",
+      "iconTone": "purple",
+      "pedagogyTip": "Friends of ten are the facts every bridging strategy stands on. Known instantly, they turn 8 + 5 into 10 + 3.",
+      "standards": [
+        "CCSS.K.OA.A.4"
+      ],
+      "trajectoryLevel": "part-whole",
+      "ageBand": [
+        5,
+        7
+      ]
+    },
+    {
+      "id": "next-multiple-of-10",
+      "title": "Reach the Next Ten",
+      "concept": "Jumping to a Round Number",
+      "conceptKey": "bridging-ten",
+      "requires": [
+        "make-ten"
+      ],
+      "activity": "addition/numberline",
+      "params": {
+        "level": 20,
+        "question": {
+          "mode": "bridge_ten",
+          "aRange": [
+            11,
+            89
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "numberline_play",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Number Line",
+          "shortDesc": "Choose the jump that lands exactly on the next ten",
+          "targetObjective": "Jump to the round number, not past it.",
+          "stepByStep": [
+            "Find the two tens your number sits between.",
+            "Work out how far it is to the one above.",
+            "Choose that jump — landing past it does not count."
+          ],
+          "kidTip": "Jump to the round number, not past it.",
+          "audioPrompt": "Reach the next ten! Which jump lands exactly on the round number?",
+          "prompts": {
+            "default": "Which jump takes {a} to the next ten?"
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🎯",
+      "iconName": "footprints",
+      "iconTone": "cyan",
+      "pedagogyTip": "Reaching the round number is the move inside every make-ten strategy. Practised alone, it stops being the hard part of 47 + 8.",
+      "standards": [
+        "CCSS.2.NBT.B.5"
+      ],
+      "trajectoryLevel": "jump-strategy",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "next-multiple-of-100",
+      "title": "Reach the Next Hundred",
+      "concept": "Jumping to a Round Hundred",
+      "conceptKey": "bridging-hundred",
+      "requires": [
+        "bridging-ten"
+      ],
+      "activity": "addition/numberline",
+      "params": {
+        "level": 21,
+        "question": {
+          "mode": "bridge_hundred",
+          "aRange": [
+            110,
+            890
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "numberline_play",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Number Line",
+          "shortDesc": "Choose the jump that lands exactly on the next hundred",
+          "targetObjective": "Jump to the round hundred, not past it.",
+          "stepByStep": [
+            "Find the two hundreds your number sits between.",
+            "Work out how far it is to the one above.",
+            "Choose that jump."
+          ],
+          "kidTip": "Jump to the round hundred, not past it.",
+          "audioPrompt": "Reach the next hundred! Which jump lands exactly on the round number?",
+          "prompts": {
+            "default": "Which jump takes {a} to the next hundred?"
+          }
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "💯",
+      "iconName": "footprints",
+      "iconTone": "indigo",
+      "pedagogyTip": "The same move one place up. A child who sees it as the same move has generalised; one who meets it as a new fact has not.",
+      "standards": [
+        "CCSS.2.NBT.B.7"
+      ],
+      "trajectoryLevel": "jump-strategy",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "break-apart-an-addend",
+      "title": "Break One Number Apart",
+      "concept": "Splitting an Addend to Reach Ten",
+      "conceptKey": "addend-decomposer",
+      "requires": [
+        "make-ten"
+      ],
+      "activity": "addition/bonds",
+      "params": {
+        "level": 22,
+        "question": {
+          "mode": "split_one",
+          "aRange": [
+            6,
+            9
+          ],
+          "bRange": [
+            3,
+            9
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "bonds_play",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Parts and Wholes",
+          "shortDesc": "Split the second number so the first can reach ten",
+          "targetObjective": "Give the first number just enough to reach ten, then add what is left.",
+          "stepByStep": [
+            "Work out what the first number needs to reach ten.",
+            "Take that much out of the second number.",
+            "Whatever is left over is the other part."
+          ],
+          "kidTip": "Give the first number just enough to reach ten, then add what is left.",
+          "audioPrompt": "Break a number apart! Give the first one just enough to reach ten.",
+          "prompts": {
+            "default": "Break {b} apart so {a} can reach ten."
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "✂️",
+      "iconName": "gem",
+      "iconTone": "emerald",
+      "pedagogyTip": "This is where make-ten becomes a strategy rather than a fact: the child chooses the split, and the split is the thinking.",
+      "standards": [
+        "CCSS.1.OA.C.6"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "decompose-both-addends",
+      "title": "Split Both Numbers",
+      "concept": "Tens and Ones, Taken Apart",
+      "conceptKey": "addend-decomposer",
+      "requires": [
+        "place-value-builder"
+      ],
+      "activity": "addition/bonds",
+      "params": {
+        "level": 23,
+        "question": {
+          "mode": "split_both",
+          "addendRange": [
+            11,
+            88
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "bonds_play",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Parts and Wholes",
+          "shortDesc": "Break each two-digit number into its tens and its ones",
+          "targetObjective": "Every two-digit number is some tens and some ones.",
+          "stepByStep": [
+            "Look at the first number's tens and ones.",
+            "Write each part in its box — the tens as a whole ten.",
+            "Do the same for the second number."
+          ],
+          "kidTip": "Every two-digit number is some tens and some ones.",
+          "audioPrompt": "Split both numbers! Each one is some tens and some ones.",
+          "prompts": {
+            "default": "Split each number into its tens and its ones."
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🔀",
+      "iconName": "gem",
+      "iconTone": "emerald",
+      "pedagogyTip": "Splitting both is what makes adding by place possible. Writing forty rather than four is the part that has to be right.",
+      "standards": [
+        "CCSS.1.NBT.C.4"
+      ],
+      "trajectoryLevel": "place-value-builder",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "use-a-known-fact",
+      "title": "Use a Fact You Know",
+      "concept": "Deriving from a Fact You Hold",
+      "conceptKey": "known-fact-user",
+      "requires": [
+        "doubles-knower"
+      ],
+      "activity": "addition/facts",
+      "params": {
+        "level": 24,
+        "question": {
+          "mode": "known_fact",
+          "addendRange": [
+            3,
+            9
+          ],
+          "sumMax": 18,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "facts_play",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Facts",
+          "shortDesc": "Pick the nearby fact that helps, then use it",
+          "targetObjective": "Pick a fact you already know that is close to this one.",
+          "stepByStep": [
+            "Look at the fact you have been given.",
+            "Choose the nearby fact you already know — a double is usually closest.",
+            "Count on or back from it to reach the answer."
+          ],
+          "kidTip": "Pick a fact you already know that is close to this one.",
+          "audioPrompt": "Use a fact you know! Which one is closest to this?",
+          "prompts": {
+            "default": "{a} plus {b}. Which fact would help?"
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "💡",
+      "iconName": "zap",
+      "iconTone": "pink",
+      "pedagogyTip": "Choosing the helper is the lesson. Every option offered is a real fact, so a child cannot pick well by spotting the silly one.",
+      "standards": [
+        "CCSS.1.OA.C.6"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "fact-families",
+      "title": "Fact Families",
+      "concept": "Three Numbers, Four Facts",
+      "conceptKey": "fact-family",
+      "requires": [
+        "part-whole-decomposer"
+      ],
+      "activity": "addition/facts",
+      "params": {
+        "level": 25,
+        "question": {
+          "mode": "family",
+          "addendRange": [
+            1,
+            9
+          ],
+          "sumMax": 18,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "facts_play",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Facts",
+          "shortDesc": "Write all four facts that three numbers make together",
+          "targetObjective": "The same three numbers make four different facts.",
+          "stepByStep": [
+            "Look at the three numbers in the family.",
+            "Two facts add them together, in either order.",
+            "Two facts take one part away from the whole."
+          ],
+          "kidTip": "The same three numbers make four different facts.",
+          "audioPrompt": "Fact families! The same three numbers make four different facts.",
+          "prompts": {
+            "default": "{a}, {b} and {sum} make a family. Fill in all four."
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "👨‍👩‍👧",
+      "iconName": "gem",
+      "iconTone": "emerald",
+      "pedagogyTip": "Seeing addition and subtraction as one family is what later makes a missing addend a question a child can answer.",
+      "standards": [
+        "CCSS.1.OA.B.4",
+        "CCSS.1.OA.D.8"
+      ],
+      "trajectoryLevel": "part-whole",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "switch-the-addends",
+      "title": "Switch the Numbers",
+      "concept": "Order Does Not Change the Total",
+      "conceptKey": "commutativity",
+      "requires": [
+        "count-on-from-larger"
+      ],
+      "activity": "addition/facts",
+      "params": {
+        "level": 26,
+        "question": {
+          "mode": "commute",
+          "aRange": [
+            1,
+            4
+          ],
+          "bRange": [
+            6,
+            9
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "facts_play",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Facts",
+          "shortDesc": "Say the same fact the other way round",
+          "targetObjective": "You can add in either order and the total does not change.",
+          "stepByStep": [
+            "Read the fact you are given.",
+            "Say it the other way round — it starts with the other number.",
+            "The total is exactly the same."
+          ],
+          "kidTip": "You can add in either order and the total does not change.",
+          "audioPrompt": "Switch the numbers! The same fact the other way round makes the same total.",
+          "prompts": {
+            "default": "{a} plus {b}. Which is the same fact the other way round?"
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🔁",
+      "iconName": "scale",
+      "iconTone": "cyan",
+      "pedagogyTip": "Commutativity is what makes starting from the larger number allowed. Stated as its own idea, it stops being a trick.",
+      "standards": [
+        "CCSS.1.OA.B.3"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "friendly-pairs",
+      "title": "Friendly Pairs",
+      "concept": "Finding Two That Make Ten",
+      "conceptKey": "friendly-pairs",
+      "requires": [
+        "make-ten"
+      ],
+      "activity": "addition/multi",
+      "params": {
+        "level": 27,
+        "question": {
+          "mode": "pairs",
+          "count": 4,
+          "target": 10,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "chain_board",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Chains",
+          "shortDesc": "Spot the two numbers that make ten and add those first",
+          "targetObjective": "Look for two that make ten and put those together first.",
+          "stepByStep": [
+            "Look across all the numbers, not just the first two.",
+            "Find the two that make ten and tap them together.",
+            "Add what is left to the ten."
+          ],
+          "kidTip": "Look for two that make ten and put those together first.",
+          "audioPrompt": "Friendly pairs! Two of these make ten. Find them first.",
+          "prompts": {
+            "default": "Two of these make {target}. Put those together first."
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🤝",
+      "iconName": "waves",
+      "iconTone": "cyan",
+      "pedagogyTip": "Order is a choice once there are more than two numbers, and finding the ten first is what makes the rest easy. This is commutativity put to work.",
+      "standards": [
+        "CCSS.1.OA.A.2",
+        "CCSS.1.OA.B.3"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "compensation",
+      "title": "Give and Take Back",
+      "concept": "Rounding Up, Then Adjusting",
+      "conceptKey": "compensator",
+      "requires": [
+        "bridging-ten"
+      ],
+      "activity": "addition/numberline",
+      "params": {
+        "level": 28,
+        "question": {
+          "mode": "compensate",
+          "aRange": [
+            21,
+            79
+          ],
+          "bRange": [
+            11,
+            89
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "jump_line",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Number Line",
+          "shortDesc": "Add an easy round number, then give back what you took too much of",
+          "targetObjective": "Jump a round number, then give back what you took too much of.",
+          "stepByStep": [
+            "Notice the second number is nearly a round one.",
+            "Jump the round number instead — it is much easier.",
+            "Then jump back the little bit you overshot by."
+          ],
+          "kidTip": "Jump a round number, then give back what you took too much of.",
+          "audioPrompt": "Give and take back! Add the easy round number, then give back the extra.",
+          "prompts": {
+            "default": "{a} plus {b}. Jump a round number, then give back what you overshot."
+          }
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "↩️",
+      "iconName": "footprints",
+      "iconTone": "indigo",
+      "pedagogyTip": "Compensation is the first strategy that makes a problem temporarily wrong on purpose. Seeing the overshoot on the line is what makes that safe.",
+      "standards": [
+        "CCSS.2.NBT.B.5",
+        "CCSS.2.NBT.B.9"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "add-multiples-of-10",
+      "title": "Adding Tens",
+      "concept": "Tens Added Like Ones",
+      "conceptKey": "tens-adder",
+      "requires": [
+        "base-ten-adder"
+      ],
+      "activity": "addition/base10",
+      "params": {
+        "level": 29,
+        "question": {
+          "mode": "multiples_ten",
+          "addendRange": [
+            10,
+            90
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "base10_play",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Place Value",
+          "shortDesc": "Add whole tens by building the answer out of rods",
+          "targetObjective": "Adding tens is like adding ones, only bigger.",
+          "stepByStep": [
+            "Both numbers are whole tens, so only rods are offered.",
+            "Count the rods you need and drop them in.",
+            "Three rods and four rods is seven rods — seventy."
+          ],
+          "kidTip": "Adding tens is like adding ones, only bigger.",
+          "audioPrompt": "Adding tens! Three tens and four tens is seven tens.",
+          "prompts": {
+            "default": "{a} plus {b}. Build the answer out of tens."
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🔟",
+      "iconName": "boxes",
+      "iconTone": "purple",
+      "pedagogyTip": "Once ten is a unit, adding tens is the same work as adding ones. That transfer is the point, and it is why the rods are all the tray offers.",
+      "standards": [
+        "CCSS.1.NBT.C.4",
+        "CCSS.2.NBT.B.8"
+      ],
+      "trajectoryLevel": "unitiser-ten",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "add-multiples-of-100",
+      "title": "Adding Hundreds",
+      "concept": "Hundreds Added Like Ones",
+      "conceptKey": "hundreds-adder",
+      "requires": [
+        "tens-adder"
+      ],
+      "activity": "addition/base10",
+      "params": {
+        "level": 30,
+        "question": {
+          "mode": "multiples_hundred",
+          "addendRange": [
+            100,
+            900
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "base10_play",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Place Value",
+          "shortDesc": "Add whole hundreds by building the answer out of flats",
+          "targetObjective": "Adding hundreds is the same move, one place up.",
+          "stepByStep": [
+            "Both numbers are whole hundreds, so only flats are offered.",
+            "Count the flats you need.",
+            "Three flats and four flats is seven flats — seven hundred."
+          ],
+          "kidTip": "Adding hundreds is the same move, one place up.",
+          "audioPrompt": "Adding hundreds! The same move as adding tens, one place up.",
+          "prompts": {
+            "default": "{a} plus {b}. Build the answer out of hundreds."
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "💯",
+      "iconName": "boxes",
+      "iconTone": "indigo",
+      "pedagogyTip": "A child who meets this as the same move has generalised the unit idea; one who meets it as a new fact has not.",
+      "standards": [
+        "CCSS.2.NBT.B.8"
+      ],
+      "trajectoryLevel": "unitiser-hundred",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "add-tens-then-ones",
+      "title": "Tens, Then Ones",
+      "concept": "Splitting a Jump into Two",
+      "conceptKey": "jump-strategy",
+      "requires": [
+        "open-number-line"
+      ],
+      "activity": "addition/numberline",
+      "params": {
+        "level": 31,
+        "question": {
+          "mode": "jump_tens_ones",
+          "addendRange": [
+            11,
+            88
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "numberline_play",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Number Line",
+          "shortDesc": "Take one big jump of tens and then a small one of ones",
+          "targetObjective": "Add the tens first, then the ones.",
+          "stepByStep": [
+            "Break the second number into its tens and its ones.",
+            "Jump the tens — it is one big, easy jump.",
+            "Then jump the ones, and say where you landed."
+          ],
+          "kidTip": "Add the tens first, then the ones.",
+          "audioPrompt": "Tens then ones! One big jump, then a small one.",
+          "prompts": {
+            "default": "{a} plus {b}. Jump the tens, then the ones."
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🦘",
+      "iconName": "footprints",
+      "iconTone": "cyan",
+      "pedagogyTip": "Two jumps instead of one is what makes a two-digit addition manageable in the head, and the open line is where that becomes visible.",
+      "standards": [
+        "CCSS.2.NBT.B.5"
+      ],
+      "trajectoryLevel": "jump-strategy",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "add-hundreds-tens-ones",
+      "title": "Hundreds, Tens and Ones",
+      "concept": "Three Columns at Once",
+      "conceptKey": "place-value-builder",
+      "requires": [
+        "place-value-builder"
+      ],
+      "activity": "addition/chart",
+      "params": {
+        "level": 32,
+        "question": {
+          "mode": "chart_three",
+          "addendRange": [
+            111,
+            888
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "chart_play",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Place Value",
+          "shortDesc": "Add three-digit numbers one column at a time",
+          "targetObjective": "Add each column on its own. Ones with ones, tens with tens.",
+          "stepByStep": [
+            "Each number fills three columns now.",
+            "Add the ones, then the tens, then the hundreds.",
+            "Write each answer under the column it came from."
+          ],
+          "kidTip": "Add each column on its own. Ones with ones, tens with tens.",
+          "audioPrompt": "Hundreds, tens and ones! Add each column on its own.",
+          "prompts": {
+            "default": "{a} plus {b}. Fill in the total, one column at a time."
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "📊",
+      "iconName": "layers",
+      "iconTone": "indigo",
+      "pedagogyTip": "A third column adds no new idea, which is exactly what a child should discover: the method already worked.",
+      "standards": [
+        "CCSS.2.NBT.B.7"
+      ],
+      "trajectoryLevel": "place-value-builder",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "expanded-form",
+      "title": "Expanded Form",
+      "concept": "Writing a Number as Its Parts",
+      "conceptKey": "expanded-form-adder",
+      "requires": [
+        "place-value-builder"
+      ],
+      "activity": "addition/chart",
+      "params": {
+        "level": 33,
+        "question": {
+          "mode": "expanded",
+          "addendRange": [
+            111,
+            888
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "chart_play",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Written Strategies",
+          "shortDesc": "Write each number as hundreds plus tens plus ones, then add",
+          "targetObjective": "Every number is some hundreds, some tens and some ones.",
+          "stepByStep": [
+            "Each number is written out as the values it is made of.",
+            "Add the hundreds together, then the tens, then the ones.",
+            "Write each column's answer as its full value — forty, not four."
+          ],
+          "kidTip": "Every number is some hundreds, some tens and some ones.",
+          "audioPrompt": "Expanded form! Write each number as hundreds, tens and ones.",
+          "prompts": {
+            "default": "{a} plus {b}, written out in hundreds, tens and ones."
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🧾",
+      "iconName": "layers",
+      "iconTone": "indigo",
+      "pedagogyTip": "Writing forty rather than four is the whole difficulty. Expanded form makes the value of a digit impossible to ignore.",
+      "standards": [
+        "CCSS.2.NBT.A.3",
+        "CCSS.2.NBT.B.7"
+      ],
+      "trajectoryLevel": "place-value-builder",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "partial-sums",
+      "title": "Partial Sums",
+      "concept": "Keeping Each Column's Answer",
+      "conceptKey": "partial-sums",
+      "requires": [
+        "expanded-form-adder"
+      ],
+      "activity": "addition/chart",
+      "params": {
+        "level": 34,
+        "question": {
+          "mode": "partial_sums",
+          "addendRange": [
+            11,
+            89
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "chart_play",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Written Strategies",
+          "shortDesc": "Add each column, keep both answers, then put them together",
+          "targetObjective": "Add one column at a time, and keep each answer before putting them together.",
+          "stepByStep": [
+            "Add the tens and write that answer down.",
+            "Add the ones and write that one down too.",
+            "Put the two answers together for the total."
+          ],
+          "kidTip": "Add one column at a time, and keep each answer before putting them together.",
+          "audioPrompt": "Partial sums! Add each column, keep both answers, then add those.",
+          "prompts": {
+            "default": "{a} plus {b}. Add the tens, add the ones, then put them together."
+          }
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "➗",
+      "iconName": "layers",
+      "iconTone": "indigo",
+      "pedagogyTip": "Nothing is carried here — the partials do that job in the open, which is why this comes before the algorithm that hides it.",
+      "standards": [
+        "CCSS.2.NBT.B.7"
+      ],
+      "trajectoryLevel": "partial-sums",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "left-to-right",
+      "title": "Left to Right",
+      "concept": "One Running Total, Adjusted",
+      "conceptKey": "left-to-right-adder",
+      "requires": [
+        "partial-sums"
+      ],
+      "activity": "addition/chart",
+      "params": {
+        "level": 35,
+        "question": {
+          "mode": "left_right",
+          "addendRange": [
+            11,
+            89
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "chart_play",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Written Strategies",
+          "shortDesc": "Start with the biggest column and let each one after it adjust the total",
+          "targetObjective": "Start with the biggest column, then let each one after it change the number you are holding.",
+          "stepByStep": [
+            "Add the tens first and hold that number.",
+            "Add the ones to the number you are holding.",
+            "You never write two answers down — only the one that grows."
+          ],
+          "kidTip": "Start with the biggest column, then let each one after it change the number you are holding.",
+          "audioPrompt": "Left to right! Start with the tens and let the ones change what you are holding.",
+          "prompts": {
+            "default": "{a} plus {b}. Start with the biggest column and work right."
+          }
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "👉",
+      "iconName": "layers",
+      "iconTone": "indigo",
+      "pedagogyTip": "This is how most people add in their heads, and it is worth naming: one number that grows, rather than parts collected and totalled at the end.",
+      "standards": [
+        "CCSS.2.NBT.B.9"
+      ],
+      "trajectoryLevel": "left-to-right-adder",
+      "ageBand": [
+        8,
+        9
+      ]
+    },
+    {
+      "id": "exchange-ten-ones",
+      "title": "Trade Ten Ones",
+      "concept": "Ten Ones Become One Ten",
+      "conceptKey": "unitiser-ten",
+      "requires": [
+        "base-ten-adder"
+      ],
+      "activity": "addition/base10",
+      "params": {
+        "level": 36,
+        "question": {
+          "mode": "trade_ones",
+          "addendRange": [
+            15,
+            89
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "base10_play",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Place Value",
+          "shortDesc": "Bundle ten loose ones into a single ten-rod",
+          "targetObjective": "Ten of one block always becomes one of the next block up.",
+          "stepByStep": [
+            "Both numbers are already tipped into the yard.",
+            "The ones column holds more than nine — that cannot stay.",
+            "Bundle ten of them into one rod, then read the answer."
+          ],
+          "kidTip": "Ten of one block always becomes one of the next block up.",
+          "audioPrompt": "Trade ten ones! Ten loose ones become a single ten.",
+          "prompts": {
+            "default": "{a} plus {b}. Bundle ten ones into a ten, then read the answer."
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🔁",
+      "iconName": "boxes",
+      "iconTone": "purple",
+      "pedagogyTip": "The exchange comes before the algorithm on purpose: carrying is this move written small, and a child who has done it can read the little one.",
+      "standards": [
+        "CCSS.1.NBT.C.4",
+        "CCSS.2.NBT.B.7"
+      ],
+      "trajectoryLevel": "unitiser-ten",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "exchange-ten-tens",
+      "title": "Trade Ten Tens",
+      "concept": "Ten Tens Become One Hundred",
+      "conceptKey": "unitiser-hundred",
+      "requires": [
+        "unitiser-ten"
+      ],
+      "activity": "addition/base10",
+      "params": {
+        "level": 37,
+        "question": {
+          "mode": "trade_tens",
+          "addendRange": [
+            150,
+            890
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "base10_play",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Place Value",
+          "shortDesc": "Bundle ten ten-rods into a single hundred-flat",
+          "targetObjective": "Ten of one block always becomes one of the next block up.",
+          "stepByStep": [
+            "The tens column holds more than nine rods.",
+            "Bundle ten rods into one flat.",
+            "Then read what the yard holds."
+          ],
+          "kidTip": "Ten of one block always becomes one of the next block up.",
+          "audioPrompt": "Trade ten tens! Ten rods become a single hundred.",
+          "prompts": {
+            "default": "{a} plus {b}. Bundle ten tens into a hundred, then read the answer."
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🔂",
+      "iconName": "boxes",
+      "iconTone": "indigo",
+      "pedagogyTip": "The same move one place up. A child who sees it as the same move will not be surprised when a column carries twice.",
+      "standards": [
+        "CCSS.2.NBT.B.7"
+      ],
+      "trajectoryLevel": "unitiser-hundred",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "cascading-regrouping",
+      "title": "Two Carries",
+      "concept": "A Carry That Makes Another Carry",
+      "conceptKey": "cascading-regrouper",
+      "requires": [
+        "unitiser-hundred"
+      ],
+      "activity": "addition/column",
+      "params": {
+        "level": 38,
+        "question": {
+          "mode": "cascade",
+          "addendRange": [
+            111,
+            889
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "column_play",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Written Strategies",
+          "shortDesc": "Work a column sum where the carry itself causes a second carry",
+          "targetObjective": "Start at the ones. When a column makes ten or more, write the carry above the next one.",
+          "stepByStep": [
+            "Add the ones. Write the carry above the tens.",
+            "Add the tens — including the carry — and it reaches ten as well.",
+            "Write that carry above the hundreds and finish."
+          ],
+          "kidTip": "Start at the ones. When a column makes ten or more, write the carry above the next one.",
+          "audioPrompt": "Two carries! One column carries, and that makes the next one carry too.",
+          "prompts": {
+            "default": "{a} plus {b}. Two columns carry — write each one down."
+          }
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "⛓️",
+      "iconName": "layers",
+      "iconTone": "indigo",
+      "pedagogyTip": "The carry that causes another carry is where children lose the thread. Meeting it as its own lesson beats meeting it by accident.",
+      "standards": [
+        "CCSS.3.NBT.A.2"
+      ],
+      "trajectoryLevel": "standard-algorithm",
+      "ageBand": [
+        8,
+        9
+      ]
+    },
+    {
+      "id": "standard-algorithm",
+      "title": "The Written Method",
+      "concept": "The Compact Form of Everything Before It",
+      "conceptKey": "standard-algorithm",
+      "requires": [
+        "unitiser-ten"
+      ],
+      "activity": "addition/column",
+      "params": {
+        "level": 39,
+        "question": {
+          "mode": "standard",
+          "addendRange": [
+            15,
+            89
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "column_play",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Written Strategies",
+          "shortDesc": "Add in columns with a single carry, the way it is written down",
+          "targetObjective": "Start at the ones. When a column makes ten or more, write the carry above the next one.",
+          "stepByStep": [
+            "Add the ones column first.",
+            "If it reaches ten, write the small one above the tens.",
+            "Add the tens, including the carry."
+          ],
+          "kidTip": "Start at the ones. When a column makes ten or more, write the carry above the next one.",
+          "audioPrompt": "The written method! Start at the ones and write the carry above the next column.",
+          "prompts": {
+            "default": "{a} plus {b}. Add each column, and write the carry."
+          }
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "✍️",
+      "iconName": "layers",
+      "iconTone": "indigo",
+      "pedagogyTip": "Everything earlier folded into one procedure. The only thing kept on paper is the carry, which is why it is not optional here.",
+      "standards": [
+        "CCSS.2.NBT.B.7",
+        "CCSS.3.NBT.A.2"
+      ],
+      "trajectoryLevel": "standard-algorithm",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "add-three-or-more",
+      "title": "Three or More",
+      "concept": "Adding a Whole List",
+      "conceptKey": "multi-addend",
+      "requires": [
+        "friendly-pairs"
+      ],
+      "activity": "addition/multi",
+      "params": {
+        "level": 40,
+        "question": {
+          "mode": "chain",
+          "count": 4,
+          "addendRange": [
+            2,
+            19
+          ],
+          "totalMax": 60,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "chain_board",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Chains",
+          "shortDesc": "Add a list of numbers in whatever order is easiest",
+          "targetObjective": "Add them in whatever order is easiest — the total is the same.",
+          "stepByStep": [
+            "Look at all the numbers before you start.",
+            "Tap two to put them together, and keep going.",
+            "The order you choose does not change the total."
+          ],
+          "kidTip": "Add them in whatever order is easiest — the total is the same.",
+          "audioPrompt": "Three or more! Add them in whatever order suits you best.",
+          "prompts": {
+            "default": "Add these in whatever order is easiest."
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "📋",
+      "iconName": "waves",
+      "iconTone": "cyan",
+      "pedagogyTip": "With three numbers, order becomes a decision rather than a given. That freedom is what every later shortcut is built on.",
+      "standards": [
+        "CCSS.1.OA.A.2",
+        "CCSS.2.NBT.B.6"
+      ],
+      "trajectoryLevel": "multi-addend",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "compatible-numbers",
+      "title": "Compatible Numbers",
+      "concept": "Finding Every Friendly Pair",
+      "conceptKey": "compatible-numbers",
+      "requires": [
+        "multi-addend"
+      ],
+      "activity": "addition/multi",
+      "params": {
+        "level": 41,
+        "question": {
+          "mode": "compatible",
+          "count": 5,
+          "target": 10,
+          "pairsWanted": 2,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "chain_board",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Chains",
+          "shortDesc": "Find both pairs that make ten before adding what is left",
+          "targetObjective": "Find every pair that makes ten first, then add the rest.",
+          "stepByStep": [
+            "There is more than one friendly pair hiding here.",
+            "Put each pair together before you add anything else.",
+            "Two tens and a leftover is an easy sum."
+          ],
+          "kidTip": "Find every pair that makes ten first, then add the rest.",
+          "audioPrompt": "Compatible numbers! More than one pair makes ten. Find them all.",
+          "prompts": {
+            "default": "Find the pairs that make {target}, then add the rest."
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🧲",
+      "iconName": "waves",
+      "iconTone": "cyan",
+      "pedagogyTip": "Scanning a whole list for what fits together — rather than working left to right — is the habit this lesson is really after.",
+      "standards": [
+        "CCSS.2.NBT.B.6"
+      ],
+      "trajectoryLevel": "multi-addend",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "running-total",
+      "title": "Keep a Running Total",
+      "concept": "One Number, Carried Along",
+      "conceptKey": "running-total",
+      "requires": [
+        "multi-addend"
+      ],
+      "activity": "addition/multi",
+      "params": {
+        "level": 42,
+        "question": {
+          "mode": "running",
+          "count": 4,
+          "addendRange": [
+            2,
+            15
+          ],
+          "totalMax": 50,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "chain_board",
+          "tier": "intermediate",
+          "difficultyColor": "violet",
+          "category": "Chains",
+          "shortDesc": "Add one number at a time, writing the total as you go",
+          "targetObjective": "Keep the total in your head and add the next one to it.",
+          "stepByStep": [
+            "Start with the first number.",
+            "Add the second, and write what you are holding.",
+            "Keep going — each answer feeds the next."
+          ],
+          "kidTip": "Keep the total in your head and add the next one to it.",
+          "audioPrompt": "Keep a running total! Add one number at a time and hold the answer.",
+          "prompts": {
+            "default": "Add them one at a time, keeping the total as you go."
+          }
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🧮",
+      "iconName": "waves",
+      "iconTone": "cyan",
+      "pedagogyTip": "A running total is how a long list is actually added. Writing each step makes the place a mistake entered findable.",
+      "standards": [
+        "CCSS.2.NBT.B.6"
+      ],
+      "trajectoryLevel": "running-total",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "estimate-by-rounding",
+      "title": "About How Many",
+      "concept": "Rounding Before Adding",
+      "conceptKey": "rounding-estimator",
+      "requires": [
+        "left-to-right-adder"
+      ],
+      "activity": "addition/estimate",
+      "params": {
+        "level": 43,
+        "question": {
+          "mode": "round_estimate",
+          "digits": 2,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "estimate_play",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Estimating",
+          "shortDesc": "Round each number to the nearest ten, then add the round numbers",
+          "targetObjective": "Round each number to the nearest one, then add the round numbers.",
+          "stepByStep": [
+            "Each number sits between two tens.",
+            "Choose the one it is nearer to.",
+            "Add the two round numbers — that is about how many."
+          ],
+          "kidTip": "Round each number to the nearest one, then add the round numbers.",
+          "audioPrompt": "About how many? Round each number first, then add the round ones.",
+          "prompts": {
+            "default": "About how many is {a} plus {b}?"
+          }
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "📏",
+      "iconName": "scale",
+      "iconTone": "emerald",
+      "pedagogyTip": "The exact answer is not wanted here, and a child who gives it has answered a different question. The prompt says about, and so does the feedback.",
+      "standards": [
+        "CCSS.3.NBT.A.1"
+      ],
+      "trajectoryLevel": "rounding-estimator",
+      "ageBand": [
+        8,
+        9
+      ]
+    },
+    {
+      "id": "is-it-reasonable",
+      "title": "Could That Be Right?",
+      "concept": "Judging an Answer Without Working It Out",
+      "conceptKey": "reasonableness-checker",
+      "requires": [
+        "rounding-estimator"
+      ],
+      "activity": "addition/estimate",
+      "params": {
+        "level": 44,
+        "question": {
+          "mode": "reasonable",
+          "digits": 3,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "estimate_play",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Estimating",
+          "shortDesc": "Decide whether someone's answer is close, far too big, or far too small",
+          "targetObjective": "You do not need the exact answer. Ask whether it is anywhere near.",
+          "stepByStep": [
+            "Round both numbers to see roughly where the answer should be.",
+            "Compare that with the answer you were given.",
+            "Say whether it is about right, far too big, or far too small."
+          ],
+          "kidTip": "You do not need the exact answer. Ask whether it is anywhere near.",
+          "audioPrompt": "Could that be right? Work out roughly where the answer should be.",
+          "prompts": {
+            "default": "Someone says {a} plus {b} is {claim}. Could that be right?"
+          }
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🤔",
+      "iconName": "scale",
+      "iconTone": "emerald",
+      "pedagogyTip": "Checking an answer without recomputing it is what stops a slipped digit going unnoticed, and it is a habit rather than a fact.",
+      "standards": [
+        "CCSS.3.OA.D.8"
+      ],
+      "trajectoryLevel": "reasonableness-checker",
+      "ageBand": [
+        8,
+        9
+      ]
+    },
+    {
+      "id": "missing-addend",
+      "title": "The Missing Part",
+      "concept": "Finding a Part When the Whole Is Known",
+      "conceptKey": "missing-addend",
+      "requires": [
+        "fact-family"
+      ],
+      "activity": "addition/bonds",
+      "params": {
+        "level": 45,
+        "question": {
+          "mode": "part_unknown",
+          "addendRange": [
+            1,
+            9
+          ],
+          "sumMax": 20,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "bonds_play",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Parts and Wholes",
+          "shortDesc": "Work out the part that is missing from a number bond",
+          "targetObjective": "The two parts have to make the whole. One is missing.",
+          "stepByStep": [
+            "The whole is at the top and one part is already there.",
+            "Count on from the part you can see until you reach the whole.",
+            "However far you counted is the missing part."
+          ],
+          "kidTip": "The two parts have to make the whole. One is missing.",
+          "audioPrompt": "The missing part! One part is hidden. What goes with the other to make the whole?",
+          "prompts": {
+            "default": "{sum} is the whole. What is the missing part?"
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🧩",
+      "iconName": "gem",
+      "iconTone": "emerald",
+      "pedagogyTip": "A missing addend is where addition and subtraction meet. A child who has done fact families already has the tool.",
+      "standards": [
+        "CCSS.1.OA.D.8"
+      ],
+      "trajectoryLevel": "part-whole",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "join-problems",
+      "title": "Getting More",
+      "concept": "A Quantity That Grows",
+      "conceptKey": "join-modeler",
+      "requires": [
+        "running-total"
+      ],
+      "activity": "addition/story",
+      "params": {
+        "level": 46,
+        "question": {
+          "mode": "join",
+          "startRange": [
+            3,
+            20
+          ],
+          "changeRange": [
+            2,
+            15
+          ],
+          "stories": [
+            "{name} had {a} {thing}. Then {name} found {b} more. How many {thing} now?",
+            "{name} picked {a} {thing} on Monday and {b} more on Tuesday. How many altogether?",
+            "There were {a} {thing} in the box. {other} put in {b} more. How many now?"
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "story_board",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Story Problems",
+          "shortDesc": "Model a story where something is added, then find the new total",
+          "targetObjective": "Both parts are known. The bar asks for the whole.",
+          "stepByStep": [
+            "Read the story — or tap the speaker to hear it.",
+            "Put each number the story gives you into its box.",
+            "The empty box is what you are asked for."
+          ],
+          "kidTip": "Both parts are known. The bar asks for the whole.",
+          "audioPrompt": "Getting more! Something is added — how many are there now?",
+          "prompts": {
+            "default": "{text}"
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "📖",
+      "iconName": "search",
+      "iconTone": "pink",
+      "pedagogyTip": "The simplest story type, and the one that makes the bar model worth trusting before the harder types need it.",
+      "standards": [
+        "CCSS.1.OA.A.1"
+      ],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "part-part-whole",
+      "title": "Two Kinds, One Total",
+      "concept": "Parts That Make a Whole",
+      "conceptKey": "part-part-whole",
+      "requires": [
+        "join-modeler"
+      ],
+      "activity": "addition/story",
+      "params": {
+        "level": 47,
+        "question": {
+          "mode": "ppw",
+          "partRange": [
+            3,
+            25
+          ],
+          "stories": [
+            "{name} has {a} red {thing} and {b} blue {thing}. How many {thing} altogether?",
+            "There are {a} big {thing} and {b} small {thing} in the jar. How many is that?",
+            "{name} has {a} {thing} and {other} has {b}. How many do they have together?"
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "story_board",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Story Problems",
+          "shortDesc": "Model a story where two groups are counted together",
+          "targetObjective": "Nothing changes here — two groups are simply counted together.",
+          "stepByStep": [
+            "Read the story.",
+            "Put each group into its own box.",
+            "The whole is what you are asked for."
+          ],
+          "kidTip": "Nothing changes here — two groups are simply counted together.",
+          "audioPrompt": "Two kinds, one total! Two groups counted together.",
+          "prompts": {
+            "default": "{text}"
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🧺",
+      "iconName": "search",
+      "iconTone": "pink",
+      "pedagogyTip": "Nothing moves in a part-part-whole story, which is what makes it different from a join even though the arithmetic is identical.",
+      "standards": [
+        "CCSS.1.OA.A.1"
+      ],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "change-unknown",
+      "title": "How Many More?",
+      "concept": "The Change Is Missing",
+      "conceptKey": "change-unknown",
+      "requires": [
+        "join-modeler"
+      ],
+      "activity": "addition/story",
+      "params": {
+        "level": 48,
+        "question": {
+          "mode": "change_unknown",
+          "startRange": [
+            5,
+            30
+          ],
+          "changeRange": [
+            2,
+            20
+          ],
+          "stories": [
+            "{name} had {a} {thing}. Now {name} has {b}. How many more did {name} get?",
+            "There were {a} {thing} in the box. Now there are {b}. How many were put in?",
+            "{name} started with {a} {thing} and ended with {b}. How many did {name} collect?"
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "story_board",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Story Problems",
+          "shortDesc": "Model a story where the total is known but the change is not",
+          "targetObjective": "You know where it started and where it ended. The middle is missing.",
+          "stepByStep": [
+            "Read the story — the total is already known.",
+            "Put the starting number in its box.",
+            "The empty box is how many were added."
+          ],
+          "kidTip": "You know where it started and where it ended. The middle is missing.",
+          "audioPrompt": "How many more? You know the start and the end — find what was added.",
+          "prompts": {
+            "default": "{text}"
+          }
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "❓",
+      "iconName": "search",
+      "iconTone": "pink",
+      "pedagogyTip": "The same three numbers as a join, with a different one missing. Which box is empty is the entire difficulty.",
+      "standards": [
+        "CCSS.1.OA.A.1",
+        "CCSS.2.OA.A.1"
+      ],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "start-unknown",
+      "title": "Where Did It Start?",
+      "concept": "The Beginning Is Missing",
+      "conceptKey": "start-unknown",
+      "requires": [
+        "change-unknown"
+      ],
+      "activity": "addition/story",
+      "params": {
+        "level": 49,
+        "question": {
+          "mode": "start_unknown",
+          "changeRange": [
+            3,
+            20
+          ],
+          "startRange": [
+            5,
+            40
+          ],
+          "stories": [
+            "{name} found {a} more {thing}. Now {name} has {b}. How many {thing} did {name} start with?",
+            "{other} gave {name} {a} {thing}. Now {name} has {b}. How many did {name} have before?",
+            "{a} {thing} were added to the box. Now there are {b}. How many were there first?"
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "story_board",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Story Problems",
+          "shortDesc": "Model a story where the ending is known but the beginning is not",
+          "targetObjective": "You know what was added and where it ended. The start is missing.",
+          "stepByStep": [
+            "Read the story — the total is known.",
+            "Put the number that was added into its box.",
+            "The empty box is what there was to begin with."
+          ],
+          "kidTip": "You know what was added and where it ended. The start is missing.",
+          "audioPrompt": "Where did it start? You know what was added and what there is now.",
+          "prompts": {
+            "default": "{text}"
+          }
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🔎",
+      "iconName": "search",
+      "iconTone": "pink",
+      "pedagogyTip": "The hardest of the addition types: the story runs forward and the thinking runs backward, and only the bar makes that safe.",
+      "standards": [
+        "CCSS.2.OA.A.1"
+      ],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "comparison-problems",
+      "title": "How Many Altogether?",
+      "concept": "Comparing Two Amounts",
+      "conceptKey": "compare-modeler",
+      "requires": [
+        "start-unknown"
+      ],
+      "activity": "addition/story",
+      "params": {
+        "level": 50,
+        "question": {
+          "mode": "compare",
+          "partRange": [
+            4,
+            30
+          ],
+          "differenceRange": [
+            2,
+            15
+          ],
+          "stories": [
+            "{name} has {a} {thing}. {other} has {b} more than {name}. How many does {other} have?",
+            "{name} collected {a} {thing}. {other} collected {b} more. How many did {other} collect?"
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "story_board",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Story Problems",
+          "shortDesc": "Model a story where one person has a number more than another",
+          "targetObjective": "Two bars, lined up. The longer one is the smaller amount plus the difference.",
+          "stepByStep": [
+            "Read the story — someone has more than someone else.",
+            "Build the shorter bar, then match it on the longer one.",
+            "Add the extra to find the bigger amount."
+          ],
+          "kidTip": "Two bars, lined up. The longer one is the smaller amount plus the difference.",
+          "audioPrompt": "How many altogether? One has more than the other — how many is that?",
+          "prompts": {
+            "default": "{text}"
+          }
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "⚖️",
+      "iconName": "scale",
+      "iconTone": "pink",
+      "pedagogyTip": "A comparison is two bars rather than one, and lining them up is what turns 'more than' from words into a length.",
+      "standards": [
+        "CCSS.2.OA.A.1"
+      ],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "multi-step-problems",
+      "title": "Two Steps",
+      "concept": "A Story with Two Changes",
+      "conceptKey": "multi-step-solver",
+      "requires": [
+        "compare-modeler"
+      ],
+      "activity": "addition/story",
+      "params": {
+        "level": 51,
+        "question": {
+          "mode": "multi_step",
+          "partRange": [
+            3,
+            40
+          ],
+          "changeRange": [
+            3,
+            20
+          ],
+          "stories": [
+            "{name} had {a} {thing}. {other} gave {name} {b} more, and then {c} more. How many now?",
+            "There were {a} {thing} in the jar. {name} added {b}, then {other} added {c}. How many now?"
+          ],
+          "questionsPerRound": 6
+        },
+        "play": {
+          "mode": "story_board",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Story Problems",
+          "shortDesc": "Work a story that changes twice, one step at a time",
+          "targetObjective": "Answer the first change, then carry that answer into the second.",
+          "stepByStep": [
+            "Read the whole story before you start.",
+            "Work out where things stood after the first change.",
+            "Then carry that number into the second change."
+          ],
+          "kidTip": "Answer the first change, then carry that answer into the second.",
+          "audioPrompt": "Two steps! Something changes twice — take it one change at a time.",
+          "prompts": {
+            "default": "{text}"
+          }
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🪜",
+      "iconName": "search",
+      "iconTone": "pink",
+      "pedagogyTip": "Two steps is where children stop and answer the first question as if it were the last. Asking for the middle number on purpose is what stops that.",
+      "standards": [
+        "CCSS.3.OA.D.8"
+      ],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        8,
+        9
+      ]
+    },
+    {
+      "id": "explain-and-compare",
+      "title": "Which Way Is Best?",
+      "concept": "Choosing a Strategy, and Saying Why",
+      "conceptKey": "strategy-chooser",
+      "requires": [
+        "multi-step-solver"
+      ],
+      "activity": "addition/strategy",
+      "params": {
+        "level": 52,
+        "question": {
+          "mode": "compare_paths",
+          "addendRange": [
+            6,
+            48
+          ],
+          "questionsPerRound": 6
+        },
+        "play": {
+          "mode": "strategy_picker",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Choosing",
+          "shortDesc": "Pick a strategy that suits the numbers, then see which route was shorter",
+          "targetObjective": "More than one way is right. Some ways are shorter than others.",
+          "stepByStep": [
+            "Look at the two numbers before you choose anything.",
+            "Pick a strategy that suits them — more than one may.",
+            "Then compare two routes and count the steps each one took."
+          ],
+          "kidTip": "Look at the numbers before you choose. Some strategies only suit some numbers.",
+          "audioPrompt": "Which way is best? Look at the numbers, then choose how you would add them.",
+          "prompts": {
+            "default": "{a} plus {b}. Which strategy would you use?"
+          }
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🧭",
+      "iconName": "sparkles",
+      "iconTone": "purple",
+      "pedagogyTip": "The only lesson here with more than one right answer. A child who can say why a strategy suits these numbers has stopped following recipes and started choosing.",
+      "standards": [
+        "CCSS.2.NBT.B.9",
+        "CCSS.3.NBT.A.2"
+      ],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        8,
+        9
+      ]
+    },
+    {
+      "id": "practice-frames",
+      "title": "Practice: Frames",
+      "concept": "Practice Without Help",
+      "conceptKey": "five-benchmark",
+      "requires": [],
+      "activity": "addition/frames",
+      "params": {
+        "level": 53,
+        "question": {
+          "practice": true,
+          "modes": [
+            "five",
+            "ten",
+            "make_five",
+            "make_ten"
+          ],
+          "questionsPerRound": 8
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Practice",
+          "shortDesc": "Four frame techniques mixed together, with nothing to lean on.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🖐️",
+      "iconName": "layers",
+      "iconTone": "purple",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        5,
+        7
+      ]
+    },
+    {
+      "id": "practice-tray",
+      "title": "Practice: Counting Trays",
+      "concept": "Practice Without Help",
+      "conceptKey": "count-all",
+      "requires": [],
+      "activity": "addition/tray",
+      "params": {
+        "level": 54,
+        "question": {
+          "practice": true,
+          "modes": [
+            "count_all",
+            "combine",
+            "count_on",
+            "count_on_larger",
+            "add_zero",
+            "add_one",
+            "fingers"
+          ],
+          "questionsPerRound": 14
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Practice",
+          "shortDesc": "Every way of counting two groups, one after another.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🧺",
+      "iconName": "boxes",
+      "iconTone": "purple",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        5,
+        7
+      ]
+    },
+    {
+      "id": "practice-bonds",
+      "title": "Practice: Number Bonds",
+      "concept": "Practice Without Help",
+      "conceptKey": "part-whole-decomposer",
+      "requires": [],
+      "activity": "addition/bonds",
+      "params": {
+        "level": 55,
+        "question": {
+          "practice": true,
+          "modes": [
+            "whole_unknown",
+            "split_one",
+            "split_both",
+            "part_unknown"
+          ],
+          "questionsPerRound": 8
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Practice",
+          "shortDesc": "Wholes, parts, splits and missing parts, in turn.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "💎",
+      "iconName": "gem",
+      "iconTone": "emerald",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "practice-numberline",
+      "title": "Practice: The Number Line",
+      "concept": "Practice Without Help",
+      "conceptKey": "jump-strategy",
+      "requires": [],
+      "activity": "addition/numberline",
+      "params": {
+        "level": 56,
+        "question": {
+          "practice": true,
+          "modes": [
+            "path",
+            "open",
+            "bridge_ten",
+            "bridge_hundred",
+            "compensate",
+            "jump_tens_ones"
+          ],
+          "questionsPerRound": 12
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Practice",
+          "shortDesc": "Every kind of jump this skill has taught.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "👣",
+      "iconName": "footprints",
+      "iconTone": "cyan",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "practice-base10",
+      "title": "Practice: Base-Ten Blocks",
+      "concept": "Practice Without Help",
+      "conceptKey": "base-ten-adder",
+      "requires": [],
+      "activity": "addition/base10",
+      "params": {
+        "level": 57,
+        "question": {
+          "practice": true,
+          "modes": [
+            "build_add",
+            "multiples_ten",
+            "multiples_hundred",
+            "trade_ones",
+            "trade_tens"
+          ],
+          "questionsPerRound": 10
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Practice",
+          "shortDesc": "Building and trading, across all three places.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🧱",
+      "iconName": "boxes",
+      "iconTone": "purple",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "practice-chart",
+      "title": "Practice: Written Strategies",
+      "concept": "Practice Without Help",
+      "conceptKey": "place-value-builder",
+      "requires": [],
+      "activity": "addition/chart",
+      "params": {
+        "level": 58,
+        "question": {
+          "practice": true,
+          "modes": [
+            "chart_add",
+            "chart_three",
+            "expanded",
+            "partial_sums",
+            "left_right"
+          ],
+          "questionsPerRound": 10
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Practice",
+          "shortDesc": "Five ways of writing an addition down, mixed.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🧾",
+      "iconName": "layers",
+      "iconTone": "indigo",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "practice-facts",
+      "title": "Practice: Facts",
+      "concept": "Practice Without Help",
+      "conceptKey": "doubles-knower",
+      "requires": [],
+      "activity": "addition/facts",
+      "params": {
+        "level": 59,
+        "question": {
+          "practice": true,
+          "modes": [
+            "doubles",
+            "near_up",
+            "near_down",
+            "known_fact",
+            "family",
+            "commute"
+          ],
+          "questionsPerRound": 12
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Practice",
+          "shortDesc": "Doubles, near doubles, helpers, families and switching.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "⚡",
+      "iconName": "zap",
+      "iconTone": "pink",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "practice-multi",
+      "title": "Practice: Chains",
+      "concept": "Practice Without Help",
+      "conceptKey": "multi-addend",
+      "requires": [],
+      "activity": "addition/multi",
+      "params": {
+        "level": 60,
+        "question": {
+          "practice": true,
+          "modes": [
+            "pairs",
+            "chain",
+            "compatible",
+            "running"
+          ],
+          "questionsPerRound": 8
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Practice",
+          "shortDesc": "Whole lists of numbers, four ways.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🧮",
+      "iconName": "waves",
+      "iconTone": "cyan",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "practice-column",
+      "title": "Practice: The Written Method",
+      "concept": "Practice Without Help",
+      "conceptKey": "standard-algorithm",
+      "requires": [],
+      "activity": "addition/column",
+      "params": {
+        "level": 61,
+        "question": {
+          "practice": true,
+          "modes": [
+            "standard",
+            "cascade"
+          ],
+          "questionsPerRound": 6
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Practice",
+          "shortDesc": "One carry and two, alternating.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "✍️",
+      "iconName": "layers",
+      "iconTone": "indigo",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "practice-estimate",
+      "title": "Practice: Estimating",
+      "concept": "Practice Without Help",
+      "conceptKey": "rounding-estimator",
+      "requires": [],
+      "activity": "addition/estimate",
+      "params": {
+        "level": 62,
+        "question": {
+          "practice": true,
+          "modes": [
+            "round_estimate",
+            "reasonable"
+          ],
+          "questionsPerRound": 6
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Practice",
+          "shortDesc": "Rounding, and judging someone else's answer.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "📏",
+      "iconName": "scale",
+      "iconTone": "emerald",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        8,
+        9
+      ]
+    },
+    {
+      "id": "practice-story",
+      "title": "Practice: Story Problems",
+      "concept": "Practice Without Help",
+      "conceptKey": "join-modeler",
+      "requires": [],
+      "activity": "addition/story",
+      "params": {
+        "level": 63,
+        "question": {
+          "practice": true,
+          "modes": [
+            "join",
+            "ppw",
+            "change_unknown",
+            "start_unknown",
+            "compare"
+          ],
+          "questionsPerRound": 10
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Practice",
+          "shortDesc": "Five problem types, told apart by which box is empty.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "📖",
+      "iconName": "search",
+      "iconTone": "pink",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "practice-strategy",
+      "title": "Practice: Choosing",
+      "concept": "Practice Without Help",
+      "conceptKey": "strategy-chooser",
+      "requires": [],
+      "activity": "addition/strategy",
+      "params": {
+        "level": 64,
+        "question": {
+          "practice": true,
+          "modes": [
+            "compare_paths"
+          ],
+          "questionsPerRound": 6
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Practice",
+          "shortDesc": "Choose a route, then see which route was shorter.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🧭",
+      "iconName": "sparkles",
+      "iconTone": "purple",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        8,
+        9
+      ]
     }
   ]
 }

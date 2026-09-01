@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { holdVoiceFloor } from "../lib/voiceClips";
 import {
   Mic,
   MicOff,
@@ -440,6 +441,25 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
     setTextInput("");
     handleQuickPrompt(msg);
   };
+
+  /**
+   * Hold the speaker for as long as this conversation is live.
+   *
+   * The skill behind this modal is still mounted and still running its round,
+   * so it goes on speaking — a number on every tap, praise on every answer —
+   * straight over Koda and straight into the open microphone. Taking the floor
+   * makes the skill yield until the session ends; releasing is the cleanup, so
+   * closing the modal, leaving the round or unmounting all give it back.
+   *
+   * Keyed on the session being live rather than on `isOpen`: an open modal that
+   * has not connected yet is not using the speaker, and a child should still
+   * hear the lesson while they are deciding.
+   */
+  const coachIsLive = isOpen && (sessionStatus !== "disconnected" || isWebSpeechSpeaking);
+  useEffect(() => {
+    if (!coachIsLive) return;
+    return holdVoiceFloor("voice-coach");
+  }, [coachIsLive]);
 
   if (!isOpen) return null;
 

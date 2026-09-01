@@ -51,3 +51,5 @@ export {
   type SpokenFinish,
   type SpokenFinishOptions,
 } from "./round/useSpokenFinish";
+/** Practice: the same engine with the hints, the voice and the explanation off. */
+export { isPractice, modeAt, type PracticeSetup } from "./practice";

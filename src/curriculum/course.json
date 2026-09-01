@@ -73,7 +73,204 @@
       "lessons": [
         "addition/add-zero",
         "addition/add-one",
-        "addition/use-fingers"
+        "addition/use-fingers",
+        "addition/five-frame"
+      ]
+    },
+    {
+      "id": "u7",
+      "unitNumber": 7,
+      "title": "Unit 7: Frames and Bonds",
+      "description": "Add inside a frame of ten, and read what a number is made of",
+      "icon": "💎",
+      "lessons": [
+        "addition/ten-frame",
+        "addition/number-bonds",
+        "addition/number-path",
+        "addition/open-number-line"
+      ]
+    },
+    {
+      "id": "u8",
+      "unitNumber": 8,
+      "title": "Unit 8: Blocks and Charts",
+      "description": "See a number's tens and ones, then write them down",
+      "icon": "🧱",
+      "lessons": [
+        "addition/base-ten-blocks",
+        "addition/place-value-chart",
+        "addition/doubles",
+        "addition/near-doubles-one-more"
+      ]
+    },
+    {
+      "id": "u9",
+      "unitNumber": 9,
+      "title": "Unit 9: Doubles and Neighbours",
+      "description": "Facts worth knowing by heart, and the ones that sit beside them",
+      "icon": "👯",
+      "lessons": [
+        "addition/near-doubles-one-less",
+        "addition/make-5",
+        "addition/make-10",
+        "addition/next-multiple-of-10"
+      ]
+    },
+    {
+      "id": "u10",
+      "unitNumber": 10,
+      "title": "Unit 10: Making Friendly Numbers",
+      "description": "Reach a round number, and split a number so you can",
+      "icon": "🎯",
+      "lessons": [
+        "addition/next-multiple-of-100",
+        "addition/break-apart-an-addend",
+        "addition/decompose-both-addends",
+        "addition/use-a-known-fact"
+      ]
+    },
+    {
+      "id": "u11",
+      "unitNumber": 11,
+      "title": "Unit 11: Facts That Help",
+      "description": "Families of facts, and the freedom to add in either order",
+      "icon": "💡",
+      "lessons": [
+        "addition/fact-families",
+        "addition/switch-the-addends",
+        "addition/friendly-pairs",
+        "addition/compensation"
+      ]
+    },
+    {
+      "id": "u12",
+      "unitNumber": 12,
+      "title": "Unit 12: Tens and Hundreds",
+      "description": "Whole tens, whole hundreds, and the jumps that use them",
+      "icon": "🔟",
+      "lessons": [
+        "addition/add-multiples-of-10",
+        "addition/add-multiples-of-100",
+        "addition/add-tens-then-ones",
+        "addition/add-hundreds-tens-ones"
+      ]
+    },
+    {
+      "id": "u13",
+      "unitNumber": 13,
+      "title": "Unit 13: Written Strategies",
+      "description": "Three ways of writing an addition down, and what each one keeps",
+      "icon": "🧾",
+      "lessons": [
+        "addition/expanded-form",
+        "addition/partial-sums",
+        "addition/left-to-right"
+      ]
+    },
+    {
+      "id": "u14",
+      "unitNumber": 14,
+      "title": "Unit 14: Trading Up",
+      "description": "Ten becomes one, and the carry that writes it down",
+      "icon": "⛓️",
+      "lessons": [
+        "addition/exchange-ten-ones",
+        "addition/exchange-ten-tens",
+        "addition/cascading-regrouping",
+        "addition/standard-algorithm"
+      ]
+    },
+    {
+      "id": "u15",
+      "unitNumber": 15,
+      "title": "Unit 15: Chains and Totals",
+      "description": "Whole lists of numbers, and the orders that make them easy",
+      "icon": "🧮",
+      "lessons": [
+        "addition/add-three-or-more",
+        "addition/compatible-numbers",
+        "addition/running-total",
+        "addition/estimate-by-rounding"
+      ]
+    },
+    {
+      "id": "u16",
+      "unitNumber": 16,
+      "title": "Unit 16: Judging and Missing Parts",
+      "description": "Is that answer sensible, and what is missing from this one",
+      "icon": "🤔",
+      "lessons": [
+        "addition/is-it-reasonable",
+        "addition/missing-addend",
+        "addition/join-problems",
+        "addition/part-part-whole"
+      ]
+    },
+    {
+      "id": "u17",
+      "unitNumber": 17,
+      "title": "Unit 17: Stories with Something Missing",
+      "description": "When the change, the start or the comparison is what you are after",
+      "icon": "📖",
+      "lessons": [
+        "addition/change-unknown",
+        "addition/start-unknown",
+        "addition/comparison-problems",
+        "addition/multi-step-problems",
+        "addition/explain-and-compare"
+      ]
+    },
+    {
+      "id": "u18",
+      "unitNumber": 18,
+      "title": "Unit 18: Practice — Counting and Frames",
+      "description": "The early techniques, mixed together with nothing to lean on",
+      "icon": "🧺",
+      "lessons": [
+        "addition/practice-frames",
+        "addition/practice-tray",
+        "addition/practice-bonds",
+        "addition/practice-numberline"
+      ]
+    },
+    {
+      "id": "u19",
+      "unitNumber": 19,
+      "title": "Unit 19: Practice — Place Value and Facts",
+      "description": "Blocks, charts and facts, unaided",
+      "icon": "⚡",
+      "lessons": [
+        "addition/practice-base10",
+        "addition/practice-chart",
+        "addition/practice-facts",
+        "addition/practice-multi"
+      ]
+    },
+    {
+      "id": "u20",
+      "unitNumber": 20,
+      "title": "Unit 20: Practice — Written Work and Problems",
+      "description": "The written method, estimating, stories and choosing",
+      "icon": "✍️",
+      "lessons": [
+        "addition/practice-column",
+        "addition/practice-estimate",
+        "addition/practice-story",
+        "addition/practice-strategy"
+      ]
+    },
+    {
+      "id": "u21",
+      "unitNumber": 21,
+      "title": "Unit 21: Practice — Counting",
+      "description": "Every counting technique, mixed and unaided",
+      "icon": "🎲",
+      "lessons": [
+        "counting/practice-orbit",
+        "counting/practice-subitize",
+        "counting/practice-tenframe",
+        "counting/practice-numberline",
+        "counting/practice-base10"
       ]
     }
   ]
