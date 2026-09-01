@@ -2803,9 +2803,7 @@
       "title": "Practice: Frames",
       "concept": "Practice Without Help",
       "conceptKey": "five-benchmark",
-      "requires": [
-        "five-benchmark"
-      ],
+      "requires": [],
       "activity": "addition/frames",
       "params": {
         "level": 53,
@@ -2840,7 +2838,7 @@
       "icon": "🖐️",
       "iconName": "layers",
       "iconTone": "purple",
-      "pedagogyTip": "Practice is retrieval, not instruction. The help is removed on purpose — recalling a technique unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
       "standards": [],
       "trajectoryLevel": "problem-solver",
       "ageBand": [
@@ -2853,9 +2851,7 @@
       "title": "Practice: Counting Trays",
       "concept": "Practice Without Help",
       "conceptKey": "count-all",
-      "requires": [
-        "count-all"
-      ],
+      "requires": [],
       "activity": "addition/tray",
       "params": {
         "level": 54,
@@ -2893,7 +2889,7 @@
       "icon": "🧺",
       "iconName": "boxes",
       "iconTone": "purple",
-      "pedagogyTip": "Practice is retrieval, not instruction. The help is removed on purpose — recalling a technique unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
       "standards": [],
       "trajectoryLevel": "problem-solver",
       "ageBand": [
@@ -2906,9 +2902,7 @@
       "title": "Practice: Number Bonds",
       "concept": "Practice Without Help",
       "conceptKey": "part-whole-decomposer",
-      "requires": [
-        "part-whole-decomposer"
-      ],
+      "requires": [],
       "activity": "addition/bonds",
       "params": {
         "level": 55,
@@ -2943,7 +2937,7 @@
       "icon": "💎",
       "iconName": "gem",
       "iconTone": "emerald",
-      "pedagogyTip": "Practice is retrieval, not instruction. The help is removed on purpose — recalling a technique unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
       "standards": [],
       "trajectoryLevel": "problem-solver",
       "ageBand": [
@@ -2956,9 +2950,7 @@
       "title": "Practice: The Number Line",
       "concept": "Practice Without Help",
       "conceptKey": "jump-strategy",
-      "requires": [
-        "jump-strategy"
-      ],
+      "requires": [],
       "activity": "addition/numberline",
       "params": {
         "level": 56,
@@ -2995,7 +2987,7 @@
       "icon": "👣",
       "iconName": "footprints",
       "iconTone": "cyan",
-      "pedagogyTip": "Practice is retrieval, not instruction. The help is removed on purpose — recalling a technique unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
       "standards": [],
       "trajectoryLevel": "problem-solver",
       "ageBand": [
@@ -3008,9 +3000,7 @@
       "title": "Practice: Base-Ten Blocks",
       "concept": "Practice Without Help",
       "conceptKey": "base-ten-adder",
-      "requires": [
-        "base-ten-adder"
-      ],
+      "requires": [],
       "activity": "addition/base10",
       "params": {
         "level": 57,
@@ -3046,7 +3036,7 @@
       "icon": "🧱",
       "iconName": "boxes",
       "iconTone": "purple",
-      "pedagogyTip": "Practice is retrieval, not instruction. The help is removed on purpose — recalling a technique unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
       "standards": [],
       "trajectoryLevel": "problem-solver",
       "ageBand": [
@@ -3059,9 +3049,7 @@
       "title": "Practice: Written Strategies",
       "concept": "Practice Without Help",
       "conceptKey": "place-value-builder",
-      "requires": [
-        "place-value-builder"
-      ],
+      "requires": [],
       "activity": "addition/chart",
       "params": {
         "level": 58,
@@ -3097,7 +3085,7 @@
       "icon": "🧾",
       "iconName": "layers",
       "iconTone": "indigo",
-      "pedagogyTip": "Practice is retrieval, not instruction. The help is removed on purpose — recalling a technique unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
       "standards": [],
       "trajectoryLevel": "problem-solver",
       "ageBand": [
@@ -3110,9 +3098,7 @@
       "title": "Practice: Facts",
       "concept": "Practice Without Help",
       "conceptKey": "doubles-knower",
-      "requires": [
-        "doubles-knower"
-      ],
+      "requires": [],
       "activity": "addition/facts",
       "params": {
         "level": 59,
@@ -3149,7 +3135,7 @@
       "icon": "⚡",
       "iconName": "zap",
       "iconTone": "pink",
-      "pedagogyTip": "Practice is retrieval, not instruction. The help is removed on purpose — recalling a technique unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
       "standards": [],
       "trajectoryLevel": "problem-solver",
       "ageBand": [
@@ -3162,9 +3148,7 @@
       "title": "Practice: Chains",
       "concept": "Practice Without Help",
       "conceptKey": "multi-addend",
-      "requires": [
-        "multi-addend"
-      ],
+      "requires": [],
       "activity": "addition/multi",
       "params": {
         "level": 60,
@@ -3199,7 +3183,7 @@
       "icon": "🧮",
       "iconName": "waves",
       "iconTone": "cyan",
-      "pedagogyTip": "Practice is retrieval, not instruction. The help is removed on purpose — recalling a technique unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
       "standards": [],
       "trajectoryLevel": "problem-solver",
       "ageBand": [
@@ -3212,9 +3196,7 @@
       "title": "Practice: The Written Method",
       "concept": "Practice Without Help",
       "conceptKey": "standard-algorithm",
-      "requires": [
-        "standard-algorithm"
-      ],
+      "requires": [],
       "activity": "addition/column",
       "params": {
         "level": 61,
@@ -3247,7 +3229,7 @@
       "icon": "✍️",
       "iconName": "layers",
       "iconTone": "indigo",
-      "pedagogyTip": "Practice is retrieval, not instruction. The help is removed on purpose — recalling a technique unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
       "standards": [],
       "trajectoryLevel": "problem-solver",
       "ageBand": [
@@ -3260,9 +3242,7 @@
       "title": "Practice: Estimating",
       "concept": "Practice Without Help",
       "conceptKey": "rounding-estimator",
-      "requires": [
-        "rounding-estimator"
-      ],
+      "requires": [],
       "activity": "addition/estimate",
       "params": {
         "level": 62,
@@ -3295,7 +3275,7 @@
       "icon": "📏",
       "iconName": "scale",
       "iconTone": "emerald",
-      "pedagogyTip": "Practice is retrieval, not instruction. The help is removed on purpose — recalling a technique unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
       "standards": [],
       "trajectoryLevel": "problem-solver",
       "ageBand": [
@@ -3308,9 +3288,7 @@
       "title": "Practice: Story Problems",
       "concept": "Practice Without Help",
       "conceptKey": "join-modeler",
-      "requires": [
-        "join-modeler"
-      ],
+      "requires": [],
       "activity": "addition/story",
       "params": {
         "level": 63,
@@ -3346,7 +3324,7 @@
       "icon": "📖",
       "iconName": "search",
       "iconTone": "pink",
-      "pedagogyTip": "Practice is retrieval, not instruction. The help is removed on purpose — recalling a technique unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
       "standards": [],
       "trajectoryLevel": "problem-solver",
       "ageBand": [
@@ -3359,9 +3337,7 @@
       "title": "Practice: Choosing",
       "concept": "Practice Without Help",
       "conceptKey": "strategy-chooser",
-      "requires": [
-        "strategy-chooser"
-      ],
+      "requires": [],
       "activity": "addition/strategy",
       "params": {
         "level": 64,
@@ -3393,7 +3369,7 @@
       "icon": "🧭",
       "iconName": "sparkles",
       "iconTone": "purple",
-      "pedagogyTip": "Practice is retrieval, not instruction. The help is removed on purpose — recalling a technique unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
       "standards": [],
       "trajectoryLevel": "problem-solver",
       "ageBand": [

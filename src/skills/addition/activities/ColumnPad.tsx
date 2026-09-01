@@ -14,7 +14,7 @@ import { ADDEND_A, ADDEND_B, CHANGE } from "../internal/data/additionPalette";
 import { SCENE } from "../internal/data/additionLayout";
 import { NudgeLine, useNudge } from "../internal/ui/useNudge";
 import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
-import { isPractice, modeAt, type PracticeSetup } from "../internal/data/practice";
+import { isPractice, modeAt, type PracticeSetup } from "../../kit";
 import {
   carriesIn,
   digitsOf,

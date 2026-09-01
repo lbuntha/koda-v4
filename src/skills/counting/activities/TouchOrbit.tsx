@@ -12,6 +12,8 @@ import {
   useSkillRound,
   useSpokenFinish,
   type RoundQuestion,
+  isPractice,
+  modeAt,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { PREDEFINED_ASSETS, type PredefinedAsset } from "../internal/data/countingAssets";
@@ -187,9 +189,13 @@ const scatterPlaces = (count: number, setup: OrbitSetup["scatter"]): Placement[]
 };
 
 const buildQuestion = (setup: OrbitSetup, index: number): OrbitQuestion => {
-  const mode = setup.mode ?? "row";
+  const mode = modeAt<OrbitMode>(
+    { mode: setup.mode, modes: (setup as { modes?: OrbitMode[] }).modes },
+    index,
+    "row",
+  );
   const asset = sample(PREDEFINED_ASSETS);
-  const base = { id: `q${index}-${Date.now().toString(36)}`, taskKind: "count_objects", asset };
+  const base = { id: `q${index}-${Date.now().toString(36)}`, taskKind: `count_objects_${mode}`, asset };
 
   if (mode === "compare") {
     const outcome = sample(setup.compareModes ?? ["SAME", "SAME", "A_MORE", "B_MORE"]);
@@ -365,6 +371,8 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
   const total = setup.questionsPerRound ?? 5;
   /** The lesson's own child-facing copy: the spoken intro, and hint rung one. */
   const copy = playCopy(params);
+  /** Practice takes the scaffolding away: no hints, no explanation, no voice. */
+  const practising = isPractice(setup as { practice?: boolean });
 
   const [tapped, setTapped] = useState<number[]>([]);
   const [tappedA, setTappedA] = useState<number[]>([]);
@@ -395,7 +403,7 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
     totalQuestions: total,
     levelNumber: lesson?.levelNumber ?? 1,
     // The lesson's own spoken instruction, said once as the round opens.
-    intro: copy.audioPrompt,
+    intro: practising ? undefined : copy.audioPrompt,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     nextQuestion: useCallback((index: number) => buildQuestion(setup, index), [params]),
     onComplete: (result) => {
@@ -405,6 +413,16 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
   });
 
   const question = round.question as OrbitQuestion;
+
+  /**
+   * Report an answer.
+   *
+   * In practice the verdict stands on its own — a child working unaided is not
+   * being walked through what happened, and an explanation after every question
+   * would put the scaffolding back one sentence at a time.
+   */
+  const submit = (outcome: Parameters<typeof round.submit>[0]) =>
+    round.submit(practising ? { ...outcome, message: undefined } : outcome);
 
   useEffect(() => {
     finishing.cancel();
@@ -425,7 +443,7 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
    * rejection resolves too: a round must not stall on a sound.
    */
   const countAloud = (n: number): Promise<void> => {
-    if (!koda.config.isEnabled("audio_speech", true)) return Promise.resolve();
+    if (!!practising && koda.config.isEnabled("audio_speech", true)) return Promise.resolve();
     return koda.speech
       .say(NUMBER_WORDS[n] ?? String(n), { rate: koda.config.get("speechRate", 1.0) })
       .catch(() => {});
@@ -468,7 +486,7 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
 
   /** The round's own reaction, once the count has been seen and heard. */
   const finish = (counted: number) => {
-    round.submit({
+    submit({
       correct: true,
       given: String(counted),
       expected: String(question.count),
@@ -507,7 +525,7 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
         ? `They look different, but count one by one. Left has ${c.countA} and right has ${c.countB}. The same!`
         : `Count one by one. Left has ${c.countA} ${c.assetA.name.toLowerCase()} and right has ${c.countB} ${c.assetB.name.toLowerCase()}.`;
 
-    round.submit({
+    submit({
       correct,
       given: choice,
       expected: c.answer,
@@ -537,17 +555,21 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
       prompt={prompt}
       iconName={question.mode === "compare" ? "scale" : "star"}
       iconTone="amber"
-      hints={orbitHints(question, {
+      hints={practising ? [] : orbitHints(question, {
         tapped: tapped.length,
         tappedA: tappedA.length,
         tappedB: tappedB.length,
         kidTip: copy.kidTip,
       })}
       onExit={koda.ui.exit}
-      onReadAloud={() => {
-        round.useSupport("audio_replay");
-        void koda.speech.say(prompt);
-      }}
+      onReadAloud={
+        practising
+          ? undefined
+          : () => {
+            round.useSupport("audio_replay");
+            void koda.speech.say(prompt);
+            }
+      }
       recommendation={nextStep}
     >
       {question.mode === "compare" ? (

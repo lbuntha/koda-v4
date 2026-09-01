@@ -18,7 +18,7 @@ import { ADDEND_A, ADDEND_B, TOTAL } from "../internal/data/additionPalette";
 import { BIN, COUNT_BADGE, SCENE, TOKEN_COMPACT } from "../internal/data/additionLayout";
 import { NudgeLine, useNudge } from "../internal/ui/useNudge";
 import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
-import { isPractice, modeAt, type PracticeSetup } from "../internal/data/practice";
+import { isPractice, modeAt, type PracticeSetup } from "../../kit";
 import {
   drawPair,
   numberWord as say,

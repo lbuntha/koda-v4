@@ -42,7 +42,7 @@ import { buildQuestion as buildEstimate, estimateHints } from "./activities/Esti
 import { buildQuestion as buildStory, type StoryMemory } from "./activities/StoryBoard";
 import { buildQuestion as buildStrategy, type ProblemMemory } from "./activities/StrategyPicker";
 import { STRATEGIES, fittingFor } from "./internal/data/strategyCards";
-import { isPractice, modeAt } from "./internal/data/practice";
+import { isPractice, modeAt } from "../kit";
 import {
   buildQuestion as buildFact,
   factHints,

@@ -866,6 +866,327 @@
         7,
         8
       ]
+    },
+    {
+      "id": "practice-orbit",
+      "title": "Practice: Touch and Count",
+      "concept": "Practice Without Help",
+      "conceptKey": "counter",
+      "requires": [],
+      "activity": "counting/orbit",
+      "params": {
+        "level": 16,
+        "question": {
+          "practice": true,
+          "modes": [
+            "row",
+            "scatter",
+            "compare"
+          ],
+          "countRange": [
+            3,
+            8
+          ],
+          "compareModes": [
+            "SAME",
+            "A_MORE",
+            "B_MORE"
+          ],
+          "biasedRange": [
+            4,
+            8
+          ],
+          "diffRange": [
+            1,
+            2
+          ],
+          "scatter": {
+            "top": [
+              15,
+              70
+            ],
+            "left": [
+              12,
+              80
+            ],
+            "rotate": [
+              -18,
+              18
+            ],
+            "minDistance": 16
+          },
+          "settleMs": 0,
+          "questionsPerRound": 9
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "emerald",
+          "category": "Practice",
+          "shortDesc": "Rows, scatters and comparisons, mixed together.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "⭐",
+      "iconName": "star",
+      "iconTone": "cyan",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "counter",
+      "ageBand": [
+        4,
+        7
+      ]
+    },
+    {
+      "id": "practice-subitize",
+      "title": "Practice: Quick Looks",
+      "concept": "Practice Without Help",
+      "conceptKey": "perceptual-subitizer",
+      "requires": [],
+      "activity": "counting/subitize",
+      "params": {
+        "level": 17,
+        "question": {
+          "practice": true,
+          "modes": [
+            "grid",
+            "scatter",
+            "twoColor"
+          ],
+          "countRange": [
+            2,
+            8
+          ],
+          "partRange": [
+            2,
+            4
+          ],
+          "jitterRange": [
+            15,
+            85
+          ],
+          "flashMs": 900,
+          "questionsPerRound": 9
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "emerald",
+          "category": "Practice",
+          "shortDesc": "Dice patterns, scattered dots and two colours, at a glance.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🎲",
+      "iconName": "dice",
+      "iconTone": "purple",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "counter",
+      "ageBand": [
+        4,
+        7
+      ]
+    },
+    {
+      "id": "practice-tenframe",
+      "title": "Practice: Ten-Frames",
+      "concept": "Practice Without Help",
+      "conceptKey": "five-benchmark",
+      "requires": [],
+      "activity": "counting/tenframe",
+      "params": {
+        "level": 18,
+        "question": {
+          "practice": true,
+          "modes": [
+            "fill",
+            "complement",
+            "teen"
+          ],
+          "targetRange": [
+            5,
+            9
+          ],
+          "initialRange": [
+            2,
+            8
+          ],
+          "teenRange": [
+            11,
+            19
+          ],
+          "questionsPerRound": 9
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "emerald",
+          "category": "Practice",
+          "shortDesc": "Filling a frame, finishing a ten, and building a teen.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🚀",
+      "iconName": "rocket",
+      "iconTone": "purple",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "counter",
+      "ageBand": [
+        5,
+        7
+      ]
+    },
+    {
+      "id": "practice-numberline",
+      "title": "Practice: Hops and Patterns",
+      "concept": "Practice Without Help",
+      "conceptKey": "skip-counter",
+      "requires": [],
+      "activity": "counting/numberline",
+      "params": {
+        "level": 19,
+        "question": {
+          "practice": true,
+          "modes": [
+            "hop",
+            "missing"
+          ],
+          "steps": [
+            2,
+            5,
+            10
+          ],
+          "hopRange": [
+            3,
+            6
+          ],
+          "seqLength": 5,
+          "startRange": [
+            5,
+            20
+          ],
+          "reverseStartRange": [
+            25,
+            45
+          ],
+          "missingIndexRange": [
+            1,
+            3
+          ],
+          "distractorJitter": [
+            -4,
+            4
+          ],
+          "settleMs": 0,
+          "questionsPerRound": 8
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "emerald",
+          "category": "Practice",
+          "shortDesc": "Skip-counting hops and missing numbers in a pattern.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🐸",
+      "iconName": "footprints",
+      "iconTone": "emerald",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "counter",
+      "ageBand": [
+        5,
+        8
+      ]
+    },
+    {
+      "id": "practice-base10",
+      "title": "Practice: Building Numbers",
+      "concept": "Practice Without Help",
+      "conceptKey": "unitiser-ten",
+      "requires": [],
+      "activity": "counting/base10",
+      "params": {
+        "level": 20,
+        "question": {
+          "practice": true,
+          "targetRange": [
+            11,
+            385
+          ],
+          "bundleOnes": true,
+          "bundleTens": true,
+          "hundreds": true,
+          "questionsPerRound": 8
+        },
+        "play": {
+          "mode": "practice",
+          "tier": "master",
+          "difficultyColor": "emerald",
+          "category": "Practice",
+          "shortDesc": "Tens, hundreds and every bundle, across the whole range.",
+          "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+          "stepByStep": [
+            "The techniques you have learned, mixed together.",
+            "Nothing is read aloud and there are no hints.",
+            "Work each one out, and see how many you get first time."
+          ],
+          "kidTip": "",
+          "audioPrompt": "",
+          "prompts": {}
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🧱",
+      "iconName": "boxes",
+      "iconTone": "indigo",
+      "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
+      "standards": [],
+      "trajectoryLevel": "counter",
+      "ageBand": [
+        6,
+        8
+      ]
     }
   ]
 }

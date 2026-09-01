@@ -1,6 +1,9 @@
 /**
  * Practice: the same engines, with the scaffolding taken away.
  *
+ * In `kit/` rather than in a skill, because every skill wants it and no skill
+ * may import another. Addition built it; counting uses the same three lines.
+ *
  * A lesson teaches one technique with everything switched on — the question
  * read aloud, a hint ladder three rungs deep, and feedback that explains what
  * happened. Practice is what comes after that: the same manipulative, several

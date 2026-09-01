@@ -8,6 +8,8 @@ import {
   playCopy,
   useSkillRound,
   type RoundQuestion,
+  isPractice,
+  modeAt,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 
@@ -265,6 +267,8 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
   const total = setup.questionsPerRound ?? 5;
   /** The lesson's own child-facing copy: the spoken intro, and hint rung one. */
   const copy = playCopy(params);
+  /** Practice takes the scaffolding away: no hints, no explanation, no voice. */
+  const practising = isPractice(setup as { practice?: boolean });
   const places = PLACES.filter((p) => p.key !== "hundreds" || setup.hundreds);
 
   const [built, setBuilt] = useState({ hundreds: 0, tens: 0, ones: 0 });
@@ -275,7 +279,7 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
     totalQuestions: total,
     levelNumber: lesson?.levelNumber ?? 1,
     // The lesson's own spoken instruction, said once as the round opens.
-    intro: copy.audioPrompt,
+    intro: practising ? undefined : copy.audioPrompt,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     nextQuestion: useCallback((index: number) => buildQuestion(setup, index), [params]),
     onComplete: (result) => {
@@ -285,6 +289,16 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
   });
 
   const question = round.question as BuildQuestion;
+
+  /**
+   * Report an answer.
+   *
+   * In practice the verdict stands on its own — a child working unaided is not
+   * being walked through what happened, and an explanation after every question
+   * would put the scaffolding back one sentence at a time.
+   */
+  const submit = (outcome: Parameters<typeof round.submit>[0]) =>
+    round.submit(practising ? { ...outcome, message: undefined } : outcome);
   const value = built.hundreds * 100 + built.tens * 10 + built.ones;
 
   useEffect(() => {
@@ -376,7 +390,7 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
         ? { ...prev, ones: prev.ones - 10, tens: prev.tens + 1 }
         : { ...prev, tens: prev.tens - 10, hundreds: prev.hundreds + 1 },
     );
-    if (koda.config.isEnabled("audio_speech", true)) {
+    if (!practising && koda.config.isEnabled("audio_speech", true)) {
       void koda.speech.say(from === "ones" ? "10 ones make 1 ten" : "10 tens make 1 hundred");
     }
   };
@@ -385,7 +399,7 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
     const say = (correct: boolean, title: string, message: string, place = false) => {
       chime(correct ? "success" : "error");
       correct ? koda.haptics.success() : koda.haptics.tap();
-      round.submit({
+      submit({
         correct,
         given: String(value),
         expected: String(question.target),
@@ -472,12 +486,16 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
       prompt={prompt}
       iconName="boxes"
       iconTone="emerald"
-      hints={base10Hints(question, { built, setup, kidTip: copy.kidTip })}
+      hints={practising ? [] : base10Hints(question, { built, setup, kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
-      onReadAloud={() => {
-        round.useSupport("audio_replay");
-        void koda.speech.say(spokenPrompt);
-      }}
+      onReadAloud={
+        practising
+          ? undefined
+          : () => {
+            round.useSupport("audio_replay");
+            void koda.speech.say(spokenPrompt);
+            }
+      }
       recommendation={nextStep}
     >
       <div className="space-y-5">

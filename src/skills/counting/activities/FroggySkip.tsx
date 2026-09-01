@@ -10,6 +10,8 @@ import {
   useSkillRound,
   useSpokenFinish,
   type RoundQuestion,
+  isPractice,
+  modeAt,
 } from "../../kit";
 import { SvgAsset } from "../../../assets/svg";
 import { SCENE } from "../internal/data/countingLayout";
@@ -66,7 +68,11 @@ const rangeOr = (range: [number, number] | undefined, lo: number, hi: number) =>
 const sample = <T,>(items: readonly T[]): T => items[Math.floor(Math.random() * items.length)];
 
 const buildQuestion = (setup: FroggySetup, index: number): LineQuestion => {
-  const mode = setup.mode ?? "hop";
+  const mode = modeAt<NumberLineMode>(
+    { mode: setup.mode, modes: (setup as { modes?: NumberLineMode[] }).modes },
+    index,
+    "hop",
+  );
   const step = sample(setup.steps ?? [2, 5]);
   const base = { id: `q${index}-${Date.now().toString(36)}`, taskKind: `numberline_${mode}` };
 
@@ -184,6 +190,8 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
   const total = setup.questionsPerRound ?? 5;
   /** The lesson's own child-facing copy: the spoken intro, and hint rung one. */
   const copy = playCopy(params);
+  /** Practice takes the scaffolding away: no hints, no explanation, no voice. */
+  const practising = isPractice(setup as { practice?: boolean });
 
   const [hop, setHop] = useState(0);
   const [guess, setGuess] = useState<number | null>(null);
@@ -194,7 +202,7 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
     totalQuestions: total,
     levelNumber: lesson?.levelNumber ?? 1,
     // The lesson's own spoken instruction, said once as the round opens.
-    intro: copy.audioPrompt,
+    intro: practising ? undefined : copy.audioPrompt,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     nextQuestion: useCallback((index: number) => buildQuestion(setup, index), [params]),
     onComplete: (result) => {
@@ -204,6 +212,16 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
   });
 
   const question = round.question as LineQuestion;
+
+  /**
+   * Report an answer.
+   *
+   * In practice the verdict stands on its own — a child working unaided is not
+   * being walked through what happened, and an explanation after every question
+   * would put the scaffolding back one sentence at a time.
+   */
+  const submit = (outcome: Parameters<typeof round.submit>[0]) =>
+    round.submit(practising ? { ...outcome, message: undefined } : outcome);
 
   /*
    * The last hop's number has to be *heard* before the round congratulates.
@@ -227,7 +245,7 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
 
   /** Say the pad the frog just landed on, resolving once it has been said. */
   const sayPad = (value: number): Promise<void> => {
-    if (!koda.config.isEnabled("audio_speech", true)) return Promise.resolve();
+    if (!!practising && koda.config.isEnabled("audio_speech", true)) return Promise.resolve();
     return koda.speech
       .say(String(value), { rate: koda.config.get("speechRate", 1.0) })
       .catch(() => {});
@@ -248,7 +266,7 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
       koda.haptics.success();
       // The number the child counted to comes first; the praise waits for it.
       finishing.after(spoken, () =>
-        round.submit({
+        submit({
           correct: true,
           given: String(pads[next]),
           expected: String(pads[next]),
@@ -264,7 +282,7 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
     const correct = choice === question.answer;
     chime(correct ? "success" : "error");
     correct ? koda.haptics.success() : koda.haptics.tap();
-    round.submit({
+    submit({
       correct,
       given: String(choice),
       expected: String(question.answer),
@@ -291,12 +309,16 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
       prompt={prompt}
       iconName="footprints"
       iconTone="emerald"
-      hints={numberLineHints(question, { hop, kidTip: copy.kidTip })}
+      hints={practising ? [] : numberLineHints(question, { hop, kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
-      onReadAloud={() => {
-        round.useSupport("audio_replay");
-        void koda.speech.say(prompt);
-      }}
+      onReadAloud={
+        practising
+          ? undefined
+          : () => {
+            round.useSupport("audio_replay");
+            void koda.speech.say(prompt);
+            }
+      }
       recommendation={nextStep}
     >
       {question.mode === "hop" ? (

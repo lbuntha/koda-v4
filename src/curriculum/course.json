@@ -258,6 +258,20 @@
         "addition/practice-story",
         "addition/practice-strategy"
       ]
+    },
+    {
+      "id": "u21",
+      "unitNumber": 21,
+      "title": "Unit 21: Practice — Counting",
+      "description": "Every counting technique, mixed and unaided",
+      "icon": "🎲",
+      "lessons": [
+        "counting/practice-orbit",
+        "counting/practice-subitize",
+        "counting/practice-tenframe",
+        "counting/practice-numberline",
+        "counting/practice-base10"
+      ]
     }
   ]
 }

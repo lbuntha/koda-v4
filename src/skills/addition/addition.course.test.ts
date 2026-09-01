@@ -39,10 +39,19 @@ describe("addition sits in the course in its own order", () => {
     expect(levels.at(-1)).toBe(skill.lessons.length);
   });
 
-  it("comes after everything that was already in the course", () => {
-    // Appended, never inserted: a unit slipped in earlier would renumber every
-    // lesson after it, and a child's saved progress points at a number.
-    const firstMine = refs.findIndex((ref) => ref.startsWith("addition/"));
-    expect(refs.slice(firstMine).every((ref) => ref.startsWith("addition/"))).toBe(true);
+  it("sits in the course as one unbroken block", () => {
+    // Appended, never interleaved: a unit slipped in among another skill's
+    // would renumber lessons on both sides of it, and a child's saved progress
+    // points at a number. Other skills may still be appended after this block —
+    // counting's own practice unit is — which renumbers nothing.
+    const first = refs.findIndex((ref) => ref.startsWith("addition/"));
+    const last = refs.length - 1 - [...refs].reverse().findIndex((ref) => ref.startsWith("addition/"));
+    expect(refs.slice(first, last + 1).every((ref) => ref.startsWith("addition/"))).toBe(true);
+  });
+
+  it("starts after every lesson that came before it", () => {
+    const first = refs.findIndex((ref) => ref.startsWith("addition/"));
+    expect(refs.slice(0, first).every((ref) => ref.startsWith("counting/"))).toBe(true);
+    expect(first).toBeGreaterThan(0);
   });
 });

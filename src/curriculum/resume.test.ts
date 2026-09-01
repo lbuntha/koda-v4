@@ -17,15 +17,26 @@ import type { Viewer } from "../skills/viewer";
 const viewer: Viewer = { age: 7, showAllSkills: true } as Viewer;
 
 const lessons = getCourseLessons(viewer);
-const bySlug = (id: string): ResolvedLesson => {
-  const lesson = lessons.find((l) => l.id === id);
-  if (!lesson) throw new Error(`no lesson "${id}" in the course`);
+
+/**
+ * Found by `skillId/lessonId`, never by the bare id.
+ *
+ * A lesson id only has to be unique inside its own skill — that is what the
+ * skill contract checks, and what the course's `skillId/lessonId` refs are for.
+ * Two skills legitimately have a `practice-numberline`, and looking one up by
+ * slug quietly returned whichever came first: a test marking addition's as
+ * finished was marking counting's instead, and the case it was checking never
+ * happened.
+ */
+const byRef = (ref: string): ResolvedLesson => {
+  const lesson = lessons.find((l) => l.ref === ref);
+  if (!lesson) throw new Error(`no lesson "${ref}" in the course`);
   return lesson;
 };
 
 /** Star counts, keyed the way the app stores them. */
-const completing = (...ids: string[]): Record<number, number> =>
-  Object.fromEntries(ids.map((id) => [bySlug(id).levelNumber, 3]));
+const completing = (...refs: string[]): Record<number, number> =>
+  Object.fromEntries(refs.map((ref) => [byRef(ref).levelNumber, 3]));
 
 /* No grown-up has placed this learner anywhere, which is the default state and
    the one the placement cases below deliberately depart from. */
@@ -38,7 +49,7 @@ describe("resumeLesson", () => {
 
   it("moves past every lesson already finished", () => {
     const done = lessons.slice(0, 5);
-    const completed = completing(...done.map((l) => l.id));
+    const completed = completing(...done.map((l) => l.ref));
 
     const next = resumeLesson(lessons, completed, viewer, unplaced);
     expect(next).toBeDefined();
@@ -47,13 +58,13 @@ describe("resumeLesson", () => {
   });
 
   it("returns undefined once every lesson is finished", () => {
-    const completed = completing(...lessons.map((l) => l.id));
+    const completed = completing(...lessons.map((l) => l.ref));
     expect(resumeLesson(lessons, completed, viewer, unplaced)).toBeUndefined();
   });
 
   it("never offers a lesson that is still locked", () => {
     for (const played of [0, 1, 3, 6]) {
-      const completed = completing(...lessons.slice(0, played).map((l) => l.id));
+      const completed = completing(...lessons.slice(0, played).map((l) => l.ref));
       const next = resumeLesson(lessons, completed, viewer, unplaced);
       if (!next) continue;
       expect(next.requires ?? []).toBeDefined();
@@ -69,7 +80,7 @@ describe("resumeLesson", () => {
     /* A child placed at unit 3 has units 1 and 2 open but unplayed. Reading the
        list front to back would hand them lesson one after a week's work. */
     const placedAt = lessons[7].levelNumber;
-    const completed = completing(lessons[8].id, lessons[9].id);
+    const completed = completing(lessons[8].ref, lessons[9].ref);
 
     const next = resumeLesson(lessons, completed, viewer, placedAt);
     expect(next?.levelNumber).toBeGreaterThan(lessons[9].levelNumber);
@@ -78,7 +89,7 @@ describe("resumeLesson", () => {
   it("falls back to a skipped lesson when there is nothing further ahead", () => {
     /* Everything from the skip onwards is done, so the gap is genuinely next. */
     const skipped = lessons[0];
-    const completed = completing(...lessons.slice(1).map((l) => l.id));
+    const completed = completing(...lessons.slice(1).map((l) => l.ref));
 
     expect(resumeLesson(lessons, completed, viewer, skipped.levelNumber)?.levelNumber).toBe(
       skipped.levelNumber,

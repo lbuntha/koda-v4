@@ -14,7 +14,7 @@ import { ADDEND_A, ADDEND_B, CHANGE, TOTAL } from "../internal/data/additionPale
 import { SCENE } from "../internal/data/additionLayout";
 import { NudgeLine, useNudge } from "../internal/ui/useNudge";
 import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
-import { isPractice, modeAt, type PracticeSetup } from "../internal/data/practice";
+import { isPractice, modeAt, type PracticeSetup } from "../../kit";
 import { NumberPad } from "../internal/ui/NumberPad";
 import { THINGS, twoNames, type Thing } from "../internal/data/storyCast";
 import { drawStory, pick, type StoryKind, type StoryNumbers } from "../internal/data/additionNumbers";
