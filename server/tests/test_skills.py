@@ -52,7 +52,14 @@ async def test_deployment_registers_bundled_skills_in_mongo(db):
     assert registered["version"] == "1.0.0"
     assert registered["status"] == "published"
     assert registered["publishedBy"]["id"] == "deploy"
-    assert len(registered["lessons"]) == 15
+
+    # Every lesson in the seed reached Mongo, checked against the seed rather
+    # than against a number. What this test is about is that nothing is dropped
+    # on the way in; adding a lesson to a skill is a normal thing to do, and the
+    # comment above already says a pinned count is how shipping breaks the API's
+    # tests — this was the same mistake one assertion further down.
+    assert len(registered["lessons"]) == len(_bundled("counting")["lessons"])
+    assert registered["lessons"], "counting was registered with no lessons"
 
 
 async def test_operator_publishes_on_server_and_every_reader_sees_it(client, db, signup_body):
