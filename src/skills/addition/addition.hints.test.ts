@@ -361,3 +361,83 @@ describe("the number line keeps each mode's shape", () => {
   });
 });
 
+import {
+  buildQuestion as buildBlocks,
+  readyToBundle,
+  specFor as blockSpec,
+} from "./activities/BlockYard";
+import {
+  buildQuestion as buildDesk,
+  specFor as deskSpec,
+} from "./activities/PlaceValueDesk";
+import { carriesIn } from "./internal/data/additionNumbers";
+
+describe("the block yard keeps each mode's shape", () => {
+  it("starts an exchange lesson holding ten of something", () => {
+    // The un-carried column is the lesson. A yard that arrived already bundled
+    // would have nothing to exchange.
+    const seen = new Set<string>();
+    for (let i = 0; i < 40; i += 1) {
+      const q = buildBlocks({ mode: "trade_ones" }, i + 1, seen);
+      expect(q.start.ones, `${q.a} + ${q.b}`).toBeGreaterThanOrEqual(10);
+      expect(readyToBundle(q.start)).toBe("ones");
+      // And the value is already right — it is the form that is unfinished.
+      expect(q.start.tens * 10 + q.start.ones + q.start.hundreds * 100).toBe(q.sum);
+    }
+  });
+
+  it("never gives a building lesson a carry to trip over", () => {
+    const seen = new Set<string>();
+    for (let i = 0; i < 40; i += 1) {
+      const q = buildBlocks({ mode: "build_add" }, i + 1, seen);
+      expect(carriesIn(q.a, q.b), `${q.a} + ${q.b}`).toEqual([]);
+      expect(q.start).toEqual({ hundreds: 0, tens: 0, ones: 0 });
+    }
+  });
+
+  it("offers only the block a tens or hundreds lesson is about", () => {
+    const seen = new Set<string>();
+    expect(buildBlocks({ mode: "multiples_ten" }, 1, seen).offers).toEqual(["tens"]);
+    expect(buildBlocks({ mode: "multiples_hundred" }, 2, seen).offers).toEqual(["hundreds"]);
+    for (let i = 0; i < 20; i += 1) {
+      const q = buildBlocks({ mode: "multiples_ten" }, i + 3, seen);
+      expect(q.a % 10).toBe(0);
+      expect(q.b % 10).toBe(0);
+    }
+  });
+
+  it("will not let a lesson take the exchange out of an exchange lesson", () => {
+    expect(blockSpec("trade_ones", { addendRange: [11, 20] }).regroup).toBe("ones");
+    expect(blockSpec("build_add", { addendRange: [11, 99] }).regroup).toBe("never");
+  });
+});
+
+describe("the chart keeps each mode's shape", () => {
+  it("keeps the columns clean where the lesson is about columns", () => {
+    const seen = new Set<string>();
+    for (let i = 0; i < 40; i += 1) {
+      const q = buildDesk({ mode: "chart_add" }, i + 1, seen);
+      expect(carriesIn(q.a, q.b), `${q.a} + ${q.b}`).toEqual([]);
+      expect(q.blanks).toHaveLength(2);
+    }
+  });
+
+  it("always gives partial sums a carry to keep", () => {
+    // A silently non-regrouping partial-sums lesson teaches nothing and looks
+    // completely fine — this is the trap the plan calls out for phase 8.
+    const seen = new Set<string>();
+    for (let i = 0; i < 40; i += 1) {
+      const q = buildDesk({ mode: "partial_sums" }, i + 1, seen);
+      expect(carriesIn(q.a, q.b), `${q.a} + ${q.b}`).toContain("ones");
+    }
+    expect(deskSpec("partial_sums", { addendRange: [11, 20] }).regroup).toBe("ones");
+  });
+
+  it("spells each number out as the values it is made of", () => {
+    const seen = new Set<string>();
+    const q = buildDesk({ mode: "expanded", addendRange: [342, 342] }, 1, seen);
+    expect(q.rows[0].cells.map((c) => c.text)).toEqual(["300", "40", "2"]);
+    expect(q.answers[0] % 100).toBe(0);
+  });
+});
+

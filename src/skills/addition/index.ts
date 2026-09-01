@@ -5,6 +5,8 @@ import { CountTray } from "./activities/CountTray";
 import { FrameFill } from "./activities/FrameFill";
 import { BondTree } from "./activities/BondTree";
 import { JumpLine } from "./activities/JumpLine";
+import { BlockYard } from "./activities/BlockYard";
+import { PlaceValueDesk } from "./activities/PlaceValueDesk";
 import { registerSkillArt } from "../../assets/svg/skillArt";
 import { registerSkillVoice } from "../../lib/voiceClips";
 import audioManifest from "./audio/manifest.json";
@@ -109,6 +111,18 @@ export const skill: Skill = {
          levels for their lessons and arrive as JSON. */
       defaultParams: { mode: "path", questionsPerRound: 5 },
       component: JumpLine,
+    },
+    base10: {
+      id: "base10",
+      name: "Base-Ten Blocks",
+      defaultParams: { mode: "build_add", questionsPerRound: 5 },
+      component: BlockYard,
+    },
+    chart: {
+      id: "chart",
+      name: "Place-Value Chart",
+      defaultParams: { mode: "chart_add", questionsPerRound: 5 },
+      component: PlaceValueDesk,
     },
   },
 };

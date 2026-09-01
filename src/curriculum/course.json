@@ -89,6 +89,17 @@
         "addition/number-path",
         "addition/open-number-line"
       ]
+    },
+    {
+      "id": "u8",
+      "unitNumber": 8,
+      "title": "Unit 8: Blocks and Charts",
+      "description": "See a number's tens and ones, then write them down",
+      "icon": "🧱",
+      "lessons": [
+        "addition/base-ten-blocks",
+        "addition/place-value-chart"
+      ]
     }
   ]
 }

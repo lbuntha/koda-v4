@@ -781,6 +781,110 @@
           7,
           9
         ]
+      },
+      {
+        "id": "base-ten-blocks",
+        "title": "Base-Ten Blocks",
+        "concept": "Adding with Tens and Ones You Can See",
+        "conceptKey": "base-ten-adder",
+        "requires": [
+          "part-whole-decomposer"
+        ],
+        "activity": "addition/base10",
+        "params": {
+          "level": 13,
+          "question": {
+            "mode": "build_add",
+            "addendRange": [
+              11,
+              88
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "block_yard",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Place Value",
+            "shortDesc": "Build a two-digit answer out of ten-rods and one-units",
+            "targetObjective": "Build the answer out of tens and ones.",
+            "stepByStep": [
+              "Look at the two numbers you are adding.",
+              "Tap rods and units in the tray to drop them into the yard.",
+              "When the yard holds the answer, check it."
+            ],
+            "kidTip": "Build each number out of blocks, then read what you have.",
+            "audioPrompt": "Base-ten blocks! Build the answer out of ten-rods and one-units.",
+            "prompts": {
+              "default": "Build {a} plus {b} out of blocks."
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "🧱",
+        "iconName": "boxes",
+        "iconTone": "purple",
+        "pedagogyTip": "A rod is worth ten because it is visibly ten units. A child who can check that is holding place value rather than remembering it.",
+        "standards": [
+          "CCSS.1.NBT.C.4"
+        ],
+        "trajectoryLevel": "base-ten-adder",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "place-value-chart",
+        "title": "The Place-Value Chart",
+        "concept": "Adding One Column at a Time",
+        "conceptKey": "place-value-builder",
+        "requires": [
+          "base-ten-adder"
+        ],
+        "activity": "addition/chart",
+        "params": {
+          "level": 14,
+          "question": {
+            "mode": "chart_add",
+            "addendRange": [
+              11,
+              88
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "place_value_desk",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Place Value",
+            "shortDesc": "Write two numbers in tens and ones columns and add each column",
+            "targetObjective": "Ones go under ones. Tens go under tens.",
+            "stepByStep": [
+              "Each number sits in its columns: tens on the left, ones on the right.",
+              "Add the ones column, then the tens column.",
+              "Write each answer in the column it belongs to."
+            ],
+            "kidTip": "Add each column on its own. Ones with ones, tens with tens.",
+            "audioPrompt": "The place-value chart! Add the ones column, then the tens column.",
+            "prompts": {
+              "default": "{a} plus {b}. Fill in the total, one column at a time."
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "📊",
+        "iconName": "layers",
+        "iconTone": "indigo",
+        "pedagogyTip": "Writing the digit in the right column is the skill. A chart that placed it for the child would be teaching something else.",
+        "standards": [
+          "CCSS.1.NBT.C.4"
+        ],
+        "trajectoryLevel": "place-value-builder",
+        "ageBand": [
+          6,
+          8
+        ]
       }
     ]
   },

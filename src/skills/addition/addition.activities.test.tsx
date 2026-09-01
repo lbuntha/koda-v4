@@ -17,7 +17,7 @@ import { skill } from ".";
  * missing `expected` fails here instead of passing quietly.
  */
 
-const { tray, frames, bonds, numberline } = skill.activities;
+const { tray, frames, bonds, numberline, base10, chart } = skill.activities;
 
 const expected = (h: ActivityHarness): string => {
   const last = h.koda.only("learning.present").at(-1);
@@ -322,6 +322,81 @@ describe("the number line plays a standard round", () => {
       },
       { params: { mode: "jump_tens_ones" }, level: 31 },
     );
+  });
+});
+
+describe("the block yard plays a standard round", () => {
+  it("build: dropping rods and units until the yard holds the answer", async () => {
+    await expectStandardRound(
+      base10,
+      async (h) => {
+        let left = Number(expected(h));
+        for (let guard = 0; guard < 40 && left >= 10; guard += 1) {
+          await h.press("Add a ten rod");
+          left -= 10;
+        }
+        for (let guard = 0; guard < 12 && left > 0; guard += 1) {
+          await h.press("Add a one unit");
+          left -= 1;
+        }
+        await h.press("Check");
+      },
+      { params: { mode: "build_add", addendRange: [11, 34] }, level: 13 },
+    );
+  });
+
+  it("trading: the exchange is required, and refusing it is not a wrong answer", async () => {
+    await expectStandardRound(
+      base10,
+      async (h) => {
+        // The yard arrives holding both numbers un-carried, so the value in it
+        // is already right — but the lesson is the exchange, and checking
+        // before it must not be scored as bad arithmetic.
+        const answers = h.koda.count("learning.answered");
+        await h.press("Check");
+        expect(h.koda.count("learning.answered"), "an unfinished exchange was scored").toBe(answers);
+        expect(h.text()).toContain("Bundle ten");
+
+        await h.press("Bundle ten ones");
+        await h.press("Check");
+      },
+      { params: { mode: "trade_ones", addendRange: [15, 48] }, level: 36 },
+    );
+  });
+});
+
+describe("the place-value chart plays a standard round", () => {
+  const typeInto = async (h: ActivityHarness, label: RegExp, value: string) => {
+    const box = h.screen.getByLabelText(label) as HTMLInputElement;
+    await h.settle();
+    box.focus();
+    // A controlled input: set the value the way a child's keystroke would.
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!;
+    setter.call(box, value);
+    box.dispatchEvent(new Event("input", { bubbles: true }));
+    await h.settle();
+  };
+
+  it("chart: filling the total, one column at a time", async () => {
+    await expectStandardRound(
+      chart,
+      async (h) => {
+        const [tens, ones] = expected(h).split(",");
+        await typeInto(h, /^Total, T$/, tens);
+        await typeInto(h, /^Total, O$/, ones);
+        await h.press("Check");
+      },
+      { params: { mode: "chart_add", addendRange: [11, 44] }, level: 14 },
+    );
+  });
+
+  it("an empty chart is refused, not scored", async () => {
+    const h = renderActivity(chart, { params: { mode: "chart_add" }, level: 14 });
+    const before = h.koda.count("learning.answered");
+    await h.press("Check");
+    expect(h.koda.count("learning.answered")).toBe(before);
+    expect(h.text()).toContain("Fill in the boxes");
+    h.unmount();
   });
 });
 
