@@ -793,7 +793,16 @@ export const themeSystem = {
            moved. Only owed on a phone; the rail has neither. */
         hasTabBar ? "pb-[calc(9.5rem+env(safe-area-inset-bottom))] rail:pb-6" : "pb-6"
       }`,
-    pageBleed: "flex-1 w-full",
+    /*
+     * Full-bleed, and a column.
+     *
+     * Only a lesson uses this (`contained={!inLesson}`), and a lesson's own
+     * root is `flex-1` — which does nothing inside a block, so the round's
+     * column stopped at its content and left a gap under it. Anything the round
+     * sticks to its bottom then sat wherever the content happened to end rather
+     * than along the bottom of the screen, which is the whole point of a strip.
+     */
+    pageBleed: "flex-1 w-full flex flex-col",
 
     /* Floating things — Ask Koda — clear the dock rather than landing on it. */
     aboveTabBar: "bottom-[calc(5.75rem+env(safe-area-inset-bottom))] rail:bottom-6",

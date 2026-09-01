@@ -302,7 +302,7 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
       nudge.refuse(
         question.asks === "added"
           ? `Nothing has been added yet. Tap the empty spaces until the frame is full.`
-          : `Tap ${question.added} empty spaces to add them to the frame.`,
+          : `Tap ${question.added} empty ${question.added === 1 ? "space" : "spaces"} to add ${question.added === 1 ? "it" : "them"} to the frame.`,
       );
       return;
     }
