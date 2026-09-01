@@ -3,7 +3,7 @@ import { Play } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
 import { UILessonIcon } from "./UILessonIcon";
 
-export type UILessonCardTone = "review" | "practise" | "advance";
+export type UILessonCardTone = "review" | "practise" | "advance" | "resume";
 
 export interface UILessonCardProps {
   title: string;
@@ -30,9 +30,11 @@ export interface UILessonCardProps {
  * lives in the recommendation's `reason`.
  */
 const TONES: Record<UILessonCardTone, { label: string; chip: string }> = {
+  /* Rose, not amber. Amber on this chip measured 168,143,0 on 255,249,196 —
+     a yellow on a yellow, and the reason yellow is not a Koda colour. */
   review: {
     label: "Warm up",
-    chip: "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300",
+    chip: "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300",
   },
   practise: {
     label: "Keep going",
@@ -41,6 +43,12 @@ const TONES: Record<UILessonCardTone, { label: string; chip: string }> = {
   advance: {
     label: "New",
     chip: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300",
+  },
+  /* Violet, the colour practice wears on the learning path, so the two read as
+     the same thing on two different screens. */
+  resume: {
+    label: "Finish",
+    chip: "bg-violet-100 text-violet-800 dark:bg-violet-950/60 dark:text-violet-300",
   },
 };
 

@@ -1,5 +1,5 @@
 import type { Catalog, CatalogLesson, CatalogSkill } from "../lib/learning/recommend";
-import { getCourseLessons } from "../curriculum";
+import { getCourseLessons, isPracticeLesson } from "../curriculum";
 import { visibleSkills } from "./registry";
 import type { Viewer } from "./viewer";
 
@@ -18,6 +18,19 @@ import type { Viewer } from "./viewer";
 export function buildCatalog(viewer: Viewer): Catalog {
   const lessons: CatalogLesson[] = getCourseLessons(viewer)
     .filter((l) => Boolean(l.conceptKey))
+    /*
+     * Practice is never *recommended*. The recommender answers "what should
+     * this child do next", and practice is not a next step — it is the same
+     * techniques again with the help removed, taken up by a child who has
+     * decided they want it. Offering it as the thing to do next inverts that,
+     * and worse: a practice lesson mixes several concepts under one
+     * `conceptKey`, so a recommender reading it as evidence of that one concept
+     * draws the wrong conclusion from it.
+     *
+     * A run left half-finished is a different matter, and Home offers that
+     * directly from `practiceProgress` rather than through the ladder.
+     */
+    .filter((l) => !isPracticeLesson(l))
     .map((l) => ({
       ref: `${l.skillId}/${l.id}`,
       skillId: l.skillId,

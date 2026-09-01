@@ -240,6 +240,7 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
 
   const round = useSkillRound({
     koda,
+    resumable: practising,
     totalQuestions,
     levelNumber: lesson?.levelNumber ?? 1,
     intro: practising ? undefined : copy.audioPrompt,

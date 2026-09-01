@@ -1,6 +1,15 @@
 import React, { useMemo, useState } from "react";
-import { ArrowLeft, BookOpen, CheckCircle2, Sparkles } from "lucide-react";
-import { getCourseUnits, getSkillLessons, isUnlocked, resumeLesson } from "../curriculum";
+import { ArrowLeft, BookOpen, CheckCircle2, Repeat, Sparkles } from "lucide-react";
+import {
+  type CourseUnit,
+  type ResolvedLesson,
+  getCourseUnits,
+  getSkillLessons,
+  isPracticeLesson,
+  isUnlocked,
+  practiceTitle,
+  resumeLesson,
+} from "../curriculum";
 import { SkillRegistryAPI } from "../lib/skillRegistryApi";
 import { useSkillRegistrations } from "../lib/skillRegistrationApi";
 import { useInstalledSkills } from "../lib/skillStore";
@@ -34,6 +43,25 @@ export interface LearnPageProps {
  */
 const unitTitle = (title: string): string => title.replace(/^Unit\s*\d+\s*[:.\-\u2013]\s*/i, "");
 
+/** The icon-and-two-lines heading that opens each section of the path. */
+const SectionIntro: React.FC<{
+  icon: React.ReactNode;
+  /** Background and text utilities for the icon tile. */
+  tint: string;
+  title: string;
+  blurb: string;
+}> = ({ icon, tint, title, blurb }) => (
+  <div className="flex items-start gap-3">
+    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${tint}`}>
+      {icon}
+    </div>
+    <div>
+      <h2 className="text-xl font-black text-ink">{title}</h2>
+      <p className="mt-0.5 text-sm text-muted">{blurb}</p>
+    </div>
+  </div>
+);
+
 export const LearnPage: React.FC<LearnPageProps> = ({
   skillId,
   completedLevels,
@@ -63,6 +91,37 @@ export const LearnPage: React.FC<LearnPageProps> = ({
     [skillId, viewer],
   );
 
+  /*
+   * Teaching and practice are two different offers, so they are two sections.
+   *
+   * A practice lesson is not the next step after the one above it — it is the
+   * whole engine again with the hints, the voice and the explanations removed,
+   * for a child who already has the technique. Left in the one column it read
+   * as four more units at the end of the path, which invites a learner to grind
+   * through them in order, and buries the thing a returning child is actually
+   * looking for at the bottom of eighteen units of scrolling.
+   *
+   * Split per lesson rather than per unit: today every practice unit is wholly
+   * practice, and a unit that later mixes the two still lands on the right side
+   * instead of being classified by its majority.
+   *
+   * The practice half is flattened. The course files it under four units purely
+   * because the course is one flat list and units are the only container it
+   * has — but "Unit 18: Practice — Counting and Frames" is not a stage anybody
+   * works through, and numbering them implies an order that does not exist.
+   * They are one set covering every technique, so they are shown as one.
+   */
+  const { teaching, practice } = useMemo(() => {
+    const teaching: CourseUnit[] = [];
+    const practice: ResolvedLesson[] = [];
+    for (const unit of units) {
+      const taught = unit.lessons.filter((lesson) => !isPracticeLesson(lesson));
+      if (taught.length) teaching.push({ ...unit, lessons: taught });
+      practice.push(...unit.lessons.filter(isPracticeLesson));
+    }
+    return { teaching, practice };
+  }, [units]);
+
   if (!skill || !lessons.length) {
     return (
       <div className="min-h-[55vh] flex items-center justify-center text-center">
@@ -85,6 +144,7 @@ export const LearnPage: React.FC<LearnPageProps> = ({
   const starsFor = (lesson: { levelNumber: number }) => completedLevels[lesson.levelNumber] ?? 0;
   const done = lessons.filter((lesson) => starsFor(lesson) > 0).length;
   const finished = done === lessons.length;
+  const practiceDone = practice.filter((lesson) => starsFor(lesson) > 0).length;
 
   /*
    * Where "Continue" goes — and, on the path below, which stone wears the
@@ -110,6 +170,63 @@ export const LearnPage: React.FC<LearnPageProps> = ({
     if (!registered) return;
     playSound("pop");
     onStartLesson(levelNumber);
+  };
+
+  /*
+   * One unit as a headed path. Shared by both sections so the stones, the
+   * locking and the star badges cannot drift apart between them — the only
+   * difference is the wording above them.
+   */
+  const pathFor = (group: ResolvedLesson[], opts: { practice?: boolean } = {}) => {
+    const items: UISkillPathItem[] = group.map((lesson) => {
+      const stars = starsFor(lesson);
+      const locked = !registered || !isUnlocked(lesson, completedLevels, viewer);
+      return {
+        id: lesson.ref,
+        title: opts.practice ? practiceTitle(lesson.title) : lesson.title,
+        icon: lesson.icon,
+        stars,
+        state: locked
+          ? "locked"
+          : lesson.ref === next?.ref
+            ? "current"
+            : stars > 0
+              ? "completed"
+              : "available",
+      };
+    });
+
+    return (
+      <UISkillPath
+        items={items}
+        startLabel={done ? "Continue" : "Start"}
+        onSelect={(ref) => {
+          const lesson = group.find((l) => l.ref === ref);
+          if (lesson) start(lesson.levelNumber);
+        }}
+      />
+    );
+  };
+
+  const unitPath = (unit: CourseUnit) => {
+    const unitDone = unit.lessons.filter((lesson) => starsFor(lesson) > 0).length;
+
+    return (
+      <section key={unit.id}>
+        {/* The count rides in the eyebrow rather than as a badge on the right:
+            it is the same fact the bar at the top of the page states, and a
+            second pill on every unit is clutter once a course runs to four or
+            five of them. Units are counted over this skill's lessons only — a
+            unit may also hold lessons from skills the learner has not
+            registered, and those are not this page's to report on. */}
+        <UIUnitHeader
+          eyebrow={`Unit ${unit.unitNumber} · ${unitDone}/${unit.lessons.length} done`}
+          title={unitTitle(unit.title)}
+          color={unitColor(unit.unitNumber)}
+        />
+        {pathFor(unit.lessons)}
+      </section>
+    );
   };
 
   const add = async () => {
@@ -187,65 +304,37 @@ export const LearnPage: React.FC<LearnPageProps> = ({
 
       <div className="grid lg:grid-cols-[minmax(0,1fr)_280px] gap-5 items-start">
         <section className={`${themeSystem.card("default")} p-5 sm:p-6`}>
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center text-indigo-600 shrink-0">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-xl font-black text-ink">Learning path</h2>
-              <p className="mt-0.5 text-sm text-muted">
-                Finish each lesson to unlock the next challenge.
-              </p>
-            </div>
-          </div>
+          <SectionIntro
+            icon={<Sparkles className="w-5 h-5" />}
+            tint="bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600"
+            title="Learning path"
+            blurb="Finish each lesson to unlock the next challenge."
+          />
 
-          <div className="mt-4 space-y-6">
-            {units.map((unit) => {
-              const unitDone = unit.lessons.filter((lesson) => starsFor(lesson) > 0).length;
-              const items: UISkillPathItem[] = unit.lessons.map((lesson) => {
-                const stars = starsFor(lesson);
-                const locked = !registered || !isUnlocked(lesson, completedLevels, viewer);
-                return {
-                  id: lesson.ref,
-                  title: lesson.title,
-                  icon: lesson.icon,
-                  stars,
-                  state: locked
-                    ? "locked"
-                    : lesson.ref === next?.ref
-                      ? "current"
-                      : stars > 0
-                        ? "completed"
-                        : "available",
-                };
-              });
+          <div className="mt-4 space-y-6">{teaching.map((unit) => unitPath(unit))}</div>
 
-              return (
-                <section key={unit.id}>
-                  {/* The count rides in the eyebrow rather than as a badge on
-                      the right: it is the same fact the bar at the top of the
-                      page states, and a second pill on every unit is clutter
-                      once a course runs to four or five of them. Units are
-                      counted over this skill's lessons only — a unit may also
-                      hold lessons from skills the learner has not registered,
-                      and those are not this page's to report on. */}
-                  <UIUnitHeader
-                    eyebrow={`Unit ${unit.unitNumber} · ${unitDone}/${unit.lessons.length} done`}
-                    title={unitTitle(unit.title)}
-                    color={unitColor(unit.unitNumber)}
-                  />
-                  <UISkillPath
-                    items={items}
-                    startLabel={done ? "Continue" : "Start"}
-                    onSelect={(ref) => {
-                      const lesson = unit.lessons.find((l) => l.ref === ref);
-                      if (lesson) start(lesson.levelNumber);
-                    }}
-                  />
-                </section>
-              );
-            })}
-          </div>
+          {practice.length > 0 && (
+            /* Its own heading behind a rule, inside the same card: practice is a
+               second way into this skill, not a second skill. The rule is what
+               stops the path reading as if it simply carries on. */
+            <div className="mt-8 pt-6 border-t border-line">
+              <SectionIntro
+                icon={<Repeat className="w-5 h-5" />}
+                tint="bg-violet-50 dark:bg-violet-950/50 text-violet-600"
+                title="Practice"
+                blurb="The same activities with the hints, voice and explanations taken away — for when you already know the technique. Open any of them, in any order."
+              />
+
+              <div className="mt-4">
+                <UIUnitHeader
+                  eyebrow={`Practice · ${practiceDone}/${practice.length} done`}
+                  title="All techniques"
+                  color="bg-violet-600"
+                />
+                {pathFor(practice, { practice: true })}
+              </div>
+            </div>
+          )}
         </section>
 
         <aside className={`${themeSystem.card("default")} p-5`}>

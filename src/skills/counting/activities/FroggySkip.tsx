@@ -199,6 +199,7 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
 
   const round = useSkillRound({
     koda,
+    resumable: practising,
     totalQuestions: total,
     levelNumber: lesson?.levelNumber ?? 1,
     // The lesson's own spoken instruction, said once as the round opens.

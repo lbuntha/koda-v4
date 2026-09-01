@@ -237,6 +237,7 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
 
   const round = useSkillRound({
     koda,
+    resumable: practising,
     totalQuestions,
     levelNumber: lesson?.levelNumber ?? 1,
     intro: practising ? undefined : copy.audioPrompt,

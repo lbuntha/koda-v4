@@ -104,6 +104,30 @@ export function getLessonByLevel(
 
 export const totalLessonCount = (viewer?: Viewer): number => getCourseLessons(viewer).length;
 
+/**
+ * Whether a lesson is practice rather than teaching.
+ *
+ * Read from `params.question.practice` — the very flag the activity reads to
+ * turn the scaffolding off (`kit/practice.ts`) — so what the path calls
+ * practice and what the round plays as practice can never disagree. Matching on
+ * the title would put that decision in two places and break the first time one
+ * of them is reworded.
+ */
+export const isPracticeLesson = (lesson: Lesson): boolean =>
+  (lesson.params?.question as { practice?: boolean } | undefined)?.practice === true;
+
+/**
+ * A practice lesson's name, for a surface that has already said "practice".
+ *
+ * The lessons are titled "Practice: Number Bonds" because in the flat course
+ * list that word is the only thing telling them apart from the lesson that
+ * teaches number bonds. Under a heading that says Practice, or on a card whose
+ * whole design says it, the word is there twice — and it is the half that
+ * carries no information, so it is the half that goes.
+ */
+export const practiceTitle = (title: string): string =>
+  title.replace(/^practice\s*[:.\-\u2013\u2014]\s*/i, "");
+
 /** Every lesson one skill contributes, in course order. */
 export function getSkillLessons(skillId: string, viewer?: Viewer): ResolvedLesson[] {
   return getCourseLessons(viewer).filter((l) => l.skillId === skillId);

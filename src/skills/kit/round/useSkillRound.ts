@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+
+import { PracticeProgressAPI } from "../../../lib/practiceProgress";
 import type { KodaSDK, SkillResult } from "../../types";
 import type { ErrorKind, SupportKind } from "../../../lib/learning/events";
 import { scoreRound, type RoundScore } from "./scoreRound";
@@ -77,6 +79,21 @@ export interface UseSkillRoundOptions {
    * the question and waits for `describeQuestion`.
    */
   deferPresent?: boolean;
+  /**
+   * Remember how far the child got, and pick up there next time.
+   *
+   * Set by practice, and by nothing else. A teaching lesson opened again should
+   * start at the beginning — the questions are scaffolding for a technique, and
+   * skipping the first six because a tablet was put down mid-round would hand a
+   * child the hardest end of a lesson they had not finished the easy end of.
+   * Practice is the opposite case: eight questions the child chose to sit, and
+   * silently making them redo the first six is the app losing their work.
+   *
+   * Position only. Nothing about *which* questions were asked is kept, because
+   * practice draws fresh numbers every time — resuming at question 7 means
+   * "two left", not "these two again".
+   */
+  resumable?: boolean;
 }
 
 /**
@@ -142,11 +159,23 @@ export function useSkillRound({
   entry = "path",
   intro,
   deferPresent = false,
+  resumable = false,
 }: UseSkillRoundOptions): RoundController {
-  const [index, setIndex] = useState(1);
-  const [question, setQuestion] = useState<RoundQuestion>(() => nextQuestion(1));
+  /*
+   * Read once, on mount. Reading it on each render would re-enter the round at
+   * the saved question every time this component re-rendered, and the save
+   * below writes the very key it reads.
+   */
+  const resumedRef = useRef(
+    resumable ? PracticeProgressAPI.get(levelNumber) : undefined,
+  );
+  const resumed = resumedRef.current;
+  const startAt = resumed ? resumed.answered + 1 : 1;
+
+  const [index, setIndex] = useState(startAt);
+  const [question, setQuestion] = useState<RoundQuestion>(() => nextQuestion(startAt));
   const [attempt, setAttempt] = useState(1);
-  const [firstTryCount, setFirstTryCount] = useState(0);
+  const [firstTryCount, setFirstTryCount] = useState(resumed?.correctFirstTry ?? 0);
   const [feedback, setFeedback] = useState<RoundFeedback | null>(null);
   const [score, setScore] = useState<RoundScore | null>(null);
   /** Which hint rung is showing on the open question. 0 is closed. */
@@ -211,8 +240,8 @@ export function useSkillRound({
     openedRef.current = true;
 
     koda.learning.startLesson(entry, levelNumber);
-    koda.log("START_LEVEL", `Round opened at level ${levelNumber}`, levelNumber, 1);
-    present(question, 1);
+    koda.log("START_LEVEL", `Round opened at level ${levelNumber}`, levelNumber, startAt);
+    present(question, startAt);
     // Not in a preview: a teacher checking a lesson does not need it read out.
     if (intro && entry !== "preview" && koda.config.isEnabled("audio_speech", true)) {
       void koda.speech.say(intro);
@@ -260,9 +289,28 @@ export function useSkillRound({
     [feedback, question, koda, levelNumber, index],
   );
 
+  /* Written after each answered question, so an interrupted run loses at most
+     the question the child was on. */
+  const remember = useCallback(
+    (answered: number, correctFirstTry: number) => {
+      if (!resumable) return;
+      PracticeProgressAPI.save({
+        levelNumber,
+        answered,
+        correctFirstTry,
+        total: totalQuestions,
+      });
+    },
+    [resumable, levelNumber, totalQuestions],
+  );
+
   const finish = useCallback(
     (correctFirstTry: number) => {
       const result = scoreRound({ correctFirstTry, total: totalQuestions });
+      // Finished, so there is nothing to come back to. Cleared before anything
+      // that can unmount this, or a resumed run would finish and still offer
+      // itself as unfinished.
+      if (resumable) PracticeProgressAPI.clear(levelNumber);
       // Close the log first: the host may unmount the activity the moment it
       // hears the result, and the round's own event would go with it.
       koda.learning.completeLesson({ stars: result.stars, xpEarned: result.xp });
@@ -282,7 +330,7 @@ export function useSkillRound({
         accuracy: correctFirstTry / Math.max(1, totalQuestions),
       });
     },
-    [koda, levelNumber, totalQuestions],
+    [koda, levelNumber, totalQuestions, resumable],
   );
 
   const advance = useCallback(() => {
@@ -303,6 +351,8 @@ export function useSkillRound({
       return;
     }
 
+    remember(index, nextFirstTry);
+
     const n = index + 1;
     const q = fns.current.nextQuestion(n);
     missedRef.current = false;
@@ -317,7 +367,7 @@ export function useSkillRound({
     setQuestion(q);
     koda.log("NEXT_QUESTION", `Moving to question ${n}`, levelNumber, n);
     present(q, n);
-  }, [feedback, firstTryCount, index, totalQuestions, finish, koda, levelNumber, present]);
+  }, [feedback, firstTryCount, index, totalQuestions, finish, koda, levelNumber, present, remember]);
 
   const useSupport = useCallback(
     (kind: SupportKind, hintLevel?: number) => {
@@ -362,6 +412,8 @@ export function useSkillRound({
   };
 
   const restart = useCallback(() => {
+    // Starting again from the top is a decision to drop the saved position.
+    if (resumable) PracticeProgressAPI.clear(levelNumber);
     const q = fns.current.nextQuestion(1);
     missedRef.current = false;
     deepestHintRef.current = 0;
@@ -374,7 +426,7 @@ export function useSkillRound({
     setScore(null);
     koda.learning.startLesson(entry, levelNumber);
     present(q, 1);
-  }, [koda, entry, levelNumber, present]);
+  }, [koda, entry, levelNumber, present, resumable]);
 
   return {
     index,

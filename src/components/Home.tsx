@@ -1,9 +1,10 @@
 import React from "react";
 import { ArrowRight, BookOpen, Flame, Star, Target, Zap } from "lucide-react";
-import { getCourseLessons, isUnlocked, satisfiedConcepts } from "../curriculum";
+import { getCourseLessons, isUnlocked, practiceTitle, satisfiedConcepts } from "../curriculum";
 import type { SkillCatalogEntry } from "../lib/skillCatalog";
 import { buildCatalog } from "../skills/catalog";
 import { recommendNow, type TodayPick } from "../lib/learning/recommend";
+import { PracticeProgressAPI } from "../lib/practiceProgress";
 import { useSkillRegistrations } from "../lib/skillRegistrationApi";
 import { useSkillCatalog } from "../lib/useSkillCatalog";
 import { themeSystem } from "../lib/themeSystem";
@@ -297,11 +298,36 @@ export const Home: React.FC<HomeProps> = ({
   const today: TodayPick[] = recommendNow(
     { ...catalog, lessons: catalog.lessons.filter((l) => registeredIds.has(l.skillId)) },
     {
+      /* The band holds three. An unfinished run takes one of those places
+         rather than adding a fourth, so Today stays a short list of choices
+         instead of growing every time a round is interrupted. */
       limit: 3,
       completed: completedRefs,
       isSatisfied: (conceptKey) => satisfied.has(conceptKey),
     },
   );
+
+  /*
+   * A practice run the child walked away from part-way.
+   *
+   * Not routed through the recommender: the ladder decides what a child should
+   * do next from what they have mastered, and this is not that question. It is
+   * work the child started and the app is holding for them, which outranks any
+   * suggestion — so it is offered first, and it is the only practice that
+   * appears on this band at all.
+   *
+   * Read on every render rather than memoised: it changes while the child is
+   * inside a lesson, and this page is what they come back to.
+   */
+  const byLevel = new Map(lessons.map((lesson) => [lesson.levelNumber, lesson]));
+  const interrupted = PracticeProgressAPI.all()
+    .map((saved) => ({ saved, lesson: byLevel.get(saved.levelNumber) }))
+    .find(
+      (entry): entry is { saved: (typeof entry)["saved"]; lesson: NonNullable<(typeof entry)["lesson"]> } =>
+        /* A skill the learner has since un-registered, or one now out of their
+           age band, leaves a saved position with no lesson behind it. */
+        entry.lesson !== undefined && registeredIds.has(entry.lesson.skillId),
+    );
 
   const readyCountFor = (skillId: string): number =>
     lessons.filter(
@@ -357,9 +383,28 @@ export const Home: React.FC<HomeProps> = ({
                 Today
               </h1>
 
-              {today.length ? (
+              {today.length || interrupted ? (
                 <div className="mt-3 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  {today.map((pick) => {
+                  {/* First, because it is the child's own unfinished work rather
+                      than a suggestion — and because the whole reason to keep
+                      the position is that they can find their way back to it. */}
+                  {interrupted && (
+                    <UILessonCard
+                      key={`resume-${interrupted.saved.levelNumber}`}
+                      title={practiceTitle(interrupted.lesson.title)}
+                      subject={byId.get(interrupted.lesson.skillId)?.name ?? interrupted.lesson.skillId}
+                      message={`You got to question ${interrupted.saved.answered} of ${interrupted.saved.total}.`}
+                      iconName={interrupted.lesson.iconName}
+                      iconTone={interrupted.lesson.iconTone}
+                      tone="resume"
+                      actionLabel="Carry on"
+                      onClick={() => {
+                        playSound("pop");
+                        onStartLesson(interrupted.lesson.levelNumber);
+                      }}
+                    />
+                  )}
+                  {(interrupted ? today.slice(0, 2) : today).map((pick) => {
                     const lesson = byRef.get(pick.lesson.ref);
                     return (
                       <UILessonCard

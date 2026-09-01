@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { expectStandardRound, renderActivity, type ActivityHarness } from "../kit/testing";
 import { skill } from ".";
+import { PracticeProgressAPI } from "../../lib/practiceProgress";
 
 /**
  * Addition's behaviour tests — one driver per engine.
@@ -884,3 +885,84 @@ describe("what Koda says about a move that was not allowed", () => {
   });
 });
 
+
+describe("a practice run that was interrupted", () => {
+  /** Answer the open frame question correctly and move past the praise. */
+  const answerOne = async (h: ActivityHarness) => {
+    const total = Number(expected(h));
+    for (let guard = 0; guard < 20 && filledSpaces(h) < total; guard += 1) {
+      const next = emptySpaces(h)[0];
+      if (!next) break;
+      await h.press(next);
+    }
+    await h.press("Check");
+    await h.press(/^(next|finish|continue)$/i);
+  };
+
+  /** Which question number the activity last put on screen. */
+  const openQuestion = (h: ActivityHarness): number => {
+    const last = h.koda.only("learning.present").at(-1);
+    return (last?.args[0] as { index: number }).index;
+  };
+
+  const practising = {
+    params: { mode: "ten", addendRange: [2, 4], sumMax: 8, practice: true, questionsPerRound: 4 },
+    level: 53,
+  };
+
+  beforeEach(() => {
+    localStorage.clear();
+    PracticeProgressAPI.clearAll();
+  });
+
+  it("comes back to the question after the last one answered", async () => {
+    const first = renderActivity(frames, practising);
+    await answerOne(first);
+    await answerOne(first);
+    expect(PracticeProgressAPI.get(53)).toMatchObject({ answered: 2, total: 4 });
+    // Put down mid-round, the way a child closes a tablet.
+    first.unmount();
+
+    const again = renderActivity(frames, practising);
+    expect(openQuestion(again), "reopened at the wrong question").toBe(3);
+    again.unmount();
+  });
+
+  it("carries the score across the break, rather than scoring the tail alone", async () => {
+    // Two right before the break and two after is a clean round of four. Losing
+    // the first two would score it 2/4 and cost the child a star for having put
+    // the tablet down.
+    const first = renderActivity(frames, practising);
+    await answerOne(first);
+    await answerOne(first);
+    first.unmount();
+
+    const again = renderActivity(frames, practising);
+    await answerOne(again);
+    await answerOne(again);
+    await again.settle();
+    expect(again.results, "the resumed round did not finish").toHaveLength(1);
+    expect(again.results[0].stars, "a resumed clean round lost a star").toBe(3);
+    again.unmount();
+  });
+
+  it("has nothing left to resume once the round is finished", async () => {
+    const h = renderActivity(frames, practising);
+    for (let n = 0; n < 4; n += 1) await answerOne(h);
+    expect(PracticeProgressAPI.get(53), "a finished run still offers itself").toBeUndefined();
+    h.unmount();
+  });
+
+  it("keeps no position for a teaching lesson", async () => {
+    // Teaching is not resumable on purpose: its questions build a technique in
+    // order, so dropping a child back at question 3 hands them the hard end of
+    // a lesson they have not done the easy end of.
+    const h = renderActivity(frames, {
+      params: { mode: "ten", addendRange: [2, 4], sumMax: 8, questionsPerRound: 4 },
+      level: 9,
+    });
+    await answerOne(h);
+    expect(PracticeProgressAPI.get(9)).toBeUndefined();
+    h.unmount();
+  });
+});
