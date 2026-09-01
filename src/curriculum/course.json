@@ -179,6 +179,18 @@
         "addition/cascading-regrouping",
         "addition/standard-algorithm"
       ]
+    },
+    {
+      "id": "u15",
+      "unitNumber": 15,
+      "title": "Unit 15: Chains and Totals",
+      "description": "Whole lists of numbers, and the orders that make them easy",
+      "icon": "🧮",
+      "lessons": [
+        "addition/add-three-or-more",
+        "addition/compatible-numbers",
+        "addition/running-total"
+      ]
     }
   ]
 }

@@ -2221,6 +2221,166 @@
           7,
           9
         ]
+      },
+      {
+        "id": "add-three-or-more",
+        "title": "Three or More",
+        "concept": "Adding a Whole List",
+        "conceptKey": "multi-addend",
+        "requires": [
+          "friendly-pairs"
+        ],
+        "activity": "addition/multi",
+        "params": {
+          "level": 40,
+          "question": {
+            "mode": "chain",
+            "count": 4,
+            "addendRange": [
+              2,
+              19
+            ],
+            "totalMax": 60,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "chain_board",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Chains",
+            "shortDesc": "Add a list of numbers in whatever order is easiest",
+            "targetObjective": "Add them in whatever order is easiest — the total is the same.",
+            "stepByStep": [
+              "Look at all the numbers before you start.",
+              "Tap two to put them together, and keep going.",
+              "The order you choose does not change the total."
+            ],
+            "kidTip": "Add them in whatever order is easiest — the total is the same.",
+            "audioPrompt": "Three or more! Add them in whatever order suits you best.",
+            "prompts": {
+              "default": "Add these in whatever order is easiest."
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "📋",
+        "iconName": "waves",
+        "iconTone": "cyan",
+        "pedagogyTip": "With three numbers, order becomes a decision rather than a given. That freedom is what every later shortcut is built on.",
+        "standards": [
+          "CCSS.1.OA.A.2",
+          "CCSS.2.NBT.B.6"
+        ],
+        "trajectoryLevel": "multi-addend",
+        "ageBand": [
+          6,
+          9
+        ]
+      },
+      {
+        "id": "compatible-numbers",
+        "title": "Compatible Numbers",
+        "concept": "Finding Every Friendly Pair",
+        "conceptKey": "compatible-numbers",
+        "requires": [
+          "multi-addend"
+        ],
+        "activity": "addition/multi",
+        "params": {
+          "level": 41,
+          "question": {
+            "mode": "compatible",
+            "count": 5,
+            "target": 10,
+            "pairsWanted": 2,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "chain_board",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Chains",
+            "shortDesc": "Find both pairs that make ten before adding what is left",
+            "targetObjective": "Find every pair that makes ten first, then add the rest.",
+            "stepByStep": [
+              "There is more than one friendly pair hiding here.",
+              "Put each pair together before you add anything else.",
+              "Two tens and a leftover is an easy sum."
+            ],
+            "kidTip": "Find every pair that makes ten first, then add the rest.",
+            "audioPrompt": "Compatible numbers! More than one pair makes ten. Find them all.",
+            "prompts": {
+              "default": "Find the pairs that make {target}, then add the rest."
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "🧲",
+        "iconName": "waves",
+        "iconTone": "cyan",
+        "pedagogyTip": "Scanning a whole list for what fits together — rather than working left to right — is the habit this lesson is really after.",
+        "standards": [
+          "CCSS.2.NBT.B.6"
+        ],
+        "trajectoryLevel": "multi-addend",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "running-total",
+        "title": "Keep a Running Total",
+        "concept": "One Number, Carried Along",
+        "conceptKey": "running-total",
+        "requires": [
+          "multi-addend"
+        ],
+        "activity": "addition/multi",
+        "params": {
+          "level": 42,
+          "question": {
+            "mode": "running",
+            "count": 4,
+            "addendRange": [
+              2,
+              15
+            ],
+            "totalMax": 50,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "chain_board",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Chains",
+            "shortDesc": "Add one number at a time, writing the total as you go",
+            "targetObjective": "Keep the total in your head and add the next one to it.",
+            "stepByStep": [
+              "Start with the first number.",
+              "Add the second, and write what you are holding.",
+              "Keep going — each answer feeds the next."
+            ],
+            "kidTip": "Keep the total in your head and add the next one to it.",
+            "audioPrompt": "Keep a running total! Add one number at a time and hold the answer.",
+            "prompts": {
+              "default": "Add them one at a time, keeping the total as you go."
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🧮",
+        "iconName": "waves",
+        "iconTone": "cyan",
+        "pedagogyTip": "A running total is how a long list is actually added. Writing each step makes the place a mistake entered findable.",
+        "standards": [
+          "CCSS.2.NBT.B.6"
+        ],
+        "trajectoryLevel": "running-total",
+        "ageBand": [
+          7,
+          9
+        ]
       }
     ]
   },
