@@ -433,7 +433,12 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
         <div className={`${SCENE} p-4 sm:p-6 space-y-4`}>
           {/* The yard: one column per place, so a block can only ever sit where
               its value belongs. */}
-          <div className="grid grid-cols-3 gap-2 sm:gap-4 min-h-[150px]">
+          {/* Three columns of blocks, and a hundred-flat is 104px wide on its
+              own — on a 360px screen that is the whole width once the scene's
+              padding is counted. The yard scrolls sideways rather than the
+              page, which is the rule for any content this wide. */}
+          <div className="overflow-x-auto -mx-1 px-1">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 min-h-[150px] min-w-[19rem]">
             {columns.map((p) => (
               <div key={p} className="flex flex-col items-center gap-2">
                 <span className="text-[11px] font-bold uppercase tracking-wide text-ink/45">
@@ -457,8 +462,9 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
                   ))}
                 </div>
                 <span className={`text-lg font-black tabular-nums ${TOTAL.text}`}>{built[p]}</span>
-              </div>
-            ))}
+                </div>
+              ))}
+            </div>
           </div>
 
           {showsTotal && (
