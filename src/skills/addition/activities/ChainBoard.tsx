@@ -181,11 +181,13 @@ export function chainHints(
 /** One number on the board. Held state is a ring and a lift, never colour alone. */
 const ChipButton: React.FC<{
   chip: Chip;
+  /** 1-based place on the board, so two chips of the same value are tellable. */
+  position: number;
   held: boolean;
   onTap: () => void;
   delay: number;
   disabled: boolean;
-}> = ({ chip, held, onTap, delay, disabled }) => (
+}> = ({ chip, position, held, onTap, delay, disabled }) => (
   <motion.button
     type="button"
     onClick={onTap}
@@ -196,7 +198,10 @@ const ChipButton: React.FC<{
     transition={{ ...SPRING.enter, delay }}
     whileHover={disabled ? undefined : { scale: 1.06, y: -2 }}
     whileTap={disabled ? undefined : { scale: 0.92 }}
-    aria-label={`Chip ${chip.value}`}
+    /* Position as well as value: a board can hold two fives, and "Chip 5"
+       twice leaves a screen-reader user with no way to say which one they
+       mean — nor any way to pick the second. */
+    aria-label={`Chip ${position}, value ${chip.value}`}
     aria-pressed={held}
     className={`${CHIP} rounded-2xl text-2xl font-black tabular-nums flex items-center justify-center border-2 ${
       held
@@ -418,6 +423,7 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
                 <ChipButton
                   key={chip.id}
                   chip={chip}
+                  position={i + 1}
                   held={held === chip.id}
                   disabled={Boolean(round.feedback)}
                   onTap={() => tapChip(chip)}

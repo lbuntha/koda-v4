@@ -484,10 +484,13 @@ describe("the fact deck plays a standard round", () => {
 });
 
 describe("the chain board plays a standard round", () => {
+  const chipsOn = (h: ActivityHarness) => h.buttons().filter((b) => /^Chip \d+, value \d+$/.test(b));
+  const valueOf = (label: string) => Number(/value (\d+)/.exec(label)![1]);
+
   /** Merge every chip into one, two taps at a time. */
   const mergeAll = async (h: ActivityHarness) => {
     for (let guard = 0; guard < 10; guard += 1) {
-      const chips = h.buttons().filter((b) => /^Chip \d+$/.test(b));
+      const chips = chipsOn(h);
       if (chips.length < 2) break;
       await h.press(chips[0]);
       await h.press(chips[1]);
@@ -516,17 +519,17 @@ describe("the chain board plays a standard round", () => {
 
   it("two chips become one that says what it became", async () => {
     const h = renderActivity(multi, { params: { mode: "pairs", count: 4 } }, );
-    const before = h.buttons().filter((b) => /^Chip \d+$/.test(b));
+    const before = chipsOn(h);
     expect(before).toHaveLength(4);
     const [first, second] = before;
-    const merged = Number(first.replace("Chip ", "")) + Number(second.replace("Chip ", ""));
+    const merged = valueOf(first) + valueOf(second);
 
     await h.press(first);
     await h.press(second);
 
-    const after = h.buttons().filter((b) => /^Chip \d+$/.test(b));
+    const after = chipsOn(h);
     expect(after).toHaveLength(3);
-    expect(after).toContain(`Chip ${merged}`);
+    expect(after.map(valueOf)).toContain(merged);
     // The ten is the reason the pair was worth finding, so it is heard too.
     expect(h.koda.only("speech.say").map((c) => c.args[0])).toContain(
       ["zero","one","two","three","four","five","six","seven","eight","nine","ten",

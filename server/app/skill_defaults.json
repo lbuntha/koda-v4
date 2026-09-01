@@ -1645,6 +1645,372 @@
           7,
           9
         ]
+      },
+      {
+        "id": "add-multiples-of-10",
+        "title": "Adding Tens",
+        "concept": "Tens Added Like Ones",
+        "conceptKey": "tens-adder",
+        "requires": [
+          "base-ten-adder"
+        ],
+        "activity": "addition/base10",
+        "params": {
+          "level": 29,
+          "question": {
+            "mode": "multiples_ten",
+            "addendRange": [
+              10,
+              90
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "base10_play",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Place Value",
+            "shortDesc": "Add whole tens by building the answer out of rods",
+            "targetObjective": "Adding tens is like adding ones, only bigger.",
+            "stepByStep": [
+              "Both numbers are whole tens, so only rods are offered.",
+              "Count the rods you need and drop them in.",
+              "Three rods and four rods is seven rods — seventy."
+            ],
+            "kidTip": "Adding tens is like adding ones, only bigger.",
+            "audioPrompt": "Adding tens! Three tens and four tens is seven tens.",
+            "prompts": {
+              "default": "{a} plus {b}. Build the answer out of tens."
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "🔟",
+        "iconName": "boxes",
+        "iconTone": "purple",
+        "pedagogyTip": "Once ten is a unit, adding tens is the same work as adding ones. That transfer is the point, and it is why the rods are all the tray offers.",
+        "standards": [
+          "CCSS.1.NBT.C.4",
+          "CCSS.2.NBT.B.8"
+        ],
+        "trajectoryLevel": "unitiser-ten",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "add-multiples-of-100",
+        "title": "Adding Hundreds",
+        "concept": "Hundreds Added Like Ones",
+        "conceptKey": "hundreds-adder",
+        "requires": [
+          "tens-adder"
+        ],
+        "activity": "addition/base10",
+        "params": {
+          "level": 30,
+          "question": {
+            "mode": "multiples_hundred",
+            "addendRange": [
+              100,
+              900
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "base10_play",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Place Value",
+            "shortDesc": "Add whole hundreds by building the answer out of flats",
+            "targetObjective": "Adding hundreds is the same move, one place up.",
+            "stepByStep": [
+              "Both numbers are whole hundreds, so only flats are offered.",
+              "Count the flats you need.",
+              "Three flats and four flats is seven flats — seven hundred."
+            ],
+            "kidTip": "Adding hundreds is the same move, one place up.",
+            "audioPrompt": "Adding hundreds! The same move as adding tens, one place up.",
+            "prompts": {
+              "default": "{a} plus {b}. Build the answer out of hundreds."
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "💯",
+        "iconName": "boxes",
+        "iconTone": "indigo",
+        "pedagogyTip": "A child who meets this as the same move has generalised the unit idea; one who meets it as a new fact has not.",
+        "standards": [
+          "CCSS.2.NBT.B.8"
+        ],
+        "trajectoryLevel": "unitiser-hundred",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "add-tens-then-ones",
+        "title": "Tens, Then Ones",
+        "concept": "Splitting a Jump into Two",
+        "conceptKey": "jump-strategy",
+        "requires": [
+          "open-number-line"
+        ],
+        "activity": "addition/numberline",
+        "params": {
+          "level": 31,
+          "question": {
+            "mode": "jump_tens_ones",
+            "addendRange": [
+              11,
+              88
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "numberline_play",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Number Line",
+            "shortDesc": "Take one big jump of tens and then a small one of ones",
+            "targetObjective": "Add the tens first, then the ones.",
+            "stepByStep": [
+              "Break the second number into its tens and its ones.",
+              "Jump the tens — it is one big, easy jump.",
+              "Then jump the ones, and say where you landed."
+            ],
+            "kidTip": "Add the tens first, then the ones.",
+            "audioPrompt": "Tens then ones! One big jump, then a small one.",
+            "prompts": {
+              "default": "{a} plus {b}. Jump the tens, then the ones."
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "🦘",
+        "iconName": "footprints",
+        "iconTone": "cyan",
+        "pedagogyTip": "Two jumps instead of one is what makes a two-digit addition manageable in the head, and the open line is where that becomes visible.",
+        "standards": [
+          "CCSS.2.NBT.B.5"
+        ],
+        "trajectoryLevel": "jump-strategy",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "add-hundreds-tens-ones",
+        "title": "Hundreds, Tens and Ones",
+        "concept": "Three Columns at Once",
+        "conceptKey": "place-value-builder",
+        "requires": [
+          "place-value-builder"
+        ],
+        "activity": "addition/chart",
+        "params": {
+          "level": 32,
+          "question": {
+            "mode": "chart_three",
+            "addendRange": [
+              111,
+              888
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "chart_play",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Place Value",
+            "shortDesc": "Add three-digit numbers one column at a time",
+            "targetObjective": "Add each column on its own. Ones with ones, tens with tens.",
+            "stepByStep": [
+              "Each number fills three columns now.",
+              "Add the ones, then the tens, then the hundreds.",
+              "Write each answer under the column it came from."
+            ],
+            "kidTip": "Add each column on its own. Ones with ones, tens with tens.",
+            "audioPrompt": "Hundreds, tens and ones! Add each column on its own.",
+            "prompts": {
+              "default": "{a} plus {b}. Fill in the total, one column at a time."
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "📊",
+        "iconName": "layers",
+        "iconTone": "indigo",
+        "pedagogyTip": "A third column adds no new idea, which is exactly what a child should discover: the method already worked.",
+        "standards": [
+          "CCSS.2.NBT.B.7"
+        ],
+        "trajectoryLevel": "place-value-builder",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "expanded-form",
+        "title": "Expanded Form",
+        "concept": "Writing a Number as Its Parts",
+        "conceptKey": "expanded-form-adder",
+        "requires": [
+          "place-value-builder"
+        ],
+        "activity": "addition/chart",
+        "params": {
+          "level": 33,
+          "question": {
+            "mode": "expanded",
+            "addendRange": [
+              111,
+              888
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "chart_play",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Written Strategies",
+            "shortDesc": "Write each number as hundreds plus tens plus ones, then add",
+            "targetObjective": "Every number is some hundreds, some tens and some ones.",
+            "stepByStep": [
+              "Each number is written out as the values it is made of.",
+              "Add the hundreds together, then the tens, then the ones.",
+              "Write each column's answer as its full value — forty, not four."
+            ],
+            "kidTip": "Every number is some hundreds, some tens and some ones.",
+            "audioPrompt": "Expanded form! Write each number as hundreds, tens and ones.",
+            "prompts": {
+              "default": "{a} plus {b}, written out in hundreds, tens and ones."
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "🧾",
+        "iconName": "layers",
+        "iconTone": "indigo",
+        "pedagogyTip": "Writing forty rather than four is the whole difficulty. Expanded form makes the value of a digit impossible to ignore.",
+        "standards": [
+          "CCSS.2.NBT.A.3",
+          "CCSS.2.NBT.B.7"
+        ],
+        "trajectoryLevel": "place-value-builder",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "partial-sums",
+        "title": "Partial Sums",
+        "concept": "Keeping Each Column's Answer",
+        "conceptKey": "partial-sums",
+        "requires": [
+          "expanded-form-adder"
+        ],
+        "activity": "addition/chart",
+        "params": {
+          "level": 34,
+          "question": {
+            "mode": "partial_sums",
+            "addendRange": [
+              11,
+              89
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "chart_play",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Written Strategies",
+            "shortDesc": "Add each column, keep both answers, then put them together",
+            "targetObjective": "Add one column at a time, and keep each answer before putting them together.",
+            "stepByStep": [
+              "Add the tens and write that answer down.",
+              "Add the ones and write that one down too.",
+              "Put the two answers together for the total."
+            ],
+            "kidTip": "Add one column at a time, and keep each answer before putting them together.",
+            "audioPrompt": "Partial sums! Add each column, keep both answers, then add those.",
+            "prompts": {
+              "default": "{a} plus {b}. Add the tens, add the ones, then put them together."
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "➗",
+        "iconName": "layers",
+        "iconTone": "indigo",
+        "pedagogyTip": "Nothing is carried here — the partials do that job in the open, which is why this comes before the algorithm that hides it.",
+        "standards": [
+          "CCSS.2.NBT.B.7"
+        ],
+        "trajectoryLevel": "partial-sums",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "left-to-right",
+        "title": "Left to Right",
+        "concept": "One Running Total, Adjusted",
+        "conceptKey": "left-to-right-adder",
+        "requires": [
+          "partial-sums"
+        ],
+        "activity": "addition/chart",
+        "params": {
+          "level": 35,
+          "question": {
+            "mode": "left_right",
+            "addendRange": [
+              11,
+              89
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "chart_play",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Written Strategies",
+            "shortDesc": "Start with the biggest column and let each one after it adjust the total",
+            "targetObjective": "Start with the biggest column, then let each one after it change the number you are holding.",
+            "stepByStep": [
+              "Add the tens first and hold that number.",
+              "Add the ones to the number you are holding.",
+              "You never write two answers down — only the one that grows."
+            ],
+            "kidTip": "Start with the biggest column, then let each one after it change the number you are holding.",
+            "audioPrompt": "Left to right! Start with the tens and let the ones change what you are holding.",
+            "prompts": {
+              "default": "{a} plus {b}. Start with the biggest column and work right."
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "👉",
+        "iconName": "layers",
+        "iconTone": "indigo",
+        "pedagogyTip": "This is how most people add in their heads, and it is worth naming: one number that grows, rather than parts collected and totalled at the end.",
+        "standards": [
+          "CCSS.2.NBT.B.9"
+        ],
+        "trajectoryLevel": "left-to-right-adder",
+        "ageBand": [
+          8,
+          9
+        ]
       }
     ]
   },

@@ -141,6 +141,31 @@
         "addition/friendly-pairs",
         "addition/compensation"
       ]
+    },
+    {
+      "id": "u12",
+      "unitNumber": 12,
+      "title": "Unit 12: Tens and Hundreds",
+      "description": "Whole tens, whole hundreds, and the jumps that use them",
+      "icon": "🔟",
+      "lessons": [
+        "addition/add-multiples-of-10",
+        "addition/add-multiples-of-100",
+        "addition/add-tens-then-ones",
+        "addition/add-hundreds-tens-ones"
+      ]
+    },
+    {
+      "id": "u13",
+      "unitNumber": 13,
+      "title": "Unit 13: Written Strategies",
+      "description": "Three ways of writing an addition down, and what each one keeps",
+      "icon": "🧾",
+      "lessons": [
+        "addition/expanded-form",
+        "addition/partial-sums",
+        "addition/left-to-right"
+      ]
     }
   ]
 }

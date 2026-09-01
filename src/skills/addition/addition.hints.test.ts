@@ -27,7 +27,11 @@ import {
   readyToBundle,
   specFor as blockSpec,
 } from "./activities/BlockYard";
-import { buildQuestion as buildDesk, specFor as deskSpec } from "./activities/PlaceValueDesk";
+import {
+  buildQuestion as buildDesk,
+  deskHints,
+  specFor as deskSpec,
+} from "./activities/PlaceValueDesk";
 import { buildQuestion as buildChain, chainHints } from "./activities/ChainBoard";
 import {
   buildQuestion as buildFact,
@@ -551,6 +555,30 @@ describe("the chain board keeps each mode's shape", () => {
     // Once the pair is gone the hint has to stop promising one.
     const [, after] = chainHints(q, { chips: [{ id: "m", value: q.sum, merged: true }], step: 0 });
     expect(after).toContain("One chip left");
+  });
+});
+
+describe("left to right is not partial sums under another name", () => {
+  it("keeps one number that grows, rather than parts totalled at the end", () => {
+    const seen = new Set<string>();
+    const lr = buildDesk({ mode: "left_right", addendRange: [47, 47] }, 1, seen);
+    const ps = buildDesk({ mode: "partial_sums", addendRange: [47, 47] }, 2, new Set());
+
+    // Two boxes, and the second one is the whole answer — not a part of it.
+    expect(lr.blanks).toHaveLength(2);
+    expect(lr.answers).toEqual([80, 94]);
+    expect(lr.answers.at(-1)).toBe(lr.sum);
+
+    // Partial sums keeps both columns and adds them afterwards.
+    expect(ps.blanks).toHaveLength(4);
+    expect(ps.answers.slice(0, 2)).toEqual([80, 14]);
+  });
+
+  it("says what you are holding, not what the parts were", () => {
+    const seen = new Set<string>();
+    const q = buildDesk({ mode: "left_right", addendRange: [47, 47] }, 1, seen);
+    const [, second] = deskHints(q, { entries: { "run-1": "80" } });
+    expect(second).toContain("holding 80");
   });
 });
 

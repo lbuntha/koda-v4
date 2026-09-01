@@ -164,11 +164,14 @@ export const buildQuestion = (
     };
   }
 
-  if (mode === "partial_sums" || mode === "left_right") {
-    const da = digitsOf(a);
-    const db = digitsOf(b);
-    const tensPart = (da.tens + db.tens) * 10;
-    const onesPart = da.ones + db.ones;
+  const da = digitsOf(a);
+  const db = digitsOf(b);
+  const tensPart = (da.tens + db.tens) * 10;
+  const onesPart = da.ones + db.ones;
+
+  if (mode === "partial_sums") {
+    // Each column worked out on its own and *kept*, then put together at the
+    // end. Nothing is carried; the partials do that job in the open.
     return {
       ...base,
       places,
@@ -182,6 +185,32 @@ export const buildQuestion = (
       blanks: ["tens", "ones", "sum-t", "sum-o"],
       answers: [tensPart, onesPart, digitsOf(sum).tens, digitsOf(sum).ones],
       expected: `${tensPart},${onesPart},${digitsOf(sum).tens},${digitsOf(sum).ones}`,
+      itemCount: sum,
+    };
+  }
+
+  if (mode === "left_right") {
+    /*
+     * One number that grows, rather than partials that are added up at the end.
+     *
+     * That is the whole difference from partial sums, and it is the lesson: you
+     * start with the biggest column, and every column after it *adjusts* the
+     * number you are already holding. Written with the same rows as partial
+     * sums it was the same exercise under a different name — which it was, until
+     * the lesson for it came to be written.
+     */
+    return {
+      ...base,
+      places,
+      rows: [
+        { label: String(a), cells: digitsFor(a, places).map((value) => ({ value })) },
+        { label: String(b), cells: digitsFor(b, places).map((value) => ({ value })) },
+        { label: "Tens first", total: true, cells: [{ blank: "run-1" }, { text: "" }] },
+        { label: "Then the ones", cells: [{ blank: "run-2" }, { text: "" }] },
+      ],
+      blanks: ["run-1", "run-2"],
+      answers: [tensPart, sum],
+      expected: `${tensPart},${sum}`,
       itemCount: sum,
     };
   }
@@ -232,13 +261,24 @@ export function deskHints(
   const da = digitsOf(q.a);
   const db = digitsOf(q.b);
 
-  if (q.mode === "partial_sums" || q.mode === "left_right") {
+  if (q.mode === "partial_sums") {
     return composeHints(
       state.kidTip ?? "Add one column at a time, and keep each answer before putting them together.",
       empty > 2
         ? `The tens are ${da.tens * 10} and ${db.tens * 10}. Add those first and write the answer on the Tens row.`
         : `You have both parts. Put them together for the last row.`,
       `${da.tens * 10} and ${db.tens * 10} is ${(da.tens + db.tens) * 10}. ${da.ones} and ${db.ones} is ${da.ones + db.ones}. Together that is ${q.sum}.`,
+    );
+  }
+
+  if (q.mode === "left_right") {
+    const afterTens = (da.tens + db.tens) * 10;
+    return composeHints(
+      state.kidTip ?? "Start with the biggest column, then let each one after it change the number you are holding.",
+      empty > 1
+        ? `Start with the tens: ${da.tens * 10} and ${db.tens * 10}. Write what you are holding after that.`
+        : `You are holding ${afterTens}. Now add the ones — ${da.ones} and ${db.ones} — to that.`,
+      `${afterTens} and ${da.ones + db.ones} is ${q.sum}.`,
     );
   }
 
