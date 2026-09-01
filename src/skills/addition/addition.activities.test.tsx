@@ -17,7 +17,7 @@ import { skill } from ".";
  * missing `expected` fails here instead of passing quietly.
  */
 
-const { tray, frames, bonds, numberline, base10, chart } = skill.activities;
+const { tray, frames, bonds, numberline, base10, chart, facts } = skill.activities;
 
 const expected = (h: ActivityHarness): string => {
   const last = h.koda.only("learning.present").at(-1);
@@ -396,6 +396,87 @@ describe("the place-value chart plays a standard round", () => {
     await h.press("Check");
     expect(h.koda.count("learning.answered")).toBe(before);
     expect(h.text()).toContain("Fill in the boxes");
+    h.unmount();
+  });
+});
+
+describe("the fact deck plays a standard round", () => {
+  const typeAnswer = async (h: ActivityHarness, value: string) => {
+    for (const digit of value) await h.press(`Digit ${digit}`);
+    await h.press("Check");
+  };
+
+  it("doubles: typing the total", async () => {
+    await expectStandardRound(
+      facts,
+      async (h) => typeAnswer(h, expected(h)),
+      { params: { mode: "doubles", nRange: [2, 8] }, level: 15 },
+    );
+  });
+
+  it("near doubles: naming the double is help, not an answer", async () => {
+    await expectStandardRound(
+      facts,
+      async (h) => {
+        // Fetching the fact the strategy is built on is the behaviour the
+        // lesson wants. Scoring it would mark a child down for using it.
+        const answers = h.koda.count("learning.answered");
+        const supports = h.koda.count("learning.supportUsed");
+        const reveal = h.buttons().find((b) => /^Show the double/.test(b));
+        expect(reveal, "the double was not offered").toBeTruthy();
+        await h.press(reveal!);
+        expect(h.koda.count("learning.answered"), "a support was scored").toBe(answers);
+        expect(h.koda.count("learning.supportUsed")).toBe(supports + 1);
+
+        await typeAnswer(h, expected(h));
+      },
+      { params: { mode: "near_up", nRange: [2, 8] }, level: 16 },
+    );
+  });
+
+  it("switching the addends: restating the fact reads as reversed", async () => {
+    const h = renderActivity(facts, { params: { mode: "commute" }, level: 26 });
+    // The switched fact is the answer, so the fact the child was *shown* is it
+    // the other way round. It is among the choices on purpose: restating the
+    // original is the mistake this lesson is named after, so it has to be
+    // available to make.
+    const [switchedA, switchedB] = expected(h).split("+");
+    await h.press(`${switchedB} plus ${switchedA}`);
+    const report = h.koda.only("learning.answered").at(-1)!.args[0] as {
+      correct: boolean;
+      errorKind?: string;
+    };
+    expect(report.correct).toBe(false);
+    expect(report.errorKind).toBe("reversed");
+    h.unmount();
+  });
+
+  it("switching the addends: choosing the other way round", async () => {
+    await expectStandardRound(
+      facts,
+      async (h) => {
+        const [a, b] = expected(h).split("+");
+        await h.press(`${a} plus ${b}`);
+      },
+      { params: { mode: "commute" }, level: 26 },
+    );
+  });
+
+  it("a wrong helper fact is refused, not scored", async () => {
+    // Pinned, so the unhelpful fact is known rather than hunted for: with
+    // 4 + 7 the helper is the double 4 + 4, and 7 + 7 is a real fact that does
+    // not help. Every option being real is the point — a child cannot pick
+    // correctly by spotting the silly one.
+    const h = renderActivity(facts, {
+      params: { mode: "known_fact", aRange: [4, 4], bRange: [7, 7] },
+      level: 24,
+    });
+    expect(h.buttons()).toContain("Helper fact 4 plus 4");
+
+    const answers = h.koda.count("learning.answered");
+    await h.press("Helper fact 7 plus 7");
+    expect(h.koda.count("learning.answered"), "a wrong route was scored").toBe(answers);
+    expect(h.text()).toContain("Look for a double");
     h.unmount();
   });
 });

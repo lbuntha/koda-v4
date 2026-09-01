@@ -7,6 +7,7 @@ import { BondTree } from "./activities/BondTree";
 import { JumpLine } from "./activities/JumpLine";
 import { BlockYard } from "./activities/BlockYard";
 import { PlaceValueDesk } from "./activities/PlaceValueDesk";
+import { FactDeck } from "./activities/FactDeck";
 import { registerSkillArt } from "../../assets/svg/skillArt";
 import { registerSkillVoice } from "../../lib/voiceClips";
 import audioManifest from "./audio/manifest.json";
@@ -123,6 +124,12 @@ export const skill: Skill = {
       name: "Place-Value Chart",
       defaultParams: { mode: "chart_add", questionsPerRound: 5 },
       component: PlaceValueDesk,
+    },
+    facts: {
+      id: "facts",
+      name: "Fact Deck",
+      defaultParams: { mode: "doubles", questionsPerRound: 5 },
+      component: FactDeck,
     },
   },
 };

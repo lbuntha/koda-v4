@@ -441,3 +441,77 @@ describe("the chart keeps each mode's shape", () => {
   });
 });
 
+import {
+  buildQuestion as buildFact,
+  factHints,
+  specFor as factSpec,
+} from "./activities/FactDeck";
+
+describe("the fact deck keeps each mode's shape", () => {
+  it("makes a double out of one number twice", () => {
+    const seen = new Set<string>();
+    for (let i = 0; i < 30; i += 1) {
+      const q = buildFact({ mode: "doubles", nRange: [1, 10] }, i + 1, seen);
+      expect(q.a).toBe(q.b);
+      expect(q.expected).toBe(String(q.a * 2));
+    }
+  });
+
+  it("puts a near double exactly one step from the double it leans on", () => {
+    const seen = new Set<string>();
+    for (let i = 0; i < 30; i += 1) {
+      const up = buildFact({ mode: "near_up", nRange: [1, 9] }, i + 1, seen);
+      expect(up.b).toBe(up.a + 1);
+      expect(up.helper!.sum).toBe(up.a * 2);
+      expect(up.sum).toBe(up.helper!.sum + 1);
+
+      const down = buildFact({ mode: "near_down", nRange: [2, 10] }, i + 1, new Set());
+      expect(down.b).toBe(down.a - 1);
+      expect(down.sum).toBe(down.helper!.sum - 1);
+    }
+  });
+
+  it("offers only real facts as helpers", () => {
+    // An obviously silly option would let a child choose correctly without
+    // thinking about which fact actually helps.
+    const seen = new Set<string>();
+    for (let i = 0; i < 30; i += 1) {
+      const q = buildFact({ mode: "known_fact" }, i + 1, seen);
+      expect(q.helpers!.length).toBeGreaterThan(1);
+      for (const f of q.helpers!) expect(f.a + f.b).toBe(f.sum);
+      expect(q.helpers!.some((f) => f.a === q.helper!.a && f.b === q.helper!.b)).toBe(true);
+    }
+  });
+
+  it("always gives switching a gap worth switching for", () => {
+    // 2 + 9 is worth reordering. 4 + 5 is not, and a lesson full of those
+    // teaches that the strategy is pointless.
+    const seen = new Set<string>();
+    for (let i = 0; i < 30; i += 1) {
+      const q = buildFact({ mode: "commute" }, i + 1, seen);
+      expect(Math.abs(q.a - q.b)).toBeGreaterThanOrEqual(3);
+      expect(q.expected).toBe(`${q.b}+${q.a}`);
+      // The fact as shown is among the choices, because choosing it is the
+      // mistake being assessed.
+      expect(q.choices!.some((f) => f.a === q.a && f.b === q.b)).toBe(true);
+    }
+    expect(factSpec("commute", { aRange: [1, 9] }).minGap).toBe(3);
+  });
+
+  it("builds all four members of a family from three numbers", () => {
+    const seen = new Set<string>();
+    const q = buildFact({ mode: "family", aRange: [3, 3], bRange: [5, 5] }, 1, seen);
+    expect(q.members!.map((m) => m.answer)).toEqual([8, 8, 5, 3]);
+    expect(q.members!.map((m) => m.text)).toEqual(["3 + 5 =", "5 + 3 =", "8 − 3 =", "8 − 5 ="]);
+  });
+
+  it("tells a child to fetch the double before it tells them anything else", () => {
+    const seen = new Set<string>();
+    const q = buildFact({ mode: "near_up", nRange: [6, 6] }, 1, seen);
+    const [, before] = factHints(q, { revealed: false });
+    expect(before).toContain("Tap the double first");
+    const [, after] = factHints(q, { revealed: true });
+    expect(after).toContain("6 and 6 is 12");
+  });
+});
+

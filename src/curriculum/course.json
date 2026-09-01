@@ -98,7 +98,19 @@
       "icon": "🧱",
       "lessons": [
         "addition/base-ten-blocks",
-        "addition/place-value-chart"
+        "addition/place-value-chart",
+        "addition/doubles",
+        "addition/near-doubles-one-more"
+      ]
+    },
+    {
+      "id": "u9",
+      "unitNumber": 9,
+      "title": "Unit 9: Doubles and Neighbours",
+      "description": "Facts worth knowing by heart, and the ones that sit beside them",
+      "icon": "👯",
+      "lessons": [
+        "addition/near-doubles-one-less"
       ]
     }
   ]

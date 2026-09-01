@@ -85,7 +85,8 @@
       "activityLabel": "",
       "guidedLabel": "",
       "milestoneLabel": "",
-      "speechRate": 0.95
+      "speechRate": 0.95,
+      "answerInput": "pad"
     },
     "settingsSchema": [
       {
@@ -129,6 +130,22 @@
         "max": 2,
         "step": 0.05,
         "unit": "x"
+      },
+      {
+        "key": "answerInput",
+        "label": "How answers are given",
+        "help": "A number pad to type on, or four numbers to choose between. Choosing suits a younger child; typing is what the written lessons need.",
+        "type": "choice",
+        "options": [
+          {
+            "value": "pad",
+            "label": "Number pad"
+          },
+          {
+            "value": "choices",
+            "label": "Four choices"
+          }
+        ]
       }
     ],
     "lessons": [
@@ -881,6 +898,162 @@
           "CCSS.1.NBT.C.4"
         ],
         "trajectoryLevel": "place-value-builder",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "doubles",
+        "title": "Doubles",
+        "concept": "The Same Number Twice",
+        "conceptKey": "doubles-knower",
+        "requires": [
+          "ten-frame-adder"
+        ],
+        "activity": "addition/facts",
+        "params": {
+          "level": 15,
+          "question": {
+            "mode": "doubles",
+            "nRange": [
+              1,
+              10
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "fact_deck",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Facts",
+            "shortDesc": "The Same Number Twice",
+            "targetObjective": "A double is the same number twice.",
+            "stepByStep": [
+              "Read the fact on the card.",
+              "Look at the two equal rows.",
+              "Type the total and check it."
+            ],
+            "kidTip": "A double is the same number twice.",
+            "audioPrompt": "Doubles! The same number twice — these are the facts to know by heart.",
+            "prompts": {
+              "default": "Double {a}. What is the total?"
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "👯",
+        "iconName": "zap",
+        "iconTone": "pink",
+        "pedagogyTip": "Doubles are learned as pictures rather than counted, and they are the anchor every near-double leans on afterwards.",
+        "standards": [
+          "CCSS.1.OA.C.6"
+        ],
+        "trajectoryLevel": "deriver",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "near-doubles-one-more",
+        "title": "Near Doubles: One More",
+        "concept": "A Double, and One More",
+        "conceptKey": "near-doubles",
+        "requires": [
+          "doubles-knower"
+        ],
+        "activity": "addition/facts",
+        "params": {
+          "level": 16,
+          "question": {
+            "mode": "near_up",
+            "nRange": [
+              1,
+              9
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "fact_deck",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Facts",
+            "shortDesc": "A Double, and One More",
+            "targetObjective": "A near double is one step from a double you already know.",
+            "stepByStep": [
+              "Read the fact on the card.",
+              "Use the double it sits beside.",
+              "Type the total and check it."
+            ],
+            "kidTip": "A near double is one step from a double you already know.",
+            "audioPrompt": "Near doubles! This fact is one more than a double you know.",
+            "prompts": {
+              "default": "{a} plus {b}. It is one away from a double you know."
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "➕",
+        "iconName": "zap",
+        "iconTone": "pink",
+        "pedagogyTip": "Naming the double first is the strategy. A child who jumps straight to the answer has not used it, even when they are right.",
+        "standards": [
+          "CCSS.1.OA.C.6"
+        ],
+        "trajectoryLevel": "deriver",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "near-doubles-one-less",
+        "title": "Near Doubles: One Less",
+        "concept": "A Double, and One Less",
+        "conceptKey": "near-doubles",
+        "requires": [
+          "doubles-knower"
+        ],
+        "activity": "addition/facts",
+        "params": {
+          "level": 17,
+          "question": {
+            "mode": "near_down",
+            "nRange": [
+              2,
+              10
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "fact_deck",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Facts",
+            "shortDesc": "A Double, and One Less",
+            "targetObjective": "A near double is one step from a double you already know.",
+            "stepByStep": [
+              "Read the fact on the card.",
+              "Use the double it sits beside.",
+              "Type the total and check it."
+            ],
+            "kidTip": "A near double is one step from a double you already know.",
+            "audioPrompt": "Near doubles! This fact is one less than a double you know.",
+            "prompts": {
+              "default": "{a} plus {b}. It is one away from a double you know."
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "➖",
+        "iconName": "zap",
+        "iconTone": "pink",
+        "pedagogyTip": "Going down from a double is harder than going up, and worth its own lesson: the same relationship, the other direction.",
+        "standards": [
+          "CCSS.1.OA.C.6"
+        ],
+        "trajectoryLevel": "deriver",
         "ageBand": [
           6,
           8
