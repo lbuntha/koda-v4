@@ -203,7 +203,9 @@ describe("the frame plays a standard round", () => {
   });
 
   it("checking an untouched frame is refused, not scored", async () => {
-    const h = renderActivity(frames, { params: { mode: "ten" }, level: 9 });
+    // Pinned, so the wording the refusal is checked against does not change
+    // with the draw.
+    const h = renderActivity(frames, { params: { mode: "ten", addendRange: [3, 3] }, level: 9 });
     const before = h.koda.count("learning.answered");
     await h.press("Check");
     expect(h.koda.count("learning.answered"), "an empty check was scored").toBe(before);
@@ -840,14 +842,23 @@ describe("what Koda says about a move that was not allowed", () => {
     // Not drawn by the activity any more, and not a bare line of text in the
     // middle of the screen: it is the same component and the same place as the
     // answer feedback, so a child learns one place to look.
-    const h = renderActivity(frames, { params: { mode: "ten" }, level: 9 });
+    // The addend is pinned: unpinned, this drew a random one and the message
+    // it asserts changed with the draw.
+    const h = renderActivity(frames, { params: { mode: "ten", addendRange: [3, 3] }, level: 9 });
     await h.press("Check");
 
     const strip = h.screen.getByRole("status");
     expect(strip.textContent).toContain("Not yet");
-    expect(strip.textContent).toContain("empty spaces");
+    expect(strip.textContent).toContain("Tap 3 empty spaces");
     // Announced rather than only drawn — a child using a screen reader is told.
     expect(strip.getAttribute("aria-live")).toBe("polite");
+    h.unmount();
+  });
+
+  it("counts one space as a space", async () => {
+    const h = renderActivity(frames, { params: { mode: "ten", addendRange: [1, 1] }, level: 9 });
+    await h.press("Check");
+    expect(h.screen.getByRole("status").textContent).toContain("Tap 1 empty space to add it");
     h.unmount();
   });
 
