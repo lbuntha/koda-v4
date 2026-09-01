@@ -16,7 +16,7 @@ import { SvgAsset } from "../../../assets/svg";
 import { COUNTABLES, type Countable } from "../internal/data/additionAssets";
 import { ADDEND_A, ADDEND_B, TOTAL } from "../internal/data/additionPalette";
 import { BIN, COUNT_BADGE, SCENE, TOKEN_COMPACT } from "../internal/data/additionLayout";
-import { NudgeLine, useNudge } from "../internal/ui/useNudge";
+import { useNudge } from "../internal/ui/useNudge";
 import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
 import { isPractice, modeAt, type PracticeSetup } from "../../kit";
 import {
@@ -767,6 +767,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
       iconTone="purple"
       contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
+      nudge={nudge.message}
       hints={practising ? [] : trayHints(question, {
         counted: counted.length,
         merged,
@@ -875,8 +876,6 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
             </motion.span>
           )}
         </div>
-
-        <NudgeLine nudge={nudge} />
 
         {question.mode === "combine" && !merged && (
           <div className="flex justify-center">

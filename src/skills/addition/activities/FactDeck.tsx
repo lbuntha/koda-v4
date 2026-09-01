@@ -12,7 +12,7 @@ import {
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B, CHANGE, TOTAL } from "../internal/data/additionPalette";
 import { SCENE } from "../internal/data/additionLayout";
-import { NudgeLine, useNudge } from "../internal/ui/useNudge";
+import { useNudge } from "../internal/ui/useNudge";
 import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
 import { isPractice, modeAt, type PracticeSetup } from "../../kit";
 import { NumberPad } from "../internal/ui/NumberPad";
@@ -455,6 +455,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
       iconTone="pink"
       contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
+      nudge={nudge.message}
       hints={practising ? [] : factHints(question, { revealed, kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
       onReadAloud={
@@ -557,8 +558,6 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
             </div>
           )}
         </div>
-
-        <NudgeLine nudge={nudge} />
 
         {question.answerShape === "fact" && (
           <div className="flex flex-wrap items-center justify-center gap-2.5">

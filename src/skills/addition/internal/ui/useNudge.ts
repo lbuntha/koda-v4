@@ -1,7 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { motion } from "motion/react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { KodaSDK } from "../../../types";
-import { SPRING } from "../../../kit";
 
 /**
  * A word about a move that was not allowed, shown and then gone.
@@ -18,6 +16,11 @@ import { SPRING } from "../../../kit";
  * the sentence that explains this particular no.
  *
  * Written seven times before this, identically, timer and cleanup and all.
+ *
+ * This owns *when* a refusal is showing. Where it is drawn belongs to
+ * `SkillRound`, which puts it in the same sticky strip along the bottom as the
+ * answer feedback — one place a child learns to look, and one that already
+ * clears a phone's home indicator.
  */
 export interface Nudge {
   /** The line to show, or null. */
@@ -62,17 +65,3 @@ export function useNudge(koda: KodaSDK, holdMs = NUDGE_MS): Nudge {
 
   return { message, refuse, clear };
 }
-
-/** The line itself. `role="status"` so it is announced, not just drawn. */
-export const NudgeLine: React.FC<{ nudge: Nudge }> = ({ nudge }) =>
-  nudge.message ? (
-    <motion.p
-      initial={{ opacity: 0, y: -4 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={SPRING.enter}
-      role="status"
-      className="text-center text-sm font-semibold text-ink/70 px-4"
-    >
-      {nudge.message}
-    </motion.p>
-  ) : null;

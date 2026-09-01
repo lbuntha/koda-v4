@@ -1,8 +1,8 @@
 import React from "react";
-import { CircleCheck, Lightbulb, RotateCcw, Sparkles } from "lucide-react";
+import { CircleCheck, Hand, Lightbulb, RotateCcw, Sparkles } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
 
-export type KidMessageTone = "correct" | "tryAgain" | "hint" | "celebrate";
+export type KidMessageTone = "correct" | "tryAgain" | "hint" | "celebrate" | "nudge";
 
 export interface UIKidMessageProps {
   tone: KidMessageTone;
@@ -40,9 +40,15 @@ export const UIKidMessage: React.FC<UIKidMessageProps> = ({
   onAction,
 }) => {
   const s = themeSystem.kidMessage;
-  const Icon = { correct: CircleCheck, celebrate: Sparkles, tryAgain: RotateCcw, hint: Lightbulb }[
-    tone
-  ];
+  // State is never colour alone, so a tone without its own icon is not a tone.
+  // `nudge` gets a raised hand: hold on, not you got it wrong.
+  const Icon = {
+    correct: CircleCheck,
+    celebrate: Sparkles,
+    tryAgain: RotateCcw,
+    hint: Lightbulb,
+    nudge: Hand,
+  }[tone];
 
   return (
     <div className={s.wrap(tone)} role="status" aria-live="polite">

@@ -12,7 +12,7 @@ import {
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B, CHANGE, TOTAL } from "../internal/data/additionPalette";
 import { BLOCK_FLAT, BLOCK_ROD, BLOCK_UNIT, SCENE } from "../internal/data/additionLayout";
-import { NudgeLine, useNudge } from "../internal/ui/useNudge";
+import { useNudge } from "../internal/ui/useNudge";
 import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
 import { isPractice, modeAt, type PracticeSetup } from "../../kit";
 import {
@@ -428,6 +428,7 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
       iconTone="purple"
       contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
+      nudge={nudge.message}
       hints={practising ? [] : blockHints(question, { built, kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
       onReadAloud={
@@ -498,8 +499,6 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
             </motion.p>
           )}
         </div>
-
-        <NudgeLine nudge={nudge} />
 
         {/* The tray. An exchange lesson has nothing to add — its blocks are
             already in the yard, and the work is turning ten into one. */}

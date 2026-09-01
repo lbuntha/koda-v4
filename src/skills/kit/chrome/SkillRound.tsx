@@ -1,4 +1,6 @@
 import React, { useEffect, useRef } from "react";
+import { motion } from "motion/react";
+import { SPRING } from "../motion";
 import type { ActivityLesson, KodaSDK } from "../../types";
 import { UIKidMessage } from "../../../components/ui";
 import { PracticeStepHeader, type StepTagLabels } from "./PracticeStepHeader";
@@ -51,6 +53,16 @@ export interface SkillRoundProps {
   contextTag?: React.ReactNode | null;
   /** Extra controls for the bar. Rarely needed. */
   extras?: React.ReactNode;
+  /**
+   * A word about a move that was not allowed, or null.
+   *
+   * Shown in the same strip as the answer feedback, because it is the same
+   * kind of thing — Koda saying something to the child — and a message that
+   * appeared somewhere else would read as a different kind of event. Feedback
+   * wins if both are somehow set: an answer has been given, so "you have not
+   * finished" is no longer true.
+   */
+  nudge?: string | null;
   /** What the log advises next, shown on the completion modal. */
   recommendation?: { kind: string; kidMessage: string };
   onNextLevel?(): void;
@@ -83,6 +95,7 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
   tagLabels,
   contextTag,
   extras,
+  nudge,
   recommendation,
   onNextLevel,
   onPracticeAgain,
@@ -237,6 +250,27 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
           in a band around the message card and the feedback read as two stacked
           panels rather than one. Opaque, so the blur it carried has nothing left
           to do. */}
+      {/*
+        * One strip along the bottom, for anything Koda says about this question.
+        *
+        * A refusal used to be drawn by each activity, inline, as a bare line of
+        * text in the middle of the screen — unthemed, in a different place from
+        * every other message, and above the fold only by luck. It belongs here,
+        * in the same strip and the same component as the feedback, so a child
+        * learns one place to look. The safe-area padding is why this matters
+        * most on a phone: the strip already sits clear of the home indicator.
+        */}
+      {!round.feedback && nudge && (
+        <motion.div
+          initial={{ y: 12, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={SPRING.enter}
+          className="sticky bottom-0 left-0 right-0 z-30 p-3 sm:p-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-[calc(1rem+env(safe-area-inset-bottom))] bg-surface"
+        >
+          <UIKidMessage tone="nudge" title="Not yet" message={nudge} />
+        </motion.div>
+      )}
+
       {round.feedback && (
         <div className="sticky bottom-0 left-0 right-0 z-30 p-3 sm:p-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-[calc(1rem+env(safe-area-inset-bottom))] bg-surface">
           <UIKidMessage

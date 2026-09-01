@@ -835,3 +835,41 @@ describe("choosing a strategy plays a standard round", () => {
   });
 });
 
+describe("what Koda says about a move that was not allowed", () => {
+  it("is the shared message, in the strip along the bottom", async () => {
+    // Not drawn by the activity any more, and not a bare line of text in the
+    // middle of the screen: it is the same component and the same place as the
+    // answer feedback, so a child learns one place to look.
+    const h = renderActivity(frames, { params: { mode: "ten" }, level: 9 });
+    await h.press("Check");
+
+    const strip = h.screen.getByRole("status");
+    expect(strip.textContent).toContain("Not yet");
+    expect(strip.textContent).toContain("empty spaces");
+    // Announced rather than only drawn — a child using a screen reader is told.
+    expect(strip.getAttribute("aria-live")).toBe("polite");
+    h.unmount();
+  });
+
+  it("gives way to the answer once one is given", async () => {
+    // A refusal says "you have not finished". The moment an answer arrives that
+    // is no longer true, so the feedback takes the strip.
+    const h = renderActivity(frames, { params: { mode: "ten", addendRange: [2, 2] }, level: 9 });
+    await h.press("Check");
+    expect(h.screen.getByRole("status").textContent).toContain("Not yet");
+
+    const total = Number(
+      (h.koda.only("learning.present").at(-1)!.args[0] as { expected: string }).expected,
+    );
+    for (let i = 0; i < 20 && filledSpaces(h) < total; i += 1) {
+      const next = emptySpaces(h)[0];
+      if (!next) break;
+      await h.press(next);
+    }
+    await h.press("Check");
+
+    expect(h.screen.getByRole("status").textContent).not.toContain("Not yet");
+    h.unmount();
+  });
+});
+

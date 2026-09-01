@@ -13,7 +13,7 @@ import {
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, CHANGE, TOTAL } from "../internal/data/additionPalette";
 import { CHIP, SCENE } from "../internal/data/additionLayout";
-import { NudgeLine, useNudge } from "../internal/ui/useNudge";
+import { useNudge } from "../internal/ui/useNudge";
 import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
 import { isPractice, modeAt, type PracticeSetup } from "../../kit";
 import { NumberPad } from "../internal/ui/NumberPad";
@@ -387,6 +387,7 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
       iconTone="cyan"
       contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
+      nudge={nudge.message}
       hints={practising ? [] : chainHints(question, { chips, step, kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
       onReadAloud={
@@ -472,8 +473,6 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
             </motion.p>
           )}
         </div>
-
-        <NudgeLine nudge={nudge} />
 
         {running && (
           <NumberPad

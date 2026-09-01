@@ -12,7 +12,7 @@ import {
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B, CHANGE, TOTAL } from "../internal/data/additionPalette";
 import { SCENE } from "../internal/data/additionLayout";
-import { NudgeLine, useNudge } from "../internal/ui/useNudge";
+import { useNudge } from "../internal/ui/useNudge";
 import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
 import { isPractice, modeAt, type PracticeSetup } from "../../kit";
 import { NumberPad } from "../internal/ui/NumberPad";
@@ -493,6 +493,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
       iconTone="pink"
       contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
+      nudge={nudge.message}
       hints={practising ? [] : storyHints(question, { placed, kidTip: copy.kidTip })}
       onExit={koda.ui.exit}
       onReadAloud={
@@ -578,8 +579,6 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
             )}
           </div>
         )}
-
-        <NudgeLine nudge={nudge} />
 
         {built && (
           <div className="space-y-3">
