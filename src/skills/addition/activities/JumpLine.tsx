@@ -107,12 +107,34 @@ const declared = (setup: JumpSetup): PairSpec => {
   return out;
 };
 
+/** Every multiple of `unit` inside a range, inclusive. */
+const multiplesWithin = (lo: number, hi: number, unit: number): number[] => {
+  const out: number[] = [];
+  for (let v = Math.ceil(lo / unit) * unit; v <= hi; v += unit) out.push(v);
+  return out;
+};
+
 export const specFor = (mode: JumpMode, setup: JumpSetup): PairSpec => {
   const spec: PairSpec = { ...DEFAULT_SPEC[mode], ...declared(setup) };
   // What each mode *is*, which a lesson may narrow but not remove.
   if (mode === "compensate") spec.endsIn = [8, 9];
   if (mode === "jump_tens_ones") spec.regroup = "never";
-  if (mode === "bridge_ten") spec.exclude = [];
+
+  /*
+   * A bridging question cannot start on the round number it is reaching for —
+   * there would be nothing to reach, and the right jump would be zero.
+   *
+   * Declared as an exclusion rather than retried after the fact. The retry that
+   * was here drew again from the same range, which can land on another multiple
+   * of ten just as easily; it passed for a while and then produced 80. A
+   * constraint the generator is told about is checked on every draw, which is
+   * the whole reason `PairSpec` exists.
+   */
+  if (mode === "bridge_ten" || mode === "bridge_hundred") {
+    const unit = mode === "bridge_ten" ? 10 : 100;
+    const [lo, hi] = spec.aRange ?? DEFAULT_SPEC[mode].aRange!;
+    spec.exclude = multiplesWithin(lo, hi, unit);
+  }
   return spec;
 };
 
@@ -126,17 +148,7 @@ export const buildQuestion = (
 ): JumpQuestion => {
   const mode = setup.mode ?? "path";
   const spec = specFor(mode, setup);
-  const pair = withoutRepeat(
-    () => {
-      const drawn = drawPair(spec);
-      // A number already sitting on a ten has nothing to bridge to.
-      if (mode === "bridge_ten" && drawn.a % 10 === 0) return drawPair({ ...spec, aRange: [11, 89] });
-      if (mode === "bridge_hundred" && drawn.a % 100 === 0) return drawPair(spec);
-      return drawn;
-    },
-    pairKey,
-    seen,
-  );
+  const pair = withoutRepeat(() => drawPair(spec), pairKey, seen);
   const { a, b, sum } = pair;
   const base = { id: `q${index}-${Date.now().toString(36)}`, taskKind: `line_${mode}`, mode, a, b, sum };
 
