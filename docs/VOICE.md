@@ -175,6 +175,47 @@ named by a hash of the phrase, alongside a `manifest.json` mapping phrase to
 file. Beside `assets/`, for the same reason: a skill is what it teaches, what it
 draws with, and what it says, and removing it should take all three.
 
+### Seeing the plan before you spend anything
+
+```bash
+npm run voice:plan                      # every skill
+npm run voice:plan -- --skill addition  # one of them
+```
+
+No key needed. It prints the file each line will land in, the voice that will
+read it, and the line itself:
+
+```
+addition: 49 phrases, 49 missing
+  numbers/seven.wav                              Kore    "seven"
+  prompts/start-at-6-and-count-on.wav            Kore    "Start at 6 and count on."
+  correct/you-put-them-together.wav              Puck    "You put them together!"
+  incorrect/hmm-lets-look-again.wav              Zephyr  "Hmm, let's look again."
+  lessons/count-them-all-touch-every-one-in-bo…  Kore    "Count them all! Touch every one…"
+```
+
+`voice:plan` is `voice:record --dry-run`; the same flags apply.
+
+### What each folder is, and when a child hears it
+
+The folder is the clip's job, which is why the names are readable rather than
+hashes — you can find a bad recording and replace it without resolving the
+manifest by hand.
+
+| Folder | What it holds | When it plays |
+|---|---|---|
+| `numbers/` | number words, `"one"`–`"twenty"` | the count-along, on every tap |
+| `lessons/` | each lesson's `audioPrompt` | once, as the round opens |
+| `prompts/` | fixed question wording, and expanded templates | the Read-aloud button |
+| `phrases/` | fixed lines an activity says in passing | in play — "Put them together!" |
+| `correct/` | praise variants | every right answer |
+| `incorrect/` | encouragement variants | every wrong answer |
+
+`correct/` and `incorrect/` are the reaction groups, and they rotate voices
+across their phrases rather than recording each line in every voice — same
+variety for a fraction of the calls. They are also **scoped per skill**, so
+counting's praise never answers an addition round.
+
 ### How many files
 
 One per phrase. Counting currently declares **140**, so 140 clips at roughly

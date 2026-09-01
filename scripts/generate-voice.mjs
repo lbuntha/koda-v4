@@ -508,7 +508,19 @@ async function main() {
     );
 
     if (dryRun) {
-      for (const { phrase } of todo) console.log(`  would record: ${JSON.stringify(phrase)}`);
+      /*
+       * The plan, not just the list.
+       *
+       * This is what you read before spending anything, so it should answer the
+       * questions you actually have: which file each line lands in, and which
+       * voice reads it. Both are already decided by the time we get here — the
+       * preview printed the phrase alone, which made it a word count rather
+       * than something you could check against the app.
+       */
+      const width = todo.reduce((w, t) => Math.max(w, t.rel.length), 0);
+      for (const { phrase, rel, voice } of todo) {
+        console.log(`  ${rel.padEnd(width)}  ${voice.padEnd(6)}  ${JSON.stringify(phrase)}`);
+      }
       if (importDir) console.log(`  would import from: ${importDir}`);
       continue;
     }

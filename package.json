@@ -13,6 +13,7 @@
     "icons": "node scripts/generate-pwa-icons.mjs",
     "svg:ids": "node scripts/generate-svg-ids.mjs",
     "voice:record": "node scripts/generate-voice.mjs",
+    "voice:plan": "node scripts/generate-voice.mjs --dry-run",
     "art:seed": "node scripts/generate-art-seed.mjs",
     "skills:seed": "node scripts/generate-skill-seed.mjs",
     "test": "vitest run",
