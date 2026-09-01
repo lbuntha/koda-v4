@@ -455,6 +455,14 @@ break it is to reach past the SDK to `playClip`, `new Audio()` or
 `createKodaSDK.test.ts` holds it for every skill at once, so a new engine needs no
 test of its own for it.
 
+**8. Two controls must never share an accessible name.** This bit three times:
+two chips holding the same value, two rounding dials on the same number, and both
+times it read as a flaky test rather than as what it was. A screen-reader user
+genuinely cannot say which one they mean or reach the second, and the harness —
+which presses by accessible name — silently hits the first every time. Where a
+control's natural name can repeat, put its position in the label: `Chip 3, value
+5`, `Second number: round 47 to 50`.
+
 **7. Recorded speech is shared, so praise must be scoped.** The clip registry is one
 global `Map<phrase, url>`, keyed by phrase text and not by skill. Two consequences:
 addition's number words already play from counting's recordings, and addition's rounds

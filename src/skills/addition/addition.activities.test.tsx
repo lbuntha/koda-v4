@@ -17,8 +17,9 @@ import { skill } from ".";
  * missing `expected` fails here instead of passing quietly.
  */
 
-const { tray, frames, bonds, numberline, base10, chart, facts, multi, column, estimate, story } =
-  skill.activities;
+const {
+  tray, frames, bonds, numberline, base10, chart, facts, multi, column, estimate, story, strategy,
+} = skill.activities;
 
 const expected = (h: ActivityHarness): string => {
   const last = h.koda.only("learning.present").at(-1);
@@ -776,6 +777,61 @@ describe("story problems play a standard round", () => {
       "story_multi_step_step1",
       "story_multi_step_step2",
     ]);
+  });
+});
+
+describe("choosing a strategy plays a standard round", () => {
+  it("accepts any strategy that suits the numbers", async () => {
+    await expectStandardRound(
+      strategy,
+      async (h) => {
+        const q = h.koda.only("learning.present").at(-1)!.args[0] as {
+          taskKind: string;
+          expected: string;
+        };
+        if (q.taskKind === "strategy_compare") {
+          // Step two: the shorter route, named by how many steps it took.
+          const paths = h.buttons().filter((b) => /, \d+ steps?$/.test(b));
+          const shortest = paths.reduce((best, p) =>
+            Number(/(\d+) steps?$/.exec(p)![1]) < Number(/(\d+) steps?$/.exec(best)![1]) ? p : best,
+          );
+          await h.press(shortest);
+          return;
+        }
+        // Step one has several right answers; the log holds all of them.
+        const fitting = q.expected.split("|");
+        expect(fitting.length).toBeGreaterThan(0);
+        const names: Record<string, string> = {
+          count_on: "Count on",
+          doubles: "Use a double",
+          near_double: "Use a near double",
+          make_ten: "Make ten first",
+          compensate: "Round and give back",
+          jump_tens_ones: "Tens, then ones",
+          start_larger: "Start with the bigger one",
+        };
+        const pickable = fitting.map((id) => names[id]).find((n) => h.buttons().includes(n))!;
+        await h.press(pickable);
+      },
+      { params: { mode: "compare_paths" }, level: 52, questions: 4 },
+    );
+  });
+
+  it("more than one card is right, and the round says which others were", async () => {
+    const h = renderActivity(strategy, { params: { addendRange: [8, 9] }, level: 52 });
+    const q = h.koda.only("learning.present").at(-1)!.args[0] as { expected: string };
+    const fitting = q.expected.split("|");
+    // 8 + 9 is a bridging pair and a near double: several routes genuinely fit,
+    // which is the whole point of the lesson.
+    expect(fitting.length).toBeGreaterThan(1);
+    h.unmount();
+  });
+
+  it("alternates choosing and comparing, on the same problem", async () => {
+    const h = renderActivity(strategy, { params: { mode: "compare_paths" }, level: 52 });
+    const first = h.koda.only("learning.present").at(-1)!.args[0] as { taskKind: string };
+    expect(first.taskKind).toBe("strategy_choose");
+    h.unmount();
   });
 });
 

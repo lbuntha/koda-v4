@@ -2893,6 +2893,59 @@
           8,
           9
         ]
+      },
+      {
+        "id": "explain-and-compare",
+        "title": "Which Way Is Best?",
+        "concept": "Choosing a Strategy, and Saying Why",
+        "conceptKey": "strategy-chooser",
+        "requires": [
+          "multi-step-solver"
+        ],
+        "activity": "addition/strategy",
+        "params": {
+          "level": 52,
+          "question": {
+            "mode": "compare_paths",
+            "addendRange": [
+              6,
+              48
+            ],
+            "questionsPerRound": 6
+          },
+          "play": {
+            "mode": "strategy_picker",
+            "tier": "master",
+            "difficultyColor": "violet",
+            "category": "Choosing",
+            "shortDesc": "Pick a strategy that suits the numbers, then see which route was shorter",
+            "targetObjective": "More than one way is right. Some ways are shorter than others.",
+            "stepByStep": [
+              "Look at the two numbers before you choose anything.",
+              "Pick a strategy that suits them — more than one may.",
+              "Then compare two routes and count the steps each one took."
+            ],
+            "kidTip": "Look at the numbers before you choose. Some strategies only suit some numbers.",
+            "audioPrompt": "Which way is best? Look at the numbers, then choose how you would add them.",
+            "prompts": {
+              "default": "{a} plus {b}. Which strategy would you use?"
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🧭",
+        "iconName": "sparkles",
+        "iconTone": "purple",
+        "pedagogyTip": "The only lesson here with more than one right answer. A child who can say why a strategy suits these numbers has stopped following recipes and started choosing.",
+        "standards": [
+          "CCSS.2.NBT.B.9",
+          "CCSS.3.NBT.A.2"
+        ],
+        "trajectoryLevel": "problem-solver",
+        "ageBand": [
+          8,
+          9
+        ]
       }
     ]
   },

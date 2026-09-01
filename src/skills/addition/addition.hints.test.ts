@@ -40,6 +40,8 @@ import {
 } from "./activities/ColumnPad";
 import { buildQuestion as buildEstimate, estimateHints } from "./activities/EstimateDial";
 import { buildQuestion as buildStory, type StoryMemory } from "./activities/StoryBoard";
+import { buildQuestion as buildStrategy, type ProblemMemory } from "./activities/StrategyPicker";
+import { STRATEGIES, fittingFor } from "./internal/data/strategyCards";
 import {
   buildQuestion as buildFact,
   factHints,
@@ -772,6 +774,60 @@ describe("controls stay tellable apart when two numbers match", () => {
     const q = buildEstimate({ mode: "round_estimate", digits: 2 }, 1, seen);
     expect(q.around).toHaveLength(2);
     expect(q.around[0]).not.toBe(q.around[1]);
+  });
+});
+
+describe("choosing a strategy is judged on what suits the numbers", () => {
+  it("knows counting on always works and is rarely the best", () => {
+    // It is in the list precisely so a child can pick it and see what it costs.
+    const countOn = STRATEGIES.find((s) => s.id === "count_on")!;
+    expect(countOn.fits(48, 19)).toBe(true);
+    expect(countOn.work(48, 19)).toHaveLength(19);
+    const compensate = STRATEGIES.find((s) => s.id === "compensate")!;
+    expect(compensate.fits(48, 19)).toBe(true);
+    expect(compensate.work(48, 19)).toHaveLength(3);
+  });
+
+  it("does not offer a double for numbers that are not one", () => {
+    const doubles = STRATEGIES.find((s) => s.id === "doubles")!;
+    expect(doubles.fits(48, 19)).toBe(false);
+    expect(doubles.fits(6, 6)).toBe(true);
+    expect(fittingFor(48, 19).map((s) => s.id)).not.toContain("doubles");
+  });
+
+  it("only asks about numbers where something clever applies", () => {
+    // Counting on always fits, so a pair with nothing else would leave one card
+    // correct and the lesson pointless.
+    const seen = new Set<string>();
+    const memory = { current: null as ProblemMemory | null };
+    for (let i = 0; i < 30; i += 1) {
+      const q = buildStrategy({}, i * 2 + 1, seen, memory);
+      expect(q.fitting.length, `${q.a} + ${q.b}`).toBeGreaterThan(1);
+      memory.current = null;
+    }
+  });
+
+  it("holds every right answer, not one of them", () => {
+    const memory = { current: null as ProblemMemory | null };
+    const q = buildStrategy({ addendRange: [8, 9] }, 1, new Set(), memory);
+    expect(q.expected.split("|")).toEqual(q.fitting);
+    expect(q.fitting.length).toBeGreaterThan(1);
+  });
+
+  it("compares the route the child chose against another, on the same numbers", () => {
+    const memory = { current: null as ProblemMemory | null };
+    const seen = new Set<string>();
+    const first = buildStrategy({}, 1, seen, memory);
+    memory.current!.chosen = first.fitting.find((id) => id !== "count_on") ?? "count_on";
+    const second = buildStrategy({}, 2, seen, memory);
+
+    expect(second.step).toBe(2);
+    expect(second.a).toBe(first.a);
+    expect(second.b).toBe(first.b);
+    expect(second.paths).toHaveLength(2);
+    // The shorter path is the one with fewer lines, and that is the answer.
+    const shortest = second.paths!.reduce((best, p) => (p.lines.length < best.lines.length ? p : best));
+    expect(second.expected).toBe(shortest.id);
   });
 });
 

@@ -96,6 +96,13 @@ available moves".
 shape is a blob beside a thing: a child cannot see "fourteen" in it, so the
 shapes buy nothing and invite counting where the lesson is a rule.
 
+**Two controls must never share an accessible name.** Where a control's natural
+name can repeat — two chips both holding 5, two dials both rounding 47 — put its
+position in the label. A screen-reader user otherwise cannot say which one they
+mean or reach the second, and a test driver that presses by accessible name
+silently hits the first every time, which surfaces as a flake rather than as the
+accessibility bug it is.
+
 **Never encode state in colour alone**, and never a raw slate shade — 
 `themeSystem.field()` for any input, `bg-surface` / `text-ink` / `border-line`
 for surfaces. Check light *and* dark. No amber or yellow: it fails against this

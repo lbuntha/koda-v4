@@ -12,6 +12,7 @@ import { ChainBoard } from "./activities/ChainBoard";
 import { ColumnPad } from "./activities/ColumnPad";
 import { EstimateDial } from "./activities/EstimateDial";
 import { StoryBoard } from "./activities/StoryBoard";
+import { StrategyPicker } from "./activities/StrategyPicker";
 import { registerSkillArt } from "../../assets/svg/skillArt";
 import { registerSkillVoice } from "../../lib/voiceClips";
 import audioManifest from "./audio/manifest.json";
@@ -158,6 +159,14 @@ export const skill: Skill = {
       name: "Story Problems",
       defaultParams: { mode: "join", questionsPerRound: 5 },
       component: StoryBoard,
+    },
+    strategy: {
+      id: "strategy",
+      name: "Which Strategy?",
+      /* Six questions, because each problem is asked twice: choose a route,
+         then compare it with another. */
+      defaultParams: { mode: "compare_paths", questionsPerRound: 6 },
+      component: StrategyPicker,
     },
   },
 };

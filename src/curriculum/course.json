@@ -216,7 +216,8 @@
         "addition/change-unknown",
         "addition/start-unknown",
         "addition/comparison-problems",
-        "addition/multi-step-problems"
+        "addition/multi-step-problems",
+        "addition/explain-and-compare"
       ]
     }
   ]
