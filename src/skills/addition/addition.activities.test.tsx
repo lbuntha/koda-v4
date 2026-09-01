@@ -17,7 +17,7 @@ import { skill } from ".";
  * missing `expected` fails here instead of passing quietly.
  */
 
-const { tray, frames, bonds, numberline, base10, chart, facts, multi, column } =
+const { tray, frames, bonds, numberline, base10, chart, facts, multi, column, estimate } =
   skill.activities;
 
 const expected = (h: ActivityHarness): string => {
@@ -630,6 +630,56 @@ describe("the column pad plays a standard round", () => {
     expect(h.koda.count("learning.answered"), "a missing carry was scored").toBe(before);
     expect(h.text()).toContain("Write its carry");
     h.unmount();
+  });
+});
+
+describe("estimating plays a standard round", () => {
+  it("rounding: round both, then pick the estimate — not the exact answer", async () => {
+    await expectStandardRound(
+      estimate,
+      async (h) => {
+        // Every rounding button says what it rounds, so the driver can pick the
+        // nearer one the same way a child reads it.
+        for (const label of h.buttons().filter((b) => /^Round \d+ to \d+$/.test(b))) {
+          const [, value, to] = /^Round (\d+) to (\d+)$/.exec(label)!;
+          const lower = Math.floor(Number(value) / 10) * 10;
+          const nearer = Number(value) - lower < 5 ? lower : lower + 10;
+          if (Number(to) === nearer) await h.press(label);
+        }
+        await h.press(`About ${expected(h)}`);
+      },
+      { params: { mode: "round_estimate", digits: 2 }, level: 43 },
+    );
+  });
+
+  it("rounding the wrong way is refused, not scored", async () => {
+    const h = renderActivity(estimate, { params: { mode: "round_estimate", digits: 2 }, level: 43 });
+    const [label] = h.buttons().filter((b) => /^Round \d+ to \d+$/.test(b));
+    const [, value, to] = /^Round (\d+) to (\d+)$/.exec(label)!;
+    const lower = Math.floor(Number(value) / 10) * 10;
+    const nearer = Number(value) - lower < 5 ? lower : lower + 10;
+    const wrong = h
+      .buttons()
+      .find((b) => b.startsWith(`Round ${value} to `) && !b.endsWith(String(nearer)))!;
+
+    const before = h.koda.count("learning.answered");
+    await h.press(wrong);
+    expect(h.koda.count("learning.answered"), "a wrong rounding was scored").toBe(before);
+    expect(h.text()).toContain("nearer to");
+    h.unmount();
+  });
+
+  it("judging: saying what is wrong with someone's answer", async () => {
+    await expectStandardRound(
+      estimate,
+      async (h) => {
+        const verdict = expected(h);
+        await h.press(
+          verdict === "right" ? "About right" : verdict === "too_big" ? "Far too big" : "Far too small",
+        );
+      },
+      { params: { mode: "reasonable", digits: 3 }, level: 44 },
+    );
   });
 });
 

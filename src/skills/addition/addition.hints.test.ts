@@ -38,14 +38,19 @@ import {
   columnHints,
   specFor as columnSpec,
 } from "./activities/ColumnPad";
+import { buildQuestion as buildEstimate, estimateHints } from "./activities/EstimateDial";
 import {
   buildQuestion as buildFact,
   factHints,
   specFor as factSpec,
 } from "./activities/FactDeck";
 import { COUNTABLES } from "./internal/data/additionAssets";
-import { isBridging, isRegrouping, carriesIn,
+import {
+  carriesIn,
   friendlyPairCount,
+  isBridging,
+  isRegrouping,
+  roundTo,
 } from "./internal/data/additionNumbers";
 /**
  * The hint ladder, tested against the state it claims to describe.
@@ -632,6 +637,55 @@ describe("the column pad keeps each mode's shape", () => {
     const q = buildColumn({ mode: "standard" }, 1, seen);
     const [, second] = columnHints(q, { digits: { ones: "5" }, carries: {} });
     expect(second).toContain("carry to go above the tens");
+  });
+});
+
+describe("estimating asks for an estimate, not the answer", () => {
+  it("expects the rounded total, and offers no exact answer among the choices", () => {
+    // A child who works out the real total and looks for it will not find it —
+    // which is the point, and why the prompt and the feedback both say "about".
+    const seen = new Set<string>();
+    for (let i = 0; i < 40; i += 1) {
+      const q = buildEstimate({ mode: "round_estimate", digits: 2 }, i + 1, seen);
+      const wanted = roundTo(q.a, 10) + roundTo(q.b, 10);
+      expect(q.expected).toBe(String(wanted));
+      expect(q.options!.every((o) => o % 10 === 0), q.options!.join(",")).toBe(true);
+      if (q.sum % 10 !== 0) expect(q.options).not.toContain(q.sum);
+    }
+  });
+
+  it("never draws a number that is already round", () => {
+    const seen = new Set<string>();
+    for (let i = 0; i < 40; i += 1) {
+      const q = buildEstimate({ mode: "round_estimate", digits: 2 }, i + 1, seen);
+      // Rounding a round number teaches nothing, and a number sitting exactly
+      // halfway makes "nearer" a coin toss.
+      for (const n of [q.a, q.b]) {
+        expect(n % 10).not.toBe(0);
+        expect(n % 10).not.toBe(5);
+      }
+    }
+  });
+
+  it("claims an answer that is right, ten times too big, or ten times too small", () => {
+    const seen = new Set<string>();
+    const seenVerdicts = new Set<string>();
+    for (let i = 0; i < 60; i += 1) {
+      const q = buildEstimate({ mode: "reasonable", digits: 3 }, i + 1, seen);
+      seenVerdicts.add(q.verdict!);
+      if (q.verdict === "right") expect(q.claim).toBe(q.sum);
+      if (q.verdict === "too_big") expect(q.claim).toBe(q.sum * 10);
+      if (q.verdict === "too_small") expect(q.claim).toBe(Math.floor(q.sum / 10));
+    }
+    // All three verdicts come up, or the lesson is a coin toss with extra steps.
+    expect(seenVerdicts).toEqual(new Set(["right", "too_big", "too_small"]));
+  });
+
+  it("stops short of judging for the child", () => {
+    const seen = new Set<string>();
+    const q = buildEstimate({ mode: "reasonable", digits: 3 }, 1, seen);
+    const rungs = estimateHints(q, { rounded: [] });
+    expect(rungs.at(-1)).toContain("Is it close, far too big, or far too small?");
   });
 });
 

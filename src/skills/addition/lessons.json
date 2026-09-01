@@ -2232,6 +2232,157 @@
         7,
         9
       ]
+    },
+    {
+      "id": "estimate-by-rounding",
+      "title": "About How Many",
+      "concept": "Rounding Before Adding",
+      "conceptKey": "rounding-estimator",
+      "requires": [
+        "left-to-right-adder"
+      ],
+      "activity": "addition/estimate",
+      "params": {
+        "level": 43,
+        "question": {
+          "mode": "round_estimate",
+          "digits": 2,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "estimate_play",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Estimating",
+          "shortDesc": "Round each number to the nearest ten, then add the round numbers",
+          "targetObjective": "Round each number to the nearest one, then add the round numbers.",
+          "stepByStep": [
+            "Each number sits between two tens.",
+            "Choose the one it is nearer to.",
+            "Add the two round numbers — that is about how many."
+          ],
+          "kidTip": "Round each number to the nearest one, then add the round numbers.",
+          "audioPrompt": "About how many? Round each number first, then add the round ones.",
+          "prompts": {
+            "default": "About how many is {a} plus {b}?"
+          }
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "📏",
+      "iconName": "scale",
+      "iconTone": "emerald",
+      "pedagogyTip": "The exact answer is not wanted here, and a child who gives it has answered a different question. The prompt says about, and so does the feedback.",
+      "standards": [
+        "CCSS.3.NBT.A.1"
+      ],
+      "trajectoryLevel": "rounding-estimator",
+      "ageBand": [
+        8,
+        9
+      ]
+    },
+    {
+      "id": "is-it-reasonable",
+      "title": "Could That Be Right?",
+      "concept": "Judging an Answer Without Working It Out",
+      "conceptKey": "reasonableness-checker",
+      "requires": [
+        "rounding-estimator"
+      ],
+      "activity": "addition/estimate",
+      "params": {
+        "level": 44,
+        "question": {
+          "mode": "reasonable",
+          "digits": 3,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "estimate_play",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Estimating",
+          "shortDesc": "Decide whether someone's answer is close, far too big, or far too small",
+          "targetObjective": "You do not need the exact answer. Ask whether it is anywhere near.",
+          "stepByStep": [
+            "Round both numbers to see roughly where the answer should be.",
+            "Compare that with the answer you were given.",
+            "Say whether it is about right, far too big, or far too small."
+          ],
+          "kidTip": "You do not need the exact answer. Ask whether it is anywhere near.",
+          "audioPrompt": "Could that be right? Work out roughly where the answer should be.",
+          "prompts": {
+            "default": "Someone says {a} plus {b} is {claim}. Could that be right?"
+          }
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🤔",
+      "iconName": "scale",
+      "iconTone": "emerald",
+      "pedagogyTip": "Checking an answer without recomputing it is what stops a slipped digit going unnoticed, and it is a habit rather than a fact.",
+      "standards": [
+        "CCSS.3.OA.D.8"
+      ],
+      "trajectoryLevel": "reasonableness-checker",
+      "ageBand": [
+        8,
+        9
+      ]
+    },
+    {
+      "id": "missing-addend",
+      "title": "The Missing Part",
+      "concept": "Finding a Part When the Whole Is Known",
+      "conceptKey": "missing-addend",
+      "requires": [
+        "fact-family"
+      ],
+      "activity": "addition/bonds",
+      "params": {
+        "level": 45,
+        "question": {
+          "mode": "part_unknown",
+          "addendRange": [
+            1,
+            9
+          ],
+          "sumMax": 20,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "bonds_play",
+          "tier": "master",
+          "difficultyColor": "violet",
+          "category": "Parts and Wholes",
+          "shortDesc": "Work out the part that is missing from a number bond",
+          "targetObjective": "The two parts have to make the whole. One is missing.",
+          "stepByStep": [
+            "The whole is at the top and one part is already there.",
+            "Count on from the part you can see until you reach the whole.",
+            "However far you counted is the missing part."
+          ],
+          "kidTip": "The two parts have to make the whole. One is missing.",
+          "audioPrompt": "The missing part! One part is hidden. What goes with the other to make the whole?",
+          "prompts": {
+            "default": "{sum} is the whole. What is the missing part?"
+          }
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🧩",
+      "iconName": "gem",
+      "iconTone": "emerald",
+      "pedagogyTip": "A missing addend is where addition and subtraction meet. A child who has done fact families already has the tool.",
+      "standards": [
+        "CCSS.1.OA.D.8"
+      ],
+      "trajectoryLevel": "part-whole",
+      "ageBand": [
+        6,
+        8
+      ]
     }
   ]
 }

@@ -10,6 +10,7 @@ import { PlaceValueDesk } from "./activities/PlaceValueDesk";
 import { FactDeck } from "./activities/FactDeck";
 import { ChainBoard } from "./activities/ChainBoard";
 import { ColumnPad } from "./activities/ColumnPad";
+import { EstimateDial } from "./activities/EstimateDial";
 import { registerSkillArt } from "../../assets/svg/skillArt";
 import { registerSkillVoice } from "../../lib/voiceClips";
 import audioManifest from "./audio/manifest.json";
@@ -144,6 +145,12 @@ export const skill: Skill = {
       name: "Column Add",
       defaultParams: { mode: "standard", questionsPerRound: 5 },
       component: ColumnPad,
+    },
+    estimate: {
+      id: "estimate",
+      name: "Estimate and Check",
+      defaultParams: { mode: "round_estimate", digits: 2, questionsPerRound: 5 },
+      component: EstimateDial,
     },
   },
 };

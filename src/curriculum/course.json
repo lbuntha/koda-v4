@@ -189,7 +189,19 @@
       "lessons": [
         "addition/add-three-or-more",
         "addition/compatible-numbers",
-        "addition/running-total"
+        "addition/running-total",
+        "addition/estimate-by-rounding"
+      ]
+    },
+    {
+      "id": "u16",
+      "unitNumber": 16,
+      "title": "Unit 16: Judging and Missing Parts",
+      "description": "Is that answer sensible, and what is missing from this one",
+      "icon": "🤔",
+      "lessons": [
+        "addition/is-it-reasonable",
+        "addition/missing-addend"
       ]
     }
   ]
