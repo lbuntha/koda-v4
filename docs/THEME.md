@@ -1,69 +1,110 @@
-# Learn with Koda theme contract
+# Koda theme contract
 
-This is the learner-facing theme carried from `koda-v4`. It is playful, calm,
-touch-friendly, and built for children. New plugins should consume semantic tokens
-and shared UI primitives instead of copying hex values into feature code.
+What a screen is allowed to be made of. Read it before writing a skill's UI: a
+component that picks its own colours is theme-correct in exactly one theme, and
+the one it is wrong in is whichever you were not looking at.
+
+Everything here is defined in two files — `src/index.css` for the tokens and
+`src/lib/themeSystem.ts` for the shapes built from them. Where this page and
+those files disagree, they win.
 
 ## Product identity
 
-- Product name: **Learn with Koda**.
-- Audience: children learning independently, primarily on touch devices.
-- Voice: encouraging, short, clear, and positive.
-- Shape language: round controls, `rounded-2xl` or `rounded-3xl` cards, friendly icon wells.
-- Motion: brief and purposeful; always respect `prefers-reduced-motion`.
+- Product name: **Learn with Koda**. Koda is the character; a skill is not one.
+- Audience: children learning independently, mostly on touch devices, ages 5
+  through the teens — so a screen must not read as babyish at the top of that
+  range or as a form at the bottom.
+- Shape language: round controls, `rounded-2xl` / `rounded-3xl` cards, icon wells.
+- Motion: brief and purposeful. The vocabulary is `kit/motion.ts` — `SPRING`,
+  `stagger`, `idleFloat`, `useMotionOK`. Do not hand-tune a spring, and always
+  respect `prefers-reduced-motion`.
 
 ## Semantic tokens
 
-| Role          | Utility                 | Value     | Use                                  |
-| ------------- | ----------------------- | --------- | ------------------------------------ |
-| Canvas        | `bg-koda-canvas`        | `#FAF9FF` | App background                       |
-| Surface       | `bg-koda-surface`       | `#FFFFFF` | Cards, toolbar, menus                |
-| Ink           | `text-koda-ink`         | `#21183D` | Headings and important content       |
-| Body          | `text-koda-body`        | `#6E6480` | Explanations and labels              |
-| Muted         | `text-koda-muted`       | `#9387AB` | Low-emphasis metadata                |
-| Primary       | `bg-koda-primary`       | `#6844EA` | Play buttons and selected navigation |
-| Primary hover | `bg-koda-primary-hover` | `#5938D2` | Hover/pressed primary actions        |
-| Accent        | `text-koda-accent`      | `#9A85FF` | Decorative emphasis                  |
-| Soft          | `bg-koda-soft`          | `#F3EFFF` | Active navigation and purple wells   |
-| Border        | `border-koda-border`    | `#E7E2F1` | Cards and controls                   |
-| Divider       | `border-koda-divider`   | `#EEE9FA` | Quiet separators                     |
+One definition per theme, swapped by the `.dark` class that `ThemeContext` sets
+on `<html>`. A component that uses these is theme-correct without asking which
+theme it is in.
 
-Tokens are defined once in `src/index.css` under Tailwind's `@theme` block.
-Change them there to update all plugins.
+| Utility | Token | Use |
+|---|---|---|
+| `bg-canvas` | `--koda-canvas` | the page behind everything |
+| `bg-surface` | `--koda-surface` | cards, bars, menus |
+| `bg-surface-muted` | `--koda-surface-muted` | wells, tracks, quiet fills |
+| `text-ink` | `--koda-ink` | headings and anything that must be read |
+| `text-body` | `--koda-body` | explanations |
+| `text-muted` | `--koda-muted` | metadata, eyebrows, captions |
+| `border-line` | `--koda-line` | card and control edges |
+| `bg-play-sky`, `bg-play-ground` | `--koda-play-*` | the ground an activity plays on — sky above, meadow below |
 
-## Typography roles
+**Never a raw slate shade in feature code.** `bg-slate-100` is a second
+definition of the surface, and it is wrong in one theme. The play tokens exist
+for the same reason: every activity that draws a play area is the same place,
+and re-tinting the product is one edit rather than a search.
 
-The UI loads local **Plus Jakarta Sans** files. **JetBrains Mono** is reserved for
-technical values. Feature components must inherit the global font.
+The brand also overrides Tailwind's own scales in `@theme`, so `bg-indigo-600`
+is Koda's indigo (`#6B46C1`) and `bg-rose-600` is Koda's rose. Use those for
+accents; use the semantic tokens for surfaces.
 
-- `koda-page-title`: the page greeting or destination title.
-- `koda-section-title`: home-page section titles.
-- `koda-card-title`: activity and feature card titles.
-- `koda-nav-label`: learner navigation labels.
-- `koda-label`: important supporting labels.
-- `koda-metric`: XP, streak, and progress values.
-- `koda-chip`: compact badges and metadata.
+### Colour that means something
+
+| Role | Colour |
+|---|---|
+| Primary action, selected navigation, current step | indigo / violet |
+| XP | indigo | 
+| Streak | orange |
+| Completed, correct | emerald |
+| Wrong, destructive, leaving | rose |
+| Practice | violet, on the path and in the round |
+
+**No amber and no yellow, anywhere.** It fails against this app's light surface
+— the lesson-card chip measured 168,143,0 on 255,249,196, a yellow on a yellow.
+The amber scale still exists in `index.css` for older code; new code does not
+reach for it. And **never encode state in colour alone**: a colour is how a
+state looks, never how it is known.
+
+## Typography
+
+**Plus Jakarta Sans** for everything a child reads; **JetBrains Mono** is
+reserved for technical values — ids, versions, counts, log rows. Both load as
+variable fonts, so any weight the UI asks for exists.
+
+Feature code inherits the global font and reaches for `themeSystem.typography()`
+(`h1`–`h4`, `body`, `body-sm`, `caption`, `subtitle`) rather than restating
+sizes. The `koda-admin-*` classes are the operator surface's own scale and are
+not for learner screens.
 
 ## Shared primitives
 
-Import `Card`, `Button`, and `Badge` from `src/components/ui`.
+Import from `src/components/ui`, and style through `themeSystem`:
 
 ```tsx
-import { Badge, Button, Card } from '../../components/ui';
+import { UIButton, UIBadge, UICard } from "../../components/ui";
+import { themeSystem } from "../../lib/themeSystem";
 
-export function ReadingPluginHome() {
-  return (
-    <Card className="p-5">
-      <Badge>New adventure</Badge>
-      <h2 className="koda-card-title mt-3">Story Explorer</h2>
-      <p className="mt-1 text-sm font-semibold text-koda-body">
-        Read a short story and find the hidden clues.
-      </p>
-      <Button className="mt-4">Play</Button>
-    </Card>
-  );
-}
+<div className={themeSystem.card("interactive", themeSystem.spacing.card)}>
+  <h3 className="text-base font-black text-ink">Number Bonds</h3>
+  <p className="mt-1 text-xs text-muted">Two parts, one whole.</p>
+  <UIButton variant="primary" size="sm">Play</UIButton>
+</div>
 ```
+
+| Reach for | Instead of |
+|---|---|
+| `themeSystem.button(variant, size)` or `UIButton` | a hand-written class string |
+| `themeSystem.card(variant)` or `UICard` | `bg-white rounded-2xl border …` |
+| `themeSystem.field(size)` | styling an `<input>` yourself |
+| `UIBadge`, `UIStatTile`, `UIDataTable`, `UIModal`, `UISkillThumbnail` | a second version of any of them |
+| `themeSystem.spacing.card` / `.section` / `.stack` | picking a padding per component |
+
+`themeSystem` also owns the composite surfaces — `statTile`, `featureCard`,
+`pathNode`, `sectionHeader`, `unitBanner`, `kidMessage`, `menu`, `dialog`,
+`list`, `sidebar`, `appShell`. If you are about to write one of those, it
+already exists.
+
+Touch targets: **44px on a touch device**, which the button scale already
+enforces with a `pointer-coarse:min-h-11` floor — so use the scale rather than a
+bespoke height. It keys off the input device, not the viewport: a tablet is a
+wide screen with fat fingers, and a breakpoint would have left it at 34px.
 
 ## Two widths, one product
 
@@ -79,9 +120,8 @@ own, so the choice is CSS, never a measurement.
 
 Feature code should not re-decide this. `UIModal` and `UIDialog` already switch
 shape, `themeSystem.list` is the grouped-row style both Settings and the account
-sheet use, `UIPageHeader` is the page title that steps aside for the toolbar,
-and `MainLayout` owns the gutter. A component reaching for its own `rail:` rule
-is usually a sign the shared piece is missing.
+sheet use, and `MainLayout` owns the gutter. A component reaching for its own
+`rail:` rule is usually a sign the shared piece is missing.
 
 Two rules that follow, and both were learned by breaking them:
 
@@ -95,26 +135,27 @@ Two rules that follow, and both were learned by breaking them:
   `lib/useBreakpoint.ts` is for. Use a `rail:` class when the difference is only
   how a thing looks, and the hook when it must not be in the tree at all.
 
+A third that applies to any list of cards: **one first thing.** Three identical
+cards stacked in one column is three identical primary buttons, so nothing reads
+as "start here" — the Today band leads with one full card and collapses the rest
+to rows below 640px. `UILessonCard`'s `compact` variant is the worked example.
+
 ## Learner UI rules
 
-1. Make primary touch targets at least 40 px; main activity actions should be larger.
-2. Keep one clear action per activity card. Prefer “Play,” “Continue,” or “Try again.”
-3. Use purple for primary actions, selected navigation, and current learning steps.
-4. Use semantic color for rewards and state: amber for XP, orange for streaks,
-   emerald for completed, and rose for errors.
-5. Keep copy short. Explain the next action rather than implementation details.
-6. Use friendly art or an honest empty state; never show a broken image placeholder.
-7. Keep `p-4 sm:p-6`, `gap-3` to `gap-6`, and responsive one-column layouts.
-8. Avoid admin tables, dense controls, and marketing-style hero sections.
+1. One clear action per card. "Play", "Continue", "Carry on", "Try again".
+2. Short copy that says what happens next, never what the code does.
+3. Friendly art or an honest empty state; never a broken image placeholder.
+4. `p-4 sm:p-6` and `gap-3`–`gap-6`; one column on a phone.
+5. No admin tables or dense controls on a learner screen — those belong to the
+   operator surface, which has its own type scale for exactly this reason.
+6. Check every screen in **light and dark**, and at **360px wide**. Both, every
+   time: half of what this page exists to prevent is invisible in one of them.
 
-## Plugin contract
+## Where a skill fits
 
-Each `AppPlugin` supplies `id`, `name`, `description`, `version`, and `component`.
-The home page renders enabled plugin components and wraps each with
-`data-plugin-id` for inspection and testing.
-
-1. Create `src/skills/<skill-id>/index.ts` and its activities.
-2. Export an object implementing `AppPlugin`.
-3. Register it in `src/skills/registry.ts`.
-4. Open **Plugin Lab** in the app and toggle it to test mount/unmount behavior.
-5. Run `npm test`, `npm run lint`, and `npm run build`.
+A skill draws only what the child touches. The bar, the step header, the
+feedback strip and the finish screen belong to `kit/` (`SkillRound`), and a
+skill that rebuilds one of them has stopped being part of the same product —
+that is not a style preference, it is the reason the kit exists. See
+`docs/SKILL_DEVELOPMENT.md` §4 for the house rules that apply inside the part
+you do draw.

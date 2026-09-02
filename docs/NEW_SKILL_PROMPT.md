@@ -15,10 +15,12 @@ contract: if `src/skills/types.ts` or `src/skills/kit/` changes, this changes.
 ```
 Build a new Koda skill.
 
-SKILL: [name, e.g. "Subtraction Steps"]
+SKILL: [name — say what it teaches, e.g. "Subtraction". Not "<Topic> Quest":
+        the suffix is on every skill, carries nothing, and truncates first]
 TEACHES: [what a child can do afterwards, in one sentence]
 AGES: [e.g. 5-7]
 LESSONS: [2-4 lesson titles, easiest first]
+PRACTICE: [1-2 practice lessons — the same engines with the help removed]
 
 Read these first — they are the contract, not documentation:
 - src/skills/types.ts                     Skill, KodaSDK, ActivityProps, Lesson
@@ -37,6 +39,9 @@ Create src/skills/<id>/ containing:
   lessons.json    one entry per lesson: id, title, concept, conceptKey, activity,
                   params, icon, iconName, iconTone, difficulty, pedagogyTip,
                   standards[], trajectoryLevel, ageBand
+                  practice lessons are the same file: title "Practice: <technique>",
+                  concept "Practice Without Help", the conceptKey they practise,
+                  and params.question = { practice: true, modes: [...] }
   activities/<Name>.tsx   the playable component
   index.ts        export const skill: Skill — copy counting/index.ts
   <id>.test.ts    describeSkillContract(skill); describeActivitySmoke(skill);
@@ -89,18 +94,43 @@ RULES — these are what the architecture is for:
 6. Style through themeSystem tokens only — `themeSystem.field()` for any input,
    `bg-surface` / `text-ink` / `border-line` for surfaces. Never a raw slate shade:
    that is a second definition of the surface and it is wrong in one theme.
-   Check light AND dark. Never encode state in colour alone.
+   Check light AND dark, and at 360px. Never encode state in colour alone, and no
+   amber or yellow anywhere — it fails against this app's light surface. Reach for
+   the existing primitive (UIButton, UICard, UIBadge, themeSystem.card/button/field)
+   before writing a class string. docs/THEME.md is the contract.
 7. Every feature declared in the manifest must actually be read with
    koda.config.isEnabled(); every setting with koda.config.get(). A flag nothing
    reads is a lie in the Skill Manager.
 8. Standards: copy published codes exactly, most-relevant first, only what the lesson
    is assessed on. Empty is a real answer when no code exists — then trajectoryLevel
    must be set. See docs/PLUGINS.md §7.
+9. Mobile and offline are requirements, not polish. The play area fits 360x640
+   with no sideways scroll on the page (wide scenes scroll inside their own
+   container); touch targets come from the button scale, which carries the 44px
+   floor; no page padding or `rail:` rules of your own. And the activity fetches
+   NOTHING — numbers are generated locally, artwork is the bundled SVG, speech
+   and telemetry degrade on their own through the SDK. A child must be able to
+   finish a round with the aeroplane on.
+10. Ship practice. `params.question.practice` is the flag — read by kit/practice.ts to
+   take the help away and by the curriculum to decide where the lesson sits — so a
+   lesson merely titled "Practice: ..." is a teaching lesson that lies. Inside the
+   activity: `modeAt(setup, index, fallback)` to cycle the modes, `quietWhenPractising`
+   around anything spoken, and no `hints`. Put the practice lessons in their own course
+   unit, appended after the teaching ones; a unit may not mix the two.
+   Practice is the only round speed is measured from — nine or ten questions, because a
+   learner is not ranked until eight practice answers. See docs/SKILL_DEVELOPMENT.md §8.
 
 WHAT THE HOST GIVES YOU — `{ params, level, koda, lesson }`:
   params  the lesson's params merged over the activity's defaultParams
   lesson  { id, title, concept, levelNumber, totalLessons } — display only
   koda    sound, haptics, speech, progress, config, learning, log, ui
+
+  Do not record what the app already says. The digits, the number words, the
+  shared place-value facts and subject-neutral praise live in src/voice/common/
+  — a voice belonging to no skill. `npm run voice:record -- --skill <id>` skips
+  whatever the pack covers; your own recording of a shared phrase still wins if
+  you make one. Reactions stay scoped to your skill, and the pack's neutral
+  praise is added to yours rather than replacing it.
 
   Gotchas that have each cost a day:
   - XP reaches the learner only through `koda.progress.awardXp`. `onComplete`
@@ -127,8 +157,11 @@ VERIFY before saying it is done:
     that crossed a level says "Level N!", and the lesson line reads
     "Lesson 3 of 15" — "Level" on that screen means the learner's XP level
   - The Activity trail in the Skill Manager shows this skill's rows
+  - The Practice section appears on the skill's path, and a practice round leaves
+    rows in the Skill Manager's Practice log (pace, top speed)
   - Disabling the skill removes its lessons from the Learn page
-  - Correct in light and dark, and on a narrow window
+  - Correct in light and dark, at 360px wide, with no sideways scroll
+  - A full round plays with the network switched off (DevTools > Offline)
 ```
 
 ---
@@ -147,6 +180,7 @@ VERIFY before saying it is done:
 | `PracticeRoundCompleteModal` | stars, XP won, streak, today's goal, level progress, what to do next |
 | `playAnswerSound` | the recorded reaction to a right or wrong answer, behind the learner's own switches |
 | `SPRING`, `stagger`, `idleFloat`, `useMotionOK` | the shared motion vocabulary — do not hand-tune a spring |
+| `isPractice`, `modeAt`, `quietWhenPractising` | practice: the mode cycle and the silence, so every skill removes the help the same way |
 | `describeSkillContract`, `describeActivitySmoke` | the whole structural suite, inherited in two lines |
 
 A skill that writes any of these itself has gone wrong.

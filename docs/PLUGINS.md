@@ -432,6 +432,10 @@ here. No skill folder is touched.
 3. **Export your activities.** Check the registry first — if the interaction already exists
    (a ten-frame, a number line), reference it instead of writing a second one.
 4. **Write your lessons** in `lessons.json`, each pointing at an activity and configuring it.
+   Include practice: the same engines with `params.question.practice: true` and a `modes`
+   cycle, in their own course unit. The flag — not the title — is what removes the help,
+   sorts the lesson into the Practice section, and marks its events as the ones speed may
+   be read from. `docs/SKILL_DEVELOPMENT.md` §8.
 5. **Register it** — one import, one array entry in `registry.ts`.
 6. **Place lessons in the course** (`curriculum/course.json`). Along with the registry, this is
    the only edit outside your folder.
@@ -544,6 +548,9 @@ can look perfect on screen while filing no learning events at all.
 - [ ] Every lesson names a `conceptKey` that already exists if the skill is not new, and
       carries `standards` codes copied from the published source — or an empty array plus a
       `trajectoryLevel`. See the rule above.
+- [ ] Ships at least one practice lesson, flagged with `params.question.practice`, in a unit
+      of its own. Without it the skill has no fluency evidence — mastery still works, but
+      "is this child getting faster?" has no answer.
 - [ ] Keyboard reachable; state never carried by colour alone.
 - [ ] Entry component under ~300 lines. Past that, the generic part belongs in the kit.
 - [ ] Has `<skill>.test.ts` calling `describeSkillContract` and `describeActivitySmoke`, and a

@@ -72,6 +72,13 @@ losing `"seven"` costs every skill on the device its count-along.
 `/api/*` is on the denylist. A cached tutor reply would be a stale answer to a
 different question, which is worse than no reply.
 
+## A note on push
+
+`docs/PUSH.md` proposes moving this worker from `generateSW` to
+`injectManifest` so a `push` handler can live beside the caching rules above,
+rather than registering a second worker for Firebase — two workers on this
+origin is the failure the last section of this file is about.
+
 ## Updates
 
 `registerType: 'prompt'`. A new build does **not** install itself: the child sees
