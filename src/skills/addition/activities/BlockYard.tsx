@@ -328,9 +328,7 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
   // Practice says nothing at all, on top of the family's own voice switch.
   const speaks = !practising && koda.config.isEnabled("audio_speech", true);
   const chimes = koda.config.isEnabled("sound_chimes", true);
-  const vibrates = koda.config.isEnabled("haptic_feedback", true);
   const showsTotal = koda.config.isEnabled("running_total_badge", true);
-  const framesSteps = koda.config.isEnabled("step_context_tags", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
 
   const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
@@ -340,7 +338,7 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
   const place = (p: Place) => {
     if (round.feedback) return;
     setBuilt((prev) => ({ ...prev, [p]: prev[p] + 1 }));
-    if (vibrates) koda.haptics.tap();
+    koda.haptics.tap();
     chime("clink");
   };
 
@@ -359,7 +357,7 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
         : { ...prev, tens: prev.tens - 10, hundreds: prev.hundreds + 1 },
     );
     chime("success");
-    if (vibrates) koda.haptics.success();
+    koda.haptics.success();
     if (speaks) {
       void koda.speech.say(
         ready === "ones" ? "10 ones make 1 ten" : "10 tens make 1 hundred",
@@ -394,7 +392,7 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
 
     const correct = have === question.sum;
     chime(correct ? "success" : "error");
-    if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
+    correct ? koda.haptics.success() : koda.haptics.tap();
     submit({
       correct,
       given: String(have),
@@ -427,7 +425,6 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
       prompt={prompt}
       iconName="boxes"
       iconTone="purple"
-      contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message}
       hints={practising ? [] : blockHints(question, { built, kidTip: copy.kidTip })}

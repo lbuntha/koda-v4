@@ -32,14 +32,10 @@ const sourceText = (() => {
   return parts.join("\n");
 })();
 
+/* Features moved to `describeSkillContract`, which now holds both halves of the
+   rule — declared and read, read and declared — for every skill rather than for
+   this one. Settings stay here until they earn the same. */
 describe("the skill manager tells the truth about this skill", () => {
-  it.each(skill.features)("$id is read somewhere", ({ id }) => {
-    expect(
-      sourceText.includes(`isEnabled("${id}"`),
-      `no activity asks about the "${id}" feature`,
-    ).toBe(true);
-  });
-
   it.each(Object.keys(skill.settings).map((key) => ({ key })))("$key is read somewhere", ({ key }) => {
     expect(
       sourceText.includes(`get("${key}"`) || sourceText.includes(`get<string>("${key}"`),

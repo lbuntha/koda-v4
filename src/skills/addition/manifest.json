@@ -113,6 +113,13 @@
       "tag": "Cognitive"
     },
     {
+      "id": "strategy_scaffold",
+      "name": "Strategy scaffold",
+      "description": "Says in words what the model is showing — what is in the frame, which box to fill next, what has been jumped. Turn off to have the child read the picture alone.",
+      "isEnabled": true,
+      "tag": "Cognitive"
+    },
+    {
       "id": "step_context_tags",
       "name": "Step framing tags",
       "description": "Labels each step — warm-up, guided challenge, final milestone — beside the step counter.",

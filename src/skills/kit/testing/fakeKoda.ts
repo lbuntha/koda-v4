@@ -85,6 +85,8 @@ export function createFakeKoda(options: FakeKodaOptions = {}): FakeKoda {
     calls.push({ name, args });
   };
 
+  const vibrates = () => options.features?.haptic_feedback ?? true;
+
   const sdk: KodaSDK = {
     skillId: options.skillId ?? "test-skill",
 
@@ -94,10 +96,20 @@ export function createFakeKoda(options: FakeKodaOptions = {}): FakeKoda {
       setEnabled: (on: boolean) => record("sound.setEnabled", on),
     },
 
+    /* Silent when the skill's own `haptic_feedback` is off, because the real
+       SDK is: it swallows the pulse there so an activity never has to ask. A
+       fake that recorded it anyway would let a test prove a switch works when
+       the app it stands in for had stopped honouring it. */
     haptics: {
-      tap: () => record("haptics.tap"),
-      success: () => record("haptics.success"),
-      pulse: (type: SoundType) => record("haptics.pulse", type),
+      tap: () => {
+        if (vibrates()) record("haptics.tap");
+      },
+      success: () => {
+        if (vibrates()) record("haptics.success");
+      },
+      pulse: (type: SoundType) => {
+        if (vibrates()) record("haptics.pulse", type);
+      },
     },
 
     speech: {

@@ -35,13 +35,6 @@
   "requires": [],
   "features": [
     {
-      "id": "tactile_pop",
-      "name": "Tactile bounce & pop",
-      "description": "Elastic scale animation when a countable item is touched.",
-      "isEnabled": true,
-      "tag": "Visual"
-    },
-    {
       "id": "haptic_feedback",
       "name": "Haptic vibration",
       "description": "Vibration pulse synchronised with the tap animation.",

@@ -569,17 +569,14 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
   // Practice says nothing at all, on top of the family's own voice switch.
   const speaks = !practising && koda.config.isEnabled("audio_speech", true);
   const chimes = koda.config.isEnabled("sound_chimes", true);
-  const vibrates = koda.config.isEnabled("haptic_feedback", true);
   const badges = koda.config.isEnabled("counting_badges", true);
   const showsTotal = koda.config.isEnabled("running_total_badge", true);
-  const framesSteps = koda.config.isEnabled("step_context_tags", true);
 
   const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
     if (chimes) koda.sound.play(type);
   };
 
   const buzz = (kind: "tap" | "success") => {
-    if (!vibrates) return;
     if (kind === "success") koda.haptics.success();
     else koda.haptics.tap();
   };
@@ -766,7 +763,6 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
       prompt={prompt}
       iconName={ICONS[question.mode]}
       iconTone="purple"
-      contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message}
       hints={practising ? [] : trayHints(question, {

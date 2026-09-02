@@ -359,8 +359,6 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
 
 
   const chimes = koda.config.isEnabled("sound_chimes", true);
-  const vibrates = koda.config.isEnabled("haptic_feedback", true);
-  const framesSteps = koda.config.isEnabled("step_context_tags", true);
 
   const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
     if (chimes) koda.sound.play(type);
@@ -381,7 +379,7 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
     const given = question.blanks.map((id) => entries[id] ?? "");
     const correct = given.join(",") === question.answers.map(String).join(",");
     chime(correct ? "success" : "error");
-    if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
+    correct ? koda.haptics.success() : koda.haptics.tap();
 
     // A digit in the wrong column is the mistake this chart exists to surface,
     // so it is reported as one rather than as a generic slip.
@@ -413,7 +411,6 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
       prompt={prompt}
       iconName="layers"
       iconTone="indigo"
-      contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message}
       hints={practising ? [] : deskHints(question, { entries, kidTip: copy.kidTip })}

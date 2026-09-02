@@ -77,7 +77,15 @@ export const PracticeStepHeader: React.FC<PracticeStepHeaderProps> = ({
 }) => {
   // Determine an inviting contextual tag instead of a dry "CHALLENGE"
   const getContextTag = () => {
-    const t = { ...DEFAULT_STEP_TAGS, ...tagLabels };
+    /* Spread would not do: a skill that leaves a label blank sends `undefined`
+       for it — "no opinion" — and `{...DEFAULT_STEP_TAGS, ...tagLabels}` writes
+       that undefined straight over the default. Both skills ship all four
+       labels empty, so every step tag was blank and the switch that hides them
+       had nothing to hide. */
+    const t = { ...DEFAULT_STEP_TAGS };
+    for (const [key, label] of Object.entries(tagLabels ?? {})) {
+      if (label) t[key as keyof StepTagLabels] = label;
+    }
     if (stepNumber === totalSteps) return t.milestone;
     if (stepNumber === 1) return t.warmup;
     if (stepNumber % 2 === 0) return t.activity;

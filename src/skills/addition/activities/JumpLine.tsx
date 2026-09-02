@@ -429,8 +429,6 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
   // Practice says nothing at all, on top of the family's own voice switch.
   const speaks = !practising && koda.config.isEnabled("audio_speech", true);
   const chimes = koda.config.isEnabled("sound_chimes", true);
-  const vibrates = koda.config.isEnabled("haptic_feedback", true);
-  const framesSteps = koda.config.isEnabled("step_context_tags", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
 
   const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
@@ -443,7 +441,7 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
   const submitTotal = (given: number) => {
     const correct = given === question.sum;
     chime(correct ? "success" : "error");
-    if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
+    correct ? koda.haptics.success() : koda.haptics.tap();
     submit({
       correct,
       given: String(given),
@@ -465,7 +463,7 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
       setAt(question.from + size);
       setMade([size]);
       chime(correct ? "success" : "error");
-      if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
+      correct ? koda.haptics.success() : koda.haptics.tap();
       const unit = question.mode === "bridge_ten" ? 10 : 100;
       const target = nextMultiple(question.a, unit);
       submit({
@@ -483,7 +481,7 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
     const next = at + size;
     setAt(next);
     setMade((prev) => [...prev, size]);
-    if (vibrates) koda.haptics.tap();
+    koda.haptics.tap();
     chime(size < 0 ? "clink" : "pop");
     // A ticked line names where you land; an open one deliberately does not.
     if (speaks && question.ticks > 0) {
@@ -492,7 +490,7 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
 
     if (question.answerKind === "arrival" && next === question.sum) {
       chime("success");
-      if (vibrates) koda.haptics.success();
+      koda.haptics.success();
       submit({
         correct: true,
         given: String(next),
@@ -548,7 +546,6 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
       prompt={prompt}
       iconName="footprints"
       iconTone="cyan"
-      contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message}
       hints={practising ? [] : jumpHints(question, { at, made, entry, kidTip: copy.kidTip })}

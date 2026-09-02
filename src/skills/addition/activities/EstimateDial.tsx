@@ -271,8 +271,6 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
   }, [question.id]);
 
   const chimes = koda.config.isEnabled("sound_chimes", true);
-  const vibrates = koda.config.isEnabled("haptic_feedback", true);
-  const framesSteps = koda.config.isEnabled("step_context_tags", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
 
   const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
@@ -291,7 +289,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
     }
     setRounded((prev) => prev.map((v, i) => (i === index ? to : v)));
     chime("clink");
-    if (vibrates) koda.haptics.tap();
+    koda.haptics.tap();
   };
 
   const chooseEstimate = (value: number) => {
@@ -302,7 +300,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
     }
     const correct = String(value) === question.expected;
     chime(correct ? "success" : "error");
-    if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
+    correct ? koda.haptics.success() : koda.haptics.tap();
     submit({
       correct,
       given: String(value),
@@ -319,7 +317,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
     const correct = verdict === question.verdict;
     const near = roundTo(question.a, question.unit) + roundTo(question.b, question.unit);
     chime(correct ? "success" : "error");
-    if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
+    correct ? koda.haptics.success() : koda.haptics.tap();
     submit({
       correct,
       given: verdict,
@@ -347,7 +345,6 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
       prompt={prompt}
       iconName="scale"
       iconTone="emerald"
-      contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message}
       hints={practising ? [] : estimateHints(question, { rounded, kidTip: copy.kidTip })}

@@ -278,9 +278,7 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
   // Practice says nothing at all, on top of the family's own voice switch.
   const speaks = !practising && koda.config.isEnabled("audio_speech", true);
   const chimes = koda.config.isEnabled("sound_chimes", true);
-  const vibrates = koda.config.isEnabled("haptic_feedback", true);
   const showsTotal = koda.config.isEnabled("running_total_badge", true);
-  const framesSteps = koda.config.isEnabled("step_context_tags", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
 
   const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
@@ -292,7 +290,7 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
   const settle = (next: number, sound: Parameters<typeof koda.sound.play>[0]) => {
     setFilled(next);
     nudge.clear();
-    if (vibrates) koda.haptics.tap();
+    koda.haptics.tap();
     chime(sound);
     if (speaks) void koda.speech.say(numberWord(next), speechRate(koda));
   };
@@ -330,7 +328,7 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
     const given = question.asks === "added" ? added : filled;
     const correct = String(given) === question.expected;
     chime(correct ? "success" : "error");
-    if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
+    correct ? koda.haptics.success() : koda.haptics.tap();
 
     submit({
       correct,
@@ -365,7 +363,6 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
       prompt={prompt}
       iconName={question.size === 5 ? "layers" : "boxes"}
       iconTone="purple"
-      contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message}
       hints={practising ? [] : frameHints(question, { filled, kidTip: copy.kidTip })}

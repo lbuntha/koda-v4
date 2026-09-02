@@ -256,8 +256,6 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({
   }, [question.id]);
 
   const chimes = koda.config.isEnabled("sound_chimes", true);
-  const vibrates = koda.config.isEnabled("haptic_feedback", true);
-  const framesSteps = koda.config.isEnabled("step_context_tags", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
 
   const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
@@ -269,7 +267,7 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({
     const correct = question.fitting.includes(s.id);
     if (correct && memory.current) memory.current.chosen = s.id;
     chime(correct ? "success" : "error");
-    if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
+    correct ? koda.haptics.success() : koda.haptics.tap();
 
     const others = question.fitting.filter((id) => id !== s.id).map(byId);
     submit({
@@ -293,7 +291,7 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({
     const short = question.paths!.find((p) => p.id === question.shorter)!;
     const long = question.paths!.find((p) => p.id !== question.shorter)!;
     chime(correct ? "success" : "error");
-    if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
+    correct ? koda.haptics.success() : koda.haptics.tap();
     submit({
       correct,
       given: id,
@@ -315,7 +313,6 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({
       prompt={prompt}
       iconName="sparkles"
       iconTone="purple"
-      contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message}
       hints={practising ? [] : strategyHints(question, { kidTip: copy.kidTip })}

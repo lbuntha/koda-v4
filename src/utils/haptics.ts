@@ -4,11 +4,6 @@
  * perfectly synchronized with the 'tap-pop-anim' spring bounce sequence.
  */
 
-import { SkillStoreAPI } from "../lib/skillStore";
-
-/** Skill whose flags currently gate haptics. See the note in triggerHaptic. */
-const HAPTICS_OWNER = "counting";
-
 export type HapticType =
   | "pop"
   | "tap-pop"
@@ -33,43 +28,43 @@ export function isHapticsSupported(): boolean {
   );
 }
 
+/** How hard a pulse lands. The calling skill's own `hapticIntensity` setting. */
+export type HapticIntensity = "subtle" | "crisp" | "strong";
+
+export interface HapticOptions {
+  intensity?: HapticIntensity | string;
+  /** An exact duration or pattern, instead of the one this type would pick. */
+  pattern?: number | number[];
+}
+
 /**
  * Dispatches a vibration pattern corresponding to the manipulative interaction.
  *
+ * Knows nothing about skills, on purpose. It used to read the *counting*
+ * skill's `haptic_feedback` flag and `hapticIntensity` setting by id, whichever
+ * skill was actually vibrating — so switching haptics off in counting silenced
+ * every other skill too, and addition's own switch was the only one that looked
+ * like it worked. Both questions belong to the caller: the SDK asks them of the
+ * skill that is running and passes the answer down.
+ *
  * @param type The semantic haptic feedback type (default: "pop")
- * @param customPattern Optional custom vibration duration (ms) or pattern array
+ * @param opts The calling skill's intensity, or an exact pattern to play
  * @returns boolean indicating if the vibration call succeeded
  */
 export function triggerHaptic(
   type: HapticType = "pop",
-  customPattern?: number | number[]
+  opts: HapticOptions = {},
 ): boolean {
   if (!isHapticsSupported()) {
     return false;
   }
 
-  // A shared util should not know a skill id — a skill that wants haptics
-  // gated by its own flag should check `koda.config.isEnabled()` and call this
-  // only when enabled. Kept pointing at the counting skill for now so existing
-  // behaviour is preserved; it defaults to on when the skill is absent.
-  if (
-    typeof SkillStoreAPI !== "undefined" &&
-    !SkillStoreAPI.isFeatureEnabled(HAPTICS_OWNER, "haptic_feedback", true)
-  ) {
-    return false;
-  }
-
   try {
-    if (customPattern !== undefined) {
-      return navigator.vibrate(customPattern);
+    if (opts.pattern !== undefined) {
+      return navigator.vibrate(opts.pattern);
     }
 
-    // Retrieve configured haptic intensity setting if available
-    const intensity =
-      typeof SkillStoreAPI !== "undefined"
-        ? SkillStoreAPI.getSkillSetting<string>(HAPTICS_OWNER, "hapticIntensity", "crisp")
-        : "crisp";
-
+    const intensity = opts.intensity ?? "crisp";
     // Duration multipliers based on intensity setting
     let popDuration = 18; // default "crisp"
     if (intensity === "subtle") popDuration = 10;
@@ -117,6 +112,6 @@ export function triggerHaptic(
 /**
  * Triggers a synchronized 'tap-pop' haptic pulse for manipulative interactions.
  */
-export function triggerTapPopHaptic(): boolean {
-  return triggerHaptic("pop");
+export function triggerTapPopHaptic(opts?: HapticOptions): boolean {
+  return triggerHaptic("pop", opts);
 }

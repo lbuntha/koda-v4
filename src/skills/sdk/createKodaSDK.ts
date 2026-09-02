@@ -111,6 +111,14 @@ export function createKodaSDK(
     return declared ? declared.isEnabled : fallback;
   };
 
+  /** How hard this skill's pulses land, if it declares a preference at all. */
+  const hapticIntensity = (): string => {
+    if (knownToStore()) {
+      return SkillStoreAPI.getSkillSetting<string>(skillId, "hapticIntensity", "crisp");
+    }
+    return (defaults.settings.hapticIntensity as string | undefined) ?? "crisp";
+  };
+
   // Bound to this mount's lesson, so a skill cannot log against another
   // lesson's concept any more than it can read another skill's settings.
   // Without a context the host is running the skill outside a lesson (a demo,
@@ -134,16 +142,30 @@ export function createKodaSDK(
       },
     },
 
+    /*
+     * Vibration, gated here on this skill's own `haptic_feedback`.
+     *
+     * The same argument as `speech.say` below: asked once, of the skill that is
+     * actually running. Before, the vibration util itself looked the flag up
+     * under a hard-coded skill id — counting's — so a parent silencing haptics
+     * in counting stopped them in every other skill, while addition's identical
+     * switch was checked a second time in each of its twelve activities and did
+     * nothing on its own. Skills may now simply vibrate.
+     */
     haptics: {
       tap() {
-        triggerTapPopHaptic();
+        if (!featureEnabled("haptic_feedback", true)) return;
+        triggerTapPopHaptic({ intensity: hapticIntensity() });
       },
       success() {
-        triggerHaptic("success");
+        if (!featureEnabled("haptic_feedback", true)) return;
+        triggerHaptic("success", { intensity: hapticIntensity() });
       },
       pulse(type: SoundType) {
-        if (type === "pop") triggerTapPopHaptic();
-        else triggerHaptic(type);
+        if (!featureEnabled("haptic_feedback", true)) return;
+        const intensity = hapticIntensity();
+        if (type === "pop") triggerTapPopHaptic({ intensity });
+        else triggerHaptic(type, { intensity });
       },
     },
 

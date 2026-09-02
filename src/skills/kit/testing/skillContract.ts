@@ -1,3 +1,5 @@
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { Lesson, Skill } from "../../types";
 
@@ -27,6 +29,54 @@ const ACTIVITY_REF = /^[a-z0-9-]+\/[a-z0-9-]+$/;
  *  rewriting lesson ids. */
 const levelOf = (lesson: Lesson): unknown =>
   (lesson.params as { level?: unknown } | undefined)?.level;
+
+
+/**
+ * Every line of a skill's own source, concatenated.
+ *
+ * A feature is a string in JSON and its reader is a string in a component, so
+ * TypeScript sees no connection between them and only the text can be asked.
+ * Crude on purpose: it cannot tell whether the flag changes anything worth
+ * changing, only that somebody asked about it.
+ */
+const sourceUnder = (...dirs: string[]): string => {
+  const parts: string[] = [];
+  const walk = (dir: string) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const path = join(dir, entry.name);
+      if (entry.isDirectory()) walk(path);
+      else if (/\.tsx?$/.test(entry.name) && !/\.test\.tsx?$/.test(entry.name)) {
+        parts.push(readFileSync(path, "utf8"));
+      }
+    }
+  };
+  for (const dir of dirs) walk(join(process.cwd(), dir));
+  return parts.join("\n");
+};
+
+/**
+ * The code that answers a feature question on every skill's behalf.
+ *
+ * Some switches are honoured once, centrally — the round hides the step tag,
+ * the SDK swallows a vibration — precisely so that twenty skills do not each
+ * have to remember. A flag read there is read.
+ */
+const sharedSource = (): string => sourceUnder("src/skills/kit", "src/skills/sdk");
+
+/**
+ * Whether a body of code asks whether this feature is on.
+ *
+ * Two spellings, one question: a skill asks `koda.config.isEnabled(...)`, and
+ * the SDK — which is what `config.isEnabled` *is* — asks it of itself under the
+ * name `featureEnabled`.
+ */
+const asksAbout = (source: string, id: string): boolean =>
+  new RegExp(`(?:isEnabled|featureEnabled)\\("${id}"`).test(source);
+
+/** Feature ids the skill's own code asks about, in the order they first appear. */
+const flagsAskedAbout = (source: string): string[] => [
+  ...new Set([...source.matchAll(/config\.isEnabled\("([a-z0-9_]+)"/g)].map((m) => m[1])),
+];
 
 export function describeSkillContract(skill: Skill): void {
   const { manifest, lessons, activities, features, settings, settingsSchema } = skill;
@@ -143,6 +193,36 @@ export function describeSkillContract(skill: Skill): void {
             ).toBe(true);
           }
           if (lesson.conceptKey) taughtSoFar.add(lesson.conceptKey);
+        }
+      });
+    });
+
+    /*
+     * The Skill Manager shows one row per declared feature and a count of how
+     * many are on. Both halves of that have to be true, and each half broke
+     * once: counting shipped three switches nothing read — `tactile_pop` never
+     * existed in any activity — and addition read `strategy_scaffold` in nine
+     * activities without declaring it, so the scaffold was permanently on and
+     * no parent could reach it.
+     */
+    describe("features the manager shows", () => {
+      const source = sourceUnder(`src/skills/${manifest.id}`);
+      const answered = `${source}\n${sharedSource()}`;
+
+      it.each(features)("$id is read somewhere", ({ id }) => {
+        expect(
+          asksAbout(answered, id),
+          `nothing asks about the "${id}" feature — not the skill, not the round`,
+        ).toBe(true);
+      });
+
+      it("declares every flag its activities ask about", () => {
+        const declared = new Set(features.map((f) => f.id));
+        for (const asked of flagsAskedAbout(source)) {
+          expect(
+            declared.has(asked),
+            `the skill reads "${asked}" but declares no such feature, so nothing can switch it`,
+          ).toBe(true);
         }
       });
     });

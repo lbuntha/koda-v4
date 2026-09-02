@@ -417,8 +417,6 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
   // Practice says nothing at all, on top of the family's own voice switch.
   const speaks = !practising && koda.config.isEnabled("audio_speech", true);
   const chimes = koda.config.isEnabled("sound_chimes", true);
-  const vibrates = koda.config.isEnabled("haptic_feedback", true);
-  const framesSteps = koda.config.isEnabled("step_context_tags", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
 
   const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
@@ -451,7 +449,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
     setPlaced((prev) => ({ ...prev, [slot.id]: value }));
     setUsedChips((prev) => [...prev, held]);
     setHeld(null);
-    if (vibrates) koda.haptics.tap();
+    koda.haptics.tap();
     chime("pop");
   };
 
@@ -468,7 +466,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
     const given = Number(entry);
     const correct = given === question.answer;
     chime(correct ? "success" : "error");
-    if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
+    correct ? koda.haptics.success() : koda.haptics.tap();
     submit({
       correct,
       given: entry,
@@ -492,7 +490,6 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
       prompt={prompt}
       iconName="search"
       iconTone="pink"
-      contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message}
       hints={practising ? [] : storyHints(question, { placed, kidTip: copy.kidTip })}

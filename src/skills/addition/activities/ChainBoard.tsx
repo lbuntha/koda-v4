@@ -281,8 +281,6 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
   // Practice says nothing at all, on top of the family's own voice switch.
   const speaks = !practising && koda.config.isEnabled("audio_speech", true);
   const chimes = koda.config.isEnabled("sound_chimes", true);
-  const vibrates = koda.config.isEnabled("haptic_feedback", true);
-  const framesSteps = koda.config.isEnabled("step_context_tags", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
   const showsTotal = koda.config.isEnabled("running_total_badge", true);
 
@@ -315,7 +313,7 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
       { id: `${first.id}+${chip.id}`, value: merged, merged: true },
     ]);
     setHeld(null);
-    if (vibrates) koda.haptics.tap();
+    koda.haptics.tap();
     chime(question.target && merged === question.target ? "success" : "pop");
     // The merged chip says what it became — the ten is the reason the pair was
     // worth finding, so it should be heard as well as seen.
@@ -325,7 +323,7 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
   const submitTotal = (given: number) => {
     const correct = given === question.sum;
     chime(correct ? "success" : "error");
-    if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
+    correct ? koda.haptics.success() : koda.haptics.tap();
     submit({
       correct,
       given: String(given),
@@ -359,7 +357,7 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
       .map((_, i) => question.values.slice(0, i + 2).reduce((t, n) => t + n, 0));
     const correct = entries.join(",") === wanted.map(String).join(",");
     chime(correct ? "success" : "error");
-    if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
+    correct ? koda.haptics.success() : koda.haptics.tap();
     const firstWrong = entries.findIndex((e, i) => e !== String(wanted[i]));
     submit({
       correct,
@@ -386,7 +384,6 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
       prompt={prompt}
       iconName="waves"
       iconTone="cyan"
-      contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message}
       hints={practising ? [] : chainHints(question, { chips, step, kidTip: copy.kidTip })}

@@ -365,8 +365,6 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
 
 
   const chimes = koda.config.isEnabled("sound_chimes", true);
-  const vibrates = koda.config.isEnabled("haptic_feedback", true);
-  const framesSteps = koda.config.isEnabled("step_context_tags", true);
 
   const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
     if (chimes) koda.sound.play(type);
@@ -379,7 +377,7 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
       const next = `${prev[active] ?? ""}${digit}`.slice(0, 3);
       return { ...prev, [active]: next };
     });
-    if (vibrates) koda.haptics.tap();
+    koda.haptics.tap();
     chime("pop");
   };
 
@@ -405,7 +403,7 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
     // holds what the child actually built, not just whether it was right.
     const correct = given.join(",") === question.answers.join(",");
     chime(correct ? "success" : "error");
-    if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
+    correct ? koda.haptics.success() : koda.haptics.tap();
 
     const swapped =
       given.length === 2 && given.slice().reverse().join(",") === question.answers.join(",");
@@ -437,7 +435,6 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
       prompt={prompt}
       iconName="gem"
       iconTone="emerald"
-      contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message}
       hints={practising ? [] : bondHints(question, { entries, kidTip: copy.kidTip })}

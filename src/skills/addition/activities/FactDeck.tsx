@@ -343,8 +343,6 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
 
 
   const chimes = koda.config.isEnabled("sound_chimes", true);
-  const vibrates = koda.config.isEnabled("haptic_feedback", true);
-  const framesSteps = koda.config.isEnabled("step_context_tags", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
   /** A family may prefer four tiles to a pad. Read here, which is what makes it
    *  a setting rather than a line in a manifest. */
@@ -387,7 +385,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
     if (round.feedback) return;
     const correct = value === question.sum;
     chime(correct ? "success" : "error");
-    if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
+    correct ? koda.haptics.success() : koda.haptics.tap();
     submit({
       correct,
       given: String(value),
@@ -406,7 +404,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
     // misunderstanding this lesson is named after.
     const restated = fact.a === question.a && fact.b === question.b;
     chime(correct ? "success" : "error");
-    if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
+    correct ? koda.haptics.success() : koda.haptics.tap();
     submit({
       correct,
       given: `${fact.a}+${fact.b}`,
@@ -430,7 +428,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
     const given = question.members!.map((_, i) => members[i] ?? "");
     const correct = given.join(",") === question.members!.map((m) => String(m.answer)).join(",");
     chime(correct ? "success" : "error");
-    if (vibrates) correct ? koda.haptics.success() : koda.haptics.tap();
+    correct ? koda.haptics.success() : koda.haptics.tap();
     submit({
       correct,
       given: given.join(","),
@@ -454,7 +452,6 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
       prompt={prompt}
       iconName={question.mode === "family" ? "gem" : "zap"}
       iconTone="pink"
-      contextTag={framesSteps ? undefined : null}
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message}
       hints={practising ? [] : factHints(question, { revealed, kidTip: copy.kidTip })}

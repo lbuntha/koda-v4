@@ -104,6 +104,17 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
   const levelNumber = lesson?.levelNumber ?? 1;
 
   /*
+   * Whether the step is framed as warm-up / challenge / milestone.
+   *
+   * Read here rather than in each activity, because in the activities it was
+   * read by one skill and forgotten by the other: addition checked it twelve
+   * times over and counting never did, so the same switch worked in one lesson
+   * and was decorative in the next. A skill still overrides the tag itself by
+   * passing one; the switch only ever takes it away.
+   */
+  const showsStepTag = koda.config.isEnabled("step_context_tags", true);
+
+  /*
    * What Koda is told about the question on screen.
    *
    * Built here rather than asked of the skill, because everything it needs is
@@ -232,7 +243,7 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
             hintPanelId={HINT_PANEL_ID}
             onReadAloud={onReadAloud}
             levelNumber={levelNumber}
-            contextTag={contextTag}
+            contextTag={showsStepTag ? contextTag : null}
             tagLabels={tagLabels}
           />
           {/* Above the play area, under the question it is a hint about. A

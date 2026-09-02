@@ -171,3 +171,76 @@ describe("whether a skill may speak at all", () => {
   });
 });
 
+
+/**
+ * Whether a skill may vibrate.
+ *
+ * The same shape as the voice question above, and asked here for the same
+ * reason: the vibration util used to answer it by looking up a hard-coded skill
+ * id — counting's — whichever skill was actually running, so counting's switch
+ * silenced every other skill and every other skill's switch silenced nothing.
+ * The SDK knows which skill it belongs to; nothing below it does.
+ */
+describe("whether a skill may vibrate", () => {
+  let patterns: (number | number[])[] = [];
+
+  beforeEach(() => {
+    patterns = [];
+    // jsdom has no Vibration API, so the util would refuse before reading a
+    // flag. This is the whole surface it touches.
+    (navigator as unknown as { vibrate: (p: number | number[]) => boolean }).vibrate = (p) => {
+      patterns.push(p);
+      return true;
+    };
+  });
+
+  afterEach(() => {
+    delete (navigator as unknown as { vibrate?: unknown }).vibrate;
+  });
+
+  const withHaptics = (isEnabled: boolean, settings: Record<string, unknown> = {}) =>
+    createKodaSDK("addition", host, {
+      features: [
+        { id: "haptic_feedback", name: "Haptic vibration", description: "", isEnabled },
+      ],
+      settings,
+    });
+
+  it("pulses when the skill's own switch is on", () => {
+    withHaptics(true).haptics.tap();
+    withHaptics(true).haptics.success();
+    expect(patterns).toHaveLength(2);
+  });
+
+  it("stays still when it is off", () => {
+    const koda = withHaptics(false);
+    koda.haptics.tap();
+    koda.haptics.success();
+    koda.haptics.pulse("pop");
+    expect(patterns, "a silenced skill vibrated").toHaveLength(0);
+  });
+
+  it("does not answer for another skill", () => {
+    // The bug this replaced: addition asked, counting answered.
+    createKodaSDK("counting", host, {
+      features: [
+        { id: "haptic_feedback", name: "Haptic vibration", description: "", isEnabled: false },
+      ],
+      settings: {},
+    });
+    withHaptics(true).haptics.tap();
+    expect(patterns, "another skill's switch stopped this one").toHaveLength(1);
+  });
+
+  it("pulses for a skill that declares no such feature", () => {
+    createKodaSDK("some-skill", host).haptics.tap();
+    expect(patterns).toHaveLength(1);
+  });
+
+  it("takes the intensity from the skill that is vibrating", () => {
+    withHaptics(true, { hapticIntensity: "subtle" }).haptics.tap();
+    withHaptics(true, { hapticIntensity: "strong" }).haptics.tap();
+    const [subtle, strong] = patterns as number[][];
+    expect(subtle[0], "a subtle pulse was not shorter than a strong one").toBeLessThan(strong[0]);
+  });
+});
