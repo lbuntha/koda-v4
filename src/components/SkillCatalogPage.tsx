@@ -8,6 +8,7 @@ import { useSkillCatalog } from "../lib/useSkillCatalog";
 import { useSkillRegistrations } from "../lib/skillRegistrationApi";
 import { refreshSkillRegistry } from "../lib/skillRegistryApi";
 import { playSound } from "../utils/audio";
+import { offlineMessage, useOfflineDownload } from "../lib/offlineSkill";
 import { themeSystem } from "../lib/themeSystem";
 import { UIBadge, UIButton, UIPageHeader, UISkillCard, skillArtFor } from "./ui";
 
@@ -40,6 +41,8 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
   const [visibleLimit, setVisibleLimit] = useState(PAGE_SIZE);
   const [registeringId, setRegisteringId] = useState<string | null>(null);
   const [registrationError, setRegistrationError] = useState<string | null>(null);
+  const { progress: offline, prepare } = useOfflineDownload();
+  const [offlineSkillId, setOfflineSkillId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [refreshError, setRefreshError] = useState<string | null>(null);
 
@@ -68,6 +71,20 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
     onSelectSkill(skillId);
   };
 
+  /*
+   * Adding a skill, then making it work on a train.
+   *
+   * Two steps rather than one, and the second is the one that used to be
+   * invisible: enrolling is a row on the server, and it downloads nothing,
+   * because a skill's lessons and artwork are already in the app bundle. Its
+   * recorded voice is not — that caches as a child plays — so a skill added at
+   * home and opened in the car spoke in the browser's voice with nothing having
+   * warned anybody. Now it is a step with a count and an end.
+   *
+   * The download is not allowed to fail the add. A child is enrolled either
+   * way; what a dropped connection costs is Koda's voice, and offering the
+   * download again next time is a better answer than refusing the skill.
+   */
   const add = async (skillId: string) => {
     setRegistrationError(null);
     setRegisteringId(skillId);
@@ -75,9 +92,12 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
       await register(skillId);
     } catch (error) {
       setRegistrationError(error instanceof Error ? error.message : "Could not add this skill.");
+      return;
     } finally {
       setRegisteringId(null);
     }
+    setOfflineSkillId(skillId);
+    await prepare(skillId);
   };
 
   const refresh = async () => {
@@ -177,6 +197,18 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
       </div>
 
       {registrationError && <p className={themeSystem.flash("error")}>{registrationError}</p>}
+
+      {/* Said where the skill was added from, so the step belongs to the thing
+          the child just tapped rather than appearing as a system message. */}
+      {offlineSkillId && offlineMessage(offline) && (
+        <p
+          aria-live="polite"
+          className={themeSystem.flash(offline.state === "incomplete" ? "warning" : "info")}
+        >
+          {skills.find((skill) => skill.id === offlineSkillId)?.name ?? "This skill"} —{" "}
+          {offlineMessage(offline)}
+        </p>
+      )}
 
       {/* The same card the grid below uses, one size up — this was thirty-five
           lines of hand-built banner with its own progress bar, which is exactly

@@ -17,6 +17,7 @@ import { getSkill } from "../skills/registry";
 import { useAudienceViewer } from "../skills/viewer";
 import { playSound } from "../utils/audio";
 import { themeSystem } from "../lib/themeSystem";
+import { offlineMessage, useOfflineDownload } from "../lib/offlineSkill";
 import {
   UIBadge,
   UIButton,
@@ -73,6 +74,7 @@ export const LearnPage: React.FC<LearnPageProps> = ({
   const { registeredIds, register } = useSkillRegistrations();
   const [registering, setRegistering] = useState(false);
   const [registrationError, setRegistrationError] = useState<string | null>(null);
+  const { progress: offline, prepare } = useOfflineDownload();
   const skill = getSkill(skillId);
   const lessons = useMemo(() => getSkillLessons(skillId, viewer), [skillId, viewer]);
   /*
@@ -229,6 +231,9 @@ export const LearnPage: React.FC<LearnPageProps> = ({
     );
   };
 
+  /* Enrol, then put the skill's voice on the device. See the note in
+     `SkillCatalogPage`: the lesson is already offline, the voice is not, and a
+     failed download must not cost the child the skill. */
   const add = async () => {
     setRegistering(true);
     setRegistrationError(null);
@@ -236,9 +241,11 @@ export const LearnPage: React.FC<LearnPageProps> = ({
       await register(skillId);
     } catch (error) {
       setRegistrationError(error instanceof Error ? error.message : "Could not register this skill.");
+      return;
     } finally {
       setRegistering(false);
     }
+    await prepare(skillId);
   };
 
   return (
@@ -301,6 +308,15 @@ export const LearnPage: React.FC<LearnPageProps> = ({
       />
 
       {registrationError && <p className={themeSystem.flash("error")}>{registrationError}</p>}
+
+      {offlineMessage(offline) && (
+        <p
+          aria-live="polite"
+          className={themeSystem.flash(offline.state === "incomplete" ? "warning" : "info")}
+        >
+          {offlineMessage(offline)}
+        </p>
+      )}
 
       <div className="grid lg:grid-cols-[minmax(0,1fr)_280px] gap-5 items-start">
         <section className={`${themeSystem.card("default")} p-5 sm:p-6`}>

@@ -125,9 +125,19 @@ export default defineConfig(() => {
               handler: 'CacheFirst',
               options: {
                 cacheName: 'koda-voice',
-                // Comfortably above one skill's collection, so a child never
-                // loses a clip they have already heard to eviction.
-                expiration: {maxEntries: 400, maxAgeSeconds: 60 * 60 * 24 * 180},
+                /*
+                 * Room for every skill in the build, several times over.
+                 *
+                 * 400 was written when a skill owned all of its own clips and
+                 * the cache held one collection at a time. It now holds the
+                 * common pack as well — the numbers and neutral praise every
+                 * skill draws on — which is the worst thing in here to lose:
+                 * evicting a skill's own line costs that skill one phrase,
+                 * evicting "seven" costs every skill on the device its
+                 * count-along. Three voices come to 237 today, so the old cap
+                 * was two skills away from quietly evicting the shared half.
+                 */
+                expiration: {maxEntries: 1000, maxAgeSeconds: 60 * 60 * 24 * 180},
                 cacheableResponse: {statuses: [0, 200]},
               },
             },

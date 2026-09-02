@@ -17,14 +17,16 @@ reload — the app still boots and a lesson is still playable.
 ## What works without a network
 
 Everything a child does. Lessons, the course order, the level picker, progress,
-XP and the learning log are all bundled JSON or `localStorage`, so counting is
-fully playable offline.
+XP and the learning log are all bundled JSON or `localStorage`, so every skill is
+fully playable offline — nothing here is per skill. A skill's artwork is inlined
+into the bundle as markup rather than fetched, so it precaches with the code that
+draws it.
 
 What needs a network, and what happens without one:
 
 | Feature | Offline behaviour |
 |---|---|
-| Spoken prompts | Falls back to the browser's own speech synthesis, which is local |
+| Spoken prompts | A recorded clip if one has played before, then the browser's own speech synthesis, which is local |
 | AI tutor replies | Falls back to `generateLocalSocraticResponse` |
 | Live voice coach | Unavailable — it is a WebSocket to Gemini |
 | Learning log | Records normally; a backend sink would queue (the local ring stays the source of truth) |
@@ -35,8 +37,37 @@ why offline needed no new fallbacks.
 ## What is cached
 
 `vite-plugin-pwa` (Workbox) precaches the built app — HTML, JS, CSS, icons,
-fonts — 19 entries. `navigateFallback` sends any deep link to `index.html`, so
+fonts — 29 entries. `navigateFallback` sends any deep link to `index.html`, so
 opening a saved URL offline still boots the app.
+
+### Adding a skill downloads its voice
+
+Enrolling in a skill is a row on the server and fetches nothing — the lessons,
+the course order and the artwork are already in the bundle the worker precached.
+Its recorded speech is not, so `prepareSkillOffline` (`lib/offlineSkill.ts`) runs
+straight after a successful add and pulls the skill's clips plus the common
+pack's through the worker's own route, reporting "Saving for offline… 31 of 70"
+and ending with a sentence rather than a spinner.
+
+Three things it is careful about, each of them a way to break the promise
+quietly:
+
+- **A skill with nothing recorded is ready, not failing.** It is genuinely
+  playable offline; the message says spoken lines will use the device's voice
+  until someone records it.
+- **A failed download never costs the child the skill.** They stay enrolled; the
+  rest is fetched next time, and only what is missing.
+- **"Ready" is compared against what the build ships**, not stored as a boolean,
+  so recording a skill's voice after a child downloaded it correctly reports the
+  skill as no longer complete.
+
+Recorded speech is the one thing deliberately left out of the precache, and cached
+on first play instead (`koda-voice`, `CacheFirst`). Making a tablet pull every
+clip during install — before a child has opened a single lesson — is a worse
+first run than a lesson that is briefly silent. The cap is 1,000 entries, which
+is several builds' worth: the cache now holds the common pack as well as each
+skill's own clips, and the shared half is the worst thing in it to evict, since
+losing `"seven"` costs every skill on the device its count-along.
 
 `/api/*` is on the denylist. A cached tutor reply would be a stale answer to a
 different question, which is worse than no reply.
