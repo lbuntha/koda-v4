@@ -43,10 +43,14 @@ export default defineConfig(() => {
         includeAssets: ['favicon.svg', 'icons/apple-touch-icon.png'],
 
         manifest: {
-          name: 'Koda — Math for Young Learners',
+          name: 'Learn with Koda',
           short_name: 'Koda',
+          // What a parent reads on the install prompt and the store card. The
+          // same sentence as the sign-in screen, kept specific for the same
+          // reason: the techniques are what make this app recognisable, and the
+          // age band alone is what every other children's app also says.
           description:
-            'Counting, comparing and place value practice for 5–6 year olds. Works offline.',
+            'Counting, addition, number bonds — reading next. Ages 5–11. Works offline, no ads.',
           lang: 'en',
           start_url: '/',
           scope: '/',
@@ -78,71 +82,20 @@ export default defineConfig(() => {
           ],
         },
 
-        workbox: {
-          // Everything the app needs to run is precached, so a cold start with
-          // no network still reaches a playable lesson: lessons and the course
-          // are bundled JSON, and progress lives in localStorage.
+        // The caching rules now live in `src/pwa/sw.ts` — a file we own, and so
+        // a file a `push` handler can live in. See the comment at the top of it
+        // and docs/PUSH.md §3. What is precached did not change with the move;
+        // it is stated here and injected into the worker as `__WB_MANIFEST`.
+        strategies: 'injectManifest',
+        srcDir: 'src/pwa',
+        // The source. The build still emits `/sw.js`, which matters: a worker
+        // under a new name would leave every installed copy of Koda listening
+        // for one that is never updated again.
+        filename: 'sw.ts',
+        injectManifest: {
+          // Everything the app needs to run, so a cold start with no network
+          // still reaches a playable lesson.
           globPatterns: ['**/*.{js,css,html,svg,png,ico,woff,woff2}'],
-          // A deep link opened offline must still boot the app rather than 404.
-          navigateFallback: '/index.html',
-          // The API is online-only by design; a cached tutor reply would be a
-          // stale answer to a different question.
-          navigateFallbackDenylist: [/^\/api\//],
-          runtimeCaching: [
-            {
-              // Fonts and images fetched at runtime: serve from cache when
-              // offline, refresh in the background when not.
-              urlPattern: ({request}) =>
-                request.destination === 'image' || request.destination === 'font',
-              handler: 'StaleWhileRevalidate',
-              options: {
-                cacheName: 'koda-assets',
-                expiration: {maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 * 30},
-              },
-            },
-            {
-              /*
-               * Recorded speech: cached the first time it plays, then offline.
-               *
-               * The precache list above deliberately does not include audio. A
-               * skill's clips are ~22MB of WAV, and making a child's tablet pull
-               * all of it during install — before they have opened a single
-               * lesson — is a worse first run than a lesson that is briefly
-               * silent. Caching on first play spreads that cost across the
-               * lessons they actually reach, and by the second visit every line
-               * they have heard is local.
-               *
-               * `CacheFirst`, not `StaleWhileRevalidate`: these files are
-               * content-addressed by the build, so a changed recording arrives
-               * under a new URL and there is nothing to revalidate.
-               *
-               * Once the clips are mp3 rather than WAV (roughly a fifth the
-               * size) precaching them outright becomes reasonable, and this
-               * becomes the fallback rather than the mechanism.
-               */
-              urlPattern: ({request, url}) =>
-                request.destination === 'audio' || /\.(wav|mp3|ogg|m4a)$/i.test(url.pathname),
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'koda-voice',
-                /*
-                 * Room for every skill in the build, several times over.
-                 *
-                 * 400 was written when a skill owned all of its own clips and
-                 * the cache held one collection at a time. It now holds the
-                 * common pack as well — the numbers and neutral praise every
-                 * skill draws on — which is the worst thing in here to lose:
-                 * evicting a skill's own line costs that skill one phrase,
-                 * evicting "seven" costs every skill on the device its
-                 * count-along. Three voices come to 237 today, so the old cap
-                 * was two skills away from quietly evicting the shared half.
-                 */
-                expiration: {maxEntries: 1000, maxAgeSeconds: 60 * 60 * 24 * 180},
-                cacheableResponse: {statuses: [0, 200]},
-              },
-            },
-          ],
-          cleanupOutdatedCaches: true,
         },
 
         devOptions: {
@@ -150,6 +103,11 @@ export default defineConfig(() => {
           // only after a production build.
           enabled: true,
           type: 'module',
+          // `injectManifest` builds our own worker in dev too, where the
+          // precache manifest would otherwise be empty — this is what puts
+          // index.html in it, so the navigation fallback has a page to be
+          // bound to rather than throwing on the first navigation.
+          navigateFallback: 'index.html',
         },
       }),
     ],

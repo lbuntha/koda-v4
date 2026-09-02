@@ -41,7 +41,7 @@ Non-goals, stated so they cannot creep in:
   token endpoint refuses a token from a principal carrying a `learnerId`.
 - **No streak-panic, no "you're losing your progress", no daily hook.** The
   reminders below fire at a time a parent chose, at most once a day, and stop
-  by themselves when nobody taps them (§8).
+  by themselves when nobody taps them (§9).
 - **No marketing.** The system settings have no "promotions" switch, so nobody
   can quietly add one to a running deployment without a release.
 - **No new source of truth.** A notification is a *pointer* at something the
@@ -103,7 +103,8 @@ service worker on the origin. Two workers, two update cycles, two caches to
 reason about, and `docs/PWA.md` already documents what a second worker on this
 origin costs (a blank page, and an afternoon finding out why). Not that.
 
-**Decision: move to `injectManifest` and own the worker.**
+**Decision: move to `injectManifest` and own the worker.** *(Shipped — the
+worker is `src/pwa/sw.ts`; see phase 0 in §11.)*
 
 ```ts
 // vite.config.ts
@@ -123,7 +124,7 @@ and all, because those comments are the reasons) plus the two handlers this
 document is about. It is a mechanical port with one real risk: the voice cache
 rules are load-bearing, and getting them subtly wrong costs every skill on the
 device its count-along. Port them first, ship that alone, and only then add
-push (§10, phase 0).
+push (§11, phase 0).
 
 **Data-only messages, and we draw the notification ourselves.**
 
@@ -187,7 +188,7 @@ gets its own collection, with a lifecycle of its own, rather than a field on
 | `installId` | Survives a re-sign-in on the same install, which `deviceId` does not |
 | `ua`, `platform` | So a parent's device list can say "Chrome on Pixel" rather than a 160-character token |
 | `createdAt`, `refreshedAt` | A token untouched for 270 days is dead by FCM's own rule; the sweep uses this |
-| `failures` | Consecutive soft failures. Three retires the row (§7) |
+| `failures` | Consecutive soft failures. Three retires the row (§8) |
 | `disabledAt` | Retired, kept briefly for the "why did this stop?" question, then swept |
 
 Indexes (`indexes.py`, the file that is this project's migration story):
@@ -235,18 +236,64 @@ mute "a new device signed in" has built a worse thing than a noisy one.
 could become a hook, so a parent has to go and ask for them, choose the hour,
 and can turn them off in one tap from the notification itself.
 
-Two ceilings above every row, both of which already exist as patterns:
+### The catalog is code; the switches are rows
 
-- **The deployment's** — `push.enabled` plus one switch per courtesy kind in
-  `system_defaults.py`. As with every setting there, it is a ceiling: a family
-  can turn a thing off for themselves, and nothing they do turns on what the
-  operator turned off. The send path re-checks it, because a client that is
-  told the effective values is not the thing enforcing them.
-- **The family's** — `notifyPrefs` on the user document: `{kind: bool}`, plus
-  `quietHours` and the IANA timezone the browser reported. A courtesy
-  notification inside quiet hours is not dropped, it is **held to the edge of
-  the window**; an account notification ignores quiet hours entirely, which is
-  the difference between the two classes.
+The split every other list in this service already makes — the menu, the plans,
+the system settings themselves. **What a kind is** comes from the code, because
+a kind needs a sender, a template and a call site behind it, which is a release.
+**Whether it is on** is a row an operator owns.
+
+So the table above ships in `push_defaults.py`, and these join `DEFAULT_SETTINGS`
+in `system_defaults.py` under a new `Notifications` group:
+
+| `settingId` | Label | Ships |
+|---|---|---|
+| `push.enabled` | Push notifications | `True` |
+| `push.weeklySummary` | Weekly summary | `True` |
+| `push.goalMet` | Goal met | `True` |
+| `push.practiceReminder` | Practice reminder | `True` |
+| `push.streakEnding` | Streak ending | `True` |
+
+`push.enabled` is the master, in the shape `ai.enabled` already has: off stops
+every kind below it whatever those rows say, and `with_master_applied` folds it
+into what the client is told, so a device sees the capabilities already false
+rather than having to know the rule.
+
+Note what a `True` in that table means, and what it does not. The two reminder
+kinds ship **enabled at the deployment and off for every family** (§5's default
+column) — the operator's row says "this deployment is willing to send these",
+and a parent still has to ask. The operator switch is a ceiling, never a
+subscription.
+
+`repos/system.seed_default` does the rest, and its `$setOnInsert` on `value` is
+the load-bearing part: a switch an operator has thrown survives the next deploy,
+while a relabelled description ships with the release. Turning one off is
+`PATCH /v1/system/{settingId}` behind `system:write`, from the same Admin →
+Settings screen as everything else; `GET /v1/system` hands every signed-in
+device the effective map.
+
+**The three account kinds get no row of their own.** They answer to
+`push.enabled` and to nothing else. An operator's legitimate question is "does
+this deployment do push at all", and that is the master; a switch that silences
+*"a new device signed in"* while leaving the rest running is not an operator
+control, it is a way to make a security notice disappear quietly.
+
+`push.py` reads the row at send time through `repos/system.value_of` — a
+single-document lookup, uncached, so an operator throwing a switch is felt by
+the next send rather than by the one after a cache expires. The client being
+told the effective values is a hint, not the enforcement.
+
+### Under that, the family's own answer
+
+`notifyPrefs` on the user document: `{kind: bool}`, plus `quietHours` and the
+IANA timezone the browser reported. A courtesy notification inside quiet hours
+is not dropped, it is **held to the edge of the window**; an account
+notification ignores quiet hours entirely, which is the difference between the
+two classes.
+
+A family may switch a thing off for themselves. Nothing they do switches on what
+the operator switched off — the same sentence `routers/system.py` opens with, and
+the same reason it is checked twice.
 
 ---
 
@@ -297,7 +344,92 @@ late one.
 
 ---
 
-## 7. When FCM says no
+## 7. Proving it works, before anyone is relying on it
+
+Push is the one thing in this service an operator cannot verify by looking at
+it. Mail has a console driver and a Mailpit window. A notification's path runs
+through a Google service, a credential minted from a metadata server, a
+certificate generated in a console, a browser permission and a worker inside
+somebody else's phone — six things that can each be individually correct and
+still not add up, and whose failure mode is *silence*. Nothing errors. Parents
+simply never hear anything, and the deployment finds out weeks later.
+
+So the operator surface gets two functions, and the difference between them is
+the point: one proves the pipe **without sending anything**, the other sends a
+real notification **only to the person asking**.
+
+### 7.1 Preflight — `GET /v1/system/push/preflight`
+
+Needs no device, no permission, and delivers nothing. This is the one to run
+against a fresh deployment, from a laptop, before a single parent is told the
+feature exists.
+
+| Check | How it is proved | What a failure means |
+|---|---|---|
+| Driver | `push_driver == "fcm"` | Still `console`: this deployment logs notifications and sends none |
+| Project | `firebase_project_id` is set | The send URL cannot be built |
+| Credential | Mint an ADC token for `…/auth/firebase.messaging` | The Cloud Run service account is missing `roles/firebasemessaging.admin` (§12, step 3) |
+| Reachability | `validateOnly` send against one live token | Project, credential, token and payload shape all agree — and nobody's phone rings |
+| Master | `push.enabled` in system settings | Everything is configured and switched off |
+| Coverage | Count of live tokens, and how many families hold at least one | Zero is not an error on day one; it is the number that should be climbing |
+
+**`validateOnly` is what makes this worth having.** FCM's v1 API takes
+`"validateOnly": true` on the same `messages:send` call: the message is checked
+against the real credential and a real registration token, and then thrown away.
+That single request proves the whole server half of the chain without buzzing a
+parent at nine in the evening to satisfy an operator's curiosity.
+
+Each check answers with a verdict and, when it fails, the sentence that fixes it
+— the same rule the rest of this service follows for errors. "Preflight failed"
+is not a result anyone can act on.
+
+The natural second home for this is the deploy: `deploy.yml` already refuses to
+start without its secrets, and a post-deploy `curl` of preflight turns "we
+shipped push" into something CI can assert.
+
+### 7.2 Test send — `POST /v1/system/push/test`
+
+A real notification, delivered, to prove the browser half: the VAPID pairing,
+the worker's handler, the icon, the wording, the tap target.
+
+**It takes no recipient. Not a family id, not a user id, not an email.** It
+rings the tokens belonging to the account making the call and nothing else. A
+test endpoint that accepts a target is an arbitrary-push primitive wearing an
+admin badge — the one thing in this design that could send a stranger's child's
+parent a message chosen by whoever got hold of a staff token. The operator is
+holding a phone; that is the device the test is for.
+
+```
+POST /v1/system/push/test        {"kind": "learn.goal_met"}   ← optional, previews that kind's copy
+→ 200 {"driver": "fcm", "sent": 1, "results": [
+        {"device": "Chrome on Pixel 8", "ok": true},
+        {"device": "Safari on iPhone", "ok": false, "error": "UNREGISTERED", "action": "row deleted"}]}
+```
+
+Six rules it lives by:
+
+- **`system:write` only**, so it is staff-reachable and family-unreachable, and
+  rate limited like everything else guessable — it spends real quota and real
+  battery.
+- **It says what it is, in its own body**: *"Test notification — you asked for
+  this from Admin → Settings."* A mystery notification is a support ticket.
+- **It ignores preferences and quiet hours**, because the caller asked for it
+  explicitly, on their own device, one second ago.
+- **It ignores `push.enabled`** — deliberately, and the response says so. The
+  moment you most need to test is *before* the master is switched on.
+- **It writes no `push_runs` row and no preference.** A test is not a kind, and
+  it must not make tomorrow's real notification think it already went.
+- **On the `console` driver it reports exactly that** — `{"driver": "console",
+  "sent": 0}` with the message body in the response, rather than a green tick
+  for a message that never left the process. A test that lies is worse than no
+  test.
+
+Both live in `routers/system.py` beside the switchboard they verify, because
+that is the screen an operator is already on when the question occurs to them.
+
+---
+
+## 8. When FCM says no
 
 Per-token, from the v1 error body, and each one has exactly one right answer:
 
@@ -316,7 +448,7 @@ run slow and every metric a lie.
 
 ---
 
-## 8. Asking a parent for permission
+## 9. Asking a parent for permission
 
 The permission prompt is the one irreversible moment in the whole feature: a
 browser gives you one refusal and then the prompt is gone for good, and asking
@@ -361,7 +493,7 @@ on it.
 
 ---
 
-## 9. The clock
+## 10. The clock
 
 Reminders and summaries need something that fires without a request. Cloud
 Scheduler, because the deployment is already Google's and Cloud Run has no
@@ -393,22 +525,45 @@ Three things this needs to get right:
 
 ---
 
-## 10. Rollout
+## 11. Rollout
 
 | Phase | Ships | Provable by |
 |---|---|---|
-| **0** | `injectManifest`, the worker ported with **no push code** | The app still installs, still plays offline, `koda-voice` still fills — i.e. nothing changed |
+| **0** ✅ | `injectManifest`, the worker ported with **no push code** | Both builds report the same *29 entries*, the hashed URLs diff clean, `tsc` passes over the worker's own project, 985 tests pass — and, in Chrome against a production build: the update prompt still installs, and a deep link still boots with the server stopped |
 | **1** | `services/push.py` with the `console` driver, `push_tokens`, the two endpoints, `device.new_signin` | `pytest server/tests/test_push.py`; a message in `make logs-api` |
-| **2** | The worker's `push`/`notificationclick` handlers, Settings → Notifications, the real `fcm` driver in staging | A notification on a real Android phone and a real installed iPhone |
+| **2** | The worker's `push`/`notificationclick` handlers, Settings → Notifications, the real `fcm` driver, preflight and test send (§7) | Preflight all-green on staging, then a notification on a real Android phone and a real installed iPhone |
 | **3** | Cloud Scheduler, `weekly_summary`, `goal_met` | A summary that arrives on Sunday and exactly once |
 | **4** | `practice_reminder`, `streak_ending`, the self-limiting counter | Off by default; on by choice; quiet by neglect |
 
 Each phase is deployable and none of them is load-bearing for the phase after,
 which is what makes phase 0 safe to ship alone.
 
+**Phase 0, as built.** `vite.config.ts` names the source and the precache glob;
+`src/pwa/sw.ts` holds the rules, ported with their comments intact. The worker
+is type-checked on its own project (`tsconfig.worker.json`, `lib: WebWorker`)
+because the app's project is typed for the DOM and the two libraries collide;
+`npm run lint` runs both. The one line that is new rather than ported is the
+`SKIP_WAITING` listener, which Workbox used to write on our behalf — it is what
+makes the "A new version is ready" prompt still install anything.
+
+That listener is the one thing no build can prove, so it was checked in a
+browser against `NODE_ENV=production node dist/server.cjs`: a controlled page,
+a second build deployed over it, the new worker correctly **waiting** rather
+than activating itself, the prompt appearing, and the click activating it and
+reloading. Then the server was stopped and `/learn/counting` — a deep link,
+never visited — booted the whole app out of the precache while `fetch` to the
+API failed. Both halves of what `docs/PWA.md` promises, still true.
+
+One thing the browser showed that the build log does not: the manifest's 29
+entries become **22 files in the cache**. Seven icons are listed twice, because
+`includeAssets` names what `globPatterns` already matches, and Workbox collapses
+the duplicates on install. Harmless, identical before the move, and worth
+tidying on its own day — not inside a change whose whole value is that nothing
+changed.
+
 ---
 
-## 11. Configuration
+## 12. Configuration
 
 Server (`settings.py`, joining `mail_driver` and its neighbours):
 
@@ -447,7 +602,7 @@ public strings in it.
 
 ---
 
-## 12. Privacy, and what a lock screen may say
+## 13. Privacy, and what a lock screen may say
 
 A notification is read by whoever is holding the phone, which is not always the
 person it was sent to.
@@ -466,15 +621,18 @@ person it was sent to.
 
 ---
 
-## 13. Testing
+## 14. Testing
 
 - `test_push.py` — the console driver records rather than sends; assert the
   catalog's defaults, the system-settings ceiling, quiet-hours holding, that a
   learner-scoped principal is refused a token, and that revoking a device takes
   its tokens.
-- A fake FCM transport for the error table in §7: `UNREGISTERED` deletes,
+- A fake FCM transport for the error table in §8: `UNREGISTERED` deletes,
   `UNAVAILABLE` retries then retires, `QUOTA_EXCEEDED` stops the run.
 - `push_runs` idempotency: run the job twice, assert one send.
+- The test send refuses a recipient: assert the route has no such parameter,
+  that a family token gets 403, and that on the console driver it reports
+  `sent: 0` rather than success.
 - The worker's handlers are ordinary units — `safePath` and `safeParse` are
   functions, and they are where the security of §3 actually lives.
 - Manual, once per phase, on a real Android device and a real iPhone with Koda

@@ -72,12 +72,23 @@ losing `"seven"` costs every skill on the device its count-along.
 `/api/*` is on the denylist. A cached tutor reply would be a stale answer to a
 different question, which is worse than no reply.
 
-## A note on push
+## Where the worker lives
 
-`docs/PUSH.md` proposes moving this worker from `generateSW` to
-`injectManifest` so a `push` handler can live beside the caching rules above,
-rather than registering a second worker for Firebase — two workers on this
-origin is the failure the last section of this file is about.
+`src/pwa/sw.ts`, built in `injectManifest` mode: the rules above are code in
+that file rather than configuration in `vite.config.ts`. They moved so that a
+`push` handler has somewhere to live beside them — the alternative, Firebase's
+own `firebase-messaging-sw.js`, is a second worker on this origin, which is the
+failure the last section of this file is about. Nothing about what is cached
+changed with the move: the same 29 entries, the same 1,559 KiB, the same rules.
+`docs/PUSH.md` §3 is the reasoning.
+
+Two things the port has to keep, because both fail silently:
+
+- **The output is still `/sw.js`.** A worker under a new name leaves every
+  installed copy of Koda listening for one that is never updated again.
+- **The worker answers `SKIP_WAITING`.** `registerType: 'prompt'` meant Workbox
+  wrote that listener; now the file does. Without it, "A new version is ready"
+  is a button that does nothing.
 
 ## Updates
 
