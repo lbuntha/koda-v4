@@ -370,6 +370,71 @@ export const Home: React.FC<HomeProps> = ({
     onOpenSkill(skillId);
   };
 
+  /*
+   * The same concept, offered twice.
+   *
+   * A half-finished practice round and the lesson that teaches the concept it
+   * practises are two different lessons with, after the word "Practice" comes
+   * off, the same name — so the band read "Number Bonds … Number Bonds" with
+   * two different reasons attached. The unfinished round wins: it is work the
+   * child started, and the suggestion was going to be about the same thing.
+   */
+  const suggestions = interrupted
+    ? today.filter((pick) => pick.lesson.conceptKey !== interrupted.lesson.conceptKey)
+    : today;
+
+  /* Wide enough to fill the top row where three cards would otherwise leave an
+     orphan, and back to one column where all three fit in a row. */
+  const leadSpan = "sm:col-span-2 xl:col-span-1";
+
+  /*
+   * What leads the band.
+   *
+   * The child's own unfinished round if there is one — that is not a suggestion
+   * and outranks every suggestion. Otherwise the recommender's own first pick:
+   * `recommendNow` returns repair, then finish-what-is-started, then something
+   * new, so first is already an answer to "what now?" rather than an arbitrary
+   * card. Only the lead carries the progress bar, because it is the only one
+   * with progress to report.
+   */
+  const leadPick = interrupted ? undefined : suggestions[0];
+  const leadLesson = leadPick ? byRef.get(leadPick.lesson.ref) : undefined;
+
+  const lead = interrupted ? (
+    <UILessonCard
+      key={`resume-${interrupted.saved.levelNumber}`}
+      className={leadSpan}
+      title={practiceTitle(interrupted.lesson.title)}
+      subject={byId.get(interrupted.lesson.skillId)?.name ?? interrupted.lesson.skillId}
+      progress={{ answered: interrupted.saved.answered, total: interrupted.saved.total }}
+      iconName={interrupted.lesson.iconName}
+      iconTone={interrupted.lesson.iconTone}
+      tone="resume"
+      actionLabel="Carry on"
+      onClick={() => {
+        playSound("pop");
+        onStartLesson(interrupted.lesson.levelNumber);
+      }}
+    />
+  ) : leadPick ? (
+    <UILessonCard
+      key={leadPick.lesson.ref}
+      className={leadSpan}
+      title={leadPick.lesson.title}
+      subject={byId.get(leadPick.lesson.skillId)?.name ?? leadPick.lesson.skillId}
+      message={leadPick.kidMessage}
+      iconName={leadLesson?.iconName}
+      iconTone={leadLesson?.iconTone}
+      tone={leadPick.kind}
+      onClick={() => start(leadPick.lesson.ref)}
+    />
+  ) : null;
+
+  /* Two, so the band is three things whichever way it was filled. A single
+     lead with nothing beside it is left as it is: one thing to do is a clearer
+     message than one thing plus filler. */
+  const rest = (interrupted ? suggestions : suggestions.slice(1)).slice(0, 2);
+
   return (
     /* Column 1 is the app shell's sidebar; this is columns 2 and 3. Neither
        band grows with the lesson count — Today is capped, and the subject list
@@ -384,31 +449,32 @@ export const Home: React.FC<HomeProps> = ({
               </h1>
 
               {today.length || interrupted ? (
+                /*
+                 * One first thing, then the alternatives.
+                 *
+                 * The band has a first item — the child's own unfinished round,
+                 * or, failing that, whatever `recommendNow` ranked first, which
+                 * is already an order (repair, then finish, then something new).
+                 * Drawing all three identically hid that, and on a phone it cost
+                 * the whole screen: three full-width purple buttons, the same
+                 * loudness three times, with the subject list pushed off the
+                 * bottom. The lead card keeps the full treatment; the rest go
+                 * `compact`, which is a row below 640px and the same card above
+                 * it.
+                 *
+                 * `sm:col-span-2 xl:col-span-1` is the middle width's fix: three
+                 * cards into two columns leaves a 2+1 orphan with a hole beside
+                 * it, so the lead fills the top row instead. At three columns
+                 * they are back to an even row and nothing spans anything.
+                 */
                 <div className="mt-3 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  {/* First, because it is the child's own unfinished work rather
-                      than a suggestion — and because the whole reason to keep
-                      the position is that they can find their way back to it. */}
-                  {interrupted && (
-                    <UILessonCard
-                      key={`resume-${interrupted.saved.levelNumber}`}
-                      title={practiceTitle(interrupted.lesson.title)}
-                      subject={byId.get(interrupted.lesson.skillId)?.name ?? interrupted.lesson.skillId}
-                      message={`You got to question ${interrupted.saved.answered} of ${interrupted.saved.total}.`}
-                      iconName={interrupted.lesson.iconName}
-                      iconTone={interrupted.lesson.iconTone}
-                      tone="resume"
-                      actionLabel="Carry on"
-                      onClick={() => {
-                        playSound("pop");
-                        onStartLesson(interrupted.lesson.levelNumber);
-                      }}
-                    />
-                  )}
-                  {(interrupted ? today.slice(0, 2) : today).map((pick) => {
+                  {lead}
+                  {rest.map((pick) => {
                     const lesson = byRef.get(pick.lesson.ref);
                     return (
                       <UILessonCard
                         key={pick.lesson.ref}
+                        variant="compact"
                         title={pick.lesson.title}
                         subject={byId.get(pick.lesson.skillId)?.name ?? pick.lesson.skillId}
                         message={pick.kidMessage}
