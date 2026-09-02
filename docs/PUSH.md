@@ -530,7 +530,7 @@ Three things this needs to get right:
 | Phase | Ships | Provable by |
 |---|---|---|
 | **0** ✅ | `injectManifest`, the worker ported with **no push code** | Both builds report the same *29 entries*, the hashed URLs diff clean, `tsc` passes over the worker's own project, 985 tests pass — and, in Chrome against a production build: the update prompt still installs, and a deep link still boots with the server stopped |
-| **1** | `services/push.py` with the `console` driver, `push_tokens`, the two endpoints, `device.new_signin` | `pytest server/tests/test_push.py`; a message in `make logs-api` |
+| **1** ✅ | `services/push.py` with the `console` driver, `push_tokens`, the two endpoints, `device.new_signin` | 22 tests in `test_push.py`, 363 in the suite, `ruff` clean |
 | **2** | The worker's `push`/`notificationclick` handlers, Settings → Notifications, the real `fcm` driver, preflight and test send (§7) | Preflight all-green on staging, then a notification on a real Android phone and a real installed iPhone |
 | **3** | Cloud Scheduler, `weekly_summary`, `goal_met` | A summary that arrives on Sunday and exactly once |
 | **4** | `practice_reminder`, `streak_ending`, the self-limiting counter | Off by default; on by choice; quiet by neglect |
@@ -560,6 +560,34 @@ entries become **22 files in the cache**. Seven icons are listed twice, because
 the duplicates on install. Harmless, identical before the move, and worth
 tidying on its own day — not inside a change whose whole value is that nothing
 changed.
+
+**Phase 1, as built.** `push_defaults.py` holds the catalog and
+`system_defaults.py` the five switches above it; `repos/push_tokens.py` is the
+collection, `routers/push.py` the two endpoints, `services/push.py` the decision
+and `services/fcm.py` the transport.
+
+Two things landed differently from the plan, both deliberately:
+
+- **The FCM transport is already written**, rather than waiting for phase 2.
+  `google-auth` was already a dependency — Google sign-in uses it — and its
+  `AuthorizedSession` mints and refreshes the access token itself, so the real
+  driver is one blocking POST in a thread, exactly as `mail.py` runs `smtplib`.
+  Shipping `push_driver: "fcm"` as a value that did nothing would have been a
+  trap; and with the transport real, the error table in §8 is a *test* rather
+  than a plan — a fake `_post` proves that `UNREGISTERED` deletes a row, three
+  `UNAVAILABLE`s retire one, and a quota refusal leaves it alone.
+- **Every revoke path forgets its tokens, not three of them.** The plan said
+  three; the code has five — `revoke`, `revoke_others_in_family`,
+  `revoke_all_for_user`, `revoke_for_user_in_family` and `expire_stale` — so
+  they share one helper, `devices._forget_push`. A session that ends quietly,
+  by ageing out, would otherwise leave a token that still rings.
+
+What phase 1 deliberately does **not** have: quiet hours and `notifyPrefs` are
+plumbed through `push.allowed` but nothing writes them yet, because the screen
+that sets them is phase 2. And `device.new_signin` sends `path="/"` — the client
+is a tab machine with no URL routing, so every deep link lands on the default
+screen. Giving a notification somewhere to land is a client-side prerequisite
+for phase 2, not a server one.
 
 ---
 

@@ -63,6 +63,17 @@ class Settings(BaseSettings):
     #: production, and a hardcoded host is a reset nobody outside dev can use.
     app_base_url: str = "http://localhost:3001"
 
+    #: How notifications leave. `console` logs the message and sends nothing,
+    #: which is what local work and the test suite want; `fcm` is Firebase Cloud
+    #: Messaging, authenticated as the Cloud Run service account.
+    push_driver: Literal["console", "fcm"] = "console"
+
+    #: The Firebase project that owns the Web Push certificate and the tokens.
+    #: There is no credential beside it: on Cloud Run the runtime service
+    #: account *is* the credential, so a deployment configures an id and grants
+    #: a role, and no key file exists to leak.
+    firebase_project_id: str | None = None
+
     cors_origins: list[str] = ["http://localhost:3001", "http://localhost:3002"]
     environment: str = "development"
 

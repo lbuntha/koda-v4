@@ -52,6 +52,18 @@ INDEXES: dict[str, list[IndexModel]] = {
         IndexModel([("codeHash", ASCENDING)], unique=True, name="invite_code_unique"),
         IndexModel([("familyId", ASCENDING)], name="by_family"),
     ],
+    "push_tokens": [
+        # One row per token, whoever presents it: the browser only ever hands
+        # out one, so a second row for the same token would be a second
+        # notification for the same phone.
+        IndexModel([("token", ASCENDING)], unique=True, name="push_token_unique"),
+        # The send path's own query — a family, optionally one person in it.
+        IndexModel([("familyId", ASCENDING), ("userId", ASCENDING)], name="by_recipient"),
+        # Revoking a device deletes its tokens, and that lookup is by device.
+        IndexModel([("deviceId", ASCENDING)], name="by_device"),
+        # The nightly sweep reads by age.
+        IndexModel([("refreshedAt", ASCENDING)], name="by_freshness"),
+    ],
     "devices": [
         # The refresh token is looked up by its hash — the token itself is never
         # stored, so a database leak cannot be replayed as a session.

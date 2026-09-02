@@ -52,7 +52,7 @@ from app.security.rate_limit import (
     VERIFY_TOKEN_PER_IP,
     limiter,
 )
-from app.services import google_identity, mail
+from app.services import google_identity, mail, push
 from app.services.codes import hash_code
 from app.settings import settings
 
@@ -92,6 +92,28 @@ async def _issue(db, family_id: str | None, role: str, *, user_id=None, learner_
             install_id=install_id,
         )
         device_id = device["_id"]
+        # A *new* row, not a rotation: this is a machine the family has not
+        # signed in from before, which is the one thing about a sign-in worth
+        # telling somebody. Signing in again on a tablet they use every day is
+        # not news, and a notification for it would teach a parent to ignore
+        # the ones that matter.
+        #
+        # Awaited rather than handed to a background task: on the console driver
+        # it is a log line, and the sign-in it sits inside already spends far
+        # longer hashing a password. If the real driver ever makes a login feel
+        # slow, this is the call that moves to `BackgroundTasks` at the route.
+        if family_id:
+            await push.send(
+                db,
+                to=push.Recipient(family_id=family_id, exclude_device_id=device_id),
+                kind="device.new_signin",
+                title="New device signed in",
+                body=f"{device_name} just signed in to Koda.",
+                # The device list, once the app can be opened at a screen. It is
+                # a tab in state today, so every deep link lands on the default
+                # one — the client half of that is the notifications phase.
+                path="/",
+            )
     else:
         await devices.rotate(db, device_id, refresh_hash)
 

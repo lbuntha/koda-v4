@@ -1,0 +1,293 @@
+"""Notifications: who may be rung, who may never be, and what a dead token costs.
+
+The console driver is the default, so nothing here needs a Firebase project. The
+one test that exercises the real transport replaces the HTTP call itself, which
+is the only part of `fcm.py` that cannot be run on a laptop.
+"""
+
+import pytest
+
+from app.repos import push_tokens
+from app.services import fcm, push
+from app.settings import settings
+
+TOKEN = "f" * 140
+OTHER = "e" * 140
+
+
+@pytest.fixture
+async def parent(client, signup_body):
+    body = signup_body()
+    body["installId"] = "i_phone"
+    tokens = (await client.post("/auth/signup", json=body)).json()
+    return {"Authorization": f"Bearer {tokens['accessToken']}"}
+
+
+@pytest.fixture
+async def child(client, parent):
+    """A learner-scoped session, the way a kid's tablet gets one."""
+    learner = (
+        await client.post("/learners", headers=parent, json={"displayName": "Mia", "birthYear": 2017})
+    ).json()
+    code = (await client.post(f"/learners/{learner['id']}/join-code", headers=parent)).json()
+    tokens = (
+        await client.post("/auth/join", json={"code": code["code"], "deviceName": "Mia's tablet"})
+    ).json()
+    return {"Authorization": f"Bearer {tokens['accessToken']}"}
+
+
+
+async def _operator_switches(db, setting_id: str, value: bool) -> None:
+    """Throw one switch on the deployment's switchboard.
+
+    Upserted rather than updated: the test app runs without its lifespan, so
+    the settings collection starts empty and `value_of` is answering with the
+    shipped default until a row exists.
+    """
+    await db.system_settings.update_one({"settingId": setting_id}, {"$set": {"value": value}}, upsert=True)
+
+
+# --- who may hold a token -------------------------------------------------
+
+
+async def test_a_parent_can_register_their_browser(client, parent, db):
+    response = await client.post("/push/tokens", headers=parent, json={"token": TOKEN, "platform": "Pixel"})
+
+    assert response.status_code == 204
+    row = await db.push_tokens.find_one({"token": TOKEN})
+    assert row["platform"] == "Pixel"
+    assert row["deviceId"], "a token is attached to the session that registered it"
+
+
+async def test_registering_the_same_token_again_is_one_row(client, parent, db):
+    """The client re-registers on every launch, because FCM rotates tokens."""
+    for _ in range(3):
+        await client.post("/push/tokens", headers=parent, json={"token": TOKEN})
+
+    assert await db.push_tokens.count_documents({}) == 1
+
+
+async def test_a_childs_device_is_refused(client, child, db):
+    """The promise that matters most, kept by the endpoint rather than the screen."""
+    response = await client.post("/push/tokens", headers=child, json={"token": TOKEN})
+
+    assert response.status_code == 403
+    assert response.json()["error"]["code"] == "push_learner_forbidden"
+    assert await db.push_tokens.count_documents({}) == 0
+
+
+async def test_forgetting_a_token_needs_it_to_be_yours(client, parent, db):
+    await db.push_tokens.insert_one(
+        {"_id": "pt_other", "token": OTHER, "familyId": "f_someone_else", "userId": "u_x",
+         "deviceId": "d_x", "disabledAt": None}
+    )
+
+    response = await client.delete(f"/push/tokens/{OTHER}")
+
+    assert response.status_code == 401
+    assert await db.push_tokens.count_documents({"token": OTHER}) == 1
+
+
+async def test_a_parent_can_forget_their_own(client, parent, db):
+    await client.post("/push/tokens", headers=parent, json={"token": TOKEN})
+
+    response = await client.delete(f"/push/tokens/{TOKEN}", headers=parent)
+
+    assert response.status_code == 204
+    assert await db.push_tokens.count_documents({}) == 0
+
+
+# --- a token dies with its session ---------------------------------------
+
+
+async def test_signing_a_device_out_stops_it_being_rung(client, parent, db):
+    await client.post("/push/tokens", headers=parent, json={"token": TOKEN})
+    device_id = (await db.push_tokens.find_one({"token": TOKEN}))["deviceId"]
+
+    await client.delete(f"/devices/{device_id}", headers=parent)
+
+    assert await db.push_tokens.count_documents({}) == 0, "a signed-out tablet must stop buzzing"
+
+
+async def test_signing_out_everything_else_takes_those_tokens_too(client, parent, db, signup_body):
+    """The gesture for a list somebody no longer recognises."""
+    await client.post("/push/tokens", headers=parent, json={"token": TOKEN})
+    kept = (await db.push_tokens.find_one({"token": TOKEN}))["deviceId"]
+    second = (
+        await client.post(
+            "/auth/login",
+            json={"email": "parent@example.com", "password": "correct horse battery", "installId": "i_laptop"},
+        )
+    ).json()
+    await client.post(
+        "/push/tokens",
+        headers={"Authorization": f"Bearer {second['accessToken']}"},
+        json={"token": OTHER},
+    )
+
+    await client.delete("/devices", headers=parent)
+
+    remaining = await db.push_tokens.find({}).to_list(length=10)
+    assert [row["deviceId"] for row in remaining] == [kept], "the device asking is spared, the rest are not"
+
+
+# --- the gates ------------------------------------------------------------
+
+
+async def test_the_deployment_switch_is_a_ceiling(db):
+    assert await push.allowed(db, "learn.goal_met") is True
+
+    await _operator_switches(db, "push.enabled", False)
+
+    assert await push.allowed(db, "learn.goal_met") is False
+    assert await push.allowed(db, "device.new_signin") is False, "the master governs account kinds too"
+
+
+async def test_one_kind_can_be_switched_off_without_the_others(db):
+    await _operator_switches(db, "push.goalMet", False)
+
+    assert await push.allowed(db, "learn.goal_met") is False
+    assert await push.allowed(db, "learn.weekly_summary") is True
+
+
+async def test_a_family_may_switch_a_courtesy_kind_off(db):
+    assert await push.allowed(db, "learn.goal_met", {"learn.goal_met": False}) is False
+
+
+async def test_a_family_cannot_switch_on_what_the_operator_switched_off(db):
+    await _operator_switches(db, "push.goalMet", False)
+
+    assert await push.allowed(db, "learn.goal_met", {"learn.goal_met": True}) is False
+
+
+async def test_reminders_ship_off_for_families(db):
+    """The operator row says Koda is willing; a parent still has to ask."""
+    assert await push.allowed(db, "learn.practice_reminder") is False
+    assert await push.allowed(db, "learn.practice_reminder", {"learn.practice_reminder": True}) is True
+
+
+async def test_an_account_kind_ignores_a_preference(db):
+    assert await push.allowed(db, "device.new_signin", {"device.new_signin": False}) is True
+
+
+async def test_an_unknown_kind_is_never_sent(db):
+    assert await push.allowed(db, "learn.made_up") is False
+
+
+# --- sending --------------------------------------------------------------
+
+
+async def test_the_console_driver_reports_what_left_the_process(client, parent, db):
+    """Zero sent, because zero was sent. A test that lies is worse than no test."""
+    await client.post("/push/tokens", headers=parent, json={"token": TOKEN})
+    family_id = (await db.push_tokens.find_one({"token": TOKEN}))["familyId"]
+
+    sent = await push.send(
+        db, to=push.Recipient(family_id=family_id), kind="learn.goal_met", title="Hi", body="There"
+    )
+
+    assert sent == 0
+    assert await db.push_tokens.count_documents({}) == 1, "logging must not retire anybody's token"
+
+
+async def test_a_new_machine_notifies_the_family_and_a_familiar_one_does_not(client, parent, monkeypatch):
+    calls: list[dict] = []
+
+    async def record(db, **kwargs):
+        calls.append(kwargs)
+        return 0
+
+    monkeypatch.setattr(push, "send", record)
+
+    login = {"email": "parent@example.com", "password": "correct horse battery"}
+    await client.post("/auth/login", json={**login, "installId": "i_laptop"})
+    assert [c["kind"] for c in calls] == ["device.new_signin"]
+    assert calls[0]["to"].exclude_device_id, "never tell the device that is signing in"
+
+    await client.post("/auth/login", json={**login, "installId": "i_laptop"})
+    assert len(calls) == 1, "signing in again on a known machine is not news"
+
+
+# --- what FCM's answers cost ----------------------------------------------
+
+
+def _fcm_says(status: int, code: str | None = None):
+    payload = {"error": {"status": code, "details": [{"errorCode": code}]}} if code else {}
+    return lambda url, body: (status, payload)
+
+
+@pytest.fixture
+def fcm_driver(monkeypatch):
+    monkeypatch.setattr(settings(), "push_driver", "fcm")
+    monkeypatch.setattr(settings(), "firebase_project_id", "learn-with-koda")
+    monkeypatch.setattr(fcm, "RETRIES", 0)
+
+
+async def _one_token(db) -> str:
+    await push_tokens.save(
+        db, token=TOKEN, family_id="f_1", user_id="u_1", device_id="d_1", platform="Pixel"
+    )
+    return "f_1"
+
+
+async def test_an_unregistered_token_is_deleted_not_disabled(db, fcm_driver, monkeypatch):
+    family_id = await _one_token(db)
+    monkeypatch.setattr(fcm, "_post", _fcm_says(404, "UNREGISTERED"))
+
+    sent = await push.send(db, to=push.Recipient(family_id=family_id), kind="learn.goal_met", title="a", body="b")
+
+    assert sent == 0
+    assert await db.push_tokens.count_documents({}) == 0, "it will never work again"
+
+
+async def test_three_soft_failures_retire_a_token(db, fcm_driver, monkeypatch):
+    family_id = await _one_token(db)
+    monkeypatch.setattr(fcm, "_post", _fcm_says(503, "UNAVAILABLE"))
+
+    for _ in range(3):
+        await push.send(db, to=push.Recipient(family_id=family_id), kind="learn.goal_met", title="a", body="b")
+
+    row = await db.push_tokens.find_one({"token": TOKEN})
+    assert row is not None, "a bad afternoon at Google is not the parent's fault"
+    assert row["disabledAt"] is not None
+    assert await push_tokens.live_for_family(db, family_id) == []
+
+
+async def test_a_quota_refusal_leaves_the_token_alone(db, fcm_driver, monkeypatch):
+    family_id = await _one_token(db)
+    monkeypatch.setattr(fcm, "_post", _fcm_says(429, "QUOTA_EXCEEDED"))
+
+    await push.send(db, to=push.Recipient(family_id=family_id), kind="learn.goal_met", title="a", body="b")
+
+    row = await db.push_tokens.find_one({"token": TOKEN})
+    assert row["failures"] == 0, "the deployment is at fault, not the phone"
+
+
+async def test_a_delivered_message_is_counted(db, fcm_driver, monkeypatch):
+    family_id = await _one_token(db)
+    monkeypatch.setattr(fcm, "_post", lambda url, body: (200, {"name": "projects/x/messages/1"}))
+
+    sent = await push.send(db, to=push.Recipient(family_id=family_id), kind="learn.goal_met", title="a", body="b")
+
+    assert sent == 1
+
+
+async def test_the_message_carries_no_notification_block(db):
+    """Data only: the worker draws the notification, so the words stay ours."""
+    body = fcm.envelope(TOKEN, {"title": "a", "body": "b", "path": "/family"})
+
+    assert "notification" not in body["message"]
+    assert body["message"]["data"]["title"] == "a"
+    assert body["message"]["webpush"]["fcm_options"]["link"].endswith("/family")
+    assert "validateOnly" not in body
+
+
+async def test_sending_never_raises(db, fcm_driver, monkeypatch):
+    family_id = await _one_token(db)
+
+    def explode(url, body):
+        raise RuntimeError("the network is on fire")
+
+    monkeypatch.setattr(fcm, "_post", explode)
+
+    assert await push.send(db, to=push.Recipient(family_id=family_id), kind="learn.goal_met", title="a", body="b") == 0

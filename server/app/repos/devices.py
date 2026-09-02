@@ -13,6 +13,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from pymongo import DESCENDING
 
 from app.models.common import now
+from app.repos import push_tokens
 from app.settings import settings
 
 
@@ -84,7 +85,23 @@ async def rotate(db: AsyncIOMotorDatabase, device_id: str, refresh_hash: str) ->
     )
 
 
+async def _forget_push(db: AsyncIOMotorDatabase, mongo_filter: dict[str, Any]) -> None:
+    """Drop the notification tokens belonging to sessions that are about to end.
+
+    Called by every path that revokes, and the reason `push_tokens` rows carry a
+    `deviceId` at all. A tablet somebody signed out of and then kept hearing
+    from is the bug this prevents — and the only way to not have it is for the
+    token to die with the row it belongs to, rather than in a sweep somebody has
+    to remember to write.
+
+    Read before the revoke, because after it the filter no longer matches.
+    """
+    ids = [row["_id"] for row in await db.devices.find(mongo_filter, {"_id": 1}).to_list(length=500)]
+    await push_tokens.delete_for_devices(db, ids)
+
+
 async def revoke(db: AsyncIOMotorDatabase, device_id: str) -> None:
+    await _forget_push(db, {"_id": device_id})
     # `$unset` rather than a null: the unique index is partial on strings, and
     # an absent field is the honest way to say "this session no longer exists".
     await db.devices.update_one(
@@ -105,6 +122,7 @@ async def revoke_all_for_user(
     mongo_filter: dict[str, Any] = {"userId": user_id, "revokedAt": None}
     if except_device_id:
         mongo_filter["_id"] = {"$ne": except_device_id}
+    await _forget_push(db, mongo_filter)
     result = await db.devices.update_many(
         mongo_filter,
         {"$set": {"revokedAt": now()}, "$unset": {"refreshHash": ""}},
@@ -145,6 +163,7 @@ async def expire_stale(db: AsyncIOMotorDatabase, family_id: str) -> int:
     sweep costs one indexed update. The rows are revoked rather than deleted,
     so `revokedAt` still answers "when did this stop being a session?".
     """
+    await _forget_push(db, {"familyId": family_id, "revokedAt": None, "lastSeenAt": {"$lt": stale_before()}})
     result = await db.devices.update_many(
         {"familyId": family_id, "revokedAt": None, "lastSeenAt": {"$lt": stale_before()}},
         {"$set": {"revokedAt": now()}, "$unset": {"refreshHash": ""}},
@@ -162,6 +181,7 @@ async def revoke_others_in_family(
     point: signing yourself out along with the rest would leave a parent at the
     sign-in screen with no way to see whether it worked.
     """
+    await _forget_push(db, {"familyId": family_id, "revokedAt": None, "_id": {"$ne": except_device_id}})
     result = await db.devices.update_many(
         {"familyId": family_id, "revokedAt": None, "_id": {"$ne": except_device_id}},
         {"$set": {"revokedAt": now()}, "$unset": {"refreshHash": ""}},
@@ -191,6 +211,7 @@ async def revoke_for_user_in_family(
 ) -> int:
     """End the sessions somebody holds *in one family* — what removing a member
     has to do, without touching sessions they hold elsewhere."""
+    await _forget_push(db, {"userId": user_id, "familyId": family_id, "revokedAt": None})
     result = await db.devices.update_many(
         {"userId": user_id, "familyId": family_id, "revokedAt": None},
         {"$set": {"revokedAt": now()}, "$unset": {"refreshHash": ""}},

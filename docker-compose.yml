@@ -91,6 +91,10 @@ services:
       SMTP_PASSWORD: '${SMTP_PASSWORD:-}'
       MAIL_FROM: '${MAIL_FROM:-Koda <no-reply@koda.local>}'
       APP_BASE_URL: '${APP_BASE_URL:-http://localhost:3001}'
+      # `console` by default, like mail: notifications are logged and nothing
+      # leaves the machine, so no Firebase project is needed to work here.
+      PUSH_DRIVER: '${PUSH_DRIVER:-console}'
+      FIREBASE_PROJECT_ID: '${FIREBASE_PROJECT_ID:-}'
       # Development only. Production supplies a real one, and the service
       # refuses to start while this value is in place.
       JWT_SECRET: '${JWT_SECRET:-dev-only-change-me-not-a-real-secret-32b}'

@@ -183,6 +183,61 @@ DEFAULT_SETTINGS: list[dict] = [
         "value": False,
         "order": 70,
     },
+    # ---- Notifications. The catalog of kinds is `push_defaults.py`; these are
+    # ---- the deployment's answers about them. A row that ships on is a
+    # ---- permission, not a subscription: it says Koda is willing to send this
+    # ---- here, and a family still chooses for itself underneath.
+    {
+        "settingId": "push.enabled",
+        "group": "Notifications",
+        "label": "Push notifications",
+        "description": (
+            "The master over every kind below. Off sends nothing at all, "
+            "including the account notices, whatever a family has asked for."
+        ),
+        "type": "bool",
+        "value": True,
+        "order": 81,
+    },
+    {
+        "settingId": "push.weeklySummary",
+        "group": "Notifications",
+        "label": "Weekly summary",
+        "description": "A parent's Sunday note about the week a child had.",
+        "type": "bool",
+        "value": True,
+        "order": 82,
+    },
+    {
+        "settingId": "push.goalMet",
+        "group": "Notifications",
+        "label": "Goal met",
+        "description": "Sent when a child reaches the day's goal.",
+        "type": "bool",
+        "value": True,
+        "order": 83,
+    },
+    {
+        "settingId": "push.practiceReminder",
+        "group": "Notifications",
+        "label": "Practice reminder",
+        "description": (
+            "Allows the reminder a parent can switch on for themselves, at an hour they pick. "
+            "Every family starts with it off."
+        ),
+        "type": "bool",
+        "value": True,
+        "order": 84,
+    },
+    {
+        "settingId": "push.streakEnding",
+        "group": "Notifications",
+        "label": "Streak ending",
+        "description": "Allows the warning that a streak is about to lapse. Every family starts with it off.",
+        "type": "bool",
+        "value": True,
+        "order": 85,
+    },
     {
         "settingId": "system.notice",
         "group": "Accounts & sync",
