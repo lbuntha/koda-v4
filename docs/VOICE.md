@@ -204,7 +204,7 @@ manifest by hand.
 
 | Folder | What it holds | When it plays |
 |---|---|---|
-| `numbers/` | number words, `"one"`–`"twenty"` | the count-along, on every tap |
+| `numbers/` | number words and digits — in the common pack, not a skill | the count-along, on every tap |
 | `lessons/` | each lesson's `audioPrompt` | once, as the round opens |
 | `prompts/` | fixed question wording, and expanded templates | the Read-aloud button |
 | `phrases/` | fixed lines an activity says in passing | in play — "Put them together!" |
@@ -215,6 +215,42 @@ manifest by hand.
 across their phrases rather than recording each line in every voice — same
 variety for a fraction of the calls. They are also **scoped per skill**, so
 counting's praise never answers an addition round.
+
+### The common pack
+
+Most of what a skill says is its own. Some of it never is: `"seven"` is
+`"seven"`, `"10 ones make 1 ten"` is the same fact in a counting frame and an
+addition column, and `"Perfect!"` is as true of a story problem as of a
+ten-frame. Those live in **`src/voice/common/`** — a voice that belongs to no
+skill, registered once from `main.tsx`.
+
+It used to be otherwise, and the fault was invisible: the number words sat in
+counting's folder, and addition's count-along was instant only because counting
+happened to be installed. The clip registry is keyed by phrase text, so the
+sharing worked — but removing counting would have taken every other skill's
+numbers with it, and the recorder, which works one folder at a time, made
+addition pay again for twenty-one words the app could already say.
+
+Two rules keep sharing safe:
+
+- **A skill's own recording wins.** The pack fills gaps; it never overwrites.
+  Record `"seven"` in your skill's own voice and yours is what plays, whichever
+  order the two registrations happen to run in.
+- **Its reactions are added to a skill's own, never substituted for them.** A
+  skill that has recorded nothing still sounds finished; one that has recorded
+  `"Brilliant counting!"` keeps it *and* draws on the neutral pool, rather than
+  repeating its single line after every answer for a whole round.
+
+What never changed: one skill's words still never reach another skill's round.
+The pack holds only lines that name no subject, which is the test a phrase has
+to pass to go in it. `"Brilliant counting!"` stays in counting; `"You put them
+together!"` stays in addition.
+
+```bash
+npm run voice:record -- --skill common      # record the pack itself
+npm run voice:record -- --skill addition    # skips what common already covers
+npm run voice:record -- --skill addition --force   # record it anyway, in your own voice
+```
 
 ### How many files
 
@@ -282,3 +318,9 @@ you, and run the recorder.
 A skill that has never been recorded needs an `audio/manifest.json` of `{}` and
 the `registerSkillVoice` call in its `index.ts` — see `skills/counting/index.ts`.
 Until clips exist, every line speaks through live TTS exactly as before.
+
+Declare only what is yours. Number words, the place-value facts and neutral
+praise are already in the common pack, so a new skill inherits them: it counts
+aloud and congratulates a child on the day it ships, and the list it has to
+record is its own lessons, its own prompts, and whatever praise names its own
+subject.

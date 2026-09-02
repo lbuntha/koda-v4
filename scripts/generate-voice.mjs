@@ -55,8 +55,26 @@ const run = promisify(execFile);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const skillsRoot = path.join(root, "src", "skills");
 
-/** Where one skill keeps its recordings. Beside `assets/`, for the same reason. */
-const audioDir = (skillId) => path.join(skillsRoot, skillId, "audio");
+/**
+ * The app's own pack, which is not a skill.
+ *
+ * Numbers, and praise that names no subject: lines every skill says the same
+ * way. It lives outside `src/skills/` because it belongs to none of them, and
+ * it is recorded like any of them — `--skill common`.
+ */
+const COMMON_ID = "common";
+const commonRoot = path.join(root, "src", "voice", COMMON_ID);
+
+/** Where one voice keeps its files. Beside its `assets/`, for the same reason. */
+const voiceRoot = (id) => (id === COMMON_ID ? commonRoot : path.join(skillsRoot, id));
+const audioDir = (id) => path.join(voiceRoot(id), "audio");
+
+/** Phrases the common pack already covers, so no skill pays to record them twice. */
+async function commonPhrases() {
+  const manifest = (await readJson(path.join(audioDir(COMMON_ID), "manifest.json"))) ?? {};
+  const declared = await phrasesFor(COMMON_ID);
+  return new Set([...Object.keys(manifest), ...declared.map((p) => p.phrase)]);
+}
 
 /** Must match the server's voice, or a fallback mid-round changes who is speaking. */
 const VOICE = process.env.KODA_VOICE || "Kore";
@@ -135,7 +153,7 @@ async function phrasesFor(skillId) {
   const voices = new Map();
   /** phrase -> the folder it belongs in, so the collection can be browsed. */
   const folders = new Map();
-  const dir = path.join(skillsRoot, skillId);
+  const dir = voiceRoot(skillId);
 
   const file = (phrase, folder) => {
     phrases.add(phrase);
@@ -231,14 +249,28 @@ async function phrasesFor(skillId) {
     }));
 }
 
-/** Every skill that has anything to say. One with nothing is not an error. */
+/**
+ * Every voice that has anything to say — the skills, and the common pack.
+ *
+ * A skill's list has the common lines taken out of it. The recorder works one
+ * folder at a time and cannot see across them, so without this addition would
+ * pay again for twenty-one number words the app can already say. `--force`
+ * still records them, for a skill that wants a line in its own voice.
+ */
 async function speakingSkills() {
   const found = [];
+  const shared = onlySkill === COMMON_ID || force ? new Set() : await commonPhrases();
+
   for (const entry of await fs.readdir(skillsRoot, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
     if (onlySkill && entry.name !== onlySkill) continue;
-    const phrases = await phrasesFor(entry.name);
+    const phrases = (await phrasesFor(entry.name)).filter((p) => !shared.has(p.phrase));
     if (phrases.length > 0) found.push({ skillId: entry.name, phrases });
+  }
+
+  if (!onlySkill || onlySkill === COMMON_ID) {
+    const phrases = await phrasesFor(COMMON_ID);
+    if (phrases.length > 0) found.push({ skillId: COMMON_ID, phrases });
   }
   return found;
 }

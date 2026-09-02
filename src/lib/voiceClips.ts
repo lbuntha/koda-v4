@@ -78,6 +78,21 @@ const registry: VoiceRegistry = ((globalThis as GlobalWithRegistry)[REGISTRY] ??
 const { clips, groups } = registry;
 
 /**
+ * Which voice each clip came from, so something can ask what a skill needs
+ * before it can play with no network.
+ *
+ * The clip map itself is keyed by phrase and shared on purpose, so it cannot
+ * answer that: once addition and the common pack have both registered, nothing
+ * in it says which URLs belong to which. Kept here rather than derived, because
+ * "what would this skill have to download" is a question the offline flow asks
+ * about a skill the child has not opened yet.
+ */
+const owned = new Map<string, Set<string>>();
+
+/** The name the common pack files its clips under. Not a skill id. */
+export const COMMON_VOICE = "common";
+
+/**
  * A phrase and its recording must key identically.
  *
  * The recorder hashes the phrase exactly as authored; this trims and collapses
@@ -97,6 +112,20 @@ const groupKey = (name: string, skillId?: string): string =>
   skillId ? `${skillId}:${name}` : name;
 
 /**
+ * Everything a skill may say for one reaction: its own words and the common
+ * pack's, never another skill's.
+ *
+ * The union rather than a fallback. A skill that recorded one line of its own
+ * would otherwise say that single line after every correct answer for the rest
+ * of the round, while a dozen neutral ones sat unused in common.
+ */
+const reactionPool = (name: string, skillId?: string): string[] => {
+  const own = skillId ? (groups.get(groupKey(name, skillId)) ?? []) : [];
+  const common = groups.get(name) ?? [];
+  return [...new Set([...own, ...common])];
+};
+
+/**
  * Register one skill's recordings.
  *
  * `manifest` maps phrase to filename — written by the recorder into the skill's
@@ -114,11 +143,13 @@ const groupKey = (name: string, skillId?: string): string =>
  * entry whose file is missing is skipped rather than registered as a broken URL —
  * that phrase then simply takes the live path.
  */
-export const registerSkillVoice = (
+const register = (
   manifest: Record<string, string>,
   files: Record<string, string>,
-  declaredGroups: Record<string, { phrases?: string[] }> = {},
-  skillId?: string,
+  declaredGroups: Record<string, { phrases?: string[] }>,
+  skillId: string | undefined,
+  /** False for the common pack: a skill saying a line its own way wins. */
+  overwrite: boolean,
 ): number => {
   // Glob keys are paths relative to the skill ("./audio/numbers/three.wav");
   // the manifest names them relative to `audio/` ("numbers/three.wav"). Matched
@@ -134,7 +165,11 @@ export const registerSkillVoice = (
   for (const [phrase, name] of Object.entries(manifest)) {
     const url = byPath.get(name);
     if (!url) continue;
+    if (!overwrite && clips.has(key(phrase))) continue;
     clips.set(key(phrase), url);
+    const owner = skillId ?? COMMON_VOICE;
+    if (!owned.has(owner)) owned.set(owner, new Set());
+    owned.get(owner)!.add(url);
     registered += 1;
   }
 
@@ -168,15 +203,67 @@ export const registerSkillVoice = (
   return registered;
 };
 
+/**
+ * Register one skill's recordings.
+ *
+ * Its phrases join the shared pool and its reactions are filed under its own
+ * name. See the note above for why those two are treated differently.
+ */
+export const registerSkillVoice = (
+  manifest: Record<string, string>,
+  files: Record<string, string>,
+  declaredGroups: Record<string, { phrases?: string[] }> = {},
+  skillId?: string,
+): number => register(manifest, files, declaredGroups, skillId, true);
+
+/**
+ * Register the app's own recordings — the common pack.
+ *
+ * What every skill says the same way: the number words and digits, the two
+ * place-value facts, and praise that names no subject. It lives outside
+ * `src/skills/` because it belongs to none of them: before this, addition's
+ * count-along was instant only because *counting* happened to be installed, and
+ * removing counting would have taken addition's numbers with it.
+ *
+ * Two rules make it safe to share. A skill's own recording of a line wins, so
+ * common never overwrites — it fills gaps. And its reactions are added to a
+ * skill's own rather than replacing them, so a skill keeps whatever flavour it
+ * recorded ("Brilliant counting!") and still has neutral praise to draw on
+ * before it has recorded any.
+ */
+export const registerCommonVoice = (
+  manifest: Record<string, string>,
+  files: Record<string, string>,
+  declaredGroups: Record<string, { phrases?: string[] }> = {},
+): number => register(manifest, files, declaredGroups, undefined, false);
+
 /** How many variants a reaction can draw on. Zero means it stays silent. */
 export const groupSize = (name: string, skillId?: string): number =>
-  groups.get(groupKey(name, skillId))?.length ?? groups.get(name)?.length ?? 0;
+  reactionPool(name, skillId).length;
 
 /** The clip URL for a phrase, or undefined when it was never recorded. */
 export const clipUrl = (text: string): string | undefined => clips.get(key(text));
 
 /** How many clips are registered. For a test, or a diagnostic. */
 export const clipCount = (): number => clips.size;
+
+/**
+ * Every clip URL a skill needs to sound like itself with no network.
+ *
+ * Its own recordings plus the common pack's, which is exactly what
+ * `playReaction` and `clipUrl` will reach for — a skill that had only its own
+ * warmed would count aloud in the browser's voice on a train.
+ *
+ * Empty is a normal answer, not a failure: a skill nobody has recorded yet is
+ * already fully playable offline, because its lessons and artwork are bundled
+ * with the app. Only speech is fetched.
+ */
+export const clipUrlsFor = (skillId?: string): string[] => [
+  ...new Set([
+    ...(skillId ? (owned.get(skillId) ?? []) : []),
+    ...(owned.get(COMMON_VOICE) ?? []),
+  ]),
+];
 
 /** The element currently speaking, so a new line can cut off the last one. */
 let playing: HTMLAudioElement | null = null;
@@ -299,16 +386,17 @@ export const playReaction = (name: string, rate = 1, skillId?: string): boolean 
   // asked for it.
   if (voiceFloorHeld()) return false;
   /*
-   * This skill's own reactions, or the unscoped pool if it has none.
+   * This skill's own reactions plus the common pack's.
    *
-   * The fallback is for a caller that registered without a skill id; a skill
-   * that has declared a group but recorded none of it stays silent rather than
-   * borrowing another skill's words, which is the whole point of scoping.
+   * Never another skill's: counting's "Brilliant counting!" after 7 + 3 is the
+   * bug scoping exists to prevent, and it stays prevented — common holds only
+   * lines that name no subject. A skill with nothing of its own is no longer
+   * silent, though, which is what lets a new skill sound finished on the day it
+   * ships and makes its own flavour an upgrade rather than a prerequisite.
    */
-  const scoped = groupKey(name, skillId);
-  const groupName = (groups.get(scoped)?.length ?? 0) > 0 ? scoped : name;
-  const urls = groups.get(groupName);
-  if (!urls || urls.length === 0) return false;
+  const groupName = groupKey(name, skillId);
+  const urls = reactionPool(name, skillId);
+  if (urls.length === 0) return false;
 
   const previous = lastPlayed.get(groupName);
   const choices = urls.length > 1 ? urls.filter((url) => url !== previous) : urls;

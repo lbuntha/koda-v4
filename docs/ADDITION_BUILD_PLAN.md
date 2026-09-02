@@ -21,9 +21,11 @@ Phases 0–15 are complete and the skill is published. What the plan describes a
 future work, and where the skill has since moved past the plan:
 
 - **The voice clips are not recorded.** Deliberate, per Phase 14 §4: `voice.json`
-  is complete and the dry run lists **96 phrases**, but `audio/manifest.json` is
+  is complete and the dry run lists **70 phrases**, but `audio/manifest.json` is
   still `{}` and the skill speaks through live TTS. Record with
-  `npm run voice:record -- --skill addition` when the spend is wanted.
+  `npm run voice:record -- --skill addition` when the spend is wanted. It is 70
+  rather than 96 because the number words and neutral praise now come from the
+  common pack (§7.2b), which addition already speaks with today.
 - **64 lessons, not 52.** Units u18–u20 — twelve practice lessons — were added
   after this plan was written. Everything below that says 52 means the 52
   techniques; `addition.course.test.ts` holds the real count.
@@ -742,6 +744,14 @@ the skill and tries the scoped key first, and `playAnswerSound` passes `koda.ski
 already on the SDK. Counting keeps its own eight and is otherwise untouched; addition now
 stays **silent** until it is recorded, rather than borrowing counting's words, which is
 what `answerSound.ts` already documents as the correct fallback for a reaction.
+
+**Superseded, 2 Sep 2026 — the shared lines moved out of counting.** They are now
+`src/voice/common/`, a pack that belongs to no skill: the number words and digits, the two
+place-value facts, and praise that names no subject. Counting owning them was the same bug
+seen from the other side — addition's numbers were instant only while counting was
+installed. A skill's own recording still wins over the pack, its reactions are now played
+*alongside* the neutral ones rather than instead of them, and one skill's words still never
+reach another skill's round. See `docs/VOICE.md`. Addition's own list is 70 phrases, not 96.
 
 Clips stay shared on purpose — `"seven"` is `"seven"`, and a second skill saying it should
 not pay to record it again. Only reactions are scoped, because a reaction is written for

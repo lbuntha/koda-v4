@@ -5,6 +5,9 @@ import App from './App.tsx';
 import { ThemeProvider } from './context/ThemeContext';
 import { PwaStatus } from './components/PwaStatus';
 import { blockPinchZoom } from './pwa/blockPinchZoom';
+// The app's own recordings — numbers, and praise that names no subject. A skill
+// registers its own on import; this belongs to no skill, so it is registered here.
+import './voice/common';
 import './index.css';
 
 /* Before the first render: a child can pinch the splash screen too. Never torn

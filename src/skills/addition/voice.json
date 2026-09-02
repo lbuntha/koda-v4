@@ -15,24 +15,6 @@
     "its own engine speaks. Nothing is recorded yet: until `npm run voice:record`",
     "is run, every line takes the live TTS path, which is slower and never silent."
   ],
-
-  "_numberComment": [
-    "CountTray counts aloud in words — `say(n)` returns 'seven', not '7' — so the",
-    "words are what get recorded. Levels 1-7 reach 12 at most; the list runs to",
-    "twenty because Phase 2's ten-frames and Phase 3's number path will use all of",
-    "it, and a word costs one clip whether or not it is a round number.",
-    "",
-    "There is deliberately no `numberRange` here. That records the *digits* '0'",
-    "to '20', and nothing in this skill speaks a digit yet — JumpLine will, in",
-    "Phase 3, when it names positions past twenty. Adding it now would buy 21",
-    "clips no screen plays."
-  ],
-  "numberWords": [
-    "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
-    "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
-    "sixteen", "seventeen", "eighteen", "nineteen", "twenty"
-  ],
-
   "_promptsComment": [
     "The question itself, as the Read-aloud button says it.",
     "",
@@ -46,7 +28,6 @@
     "Put the groups together, then count them all.",
     "Start with the bigger number, then count on."
   ],
-
   "_templateComment": [
     "A template is expanded into one recorded line per value, which is how a",
     "prompt containing a number gets recorded at all.",
@@ -59,17 +40,20 @@
   "templates": [
     {
       "text": "Start at {value} and count on.",
-      "values": [4, 5, 6, 7, 8, 9]
+      "values": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
     }
   ],
-
   "_phrasesComment": "Everything else CountTray says in passing. One line, so far.",
   "phrases": [
-    "Put them together!",
-    "10 ones make 1 ten",
-    "10 tens make 1 hundred"
+    "Put them together!"
   ],
-
   "_groupsComment": [
     "Several ways of saying the same thing, so praise does not become wallpaper.",
     "`playAnswerSound` picks one on every answer, which is why these are recorded",
@@ -78,24 +62,29 @@
   ],
   "groups": {
     "correct": {
-      "voices": ["Kore", "Puck", "Zephyr"],
+      "voices": [
+        "Kore",
+        "Puck",
+        "Zephyr"
+      ],
       "phrases": [
         "That is the total!",
         "Yes — you added it!",
         "Great adding!",
-        "That's right!",
-        "You put them together!",
-        "Perfect!"
+        "You put them together!"
       ]
     },
     "incorrect": {
-      "voices": ["Kore", "Zephyr", "Puck"],
+      "voices": [
+        "Kore",
+        "Zephyr",
+        "Puck"
+      ],
       "phrases": [
         "Not quite. Count once more.",
         "So close! Try counting again.",
         "Almost! Have another go.",
-        "Good try. Let's count them together.",
-        "Hmm, let's look again."
+        "Good try. Let's count them together."
       ]
     }
   }

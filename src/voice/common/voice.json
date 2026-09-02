@@ -1,0 +1,63 @@
+{
+  "_comment": [
+    "What the app says the same way in every skill.",
+    "",
+    "This pack belongs to no skill, which is the whole point: before it existed the",
+    "number words lived in counting's folder, and addition's count-along was instant",
+    "only because counting happened to be installed. Removing counting would have",
+    "taken addition's numbers with it.",
+    "",
+    "A line belongs here when it names no subject. 'seven' is 'seven', and 'Perfect!'",
+    "is as true of a story problem as of a ten-frame. A line that mentions what is",
+    "being learned - 'Brilliant counting!', 'You put them together!' - belongs to the",
+    "skill that teaches it, and stays in that skill's own voice.json.",
+    "",
+    "Record it with: npm run voice:record -- --skill common"
+  ],
+  "numberWords": [
+    "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+    "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen",
+    "seventeen", "eighteen", "nineteen", "twenty"
+  ],
+  "numberRange": [0, 60],
+  "_phrasesComment": [
+    "Facts about how numbers are written, not about any one skill's subject.",
+    "Counting says them building a ten; addition says them regrouping a column."
+  ],
+  "phrases": [
+    "10 ones make 1 ten",
+    "10 tens make 1 hundred"
+  ],
+  "_groupsComment": [
+    "Praise and correction that name no subject.",
+    "",
+    "A skill's own reactions are played alongside these, never instead of them, so",
+    "a skill that has recorded nothing still sounds finished and one that has",
+    "recorded its own flavour keeps it. What a skill must never hear is another",
+    "skill's words: 'Brilliant counting!' after 7 + 3 is the bug scoping prevents."
+  ],
+  "groups": {
+    "correct": {
+      "voices": ["Kore", "Puck", "Zephyr"],
+      "phrases": [
+        "Yes! You got it!",
+        "Nice work!",
+        "That's right!",
+        "You did it!",
+        "Perfect!",
+        "Wonderful!",
+        "Great job!"
+      ]
+    },
+    "incorrect": {
+      "voices": ["Kore", "Zephyr", "Puck"],
+      "phrases": [
+        "Not quite. Let's try again!",
+        "So close! Have another go.",
+        "Almost! Try once more.",
+        "Hmm, let's look again.",
+        "Nearly there! One more try."
+      ]
+    }
+  }
+}

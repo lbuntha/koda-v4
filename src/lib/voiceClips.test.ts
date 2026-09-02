@@ -236,12 +236,130 @@ describe("reactions belong to the skill that recorded them", () => {
     expect(registerSkillVoice).toBeTypeOf("function");
   });
 
-  it("counts a skill's own variants, not the whole pool", async () => {
+  it("counts a skill's own variants and the common pack's, not another skill's", async () => {
     const mod = await import("./voiceClips");
     registerCounting(mod);
     registerAddition(mod);
     expect(mod.groupSize("correct", "counting")).toBe(1);
     expect(mod.groupSize("correct", "addition")).toBe(1);
+
+    // The common pack is every skill's to draw on, so it counts for both.
+    mod.registerCommonVoice(
+      { "Perfect!": "correct/perfect.wav" },
+      { "./audio/correct/perfect.wav": "/common/perfect.wav" },
+      { correct: { phrases: ["Perfect!"] } },
+    );
+    expect(mod.groupSize("correct", "counting")).toBe(2);
+    expect(mod.groupSize("correct", "addition")).toBe(2);
+  });
+});
+
+/**
+ * The common pack — what the app says the same way in every skill.
+ *
+ * Numbers, and praise that names no subject. It used to live inside counting,
+ * so addition's count-along was instant only because counting happened to be
+ * installed: a shared asset owned by one skill, whose removal would have taken
+ * every other skill's numbers with it.
+ *
+ * Two rules make sharing safe, and both are here. A skill's own recording of a
+ * line wins, so the pack fills gaps rather than overwriting. And its reactions
+ * are added to a skill's own rather than replacing them — while still never
+ * reaching across from one skill to another, which is the line scoping drew.
+ */
+describe("the common pack", () => {
+  type VoiceModule = typeof import("./voiceClips");
+
+  const registerCommon = (mod: VoiceModule) =>
+    mod.registerCommonVoice(
+      { seven: "numbers/seven.wav", "Perfect!": "correct/perfect.wav" },
+      {
+        "./audio/numbers/seven.wav": "/common/seven.wav",
+        "./audio/correct/perfect.wav": "/common/perfect.wav",
+      },
+      { correct: { phrases: ["Perfect!"] } },
+    );
+
+  const registerCounting = (mod: VoiceModule) =>
+    mod.registerSkillVoice(
+      { "Brilliant counting!": "correct/brilliant.wav" },
+      { "./audio/correct/brilliant.wav": "/a/brilliant.wav" },
+      { correct: { phrases: ["Brilliant counting!"] } },
+      "counting",
+    );
+
+  it("says a line no skill recorded", async () => {
+    const mod = await import("./voiceClips");
+    registerCommon(mod);
+    expect(mod.clipUrl("seven")).toBe("/common/seven.wav");
+  });
+
+  it("never overwrites a skill that recorded the line its own way", async () => {
+    const mod = await import("./voiceClips");
+    mod.registerSkillVoice(
+      { seven: "numbers/seven.wav" },
+      { "./audio/numbers/seven.wav": "/counting/seven.wav" },
+      {},
+      "counting",
+    );
+    registerCommon(mod);
+    expect(mod.clipUrl("seven"), "the pack clobbered a skill's own voice").toBe(
+      "/counting/seven.wav",
+    );
+  });
+
+  it("is overwritten by a skill that records the line afterwards", async () => {
+    // Order must not decide it: the pack fills gaps whichever way round the two
+    // registrations happen to run.
+    const mod = await import("./voiceClips");
+    registerCommon(mod);
+    mod.registerSkillVoice(
+      { seven: "numbers/seven.wav" },
+      { "./audio/numbers/seven.wav": "/counting/seven.wav" },
+      {},
+      "counting",
+    );
+    expect(mod.clipUrl("seven")).toBe("/counting/seven.wav");
+  });
+
+  it("gives a skill with no reactions of its own something to say", async () => {
+    const mod = await import("./voiceClips");
+    registerCommon(mod);
+    // Addition has declared the group and recorded none of it — the state every
+    // new skill ships in.
+    mod.registerSkillVoice({}, {}, { correct: { phrases: ["Great adding!"] } }, "addition");
+
+    expect(mod.playReaction("correct", 1, "addition")).toBe(true);
+    expect(played.at(-1)!.src).toBe("/common/perfect.wav");
+  });
+
+  it("is heard alongside a skill's own words, not instead of them", async () => {
+    // A skill with one recorded line would otherwise repeat it after every
+    // answer for the whole round while the neutral ones sat unused.
+    const mod = await import("./voiceClips");
+    registerCommon(mod);
+    registerCounting(mod);
+
+    const heard = new Set<string>();
+    for (let i = 0; i < 12; i += 1) {
+      mod.playReaction("correct", 1, "counting");
+      heard.add(played.at(-1)!.src);
+    }
+    expect(heard).toEqual(new Set(["/a/brilliant.wav", "/common/perfect.wav"]));
+  });
+
+  it("still keeps one skill's words out of another skill's round", async () => {
+    const mod = await import("./voiceClips");
+    registerCommon(mod);
+    registerCounting(mod);
+    mod.registerSkillVoice({}, {}, { correct: { phrases: ["Great adding!"] } }, "addition");
+
+    for (let i = 0; i < 12; i += 1) {
+      expect(mod.playReaction("correct", 1, "addition")).toBe(true);
+      expect(played.at(-1)!.src, "counting's praise reached an addition round").toBe(
+        "/common/perfect.wav",
+      );
+    }
   });
 });
 

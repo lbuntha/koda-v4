@@ -9,37 +9,7 @@
     "fixed or templated lines an activity says. Anything missing is not broken, only",
     "slower: an unrecorded phrase falls back to server TTS and then to the browser."
   ],
-  "numberWords": [
-    "one",
-    "two",
-    "three",
-    "four",
-    "five",
-    "six",
-    "seven",
-    "eight",
-    "nine",
-    "ten",
-    "eleven",
-    "twelve",
-    "thirteen",
-    "fourteen",
-    "fifteen",
-    "sixteen",
-    "seventeen",
-    "eighteen",
-    "nineteen",
-    "twenty"
-  ],
   "_numberRangeComment": "FroggySkip speaks every pad it lands on. `count-by-10s-up-to-100` hops by 10 up to six times, so it says 60 — the range was 0-50 and that last hop fell through to the browser's voice. Derived from the numberline lessons' steps and hop ranges; widen this if either grows.",
-  "numberRange": [
-    0,
-    60
-  ],
-  "phrases": [
-    "10 ones make 1 ten",
-    "10 tens make 1 hundred"
-  ],
   "_templateComment": [
     "A template is expanded into one recorded line per value.",
     "",
@@ -123,14 +93,7 @@
         "Zephyr"
       ],
       "phrases": [
-        "Yes! You got it!",
-        "Brilliant counting!",
-        "Nice work!",
-        "That's right!",
-        "You did it!",
-        "Perfect!",
-        "Wonderful!",
-        "Great job!"
+        "Brilliant counting!"
       ]
     },
     "incorrect": {
@@ -140,21 +103,10 @@
         "Puck"
       ],
       "phrases": [
-        "Not quite. Let's try again!",
-        "So close! Have another go.",
-        "Almost! Try once more.",
-        "Good try! Let's count again.",
-        "Hmm, let's look again.",
-        "Nearly there! One more try."
+        "Good try! Let's count again."
       ]
     }
   },
-  "_phrasesComment": [
-    "Lines an activity says in passing — not the question itself.",
-    "",
-    "Base10 says these when ten ones become a ten, mid-drag. They are commentary",
-    "on what just happened, which is why they are not prompts."
-  ],
   "_promptsComment": [
     "What an activity says as the question — the thing being asked.",
     "",
