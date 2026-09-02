@@ -1,7 +1,7 @@
 [
   {
     "id": "addition",
-    "name": "Addition Quest",
+    "name": "Addition",
     "version": "1.0.0",
     "description": "Fifty-two ways to add, from counting two groups to choosing which strategy the numbers deserve.",
     "category": "core",
@@ -3578,7 +3578,7 @@
   },
   {
     "id": "counting",
-    "name": "Counting Quest",
+    "name": "Counting",
     "version": "1.0.0",
     "description": "One-to-one correspondence, subitizing and quantity comparison.",
     "category": "core",

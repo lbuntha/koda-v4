@@ -69,8 +69,8 @@ export interface ChildReportPageProps {
  * Row" and "Count the Beat" are different lessons in different skills, and a
  * list of bare lesson titles stops being navigable the moment two of them read
  * alike. It is only ever *shown* when this child's record spans more than one
- * skill — a caption saying "Counting Quest" under every row of a page about
- * Counting Quest is noise.
+ * skill — a caption saying "Counting" under every row of a page about
+ * Counting is noise.
  */
 interface ConceptName {
   lesson: string;
