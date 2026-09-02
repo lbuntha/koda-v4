@@ -62,7 +62,24 @@ export interface KodaHost {
   }): Recommendation | undefined;
 }
 
-async function postJson<T>(path: string, body: Record<string, unknown>): Promise<T | null> {
+/**
+ * How long a spoken line may wait on the server before the device says it.
+ *
+ * Deliberately short, and shorter than the round's own 2.6s cap on waiting for
+ * a word (`useSpokenFinish`). On an unstable connection a request can stall
+ * without failing, and every extra second is one where the child hears nothing
+ * — and worse, where a late answer arrives to be spoken over the *next*
+ * question. The device's own voice, now, beats Koda's voice, eventually.
+ */
+const SPEECH_TIMEOUT_MS = 4_000;
+
+async function postJson<T>(
+  path: string,
+  body: Record<string, unknown>,
+  timeoutMs = 0,
+): Promise<T | null> {
+  const controller = timeoutMs > 0 ? new AbortController() : null;
+  const timer = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
   try {
     // The Gemini key is the server's now: this sends the session's token and
     // the tutor server resolves the key behind it.
@@ -70,11 +87,14 @@ async function postJson<T>(path: string, body: Record<string, unknown>): Promise
       method: "POST",
       headers: await tutorHeaders(),
       body: JSON.stringify(body),
+      signal: controller?.signal,
     });
     if (!res.ok) return null;
     return (await res.json()) as T;
   } catch {
     return null;
+  } finally {
+    if (timer) clearTimeout(timer);
   }
 }
 
@@ -236,10 +256,11 @@ export function createKodaSDK(
           return;
         }
 
-        const data = await postJson<{ audio?: string }>("/api/tutor/speech", {
-          text,
-          voice: "Kore",
-        });
+        const data = await postJson<{ audio?: string }>(
+          "/api/tutor/speech",
+          { text, voice: "Kore" },
+          SPEECH_TIMEOUT_MS,
+        );
         if (data?.audio) {
           const source = playBase64Pcm(data.audio);
           if (source) await new Promise<void>((resolve) => (source.onended = () => resolve()));

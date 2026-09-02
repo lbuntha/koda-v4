@@ -50,16 +50,58 @@ interface RequestOptions {
   /** Bearer token, when the route needs one. */
   token?: string | null;
   signal?: AbortSignal;
+  /** Give up and call it offline after this long. `0` waits forever. */
+  timeoutMs?: number;
+}
+
+/**
+ * How long to wait before calling a request offline.
+ *
+ * A connection that drops is the easy case: `fetch` rejects and the caller
+ * queues. The hard one, and the common one on an unstable link, is a request
+ * that connects and then stalls — nothing rejects, and the browser's own limit
+ * can be half a minute. Anything waiting on that is stuck for as long, and the
+ * sync engine is single-flight, so one stalled flush also holds off the retry
+ * that would have worked.
+ *
+ * Fifteen seconds is far longer than a healthy request and far shorter than
+ * giving up on the app.
+ */
+const DEFAULT_TIMEOUT_MS = 15_000;
+
+/**
+ * The caller's signal, plus a deadline of our own.
+ *
+ * `AbortSignal.any`/`timeout` are not in every engine this runs in — jsdom
+ * included — so it is built by hand rather than feature-detected in two places.
+ */
+function withDeadline(signal: AbortSignal | undefined, timeoutMs: number) {
+  if (timeoutMs <= 0) return { signal, done: () => {} };
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const relay = () => controller.abort();
+  signal?.addEventListener("abort", relay);
+  if (signal?.aborted) controller.abort();
+
+  return {
+    signal: controller.signal,
+    done: () => {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", relay);
+    },
+  };
 }
 
 export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { method = "GET", body, token, signal } = options;
+  const { method = "GET", body, token, signal, timeoutMs = DEFAULT_TIMEOUT_MS } = options;
+  const deadline = withDeadline(signal, timeoutMs);
 
   let response: Response;
   try {
     response = await fetch(`${API_BASE}${path}`, {
       method,
-      signal,
+      signal: deadline.signal,
       headers: {
         ...(body ? { "Content-Type": "application/json" } : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -68,8 +110,12 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
     });
   } catch {
     // A failed fetch is the offline case, and offline is not an error state in
-    // this app — the caller decides whether it is worth saying anything.
+    // this app — the caller decides whether it is worth saying anything. A
+    // request that ran out of time arrives here too, and means the same thing:
+    // this device cannot reach the server *now*, so queue it and back off.
     throw new ApiError(0, "network", "No connection to the data service.");
+  } finally {
+    deadline.done();
   }
 
   if (response.status === 204) return undefined as T;
