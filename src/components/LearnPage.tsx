@@ -162,8 +162,12 @@ export const LearnPage: React.FC<LearnPageProps> = ({
    */
   const next = resumeLesson(lessons, completedLevels, viewer);
   /* The button always has somewhere to go, even when the path has nothing left
-     to unlock: a finished skill reopens its last lesson as revision. */
-  const resume = next ?? lessons[lessons.length - 1];
+     to unlock: a finished skill reopens its last lesson as revision. Its last
+     *teaching* lesson — the fallback used to be the last lesson in the list,
+     which is practice, so a learner who finished the path was handed practice
+     by the one control on the page that is not asking them to choose. */
+  const taught = teaching.flatMap((unit) => unit.lessons);
+  const resume = next ?? taught[taught.length - 1] ?? lessons[lessons.length - 1];
   const category = skill.manifest.audience.category;
   const art = skillArtFor(category);
   const registered = viewer.showAllSkills || registeredIds.has(skillId);
@@ -295,6 +299,12 @@ export const LearnPage: React.FC<LearnPageProps> = ({
               <>
                 Up next: <span className="font-bold text-ink">{next.title}</span>
               </>
+            ) : practice.length > practiceDone ? (
+              /* The teaching is done and practice is not. Said as an invitation
+                 rather than as the next step, because that is what practice is:
+                 nothing above points a learner into it, so this is where they
+                 find out it is there. */
+              <>Every lesson complete — practice is open below whenever you want it.</>
             ) : (
               <>Every lesson complete — play any of them again.</>
             )

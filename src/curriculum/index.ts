@@ -224,6 +224,18 @@ export function isUnlocked(
  * Returns undefined when there is nothing open and unplayed at all, which is
  * both "finished" and "everything remaining is locked"; the caller decides what
  * to offer instead, and must not fall back to the first lesson in the list.
+ *
+ * **Practice is not an answer to this question, and not evidence about it
+ * either.** The course files practice in units of its own at the end of the
+ * flat list, so reading straight through it made "Continue" point at
+ * "Practice: Frames" the moment the teaching ran out — offering, as the next
+ * step, the one thing that is explicitly the learner's own choice to take up.
+ * Worse in the other direction: a single practice run played early moved the
+ * "furthest played" mark into the practice block, and every unplayed teaching
+ * lesson behind it was then skipped. So practice is excluded from both halves —
+ * the candidates and the mark. `lib/learning/recommend.ts` holds the same line
+ * for the same reasons, and the Practice section stays open to anyone who taps
+ * it.
  */
 export function resumeLesson(
   lessons: ResolvedLesson[],
@@ -231,6 +243,7 @@ export function resumeLesson(
   viewer?: Viewer,
   startingPoint?: number | null,
 ): ResolvedLesson | undefined {
+  const taught = lessons.filter((lesson) => !isPracticeLesson(lesson));
   const played = (lesson: ResolvedLesson) => (completed[lesson.levelNumber] ?? 0) > 0;
   const open = (lesson: ResolvedLesson) =>
     !played(lesson) &&
@@ -238,6 +251,6 @@ export function resumeLesson(
       ? isUnlocked(lesson, completed, viewer)
       : isUnlocked(lesson, completed, viewer, startingPoint));
 
-  const lastPlayed = lessons.reduce((at, lesson, i) => (played(lesson) ? i : at), -1);
-  return lessons.slice(lastPlayed + 1).find(open) ?? lessons.find(open);
+  const lastPlayed = taught.reduce((at, lesson, i) => (played(lesson) ? i : at), -1);
+  return taught.slice(lastPlayed + 1).find(open) ?? taught.find(open);
 }

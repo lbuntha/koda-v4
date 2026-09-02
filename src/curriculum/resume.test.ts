@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getCourseLessons, resumeLesson } from "./index";
+import { getCourseLessons, isPracticeLesson, resumeLesson } from "./index";
 import type { ResolvedLesson } from "./index";
 import type { Viewer } from "../skills/viewer";
 
@@ -94,6 +94,41 @@ describe("resumeLesson", () => {
     expect(resumeLesson(lessons, completed, viewer, skipped.levelNumber)?.levelNumber).toBe(
       skipped.levelNumber,
     );
+  });
+
+  it("never offers practice, however much of the teaching is finished", () => {
+    /* Practice sits in units of its own at the end of the flat course, so
+       reading straight through pointed "Continue" at it the moment the teaching
+       ran out. Practice is a choice a learner makes, never the answer to "what
+       next" — checked at every depth, not just at the end. */
+    for (const played of [0, 5, 20, lessons.filter((l) => !isPracticeLesson(l)).length]) {
+      const completed = completing(...lessons.slice(0, played).map((l) => l.ref));
+      const next = resumeLesson(lessons, completed, viewer, unplaced);
+      if (next) expect(isPracticeLesson(next), next.ref).toBe(false);
+    }
+  });
+
+  it("is not moved on by a practice run played early", () => {
+    /* The other half of the same rule. A child who dips into practice has not
+       moved further through the course, and treating it as the furthest thing
+       played skipped every teaching lesson still open behind it. */
+    const practice = lessons.find(isPracticeLesson);
+    expect(practice).toBeDefined();
+
+    const done = lessons.slice(0, 3);
+    const completed = completing(...done.map((l) => l.ref), practice!.ref);
+
+    const next = resumeLesson(lessons, completed, viewer, unplaced);
+    expect(next?.levelNumber).toBe(lessons[3].levelNumber);
+  });
+
+  it("returns undefined once every teaching lesson is finished", () => {
+    /* Untouched practice is not unfinished business: the page falls back to
+       revision rather than being handed a practice lesson to "continue". */
+    const completed = completing(
+      ...lessons.filter((l) => !isPracticeLesson(l)).map((l) => l.ref),
+    );
+    expect(resumeLesson(lessons, completed, viewer, unplaced)).toBeUndefined();
   });
 
   it("answers per skill, so a second skill is not judged by the first's progress", () => {
