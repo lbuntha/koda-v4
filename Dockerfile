@@ -28,6 +28,21 @@ FROM deps AS build
 COPY . .
 ARG VITE_GOOGLE_CLIENT_ID
 ENV VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
+# Firebase Cloud Messaging's browser half. Baked in here because Vite resolves
+# them at build time: a runtime environment variable on Cloud Run arrives long
+# after the bundle that would have read it was written. All five are public
+# identifiers, like the OAuth client id above. Absent, the app simply does not
+# offer notifications.
+ARG VITE_FIREBASE_API_KEY
+ENV VITE_FIREBASE_API_KEY=${VITE_FIREBASE_API_KEY}
+ARG VITE_FIREBASE_PROJECT_ID
+ENV VITE_FIREBASE_PROJECT_ID=${VITE_FIREBASE_PROJECT_ID}
+ARG VITE_FIREBASE_APP_ID
+ENV VITE_FIREBASE_APP_ID=${VITE_FIREBASE_APP_ID}
+ARG VITE_FIREBASE_MESSAGING_SENDER_ID
+ENV VITE_FIREBASE_MESSAGING_SENDER_ID=${VITE_FIREBASE_MESSAGING_SENDER_ID}
+ARG VITE_FIREBASE_VAPID_KEY
+ENV VITE_FIREBASE_VAPID_KEY=${VITE_FIREBASE_VAPID_KEY}
 RUN npm run build
 
 # ---------- production ----------

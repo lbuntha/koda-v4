@@ -95,6 +95,10 @@ jobs:
       SMTP_USER: ${{ secrets.SMTP_USER }}
       SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
       MAIL_FROM: ${{ vars.MAIL_FROM || 'Koda <no-reply@koda.local>' }}
+      # `console` logs and sends nothing, which is the safe default for a
+      # deployment that has not been given a Firebase project yet.
+      PUSH_DRIVER: ${{ vars.PUSH_DRIVER || 'console' }}
+      FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v4
 
@@ -139,7 +143,7 @@ jobs:
             --platform managed \
             --port 8000 \
             --allow-unauthenticated \
-            --set-env-vars "^|^ENVIRONMENT=production|MONGODB_URI=${MONGODB_URI}|MONGODB_DB=koda_v4|JWT_SECRET=${JWT_SECRET}|TUTOR_SERVICE_TOKEN=${TUTOR_SERVICE_TOKEN}|GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}|APP_BASE_URL=https://learn-with-koda.web.app|REQUIRE_EMAIL_VERIFICATION=${REQUIRE_EMAIL_VERIFICATION}|MAIL_DRIVER=${MAIL_DRIVER}|SMTP_HOST=${SMTP_HOST}|SMTP_PORT=${SMTP_PORT}|SMTP_STARTTLS=${SMTP_STARTTLS}|SMTP_USER=${SMTP_USER}|SMTP_PASSWORD=${SMTP_PASSWORD}|MAIL_FROM=${MAIL_FROM}"
+            --set-env-vars "^|^ENVIRONMENT=production|MONGODB_URI=${MONGODB_URI}|MONGODB_DB=koda_v4|JWT_SECRET=${JWT_SECRET}|TUTOR_SERVICE_TOKEN=${TUTOR_SERVICE_TOKEN}|GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}|APP_BASE_URL=https://learn-with-koda.web.app|REQUIRE_EMAIL_VERIFICATION=${REQUIRE_EMAIL_VERIFICATION}|MAIL_DRIVER=${MAIL_DRIVER}|SMTP_HOST=${SMTP_HOST}|SMTP_PORT=${SMTP_PORT}|SMTP_STARTTLS=${SMTP_STARTTLS}|SMTP_USER=${SMTP_USER}|SMTP_PASSWORD=${SMTP_PASSWORD}|MAIL_FROM=${MAIL_FROM}|PUSH_DRIVER=${PUSH_DRIVER}|FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}"
 
       - name: Verify API health
         run: |
@@ -154,6 +158,14 @@ jobs:
     env:
       TUTOR_SERVICE_TOKEN: ${{ secrets.TUTOR_SERVICE_TOKEN }}
       GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
+      # Variables rather than secrets, like the OAuth client id above: these are
+      # public identifiers that ship inside the browser bundle, and calling them
+      # secrets would only teach somebody that a leaked one matters.
+      VITE_FIREBASE_API_KEY: ${{ vars.VITE_FIREBASE_API_KEY }}
+      VITE_FIREBASE_PROJECT_ID: ${{ vars.VITE_FIREBASE_PROJECT_ID }}
+      VITE_FIREBASE_APP_ID: ${{ vars.VITE_FIREBASE_APP_ID }}
+      VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ vars.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+      VITE_FIREBASE_VAPID_KEY: ${{ vars.VITE_FIREBASE_VAPID_KEY }}
     steps:
       - uses: actions/checkout@v4
 
@@ -177,6 +189,11 @@ jobs:
         run: |
           docker build --platform linux/amd64 --target prod \
             --build-arg VITE_GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" \
+            --build-arg VITE_FIREBASE_API_KEY="$VITE_FIREBASE_API_KEY" \
+            --build-arg VITE_FIREBASE_PROJECT_ID="$VITE_FIREBASE_PROJECT_ID" \
+            --build-arg VITE_FIREBASE_APP_ID="$VITE_FIREBASE_APP_ID" \
+            --build-arg VITE_FIREBASE_MESSAGING_SENDER_ID="$VITE_FIREBASE_MESSAGING_SENDER_ID" \
+            --build-arg VITE_FIREBASE_VAPID_KEY="$VITE_FIREBASE_VAPID_KEY" \
             -t "$IMAGE" .
           docker push "$IMAGE"
 
