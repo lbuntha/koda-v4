@@ -87,6 +87,14 @@ jobs:
       # OAuth client ids are public identifiers, so this is a repository
       # variable rather than a secret. Empty leaves Google sign-in disabled.
       GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
+      REQUIRE_EMAIL_VERIFICATION: ${{ vars.REQUIRE_EMAIL_VERIFICATION || 'false' }}
+      MAIL_DRIVER: ${{ vars.MAIL_DRIVER || 'console' }}
+      SMTP_HOST: ${{ vars.SMTP_HOST }}
+      SMTP_PORT: ${{ vars.SMTP_PORT || '587' }}
+      SMTP_STARTTLS: ${{ vars.SMTP_STARTTLS || 'true' }}
+      SMTP_USER: ${{ secrets.SMTP_USER }}
+      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+      MAIL_FROM: ${{ vars.MAIL_FROM || 'Koda <no-reply@koda.local>' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -95,6 +103,12 @@ jobs:
           test -n "$MONGODB_URI"
           test -n "$JWT_SECRET"
           test -n "$TUTOR_SERVICE_TOKEN"
+          if [ "$REQUIRE_EMAIL_VERIFICATION" = "true" ]; then
+            test "$MAIL_DRIVER" = "smtp"
+            test -n "$SMTP_HOST"
+            test -n "$SMTP_USER"
+            test -n "$SMTP_PASSWORD"
+          fi
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -125,7 +139,7 @@ jobs:
             --platform managed \
             --port 8000 \
             --allow-unauthenticated \
-            --set-env-vars "^|^ENVIRONMENT=production|MONGODB_URI=${MONGODB_URI}|MONGODB_DB=koda_v4|JWT_SECRET=${JWT_SECRET}|TUTOR_SERVICE_TOKEN=${TUTOR_SERVICE_TOKEN}|GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}|APP_BASE_URL=https://learn-with-koda.web.app"
+            --set-env-vars "^|^ENVIRONMENT=production|MONGODB_URI=${MONGODB_URI}|MONGODB_DB=koda_v4|JWT_SECRET=${JWT_SECRET}|TUTOR_SERVICE_TOKEN=${TUTOR_SERVICE_TOKEN}|GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}|APP_BASE_URL=https://learn-with-koda.web.app|REQUIRE_EMAIL_VERIFICATION=${REQUIRE_EMAIL_VERIFICATION}|MAIL_DRIVER=${MAIL_DRIVER}|SMTP_HOST=${SMTP_HOST}|SMTP_PORT=${SMTP_PORT}|SMTP_STARTTLS=${SMTP_STARTTLS}|SMTP_USER=${SMTP_USER}|SMTP_PASSWORD=${SMTP_PASSWORD}|MAIL_FROM=${MAIL_FROM}"
 
       - name: Verify API health
         run: |

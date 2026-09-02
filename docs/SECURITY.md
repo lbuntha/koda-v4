@@ -72,6 +72,8 @@ will eventually be forgotten, and the forgotten one is the one that matters.
 | `POST /v1/auth/token` | Form-encoded login used by development API docs |
 | `POST /v1/auth/password/forgot` | A person who forgot their password has no token; the response never reveals whether an account exists |
 | `POST /v1/auth/password/reset` | Carries its own single-use, expiring credential |
+| `POST /v1/auth/email/resend` | No session exists yet; always answers 204 to prevent account discovery |
+| `POST /v1/auth/email/verify` | Carries its own single-use, expiring credential |
 
 `tests/test_guarded.py` sweeps the OpenAPI schema and asserts **401** for every
 route not on that list — so a route added next month is covered the day it is
@@ -135,6 +137,8 @@ account, which the IP limit alone never sees.
 |---|---|
 | `POST /auth/login` | 20/min per IP · 10/min per email |
 | `POST /auth/signup` | 5 per 5 min per IP |
+| `POST /auth/email/resend` | 5 per 5 min per IP · 3 per 15 min per email |
+| `POST /auth/email/verify` | 30 per 5 min per IP |
 
 A correct password clears the account's budget, so somebody who mistyped twice
 is not still counted against. Counters live in Mongo with a TTL index, not in

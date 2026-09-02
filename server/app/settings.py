@@ -23,6 +23,12 @@ class Settings(BaseSettings):
     access_ttl_minutes: int = 15
     refresh_ttl_days: int = 60
 
+    #: Password registrations may be held until their mailbox is proved. Off
+    #: by default so a deployment without outbound mail cannot create accounts
+    #: whose activation link it has no way to deliver.
+    require_email_verification: bool = False
+    email_verification_ttl_hours: int = 24
+
     #: Public OAuth client id for Google Identity Services. The browser and
     #: this API receive the same value: the browser asks Google for an ID token,
     #: and the API uses the id as the token's required audience. There is no

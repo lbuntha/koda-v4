@@ -53,6 +53,7 @@ async def test_google_can_create_a_parent_and_then_sign_in_again(client, db, mon
     stored = await users.by_google_sub(db, "google-123")
     assert stored is not None
     assert stored["passwordHash"] is None
+    assert stored["emailVerifiedAt"] is not None
 
     signed_in = await client.post(
         "/auth/google",

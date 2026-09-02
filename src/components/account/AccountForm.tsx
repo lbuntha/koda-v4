@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Eye, EyeOff, KeyRound, LogIn, UserPlus } from "lucide-react";
+import { Eye, EyeOff, KeyRound, LogIn, MailCheck, RefreshCw, UserPlus } from "lucide-react";
 
 import { ApiError, SessionAPI, request } from "../../lib/sync";
 import { themeSystem } from "../../lib/themeSystem";
@@ -183,6 +183,8 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
   const [error, setError] = useState<string | null>(null);
   const [sentTo, setSentTo] = useState<string | null>(null);
   const [googleUnavailable, setGoogleUnavailable] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState<string | null>(null);
+  const [verificationSent, setVerificationSent] = useState(false);
 
   /**
    * Ask for a reset link.
@@ -223,6 +225,23 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
     playSound("pop");
   };
 
+  const resendVerification = async () => {
+    if (!verificationEmail || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await SessionAPI.resendVerification(verificationEmail);
+      // Deliberately generic: the API does not reveal whether an address is
+      // registered, and the UI keeps that same privacy boundary.
+      setVerificationSent(true);
+    } catch (err) {
+      const problem = err as ApiError;
+      setError(problem.isOffline ? "No connection. Try again in a moment." : problem.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (busy) return;
@@ -231,12 +250,21 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
     setError(null);
     try {
       if (mode === "signUp") {
-        await SessionAPI.signUp(
+        const result = await SessionAPI.signUp(
           email.trim(),
           password,
           signupType === "parent" ? familyName.trim() || "My family" : "My learning space",
           signupType,
         );
+        if ("verificationRequired" in result) {
+          setVerificationEmail(result.email);
+          setVerificationSent(result.emailSent);
+          if (!result.emailSent) {
+            setError("We could not send the first message. Check the address, then send a new link.");
+          }
+          setPassword("");
+          return;
+        }
       } else if (loginMethod === "childCode") {
         await SessionAPI.join(joinCode);
       } else {
@@ -247,6 +275,12 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
       onSignedIn?.();
     } catch (err) {
       const problem = err as ApiError;
+      if (problem.code === "email_not_verified" && email.trim()) {
+        setVerificationEmail(email.trim());
+        setVerificationSent(false);
+        setPassword("");
+        return;
+      }
       setError(
         problem.isOffline
           ? "No connection to the data service. Your work is saved on this device either way."
@@ -280,6 +314,58 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
       setBusy(false);
     }
   };
+
+  if (verificationEmail) {
+    return (
+      <div className="space-y-5 text-center">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 shadow-sm">
+          <MailCheck className="h-7 w-7 text-white" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-xl font-black tracking-tight text-ink">Check your email</h2>
+          <p className="text-sm leading-relaxed text-muted">
+            {verificationSent ? "Open the verification link sent to " : "Send a verification link to "}
+            <strong className="text-ink">{verificationEmail}</strong>. It works once and expires
+            after 24 hours.
+          </p>
+        </div>
+
+        {verificationSent && (
+          <p role="status" className="rounded-xl border-2 border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300">
+            A verification link is on its way. Check spam if it does not appear soon.
+          </p>
+        )}
+        {error && (
+          <p role="alert" className="rounded-xl border-2 border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-600 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-400">
+            {error}
+          </p>
+        )}
+
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => void resendVerification()}
+          className={themeSystem.button("secondary", "md", "w-full")}
+        >
+          <RefreshCw className={busy ? "animate-spin" : ""} />
+          {busy ? "Sending…" : "Send a new link"}
+        </button>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => {
+            setVerificationEmail(null);
+            setVerificationSent(false);
+            setError(null);
+            setMode("signIn");
+          }}
+          className="w-full text-sm font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+        >
+          Back to sign in
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5">

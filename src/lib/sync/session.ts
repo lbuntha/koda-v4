@@ -75,6 +75,12 @@ interface TokenPair {
   permissions?: string[];
 }
 
+export interface EmailVerificationPending {
+  verificationRequired: true;
+  email: string;
+  emailSent: boolean;
+}
+
 interface MeOut {
   userId: string | null;
   email: string | null;
@@ -431,12 +437,30 @@ export const SessionAPI = {
     password: string,
     familyName: string,
     accountType: "parent" | "student" = "parent",
-  ): Promise<Session> {
-    const pair = await request<TokenPair>("/auth/signup", {
+  ): Promise<Session | EmailVerificationPending> {
+    const result = await request<TokenPair | EmailVerificationPending>("/auth/signup", {
       method: "POST",
       body: { email, password, familyName, accountType, deviceName: deviceName(), installId: installId() },
     });
-    const session = fromPair(pair, { email, familyName });
+    if ("verificationRequired" in result) return result;
+    const session = fromPair(result, { email, familyName });
+    activate(session);
+    return loadProfile(session);
+  },
+
+  async resendVerification(email: string): Promise<void> {
+    await request("/auth/email/resend", {
+      method: "POST",
+      body: { email },
+    });
+  },
+
+  async verifyEmail(token: string): Promise<Session> {
+    const pair = await request<TokenPair>("/auth/email/verify", {
+      method: "POST",
+      body: { token, deviceName: deviceName(), installId: installId() },
+    });
+    const session = fromPair(pair);
     activate(session);
     return loadProfile(session);
   },

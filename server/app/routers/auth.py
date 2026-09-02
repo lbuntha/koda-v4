@@ -16,6 +16,9 @@ from app.errors import Conflict, Forbidden, NotFound, Unauthorized
 from app.models.auth import (
     AvatarIn,
     AvatarOut,
+    EmailVerificationIn,
+    EmailVerificationPending,
+    EmailVerificationResendIn,
     ForgotIn,
     GoogleAuthIn,
     JoinIn,
@@ -44,6 +47,9 @@ from app.security.rate_limit import (
     LOGIN_PER_ACCOUNT,
     LOGIN_PER_IP,
     SIGNUP_PER_IP,
+    VERIFY_RESEND_PER_ACCOUNT,
+    VERIFY_RESEND_PER_IP,
+    VERIFY_TOKEN_PER_IP,
     limiter,
 )
 from app.services import google_identity, mail
@@ -153,6 +159,25 @@ async def _issue_for_user(db, user: dict, *, device_name: str, install_id: str |
     raise Unauthorized("That account is not part of a family yet.", "no_family")
 
 
+async def _send_verification(db, user: dict) -> bool:
+    """Replace the outstanding token and send its one-time link."""
+    cfg = settings()
+    raw, hashed = tokens.new_refresh_token()
+    expires = now() + timedelta(hours=cfg.email_verification_ttl_hours)
+    await users.set_verification_token(db, user["_id"], hashed, expires)
+    link = f"{cfg.app_base_url}/verify-email?token={raw}"
+    return await mail.send(
+        user["email"],
+        "Verify your Koda email",
+        (
+            "Welcome to Koda. Confirm that this email belongs to you by opening "
+            f"this link:\n\n{link}\n\n"
+            f"The link works once and expires in {cfg.email_verification_ttl_hours} hours.\n\n"
+            "If you did not create this account, you can ignore this message."
+        ),
+    )
+
+
 def _name_from_email(email: str) -> str:
     """Something to call a student until they rename themselves.
 
@@ -217,7 +242,9 @@ async def switch_to_learner(
 
 
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
-async def signup(body: SignupIn, db: Db, request: Request) -> TokenPair:
+async def signup(
+    body: SignupIn, db: Db, request: Request
+) -> TokenPair | EmailVerificationPending:
     await limiter.hit(db, "signup:ip", _caller(request), SIGNUP_PER_IP)
 
     # The deployment's own switch, not a family's. Checked before the email is
@@ -229,7 +256,13 @@ async def signup(body: SignupIn, db: Db, request: Request) -> TokenPair:
     if await users.by_email(db, body.email):
         raise Conflict("That email already has an account. Sign in instead.", "email_taken")
 
-    user = await users.create(db, body.email, passwords.hash_password(body.password))
+    verification_required = settings().require_email_verification
+    user = await users.create(
+        db,
+        body.email,
+        passwords.hash_password(body.password),
+        email_verified=not verification_required,
+    )
     fallback_name = "My family" if body.account_type == "parent" else "My learning space"
     family_name = body.family_name or fallback_name
     family = await families.create(db, family_name, owner_id=user["_id"])
@@ -252,9 +285,50 @@ async def signup(body: SignupIn, db: Db, request: Request) -> TokenPair:
         learner = await learners.create(db, family["_id"], _name_from_email(body.email))
         learner_id = learner["_id"]
 
+    if verification_required:
+        sent = await _send_verification(db, user)
+        return EmailVerificationPending(email=body.email, emailSent=sent)
+
     return await _issue(db, family["_id"], role, user_id=user["_id"],
                         learner_id=learner_id, device_name=body.device_name,
                         install_id=body.install_id)
+
+
+@router.post("/email/resend", status_code=status.HTTP_204_NO_CONTENT)
+async def resend_verification(
+    body: EmailVerificationResendIn, db: Db, request: Request
+) -> None:
+    """Send a fresh link without revealing whether the address is registered."""
+    await limiter.hit(db, "verify:ip", _caller(request), VERIFY_RESEND_PER_IP)
+    await limiter.hit(
+        db, "verify:email", body.email.lower(), VERIFY_RESEND_PER_ACCOUNT
+    )
+    user = await users.by_email(db, body.email)
+    if not user or user.get("status", "active") == "suspended":
+        return
+    # Missing means a legacy account that predates verification and remains
+    # valid. A timestamp means it has already completed the flow.
+    if "emailVerifiedAt" not in user or user.get("emailVerifiedAt") is not None:
+        return
+    await _send_verification(db, user)
+
+
+@router.post("/email/verify")
+async def verify_email(
+    body: EmailVerificationIn, db: Db, request: Request
+) -> TokenPair:
+    await limiter.hit(db, "verify:token:ip", _caller(request), VERIFY_TOKEN_PER_IP)
+    user = await users.verify_email_token(db, tokens.hash_refresh(body.token), now())
+    if not user:
+        raise Unauthorized(
+            "That verification link has expired or has already been used.",
+            "verification_invalid",
+        )
+    await limiter.clear(db, "verify:email", user["email"].lower())
+    await users.touch_login(db, user["_id"])
+    return await _issue_for_user(
+        db, user, device_name=body.device_name, install_id=body.install_id
+    )
 
 
 @router.post("/login")
@@ -270,6 +344,11 @@ async def login(body: LoginIn, db: Db, request: Request) -> TokenPair:
         raise Unauthorized("That email and password do not match.", "bad_credentials")
     if user.get("status", "active") == "suspended":
         raise Forbidden("This account is suspended. Contact an administrator.", "account_suspended")
+    if "emailVerifiedAt" in user and user.get("emailVerifiedAt") is None:
+        raise Forbidden(
+            "Verify your email before signing in. You can request a new link from the sign-in screen.",
+            "email_not_verified",
+        )
 
     # A correct password clears the budget, so a person who mistyped twice and
     # then got it right is not still counted against on their next sign-in.

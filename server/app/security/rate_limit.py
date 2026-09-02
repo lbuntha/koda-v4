@@ -56,6 +56,13 @@ FAMILY_PIN_PER_FAMILY = RateLimit(attempts=5, window_seconds=60)
 # endpoint here is a way to use the service to post a stranger a hundred emails.
 FORGOT_PER_IP = RateLimit(attempts=5, window_seconds=300)
 FORGOT_PER_ACCOUNT = RateLimit(attempts=3, window_seconds=900)
+# Resending verification also sends mail. A person may reasonably ask again
+# after checking spam, but not turn the endpoint into a mail flood.
+VERIFY_RESEND_PER_IP = RateLimit(attempts=5, window_seconds=300)
+VERIFY_RESEND_PER_ACCOUNT = RateLimit(attempts=3, window_seconds=900)
+# The link is 256 random bits and cannot realistically be guessed. Keep a broad
+# abuse ceiling without locking several families behind one school/public IP.
+VERIFY_TOKEN_PER_IP = RateLimit(attempts=30, window_seconds=300)
 # Redeeming an invite. Eight characters from a 32-letter alphabet is a large
 # space, but a budget is what keeps it large in practice.
 INVITE_PER_IP = RateLimit(attempts=10, window_seconds=300)

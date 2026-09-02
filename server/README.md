@@ -47,6 +47,32 @@ The value is a public identifier, not an OAuth client secret. If it is absent,
 the Google button is hidden and `/v1/auth/google` returns
 `google_not_configured`; email and child-code sign-in continue to work.
 
+## Email verification
+
+Password registration can require proof that the person owns the address. Set
+`REQUIRE_EMAIL_VERIFICATION=true` only after SMTP is working. A new account is
+then shown a **Check your email** screen; its random, hashed, single-use link
+expires after 24 hours and creates the first Koda session when opened. Resends
+are rate-limited and return the same response for known and unknown addresses.
+
+For local testing, set these in the root `.env`, restart compose, and open the
+captured message at `http://localhost:8025` (or the `MAILPIT_PORT` shown by
+`make dev-local`):
+
+```dotenv
+REQUIRE_EMAIL_VERIFICATION=true
+MAIL_DRIVER=smtp
+SMTP_HOST=mailpit
+SMTP_PORT=1025
+SMTP_STARTTLS=false
+```
+
+For GitHub deployment, add repository variables `REQUIRE_EMAIL_VERIFICATION`,
+`MAIL_DRIVER`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_STARTTLS`, and `MAIL_FROM`, plus
+repository secrets `SMTP_USER` and `SMTP_PASSWORD`. The deploy job refuses to
+enable verification if those SMTP settings are incomplete. Accounts created
+before this feature and Google-verified accounts remain usable.
+
 ## Layout
 
 ```

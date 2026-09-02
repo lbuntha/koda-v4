@@ -19,6 +19,12 @@ from app.main import create_app  # noqa: E402
 from app.settings import settings  # noqa: E402
 
 
+@pytest.fixture(autouse=True)
+def email_verification_disabled_by_default(monkeypatch):
+    """A developer's local opt-in must not change unrelated auth contracts."""
+    monkeypatch.setattr(settings(), "require_email_verification", False)
+
+
 @pytest_asyncio.fixture
 async def db():
     name = f"koda_test_{uuid4().hex[:8]}"

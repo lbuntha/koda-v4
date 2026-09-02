@@ -30,6 +30,7 @@ async def create(
     platform_role: str = "none",
     display_name: str | None = None,
     google_sub: str | None = None,
+    email_verified: bool = True,
 ) -> dict[str, Any]:
     timestamp = now()
     doc = {
@@ -39,6 +40,7 @@ async def create(
         "avatarSeed": f"a_{uuid4().hex[:20]}",
         "passwordHash": password_hash,
         "googleSub": google_sub,
+        "emailVerifiedAt": timestamp if email_verified else None,
         "platformRole": platform_role,
         "status": "active",
         "totpSecret": None,
@@ -52,9 +54,18 @@ async def create(
 
 async def link_google(db: AsyncIOMotorDatabase, user_id: str, subject: str) -> bool:
     """Bind a verified Google identity to one existing Koda account."""
+    timestamp = now()
     result = await db.users.update_one(
         {"_id": user_id, "$or": [{"googleSub": None}, {"googleSub": {"$exists": False}}]},
-        {"$set": {"googleSub": subject, "updatedAt": now()}},
+        {
+            "$set": {
+                "googleSub": subject,
+                # This route only calls us after Google has proved ownership.
+                "emailVerifiedAt": timestamp,
+                "updatedAt": timestamp,
+            },
+            "$unset": {"verificationTokenHash": "", "verificationExpiresAt": ""},
+        },
     )
     return result.modified_count == 1
 
@@ -227,6 +238,40 @@ async def set_password(db: AsyncIOMotorDatabase, user_id: str, password_hash: st
         {"$set": {"passwordHash": password_hash, "updatedAt": now()}},
     )
     return result.matched_count == 1
+
+
+async def set_verification_token(
+    db: AsyncIOMotorDatabase, user_id: str, token_hash: str, expires_at: datetime
+) -> None:
+    """Replace any older verification link; only the latest remains live."""
+    await db.users.update_one(
+        {"_id": user_id, "emailVerifiedAt": None},
+        {
+            "$set": {
+                "verificationTokenHash": token_hash,
+                "verificationExpiresAt": expires_at,
+                "updatedAt": now(),
+            }
+        },
+    )
+
+
+async def verify_email_token(
+    db: AsyncIOMotorDatabase, token_hash: str, at: datetime
+) -> dict[str, Any] | None:
+    """Spend one live link and mark its account verified in one atomic write."""
+    return await db.users.find_one_and_update(
+        {
+            "verificationTokenHash": token_hash,
+            "verificationExpiresAt": {"$gt": at},
+            "emailVerifiedAt": None,
+        },
+        {
+            "$set": {"emailVerifiedAt": at, "updatedAt": at},
+            "$unset": {"verificationTokenHash": "", "verificationExpiresAt": ""},
+        },
+        return_document=ReturnDocument.AFTER,
+    )
 
 
 async def active_admin_count(db: AsyncIOMotorDatabase) -> int:

@@ -158,6 +158,76 @@ describe("signing out", () => {
   });
 });
 
+describe("email verification", () => {
+  it("does not create a local session while signup is waiting for email", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        status: 201,
+        json: async () => ({
+          verificationRequired: true,
+          email: "parent@example.com",
+          emailSent: true,
+        }),
+      }),
+    );
+
+    const SessionAPI = await loadSession();
+    const result = await SessionAPI.signUp(
+      "parent@example.com",
+      "password",
+      "My family",
+    );
+    expect(result).toMatchObject({ verificationRequired: true, emailSent: true });
+    expect(SessionAPI.current()).toBeNull();
+  });
+
+  it("activates the session returned by a valid verification link", async () => {
+    const fetchMock = vi.fn(async (url: string) => {
+      if (String(url).endsWith("/auth/email/verify")) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            accessToken: "verified-access",
+            refreshToken: "verified-refresh",
+            expiresIn: 900,
+            deviceId: "d_verified",
+            familyId: "f_verified",
+            role: "owner",
+            permissions: [],
+          }),
+        };
+      }
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          userId: "u_verified",
+          email: "parent@example.com",
+          displayName: null,
+          avatarSeed: "a_verified",
+          familyId: "f_verified",
+          familyName: "My family",
+          role: "owner",
+          platformRole: "none",
+          learnerId: null,
+          learnerName: null,
+          learnerBirthYear: null,
+          permissions: [],
+        }),
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const SessionAPI = await loadSession();
+    const session = await SessionAPI.verifyEmail("one-time-token");
+    expect(session.email).toBe("parent@example.com");
+    expect(SessionAPI.current()?.refreshToken).toBe("verified-refresh");
+  });
+});
+
 describe("Google sign-in", () => {
   it("exchanges the Google credential and stores the ordinary Koda session", async () => {
     const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {

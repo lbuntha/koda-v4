@@ -26,6 +26,22 @@ class SignupIn(Model):
     install_id: str | None = Field(default=None, max_length=64, alias="installId")
 
 
+class EmailVerificationPending(Model):
+    verification_required: Literal[True] = Field(default=True, alias="verificationRequired")
+    email: EmailStr
+    email_sent: bool = Field(alias="emailSent")
+
+
+class EmailVerificationResendIn(Model):
+    email: EmailStr
+
+
+class EmailVerificationIn(Model):
+    token: str = Field(min_length=16, max_length=200)
+    device_name: str = Field(default="This device", max_length=60, alias="deviceName")
+    install_id: str | None = Field(default=None, max_length=64, alias="installId")
+
+
 class ForgotIn(Model):
     email: EmailStr
 

@@ -1,5 +1,10 @@
 export { API_BASE, ApiError, request } from "./api";
-export { SessionAPI, accessToken, type Session } from "./session";
+export {
+  SessionAPI,
+  accessToken,
+  type EmailVerificationPending,
+  type Session,
+} from "./session";
 export { useSession } from "./useSession";
 export { Outbox, type Mutation } from "./outbox";
 export { SyncEngine, type SyncState, type SyncStatus } from "./engine";

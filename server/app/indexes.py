@@ -15,6 +15,11 @@ INDEXES: dict[str, list[IndexModel]] = {
         # outstanding at any moment, and an index over mostly-absent fields
         # should not carry a row for every account.
         IndexModel([("resetTokenHash", ASCENDING)], name="by_reset_token", sparse=True),
+        IndexModel(
+            [("verificationTokenHash", ASCENDING)],
+            name="by_verification_token",
+            sparse=True,
+        ),
         IndexModel([("email", ASCENDING)], unique=True, name="email_unique"),
         # Google's `sub`, not an email address, is the durable provider identity.
         # Partial so password-only users carrying null do not collide.

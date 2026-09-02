@@ -63,6 +63,7 @@ import { getCourseLessons, getLessonByLevel, totalLessonCount } from "./curricul
 import { useAudienceViewer } from "./skills/viewer";
 import { SignInScreen } from "./components/account/SignInScreen";
 import { ResetPasswordScreen, resetTokenFromUrl } from "./components/account/ResetPasswordScreen";
+import { VerifyEmailScreen, verificationTokenFromUrl } from "./components/account/VerifyEmailScreen";
 import { LearnersPage } from "./components/account/LearnersPage";
 import { DevicesPage } from "./components/account/DevicesPage";
 import { ProfilePage } from "./components/account/ProfilePage";
@@ -293,6 +294,7 @@ export default function App() {
   const [inRound, setInRound] = useState<boolean>(false);
   // Read once, from the address bar, before anything else has an opinion.
   const [resetToken, setResetToken] = useState<string | null>(resetTokenFromUrl);
+  const [verificationToken, setVerificationToken] = useState<string | null>(verificationTokenFromUrl);
 
   /*
    * The day's time cap, if this child's grown-up set one.
@@ -699,6 +701,15 @@ export default function App() {
    * key taped to the other side. Read once at mount: the token is on the URL,
    * and the screen clears it as soon as it has been spent.
    */
+  if (verificationToken) {
+    return (
+      <VerifyEmailScreen
+        token={verificationToken}
+        onDone={() => setVerificationToken(null)}
+      />
+    );
+  }
+
   if (resetToken) {
     return <ResetPasswordScreen token={resetToken} onDone={() => setResetToken(null)} />;
   }

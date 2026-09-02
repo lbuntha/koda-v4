@@ -26,6 +26,10 @@ PUBLIC = {
     # not the address exists, so neither leaks who has an account.
     ("POST", "/v1/auth/password/forgot"),
     ("POST", "/v1/auth/password/reset"),
+    # Email ownership is proved before a session exists. Resend deliberately
+    # answers the same way for known and unknown addresses.
+    ("POST", "/v1/auth/email/resend"),
+    ("POST", "/v1/auth/email/verify"),
 }
 
 DOCS = {"/v1/docs", "/v1/openapi.json", "/v1/docs/oauth2-redirect"}

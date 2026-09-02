@@ -83,6 +83,7 @@ services:
       # `console` by default so nothing depends on the mail container being up.
       # Set MAIL_DRIVER=smtp in .env to watch messages arrive in Mailpit.
       MAIL_DRIVER: '${MAIL_DRIVER:-console}'
+      REQUIRE_EMAIL_VERIFICATION: '${REQUIRE_EMAIL_VERIFICATION:-false}'
       SMTP_HOST: '${SMTP_HOST:-mailpit}'
       SMTP_PORT: '${SMTP_PORT:-1025}'
       SMTP_STARTTLS: '${SMTP_STARTTLS:-false}'
