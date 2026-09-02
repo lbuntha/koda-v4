@@ -228,9 +228,12 @@ const SkillRow: React.FC<{
           <UIBadge variant={STATUS_TONE[releaseStatus] ?? "neutral"}>{releaseStatus}</UIBadge>
           {hidden && <UIBadge variant="neutral">not shown</UIBadge>}
         </span>
+        {/* The byline first, because with more than a couple of skills
+            installed "who published this?" is what an operator scans the list
+            for — the counts are what they read once they have found the row. */}
         <span className="block text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-          {skill.lessons.length} lessons · {activityLabel} · ages {manifest.audience.ages[0]}–
-          {manifest.audience.ages[1]} · {manifest.audience.category}
+          by {manifest.author} · {skill.lessons.length} lessons · {activityLabel} · ages{" "}
+          {manifest.audience.ages[0]}–{manifest.audience.ages[1]} · {manifest.audience.category}
         </span>
       </span>
 
