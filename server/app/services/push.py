@@ -314,12 +314,26 @@ async def send_test(db: AsyncIOMotorDatabase, user_id: str) -> dict[str, Any]:
     message = {"title": TEST_TITLE, "body": TEST_BODY, "path": "/", "kind": "system.test", "tag": "system.test"}
 
     if not rows:
-        return {
-            "driver": cfg.push_driver,
-            "sent": 0,
-            "results": [],
-            "note": "This account has no browser registered. Turn notifications on in Settings first.",
-        }
+        # Two very different situations wearing the same symptom, and saying the
+        # wrong one sends an operator to re-do something that already worked.
+        #
+        # Nothing registered anywhere is a setup step. Browsers registered but
+        # none of them *yours* is the test doing what it promises — it rings the
+        # caller's own devices and nobody else's — and the usual cause is
+        # turning notifications on while signed in as one account and testing
+        # from another, which is normal here, because Admin needs a platform
+        # account and a phone is usually signed in as a family one.
+        counts = await push_tokens.coverage(db)
+        if counts["tokens"]:
+            note = (
+                f"No browser is registered to this account, though {counts['tokens']} "
+                f"{'is' if counts['tokens'] == 1 else 'are'} registered on this deployment. "
+                "The test only ever rings your own devices. If you turned notifications on "
+                "while signed in as a different account, sign in as that one and test there."
+            )
+        else:
+            note = "No browser is registered anywhere yet. Turn notifications on in Settings first."
+        return {"driver": cfg.push_driver, "sent": 0, "results": [], "note": note}
 
     if cfg.push_driver == "console":
         log.info("push test (console driver)\n%s\n%s", TEST_TITLE, TEST_BODY)

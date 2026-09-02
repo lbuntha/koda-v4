@@ -407,7 +407,7 @@ async def test_the_test_send_says_when_there_is_nothing_to_ring(client, admin, s
     body = (await client.post("/system/push/test", headers=admin)).json()
 
     assert body["sent"] == 0
-    assert "no browser registered" in body["note"]
+    assert "No browser is registered anywhere yet" in body["note"]
 
 
 async def test_an_operator_may_register_their_own_browser(client, admin, db, seeded):
@@ -477,3 +477,19 @@ async def test_coverage_reads_as_a_sentence(client, admin, db, seeded):
 
     coverage = next(check for check in body["checks"] if check["check"] == "coverage")
     assert coverage["detail"] == "1 browser registered, across no families yet"
+
+
+async def test_a_test_send_says_when_the_browser_belongs_to_someone_else(client, admin, db, seeded):
+    """The confusing case: registered on this deployment, but not to you.
+
+    Telling an operator to "turn notifications on in Settings" when they already
+    did — on a phone signed in as their family account — sends them to re-do the
+    one thing that worked.
+    """
+    await push_tokens.save(db, token=TOKEN, family_id="f_1", user_id="u_somebody_else", device_id="d_1")
+
+    body = (await client.post("/system/push/test", headers=admin)).json()
+
+    assert body["sent"] == 0
+    assert "1 is registered on this deployment" in body["note"]
+    assert "signed in as a different account" in body["note"]
