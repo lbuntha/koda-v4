@@ -448,3 +448,22 @@ async def test_an_account_notice_reaches_a_parent_who_muted_everything(db, fcm_d
     )
 
     assert sent == 1, "a security notice is not something to have muted by accident"
+
+
+async def test_a_passing_check_carries_no_fix(client, admin, seeded):
+    """A "here is how to fix it" beside a PASS teaches people to stop reading."""
+    body = (await client.get("/system/push/preflight", headers=admin)).json()
+
+    for check in body["checks"]:
+        if check["ok"]:
+            assert check["fix"] is None, f"{check['check']} passed but suggests a fix"
+
+
+async def test_preflight_says_which_reason_it_skipped_reachability_for(client, admin, db, seeded):
+    """Reporting "no live token" while a token plainly exists is worse than silence."""
+    await push_tokens.save(db, token=TOKEN, family_id=None, user_id="u_ops", device_id=None)
+
+    body = (await client.get("/system/push/preflight", headers=admin)).json()
+
+    reach = next(check for check in body["checks"] if check["check"] == "reachability")
+    assert "driver or project" in reach["detail"], reach["detail"]

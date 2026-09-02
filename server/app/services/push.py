@@ -212,7 +212,10 @@ async def preflight(db: AsyncIOMotorDatabase) -> dict[str, Any]:
     checks: list[dict[str, Any]] = []
 
     def note(name: str, ok: bool, detail: str, fix: str | None = None) -> bool:
-        checks.append({"check": name, "ok": ok, "detail": detail, "fix": fix})
+        # A passing check carries no fix. Printing "here is how to fix it"
+        # beside a PASS is how a diagnostic screen teaches people to stop
+        # reading it.
+        checks.append({"check": name, "ok": ok, "detail": detail, "fix": None if ok else fix})
         return ok
 
     driver_ok = note(
@@ -256,7 +259,9 @@ async def preflight(db: AsyncIOMotorDatabase) -> dict[str, Any]:
 
     # The last check needs a real token, and on a new deployment there is not
     # one yet. Absent is not a failure: it is the honest answer that this half
-    # cannot be proved until somebody turns notifications on.
+    # cannot be proved until somebody turns notifications on. Which of the two
+    # reasons it was skipped for is stated rather than guessed at — "no live
+    # token" printed while a token plainly exists is worse than saying nothing.
     if driver_ok and project_ok and counts["tokens"]:
         from app.services import fcm
 
@@ -272,8 +277,10 @@ async def preflight(db: AsyncIOMotorDatabase) -> dict[str, Any]:
             f"validateOnly send returned {outcome.value}",
             None if outcome is fcm.Outcome.OK else "FCM refused a message it was only asked to validate.",
         )
+    elif not (driver_ok and project_ok):
+        note("reachability", False, "not checked — the driver or project is not configured yet")
     else:
-        note("reachability", False, "not checked — no live token to validate against", None)
+        note("reachability", False, "not checked — no live token to validate against")
 
     return {"ok": all(check["ok"] for check in checks), "checks": checks}
 
