@@ -31,6 +31,7 @@ import type { Lesson, SettingField, Skill } from "../../skills/types";
 import { themeSystem } from "../../lib/themeSystem";
 import { ScoringAPI } from "../../lib/scoring";
 import { LessonContentAPI, editsAsLessonJson } from "../../lib/lessonContent";
+import { isPracticeLesson, practiceTitle } from "../../curriculum";
 import {
   lessonIcons,
   UIBadge,
@@ -567,7 +568,87 @@ export const ActivityTrail: React.FC<{ skillId: string }> = ({ skillId }) => {
 };
 
 /** The sections of one skill's page, each independent of the others. */
-type DetailTab = "features" | "listing" | "settings" | "lessons" | "trail";
+type DetailTab = "features" | "listing" | "settings" | "lessons" | "practice" | "trail";
+
+/**
+ * The lessons of one section, as rows you can play or reword.
+ *
+ * Lifted out of the page when the lessons split in two, because the two lists
+ * differ only in which lessons they hold and what a row is called — and a
+ * second copy of a row this detailed is a second place to fix a row bug.
+ */
+const LessonRows: React.FC<{
+  skillId: string;
+  lessons: Lesson[];
+  titleOf?: (title: string) => string;
+  editingLessonId: string | null;
+  onEdit: (id: string) => void;
+  onPreview: (lesson: Lesson) => void;
+}> = ({ skillId, lessons, titleOf = (t) => t, editingLessonId, onEdit, onPreview }) => (
+  <div className={themeSystem.card("default", "p-4 sm:p-5")}>
+    <ol className="divide-y-2 divide-slate-100 dark:divide-slate-800">
+      {lessons.map((lesson) => (
+        <li key={lesson.id}>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => {
+                playSound("pop");
+                onPreview(lesson);
+              }}
+              className="flex-1 min-w-0 flex items-center gap-3 py-2.5 px-2 -mx-2 rounded-xl text-left hover:bg-slate-50 dark:hover:bg-slate-800/60 transition group"
+            >
+              <UILessonIcon name={lesson.iconName} tone={lesson.iconTone} size="sm" />
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-bold text-slate-900 dark:text-white truncate">
+                  {titleOf(lesson.title)}
+                </span>
+                <span className="block text-xs text-slate-500 dark:text-slate-400 truncate">
+                  {lesson.concept}
+                </span>
+              </span>
+              <span className="hidden sm:flex items-center gap-2 shrink-0">
+                {lesson.ageBand && (
+                  <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                    ages {lesson.ageBand[0]}–{lesson.ageBand[1]}
+                  </span>
+                )}
+                <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500">
+                  {lesson.standards?.[0] ?? "—"}
+                </span>
+              </span>
+              <Play className="w-4 h-4 shrink-0 text-slate-300 dark:text-slate-600 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition" />
+            </button>
+
+            {/* Editing is a separate act from playing, so it is a separate
+            control rather than a mode the preview drops you into. */}
+            <button
+              onClick={() => {
+                playSound("pop");
+                onEdit(lesson.id);
+              }}
+              aria-expanded={editingLessonId === lesson.id}
+              aria-label={`Edit the wording of ${lesson.title}`}
+              title="Edit wording"
+              className={`p-2 rounded-xl shrink-0 transition cursor-pointer ${
+                editingLessonId === lesson.id
+                  ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/15"
+                  : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+              }`}
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
+          </div>
+
+          {editingLessonId === lesson.id && (
+            <div className="pb-3">
+              <LessonContentEditor skillId={skillId} lesson={lesson} />
+            </div>
+          )}
+        </li>
+      ))}
+    </ol>
+  </div>
+);
 
 const SkillDetail: React.FC<{
   skill: Skill;
@@ -597,6 +678,16 @@ const SkillDetail: React.FC<{
   // they are tabs rather than a sequence.
   const [tab, setTab] = useState<DetailTab>("features");
   const activeFeatures = features.filter((f) => f.isEnabled).length;
+  /*
+   * Teaching and practice, as two lists.
+   *
+   * The same split the Learn page makes, read from the same flag, because they
+   * are two different things to look at: the teaching lessons are a sequence a
+   * child works through, and the practice ones are a pool that mixes techniques
+   * already taught. Sixty-four rows in one scroll hid both.
+   */
+  const teaching = skill.lessons.filter((lesson) => !isPracticeLesson(lesson));
+  const practice = skill.lessons.filter(isPracticeLesson);
   const tabs: UITabItem<DetailTab>[] = [
     {
       id: "features",
@@ -613,7 +704,10 @@ const SkillDetail: React.FC<{
           },
         ]
       : []),
-    { id: "lessons", label: "Lessons", count: skill.lessons.length },
+    { id: "lessons", label: "Lessons", count: teaching.length },
+    ...(practice.length > 0
+      ? [{ id: "practice" as const, label: "Practice", count: practice.length }]
+      : []),
     { id: "trail", label: "Activity" },
   ];
 
@@ -789,69 +883,25 @@ const SkillDetail: React.FC<{
       )}
 
       {tab === "lessons" && (
-        <div className={themeSystem.card("default", "p-4 sm:p-5")}>
-          <ol className="divide-y-2 divide-slate-100 dark:divide-slate-800">
-            {skill.lessons.map((lesson) => (
-              <li key={lesson.id}>
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => {
-                      playSound("pop");
-                      onPreview(lesson);
-                    }}
-                    className="flex-1 min-w-0 flex items-center gap-3 py-2.5 px-2 -mx-2 rounded-xl text-left hover:bg-slate-50 dark:hover:bg-slate-800/60 transition group"
-                  >
-                    <UILessonIcon name={lesson.iconName} tone={lesson.iconTone} size="sm" />
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-bold text-slate-900 dark:text-white truncate">
-                        {lesson.title}
-                      </span>
-                      <span className="block text-xs text-slate-500 dark:text-slate-400 truncate">
-                        {lesson.concept}
-                      </span>
-                    </span>
-                    <span className="hidden sm:flex items-center gap-2 shrink-0">
-                      {lesson.ageBand && (
-                        <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
-                          ages {lesson.ageBand[0]}–{lesson.ageBand[1]}
-                        </span>
-                      )}
-                      <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500">
-                        {lesson.standards?.[0] ?? "—"}
-                      </span>
-                    </span>
-                    <Play className="w-4 h-4 shrink-0 text-slate-300 dark:text-slate-600 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition" />
-                  </button>
+        <LessonRows
+          skillId={manifest.id}
+          lessons={teaching}
+          editingLessonId={editingLessonId}
+          onEdit={(id) => setEditingLessonId((open) => (open === id ? null : id))}
+          onPreview={onPreview}
+        />
+      )}
 
-                  {/* Editing is a separate act from playing, so it is a separate
-                  control rather than a mode the preview drops you into. */}
-                  <button
-                    onClick={() => {
-                      playSound("pop");
-                      setEditingLessonId((id) => (id === lesson.id ? null : lesson.id));
-                    }}
-                    aria-expanded={editingLessonId === lesson.id}
-                    aria-label={`Edit the wording of ${lesson.title}`}
-                    title="Edit wording"
-                    className={`p-2 rounded-xl shrink-0 transition cursor-pointer ${
-                      editingLessonId === lesson.id
-                        ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/15"
-                        : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
-                    }`}
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </button>
-                </div>
-
-                {editingLessonId === lesson.id && (
-                  <div className="pb-3">
-                    <LessonContentEditor skillId={manifest.id} lesson={lesson} />
-                  </div>
-                )}
-              </li>
-            ))}
-          </ol>
-        </div>
+      {/* The word "Practice" is already the tab, so a row does not repeat it. */}
+      {tab === "practice" && (
+        <LessonRows
+          skillId={manifest.id}
+          lessons={practice}
+          titleOf={practiceTitle}
+          editingLessonId={editingLessonId}
+          onEdit={(id) => setEditingLessonId((open) => (open === id ? null : id))}
+          onPreview={onPreview}
+        />
       )}
 
       {/* Diagnostics, so it sits after everything you can actually change. */}
