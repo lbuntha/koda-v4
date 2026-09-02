@@ -26,11 +26,17 @@ async def seed_default(db: AsyncIOMotorDatabase, manifest: dict[str, Any]) -> bo
     timestamp = now()
     skill_id = manifest["id"]
     status = manifest.get("status", "draft")
-    editable = {key: manifest.get(key) for key in ("tagline", "thumbnail", "features", "settings")}
+    # `title` sits with the editable set, not with the metadata: it is an
+    # operator's rename, and a deploy that re-set it would undo their edit on
+    # every restart. The manifest's own `name` still follows the code.
+    editable = {
+        key: manifest.get(key)
+        for key in ("title", "tagline", "thumbnail", "features", "settings")
+    }
     metadata = {
         key: value
         for key, value in manifest.items()
-        if key not in {"id", "status", "tagline", "thumbnail", "features", "settings"}
+        if key not in {"id", "status", "title", "tagline", "thumbnail", "features", "settings"}
     }
     result = await db.skill_registry.update_one(
         {"id": skill_id},

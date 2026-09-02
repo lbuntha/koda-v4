@@ -18,6 +18,7 @@ import {
   X,
 } from "lucide-react";
 import {
+  skillTitle,
   SkillStoreAPI,
   useGlobalActionLogs,
   useInstalledSkills,
@@ -197,14 +198,29 @@ const SkillRow: React.FC<{
       onClick={onOpen}
       className={themeSystem.card("interactive", "w-full flex items-center gap-3 p-4 text-left")}
     >
-      <span className="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-500/15 border-2 border-indigo-200 dark:border-indigo-500/40 flex items-center justify-center shrink-0">
-        <Package className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-      </span>
+      {/*
+        * The skill's own artwork, resolved exactly as every other surface
+        * resolves it — the per-install override, else the manifest's, else the
+        * first lesson's icon on the category's gradient.
+        *
+        * This was a parcel glyph on an indigo square, identical for every row,
+        * which made the one screen listing every skill the one screen where
+        * they all look the same. The learner sees the real thumbnail on Home
+        * and in the catalogue; an operator changing that artwork should be
+        * looking at what they are changing.
+        */}
+      <UISkillThumbnail
+        thumbnail={stored?.thumbnail ?? manifest.thumbnail}
+        fallbackIconName={skill.lessons[0]?.iconName}
+        category={manifest.audience.category}
+        size="sm"
+        className="shrink-0"
+      />
 
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-2 flex-wrap">
           <span className="font-mono font-black text-slate-900 dark:text-white">
-            {manifest.name}
+            {skillTitle(manifest.name, stored)}
           </span>
           <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
             v{manifest.version}
@@ -258,14 +274,17 @@ const ListingEditor: React.FC<{
   stored: InstalledSkill | undefined;
 }> = ({ skill, stored }) => {
   const { manifest } = skill;
+  const title = stored?.title ?? "";
   const tagline = stored?.tagline ?? manifest.tagline ?? "";
   const thumbnail = stored?.thumbnail ?? manifest.thumbnail ?? "";
   const edited =
+    Boolean(stored?.title) ||
     (stored?.tagline ?? undefined) !== manifest.tagline ||
     (stored?.thumbnail ?? undefined) !== manifest.thumbnail;
 
   // Typing is local; the store is written on blur, so the Learn page does not
   // redraw on every keystroke.
+  const [draftName, setDraftName] = useState<string | null>(null);
   const [draftTag, setDraftTag] = useState<string | null>(null);
   const [draftThumb, setDraftThumb] = useState<string | null>(null);
 
@@ -293,6 +312,7 @@ const ListingEditor: React.FC<{
           <button
             onClick={() => {
               SkillStoreAPI.resetSkillListing(manifest.id);
+              setDraftName(null);
               setDraftTag(null);
               setDraftThumb(null);
               playSound("pop");
@@ -314,13 +334,44 @@ const ListingEditor: React.FC<{
         />
         <div className="min-w-0">
           <div className="font-mono font-black text-sm text-slate-900 dark:text-white truncate">
-            {manifest.name}
+            {(draftName ?? title).trim() || manifest.name}
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400 truncate">
             {(draftTag ?? tagline) || manifest.description}
           </div>
         </div>
       </div>
+
+      <label className="block space-y-1">
+        <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
+          Name
+        </span>
+        <input
+          type="text"
+          value={draftName ?? title}
+          maxLength={60}
+          /* The manifest's name as the placeholder, so an empty box reads as
+             "this is what it is called" rather than as a missing name. */
+          placeholder={manifest.name}
+          onChange={(e) => setDraftName(e.target.value)}
+          onBlur={() => {
+            if (draftName !== null) {
+              SkillStoreAPI.updateSkillListing(manifest.id, { title: draftName });
+            }
+            setDraftName(null);
+          }}
+          className={themeSystem.field("lg", "w-full")}
+        />
+        <span className="block text-[11px] text-slate-500 dark:text-slate-400">
+          {/* What a rename does and does not touch. The id is what lessons,
+              events and the course reference, and it never moves — an operator
+              renaming a skill should know the record follows it. */}
+          Shown wherever a learner sees this skill. Clearing it goes back to{" "}
+          <span className="font-mono">{manifest.name}</span>. The skill's id (
+          <span className="font-mono">{manifest.id}</span>) never changes, so
+          progress and the learning log follow the rename.
+        </span>
+      </label>
 
       <label className="block space-y-1">
         <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
@@ -721,13 +772,19 @@ const SkillDetail: React.FC<{
 
       <div className={themeSystem.card("default", "p-4 sm:p-5 space-y-5")}>
         <div className="flex items-start gap-3">
-          <span className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/15 border-2 border-indigo-200 dark:border-indigo-500/40 flex items-center justify-center shrink-0">
-            <Package className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-          </span>
+          {/* The same artwork the row you arrived from showed, and the same the
+              listing editor below edits — one skill, one picture of it. */}
+          <UISkillThumbnail
+            thumbnail={stored?.thumbnail ?? manifest.thumbnail}
+            fallbackIconName={skill.lessons[0]?.iconName}
+            category={manifest.audience.category}
+            size="sm"
+            className="shrink-0"
+          />
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h2 className="font-mono font-black text-lg text-slate-900 dark:text-white">
-                {manifest.name}
+                {skillTitle(manifest.name, stored)}
               </h2>
               <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
                 v{manifest.version}

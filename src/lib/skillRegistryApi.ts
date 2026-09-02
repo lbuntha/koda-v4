@@ -10,6 +10,8 @@ const LESSON_CACHE_KEY = "koda_lesson_content_v1";
 
 export interface SkillConfiguration {
   isEnabled: boolean;
+  /** The deployment's own name for the skill, when it has one. */
+  title?: string;
   tagline?: string;
   thumbnail?: string;
   features: Array<Record<string, unknown>>;
@@ -25,6 +27,8 @@ export interface RegisteredSkill {
   category: string;
   author: string;
   iconName: string;
+  /** An operator's rename. `name` stays whatever the deployed manifest says. */
+  title?: string;
   tagline?: string;
   thumbnail?: string;
   status: ReleaseStatus;
@@ -95,6 +99,7 @@ function applyConfigurationSnapshot(next: RegisteredSkill[]): void {
     category: skill.category,
     author: skill.author,
     iconName: skill.iconName,
+    title: skill.title,
     tagline: skill.tagline,
     thumbnail: skill.thumbnail,
     isEnabled: skill.isEnabled,
@@ -179,6 +184,7 @@ export function queueSkillConfiguration(
     ...pending(),
     [skill.id]: {
       isEnabled: skill.isEnabled,
+      title: skill.title,
       tagline: skill.tagline,
       thumbnail: skill.thumbnail,
       features: skill.features,
@@ -197,6 +203,7 @@ export function queueLocalSkillConfiguration(skillId: string): void {
   queueSkillConfiguration({
     id: skillId,
     isEnabled: Boolean(skill.isEnabled),
+    title: typeof skill.title === "string" ? skill.title : undefined,
     tagline: typeof skill.tagline === "string" ? skill.tagline : undefined,
     thumbnail: typeof skill.thumbnail === "string" ? skill.thumbnail : undefined,
     features: Array.isArray(skill.features) ? skill.features : [],

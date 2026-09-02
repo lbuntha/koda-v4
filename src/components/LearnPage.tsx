@@ -12,7 +12,7 @@ import {
 } from "../curriculum";
 import { SkillRegistryAPI } from "../lib/skillRegistryApi";
 import { useSkillRegistrations } from "../lib/skillRegistrationApi";
-import { useInstalledSkills } from "../lib/skillStore";
+import { skillTitle, useInstalledSkills } from "../lib/skillStore";
 import { getSkill } from "../skills/registry";
 import { useAudienceViewer } from "../skills/viewer";
 import { playSound } from "../utils/audio";
@@ -270,7 +270,7 @@ export const LearnPage: React.FC<LearnPageProps> = ({
         */}
       <UISkillCard
         size="lg"
-        title={skill.manifest.name}
+        title={skillTitle(skill.manifest.name, listing)}
         tagline={listing?.tagline ?? skill.manifest.tagline ?? skill.manifest.description}
         thumbnail={listing?.thumbnail ?? skill.manifest.thumbnail}
         fallbackIconName={skill.manifest.iconName}

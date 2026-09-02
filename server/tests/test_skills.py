@@ -108,6 +108,7 @@ async def test_deploy_refreshes_metadata_without_overwriting_publication(db):
         "counting",
         {
             "isEnabled": False,
+            "title": "Counting Adventure",
             "tagline": "Managed on the server",
             "thumbnail": "apple",
             "features": [{"id": "sound", "isEnabled": False}],
@@ -121,6 +122,7 @@ async def test_deploy_refreshes_metadata_without_overwriting_publication(db):
         **default,
         "name": "A New Display Name",
         "status": "draft",
+        "title": "A deploy must not restore this either",
         "tagline": "A deploy must not restore this",
         "settings": {"speechRate": 0.5},
     }
@@ -131,6 +133,8 @@ async def test_deploy_refreshes_metadata_without_overwriting_publication(db):
     assert registered["status"] == "published"
     assert registered["isEnabled"] is False
     assert registered["tagline"] == "Managed on the server"
+    # The operator's rename outlives the deploy that renamed the skill in code.
+    assert registered["title"] == "Counting Adventure"
     assert registered["settings"] == {"speechRate": 1.4}
     assert registered["lessonContent"]["lesson-1"]["title"] == "Managed title"
 
@@ -158,6 +162,7 @@ async def test_operator_saves_the_complete_skill_manager_configuration(client, d
     operator = await _operator(client, db)
     configuration = {
         "isEnabled": False,
+        "title": "Counting Adventure",
         "tagline": "Server listing",
         "thumbnail": "apple",
         "features": [{"id": "sound", "name": "Sound", "isEnabled": False}],
@@ -176,6 +181,11 @@ async def test_operator_saves_the_complete_skill_manager_configuration(client, d
     assert saved.status_code == 200, saved.text
     body = saved.json()
     assert body["isEnabled"] is False
+    assert body["title"] == "Counting Adventure"
+    # The manifest still says what the code calls it. A rename is a listing
+    # edit, not an identity change, so `name` and `id` are untouched.
+    assert body["name"] == _bundled("counting")["name"]
+    assert body["id"] == "counting"
     assert body["tagline"] == "Server listing"
     assert body["settings"]["speechRate"] == 1.4
     assert body["lessonContent"]["count-in-a-row"]["title"] == "Server-authored title"

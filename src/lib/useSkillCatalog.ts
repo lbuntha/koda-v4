@@ -4,7 +4,7 @@ import { getSkill } from "../skills/registry";
 import { useAudienceViewer } from "../skills/viewer";
 import { buildSkillCatalog, type SkillCatalogSource } from "./skillCatalog";
 import { SkillRegistryAPI, useSkillRegistryVersion } from "./skillRegistryApi";
-import { useInstalledSkills } from "./skillStore";
+import { skillTitle, useInstalledSkills } from "./skillStore";
 
 /**
  * One compact learner catalog resolver shared by Home and Learn.
@@ -36,7 +36,9 @@ export function useSkillCatalog(completedLevels: Record<number, number>) {
       const server = SkillRegistryAPI.get(skillId);
       return [{
         id: skillId,
-        name: skill.manifest.name,
+        // The deployment's name for it, else the manifest's. Everything a
+        // learner sees reads the catalog, so this is where a rename lands.
+        name: skillTitle(skill.manifest.name, listing),
         description: skill.manifest.description,
         tagline: listing?.tagline ?? skill.manifest.tagline ?? skill.manifest.description,
         thumbnail: listing?.thumbnail ?? skill.manifest.thumbnail,

@@ -42,6 +42,10 @@ class RegisteredSkill(Model):
     category: str
     author: str
     icon_name: str = Field(alias="iconName")
+    # An operator's own name for the skill. `name` follows the deployed
+    # manifest and is not editable here, so a rename lives in its own field or
+    # the next deploy silently undoes it.
+    title: str | None = None
     tagline: str | None = None
     thumbnail: str | None = None
     status: Literal["draft", "published"]
@@ -77,6 +81,7 @@ class PublicationWrite(Model):
 
 class SkillConfigurationWrite(Model):
     is_enabled: bool = Field(alias="isEnabled")
+    title: str | None = Field(default=None, max_length=60)
     tagline: str | None = Field(default=None, max_length=160)
     thumbnail: str | None = Field(default=None, max_length=500)
     features: list[dict[str, Any]] = Field(default_factory=list, max_length=100)
@@ -100,6 +105,7 @@ def _out(row: dict[str, Any]) -> RegisteredSkill:
         category=row.get("category", "core"),
         author=row.get("author", ""),
         iconName=row.get("iconName", "Puzzle"),
+        title=row.get("title"),
         tagline=row.get("tagline"),
         thumbnail=row.get("thumbnail"),
         status=row.get("status", "draft"),
@@ -176,6 +182,7 @@ async def save_skill_configuration(
         skill_id,
         {
             "isEnabled": body.is_enabled,
+            "title": body.title,
             "tagline": body.tagline,
             "thumbnail": body.thumbnail,
             "features": body.features,

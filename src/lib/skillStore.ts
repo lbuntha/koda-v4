@@ -19,6 +19,17 @@ export interface InstalledSkill {
   isEnabled: boolean;
   iconName: string;
   /** Store listing, seeded from the manifest and editable per install. */
+  /**
+   * What this deployment calls the skill, when it does not call it what the
+   * manifest does.
+   *
+   * Its own field rather than an edit to `name`, for the same reason `tagline`
+   * is: `name` is code-owned and re-seeded from the manifest on every boot, so
+   * a rename written there would survive exactly until the next deploy. Empty
+   * means "no opinion" and the manifest's name is used — `skillTitle` is the
+   * one place that decides.
+   */
+  title?: string;
   tagline?: string;
   thumbnail?: string;
   features: SkillFeature[];
@@ -28,6 +39,19 @@ export interface InstalledSkill {
     lastActive: string;
   };
 }
+
+/**
+ * What to call a skill on screen.
+ *
+ * One rule, because a rename that reaches Home but not the Learn page is worse
+ * than no rename at all: a learner would see two names for the same thing and
+ * have no way to know they are one skill. A blank or whitespace-only override
+ * is not a name and falls through to the manifest's.
+ */
+export const skillTitle = (
+  manifestName: string,
+  stored?: { title?: string } | null,
+): string => stored?.title?.trim() || manifestName;
 
 /**
  * Interface representing a chronological action logged globally in the system.
@@ -127,6 +151,7 @@ function syncStoredSkills(skills: InstalledSkill[]) {
     queueSkillConfiguration({
       id: skill.id,
       isEnabled: skill.isEnabled,
+      title: skill.title,
       tagline: skill.tagline,
       thumbnail: skill.thumbnail,
       features: skill.features as unknown as Array<Record<string, unknown>>,
@@ -146,6 +171,7 @@ function mergeRegisteredSkill(
   return {
     ...incoming,
     isEnabled: existing.isEnabled,
+    title: existing.title ?? incoming.title,
     tagline: existing.tagline ?? incoming.tagline,
     thumbnail: existing.thumbnail ?? incoming.thumbnail,
     settings: { ...incoming.settings, ...existing.settings },
@@ -233,11 +259,12 @@ export const SkillStoreAPI = {
    */
   updateSkillListing: (
     skillId: string,
-    patch: { tagline?: string; thumbnail?: string },
+    patch: { title?: string; tagline?: string; thumbnail?: string },
   ): void => {
     globalSkills = globalSkills.map((p) => {
       if (p.id !== skillId) return p;
       const next = { ...p };
+      if (patch.title !== undefined) next.title = patch.title.trim() || undefined;
       if (patch.tagline !== undefined) next.tagline = patch.tagline.trim() || undefined;
       if (patch.thumbnail !== undefined) next.thumbnail = patch.thumbnail.trim() || undefined;
       return next;
@@ -249,7 +276,9 @@ export const SkillStoreAPI = {
   resetSkillListing: (skillId: string): void => {
     const def = registeredDefaults.get(skillId);
     globalSkills = globalSkills.map((p) =>
-      p.id === skillId ? { ...p, tagline: def?.tagline, thumbnail: def?.thumbnail } : p,
+      p.id === skillId
+        ? { ...p, title: def?.title, tagline: def?.tagline, thumbnail: def?.thumbnail }
+        : p,
     );
     notifySkills();
   },
