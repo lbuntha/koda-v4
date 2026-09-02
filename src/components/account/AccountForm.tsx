@@ -331,12 +331,12 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
         </div>
 
         {verificationSent && (
-          <p role="status" className="rounded-xl border-2 border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300">
+          <p role="status" className={themeSystem.flash("success", "text-sm text-left")}>
             A verification link is on its way. Check spam if it does not appear soon.
           </p>
         )}
         {error && (
-          <p role="alert" className="rounded-xl border-2 border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-600 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-400">
+          <p role="alert" className={themeSystem.flash("error", "text-sm text-left")}>
             {error}
           </p>
         )}
@@ -399,7 +399,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
           {googleUnavailable && (
             <p
               role="status"
-              className="rounded-xl border-2 border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-200"
+              className={themeSystem.flash("warning", "text-sm")}
             >
               Google sign-in could not load. Check your connection or use email below.
             </p>
@@ -496,7 +496,10 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               aria-label={showPassword ? "Hide password" : "Show password"}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition cursor-pointer"
+              /* A 44px target, because on a phone this sits beside a field a
+                 thumb is already aiming at, and tokens rather than slate so it
+                 is the same grey in both themes. */
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 grid h-9 w-9 place-items-center rounded-lg text-muted hover:text-ink transition cursor-pointer"
             >
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
@@ -504,8 +507,9 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
         </div>}
 
         {sentTo && (
-          <p className="rounded-xl border-2 border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300">
-            If <strong>{sentTo}</strong> has an account, a reset link is on its way.
+          <p role="status" className={themeSystem.flash("success", "text-sm")}>
+            If <strong>{sentTo}</strong> has an account, a reset link is on its way. It works
+            once and expires in 30 minutes.
           </p>
         )}
 
@@ -544,10 +548,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
         )}
 
         {error && (
-          <p
-            role="alert"
-            className="text-sm text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border-2 border-rose-200 dark:border-rose-900/60 rounded-xl px-3 py-2"
-          >
+          <p role="alert" className={themeSystem.flash("error", "text-sm")}>
             {error}
           </p>
         )}

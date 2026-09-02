@@ -38,11 +38,24 @@ export const SignInScreen: React.FC = () => (
           height={64}
           className="mx-auto mb-4 h-16 w-16 rounded-2xl shadow-lg shadow-indigo-600/25"
         />
-        <h1 className="text-[26px] font-extrabold tracking-tight text-ink">Welcome to Koda</h1>
-        {/* One short line. The offline promise was two sentences of explanation
-            above a form nobody reads before typing — it is restated as a single
-            phrase at the foot of the page, where it belongs. */}
-        <p className="mt-1.5 text-sm text-muted">Maths practice for ages 5–8.</p>
+        <h1 className="text-[26px] font-extrabold tracking-tight text-ink">
+          Learning your child asks for
+        </h1>
+        {/*
+         * Specific, and one line.
+         *
+         * "Maths practice for ages 5–8" named a category and an age band —
+         * the sentence every children's app on the store writes. The
+         * techniques are what make it this app rather than any of them, and a
+         * child recognises them too: they know what counting is. The headline
+         * above does the selling, so this only has to say what is inside.
+         *
+         * The offline promise and the evidence sit at the foot of the page,
+         * where a parent looks after deciding to read on rather than before.
+        */}
+        <p className="mt-2 text-sm text-muted">
+          Kids’ maths practice: counting, addition and number bonds. Ages 5–11.
+        </p>
       </div>
 
       <div className={themeSystem.card("default", "p-5 sm:p-6")}>
@@ -55,9 +68,9 @@ export const SignInScreen: React.FC = () => (
        * It is the one genuinely unusual thing about this app on a tablet that
        * shares a household's patchy wifi, and it reads as reassurance rather
        * than as a feature list.
-       */}
-      <p className="mt-5 text-center text-xs text-muted">
-        Works offline after sign-in · No ads
+      */}
+      <p className="mt-5 text-center text-xs leading-relaxed text-muted">
+        Works offline after sign-in
       </p>
     </div>
   </div>
