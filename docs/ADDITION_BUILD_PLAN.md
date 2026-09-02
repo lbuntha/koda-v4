@@ -15,26 +15,40 @@ counting already paid for once.
 
 ---
 
-## Status — built
+## Status — finished
 
-Phases 0–15 are complete and the skill is published. What the plan describes as
-future work, and where the skill has since moved past the plan:
+**Every phase in this plan is built, and the skill is published.** Twelve
+engines, sixty-four lessons, seven features, seventy recorded clips, and 308
+tests across nine files. The plan below is kept as the account of how it was
+built, not as work outstanding.
 
-- **The voice clips are not recorded.** Deliberate, per Phase 14 §4: `voice.json`
-  is complete and the dry run lists **70 phrases**, but `audio/manifest.json` is
-  still `{}` and the skill speaks through live TTS. Record with
-  `npm run voice:record -- --skill addition` when the spend is wanted. It is 70
-  rather than 96 because the number words and neutral praise now come from the
-  common pack (§7.2b), which addition already speaks with today.
+Where the skill has moved past the plan:
+
+- **The voice is recorded.** `voice.json` and `audio/manifest.json` both hold
+  **70 phrases**, and the clips ship as M4A in `audio/` — 2.6 MB for the set.
+  Seventy rather than the ninety-six first counted, because the number words and
+  the praise that names no subject come from the common pack (§7.2b) instead.
 - **64 lessons, not 52.** Units u18–u20 — twelve practice lessons — were added
-  after this plan was written. Everything below that says 52 means the 52
-  techniques; `addition.course.test.ts` holds the real count.
+  after this plan was written, and a thirteenth unit of counting practice
+  followed. Everything below that says 52 means the 52 *techniques*;
+  `addition.course.test.ts` holds the real count.
 - **Phase 15's manual pass is now three tests, not a checklist.**
   `addition.features.test.tsx` proves each of the seven feature toggles changes
   the round, `addition.course.test.ts` proves disabling the skill empties its
   lessons out of the course, and `describeSkillContract` proves the manifest and
   the code agree about which features exist at all. Light/dark and 360px stay a
   thing to look at.
+- **The skill is called `Addition`.** The `Quest` suffix went when the catalogue
+  outgrew it — see `docs/SKILL_DEVELOPMENT.md` §8. The id never moved, so every
+  lesson reference, progress record and learning event still resolves.
+
+One thing this plan settled that the deployment has not: **§13 decision 1 shipped
+`assets/svg/thumbnail/addition-quest.svg`, and the app may still draw the
+fallback glyph instead.** Once the shared art collection holds a complete
+snapshot it becomes authoritative (`assets/svg/useArt.ts`), and a bundled asset
+it does not carry is deliberately ignored. Publish `addition-quest` to the Art
+page and the poster gets its artwork; until then the card falls back to an icon
+on the category gradient, which is correct behaviour and looks unfinished.
 
 ---
 
