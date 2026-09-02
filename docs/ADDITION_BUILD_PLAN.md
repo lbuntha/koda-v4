@@ -15,6 +15,27 @@ counting already paid for once.
 
 ---
 
+## Status — built
+
+Phases 0–15 are complete and the skill is published. What the plan describes as
+future work, and where the skill has since moved past the plan:
+
+- **The voice clips are not recorded.** Deliberate, per Phase 14 §4: `voice.json`
+  is complete and the dry run lists **96 phrases**, but `audio/manifest.json` is
+  still `{}` and the skill speaks through live TTS. Record with
+  `npm run voice:record -- --skill addition` when the spend is wanted.
+- **64 lessons, not 52.** Units u18–u20 — twelve practice lessons — were added
+  after this plan was written. Everything below that says 52 means the 52
+  techniques; `addition.course.test.ts` holds the real count.
+- **Phase 15's manual pass is now three tests, not a checklist.**
+  `addition.features.test.tsx` proves each of the seven feature toggles changes
+  the round, `addition.course.test.ts` proves disabling the skill empties its
+  lessons out of the course, and `describeSkillContract` proves the manifest and
+  the code agree about which features exist at all. Light/dark and 360px stay a
+  thing to look at.
+
+---
+
 ## 0. Pre-flight — read this before Phase 1
 
 ### 0.1 The repo is mid-migration. Know which API is current.

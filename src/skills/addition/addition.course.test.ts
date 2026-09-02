@@ -1,6 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { skill } from ".";
 import courseJson from "../../curriculum/course.json";
+import { getCourseUnits } from "../../curriculum";
+import { SkillStoreAPI } from "../../lib/skillStore";
+import { DEFAULT_VIEWER } from "../viewer";
 
 /**
  * The two numbers both called "level", held in step.
@@ -53,5 +56,35 @@ describe("addition sits in the course in its own order", () => {
     const first = refs.findIndex((ref) => ref.startsWith("addition/"));
     expect(refs.slice(0, first).every((ref) => ref.startsWith("counting/"))).toBe(true);
     expect(first).toBeGreaterThan(0);
+  });
+});
+
+/**
+ * Switching the skill off takes its lessons with it.
+ *
+ * The Skill Manager promises exactly this, and it is the one promise a child
+ * would find broken rather than a developer: a parent turns addition off and
+ * sixty-four lessons stay on the Learn page, opening into rounds from a skill
+ * that is supposed to be gone.
+ */
+describe("disabling the skill empties it out of the course", () => {
+  // Old enough for both skills, and allowed to see published ones only.
+  const learner = { ...DEFAULT_VIEWER, age: 9 };
+  const additionLessons = (viewer = learner) =>
+    getCourseUnits(viewer)
+      .flatMap((unit) => unit.lessons)
+      .filter((lesson) => lesson.skillId === "addition");
+
+  afterEach(() => {
+    if (!SkillStoreAPI.isSkillEnabled("addition")) SkillStoreAPI.toggleSkill("addition");
+  });
+
+  it("offers every lesson while it is on", () => {
+    expect(additionLessons()).toHaveLength(skill.lessons.length);
+  });
+
+  it("offers none while it is off", () => {
+    SkillStoreAPI.toggleSkill("addition");
+    expect(additionLessons(), "a disabled skill still fills the Learn page").toHaveLength(0);
   });
 });
