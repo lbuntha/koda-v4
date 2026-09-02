@@ -9,6 +9,7 @@ import {
 } from "../../lib/maintenanceReset";
 import { playSound } from "../../utils/audio";
 import { UIBadge, UIButton, UIDialog, UISectionHeader, UITabs, UIToggle } from "../ui";
+import { PushDiagnostics } from "./PushDiagnostics";
 import { BadgesPage } from "./BadgesPage";
 import { BillingPage } from "./BillingPage";
 import { ScoringPage } from "./ScoringPage";
@@ -346,6 +347,11 @@ const SystemPanel: React.FC<{
             </div>
           </section>
         ))}
+
+        {/* The switchboard above says what this deployment *offers*. This says
+            whether one of those things actually works — the only feature here
+            whose failure is silence rather than an error. */}
+        {show !== "secrets" && <PushDiagnostics />}
 
         {/* Erasing data is switchboard work, not credential work. */}
         {show !== "secrets" && (

@@ -250,12 +250,16 @@ async def preflight(db: AsyncIOMotorDatabase) -> dict[str, Any]:
     )
 
     counts = await push_tokens.coverage(db)
-    note(
-        "coverage",
-        True,
-        f"{counts['tokens']} browser(s) across {counts['families']} family(ies)",
-        None,
-    )
+    # Written out rather than "1 browser(s) across 0 family(ies)". This is a
+    # line an operator reads at a glance to decide whether anything is wrong,
+    # and a sentence that cannot be bothered to pluralise reads as a value
+    # nobody checked.
+    browsers = "no browsers" if not counts["tokens"] else f"{counts['tokens']} browser" + ("" if counts["tokens"] == 1 else "s")
+    if not counts["families"]:
+        families = "no families yet"
+    else:
+        families = f"{counts['families']} famil" + ("y" if counts["families"] == 1 else "ies")
+    note("coverage", True, f"{browsers} registered, across {families}")
 
     # The last check needs a real token, and on a new deployment there is not
     # one yet. Absent is not a failure: it is the honest answer that this half

@@ -192,3 +192,42 @@ export async function chooseNotification(kind: string, on: boolean): Promise<Not
     body: { kind, on },
   });
 }
+
+/* ---------------------------------------------------------------- *
+ * The operator's two functions. Staff only — the API refuses anyone
+ * without `system:write`, so nothing below is a second gate, only the
+ * shape of the answer.
+ * ---------------------------------------------------------------- */
+
+export interface PreflightCheck {
+  check: string;
+  ok: boolean;
+  detail: string;
+  /** Present only when the check failed: the sentence that fixes it. */
+  fix: string | null;
+}
+
+export interface Preflight {
+  ok: boolean;
+  checks: PreflightCheck[];
+}
+
+export interface TestSendResult {
+  driver: string;
+  sent: number;
+  results: { device: string; ok: boolean; error?: string | null }[];
+  note?: string;
+}
+
+/** Is push actually working here? Answered without sending anything. */
+export async function pushPreflight(): Promise<Preflight> {
+  return await request<Preflight>("/system/push/preflight", { token: await accessToken() });
+}
+
+/** Ring the caller's own browsers, and nobody else's. Takes no recipient. */
+export async function sendTestNotification(): Promise<TestSendResult> {
+  return await request<TestSendResult>("/system/push/test", {
+    method: "POST",
+    token: await accessToken(),
+  });
+}

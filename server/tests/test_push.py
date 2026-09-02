@@ -379,7 +379,7 @@ async def test_preflight_names_the_thing_to_fix(client, admin, seeded):
     driver = next(check for check in body["checks"] if check["check"] == "driver")
     assert "PUSH_DRIVER=fcm" in driver["fix"], "a failed check must say what fixes it"
     coverage = next(check for check in body["checks"] if check["check"] == "coverage")
-    assert "0 browser" in coverage["detail"]
+    assert coverage["detail"].startswith("no browsers"), coverage["detail"]
 
 
 async def test_the_test_send_takes_no_recipient(client, admin, seeded):
@@ -467,3 +467,13 @@ async def test_preflight_says_which_reason_it_skipped_reachability_for(client, a
 
     reach = next(check for check in body["checks"] if check["check"] == "reachability")
     assert "driver or project" in reach["detail"], reach["detail"]
+
+
+async def test_coverage_reads_as_a_sentence(client, admin, db, seeded):
+    """A line an operator scans should not say "1 browser(s) across 0 family(ies)"."""
+    await push_tokens.save(db, token=TOKEN, family_id=None, user_id="u_ops", device_id=None)
+
+    body = (await client.get("/system/push/preflight", headers=admin)).json()
+
+    coverage = next(check for check in body["checks"] if check["check"] == "coverage")
+    assert coverage["detail"] == "1 browser registered, across no families yet"
