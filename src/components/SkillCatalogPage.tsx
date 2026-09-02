@@ -10,6 +10,7 @@ import { refreshSkillRegistry } from "../lib/skillRegistryApi";
 import { playSound } from "../utils/audio";
 import { offlineMessage, useOfflineDownload } from "../lib/offlineSkill";
 import { themeSystem } from "../lib/themeSystem";
+import { useIsCompact } from "../lib/useBreakpoint";
 import { UIBadge, UIButton, UIPageHeader, UISkillCard, skillArtFor } from "./ui";
 
 export interface SkillCatalogPageProps {
@@ -27,6 +28,18 @@ const PAGE_SIZE = 12;
  * five columns a landscape picture is too small to read the title inside it.
  */
 const CARD_GRID = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4";
+/** A phone gets rows; a poster grid needs width to be a grid at all. */
+const ROW_LIST = "space-y-2.5";
+
+/**
+ * Below this, "recommended" and "all" are the same list.
+ *
+ * A catalogue of two skills that draws a Recommended section above a Browse
+ * section prints the same cards twice and doubles the length of the page to say
+ * nothing. The section earns its place once there is more on offer than a
+ * learner can take in at a glance.
+ */
+const RECOMMENDATION_FLOOR = 4;
 const labelForCategory = (category: string) => skillArtFor(category).label;
 
 export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
@@ -64,7 +77,28 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
   const recommended = recommendedSkills(skills)
     .filter((skill) => skill.id !== resume?.id)
     .slice(0, 4);
-  const visiblePage = visible.slice(0, visibleLimit);
+
+  const compact = useIsCompact();
+  const unfiltered = !query && category === "all";
+  const showResume = unfiltered && Boolean(resume);
+  const showRecommended =
+    unfiltered && recommended.length > 0 && skills.length > RECOMMENDATION_FLOOR;
+
+  /*
+   * Browse holds what is not already on screen above it.
+   *
+   * The two sections used to be drawn from the same unfiltered list, so with a
+   * small library every card appeared twice — once as a recommendation and
+   * again a scroll further down, with nothing saying they were the same skill.
+   * A filtered view is a different question ("show me everything matching"),
+   * so it lists everything.
+   */
+  const shownAbove = new Set(
+    [showResume ? resume?.id : undefined, ...(showRecommended ? recommended.map((s) => s.id) : [])]
+      .filter(Boolean) as string[],
+  );
+  const browse = unfiltered ? visible.filter((skill) => !shownAbove.has(skill.id)) : visible;
+  const visiblePage = browse.slice(0, visibleLimit);
 
   const open = (skillId: string) => {
     playSound("pop");
@@ -213,7 +247,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
       {/* The same card the grid below uses, one size up — this was thirty-five
           lines of hand-built banner with its own progress bar, which is exactly
           the duplication the size scale exists to remove. */}
-      {!query && category === "all" && resume && (
+      {showResume && resume && (
         <UISkillCard
           size="lg"
           eyebrow="Continue learning"
@@ -230,7 +264,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
         />
       )}
 
-      {!query && category === "all" && recommended.length > 0 && (
+      {showRecommended && (
         <section>
           <div className="mb-3 flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-indigo-600" />
@@ -239,10 +273,11 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
               <p className="text-xs text-muted">Age-fit skills, ready to start or continue.</p>
             </div>
           </div>
-          <div className={CARD_GRID}>
+          <div className={compact ? ROW_LIST : CARD_GRID}>
             {recommended.map((skill) => (
               <UISkillCard
                 key={skill.id}
+                size={compact ? "sm" : "md"}
                 title={skill.name}
                 tagline={skill.tagline}
                 thumbnail={skill.thumbnail}
@@ -267,10 +302,10 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
         <div className="mb-3 flex items-end justify-between gap-3">
           <div>
             <h2 className="font-black text-lg text-ink">
-              {query || category !== "all" ? "Search results" : "Browse all skills"}
+              {!unfiltered ? "Search results" : shownAbove.size ? "More skills" : "All skills"}
             </h2>
             <p className="text-xs text-muted">
-              {visible.length} {visible.length === 1 ? "skill" : "skills"}
+              {browse.length} {browse.length === 1 ? "skill" : "skills"}
             </p>
           </div>
           {skills.every((skill) => skill.progressPercent === 100) && (
@@ -279,11 +314,12 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
             </span>
           )}
         </div>
-        {visible.length ? (
-          <div className={CARD_GRID}>
+        {browse.length ? (
+          <div className={compact ? ROW_LIST : CARD_GRID}>
             {visiblePage.map((skill) => (
               <UISkillCard
                 key={skill.id}
+                size={compact ? "sm" : "md"}
                 title={skill.name}
                 tagline={skill.tagline}
                 thumbnail={skill.thumbnail}
@@ -301,6 +337,12 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
               />
             ))}
           </div>
+        ) : unfiltered ? (
+          /* Everything this learner has is already on screen above. Saying "no
+             matching skills" under it would read as the library being empty. */
+          <p className="text-sm text-muted">
+            That is every skill available to this learner.
+          </p>
         ) : (
           <div className={`${themeSystem.card("default")} p-8 text-center`}>
             <p className="font-mono font-black text-ink">No matching skills</p>
@@ -319,7 +361,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
             </UIButton>
           </div>
         )}
-        {visible.length > visiblePage.length && (
+        {browse.length > visiblePage.length && (
           <div className="mt-4 flex justify-center">
             <UIButton
               type="button"

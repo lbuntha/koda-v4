@@ -2,7 +2,7 @@ import React from "react";
 import { ChevronRight, Play } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIBadge, UIButton } from "./ThemeUI";
-import { UISkillThumbnail, skillArtFor } from "./UISkillThumbnail";
+import { UISkillThumbnail, skillArtFor, useHasSkillArtwork } from "./UISkillThumbnail";
 
 /**
  * How much room a skill is given.
@@ -68,7 +68,9 @@ const Progress: React.FC<{ percent: number; size: SkillCardSize; label?: string 
   label,
 }) => (
   <div
-    className={`${size === "sm" ? "h-1.5" : size === "md" ? "h-1" : "h-2"} flex-1 overflow-hidden rounded-full bg-surface-muted`}
+    /* `md` was a 4px hairline beside a count it now shares a line with. A bar
+       nobody can see is decoration, not progress. */
+    className={`${size === "lg" ? "h-2" : "h-1.5"} flex-1 overflow-hidden rounded-full bg-surface-muted`}
     {...(label
       ? { role: "progressbar", "aria-valuenow": percent, "aria-valuemin": 0, "aria-valuemax": 100, "aria-label": label }
       : { "aria-hidden": true })}
@@ -113,6 +115,7 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
   onRegister,
   className = "",
 }) => {
+  const hasArtwork = useHasSkillArtwork(thumbnail);
   const percent =
     progressPercent ?? (lessonCount ? Math.round((completedLessons / lessonCount) * 100) : 0);
   const complete = percent === 100;
@@ -130,7 +133,11 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
     return (
       <button
         type="button"
-        onClick={onOpen}
+        /* `act`, not `onOpen`: in a catalogue this row may be a skill the
+           learner has not added yet, and pressing it there means "add it" — the
+           same thing pressing the poster means. */
+        onClick={act}
+        aria-label={`${label} ${title}`}
         className={`${themeSystem.card("interactive")} flex w-full items-center gap-3 p-3 text-left ${className}`}
       >
         <UISkillThumbnail
@@ -150,15 +157,29 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
             )}
           </div>
 
+          {/* Only where one is passed: Home's subject rows are a list of things
+              the learner already has, and a tagline there is a sentence they
+              have read every day. A catalogue row is a skill they are deciding
+              about, so it needs the line. */}
+          {tagline && (
+            <p className="mt-0.5 truncate text-[13px] leading-snug text-muted">{tagline}</p>
+          )}
+
           <div className="mt-1.5 flex items-center gap-2">
             <Progress percent={percent} size="sm" />
-            <span className="shrink-0 font-mono text-[11px] font-bold text-muted">
+            <span className="shrink-0 text-[11px] font-bold text-muted tabular-nums">
               {completedLessons}/{lessonCount}
             </span>
           </div>
         </div>
 
-        <ChevronRight className="w-4 h-4 shrink-0 text-muted" />
+        {registered ? (
+          <ChevronRight className="w-4 h-4 shrink-0 text-muted" />
+        ) : (
+          <span className="shrink-0 rounded-full bg-indigo-600 px-3 py-1.5 text-xs font-black text-white">
+            {registering ? "Adding…" : label}
+          </span>
+        )}
       </button>
     );
   }
@@ -230,7 +251,12 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
         type="button"
         onClick={onOpen}
         aria-label={`Open ${title}`}
-        className="relative block w-full aspect-[16/9] bg-slate-50 dark:bg-slate-950/40 border-b-2 border-slate-100 dark:border-slate-800 overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
+        /* Drawn artwork earns 16:9. A fallback glyph on a gradient does not —
+           full-bleed on a phone that is a third of the screen carrying one
+           symbol, which is what every skill looks like before it has art. */
+        className={`relative block w-full ${
+          hasArtwork ? "aspect-[16/9]" : "aspect-[3/1]"
+        } bg-slate-50 dark:bg-slate-950/40 border-b-2 border-slate-100 dark:border-slate-800 overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500`}
       >
         <UISkillThumbnail
           thumbnail={thumbnail}
@@ -254,29 +280,35 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
           onClick={onOpen}
           className="text-left min-w-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg"
         >
-          <h3 className="font-mono font-black text-sm text-ink leading-tight truncate">{title}</h3>
+          {/*
+            * Sized for a phone, where this poster is the full width of the
+            * screen and its tagline is the only sentence describing the skill.
+            * It was 11px on top of a 14px title — a caption under a label, when
+            * it is the line a parent actually reads to decide. 16 / 13 / 11
+            * keeps three legible steps at every width the grid uses.
+            */}
+          <h3 className="font-black text-base text-ink leading-tight truncate">{title}</h3>
           {tagline && (
-            <p className="mt-1 text-[11px] leading-snug text-muted line-clamp-2">{tagline}</p>
+            <p className="mt-1 text-[13px] leading-snug text-muted line-clamp-2">{tagline}</p>
           )}
         </button>
 
         {/* The lesson count only where the progress row is not already giving
             it — at poster width a third clause just truncates the ages away. */}
-        <p className="text-[10px] font-mono font-bold text-muted truncate">
+        <p className="text-[11px] font-bold text-muted truncate">
           {categoryLabel}
           {ages ? ` · ages ${ages[0]}–${ages[1]}` : ""}
           {completedLessons > 0 ? "" : ` · ${lessonCount} lessons`}
         </p>
 
+        {/* The bar and the count on one line. "1 of 56" above "2%" was the same
+            fact twice, in two rows, on a card that already has five. */}
         {completedLessons > 0 && (
-          <div>
-            <div className="flex justify-between text-[10px] font-mono font-bold text-muted mb-1">
-              <span>{complete ? "Completed" : `${completedLessons} of ${lessonCount}`}</span>
-              <span>{percent}%</span>
-            </div>
-            <div className="flex">
-              <Progress percent={percent} size="md" label={`${title} progress`} />
-            </div>
+          <div className="flex items-center gap-2">
+            <Progress percent={percent} size="md" label={`${title} progress`} />
+            <span className="shrink-0 text-[11px] font-bold text-muted tabular-nums">
+              {complete ? "Done" : `${completedLessons} of ${lessonCount}`}
+            </span>
           </div>
         )}
 

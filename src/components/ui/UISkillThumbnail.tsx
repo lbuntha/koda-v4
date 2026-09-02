@@ -45,6 +45,21 @@ const isImage = (v: string) =>
  */
 const isEmoji = (v: string) => !/[a-zA-Z0-9]/.test(v) && [...v].length <= 4;
 
+/**
+ * Whether this thumbnail draws real artwork, or falls back to a glyph.
+ *
+ * A poster's media band is sized on the answer: a drawn illustration earns
+ * 16:9, and an icon on a gradient does not get better at 220px tall — on a
+ * phone that is a third of the screen carrying one symbol. Exported as a hook
+ * because artwork can arrive from the family or shared collections after the
+ * first render, and the card has to re-size when it does.
+ */
+export const useHasSkillArtwork = (thumbnail?: string): boolean => {
+  const value = thumbnail?.trim() ?? "";
+  const isArt = useHasArt(value);
+  return Boolean(value) && (isImage(value) || isArt);
+};
+
 export interface UISkillThumbnailProps {
   /** The manifest's `thumbnail`, or a per-install override. */
   thumbnail?: string;
