@@ -16,8 +16,9 @@ from app.deps import AUTHENTICATED, CurrentPrincipal, Db
 from app.errors import Forbidden, NotFound
 from app.models.auth import Principal
 from app.models.common import Model
-from app.repos import push_tokens
-from app.repos.base import scoped
+from app.push_defaults import DEFAULT_KINDS, MASTER
+from app.repos import notify_prefs, push_tokens
+from app.repos import system as system_repo
 
 router = APIRouter(prefix="/push", tags=["push"], dependencies=[AUTHENTICATED])
 
@@ -37,13 +38,19 @@ class TokenIn(Model):
     platform: str | None = Field(default=None, max_length=60)
 
 
-def _adult(p: Principal) -> str:
+def _adult(p: Principal) -> str | None:
     """The family this caller may register a token for — and never a child's.
 
     A learner-scoped session is refused outright rather than quietly ignored.
     A kid's tablet is where the app is played, not where it is advertised, and
     the promise is only worth making if it is the endpoint that keeps it rather
     than the screen that happens not to draw the switch.
+
+    Returns `None` for staff, who belong to no family. Deliberately not
+    `scoped()`, which refuses them: an operator holding no `familyId` is the
+    normal case here rather than a tenancy mistake, and it is what lets them run
+    the test send in §7 against the phone in their own hand. A row with no
+    family is reachable by nothing that addresses a family.
     """
     if p.learner_id:
         raise Forbidden(
@@ -52,7 +59,7 @@ def _adult(p: Principal) -> str:
         )
     if p.kind != "user" or not p.subject_id:
         raise Forbidden("Only a signed-in account can be notified.", "push_no_account")
-    return scoped(p)["familyId"]
+    return p.family_id
 
 
 @router.post("/tokens", status_code=204)
@@ -84,8 +91,83 @@ async def forget(token: str, db: Db, p: CurrentPrincipal) -> None:
     somebody else is simply not there, which is the same shape every other
     lookup in this service has.
     """
-    family_id = _adult(p)
-    found = await db.push_tokens.find_one({"token": token, "familyId": family_id})
+    _adult(p)
+    # By `userId`, not by family: a token belongs to the browser one person
+    # granted permission in, and "it is not yours" and "it does not exist"
+    # should be the same answer.
+    found = await db.push_tokens.find_one({"token": token, "userId": p.subject_id})
     if not found:
         raise NotFound("No such notification token on this account.")
     await push_tokens.delete(db, token)
+
+
+class KindOut(Model):
+    """One switch as a parent sees it."""
+
+    id: str
+    label: str
+    on: bool
+
+
+class PreferencesOut(Model):
+    #: The deployment's master. False means the screen should say Koda is not
+    #: sending notifications here at all, rather than draw switches that lie.
+    enabled: bool
+    kinds: list[KindOut]
+
+
+class PreferenceIn(Model):
+    kind: str = Field(max_length=60)
+    on: bool
+
+
+async def _preferences(db, p: Principal) -> PreferencesOut:
+    """What this account may choose, and what it has chosen.
+
+    Kinds the operator has switched off are **absent**, not shown as off: a
+    switch a family cannot move is not a setting, it is a decision somebody else
+    made, and drawing it would invite a parent to fix something they cannot.
+    Account kinds are absent for the same reason — they carry no preference.
+    """
+    chosen = await notify_prefs.for_user(db, p.subject_id)
+    master = await system_repo.value_of(db, MASTER, True)
+
+    kinds: list[KindOut] = []
+    for kind in DEFAULT_KINDS:
+        if kind["class"] != "courtesy":
+            continue
+        if not await system_repo.value_of(db, kind["settingId"], True):
+            continue
+        kinds.append(
+            KindOut(
+                id=kind["kindId"],
+                label=kind["label"],
+                on=bool(chosen.get(kind["kindId"], kind["familyDefault"])),
+            )
+        )
+
+    return PreferencesOut(enabled=bool(master), kinds=kinds)
+
+
+@router.get("/preferences")
+async def preferences(db: Db, p: CurrentPrincipal) -> PreferencesOut:
+    _adult(p)
+    return await _preferences(db, p)
+
+
+@router.put("/preferences")
+async def choose(body: PreferenceIn, db: Db, p: CurrentPrincipal) -> PreferencesOut:
+    """Turn one kind on or off for this account.
+
+    One kind per call rather than a whole object: two browsers changing two
+    switches at the same moment must not overwrite each other.
+    """
+    _adult(p)
+    definition = next((k for k in DEFAULT_KINDS if k["kindId"] == body.kind), None)
+    if definition is None or definition["class"] != "courtesy":
+        # An account kind has no preference to set, and an unknown one is a
+        # client bug. Both are the same answer: there is no such switch.
+        raise NotFound(f"There is no notification setting called '{body.kind}'.")
+
+    await notify_prefs.set_pref(db, p.subject_id, body.kind, body.on)
+    return await _preferences(db, p)

@@ -10,10 +10,13 @@
  * the last section of `docs/PWA.md` is a whole page about what two workers on
  * this origin cost. See `docs/PUSH.md` §3.
  *
- * The rules below are ported unchanged, comments included, because the comments
- * are the reasons. Nothing about what is cached, or for how long, changed with
- * the move; a build from before this file and a build from after it should be
- * indistinguishable from a tablet in a drawer.
+ * The caching rules below are ported unchanged, comments included, because the
+ * comments are the reasons. Nothing about what is cached, or for how long,
+ * changed with the move; a build from before this file and a build from after
+ * it should be indistinguishable from a tablet in a drawer.
+ *
+ * The two push handlers are at the bottom. They are the only thing in this file
+ * that is not a port.
  */
 
 import { cleanupOutdatedCaches, createHandlerBoundToURL, precacheAndRoute } from "workbox-precaching";
@@ -22,6 +25,7 @@ import { NavigationRoute, registerRoute } from "workbox-routing";
 import { CacheFirst, StaleWhileRevalidate } from "workbox-strategies";
 import { ExpirationPlugin } from "workbox-expiration";
 import { CacheableResponsePlugin } from "workbox-cacheable-response";
+import { safeParse } from "./pushPayload";
 
 // File-scoped, because this module has imports: it shadows the global `self`
 // with the worker type rather than colliding with it.
@@ -106,3 +110,70 @@ registerRoute(
     ],
   }),
 );
+
+
+/* ------------------------------------------------------------------ *
+ * Notifications
+ *
+ * The server sends `data` and no `notification` block, so nothing is drawn
+ * until this file draws it. That is the point: the copy, the icon and the tap
+ * target stay ours, foreground and background take one code path, and a page
+ * that is already open does not get an OS toast *and* an in-app one.
+ * ------------------------------------------------------------------ */
+
+/**
+ * Focus the window Koda is already open in, rather than opening a second one.
+ *
+ * A child may be mid-lesson in the tab that exists; opening another copy of the
+ * app beside it is how a parent's tap loses somebody's round.
+ */
+async function focusOrOpen(path: string): Promise<void> {
+  const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+
+  for (const client of windows) {
+    if (new URL(client.url).origin === self.location.origin) {
+      // The app has no URL routing yet — tabs are state — so the path is sent
+      // as a message for it to act on rather than navigated to.
+      client.postMessage({ type: "KODA_NOTIFICATION_CLICK", path });
+      await client.focus();
+      return;
+    }
+  }
+
+  await self.clients.openWindow(path);
+}
+
+self.addEventListener("push", (event) => {
+  // Always show something. A push event that resolves without a notification is
+  // what makes Chrome post "This site has been updated in the background" — a
+  // notice in words nobody here chose. `safeParse` is written so that every
+  // path through it returns a message worth reading.
+  const payload = safeParse(event.data?.text());
+
+  event.waitUntil(
+    (async () => {
+      await self.registration.showNotification(payload.title, {
+        body: payload.body,
+        icon: "/icons/icon-192.png",
+        badge: "/icons/icon-64.png",
+        // A second "Mia met her goal" replaces the first rather than stacking
+        // two of the same sentence on a lock screen.
+        tag: payload.tag,
+        data: { path: payload.path, kind: payload.kind },
+      });
+
+      // If the app is open, tell it — a summary that just arrived is a reason
+      // to refresh the screen behind the notification.
+      const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+      for (const client of windows) {
+        client.postMessage({ type: "KODA_PUSH", kind: payload.kind, path: payload.path });
+      }
+    })(),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const path = (event.notification.data as { path?: string } | undefined)?.path ?? "/";
+  event.waitUntil(focusOrOpen(path));
+});

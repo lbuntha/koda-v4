@@ -52,6 +52,10 @@ JOIN_CODE_PER_VALUE = RateLimit(attempts=5, window_seconds=60)
 # exhausting it take a fortnight of uninterrupted guessing, and still lets a
 # parent fumble it twice at bedtime.
 FAMILY_PIN_PER_FAMILY = RateLimit(attempts=5, window_seconds=60)
+# The operator's test notification. Generous enough to try it, fix a setting and
+# try again; tight enough that a staff token cannot be used to buzz somebody's
+# phone all afternoon. It spends real quota and real battery.
+PUSH_TEST_PER_ACCOUNT = RateLimit(attempts=6, window_seconds=300)
 # Reset requests. Tighter than a login because each one sends mail: an unbudgeted
 # endpoint here is a way to use the service to post a stranger a hundred emails.
 FORGOT_PER_IP = RateLimit(attempts=5, window_seconds=300)

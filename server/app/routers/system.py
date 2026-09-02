@@ -23,6 +23,8 @@ from app.models.auth import Principal
 from app.models.common import Model
 from app.repos import maintenance as maintenance_repo
 from app.repos import system as system_repo
+from app.security.rate_limit import PUSH_TEST_PER_ACCOUNT, limiter
+from app.services import push as push_service
 from app.settings import settings
 from app.system_defaults import BY_ID, with_master_applied
 
@@ -217,3 +219,26 @@ async def resolve(
     if not value:
         raise NotFound(f"'{setting_id}' is not set on this deployment.")
     return {"value": value}
+
+
+@router.get("/push/preflight")
+async def push_preflight(db: Db, p: CanOperate) -> dict[str, Any]:
+    """Is push actually working here? Answered without sending anything.
+
+    Run against a fresh deployment, from a laptop, before a single parent is
+    told the feature exists — and afterwards from the deploy, because a `curl`
+    of this turns "we shipped notifications" into something CI can assert.
+    """
+    return await push_service.preflight(db)
+
+
+@router.post("/push/test")
+async def push_test(db: Db, p: CanOperate) -> dict[str, Any]:
+    """Ring the caller's own browsers, and nobody else's.
+
+    Note what this route does not take: a recipient. Not a family, not a user,
+    not an email. A test endpoint that accepts a target is an arbitrary-push
+    primitive wearing an admin badge.
+    """
+    await limiter.hit(db, "push:test", p.subject_id, PUSH_TEST_PER_ACCOUNT)
+    return await push_service.send_test(db, p.subject_id)

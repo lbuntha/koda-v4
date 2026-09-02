@@ -177,3 +177,22 @@ async def send_one(token: str, message: dict[str, str], *, validate_only: bool =
         await asyncio.sleep((2**attempt) * 0.5 + random.random() * 0.25)
 
     return Outcome.SOFT
+
+
+def check_credentials() -> tuple[bool, str]:
+    """Mint an access token and throw it away.
+
+    The cheapest proof that `roles/firebasemessaging.admin` is actually granted
+    to whatever this service runs as: if the scope cannot be minted, nothing
+    else in this file can work, and the failure says so in words rather than
+    turning up later as notifications nobody receives.
+    """
+    try:
+        import google.auth
+        from google.auth.transport.requests import Request
+
+        credentials, project = google.auth.default(scopes=[SCOPE])
+        credentials.refresh(Request())
+        return True, f"minted for {project or 'an unnamed project'}"
+    except Exception as error:  # noqa: BLE001 — every failure here is "no credential"
+        return False, str(error)

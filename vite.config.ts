@@ -32,6 +32,29 @@ export default defineConfig(() => {
        */
       testTimeout: 20_000,
     },
+    build: {
+      rollupOptions: {
+        output: {
+          /*
+           * Keep the Firebase SDK in a chunk with a name we can point at.
+           *
+           * It is loaded only when a parent turns notifications on, and the
+           * precache glob below excludes it by that name — otherwise every
+           * child's tablet would download 100KB of messaging SDK during
+           * install, for a feature most of them will never use. Rollup names
+           * these `index.esm-<hash>.js` on its own, which is not something a
+           * glob can single out.
+           */
+          manualChunks(id: string) {
+            if (id.includes("node_modules/@firebase") || id.includes("node_modules/firebase")) {
+              return "firebase";
+            }
+            return undefined;
+          },
+        },
+      },
+    },
+
     plugins: [
       react(),
       tailwindcss(),
@@ -96,6 +119,11 @@ export default defineConfig(() => {
           // Everything the app needs to run, so a cold start with no network
           // still reaches a playable lesson.
           globPatterns: ['**/*.{js,css,html,svg,png,ico,woff,woff2}'],
+          // …except the messaging SDK. A child playing a counting game offline
+          // never needs it, and a parent turning notifications on is online by
+          // definition — registering a token is a round trip. Precaching it
+          // would put 100KB into every install to save nothing.
+          globIgnores: ['**/node_modules/**/*', '**/firebase-*.js'],
         },
 
         devOptions: {

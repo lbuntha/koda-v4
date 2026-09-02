@@ -10,6 +10,7 @@ import pytest
 from app.repos import push_tokens
 from app.services import fcm, push
 from app.settings import settings
+from app.system_defaults import DEFAULT_SETTINGS
 
 TOKEN = "f" * 140
 OTHER = "e" * 140
@@ -36,6 +37,28 @@ async def child(client, parent):
     return {"Authorization": f"Bearer {tokens['accessToken']}"}
 
 
+
+@pytest.fixture
+async def seeded(db):
+    """The app seeds the switchboard at startup; the test fixture skips the lifespan."""
+    from app.repos import system as system_repo
+
+    for item in DEFAULT_SETTINGS:
+        await system_repo.seed_default(db, item)
+
+
+@pytest.fixture
+async def admin(client, db):
+    """A platform operator: staff, no family, provisioned rather than signed up."""
+    from app.repos import users
+    from app.security import passwords
+
+    await users.create(db, "ops@example.com", passwords.hash_password("correct horse battery"),
+                       platform_role="admin")
+    tokens = (
+        await client.post("/auth/login", json={"email": "ops@example.com", "password": "correct horse battery"})
+    ).json()
+    return {"Authorization": f"Bearer {tokens['accessToken']}"}
 
 async def _operator_switches(db, setting_id: str, value: bool) -> None:
     """Throw one switch on the deployment's switchboard.
@@ -291,3 +314,137 @@ async def test_sending_never_raises(db, fcm_driver, monkeypatch):
     monkeypatch.setattr(fcm, "_post", explode)
 
     assert await push.send(db, to=push.Recipient(family_id=family_id), kind="learn.goal_met", title="a", body="b") == 0
+
+
+# --- what a parent may choose ---------------------------------------------
+
+
+async def test_a_parent_is_offered_the_courtesy_kinds_only(client, parent, seeded):
+    body = (await client.get("/push/preferences", headers=parent)).json()
+
+    offered = {kind["id"] for kind in body["kinds"]}
+    assert "learn.goal_met" in offered
+    assert "device.new_signin" not in offered, "an account notice is not a preference"
+    assert body["enabled"] is True
+
+
+async def test_reminders_are_offered_but_start_off(client, parent, seeded):
+    body = (await client.get("/push/preferences", headers=parent)).json()
+
+    reminder = next(k for k in body["kinds"] if k["id"] == "learn.practice_reminder")
+    assert reminder["on"] is False, "a parent has to ask for it"
+
+
+async def test_a_kind_the_operator_switched_off_is_absent_not_shown_off(client, parent, db, seeded):
+    await _operator_switches(db, "push.goalMet", False)
+
+    body = (await client.get("/push/preferences", headers=parent)).json()
+
+    assert "learn.goal_met" not in {kind["id"] for kind in body["kinds"]}, (
+        "a switch a family cannot move is not a setting"
+    )
+
+
+async def test_a_parent_can_turn_a_reminder_on(client, parent, db, seeded):
+    body = (
+        await client.put("/push/preferences", headers=parent, json={"kind": "learn.practice_reminder", "on": True})
+    ).json()
+
+    reminder = next(k for k in body["kinds"] if k["id"] == "learn.practice_reminder")
+    assert reminder["on"] is True
+    assert await push.allowed(db, "learn.practice_reminder", {"learn.practice_reminder": True}) is True
+
+
+async def test_an_account_kind_cannot_be_muted(client, parent, seeded):
+    response = await client.put("/push/preferences", headers=parent, json={"kind": "device.new_signin", "on": False})
+
+    assert response.status_code == 404
+
+
+async def test_a_childs_device_cannot_read_preferences(client, child, seeded):
+    assert (await client.get("/push/preferences", headers=child)).status_code == 403
+
+
+# --- the operator's two functions -----------------------------------------
+
+
+async def test_preflight_is_staff_only(client, parent, seeded):
+    assert (await client.get("/system/push/preflight", headers=parent)).status_code == 403
+
+
+async def test_preflight_names_the_thing_to_fix(client, admin, seeded):
+    body = (await client.get("/system/push/preflight", headers=admin)).json()
+
+    assert body["ok"] is False, "the console driver is not a working deployment"
+    driver = next(check for check in body["checks"] if check["check"] == "driver")
+    assert "PUSH_DRIVER=fcm" in driver["fix"], "a failed check must say what fixes it"
+    coverage = next(check for check in body["checks"] if check["check"] == "coverage")
+    assert "0 browser" in coverage["detail"]
+
+
+async def test_the_test_send_takes_no_recipient(client, admin, seeded):
+    """The rule that matters most about this route, asserted rather than trusted."""
+    schema = (await client.get("/openapi.json")).json()
+    route = schema["paths"]["/v1/system/push/test"]["post"]
+
+    assert not route.get("parameters"), "a test send that can name a target is an arbitrary-push primitive"
+    assert "requestBody" not in route
+
+
+async def test_the_test_send_is_honest_about_the_console_driver(client, admin, db, seeded):
+    await push_tokens.save(db, token=TOKEN, family_id=None, user_id="u_ops", device_id=None)
+    ops = await db.users.find_one({"email": "ops@example.com"})
+    await db.push_tokens.update_one({"token": TOKEN}, {"$set": {"userId": ops["_id"]}})
+
+    body = (await client.post("/system/push/test", headers=admin)).json()
+
+    assert body["driver"] == "console"
+    assert body["sent"] == 0
+    assert "sends nothing" in body["note"], "a test that lies is worse than no test"
+
+
+async def test_the_test_send_says_when_there_is_nothing_to_ring(client, admin, seeded):
+    body = (await client.post("/system/push/test", headers=admin)).json()
+
+    assert body["sent"] == 0
+    assert "no browser registered" in body["note"]
+
+
+async def test_an_operator_may_register_their_own_browser(client, admin, db, seeded):
+    """Staff belong to no family, and would otherwise be unable to test their own work."""
+    response = await client.post("/push/tokens", headers=admin, json={"token": TOKEN})
+
+    assert response.status_code == 204
+    row = await db.push_tokens.find_one({"token": TOKEN})
+    assert row["familyId"] is None
+    assert await push_tokens.live_for_family(db, "f_any") == [], "and is reachable by no family's send"
+
+
+async def test_a_send_asks_each_adult_separately(db, fcm_driver, monkeypatch, seeded):
+    """Two parents on one account may want different things."""
+    from app.repos import notify_prefs
+
+    await push_tokens.save(db, token=TOKEN, family_id="f_1", user_id="u_keen", device_id="d_1")
+    await push_tokens.save(db, token=OTHER, family_id="f_1", user_id="u_quiet", device_id="d_2")
+    await notify_prefs.set_pref(db, "u_quiet", "learn.goal_met", False)
+    rung: list[str] = []
+    monkeypatch.setattr(fcm, "_post", lambda url, body: (rung.append(body["message"]["token"]), (200, {}))[1])
+
+    sent = await push.send(db, to=push.Recipient(family_id="f_1"), kind="learn.goal_met", title="a", body="b")
+
+    assert sent == 1
+    assert rung == [TOKEN], "the parent who switched it off is not rung"
+
+
+async def test_an_account_notice_reaches_a_parent_who_muted_everything(db, fcm_driver, monkeypatch, seeded):
+    from app.repos import notify_prefs
+
+    await push_tokens.save(db, token=TOKEN, family_id="f_1", user_id="u_quiet", device_id="d_1")
+    await notify_prefs.set_pref(db, "u_quiet", "learn.goal_met", False)
+    monkeypatch.setattr(fcm, "_post", lambda url, body: (200, {}))
+
+    sent = await push.send(
+        db, to=push.Recipient(family_id="f_1"), kind="device.new_signin", title="a", body="b"
+    )
+
+    assert sent == 1, "a security notice is not something to have muted by accident"

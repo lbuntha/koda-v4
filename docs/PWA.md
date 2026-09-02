@@ -69,6 +69,12 @@ is several builds' worth: the cache now holds the common pack as well as each
 skill's own clips, and the shared half is the worst thing in it to evict, since
 losing `"seven"` costs every skill on the device its count-along.
 
+One chunk is deliberately outside the precache: the Firebase messaging SDK.
+It is loaded only when a parent turns notifications on — which is an online
+act by definition, since it registers a token — so precaching 100KB of it onto
+every child's tablet during install would buy nothing. `globIgnores` in
+`vite.config.ts` keeps it out, which is also why it is a named chunk.
+
 `/api/*` is on the denylist. A cached tutor reply would be a stale answer to a
 different question, which is worse than no reply.
 

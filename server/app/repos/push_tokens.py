@@ -104,6 +104,28 @@ async def live_for_family(
     return await db.push_tokens.find(mongo_filter).to_list(length=200)
 
 
+async def live_for_user(db: AsyncIOMotorDatabase, user_id: str) -> list[dict[str, Any]]:
+    """One person's own browsers, whatever family they are in — or none.
+
+    By `userId` rather than by family, because this is what the operator test
+    send addresses: staff belong to no family, and a test that could only reach
+    a family's devices would be untestable by the very people who need to run
+    it.
+    """
+    return await db.push_tokens.find({"userId": user_id, "disabledAt": None}).to_list(length=50)
+
+
+async def coverage(db: AsyncIOMotorDatabase) -> dict[str, int]:
+    """How many browsers this deployment can reach, and across how many families.
+
+    Zero is not an error on day one. It is the number that should be climbing,
+    which is why preflight reports it rather than passing or failing on it.
+    """
+    live = await db.push_tokens.count_documents({"disabledAt": None})
+    families = await db.push_tokens.distinct("familyId", {"disabledAt": None})
+    return {"tokens": live, "families": len([f for f in families if f])}
+
+
 async def delete(db: AsyncIOMotorDatabase, token: str) -> bool:
     """Forget a token. Used both by a sign-out and by FCM telling us it is dead."""
     result = await db.push_tokens.delete_one({"token": token})

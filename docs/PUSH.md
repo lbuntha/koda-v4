@@ -531,7 +531,7 @@ Three things this needs to get right:
 |---|---|---|
 | **0** ✅ | `injectManifest`, the worker ported with **no push code** | Both builds report the same *29 entries*, the hashed URLs diff clean, `tsc` passes over the worker's own project, 985 tests pass — and, in Chrome against a production build: the update prompt still installs, and a deep link still boots with the server stopped |
 | **1** ✅ | `services/push.py` with the `console` driver, `push_tokens`, the two endpoints, `device.new_signin` | 22 tests in `test_push.py`, 363 in the suite, `ruff` clean |
-| **2** | The worker's `push`/`notificationclick` handlers, Settings → Notifications, the real `fcm` driver, preflight and test send (§7) | Preflight all-green on staging, then a notification on a real Android phone and a real installed iPhone |
+| **2** ✅ | The worker's `push`/`notificationclick` handlers, Settings → Notifications, preferences, preflight and test send (§7) | 36 tests in `test_push.py` and 14 over the payload guard; 381 API tests, 1,002 frontend tests, both builds clean. **Still to do on hardware:** preflight green on staging, then a real Android phone and a real installed iPhone |
 | **3** | Cloud Scheduler, `weekly_summary`, `goal_met` | A summary that arrives on Sunday and exactly once |
 | **4** | `practice_reminder`, `streak_ending`, the self-limiting counter | Off by default; on by choice; quiet by neglect |
 
@@ -588,6 +588,39 @@ that sets them is phase 2. And `device.new_signin` sends `path="/"` — the clie
 is a tab machine with no URL routing, so every deep link lands on the default
 screen. Giving a notification somewhere to land is a client-side prerequisite
 for phase 2, not a server one.
+
+**Phase 2, as built.** The worker grew two handlers and one imported module:
+`src/pwa/pushPayload.ts`, where `safeParse` and `safePath` live so they can be
+tested — which they are, fourteen ways, because "the payload decides where a tap
+lands and the payload came from the network" is the one sentence in this design
+that is a security claim. On the client, `src/lib/push/` owns the token's life
+and `NotificationsSettings` is the only place in Koda that raises a permission
+prompt. On the server, preferences, preflight and the test send.
+
+Three things the building taught, none of which was in the plan:
+
+- **A kind id contains a dot, and Mongo reads dots as a path.** Storing
+  preferences as `{"$set": {"notifyPrefs.learn.goal_met": true}}` writes
+  `{learn: {goal_met: true}}` — the switch appears to save and silently does
+  nothing, because the key it is read back by never existed. Preferences are
+  rows in `notify_prefs`, where an id is a value rather than a path. The test
+  that caught it is the one that turns a reminder on and then asks whether it is
+  on.
+- **A family send has to ask each adult, not the family.** Two parents on one
+  account may want different things, so `send` resolves the deployment's gates
+  once and then filters the browsers by their own owner's preference. An account
+  kind skips that, which is what makes "a new device signed in" still arrive for
+  somebody who has muted everything else.
+- **The Firebase SDK must not be precached.** It arrives as a dynamic import, so
+  it was landing in the Workbox manifest anyway: 100KB downloaded during install
+  onto every child's tablet for a feature most of them will never use. It is now
+  its own named chunk, excluded by `globIgnores`, and the precache is back to the
+  29 entries it has always been. A parent turning notifications on is online by
+  definition.
+
+What is still not built: the clock (§10) and the two reminder kinds, which are
+phases 3 and 4. And the app still has no URL routing, so `notificationclick`
+focuses the open window and posts it the path rather than navigating to it.
 
 ---
 

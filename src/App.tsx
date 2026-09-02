@@ -87,6 +87,7 @@ import {
   useSession,
   useSystem,
 } from "./lib/sync";
+import { refreshNotificationToken } from "./lib/push";
 import { DailyStudyGoal } from "./components/DailyStudyGoal";
 import { DayDoneScreen } from "./components/DayDoneScreen";
 import { QuickMathPanel } from "./components/QuickMathPanel";
@@ -182,6 +183,21 @@ export default function App() {
   // Everything the learning log records is also queued for upload. Starting it
   // here rather than at module load keeps it out of the way of tests.
   useEffect(() => installLearningSink(), []);
+
+  /*
+   * Keep the notification token current, for accounts that have one.
+   *
+   * FCM rotates a registration token on its own schedule, and a browser that
+   * registered once and never again goes quiet after a rotation: no error, no
+   * bounce, just a parent who stops hearing from Koda. This asks for the token
+   * on each launch and only writes when it has actually changed, so the usual
+   * case costs nothing. It never prompts — permission is asked for in Settings,
+   * from a tap, and nowhere else.
+   */
+  useEffect(() => {
+    if (!session) return;
+    void refreshNotificationToken();
+  }, [session]);
 
   // What this account may do decides what the sidebar draws, and it depends on
   // the account — so it is fetched when one appears, not once at boot when

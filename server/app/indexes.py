@@ -52,6 +52,9 @@ INDEXES: dict[str, list[IndexModel]] = {
         IndexModel([("codeHash", ASCENDING)], unique=True, name="invite_code_unique"),
         IndexModel([("familyId", ASCENDING)], name="by_family"),
     ],
+    "notify_prefs": [
+        IndexModel([("userId", ASCENDING)], name="by_person"),
+    ],
     "push_tokens": [
         # One row per token, whoever presents it: the browser only ever hands
         # out one, so a second row for the same token would be a second
