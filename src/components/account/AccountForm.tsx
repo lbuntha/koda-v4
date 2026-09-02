@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Eye, EyeOff, KeyRound, LogIn, UserPlus } from "lucide-react";
 
 import { ApiError, SessionAPI, request } from "../../lib/sync";
@@ -72,41 +72,93 @@ export interface AccountFormProps {
  * of validation rules and one set of error sentences — two copies of a login
  * form is how two different messages for the same failure happen.
  */
-/**
- * Sign in with a provider a parent already has.
- *
- * Present but not wired: the buttons exist so the shape of the screen is right
- * and so the work left is visible, and they say so when pressed rather than
- * doing nothing. A dead control that swallows a tap is worse than no control —
- * a parent assumes it failed and tries again.
- *
- * The marks are inline SVG. Both brands require their own logo, and a strict CSP
- * blocks fetching them from a CDN, so they are drawn here.
- */
-const GoogleMark = () => (
-  <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" aria-hidden="true">
-    <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5a5.6 5.6 0 0 1-2.4 3.6v3h3.9c2.3-2.1 3.5-5.2 3.5-8.8Z" />
-    <path fill="#34A853" d="M12 24c3.2 0 5.9-1.1 7.9-2.9l-3.9-3a7.2 7.2 0 0 1-10.7-3.8h-4v3.1A12 12 0 0 0 12 24Z" />
-    <path fill="#FBBC05" d="M5.3 14.3a7.1 7.1 0 0 1 0-4.6V6.6h-4a12 12 0 0 0 0 10.8l4-3.1Z" />
-    <path fill="#EA4335" d="M12 4.8c1.8 0 3.4.6 4.6 1.8l3.5-3.5A12 12 0 0 0 1.3 6.6l4 3.1A7.2 7.2 0 0 1 12 4.8Z" />
-  </svg>
-);
+const GOOGLE_SCRIPT_ID = "google-identity-services";
+let googleScript: Promise<void> | null = null;
 
-const FacebookMark = () => (
-  <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" aria-hidden="true">
-    <path
-      fill="#1877F2"
-      d="M24 12a12 12 0 1 0-13.9 11.9v-8.4H7.1V12h3V9.4c0-3 1.8-4.6 4.5-4.6 1.3 0 2.6.2 2.6.2v2.9h-1.5c-1.5 0-1.9.9-1.9 1.8V12h3.3l-.5 3.5h-2.8v8.4A12 12 0 0 0 24 12Z"
-    />
-  </svg>
-);
+/** Load Google's public button code only on a screen that can use it. */
+function loadGoogleIdentity(): Promise<void> {
+  if (window.google?.accounts.id) return Promise.resolve();
+  if (googleScript) return googleScript;
 
-const SOCIAL = [
-  ["Google", GoogleMark],
-  ["Facebook", FacebookMark],
-] as const;
+  googleScript = new Promise<void>((resolve, reject) => {
+    const existing = document.getElementById(GOOGLE_SCRIPT_ID) as HTMLScriptElement | null;
+    const script = existing ?? document.createElement("script");
+    const loaded = () => window.google?.accounts.id
+      ? resolve()
+      : reject(new Error("Google Identity Services did not load."));
+
+    script.addEventListener("load", loaded, { once: true });
+    script.addEventListener("error", () => reject(new Error("Google Identity Services could not load.")), { once: true });
+    if (!existing) {
+      script.id = GOOGLE_SCRIPT_ID;
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      document.head.appendChild(script);
+    }
+  }).catch((error) => {
+    // A transient offline failure should be retryable the next time this form mounts.
+    googleScript = null;
+    throw error;
+  });
+  return googleScript;
+}
+
+const GoogleSignInButton: React.FC<{
+  mode: AccountMode;
+  busy: boolean;
+  onCredential: (credential: string) => void;
+  onUnavailable: () => void;
+}> = ({ mode, busy, onCredential, onUnavailable }) => {
+  const host = useRef<HTMLDivElement>(null);
+  const callback = useRef(onCredential);
+  const unavailable = useRef(onUnavailable);
+  callback.current = onCredential;
+  unavailable.current = onUnavailable;
+
+  useEffect(() => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim();
+    if (!clientId || !host.current) return;
+    let live = true;
+
+    void loadGoogleIdentity()
+      .then(() => {
+        if (!live || !host.current || !window.google) return;
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: (response) => callback.current(response.credential),
+        });
+        host.current.replaceChildren();
+        window.google.accounts.id.renderButton(host.current, {
+          type: "standard",
+          theme: "outline",
+          size: "large",
+          shape: "rectangular",
+          text: mode === "signUp" ? "signup_with" : "signin_with",
+          width: Math.min(400, Math.max(240, host.current.clientWidth)),
+        });
+      })
+      .catch(() => {
+        if (live) unavailable.current();
+      });
+
+    return () => {
+      live = false;
+    };
+  }, [mode]);
+
+  if (!import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim()) return null;
+  return (
+    <div
+      className={`flex min-h-10 justify-center ${busy ? "pointer-events-none opacity-60" : ""}`}
+      aria-busy={busy}
+    >
+      <div ref={host} className="w-full max-w-[400px]" />
+    </div>
+  );
+};
 
 export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus = false }) => {
+  const googleConfigured = Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim());
   const [mode, setMode] = useState<AccountMode>("signIn");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -130,8 +182,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sentTo, setSentTo] = useState<string | null>(null);
-  /** Which provider was tapped, so the screen can say it is not ready yet. */
-  const [pendingProvider, setPendingProvider] = useState<string | null>(null);
+  const [googleUnavailable, setGoogleUnavailable] = useState(false);
 
   /**
    * Ask for a reset link.
@@ -206,6 +257,30 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
     }
   };
 
+  const googleSignIn = async (credential: string) => {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await SessionAPI.signInWithGoogle(
+        credential,
+        mode === "signUp",
+        familyName.trim() || undefined,
+      );
+      playSound("pop");
+      onSignedIn?.();
+    } catch (err) {
+      const problem = err as ApiError;
+      setError(
+        problem.isOffline
+          ? "Google sign-in needs a connection. Your saved work is still on this device."
+          : problem.message,
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div className="space-y-5">
       <Segmented
@@ -226,32 +301,21 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
        * child-code path, which is a different kind of credential entirely — a
        * child on a shared tablet has no Google account to offer.
        */}
-      {!(mode === "signIn" && loginMethod === "childCode") && (
+      {googleConfigured && !(mode === "signIn" && loginMethod === "childCode") && (
         <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-2.5">
-            {SOCIAL.map(([name, Mark]) => (
-              <button
-                key={name}
-                type="button"
-                onClick={() => {
-                  setError(null);
-                  setPendingProvider(name);
-                  playSound("pop");
-                }}
-                className="flex h-12 items-center justify-center gap-2.5 rounded-xl border-2 border-line bg-surface text-sm font-bold text-ink transition hover:bg-surface-muted active:scale-[0.98] cursor-pointer"
-              >
-                <Mark />
-                {name}
-              </button>
-            ))}
-          </div>
+          <GoogleSignInButton
+            mode={mode}
+            busy={busy}
+            onCredential={(credential) => void googleSignIn(credential)}
+            onUnavailable={() => setGoogleUnavailable(true)}
+          />
 
-          {pendingProvider && (
+          {googleUnavailable && (
             <p
               role="status"
               className="rounded-xl border-2 border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-200"
             >
-              {pendingProvider} sign-in is coming soon. For now, use your email below.
+              Google sign-in could not load. Check your connection or use email below.
             </p>
           )}
 
@@ -427,7 +491,6 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
             onClick={() => {
               setLoginMethod(loginMethod === "email" ? "childCode" : "email");
               setError(null);
-              setPendingProvider(null);
               playSound("pop");
             }}
             className="w-full text-center text-sm font-semibold text-muted hover:text-ink transition cursor-pointer disabled:opacity-60"

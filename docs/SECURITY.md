@@ -66,7 +66,12 @@ will eventually be forgotten, and the forgotten one is the one that matters.
 | `GET /v1/health` | Liveness, before anyone has signed in |
 | `POST /v1/auth/signup` | There is no token before an account exists |
 | `POST /v1/auth/login` | Ditto |
+| `POST /v1/auth/google` | Carries a Google-signed ID token; the API verifies its signature, audience, issuer and expiry |
+| `POST /v1/auth/join` | A child has a single-use pairing code instead of a session yet |
 | `POST /v1/auth/refresh` | Carries its own credential in the body |
+| `POST /v1/auth/token` | Form-encoded login used by development API docs |
+| `POST /v1/auth/password/forgot` | A person who forgot their password has no token; the response never reveals whether an account exists |
+| `POST /v1/auth/password/reset` | Carries its own single-use, expiring credential |
 
 `tests/test_guarded.py` sweeps the OpenAPI schema and asserts **401** for every
 route not on that list — so a route added next month is covered the day it is

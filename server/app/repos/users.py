@@ -18,12 +18,18 @@ async def by_id(db: AsyncIOMotorDatabase, user_id: str) -> dict[str, Any] | None
     return await db.users.find_one({"_id": user_id})
 
 
+async def by_google_sub(db: AsyncIOMotorDatabase, subject: str) -> dict[str, Any] | None:
+    """Find the Koda account bound to Google's stable account identifier."""
+    return await db.users.find_one({"googleSub": subject})
+
+
 async def create(
     db: AsyncIOMotorDatabase,
     email: str,
-    password_hash: str,
+    password_hash: str | None,
     platform_role: str = "none",
     display_name: str | None = None,
+    google_sub: str | None = None,
 ) -> dict[str, Any]:
     timestamp = now()
     doc = {
@@ -32,6 +38,7 @@ async def create(
         "displayName": display_name.strip() if display_name else None,
         "avatarSeed": f"a_{uuid4().hex[:20]}",
         "passwordHash": password_hash,
+        "googleSub": google_sub,
         "platformRole": platform_role,
         "status": "active",
         "totpSecret": None,
@@ -41,6 +48,15 @@ async def create(
     }
     await db.users.insert_one(doc)
     return doc
+
+
+async def link_google(db: AsyncIOMotorDatabase, user_id: str, subject: str) -> bool:
+    """Bind a verified Google identity to one existing Koda account."""
+    result = await db.users.update_one(
+        {"_id": user_id, "$or": [{"googleSub": None}, {"googleSub": {"$exists": False}}]},
+        {"$set": {"googleSub": subject, "updatedAt": now()}},
+    )
+    return result.modified_count == 1
 
 
 async def ensure_avatar_seed(db: AsyncIOMotorDatabase, user_id: str) -> str:

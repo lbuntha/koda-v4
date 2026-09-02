@@ -23,6 +23,12 @@ class Settings(BaseSettings):
     access_ttl_minutes: int = 15
     refresh_ttl_days: int = 60
 
+    #: Public OAuth client id for Google Identity Services. The browser and
+    #: this API receive the same value: the browser asks Google for an ID token,
+    #: and the API uses the id as the token's required audience. There is no
+    #: client secret in this flow.
+    google_client_id: str | None = None
+
     #: Shared with the tutor server (`server.ts`), and with nothing else.
     #:
     #: A family's Gemini key has to reach whatever calls Gemini, and that is not

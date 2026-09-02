@@ -158,6 +158,65 @@ describe("signing out", () => {
   });
 });
 
+describe("Google sign-in", () => {
+  it("exchanges the Google credential and stores the ordinary Koda session", async () => {
+    const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
+      if (String(url).endsWith("/auth/google")) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            accessToken: "google-access",
+            refreshToken: "google-refresh",
+            expiresIn: 900,
+            deviceId: "d_google",
+            familyId: "f_google",
+            role: "owner",
+            permissions: ["learner:read"],
+          }),
+        };
+      }
+      expect(init?.headers).toMatchObject({ Authorization: "Bearer google-access" });
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          userId: "u_google",
+          email: "parent@gmail.com",
+          displayName: "Sokha Parent",
+          avatarSeed: "a_google_parent",
+          familyId: "f_google",
+          familyName: "Sokha's family",
+          role: "owner",
+          platformRole: "none",
+          learnerId: null,
+          learnerName: null,
+          learnerBirthYear: null,
+          permissions: ["learner:read"],
+        }),
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const SessionAPI = await loadSession();
+    const session = await SessionAPI.signInWithGoogle(
+      "google-id-token",
+      true,
+      "Sokha's family",
+    );
+
+    const exchange = fetchMock.mock.calls[0];
+    expect(exchange[0]).toContain("/auth/google");
+    expect(JSON.parse(String(exchange[1]?.body))).toMatchObject({
+      credential: "google-id-token",
+      createAccount: true,
+      familyName: "Sokha's family",
+    });
+    expect(session.email).toBe("parent@gmail.com");
+    expect(SessionAPI.current()?.refreshToken).toBe("google-refresh");
+  });
+});
+
 /**
  * Switching between the accounts this device remembers.
  *

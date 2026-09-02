@@ -451,6 +451,26 @@ export const SessionAPI = {
     return loadProfile(session);
   },
 
+  async signInWithGoogle(
+    credential: string,
+    createAccount: boolean,
+    familyName?: string,
+  ): Promise<Session> {
+    const pair = await request<TokenPair>("/auth/google", {
+      method: "POST",
+      body: {
+        credential,
+        createAccount,
+        familyName,
+        deviceName: deviceName(),
+        installId: installId(),
+      },
+    });
+    const session = fromPair(pair);
+    activate(session);
+    return loadProfile(session);
+  },
+
   async join(code: string): Promise<Session> {
     const pair = await request<TokenPair>("/auth/join", {
       method: "POST",

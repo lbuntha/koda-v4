@@ -19,6 +19,34 @@ python -m app.cli migrate
 python -m app.cli create-admin --email you@example.com --password '…'
 ```
 
+## Google sign-in
+
+Koda uses Google only to prove identity; the API then issues its normal Koda
+access and refresh tokens. To enable it:
+
+1. In Google Cloud, open **Google Auth Platform**, configure Branding and
+   Audience, then create a **Web application** client.
+2. Add `http://localhost:3001` and every production page origin (for this repo,
+   `https://learn-with-koda.web.app`) under **Authorized JavaScript origins**.
+   Popup mode needs no redirect URI.
+3. Put the client id in both local files:
+
+   ```dotenv
+   # ../.env
+   VITE_GOOGLE_CLIENT_ID=123.apps.googleusercontent.com
+
+   # .env
+   GOOGLE_CLIENT_ID=123.apps.googleusercontent.com
+   ```
+
+4. For GitHub deployment, create the repository variable `GOOGLE_CLIENT_ID`.
+   The workflow bakes it into the Vite bundle and sets the same audience on the
+   Cloud Run API. Push `main` to deploy.
+
+The value is a public identifier, not an OAuth client secret. If it is absent,
+the Google button is hidden and `/v1/auth/google` returns
+`google_not_configured`; email and child-code sign-in continue to work.
+
 ## Layout
 
 ```

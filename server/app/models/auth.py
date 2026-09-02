@@ -72,6 +72,16 @@ class LoginIn(Model):
     install_id: str | None = Field(default=None, max_length=64, alias="installId")
 
 
+class GoogleAuthIn(Model):
+    """A Google ID token exchanged for Koda's ordinary session pair."""
+
+    credential: str = Field(min_length=100, max_length=10_000)
+    create_account: bool = Field(default=False, alias="createAccount")
+    family_name: str | None = Field(default=None, max_length=60, alias="familyName")
+    device_name: str = Field(default="This device", max_length=60, alias="deviceName")
+    install_id: str | None = Field(default=None, max_length=64, alias="installId")
+
+
 class JoinIn(Model):
     code: str = Field(min_length=8, max_length=8)
     device_name: str = Field(default="This device", max_length=60, alias="deviceName")

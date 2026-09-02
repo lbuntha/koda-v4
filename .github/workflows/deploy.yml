@@ -84,6 +84,9 @@ jobs:
       MONGODB_URI: ${{ secrets.MONGODB_URI }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       TUTOR_SERVICE_TOKEN: ${{ secrets.TUTOR_SERVICE_TOKEN }}
+      # OAuth client ids are public identifiers, so this is a repository
+      # variable rather than a secret. Empty leaves Google sign-in disabled.
+      GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
     steps:
       - uses: actions/checkout@v4
 
@@ -122,7 +125,7 @@ jobs:
             --platform managed \
             --port 8000 \
             --allow-unauthenticated \
-            --set-env-vars "^|^ENVIRONMENT=production|MONGODB_URI=${MONGODB_URI}|MONGODB_DB=koda_v4|JWT_SECRET=${JWT_SECRET}|TUTOR_SERVICE_TOKEN=${TUTOR_SERVICE_TOKEN}|APP_BASE_URL=https://learn-with-koda.web.app"
+            --set-env-vars "^|^ENVIRONMENT=production|MONGODB_URI=${MONGODB_URI}|MONGODB_DB=koda_v4|JWT_SECRET=${JWT_SECRET}|TUTOR_SERVICE_TOKEN=${TUTOR_SERVICE_TOKEN}|GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}|APP_BASE_URL=https://learn-with-koda.web.app"
 
       - name: Verify API health
         run: |
@@ -136,6 +139,7 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     env:
       TUTOR_SERVICE_TOKEN: ${{ secrets.TUTOR_SERVICE_TOKEN }}
+      GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
     steps:
       - uses: actions/checkout@v4
 
@@ -157,7 +161,9 @@ jobs:
         env:
           IMAGE: ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY }}/koda-app:${{ github.sha }}
         run: |
-          docker build --platform linux/amd64 --target prod -t "$IMAGE" .
+          docker build --platform linux/amd64 --target prod \
+            --build-arg VITE_GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" \
+            -t "$IMAGE" .
           docker push "$IMAGE"
 
       - name: Resolve API service URL

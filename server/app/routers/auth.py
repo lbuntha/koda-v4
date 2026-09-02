@@ -8,6 +8,7 @@ from datetime import timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request, status
+from fastapi.concurrency import run_in_threadpool
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.deps import AUTHENTICATED, CurrentPrincipal, Db, require
@@ -16,6 +17,7 @@ from app.models.auth import (
     AvatarIn,
     AvatarOut,
     ForgotIn,
+    GoogleAuthIn,
     JoinIn,
     LoginIn,
     MeOut,
@@ -44,7 +46,7 @@ from app.security.rate_limit import (
     SIGNUP_PER_IP,
     limiter,
 )
-from app.services import mail
+from app.services import google_identity, mail
 from app.services.codes import hash_code
 from app.settings import settings
 
@@ -116,6 +118,39 @@ async def _issue(db, family_id: str | None, role: str, *, user_id=None, learner_
         platformRole=platform_role,
         permissions=permissions,
     )
+
+
+async def _issue_for_user(db, user: dict, *, device_name: str, install_id: str | None) -> TokenPair:
+    """Turn an authenticated user into the same Koda session, however they signed in."""
+    rows = await memberships.for_user(db, user["_id"])
+    platform_role = user.get("platformRole", "none")
+
+    if rows:
+        membership = rows[0]
+        return await _issue(
+            db,
+            membership["familyId"],
+            membership["role"],
+            user_id=user["_id"],
+            device_name=device_name,
+            install_id=install_id,
+            platform_role=platform_role,
+            extra=membership.get("extraPermissions"),
+            denied=membership.get("deniedPermissions"),
+        )
+
+    if platform_role != "none":
+        return await _issue(
+            db,
+            None,
+            platform_role,
+            user_id=user["_id"],
+            device_name=device_name,
+            install_id=install_id,
+            platform_role=platform_role,
+        )
+
+    raise Unauthorized("That account is not part of a family yet.", "no_family")
 
 
 def _name_from_email(email: str) -> str:
@@ -231,7 +266,7 @@ async def login(body: LoginIn, db: Db, request: Request) -> TokenPair:
 
     user = await users.by_email(db, body.email)
     # Same message either way: which half was wrong is not the caller's business.
-    if not user or not passwords.verify_password(user["passwordHash"], body.password):
+    if not user or not user.get("passwordHash") or not passwords.verify_password(user["passwordHash"], body.password):
         raise Unauthorized("That email and password do not match.", "bad_credentials")
     if user.get("status", "active") == "suspended":
         raise Forbidden("This account is suspended. Contact an administrator.", "account_suspended")
@@ -241,29 +276,98 @@ async def login(body: LoginIn, db: Db, request: Request) -> TokenPair:
     await limiter.clear(db, "login:email", body.email.lower())
 
     await users.touch_login(db, user["_id"])
-    rows = await memberships.for_user(db, user["_id"])
-    platform_role = user.get("platformRole", "none")
+    return await _issue_for_user(
+        db, user, device_name=body.device_name, install_id=body.install_id
+    )
 
-    if rows:
-        # A member of a family: the membership row decides what they can do —
-        # the role, plus whatever was granted or taken away for this person.
-        membership = rows[0]
-        return await _issue(db, membership["familyId"], membership["role"],
-                            user_id=user["_id"], device_name=body.device_name,
-                            install_id=body.install_id,
-                            platform_role=platform_role,
-                            extra=membership.get("extraPermissions"),
-                            denied=membership.get("deniedPermissions"))
 
-    if platform_role != "none":
-        # Staff. No family, so the role *is* the platform role — they see across
-        # families through the admin routes rather than into one through the
-        # family routes.
-        return await _issue(db, None, platform_role, user_id=user["_id"],
-                            device_name=body.device_name, install_id=body.install_id,
-                            platform_role=platform_role)
+def _google_controls_email(claims: dict) -> bool:
+    """Whether Google remains authoritative for the address in this token."""
+    email = str(claims.get("email", "")).lower()
+    return email.endswith("@gmail.com") or bool(claims.get("hd"))
 
-    raise Unauthorized("That account is not part of a family yet.", "no_family")
+
+@router.post("/google")
+async def google_auth(body: GoogleAuthIn, db: Db, request: Request) -> TokenPair:
+    """Exchange a verified Google identity for Koda's normal token pair."""
+    cfg = settings()
+    if not cfg.google_client_id:
+        raise Forbidden("Google sign-in is not configured.", "google_not_configured")
+
+    # Token verification performs a public-key lookup and is synchronous, so it
+    # belongs off the event loop. Limit the caller first so it cannot be used as
+    # an unlimited verification proxy.
+    await limiter.hit(db, "google:ip", _caller(request), LOGIN_PER_IP)
+    try:
+        claims = await run_in_threadpool(
+            google_identity.verify, body.credential, cfg.google_client_id
+        )
+    except (ValueError, TypeError):
+        raise Unauthorized(
+            "Google sign-in could not be verified.", "google_token_invalid"
+        ) from None
+
+    subject = claims.get("sub")
+    email = str(claims.get("email", "")).strip().lower()
+    if not subject or not email or claims.get("email_verified") is not True:
+        raise Unauthorized(
+            "Google did not provide a verified email address.", "google_email_unverified"
+        )
+
+    await limiter.hit(db, "google:account", str(subject), LOGIN_PER_ACCOUNT)
+    user = await users.by_google_sub(db, str(subject))
+
+    if not user:
+        user = await users.by_email(db, email)
+        if user:
+            # Gmail and Workspace addresses remain controlled by Google. For a
+            # third-party address Google only knows it was verified sometime in
+            # the past, so silently linking it could join the wrong account.
+            if not _google_controls_email(claims):
+                raise Conflict(
+                    "That email already has a Koda account. Sign in with its password instead.",
+                    "google_link_required",
+                )
+            linked = await users.link_google(db, user["_id"], str(subject))
+            if not linked:
+                raise Conflict(
+                    "That Koda account is already connected to another Google account.",
+                    "google_identity_conflict",
+                )
+        else:
+            if not body.create_account:
+                raise NotFound(
+                    "No Koda account uses this Google account. Choose Create account first.",
+                    "google_account_missing",
+                )
+            if not await system_repo.value_of(db, "account.signupOpen", True):
+                raise Forbidden(
+                    "This deployment is not accepting new accounts.", "signup_closed"
+                )
+
+            display_name = str(claims.get("name", "")).strip()[:80] or None
+            user = await users.create(
+                db,
+                email,
+                None,
+                display_name=display_name,
+                google_sub=str(subject),
+            )
+            family = await families.create(
+                db, body.family_name or "My family", owner_id=user["_id"]
+            )
+            await memberships.add(db, user["_id"], family["_id"], role="owner")
+
+    if user.get("status", "active") == "suspended":
+        raise Forbidden(
+            "This account is suspended. Contact an administrator.", "account_suspended"
+        )
+
+    await limiter.clear(db, "google:account", str(subject))
+    await users.touch_login(db, user["_id"])
+    return await _issue_for_user(
+        db, user, device_name=body.device_name, install_id=body.install_id
+    )
 
 
 #: How long a reset link works. Long enough to walk to another device and read
@@ -483,6 +587,11 @@ async def change_my_password(
     # and a borrowed unlocked laptop should not be an unlimited guessing seat.
     await limiter.hit(db, "password:user", p.subject_id, LOGIN_PER_ACCOUNT)
 
+    if not user.get("passwordHash"):
+        raise Forbidden(
+            "This account signs in with Google and does not have a password.",
+            "no_password_account",
+        )
     if not passwords.verify_password(user["passwordHash"], body.current_password):
         raise Unauthorized("That is not your current password.", "bad_credentials")
 

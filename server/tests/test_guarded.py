@@ -15,6 +15,7 @@ PUBLIC = {
     ("GET", "/v1/health"),  # liveness — must work before anyone has signed in
     ("POST", "/v1/auth/signup"),  # there is no token before an account exists
     ("POST", "/v1/auth/login"),  # ditto
+    ("POST", "/v1/auth/google"),  # carries a Google-signed credential
     ("POST", "/v1/auth/join"),  # a child has no token before pairing
     ("POST", "/v1/auth/refresh"),  # carries its own credential in the body
     ("POST", "/v1/auth/token"),  # form-encoded sign-in, for the Swagger Authorize box

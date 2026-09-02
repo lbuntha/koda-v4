@@ -128,12 +128,13 @@ Family ──┬── Parent (email + password)          can see every learner
          └── Learner "Sam"
 ```
 
-**Four flows, four endpoints:**
+**Account flows:**
 
 | Flow | Call | Result |
 |---|---|---|
 | Parent signs up | `POST /v1/auth/signup {email, password}` | Family + parent created, tokens returned |
 | Parent signs in | `POST /v1/auth/login` | Family-scoped tokens on this device |
+| Parent uses Google | `POST /v1/auth/google {credential, createAccount}` | Google identity is verified, then the same family-scoped Koda tokens are returned |
 | Parent adds a child | `POST /v1/learners {displayName, birthYear?}` | Learner id; the local `learnerId` is claimed into it on first sync |
 | Child signs in elsewhere | parent: `POST /v1/learners/{id}/join-code` → child: `POST /v1/auth/join {code, deviceName}` | Learner-scoped tokens on the kid's device |
 | Staff sign in | `POST /v1/auth/login` | A family-less token whose `role` is the platform role; family routes refuse it |
@@ -807,7 +808,7 @@ becomes a switch statement that every new setting has to remember to update.
 | Runtime | Python 3.12, FastAPI, uvicorn | Async all the way to the driver |
 | Driver | Motor | The async Mongo driver; no ORM — the documents are the model |
 | Validation | pydantic v2 | Already the FastAPI idiom, and it is the wire contract |
-| Auth | pyjwt · argon2-cffi · pyotp | Access JWT, Argon2id passwords, TOTP for staff |
+| Auth | pyjwt · argon2-cffi · google-auth · pyotp | Access JWT, Argon2id passwords, verified Google ID tokens, TOTP for staff |
 | Lint/format | ruff | One tool, configured in `pyproject.toml` |
 | Tests | pytest · pytest-asyncio · httpx ASGI transport | Real routes, real Mongo, throwaway database per run |
 | Migrations | `app/indexes.py` + `cli migrate` | Mongo needs index management, not schema migration |

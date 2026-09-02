@@ -26,6 +26,8 @@ CMD ["npm", "run", "dev"]
 # ---------- build ----------
 FROM deps AS build
 COPY . .
+ARG VITE_GOOGLE_CLIENT_ID
+ENV VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
 RUN npm run build
 
 # ---------- production ----------

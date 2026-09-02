@@ -16,6 +16,14 @@ INDEXES: dict[str, list[IndexModel]] = {
         # should not carry a row for every account.
         IndexModel([("resetTokenHash", ASCENDING)], name="by_reset_token", sparse=True),
         IndexModel([("email", ASCENDING)], unique=True, name="email_unique"),
+        # Google's `sub`, not an email address, is the durable provider identity.
+        # Partial so password-only users carrying null do not collide.
+        IndexModel(
+            [("googleSub", ASCENDING)],
+            unique=True,
+            name="google_sub_unique",
+            partialFilterExpression={"googleSub": {"$type": "string"}},
+        ),
     ],
     "platform_roles": [
         IndexModel([("roleId", ASCENDING)], unique=True, name="platform_role_unique"),
