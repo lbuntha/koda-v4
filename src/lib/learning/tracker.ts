@@ -10,8 +10,8 @@ import {
 import {
   APP_VERSION,
   LearningLog,
+  activeLearnerId,
   currentSessionId,
-  learnerId,
   localDayOf,
   newEventId,
   newId,
@@ -153,7 +153,9 @@ export class LessonTracker {
       id: newEventId(),
       ts: now.toISOString(),
       sessionId: currentSessionId,
-      learnerId,
+      // Read per event, not captured once: a family can switch child mid-round
+      // from the account menu, and the answers after that are the new child's.
+      learnerId: activeLearnerId(),
       seq: nextSeq(),
       appVersion: APP_VERSION,
       tzOffsetMinutes: -now.getTimezoneOffset(),

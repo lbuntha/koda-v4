@@ -47,6 +47,7 @@ import {
   type UITabItem,
 } from "../ui";
 import { LearningLogPanel } from "./LearningLogPanel";
+import { PracticeLogPanel } from "./PracticeLogPanel";
 import { playSound } from "../../utils/audio";
 import { SkillHost } from "../../skills/host/SkillHost";
 import {
@@ -1177,6 +1178,7 @@ const LessonPreview: React.FC<{ lesson: Lesson; onClose: () => void }> = ({ less
             conceptKey: lesson.conceptKey ?? "",
             title: lesson.title,
             concept: lesson.concept,
+            practice: isPracticeLesson(lesson),
           }}
           onExit={onClose}
           // Swallowed on purpose — a preview must not touch the learner's record.
@@ -1211,7 +1213,7 @@ export const SkillManagerPage: React.FC = () => {
   const viewer = useViewer();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [preview, setPreview] = useState<Lesson | null>(null);
-  const [tab, setTab] = useState<"skills" | "log">("skills");
+  const [tab, setTab] = useState<"skills" | "log" | "practice">("skills");
 
   const storedById = useMemo(() => new Map(stored.map((p) => [p.id, p])), [stored]);
 
@@ -1258,6 +1260,11 @@ export const SkillManagerPage: React.FC = () => {
         items={[
           { id: "skills", label: "Skills", count: SKILLS.length },
           { id: "log", label: "Learning log" },
+          // Its own tab rather than a section of the learning log: that log
+          // answers "is this understood?", and this one answers "how fluent is
+          // it?". Reading a speed table as a mastery table is the misreading
+          // worth designing against, so they do not share a screen.
+          { id: "practice", label: "Practice log" },
         ]}
         value={tab}
         onChange={setTab}
@@ -1266,6 +1273,8 @@ export const SkillManagerPage: React.FC = () => {
 
       {tab === "log" ? (
         <LearningLogPanel />
+      ) : tab === "practice" ? (
+        <PracticeLogPanel />
       ) : (
         <>
           <UIStatGrid>

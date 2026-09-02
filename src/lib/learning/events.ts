@@ -96,6 +96,21 @@ export interface LearningContext {
   standards?: string[];
   /** Intended age range, so advice can tell "too hard" from "too young". */
   ageBand?: [number, number];
+  /**
+   * Whether this was practice rather than teaching.
+   *
+   * Carried on every event because the two are different measurements and
+   * averaging them together answers neither question. A teaching round is a
+   * child being walked through a technique with hints, a voice and an
+   * explanation; a practice round is the same child retrieving it unaided and
+   * against the clock. Only the second is evidence of speed, so "how fast is
+   * this learner?" is only answerable if the log says which rounds were which.
+   *
+   * Optional because events written before this existed have no answer, and
+   * inventing one for them would put guessed rows in a table a grown-up is
+   * meant to be able to verify.
+   */
+  practice?: boolean;
 }
 
 export interface LearningEventBase extends LearningContext {

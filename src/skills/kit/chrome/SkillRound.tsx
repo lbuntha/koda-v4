@@ -7,6 +7,7 @@ import { PracticeStepHeader, type StepTagLabels } from "./PracticeStepHeader";
 import { SkillHint } from "./SkillHint";
 import { PracticeRoundCompleteModal } from "./RoundCompleteModal";
 import { SkillRoundTopBar, type SkillVoiceContext } from "./SkillRoundTopBar";
+import { withoutPracticeLabel } from "../practice";
 import type { RoundController } from "../round/useSkillRound";
 
 /**
@@ -100,7 +101,19 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
   onNextLevel,
   onPracticeAgain,
 }) => {
-  const title = lesson?.title ?? fallbackTitle;
+  /*
+   * What the bar calls this lesson.
+   *
+   * A practice lesson is titled "Practice: Number Bonds" and its concept line
+   * reads "Practice Without Help", which is right in a list of sixty lessons
+   * and wrong here: this screen *is* the practice, so the word was printed
+   * twice above a question about number bonds and told the child nothing either
+   * time. The technique is what they came for, so the technique is what stays.
+   */
+  const named = lesson?.title ?? fallbackTitle;
+  const title = lesson?.practice ? withoutPracticeLabel(named) : named;
+  const subtitle =
+    lesson?.concept && lesson.practice ? withoutPracticeLabel(lesson.concept) : lesson?.concept;
   const levelNumber = lesson?.levelNumber ?? 1;
 
   /*
@@ -212,7 +225,7 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
       <SkillRoundTopBar
         koda={koda}
         title={title}
-        subtitle={lesson?.concept}
+        subtitle={subtitle}
         levelNumber={lesson?.levelNumber}
         iconName={iconName}
         iconTone={iconTone}

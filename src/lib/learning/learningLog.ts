@@ -279,8 +279,9 @@ export const currentSessionId: SessionId = `s_${Date.now().toString(36)}_${Math.
  * A stable, random per-device id.
  *
  * Deliberately not derived from anything about the child — it identifies a
- * record, not a person, and carries no meaning outside this app. When real
- * accounts arrive, the account id replaces this and the schema does not change.
+ * record, not a person, and carries no meaning outside this app. It is the
+ * fallback now rather than the answer: a signed-in child has a real learner id,
+ * and `activeLearnerId` prefers it.
  */
 export const learnerId: string = (() => {
   try {
@@ -293,6 +294,46 @@ export const learnerId: string = (() => {
     return "l_anonymous";
   }
 })();
+
+/**
+ * Whose events these are, when the app knows.
+ *
+ * The device id above cannot answer "who". On a shared family tablet every
+ * child's practice lands under the one id, so a screen asking which of them is
+ * quickest has nothing to group by — and the moment those rows reach a server
+ * they merge two children into one learner. A signed-in child has an id the
+ * family already agreed on, so when there is one, it is the answer.
+ *
+ * Names are kept beside it so a record can still be read back after that child
+ * signs out: the log is a list of ids, and a table of ids is not something a
+ * grown-up can verify anything from. Only what the family typed themselves, and
+ * only on this device — it is never sent anywhere, because the server knows its
+ * own learners by name already.
+ */
+const NAMES_KEY = "koda_learner_names_v1";
+
+let activeLearner: string | null = null;
+let learnerNames: Record<string, string> = readJson<Record<string, string>>(NAMES_KEY, {});
+
+export const setActiveLearner = (learner: { id: string; name?: string } | null): void => {
+  activeLearner = learner?.id ?? null;
+  if (learner?.id && learner.name && learnerNames[learner.id] !== learner.name) {
+    learnerNames = { ...learnerNames, [learner.id]: learner.name };
+    writeJson(NAMES_KEY, learnerNames);
+  }
+};
+
+/** The id every event written from now on is stamped with. */
+export const activeLearnerId = (): string => activeLearner ?? learnerId;
+
+/**
+ * A learner's name, if this device has ever been told it.
+ *
+ * Undefined is a normal answer — a device that was played on before anybody
+ * signed in has records belonging to "whoever was holding it", and saying so
+ * is better than inventing a name for them.
+ */
+export const learnerNameOf = (id: string): string | undefined => learnerNames[id];
 
 /** Monotonic within this session. Timestamps collide; this never does. */
 let seqCounter = 0;

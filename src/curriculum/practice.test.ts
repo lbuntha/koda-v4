@@ -75,6 +75,9 @@ describe("naming a practice lesson where the surface already says practice", () 
     expect(practiceTitle("Practice: Number Bonds")).toBe("Number Bonds");
     expect(practiceTitle("Practice — Counting and Frames")).toBe("Counting and Frames");
     expect(practiceTitle("Practice - Facts")).toBe("Facts");
+    // No separator either: the concept line of every practice lesson reads
+    // "Practice Without Help", and the round chrome strips it the same way.
+    expect(practiceTitle("Practice Without Help")).toBe("Without Help");
   });
 
   it("leaves a title that is not prefixed alone", () => {

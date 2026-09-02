@@ -2,6 +2,7 @@ import { getSkill, visibleTo } from "../skills/registry";
 import { getViewer } from "../skills/viewer";
 import type { Viewer } from "../skills/viewer";
 import type { Lesson } from "../skills/types";
+import { withoutPracticeLabel } from "../skills/kit/practice";
 import courseJson from "./course.json";
 import { withLessonEdits } from "../lib/lessonContent";
 import { ChildSettingsAPI } from "../lib/childSettings";
@@ -124,9 +125,12 @@ export const isPracticeLesson = (lesson: Lesson): boolean =>
  * teaches number bonds. Under a heading that says Practice, or on a card whose
  * whole design says it, the word is there twice — and it is the half that
  * carries no information, so it is the half that goes.
+ *
+ * The rule itself lives in `skills/kit/practice.ts`, because the round chrome
+ * strips the same word from the same titles and a second copy of the regex is
+ * how the path and the round come to disagree about what a lesson is called.
  */
-export const practiceTitle = (title: string): string =>
-  title.replace(/^practice\s*[:.\-\u2013\u2014]\s*/i, "");
+export const practiceTitle = withoutPracticeLabel;
 
 /** Every lesson one skill contributes, in course order. */
 export function getSkillLessons(skillId: string, viewer?: Viewer): ResolvedLesson[] {

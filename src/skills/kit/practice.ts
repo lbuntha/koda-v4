@@ -58,3 +58,23 @@ export const quietWhenPractising = (
   say: (text: string) => void,
   practising: boolean,
 ): ((text: string) => void) => (practising ? () => {} : say);
+
+/**
+ * The same name with the word "Practice" taken off the front.
+ *
+ * Practice lessons are titled "Practice: Number Bonds" and their concept line
+ * reads "Practice Without Help", because in a flat list of sixty lessons that
+ * word is the only thing telling them apart from the lesson that *teaches*
+ * number bonds. Inside a round it is neither: the screen is already practice,
+ * so the bar was saying it twice — once in the title and once underneath — and
+ * both times about the half that carries no information.
+ *
+ * The separator is optional so both forms are covered, but a word boundary is
+ * required: "Practising Bonds" is a title, not a prefix, and must survive
+ * whole. A name that is *only* the word is returned untouched rather than
+ * blanked — an empty title is a worse bug than a repeated one.
+ */
+export const withoutPracticeLabel = (name: string): string => {
+  const stripped = name.replace(/^practice(?:\s*[:.\-–—]\s*|\s+)/i, "").trim();
+  return stripped || name;
+};

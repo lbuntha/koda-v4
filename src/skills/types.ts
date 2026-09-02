@@ -214,6 +214,14 @@ export interface ActivityLesson {
   levelNumber: number;
   /** How many lessons the course has, so a position can be read as one. */
   totalLessons?: number;
+  /**
+   * Whether this lesson is practice rather than teaching.
+   *
+   * Decided by the course (`isPracticeLesson`) and passed down, not guessed
+   * from the title here: the same flag turns the scaffolding off, so the chrome
+   * and the activity cannot disagree about which kind of round this is.
+   */
+  practice?: boolean;
 }
 
 export interface ActivityProps<P = Record<string, unknown>> {

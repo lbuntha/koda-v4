@@ -38,6 +38,14 @@ export interface SkillHostProps {
     concept?: string;
     /** How many lessons the course has. Shown as "Lesson 3 of 15". */
     totalLessons?: number;
+    /**
+     * Practice rather than teaching, as the course decides it.
+     *
+     * Reaches two places from here: the chrome, which stops saying "practice"
+     * on a screen that already is it, and every learning event, which is what
+     * lets speed be read off practice alone.
+     */
+    practice?: boolean;
   };
   /** How the learner got here. `"preview"` also disables telemetry. */
   entry?: LessonEntry;
@@ -118,6 +126,7 @@ export const SkillHost: React.FC<SkillHostProps> = ({
             levelNumber: level,
             standards: lesson.standards,
             ageBand: lesson.ageBand,
+            practice: lesson.practice,
           }
         : undefined;
 
@@ -133,7 +142,7 @@ export const SkillHost: React.FC<SkillHostProps> = ({
     // read through `hostRef`, so this must rebind only when the activity or the
     // lesson it is running actually changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activityRef, theme, entry, level, lesson?.lessonId, lesson?.conceptKey]);
+  }, [activityRef, theme, entry, level, lesson?.lessonId, lesson?.conceptKey, lesson?.practice]);
 
   if (!activity) {
     // Visible rather than silent: a bad reference is a config bug worth seeing.
@@ -182,6 +191,7 @@ export const SkillHost: React.FC<SkillHostProps> = ({
             concept: lesson.concept,
             levelNumber: level,
             totalLessons: lesson.totalLessons,
+            practice: lesson.practice,
           }
         }
       />

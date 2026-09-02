@@ -59,7 +59,12 @@ import { SidebarNav } from "./components/SidebarNav";
 import { MainLayout } from "./components/layout/MainLayout";
 import { UIPageLoader } from "./components/ui";
 import { SkillHost } from "./skills/host/SkillHost";
-import { getCourseLessons, getLessonByLevel, totalLessonCount } from "./curriculum";
+import {
+  getCourseLessons,
+  getLessonByLevel,
+  isPracticeLesson,
+  totalLessonCount,
+} from "./curriculum";
 import { useAudienceViewer } from "./skills/viewer";
 import { SignInScreen } from "./components/account/SignInScreen";
 import { ResetPasswordScreen, resetTokenFromUrl } from "./components/account/ResetPasswordScreen";
@@ -654,6 +659,10 @@ export default function App() {
               title: activeLesson.title,
               concept: activeLesson.concept,
               totalLessons: totalLessonCount(viewer),
+              // Which kind of round this is, decided once by the course: the
+              // chrome reads it to stop repeating the word, and every event
+              // carries it so speed can be read off practice alone.
+              practice: isPracticeLesson(activeLesson),
             }
           : undefined
       }

@@ -1,4 +1,5 @@
-import { LearningLog, setLearningSink } from "../learning/learningLog";
+import { LearningLog, setActiveLearner, setLearningSink } from "../learning/learningLog";
+import { SessionAPI } from "./session";
 import { ArtStore } from "./artStore";
 import { SyncEngine } from "./engine";
 import { refreshPermissions } from "./permissions";
@@ -45,5 +46,27 @@ export function installLearningSink(): () => void {
   // Read the family's artwork into memory before anything draws with it.
   void ArtStore.load();
   void refreshPermissions();
-  return SyncEngine.start();
+
+  /*
+   * Whose practice this is.
+   *
+   * The log stamps every event with a learner id, and without this that id is
+   * the device's — so on a tablet two children share, both of their records are
+   * one record, and nothing downstream can tell them apart again. Following the
+   * session is what makes "who is quickest?" a question with an answer.
+   */
+  const followSession = () => {
+    const session = SessionAPI.current();
+    setActiveLearner(
+      session?.learnerId ? { id: session.learnerId, name: session.learnerName } : null,
+    );
+  };
+  followSession();
+  const unfollow = SessionAPI.subscribe(followSession);
+
+  const stopSync = SyncEngine.start();
+  return () => {
+    unfollow();
+    stopSync();
+  };
 }
