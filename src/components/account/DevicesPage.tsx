@@ -291,7 +291,19 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({ embedded = false }) =>
                           {device.learnerName ? `${device.learnerName}'s device` : device.name}
                         </p>
                         <p className="text-xs text-muted">
-                          {device.kind === "child" ? "Child tablet" : "Grown-up sign-in"} · last
+                          {device.kind === "child" ? "Child tablet" : "Grown-up sign-in"}
+                          {/*
+                           * Which machine a child's session is on.
+                           *
+                           * The title above says who a row is *for*, which is
+                           * what a parent scans by — but a child who plays on
+                           * the tablet and on a parent's laptop then has two
+                           * rows reading "Thana's device", and the list cannot
+                           * be used for the thing it exists for: picking out
+                           * the one to sign out. The machine name is already on
+                           * the row; it was only being thrown away.
+                           */}
+                          {device.learnerName && device.name ? ` on ${device.name}` : ""} · last
                           used {whenSeen(device.lastSeenAt)}
                         </p>
                       </div>
@@ -370,7 +382,11 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({ embedded = false }) =>
         description={
           signingOut?.current
             ? "You are using this one. You will be returned to the sign-in screen."
-            : `${signingOut?.learnerName ?? signingOut?.name} will be signed out straight away, and will need to sign in again.`
+            : `${
+                signingOut?.learnerName
+                  ? `${signingOut.learnerName}'s session on ${signingOut.name}`
+                  : signingOut?.name
+              } will be signed out straight away, and will need to sign in again.`
         }
         confirmText="Sign out"
         variant="danger"
