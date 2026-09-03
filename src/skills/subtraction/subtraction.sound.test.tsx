@@ -66,32 +66,47 @@ describe("the subtraction sound map", () => {
   });
 });
 
-describe("an answer is sounded once, by the shared reaction", () => {
+describe("an answer is always heard", () => {
   /*
-   * Addition submits and lets `useSkillRound` play the spoken reaction.
-   * Subtraction used to do that *and* chime, so every answer sounded twice —
-   * and a wrong one got an error buzz that Addition never gives.
+   * Two channels, not one doubled. The chime rides `sound_chimes`; the spoken
+   * reaction rides `audio_speech` and only fires for phrases that have been
+   * recorded. Drop the chime — as this once did, on a misreading of Addition —
+   * and a child with the voice off, or a skill whose clips are not cut yet,
+   * gets nothing back for an answer at all.
    */
-  it("adds no chime of its own on top of the reaction", async () => {
+  const answer = async (given: string) => {
     const h = renderActivity(skill.activities.bonds, {
       params: { mode: "part_unknown", minuendRange: [8, 8], subtrahendRange: [3, 3] }, level: 13,
     });
-    await h.press("5");
-    const before = h.koda.count("sound.play");
+    await h.press(given);
     await h.press("Check");
-    expect(h.koda.count("learning.answered")).toBe(1);
-    expect(h.koda.count("sound.play") - before, "the answer chimed as well as spoke").toBe(0);
+    const tones = played(h);
     h.unmount();
+    return tones;
+  };
+
+  it("chimes a right answer", async () => {
+    expect(await answer("5")).toContain(SUBTRACTION_SOUND.right);
   });
 
-  it("never buzzes a wrong answer", async () => {
-    const h = renderActivity(skill.activities.bonds, {
-      params: { mode: "part_unknown", minuendRange: [8, 8], subtrahendRange: [3, 3] }, level: 13,
+  it("chimes a wrong one too, rather than leaving it silent", async () => {
+    expect(await answer("4")).toContain(SUBTRACTION_SOUND.wrong);
+  });
+
+  it("judges an answer with the same pair the other skills use", () => {
+    // Read from Counting and Addition rather than restated here, so this fails
+    // if the house convention moves rather than quietly describing an old one.
+    const elsewhere = ["addition", "counting"].flatMap((id) => {
+      const dir = join(HERE, "..", id, "activities");
+      return readdirSync(dir).flatMap((file) =>
+        [...readFileSync(join(dir, file), "utf8")
+          .matchAll(/(?:playChrome\(koda,|chime\(|sound\.play\()\s*correct \? "([a-z]+)" : "([a-z]+)"/g)]);
     });
-    await h.press("4");
-    await h.press("Check");
-    expect(played(h)).not.toContain("error");
-    h.unmount();
+    expect(elsewhere.length, "no answer chime found in addition or counting").toBeGreaterThan(0);
+    for (const [, right, wrong] of elsewhere) {
+      expect(right).toBe(SUBTRACTION_SOUND.right);
+      expect(wrong).toBe(SUBTRACTION_SOUND.wrong);
+    }
   });
 });
 

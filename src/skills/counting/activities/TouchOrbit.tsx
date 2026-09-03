@@ -14,6 +14,7 @@ import {
   type RoundQuestion,
   isPractice,
   modeAt,
+  playChrome,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { PREDEFINED_ASSETS, type PredefinedAsset } from "../internal/data/countingAssets";
@@ -510,9 +511,6 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
     setLastTap(null);
   }, [question.id, finishing]);
 
-  const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
-    if (koda.config.isEnabled("sound_chimes", true)) koda.sound.play(type);
-  };
 
   /**
    * Say the running count aloud — the number word is the point of the tap.
@@ -532,7 +530,7 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
     const next = [...tapped, index];
     setTapped(next);
     koda.haptics.tap();
-    chime(question.mode === "scatter" ? "clink" : "pop");
+    playChrome(koda, question.mode === "scatter" ? "clink" : "pop");
     const spoken = countAloud(next.length);
     /*
      * The number the child just reached, tied to the object they just touched.
@@ -545,7 +543,7 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
     setLastTap({ index, n: next.length, key: tapSeq.current++ });
 
     if (next.length === question.count) {
-      chime("success");
+      playChrome(koda, "success");
       koda.haptics.success();
       /*
        * Let the last number land before the round reacts.
@@ -581,14 +579,14 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
     const on = list.includes(index);
     const next = on ? list.filter((i) => i !== index) : [...list, index];
     set(next);
-    chime("pop");
+    playChrome(koda, "pop");
     if (!on) void countAloud(next.length);
   };
 
   const answerCompare = (choice: "A" | "B" | "SAME") => {
     const c = question.compare!;
     const correct = choice === c.answer;
-    chime(correct ? "success" : "error");
+    playChrome(koda, correct ? "success" : "error");
     correct ? koda.haptics.success() : koda.haptics.tap();
 
     // Said the way the screen says it — the buttons are left and right, so the

@@ -184,6 +184,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({ para
 
   const answerEstimate = (value: number) => {
     const correct = value === q.estimate;
+    chime(koda, correct ? "right" : "wrong");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     round.submit({
       correct, given: String(value), expected: q.expected,
@@ -198,6 +199,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({ para
     if (!reason) { nudge.refuse("Choose the reason that explains it."); return; }
     const given = `${verdict},${reason}`;
     const correct = given === q.expected;
+    chime(koda, correct ? "right" : "wrong");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     round.submit({
       correct, given, expected: q.expected,

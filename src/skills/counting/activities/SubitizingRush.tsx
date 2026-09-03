@@ -10,6 +10,7 @@ import {
   type RoundQuestion,
   isPractice,
   modeAt,
+  playChrome,
 } from "../../kit";
 import { SCENE } from "../internal/data/countingLayout";
 import { themeSystem } from "../../../lib/themeSystem";
@@ -249,7 +250,7 @@ export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
     round.submit(practising ? { ...outcome, message: undefined } : outcome);
 
   const flash = useCallback(() => {
-    if (koda.config.isEnabled("sound_chimes", true)) koda.sound.play("pop");
+    playChrome(koda, "pop");
     setPhase("flashing");
     if (timer.current) window.clearTimeout(timer.current);
     timer.current = window.setTimeout(() => setPhase("answering"), flashMs);
@@ -265,7 +266,7 @@ export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
 
   const guess = (choice: number) => {
     const correct = choice === question.total;
-    if (koda.config.isEnabled("sound_chimes", true)) koda.sound.play(correct ? "success" : "error");
+    playChrome(koda, correct ? "success" : "error");
     correct ? koda.haptics.success() : koda.haptics.tap();
 
     submit({

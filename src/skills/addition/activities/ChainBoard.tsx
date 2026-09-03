@@ -9,6 +9,7 @@ import {
   stagger,
   useSkillRound,
   type RoundQuestion,
+  playChrome,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, CHANGE, TOTAL } from "../internal/data/additionPalette";
@@ -325,13 +326,9 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
 
   // Practice says nothing at all, on top of the family's own voice switch.
   const speaks = !practising && koda.config.isEnabled("audio_speech", true);
-  const chimes = koda.config.isEnabled("sound_chimes", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
   const showsTotal = koda.config.isEnabled("running_total_badge", true);
 
-  const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
-    if (chimes) koda.sound.play(type);
-  };
 
   /**
    * Tap one chip, then another, and the two become one.
@@ -343,7 +340,7 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
     if (round.feedback) return;
     if (held === null) {
       setHeld(chip.id);
-      chime("clink");
+      playChrome(koda, "clink");
       return;
     }
     if (held === chip.id) {
@@ -359,7 +356,7 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
     ]);
     setHeld(null);
     koda.haptics.tap();
-    chime(question.target && merged === question.target ? "success" : "pop");
+    playChrome(koda, question.target && merged === question.target ? "success" : "pop");
     // The merged chip says what it became — the ten is the reason the pair was
     // worth finding, so it should be heard as well as seen.
     if (speaks) void koda.speech.say(numberWord(merged), speechRate(koda));
@@ -367,7 +364,7 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
 
   const submitTotal = (given: number) => {
     const correct = given === question.sum;
-    chime(correct ? "success" : "error");
+    playChrome(koda, correct ? "success" : "error");
     correct ? koda.haptics.success() : koda.haptics.tap();
     submit({
       correct,
@@ -401,7 +398,7 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
       .slice(1)
       .map((_, i) => question.values.slice(0, i + 2).reduce((t, n) => t + n, 0));
     const correct = entries.join(",") === wanted.map(String).join(",");
-    chime(correct ? "success" : "error");
+    playChrome(koda, correct ? "success" : "error");
     correct ? koda.haptics.success() : koda.haptics.tap();
     const firstWrong = entries.findIndex((e, i) => e !== String(wanted[i]));
     submit({

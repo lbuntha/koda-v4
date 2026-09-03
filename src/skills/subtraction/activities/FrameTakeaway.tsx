@@ -182,6 +182,7 @@ export const FrameTakeaway: React.FC<ActivityProps<FrameTakeawayParams>> = ({ pa
     // The frame answers back: recall reveals the partner the child just named.
     if (recall) setRemoved(Array.from({ length: q.subtrahend }, (_, i) => i));
     const correct = value === q.difference;
+    chime(koda, correct ? "right" : "wrong");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     round.submit({ correct, given: String(value), expected: q.expected, errorKind: correct ? undefined : "miscounted_items",
       title: correct ? "You read the frame!" : "Look at the filled counters",

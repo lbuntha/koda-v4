@@ -9,6 +9,7 @@ import { COMPARISON, DIFFERENCE, REMOVED_PART, WHOLE } from "../internal/data/su
 import { DIGIT_CELL, SCENE } from "../internal/data/subtractionLayout";
 import { speechRate, tagLabelsFrom } from "../internal/data/subtractionChrome";
 import { useNudge } from "../internal/ui/useNudge";
+import { chime } from "../internal/data/subtractionSound";
 import {
   differenceKey, digitsOf, drawDifference, withoutRepeat,
   type Difference, type DifferenceSpec, type Place,
@@ -254,6 +255,7 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({ 
     }
     const given = q.slots.map((slot) => entries[slot.key]).join(",");
     const correct = given === q.expected;
+    chime(koda, correct ? "right" : "wrong");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     // A column filled with the right digit in the wrong place is a place-value
     // slip, not a random miss, and the analyzer should be able to tell them apart.

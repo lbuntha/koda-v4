@@ -8,6 +8,7 @@ import {
   playCopy,
   useSkillRound,
   type RoundQuestion,
+  playChrome,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B, CHANGE, TOTAL } from "../internal/data/additionPalette";
@@ -421,25 +422,21 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
 
   // Practice says nothing at all, on top of the family's own voice switch.
   const speaks = !practising && koda.config.isEnabled("audio_speech", true);
-  const chimes = koda.config.isEnabled("sound_chimes", true);
   const showsTotal = koda.config.isEnabled("running_total_badge", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
 
-  const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
-    if (chimes) koda.sound.play(type);
-  };
 
   const place = (p: Place) => {
     if (round.feedback) return;
     setBuilt((prev) => ({ ...prev, [p]: prev[p] + 1 }));
     koda.haptics.tap();
-    chime("clink");
+    playChrome(koda, "clink");
   };
 
   const takeBack = (p: Place) => {
     if (round.feedback) return;
     setBuilt((prev) => ({ ...prev, [p]: Math.max(0, prev[p] - 1) }));
-    chime("pop");
+    playChrome(koda, "pop");
   };
 
   const bundle = () => {
@@ -450,7 +447,7 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
         ? { ...prev, ones: prev.ones - 10, tens: prev.tens + 1 }
         : { ...prev, tens: prev.tens - 10, hundreds: prev.hundreds + 1 },
     );
-    chime("success");
+    playChrome(koda, "success");
     koda.haptics.success();
     if (speaks) {
       void koda.speech.say(
@@ -485,7 +482,7 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
     }
 
     const correct = have === question.sum;
-    chime(correct ? "success" : "error");
+    playChrome(koda, correct ? "success" : "error");
     correct ? koda.haptics.success() : koda.haptics.tap();
     submit({
       correct,

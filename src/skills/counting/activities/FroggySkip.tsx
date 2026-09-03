@@ -12,6 +12,7 @@ import {
   type RoundQuestion,
   isPractice,
   modeAt,
+  playChrome,
 } from "../../kit";
 import { SvgAsset } from "../../../assets/svg";
 import { SCENE } from "../internal/data/countingLayout";
@@ -365,9 +366,6 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
     setGuess(null);
   }, [question.id, finishing]);
 
-  const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
-    if (koda.config.isEnabled("sound_chimes", true)) koda.sound.play(type);
-  };
 
   /** Say the pad the frog just landed on, resolving once it has been said. */
   const sayPad = (value: number): Promise<void> => {
@@ -383,12 +381,12 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
 
     const next = hop + 1;
     setHop(next);
-    chime("clink");
+    playChrome(koda, "clink");
     koda.haptics.tap();
     const spoken = sayPad(pads[next]);
 
     if (next === pads.length - 1) {
-      chime("success");
+      playChrome(koda, "success");
       koda.haptics.success();
       // The number the child counted to comes first; the praise waits for it.
       finishing.after(spoken, () =>
@@ -406,7 +404,7 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
   const answerMissing = (choice: number) => {
     setGuess(choice);
     const correct = choice === question.answer;
-    chime(correct ? "success" : "error");
+    playChrome(koda, correct ? "success" : "error");
     correct ? koda.haptics.success() : koda.haptics.tap();
     submit({
       correct,

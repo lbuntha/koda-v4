@@ -10,6 +10,7 @@ import {
   useSkillRound,
   useSpokenFinish,
   type RoundQuestion,
+  playChrome,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { SvgAsset } from "../../../assets/svg";
@@ -651,13 +652,9 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
      a lie in the Skill Manager. */
   // Practice says nothing at all, on top of the family's own voice switch.
   const speaks = !practising && koda.config.isEnabled("audio_speech", true);
-  const chimes = koda.config.isEnabled("sound_chimes", true);
   const badges = koda.config.isEnabled("counting_badges", true);
   const showsTotal = koda.config.isEnabled("running_total_badge", true);
 
-  const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
-    if (chimes) koda.sound.play(type);
-  };
 
   const buzz = (kind: "tap" | "success") => {
     if (kind === "success") koda.haptics.success();
@@ -707,11 +704,11 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
     const next = [...counted, key];
     setCounted(next);
     buzz("tap");
-    chime("pop");
+    playChrome(koda, "pop");
     const spoken = countAloud(base + next.length);
 
     if (next.length === toTap) {
-      chime("success");
+      playChrome(koda, "success");
       buzz("success");
       const reached = base + next.length;
       finishing.after(spoken, () =>
@@ -738,7 +735,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
       return;
     }
     setStartSide(side);
-    chime("clink");
+    playChrome(koda, "clink");
     buzz("tap");
     void countAloud(value);
   };
@@ -746,7 +743,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
   const choose = (value: number) => {
     if (round.feedback) return;
     const correct = value === question.sum;
-    chime(correct ? "success" : "error");
+    playChrome(koda, correct ? "success" : "error");
     buzz(correct ? "success" : "tap");
     submit({
       correct,
@@ -770,7 +767,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
       return;
     }
     const correct = raised === question.sum;
-    chime(correct ? "success" : "error");
+    playChrome(koda, correct ? "success" : "error");
     buzz(correct ? "success" : "tap");
     submitTotal(
       raised,
@@ -783,7 +780,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
 
   const mergeGroups = () => {
     setMerged(true);
-    chime("clink");
+    playChrome(koda, "clink");
     buzz("tap");
     if (speaks) void koda.speech.say("Put them together!", speechRate(koda));
   };

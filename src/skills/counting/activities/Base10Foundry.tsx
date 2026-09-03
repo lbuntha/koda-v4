@@ -10,6 +10,7 @@ import {
   type RoundQuestion,
   isPractice,
   modeAt,
+  playChrome,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 
@@ -382,12 +383,9 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
     setBuilt({ hundreds: 0, tens: 0, ones: 0 });
   }, [question.id]);
 
-  const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
-    if (koda.config.isEnabled("sound_chimes", true)) koda.sound.play(type);
-  };
 
   const adjust = (key: Place["key"], delta: number, max: number) => {
-    chime("pop");
+    playChrome(koda, "pop");
     koda.haptics.tap();
     setBuilt((prev) => ({ ...prev, [key]: Math.max(0, Math.min(max, prev[key] + delta)) }));
   };
@@ -425,7 +423,7 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
     setGhost({ x: e.clientX, y: e.clientY });
     draggedRef.current = false;
     startedAt.current = { x: e.clientX, y: e.clientY };
-    chime("pop");
+    playChrome(koda, "pop");
     koda.haptics.tap();
   };
 
@@ -445,10 +443,10 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
     if (!result.accepted) {
       setRefused(target);
       window.setTimeout(() => setRefused(null), 600);
-      chime("error");
+      playChrome(koda, "error");
     } else if (result.change) {
       setBuilt(result.built);
-      chime(result.change === "added" ? "clink" : "pop");
+      playChrome(koda, result.change === "added" ? "clink" : "pop");
       koda.haptics.tap();
     }
 
@@ -461,7 +459,7 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
   const blocksIn = (key: PlaceKey) => Math.min(built[key], 12);
 
   const bundle = (from: "ones" | "tens") => {
-    chime("clink");
+    playChrome(koda, "clink");
     setBuilt((prev) =>
       from === "ones"
         ? { ...prev, ones: prev.ones - 10, tens: prev.tens + 1 }
@@ -474,7 +472,7 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
 
   const check = () => {
     const say = (correct: boolean, title: string, message: string, place = false) => {
-      chime(correct ? "success" : "error");
+      playChrome(koda, correct ? "success" : "error");
       correct ? koda.haptics.success() : koda.haptics.tap();
       submit({
         correct,

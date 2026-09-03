@@ -10,6 +10,7 @@ import { DIFFERENCE, REMOVED_PART, WHOLE } from "../internal/data/subtractionPal
 import { BOND_NODE, SCENE } from "../internal/data/subtractionLayout";
 import { speechRate, tagLabelsFrom } from "../internal/data/subtractionChrome";
 import { useNudge } from "../internal/ui/useNudge";
+import { chime } from "../internal/data/subtractionSound";
 import {
   differenceKey, drawDifference, withoutRepeat, type Difference, type DifferenceSpec,
 } from "../internal/data/subtractionNumbers";
@@ -146,6 +147,7 @@ export const BondHouse: React.FC<ActivityProps<BondHouseParams>> = ({ params, ko
   const submit = () => {
     if (selected === undefined) { nudge.refuse("Choose the number for the empty box before you check."); return; }
     const correct = selected === answer;
+    chime(koda, correct ? "right" : "wrong");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     round.submit({ correct, given: String(selected), expected: q.expected, errorKind: correct ? undefined : "off_by_more",
       title: correct ? "The bond is complete!" : "Check the whole and its parts",

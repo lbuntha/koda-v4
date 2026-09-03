@@ -10,6 +10,7 @@ import { COMPARISON, DIFFERENCE, REMOVED_PART, WHOLE } from "../internal/data/su
 import { SCENE, TOUCH_TARGET } from "../internal/data/subtractionLayout";
 import { speechRate, tagLabelsFrom } from "../internal/data/subtractionChrome";
 import { useNudge } from "../internal/ui/useNudge";
+import { chime } from "../internal/data/subtractionSound";
 import {
   cardFor, comparisonPair, strategiesFor, STRATEGY_CARDS,
   type StrategyCard, type StrategyId,
@@ -139,6 +140,7 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({ 
     if (round.feedback) return;
     const correct = q.fits.includes(id);
     setChosen(id);
+    chime(koda, correct ? "right" : "wrong");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     round.submit({
       correct, given: id, expected: q.expected, errorKind: correct ? undefined : "off_by_more",

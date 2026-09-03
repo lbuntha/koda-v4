@@ -28,6 +28,17 @@ export const SUBTRACTION_SOUND = {
   refused: "hint",
   /** A sub-goal inside the question is finished — a jump lands, a trade completes. */
   reached: "success",
+  /**
+   * An answer was judged.
+   *
+   * This rides `sound_chimes`; the spoken reaction `useSkillRound` plays rides
+   * `audio_speech` *and* only fires for phrases that have been recorded. They
+   * are two channels, not one doubled — drop the chime and a child with the
+   * voice off, or a skill whose clips are not cut yet, gets no answer feedback
+   * at all. Counting and Addition both chime here.
+   */
+  right: "success",
+  wrong: "error",
 } as const satisfies Record<string, SoundType>;
 
 export type SubtractionSound = keyof typeof SUBTRACTION_SOUND;
@@ -37,13 +48,8 @@ export type SubtractionSound = keyof typeof SUBTRACTION_SOUND;
  *
  * `levelup` is the round-complete fanfare and belongs to the shared chrome; an
  * activity firing it would congratulate a child mid-round.
- *
- * `success`/`error` on an *answer* belong to `useSkillRound`, which already
- * plays a spoken reaction through `playAnswerSound` on every submit. Addition
- * leaves it at that; Subtraction used to chime as well, so every answer sounded
- * twice and a wrong one was met with a buzz Addition never gives.
  */
-export const CHROME_ONLY: SoundType[] = ["levelup", "error"];
+export const CHROME_ONLY: SoundType[] = ["levelup"];
 
 /**
  * Play what just happened.

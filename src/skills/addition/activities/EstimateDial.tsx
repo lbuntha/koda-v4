@@ -8,6 +8,7 @@ import {
   playCopy,
   useSkillRound,
   type RoundQuestion,
+  playChrome,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B, CHANGE, TOTAL } from "../internal/data/additionPalette";
@@ -316,12 +317,8 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [question.id]);
 
-  const chimes = koda.config.isEnabled("sound_chimes", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
 
-  const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
-    if (chimes) koda.sound.play(type);
-  };
 
   const roundOne = (index: number, to: number) => {
     if (round.feedback) return;
@@ -334,7 +331,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
       return;
     }
     setRounded((prev) => prev.map((v, i) => (i === index ? to : v)));
-    chime("clink");
+    playChrome(koda, "clink");
     koda.haptics.tap();
   };
 
@@ -345,7 +342,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
       return;
     }
     const correct = String(value) === question.expected;
-    chime(correct ? "success" : "error");
+    playChrome(koda, correct ? "success" : "error");
     correct ? koda.haptics.success() : koda.haptics.tap();
     submit({
       correct,
@@ -362,7 +359,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
     if (round.feedback) return;
     const correct = verdict === question.verdict;
     const near = roundTo(question.a, question.unit) + roundTo(question.b, question.unit);
-    chime(correct ? "success" : "error");
+    playChrome(koda, correct ? "success" : "error");
     correct ? koda.haptics.success() : koda.haptics.tap();
     submit({
       correct,

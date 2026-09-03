@@ -236,6 +236,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
   };
   const submitNumber = (value: number) => {
     const correct = value === q.difference;
+    chime(koda, correct ? "right" : "wrong");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     round.submit({ correct, given: String(value), expected: q.expected, errorKind: correct ? undefined : Math.abs(value - q.difference) === 1 ? "off_by_one" : "off_by_more",
       title: correct ? "That fact works!" : "Check the relationship",
@@ -245,6 +246,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
     const values = q.members!.map((_, i) => members[i] ?? "");
     if (values.some((value) => value === "")) { nudge.refuse(`${values.filter((value) => value === "").length} facts are still empty.`); return; }
     const correct = values.join(",") === q.expected;
+    chime(koda, correct ? "right" : "wrong");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     round.submit({ correct, given: values.join(","), expected: q.expected, errorKind: correct ? undefined : "off_by_more",
       title: correct ? "The whole fact family!" : "Check all four facts", message: practising ? undefined : `All four facts use ${q.subtrahend}, ${q.difference}, and ${q.minuend}.` });

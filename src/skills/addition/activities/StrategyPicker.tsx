@@ -8,6 +8,7 @@ import {
   playCopy,
   useSkillRound,
   type RoundQuestion,
+  playChrome,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B, TOTAL } from "../internal/data/additionPalette";
@@ -271,18 +272,14 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [question.id]);
 
-  const chimes = koda.config.isEnabled("sound_chimes", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
 
-  const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
-    if (chimes) koda.sound.play(type);
-  };
 
   const chooseStrategy = (s: Strategy) => {
     if (round.feedback) return;
     const correct = question.fitting.includes(s.id);
     if (correct && memory.current) memory.current.chosen = s.id;
-    chime(correct ? "success" : "error");
+    playChrome(koda, correct ? "success" : "error");
     correct ? koda.haptics.success() : koda.haptics.tap();
 
     const others = question.fitting.filter((id) => id !== s.id).map(byId);
@@ -306,7 +303,7 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({
     const correct = id === question.shorter;
     const short = question.paths!.find((p) => p.id === question.shorter)!;
     const long = question.paths!.find((p) => p.id !== question.shorter)!;
-    chime(correct ? "success" : "error");
+    playChrome(koda, correct ? "success" : "error");
     correct ? koda.haptics.success() : koda.haptics.tap();
     submit({
       correct,

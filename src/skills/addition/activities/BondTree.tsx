@@ -8,6 +8,7 @@ import {
   playCopy,
   useSkillRound,
   type RoundQuestion,
+  playChrome,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B, CHANGE, TOTAL } from "../internal/data/additionPalette";
@@ -468,11 +469,7 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
   }, [question.id, question.blanks]);
 
 
-  const chimes = koda.config.isEnabled("sound_chimes", true);
 
-  const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
-    if (chimes) koda.sound.play(type);
-  };
 
 
   const typeDigit = (digit: string) => {
@@ -482,7 +479,7 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
       return { ...prev, [active]: next };
     });
     koda.haptics.tap();
-    chime("pop");
+    playChrome(koda, "pop");
   };
 
   const deleteDigit = () => {
@@ -506,7 +503,7 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
     // One submit, however many boxes. Reported as the joined string so the log
     // holds what the child actually built, not just whether it was right.
     const correct = given.join(",") === question.answers.join(",");
-    chime(correct ? "success" : "error");
+    playChrome(koda, correct ? "success" : "error");
     correct ? koda.haptics.success() : koda.haptics.tap();
 
     const swapped =
@@ -563,7 +560,7 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
               active={active}
               onSelect={(id) => {
                 setActive(id);
-                chime("clink");
+                playChrome(koda, "clink");
               }}
             />
           ))}

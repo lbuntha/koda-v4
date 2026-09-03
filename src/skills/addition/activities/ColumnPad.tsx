@@ -8,6 +8,7 @@ import {
   playCopy,
   useSkillRound,
   type RoundQuestion,
+  playChrome,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B, CHANGE } from "../internal/data/additionPalette";
@@ -288,12 +289,8 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [question.id]);
 
-  const chimes = koda.config.isEnabled("sound_chimes", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
 
-  const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
-    if (chimes) koda.sound.play(type);
-  };
 
   const check = () => {
     if (round.feedback) return;
@@ -324,7 +321,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({
     const carriesRight = question.carryInto.every((p) => carries[p] === "1");
     const correct = given === wanted && carriesRight;
 
-    chime(correct ? "success" : "error");
+    playChrome(koda, correct ? "success" : "error");
     correct ? koda.haptics.success() : koda.haptics.tap();
 
     // Right digits in the wrong columns is the mistake this layout exists to

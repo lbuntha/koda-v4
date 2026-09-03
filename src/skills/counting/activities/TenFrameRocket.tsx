@@ -11,6 +11,7 @@ import {
   type RoundQuestion,
   isPractice,
   modeAt,
+  playChrome,
 } from "../../kit";
 import { FRAME_CELL, SCENE } from "../internal/data/countingLayout";
 import { themeSystem } from "../../../lib/themeSystem";
@@ -371,12 +372,9 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
     setFrame(EMPTY_FRAME());
   }, [question.id]);
 
-  const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
-    if (koda.config.isEnabled("sound_chimes", true)) koda.sound.play(type);
-  };
 
   const toggle = (idx: number) => {
-    chime("pop");
+    playChrome(koda, "pop");
     koda.haptics.tap();
     setFrame((prev) => {
       const next = prev.map((v, i) => (i === idx ? !v : v));
@@ -399,7 +397,7 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
   };
 
   const submit = (given: number, correct: boolean, title: string, message: string) => {
-    chime(correct ? "success" : "error");
+    playChrome(koda, correct ? "success" : "error");
     correct ? koda.haptics.success() : koda.haptics.tap();
     report({
       correct,

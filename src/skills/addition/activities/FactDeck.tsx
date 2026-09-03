@@ -8,6 +8,7 @@ import {
   playCopy,
   useSkillRound,
   type RoundQuestion,
+  playChrome,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B, CHANGE, TOTAL } from "../internal/data/additionPalette";
@@ -401,15 +402,11 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
   }, [question.id]);
 
 
-  const chimes = koda.config.isEnabled("sound_chimes", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
   /** A family may prefer four tiles to a pad. Read here, which is what makes it
    *  a setting rather than a line in a manifest. */
   const answerInput = koda.config.get<string>("answerInput", "pad");
 
-  const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
-    if (chimes) koda.sound.play(type);
-  };
 
   /**
    * Show the double this fact leans on.
@@ -422,7 +419,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
     if (revealed || round.feedback) return;
     setRevealed(true);
     round.useSupport("walkthrough");
-    chime("clink");
+    playChrome(koda, "clink");
   };
 
   const chooseHelper = (fact: Fact) => {
@@ -437,13 +434,13 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
     }
     setRevealed(true);
     round.useSupport("walkthrough");
-    chime("success");
+    playChrome(koda, "success");
   };
 
   const submitNumber = (value: number) => {
     if (round.feedback) return;
     const correct = value === question.sum;
-    chime(correct ? "success" : "error");
+    playChrome(koda, correct ? "success" : "error");
     correct ? koda.haptics.success() : koda.haptics.tap();
     submit({
       correct,
@@ -462,7 +459,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
     // Choosing the fact they were shown is not a random miss — it is the
     // misunderstanding this lesson is named after.
     const restated = fact.a === question.a && fact.b === question.b;
-    chime(correct ? "success" : "error");
+    playChrome(koda, correct ? "success" : "error");
     correct ? koda.haptics.success() : koda.haptics.tap();
     submit({
       correct,
@@ -486,7 +483,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
     }
     const given = question.members!.map((_, i) => members[i] ?? "");
     const correct = given.join(",") === question.members!.map((m) => String(m.answer)).join(",");
-    chime(correct ? "success" : "error");
+    playChrome(koda, correct ? "success" : "error");
     correct ? koda.haptics.success() : koda.haptics.tap();
     submit({
       correct,

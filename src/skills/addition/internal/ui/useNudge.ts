@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { KodaSDK } from "../../../types";
+import { playChrome } from "../../../kit";
 
 /**
  * A word about a move that was not allowed, shown and then gone.
@@ -50,7 +51,7 @@ export function useNudge(koda: KodaSDK, holdMs = NUDGE_MS): Nudge {
 
   const refuse = useCallback(
     (why: string) => {
-      if (koda.config.isEnabled("sound_chimes", true)) koda.sound.play("hint");
+      playChrome(koda, "hint");
       setMessage(why);
       stop();
       timer.current = window.setTimeout(() => setMessage(null), holdMs);

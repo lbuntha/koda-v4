@@ -8,6 +8,7 @@ import {
   playCopy,
   useSkillRound,
   type RoundQuestion,
+  playChrome,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_B, CHANGE } from "../internal/data/additionPalette";
@@ -553,19 +554,15 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
 
   // Practice says nothing at all, on top of the family's own voice switch.
   const speaks = !practising && koda.config.isEnabled("audio_speech", true);
-  const chimes = koda.config.isEnabled("sound_chimes", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
 
-  const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
-    if (chimes) koda.sound.play(type);
-  };
 
   const x = (value: number) =>
     ((value - question.min) / Math.max(1, question.max - question.min)) * W;
 
   const submitTotal = (given: number) => {
     const correct = given === question.sum;
-    chime(correct ? "success" : "error");
+    playChrome(koda, correct ? "success" : "error");
     correct ? koda.haptics.success() : koda.haptics.tap();
     submit({
       correct,
@@ -587,7 +584,7 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
       const correct = size === question.required[0];
       setAt(question.from + size);
       setMade([size]);
-      chime(correct ? "success" : "error");
+      playChrome(koda, correct ? "success" : "error");
       correct ? koda.haptics.success() : koda.haptics.tap();
       const unit = question.mode === "bridge_ten" ? 10 : 100;
       const target = nextMultiple(question.a, unit);
@@ -607,14 +604,14 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
     setAt(next);
     setMade((prev) => [...prev, size]);
     koda.haptics.tap();
-    chime(size < 0 ? "clink" : "pop");
+    playChrome(koda, size < 0 ? "clink" : "pop");
     // A ticked line names where you land; an open one deliberately does not.
     if (speaks && question.ticks > 0) {
       void koda.speech.say(numberWord(next), speechRate(koda));
     }
 
     if (question.answerKind === "arrival" && next === question.sum) {
-      chime("success");
+      playChrome(koda, "success");
       koda.haptics.success();
       submit({
         correct: true,
@@ -630,7 +627,7 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
     const last = made[made.length - 1];
     setAt((v) => v - last);
     setMade((prev) => prev.slice(0, -1));
-    chime("clink");
+    playChrome(koda, "clink");
   };
 
   const check = () => {

@@ -333,6 +333,7 @@ export const BlockExchange: React.FC<ActivityProps<BlockExchangeParams>> = ({ pa
     if (!entry) { nudge.refuse("Type the value of the blocks that remain."); return; }
     const given = Number(entry);
     const correct = given === q.difference;
+    chime(koda, correct ? "right" : "wrong");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     round.submit({
       correct, given: entry, expected: q.expected,

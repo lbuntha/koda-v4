@@ -334,6 +334,7 @@ export const DifferenceLine: React.FC<ActivityProps<DifferenceLineParams>> = ({ 
   };
   const choose = (value: number) => {
     const correct = value === q.difference;
+    chime(koda, correct ? "right" : "wrong");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     round.submit({ correct, given: String(value), expected: q.expected, errorKind: correct ? undefined : "off_by_more",
       title: correct ? "That is the difference!" : "Check the distance",

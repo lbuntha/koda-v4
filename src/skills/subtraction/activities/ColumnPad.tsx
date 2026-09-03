@@ -208,6 +208,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({ params, ko
     if (filled < width) { nudge.refuse(`Write the ${PLACES[nextColumn]} column before you check.`); return; }
     const given = q.answer.map((_, i) => written[i]).reverse().join("").replace(/^0+(?=\d)/, "");
     const correct = given === String(q.difference);
+    chime(koda, correct ? "right" : "wrong");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     // A dropped exchange is a place-value slip, not a random miss: the child
     // took the smaller digit from the larger one and called it subtraction.

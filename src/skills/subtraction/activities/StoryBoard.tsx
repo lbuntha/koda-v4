@@ -245,6 +245,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({ params, 
       return;
     }
     const correct = value === q.answer;
+    chime(koda, correct ? "right" : "wrong");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     round.submit({
       correct, given: multi ? `${q.intermediate},${value}` : String(value), expected: q.expected,

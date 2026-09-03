@@ -8,6 +8,7 @@ import {
   playCopy,
   useSkillRound,
   type RoundQuestion,
+  playChrome,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B, CHANGE, TOTAL } from "../internal/data/additionPalette";
@@ -429,12 +430,8 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
 
   // Practice says nothing at all, on top of the family's own voice switch.
   const speaks = !practising && koda.config.isEnabled("audio_speech", true);
-  const chimes = koda.config.isEnabled("sound_chimes", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
 
-  const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
-    if (chimes) koda.sound.play(type);
-  };
 
   const slots = question.rows.flatMap((r) => r.slots);
   const toPlace = slots.filter((s) => s.value !== undefined);
@@ -443,7 +440,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
   const tapChip = (value: number, at: number) => {
     if (round.feedback) return;
     setHeld((h) => (h === at ? null : at));
-    chime("clink");
+    playChrome(koda, "clink");
   };
 
   const tapSlot = (slot: Slot) => {
@@ -463,7 +460,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
     setUsedChips((prev) => [...prev, held]);
     setHeld(null);
     koda.haptics.tap();
-    chime("pop");
+    playChrome(koda, "pop");
   };
 
   const check = () => {
@@ -478,7 +475,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
     }
     const given = Number(entry);
     const correct = given === question.answer;
-    chime(correct ? "success" : "error");
+    playChrome(koda, correct ? "success" : "error");
     correct ? koda.haptics.success() : koda.haptics.tap();
     submit({
       correct,

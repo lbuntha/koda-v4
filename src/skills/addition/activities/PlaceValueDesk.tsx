@@ -8,6 +8,7 @@ import {
   playCopy,
   useSkillRound,
   type RoundQuestion,
+  playChrome,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B, TOTAL } from "../internal/data/additionPalette";
@@ -462,11 +463,7 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
   }, [question.id]);
 
 
-  const chimes = koda.config.isEnabled("sound_chimes", true);
 
-  const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
-    if (chimes) koda.sound.play(type);
-  };
 
   const check = () => {
     if (round.feedback) return;
@@ -482,7 +479,7 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
 
     const given = question.blanks.map((id) => entries[id] ?? "");
     const correct = given.join(",") === question.answers.map(String).join(",");
-    chime(correct ? "success" : "error");
+    playChrome(koda, correct ? "success" : "error");
     correct ? koda.haptics.success() : koda.haptics.tap();
 
     // A digit in the wrong column is the mistake this chart exists to surface,

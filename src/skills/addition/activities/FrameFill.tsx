@@ -9,6 +9,7 @@ import {
   stagger,
   useSkillRound,
   type RoundQuestion,
+  playChrome,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B } from "../internal/data/additionPalette";
@@ -369,13 +370,9 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
 
   // Practice says nothing at all, on top of the family's own voice switch.
   const speaks = !practising && koda.config.isEnabled("audio_speech", true);
-  const chimes = koda.config.isEnabled("sound_chimes", true);
   const showsTotal = koda.config.isEnabled("running_total_badge", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
 
-  const chime = (type: Parameters<typeof koda.sound.play>[0]) => {
-    if (chimes) koda.sound.play(type);
-  };
 
 
   /** Say where the frame stands now — the point of every tap, either way. */
@@ -383,7 +380,7 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
     setFilled(next);
     nudge.clear();
     koda.haptics.tap();
-    chime(sound);
+    playChrome(koda, sound);
     if (speaks) void koda.speech.say(numberWord(next), speechRate(koda));
   };
 
@@ -419,7 +416,7 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
 
     const given = question.asks === "added" ? added : filled;
     const correct = String(given) === question.expected;
-    chime(correct ? "success" : "error");
+    playChrome(koda, correct ? "success" : "error");
     correct ? koda.haptics.success() : koda.haptics.tap();
 
     submit({
