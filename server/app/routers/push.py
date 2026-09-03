@@ -92,13 +92,17 @@ async def forget(token: str, db: Db, p: CurrentPrincipal) -> None:
     lookup in this service has.
     """
     _adult(p)
-    # By `userId`, not by family: a token belongs to the browser one person
-    # granted permission in, and "it is not yours" and "it does not exist"
-    # should be the same answer.
-    found = await db.push_tokens.find_one({"token": token, "userId": p.subject_id})
-    if not found:
-        raise NotFound("No such notification token on this account.")
-    await push_tokens.delete(db, token)
+    # Idempotent, and by `userId` rather than by family: a token belongs to the
+    # browser one person granted permission in.
+    #
+    # A token that is not there is not an error — it is the state the caller
+    # asked for. FCM rotates tokens on its own schedule and revoking a device
+    # deletes its row, so a browser can quite normally hold a value the server
+    # has already forgotten; answering 404 turned "stop notifying me" into a
+    # failure for somebody whose wish had already come true. Not finding it
+    # because it belongs to someone else answers the same way, which also means
+    # this route never confirms whether a stranger's token exists.
+    await db.push_tokens.delete_one({"token": token, "userId": p.subject_id})
 
 
 class KindOut(Model):

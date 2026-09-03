@@ -7,6 +7,7 @@ import {
   disableNotifications,
   enableNotifications,
   notificationPreferences,
+  notificationsAreOn,
   pushSupport,
   type NotificationKind,
 } from "../../lib/push";
@@ -32,6 +33,15 @@ import {
 export const NotificationsSettings: React.FC = () => {
   const l = themeSystem.list;
   const [support, setSupport] = useState(() => pushSupport());
+  /*
+   * Whether this browser is registered — which is what the switch shows.
+   *
+   * Separate from `support`, because permission and registration part company
+   * the moment somebody turns notifications off: the browser keeps the
+   * permission for good, and only this says whether Koda is still allowed to
+   * use it.
+   */
+  const [registered, setRegistered] = useState(() => notificationsAreOn());
   const [kinds, setKinds] = useState<NotificationKind[] | null>(null);
   const [deploymentSends, setDeploymentSends] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -49,8 +59,8 @@ export const NotificationsSettings: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (support.state === "granted") void load();
-  }, [support.state, load]);
+    if (registered) void load();
+  }, [registered, load]);
 
   if (support.state === "not-configured") return null;
 
@@ -58,6 +68,7 @@ export const NotificationsSettings: React.FC = () => {
     setBusy(true);
     const result = await enableNotifications();
     setSupport(pushSupport());
+    setRegistered(notificationsAreOn());
     if (result === "on") await load();
     setBusy(false);
   };
@@ -66,9 +77,11 @@ export const NotificationsSettings: React.FC = () => {
     setBusy(true);
     await disableNotifications();
     setKinds(null);
-    // The permission itself stays granted — only a browser setting can undo
-    // that — so the state is read again rather than assumed.
+    // The permission itself stays granted — only the browser's own settings can
+    // undo that — so what changes here is registration, and that is what the
+    // switch is bound to.
     setSupport(pushSupport());
+    setRegistered(notificationsAreOn());
     setBusy(false);
   };
 
@@ -89,6 +102,7 @@ export const NotificationsSettings: React.FC = () => {
   const note = (): string => {
     switch (support.state) {
       case "granted":
+        if (!registered) return "Turn this on to be told about the things you choose.";
         return deploymentSends
           ? "This browser will be told about the things you pick below."
           : "Koda is not sending notifications on this service right now.";
@@ -104,7 +118,7 @@ export const NotificationsSettings: React.FC = () => {
   };
 
   const canAsk = support.state === "askable" || support.state === "granted";
-  const on = support.state === "granted";
+  const on = registered;
 
   return (
     <section>

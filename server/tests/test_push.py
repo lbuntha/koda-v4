@@ -111,6 +111,30 @@ async def test_forgetting_a_token_needs_it_to_be_yours(client, parent, db):
     assert await db.push_tokens.count_documents({"token": OTHER}) == 1
 
 
+async def test_someone_elses_token_survives_your_delete(client, parent, db):
+    """Answered the same way as your own, so the route never confirms it exists."""
+    await db.push_tokens.insert_one(
+        {"_id": "pt_other", "token": OTHER, "familyId": "f_someone_else", "userId": "u_x",
+         "deviceId": "d_x", "disabledAt": None}
+    )
+
+    response = await client.delete(f"/push/tokens/{OTHER}", headers=parent)
+
+    assert response.status_code == 204
+    assert await db.push_tokens.count_documents({"token": OTHER}) == 1, "not yours to delete"
+
+
+async def test_forgetting_a_token_that_is_already_gone_is_not_an_error(client, parent):
+    """FCM rotates tokens, so a browser can hold one the server has forgotten.
+
+    Answering 404 turned "stop notifying me" into a failure for somebody whose
+    wish had already come true — and it is what stopped the switch turning off.
+    """
+    response = await client.delete(f"/push/tokens/{TOKEN}", headers=parent)
+
+    assert response.status_code == 204
+
+
 async def test_a_parent_can_forget_their_own(client, parent, db):
     await client.post("/push/tokens", headers=parent, json={"token": TOKEN})
 

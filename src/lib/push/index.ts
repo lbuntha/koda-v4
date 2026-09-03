@@ -38,6 +38,24 @@ export interface NotificationPreferences {
   kinds: NotificationKind[];
 }
 
+/**
+ * Whether *this browser* is currently signed up to be rung.
+ *
+ * Deliberately not `Notification.permission === "granted"`. Permission is
+ * granted once and then stays granted for good — a browser has no way to
+ * withdraw it on the site's behalf — so a switch that reads permission springs
+ * back to on the instant somebody turns it off. What "on" means here is that a
+ * token exists *and* the server has been told about it, which is exactly what
+ * turning the switch off undoes.
+ */
+export function notificationsAreOn(): boolean {
+  return (
+    typeof Notification !== "undefined" &&
+    Notification.permission === "granted" &&
+    remembered() !== null
+  );
+}
+
 function remembered(): string | null {
   try {
     return localStorage.getItem(TOKEN_KEY);
@@ -173,6 +191,11 @@ export async function disableNotifications(): Promise<void> {
  */
 export async function refreshNotificationToken(): Promise<void> {
   if (pushSupport().state !== "granted") return;
+  // Only for a browser that is *opted in*. Refreshing on permission alone would
+  // quietly re-register the browser of somebody who had just turned
+  // notifications off, on their very next launch — an opt-out that does not
+  // survive a reload is not an opt-out.
+  if (remembered() === null) return;
   try {
     const token = await mintToken();
     if (token && token !== remembered()) await tellTheServer(token);
