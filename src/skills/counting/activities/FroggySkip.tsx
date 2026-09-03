@@ -81,8 +81,26 @@ export const buildQuestion = (setup: FroggySetup, index: number): LineQuestion =
     // assumed — a child who only ever counts up never notices they are.
     const reverse = Math.random() > 0.5;
     const length = setup.seqLength ?? 5;
+
+    /*
+     * A backward sequence has to stop at zero.
+     *
+     * Its last term is `start - (length - 1) * step`, and nothing held that
+     * above the floor — so counting back by ten across five terms printed
+     * "28, 18, 8, -2, -12", with the missing number sometimes being the -2.
+     * Negative numbers in a skill whose next lesson is teen numbers, and the
+     * shipped lesson hits it: `steps` includes 10 and `reverseStartRange`
+     * starts at 25, four hops short of what a ten-step run needs.
+     *
+     * The lesson's own range is honoured wherever it can be and lifted to the
+     * floor where it cannot, keeping its width — so a lesson that asked for a
+     * narrow band still gets a narrow band, just a legal one.
+     */
+    const lowestStart = (length - 1) * step;
+    const [declaredLow, declaredHigh] = setup.reverseStartRange ?? [25, 45];
+    const low = Math.max(declaredLow, lowestStart);
     const start = reverse
-      ? rangeOr(setup.reverseStartRange, 25, 45)
+      ? randomInt(low, Math.max(declaredHigh, low + (declaredHigh - declaredLow)))
       : rangeOr(setup.startRange, 5, 20);
 
     const full = Array.from({ length }, (_, i) => (reverse ? start - i * step : start + i * step));
@@ -91,13 +109,31 @@ export const buildQuestion = (setup: FroggySetup, index: number): LineQuestion =
     const sequence: (number | null)[] = [...full];
     sequence[missingIndex] = null;
 
-    const distractors = new Set<number>([
-      answer + step,
-      answer - step,
-      answer + (reverse ? -1 : 1),
-    ]);
-    while (distractors.size < 3) distractors.add(answer + rangeOr(setup.distractorJitter, -4, 4));
-    distractors.delete(answer);
+    /*
+     * The wrong answers stop at zero too.
+     *
+     * `answer - step` and the jitter both go under it for a small answer, and a
+     * wrong answer a child can dismiss by its sign is not a wrong answer — it
+     * is a free elimination, and it quietly teaches that the number line
+     * carries on the other side of nought, which is a different lesson three
+     * years later.
+     */
+    const distractors = new Set<number>();
+    const offer = (candidate: number) => {
+      if (candidate >= 0 && candidate !== answer) distractors.add(candidate);
+    };
+
+    offer(answer + step);
+    offer(answer - step);
+    offer(answer + (reverse ? -1 : 1));
+    // Bounded: the jitter can keep landing on the answer or below zero when the
+    // answer is small, and a `while` on the set size would spin there.
+    for (let tries = 0; distractors.size < 3 && tries < 40; tries += 1) {
+      offer(answer + rangeOr(setup.distractorJitter, -4, 4));
+    }
+    // Whatever is still missing, counted up from the answer. Always available,
+    // always positive, and never a repeat.
+    for (let n = 1; distractors.size < 3; n += 1) offer(answer + n);
 
     return {
       ...base,
