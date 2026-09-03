@@ -1,0 +1,60 @@
+{
+  "id": "subtraction",
+  "name": "Subtraction",
+  "version": "1.0.0",
+  "description": "Learn to take away, compare groups, and find what remains through clear, concrete models.",
+  "category": "core",
+  "author": "Koda Math Lab",
+  "iconName": "Boxes",
+  "tagline": "Take away, compare, and find the missing part.",
+  "thumbnail": "subtraction-quest",
+  "status": "draft",
+  "audience": { "ages": [5, 9], "category": "operations" },
+  "teaches": [
+    "remover", "remainder-counter", "separator", "comparer",
+    "subtraction-equation-reader", "count-back", "subtract-zero",
+    "subtract-self", "previous-number-subtractor", "finger-subtractor",
+    "five-benchmark", "ten-frame-subtractor", "part-whole-decomposer",
+    "backward-number-path", "subtraction-number-line", "difference-finder",
+    "fact-family", "missing-addend", "doubles-knower", "make-ten",
+    "bridging-ten", "bridging-hundred", "known-fact-user", "compensator",
+    "constant-difference", "base-ten-subtractor", "tens-subtractor",
+    "hundreds-subtractor", "backward-jump-strategy", "expanded-form-subtractor",
+    "subtraction-checker", "left-to-right-subtractor", "unbundler-ten",
+    "unbundler-hundred", "standard-subtraction-algorithm",
+    "subtraction-cascading-regrouper", "zero-regrouper", "rounding-estimator",
+    "reasonableness-checker", "missing-subtrahend", "missing-minuend",
+    "removal-result-modeler", "removal-change-modeler", "removal-start-modeler",
+    "comparison-difference-modeler", "comparison-bigger-modeler",
+    "comparison-smaller-modeler", "subtraction-multi-step-solver",
+    "subtraction-strategy-chooser", "place-value-builder"
+  ],
+  "requires": [
+    "counter", "corresponder", "comparer", "five-benchmark", "make-ten",
+    "part-whole-decomposer", "place-value-builder", "fact-family",
+    "doubles-knower", "unitiser-ten", "unitiser-hundred"
+  ],
+  "features": [
+    { "id": "audio_speech", "name": "Spoken voice", "description": "Reads prompts, counts moves, and speaks hints. Turn off for a silent lesson.", "isEnabled": true, "tag": "Audio" },
+    { "id": "sound_chimes", "name": "Sound chimes", "description": "Plays shared movement and answer chimes.", "isEnabled": true, "tag": "Audio" },
+    { "id": "haptic_feedback", "name": "Haptic vibration", "description": "Adds a small vibration to moves and completed models.", "isEnabled": true, "tag": "Haptic" },
+    { "id": "counting_badges", "name": "1-to-1 badges", "description": "Numbers objects as they are removed, counted, or paired.", "isEnabled": true, "tag": "Cognitive" },
+    { "id": "running_difference_badge", "name": "Running difference", "description": "Shows how many remain as the model changes.", "isEnabled": true, "tag": "Cognitive" },
+    { "id": "strategy_scaffold", "name": "Strategy scaffold", "description": "Explains what the current model shows and what to do next.", "isEnabled": true, "tag": "Cognitive" },
+    { "id": "step_context_tags", "name": "Step framing tags", "description": "Labels warm-up, guided, activity, and milestone steps.", "isEnabled": true, "tag": "Cognitive" },
+    { "id": "premium_lessons", "name": "Charge for later lessons", "description": "Uses the Free lessons setting to decide which lessons need a full plan.", "isEnabled": false, "tag": "Plan" }
+  ],
+  "settings": {
+    "warmupLabel": "", "activityLabel": "", "guidedLabel": "", "milestoneLabel": "",
+    "speechRate": 0.95, "answerInput": "choices", "freeLessons": 10
+  },
+  "settingsSchema": [
+    { "key": "warmupLabel", "label": "Warm-up tag", "help": "Custom wording for the first step.", "type": "text", "placeholder": "Warm-up Exercise 🌱", "maxLength": 32 },
+    { "key": "activityLabel", "label": "Activity tag", "help": "Custom wording for activity steps.", "type": "text", "placeholder": "Interactive Activity 🚀", "maxLength": 32 },
+    { "key": "guidedLabel", "label": "Guided tag", "help": "Custom wording for guided steps.", "type": "text", "placeholder": "Guided Challenge 🌟", "maxLength": 32 },
+    { "key": "milestoneLabel", "label": "Final tag", "help": "Custom wording for the last step.", "type": "text", "placeholder": "Final Milestone 🏆", "maxLength": 32 },
+    { "key": "speechRate", "label": "Speech rate", "help": "How fast Koda speaks prompts and hints.", "type": "number", "min": 0.5, "max": 2, "step": 0.05, "unit": "x" },
+    { "key": "answerInput", "label": "How answers are given", "help": "Choose from four answers or use the number pad in later written lessons.", "type": "choice", "options": [{ "value": "choices", "label": "Four choices" }, { "value": "pad", "label": "Number pad" }] },
+    { "key": "freeLessons", "label": "Free lessons", "help": "How many lessons remain free when charging is enabled.", "type": "number", "min": 0, "max": 100, "step": 1 }
+  ]
+}

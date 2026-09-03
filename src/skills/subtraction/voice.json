@@ -1,0 +1,69 @@
+{
+  "_comment": [
+    "Phase 13 speech inventory. No audio is generated or recorded during this build:",
+    "audio/manifest.json stays empty, so every line below plays through live TTS.",
+    "Lesson audioPrompt values are collected from lessons.json automatically and are",
+    "deliberately not repeated here — one line, one home."
+  ],
+  "prompts": [],
+  "templates": [
+    "Take {b} away from {a}.",
+    "{a} minus {b}.",
+    "How many are left?"
+  ],
+  "phrases": [
+    "Take one away.",
+    "zero",
+    "one",
+    "two",
+    "three",
+    "four",
+    "five",
+    "six",
+    "seven",
+    "eight",
+    "nine",
+    "ten",
+    "eleven",
+    "twelve",
+    "thirteen",
+    "fourteen",
+    "fifteen",
+    "sixteen",
+    "seventeen",
+    "eighteen",
+    "nineteen",
+    "twenty"
+  ],
+  "groups": {
+    "correct": {
+      "voices": [
+        "Kore",
+        "Puck",
+        "Zephyr"
+      ],
+      "phrases": [
+        "Yes — that is the difference!",
+        "You found what remains!",
+        "Great subtracting!",
+        "That model matches!",
+        "You read the blocks right!",
+        "Every column balances!"
+      ]
+    },
+    "incorrect": {
+      "voices": [
+        "Kore",
+        "Zephyr",
+        "Puck"
+      ],
+      "phrases": [
+        "Not quite. Look at what remains.",
+        "Close! Try the subtraction again.",
+        "Good try. Check what was taken away.",
+        "Almost! Count the difference once more.",
+        "Check each place and try again."
+      ]
+    }
+  }
+}

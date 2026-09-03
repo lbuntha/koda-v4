@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <radialGradient id="cookieBody" cx="34%" cy="28%" r="76%">
+      <stop offset="0%" stop-color="#FED7AA"/>
+      <stop offset="58%" stop-color="#FB923C"/>
+      <stop offset="100%" stop-color="#9A3412"/>
+    </radialGradient>
+    <radialGradient id="cookieShadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.24"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <ellipse cx="64" cy="116" rx="31" ry="6" fill="url(#cookieShadow)"/>
+  <circle cx="64" cy="62" r="45" fill="url(#cookieBody)" stroke="#7C2D12" stroke-width="2"/>
+  <g fill="#78350F">
+    <circle cx="45" cy="42" r="5"/><circle cx="76" cy="35" r="4"/>
+    <circle cx="88" cy="61" r="5"/><circle cx="59" cy="65" r="4"/>
+    <circle cx="39" cy="78" r="4"/><circle cx="74" cy="88" r="5"/>
+  </g>
+  <ellipse cx="44" cy="34" rx="9" ry="6" fill="#FFFFFF" fill-opacity="0.26" transform="rotate(-25 44 34)"/>
+</svg>

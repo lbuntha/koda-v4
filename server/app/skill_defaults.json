@@ -4955,5 +4955,3777 @@
         ]
       }
     ]
+  },
+  {
+    "id": "subtraction",
+    "name": "Subtraction",
+    "version": "1.0.0",
+    "description": "Learn to take away, compare groups, and find what remains through clear, concrete models.",
+    "category": "core",
+    "author": "Koda Math Lab",
+    "iconName": "Boxes",
+    "tagline": "Take away, compare, and find the missing part.",
+    "thumbnail": "subtraction-quest",
+    "status": "draft",
+    "audience": {
+      "ages": [
+        5,
+        9
+      ],
+      "category": "operations"
+    },
+    "teaches": [
+      "remover",
+      "remainder-counter",
+      "separator",
+      "comparer",
+      "subtraction-equation-reader",
+      "count-back",
+      "subtract-zero",
+      "subtract-self",
+      "previous-number-subtractor",
+      "finger-subtractor",
+      "five-benchmark",
+      "ten-frame-subtractor",
+      "part-whole-decomposer",
+      "backward-number-path",
+      "subtraction-number-line",
+      "difference-finder",
+      "fact-family",
+      "missing-addend",
+      "doubles-knower",
+      "make-ten",
+      "bridging-ten",
+      "bridging-hundred",
+      "known-fact-user",
+      "compensator",
+      "constant-difference",
+      "base-ten-subtractor",
+      "tens-subtractor",
+      "hundreds-subtractor",
+      "backward-jump-strategy",
+      "expanded-form-subtractor",
+      "subtraction-checker",
+      "left-to-right-subtractor",
+      "unbundler-ten",
+      "unbundler-hundred",
+      "standard-subtraction-algorithm",
+      "subtraction-cascading-regrouper",
+      "zero-regrouper",
+      "rounding-estimator",
+      "reasonableness-checker",
+      "missing-subtrahend",
+      "missing-minuend",
+      "removal-result-modeler",
+      "removal-change-modeler",
+      "removal-start-modeler",
+      "comparison-difference-modeler",
+      "comparison-bigger-modeler",
+      "comparison-smaller-modeler",
+      "subtraction-multi-step-solver",
+      "subtraction-strategy-chooser",
+      "place-value-builder"
+    ],
+    "requires": [
+      "counter",
+      "corresponder",
+      "comparer",
+      "five-benchmark",
+      "make-ten",
+      "part-whole-decomposer",
+      "place-value-builder",
+      "fact-family",
+      "doubles-knower",
+      "unitiser-ten",
+      "unitiser-hundred"
+    ],
+    "features": [
+      {
+        "id": "audio_speech",
+        "name": "Spoken voice",
+        "description": "Reads prompts, counts moves, and speaks hints. Turn off for a silent lesson.",
+        "isEnabled": true,
+        "tag": "Audio"
+      },
+      {
+        "id": "sound_chimes",
+        "name": "Sound chimes",
+        "description": "Plays shared movement and answer chimes.",
+        "isEnabled": true,
+        "tag": "Audio"
+      },
+      {
+        "id": "haptic_feedback",
+        "name": "Haptic vibration",
+        "description": "Adds a small vibration to moves and completed models.",
+        "isEnabled": true,
+        "tag": "Haptic"
+      },
+      {
+        "id": "counting_badges",
+        "name": "1-to-1 badges",
+        "description": "Numbers objects as they are removed, counted, or paired.",
+        "isEnabled": true,
+        "tag": "Cognitive"
+      },
+      {
+        "id": "running_difference_badge",
+        "name": "Running difference",
+        "description": "Shows how many remain as the model changes.",
+        "isEnabled": true,
+        "tag": "Cognitive"
+      },
+      {
+        "id": "strategy_scaffold",
+        "name": "Strategy scaffold",
+        "description": "Explains what the current model shows and what to do next.",
+        "isEnabled": true,
+        "tag": "Cognitive"
+      },
+      {
+        "id": "step_context_tags",
+        "name": "Step framing tags",
+        "description": "Labels warm-up, guided, activity, and milestone steps.",
+        "isEnabled": true,
+        "tag": "Cognitive"
+      },
+      {
+        "id": "premium_lessons",
+        "name": "Charge for later lessons",
+        "description": "Uses the Free lessons setting to decide which lessons need a full plan.",
+        "isEnabled": false,
+        "tag": "Plan"
+      }
+    ],
+    "settings": {
+      "warmupLabel": "",
+      "activityLabel": "",
+      "guidedLabel": "",
+      "milestoneLabel": "",
+      "speechRate": 0.95,
+      "answerInput": "choices",
+      "freeLessons": 10
+    },
+    "settingsSchema": [
+      {
+        "key": "warmupLabel",
+        "label": "Warm-up tag",
+        "help": "Custom wording for the first step.",
+        "type": "text",
+        "placeholder": "Warm-up Exercise 🌱",
+        "maxLength": 32
+      },
+      {
+        "key": "activityLabel",
+        "label": "Activity tag",
+        "help": "Custom wording for activity steps.",
+        "type": "text",
+        "placeholder": "Interactive Activity 🚀",
+        "maxLength": 32
+      },
+      {
+        "key": "guidedLabel",
+        "label": "Guided tag",
+        "help": "Custom wording for guided steps.",
+        "type": "text",
+        "placeholder": "Guided Challenge 🌟",
+        "maxLength": 32
+      },
+      {
+        "key": "milestoneLabel",
+        "label": "Final tag",
+        "help": "Custom wording for the last step.",
+        "type": "text",
+        "placeholder": "Final Milestone 🏆",
+        "maxLength": 32
+      },
+      {
+        "key": "speechRate",
+        "label": "Speech rate",
+        "help": "How fast Koda speaks prompts and hints.",
+        "type": "number",
+        "min": 0.5,
+        "max": 2,
+        "step": 0.05,
+        "unit": "x"
+      },
+      {
+        "key": "answerInput",
+        "label": "How answers are given",
+        "help": "Choose from four answers or use the number pad in later written lessons.",
+        "type": "choice",
+        "options": [
+          {
+            "value": "choices",
+            "label": "Four choices"
+          },
+          {
+            "value": "pad",
+            "label": "Number pad"
+          }
+        ]
+      },
+      {
+        "key": "freeLessons",
+        "label": "Free lessons",
+        "help": "How many lessons remain free when charging is enabled.",
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "step": 1
+      }
+    ],
+    "lessons": [
+      {
+        "id": "take-away",
+        "title": "Take Objects Away",
+        "concept": "Removing a Part from a Whole",
+        "conceptKey": "remover",
+        "requires": [
+          "counter",
+          "corresponder"
+        ],
+        "activity": "subtraction/tray",
+        "params": {
+          "level": 1,
+          "question": {
+            "mode": "remove",
+            "minuendRange": [
+              2,
+              10
+            ],
+            "subtrahendRange": [
+              1,
+              9
+            ],
+            "differenceRange": [
+              1,
+              9
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "remove_tray",
+            "tier": "beginner",
+            "difficultyColor": "violet",
+            "category": "Taking Away",
+            "shortDesc": "Touch the named part to take it away, then count what is left",
+            "targetObjective": "Take away a part and find what remains.",
+            "stepByStep": [
+              "Look at the whole group.",
+              "Touch exactly the number being taken away.",
+              "Count the objects that remain."
+            ],
+            "kidTip": "Take away only the amount named in the question.",
+            "audioPrompt": "Take objects away. Touch the part that leaves, then find how many remain.",
+            "prompts": {
+              "default": "Take away {b}. How many {item} are left?"
+            }
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "🍪",
+        "iconName": "boxes",
+        "iconTone": "purple",
+        "pedagogyTip": "The crossed-out objects remain visible so subtraction means a change to one whole, not a second unrelated count.",
+        "standards": [
+          "CCSS.K.OA.A.1"
+        ],
+        "trajectoryLevel": "remove-result",
+        "ageBand": [
+          5,
+          6
+        ]
+      },
+      {
+        "id": "count-what-remains",
+        "title": "Count What Remains",
+        "concept": "Counting Only the Remaining Part",
+        "conceptKey": "remainder-counter",
+        "requires": [
+          "remover"
+        ],
+        "activity": "subtraction/tray",
+        "params": {
+          "level": 2,
+          "question": {
+            "mode": "remainder",
+            "minuendRange": [
+              3,
+              10
+            ],
+            "subtrahendRange": [
+              1,
+              9
+            ],
+            "differenceRange": [
+              1,
+              9
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "remove_tray",
+            "tier": "beginner",
+            "difficultyColor": "violet",
+            "category": "Taking Away",
+            "shortDesc": "Skip the crossed-out objects and count only what remains",
+            "targetObjective": "Count the remaining objects once each.",
+            "stepByStep": [
+              "Notice which objects are already crossed out.",
+              "Touch only the objects that remain.",
+              "The last number you say is the difference."
+            ],
+            "kidTip": "The crossed-out objects are gone. Count only what is still here.",
+            "audioPrompt": "Count what remains. Skip every crossed-out object.",
+            "prompts": {
+              "default": "Count only the {item} that remain."
+            }
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "🔎",
+        "iconName": "search",
+        "iconTone": "purple",
+        "pedagogyTip": "Separating the removal action from the final count helps children understand that the answer names the remaining set.",
+        "standards": [
+          "CCSS.K.OA.A.1"
+        ],
+        "trajectoryLevel": "remove-result",
+        "ageBand": [
+          5,
+          6
+        ]
+      },
+      {
+        "id": "separate-a-part",
+        "title": "Separate a Part",
+        "concept": "A Whole Made of Two Parts",
+        "conceptKey": "separator",
+        "requires": [
+          "remover"
+        ],
+        "activity": "subtraction/tray",
+        "params": {
+          "level": 3,
+          "question": {
+            "mode": "separate",
+            "minuendRange": [
+              3,
+              10
+            ],
+            "subtrahendRange": [
+              1,
+              9
+            ],
+            "differenceRange": [
+              1,
+              9
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "remove_tray",
+            "tier": "beginner",
+            "difficultyColor": "violet",
+            "category": "Parts and Wholes",
+            "shortDesc": "Move one named part away and see the two parts of the whole",
+            "targetObjective": "Separate the whole into a removed part and a remaining part.",
+            "stepByStep": [
+              "Start with the whole group.",
+              "Move the named part into the separated area.",
+              "The objects still in the whole area are the other part."
+            ],
+            "kidTip": "Move the named part away from the whole.",
+            "audioPrompt": "Separate a part. Move the named part away and look at the part that remains.",
+            "prompts": {
+              "default": "Move {b} {item} into the separated part."
+            }
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "💎",
+        "iconName": "gem",
+        "iconTone": "purple",
+        "pedagogyTip": "This keeps subtraction connected to part–whole composition: neither part disappears from the relationship when one moves away.",
+        "standards": [
+          "CCSS.K.OA.A.1",
+          "CCSS.K.OA.A.3"
+        ],
+        "trajectoryLevel": "part-whole",
+        "ageBand": [
+          5,
+          6
+        ]
+      },
+      {
+        "id": "compare-by-matching",
+        "title": "Match Groups to Compare",
+        "concept": "Finding the Extra Objects by One-to-One Matching",
+        "conceptKey": "comparer",
+        "requires": [
+          "corresponder"
+        ],
+        "activity": "subtraction/tray",
+        "params": {
+          "level": 4,
+          "question": {
+            "mode": "match_groups",
+            "minuendRange": [
+              3,
+              10
+            ],
+            "subtrahendRange": [
+              2,
+              9
+            ],
+            "differenceRange": [
+              1,
+              8
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "remove_tray",
+            "tier": "beginner",
+            "difficultyColor": "violet",
+            "category": "Comparing",
+            "shortDesc": "Pair one object from each group and count what has no partner",
+            "targetObjective": "Match the groups to reveal their difference.",
+            "stepByStep": [
+              "Choose one object in the larger group.",
+              "Match it with one object in the smaller group.",
+              "When the smaller group is used, count what is unmatched."
+            ],
+            "kidTip": "A matched pair uses one object from each group.",
+            "audioPrompt": "Match the groups. Make pairs, then count the objects with no partner.",
+            "prompts": {
+              "default": "Match the groups. How many are unmatched?"
+            }
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "⚖️",
+        "iconName": "scale",
+        "iconTone": "cyan",
+        "pedagogyTip": "One-to-one matching makes comparison subtraction a measured gap, not an instruction to remove from the larger set.",
+        "standards": [
+          "CCSS.K.CC.C.6",
+          "CCSS.1.OA.A.1"
+        ],
+        "trajectoryLevel": "compare-difference",
+        "ageBand": [
+          5,
+          7
+        ]
+      },
+      {
+        "id": "read-subtraction-equations",
+        "title": "Read a Subtraction Equation",
+        "concept": "Connecting a Removal Model to Symbols",
+        "conceptKey": "subtraction-equation-reader",
+        "requires": [
+          "remover"
+        ],
+        "activity": "subtraction/tray",
+        "params": {
+          "level": 5,
+          "question": {
+            "mode": "equation_match",
+            "minuendRange": [
+              2,
+              10
+            ],
+            "subtrahendRange": [
+              1,
+              9
+            ],
+            "differenceRange": [
+              0,
+              9
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "remove_tray",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Equations",
+            "shortDesc": "Choose the equation whose whole, removed part, and remainder match the model",
+            "targetObjective": "Read a removal action as a subtraction equation.",
+            "stepByStep": [
+              "Read how many the model started with.",
+              "Read how many were removed.",
+              "Choose the equation with that start, change, and remainder."
+            ],
+            "kidTip": "The first number is the whole; the second is what left.",
+            "audioPrompt": "Read the subtraction equation. Match the start, the part removed, and what remains.",
+            "prompts": {
+              "default": "Choose the equation that matches the picture."
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "➖",
+        "iconName": "circleDot",
+        "iconTone": "indigo",
+        "pedagogyTip": "The minus sign gains meaning only after its three quantities are grounded in an action the child can already explain.",
+        "standards": [
+          "CCSS.K.OA.A.1"
+        ],
+        "trajectoryLevel": "represent-equations",
+        "ageBand": [
+          5,
+          7
+        ]
+      },
+      {
+        "id": "count-back",
+        "title": "Count Back",
+        "concept": "Moving Back for a Small Subtrahend",
+        "conceptKey": "count-back",
+        "requires": [
+          "subtraction-equation-reader"
+        ],
+        "activity": "subtraction/tray",
+        "params": {
+          "level": 6,
+          "question": {
+            "mode": "count_back",
+            "minuendRange": [
+              4,
+              15
+            ],
+            "subtrahendRange": [
+              1,
+              3
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "remove_tray",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Counting Strategies",
+            "shortDesc": "Start at the whole and say one earlier number for each part taken away",
+            "targetObjective": "Count backward once for each object removed.",
+            "stepByStep": [
+              "Say the starting number without recounting it.",
+              "Move back one number for each step.",
+              "Stop after the named number of backward steps."
+            ],
+            "kidTip": "Each tap is one step backward, never forward.",
+            "audioPrompt": "Count back. Start at the whole and move backward one step at a time.",
+            "prompts": {
+              "default": "Start at {a} and count back {b}."
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "👣",
+        "iconName": "footprints",
+        "iconTone": "cyan",
+        "pedagogyTip": "Counting back is deliberately limited to one, two, or three steps; larger subtrahends need more efficient strategies rather than longer counting chains.",
+        "standards": [
+          "CCSS.1.OA.C.5"
+        ],
+        "trajectoryLevel": "counting-strategies",
+        "ageBand": [
+          5,
+          7
+        ]
+      },
+      {
+        "id": "subtract-zero",
+        "title": "Subtract Zero",
+        "concept": "Taking Away Nothing Changes Nothing",
+        "conceptKey": "subtract-zero",
+        "requires": [
+          "subtraction-equation-reader"
+        ],
+        "activity": "subtraction/tray",
+        "params": {
+          "level": 7,
+          "question": {
+            "mode": "subtract_zero",
+            "minuendRange": [
+              0,
+              20
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "remove_tray",
+            "tier": "beginner",
+            "difficultyColor": "violet",
+            "category": "Number Rules",
+            "shortDesc": "See that taking away none leaves the starting amount unchanged",
+            "targetObjective": "Subtracting zero leaves a number unchanged.",
+            "stepByStep": [
+              "Begin with the starting number.",
+              "Zero means no objects leave.",
+              "Choose the same number you started with."
+            ],
+            "kidTip": "Taking away zero changes nothing.",
+            "audioPrompt": "Subtract zero. Nothing leaves, so the starting number stays the same.",
+            "prompts": {
+              "default": "What is {a} minus zero?"
+            }
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "⭕",
+        "iconName": "circleDot",
+        "iconTone": "indigo",
+        "pedagogyTip": "Showing the unchanged quantity prevents the brittle shortcut that zero itself must always be the answer.",
+        "standards": [
+          "CCSS.1.OA.C.6"
+        ],
+        "trajectoryLevel": "find-result",
+        "ageBand": [
+          5,
+          7
+        ]
+      },
+      {
+        "id": "subtract-all",
+        "title": "Subtract All",
+        "concept": "Taking Away the Whole Leaves Zero",
+        "conceptKey": "subtract-self",
+        "requires": [
+          "subtraction-equation-reader"
+        ],
+        "activity": "subtraction/tray",
+        "params": {
+          "level": 8,
+          "question": {
+            "mode": "subtract_all",
+            "minuendRange": [
+              1,
+              20
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "remove_tray",
+            "tier": "beginner",
+            "difficultyColor": "violet",
+            "category": "Number Rules",
+            "shortDesc": "Take away an amount equal to the whole and see that none remain",
+            "targetObjective": "A number minus itself is zero.",
+            "stepByStep": [
+              "Compare the whole with the amount being removed.",
+              "Every object belongs to the removed part.",
+              "No object remains, so choose zero."
+            ],
+            "kidTip": "Taking away all leaves none.",
+            "audioPrompt": "Subtract all. When the whole group leaves, how many remain?",
+            "prompts": {
+              "default": "What is {a} minus {b}?"
+            }
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "✨",
+        "iconName": "sparkles",
+        "iconTone": "indigo",
+        "pedagogyTip": "Subtracting all is the complementary zero rule: the equal operands matter, not merely the appearance of a zero.",
+        "standards": [
+          "CCSS.1.OA.C.6"
+        ],
+        "trajectoryLevel": "find-result",
+        "ageBand": [
+          5,
+          7
+        ]
+      },
+      {
+        "id": "subtract-one",
+        "title": "Subtract One",
+        "concept": "One Less Is the Previous Number",
+        "conceptKey": "previous-number-subtractor",
+        "requires": [
+          "count-back"
+        ],
+        "activity": "subtraction/tray",
+        "params": {
+          "level": 9,
+          "question": {
+            "mode": "subtract_one",
+            "minuendRange": [
+              1,
+              20
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "remove_tray",
+            "tier": "beginner",
+            "difficultyColor": "violet",
+            "category": "Number Rules",
+            "shortDesc": "Move to the previous counting number when one is taken away",
+            "targetObjective": "One less is the number immediately before.",
+            "stepByStep": [
+              "Say the starting number.",
+              "Take one backward step.",
+              "The number just before it is one less."
+            ],
+            "kidTip": "One less is the previous number.",
+            "audioPrompt": "Subtract one. Say the number immediately before the starting number.",
+            "prompts": {
+              "default": "What is one less than {a}?"
+            }
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "⚡",
+        "iconName": "zap",
+        "iconTone": "indigo",
+        "pedagogyTip": "Linking one less to the counting sequence turns a memorised fact into a reusable relationship.",
+        "standards": [
+          "CCSS.1.OA.C.5",
+          "CCSS.1.OA.C.6"
+        ],
+        "trajectoryLevel": "counting-strategies",
+        "ageBand": [
+          5,
+          7
+        ]
+      },
+      {
+        "id": "use-fingers",
+        "title": "Use Your Fingers",
+        "concept": "Lowering Fingers to Model Taking Away",
+        "conceptKey": "finger-subtractor",
+        "requires": [
+          "remover"
+        ],
+        "activity": "subtraction/tray",
+        "params": {
+          "level": 10,
+          "question": {
+            "mode": "fingers",
+            "minuendRange": [
+              1,
+              10
+            ],
+            "subtrahendRange": [
+              1,
+              10
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "remove_tray",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Taking Away",
+            "shortDesc": "Raise the whole on your fingers, lower the removed part, and count what remains",
+            "targetObjective": "Model subtraction with fingers you raise and lower.",
+            "stepByStep": [
+              "Raise the starting number of fingers.",
+              "Lower the number being taken away.",
+              "Count the fingers that stay raised."
+            ],
+            "kidTip": "Lower only the fingers being taken away.",
+            "audioPrompt": "Use your fingers. Raise the whole, lower the part taken away, and count what stays up.",
+            "prompts": {
+              "default": "Show {a} fingers. Lower {b}. How many stay up?"
+            }
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "🖐️",
+        "iconName": "sparkles",
+        "iconTone": "pink",
+        "pedagogyTip": "Fingers make the whole, removed part, and remainder simultaneously visible; they are a legitimate model, not a habit to hide.",
+        "standards": [],
+        "trajectoryLevel": "counting-strategies",
+        "ageBand": [
+          5,
+          7
+        ]
+      },
+      {
+        "id": "five-frame",
+        "title": "Subtract in a Five-Frame",
+        "concept": "Seeing What Remains within Five",
+        "conceptKey": "five-benchmark",
+        "requires": [
+          "remover"
+        ],
+        "activity": "subtraction/frames",
+        "params": {
+          "level": 11,
+          "question": {
+            "mode": "five",
+            "minuendRange": [
+              2,
+              5
+            ],
+            "subtrahendRange": [
+              1,
+              4
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "frame_takeaway",
+            "tier": "beginner",
+            "difficultyColor": "violet",
+            "category": "Frames",
+            "shortDesc": "Remove counters while keeping the five-frame pattern visible",
+            "targetObjective": "Take counters from a five-frame and read what remains.",
+            "stepByStep": [
+              "See the starting number in the row of five.",
+              "Take out the named number of counters.",
+              "Read the pattern that remains without rearranging it."
+            ],
+            "kidTip": "Keep the frame in its row. Take counters out without moving the others.",
+            "audioPrompt": "Five-frame subtraction. Take counters out and read how many remain.",
+            "prompts": {
+              "default": "Take {b} counters out of the five-frame. How many remain?"
+            }
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "🖐️",
+        "iconName": "layers",
+        "iconTone": "purple",
+        "pedagogyTip": "The fixed row lets a child see a remainder as its distance from five, while the faint removed marks preserve the starting quantity.",
+        "standards": [
+          "CCSS.K.OA.A.5"
+        ],
+        "trajectoryLevel": "benchmark-five",
+        "ageBand": [
+          5,
+          6
+        ]
+      },
+      {
+        "id": "ten-frame",
+        "title": "Subtract in a Ten-Frame",
+        "concept": "Seeing What Remains within Ten",
+        "conceptKey": "ten-frame-subtractor",
+        "requires": [
+          "five-benchmark"
+        ],
+        "activity": "subtraction/frames",
+        "params": {
+          "level": 12,
+          "question": {
+            "mode": "ten",
+            "minuendRange": [
+              3,
+              10
+            ],
+            "subtrahendRange": [
+              1,
+              9
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "frame_takeaway",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Frames",
+            "shortDesc": "Remove counters from two rows of five and read the remaining pattern",
+            "targetObjective": "Use the five-and-five structure to subtract within ten.",
+            "stepByStep": [
+              "Read the starting counters in rows of five.",
+              "Take out the named number without moving the others.",
+              "Use the full row and empty spaces to see the remainder."
+            ],
+            "kidTip": "A full row is five. Keep that structure while counters leave.",
+            "audioPrompt": "Ten-frame subtraction. Remove the named counters and read what is left.",
+            "prompts": {
+              "default": "Take {b} counters out of the ten-frame. How many remain?"
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "🔟",
+        "iconName": "boxes",
+        "iconTone": "purple",
+        "pedagogyTip": "A ten-frame turns subtraction facts into recognisable five-and-ten relationships instead of another count from one.",
+        "standards": [
+          "CCSS.1.OA.C.6"
+        ],
+        "trajectoryLevel": "benchmark-ten",
+        "ageBand": [
+          5,
+          7
+        ]
+      },
+      {
+        "id": "number-bonds",
+        "title": "Find the Missing Part",
+        "concept": "Whole and Parts in Subtraction",
+        "conceptKey": "part-whole-decomposer",
+        "requires": [
+          "remover"
+        ],
+        "activity": "subtraction/bonds",
+        "params": {
+          "level": 13,
+          "question": {
+            "mode": "part_unknown",
+            "minuendRange": [
+              3,
+              10
+            ],
+            "subtrahendRange": [
+              1,
+              9
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "bond_house",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Parts and Wholes",
+            "shortDesc": "Use the whole and one known part to find the other part",
+            "targetObjective": "Find the missing part that completes a whole.",
+            "stepByStep": [
+              "Read the whole at the top of the bond.",
+              "Read the known removed part below it.",
+              "Choose the remaining part that makes both parts equal the whole."
+            ],
+            "kidTip": "The two parts must make the whole.",
+            "audioPrompt": "Complete the number bond. Use the whole and one part to find the missing part.",
+            "prompts": {
+              "default": "{a} is the whole. One part is {b}. What is the missing part?"
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "💎",
+        "iconName": "gem",
+        "iconTone": "emerald",
+        "pedagogyTip": "The labels keep operand roles stable: the subtrahend is the removed part and the difference is the remaining part, even when a different box is unknown later.",
+        "standards": [
+          "CCSS.K.OA.A.3",
+          "CCSS.1.OA.B.4"
+        ],
+        "trajectoryLevel": "part-whole",
+        "ageBand": [
+          5,
+          7
+        ]
+      },
+      {
+        "id": "number-path-back",
+        "title": "Move Back on a Number Path",
+        "concept": "Backward Unit Jumps from the Minuend",
+        "conceptKey": "backward-number-path",
+        "requires": [
+          "count-back"
+        ],
+        "activity": "subtraction/numberline",
+        "params": {
+          "level": 14,
+          "question": {
+            "mode": "path_back",
+            "minuendRange": [
+              3,
+              20
+            ],
+            "subtrahendRange": [
+              1,
+              9
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "difference_line",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Number Lines",
+            "shortDesc": "Start at the whole and keep every one-step backward jump visible",
+            "targetObjective": "Move backward one number for each unit subtracted.",
+            "stepByStep": [
+              "Find the minuend on the numbered path.",
+              "Make one backward jump for each unit being subtracted.",
+              "The number where you stop is the difference."
+            ],
+            "kidTip": "Backward jumps make the number smaller.",
+            "audioPrompt": "Move back on the number path. Start at the whole and jump left once for each unit taken away.",
+            "prompts": {
+              "default": "Start at {a} and move back {b}."
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "👣",
+        "iconName": "footprints",
+        "iconTone": "cyan",
+        "pedagogyTip": "Numbered unit intervals connect object removal to movement while retaining every jump as visible mathematical working.",
+        "standards": [
+          "CCSS.1.OA.C.5"
+        ],
+        "trajectoryLevel": "number-path",
+        "ageBand": [
+          5,
+          7
+        ]
+      },
+      {
+        "id": "open-number-line-back",
+        "title": "Subtract on an Open Number Line",
+        "concept": "Backward Jumps without Printed Intermediate Numbers",
+        "conceptKey": "subtraction-number-line",
+        "requires": [
+          "backward-number-path"
+        ],
+        "activity": "subtraction/numberline",
+        "params": {
+          "level": 15,
+          "question": {
+            "mode": "open_back",
+            "minuendRange": [
+              20,
+              100
+            ],
+            "subtrahendRange": [
+              2,
+              29
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "difference_line",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Number Lines",
+            "shortDesc": "Make a backward jump and calculate its unlabelled landing point",
+            "targetObjective": "Track subtraction on an open number line.",
+            "stepByStep": [
+              "Mark the minuend as the starting point.",
+              "Jump left by the subtrahend.",
+              "Work out the landing value because the open line does not print it."
+            ],
+            "kidTip": "The line is open, so keep the landing number in your head.",
+            "audioPrompt": "Use an open number line. Jump backward from the minuend and work out where you land.",
+            "prompts": {
+              "default": "Start at {a}. Jump back {b}. Where do you land?"
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "〰️",
+        "iconName": "waves",
+        "iconTone": "cyan",
+        "pedagogyTip": "Removing intermediate labels shifts the work from reading a scale to calculating and recording a purposeful jump.",
+        "standards": [
+          "CCSS.2.NBT.B.5"
+        ],
+        "trajectoryLevel": "open-number-line",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "count-up-for-difference",
+        "title": "Count Up to Find the Difference",
+        "concept": "Measuring the Gap between Two Numbers",
+        "conceptKey": "difference-finder",
+        "requires": [
+          "comparer",
+          "subtraction-number-line"
+        ],
+        "activity": "subtraction/numberline",
+        "params": {
+          "level": 16,
+          "question": {
+            "mode": "count_up",
+            "minuendRange": [
+              10,
+              100
+            ],
+            "subtrahendRange": [
+              1,
+              99
+            ],
+            "differenceRange": [
+              1,
+              10
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "difference_line",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Comparing",
+            "shortDesc": "Start at the smaller number and count forward to measure a short gap",
+            "targetObjective": "Count up when the difference is small.",
+            "stepByStep": [
+              "Start at the subtrahend, the smaller endpoint.",
+              "Count forward until you reach the minuend.",
+              "Count the jumps—the distance—not the landing number."
+            ],
+            "kidTip": "Count the distance, not the number you land on.",
+            "audioPrompt": "Count up to find the difference. Start at the smaller number and measure the short gap.",
+            "prompts": {
+              "default": "Start at {b}. Count up to {a}. How big is the difference?"
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "⚖️",
+        "iconName": "scale",
+        "iconTone": "cyan",
+        "pedagogyTip": "For 83 minus 79, four forward counts are more efficient and less error-prone than seventy-nine backward counts; the number shape should choose the strategy.",
+        "standards": [
+          "CCSS.1.OA.B.4",
+          "CCSS.2.NBT.B.5"
+        ],
+        "trajectoryLevel": "compare-difference",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "fact-families",
+        "title": "Use Fact Families",
+        "concept": "Four Equations from One Part–Whole Relationship",
+        "conceptKey": "fact-family",
+        "requires": [
+          "part-whole-decomposer",
+          "subtraction-equation-reader"
+        ],
+        "activity": "subtraction/facts",
+        "params": {
+          "level": 17,
+          "question": {
+            "mode": "family",
+            "minuendRange": [
+              3,
+              18
+            ],
+            "subtrahendRange": [
+              1,
+              9
+            ],
+            "differenceRange": [
+              1,
+              9
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "fact_deck",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Related Facts",
+            "shortDesc": "Build two addition and two subtraction equations from the same whole and parts",
+            "targetObjective": "Write all four facts in a part–whole family.",
+            "stepByStep": [
+              "Identify the whole and its two parts.",
+              "Write both addition orders with the whole as their total.",
+              "Write both subtractions with the whole first, then check all four together."
+            ],
+            "kidTip": "The same three numbers make two additions and two subtractions.",
+            "audioPrompt": "Use a fact family. Build two additions and two subtractions from the same three numbers.",
+            "prompts": {
+              "default": "{b}, {difference}, and {a} make a fact family. Complete all four facts."
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "💎",
+        "iconName": "gem",
+        "iconTone": "emerald",
+        "pedagogyTip": "One Check keeps the four equations as one relationship; scoring each blank separately would turn a structural idea into four unrelated quiz items.",
+        "standards": [
+          "CCSS.1.OA.B.4"
+        ],
+        "trajectoryLevel": "related-facts",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "think-addition",
+        "title": "Think Addition",
+        "concept": "Subtraction as a Missing-Addend Question",
+        "conceptKey": "missing-addend",
+        "requires": [
+          "fact-family"
+        ],
+        "activity": "subtraction/facts",
+        "params": {
+          "level": 18,
+          "question": {
+            "mode": "missing_addend",
+            "minuendRange": [
+              3,
+              20
+            ],
+            "subtrahendRange": [
+              1,
+              19
+            ],
+            "differenceRange": [
+              1,
+              19
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "fact_deck",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Related Facts",
+            "shortDesc": "Turn whole minus part into a known part plus a missing part",
+            "targetObjective": "Use addition to find an unknown subtraction difference.",
+            "stepByStep": [
+              "Keep the subtrahend as the known part.",
+              "Choose the addition equation that reaches the minuend whole.",
+              "Find the missing addend; it is also the subtraction difference."
+            ],
+            "kidTip": "Think: known part plus what makes the whole?",
+            "audioPrompt": "Think addition. Turn the subtraction into a missing-addend equation, then find the missing part.",
+            "prompts": {
+              "default": "{a} minus {b}. Which addition equation finds the missing part?"
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "🔍",
+        "iconName": "search",
+        "iconTone": "cyan",
+        "pedagogyTip": "The inverse relationship makes subtraction answerable from facts the child already knows and prepares unknown-position equations without keyword shortcuts.",
+        "standards": [
+          "CCSS.1.OA.B.4",
+          "CCSS.1.OA.D.8"
+        ],
+        "trajectoryLevel": "related-facts",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "subtract-with-doubles",
+        "title": "Use Doubles to Subtract",
+        "concept": "An Equal Part Removed from Its Double",
+        "conceptKey": "doubles-knower",
+        "requires": [
+          "fact-family"
+        ],
+        "activity": "subtraction/facts",
+        "params": {
+          "level": 19,
+          "question": {
+            "mode": "doubles",
+            "nRange": [
+              2,
+              10
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "fact_deck",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Related Facts",
+            "shortDesc": "Use a known double to see what remains when one equal part is removed",
+            "targetObjective": "Undo a doubles fact with subtraction.",
+            "stepByStep": [
+              "Read the known double as two equal parts.",
+              "Remove one of those equal parts from the whole.",
+              "The other equal part remains."
+            ],
+            "kidTip": "A double has two equal parts.",
+            "audioPrompt": "Use doubles to subtract. The whole has two equal parts, so remove one and read the other.",
+            "prompts": {
+              "default": "Use the double to solve {a} minus {b}."
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "⚡",
+        "iconName": "zap",
+        "iconTone": "pink",
+        "pedagogyTip": "The displayed addition fact is the reason, not decorative help: if n plus n makes two n, removing either n must leave the other.",
+        "standards": [
+          "CCSS.1.OA.C.6"
+        ],
+        "trajectoryLevel": "derived-facts",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "subtract-from-5",
+        "title": "Recall Facts from Five",
+        "concept": "The Partners That Make Five",
+        "conceptKey": "five-benchmark",
+        "requires": [
+          "five-benchmark"
+        ],
+        "activity": "subtraction/frames",
+        "params": {
+          "level": 20,
+          "question": {
+            "mode": "from_five",
+            "subtrahendRange": [
+              1,
+              4
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "frame_takeaway",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Frames",
+            "shortDesc": "Say what is left from five, then let the frame confirm the partner",
+            "targetObjective": "Recall the subtraction facts from five.",
+            "stepByStep": [
+              "Hold the five-frame in your mind, full.",
+              "Say how many are left when the named part goes.",
+              "Watch the frame cross them out and check your answer."
+            ],
+            "kidTip": "Remember the partners that make five.",
+            "audioPrompt": "Recall facts from five. Say what is left, then check the frame.",
+            "prompts": {
+              "default": "Five take away {b}. How many are left?"
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "🖐️",
+        "iconName": "layers",
+        "iconTone": "purple",
+        "pedagogyTip": "The frame answers second on purpose: a child who can already see the counters is counting, not recalling, and level 11 has taught that counting already.",
+        "standards": [
+          "CCSS.K.OA.A.5"
+        ],
+        "trajectoryLevel": "benchmark-five",
+        "ageBand": [
+          5,
+          7
+        ]
+      },
+      {
+        "id": "subtract-from-10",
+        "title": "Recall Facts from Ten",
+        "concept": "The Partners That Make Ten",
+        "conceptKey": "make-ten",
+        "requires": [
+          "five-benchmark",
+          "ten-frame-subtractor"
+        ],
+        "activity": "subtraction/frames",
+        "params": {
+          "level": 21,
+          "question": {
+            "mode": "from_ten",
+            "subtrahendRange": [
+              1,
+              9
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "frame_takeaway",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Frames",
+            "shortDesc": "Say the partner of ten from memory, then let the frame confirm it",
+            "targetObjective": "Recall the subtraction facts from ten.",
+            "stepByStep": [
+              "Picture the full ten-frame.",
+              "Say the partner that goes with the named part.",
+              "Let the frame cross them out and check your answer."
+            ],
+            "kidTip": "The two partners of ten always make ten.",
+            "audioPrompt": "Recall facts from ten. Say the partner, then check the frame.",
+            "prompts": {
+              "default": "Ten take away {b}. How many are left?"
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "🔟",
+        "iconName": "boxes",
+        "iconTone": "purple",
+        "pedagogyTip": "Complements of ten are the same relationship the child met making ten in addition, so this reuses that concept key rather than opening a second record for it.",
+        "standards": [
+          "CCSS.K.OA.A.4",
+          "CCSS.1.OA.C.6"
+        ],
+        "trajectoryLevel": "benchmark-ten",
+        "ageBand": [
+          5,
+          7
+        ]
+      },
+      {
+        "id": "bridge-through-10",
+        "title": "Bridge Through Ten",
+        "concept": "Landing on Ten Before Subtracting the Rest",
+        "conceptKey": "bridging-ten",
+        "requires": [
+          "make-ten",
+          "backward-number-path"
+        ],
+        "activity": "subtraction/numberline",
+        "params": {
+          "level": 22,
+          "question": {
+            "mode": "bridge_ten",
+            "minuendRange": [
+              11,
+              19
+            ],
+            "subtrahendRange": [
+              2,
+              9
+            ],
+            "differenceRange": [
+              1,
+              9
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "difference_line",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Number Lines",
+            "shortDesc": "Jump back to ten first, then subtract whatever is left of the part",
+            "targetObjective": "Split a subtrahend so one jump lands on ten.",
+            "stepByStep": [
+              "Work out how far the whole is above ten.",
+              "Jump back that far to land exactly on ten.",
+              "Subtract the rest of the part from ten."
+            ],
+            "kidTip": "Land on ten first; the rest is easier from there.",
+            "audioPrompt": "Bridge through ten. Jump back to ten, then subtract what is left of the part.",
+            "prompts": {
+              "default": "{a} minus {b}. Jump back through ten."
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🌉",
+        "iconName": "waves",
+        "iconTone": "cyan",
+        "pedagogyTip": "Ten is the landmark that makes the second jump a known fact, which is why the split is chosen by the numbers rather than always cutting the part in half.",
+        "standards": [
+          "CCSS.1.OA.C.6"
+        ],
+        "trajectoryLevel": "bridging",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "bridge-through-100",
+        "title": "Bridge Through One Hundred",
+        "concept": "Landing on a Hundred Before Subtracting the Rest",
+        "conceptKey": "bridging-hundred",
+        "requires": [
+          "bridging-ten"
+        ],
+        "activity": "subtraction/numberline",
+        "params": {
+          "level": 23,
+          "question": {
+            "mode": "bridge_hundred",
+            "minuendRange": [
+              101,
+              199
+            ],
+            "subtrahendRange": [
+              2,
+              99
+            ],
+            "differenceRange": [
+              2,
+              99
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "difference_line",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Number Lines",
+            "shortDesc": "Use one hundred as the landmark, then subtract the remaining part",
+            "targetObjective": "Split a subtrahend so one jump lands on one hundred.",
+            "stepByStep": [
+              "Find how far the whole is above one hundred.",
+              "Jump back that far to land exactly on one hundred.",
+              "Subtract the rest of the part from one hundred."
+            ],
+            "kidTip": "One hundred is the landmark; land there first.",
+            "audioPrompt": "Bridge through one hundred. Land on the hundred, then subtract the rest.",
+            "prompts": {
+              "default": "{a} minus {b}. Jump back through one hundred."
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "💯",
+        "iconName": "waves",
+        "iconTone": "cyan",
+        "pedagogyTip": "The same bridging move at a larger place value shows the strategy belongs to the structure of the number system, not to the numbers under twenty where it was learned.",
+        "standards": [
+          "CCSS.2.NBT.B.7"
+        ],
+        "trajectoryLevel": "bridging",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "use-a-known-fact",
+        "title": "Use a Known Fact",
+        "concept": "Deriving a Fact from Its Neighbour",
+        "conceptKey": "known-fact-user",
+        "requires": [
+          "fact-family"
+        ],
+        "activity": "subtraction/facts",
+        "params": {
+          "level": 24,
+          "question": {
+            "mode": "known_fact",
+            "minuendRange": [
+              5,
+              20
+            ],
+            "subtrahendRange": [
+              2,
+              18
+            ],
+            "differenceRange": [
+              1,
+              18
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "fact_deck",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Related Facts",
+            "shortDesc": "Pick a fact you already know that is one step away, then adjust once",
+            "targetObjective": "Derive an unknown fact from a known neighbour.",
+            "stepByStep": [
+              "Find the offered fact with the same whole, one step from this one.",
+              "Read the answer you already know.",
+              "Adjust it by one in the right direction."
+            ],
+            "kidTip": "Use a nearby fact, then adjust by one.",
+            "audioPrompt": "Use a known fact. Choose the fact one step away, then adjust your answer by one.",
+            "prompts": {
+              "default": "{a} minus {b}. Which nearby fact helps?"
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🔑",
+        "iconName": "search",
+        "iconTone": "emerald",
+        "pedagogyTip": "Taking one more away makes the answer one smaller, and one fewer makes it one larger; naming that direction is the whole lesson, so the offered facts never include the target itself.",
+        "standards": [
+          "CCSS.1.OA.C.6"
+        ],
+        "trajectoryLevel": "derived-facts",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "compensation",
+        "title": "Subtract a Friendly Number, Then Adjust",
+        "concept": "Rounding the Part Up and Giving Back the Extra",
+        "conceptKey": "compensator",
+        "requires": [
+          "subtraction-number-line"
+        ],
+        "activity": "subtraction/numberline",
+        "params": {
+          "level": 25,
+          "question": {
+            "mode": "compensate_subtrahend",
+            "minuendRange": [
+              30,
+              99
+            ],
+            "subtrahendRange": [
+              18,
+              79
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "difference_line",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Mental Strategies",
+            "shortDesc": "Take away the next whole ten, then hand back the extra you took",
+            "targetObjective": "Subtract a friendly number and compensate.",
+            "stepByStep": [
+              "Round the part up to the next ten.",
+              "Jump back by that friendly number.",
+              "Jump forward by the extra you took away."
+            ],
+            "kidTip": "You took too much, so give the extra back.",
+            "audioPrompt": "Subtract a friendly number, then adjust. Take the whole ten, then give back the extra.",
+            "prompts": {
+              "default": "{a} minus {b}. Subtract a friendly ten, then adjust."
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "↩️",
+        "iconName": "waves",
+        "iconTone": "cyan",
+        "pedagogyTip": "The forward jump is the lesson: taking away too much has to be undone in the opposite direction, which is what separates compensation from a guess.",
+        "standards": [
+          "CCSS.2.NBT.B.5",
+          "CCSS.2.NBT.B.9"
+        ],
+        "trajectoryLevel": "mental-strategies",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "constant-difference",
+        "title": "Keep the Same Difference",
+        "concept": "Shifting Both Numbers by the Same Amount",
+        "conceptKey": "constant-difference",
+        "requires": [
+          "difference-finder",
+          "compensator"
+        ],
+        "activity": "subtraction/numberline",
+        "params": {
+          "level": 26,
+          "question": {
+            "mode": "constant_difference",
+            "minuendRange": [
+              30,
+              99
+            ],
+            "subtrahendRange": [
+              11,
+              79
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "difference_line",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Mental Strategies",
+            "shortDesc": "Slide both numbers up together until the part becomes a friendly ten",
+            "targetObjective": "Keep a difference unchanged by shifting both operands.",
+            "stepByStep": [
+              "Work out what the part needs to reach the next ten.",
+              "Add that same amount to both numbers.",
+              "Subtract the new friendly pair; the gap has not moved."
+            ],
+            "kidTip": "Move both numbers the same, and the gap stays the same.",
+            "audioPrompt": "Keep the same difference. Slide both numbers up by the same amount, then subtract.",
+            "prompts": {
+              "default": "{a} minus {b}. Shift both numbers to keep the same difference."
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "⚖️",
+        "iconName": "scale",
+        "iconTone": "cyan",
+        "pedagogyTip": "Changing only one operand changes the answer; the difference survives only because both endpoints move together, which the two arrows on the line are there to show.",
+        "standards": [
+          "CCSS.2.NBT.B.5",
+          "CCSS.2.NBT.B.9"
+        ],
+        "trajectoryLevel": "mental-strategies",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "base-ten-blocks",
+        "title": "Use Base-Ten Blocks",
+        "concept": "Subtracting Whole Units of Each Place",
+        "conceptKey": "base-ten-subtractor",
+        "requires": [
+          "remover",
+          "place-value-builder"
+        ],
+        "activity": "subtraction/base10",
+        "params": {
+          "level": 27,
+          "question": {
+            "mode": "build_subtract",
+            "minuendRange": [
+              21,
+              99
+            ],
+            "subtrahendRange": [
+              10,
+              88
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "block_exchange",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Place Value",
+            "shortDesc": "Take whole rods and units off the desk, then read what is left",
+            "targetObjective": "Subtract two-digit numbers with base-ten blocks.",
+            "stepByStep": [
+              "Read how many rods and units the desk holds.",
+              "Take away the rods and units the question names.",
+              "Read the value of the blocks that remain."
+            ],
+            "kidTip": "Rods come off with rods, units with units.",
+            "audioPrompt": "Use base-ten blocks. Take away the rods and units, then read what remains.",
+            "prompts": {
+              "default": "{a} minus {b}. Take the blocks away."
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "🧱",
+        "iconName": "boxes",
+        "iconTone": "purple",
+        "pedagogyTip": "Every column here already has enough to give, so the child meets the place-value structure before meeting the exchange that complicates it.",
+        "standards": [
+          "CCSS.2.NBT.B.5"
+        ],
+        "trajectoryLevel": "place-value",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "place-value-chart",
+        "title": "Use a Place-Value Chart",
+        "concept": "Subtracting Column by Column",
+        "conceptKey": "place-value-builder",
+        "requires": [
+          "base-ten-subtractor"
+        ],
+        "activity": "subtraction/chart",
+        "params": {
+          "level": 28,
+          "question": {
+            "mode": "chart_subtract",
+            "minuendRange": [
+              21,
+              99
+            ],
+            "subtrahendRange": [
+              10,
+              88
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "place_value_desk",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Place Value",
+            "shortDesc": "Line the digits up by place and subtract each column on its own",
+            "targetObjective": "Record subtraction in a place-value chart.",
+            "stepByStep": [
+              "Check that the digits line up under T and O.",
+              "Subtract the ones column.",
+              "Subtract the tens column, then read the answer row."
+            ],
+            "kidTip": "Each column only uses its own two digits.",
+            "audioPrompt": "Use a place-value chart. Subtract each column on its own.",
+            "prompts": {
+              "default": "{a} minus {b}. Fill the answer row of the chart."
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "📊",
+        "iconName": "layers",
+        "iconTone": "indigo",
+        "pedagogyTip": "The chart is the blocks with the pictures removed: the same columns, so a child who can move rods can see why the digits may not be mixed between them.",
+        "standards": [
+          "CCSS.2.NBT.B.5"
+        ],
+        "trajectoryLevel": "place-value",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "subtract-multiples-of-10",
+        "title": "Subtract Multiples of Ten",
+        "concept": "Whole Tens Taken from Whole Tens",
+        "conceptKey": "tens-subtractor",
+        "requires": [
+          "base-ten-subtractor"
+        ],
+        "activity": "subtraction/base10",
+        "params": {
+          "level": 29,
+          "question": {
+            "mode": "multiples_ten",
+            "minuendRange": [
+              20,
+              100
+            ],
+            "subtrahendRange": [
+              10,
+              90
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "block_exchange",
+            "tier": "intermediate",
+            "difficultyColor": "violet",
+            "category": "Place Value",
+            "shortDesc": "Count in whole rods when nothing but tens is involved",
+            "targetObjective": "Subtract multiples of ten within one hundred.",
+            "stepByStep": [
+              "Notice the desk holds only ten-rods.",
+              "Take away the number of rods the question names.",
+              "Count the rods left in tens."
+            ],
+            "kidTip": "Count the rods, then say them in tens.",
+            "audioPrompt": "Subtract multiples of ten. Take whole rods away and count what is left in tens.",
+            "prompts": {
+              "default": "{a} minus {b}. Take away whole ten-rods."
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "🔟",
+        "iconName": "boxes",
+        "iconTone": "purple",
+        "pedagogyTip": "Seven rods minus three rods is four rods, exactly as seven minus three is four; naming that likeness is what makes multiples of ten a known fact rather than a new one.",
+        "standards": [
+          "CCSS.1.NBT.C.6"
+        ],
+        "trajectoryLevel": "place-value",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "subtract-multiples-of-100",
+        "title": "Subtract Multiples of One Hundred",
+        "concept": "Whole Hundreds Taken from Whole Hundreds",
+        "conceptKey": "hundreds-subtractor",
+        "requires": [
+          "tens-subtractor"
+        ],
+        "activity": "subtraction/base10",
+        "params": {
+          "level": 30,
+          "question": {
+            "mode": "multiples_hundred",
+            "minuendRange": [
+              200,
+              900
+            ],
+            "subtrahendRange": [
+              100,
+              800
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "block_exchange",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Place Value",
+            "shortDesc": "Count in whole flats when nothing but hundreds is involved",
+            "targetObjective": "Subtract multiples of one hundred within one thousand.",
+            "stepByStep": [
+              "Notice the desk holds only hundred-flats.",
+              "Take away the number of flats the question names.",
+              "Count the flats left in hundreds."
+            ],
+            "kidTip": "Count the flats, then say them in hundreds.",
+            "audioPrompt": "Subtract multiples of one hundred. Take whole flats away and count what is left.",
+            "prompts": {
+              "default": "{a} minus {b}. Take away whole hundred-flats."
+            }
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "💯",
+        "iconName": "boxes",
+        "iconTone": "purple",
+        "pedagogyTip": "The same small fact reappears one place further left, which is the whole argument for place value and worth saying out loud rather than leaving to be noticed.",
+        "standards": [
+          "CCSS.2.NBT.B.8"
+        ],
+        "trajectoryLevel": "place-value",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "subtract-tens-then-ones",
+        "title": "Subtract Tens, Then Ones",
+        "concept": "Splitting a Subtrahend by Place on a Line",
+        "conceptKey": "backward-jump-strategy",
+        "requires": [
+          "subtraction-number-line",
+          "place-value-builder"
+        ],
+        "activity": "subtraction/numberline",
+        "params": {
+          "level": 31,
+          "question": {
+            "mode": "jump_tens_ones",
+            "minuendRange": [
+              21,
+              99
+            ],
+            "subtrahendRange": [
+              10,
+              88
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "difference_line",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Number Lines",
+            "shortDesc": "Jump back the tens and the ones as two separate moves",
+            "targetObjective": "Subtract a two-digit number in two place-value jumps.",
+            "stepByStep": [
+              "Split the part into its tens and its ones.",
+              "Jump back the tens.",
+              "Jump back the ones, in either order."
+            ],
+            "kidTip": "Two jumps: the tens and the ones.",
+            "audioPrompt": "Subtract tens, then ones. Split the part by place and make two jumps.",
+            "prompts": {
+              "default": "{a} minus {b}. Jump back the tens and the ones."
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "👣",
+        "iconName": "footprints",
+        "iconTone": "cyan",
+        "pedagogyTip": "Either order lands on the same number, so this mode accepts both: insisting on tens first would teach a rule where the point is that place value makes the order free.",
+        "standards": [
+          "CCSS.2.NBT.B.5"
+        ],
+        "trajectoryLevel": "place-value",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "subtract-hundreds-tens-ones",
+        "title": "Subtract Hundreds, Tens, and Ones",
+        "concept": "Three Columns, Each Subtracted Alone",
+        "conceptKey": "place-value-builder",
+        "requires": [
+          "place-value-builder"
+        ],
+        "activity": "subtraction/chart",
+        "params": {
+          "level": 32,
+          "question": {
+            "mode": "chart_three",
+            "minuendRange": [
+              200,
+              999
+            ],
+            "subtrahendRange": [
+              100,
+              888
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "place_value_desk",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Place Value",
+            "shortDesc": "Extend the chart to three columns without changing the method",
+            "targetObjective": "Subtract three-digit numbers column by column.",
+            "stepByStep": [
+              "Line the digits up under H, T and O.",
+              "Subtract the ones, then the tens, then the hundreds.",
+              "Read the whole answer row."
+            ],
+            "kidTip": "A third column changes nothing about how each column works.",
+            "audioPrompt": "Subtract hundreds, tens, and ones. Work each column on its own.",
+            "prompts": {
+              "default": "{a} minus {b}. Fill the answer row of the chart."
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "📊",
+        "iconName": "layers",
+        "iconTone": "indigo",
+        "pedagogyTip": "Adding a column is deliberately uneventful; a child who expects a new rule for hundreds has learned the chart as a procedure rather than as places.",
+        "standards": [
+          "CCSS.2.NBT.B.7"
+        ],
+        "trajectoryLevel": "place-value",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "expanded-form",
+        "title": "Use Expanded Form",
+        "concept": "Subtracting Each Place, Then Recombining",
+        "conceptKey": "expanded-form-subtractor",
+        "requires": [
+          "place-value-builder"
+        ],
+        "activity": "subtraction/chart",
+        "params": {
+          "level": 33,
+          "question": {
+            "mode": "expanded",
+            "minuendRange": [
+              21,
+              99
+            ],
+            "subtrahendRange": [
+              10,
+              88
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "place_value_desk",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Written Methods",
+            "shortDesc": "Break both numbers into parts, subtract each, then add the parts back",
+            "targetObjective": "Subtract using expanded form.",
+            "stepByStep": [
+              "Write each number as its tens and its ones.",
+              "Subtract the tens, then subtract the ones.",
+              "Add the two answers back together."
+            ],
+            "kidTip": "Subtract the parts, then put them back together.",
+            "audioPrompt": "Use expanded form. Subtract each part, then add the parts back together.",
+            "prompts": {
+              "default": "{a} minus {b}. Subtract each part, then put them back together."
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🧩",
+        "iconName": "layers",
+        "iconTone": "indigo",
+        "pedagogyTip": "Expanded form is the bridge to the vertical algorithm: it shows the same column work with the place values still written out, before they are compressed into single digits.",
+        "standards": [
+          "CCSS.2.NBT.A.3",
+          "CCSS.2.NBT.B.7"
+        ],
+        "trajectoryLevel": "written-methods",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "check-with-addition",
+        "title": "Check Subtraction with Addition",
+        "concept": "Rebuilding the Whole to Test an Answer",
+        "conceptKey": "subtraction-checker",
+        "requires": [
+          "missing-addend",
+          "place-value-builder"
+        ],
+        "activity": "subtraction/chart",
+        "params": {
+          "level": 34,
+          "question": {
+            "mode": "check_addition",
+            "minuendRange": [
+              21,
+              99
+            ],
+            "subtrahendRange": [
+              10,
+              88
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "place_value_desk",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Written Methods",
+            "shortDesc": "Solve the subtraction, then add your answer back to test it",
+            "targetObjective": "Check a difference by rebuilding the minuend.",
+            "stepByStep": [
+              "Subtract to find the difference.",
+              "Add that difference to the part taken away.",
+              "If it rebuilds the whole, the answer is right."
+            ],
+            "kidTip": "Adding your answer back should rebuild the whole.",
+            "audioPrompt": "Check subtraction with addition. Solve it, then add your answer back to the part taken away.",
+            "prompts": {
+              "default": "{a} minus {b}. Solve it, then check it with addition."
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🔁",
+        "iconName": "search",
+        "iconTone": "emerald",
+        "pedagogyTip": "A check a child can run alone is worth more than a correct answer they cannot test, and it reuses the inverse relationship rather than teaching a separate verification trick.",
+        "standards": [
+          "CCSS.2.NBT.B.5",
+          "CCSS.2.NBT.B.9"
+        ],
+        "trajectoryLevel": "written-methods",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "left-to-right",
+        "title": "Subtract Left to Right",
+        "concept": "Taking the Largest Place Away First",
+        "conceptKey": "left-to-right-subtractor",
+        "requires": [
+          "expanded-form-subtractor"
+        ],
+        "activity": "subtraction/chart",
+        "params": {
+          "level": 35,
+          "question": {
+            "mode": "left_right",
+            "minuendRange": [
+              21,
+              99
+            ],
+            "subtrahendRange": [
+              10,
+              88
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "place_value_desk",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Written Methods",
+            "shortDesc": "Work down from the biggest place, keeping a running total",
+            "targetObjective": "Subtract left to right, one place at a time.",
+            "stepByStep": [
+              "Take away the tens first.",
+              "Take that answer and subtract the ones.",
+              "The last total is the difference."
+            ],
+            "kidTip": "Biggest place first, then work down.",
+            "audioPrompt": "Subtract left to right. Take the biggest place away first, then work down.",
+            "prompts": {
+              "default": "{a} minus {b}. Subtract the biggest place first."
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "⬅️",
+        "iconName": "layers",
+        "iconTone": "indigo",
+        "pedagogyTip": "Mental arithmetic usually runs left to right while the written algorithm runs right to left; meeting both stops a child treating the written direction as the only lawful one.",
+        "standards": [
+          "CCSS.2.NBT.B.5",
+          "CCSS.2.NBT.B.9"
+        ],
+        "trajectoryLevel": "written-methods",
+        "ageBand": [
+          8,
+          9
+        ]
+      },
+      {
+        "id": "exchange-one-ten",
+        "title": "Exchange One Ten for Ten Ones",
+        "concept": "Opening a Rod When the Ones Run Out",
+        "conceptKey": "unbundler-ten",
+        "requires": [
+          "base-ten-subtractor"
+        ],
+        "activity": "subtraction/base10",
+        "params": {
+          "level": 36,
+          "question": {
+            "mode": "trade_ten",
+            "minuendRange": [
+              21,
+              99
+            ],
+            "subtrahendRange": [
+              12,
+              88
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "block_exchange",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Exchanging",
+            "shortDesc": "Break one ten-rod into ten units when there are not enough ones",
+            "targetObjective": "Exchange a ten for ten ones and keep the value.",
+            "stepByStep": [
+              "Check whether the desk has enough units.",
+              "Break one ten-rod into ten units.",
+              "Now take away the units and the rods the question names."
+            ],
+            "kidTip": "Ten units are worth exactly one rod.",
+            "audioPrompt": "Exchange one ten for ten ones. Break a rod when there are not enough units.",
+            "prompts": {
+              "default": "{a} minus {b}. Break a ten before you take the units."
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🔄",
+        "iconName": "boxes",
+        "iconTone": "pink",
+        "pedagogyTip": "Composing a ten and decomposing one are different skills, so this earns its own concept key rather than reusing the one Addition's bundling wrote.",
+        "standards": [
+          "CCSS.2.NBT.B.7"
+        ],
+        "trajectoryLevel": "exchanging",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "exchange-one-hundred",
+        "title": "Exchange One Hundred for Ten Tens",
+        "concept": "Opening a Flat When the Rods Run Out",
+        "conceptKey": "unbundler-hundred",
+        "requires": [
+          "unbundler-ten"
+        ],
+        "activity": "subtraction/base10",
+        "params": {
+          "level": 37,
+          "question": {
+            "mode": "trade_hundred",
+            "minuendRange": [
+              201,
+              999
+            ],
+            "subtrahendRange": [
+              110,
+              899
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "block_exchange",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Exchanging",
+            "shortDesc": "Break one hundred-flat into ten rods when there are not enough tens",
+            "targetObjective": "Exchange a hundred for ten tens and keep the value.",
+            "stepByStep": [
+              "Check whether the desk has enough ten-rods.",
+              "Break one hundred-flat into ten rods.",
+              "Now take away the blocks the question names."
+            ],
+            "kidTip": "Ten rods are worth exactly one flat.",
+            "audioPrompt": "Exchange one hundred for ten tens. Break a flat when there are not enough rods.",
+            "prompts": {
+              "default": "{a} minus {b}. Break a hundred before you take the rods."
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🔄",
+        "iconName": "boxes",
+        "iconTone": "pink",
+        "pedagogyTip": "The same move one place further left, so a child can see that exchanging is a rule about the number system rather than a trick that only works with ones.",
+        "standards": [
+          "CCSS.2.NBT.B.7"
+        ],
+        "trajectoryLevel": "exchanging",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "standard-algorithm",
+        "title": "Use the Vertical Algorithm",
+        "concept": "Recording an Exchange in Columns",
+        "conceptKey": "standard-subtraction-algorithm",
+        "requires": [
+          "unbundler-ten",
+          "place-value-builder"
+        ],
+        "activity": "subtraction/column",
+        "params": {
+          "level": 38,
+          "question": {
+            "mode": "standard",
+            "minuendRange": [
+              21,
+              999
+            ],
+            "subtrahendRange": [
+              12,
+              899
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "column_pad",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Written Methods",
+            "shortDesc": "Set the sum out in columns and write the exchange where it happened",
+            "targetObjective": "Subtract in columns with one exchange.",
+            "stepByStep": [
+              "Start at the ones column.",
+              "If the top digit is too small, exchange one from its left and write both changes.",
+              "Subtract each column and write the digit underneath."
+            ],
+            "kidTip": "Start at the ones and work left.",
+            "audioPrompt": "Use the vertical algorithm. Exchange where you need to, and write down what changed.",
+            "prompts": {
+              "default": "{a} minus {b}. Write it in columns and exchange once."
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "📝",
+        "iconName": "layers",
+        "iconTone": "indigo",
+        "pedagogyTip": "The crossed-out digit and its replacement are written in full because a small unexplained mark above a column is the point at which the algorithm stops meaning anything.",
+        "standards": [
+          "CCSS.2.NBT.B.7",
+          "CCSS.3.NBT.A.2"
+        ],
+        "trajectoryLevel": "written-methods",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "cascading-regrouping",
+        "title": "Use Cascading Regrouping",
+        "concept": "Two Exchanges in One Subtraction",
+        "conceptKey": "subtraction-cascading-regrouper",
+        "requires": [
+          "standard-subtraction-algorithm"
+        ],
+        "activity": "subtraction/column",
+        "params": {
+          "level": 39,
+          "question": {
+            "mode": "cascade",
+            "minuendRange": [
+              200,
+              999
+            ],
+            "subtrahendRange": [
+              111,
+              899
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "column_pad",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Written Methods",
+            "shortDesc": "Exchange twice when both the ones and the tens run short",
+            "targetObjective": "Subtract in columns with two exchanges.",
+            "stepByStep": [
+              "Exchange into the ones and subtract them.",
+              "Now check the tens; they may be short too.",
+              "Exchange into the tens, then finish every column."
+            ],
+            "kidTip": "One exchange can leave the next column short.",
+            "audioPrompt": "Use cascading regrouping. Exchange into the ones, then check whether the tens need one too.",
+            "prompts": {
+              "default": "{a} minus {b}. This one needs two exchanges."
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "⛓️",
+        "iconName": "layers",
+        "iconTone": "indigo",
+        "pedagogyTip": "The second exchange is caused by the first, which is why the columns must be worked in order rather than scanned for trouble all at once.",
+        "standards": [
+          "CCSS.3.NBT.A.2"
+        ],
+        "trajectoryLevel": "written-methods",
+        "ageBand": [
+          8,
+          9
+        ]
+      },
+      {
+        "id": "regroup-across-zero",
+        "title": "Regroup Across a Zero",
+        "concept": "Opening a Hundred to Reach the Ones",
+        "conceptKey": "zero-regrouper",
+        "requires": [
+          "subtraction-cascading-regrouper"
+        ],
+        "activity": "subtraction/column",
+        "params": {
+          "level": 40,
+          "question": {
+            "mode": "across_zero",
+            "minuendRange": [
+              200,
+              909
+            ],
+            "subtrahendRange": [
+              101,
+              899
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "column_pad",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Written Methods",
+            "shortDesc": "Open a hundred into tens first when the tens column is empty",
+            "targetObjective": "Exchange through a zero column.",
+            "stepByStep": [
+              "The ones are short, but the tens have nothing to give.",
+              "Open one hundred into ten tens first.",
+              "Now take one of those tens into the ones and subtract."
+            ],
+            "kidTip": "An empty column has to be filled before it can give.",
+            "audioPrompt": "Regroup across a zero. Open a hundred into ten tens first, then take one ten into the ones.",
+            "prompts": {
+              "default": "{a} minus {b}. Exchange through the zero."
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "0️⃣",
+        "iconName": "layers",
+        "iconTone": "indigo",
+        "pedagogyTip": "Both exchanges are shown as separate written steps: compressing them into one move is exactly where children learn to produce the right digits without any idea what happened.",
+        "standards": [
+          "CCSS.3.NBT.A.2"
+        ],
+        "trajectoryLevel": "written-methods",
+        "ageBand": [
+          8,
+          9
+        ]
+      },
+      {
+        "id": "estimate-by-rounding",
+        "title": "Estimate by Rounding",
+        "concept": "An Answer That Is About Right",
+        "conceptKey": "rounding-estimator",
+        "requires": [
+          "place-value-builder"
+        ],
+        "activity": "subtraction/estimate",
+        "params": {
+          "level": 41,
+          "question": {
+            "mode": "round_estimate",
+            "digits": 3,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "estimate_dial",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Estimation",
+            "shortDesc": "Round both numbers, then subtract the friendly pair",
+            "targetObjective": "Estimate a difference by rounding.",
+            "stepByStep": [
+              "Round each number to the nearest hundred.",
+              "Subtract the rounded numbers.",
+              "Say the answer as 'about', not as exact."
+            ],
+            "kidTip": "An estimate is about, not exact.",
+            "audioPrompt": "Estimate by rounding. Round both numbers, then subtract the friendly pair.",
+            "prompts": {
+              "default": "About how much is {a} minus {b}?"
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🎯",
+        "iconName": "scale",
+        "iconTone": "cyan",
+        "pedagogyTip": "Neither number is already round, so rounding is real work rather than a step the question has done in advance.",
+        "standards": [
+          "CCSS.3.NBT.A.1"
+        ],
+        "trajectoryLevel": "estimation",
+        "ageBand": [
+          8,
+          9
+        ]
+      },
+      {
+        "id": "is-it-reasonable",
+        "title": "Is the Answer Reasonable?",
+        "concept": "Judging an Answer Against an Estimate",
+        "conceptKey": "reasonableness-checker",
+        "requires": [
+          "rounding-estimator"
+        ],
+        "activity": "subtraction/estimate",
+        "params": {
+          "level": 42,
+          "question": {
+            "mode": "reasonable",
+            "digits": 3,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "estimate_dial",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Estimation",
+            "shortDesc": "Estimate first, then decide whether a claimed answer can be right",
+            "targetObjective": "Judge whether an answer is reasonable, and say why.",
+            "stepByStep": [
+              "Round and estimate the answer for yourself.",
+              "Compare the claim with your estimate.",
+              "Choose the reason that explains the difference."
+            ],
+            "kidTip": "Estimate first, then judge the claim.",
+            "audioPrompt": "Is the answer reasonable? Estimate first, then decide whether the claim can be right.",
+            "prompts": {
+              "default": "Someone says {a} minus {b} is {claim}. Is that reasonable?"
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "⚖️",
+        "iconName": "scale",
+        "iconTone": "cyan",
+        "pedagogyTip": "The wrong claims are the mistakes children actually make, so rejecting one takes a real estimate; an answer twenty times too big would be dismissed on sight without any estimating at all.",
+        "standards": [
+          "CCSS.3.OA.D.8"
+        ],
+        "trajectoryLevel": "estimation",
+        "ageBand": [
+          8,
+          9
+        ]
+      },
+      {
+        "id": "missing-subtrahend",
+        "title": "Find the Missing Part Taken Away",
+        "concept": "The Unknown in the Middle of an Equation",
+        "conceptKey": "missing-subtrahend",
+        "requires": [
+          "part-whole-decomposer",
+          "difference-finder"
+        ],
+        "activity": "subtraction/bonds",
+        "params": {
+          "level": 43,
+          "question": {
+            "mode": "subtrahend_unknown",
+            "minuendRange": [
+              4,
+              20
+            ],
+            "subtrahendRange": [
+              1,
+              19
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "bond_house",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Parts and Wholes",
+            "shortDesc": "Use the whole and what remains to find the part that left",
+            "targetObjective": "Find a missing subtrahend.",
+            "stepByStep": [
+              "Read the whole and the part that remains.",
+              "Find the gap between them.",
+              "That gap is the part that was taken away."
+            ],
+            "kidTip": "Count up from what remains to the whole.",
+            "audioPrompt": "Find the missing part taken away. Use the whole and what remains.",
+            "prompts": {
+              "default": "{a} is the whole and {difference} remains. What part was taken away?"
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "❓",
+        "iconName": "gem",
+        "iconTone": "emerald",
+        "pedagogyTip": "Moving the unknown out of the answer position is what stops subtraction being read as an instruction to perform, and starts it being read as a relationship.",
+        "standards": [
+          "CCSS.1.OA.D.8"
+        ],
+        "trajectoryLevel": "unknown-position",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "missing-minuend",
+        "title": "Find the Missing Whole",
+        "concept": "Rebuilding a Whole from Both Parts",
+        "conceptKey": "missing-minuend",
+        "requires": [
+          "missing-subtrahend"
+        ],
+        "activity": "subtraction/bonds",
+        "params": {
+          "level": 44,
+          "question": {
+            "mode": "minuend_unknown",
+            "minuendRange": [
+              3,
+              20
+            ],
+            "subtrahendRange": [
+              1,
+              10
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "bond_house",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Parts and Wholes",
+            "shortDesc": "Put both parts back together to find where the subtraction started",
+            "targetObjective": "Find a missing minuend.",
+            "stepByStep": [
+              "Read the part taken away and the part that remains.",
+              "Join the two parts.",
+              "Their total is the whole you started with."
+            ],
+            "kidTip": "Both parts together make the whole.",
+            "audioPrompt": "Find the missing whole. Put the part taken away and the part left back together.",
+            "prompts": {
+              "default": "One part is {b} and the other is {difference}. What is the whole?"
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🧩",
+        "iconName": "gem",
+        "iconTone": "emerald",
+        "pedagogyTip": "An unknown start is solved by adding, which is the clearest case of why keyword reading fails: the word is still 'left', but the operation is not subtraction.",
+        "standards": [
+          "CCSS.1.OA.D.8"
+        ],
+        "trajectoryLevel": "unknown-position",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "take-away-result-unknown",
+        "title": "Take Away: How Many Are Left?",
+        "concept": "A Removal Story with the Result Unknown",
+        "conceptKey": "removal-result-modeler",
+        "requires": [
+          "remover",
+          "subtraction-equation-reader"
+        ],
+        "activity": "subtraction/story",
+        "params": {
+          "level": 45,
+          "question": {
+            "mode": "remove_result",
+            "startRange": [
+              5,
+              50
+            ],
+            "changeRange": [
+              1,
+              20
+            ],
+            "templates": [
+              "{who} had {v0} {item} at {place}. {who} gave {v1} away.",
+              "{who} picked {v0} {item}. Then {v1} of them blew away.",
+              "There were {v0} {item} in {who}'s basket. {who} used {v1}."
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "story_board",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Story Problems",
+            "shortDesc": "Model a story where something is taken away and the end amount is unknown",
+            "targetObjective": "Model a take-away story with the result unknown.",
+            "stepByStep": [
+              "Find the amount at the start.",
+              "Find the amount that left.",
+              "The bar that is left is the answer."
+            ],
+            "kidTip": "The start, the change, and what is left are three different numbers.",
+            "audioPrompt": "Take away, result unknown. Find how many are left at the end.",
+            "prompts": {
+              "default": "{who} had {v0} {item}. {who} gave {v1} away. How many are left?"
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "📖",
+        "iconName": "search",
+        "iconTone": "cyan",
+        "pedagogyTip": "The bar model is drawn before the answer is chosen so the child commits to a structure rather than to a guess about which operation the words imply.",
+        "standards": [
+          "CCSS.1.OA.A.1",
+          "CCSS.2.OA.A.1"
+        ],
+        "trajectoryLevel": "story-problems",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "take-away-change-unknown",
+        "title": "Take Away: How Many Left the Group?",
+        "concept": "A Removal Story with the Change Unknown",
+        "conceptKey": "removal-change-modeler",
+        "requires": [
+          "removal-result-modeler"
+        ],
+        "activity": "subtraction/story",
+        "params": {
+          "level": 46,
+          "question": {
+            "mode": "remove_change",
+            "startRange": [
+              8,
+              50
+            ],
+            "resultRange": [
+              1,
+              30
+            ],
+            "templates": [
+              "{who} had {v0} {item}. Now {who} has {v1}.",
+              "{who} started with {v0} {item} and has {v1} left after {place} closed.",
+              "There were {v0} {item} on the shelf. Only {v1} are still there."
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "story_board",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Story Problems",
+            "shortDesc": "Model a story where the amount that left is the unknown",
+            "targetObjective": "Model a take-away story with the change unknown.",
+            "stepByStep": [
+              "Find the amount at the start.",
+              "Find the amount at the end.",
+              "The gap between them is what left."
+            ],
+            "kidTip": "The missing number is the part that went away.",
+            "audioPrompt": "Take away, change unknown. Work out how many left the group.",
+            "prompts": {
+              "default": "{who} had {v0} {item}. Now {who} has {v1}. How many were given away?"
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "📖",
+        "iconName": "search",
+        "iconTone": "cyan",
+        "pedagogyTip": "Nothing in the sentence says 'take away', yet the model is still removal — which is why the unknown's position must drive the model rather than the wording.",
+        "standards": [
+          "CCSS.1.OA.A.1",
+          "CCSS.2.OA.A.1"
+        ],
+        "trajectoryLevel": "story-problems",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "take-away-start-unknown",
+        "title": "Take Away: How Many Were There?",
+        "concept": "A Removal Story with the Start Unknown",
+        "conceptKey": "removal-start-modeler",
+        "requires": [
+          "removal-change-modeler"
+        ],
+        "activity": "subtraction/story",
+        "params": {
+          "level": 47,
+          "question": {
+            "mode": "remove_start",
+            "changeRange": [
+              1,
+              20
+            ],
+            "resultRange": [
+              1,
+              30
+            ],
+            "templates": [
+              "{who} gave away {v0} {item} and has {v1} left.",
+              "{v0} {item} were sold at {place}, and {v1} are still there.",
+              "{who} lost {v0} {item} and still has {v1}."
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "story_board",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Story Problems",
+            "shortDesc": "Model a story where the starting amount is the unknown",
+            "targetObjective": "Model a take-away story with the start unknown.",
+            "stepByStep": [
+              "Find what was taken away.",
+              "Find what is left.",
+              "Put both parts back together to rebuild the start."
+            ],
+            "kidTip": "Both parts together make the amount you started with.",
+            "audioPrompt": "Take away, start unknown. Put the parts back together to find the beginning.",
+            "prompts": {
+              "default": "{who} gave away {v0} {item} and has {v1} left. How many were there to start with?"
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "📖",
+        "iconName": "search",
+        "iconTone": "cyan",
+        "pedagogyTip": "This is the clearest case against keyword reading: the story says 'gave away' and 'lost', and the child has to add.",
+        "standards": [
+          "CCSS.1.OA.A.1",
+          "CCSS.2.OA.A.1"
+        ],
+        "trajectoryLevel": "story-problems",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "compare-difference-unknown",
+        "title": "Compare: How Many More?",
+        "concept": "A Comparison Story with the Gap Unknown",
+        "conceptKey": "comparison-difference-modeler",
+        "requires": [
+          "comparer",
+          "difference-finder"
+        ],
+        "activity": "subtraction/story",
+        "params": {
+          "level": 48,
+          "question": {
+            "mode": "compare_difference",
+            "smallerRange": [
+              2,
+              40
+            ],
+            "differenceRange": [
+              1,
+              15
+            ],
+            "templates": [
+              "{who} has {v0} {item}. {other} has {v1}.",
+              "At {place}, {who} counted {v0} {item} and {other} counted {v1}.",
+              "{who} collected {v0} {item}; {other} collected {v1}."
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "story_board",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Story Problems",
+            "shortDesc": "Line two groups up and measure the gap without taking anything away",
+            "targetObjective": "Model a comparison story with the difference unknown.",
+            "stepByStep": [
+              "Draw one bar for each group.",
+              "Line them up at the same left edge.",
+              "Measure the gap where one bar is longer."
+            ],
+            "kidTip": "Nobody gives anything away when we compare.",
+            "audioPrompt": "Compare, difference unknown. Line the two groups up and measure the gap.",
+            "prompts": {
+              "default": "{who} has {v0} {item}. {other} has {v1}. How many more does one have than the other?"
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "⚖️",
+        "iconName": "scale",
+        "iconTone": "cyan",
+        "pedagogyTip": "Comparison is where 'subtraction means take away' finally breaks: both groups keep everything they have, and the answer is a measured distance.",
+        "standards": [
+          "CCSS.1.OA.A.1",
+          "CCSS.2.OA.A.1"
+        ],
+        "trajectoryLevel": "story-problems",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "compare-bigger-unknown",
+        "title": "Compare: How Many Does the Bigger Group Have?",
+        "concept": "A Comparison Story with the Larger Amount Unknown",
+        "conceptKey": "comparison-bigger-modeler",
+        "requires": [
+          "comparison-difference-modeler"
+        ],
+        "activity": "subtraction/story",
+        "params": {
+          "level": 49,
+          "question": {
+            "mode": "compare_bigger",
+            "smallerRange": [
+              2,
+              40
+            ],
+            "differenceRange": [
+              1,
+              15
+            ],
+            "templates": [
+              "{who} has {v0} {item}. {other} has {v1} more than {who}.",
+              "At {place}, {who} found {v0} {item}, and {other} found {v1} more than that."
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "story_board",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Story Problems",
+            "shortDesc": "Use the smaller group and the gap to find the larger group",
+            "targetObjective": "Model a comparison story with the bigger amount unknown.",
+            "stepByStep": [
+              "Draw the group you know.",
+              "Add the gap on to the end of it.",
+              "The longer bar is the group you are asked about."
+            ],
+            "kidTip": "More than means the other bar is longer by the gap.",
+            "audioPrompt": "Compare, bigger unknown. Add the gap to the group you already know.",
+            "prompts": {
+              "default": "{who} has {v0} {item}. {other} has {v1} more. How many does {other} have?"
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "⚖️",
+        "iconName": "scale",
+        "iconTone": "cyan",
+        "pedagogyTip": "'More' appears in the sentence and the answer is found by adding, which is correct here and wrong in the next lesson — the model, not the word, decides.",
+        "standards": [
+          "CCSS.1.OA.A.1",
+          "CCSS.2.OA.A.1"
+        ],
+        "trajectoryLevel": "story-problems",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "compare-smaller-unknown",
+        "title": "Compare: How Many Does the Smaller Group Have?",
+        "concept": "A Comparison Story with the Smaller Amount Unknown",
+        "conceptKey": "comparison-smaller-modeler",
+        "requires": [
+          "comparison-bigger-modeler"
+        ],
+        "activity": "subtraction/story",
+        "params": {
+          "level": 50,
+          "question": {
+            "mode": "compare_smaller",
+            "smallerRange": [
+              2,
+              40
+            ],
+            "differenceRange": [
+              1,
+              15
+            ],
+            "templates": [
+              "{who} has {v0} {item}. {other} has {v1} fewer than {who}.",
+              "{who} brought {v0} {item} to {place}. {other} brought {v1} fewer."
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "story_board",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Story Problems",
+            "shortDesc": "Use the larger group and the gap to find the smaller group",
+            "targetObjective": "Model a comparison story with the smaller amount unknown.",
+            "stepByStep": [
+              "Draw the group you know.",
+              "Mark the gap back from its end.",
+              "The shorter bar is the group you are asked about."
+            ],
+            "kidTip": "Fewer than means the other bar is shorter by the gap.",
+            "audioPrompt": "Compare, smaller unknown. Take the gap back from the group you know.",
+            "prompts": {
+              "default": "{who} has {v0} {item}. {other} has {v1} fewer. How many does {other} have?"
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "⚖️",
+        "iconName": "scale",
+        "iconTone": "cyan",
+        "pedagogyTip": "Paired with level 49 on purpose: same shape, opposite operation, so the child has to read the relationship rather than hunt for a keyword.",
+        "standards": [
+          "CCSS.1.OA.A.1",
+          "CCSS.2.OA.A.1"
+        ],
+        "trajectoryLevel": "story-problems",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "multi-step-problems",
+        "title": "Solve Two-Step Problems",
+        "concept": "Two Changes, One After the Other",
+        "conceptKey": "subtraction-multi-step-solver",
+        "requires": [
+          "removal-result-modeler",
+          "comparison-difference-modeler"
+        ],
+        "activity": "subtraction/story",
+        "params": {
+          "level": 51,
+          "question": {
+            "mode": "multi_step",
+            "startRange": [
+              5,
+              40
+            ],
+            "changeRange": [
+              1,
+              20
+            ],
+            "templates": [
+              "{who} had {v0} {item}, then found {v1} more, then gave {v2} away.",
+              "At {place}, {who} started with {v0} {item}, was given {v1} more, and used {v2}."
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "story_board",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Story Problems",
+            "shortDesc": "Work through two changes in the order the story tells them",
+            "targetObjective": "Solve a problem with two changes.",
+            "stepByStep": [
+              "Work out the amount after the first change.",
+              "Apply the second change to that amount.",
+              "Only the final amount answers the question."
+            ],
+            "kidTip": "Answer the first change before you touch the second.",
+            "audioPrompt": "Solve a two-step problem. Take the changes one at a time, in order.",
+            "prompts": {
+              "default": "{who} had {v0} {item}, then found {v1} more, then gave {v2} away. How many are left?"
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🪜",
+        "iconName": "search",
+        "iconTone": "cyan",
+        "pedagogyTip": "The middle amount is asked for first and refused if wrong, because a child who jumps to the end has usually combined the two changes into one number that means nothing.",
+        "standards": [
+          "CCSS.3.OA.D.8"
+        ],
+        "trajectoryLevel": "story-problems",
+        "ageBand": [
+          8,
+          9
+        ]
+      },
+      {
+        "id": "explain-and-compare",
+        "title": "Explain and Compare Strategies",
+        "concept": "Choosing the Method the Numbers Reward",
+        "conceptKey": "subtraction-strategy-chooser",
+        "requires": [
+          "compensator",
+          "constant-difference",
+          "standard-subtraction-algorithm"
+        ],
+        "activity": "subtraction/strategy",
+        "params": {
+          "level": 52,
+          "question": {
+            "mode": "compare_paths",
+            "minuendRange": [
+              20,
+              99
+            ],
+            "subtrahendRange": [
+              2,
+              89
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "mode": "strategy_picker",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Strategies",
+            "shortDesc": "Pick a method that suits these numbers, then compare it with another that works",
+            "targetObjective": "Choose and justify a subtraction strategy.",
+            "stepByStep": [
+              "Look at the two numbers before choosing anything.",
+              "Pick a method their shape rewards.",
+              "Compare it with another correct method and count the steps."
+            ],
+            "kidTip": "Look at the numbers before you choose a method.",
+            "audioPrompt": "Explain and compare strategies. Choose the way these numbers reward, then compare it with another that also works.",
+            "prompts": {
+              "default": "{a} minus {b}. Which way would you do it?"
+            }
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🧭",
+        "iconName": "scale",
+        "iconTone": "emerald",
+        "pedagogyTip": "Every strategy that genuinely fits is accepted, and the comparison is between two correct paths: choosing between one right and one broken method is not strategy work, it is spotting an error.",
+        "standards": [
+          "CCSS.2.NBT.B.9",
+          "CCSS.3.NBT.A.2"
+        ],
+        "trajectoryLevel": "strategies",
+        "ageBand": [
+          8,
+          9
+        ]
+      },
+      {
+        "id": "practice-tray",
+        "title": "Practice: Take Away and Compare",
+        "concept": "Practice Without Help",
+        "conceptKey": "remover",
+        "requires": [
+          "remover",
+          "comparer",
+          "count-back"
+        ],
+        "activity": "subtraction/tray",
+        "params": {
+          "level": 53,
+          "question": {
+            "practice": true,
+            "modes": [
+              "remove",
+              "remainder",
+              "separate",
+              "match_groups",
+              "equation_match",
+              "count_back",
+              "subtract_zero",
+              "subtract_all",
+              "subtract_one",
+              "fingers"
+            ],
+            "questionsPerRound": 10
+          },
+          "play": {
+            "mode": "practice",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Practice",
+            "shortDesc": "Every way of taking objects away, mixed and unaided",
+            "targetObjective": "Retrieve every object-level subtraction without help.",
+            "stepByStep": [],
+            "kidTip": "No hints here — try what you remember.",
+            "prompts": {}
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🍪",
+        "iconName": "boxes",
+        "iconTone": "purple",
+        "pedagogyTip": "Retrieval without scaffolding is a different act from being walked through a method, and it is the one that makes a technique stick.",
+        "standards": [
+          "CCSS.K.OA.A.1",
+          "CCSS.1.OA.C.6"
+        ],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          5,
+          7
+        ]
+      },
+      {
+        "id": "practice-frames",
+        "title": "Practice: Five and Ten Frames",
+        "concept": "Practice Without Help",
+        "conceptKey": "five-benchmark",
+        "requires": [
+          "five-benchmark",
+          "ten-frame-subtractor",
+          "make-ten"
+        ],
+        "activity": "subtraction/frames",
+        "params": {
+          "level": 54,
+          "question": {
+            "practice": true,
+            "modes": [
+              "five",
+              "ten",
+              "from_five",
+              "from_ten"
+            ],
+            "questionsPerRound": 10
+          },
+          "play": {
+            "mode": "practice",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Practice",
+            "shortDesc": "Build and recall inside both frames, mixed and unaided",
+            "targetObjective": "Retrieve frame subtraction and the partners of five and ten.",
+            "stepByStep": [],
+            "kidTip": "Some of these you build; some you just remember.",
+            "prompts": {}
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🔟",
+        "iconName": "layers",
+        "iconTone": "purple",
+        "pedagogyTip": "Mixing the building modes with the recall modes is the point: a child who can only answer when the counters are tappable has not learned the facts.",
+        "standards": [
+          "CCSS.K.OA.A.5",
+          "CCSS.1.OA.C.6"
+        ],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          5,
+          7
+        ]
+      },
+      {
+        "id": "practice-bonds",
+        "title": "Practice: Number Bonds",
+        "concept": "Practice Without Help",
+        "conceptKey": "part-whole-decomposer",
+        "requires": [
+          "part-whole-decomposer",
+          "missing-subtrahend",
+          "missing-minuend"
+        ],
+        "activity": "subtraction/bonds",
+        "params": {
+          "level": 55,
+          "question": {
+            "practice": true,
+            "modes": [
+              "part_unknown",
+              "subtrahend_unknown",
+              "minuend_unknown"
+            ],
+            "questionsPerRound": 9
+          },
+          "play": {
+            "mode": "practice",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Practice",
+            "shortDesc": "All three unknown positions in a part-whole bond, mixed",
+            "targetObjective": "Solve a bond wherever the unknown sits.",
+            "stepByStep": [],
+            "kidTip": "Check which box is empty before you start.",
+            "prompts": {}
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "💎",
+        "iconName": "gem",
+        "iconTone": "emerald",
+        "pedagogyTip": "Cycling the unknown position stops a child answering by habit: the same three numbers ask a different question depending on which box is blank.",
+        "standards": [
+          "CCSS.1.OA.B.4",
+          "CCSS.1.OA.D.8"
+        ],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "practice-facts",
+        "title": "Practice: Related Facts",
+        "concept": "Practice Without Help",
+        "conceptKey": "fact-family",
+        "requires": [
+          "fact-family",
+          "missing-addend",
+          "doubles-knower",
+          "known-fact-user"
+        ],
+        "activity": "subtraction/facts",
+        "params": {
+          "level": 56,
+          "question": {
+            "practice": true,
+            "modes": [
+              "family",
+              "missing_addend",
+              "doubles",
+              "known_fact"
+            ],
+            "questionsPerRound": 12
+          },
+          "play": {
+            "mode": "practice",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Practice",
+            "shortDesc": "Families, think-addition, doubles and derived facts, mixed",
+            "targetObjective": "Retrieve and derive subtraction facts without help.",
+            "stepByStep": [],
+            "kidTip": "Use whatever fact you already know.",
+            "prompts": {}
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "⚡",
+        "iconName": "zap",
+        "iconTone": "pink",
+        "pedagogyTip": "The four modes are four routes to the same recall, so mixing them asks the child to choose a route rather than follow the one the lesson just taught.",
+        "standards": [
+          "CCSS.1.OA.B.4",
+          "CCSS.1.OA.C.6"
+        ],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "practice-numberline",
+        "title": "Practice: Number Lines",
+        "concept": "Practice Without Help",
+        "conceptKey": "subtraction-number-line",
+        "requires": [
+          "backward-number-path",
+          "subtraction-number-line",
+          "difference-finder",
+          "bridging-ten",
+          "compensator",
+          "constant-difference"
+        ],
+        "activity": "subtraction/numberline",
+        "params": {
+          "level": 57,
+          "question": {
+            "practice": true,
+            "modes": [
+              "path_back",
+              "open_back",
+              "count_up",
+              "bridge_ten",
+              "bridge_hundred",
+              "compensate_subtrahend",
+              "constant_difference",
+              "jump_tens_ones"
+            ],
+            "questionsPerRound": 12
+          },
+          "play": {
+            "mode": "practice",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Practice",
+            "shortDesc": "Every jump strategy on the line, mixed and unaided",
+            "targetObjective": "Choose and carry out the right jumps without help.",
+            "stepByStep": [],
+            "kidTip": "Look at the numbers before you jump.",
+            "prompts": {}
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "〰️",
+        "iconName": "waves",
+        "iconTone": "cyan",
+        "pedagogyTip": "Eight strategies in one round is where the child stops being told which one to use and starts reading the numbers for themselves.",
+        "standards": [
+          "CCSS.2.NBT.B.5",
+          "CCSS.2.NBT.B.9"
+        ],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "practice-base10",
+        "title": "Practice: Base-Ten Blocks",
+        "concept": "Practice Without Help",
+        "conceptKey": "base-ten-subtractor",
+        "requires": [
+          "base-ten-subtractor",
+          "tens-subtractor",
+          "hundreds-subtractor",
+          "unbundler-ten",
+          "unbundler-hundred"
+        ],
+        "activity": "subtraction/base10",
+        "params": {
+          "level": 58,
+          "question": {
+            "practice": true,
+            "modes": [
+              "build_subtract",
+              "multiples_ten",
+              "multiples_hundred",
+              "trade_ten",
+              "trade_hundred"
+            ],
+            "questionsPerRound": 10
+          },
+          "play": {
+            "mode": "practice",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Practice",
+            "shortDesc": "Clean columns, whole units and exchanges, mixed",
+            "targetObjective": "Subtract with blocks, exchanging only when the desk needs it.",
+            "stepByStep": [],
+            "kidTip": "Check whether the desk can pay before you take.",
+            "prompts": {}
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🧱",
+        "iconName": "boxes",
+        "iconTone": "purple",
+        "pedagogyTip": "Half these questions need an exchange and half do not, so the child has to check rather than reach for the trade every time.",
+        "standards": [
+          "CCSS.2.NBT.B.5",
+          "CCSS.2.NBT.B.7"
+        ],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          6,
+          9
+        ]
+      },
+      {
+        "id": "practice-chart",
+        "title": "Practice: Place Value Charts",
+        "concept": "Practice Without Help",
+        "conceptKey": "place-value-builder",
+        "requires": [
+          "place-value-builder",
+          "expanded-form-subtractor",
+          "subtraction-checker",
+          "left-to-right-subtractor"
+        ],
+        "activity": "subtraction/chart",
+        "params": {
+          "level": 59,
+          "question": {
+            "practice": true,
+            "modes": [
+              "chart_subtract",
+              "chart_three",
+              "expanded",
+              "check_addition",
+              "left_right"
+            ],
+            "questionsPerRound": 10
+          },
+          "play": {
+            "mode": "practice",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Practice",
+            "shortDesc": "Charts, expanded form, checking and left-to-right, mixed",
+            "targetObjective": "Record subtraction by place in every written form taught.",
+            "stepByStep": [],
+            "kidTip": "Each column keeps its own two digits.",
+            "prompts": {}
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "📊",
+        "iconName": "layers",
+        "iconTone": "indigo",
+        "pedagogyTip": "The same arithmetic in four notations, so place value is the thing being practised rather than one layout.",
+        "standards": [
+          "CCSS.2.NBT.B.7",
+          "CCSS.2.NBT.B.9"
+        ],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "practice-column",
+        "title": "Practice: Column Subtraction",
+        "concept": "Practice Without Help",
+        "conceptKey": "standard-subtraction-algorithm",
+        "requires": [
+          "standard-subtraction-algorithm",
+          "subtraction-cascading-regrouper",
+          "zero-regrouper"
+        ],
+        "activity": "subtraction/column",
+        "params": {
+          "level": 60,
+          "question": {
+            "practice": true,
+            "modes": [
+              "standard",
+              "cascade",
+              "across_zero"
+            ],
+            "questionsPerRound": 9
+          },
+          "play": {
+            "mode": "practice",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Practice",
+            "shortDesc": "One exchange, two exchanges, and exchanging across a zero",
+            "targetObjective": "Run the written algorithm on every exchange shape.",
+            "stepByStep": [],
+            "kidTip": "Start at the ones and write every exchange down.",
+            "prompts": {}
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "📝",
+        "iconName": "layers",
+        "iconTone": "indigo",
+        "pedagogyTip": "The three shapes are indistinguishable until the ones column is reached, so mixing them forces the child to work rather than to recognise the lesson.",
+        "standards": [
+          "CCSS.3.NBT.A.2"
+        ],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "practice-estimate",
+        "title": "Practice: Estimation",
+        "concept": "Practice Without Help",
+        "conceptKey": "rounding-estimator",
+        "requires": [
+          "rounding-estimator",
+          "reasonableness-checker"
+        ],
+        "activity": "subtraction/estimate",
+        "params": {
+          "level": 61,
+          "question": {
+            "practice": true,
+            "modes": [
+              "round_estimate",
+              "reasonable"
+            ],
+            "digits": 3,
+            "questionsPerRound": 9
+          },
+          "play": {
+            "mode": "practice",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Practice",
+            "shortDesc": "Estimate a difference, then judge someone else's answer",
+            "targetObjective": "Estimate and judge without help.",
+            "stepByStep": [],
+            "kidTip": "About, not exact.",
+            "prompts": {}
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🎯",
+        "iconName": "scale",
+        "iconTone": "cyan",
+        "pedagogyTip": "Producing an estimate and judging one are different skills; alternating them stops the second becoming a guess about which button is nicer.",
+        "standards": [
+          "CCSS.3.NBT.A.1",
+          "CCSS.3.OA.D.8"
+        ],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          8,
+          9
+        ]
+      },
+      {
+        "id": "practice-story",
+        "title": "Practice: Story Problems",
+        "concept": "Practice Without Help",
+        "conceptKey": "removal-result-modeler",
+        "requires": [
+          "removal-result-modeler",
+          "removal-change-modeler",
+          "removal-start-modeler",
+          "comparison-difference-modeler",
+          "comparison-bigger-modeler",
+          "comparison-smaller-modeler",
+          "subtraction-multi-step-solver"
+        ],
+        "activity": "subtraction/story",
+        "params": {
+          "level": 62,
+          "question": {
+            "practice": true,
+            "modes": [
+              "remove_result",
+              "remove_change",
+              "remove_start",
+              "compare_difference",
+              "compare_bigger",
+              "compare_smaller",
+              "multi_step"
+            ],
+            "questionsPerRound": 12
+          },
+          "play": {
+            "mode": "practice",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Practice",
+            "shortDesc": "All seven story shapes, mixed, with no keyword to lean on",
+            "targetObjective": "Model any subtraction story without help.",
+            "stepByStep": [],
+            "kidTip": "Find the unknown before you choose what to do.",
+            "prompts": {}
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "📖",
+        "iconName": "search",
+        "iconTone": "cyan",
+        "pedagogyTip": "Mixed unknown positions are the only honest test of story work: with one shape per round a child can answer every question by copying the last one.",
+        "standards": [
+          "CCSS.2.OA.A.1",
+          "CCSS.3.OA.D.8"
+        ],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "practice-strategy",
+        "title": "Practice: Choosing a Strategy",
+        "concept": "Practice Without Help",
+        "conceptKey": "subtraction-strategy-chooser",
+        "requires": [
+          "subtraction-strategy-chooser"
+        ],
+        "activity": "subtraction/strategy",
+        "params": {
+          "level": 63,
+          "question": {
+            "practice": true,
+            "modes": [
+              "compare_paths"
+            ],
+            "questionsPerRound": 9
+          },
+          "play": {
+            "mode": "practice",
+            "tier": "advanced",
+            "difficultyColor": "violet",
+            "category": "Practice",
+            "shortDesc": "Read the numbers and choose a method that suits them",
+            "targetObjective": "Choose a fitting strategy unaided.",
+            "stepByStep": [],
+            "kidTip": "The numbers decide, not habit.",
+            "prompts": {}
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🧭",
+        "iconName": "scale",
+        "iconTone": "emerald",
+        "pedagogyTip": "One mode, but every question is different numbers: the practice is the reading, not the method.",
+        "standards": [
+          "CCSS.2.NBT.B.9",
+          "CCSS.3.NBT.A.2"
+        ],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          8,
+          9
+        ]
+      }
+    ]
   }
 ]

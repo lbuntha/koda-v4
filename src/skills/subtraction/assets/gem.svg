@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="gemBody" x1="15%" y1="5%" x2="85%" y2="100%">
+      <stop offset="0%" stop-color="#DDD6FE"/>
+      <stop offset="45%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#4C1D95"/>
+    </linearGradient>
+    <radialGradient id="gemShadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.24"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <ellipse cx="64" cy="116" rx="30" ry="6" fill="url(#gemShadow)"/>
+  <polygon points="31,34 49,18 80,18 99,38 88,78 64,108 38,78" fill="url(#gemBody)" stroke="#4C1D95" stroke-width="2" stroke-linejoin="round"/>
+  <g fill="none" stroke="#EDE9FE" stroke-width="2" stroke-linejoin="round" opacity="0.62">
+    <path d="M31 34 L64 48 L99 38"/><path d="M49 18 L64 48 L80 18"/>
+    <path d="M38 78 L64 48 L88 78 L64 108 Z"/>
+  </g>
+</svg>

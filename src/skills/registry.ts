@@ -1,6 +1,7 @@
 import { SkillStoreAPI, type InstalledSkill } from "../lib/skillStore";
 import { skill as counting } from "./counting";
 import { skill as addition } from "./addition";
+import { skill as subtraction } from "./subtraction";
 import type { AnyActivityDefinition, Lesson, Skill } from "./types";
 import type { Viewer } from "./viewer";
 import { releaseStatusOf } from "../lib/skillRegistryApi";
@@ -9,7 +10,7 @@ import { releaseStatusOf } from "../lib/skillRegistryApi";
  * Every skill in the build. Adding one is a single import and a single entry —
  * this is the only file outside a skill folder that a new skill touches.
  */
-export const SKILLS: Skill[] = [counting, addition];
+export const SKILLS: Skill[] = [counting, addition, subtraction];
 
 /**
  * Publish every registered skill into the settings store.
@@ -86,10 +87,14 @@ export type HiddenReason =
 export function hiddenReason(p: Skill, viewer: Viewer): HiddenReason {
   if (viewer.showAllSkills) return null;
   if (releaseStatusOf(p) === "draft") {
-    return viewer.isDeveloper ? null : "draft";
+    // A draft is a developer preview, and previewing it ignores the audience
+    // band. It does not ignore the parent's switch: returning early here left a
+    // skill turned off in the Skill Manager still filling the Learn page.
+    if (!viewer.isDeveloper) return "draft";
+  } else {
+    const [minAge, maxAge] = p.manifest.audience.ages;
+    if (viewer.age < minAge || viewer.age > maxAge) return "outside-age-range";
   }
-  const [minAge, maxAge] = p.manifest.audience.ages;
-  if (viewer.age < minAge || viewer.age > maxAge) return "outside-age-range";
 
   return isEnabledHere(p) ? null : "disabled-here";
 }

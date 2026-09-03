@@ -272,6 +272,213 @@
         "counting/practice-numberline",
         "counting/practice-base10"
       ]
+    },
+    {
+      "id": "u22",
+      "unitNumber": 22,
+      "title": "Unit 22: Taking Away",
+      "description": "Remove a part, count what remains, and compare two groups",
+      "icon": "➖",
+      "lessons": [
+        "subtraction/take-away",
+        "subtraction/count-what-remains",
+        "subtraction/separate-a-part",
+        "subtraction/compare-by-matching"
+      ]
+    },
+    {
+      "id": "u23",
+      "unitNumber": 23,
+      "title": "Unit 23: Equations, Back, Zero, and All",
+      "description": "Connect taking away to symbols, counting back, and subtraction rules",
+      "icon": "🔢",
+      "lessons": [
+        "subtraction/read-subtraction-equations",
+        "subtraction/count-back",
+        "subtraction/subtract-zero",
+        "subtraction/subtract-all"
+      ]
+    },
+    {
+      "id": "u24",
+      "unitNumber": 24,
+      "title": "Unit 24: One, Fingers, and Frames",
+      "description": "Use the previous number and concrete models to subtract",
+      "icon": "🖐️",
+      "lessons": [
+        "subtraction/subtract-one",
+        "subtraction/use-fingers",
+        "subtraction/five-frame",
+        "subtraction/ten-frame"
+      ]
+    },
+    {
+      "id": "u25",
+      "unitNumber": 25,
+      "title": "Unit 25: Bonds, Paths, and Differences",
+      "description": "Find a missing part, then move into subtraction paths",
+      "icon": "💎",
+      "lessons": [
+        "subtraction/number-bonds",
+        "subtraction/number-path-back",
+        "subtraction/open-number-line-back",
+        "subtraction/count-up-for-difference"
+      ]
+    },
+    {
+      "id": "u26",
+      "unitNumber": 26,
+      "title": "Unit 26: Facts That Undo",
+      "description": "Use related addition facts, families, and doubles to subtract",
+      "icon": "⚡",
+      "lessons": [
+        "subtraction/fact-families",
+        "subtraction/think-addition",
+        "subtraction/subtract-with-doubles",
+        "subtraction/subtract-from-5"
+      ]
+    },
+    {
+      "id": "u27",
+      "unitNumber": 27,
+      "title": "Unit 27: Ten as a Bridge",
+      "description": "Use ten and one hundred as landmarks, and a known fact as a shortcut",
+      "icon": "🌉",
+      "lessons": [
+        "subtraction/subtract-from-10",
+        "subtraction/bridge-through-10",
+        "subtraction/bridge-through-100",
+        "subtraction/use-a-known-fact"
+      ]
+    },
+    {
+      "id": "u28",
+      "unitNumber": 28,
+      "title": "Unit 28: Friendly Differences",
+      "description": "Round a part, adjust, and shift both numbers to keep the gap",
+      "icon": "⚖️",
+      "lessons": [
+        "subtraction/compensation",
+        "subtraction/constant-difference",
+        "subtraction/base-ten-blocks",
+        "subtraction/place-value-chart"
+      ]
+    },
+    {
+      "id": "u29",
+      "unitNumber": 29,
+      "title": "Unit 29: Tens and Hundreds",
+      "description": "Subtract whole tens and hundreds, then split a part by place",
+      "icon": "🧱",
+      "lessons": [
+        "subtraction/subtract-multiples-of-10",
+        "subtraction/subtract-multiples-of-100",
+        "subtraction/subtract-tens-then-ones",
+        "subtraction/subtract-hundreds-tens-ones"
+      ]
+    },
+    {
+      "id": "u30",
+      "unitNumber": 30,
+      "title": "Unit 30: Written Strategies",
+      "description": "Expanded form, checking with addition, and working left to right",
+      "icon": "🧩",
+      "lessons": [
+        "subtraction/expanded-form",
+        "subtraction/check-with-addition",
+        "subtraction/left-to-right",
+        "subtraction/exchange-one-ten"
+      ]
+    },
+    {
+      "id": "u31",
+      "unitNumber": 31,
+      "title": "Unit 31: Exchanging Down",
+      "description": "Open a hundred, then record every exchange in columns",
+      "icon": "🔄",
+      "lessons": [
+        "subtraction/exchange-one-hundred",
+        "subtraction/standard-algorithm",
+        "subtraction/cascading-regrouping",
+        "subtraction/regroup-across-zero"
+      ]
+    },
+    {
+      "id": "u32",
+      "unitNumber": 32,
+      "title": "Unit 32: Estimate and Find the Unknown",
+      "description": "Judge whether an answer is about right, then solve for a missing part",
+      "icon": "🎯",
+      "lessons": [
+        "subtraction/estimate-by-rounding",
+        "subtraction/is-it-reasonable",
+        "subtraction/missing-subtrahend",
+        "subtraction/missing-minuend"
+      ]
+    },
+    {
+      "id": "u33",
+      "unitNumber": 33,
+      "title": "Unit 33: Take-Away Stories",
+      "description": "Model removal stories with the result, the change, or the start unknown",
+      "icon": "📖",
+      "lessons": [
+        "subtraction/take-away-result-unknown",
+        "subtraction/take-away-change-unknown",
+        "subtraction/take-away-start-unknown",
+        "subtraction/compare-difference-unknown"
+      ]
+    },
+    {
+      "id": "u34",
+      "unitNumber": 34,
+      "title": "Unit 34: Comparison Stories and Strategies",
+      "description": "Compare two groups, solve two-step problems, and choose a method",
+      "icon": "🧭",
+      "lessons": [
+        "subtraction/compare-bigger-unknown",
+        "subtraction/compare-smaller-unknown",
+        "subtraction/multi-step-problems",
+        "subtraction/explain-and-compare"
+      ]
+    },
+    {
+      "id": "u35",
+      "unitNumber": 35,
+      "title": "Unit 35: Practice — Objects, Frames, Facts, and Bonds",
+      "description": "Mixed retrieval on the models that build subtraction",
+      "icon": "🎪",
+      "lessons": [
+        "subtraction/practice-tray",
+        "subtraction/practice-frames",
+        "subtraction/practice-bonds",
+        "subtraction/practice-facts"
+      ]
+    },
+    {
+      "id": "u36",
+      "unitNumber": 36,
+      "title": "Unit 36: Practice — Lines, Blocks, Charts, and Columns",
+      "description": "Mixed retrieval on the models that record subtraction",
+      "icon": "🎪",
+      "lessons": [
+        "subtraction/practice-numberline",
+        "subtraction/practice-base10",
+        "subtraction/practice-chart",
+        "subtraction/practice-column"
+      ]
+    },
+    {
+      "id": "u37",
+      "unitNumber": 37,
+      "title": "Unit 37: Practice — Estimation, Stories, and Strategies",
+      "description": "Mixed retrieval on judging, modelling, and choosing",
+      "icon": "🎪",
+      "lessons": [
+        "subtraction/practice-estimate",
+        "subtraction/practice-story",
+        "subtraction/practice-strategy"
+      ]
     }
   ]
 }

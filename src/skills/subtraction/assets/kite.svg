@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="kiteBody" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#BAE6FD"/>
+      <stop offset="52%" stop-color="#0EA5E9"/>
+      <stop offset="100%" stop-color="#075985"/>
+    </linearGradient>
+  </defs>
+  <path d="M64 9 L101 49 L64 91 L27 49 Z" fill="url(#kiteBody)" stroke="#075985" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M64 9 L64 91 M27 49 L101 49" stroke="#E0F2FE" stroke-width="2" opacity="0.7"/>
+  <path d="M64 91 C78 101 48 105 67 119" fill="none" stroke="#0369A1" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M59 102 L49 97 L51 108 Z M65 114 L76 109 L74 120 Z" fill="#F472B6" stroke="#9D174D" stroke-width="1" stroke-linejoin="round"/>
+  <path d="M38 43 L59 19" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" opacity="0.3"/>
+</svg>
