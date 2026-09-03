@@ -113,18 +113,26 @@ describe("the other techniques' apparatus", () => {
   });
 
   it("draws a bond with a box for every slot, filled only where the lesson gives one", () => {
-    const q = build(bonds, "part_unknown") as { sum: number; expected: string };
-    const { container } = render(<>{bonds.figureFor(q as never)}</>);
-    const boxes = [...container.querySelectorAll("span")].filter((el) =>
-      el.className.includes("border-2 border-slate-900"),
-    );
+    /* Asserted on the shape rather than on the values. A bond may legitimately
+       be 5 and 5, and then the part that is shown carries the same digits as
+       the part that is hidden — so "the answer does not appear" is true of the
+       diagram and false of its text, and a test written that way fails once in
+       every several runs for no reason. What must hold is that exactly one box
+       is empty: the one the child fills in. */
+    for (let i = 0; i < 12; i += 1) {
+      const q = bonds.buildQuestion({ mode: "part_unknown" } as never, i, new Set<string>());
+      const { container } = render(<>{bonds.figureFor(q as never)}</>);
+      const boxes = [...container.querySelectorAll("span")].filter((el) =>
+        el.className.includes("border-2 border-slate-900"),
+      );
 
-    // A whole and two parts.
-    expect(boxes.length).toBeGreaterThanOrEqual(3);
-    // The hidden part is not printed anywhere in the diagram.
-    const shown = boxes.map((b) => b.textContent).filter(Boolean);
-    expect(shown).toContain(String(q.sum));
-    expect(shown).not.toContain(q.expected);
+      // A whole and two parts.
+      expect(boxes.length).toBe(3);
+      expect(boxes.filter((b) => b.textContent === "")).toHaveLength(1);
+      // The whole is always given; it is one of the parts that is asked for.
+      expect(boxes[0].textContent).toBe(String((q as { sum: number }).sum));
+      cleanup();
+    }
   });
 
   it("refuses to draw blocks it would take a page of ink to print", () => {
