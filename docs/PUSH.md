@@ -426,6 +426,32 @@ Six rules it lives by:
 
 Both live in `routers/system.py` beside the switchboard they verify, because
 that is the screen an operator is already on when the question occurs to them.
+They are drawn by `PushDiagnostics` in Admin → System: the check runs on open,
+the send is a separate button, and PASS/FAIL are words rather than only
+colours.
+
+### 7.3 The words themselves — `GET|PATCH|DELETE /v1/system/push/templates`
+
+Wording that only a release can change is wording nobody fixes. Each kind
+ships its `title` and `body` in `push_defaults.py`, and an operator edits them
+in Admin → System → Notification wording.
+
+**Overrides only.** A row in `push_templates` exists *because* somebody edited
+that kind, which makes "Reset" a delete rather than a second copy of the
+shipped words — and means a release that improves the default copy still
+reaches every deployment that never touched it. Same split as the switchboard:
+the code says what a thing is, the database holds the decisions made about it.
+
+**Substitution is a plain replace, not `str.format`.** An operator editing copy
+is not writing Python, and `100% done` or an unclosed brace must not be able to
+raise inside a send. Only the placeholders a kind declares are substituted; one
+nobody supplied is left standing, so a typo appears in the editor rather than
+disappearing on a parent's lock screen. The declared placeholders are listed
+beside the fields, because the failure they prevent is public.
+
+Capped at 60 and 160 characters. A lock screen shows about one line of each and
+hides the rest, so the cap is not a limit on expression — it is the shape of
+the medium.
 
 ---
 
@@ -588,6 +614,23 @@ that sets them is phase 2. And `device.new_signin` sends `path="/"` — the clie
 is a tab machine with no URL routing, so every deep link lands on the default
 screen. Giving a notification somewhere to land is a client-side prerequisite
 for phase 2, not a server one.
+
+**Beyond the plan.** Four things were built after phase 2 that the design did
+not call for, each because using it asked for them:
+
+- **A parent can silence one device from another.** The device list says which
+  browsers hold a token and offers the one thing worth offering: stop.
+  Deliberately one-way — a token can only be minted by the browser holding the
+  permission, so the row says where to turn it back on rather than drawing a
+  switch that would do nothing. Silencing is not signing out: the laptop left
+  at work stays signed in and simply goes quiet.
+- **The admin user list counts notified browsers.** A count, not a flag: one
+  account may hold three, and a yes/no would be wrong about at least one of
+  them, which is exactly the case somebody is looking at the column to
+  diagnose.
+- **An operator writes the copy** (§7.3).
+- **The device list names the machine a child's session is on.** Two rows
+  reading "Thana's device" cannot be used to pick which session to end.
 
 **Phase 2, as built.** The worker grew two handlers and one imported module:
 `src/pwa/pushPayload.ts`, where `safeParse` and `safePath` live so they can be
