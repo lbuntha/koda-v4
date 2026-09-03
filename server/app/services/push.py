@@ -247,6 +247,15 @@ async def _deliver_one(db: AsyncIOMotorDatabase, row: dict[str, Any], message: d
 TEST_TITLE = "Test notification"
 TEST_BODY = "You asked for this from Admin → Settings. Notifications are working."
 
+#: The same check, asked by the person whose phone it is.
+#:
+#: Separate wording because the operator's names a screen a parent has never
+#: seen: being told you asked for something from Admin → Settings, when you
+#: pressed a button in your own Settings, is a notification explaining itself
+#: incorrectly — which is the one thing a test notification must not do.
+SELF_TITLE = "Notifications are on"
+SELF_BODY = "This is how Koda will reach you on this device."
+
 
 async def preflight(db: AsyncIOMotorDatabase) -> dict[str, Any]:
     """Prove the pipe without sending anything to anybody.
@@ -344,7 +353,13 @@ def _credentials_check() -> tuple[bool, str]:
     return fcm.check_credentials()
 
 
-async def send_test(db: AsyncIOMotorDatabase, user_id: str, kind: str | None = None) -> dict[str, Any]:
+async def send_test(
+    db: AsyncIOMotorDatabase,
+    user_id: str,
+    kind: str | None = None,
+    *,
+    from_admin: bool = False,
+) -> dict[str, Any]:
     """A real notification, to the caller's own browsers and nowhere else.
 
     **There is no recipient parameter, and there must never be one.** A test
@@ -370,8 +385,10 @@ async def send_test(db: AsyncIOMotorDatabase, user_id: str, kind: str | None = N
     # nobody else's.
     if kind and kind in BY_KIND:
         title, body = await wording(db, kind, SAMPLES)
-    else:
+    elif from_admin:
         title, body = TEST_TITLE, TEST_BODY
+    else:
+        title, body = SELF_TITLE, SELF_BODY
 
     message = {"title": title, "body": body, "path": "/", "kind": "system.test", "tag": "system.test"}
 

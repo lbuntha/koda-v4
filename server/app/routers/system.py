@@ -254,7 +254,7 @@ async def push_test(db: Db, p: CanOperate, body: TestSendIn | None = None) -> di
     primitive wearing an admin badge.
     """
     await limiter.hit(db, "push:test", p.subject_id, PUSH_TEST_PER_ACCOUNT)
-    return await push_service.send_test(db, p.subject_id, body.kind if body else None)
+    return await push_service.send_test(db, p.subject_id, body.kind if body else None, from_admin=True)
 
 
 class TemplateOut(Model):

@@ -763,3 +763,18 @@ async def test_a_parent_can_test_their_own_phone(client, parent, db, seeded, fcm
 
 async def test_a_childs_device_cannot_send_itself_a_test(client, child, seeded):
     assert (await client.post("/push/test", headers=child)).status_code == 403
+
+
+async def test_a_parents_own_test_does_not_name_a_screen_they_have_never_seen(
+    client, parent, db, seeded, fcm_driver, monkeypatch
+):
+    """A test notification explaining itself incorrectly is the one thing it must not do."""
+    await client.post("/push/tokens", headers=parent, json={"token": TOKEN})
+    sent: list[dict] = []
+    monkeypatch.setattr(fcm, "_post", lambda url, body: (sent.append(body), (200, {}))[1])
+
+    await client.post("/push/test", headers=parent)
+
+    data = sent[0]["message"]["data"]
+    assert data["title"] == "Notifications are on"
+    assert "Admin" not in data["body"], "a parent did not press anything in Admin"
