@@ -10,12 +10,22 @@ from datetime import timedelta
 import pytest
 
 from app.models.common import now
-from app.plan_defaults import DEFAULT_PLANS
+from app.plan_defaults import DEFAULT_PLANS, PLAN_FEATURES
 from app.repos import plans as plans_repo
 from app.repos import platform_roles as platform_roles_repo
 from app.repos import subscriptions as subs_repo
 from app.role_defaults import DEFAULT_PLATFORM_ROLES
 from app.services.entitlements import entitlements, has_feature
+
+
+def _shipped(plan_id: str) -> dict:
+    """The plan as the code ships it.
+
+    For tests about *granting* rather than about which features exist this
+    month: a literal list of features turns every new one into a failure in a
+    test that is not about features at all.
+    """
+    return next(plan for plan in DEFAULT_PLANS if plan["planId"] == plan_id)
 
 
 async def _seed_plans(db):
@@ -280,7 +290,12 @@ async def test_an_operator_grants_a_plan_and_the_family_feels_it(db, client, sig
     after = (await client.get("/billing/me", headers=family_auth)).json()
     assert after["planId"] == "family"
     assert after["learnerLimit"] == 3
-    assert after["features"] == ["ai.koda"]
+    # What the family plan ships, read from the plan rather than restated here:
+    # the point of this test is that granting a plan hands over what that plan
+    # carries, and a literal list turns every new feature into a failure in a
+    # test that is not about features at all.
+    assert after["features"] == _shipped("family")["features"]
+    assert "ai.koda" in after["features"]
     assert after["renewsAt"] is not None
 
 
@@ -347,8 +362,11 @@ async def test_an_operator_can_add_a_plan_and_reprice_one(db, client, signup_bod
     catalogue = (await client.get("/billing/plans", headers=admin)).json()
     assert {p["planId"] for p in catalogue["plans"]} == {"free", "family", "school"}
     # Every feature a plan can carry is declared in code, so the editor can only
-    # ever offer things something enforces.
-    assert [f["featureId"] for f in catalogue["features"]] == ["ai.koda"]
+    # ever offer things something enforces — which is the property worth
+    # asserting, rather than today's list of them.
+    assert [f["featureId"] for f in catalogue["features"]] == [
+        feature["featureId"] for feature in PLAN_FEATURES
+    ]
 
 
 @pytest.mark.asyncio
