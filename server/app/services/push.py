@@ -27,8 +27,7 @@ from typing import Any
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.push_defaults import BODY_MAX, BY_KIND, MASTER, TITLE_MAX
-from app.repos import push_templates
-from app.repos import notify_prefs, push_tokens
+from app.repos import notify_prefs, push_templates, push_tokens
 from app.repos import system as system_repo
 from app.settings import settings
 

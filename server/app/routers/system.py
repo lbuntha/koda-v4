@@ -21,13 +21,13 @@ from app.deps import AUTHENTICATED, CurrentPrincipal, Db, require
 from app.errors import AppError, Forbidden, NotFound
 from app.models.auth import Principal
 from app.models.common import Model
+from app.push_defaults import BODY_MAX, DEFAULT_KINDS, TITLE_MAX
 from app.repos import maintenance as maintenance_repo
 from app.repos import push_templates
 from app.repos import system as system_repo
 from app.security.rate_limit import PUSH_TEST_PER_ACCOUNT, limiter
 from app.services import push as push_service
 from app.settings import settings
-from app.push_defaults import BODY_MAX, DEFAULT_KINDS, TITLE_MAX
 from app.system_defaults import BY_ID, with_master_applied
 
 router = APIRouter(prefix="/system", tags=["system"], dependencies=[AUTHENTICATED])
