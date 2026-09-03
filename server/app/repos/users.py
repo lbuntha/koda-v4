@@ -198,9 +198,22 @@ async def list_for_admin(
     ]).to_list(length=len(user_ids))
     active_sessions = {row["_id"]: row["count"] for row in sessions}
 
+    # How many browsers each person has agreed to be notified on.
+    #
+    # A count, not a flag. One parent may hold three — a phone that is
+    # registered, a laptop where they closed the prompt, and a machine they have
+    # since signed out of — and a yes/no would be wrong about at least one of
+    # them. Zero reads as "off" without having to claim anything more.
+    notified = await db.push_tokens.aggregate([
+        {"$match": {"userId": {"$in": user_ids}, "disabledAt": None}},
+        {"$group": {"_id": "$userId", "count": {"$sum": 1}}},
+    ]).to_list(length=len(user_ids))
+    notified_browsers = {row["_id"]: row["count"] for row in notified}
+
     for row in rows:
         row["memberships"] = memberships_by_user.get(row["_id"], [])
         row["activeSessionCount"] = active_sessions.get(row["_id"], 0)
+        row["notifiedBrowserCount"] = notified_browsers.get(row["_id"], 0)
     return rows, total
 
 

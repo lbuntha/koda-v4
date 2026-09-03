@@ -49,6 +49,9 @@ class UserOut(Model):
     status: AccountStatus = "active"
     memberships: list[MembershipOut] = Field(default_factory=list)
     active_session_count: int = Field(default=0, alias="activeSessionCount")
+    #: Browsers this account has turned notifications on in. A count rather than
+    #: a flag: one person may hold several, and they do not all agree.
+    notified_browser_count: int = Field(default=0, alias="notifiedBrowserCount")
     created_at: str | None = Field(default=None, alias="createdAt")
     updated_at: str | None = Field(default=None, alias="updatedAt")
     last_login_at: str | None = Field(default=None, alias="lastLoginAt")
@@ -120,6 +123,7 @@ def _out(row: dict, current_id: str) -> UserOut:
         status=row.get("status", "active"),
         memberships=row.get("memberships", []),
         activeSessionCount=row.get("activeSessionCount", 0),
+        notifiedBrowserCount=row.get("notifiedBrowserCount", 0),
         createdAt=_iso(row.get("createdAt")),
         updatedAt=_iso(row.get("updatedAt")),
         lastLoginAt=_iso(row.get("lastLoginAt")),
@@ -154,6 +158,9 @@ async def _full_user(db: Db, user_id: str) -> dict | None:
         }
         for item in member_rows
     ]
+    row["notifiedBrowserCount"] = await db.push_tokens.count_documents(
+        {"userId": row["_id"], "disabledAt": None}
+    )
     row["activeSessionCount"] = await db.devices.count_documents(
         {"userId": user_id, "revokedAt": None, "refreshHash": {"$type": "string"}}
     )
@@ -203,6 +210,7 @@ async def create_user(body: CreateUserIn, db: Db, p: CanManageUsers) -> UserOut:
     )
     row["memberships"] = []
     row["activeSessionCount"] = 0
+    row["notifiedBrowserCount"] = 0
     return _out(row, p.subject_id)
 
 

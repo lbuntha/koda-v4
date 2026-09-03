@@ -62,6 +62,8 @@ interface UserRecord {
   status: AccountStatus;
   memberships: Membership[];
   activeSessionCount: number;
+  /** Browsers this person has turned notifications on in. */
+  notifiedBrowserCount: number;
   createdAt: string | null;
   updatedAt: string | null;
   lastLoginAt: string | null;
@@ -456,6 +458,31 @@ export const UsersPage: React.FC = () => {
       sortValue: (user) => user.activeSessionCount,
       render: (user) => user.activeSessionCount,
       numeric: true,
+      align: "right",
+    },
+    {
+      /*
+       * Whether notifications reach this person, and on how many browsers.
+       *
+       * A count rather than a tick, because one account may hold three — a
+       * phone that is registered, a laptop where the prompt was dismissed, and
+       * a machine since signed out of — and a single yes/no would be wrong
+       * about at least one of them. Zero is drawn as "Off" rather than as 0:
+       * this column is read to answer "can I reach them?", and a nought in a
+       * numeric column reads as a measurement rather than an answer.
+       */
+      key: "notifications",
+      header: "Notifications",
+      sortValue: (user) => user.notifiedBrowserCount,
+      render: (user) =>
+        user.notifiedBrowserCount === 0 ? (
+          <span className="text-muted">Off</span>
+        ) : (
+          <span className="text-ink font-bold">
+            {user.notifiedBrowserCount === 1 ? "1 browser" : `${user.notifiedBrowserCount} browsers`}
+          </span>
+        ),
+      nowrap: true,
       align: "right",
     },
     {

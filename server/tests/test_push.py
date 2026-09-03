@@ -493,3 +493,19 @@ async def test_a_test_send_says_when_the_browser_belongs_to_someone_else(client,
     assert body["sent"] == 0
     assert "1 is registered on this deployment" in body["note"]
     assert "signed in as a different account" in body["note"]
+
+
+async def test_the_admin_user_list_counts_notified_browsers(client, admin, parent, db, seeded):
+    """An operator's question is "can I reach them?", so the answer is a count.
+
+    A flag would be wrong about the common case: one account holding a phone
+    that is registered and a laptop where the prompt was dismissed.
+    """
+    await client.post("/push/tokens", headers=parent, json={"token": TOKEN})
+    await client.post("/push/tokens", headers=parent, json={"token": OTHER})
+
+    rows = (await client.get("/admin/users", headers=admin)).json()["users"]
+
+    by_email = {row["email"]: row for row in rows}
+    assert by_email["parent@example.com"]["notifiedBrowserCount"] == 2
+    assert by_email["ops@example.com"]["notifiedBrowserCount"] == 0, "nobody is notified by default"
