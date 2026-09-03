@@ -234,8 +234,19 @@ async def push_preflight(db: Db, p: CanOperate) -> dict[str, Any]:
     return await push_service.preflight(db)
 
 
+class TestSendIn(Model):
+    """The only thing this route accepts, and notably not a recipient.
+
+    A kind names *which wording to preview*. There is no field here for who to
+    send it to, and there must never be one: a test that can name a target is a
+    way to put chosen words on a stranger's lock screen.
+    """
+
+    kind: str | None = Field(default=None, max_length=60)
+
+
 @router.post("/push/test")
-async def push_test(db: Db, p: CanOperate) -> dict[str, Any]:
+async def push_test(db: Db, p: CanOperate, body: TestSendIn | None = None) -> dict[str, Any]:
     """Ring the caller's own browsers, and nobody else's.
 
     Note what this route does not take: a recipient. Not a family, not a user,
@@ -243,7 +254,7 @@ async def push_test(db: Db, p: CanOperate) -> dict[str, Any]:
     primitive wearing an admin badge.
     """
     await limiter.hit(db, "push:test", p.subject_id, PUSH_TEST_PER_ACCOUNT)
-    return await push_service.send_test(db, p.subject_id)
+    return await push_service.send_test(db, p.subject_id, body.kind if body else None)
 
 
 class TemplateOut(Model):

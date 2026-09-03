@@ -407,12 +407,18 @@ async def test_preflight_names_the_thing_to_fix(client, admin, seeded):
 
 
 async def test_the_test_send_takes_no_recipient(client, admin, seeded):
-    """The rule that matters most about this route, asserted rather than trusted."""
+    """The rule that matters most about this route, asserted rather than trusted.
+
+    It accepts a *kind* — which wording to preview — and nothing else. A field
+    naming who to send to would make this a way to put chosen words on a
+    stranger's lock screen, so the schema is asserted rather than the intent.
+    """
     schema = (await client.get("/openapi.json")).json()
     route = schema["paths"]["/v1/system/push/test"]["post"]
 
     assert not route.get("parameters"), "a test send that can name a target is an arbitrary-push primitive"
-    assert "requestBody" not in route
+    fields = set(schema["components"]["schemas"]["TestSendIn"]["properties"])
+    assert fields == {"kind"}, fields
 
 
 async def test_the_test_send_is_honest_about_the_console_driver(client, admin, db, seeded):
@@ -713,3 +719,33 @@ async def test_a_child_has_no_notifications_and_is_not_refused(client, child, se
     body = (await client.get("/notifications", headers=child)).json()
 
     assert body == {"notifications": [], "unread": 0}
+
+
+async def test_a_test_send_previews_the_operators_own_wording(client, admin, db, seeded, fcm_driver, monkeypatch):
+    """The question this answers: does my new copy read well on a lock screen?"""
+    ops = await db.users.find_one({"email": "ops@example.com"})
+    await push_tokens.save(db, token=TOKEN, family_id=None, user_id=ops["_id"], device_id="d_ops")
+    await client.patch(
+        "/system/push/templates/learn.goal_met",
+        headers=admin,
+        json={"title": "{learner} did it", "body": "{rounds} rounds of {skill} today."},
+    )
+    sent: list[dict] = []
+    monkeypatch.setattr(fcm, "_post", lambda url, body: (sent.append(body), (200, {}))[1])
+
+    await client.post("/system/push/test", headers=admin, json={"kind": "learn.goal_met"})
+
+    data = sent[0]["message"]["data"]
+    assert data["title"] == "Mia did it", "the operator's words, with sample values filled in"
+    assert data["body"] == "6 rounds of Counting today."
+
+
+async def test_a_test_send_with_no_kind_still_explains_itself(client, admin, db, seeded, fcm_driver, monkeypatch):
+    ops = await db.users.find_one({"email": "ops@example.com"})
+    await push_tokens.save(db, token=TOKEN, family_id=None, user_id=ops["_id"], device_id="d_ops")
+    sent: list[dict] = []
+    monkeypatch.setattr(fcm, "_post", lambda url, body: (sent.append(body), (200, {}))[1])
+
+    await client.post("/system/push/test", headers=admin)
+
+    assert sent[0]["message"]["data"]["title"] == "Test notification"

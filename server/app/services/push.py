@@ -26,7 +26,7 @@ from typing import Any
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
-from app.push_defaults import BODY_MAX, BY_KIND, MASTER, TITLE_MAX
+from app.push_defaults import BODY_MAX, BY_KIND, MASTER, SAMPLES, TITLE_MAX
 from app.repos import memberships, notifications, notify_prefs, push_templates, push_tokens
 from app.repos import system as system_repo
 from app.settings import settings
@@ -344,7 +344,7 @@ def _credentials_check() -> tuple[bool, str]:
     return fcm.check_credentials()
 
 
-async def send_test(db: AsyncIOMotorDatabase, user_id: str) -> dict[str, Any]:
+async def send_test(db: AsyncIOMotorDatabase, user_id: str, kind: str | None = None) -> dict[str, Any]:
     """A real notification, to the caller's own browsers and nowhere else.
 
     **There is no recipient parameter, and there must never be one.** A test
@@ -360,7 +360,20 @@ async def send_test(db: AsyncIOMotorDatabase, user_id: str) -> dict[str, Any]:
     """
     cfg = settings()
     rows = await push_tokens.live_for_user(db, user_id)
-    message = {"title": TEST_TITLE, "body": TEST_BODY, "path": "/", "kind": "system.test", "tag": "system.test"}
+
+    # Naming a kind previews *that kind's wording* — the operator's own words if
+    # they have edited them — filled with sample values. Which is the only way
+    # to answer "does my new copy read well on a lock screen?" without waiting
+    # for the event itself to happen to somebody.
+    #
+    # A kind is not a recipient. This still rings the caller's own browsers and
+    # nobody else's.
+    if kind and kind in BY_KIND:
+        title, body = await wording(db, kind, SAMPLES)
+    else:
+        title, body = TEST_TITLE, TEST_BODY
+
+    message = {"title": title, "body": body, "path": "/", "kind": "system.test", "tag": "system.test"}
 
     if not rows:
         # Two very different situations wearing the same symptom, and saying the
@@ -385,7 +398,7 @@ async def send_test(db: AsyncIOMotorDatabase, user_id: str) -> dict[str, Any]:
         return {"driver": cfg.push_driver, "sent": 0, "results": [], "note": note}
 
     if cfg.push_driver == "console":
-        log.info("push test (console driver)\n%s\n%s", TEST_TITLE, TEST_BODY)
+        log.info("push test (console driver)\n%s\n%s", title, body)
         return {
             "driver": "console",
             "sent": 0,

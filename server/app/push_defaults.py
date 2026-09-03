@@ -148,6 +148,23 @@ DEFAULT_KINDS: list[dict[str, Any]] = [
 #: in the caller rather than something to guess at.
 BY_KIND: dict[str, dict[str, Any]] = {item["kindId"]: item for item in DEFAULT_KINDS}
 
+#: What a placeholder is filled with when there is nothing real to fill it.
+#:
+#: For previewing wording — in the editor as somebody types, and in the test
+#: send. Chosen to look like a real notification rather than like a template:
+#: "Mia met today's goal" tells an operator what a parent will see in a way
+#: that "{learner} met today's goal" cannot.
+SAMPLES = {
+    "device": "Chrome on Mac",
+    "learner": "Mia",
+    "rounds": "6",
+    "skill": "Counting",
+    "days": "4",
+    "name": "Sam",
+    "decision": "approved",
+    "message": "Koda is down for maintenance until 6pm.",
+}
+
 #: Longest a notification may be. A lock screen truncates well before this;
 #: the caps exist so an operator cannot paste an essay into a place that shows
 #: one line of it and hides the rest.

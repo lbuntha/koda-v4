@@ -24,6 +24,27 @@ import {
  */
 const LIMITS = { title: 60, body: 160 };
 
+/**
+ * What a placeholder is filled with while somebody is writing.
+ *
+ * Mirrors the server's own samples, so the preview here is what the test send
+ * puts on a phone. "Mia met today's goal" tells an operator what a parent will
+ * read in a way that "{learner} met today's goal" cannot.
+ */
+const SAMPLES: Record<string, string> = {
+  device: "Chrome on Mac",
+  learner: "Mia",
+  rounds: "6",
+  skill: "Counting",
+  days: "4",
+  name: "Sam",
+  decision: "approved",
+  message: "Koda is down for maintenance until 6pm.",
+};
+
+const filled = (text: string): string =>
+  Object.entries(SAMPLES).reduce((out, [key, value]) => out.split(`{${key}}`).join(value), text);
+
 export const PushTemplates: React.FC = () => {
   const [templates, setTemplates] = useState<NotificationTemplate[] | null>(null);
   const [drafts, setDrafts] = useState<Record<string, { title: string; body: string }>>({});
@@ -117,6 +138,15 @@ export const PushTemplates: React.FC = () => {
                 }
                 className="w-full bg-surface border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-indigo-500"
               />
+
+              {/* What it will actually look like. A lock screen shows one line
+                  of each and hides the rest, which is easier to believe when
+                  you can see it than when it is written in a caption. */}
+              <div className="rounded-xl border border-line bg-surface px-3 py-2">
+                <p className="font-mono text-[10px] uppercase tracking-wider text-muted">Preview</p>
+                <p className="mt-1 truncate text-sm font-bold text-ink">{filled(draft.title)}</p>
+                <p className="truncate text-xs text-body">{filled(draft.body)}</p>
+              </div>
 
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 <p className="text-xs text-muted">

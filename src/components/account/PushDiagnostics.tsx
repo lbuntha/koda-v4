@@ -3,8 +3,10 @@ import { Bell, RefreshCw, Send } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
 import { UISectionHeader } from "../ui";
 import {
+  notificationTemplates,
   pushPreflight,
   sendTestNotification,
+  type NotificationTemplate,
   type Preflight,
   type TestSendResult,
 } from "../../lib/push";
@@ -48,6 +50,13 @@ export const PushDiagnostics: React.FC = () => {
   const [checking, setChecking] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /*
+   * Which wording to try. Empty means the plain "Test notification", which is
+   * the right default: most of the time the question is "does push work at
+   * all?", not "how does this sentence read?".
+   */
+  const [kind, setKind] = useState("");
+  const [kinds, setKinds] = useState<NotificationTemplate[]>([]);
 
   const check = useCallback(async () => {
     setChecking(true);
@@ -64,13 +73,16 @@ export const PushDiagnostics: React.FC = () => {
   // check delivers nothing to anybody.
   useEffect(() => {
     void check();
+    void notificationTemplates()
+      .then(setKinds)
+      .catch(() => setKinds([]));
   }, [check]);
 
   const send = async () => {
     setSending(true);
     setError(null);
     try {
-      setTest(await sendTestNotification());
+      setTest(await sendTestNotification(kind || undefined));
       // A send can retire a dead token, so the counts above may have moved.
       await check();
     } catch {
@@ -145,6 +157,19 @@ export const PushDiagnostics: React.FC = () => {
           <RefreshCw className="w-4 h-4 mr-2" />
           {checking ? "Checking…" : "Check setup"}
         </button>
+        <select
+          value={kind}
+          onChange={(e) => setKind(e.target.value)}
+          aria-label="Which notification to preview"
+          className="bg-surface border border-line rounded-2xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-indigo-500"
+        >
+          <option value="">Plain test message</option>
+          {kinds.map((row) => (
+            <option key={row.id} value={row.id}>
+              Preview: {row.label}
+            </option>
+          ))}
+        </select>
         <button
           disabled={sending}
           onClick={() => void send()}
@@ -156,8 +181,9 @@ export const PushDiagnostics: React.FC = () => {
       </div>
 
       <p className="text-xs text-muted">
-        The test rings only the browsers you have turned notifications on in — it takes no
-        recipient. Checking delivers nothing to anybody.
+        Picking a kind sends <em>that kind's wording</em>, filled with sample values, so you can
+        read your own copy on your own lock screen. The test rings only the browsers you have
+        turned notifications on in — it takes no recipient. Checking delivers nothing to anybody.
       </p>
     </section>
   );

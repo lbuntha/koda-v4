@@ -247,11 +247,17 @@ export async function pushPreflight(): Promise<Preflight> {
   return await request<Preflight>("/system/push/preflight", { token: await accessToken() });
 }
 
-/** Ring the caller's own browsers, and nobody else's. Takes no recipient. */
-export async function sendTestNotification(): Promise<TestSendResult> {
+/**
+ * Ring the caller's own browsers, and nobody else's.
+ *
+ * `kind` names *which wording to preview*, filled with sample values — not who
+ * to send to. There is no recipient here and there must never be one.
+ */
+export async function sendTestNotification(kind?: string): Promise<TestSendResult> {
   return await request<TestSendResult>("/system/push/test", {
     method: "POST",
     token: await accessToken(),
+    body: { kind: kind ?? null },
   });
 }
 
