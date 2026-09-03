@@ -102,7 +102,17 @@ async def _issue(db, family_id: str | None, role: str, *, user_id=None, learner_
         # it is a log line, and the sign-in it sits inside already spends far
         # longer hashing a password. If the real driver ever makes a login feel
         # slow, this is the call that moves to `BackgroundTasks` at the route.
-        if family_id:
+        # …but not the first one. Creating an account and being told that a new
+        # device just signed in is Koda reporting the thing the person is doing
+        # as it happens: they know, they are holding it, and there is nobody
+        # else on the account to tell. Now that the notice is also *recorded*,
+        # it would be the first thing in an empty list, which is a worse start
+        # than an empty one.
+        others = await db.devices.count_documents(
+            {"familyId": family_id, "revokedAt": None, "_id": {"$ne": device_id}}
+        ) if family_id else 0
+
+        if family_id and others:
             title, body = await push.wording(db, "device.new_signin", {"device": device_name})
             await push.send(
                 db,

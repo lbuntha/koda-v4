@@ -641,3 +641,75 @@ async def test_the_templates_list_says_what_may_be_substituted(client, admin, se
     goal = next(row for row in rows if row["id"] == "learn.goal_met")
     assert set(goal["placeholders"]) == {"learner", "rounds", "skill"}
     assert goal["edited"] is False
+
+
+# --- what a person can go back and read --------------------------------------
+
+
+async def test_a_notification_is_recorded_before_it_is_sent(client, parent, db, seeded):
+    """The record is the durable half; the push is the tap on the shoulder."""
+    await client.post("/push/tokens", headers=parent, json={"token": TOKEN})
+    row = await db.push_tokens.find_one({"token": TOKEN})
+
+    await push.send(
+        db,
+        to=push.Recipient(family_id=row["familyId"]),
+        kind="device.new_signin",
+        title="New sign-in to Koda",
+        body="Mac just signed in.",
+    )
+
+    body = (await client.get("/notifications", headers=parent)).json()
+    assert body["unread"] == 1
+    assert body["notifications"][0]["title"] == "New sign-in to Koda"
+    assert body["notifications"][0]["read"] is False
+
+
+async def test_someone_with_no_browser_still_has_a_history(client, parent, db, seeded):
+    """The reason the record exists at all: push is best-effort, this is not."""
+    me = (await client.get("/auth/me", headers=parent)).json()
+
+    await push.send(
+        db,
+        to=push.Recipient(family_id=me["familyId"], user_id=me["userId"]),
+        kind="device.new_signin",
+        title="New sign-in to Koda",
+        body="A laptop just signed in.",
+    )
+
+    body = (await client.get("/notifications", headers=parent)).json()
+    assert len(body["notifications"]) == 1, "nothing was sent, and they were still told"
+
+
+async def test_reading_the_list_clears_the_badge(client, parent, db, seeded):
+    me = (await client.get("/auth/me", headers=parent)).json()
+    await push.send(
+        db, to=push.Recipient(family_id=me["familyId"], user_id=me["userId"]),
+        kind="device.new_signin", title="a", body="b",
+    )
+
+    read = (await client.post("/notifications/read", headers=parent)).json()
+
+    assert read["unread"] == 0
+    assert (await client.get("/notifications", headers=parent)).json()["unread"] == 0
+
+
+async def test_a_muted_kind_is_not_recorded_either(client, parent, db, seeded):
+    """Muting is "do not tell me", not "tell me somewhere quieter"."""
+    me = (await client.get("/auth/me", headers=parent)).json()
+    from app.repos import notify_prefs
+
+    await notify_prefs.set_pref(db, me["userId"], "learn.goal_met", False)
+
+    await push.send(
+        db, to=push.Recipient(family_id=me["familyId"], user_id=me["userId"]),
+        kind="learn.goal_met", title="a", body="b",
+    )
+
+    assert (await client.get("/notifications", headers=parent)).json()["notifications"] == []
+
+
+async def test_a_child_has_no_notifications_and_is_not_refused(client, child, seeded):
+    body = (await client.get("/notifications", headers=child)).json()
+
+    assert body == {"notifications": [], "unread": 0}

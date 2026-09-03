@@ -52,6 +52,10 @@ INDEXES: dict[str, list[IndexModel]] = {
         IndexModel([("codeHash", ASCENDING)], unique=True, name="invite_code_unique"),
         IndexModel([("familyId", ASCENDING)], name="by_family"),
     ],
+    "notifications": [
+        # The list is always "mine, newest first", so it is one compound index.
+        IndexModel([("userId", ASCENDING), ("createdAt", DESCENDING)], name="by_person_recent"),
+    ],
     "notify_prefs": [
         IndexModel([("userId", ASCENDING)], name="by_person"),
     ],

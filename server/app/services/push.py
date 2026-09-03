@@ -27,7 +27,7 @@ from typing import Any
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.push_defaults import BODY_MAX, BY_KIND, MASTER, TITLE_MAX
-from app.repos import notify_prefs, push_templates, push_tokens
+from app.repos import memberships, notifications, notify_prefs, push_templates, push_tokens
 from app.repos import system as system_repo
 from app.settings import settings
 
@@ -37,6 +37,11 @@ log = logging.getLogger("koda.push")
 #: request per token — bounded, because a family with a school's worth of
 #: devices should not open a hundred sockets to say "well done".
 CONCURRENCY = 10
+
+#: Who counts as a person a notification is addressed to. Learner roles are
+#: absent on purpose: a child's session cannot hold a token, so addressing one
+#: would only ever write a record nobody can be shown.
+ADULT_ROLES = {"owner", "parent", "caregiver"}
 
 
 @dataclass(frozen=True)
@@ -121,15 +126,29 @@ async def send(
         if not await deployment_allows(db, kind):
             return 0
 
+        # People first, browsers second — and in that order for a reason. The
+        # record is what a person can go back and read; the push is a best-effort
+        # tap on the shoulder. Somebody with no browser registered still gets the
+        # history, which is the whole point of keeping one.
+        people = await _people(db, to)
+        prefs = await notify_prefs.for_users(db, people)
+        people = [user_id for user_id in people if wanted_by(kind, prefs.get(user_id))]
+        if not people:
+            return 0
+
+        for user_id in people:
+            await notifications.record(
+                db, user_id=user_id, family_id=to.family_id, kind=kind, title=title, body=body, path=path
+            )
+
         rows = await push_tokens.live_for_family(
             db, to.family_id, user_id=to.user_id, exclude_device_id=to.exclude_device_id
         )
-
-        # Each adult answers for themselves. One query for everyone the send
-        # touches, rather than one per browser.
-        prefs = await notify_prefs.for_users(db, [row["userId"] for row in rows if row.get("userId")])
-        rows = [row for row in rows if wanted_by(kind, prefs.get(row.get("userId") or ""))]
+        wanted = set(people)
+        rows = [row for row in rows if row.get("userId") in wanted]
         if not rows:
+            # Nobody to ring is not nobody told: the records above stand, and
+            # the app will show them next time somebody opens it.
             return 0
 
         message = {"title": title, "body": body, "path": path, "kind": kind, "tag": kind}
@@ -161,6 +180,36 @@ async def send(
     except Exception:  # noqa: BLE001 — every failure here is the same failure
         log.exception("could not send %s notification", kind)
         return 0
+
+
+async def _people(db: AsyncIOMotorDatabase, to: Recipient) -> list[str]:
+    """Who this notification is addressed to, as accounts rather than devices.
+
+    A family send reaches the adults in it. Children are not addressed at all —
+    a learner session cannot hold a token, so a record for one would be a note
+    nobody can be shown.
+    """
+    if to.user_id:
+        return [to.user_id]
+
+    people = {
+        member["userId"]
+        for member in await memberships.for_family(db, to.family_id)
+        if member.get("role") in ADULT_ROLES
+    }
+
+    # Plus anyone in this family who actually holds a browser.
+    #
+    # Membership is the right list, and a missing row is the wrong reason to
+    # stop notifying somebody: a person whose registered browser says they
+    # belong to this family should hear about it whatever the membership
+    # collection has lost. It cannot over-reach — a token row carries the same
+    # `familyId` the query is already scoped to.
+    for row in await push_tokens.live_for_family(db, to.family_id):
+        if row.get("userId"):
+            people.add(row["userId"])
+
+    return sorted(people)
 
 
 async def _deliver(db: AsyncIOMotorDatabase, row: dict[str, Any], message: dict[str, str]) -> bool:

@@ -6,6 +6,7 @@ import { SidebarIcon, UIAppBar, UIAppBarChip, UITabBar, type UITabBarItem } from
 import { useSession } from "../lib/sync";
 import { useStreak } from "../lib/streak";
 import { AccountMenu, accountSubtitle } from "./AccountMenu";
+import { NotificationsBell } from "./account/NotificationsBell";
 import { navDefaults, splitTabs, useNavItems } from "./navRecord";
 import type { TabId } from "./navTabs";
 
@@ -110,6 +111,11 @@ export const AppNav: React.FC<AppNavProps> = ({
               value={compact(userProgress.xp)}
               label={`${userProgress.xp} XP`}
             />
+            {/* Adults only. A child's bar has no bell because nothing is ever
+                addressed to a learner — the endpoint answers them with an empty
+                list rather than a refusal, and drawing one would be a control
+                that never has anything in it. */}
+            {session && !session.learnerId && <NotificationsBell />}
             {config.profile && (
               <AccountMenu profile={config.profile} onOpenProfile={() => onSelectTab("profile")} />
             )}

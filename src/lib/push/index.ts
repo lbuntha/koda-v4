@@ -293,3 +293,36 @@ export async function resetNotificationWording(kind: string): Promise<Notificati
   );
   return body.templates;
 }
+
+export interface NotificationRecord {
+  id: string;
+  kind: string;
+  title: string;
+  body: string;
+  path: string;
+  createdAt: string;
+  read: boolean;
+}
+
+export interface NotificationHistory {
+  notifications: NotificationRecord[];
+  unread: number;
+}
+
+/**
+ * What Koda has told this account, newest first.
+ *
+ * The durable half of push: a lock-screen banner is gone the moment somebody
+ * swipes it, and this is where it can still be found — which is also why it
+ * has nothing to do with whether notifications were ever switched on.
+ */
+export async function notificationHistory(): Promise<NotificationHistory> {
+  return await request<NotificationHistory>("/notifications", { token: await accessToken() });
+}
+
+export async function markNotificationsRead(): Promise<NotificationHistory> {
+  return await request<NotificationHistory>("/notifications/read", {
+    method: "POST",
+    token: await accessToken(),
+  });
+}
