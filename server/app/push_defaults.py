@@ -33,6 +33,12 @@ KIND_CLASSES = ("account", "courtesy", "operator")
 DEFAULT_KINDS: list[dict[str, Any]] = [
     {
         "kindId": "device.new_signin",
+        "title": 'New sign-in to Koda',
+        "body": "{device} just signed in. If that wasn't you, sign it out in Settings.",
+        #: What a sender may substitute. Anything else an operator types is
+        #: left visible rather than guessed at, so a typo shows up in the
+        #: preview instead of on somebody's lock screen.
+        "placeholders": ['device'],
         "class": "account",
         "label": "New device signed in",
         # No `settingId`: see the module docstring. An account kind is not
@@ -44,6 +50,12 @@ DEFAULT_KINDS: list[dict[str, Any]] = [
     },
     {
         "kindId": "family.invite_redeemed",
+        "title": 'Invite accepted',
+        "body": '{name} has joined your family on Koda.',
+        #: What a sender may substitute. Anything else an operator types is
+        #: left visible rather than guessed at, so a typo shows up in the
+        #: preview instead of on somebody's lock screen.
+        "placeholders": ['name'],
         "class": "account",
         "label": "Invite accepted",
         "settingId": None,
@@ -51,6 +63,12 @@ DEFAULT_KINDS: list[dict[str, Any]] = [
     },
     {
         "kindId": "plan.request_decided",
+        "title": 'Your plan request',
+        "body": 'Your request to change plan was {decision}.',
+        #: What a sender may substitute. Anything else an operator types is
+        #: left visible rather than guessed at, so a typo shows up in the
+        #: preview instead of on somebody's lock screen.
+        "placeholders": ['decision'],
         "class": "account",
         "label": "Plan request decided",
         "settingId": None,
@@ -58,6 +76,12 @@ DEFAULT_KINDS: list[dict[str, Any]] = [
     },
     {
         "kindId": "learn.weekly_summary",
+        "title": "{learner}'s week",
+        "body": '{learner} practised on {days} days this week.',
+        #: What a sender may substitute. Anything else an operator types is
+        #: left visible rather than guessed at, so a typo shows up in the
+        #: preview instead of on somebody's lock screen.
+        "placeholders": ['learner', 'days'],
         "class": "courtesy",
         "label": "Weekly summary",
         "settingId": "push.weeklySummary",
@@ -65,6 +89,12 @@ DEFAULT_KINDS: list[dict[str, Any]] = [
     },
     {
         "kindId": "learn.goal_met",
+        "title": "{learner} met today's goal",
+        "body": '{rounds} rounds of {skill}. Nicely done.',
+        #: What a sender may substitute. Anything else an operator types is
+        #: left visible rather than guessed at, so a typo shows up in the
+        #: preview instead of on somebody's lock screen.
+        "placeholders": ['learner', 'rounds', 'skill'],
         "class": "courtesy",
         "label": "Goal met",
         "settingId": "push.goalMet",
@@ -75,6 +105,12 @@ DEFAULT_KINDS: list[dict[str, Any]] = [
         # only that this deployment is *willing* to send reminders; a parent
         # still has to ask for them and choose the hour.
         "kindId": "learn.practice_reminder",
+        "title": 'Time to practise',
+        "body": "{learner} hasn't had a go today yet.",
+        #: What a sender may substitute. Anything else an operator types is
+        #: left visible rather than guessed at, so a typo shows up in the
+        #: preview instead of on somebody's lock screen.
+        "placeholders": ['learner'],
         "class": "courtesy",
         "label": "Practice reminder",
         "settingId": "push.practiceReminder",
@@ -82,6 +118,12 @@ DEFAULT_KINDS: list[dict[str, Any]] = [
     },
     {
         "kindId": "learn.streak_ending",
+        "title": "{learner}'s streak ends today",
+        "body": '{days} days so far — one round keeps it going.',
+        #: What a sender may substitute. Anything else an operator types is
+        #: left visible rather than guessed at, so a typo shows up in the
+        #: preview instead of on somebody's lock screen.
+        "placeholders": ['learner', 'days'],
         "class": "courtesy",
         "label": "Streak ending",
         "settingId": "push.streakEnding",
@@ -89,6 +131,12 @@ DEFAULT_KINDS: list[dict[str, Any]] = [
     },
     {
         "kindId": "system.broadcast",
+        "title": 'Koda',
+        "body": '{message}',
+        #: What a sender may substitute. Anything else an operator types is
+        #: left visible rather than guessed at, so a typo shows up in the
+        #: preview instead of on somebody's lock screen.
+        "placeholders": ['message'],
         "class": "operator",
         "label": "Broadcast to staff",
         "settingId": None,
@@ -99,6 +147,12 @@ DEFAULT_KINDS: list[dict[str, Any]] = [
 #: `kindId` -> its definition. A send names a kind, and an unknown one is a bug
 #: in the caller rather than something to guess at.
 BY_KIND: dict[str, dict[str, Any]] = {item["kindId"]: item for item in DEFAULT_KINDS}
+
+#: Longest a notification may be. A lock screen truncates well before this;
+#: the caps exist so an operator cannot paste an essay into a place that shows
+#: one line of it and hides the rest.
+TITLE_MAX = 60
+BODY_MAX = 160
 
 #: The switch above every kind, whatever its class. Named here rather than
 #: spelled in three modules.

@@ -103,12 +103,13 @@ async def _issue(db, family_id: str | None, role: str, *, user_id=None, learner_
         # longer hashing a password. If the real driver ever makes a login feel
         # slow, this is the call that moves to `BackgroundTasks` at the route.
         if family_id:
+            title, body = await push.wording(db, "device.new_signin", {"device": device_name})
             await push.send(
                 db,
                 to=push.Recipient(family_id=family_id, exclude_device_id=device_id),
                 kind="device.new_signin",
-                title="New device signed in",
-                body=f"{device_name} just signed in to Koda.",
+                title=title,
+                body=body,
                 # The device list, once the app can be opened at a screen. It is
                 # a tab in state today, so every deep link lands on the default
                 # one — the client half of that is the notifications phase.

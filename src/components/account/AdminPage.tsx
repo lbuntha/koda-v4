@@ -10,6 +10,7 @@ import {
 import { playSound } from "../../utils/audio";
 import { UIBadge, UIButton, UIDialog, UISectionHeader, UITabs, UIToggle } from "../ui";
 import { PushDiagnostics } from "./PushDiagnostics";
+import { PushTemplates } from "./PushTemplates";
 import { BadgesPage } from "./BadgesPage";
 import { BillingPage } from "./BillingPage";
 import { ScoringPage } from "./ScoringPage";
@@ -352,6 +353,8 @@ const SystemPanel: React.FC<{
             whether one of those things actually works — the only feature here
             whose failure is silence rather than an error. */}
         {show !== "secrets" && <PushDiagnostics />}
+
+        {show !== "secrets" && <PushTemplates />}
 
         {/* Erasing data is switchboard work, not credential work. */}
         {show !== "secrets" && (

@@ -567,3 +567,77 @@ async def test_silencing_a_device_in_another_family_is_not_possible(client, pare
     response = await client.delete("/devices/d_elsewhere/notifications", headers=parent)
 
     assert response.status_code == 404
+
+
+# --- the words a notification uses ------------------------------------------
+
+
+async def test_a_kind_ships_with_wording(db):
+    title, body = await push.wording(db, "device.new_signin", {"device": "Mac"})
+
+    assert title == "New sign-in to Koda"
+    assert "Mac just signed in" in body
+
+
+async def test_an_operator_can_reword_a_kind(client, admin, db, seeded):
+    response = await client.patch(
+        "/system/push/templates/device.new_signin",
+        headers=admin,
+        json={"title": "Somebody signed in", "body": "{device} joined your account."},
+    )
+
+    assert response.status_code == 200
+    title, body = await push.wording(db, "device.new_signin", {"device": "Pixel"})
+    assert title == "Somebody signed in"
+    assert body == "Pixel joined your account."
+
+
+async def test_resetting_restores_the_shipped_words(client, admin, db, seeded):
+    await client.patch(
+        "/system/push/templates/device.new_signin",
+        headers=admin,
+        json={"title": "Anything", "body": "At all."},
+    )
+
+    await client.delete("/system/push/templates/device.new_signin", headers=admin)
+
+    title, _ = await push.wording(db, "device.new_signin", {"device": "Mac"})
+    assert title == "New sign-in to Koda", "a reset is a delete, not a second copy of the default"
+
+
+async def test_wording_is_only_editable_by_staff(client, parent, seeded):
+    response = await client.patch(
+        "/system/push/templates/device.new_signin",
+        headers=parent,
+        json={"title": "Mine now", "body": "Ha."},
+    )
+
+    assert response.status_code == 403
+
+
+async def test_a_placeholder_nobody_supplied_is_left_standing(db):
+    """Visible in a preview beats vanished on somebody's lock screen."""
+    assert push.fill("{learner} did {what}", {"learner": "Mia"}) == "Mia did {what}"
+
+
+async def test_operator_wording_cannot_raise_inside_a_send(db, seeded):
+    """An operator editing copy is not writing Python."""
+    assert push.fill("100% done {0} {unclosed", {"device": "Mac"}) == "100% done {0} {unclosed"
+
+
+async def test_wording_is_capped_at_what_a_lock_screen_shows(client, admin, db, seeded):
+    too_long = await client.patch(
+        "/system/push/templates/device.new_signin",
+        headers=admin,
+        json={"title": "x" * 200, "body": "fine"},
+    )
+
+    assert too_long.status_code == 422
+
+
+async def test_the_templates_list_says_what_may_be_substituted(client, admin, seeded):
+    rows = (await client.get("/system/push/templates", headers=admin)).json()["templates"]
+
+    goal = next(row for row in rows if row["id"] == "learn.goal_met")
+    assert set(goal["placeholders"]) == {"learner", "rounds", "skill"}
+    assert goal["edited"] is False

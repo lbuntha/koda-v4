@@ -254,3 +254,42 @@ export async function sendTestNotification(): Promise<TestSendResult> {
     token: await accessToken(),
   });
 }
+
+export interface NotificationTemplate {
+  id: string;
+  label: string;
+  class: string;
+  title: string;
+  body: string;
+  /** What a sender may substitute — `{device}`, `{learner}` and so on. */
+  placeholders: string[];
+  /** Whether these are the shipped words or somebody's edit. */
+  edited: boolean;
+}
+
+export async function notificationTemplates(): Promise<NotificationTemplate[]> {
+  const body = await request<{ templates: NotificationTemplate[] }>("/system/push/templates", {
+    token: await accessToken(),
+  });
+  return body.templates;
+}
+
+export async function rewordNotification(
+  kind: string,
+  wording: { title: string; body: string },
+): Promise<NotificationTemplate[]> {
+  const body = await request<{ templates: NotificationTemplate[] }>(
+    `/system/push/templates/${kind}`,
+    { method: "PATCH", token: await accessToken(), body: wording },
+  );
+  return body.templates;
+}
+
+/** Back to the words the code ships. */
+export async function resetNotificationWording(kind: string): Promise<NotificationTemplate[]> {
+  const body = await request<{ templates: NotificationTemplate[] }>(
+    `/system/push/templates/${kind}`,
+    { method: "DELETE", token: await accessToken() },
+  );
+  return body.templates;
+}

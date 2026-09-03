@@ -22,10 +22,12 @@ from app.errors import AppError, Forbidden, NotFound
 from app.models.auth import Principal
 from app.models.common import Model
 from app.repos import maintenance as maintenance_repo
+from app.repos import push_templates
 from app.repos import system as system_repo
 from app.security.rate_limit import PUSH_TEST_PER_ACCOUNT, limiter
 from app.services import push as push_service
 from app.settings import settings
+from app.push_defaults import BODY_MAX, DEFAULT_KINDS, TITLE_MAX
 from app.system_defaults import BY_ID, with_master_applied
 
 router = APIRouter(prefix="/system", tags=["system"], dependencies=[AUTHENTICATED])
@@ -242,3 +244,74 @@ async def push_test(db: Db, p: CanOperate) -> dict[str, Any]:
     """
     await limiter.hit(db, "push:test", p.subject_id, PUSH_TEST_PER_ACCOUNT)
     return await push_service.send_test(db, p.subject_id)
+
+
+class TemplateOut(Model):
+    """One kind's wording, as an operator edits it."""
+
+    id: str
+    label: str
+    kind_class: str = Field(alias="class")
+    title: str
+    body: str
+    #: What a sender substitutes here. Shown so an operator knows what they may
+    #: use, rather than discovering it from a notification that reads
+    #: "{learner} met today's goal" on somebody's phone.
+    placeholders: list[str]
+    #: Whether these are the shipped words or somebody's edit — which is also
+    #: the only thing "reset" needs to know.
+    edited: bool
+
+
+class TemplatesOut(Model):
+    templates: list[TemplateOut]
+
+
+class TemplateIn(Model):
+    title: str = Field(min_length=1, max_length=TITLE_MAX)
+    body: str = Field(min_length=1, max_length=BODY_MAX)
+
+
+async def _templates(db) -> TemplatesOut:
+    edits = await push_templates.overrides(db)
+    return TemplatesOut(templates=[
+        TemplateOut(
+            id=kind["kindId"],
+            label=kind["label"],
+            **{"class": kind["class"]},
+            title=edits.get(kind["kindId"], {}).get("title") or kind["title"],
+            body=edits.get(kind["kindId"], {}).get("body") or kind["body"],
+            placeholders=kind.get("placeholders", []),
+            edited=kind["kindId"] in edits,
+        )
+        for kind in DEFAULT_KINDS
+    ])
+
+
+@router.get("/push/templates")
+async def push_templates_list(db: Db, p: CanOperate) -> TemplatesOut:
+    """What every kind of notification says on this deployment."""
+    return await _templates(db)
+
+
+@router.patch("/push/templates/{kind_id}")
+async def push_template_write(kind_id: str, body: TemplateIn, db: Db, p: CanOperate) -> TemplatesOut:
+    """Reword one kind.
+
+    A kind needs code behind it, so an unknown id is a client bug rather than a
+    new kind — the same rule the menu and the switchboard follow.
+    """
+    if kind_id not in {kind["kindId"] for kind in DEFAULT_KINDS}:
+        raise NotFound(f"There is no notification called '{kind_id}'.")
+    await push_templates.set_wording(
+        db, kind_id, title=body.title.strip(), body=body.body.strip(), updated_by=p.subject_id
+    )
+    return await _templates(db)
+
+
+@router.delete("/push/templates/{kind_id}")
+async def push_template_reset(kind_id: str, db: Db, p: CanOperate) -> TemplatesOut:
+    """Back to the words the code ships — which is deleting the edit, not
+    writing a second copy of the default."""
+    await push_templates.reset(db, kind_id)
+    return await _templates(db)

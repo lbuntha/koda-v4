@@ -26,7 +26,8 @@ from typing import Any
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
-from app.push_defaults import BY_KIND, MASTER
+from app.push_defaults import BODY_MAX, BY_KIND, MASTER, TITLE_MAX
+from app.repos import push_templates
 from app.repos import notify_prefs, push_tokens
 from app.repos import system as system_repo
 from app.settings import settings
@@ -364,3 +365,26 @@ async def send_test(db: AsyncIOMotorDatabase, user_id: str) -> dict[str, Any]:
         "results": results,
         "note": "Sent whatever push.enabled says, because a test before the master is on is the point.",
     }
+
+
+def fill(template: str, values: dict[str, Any]) -> str:
+    """Substitute the placeholders a kind declares, and nothing else.
+
+    Deliberately not `str.format`: an operator editing wording is not writing
+    Python, and `{0}` or an unclosed brace should not be able to raise inside a
+    send. A placeholder nobody supplied is left standing, so a typo shows up in
+    the preview rather than disappearing silently on somebody's lock screen.
+    """
+    filled = template
+    for key, value in values.items():
+        filled = filled.replace("{" + key + "}", str(value))
+    return filled
+
+
+async def wording(db: AsyncIOMotorDatabase, kind: str, values: dict[str, Any] | None = None) -> tuple[str, str]:
+    """What this kind says — the operator's wording if they changed it, else ours."""
+    definition = BY_KIND.get(kind, {})
+    override = await push_templates.get(db, kind) or {}
+    title = override.get("title") or definition.get("title", "Koda")
+    body = override.get("body") or definition.get("body", "Open Koda to see what's new.")
+    return fill(title, values or {})[:TITLE_MAX], fill(body, values or {})[:BODY_MAX]
