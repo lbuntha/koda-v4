@@ -749,3 +749,17 @@ async def test_a_test_send_with_no_kind_still_explains_itself(client, admin, db,
     await client.post("/system/push/test", headers=admin)
 
     assert sent[0]["message"]["data"]["title"] == "Test notification"
+
+
+async def test_a_parent_can_test_their_own_phone(client, parent, db, seeded, fcm_driver, monkeypatch):
+    """"Did that work?" is a fair question to be able to answer about your own phone."""
+    await client.post("/push/tokens", headers=parent, json={"token": TOKEN})
+    monkeypatch.setattr(fcm, "_post", lambda url, body: (200, {}))
+
+    body = (await client.post("/push/test", headers=parent)).json()
+
+    assert body["sent"] == 1
+
+
+async def test_a_childs_device_cannot_send_itself_a_test(client, child, seeded):
+    assert (await client.post("/push/test", headers=child)).status_code == 403

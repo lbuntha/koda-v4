@@ -204,6 +204,16 @@ export async function refreshNotificationToken(): Promise<void> {
   }
 }
 
+/**
+ * Ring this account's own browsers, so a parent can check it works.
+ *
+ * The plain "did that arrive?" question, answerable without a staff account.
+ * No recipient, and none possible.
+ */
+export async function testMyOwnDevices(): Promise<{ sent: number; note?: string }> {
+  return await request("/push/test", { method: "POST", token: await accessToken() });
+}
+
 export async function notificationPreferences(): Promise<NotificationPreferences> {
   return await request<NotificationPreferences>("/push/preferences", { token: await accessToken() });
 }

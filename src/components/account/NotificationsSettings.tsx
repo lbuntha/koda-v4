@@ -9,6 +9,7 @@ import {
   notificationPreferences,
   notificationsAreOn,
   pushSupport,
+  testMyOwnDevices,
   type NotificationKind,
 } from "../../lib/push";
 
@@ -45,6 +46,8 @@ export const NotificationsSettings: React.FC = () => {
   const [kinds, setKinds] = useState<NotificationKind[] | null>(null);
   const [deploymentSends, setDeploymentSends] = useState(true);
   const [busy, setBusy] = useState(false);
+  /** What the last "send me one" attempt did, in a sentence. */
+  const [tested, setTested] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -82,6 +85,22 @@ export const NotificationsSettings: React.FC = () => {
     // switch is bound to.
     setSupport(pushSupport());
     setRegistered(notificationsAreOn());
+    setBusy(false);
+  };
+
+  const sendMyself = async () => {
+    setBusy(true);
+    setTested(null);
+    try {
+      const result = await testMyOwnDevices();
+      setTested(
+        result.sent > 0
+          ? `Sent to ${result.sent === 1 ? "this browser" : `${result.sent} browsers`}. It should arrive in a moment.`
+          : (result.note ?? "Nothing was sent."),
+      );
+    } catch {
+      setTested("That could not be sent. Try again in a minute.");
+    }
     setBusy(false);
   };
 
@@ -165,6 +184,24 @@ export const NotificationsSettings: React.FC = () => {
               />
             </div>
           ))}
+
+        {on && deploymentSends && (
+          <div className={l.row}>
+            <div className="min-w-0">
+              <h4 className={l.rowTitle}>Send me one now</h4>
+              <p className={l.rowNote}>
+                {tested ?? "Checks that notifications actually arrive on this device."}
+              </p>
+            </div>
+            <button
+              disabled={busy}
+              onClick={() => void sendMyself()}
+              className={themeSystem.button("secondary", "sm")}
+            >
+              Send
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

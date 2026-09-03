@@ -19,6 +19,8 @@ from app.models.common import Model
 from app.push_defaults import DEFAULT_KINDS, MASTER
 from app.repos import notify_prefs, push_tokens
 from app.repos import system as system_repo
+from app.security.rate_limit import PUSH_TEST_PER_ACCOUNT, limiter
+from app.services import push as push_service
 
 router = APIRouter(prefix="/push", tags=["push"], dependencies=[AUTHENTICATED])
 
@@ -175,3 +177,22 @@ async def choose(body: PreferenceIn, db: Db, p: CurrentPrincipal) -> Preferences
 
     await notify_prefs.set_pref(db, p.subject_id, body.kind, body.on)
     return await _preferences(db, p)
+
+
+@router.post("/test", status_code=200)
+async def test_my_own(db: Db, p: CurrentPrincipal) -> dict:
+    """Ring this account's own browsers, so a parent can check it works.
+
+    The same rule as the operator's version in `system.py`, and here for a
+    plainer reason: somebody who has just turned notifications on wants to know
+    they will actually arrive, and until now the only way to find out was to
+    hold a staff account or to wait for something to happen. "Did that work?" is
+    a fair question to be able to answer about your own phone.
+
+    No recipient, and none possible: it rings the browsers belonging to the
+    caller and nobody else's. Rate limited like the operator's, because it
+    spends real quota and real battery.
+    """
+    _adult(p)
+    await limiter.hit(db, "push:selftest", p.subject_id, PUSH_TEST_PER_ACCOUNT)
+    return await push_service.send_test(db, p.subject_id)
