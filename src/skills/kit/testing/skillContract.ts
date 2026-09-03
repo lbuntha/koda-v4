@@ -61,17 +61,26 @@ const sourceUnder = (...dirs: string[]): string => {
  * the SDK swallows a vibration — precisely so that twenty skills do not each
  * have to remember. A flag read there is read.
  */
-const sharedSource = (): string => sourceUnder("src/skills/kit", "src/skills/sdk");
+const sharedSource = (): string =>
+  [
+    sourceUnder("src/skills/kit", "src/skills/sdk"),
+    /* A switch the app honours outside a round, on every skill's behalf. Not a
+       directory: `src/lib` is the whole app, and scanning it would let any
+       stray mention of an id pass for reading it. */
+    readFileSync(join(process.cwd(), "src/lib/premiumLessons.ts"), "utf8"),
+  ].join("\n");
 
 /**
  * Whether a body of code asks whether this feature is on.
  *
- * Two spellings, one question: a skill asks `koda.config.isEnabled(...)`, and
- * the SDK — which is what `config.isEnabled` *is* — asks it of itself under the
- * name `featureEnabled`.
+ * Three spellings, one question: a skill asks `koda.config.isEnabled(...)`; the
+ * SDK — which is what `config.isEnabled` *is* — asks it of itself under the name
+ * `featureEnabled`; and code with no SDK to hand, because it runs outside a
+ * round, asks the store directly with `SkillStoreAPI.isFeatureEnabled(id, ...)`.
  */
 const asksAbout = (source: string, id: string): boolean =>
-  new RegExp(`(?:isEnabled|featureEnabled)\\("${id}"`).test(source);
+  new RegExp(`(?:isEnabled|featureEnabled)\\("${id}"`).test(source) ||
+  new RegExp(`isFeatureEnabled\\([^)]*"${id}"`).test(source);
 
 /** Feature ids the skill's own code asks about, in the order they first appear. */
 const flagsAskedAbout = (source: string): string[] => [

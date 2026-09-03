@@ -3,6 +3,8 @@ import { ArrowRight, BookOpen, Flame, Star, Target, Zap } from "lucide-react";
 import { getCourseLessons, isUnlocked, practiceTitle, satisfiedConcepts } from "../curriculum";
 import type { SkillCatalogEntry } from "../lib/skillCatalog";
 import { buildCatalog } from "../skills/catalog";
+import { premiumLocked } from "../lib/premiumLessons";
+import { useBilling } from "../lib/useBilling";
 import { recommendNow, type TodayPick } from "../lib/learning/recommend";
 import { PracticeProgressAPI } from "../lib/practiceProgress";
 import { useSkillRegistrations } from "../lib/skillRegistrationApi";
@@ -267,6 +269,10 @@ export const Home: React.FC<HomeProps> = ({
 }) => {
   const { skills, viewer } = useSkillCatalog(completedLevels);
   const { registrations } = useSkillRegistrations();
+  /* Subscribed so Today re-reads the plan: a family that upgrades should see
+     the lessons it just bought appear here without reloading. The value is
+     unused — `premiumLocked` asks `Billing` itself. */
+  useBilling();
   const [showAllSubjects, setShowAllSubjects] = React.useState(false);
 
   const byId = new Map(skills.map((skill) => [skill.id, skill]));
@@ -296,7 +302,17 @@ export const Home: React.FC<HomeProps> = ({
   const satisfied = satisfiedConcepts(completedLevels, viewer);
   const catalog = buildCatalog(viewer);
   const today: TodayPick[] = recommendNow(
-    { ...catalog, lessons: catalog.lessons.filter((l) => registeredIds.has(l.skillId)) },
+    {
+      ...catalog,
+      lessons: catalog.lessons.filter(
+        (l) =>
+          registeredIds.has(l.skillId) &&
+          /* A lesson the plan does not cover is not a suggestion. The path
+             still draws it, with its own padlock and a way to ask about it —
+             but "what should I do now?" has to be answerable by doing it. */
+          !premiumLocked({ skillId: l.skillId, levelNumber: l.levelNumber ?? 0 }),
+      ),
+    },
     {
       /* The band holds three. An unfinished run takes one of those places
          rather than adding a fourth, so Today stays a short list of choices

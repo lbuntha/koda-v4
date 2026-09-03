@@ -125,6 +125,10 @@ describe("every feature toggle changes the round", () => {
       "sound_chimes",
       "haptic_feedback",
       "audio_speech",
+      /* Not a round behaviour and so not comparable here: it decides which
+         lessons the app *offers*, before a round exists. Its switch, its count
+         and the plan behind it are covered in `lib/premiumLessons.test.ts`. */
+      "premium_lessons",
     ]);
     for (const feature of skill.features) {
       expect(covered.has(feature.id), `${feature.id} has no toggle test`).toBe(true);

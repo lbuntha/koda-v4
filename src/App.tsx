@@ -38,6 +38,8 @@ import { SocraticChatPanel } from "./components/SocraticChatPanel";
 import { Home } from "./components/Home";
 import { KodaFab } from "./components/KodaFab";
 import { UpgradePrompt } from "./components/UpgradePrompt";
+import { requireFeature } from "./lib/featureGate";
+import { PREMIUM_FEATURE, premiumLocked } from "./lib/premiumLessons";
 import {
   loadCompletedLevels,
   loadProgress,
@@ -339,6 +341,22 @@ export default function App() {
    * deliberate.
    */
   const startLesson = (levelNumber: number) => {
+    /*
+     * A lesson the plan does not cover is explained rather than opened.
+     *
+     * Here, with the study cap, because this is the one door — a padlock drawn
+     * on the learning path is a hint, and a hint is all it can be while every
+     * other way in (Home's band, a resume card, a deep link) exists. Asked
+     * before the cap, and before the tab changes, so a child who cannot open it
+     * is not first dropped onto an empty game screen.
+     */
+    const lesson = getLessonByLevel(levelNumber, viewer);
+    if (lesson && premiumLocked(lesson)) {
+      // `premiumLocked` has already asked the plan, so this only ever explains.
+      requireFeature(PREMIUM_FEATURE, () => {});
+      return;
+    }
+
     setActiveTab("game");
     if (dayDone) {
       setInRound(false);

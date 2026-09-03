@@ -22,12 +22,31 @@ import { UIButton, UIModal } from "./ui";
  * them one is how a tablet ends up ordering a subscription.
  */
 
-/** What each sellable feature is, in words a seven-year-old can read. */
-const FEATURE_COPY: Record<string, { title: string; blurb: string }> = {
+/**
+ * What each sellable feature is, in words a seven-year-old can read.
+ *
+ * Four sentences rather than one, because the reassurance is the half that has
+ * to be true. "Everything else is still yours — every lesson" reads as kindness
+ * under the Koda gate and as a lie under the lessons one, where lessons are
+ * exactly what is being withheld. Each feature says what a child still has.
+ */
+const FEATURE_COPY: Record<
+  string,
+  { title: string; blurb: string; kept: string; ask: string }
+> = {
   "ai.koda": {
     title: "Ask Koda",
     blurb:
       "Koda can talk you through a problem, read what you have drawn, and answer out loud.",
+    kept: "Everything else is still yours: every lesson, every star, your streak and your badges.",
+    ask: "Ask your grown-up if you would like Koda to start answering.",
+  },
+  "course.premium": {
+    title: "The rest of this skill",
+    blurb:
+      "You have played all the lessons this skill gives away. The rest of the path comes with the plan.",
+    kept: "Every lesson you have already opened is still yours, with your stars, your streak and your badges.",
+    ask: "Ask your grown-up if you would like the rest of the path.",
   },
 };
 
@@ -88,6 +107,8 @@ export const UpgradePrompt: React.FC<UpgradePromptProps> = ({ onOpenPlan }) => {
   const copy = FEATURE_COPY[feature] ?? {
     title: "Not on this plan",
     blurb: "This part of Koda is included with a paid plan.",
+    kept: "Everything else is still yours: your stars, your streak and your badges.",
+    ask: "Ask your grown-up if you would like it.",
   };
 
   return (
@@ -128,10 +149,10 @@ export const UpgradePrompt: React.FC<UpgradePromptProps> = ({ onOpenPlan }) => {
         </div>
 
         <p className="text-sm text-muted">
-          Everything else is still yours: every lesson, every star, your streak and your badges.
+          {copy.kept}
           {mayBuy
             ? " Your plan is under Settings, and you can ask to move to one that includes it."
-            : " Ask your grown-up if you would like Koda to start answering."}
+            : ` ${copy.ask}`}
         </p>
 
         {/*

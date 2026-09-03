@@ -32,6 +32,9 @@ export const UIPathNode: React.FC<UIPathNodeProps> = ({
 }) => {
   const s = themeSystem.pathNode;
   const isLocked = state === "locked";
+  /* A plan lock, not a path lock: it draws the padlock but stays pressable,
+     because pressing it is what explains the plan. See `PathNodeState`. */
+  const isPremium = state === "premium";
 
   return (
     <div className={s.item}>
@@ -40,11 +43,11 @@ export const UIPathNode: React.FC<UIPathNodeProps> = ({
         onClick={onClick}
         className={s.circle(state)}
         title={title}
-        aria-label={`${title}${isLocked ? " (locked)" : ""}`}
+        aria-label={`${title}${isLocked ? " (locked)" : isPremium ? " (on the plan)" : ""}`}
       >
         {state === "completed" ? (
           <CheckCircle2 className="w-8 h-8 sm:w-9 sm:h-9" />
-        ) : isLocked ? (
+        ) : isLocked || isPremium ? (
           <Lock className="w-6 h-6" />
         ) : (
           <span className="text-2xl sm:text-3xl">{icon}</span>

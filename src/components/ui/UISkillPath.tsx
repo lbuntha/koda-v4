@@ -80,6 +80,9 @@ export const UISkillPath: React.FC<UISkillPathProps> = ({
     >
       {items.map((item, index) => {
         const locked = item.state === "locked";
+        /* Locked by a plan rather than by the path. It still presses — the tap
+           is what explains it — so only the prerequisite lock is `disabled`. */
+        const premium = item.state === "premium";
         const stars = item.stars ?? 0;
         return (
           <div
@@ -92,10 +95,10 @@ export const UISkillPath: React.FC<UISkillPathProps> = ({
               disabled={locked}
               onClick={() => onSelect(item.id)}
               title={item.title}
-              aria-label={`${item.title}${locked ? " (locked)" : ""}`}
+              aria-label={`${item.title}${locked ? " (locked)" : premium ? " (on the plan)" : ""}`}
               className={s.circle(item.state)}
             >
-              {locked ? (
+              {locked || premium ? (
                 <Lock className="w-6 h-6" />
               ) : item.icon ? (
                 <span className="text-2xl sm:text-3xl">{item.icon}</span>

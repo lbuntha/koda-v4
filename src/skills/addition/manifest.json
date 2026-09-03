@@ -125,6 +125,13 @@
       "description": "Labels each step — warm-up, guided challenge, final milestone — beside the step counter.",
       "isEnabled": true,
       "tag": "Cognitive"
+    },
+    {
+      "id": "premium_lessons",
+      "name": "Charge for later lessons",
+      "description": "How many lessons stay free is “Free lessons” on the Settings tab; the rest need a plan that includes the full course.",
+      "isEnabled": false,
+      "tag": "Plan"
     }
   ],
   "settings": {
@@ -133,7 +140,8 @@
     "guidedLabel": "",
     "milestoneLabel": "",
     "speechRate": 0.95,
-    "answerInput": "pad"
+    "answerInput": "pad",
+    "freeLessons": 10
   },
   "settingsSchema": [
     {
@@ -193,6 +201,15 @@
           "label": "Four choices"
         }
       ]
+    },
+    {
+      "key": "freeLessons",
+      "label": "Free lessons",
+      "help": "How many of this skill's lessons anyone can play. The rest need the plan. Only applies while 'Charge for later lessons' is on.",
+      "type": "number",
+      "min": 0,
+      "max": 100,
+      "step": 1
     }
   ]
 }

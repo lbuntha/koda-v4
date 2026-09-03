@@ -68,6 +68,13 @@
       "description": "Pop and success chimes during a round.",
       "isEnabled": true,
       "tag": "Audio"
+    },
+    {
+      "id": "premium_lessons",
+      "name": "Charge for later lessons",
+      "description": "How many lessons stay free is “Free lessons” on the Settings tab; the rest need a plan that includes the full course.",
+      "isEnabled": false,
+      "tag": "Plan"
     }
   ],
   "settings": {
@@ -77,7 +84,8 @@
     "milestoneLabel": "",
     "speechRate": 1.0,
     "hapticIntensity": "crisp",
-    "popScaleFactor": 1.2
+    "popScaleFactor": 1.2,
+    "freeLessons": 10
   },
   "settingsSchema": [
     {
@@ -151,6 +159,15 @@
       "max": 1.6,
       "step": 0.1,
       "unit": "x"
+    },
+    {
+      "key": "freeLessons",
+      "label": "Free lessons",
+      "help": "How many of this skill's lessons anyone can play. The rest need the plan. Only applies while 'Charge for later lessons' is on.",
+      "type": "number",
+      "min": 0,
+      "max": 100,
+      "step": 1
     }
   ]
 }

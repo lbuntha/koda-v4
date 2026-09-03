@@ -29,6 +29,11 @@ const sourceText = (() => {
     }
   };
   walk(SRC);
+  /* A setting the app honours outside a round, on every skill's behalf. Named
+     as one file rather than scanning `src/lib`, so a stray mention of a key
+     somewhere in the app cannot pass for reading it. See `skillContract`, which
+     holds the same line for feature flags. */
+  parts.push(readFileSync(join(process.cwd(), "src/lib/premiumLessons.ts"), "utf8"));
   return parts.join("\n");
 })();
 
@@ -38,7 +43,10 @@ const sourceText = (() => {
 describe("the skill manager tells the truth about this skill", () => {
   it.each(Object.keys(skill.settings).map((key) => ({ key })))("$key is read somewhere", ({ key }) => {
     expect(
-      sourceText.includes(`get("${key}"`) || sourceText.includes(`get<string>("${key}"`),
+      sourceText.includes(`get("${key}"`) ||
+        sourceText.includes(`get<string>("${key}"`) ||
+        /* The store's own spelling, for a reader with no SDK to hand. */
+        new RegExp(`getSkillSetting(?:<[^>]*>)?\\([^)]*"${key}"`).test(sourceText),
       `nothing reads the "${key}" setting`,
     ).toBe(true);
   });

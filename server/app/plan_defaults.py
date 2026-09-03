@@ -23,14 +23,22 @@ FREE_PLAN = "free"
 
 #: Every feature a plan may include.
 #:
-#: One entry today, on purpose. A feature is only real once something refuses
-#: without it, and shipping a list of switches that nothing enforces is how a
-#: plan comes to promise things it does not deliver.
+#: Short on purpose. A feature is only real once something withholds without it,
+#: and shipping a list of switches that nothing honours is how a plan comes to
+#: promise things it does not deliver.
 #:
-#: **Adding the next one is two edits**: an entry here, and a check at whatever
-#: it gates — the plan editor, the family's plan card, and the admin screens all
-#: read this list and need no change. Splitting the live voice coach out of
-#: `ai.koda` and selling it separately is that shape of change.
+#: **Adding one is two edits**: an entry here, and a check at whatever it gates —
+#: the plan editor, the family's plan card, and the admin screens all read this
+#: list and need no change. Splitting the live voice coach out of `ai.koda` and
+#: selling it separately is that shape of change.
+#:
+#: The two differ in where they are answered, which is worth knowing before
+#: adding a third. `ai.koda` is *refused*: the tutor proxy returns 402 and the
+#: learner route refuses a fourth child, so the device merely explains. There is
+#: nothing to refuse for `course.premium` — every lesson is bundled with the app
+#: and a round is played offline against no server — so the device is where it is
+#: answered, the way the learning path's own padlocks are. See
+#: `src/lib/premiumLessons.ts`.
 PLAN_FEATURES: list[dict] = [
     {
         "featureId": "ai.koda",
@@ -41,6 +49,16 @@ PLAN_FEATURES: list[dict] = [
         ),
         "order": 10,
     },
+    {
+        "featureId": "course.premium",
+        "label": "The full course",
+        "description": (
+            "Every lesson of every skill. Without it a learner keeps the free "
+            "lessons each skill opens with — how many is the operator's to set, "
+            "per skill, in Skill Manager."
+        ),
+        "order": 20,
+    },
 ]
 
 FEATURE_IDS = frozenset(feature["featureId"] for feature in PLAN_FEATURES)
@@ -50,7 +68,10 @@ DEFAULT_PLANS: list[dict] = [
     {
         "planId": FREE_PLAN,
         "name": "Free",
-        "description": "One child, and the whole course. Koda's AI help is not included.",
+        # Not "the whole course": a skill may be set to charge for its later
+        # lessons, and a plan description that contradicts the padlock a child
+        # is looking at is worse than a vaguer one.
+        "description": "One child, and the lessons each skill opens with.",
         "priceCents": 0,
         "currency": "USD",
         "learnerLimit": 1,
@@ -60,11 +81,11 @@ DEFAULT_PLANS: list[dict] = [
     {
         "planId": "family",
         "name": "Family",
-        "description": "Up to three children, and Koda answers.",
+        "description": "Up to three children, every lesson, and Koda answers.",
         "priceCents": 500,
         "currency": "USD",
         "learnerLimit": 3,
-        "features": ["ai.koda"],
+        "features": ["ai.koda", "course.premium"],
         "order": 20,
     },
 ]

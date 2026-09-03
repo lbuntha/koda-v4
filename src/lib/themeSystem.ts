@@ -15,7 +15,14 @@ export type TypographyVariant = "h1" | "h2" | "h3" | "h4" | "body" | "body-sm" |
 export type StatTone = "primary" | "streak" | "success" | "danger";
 export type SurfaceVariant = "default" | "glass" | "bordered" | "interactive";
 export type FeatureVariant = "default" | "accent" | "subtle";
-export type PathNodeState = "completed" | "current" | "available" | "locked";
+/**
+ * `premium` is a lock a grown-up can open, `locked` is one only work opens.
+ *
+ * Kept apart because they are answered differently and a child can tell: a grey
+ * padlock means "not yet, keep going", and pressing it does nothing. A violet
+ * one means "this is on the plan" — it presses, and says so.
+ */
+export type PathNodeState = "completed" | "current" | "available" | "locked" | "premium";
 export type KidMessageTone = "correct" | "tryAgain" | "hint" | "celebrate" | "nudge";
 export type FieldSize = "sm" | "md" | "lg";
 
@@ -346,6 +353,11 @@ export const themeSystem = {
         available: `bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-400 dark:text-slate-300 border-slate-300 dark:border-slate-900 ${press}`,
         locked:
           "bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border-slate-300 dark:border-slate-700 cursor-not-allowed",
+        /* Pressable, unlike `locked`: the tap is the whole point — it is what
+           tells a family what the lesson is behind. Violet rather than the
+           indigo the open states use, so the difference is visible at a glance
+           down a path and not only on the icon inside. */
+        premium: `bg-violet-100 dark:bg-violet-950/60 text-violet-600 dark:text-violet-300 border-violet-300 dark:border-violet-800 hover:bg-violet-200 dark:hover:bg-violet-900/60 ${press}`,
       };
       return `${base} ${states[state]}`;
     },
@@ -372,6 +384,7 @@ export const themeSystem = {
         current: "text-indigo-700 dark:text-indigo-300",
         available: "text-slate-700 dark:text-slate-300",
         locked: "text-slate-500 dark:text-slate-400",
+        premium: "text-violet-700 dark:text-violet-300",
       };
       return `${base} ${states[state]}`;
     },
@@ -389,6 +402,7 @@ export const themeSystem = {
         current: "text-indigo-700 dark:text-indigo-300",
         available: "text-slate-700 dark:text-slate-300",
         locked: "text-slate-400 dark:text-slate-500",
+        premium: "text-violet-600 dark:text-violet-300",
       };
       return `${base} ${states[state]}`;
     },
