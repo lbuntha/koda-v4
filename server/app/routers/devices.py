@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, Query
 from app.deps import AUTHENTICATED, Db, require
 from app.errors import Forbidden, NotFound
 from app.models.auth import Principal
-from app.repos import devices, learners
+from app.repos import devices, learners, push_tokens
 from app.repos.base import scoped
 
 # Every route here needs a signed-in caller; the permission each one needs
@@ -61,6 +61,10 @@ async def list_devices(
     for learner in await learners.for_family(db, family_id):
         names[learner["_id"]] = learner["displayName"]
 
+    # Which of these can be rung. A parent asking "why does my laptop never
+    # buzz?" is asking about a device, so the answer belongs on the device.
+    notified = await push_tokens.device_ids_with_tokens(db, [row["_id"] for row in rows])
+
     return {
         "devices": [
             {
@@ -73,6 +77,7 @@ async def list_devices(
                 "createdAt": r.get("createdAt"),
                 "revokedAt": r.get("revokedAt"),
                 "current": r["_id"] == p.device_id,
+                "notifications": r["_id"] in notified,
             }
             for r in rows
         ],
@@ -99,6 +104,25 @@ async def revoke_others(db: Db, p: CanRevoke) -> dict:
     family_id = scoped(p)["familyId"]
     signed_out = await devices.revoke_others_in_family(db, family_id, p.device_id)
     return {"signedOut": signed_out}
+
+
+@router.delete("/{device_id}/notifications", status_code=204)
+async def silence_device(device_id: str, db: Db, p: CanRevoke) -> None:
+    """Stop one browser being notified, without signing it out.
+
+    The gesture for a laptop left at work: it stays signed in, it just stops
+    buzzing. Deliberately one-way — a token can only be minted by the browser
+    that holds the permission, so there is no matching "turn it back on from
+    here", and the screen says so rather than drawing a switch that cannot
+    work.
+
+    Idempotent, and scoped by the same lookup as signing a device out: a device
+    id from another family is simply not there.
+    """
+    found = await db.devices.find_one(scoped(p, {"_id": device_id}))
+    if not found or (p.learner_id and device_id != p.device_id):
+        raise NotFound("No such device on this account.")
+    await push_tokens.delete_for_device(db, device_id)
 
 
 @router.delete("/{device_id}", status_code=204)

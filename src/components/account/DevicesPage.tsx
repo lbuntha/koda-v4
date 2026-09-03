@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Baby, ChevronLeft, ChevronRight, Laptop, LogOut, RefreshCw } from "lucide-react";
+import { Baby, BellOff, ChevronLeft, ChevronRight, Laptop, LogOut, RefreshCw } from "lucide-react";
 
 import { ApiError, accessToken, request, usePermissions, useSession } from "../../lib/sync";
 import { themeSystem } from "../../lib/themeSystem";
 import { playSound } from "../../utils/audio";
 import { UIBadge, UIButton, UIDialog, UISectionHeader } from "../ui";
 import { NoAccess } from "./NoAccess";
+import { disableNotifications } from "../../lib/push";
 
 interface Device {
   id: string;
@@ -17,6 +18,8 @@ interface Device {
   createdAt: string | null;
   revokedAt: string | null;
   current: boolean;
+  /** Whether this browser currently holds a notification token. */
+  notifications: boolean;
 }
 
 interface DevicePage {
@@ -110,6 +113,42 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({ embedded = false }) =>
   const devices = result?.devices ?? [];
   const total = result?.total ?? 0;
   const pages = result?.pages ?? 1;
+
+  /**
+   * Stop one browser being notified, without signing it out.
+   *
+   * One-way on purpose. A token can only be minted by the browser that holds
+   * the permission, so there is no "turn it back on from here" to offer — the
+   * row says where to do it instead of drawing a switch that would do nothing.
+   *
+   * The device you are holding is the exception, and takes the normal path:
+   * that one also has a token remembered in this browser's own storage, and
+   * deleting the row without clearing it would leave the Settings switch
+   * reading "on" and the next launch quietly registering again.
+   */
+  const silence = async (device: Device) => {
+    setBusy(device.id);
+    setError(null);
+    try {
+      if (device.current) {
+        await disableNotifications();
+      } else {
+        const token = await accessToken();
+        await request(`/devices/${device.id}/notifications`, { method: "DELETE", token });
+      }
+      setNotice(
+        device.current
+          ? "This device will not be notified any more."
+          : `${device.name} will not be notified any more.`,
+      );
+      playSound("pop");
+      await load();
+    } catch (err) {
+      setError((err as ApiError).message);
+    } finally {
+      setBusy(null);
+    }
+  };
 
   const revoke = async (device: Device) => {
     setBusy(device.id);
@@ -260,6 +299,17 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({ embedded = false }) =>
 
                     <div className="flex shrink-0 items-center gap-2">
                       {device.current && <UIBadge variant="success">This one</UIBadge>}
+                      {device.notifications && (
+                        <UIButton
+                          variant="secondary"
+                          size="sm"
+                          icon={<BellOff />}
+                          isLoading={busy === device.id}
+                          onClick={() => void silence(device)}
+                        >
+                          Notifications on
+                        </UIButton>
+                      )}
                       {mayRevoke && (
                         <UIButton
                           variant={device.current ? "secondary" : "danger"}

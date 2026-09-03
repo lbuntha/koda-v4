@@ -533,3 +533,37 @@ async def test_the_admin_user_list_counts_notified_browsers(client, admin, paren
     by_email = {row["email"]: row for row in rows}
     assert by_email["parent@example.com"]["notifiedBrowserCount"] == 2
     assert by_email["ops@example.com"]["notifiedBrowserCount"] == 0, "nobody is notified by default"
+
+
+async def test_the_device_list_says_which_browsers_can_be_rung(client, parent, db, seeded):
+    """"Why does my laptop never buzz?" is a question about a device."""
+    await client.post("/push/tokens", headers=parent, json={"token": TOKEN})
+
+    rows = (await client.get("/devices", headers=parent)).json()["devices"]
+
+    assert [row["notifications"] for row in rows] == [True]
+
+
+async def test_a_device_can_be_silenced_without_signing_it_out(client, parent, db, seeded):
+    """The laptop left at work: still signed in, no longer buzzing."""
+    await client.post("/push/tokens", headers=parent, json={"token": TOKEN})
+    device_id = (await db.push_tokens.find_one({"token": TOKEN}))["deviceId"]
+
+    response = await client.delete(f"/devices/{device_id}/notifications", headers=parent)
+
+    assert response.status_code == 204
+    rows = (await client.get("/devices", headers=parent)).json()["devices"]
+    assert rows[0]["notifications"] is False
+    assert rows[0]["revokedAt"] is None, "silencing is not signing out"
+    assert await db.push_tokens.count_documents({}) == 0
+
+
+async def test_silencing_a_device_in_another_family_is_not_possible(client, parent, db, seeded):
+    await db.devices.insert_one(
+        {"_id": "d_elsewhere", "familyId": "f_someone_else", "name": "Their laptop",
+         "kind": "user", "revokedAt": None}
+    )
+
+    response = await client.delete("/devices/d_elsewhere/notifications", headers=parent)
+
+    assert response.status_code == 404

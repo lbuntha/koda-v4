@@ -126,6 +126,31 @@ async def coverage(db: AsyncIOMotorDatabase) -> dict[str, int]:
     return {"tokens": live, "families": len([f for f in families if f])}
 
 
+async def device_ids_with_tokens(db: AsyncIOMotorDatabase, device_ids: list[str]) -> set[str]:
+    """Which of these sessions currently hold a live token.
+
+    One query for a whole page of devices rather than one each: the device list
+    is read on a phone, and a round trip per row is how a list becomes a wait.
+    """
+    if not device_ids:
+        return set()
+    rows = await db.push_tokens.find(
+        {"deviceId": {"$in": device_ids}, "disabledAt": None}, {"deviceId": 1}
+    ).to_list(length=200)
+    return {row["deviceId"] for row in rows if row.get("deviceId")}
+
+
+async def delete_for_device(db: AsyncIOMotorDatabase, device_id: str) -> int:
+    """Silence one browser without ending its session.
+
+    The difference from `delete_for_devices` is intent, not mechanism: that one
+    is called when a session dies and takes its token with it, this one when
+    somebody wants a laptop to stop buzzing while staying signed in.
+    """
+    result = await db.push_tokens.delete_many({"deviceId": device_id})
+    return result.deleted_count
+
+
 async def delete(db: AsyncIOMotorDatabase, token: str) -> bool:
     """Forget a token. Used both by a sign-out and by FCM telling us it is dead."""
     result = await db.push_tokens.delete_one({"token": token})
