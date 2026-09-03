@@ -10,6 +10,7 @@ import { DIFFERENCE, REMOVED_PART, WHOLE } from "../internal/data/subtractionPal
 import { FRAME_CELL, SCENE } from "../internal/data/subtractionLayout";
 import { speechRate, tagLabelsFrom } from "../internal/data/subtractionChrome";
 import { useNudge } from "../internal/ui/useNudge";
+import { chime } from "../internal/data/subtractionSound";
 import {
   differenceKey, drawDifference, withoutRepeat, type Difference, type DifferenceSpec,
 } from "../internal/data/subtractionNumbers";
@@ -157,7 +158,6 @@ export const FrameTakeaway: React.FC<ActivityProps<FrameTakeawayParams>> = ({ pa
 
   useEffect(() => { setRemoved([]); nudge.clear(); }, [q.id, nudge.clear]);
 
-  const chimes = koda.config.isEnabled("sound_chimes", true);
   const speaks = !practising && koda.config.isEnabled("audio_speech", true);
   const badges = koda.config.isEnabled("counting_badges", true);
   const showsDifference = koda.config.isEnabled("running_difference_badge", true);
@@ -166,9 +166,14 @@ export const FrameTakeaway: React.FC<ActivityProps<FrameTakeawayParams>> = ({ pa
     if (removed.includes(i) || round.feedback) return;
     if (removed.length >= q.subtrahend) { nudge.refuse(`You have already taken out ${q.subtrahend}. Read what remains.`); return; }
     setRemoved((current) => [...current, i]);
-    if (chimes) koda.sound.play("pop");
+    chime(koda, "moved");
     koda.haptics.tap();
     if (speaks) void koda.speech.say(String(removed.length + 1), speechRate(koda));
+  };
+  const putBackLast = () => {
+    setRemoved((items) => items.slice(0, -1));
+    chime(koda, "undone");
+    koda.haptics.tap();
   };
   const check = () => {
     if (removed.length !== q.subtrahend) { nudge.refuse(`Take out ${q.subtrahend - removed.length} more before you check.`); return; }
@@ -177,7 +182,6 @@ export const FrameTakeaway: React.FC<ActivityProps<FrameTakeawayParams>> = ({ pa
     // The frame answers back: recall reveals the partner the child just named.
     if (recall) setRemoved(Array.from({ length: q.subtrahend }, (_, i) => i));
     const correct = value === q.difference;
-    if (chimes) koda.sound.play(correct ? "success" : "error");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     round.submit({ correct, given: String(value), expected: q.expected, errorKind: correct ? undefined : "miscounted_items",
       title: correct ? "You read the frame!" : "Look at the filled counters",
@@ -225,7 +229,7 @@ export const FrameTakeaway: React.FC<ActivityProps<FrameTakeawayParams>> = ({ pa
             : `Answer from memory; the frame will show the partner.`
           : `Take out ${Math.max(0, q.subtrahend - removed.length)} more; keep the frame pattern.`}</div>}
       </div>
-      {!recall && removed.length > 0 && !round.feedback && <div className="flex justify-center"><button type="button" onClick={() => setRemoved((items) => items.slice(0, -1))} className={themeSystem.button("ghost", "sm")}>Put back the last counter</button></div>}
+      {!recall && removed.length > 0 && !round.feedback && <div className="flex justify-center"><button type="button" onClick={putBackLast} className={themeSystem.button("ghost", "sm")}>Put back the last counter</button></div>}
       {!recall && !ready && <div className="flex justify-center"><button type="button" onClick={check} className={themeSystem.button("primary", "lg")}>Check</button></div>}
       {(recall || ready) && <div className="flex flex-wrap justify-center gap-2.5">{choicesFor(q.difference).map((value) => <button key={value} type="button" onClick={() => choose(value)} disabled={Boolean(round.feedback)} className={themeSystem.button("secondary", "choice")}>{value}</button>)}</div>}
     </div>

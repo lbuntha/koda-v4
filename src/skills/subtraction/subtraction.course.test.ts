@@ -53,10 +53,11 @@ describe("subtraction sits in the course in its own order", () => {
   });
 
   it("starts after every lesson that came before it", () => {
+    // Appended, not last for ever. Another skill may be added after this block
+    // — one already has been — and appending renumbers nothing on either side.
     const first = refs.findIndex((ref) => ref.startsWith("subtraction/"));
     expect(first).toBeGreaterThan(0);
     expect(refs.slice(0, first).every((ref) => !ref.startsWith("subtraction/"))).toBe(true);
-    expect(refs.at(-1)!.startsWith("subtraction/")).toBe(true);
   });
 });
 

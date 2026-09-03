@@ -10,6 +10,7 @@ import { DIFFERENCE, REMOVED_PART, WHOLE } from "../internal/data/subtractionPal
 import { BLOCK_SIZES, REMOVED, SCENE, TOUCH_TARGET, ZONE, type BlockDensity } from "../internal/data/subtractionLayout";
 import { speechRate, tagLabelsFrom } from "../internal/data/subtractionChrome";
 import { useNudge } from "../internal/ui/useNudge";
+import { chime } from "../internal/data/subtractionSound";
 import {
   differenceKey, digitsOf, drawDifference, withoutRepeat,
   type Difference, type DifferenceSpec, type Digits, type Place,
@@ -276,7 +277,6 @@ export const BlockExchange: React.FC<ActivityProps<BlockExchangeParams>> = ({ pa
 
   useEffect(() => { setHeld(q.start); setTaken(ZERO); setEntry(""); nudge.clear(); }, [q.id, q.start, nudge.clear]);
 
-  const chimes = koda.config.isEnabled("sound_chimes", true);
   const badges = koda.config.isEnabled("counting_badges", true);
   const showsDifference = koda.config.isEnabled("running_difference_badge", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
@@ -294,7 +294,7 @@ export const BlockExchange: React.FC<ActivityProps<BlockExchangeParams>> = ({ pa
     }
     setHeld((current) => ({ ...current, [place]: current[place] - 1 }));
     setTaken((current) => ({ ...current, [place]: current[place] + 1 }));
-    if (chimes) koda.sound.play("pop");
+    chime(koda, "moved");
     koda.haptics.tap();
   };
 
@@ -312,7 +312,7 @@ export const BlockExchange: React.FC<ActivityProps<BlockExchangeParams>> = ({ pa
       const next = { ...current, [from]: current[from] - 1, [into]: current[into] + 10 };
       return totalOf(next) === totalOf(current) ? next : current;
     });
-    if (chimes) koda.sound.play("clink");
+    chime(koda, "changed");
     koda.haptics.tap();
   };
 
@@ -333,7 +333,6 @@ export const BlockExchange: React.FC<ActivityProps<BlockExchangeParams>> = ({ pa
     if (!entry) { nudge.refuse("Type the value of the blocks that remain."); return; }
     const given = Number(entry);
     const correct = given === q.difference;
-    if (chimes) koda.sound.play(correct ? "success" : "error");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     round.submit({
       correct, given: entry, expected: q.expected,

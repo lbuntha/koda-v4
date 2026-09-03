@@ -10,6 +10,7 @@ import { COMPARISON, DIFFERENCE, REMOVED_PART, WHOLE } from "../internal/data/su
 import { SCENE, TOUCH_TARGET } from "../internal/data/subtractionLayout";
 import { speechRate, tagLabelsFrom } from "../internal/data/subtractionChrome";
 import { useNudge } from "../internal/ui/useNudge";
+import { chime } from "../internal/data/subtractionSound";
 import {
   differenceKey, digitsOf, drawRoundingDifference, roundTo, shuffle, withoutRepeat,
   type Difference,
@@ -178,13 +179,11 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({ para
 
   useEffect(() => { setRounded(false); setVerdict(undefined); setReason(undefined); nudge.clear(); }, [q.id, nudge.clear]);
 
-  const chimes = koda.config.isEnabled("sound_chimes", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
   const prompt = promptFor(q, copy.prompts?.default);
 
   const answerEstimate = (value: number) => {
     const correct = value === q.estimate;
-    if (chimes) koda.sound.play(correct ? "success" : "error");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     round.submit({
       correct, given: String(value), expected: q.expected,
@@ -199,7 +198,6 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({ para
     if (!reason) { nudge.refuse("Choose the reason that explains it."); return; }
     const given = `${verdict},${reason}`;
     const correct = given === q.expected;
-    if (chimes) koda.sound.play(correct ? "success" : "error");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     round.submit({
       correct, given, expected: q.expected,
@@ -227,7 +225,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({ para
             about {q.roundedMinuend} − {q.roundedSubtrahend}
           </motion.div>
           : <button type="button" className={`${TOUCH_TARGET} ${themeSystem.button("secondary", "md")}`}
-            onClick={() => { setRounded(true); round.useSupport("walkthrough"); if (chimes) koda.sound.play("clink"); }}>
+            onClick={() => { setRounded(true); round.useSupport("walkthrough"); chime(koda, "changed"); }}>
             Round both to the nearest {q.unit === 10 ? "ten" : "hundred"}
           </button>)}
 

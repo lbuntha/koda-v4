@@ -10,6 +10,7 @@ import { COMPARISON, DIFFERENCE, REMOVED_PART, WHOLE } from "../internal/data/su
 import { SCENE, TOUCH_TARGET } from "../internal/data/subtractionLayout";
 import { speechRate, tagLabelsFrom } from "../internal/data/subtractionChrome";
 import { useNudge } from "../internal/ui/useNudge";
+import { chime } from "../internal/data/subtractionSound";
 import {
   differenceKey, drawDifference, randInt, shuffle, withoutRepeat,
   type Difference, type DifferenceSpec,
@@ -222,7 +223,6 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
   });
   const q = round.question as FactQuestion;
   useEffect(() => { setHelperChosen(false); setEntry(""); setMembers({}); nudge.clear(); }, [q.id, nudge.clear]);
-  const chimes = koda.config.isEnabled("sound_chimes", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
   const answerInput = koda.config.get<string>("answerInput", "choices");
   const prompt = promptFor(q, copy.prompts?.default);
@@ -231,12 +231,11 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
     if (!correct) { nudge.refuse(message); return; }
     setHelperChosen(true);
     round.useSupport("walkthrough");
-    if (chimes) koda.sound.play("clink");
+    chime(koda, "changed");
     koda.haptics.tap();
   };
   const submitNumber = (value: number) => {
     const correct = value === q.difference;
-    if (chimes) koda.sound.play(correct ? "success" : "error");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     round.submit({ correct, given: String(value), expected: q.expected, errorKind: correct ? undefined : Math.abs(value - q.difference) === 1 ? "off_by_one" : "off_by_more",
       title: correct ? "That fact works!" : "Check the relationship",
@@ -246,7 +245,6 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
     const values = q.members!.map((_, i) => members[i] ?? "");
     if (values.some((value) => value === "")) { nudge.refuse(`${values.filter((value) => value === "").length} facts are still empty.`); return; }
     const correct = values.join(",") === q.expected;
-    if (chimes) koda.sound.play(correct ? "success" : "error");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     round.submit({ correct, given: values.join(","), expected: q.expected, errorKind: correct ? undefined : "off_by_more",
       title: correct ? "The whole fact family!" : "Check all four facts", message: practising ? undefined : `All four facts use ${q.subtrahend}, ${q.difference}, and ${q.minuend}.` });

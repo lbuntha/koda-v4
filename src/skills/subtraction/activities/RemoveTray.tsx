@@ -21,6 +21,7 @@ import { DIFFERENCE, REMOVED_PART, WHOLE } from "../internal/data/subtractionPal
 import { COUNT_BADGE, HELD, REMOVED, SCENE, TOKEN_COMPACT, ZONE } from "../internal/data/subtractionLayout";
 import { speechRate, tagLabelsFrom } from "../internal/data/subtractionChrome";
 import { useNudge } from "../internal/ui/useNudge";
+import { chime } from "../internal/data/subtractionSound";
 import {
   differenceKey,
   drawDifference,
@@ -305,13 +306,20 @@ export const RemoveTray: React.FC<ActivityProps<RemoveTrayParams>> = ({ params, 
   }, [q.id, q.minuend, finishing, nudge.clear]);
 
   const speaks = !practising && koda.config.isEnabled("audio_speech", true);
-  const chimes = koda.config.isEnabled("sound_chimes", true);
   const badges = koda.config.isEnabled("counting_badges", true);
   const showsDifference = koda.config.isEnabled("running_difference_badge", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
 
+  const undoLastMove = () => {
+    setRemoved((items) => items.slice(0, -1));
+    chime(koda, "undone");
+    koda.haptics.tap();
+  };
+
   const feedback = (kind: "tap" | "success" | "error") => {
-    if (chimes) koda.sound.play(kind === "tap" ? "pop" : kind);
+    // Only the tap sounds. A judged answer is spoken by the shared reaction,
+    // and Addition adds no chime of its own on top of it.
+    if (kind === "tap") chime(koda, "moved");
     if (kind === "success") koda.haptics.success();
     else koda.haptics.tap();
   };
@@ -486,7 +494,7 @@ export const RemoveTray: React.FC<ActivityProps<RemoveTrayParams>> = ({ params, 
       </div>
 
       {(q.mode === "remove" || q.mode === "separate") && removed.length > 0 && !round.feedback && <div className="flex justify-center">
-        <button type="button" onClick={() => setRemoved((items) => items.slice(0, -1))} className={themeSystem.button("ghost", "sm")}>Undo last move</button>
+        <button type="button" onClick={undoLastMove} className={themeSystem.button("ghost", "sm")}>Undo last move</button>
       </div>}
       {q.mode === "match_groups" && pairs > 0 && !round.feedback && <div className="flex justify-center">
         <button type="button" onClick={() => setPairs((n) => n - 1)} className={themeSystem.button("ghost", "sm")}>Undo last pair</button>

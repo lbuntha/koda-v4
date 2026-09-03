@@ -10,6 +10,7 @@ import { COMPARISON, DIFFERENCE, REMOVED_PART, WHOLE } from "../internal/data/su
 import { SCENE, TOUCH_TARGET } from "../internal/data/subtractionLayout";
 import { speechRate, tagLabelsFrom } from "../internal/data/subtractionChrome";
 import { useNudge } from "../internal/ui/useNudge";
+import { chime } from "../internal/data/subtractionSound";
 import { fillTemplate, sceneAt, type StoryScene } from "../internal/data/storyCast";
 import {
   drawSubtractionStory, type StoryKind, type StoryNumbers, type StorySpec,
@@ -227,7 +228,6 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({ params, 
 
   useEffect(() => { setBuilt(false); setStep(0); nudge.clear(); }, [q.id, nudge.clear]);
 
-  const chimes = koda.config.isEnabled("sound_chimes", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
   const prompt = promptFor(q, copy.prompts?.default);
   const multi = q.mode === "multi_step";
@@ -241,11 +241,10 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({ params, 
       }
       setStep(1);
       round.useSupport("walkthrough");
-      if (chimes) koda.sound.play("clink");
+      chime(koda, "changed");
       return;
     }
     const correct = value === q.answer;
-    if (chimes) koda.sound.play(correct ? "success" : "error");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     round.submit({
       correct, given: multi ? `${q.intermediate},${value}` : String(value), expected: q.expected,
@@ -285,7 +284,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({ params, 
             </div>;
           })}
         </motion.div> : <div className="flex justify-center">
-          <button type="button" onClick={() => { setBuilt(true); round.useSupport("walkthrough"); if (chimes) koda.sound.play("clink"); }}
+          <button type="button" onClick={() => { setBuilt(true); round.useSupport("walkthrough"); chime(koda, "changed"); }}
             className={`${TOUCH_TARGET} ${themeSystem.button("secondary", "md")}`}>Draw the bars</button>
         </div>}
 

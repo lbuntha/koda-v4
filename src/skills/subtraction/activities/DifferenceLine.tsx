@@ -10,6 +10,7 @@ import { COMPARISON, DIFFERENCE, REMOVED_PART, WHOLE } from "../internal/data/su
 import { SCENE } from "../internal/data/subtractionLayout";
 import { speechRate, tagLabelsFrom } from "../internal/data/subtractionChrome";
 import { useNudge } from "../internal/ui/useNudge";
+import { chime } from "../internal/data/subtractionSound";
 import {
   differenceKey, digitsOf, drawConstantDifference, drawDifference, numberWord,
   shuffle, withoutRepeat, type ConstantDifference, type Difference, type DifferenceSpec,
@@ -304,7 +305,6 @@ export const DifferenceLine: React.FC<ActivityProps<DifferenceLineParams>> = ({ 
   const q = round.question as LineQuestion;
   useEffect(() => { setAt(q.from); setMade([]); nudge.clear(); }, [q.id, q.from, nudge.clear]);
   const speaks = !practising && koda.config.isEnabled("audio_speech", true);
-  const chimes = koda.config.isEnabled("sound_chimes", true);
   const showsDifference = koda.config.isEnabled("running_difference_badge", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
   const x = (value: number) => ((value - q.min) / Math.max(1, q.max - q.min)) * WIDTH;
@@ -323,18 +323,17 @@ export const DifferenceLine: React.FC<ActivityProps<DifferenceLineParams>> = ({ 
     const next = at + step;
     setAt(next);
     setMade((current) => [...current, step]);
-    if (chimes) koda.sound.play(step < 0 ? "clink" : "pop");
+    chime(koda, step < 0 ? "changed" : "moved");
     koda.haptics.tap();
     if (speaks) void koda.speech.say(numberWord(next), speechRate(koda));
     if (q.mode === "path_back" && made.length + 1 === q.required.length) {
-      if (chimes) koda.sound.play("success");
+      chime(koda, "reached");
       koda.haptics.success();
       round.submit({ correct: true, given: String(q.difference), expected: q.expected, title: "You landed on the difference!", message: `${q.minuend} minus ${q.subtrahend} is ${q.difference}.` });
     }
   };
   const choose = (value: number) => {
     const correct = value === q.difference;
-    if (chimes) koda.sound.play(correct ? "success" : "error");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     round.submit({ correct, given: String(value), expected: q.expected, errorKind: correct ? undefined : "off_by_more",
       title: correct ? "That is the difference!" : "Check the distance",
@@ -345,7 +344,8 @@ export const DifferenceLine: React.FC<ActivityProps<DifferenceLineParams>> = ({ 
     if (last === undefined || round.feedback) return;
     setAt((value) => value - last);
     setMade((current) => current.slice(0, -1));
-    if (chimes) koda.sound.play("clink");
+    chime(koda, "undone");
+    koda.haptics.tap();
   };
   const prompt = promptFor(q, copy.prompts?.default);
   const regularTicks = q.ticks > 0 ? Array.from({ length: Math.floor((q.max - q.min) / q.ticks) + 1 }, (_, i) => q.min + i * q.ticks).filter((value) => value <= q.max) : [];

@@ -242,7 +242,6 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({ 
 
   useEffect(() => { setEntries({}); nudge.clear(); }, [q.id, nudge.clear]);
 
-  const chimes = koda.config.isEnabled("sound_chimes", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
   const prompt = promptFor(q, copy.prompts?.default);
   const filled = q.slots.filter((slot) => (entries[slot.key] ?? "") !== "").length;
@@ -255,7 +254,6 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({ 
     }
     const given = q.slots.map((slot) => entries[slot.key]).join(",");
     const correct = given === q.expected;
-    if (chimes) koda.sound.play(correct ? "success" : "error");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     // A column filled with the right digit in the wrong place is a place-value
     // slip, not a random miss, and the analyzer should be able to tell them apart.

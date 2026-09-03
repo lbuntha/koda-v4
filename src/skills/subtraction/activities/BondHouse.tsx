@@ -140,14 +140,12 @@ export const BondHouse: React.FC<ActivityProps<BondHouseParams>> = ({ params, ko
   });
   const q = round.question as BondQuestion;
   useEffect(() => { setSelected(undefined); nudge.clear(); }, [q.id, nudge.clear]);
-  const chimes = koda.config.isEnabled("sound_chimes", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
   const prompt = promptFor(q, copy.prompts?.default);
   const answer = Number(q.expected);
   const submit = () => {
     if (selected === undefined) { nudge.refuse("Choose the number for the empty box before you check."); return; }
     const correct = selected === answer;
-    if (chimes) koda.sound.play(correct ? "success" : "error");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     round.submit({ correct, given: String(selected), expected: q.expected, errorKind: correct ? undefined : "off_by_more",
       title: correct ? "The bond is complete!" : "Check the whole and its parts",

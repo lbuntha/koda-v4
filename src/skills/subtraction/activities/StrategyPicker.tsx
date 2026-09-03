@@ -124,7 +124,6 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({ 
 
   useEffect(() => { setChosen(undefined); nudge.clear(); }, [q.id, nudge.clear]);
 
-  const chimes = koda.config.isEnabled("sound_chimes", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
   const prompt = promptFor(q, copy.prompts?.default);
 
@@ -140,7 +139,6 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({ 
     if (round.feedback) return;
     const correct = q.fits.includes(id);
     setChosen(id);
-    if (chimes) koda.sound.play(correct ? "success" : "error");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     round.submit({
       correct, given: id, expected: q.expected, errorKind: correct ? undefined : "off_by_more",

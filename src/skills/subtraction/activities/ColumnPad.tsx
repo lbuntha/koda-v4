@@ -10,6 +10,7 @@ import { DIFFERENCE, REMOVED_PART, WHOLE } from "../internal/data/subtractionPal
 import { DIGIT_CELL, SCENE, TOUCH_TARGET } from "../internal/data/subtractionLayout";
 import { speechRate, tagLabelsFrom } from "../internal/data/subtractionChrome";
 import { useNudge } from "../internal/ui/useNudge";
+import { chime } from "../internal/data/subtractionSound";
 import {
   differenceKey, digitsOf, drawDifference, exchangesIn, withoutRepeat,
   type Difference, type DifferenceSpec,
@@ -171,7 +172,6 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({ params, ko
 
   useEffect(() => { setTop(q.top); setMarks({}); setWritten({}); nudge.clear(); }, [q.id, q.top, nudge.clear]);
 
-  const chimes = koda.config.isEnabled("sound_chimes", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
   const prompt = promptFor(q, copy.prompts?.default);
   const width = q.answer.length;
@@ -200,7 +200,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({ params, ko
       return next;
     });
     setMarks((current) => ({ ...current, [column]: (current[column] ?? 0) + 1 }));
-    if (chimes) koda.sound.play("clink");
+    chime(koda, "changed");
     koda.haptics.tap();
   };
 
@@ -208,7 +208,6 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({ params, ko
     if (filled < width) { nudge.refuse(`Write the ${PLACES[nextColumn]} column before you check.`); return; }
     const given = q.answer.map((_, i) => written[i]).reverse().join("").replace(/^0+(?=\d)/, "");
     const correct = given === String(q.difference);
-    if (chimes) koda.sound.play(correct ? "success" : "error");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     // A dropped exchange is a place-value slip, not a random miss: the child
     // took the smaller digit from the larger one and called it subtraction.
