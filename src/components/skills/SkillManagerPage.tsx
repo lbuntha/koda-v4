@@ -64,6 +64,117 @@ const STATUS_TONE: Record<string, "success" | "warning" | "neutral"> = {
   draft: "neutral",
 };
 
+/**
+ * A number, dragged or typed.
+ *
+ * The readout used to be a `<span>`, which is fine for the two settings this
+ * started with — speech rate and pop scale are felt rather than known, and a
+ * slider is the right way to hunt for "a bit slower". It is the wrong control
+ * for a count: "ten free lessons" is a number somebody already has in mind, and
+ * asking them to land on it by dragging across a hundred steps is a puzzle.
+ *
+ * So both. The slider still answers "roughly where", and the value beside it is
+ * an input for when the answer is exact.
+ *
+ * The field keeps its own draft while it has focus. A controlled input that
+ * wrote every keystroke straight through would fight the typist: clearing it to
+ * type "5" sends an empty string, which is not a number, and the value snaps
+ * back under the cursor. What is typed is committed when it parses, and what is
+ * left behind on blur is clamped to the field's own range — a skill that
+ * declares 0 to 100 must never be handed 400 by a settings form.
+ */
+export const NumberSetting: React.FC<{
+  field: Extract<SettingField, { type: "number" }>;
+  value: unknown;
+  disabled: boolean;
+  onChange: (value: number) => void;
+}> = ({ field, value, disabled, onChange }) => {
+  const current = typeof value === "number" ? value : field.min;
+  const [draft, setDraft] = useState(String(current));
+
+  // Follows the value while the field is idle — a reset, or the slider moving —
+  // and is left alone while somebody is typing into it.
+  const [typing, setTyping] = useState(false);
+  React.useEffect(() => {
+    if (!typing) setDraft(String(current));
+  }, [current, typing]);
+
+  /** Inside the declared range, and on one of the declared steps. */
+  const legal = (raw: number): number => {
+    const clamped = Math.min(field.max, Math.max(field.min, raw));
+    const steps = Math.round((clamped - field.min) / field.step);
+    // `toFixed` because 0.5 + 11 × 0.05 is 1.0500000000000003, and a settings
+    // row that reads like that looks broken however correct it is.
+    return Number((field.min + steps * field.step).toFixed(4));
+  };
+
+  const commit = (raw: string) => {
+    const parsed = Number(raw);
+    if (raw.trim() === "" || !Number.isFinite(parsed)) {
+      setDraft(String(current));
+      return;
+    }
+    const next = legal(parsed);
+    setDraft(String(next));
+    if (next !== current) onChange(next);
+  };
+
+  return (
+    <div className="flex items-center gap-3 shrink-0">
+      <input
+        type="range"
+        min={field.min}
+        max={field.max}
+        step={field.step}
+        value={current}
+        disabled={disabled}
+        onChange={(e) => onChange(legal(parseFloat(e.target.value)))}
+        className="w-28 sm:w-36 accent-indigo-600 disabled:opacity-40"
+        aria-label={`${field.label} slider`}
+      />
+      <div className="flex items-center gap-1">
+        <input
+          type="number"
+          inputMode="decimal"
+          min={field.min}
+          max={field.max}
+          step={field.step}
+          value={draft}
+          disabled={disabled}
+          onFocus={() => setTyping(true)}
+          onChange={(e) => {
+            setDraft(e.target.value);
+            const parsed = Number(e.target.value);
+            // Written through as it is typed, so the slider tracks — but only
+            // once what is in the box is a number the field would accept.
+            if (e.target.value.trim() !== "" && Number.isFinite(parsed)) {
+              const next = legal(parsed);
+              if (next === parsed && next !== current) onChange(next);
+            }
+          }}
+          onBlur={(e) => {
+            setTyping(false);
+            commit(e.target.value);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") e.currentTarget.blur();
+          }}
+          aria-label={field.label}
+          className={themeSystem.field(
+            "sm",
+            "w-16 text-right font-mono font-black text-indigo-600 dark:text-indigo-400 tabular-nums",
+          )}
+        />
+        {field.unit && (
+          <span className="text-sm font-mono font-black text-indigo-600 dark:text-indigo-400">
+            {field.unit}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+};
+
 /** One control, rendered from the skill's own `settingsSchema`. */
 const SettingControl: React.FC<{
   field: SettingField;
@@ -79,27 +190,10 @@ const SettingControl: React.FC<{
   );
 
   if (field.type === "number") {
-    const current = typeof value === "number" ? value : field.min;
     return (
       <div className="flex items-center justify-between gap-4 py-3">
         {label}
-        <div className="flex items-center gap-3 shrink-0">
-          <input
-            type="range"
-            min={field.min}
-            max={field.max}
-            step={field.step}
-            value={current}
-            disabled={disabled}
-            onChange={(e) => onChange(parseFloat(e.target.value))}
-            className="w-36 accent-indigo-600 disabled:opacity-40"
-            aria-label={field.label}
-          />
-          <span className="w-14 text-right text-sm font-mono font-black text-indigo-600 dark:text-indigo-400 tabular-nums">
-            {current}
-            {field.unit ?? ""}
-          </span>
-        </div>
+        <NumberSetting field={field} value={value} disabled={disabled} onChange={onChange} />
       </div>
     );
   }
