@@ -2,9 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   buildSkillCatalog,
   filterSkillCatalog,
+  learnOrder,
   newestSkills,
-  recommendedSkills,
-  totalRecommendationScore,
   type SkillCatalogSource,
 } from "./skillCatalog";
 
@@ -31,16 +30,6 @@ const source = (id: string, category = "number-sense"): SkillCatalogSource => ({
 });
 
 describe("skill catalog", () => {
-  it("calculates the documented weighted recommendation total", () => {
-    expect(totalRecommendationScore({
-      ageRelevance: 100,
-      meaningfulPlays: 80,
-      completionRate: 70,
-      recentPopularity: 60,
-      freshness: 40,
-    })).toBe(77);
-  });
-
   it("builds compact progress and resume metadata for each skill", () => {
     const [entry] = buildSkillCatalog([source("counting")], { 1: 3 });
     expect(entry.completedLessons).toBe(1);
@@ -61,12 +50,63 @@ describe("skill catalog", () => {
     ]);
   });
 
-  it("uses progress as a deterministic offline recommendation fallback", () => {
+  /*
+   * Distinct level numbers per skill.
+   *
+   * `source` files every skill's lessons at levels 1 and 2, and progress is
+   * keyed by level across the whole course — so one `{ 1: 3 }` marks every
+   * skill half-finished, and an ordering test written on it passes whatever
+   * the rule does.
+   */
+  const at = (id: string, from: number, category?: string): SkillCatalogSource => ({
+    ...source(id, category),
+    lessons: [lesson(from, id), lesson(from + 1, id)] as never,
+  });
+
+  it("puts what is on the go first, then whatever changed most recently", () => {
     const entries = buildSkillCatalog(
-      [source("counting"), source("shapes", "geometry")],
+      [
+        /* Started and unfinished, and the oldest of the three. */
+        { ...at("counting", 1), publishedAt: 100 },
+        /* Untouched, updated most recently. */
+        { ...at("shapes", 3, "geometry"), publishedAt: 300 },
+        /* Untouched and older. */
+        { ...at("patterns", 5, "patterns"), publishedAt: 200 },
+      ],
       { 1: 3 },
     );
-    expect(recommendedSkills(entries)[0].id).toBe("counting");
+
+    expect(learnOrder(entries).map((item) => item.id)).toEqual([
+      "counting",
+      "shapes",
+      "patterns",
+    ]);
+  });
+
+  it("drops a finished skill to the bottom, however recently it was updated", () => {
+    /* A skill with nothing left to do is a record, not something to do next —
+       and being the newest thing in the library is exactly what would
+       otherwise float it to the top of a list of things to do. */
+    const entries = buildSkillCatalog(
+      [
+        { ...at("counting", 1), publishedAt: 900 },
+        { ...at("shapes", 3, "geometry"), publishedAt: 100 },
+      ],
+      { 1: 3, 2: 3 },
+    );
+
+    expect(entries.find((e) => e.id === "counting")!.progressPercent).toBe(100);
+    expect(learnOrder(entries).map((item) => item.id)).toEqual(["shapes", "counting"]);
+  });
+
+  it("orders by name when a deployment carries no timestamps at all", () => {
+    /* Offline, or a library never published from the server: an unstable sort
+       key would reshuffle the shelf on every render. */
+    const entries = buildSkillCatalog([at("shapes", 3, "geometry"), at("counting", 1)], {});
+    expect(learnOrder(entries).map((item) => item.name)).toEqual([
+      "Counting Quest",
+      "Shape Explorer",
+    ]);
   });
 
   it("limits newest skills in server timestamp order with an offline LIFO fallback", () => {

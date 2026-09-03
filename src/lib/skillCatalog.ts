@@ -1,14 +1,6 @@
 import type { ResolvedLesson } from "../curriculum";
 import type { ReleaseStatus } from "../skills/types";
 
-export interface RecommendationSignals {
-  ageRelevance: number;
-  meaningfulPlays: number;
-  completionRate: number;
-  recentPopularity: number;
-  freshness: number;
-}
-
 export interface SkillCatalogEntry {
   id: string;
   name: string;
@@ -27,30 +19,12 @@ export interface SkillCatalogEntry {
   completedLessons: number;
   progressPercent: number;
   nextLesson: ResolvedLesson;
-  recommendationScore?: number;
 }
 
-export interface SkillCatalogSource
-  extends Omit<
-    SkillCatalogEntry,
-    "completedLessons" | "progressPercent" | "nextLesson" | "recommendationScore"
-  > {
-  recommendationSignals?: RecommendationSignals;
-}
-
-const clampScore = (value: number) => Math.max(0, Math.min(100, value));
-
-/** Inputs are normalized to 0–100 by server rollups before reaching the catalog. */
-export function totalRecommendationScore(signals: RecommendationSignals): number {
-  return Math.round(
-    (clampScore(signals.ageRelevance) * 0.3 +
-      clampScore(signals.meaningfulPlays) * 0.25 +
-      clampScore(signals.completionRate) * 0.2 +
-      clampScore(signals.recentPopularity) * 0.15 +
-      clampScore(signals.freshness) * 0.1) *
-      100,
-  ) / 100;
-}
+export type SkillCatalogSource = Omit<
+  SkillCatalogEntry,
+  "completedLessons" | "progressPercent" | "nextLesson"
+>;
 
 export function buildSkillCatalog(
   sources: SkillCatalogSource[],
@@ -71,34 +45,57 @@ export function buildSkillCatalog(
         completedLessons,
         progressPercent: Math.round((completedLessons / source.lessons.length) * 100),
         nextLesson,
-        recommendationScore: source.recommendationSignals
-          ? totalRecommendationScore(source.recommendationSignals)
-          : undefined,
       };
     });
 }
 
-/** Deterministic offline fallback. Real server scores win whenever available. */
-export function recommendedSkills(entries: SkillCatalogEntry[]): SkillCatalogEntry[] {
-  return [...entries].sort((a, b) => {
-    const scoreDifference = (b.recommendationScore ?? -1) - (a.recommendationScore ?? -1);
-    if (scoreDifference !== 0) return scoreDifference;
-    const progressDifference = b.progressPercent - a.progressPercent;
-    if (progressDifference !== 0) return progressDifference;
-    return a.name.localeCompare(b.name);
-  });
+/** When a deployment last touched a skill. Publication wins; an edit is the fallback. */
+const updatedAt = (entry: SkillCatalogEntry): number => entry.publishedAt ?? entry.modified ?? 0;
+
+/**
+ * Where a skill stands with this learner. The Learn page's first sort key.
+ *
+ * Three states, not a score. "Started and unfinished" is the only one a learner
+ * has an open question about, so it leads; a skill nobody has opened is an
+ * offer; a finished one is a record of work done and belongs at the bottom
+ * rather than at the top of a list of things to do.
+ */
+const standing = (entry: SkillCatalogEntry): 0 | 1 | 2 => {
+  if (entry.progressPercent >= 100) return 2;
+  return entry.completedLessons > 0 ? 0 : 1;
+};
+
+/**
+ * The Learn page's order: what is on the go, then what changed most recently.
+ *
+ * This replaced a "Recommended for you" shelf, and the weighted score behind
+ * it. Two things were wrong with that. The score read five signals a server
+ * rollup was meant to supply and none of them ever arrived — nothing in the app
+ * built a catalog source carrying them — so every entry scored `undefined` and
+ * the shelf silently fell through to "most progressed first", putting the skill
+ * a child had nearly finished above the one they are in the middle of. And a
+ * recommendation is a claim about what a learner should do next; the catalogue
+ * is a shelf they are browsing, and a shelf only has to be in a sensible order.
+ * What is worth recommending is decided in `lib/learning/recommend.ts`, from
+ * evidence, and offered on Home where a child is asking "what now?".
+ *
+ * Ties break on the name so the page does not reshuffle between renders when a
+ * deployment carries no timestamps at all.
+ */
+export function learnOrder(entries: SkillCatalogEntry[]): SkillCatalogEntry[] {
+  return [...entries].sort(
+    (a, b) =>
+      standing(a) - standing(b) ||
+      updatedAt(b) - updatedAt(a) ||
+      a.name.localeCompare(b.name),
+  );
 }
 
 /** Newest server publication/update first; registry insertion order is the offline LIFO fallback. */
 export function newestSkills(entries: SkillCatalogEntry[], limit = 2): SkillCatalogEntry[] {
   return entries
     .map((entry, index) => ({ entry, index }))
-    .sort((a, b) => {
-      const timeDifference =
-        (b.entry.publishedAt ?? b.entry.modified ?? 0) -
-        (a.entry.publishedAt ?? a.entry.modified ?? 0);
-      return timeDifference || b.index - a.index;
-    })
+    .sort((a, b) => updatedAt(b.entry) - updatedAt(a.entry) || b.index - a.index)
     .slice(0, Math.max(0, limit))
     .map(({ entry }) => entry);
 }

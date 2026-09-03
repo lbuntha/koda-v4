@@ -1,9 +1,6 @@
 import React, { useMemo, useState } from "react";
-import { BookOpen, CheckCircle2, RefreshCw, Search, Sparkles } from "lucide-react";
-import {
-  filterSkillCatalog,
-  recommendedSkills,
-} from "../lib/skillCatalog";
+import { BookOpen, CheckCircle2, RefreshCw, Search } from "lucide-react";
+import { filterSkillCatalog, learnOrder } from "../lib/skillCatalog";
 import { useSkillCatalog } from "../lib/useSkillCatalog";
 import { useSkillRegistrations } from "../lib/skillRegistrationApi";
 import { refreshSkillRegistry } from "../lib/skillRegistryApi";
@@ -31,15 +28,6 @@ const CARD_GRID = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4
 /** A phone gets rows; a poster grid needs width to be a grid at all. */
 const ROW_LIST = "space-y-2.5";
 
-/**
- * Below this, "recommended" and "all" are the same list.
- *
- * A catalogue of two skills that draws a Recommended section above a Browse
- * section prints the same cards twice and doubles the length of the page to say
- * nothing. The section earns its place once there is more on offer than a
- * learner can take in at a glance.
- */
-const RECOMMENDATION_FLOOR = 4;
 const labelForCategory = (category: string) => skillArtFor(category).label;
 
 export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
@@ -74,30 +62,26 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
         skill.progressPercent < 100 &&
         skill.lessons.some((lesson) => lesson.levelNumber === activeLevelNumber),
     ) ?? skills.find((skill) => skill.completedLessons > 0 && skill.progressPercent < 100);
-  const recommended = recommendedSkills(skills)
-    .filter((skill) => skill.id !== resume?.id)
-    .slice(0, 4);
-
   const compact = useIsCompact();
   const unfiltered = !query && category === "all";
   const showResume = unfiltered && Boolean(resume);
-  const showRecommended =
-    unfiltered && recommended.length > 0 && skills.length > RECOMMENDATION_FLOOR;
 
   /*
-   * Browse holds what is not already on screen above it.
+   * One shelf, in the order a learner would put it in themselves.
    *
-   * The two sections used to be drawn from the same unfiltered list, so with a
-   * small library every card appeared twice — once as a recommendation and
-   * again a scroll further down, with nothing saying they were the same skill.
-   * A filtered view is a different question ("show me everything matching"),
-   * so it lists everything.
+   * There used to be a "Recommended for you" section above this one. It is
+   * gone: the app never fed it the server signals it sorted on, so it was
+   * ranking by raw progress under a heading that claimed to know better, and
+   * the same cards then appeared again a scroll further down. What is left is
+   * an order rather than a claim — what is on the go first, then whatever
+   * changed most recently, with finished skills last. See `learnOrder`.
+   *
+   * Only the resume card is held back, because it is already on screen above.
+   * A filtered view is a different question ("show me everything matching"), so
+   * it lists everything.
    */
-  const shownAbove = new Set(
-    [showResume ? resume?.id : undefined, ...(showRecommended ? recommended.map((s) => s.id) : [])]
-      .filter(Boolean) as string[],
-  );
-  const browse = unfiltered ? visible.filter((skill) => !shownAbove.has(skill.id)) : visible;
+  const browse = learnOrder(unfiltered ? visible.filter((skill) => skill.id !== resume?.id) : visible);
+  const shownAbove = new Set(showResume && resume ? [resume.id] : []);
   const visiblePage = browse.slice(0, visibleLimit);
 
   const open = (skillId: string) => {
@@ -262,40 +246,6 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
           actionLabel="Open skill"
           onOpen={() => open(resume.id)}
         />
-      )}
-
-      {showRecommended && (
-        <section>
-          <div className="mb-3 flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-indigo-600" />
-            <div>
-              <h2 className="font-black text-lg text-ink">Recommended for you</h2>
-              <p className="text-xs text-muted">Age-fit skills, ready to start or continue.</p>
-            </div>
-          </div>
-          <div className={compact ? ROW_LIST : CARD_GRID}>
-            {recommended.map((skill) => (
-              <UISkillCard
-                key={skill.id}
-                size={compact ? "sm" : "md"}
-                title={skill.name}
-                tagline={skill.tagline}
-                thumbnail={skill.thumbnail}
-                fallbackIconName={skill.iconName}
-                category={skill.category}
-                ages={skill.ages}
-                lessonCount={skill.lessons.length}
-                completedLessons={skill.completedLessons}
-                progressPercent={skill.progressPercent}
-                status={skill.status}
-                registered={viewer.showAllSkills || registeredIds.has(skill.id)}
-                registering={registeringId === skill.id}
-                onOpen={() => open(skill.id)}
-                onRegister={() => void add(skill.id)}
-              />
-            ))}
-          </div>
-        </section>
       )}
 
       <section>
