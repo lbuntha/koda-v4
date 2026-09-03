@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import type { ActivityProps } from "../../types";
+import type { ActivityProps , PrintedQuestion } from "../../types";
 import {
   SkillRound,
   SPRING,
@@ -173,6 +173,100 @@ export const promptFor = (q: BlockQuestion, template?: string): string => {
     default:
       return `Build ${q.a} plus ${q.b} out of blocks.`;
   }
+};
+
+
+/**
+ * On paper.
+ *
+ * Every mode already names both numbers; what changes is the instruction about
+ * how to build the answer, which is the technique and so is kept.
+ */
+export const printedFor = (q: BlockQuestion): PrintedQuestion => {
+  const answer = String(q.sum);
+  switch (q.mode) {
+    case "trade_ones":
+      return { text: `${q.a} + ${q.b}. Bundle ten ones into a ten.`, answer };
+    case "trade_tens":
+      return { text: `${q.a} + ${q.b}. Bundle ten tens into a hundred.`, answer };
+    case "multiples_ten":
+      return { text: `${q.a} + ${q.b}. Count in tens.`, answer };
+    case "multiples_hundred":
+      return { text: `${q.a} + ${q.b}. Count in hundreds.`, answer };
+    default:
+      return { text: `${q.a} + ${q.b} =`, answer };
+  }
+};
+
+/**
+ * How this technique goes, for a sheet that has to teach it.
+ *
+ * Written for paper: no control is named, nothing is tapped, and each line is
+ * something a child could do with a pencil or in their head. See `method` on
+ * `WorksheetSource` for why this is not the lesson's own `stepByStep`.
+ */
+export const methodFor = (q: BlockQuestion): string[] => {
+  switch (q.mode) {
+    case "trade_ones":
+      return [
+        "Add the ones. Ten ones make one ten, so bundle them.",
+        "Add the tens, including the one you just made.",
+      ];
+    case "trade_tens":
+      return [
+        "Add the tens. Ten tens make one hundred, so bundle them.",
+        "Add the hundreds, including the one you just made.",
+      ];
+    case "multiples_ten":
+      return ["Count in tens: three tens and four tens is seven tens.", "Seven tens is 70."];
+    case "multiples_hundred":
+      return ["Count in hundreds, the same way you count in tens.", "Four hundreds and three hundreds is seven hundreds."];
+    default:
+      return ["Build each number out of tens and ones.", "Put them together, then count the tens and the ones."];
+  }
+};
+
+
+/**
+ * The blocks, drawn for a pencil.
+ *
+ * Tens as rods and ones as squares, which is the whole argument of the lesson:
+ * ten ones and one ten are the same amount and look different. The child rings
+ * the ten they make, so the blocks are printed and nothing is filled in.
+ *
+ * `null` above two digits. Three hundred and ninety as thirty-nine rods is a
+ * page of ink and nothing a child can count — the modes that reach that far are
+ * taught with the written method by then, and their sheets say so in words.
+ */
+export const figureFor = (q: BlockQuestion): React.ReactNode | null => {
+  if (q.a > 99 || q.b > 99) return null;
+
+  const pile = (n: number, key: string) => {
+    const tens = Math.floor(n / 10);
+    const ones = n % 10;
+    return (
+      <span key={key} className="inline-flex items-end gap-1">
+        {Array.from({ length: tens }, (_, i) => (
+          <span key={`t${i}`} className="inline-block h-9 w-2.5 border border-slate-900" />
+        ))}
+        {ones > 0 && (
+          <span className="inline-grid grid-flow-col grid-rows-5 gap-0.5">
+            {Array.from({ length: ones }, (_, i) => (
+              <span key={`o${i}`} className="inline-block h-1.5 w-1.5 border border-slate-900" />
+            ))}
+          </span>
+        )}
+      </span>
+    );
+  };
+
+  return (
+    <span className="inline-flex items-end gap-3">
+      {pile(q.a, "a")}
+      <span className="text-[15px] font-bold">+</span>
+      {pile(q.b, "b")}
+    </span>
+  );
 };
 
 /** Ten of something waiting to become one of the next thing up. */

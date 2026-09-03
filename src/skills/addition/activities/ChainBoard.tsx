@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import type { ActivityProps } from "../../types";
+import type { ActivityProps , PrintedQuestion } from "../../types";
 import {
   SkillRound,
   SPRING,
@@ -138,6 +138,51 @@ export const promptFor = (q: ChainQuestion, template?: string): string => {
       return "Add them one at a time, keeping the total as you go.";
     default:
       return "Add these in whatever order is easiest.";
+  }
+};
+
+
+/**
+ * On paper.
+ *
+ * The chain is the question, and the round's prompt never said it: "Add these
+ * in whatever order is easiest" printed beside a blank line is the clearest
+ * example in this skill of a caption standing in for a question. The numbers go
+ * on the page.
+ */
+export const printedFor = (q: ChainQuestion): PrintedQuestion => {
+  const chain = q.values.join(" + ");
+  const answer = String(q.sum);
+  switch (q.mode) {
+    case "pairs":
+      return { text: `${chain} =   (two of these make ${q.target ?? 10})`, answer };
+    case "compatible":
+      return { text: `${chain} =   (find the pairs that make ${q.target ?? 10} first)`, answer };
+    case "running":
+      return { text: `${chain} =   (add them one at a time)`, answer };
+    default:
+      return { text: `${chain} =`, answer };
+  }
+};
+
+/**
+ * How this technique goes, for a sheet that has to teach it.
+ *
+ * Written for paper: no control is named, nothing is tapped, and each line is
+ * something a child could do with a pencil or in their head. See `method` on
+ * `WorksheetSource` for why this is not the lesson's own `stepByStep`.
+ */
+export const methodFor = (q: ChainQuestion): string[] => {
+  const target = q.target ?? 10;
+  switch (q.mode) {
+    case "pairs":
+      return [`Look for two numbers that make ${target}.`, "Add those first.", "Then add what is left."];
+    case "compatible":
+      return [`Find every pair that makes ${target}.`, "Add the pairs, then whatever is left over."];
+    case "running":
+      return ["Add the numbers one at a time, left to right.", "Keep the total as you go."];
+    default:
+      return ["Add them in whatever order is easiest.", "Friendly pairs first, then the rest."];
   }
 };
 

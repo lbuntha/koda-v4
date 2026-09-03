@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import type { ActivityProps } from "../../types";
+import type { ActivityProps, PrintedQuestion } from "../../types";
 import {
   SkillRound,
   SPRING,
@@ -201,6 +201,89 @@ export const promptFor = (q: TrayQuestion, template?: string): string => {
       return `Show ${q.a} on one hand and ${q.b} on the other. How many fingers altogether?`;
     default:
       return "Count them all. How many altogether?";
+  }
+};
+
+/**
+ * This engine's questions on paper. The reference implementation — see
+ * `PrintedQuestion` and `lib/worksheet.ts`.
+ *
+ * Each mode is decided on its own, because each one keeps its question in a
+ * different place:
+ *
+ *  - `count_all` and `combine` keep it in the objects. Two bins of things to
+ *    touch is the question, and there is nothing to write down — the round's
+ *    prompt ("Count them all. How many altogether?") is a caption for a picture
+ *    that will not be printed. `null`, and the lesson stays out of the printer.
+ *  - `count_on` keeps *half* of it in the objects: the round says "Start at 6
+ *    and count on" because the three things to count on are on the screen. On
+ *    paper the 3 has to be said, or the question has no answer. This is the case
+ *    that started all of this.
+ *  - `count_on_larger` is a choice, and the choice has to survive: the paper
+ *    version names both numbers and asks for the bigger one to be found, which
+ *    is the technique.
+ *  - `add_zero` and `add_one` are already written arithmetic. They print as the
+ *    sum they are, because dressing a rule up in a sentence is how a worksheet
+ *    stops looking like the maths it is teaching.
+ *  - `fingers` is an instruction the child carries out with their own hands, and
+ *    those come with them. It prints as it is said.
+ */
+export const printedFor = (q: TrayQuestion): PrintedQuestion | null => {
+  const answer = String(q.sum);
+  switch (q.mode) {
+    case "count_on":
+      return { text: `Start at ${q.a} and count on ${q.b}. What number do you reach?`, answer };
+    case "count_on_larger":
+      return {
+        text: `${q.a} and ${q.b}. Start from the bigger number and count on. How many altogether?`,
+        answer,
+      };
+    case "add_zero":
+    case "add_one":
+      return { text: `${q.a} + ${q.b} =`, answer };
+    case "fingers":
+      return {
+        text: `Show ${q.a} on one hand and ${q.b} on the other. How many fingers altogether?`,
+        answer,
+      };
+    default:
+      return null;
+  }
+};
+
+/**
+ * How this technique goes, for a sheet that has to teach it.
+ *
+ * Written for paper: no control is named, nothing is tapped, and each line is
+ * something a child could do with a pencil or in their head. See `method` on
+ * `WorksheetSource` for why this is not the lesson's own `stepByStep`.
+ */
+export const methodFor = (q: TrayQuestion): string[] | null => {
+  switch (q.mode) {
+    case "count_on":
+      return [
+        "Say the first number out loud. You do not need to count it.",
+        "Count on the second number, one at a time.",
+        "The last number you say is the answer.",
+      ];
+    case "count_on_larger":
+      return [
+        "Find the bigger of the two numbers.",
+        "Say it, then count on the smaller one.",
+        "Starting from the bigger number leaves less to count.",
+      ];
+    case "add_zero":
+      return ["Zero means nothing was added.", "The answer is the number you started with."];
+    case "add_one":
+      return ["One more is the next counting number.", "Say the number, then say the one after it."];
+    case "fingers":
+      return [
+        "Hold up the first number on one hand.",
+        "Hold up the second number on the other.",
+        "Count every raised finger.",
+      ];
+    default:
+      return null;
   }
 };
 

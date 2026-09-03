@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import type { ActivityProps } from "../../types";
+import type { ActivityProps , PrintedQuestion } from "../../types";
 import {
   SkillRound,
   SPRING,
@@ -226,6 +226,65 @@ export const promptFor = (q: FactQuestion, template?: string): string => {
       return `${q.a} plus ${q.b}. Which is the same fact the other way round?`;
     default:
       return `Double ${q.a}. What is the total?`;
+  }
+};
+
+
+/**
+ * On paper.
+ *
+ * Facts are already written arithmetic, so most of these print as themselves.
+ * The two that do not are the ones whose answer is another *fact* rather than a
+ * number, and those say so.
+ */
+export const printedFor = (q: FactQuestion): PrintedQuestion => {
+  switch (q.mode) {
+    case "commute":
+      return {
+        text: `${q.a} + ${q.b}. Write the same fact the other way round.`,
+        answer: `${q.b} + ${q.a} = ${q.sum}`,
+      };
+    case "family":
+      return {
+        text: `${q.a}, ${q.b} and ${q.sum} make a fact family. Write all four facts.`,
+        answer: `${q.a}+${q.b}=${q.sum}; ${q.b}+${q.a}=${q.sum}; ${q.sum}-${q.a}=${q.b}; ${q.sum}-${q.b}=${q.a}`,
+      };
+    case "near_up":
+    case "near_down":
+      return {
+        text: `${q.a} + ${q.b}. Use the double you know.`,
+        answer: String(q.sum),
+      };
+    case "known_fact":
+      return { text: `${q.a} + ${q.b}. Which fact helps?`, answer: String(q.sum) };
+    default:
+      return { text: `Double ${q.a}.`, answer: String(q.sum) };
+  }
+};
+
+/**
+ * How this technique goes, for a sheet that has to teach it.
+ *
+ * Written for paper: no control is named, nothing is tapped, and each line is
+ * something a child could do with a pencil or in their head. See `method` on
+ * `WorksheetSource` for why this is not the lesson's own `stepByStep`.
+ */
+export const methodFor = (q: FactQuestion): string[] => {
+  switch (q.mode) {
+    case "near_up":
+    case "near_down":
+      return [
+        "Find the double you already know.",
+        "This fact is one away from it, so the answer is one more or one less.",
+      ];
+    case "known_fact":
+      return ["Look for a fact you already know inside this one.", "Use it, then adjust."];
+    case "family":
+      return ["The same three numbers make four facts.", "Two adds, and two takeaways."];
+    case "commute":
+      return ["Adding is the same in either order.", "Swapping the numbers gives the same total."];
+    default:
+      return ["A double is the same number twice.", "These are the facts worth knowing by heart."];
   }
 };
 

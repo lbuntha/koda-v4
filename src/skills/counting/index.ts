@@ -1,11 +1,11 @@
 import type { Lesson, SkillFeature, SkillManifest, Skill } from "../types";
 import manifestJson from "./manifest.json";
 import lessonsJson from "./lessons.json";
-import { TouchOrbit } from "./activities/TouchOrbit";
-import { SubitizingRush } from "./activities/SubitizingRush";
-import { TenFrameRocket } from "./activities/TenFrameRocket";
-import { FroggySkip } from "./activities/FroggySkip";
-import { Base10Foundry } from "./activities/Base10Foundry";
+import * as orbit from "./activities/TouchOrbit";
+import * as subitize from "./activities/SubitizingRush";
+import * as tenframe from "./activities/TenFrameRocket";
+import * as numberline from "./activities/FroggySkip";
+import * as base10 from "./activities/Base10Foundry";
 import { registerSkillArt } from "../../assets/svg/skillArt";
 import { registerSkillVoice } from "../../lib/voiceClips";
 import audioManifest from "./audio/manifest.json";
@@ -80,31 +80,36 @@ export const skill: Skill = {
       id: "orbit",
       name: "Touch and Count",
       defaultParams: { mode: "row", questionsPerRound: 5 },
-      component: TouchOrbit,
+      component: orbit.TouchOrbit,
+      worksheet: { build: orbit.buildQuestion, prompt: orbit.promptFor, printed: orbit.printedFor, method: orbit.methodFor, figure: orbit.figureFor },
     },
     subitize: {
       id: "subitize",
       name: "Subitizing Rush",
       defaultParams: { display: "grid", questionsPerRound: 5 },
-      component: SubitizingRush,
+      component: subitize.SubitizingRush,
+      worksheet: { build: subitize.buildQuestion, prompt: subitize.promptFor, printed: subitize.printedFor },
     },
     tenframe: {
       id: "tenframe",
       name: "Ten-Frame Rocket",
       defaultParams: { mode: "fill", questionsPerRound: 5 },
-      component: TenFrameRocket,
+      component: tenframe.TenFrameRocket,
+      worksheet: { build: tenframe.buildQuestion, prompt: tenframe.promptFor, printed: tenframe.printedFor, method: tenframe.methodFor, figure: tenframe.figureFor },
     },
     numberline: {
       id: "numberline",
       name: "Froggy Skip",
       defaultParams: { mode: "hop", questionsPerRound: 5 },
-      component: FroggySkip,
+      component: numberline.FroggySkip,
+      worksheet: { build: numberline.buildQuestion, prompt: numberline.promptFor, printed: numberline.printedFor, method: numberline.methodFor, figure: numberline.figureFor },
     },
     base10: {
       id: "base10",
       name: "Base-10 Foundry",
       defaultParams: { targetRange: [11, 35], bundleOnes: true, questionsPerRound: 5 },
-      component: Base10Foundry,
+      component: base10.Base10Foundry,
+      worksheet: { build: base10.buildQuestion, prompt: base10.promptFor, printed: base10.printedFor, method: base10.methodFor, figure: base10.figureFor },
     },
   },
 };

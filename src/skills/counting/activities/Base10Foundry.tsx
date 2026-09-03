@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { motion } from "motion/react";
-import type { ActivityProps } from "../../types";
+import type { ActivityProps, PrintedQuestion } from "../../types";
 import {
   SkillRound,
   SPRING,
@@ -54,7 +54,7 @@ export interface BuildQuestion extends RoundQuestion {
 
 const randomInt = (lo: number, hi: number) => lo + Math.floor(Math.random() * (hi - lo + 1));
 
-const buildQuestion = (setup: Base10Setup, index: number): BuildQuestion => {
+export const buildQuestion = (setup: Base10Setup, index: number): BuildQuestion => {
   const [lo, hi] = setup.targetRange ?? [11, 35];
   const target = randomInt(lo, hi);
   return {
@@ -155,6 +155,82 @@ function saidAsPlaces(parts: Built): string {
  *
  * Pure and exported so the place-value arithmetic in the wording is tested.
  */
+/**
+ * The question in words.
+ *
+ * Not the round's own line, which counts what the child has built so far
+ * ("Make 34. You have 20. Add 14 more!") and so cannot be asked before they
+ * have started. This is the question the round is asking underneath that.
+ */
+export const promptFor = (q: BuildQuestion): string => `Make ${q.target} out of tens and ones.`;
+
+/**
+ * On paper.
+ *
+ * The answer is the *bundling*, not the number — a child who writes "34" has
+ * not shown they know it is three tens and four ones, which is the whole
+ * lesson. So the key holds both.
+ */
+export const printedFor = (q: BuildQuestion): PrintedQuestion => {
+  const hundreds = Math.floor(q.target / 100);
+  const tens = Math.floor((q.target % 100) / 10);
+  const ones = q.target % 10;
+
+  /* Named singly or plurally, and zeroes left out: "1 tens and 0 ones" is not
+     English and not what a child would write. */
+  const say = (n: number, one: string, many: string) => (n === 1 ? `1 ${one}` : `${n} ${many}`);
+  const parts = [
+    hundreds > 0 ? say(hundreds, "hundred", "hundreds") : "",
+    tens > 0 ? say(tens, "ten", "tens") : "",
+    ones > 0 ? say(ones, "one", "ones") : "",
+  ].filter(Boolean);
+
+  return {
+    /* Above a hundred the answer is not "fifteen tens". Bundling ten tens into
+       a hundred is the whole lesson at that size, and a sheet that asks for
+       rods only would be teaching against it. */
+    text:
+      hundreds > 0
+        ? `Draw ${q.target} using hundreds, tens and ones.`
+        : `Draw ${q.target} using ten-rods and ones.`,
+    answer: parts.join(", "),
+  };
+};
+
+/** How the technique goes, in paper words. */
+export const methodFor = (q: BuildQuestion): string[] =>
+  q.target >= 100
+    ? [
+        "Take as many whole hundreds as you can.",
+        "Then as many whole tens from what is left.",
+        "Whatever remains is the ones. Ten tens make a hundred — never leave ten loose tens.",
+      ]
+    : [
+        "Take as many whole tens as you can.",
+        "Whatever is left over is the ones.",
+        "Ten ones make one ten — never leave ten loose ones behind.",
+      ];
+
+/**
+ * Somewhere to draw it.
+ *
+ * A ruled workspace rather than a picture of the answer: the child draws the
+ * rods and the ones themselves, which is the doing. Headed so the two columns
+ * cannot be muddled, because muddling them is exactly the mistake.
+ */
+export const figureFor = (q: BuildQuestion): React.ReactNode => (
+  <span className="inline-flex">
+    {(q.target >= 100 ? ["Hundreds", "Tens", "Ones"] : ["Tens", "Ones"]).map((label) => (
+      <span key={label} className="inline-flex w-28 flex-col border border-slate-900">
+        <span className="border-b border-slate-900 py-0.5 text-center text-[10px] font-black uppercase tracking-widest text-slate-500">
+          {label}
+        </span>
+        <span className="block h-14" />
+      </span>
+    ))}
+  </span>
+);
+
 export function base10Hints(
   question: BuildQuestion,
   state: {

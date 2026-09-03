@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import type { ActivityProps } from "../../types";
+import type { ActivityProps , PrintedQuestion } from "../../types";
 import {
   SkillRound,
   SPRING,
@@ -355,6 +355,19 @@ const SlotBox: React.FC<{
   );
 };
 
+
+/**
+ * On paper.
+ *
+ * A story problem is words already, and the best case for printing at all: it
+ * reads the same on a page as on a screen. The second step of a two-step story
+ * carries its own question, exactly as the round asks it.
+ */
+export const printedFor = (q: StoryQuestion): PrintedQuestion => ({
+  text: q.step === 2 ? `${q.text} — and after the second lot?` : q.text,
+  answer: q.expected,
+});
+
 export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
   params,
   koda,
@@ -611,3 +624,16 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
     </SkillRound>
   );
 };
+
+/**
+ * How this technique goes, for a sheet that has to teach it.
+ *
+ * Written for paper: no control is named, nothing is tapped, and each line is
+ * something a child could do with a pencil or in their head. See `method` on
+ * `WorksheetSource` for why this is not the lesson's own `stepByStep`.
+ */
+export const methodFor = (): string[] => [
+  "Read the story and find the numbers it gives you.",
+  "Work out what the question is asking for.",
+  "The number you are missing is the one to write.",
+];

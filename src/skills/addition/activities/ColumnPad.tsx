@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import type { ActivityProps } from "../../types";
+import type { ActivityProps , PrintedQuestion } from "../../types";
 import {
   SkillRound,
   SPRING,
@@ -168,6 +168,22 @@ export const promptFor = (q: ColumnQuestion, template?: string): string => {
     ? `${q.a} plus ${q.b}. Two columns carry — write each one down.`
     : `${q.a} plus ${q.b}. Add each column, and write the carry.`;
 };
+
+
+/**
+ * On paper.
+ *
+ * The written method is the one technique that is *already* a worksheet: the
+ * round draws a carry box because paper has one. Printed as the sum, laid out
+ * by the child.
+ */
+export const printedFor = (q: ColumnQuestion): PrintedQuestion => ({
+  text:
+    q.mode === "cascade"
+      ? `${q.a} + ${q.b}. Two columns carry.`
+      : `${q.a} + ${q.b}. Write the carry.`,
+  answer: String(q.sum),
+});
 
 export function columnHints(
   q: ColumnQuestion,
@@ -450,5 +466,68 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({
         </div>
       </div>
     </SkillRound>
+  );
+};
+
+/**
+ * How this technique goes, for a sheet that has to teach it.
+ *
+ * Written for paper: no control is named, nothing is tapped, and each line is
+ * something a child could do with a pencil or in their head. See `method` on
+ * `WorksheetSource` for why this is not the lesson's own `stepByStep`.
+ */
+export const methodFor = (q: ColumnQuestion): string[] => q.mode === "cascade"
+  ? [
+      "Work right to left, one column at a time.",
+      "Carry from the ones into the tens, then again from the tens into the hundreds.",
+    ]
+  : [
+      "Add the ones column first.",
+      "If it reaches ten, write the carry above the tens.",
+      "Add the tens, including the carry.",
+    ];
+
+
+/**
+ * The column, drawn for a pencil.
+ *
+ * This technique *is* a paper layout — the round draws a carry box because
+ * paper has one — so printing it as "38 + 24, write the carry" and leaving the
+ * child to set it out themselves loses the part being taught. The digits are
+ * placed, the rule is ruled, and the carry boxes and the answer row are left
+ * empty.
+ */
+export const figureFor = (q: ColumnQuestion): React.ReactNode => {
+  const width = Math.max(String(q.a).length, String(q.b).length, String(q.sum).length);
+  const cells = (n?: number) => {
+    const digits = n === undefined ? [] : String(n).split("");
+    return Array.from({ length: width }, (_, i) => digits[digits.length - width + i] ?? "");
+  };
+
+  const row = (label: string, values: string[], opts: { rule?: boolean; boxed?: boolean } = {}) => (
+    <span className={`flex justify-end ${opts.rule ? "border-t-2 border-slate-900 pt-0.5" : ""}`}>
+      <span className="w-5 text-[13px]">{label}</span>
+      {values.map((v, i) => (
+        <span
+          key={i}
+          className={`inline-flex h-7 w-7 items-center justify-center text-[15px] font-bold tabular-nums ${
+            opts.boxed ? "border border-dashed border-slate-400" : ""
+          }`}
+        >
+          {v}
+        </span>
+      ))}
+    </span>
+  );
+
+  return (
+    <span className="inline-flex flex-col">
+      {/* Where the carries go. Dashed, so they read as somewhere to write
+          rather than as part of the sum. */}
+      {row("", Array.from({ length: width }, () => ""), { boxed: true })}
+      {row("", cells(q.a))}
+      {row("+", cells(q.b))}
+      {row("", Array.from({ length: width }, () => ""), { rule: true })}
+    </span>
   );
 };

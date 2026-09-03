@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import type { ActivityProps } from "../../types";
+import type { ActivityProps , PrintedQuestion } from "../../types";
 import {
   SkillRound,
   SPRING,
@@ -190,6 +190,110 @@ export const promptFor = (q: BondQuestion, template?: string): string => {
     default:
       return `What do ${q.a} and ${q.b} make altogether?`;
   }
+};
+
+
+/**
+ * On paper.
+ *
+ * Each mode hides something different, and the printed line has to say which —
+ * "What is the missing part?" is unanswerable without the part that is *not*
+ * missing, which the round shows in the bond diagram and paper cannot.
+ */
+export const printedFor = (q: BondQuestion): PrintedQuestion => {
+  switch (q.mode) {
+    case "split_one": {
+      const toTen = 10 - q.a;
+      return {
+        text: `${q.a} + ${q.b}. Break ${q.b} into ${toTen} and what, so ${q.a} makes ten?`,
+        answer: `${toTen},${q.b - toTen}`,
+      };
+    }
+    case "split_both":
+      return {
+        text: `Split ${q.a} and ${q.b} into their tens and ones.`,
+        answer: q.expected,
+      };
+    case "part_unknown": {
+      // Either part may be the hidden one; the visible one is what is left.
+      const hidden = Number(q.expected);
+      return {
+        text: `${q.sum} is the whole. One part is ${q.sum - hidden}. What is the other part?`,
+        answer: String(hidden),
+      };
+    }
+    default:
+      return { text: `${q.a} + ${q.b} =`, answer: String(q.sum) };
+  }
+};
+
+/**
+ * How this technique goes, for a sheet that has to teach it.
+ *
+ * Written for paper: no control is named, nothing is tapped, and each line is
+ * something a child could do with a pencil or in their head. See `method` on
+ * `WorksheetSource` for why this is not the lesson's own `stepByStep`.
+ */
+export const methodFor = (q: BondQuestion): string[] => {
+  switch (q.mode) {
+    case "split_one":
+      return [
+        "See how much the first number needs to reach ten.",
+        "Break the second number into that much, and the rest.",
+        "Make ten first, then add what is left over.",
+      ];
+    case "split_both":
+      return ["Split each number into its tens and its ones.", "Tens go with tens, ones with ones."];
+    case "part_unknown":
+      return [
+        "You know the whole and one of its parts.",
+        "Take the part away from the whole to find the other part.",
+      ];
+    default:
+      return ["The two parts go together to make the whole.", "Add them."];
+  }
+};
+
+
+/**
+ * The bond, drawn for a pencil.
+ *
+ * Rendered straight from `bonds`, so every mode gets the diagram it actually
+ * asks about: the whole above, its two parts below, and whichever of the three
+ * the lesson hides left as an empty box. Splitting both numbers draws two bonds
+ * side by side, exactly as the round does.
+ *
+ * A bond is the technique. Printed as "13 is the whole, one part is 5" it is a
+ * subtraction in disguise; printed as a bond it is the picture a child is being
+ * taught to see.
+ */
+export const figureFor = (q: BondQuestion): React.ReactNode => {
+  const box = (slot: Slot, key: string) => (
+    <span
+      key={key}
+      className="inline-flex h-8 w-12 items-center justify-center border-2 border-slate-900 text-[15px] font-bold"
+    >
+      {"value" in slot && slot.value !== undefined ? slot.value : ""}
+    </span>
+  );
+
+  return (
+    <span className="inline-flex flex-wrap items-start gap-8">
+      {q.bonds.map((bond, i) => (
+        <span key={i} className="inline-flex flex-col items-center gap-1">
+          {bond.caption && <span className="text-[10px] text-slate-500">{bond.caption}</span>}
+          {box(bond.whole, `w${i}`)}
+          {/* The two arms of the bond. Drawn as a bracket rather than two
+              diagonal rules: a printer at 300dpi renders a hairline diagonal
+              as a staircase, and this reads the same. */}
+          <span className="h-3 w-16 border-l-2 border-r-2 border-t-2 border-slate-900" />
+          <span className="inline-flex gap-2">
+            {bond.parts.map((part, j) => box(part, `p${i}-${j}`))}
+          </span>
+        </span>
+      ))}
+    </span>
+  );
 };
 
 export function bondHints(

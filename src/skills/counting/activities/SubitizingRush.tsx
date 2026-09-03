@@ -64,7 +64,7 @@ const rangeOr = (range: [number, number] | undefined, lo: number, hi: number) =>
 
 const sample = <T,>(items: readonly T[]): T => items[Math.floor(Math.random() * items.length)];
 
-const buildQuestion = (params: SubitizingSetup, index: number): SubitizingQuestion => {
+export const buildQuestion = (params: SubitizingSetup, index: number): SubitizingQuestion => {
   const display = modeAt<SubitizingDisplay>(
     { mode: params.display, modes: (params as { modes?: SubitizingDisplay[] }).modes },
     index,
@@ -186,6 +186,21 @@ export function subitizeHints(
 const Dot: React.FC<{ className: string }> = ({ className }) => (
   <div className={`w-11 h-11 rounded-full ${className}`} />
 );
+
+/** The question in words, as the round says it. */
+export const promptFor = (): string => "Look fast! How many did you see?";
+
+/**
+ * Not on paper.
+ *
+ * Subitizing is recognising a quantity *without* counting it, and the round
+ * enforces that the only way it can be enforced: the dots are shown for a
+ * fraction of a second and then taken away. A printed sheet cannot take
+ * anything away. The same dots on a page are a counting exercise — the exact
+ * thing this lesson exists to make unnecessary — so it prints nothing rather
+ * than printing its own opposite.
+ */
+export const printedFor = (): null => null;
 
 export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
   params,

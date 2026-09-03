@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import type { ActivityProps } from "../../types";
+import type { ActivityProps , PrintedQuestion } from "../../types";
 import {
   SkillRound,
   SPRING,
@@ -145,6 +145,45 @@ export const promptFor = (q: FrameQuestion, template?: string): string => {
     : `Fill in ${q.added} more. How many are there altogether?`;
 };
 
+
+/**
+ * On paper.
+ *
+ * The frame is the teaching and the arithmetic is the question, so the sheet
+ * prints the arithmetic. A ten-frame drawn in ink would be a nice worksheet and
+ * a different one — the child would be filling boxes, not adding — and that is
+ * a thing to build deliberately rather than to approximate here.
+ */
+export const printedFor = (q: FrameQuestion): PrintedQuestion => {
+  if (q.asks === "added") {
+    // Make five, make ten: the whole is known and a part is missing.
+    return {
+      text: `${q.given} and how many more make ${q.size}?`,
+      answer: String(q.added),
+    };
+  }
+  return { text: `${q.given} + ${q.added} =`, answer: String(q.given + q.added) };
+};
+
+/**
+ * How this technique goes, for a sheet that has to teach it.
+ *
+ * Written for paper: no control is named, nothing is tapped, and each line is
+ * something a child could do with a pencil or in their head. See `method` on
+ * `WorksheetSource` for why this is not the lesson's own `stepByStep`.
+ */
+export const methodFor = (q: FrameQuestion): string[] => q.asks === "added"
+  ? [
+      `A full frame holds ${q.size}.`,
+      "Count how many spaces are still empty.",
+      "That is how many more you need.",
+    ]
+  : [
+      "Start from the number already in the frame.",
+      "Count on the ones you are adding.",
+      "A full row of five helps you see the total without counting.",
+    ];
+
 export function frameHints(
   q: FrameQuestion,
   state: { filled: number; kidTip?: string },
@@ -219,6 +258,59 @@ const Cell: React.FC<{
         />
       )}
     </motion.button>
+  );
+};
+
+/**
+ * The frame, drawn for a pencil.
+ *
+ * The counters already in the frame are printed; the rest of the cells are left
+ * empty for the child to fill in, which is the technique — you see five without
+ * counting it, and count on from there. A sentence saying "you have 6" cannot do
+ * that, and it is the whole reason this lesson uses a frame rather than a sum.
+ *
+ * Plain SVG in black: strokes print, background fills do not (a browser drops
+ * them unless the person ticks "background graphics"), so a filled counter is a
+ * solid circle drawn with `currentColor` and never a coloured cell.
+ */
+export const figureFor = (q: FrameQuestion): React.ReactNode => {
+  const rows = q.size === 5 ? 1 : 2;
+  const CELL = 26;
+  const width = 5 * CELL;
+  const height = rows * CELL;
+
+  return (
+    <svg
+      viewBox={`0 0 ${width + 2} ${height + 2}`}
+      width={width + 2}
+      height={height + 2}
+      role="img"
+      aria-label={`${q.size} frame with ${q.given} counters`}
+      className="text-slate-900"
+    >
+      <g stroke="currentColor" strokeWidth="1.5" fill="none">
+        {Array.from({ length: rows * 5 }, (_, i) => (
+          <rect
+            key={i}
+            x={(i % 5) * CELL + 1}
+            y={Math.floor(i / 5) * CELL + 1}
+            width={CELL}
+            height={CELL}
+          />
+        ))}
+      </g>
+      {/* The counters that are already there. Filled, so the empty cells read
+          as the ones to use. */}
+      {Array.from({ length: Math.min(q.given, rows * 5) }, (_, i) => (
+        <circle
+          key={i}
+          cx={(i % 5) * CELL + 1 + CELL / 2}
+          cy={Math.floor(i / 5) * CELL + 1 + CELL / 2}
+          r={CELL / 3}
+          fill="currentColor"
+        />
+      ))}
+    </svg>
   );
 };
 

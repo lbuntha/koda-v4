@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import type { ActivityProps } from "../../types";
+import type { ActivityProps, PrintedQuestion } from "../../types";
 import {
   SkillRound,
   SPRING,
@@ -188,7 +188,7 @@ const scatterPlaces = (count: number, setup: OrbitSetup["scatter"]): Placement[]
   }));
 };
 
-const buildQuestion = (setup: OrbitSetup, index: number): OrbitQuestion => {
+export const buildQuestion = (setup: OrbitSetup, index: number): OrbitQuestion => {
   const mode = modeAt<OrbitMode>(
     { mode: setup.mode, modes: (setup as { modes?: OrbitMode[] }).modes },
     index,
@@ -310,6 +310,83 @@ const TapGroup: React.FC<{
  * rung's job is to tell the child what to do *next*, and next depends on what
  * they have already done.
  */
+/** The question in words, as the round says it. */
+export const promptFor = (q: OrbitQuestion): string =>
+  q.mode === "compare"
+    ? q.compare!.answer === "SAME"
+      ? "Count both groups. Do they have the same?"
+      : "Count both groups. Which one has more?"
+    : q.mode === "scatter"
+      ? `Touch every ${singular(q.asset.name)}. Do not miss any!`
+      : `Touch each ${singular(q.asset.name)}. Count as you go!`;
+
+/**
+ * On paper.
+ *
+ * "Touch every fish" is an instruction to a finger. What survives is the
+ * question underneath it — how many are there — and that only works because the
+ * fish come with it: see `figureFor`. Without the objects printed this would be
+ * the emptiest sheet in the app, which is why counting could not print at all
+ * until the figures existed.
+ */
+export const printedFor = (q: OrbitQuestion): PrintedQuestion => {
+  if (q.mode === "compare") {
+    const { answer } = q.compare!;
+    return {
+      text: "Count both groups. Which has more?",
+      answer:
+        answer === "SAME" ? "They are the same" : answer === "A" ? "The first group" : "The second group",
+    };
+  }
+  return { text: `How many ${q.asset.name.toLowerCase()} are there?`, answer: String(q.count) };
+};
+
+/** How the technique goes, in paper words. */
+export const methodFor = (q: OrbitQuestion): string[] =>
+  q.mode === "compare"
+    ? [
+        "Count the first group and write the number down.",
+        "Count the second group.",
+        "The bigger number is the group with more — even if it takes up less room.",
+      ]
+    : [
+        "Count them one at a time, saying each number out loud.",
+        "Cross each one off as you count it, so none is counted twice.",
+        "The last number you say is how many there are.",
+      ];
+
+/**
+ * The objects, printed to be counted.
+ *
+ * The skill's own artwork, which is drawn in `currentColor` — so on paper it
+ * comes out as black line art rather than as eight colours a school printer
+ * would charge for.
+ *
+ * Laid out in a wrapped row rather than scattered as the round scatters them:
+ * on screen the scatter is the difficulty, and on paper it is a page a child
+ * cannot mark off in order and an adult cannot check.
+ */
+export const figureFor = (q: OrbitQuestion): React.ReactNode => {
+  const group = (asset: PredefinedAsset, count: number, key: string) => (
+    <span key={key} className="inline-flex max-w-[16rem] flex-wrap gap-1.5 rounded border border-slate-300 p-2">
+      {Array.from({ length: count }, (_, i) => (
+        <SvgAsset key={i} id={asset.id} className="h-6 w-6 text-slate-900" />
+      ))}
+    </span>
+  );
+
+  if (q.mode === "compare") {
+    const { assetA, countA, assetB, countB } = q.compare!;
+    return (
+      <span className="inline-flex items-start gap-4">
+        {group(assetA, countA, "a")}
+        {group(assetB, countB, "b")}
+      </span>
+    );
+  }
+  return group(q.asset, q.count, "one");
+};
+
 export function orbitHints(
   question: OrbitQuestion,
   state: { tapped: number; tappedA: number; tappedB: number; kidTip?: string },
@@ -537,14 +614,7 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
     });
   };
 
-  const prompt =
-    question.mode === "compare"
-      ? question.compare!.answer === "SAME"
-        ? "Count both groups. Do they have the same?"
-        : "Count both groups. Which one has more?"
-      : question.mode === "scatter"
-        ? `Touch every ${singular(question.asset.name)}. Do not miss any!`
-        : `Touch each ${singular(question.asset.name)}. Count as you go!`;
+  const prompt = promptFor(question);
 
   return (
     <SkillRound

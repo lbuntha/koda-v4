@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import type { ActivityProps } from "../../types";
+import type { ActivityProps , PrintedQuestion } from "../../types";
 import {
   SkillRound,
   SPRING,
@@ -136,6 +136,33 @@ export const promptFor = (q: EstimateQuestion, template?: string): string => {
     : `About how many is ${q.a} plus ${q.b}?`;
 };
 
+
+/**
+ * On paper.
+ *
+ * `reasonable` is a yes-or-no about somebody else's answer, so the key holds
+ * the verdict rather than the sum — printing the total would be marking a
+ * different question from the one asked.
+ */
+export const printedFor = (q: EstimateQuestion): PrintedQuestion =>
+  q.mode === "reasonable"
+    ? {
+        text: `Someone says ${q.a} + ${q.b} is ${q.claim}. Could that be right?`,
+        /* The verdict in words. `expected` is `too_big`, which is the right key
+           for the learning log and wrong on a sheet of paper a parent reads —
+           an answer key is the one place an internal token cannot appear. */
+        answer:
+          q.verdict === "right"
+            ? `Yes — about ${q.sum}`
+            : q.verdict === "too_big"
+              ? `No — far too big (about ${q.sum})`
+              : `No — far too small (about ${q.sum})`,
+      }
+    : {
+        text: `About how many is ${q.a} + ${q.b}? Round each number first.`,
+        answer: q.expected,
+      };
+
 export function estimateHints(
   q: EstimateQuestion,
   state: { rounded: (number | null)[]; kidTip?: string },
@@ -211,6 +238,25 @@ const Dial: React.FC<{
     </div>
   );
 };
+
+/**
+ * How this technique goes, for a sheet that has to teach it.
+ *
+ * Written for paper: no control is named, nothing is tapped, and each line is
+ * something a child could do with a pencil or in their head. See `method` on
+ * `WorksheetSource` for why this is not the lesson's own `stepByStep`.
+ */
+export const methodFor = (q: EstimateQuestion): string[] => q.mode === "reasonable"
+  ? [
+      "Round both numbers to something easy.",
+      "Add the round numbers for a rough answer.",
+      "Compare that with the answer you were given.",
+    ]
+  : [
+      "Round each number to the nearest ten.",
+      "Add the round numbers.",
+      "That is roughly the answer — close, not exact.",
+    ];
 
 const VERDICTS: { key: Verdict; label: string }[] = [
   { key: "too_small", label: "Far too small" },

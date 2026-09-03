@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import type { ActivityProps } from "../../types";
+import type { ActivityProps , PrintedQuestion } from "../../types";
 import {
   SkillRound,
   SPRING,
@@ -181,6 +181,22 @@ export const promptFor = (q: StrategyQuestion, template?: string): string => {
     ? `Both of these get to ${q.sum}. Which one took fewer steps?`
     : `${q.a} plus ${q.b}. Which strategy would you use?`;
 };
+
+
+/**
+ * Not on paper.
+ *
+ * The question is four strategy cards, each showing its own working, and the
+ * child picks between them — then the second step lays their choice beside
+ * another and asks which was shorter. Printing that means printing the cards,
+ * which is a worksheet somebody should design rather than one this can
+ * approximate: reduced to a sentence it becomes "47 + 8. Which strategy?", a
+ * question with no options and no markable answer.
+ *
+ * `null` keeps the lesson out of the printer and says why here, which is the
+ * point of every technique declaring its own paper form.
+ */
+export const printedFor = (): PrintedQuestion | null => null;
 
 export function strategyHints(
   q: StrategyQuestion,

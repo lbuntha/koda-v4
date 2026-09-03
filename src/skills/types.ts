@@ -240,11 +240,124 @@ export interface ActivityProps<P = Record<string, unknown>> {
   lesson?: ActivityLesson;
 }
 
+/**
+ * How an activity's questions go onto paper.
+ *
+ * A round is tapped, dragged and spoken; a worksheet is a sentence and a box to
+ * write in. Most of what an activity draws cannot survive that — an object to
+ * touch, a line to hop along, a frame to fill — so printing is something an
+ * activity *offers* rather than something every activity has. An engine whose
+ * questions are already written ones (`47 + 8`, a word problem) declares this
+ * and can be printed; one whose question is the picture leaves it out, and the
+ * app says so instead of printing a page of "Touch every fish".
+ *
+ * The two functions are the ones the round already uses, handed over unchanged:
+ * a worksheet asks for exactly the questions the round would have asked, at the
+ * lesson's own number ranges, which is the whole point of printing one.
+ */
+/**
+ * One question as it must appear on paper.
+ *
+ * The distinction this exists to draw: a *prompt* is what the round says beside
+ * a picture, and a *printed question* has to carry the whole question itself.
+ * "Start at 6 and count on." is a fine prompt — the child can see the three
+ * things in the second bin — and a broken worksheet, because the 3 is nowhere on
+ * the page and there is no answer to write. The printed form says "Start at 6
+ * and count on 3."
+ *
+ * `null` is a legitimate answer, and an important one: a question whose subject
+ * is a picture cannot be written down at all. Counting five apples is not a
+ * sentence, and inventing one that fits ("How many is 3 and 2?") would print a
+ * different question from the one the lesson teaches.
+ */
+export interface PrintedQuestion {
+  /** The question, self-contained. Everything needed to answer it is in here. */
+  text: string;
+  /** What belongs on the line, for the key a grown-up keeps. */
+  answer: string;
+}
+
+export interface WorksheetSource<P = Record<string, unknown>> {
+  /**
+   * One question, drawn as the round draws it.
+   *
+   * `seen` is the round's own de-duplication: a sheet of twenty questions must
+   * not ask 3 + 4 six times, and the engines already know how to avoid that.
+   */
+  build(
+    params: P,
+    index: number,
+    seen: Set<string>,
+    /**
+     * What the last question was, for an engine that has to know.
+     *
+     * Story problems keep it so a sheet is not five sentences about the same
+     * child and the same apples. Declared here even though most engines ignore
+     * it, because a printer holding one ref and passing it every time is what
+     * makes the variety work — and an engine that does not take it is still
+     * assignable to this.
+     */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    memory: { current: any },
+  ): { expected?: string };
+  /** The question in words, given the lesson's own prompt template if it has one. */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  prompt(question: any, template?: string): string;
+  /**
+   * The question as paper needs it, or `null` where this one cannot be written.
+   *
+   * Declared per technique rather than derived, because only the engine knows
+   * what its question actually is. Where it is absent the sheet falls back to
+   * `prompt`, which is right for the engines whose prompt already states the
+   * whole problem ("47 plus 8. Add each column, and write the carry.") and
+   * wrong for the ones that lean on the picture — so every engine should end up
+   * declaring one.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  printed?(question: any): PrintedQuestion | null;
+  /**
+   * How the technique goes, in two or three lines, for the sheet to teach from.
+   *
+   * Declared per technique for the same reason the printed question is: a
+   * lesson's `stepByStep` is written for the help panel inside a round, and
+   * describes the app as often as the method — "Its number is written on the
+   * lid", "Read the fact on the card", "Type the total and check it". None of
+   * that survives being printed, and no word filter can reliably tell the two
+   * apart.
+   *
+   * `null` where the mode has no method worth stating. The sheet then falls
+   * back to whatever of the lesson's own steps do not mention the screen.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  method?(question: any): string[] | null;
+  /**
+   * The technique's apparatus, drawn for a pencil.
+   *
+   * A ten-frame lesson on paper should have ten-frames on it; a number-line
+   * lesson should have a line to hop along. Printing the sentence and leaving
+   * the picture on the screen turns every technique into the same worksheet —
+   * arithmetic with a ruled line beside it — which is exactly the thing the
+   * technique was invented to avoid.
+   *
+   * Not the round's component. Those are built for a finger: they carry theme
+   * colours, hover states, springs and hit targets, none of which survive being
+   * printed and several of which cost ink. What belongs here is the same figure
+   * redrawn in black lines, with the parts the child fills in left empty.
+   *
+   * `null` where a technique's question is already complete in words — a fact
+   * family, a story problem — so the sheet does not decorate for the sake of it.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  figure?(question: any): React.ReactNode | null;
+}
+
 export interface ActivityDefinition<P = Record<string, unknown>> {
   id: string;
   name: string;
   defaultParams: P;
   component: React.ComponentType<ActivityProps<P>>;
+  /** Present when this activity's questions can be printed. See `lib/worksheet.ts`. */
+  worksheet?: WorksheetSource<P>;
 }
 
 /**

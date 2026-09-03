@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import type { ActivityProps } from "../../types";
+import type { ActivityProps , PrintedQuestion } from "../../types";
 import {
   SkillRound,
   SPRING,
@@ -252,6 +252,110 @@ export const promptFor = (q: DeskQuestion, template?: string): string => {
     default:
       return `${q.a} plus ${q.b}. Fill in the total, one column at a time.`;
   }
+};
+
+
+/**
+ * On paper.
+ *
+ * The grid is the round's scaffolding; on a sheet the child writes the columns
+ * out themselves, so the printed answer is the total rather than the round's
+ * per-column `expected`. The instruction keeps the route — adding column by
+ * column and adding left to right are different lessons about the same sum.
+ */
+export const printedFor = (q: DeskQuestion): PrintedQuestion => {
+  const answer = String(q.sum);
+  switch (q.mode) {
+    case "expanded":
+      return { text: `${q.a} + ${q.b}. Write each number out in hundreds, tens and ones, then add.`, answer };
+    case "partial_sums":
+      return { text: `${q.a} + ${q.b}. Add the tens, add the ones, then put them together.`, answer };
+    case "left_right":
+      return { text: `${q.a} + ${q.b}. Start with the biggest column and work right.`, answer };
+    default:
+      return { text: `${q.a} + ${q.b}. Add one column at a time.`, answer };
+  }
+};
+
+/**
+ * How this technique goes, for a sheet that has to teach it.
+ *
+ * Written for paper: no control is named, nothing is tapped, and each line is
+ * something a child could do with a pencil or in their head. See `method` on
+ * `WorksheetSource` for why this is not the lesson's own `stepByStep`.
+ */
+export const methodFor = (q: DeskQuestion): string[] => {
+  switch (q.mode) {
+    case "expanded":
+      return [
+        "Write each number as hundreds, tens and ones.",
+        "Add each place on its own.",
+        "Put the places back together.",
+      ];
+    case "partial_sums":
+      return [
+        "Add the tens and write that answer down.",
+        "Add the ones and write that one down too.",
+        "Add your two answers for the total.",
+      ];
+    case "left_right":
+      return [
+        "Start with the biggest place and work right.",
+        "Keep a running total, adjusting it as you go.",
+      ];
+    default:
+      return ["Line the numbers up by place.", "Add one column at a time, ones first."];
+  }
+};
+
+
+/**
+ * The chart, drawn for a pencil.
+ *
+ * The grid is the technique: what it teaches is that a column of ones and a
+ * column of tens are added separately and never mixed. Printed without it, the
+ * child sets the sum out however they like and the lesson has not happened.
+ * Headed to whatever places the numbers actually use, so a two-digit lesson does
+ * not print an empty hundreds column to confuse things.
+ */
+export const figureFor = (q: DeskQuestion): React.ReactNode => {
+  const width = Math.max(String(q.a).length, String(q.b).length, String(q.sum).length);
+  const heads = ["H", "T", "O"].slice(-width);
+  const cells = (n?: number) => {
+    const digits = n === undefined ? [] : String(n).split("");
+    return Array.from({ length: width }, (_, i) => digits[digits.length - width + i] ?? "");
+  };
+
+  const Row: React.FC<{ label: string; values: string[]; head?: boolean }> = ({
+    label,
+    values,
+    head,
+  }) => (
+    <tr>
+      <td className="pr-1 text-right text-[13px]">{label}</td>
+      {values.map((v, i) => (
+        <td
+          key={i}
+          className={`h-7 w-9 border border-slate-900 text-center text-[15px] tabular-nums ${
+            head ? "text-[11px] font-black text-slate-500" : "font-bold"
+          }`}
+        >
+          {v}
+        </td>
+      ))}
+    </tr>
+  );
+
+  return (
+    <table className="border-collapse">
+      <tbody>
+        <Row label="" values={heads} head />
+        <Row label="" values={cells(q.a)} />
+        <Row label="+" values={cells(q.b)} />
+        <Row label="" values={Array.from({ length: width }, () => "")} />
+      </tbody>
+    </table>
+  );
 };
 
 export function deskHints(

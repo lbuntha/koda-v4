@@ -506,3 +506,71 @@ html.theme-light,
     background-position: 0 0, 8px 8px;
   }
 }
+
+/* ==========================================================================
+   PRINT — one sheet of paper, and nothing else on the page.
+
+   The printed copy lives in `#print-root`, a sibling of `#root` that
+   `components/print/UIPaper.tsx` portals into. Hidden on screen; on paper it is
+   the only thing left standing.
+
+   Two things this has already got wrong, both worth keeping written down.
+
+   It began as `visibility: hidden` over the whole app. `visibility` hides the
+   ink and keeps the *layout*, so the app's own height still paginated: a
+   fifteen-question worksheet came out as twelve pages, eleven of them blank.
+
+   Hiding `#root` fixed the page count and printed the wrong thing — an empty
+   dialog frame. `UIModal` puts its overlay on `document.body` rather than where
+   it was mounted (see `ThemeUI`), so the dialog is a *sibling* of `#root`, not
+   a descendant, and hiding the app left the modal chrome standing. Anything
+   that portals — a modal, a toast, a tooltip — lands in the same place.
+
+   So the rule is stated the other way round: everything in `body` goes, except
+   the paper. A new portal cannot escape it, because it does not have to be
+   named.
+   ========================================================================== */
+#print-root {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 14mm;
+  }
+
+  body > *:not(#print-root) {
+    display: none !important;
+  }
+
+  #print-root {
+    display: block !important;
+  }
+
+  /* The preview copy, and any app furniture that shares a page with paper. */
+  [data-print-hide] {
+    display: none !important;
+  }
+
+  /* Paper is paper in both themes, and the screen's card treatment is not it. */
+  .paper {
+    background: #fff !important;
+    color: #000 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* A section that starts its own sheet — an answer key a grown-up keeps back. */
+  .paper-break {
+    break-before: page;
+    border-top: 0 !important;
+  }
+
+  /* Nothing a pencil has to answer may straddle two pages. */
+  .paper li,
+  .paper tr {
+    break-inside: avoid;
+  }
+}

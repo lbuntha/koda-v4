@@ -1,18 +1,18 @@
 import type { Lesson, SkillFeature, SkillManifest, Skill } from "../types";
 import manifestJson from "./manifest.json";
 import lessonsJson from "./lessons.json";
-import { CountTray } from "./activities/CountTray";
-import { FrameFill } from "./activities/FrameFill";
-import { BondTree } from "./activities/BondTree";
-import { JumpLine } from "./activities/JumpLine";
-import { BlockYard } from "./activities/BlockYard";
-import { PlaceValueDesk } from "./activities/PlaceValueDesk";
-import { FactDeck } from "./activities/FactDeck";
-import { ChainBoard } from "./activities/ChainBoard";
-import { ColumnPad } from "./activities/ColumnPad";
-import { EstimateDial } from "./activities/EstimateDial";
-import { StoryBoard } from "./activities/StoryBoard";
-import { StrategyPicker } from "./activities/StrategyPicker";
+import * as tray from "./activities/CountTray";
+import * as frames from "./activities/FrameFill";
+import * as bonds from "./activities/BondTree";
+import * as numberline from "./activities/JumpLine";
+import * as base10 from "./activities/BlockYard";
+import * as chart from "./activities/PlaceValueDesk";
+import * as facts from "./activities/FactDeck";
+import * as multi from "./activities/ChainBoard";
+import * as column from "./activities/ColumnPad";
+import * as estimate from "./activities/EstimateDial";
+import * as story from "./activities/StoryBoard";
+import * as strategy from "./activities/StrategyPicker";
 import { registerSkillArt } from "../../assets/svg/skillArt";
 import { registerSkillVoice } from "../../lib/voiceClips";
 import audioManifest from "./audio/manifest.json";
@@ -93,7 +93,8 @@ export const skill: Skill = {
        * complete, playable question.
        */
       defaultParams: { mode: "count_all", questionsPerRound: 5 },
-      component: CountTray,
+      component: tray.CountTray,
+      worksheet: { build: tray.buildQuestion, prompt: tray.promptFor, printed: tray.printedFor, method: tray.methodFor },
     },
     frames: {
       id: "frames",
@@ -102,13 +103,15 @@ export const skill: Skill = {
          for their lessons. Writing an engine complete is what lets those two
          arrive as JSON rather than as code. */
       defaultParams: { mode: "ten", questionsPerRound: 5 },
-      component: FrameFill,
+      component: frames.FrameFill,
+      worksheet: { build: frames.buildQuestion, prompt: frames.promptFor, printed: frames.printedFor, method: frames.methodFor, figure: frames.figureFor },
     },
     bonds: {
       id: "bonds",
       name: "Number Bonds",
       defaultParams: { mode: "whole_unknown", questionsPerRound: 5 },
-      component: BondTree,
+      component: bonds.BondTree,
+      worksheet: { build: bonds.buildQuestion, prompt: bonds.promptFor, printed: bonds.printedFor, method: bonds.methodFor, figure: bonds.figureFor },
     },
     numberline: {
       id: "numberline",
@@ -116,49 +119,57 @@ export const skill: Skill = {
       /* Six modes across two kinds of line. `bridge_ten` onwards wait eight
          levels for their lessons and arrive as JSON. */
       defaultParams: { mode: "path", questionsPerRound: 5 },
-      component: JumpLine,
+      component: numberline.JumpLine,
+      worksheet: { build: numberline.buildQuestion, prompt: numberline.promptFor, printed: numberline.printedFor, method: numberline.methodFor, figure: numberline.figureFor },
     },
     base10: {
       id: "base10",
       name: "Base-Ten Blocks",
       defaultParams: { mode: "build_add", questionsPerRound: 5 },
-      component: BlockYard,
+      component: base10.BlockYard,
+      worksheet: { build: base10.buildQuestion, prompt: base10.promptFor, printed: base10.printedFor, method: base10.methodFor, figure: base10.figureFor },
     },
     chart: {
       id: "chart",
       name: "Place-Value Chart",
       defaultParams: { mode: "chart_add", questionsPerRound: 5 },
-      component: PlaceValueDesk,
+      component: chart.PlaceValueDesk,
+      worksheet: { build: chart.buildQuestion, prompt: chart.promptFor, printed: chart.printedFor, method: chart.methodFor, figure: chart.figureFor },
     },
     facts: {
       id: "facts",
       name: "Fact Deck",
       defaultParams: { mode: "doubles", questionsPerRound: 5 },
-      component: FactDeck,
+      component: facts.FactDeck,
+      worksheet: { build: facts.buildQuestion, prompt: facts.promptFor, printed: facts.printedFor, method: facts.methodFor },
     },
     multi: {
       id: "multi",
       name: "Chains and Pairs",
       defaultParams: { mode: "pairs", questionsPerRound: 5 },
-      component: ChainBoard,
+      component: multi.ChainBoard,
+      worksheet: { build: multi.buildQuestion, prompt: multi.promptFor, printed: multi.printedFor, method: multi.methodFor },
     },
     column: {
       id: "column",
       name: "Column Add",
       defaultParams: { mode: "standard", questionsPerRound: 5 },
-      component: ColumnPad,
+      component: column.ColumnPad,
+      worksheet: { build: column.buildQuestion, prompt: column.promptFor, printed: column.printedFor, method: column.methodFor, figure: column.figureFor },
     },
     estimate: {
       id: "estimate",
       name: "Estimate and Check",
       defaultParams: { mode: "round_estimate", digits: 2, questionsPerRound: 5 },
-      component: EstimateDial,
+      component: estimate.EstimateDial,
+      worksheet: { build: estimate.buildQuestion, prompt: estimate.promptFor, printed: estimate.printedFor, method: estimate.methodFor },
     },
     story: {
       id: "story",
       name: "Story Problems",
       defaultParams: { mode: "join", questionsPerRound: 5 },
-      component: StoryBoard,
+      component: story.StoryBoard,
+      worksheet: { build: story.buildQuestion, prompt: story.promptFor, printed: story.printedFor, method: story.methodFor },
     },
     strategy: {
       id: "strategy",
@@ -166,7 +177,8 @@ export const skill: Skill = {
       /* Six questions, because each problem is asked twice: choose a route,
          then compare it with another. */
       defaultParams: { mode: "compare_paths", questionsPerRound: 6 },
-      component: StrategyPicker,
+      component: strategy.StrategyPicker,
+      worksheet: { build: strategy.buildQuestion, prompt: strategy.promptFor, printed: strategy.printedFor },
     },
   },
 };

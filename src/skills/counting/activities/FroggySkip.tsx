@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { ArrowRight } from "lucide-react";
-import type { ActivityProps } from "../../types";
+import type { ActivityProps, PrintedQuestion } from "../../types";
 import {
   SkillRound,
   SPRING,
@@ -67,7 +67,7 @@ const rangeOr = (range: [number, number] | undefined, lo: number, hi: number) =>
   randomInt(range?.[0] ?? lo, range?.[1] ?? hi);
 const sample = <T,>(items: readonly T[]): T => items[Math.floor(Math.random() * items.length)];
 
-const buildQuestion = (setup: FroggySetup, index: number): LineQuestion => {
+export const buildQuestion = (setup: FroggySetup, index: number): LineQuestion => {
   const mode = modeAt<NumberLineMode>(
     { mode: setup.mode, modes: (setup as { modes?: NumberLineMode[] }).modes },
     index,
@@ -138,6 +138,95 @@ const buildQuestion = (setup: FroggySetup, index: number): LineQuestion => {
  * says "the jump is +5" about a line that steps by 2 is a lie a child will
  * trust over their own eyes.
  */
+/** The question in words, as the round says it. */
+export const promptFor = (q: LineQuestion): string =>
+  q.mode === "missing"
+    ? "Which number is missing?"
+    : `Hop by ${q.step} to get to ${q.pads?.[q.pads.length - 1]}!`;
+
+/**
+ * On paper.
+ *
+ * "Which number is missing?" is unanswerable without the sequence, which the
+ * round shows on the pads beside it — so the printed question carries the
+ * sequence, gap and all. Hopping is a pencil task already: the child writes the
+ * numbers they land on.
+ */
+export const printedFor = (q: LineQuestion): PrintedQuestion => {
+  if (q.mode === "missing") {
+    const shown = (q.sequence ?? []).map((n) => (n === null ? "___" : String(n))).join(",  ");
+    return { text: `${shown}    Which number is missing?`, answer: String(q.answer ?? "") };
+  }
+  const pads = q.pads ?? [];
+  return {
+    text: `Start at 0 and hop by ${q.step} to reach ${pads[pads.length - 1]}. Write every number you land on.`,
+    answer: pads.join(", "),
+  };
+};
+
+/** How the technique goes, in paper words. */
+export const methodFor = (q: LineQuestion): string[] =>
+  q.mode === "missing"
+    ? [
+        "Look at the gap between two numbers you can see.",
+        "That gap is the same all the way along.",
+        "Count on — or back — from the number beside the hole.",
+      ]
+    : [
+        `Each hop is the same size: ${q.step}.`,
+        "Start at zero and add that much every time.",
+        "Write each number as you land on it — that is the count.",
+      ];
+
+/**
+ * The line, drawn for a pencil.
+ *
+ * Hopping gets the line with its pads ticked and only the first labelled: the
+ * numbers are what the child is working out, so printing them would be printing
+ * the answer. The missing-number mode has its sequence in the question already
+ * and needs no picture.
+ */
+export const figureFor = (q: LineQuestion): React.ReactNode | null => {
+  if (q.mode === "missing") return null;
+  const pads = q.pads ?? [];
+  if (pads.length === 0) return null;
+
+  const W = 300;
+  const last = pads[pads.length - 1];
+  const at = (value: number) => (value / Math.max(1, last)) * W;
+
+  return (
+    <svg
+      viewBox="-14 0 328 30"
+      width={328}
+      height={30}
+      role="img"
+      aria-label={`Number line with ${pads.length} pads, hopping by ${q.step}`}
+      className="text-slate-900"
+    >
+      <line x1={0} y1={12} x2={W} y2={12} stroke="currentColor" strokeWidth="1.5" />
+      {pads.map((value, i) => (
+        <g key={value}>
+          <line
+            x1={at(value)}
+            y1={i === 0 ? 5 : 8}
+            x2={at(value)}
+            y2={16}
+            stroke="currentColor"
+            strokeWidth={i === 0 ? 2.5 : 1.5}
+          />
+          {/* Only the start. The rest is what the child is counting out. */}
+          {i === 0 && (
+            <text x={at(value)} y={27} textAnchor="middle" fontSize="10" fill="currentColor">
+              {value}
+            </text>
+          )}
+        </g>
+      ))}
+    </svg>
+  );
+};
+
 export function numberLineHints(
   question: LineQuestion,
   state: { hop: number; kidTip?: string },
@@ -295,10 +384,7 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
     });
   };
 
-  const prompt =
-    question.mode === "missing"
-      ? "Which number is missing?"
-      : `Hop by ${question.step} to get to ${question.pads?.[question.pads.length - 1]}!`;
+  const prompt = promptFor(question);
 
   return (
     <SkillRound

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import type { ActivityProps } from "../../types";
+import type { ActivityProps , PrintedQuestion } from "../../types";
 import {
   SkillRound,
   SPRING,
@@ -266,6 +266,131 @@ export const promptFor = (q: JumpQuestion, template?: string): string => {
     default:
       return `Start at ${q.a} and hop forward ${q.b}.`;
   }
+};
+
+
+/**
+ * On paper.
+ *
+ * The line itself is the round's; what a pencil needs is the pair of numbers and
+ * what to do with them. The bridging modes ask for the *jump* rather than the
+ * total, so their answer is the size of the hop and not the sum.
+ */
+export const printedFor = (q: JumpQuestion): PrintedQuestion => {
+  switch (q.mode) {
+    case "bridge_ten":
+      return { text: `What jump takes ${q.a} to the next ten?`, answer: q.expected };
+    case "bridge_hundred":
+      return { text: `What jump takes ${q.a} to the next hundred?`, answer: q.expected };
+    case "compensate":
+      return {
+        text: `${q.a} + ${q.b}. Jump a round number, then give back what you overshot.`,
+        answer: String(q.sum),
+      };
+    case "jump_tens_ones":
+      return { text: `${q.a} + ${q.b}. Jump the tens, then the ones.`, answer: String(q.sum) };
+    default:
+      return { text: `Start at ${q.a} and jump ${q.b}. Where do you land?`, answer: String(q.sum) };
+  }
+};
+
+/**
+ * How this technique goes, for a sheet that has to teach it.
+ *
+ * Written for paper: no control is named, nothing is tapped, and each line is
+ * something a child could do with a pencil or in their head. See `method` on
+ * `WorksheetSource` for why this is not the lesson's own `stepByStep`.
+ */
+export const methodFor = (q: JumpQuestion): string[] => {
+  switch (q.mode) {
+    case "bridge_ten":
+      return ["Look at the ones digit.", "Count how many more it needs to reach the next ten."];
+    case "bridge_hundred":
+      return ["Look at the tens and ones.", "Count how many more they need to reach the next hundred."];
+    case "compensate":
+      return [
+        "Round the second number up to a friendly one.",
+        "Add that instead — it is easier.",
+        "Then give back the extra you added.",
+      ];
+    case "jump_tens_ones":
+      return ["Jump the tens first.", "Then jump the ones.", "Two easy jumps instead of one hard one."];
+    default:
+      return ["Start at the first number.", "Jump forward the second number.", "Where you land is the answer."];
+  }
+};
+
+
+/**
+ * The line, drawn for a pencil.
+ *
+ * A number line is a thing you draw *on* — the jumps are arcs a child makes with
+ * a pencil, and that is the technique. So the line is printed with its ticks and
+ * its starting number marked, and the jumps are left to them.
+ *
+ * An open line (`ticks: 0`) prints as a bare rule with only the start marked,
+ * exactly as the round shows it: the point of that mode is that there is nothing
+ * to read the answer off.
+ *
+ * The box is widened by half a label at each end, because the first and last
+ * ticks sit *on* the ends of the line and their numbers are centred under them.
+ * A fixed padding was enough for two digits and clipped everything above: the
+ * hundreds lessons printed "700" as "\'00" and "1000" as "100", which is not a
+ * cosmetic fault — it is a worksheet asking a child to read a number that is not
+ * there.
+ */
+export const figureFor = (q: JumpQuestion): React.ReactNode => {
+  const W = 320;
+  const LABEL = 10;
+  const span = Math.max(1, q.max - q.min);
+  const at = (value: number) => ((value - q.min) / span) * W;
+  const marks = q.ticks > 0
+    ? Array.from(
+        { length: Math.floor(span / q.ticks) + 1 },
+        (_, i) => q.min + i * q.ticks,
+      ).filter((v) => v <= q.max)
+    : [q.from];
+
+  /* Half the widest label, from its digit count: SVG text cannot be measured
+     before it is laid out, and a digit at this size is a little over half its
+     font size wide. Rounded up rather than down — an over-wide box costs a few
+     millimetres of margin, and a narrow one costs the number. */
+  const pad = Math.max(12, Math.max(...marks.map((m) => String(m).length)) * LABEL * 0.36);
+
+  return (
+    <svg
+      viewBox={`${-pad} 0 ${W + pad * 2} 34`}
+      width={W + pad * 2}
+      height={34}
+      role="img"
+      aria-label={`Number line from ${q.min} to ${q.max}, starting at ${q.from}`}
+      className="text-slate-900"
+    >
+      <line x1={0} y1={12} x2={W} y2={12} stroke="currentColor" strokeWidth="1.5" />
+      {marks.map((value) => (
+        <g key={value}>
+          <line
+            x1={at(value)}
+            y1={value === q.from ? 5 : 8}
+            x2={at(value)}
+            y2={16}
+            stroke="currentColor"
+            strokeWidth={value === q.from ? 2.5 : 1.5}
+          />
+          <text
+            x={at(value)}
+            y={28}
+            textAnchor="middle"
+            fontSize={LABEL}
+            fontWeight={value === q.from ? 700 : 400}
+            fill="currentColor"
+          >
+            {value}
+          </text>
+        </g>
+      ))}
+    </svg>
+  );
 };
 
 export function jumpHints(

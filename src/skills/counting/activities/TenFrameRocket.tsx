@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { Rocket } from "lucide-react";
-import type { ActivityProps } from "../../types";
+import type { ActivityProps, PrintedQuestion } from "../../types";
 import {
   SkillRound,
   SPRING,
@@ -54,7 +54,7 @@ const rangeOr = (range: [number, number] | undefined, lo: number, hi: number) =>
   return min + Math.floor(Math.random() * (max - min + 1));
 };
 
-const buildQuestion = (setup: TenFrameSetup, index: number): FrameQuestion => {
+export const buildQuestion = (setup: TenFrameSetup, index: number): FrameQuestion => {
   const mode = modeAt<TenFrameMode>(
     { mode: setup.mode, modes: (setup as { modes?: TenFrameMode[] }).modes },
     index,
@@ -86,6 +86,122 @@ const buildQuestion = (setup: TenFrameSetup, index: number): FrameQuestion => {
  * is told what to do from four. Pure and exported, so the arithmetic in the
  * wording is tested rather than eyeballed.
  */
+/** The question in words, as the round says it. */
+export const promptFor = (q: FrameQuestion): string =>
+  q.mode === "complement"
+    ? `You have ${q.initial}. How many more to make 10?`
+    : q.mode === "teen"
+      ? `Make ${q.target}. Fill one frame with 10, then add more.`
+      : `Make ${q.target} dots. Fill the top row first.`;
+
+/**
+ * On paper.
+ *
+ * `fill` and `teen` ask the child to *make* a number, which a pencil does as
+ * well as a finger — so the printed question asks them to draw it, and the key
+ * says what a finished frame looks like. `complement` is the one that asks for
+ * a number back, and it is printed as the question it is.
+ */
+export const printedFor = (q: FrameQuestion): PrintedQuestion => {
+  switch (q.mode) {
+    case "complement":
+      return {
+        text: `The frame holds ${q.initial}. How many more make 10?`,
+        answer: String(q.target),
+      };
+    case "teen":
+      return {
+        text: `Draw ${q.target}. Fill one frame with ten, then start the next.`,
+        answer: `${q.target} — one full frame and ${q.target - 10} more`,
+      };
+    default:
+      return {
+        text: `Draw ${q.target} dots. Fill the top row first.`,
+        answer: `${q.target} — ${Math.min(q.target, 5)} on the top row${
+          q.target > 5 ? ` and ${q.target - 5} below` : ""
+        }`,
+      };
+  }
+};
+
+/** How the technique goes, in paper words. */
+export const methodFor = (q: FrameQuestion): string[] => {
+  switch (q.mode) {
+    case "complement":
+      return [
+        "A full frame holds ten.",
+        "Count the empty cells rather than the full ones.",
+        "That is how many more you need.",
+      ];
+    case "teen":
+      return [
+        "A teen number is a full ten and some ones.",
+        "Fill one frame completely, then put the rest in the next.",
+        "The full frame is the ten you do not need to count again.",
+      ];
+    default:
+      return [
+        "Fill the top row first — a full row is five.",
+        "Put the rest in the bottom row.",
+        "A full row is seen without counting, which is the point of the frame.",
+      ];
+  }
+};
+
+/**
+ * The frame, drawn for a pencil.
+ *
+ * Empty where the child is doing the filling, and pre-filled only where the
+ * lesson gives them a starting point. `teen` gets two frames, with the first
+ * already full: the ten a child stops counting is the idea being taught, and
+ * making them draw it again would teach the opposite.
+ */
+export const figureFor = (q: FrameQuestion): React.ReactNode => {
+  const CELL = 26;
+  const frame = (filled: number, key: string) => (
+    <svg
+      key={key}
+      viewBox={`0 0 ${5 * CELL + 2} ${2 * CELL + 2}`}
+      width={5 * CELL + 2}
+      height={2 * CELL + 2}
+      role="img"
+      aria-label={`Ten frame with ${filled} filled`}
+      className="text-slate-900"
+    >
+      <g stroke="currentColor" strokeWidth="1.5" fill="none">
+        {Array.from({ length: 10 }, (_, i) => (
+          <rect
+            key={i}
+            x={(i % 5) * CELL + 1}
+            y={Math.floor(i / 5) * CELL + 1}
+            width={CELL}
+            height={CELL}
+          />
+        ))}
+      </g>
+      {Array.from({ length: Math.min(filled, 10) }, (_, i) => (
+        <circle
+          key={i}
+          cx={(i % 5) * CELL + 1 + CELL / 2}
+          cy={Math.floor(i / 5) * CELL + 1 + CELL / 2}
+          r={CELL / 3}
+          fill="currentColor"
+        />
+      ))}
+    </svg>
+  );
+
+  if (q.mode === "teen") {
+    return (
+      <span className="inline-flex items-start gap-3">
+        {frame(10, "full")}
+        {frame(0, "rest")}
+      </span>
+    );
+  }
+  return frame(q.mode === "complement" ? (q.initial ?? 0) : 0, "one");
+};
+
 export function tenFrameHints(
   question: FrameQuestion,
   state: { filled: number; kidTip?: string },
@@ -342,12 +458,7 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
         );
   };
 
-  const prompt =
-    question.mode === "complement"
-      ? `You have ${question.initial}. How many more to make 10?`
-      : question.mode === "teen"
-        ? `Make ${question.target}. Fill one frame with 10, then add more.`
-        : `Make ${question.target} dots. Fill the top row first.`;
+  const prompt = promptFor(question);
 
   return (
     <SkillRound

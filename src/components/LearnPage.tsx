@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { ArrowLeft, BookOpen, CheckCircle2, Repeat, Sparkles } from "lucide-react";
+import { ArrowLeft, BookOpen, CheckCircle2, Printer, Repeat, Sparkles } from "lucide-react";
 import {
   type CourseUnit,
   type ResolvedLesson,
@@ -11,6 +11,10 @@ import {
   resumeLesson,
 } from "../curriculum";
 import { SkillRegistryAPI } from "../lib/skillRegistryApi";
+import { premiumLocked } from "../lib/premiumLessons";
+import { canPrint } from "../lib/worksheet";
+import { WorksheetDialog } from "./WorksheetDialog";
+import { useBilling } from "../lib/useBilling";
 import { useSkillRegistrations } from "../lib/skillRegistrationApi";
 import { skillTitle, useInstalledSkills } from "../lib/skillStore";
 import { getSkill } from "../skills/registry";
@@ -71,8 +75,13 @@ export const LearnPage: React.FC<LearnPageProps> = ({
 }) => {
   const viewer = useAudienceViewer();
   const installed = useInstalledSkills();
+  /* Subscribed, not read once: the padlocks below are drawn from the plan, and
+     a family that upgrades in another tab has to see them open without
+     reloading. The value itself is unused — `premiumLocked` asks `Billing`. */
+  useBilling();
   const { registeredIds, register } = useSkillRegistrations();
   const [registering, setRegistering] = useState(false);
+  const [printing, setPrinting] = useState(false);
   const [registrationError, setRegistrationError] = useState<string | null>(null);
   const { progress: offline, prepare } = useOfflineDownload();
   const skill = getSkill(skillId);
@@ -187,6 +196,10 @@ export const LearnPage: React.FC<LearnPageProps> = ({
     const items: UISkillPathItem[] = group.map((lesson) => {
       const stars = starsFor(lesson);
       const locked = !registered || !isUnlocked(lesson, completedLevels, viewer);
+      /* Asked after the prerequisite lock, and drawn instead of it. A lesson a
+         child has not earned yet is not something to sell them — "keep going"
+         is the honest answer, and it is the one the grey padlock gives. */
+      const premium = !locked && premiumLocked(lesson);
       return {
         id: lesson.ref,
         title: opts.practice ? practiceTitle(lesson.title) : lesson.title,
@@ -194,11 +207,13 @@ export const LearnPage: React.FC<LearnPageProps> = ({
         stars,
         state: locked
           ? "locked"
-          : lesson.ref === next?.ref
-            ? "current"
-            : stars > 0
-              ? "completed"
-              : "available",
+          : premium
+            ? "premium"
+            : lesson.ref === next?.ref
+              ? "current"
+              : stars > 0
+                ? "completed"
+                : "available",
       };
     });
 
@@ -259,9 +274,24 @@ export const LearnPage: React.FC<LearnPageProps> = ({
           under a mouse and not a target a thumb can hit. `ghost` keeps the
           light look it had; the size token brings the padding, the focus ring
           and the touch floor with it. */}
-      <UIButton variant="ghost" size="sm" icon={<ArrowLeft />} onClick={onBack}>
-        All skills
-      </UIButton>
+      <div className="flex items-center justify-between gap-3">
+        <UIButton variant="ghost" size="sm" icon={<ArrowLeft />} onClick={onBack}>
+          All skills
+        </UIButton>
+
+        {/* Only where there is something to print. An engine whose question is
+            a picture has nothing to put on paper, and a button that opens a
+            dialog to say so is worse than no button. */}
+        {lessons.some(canPrint) && (
+          <UIButton variant="secondary" size="sm" icon={<Printer />} onClick={() => setPrinting(true)}>
+            Print worksheet
+          </UIButton>
+        )}
+      </div>
+
+      {printing && (
+        <WorksheetDialog lessons={lessons} initial={next} onClose={() => setPrinting(false)} />
+      )}
 
       {/*
         * The shared skill card at `lg`, not a fifth hand-built header.
