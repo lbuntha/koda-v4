@@ -1,18 +1,20 @@
 """Mongo-backed registration and publication API for bundled skills."""
 
 from datetime import datetime
+from math import floor, isfinite
 from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends
 from pydantic import Field
 
 from app.deps import AUTHENTICATED, CurrentPrincipal, Db, require
-from app.errors import Forbidden, NotFound
+from app.errors import Forbidden, NotFound, PaymentRequired
 from app.models.auth import Principal
 from app.models.common import Model
 from app.repos import skills as skills_repo
 from app.repos import users as users_repo
 from app.security.permissions import principal_can
+from app.services.entitlements import has_feature
 
 router = APIRouter(prefix="/skills", tags=["skills"], dependencies=[AUTHENTICATED])
 
@@ -73,6 +75,13 @@ class RegisteredSkill(Model):
     )
 class SkillList(Model):
     skills: list[RegisteredSkill]
+
+
+class LessonAccess(Model):
+    skill_id: str = Field(alias="skillId")
+    lesson_id: str = Field(alias="lessonId")
+    tier: Literal["free", "premium"]
+    allowed: bool = True
 
 
 class PublicationWrite(Model):
@@ -138,9 +147,72 @@ def _out(row: dict[str, Any]) -> RegisteredSkill:
     )
 
 
+def _premium_position(row: dict[str, Any]) -> int | None:
+    """First premium lesson position, or None when this skill charges nothing."""
+    enabled = any(
+        feature.get("id") == "premium_lessons" and feature.get("isEnabled") is True
+        for feature in row.get("features") or []
+        if isinstance(feature, dict)
+    )
+    if not enabled:
+        return None
+    try:
+        raw = float((row.get("settings") or {}).get("freeLessons", 10))
+        free = max(0, floor(raw)) if isfinite(raw) else 0
+    except (TypeError, ValueError):
+        free = 0
+    return free + 1
+
+
 @router.get("")
 async def list_skills(db: Db, _: CanRead) -> SkillList:
     return SkillList(skills=[_out(row) for row in await skills_repo.list_all(db)])
+
+
+@router.get("/{skill_id}/lessons/{lesson_id}/access")
+async def lesson_access(
+    skill_id: str, lesson_id: str, db: Db, p: CurrentPrincipal
+) -> LessonAccess:
+    """Authorize the server-owned subscription boundary before a paid round.
+
+    The browser may describe a node as premium, but that claim grants nothing:
+    this route resolves the lesson and its position from Mongo, then asks the
+    effective (including expiry/status) subscription for the paid feature.
+    """
+    row = await skills_repo.get(db, skill_id)
+    if row is None:
+        raise NotFound(f'No registered skill "{skill_id}".', "skill_not_found")
+
+    lessons = row.get("lessons") or []
+    position = next(
+        (
+            index
+            for index, lesson in enumerate(lessons, start=1)
+            if isinstance(lesson, dict) and lesson.get("id") == lesson_id
+        ),
+        None,
+    )
+    if position is None:
+        raise NotFound(f'No lesson "{lesson_id}" in skill "{skill_id}".', "lesson_not_found")
+
+    premium_from = _premium_position(row)
+    premium = premium_from is not None and position >= premium_from
+    if premium and not await has_feature(
+        db,
+        p.family_id,
+        "course.premium",
+        staff=principal_can(p, "system:write"),
+    ):
+        raise PaymentRequired(
+            "This lesson needs a plan that includes the full course.",
+            "premium_lesson_required",
+        )
+
+    return LessonAccess(
+        skillId=skill_id,
+        lessonId=lesson_id,
+        tier="premium" if premium else "free",
+    )
 
 
 @router.patch("/{skill_id}/publication")

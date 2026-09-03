@@ -2,7 +2,7 @@
  * Synthesis Tutor - AI Math & Problem Solving Socratic Tutor
  */
 
-import React, { Suspense, lazy, useState, useEffect, useSyncExternalStore } from "react";
+import React, { Suspense, lazy, useState, useEffect, useRef, useSyncExternalStore } from "react";
 import {
   Megaphone,
   Sparkles,
@@ -39,7 +39,8 @@ import { Home } from "./components/Home";
 import { KodaFab } from "./components/KodaFab";
 import { UpgradePrompt } from "./components/UpgradePrompt";
 import { requireFeature } from "./lib/featureGate";
-import { PREMIUM_FEATURE, premiumLocked } from "./lib/premiumLessons";
+import { PREMIUM_FEATURE, isPremiumLesson, premiumLocked } from "./lib/premiumLessons";
+import { authorizeLesson } from "./lib/lessonAccess";
 import {
   loadCompletedLevels,
   loadProgress,
@@ -52,6 +53,7 @@ import { useSessionClock, useStudyGate } from "./lib/sessionTime";
 import { levelFromXp } from "./lib/level";
 import { publishLearnerFigures } from "./lib/profileStats";
 import { Billing } from "./lib/billing";
+import { ApiError } from "./lib/sync";
 import { refreshDeploymentRules } from "./lib/deploymentRules";
 import { BadgeAPI, earnedBadges } from "./lib/badges";
 import { LearnPage } from "./components/LearnPage";
@@ -307,6 +309,8 @@ export default function App() {
   const { soundEnabled, voiceEnabled } = PreferencesAPI.current();
   const { notice: systemNotice } = useSystem();
   const [activeLevelNumber, setActiveLevelNumber] = useState<number>(1);
+  const lessonStartInFlight = useRef(false);
+  const [lessonAccessError, setLessonAccessError] = useState<string | null>(null);
   /**
    * Whether the Learn tab is playing a round or offering the picker.
    *
@@ -340,7 +344,9 @@ export default function App() {
    * can overrun by one round's length. That is the humane reading and it is
    * deliberate.
    */
-  const startLesson = (levelNumber: number) => {
+  const startLesson = async (levelNumber: number) => {
+    if (lessonStartInFlight.current) return;
+    setLessonAccessError(null);
     /*
      * A lesson the plan does not cover is explained rather than opened.
      *
@@ -351,10 +357,41 @@ export default function App() {
      * is not first dropped onto an empty game screen.
      */
     const lesson = getLessonByLevel(levelNumber, viewer);
-    if (lesson && premiumLocked(lesson)) {
-      // `premiumLocked` has already asked the plan, so this only ever explains.
-      requireFeature(PREMIUM_FEATURE, () => {});
-      return;
+
+    /* A cached paid entitlement makes the path responsive and keeps it useful
+     * offline, but an online start is authorized again by the API. The server
+     * resolves the lesson tier itself and checks the effective subscription,
+     * including cancellation and expiry; the browser's label grants nothing. */
+    if (lesson) {
+      lessonStartInFlight.current = true;
+      try {
+        await authorizeLesson(lesson.skillId, lesson.id);
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 402) {
+          await Billing.refresh();
+          requireFeature(PREMIUM_FEATURE, () => {});
+          return;
+        }
+        if (error instanceof ApiError && error.isOffline && premiumLocked(lesson)) {
+          /* Offline cannot re-check an expired grant. Free accounts still get
+           * the useful plan explanation; a cached paid grant is the explicit
+           * offline licence and continues below. */
+          requireFeature(PREMIUM_FEATURE, () => {});
+          return;
+        }
+        const mayUseOffline =
+          error instanceof ApiError &&
+          error.isOffline &&
+          (!isPremiumLesson(lesson) || Billing.has(PREMIUM_FEATURE));
+        if (!mayUseOffline) {
+          setLessonAccessError(
+            error instanceof Error ? error.message : "Could not verify access to this lesson.",
+          );
+          return;
+        }
+      } finally {
+        lessonStartInFlight.current = false;
+      }
     }
 
     setActiveTab("game");
@@ -808,6 +845,12 @@ export default function App() {
               <Megaphone className="w-4 h-4 inline mr-1.5" />
               {systemNotice}
             </p>
+          </div>
+        )}
+
+        {lessonAccessError && (
+          <div className="mb-4">
+            <p className={themeSystem.flash("error")}>{lessonAccessError}</p>
           </div>
         )}
 

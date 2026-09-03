@@ -35,10 +35,9 @@ FREE_PLAN = "free"
 #: The two differ in where they are answered, which is worth knowing before
 #: adding a third. `ai.koda` is *refused*: the tutor proxy returns 402 and the
 #: learner route refuses a fourth child, so the device merely explains. There is
-#: nothing to refuse for `course.premium` — every lesson is bundled with the app
-#: and a round is played offline against no server — so the device is where it is
-#: answered, the way the learning path's own padlocks are. See
-#: `src/lib/premiumLessons.ts`.
+#: `course.premium` is refused by the lesson-access route before an online round
+#: opens. The device keeps the same decision for path labels and for explicitly
+#: supported offline play; see `src/lib/premiumLessons.ts`.
 PLAN_FEATURES: list[dict] = [
     {
         "featureId": "ai.koda",

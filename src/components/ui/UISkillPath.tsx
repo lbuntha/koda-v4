@@ -10,6 +10,8 @@ export interface UISkillPathItem {
   state: PathNodeState;
   /** Star count on a completed node. Omitted or 0 falls back to a tick. */
   stars?: number;
+  /** The course tier is separate from whether this account can open it. */
+  tier?: "free" | "premium";
 }
 
 export interface UISkillPathProps {
@@ -84,6 +86,8 @@ export const UISkillPath: React.FC<UISkillPathProps> = ({
            is what explains it — so only the prerequisite lock is `disabled`. */
         const premium = item.state === "premium";
         const stars = item.stars ?? 0;
+        const tierLabel =
+          item.tier === "premium" ? "Premium" : item.tier === "free" ? "Free" : null;
         return (
           <div
             key={item.id}
@@ -95,7 +99,7 @@ export const UISkillPath: React.FC<UISkillPathProps> = ({
               disabled={locked}
               onClick={() => onSelect(item.id)}
               title={item.title}
-              aria-label={`${item.title}${locked ? " (locked)" : premium ? " (on the plan)" : ""}`}
+              aria-label={`${item.title}${tierLabel ? ` (${tierLabel})` : ""}${locked ? " (locked)" : premium ? " (subscription required)" : ""}`}
               className={s.circle(item.state)}
             >
               {locked || premium ? (
@@ -126,6 +130,17 @@ export const UISkillPath: React.FC<UISkillPathProps> = ({
             </button>
 
             <span className={s.pathLabel(item.state)}>{item.title}</span>
+            {tierLabel && (
+              <span
+                className={`rounded-full border px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wide ${
+                  item.tier === "premium"
+                    ? "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-300"
+                    : "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"
+                }`}
+              >
+                {tierLabel}
+              </span>
+            )}
           </div>
         );
       })}

@@ -11,7 +11,7 @@ import {
   resumeLesson,
 } from "../curriculum";
 import { SkillRegistryAPI } from "../lib/skillRegistryApi";
-import { premiumLocked } from "../lib/premiumLessons";
+import { PREMIUM_FEATURE, isPremiumLesson } from "../lib/premiumLessons";
 import { canPrint } from "../lib/worksheet";
 import { WorksheetDialog } from "./WorksheetDialog";
 import { useBilling } from "../lib/useBilling";
@@ -77,8 +77,9 @@ export const LearnPage: React.FC<LearnPageProps> = ({
   const installed = useInstalledSkills();
   /* Subscribed, not read once: the padlocks below are drawn from the plan, and
      a family that upgrades in another tab has to see them open without
-     reloading. The value itself is unused — `premiumLocked` asks `Billing`. */
-  useBilling();
+     reloading. Keep the returned snapshot too, so every node in this render
+     answers from the same entitlement row. */
+  const plan = useBilling();
   const { registeredIds, register } = useSkillRegistrations();
   const [registering, setRegistering] = useState(false);
   const [printing, setPrinting] = useState(false);
@@ -156,6 +157,9 @@ export const LearnPage: React.FC<LearnPageProps> = ({
   const done = lessons.filter((lesson) => starsFor(lesson) > 0).length;
   const finished = done === lessons.length;
   const practiceDone = practice.filter((lesson) => starsFor(lesson) > 0).length;
+  const premiumLessons = lessons.filter(isPremiumLesson);
+  const freeLessons = lessons.length - premiumLessons.length;
+  const premiumIncluded = plan.has(PREMIUM_FEATURE);
 
   /*
    * Where "Continue" goes — and, on the path below, which stone wears the
@@ -199,15 +203,17 @@ export const LearnPage: React.FC<LearnPageProps> = ({
       /* Asked after the prerequisite lock, and drawn instead of it. A lesson a
          child has not earned yet is not something to sell them — "keep going"
          is the honest answer, and it is the one the grey padlock gives. */
-      const premium = !locked && premiumLocked(lesson);
+      const premium = isPremiumLesson(lesson);
+      const subscriptionLocked = !locked && premium && !premiumIncluded;
       return {
         id: lesson.ref,
         title: opts.practice ? practiceTitle(lesson.title) : lesson.title,
         icon: lesson.icon,
         stars,
+        tier: premium ? "premium" : "free",
         state: locked
           ? "locked"
-          : premium
+          : subscriptionLocked
             ? "premium"
             : lesson.ref === next?.ref
               ? "current"
@@ -364,8 +370,23 @@ export const LearnPage: React.FC<LearnPageProps> = ({
             icon={<Sparkles className="w-5 h-5" />}
             tint="bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600"
             title="Learning path"
-            blurb="Finish each lesson to unlock the next challenge."
+            blurb="Finish each lesson to unlock the next challenge. Your plan decides which premium lessons you can open."
           />
+
+          <div className="mt-4 flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-slate-50/80 p-3 dark:bg-slate-950/40">
+            <UIBadge variant="success">{freeLessons} Free</UIBadge>
+            {premiumLessons.length > 0 && (
+              <UIBadge variant="primary">{premiumLessons.length} Premium</UIBadge>
+            )}
+            <span className="text-xs text-muted sm:ml-auto">
+              <span className="font-bold text-ink">{plan.planName} plan</span>
+              {premiumLessons.length > 0
+                ? premiumIncluded
+                  ? " · Premium lessons included"
+                  : " · Free lessons are open; premium lessons require an upgrade"
+                : " · Every lesson is free"}
+            </span>
+          </div>
 
           <div className="mt-4 space-y-6">{teaching.map((unit) => unitPath(unit))}</div>
 

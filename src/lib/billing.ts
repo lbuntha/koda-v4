@@ -85,6 +85,11 @@ export const FREE_ENTITLEMENTS: Entitlements = {
 const CACHE_KEY = "koda_entitlements_v1";
 
 let current: Entitlements | null = null;
+/* The in-memory row is just as account-scoped as the localStorage cache.
+ * Without its owner beside it, signing out could leave a paid family's row in
+ * memory and the signed-out/free experience would keep passing feature gates
+ * until the page was reloaded. */
+let currentSubject: string | null = null;
 let version = 0;
 const listeners = new Set<() => void>();
 
@@ -124,8 +129,8 @@ export const Billing = {
 
   /** The plan in force, as far as this device knows. */
   current(): Entitlements {
-    if (current) return current;
     const key = subject();
+    if (current && currentSubject === key) return current;
     return (key && readCache(key)) || FREE_ENTITLEMENTS;
   },
 
@@ -137,11 +142,15 @@ export const Billing = {
   /** Re-read from the server. Never throws — offline keeps the last answer. */
   async refresh(): Promise<Entitlements> {
     try {
+      const key = subject();
       const token = await accessToken();
       if (!token) return Billing.current();
       const row = await request<Entitlements>("/billing/me", { token });
+      /* An account change while this request was in flight must not install the
+       * previous family's plan into the new account's memory slot. */
+      if (subject() !== key) return Billing.current();
       current = row;
-      const key = subject();
+      currentSubject = key;
       if (key) writeCache(key, row);
       notify();
       return row;
@@ -155,6 +164,7 @@ export const Billing = {
   adopt(row: Entitlements): void {
     current = row;
     const key = subject();
+    currentSubject = key;
     if (key) writeCache(key, row);
     notify();
   },
@@ -162,6 +172,7 @@ export const Billing = {
   /** Forget it on sign-out, so the next account never inherits this plan. */
   clear(): void {
     current = null;
+    currentSubject = null;
     notify();
   },
 

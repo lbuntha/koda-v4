@@ -20,12 +20,9 @@ import { SkillStoreAPI } from "./skillStore";
  *  - **Is it locked?** That, and this family's plan. What a padlock draws.
  *  - **May they open it?** `requireFeature`, which also explains the answer.
  *
- * None of this is enforcement, and it cannot be. Lessons are bundled with the
- * app and a round is played offline against no server — there is no request to
- * refuse. What the plan actually buys is what the app *offers*, which is the
- * same bargain the padlocks on the learning path already make. Anything that
- * must be enforced (adding a learner, calling the tutor) is refused server-side
- * and always was; see `services/entitlements.py`.
+ * These helpers decide what the path draws and provide the offline fallback.
+ * Online starts are authorized separately by the lesson-access API, which
+ * resolves the tier from Mongo and checks the effective subscription itself.
  */
 
 /** The plan feature that opens the paid lessons. Declared in `plan_defaults.py`. */

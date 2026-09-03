@@ -1,6 +1,12 @@
 """Skill registration is deployment data; publication survives restarts."""
 
+from datetime import timedelta
+
+from app.models.common import now
+from app.plan_defaults import DEFAULT_PLANS
+from app.repos import plans as plans_repo
 from app.repos import skills as skills_repo
+from app.repos import subscriptions as subs_repo
 from app.repos import users
 from app.security import passwords
 from app.skill_defaults import load_defaults
@@ -155,6 +161,68 @@ async def test_family_can_read_but_cannot_publish(client, db, signup_body):
         headers=auth,
     )
     assert refused_config.status_code == 403
+
+
+async def test_lesson_access_is_decided_by_the_effective_subscription(
+    client, db, signup_body
+):
+    skill = _bundled("counting")
+    skill["features"] = [
+        {
+            **feature,
+            "isEnabled": True,
+        }
+        if feature.get("id") == "premium_lessons"
+        else feature
+        for feature in skill["features"]
+    ]
+    skill["settings"] = {**skill["settings"], "freeLessons": 1}
+    await skills_repo.seed_default(db, skill)
+    for plan in DEFAULT_PLANS:
+        await plans_repo.seed_default(db, plan)
+
+    tokens = (await client.post("/auth/signup", json=signup_body())).json()
+    auth = {"Authorization": f"Bearer {tokens['accessToken']}"}
+    me = (await client.get("/auth/me", headers=auth)).json()
+    first, second = skill["lessons"][:2]
+
+    free = await client.get(
+        f"/skills/counting/lessons/{first['id']}/access", headers=auth
+    )
+    assert free.status_code == 200, free.text
+    assert free.json()["tier"] == "free"
+
+    refused = await client.get(
+        f"/skills/counting/lessons/{second['id']}/access", headers=auth
+    )
+    assert refused.status_code == 402, refused.text
+    assert refused.json()["error"]["code"] == "premium_lesson_required"
+
+    await subs_repo.set_plan(
+        db,
+        me["familyId"],
+        plan_id="family",
+        status="active",
+        current_period_end=now() + timedelta(days=30),
+        actor_id="test",
+    )
+    paid = await client.get(
+        f"/skills/counting/lessons/{second['id']}/access", headers=auth
+    )
+    assert paid.status_code == 200, paid.text
+    assert paid.json()["tier"] == "premium"
+
+
+async def test_lesson_access_rejects_unknown_lessons(client, db, signup_body):
+    await skills_repo.seed_default(db, _bundled("counting"))
+    tokens = (await client.post("/auth/signup", json=signup_body())).json()
+    auth = {"Authorization": f"Bearer {tokens['accessToken']}"}
+
+    missing = await client.get(
+        "/skills/counting/lessons/not-a-lesson/access", headers=auth
+    )
+    assert missing.status_code == 404
+    assert missing.json()["error"]["code"] == "lesson_not_found"
 
 
 async def test_operator_saves_the_complete_skill_manager_configuration(client, db):
