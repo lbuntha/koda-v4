@@ -398,7 +398,37 @@ async function compress(wav, outPath) {
   return outPath;
 }
 
+/**
+ * A rate limit is a wait, not a failure.
+ *
+ * The free tier allows a handful of requests a minute, and this loop is
+ * sequential with no pacing, so a run of sixty-four hits the limit within
+ * seconds. Without a retry each 429 burned its phrase — the run "succeeded",
+ * most lines were quietly left to live TTS, and the only way to find out was to
+ * run it again and watch the missing count barely move.
+ *
+ * Depleted credits are a different answer to the same code and cannot be waited
+ * out, so they stop the run rather than sleeping through five doublings first.
+ */
+const RETRIES = 5;
+const isRateLimit = (error) => /429|RESOURCE_EXHAUSTED|rate limit/i.test(error?.message ?? "");
+const isOutOfCredit = (error) => /credit|billing|prepayment/i.test(error?.message ?? "");
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 async function record(ai, phrase, voice = VOICE) {
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      return await generate(ai, phrase, voice);
+    } catch (error) {
+      if (isOutOfCredit(error) || !isRateLimit(error) || attempt >= RETRIES) throw error;
+      const pause = 2 ** attempt * 2000;
+      console.log(`      rate limited, waiting ${pause / 1000}s`);
+      await wait(pause);
+    }
+  }
+}
+
+async function generate(ai, phrase, voice = VOICE) {
   const response = await ai.models.generateContent({
     model: MODEL,
     contents: [{ parts: [{ text: `${DIRECTION}${phrase}` }] }],
