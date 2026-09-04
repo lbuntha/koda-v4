@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { getCourseLessons, isPracticeLesson, resumeLesson } from "./index";
+import {
+  getCourseLessons,
+  getSkillLessons,
+  isPracticeLesson,
+  nextSkillLesson,
+  resumeLesson,
+  skillLessonNumber,
+} from "./index";
 import type { ResolvedLesson } from "./index";
 import type { Viewer } from "../skills/viewer";
 
@@ -154,5 +161,38 @@ describe("resumeLesson", () => {
 
     expect(resumeLesson(alpha, completed, viewer, unplaced)).toBeUndefined();
     expect(resumeLesson(beta, completed, viewer, unplaced)?.levelNumber).toBe(4);
+  });
+});
+
+describe("sequential lessons within a skill", () => {
+  it("starts each skill's displayed lesson count at one", () => {
+    const firstCounting = getSkillLessons("counting", viewer)[0];
+    const firstAddition = getSkillLessons("addition", viewer)[0];
+
+    expect(firstCounting).toBeDefined();
+    expect(firstAddition).toBeDefined();
+    expect(firstAddition.levelNumber).toBeGreaterThan(firstCounting.levelNumber);
+    expect(skillLessonNumber(firstCounting, viewer)).toBe(1);
+    expect(skillLessonNumber(firstAddition, viewer)).toBe(1);
+  });
+
+  it("chooses the immediate next lesson from the same skill", () => {
+    const addition = getSkillLessons("addition", viewer).filter(
+      (lesson) => !isPracticeLesson(lesson),
+    );
+    const current = addition[3];
+    const next = nextSkillLesson(current, viewer);
+
+    expect(next?.ref).toBe(addition[4].ref);
+    expect(next?.skillId).toBe("addition");
+    expect(skillLessonNumber(next!, viewer)).toBe(skillLessonNumber(current, viewer) + 1);
+  });
+
+  it("stops at the end of teaching instead of jumping into practice", () => {
+    const countingTeaching = getSkillLessons("counting", viewer).filter(
+      (lesson) => !isPracticeLesson(lesson),
+    );
+
+    expect(nextSkillLesson(countingTeaching[countingTeaching.length - 1], viewer)).toBeUndefined();
   });
 });

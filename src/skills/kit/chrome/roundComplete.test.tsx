@@ -101,4 +101,11 @@ describe("the headline names what happened", () => {
 
     expect(screen.getByText("Lesson 7 · Count the Row")).toBeTruthy();
   });
+
+  it("returns to the lesson list when the skill path is complete", () => {
+    draw({ nextLevelNumber: undefined });
+
+    expect(screen.getByText("BACK TO LESSONS")).toBeTruthy();
+    expect(screen.queryByText(/NEXT LESSON/)).toBeNull();
+  });
 });

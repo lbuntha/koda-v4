@@ -129,11 +129,19 @@ export function buildQuestion(setup: ObjectHuntSetup, index: number): ObjectHunt
   const placedObjects = placeObjects(scene, shuffled([...targetObjects, ...distractors], `${seed}:display`), `${seed}:locations`);
   const rotationSteps = [45, -60, 90, -120, 135, 180];
   const scaleSteps = [0.72, 0.84, 0.96, 1.08, 1.2];
+  // The transform a level teaches has to reach the distractors too. Rotating
+  // only the answers turns "find the turned object" into "find the one that
+  // looks different", which needs no shape matching at all — and is the
+  // shrinking-targets anti-pattern the build plan opens its risk list with.
   const objects = placedObjects.map((object) => {
-    if (!targetIds.has(keyOf(object))) return object;
-    if (mode === "rotation") return { ...object, rotation: rotationSteps[hash(`${seed}:${object.id}:rotation`) % rotationSteps.length] };
-    if (mode === "scale") return { ...object, visualScale: scaleSteps[hash(`${seed}:${object.id}:scale`) % scaleSteps.length] };
-    if (mode === "occluded") return { ...object, visibleFraction: 0.72 };
+    const key = keyOf(object);
+    if (mode === "rotation") return { ...object, rotation: rotationSteps[hash(`${seed}:${key}:rotation`) % rotationSteps.length] };
+    if (mode === "scale") return { ...object, visualScale: scaleSteps[hash(`${seed}:${key}:scale`) % scaleSteps.length] };
+    // Targets are always partly hidden; enough distractors join them that being
+    // occluded is not itself the clue.
+    if (mode === "occluded" && (targetIds.has(key) || hash(`${seed}:${key}:occlude`) % 3 > 0)) {
+      return { ...object, visibleFraction: 0.72 };
+    }
     return object;
   });
   const targets = targetObjects.map(keyOf);
@@ -367,14 +375,18 @@ export const ObjectHunt: React.FC<ActivityProps<ObjectHuntParams>> = ({ params, 
                 transition={isCelebrating && motionOK ? { type: "spring", stiffness: 520, damping: 22, mass: .65 } : { ...SPRING.enter, delay: stagger(index, .045, .35) }}
                 className="absolute grid cursor-pointer place-items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
                 style={{ left: `${object.x - object.hitPadding}%`, top: `${object.y - object.hitPadding}%`, width: `${object.width + object.hitPadding * 2}%`, height: `${object.height + object.hitPadding * 2}%`, zIndex: object.z }}>
+                {/* Size, fade, and camouflage are scene-wide. Applying them to
+                    the answers alone made every target the one small washed-out
+                    thing on screen, which a child solves without looking at a
+                    shape. Found objects return to full opacity as the reward. */}
                 <span data-visual-scale={isTarget ? "target" : "ordinary"} className="pointer-events-none grid h-full w-full place-items-center transition-transform duration-200"
-                  style={isTarget ? {
+                  style={{
                     transform: `scale(${question.targetScale * (object.visualScale ?? 1)})`,
                     opacity: isFound ? 1 : .85,
                     filter: `saturate(${1 - question.camouflageStrength * .55}) contrast(${1 - question.camouflageStrength * .18})`,
                     mixBlendMode: question.camouflageStrength >= .16 ? "multiply" : "normal",
                     clipPath: object.visibleFraction < 1 ? `inset(0 0 ${(1 - object.visibleFraction) * 100}% 0)` : undefined,
-                  } : undefined}><SvgAsset id={object.asset} size="100%" className={PREMIUM_ART_CLASS} /></span>
+                  }}><SvgAsset id={object.asset} size="100%" className={PREMIUM_ART_CLASS} /></span>
                 {isCelebrating && motionOK && <MatchBurst />}
               </motion.button>
             );

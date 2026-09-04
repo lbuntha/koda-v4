@@ -255,7 +255,7 @@ for (const [theme, id, name, place, variant] of sceneDefs) {
   const names = theme === "beach" ? ["shell","sunglasses","crab","bucket","sunscreen","sun-hat","beach-ball","sandal","camera","kite"] : packs[theme];
   const objects = names.map((item, i) => ({
     id: `${theme}-${item}`, asset: `observation-${theme}-${item}`, x: slots[i][0], y: slots[i][1], width: 8,
-    height: 10, rotation: ((i * 7 + variant * 5) % 19) - 9, z: 3 + (i % 3), hitPadding: 2,
+    height: 10, rotation: ((i * 7 + variant * 5) % 19) - 9, z: 3 + (i % 3), hitPadding: 3,
     visibleFraction: 1, tags: [theme, "environment-anchor"], region: slots[i][2],
   }));
   await fs.writeFile(path.join(scenes, `${theme}-${id}.json`), `${JSON.stringify({
@@ -276,7 +276,7 @@ for (const [theme, id, name, place, variant] of sceneDefs) {
 const jitter = (n, spread) => (((Math.imul(n + 1, 2654435761) >>> 0) % (spread * 200 + 1)) / 100) - spread;
 const swarmGrid = [];
 let slotSeed = 0;
-for (const y of [8, 30, 52, 70]) {
+for (const y of [6, 28, 50, 72]) {
   for (const x of [5, 24, 43, 62, 81]) {
     const px = +(x + jitter(slotSeed, 3)).toFixed(2);
     const py = +(y + jitter(slotSeed + 97, 3)).toFixed(2);
@@ -301,7 +301,7 @@ await fs.writeFile(path.join(assets, "scene-castle-frog-moat.svg"), sceneSvg("ca
       ...(isFrog ? { instanceId: `castle-frog-${frog}` } : {}),
       asset: `observation-castle-${item}`,
       x: slot[0], y: slot[1], width: 8, height: 10,
-      rotation: ((i * 11) % 15) - 7, z: 3 + (i % 3), hitPadding: 2,
+      rotation: ((i * 11) % 15) - 7, z: 3 + (i % 3), hitPadding: 3,
       visibleFraction: 1, tags: ["castle", "environment-anchor"], region: slot[2],
     };
   });

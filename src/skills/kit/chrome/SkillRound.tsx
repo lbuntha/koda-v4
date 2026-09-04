@@ -115,6 +115,8 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
   const subtitle =
     lesson?.concept && lesson.practice ? withoutPracticeLabel(lesson.concept) : lesson?.concept;
   const levelNumber = lesson?.levelNumber ?? 1;
+  const lessonNumber = lesson?.lessonNumber ?? levelNumber;
+  const nextLesson = koda.ui.nextLesson;
 
   /*
    * Whether the step is framed as warm-up / challenge / milestone.
@@ -226,7 +228,7 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
         koda={koda}
         title={title}
         subtitle={subtitle}
-        levelNumber={lesson?.levelNumber}
+        levelNumber={lesson ? lessonNumber : undefined}
         iconName={iconName}
         iconTone={iconTone}
         questionIndex={round.index}
@@ -255,7 +257,7 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
             hintCount={hints.length}
             hintPanelId={HINT_PANEL_ID}
             onReadAloud={onReadAloud}
-            levelNumber={levelNumber}
+            levelNumber={lessonNumber}
             contextTag={showsStepTag ? contextTag : null}
             tagLabels={tagLabels}
           />
@@ -318,16 +320,16 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
 
       {round.score && (
         <PracticeRoundCompleteModal
-          levelNumber={levelNumber}
+          levelNumber={lessonNumber}
           levelTitle={title}
           totalLessons={lesson?.totalLessons}
           stars={round.score.stars}
           xpWon={round.score.xp}
           perfect={round.score.perfect}
           standing={standing}
-          nextLevelNumber={levelNumber + 1}
+          nextLevelNumber={nextLesson?.lessonNumber}
           recommendation={recommendation}
-          onNextLevel={onNextLevel ?? onExit}
+          onNextLevel={onNextLevel ?? nextLesson?.open ?? onExit}
           onPracticeAgain={onPracticeAgain ?? round.restart}
         />
       )}

@@ -52,14 +52,18 @@ export function seededShuffle<T>(items: readonly T[], seed: string): T[] {
 }
 
 /**
- * A full permutation with no object left on its own slot.
+ * A permutation that keeps a group looking different question to question.
  *
- * A plain shuffle leaves fixed points, and a fixed point is an object that did
- * not move this question — exactly the thing a child notices. Rotating the
- * cycle that contains each fixed point clears it without disturbing the rest.
+ * With three or more slots the permutation is deranged: no object stays put,
+ * because a fixed point is an object that visibly did not move. A pair has only
+ * one derangement — the swap — so forcing it there would pin both objects to a
+ * single alternate spot forever, which is the same freeze in miniature. Pairs
+ * therefore alternate between swapping and holding, giving two arrangements
+ * rather than one.
  */
 function derange(count: number, seed: string): number[] {
   if (count < 2) return [0];
+  if (count === 2) return seededRandom(seed)() < 0.5 ? [1, 0] : [0, 1];
   const order = seededShuffle(Array.from({ length: count }, (_, i) => i), seed);
   for (let i = 0; i < count; i += 1) {
     if (order[i] !== i) continue;

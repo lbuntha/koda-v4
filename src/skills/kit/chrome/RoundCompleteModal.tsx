@@ -11,7 +11,8 @@ interface PracticeRoundCompleteModalProps {
   /** Stars earned, 1–3. */
   stars: number;
   xpWon: number;
-  nextLevelNumber: number;
+  /** Undefined when the current skill path has no following lesson. */
+  nextLevelNumber?: number;
   onNextLevel: () => void;
   onPracticeAgain: () => void;
   /**
@@ -285,7 +286,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
               onClick={onNextLevel}
               className="w-full py-3.5 px-6 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-mono font-black text-sm tracking-wide shadow-lg hover:shadow-orange-500/20 active:scale-[0.98] transition-all transform flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>NEXT LESSON ({nextLevelNumber})</span>
+              <span>{nextLevelNumber ? `NEXT LESSON (${nextLevelNumber})` : "BACK TO LESSONS"}</span>
               <ArrowRight className="w-4 h-4 stroke-[3]" />
             </button>
           )}
@@ -302,7 +303,9 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
             <RotateCcw className="w-3.5 h-3.5" />
             <span>
               {recommendation?.kind === "practise" || recommendation?.kind === "review"
-                ? `Skip to Lesson ${nextLevelNumber}`
+                ? nextLevelNumber
+                  ? `Skip to Lesson ${nextLevelNumber}`
+                  : "Back to lessons"
                 : "Practice Again"}
             </span>
           </button>

@@ -162,8 +162,8 @@
           "objectCount": 10,
           "targetCount": 3,
           "questionsPerRound": 5,
-          "targetScale": 0.62,
-          "camouflageStrength": 0.28
+          "targetScale": 0.74,
+          "camouflageStrength": 0.3
         },
         "play": {
           "mode": "object_hunt",
@@ -218,8 +218,8 @@
           "objectCount": 10,
           "targetCount": 3,
           "questionsPerRound": 5,
-          "targetScale": 0.58,
-          "camouflageStrength": 0.32
+          "targetScale": 0.74,
+          "camouflageStrength": 0.36
         },
         "play": {
           "mode": "object_hunt",
@@ -270,8 +270,8 @@
           "objectCount": 10,
           "targetCount": 3,
           "questionsPerRound": 5,
-          "targetScale": 0.54,
-          "camouflageStrength": 0.5
+          "targetScale": 0.72,
+          "camouflageStrength": 0.52
         },
         "play": {
           "mode": "object_hunt",
@@ -320,8 +320,8 @@
           "objectCount": 10,
           "targetCount": 4,
           "questionsPerRound": 5,
-          "targetScale": 0.5,
-          "camouflageStrength": 0.54
+          "targetScale": 0.72,
+          "camouflageStrength": 0.56
         },
         "play": {
           "mode": "object_hunt",
@@ -370,8 +370,8 @@
           "objectCount": 10,
           "targetCount": 4,
           "questionsPerRound": 5,
-          "targetScale": 0.47,
-          "camouflageStrength": 0.57
+          "targetScale": 0.7,
+          "camouflageStrength": 0.6
         },
         "play": {
           "mode": "object_hunt",
@@ -420,8 +420,8 @@
           "objectCount": 10,
           "targetCount": 5,
           "questionsPerRound": 5,
-          "targetScale": 0.45,
-          "camouflageStrength": 0.6
+          "targetScale": 0.7,
+          "camouflageStrength": 0.66
         },
         "play": {
           "mode": "object_hunt",
@@ -469,8 +469,8 @@
           "objectCount": 10,
           "targetCount": 4,
           "questionsPerRound": 5,
-          "targetScale": 0.5,
-          "camouflageStrength": 0.5
+          "targetScale": 0.7,
+          "camouflageStrength": 0.62
         },
         "play": {
           "mode": "object_hunt",
@@ -518,8 +518,8 @@
           "objectCount": 18,
           "swarmCount": 12,
           "questionsPerRound": 5,
-          "targetScale": 0.44,
-          "camouflageStrength": 0.52
+          "targetScale": 0.68,
+          "camouflageStrength": 0.62
         },
         "play": {
           "mode": "object_hunt",
@@ -578,8 +578,8 @@
           "objectCount": 10,
           "targetCount": 5,
           "questionsPerRound": 5,
-          "targetScale": 0.42,
-          "camouflageStrength": 0.64
+          "targetScale": 0.68,
+          "camouflageStrength": 0.72
         },
         "play": {
           "mode": "object_hunt",
@@ -656,8 +656,8 @@
           "objectCount": 10,
           "targetCount": 1,
           "questionsPerRound": 10,
-          "targetScale": 0.48,
-          "camouflageStrength": 0.48
+          "targetScale": 0.7,
+          "camouflageStrength": 0.58
         },
         "play": {
           "mode": "practice",

@@ -184,6 +184,8 @@ export interface KodaSDK {
   ui: {
     readonly theme: "light" | "dark";
     exit(): void;
+    /** The actual next lesson in this skill, or null at the end of its path. */
+    readonly nextLesson: { lessonNumber: number; open(): void } | null;
   };
 }
 
@@ -212,7 +214,9 @@ export interface ActivityLesson {
    * one, the way Home already uses it.
    */
   levelNumber: number;
-  /** How many lessons the course has, so a position can be read as one. */
+  /** Learner-facing position inside this skill. */
+  lessonNumber?: number;
+  /** How many lessons this skill has, so a position can be read as one. */
   totalLessons?: number;
   /**
    * Whether this lesson is practice rather than teaching.

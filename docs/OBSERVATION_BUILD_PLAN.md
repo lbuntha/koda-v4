@@ -204,7 +204,11 @@ standard. Each lesson uses its concept key as a non-empty `trajectoryLevel`.
   85% opacity; found previews return to 100% opacity.
 - On desktop the activity is capped at 760px wide so the scene and hidden objects remain
   compact. The percentage-based scene layout still fills narrow mobile screens.
-- Every effective target area is at least 44×44 CSS pixels.
+- Every effective target area is at least **44 CSS pixels wide** at a 360px viewport
+  (14% of the scene box). Height reaches 38px, not 44: the scene is authored 4:3, so at
+  360px it is only ~237px tall and a 16%-tall hit box cannot reach 44 without overlapping
+  its neighbours. Closing the remaining 6px needs a taller scene on narrow screens, which
+  means re-authoring the 1000×750 backdrops — deliberately out of scope for v1.
 - Wrong taps use a neutral ripple; hints use a broad search region, never the exact hit box.
 
 ### Feedback and sound ownership
@@ -440,7 +444,7 @@ Draw at least 200 questions per lesson configuration and prove:
 1. every target exists exactly once;
 2. targets remain in bounds and meet the visible-fraction range;
 3. selectable hit areas do not overlap;
-4. targets retain a 44×44 CSS-pixel effective hit area at 360px;
+4. every placement retains a 44 CSS-pixel-wide effective hit area at 360px;
 5. look-alikes differ by a meaningful visible feature;
 6. silhouette targets have one unambiguous contour match;
 7. scale/rotation preserve authored centers and bounds;
@@ -451,7 +455,9 @@ Draw at least 200 questions per lesson configuration and prove:
 12. retries are bounded with a constructive fallback; and
 13. questions reproduce from params and index for StrictMode, tests, and bug reports;
 14. consecutive questions never produce the same arrangement; and
-15. an object reused across a round lands somewhere new rather than staying put.
+15. an object reused across a round lands somewhere new rather than staying put;
+16. size, fade, and camouflage are scene-wide, never applied to targets alone; and
+17. the transform a level teaches reaches its distractors too.
 
 ## 7. Repository shape and contract compliance
 
@@ -758,7 +764,12 @@ practice in its own unit. Data tests cover every invariant in §6.
 
 ## 13. Development risks
 
-1. Do not make difficulty by shrinking targets.
+1. Do not make difficulty by shrinking targets. This is the easiest rule in the list to
+   break by accident: applying scale, opacity, or camouflage to `isTarget` alone makes every
+   answer the one small washed-out thing on screen, and rotating or clipping only the targets
+   turns "find the turned object" into "find the odd one out". Difficulty belongs in
+   camouflage strength, distractor count, decoy similarity, and occlusion — all of which
+   apply to the whole scene.
 2. Reject ambiguous targets and overlapping hit areas.
 3. Keep found targets visible.
 4. Do not rely on colour alone.

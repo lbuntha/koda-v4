@@ -167,6 +167,7 @@ export function createFakeKoda(options: FakeKodaOptions = {}): FakeKoda {
     ui: {
       theme: options.theme ?? "light",
       exit: () => record("ui.exit"),
+      nextLesson: null,
     },
   };
 

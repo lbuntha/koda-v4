@@ -13,7 +13,7 @@
       "height": 10,
       "rotation": -4,
       "z": 3,
-      "hitPadding": 2,
+      "hitPadding": 3,
       "visibleFraction": 1,
       "tags": [
         "farm",
@@ -30,7 +30,7 @@
       "height": 10,
       "rotation": 3,
       "z": 4,
-      "hitPadding": 2,
+      "hitPadding": 3,
       "visibleFraction": 1,
       "tags": [
         "farm",
@@ -47,7 +47,7 @@
       "height": 10,
       "rotation": -9,
       "z": 5,
-      "hitPadding": 2,
+      "hitPadding": 3,
       "visibleFraction": 1,
       "tags": [
         "farm",
@@ -64,7 +64,7 @@
       "height": 10,
       "rotation": -2,
       "z": 3,
-      "hitPadding": 2,
+      "hitPadding": 3,
       "visibleFraction": 1,
       "tags": [
         "farm",
@@ -81,7 +81,7 @@
       "height": 10,
       "rotation": 5,
       "z": 4,
-      "hitPadding": 2,
+      "hitPadding": 3,
       "visibleFraction": 1,
       "tags": [
         "farm",
@@ -98,7 +98,7 @@
       "height": 10,
       "rotation": -7,
       "z": 5,
-      "hitPadding": 2,
+      "hitPadding": 3,
       "visibleFraction": 1,
       "tags": [
         "farm",
@@ -115,7 +115,7 @@
       "height": 10,
       "rotation": 0,
       "z": 3,
-      "hitPadding": 2,
+      "hitPadding": 3,
       "visibleFraction": 1,
       "tags": [
         "farm",
@@ -132,7 +132,7 @@
       "height": 10,
       "rotation": 7,
       "z": 4,
-      "hitPadding": 2,
+      "hitPadding": 3,
       "visibleFraction": 1,
       "tags": [
         "farm",
@@ -149,7 +149,7 @@
       "height": 10,
       "rotation": -5,
       "z": 5,
-      "hitPadding": 2,
+      "hitPadding": 3,
       "visibleFraction": 1,
       "tags": [
         "farm",
@@ -166,7 +166,7 @@
       "height": 10,
       "rotation": 2,
       "z": 3,
-      "hitPadding": 2,
+      "hitPadding": 3,
       "visibleFraction": 1,
       "tags": [
         "farm",

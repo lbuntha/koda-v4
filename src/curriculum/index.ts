@@ -137,6 +137,31 @@ export function getSkillLessons(skillId: string, viewer?: Viewer): ResolvedLesso
   return getCourseLessons(viewer).filter((l) => l.skillId === skillId);
 }
 
+/** Learner-facing position inside a skill, rather than inside the whole course. */
+export function skillLessonNumber(lesson: ResolvedLesson, viewer?: Viewer): number {
+  const at = getSkillLessons(lesson.skillId, viewer).findIndex(
+    (candidate) => candidate.ref === lesson.ref,
+  );
+  return at < 0 ? lesson.levelNumber : at + 1;
+}
+
+/**
+ * The lesson immediately after this one in the same skill and the same path.
+ * Teaching never spills into optional practice; practice advances through
+ * practice only.
+ */
+export function nextSkillLesson(
+  lesson: ResolvedLesson,
+  viewer?: Viewer,
+): ResolvedLesson | undefined {
+  const practice = isPracticeLesson(lesson);
+  const path = getSkillLessons(lesson.skillId, viewer).filter(
+    (candidate) => isPracticeLesson(candidate) === practice,
+  );
+  const at = path.findIndex((candidate) => candidate.ref === lesson.ref);
+  return at < 0 ? undefined : path[at + 1];
+}
+
 /**
  * Every concept the learner has already been through at least once.
  *

@@ -4,6 +4,7 @@ import { placeObjects, seedHash, seededShuffle } from "./internal/placement";
 import { SCENES, SCENE_BY_ID } from "./internal/scenes";
 import { validateScene } from "./internal/validation";
 import { keyOf } from "./internal/types";
+import lessons from "./lessons.json";
 
 const layoutOf = (objects: { x: number; y: number }[], keys: string[]) =>
   objects.map((object, i) => `${keys[i]}@${object.x.toFixed(2)},${object.y.toFixed(2)}`).sort().join(" ");
@@ -65,15 +66,26 @@ describe("hidden object placement", () => {
     });
   });
 
-  it("never leaves an object on the slot it came from", () => {
+  it("keeps most objects off the slot they came from, and never pins one", () => {
     const scene = SCENE_BY_ID.get("beach-sandcastle-shore")!;
+    const spots = new Map<string, Set<string>>();
+    let stayed = 0;
+    let moves = 0;
     for (let index = 1; index <= 12; index += 1) {
-      const placed = placeObjects(scene, scene.objects, `derange-${index}`);
-      placed.forEach((object, i) => {
+      placeObjects(scene, scene.objects, `derange-${index}`).forEach((object, i) => {
         const home = scene.objects[i];
-        expect(`${object.x},${object.y}`, `${home.id} q${index}`).not.toBe(`${home.x},${home.y}`);
+        moves += 1;
+        if (object.x === home.x && object.y === home.y) stayed += 1;
+        const key = home.id;
+        if (!spots.has(key)) spots.set(key, new Set());
+        spots.get(key)!.add(`${object.x},${object.y}`);
       });
     }
+    // Slots grouped in threes or more are deranged outright; a pair alternates
+    // between swapping and holding, so a few holds are expected — what must not
+    // happen is any object being stuck on one spot for the whole round.
+    expect(stayed / moves).toBeLessThan(0.25);
+    spots.forEach((seen, id) => expect(seen.size, id).toBeGreaterThan(1));
   });
 
   it("keeps an object inside the region its scene authored for it", () => {
@@ -104,5 +116,50 @@ describe("hidden object placement", () => {
       return layoutOf(question.objects, question.objects.map(keyOf));
     });
     expect(new Set(layouts).size).toBe(layouts.length);
+  });
+});
+
+describe("targets do not give themselves away", () => {
+  it("transforms distractors the same way as targets in every taught mode", () => {
+    const modes = [
+      ["rotation", (o: { rotation?: number }) => (o.rotation ?? 0) !== 0],
+      ["scale", (o: { visualScale?: number }) => o.visualScale !== undefined],
+    ] as const;
+    modes.forEach(([mode, transformed]) => {
+      const question = buildQuestion({ seed: `tell-${mode}`, mode, sceneIds: ["museum-planetarium"], objectCount: 10, targetCount: 3 }, 1);
+      const decoys = question.objects.filter((object) => !question.targets.includes(keyOf(object)));
+      // If only the answers were turned or resized, "find the odd one out" wins
+      // and no shape matching is needed.
+      expect(decoys.length).toBeGreaterThan(0);
+      expect(decoys.every(transformed), mode).toBe(true);
+    });
+  });
+
+  it("hides some distractors too, so being clipped is not the clue", () => {
+    const question = buildQuestion({ seed: "tell-occluded", mode: "occluded", sceneIds: ["harbor-harbor-docks"], objectCount: 10, targetCount: 4 }, 1);
+    const decoys = question.objects.filter((object) => !question.targets.includes(keyOf(object)));
+    const clipped = decoys.filter((object) => object.visibleFraction < 1);
+    expect(question.objects.filter((o) => question.targets.includes(keyOf(o))).every((o) => o.visibleFraction === 0.72)).toBe(true);
+    expect(clipped.length).toBeGreaterThan(0);
+  });
+
+  it("keeps every level's art large enough to recognise on a phone", () => {
+    const SCENE_W = 316; const SCENE_H = 237; // 360px viewport, less padding and border
+    lessons.lessons.forEach((lesson) => {
+      const q = lesson.params.question as { targetScale?: number };
+      const scale = q.targetScale ?? 0.66;
+      // 8% x 10% of the scene box is the authored art size.
+      const visible = { w: 0.08 * SCENE_W * scale, h: 0.10 * SCENE_H * scale };
+      expect(visible.w, `${lesson.id} width`).toBeGreaterThanOrEqual(13);
+      expect(visible.h, `${lesson.id} height`).toBeGreaterThanOrEqual(13);
+    });
+  });
+
+  it("gives every placement a tap target at least 44 CSS px wide at 360px", () => {
+    const SCENE_W = 316;
+    SCENES.forEach((scene) => scene.objects.forEach((object) => {
+      const px = (object.width + object.hitPadding * 2) / 100 * SCENE_W;
+      expect(px, `${scene.id}/${keyOf(object)}`).toBeGreaterThanOrEqual(44);
+    }));
   });
 });

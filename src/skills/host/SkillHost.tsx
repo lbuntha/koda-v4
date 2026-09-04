@@ -20,6 +20,9 @@ export interface SkillHostProps {
   onAwardXp(amount: number): void;
   onComplete(result: SkillResult): void;
   onExit(): void;
+  /** Course-owned route to the next lesson in this skill. */
+  nextLesson?: { levelNumber: number; lessonNumber: number };
+  onStartLesson?(levelNumber: number): void;
   /**
    * Which lesson is being run, for the learning log.
    *
@@ -36,7 +39,9 @@ export interface SkillHostProps {
     /** Display only — passed through to the activity for its chrome. */
     title?: string;
     concept?: string;
-    /** How many lessons the course has. Shown as "Lesson 3 of 15". */
+    /** Learner-facing position inside the owning skill. */
+    lessonNumber?: number;
+    /** How many lessons the skill has. Shown as "Lesson 3 of 15". */
     totalLessons?: number;
     /**
      * Practice rather than teaching, as the course decides it.
@@ -66,6 +71,8 @@ export const SkillHost: React.FC<SkillHostProps> = ({
   onAwardXp,
   onComplete,
   onExit,
+  nextLesson,
+  onStartLesson,
   lesson,
   entry = "path",
 }) => {
@@ -82,8 +89,8 @@ export const SkillHost: React.FC<SkillHostProps> = ({
    * `lesson_completed`. Reading through a ref means the SDK is bound once per
    * activity and always calls the current handlers.
    */
-  const hostRef = useRef({ onAwardXp, onComplete, onExit, snapshot, viewer });
-  hostRef.current = { onAwardXp, onComplete, onExit, snapshot, viewer };
+  const hostRef = useRef({ onAwardXp, onComplete, onExit, onStartLesson, snapshot, viewer });
+  hostRef.current = { onAwardXp, onComplete, onExit, onStartLesson, snapshot, viewer };
 
   const koda = useMemo(() => {
     const skillId = activityRef.split("/")[0] ?? "unknown";
@@ -93,6 +100,12 @@ export const SkillHost: React.FC<SkillHostProps> = ({
       getSnapshot: () => hostRef.current.snapshot,
       theme,
       exit: () => hostRef.current.onExit(),
+      nextLesson: nextLesson
+        ? {
+            lessonNumber: nextLesson.lessonNumber,
+            open: () => hostRef.current.onStartLesson?.(nextLesson.levelNumber),
+          }
+        : null,
       // The course, not the skill, decides what a level means. Telemetry is off
       // for previews, so this resolver is not consulted there either.
       // Built fresh per call so a skill enabled or a lesson unlocked between
@@ -142,7 +155,17 @@ export const SkillHost: React.FC<SkillHostProps> = ({
     // read through `hostRef`, so this must rebind only when the activity or the
     // lesson it is running actually changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activityRef, theme, entry, level, lesson?.lessonId, lesson?.conceptKey, lesson?.practice]);
+  }, [
+    activityRef,
+    theme,
+    entry,
+    level,
+    lesson?.lessonId,
+    lesson?.conceptKey,
+    lesson?.practice,
+    nextLesson?.levelNumber,
+    nextLesson?.lessonNumber,
+  ]);
 
   if (!activity) {
     // Visible rather than silent: a bad reference is a config bug worth seeing.
@@ -190,6 +213,7 @@ export const SkillHost: React.FC<SkillHostProps> = ({
             title: lesson.title ?? lesson.lessonId,
             concept: lesson.concept,
             levelNumber: level,
+            lessonNumber: lesson.lessonNumber,
             totalLessons: lesson.totalLessons,
             practice: lesson.practice,
           }

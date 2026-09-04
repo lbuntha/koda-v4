@@ -66,8 +66,10 @@ import { SkillHost } from "./skills/host/SkillHost";
 import {
   getCourseLessons,
   getLessonByLevel,
+  getSkillLessons,
   isPracticeLesson,
-  totalLessonCount,
+  nextSkillLesson,
+  skillLessonNumber,
 } from "./curriculum";
 import { useAudienceViewer } from "./skills/viewer";
 import { SignInScreen } from "./components/account/SignInScreen";
@@ -711,6 +713,8 @@ export default function App() {
   // every other skill's lessons into the counting game the moment a second one
   // registered — the course already knows the answer, so ask it.
   const activeLesson = getLessonByLevel(activeLevelNumber, viewer);
+  const activeSkillLessons = activeLesson ? getSkillLessons(activeLesson.skillId, viewer) : [];
+  const followingLesson = activeLesson ? nextSkillLesson(activeLesson, viewer) : undefined;
 
   const lessonHost = (
     <SkillHost
@@ -729,7 +733,8 @@ export default function App() {
               ageBand: activeLesson.ageBand,
               title: activeLesson.title,
               concept: activeLesson.concept,
-              totalLessons: totalLessonCount(viewer),
+              lessonNumber: skillLessonNumber(activeLesson, viewer),
+              totalLessons: activeSkillLessons.length,
               // Which kind of round this is, decided once by the course: the
               // chrome reads it to stop repeating the word, and every event
               // carries it so speed can be read off practice alone.
@@ -745,6 +750,15 @@ export default function App() {
         dailySolved: streak.solvedToday,
       }}
       onExit={() => setInRound(false)}
+      nextLesson={
+        followingLesson
+          ? {
+              levelNumber: followingLesson.levelNumber,
+              lessonNumber: skillLessonNumber(followingLesson, viewer),
+            }
+          : undefined
+      }
+      onStartLesson={(levelNumber) => void startLesson(levelNumber)}
       onAwardXp={(earnedXp) =>
         setUserProgress((prev) => ({ ...prev, xp: prev.xp + earnedXp }))
       }

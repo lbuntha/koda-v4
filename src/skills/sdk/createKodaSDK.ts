@@ -44,6 +44,8 @@ export interface KodaHost {
   getSnapshot(): LearnerSnapshot;
   theme: "light" | "dark";
   exit(): void;
+  /** Sequential next lesson in this skill. Null means this path is complete. */
+  nextLesson?: { lessonNumber: number; open(): void } | null;
   /**
    * Which lesson a course level is, for skills that navigate internally.
    *
@@ -366,6 +368,7 @@ export function createKodaSDK(
     ui: {
       theme: host.theme,
       exit: host.exit,
+      nextLesson: host.nextLesson ?? null,
     },
   };
 }
