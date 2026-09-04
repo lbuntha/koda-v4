@@ -28,7 +28,10 @@ registerSkillVoice(
   import.meta.glob("./audio/**/*.{wav,mp3,ogg,m4a}", {
     query: "?url", import: "default", eager: true,
   }) as Record<string, string>,
-  voiceJson.groups,
+  // No skill-scoped reactions: praise comes from the common pack, which names
+  // no subject. `reactionPool` pools a skill's own with common's, so passing
+  // none is a choice to use the shared voice, not a gap to fill later.
+  {},
   manifestFields.id,
 );
 

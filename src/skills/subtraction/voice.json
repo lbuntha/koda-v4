@@ -1,9 +1,14 @@
 {
   "_comment": [
     "Phase 13 speech inventory. No audio is generated or recorded during this build:",
-    "audio/manifest.json stays empty, so every line below plays through live TTS.",
+    "audio/manifest.json is filled by `npm run voice:record`, and every line not yet",
+    "recorded plays through live TTS.",
     "Lesson audioPrompt values are collected from lessons.json automatically and are",
-    "deliberately not repeated here — one line, one home."
+    "deliberately not repeated here — one line, one home.",
+    "No `groups`: praise and correction come from the common pack, which names no",
+    "subject and so cannot congratulate a child on the wrong skill. `reactionPool`",
+    "pools a skill's own reactions with common's, so declaring none here is a",
+    "choice to use the shared voice rather than a gap."
   ],
   "prompts": [],
   "templates": [
@@ -34,36 +39,5 @@
     "eighteen",
     "nineteen",
     "twenty"
-  ],
-  "groups": {
-    "correct": {
-      "voices": [
-        "Kore",
-        "Puck",
-        "Zephyr"
-      ],
-      "phrases": [
-        "Yes — that is the difference!",
-        "You found what remains!",
-        "Great subtracting!",
-        "That model matches!",
-        "You read the blocks right!",
-        "Every column balances!"
-      ]
-    },
-    "incorrect": {
-      "voices": [
-        "Kore",
-        "Zephyr",
-        "Puck"
-      ],
-      "phrases": [
-        "Not quite. Look at what remains.",
-        "Close! Try the subtraction again.",
-        "Good try. Check what was taken away.",
-        "Almost! Count the difference once more.",
-        "Check each place and try again."
-      ]
-    }
-  }
+  ]
 }

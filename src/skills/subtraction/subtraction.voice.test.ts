@@ -78,15 +78,25 @@ describe("the subtraction speech inventory", () => {
     for (const word of ["zero", "one", "ten", "twenty"]) expect(declared.has(word)).toBe(true);
   });
 
-  it("owns its praise so another skill's round cannot play it", () => {
-    for (const [name, group] of Object.entries(voiceJson.groups)) {
-      expect(group.phrases.length, `${name} has no phrases`).toBeGreaterThan(0);
-      expect(group.voices.length, `${name} names no voice`).toBeGreaterThan(0);
+  /**
+   * Praise is the common pack's job.
+   *
+   * `reactionPool` plays this skill's own reactions *and* the common pack's,
+   * never another skill's — so a skill that declares none is not silent, it is
+   * using the shared voice. Common's lines name no subject, which is exactly
+   * what makes them safe to share and what stops "Brilliant counting!" landing
+   * after a subtraction answer.
+   */
+  it("declares no praise of its own, and leans on common instead", () => {
+    expect((voiceJson as { groups?: unknown }).groups,
+      "subtraction re-recorded praise the common pack already covers").toBeUndefined();
+  });
+
+  it("ships no praise clips it would never reach for", () => {
+    for (const rel of Object.values(audioManifest as Record<string, string>)) {
+      expect(rel.startsWith("correct/") || rel.startsWith("incorrect/"),
+        `${rel} is a reaction clip, but reactions come from common`).toBe(false);
     }
-    // Subtraction-scoped wording: praise that could equally follow an addition
-    // round is praise the global registry is free to play after one.
-    const correct = voiceJson.groups.correct.phrases.join(" ").toLowerCase();
-    expect(/differen|remain|subtract|left|block|column/.test(correct)).toBe(true);
   });
 
   /**
@@ -105,8 +115,7 @@ describe("the subtraction speech inventory", () => {
     for (const [phrase, file] of entries) {
       expect(existsSync(join(HERE, "audio", file)), `${phrase} points at a missing ${file}`).toBe(true);
     }
-    const declared = new Set([...voiceJson.phrases, ...voiceJson.prompts,
-      ...Object.values(voiceJson.groups).flatMap((group) => group.phrases)]);
+    const declared = new Set([...voiceJson.phrases, ...voiceJson.prompts]);
     const lessonPrompts = new Set(teaching.map((lesson) => playOf(lesson).audioPrompt!));
     for (const phrase of entries.map(([phrase]) => phrase)) {
       expect(declared.has(phrase) || lessonPrompts.has(phrase),
