@@ -11,6 +11,7 @@ import {
   isPractice,
   modeAt,
   playChrome,
+  answerChoices,
 } from "../../kit";
 import { SCENE } from "../internal/data/countingLayout";
 import { themeSystem } from "../../../lib/themeSystem";
@@ -103,11 +104,15 @@ export const buildQuestion = (params: SubitizingSetup, index: number): Subitizin
 };
 
 /** Five choices centred on the answer, clamped to what this lesson generates. */
-const choicesFor = (total: number, params: SubitizingSetup): number[] => {
+/**
+ * Five near misses inside the lesson's own range, ordered by the question.
+ *
+ * The ascending window put the answer third almost every time, which in a game
+ * built on a flash the child cannot re-count is the easiest tell in the skill.
+ */
+const choicesFor = (total: number, params: SubitizingSetup, seed: string): number[] => {
   const [lo, hi] = params.countRange ?? [2, 8];
-  const span = Math.max(0, Math.min(total - 2, hi - 4));
-  const start = Math.max(lo, Math.min(span, total - 2));
-  return Array.from({ length: 5 }, (_, i) => start + i).filter((n) => n >= lo && n <= hi + 1);
+  return answerChoices(total, seed, { count: 5, min: lo, max: hi + 1 });
 };
 
 /**
@@ -395,7 +400,7 @@ export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-2.5">
-          {choicesFor(question.total, setup).map((num) => (
+          {choicesFor(question.total, setup, question.id).map((num) => (
             <motion.button
               key={num}
               onClick={() => guess(num)}

@@ -4,6 +4,7 @@ import type { ActivityProps, PrintedQuestion } from "../../types";
 import {
   SkillRound, SPRING, composeHints, isPractice, modeAt, playCopy,
   useSkillRound, type PracticeSetup, type RoundQuestion,
+  answerChoices,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { COMPARISON, DIFFERENCE, REMOVED_PART, WHOLE } from "../internal/data/subtractionPalette";
@@ -205,7 +206,8 @@ export const figureFor = (q: StoryQuestion): React.ReactNode => {
   </span>;
 };
 
-const choicesFor = (answer: number) => Array.from({ length: 4 }, (_, i) => Math.max(0, answer - 2) + i);
+/** Four near misses, ordered by the question so they cannot be learned by position. */
+const choicesFor = (answer: number, seed: string): number[] => answerChoices(answer, seed);
 
 export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({ params, koda, onComplete, lesson }) => {
   const setup: StorySetup = { ...params, ...params.question };
@@ -300,7 +302,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({ params, 
       </div>
 
       <div className="flex flex-wrap justify-center gap-2.5">
-        {choicesFor(target).map((value) => <button key={value} type="button" onClick={() => answer(value)}
+        {choicesFor(target, q.id).map((value) => <button key={value} type="button" onClick={() => answer(value)}
           disabled={Boolean(round.feedback)} className={themeSystem.button("secondary", "choice")}>{value}</button>)}
       </div>
     </div>

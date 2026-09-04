@@ -13,6 +13,7 @@ import {
   useSpokenFinish,
   type PracticeSetup,
   type RoundQuestion,
+  answerChoices,
 } from "../../kit";
 import { SvgAsset } from "../../../assets/svg";
 import { themeSystem } from "../../../lib/themeSystem";
@@ -158,10 +159,8 @@ export const methodFor = (q: TrayQuestion): string[] => {
   }
 };
 
-export const choicesFor = (answer: number): number[] => {
-  const start = Math.max(0, answer - 2);
-  return Array.from({ length: 4 }, (_, i) => start + i);
-};
+/** Four near misses, ordered by the question so they cannot be learned by position. */
+export const choicesFor = (answer: number, seed: string): number[] => answerChoices(answer, seed);
 
 export const equationChoicesFor = (q: TrayQuestion): string[] => shuffle([
   `${q.minuend} − ${q.subtrahend} = ${q.difference}`,
@@ -383,7 +382,7 @@ export const RemoveTray: React.FC<ActivityProps<RemoveTrayParams>> = ({ params, 
   };
 
   const ready = removed.length === q.subtrahend;
-  const answerChoices = choicesFor(q.difference);
+  const answerChoices = choicesFor(q.difference, q.id);
   const equationChoices = useRef(new Map<string, string[]>());
   if (!equationChoices.current.has(q.id)) equationChoices.current.set(q.id, equationChoicesFor(q));
   const prompt = promptFor(q, copy.prompts?.default);

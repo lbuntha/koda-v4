@@ -4,6 +4,7 @@ import type { ActivityProps, PrintedQuestion } from "../../types";
 import {
   SkillRound, SPRING, composeHints, isPractice, modeAt, playCopy, stagger,
   useSkillRound, type PracticeSetup, type RoundQuestion,
+  answerChoices,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { DIFFERENCE, REMOVED_PART, WHOLE } from "../internal/data/subtractionPalette";
@@ -135,7 +136,8 @@ export const figureFor = (q: FrameQuestion): React.ReactNode => {
   </svg>;
 };
 
-const choicesFor = (answer: number) => Array.from({ length: 4 }, (_, i) => Math.max(0, answer - 2) + i);
+/** Four near misses, ordered by the question so they cannot be learned by position. */
+const choicesFor = (answer: number, seed: string): number[] => answerChoices(answer, seed);
 
 export const FrameTakeaway: React.FC<ActivityProps<FrameTakeawayParams>> = ({ params, koda, onComplete, lesson }) => {
   const setup: FrameSetup = { ...params, ...params.question };
@@ -232,7 +234,7 @@ export const FrameTakeaway: React.FC<ActivityProps<FrameTakeawayParams>> = ({ pa
       </div>
       {!recall && removed.length > 0 && !round.feedback && <div className="flex justify-center"><button type="button" onClick={putBackLast} className={themeSystem.button("ghost", "sm")}>Put back the last counter</button></div>}
       {!recall && !ready && <div className="flex justify-center"><button type="button" onClick={check} className={themeSystem.button("primary", "lg")}>Check</button></div>}
-      {(recall || ready) && <div className="flex flex-wrap justify-center gap-2.5">{choicesFor(q.difference).map((value) => <button key={value} type="button" onClick={() => choose(value)} disabled={Boolean(round.feedback)} className={themeSystem.button("secondary", "choice")}>{value}</button>)}</div>}
+      {(recall || ready) && <div className="flex flex-wrap justify-center gap-2.5">{choicesFor(q.difference, q.id).map((value) => <button key={value} type="button" onClick={() => choose(value)} disabled={Boolean(round.feedback)} className={themeSystem.button("secondary", "choice")}>{value}</button>)}</div>}
     </div>
   </SkillRound>;
 };

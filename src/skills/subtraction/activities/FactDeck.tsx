@@ -4,6 +4,7 @@ import type { ActivityProps, PrintedQuestion } from "../../types";
 import {
   SkillRound, SPRING, composeHints, isPractice, modeAt, playCopy,
   useSkillRound, type PracticeSetup, type RoundQuestion,
+  answerChoices,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { COMPARISON, DIFFERENCE, REMOVED_PART, WHOLE } from "../internal/data/subtractionPalette";
@@ -192,7 +193,8 @@ export function factHints(q: FactQuestion, state: { helperChosen: boolean; fille
   );
 }
 
-export const choicesFor = (answer: number): number[] => Array.from({ length: 4 }, (_, i) => Math.max(0, answer - 2) + i);
+/** Four near misses, ordered by the question so they cannot be learned by position. */
+export const choicesFor = (answer: number, seed: string): number[] => answerChoices(answer, seed);
 
 const NumberPad: React.FC<{ onDigit: (digit: string) => void; onDelete: () => void; disabled: boolean }> = ({ onDigit, onDelete, disabled }) => (
   <div className="grid grid-cols-6 gap-1.5 max-w-md mx-auto">
@@ -299,7 +301,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
         <div className="mx-auto w-20 h-14 rounded-2xl border-2 border-dashed border-violet-400 flex items-center justify-center text-3xl font-black">{entry || "?"}</div>
         <NumberPad disabled={Boolean(round.feedback)} onDigit={(digit) => setEntry((value) => `${value}${digit}`.slice(0, 2))} onDelete={() => setEntry((value) => value.slice(0, -1))} />
         <div className="flex justify-center"><button type="button" onClick={() => entry ? submitNumber(Number(entry)) : nudge.refuse("Type your answer first.")} className={themeSystem.button("primary", "lg")}>Check</button></div>
-      </div> : <div className="flex flex-wrap justify-center gap-2.5">{choicesFor(q.difference).map((value) => <button key={value} type="button" onClick={() => submitNumber(value)} disabled={Boolean(round.feedback)} className={themeSystem.button("secondary", "choice")}>{value}</button>)}</div>)}
+      </div> : <div className="flex flex-wrap justify-center gap-2.5">{choicesFor(q.difference, q.id).map((value) => <button key={value} type="button" onClick={() => submitNumber(value)} disabled={Boolean(round.feedback)} className={themeSystem.button("secondary", "choice")}>{value}</button>)}</div>)}
     </div>
   </SkillRound>;
 };

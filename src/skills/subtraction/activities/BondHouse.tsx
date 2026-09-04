@@ -4,6 +4,7 @@ import type { ActivityProps, PrintedQuestion } from "../../types";
 import {
   SkillRound, SPRING, composeHints, isPractice, modeAt, playCopy,
   useSkillRound, type PracticeSetup, type RoundQuestion,
+  answerChoices,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { DIFFERENCE, REMOVED_PART, WHOLE } from "../internal/data/subtractionPalette";
@@ -99,7 +100,8 @@ export function bondHints(q: BondQuestion, state: { selected?: number; kidTip?: 
 }
 
 const valueFor = (q: BondQuestion, role: BondQuestion["blankRole"]): number => role === "whole" ? q.minuend : role === "removed" ? q.subtrahend : q.difference;
-const choicesFor = (answer: number) => Array.from({ length: 4 }, (_, i) => Math.max(0, answer - 2) + i);
+/** Four near misses, ordered by the question so they cannot be learned by position. */
+const choicesFor = (answer: number, seed: string): number[] => answerChoices(answer, seed);
 
 export const figureFor = (q: BondQuestion): React.ReactNode => {
   const text = (role: BondQuestion["blankRole"]) => q.blankRole === role ? "" : String(valueFor(q, role));
@@ -172,7 +174,7 @@ export const BondHouse: React.FC<ActivityProps<BondHouseParams>> = ({ params, ko
         {scaffold && !practising && <div className="mt-5 text-sm font-bold text-ink/60">Whole = removed part + remaining part</div>}
       </div>
       <div className="flex flex-wrap justify-center gap-2.5">
-        {choicesFor(answer).map((choice) => <motion.button key={choice} type="button" onClick={() => setSelected(choice)} aria-pressed={selected === choice}
+        {choicesFor(answer, q.id).map((choice) => <motion.button key={choice} type="button" onClick={() => setSelected(choice)} aria-pressed={selected === choice}
           className={`${themeSystem.button("secondary", "choice")} ${selected === choice ? "ring-4 ring-violet-400/60" : ""}`} whileTap={{ scale: 0.9 }}>{choice}</motion.button>)}
       </div>
       <div className="flex justify-center"><button type="button" onClick={submit} className={themeSystem.button("primary", "lg")}>Check</button></div>

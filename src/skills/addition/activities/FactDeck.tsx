@@ -9,6 +9,7 @@ import {
   useSkillRound,
   type RoundQuestion,
   playChrome,
+  answerChoices,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B, CHANGE, TOTAL } from "../internal/data/additionPalette";
@@ -334,8 +335,8 @@ export function factHints(
 }
 
 /** Four answers around the right one, never below zero. */
-export const choicesFor = (answer: number): number[] =>
-  Array.from({ length: 4 }, (_, i) => Math.max(0, answer - 2) + i);
+/** Four near misses, ordered by the question so they cannot be learned by position. */
+export const choicesFor = (answer: number, seed: string): number[] => answerChoices(answer, seed);
 
 /** A row of dots, so a double can be seen as two of the same thing. */
 const DotRow: React.FC<{ count: number; tone: string; label: string }> = ({ count, tone, label }) => (
@@ -651,7 +652,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
         {question.answerShape === "number" && !picking && (
           answerInput === "choices" ? (
             <div className="flex flex-wrap items-center justify-center gap-2.5">
-              {choicesFor(question.sum).map((n) => (
+              {choicesFor(question.sum, question.id).map((n) => (
                 <motion.button
                   key={n}
                   type="button"

@@ -17,6 +17,8 @@ export { ActivityErrorBoundary } from "./chrome/ActivityErrorBoundary";
 export { PracticeStepHeader, DEFAULT_STEP_TAGS, type StepTagLabels } from "./chrome/PracticeStepHeader";
 export { PracticeRoundCompleteModal } from "./chrome/RoundCompleteModal";
 export { scoreRound, type RoundOutcome, type RoundScore } from "./round/scoreRound";
+/** Four near misses in an order a child cannot learn, stable per question. */
+export { answerChoices, type AnswerChoiceOptions } from "./round/answerChoices";
 /** Speak a reaction to an answer. `useSkillRound` calls it; a skill with its
  *  own round loop can call it directly and sound the same. */
 export { playAnswerSound, playChrome } from "./round/answerSound";

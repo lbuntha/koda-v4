@@ -11,6 +11,7 @@ import {
   useSpokenFinish,
   type RoundQuestion,
   playChrome,
+  answerChoices,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { SvgAsset } from "../../../assets/svg";
@@ -296,10 +297,8 @@ export const methodFor = (q: TrayQuestion): string[] | null => {
  * about a *rule*, so the neighbours are what make the rule visible: the answer
  * sits beside the number the child started from.
  */
-export const choicesFor = (answer: number): number[] => {
-  const start = Math.max(0, answer - 2);
-  return Array.from({ length: 4 }, (_, i) => start + i);
-};
+/** Four near misses, ordered by the question so they cannot be learned by position. */
+export const choicesFor = (answer: number, seed: string): number[] => answerChoices(answer, seed);
 
 /**
  * What to say to a child who is stuck, read off what they have actually done.
@@ -986,7 +985,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
 
         {(question.mode === "add_zero" || question.mode === "add_one") && (
           <div className="flex flex-wrap items-center justify-center gap-2.5">
-            {choicesFor(question.sum).map((n) => (
+            {choicesFor(question.sum, question.id).map((n) => (
               <motion.button
                 key={n}
                 type="button"

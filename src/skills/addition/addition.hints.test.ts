@@ -167,10 +167,26 @@ describe("the question a child is shown", () => {
     expect(promptFor(question({ mode: "count_on", a: 6 }))).toBe("Start at 6 and count on.");
   });
 
-  it("puts the answer among its neighbours, and never below zero", () => {
-    expect(choicesFor(7)).toEqual([5, 6, 7, 8]);
-    expect(choicesFor(1)).toEqual([0, 1, 2, 3]);
-    expect(choicesFor(0)).toEqual([0, 1, 2, 3]);
+  it("offers four nonnegative near misses in an order the question decides", () => {
+    // Same contents as the old ascending window, but no longer always
+    // ascending: a fixed position is worth more to a child than the arithmetic.
+    expect([...choicesFor(7, "q1")].sort((a, b) => a - b)).toEqual([5, 6, 7, 8]);
+    expect([...choicesFor(0, "q1")].sort((a, b) => a - b)).toEqual([0, 1, 2, 3]);
+    for (const answer of [0, 1, 7, 40]) {
+      expect(choicesFor(answer, "q1")).toContain(answer);
+      expect(choicesFor(answer, "q1").every((n) => n >= 0)).toBe(true);
+    }
+  });
+
+  it("keeps one question's order still while it is on screen", () => {
+    // Re-shuffling on each render would slide the buttons sideways under a
+    // finger already on its way down.
+    expect(choicesFor(7, "q1")).toEqual(choicesFor(7, "q1"));
+  });
+
+  it("orders a later question differently", () => {
+    const orders = new Set(["q1", "q2", "q3", "q4", "q5", "q6"].map((seed) => choicesFor(7, seed).join(",")));
+    expect(orders.size, "every question ordered its choices the same way").toBeGreaterThan(1);
   });
 });
 
