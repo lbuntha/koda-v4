@@ -306,6 +306,31 @@ const slug = (phrase) =>
     .slice(0, 60)
     .replace(/-+$/g, "") || "clip";
 
+/**
+ * The extension a recorded clip will actually land with.
+ *
+ * `compress` encodes to m4a and only falls back to wav when neither encoder is
+ * present, so naming the plan ".wav" advertised a file that was never written:
+ * every skill on disk is m4a. Probed once, the same way `compress` picks, so a
+ * dry run promises what a real run produces.
+ */
+let encoderExt;
+async function outputExt() {
+  if (encoderExt) return encoderExt;
+  for (const cmd of ["afconvert", "ffmpeg"]) {
+    try {
+      await run("which", [cmd]);
+      return (encoderExt = ".m4a");
+    } catch {
+      /* try the next encoder */
+    }
+  }
+  return (encoderExt = ".wav");
+}
+
+/** The same clip, whatever it was encoded as. */
+const sameClip = (rel) => rel.replace(/\.[^.]+$/, "");
+
 const clipPath = (phrase, folder, taken, ext = ".wav") => {
   let name = slug(phrase);
   if (taken.has(`${folder}/${name}`)) {
@@ -523,9 +548,13 @@ async function main() {
         taken.add(kept.replace(/\.[^.]+$/, ""));
         continue;
       }
-      const rel = clipPath(phrase, folder, taken);
-      if (!force && existing.has(rel)) {
-        manifest[phrase] = rel;
+      const rel = clipPath(phrase, folder, taken, await outputExt());
+      // A clip on disk but absent from the manifest still counts, whichever
+      // encoder produced it — matching on the extension too would re-record an
+      // m4a because the plan had called it a wav.
+      const onDisk = [...existing].find((file) => sameClip(file) === sameClip(rel));
+      if (!force && onDisk) {
+        manifest[phrase] = onDisk;
         continue;
       }
       todo.push({ phrase, rel, voice });
