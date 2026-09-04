@@ -184,8 +184,14 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({ 
           return <button key={id} type="button" onClick={() => choose(id)} disabled={Boolean(round.feedback)}
             aria-label={`${card.name}: ${card.how}`}
             className={`${TOUCH_TARGET} text-left ${themeSystem.button("secondary", "md")} ${chosen === id ? "ring-4 ring-violet-400/60" : ""}`}>
-            <span className="block text-sm font-black">{card.name}</span>
-            <span className="block text-[11px] font-bold opacity-70">{card.how}</span>
+            {/* One column inside the button, not two `block` children of it:
+                `themeSystem.button` is `inline-flex … justify-center`, so the
+                name and the description became columns side by side and
+                "Count up" was squeezed into a two-line sliver at 360px. */}
+            <span className="flex w-full flex-col items-start gap-0.5 text-left">
+              <span className="text-sm font-black leading-tight">{card.name}</span>
+              <span className="text-[11px] font-bold leading-snug opacity-70">{card.how}</span>
+            </span>
           </button>;
         })}
       </div>

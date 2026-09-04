@@ -91,7 +91,17 @@ describe("disabling the skill empties it out of the course", () => {
     expect(subtractionLessons(), "a disabled skill still fills the Learn page").toHaveLength(0);
   });
 
-  it("stays out of sight for a learner who is not a developer", () => {
-    expect(subtractionLessons({ ...learner, isDeveloper: false })).toHaveLength(0);
+  /*
+   * Published, so the developer flag stops mattering and the audience band
+   * starts. While it was a draft the opposite held — invisible to everyone but
+   * a developer, at any age — and this test asserted that instead.
+   */
+  it("is visible to an ordinary learner inside its audience", () => {
+    expect(subtractionLessons({ ...learner, isDeveloper: false })).toHaveLength(skill.lessons.length);
+  });
+
+  it("is held back from a learner too young for it", () => {
+    // Four is below the 5–9 band, and a lesson may only run a year ahead.
+    expect(subtractionLessons({ ...learner, isDeveloper: false, age: 3 })).toHaveLength(0);
   });
 });

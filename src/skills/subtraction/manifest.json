@@ -8,7 +8,7 @@
   "iconName": "Boxes",
   "tagline": "Take away, compare, and find the missing part.",
   "thumbnail": "subtraction-quest",
-  "status": "draft",
+  "status": "published",
   "audience": { "ages": [5, 9], "category": "operations" },
   "teaches": [
     "remover", "remainder-counter", "separator", "comparer",

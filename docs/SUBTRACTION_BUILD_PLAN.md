@@ -13,11 +13,11 @@ placement has its own invariant test.
 
 ---
 
-## Status — Phases 0–14 complete; publishing is the one step left
+## Status — complete and published
 
-Built 2026-09-03/04. All **63 lessons** (52 teaching + 11 practice) are registered
-across **eleven engines**, in course units u22–u37, and the gate is green: lint,
-**92 test files / 1,369 tests**, and the production build.
+Built 2026-09-03/04. All **63 lessons** (52 teaching + 11 practice) across **eleven
+engines**, in course units u22–u37, with **53 recorded clips** and the manifest at
+`"status": "published"`. Gate green: lint, **1,427 tests**, production build.
 
 | Engine | Activity | Modes | Levels |
 |---|---|---|---|
@@ -33,21 +33,11 @@ across **eleven engines**, in course units u22–u37, and the gate is green: lin
 | `StoryBoard` | `story` | 7 | 45–51, 62 |
 | `StrategyPicker` | `strategy` | 1 | 52, 63 |
 
-`audio/manifest.json` is `{}` and every line plays through live TTS, exactly as §7
-requires; `subtraction.voice.test.ts` proves the inventory declares each fixed spoken
-line and duplicates no lesson prompt.
-
-### Phase 15 is deliberately not done
-
-`manifest.json` still reads `"status": "draft"`. §0.4 makes publishing conditional on the
-mobile/theme pass, and two engines have not had it: **`EstimateDial` and
-`StrategyPicker` were never opened at 360px** — the signed-in session on
-`localhost:3001` ended before they could be checked, and signing back in is not
-something this build should do on the owner's behalf. Both are plain choice-button
-layouts of a shape already verified elsewhere, and both have behaviour tests, but that
-is an argument, not the pass the plan asks for.
-
-Publishing is then one line in `manifest.json`, a `npm run skills:seed`, and the gate.
+Every engine was opened at 360px in light and dark before publishing, which §0.4 makes
+the condition. Praise, correction and the number words come from the common pack rather
+than being re-recorded here — §7's "subtraction-scoped praise" was a misreading:
+`reactionPool` pools a skill's own reactions *with* common's and never with another
+skill's, so common is already safe and a second copy only overrides an identical one.
 
 ### What the phases caught
 
@@ -660,7 +650,7 @@ earlier engine was under-parameterised.
 | 12 | 53–63 | none | eleven practice lessons, one per engine; practice tests |
 | 13 | — | — | complete and validate the voice phrase inventory; no audio command or generated clips |
 | 14 | — | — | features/settings, worksheet, art, manifest, and course audit |
-| 15 | — | — | publish last after mobile/theme/manual pass |
+| 15 | — | — | publish last after mobile/theme/manual pass ✅ |
 
 Every phase gate:
 
