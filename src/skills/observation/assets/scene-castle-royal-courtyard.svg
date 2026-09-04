@@ -10,6 +10,7 @@
       <path d="M470 176h22v46h-22Zm52 0h22v46h-22ZM196 330h30v52h-30Zm556 0h30v52h-30Z" fill="#fff8e8"/>
       <path d="M0 556q250-46 500 0t500-12v58q-250 44-500-2T0 616Z" fill="#a8d4e6"/>
       <path d="M440 560h120v190H440Z" fill="#ded4c0"/>
+      
     </g>
     <g fill="#f2e6c9" stroke="#263b50" stroke-width="5"><ellipse cx="478" cy="636" rx="32" ry="16"/><ellipse cx="540" cy="672" rx="28" ry="14"/><ellipse cx="472" cy="708" rx="30" ry="15"/><ellipse cx="548" cy="742" rx="26" ry="13"/></g>
     <g fill="#fff" stroke="#263b50" stroke-width="5" opacity=".95"><path d="M120 96q10-40 52-32 14-30 52-14 34-6 40 30 34 4 26 34-8 24-46 20H160q-42 2-40-38Z"/><path d="M700 74q9-36 47-29 12-27 47-13 31-5 36 27 31 4 24 31-7 22-42 18H736q-38 2-36-34Z"/></g>

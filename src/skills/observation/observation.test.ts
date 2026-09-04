@@ -7,9 +7,9 @@ describeSkillContract(skill);
 describeActivitySmoke(skill);
 
 describe("Observation registration", () => {
-  it("bundles 110 object SVGs and twenty-two scene backdrops", () => {
-    expect(Object.keys(skill.assets)).toHaveLength(132);
-    expect(SCENES).toHaveLength(22);
-    expect(skill.lessons).toHaveLength(13);
+  it("bundles 130 object SVGs and twenty-eight scene backdrops", () => {
+    expect(Object.keys(skill.assets)).toHaveLength(158);
+    expect(SCENES).toHaveLength(28);
+    expect(skill.lessons).toHaveLength(18);
   });
 });

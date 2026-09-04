@@ -17,6 +17,8 @@ const packs = {
   museum: ["rocket", "planet", "astronaut-helmet", "satellite", "telescope", "robot", "moon-boot", "comet", "control-panel", "wrench"],
   town: ["bicycle", "balloon", "ticket", "cupcake", "drum", "crown", "gift-box", "traffic-cone", "toy-train", "pinwheel"],
   castle: ["frog", "royal-crown", "castle-key", "shield", "goblet", "scroll", "torch", "banner", "dragon", "chess-knight"],
+  workshop: ["gear", "spring", "magnet", "screwdriver", "bolt", "oil-can", "blueprint", "magnifier", "drive-belt", "wind-up-key"],
+  reef: ["sea-urchin", "kelp-frond", "hermit-crab", "angelfish", "sand-dollar", "sea-turtle", "jellyfish", "cowrie-shell", "sea-fan", "moray-eel"],
 };
 
 const bodies = {
@@ -121,6 +123,29 @@ const bodies = {
   banner: '<path d="M22 12h76v76L60 66 22 88Z" fill="url(#a)"/><path d="M14 6h92" stroke-width="7"/><path d="M60 30v22m-11-11h22" stroke="#ffe98a" stroke-width="6"/>',
   dragon: '<path d="M22 78q-12-34 18-46 26-11 44 8l24-16-8 26 14 12-22 8q-6 26-34 26-28 0-36-18Z" fill="url(#a)"/><path d="m40 32-6-22 22 14m8-2 8-20 10 22" fill="url(#a)"/><circle cx="88" cy="52" r="4" fill="#263b50"/><path d="M22 96q14 16 36 12" fill="none"/>',
   'chess-knight': '<path d="M46 108h44q2-40-6-56Q76 34 66 30l6-16-22-4-10 22q-16 10-18 30l16 4 6-10 10 6q-10 20-8 46Z" fill="url(#b)"/><path d="M28 108h64v10H28Z" fill="url(#b)"/><circle cx="56" cy="36" r="4" fill="#263b50"/>',
+  // Workshop (Pack 12). Strong closed outlines, so two of these stacked on one
+  // another still read as two things rather than one blob.
+  gear: '<path d="M60 8l9 13 15-5 4 15 15 4-5 15 13 9-13 9 5 15-15 4-4 15-15-5-9 13-9-13-15 5-4-15-15-4 5-15-13-9 13-9-5-15 15-4 4-15 15 5Z" fill="url(#a)"/><circle cx="60" cy="60" r="20" fill="#e8eef5"/>',
+  spring: '<path d="M32 18h56M36 34h52M32 50h56M36 66h52M32 82h56M36 98h52" fill="none" stroke-width="9" stroke="url(#a)"/><path d="M88 18 36 34m52 0L32 50m56 0L36 66m52 0L32 82m56 0L36 98" fill="none" stroke-width="9" stroke="url(#a)"/>',
+  magnet: '<path d="M26 100V60a34 34 0 0 1 68 0v40H70V60a10 10 0 0 0-20 0v40Z" fill="#e0544f"/><path d="M26 100V78h24v22Zm44 0V78h24v22Z" fill="#cfd8e3"/>',
+  screwdriver: '<path d="M50 12h20v46H50Z" fill="url(#a)"/><path d="M54 58h12v34H54Z" fill="#cfd8e3"/><path d="M56 92h8v18h-8Z" fill="#9aa8b8"/><path d="M50 24h20M50 36h20"/>',
+  bolt: '<path d="m60 10 26 15v30L60 70 34 55V25Z" fill="url(#a)"/><circle cx="60" cy="40" r="12" fill="#e8eef5"/><path d="M48 70h24v42H48Z" fill="#b8c4d2"/><path d="M48 80h24M48 90h24M48 100h24"/>',
+  'oil-can': '<path d="M22 52h60v50a8 8 0 0 1-8 8H30a8 8 0 0 1-8-8Z" fill="url(#a)"/><path d="M82 62 112 34" stroke-width="8" fill="none"/><path d="M40 52V36h24v16Z" fill="#b8c4d2"/><path d="M30 74h44" stroke="#fff" opacity=".55"/>',
+  blueprint: '<path d="M18 26h84v68H18Z" fill="#4a7fb5"/><path d="M32 40h34v22H32Zm44 0h14v40H76ZM32 70h34v12H32Z" fill="none" stroke="#dce9f7" stroke-width="3"/><path d="M18 26q-12 34 0 68" fill="#3f6d9c"/>',
+  magnifier: '<circle cx="52" cy="48" r="32" fill="#cfe8f5" stroke-width="7"/><path d="m76 72 32 34" stroke-width="12" fill="none"/><path d="M38 34a22 22 0 0 1 16-6" fill="none" stroke="#fff" stroke-width="5"/>',
+  'drive-belt': '<path d="M60 14c40 0 46 92 0 92S20 14 60 14Z" fill="none" stroke="url(#a)" stroke-width="16"/><path d="M60 14c40 0 46 92 0 92S20 14 60 14Z" fill="none" stroke="#3c4a5c" stroke-width="4" stroke-dasharray="8 10"/>',
+  'wind-up-key': '<circle cx="40" cy="40" r="24" fill="none" stroke-width="11"/><circle cx="80" cy="40" r="24" fill="none" stroke-width="11"/><path d="M60 58v46" stroke-width="11" fill="none"/><path d="M46 104h28M50 88h20" stroke-width="8"/>',
+  // Reef (Pack 13). Each one plausibly wears the reef's own texture.
+  'sea-urchin': '<circle cx="60" cy="60" r="30" fill="url(#a)"/><g stroke-width="4"><path d="M60 30V6m0 108V90M30 60H6m108 0H90M39 39 22 22m76 76L81 81M81 39l17-17M39 81l-17 17M74 32l9-20M46 88l-9 20M88 74l20 9M32 46l-20-9M88 46l20-9M32 74l-20 9M74 88l9 20M46 32l-9-20"/></g>',
+  'kelp-frond': '<path d="M60 114V22" stroke-width="7" fill="none"/><path d="M60 34q-30-14-38 8 26 16 38-8Zm0 24q30-14 38 8-26 16-38-8Zm0 24q-30-14-38 8 26 16 38-8Z" fill="url(#a)"/>',
+  'hermit-crab': '<path d="M78 42c26 0 30 46 0 52-30 6-42-14-38-30 4-14 20-22 38-22Z" fill="url(#b)"/><path d="M78 42q14 16 0 52" fill="none"/><path d="M34 74q-18 2-22-10m22 22q-18 6-24-4" fill="none" stroke-width="5"/><circle cx="30" cy="62" r="4"/><path d="M22 58q-10-8-4-16m22 12q-6-12 2-18" fill="none" stroke-width="4"/>',
+  angelfish: '<path d="M40 60 16 22q34-2 48 16 22-4 34 10-10 18-34 16-12 20-48 18Z" fill="url(#a)"/><path d="M46 40q6 24 0 44m18-46q6 26 0 46" stroke="#fff" stroke-width="7" fill="none"/><circle cx="88" cy="52" r="4" fill="#263b50"/>',
+  'sand-dollar': '<circle cx="60" cy="60" r="44" fill="#f2e6cf"/><g fill="#dcc9a8" stroke="none"><ellipse cx="60" cy="34" rx="7" ry="16"/><ellipse cx="60" cy="86" rx="7" ry="16"/><ellipse cx="34" cy="60" rx="16" ry="7"/><ellipse cx="86" cy="60" rx="16" ry="7"/><ellipse cx="60" cy="60" rx="6" ry="6"/></g>',
+  'sea-turtle': '<ellipse cx="58" cy="62" rx="38" ry="32" fill="url(#a)"/><g fill="none" stroke-width="4"><path d="M58 30v64M20 62h76M34 38l48 48m0-48-48 48"/></g><circle cx="102" cy="46" r="13" fill="#7fc48f"/><path d="M22 34q-14-6-18 6m18 54q-14 6-18-6m74-54q14-6 18 6" fill="#7fc48f"/><circle cx="106" cy="42" r="3" fill="#263b50"/>',
+  jellyfish: '<path d="M14 58a46 40 0 0 1 92 0Z" fill="url(#b)" opacity=".92"/><path d="M22 58q6 30-4 46m22-46q4 34-6 50m26-50q0 34 0 52m24-52q-4 34 6 50m20-50q-6 30 4 46" fill="none" stroke-width="5"/>',
+  'cowrie-shell': '<ellipse cx="60" cy="60" rx="42" ry="30" fill="url(#b)"/><path d="M22 62q38 16 76 0" fill="none" stroke-width="5"/><path d="M32 50q10-10 22-6m18 4q12-6 22 4" fill="none" stroke-width="4"/>',
+  'sea-fan': '<path d="M56 114V78" stroke-width="7" fill="none"/><path d="M58 80q-38-8-44-44 30 0 44 20 14-20 44-20-6 36-44 44Z" fill="url(#a)"/><g fill="none" stroke="#f7dcd0" stroke-width="3"><path d="M58 78q-20-8-30-26m30 26q20-8 30-26M58 78V56"/></g>',
+  'moray-eel': '<path d="M14 96q26 4 34-20T78 30q22 0 26 22" fill="none" stroke="url(#a)" stroke-width="20" stroke-linecap="round"/><path d="M104 52q6 18-10 22-14 4-16-10" fill="url(#a)"/><circle cx="96" cy="46" r="4" fill="#263b50"/><path d="M88 62q10 6 18 0" fill="none" stroke-width="3"/>',
   pinwheel: '<circle cx="60" cy="53" r="7" fill="#f7cc67"/><path d="M60 53Q31 50 23 20q30-7 37 33Zm0 0q3-29 33-37 7 30-33 37Zm0 0q29 3 37 33-30 7-37-33Zm0 0q-3 29-33 37-7-30 33-37Z" fill="url(#a)"/><path d="M60 60v58"/>',
 };
 
@@ -138,6 +163,8 @@ const palettes = {
   museum: ["#202b54", "#5368a8", "#8272b8", "#f0b956"],
   town: ["#b9e1ee", "#65ad8b", "#e6c27f", "#e96f7e"],
   castle: ["#cfe4f2", "#6f9c74", "#dfe5ea", "#9c7cc4"],
+  workshop: ["#d7dee8", "#7a8899", "#c9b79c", "#e08a5c"],
+  reef: ["#5cc2de", "#1f7fa8", "#e8d8a8", "#f08a6c"],
 };
 
 const sceneDecor = {
@@ -184,8 +211,9 @@ const sceneDecor = {
       <path d="M470 176h22v46h-22Zm52 0h22v46h-22ZM196 330h30v52h-30Zm556 0h30v52h-30Z" fill="#fff8e8"/>
       <path d="M0 556q250-46 500 0t500-12v58q-250 44-500-2T0 616Z" fill="#a8d4e6"/>
       <path d="M440 560h120v190H440Z" fill="#ded4c0"/>
+      ${variant === 2 ? `<g>${[110, 300, 560, 780].map((x) => `<path d="M${x} 200h130v300H${x}Z" fill="#dceaf2"/><path d="M${x} 200h130v300H${x}Z" fill="none" stroke-width="10"/><path d="M${x + 16} 220v260m26-260v260" stroke="#fff" stroke-width="7" opacity=".7"/>`).join("")}</g>` : ""}
     </g>
-    ${variant ? `<g fill="#f2e6c9" stroke="#263b50" stroke-width="5"><ellipse cx="470" cy="640" rx="34" ry="17"/><ellipse cx="556" cy="676" rx="30" ry="15"/><ellipse cx="468" cy="712" rx="32" ry="16"/></g>
+    ${variant === 1 ? `<g fill="#f2e6c9" stroke="#263b50" stroke-width="5"><ellipse cx="470" cy="640" rx="34" ry="17"/><ellipse cx="556" cy="676" rx="30" ry="15"/><ellipse cx="468" cy="712" rx="32" ry="16"/></g>
       ${/* Ivy, lily pads and bushes, all sized like a rendered frog (~50 units
             across) so a green shape is never automatically the answer. */""}
       <g fill="#5f9e63" stroke="#3c6b47" stroke-width="4" opacity=".9">${[
@@ -202,7 +230,37 @@ const sceneDecor = {
       ].map(([x,y]) => `<path d="M${x} ${y}q28-30 56 0 14 12 0 20h-56q-14-8 0-20Z"/>`).join("")}</g>` : `<g fill="#f2e6c9" stroke="#263b50" stroke-width="5"><ellipse cx="478" cy="636" rx="32" ry="16"/><ellipse cx="540" cy="672" rx="28" ry="14"/><ellipse cx="472" cy="708" rx="30" ry="15"/><ellipse cx="548" cy="742" rx="26" ry="13"/></g>`}
     <g fill="#fff" stroke="#263b50" stroke-width="5" opacity=".95"><path d="M120 96q10-40 52-32 14-30 52-14 34-6 40 30 34 4 26 34-8 24-46 20H160q-42 2-40-38Z"/><path d="M700 74q9-36 47-29 12-27 47-13 31-5 36 27 31 4 24 31-7 22-42 18H736q-38 2-36-34Z"/></g>
     <g fill="#6f9c74" stroke="#263b50" stroke-width="5"><path d="M60 700q10-64 54-92-6 56-54 92Z"/><path d="M930 690q-10-62-54-90 6 55 54 90Z"/></g>`,
-  town: (variant) => `<path d="M0 0h1000v750H0Z" fill="#b9e1ee"/><path d="M0 480h1000v270H0Z" fill="#e6c27f"/>
+  workshop: (variant) => `<path d="M0 0h1000v470H0Z" fill="#dbe3ec"/><path d="M0 470h1000v280H0Z" fill="#b99b75"/><path d="M0 468h1000" stroke="#263b50" stroke-width="8"/>
+    <g filter="url(#sh)" stroke="#263b50" stroke-width="6" stroke-linejoin="round">
+      <path d="M60 120h320v210H60Z" fill="#e7edf4"/><path d="M60 190h320M60 260h320M168 120v210M276 120v210"/>
+      <path d="M620 96h330v150H620Z" fill="#cdd7e3"/><path d="M620 160h330M736 96v150M842 96v150"/>
+      <path d="M${variant ? 430 : 452} 300h190v170H${variant ? 430 : 452}Z" fill="#a97f52"/>
+      <path d="M40 470h920v46H40Z" fill="#8f6b46"/><path d="M96 516v210m808-210v210"/>
+      ${variant ? `<path d="M640 300h300v168H640Z" fill="#e7edf4"/><path d="M640 356h300m-150-56v168"/>` : `<circle cx="790" cy="380" r="76" fill="#e7edf4"/><path d="M790 380V320m0 60 42 30"/>`}
+    </g>
+    <g fill="none" stroke="#8a7358" stroke-width="5" opacity=".65"><path d="M0 560h1000M0 620h1000M0 680h1000"/></g>
+    <g fill="#9aa8b8" stroke="#263b50" stroke-width="5"><path d="M120 400h44v66h-44Z"/><path d="M200 420h36v46h-36Z"/><path d="M880 402h50v64h-50Z"/></g>`,
+  reef: (variant) => `<path d="M0 0h1000v750H0Z" fill="url(#bg)"/>
+    <g fill="#1a6d92" opacity=".45"><path d="M0 0h1000v120q-250 60-500 0T0 120Z"/></g>
+    <path d="M0 560q180-70 360-10t640-40v240H0Z" fill="#e6d6a6"/>
+    <g filter="url(#sh)" stroke="#263b50" stroke-width="6" stroke-linejoin="round">
+      ${variant ? `<path d="M240 560q40-190 250-190t260 186q-40 60-260 60T240 560Z" fill="#7a6a58"/><path d="M330 420h90v70h-90Zm200-20h96v78h-96Z" fill="#3f5f72"/><path d="M300 372q220-70 420 0" fill="none"/>` : `<path d="M120 566q-24-150 40-206 44 44 26 122 44-96 104-66-6 78-58 128 60-40 92 2-30 40-90 46Z" fill="#ef8a72"/><path d="M880 570q24-150-40-206-44 44-26 122-44-96-104-66 6 78 58 128-60-40-92 2 30 40 90 46Z" fill="#f0a07c"/>`}
+    </g>
+    <g fill="#3f9e7c" stroke="#25664f" stroke-width="5" opacity=".9">${[
+      [180,560],[300,584],[700,576],[860,556],[430,600],[600,596],
+    ].map(([x,y]) => `<path d="M${x} ${y}q-16-52 4-84 18 30 8 84Zm18 0q6-56 30-76-2 40-14 76Z"/>`).join("")}</g>
+    <g fill="#f2e0b8" opacity=".55">${[
+      [140,690],[380,706],[620,690],[840,712],
+    ].map(([x,y]) => `<ellipse cx="${x}" cy="${y}" rx="52" ry="16"/>`).join("")}</g>
+    <g fill="#bfe8f5" opacity=".5">${[
+      [160,120,9],[340,80,12],[560,140,8],[760,90,11],[900,160,7],
+    ].map(([x,y,r]) => `<circle cx="${x}" cy="${y}" r="${r}"/>`).join("")}</g>`,
+  town: (variant) => variant === 2 ? `<path d="M0 0h1000v750H0Z" fill="#8fa2c8"/><path d="M0 470h1000v280H0Z" fill="#d9c9a8"/>
+    <circle cx="820" cy="120" r="52" fill="#f3ead0" opacity=".9"/>
+    <g fill="#e8834f" stroke="#1b2038" stroke-width="5">${[[120,180],[260,140],[420,190],[600,150],[740,200],[900,160]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="30" ry="38"/><path d="M${x} ${y+38}v22"/>`).join("")}</g>
+    <path d="M0 150q250 60 500 0t500 20" fill="none" stroke="#1b2038" stroke-width="5"/>
+    <g filter="url(#sh)" stroke="#3a4166" stroke-width="6" stroke-linejoin="round"><path d="M80 300h240v170H80Z" fill="#e7dcc4"/><path d="M60 300h280l-40-64H100Z" fill="#c9b493"/><path d="M660 280h260v190H660Z" fill="#e7dcc4"/><path d="M640 280h300l-42-70H682Z" fill="#c9b493"/><path d="M380 330h240v140H380Z" fill="#efe6d2"/></g>
+    <g fill="#fff3d0" opacity=".3">${[[120,180],[260,140],[420,190],[600,150],[740,200],[900,160]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="74"/>`).join("")}</g>` : `<path d="M0 0h1000v750H0Z" fill="#b9e1ee"/><path d="M0 480h1000v270H0Z" fill="#e6c27f"/>
     <g filter="url(#sh)" stroke="#263b50" stroke-width="6" stroke-linejoin="round"><path d="M35 185h275v315H35Z" fill="#fff7e5"/><path d="m18 185 155-110 155 110" fill="#e96f7e"/><path d="M690 165h275v335H690Z" fill="#fff7e5"/><path d="m672 165 155-105 156 105" fill="#65ad8b"/><path d="M365 270h270v230H365Z" fill="#fff7e5"/><path d="M345 270h310l-45-85H390Z" fill="#f1bd58"/>${variant ? `<path d="M405 355h190v145H405Z" fill="#8dc6d5"/><path d="M100 520h800v55H100Z" fill="#bf8958"/>` : `<path d="M430 350h140v150H430Z" fill="#8dc6d5"/><path d="M85 535h830v50H85Z" fill="#bf8958"/>`}</g>
     <g fill="#e96f7e" stroke="#263b50" stroke-width="4"><circle cx="118" cy="130" r="16"/><circle cx="370" cy="120" r="14"/><circle cx="650" cy="115" r="18"/><circle cx="910" cy="120" r="15"/></g><g stroke="#263b50" stroke-width="4"><path d="M118 146v90m252-102v95m280-96v96m260-94v95"/></g>`,
 };
@@ -227,6 +285,8 @@ const sceneTexture = {
       [336,516],[610,490],[196,664],[772,676],[470,300],[236,404],
     ].map(([x,y]) => `<ellipse cx="${x}" cy="${y}" rx="25" ry="17"/>`).join("")}</g>
     <g fill="none" stroke="#b3a892" stroke-width="4" opacity=".5"><path d="M320 300h360M320 356h360M320 412h360M320 468h360M352 300v56m64-56v56m64-56v56m64-56v56m64-56v56M320 356v56m64-56v56m64-56v56m64-56v56m64-56v56"/></g><g fill="none" stroke="#8fb9cc" stroke-width="4" opacity=".55"><path d="M120 588q18-18 36 0m64 22q18-18 36 0m560-26q18-18 36 0m-140 30q18-18 36 0"/></g>`,
+  workshop: `<g fill="none" stroke="#8d99a8" stroke-width="4" opacity=".5"><circle cx="470" cy="180" r="26"/><circle cx="470" cy="180" r="9"/><circle cx="540" cy="226" r="20"/><circle cx="540" cy="226" r="7"/><path d="M170 560h60v34h-60Zm620 10h64v34h-64Z"/></g><g fill="#c6d0dc" opacity=".55"><circle cx="404" cy="196" r="15"/><circle cx="596" cy="168" r="12"/><circle cx="300" cy="620" r="14"/><circle cx="722" cy="636" r="13"/></g>`,
+  reef: `<g fill="#4aa9c4" opacity=".5">${[[210,300],[400,240],[600,300],[790,250],[300,430],[690,430]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="26" ry="17"/><circle cx="${x-13}" cy="${y-15}" r="8"/><circle cx="${x+13}" cy="${y-15}" r="8"/>`).join("")}</g><g fill="none" stroke="#2b8aab" stroke-width="4" opacity=".55"><path d="M120 400q22-24 44 0m620-30q22-24 44 0M440 500q22-24 44 0"/></g>`,
   town: `<g fill="none" stroke="#a6754e" stroke-width="4" opacity=".55"><ellipse cx="170" cy="650" rx="30" ry="14"/><ellipse cx="295" cy="610" rx="26" ry="12"/><ellipse cx="470" cy="680" rx="34" ry="15"/><ellipse cx="635" cy="615" rx="28" ry="13"/><ellipse cx="820" cy="665" rx="31" ry="14"/><path d="m245 430 19-18 19 18-19 18Zm480 8 18-18 18 18-18 18Z"/></g>`,
 };
 const sceneSvg = (theme, variant) => {
@@ -259,6 +319,12 @@ const sceneDefs = [
   ["town","festival-square","Festival Square","Town Square",0],
   ["town","toy-parade","Toy Parade","Town Square",1],
   ["castle","royal-courtyard","Royal Courtyard","Castle Kingdom",0],
+  ["castle","hall-of-mirrors","Hall of Mirrors","Castle Kingdom",2],
+  ["town","lantern-night","Lantern Night","Town Square",2],
+  ["workshop","cluttered-workbench","Cluttered Workbench","Inventor's Workshop",0],
+  ["workshop","gear-room","Gear Room","Inventor's Workshop",1],
+  ["reef","coral-thicket","Coral Thicket","Coral Reef",0],
+  ["reef","sunken-hold","Sunken Hold","Coral Reef",1],
 ];
 
 await fs.mkdir(assets, { recursive: true });
@@ -272,9 +338,15 @@ for (const [theme, names] of Object.entries(packs)) {
 }
 for (const [theme, id, name, place, variant] of sceneDefs) {
   await fs.writeFile(path.join(assets, `scene-${theme}-${id}.svg`), sceneSvg(theme, variant));
+  // The Hall of Mirrors is stocked from across the catalog on purpose: it needs
+  // ten objects whose reflection is visibly different, and one themed pack
+  // cannot supply that many.
+  const mirrorHall = ["castle-castle-key","castle-banner","castle-dragon","castle-chess-knight","home-key",
+    "market-teacup","market-spoon","school-paintbrush","farm-rubber-boot","harbor-snorkel"];
   const names = theme === "beach" ? ["shell","sunglasses","crab","bucket","sunscreen","sun-hat","beach-ball","sandal","camera","kite"] : packs[theme];
-  const objects = names.map((item, i) => ({
-    id: `${theme}-${item}`, asset: `observation-${theme}-${item}`, x: slots[i][0], y: slots[i][1], width: 8,
+  const ids = id === "hall-of-mirrors" ? mirrorHall : names.map((item) => `${theme}-${item}`);
+  const objects = ids.map((full, i) => ({
+    id: full, asset: `observation-${full}`, x: slots[i][0], y: slots[i][1], width: 8,
     height: 10, rotation: ((i * 7 + variant * 5) % 19) - 9, z: 3 + (i % 3), hitPadding: 3,
     visibleFraction: 1, tags: [theme, "environment-anchor"], region: slots[i][2],
   }));

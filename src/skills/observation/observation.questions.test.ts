@@ -48,6 +48,11 @@ describe("observation question generator", () => {
       // no-repeat promise applies to its count, not to a rotating first target.
       if (lesson.params.question.mode === "swarm") {
         questions.forEach((question) => expect(question.targets).toHaveLength(lesson.params.question.swarmCount));
+      } else if (lesson.params.question.mode === "category") {
+        // A category round's targets are whatever belongs to the group, so the
+        // varying part is the group and the scene, not a rotating first target.
+        questions.forEach((question) => expect(question.targets.length).toBeGreaterThan(1));
+        expect(new Set(questions.map((question) => `${question.category}:${question.scene.id}`)).size).toBeGreaterThan(1);
       } else {
         expect(new Set(questions.map((question) => question.targets[0])).size).toBe(questionCount);
       }

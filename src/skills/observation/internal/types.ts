@@ -7,6 +7,11 @@ export type ObservationMode =
   | "occluded"
   | "clutter"
   | "swarm"
+  | "overlap"
+  | "mirror"
+  | "camouflage"
+  | "shadow"
+  | "category"
   | "mixed";
 
 export type ObservationRegion = "top-left" | "top-right" | "bottom-left" | "bottom-right";
@@ -20,6 +25,10 @@ export interface ObservationObject {
   silhouetteFamily: string;
   decoyGroup?: string;
   dominantColorRole: string;
+  /** What the object is, for rounds that ask by category rather than picture. */
+  category?: string;
+  /** Its mirror image is visibly different, so a mirror round can use it. */
+  mirrorSafe?: boolean;
   orientationSafe: boolean;
   minimumVisibleFraction: number;
 }
@@ -43,6 +52,8 @@ export interface SceneObject {
   z: number;
   hitPadding: number;
   visibleFraction: number;
+  /** Horizontally flipped. Mirror rounds ask the child to reject these. */
+  mirrored?: boolean;
   tags: string[];
   region: ObservationRegion;
 }
@@ -82,4 +93,6 @@ export interface ObjectHuntSetup {
   camouflageStrength?: number;
   /** Swarm mode: how many copies of the repeated character to hide. */
   swarmCount?: number | [number, number];
+  /** Category mode: which categories a round may ask for. */
+  categories?: string[];
 }

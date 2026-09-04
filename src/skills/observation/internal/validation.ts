@@ -11,7 +11,7 @@ const overlap = (a: SceneObject, b: SceneObject) => {
 export function validateCatalog(): string[] {
   const ids = OBJECT_CATALOG.map((object) => object.id);
   const errors: string[] = [];
-  if (ids.length !== 110) errors.push(`Expected 110 objects; got ${ids.length}.`);
+  if (ids.length !== 130) errors.push(`Expected 110 objects; got ${ids.length}.`);
   if (new Set(ids).size !== ids.length) errors.push("Object IDs must be unique.");
   return errors;
 }

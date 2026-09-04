@@ -16,7 +16,7 @@ describe("observation mixed practice", () => {
     expect(questions.every((question) => question.targets.length === 1)).toBe(true);
     expect(new Set(questions.map((question) => question.scene.id)).size).toBe(10);
     expect(new Set(questions.map((question) => question.mode))).toEqual(new Set<ObservationMode>([
-      "exact", "silhouette", "near_decoys", "rotation", "scale", "occluded", "clutter",
+      "exact", "silhouette", "near_decoys", "rotation", "scale", "occluded", "overlap", "mirror", "camouflage", "shadow",
     ]));
   });
 

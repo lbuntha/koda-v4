@@ -4986,6 +4986,11 @@
       "figure-ground-searcher",
       "themed-scene-searcher",
       "exhaustive-searcher",
+      "figure-separator",
+      "mirror-discriminator",
+      "camouflage-breaker",
+      "shadow-matcher",
+      "category-searcher",
       "independent-visual-searcher"
     ],
     "requires": [],
@@ -5104,7 +5109,7 @@
         "help": "Number of lessons available before a plan is needed.",
         "type": "number",
         "min": 0,
-        "max": 13,
+        "max": 18,
         "step": 1
       }
     ],
@@ -5658,10 +5663,10 @@
         ]
       },
       {
-        "id": "hidden-object-challenge",
-        "title": "Hidden Object Challenge",
-        "concept": "Independent Visual Search",
-        "conceptKey": "independent-visual-searcher",
+        "id": "untangle-the-pile",
+        "title": "Untangle the Pile",
+        "concept": "Overlapping Figures",
+        "conceptKey": "figure-separator",
         "requires": [
           "exhaustive-searcher"
         ],
@@ -5669,12 +5674,273 @@
         "params": {
           "level": 12,
           "question": {
+            "mode": "overlap",
+            "sceneIds": [
+              "workshop-cluttered-workbench",
+              "workshop-gear-room"
+            ],
+            "objectCount": 10,
+            "targetCount": 3,
+            "questionsPerRound": 5,
+            "targetScale": 0.72,
+            "camouflageStrength": 0.34
+          },
+          "play": {
+            "mode": "object_hunt",
+            "tier": "challenge",
+            "difficultyColor": "indigo",
+            "category": "Visual Search",
+            "shortDesc": "Tools piled on top of each other in the workshop",
+            "targetObjective": "Find each object even where it lies under another.",
+            "stepByStep": [
+              "Look at the target picture.",
+              "Follow one outline at a time where shapes cross.",
+              "Tap the object you traced."
+            ],
+            "kidTip": "Trace the edge with your finger to see where one thing ends.",
+            "audioPrompt": "Welcome to the workshop. The tools are piled up. Follow one outline at a time."
+          }
+        },
+        "difficulty": "Hard",
+        "iconName": "search",
+        "iconTone": "indigo",
+        "pedagogyTip": "Pulling one contour out of another is a harder step than spotting a whole shape.",
+        "standards": [],
+        "trajectoryLevel": "figure-separator",
+        "ageBand": [
+          6,
+          9
+        ]
+      },
+      {
+        "id": "same-or-mirrored",
+        "title": "Same or Mirrored?",
+        "concept": "Left-Right Discrimination",
+        "conceptKey": "mirror-discriminator",
+        "requires": [
+          "figure-separator"
+        ],
+        "activity": "observation/object-hunt",
+        "params": {
+          "level": 13,
+          "question": {
+            "mode": "mirror",
+            "sceneIds": [
+              "castle-hall-of-mirrors"
+            ],
+            "objectCount": 10,
+            "targetCount": 3,
+            "questionsPerRound": 5,
+            "targetScale": 0.74,
+            "camouflageStrength": 0.3
+          },
+          "play": {
+            "mode": "object_hunt",
+            "tier": "challenge",
+            "difficultyColor": "purple",
+            "category": "Visual Search",
+            "shortDesc": "Half the hall is reflected, so check which way things face",
+            "targetObjective": "Find the object facing the same way as the picture.",
+            "stepByStep": [
+              "Look at which way the target faces.",
+              "Check whether the one you found faces the same way.",
+              "Tap only the matching one."
+            ],
+            "kidTip": "A mirror swaps left and right but nothing else.",
+            "audioPrompt": "Some things in the hall of mirrors are flipped. Find the ones facing the same way as the picture."
+          }
+        },
+        "difficulty": "Hard",
+        "iconName": "search",
+        "iconTone": "purple",
+        "pedagogyTip": "Rotation says an object stays the same when turned; mirroring says it does not. Holding both rules apart is the b-and-d skill.",
+        "standards": [],
+        "trajectoryLevel": "mirror-discriminator",
+        "ageBand": [
+          6,
+          9
+        ]
+      },
+      {
+        "id": "hiding-in-the-pattern",
+        "title": "Hiding in the Pattern",
+        "concept": "Texture Camouflage",
+        "conceptKey": "camouflage-breaker",
+        "requires": [
+          "mirror-discriminator"
+        ],
+        "activity": "observation/object-hunt",
+        "params": {
+          "level": 14,
+          "question": {
+            "mode": "camouflage",
+            "sceneIds": [
+              "reef-coral-thicket",
+              "reef-sunken-hold"
+            ],
+            "objectCount": 10,
+            "targetCount": 3,
+            "questionsPerRound": 5,
+            "targetScale": 0.76,
+            "camouflageStrength": 0.5
+          },
+          "play": {
+            "mode": "object_hunt",
+            "tier": "challenge",
+            "difficultyColor": "cyan",
+            "category": "Visual Search",
+            "shortDesc": "Reef creatures wearing the colours of the reef itself",
+            "targetObjective": "Find the objects that blend into the reef.",
+            "stepByStep": [
+              "Look at the target shape, not its colour.",
+              "Sweep slowly, because colour will not help here.",
+              "Tap the shape when you find it."
+            ],
+            "kidTip": "When colour is gone, the outline is all you have.",
+            "audioPrompt": "These reef animals wear the colours around them. Look for their shapes."
+          }
+        },
+        "difficulty": "Hard",
+        "iconName": "search",
+        "iconTone": "cyan",
+        "pedagogyTip": "Removing colour as a cue forces the search onto shape alone, the way real camouflage works.",
+        "standards": [],
+        "trajectoryLevel": "camouflage-breaker",
+        "ageBand": [
+          6,
+          9
+        ]
+      },
+      {
+        "id": "follow-the-shadow",
+        "title": "Follow the Shadow",
+        "concept": "Shadow Matching",
+        "conceptKey": "shadow-matcher",
+        "requires": [
+          "camouflage-breaker"
+        ],
+        "activity": "observation/object-hunt",
+        "params": {
+          "level": 15,
+          "question": {
+            "mode": "shadow",
+            "sceneIds": [
+              "town-lantern-night"
+            ],
+            "objectCount": 10,
+            "targetCount": 3,
+            "questionsPerRound": 5,
+            "targetScale": 0.78,
+            "camouflageStrength": 0.22
+          },
+          "play": {
+            "mode": "object_hunt",
+            "tier": "challenge",
+            "difficultyColor": "indigo",
+            "category": "Visual Search",
+            "shortDesc": "At the lantern festival everything is a silhouette",
+            "targetObjective": "Match each picture to its shadow.",
+            "stepByStep": [
+              "Look at the shape of the target.",
+              "Find the shadow with the same outline.",
+              "Tap the shadow."
+            ],
+            "kidTip": "Shadows keep the edge and lose everything else.",
+            "audioPrompt": "The lanterns are lit and everything is a shadow. Match each picture to its shape."
+          }
+        },
+        "difficulty": "Hard",
+        "iconName": "search",
+        "iconTone": "indigo",
+        "pedagogyTip": "A shadow strips colour and inner detail, leaving contour as the only evidence.",
+        "standards": [],
+        "trajectoryLevel": "shadow-matcher",
+        "ageBand": [
+          6,
+          9
+        ]
+      },
+      {
+        "id": "find-what-belongs",
+        "title": "Find What Belongs",
+        "concept": "Category Search",
+        "conceptKey": "category-searcher",
+        "requires": [
+          "shadow-matcher"
+        ],
+        "activity": "observation/object-hunt",
+        "params": {
+          "level": 16,
+          "question": {
+            "mode": "category",
+            "sceneIds": [
+              "market-fruit-market",
+              "home-busy-playroom",
+              "school-art-classroom",
+              "market-bakery-cafe",
+              "home-cozy-bedroom"
+            ],
+            "objectCount": 10,
+            "questionsPerRound": 5,
+            "targetScale": 0.74,
+            "camouflageStrength": 0.36,
+            "categories": [
+              "food",
+              "toy",
+              "tool",
+              "clothing",
+              "container"
+            ]
+          },
+          "play": {
+            "mode": "object_hunt",
+            "tier": "challenge",
+            "difficultyColor": "emerald",
+            "category": "Visual Search",
+            "shortDesc": "No picture this time, just a group to find",
+            "targetObjective": "Find every object that belongs to the group.",
+            "stepByStep": [
+              "Read or listen to the group you need.",
+              "Look at each object and ask if it belongs.",
+              "Tap every one that does."
+            ],
+            "kidTip": "There is no picture to copy, so you have to know what the thing is.",
+            "audioPrompt": "This time there is no picture. Find everything that belongs to the group."
+          }
+        },
+        "difficulty": "Hard",
+        "iconName": "search",
+        "iconTone": "emerald",
+        "pedagogyTip": "Searching by category removes the template entirely: the child must recognise an object and judge it, not match artwork.",
+        "standards": [],
+        "trajectoryLevel": "category-searcher",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "hidden-object-challenge",
+        "title": "Hidden Object Challenge",
+        "concept": "Independent Visual Search",
+        "conceptKey": "independent-visual-searcher",
+        "requires": [
+          "category-searcher"
+        ],
+        "activity": "observation/object-hunt",
+        "params": {
+          "level": 17,
+          "question": {
             "modes": [
               "occluded",
+              "overlap",
+              "mirror",
+              "camouflage",
+              "shadow",
               "clutter",
+              "near_decoys",
               "rotation",
-              "scale",
-              "near_decoys"
+              "scale"
             ],
             "sceneIds": [
               "town-festival-square",
@@ -5725,7 +5991,7 @@
         "requires": [],
         "activity": "observation/object-hunt",
         "params": {
-          "level": 13,
+          "level": 18,
           "question": {
             "practice": true,
             "modes": [
@@ -5735,10 +6001,10 @@
               "rotation",
               "scale",
               "occluded",
-              "clutter",
-              "rotation",
-              "near_decoys",
-              "clutter"
+              "overlap",
+              "mirror",
+              "camouflage",
+              "shadow"
             ],
             "sceneIds": [
               "beach-sandcastle-shore",

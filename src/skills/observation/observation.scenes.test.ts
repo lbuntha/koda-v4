@@ -4,17 +4,17 @@ import { SCENES } from "./internal/scenes";
 import { validateCatalog, validateScene } from "./internal/validation";
 
 describe("observation content data", () => {
-  it("freezes exactly 110 unique objects", () => {
-    expect(OBJECT_CATALOG).toHaveLength(110);
+  it("freezes exactly 130 unique objects", () => {
+    expect(OBJECT_CATALOG).toHaveLength(130);
     expect(validateCatalog()).toEqual([]);
   });
 
-  it("keeps all twenty-two scenes reachable and unambiguous", () => {
-    expect(SCENES).toHaveLength(22);
+  it("keeps all twenty-eight scenes reachable and unambiguous", () => {
+    expect(SCENES).toHaveLength(28);
     SCENES.forEach((scene) => expect(validateScene(scene)).toEqual([]));
     expect(new Set(SCENES.map((scene) => scene.place))).toEqual(new Set([
       "Beach Promenade", "City Park", "Family Home", "Market Street", "Farm Village", "Forest Camp", "School Campus",
-      "Harbor & Aquarium", "Science Museum", "Town Square", "Castle Kingdom",
+      "Harbor & Aquarium", "Science Museum", "Town Square", "Castle Kingdom", "Inventor's Workshop", "Coral Reef",
     ]));
   });
 

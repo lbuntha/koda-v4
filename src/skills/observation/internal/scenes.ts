@@ -20,6 +20,12 @@ import townFestivalJson from "./scenes/town-festival-square.json";
 import townParadeJson from "./scenes/town-toy-parade.json";
 import castleCourtyardJson from "./scenes/castle-royal-courtyard.json";
 import castleFrogMoatJson from "./scenes/castle-frog-moat.json";
+import castleMirrorsJson from "./scenes/castle-hall-of-mirrors.json";
+import townNightJson from "./scenes/town-lantern-night.json";
+import workshopBenchJson from "./scenes/workshop-cluttered-workbench.json";
+import workshopGearJson from "./scenes/workshop-gear-room.json";
+import reefThicketJson from "./scenes/reef-coral-thicket.json";
+import reefHoldJson from "./scenes/reef-sunken-hold.json";
 import type { ObservationScene } from "./types";
 
 export const SCENES = [
@@ -33,6 +39,9 @@ export const SCENES = [
   harborDocksJson, harborAquariumJson,
   museumPlanetariumJson, museumRoboticsJson,
   townFestivalJson, townParadeJson,
-  castleCourtyardJson, castleFrogMoatJson,
+  castleCourtyardJson, castleFrogMoatJson, castleMirrorsJson,
+  townNightJson,
+  workshopBenchJson, workshopGearJson,
+  reefThicketJson, reefHoldJson,
 ] as ObservationScene[];
 export const SCENE_BY_ID = new Map(SCENES.map((scene) => [scene.id, scene]));

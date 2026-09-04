@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import { SvgAsset } from "../../../assets/svg";
 import type { ActivityProps } from "../../types";
 import { SkillRound, SPRING, composeHints, isPractice, playCopy, stagger, useMotionOK, useSkillRound, type RoundQuestion } from "../../kit";
-import { OBJECT_BY_ID, SWARM_OBJECT_ID } from "../internal/data";
+import { CATEGORY_LABELS, OBJECT_BY_ID, SWARM_OBJECT_ID } from "../internal/data";
 import { SCENE_BY_ID } from "../internal/scenes";
 import { placeObjects, seedHash, seededShuffle } from "../internal/placement";
 import { keyOf, type ObjectHuntSetup, type ObservationMode, type ObservationRegion, type ObservationScene, type SceneObject } from "../internal/types";
@@ -24,6 +24,8 @@ export interface ObjectHuntQuestion extends RoundQuestion {
   camouflageStrength: number;
   /** Swarm rounds only: the catalog id every target shares. */
   swarmObjectId?: string;
+  /** Category rounds only: what the round is asking for. */
+  category?: string;
 }
 
 const FUTURE_MODES: ObservationMode[] = ["exact", "silhouette", "near_decoys", "rotation", "scale", "occluded", "clutter"];
@@ -113,6 +115,54 @@ function buildSwarmQuestion(setup: ObjectHuntSetup, scene: ObservationScene, see
   };
 }
 
+/**
+ * Category question: "find three things you can eat".
+ *
+ * The tray shows no picture, so there is nothing to template-match against —
+ * the child has to recognise each object and decide whether it belongs. Every
+ * scene object of the chosen category is a target, which keeps the count
+ * honest and stops a partial answer from scoring.
+ */
+function buildCategoryQuestion(setup: ObjectHuntSetup, scene: ObservationScene, seed: string): ObjectHuntQuestion {
+  const available = new Map<string, SceneObject[]>();
+  scene.objects.forEach((object) => {
+    const category = OBJECT_BY_ID.get(object.id)?.category;
+    if (category) available.set(category, [...(available.get(category) ?? []), object]);
+  });
+  const allowed = (setup.categories ?? [...available.keys()])
+    .filter((category) => (available.get(category)?.length ?? 0) >= 2);
+  const pool = allowed.length ? allowed : [...available.keys()];
+  const category = shuffled(pool, `${seed}:category`)[0];
+  const members = available.get(category) ?? [];
+  const targetObjects = shuffled(members, `${seed}:members`).slice(0, Math.min(members.length, 4));
+  const targetKeys = new Set(targetObjects.map(keyOf));
+  // Every remaining member of the group leaves the scene as well. A capped
+  // round that still showed the leftovers would call a correct answer wrong:
+  // the child taps a thing you can eat and is told it is not a match.
+  const others = scene.objects.filter((object) => {
+    if (targetKeys.has(keyOf(object))) return false;
+    return OBJECT_BY_ID.get(object.id)?.category !== category;
+  });
+  const wanted = Math.max(targetObjects.length + 2, amount(setup.objectCount, 10, `${seed}:count`));
+  const decoys = shuffled(others, `${seed}:decoys`).slice(0, Math.max(0, wanted - targetObjects.length));
+  const objects = placeObjects(scene, shuffled([...targetObjects, ...decoys], `${seed}:display`), `${seed}:locations`);
+  const targets = targetObjects.map(keyOf);
+  const visibility = visibilityProfile(setup.level, setup);
+  return {
+    id: `object-hunt-${hash(seed).toString(36)}`,
+    taskKind: `find_category_${category}_${scene.id}`,
+    prompt: `Find ${targets.length} ${CATEGORY_LABELS[category] ?? category}.`,
+    expected: [...targets].sort().join(","),
+    itemCount: objects.length,
+    mode: "category",
+    scene,
+    objects,
+    targets,
+    category,
+    ...visibility,
+  };
+}
+
 export function buildQuestion(setup: ObjectHuntSetup, index: number): ObjectHuntQuestion {
   const baseSeed = setup.seed ?? "observation";
   const requestedScenes = setup.sceneIds?.length ? setup.sceneIds : [setup.sceneId ?? "beach-sandcastle-shore"];
@@ -122,12 +172,18 @@ export function buildQuestion(setup: ObjectHuntSetup, index: number): ObjectHunt
   const seed = `${roundSeed}:${index}`;
   const mode = selectedMode(setup, index);
   if (mode === "swarm") return buildSwarmQuestion(setup, scene, seed);
+  if (mode === "category") return buildCategoryQuestion(setup, scene, seed);
   const objectCount = Math.max(1, Math.min(scene.objects.length, amount(setup.objectCount, 8, `${seed}:objects`)));
   const targetCount = Math.max(1, Math.min(objectCount, amount(setup.targetCount, 1, `${seed}:targets`)));
   // Scene variants in one lesson share a target deck, so moving from one
   // backdrop to another does not reset the no-repeat promise.
   const targetDeckSeed = `${baseSeed}:${requestedScenes.join("|")}:answers`;
-  const targetOrder = [...scene.objects].sort((a, b) => hash(`${targetDeckSeed}:${a.id}`) - hash(`${targetDeckSeed}:${b.id}`));
+  // A mirror round can only ask about objects whose reflection looks different.
+  const eligible = mode === "mirror"
+    ? scene.objects.filter((object) => OBJECT_BY_ID.get(object.id)?.mirrorSafe)
+    : scene.objects;
+  const deck = eligible.length >= 2 ? eligible : scene.objects;
+  const targetOrder = [...deck].sort((a, b) => hash(`${targetDeckSeed}:${a.id}`) - hash(`${targetDeckSeed}:${b.id}`));
   // Deal from one shuffled round deck so every scene object is considered
   // before any target repeats, including multi-target questions.
   const plannedTargetDraws = targetCount * (setup.questionsPerRound ?? 5);
@@ -156,6 +212,17 @@ export function buildQuestion(setup: ObjectHuntSetup, index: number): ObjectHunt
     // occluded is not itself the clue.
     if (mode === "occluded" && (targetIds.has(key) || hash(`${seed}:${key}:occlude`) % 3 > 0)) {
       return { ...object, visibleFraction: 0.72 };
+    }
+    // Overlap: art is drawn larger than its hit box, so shapes cross over one
+    // another the way a real pile does. The boxes stay apart, so a tap is still
+    // unambiguous — only the picture is tangled, never the scoring.
+    // Slots sit ~19% of the scene apart, so art has to pass that to cross.
+    if (mode === "overlap") return { ...object, visualScale: 3.3 + (hash(`${seed}:${key}:spill`) % 50) / 100 };
+    // Mirror: about half the scene is flipped, targets included, so handedness
+    // is a real feature to check rather than a marker for the answer.
+    if (mode === "mirror") {
+      const canFlip = OBJECT_BY_ID.get(object.id)?.mirrorSafe;
+      return { ...object, mirrored: !!canFlip && hash(`${seed}:${key}:flip`) % 2 === 0 };
     }
     return object;
   });
@@ -396,10 +463,15 @@ export const ObjectHunt: React.FC<ActivityProps<ObjectHuntParams>> = ({ params, 
                     shape. Found objects return to full opacity as the reward. */}
                 <span data-visual-scale={isTarget ? "target" : "ordinary"} className="pointer-events-none grid h-full w-full place-items-center transition-transform duration-200"
                   style={{
-                    transform: `scale(${question.targetScale * (object.visualScale ?? 1)})`,
+                    transform: `scale(${question.targetScale * (object.visualScale ?? 1)})${object.mirrored ? " scaleX(-1)" : ""}`,
                     opacity: isFound ? 1 : .85,
-                    filter: `saturate(${1 - question.camouflageStrength * .55}) contrast(${1 - question.camouflageStrength * .18})`,
-                    mixBlendMode: question.camouflageStrength >= .16 ? "multiply" : "normal",
+                    // Shadow rounds flatten every object to its outline, so only
+                    // contour is left to match. Camouflage rounds drain colour
+                    // and let the backdrop's own hue come through instead.
+                    filter: question.mode === "shadow"
+                      ? "brightness(0)"
+                      : `saturate(${(question.mode === "camouflage" ? .34 : 1) * (1 - question.camouflageStrength * .55)}) contrast(${1 - question.camouflageStrength * .18})`,
+                    mixBlendMode: question.mode === "camouflage" ? "luminosity" : question.camouflageStrength >= .16 ? "multiply" : "normal",
                     clipPath: object.visibleFraction < 1 ? `inset(0 0 ${(1 - object.visibleFraction) * 100}% 0)` : undefined,
                   }}><SvgAsset id={object.asset} size="100%" className={PREMIUM_ART_CLASS} /></span>
                 {isCelebrating && motionOK && <MatchBurst />}
@@ -432,7 +504,18 @@ export const ObjectHunt: React.FC<ActivityProps<ObjectHuntParams>> = ({ params, 
         )}
         <motion.div initial={motionOK ? { y: 10, opacity: 0 } : false} animate={{ y: 0, opacity: 1 }} transition={SPRING.enter}
           className="flex items-center justify-center gap-5 overflow-x-auto px-3 py-2" aria-label="Objects to find">
-          {question.swarmObjectId ? (() => {
+          {question.category ? (
+            // No preview art: showing pictures would hand back the template the
+            // level exists to remove. The card names the group and counts down.
+            <div data-target-id={`category-${question.category}`} data-category-progress={`${found.size}/${question.targets.length}`}
+              className="flex shrink-0 items-center gap-3 rounded-2xl bg-slate-100 px-4 py-2 dark:bg-slate-800">
+              <span aria-hidden className="grid h-14 w-14 place-items-center rounded-xl bg-white text-2xl dark:bg-slate-900">?</span>
+              <span className="flex flex-col leading-tight">
+                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{CATEGORY_LABELS[question.category] ?? question.category}</span>
+                <span className="text-lg font-bold tabular-nums text-emerald-600 dark:text-emerald-400">{found.size} / {question.targets.length}</span>
+              </span>
+            </div>
+          ) : question.swarmObjectId ? (() => {
             // One card for the whole swarm. A tray of fourteen identical frog
             // previews would say nothing the counter does not say better.
             const swarmId = question.swarmObjectId;

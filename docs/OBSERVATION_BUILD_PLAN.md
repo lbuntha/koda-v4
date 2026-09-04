@@ -44,8 +44,8 @@ speed-scored mobile hidden-object game, and simpler than an interactive adventur
 
 ### 1.2 Content scale for v1
 
-V1 contains **110 original targetable object assets**, organized around **11
-recognizable places**, plus **22 authored scenes** (two per place). Each scene follows the
+V1 contains **130 original targetable object assets**, organized around **13
+recognizable places**, plus **28 authored scenes**. Each scene follows the
 attached reference's composition: one lively location with people, furniture, plants,
 architecture, and small story moments, with target objects naturally embedded throughout.
 This is large enough for varied rounds without claiming the hundreds of scenes or targets of
@@ -147,6 +147,22 @@ Moat carries:
 Not every copy should be well hidden. A few in open sky stay easy on purpose: a round where
 all twelve are maximally camouflaged is one a five-year-old abandons.
 
+### The five advanced modes
+
+Levels 12–16 each ask for something the earlier ladder never does. All five run on the same
+engine and the same scoring contract; what changes is what the child has to look at.
+
+| Mode | The new demand | How it is built |
+|---|---|---|
+| `overlap` | pull one contour out of another | art is drawn ~3.4× its hit box so shapes cross, while the boxes stay apart — the picture is tangled, the scoring never is |
+| `mirror` | tell an object from its reflection | about half the scene is flipped, targets included; **only objects flagged `mirrorSafe` are eligible**, because flipping a frog or a crown changes nothing a child could see |
+| `camouflage` | search by shape when colour is no help | saturation is drained and the objects blend with `luminosity`, so the backdrop's own hue shows through |
+| `shadow` | match a filled outline | `brightness(0)` flattens every object to its silhouette against a lit dusk scene |
+| `category` | recognise, then judge membership | no preview art at all — the tray names a group and counts. **Every scene member of that group is a target, and any capped leftovers are removed from the scene**, or a child tapping a genuine "thing you can eat" would be told it was wrong |
+
+`category` is the reason the catalog finally carries semantic data: every other level matches
+artwork, so nothing until now needed to know that a banana and a cupcake are both food.
+
 Swarm is deliberately excluded from the `mixed` challenge cycle: mixing a
 counting task into a five-target recognition round would change what the final
 challenge measures.
@@ -169,8 +185,13 @@ on `params.level`.
 | 9 | `search-a-busy-scene` | Search the Busy Scene | Science Museum | 5 targets, 10 interactive objects plus dense visual decoys |
 | 10 | `search-the-castle` | Search the Castle | Castle Kingdom | 4 targets, 10 objects, dense visual decoys |
 | 11 | `find-all-the-frogs` | Find All the Frogs | Castle Kingdom | one repeated character hidden 12 times, 18 objects |
-| 12 | `hidden-object-challenge` | Hidden Object Challenge | Town, Harbor, and Museum | 5 targets, five-mode cycle, dense visual decoys |
-| 13 | `practice-object-hunt` | Practice: Object Hunt | All Places | 10 one-target scenes cycling L3–10, no hints/opening speech |
+| 12 | `untangle-the-pile` | Untangle the Pile | Inventor's Workshop | 3 targets, art drawn past its hit box so shapes cross |
+| 13 | `same-or-mirrored` | Same or Mirrored? | Castle Hall of Mirrors | 3 targets, half the scene flipped, asymmetric objects only |
+| 14 | `hiding-in-the-pattern` | Hiding in the Pattern | Coral Reef | 3 targets, colour drained so only contour is left |
+| 15 | `follow-the-shadow` | Follow the Shadow | Town Lantern Night | 3 targets rendered as silhouettes |
+| 16 | `find-what-belongs` | Find What Belongs | Market, Home, School | every member of a named category, no preview art |
+| 17 | `hidden-object-challenge` | Hidden Object Challenge | Town, Harbor, and Museum | 5 targets, nine-mode cycle, dense visual decoys |
+| 18 | `practice-object-hunt` | Practice: Object Hunt | All Places | 10 one-target scenes cycling ten modes, no hints/opening speech |
 
 ### Learning records
 
@@ -187,7 +208,12 @@ on `params.level`.
 | 9 | `figure-ground-searcher` | Separate targets from a busy background |
 | 10 | `themed-scene-searcher` | Carry a learned search into an unfamiliar place |
 | 11 | `exhaustive-searcher` | Cover a whole scene systematically and keep count |
-| 12–13 | `independent-visual-searcher` | Apply taught search skills without scaffolding |
+| 12 | `figure-separator` | Pull one contour out of another where shapes cross |
+| 13 | `mirror-discriminator` | Tell an object from its reflection — the b/d rule |
+| 14 | `camouflage-breaker` | Search by shape when colour is no help |
+| 15 | `shadow-matcher` | Match a filled outline with no inner detail |
+| 16 | `category-searcher` | Recognise objects and judge membership, with no template |
+| 17–18 | `independent-visual-searcher` | Apply taught search skills without scaffolding |
 
 `manifest.requires` is `[]`; Level 1 is independent. Lesson `requires` follows the sequence.
 Do not reuse mathematical keys such as `counter` or `comparer`.
@@ -308,8 +334,10 @@ The 20 authored scene briefs are:
 | School Campus | Art Classroom | Library Lab |
 | Harbor & Aquarium | Aquarium Gallery | Harbor Docks |
 | Science Museum | Planetarium | Robotics Hall |
-| Town Square | Festival Square | Toy Parade |
-| Castle Kingdom | Royal Courtyard | Frog Moat |
+| Town Square | Festival Square | Toy Parade · Lantern Night |
+| Castle Kingdom | Royal Courtyard | Frog Moat · Hall of Mirrors |
+| Inventor's Workshop | Cluttered Workbench | Gear Room |
+| Coral Reef | Coral Thicket | Sunken Hold |
 
 Every scene contains foreground, middle-ground, and background activity. People or friendly
 characters may provide story and scale, but are decorative in v1. Target objects belong in
@@ -324,7 +352,7 @@ sky, or in water.
 
 ### 5.2 The 100-object catalog
 
-The catalog has 11 packs of 10 unique, targetable objects. Names are child-facing canonical
+The catalog has 13 packs of 10 unique, targetable objects. Names are child-facing canonical
 English labels; `voice.json` may provide approved synonyms without changing ids.
 
 | Pack | Place | Objects 1–10 |
@@ -340,8 +368,10 @@ English labels; `voice.json` may provide approved synonyms without changing ids.
 | 9 | Science Museum | rocket, planet, astronaut helmet, satellite, telescope, robot, moon boot, comet, control panel, wrench |
 | 10 | Town Square | bicycle, balloon, ticket, cupcake, drum, crown, gift box, traffic cone, toy train, pinwheel |
 | 11 | Castle Kingdom | frog, royal crown, castle key, shield, goblet, scroll, torch, banner, dragon, chess knight |
+| 12 | Inventor's Workshop | gear, spring, magnet, screwdriver, bolt, oil can, blueprint, magnifier, drive belt, wind-up key |
+| 13 | Coral Reef | sea urchin, kelp frond, hermit crab, angelfish, sand dollar, sea turtle, jellyfish, cowrie shell, sea fan, moray eel |
 
-These 110 canonical ids are frozen once implementation begins. Rename child-facing copy
+These 130 canonical ids are frozen once implementation begins. Rename child-facing copy
 through metadata; do not rename ids and split progress or scene references.
 
 ### 5.3 Object and placement metadata
@@ -436,7 +466,8 @@ type ObservationScene = {
 
 type ObjectHuntParams = {
   mode: "exact" | "silhouette" | "near_decoys" | "rotation" |
-        "scale" | "occluded" | "clutter" | "swarm" | "mixed";
+        "scale" | "occluded" | "clutter" | "swarm" |
+        "overlap" | "mirror" | "camouflage" | "shadow" | "category" | "mixed";
   questionsPerRound: number;
   objectCount: [number, number];
   targetCount: number;
@@ -722,8 +753,9 @@ silent, hint-free one-target practice searches. Scene/List switching, keyboard f
 progress, and reduced-motion behavior are implemented. The 132-phrase Phase 7 audio plan now
 reports **0 missing**: every object prompt, lesson introduction, hint phrase, and reaction
 variant is recorded and bundled. All seven declared features are read by the activity and
-behaviour-tested in `observation.features.test.tsx`. A Castle Kingdom pack (10 objects, 2
-scenes) and the `swarm` mode ship on top of that: Level 10 searches the Royal Courtyard and
+behaviour-tested in `observation.features.test.tsx`. Eighteen lessons now run across 13 places,
+130 objects, and 28 scenes; the voice plan covers 208 phrases with 0 missing. A Castle Kingdom
+pack (10 objects, 3 scenes) and the `swarm` mode ship on top of that: Level 10 searches the Royal Courtyard and
 Level 11 hides one frog fourteen times around the Frog Moat, with 12 live per question. The
 voice plan covers all 153 phrases with **0 missing**. Only the final manual device/offline
 pass and the Phase 9 status flip remain.
@@ -743,6 +775,7 @@ no longer referenced; `npm run voice:observation -- --prune` removes them.
 | **7 — Voice/settings (complete)** | — | Final `voice.json`; object-name/alias audit; record or import required clips; generated `audio/manifest.json`; audio/feature/settings tests | All 100 object prompts are pronounceable, required reactions exist, and voice plan reports 0 missing |
 | **8 — Integration (automated audit complete)** | — | Course; thumbnail; generated seeds; Skill Manager, disable, mobile/theme/offline/audio pass | 11 lessons open once/in order; disabling removes all; required audio works on a second offline round |
 | **9 — Publish (gated)** | — | Change `draft` to `published` | Publication is the only functional change |
+| **11 — Advanced modes (complete)** | 12–16 | Inventor's Workshop and Coral Reef packs; Hall of Mirrors and Lantern Night scenes; overlap/mirror/camouflage/shadow/category modes; category and mirror-safety metadata | Five new demands, each behaviour-tested; challenge and practice cycle them |
 | **10 — Swarm + Castle (complete)** | 10–11 | Castle Kingdom pack; `castle-frog-moat` swarm scene; `instanceId`/`keyOf` placement keys; counter tray; swarm tests | One character is findable many times over; every copy scores once; List view names each copy |
 
 Gate every phase:
@@ -804,10 +837,10 @@ offline-capable.
 
 ## 14. Definition of done
 
-- All 13 lessons open exactly once and in order.
+- All 18 lessons open exactly once and in order.
 - Levels advance from one clear object to a five-object crowded challenge.
 - The screen has an original scene, persistent tray, any-order finding, and retained marks.
-- Exactly 110 original targetable objects across 11 themes and 22 authored scenes are
+- Exactly 130 original targetable objects across 13 themes and 28 authored scenes are
   bundled, namespaced, and listed in one validated catalog.
 - Flat `assets/*.svg` and recursive `audio/**/*` registration match the Counting reference;
   there are no unregistered nested art folders.
@@ -820,5 +853,5 @@ offline-capable.
 - Every feature changes observable behaviour and has a test.
 - Shared kit owns stars/XP; the activity awards none.
 - Light/dark, 360px, desktop, reduced-motion, and offline checks pass.
-- Disabling Observation removes all 13 lessons.
+- Disabling Observation removes all 18 lessons.
 - Lint, tests, and build are green; publishing happens only in Phase 9.

@@ -498,6 +498,11 @@
         "observation/search-a-busy-scene",
         "observation/search-the-castle",
         "observation/find-all-the-frogs",
+        "observation/untangle-the-pile",
+        "observation/same-or-mirrored",
+        "observation/hiding-in-the-pattern",
+        "observation/follow-the-shadow",
+        "observation/find-what-belongs",
         "observation/hidden-object-challenge"
       ]
     },

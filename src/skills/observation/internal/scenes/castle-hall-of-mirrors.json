@@ -1,0 +1,178 @@
+{
+  "id": "castle-hall-of-mirrors",
+  "name": "Hall of Mirrors",
+  "place": "Castle Kingdom",
+  "backdrop": "observation-scene-castle-hall-of-mirrors",
+  "objects": [
+    {
+      "id": "castle-castle-key",
+      "asset": "observation-castle-castle-key",
+      "x": 10,
+      "y": 24,
+      "width": 8,
+      "height": 10,
+      "rotation": 1,
+      "z": 3,
+      "hitPadding": 3,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "top-left"
+    },
+    {
+      "id": "castle-banner",
+      "asset": "observation-castle-banner",
+      "x": 31,
+      "y": 38,
+      "width": 8,
+      "height": 10,
+      "rotation": 8,
+      "z": 4,
+      "hitPadding": 3,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "top-left"
+    },
+    {
+      "id": "castle-dragon",
+      "asset": "observation-castle-dragon",
+      "x": 57,
+      "y": 23,
+      "width": 8,
+      "height": 10,
+      "rotation": -4,
+      "z": 5,
+      "hitPadding": 3,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "top-right"
+    },
+    {
+      "id": "castle-chess-knight",
+      "asset": "observation-castle-chess-knight",
+      "x": 78,
+      "y": 35,
+      "width": 8,
+      "height": 10,
+      "rotation": 3,
+      "z": 3,
+      "hitPadding": 3,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "top-right"
+    },
+    {
+      "id": "home-key",
+      "asset": "observation-home-key",
+      "x": 88,
+      "y": 14,
+      "width": 8,
+      "height": 10,
+      "rotation": -9,
+      "z": 4,
+      "hitPadding": 3,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "top-right"
+    },
+    {
+      "id": "market-teacup",
+      "asset": "observation-market-teacup",
+      "x": 9,
+      "y": 67,
+      "width": 8,
+      "height": 10,
+      "rotation": -2,
+      "z": 5,
+      "hitPadding": 3,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "bottom-left"
+    },
+    {
+      "id": "market-spoon",
+      "asset": "observation-market-spoon",
+      "x": 30,
+      "y": 76,
+      "width": 8,
+      "height": 10,
+      "rotation": 5,
+      "z": 3,
+      "hitPadding": 3,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "bottom-left"
+    },
+    {
+      "id": "school-paintbrush",
+      "asset": "observation-school-paintbrush",
+      "x": 43,
+      "y": 59,
+      "width": 8,
+      "height": 10,
+      "rotation": -7,
+      "z": 4,
+      "hitPadding": 3,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "bottom-left"
+    },
+    {
+      "id": "farm-rubber-boot",
+      "asset": "observation-farm-rubber-boot",
+      "x": 62,
+      "y": 68,
+      "width": 8,
+      "height": 10,
+      "rotation": 0,
+      "z": 5,
+      "hitPadding": 3,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "bottom-right"
+    },
+    {
+      "id": "harbor-snorkel",
+      "asset": "observation-harbor-snorkel",
+      "x": 82,
+      "y": 75,
+      "width": 8,
+      "height": 10,
+      "rotation": 7,
+      "z": 3,
+      "hitPadding": 3,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "bottom-right"
+    }
+  ]
+}

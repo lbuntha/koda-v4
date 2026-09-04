@@ -14,7 +14,63 @@ const PACKS = {
   // Pack 11 (Castle Kingdom) arrived with swarm mode. Its frog is the first
   // catalog object authored to be hidden many times in one scene.
   castle: ["frog", "royal crown", "castle key", "shield", "goblet", "scroll", "torch", "banner", "dragon", "chess knight"],
+  // Pack 12: shapes with strong outlines that stay readable when they overlap.
+  workshop: ["gear", "spring", "magnet", "screwdriver", "bolt", "oil can", "blueprint", "magnifier", "drive belt", "wind-up key"],
+  // Pack 13: creatures and growths that plausibly wear the reef's own texture.
+  reef: ["sea urchin", "kelp frond", "hermit crab", "angelfish", "sand dollar", "sea turtle", "jellyfish", "cowrie shell", "sea fan", "moray eel"],
 } as const;
+
+/**
+ * What each object *is*, for the level that asks by category instead of by
+ * picture. This is the first real semantic data the catalog carries: every
+ * other level matches artwork, so nothing until now needed to know that a
+ * banana and a cupcake are both food.
+ */
+const CATEGORY_MEMBERS: Record<string, string[]> = {
+  food: ["apple", "banana", "carrot", "bread loaf", "cheese wedge", "jam jar", "cupcake", "corn cob", "marshmallow", "goblet"],
+  animal: ["crab", "butterfly", "robin", "ladybug", "rooster", "sheep", "piglet", "owl", "clownfish", "seahorse",
+           "octopus", "starfish", "frog", "dragon", "hermit crab", "angelfish", "sea turtle", "jellyfish", "moray eel", "sea urchin"],
+  tool: ["watering can", "hairbrush", "spoon", "rolling pin", "scissors", "paintbrush", "wrench", "screwdriver",
+         "magnet", "gear", "bolt", "spring", "drive belt", "wind-up key", "magnifier", "castle key", "key"],
+  clothing: ["sun hat", "sandal", "sunglasses", "sock", "slipper", "rubber boot", "moon boot", "astronaut helmet", "snorkel", "crown"],
+  toy: ["beach ball", "teddy bear", "building block", "toy car", "toy star", "kite", "paper plane", "toy train", "pinwheel", "drum", "chess knight", "balloon"],
+  container: ["bucket", "picnic basket", "teacup", "shopping bag", "milk pail", "backpack", "camp mug", "lunchbox",
+              "glue bottle", "treasure chest", "gift box", "oil can", "sunscreen"],
+  nature: ["shell", "leaf", "daisy", "acorn", "pinecone", "mushroom", "coral branch", "pearl", "straw bale",
+           "kelp frond", "sand dollar", "cowrie shell", "sea fan", "planet", "comet"],
+};
+
+const CATEGORY_OF: Record<string, string> = Object.fromEntries(
+  Object.entries(CATEGORY_MEMBERS).flatMap(([category, names]) => names.map((name) => [name, category])),
+);
+
+/**
+ * Objects whose mirror image is visibly different.
+ *
+ * Flipping a frog, a crown, or a shield changes nothing a child could see, so
+ * a mirror round built from symmetric art would be unanswerable. Only these
+ * carry a left and a right.
+ */
+const MIRROR_SAFE = new Set([
+  "banana", "spoon", "teacup", "cheese wedge", "carrot", "jam jar",
+  "pencil", "crayon", "paintbrush", "scissors", "glue bottle", "paper plane",
+  "key", "castle key", "hairbrush", "slipper", "sock", "sandal", "rubber boot", "moon boot",
+  "watering can", "picnic basket", "shopping bag", "oil can", "magnifier", "screwdriver",
+  "rooster", "piglet", "sheep", "robin", "owl", "tractor", "toy car", "toy train",
+  "clownfish", "seahorse", "snorkel", "submarine", "angelfish", "moray eel", "hermit crab", "sea turtle",
+  "banner", "dragon", "chess knight", "comet", "telescope", "wrench", "kelp frond", "sea fan",
+]);
+
+/** Child-facing wording for a category round's prompt. */
+export const CATEGORY_LABELS: Record<string, string> = {
+  food: "things you can eat",
+  animal: "animals",
+  tool: "tools",
+  clothing: "things you can wear",
+  toy: "toys",
+  container: "things that hold something",
+  nature: "things that grow or wash up",
+};
 
 const slug = (value: string) => value.replace(/\s+/g, "-");
 const DECOY_GROUPS: Record<string, string> = {
@@ -56,6 +112,8 @@ export const OBJECT_CATALOG: ObservationObject[] = Object.entries(PACKS).flatMap
     silhouetteFamily: `${theme}-${index}`,
     decoyGroup: DECOY_GROUPS[id],
     dominantColorRole: ["amber", "cyan", "rose", "emerald", "violet"][index % 5],
+    category: CATEGORY_OF[name],
+    mirrorSafe: MIRROR_SAFE.has(name),
     orientationSafe: !["sunscreen", "kite", "robin", "watering can", "alarm clock", "windmill", "frog", "banner", "torch"].includes(name),
     minimumVisibleFraction: index < 3 ? 0.7 : 0.6,
   }}),
@@ -67,3 +125,9 @@ export const BEACH_OBJECT_IDS = PACKS.beach.map((name) => `beach-${slug(name)}`)
 
 /** The character swarm rounds hide many times over. */
 export const SWARM_OBJECT_ID = "castle-frog";
+
+/** Objects grouped by what they are, for category rounds. */
+export const OBJECTS_BY_CATEGORY = OBJECT_CATALOG.reduce<Record<string, string[]>>((all, object) => {
+  if (object.category) all[object.category] = [...(all[object.category] ?? []), object.id];
+  return all;
+}, {});
