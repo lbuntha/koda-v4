@@ -37,7 +37,7 @@ export const MatchFlight: React.FC<MatchFlightProps> = ({ flight, motionOK, artC
       animate={{ x: [0, dx * .16, dx * .68, dx], y: [0, -24, dy * .56, dy], scale: [.9, 1.18, .82, .58], rotate: [0, -7, 5, 0], opacity: [1, 1, .95, 0] }}
       transition={{ duration: .74, times: [0, .2, .72, 1], ease: ["easeOut", "easeInOut", "easeIn"] }}
       onAnimationComplete={onComplete}>
-      <span className="absolute inset-[-18%] rounded-full bg-amber-200/35 blur-lg" />
+      <span className="absolute inset-[-18%] rounded-full bg-emerald-200/35 blur-lg" />
       <SvgAsset id={flight.asset} size="100%" className={artClassName} />
     </motion.div>,
     document.body,

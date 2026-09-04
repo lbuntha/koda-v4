@@ -4977,14 +4977,23 @@
     "teaches": [
       "visual-scanner",
       "visual-matcher",
-      "selective-attender"
+      "selective-attender",
+      "shape-feature-searcher",
+      "feature-conjunction-searcher",
+      "rotation-invariant-matcher",
+      "scale-invariant-matcher",
+      "partial-object-completer",
+      "figure-ground-searcher",
+      "themed-scene-searcher",
+      "exhaustive-searcher",
+      "independent-visual-searcher"
     ],
     "requires": [],
     "features": [
       {
         "id": "audio_speech",
         "name": "Spoken voice",
-        "description": "Reads directions, hints, and object celebrations aloud.",
+        "description": "Uses AI-generated voice recordings for directions, hints, object names, and celebrations.",
         "isEnabled": true,
         "tag": "Audio"
       },
@@ -5015,6 +5024,13 @@
         "description": "Guides attention toward a broad quadrant without revealing the answer.",
         "isEnabled": true,
         "tag": "Cognitive"
+      },
+      {
+        "id": "accessible_list_view",
+        "name": "Labelled list view",
+        "description": "Offers a labelled, keyboard-friendly card list as an alternative to searching the scene.",
+        "isEnabled": true,
+        "tag": "Accessibility"
       },
       {
         "id": "step_context_tags",
@@ -5088,7 +5104,7 @@
         "help": "Number of lessons available before a plan is needed.",
         "type": "number",
         "min": 0,
-        "max": 11,
+        "max": 13,
         "step": 1
       }
     ],
@@ -5104,7 +5120,10 @@
           "level": 1,
           "question": {
             "mode": "exact",
-            "sceneId": "beach-sandcastle-shore",
+            "sceneIds": [
+              "beach-sandcastle-shore",
+              "beach-seaside-cafe"
+            ],
             "objectCount": 6,
             "targetCount": 1,
             "questionsPerRound": 5
@@ -5112,7 +5131,7 @@
           "play": {
             "mode": "object_hunt",
             "tier": "beginner",
-            "difficultyColor": "amber",
+            "difficultyColor": "indigo",
             "category": "Visual Matching",
             "shortDesc": "Match one target picture inside a lively beach scene",
             "targetObjective": "Find the object that matches the picture.",
@@ -5122,12 +5141,12 @@
               "Tap the matching object."
             ],
             "kidTip": "Move your eyes slowly from left to right.",
-            "audioPrompt": "Welcome to the beach! Look at the target, then find the matching hidden object."
+            "audioPrompt": "Welcome to the beach. Look at the target, then find the matching hidden object."
           }
         },
         "difficulty": "Easy",
         "iconName": "search",
-        "iconTone": "amber",
+        "iconTone": "indigo",
         "pedagogyTip": "A single exact target isolates visual matching and systematic scanning.",
         "standards": [],
         "trajectoryLevel": "visual-matcher",
@@ -5149,7 +5168,10 @@
           "level": 2,
           "question": {
             "mode": "exact",
-            "sceneId": "beach-sandcastle-shore",
+            "sceneIds": [
+              "park-playground-picnic",
+              "park-botanical-pond"
+            ],
             "objectCount": 8,
             "targetCount": 2,
             "questionsPerRound": 5
@@ -5157,23 +5179,23 @@
           "play": {
             "mode": "object_hunt",
             "tier": "beginner",
-            "difficultyColor": "amber",
+            "difficultyColor": "cyan",
             "category": "Visual Search",
-            "shortDesc": "Keep two beach targets in mind and find them in any order",
+            "shortDesc": "Keep two park targets in mind and find them in any order",
             "targetObjective": "Find both hidden objects in any order.",
             "stepByStep": [
               "Look at both target pictures.",
               "Choose one and scan the scene in sections.",
-              "Found objects stay marked while you find the other."
+              "Found objects become fully visible while you find the other."
             ],
             "kidTip": "Find one target first, then look again for the other.",
-            "audioPrompt": "Find two hidden objects. You can find them in any order."
+            "audioPrompt": "Explore the city park and find two hidden objects in any order."
           }
         },
         "difficulty": "Easy",
-        "iconName": "eye",
+        "iconName": "search",
         "iconTone": "cyan",
-        "pedagogyTip": "Two targets add working-memory demand while persistent markers reduce repeated search.",
+        "pedagogyTip": "Two targets add working-memory demand while persistent opacity state reduces repeated search.",
         "standards": [],
         "trajectoryLevel": "visual-scanner",
         "ageBand": [
@@ -5194,7 +5216,10 @@
           "level": 3,
           "question": {
             "mode": "exact",
-            "sceneId": "beach-sandcastle-shore",
+            "sceneIds": [
+              "home-busy-playroom",
+              "home-cozy-bedroom"
+            ],
             "objectCount": 10,
             "targetCount": 3,
             "questionsPerRound": 5
@@ -5202,9 +5227,9 @@
           "play": {
             "mode": "object_hunt",
             "tier": "intermediate",
-            "difficultyColor": "amber",
+            "difficultyColor": "purple",
             "category": "Selective Attention",
-            "shortDesc": "Scan a complete beach scene for three targets",
+            "shortDesc": "Scan a complete home scene for three targets",
             "targetObjective": "Find all three hidden objects without rushing.",
             "stepByStep": [
               "Study all three target pictures.",
@@ -5212,17 +5237,561 @@
               "Check each corner before moving on."
             ],
             "kidTip": "Split the scene into four parts and check each part.",
-            "audioPrompt": "Sharp eyes ready! Find all three hidden objects in the beach scene."
+            "audioPrompt": "Look through the family home and find all three hidden objects."
           }
         },
         "difficulty": "Medium",
         "iconName": "scan-search",
-        "iconTone": "violet",
-        "pedagogyTip": "A denser scene rewards quadrant scanning rather than random tapping.",
+        "iconTone": "purple",
+        "pedagogyTip": "A denser home scene rewards quadrant scanning rather than random tapping.",
         "standards": [],
         "trajectoryLevel": "selective-attender",
         "ageBand": [
           6,
+          9
+        ]
+      },
+      {
+        "id": "search-by-shape",
+        "title": "Look at the Shape",
+        "concept": "Shape-Based Visual Search",
+        "conceptKey": "shape-feature-searcher",
+        "requires": [
+          "selective-attender"
+        ],
+        "activity": "observation/object-hunt",
+        "params": {
+          "level": 4,
+          "question": {
+            "mode": "silhouette",
+            "sceneIds": [
+              "market-fruit-market",
+              "market-bakery-cafe"
+            ],
+            "objectCount": 10,
+            "targetCount": 3,
+            "questionsPerRound": 5,
+            "targetScale": 0.62,
+            "camouflageStrength": 0.28
+          },
+          "play": {
+            "mode": "object_hunt",
+            "tier": "intermediate",
+            "difficultyColor": "pink",
+            "category": "Shape Search",
+            "shortDesc": "Use only an object's outline to locate it in the market",
+            "targetObjective": "Match each dark shape to an object in the scene.",
+            "stepByStep": [
+              "Study the outside shape.",
+              "Ignore colour and compare the outline.",
+              "Find all three matching objects."
+            ],
+            "kidTip": "Look for corners, curves, handles, and long edges.",
+            "audioPrompt": "At Market Street, use each silhouette to find three hidden objects."
+          }
+        },
+        "difficulty": "Medium",
+        "iconName": "shapes",
+        "iconTone": "pink",
+        "pedagogyTip": "Silhouette previews isolate contour recognition from colour cues.",
+        "standards": [],
+        "trajectoryLevel": "shape-feature-searcher",
+        "ageBand": [
+          6,
+          9
+        ]
+      },
+      {
+        "id": "ignore-lookalikes",
+        "title": "Ignore the Look-Alikes",
+        "concept": "Feature Conjunction Search",
+        "conceptKey": "feature-conjunction-searcher",
+        "requires": [
+          "shape-feature-searcher"
+        ],
+        "activity": "observation/object-hunt",
+        "params": {
+          "level": 5,
+          "question": {
+            "mode": "near_decoys",
+            "sceneIds": [
+              "beach-sandcastle-shore",
+              "beach-seaside-cafe",
+              "park-playground-picnic",
+              "park-botanical-pond",
+              "home-busy-playroom",
+              "home-cozy-bedroom",
+              "market-fruit-market",
+              "market-bakery-cafe"
+            ],
+            "objectCount": 10,
+            "targetCount": 3,
+            "questionsPerRound": 5,
+            "targetScale": 0.58,
+            "camouflageStrength": 0.32
+          },
+          "play": {
+            "mode": "object_hunt",
+            "tier": "advanced",
+            "difficultyColor": "pink",
+            "category": "Feature Search",
+            "shortDesc": "Compare small details while ignoring related objects",
+            "targetObjective": "Find the exact objects and ignore the look-alikes.",
+            "stepByStep": [
+              "Study the target's full shape.",
+              "Compare one visible feature at a time.",
+              "Reject objects that match only partly."
+            ],
+            "kidTip": "Check shape first, then colour and small details.",
+            "audioPrompt": "Look closely across the city places. Find the exact objects and ignore the look-alikes."
+          }
+        },
+        "difficulty": "Hard",
+        "iconName": "scan-search",
+        "iconTone": "pink",
+        "pedagogyTip": "Related distractors require the learner to combine multiple visible features.",
+        "standards": [],
+        "trajectoryLevel": "feature-conjunction-searcher",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "find-turned-objects",
+        "title": "Find the Turned Objects",
+        "concept": "Rotation-Invariant Matching",
+        "conceptKey": "rotation-invariant-matcher",
+        "requires": [
+          "feature-conjunction-searcher"
+        ],
+        "activity": "observation/object-hunt",
+        "params": {
+          "level": 6,
+          "question": {
+            "mode": "rotation",
+            "sceneIds": [
+              "farm-barnyard-morning",
+              "farm-farm-stand",
+              "forest-tent-clearing",
+              "forest-ranger-cabin"
+            ],
+            "objectCount": 10,
+            "targetCount": 3,
+            "questionsPerRound": 5,
+            "targetScale": 0.54,
+            "camouflageStrength": 0.5
+          },
+          "play": {
+            "mode": "object_hunt",
+            "tier": "advanced",
+            "difficultyColor": "emerald",
+            "category": "Rotation Search",
+            "shortDesc": "Recognize farm and forest objects after they have been turned",
+            "targetObjective": "Find each object even when it points another way.",
+            "stepByStep": [
+              "Study the target's important parts.",
+              "Imagine turning the object in your mind.",
+              "Find the same parts in the scene."
+            ],
+            "kidTip": "The direction can change, but the object's parts stay the same.",
+            "audioPrompt": "Search the farm and forest. Find the objects even when they are turned."
+          }
+        },
+        "difficulty": "Hard",
+        "iconName": "rotate-cw",
+        "iconTone": "emerald",
+        "pedagogyTip": "Large authored rotations build orientation-invariant recognition without reducing the effective touch target.",
+        "standards": [],
+        "trajectoryLevel": "rotation-invariant-matcher",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "find-different-sizes",
+        "title": "Same Object, New Size",
+        "concept": "Scale-Invariant Matching",
+        "conceptKey": "scale-invariant-matcher",
+        "requires": [
+          "rotation-invariant-matcher"
+        ],
+        "activity": "observation/object-hunt",
+        "params": {
+          "level": 7,
+          "question": {
+            "mode": "scale",
+            "sceneIds": [
+              "school-art-classroom",
+              "school-library-lab"
+            ],
+            "objectCount": 10,
+            "targetCount": 4,
+            "questionsPerRound": 5,
+            "targetScale": 0.5,
+            "camouflageStrength": 0.54
+          },
+          "play": {
+            "mode": "object_hunt",
+            "tier": "advanced",
+            "difficultyColor": "cyan",
+            "category": "Size Search",
+            "shortDesc": "Match school objects when their scene size differs from the preview",
+            "targetObjective": "Find the same objects at different sizes.",
+            "stepByStep": [
+              "Notice the object's shape and parts.",
+              "Ignore whether it looks larger or smaller.",
+              "Find all four exact matches."
+            ],
+            "kidTip": "Size can change, but the shape and details still match.",
+            "audioPrompt": "Explore the school. Find the same objects even when their sizes are different."
+          }
+        },
+        "difficulty": "Hard",
+        "iconName": "scaling",
+        "iconTone": "cyan",
+        "pedagogyTip": "Controlled size variation separates identity from apparent scale while keeping every hit region accessible.",
+        "standards": [],
+        "trajectoryLevel": "scale-invariant-matcher",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "find-peeking-objects",
+        "title": "Find What Is Peeking Out",
+        "concept": "Partial Object Completion",
+        "conceptKey": "partial-object-completer",
+        "requires": [
+          "scale-invariant-matcher"
+        ],
+        "activity": "observation/object-hunt",
+        "params": {
+          "level": 8,
+          "question": {
+            "mode": "occluded",
+            "sceneIds": [
+              "harbor-harbor-docks",
+              "harbor-aquarium-gallery"
+            ],
+            "objectCount": 10,
+            "targetCount": 4,
+            "questionsPerRound": 5,
+            "targetScale": 0.47,
+            "camouflageStrength": 0.57
+          },
+          "play": {
+            "mode": "object_hunt",
+            "tier": "advanced",
+            "difficultyColor": "cyan",
+            "category": "Partial Search",
+            "shortDesc": "Recognize harbor objects when only part of each object is visible",
+            "targetObjective": "Find all four objects from the parts that are peeking out.",
+            "stepByStep": [
+              "Study the complete target picture.",
+              "Look for a matching edge or important part.",
+              "Imagine the hidden part and tap the exact object."
+            ],
+            "kidTip": "A handle, point, or curve can identify the whole object.",
+            "audioPrompt": "Search the harbor and aquarium. Find four objects from the parts that are peeking out."
+          }
+        },
+        "difficulty": "Hard",
+        "iconName": "scan-eye",
+        "iconTone": "cyan",
+        "pedagogyTip": "Seventy-two percent visibility develops perceptual completion while retaining a fair identifying feature.",
+        "standards": [],
+        "trajectoryLevel": "partial-object-completer",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "search-a-busy-scene",
+        "title": "Search the Busy Scene",
+        "concept": "Figure-Ground Search",
+        "conceptKey": "figure-ground-searcher",
+        "requires": [
+          "partial-object-completer"
+        ],
+        "activity": "observation/object-hunt",
+        "params": {
+          "level": 9,
+          "question": {
+            "mode": "clutter",
+            "sceneIds": [
+              "museum-planetarium",
+              "museum-robotics-hall"
+            ],
+            "objectCount": 10,
+            "targetCount": 5,
+            "questionsPerRound": 5,
+            "targetScale": 0.45,
+            "camouflageStrength": 0.6
+          },
+          "play": {
+            "mode": "object_hunt",
+            "tier": "expert",
+            "difficultyColor": "purple",
+            "category": "Figure Ground",
+            "shortDesc": "Separate five museum targets from dense exhibits and repeated shapes",
+            "targetObjective": "Find five objects inside the busy museum scene.",
+            "stepByStep": [
+              "Choose one target and remember its strongest feature.",
+              "Scan one museum section at a time.",
+              "Ignore background shapes that match only partly."
+            ],
+            "kidTip": "Finish one small area before moving to the next.",
+            "audioPrompt": "The science museum is busy. Search one section at a time and find all five objects."
+          }
+        },
+        "difficulty": "Very Hard",
+        "iconName": "scan-search",
+        "iconTone": "purple",
+        "pedagogyTip": "Dense low-contrast exhibits increase figure-ground demand without introducing ambiguous exact duplicates.",
+        "standards": [],
+        "trajectoryLevel": "figure-ground-searcher",
+        "ageBand": [
+          8,
+          9
+        ]
+      },
+      {
+        "id": "search-the-castle",
+        "title": "Search the Castle",
+        "concept": "Themed Scene Search",
+        "conceptKey": "themed-scene-searcher",
+        "requires": [
+          "figure-ground-searcher"
+        ],
+        "activity": "observation/object-hunt",
+        "params": {
+          "level": 10,
+          "question": {
+            "mode": "clutter",
+            "sceneIds": [
+              "castle-royal-courtyard"
+            ],
+            "objectCount": 10,
+            "targetCount": 4,
+            "questionsPerRound": 5,
+            "targetScale": 0.5,
+            "camouflageStrength": 0.5
+          },
+          "play": {
+            "mode": "object_hunt",
+            "tier": "challenge",
+            "difficultyColor": "indigo",
+            "category": "Visual Search",
+            "shortDesc": "Hunt for royal treasures around the castle courtyard",
+            "targetObjective": "Find every object hiding in the castle.",
+            "stepByStep": [
+              "Look at the four target pictures.",
+              "Search the towers, then the walls, then the ground.",
+              "Tap each object you find."
+            ],
+            "kidTip": "Check the shadows near the walls - things hide well there.",
+            "audioPrompt": "Welcome to the castle. Find the four royal objects hidden in the courtyard."
+          }
+        },
+        "difficulty": "Medium",
+        "iconName": "search",
+        "iconTone": "indigo",
+        "pedagogyTip": "A new place keeps figure-ground search effortful once earlier scenes feel familiar.",
+        "standards": [],
+        "trajectoryLevel": "themed-scene-searcher",
+        "ageBand": [
+          6,
+          9
+        ]
+      },
+      {
+        "id": "find-all-the-frogs",
+        "title": "Find All the Frogs",
+        "concept": "Exhaustive Search & Keeping Count",
+        "conceptKey": "exhaustive-searcher",
+        "requires": [
+          "themed-scene-searcher"
+        ],
+        "activity": "observation/object-hunt",
+        "params": {
+          "level": 11,
+          "question": {
+            "mode": "swarm",
+            "sceneIds": [
+              "castle-frog-moat"
+            ],
+            "objectCount": 18,
+            "swarmCount": 12,
+            "questionsPerRound": 5,
+            "targetScale": 0.44,
+            "camouflageStrength": 0.52
+          },
+          "play": {
+            "mode": "object_hunt",
+            "tier": "challenge",
+            "difficultyColor": "emerald",
+            "category": "Visual Search",
+            "shortDesc": "One frog, hidden over and over around the castle moat",
+            "targetObjective": "Find every frog before the count is full.",
+            "stepByStep": [
+              "Look at the frog on the counter.",
+              "Sweep the scene one strip at a time.",
+              "Tap every frog until the count is full."
+            ],
+            "kidTip": "Finish one strip of the picture before moving to the next.",
+            "audioPrompt": "Frogs are hiding all around the castle moat. Find every single one."
+          }
+        },
+        "difficulty": "Medium",
+        "iconName": "search",
+        "iconTone": "emerald",
+        "pedagogyTip": "Repeating one target shifts the work from recognition to systematic, exhaustive coverage.",
+        "standards": [],
+        "trajectoryLevel": "exhaustive-searcher",
+        "ageBand": [
+          6,
+          9
+        ]
+      },
+      {
+        "id": "hidden-object-challenge",
+        "title": "Hidden Object Challenge",
+        "concept": "Independent Visual Search",
+        "conceptKey": "independent-visual-searcher",
+        "requires": [
+          "exhaustive-searcher"
+        ],
+        "activity": "observation/object-hunt",
+        "params": {
+          "level": 12,
+          "question": {
+            "modes": [
+              "occluded",
+              "clutter",
+              "rotation",
+              "scale",
+              "near_decoys"
+            ],
+            "sceneIds": [
+              "town-festival-square",
+              "town-toy-parade",
+              "harbor-harbor-docks",
+              "harbor-aquarium-gallery",
+              "museum-planetarium",
+              "museum-robotics-hall"
+            ],
+            "objectCount": 10,
+            "targetCount": 5,
+            "questionsPerRound": 5,
+            "targetScale": 0.42,
+            "camouflageStrength": 0.64
+          },
+          "play": {
+            "mode": "object_hunt",
+            "tier": "expert",
+            "difficultyColor": "pink",
+            "category": "Independent Search",
+            "shortDesc": "Combine every taught strategy across the busiest places",
+            "targetObjective": "Find all five objects using the best search strategy for each scene.",
+            "stepByStep": [
+              "Study all five targets before searching.",
+              "Notice whether shape, direction, size, or a visible part has changed.",
+              "Search systematically and reject partial matches."
+            ],
+            "kidTip": "Use the strategy that matches what changed in this scene.",
+            "audioPrompt": "Take the hidden object challenge. Use every search strategy to find all five objects."
+          }
+        },
+        "difficulty": "Expert",
+        "iconName": "trophy",
+        "iconTone": "pink",
+        "pedagogyTip": "A controlled five-mode cycle measures independent strategy selection without time pressure.",
+        "standards": [],
+        "trajectoryLevel": "independent-visual-searcher",
+        "ageBand": [
+          8,
+          9
+        ]
+      },
+      {
+        "id": "practice-object-hunt",
+        "title": "Practice: Object Hunt",
+        "concept": "Practice Without Help",
+        "conceptKey": "independent-visual-searcher",
+        "requires": [],
+        "activity": "observation/object-hunt",
+        "params": {
+          "level": 13,
+          "question": {
+            "practice": true,
+            "modes": [
+              "exact",
+              "silhouette",
+              "near_decoys",
+              "rotation",
+              "scale",
+              "occluded",
+              "clutter",
+              "rotation",
+              "near_decoys",
+              "clutter"
+            ],
+            "sceneIds": [
+              "beach-sandcastle-shore",
+              "beach-seaside-cafe",
+              "park-playground-picnic",
+              "park-botanical-pond",
+              "home-busy-playroom",
+              "home-cozy-bedroom",
+              "market-fruit-market",
+              "market-bakery-cafe",
+              "farm-barnyard-morning",
+              "farm-farm-stand",
+              "forest-tent-clearing",
+              "forest-ranger-cabin",
+              "school-art-classroom",
+              "school-library-lab",
+              "harbor-harbor-docks",
+              "harbor-aquarium-gallery",
+              "museum-planetarium",
+              "museum-robotics-hall",
+              "town-festival-square",
+              "town-toy-parade"
+            ],
+            "objectCount": 10,
+            "targetCount": 1,
+            "questionsPerRound": 10,
+            "targetScale": 0.48,
+            "camouflageStrength": 0.48
+          },
+          "play": {
+            "mode": "practice",
+            "tier": "master",
+            "difficultyColor": "purple",
+            "category": "Practice",
+            "shortDesc": "Ten independent searches across every place and taught mode",
+            "targetObjective": "Find one target in each scene without hints or spoken directions.",
+            "stepByStep": [
+              "The search skills you learned are mixed together.",
+              "Nothing is read aloud and there are no hints.",
+              "Study the target and search each scene carefully."
+            ],
+            "kidTip": "",
+            "audioPrompt": ""
+          }
+        },
+        "difficulty": "Expert",
+        "iconName": "target",
+        "iconTone": "purple",
+        "pedagogyTip": "Ten one-target questions preserve comparable pace evidence while removing hints and opening speech.",
+        "standards": [],
+        "trajectoryLevel": "independent-visual-searcher",
+        "ageBand": [
+          7,
           9
         ]
       }
@@ -5238,7 +5807,7 @@
     "iconName": "Boxes",
     "tagline": "Take away, compare, and find the missing part.",
     "thumbnail": "subtraction-quest",
-    "status": "draft",
+    "status": "published",
     "audience": {
       "ages": [
         5,

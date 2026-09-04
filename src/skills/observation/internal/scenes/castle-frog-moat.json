@@ -1,0 +1,363 @@
+{
+  "id": "castle-frog-moat",
+  "name": "Frog Moat",
+  "place": "Castle Kingdom",
+  "backdrop": "observation-scene-castle-frog-moat",
+  "swarmObjectId": "castle-frog",
+  "objects": [
+    {
+      "id": "castle-frog",
+      "instanceId": "castle-frog-1",
+      "asset": "observation-castle-frog",
+      "x": 4.63,
+      "y": 5.64,
+      "width": 8,
+      "height": 10,
+      "rotation": -7,
+      "z": 3,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "top-left"
+    },
+    {
+      "id": "castle-frog",
+      "instanceId": "castle-frog-2",
+      "asset": "observation-castle-frog",
+      "x": 24.98,
+      "y": 6.99,
+      "width": 8,
+      "height": 10,
+      "rotation": 4,
+      "z": 4,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "top-left"
+    },
+    {
+      "id": "castle-frog",
+      "instanceId": "castle-frog-3",
+      "asset": "observation-castle-frog",
+      "x": 40.6,
+      "y": 9.62,
+      "width": 8,
+      "height": 10,
+      "rotation": 0,
+      "z": 5,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "top-right"
+    },
+    {
+      "id": "castle-royal-crown",
+      "asset": "observation-castle-royal-crown",
+      "x": 60.95,
+      "y": 10.97,
+      "width": 8,
+      "height": 10,
+      "rotation": -4,
+      "z": 3,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "top-right"
+    },
+    {
+      "id": "castle-frog",
+      "instanceId": "castle-frog-4",
+      "asset": "observation-castle-frog",
+      "x": 81.3,
+      "y": 6.31,
+      "width": 8,
+      "height": 10,
+      "rotation": 7,
+      "z": 4,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "top-right"
+    },
+    {
+      "id": "castle-frog",
+      "instanceId": "castle-frog-5",
+      "asset": "observation-castle-frog",
+      "x": 7.93,
+      "y": 30.94,
+      "width": 8,
+      "height": 10,
+      "rotation": 3,
+      "z": 5,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "top-left"
+    },
+    {
+      "id": "castle-frog",
+      "instanceId": "castle-frog-6",
+      "asset": "observation-castle-frog",
+      "x": 22.27,
+      "y": 32.29,
+      "width": 8,
+      "height": 10,
+      "rotation": -1,
+      "z": 3,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "top-left"
+    },
+    {
+      "id": "castle-castle-key",
+      "asset": "observation-castle-castle-key",
+      "x": 43.9,
+      "y": 28.91,
+      "width": 8,
+      "height": 10,
+      "rotation": -5,
+      "z": 4,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "top-right"
+    },
+    {
+      "id": "castle-frog",
+      "instanceId": "castle-frog-7",
+      "asset": "observation-castle-frog",
+      "x": 64.25,
+      "y": 30.26,
+      "width": 8,
+      "height": 10,
+      "rotation": 6,
+      "z": 5,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "top-right"
+    },
+    {
+      "id": "castle-frog",
+      "instanceId": "castle-frog-8",
+      "asset": "observation-castle-frog",
+      "x": 78.59,
+      "y": 31.61,
+      "width": 8,
+      "height": 10,
+      "rotation": 2,
+      "z": 3,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "top-right"
+    },
+    {
+      "id": "castle-frog",
+      "instanceId": "castle-frog-9",
+      "asset": "observation-castle-frog",
+      "x": 5.22,
+      "y": 50.23,
+      "width": 8,
+      "height": 10,
+      "rotation": -2,
+      "z": 4,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "bottom-left"
+    },
+    {
+      "id": "castle-shield",
+      "asset": "observation-castle-shield",
+      "x": 25.57,
+      "y": 51.58,
+      "width": 8,
+      "height": 10,
+      "rotation": -6,
+      "z": 5,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "bottom-left"
+    },
+    {
+      "id": "castle-frog",
+      "instanceId": "castle-frog-10",
+      "asset": "observation-castle-frog",
+      "x": 45.92,
+      "y": 54.21,
+      "width": 8,
+      "height": 10,
+      "rotation": 5,
+      "z": 3,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "bottom-right"
+    },
+    {
+      "id": "castle-frog",
+      "instanceId": "castle-frog-11",
+      "asset": "observation-castle-frog",
+      "x": 61.54,
+      "y": 49.55,
+      "width": 8,
+      "height": 10,
+      "rotation": 1,
+      "z": 4,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "bottom-right"
+    },
+    {
+      "id": "castle-torch",
+      "asset": "observation-castle-torch",
+      "x": 81.89,
+      "y": 50.9,
+      "width": 8,
+      "height": 10,
+      "rotation": -3,
+      "z": 5,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "bottom-right"
+    },
+    {
+      "id": "castle-frog",
+      "instanceId": "castle-frog-12",
+      "asset": "observation-castle-frog",
+      "x": 2.51,
+      "y": 71.53,
+      "width": 8,
+      "height": 10,
+      "rotation": -7,
+      "z": 3,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "bottom-left"
+    },
+    {
+      "id": "castle-frog",
+      "instanceId": "castle-frog-13",
+      "asset": "observation-castle-frog",
+      "x": 22.86,
+      "y": 72.88,
+      "width": 8,
+      "height": 10,
+      "rotation": 4,
+      "z": 4,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "bottom-left"
+    },
+    {
+      "id": "castle-banner",
+      "asset": "observation-castle-banner",
+      "x": 43.21,
+      "y": 68.22,
+      "width": 8,
+      "height": 10,
+      "rotation": 0,
+      "z": 5,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "bottom-right"
+    },
+    {
+      "id": "castle-frog",
+      "instanceId": "castle-frog-14",
+      "asset": "observation-castle-frog",
+      "x": 64.84,
+      "y": 70.85,
+      "width": 8,
+      "height": 10,
+      "rotation": -4,
+      "z": 3,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "bottom-right"
+    },
+    {
+      "id": "castle-dragon",
+      "asset": "observation-castle-dragon",
+      "x": 79.18,
+      "y": 72.2,
+      "width": 8,
+      "height": 10,
+      "rotation": 7,
+      "z": 4,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "castle",
+        "environment-anchor"
+      ],
+      "region": "bottom-right"
+    }
+  ]
+}

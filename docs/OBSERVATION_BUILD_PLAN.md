@@ -8,7 +8,7 @@ This is the source-of-truth specification for v1. It follows
 `src/skills/counting/`. A review-friendly version lives at `docs/observation-spec.html`.
 
 The supplied beach “Find Hidden Objects” image is the interaction reference: a busy scene,
-object targets along the bottom, and a visible checked state when an object is found. The
+object targets along the bottom, and a visible completed state when an object is found. The
 image itself is not assumed to be licensed and will not be copied.
 
 ## 1. Product outcome
@@ -44,8 +44,8 @@ speed-scored mobile hidden-object game, and simpler than an interactive adventur
 
 ### 1.2 Content scale for v1
 
-V1 contains exactly **100 original targetable object assets**, organized around **10
-recognizable places**, plus **20 authored scenes** (two per place). Each scene follows the
+V1 contains **110 original targetable object assets**, organized around **11
+recognizable places**, plus **22 authored scenes** (two per place). Each scene follows the
 attached reference's composition: one lively location with people, furniture, plants,
 architecture, and small story moments, with target objects naturally embedded throughout.
 This is large enough for varied rounds without claiming the hundreds of scenes or targets of
@@ -84,7 +84,7 @@ as a diagnosis.
 
 1. Show a short instruction and 1–5 object cards in the target tray.
 2. The child searches and taps matching objects in any order.
-3. A correct tap flies the scene object into its target, checks the target, and plays either
+3. A correct tap flies the scene object into its target, restores it to full opacity, and plays either
    one short partial-match pop or one recorded final reaction.
 4. A wrong tap gives a gentle error sound and shows “Not a match. Try again.” without
    exposing the answer.
@@ -107,6 +107,34 @@ One complete scene is one scored question.
 
 The tray never makes one target artificially active.
 
+### Swarm rounds
+
+`swarm` mode hides **one character many times** in a single scene — the "find all
+the frogs" shape of the genre. It runs on the same engine and the same scoring
+contract; only the target model and the tray change.
+
+- A swarm scene names its repeated character in `scene.swarmObjectId`, and every
+  copy carries its own `instanceId`. Scene uniqueness is checked per placement,
+  not per catalog entry, so one catalog object can legitimately appear fourteen
+  times.
+- `keyOf(object)` returns `instanceId ?? id`. Scenes authored before swarm mode
+  carry no `instanceId`, so their catalog ids stay the key and every existing
+  scene, saved round, and answer string keeps working untouched.
+- Each copy is a separate target. `expected` is still a sorted key list, wrong
+  taps are still attempts, and the final copy is still the one scored
+  submission — the round contract does not special-case swarm.
+- The tray shows **one card with a live count** ("Frogs 7 / 12") rather than
+  twelve identical previews, and every correct find flies to that one card.
+- `swarmCount` chooses how many copies are live; the rest of the scene's copies
+  sit out that question, so the count is honest and the layout is not
+  memorisable across a round.
+- The List view numbers the copies ("frog 3", "frog 7") so a screen-reader user
+  can tell them apart and still complete the round.
+
+Swarm is deliberately excluded from the `mixed` challenge cycle: mixing a
+counting task into a five-target recognition round would change what the final
+challenge measures.
+
 ## 3. Level progression
 
 All lessons configure the same `ObjectHunt` engine through JSON. The engine never branches
@@ -116,28 +144,34 @@ on `params.level`.
 |---:|---|---|---|---|
 | 1 | `find-one-object` | Find One Object | Beach Promenade | 1 target, 6 objects, clear spacing, exact preview |
 | 2 | `find-two-objects` | Find Two Objects | City Park | 2 targets, 8 objects, clear spacing |
-| 3 | `find-three-objects` | Find Three Objects | Family Home | 3 targets, 12 objects, light clutter |
-| 4 | `search-by-shape` | Look at the Shape | Market Street | 3 targets, silhouette previews, 14 objects |
-| 5 | `ignore-lookalikes` | Ignore the Look-Alikes | Farm Village | 3 targets, 16 objects, one-feature decoys |
-| 6 | `find-turned-objects` | Find the Turned Objects | Forest Camp | 3 targets, 18 objects, rotations ±45°–180° |
-| 7 | `find-different-sizes` | Same Object, New Size | School Campus | 4 targets, 20 objects, scale 0.7–1.3× preview |
-| 8 | `find-peeking-objects` | Find What Is Peeking Out | Harbor & Aquarium | 4 targets, 24 objects, targets 65–80% visible |
-| 9 | `search-a-busy-scene` | Search the Busy Scene | Science Museum | 5 targets, 30–36 objects, mixed taught transforms |
-| 10 | `hidden-object-challenge` | Hidden Object Challenge | Town Square | 5 targets, 36–45 objects, close decoys and safe occlusion |
-| 11 | `practice-object-hunt` | Practice: Object Hunt | All Places | 10 one-target scenes cycling L3–10, no hints/opening speech |
+| 3 | `find-three-objects` | Find Three Objects | Family Home | 3 targets, 10 objects, light clutter |
+| 4 | `search-by-shape` | Look at the Shape | Market Street | 3 targets, silhouette previews, 10 objects |
+| 5 | `ignore-lookalikes` | Ignore the Look-Alikes | All four current places | 3 targets, 10 objects, one-feature decoys |
+| 6 | `find-turned-objects` | Find the Turned Objects | Farm Village and Forest Camp | 3 targets, 10 objects, rotations ±45°–180° |
+| 7 | `find-different-sizes` | Same Object, New Size | School Campus | 4 targets, 10 objects, scale 0.72–1.2× scene variation |
+| 8 | `find-peeking-objects` | Find What Is Peeking Out | Harbor & Aquarium | 4 targets, 10 interactive objects, targets 72% visible |
+| 9 | `search-a-busy-scene` | Search the Busy Scene | Science Museum | 5 targets, 10 interactive objects plus dense visual decoys |
+| 10 | `search-the-castle` | Search the Castle | Castle Kingdom | 4 targets, 10 objects, dense visual decoys |
+| 11 | `find-all-the-frogs` | Find All the Frogs | Castle Kingdom | one repeated character hidden 12 times, 18 objects |
+| 12 | `hidden-object-challenge` | Hidden Object Challenge | Town, Harbor, and Museum | 5 targets, five-mode cycle, dense visual decoys |
+| 13 | `practice-object-hunt` | Practice: Object Hunt | All Places | 10 one-target scenes cycling L3–10, no hints/opening speech |
 
 ### Learning records
 
 | Levels | conceptKey | Meaning |
 |---|---|---|
-| 1–3 | `visual-target-matcher` | Match an object preview to the same scene object |
+| 1 | `visual-matcher` | Match one object preview to the same scene object |
+| 2 | `visual-scanner` | Sweep a whole scene for more than one target |
+| 3 | `selective-attender` | Hold three targets in mind while ignoring clutter |
 | 4 | `shape-feature-searcher` | Search by contour without depending on colour |
 | 5 | `feature-conjunction-searcher` | Combine features and ignore partial matches |
 | 6 | `rotation-invariant-matcher` | Recognize the same object after rotation |
 | 7 | `scale-invariant-matcher` | Recognize the same object at a different size |
 | 8 | `partial-object-completer` | Recognize an object from a sufficiently visible part |
 | 9 | `figure-ground-searcher` | Separate targets from a busy background |
-| 10–11 | `independent-visual-searcher` | Apply taught search skills without scaffolding |
+| 10 | `themed-scene-searcher` | Carry a learned search into an unfamiliar place |
+| 11 | `exhaustive-searcher` | Cover a whole scene systematically and keep count |
+| 12–13 | `independent-visual-searcher` | Apply taught search skills without scaffolding |
 
 `manifest.requires` is `[]`; Level 1 is independent. Lesson `requires` follows the sequence.
 Do not reuse mathematical keys such as `counter` or `comparer`.
@@ -158,7 +192,7 @@ standard. Each lesson uses its concept key as a non-empty `trajectoryLevel`.
 │                                      │
 ├──────────────────────────────────────┤
 │ target 1   target 2   target 3       │
-│   ✓          ○          ○            │
+│  100%       85%        85%           │
 └──────────────────────────────────────┘
 ```
 
@@ -166,7 +200,10 @@ standard. Each lesson uses its concept key as a non-empty `trajectoryLevel`.
 - The scene is the one meaningful frame; avoid decorative nested cards.
 - The target tray stays below the scene and fits five cards at 360×640.
 - Dense art may offer two-tap quadrant zoom and Back. Pinch and drag are never required.
-- Found objects remain visible and carry both a violet ring and checkmark.
+- Target cards have no selection border, ring, eye icon, or checkmark. Unfound previews use
+  85% opacity; found previews return to 100% opacity.
+- On desktop the activity is capped at 760px wide so the scene and hidden objects remain
+  compact. The percentage-based scene layout still fills narrow mobile screens.
 - Every effective target area is at least 44×44 CSS pixels.
 - Wrong taps use a neutral ripple; hints use a broad search region, never the exact hit box.
 
@@ -201,6 +238,25 @@ question also moves its objects between authored, collision-safe slots within th
 region. This changes target locations without pushing an object outside the scene or placing
 it in an implausible region such as moving a sand object into the sky.
 
+`internal/placement.ts` owns all of that in one function, `placeObjects`, because the rules
+interlock and splitting them is what let an earlier version silently freeze:
+
+- **Real randomness.** The seed hash avalanches (murmur3 finalizer) before use. Plain FNV-1a
+  has a parity low bit, so `% 2` on two near-identical seed strings moved in lockstep — a
+  direction and a distance drawn that way cancelled out to a constant shift, and no object
+  ever changed position.
+- **Derangement, not rotation.** Each region's slot ring is fully permuted and any fixed
+  point is swapped out, so an object never sits out a question on its old spot, and the
+  relative arrangement changes rather than merely rotating.
+- **Band-constrained swaps.** Regions are quadrants and a quadrant can span sky and sand, so
+  slots are further grouped by vertical band. A kite stays airborne and a bucket stays on the
+  ground without per-object surface metadata the generated scenes do not carry.
+- **Proven-safe jitter.** Each landing is nudged by at most half the roomier-axis gap to its
+  nearest neighbour, capped by the scene edges. Two boxes only collide when they overlap on
+  both axes, so budgeting the roomier axis holds for diagonal neighbours too. A slot revisited
+  in a later question therefore never looks pixel-identical.
+- **Reproducible.** Same seed, same layout — for StrictMode, tests, and saved rounds.
+
 ### Hints
 
 Teaching lessons offer three live-state rungs:
@@ -229,10 +285,11 @@ The 20 authored scene briefs are:
 | Market Street | Fruit Market | Bakery Café |
 | Farm Village | Barnyard Morning | Farm Stand |
 | Forest Camp | Tent Clearing | Ranger Cabin |
-| School Campus | Classroom Day | Art Studio |
-| Harbor & Aquarium | Aquarium Hall | Harbor Pier |
-| Science Museum | Space Gallery | Observatory Deck |
-| Town Square | Carnival Midway | Parade Day |
+| School Campus | Art Classroom | Library Lab |
+| Harbor & Aquarium | Aquarium Gallery | Harbor Docks |
+| Science Museum | Planetarium | Robotics Hall |
+| Town Square | Festival Square | Toy Parade |
+| Castle Kingdom | Royal Courtyard | Frog Moat |
 
 Every scene contains foreground, middle-ground, and background activity. People or friendly
 characters may provide story and scale, but are decorative in v1. Target objects belong in
@@ -247,7 +304,7 @@ sky, or in water.
 
 ### 5.2 The 100-object catalog
 
-The catalog has 10 packs of 10 unique, targetable objects. Names are child-facing canonical
+The catalog has 11 packs of 10 unique, targetable objects. Names are child-facing canonical
 English labels; `voice.json` may provide approved synonyms without changing ids.
 
 | Pack | Place | Objects 1–10 |
@@ -262,8 +319,9 @@ English labels; `voice.json` may provide approved synonyms without changing ids.
 | 8 | Harbor & Aquarium | clownfish, seahorse, octopus, starfish, pearl, anchor, treasure chest, snorkel, coral branch, submarine |
 | 9 | Science Museum | rocket, planet, astronaut helmet, satellite, telescope, robot, moon boot, comet, control panel, wrench |
 | 10 | Town Square | bicycle, balloon, ticket, cupcake, drum, crown, gift box, traffic cone, toy train, pinwheel |
+| 11 | Castle Kingdom | frog, royal crown, castle key, shield, goblet, scroll, torch, banner, dragon, chess knight |
 
-These 100 canonical ids are frozen once implementation begins. Rename child-facing copy
+These 110 canonical ids are frozen once implementation begins. Rename child-facing copy
 through metadata; do not rename ids and split progress or scene references.
 
 ### 5.3 Object and placement metadata
@@ -358,7 +416,7 @@ type ObservationScene = {
 
 type ObjectHuntParams = {
   mode: "exact" | "silhouette" | "near_decoys" | "rotation" |
-        "scale" | "occluded" | "clutter" | "mixed";
+        "scale" | "occluded" | "clutter" | "swarm" | "mixed";
   questionsPerRound: number;
   objectCount: [number, number];
   targetCount: number;
@@ -367,6 +425,8 @@ type ObjectHuntParams = {
   visibleFraction?: [number, number];
   practice?: boolean;
   modes?: ObjectHuntParams["mode"][];
+  /** Swarm mode: how many copies of the repeated character to hide. */
+  swarmCount?: number | [number, number];
 };
 ```
 
@@ -389,7 +449,9 @@ Draw at least 200 questions per lesson configuration and prove:
 10. each target's place and surface satisfy its placement metadata;
 11. at least 70% of targets use a meaningful environmental anchor;
 12. retries are bounded with a constructive fallback; and
-13. questions reproduce from params and index for StrictMode, tests, and bug reports.
+13. questions reproduce from params and index for StrictMode, tests, and bug reports;
+14. consecutive questions never produce the same arrangement; and
+15. an object reused across a round lands somewhere new rather than staying put.
 
 ## 7. Repository shape and contract compliance
 
@@ -418,24 +480,24 @@ src/skills/observation/
 │   ├── prompts/                  “Find the {object}” recordings
 │   └── phrases/                  fixed hint/status recordings
 ├── internal/
-│   ├── data/
-│   │   ├── observationQuestions.ts
-│   │   ├── observationScenes.ts
-│   │   ├── observationLayout.ts
-│   │   └── observationPalette.ts
+│   ├── data.ts                   frozen 110-object catalog
+│   ├── placement.ts              the one function that positions everything
+│   ├── scenes.ts                 authored scene registry
+│   ├── types.ts                  incl. `keyOf` placement identity
+│   ├── validation.ts             catalog + per-question scene legality
 │   ├── scenes/                   authored JSON scene graphs
 │   └── ui/                       scene, target tray, found marker
 ├── index.ts
 ├── lessons.json
 ├── manifest.json
 ├── voice.json
-├── observation.test.ts
+├── observation.test.ts           art/registration audit
 ├── observation.activities.test.tsx
-├── observation.art.test.ts
 ├── observation.audio.test.ts
-├── observation.course.test.ts
 ├── observation.features.test.tsx
 ├── observation.hints.test.ts
+├── observation.integration.test.ts   course order + offline bundling
+├── observation.placement.test.ts     layout variety, legality, determinism
 ├── observation.practice.test.tsx
 ├── observation.questions.test.ts
 └── observation.scenes.test.ts
@@ -485,14 +547,14 @@ reveals the answer. V1 includes an **Accessible List view**:
 ```jsonc
 {
   "id": "observation",
-  "name": "Observation",
-  "version": "1.0.0",
-  "description": "Find hidden objects by matching shapes, details, size, and orientation.",
+  "name": "Observation Quest",
+  "version": "0.1.0",
+  "description": "Place-based hidden-object games that build visual scanning, comparison, and attention.",
   "category": "core",
-  "author": "Koda Math Lab",
+  "author": "Koda Learning Lab",
   "iconName": "Search",
-  "tagline": "Look closely and find every hidden object.",
-  "thumbnail": "observation",
+  "tagline": "Look closely, scan the scene, and spot every match.",
+  "thumbnail": "observation-scene-beach-sandcastle-shore",
   "status": "draft",
   "audience": { "ages": [5, 9], "category": "spatial-reasoning" },
   "requires": []
@@ -508,7 +570,7 @@ reveals the answer. V1 includes an **Accessible List view**:
 | `haptic_feedback` | tactile found and wrong-tap feedback |
 | `target_preview` | opens a larger labelled target card |
 | `search_region_hints` | enables region-based hints |
-| `accessible_list_view` | replaces the scene with labelled candidate cards |
+| `accessible_list_view` | offers the labelled candidate-card list beside the scene |
 | `step_context_tags` | shared warm-up/guided/milestone labels |
 | `premium_lessons` | gates lessons after the configured free count |
 
@@ -577,13 +639,20 @@ The real file lists all 100 subjects. Lesson introductions are collected automat
 `lessons.json` and are not duplicated in `voice.json`.
 
 ```bash
-npm run voice:plan -- --skill observation
-npm run voice:record -- --skill observation --limit 5
-GEMINI_API_KEY=... npm run voice:record -- --skill observation
+npm run voice:observation -- --dry-run
+npm run voice:observation -- --limit 5
+npm run voice:observation
 # or import a human voice:
 npm run voice:record -- --skill observation --import ./my-voice
 npm run voice:plan -- --skill observation   # must report 0 missing to publish
 ```
+
+`voice:observation` selects OpenAI's `gpt-4o-mini-tts` model and the `marin`
+voice. It reads `OPENAI_API_KEY` from the ignored `.env` file or the current
+process environment. The key is never written into the skill or its manifest.
+The full ten-place build plans 132 local clips, all of which are now recorded
+and bundled. Later scene packs add their object prompts and hints through the
+same `voice.json` inventory.
 
 Recording is deliberate because generation can cost money. Generated or imported clips land
 below `audio/` and update `audio/manifest.json`; implementation never edits that manifest by
@@ -621,26 +690,38 @@ V1 declares no worksheet adapter: scene touch state and retained found marks are
 
 ## 11. Implementation phases
 
-**Implementation status — 2026-09-04:** Phase 0 and Phase 1 are complete. The skill is
-registered as `draft`, Levels 1–3 use Sandcastle Shore, the 100 canonical object IDs are
-frozen, and 10 beach object assets plus the first authored backdrop are bundled. Observation's
-41 focused tests, TypeScript lint, and the production build pass. The repository-wide test
-baseline still has 138 pre-existing Addition/Subtraction activity failures; none are in
-Observation. Recorded voice clips remain intentionally deferred to Phase 7; the Phase 1
-audio manifest is empty and uses the supported live-speech fallback.
+**Implementation status — 2026-09-04:** Phases 0–7 and the automated Phase 8 audit are complete. The skill remains
+registered as `draft`; Levels 1–10 rotate through twenty authored scenes across all ten
+planned places. All 100 object assets are bundled; silhouette, near-decoy, rotation, scale,
+partial-object, clutter, and mixed challenge modes are live. Scene texture supplies
+low-contrast visual decoys while targets blend with their surroundings, and locations remain
+deterministically randomized between collision-safe authored slots. Level 11 now provides ten
+silent, hint-free one-target practice searches. Scene/List switching, keyboard focus, live
+progress, and reduced-motion behavior are implemented. The 132-phrase Phase 7 audio plan now
+reports **0 missing**: every object prompt, lesson introduction, hint phrase, and reaction
+variant is recorded and bundled. All seven declared features are read by the activity and
+behaviour-tested in `observation.features.test.tsx`. A Castle Kingdom pack (10 objects, 2
+scenes) and the `swarm` mode ship on top of that: Level 10 searches the Royal Courtyard and
+Level 11 hides one frog fourteen times around the Frog Moat, with 12 live per question. The
+voice plan covers all 153 phrases with **0 missing**. Only the final manual device/offline
+pass and the Phase 9 status flip remain.
+
+Twenty-two clips under `audio/` are left over from an earlier Beach-only `voice.json` and are
+no longer referenced; `npm run voice:observation -- --prune` removes them.
 
 | Phase | Levels | Deliverables | Completion signal |
 |---|---|---|---|
-| **0 — Groundwork ✅** | — | Baseline; schemas; validators; deterministic generator; layout/palette; 10 prototype objects; one beach scene; 100-object catalog frozen | 200 L1–3 questions pass invariants; contact-sheet review passes; nothing registered |
-| **1 — Playable core ✅** | 1–3 | Full engine/scaffold; every future mode; manifest; registry; course; structural/behaviour/hint tests | Skill appears; L1–3 complete; wrong taps preserve state; kit owns stars/XP |
-| **2 — Visual features** | 4–5 | Silhouette and near-decoy JSON; complete Beach, Park, Home, and Market packs/scenes (40 objects, 8 scenes) | One exact answer per clue; differences visible at 360px |
-| **3 — Transformations** | 6–7 | Rotation/scale JSON; complete Farm, Forest, and School packs/scenes (70 objects, 14 scenes) | Centers/bounds remain correct; hit regions remain 44px; art contact sheet remains coherent |
-| **4 — Hidden and busy** | 8–10 | Occlusion/clutter/mixed JSON; complete Ocean, Space, and Carnival (100 objects, 20 scenes) | Five targets work in any order; all remain marked; 100-object and 20-scene audits pass at 360px |
-| **5 — Practice** | 11 | Mixed practice; `modeAt`; silence/no-hint tests; Practice log check | 10 one-target questions file comparable pace |
-| **6 — Accessibility** | — | List view; keyboard, focus, live-region, reduced-motion audit | Every round completes without pointer input or exposed hidden labels |
-| **7 — Voice/settings** | — | Final `voice.json`; object-name/alias audit; record or import required clips; generated `audio/manifest.json`; audio/feature/settings tests | All 100 object prompts are pronounceable, required reactions exist, and voice plan reports 0 missing |
-| **8 — Integration** | — | Course; thumbnail; generated seeds; Skill Manager, disable, mobile/theme/offline/audio pass | 11 lessons open once/in order; disabling removes all; required audio works on a second offline round |
-| **9 — Publish** | — | Change `draft` to `published` | Publication is the only functional change |
+| **0 — Groundwork (complete)** | — | Baseline; schemas; validators; deterministic generator; layout/palette; 10 prototype objects; one beach scene; 100-object catalog frozen | 200 L1–3 questions pass invariants; contact-sheet review passes; nothing registered |
+| **1 — Playable core (complete)** | 1–3 | Full engine/scaffold; every future mode; manifest; registry; course; structural/behaviour/hint tests | Skill appears; L1–3 complete; wrong taps preserve state; kit owns stars/XP |
+| **2 — Visual features (complete)** | 4–5 | Silhouette and near-decoy JSON; complete Beach, Park, Home, and Market packs/scenes (40 objects, 8 scenes) | One exact answer per clue; differences visible at 360px |
+| **3 — Transformations (complete)** | 6–7 | Rotation/scale JSON; complete Farm, Forest, and School packs/scenes (70 objects, 14 scenes) | Centers/bounds remain correct; hit regions remain 44px; art contact sheet remains coherent |
+| **4 — Hidden and busy (complete)** | 8–10 | Partial-object/clutter/mixed JSON; complete Harbor, Museum, and Town (100 objects, 20 scenes) | Five targets work in any order; all remain marked; 100-object and 20-scene audits pass at 360px |
+| **5 — Practice (complete)** | 11 | Mixed practice; `modeAt`; silence/no-hint tests; Practice log check | 10 one-target questions file comparable pace |
+| **6 — Accessibility (complete)** | — | List view; keyboard, focus, live-region, reduced-motion audit | Every round completes without pointer input or exposed hidden labels |
+| **7 — Voice/settings (complete)** | — | Final `voice.json`; object-name/alias audit; record or import required clips; generated `audio/manifest.json`; audio/feature/settings tests | All 100 object prompts are pronounceable, required reactions exist, and voice plan reports 0 missing |
+| **8 — Integration (automated audit complete)** | — | Course; thumbnail; generated seeds; Skill Manager, disable, mobile/theme/offline/audio pass | 11 lessons open once/in order; disabling removes all; required audio works on a second offline round |
+| **9 — Publish (gated)** | — | Change `draft` to `published` | Publication is the only functional change |
+| **10 — Swarm + Castle (complete)** | 10–11 | Castle Kingdom pack; `castle-frog-moat` swarm scene; `instanceId`/`keyOf` placement keys; counter tray; swarm tests | One character is findable many times over; every copy scores once; List view names each copy |
 
 Gate every phase:
 
@@ -663,7 +744,7 @@ The `ObjectHunt` driver reads `expected` from `learning.present` and proves:
 - a wrong tap stays on the scene and counts as an attempt;
 - the final target advances once;
 - found-object retaps do not submit;
-- scene markers and tray checks agree;
+- scene and tray opacity states agree;
 - correct subtargets play one `pop` chime and animate into the matching target;
 - wrong taps show “Not a match. Try again.” and trigger one recorded incorrect reaction
   without a simultaneous synthesized tone;
@@ -696,10 +777,10 @@ offline-capable.
 
 ## 14. Definition of done
 
-- All 11 lessons open exactly once and in order.
+- All 13 lessons open exactly once and in order.
 - Levels advance from one clear object to a five-object crowded challenge.
 - The screen has an original scene, persistent tray, any-order finding, and retained marks.
-- Exactly 100 original targetable objects across 10 themes and 20 authored scenes are
+- Exactly 110 original targetable objects across 11 themes and 22 authored scenes are
   bundled, namespaced, and listed in one validated catalog.
 - Flat `assets/*.svg` and recursive `audio/**/*` registration match the Counting reference;
   there are no unregistered nested art folders.
@@ -712,5 +793,5 @@ offline-capable.
 - Every feature changes observable behaviour and has a test.
 - Shared kit owns stars/XP; the activity awards none.
 - Light/dark, 360px, desktop, reduced-motion, and offline checks pass.
-- Disabling Observation removes all 11 lessons.
+- Disabling Observation removes all 13 lessons.
 - Lint, tests, and build are green; publishing happens only in Phase 9.

@@ -170,6 +170,23 @@ GEMINI_API_KEY=... npm run voice:record # record everything missing
 npm run voice:record -- --force         # re-record, e.g. after changing voice
 ```
 
+Observation has a focused OpenAI command. It always selects the Observation
+skill, the OpenAI provider, and the `marin` voice:
+
+```bash
+npm run voice:observation -- --dry-run
+npm run voice:observation -- --limit 5
+npm run voice:observation
+npm run voice:plan -- --skill observation
+```
+
+Put `OPENAI_API_KEY` in the repository's ignored `.env` file before a recording
+run. Never put the key in `voice.json`, an audio manifest, or a committed shell
+script. The generated voice is disclosed in the Observation skill's Spoken
+voice setting. Generated files are compressed and stored below
+`src/skills/observation/audio/`; subsequent runs skip existing clips unless
+`--force` is supplied.
+
 Clips land in **the skill's own folder** — `src/skills/counting/audio/` — as WAV
 named by a hash of the phrase, alongside a `manifest.json` mapping phrase to
 file. Beside `assets/`, for the same reason: a skill is what it teaches, what it

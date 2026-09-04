@@ -483,13 +483,32 @@
     {
       "id": "u38",
       "unitNumber": 38,
-      "title": "Unit 38: Observation — Sandcastle Shore",
-      "description": "Build sharp eyes by finding one, two, then three objects in a lively beach scene",
+      "title": "Unit 38: Observation Quest",
+      "description": "Build visual search skills across beach, park, home, market, farm, forest, and school scenes",
       "icon": "O",
       "lessons": [
         "observation/find-one-object",
         "observation/find-two-objects",
-        "observation/find-three-objects"
+        "observation/find-three-objects",
+        "observation/search-by-shape",
+        "observation/ignore-lookalikes",
+        "observation/find-turned-objects",
+        "observation/find-different-sizes",
+        "observation/find-peeking-objects",
+        "observation/search-a-busy-scene",
+        "observation/search-the-castle",
+        "observation/find-all-the-frogs",
+        "observation/hidden-object-challenge"
+      ]
+    },
+    {
+      "id": "u39",
+      "unitNumber": 39,
+      "title": "Unit 39: Practice — Observation Quest",
+      "description": "Independent hidden-object practice across all ten locations and taught search modes",
+      "icon": "O",
+      "lessons": [
+        "observation/practice-object-hunt"
       ]
     }
   ]

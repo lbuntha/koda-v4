@@ -1,0 +1,178 @@
+{
+  "id": "forest-ranger-cabin",
+  "name": "Ranger Cabin",
+  "place": "Forest Camp",
+  "backdrop": "observation-scene-forest-ranger-cabin",
+  "objects": [
+    {
+      "id": "forest-pinecone",
+      "asset": "observation-forest-pinecone",
+      "x": 10,
+      "y": 24,
+      "width": 8,
+      "height": 10,
+      "rotation": -4,
+      "z": 3,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "forest",
+        "environment-anchor"
+      ],
+      "region": "top-left"
+    },
+    {
+      "id": "forest-mushroom",
+      "asset": "observation-forest-mushroom",
+      "x": 31,
+      "y": 38,
+      "width": 8,
+      "height": 10,
+      "rotation": 3,
+      "z": 4,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "forest",
+        "environment-anchor"
+      ],
+      "region": "top-left"
+    },
+    {
+      "id": "forest-owl",
+      "asset": "observation-forest-owl",
+      "x": 57,
+      "y": 23,
+      "width": 8,
+      "height": 10,
+      "rotation": -9,
+      "z": 5,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "forest",
+        "environment-anchor"
+      ],
+      "region": "top-right"
+    },
+    {
+      "id": "forest-lantern",
+      "asset": "observation-forest-lantern",
+      "x": 78,
+      "y": 35,
+      "width": 8,
+      "height": 10,
+      "rotation": -2,
+      "z": 3,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "forest",
+        "environment-anchor"
+      ],
+      "region": "top-right"
+    },
+    {
+      "id": "forest-tent",
+      "asset": "observation-forest-tent",
+      "x": 88,
+      "y": 14,
+      "width": 8,
+      "height": 10,
+      "rotation": 5,
+      "z": 4,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "forest",
+        "environment-anchor"
+      ],
+      "region": "top-right"
+    },
+    {
+      "id": "forest-compass",
+      "asset": "observation-forest-compass",
+      "x": 9,
+      "y": 67,
+      "width": 8,
+      "height": 10,
+      "rotation": -7,
+      "z": 5,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "forest",
+        "environment-anchor"
+      ],
+      "region": "bottom-left"
+    },
+    {
+      "id": "forest-backpack",
+      "asset": "observation-forest-backpack",
+      "x": 30,
+      "y": 76,
+      "width": 8,
+      "height": 10,
+      "rotation": 0,
+      "z": 3,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "forest",
+        "environment-anchor"
+      ],
+      "region": "bottom-left"
+    },
+    {
+      "id": "forest-camp-mug",
+      "asset": "observation-forest-camp-mug",
+      "x": 43,
+      "y": 59,
+      "width": 8,
+      "height": 10,
+      "rotation": 7,
+      "z": 4,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "forest",
+        "environment-anchor"
+      ],
+      "region": "bottom-left"
+    },
+    {
+      "id": "forest-binoculars",
+      "asset": "observation-forest-binoculars",
+      "x": 62,
+      "y": 68,
+      "width": 8,
+      "height": 10,
+      "rotation": -5,
+      "z": 5,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "forest",
+        "environment-anchor"
+      ],
+      "region": "bottom-right"
+    },
+    {
+      "id": "forest-marshmallow",
+      "asset": "observation-forest-marshmallow",
+      "x": 82,
+      "y": 75,
+      "width": 8,
+      "height": 10,
+      "rotation": 2,
+      "z": 3,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "forest",
+        "environment-anchor"
+      ],
+      "region": "bottom-right"
+    }
+  ]
+}

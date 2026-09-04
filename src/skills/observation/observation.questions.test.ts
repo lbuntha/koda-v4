@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { keyOf } from "./internal/types";
 import { buildQuestion, visibilityProfile } from "./activities/ObjectHunt";
 import { SCENE_BY_ID } from "./internal/scenes";
+import { OBJECT_BY_ID } from "./internal/data";
+import type { ObjectHuntSetup, ObservationMode } from "./internal/types";
 import { validateScene } from "./internal/validation";
 import lessonsJson from "./lessons.json";
 
@@ -34,14 +37,21 @@ describe("observation question generator", () => {
     expect(levels[2].camouflageStrength).toBeGreaterThan(levels[1].camouflageStrength);
   });
 
-  it("builds five varied questions for every lesson", () => {
+  it("builds the planned number of varied questions for every lesson", () => {
     lessonsJson.lessons.forEach((lesson) => {
-      expect(lesson.params.question.questionsPerRound).toBe(5);
+      const questionCount = lesson.params.question.practice ? 10 : 5;
+      expect(lesson.params.question.questionsPerRound).toBe(questionCount);
       expect("seed" in lesson.params.question).toBe(false);
-      const setup = { ...lesson.params.question, mode: lesson.params.question.mode as "exact", seed: `audit-${lesson.id}` };
-      const questions = Array.from({ length: 5 }, (_, index) => buildQuestion(setup, index + 1));
-      expect(new Set(questions.map((question) => question.targets[0])).size).toBe(5);
-      questions.forEach((question) => expect(question.targets.every((id) => question.objects.some((object) => object.id === id))).toBe(true));
+      const setup = { ...lesson.params.question, seed: `audit-${lesson.id}` } as ObjectHuntSetup;
+      const questions = Array.from({ length: questionCount }, (_, index) => buildQuestion(setup, index + 1));
+      // A swarm round asks for the same character every question, so the
+      // no-repeat promise applies to its count, not to a rotating first target.
+      if (lesson.params.question.mode === "swarm") {
+        questions.forEach((question) => expect(question.targets).toHaveLength(lesson.params.question.swarmCount));
+      } else {
+        expect(new Set(questions.map((question) => question.targets[0])).size).toBe(questionCount);
+      }
+      questions.forEach((question) => expect(question.targets.every((id) => question.objects.some((object) => keyOf(object) === id))).toBe(true));
     });
   });
 
@@ -64,5 +74,43 @@ describe("observation question generator", () => {
       });
       expect(validateScene({ ...scene, objects: question.objects })).toEqual([]);
     }
+  });
+
+  it("prioritizes a related distractor in near-decoy mode", () => {
+    const question = buildQuestion({ mode: "near_decoys", sceneId: "market-fruit-market", seed: "decoy-audit", objectCount: 4, targetCount: 1 }, 1);
+    const targetGroup = OBJECT_BY_ID.get(question.targets[0])?.decoyGroup;
+    expect(targetGroup).toBeTruthy();
+    expect(question.objects.some((object) => !question.targets.includes(object.id) && OBJECT_BY_ID.get(object.id)?.decoyGroup === targetGroup)).toBe(true);
+  });
+
+  it("turns Level 6 targets through meaningful angles", () => {
+    const question = buildQuestion({ mode: "rotation", sceneId: "forest-tent-clearing", seed: "rotation-audit", objectCount: 10, targetCount: 3 }, 1);
+    const rotations = question.objects.filter((object) => question.targets.includes(object.id)).map((object) => Math.abs(object.rotation ?? 0));
+    expect(rotations.every((rotation) => rotation >= 45 && rotation <= 180)).toBe(true);
+  });
+
+  it("varies Level 7 scene scale without changing authored hit boxes", () => {
+    const scene = SCENE_BY_ID.get("school-art-classroom")!;
+    const question = buildQuestion({ mode: "scale", sceneId: scene.id, seed: "scale-audit", objectCount: 10, targetCount: 4 }, 1);
+    const targets = question.objects.filter((object) => question.targets.includes(object.id));
+    expect(targets.every((object) => object.visualScale !== undefined && object.visualScale >= 0.72 && object.visualScale <= 1.2)).toBe(true);
+    targets.forEach((object) => {
+      const authored = scene.objects.find((candidate) => candidate.id === object.id)!;
+      expect([object.width, object.height, object.hitPadding]).toEqual([authored.width, authored.height, authored.hitPadding]);
+    });
+  });
+
+  it("shows enough of every partially hidden Level 8 target", () => {
+    const question = buildQuestion({ mode: "occluded", sceneId: "harbor-aquarium-gallery", seed: "occlusion-audit", objectCount: 10, targetCount: 4 }, 1);
+    const targets = question.objects.filter((object) => question.targets.includes(object.id));
+    expect(targets.every((object) => object.visibleFraction === 0.72)).toBe(true);
+    expect(validateScene({ ...question.scene, objects: question.objects })).toEqual([]);
+  });
+
+  it("cycles five taught transformations in the final challenge", () => {
+    const modes: ObservationMode[] = ["occluded", "clutter", "rotation", "scale", "near_decoys"];
+    const setup = { modes, sceneIds: ["town-festival-square", "town-toy-parade"], seed: "challenge-audit", objectCount: 10, targetCount: 5 };
+    const questions = Array.from({ length: 5 }, (_, index) => buildQuestion(setup, index + 1));
+    expect(questions.map((question) => question.mode)).toEqual(modes);
   });
 });

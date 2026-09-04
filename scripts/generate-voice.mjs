@@ -27,6 +27,8 @@
  *   GEMINI_API_KEY=... npm run voice:record            # record what is missing
  *   GEMINI_API_KEY=... npm run voice:record -- --force # re-record everything
  *   OPENAI_API_KEY=... npm run voice:record -- --provider openai
+ *   npm run voice:observation -- --dry-run             # preview Observation, no key
+ *   npm run voice:observation -- --limit 5             # sample five OpenAI clips
  *   npm run voice:record -- --skill counting --import ./my-voice
  *
  * Two providers, one folder. Gemini is the default when its key is present;
@@ -36,9 +38,8 @@
  * answer to a free tier that rate-limits every few requests.
  *
  * Voices differ by provider and a skill's `voices` list is written in Gemini's
- * names, so `OPENAI_VOICE_FOR` maps them across. Override the default with
- * `KODA_OPENAI_VOICE`; `shimmer` and `nova` are the soft ones, `coral` warmer,
- * `onyx` and `echo` deeper.
+ * names, so `OPENAI_VOICE_FOR` maps them across. Override every mapped voice
+ * with `--voice` or `KODA_OPENAI_VOICE` when a skill needs one consistent voice.
  *
  * `--import` takes a folder holding an `index.json` of `{ "phrase": "file.wav" }`
  * plus the files it names, and installs them as that skill's clips. No API key,
@@ -111,8 +112,8 @@ const DIRECTION = "Say warmly and clearly like a friendly math coach: ";
  */
 const OPENAI_MODEL = process.env.KODA_OPENAI_TTS_MODEL || "gpt-4o-mini-tts";
 const OPENAI_VOICE = process.env.KODA_OPENAI_VOICE || "shimmer";
-const OPENAI_DIRECTION =
-  "Warm, soft and unhurried, like a friendly maths coach talking to a young " +
+const OPENAI_DIRECTION = process.env.KODA_OPENAI_TTS_INSTRUCTIONS ||
+  "Warm, soft and unhurried, like a friendly learning coach talking to a young " +
   "child. Gentle and encouraging, never brisk or announcer-like.";
 
 /**
@@ -152,6 +153,10 @@ const flag = (name) => {
   const at = args.indexOf(name);
   return at !== -1 && args[at + 1] && !args[at + 1].startsWith("--") ? args[at + 1] : undefined;
 };
+
+/** One consistent OpenAI voice, when requested by a skill-specific command. */
+const openAIVoiceOverride = flag("--voice") || process.env.KODA_OPENAI_VOICE;
+const openAIVoiceFor = (voice) => openAIVoiceOverride ?? OPENAI_VOICE_FOR[voice] ?? OPENAI_VOICE;
 
 /**
  * Stop after this many recordings, across all skills.
@@ -505,7 +510,7 @@ async function generateOpenAI(phrase, voice = VOICE) {
     },
     body: JSON.stringify({
       model: OPENAI_MODEL,
-      voice: OPENAI_VOICE_FOR[voice] ?? OPENAI_VOICE,
+      voice: openAIVoiceFor(voice),
       input: phrase,
       instructions: OPENAI_DIRECTION,
       response_format: "wav",
@@ -706,7 +711,8 @@ async function main() {
        */
       const width = todo.reduce((w, t) => Math.max(w, t.rel.length), 0);
       for (const { phrase, rel, voice } of todo) {
-        console.log(`  ${rel.padEnd(width)}  ${voice.padEnd(6)}  ${JSON.stringify(phrase)}`);
+        const plannedVoice = provider === "openai" ? openAIVoiceFor(voice) : voice;
+        console.log(`  ${rel.padEnd(width)}  ${plannedVoice.padEnd(7)}  ${JSON.stringify(phrase)}`);
       }
       if (importDir) console.log(`  would import from: ${importDir}`);
       continue;

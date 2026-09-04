@@ -1,0 +1,178 @@
+{
+  "id": "school-art-classroom",
+  "name": "Art Classroom",
+  "place": "School Campus",
+  "backdrop": "observation-scene-school-art-classroom",
+  "objects": [
+    {
+      "id": "school-notebook",
+      "asset": "observation-school-notebook",
+      "x": 10,
+      "y": 24,
+      "width": 8,
+      "height": 10,
+      "rotation": -9,
+      "z": 3,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "school",
+        "environment-anchor"
+      ],
+      "region": "top-left"
+    },
+    {
+      "id": "school-ruler",
+      "asset": "observation-school-ruler",
+      "x": 31,
+      "y": 38,
+      "width": 8,
+      "height": 10,
+      "rotation": -2,
+      "z": 4,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "school",
+        "environment-anchor"
+      ],
+      "region": "top-left"
+    },
+    {
+      "id": "school-scissors",
+      "asset": "observation-school-scissors",
+      "x": 57,
+      "y": 23,
+      "width": 8,
+      "height": 10,
+      "rotation": 5,
+      "z": 5,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "school",
+        "environment-anchor"
+      ],
+      "region": "top-right"
+    },
+    {
+      "id": "school-paintbrush",
+      "asset": "observation-school-paintbrush",
+      "x": 78,
+      "y": 35,
+      "width": 8,
+      "height": 10,
+      "rotation": -7,
+      "z": 3,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "school",
+        "environment-anchor"
+      ],
+      "region": "top-right"
+    },
+    {
+      "id": "school-glue-bottle",
+      "asset": "observation-school-glue-bottle",
+      "x": 88,
+      "y": 14,
+      "width": 8,
+      "height": 10,
+      "rotation": 0,
+      "z": 4,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "school",
+        "environment-anchor"
+      ],
+      "region": "top-right"
+    },
+    {
+      "id": "school-globe",
+      "asset": "observation-school-globe",
+      "x": 9,
+      "y": 67,
+      "width": 8,
+      "height": 10,
+      "rotation": 7,
+      "z": 5,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "school",
+        "environment-anchor"
+      ],
+      "region": "bottom-left"
+    },
+    {
+      "id": "school-calculator",
+      "asset": "observation-school-calculator",
+      "x": 30,
+      "y": 76,
+      "width": 8,
+      "height": 10,
+      "rotation": -5,
+      "z": 3,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "school",
+        "environment-anchor"
+      ],
+      "region": "bottom-left"
+    },
+    {
+      "id": "school-crayon",
+      "asset": "observation-school-crayon",
+      "x": 43,
+      "y": 59,
+      "width": 8,
+      "height": 10,
+      "rotation": 2,
+      "z": 4,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "school",
+        "environment-anchor"
+      ],
+      "region": "bottom-left"
+    },
+    {
+      "id": "school-lunchbox",
+      "asset": "observation-school-lunchbox",
+      "x": 62,
+      "y": 68,
+      "width": 8,
+      "height": 10,
+      "rotation": 9,
+      "z": 5,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "school",
+        "environment-anchor"
+      ],
+      "region": "bottom-right"
+    },
+    {
+      "id": "school-paper-plane",
+      "asset": "observation-school-paper-plane",
+      "x": 82,
+      "y": 75,
+      "width": 8,
+      "height": 10,
+      "rotation": -3,
+      "z": 3,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "school",
+        "environment-anchor"
+      ],
+      "region": "bottom-right"
+    }
+  ]
+}

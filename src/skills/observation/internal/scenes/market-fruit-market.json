@@ -1,0 +1,178 @@
+{
+  "id": "market-fruit-market",
+  "name": "Fruit Market",
+  "place": "Market Street",
+  "backdrop": "observation-scene-market-fruit-market",
+  "objects": [
+    {
+      "id": "market-apple",
+      "asset": "observation-market-apple",
+      "x": 10,
+      "y": 24,
+      "width": 8,
+      "height": 10,
+      "rotation": -9,
+      "z": 3,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "market",
+        "environment-anchor"
+      ],
+      "region": "top-left"
+    },
+    {
+      "id": "market-banana",
+      "asset": "observation-market-banana",
+      "x": 31,
+      "y": 38,
+      "width": 8,
+      "height": 10,
+      "rotation": -2,
+      "z": 4,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "market",
+        "environment-anchor"
+      ],
+      "region": "top-left"
+    },
+    {
+      "id": "market-carrot",
+      "asset": "observation-market-carrot",
+      "x": 57,
+      "y": 23,
+      "width": 8,
+      "height": 10,
+      "rotation": 5,
+      "z": 5,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "market",
+        "environment-anchor"
+      ],
+      "region": "top-right"
+    },
+    {
+      "id": "market-bread-loaf",
+      "asset": "observation-market-bread-loaf",
+      "x": 78,
+      "y": 35,
+      "width": 8,
+      "height": 10,
+      "rotation": -7,
+      "z": 3,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "market",
+        "environment-anchor"
+      ],
+      "region": "top-right"
+    },
+    {
+      "id": "market-teacup",
+      "asset": "observation-market-teacup",
+      "x": 88,
+      "y": 14,
+      "width": 8,
+      "height": 10,
+      "rotation": 0,
+      "z": 4,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "market",
+        "environment-anchor"
+      ],
+      "region": "top-right"
+    },
+    {
+      "id": "market-spoon",
+      "asset": "observation-market-spoon",
+      "x": 9,
+      "y": 67,
+      "width": 8,
+      "height": 10,
+      "rotation": 7,
+      "z": 5,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "market",
+        "environment-anchor"
+      ],
+      "region": "bottom-left"
+    },
+    {
+      "id": "market-shopping-bag",
+      "asset": "observation-market-shopping-bag",
+      "x": 30,
+      "y": 76,
+      "width": 8,
+      "height": 10,
+      "rotation": -5,
+      "z": 3,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "market",
+        "environment-anchor"
+      ],
+      "region": "bottom-left"
+    },
+    {
+      "id": "market-cheese-wedge",
+      "asset": "observation-market-cheese-wedge",
+      "x": 43,
+      "y": 59,
+      "width": 8,
+      "height": 10,
+      "rotation": 2,
+      "z": 4,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "market",
+        "environment-anchor"
+      ],
+      "region": "bottom-left"
+    },
+    {
+      "id": "market-jam-jar",
+      "asset": "observation-market-jam-jar",
+      "x": 62,
+      "y": 68,
+      "width": 8,
+      "height": 10,
+      "rotation": 9,
+      "z": 5,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "market",
+        "environment-anchor"
+      ],
+      "region": "bottom-right"
+    },
+    {
+      "id": "market-rolling-pin",
+      "asset": "observation-market-rolling-pin",
+      "x": 82,
+      "y": 75,
+      "width": 8,
+      "height": 10,
+      "rotation": -3,
+      "z": 3,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "market",
+        "environment-anchor"
+      ],
+      "region": "bottom-right"
+    }
+  ]
+}

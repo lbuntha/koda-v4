@@ -1,0 +1,178 @@
+{
+  "id": "park-botanical-pond",
+  "name": "Botanical Pond",
+  "place": "City Park",
+  "backdrop": "observation-scene-park-botanical-pond",
+  "objects": [
+    {
+      "id": "park-leaf",
+      "asset": "observation-park-leaf",
+      "x": 10,
+      "y": 24,
+      "width": 8,
+      "height": 10,
+      "rotation": -4,
+      "z": 3,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "park",
+        "environment-anchor"
+      ],
+      "region": "top-left"
+    },
+    {
+      "id": "park-daisy",
+      "asset": "observation-park-daisy",
+      "x": 31,
+      "y": 38,
+      "width": 8,
+      "height": 10,
+      "rotation": 3,
+      "z": 4,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "park",
+        "environment-anchor"
+      ],
+      "region": "top-left"
+    },
+    {
+      "id": "park-butterfly",
+      "asset": "observation-park-butterfly",
+      "x": 57,
+      "y": 23,
+      "width": 8,
+      "height": 10,
+      "rotation": -9,
+      "z": 5,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "park",
+        "environment-anchor"
+      ],
+      "region": "top-right"
+    },
+    {
+      "id": "park-robin",
+      "asset": "observation-park-robin",
+      "x": 78,
+      "y": 35,
+      "width": 8,
+      "height": 10,
+      "rotation": -2,
+      "z": 3,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "park",
+        "environment-anchor"
+      ],
+      "region": "top-right"
+    },
+    {
+      "id": "park-acorn",
+      "asset": "observation-park-acorn",
+      "x": 88,
+      "y": 14,
+      "width": 8,
+      "height": 10,
+      "rotation": 5,
+      "z": 4,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "park",
+        "environment-anchor"
+      ],
+      "region": "top-right"
+    },
+    {
+      "id": "park-watering-can",
+      "asset": "observation-park-watering-can",
+      "x": 9,
+      "y": 67,
+      "width": 8,
+      "height": 10,
+      "rotation": -7,
+      "z": 5,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "park",
+        "environment-anchor"
+      ],
+      "region": "bottom-left"
+    },
+    {
+      "id": "park-picnic-basket",
+      "asset": "observation-park-picnic-basket",
+      "x": 30,
+      "y": 76,
+      "width": 8,
+      "height": 10,
+      "rotation": 0,
+      "z": 3,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "park",
+        "environment-anchor"
+      ],
+      "region": "bottom-left"
+    },
+    {
+      "id": "park-bench",
+      "asset": "observation-park-bench",
+      "x": 43,
+      "y": 59,
+      "width": 8,
+      "height": 10,
+      "rotation": 7,
+      "z": 4,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "park",
+        "environment-anchor"
+      ],
+      "region": "bottom-left"
+    },
+    {
+      "id": "park-ladybug",
+      "asset": "observation-park-ladybug",
+      "x": 62,
+      "y": 68,
+      "width": 8,
+      "height": 10,
+      "rotation": -5,
+      "z": 5,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "park",
+        "environment-anchor"
+      ],
+      "region": "bottom-right"
+    },
+    {
+      "id": "park-umbrella",
+      "asset": "observation-park-umbrella",
+      "x": 82,
+      "y": 75,
+      "width": 8,
+      "height": 10,
+      "rotation": 2,
+      "z": 3,
+      "hitPadding": 2,
+      "visibleFraction": 1,
+      "tags": [
+        "park",
+        "environment-anchor"
+      ],
+      "region": "bottom-right"
+    }
+  ]
+}
