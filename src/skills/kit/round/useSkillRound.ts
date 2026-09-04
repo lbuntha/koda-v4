@@ -94,6 +94,8 @@ export interface UseSkillRoundOptions {
    * "two left", not "these two again".
    */
   resumable?: boolean;
+  /** Delay the recorded answer reaction so a short activity chime can finish. */
+  answerSoundDelayMs?: number | ((correct: boolean) => number);
 }
 
 /**
@@ -160,6 +162,7 @@ export function useSkillRound({
   intro,
   deferPresent = false,
   resumable = false,
+  answerSoundDelayMs = 0,
 }: UseSkillRoundOptions): RoundController {
   /*
    * Read once, on mount. Reading it on each render would re-enter the round at
@@ -193,6 +196,11 @@ export function useSkillRound({
 
   /** The question awaiting description, when `deferPresent` is on. */
   const pendingRef = useRef<{ q: RoundQuestion; n: number } | null>(null);
+  const answerSoundTimerRef = useRef<number | null>(null);
+
+  useEffect(() => () => {
+    if (answerSoundTimerRef.current !== null) window.clearTimeout(answerSoundTimerRef.current);
+  }, []);
 
   const present = useCallback(
     (q: RoundQuestion, n: number) => {
@@ -284,9 +292,20 @@ export function useSkillRound({
       // the child being told whether they were right must not depend on
       // anything a sound does. `answerSound.ts` owns the switches and the
       // choice of clip.
-      playAnswerSound(koda, outcome.correct);
+      if (answerSoundTimerRef.current !== null) window.clearTimeout(answerSoundTimerRef.current);
+      const delay = typeof answerSoundDelayMs === "function"
+        ? answerSoundDelayMs(outcome.correct)
+        : answerSoundDelayMs;
+      if (delay > 0) {
+        answerSoundTimerRef.current = window.setTimeout(() => {
+          answerSoundTimerRef.current = null;
+          playAnswerSound(koda, outcome.correct);
+        }, delay);
+      } else {
+        playAnswerSound(koda, outcome.correct);
+      }
     },
-    [feedback, question, koda, levelNumber, index],
+    [feedback, question, koda, levelNumber, index, answerSoundDelayMs],
   );
 
   /* Written after each answered question, so an interrupted run loses at most

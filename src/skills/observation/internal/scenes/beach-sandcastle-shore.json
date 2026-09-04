@@ -1,0 +1,18 @@
+{
+  "id": "beach-sandcastle-shore",
+  "name": "Sandcastle Shore",
+  "place": "Beach Promenade",
+  "backdrop": "observation-scene-beach-sandcastle-shore",
+  "objects": [
+    { "id": "beach-shell", "asset": "observation-beach-shell", "x": 8, "y": 72, "width": 9, "height": 10, "rotation": -12, "z": 3, "hitPadding": 2, "visibleFraction": 1, "tags": ["sand", "natural"], "region": "bottom-left" },
+    { "id": "beach-sunglasses", "asset": "observation-beach-sunglasses", "x": 38, "y": 65, "width": 12, "height": 8, "rotation": 8, "z": 4, "hitPadding": 2, "visibleFraction": 1, "tags": ["blanket"], "region": "bottom-left" },
+    { "id": "beach-crab", "asset": "observation-beach-crab", "x": 77, "y": 72, "width": 10, "height": 10, "rotation": 0, "z": 4, "hitPadding": 2, "visibleFraction": 1, "tags": ["rock", "animal"], "region": "bottom-right" },
+    { "id": "beach-bucket", "asset": "observation-beach-bucket", "x": 60, "y": 61, "width": 9, "height": 12, "rotation": 0, "z": 4, "hitPadding": 2, "visibleFraction": 1, "tags": ["sandcastle"], "region": "bottom-right" },
+    { "id": "beach-sunscreen", "asset": "observation-beach-sunscreen", "x": 89, "y": 43, "width": 7, "height": 13, "rotation": 3, "z": 3, "hitPadding": 2, "visibleFraction": 1, "tags": ["table"], "region": "top-right" },
+    { "id": "beach-sun-hat", "asset": "observation-beach-sun-hat", "x": 16, "y": 45, "width": 12, "height": 10, "rotation": -6, "z": 3, "hitPadding": 2, "visibleFraction": 1, "tags": ["chair"], "region": "top-left" },
+    { "id": "beach-beach-ball", "asset": "observation-beach-beach-ball", "x": 27, "y": 78, "width": 11, "height": 12, "rotation": 0, "z": 5, "hitPadding": 2, "visibleFraction": 1, "tags": ["sand"], "region": "bottom-left" },
+    { "id": "beach-sandal", "asset": "observation-beach-sandal", "x": 69, "y": 42, "width": 9, "height": 10, "rotation": 18, "z": 3, "hitPadding": 2, "visibleFraction": 1, "tags": ["boardwalk"], "region": "top-right" },
+    { "id": "beach-camera", "asset": "observation-beach-camera", "x": 46, "y": 42, "width": 10, "height": 9, "rotation": -4, "z": 3, "hitPadding": 2, "visibleFraction": 1, "tags": ["table"], "region": "top-left" },
+    { "id": "beach-kite", "asset": "observation-beach-kite", "x": 75, "y": 17, "width": 10, "height": 14, "rotation": 8, "z": 2, "hitPadding": 2, "visibleFraction": 1, "tags": ["sky"], "region": "top-right" }
+  ]
+}

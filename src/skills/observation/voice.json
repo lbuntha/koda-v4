@@ -1,0 +1,10 @@
+{
+  "subjects": ["shell", "sunglasses", "crab", "bucket", "sunscreen", "sun hat", "beach ball", "sandal", "camera", "kite"],
+  "templates": ["Find the {value}."],
+  "phrases": ["Welcome to the beach! Look at the target, then find the matching hidden object.", "Find two hidden objects. You can find them in any order.", "Sharp eyes ready! Find all three hidden objects in the beach scene.", "Scan one small part at a time. Move your eyes from left to right.", "Not a match. Look carefully and try again!", "Congratulations! You found every hidden object!"],
+  "prompts": [],
+  "groups": {
+    "correct": { "phrases": ["Congratulations! You found every hidden object!"] },
+    "incorrect": { "phrases": ["Not a match. Look carefully and try again!"] }
+  }
+}

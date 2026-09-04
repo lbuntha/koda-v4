@@ -2,6 +2,7 @@ import { SkillStoreAPI, type InstalledSkill } from "../lib/skillStore";
 import { skill as counting } from "./counting";
 import { skill as addition } from "./addition";
 import { skill as subtraction } from "./subtraction";
+import { skill as observation } from "./observation";
 import type { AnyActivityDefinition, Lesson, Skill } from "./types";
 import type { Viewer } from "./viewer";
 import { releaseStatusOf } from "../lib/skillRegistryApi";
@@ -10,7 +11,7 @@ import { releaseStatusOf } from "../lib/skillRegistryApi";
  * Every skill in the build. Adding one is a single import and a single entry —
  * this is the only file outside a skill folder that a new skill touches.
  */
-export const SKILLS: Skill[] = [counting, addition, subtraction];
+export const SKILLS: Skill[] = [counting, addition, subtraction, observation];
 
 /**
  * Publish every registered skill into the settings store.

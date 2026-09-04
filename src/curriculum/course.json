@@ -479,6 +479,18 @@
         "subtraction/practice-story",
         "subtraction/practice-strategy"
       ]
+    },
+    {
+      "id": "u38",
+      "unitNumber": 38,
+      "title": "Unit 38: Observation — Sandcastle Shore",
+      "description": "Build sharp eyes by finding one, two, then three objects in a lively beach scene",
+      "icon": "O",
+      "lessons": [
+        "observation/find-one-object",
+        "observation/find-two-objects",
+        "observation/find-three-objects"
+      ]
     }
   ]
 }

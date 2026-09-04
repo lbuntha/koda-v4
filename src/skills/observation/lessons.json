@@ -1,0 +1,19 @@
+{
+  "lessons": [
+    {
+      "id": "find-one-object", "title": "Find One Object", "concept": "Focused Visual Matching", "conceptKey": "visual-matcher", "requires": [], "activity": "observation/object-hunt",
+      "params": { "level": 1, "question": { "mode": "exact", "sceneId": "beach-sandcastle-shore", "objectCount": 6, "targetCount": 1, "questionsPerRound": 5 }, "play": { "mode": "object_hunt", "tier": "beginner", "difficultyColor": "amber", "category": "Visual Matching", "shortDesc": "Match one target picture inside a lively beach scene", "targetObjective": "Find the object that matches the picture.", "stepByStep": ["Look at the target picture.", "Scan one small part of the beach at a time.", "Tap the matching object."], "kidTip": "Move your eyes slowly from left to right.", "audioPrompt": "Welcome to the beach! Look at the target, then find the matching hidden object." } },
+      "difficulty": "Easy", "iconName": "search", "iconTone": "amber", "pedagogyTip": "A single exact target isolates visual matching and systematic scanning.", "standards": [], "trajectoryLevel": "visual-matcher", "ageBand": [5, 7]
+    },
+    {
+      "id": "find-two-objects", "title": "Find Two Objects", "concept": "Visual Search and Working Memory", "conceptKey": "visual-scanner", "requires": ["visual-matcher"], "activity": "observation/object-hunt",
+      "params": { "level": 2, "question": { "mode": "exact", "sceneId": "beach-sandcastle-shore", "objectCount": 8, "targetCount": 2, "questionsPerRound": 5 }, "play": { "mode": "object_hunt", "tier": "beginner", "difficultyColor": "amber", "category": "Visual Search", "shortDesc": "Keep two beach targets in mind and find them in any order", "targetObjective": "Find both hidden objects in any order.", "stepByStep": ["Look at both target pictures.", "Choose one and scan the scene in sections.", "Found objects stay marked while you find the other."], "kidTip": "Find one target first, then look again for the other.", "audioPrompt": "Find two hidden objects. You can find them in any order." } },
+      "difficulty": "Easy", "iconName": "eye", "iconTone": "cyan", "pedagogyTip": "Two targets add working-memory demand while persistent markers reduce repeated search.", "standards": [], "trajectoryLevel": "visual-scanner", "ageBand": [5, 8]
+    },
+    {
+      "id": "find-three-objects", "title": "Find Three Objects", "concept": "Systematic Scene Scanning", "conceptKey": "selective-attender", "requires": ["visual-scanner"], "activity": "observation/object-hunt",
+      "params": { "level": 3, "question": { "mode": "exact", "sceneId": "beach-sandcastle-shore", "objectCount": 10, "targetCount": 3, "questionsPerRound": 5 }, "play": { "mode": "object_hunt", "tier": "intermediate", "difficultyColor": "amber", "category": "Selective Attention", "shortDesc": "Scan a complete beach scene for three targets", "targetObjective": "Find all three hidden objects without rushing.", "stepByStep": ["Study all three target pictures.", "Sweep the scene from top to bottom.", "Check each corner before moving on."], "kidTip": "Split the scene into four parts and check each part.", "audioPrompt": "Sharp eyes ready! Find all three hidden objects in the beach scene." } },
+      "difficulty": "Medium", "iconName": "scan-search", "iconTone": "violet", "pedagogyTip": "A denser scene rewards quadrant scanning rather than random tapping.", "standards": [], "trajectoryLevel": "selective-attender", "ageBand": [6, 9]
+    }
+  ]
+}

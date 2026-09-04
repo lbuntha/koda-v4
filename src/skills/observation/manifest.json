@@ -1,0 +1,33 @@
+{
+  "id": "observation",
+  "name": "Observation Quest",
+  "version": "0.1.0",
+  "description": "Place-based hidden-object games that build visual scanning, comparison, and attention.",
+  "category": "core",
+  "author": "Koda Learning Lab",
+  "iconName": "Search",
+  "tagline": "Look closely, scan the scene, and spot every match.",
+  "thumbnail": "observation-scene-beach-sandcastle-shore",
+  "status": "draft",
+  "audience": { "ages": [5, 9], "category": "spatial-reasoning" },
+  "teaches": ["visual-scanner", "visual-matcher", "selective-attender"],
+  "requires": [],
+  "features": [
+    { "id": "audio_speech", "name": "Spoken voice", "description": "Reads directions, hints, and object celebrations aloud.", "isEnabled": true, "tag": "Audio" },
+    { "id": "sound_chimes", "name": "Sound chimes", "description": "Plays pop, success, and not-match feedback sounds.", "isEnabled": true, "tag": "Audio" },
+    { "id": "haptic_feedback", "name": "Haptic feedback", "description": "Pairs correct and incorrect taps with device feedback.", "isEnabled": true, "tag": "Haptic" },
+    { "id": "target_preview", "name": "Target previews", "description": "Shows the object or silhouette the learner must find.", "isEnabled": true, "tag": "Cognitive" },
+    { "id": "search_region_hints", "name": "Search-region hints", "description": "Guides attention toward a broad quadrant without revealing the answer.", "isEnabled": true, "tag": "Cognitive" },
+    { "id": "step_context_tags", "name": "Step framing tags", "description": "Labels warm-up, challenge, and milestone steps.", "isEnabled": true, "tag": "Cognitive" },
+    { "id": "premium_lessons", "name": "Charge for later lessons", "description": "Keeps a configurable number of lessons free.", "isEnabled": false, "tag": "Plan" }
+  ],
+  "settings": { "warmupLabel": "", "activityLabel": "", "guidedLabel": "", "milestoneLabel": "", "speechRate": 0.95, "freeLessons": 3 },
+  "settingsSchema": [
+    { "key": "warmupLabel", "label": "Warm-up tag", "help": "Optional wording for step 1.", "type": "text", "placeholder": "Warm-up Look", "maxLength": 32 },
+    { "key": "activityLabel", "label": "Activity tag", "help": "Optional wording for activity steps.", "type": "text", "placeholder": "Observation Hunt", "maxLength": 32 },
+    { "key": "guidedLabel", "label": "Guided tag", "help": "Optional wording for guided steps.", "type": "text", "placeholder": "Guided Search", "maxLength": 32 },
+    { "key": "milestoneLabel", "label": "Final tag", "help": "Optional wording for the final step.", "type": "text", "placeholder": "Sharp Eyes Trophy", "maxLength": 32 },
+    { "key": "speechRate", "label": "Speech rate", "help": "How quickly directions are spoken.", "type": "number", "min": 0.5, "max": 1.5, "step": 0.05, "unit": "x" },
+    { "key": "freeLessons", "label": "Free lessons", "help": "Number of lessons available before a plan is needed.", "type": "number", "min": 0, "max": 11, "step": 1 }
+  ]
+}
