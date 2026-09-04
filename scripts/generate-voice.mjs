@@ -26,7 +26,19 @@
  *   npm run voice:record -- --folder correct,incorrect --force   # redo just the reactions
  *   GEMINI_API_KEY=... npm run voice:record            # record what is missing
  *   GEMINI_API_KEY=... npm run voice:record -- --force # re-record everything
+ *   OPENAI_API_KEY=... npm run voice:record -- --provider openai
  *   npm run voice:record -- --skill counting --import ./my-voice
+ *
+ * Two providers, one folder. Gemini is the default when its key is present;
+ * `--provider openai` switches, and with only one key set it is chosen for you.
+ * Clips are interchangeable — same names, same folders, same m4a — so a skill
+ * half-recorded on one can be finished on the other, which is the practical
+ * answer to a free tier that rate-limits every few requests.
+ *
+ * Voices differ by provider and a skill's `voices` list is written in Gemini's
+ * names, so `OPENAI_VOICE_FOR` maps them across. Override the default with
+ * `KODA_OPENAI_VOICE`; `shimmer` and `nova` are the soft ones, `coral` warmer,
+ * `onyx` and `echo` deeper.
  *
  * `--import` takes a folder holding an `index.json` of `{ "phrase": "file.wav" }`
  * plus the files it names, and installs them as that skill's clips. No API key,
@@ -82,12 +94,58 @@ const MODEL = process.env.KODA_TTS_MODEL || "gemini-3.1-flash-tts-preview";
 /** The same framing `server.ts` sends, so recorded and live lines match in tone. */
 const DIRECTION = "Say warmly and clearly like a friendly math coach: ";
 
+/**
+ * The second provider.
+ *
+ * Not a hedge against Gemini so much as a way out of its billing: a free tier
+ * that rate-limits every few requests turns sixty lessons into an afternoon,
+ * and the clips are identical work either way. Whichever provider records a
+ * phrase, it lands under the same name in the same folder and the manifest
+ * cannot tell them apart — so a skill can be finished on one and topped up on
+ * the other.
+ *
+ * `gpt-4o-mini-tts` takes the tone as a separate `instructions` field rather
+ * than as a prefix on the text. That distinction matters: Gemini is prompted,
+ * so `DIRECTION` is glued to the front of the line, and gluing it on here would
+ * have the model read the stage direction out loud.
+ */
+const OPENAI_MODEL = process.env.KODA_OPENAI_TTS_MODEL || "gpt-4o-mini-tts";
+const OPENAI_VOICE = process.env.KODA_OPENAI_VOICE || "shimmer";
+const OPENAI_DIRECTION =
+  "Warm, soft and unhurried, like a friendly maths coach talking to a young " +
+  "child. Gentle and encouraging, never brisk or announcer-like.";
+
+/**
+ * Gemini's voice names mean nothing to OpenAI, and a skill's `voices` list is
+ * written in Gemini's. Mapped rather than ignored so a skill that rotates three
+ * voices still rotates three, instead of collapsing to one on the other
+ * provider and quietly losing the variety it asked for.
+ */
+const OPENAI_VOICE_FOR = {
+  Kore: "shimmer",
+  Puck: "fable",
+  Zephyr: "nova",
+  Charon: "onyx",
+  Fenrir: "echo",
+  Aoede: "coral",
+};
+
 /** Gemini returns raw little-endian 16-bit mono PCM at this rate. */
 const SAMPLE_RATE = 24000;
 
 const args = process.argv.slice(2);
 const force = args.includes("--force");
 const dryRun = args.includes("--dry-run");
+/** Explicit wins; otherwise whichever key is actually present. */
+const askedProvider = (args[args.indexOf("--provider") + 1] || "").toLowerCase();
+const provider = ["gemini", "openai"].includes(askedProvider)
+  ? askedProvider
+  : process.env.GEMINI_API_KEY
+    ? "gemini"
+    : process.env.OPENAI_API_KEY
+      ? "openai"
+      : "gemini";
+const apiKeyName = provider === "openai" ? "OPENAI_API_KEY" : "GEMINI_API_KEY";
 
 /** Read `--flag value`, or undefined when the flag is absent. */
 const flag = (name) => {
@@ -418,7 +476,9 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 async function record(ai, phrase, voice = VOICE) {
   for (let attempt = 0; ; attempt += 1) {
     try {
-      return await generate(ai, phrase, voice);
+      return provider === "openai"
+        ? await generateOpenAI(phrase, voice)
+        : await generate(ai, phrase, voice);
     } catch (error) {
       if (isOutOfCredit(error) || !isRateLimit(error) || attempt >= RETRIES) throw error;
       const pause = 2 ** attempt * 2000;
@@ -426,6 +486,37 @@ async function record(ai, phrase, voice = VOICE) {
       await wait(pause);
     }
   }
+}
+
+/**
+ * One line from OpenAI, as a finished WAV.
+ *
+ * Asked for over plain `fetch` rather than the SDK: it is one POST that returns
+ * audio bytes, and a second provider is not worth a second dependency in the
+ * bundle. `wav` is requested so the file arrives in the shape `compress` and
+ * the Gemini path already agree on, and gets the same m4a encode afterwards.
+ */
+async function generateOpenAI(phrase, voice = VOICE) {
+  const response = await fetch("https://api.openai.com/v1/audio/speech", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: OPENAI_MODEL,
+      voice: OPENAI_VOICE_FOR[voice] ?? OPENAI_VOICE,
+      input: phrase,
+      instructions: OPENAI_DIRECTION,
+      response_format: "wav",
+    }),
+  });
+  if (!response.ok) {
+    // Keep the status in the message: the retry above reads it to tell a rate
+    // limit worth waiting out from a key or a balance that will not improve.
+    throw new Error(`${response.status} ${(await response.text()).slice(0, 300)}`);
+  }
+  return Buffer.from(await response.arrayBuffer());
 }
 
 async function generate(ai, phrase, voice = VOICE) {
@@ -492,7 +583,12 @@ async function main() {
   }
 
   const total = skills.reduce((n, s) => n + s.phrases.length, 0);
-  console.log(`voice — ${skills.length} skill(s), ${total} phrases`);
+  // Name the provider up front: two of them recording into one folder is only
+  // safe if you can see which one a run used.
+  console.log(
+    `voice — ${skills.length} skill(s), ${total} phrases` +
+      (dryRun ? "" : `, via ${provider}`),
+  );
 
   let budget = limit;
   let ai = null;
@@ -627,19 +723,20 @@ async function main() {
     }
 
     if (todo.length > 0) {
-      const key = process.env.GEMINI_API_KEY;
+      const key = process.env[apiKeyName];
       if (!key) {
         // Not fatal: clips may have arrived by --import, and the manifest below
         // is still worth writing for whatever is on disk.
         console.warn(
-          "  GEMINI_API_KEY is not set, so nothing new was generated.\n" +
-            "    GEMINI_API_KEY=... npm run voice:record        generate them\n" +
+          `  ${apiKeyName} is not set, so nothing new was generated.\n` +
+            `    ${apiKeyName}=... npm run voice:record        generate them\n` +
+            `    npm run voice:record -- --provider ${provider === "openai" ? "gemini" : "openai"}      use the other one\n` +
             "    npm run voice:record -- --skill <id> --import ./my-voice\n" +
             "    npm run voice:record -- --dry-run              just list the phrases",
         );
         todo.length = 0;
       } else {
-        ai ??= new GoogleGenAI({ apiKey: key });
+        if (provider === "gemini") ai ??= new GoogleGenAI({ apiKey: key });
         let done = 0;
         let failed = 0;
         for (const { phrase, rel, voice } of todo) {
