@@ -185,7 +185,21 @@ const sceneDecor = {
       <path d="M0 556q250-46 500 0t500-12v58q-250 44-500-2T0 616Z" fill="#a8d4e6"/>
       <path d="M440 560h120v190H440Z" fill="#ded4c0"/>
     </g>
-    ${variant ? `<g fill="#f2e6c9" stroke="#263b50" stroke-width="5"><ellipse cx="470" cy="640" rx="34" ry="17"/><ellipse cx="556" cy="676" rx="30" ry="15"/><ellipse cx="468" cy="712" rx="32" ry="16"/></g>` : `<g fill="#f2e6c9" stroke="#263b50" stroke-width="5"><ellipse cx="478" cy="636" rx="32" ry="16"/><ellipse cx="540" cy="672" rx="28" ry="14"/><ellipse cx="472" cy="708" rx="30" ry="15"/><ellipse cx="548" cy="742" rx="26" ry="13"/></g>`}
+    ${variant ? `<g fill="#f2e6c9" stroke="#263b50" stroke-width="5"><ellipse cx="470" cy="640" rx="34" ry="17"/><ellipse cx="556" cy="676" rx="30" ry="15"/><ellipse cx="468" cy="712" rx="32" ry="16"/></g>
+      ${/* Ivy, lily pads and bushes, all sized like a rendered frog (~50 units
+            across) so a green shape is never automatically the answer. */""}
+      <g fill="#5f9e63" stroke="#3c6b47" stroke-width="4" opacity=".9">${[
+        [126,268],[168,300],[132,346],[176,382],[138,424],[182,452],[128,486],
+        [796,262],[756,298],[790,344],[748,380],[786,422],[744,454],[794,488],
+        [352,214],[300,244],[664,212],[712,244],
+      ].map(([x,y]) => `<path d="M${x} ${y}q26 6 24 30-2 22-26 22-22-2-22-26 0-22 24-26Z"/>`).join("")}</g>
+      <g fill="none" stroke="#3f7a4c" stroke-width="5" opacity=".85"><path d="M150 262v240M772 258v244M330 214q22 20 22 42M690 212q-22 20-22 42"/></g>
+      <g fill="#4f8d57" stroke="#335f3e" stroke-width="4" opacity=".8">${[
+        [206,584],[318,600],[652,590],[822,606],[132,612],[900,596],[430,606],
+      ].map(([x,y]) => `<ellipse cx="${x}" cy="${y}" rx="27" ry="14"/>`).join("")}</g>
+      <g fill="#6aa96e" stroke="#3c6b47" stroke-width="4" opacity=".82">${[
+        [96,668],[262,690],[560,700],[726,672],[880,694],
+      ].map(([x,y]) => `<path d="M${x} ${y}q28-30 56 0 14 12 0 20h-56q-14-8 0-20Z"/>`).join("")}</g>` : `<g fill="#f2e6c9" stroke="#263b50" stroke-width="5"><ellipse cx="478" cy="636" rx="32" ry="16"/><ellipse cx="540" cy="672" rx="28" ry="14"/><ellipse cx="472" cy="708" rx="30" ry="15"/><ellipse cx="548" cy="742" rx="26" ry="13"/></g>`}
     <g fill="#fff" stroke="#263b50" stroke-width="5" opacity=".95"><path d="M120 96q10-40 52-32 14-30 52-14 34-6 40 30 34 4 26 34-8 24-46 20H160q-42 2-40-38Z"/><path d="M700 74q9-36 47-29 12-27 47-13 31-5 36 27 31 4 24 31-7 22-42 18H736q-38 2-36-34Z"/></g>
     <g fill="#6f9c74" stroke="#263b50" stroke-width="5"><path d="M60 700q10-64 54-92-6 56-54 92Z"/><path d="M930 690q-10-62-54-90 6 55 54 90Z"/></g>`,
   town: (variant) => `<path d="M0 0h1000v750H0Z" fill="#b9e1ee"/><path d="M0 480h1000v270H0Z" fill="#e6c27f"/>
@@ -206,7 +220,13 @@ const sceneTexture = {
   school: `<g fill="none" stroke="#7687a0" stroke-width="4" opacity=".52"><path d="m400 130 44-20 15 33-44 20Zm55 165 45-18 14 34-45 18Zm-70 125 48-16 12 35-48 16Z"/><circle cx="450" cy="520" r="22"/><path d="M450 499v22l14 9M875 474h58v35h-58ZM50 465h54v38H50Z"/></g>`,
   harbor: `<g fill="none" stroke="#1f6f87" stroke-width="4" opacity=".58"><path d="M130 610q18-20 36 0m45 53q18-20 36 0m88-62q18-20 36 0m82 77q18-20 36 0m84-68q18-20 36 0m75 50q18-20 36 0m75-60q18-20 36 0"/><circle cx="315" cy="445" r="12"/><circle cx="740" cy="440" r="15"/></g><g fill="#65bfd0" opacity=".6"><circle cx="180" cy="530" r="8"/><circle cx="610" cy="575" r="10"/><circle cx="860" cy="525" r="7"/></g>`,
   museum: `<g fill="none" stroke="#8e91c2" stroke-width="4" opacity=".55"><circle cx="455" cy="310" r="17"/><circle cx="555" cy="355" r="13"/><path d="m445 310 10-25 10 25-10 24Zm91 45 19-18 18 18-18 17ZM170 510h46v26h-46Zm610 0h52v26h-52Z"/></g><g fill="#f0b956" opacity=".5"><circle cx="315" cy="120" r="9"/><circle cx="710" cy="105" r="12"/></g>`,
-  castle: `<g fill="none" stroke="#b3a892" stroke-width="4" opacity=".5"><path d="M320 300h360M320 356h360M320 412h360M320 468h360M352 300v56m64-56v56m64-56v56m64-56v56m64-56v56M320 356v56m64-56v56m64-56v56m64-56v56m64-56v56"/></g><g fill="none" stroke="#8fb9cc" stroke-width="4" opacity=".55"><path d="M120 588q18-18 36 0m64 22q18-18 36 0m560-26q18-18 36 0m-140 30q18-18 36 0"/></g>`,
+  castle: `<g fill="#63a86c" stroke="#3c6b47" stroke-width="4" opacity=".85">${[
+      [246,600],[706,614],[150,486],[858,470],[398,216],[598,672],[318,676],
+    ].map(([x,y]) => `<ellipse cx="${x}" cy="${y}" rx="26" ry="18"/><circle cx="${x-13}" cy="${y-16}" r="9"/><circle cx="${x+13}" cy="${y-16}" r="9"/>`).join("")}</g>
+    <g fill="#7bb87f" opacity=".62">${[
+      [336,516],[610,490],[196,664],[772,676],[470,300],[236,404],
+    ].map(([x,y]) => `<ellipse cx="${x}" cy="${y}" rx="25" ry="17"/>`).join("")}</g>
+    <g fill="none" stroke="#b3a892" stroke-width="4" opacity=".5"><path d="M320 300h360M320 356h360M320 412h360M320 468h360M352 300v56m64-56v56m64-56v56m64-56v56m64-56v56M320 356v56m64-56v56m64-56v56m64-56v56m64-56v56"/></g><g fill="none" stroke="#8fb9cc" stroke-width="4" opacity=".55"><path d="M120 588q18-18 36 0m64 22q18-18 36 0m560-26q18-18 36 0m-140 30q18-18 36 0"/></g>`,
   town: `<g fill="none" stroke="#a6754e" stroke-width="4" opacity=".55"><ellipse cx="170" cy="650" rx="30" ry="14"/><ellipse cx="295" cy="610" rx="26" ry="12"/><ellipse cx="470" cy="680" rx="34" ry="15"/><ellipse cx="635" cy="615" rx="28" ry="13"/><ellipse cx="820" cy="665" rx="31" ry="14"/><path d="m245 430 19-18 19 18-19 18Zm480 8 18-18 18 18-18 18Z"/></g>`,
 };
 const sceneSvg = (theme, variant) => {

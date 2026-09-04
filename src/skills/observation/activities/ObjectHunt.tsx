@@ -79,7 +79,22 @@ function buildSwarmQuestion(setup: ObjectHuntSetup, scene: ObservationScene, see
   const live = shuffled(copies, `${seed}:swarm-pick`).slice(0, wanted);
   const decoyCount = Math.max(0, Math.min(others.length, (setup.objectCount as number | undefined ?? live.length + 4) - live.length));
   const decoys = shuffled(others, `${seed}:swarm-decoys`).slice(0, decoyCount);
-  const objects = placeObjects(scene, shuffled([...live, ...decoys], `${seed}:display`), `${seed}:locations`);
+  // Fourteen identical stamps read as a row of stickers, not as something
+  // hidden. Turning, resizing, and half-tucking each copy makes the child
+  // check a shape rather than scan for one repeated blob — and the decoys get
+  // the same treatment so none of it marks out an answer.
+  const varied = placeObjects(scene, shuffled([...live, ...decoys], `${seed}:display`), `${seed}:locations`);
+  const swarmRotations = [0, 14, -12, 26, -22, 8, -30, 18];
+  const objects = varied.map((object) => {
+    const key = keyOf(object);
+    const tuck = hash(`${seed}:${key}:tuck`) % 5;
+    return {
+      ...object,
+      rotation: (object.rotation ?? 0) + swarmRotations[hash(`${seed}:${key}:spin`) % swarmRotations.length],
+      visualScale: 0.82 + (hash(`${seed}:${key}:size`) % 30) / 100,
+      visibleFraction: tuck < 2 ? 0.74 : object.visibleFraction,
+    };
+  });
   const targets = live.map(keyOf);
   const name = OBJECT_BY_ID.get(swarmObjectId)?.name ?? "frog";
   const visibility = visibilityProfile(setup.level, setup);

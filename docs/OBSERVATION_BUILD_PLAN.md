@@ -131,6 +131,22 @@ contract; only the target model and the tray change.
 - The List view numbers the copies ("frog 3", "frog 7") so a screen-reader user
   can tell them apart and still complete the round.
 
+A swarm scene has to be authored *for* its character, or the round is trivial. Fourteen
+identical bright stamps on flat stone read as stickers, not as something hidden, so the Frog
+Moat carries:
+
+- **cover of the target's own colour** — ivy up the towers, lily pads in the moat, and grass
+  tufts, every element drawn at roughly the size a placed frog renders at, so a green shape
+  is never automatically the answer;
+- **frog-shaped scenery that is not tappable** — a squat body with two eye-bumps, close
+  enough to demand a second look but never a copy of the target art; and
+- **per-copy variation** — each frog is turned, resized, and sometimes half-tucked, so the
+  child checks a shape instead of sweeping for one repeated blob. Distractors vary the same
+  way, for the reason in the risk list.
+
+Not every copy should be well hidden. A few in open sky stay easy on purpose: a round where
+all twelve are maximally camouflaged is one a five-year-old abandons.
+
 Swarm is deliberately excluded from the `mixed` challenge cycle: mixing a
 counting task into a five-target recognition round would change what the final
 challenge measures.
