@@ -1,14 +1,13 @@
 {
   "_comment": [
-    "Phase 13 speech inventory. No audio is generated or recorded during this build:",
-    "audio/manifest.json is filled by `npm run voice:record`, and every line not yet",
-    "recorded plays through live TTS.",
+    "Phase 13 speech inventory. `npm run voice:record` fills audio/manifest.json;",
+    "any line not yet recorded plays through live TTS.",
     "Lesson audioPrompt values are collected from lessons.json automatically and are",
     "deliberately not repeated here — one line, one home.",
-    "No `groups`: praise and correction come from the common pack, which names no",
-    "subject and so cannot congratulate a child on the wrong skill. `reactionPool`",
-    "pools a skill's own reactions with common's, so declaring none here is a",
-    "choice to use the shared voice rather than a gap."
+    "No `groups` and no number words: praise, correction and the numbers all come",
+    "from the common pack. Common holds what every skill says the same way, so",
+    "re-recording them here would ship a second copy of a clip the app already has",
+    "and override it with an identical one."
   ],
   "prompts": [],
   "templates": [
@@ -17,27 +16,6 @@
     "How many are left?"
   ],
   "phrases": [
-    "Take one away.",
-    "zero",
-    "one",
-    "two",
-    "three",
-    "four",
-    "five",
-    "six",
-    "seven",
-    "eight",
-    "nine",
-    "ten",
-    "eleven",
-    "twelve",
-    "thirteen",
-    "fourteen",
-    "fifteen",
-    "sixteen",
-    "seventeen",
-    "eighteen",
-    "nineteen",
-    "twenty"
+    "Take one away."
   ]
 }

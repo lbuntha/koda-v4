@@ -153,9 +153,21 @@ export const roundingChoices = (value: number, unit: 10 | 100): number[] => {
     .filter((option, at, all) => option >= 0 && all.indexOf(option) === at));
 };
 
-const estimateChoices = (estimate: number, unit: 10 | 100): number[] =>
-  shuffle([estimate, estimate + unit, Math.max(0, estimate - unit), estimate + unit * 2]
-    .filter((option, at, all) => all.indexOf(option) === at));
+/**
+ * Four distinct estimates, always.
+ *
+ * Clamping `estimate - unit` at zero used to collapse a choice into another
+ * when the estimate was small, leaving three buttons — and a round with fewer
+ * wrong answers than it looks is a round a child can win by counting.
+ */
+const estimateChoices = (estimate: number, unit: 10 | 100): number[] => {
+  const options = new Set<number>([estimate]);
+  for (let step = 1; options.size < 4; step += 1) {
+    if (estimate - unit * step >= 0) options.add(estimate - unit * step);
+    if (options.size < 4) options.add(estimate + unit * step);
+  }
+  return shuffle([...options]);
+};
 
 export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({ params, koda, onComplete, lesson }) => {
   const setup: EstimateSetup = { ...params, ...params.question };

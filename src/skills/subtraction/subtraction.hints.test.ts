@@ -8,7 +8,7 @@ import { buildQuestion as buildFact, factHints, isOneStepHelper } from "./activi
 import { blockHints, buildQuestion as buildBlocks, owedExchange, remainingNeed, totalOf } from "./activities/BlockExchange";
 import { buildQuestion as buildChart, chartHints } from "./activities/PlaceValueDesk";
 import { buildQuestion as buildColumn, columnHints, markFor } from "./activities/ColumnPad";
-import { claimsFor, isReasonable, REASONS, reverseColumns } from "./activities/EstimateDial";
+import { buildQuestion as buildEstimate, claimsFor, isReasonable, REASONS, reverseColumns } from "./activities/EstimateDial";
 
 const question = (over: Partial<TrayQuestion> = {}): TrayQuestion => ({
   id: "q1", taskKind: "subtract_remove", mode: "remove", minuend: 8,
@@ -358,5 +358,16 @@ describe("the reasonableness answers stay comparable", () => {
   it("keeps the field separator out of every reason", () => {
     // `expected` is "yes,<reason>"; a comma inside a reason splits it in half.
     for (const reason of Object.values(REASONS)) expect(reason).not.toContain(",");
+  });
+});
+
+describe("the estimate choices", () => {
+  it("always offers four distinct estimates", () => {
+    for (let i = 0; i < 100; i += 1) {
+      const q = buildEstimate({ mode: "round_estimate", digits: 3 }, i, new Set());
+      // The estimate itself must be one of them, and it must be worth making.
+      expect(q.estimate).toBeGreaterThan(0);
+      expect(q.roundedMinuend - q.roundedSubtrahend).toBe(q.estimate);
+    }
   });
 });

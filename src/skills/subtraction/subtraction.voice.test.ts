@@ -4,6 +4,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { skill } from ".";
 import voiceJson from "./voice.json";
+import commonVoice from "../../voice/common/voice.json";
 import audioManifest from "./audio/manifest.json";
 import { isPracticeLesson } from "../../curriculum";
 import type { Lesson } from "../types";
@@ -73,9 +74,25 @@ describe("the subtraction speech inventory", () => {
     }
   });
 
-  it("covers the number words the counting engines speak", () => {
-    const declared = new Set(voiceJson.phrases);
-    for (const word of ["zero", "one", "ten", "twenty"]) expect(declared.has(word)).toBe(true);
+  /**
+   * Numbers belong to the common pack.
+   *
+   * The line engines speak number words, and this file once declared all
+   * twenty-one of them — so a recording run cut a second copy of clips the app
+   * already had, and registered them over common's. Common is where lines every
+   * skill says the same way live, and a skill re-recording them ships bytes to
+   * say exactly what was already being said.
+   */
+  it("leaves the number words to the common pack", () => {
+    const own = new Set(voiceJson.phrases);
+    for (const word of ["zero", "one", "ten", "twenty"]) {
+      expect(own.has(word), `${word} is re-declared here instead of taken from common`).toBe(false);
+    }
+    // Common keeps them under `numberWords`, with a range it expands over.
+    const shared = new Set(commonVoice.numberWords as string[]);
+    for (const word of ["zero", "one", "ten", "twenty"]) {
+      expect(shared.has(word), `common does not carry ${word}`).toBe(true);
+    }
   });
 
   /**

@@ -219,6 +219,22 @@ describe("strategy invariants", () => {
     });
   });
 
+  /*
+   * An estimate of zero for a difference of forty-six is not a rough answer,
+   * it is a wrong one. 297 − 251 rounded to hundreds gave exactly that, and
+   * the round marked "about 0" correct.
+   */
+  it("never rounds both operands to the same place", () => {
+    times(DRAWS, () => {
+      for (const [digits, unit] of [[2, 10], [3, 100]] as const) {
+        const value = drawRoundingDifference(digits);
+        const estimate = roundTo(value.minuend, unit) - roundTo(value.subtrahend, unit);
+        expect(estimate, `${value.minuend} − ${value.subtrahend} estimates as ${estimate}`)
+          .toBeGreaterThanOrEqual(unit);
+      }
+    });
+  });
+
   it("draws ordered operands that are worth rounding", () => {
     times(DRAWS, () => {
       const two = drawRoundingDifference(2);

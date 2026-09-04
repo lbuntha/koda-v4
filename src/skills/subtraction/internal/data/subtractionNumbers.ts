@@ -317,11 +317,25 @@ export function drawRoundingDifference(digits: 2 | 3): Difference {
   const unit = digits === 2 ? 10 : 100;
   const worthRounding = (n: number) =>
     n % unit !== 0 && n % unit !== unit / 2 && (digits === 2 || n % 10 !== 0);
+  /*
+   * The estimate has to be worth making.
+   *
+   * Both operands rounding to the same place gives an estimate of zero: 297
+   * minus 251 came out as "about 300 − 300", so the answer a child was marked
+   * right for was "about 0" — for a difference of forty-six. An estimate that
+   * far from the truth is not a rough answer, it is a wrong one, and it teaches
+   * the opposite of what rounding is for.
+   *
+   * One whole unit apart is the smallest gap that survives rounding, so it is
+   * the floor.
+   */
+  const usefulEstimate = (minuend: number, subtrahend: number) =>
+    roundTo(minuend, unit) - roundTo(subtrahend, unit) >= unit;
 
   for (let i = 0; i < ATTEMPTS; i += 1) {
     const minuend = randInt(lo, hi);
     const subtrahend = randInt(lo, minuend);
-    if (worthRounding(minuend) && worthRounding(subtrahend)) {
+    if (worthRounding(minuend) && worthRounding(subtrahend) && usefulEstimate(minuend, subtrahend)) {
       return differenceOf(minuend, subtrahend);
     }
   }
