@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { skill } from ".";
@@ -89,7 +89,28 @@ describe("the subtraction speech inventory", () => {
     expect(/differen|remain|subtract|left|block|column/.test(correct)).toBe(true);
   });
 
-  it("ships no generated audio, exactly as the plan requires", () => {
-    expect(audioManifest, "audio production is outside this build").toEqual({});
+  /**
+   * The manifest may be empty or full; it may not be wrong.
+   *
+   * This used to assert it was empty, which was true while audio production was
+   * out of scope and would have failed the first time anyone recorded — a test
+   * that breaks on the work succeeding is worse than no test. What actually
+   * matters is that every entry names a clip that exists: `registerSkillVoice`
+   * skips a missing file rather than registering a broken URL, so a stale entry
+   * is silent rather than loud, and the phrase quietly drops to live TTS for
+   * ever.
+   */
+  it("names a real file for every phrase it claims to have recorded", () => {
+    const entries = Object.entries(audioManifest as Record<string, string>);
+    for (const [phrase, file] of entries) {
+      expect(existsSync(join(HERE, "audio", file)), `${phrase} points at a missing ${file}`).toBe(true);
+    }
+    const declared = new Set([...voiceJson.phrases, ...voiceJson.prompts,
+      ...Object.values(voiceJson.groups).flatMap((group) => group.phrases)]);
+    const lessonPrompts = new Set(teaching.map((lesson) => playOf(lesson).audioPrompt!));
+    for (const phrase of entries.map(([phrase]) => phrase)) {
+      expect(declared.has(phrase) || lessonPrompts.has(phrase),
+        `a clip exists for "${phrase}", which nothing says any more`).toBe(true);
+    }
   });
 });
