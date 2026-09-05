@@ -64,6 +64,30 @@ describe("rack generation", () => {
     });
   });
 
+  it("actually mixes the colours it deals", () => {
+    // The invariant that was missing. Every other check passed while every
+    // bottle held a single colour: the scramble had kept the pour rule that
+    // colours must match, so nothing could ever land on a different colour and
+    // no rack was ever a puzzle. Measured at avg 1.00 bands per bottle across
+    // all 32 specs before this existed.
+    RACK_SPECS.filter((s) => s.scramble >= 5).forEach((spec) => {
+      let bands = 0, bottles = 0, mixedRacks = 0;
+      for (let i = 1; i <= 30; i += 1) {
+        const { rack } = rackFor(spec, "mixed", i);
+        let anyMixed = false;
+        rack.forEach((b) => {
+          if (!b.seg.length) return;
+          const runs = b.seg.filter((c, k) => k === 0 || c !== b.seg[k - 1]).length;
+          bands += runs; bottles += 1;
+          if (runs > 1) anyMixed = true;
+        });
+        if (anyMixed) mixedRacks += 1;
+      }
+      expect(bands / bottles, `${spec.id} bottles hold one colour each`).toBeGreaterThan(1.2);
+      expect(mixedRacks, `${spec.id} dealt racks with nothing stacked`).toBe(30);
+    });
+  });
+
   it("never deals a rack with no move to make", () => {
     RACK_SPECS.forEach((spec) => {
       for (let i = 1; i <= DRAWS; i += 1) {

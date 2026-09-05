@@ -118,3 +118,42 @@ describe("the pouring animation", () => {
     h.unmount();
   }, 20000);
 });
+
+describe("under StrictMode", () => {
+  it("still pours after the double mount development does", async () => {
+    // The bug this exists for: a liveness guard set false in a cleanup and never
+    // set true again. StrictMode mounts, unmounts and remounts, so the second
+    // mount inherited `false` and every pour bailed after its first await —
+    // bottle stuck tilted in mid-air, no stream. The harness mounts once, so
+    // nothing caught it until it was played for real.
+    allowMotion();
+    const q = buildQuestion(params, 1);
+    const move = legalPours(q.rack)[0];
+    const expected = pour(q.rack, move.from, move.to);
+
+    const { StrictMode, createElement } = await import("react");
+    const { render } = await import("@testing-library/react");
+    const { createFakeKoda } = await import("../kit/testing");
+    const koda = createFakeKoda({});
+    const view = render(createElement(StrictMode, null,
+      createElement(sort.component as never, {
+        params: { ...sort.defaultParams, ...params },
+        level: 1,
+        koda: koda.sdk,
+        onComplete: () => {},
+      })));
+
+    const btn = (n: number) => view.getByRole("button", { name: new RegExp(`^Bottle ${n},`) });
+    fireEvent.click(btn(move.from + 1));
+    fireEvent.click(btn(move.to + 1));
+
+    // It has to actually finish, not freeze part-way through.
+    await waitFor(() => expect(document.querySelector("[data-pouring]")).toBeNull(), { timeout: 5000 });
+    await waitFor(() => expect(btn(move.to + 1).getAttribute("aria-label"))
+      .toMatch(new RegExp(`^Bottle ${move.to + 1}, holds ${expected[move.to].cap}\\.`)), { timeout: 5000 });
+    // One comma after "Bottle n", then one between each named segment.
+    expect(btn(move.to + 1).getAttribute("aria-label")!.split(",").length - 1)
+      .toBe(expected[move.to].seg.length);
+    view.unmount();
+  }, 20000);
+});

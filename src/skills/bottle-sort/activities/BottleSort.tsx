@@ -4,6 +4,7 @@ import { SkillRound, composeHints, isPractice, playCopy, useMotionOK, useSkillRo
 import { isDeadlock, isSolvedRack, legalPours, pour, pourSteps, refuseReason } from "../internal/pour";
 import { POOL, rackFor } from "../internal/racks";
 import { specFor } from "../internal/specs";
+import { PIVOT_Y, POUR_ANGLE, aimPour } from "../internal/bottle";
 import { topRun, type Bottle, type Rack } from "../internal/types";
 
 interface BottleSortSetup {
@@ -47,20 +48,46 @@ const cssColour = (hues: number[], colour: number) => {
   return `rgb(${r} ${g} ${b})`;
 };
 
-/* Geometry. Phase 7 gives the glass its depth; this is the shape it hangs on. */
-const NECK_TOP = 9, NECK_H = 18, SHOULDER_H = 18, LAYER_H = 22, W = 60;
+/*
+ * A bottle in the shape the genre uses: a straight-sided cylinder with a short
+ * neck and a darker collar, not a tapered wine bottle. Straight sides matter —
+ * colour bands read as equal measures of liquid only when the width is
+ * constant, which is the whole point of a bottle you sort by eye.
+ */
+const NECK_TOP = 7, NECK_H = 10, SHOULDER_H = 14, LAYER_H = 22, W = 60;
+const NECK_L = 20, NECK_R = 40;
+const BASE_CURVE = 9;
 function geometry(cap: number) {
-  const bodyTop = NECK_TOP + NECK_H + SHOULDER_H;
-  const bodyH = cap * LAYER_H;
+  const neckBottom = NECK_TOP + NECK_H;
+  const bodyTop = neckBottom + SHOULDER_H;
+  // The base curves below the straight sides, so the straight part is short by
+  // exactly that much — otherwise the lowest band stops above the curve and the
+  // bottle looks like it is standing in an empty glass foot.
+  const bodyH = cap * LAYER_H - BASE_CURVE;
   const bodyBottom = bodyTop + bodyH;
-  // Open at the mouth on purpose: a line drawn across the top is what makes a
-  // bottle read as a flat cut-out, so the rim ellipse caps it instead.
-  const outline = `M23 ${NECK_TOP} v${NECK_H}`
-    + ` C23 ${NECK_TOP + NECK_H + 6} 6 ${bodyTop - 10} 6 ${bodyTop}`
-    + ` v${bodyH} q0 10 10 10 h28 q10 0 10 -10 v-${bodyH}`
-    + ` C54 ${bodyTop - 10} 37 ${NECK_TOP + NECK_H + 6} 37 ${NECK_TOP + NECK_H}`
+  const outline = `M${NECK_L} ${NECK_TOP} v${NECK_H}`
+    + ` C${NECK_L} ${neckBottom + 6} 6 ${bodyTop - 8} 6 ${bodyTop}`
+    + ` v${bodyH} q0 9 9 9 h30 q9 0 9 -9 v-${bodyH}`
+    + ` C54 ${bodyTop - 8} ${NECK_R} ${neckBottom + 6} ${NECK_R} ${neckBottom}`
     + ` V${NECK_TOP}`;
-  return { outline, body: `${outline} Z`, bodyTop, bodyBottom, height: bodyBottom + 14 };
+  // Liquid fills to the true inside of the base, not to where the sides stop.
+  const liquidBottom = bodyBottom + BASE_CURVE;
+  return { outline, body: `${outline} Z`, neckBottom, bodyTop, bodyBottom, liquidBottom, height: liquidBottom + 6 };
+}
+
+/**
+ * Bubbles, which are what make a coloured band read as liquid.
+ *
+ * Placed from the segment's own index so they do not move about between
+ * renders, and drawn only where there is liquid to hold them.
+ */
+function bubblesFor(seedIndex: number, y: number) {
+  const spots = [
+    { cx: 20, r: 2.0, delay: 0 },
+    { cx: 38, r: 1.4, delay: 1.3 },
+    { cx: 29, r: 1.1, delay: 2.4 },
+  ];
+  return spots.map((b, k) => ({ ...b, key: `${seedIndex}-${k}`, from: y + LAYER_H - 3, to: y + 3 }));
 }
 
 export function buildQuestion(params: BottleSortParams, index: number): BottleSortQuestion {
@@ -108,6 +135,8 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
   // the child, the feature belongs to the adult setting the skill up.
   const motionOK = useMotionOK();
   const animate = motionOK && koda.config.isEnabled("pour_animation", true);
+  // Bubbles are ambient motion, so they follow the same preference.
+  const bubbles = motionOK;
   const speechRate = koda.config.get("speechRate", 0.95);
 
   const [rack, setRack] = useState<Rack>([]);
@@ -116,12 +145,20 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
   const [picked, setPicked] = useState<number | null>(null);
   const [nudge, setNudge] = useState<string | null>(null);
   /** The pour being drawn, and the stream that connects the two mouths. */
-  const [pouring, setPouring] = useState<{ from: number; to: number } | null>(null);
-  const [stream, setStream] = useState<{ d: string; colour: string } | null>(null);
+  const [pouring, setPouring] = useState<{ from: number; to: number; dir: number; angle: number; dx: number; dy: number } | null>(null);
+  const [stream, setStream] = useState<{ d: string; colour: string; spine: string; top: number; drop: number; fading?: boolean } | null>(null);
   const rackRef = useRef<HTMLDivElement | null>(null);
   const mouths = useRef(new Map<number, SVGCircleElement>());
+  const bottles = useRef(new Map<number, HTMLButtonElement>());
   const alive = useRef(true);
-  useEffect(() => () => { alive.current = false; }, []);
+  // Set true on *mount*, not just false on unmount. StrictMode mounts, unmounts
+  // and remounts in development, so a cleanup-only guard latches false forever
+  // and every pour bails after its first await — the bottle stays tilted in
+  // mid-air with no stream, which is exactly what it did.
+  useEffect(() => {
+    alive.current = true;
+    return () => { alive.current = false; };
+  }, []);
 
   const round = useSkillRound({
     koda,
@@ -220,39 +257,63 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
     if (!animate) { finish(); return; }
 
     const steps = pourSteps(rack, from, to);
-    setPouring({ from, to });
-    await wait(300);
+    const dir: 1 | -1 = to >= from ? 1 : -1;
+    let angle = dir * POUR_ANGLE;
+    let dx = dir * 34, dy = -26;
+    const srcBox = bottles.current.get(from)?.getBoundingClientRect();
+    const srcMouth = mouths.current.get(from)?.getBoundingClientRect();
+    const dstMouth = mouths.current.get(to)?.getBoundingClientRect();
+    if (srcBox && srcMouth && dstMouth) {
+      const aim = aimPour(srcBox, srcMouth, dstMouth, dir as 1 | -1);
+      angle = aim.angle; dx = aim.dx; dy = aim.dy;
+    }
+
+    setPouring({ from, to, dir, angle, dx, dy });
+    await wait(340);
     if (!alive.current) return;
 
-    // Both ends come from the mouth markers' live positions, read *after* the
-    // tilt, so the stream is attached to the two bottles rather than drawn near
-    // them — and stays attached at any rack size or across two rows.
     const box = rackRef.current?.getBoundingClientRect();
     const a = mouths.current.get(from)?.getBoundingClientRect();
     const b = mouths.current.get(to)?.getBoundingClientRect();
     if (box && a && b) {
       const p1 = { x: a.left + a.width / 2 - box.left, y: a.top + a.height / 2 - box.top };
       const p2 = { x: b.left + b.width / 2 - box.left, y: b.top + b.height / 2 - box.top };
-      const dir = p2.x >= p1.x ? 1 : -1;
-      const cx = (p1.x + p2.x) / 2 + dir * 4;
-      const cy = (p1.y + p2.y) / 2 + 14;
-      // A falling stream narrows: wider at the lip than where it lands.
+      const cx = (p1.x + p2.x) / 2 + dir * 3;
+      const cy = (p1.y + p2.y) / 2 + 12;
       setStream({
         colour: cssColour(question.hues, topRun(rack[from]).colour),
-        d: `M${p1.x - 4.5} ${p1.y} Q${cx - 4.5} ${cy} ${p2.x - 2.6} ${p2.y}`
-          + ` L${p2.x + 2.6} ${p2.y} Q${cx + 4.5} ${cy} ${p1.x + 4.5} ${p1.y} Z`,
+        d: `M${p1.x - 4.5} ${p1.y} Q${cx - 4.5} ${cy} ${p2.x - 2.4} ${p2.y}`
+          + ` L${p2.x + 2.4} ${p2.y} Q${cx + 4.5} ${cy} ${p1.x + 4.5} ${p1.y} Z`,
+        spine: `M${p1.x} ${p1.y} Q${cx} ${cy} ${p2.x} ${p2.y}`,
+        // Where the liquid starts and how far it has to fall, so the ribbon can
+        // be revealed downwards instead of appearing already joined.
+        top: p1.y - 4,
+        drop: Math.abs(p2.y - p1.y) + 24,
       });
     }
 
+    // The stream has to reach the other mouth before liquid appears in it, or
+    // the destination fills from nothing while the ribbon is still falling.
+    await wait(70);
+    if (!alive.current) return;
+
+    // Segments leave close enough together to read as one continuous stream,
+    // but far enough apart that a run of three is still visibly three.
     for (const step of steps) {
-      await wait(150);
+      await wait(115);
       if (!alive.current) return;
       setRack(step);
     }
 
+    // Let the last of the liquid land, and let the stream run dry rather than
+    // blink out — a ribbon that disappears mid-frame is the single thing that
+    // most made the pour read as stepped rather than poured.
+    setStream((s) => (s ? { ...s, fading: true } : s));
+    await wait(150);
+    if (!alive.current) return;
     setStream(null);
     setPouring(null);
-    await wait(260);
+    await wait(280);
     if (!alive.current) return;
     finish();
   };
@@ -293,12 +354,6 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
     setPicked(null);
   };
 
-  /** Swing the bottle over its target, pivoting on its own base. */
-  const tiltFor = (p: { from: number; to: number }) => {
-    const dir = p.to >= p.from ? 1 : -1;
-    return `translate(${dir * 34}%, -26%) rotate(${dir * 58}deg)`;
-  };
-
   const hints = practising || !hintsEnabled ? [] : bottleHints(rack);
 
   return (
@@ -318,7 +373,43 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
         <div ref={rackRef} className="relative grid grid-cols-[repeat(auto-fit,minmax(48px,64px))] items-end justify-center gap-3 rounded-2xl bg-slate-100 px-2 py-6 dark:bg-slate-900/50">
           {stream && (
             <svg className="pointer-events-none absolute inset-0 z-[4] h-full w-full overflow-visible" aria-hidden="true">
-              <path d={stream.d} fill={stream.colour} opacity=".95" data-stream="" />
+              <defs>
+                <path id="bs-flow" d={stream.spine} fill="none" />
+                {/* Liquid falls; it does not appear already joining two
+                    bottles. The ribbon is revealed top-down at roughly the
+                    speed the bubbles travel, so the first thing the eye sees
+                    is the stream reaching for the other mouth. */}
+                <clipPath id="bs-fall">
+                  <rect x="-400" y={stream.top} width="1600" height={animate ? 0 : stream.drop}>
+                    {animate && (
+                      <animate attributeName="height" from="0" to={stream.drop} dur="0.13s" fill="freeze"
+                        calcMode="spline" keySplines="0.3 0 0.7 1" keyTimes="0;1" />
+                    )}
+                  </rect>
+                </clipPath>
+              </defs>
+              <g clipPath="url(#bs-fall)" opacity={stream.fading ? 0 : 1}
+                style={{ transition: animate ? "opacity .15s linear" : undefined }}>
+                <path d={stream.d} fill={stream.colour} opacity=".95" data-stream="" />
+                {/* The surface of the falling liquid. A dash running down the
+                    spine is what reads as flow: without it the ribbon is a
+                    rope, however fast the liquid behind it arrives. */}
+                {animate && (
+                  <path d={stream.spine} fill="none" stroke="#fff" strokeOpacity=".45" strokeWidth="1.6"
+                    strokeLinecap="round" strokeDasharray="5 9">
+                    <animate attributeName="stroke-dashoffset" from="14" to="0" dur="0.3s" repeatCount="indefinite" />
+                  </path>
+                )}
+                {/* Bubbles carried down with it, staggered so the stream never
+                    shows a gap. */}
+                {animate && [0, 0.11, 0.22, 0.33, 0.44].map((begin) => (
+                  <circle key={begin} r="1.6" fill="#fff" opacity=".5">
+                    <animateMotion dur="0.55s" begin={`${begin}s`} repeatCount="indefinite">
+                      <mpath href="#bs-flow" />
+                    </animateMotion>
+                  </circle>
+                ))}
+              </g>
             </svg>
           )}
           {rack.map((b, i) => {
@@ -327,43 +418,105 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
             const sorted = b.seg.length > 0 && b.seg.length === b.cap && new Set(b.seg).size === 1;
             return (
               <button key={i} type="button" onClick={() => tap(i)}
+                ref={(node) => { if (node) bottles.current.set(i, node); else bottles.current.delete(i); }}
                 data-bottle={i} data-picked={picked === i} data-sorted={sorted}
                 aria-label={`Bottle ${i + 1}, holds ${b.cap}. ${b.seg.length ? b.seg.map((c, k) => (k < shown ? nameOf(c) : "hidden")).join(", ") : "Empty"}.`
                   + (showRunCount && picked === i ? ` ${topRun(b).n} will pour.` : "")}
                 data-pouring={pouring?.from === i || undefined}
-                style={pouring?.from === i ? { transform: tiltFor(pouring), transformOrigin: "50% 88%", zIndex: 6 }
+                style={pouring?.from === i
+                  ? { transform: `translate(${pouring.dx}px, ${pouring.dy}px) rotate(${pouring.angle}deg)`, transformOrigin: `50% ${PIVOT_Y * 100}%`, zIndex: 6 }
                   : pouring?.to === i ? { zIndex: 5 } : undefined}
-                className={`block w-full min-w-11 cursor-pointer leading-none focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${picked === i && !pouring ? "-translate-y-2" : ""} ${animate ? "transition-transform duration-300 ease-out" : ""}`}>
+                className={`block w-full min-w-11 cursor-pointer leading-none focus:outline-none ${pouring ? "" : "focus-visible:ring-2 focus-visible:ring-indigo-500"} ${picked === i && !pouring ? "-translate-y-2" : ""} ${animate ? "transition-transform duration-[340ms] ease-in-out" : ""}`}>
                 <svg viewBox={`0 0 ${W} ${geo.height}`} className="h-auto w-full" aria-hidden="true">
-                  <defs><clipPath id={`bs-clip-${i}`}><path d={geo.body} /></clipPath></defs>
-                  <path d={geo.body} className="fill-white/60 dark:fill-white/10" />
-                  <g clipPath={`url(#bs-clip-${i})`}>
+                  <defs>
+                    <clipPath id={`bs-clip-${i}`}><path d={geo.body} /></clipPath>
+                    {/* Glass turns away at both edges, so a band is darker there. */}
+                    <linearGradient id={`bs-round-${i}`} x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0" stopColor="#000" stopOpacity=".26" />
+                      <stop offset=".22" stopColor="#fff" stopOpacity=".22" />
+                      <stop offset=".58" stopColor="#000" stopOpacity="0" />
+                      <stop offset="1" stopColor="#000" stopOpacity=".24" />
+                    </linearGradient>
+                  </defs>
+
+                  <path d={geo.body} className="fill-white/70 dark:fill-white/10" />
+
+                  <g clipPath={`url(#bs-clip-${i})`}
+                    transform={pouring?.from === i ? `rotate(${-pouring.angle} 30 ${geo.liquidBottom - 4})` : undefined}>
                     {b.seg.map((colour, k) => {
-                      const y = geo.bodyBottom - (k + 1) * LAYER_H;
+                      const y = geo.liquidBottom - (k + 1) * LAYER_H;
                       if (k >= shown) return <rect key={k} x="0" y={y} width={W} height={LAYER_H} className="fill-slate-300 dark:fill-slate-700" />;
+                      const arriving = pouring?.to === i && k === b.seg.length - 1;
+                      const draining = pouring?.from === i && k === b.seg.length - 1;
                       return (
                         <g key={k}>
-                          <rect x="0" y={y} width={W} height={LAYER_H} fill={cssColour(question.hues, colour)} />
-                          <rect x="0" y={y} width={W} height="2.5" fill="#fff" opacity=".25" />
-                          <path d={GLYPH[shapeOf(colour)]} transform={`translate(30 ${y + LAYER_H / 2})`} fill="#fff" fillOpacity=".9" />
+                          <rect x="0" y={y} width={W} height={LAYER_H} fill={cssColour(question.hues, colour)}>
+                            {animate && arriving && (
+                              <>
+                                <animate attributeName="y" from={y + LAYER_H} to={y} dur="0.11s" fill="freeze"
+                                  calcMode="spline" keySplines="0.2 0.8 0.3 1" keyTimes="0;1" />
+                                <animate attributeName="height" from="0" to={LAYER_H} dur="0.11s" fill="freeze"
+                                  calcMode="spline" keySplines="0.2 0.8 0.3 1" keyTimes="0;1" />
+                              </>
+                            )}
+                            {/* The band leaving the tilted bottle thins out as
+                                it goes, so the two ends of the stream move
+                                together instead of the source snapping empty. */}
+                            {animate && draining && (
+                              <animate attributeName="height" from={LAYER_H} to={LAYER_H * 0.55} dur="0.11s" fill="freeze" />
+                            )}
+                          </rect>
+                          {/* The surface of a band, and the shadow under the one above it. */}
+                          <rect x="0" y={y} width={W} height="2.5" fill="#fff" opacity=".3" />
+                          <rect x="0" y={y + LAYER_H - 1.5} width={W} height="1.5" fill="#000" opacity=".12" />
+                          <rect x="0" y={y} width={W} height={LAYER_H} fill={`url(#bs-round-${i})`} />
+                          {bubbles && bubblesFor(k, y).map((bub) => (
+                            <circle key={bub.key} cx={bub.cx} cy={bub.from} r={bub.r} fill="#fff" opacity=".45">
+                              <animate attributeName="cy" from={bub.from} to={bub.to} dur="3.6s" begin={`${bub.delay}s`} repeatCount="indefinite" />
+                              <animate attributeName="opacity" values=".05;.5;0" dur="3.6s" begin={`${bub.delay}s`} repeatCount="indefinite" />
+                            </circle>
+                          ))}
+                          <path d={GLYPH[shapeOf(colour)]} transform={`translate(30 ${y + LAYER_H / 2})`} fill="#fff" fillOpacity=".92" />
                         </g>
                       );
                     })}
+                    {/* Gloss, over the liquid: it is the glass in front of it. */}
+                    <rect x="11" y={geo.bodyTop + 4} width="6" height={b.cap * LAYER_H - 18} rx="3" fill="#fff" opacity=".42" />
+                    <rect x="46" y={geo.bodyTop + 10} width="2.6" height={b.cap * LAYER_H - 30} rx="1.3" fill="#fff" opacity=".2" />
+                    <rect x="24" y={NECK_TOP + 8} width="3" height={NECK_H + 6} rx="1.5" fill="#fff" opacity=".35" />
                   </g>
+
                   <path d={geo.outline} fill="none" strokeWidth="2.5" strokeLinecap="round"
                     className={sorted ? "stroke-emerald-500" : picked === i ? "stroke-indigo-500" : "stroke-slate-400 dark:stroke-slate-500"} />
-                  <ellipse cx="30" cy={NECK_TOP} rx="7" ry="3.5" fill="none" strokeWidth="2.5"
-                    className={picked === i ? "stroke-indigo-500" : "stroke-slate-400 dark:stroke-slate-500"} />
-                  {/* The stream is anchored to this, read after the tilt, so it
-                      joins the two mouths rather than being drawn near them. */}
-                  <circle r="0.4" cx="30" cy={NECK_TOP} fill="none" data-mouth={i}
-                    ref={(node) => { if (node) mouths.current.set(i, node); else mouths.current.delete(i); }} />
-                  {/* Level 9 asks the child to notice that a run travels as one,
-                      so the count is shown at the moment they commit to it. */}
+                  {/* The mouth. Read as an opening seen slightly from above,
+                      not a cap: a glass rim ring, a genuinely darker bore
+                      inside it, and a highlight where the light catches the
+                      near edge. Earlier tries were a black disc, then a
+                      swollen cap, then a rim so pale the bottle looked shut. */}
+                  <g className={sorted ? "text-emerald-500" : picked === i ? "text-indigo-500" : "text-slate-500 dark:text-slate-400"}>
+                    {/* Glass thickness below the lip, where the neck widens out. */}
+                    <rect x={NECK_L - 0.5} y={NECK_TOP + 4.5} width={NECK_R - NECK_L + 1} height="3.5" rx="1.2"
+                      fill="currentColor" opacity=".35" />
+                    {/* The rim, drawn as a ring: outer edge, then the bore. */}
+                    <ellipse cx="30" cy={NECK_TOP + 1} rx={(NECK_R - NECK_L) / 2 + 1.6} ry="3"
+                      fill="currentColor" opacity=".7" />
+                    <ellipse cx="30" cy={NECK_TOP + 0.2} rx={(NECK_R - NECK_L) / 2 + 1.6} ry="2.9"
+                      className="fill-slate-100 dark:fill-slate-500" />
+                    <ellipse cx="30" cy={NECK_TOP + 0.4} rx={(NECK_R - NECK_L) / 2 - 1.8} ry="1.7"
+                      className="fill-slate-400 dark:fill-slate-900" opacity=".8" />
+                    {/* Down the bore: darker at the back, so it reads as depth. */}
+                    <ellipse cx="30" cy={NECK_TOP - 0.1} rx={(NECK_R - NECK_L) / 2 - 2.4} ry="1.1"
+                      className="fill-slate-600 dark:fill-slate-950" opacity=".55" />
+                    <ellipse cx="26.5" cy={NECK_TOP - 1} rx="2.6" ry=".8" fill="#fff" opacity=".75" />
+                  </g>
+                  {/* Level 9 asks the child to notice a run travels as one, so
+                      the count appears the moment they commit to it. */}
                   {showRunCount && picked === i && topRun(b).n > 0 && (
-                    <text x="30" y={geo.bodyTop - 6} textAnchor="middle" data-run-count={topRun(b).n}
+                    <text x="30" y={geo.bodyTop - 8} textAnchor="middle" data-run-count={topRun(b).n}
                       className="fill-indigo-600 text-[13px] font-bold dark:fill-indigo-300">{topRun(b).n}</text>
                   )}
+                  <circle r="0.4" cx="30" cy={NECK_TOP} fill="none" data-mouth={i}
+                    ref={(node) => { if (node) mouths.current.set(i, node); else mouths.current.delete(i); }} />
                 </svg>
               </button>
             );

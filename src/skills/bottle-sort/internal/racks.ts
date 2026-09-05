@@ -120,27 +120,24 @@ export function dealRack(spec: RackSpec, seed: string): Deal {
       if (!run.n) continue;
       for (let to = 0; to < rack.length; to += 1) {
         if (from === to) continue;
-        const b = rack[to];
-        const room = b.cap - b.seg.length;
+        const room = rack[to].cap - rack[to].seg.length;
         if (room <= 0) continue;
-        if (b.seg.length && b.seg[b.seg.length - 1] !== run.colour) continue;
-        // Moving the whole of a uniform bottle into an empty one only renames
-        // it, which is why whole-run scrambling never mixes anything.
-        const max = Math.min(run.n, room);
-        const useful = !(b.seg.length === 0 && run.n === rack[from].seg.length);
-        if (useful || max > 1) options.push({ from, to, max });
+        // No colour-match test here, and that is the whole point. Keeping the
+        // pour rule in the scramble meant a colour could only ever land on its
+        // own kind, so every bottle stayed uniform and no rack was ever mixed:
+        // measured across all 32 specs, every bottle held exactly one colour.
+        // A scramble has to be able to do what a pour cannot.
+        options.push({ from, to, max: Math.min(run.n, room) });
       }
     }
     if (!options.length) break;
     const choice = options[Math.floor(next() * options.length)];
-    const whole = rack[choice.from].seg.length === topRun(rack[choice.from]).n && !rack[choice.to].seg.length;
-    // Leave something behind when taking from a bottle that would otherwise
-    // empty into an empty one; that single held-back segment is what mixes.
-    const cap = whole ? Math.max(1, choice.max - 1) : choice.max;
-    const moved = 1 + Math.floor(next() * cap);
-    const colour = topRun(rack[choice.from]).colour;
-    for (let i = 0; i < moved; i += 1) rack[choice.to].seg.push(rack[choice.from].seg.pop() as number);
-    void colour;
+    // Usually one segment. Moving whole runs every time just relabels bottles;
+    // single segments are what interleave the colours.
+    const moved = next() < 0.75 ? 1 : 1 + Math.floor(next() * choice.max);
+    for (let i = 0; i < Math.min(moved, choice.max); i += 1) {
+      rack[choice.to].seg.push(rack[choice.from].seg.pop() as number);
+    }
     applied += 1;
   }
 
@@ -171,18 +168,32 @@ const ROUND_MEMORY = 9;
  * Pure: earlier questions are recomputed from the same seed rather than
  * remembered, so the answer depends only on `(spec, seed, index)`.
  */
+/**
+ * One round's deals, kept so question 5 does not re-deal questions 1 to 4.
+ *
+ * Once the scramble started genuinely mixing, every deal became a real search,
+ * and re-walking the round for each question turned a fast suite into a
+ * two-minute one. The walk is still pure — this only stops it repeating work.
+ */
+const roundCache = new Map<string, Deal[]>();
+
 export function rackFor(spec: RackSpec, seed: string, index: number): Deal {
   // Built forward from question 1, never by recursion: asking each earlier
   // question to look up *its* predecessors makes the cost exponential in the
   // question number, which hung the suite outright.
+  const key = `${spec.id}:${seed}`;
+  const round = roundCache.get(key) ?? [];
+  if (!roundCache.has(key)) roundCache.set(key, round);
+  if (roundCache.size > 64) { roundCache.clear(); roundCache.set(key, round); }
+
   const earlier = new Set<string>();
   const from = Math.max(1, index - ROUND_MEMORY);
-  let deal = dealOne(spec, seed, from, earlier);
   for (let i = from; i < index; i += 1) {
-    earlier.add(signature(deal.rack));
-    deal = dealOne(spec, seed, i + 1, earlier);
+    if (!round[i]) round[i] = dealOne(spec, seed, i, earlier);
+    earlier.add(signature(round[i].rack));
   }
-  return deal;
+  if (!round[index]) round[index] = dealOne(spec, seed, index, earlier);
+  return round[index];
 }
 
 /**
@@ -197,7 +208,10 @@ export function rackFor(spec: RackSpec, seed: string, index: number): Deal {
 function dealOne(spec: RackSpec, seed: string, index: number, earlier: ReadonlySet<string>): Deal {
   const finished = (deal: Deal) => deal.rack.every((b) => b.seg.length === 0
     || (b.seg.length === b.cap && b.seg.every((c) => c === b.seg[0])));
+  /** At least one bottle holding two colours: otherwise there is nothing to sort. */
+  const mixed = (deal: Deal) => deal.rack.some((b) => b.seg.some((c, k) => k > 0 && c !== b.seg[k - 1]));
   const playable = (deal: Deal) => !finished(deal) && deal.scramble >= 1
+    && (spec.scramble < 5 || mixed(deal))
     && minimumPours(deal.rack).moves !== null;
 
   let fallback: Deal | null = null;

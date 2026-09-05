@@ -11,7 +11,10 @@ import { isSolved, type Rack } from "./types";
  */
 
 /** Beyond this many states the answer is not worth the wait. */
-export const SEARCH_BUDGET = 120_000;
+// Lower than it was. A rack a search this wide cannot finish is one the
+// generator should redraw rather than wait for, and every rack the lessons
+// actually deal solves far inside it.
+export const SEARCH_BUDGET = 24_000;
 
 export interface SolveResult {
   /** Pours in the shortest solution, or `null` if the search ran out of budget. */
