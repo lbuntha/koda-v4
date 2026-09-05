@@ -16,9 +16,16 @@ export const POUR_ANGLE = 72;
 /** Fraction of the bottle's height the tilt pivots on. */
 export const PIVOT_Y = 0.5;
 
-/** Where the tilt should put the lip, relative to the receiving mouth. */
-const LIP_INSET = 10;
-const LIP_RISE = 22;
+/**
+ * Where the tilt should put the lip, relative to the receiving mouth.
+ *
+ * A 22px rise over a 10px reach left barely enough space for liquid to fall
+ * through, so the arc was a stub and the pour read as a transfer rather than a
+ * fall. Both are up a little: enough air to see the stream leave the lip and
+ * drop in, without lifting the bottle so high it stops looking like pouring.
+ */
+const LIP_INSET = 14;
+const LIP_RISE = 30;
 
 const centre = (b: Box) => ({ x: b.left + b.width / 2, y: b.top + b.height / 2 });
 

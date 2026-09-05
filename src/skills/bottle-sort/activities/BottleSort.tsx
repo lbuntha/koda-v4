@@ -146,7 +146,7 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
   const [nudge, setNudge] = useState<string | null>(null);
   /** The pour being drawn, and the stream that connects the two mouths. */
   const [pouring, setPouring] = useState<{ from: number; to: number; dir: number; angle: number; dx: number; dy: number } | null>(null);
-  const [stream, setStream] = useState<{ d: string; colour: string; spine: string; length: number; fading?: boolean } | null>(null);
+  const [stream, setStream] = useState<{ d: string; colour: string; spine: string; length: number; end: { x: number; y: number }; fading?: boolean } | null>(null);
   const rackRef = useRef<HTMLDivElement | null>(null);
   const mouths = useRef(new Map<number, SVGCircleElement>());
   const bottles = useRef(new Map<number, HTMLButtonElement>());
@@ -311,6 +311,7 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
       const target = { x: into.x, y: into.y + 3 };
       setStream({
         colour: cssColour(question.hues, topRun(rack[from]).colour),
+        end: target,
         ...streamPath(lip, target),
       });
     }
@@ -332,7 +333,7 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
     // blink out — a ribbon that disappears mid-frame is the single thing that
     // most made the pour read as stepped rather than poured.
     setStream((s) => (s ? { ...s, fading: true } : s));
-    await wait(150);
+    await wait(200);
     if (!alive.current) return;
     setStream(null);
     setPouring(null);
@@ -406,17 +407,27 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
                     like it was simply switched on. A mask, not a clip, because
                     clipping ignores stroke geometry. */}
                 <mask id="bs-fall" maskUnits="userSpaceOnUse">
-                  <path d={stream.spine} fill="none" stroke="#fff" strokeWidth="18" strokeLinecap="round"
-                    strokeDasharray={stream.length} strokeDashoffset={animate ? stream.length : 0}>
+                  {/* The same dash does both ends of the pour. Running the
+                      offset down to 0 reveals the arc from the lip forward;
+                      running it on to -length retracts it from the lip while
+                      the tail keeps falling into the bottle, which is how a
+                      pour actually stops. Fading the whole ribbon out at once
+                      was the last thing that read as a switch rather than
+                      liquid. */}
+                  <path key={stream.fading ? "drain" : "fall"}
+                    d={stream.spine} fill="none" stroke="#fff" strokeWidth="18" strokeLinecap="round"
+                    strokeDasharray={stream.length}
+                    strokeDashoffset={animate && !stream.fading ? stream.length : 0}>
                     {animate && (
-                      <animate attributeName="stroke-dashoffset" from={stream.length} to="0" dur="0.16s"
-                        fill="freeze" calcMode="spline" keySplines="0.35 0 0.7 1" keyTimes="0;1" />
+                      <animate attributeName="stroke-dashoffset"
+                        from={stream.fading ? 0 : stream.length} to={stream.fading ? -stream.length : 0}
+                        dur={stream.fading ? "0.19s" : "0.16s"} fill="freeze"
+                        calcMode="spline" keySplines={stream.fading ? "0.4 0 1 1" : "0.35 0 0.7 1"} keyTimes="0;1" />
                     )}
                   </path>
                 </mask>
               </defs>
-              <g mask="url(#bs-fall)" opacity={stream.fading ? 0 : 1}
-                style={{ transition: animate ? "opacity .15s linear" : undefined }}>
+              <g mask="url(#bs-fall)">
                 <path d={stream.d} fill={stream.colour} opacity=".95" data-stream="" />
                 {/* The surface of the falling liquid. A dash running down the
                     spine is what reads as flow: without it the ribbon is a
@@ -426,6 +437,32 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
                     strokeLinecap="round" strokeDasharray="5 9">
                     <animate attributeName="stroke-dashoffset" from="14" to="0" dur="0.3s" repeatCount="indefinite" />
                   </path>
+                )}
+                {/* Where it lands. Liquid falling onto liquid throws a little
+                    back up, and without it the stream just ended in mid-air at
+                    the mouth — the eye reads an arrival, or it reads a pasted
+                    shape. Drops arc out and fall back, and a ring spreads on
+                    the surface underneath them. */}
+                {animate && !stream.fading && (
+                  <g>
+                    <ellipse cx={stream.end.x} cy={stream.end.y} rx="1" ry="0.5"
+                      fill="none" stroke="#fff" strokeOpacity=".5" strokeWidth="1.2">
+                      <animate attributeName="rx" values="1;7" dur="0.42s" repeatCount="indefinite" />
+                      <animate attributeName="ry" values="0.5;2.4" dur="0.42s" repeatCount="indefinite" />
+                      <animate attributeName="stroke-opacity" values=".5;0" dur="0.42s" repeatCount="indefinite" />
+                    </ellipse>
+                    {[-1, 1, -1].map((side, n) => (
+                      <circle key={n} r={1.5 - n * 0.25} fill={stream.colour} opacity=".85">
+                        <animate attributeName="cx" dur="0.4s" begin={`${n * 0.13}s`} repeatCount="indefinite"
+                          values={`${stream.end.x};${stream.end.x + side * (4 + n)};${stream.end.x + side * (6 + n)}`} />
+                        {/* Up, then down: the drop is thrown, not slid. */}
+                        <animate attributeName="cy" dur="0.4s" begin={`${n * 0.13}s`} repeatCount="indefinite"
+                          values={`${stream.end.y};${stream.end.y - 5 - n};${stream.end.y + 2}`} />
+                        <animate attributeName="opacity" values=".85;.7;0" dur="0.4s"
+                          begin={`${n * 0.13}s`} repeatCount="indefinite" />
+                      </circle>
+                    ))}
+                  </g>
                 )}
                 {/* Bubbles carried down with it, staggered so the stream never
                     shows a gap. */}
