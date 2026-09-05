@@ -27,6 +27,7 @@ export interface UISkillCardProps {
   thumbnail?: string;
   fallbackIconName?: string;
   category: string;
+  subjectName?: string;
   ages?: [number, number];
   lessonCount: number;
   completedLessons?: number;
@@ -98,6 +99,7 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
   thumbnail,
   fallbackIconName,
   category,
+  subjectName,
   ages,
   lessonCount,
   completedLessons = 0,
@@ -119,7 +121,7 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
   const percent =
     progressPercent ?? (lessonCount ? Math.round((completedLessons / lessonCount) * 100) : 0);
   const complete = percent === 100;
-  const categoryLabel = skillArtFor(category).label;
+  const categoryLabel = subjectName ?? skillArtFor(category).label;
   const label =
     actionLabel ??
     (!registered ? "Add" : complete ? "Review" : completedLessons > 0 ? "Continue" : "Open");
@@ -161,6 +163,7 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
               the learner already has, and a tagline there is a sentence they
               have read every day. A catalogue row is a skill they are deciding
               about, so it needs the line. */}
+          {subjectName && <p className="mt-1 text-xs text-muted">{subjectName}</p>}
           {tagline && (
             <p className="mt-0.5 truncate text-[13px] leading-snug text-muted">{tagline}</p>
           )}
@@ -191,52 +194,73 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
   if (size === "lg") {
     return (
       <section className={`${themeSystem.card("default")} overflow-hidden ${className}`}>
-        <div className="p-5 sm:p-7 flex flex-col md:flex-row md:items-center gap-5">
-          <UISkillThumbnail
-            thumbnail={thumbnail}
-            fallbackIconName={fallbackIconName}
-            category={category}
-            size="lg"
-          />
-          <div className="min-w-0 flex-1">
-            {eyebrow && (
-              <p className="text-xs font-mono font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
-                {eyebrow}
-              </p>
-            )}
-            {badges && <div className="flex flex-wrap items-center gap-2">{badges}</div>}
-            <h2
-              className={`${eyebrow || badges ? "mt-2" : ""} text-2xl sm:text-3xl font-black tracking-tight text-ink`}
-            >
-              {title}
-            </h2>
-            {tagline && <p className="mt-2 text-base text-muted max-w-2xl">{tagline}</p>}
-            {meta && <p className="mt-2 text-xs font-mono font-bold text-muted">{meta}</p>}
-
-            <div className="mt-5 max-w-xl">
-              <div className="flex justify-between text-xs font-mono font-bold text-muted mb-1.5">
-                <span>
-                  {completedLessons
-                    ? `${completedLessons} of ${lessonCount} lessons complete`
-                    : "Ready to begin"}
-                </span>
-                <span>{percent}%</span>
-              </div>
-              <div className="flex">
-                <Progress percent={percent} size="lg" label={`${title} progress`} />
-              </div>
-              {footnote && <p className="mt-2 text-xs text-muted">{footnote}</p>}
-            </div>
-          </div>
-          <UIButton
-            size="lg"
-            className="w-full md:w-auto"
-            icon={<Play />}
-            isLoading={registering}
-            onClick={act}
+        <div className="flex flex-col md:flex-row md:items-center md:gap-5 md:p-7">
+          {/*
+            * Stacked, the artwork *is* the top of the card rather than a
+            * picture sitting inside it: a 16:9 band edge to edge, clipped by
+            * the card's own corners, which is also the crop the same art gets
+            * in the grid so a skill looks like itself in both places.
+            *
+            * A fallback glyph keeps a shorter band. Full-bleed 16:9 of one
+            * symbol on a gradient is a lot of card saying very little — the
+            * same reason the grid poster drops to 3:1 without artwork.
+            */}
+          <div
+            className={`relative w-full shrink-0 overflow-hidden md:w-56 md:rounded-2xl lg:w-64 ${
+              hasArtwork ? "aspect-[16/9]" : "aspect-[5/2] md:aspect-[16/9]"
+            }`}
           >
-            {label}
-          </UIButton>
+            <UISkillThumbnail
+              thumbnail={thumbnail}
+              fallbackIconName={fallbackIconName}
+              category={category}
+              size="lg"
+              fill
+              cover
+            />
+          </div>
+          <div className="flex flex-col gap-5 p-5 sm:p-7 md:flex-1 md:flex-row md:items-center md:p-0">
+            <div className="min-w-0 flex-1">
+              {eyebrow && (
+                <p className="text-xs font-mono font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
+                  {eyebrow}
+                </p>
+              )}
+              {subjectName && <p className="mt-1 text-sm text-muted">{subjectName}</p>}
+              {badges && <div className="flex flex-wrap items-center gap-2">{badges}</div>}
+              <h2
+                className={`${eyebrow || badges ? "mt-2" : ""} text-2xl sm:text-3xl font-black tracking-tight text-ink`}
+              >
+                {title}
+              </h2>
+              {tagline && <p className="mt-2 text-base text-muted max-w-2xl">{tagline}</p>}
+              {meta && <p className="mt-2 text-xs font-mono font-bold text-muted">{meta}</p>}
+
+              <div className="mt-5 max-w-xl">
+                <div className="flex justify-between text-xs font-mono font-bold text-muted mb-1.5">
+                  <span>
+                    {completedLessons
+                      ? `${completedLessons} of ${lessonCount} lessons complete`
+                      : "Ready to begin"}
+                  </span>
+                  <span>{percent}%</span>
+                </div>
+                <div className="flex">
+                  <Progress percent={percent} size="lg" label={`${title} progress`} />
+                </div>
+                {footnote && <p className="mt-2 text-xs text-muted">{footnote}</p>}
+              </div>
+            </div>
+            <UIButton
+              size="lg"
+              className="w-full md:w-auto"
+              icon={<Play />}
+              isLoading={registering}
+              onClick={act}
+            >
+              {label}
+            </UIButton>
+          </div>
         </div>
       </section>
     );
