@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, playCopy, useMotionOK, useSkillRound, type RoundQuestion } from "../../kit";
-import { isDeadlock, isSolvedRack, legalPours, pour, pourSteps, refuseReason } from "../internal/pour";
+import { isCorked, isDeadlock, isSolvedRack, legalPours, pour, pourSteps, refuseReason } from "../internal/pour";
 import { POOL, rackFor } from "../internal/racks";
 import { specFor } from "../internal/specs";
+import { minimumPours } from "../internal/solve";
 import { PIVOT_Y, POUR_ANGLE, aimPour, streamPath } from "../internal/bottle";
 import { topRun, type Bottle, type Rack } from "../internal/types";
 
@@ -27,6 +28,8 @@ export interface BottleSortQuestion extends RoundQuestion {
   hues: number[];
   /** Pours used to scramble: the upper bound on the solution. */
   scramble: number;
+  /** Pours allowed, on the lessons that set one. Absent means unlimited. */
+  budget?: number;
 }
 
 /** Shape is bound to the deal position, never the hue, so a redrawn palette
@@ -97,7 +100,17 @@ export function buildQuestion(params: BottleSortParams, index: number): BottleSo
   const cycle = setup.specs?.length ? setup.specs : [setup.spec ?? "one-pour"];
   const spec = specFor(cycle[(index - 1) % cycle.length]) ?? specFor("one-pour")!;
   const { rack, hues, scramble } = rackFor(spec, setup.seed ?? "bottle-sort", index);
+  // A budget is only meaningful against the *shortest* solution, so it is
+  // measured, not guessed. If the search runs out of room the rack still has to
+  // be playable, and undoing the scramble is always a solution — so that bound
+  // stands in, with room to spare rather than a budget nobody could meet.
+  let budget: number | undefined;
+  if (spec.budget) {
+    const shortest = minimumPours(rack).moves;
+    budget = shortest === null ? scramble + 2 : shortest + (spec.budget === "minimum+2" ? 2 : 0);
+  }
   return {
+    budget,
     id: `bottle-sort-${spec.id}-${index}`,
     taskKind: `sort_${spec.id}`,
     prompt: spec.colours === 2 ? "Sort both bottles." : `Sort all ${spec.colours} colours.`,
@@ -113,8 +126,16 @@ export function buildQuestion(params: BottleSortParams, index: number): BottleSo
 
 export function bottleHints(rack: Rack): string[] {
   const source = legalPours(rack).find((m) => topRun(rack[m.from]).n < rack[m.from].seg.length);
+  // A rack with a rule on it gets that rule first. Telling a child to look for
+  // a bottle to empty is no help when the reason they are stuck is a cork.
+  const corked = rack.findIndex((b, i) => b.lockedBy !== undefined && isCorked(rack, i));
+  const oneWay = rack.findIndex((b) => b.oneWay);
+  const rule = corked >= 0 ? "Finish the bottle the cork is waiting on."
+    : oneWay >= 0 ? "Whatever you pour into that bottle stays there."
+    : undefined;
   return composeHints(
-    "Look for a bottle you could empty completely.",
+    rule ?? "Look for a bottle you could empty completely.",
+    rule ? "Look for a bottle you could empty completely." : undefined,
     source ? `Bottle ${source.from + 1} has somewhere to go.` : undefined,
   );
 }
@@ -143,6 +164,8 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
   const [dealt, setDealt] = useState<Rack>([]);
   const [history, setHistory] = useState<Rack[]>([]);
   const [picked, setPicked] = useState<number | null>(null);
+  /** Pours spent on this rack. Only the budget lessons show it. */
+  const [poured, setPoured] = useState(0);
   const [nudge, setNudge] = useState<string | null>(null);
   /** The pour being drawn, and the stream that connects the two mouths. */
   const [pouring, setPouring] = useState<{ from: number; to: number; dir: number; angle: number; dx: number; dy: number } | null>(null);
@@ -180,6 +203,7 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
     setDealt(question.rack);
     setHistory([]);
     setPicked(null);
+    setPoured(0);
     setNudge(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [question.id]);
@@ -235,10 +259,14 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
 
     const from = picked;
     const next = pour(rack, from, index);
+    // Counted here rather than inside the animation, so a pour costs the same
+    // whether or not it is drawn. Undo puts it back.
+    const spent = poured + 1;
+    setPoured(spent);
     setHistory((h) => [...h, rack]);
     setPicked(null);
     setNudge(null);
-    void runPour(from, index, next);
+    void runPour(from, index, next, spent);
   };
 
   /**
@@ -267,10 +295,10 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
       setTimeout(finish, ms + 140);
     });
 
-  const runPour = async (from: number, to: number, next: Rack) => {
+  const runPour = async (from: number, to: number, next: Rack, spent?: number) => {
     const finish = () => {
       setRack(next);
-      judge(next);
+      judge(next, spent);
     };
     if (!animate) { finish(); return; }
 
@@ -343,7 +371,7 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
   };
 
   /** The scoring contract, applied once the liquid has landed. */
-  const judge = (next: Rack) => {
+  const judge = (next: Rack, spent?: number) => {
     if (isSolvedRack(next)) {
       chime("success");
       buzz("success");
@@ -358,6 +386,19 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
       round.submit({ correct: false, given: "no pours left", expected: question.expected, errorKind: "miscounted_items", title: "No pours left", message: "That path ran out. The rack is back as it was dealt." });
       setRack(dealt);
       setHistory([]);
+      setPoured(0);
+      return;
+    }
+    // Spending the budget without sorting the rack ends the attempt the same
+    // way a deadlock does: scored once, rack back as dealt. Checked after the
+    // solved test above, so a pour that finishes on the very last of the
+    // budget still counts as sorted.
+    if (spent !== undefined && question.budget !== undefined && spent >= question.budget) {
+      koda.speech.stop();
+      round.submit({ correct: false, given: `${spent} pours`, expected: question.expected, errorKind: "miscounted_items", title: "Out of pours", message: "You are out of pours. The rack is back as it was dealt." });
+      setRack(dealt);
+      setHistory([]);
+      setPoured(0);
     }
   };
 
@@ -485,7 +526,11 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
                 ref={(node) => { if (node) bottles.current.set(i, node); else bottles.current.delete(i); }}
                 data-bottle={i} data-picked={picked === i} data-sorted={sorted}
                 aria-label={`Bottle ${i + 1}, holds ${b.cap}. ${b.seg.length ? b.seg.map((c, k) => (k < shown ? nameOf(c) : "hidden")).join(", ") : "Empty"}.`
-                  + (showRunCount && picked === i ? ` ${topRun(b).n} will pour.` : "")}
+                  + (showRunCount && picked === i ? ` ${topRun(b).n} will pour.` : "")
+                  // A child using the label instead of the picture has to be
+                  // told the same rules the badges show.
+                  + (b.lockedBy !== undefined && isCorked(rack, i) ? ` Corked until bottle ${b.lockedBy + 1} is finished.` : "")
+                  + (b.oneWay ? " Receives only." : "")}
                 data-pouring={pouring?.from === i || undefined}
                 style={pouring?.from === i
                   ? { transform: `translate(${pouring.dx}px, ${pouring.dy}px) rotate(${pouring.angle}deg)`, transformOrigin: `50% ${PIVOT_Y * 100}%`, zIndex: 6 }
@@ -587,6 +632,32 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
                     <text x="30" y={geo.bodyTop - 8} textAnchor="middle" data-run-count={topRun(b).n}
                       className="fill-indigo-600 text-[13px] font-bold dark:fill-indigo-300">{topRun(b).n}</text>
                   )}
+                  {/* A rule the child cannot see is a rule that feels unfair.
+                      A corked bottle wears its cork until the bottle it waits
+                      on is finished; a receive-only bottle wears the arrow
+                      that says liquid goes in and never comes out. Both sit on
+                      the shoulder, where a bottle has headroom whatever it
+                      holds, on a disc so they stay legible over liquid. Both
+                      are in the accessible name too, and the refusal explains
+                      itself if the child tries anyway. */}
+                  {b.lockedBy !== undefined && isCorked(rack, i) && (
+                    <g data-locked={i}>
+                      <circle cx="30" cy={geo.bodyTop + 9} r="11" className="fill-white/85 dark:fill-slate-900/85" />
+                      <g className="text-rose-600 dark:text-rose-400">
+                        <path d={`M26 ${geo.bodyTop + 6} v-2.5 a4 4 0 0 1 8 0 v2.5`} fill="none"
+                          stroke="currentColor" strokeWidth="2.2" />
+                        <rect x="23.5" y={geo.bodyTop + 6} width="13" height="9.5" rx="2" fill="currentColor" />
+                      </g>
+                    </g>
+                  )}
+                  {b.oneWay && (
+                    <g data-one-way={i}>
+                      <circle cx="30" cy={geo.bodyTop + 9} r="11" className="fill-white/85 dark:fill-slate-900/85" />
+                      <path d={`M30 ${geo.bodyTop + 3} v9 M25.5 ${geo.bodyTop + 8} l4.5 4.5 4.5 -4.5`}
+                        fill="none" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"
+                        className="stroke-sky-600 dark:stroke-sky-400" />
+                    </g>
+                  )}
                   <circle r="0.4" cx="30" cy={NECK_TOP} fill="none" data-mouth={i}
                     ref={(node) => { if (node) mouths.current.set(i, node); else mouths.current.delete(i); }} />
                 </svg>
@@ -595,14 +666,24 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
           })}
         </div>
 
+        {question.budget !== undefined && (
+          <p data-budget={question.budget} aria-live="polite"
+            className={`text-center text-sm font-semibold tabular-nums ${
+              poured >= question.budget ? "text-rose-600 dark:text-rose-400"
+                : poured >= question.budget - 2 ? "text-indigo-600 dark:text-indigo-300"
+                : "text-slate-600 dark:text-slate-300"}`}>
+            {`Pours: ${poured} of ${question.budget}`}
+          </p>
+        )}
+
         <div className="flex justify-center gap-2">
           <button type="button" data-action="undo" disabled={!history.length || !!round.feedback}
-            onClick={() => stepBack("Stepped back.", () => { setRack(history[history.length - 1]); setHistory((h) => h.slice(0, -1)); })}
+            onClick={() => stepBack("Stepped back.", () => { setRack(history[history.length - 1]); setHistory((h) => h.slice(0, -1)); setPoured((n) => Math.max(0, n - 1)); })}
             className="min-h-11 rounded-xl border border-slate-300 px-4 text-sm font-semibold text-slate-700 disabled:opacity-40 dark:border-slate-600 dark:text-slate-200">
             Undo
           </button>
           <button type="button" data-action="reset" disabled={!!round.feedback}
-            onClick={() => stepBack("Back to the dealt rack.", () => { setRack(dealt); setHistory([]); })}
+            onClick={() => stepBack("Back to the dealt rack.", () => { setRack(dealt); setHistory([]); setPoured(0); })}
             className="min-h-11 rounded-xl border border-slate-300 px-4 text-sm font-semibold text-slate-700 disabled:opacity-40 dark:border-slate-600 dark:text-slate-200">
             Start over
           </button>

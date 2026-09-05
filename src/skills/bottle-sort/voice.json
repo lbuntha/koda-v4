@@ -3,18 +3,30 @@
   "templates": [],
   "prompts": [
     "Sort every bottle.",
+    "Pick a different bottle to pour into.",
+    "That bottle is not there.",
+    "That bottle is corked.",
     "That bottle is full.",
     "That bottle is empty.",
-    "Those colours do not match.",
     "That bottle only receives.",
+    "Those colours do not match.",
     "Look for a bottle you could empty completely.",
     "You sorted them all.",
-    "No pours left. Start the rack again."
+    "Every bottle holds one colour.",
+    "No pours left. Start the rack again.",
+    "That path ran out. The rack is back as it was dealt.",
+    "You are out of pours. The rack is back as it was dealt.",
+    "Finish the bottle the cork is waiting on.",
+    "Whatever you pour into that bottle stays there."
   ],
   "phrases": [],
   "groups": {
     "correct": {
-      "voices": ["Kore", "Puck", "Zephyr"],
+      "voices": [
+        "Kore",
+        "Puck",
+        "Zephyr"
+      ],
       "phrases": [
         "You sorted them all!",
         "Every bottle is one colour.",
@@ -24,7 +36,11 @@
       ]
     },
     "incorrect": {
-      "voices": ["Kore", "Zephyr", "Puck"],
+      "voices": [
+        "Kore",
+        "Zephyr",
+        "Puck"
+      ],
       "phrases": [
         "That path ran out. Try another way.",
         "No pours left. Start again and plan ahead.",

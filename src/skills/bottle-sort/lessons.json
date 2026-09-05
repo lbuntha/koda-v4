@@ -423,6 +423,435 @@
         6,
         12
       ]
+    },
+    {
+      "id": "four-colours",
+      "title": "Four Colours",
+      "concept": "More to Hold",
+      "conceptKey": "colour-grower",
+      "requires": [
+        "run-counter"
+      ],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 11,
+        "question": {
+          "spec": "four-colours",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "cyan",
+          "category": "Planning",
+          "shortDesc": "A fourth colour joins the rack",
+          "targetObjective": "Sort all four colours into their own bottles.",
+          "stepByStep": [
+            "Look at the whole rack before pouring.",
+            "Decide which bottle you can empty first.",
+            "Pour, then look again."
+          ],
+          "kidTip": "One more colour means one more thing to keep track of. Empty a bottle before you fill one.",
+          "audioPrompt": "Four colours now. Keep one bottle free if you can."
+        }
+      },
+      "difficulty": "Medium",
+      "iconName": "flask-conical",
+      "iconTone": "cyan",
+      "pedagogyTip": "The first rack where holding the whole plan in mind matters more than the next legal pour.",
+      "standards": [],
+      "trajectoryLevel": "colour-grower",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "taller-bottles",
+      "title": "Taller Bottles",
+      "concept": "Taller to Hold Them",
+      "conceptKey": "capacity-grower",
+      "requires": [
+        "colour-grower"
+      ],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 12,
+        "question": {
+          "spec": "taller-bottles",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "cyan",
+          "category": "Planning",
+          "shortDesc": "Five deep instead of four",
+          "targetObjective": "Sort all four colours into the taller bottles.",
+          "stepByStep": [
+            "Check how deep each bottle is.",
+            "A taller bottle takes a longer run.",
+            "Pour, then look again."
+          ],
+          "kidTip": "These bottles hold five. A run of five can move in one pour.",
+          "audioPrompt": "Taller bottles. They hold five now, not four."
+        }
+      },
+      "difficulty": "Medium",
+      "iconName": "flask-conical",
+      "iconTone": "cyan",
+      "pedagogyTip": "Capacity and colour count grow separately, so the child meets one new thing at a time.",
+      "standards": [],
+      "trajectoryLevel": "capacity-grower",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "one-space-left",
+      "title": "One Space Left",
+      "concept": "Plan the Last Slot",
+      "conceptKey": "space-planner",
+      "requires": [
+        "capacity-grower"
+      ],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 13,
+        "question": {
+          "spec": "one-space-left",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "indigo",
+          "category": "Planning",
+          "shortDesc": "Only one free slot in the whole rack",
+          "targetObjective": "Sort every colour with only one space to work in.",
+          "stepByStep": [
+            "Find the only free space.",
+            "Ask what has to move into it first.",
+            "Pour, then look again."
+          ],
+          "kidTip": "There is only one space. Spend it on the pour that frees another.",
+          "audioPrompt": "Only one space left. Choose what goes into it carefully."
+        }
+      },
+      "difficulty": "Hard",
+      "iconName": "flask-conical",
+      "iconTone": "indigo",
+      "pedagogyTip": "A single free slot forces the child to sequence rather than search.",
+      "standards": [],
+      "trajectoryLevel": "space-planner",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "no-free-bottle",
+      "title": "No Free Bottle",
+      "concept": "Make Space First",
+      "conceptKey": "space-planner",
+      "requires": [
+        "capacity-grower"
+      ],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 14,
+        "question": {
+          "spec": "no-free-bottle",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "indigo",
+          "category": "Planning",
+          "shortDesc": "Nothing starts empty",
+          "targetObjective": "Make your own space, then sort every colour.",
+          "stepByStep": [
+            "No bottle starts empty.",
+            "Find a pour that empties one.",
+            "Then use the space you made."
+          ],
+          "kidTip": "You have to make space before you can use it. Look for a bottle that is nearly one colour already.",
+          "audioPrompt": "No empty bottle this time. Make one."
+        }
+      },
+      "difficulty": "Hard",
+      "iconName": "flask-conical",
+      "iconTone": "indigo",
+      "pedagogyTip": "Space becomes something the child creates rather than something the rack provides.",
+      "standards": [],
+      "trajectoryLevel": "space-planner",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "the-locked-bottle",
+      "title": "The Locked Bottle",
+      "concept": "Order the Plan",
+      "conceptKey": "order-planner",
+      "requires": [
+        "space-planner"
+      ],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 15,
+        "question": {
+          "spec": "the-locked-bottle",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "indigo",
+          "category": "Planning",
+          "shortDesc": "One bottle is corked until another is done",
+          "targetObjective": "Finish the right bottle first to open the corked one.",
+          "stepByStep": [
+            "Find the corked bottle.",
+            "See which bottle it is waiting on.",
+            "Finish that one first."
+          ],
+          "kidTip": "The cork comes off when the bottle it waits on holds one colour. Work out which one that is.",
+          "audioPrompt": "One bottle is corked. Finish the bottle it is waiting on."
+        }
+      },
+      "difficulty": "Hard",
+      "iconName": "flask-conical",
+      "iconTone": "indigo",
+      "pedagogyTip": "The first lesson where the order of two correct pours is what matters.",
+      "standards": [],
+      "trajectoryLevel": "order-planner",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "two-locks",
+      "title": "Two Locks",
+      "concept": "Chained Order",
+      "conceptKey": "order-planner",
+      "requires": [
+        "space-planner"
+      ],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 16,
+        "question": {
+          "spec": "two-locks",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "indigo",
+          "category": "Planning",
+          "shortDesc": "A cork that opens another cork",
+          "targetObjective": "Work out the order that opens every bottle.",
+          "stepByStep": [
+            "Find the bottle that is not waiting on anything.",
+            "Finish it to open the next.",
+            "Follow the chain."
+          ],
+          "kidTip": "One cork opens another. Start with the bottle that is not waiting on anything.",
+          "audioPrompt": "Two corks now. Find the one you can open first."
+        }
+      },
+      "difficulty": "Hard",
+      "iconName": "flask-conical",
+      "iconTone": "indigo",
+      "pedagogyTip": "A chain of dependencies, which is planning two steps rather than one.",
+      "standards": [],
+      "trajectoryLevel": "order-planner",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "the-one-way-bottle",
+      "title": "The One-Way Bottle",
+      "concept": "A Move You Cannot Undo",
+      "conceptKey": "irreversible-mover",
+      "requires": [
+        "order-planner"
+      ],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 17,
+        "question": {
+          "spec": "the-one-way-bottle",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "rose",
+          "category": "Planning",
+          "shortDesc": "One bottle takes liquid and never gives it back",
+          "targetObjective": "Sort every colour without trapping anything in the one-way bottle.",
+          "stepByStep": [
+            "Find the one-way bottle.",
+            "Anything poured in stays in.",
+            "Only pour the colour that belongs there."
+          ],
+          "kidTip": "Liquid goes into that bottle and never comes out. Be sure before you pour.",
+          "audioPrompt": "One bottle only receives. Whatever goes in stays in."
+        }
+      },
+      "difficulty": "Hard",
+      "iconName": "flask-conical",
+      "iconTone": "pink",
+      "pedagogyTip": "An irreversible move makes the child check a plan before committing to it.",
+      "standards": [],
+      "trajectoryLevel": "irreversible-mover",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "think-before-you-pour",
+      "title": "Think Before You Pour",
+      "concept": "Prefer a Short Plan",
+      "conceptKey": "move-budgeter",
+      "requires": [
+        "irreversible-mover"
+      ],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 18,
+        "question": {
+          "spec": "think-before-you-pour",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "rose",
+          "category": "Planning",
+          "shortDesc": "A pour budget, with a little room",
+          "targetObjective": "Sort the rack within the pours you are given.",
+          "stepByStep": [
+            "Count the pours you have.",
+            "Plan before the first one.",
+            "Undo costs you nothing."
+          ],
+          "kidTip": "You have a couple of spare pours. Plan first and you will not need them.",
+          "audioPrompt": "Watch your pours this time. You do not have many."
+        }
+      },
+      "difficulty": "Hard",
+      "iconName": "flask-conical",
+      "iconTone": "pink",
+      "pedagogyTip": "A budget converts 'a legal pour' into 'a pour worth making'.",
+      "standards": [],
+      "trajectoryLevel": "move-budgeter",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "the-shortest-way",
+      "title": "The Shortest Way",
+      "concept": "The Shortest Plan",
+      "conceptKey": "move-budgeter",
+      "requires": [
+        "irreversible-mover"
+      ],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 19,
+        "question": {
+          "spec": "the-shortest-way",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "rose",
+          "category": "Planning",
+          "shortDesc": "Exactly the shortest solution, no spare pours",
+          "targetObjective": "Sort the rack in the fewest pours there are.",
+          "stepByStep": [
+            "There are no spare pours.",
+            "Work the whole plan out first.",
+            "Undo and start over cost nothing."
+          ],
+          "kidTip": "Every pour has to count. Work it out before you start.",
+          "audioPrompt": "The shortest way only. Every pour has to count."
+        }
+      },
+      "difficulty": "Hard",
+      "iconName": "flask-conical",
+      "iconTone": "pink",
+      "pedagogyTip": "The tightest constraint in the skill, and the reason undo is free.",
+      "standards": [],
+      "trajectoryLevel": "move-budgeter",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "practice-planning",
+      "title": "Practice: Planning",
+      "concept": "Practice Without Help",
+      "conceptKey": "move-budgeter",
+      "requires": [],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 20,
+        "question": {
+          "specs": [
+            "four-colours",
+            "taller-bottles",
+            "one-space-left",
+            "no-free-bottle",
+            "the-locked-bottle",
+            "two-locks",
+            "the-one-way-bottle",
+            "think-before-you-pour",
+            "the-shortest-way"
+          ],
+          "questionsPerRound": 5,
+          "practice": true
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "rose",
+          "category": "Planning",
+          "shortDesc": "Five racks across every planning technique",
+          "targetObjective": "Sort five racks without help.",
+          "stepByStep": [
+            "Look at the whole rack first.",
+            "Corks, one-way bottles and budgets all still apply.",
+            "Pour, then look again."
+          ],
+          "kidTip": "No hints here. Take your time.",
+          "audioPrompt": ""
+        }
+      },
+      "difficulty": "Hard",
+      "iconName": "flask-conical",
+      "iconTone": "pink",
+      "pedagogyTip": "Practice measures pace across the taught techniques, so it draws from all of them rather than one.",
+      "standards": [],
+      "trajectoryLevel": "move-budgeter",
+      "ageBand": [
+        6,
+        12
+      ]
     }
   ]
 }

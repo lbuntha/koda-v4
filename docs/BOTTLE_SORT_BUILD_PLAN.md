@@ -339,7 +339,7 @@ one engine and its behaviour driver, then expand by the lesson map. **Ten phases
 | 1 | **Done.** Engine, L1–5, scoring contract, driver | A rack completes; a refusal scores nothing |
 | 2 | **Done.** Capacity and counting, L6–10 | Capacity refuses correctly; practice draws from every taught spec |
 | 2a | **Done.** Pouring animation, pulled forward from Phase 7 | Stream joins both mouths; the rack is identical with motion off |
-| 3 | Planning, L11–20 | Locked and one-way bottles refuse and accept correctly |
+| 3 | **Done.** Planning, L11–20 | Locked and one-way bottles refuse and accept correctly; a budget ends an attempt |
 | 4 | Hidden state and prediction, L21–24 | `PredictThePour` scores from a picture choice |
 | 5 | Number, fraction, pattern, L25–30 | Ordering goals judged correctly |
 | 6 | Linked and mixed, L31–33 | Every technique cycles in the mixed rack |
@@ -360,9 +360,12 @@ results; it is not restated here. Skill-specific checks to add to it:
   shape stays bound to deal position across 200 rounds;
 - the stream's endpoints stay on both bottles' mouths at every rack size and on two rows.
 
-**Outstanding:** Phases 3–9. Phases 0 to 2 are built: the pure layer in
+**Outstanding:** Phases 4–9. Phases 0 to 3 are built: the pure layer in
 `src/skills/bottle-sort/internal/`, the engine in `activities/BottleSort.tsx`, ten
 lessons across a teaching unit and a separate practice unit, and the skill registered
-as `draft`. Practice cycles specs rather than repeating one rack, so the pace it files
+as `draft`. Phase 3 added the planning lessons on two more units, and with them the
+three rules the engine had not carried onto the screen: a cork, a receive-only bottle
+and a pour budget. Levels 11–33 were also scrambled harder — the counts were set
+before the generator actually mixed a rack, so they had been measuring nothing. Practice cycles specs rather than repeating one rack, so the pace it files
 spans the techniques taught. Voice is declared
 but unrecorded, which Phase 8 closes.
