@@ -16,6 +16,28 @@ Design only. Nothing here is implemented.
   for a round of one long interaction scored as a single question, and
   `src/skills/kit/example/ExampleActivity.tsx` for the contract.
 
+## 1.1 Product benchmark
+
+Checked against what shipped games actually document, not from memory. The genre is
+remarkably consistent: capacity four, tap source then target, the whole top run moves
+together, and — in every product examined — **no timer and no penalty for a wrong move**.
+That last point is not a Koda concession; it is how the genre already works.
+
+| Product | Documented strength | Adopt | Do not copy |
+|---|---|---|---|
+| [Ball Sort Puzzle](https://play.google.com/store/apps/details?id=app.game.ball.sort&hl=en_US) | 500+ levels, offline, no login; undo, hint and extra-tube help; **letters on balls for colour-blind players** | Endless offline play, the three supports, and a non-colour mark on every segment | Skins, ad-gated power-ups, level-count as the headline |
+| [Ball Sort (Coolmath)](https://www.coolmathgames.com/0-ball-sort) | Capacity four, tap-to-lift then tap-to-place, reset without penalty, **an extra vial every five levels**, adjustable animation speed | The reset-is-free rule, and pacing help by progress rather than by payment | Difficulty that spikes early then plateaus |
+| [Water Sort: Color Tube Puzzle](https://play.google.com/store/apps/details?id=water.sort.puzzle.color.sort.games&hl=en_US) | Easy/Normal/Hard/Expert bands; foresight and limited space as the stated difficulty source | Difficulty from space and lookahead, expressed as lessons rather than modes | Mode pickers; a Koda lesson already is the difficulty band |
+| [Secret Tube](https://apps.apple.com/us/app/secret-tube-color-sort-puzzle/id1551197535) / [Unlock Tubes](https://apps.apple.com/app/id1545798801) | Hidden colours and locked tubes as whole products | Both, as single lessons rather than whole games | Building a separate app around one twist |
+
+Two things stand out. **The extra tube is the genre's signature help** and it is a better hint
+than anything generic: it eases the constraint without naming a move, so the child still solves
+it. And a third-party [solver site](https://chromaoracle.com/water-sort-puzzle-solver) exists,
+advertising a mystery mode for hidden colours — people reach for solvers because shipped racks
+can be brutal or unsolvable. Reverse-generation is the answer to that, and it is the one place
+this design should be plainly better than the market rather than equal to it.
+
+
 ## What it teaches, and why it is worth building
 
 A pour is trivially understood and the plan behind it is not, which is the whole
@@ -78,26 +100,61 @@ Invariants to prove over 200 draws per lesson:
 6. every colour is distinguishable without colour — shape included;
 7. a rack reproduces from params and index.
 
-## Creative techniques
+## Complete technique set
 
-Each is a parameter on one engine, not a second engine, and each exists because
-it asks for something the plain puzzle does not.
+Three tiers. The first is what makes it recognisably the game; skipping any of it makes a
+worse version of something a child has already played. The second is what other products
+built whole apps around. The third is what makes it a Koda skill rather than a clone.
+
+### Tier 1 — genre standard, non-negotiable
+
+| Technique | Rule |
+|---|---|
+| Capacity four | The genre default. Mixed capacity is a variation on it, not a replacement |
+| Whole-run pour | Every consecutive segment of the top colour moves together, space permitting |
+| Tap source, tap target | One-tap selection; tapping the picked tube puts it down |
+| Refusal, not penalty | An illegal pour explains itself and scores nothing |
+| Undo | Step back one pour, recorded as support |
+| Reset | Return to the dealt rack, free, recorded as support |
+| **Extra tube** | An empty tube, granted as the last hint rung |
+| No timer | Nothing anywhere is timed |
+| Non-colour mark | Every colour carries a shape; the shape is the accessible name |
+| Endless racks | The generator is infinite; 33 lessons are the taught path, not the content limit |
+
+### Tier 2 — variants other products shipped as whole games
 
 | Technique | The rack | What it forces |
 |---|---|---|
-| **Mixed capacity** | tubes hold 3, 4 or 5 | read capacity before pouring, not after |
-| **Locked tube** | opens only when another tube is completed | order the plan, not just the moves |
-| **One-way tube** | receives but never pours | recognise a move you cannot take back |
-| **Hidden depths** | lower segments unseen until uncovered | act on partial information, revise |
-| **Predict the pour** | no touching; choose the picture that results | simulate a move mentally, the skill itself |
-| **Numbered segments** | sort ascending or descending | order, not just match |
-| **Fraction segments** | ½, ¾, ⅓ … sorted by value | compare fractions by size |
-| **Target pattern** | finish as a named sequence, not uniform tubes | reproduce a sequence, not just group |
-| **Move budget** | solve within *n* pours | prefer the shorter plan |
-| **Linked tubes** | two tubes fill together | reason about a side effect |
+| Hidden depths | lower segments unseen until uncovered | act on partial information, then revise |
+| Locked tube | opens only when another tube is completed | order the plan, not just the moves |
 
-`predict-the-pour` is the one that most directly trains the skill the rest of the
-game only rewards, and it is the cheapest to build: no pouring, one tap.
+### Tier 3 — Koda's own, where the teaching lives
+
+| Technique | The rack | What it forces |
+|---|---|---|
+| Mixed capacity | tubes hold 3, 4 or 5 | read capacity before pouring, not after |
+| One-way tube | receives but never pours | recognise a move you cannot take back |
+| Move budget | solve within *n* pours | prefer the shorter plan |
+| Numbered segments | sort ascending or descending | order, not just match |
+| Fraction segments | ½, ¾, ⅓ … sorted by value | compare fractions by size |
+| Skip-count target | build 2, 4, 6, 8 | a sequence as the goal |
+| Target pattern | finish as a named order, not uniform tubes | reproduce a sequence, not just group |
+| Linked tubes | two tubes fill together | reason about a side effect |
+| **Predict the pour** | no touching; choose the picture that results | simulate a move mentally |
+
+`predict-the-pour` has no equivalent in any product examined, and it trains the skill every
+other level only rewards. It is also the cheapest to build: no pouring, one tap.
+
+### The hint ladder
+
+The genre's own supports are better rungs than generic prose, so the ladder uses them:
+
+1. "Look for a tube you could empty completely." — strategy, no rack knowledge
+2. "Tube 3 has somewhere to go." — names a source, not a destination
+3. **An extra tube appears** — eases the constraint, still does not name a move
+
+Each rung is `round.useSupport`. Practice passes no hints. The extra tube is deliberately last:
+it changes the puzzle, and a child who reaches for it has still solved what remains.
 
 ## Lesson map
 
