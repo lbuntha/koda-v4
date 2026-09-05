@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PIVOT_Y, POUR_ANGLE, aimPour, type Box } from "./internal/bottle";
+import { PIVOT_Y, POUR_ANGLE, aimPour, type Box, streamPath } from "./internal/bottle";
 
 /**
  * Where the tilted bottle ends up, checked as arithmetic.
@@ -76,5 +76,67 @@ describe("aiming a pour", () => {
     const near = aimPour(src, mouthOf(src), mouthOf(bottle(200)), 1);
     const far = aimPour(src, mouthOf(src), mouthOf(bottle(400)), 1);
     expect(far.dx).toBeGreaterThan(near.dx);
+  });
+});
+
+describe("the falling stream", () => {
+  const lip = { x: 100, y: 60 };
+  const target = { x: 160, y: 200 };
+
+  const points = (d: string) =>
+    d.replace(/^M/, "").replace(/Z$/, "").split(/ ?L/).map((pair) => {
+      const [x, y] = pair.trim().split(" ").map(Number);
+      return { x, y };
+    });
+
+  it("leaves the lip sideways and arrives falling, like a poured arc", () => {
+    const { spine } = streamPath(lip, target);
+    // The control point is what sets both tangents on a quadratic. Directly
+    // above the target means: horizontal out of the lip, vertical into the
+    // mouth. A control at the midpoint — what this used to do — is a rope,
+    // aligned with neither bottle.
+    expect(spine).toBe("M100.00 60.00 Q160.00 60.00 160.00 200.00");
+  });
+
+  it("starts at the lip and ends at the target", () => {
+    const p = points(streamPath(lip, target).d);
+    const first = p[0], last = p[p.length - 1];
+    // Both edges of the ribbon meet the lip within its own half-width.
+    expect(Math.hypot(first.x - lip.x, first.y - lip.y)).toBeLessThan(6);
+    expect(Math.hypot(last.x - lip.x, last.y - lip.y)).toBeLessThan(6);
+  });
+
+  it("keeps its thickness where the stream runs sideways", () => {
+    // The bug this replaces: edges offset horizontally, so a near-horizontal
+    // stretch of stream had no visible thickness at all. Offsetting along the
+    // normal means the two edges stay apart whichever way the flow points.
+    const p = points(streamPath(lip, target).d);
+    const half = p.length / 2;
+    for (let i = 0; i < half; i += 1) {
+      const opposite = p[p.length - 1 - i];
+      const width = Math.hypot(p[i].x - opposite.x, p[i].y - opposite.y);
+      expect(width, `sample ${i} collapsed`).toBeGreaterThan(3.5);
+    }
+  });
+
+  it("narrows as it falls, because falling liquid speeds up", () => {
+    const p = points(streamPath(lip, target).d);
+    const widthAt = (i: number) => {
+      const o = p[p.length - 1 - i];
+      return Math.hypot(p[i].x - o.x, p[i].y - o.y);
+    };
+    expect(widthAt(0)).toBeGreaterThan(widthAt(p.length / 2 - 1));
+  });
+
+  it("measures the arc, so the reveal can run along its length", () => {
+    const { length } = streamPath(lip, target);
+    const straight = Math.hypot(target.x - lip.x, target.y - lip.y);
+    expect(length).toBeGreaterThan(straight);
+    expect(length).toBeLessThan(straight * 1.5);
+  });
+
+  it("falls straight down when the mouths line up", () => {
+    const { spine } = streamPath({ x: 80, y: 50 }, { x: 80, y: 190 });
+    expect(spine).toBe("M80.00 50.00 Q80.00 50.00 80.00 190.00");
   });
 });

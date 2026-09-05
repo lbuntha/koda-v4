@@ -72,6 +72,37 @@ describe("the pouring animation", () => {
     h.unmount();
   }, 20000);
 
+  it("keeps the tilted bottle's liquid inside its glass", async () => {
+    // The liquid counter-rotates so it stays level while the bottle tips. That
+    // rotation and the clip to the bottle's body used to sit on the same <g>,
+    // and `clip-path` resolves in the user space the element's own transform
+    // establishes — so the clip spun with the liquid and stopped matching the
+    // glass drawn behind it. The visible result was liquid outside the bottle
+    // for the whole pour. The clip has to stay still while the liquid turns.
+    allowMotion();
+    const q = buildQuestion(params, 1);
+    const move = legalPours(q.rack)[0];
+    const h = renderActivity(sort, { params });
+
+    fireEvent.click(h.screen.getByRole("button", { name: new RegExp(`^Bottle ${move.from + 1},`) }));
+    fireEvent.click(h.screen.getByRole("button", { name: new RegExp(`^Bottle ${move.to + 1},`) }));
+    await waitFor(() => expect(document.querySelector("[data-pouring]")).not.toBeNull());
+
+    const bottle = document.querySelector("[data-pouring]")!;
+    const clipped = bottle.querySelectorAll("g[clip-path]");
+    expect(clipped.length).toBeGreaterThan(0);
+    clipped.forEach((g) => expect(g.getAttribute("transform")).toBeNull());
+
+    // ...and the rotation is still happening, one level in.
+    const turned = [...bottle.querySelectorAll("g[transform]")]
+      .filter((g) => g.getAttribute("transform")!.startsWith("rotate("));
+    expect(turned.length).toBeGreaterThan(0);
+    turned.forEach((g) => expect(g.getAttribute("clip-path")).toBeNull());
+
+    await waitFor(() => expect(document.querySelector("[data-pouring]")).toBeNull(), { timeout: 4000 });
+    h.unmount();
+  }, 20000);
+
   it("lands the same rack whether it animates or not", async () => {
     const q = buildQuestion(params, 1);
     const move = legalPours(q.rack)[0];

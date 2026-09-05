@@ -4,7 +4,7 @@ import { SkillRound, composeHints, isPractice, playCopy, useMotionOK, useSkillRo
 import { isDeadlock, isSolvedRack, legalPours, pour, pourSteps, refuseReason } from "../internal/pour";
 import { POOL, rackFor } from "../internal/racks";
 import { specFor } from "../internal/specs";
-import { PIVOT_Y, POUR_ANGLE, aimPour } from "../internal/bottle";
+import { PIVOT_Y, POUR_ANGLE, aimPour, streamPath } from "../internal/bottle";
 import { topRun, type Bottle, type Rack } from "../internal/types";
 
 interface BottleSortSetup {
@@ -146,7 +146,7 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
   const [nudge, setNudge] = useState<string | null>(null);
   /** The pour being drawn, and the stream that connects the two mouths. */
   const [pouring, setPouring] = useState<{ from: number; to: number; dir: number; angle: number; dx: number; dy: number } | null>(null);
-  const [stream, setStream] = useState<{ d: string; colour: string; spine: string; top: number; drop: number; fading?: boolean } | null>(null);
+  const [stream, setStream] = useState<{ d: string; colour: string; spine: string; length: number; fading?: boolean } | null>(null);
   const rackRef = useRef<HTMLDivElement | null>(null);
   const mouths = useRef(new Map<number, SVGCircleElement>());
   const bottles = useRef(new Map<number, HTMLButtonElement>());
@@ -249,6 +249,24 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
    * With motion off it is applied in one step, and the resulting rack is
    * identical either way.
    */
+  /** Resolves when `el` has finished transforming, or when `ms` has passed. */
+  const settled = (el: HTMLElement | undefined, ms: number) =>
+    new Promise<void>((resolve) => {
+      if (!el) { setTimeout(resolve, ms); return; }
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        el.removeEventListener("transitionend", onEnd);
+        resolve();
+      };
+      const onEnd = (e: TransitionEvent) => { if (e.propertyName === "transform") finish(); };
+      el.addEventListener("transitionend", onEnd);
+      // A transition that never fires — reduced motion, a backgrounded tab —
+      // must not strand the pour.
+      setTimeout(finish, ms + 140);
+    });
+
   const runPour = async (from: number, to: number, next: Rack) => {
     const finish = () => {
       setRack(next);
@@ -269,26 +287,31 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
     }
 
     setPouring({ from, to, dir, angle, dx, dy });
-    await wait(340);
+
+    // Wait for the tilt to actually finish, not for a timer that guesses when.
+    // A CSS transition only starts on the frame after React applies the style,
+    // so a 340ms sleep measured the lip while the bottle still had a frame or
+    // two to travel — the stream anchored about 11px short of the mouth and
+    // then sat there, detached, for the whole pour.
+    await settled(bottles.current.get(from), 340);
     if (!alive.current) return;
 
     const box = rackRef.current?.getBoundingClientRect();
     const a = mouths.current.get(from)?.getBoundingClientRect();
     const b = mouths.current.get(to)?.getBoundingClientRect();
     if (box && a && b) {
-      const p1 = { x: a.left + a.width / 2 - box.left, y: a.top + a.height / 2 - box.top };
-      const p2 = { x: b.left + b.width / 2 - box.left, y: b.top + b.height / 2 - box.top };
-      const cx = (p1.x + p2.x) / 2 + dir * 3;
-      const cy = (p1.y + p2.y) / 2 + 12;
+      const mouth = { x: a.left + a.width / 2 - box.left, y: a.top + a.height / 2 - box.top };
+      const into = { x: b.left + b.width / 2 - box.left, y: b.top + b.height / 2 - box.top };
+      // Liquid leaves the lip, not the middle of the mouth: with the bottle
+      // tilted the mouth is nearly side-on, and the low outer edge is the only
+      // part of it the liquid ever touches. Starting from the centre was why
+      // the stream appeared to grow out of the neck rather than off the rim.
+      const lip = { x: mouth.x + dir * a.width * 0.3, y: mouth.y + a.height * 0.22 };
+      // Ending just below the rim reads as going in rather than stopping on it.
+      const target = { x: into.x, y: into.y + 3 };
       setStream({
         colour: cssColour(question.hues, topRun(rack[from]).colour),
-        d: `M${p1.x - 4.5} ${p1.y} Q${cx - 4.5} ${cy} ${p2.x - 2.4} ${p2.y}`
-          + ` L${p2.x + 2.4} ${p2.y} Q${cx + 4.5} ${cy} ${p1.x + 4.5} ${p1.y} Z`,
-        spine: `M${p1.x} ${p1.y} Q${cx} ${cy} ${p2.x} ${p2.y}`,
-        // Where the liquid starts and how far it has to fall, so the ribbon can
-        // be revealed downwards instead of appearing already joined.
-        top: p1.y - 4,
-        drop: Math.abs(p2.y - p1.y) + 24,
+        ...streamPath(lip, target),
       });
     }
 
@@ -372,23 +395,27 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
         {/* Six per row is the phone ceiling; a seventh drops a bottle under 44px. */}
         <div ref={rackRef} className="relative grid grid-cols-[repeat(auto-fit,minmax(48px,64px))] items-end justify-center gap-3 rounded-2xl bg-slate-100 px-2 py-6 dark:bg-slate-900/50">
           {stream && (
-            <svg className="pointer-events-none absolute inset-0 z-[4] h-full w-full overflow-visible" aria-hidden="true">
+            <svg key={`${pouring?.from}-${pouring?.to}`}
+              className="pointer-events-none absolute inset-0 z-[4] h-full w-full overflow-visible" aria-hidden="true">
               <defs>
                 <path id="bs-flow" d={stream.spine} fill="none" />
-                {/* Liquid falls; it does not appear already joining two
-                    bottles. The ribbon is revealed top-down at roughly the
-                    speed the bubbles travel, so the first thing the eye sees
-                    is the stream reaching for the other mouth. */}
-                <clipPath id="bs-fall">
-                  <rect x="-400" y={stream.top} width="1600" height={animate ? 0 : stream.drop}>
+                {/* Revealed along its own length, so the liquid travels out of
+                    the lip and falls into the other bottle. A top-down wipe
+                    used to uncover the whole near-horizontal first half of the
+                    arc in a single frame, which is what made the stream look
+                    like it was simply switched on. A mask, not a clip, because
+                    clipping ignores stroke geometry. */}
+                <mask id="bs-fall" maskUnits="userSpaceOnUse">
+                  <path d={stream.spine} fill="none" stroke="#fff" strokeWidth="18" strokeLinecap="round"
+                    strokeDasharray={stream.length} strokeDashoffset={animate ? stream.length : 0}>
                     {animate && (
-                      <animate attributeName="height" from="0" to={stream.drop} dur="0.13s" fill="freeze"
-                        calcMode="spline" keySplines="0.3 0 0.7 1" keyTimes="0;1" />
+                      <animate attributeName="stroke-dashoffset" from={stream.length} to="0" dur="0.16s"
+                        fill="freeze" calcMode="spline" keySplines="0.35 0 0.7 1" keyTimes="0;1" />
                     )}
-                  </rect>
-                </clipPath>
+                  </path>
+                </mask>
               </defs>
-              <g clipPath="url(#bs-fall)" opacity={stream.fading ? 0 : 1}
+              <g mask="url(#bs-fall)" opacity={stream.fading ? 0 : 1}
                 style={{ transition: animate ? "opacity .15s linear" : undefined }}>
                 <path d={stream.d} fill={stream.colour} opacity=".95" data-stream="" />
                 {/* The surface of the falling liquid. A dash running down the
@@ -441,8 +468,15 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
 
                   <path d={geo.body} className="fill-white/70 dark:fill-white/10" />
 
-                  <g clipPath={`url(#bs-clip-${i})`}
-                    transform={pouring?.from === i ? `rotate(${-pouring.angle} 30 ${geo.liquidBottom - 4})` : undefined}>
+                  {/* Two groups, not one. `clip-path` resolves in the user
+                      space the element's own `transform` establishes, so a clip
+                      and a rotation on the same <g> rotate together: the tilted
+                      bottle's liquid was being clipped to a spun copy of the
+                      body outline, which let it draw outside the glass. The
+                      clip stays still on the outer group; only the liquid
+                      counter-rotates inside it. */}
+                  <g clipPath={`url(#bs-clip-${i})`}>
+                  <g transform={pouring?.from === i ? `rotate(${-pouring.angle} 30 ${geo.liquidBottom - 4})` : undefined}>
                     {b.seg.map((colour, k) => {
                       const y = geo.liquidBottom - (k + 1) * LAYER_H;
                       if (k >= shown) return <rect key={k} x="0" y={y} width={W} height={LAYER_H} className="fill-slate-300 dark:fill-slate-700" />;
@@ -480,6 +514,7 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
                         </g>
                       );
                     })}
+                  </g>
                     {/* Gloss, over the liquid: it is the glass in front of it. */}
                     <rect x="11" y={geo.bodyTop + 4} width="6" height={b.cap * LAYER_H - 18} rx="3" fill="#fff" opacity=".42" />
                     <rect x="46" y={geo.bodyTop + 10} width="2.6" height={b.cap * LAYER_H - 30} rx="1.3" fill="#fff" opacity=".2" />
