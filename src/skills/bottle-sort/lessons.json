@@ -205,6 +205,224 @@
         6,
         9
       ]
+    },
+    {
+      "id": "short-and-tall",
+      "title": "Short and Tall",
+      "concept": "Reading Capacity",
+      "conceptKey": "capacity-reader",
+      "requires": [
+        "colour-sorter"
+      ],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 6,
+        "question": {
+          "spec": "short-and-tall",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "indigo",
+          "category": "Planning",
+          "shortDesc": "Bottles that hold three, four or five",
+          "targetObjective": "Sort the rack when the bottles are different sizes.",
+          "stepByStep": [
+            "Look at how tall each bottle is.",
+            "A short bottle fills sooner than a tall one.",
+            "Check there is room before you pour."
+          ],
+          "kidTip": "A taller bottle holds more. Count the space, not the bottles.",
+          "audioPrompt": "These bottles are different sizes. Check how much room there is before you pour."
+        }
+      },
+      "difficulty": "Medium",
+      "iconName": "flask-conical",
+      "iconTone": "indigo",
+      "pedagogyTip": "Capacity becomes a thing to read rather than assume once it stops being uniform.",
+      "standards": [],
+      "trajectoryLevel": "capacity-reader",
+      "ageBand": [
+        6,
+        12
+      ]
+    },
+    {
+      "id": "will-it-fit",
+      "title": "Will It Fit?",
+      "concept": "Reading Capacity",
+      "conceptKey": "capacity-reader",
+      "requires": [
+        "colour-sorter"
+      ],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 7,
+        "question": {
+          "spec": "will-it-fit",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "indigo",
+          "category": "Planning",
+          "shortDesc": "The colours match, but the room does not",
+          "targetObjective": "Find the pours that actually fit.",
+          "stepByStep": [
+            "Find a colour sitting on its match.",
+            "Count the empty space in the bottle below it.",
+            "If it will not all fit, look for another pour."
+          ],
+          "kidTip": "Matching colours is not enough. There has to be room.",
+          "audioPrompt": "Sometimes the colours match but there is not enough room. Count the space first."
+        }
+      },
+      "difficulty": "Medium",
+      "iconName": "flask-conical",
+      "iconTone": "indigo",
+      "pedagogyTip": "Separating 'legal colour' from 'enough room' is the first two-part condition in the skill.",
+      "standards": [],
+      "trajectoryLevel": "capacity-reader",
+      "ageBand": [
+        6,
+        12
+      ]
+    },
+    {
+      "id": "fill-to-the-top",
+      "title": "Fill It to the Top",
+      "concept": "Finishing Exactly",
+      "conceptKey": "exact-filler",
+      "requires": [
+        "capacity-reader"
+      ],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 8,
+        "question": {
+          "spec": "fill-to-the-top",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "purple",
+          "category": "Planning",
+          "shortDesc": "A bottle is only finished when it is full",
+          "targetObjective": "Fill each bottle exactly to the top with one colour.",
+          "stepByStep": [
+            "Pick a colour to collect.",
+            "Bring every part of it into one bottle.",
+            "The bottle is done when it is full and one colour."
+          ],
+          "kidTip": "Half a bottle of one colour is not finished yet.",
+          "audioPrompt": "A bottle is finished when it is full and holds one colour. Fill each one to the top."
+        }
+      },
+      "difficulty": "Medium",
+      "iconName": "flask-conical",
+      "iconTone": "purple",
+      "pedagogyTip": "Naming the finish condition stops a child stopping at a tidy-looking half-bottle.",
+      "standards": [],
+      "trajectoryLevel": "exact-filler",
+      "ageBand": [
+        6,
+        12
+      ]
+    },
+    {
+      "id": "count-before-you-pour",
+      "title": "Count Before You Pour",
+      "concept": "Counting the Run",
+      "conceptKey": "run-counter",
+      "requires": [
+        "exact-filler"
+      ],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 9,
+        "question": {
+          "spec": "count-before-you-pour",
+          "questionsPerRound": 3,
+          "showRunCount": true
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "purple",
+          "category": "Planning",
+          "shortDesc": "See how many will travel before you commit",
+          "targetObjective": "Know how many segments a pour will move.",
+          "stepByStep": [
+            "Tap a bottle to pick it up.",
+            "The number shows how many will pour.",
+            "Check they will all fit before you tap the next bottle."
+          ],
+          "kidTip": "The number on the bottle is how many are about to move.",
+          "audioPrompt": "When you pick a bottle up, the number tells you how many will pour."
+        }
+      },
+      "difficulty": "Medium",
+      "iconName": "flask-conical",
+      "iconTone": "purple",
+      "pedagogyTip": "Turning the run length from something noticed into something read makes the whole-run rule usable.",
+      "standards": [],
+      "trajectoryLevel": "run-counter",
+      "ageBand": [
+        6,
+        12
+      ]
+    },
+    {
+      "id": "practice-pouring",
+      "title": "Practice: Pouring",
+      "concept": "Practice Without Help",
+      "conceptKey": "run-counter",
+      "requires": [],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 10,
+        "question": {
+          "specs": [
+            "use-the-empty-bottle",
+            "pour-the-whole-run",
+            "sort-three-colours",
+            "short-and-tall",
+            "will-it-fit",
+            "fill-to-the-top",
+            "count-before-you-pour"
+          ],
+          "questionsPerRound": 5,
+          "practice": true
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "emerald",
+          "category": "Planning",
+          "shortDesc": "Five racks across everything so far",
+          "targetObjective": "Sort five racks without help.",
+          "stepByStep": [
+            "Look at the whole rack first.",
+            "Decide which bottle to empty.",
+            "Pour, then look again."
+          ],
+          "kidTip": "No hints here. Take your time.",
+          "audioPrompt": ""
+        }
+      },
+      "difficulty": "Medium",
+      "iconName": "flask-conical",
+      "iconTone": "emerald",
+      "pedagogyTip": "Practice measures pace across the taught techniques, so it draws from all of them rather than one.",
+      "standards": [],
+      "trajectoryLevel": "run-counter",
+      "ageBand": [
+        6,
+        12
+      ]
     }
   ]
 }

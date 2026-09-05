@@ -530,7 +530,21 @@
         "bottle-sort/two-pours",
         "bottle-sort/use-the-empty-bottle",
         "bottle-sort/pour-the-whole-run",
-        "bottle-sort/sort-three-colours"
+        "bottle-sort/sort-three-colours",
+        "bottle-sort/short-and-tall",
+        "bottle-sort/will-it-fit",
+        "bottle-sort/fill-to-the-top",
+        "bottle-sort/count-before-you-pour"
+      ]
+    },
+    {
+      "id": "u41",
+      "unitNumber": 41,
+      "title": "Unit 41: Practice \u2014 Bottle Sort",
+      "description": "Independent pouring practice across the taught techniques",
+      "icon": "B",
+      "lessons": [
+        "bottle-sort/practice-pouring"
       ]
     }
   ]

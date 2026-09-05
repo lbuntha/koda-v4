@@ -1,7 +1,7 @@
 # Bottle Sort — build plan
 
 Follows [SKILL_BUILD_TEMPLATE.md](SKILL_BUILD_TEMPLATE.md). Ten phases, 0 through 9, in
-[Delivery](#delivery). **Phases 0 and 1 are built**; Phases 2–9 are design.
+[Delivery](#delivery). **Phases 0 to 2 are built**; Phases 3–9 are design.
 
 ## Release scope
 
@@ -329,7 +329,7 @@ one engine and its behaviour driver, then expand by the lesson map. **Ten phases
 |---|---|---|
 | 0 | **Done.** Pure rules, scramble, solver, palette | 17 tests; 200 draws per lesson; no rack unsolvable, none repeated in a round |
 | 1 | **Done.** Engine, L1–5, scoring contract, driver | A rack completes; a refusal scores nothing |
-| 2 | Capacity and counting, L6–10 | Capacity refuses correctly; practice files pace |
+| 2 | **Done.** Capacity and counting, L6–10 | Capacity refuses correctly; practice draws from every taught spec |
 | 3 | Planning, L11–20 | Locked and one-way bottles refuse and accept correctly |
 | 4 | Hidden state and prediction, L21–24 | `PredictThePour` scores from a picture choice |
 | 5 | Number, fraction, pattern, L25–30 | Ordering goals judged correctly |
@@ -351,7 +351,9 @@ results; it is not restated here. Skill-specific checks to add to it:
   shape stays bound to deal position across 200 rounds;
 - the stream's endpoints stay on both bottles' mouths at every rack size and on two rows.
 
-**Outstanding:** Phases 2–9. Phases 0 and 1 are built: the pure layer in
-`src/skills/bottle-sort/internal/`, the engine in `activities/BottleSort.tsx`, five
-lessons, and the skill registered as `draft` in its own course unit. Voice is declared
+**Outstanding:** Phases 3–9. Phases 0 to 2 are built: the pure layer in
+`src/skills/bottle-sort/internal/`, the engine in `activities/BottleSort.tsx`, ten
+lessons across a teaching unit and a separate practice unit, and the skill registered
+as `draft`. Practice cycles specs rather than repeating one rack, so the pace it files
+spans the techniques taught. Voice is declared
 but unrecorded, which Phase 8 closes.

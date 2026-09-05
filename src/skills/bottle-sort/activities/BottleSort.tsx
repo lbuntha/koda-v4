@@ -6,12 +6,19 @@ import { POOL, rackFor } from "../internal/racks";
 import { specFor } from "../internal/specs";
 import { topRun, type Bottle, type Rack } from "../internal/types";
 
-export interface BottleSortParams {
-  question?: { spec?: string; questionsPerRound?: number; practice?: boolean; seed?: string };
+interface BottleSortSetup {
+  /** One rack spec, or several for a practice round to cycle through. */
   spec?: string;
+  specs?: string[];
   questionsPerRound?: number;
   practice?: boolean;
   seed?: string;
+  /** Show how many segments a picked bottle will pour. */
+  showRunCount?: boolean;
+}
+
+export interface BottleSortParams extends BottleSortSetup {
+  question?: BottleSortSetup;
 }
 
 export interface BottleSortQuestion extends RoundQuestion {
@@ -57,7 +64,10 @@ function geometry(cap: number) {
 
 export function buildQuestion(params: BottleSortParams, index: number): BottleSortQuestion {
   const setup = { ...params, ...params.question };
-  const spec = specFor(setup.spec ?? "one-pour") ?? specFor("one-pour")!;
+  // A practice round cycles specs so the pace it measures spans the techniques
+  // taught, rather than five draws of the same rack.
+  const cycle = setup.specs?.length ? setup.specs : [setup.spec ?? "one-pour"];
+  const spec = specFor(cycle[(index - 1) % cycle.length]) ?? specFor("one-pour")!;
   const { rack, hues, scramble } = rackFor(spec, setup.seed ?? "bottle-sort", index);
   return {
     id: `bottle-sort-${spec.id}-${index}`,
@@ -92,6 +102,7 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
 
   const speechEnabled = koda.config.isEnabled("audio_speech", true);
   const hintsEnabled = koda.config.isEnabled("move_hints", true);
+  const showRunCount = !!setup.showRunCount;
   const speechRate = koda.config.get("speechRate", 0.95);
 
   const [rack, setRack] = useState<Rack>([]);
@@ -237,7 +248,8 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
             return (
               <button key={i} type="button" onClick={() => tap(i)}
                 data-bottle={i} data-picked={picked === i} data-sorted={sorted}
-                aria-label={`Bottle ${i + 1}, holds ${b.cap}. ${b.seg.length ? b.seg.map((c, k) => (k < shown ? nameOf(c) : "hidden")).join(", ") : "Empty"}.`}
+                aria-label={`Bottle ${i + 1}, holds ${b.cap}. ${b.seg.length ? b.seg.map((c, k) => (k < shown ? nameOf(c) : "hidden")).join(", ") : "Empty"}.`
+                  + (showRunCount && picked === i ? ` ${topRun(b).n} will pour.` : "")}
                 className={`block w-full min-w-11 cursor-pointer leading-none focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${picked === i ? "-translate-y-2" : ""} transition-transform`}>
                 <svg viewBox={`0 0 ${W} ${geo.height}`} className="h-auto w-full" aria-hidden="true">
                   <defs><clipPath id={`bs-clip-${i}`}><path d={geo.body} /></clipPath></defs>
@@ -259,6 +271,12 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
                     className={sorted ? "stroke-emerald-500" : picked === i ? "stroke-indigo-500" : "stroke-slate-400 dark:stroke-slate-500"} />
                   <ellipse cx="30" cy={NECK_TOP} rx="7" ry="3.5" fill="none" strokeWidth="2.5"
                     className={picked === i ? "stroke-indigo-500" : "stroke-slate-400 dark:stroke-slate-500"} />
+                  {/* Level 9 asks the child to notice that a run travels as one,
+                      so the count is shown at the moment they commit to it. */}
+                  {showRunCount && picked === i && topRun(b).n > 0 && (
+                    <text x="30" y={geo.bodyTop - 6} textAnchor="middle" data-run-count={topRun(b).n}
+                      className="fill-indigo-600 text-[13px] font-bold dark:fill-indigo-300">{topRun(b).n}</text>
+                  )}
                 </svg>
               </button>
             );
