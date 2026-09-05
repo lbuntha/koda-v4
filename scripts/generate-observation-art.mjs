@@ -149,7 +149,7 @@ const bodies = {
   pinwheel: '<circle cx="60" cy="53" r="7" fill="#f7cc67"/><path d="M60 53Q31 50 23 20q30-7 37 33Zm0 0q3-29 33-37 7 30-33 37Zm0 0q29 3 37 33-30 7-37-33Zm0 0q-3 29-33 37-7-30 33-37Z" fill="url(#a)"/><path d="M60 60v58"/>',
 };
 
-const objectSvg = (body, index) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><defs><linearGradient id="a" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${["#72e1b3","#ff8fa3","#79d8ff"][index % 3]}"/><stop offset="1" stop-color="${["#22a878","#e95376","#258fbd"][index % 3]}"/></linearGradient><linearGradient id="b" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffe98a"/><stop offset="1" stop-color="#e7a93b"/></linearGradient><filter id="s"><feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-color="#17324a" flood-opacity=".2"/></filter></defs><g filter="url(#s)" stroke="#263b50" stroke-width="3.25" stroke-linecap="round" stroke-linejoin="round">${body}</g></svg>`;
+const objectSvg = (body, index) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><defs><linearGradient id="a" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${["#72e1b3","#ff8fa3","#79d8ff"][index % 3]}"/><stop offset="1" stop-color="${["#22a878","#e95376","#258fbd"][index % 3]}"/></linearGradient><linearGradient id="b" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffe98a"/><stop offset="1" stop-color="#e7a93b"/></linearGradient></defs><g stroke="#263b50" stroke-width="3.25" stroke-linecap="round" stroke-linejoin="round">${body}</g></svg>`;
 
 const palettes = {
   beach: ["#75d9f5", "#2bbcc0", "#f8d695", "#f27678"],

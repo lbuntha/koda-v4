@@ -434,9 +434,9 @@ export const ObjectHunt: React.FC<ActivityProps<ObjectHuntParams>> = ({ params, 
         {view === "scene" ? (
         <motion.div initial={motionOK ? { scale: .975, opacity: 0 } : false} animate={{ scale: 1, opacity: 1 }} transition={SPRING.settle}
           className="relative aspect-[4/3] w-full overflow-hidden rounded-[2rem] border-[6px] border-white bg-sky-100 shadow-[0_22px_55px_rgba(30,70,100,0.22)] ring-1 ring-sky-200/60">
-          <motion.div className="absolute inset-0" animate={motionOK ? { scale: [1, 1.008, 1] } : { scale: 1 }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}>
+          <div className="absolute inset-0">
             <SvgAsset id={question.scene.backdrop} size="100%" cover className="h-full w-full" />
-          </motion.div>
+          </div>
           {motionOK && <>
             <motion.div aria-hidden className="pointer-events-none absolute left-[-18%] top-[41%] z-[1] h-2 w-[42%] rounded-full bg-white/50 blur-[1px]" animate={{ x: [0, 560, 0], opacity: [.35, .75, .35] }} transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }} />
             <motion.div aria-hidden className="pointer-events-none absolute right-[-12%] top-[49%] z-[1] h-1.5 w-[32%] rounded-full bg-cyan-50/60" animate={{ x: [0, -440, 0], opacity: [.25, .65, .25] }} transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }} />
@@ -470,8 +470,8 @@ export const ObjectHunt: React.FC<ActivityProps<ObjectHuntParams>> = ({ params, 
                     // and let the backdrop's own hue come through instead.
                     filter: question.mode === "shadow"
                       ? "brightness(0)"
-                      : `saturate(${(question.mode === "camouflage" ? .34 : 1) * (1 - question.camouflageStrength * .55)}) contrast(${1 - question.camouflageStrength * .18})`,
-                    mixBlendMode: question.mode === "camouflage" ? "luminosity" : question.camouflageStrength >= .16 ? "multiply" : "normal",
+                      : `saturate(${(question.mode === "camouflage" ? .34 : 1) * (1 - question.camouflageStrength * .55)}) contrast(${1 - question.camouflageStrength * .18}) brightness(${1 - question.camouflageStrength * .12})`,
+                    mixBlendMode: question.mode === "camouflage" ? "luminosity" : "normal",
                     clipPath: object.visibleFraction < 1 ? `inset(0 0 ${(1 - object.visibleFraction) * 100}% 0)` : undefined,
                   }}><SvgAsset id={object.asset} size="100%" className={PREMIUM_ART_CLASS} /></span>
                 {isCelebrating && motionOK && <MatchBurst />}
