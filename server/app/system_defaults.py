@@ -28,7 +28,11 @@ DEFAULT_SETTINGS: list[dict] = [
         "label": "Subjects",
         "description": "Subjects and skill assignments used by the Learn library.",
         "type": "text",
-        "value": '{"subjects":[{"id":"math","name":"Math"},{"id":"thinking","name":"Thinking"}],"assignments":{"counting":"math","addition":"math","subtraction":"math","observation":"thinking"}}',
+        "value": (
+            '{"subjects":[{"id":"math","name":"Math"},{"id":"thinking","name":"Thinking"}],'
+            '"assignments":{"counting":"math","addition":"math",'
+            '"subtraction":"math","observation":"thinking"}}'
+        ),
         "order": 1,
     },
     # ---- Ask Koda. The assistant, and the one credential it needs.

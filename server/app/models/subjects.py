@@ -1,5 +1,6 @@
 """Validated deployment subjects and stable skill-to-subject references."""
 from pydantic import Field, field_validator, model_validator
+
 from app.models.common import Model
 
 

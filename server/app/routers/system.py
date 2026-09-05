@@ -16,12 +16,12 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Header
 from pydantic import Field, ValidationError
-from app.models.subjects import SubjectCatalog
 
 from app.deps import AUTHENTICATED, CurrentPrincipal, Db, require
 from app.errors import AppError, Forbidden, NotFound
 from app.models.auth import Principal
 from app.models.common import Model
+from app.models.subjects import SubjectCatalog
 from app.push_defaults import BODY_MAX, DEFAULT_KINDS, TITLE_MAX
 from app.repos import maintenance as maintenance_repo
 from app.repos import push_templates
