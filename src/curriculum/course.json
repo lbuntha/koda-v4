@@ -503,6 +503,9 @@
         "observation/hiding-in-the-pattern",
         "observation/follow-the-shadow",
         "observation/find-what-belongs",
+        "observation/spot-three-differences",
+        "observation/spot-five-differences",
+        "observation/spot-seven-differences",
         "observation/hidden-object-challenge"
       ]
     },

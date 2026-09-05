@@ -4991,6 +4991,9 @@
       "camouflage-breaker",
       "shadow-matcher",
       "category-searcher",
+      "difference-comparer",
+      "difference-checker",
+      "difference-auditor",
       "independent-visual-searcher"
     ],
     "requires": [],
@@ -5109,7 +5112,7 @@
         "help": "Number of lessons available before a plan is needed.",
         "type": "number",
         "min": 0,
-        "max": 18,
+        "max": 21,
         "step": 1
       }
     ],
@@ -5920,16 +5923,193 @@
         ]
       },
       {
+        "id": "spot-three-differences",
+        "title": "Spot Three Differences",
+        "concept": "Comparison Search",
+        "conceptKey": "difference-comparer",
+        "requires": [
+          "category-searcher"
+        ],
+        "activity": "observation/spot-the-difference",
+        "params": {
+          "level": 17,
+          "question": {
+            "sceneIds": [
+              "beach-sandcastle-shore",
+              "park-playground-picnic",
+              "market-fruit-market",
+              "farm-barnyard-morning",
+              "town-festival-square",
+              "school-art-classroom"
+            ],
+            "objectCount": 8,
+            "differenceCount": 3,
+            "kinds": [
+              "missing",
+              "moved"
+            ],
+            "questionsPerRound": 5,
+            "targetScale": 0.8,
+            "camouflageStrength": 0.16
+          },
+          "play": {
+            "mode": "spot_difference",
+            "tier": "challenge",
+            "difficultyColor": "cyan",
+            "category": "Visual Search",
+            "shortDesc": "Two pictures, three things changed",
+            "targetObjective": "Find the three things that are not the same.",
+            "stepByStep": [
+              "Look at the same corner of both pictures.",
+              "Move across a strip at a time.",
+              "Tap a thing that is different in either picture."
+            ],
+            "kidTip": "Compare a small piece at a time, not the whole picture at once.",
+            "audioPrompt": "Two pictures, almost the same. Find the three things that changed."
+          }
+        },
+        "difficulty": "Hard",
+        "iconName": "search",
+        "iconTone": "cyan",
+        "pedagogyTip": "Comparing two scenes turns recognition into checking, which is a different and harder job.",
+        "standards": [],
+        "trajectoryLevel": "difference-comparer",
+        "ageBand": [
+          6,
+          9
+        ]
+      },
+      {
+        "id": "spot-five-differences",
+        "title": "Spot Five Differences",
+        "concept": "Comparison Search",
+        "conceptKey": "difference-checker",
+        "requires": [
+          "difference-comparer"
+        ],
+        "activity": "observation/spot-the-difference",
+        "params": {
+          "level": 18,
+          "question": {
+            "sceneIds": [
+              "beach-sandcastle-shore",
+              "park-playground-picnic",
+              "market-fruit-market",
+              "farm-barnyard-morning",
+              "town-festival-square",
+              "school-art-classroom"
+            ],
+            "objectCount": 9,
+            "differenceCount": 5,
+            "kinds": [
+              "missing",
+              "moved",
+              "turned",
+              "swapped"
+            ],
+            "questionsPerRound": 5,
+            "targetScale": 0.78,
+            "camouflageStrength": 0.2
+          },
+          "play": {
+            "mode": "spot_difference",
+            "tier": "challenge",
+            "difficultyColor": "purple",
+            "category": "Visual Search",
+            "shortDesc": "Five changes, and some are swaps rather than gaps",
+            "targetObjective": "Find all five differences between the pictures.",
+            "stepByStep": [
+              "Split each picture into four parts.",
+              "Check one part in both pictures before moving on.",
+              "Tap each difference you find."
+            ],
+            "kidTip": "Something can change without disappearing.",
+            "audioPrompt": "Five things changed this time. Some moved, some turned, some were swapped."
+          }
+        },
+        "difficulty": "Hard",
+        "iconName": "search",
+        "iconTone": "purple",
+        "pedagogyTip": "Adding turns and swaps means an object can differ without leaving, so absence is no longer the only cue.",
+        "standards": [],
+        "trajectoryLevel": "difference-checker",
+        "ageBand": [
+          6,
+          9
+        ]
+      },
+      {
+        "id": "spot-seven-differences",
+        "title": "Spot Seven Differences",
+        "concept": "Comparison Search",
+        "conceptKey": "difference-auditor",
+        "requires": [
+          "difference-checker"
+        ],
+        "activity": "observation/spot-the-difference",
+        "params": {
+          "level": 19,
+          "question": {
+            "sceneIds": [
+              "beach-sandcastle-shore",
+              "park-playground-picnic",
+              "market-fruit-market",
+              "farm-barnyard-morning",
+              "town-festival-square",
+              "school-art-classroom"
+            ],
+            "objectCount": 10,
+            "differenceCount": 7,
+            "kinds": [
+              "missing",
+              "moved",
+              "turned",
+              "swapped",
+              "resized",
+              "mirrored"
+            ],
+            "questionsPerRound": 5,
+            "targetScale": 0.76,
+            "camouflageStrength": 0.24
+          },
+          "play": {
+            "mode": "spot_difference",
+            "tier": "challenge",
+            "difficultyColor": "indigo",
+            "category": "Visual Search",
+            "shortDesc": "Seven changes, including size and reflection",
+            "targetObjective": "Find every difference, however small.",
+            "stepByStep": [
+              "Work through the pictures in the same order every time.",
+              "Check size and which way things face.",
+              "Tap each difference until the counter is full."
+            ],
+            "kidTip": "A thing can be the same shape but a different size, or facing the other way.",
+            "audioPrompt": "Seven differences now, and some are only a size or a reflection. Take your time."
+          }
+        },
+        "difficulty": "Hard",
+        "iconName": "search",
+        "iconTone": "indigo",
+        "pedagogyTip": "Every discrimination the earlier levels taught is now asked at once, against a second picture.",
+        "standards": [],
+        "trajectoryLevel": "difference-auditor",
+        "ageBand": [
+          6,
+          9
+        ]
+      },
+      {
         "id": "hidden-object-challenge",
         "title": "Hidden Object Challenge",
         "concept": "Independent Visual Search",
         "conceptKey": "independent-visual-searcher",
         "requires": [
-          "category-searcher"
+          "difference-auditor"
         ],
         "activity": "observation/object-hunt",
         "params": {
-          "level": 17,
+          "level": 20,
           "question": {
             "modes": [
               "occluded",
@@ -5991,7 +6171,7 @@
         "requires": [],
         "activity": "observation/object-hunt",
         "params": {
-          "level": 18,
+          "level": 21,
           "question": {
             "practice": true,
             "modes": [

@@ -82,13 +82,24 @@ function derange(count: number, seed: string): number[] {
  * of separation — and that holds for diagonal neighbours, which an axis-by-axis
  * budget wrongly treated as free to move in both directions at once.
  */
+/**
+ * The vertical band every placement stays inside.
+ *
+ * Spot the Difference crops each pane to this band so two pictures fit a phone
+ * without scrolling. Honouring it here — rather than only in that activity —
+ * means jitter can never nudge an object out of a cropped view, and costs the
+ * hidden-object rounds nothing, since no authored slot sits outside it anyway.
+ */
+export const BAND_TOP = 11;
+export const BAND_BOTTOM = 89;
+
 function jitterBudget(slot: SceneObject, all: readonly SceneObject[]): number {
   const MAX = 3;
   const left = slot.x - slot.hitPadding;
   const top = slot.y - slot.hitPadding;
   const right = slot.x + slot.width + slot.hitPadding;
   const bottom = slot.y + slot.height + slot.hitPadding;
-  let budget = Math.min(MAX, left, top, 100 - right, 100 - bottom);
+  let budget = Math.min(MAX, left, 100 - right, top - BAND_TOP, BAND_BOTTOM - bottom);
   all.forEach((other) => {
     if (keyOf(other) === keyOf(slot)) return;
     const oLeft = other.x - other.hitPadding;

@@ -38,7 +38,9 @@ describe("observation question generator", () => {
   });
 
   it("builds the planned number of varied questions for every lesson", () => {
-    lessonsJson.lessons.forEach((lesson) => {
+    // Spot the Difference is a second activity with its own generator; running
+    // its params through this one proves nothing and hides real failures.
+    lessonsJson.lessons.filter((lesson) => lesson.activity === "observation/object-hunt").forEach((lesson) => {
       const questionCount = lesson.params.question.practice ? 10 : 5;
       expect(lesson.params.question.questionsPerRound).toBe(questionCount);
       expect("seed" in lesson.params.question).toBe(false);

@@ -775,6 +775,7 @@ no longer referenced; `npm run voice:observation -- --prune` removes them.
 | **7 — Voice/settings (complete)** | — | Final `voice.json`; object-name/alias audit; record or import required clips; generated `audio/manifest.json`; audio/feature/settings tests | All 100 object prompts are pronounceable, required reactions exist, and voice plan reports 0 missing |
 | **8 — Integration (automated audit complete)** | — | Course; thumbnail; generated seeds; Skill Manager, disable, mobile/theme/offline/audio pass | 11 lessons open once/in order; disabling removes all; required audio works on a second offline round |
 | **9 — Publish (gated)** | — | Change `draft` to `published` | Publication is the only functional change |
+| **12 — Spot the Difference (complete)** | 17–19 | Second activity; difference generator; band-aware placement; re-spaced slot grid | Both pictures legal, exactly N differences, nothing else differs |
 | **11 — Advanced modes (complete)** | 12–16 | Inventor's Workshop and Coral Reef packs; Hall of Mirrors and Lantern Night scenes; overlap/mirror/camouflage/shadow/category modes; category and mirror-safety metadata | Five new demands, each behaviour-tested; challenge and practice cycle them |
 | **10 — Swarm + Castle (complete)** | 10–11 | Castle Kingdom pack; `castle-frog-moat` swarm scene; `instanceId`/`keyOf` placement keys; counter tray; swarm tests | One character is findable many times over; every copy scores once; List view names each copy |
 
@@ -837,7 +838,7 @@ offline-capable.
 
 ## 14. Definition of done
 
-- All 18 lessons open exactly once and in order.
+- All 21 lessons open exactly once and in order.
 - Levels advance from one clear object to a five-object crowded challenge.
 - The screen has an original scene, persistent tray, any-order finding, and retained marks.
 - Exactly 130 original targetable objects across 13 themes and 28 authored scenes are
@@ -853,13 +854,22 @@ offline-capable.
 - Every feature changes observable behaviour and has a test.
 - Shared kit owns stars/XP; the activity awards none.
 - Light/dark, 360px, desktop, reduced-motion, and offline checks pass.
-- Disabling Observation removes all 18 lessons.
+- Disabling Observation removes all 21 lessons.
 - Lint, tests, and build are green; publishing happens only in Phase 9.
 
-## 15. Spot the Difference (proposed — not built)
+## 15. Spot the Difference (built)
 
-The most played observation format there is, and the one v1 §1 deliberately excluded. This
-section is the design; nothing here is implemented.
+The most played observation format there is, and the one v1 §1 deliberately excluded. Built as
+`activities/SpotTheDifference.tsx` with `internal/differences.ts`; Levels 17–19.
+
+Two things the design did not anticipate, both caught by its own invariants before release:
+checking that an object *supports* a difference kind is not enough, because a `swapped` object
+may have a decoy group whose only partner is already on screen and a free slot may still clash
+with a neighbour jitter moved — so the generator now tries the next kind rather than losing the
+difference, and closes any shortfall with `missing`, which needs nothing from an object. And
+honouring the crop band meant the shared slot grid had to be re-spaced: it now runs two rows of
+five inside the band, which also guarantees every region-and-band group holds at least two
+slots, so no object is ever stranded with nowhere to move.
 
 ### 15.1 The decision that makes it affordable
 

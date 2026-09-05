@@ -15,6 +15,7 @@ import { BadgesPage } from "./BadgesPage";
 import { BillingPage } from "./BillingPage";
 import { ScoringPage } from "./ScoringPage";
 import { NoAccess } from "./NoAccess";
+import { SubjectsPanel } from "./SubjectsPanel";
 
 interface Setting {
   id: string;
@@ -193,6 +194,7 @@ const SystemPanel: React.FC<{
       // would give an operator two places to change one thing and no way to
       // know which is authoritative. The key stays in the vault below, because
       // that tab is every credential this deployment holds.
+      .filter((setting) => setting.id !== "learning.subjects")
       .filter((setting) => setting.group !== "Ask Koda" || setting.type === "secret") ?? null;
 
   const groups = shown
@@ -529,6 +531,7 @@ export const AdminPage: React.FC<{
         <SystemPanel embedded show="secrets" />
       </div>
       <div hidden={active !== "system"}>
+        {active === "system" && <div className="mb-6"><SubjectsPanel /></div>}
         <SystemPanel embedded show="switches" />
       </div>
 

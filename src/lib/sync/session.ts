@@ -217,13 +217,34 @@ const fromPair = (pair: TokenPair, extra: Partial<Session> = {}): Session => ({
 /** Refresh a minute before expiry rather than after a 401. */
 const isStale = (session: Session) => session.expiresAt - Date.now() < 60_000;
 
+/** Token rotation must be serialized across tabs, not just within this module. */
+async function withRefreshLock<T>(deviceId: string, work: () => Promise<T>): Promise<T> {
+  if (typeof navigator !== "undefined" && navigator.locks?.request) {
+    return navigator.locks.request(`koda-refresh:${deviceId}`, work);
+  }
+  return work();
+}
+
+function adoptSavedRefresh(): void {
+  const saved = load();
+  if (current && saved?.deviceId === current.deviceId && saved.refreshToken !== current.refreshToken) {
+    current = saved;
+  }
+}
+
+function isCurrentSession(session: Session): boolean {
+  return current?.deviceId === session.deviceId && current.refreshToken === session.refreshToken;
+}
+
 async function performRefresh(): Promise<Session | null> {
   if (!current) return null;
+  const session = current;
   try {
     const pair = await request<TokenPair>("/auth/refresh", {
       method: "POST",
-      body: { refreshToken: current.refreshToken },
+      body: { refreshToken: session.refreshToken },
     });
+    if (!isCurrentSession(session) || !current) return current;
     const next = fromPair(pair, {
       email: current.email,
       userId: current.userId,
@@ -233,6 +254,7 @@ async function performRefresh(): Promise<Session | null> {
       learnerName: current.learnerName,
       learnerBirthYear: current.learnerBirthYear,
       avatarSeed: current.avatarSeed,
+      joinedAt: current.joinedAt,
     });
     store(next);
     remember(next);
@@ -240,7 +262,10 @@ async function performRefresh(): Promise<Session | null> {
   } catch (error) {
     // Offline keeps the session — the token is stale, not wrong. So does a
     // server fault: only an outright rejection means the device was revoked.
-    if (error instanceof ApiError && !error.isRejected) return current;
+    if (!(error instanceof ApiError) || !error.isRejected) return current;
+    if (!isCurrentSession(session)) return current;
+    adoptSavedRefresh();
+    if (!isCurrentSession(session)) return current;
     // Same treatment `verify` gives a rejected session: an account the server
     // has disowned must leave the switch list too, or it sits there as an
     // entry whose only behaviour is to sign this device out.
@@ -261,13 +286,23 @@ async function performRefresh(): Promise<Session | null> {
  * switch, and the app works signed in without a server.
  */
 async function reissue(target: Session): Promise<Session | null> {
+  return withRefreshLock(target.deviceId, () => {
+    const active = load();
+    const saved = active?.deviceId === target.deviceId
+      ? active
+      : loadAccounts().find((account) => account.deviceId === target.deviceId);
+    return performReissue(saved ?? target);
+  });
+}
+
+async function performReissue(target: Session): Promise<Session | null> {
   if (!isStale(target)) return target;
   try {
     const pair = await request<TokenPair>("/auth/refresh", {
       method: "POST",
       body: { refreshToken: target.refreshToken },
     });
-    return fromPair(pair, {
+    const next = fromPair(pair, {
       email: target.email,
       userId: target.userId,
       displayName: target.displayName,
@@ -278,6 +313,16 @@ async function reissue(target: Session): Promise<Session | null> {
       avatarSeed: target.avatarSeed,
       joinedAt: target.joinedAt,
     });
+    // Publish the replacement before releasing the lock for another tab.
+    remember(next);
+    if (load()?.deviceId === target.deviceId) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      } catch {
+        // The caller can still activate the renewed session in this tab.
+      }
+    }
+    return next;
   } catch (error) {
     if (error instanceof ApiError && !error.isRejected) return target;
     return null;
@@ -316,7 +361,14 @@ async function reopenChild(target: Session): Promise<Session | null> {
 
 async function refresh(): Promise<Session | null> {
   if (refreshInFlight) return refreshInFlight;
-  refreshInFlight = performRefresh().finally(() => {
+  if (!current) return null;
+  const session = current;
+  refreshInFlight = withRefreshLock(session.deviceId, async () => {
+    if (!isCurrentSession(session)) return current;
+    adoptSavedRefresh();
+    if (current !== session && current && !isStale(current)) return current;
+    return performRefresh();
+  }).finally(() => {
     refreshInFlight = null;
   });
   return refreshInFlight;
@@ -324,6 +376,7 @@ async function refresh(): Promise<Session | null> {
 
 /** The token to send, refreshed first if it is about to expire. */
 export async function accessToken(): Promise<string | null> {
+  adoptSavedRefresh();
   if (!current) return null;
   if (!isStale(current)) return current.accessToken;
   const next = await refresh();
@@ -359,10 +412,11 @@ function mergeProfile(session: Session, me: MeOut): Session {
 async function loadProfile(session: Session): Promise<Session> {
   try {
     const me = await request<MeOut>("/auth/me", { token: session.accessToken });
-    const next = mergeProfile(session, me);
+    adoptSavedRefresh();
     // A slower request from the account we just left must never overwrite the
     // account that is active now.
     if (current?.deviceId !== session.deviceId) return session;
+    const next = mergeProfile(current, me);
     store(next);
     remember(next);
     return next;
@@ -399,9 +453,15 @@ async function verify(): Promise<boolean> {
 
   const token = await accessToken();
   if (!token) return false;
+  // Renewal could not reach the server. Keep offline access and do not send
+  // an expired token to /me, whose rejection would erase a recoverable login.
+  if (current && isStale(current)) return true;
+  const session = current;
 
   try {
     const me = await request<MeOut>("/auth/me", { token });
+    adoptSavedRefresh();
+    if (!current || current !== session) return !!current;
     const next = mergeProfile(current, me);
     store(next);
     remember(next);
@@ -409,7 +469,14 @@ async function verify(): Promise<boolean> {
   } catch (error) {
     // Anything short of a rejection leaves the session alone — a restart or a
     // 500 must not sign a child out mid-round.
-    if (error instanceof ApiError && !error.isRejected) return true;
+    if (!(error instanceof ApiError) || !error.isRejected) return !!current;
+    adoptSavedRefresh();
+    if (current !== session) return !!current;
+    // The server clock or a delayed request may expire an access token even
+    // when our local expiry check passed. Let the refresh endpoint decide.
+    if (error.code === "token_expired" || error.code === "token_invalid") {
+      return !!(await refresh());
+    }
     saveAccounts(loadAccounts().filter((account) => account.deviceId !== current?.deviceId));
     store(null);
     return false;

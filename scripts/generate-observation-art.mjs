@@ -294,9 +294,12 @@ const sceneSvg = (theme, variant) => {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 750"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop stop-color="${sky}"/><stop offset="1" stop-color="${ground}"/></linearGradient><filter id="sh"><feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#263b50" flood-opacity=".18"/></filter></defs><rect width="1000" height="750" rx="36" fill="url(#bg)"/>${sceneDecor[theme](variant)}${sceneTexture[theme]}</svg>`;
 };
 
+// Two rows of five, inside the 11-89% crop band, spaced so every region-and-band
+// group holds at least two slots (or an object has nowhere to move to) and every
+// neighbour leaves room for jitter.
 const slots = [
-  [10,24,"top-left"],[31,38,"top-left"],[57,23,"top-right"],[78,35,"top-right"],[88,14,"top-right"],
-  [9,67,"bottom-left"],[30,76,"bottom-left"],[43,59,"bottom-left"],[62,68,"bottom-right"],[82,75,"bottom-right"],
+  [6,20,"top-left"],[24,20,"top-left"],[42,20,"top-left"],[60,20,"top-right"],[78,20,"top-right"],
+  [6,60,"bottom-left"],[24,60,"bottom-left"],[42,60,"bottom-left"],[60,60,"bottom-right"],[78,60,"bottom-right"],
 ];
 const sceneDefs = [
   ["beach","seaside-cafe","Seaside Café","Beach Promenade",1],
@@ -368,10 +371,10 @@ for (const [theme, id, name, place, variant] of sceneDefs) {
 const jitter = (n, spread) => (((Math.imul(n + 1, 2654435761) >>> 0) % (spread * 200 + 1)) / 100) - spread;
 const swarmGrid = [];
 let slotSeed = 0;
-for (const y of [6, 28, 50, 72]) {
+for (const y of [16, 35, 54, 73]) {
   for (const x of [5, 24, 43, 62, 81]) {
     const px = +(x + jitter(slotSeed, 3)).toFixed(2);
-    const py = +(y + jitter(slotSeed + 97, 3)).toFixed(2);
+    const py = +(y + jitter(slotSeed + 97, 2)).toFixed(2);
     swarmGrid.push([px, py, `${y < 50 ? "top" : "bottom"}-${x < 43 ? "left" : "right"}`]);
     slotSeed += 1;
   }

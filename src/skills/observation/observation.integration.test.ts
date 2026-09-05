@@ -7,9 +7,9 @@ const observationLessons = course.units.flatMap((unit) => unit.lessons).filter((
 const audioFiles = import.meta.glob("./audio/**/*.{wav,mp3,ogg,m4a}", { query: "?url", import: "default", eager: true });
 
 describe("observation integration", () => {
-  it("registers all eighteen lessons exactly once and keeps practice separate", () => {
-    expect(observationLessons).toHaveLength(18);
-    expect(new Set(observationLessons).size).toBe(18);
+  it("registers all twenty-one lessons exactly once and keeps practice separate", () => {
+    expect(observationLessons).toHaveLength(21);
+    expect(new Set(observationLessons).size).toBe(21);
     expect(observationLessons).toEqual(skill.lessons.map((lesson) => `observation/${lesson.id}`));
     const practiceUnit = course.units.find((unit) => unit.lessons.includes("observation/practice-object-hunt"));
     expect(practiceUnit?.lessons).toEqual(["observation/practice-object-hunt"]);

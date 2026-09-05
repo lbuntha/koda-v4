@@ -7,8 +7,8 @@
     {
       "id": "forest-pinecone",
       "asset": "observation-forest-pinecone",
-      "x": 10,
-      "y": 24,
+      "x": 6,
+      "y": 20,
       "width": 8,
       "height": 10,
       "rotation": -9,
@@ -24,8 +24,8 @@
     {
       "id": "forest-mushroom",
       "asset": "observation-forest-mushroom",
-      "x": 31,
-      "y": 38,
+      "x": 24,
+      "y": 20,
       "width": 8,
       "height": 10,
       "rotation": -2,
@@ -41,8 +41,8 @@
     {
       "id": "forest-owl",
       "asset": "observation-forest-owl",
-      "x": 57,
-      "y": 23,
+      "x": 42,
+      "y": 20,
       "width": 8,
       "height": 10,
       "rotation": 5,
@@ -53,13 +53,13 @@
         "forest",
         "environment-anchor"
       ],
-      "region": "top-right"
+      "region": "top-left"
     },
     {
       "id": "forest-lantern",
       "asset": "observation-forest-lantern",
-      "x": 78,
-      "y": 35,
+      "x": 60,
+      "y": 20,
       "width": 8,
       "height": 10,
       "rotation": -7,
@@ -75,8 +75,8 @@
     {
       "id": "forest-tent",
       "asset": "observation-forest-tent",
-      "x": 88,
-      "y": 14,
+      "x": 78,
+      "y": 20,
       "width": 8,
       "height": 10,
       "rotation": 0,
@@ -92,8 +92,8 @@
     {
       "id": "forest-compass",
       "asset": "observation-forest-compass",
-      "x": 9,
-      "y": 67,
+      "x": 6,
+      "y": 60,
       "width": 8,
       "height": 10,
       "rotation": 7,
@@ -109,8 +109,8 @@
     {
       "id": "forest-backpack",
       "asset": "observation-forest-backpack",
-      "x": 30,
-      "y": 76,
+      "x": 24,
+      "y": 60,
       "width": 8,
       "height": 10,
       "rotation": -5,
@@ -126,8 +126,8 @@
     {
       "id": "forest-camp-mug",
       "asset": "observation-forest-camp-mug",
-      "x": 43,
-      "y": 59,
+      "x": 42,
+      "y": 60,
       "width": 8,
       "height": 10,
       "rotation": 2,
@@ -143,8 +143,8 @@
     {
       "id": "forest-binoculars",
       "asset": "observation-forest-binoculars",
-      "x": 62,
-      "y": 68,
+      "x": 60,
+      "y": 60,
       "width": 8,
       "height": 10,
       "rotation": 9,
@@ -160,8 +160,8 @@
     {
       "id": "forest-marshmallow",
       "asset": "observation-forest-marshmallow",
-      "x": 82,
-      "y": 75,
+      "x": 78,
+      "y": 60,
       "width": 8,
       "height": 10,
       "rotation": -3,

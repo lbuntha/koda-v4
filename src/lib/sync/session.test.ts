@@ -37,6 +37,31 @@ afterEach(() => {
 });
 
 describe("a signed-in device that loses the network", () => {
+  it("does not verify an expired access token after renewal loses connectivity", async () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(storedSession({ expiresAt: 0 })));
+    const fetch = vi.fn()
+      .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+      .mockResolvedValue({ ok: false, status: 401, json: async () => ({ error: { code: "token_expired" } }) });
+    vi.stubGlobal("fetch", fetch);
+    const session = await loadSession();
+
+    await expect(session.verify()).resolves.toBe(true);
+    expect(session.current()).not.toBeNull();
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(fetch.mock.calls[0][0]).toContain("/auth/refresh");
+    expect(localStorage.getItem(STORAGE_KEY)).not.toBeNull();
+  });
+
+  it("keeps offline access when the server reports expiry and renewal is unavailable", async () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(storedSession()));
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce({ ok: false, status: 401, json: async () => ({ error: { code: "token_expired" } }) })
+      .mockRejectedValueOnce(new TypeError("Failed to fetch")));
+    const session = await loadSession();
+    await expect(session.verify()).resolves.toBe(true);
+    expect(session.current()).not.toBeNull();
+  });
+
   it("keeps the session when the fetch itself fails", async () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(storedSession()));
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")));
@@ -72,6 +97,78 @@ describe("a signed-in device that loses the network", () => {
     const SessionAPI = await loadSession();
     await SessionAPI.verify();
     expect(SessionAPI.current()?.email).toBe("parent@example.com");
+  });
+});
+
+describe("refreshing across tabs", () => {
+  const pair = { accessToken: "fresh-access", refreshToken: "fresh-refresh", expiresIn: 900,
+    deviceId: "d_1", familyId: "f_1", role: "owner" };
+  const response = { ok: true, status: 200, json: async () => pair };
+
+  it("uses a token already renewed by another tab", async () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(storedSession({ expiresAt: 0 })));
+    const first = await loadSession();
+    vi.resetModules();
+    const second = await loadSession();
+    const fetch = vi.fn().mockResolvedValueOnce(response).mockResolvedValue({
+      ok: false, status: 401, json: async () => ({ error: { code: "refresh_invalid" } }),
+    });
+    vi.stubGlobal("fetch", fetch);
+
+    await first.refresh();
+    await second.refresh();
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(second.current()?.refreshToken).toBe(pair.refreshToken);
+    expect(localStorage.getItem(STORAGE_KEY)).not.toBeNull();
+  });
+
+  it("serializes simultaneous renewal in different tabs", async () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(storedSession({ expiresAt: 0 })));
+    let queue = Promise.resolve();
+    const lock = vi.fn((_name: string, callback: () => Promise<unknown>) => {
+      const result = queue.then(callback);
+      queue = result.then(() => undefined);
+      return result;
+    });
+    vi.stubGlobal("navigator", { locks: { request: lock } });
+    const first = await loadSession();
+    vi.resetModules();
+    const second = await loadSession();
+    const fetch = vi.fn().mockResolvedValue(response);
+    vi.stubGlobal("fetch", fetch);
+
+    await Promise.all([first.refresh(), second.refresh()]);
+    expect(lock).toHaveBeenCalledTimes(2);
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(first.current()?.refreshToken).toBe(pair.refreshToken);
+    expect(second.current()?.refreshToken).toBe(pair.refreshToken);
+  });
+
+  it("does not clear a newer saved session when an older refresh is rejected", async () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(storedSession({ expiresAt: 0 })));
+    const session = await loadSession();
+    vi.stubGlobal("fetch", vi.fn().mockImplementation(async () => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(storedSession({ refreshToken: "other-tab-token" })));
+      return { ok: false, status: 401, json: async () => ({ error: { code: "refresh_invalid" } }) };
+    }));
+    await session.refresh();
+    expect(session.current()?.refreshToken).toBe("other-tab-token");
+    expect(localStorage.getItem(STORAGE_KEY)).not.toBeNull();
+  });
+
+  it("does not restore a session signed out while renewal was in progress", async () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(storedSession({ expiresAt: 0 })));
+    const session = await loadSession();
+    let finish!: (value: typeof response) => void;
+    vi.stubGlobal("fetch", vi.fn()
+      .mockImplementationOnce(() => new Promise((resolve) => { finish = resolve; }))
+      .mockResolvedValue({ ok: true, status: 204 }));
+    const refreshing = session.refresh();
+    await session.signOut();
+    finish(response);
+    await refreshing;
+    expect(session.current()).toBeNull();
+    expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
   });
 });
 

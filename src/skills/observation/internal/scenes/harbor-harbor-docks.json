@@ -7,8 +7,8 @@
     {
       "id": "harbor-clownfish",
       "asset": "observation-harbor-clownfish",
-      "x": 10,
-      "y": 24,
+      "x": 6,
+      "y": 20,
       "width": 8,
       "height": 10,
       "rotation": -9,
@@ -24,8 +24,8 @@
     {
       "id": "harbor-seahorse",
       "asset": "observation-harbor-seahorse",
-      "x": 31,
-      "y": 38,
+      "x": 24,
+      "y": 20,
       "width": 8,
       "height": 10,
       "rotation": -2,
@@ -41,8 +41,8 @@
     {
       "id": "harbor-octopus",
       "asset": "observation-harbor-octopus",
-      "x": 57,
-      "y": 23,
+      "x": 42,
+      "y": 20,
       "width": 8,
       "height": 10,
       "rotation": 5,
@@ -53,13 +53,13 @@
         "harbor",
         "environment-anchor"
       ],
-      "region": "top-right"
+      "region": "top-left"
     },
     {
       "id": "harbor-starfish",
       "asset": "observation-harbor-starfish",
-      "x": 78,
-      "y": 35,
+      "x": 60,
+      "y": 20,
       "width": 8,
       "height": 10,
       "rotation": -7,
@@ -75,8 +75,8 @@
     {
       "id": "harbor-pearl",
       "asset": "observation-harbor-pearl",
-      "x": 88,
-      "y": 14,
+      "x": 78,
+      "y": 20,
       "width": 8,
       "height": 10,
       "rotation": 0,
@@ -92,8 +92,8 @@
     {
       "id": "harbor-anchor",
       "asset": "observation-harbor-anchor",
-      "x": 9,
-      "y": 67,
+      "x": 6,
+      "y": 60,
       "width": 8,
       "height": 10,
       "rotation": 7,
@@ -109,8 +109,8 @@
     {
       "id": "harbor-treasure-chest",
       "asset": "observation-harbor-treasure-chest",
-      "x": 30,
-      "y": 76,
+      "x": 24,
+      "y": 60,
       "width": 8,
       "height": 10,
       "rotation": -5,
@@ -126,8 +126,8 @@
     {
       "id": "harbor-snorkel",
       "asset": "observation-harbor-snorkel",
-      "x": 43,
-      "y": 59,
+      "x": 42,
+      "y": 60,
       "width": 8,
       "height": 10,
       "rotation": 2,
@@ -143,8 +143,8 @@
     {
       "id": "harbor-coral-branch",
       "asset": "observation-harbor-coral-branch",
-      "x": 62,
-      "y": 68,
+      "x": 60,
+      "y": 60,
       "width": 8,
       "height": 10,
       "rotation": 9,
@@ -160,8 +160,8 @@
     {
       "id": "harbor-submarine",
       "asset": "observation-harbor-submarine",
-      "x": 82,
-      "y": 75,
+      "x": 78,
+      "y": 60,
       "width": 8,
       "height": 10,
       "rotation": -3,

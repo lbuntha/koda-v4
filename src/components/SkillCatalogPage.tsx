@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { BookOpen, CheckCircle2, RefreshCw, Search } from "lucide-react";
 import { filterSkillCatalog, learnOrder } from "../lib/skillCatalog";
 import { useSkillCatalog } from "../lib/useSkillCatalog";
@@ -8,7 +8,9 @@ import { playSound } from "../utils/audio";
 import { offlineMessage, useOfflineDownload } from "../lib/offlineSkill";
 import { themeSystem } from "../lib/themeSystem";
 import { useIsCompact } from "../lib/useBreakpoint";
-import { UIBadge, UIButton, UIPageHeader, UISkillCard, skillArtFor } from "./ui";
+import { UIBadge, UIButton, UIPageHeader, UISkillCard } from "./ui";
+import { subjectForSkill, useSubjects } from "../lib/subjects";
+import { refreshSystem } from "../lib/sync/system";
 
 export interface SkillCatalogPageProps {
   activeLevelNumber: number;
@@ -28,14 +30,13 @@ const CARD_GRID = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4
 /** A phone gets rows; a poster grid needs width to be a grid at all. */
 const ROW_LIST = "space-y-2.5";
 
-const labelForCategory = (category: string) => skillArtFor(category).label;
-
 export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
   activeLevelNumber,
   completedLevels,
   onSelectSkill,
 }) => {
   const { skills, viewer } = useSkillCatalog(completedLevels);
+  const subjects = useSubjects();
   const { registeredIds, register } = useSkillRegistrations();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("all");
@@ -48,12 +49,18 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
   const [refreshError, setRefreshError] = useState<string | null>(null);
 
   const categories = useMemo(
-    () => [...new Set(skills.map((skill) => skill.category))].sort(),
-    [skills],
+    () => subjects.subjects,
+    [subjects],
   );
+  useEffect(() => {
+    if (category !== "all" && !categories.some((subject) => subject.id === category)) {
+      setCategory("all");
+      setVisibleLimit(PAGE_SIZE);
+    }
+  }, [categories, category]);
   const visible = useMemo(
-    () => filterSkillCatalog(skills, query, category),
-    [category, query, skills],
+    () => filterSkillCatalog(skills, query, "all").filter((skill) => category === "all" || subjectForSkill(subjects, skill.id)?.id === category),
+    [category, query, skills, subjects],
   );
   const resume =
     skills.find(
@@ -123,6 +130,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
     setRefreshError(null);
     try {
       await refreshSkillRegistry();
+      await refreshSystem();
     } catch (error) {
       setRefreshError(error instanceof Error ? error.message : "The skill library could not be refreshed.");
     } finally {
@@ -193,8 +201,8 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
         />
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Skill categories">
-        {["all", ...categories].map((value) => (
+      <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Skill subjects">
+        {[{ id: "all", name: "For you" }, ...categories].map(({ id: value, name }) => (
           <button
             key={value}
             type="button"
@@ -209,7 +217,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
                 : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-muted hover:border-indigo-300"
             }`}
           >
-            {value === "all" ? "For you" : labelForCategory(value)}
+            {name}
           </button>
         ))}
       </div>

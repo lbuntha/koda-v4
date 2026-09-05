@@ -7,8 +7,8 @@
     {
       "id": "park-leaf",
       "asset": "observation-park-leaf",
-      "x": 10,
-      "y": 24,
+      "x": 6,
+      "y": 20,
       "width": 8,
       "height": 10,
       "rotation": -9,
@@ -24,8 +24,8 @@
     {
       "id": "park-daisy",
       "asset": "observation-park-daisy",
-      "x": 31,
-      "y": 38,
+      "x": 24,
+      "y": 20,
       "width": 8,
       "height": 10,
       "rotation": -2,
@@ -41,8 +41,8 @@
     {
       "id": "park-butterfly",
       "asset": "observation-park-butterfly",
-      "x": 57,
-      "y": 23,
+      "x": 42,
+      "y": 20,
       "width": 8,
       "height": 10,
       "rotation": 5,
@@ -53,13 +53,13 @@
         "park",
         "environment-anchor"
       ],
-      "region": "top-right"
+      "region": "top-left"
     },
     {
       "id": "park-robin",
       "asset": "observation-park-robin",
-      "x": 78,
-      "y": 35,
+      "x": 60,
+      "y": 20,
       "width": 8,
       "height": 10,
       "rotation": -7,
@@ -75,8 +75,8 @@
     {
       "id": "park-acorn",
       "asset": "observation-park-acorn",
-      "x": 88,
-      "y": 14,
+      "x": 78,
+      "y": 20,
       "width": 8,
       "height": 10,
       "rotation": 0,
@@ -92,8 +92,8 @@
     {
       "id": "park-watering-can",
       "asset": "observation-park-watering-can",
-      "x": 9,
-      "y": 67,
+      "x": 6,
+      "y": 60,
       "width": 8,
       "height": 10,
       "rotation": 7,
@@ -109,8 +109,8 @@
     {
       "id": "park-picnic-basket",
       "asset": "observation-park-picnic-basket",
-      "x": 30,
-      "y": 76,
+      "x": 24,
+      "y": 60,
       "width": 8,
       "height": 10,
       "rotation": -5,
@@ -126,8 +126,8 @@
     {
       "id": "park-bench",
       "asset": "observation-park-bench",
-      "x": 43,
-      "y": 59,
+      "x": 42,
+      "y": 60,
       "width": 8,
       "height": 10,
       "rotation": 2,
@@ -143,8 +143,8 @@
     {
       "id": "park-ladybug",
       "asset": "observation-park-ladybug",
-      "x": 62,
-      "y": 68,
+      "x": 60,
+      "y": 60,
       "width": 8,
       "height": 10,
       "rotation": 9,
@@ -160,8 +160,8 @@
     {
       "id": "park-umbrella",
       "asset": "observation-park-umbrella",
-      "x": 82,
-      "y": 75,
+      "x": 78,
+      "y": 60,
       "width": 8,
       "height": 10,
       "rotation": -3,

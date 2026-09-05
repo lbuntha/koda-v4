@@ -7,8 +7,8 @@
     {
       "id": "market-apple",
       "asset": "observation-market-apple",
-      "x": 10,
-      "y": 24,
+      "x": 6,
+      "y": 20,
       "width": 8,
       "height": 10,
       "rotation": -4,
@@ -24,8 +24,8 @@
     {
       "id": "market-banana",
       "asset": "observation-market-banana",
-      "x": 31,
-      "y": 38,
+      "x": 24,
+      "y": 20,
       "width": 8,
       "height": 10,
       "rotation": 3,
@@ -41,8 +41,8 @@
     {
       "id": "market-carrot",
       "asset": "observation-market-carrot",
-      "x": 57,
-      "y": 23,
+      "x": 42,
+      "y": 20,
       "width": 8,
       "height": 10,
       "rotation": -9,
@@ -53,13 +53,13 @@
         "market",
         "environment-anchor"
       ],
-      "region": "top-right"
+      "region": "top-left"
     },
     {
       "id": "market-bread-loaf",
       "asset": "observation-market-bread-loaf",
-      "x": 78,
-      "y": 35,
+      "x": 60,
+      "y": 20,
       "width": 8,
       "height": 10,
       "rotation": -2,
@@ -75,8 +75,8 @@
     {
       "id": "market-teacup",
       "asset": "observation-market-teacup",
-      "x": 88,
-      "y": 14,
+      "x": 78,
+      "y": 20,
       "width": 8,
       "height": 10,
       "rotation": 5,
@@ -92,8 +92,8 @@
     {
       "id": "market-spoon",
       "asset": "observation-market-spoon",
-      "x": 9,
-      "y": 67,
+      "x": 6,
+      "y": 60,
       "width": 8,
       "height": 10,
       "rotation": -7,
@@ -109,8 +109,8 @@
     {
       "id": "market-shopping-bag",
       "asset": "observation-market-shopping-bag",
-      "x": 30,
-      "y": 76,
+      "x": 24,
+      "y": 60,
       "width": 8,
       "height": 10,
       "rotation": 0,
@@ -126,8 +126,8 @@
     {
       "id": "market-cheese-wedge",
       "asset": "observation-market-cheese-wedge",
-      "x": 43,
-      "y": 59,
+      "x": 42,
+      "y": 60,
       "width": 8,
       "height": 10,
       "rotation": 7,
@@ -143,8 +143,8 @@
     {
       "id": "market-jam-jar",
       "asset": "observation-market-jam-jar",
-      "x": 62,
-      "y": 68,
+      "x": 60,
+      "y": 60,
       "width": 8,
       "height": 10,
       "rotation": -5,
@@ -160,8 +160,8 @@
     {
       "id": "market-rolling-pin",
       "asset": "observation-market-rolling-pin",
-      "x": 82,
-      "y": 75,
+      "x": 78,
+      "y": 60,
       "width": 8,
       "height": 10,
       "rotation": 2,

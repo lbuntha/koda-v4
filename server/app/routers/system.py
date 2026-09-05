@@ -15,7 +15,8 @@ import secrets as stdlib_secrets
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Header
-from pydantic import Field
+from pydantic import Field, ValidationError
+from app.models.subjects import SubjectCatalog
 
 from app.deps import AUTHENTICATED, CurrentPrincipal, Db, require
 from app.errors import AppError, Forbidden, NotFound
@@ -163,7 +164,14 @@ async def update(setting_id: str, body: ValueIn, db: Db, p: CanOperate) -> Setti
         raise NotFound(f"There is no system setting called '{setting_id}'.")
 
     value = body.value
-    if definition["type"] == "bool":
+    if setting_id == "learning.subjects":
+        if not isinstance(value, str) or len(value) > 100_000:
+            raise AppError(400, "bad_value", "Invalid subject catalog.")
+        try:
+            value = SubjectCatalog.model_validate_json(value).model_dump_json()
+        except ValidationError as exc:
+            raise AppError(400, "bad_value", "Use unique subject names and assign skills to existing subjects.") from exc
+    elif definition["type"] == "bool":
         if not isinstance(value, bool):
             raise AppError(400, "bad_value", f"'{setting_id}' is a switch: send true or false.")
     elif definition["type"] == "secret":
