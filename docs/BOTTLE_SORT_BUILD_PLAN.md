@@ -1,7 +1,7 @@
 # Bottle Sort — build plan
 
-Follows [SKILL_BUILD_TEMPLATE.md](SKILL_BUILD_TEMPLATE.md). Design only; nothing is
-implemented. Ten phases, 0 through 9, in [Delivery](#delivery).
+Follows [SKILL_BUILD_TEMPLATE.md](SKILL_BUILD_TEMPLATE.md). Ten phases, 0 through 9, in
+[Delivery](#delivery). **Phase 0 is built**; Phases 1–9 are design.
 
 ## Release scope
 
@@ -11,7 +11,7 @@ implemented. Ten phases, 0 through 9, in [Delivery](#delivery).
 - **Prerequisites:** none. `manifest.requires: []`; Level 1 is independent.
 - **Included techniques:** pouring, capacity, planning under constraint, locked and
   one-way bottles, hidden state, move budgets, ordering by number and fraction, target
-  patterns, linked bottles, predicting a pour.
+  patterns, predicting a pour. Linked bottles are withdrawn — see Modes.
 - **Deferred:** timers of any kind, colour mixing, competitive scoring, bottle editors,
   anything that pressures a child to hurry.
 - **Closest reference engine:** `src/skills/observation/activities/ObjectHunt.tsx` — one
@@ -43,7 +43,8 @@ the market rather than equal to it.
 
 ## Lesson map
 
-30 teaching lessons and 3 practice. Local `params.level` is contiguous 1–33. The hint
+29 teaching lessons and 3 practice; Level 31 is unassigned since linked bottles were
+withdrawn. Local `params.level` is contiguous 1–33. The hint
 strategy is one ladder throughout — **scan → name a source → extra bottle** — except
 where a row says otherwise; practice passes none.
 
@@ -79,7 +80,7 @@ where a row says otherwise; practice passes none.
 | 28 / `sort-by-size` | compare fractions / `fraction-comparer` | `parity-sorter` | sort · fractions | ½ ¾ ⅓ ⅔, by value | full ladder | `practice-bottle-sort` |
 | 29 / `count-by-twos` | a sequence as the goal / `skip-counter` | `parity-sorter` | sort · numbered | build 2, 4, 6, 8 | full ladder | `practice-bottle-sort` |
 | 30 / `make-the-rainbow` | reproduce an order / `pattern-builder` | `skip-counter` | sort · pattern | a named order, not uniform | full ladder | `practice-bottle-sort` |
-| 31 / `linked-bottles` | reason about a side effect / `side-effect-reasoner` | `pattern-builder` | sort · linked | two bottles fill together | full ladder | `practice-bottle-sort` |
+| 31 / *(withdrawn)* | linked bottles created liquid; see Modes | — | — | — | — | — |
 | 32 / `mixed-racks` | everything at once / `independent-planner` | `side-effect-reasoner` | sort · mixed | 6 colours, cap 5, 8 bottles, cycles techniques | full ladder | `practice-bottle-sort` |
 | 33 / `practice-bottle-sort` | practice / `independent-planner` | — | sort · mixed | 5 racks, all techniques | none | — |
 
@@ -107,39 +108,38 @@ Only decisions the guide does not already make.
 the extra-bottle hint changes the rack mid-round, so a fixed string would stop matching.
 `given` is the final arrangement.
 
-### Generation, and the invariant that matters
+### Generation, and what Phase 0 disproved
 
-**Solvability is structural, not checked.** Generate backwards: start from the solved
-rack and apply random legal pours. Undoing those pours one at a time is itself a legal
-solution, so no generated rack can be impossible — there is no generate-then-discard
-loop and no unsolvable deal.
+The plan said solvability would be **structural**: scramble a solved rack with legal
+pours, and undoing them is a solution, so no generate-then-check loop is needed.
+**Phase 0 disproved it.** A pour moves the *whole* top run, so from a solved rack every
+move tips one uniform bottle into another — after thirty such pours every bottle is
+still uniform and nothing has mixed. Whole-run scrambling cannot produce a puzzle at
+all, let alone a guaranteed-solvable one.
 
-Difficulty is the number of scramble pours and the free space left. For racks this size
-an exact minimum solution is computable by breadth-first search, so a lesson asserts
-"solvable in ≤ n" rather than hoping.
+What is built instead:
 
-Prove over 200 draws per lesson: every rack solvable by construction and by search;
-colour counts exact multiples of a bottle; no rack dealt solved, or solvable in one pour
-above Level 2; free space matching the lesson; minimum solution inside the lesson's band;
-every colour distinguishable without colour; and a rack reproducing from params and index.
+- The scramble moves **partial** amounts, which mixes properly. That is not a legal
+  pour, so it proves nothing about solvability.
+- Every dealt rack is therefore **checked by the solver**, and redrawn if it cannot be
+  finished. `dealRack` never returns an unsolvable rack; it just costs a search rather
+  than a proof.
+- The cost is affordable: 6,400 verified deals across all specs run in about a second,
+  so the check can stay at deal time rather than being pushed into tests.
 
-### Colours are drawn fresh every round
+Difficulty is still the scramble length and the free space left, and the solver still
+gives a lesson its "solvable in ≤ n" bound and a move budget its number.
 
-A rack replayed with the same colours looks like the same rack, and a child who
-remembers "blue goes right" is remembering a picture rather than solving. So the palette
-is **dealt per round from a vetted set of twelve**, not fixed to the level.
+**Racks must also not repeat inside a round.** At the short scrambles the early lessons
+use, the reachable space is small enough that two of five questions collided — so a
+deal is checked against what the round has already shown. When a small rack cannot
+satisfy all three wants at once, uniqueness is the one given up: a repeated puzzle is a
+disappointment, a finished or unsolvable one is a broken question.
 
-- The set is vetted once for contrast on both grounds and for separation from one
-  another; the round draws *k* from it with a minimum perceptual distance between any
-  two, so a deal never produces two blues a child must squint at.
-- **The shape stays bound to the position in the deal, not to the hue.** Colour one is
-  always the circle, whatever colour one turns out to be. A colour-blind child then
-  plays the same puzzle every time, because the marks are what they read.
-- It is part of the seed, so a rack still reproduces from params and index — the same
-  question asked twice is identical, and only a *new* round redraws.
-
-Numbered and fraction levels keep their glyphs as the meaning; colour there is
-decoration and may still rotate.
+Proved over 200 draws per lesson: every rack finishable by search; colour counts exact
+multiples of a bottle; no rack dealt finished; at least one legal pour at deal; no
+repeat within a round of five; every dealt palette pair at least 94 apart; and a rack
+reproducing from spec, seed and index.
 
 ### Modes
 
@@ -165,12 +165,17 @@ uncovered) and `locked` (a bottle that opens when another is completed).
 | numbered | ascending, descending, parity, skip-count | order, not just match |
 | fractions | sorted by value | compare fractions by size |
 | pattern | finish as a named order | reproduce a sequence |
-| linked | two bottles fill together | reason about a side effect |
 | **predict** | choose the resulting picture; nothing pours | simulate a move mentally |
 
 `predict` has no equivalent in any product examined, trains the skill every other level
 only rewards, and is the cheapest to build. It is a **second activity**, not a mode: it
 does not pour, and its answer is a choice among pictures.
+
+**Linked bottles are withdrawn.** As specced — pouring into one also fills its twin —
+they create liquid out of nothing: colour counts stop being multiples of a bottle and
+the rack can never be finished. Phase 0's colour-count invariant caught it on the first
+draw. The idea needs a definition that *conserves* what it moves before it can return;
+until then Level 31 is unassigned and the lesson map is 32 lessons plus practice.
 
 **Growth runs on two axes together** — more colours, and taller bottles to hold them.
 More bottles alone makes a rack longer, not harder.
@@ -310,7 +315,7 @@ one engine and its behaviour driver, then expand by the lesson map. **Ten phases
 
 | Phase | Deliverable | Done when |
 |---|---|---|
-| 0 | Pure rules, reverse-generation, solver, palette draw | 200 draws per lesson pass; no rack unsolvable |
+| 0 | **Done.** Pure rules, scramble, solver, palette | 17 tests; 200 draws per lesson; no rack unsolvable, none repeated in a round |
 | 1 | Engine, L1–5, scoring contract, driver | A rack completes; a refusal scores nothing |
 | 2 | Capacity and counting, L6–10 | Capacity refuses correctly; practice files pace |
 | 3 | Planning, L11–20 | Locked and one-way bottles refuse and accept correctly |
@@ -334,4 +339,5 @@ results; it is not restated here. Skill-specific checks to add to it:
   shape stays bound to deal position across 200 rounds;
 - the stream's endpoints stay on both bottles' mouths at every rack size and on two rows.
 
-**Outstanding:** everything. Nothing in this plan is built.
+**Outstanding:** Phases 1–9. Phase 0 is built and tested in
+`src/skills/bottle-sort/internal/`; nothing is registered and there is no UI.
