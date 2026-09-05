@@ -855,3 +855,121 @@ offline-capable.
 - Light/dark, 360px, desktop, reduced-motion, and offline checks pass.
 - Disabling Observation removes all 18 lessons.
 - Lint, tests, and build are green; publishing happens only in Phase 9.
+
+## 15. Spot the Difference (proposed — not built)
+
+The most played observation format there is, and the one v1 §1 deliberately excluded. This
+section is the design; nothing here is implemented.
+
+### 15.1 The decision that makes it affordable
+
+**Both panes share one backdrop, and the differences live in the object layer.**
+
+The obvious build — draw each scene twice with the differences painted in — costs 28 more
+backdrops and hand-places every difference, produces nothing the generator can vary, and gives
+a child the same five differences on every replay. Instead, pane A is an ordinary generated
+layout and pane B is that layout with N mutations applied. Every mutation already has an engine
+behind it:
+
+| Difference kind | Mutation applied to pane B | Reuses |
+|---|---|---|
+| `missing` | the object is not drawn | — |
+| `moved` | placed in a different slot in the same band | `placeObjects` |
+| `turned` | a different rotation | `rotation` mode |
+| `resized` | a different `visualScale` | `scale` mode |
+| `swapped` | replaced by its `decoyGroup` partner | `near_decoys` mode |
+| `mirrored` | flipped, `mirrorSafe` objects only | `mirror` mode |
+
+**No new art at all**, differences are re-drawn every question, and the format becomes a
+genuine capstone: it re-asks every discrimination the ladder taught, side by side.
+
+Colour-only differences are excluded. Risk 4 says do not rely on colour alone, and a hue shift
+is the one difference a colour-blind child cannot see.
+
+### 15.2 A second activity, not a mode
+
+`SpotTheDifference.tsx` sits beside `ObjectHunt.tsx` and shares `internal/`. Two panes and a
+difference counter is a different screen, not a different parameter, and v1's "one interaction,
+one engine" rule is explicit — so this is stated as a second interaction rather than smuggled
+in as a mode. Counting already registers four activities; the contract supports it.
+
+### 15.3 Scoring
+
+Unchanged in shape from a swarm round. One pair is one scored question.
+
+- A difference is identified by its **slot**, not by an object, because a `missing` difference
+  has nothing to tap in pane B. Both panes expose a button at every slot the base layout uses,
+  so the tappable grid is identical in both and reveals nothing.
+- Tapping a difference slot **in either pane** finds it, and it is marked in both.
+- `expected` is the sorted difference-slot list; `given` is the tapped slot.
+- Wrong slot: one incorrect `round.submit`, panes and found state preserved.
+- Last difference: the one correct `round.submit`.
+- Background taps stay inert, as they are today.
+
+### 15.4 Layout — the real engineering cost
+
+Both panes must be **visible at once**. A format where the child scrolls between pictures is
+not this game. On a 360×667 viewport, roughly 240px goes to the shared chrome and counter,
+leaving ~427px for two panes: about **213px each**.
+
+| Pane aspect | Height at 316px wide | Two panes | Fits 667px? | Cost |
+|---|---|---|---|---|
+| 4:3 (as today) | 237 | 474 | no | scrolls on small phones |
+| letterboxed 3:2 | 211 | 422 | yes | art drops to 237px wide, so hit targets fall to 33px |
+| cropped to the slot band | 185 | 378 | comfortably | one scene's slot grid nudged |
+
+Recommended: **crop each pane to the band the slots actually occupy, using `cover`**, at full
+width so the 44px hit floor survives.
+
+Measured across the 28 scenes, every padded slot sits between **11% and 89%** of scene height —
+27 of them land on exactly those bounds, and only `castle-frog-moat` breaks it, with a top slot
+at 0.6% that a one-row nudge to its generated grid fixes. So the band is not a constraint to
+impose; it is already the shape of the content.
+
+Cropping to that band keeps 78% of the art height, which makes each pane 1000:585, about
+**185px tall at 316px wide**. Two panes plus a gap is ~378px against the ~427px available — a
+comfortable fit on a 667px phone rather than the marginal one a 3:2 pane would give. Slot
+positions remap as `y' = (y − 11) / 78 × 100`, and because heights rescale with them the hit
+box stays 38px tall, so nothing regresses.
+
+The new invariant is therefore *every slot lies inside the pane's crop band*, checked per scene,
+with `castle-frog-moat` adjusted rather than any scene redrawn.
+
+Side-by-side from 768px, where there is width for it.
+
+### 15.5 Levels
+
+| L | Lesson | Differences | Kinds |
+|---|---|---|---|
+| 19 | `spot-three-differences` | 3 | `missing`, `moved` |
+| 20 | `spot-five-differences` | 5 | adds `turned`, `swapped` |
+| 21 | `spot-seven-differences` | 7 | adds `resized`, `mirrored` |
+
+conceptKey `difference-comparer`; the capstone and practice keep their place after it.
+
+### 15.6 Accessibility
+
+The List view becomes two labelled columns, top and bottom, and the child selects the row
+that differs — the same expected answer, attempts, and telemetry as the visual round. Both
+panes carry an accessible name ("top picture", "bottom picture") and the counter is announced
+through the existing polite live region.
+
+### 15.7 Invariants
+
+Beyond the existing set, and testable before any of it ships:
+
+1. both panes are individually legal scenes — in bounds, no overlapping hit boxes;
+2. exactly N differences exist, and no unintended one — every non-difference slot is
+   byte-identical between panes;
+3. every difference is visible at 360px without zoom;
+4. no difference is colour-only;
+5. `mirrored` is offered only for `mirrorSafe` objects, and `swapped` only where a
+   `decoyGroup` partner exists;
+6. a `moved` object lands in a slot free in both panes; and
+7. the pair reproduces from params and index.
+
+### 15.8 Cost
+
+No new object or scene art. One new activity component, one difference generator, the slot
+safe-band adjustment, three lessons, and roughly a dozen voice lines ("Find 5 differences.",
+"You found them all."). The layout work in §15.4 is the bulk of it.
