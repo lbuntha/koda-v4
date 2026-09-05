@@ -11,12 +11,17 @@ Read this guide once. Code types and executable tests resolve API disagreements.
 Inspect one relevant reference engine and expand only when it lacks the behavior
 needed. Avoid reading entire skill directories or historical build plans.
 
+Read the ranges, not the files. `types.ts` is 569 lines and a builder needs
+about 150 of them; a production engine is 600–1,000 lines of animation and modes
+around a contract that is 100. Opening whole files is most of the cost of a build.
+
 | Need | Read |
 |---|---|
-| Interfaces | `src/skills/types.ts`: `Skill`, `Lesson`, `ActivityProps`, `KodaSDK` |
+| **The whole contract, minimal** | **`src/skills/kit/example/ExampleActivity.tsx`** — start here |
+| Interfaces | `src/skills/types.ts`: `KodaSDK` (64), `ActivityProps` (231), `Lesson` (381), `Skill` (552) |
 | Registration pattern | `src/skills/counting/index.ts` |
-| Round lifecycle/chrome | `src/skills/kit/round/useSkillRound.ts`, `kit/chrome/SkillRound.tsx` |
-| Interaction example | One engine under `src/skills/counting/activities/` or `src/skills/addition/activities/` |
+| Round lifecycle/chrome | `useSkillRound.ts` `UseSkillRoundOptions` (52) and its return (451); `kit/chrome/SkillRound.tsx` props only |
+| Interaction example | The example above. A real engine under `counting/activities/` or `addition/activities/` only for behaviour it does not show |
 | Practice | `src/skills/kit/practice.ts`, addition's practice tests |
 | Hints | `src/skills/kit/round/hints.ts`, the selected engine's hint builder/tests |
 | Artwork/theme | `docs/THEME.md`; `docs/PLUGINS.md` §5 for asset registration |
@@ -24,6 +29,26 @@ needed. Avoid reading entire skill directories or historical build plans.
 | Standards | `docs/PLUGINS.md` §7, curriculum standards |
 | Print support | `WorksheetSource` in `types.ts`, `src/lib/worksheet.ts`, one reference adapter |
 | Publication | `docs/PLUGINS.md` §8 |
+
+## 0. The rules that fail silently
+
+Everything here is a mistake that leaves no trace: nothing throws, no test goes
+red, and the skill looks finished. Check them before saying a skill is done.
+
+| Rule | What happens if you miss it |
+|---|---|
+| `requires` takes conceptKeys, not lesson ids | The prerequisite never matches, so the lesson unlocks out of order |
+| `params.level` is distinct and contiguous from 1 | Lessons collide or gap; ordering silently misbehaves |
+| Practice is `params.question.practice: true` | Titled "Practice" but scored and hinted as teaching |
+| `iconTone` is one of amber, cyan, indigo, purple, pink, emerald | Anything else becomes indigo without complaint |
+| Gate your own `speech.say` on `audio_speech` | The kit covers intro, hints and reactions only — your line still speaks |
+| `assets/` stays flat | The glob misses subdirectories; nested art is absent, not broken |
+| Every declared feature changes behaviour and has a test | A dead switch in the Skill Manager |
+| Presentation applies to distractors too, not the answer alone | The answer is the item that looks different; the task is bypassed |
+| `expected` on every question | The log records what the child did but not what was asked |
+| Register in `registry.ts` **and** `course.json` | Built, tested, and invisible |
+| `npm run voice:plan -- --skill <id>` reports 0 missing | Publishes with silent lessons |
+
 
 ## 1. Lessons configure engines
 
