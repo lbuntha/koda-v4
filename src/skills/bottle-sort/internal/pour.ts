@@ -66,6 +66,32 @@ export function pour(rack: Rack, from: number, to: number): Rack {
   return next;
 }
 
+/**
+ * The same pour, decomposed one segment at a time.
+ *
+ * Presentation only. The rule is unchanged — a pour moves the whole run and is
+ * judged as one move — but liquid that jumps in a single frame reads as a
+ * relabelling rather than a pour, so the drawing walks through the states in
+ * between. The last element is exactly `pour(rack, from, to)`, and a test holds
+ * that: the animation must never be able to change the outcome.
+ */
+export function pourSteps(rack: Rack, from: number, to: number): Rack[] {
+  if (!canPour(rack, from, to)) return [];
+  const final = pour(rack, from, to);
+  const moved = final[to].seg.length - rack[to].seg.length;
+  const steps: Rack[] = [];
+  let current = rack;
+  for (let i = 0; i < moved; i += 1) {
+    const next: Bottle[] = current.map((b) => ({ ...b, seg: [...b.seg] }));
+    next[to].seg.push(next[from].seg.pop() as number);
+    if (next[from].shown !== undefined) next[from].shown = Math.min(next[from].shown, next[from].seg.length);
+    if (next[to].shown !== undefined) next[to].shown = next[to].seg.length;
+    steps.push(next);
+    current = next;
+  }
+  return steps;
+}
+
 /** Every pour the rack allows right now. */
 export function legalPours(rack: Rack): Pour[] {
   const out: Pour[] = [];

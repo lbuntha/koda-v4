@@ -256,6 +256,14 @@ drawn behind the receiving bottle's glass so the liquid arrives inside it.
 The tilt pivots on the source's base, the way a hand tips a bottle, and segments leave
 and arrive one at a time so a run of three reads as three.
 
+**Built, ahead of its phase.** `pourSteps` decomposes a pour into one-segment states
+for drawing only; its last state is exactly `pour(rack, from, to)`, which a test holds
+across every legal move of seventy-two racks. The rule stays whole-run and one move.
+Input is refused while liquid is in the air, and with `pour_animation` off — or reduced
+motion on — the same rack appears immediately. The stream's ends are read from the two
+mouth markers *after* the tilt, so it joins the bottles rather than being drawn near
+them. Glass depth is still Phase 7.
+
 ### Layout and accessibility
 
 Measured against the 44px floor at a 316px content width: 4 bottles/row 73px, 5/row
@@ -330,11 +338,12 @@ one engine and its behaviour driver, then expand by the lesson map. **Ten phases
 | 0 | **Done.** Pure rules, scramble, solver, palette | 17 tests; 200 draws per lesson; no rack unsolvable, none repeated in a round |
 | 1 | **Done.** Engine, L1–5, scoring contract, driver | A rack completes; a refusal scores nothing |
 | 2 | **Done.** Capacity and counting, L6–10 | Capacity refuses correctly; practice draws from every taught spec |
+| 2a | **Done.** Pouring animation, pulled forward from Phase 7 | Stream joins both mouths; the rack is identical with motion off |
 | 3 | Planning, L11–20 | Locked and one-way bottles refuse and accept correctly |
 | 4 | Hidden state and prediction, L21–24 | `PredictThePour` scores from a picture choice |
 | 5 | Number, fraction, pattern, L25–30 | Ordering goals judged correctly |
 | 6 | Linked and mixed, L31–33 | Every technique cycles in the mixed rack |
-| 7 | Glass depth, mouth-to-mouth stream, sound, haptics, features, accessibility | Each switch behaviour-tested; keyboard completes a rack |
+| 7 | Glass depth, sound, haptics, remaining features, accessibility | Each switch behaviour-tested; keyboard completes a rack |
 | 8 | Voice recorded; integration, device, offline | Voice plan 0 missing; a second round completes offline |
 | 9 | Publish | `draft` → `published`, and nothing else changes |
 

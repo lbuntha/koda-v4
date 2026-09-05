@@ -16,6 +16,7 @@
     { "id": "audio_speech", "name": "Spoken voice", "description": "Reads the lesson opening, the hint line and the reason a pour was refused.", "isEnabled": true, "tag": "Audio" },
     { "id": "sound_chimes", "name": "Sound chimes", "description": "Plays the pour, refusal and solved sounds.", "isEnabled": true, "tag": "Audio" },
     { "id": "haptic_feedback", "name": "Haptic feedback", "description": "Pairs a pour and a refusal with device feedback.", "isEnabled": true, "tag": "Haptic" },
+    { "id": "pour_animation", "name": "Pouring animation", "description": "Tips the bottle and draws the stream. Off pours instantly; the result is the same either way.", "isEnabled": true, "tag": "Motion" },
     { "id": "move_hints", "name": "Move hints", "description": "Offers a strategy nudge, then names a bottle that has somewhere to go.", "isEnabled": true, "tag": "Cognitive" },
     { "id": "step_context_tags", "name": "Step framing tags", "description": "Labels warm-up, challenge and milestone steps.", "isEnabled": true, "tag": "Cognitive" },
     { "id": "premium_lessons", "name": "Charge for later lessons", "description": "Keeps a configurable number of lessons free.", "isEnabled": false, "tag": "Plan" }

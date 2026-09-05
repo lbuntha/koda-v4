@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ActivityProps } from "../../types";
-import { SkillRound, composeHints, isPractice, playCopy, useSkillRound, type RoundQuestion } from "../../kit";
-import { isDeadlock, isSolvedRack, legalPours, pour, refuseReason } from "../internal/pour";
+import { SkillRound, composeHints, isPractice, playCopy, useMotionOK, useSkillRound, type RoundQuestion } from "../../kit";
+import { isDeadlock, isSolvedRack, legalPours, pour, pourSteps, refuseReason } from "../internal/pour";
 import { POOL, rackFor } from "../internal/racks";
 import { specFor } from "../internal/specs";
 import { topRun, type Bottle, type Rack } from "../internal/types";
@@ -39,6 +39,7 @@ const GLYPH: Record<string, string> = {
   cross: "M-1.8-5.4h3.6v3.6h3.6v3.6H1.8v3.6h-3.6V1.8h-3.6v-3.6h3.6Z",
   bar: "M-5.6-2h11.2v4h-11.2Z",
 };
+const wait = (ms: number) => new Promise<void>((r) => { setTimeout(r, ms); });
 const shapeOf = (colour: number) => SHAPES[colour % SHAPES.length];
 const nameOf = (colour: number) => `${shapeOf(colour)} ${colour + 1}`;
 const cssColour = (hues: number[], colour: number) => {
@@ -103,6 +104,10 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
   const speechEnabled = koda.config.isEnabled("audio_speech", true);
   const hintsEnabled = koda.config.isEnabled("move_hints", true);
   const showRunCount = !!setup.showRunCount;
+  // Two switches, and they are not the same thing: the OS preference belongs to
+  // the child, the feature belongs to the adult setting the skill up.
+  const motionOK = useMotionOK();
+  const animate = motionOK && koda.config.isEnabled("pour_animation", true);
   const speechRate = koda.config.get("speechRate", 0.95);
 
   const [rack, setRack] = useState<Rack>([]);
@@ -110,6 +115,13 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
   const [history, setHistory] = useState<Rack[]>([]);
   const [picked, setPicked] = useState<number | null>(null);
   const [nudge, setNudge] = useState<string | null>(null);
+  /** The pour being drawn, and the stream that connects the two mouths. */
+  const [pouring, setPouring] = useState<{ from: number; to: number } | null>(null);
+  const [stream, setStream] = useState<{ d: string; colour: string } | null>(null);
+  const rackRef = useRef<HTMLDivElement | null>(null);
+  const mouths = useRef(new Map<number, SVGCircleElement>());
+  const alive = useRef(true);
+  useEffect(() => () => { alive.current = false; }, []);
 
   const round = useSkillRound({
     koda,
@@ -167,7 +179,7 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
   };
 
   const tap = (index: number) => {
-    if (round.feedback) return;
+    if (round.feedback || pouring) return;
     if (picked === null) {
       const why = refuseReason(rack, index, index === 0 ? 1 : 0);
       // Only the reasons that are about the source itself stop a pick-up.
@@ -184,12 +196,69 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
     const why = refuseReason(rack, picked, index);
     if (why) { refuse(why); return; }
 
-    const next = pour(rack, picked, index);
+    const from = picked;
+    const next = pour(rack, from, index);
     setHistory((h) => [...h, rack]);
-    setRack(next);
     setPicked(null);
     setNudge(null);
+    void runPour(from, index, next);
+  };
 
+  /**
+   * Tips the bottle, runs the stream, and lets the liquid arrive.
+   *
+   * Every judgement below happens on `next`, which `pour` already decided — so
+   * the animation can only change how long the same outcome takes to appear.
+   * With motion off it is applied in one step, and the resulting rack is
+   * identical either way.
+   */
+  const runPour = async (from: number, to: number, next: Rack) => {
+    const finish = () => {
+      setRack(next);
+      judge(next);
+    };
+    if (!animate) { finish(); return; }
+
+    const steps = pourSteps(rack, from, to);
+    setPouring({ from, to });
+    await wait(300);
+    if (!alive.current) return;
+
+    // Both ends come from the mouth markers' live positions, read *after* the
+    // tilt, so the stream is attached to the two bottles rather than drawn near
+    // them — and stays attached at any rack size or across two rows.
+    const box = rackRef.current?.getBoundingClientRect();
+    const a = mouths.current.get(from)?.getBoundingClientRect();
+    const b = mouths.current.get(to)?.getBoundingClientRect();
+    if (box && a && b) {
+      const p1 = { x: a.left + a.width / 2 - box.left, y: a.top + a.height / 2 - box.top };
+      const p2 = { x: b.left + b.width / 2 - box.left, y: b.top + b.height / 2 - box.top };
+      const dir = p2.x >= p1.x ? 1 : -1;
+      const cx = (p1.x + p2.x) / 2 + dir * 4;
+      const cy = (p1.y + p2.y) / 2 + 14;
+      // A falling stream narrows: wider at the lip than where it lands.
+      setStream({
+        colour: cssColour(question.hues, topRun(rack[from]).colour),
+        d: `M${p1.x - 4.5} ${p1.y} Q${cx - 4.5} ${cy} ${p2.x - 2.6} ${p2.y}`
+          + ` L${p2.x + 2.6} ${p2.y} Q${cx + 4.5} ${cy} ${p1.x + 4.5} ${p1.y} Z`,
+      });
+    }
+
+    for (const step of steps) {
+      await wait(150);
+      if (!alive.current) return;
+      setRack(step);
+    }
+
+    setStream(null);
+    setPouring(null);
+    await wait(260);
+    if (!alive.current) return;
+    finish();
+  };
+
+  /** The scoring contract, applied once the liquid has landed. */
+  const judge = (next: Rack) => {
     if (isSolvedRack(next)) {
       chime("success");
       buzz("success");
@@ -224,6 +293,12 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
     setPicked(null);
   };
 
+  /** Swing the bottle over its target, pivoting on its own base. */
+  const tiltFor = (p: { from: number; to: number }) => {
+    const dir = p.to >= p.from ? 1 : -1;
+    return `translate(${dir * 34}%, -26%) rotate(${dir * 58}deg)`;
+  };
+
   const hints = practising || !hintsEnabled ? [] : bottleHints(rack);
 
   return (
@@ -240,7 +315,12 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
         </p>
 
         {/* Six per row is the phone ceiling; a seventh drops a bottle under 44px. */}
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(48px,64px))] items-end justify-center gap-3 rounded-2xl bg-slate-100 px-2 py-6 dark:bg-slate-900/50">
+        <div ref={rackRef} className="relative grid grid-cols-[repeat(auto-fit,minmax(48px,64px))] items-end justify-center gap-3 rounded-2xl bg-slate-100 px-2 py-6 dark:bg-slate-900/50">
+          {stream && (
+            <svg className="pointer-events-none absolute inset-0 z-[4] h-full w-full overflow-visible" aria-hidden="true">
+              <path d={stream.d} fill={stream.colour} opacity=".95" data-stream="" />
+            </svg>
+          )}
           {rack.map((b, i) => {
             const geo = geometry(b.cap);
             const shown = b.shown ?? b.seg.length;
@@ -250,7 +330,10 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
                 data-bottle={i} data-picked={picked === i} data-sorted={sorted}
                 aria-label={`Bottle ${i + 1}, holds ${b.cap}. ${b.seg.length ? b.seg.map((c, k) => (k < shown ? nameOf(c) : "hidden")).join(", ") : "Empty"}.`
                   + (showRunCount && picked === i ? ` ${topRun(b).n} will pour.` : "")}
-                className={`block w-full min-w-11 cursor-pointer leading-none focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${picked === i ? "-translate-y-2" : ""} transition-transform`}>
+                data-pouring={pouring?.from === i || undefined}
+                style={pouring?.from === i ? { transform: tiltFor(pouring), transformOrigin: "50% 88%", zIndex: 6 }
+                  : pouring?.to === i ? { zIndex: 5 } : undefined}
+                className={`block w-full min-w-11 cursor-pointer leading-none focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${picked === i && !pouring ? "-translate-y-2" : ""} ${animate ? "transition-transform duration-300 ease-out" : ""}`}>
                 <svg viewBox={`0 0 ${W} ${geo.height}`} className="h-auto w-full" aria-hidden="true">
                   <defs><clipPath id={`bs-clip-${i}`}><path d={geo.body} /></clipPath></defs>
                   <path d={geo.body} className="fill-white/60 dark:fill-white/10" />
@@ -271,6 +354,10 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
                     className={sorted ? "stroke-emerald-500" : picked === i ? "stroke-indigo-500" : "stroke-slate-400 dark:stroke-slate-500"} />
                   <ellipse cx="30" cy={NECK_TOP} rx="7" ry="3.5" fill="none" strokeWidth="2.5"
                     className={picked === i ? "stroke-indigo-500" : "stroke-slate-400 dark:stroke-slate-500"} />
+                  {/* The stream is anchored to this, read after the tilt, so it
+                      joins the two mouths rather than being drawn near them. */}
+                  <circle r="0.4" cx="30" cy={NECK_TOP} fill="none" data-mouth={i}
+                    ref={(node) => { if (node) mouths.current.set(i, node); else mouths.current.delete(i); }} />
                   {/* Level 9 asks the child to notice that a run travels as one,
                       so the count is shown at the moment they commit to it. */}
                   {showRunCount && picked === i && topRun(b).n > 0 && (
