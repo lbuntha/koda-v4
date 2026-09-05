@@ -1,7 +1,7 @@
 # Bottle Sort — build plan
 
 Follows [SKILL_BUILD_TEMPLATE.md](SKILL_BUILD_TEMPLATE.md). Ten phases, 0 through 9, in
-[Delivery](#delivery). **Phase 0 is built**; Phases 1–9 are design.
+[Delivery](#delivery). **Phases 0 and 1 are built**; Phases 2–9 are design.
 
 ## Release scope
 
@@ -101,7 +101,12 @@ Only decisions the guide does not already make.
    see what happens is the method, and scoring it teaches a child to stop.
 3. Solving the rack is one correct `round.submit`. A deadlock — no legal pour, not
    solved — is one incorrect `round.submit`, and the rack returns to its dealt state.
-4. Undo, reset and every hint rung are `round.useSupport`.
+4. Hint rungs are `round.useSupport`. **Undo and start-over are not**, and that is
+   a correction: the shared `SupportKind` union offers only `hint`, `audio_replay`,
+   `reveal` and `walkthrough`, and filing a step backwards under `hint` would put it
+   in the hint statistics. Neither submits an answer, which is the half that matters.
+   Adding a kind is a change to the shared learning vocabulary, to propose rather
+   than assume.
 5. Teaching rounds are 3 racks; practice is 5.
 
 `expected` is the **property** "every bottle uniform", not a signature of the dealt rack:
@@ -126,6 +131,13 @@ What is built instead:
   than a proof.
 - The cost is affordable: 6,400 verified deals across all specs run in about a second,
   so the check can stay at deal time rather than being pushed into tests.
+
+Phase 1 then found something about the early lessons: across every legal move of forty
+racks per spec, **not one leads to an unsolvable position**. Levels 1 to 5 are generous
+enough that a child cannot trap themselves — so the deadlock branch, the one incorrect
+answer this skill records, has no path there and a Phase 1 round can only be won. That
+is right for the early ladder and worth stating: the incorrect-submit path stays
+unverified through the engine until a later phase tightens the space.
 
 Difficulty is still the scramble length and the free space left, and the solver still
 gives a lesson its "solvable in ≤ n" bound and a move budget its number.
@@ -316,7 +328,7 @@ one engine and its behaviour driver, then expand by the lesson map. **Ten phases
 | Phase | Deliverable | Done when |
 |---|---|---|
 | 0 | **Done.** Pure rules, scramble, solver, palette | 17 tests; 200 draws per lesson; no rack unsolvable, none repeated in a round |
-| 1 | Engine, L1–5, scoring contract, driver | A rack completes; a refusal scores nothing |
+| 1 | **Done.** Engine, L1–5, scoring contract, driver | A rack completes; a refusal scores nothing |
 | 2 | Capacity and counting, L6–10 | Capacity refuses correctly; practice files pace |
 | 3 | Planning, L11–20 | Locked and one-way bottles refuse and accept correctly |
 | 4 | Hidden state and prediction, L21–24 | `PredictThePour` scores from a picture choice |
@@ -339,5 +351,7 @@ results; it is not restated here. Skill-specific checks to add to it:
   shape stays bound to deal position across 200 rounds;
 - the stream's endpoints stay on both bottles' mouths at every rack size and on two rows.
 
-**Outstanding:** Phases 1–9. Phase 0 is built and tested in
-`src/skills/bottle-sort/internal/`; nothing is registered and there is no UI.
+**Outstanding:** Phases 2–9. Phases 0 and 1 are built: the pure layer in
+`src/skills/bottle-sort/internal/`, the engine in `activities/BottleSort.tsx`, five
+lessons, and the skill registered as `draft` in its own course unit. Voice is declared
+but unrecorded, which Phase 8 closes.

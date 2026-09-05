@@ -1,0 +1,210 @@
+{
+  "lessons": [
+    {
+      "id": "one-pour",
+      "title": "One Pour",
+      "concept": "Pouring onto a Match",
+      "conceptKey": "pourer",
+      "requires": [],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 1,
+        "question": {
+          "spec": "one-pour",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "beginner",
+          "difficultyColor": "cyan",
+          "category": "Planning",
+          "shortDesc": "Two colours, three bottles, one pour",
+          "targetObjective": "Pour so every bottle holds one colour.",
+          "stepByStep": [
+            "Tap the bottle you want to pour from.",
+            "Tap the bottle to pour into.",
+            "A colour only goes onto the same colour, or into an empty bottle."
+          ],
+          "kidTip": "Look for the two bottles that share a colour.",
+          "audioPrompt": "Pour the colours together. One pour finishes this rack."
+        }
+      },
+      "difficulty": "Easy",
+      "iconName": "flask-conical",
+      "iconTone": "cyan",
+      "pedagogyTip": "One move isolates the rule before any planning is asked for.",
+      "standards": [],
+      "trajectoryLevel": "pourer",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "two-pours",
+      "title": "Two Pours",
+      "concept": "Pouring onto a Match",
+      "conceptKey": "pourer",
+      "requires": [],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 2,
+        "question": {
+          "spec": "two-pours",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "beginner",
+          "difficultyColor": "cyan",
+          "category": "Planning",
+          "shortDesc": "The same rule, twice over",
+          "targetObjective": "Pour so every bottle holds one colour.",
+          "stepByStep": [
+            "Find a colour sitting on top of another.",
+            "Pour it onto its match.",
+            "Do the same again."
+          ],
+          "kidTip": "Only the top colour ever moves.",
+          "audioPrompt": "Two pours this time. Move each colour onto its match."
+        }
+      },
+      "difficulty": "Easy",
+      "iconName": "flask-conical",
+      "iconTone": "cyan",
+      "pedagogyTip": "A second repetition before anything new is introduced.",
+      "standards": [],
+      "trajectoryLevel": "pourer",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "use-the-empty-bottle",
+      "title": "Use the Empty Bottle",
+      "concept": "Making Room",
+      "conceptKey": "space-maker",
+      "requires": [
+        "pourer"
+      ],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 3,
+        "question": {
+          "spec": "use-the-empty-bottle",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "indigo",
+          "category": "Planning",
+          "shortDesc": "The spare bottle is the only way through",
+          "targetObjective": "Use the empty bottle to unstack the colours.",
+          "stepByStep": [
+            "Find a colour with nowhere to go.",
+            "Pour it into the empty bottle.",
+            "Now the colour underneath can move."
+          ],
+          "kidTip": "An empty bottle takes any colour.",
+          "audioPrompt": "There is one empty bottle. It will take any colour you need to move."
+        }
+      },
+      "difficulty": "Medium",
+      "iconName": "flask-conical",
+      "iconTone": "indigo",
+      "pedagogyTip": "The empty bottle is the first tool, and the first thing worth spending carefully.",
+      "standards": [],
+      "trajectoryLevel": "space-maker",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "pour-the-whole-run",
+      "title": "The Whole Run Moves",
+      "concept": "Runs Move Together",
+      "conceptKey": "run-mover",
+      "requires": [
+        "space-maker"
+      ],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 4,
+        "question": {
+          "spec": "pour-the-whole-run",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "purple",
+          "category": "Planning",
+          "shortDesc": "Matching colours travel as one",
+          "targetObjective": "Move a run of the same colour in a single pour.",
+          "stepByStep": [
+            "Find two or three of the same colour stacked together.",
+            "Pour them onto their match.",
+            "They all move at once, if there is room."
+          ],
+          "kidTip": "Three the same is still one pour.",
+          "audioPrompt": "Colours that are stacked together move as one. Watch how many travel."
+        }
+      },
+      "difficulty": "Medium",
+      "iconName": "flask-conical",
+      "iconTone": "purple",
+      "pedagogyTip": "Naming the whole-run rule stops a child counting pours one segment at a time.",
+      "standards": [],
+      "trajectoryLevel": "run-mover",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "sort-three-colours",
+      "title": "Sort Three Colours",
+      "concept": "Sorting a Full Rack",
+      "conceptKey": "colour-sorter",
+      "requires": [
+        "run-mover"
+      ],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 5,
+        "question": {
+          "spec": "sort-three-colours",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "emerald",
+          "category": "Planning",
+          "shortDesc": "The first rack that needs a plan",
+          "targetObjective": "Sort all three colours into their own bottles.",
+          "stepByStep": [
+            "Look at the whole rack before pouring.",
+            "Decide which bottle you can empty first.",
+            "Pour, then look again."
+          ],
+          "kidTip": "Think about which bottle you want to empty, not just which pour is possible.",
+          "audioPrompt": "Three colours now. Look at the whole rack before you pour."
+        }
+      },
+      "difficulty": "Medium",
+      "iconName": "flask-conical",
+      "iconTone": "emerald",
+      "pedagogyTip": "The first rack where a legal pour is not automatically a good one.",
+      "standards": [],
+      "trajectoryLevel": "colour-sorter",
+      "ageBand": [
+        6,
+        9
+      ]
+    }
+  ]
+}

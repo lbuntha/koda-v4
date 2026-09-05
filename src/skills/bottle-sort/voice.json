@@ -1,0 +1,36 @@
+{
+  "subjects": [],
+  "templates": [],
+  "prompts": [
+    "Sort every bottle.",
+    "That bottle is full.",
+    "That bottle is empty.",
+    "Those colours do not match.",
+    "That bottle only receives.",
+    "Look for a bottle you could empty completely.",
+    "You sorted them all.",
+    "No pours left. Start the rack again."
+  ],
+  "phrases": [],
+  "groups": {
+    "correct": {
+      "voices": ["Kore", "Puck", "Zephyr"],
+      "phrases": [
+        "You sorted them all!",
+        "Every bottle is one colour.",
+        "That was a good plan.",
+        "Neatly poured!",
+        "All sorted."
+      ]
+    },
+    "incorrect": {
+      "voices": ["Kore", "Zephyr", "Puck"],
+      "phrases": [
+        "That path ran out. Try another way.",
+        "No pours left. Start again and plan ahead.",
+        "Nearly. Think about which bottle to empty first.",
+        "Have another go."
+      ]
+    }
+  }
+}
