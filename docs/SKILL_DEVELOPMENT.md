@@ -1,569 +1,286 @@
-# Building a skill
+# Building a Koda learning skill
 
-The end-to-end guide: what to read, what order to build in, and the mistakes
-that have already been made so you do not make them again.
+Implementation guide for `src/skills/` learning activities. Start with
+[NEW_SKILL_PROMPT.md](NEW_SKILL_PROMPT.md); use
+[SKILL_BUILD_TEMPLATE.md](SKILL_BUILD_TEMPLATE.md) for a larger curriculum or a
+lesson JSON example. These are app skills, not Codex `SKILL.md` packages.
 
-This is the practical walkthrough. It does not restate the contract — that lives
-in the files below, and where they disagree with this page, they win.
+## Read only what the task needs
 
-| Read this | For |
+Read this guide once. Code types and executable tests resolve API disagreements.
+Inspect one relevant reference engine and expand only when it lacks the behavior
+needed. Avoid reading entire skill directories or historical build plans.
+
+| Need | Read |
 |---|---|
-| `src/skills/types.ts` | `Skill`, `KodaSDK`, `ActivityProps`, `Lesson` — the contract |
-| `src/skills/kit/` | the shared round: chrome, loop, scoring, praise, hints |
-| `src/skills/counting/` | the reference skill. Copy its shape, not its body |
-| `docs/PLUGINS.md` §7 | adding a skill, and the curriculum-standards rule |
-| `docs/NEW_SKILL_PROMPT.md` | the prompt that produces a registered, playable skill |
-| `docs/VOICE.md` | everything the app says out loud |
-| `docs/THEME.md` | the tokens, the primitives and the two widths |
-| `src/skills/kit/practice.ts` | practice: the same engines with the help taken away |
-| `src/voice/common/` | the shared voice: numbers, facts, subject-neutral praise |
-| `src/lib/learning/practiceLog.ts` | what practice is measured on — pace, top speed, trend |
-| `docs/ADDITION_BUILD_PLAN.md` | a worked 52-lesson plan, phase by phase |
+| Interfaces | `src/skills/types.ts`: `Skill`, `Lesson`, `ActivityProps`, `KodaSDK` |
+| Registration pattern | `src/skills/counting/index.ts` |
+| Round lifecycle/chrome | `src/skills/kit/round/useSkillRound.ts`, `kit/chrome/SkillRound.tsx` |
+| Interaction example | One engine under `src/skills/counting/activities/` or `src/skills/addition/activities/` |
+| Practice | `src/skills/kit/practice.ts`, addition's practice tests |
+| Hints | `src/skills/kit/round/hints.ts`, the selected engine's hint builder/tests |
+| Artwork/theme | `docs/THEME.md`; `docs/PLUGINS.md` §5 for asset registration |
+| Spoken content | `docs/VOICE.md`; inspect `src/voice/common/` before declaring shared phrases |
+| Standards | `docs/PLUGINS.md` §7, curriculum standards |
+| Print support | `WorksheetSource` in `types.ts`, `src/lib/worksheet.ts`, one reference adapter |
+| Publication | `docs/PLUGINS.md` §8 |
 
----
+## 1. Lessons configure engines
 
-## 1. A technique is a lesson, not a component
+An engine owns an interaction; lessons configure it through modes and constraints.
+Never branch on lesson/level number to select the teaching method. Map objectives,
+prerequisites, modes, hints and practice before implementing a large curriculum.
+Build the modes needed for the planned release; extend engines when later lessons
+need new behavior. Counting shows the basic shape; addition shows a larger release.
 
-The single most expensive mistake available here is building one component per
-thing you teach. Fifty-two techniques is not fifty-two components — it is a
-handful of **engines**, each owning one interaction, and fifty-two **lessons**
-that configure them in JSON.
+A skill registers as many activities as it has interactions; counting has five.
+Add a mode when lessons differ by configuration, and a second activity when the
+screen itself differs — a different apparatus, or a layout the existing component
+cannot express. Lessons name the one they use through `activity`.
 
-> An engine never asks which level it is. Mode is a lesson parameter.
+Check the registry for reuse first. Lessons can reference `otherSkill/activity`;
+code must not import another skill's internals. Shared implementation belongs in
+`kit/`. Verify that reused engines support the intended copy, settings and modes.
 
-`FrameFill` does not know that *Make 10* is level 19; it knows
-`mode: "make_ten"`. That is what lets a fifty-third technique ship as data.
+## 2. Build order and files
 
-**Write an engine complete, with every mode it will ever have, the first time
-you write it** — even when the lessons for half those modes arrive four phases
-later. Addition's phases 6, 8 and 10 add nineteen lessons between them and touch
-no `.tsx` at all, and that is only possible because the engines were finished
-before their lessons existed.
+1. Define the release's lesson-to-engine map and question constraints.
+2. Build one complete playable engine with generator checks and a behavior driver.
+3. Add lessons in contiguous `params.level` order; extend engines as needed.
+4. Add practice coverage, hints, assets and supported worksheet adapters.
+5. Finalize voice wording, course placement and release checks.
 
-A consequence to respect: `describeActivitySmoke` mounts every registered
-activity, and an engine with no lesson yet is mounted on `defaultParams` alone.
-**Those defaults must produce a playable question by themselves.**
+Required folder shape:
 
----
-
-## 2. Build order
-
-1. **Groundwork.** The number generator and its tests, the size ladder, the
-   colour roles, the artwork. Nothing is registered yet, so nothing can break.
-2. **Scaffold plus the first engine.** `manifest.json`, `lessons.json`,
-   `voice.json`, `audio/manifest.json` = `{}`, `index.ts`, the two-line contract
-   test, one registry entry, one course unit.
-3. **An engine at a time**, each complete, each with its behaviour driver.
-4. **Lessons as JSON**, in level order.
-5. **Voice script**, once the wording has stopped moving.
-6. **Course placement and release**, last.
-
-**Build in level order.** The contract test requires `params.level` to run
-`1..n` with no gaps, so a phase always adds a contiguous block. Building in
-engine order leaves a hole and fails.
-
-Gate every step: `npx tsc --noEmit`, `npm test`, `npm run build`, and the lesson
-opened in the real app — at 360px, in dark as well as light, and once with the
-network switched off. Not a harness: StrictMode double-mounts, mobile-viewport
-bugs and anything that quietly needed a network only show up there.
-
----
-
-## 3. The host, and what a skill may touch
-
-Everything a skill needs from the app arrives as one injected object. Nothing
-else is reachable, and that is the point: a skill that imports `playSound`,
-`SkillStoreAPI` or app state has bound itself to this build of this app, and it
-is also invisible to every switch a family has set.
-
-| `koda.` | What it is for |
-|---|---|
-| `sound.play/isEnabled/setEnabled` | pops and chimes, behind the learner's Sound FX switch |
-| `haptics.tap/success/pulse` | the vibration that matches a sound |
-| `speech.say/stop/isEnabled` | anything said out loud — see §9 |
-| `progress.awardXp/complete/snapshot/nextStep` | the learner's standing, shared across every skill |
-| `config.get/isEnabled` | this skill's settings and feature flags, pre-bound to its id |
-| `learning.*` | the five telemetry calls — see §10 |
-| `ai.tutor/generateProblem/analyzeDrawing` | server-backed AI, proxied so no key reaches a skill |
-| `log` | the Activity trail in the Skill Manager |
-| `ui.theme/exit` | the current theme, and the way out of a round |
-
-Three consequences worth stating outright:
-
-- **XP reaches the learner only through `progress.awardXp`.** `onComplete`
-  records a result; it awards nothing. The round hook does both for you, which
-  is why a skill should never touch either directly.
-- **`config` is read at mount, not reactive.** A Skill Manager toggle applies on
-  the next round. Do not build for live updates.
-- **`ai` and the voice coach are the only things here that need a network**, and
-  both already fail soft — see §6.
-
-`themeSystem`, `components/ui`, `lucide-react` and `motion` are fine to import.
-`utils/` is not: it is the host's own drawer, and everything in it a skill
-legitimately needs is already on `koda`.
-
----
-
-## 4. House rules
-
-Each of these replaced something that was actually wrong on screen or in the log.
-
-**One frame per question.** The scene is the only container. Addition shipped
-with three frames nested — scene → bin → tile — and none of the inner ones said
-anything the spacing and the operator were not already saying. The kit states
-the principle itself: `SkillRound` draws no card around the question, because
-boxes inside boxes is most of what makes a screen busy. An outline is allowed
-only where it carries meaning — an empty group in *Adding Zero* has no objects
-and no border would leave nothing on screen at all.
-
-**Tap-to-place, never drag.** Tap the source, tap the destination. A
-five-year-old's drag on a small touchscreen misses more often than it lands, and
-pointer-drag cannot be driven by the test harness — a dragged interface is an
-untested interface. Both halves are real buttons, so both get an `aria-label`.
-
-**A refused move is not an answer, and not a hint.** Show a short transient line
-saying why. Do not `submit` — the child has not answered — and do not open the
-hint ladder, which files `supportUsed` against someone who never asked for help
-and opens at the generic tip rather than the sentence that explains this
-particular no.
-
-**A tile nobody can press is not a button.** A disabled button announces as a
-control that exists but is unavailable. Render it as a `div` with `role="img"`
-and a label. It also keeps `h.buttons()` in the tests meaning "the child's
-available moves".
-
-**A group too big to draw is stated as its number.** Fourteen shapes beside one
-shape is a blob beside a thing: a child cannot see "fourteen" in it, so the
-shapes buy nothing and invite counting where the lesson is a rule.
-
-**Two controls must never share an accessible name.** Where a control's natural
-name can repeat — two chips both holding 5, two dials both rounding 47 — put its
-position in the label. A screen-reader user otherwise cannot say which one they
-mean or reach the second, and a test driver that presses by accessible name
-silently hits the first every time, which surfaces as a flake rather than as the
-accessibility bug it is.
-
-**Never encode state in colour alone**, and never a raw slate shade — 
-`themeSystem.field()` for any input, `bg-surface` / `text-ink` / `border-line`
-for surfaces. Check light *and* dark, and at 360px. No amber or yellow: it fails
-against this app's light surface. `docs/THEME.md` is the full contract — the
-tokens, which primitive to reach for, and the one breakpoint that changes shape.
-
----
-
-## 5. Mobile first, and 360px is the floor
-
-The device this app is used on is a phone, often an old one, often held by a
-five-year-old. A layout that works at 1280px and breaks at 360px is broken, not
-"mostly working" — and the breakage is invisible from a desktop browser, which
-is how it ships.
-
-**One breakpoint changes shape**: `rail:` (720px), not Tailwind's `md`, because
-768px runs through the middle of the devices this has to get right — an iPad
-mini is 744px in portrait. Below `rail:` the app is a phone with a toolbar and a
-bottom tab bar; above it, a sidebar rail. `docs/THEME.md` has the full contract.
-
-Inside a round, the chrome is already responsive and already handles the phone —
-the top bar is sticky and pads for the notch, the progress bar spans the width
-below it, and the feedback strip sits where a thumb is not covering it. A skill
-that adds its own top chrome is fighting all of that.
-
-What the part you draw has to get right:
-
-- **The play area fits 360×640 with no horizontal scroll on the page.** If a
-  scene genuinely cannot shrink — a wide number line, a place-value chart — give
-  it its own `overflow-x: auto` container. The page never scrolls sideways.
-- **Touch targets are 44px, not 40.** The button scale already carries a
-  `pointer-coarse:min-h-11` floor, so use `themeSystem.button` rather than a
-  bespoke height. The variant keys off the input device, not the viewport: a
-  tablet is a wide screen with fat fingers.
-- **Tap-to-place, never drag** — see §4. This is a mobile rule before it is a
-  testability one.
-- **Never re-decide the shell.** No page padding of your own (`MainLayout` pads
-  and centres), no bespoke `rail:` rules where a shared piece exists, and no
-  `touch-action` or `overscroll-behavior` — the app sets those globally so a
-  fast second tap counts instead of zooming.
-- **Hiding with a class is not the same as not rendering.** `space-y-*` spaces a
-  child it cannot see, so anything that disappears at one width inside a stack
-  must return `null` — `useIsCompact()` in `lib/useBreakpoint.ts`.
-- **A scene that scales, not one that reflows.** Every tappable size lives in
-  one module per skill, as responsive steps —
-  `src/skills/addition/internal/data/additionLayout.ts` is the worked example:
-  `w-14 h-14 sm:w-20 sm:h-20 lg:w-[88px]`. Twelve engines picking their own
-  sizes means a child meets a different finger target in every lesson of one
-  skill, and an object still 88px wide on a 360px screen is a scene that has
-  stopped fitting.
-
-**Check it in the running app at 360px, not in a harness.** StrictMode's double
-mount and mobile-viewport bugs only appear there, and the second is exactly the
-class of bug this section exists to catch.
-
----
-
-## 6. Offline is the default, not a fallback
-
-Koda is used where the internet is unreliable. **Everything a child does works
-with no network** — lessons, the course, the level picker, progress, XP and the
-learning log are bundled JSON or `localStorage`, and a skill's artwork is inlined
-into the bundle as markup rather than fetched. None of that is per skill, and
-none of it is an error path: it is simply how the app is built.
-
-Which means a skill has one job here — **do not be the thing that breaks it.**
-
-- **An activity fetches nothing.** No `fetch`, no image URL, no font, no CDN.
-  Generate your numbers locally (§7), draw with the SVG the bundle already
-  carries, and let the host worry about the network.
-- **Speech already degrades on its own.** `koda.speech.say()` plays a recorded
-  clip if there is one, and falls through to the browser's local synthesis if
-  there is not. Adding a skill downloads its clips deliberately
-  (`lib/offlineSkill.ts`) so a child who enrolled on the sofa still hears Koda in
-  the car; clips otherwise cache on first play. You get all of this by using the
-  SDK and none of it by going around it.
-- **Telemetry is local first.** `koda.learning.*` writes to the device ring and
-  the durable rollup; a backend sink queues and retries. A round played on a
-  train is recorded exactly like any other.
-- **`koda.ai` is the one call that needs a network**, and it already falls back
-  to a local Socratic response. The live voice coach is unavailable offline, by
-  design. Never make a lesson's *progress* depend on either — a child must be
-  able to finish a round with the aeroplane on.
-
-If you ever do add something remote, the rule from everything else in this app
-applies: **every fetch gets a deadline and a local answer.** A request with no
-timeout is a spinner a child sits in front of on a bad connection, which is
-worse than the answer you would have given them without it.
-
-**Test it, because nothing else will**: DevTools → Network → Offline, reload,
-and play a full round. `docs/PWA.md` lists what is precached and what each
-network feature does without one.
-
----
-
-## 7. Numbers
-
-Every question generates fresh numbers, and every technique needs a *shape* of
-number, not just a range: make-ten wants a pair that crosses ten, compensation
-wants a second addend ending in 8 or 9, the place-value chart wants no carry and
-partial sums wants one.
-
-Put all of it in one module with declared constraints, and unit-test the
-properties — 200 draws per spec, every one satisfying it. See
-`src/skills/addition/internal/data/additionNumbers.ts`.
-
-Four rules, each of which cost something:
-
-1. **Constraints are hard.** One judge function, and everything returned passes
-   through it — including values the module constructed itself. A constructor
-   with a bug is exactly as wrong as a bad draw.
-2. **Search is bounded.** Random draws, then a deterministic scan, then a throw.
-   Never loop until you get lucky: that is a frozen tablet on the one spec
-   nobody tried. An impossible spec is an authoring bug and should be loud.
-3. **A mode's defaults belong to the mode.** Two silent bugs live in the
-   alternative. Spreading a lesson's setup over a default writes `undefined` for
-   every key the lesson omitted, so a mode meaning "start from four to nine"
-   silently starts from one. And a range on `defaultParams` is inherited by
-   *every* mode — count-all's `sumMax: 10` reached Adding One, whose declared
-   range of 1 to 15 could then never exceed nine. Nothing failed; the lesson
-   just did not teach what it said.
-4. **No repeats inside a round.** Five questions that are all `3 + 4` is a
-   broken round, and with small ranges it is not unlikely.
-
----
-
-## 8. Practice, and the speed record
-
-A skill is not finished at its last teaching lesson. Practice is the same
-engines with the scaffolding taken away — several techniques mixed together, no
-hints, no explanation, no voice — and it is a different act from being walked
-through something, not a smaller lesson. It is also the only place the app can
-honestly measure how *fluent* a child has become, so a skill that ships none
-contributes nothing to the Practice log and shows no Practice section on its
-path.
-
-A practice lesson is JSON, like every other lesson:
-
-```json
-{
-  "id": "practice-orbit",
-  "title": "Practice: Touch and Count",
-  "concept": "Practice Without Help",
-  "conceptKey": "counter",
-  "activity": "counting/orbit",
-  "params": {
-    "level": 16,
-    "question": { "practice": true, "modes": ["row", "scatter", "compare"] }
-  }
-}
+```text
+src/skills/<id>/
+  manifest.json          metadata, features, settings and settingsSchema
+  lessons.json           { "lessons": [...] }
+  index.ts               export const skill: Skill; activity/art/voice registration
+  activities/*.tsx       interaction components
+  <id>.test.ts           inherited contract and smoke tests
+  voice.json             speech declarations per docs/VOICE.md
+  audio/manifest.json    {} before recording
+  internal/              helpers when needed
+  assets/                skill-owned SVG when needed
 ```
 
-**`params.question.practice` is the flag, and the title is not.** The same field
-is read in two places that must never disagree: `isPractice` in `kit/practice.ts`
-turns the help off inside the round, and `isPracticeLesson` in the curriculum
-decides where the lesson appears and how it is logged. A lesson *named* like
-practice but not flagged is a teaching lesson that lies about itself, and the
-course test asserts the two agree.
+Add behavior and pure-function tests where §11 calls for them. Do not create empty
+helper files or unused assets. Activity defaults must open a playable question
+without a lesson. Keep mode-specific ranges in the mode's defaults.
 
-What an activity has to do to support practice, in three lines:
+The host shallow-merges activity defaults and lesson params. Reference engines
+normalize `{ ...params, ...params.question }`; `params.play` remains authored copy.
+Do not overwrite valid defaults with `undefined`. See the template's complete JSON.
 
-- `modeAt(setup, index, fallback)` picks this question's mode. It **cycles**
-  `modes` rather than sampling, so a nine-question round over three modes covers
-  all three — random selection leaves a child who drew badly practising one
-  technique nine times and calling it mixed practice.
-- `quietWhenPractising(say, practising)` wraps `koda.speech.say`. Returned as a
-  function so the call site cannot forget the check.
-- Pass no `hints` when practising. The Hint button disappears on its own at zero
-  rungs, and a button with nothing behind it teaches a child that the app's
-  controls are decorative.
+Run focused checks after meaningful edits. Run the full release checks once the
+implementation is ready; repeat them only for changes or failures that warrant it.
 
-**Wording.** Title it `Practice: <technique>` and set the concept line to
-`Practice Without Help`. The flat lesson list needs that word — it is the only
-thing telling the entry apart from the lesson that *teaches* the technique — but
-the round chrome strips it (`withoutPracticeLabel`), because a screen that is
-already practice does not need to say so twice above the question.
+## 3. Host boundary and round
 
-**`conceptKey` is the concept being practised**, not a new one. Practice is
-deliberately kept out of the recommender for exactly this reason: one practice
-lesson mixes several techniques under a single key, so a recommender reading it
-as progress on that key reads it wrong.
+Receive `{ params, level, koda, lesson, onComplete }` through `ActivityProps`.
+Use `useSkillRound` for question sequencing, retries, scoring, XP and learning
+calls; `SkillRound` owns chrome, feedback and completion. Draw the interaction.
 
-**Place practice in its own unit**, appended after the teaching units. The Learn
-page draws it as a separate section, and `curriculum/practice.test.ts` asserts no
-unit mixes the two.
+- Supply questions with stable `id`, `taskKind`, `prompt` and `expected`.
+- Submit one verdict per answer attempt with `round.submit({ correct, given,
+  expected, title, message })`. Wrong answers retain the current question.
+- Do not award XP or manually duplicate the hook's learning/completion calls.
+- Use `koda.sound`, `haptics`, `speech`, `config`, `ai`, `log` and `ui` for host access.
+  No direct app state, `utils/`, storage, audio constructors or speech APIs.
+- Registration in `index.ts` uses the host art/voice registrars as counting does.
+  `themeSystem`, shared UI primitives, `lucide-react` and `motion` are allowed.
+- Feature/settings changes take effect on the next mount. Shared kit/SDK readers
+  count; do not duplicate their work inside every engine.
 
-**What gets measured.** Every event from a practice round carries `practice:
-true` (the host adds it from the flag), and `practiceLog.ts` reads speed off
-those alone — a teaching round times how long Koda talked, not how long the
-child thought. Three exclusions are worth knowing while authoring, because they
-decide whether your questions can set a record at all:
+## 4. Interaction and accessibility
 
-| Not counted as speed | Why |
-|---|---|
-| An answer faster than 700ms | A tap that happened to land. Rewarding it teaches keypad-hammering |
-| An answer with a support taken | Help is a signal, not a speed |
-| Any attempt after the first | The answer is already on screen |
+Use one scene frame; additional outlines should convey meaning. Tap source then
+destination for placement interactions; use real, labelled buttons. A refused
+intermediate move shows a short explanation without submitting an answer or
+recording a hint. Noninteractive objects should not appear as disabled controls.
+Distinguish repeated control labels by position. Support keyboard access and
+never convey state through color alone.
 
-A learner is not ranked until eight practice answers, and "getting faster"
-compares their most recent eight with their first eight. A round of five
-questions therefore says almost nothing; nine or ten is the useful size.
+Use live-state hints: lesson `kidTip`, a contextual nudge, then worked guidance.
+`composeHints` removes empty rungs; `SkillRound` owns hint state and reporting.
+For answer-choice tasks, stop short of revealing the choice; for action-based
+tasks, explain the action fully. Do not use a generic hint to explain a refused move.
 
----
+## 5. Mobile and theme
 
-## 9. Speech
+Use `themeSystem` and shared primitives: `field()` for inputs, `bg-surface`,
+`text-ink`, `border-line` for surfaces. Follow `docs/THEME.md` for color roles;
+avoid raw slate surfaces and low-contrast amber/yellow foregrounds.
 
-Read `docs/VOICE.md`. Three things matter while building:
+A lesson's `iconTone` is a closed set — amber, cyan, indigo, purple, pink,
+emerald (`lessonIconTones` in `src/components/ui/lessonIcons.ts`). Anything else
+resolves to indigo without complaint, so a made-up tone is a silent wrong colour,
+not an error.
 
-- **Say everything through `koda.speech.say()`.** Never `playClip`, never
-  `new Audio()`, never `window.speechSynthesis`. That method is where the app
-  decides whether a skill may talk at all — the voice coach's floor, the
-  learner's *Koda's Voice* switch, and the skill's own *Spoken voice* feature.
-  Going around it talks over a live conversation and into an open microphone.
-- **Declare only what something says.** A phrase in `voice.json` that nothing
-  speaks is a clip nobody hears and an API call somebody paid for — the same
-  failure as a feature flag nothing reads.
-- **Do not record what the app already says.** `"seven"` is `"seven"`, and
-  `"Perfect!"` is as true of a story problem as of a ten-frame, so the digits,
-  the number words, the shared place-value facts and subject-neutral praise live
-  in `src/voice/common/` — a voice belonging to no skill, registered once from
-  `main.tsx`. `npm run voice:record -- --skill <id>` skips whatever the pack
-  already covers, so a new skill records only what is genuinely its own.
+Fit 360×640 without page-level horizontal scrolling; a wide apparatus may scroll
+inside its own container. Use the button scale's 44px coarse-pointer floor.
+Centralize repeated apparatus sizes, as `additionLayout.ts` does. The shell owns
+page padding, top chrome and global touch behavior. Use `rail:` (720px) for shell
+shape changes only when a shared component does not already handle them.
+Check light and dark in the real app. If a hidden child affects stack spacing,
+conditionally render it instead of only hiding it with CSS.
 
-Two rules decide what the pack does for you, and they are worth knowing before
-you write a phrase list:
+## 6. Offline
 
-- **Your own recording wins.** The pack fills gaps and never overwrites, in
-  either registration order. Record `"seven"` in your skill's voice
-  (`--force`) and yours is what plays.
-- **Its praise is added to yours, not swapped for it.** A skill that has
-  recorded no reactions still sounds finished on the day it ships; one that
-  recorded `"Brilliant counting!"` keeps it *and* draws on the neutral pool,
-  rather than repeating a single line after every answer for a whole round.
+Generate questions locally; bundle artwork. Activities must not fetch remote
+assets or depend on AI/network responses to complete. Speech and telemetry use
+the SDK's fallback/queue behavior. Speech availability still depends on installed
+clips or device voices; verify it on the target device. See `docs/PWA.md` for cache
+behavior when diagnosing offline failures.
 
-What has not changed: **one skill's words never reach another skill's round.**
-Reactions are scoped by skill id, and the pack holds only lines that name no
-subject — which is the test a phrase has to pass to go in it. `"Brilliant
-counting!"` stays in counting.
+After loading/enrolling online, switch the running app offline, reload, complete
+a round, and open the lesson again. Test the actual app, including StrictMode,
+rather than assuming a component harness establishes offline readiness.
 
-`npm run voice:plan` shows every line, its file and its voice, with no key and
-no cost.
+## 7. Question generation
 
----
+Use pure generators with declared constraints. Verify mathematical/content
+correctness independently of the generator's reported answer. Include boundary
+cases and sampled properties for each distinct specification.
 
-## 10. What your skill records
+Bound random search, then use a deterministic fallback where appropriate; throw
+for impossible authoring specifications. Avoid repeats with bounded retries and
+a round-local `seen` set. If the valid question space is exhausted, allow a repeat
+rather than hang. Addition's `withoutRepeat` is the reference behavior, not a
+strict uniqueness guarantee. Reset question state and round-local memory on replay.
 
-The learning log is the product's memory: the recommender, the mastery status a
-parent reads, and the Practice log all fold the same events. A skill reports
-facts and never statistics — response time, attempt index, accuracy, medians and
-error classification are all derived by the SDK, so two skills cannot disagree
-about what "accuracy" means.
+Where a question draws distractors, apply presentation to the whole set, never to
+the answer alone. Scale, opacity, colour treatment, rotation and occlusion applied
+only to targets make the answer the one item that looks different, which a learner
+solves without doing the task — and no test sees it, because the answer is still
+correct. Difficulty belongs in the distractors' similarity and count.
 
-Five calls, in order, and `useSkillRound` already makes all five for you:
+## 8. Practice
 
-```
-startLesson(entry)   → present(question) → [supportUsed(kind, level)]
-                     → answered(report)  → completeLesson({ stars, xpEarned })
-```
+The flag is `params.question.practice: true`, never the title. Use title
+`Practice: <technique>`, concept `Practice Without Help`, and the conceptKey being
+practised. Append practice in separate course units after teaching units.
 
-What you actually have to get right is the content of two of them:
+Use `modeAt(setup, index, fallback)` (1-based index) to cycle supported modes.
+Import `quietWhenPractising` from `kit/practice` to suppress activity speech;
+pass no hints or teaching intro. Match reference handling of read-aloud controls,
+explanations and resumable rounds. Test silence across a round, not just on mount.
 
-- **`present` carries the prompt and the `expected` answer.** Without `expected`
-  every wrong answer files as `unknown` instead of `off_by_one`, which is the
-  difference between "she has the idea and slipped" and "she did not run the
-  procedure".
-- **`answered` reports one answer per question.** A multi-box answer checks once
-  and submits once; submitting per box files four answers for one question and
-  wrecks first-try accuracy.
+Nine or ten questions is a useful default; practice ranking needs eight qualifying
+answers. Speed excludes answers under 700ms, assisted answers and repeat attempts.
+The host adds practice telemetry from the lesson flag. Verify Practice log entries;
+see `src/lib/learning/practiceLog.ts` for the current calculation. Mixed practice
+is deliberately excluded from the concept recommender.
 
-And one thing that lives in `lessons.json` rather than in code:
+## 9. Speech and assets
 
-- **`conceptKey` is the unit of mastery, and it is shared across skills.** Reuse
-  an existing key before inventing one — `grep -r '"conceptKey"' src/skills/*/lessons.json`
-  — because a new name for an old idea splits a child's record in two. A lesson
-  with no key records **nothing at all**: the SDK refuses events it cannot
-  attribute, so the log stays silently empty.
+Say everything through `koda.speech.say()` so learner switches and the live coach's
+speaker ownership are respected. Await completion when the action depends on the
+line finishing; use `useSpokenFinish` for the reference timed-finish pattern.
 
-`docs/LEARNING_LOG.md` is the full schema, including what is deliberately not
-stored.
+Gate the skill's own speech on `audio_speech` yourself. The kit gates the lesson
+intro, the hint line and the recorded answer reactions; a `speech.say()` an
+activity calls directly is not covered, so a declared switch that only the kit
+respects is a switch that does nothing. Counting is the reference.
 
----
+Declare phrases that are actually spoken. Reuse common numbers/facts/neutral
+praise; keep topic-specific reactions scoped to the skill. Register audio and
+skill-owned SVG from `index.ts`, following counting. Artwork registers through a
+flat `./assets/*.svg` glob, which does not match subdirectories — art in a nested
+folder is silently absent rather than an error, so keep `assets/` flat and carry
+grouping in the filename. Do not copy another skill's
+recordings or assets by default. Finalize wording before recording; dry-run with
+`npm run voice:plan -- --skill <id>`. Recording/provider details live in `VOICE.md`.
 
-## 11. Tests
+## 10. Curriculum and telemetry
 
-**Structural — two lines, inherited.**
+Reuse a conceptKey for the same learning objective; introduce one for a genuinely
+new objective. Search existing lessons first. A missing key prevents attributed
+learning events. Declare external prerequisites in manifest `requires`; a lesson's
+`requires` may use those or concepts taught earlier in the skill. Keep `teaches`
+aligned with the curriculum.
 
-```ts
-describeSkillContract(skill);   // manifest, lessons, refs, requires chain, settings
-describeActivitySmoke(skill);   // every activity mounts and opens a round
-```
+Every presented question needs `expected`. Check multi-box answers together once
+per attempt; a multi-step task may present separate questions when each step is
+assessed separately. Let the SDK derive attempts, timing and error classification.
+Do not file refused setup moves as answers or unsolicited help as support.
 
-That catches the class of bug that actually happens: a lesson pointing at a
-renamed activity, a `requires` naming nothing, two lessons claiming one level, a
-settings field describing a setting that does not exist. None are type errors —
-they are strings inside JSON — and every one has shipped at least once.
+Copy published standards exactly, primary first, and only those actually assessed.
+Use an empty array when none applies and provide a defensible `trajectoryLevel`;
+do not invent a standard or borrow an unrelated counting trajectory for a new domain.
+See `PLUGINS.md` §7 for the full standards rule.
 
-**Behaviour — one driver per engine.** Only the skill knows what its buttons
-mean; the kit asserts everything else. Two rules keep drivers stable:
+## 11. Validation matrix
 
-- **Read the answer out of the telemetry, never recompute it.** A test that
-  recomputes can drift from the activity; one that reads `learning.present`
-  cannot, and a missing `expected` fails loudly instead of passing quietly.
-- **Drive by accessible name.** If a driver cannot find a control, a screen
-  reader cannot either. That is the bug, not the test.
+The shared structural suite is required but insufficient: `describeActivitySmoke`
+opens only the first matching lesson per engine (or defaults if none exists).
+It does not exercise every mode, finish rounds, or prove answer correctness.
 
-**Pure functions for anything written *about* the screen.** Hint builders take
-live state and return strings, exported and tested. A hint that says "you have
-counted 3" while four objects carry a number is worse than no hint, and no
-rendered test catches it.
+| Check | Required evidence | Reference (under `src/skills/` unless prefixed `src/`) |
+|---|---|---|
+| Structure | `describeSkillContract(skill)` and `describeActivitySmoke(skill)` | `counting/counting.test.ts` |
+| Interaction | Driver per engine, all shipped modes; wrong→right retry; refused moves if applicable; replay cleanup | `addition/addition.activities.test.tsx`, `kit/testing/renderActivity.tsx` |
+| Content | Independent known answers and constraint/boundary checks; impossible/exhausted generation cases | `addition/internal/data/additionNumbers.test.ts` |
+| Hints | Live question/progress values and appropriate reveal depth | `addition/addition.hints.test.ts` |
+| Practice | Mode coverage, no help/speech, normal completion; resume if supported | `addition/addition.practice.test.tsx` |
+| Configuration | Declared features/settings change observable behavior; shared controls may rely on shared coverage | `addition/addition.features.test.tsx` |
+| Course | Every lesson placed once, ordered; teaching/practice units separate; disabled skill hidden | `addition/addition.course.test.ts`, `src/curriculum/practice.test.ts` |
+| Print/art | Supported modes have self-contained questions, correct answer keys and meaningful figures; referenced assets exist | `addition/addition.figures.test.tsx`, `addition/addition.art.test.ts` |
 
----
+Behavior drivers may read telemetry to choose a correct UI answer. Separately
+check known answers/content against an independent expectation: trusting telemetry
+alone lets a wrong answer key pass. Drive by accessible name. Prefer observable
+invariants to tests that merely match source text or mirror implementation.
 
-## 12. Registering, and why a finished lesson can still be invisible
+### 11.1 Worksheets
 
-### What the skill is called, and what it looks like
+When a technique works on paper, register `worksheet` on its activity. Reuse the
+round's generator via `build`, provide `prompt`, and explicitly implement `printed`
+with self-contained text and answer. Preserve the unknown's position. Supply
+`method` for useful screen-independent steps and `figure` where a frame, line or
+other apparatus is essential. Use print-friendly lines and leave learner work blank.
 
-**Name it for what it teaches.** `Counting`, `Addition`, `Fractions` — not
-`<Topic> Quest`. That suffix is identical on every skill, so it carries no
-information while costing the places the name is squeezed: the Today card's 10px
-eyebrow, the compact row's meta line, the round bar's truncated title. It also
-stops scaling — this app goes to grade 12, where the same scheme produces
-"Quadratic Equations Quest" for a fifteen-year-old who reads it as an app for
-their little brother. Koda is the character; a skill does not need to be one too.
-The `tagline` does the inviting, and does it better.
+Return `null` for unsupported modes; omit the adapter if the activity cannot
+meaningfully print. Do not replace a visual task with different arithmetic just
+to produce a worksheet. Verify through the worksheet path, including mixed modes.
 
-| Field | What it is |
-|---|---|
-| `name` | code-owned. Re-seeded from your manifest on every boot, client and server |
-| `tagline` | the one line under the name. Blank falls back to `description` |
-| `thumbnail` | one string: an art id from the Art page, else an emoji, an icon name, or an image URL. Empty falls back to your first lesson's `iconName` on the category gradient |
-| `author` | the byline in the Skill Manager list and on the Learn page. Free text, so spell it identically across your skills |
+## 12. Registration and release
 
-A deployment can rename a skill and reword its tagline from the Skill Manager's
-**Listing** tab. A rename is stored as `title`, a separate field that wins over
-`name` on every learner surface — never as an edit to `name`, which the next
-deploy would overwrite. `skillTitle()` is the one place that decides, so a
-rename cannot reach Home but miss the Learn page.
+Register in `src/skills/registry.ts`; append course units in
+`src/curriculum/course.json` without shifting existing lessons. Supporting assets
+may need additional files. `npm run build` generates
+`server/app/skill_defaults.json`; never maintain this seed by hand.
 
-### The three edits
+Name the skill for its topic, supply a short tagline, thumbnail and consistent
+author. Start at `status: "draft"`. Only `draft` and `published` are supported;
+publication is managed in Skill Manager, separately from bundling code.
 
-Three edits outside your folder, and no more: `src/skills/registry.ts`,
-`src/curriculum/course.json` (appended last, so existing level numbers do not
-shift), and a thumbnail SVG if you ship one.
+When a lesson is missing, inspect publication, enabled state, viewer access/age,
+lesson ageBand and course placement. Use the actual preview and learner routes.
+See `PLUGINS.md` §8 for server ownership and publication behavior.
 
-**Two different numbers are both called "level".** `params.level` is the skill's
-own ordering, which the contract test holds to `1..n`. The `levelNumber` a child
-sees is the lesson's position in `course.json`. They agree only if the course
-lists your lessons in `params.level` order.
+`params.level` is local contiguous ordering; course levelNumber is global position;
+learner-facing lessonNumber and XP level are different. Let the kit display them.
 
-**Four gates sit between a lesson and the Learn page**, and when a new lesson
-does not appear it is almost always one of them rather than a bug:
+## 13. Frequent failures
 
-| Gate | Where |
-|---|---|
-| `status: "draft"` | developer-only until you publish |
-| Skill age range | `manifest.audience.ages` against the viewer |
-| **Lesson age band** | `ageBand[0] > viewer.age + 1` hides it. The default viewer is age 6 |
-| Not in the course | until its unit is appended, open it from a Skill Manager preview |
+Use the section for the failure instead of rereading every reference:
 
-A practice lesson has a fifth thing to get right: without
-`params.question.practice`, it is drawn in the teaching path rather than the
-Practice section, keeps its help, and files no speed data.
+- Wrong ranges or repeated questions: §2 and §7.
+- Missing learning records or duplicate awards: §3 and §10.
+- Help or speech remains in practice: §8 and §9.
+- A lesson is registered but invisible: §12.
+- Structural tests pass but another mode fails: §11.
 
-```js
-localStorage.setItem("koda_viewer_v1", JSON.stringify({ age: 9, isDeveloper: true, showAllSkills: true }));
-```
+## 14. Completion
 
----
+- Run `npm run lint`, `npm test`, `npm run build`; resolve failures relevant to the change.
+- Confirm every lesson opens from Learn and Skill Manager preview with appropriate access.
+- Check perfect and corrected rounds, XP, completion labels and Practice log entries.
+- Verify features/settings, keyboard controls, 360px light/dark layouts and an offline round.
+- Verify supported worksheets and that disabling the skill removes learner access.
+- Report checks actually performed, limitations and draft/published status. A missing
+  browser environment is an unperformed check, not a pass.
 
-## 13. The traps
-
-1. **A lesson with no `conceptKey`** files no telemetry at all — the SDK refuses
-   events it cannot attribute, so the log stays silently empty.
-2. **Reuse a `conceptKey` before inventing one.** Mastery aggregates on it
-   across skills, so a new name for an old idea splits a child's record in two.
-   `grep -r '"conceptKey"' src/skills/*/lessons.json` first.
-3. **A missing `expected`** files every wrong answer as `unknown` instead of
-   `off_by_one`.
-4. **XP anywhere in a skill.** Never. One rate lives in Settings, `scoreRound`
-   applies it, stars come from first-try accuracy.
-5. **`koda.config` is read at mount, not reactive.** A Skill Manager toggle
-   applies on the next round.
-6. **`koda.speech.say()` resolves when the line has *finished*.** Await it where
-   a child must hear it before the round reacts. A fixed delay is a guess, and
-   it was wrong on mobile — `useSpokenFinish` exists for this.
-7. **One `submit` per question.** Multi-box answers check once and submit once.
-   Submitting per box files four answers for one question and wrecks first-try
-   accuracy.
-8. **A cross-folder import ends modularity.** Reuse goes through `kit/`, or a
-   lesson referencing `"otherSkill/activity"`.
-9. **A flag nothing reads is a lie in the Skill Manager.** Every declared
-   feature must be checked with `config.isEnabled`, every setting with
-   `config.get`.
-10. **Standards: copy published codes exactly, or leave the array empty.** Empty
-    is a real answer — then `trajectoryLevel` must not be. A wrong code is worse
-    than none, because a teacher will believe it.
-11. **A practice lesson without `params.question.practice`** is a teaching
-    lesson wearing the word: full scaffolding, wrong section of the path, and
-    invisible to the Practice log.
-12. **A skill with no practice lesson** produces no speed data at all. Mastery
-    still works; "is she getting faster?" has no answer.
-13. **A `fetch` anywhere in an activity** breaks the one promise the whole app
-    keeps — that a child on a bad connection can still finish a round. §6.
-14. **A scene checked only on a laptop.** 360px is where it breaks, and a
-    desktop browser will never tell you. §5.
-
----
-
-## 14. Done
-
-- [ ] Imports nothing from another skill folder; touches the host only through `koda`.
-- [ ] Built on `kit/` — `useSkillRound` for the loop, `SkillRound` for the chrome.
-- [ ] Every lesson opens from the Learn page **and** a Skill Manager preview.
-- [ ] Ships practice: flagged, in its own unit, and reaching the Practice log.
-- [ ] Named for what it teaches, with a tagline, a thumbnail and an author.
-- [ ] A perfect round is three gold stars; one mistake is two gold and one hollow.
-- [ ] The finish screen reads "Lesson N of M", and "Level" there means XP level.
-- [ ] Correct in light **and** dark, and at 360px wide with no sideways scroll.
-- [ ] Plays a full round with the network off, including a second run of the same
-      lesson.
-- [ ] Every feature toggles something; every setting is read.
-- [ ] Every question files `expected`, and one answer per question.
-- [ ] Disabling the skill removes its lessons from the Learn page.
-- [ ] `tsc`, `npm test` and `npm run build` all clean.
+Documentation-only changes need link/example validation, not a full application build.
