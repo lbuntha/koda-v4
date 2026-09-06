@@ -15,6 +15,7 @@
     "voice:record": "node scripts/generate-voice.mjs",
     "voice:plan": "node scripts/generate-voice.mjs --dry-run",
     "voice:observation": "node scripts/generate-voice.mjs --skill observation --provider openai --voice marin",
+    "voice:bottle-sort": "node scripts/generate-voice.mjs --skill bottle-sort --provider openai --voice marin",
     "art:seed": "node scripts/generate-art-seed.mjs",
     "skills:seed": "node scripts/generate-skill-seed.mjs",
     "test": "vitest run",
