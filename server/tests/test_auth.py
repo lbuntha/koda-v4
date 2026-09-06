@@ -64,15 +64,66 @@ async def test_login_wrong_password_says_nothing_useful(client, signup_body):
     assert r.json()["error"]["message"] == "That email and password do not match."
 
 
-async def test_refresh_rotates_and_kills_the_old_token(client, signup_body):
+async def test_refresh_rotates_the_token(client, signup_body):
     first = (await client.post("/auth/signup", json=signup_body())).json()
 
     second = await client.post("/auth/refresh", json={"refreshToken": first["refreshToken"]})
     assert second.status_code == 200
     assert second.json()["refreshToken"] != first["refreshToken"]
 
+
+async def test_a_spent_token_still_works_until_its_replacement_is_used(client, signup_body):
+    """The lost-reply case: the rotation landed, the answer did not.
+
+    On a connection that drops or stalls this is ordinary, and refusing the
+    token the device is still holding costs a child their session for bad
+    reception. So the spent one is honoured once more — and dies the moment its
+    replacement is presented, which is proof the device received it.
+    """
+    first = (await client.post("/auth/signup", json=signup_body())).json()
+
+    lost = await client.post("/auth/refresh", json={"refreshToken": first["refreshToken"]})
+    assert lost.status_code == 200
+
+    # The device never saw that reply, so it asks again with what it has.
+    retry = await client.post("/auth/refresh", json={"refreshToken": first["refreshToken"]})
+    assert retry.status_code == 200
+    assert retry.json()["refreshToken"] not in (first["refreshToken"], lost.json()["refreshToken"])
+
+    # This time the reply arrives and is used. The old token is now spent for real.
+    used = await client.post("/auth/refresh", json={"refreshToken": retry.json()["refreshToken"]})
+    assert used.status_code == 200
+
     replay = await client.post("/auth/refresh", json={"refreshToken": first["refreshToken"]})
     assert replay.status_code == 401
+
+
+async def test_a_spent_token_dies_with_the_grace_window(client, signup_body, monkeypatch):
+    """The backstop, for a device that never comes back to collect."""
+    from app.settings import settings
+
+    first = (await client.post("/auth/signup", json=signup_body())).json()
+    assert (await client.post("/auth/refresh",
+                              json={"refreshToken": first["refreshToken"]})).status_code == 200
+
+    monkeypatch.setattr(settings(), "refresh_grace_hours", 0)
+    late = await client.post("/auth/refresh", json={"refreshToken": first["refreshToken"]})
+    assert late.status_code == 401
+
+
+async def test_signing_out_kills_the_spare_too(client, signup_body):
+    """A revoked session leaves nothing behind that can be presented."""
+    first = (await client.post("/auth/signup", json=signup_body())).json()
+    second = (await client.post("/auth/refresh",
+                                json={"refreshToken": first["refreshToken"]})).json()
+
+    logout = await client.post(
+        "/auth/logout", headers={"Authorization": f"Bearer {second['accessToken']}"}
+    )
+    assert logout.status_code == 204
+
+    for token in (first["refreshToken"], second["refreshToken"]):
+        assert (await client.post("/auth/refresh", json={"refreshToken": token})).status_code == 401
 
 
 async def test_me_needs_a_token(client, signup_body):

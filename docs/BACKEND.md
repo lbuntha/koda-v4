@@ -146,6 +146,15 @@ can be revoked ("sign out that tablet"). Both live in `localStorage` — the app
 must work after a week in a drawer with no network, which rules out
 session-cookie-only auth.
 
+A rotated-away refresh token is kept in `prevRefreshHash` and still works, for
+`REFRESH_GRACE_HOURS` (default 24) *or* until its replacement is presented —
+whichever comes first. That second half is the real rule: a device that uses
+the new token has proved it received it, and the old one dies at that moment.
+The window only exists for the device that never got an answer. Without it, a
+rotation whose reply is lost to a dropped link takes the session with it, and
+the child is signed out for bad reception — which is the opposite of what an
+app that otherwise runs offline should do.
+
 **Your own profile.** `GET /v1/auth/me` answers with the account behind the
 token — including `joinedAt`, which the profile page prints as "Joined August
 2026". `PATCH /v1/auth/me {displayName?, avatarSeed?}` edits it, and

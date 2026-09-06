@@ -23,6 +23,23 @@ class Settings(BaseSettings):
     access_ttl_minutes: int = 15
     refresh_ttl_days: int = 60
 
+    #: How long a *spent* refresh token keeps working after it was rotated.
+    #:
+    #: Rotation makes the presented token die as the replacement is written,
+    #: which is right until the reply never arrives. On an unstable connection
+    #: that is common: the request lands, the row rotates, the response is lost
+    #: to a dropped link or a client-side deadline — and the device is left
+    #: holding a token the server has already retired. Every later refresh is
+    #: then a 401, and the child is thrown back to the sign-in screen for
+    #: nothing worse than bad reception. Koda is used where the internet is
+    #: unreliable, so this is not an edge case.
+    #:
+    #: A spent token stays usable for this long *or until its replacement is
+    #: presented*, whichever comes first — proof the device received the new
+    #: one is what actually retires the old one, and the clock is only the
+    #: backstop for a device that never comes back.
+    refresh_grace_hours: int = 24
+
     #: Password registrations may be held until their mailbox is proved. Off
     #: by default so a deployment without outbound mail cannot create accounts
     #: whose activation link it has no way to deliver.

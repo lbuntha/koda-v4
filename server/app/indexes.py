@@ -95,6 +95,11 @@ INDEXES: dict[str, list[IndexModel]] = {
         # Finding the row an install already owns, so signing in again rotates
         # it rather than writing another "This device".
         IndexModel([("installId", ASCENDING), ("revokedAt", ASCENDING)], name="by_install"),
+        # The spare hash a rotation leaves behind, looked up when a device
+        # presents a token whose replacement never reached it. Not unique: it
+        # holds a *copy* of a hash the live index may also be holding, and two
+        # revoked rows can both carry nothing.
+        IndexModel([("prevRefreshHash", ASCENDING)], name="by_spent_refresh"),
     ],
     "events": [
         # The whole idempotency story: a replayed batch inserts nothing twice.

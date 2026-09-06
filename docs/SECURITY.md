@@ -82,7 +82,15 @@ added, and adding a public one means editing the list, in a diff, on purpose.
 **Tokens.** Access: JWT, 15 minutes, carrying `familyId`, `role`, `platformRole`
 and the effective permission set. Refresh: 32 random bytes, 60 days, rotated on
 use, stored only as SHA-256 — a leaked database cannot be replayed as a session,
-and "sign this tablet out" is one field cleared.
+and "sign this tablet out" is two fields cleared.
+
+Two, because the token a rotation replaced is kept beside the live one and stays
+valid until the replacement is used (backstop: `REFRESH_GRACE_HOURS`, default
+24). The exposure is one extra token per device, bounded by the next successful
+refresh; what it buys is that a lost reply on a bad connection no longer ends a
+session, which was signing children out of a device that works offline. Every
+revoke path — logout, password change, "sign out everything", the stale sweep —
+clears both.
 
 **In production the OpenAPI schema is off.** It was the one thing answering
 without a token; a map of every route and body shape is not something to hand

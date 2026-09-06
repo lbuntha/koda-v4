@@ -206,6 +206,52 @@ describe("a server having trouble", () => {
   });
 });
 
+describe("something that is not the data service answering", () => {
+  /**
+   * A captive portal, a school proxy, a CDN edge that has lost the origin.
+   *
+   * All of them answer 401 or 403 with a page of HTML, and none of them knows
+   * anything about this session — but the client used to read the status alone,
+   * so half-joining a hotel network signed a child out of a tablet that would
+   * have worked perfectly offline. The service always sends its own error
+   * envelope (`errors.py`), so its absence is the tell.
+   */
+  it("does not sign anybody out on a portal's 401", async () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(storedSession()));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 401,
+        // A login page, not an answer about this token.
+        json: async () => {
+          throw new SyntaxError("Unexpected token '<'");
+        },
+      }),
+    );
+
+    const SessionAPI = await loadSession();
+    await expect(SessionAPI.verify()).resolves.toBe(true);
+    expect(SessionAPI.current()).not.toBeNull();
+    expect(localStorage.getItem(STORAGE_KEY)).not.toBeNull();
+  });
+
+  it("keeps the session when a proxy refuses the renewal", async () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(storedSession({ expiresAt: Date.now() - 1000 })),
+    );
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: false, status: 403, json: async () => null }),
+    );
+
+    const SessionAPI = await loadSession();
+    await SessionAPI.verify();
+    expect(SessionAPI.current()).not.toBeNull();
+  });
+});
+
 describe("a session the server no longer honours", () => {
   it("is cleared when /auth/me rejects it", async () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(storedSession()));

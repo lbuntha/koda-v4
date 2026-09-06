@@ -260,12 +260,17 @@ export async function flush(): Promise<void> {
     if (problem.isOffline) {
       setStatus({ state: "offline", lastError: null });
       scheduleRetry();
-    } else if (problem.status === 403) {
+    } else if (problem.status === 403 && problem.fromService) {
       // This account may not write this record — a staff device, say, which has
       // no family to write into. Retrying cannot change that, so the queue is
       // *kept* and the loop stops until something changes: signing in as
       // somebody else, or recording something new. A 403 every thirty seconds
       // for the rest of the session helps nobody.
+      //
+      // From the service itself, though. A proxy or a captive portal answers
+      // 403 too, and stopping the queue for the rest of the session because a
+      // café put a login page in the way is the opposite of what to do about
+      // it: that one is weather, and weather is what the retry is for.
       refusedFor = accountKey(session);
       setStatus({ state: "refused", lastError: problem.message, reason: problem.code });
     } else {

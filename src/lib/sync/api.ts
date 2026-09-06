@@ -14,6 +14,16 @@ export class ApiError extends Error {
     readonly status: number,
     readonly code: string,
     message: string,
+    /**
+     * Whether this came from the data service itself.
+     *
+     * The service answers every failure with `{error:{code,message}}`
+     * (`errors.py`), so a 401 without one did not come from it: a captive
+     * portal, a proxy, a CDN edge that has lost the origin. Those are network
+     * weather, and the difference matters because only a real rejection may
+     * end a session. Hand-built errors below default to true — they are ours.
+     */
+    readonly fromService: boolean = true,
   ) {
     super(message);
     this.name = "ApiError";
@@ -29,9 +39,13 @@ export class ApiError extends Error {
    * trouble". Only this may sign a device out: a 500 or a restart mid-request
    * is the server's problem, and treating it as a rejection would throw a child
    * back to the sign-in screen because a deploy happened while they played.
+   *
+   * A 401 that did not come from the service is not a rejection either. A
+   * hotel portal, a school proxy or a phone that has half-joined a network all
+   * answer with one, and none of them knows anything about this session.
    */
   get isRejected(): boolean {
-    return this.status === 401 || this.status === 403;
+    return this.fromService && (this.status === 401 || this.status === 403);
   }
 
   /** A server-side fault. Retry later; the session stands. */
@@ -113,7 +127,7 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
     // this app — the caller decides whether it is worth saying anything. A
     // request that ran out of time arrives here too, and means the same thing:
     // this device cannot reach the server *now*, so queue it and back off.
-    throw new ApiError(0, "network", "No connection to the data service.");
+    throw new ApiError(0, "network", "No connection to the data service.", false);
   } finally {
     deadline.done();
   }
@@ -128,6 +142,7 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
       response.status,
       error?.code ?? "unknown",
       error?.message ?? "Something went wrong. Try again.",
+      Boolean(error?.code),
     );
   }
 

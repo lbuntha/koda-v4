@@ -3,6 +3,10 @@
 The token itself is never stored — only its SHA-256 — so a leaked database
 cannot be replayed as a session. Rotation replaces the hash in place, which is
 also how "sign out that tablet" works: clear the hash and the token is dead.
+
+A rotated-away hash is kept for a while in `prevRefreshHash`, because "the reply
+never arrived" and "this token is not yours" look identical from the server and
+are opposite things to do about. See `rotate` and `by_spent_hash`.
 """
 
 from datetime import datetime, timedelta
@@ -15,6 +19,18 @@ from pymongo import DESCENDING
 from app.models.common import now
 from app.repos import push_tokens
 from app.settings import settings
+
+
+def grace_before() -> datetime:
+    """The moment a spent refresh token stops being honoured.
+
+    See `settings.refresh_grace_hours`: a rotation whose reply never reached
+    the device must not cost that device its session, so the token it is still
+    holding keeps working for a while. The window is the backstop — the usual
+    end of a spent token is its replacement being presented, which proves the
+    device got it.
+    """
+    return now() - timedelta(hours=settings().refresh_grace_hours)
 
 
 def stale_before() -> datetime:
@@ -78,10 +94,45 @@ async def by_refresh_hash(db: AsyncIOMotorDatabase, refresh_hash: str) -> dict[s
     return await db.devices.find_one({"refreshHash": refresh_hash, "revokedAt": None})
 
 
-async def rotate(db: AsyncIOMotorDatabase, device_id: str, refresh_hash: str) -> None:
+async def by_spent_hash(db: AsyncIOMotorDatabase, refresh_hash: str) -> dict[str, Any] | None:
+    """The row whose *previous* token this is, while that token still counts.
+
+    The lost-reply case, and only that: the device is presenting the token it
+    was holding when a rotation it never heard about happened. The replacement
+    it never received is thrown away and it is given another — which is the
+    same thing a successful rotation would have done, one round trip later.
+    """
+    return await db.devices.find_one(
+        {
+            "prevRefreshHash": refresh_hash,
+            "prevRefreshAt": {"$gte": grace_before()},
+            "revokedAt": None,
+        }
+    )
+
+
+async def rotate(
+    db: AsyncIOMotorDatabase, device_id: str, refresh_hash: str, spent_hash: str | None = None
+) -> None:
+    """Write the new token, and remember the one that was just spent.
+
+    `spent_hash` is what the caller presented. Keeping it is what makes a lost
+    reply survivable: the device is still holding it, and until the *new* token
+    comes back to us there is no evidence the device has anything else. A path
+    that mints a session rather than rotating one — a sign-in, a switch — passes
+    nothing, which clears the slot: whatever that row held before is not a token
+    anybody is waiting on a reply for.
+    """
     await db.devices.update_one(
         {"_id": device_id},
-        {"$set": {"refreshHash": refresh_hash, "lastSeenAt": now()}},
+        {
+            "$set": {
+                "refreshHash": refresh_hash,
+                "lastSeenAt": now(),
+                "prevRefreshHash": spent_hash,
+                "prevRefreshAt": now() if spent_hash else None,
+            }
+        },
     )
 
 
@@ -105,7 +156,7 @@ async def revoke(db: AsyncIOMotorDatabase, device_id: str) -> None:
     # `$unset` rather than a null: the unique index is partial on strings, and
     # an absent field is the honest way to say "this session no longer exists".
     await db.devices.update_one(
-        {"_id": device_id}, {"$set": {"revokedAt": now()}, "$unset": {"refreshHash": ""}}
+        {"_id": device_id}, {"$set": {"revokedAt": now()}, "$unset": {"refreshHash": "", "prevRefreshHash": ""}}
     )
 
 
@@ -125,7 +176,7 @@ async def revoke_all_for_user(
     await _forget_push(db, mongo_filter)
     result = await db.devices.update_many(
         mongo_filter,
-        {"$set": {"revokedAt": now()}, "$unset": {"refreshHash": ""}},
+        {"$set": {"revokedAt": now()}, "$unset": {"refreshHash": "", "prevRefreshHash": ""}},
     )
     return result.modified_count
 
@@ -147,7 +198,7 @@ async def for_family(
     mongo_filter = {"familyId": family_id, "revokedAt": None}
     total = await db.devices.count_documents(mongo_filter)
     cursor = (
-        db.devices.find(mongo_filter, {"refreshHash": 0})
+        db.devices.find(mongo_filter, {"refreshHash": 0, "prevRefreshHash": 0})
         .sort("lastSeenAt", DESCENDING)
         .skip((page - 1) * page_size)
         .limit(page_size)
@@ -166,7 +217,7 @@ async def expire_stale(db: AsyncIOMotorDatabase, family_id: str) -> int:
     await _forget_push(db, {"familyId": family_id, "revokedAt": None, "lastSeenAt": {"$lt": stale_before()}})
     result = await db.devices.update_many(
         {"familyId": family_id, "revokedAt": None, "lastSeenAt": {"$lt": stale_before()}},
-        {"$set": {"revokedAt": now()}, "$unset": {"refreshHash": ""}},
+        {"$set": {"revokedAt": now()}, "$unset": {"refreshHash": "", "prevRefreshHash": ""}},
     )
     return result.modified_count
 
@@ -184,7 +235,7 @@ async def revoke_others_in_family(
     await _forget_push(db, {"familyId": family_id, "revokedAt": None, "_id": {"$ne": except_device_id}})
     result = await db.devices.update_many(
         {"familyId": family_id, "revokedAt": None, "_id": {"$ne": except_device_id}},
-        {"$set": {"revokedAt": now()}, "$unset": {"refreshHash": ""}},
+        {"$set": {"revokedAt": now()}, "$unset": {"refreshHash": "", "prevRefreshHash": ""}},
     )
     return result.modified_count
 
@@ -214,6 +265,6 @@ async def revoke_for_user_in_family(
     await _forget_push(db, {"userId": user_id, "familyId": family_id, "revokedAt": None})
     result = await db.devices.update_many(
         {"userId": user_id, "familyId": family_id, "revokedAt": None},
-        {"$set": {"revokedAt": now()}, "$unset": {"refreshHash": ""}},
+        {"$set": {"revokedAt": now()}, "$unset": {"refreshHash": "", "prevRefreshHash": ""}},
     )
     return result.modified_count

@@ -66,7 +66,7 @@ CanSwitchLearner = Annotated[Principal, Depends(require("learner:read"))]
 
 async def _issue(db, family_id: str | None, role: str, *, user_id=None, learner_id=None,
                  device_name="This device", device_id=None, platform_role="none",
-                 extra=None, denied=None, install_id=None) -> TokenPair:
+                 extra=None, denied=None, install_id=None, spent_hash=None) -> TokenPair:
     refresh, refresh_hash = tokens.new_refresh_token()
 
     # Signing in again on a machine that has signed in before rotates the row it
@@ -126,7 +126,9 @@ async def _issue(db, family_id: str | None, role: str, *, user_id=None, learner_
                 path="/",
             )
     else:
-        await devices.rotate(db, device_id, refresh_hash)
+        # `spent_hash` is set only by /auth/refresh — the one caller that is
+        # spending a token rather than minting a session. See devices.rotate.
+        await devices.rotate(db, device_id, refresh_hash, spent_hash)
 
     permissions = rbac.effective_permissions(role, extra, denied) if family_id else set()
     # Platform roles belong to staff accounts. A family member may have a
@@ -572,7 +574,17 @@ async def token(
 
 @router.post("/refresh")
 async def refresh(body: RefreshIn, db: Db) -> TokenPair:
-    device = await devices.by_refresh_hash(db, tokens.hash_refresh(body.refresh_token))
+    presented = tokens.hash_refresh(body.refresh_token)
+    device = await devices.by_refresh_hash(db, presented)
+    if not device:
+        # Not the live token — but possibly the one this device was holding when
+        # a rotation it never heard the answer to happened. On a link that drops
+        # or stalls that is the common case, not an attack: the request landed,
+        # the row rotated, and the reply died on the way back. Refusing it costs
+        # a child their session for bad reception, so a recently spent token is
+        # honoured and rotated again. It stops working the moment its
+        # replacement is presented, which is proof the device received one.
+        device = await devices.by_spent_hash(db, presented)
     if not device:
         raise Unauthorized("Please sign in again.", "refresh_invalid")
 
@@ -604,10 +616,12 @@ async def refresh(body: RefreshIn, db: Db) -> TokenPair:
         else:
             role = platform_role
 
-    # Rotation: the presented token dies as the new one is written.
+    # Rotation: the presented token becomes the spare as the new one is written,
+    # and whatever was in the spare slot before it dies here.
     return await _issue(db, device.get("familyId"), role, user_id=device.get("userId"),
                         learner_id=device.get("learnerId"), device_id=device["_id"],
-                        platform_role=platform_role, extra=extra, denied=denied)
+                        platform_role=platform_role, extra=extra, denied=denied,
+                        spent_hash=presented)
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT, dependencies=[AUTHENTICATED])
