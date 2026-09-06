@@ -186,8 +186,18 @@ export interface KodaSDK {
   ui: {
     readonly theme: "light" | "dark";
     exit(): void;
-    /** The actual next lesson in this skill, or null at the end of its path. */
-    readonly nextLesson: { lessonNumber: number; open(): void } | null;
+    /**
+     * What to offer when this round ends, or null when there is nothing after
+     * it at all.
+     *
+     * `practice: true` marks the one case where this is not the next step: the
+     * teaching path is finished and what is on offer is an optional practice
+     * round. The chrome says so rather than calling it "Lesson 16", because a
+     * child who has just finished a course should be told they finished it.
+     */
+    readonly nextLesson: { lessonNumber: number; open(): void; practice?: boolean } | null;
+    /** Whether the lesson just played was the last of its path. */
+    readonly pathComplete: boolean;
   };
 }
 

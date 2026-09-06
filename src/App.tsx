@@ -64,11 +64,12 @@ import { MainLayout } from "./components/layout/MainLayout";
 import { UIPageLoader } from "./components/ui";
 import { SkillHost } from "./skills/host/SkillHost";
 import {
+  firstPracticeLesson,
   getCourseLessons,
   getLessonByLevel,
-  getSkillLessons,
   isPracticeLesson,
   nextSkillLesson,
+  pathPosition,
   skillLessonNumber,
 } from "./curriculum";
 import { useAudienceViewer } from "./skills/viewer";
@@ -715,8 +716,32 @@ export default function App() {
   // every other skill's lessons into the counting game the moment a second one
   // registered — the course already knows the answer, so ask it.
   const activeLesson = getLessonByLevel(activeLevelNumber, viewer);
-  const activeSkillLessons = activeLesson ? getSkillLessons(activeLesson.skillId, viewer) : [];
+  /*
+   * Where the round sits, and what follows it — both read off the lesson's own
+   * path rather than off the skill as a whole.
+   *
+   * The teaching and the practice halves are two different offers (see
+   * `resumeLesson`), so a course of fifteen lessons with five practice rounds
+   * is not "lesson 15 of 20": that number told a child who had just finished
+   * everything that five lessons were still ahead of them, and then handed
+   * them a screen with no next step. Fifteen of fifteen is the truth, and it
+   * is the sentence that lets the end read as an ending.
+   */
+  const activePosition = activeLesson ? pathPosition(activeLesson, viewer) : undefined;
   const followingLesson = activeLesson ? nextSkillLesson(activeLesson, viewer) : undefined;
+  /*
+   * The last teaching lesson leads to practice — offered, never assumed.
+   *
+   * Only when the path has actually run out, and marked `practice` so the round
+   * can say what it is: "Try a practice round", under a headline that says the
+   * course is finished. Without this the final lesson's only exit was a button
+   * back to a list the child had just completed, which is the "no end" they
+   * reported.
+   */
+  const practiceInvitation =
+    activeLesson && !followingLesson && !isPracticeLesson(activeLesson)
+      ? firstPracticeLesson(activeLesson.skillId, completedGameLevels, viewer)
+      : undefined;
 
   const lessonHost = (
     <SkillHost
@@ -735,8 +760,8 @@ export default function App() {
               ageBand: activeLesson.ageBand,
               title: activeLesson.title,
               concept: activeLesson.concept,
-              lessonNumber: skillLessonNumber(activeLesson, viewer),
-              totalLessons: activeSkillLessons.length,
+              lessonNumber: activePosition?.number ?? skillLessonNumber(activeLesson, viewer),
+              totalLessons: activePosition?.total,
               // Which kind of round this is, decided once by the course: the
               // chrome reads it to stop repeating the word, and every event
               // carries it so speed can be read off practice alone.
@@ -756,10 +781,17 @@ export default function App() {
         followingLesson
           ? {
               levelNumber: followingLesson.levelNumber,
-              lessonNumber: skillLessonNumber(followingLesson, viewer),
+              lessonNumber: pathPosition(followingLesson, viewer).number,
             }
-          : undefined
+          : practiceInvitation
+            ? {
+                levelNumber: practiceInvitation.levelNumber,
+                lessonNumber: pathPosition(practiceInvitation, viewer).number,
+                practice: true,
+              }
+            : undefined
       }
+      pathComplete={!followingLesson}
       onStartLesson={(levelNumber) => void startLesson(levelNumber)}
       onAwardXp={(earnedXp) =>
         setUserProgress((prev) => ({ ...prev, xp: prev.xp + earnedXp }))

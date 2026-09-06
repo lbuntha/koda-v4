@@ -328,9 +328,13 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
           perfect={round.score.perfect}
           standing={standing}
           nextLevelNumber={nextLesson?.lessonNumber}
+          nextIsPractice={nextLesson?.practice ?? false}
+          pathComplete={koda.ui.pathComplete}
+          practiceRound={lesson?.practice ?? false}
           recommendation={recommendation}
           onNextLevel={onNextLevel ?? nextLesson?.open ?? onExit}
           onPracticeAgain={onPracticeAgain ?? round.restart}
+          onBackToLessons={onExit}
         />
       )}
     </div>

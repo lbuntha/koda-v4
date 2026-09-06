@@ -26,6 +26,15 @@ const round = (over: Partial<PraiseFacts> = {}): PraiseFacts => ({
 });
 
 describe("the biggest news wins the headline", () => {
+  it("finishing the path beats a new level, which happens far more often", () => {
+    const praise = roundPraise(
+      round({ finale: true, xpWon: 40, xpAfter: 420, perfect: true, streakDays: 7 }),
+    );
+
+    expect(praise.kind).toBe("finale");
+    expect(praise.headline).toBe("You finished every lesson!");
+  });
+
   it("a new level beats everything, including a perfect round", async () => {
     const praise = roundPraise(
       round({

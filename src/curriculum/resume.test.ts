@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  firstPracticeLesson,
   getCourseLessons,
   getSkillLessons,
   isPracticeLesson,
   nextSkillLesson,
+  pathPosition,
   resumeLesson,
   skillLessonNumber,
 } from "./index";
@@ -194,5 +196,53 @@ describe("sequential lessons within a skill", () => {
     );
 
     expect(nextSkillLesson(countingTeaching[countingTeaching.length - 1], viewer)).toBeUndefined();
+  });
+});
+
+/**
+ * Where a lesson sits, and what a finished path is offered.
+ *
+ * A skill of fifteen lessons and five practice rounds is not a course of
+ * twenty. Counting the whole skill told a child who had just finished
+ * everything they were on "lesson 15 of 20" — five short of an end they had
+ * already reached — and then handed them a screen with no next step.
+ */
+describe("the end of a path", () => {
+  const teaching = () =>
+    getSkillLessons("counting", viewer).filter((lesson) => !isPracticeLesson(lesson));
+  const practice = () => getSkillLessons("counting", viewer).filter(isPracticeLesson);
+
+  it("counts a lesson within its own path, not the whole skill", () => {
+    const taught = teaching();
+    const last = taught[taught.length - 1];
+
+    expect(pathPosition(last, viewer)).toEqual({ number: taught.length, total: taught.length });
+    // The skill-wide count is the number that read as an unfinished course.
+    expect(skillLessonNumber(last, viewer)).toBeGreaterThan(taught.length - 1);
+    expect(pathPosition(taught[0], viewer).number).toBe(1);
+  });
+
+  it("counts practice against the practice set", () => {
+    const rounds = practice();
+
+    expect(pathPosition(rounds[0], viewer)).toEqual({ number: 1, total: rounds.length });
+  });
+
+  it("offers the first practice round nobody has played", () => {
+    const rounds = practice();
+    const completed = { [rounds[0].levelNumber]: 3 };
+
+    expect(firstPracticeLesson("counting", completed, viewer)?.ref).toBe(rounds[1].ref);
+  });
+
+  it("falls back to the first round once every one is played", () => {
+    const rounds = practice();
+    const completed = Object.fromEntries(rounds.map((lesson) => [lesson.levelNumber, 3]));
+
+    expect(firstPracticeLesson("counting", completed, viewer)?.ref).toBe(rounds[0].ref);
+  });
+
+  it("has nothing to offer for a skill that ships no practice", () => {
+    expect(firstPracticeLesson("nothing-here", {}, viewer)).toBeUndefined();
   });
 });

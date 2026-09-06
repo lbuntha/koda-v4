@@ -20,8 +20,11 @@ export interface SkillHostProps {
   onAwardXp(amount: number): void;
   onComplete(result: SkillResult): void;
   onExit(): void;
-  /** Course-owned route to the next lesson in this skill. */
-  nextLesson?: { levelNumber: number; lessonNumber: number };
+  /** Course-owned route to the next lesson in this skill. `practice` marks the
+   *  optional practice round offered once the teaching path is finished. */
+  nextLesson?: { levelNumber: number; lessonNumber: number; practice?: boolean };
+  /** Whether the lesson being played is the last of its own path. */
+  pathComplete?: boolean;
   onStartLesson?(levelNumber: number): void;
   /**
    * Which lesson is being run, for the learning log.
@@ -72,6 +75,7 @@ export const SkillHost: React.FC<SkillHostProps> = ({
   onComplete,
   onExit,
   nextLesson,
+  pathComplete = false,
   onStartLesson,
   lesson,
   entry = "path",
@@ -103,9 +107,11 @@ export const SkillHost: React.FC<SkillHostProps> = ({
       nextLesson: nextLesson
         ? {
             lessonNumber: nextLesson.lessonNumber,
+            practice: nextLesson.practice,
             open: () => hostRef.current.onStartLesson?.(nextLesson.levelNumber),
           }
         : null,
+      pathComplete,
       // The course, not the skill, decides what a level means. Telemetry is off
       // for previews, so this resolver is not consulted there either.
       // Built fresh per call so a skill enabled or a lesson unlocked between
@@ -165,6 +171,8 @@ export const SkillHost: React.FC<SkillHostProps> = ({
     lesson?.practice,
     nextLesson?.levelNumber,
     nextLesson?.lessonNumber,
+    nextLesson?.practice,
+    pathComplete,
   ]);
 
   if (!activity) {

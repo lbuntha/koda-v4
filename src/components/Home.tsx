@@ -12,7 +12,7 @@ import { useSkillCatalog } from "../lib/useSkillCatalog";
 import { themeSystem } from "../lib/themeSystem";
 import { useStreak } from "../lib/streak";
 import { BADGE_METRICS, nextBadge, useBadges } from "../lib/badges";
-import { levelFromXp, levelProgress, xpToNextLevel } from "../lib/level";
+import { levelFromXp, levelProgress, XP_PER_LEVEL, xpToNextLevel } from "../lib/level";
 import { BadgeIcon } from "./account/BadgeVisuals";
 import type { UserProgress } from "../types";
 import { playSound } from "../utils/audio";
@@ -195,7 +195,7 @@ const HomeRail: React.FC<{
           <div className="pl-[3.75rem] -mt-1">
             <div className="flex items-baseline justify-between gap-2">
               <span className="text-xs font-bold text-muted">
-                Level {levelFromXp(userProgress.xp)}
+                XP Level {levelFromXp(userProgress.xp)}
               </span>
               <span className="font-mono text-[0.6875rem] tabular-nums text-muted">
                 {xpToNextLevel(userProgress.xp)} XP to level {levelFromXp(userProgress.xp) + 1}
@@ -207,6 +207,13 @@ const HomeRail: React.FC<{
                 style={{ width: `${Math.round(levelProgress(userProgress.xp) * 100)}%` }}
               />
             </div>
+            {/* The rule itself, said once. "XP Level 4" and "Lesson 4" are two
+                different numbers on two different screens, and this is the
+                sentence that keeps them apart: levels come from points, and
+                points come from rounds — nothing else moves either. */}
+            <p className="mt-1 text-[0.6875rem] text-muted">
+              {XP_PER_LEVEL} XP earns a level. Every finished round pays XP.
+            </p>
           </div>
           <RailStat
             icon={

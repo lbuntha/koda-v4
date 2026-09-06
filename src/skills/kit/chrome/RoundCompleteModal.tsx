@@ -13,8 +13,23 @@ interface PracticeRoundCompleteModalProps {
   xpWon: number;
   /** Undefined when the current skill path has no following lesson. */
   nextLevelNumber?: number;
+  /**
+   * What is on offer is an optional practice round, not the next lesson.
+   *
+   * True only at the end of the teaching path, where the honest thing to say is
+   * "you have finished — here is practice if you want it", and calling that
+   * "Next lesson" would take the ending away.
+   */
+  nextIsPractice?: boolean;
+  /** The lesson just played was the last of its path. Changes the headline. */
+  pathComplete?: boolean;
+  /** This round was practice, so the position line counts practice rounds. */
+  practiceRound?: boolean;
   onNextLevel: () => void;
   onPracticeAgain: () => void;
+  /** Leave the round for the lesson list. Drawn when neither button already
+   *  does, so a finished path always has a way out. */
+  onBackToLessons?: () => void;
   /**
    * What the log says to do next, if anything.
    *
@@ -42,6 +57,13 @@ interface PracticeRoundCompleteModalProps {
   perfect?: boolean;
 }
 
+/** The one filled button. Shared so the three things it can say cannot drift. */
+const PRIMARY =
+  "w-full py-3.5 px-6 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-mono font-black text-sm tracking-wide shadow-lg hover:shadow-orange-500/20 active:scale-[0.98] transition-all transform flex items-center justify-center gap-2 cursor-pointer";
+
+const SECONDARY =
+  "w-full py-3 rounded-full bg-slate-800/80 hover:bg-slate-750 text-slate-300 hover:text-white font-mono font-bold text-xs transition-all active:scale-[0.97] flex items-center justify-center gap-1.5 border border-slate-700/50 cursor-pointer";
+
 export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProps> = ({
   levelNumber,
   levelTitle,
@@ -49,8 +71,12 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
   stars,
   xpWon,
   nextLevelNumber,
+  nextIsPractice = false,
+  pathComplete = false,
+  practiceRound = false,
   onNextLevel,
   onPracticeAgain,
+  onBackToLessons,
   recommendation,
   standing,
   perfect = false,
@@ -72,8 +98,34 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
     cadence: standing?.cadence,
     dailySolved: standing?.dailySolved ?? 0,
     dailyGoal: standing?.dailyGoal ?? 0,
+    finale: pathComplete,
+    practiceRound,
   };
   const praise = roundPraise(facts);
+
+  /*
+   * What "forward" is, and whether the log would rather the child stayed.
+   *
+   * `primary` says the repeat button wins the filled slot: the measurement
+   * changed what happens, which is the point of measuring. Everything else is
+   * the wording of the move on, in both the sizes it is drawn at.
+   */
+  const advance = {
+    primary: recommendation?.kind === "practise" || recommendation?.kind === "review",
+    label: !nextLevelNumber
+      ? "BACK TO LESSONS"
+      : nextIsPractice
+        ? "TRY A PRACTICE ROUND"
+        : `NEXT LESSON (${nextLevelNumber})`,
+    short: !nextLevelNumber
+      ? "Back to lessons"
+      : nextIsPractice
+        ? "Try a practice round"
+        : `Skip to Lesson ${nextLevelNumber}`,
+  };
+  /* Both buttons keep the child in the round only when practice is the offer:
+     the repeat replays this lesson and the advance opens another one. */
+  const showExit = Boolean(onBackToLessons) && Boolean(nextLevelNumber) && nextIsPractice;
   const bar = standing ? levelBar(standing.xpAfter) : null;
   const streak = standing?.streakDays ?? 0;
   const unit = standing?.cadence === "weekly" ? "week" : "day";
@@ -136,7 +188,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
               "Lesson", not "Level" — the level bar below is the learner's XP
               level, and one word cannot mean both on one card. */}
           <p className="text-[11px] text-slate-500 font-medium pt-1">
-            Lesson {levelNumber}
+            {practiceRound ? "Practice" : "Lesson"} {levelNumber}
             {totalLessons ? ` of ${totalLessons}` : ""} · {levelTitle}
           </p>
         </div>
@@ -241,7 +293,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
           {bar && (
             <div className="space-y-1.5">
               <div className="flex items-baseline justify-between font-mono text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                <span>Level {bar.level}</span>
+                <span>XP Level {bar.level}</span>
                 <span>{bar.toNext} XP to Level {bar.level + 1}</span>
               </div>
               <div
@@ -257,6 +309,16 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
                   style={{ width: `${Math.round((bar.into / bar.per) * 100)}%` }}
                 />
               </div>
+              {/* The rule, in one line, where the number it explains is.
+
+                  Two things on this card are called a number — the lesson at
+                  the top and the level here — and only one of them is earned by
+                  playing anything at all. Saying how XP turns into levels is
+                  what stops "Level 4" reading as "lesson 4", and it is the only
+                  place a child (or the grown-up beside them) is ever told. */}
+              <p className="text-center font-mono text-[9px] uppercase tracking-wider text-slate-600">
+                {bar.per} XP earns a level
+              </p>
             </div>
           )}
         </div>
@@ -271,44 +333,66 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
           </div>
         )}
 
-        {/* 6. Primary action — practise again when the concept is not secure */}
+        {/*
+          6. Where to go from here.
+
+          Three shapes, and the wording of each is decided above rather than
+          inline, because the same button means three different things: the next
+          lesson mid-path, an *offer* of practice once the path is finished, and
+          the way out when there is nothing after it at all. Calling the third
+          "Next lesson" is what left a child on the last lesson tapping a button
+          that took them nowhere.
+        */}
         <div className="space-y-3 pt-2">
-          {recommendation?.kind === "practise" || recommendation?.kind === "review" ? (
+          {advance.primary ? (
             <button
               onClick={onPracticeAgain}
-              className="w-full py-3.5 px-6 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-mono font-black text-sm tracking-wide shadow-lg hover:shadow-orange-500/20 active:scale-[0.98] transition-all transform flex items-center justify-center gap-2 cursor-pointer"
+              className={PRIMARY}
             >
               <RotateCcw className="w-4 h-4 stroke-[3]" />
               <span>ONE MORE ROUND</span>
             </button>
           ) : (
-            <button
-              onClick={onNextLevel}
-              className="w-full py-3.5 px-6 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-mono font-black text-sm tracking-wide shadow-lg hover:shadow-orange-500/20 active:scale-[0.98] transition-all transform flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <span>{nextLevelNumber ? `NEXT LESSON (${nextLevelNumber})` : "BACK TO LESSONS"}</span>
+            <button onClick={onNextLevel} className={PRIMARY}>
+              <span>{advance.label}</span>
               <ArrowRight className="w-4 h-4 stroke-[3]" />
             </button>
           )}
 
           {/* Secondary option: whichever action is not primary */}
           <button
-            onClick={
-              recommendation?.kind === "practise" || recommendation?.kind === "review"
-                ? onNextLevel
-                : onPracticeAgain
-            }
-            className="w-full py-3 rounded-full bg-slate-800/80 hover:bg-slate-750 text-slate-300 hover:text-white font-mono font-bold text-xs transition-all active:scale-[0.97] flex items-center justify-center gap-1.5 border border-slate-700/50 cursor-pointer"
+            onClick={advance.primary ? onNextLevel : onPracticeAgain}
+            className={SECONDARY}
           >
             <RotateCcw className="w-3.5 h-3.5" />
+            {/* "Practice Again" would be the word twice with two meanings on the
+                screen that offers a practice round: this button replays the
+                lesson just finished, and the one above opens a different kind
+                of round. */}
             <span>
-              {recommendation?.kind === "practise" || recommendation?.kind === "review"
-                ? nextLevelNumber
-                  ? `Skip to Lesson ${nextLevelNumber}`
-                  : "Back to lessons"
-                : "Practice Again"}
+              {advance.primary
+                ? advance.short
+                : nextIsPractice
+                  ? "Play this lesson again"
+                  : "Practice Again"}
             </span>
           </button>
+
+          {/*
+            A third, quiet way out — only when neither button above is one.
+
+            At the end of a path with practice on offer, both of the buttons
+            above keep the child in the round; the modal covers the screen, so
+            the round's own exit is unreachable behind it. This is the door.
+          */}
+          {showExit && (
+            <button
+              onClick={onBackToLessons}
+              className="w-full py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500 hover:text-slate-300 transition-colors cursor-pointer"
+            >
+              Back to lessons
+            </button>
+          )}
         </div>
       </div>
     </div>

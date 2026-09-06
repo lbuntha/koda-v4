@@ -44,8 +44,12 @@ export interface KodaHost {
   getSnapshot(): LearnerSnapshot;
   theme: "light" | "dark";
   exit(): void;
-  /** Sequential next lesson in this skill. Null means this path is complete. */
-  nextLesson?: { lessonNumber: number; open(): void } | null;
+  /** Sequential next lesson in this skill. Null means this path is complete.
+   *  `practice` marks an optional practice round offered after the last
+   *  teaching lesson — an invitation, not the next step. */
+  nextLesson?: { lessonNumber: number; open(): void; practice?: boolean } | null;
+  /** Whether the lesson being played is the last of its path. */
+  pathComplete?: boolean;
   /**
    * Which lesson a course level is, for skills that navigate internally.
    *
@@ -369,6 +373,7 @@ export function createKodaSDK(
       theme: host.theme,
       exit: host.exit,
       nextLesson: host.nextLesson ?? null,
+      pathComplete: host.pathComplete ?? false,
     },
   };
 }

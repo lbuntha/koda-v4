@@ -279,3 +279,56 @@ export function resumeLesson(
   const lastPlayed = taught.reduce((at, lesson, i) => (played(lesson) ? i : at), -1);
   return taught.slice(lastPlayed + 1).find(open) ?? taught.find(open);
 }
+
+/**
+ * The lessons that share a path with this one — teaching, or practice.
+ *
+ * The same split `nextSkillLesson` walks, named once so that "which lesson is
+ * this, out of how many" and "what comes after it" cannot answer from two
+ * different lists. A skill of fifteen lessons and five practice rounds is not a
+ * course of twenty: the child working through the teaching is fifteen from the
+ * end, and telling them otherwise is what made the last lesson read as "15 of
+ * 20" — an ending that looks like a stall.
+ */
+export function skillPathLessons(lesson: ResolvedLesson, viewer?: Viewer): ResolvedLesson[] {
+  const practice = isPracticeLesson(lesson);
+  return getSkillLessons(lesson.skillId, viewer).filter(
+    (candidate) => isPracticeLesson(candidate) === practice,
+  );
+}
+
+/** Where this lesson sits in its own path: "Lesson 15 of 15". */
+export function pathPosition(
+  lesson: ResolvedLesson,
+  viewer?: Viewer,
+): { number: number; total: number } {
+  const path = skillPathLessons(lesson, viewer);
+  const at = path.findIndex((candidate) => candidate.ref === lesson.ref);
+  return { number: at < 0 ? 1 : at + 1, total: path.length || 1 };
+}
+
+/**
+ * The practice round to offer a learner who has just finished the teaching.
+ *
+ * The first they have not played, or — once they have played them all — the
+ * first of the set, because by then any of them is as good as any other.
+ * Undefined when the skill ships no practice at all.
+ *
+ * This is an *invitation*, never the next step: `resumeLesson` and the path
+ * still refuse to walk teaching into practice. What it fixes is the dead end at
+ * the other end of that rule — a child who finishes the last lesson was shown a
+ * screen with nowhere to go, while five practice rounds sat unopened below.
+ */
+export function firstPracticeLesson(
+  skillId: string,
+  completed: Record<number, number>,
+  viewer?: Viewer,
+): ResolvedLesson | undefined {
+  // Locked rounds are not offered. A learner reaching this point has finished
+  // the teaching, so in practice nothing is — but an offer that opens a padlock
+  // is worse than no offer, and the check costs a line.
+  const practice = getSkillLessons(skillId, viewer)
+    .filter(isPracticeLesson)
+    .filter((lesson) => isUnlocked(lesson, completed, viewer));
+  return practice.find((lesson) => (completed[lesson.levelNumber] ?? 0) === 0) ?? practice[0];
+}

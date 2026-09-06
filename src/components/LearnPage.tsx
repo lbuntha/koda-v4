@@ -180,7 +180,20 @@ export const LearnPage: React.FC<LearnPageProps> = ({
      which is practice, so a learner who finished the path was handed practice
      by the one control on the page that is not asking them to choose. */
   const taught = teaching.flatMap((unit) => unit.lessons);
-  const resume = next ?? taught[taught.length - 1] ?? lessons[lessons.length - 1];
+  /*
+   * A finished path offers practice before it offers a replay.
+   *
+   * Once every lesson is played `next` is undefined, and the one button on this
+   * page reopened the lesson the child had just come out of — which is how the
+   * end of a skill came to feel like being stuck on its last lesson. Practice
+   * they have not touched is a real next thing to do; only when that is gone
+   * too does the button become revision, and say so.
+   */
+  const openPractice = practice.find(
+    (lesson) => starsFor(lesson) === 0 && isUnlocked(lesson, completedLevels, viewer),
+  );
+  const resume =
+    next ?? openPractice ?? taught[taught.length - 1] ?? lessons[lessons.length - 1];
   const category = skill.manifest.audience.category;
   const art = skillArtFor(category);
   const registered = viewer.showAllSkills || registeredIds.has(skillId);
@@ -347,7 +360,18 @@ export const LearnPage: React.FC<LearnPageProps> = ({
           ) : undefined
         }
         actionLabel={
-          !registered ? "Register skill" : finished ? "Review" : done ? "Continue" : "Start learning"
+          !registered
+            ? "Register skill"
+            : finished
+              ? "Review a lesson"
+              : /* Named for what it opens, not for the fiction that the path
+                   carries on: "Continue" on a finished course pointed at a
+                   lesson the child had already finished. */
+                !next && openPractice
+                ? "Start practice"
+                : done
+                  ? "Continue"
+                  : "Start learning"
         }
         onOpen={() => start(resume.levelNumber)}
         onRegister={() => void add()}

@@ -16,6 +16,7 @@ import { levelFromXp, xpIntoLevel, XP_PER_LEVEL } from "../../../lib/level";
  * The order below is the whole rule, and it is ordered by how *rare* the fact
  * is, not by how good it is:
  *
+ *   0. the last lesson    — the end of a path, which happens once
  *   1. a new level        — a session or two of work, across every skill
  *   2. a streak milestone — days in a row, which nothing but showing up earns
  *   3. a perfect round    — every question right first time, with no help
@@ -31,7 +32,7 @@ import { levelFromXp, xpIntoLevel, XP_PER_LEVEL } from "../../../lib/level";
 /** Streak lengths worth stopping for. Between them the flame is just shown. */
 export const STREAK_MILESTONES = [3, 5, 7, 10, 14, 21, 30, 50, 75, 100] as const;
 
-export type PraiseKind = "levelUp" | "streak" | "perfect" | "goal" | "stars";
+export type PraiseKind = "finale" | "levelUp" | "streak" | "perfect" | "goal" | "stars";
 
 export interface PraiseFacts {
   stars: 1 | 2 | 3;
@@ -48,6 +49,18 @@ export interface PraiseFacts {
   /** Rounds finished today, and how many the learner was aiming for. */
   dailySolved: number;
   dailyGoal: number;
+  /**
+   * The last lesson of its path has just been finished.
+   *
+   * Above every other fact, including a new level, because it is the rarest
+   * thing on the list: a child finishes a course once. It is also the one the
+   * screen previously never said at all — the last lesson ended with the same
+   * "Round complete" as the first, and a button back to a list with nothing
+   * left on it.
+   */
+  finale?: boolean;
+  /** The round just played was practice, so the finale says which set ended. */
+  practiceRound?: boolean;
 }
 
 export interface RoundPraise {
@@ -82,6 +95,28 @@ export const levelledUp = (xpAfter: number, xpWon: number): boolean =>
 
 export function roundPraise(facts: PraiseFacts): RoundPraise {
   const { stars, perfect, xpWon, xpAfter, streakDays, cadence, dailySolved, dailyGoal } = facts;
+
+  if (facts.finale) {
+    // Which set ended, because they are two different achievements: the lessons
+    // are the course, and the practice is the whole course again with the
+    // hints, the voice and the explanations taken away.
+    return facts.practiceRound
+      ? {
+          kind: "finale",
+          tag: "Practice complete",
+          headline: "Every practice round done!",
+          note: "All of it again, with no help at all. That is what knowing something looks like.",
+        }
+      : {
+          kind: "finale",
+          tag: "Skill complete",
+          headline: "You finished every lesson!",
+          // Says what was finished, not how well: a child who took three goes at
+          // half of them has still reached the end, and this is the sentence
+          // about reaching the end. The stars already report the last round.
+          note: "That is the whole path, first lesson to last. Nothing here is beyond you.",
+        };
+  }
 
   if (levelledUp(xpAfter, xpWon)) {
     return {
