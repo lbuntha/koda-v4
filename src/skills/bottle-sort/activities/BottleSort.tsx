@@ -124,19 +124,45 @@ export function buildQuestion(params: BottleSortParams, index: number): BottleSo
   };
 }
 
-export function bottleHints(rack: Rack): string[] {
-  const source = legalPours(rack).find((m) => topRun(rack[m.from]).n < rack[m.from].seg.length);
-  // A rack with a rule on it gets that rule first. Telling a child to look for
-  // a bottle to empty is no help when the reason they are stuck is a cork.
+/**
+ * The hint ladder, per the kit's contract in `kit/round/hints.ts`.
+ *
+ * It used to return the same two lines whatever the lesson and whatever the
+ * rack, which made the button useless from about level 11 on: a child stuck on
+ * a cork was told to look for a bottle to empty. Now each rung does its own
+ * job — the lesson's words, then this rack, then the actual move — and the
+ * middle rung leads with whichever rule is the reason they are stuck.
+ */
+export function bottleHints(
+  rack: Rack,
+  state: { kidTip?: string; budget?: number; poured?: number } = {},
+): string[] {
   const corked = rack.findIndex((b, i) => b.lockedBy !== undefined && isCorked(rack, i));
   const oneWay = rack.findIndex((b) => b.oneWay);
-  const rule = corked >= 0 ? "Finish the bottle the cork is waiting on."
-    : oneWay >= 0 ? "Whatever you pour into that bottle stays there."
-    : undefined;
+  const empty = rack.findIndex((b) => b.seg.length === 0);
+  const left = state.budget === undefined ? undefined : state.budget - (state.poured ?? 0);
+
+  // Rung 2: what to do *here*, read off this rack. The rule that is actually
+  // biting comes first, and it names the bottles rather than describing them.
+  const here = corked >= 0
+    ? `Bottle ${corked + 1} is corked. Finish bottle ${(rack[corked].lockedBy ?? 0) + 1} to open it.`
+    : oneWay >= 0
+      ? `Bottle ${oneWay + 1} only receives. Pour into it once you are sure of the colour.`
+      : left !== undefined && left <= 2
+        ? `${left === 1 ? "One pour" : `${left} pours`} left. Work the rest out before you move.`
+        : empty < 0
+          ? "Nothing is empty. Find the bottle you can clear first."
+          : `Bottle ${empty + 1} is free. Use it for the colour that is in the way.`;
+
+  // Rung 3: the worked step. Sorting is done rather than chosen, so this names
+  // a real pour instead of stopping short of one.
+  const move = legalPours(rack).find((m) => topRun(rack[m.from]).n < rack[m.from].seg.length)
+    ?? legalPours(rack)[0];
+
   return composeHints(
-    rule ?? "Look for a bottle you could empty completely.",
-    rule ? "Look for a bottle you could empty completely." : undefined,
-    source ? `Bottle ${source.from + 1} has somewhere to go.` : undefined,
+    state.kidTip ?? "Look for a bottle you could empty completely.",
+    here,
+    move ? `Try pouring bottle ${move.from + 1} onto bottle ${move.to + 1}.` : undefined,
   );
 }
 
@@ -211,7 +237,7 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
   useEffect(() => { if (!round.feedback) setNudge(null); }, [round.feedback]);
   useEffect(() => () => koda.speech.stop(), [koda]);
 
-  const chime = (type: "clink" | "pop" | "success" | "error") => {
+  const chime = (type: "clink" | "pop" | "success" | "error" | "pour") => {
     if (koda.config.isEnabled("sound_chimes", true) && koda.sound.isEnabled()) koda.sound.play(type);
   };
   const buzz = (kind: "tap" | "success" | "error") => {
@@ -300,7 +326,7 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
       setRack(next);
       judge(next, spent);
     };
-    if (!animate) { finish(); return; }
+    if (!animate) { chime("pour"); finish(); return; }
 
     const steps = pourSteps(rack, from, to);
     const dir: 1 | -1 = to >= from ? 1 : -1;
@@ -343,6 +369,8 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
         ...streamPath(lip, target),
       });
     }
+
+    chime("pour");
 
     // The stream has to reach the other mouth before liquid appears in it, or
     // the destination fills from nothing while the ribbon is still falling.
@@ -419,7 +447,9 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
     setPicked(null);
   };
 
-  const hints = practising || !hintsEnabled ? [] : bottleHints(rack);
+  const hints = practising || !hintsEnabled
+    ? []
+    : bottleHints(rack, { kidTip: copy.kidTip, budget: question.budget, poured });
 
   return (
     <SkillRound koda={koda} lesson={lesson} fallbackTitle="Bottle Sort" round={round} totalQuestions={total}

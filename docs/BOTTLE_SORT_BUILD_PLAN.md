@@ -343,7 +343,7 @@ one engine and its behaviour driver, then expand by the lesson map. **Ten phases
 | 4 | Hidden state and prediction, L21–24 | `PredictThePour` scores from a picture choice |
 | 5 | Number, fraction, pattern, L25–30 | Ordering goals judged correctly |
 | 6 | Linked and mixed, L31–33 | Every technique cycles in the mixed rack |
-| 7 | Glass depth, sound, haptics, remaining features, accessibility | Each switch behaviour-tested; keyboard completes a rack |
+| 7 | Glass depth, remaining features, accessibility | Each switch behaviour-tested; keyboard completes a rack |
 | 8 | Voice recorded; integration, device, offline | Voice plan 0 missing; a second round completes offline |
 | 9 | Publish | `draft` → `published`, and nothing else changes |
 
@@ -359,6 +359,13 @@ results; it is not restated here. Skill-specific checks to add to it:
 - a redrawn palette never puts two colours within the minimum perceptual distance, and
   shape stays bound to deal position across 200 rounds;
 - the stream's endpoints stay on both bottles' mouths at every rack size and on two rows.
+
+The pouring sound was pulled forward from Phase 7 and is **built, not recorded**:
+`playSound("pour")` is a noise buffer through a bandpass that opens as the flow
+starts and closes as it runs dry, with four unevenly spaced glugs whose pitch
+*rises*, because that is what a collapsing bubble does — a falling pitch reads as a
+drain. It is deliberately quiet: it plays on every pour. Voice is a separate matter
+and is still Phase 8; `npm run voice:plan` reports 41 phrases, all unrecorded.
 
 **Outstanding:** Phases 4–9. Phases 0 to 3 are built: the pure layer in
 `src/skills/bottle-sort/internal/`, the engine in `activities/BottleSort.tsx`, ten

@@ -36,13 +36,69 @@ function getAudioContext(): AudioContext {
   return audioCtx;
 }
 
-export function playSound(type: "pop" | "clink" | "success" | "hint" | "levelup" | "error") {
+export function playSound(type: "pop" | "clink" | "success" | "hint" | "levelup" | "error" | "pour") {
   if (!isSoundEnabled()) return;
   try {
     const ctx = getAudioContext();
     const now = ctx.currentTime;
 
-    if (type === "pop") {
+    if (type === "pour") {
+      /*
+       * Liquid leaving a bottle, built rather than recorded.
+       *
+       * Two things make a pour sound like one. The stream itself is broadband
+       * noise, not a tone — so it is a noise buffer through a bandpass that
+       * opens as the flow gets going and closes as it runs dry. The glugs are
+       * bubbles, and a bubble's note *rises* as it collapses, which is why a
+       * falling pitch here would read as a drain rather than a pour.
+       *
+       * Kept quiet: this plays on every pour, and a sound a child hears a
+       * hundred times a session has to sit under the music, not on top of it.
+       */
+      const seconds = 0.62;
+      const frames = Math.floor(ctx.sampleRate * seconds);
+      const buffer = ctx.createBuffer(1, frames, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < frames; i += 1) data[i] = Math.random() * 2 - 1;
+
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+      const band = ctx.createBiquadFilter();
+      band.type = "bandpass";
+      band.Q.value = 1.1;
+      band.frequency.setValueAtTime(700, now);
+      band.frequency.linearRampToValueAtTime(1500, now + 0.16);
+      band.frequency.linearRampToValueAtTime(900, now + seconds);
+
+      const stream = ctx.createGain();
+      stream.gain.setValueAtTime(0.0001, now);
+      stream.gain.exponentialRampToValueAtTime(0.075, now + 0.09);
+      stream.gain.setValueAtTime(0.075, now + seconds - 0.22);
+      stream.gain.exponentialRampToValueAtTime(0.0001, now + seconds);
+
+      noise.connect(band);
+      band.connect(stream);
+      stream.connect(ctx.destination);
+      noise.start(now);
+      noise.stop(now + seconds);
+
+      // The glugs, unevenly spaced: a metronome of bubbles sounds mechanical.
+      [[0.05, 190], [0.17, 240], [0.3, 205], [0.44, 260]].forEach(([at, hz]) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const t = now + at;
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(hz, t);
+        osc.frequency.exponentialRampToValueAtTime(hz * 1.7, t + 0.06);
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(0.06, t + 0.012);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.08);
+      });
+    } else if (type === "pop") {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = "sine";

@@ -3,8 +3,9 @@ import type { SkillActionLog } from "../lib/skillStore";
 import type { LessonEntry, SupportKind } from "../lib/learning/events";
 import type { AnswerReport } from "../lib/learning/tracker";
 import type { Recommendation } from "../lib/learning/recommend";
+import type { HapticType } from "../utils/haptics";
 
-export type SoundType = "pop" | "clink" | "success" | "hint" | "levelup" | "error";
+export type SoundType = "pop" | "clink" | "success" | "hint" | "levelup" | "error" | "pour";
 
 /**
  * One switchable behaviour a skill declares and checks at runtime.
@@ -84,7 +85,8 @@ export interface KodaSDK {
     success(): void;
     /** The vibration that matches a sound. `tap()` and `success()` are the two
      *  common cases; this covers the rest without a skill importing the driver. */
-    pulse(type: SoundType): void;
+    /** A haptic, not a sound: the two sets overlapped until `pour` existed. */
+    pulse(type: HapticType): void;
   };
 
   speech: {

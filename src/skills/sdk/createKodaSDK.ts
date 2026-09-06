@@ -9,7 +9,7 @@ import {
   speakWebSpeech,
 } from "../../utils/audio";
 import { playClip, stopClip, voiceFloorHeld } from "../../lib/voiceClips";
-import { triggerHaptic, triggerTapPopHaptic } from "../../utils/haptics";
+import { triggerHaptic, triggerTapPopHaptic, type HapticType } from "../../utils/haptics";
 import type {
   KodaSDK,
   LearnerSnapshot,
@@ -183,7 +183,7 @@ export function createKodaSDK(
         if (!featureEnabled("haptic_feedback", true)) return;
         triggerHaptic("success", { intensity: hapticIntensity() });
       },
-      pulse(type: SoundType) {
+      pulse(type: HapticType) {
         if (!featureEnabled("haptic_feedback", true)) return;
         const intensity = hapticIntensity();
         if (type === "pop") triggerTapPopHaptic({ intensity });

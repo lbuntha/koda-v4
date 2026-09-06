@@ -7,6 +7,7 @@ import type {
 } from "../../types";
 import type { LessonEntry, SupportKind } from "../../../lib/learning/events";
 import type { AnswerReport } from "../../../lib/learning/tracker";
+import type { HapticType } from "../../../utils/haptics";
 
 /**
  * A KodaSDK that records instead of doing.
@@ -107,7 +108,7 @@ export function createFakeKoda(options: FakeKodaOptions = {}): FakeKoda {
       success: () => {
         if (vibrates()) record("haptics.success");
       },
-      pulse: (type: SoundType) => {
+      pulse: (type: HapticType) => {
         if (vibrates()) record("haptics.pulse", type);
       },
     },

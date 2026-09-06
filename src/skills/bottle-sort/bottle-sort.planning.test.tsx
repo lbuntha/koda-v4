@@ -69,9 +69,12 @@ describe("the locked bottle", () => {
     h.unmount();
   });
 
-  it("leads with the cork when it offers a hint", () => {
+  it("names the cork and the bottle that opens it, on the rung about this rack", () => {
     const rack: Rack = [{ cap: 2, seg: [0, 1] }, { cap: 2, seg: [1] }, { cap: 2, seg: [], lockedBy: 0 }];
-    expect(bottleHints(rack)[0]).toBe("Finish the bottle the cork is waiting on.");
+    const hints = bottleHints(rack, { kidTip: "Work out the order first." });
+    // Rung 1 is the lesson's own words; rung 2 is this rack.
+    expect(hints[0]).toBe("Work out the order first.");
+    expect(hints[1]).toBe("Bottle 3 is corked. Finish bottle 1 to open it.");
   });
 });
 
@@ -99,9 +102,10 @@ describe("the one-way bottle", () => {
     h.unmount();
   });
 
-  it("warns about the one-way bottle when it offers a hint", () => {
+  it("names the one-way bottle on the rung about this rack", () => {
     const rack: Rack = [{ cap: 4, seg: [0, 1] }, { cap: 4, seg: [], oneWay: true }];
-    expect(bottleHints(rack)[0]).toBe("Whatever you pour into that bottle stays there.");
+    expect(bottleHints(rack, { kidTip: "Be sure before you pour." })[1])
+      .toBe("Bottle 2 only receives. Pour into it once you are sure of the colour.");
   });
 });
 
@@ -180,6 +184,56 @@ describe("the pour budget", () => {
     await waitFor(() => expect(h.screen.getByText(/Out of pours/)).toBeTruthy());
     // Scored once, and the rack is back as dealt so the child can try again.
     await waitFor(() => expect(document.querySelector("[data-budget]")!.textContent).toBe("Pours: 0 of " + question.budget));
+    h.unmount();
+  });
+
+  it("counts the pours left down, once the budget is close", () => {
+    const rack: Rack = [{ cap: 4, seg: [0, 1] }, { cap: 4, seg: [1] }, { cap: 4, seg: [] }];
+    expect(bottleHints(rack, { budget: 8, poured: 7 })[1]).toBe("One pour left. Work the rest out before you move.");
+    expect(bottleHints(rack, { budget: 8, poured: 6 })[1]).toBe("2 pours left. Work the rest out before you move.");
+    // Plenty left is not worth spending a rung on.
+    expect(bottleHints(rack, { budget: 8, poured: 0 })[1]).not.toMatch(/pours left/);
+  });
+
+  it("gives every lesson its own first rung, and a last rung that names a pour", () => {
+    // The complaint this fixes: one ladder for thirty lessons. Rung 1 is the
+    // lesson's own kidTip, so no two lessons open the same way.
+    const tips = skill.lessons
+      .filter((l) => !(l.params as { question: { practice?: boolean } }).question.practice)
+      .map((l) => (l.params as { play: { kidTip: string } }).play.kidTip);
+    expect(new Set(tips).size, "two lessons share a kidTip").toBe(tips.length);
+
+    const rack: Rack = [{ cap: 4, seg: [0, 0, 1] }, { cap: 4, seg: [1, 1] }, { cap: 4, seg: [] }];
+    const hints = bottleHints(rack, { kidTip: tips[0] });
+    expect(hints[0]).toBe(tips[0]);
+    expect(hints[hints.length - 1]).toMatch(/^Try pouring bottle \d+ onto bottle \d+\.$/);
+  });
+
+  it("plays the pouring sound when the liquid moves, and only then", async () => {
+    // Built rather than recorded: `playSound("pour")` is noise through a
+    // bandpass with four rising glugs. What matters to the activity is that it
+    // fires with the pour and not with a refusal.
+    const question = q("four-colours", 1);
+    const h = renderActivity(sort, { params: { spec: "four-colours", questionsPerRound: 1, seed: "phase3" } });
+    await waitFor(() => expect(document.querySelectorAll("[data-bottle]").length).toBeGreaterThan(0));
+
+    const legal = question.rack
+      .flatMap((_, a) => question.rack.map((__, b) => ({ from: a, to: b })))
+      .find((m) => m.from !== m.to && canPour(question.rack, m.from, m.to))!;
+    const refused = question.rack
+      .flatMap((_, a) => question.rack.map((__, b) => ({ from: a, to: b })))
+      .find((m) => m.from !== m.to && question.rack[m.from].seg.length > 0 && !canPour(question.rack, m.from, m.to));
+
+    if (refused) {
+      fireEvent.click(h.screen.getByRole("button", { name: new RegExp(`^Bottle ${refused.from + 1},`) }));
+      fireEvent.click(h.screen.getByRole("button", { name: new RegExp(`^Bottle ${refused.to + 1},`) }));
+      expect(h.koda.only("sound.play").filter((c) => c.args[0] === "pour"), "a refusal poured nothing").toHaveLength(0);
+    }
+
+    fireEvent.click(h.screen.getByRole("button", { name: new RegExp(`^Bottle ${legal.from + 1},`) }));
+    fireEvent.click(h.screen.getByRole("button", { name: new RegExp(`^Bottle ${legal.to + 1},`) }));
+    await waitFor(() =>
+      expect(h.koda.only("sound.play").filter((c) => c.args[0] === "pour").length).toBeGreaterThan(0));
     h.unmount();
   });
 });
