@@ -7,9 +7,10 @@ describeSkillContract(skill);
 describeActivitySmoke(skill);
 
 describe("Bottle Sort registration", () => {
-  it("ships Phases 1 to 4 on two engines, with no artwork", () => {
-    // 24: 9 pouring + practice, 9 planning + practice, 2 hidden and 2 predict.
-    expect(skill.lessons).toHaveLength(24);
+  it("ships Phases 1 to 5 on two engines, with no artwork", () => {
+    // 30: 9 pouring + practice, 9 planning + practice, 2 hidden, 2 predict,
+    // and 6 where the goal is an arrangement rather than a match.
+    expect(skill.lessons).toHaveLength(30);
     // Two engines, because predicting is scored from a picture the child
     // chooses rather than from a rack they build.
     expect(Object.keys(skill.activities)).toEqual(["sort", "predict"]);

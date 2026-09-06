@@ -34,12 +34,12 @@ export const RACK_SPECS: RackSpec[] = [
   { id: "reveal-as-you-go", mode: "hidden", colours: 4, bottles: 6, cap: 4, scramble: 13, hidden: true },
   { id: "guess-the-result", mode: "plain", colours: 3, bottles: 4, cap: 4, scramble: 5 },
   { id: "guess-two-ahead", mode: "plain", colours: 3, bottles: 5, cap: 4, scramble: 7 },
-  { id: "sort-by-number", mode: "numbered", colours: 4, bottles: 6, cap: 4, scramble: 13 },
-  { id: "sort-backwards", mode: "numbered", colours: 4, bottles: 6, cap: 4, scramble: 13 },
-  { id: "odd-and-even-bottles", mode: "numbered", colours: 4, bottles: 6, cap: 4, scramble: 13 },
-  { id: "sort-by-size", mode: "fractions", colours: 4, bottles: 6, cap: 4, scramble: 13 },
-  { id: "count-by-twos", mode: "numbered", colours: 4, bottles: 6, cap: 4, scramble: 13 },
-  { id: "make-the-rainbow", mode: "pattern", colours: 4, bottles: 6, cap: 4, scramble: 14 },
+  { id: "sort-by-number", mode: "numbered", colours: 4, bottles: 6, cap: 4, scramble: 20 , goal: "ascending" },
+  { id: "sort-backwards", mode: "numbered", colours: 4, bottles: 6, cap: 4, scramble: 20 , goal: "descending" },
+  { id: "odd-and-even-bottles", mode: "numbered", colours: 4, bottles: 6, cap: 4, scramble: 12 , goal: "parity" },
+  { id: "sort-by-size", mode: "fractions", colours: 4, bottles: 6, cap: 4, scramble: 20 , goal: "by-size" },
+  { id: "count-by-twos", mode: "numbered", colours: 4, bottles: 6, cap: 4, scramble: 22 , goal: "count-by-twos" },
+  { id: "make-the-rainbow", mode: "pattern", colours: 4, bottles: 6, cap: 4, scramble: 24 , goal: "pattern" },
   // "linked-bottles" is held back: see the note in pour.ts. It needs a rule
   // that conserves liquid before a rack for it can be generated.
   { id: "mixed-racks", mode: "plain", colours: 6, bottles: 8, cap: 5, scramble: 20 },

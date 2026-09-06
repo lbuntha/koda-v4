@@ -5,6 +5,7 @@ import { isCorked, isDeadlock, isSolvedRack, legalPours, pour, pourSteps, refuse
 import { rackFor } from "../internal/racks";
 import { GLYPH, cssColour, nameOf, shapeOf } from "../internal/paint";
 import { specFor } from "../internal/specs";
+import { UNIFORM, bottleDone, goalFor, labelFor, numbered, type Goal } from "../internal/goal";
 import { minimumPours } from "../internal/solve";
 import { PIVOT_Y, POUR_ANGLE, aimPour, streamPath } from "../internal/bottle";
 import { topRun, type Bottle, type Rack } from "../internal/types";
@@ -31,6 +32,10 @@ export interface BottleSortQuestion extends RoundQuestion {
   scramble: number;
   /** Pours allowed, on the lessons that set one. Absent means unlimited. */
   budget?: number;
+  /** What finished means here, and what may be poured onto what. */
+  goal: Goal;
+  /** The spec, so a segment can be labelled the way its lesson names it. */
+  specId: string;
 }
 
 const wait = (ms: number) => new Promise<void>((r) => { setTimeout(r, ms); });
@@ -83,6 +88,7 @@ export function buildQuestion(params: BottleSortParams, index: number): BottleSo
   // taught, rather than five draws of the same rack.
   const cycle = setup.specs?.length ? setup.specs : [setup.spec ?? "one-pour"];
   const spec = specFor(cycle[(index - 1) % cycle.length]) ?? specFor("one-pour")!;
+  const goal = goalFor(spec);
   const { rack, hues, scramble } = rackFor(spec, setup.seed ?? "bottle-sort", index);
   // A budget is only meaningful against the *shortest* solution, so it is
   // measured, not guessed. If the search runs out of room the rack still has to
@@ -90,17 +96,24 @@ export function buildQuestion(params: BottleSortParams, index: number): BottleSo
   // stands in, with room to spare rather than a budget nobody could meet.
   let budget: number | undefined;
   if (spec.budget) {
-    const shortest = minimumPours(rack).moves;
+    const shortest = minimumPours(rack, goal).moves;
     budget = shortest === null ? scramble + 2 : shortest + (spec.budget === "minimum+2" ? 2 : 0);
   }
   return {
     budget,
+    goal,
+    specId: spec.id,
     id: `bottle-sort-${spec.id}-${index}`,
     taskKind: `sort_${spec.id}`,
-    prompt: spec.colours === 2 ? "Sort both bottles." : `Sort all ${spec.colours} colours.`,
+    // The goal is the lesson from 25 on, so the prompt has to say it.
+    prompt: goal.kind === "order"
+      ? `Put every bottle in order: ${goal.order.map((c) => labelFor(goal, spec, c)).join(", ")}.`
+      : goal.kind === "group"
+        ? "Sort the odd numbers and the even numbers into different bottles."
+        : spec.colours === 2 ? "Sort both bottles." : `Sort all ${spec.colours} colours.`,
     // The answer is the property, not a signature of the dealt rack: a hint can
     // add a bottle mid-round and the goal has to survive that.
-    expected: "every bottle one colour",
+    expected: goal.kind === "uniform" ? "every bottle one colour" : "every bottle finished",
     itemCount: rack.length,
     rack,
     hues,
@@ -119,8 +132,9 @@ export function buildQuestion(params: BottleSortParams, index: number): BottleSo
  */
 export function bottleHints(
   rack: Rack,
-  state: { kidTip?: string; budget?: number; poured?: number } = {},
+  state: { kidTip?: string; budget?: number; poured?: number; goal?: Goal } = {},
 ): string[] {
+  const goal = state.goal ?? UNIFORM;
   const corked = rack.findIndex((b, i) => b.lockedBy !== undefined && isCorked(rack, i));
   const oneWay = rack.findIndex((b) => b.oneWay);
   const empty = rack.findIndex((b) => b.seg.length === 0);
@@ -140,8 +154,8 @@ export function bottleHints(
 
   // Rung 3: the worked step. Sorting is done rather than chosen, so this names
   // a real pour instead of stopping short of one.
-  const move = legalPours(rack).find((m) => topRun(rack[m.from]).n < rack[m.from].seg.length)
-    ?? legalPours(rack)[0];
+  const move = legalPours(rack, goal).find((m) => topRun(rack[m.from]).n < rack[m.from].seg.length)
+    ?? legalPours(rack, goal)[0];
 
   return composeHints(
     state.kidTip ?? "Look for a bottle you could empty completely.",
@@ -204,6 +218,7 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
     onComplete,
   });
   const question = round.question as BottleSortQuestion;
+  const spec = specFor(question.specId)!;
 
   // Keyed on the question id alone. `question.rack` is a fresh array on every
   // build, so depending on it re-ran this effect mid-play — wiping the undo
@@ -252,7 +267,7 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
   const tap = (index: number) => {
     if (round.feedback || pouring) return;
     if (picked === null) {
-      const why = refuseReason(rack, index, index === 0 ? 1 : 0);
+      const why = refuseReason(rack, index, index === 0 ? 1 : 0, question.goal);
       // Only the reasons that are about the source itself stop a pick-up.
       if (why === "That bottle is corked." || why === "That bottle is empty." || why === "That bottle only receives.") {
         refuse(why);
@@ -264,11 +279,11 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
     }
     if (picked === index) { setPicked(null); return; }
 
-    const why = refuseReason(rack, picked, index);
+    const why = refuseReason(rack, picked, index, question.goal);
     if (why) { refuse(why); return; }
 
     const from = picked;
-    const next = pour(rack, from, index);
+    const next = pour(rack, from, index, question.goal);
     // Counted here rather than inside the animation, so a pour costs the same
     // whether or not it is drawn. Undo puts it back.
     const spent = poured + 1;
@@ -312,7 +327,7 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
     };
     if (!animate) { chime("pour"); finish(); return; }
 
-    const steps = pourSteps(rack, from, to);
+    const steps = pourSteps(rack, from, to, question.goal);
     const dir: 1 | -1 = to >= from ? 1 : -1;
     let angle = dir * POUR_ANGLE;
     let dx = dir * 34, dy = -26;
@@ -384,7 +399,7 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
 
   /** The scoring contract, applied once the liquid has landed. */
   const judge = (next: Rack, spent?: number) => {
-    if (isSolvedRack(next)) {
+    if (isSolvedRack(next, question.goal)) {
       chime("success");
       buzz("success");
       koda.speech.stop();
@@ -393,7 +408,7 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
     }
     chime("clink");
     buzz("tap");
-    if (isDeadlock(next)) {
+    if (isDeadlock(next, question.goal)) {
       koda.speech.stop();
       round.submit({ correct: false, given: "no pours left", expected: question.expected, errorKind: "miscounted_items", title: "No pours left", message: "That path ran out. The rack is back as it was dealt." });
       setRack(dealt);
@@ -433,7 +448,7 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
 
   const hints = practising || !hintsEnabled
     ? []
-    : bottleHints(rack, { kidTip: copy.kidTip, budget: question.budget, poured });
+    : bottleHints(rack, { kidTip: copy.kidTip, budget: question.budget, poured, goal: question.goal });
 
   return (
     <SkillRound koda={koda} lesson={lesson} fallbackTitle="Bottle Sort" round={round} totalQuestions={total}
@@ -445,7 +460,7 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
       }}>
       <section aria-label="Bottle rack" className="mx-auto flex w-full max-w-[640px] flex-col gap-4">
         <p className="sr-only" aria-live="polite">
-          {rack.filter((b) => b.seg.length === 0 || new Set(b.seg).size === 1).length} of {rack.length} bottles sorted.
+          {rack.filter((b) => bottleDone(question.goal, b)).length} of {rack.length} bottles sorted.
         </p>
 
         {/* Six per row is the phone ceiling; a seventh drops a bottle under 44px. */}
@@ -536,12 +551,12 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
             const shown = b.shown ?? b.seg.length;
             // Hidden segments sit underneath, so they are the low indices.
             const buried = b.seg.length - shown;
-            const sorted = b.seg.length > 0 && b.seg.length === b.cap && new Set(b.seg).size === 1;
+            const sorted = b.seg.length > 0 && bottleDone(question.goal, b);
             return (
               <button key={i} type="button" onClick={() => tap(i)}
                 ref={(node) => { if (node) bottles.current.set(i, node); else bottles.current.delete(i); }}
                 data-bottle={i} data-picked={picked === i} data-sorted={sorted}
-                aria-label={`Bottle ${i + 1}, holds ${b.cap}. ${b.seg.length ? b.seg.map((c, k) => (k < buried ? "hidden" : nameOf(c))).join(", ") : "Empty"}.`
+                aria-label={`Bottle ${i + 1}, holds ${b.cap}. ${b.seg.length ? b.seg.map((c, k) => (k < buried ? "hidden" : numbered(spec) ? labelFor(question.goal, spec, c) : nameOf(c))).join(", ") : "Empty"}.`
                   + (showRunCount && picked === i ? ` ${topRun(b).n} will pour.` : "")
                   // A child using the label instead of the picture has to be
                   // told the same rules the badges show.
@@ -619,7 +634,19 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
                               <animate attributeName="opacity" values=".05;.5;0" dur="3.6s" begin={`${bub.delay}s`} repeatCount="indefinite" />
                             </circle>
                           ))}
-                          <path d={GLYPH[shapeOf(colour)]} transform={`translate(30 ${y + LAYER_H / 2})`} fill="#fff" fillOpacity=".92" />
+                          {/* A shape says which colour; a number says which
+                              *order*. From level 25 the order is the lesson, so
+                              the segment wears the thing being sorted — 1 2 3 4,
+                              or the fraction — and the shape would only be
+                              another name for the same colour. */}
+                          {!numbered(spec) ? (
+                            <path d={GLYPH[shapeOf(colour)]} transform={`translate(30 ${y + LAYER_H / 2})`} fill="#fff" fillOpacity=".92" />
+                          ) : (
+                            <text x="30" y={y + LAYER_H / 2 + 5} textAnchor="middle"
+                              className="fill-white text-[13px] font-bold tabular-nums">
+                              {labelFor(question.goal, spec, colour)}
+                            </text>
+                          )}
                         </g>
                       );
                     })}

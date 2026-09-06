@@ -1,5 +1,6 @@
-import { isPointless, legalPours, pour, signature } from "./pour";
-import { isSolved, type Rack } from "./types";
+import { isPointless, isSolvedRack, legalPours, pour, signature } from "./pour";
+import type { Rack } from "./types";
+import { UNIFORM, type Goal } from "./goal";
 
 /**
  * How few pours a rack can be finished in.
@@ -30,8 +31,8 @@ export interface SolveResult {
  * `signature` collapses those orderings into a single state — without that the
  * frontier explodes on six colours and the search never returns.
  */
-export function minimumPours(start: Rack): SolveResult {
-  if (isSolved(start)) return { moves: 0, visited: 0 };
+export function minimumPours(start: Rack, goal: Goal = UNIFORM): SolveResult {
+  if (isSolvedRack(start, goal)) return { moves: 0, visited: 0 };
 
   const seen = new Set<string>([signature(start)]);
   let frontier: Rack[] = [start];
@@ -42,16 +43,16 @@ export function minimumPours(start: Rack): SolveResult {
     depth += 1;
     const nextFrontier: Rack[] = [];
     for (const rack of frontier) {
-      for (const move of legalPours(rack)) {
+      for (const move of legalPours(rack, goal)) {
         // A whole bottle tipped into an empty one is the same position wearing
         // different labels; exploring it doubles the search for nothing.
-        if (isPointless(rack, move.from, move.to)) continue;
-        const child = pour(rack, move.from, move.to);
+        if (isPointless(rack, move.from, move.to, goal)) continue;
+        const child = pour(rack, move.from, move.to, goal);
         const key = signature(child);
         if (seen.has(key)) continue;
         seen.add(key);
         visited += 1;
-        if (isSolved(child)) return { moves: depth, visited };
+        if (isSolvedRack(child, goal)) return { moves: depth, visited };
         if (visited > SEARCH_BUDGET) return { moves: null, visited };
         nextFrontier.push(child);
       }
@@ -63,6 +64,6 @@ export function minimumPours(start: Rack): SolveResult {
 }
 
 /** Is there any way to finish from here? */
-export function isSolvable(rack: Rack): boolean {
-  return minimumPours(rack).moves !== null;
+export function isSolvable(rack: Rack, goal: Goal = UNIFORM): boolean {
+  return minimumPours(rack, goal).moves !== null;
 }

@@ -3,6 +3,7 @@ import { MIN_COLOUR_DISTANCE, POOL, dealRack, drawPalette, rackFor, rng, solvedR
 import { canPour, isDeadlock, isSolvedRack, legalPours, pour, refuseReason, signature } from "./internal/pour";
 import { minimumPours } from "./internal/solve";
 import { RACK_SPECS } from "./internal/specs";
+import { bottleDone, goalFor } from "./internal/goal";
 import { isBottleDone, topRun, type Rack } from "./internal/types";
 
 /**
@@ -15,6 +16,13 @@ import { isBottleDone, topRun, type Rack } from "./internal/types";
  * that guarantee, which a sample detects just as well as a sweep.
  */
 const DRAWS = 200;
+/**
+ * One seed across the sweeps below, so the 200 draws are dealt once and every
+ * invariant is checked against the same racks. Each sweep used its own seed,
+ * which meant generating 200 racks per spec four times over — and generating a
+ * rack now runs the solver, so the suite paid for that four times.
+ */
+const SWEEP = "invariants";
 const SOLVER_SAMPLE = 12;
 
 const colourCounts = (rack: Rack) => {
@@ -27,7 +35,7 @@ describe("rack generation", () => {
   it("deals every lesson's racks from a solved rack, so none can be impossible", () => {
     RACK_SPECS.forEach((spec) => {
       for (let i = 1; i <= DRAWS; i += 1) {
-        const { rack } = rackFor(spec, "phase0", i);
+        const { rack } = rackFor(spec, SWEEP, i);
 
         // In bounds: every bottle holds no more than its capacity.
         rack.forEach((b) => expect(b.seg.length, `${spec.id} q${i}`).toBeLessThanOrEqual(b.cap));
@@ -48,7 +56,7 @@ describe("rack generation", () => {
     RACK_SPECS.forEach((spec) => {
       for (let i = 1; i <= SOLVER_SAMPLE; i += 1) {
         const { rack, scramble } = rackFor(spec, "solver", i);
-        const { moves } = minimumPours(rack);
+        const { moves } = minimumPours(rack, goalFor(spec));
         expect(moves, `${spec.id} q${i} unsolvable`).not.toBeNull();
         // The scramble is an upper bound: undoing it is itself a solution.
         expect(moves!, `${spec.id} q${i} above its own bound`).toBeLessThanOrEqual(scramble);
@@ -59,7 +67,7 @@ describe("rack generation", () => {
   it("never deals a rack that is already finished", () => {
     RACK_SPECS.filter((s) => s.scramble > 2).forEach((spec) => {
       for (let i = 1; i <= DRAWS; i += 1) {
-        expect(isSolvedRack(rackFor(spec, "unsolved", i).rack), `${spec.id} q${i}`).toBe(false);
+        expect(isSolvedRack(rackFor(spec, SWEEP, i).rack, goalFor(spec)), `${spec.id} q${i}`).toBe(false);
       }
     });
   });
@@ -70,10 +78,13 @@ describe("rack generation", () => {
     // colours must match, so nothing could ever land on a different colour and
     // no rack was ever a puzzle. Measured at avg 1.00 bands per bottle across
     // all 32 specs before this existed.
-    RACK_SPECS.filter((s) => s.scramble >= 5).forEach((spec) => {
+    // Ordering lessons are measured by their own goal below, not by whether a
+    // bottle holds two colours: under an ordering goal a bottle of one colour
+    // is the mess, not the finished article.
+    RACK_SPECS.filter((s) => s.scramble >= 5 && !s.goal).forEach((spec) => {
       let bands = 0, bottles = 0, mixedRacks = 0;
       for (let i = 1; i <= 30; i += 1) {
-        const { rack } = rackFor(spec, "mixed", i);
+        const { rack } = rackFor(spec, SWEEP, i);
         let anyMixed = false;
         rack.forEach((b) => {
           if (!b.seg.length) return;
@@ -88,11 +99,24 @@ describe("rack generation", () => {
     });
   });
 
+  it("deals ordering racks with something actually out of order", () => {
+    RACK_SPECS.filter((spec) => spec.goal).forEach((spec) => {
+      const goal = goalFor(spec);
+      for (let i = 1; i <= 30; i += 1) {
+        const { rack } = rackFor(spec, SWEEP, i);
+        const unfinished = rack.filter((b) => b.seg.length > 0 && !bottleDone(goal, b));
+        expect(unfinished.length, `${spec.id} q${i} arrived finished`).toBeGreaterThan(0);
+      }
+    });
+  });
+
   it("never deals a rack with no move to make", () => {
     RACK_SPECS.forEach((spec) => {
       for (let i = 1; i <= DRAWS; i += 1) {
-        const { rack } = rackFor(spec, "alive", i);
-        expect(legalPours(rack).length, `${spec.id} q${i}`).toBeGreaterThan(0);
+        const { rack } = rackFor(spec, SWEEP, i);
+        // Under the lesson's own goal: an ordering rack has no legal pour at
+        // all by the matching rule, which is the point of the goal existing.
+        expect(legalPours(rack, goalFor(spec)).length, `${spec.id} q${i}`).toBeGreaterThan(0);
       }
     });
   });

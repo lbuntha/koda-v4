@@ -61,6 +61,14 @@ export interface RackSpec {
   hidden?: boolean;
   /** Solve within this many pours. */
   budget?: "minimum" | "minimum+2";
+  /**
+   * What "finished" means, when it is not "every bottle one colour".
+   *
+   * Absent is the uniform goal every lesson up to 24 uses. See `goal.ts`: the
+   * goal decides both what a finished bottle looks like and what may be poured
+   * onto what, because an ordering goal is unreachable under the matching rule.
+   */
+  goal?: "ascending" | "descending" | "by-size" | "parity" | "count-by-twos" | "pattern";
 }
 
 /** Every bottle holds one colour, or nothing. */

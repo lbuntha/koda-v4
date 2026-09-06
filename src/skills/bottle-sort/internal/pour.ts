@@ -1,4 +1,5 @@
-import { isBottleDone, topRun, type Bottle, type Pour, type Rack } from "./types";
+import { topRun, type Bottle, type Pour, type Rack } from "./types";
+import { UNIFORM, accepts, bottleDone, refusalFor, type Goal } from "./goal";
 
 /**
  * The rules of a pour, and nothing else.
@@ -15,7 +16,7 @@ import { isBottleDone, topRun, type Bottle, type Pour, type Rack } from "./types
  * scored: "That bottle is full." is the whole feedback, and the plan's first
  * risk is that a refusal must never be recorded as a wrong answer.
  */
-export function refuseReason(rack: Rack, from: number, to: number): string | null {
+export function refuseReason(rack: Rack, from: number, to: number, goal: Goal = UNIFORM): string | null {
   if (from === to) return "Pick a different bottle to pour into.";
   const a = rack[from], b = rack[to];
   if (!a || !b) return "That bottle is not there.";
@@ -23,8 +24,9 @@ export function refuseReason(rack: Rack, from: number, to: number): string | nul
   if (!a.seg.length) return "That bottle is empty.";
   if (a.oneWay) return "That bottle only receives.";
   if (b.seg.length >= b.cap) return "That bottle is full.";
-  const run = topRun(a);
-  if (b.seg.length && b.seg[b.seg.length - 1] !== run.colour) return "Those colours do not match.";
+  // What may sit on what is the goal's business, not the rules': an ordering
+  // goal wants the *next* colour, not the same one.
+  if (accepts(goal, b, topRun(a).colour) === 0) return refusalFor(goal, b, topRun(a).colour);
   return null;
 }
 
@@ -33,11 +35,11 @@ export function isCorked(rack: Rack, index: number): boolean {
   const b = rack[index];
   if (!b || b.lockedBy === undefined) return false;
   const on = rack[b.lockedBy];
-  return !on || !on.seg.length || !isBottleDone(on);
+  return !on || !on.seg.length || !bottleDone(UNIFORM, on);
 }
 
-export const canPour = (rack: Rack, from: number, to: number): boolean =>
-  refuseReason(rack, from, to) === null;
+export const canPour = (rack: Rack, from: number, to: number, goal: Goal = UNIFORM): boolean =>
+  refuseReason(rack, from, to, goal) === null;
 
 /**
  * Pours the top run, and returns a new rack.
@@ -62,12 +64,15 @@ function reveal(shownBefore: number, moved: number, length: number): number {
   return Math.min(length, Math.max(1, shownBefore - moved));
 }
 
-export function pour(rack: Rack, from: number, to: number): Rack {
-  if (!canPour(rack, from, to)) return rack;
+export function pour(rack: Rack, from: number, to: number, goal: Goal = UNIFORM): Rack {
+  if (!canPour(rack, from, to, goal)) return rack;
   const next: Bottle[] = rack.map((b) => ({ ...b, seg: [...b.seg] }));
   const a = next[from], b = next[to];
   const run = topRun(a);
-  const moved = Math.min(run.n, b.cap - b.seg.length);
+  // The whole run travels, capped by what the destination will actually take —
+  // which under an ordering goal is one, because the slot above wants a
+  // different colour.
+  const moved = Math.min(run.n, accepts(goal, b, run.colour));
 
   for (let i = 0; i < moved; i += 1) b.seg.push(a.seg.pop() as number);
 
@@ -93,9 +98,9 @@ export function pour(rack: Rack, from: number, to: number): Rack {
  * between. The last element is exactly `pour(rack, from, to)`, and a test holds
  * that: the animation must never be able to change the outcome.
  */
-export function pourSteps(rack: Rack, from: number, to: number): Rack[] {
-  if (!canPour(rack, from, to)) return [];
-  const final = pour(rack, from, to);
+export function pourSteps(rack: Rack, from: number, to: number, goal: Goal = UNIFORM): Rack[] {
+  if (!canPour(rack, from, to, goal)) return [];
+  const final = pour(rack, from, to, goal);
   const moved = final[to].seg.length - rack[to].seg.length;
   const steps: Rack[] = [];
   let current = rack;
@@ -111,12 +116,12 @@ export function pourSteps(rack: Rack, from: number, to: number): Rack[] {
 }
 
 /** Every pour the rack allows right now. */
-export function legalPours(rack: Rack): Pour[] {
+export function legalPours(rack: Rack, goal: Goal = UNIFORM): Pour[] {
   const out: Pour[] = [];
   for (let from = 0; from < rack.length; from += 1) {
     if (!topRun(rack[from]).n) continue;
     for (let to = 0; to < rack.length; to += 1) {
-      if (from !== to && canPour(rack, from, to)) out.push({ from, to });
+      if (from !== to && canPour(rack, from, to, goal)) out.push({ from, to });
     }
   }
   return out;
@@ -128,10 +133,11 @@ export function legalPours(rack: Rack): Pour[] {
  * Checked across every ordered pair rather than inferred, because telling a
  * child they are stuck while a legal pour exists is worse than not checking.
  */
-export const isDeadlock = (rack: Rack): boolean =>
-  !isSolvedRack(rack) && legalPours(rack).length === 0;
+export const isDeadlock = (rack: Rack, goal: Goal = UNIFORM): boolean =>
+  !isSolvedRack(rack, goal) && legalPours(rack, goal).length === 0;
 
-export const isSolvedRack = (rack: Rack): boolean => rack.every(isBottleDone);
+export const isSolvedRack = (rack: Rack, goal: Goal = UNIFORM): boolean =>
+  rack.every((b) => bottleDone(goal, b));
 
 /**
  * A pour that only rearranges nothing.
@@ -140,9 +146,12 @@ export const isSolvedRack = (rack: Rack): boolean => rack.every(isBottleDone);
  * different labels; the solver would explore it forever and a child would learn
  * nothing from it.
  */
-export function isPointless(rack: Rack, from: number, to: number): boolean {
+export function isPointless(rack: Rack, from: number, to: number, goal: Goal = UNIFORM): boolean {
   const a = rack[from], b = rack[to];
   if (!a || !b) return false;
+  // Under an ordering goal a whole bottle never moves in one pour, so tipping
+  // it into an empty one is real progress rather than a relabelling.
+  if (goal.kind === "order") return false;
   return b.seg.length === 0 && topRun(a).n === a.seg.length;
 }
 

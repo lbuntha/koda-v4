@@ -587,6 +587,21 @@
         "bottle-sort/guess-the-result",
         "bottle-sort/guess-two-ahead"
       ]
+    },
+    {
+      "id": "u45",
+      "unitNumber": 45,
+      "title": "Unit 45: Bottle Sort — Order and Pattern",
+      "description": "When finished stops meaning one colour and starts meaning the right arrangement",
+      "icon": "B",
+      "lessons": [
+        "bottle-sort/sort-by-number",
+        "bottle-sort/sort-backwards",
+        "bottle-sort/odd-and-even-bottles",
+        "bottle-sort/sort-by-size",
+        "bottle-sort/count-by-twos",
+        "bottle-sort/make-the-rainbow"
+      ]
     }
   ]
 }

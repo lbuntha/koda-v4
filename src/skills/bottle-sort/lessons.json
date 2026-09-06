@@ -1022,6 +1022,258 @@
         6,
         12
       ]
+    },
+    {
+      "id": "sort-by-number",
+      "title": "Sort by Number",
+      "concept": "Order, Not Match",
+      "conceptKey": "order-builder",
+      "requires": [
+        "pour-predictor"
+      ],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 25,
+        "question": {
+          "spec": "sort-by-number",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "violet",
+          "category": "Planning",
+          "shortDesc": "Build 1, 2, 3, 4 in every bottle",
+          "targetObjective": "Put every bottle in order from 1 to 4.",
+          "stepByStep": [
+            "A bottle is finished when it reads 1, 2, 3, 4 from the bottom.",
+            "Only the next number will go on.",
+            "Take apart what is in the wrong order first."
+          ],
+          "kidTip": "The rule has changed: numbers no longer go on their own kind, they go on the number before them.",
+          "audioPrompt": "New rule. Numbers go in order now, not on their match."
+        }
+      },
+      "difficulty": "Hard",
+      "iconName": "flask-conical",
+      "iconTone": "purple",
+      "pedagogyTip": "The first goal that is an arrangement rather than a match; the pouring rule changes with it.",
+      "standards": [],
+      "trajectoryLevel": "order-builder",
+      "ageBand": [
+        6,
+        12
+      ]
+    },
+    {
+      "id": "sort-backwards",
+      "title": "Sort Backwards",
+      "concept": "Reverse the Order",
+      "conceptKey": "order-builder",
+      "requires": [
+        "pour-predictor"
+      ],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 26,
+        "question": {
+          "spec": "sort-backwards",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "violet",
+          "category": "Planning",
+          "shortDesc": "The same idea, counting down",
+          "targetObjective": "Put every bottle in order from 4 down to 1.",
+          "stepByStep": [
+            "A finished bottle reads 4, 3, 2, 1 from the bottom.",
+            "Only the next number down will go on.",
+            "The bottle you built yesterday is upside down today."
+          ],
+          "kidTip": "Same rule, other direction. Start with the biggest at the bottom.",
+          "audioPrompt": "Backwards this time. Biggest at the bottom."
+        }
+      },
+      "difficulty": "Hard",
+      "iconName": "flask-conical",
+      "iconTone": "purple",
+      "pedagogyTip": "Reversing a rule tests whether the child learned the rule or the picture.",
+      "standards": [],
+      "trajectoryLevel": "order-builder",
+      "ageBand": [
+        6,
+        12
+      ]
+    },
+    {
+      "id": "odd-and-even-bottles",
+      "title": "Odd and Even Bottles",
+      "concept": "Sort by a Property",
+      "conceptKey": "parity-sorter",
+      "requires": [
+        "order-builder"
+      ],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 27,
+        "question": {
+          "spec": "odd-and-even-bottles",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "violet",
+          "category": "Planning",
+          "shortDesc": "Odds in one bottle, evens in another",
+          "targetObjective": "Keep the odd numbers and the even numbers apart.",
+          "stepByStep": [
+            "Odd numbers are 1 and 3. Even numbers are 2 and 4.",
+            "A bottle may hold odds or evens, never both.",
+            "The order inside a bottle does not matter here."
+          ],
+          "kidTip": "You are not matching numbers now, you are matching a property. Ask: is it odd or even?",
+          "audioPrompt": "Odds with odds, evens with evens. The order inside does not matter."
+        }
+      },
+      "difficulty": "Hard",
+      "iconName": "flask-conical",
+      "iconTone": "purple",
+      "pedagogyTip": "Sorting by a category rather than by identity, which is a genuine step up in abstraction.",
+      "standards": [],
+      "trajectoryLevel": "parity-sorter",
+      "ageBand": [
+        6,
+        12
+      ]
+    },
+    {
+      "id": "sort-by-size",
+      "title": "Sort by Size",
+      "concept": "Compare Fractions",
+      "conceptKey": "fraction-comparer",
+      "requires": [
+        "parity-sorter"
+      ],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 28,
+        "question": {
+          "spec": "sort-by-size",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "violet",
+          "category": "Planning",
+          "shortDesc": "Fractions, smallest piece to biggest",
+          "targetObjective": "Put the fractions in order of size, not of number.",
+          "stepByStep": [
+            "A third is smaller than a half.",
+            "Bigger numbers underneath do not mean a bigger piece.",
+            "Build from the smallest piece up."
+          ],
+          "kidTip": "One third is smaller than one half, even though three is bigger than two. Think about the piece, not the digits.",
+          "audioPrompt": "Fractions now. Smallest piece at the bottom."
+        }
+      },
+      "difficulty": "Hard",
+      "iconName": "flask-conical",
+      "iconTone": "purple",
+      "pedagogyTip": "The classic fraction misconception, made physical: a child who reads only the digits gets this wrong every time.",
+      "standards": [],
+      "trajectoryLevel": "fraction-comparer",
+      "ageBand": [
+        6,
+        12
+      ]
+    },
+    {
+      "id": "count-by-twos",
+      "title": "Count by Twos",
+      "concept": "A Sequence as the Goal",
+      "conceptKey": "skip-counter",
+      "requires": [
+        "parity-sorter"
+      ],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 29,
+        "question": {
+          "spec": "count-by-twos",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "violet",
+          "category": "Planning",
+          "shortDesc": "Build 2, 4, 6, 8",
+          "targetObjective": "Put every bottle in order: 2, 4, 6, 8.",
+          "stepByStep": [
+            "Start at 2 and count up in twos.",
+            "Only the next number in the count will go on.",
+            "Say the count aloud if it helps."
+          ],
+          "kidTip": "Two, four, six, eight. Each one goes on the one before it.",
+          "audioPrompt": "Count by twos. Two at the bottom, then four, then six, then eight."
+        }
+      },
+      "difficulty": "Hard",
+      "iconName": "flask-conical",
+      "iconTone": "purple",
+      "pedagogyTip": "A known sequence reused from counting, so the child brings something they already have.",
+      "standards": [],
+      "trajectoryLevel": "skip-counter",
+      "ageBand": [
+        6,
+        12
+      ]
+    },
+    {
+      "id": "make-the-rainbow",
+      "title": "Make the Rainbow",
+      "concept": "Reproduce an Order",
+      "conceptKey": "pattern-builder",
+      "requires": [
+        "skip-counter"
+      ],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 30,
+        "question": {
+          "spec": "make-the-rainbow",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "violet",
+          "category": "Planning",
+          "shortDesc": "One named order, every bottle the same",
+          "targetObjective": "Build the same order in every bottle.",
+          "stepByStep": [
+            "Every finished bottle looks the same.",
+            "Read the order at the top of the screen.",
+            "Only the next one in the pattern will go on."
+          ],
+          "kidTip": "Every bottle ends up identical. Build the pattern one step at a time.",
+          "audioPrompt": "Every bottle the same order this time. Make the rainbow."
+        }
+      },
+      "difficulty": "Hard",
+      "iconName": "flask-conical",
+      "iconTone": "purple",
+      "pedagogyTip": "Reproducing a given arrangement, rather than deriving one from a rule.",
+      "standards": [],
+      "trajectoryLevel": "pattern-builder",
+      "ageBand": [
+        6,
+        12
+      ]
     }
   ]
 }

@@ -1,5 +1,6 @@
-import { signature } from "./pour";
+import { isSolvedRack, signature } from "./pour";
 import { minimumPours } from "./solve";
+import { bottleDone, goalFor } from "./goal";
 import { topRun, type Bottle, type Rack, type RackSpec } from "./types";
 
 /**
@@ -80,13 +81,19 @@ export function drawPalette(k: number, next: () => number): number[] {
 
 /** The finished rack a scramble starts from. */
 export function solvedRack(spec: RackSpec): Bottle[] {
+  const goal = goalFor(spec);
   const caps = spec.caps ?? Array.from({ length: spec.bottles }, () => spec.cap);
   return caps.map((cap, i) => {
     const b: Bottle = { cap, seg: [] };
     if (spec.oneWay === i) b.oneWay = true;
     if (spec.lock && spec.lock.tube === i) b.lockedBy = spec.lock.on;
     if (spec.linked && spec.linked[0] === i) b.linkedTo = spec.linked[1];
-    if (i < spec.colours) for (let k = 0; k < cap; k += 1) b.seg.push(i);
+    // Under an ordering goal a finished bottle holds the whole order, not one
+    // colour repeated — so the rack the scramble starts from is different too.
+    if (i < spec.colours) {
+      if (goal.kind === "order") b.seg.push(...goal.order.slice(0, cap));
+      else for (let k = 0; k < cap; k += 1) b.seg.push(i);
+    }
     return b;
   });
 }
@@ -208,13 +215,19 @@ export function rackFor(spec: RackSpec, seed: string, index: number): Deal {
  * unsolvable one is a broken question.
  */
 function dealOne(spec: RackSpec, seed: string, index: number, earlier: ReadonlySet<string>): Deal {
-  const finished = (deal: Deal) => deal.rack.every((b) => b.seg.length === 0
-    || (b.seg.length === b.cap && b.seg.every((c) => c === b.seg[0])));
-  /** At least one bottle holding two colours: otherwise there is nothing to sort. */
-  const mixed = (deal: Deal) => deal.rack.some((b) => b.seg.some((c, k) => k > 0 && c !== b.seg[k - 1]));
+  const goal = goalFor(spec);
+  const finished = (deal: Deal) => isSolvedRack(deal.rack, goal);
+  /**
+   * Something to sort. Under the uniform goal that means a bottle holding two
+   * colours; under an ordering goal a bottle of one colour is itself the mess,
+   * so the question becomes whether any bottle is unfinished.
+   */
+  const mixed = (deal: Deal) => goal.kind === "uniform"
+    ? deal.rack.some((b) => b.seg.some((c, k) => k > 0 && c !== b.seg[k - 1]))
+    : deal.rack.some((b) => b.seg.length > 0 && !bottleDone(goal, b));
   const playable = (deal: Deal) => !finished(deal) && deal.scramble >= 1
     && (spec.scramble < 5 || mixed(deal))
-    && minimumPours(deal.rack).moves !== null;
+    && minimumPours(deal.rack, goal).moves !== null;
 
   let fallback: Deal | null = null;
   for (let attempt = 0; attempt <= 40; attempt += 1) {

@@ -31,7 +31,12 @@
     "irreversible-mover",
     "move-budgeter",
     "hidden-state-reasoner",
-    "pour-predictor"
+    "pour-predictor",
+    "order-builder",
+    "parity-sorter",
+    "fraction-comparer",
+    "skip-counter",
+    "pattern-builder"
   ],
   "requires": [],
   "features": [
