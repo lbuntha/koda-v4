@@ -19,7 +19,9 @@ describe("Bottle Sort registration", () => {
     expect(Object.keys(skill.activities)).toEqual(["sort", "predict"]);
     // Bottles are geometry; there is deliberately nothing in assets/.
     expect(skill.assets).toEqual([]);
-    expect(skill.manifest.status).toBe("draft");
+    // Phase 9. Publishing is a one-line change by design: everything that
+    // makes the skill fit to publish was done in the eight phases before it.
+    expect(skill.manifest.status).toBe("published");
   });
 
   it("names a real rack spec in every lesson", () => {

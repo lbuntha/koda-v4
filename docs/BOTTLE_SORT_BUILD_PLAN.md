@@ -344,8 +344,8 @@ one engine and its behaviour driver, then expand by the lesson map. **Ten phases
 | 5 | **Done.** Number, fraction, pattern, L25–30 | Ordering goals judged correctly |
 | 6 | **Done.** Mixed, L31–32 | Every technique cycles in the mixed rack |
 | 7 | **Done.** Glass depth, remaining features, accessibility | Each switch behaviour-tested; keyboard completes a rack |
-| 8 | Voice recorded; integration, device, offline | Voice plan 0 missing; a second round completes offline |
-| 9 | Publish | `draft` → `published`, and nothing else changes |
+| 8 | **Done.** Voice recorded; integration, device, offline | Voice plan 0 missing; a second round completes offline |
+| 9 | **Done.** Publish | `draft` → `published`, and nothing else changes |
 
 Use the [validation matrix](SKILL_DEVELOPMENT.md#11-validation-matrix) and record actual
 results; it is not restated here. Skill-specific checks to add to it:
@@ -400,7 +400,20 @@ audible rather than only raised. Glass depth is a contact shadow and a sheen,
 both plain shapes: the Observation skill already established what a filter on
 every object costs a phone.
 
-**Outstanding:** Phases 8–9. Phases 0 to 3 are built: the pure layer in
+Phase 8 found nothing to fix, which is the point of running it. The skill
+fetches nothing itself; racks are generated from a seed, so a lesson opens on a
+train. Recorded speech is deliberately absent from the precache and cached on
+first play instead — 22MB of clips pulled during install is a worse first run
+than a briefly silent lesson — so the second round is the one that is fully
+offline, which is exactly what this phase asks for. Two-row racks were the
+device risk worth testing: the mixed lesson deals eight bottles, six is the
+phone ceiling, so a pour between rows is most of that lesson rather than a
+corner case.
+
+Phase 9 was one line. Everything that made the skill fit to publish had already
+been done.
+
+**Outstanding:** nothing. The skill is published. Phases 0 to 3 are built: the pure layer in
 `src/skills/bottle-sort/internal/`, the engine in `activities/BottleSort.tsx`, ten
 lessons across a teaching unit and a separate practice unit, and the skill registered
 as `draft`. Phase 3 added the planning lessons on two more units, and with them the
