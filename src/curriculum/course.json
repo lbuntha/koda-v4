@@ -602,6 +602,26 @@
         "bottle-sort/count-by-twos",
         "bottle-sort/make-the-rainbow"
       ]
+    },
+    {
+      "id": "u46",
+      "unitNumber": 46,
+      "title": "Unit 46: Bottle Sort — Everything at Once",
+      "description": "Eight bottles and a different rule on every rack",
+      "icon": "B",
+      "lessons": [
+        "bottle-sort/mixed-racks"
+      ]
+    },
+    {
+      "id": "u47",
+      "unitNumber": 47,
+      "title": "Unit 47: Practice — Bottle Sort",
+      "description": "Independent practice across everything the skill teaches",
+      "icon": "B",
+      "lessons": [
+        "bottle-sort/practice-bottle-sort"
+      ]
     }
   ]
 }

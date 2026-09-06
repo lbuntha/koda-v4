@@ -7,10 +7,13 @@ describeSkillContract(skill);
 describeActivitySmoke(skill);
 
 describe("Bottle Sort registration", () => {
-  it("ships Phases 1 to 5 on two engines, with no artwork", () => {
-    // 30: 9 pouring + practice, 9 planning + practice, 2 hidden, 2 predict,
-    // and 6 where the goal is an arrangement rather than a match.
-    expect(skill.lessons).toHaveLength(30);
+  it("ships the whole lesson map on two engines, with no artwork", () => {
+    // 32 = the plan's 29 teaching lessons and 3 practice. Level 31 is not
+    // skipped as the plan has it: the linked-bottle lesson was withdrawn, and
+    // a gap in the numbering is a worse record of that than a footnote.
+    expect(skill.lessons).toHaveLength(32);
+    expect(skill.lessons.map((l) => (l.params as { level: number }).level))
+      .toEqual(Array.from({ length: 32 }, (_, i) => i + 1));
     // Two engines, because predicting is scored from a picture the child
     // chooses rather than from a rack they build.
     expect(Object.keys(skill.activities)).toEqual(["sort", "predict"]);
@@ -31,7 +34,8 @@ describe("Bottle Sort registration", () => {
 
   it("keeps practice out of the teaching unit and free of help", () => {
     const practice = skill.lessons.filter((l) => (l.params as { question: { practice?: boolean } }).question.practice);
-    expect(practice.map((l) => l.id)).toEqual(["practice-pouring", "practice-planning"]);
+    expect(practice.map((l) => l.id))
+      .toEqual(["practice-pouring", "practice-planning", "practice-bottle-sort"]);
     practice.forEach((lesson) => {
       // Drawn from several specs, or it measures pace on one rack shape only.
       const { specs } = (lesson.params as { question: { specs: string[] } }).question;

@@ -1274,6 +1274,109 @@
         6,
         12
       ]
+    },
+    {
+      "id": "mixed-racks",
+      "title": "Mixed Racks",
+      "concept": "Everything at Once",
+      "conceptKey": "independent-planner",
+      "requires": [
+        "pattern-builder"
+      ],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 31,
+        "question": {
+          "specs": [
+            "mixed-racks",
+            "mixed-locked",
+            "mixed-one-way",
+            "mixed-hidden",
+            "mixed-budget"
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "rose",
+          "category": "Planning",
+          "shortDesc": "Eight bottles, and a different rule each time",
+          "targetObjective": "Sort five big racks, each with a different rule.",
+          "stepByStep": [
+            "Look for the rule before you look for a pour.",
+            "A cork, a one-way bottle, a covered rack or a budget.",
+            "Then sort it the way you always have."
+          ],
+          "kidTip": "Every rack here plays by a different rule. Find out which one before you start pouring.",
+          "audioPrompt": "Bigger racks now, and the rule changes every time. Look first."
+        }
+      },
+      "difficulty": "Hard",
+      "iconName": "flask-conical",
+      "iconTone": "pink",
+      "pedagogyTip": "Techniques were taught one per lesson, so a child can pass each by knowing which lesson they are in. Cycling them removes that crutch.",
+      "standards": [],
+      "trajectoryLevel": "independent-planner",
+      "ageBand": [
+        6,
+        12
+      ]
+    },
+    {
+      "id": "practice-bottle-sort",
+      "title": "Practice: Bottle Sort",
+      "concept": "Practice Without Help",
+      "conceptKey": "independent-planner",
+      "requires": [],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 32,
+        "question": {
+          "specs": [
+            "mixed-racks",
+            "mixed-locked",
+            "mixed-one-way",
+            "mixed-hidden",
+            "mixed-budget",
+            "practice-bottle-sort",
+            "four-colours",
+            "no-free-bottle",
+            "the-locked-bottle",
+            "the-one-way-bottle",
+            "what-is-underneath",
+            "sort-by-number",
+            "odd-and-even-bottles"
+          ],
+          "questionsPerRound": 5,
+          "practice": true
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "rose",
+          "category": "Planning",
+          "shortDesc": "Five racks drawn from everything the skill teaches",
+          "targetObjective": "Sort five racks without help.",
+          "stepByStep": [
+            "Any rule may turn up.",
+            "Read the rack before you pour.",
+            "Undo and start over are still free."
+          ],
+          "kidTip": "No hints here. Take your time.",
+          "audioPrompt": ""
+        }
+      },
+      "difficulty": "Hard",
+      "iconName": "flask-conical",
+      "iconTone": "pink",
+      "pedagogyTip": "Practice measures pace across the taught techniques, so it draws from all of them rather than one.",
+      "standards": [],
+      "trajectoryLevel": "independent-planner",
+      "ageBand": [
+        6,
+        12
+      ]
     }
   ]
 }

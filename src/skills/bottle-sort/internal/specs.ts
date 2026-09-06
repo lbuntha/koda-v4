@@ -42,7 +42,16 @@ export const RACK_SPECS: RackSpec[] = [
   { id: "make-the-rainbow", mode: "pattern", colours: 4, bottles: 6, cap: 4, scramble: 24 , goal: "pattern" },
   // "linked-bottles" is held back: see the note in pour.ts. It needs a rule
   // that conserves liquid before a rack for it can be generated.
+  // The mixed rack, and the same rack wearing each technique in turn. The
+  // lesson cycles them, which is what "everything at once" has to mean when a
+  // single rack can only carry one rule: the child meets a cork, a one-way
+  // bottle, a covered rack and a budget on the same eight bottles, and cannot
+  // rely on which lesson they are in to know which rule applies.
   { id: "mixed-racks", mode: "plain", colours: 6, bottles: 8, cap: 5, scramble: 20 },
+  { id: "mixed-locked", mode: "locked", colours: 5, bottles: 7, cap: 5, scramble: 14, lock: { tube: 6, on: 0 } },
+  { id: "mixed-one-way", mode: "oneway", colours: 5, bottles: 7, cap: 5, scramble: 14, oneWay: 6 },
+  { id: "mixed-hidden", mode: "hidden", colours: 5, bottles: 7, cap: 5, scramble: 14, hidden: true },
+  { id: "mixed-budget", mode: "budget", colours: 5, bottles: 7, cap: 5, scramble: 14, budget: "minimum+2" },
   { id: "practice-bottle-sort", mode: "plain", colours: 5, bottles: 7, cap: 4, scramble: 16 },
 ];
 

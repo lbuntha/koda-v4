@@ -342,7 +342,7 @@ one engine and its behaviour driver, then expand by the lesson map. **Ten phases
 | 3 | **Done.** Planning, L11–20 | Locked and one-way bottles refuse and accept correctly; a budget ends an attempt |
 | 4 | **Done.** Hidden state and prediction, L21–24 | `PredictThePour` scores from a picture choice |
 | 5 | **Done.** Number, fraction, pattern, L25–30 | Ordering goals judged correctly |
-| 6 | Linked and mixed, L31–33 | Every technique cycles in the mixed rack |
+| 6 | **Done.** Mixed, L31–32 | Every technique cycles in the mixed rack |
 | 7 | Glass depth, remaining features, accessibility | Each switch behaviour-tested; keyboard completes a rack |
 | 8 | Voice recorded; integration, device, offline | Voice plan 0 missing; a second round completes offline |
 | 9 | Publish | `draft` → `published`, and nothing else changes |
@@ -383,7 +383,17 @@ what a finished bottle looks like and what a bottle will accept, and every rule
 asks the goal rather than assuming. The default is the uniform goal, so levels
 1–24 are provably unchanged.
 
-**Outstanding:** Phases 6–9. Phases 0 to 3 are built: the pure layer in
+Phase 6 built the mixed rack as five specs, not one. A rack can only carry one
+rule at a time, so "everything at once" means the *round* cycles them: the
+child meets a cork, a one-way bottle, a covered rack and a budget on the same
+eight bottles and cannot use which lesson they are in to know which rule
+applies. Levels are contiguous 1–32 rather than the plan's 1–33 with a hole at
+31: the linked-bottle lesson stays withdrawn, and a gap in the numbering is a
+worse record of that than this note. Lesson 31 requires `pattern-builder`
+rather than the plan's `side-effect-reasoner`, which the withdrawn lesson would
+have taught and nothing now does.
+
+**Outstanding:** Phases 7–9. Phases 0 to 3 are built: the pure layer in
 `src/skills/bottle-sort/internal/`, the engine in `activities/BottleSort.tsx`, ten
 lessons across a teaching unit and a separate practice unit, and the skill registered
 as `draft`. Phase 3 added the planning lessons on two more units, and with them the

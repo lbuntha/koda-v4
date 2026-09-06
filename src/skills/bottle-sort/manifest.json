@@ -36,7 +36,8 @@
     "parity-sorter",
     "fraction-comparer",
     "skip-counter",
-    "pattern-builder"
+    "pattern-builder",
+    "independent-planner"
   ],
   "requires": [],
   "features": [

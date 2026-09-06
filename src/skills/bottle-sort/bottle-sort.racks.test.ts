@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { MIN_COLOUR_DISTANCE, POOL, dealRack, drawPalette, rackFor, rng, solvedRack } from "./internal/racks";
 import { canPour, isDeadlock, isSolvedRack, legalPours, pour, refuseReason, signature } from "./internal/pour";
 import { minimumPours } from "./internal/solve";
@@ -17,6 +17,19 @@ import { isBottleDone, topRun, type Rack } from "./internal/types";
  */
 const DRAWS = 200;
 /**
+ * Fewer draws on the largest racks.
+ *
+ * Dealing a rack runs the solver, because solvability is verified rather than
+ * constructed — so a draw on the eight-bottle, six-colour mixed rack costs
+ * orders of magnitude more than one on a three-bottle opener. 200 draws of
+ * everything took this file from 10s to 31s as Phase 6's mixed racks arrived,
+ * which is the same trade-off the solver sample below already makes: these
+ * sweeps exist to catch a generator that has stopped honouring its invariants,
+ * and a generator that breaks does so on the first handful of draws.
+ */
+const drawsFor = (spec: { bottles: number; colours: number }) =>
+  spec.bottles * spec.colours >= 35 ? 40 : DRAWS;
+/**
  * One seed across the sweeps below, so the 200 draws are dealt once and every
  * invariant is checked against the same racks. Each sweep used its own seed,
  * which meant generating 200 racks per spec four times over — and generating a
@@ -24,6 +37,25 @@ const DRAWS = 200;
  */
 const SWEEP = "invariants";
 const SOLVER_SAMPLE = 12;
+
+/**
+ * The swept racks, dealt once before any of the invariants run.
+ *
+ * Sharing a seed already meant the racks were dealt once, but it left the
+ * whole cost inside whichever test ran first — which then took 21s of a 20s
+ * budget while its neighbours took milliseconds. The sweep is one body of
+ * work, so it is done as one, and no single assertion carries the bill.
+ */
+const swept = new Map<string, Rack[]>();
+const racksFor = (spec: { id: string }) => swept.get(spec.id)!;
+
+beforeAll(() => {
+  RACK_SPECS.forEach((spec) => {
+    const racks: Rack[] = [];
+    for (let i = 1; i <= drawsFor(spec); i += 1) racks.push(rackFor(spec, SWEEP, i).rack);
+    swept.set(spec.id, racks);
+  });
+}, 180_000);
 
 const colourCounts = (rack: Rack) => {
   const counts = new Map<number, number>();
@@ -34,8 +66,8 @@ const colourCounts = (rack: Rack) => {
 describe("rack generation", () => {
   it("deals every lesson's racks from a solved rack, so none can be impossible", () => {
     RACK_SPECS.forEach((spec) => {
-      for (let i = 1; i <= DRAWS; i += 1) {
-        const { rack } = rackFor(spec, SWEEP, i);
+      racksFor(spec).forEach((rack, drawn) => {
+        const i = drawn + 1;
 
         // In bounds: every bottle holds no more than its capacity.
         rack.forEach((b) => expect(b.seg.length, `${spec.id} q${i}`).toBeLessThanOrEqual(b.cap));
@@ -44,11 +76,11 @@ describe("rack generation", () => {
         // never finish however well it is played.
         const counts = colourCounts(rack);
         expect(counts.size, `${spec.id} q${i} colours`).toBe(spec.colours);
-        counts.forEach((n, colour) => {
+        counts.forEach((held, colour) => {
           const cap = solvedRack(spec)[colour].cap;
-          expect(n, `${spec.id} q${i} colour ${colour}`).toBe(cap);
+          expect(held, `${spec.id} q${i} colour ${colour}`).toBe(cap);
         });
-      }
+      });
     });
   });
 
@@ -66,9 +98,8 @@ describe("rack generation", () => {
 
   it("never deals a rack that is already finished", () => {
     RACK_SPECS.filter((s) => s.scramble > 2).forEach((spec) => {
-      for (let i = 1; i <= DRAWS; i += 1) {
-        expect(isSolvedRack(rackFor(spec, SWEEP, i).rack, goalFor(spec)), `${spec.id} q${i}`).toBe(false);
-      }
+      racksFor(spec).forEach((rack, n) =>
+        expect(isSolvedRack(rack, goalFor(spec)), `${spec.id} q${n + 1}`).toBe(false));
     });
   });
 
@@ -112,12 +143,10 @@ describe("rack generation", () => {
 
   it("never deals a rack with no move to make", () => {
     RACK_SPECS.forEach((spec) => {
-      for (let i = 1; i <= DRAWS; i += 1) {
-        const { rack } = rackFor(spec, SWEEP, i);
+      racksFor(spec).forEach((rack, n) =>
         // Under the lesson's own goal: an ordering rack has no legal pour at
         // all by the matching rule, which is the point of the goal existing.
-        expect(legalPours(rack, goalFor(spec)).length, `${spec.id} q${i}`).toBeGreaterThan(0);
-      }
+        expect(legalPours(rack, goalFor(spec)).length, `${spec.id} q${n + 1}`).toBeGreaterThan(0));
     });
   });
 
