@@ -340,7 +340,7 @@ one engine and its behaviour driver, then expand by the lesson map. **Ten phases
 | 2 | **Done.** Capacity and counting, L6–10 | Capacity refuses correctly; practice draws from every taught spec |
 | 2a | **Done.** Pouring animation, pulled forward from Phase 7 | Stream joins both mouths; the rack is identical with motion off |
 | 3 | **Done.** Planning, L11–20 | Locked and one-way bottles refuse and accept correctly; a budget ends an attempt |
-| 4 | Hidden state and prediction, L21–24 | `PredictThePour` scores from a picture choice |
+| 4 | **Done.** Hidden state and prediction, L21–24 | `PredictThePour` scores from a picture choice |
 | 5 | Number, fraction, pattern, L25–30 | Ordering goals judged correctly |
 | 6 | Linked and mixed, L31–33 | Every technique cycles in the mixed rack |
 | 7 | Glass depth, remaining features, accessibility | Each switch behaviour-tested; keyboard completes a rack |
@@ -367,7 +367,14 @@ starts and closes as it runs dry, with four unevenly spaced glugs whose pitch
 drain. It is deliberately quiet: it plays on every pour. Voice is a separate matter
 and is still Phase 8; `npm run voice:plan` reports 41 phrases, all unrecorded.
 
-**Outstanding:** Phases 4–9. Phases 0 to 3 are built: the pure layer in
+Phase 4 added the second engine and fixed what `shown` meant. It counted
+visible segments from the *bottom*, so a hidden rack concealed the top of every
+bottle — in a lesson called "what is underneath", and with the child unable to
+see the colour they were about to pour. It counts down from the top now, the
+hidden count is bottom-anchored and sticky, and receiving liquid no longer
+X-rays what was already buried in the destination.
+
+**Outstanding:** Phases 5–9. Phases 0 to 3 are built: the pure layer in
 `src/skills/bottle-sort/internal/`, the engine in `activities/BottleSort.tsx`, ten
 lessons across a teaching unit and a separate practice unit, and the skill registered
 as `draft`. Phase 3 added the planning lessons on two more units, and with them the

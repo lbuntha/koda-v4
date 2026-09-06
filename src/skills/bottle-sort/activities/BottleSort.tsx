@@ -2,7 +2,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, playCopy, useMotionOK, useSkillRound, type RoundQuestion } from "../../kit";
 import { isCorked, isDeadlock, isSolvedRack, legalPours, pour, pourSteps, refuseReason } from "../internal/pour";
-import { POOL, rackFor } from "../internal/racks";
+import { rackFor } from "../internal/racks";
+import { GLYPH, cssColour, nameOf, shapeOf } from "../internal/paint";
 import { specFor } from "../internal/specs";
 import { minimumPours } from "../internal/solve";
 import { PIVOT_Y, POUR_ANGLE, aimPour, streamPath } from "../internal/bottle";
@@ -32,24 +33,7 @@ export interface BottleSortQuestion extends RoundQuestion {
   budget?: number;
 }
 
-/** Shape is bound to the deal position, never the hue, so a redrawn palette
- *  leaves a colour-blind child playing exactly the same puzzle. */
-const SHAPES = ["circle", "square", "triangle", "diamond", "cross", "bar"] as const;
-const GLYPH: Record<string, string> = {
-  circle: "M0-5A5 5 0 1 0 0 5 5 5 0 1 0 0-5Z",
-  square: "M-4.4-4.4h8.8v8.8h-8.8Z",
-  triangle: "M0-5.4 5.4 4.6H-5.4Z",
-  diamond: "M0-5.6 5.6 0 0 5.6-5.6 0Z",
-  cross: "M-1.8-5.4h3.6v3.6h3.6v3.6H1.8v3.6h-3.6V1.8h-3.6v-3.6h3.6Z",
-  bar: "M-5.6-2h11.2v4h-11.2Z",
-};
 const wait = (ms: number) => new Promise<void>((r) => { setTimeout(r, ms); });
-const shapeOf = (colour: number) => SHAPES[colour % SHAPES.length];
-const nameOf = (colour: number) => `${shapeOf(colour)} ${colour + 1}`;
-const cssColour = (hues: number[], colour: number) => {
-  const [r, g, b] = POOL[hues[colour] ?? 0];
-  return `rgb(${r} ${g} ${b})`;
-};
 
 /*
  * A bottle in the shape the genre uses: a straight-sided cylinder with a short
@@ -550,12 +534,14 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
           {rack.map((b, i) => {
             const geo = geometry(b.cap);
             const shown = b.shown ?? b.seg.length;
+            // Hidden segments sit underneath, so they are the low indices.
+            const buried = b.seg.length - shown;
             const sorted = b.seg.length > 0 && b.seg.length === b.cap && new Set(b.seg).size === 1;
             return (
               <button key={i} type="button" onClick={() => tap(i)}
                 ref={(node) => { if (node) bottles.current.set(i, node); else bottles.current.delete(i); }}
                 data-bottle={i} data-picked={picked === i} data-sorted={sorted}
-                aria-label={`Bottle ${i + 1}, holds ${b.cap}. ${b.seg.length ? b.seg.map((c, k) => (k < shown ? nameOf(c) : "hidden")).join(", ") : "Empty"}.`
+                aria-label={`Bottle ${i + 1}, holds ${b.cap}. ${b.seg.length ? b.seg.map((c, k) => (k < buried ? "hidden" : nameOf(c))).join(", ") : "Empty"}.`
                   + (showRunCount && picked === i ? ` ${topRun(b).n} will pour.` : "")
                   // A child using the label instead of the picture has to be
                   // told the same rules the badges show.
@@ -591,7 +577,18 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
                   <g transform={pouring?.from === i ? `rotate(${-pouring.angle} 30 ${geo.liquidBottom - 4})` : undefined}>
                     {b.seg.map((colour, k) => {
                       const y = geo.liquidBottom - (k + 1) * LAYER_H;
-                      if (k >= shown) return <rect key={k} x="0" y={y} width={W} height={LAYER_H} className="fill-slate-300 dark:fill-slate-700" />;
+                      if (k < buried) {
+                        return (
+                          <g key={k}>
+                            <rect x="0" y={y} width={W} height={LAYER_H} className="fill-slate-300 dark:fill-slate-700" />
+                            {/* A question mark, so a covered segment reads as
+                                "not known yet" rather than as a grey colour the
+                                child is meant to sort. */}
+                            <text x="30" y={y + LAYER_H / 2 + 5} textAnchor="middle"
+                              className="fill-slate-500 text-[14px] font-bold dark:fill-slate-400">?</text>
+                          </g>
+                        );
+                      }
                       const arriving = pouring?.to === i && k === b.seg.length - 1;
                       const draining = pouring?.from === i && k === b.seg.length - 1;
                       return (

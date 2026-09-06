@@ -15,7 +15,10 @@
     "Every bottle holds one colour.",
     "No pours left. Start the rack again.",
     "That path ran out. The rack is back as it was dealt.",
-    "You are out of pours. The rack is back as it was dealt."
+    "You are out of pours. The rack is back as it was dealt.",
+    "A pour moves the whole run of one colour.",
+    "Look again at how many move, and how much room there is.",
+    "A pour moves the whole run of one colour, not just one."
   ],
   "phrases": [],
   "groups": {

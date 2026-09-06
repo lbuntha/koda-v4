@@ -29,7 +29,9 @@
     "space-planner",
     "order-planner",
     "irreversible-mover",
-    "move-budgeter"
+    "move-budgeter",
+    "hidden-state-reasoner",
+    "pour-predictor"
   ],
   "requires": [],
   "features": [

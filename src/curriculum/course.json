@@ -574,6 +574,19 @@
       "lessons": [
         "bottle-sort/practice-planning"
       ]
+    },
+    {
+      "id": "u44",
+      "unitNumber": 44,
+      "title": "Unit 44: Bottle Sort — Hidden and Predicted",
+      "description": "Sort what you cannot fully see, then say what a pour will do before making it",
+      "icon": "B",
+      "lessons": [
+        "bottle-sort/what-is-underneath",
+        "bottle-sort/reveal-as-you-go",
+        "bottle-sort/guess-the-result",
+        "bottle-sort/guess-two-ahead"
+      ]
     }
   ]
 }

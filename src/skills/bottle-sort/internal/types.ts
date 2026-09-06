@@ -22,7 +22,14 @@ export interface Bottle {
   lockedBy?: number;
   /** Pouring into this bottle also fills the one at this index. */
   linkedTo?: number;
-  /** How many segments are visible, bottom-first. Hidden rounds start below `seg.length`. */
+  /**
+   * How many segments are visible, counting down from the top.
+   *
+   * The hidden ones are the segments *underneath* — which is the whole point of
+   * the lesson, and was the other way round until Phase 4: `shown` counted from
+   * the bottom, so a hidden rack concealed the top of each bottle and a child
+   * could not see the colour they were about to pour.
+   */
   shown?: number;
 }
 

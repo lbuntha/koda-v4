@@ -51,6 +51,17 @@ export const canPour = (rack: Rack, from: number, to: number): boolean =>
  * Phase 0's colour-count invariant caught it on the first draw. Linked needs a
  * definition that conserves what it moves before it can exist.
  */
+/**
+ * What stays visible after `moved` segments leave the top of a bottle.
+ *
+ * The hidden count is bottom-anchored and sticky — once a segment has been
+ * seen it is never hidden again — but the new top is always revealed.
+ */
+function reveal(shownBefore: number, moved: number, length: number): number {
+  if (length === 0) return 0;
+  return Math.min(length, Math.max(1, shownBefore - moved));
+}
+
 export function pour(rack: Rack, from: number, to: number): Rack {
   if (!canPour(rack, from, to)) return rack;
   const next: Bottle[] = rack.map((b) => ({ ...b, seg: [...b.seg] }));
@@ -61,8 +72,15 @@ export function pour(rack: Rack, from: number, to: number): Rack {
   for (let i = 0; i < moved; i += 1) b.seg.push(a.seg.pop() as number);
 
   // Hidden rounds reveal only what a pour uncovers.
-  if (a.shown !== undefined) a.shown = Math.min(a.shown, a.seg.length);
-  if (b.shown !== undefined) b.shown = b.seg.length;
+  //
+  // `shown` counts down from the top, so the hidden segments sit at the bottom
+  // and their count does not change when liquid leaves the top. What does
+  // change is that the newly exposed segment is now the top one, and the top is
+  // always visible — that is the reveal. Receiving does not uncover anything:
+  // the arriving liquid is visible because the child just saw it pour, but what
+  // was already underneath in the destination stays underneath.
+  if (a.shown !== undefined) a.shown = reveal(a.shown + moved, moved, a.seg.length);
+  if (b.shown !== undefined) b.shown = Math.min(b.seg.length, b.shown + moved);
   return next;
 }
 

@@ -147,7 +147,9 @@ export function dealRack(spec: RackSpec, seed: string): Deal {
     oneWay: template[i].oneWay,
     lockedBy: template[i].lockedBy,
     linkedTo: template[i].linkedTo,
-    shown: spec.hidden ? Math.max(0, b.seg.length - 2) : b.seg.length,
+    // Two hidden underneath, and never the top one: a child has to be able to
+    // see the colour they are pouring.
+    shown: spec.hidden && b.seg.length ? Math.max(1, b.seg.length - 2) : b.seg.length,
   }));
 
   return { rack: dealt, hues, scramble: applied };

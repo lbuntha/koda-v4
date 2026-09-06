@@ -852,6 +852,176 @@
         6,
         12
       ]
+    },
+    {
+      "id": "what-is-underneath",
+      "title": "What Is Underneath",
+      "concept": "Act on Partial Information",
+      "conceptKey": "hidden-state-reasoner",
+      "requires": [
+        "move-budgeter"
+      ],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 21,
+        "question": {
+          "spec": "what-is-underneath",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "purple",
+          "category": "Planning",
+          "shortDesc": "Two colours in each bottle are covered",
+          "targetObjective": "Sort the rack without knowing everything at the start.",
+          "stepByStep": [
+            "The covered segments show a question mark.",
+            "You can always see the colour on top.",
+            "Pour, and what was underneath comes into view."
+          ],
+          "kidTip": "You cannot see the bottom yet. Work with the colours you can see, and find out the rest.",
+          "audioPrompt": "Some colours are covered. You can always see the top one."
+        }
+      },
+      "difficulty": "Hard",
+      "iconName": "flask-conical",
+      "iconTone": "purple",
+      "pedagogyTip": "The first rack that cannot be solved by looking; the child has to act to learn.",
+      "standards": [],
+      "trajectoryLevel": "hidden-state-reasoner",
+      "ageBand": [
+        6,
+        12
+      ]
+    },
+    {
+      "id": "reveal-as-you-go",
+      "title": "Reveal As You Go",
+      "concept": "Revise As It Reveals",
+      "conceptKey": "hidden-state-reasoner",
+      "requires": [
+        "move-budgeter"
+      ],
+      "activity": "bottle-sort/sort",
+      "params": {
+        "level": 22,
+        "question": {
+          "spec": "reveal-as-you-go",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "purple",
+          "category": "Planning",
+          "shortDesc": "Four colours, and most of them covered",
+          "targetObjective": "Uncover the rack as you sort it.",
+          "stepByStep": [
+            "Pour to find out what is underneath.",
+            "A plan made before you look may need changing.",
+            "Undo costs nothing if a colour surprises you."
+          ],
+          "kidTip": "Your first plan is a guess. Change it when a new colour appears.",
+          "audioPrompt": "Four colours, mostly covered. Pour to find out what is underneath."
+        }
+      },
+      "difficulty": "Hard",
+      "iconName": "flask-conical",
+      "iconTone": "purple",
+      "pedagogyTip": "Planning under uncertainty: the point is revising the plan, not having the right one first.",
+      "standards": [],
+      "trajectoryLevel": "hidden-state-reasoner",
+      "ageBand": [
+        6,
+        12
+      ]
+    },
+    {
+      "id": "guess-the-result",
+      "title": "Guess the Result",
+      "concept": "Simulate One Move",
+      "conceptKey": "pour-predictor",
+      "requires": [
+        "hidden-state-reasoner"
+      ],
+      "activity": "bottle-sort/predict",
+      "params": {
+        "level": 23,
+        "question": {
+          "spec": "guess-the-result",
+          "questionsPerRound": 3,
+          "steps": 1
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "rose",
+          "category": "Planning",
+          "shortDesc": "Say what one pour will do, before it happens",
+          "targetObjective": "Choose the rack that the pour will make.",
+          "stepByStep": [
+            "Read the rack you are given.",
+            "Find the run on top of the pouring bottle.",
+            "Count the room in the bottle it pours into."
+          ],
+          "kidTip": "The whole run of one colour moves together, as long as there is room for it.",
+          "audioPrompt": "Look before you pour. Which rack comes next?"
+        }
+      },
+      "difficulty": "Hard",
+      "iconName": "flask-conical",
+      "iconTone": "pink",
+      "pedagogyTip": "Doing and predicting are different skills; a child can sort by trial and error and still not say what a pour will do.",
+      "standards": [],
+      "trajectoryLevel": "pour-predictor",
+      "ageBand": [
+        6,
+        12
+      ]
+    },
+    {
+      "id": "guess-two-ahead",
+      "title": "Guess Two Ahead",
+      "concept": "Simulate Two Moves",
+      "conceptKey": "pour-predictor",
+      "requires": [
+        "hidden-state-reasoner"
+      ],
+      "activity": "bottle-sort/predict",
+      "params": {
+        "level": 24,
+        "question": {
+          "spec": "guess-two-ahead",
+          "questionsPerRound": 3,
+          "steps": 2
+        },
+        "play": {
+          "mode": "bottle_sort",
+          "tier": "core",
+          "difficultyColor": "rose",
+          "category": "Planning",
+          "shortDesc": "Two pours to hold in your head",
+          "targetObjective": "Choose the rack that both pours will make.",
+          "stepByStep": [
+            "Work out the first pour.",
+            "Then work out the second on what the first leaves.",
+            "Choose the rack that matches."
+          ],
+          "kidTip": "Do the first pour in your head, then the second on top of it.",
+          "audioPrompt": "Two pours this time. Picture the first, then the second."
+        }
+      },
+      "difficulty": "Hard",
+      "iconName": "flask-conical",
+      "iconTone": "pink",
+      "pedagogyTip": "Holding an imagined state and acting on it again is where planning becomes reasoning.",
+      "standards": [],
+      "trajectoryLevel": "pour-predictor",
+      "ageBand": [
+        6,
+        12
+      ]
     }
   ]
 }
