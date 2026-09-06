@@ -264,6 +264,44 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
     setPicked(null);
   };
 
+  /**
+   * The rack from a keyboard.
+   *
+   * Enter and Space are left to the button, which already fires a click and so
+   * runs `tap` — adding a second path here would pour twice on a real
+   * keyboard. What a plain button cannot do is move between bottles without
+   * tabbing through all eight, or let go of a bottle once it is picked up,
+   * which is what the arrows and Escape are for.
+   */
+  const onRackKey = (e: React.KeyboardEvent) => {
+    if (round.feedback || pouring) return;
+    const focused = [...bottles.current.entries()].find(([, node]) => node === document.activeElement);
+    const here = focused ? focused[0] : 0;
+    const last = rack.length - 1;
+
+    const go = (to: number) => {
+      e.preventDefault();
+      bottles.current.get(Math.max(0, Math.min(last, to)))?.focus();
+    };
+
+    switch (e.key) {
+      // Wraps, because a rack is a ring of choices rather than a list with
+      // ends, and running off the last bottle to reach the first is a step a
+      // child should not have to count.
+      case "ArrowRight": case "ArrowDown": return go(here === last ? 0 : here + 1);
+      case "ArrowLeft": case "ArrowUp": return go(here === 0 ? last : here - 1);
+      case "Home": return go(0);
+      case "End": return go(last);
+      case "Escape":
+        if (picked === null) return;
+        e.preventDefault();
+        setPicked(null);
+        setNudge(null);
+        return;
+      default:
+    }
+  };
+
   const tap = (index: number) => {
     if (round.feedback || pouring) return;
     if (picked === null) {
@@ -464,7 +502,8 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
         </p>
 
         {/* Six per row is the phone ceiling; a seventh drops a bottle under 44px. */}
-        <div ref={rackRef} className="relative grid grid-cols-[repeat(auto-fit,minmax(48px,64px))] items-end justify-center gap-3 rounded-2xl bg-slate-100 px-2 py-6 dark:bg-slate-900/50">
+        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+        <div ref={rackRef} onKeyDown={onRackKey} className="relative grid grid-cols-[repeat(auto-fit,minmax(48px,64px))] items-end justify-center gap-3 rounded-2xl bg-slate-100 px-2 py-6 dark:bg-slate-900/50">
           {stream && (
             <svg key={`${pouring?.from}-${pouring?.to}`}
               className="pointer-events-none absolute inset-0 z-[4] h-full w-full overflow-visible" aria-hidden="true">
@@ -556,6 +595,9 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
               <button key={i} type="button" onClick={() => tap(i)}
                 ref={(node) => { if (node) bottles.current.set(i, node); else bottles.current.delete(i); }}
                 data-bottle={i} data-picked={picked === i} data-sorted={sorted}
+                // Announces "pressed" when a bottle is picked up, so the
+                // selection is audible and not only a raised bottle.
+                aria-pressed={picked === i}
                 aria-label={`Bottle ${i + 1}, holds ${b.cap}. ${b.seg.length ? b.seg.map((c, k) => (k < buried ? "hidden" : numbered(spec) ? labelFor(question.goal, spec, c) : nameOf(c))).join(", ") : "Empty"}.`
                   + (showRunCount && picked === i ? ` ${topRun(b).n} will pour.` : "")
                   // A child using the label instead of the picture has to be
@@ -571,6 +613,11 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
                   <defs>
                     <clipPath id={`bs-clip-${i}`}><path d={geo.body} /></clipPath>
                     {/* Glass turns away at both edges, so a band is darker there. */}
+                    <linearGradient id={`bs-sheen-${i}`} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stopColor="#fff" stopOpacity=".22" />
+                      <stop offset=".35" stopColor="#fff" stopOpacity=".05" />
+                      <stop offset="1" stopColor="#000" stopOpacity=".07" />
+                    </linearGradient>
                     <linearGradient id={`bs-round-${i}`} x1="0" y1="0" x2="1" y2="0">
                       <stop offset="0" stopColor="#000" stopOpacity=".26" />
                       <stop offset=".22" stopColor="#fff" stopOpacity=".22" />
@@ -579,6 +626,14 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
                     </linearGradient>
                   </defs>
 
+                  {/* Depth, without a filter. The Observation skill learned
+                      what `feDropShadow` on every object costs a phone, so this
+                      is two plain shapes: a contact shadow that sits the bottle
+                      on the shelf rather than floating it, and a sheen down the
+                      glass. Both are outside the liquid clip — they are the
+                      glass, not what is in it. */}
+                  <ellipse cx="30" cy={geo.liquidBottom + 3} rx="21" ry="2.6"
+                    className="fill-slate-900/15 dark:fill-black/40" />
                   <path d={geo.body} className="fill-white/70 dark:fill-white/10" />
 
                   {/* Two groups, not one. `clip-path` resolves in the user
@@ -655,6 +710,9 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
                     <rect x="11" y={geo.bodyTop + 4} width="6" height={b.cap * LAYER_H - 18} rx="3" fill="#fff" opacity=".42" />
                     <rect x="46" y={geo.bodyTop + 10} width="2.6" height={b.cap * LAYER_H - 30} rx="1.3" fill="#fff" opacity=".2" />
                     <rect x="24" y={NECK_TOP + 8} width="3" height={NECK_H + 6} rx="1.5" fill="#fff" opacity=".35" />
+                    {/* The sheen: brightest where the glass turns toward the
+                        light, fading before it reaches the far edge. */}
+                    <rect x="6" y={geo.bodyTop} width="48" height={b.cap * LAYER_H} fill={`url(#bs-sheen-${i})`} />
                   </g>
 
                   <path d={geo.outline} fill="none" strokeWidth="2.5" strokeLinecap="round"
