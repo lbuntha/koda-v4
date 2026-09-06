@@ -131,6 +131,21 @@ const OPENAI_VOICE_FOR = {
   Aoede: "coral",
 };
 
+/**
+ * OpenAI's own voices, so a skill can name one directly.
+ *
+ * The map above translates Gemini's vocabulary, which is what a skill written
+ * against Gemini uses. A skill written against OpenAI has the opposite
+ * problem: `marin` is not a key in that map, so it fell through to the default
+ * and every voice in the skill collapsed to `shimmer` — silently, and
+ * precisely the variety the map exists to keep. Either vocabulary resolves
+ * now, and anything in neither is reported rather than quietly replaced.
+ */
+const OPENAI_VOICES = new Set([
+  "alloy", "ash", "ballad", "cedar", "coral", "echo", "fable",
+  "marin", "nova", "onyx", "sage", "shimmer", "verse",
+]);
+
 /** Gemini returns raw little-endian 16-bit mono PCM at this rate. */
 const SAMPLE_RATE = 24000;
 
@@ -156,7 +171,19 @@ const flag = (name) => {
 
 /** One consistent OpenAI voice, when requested by a skill-specific command. */
 const openAIVoiceOverride = flag("--voice") || process.env.KODA_OPENAI_VOICE;
-const openAIVoiceFor = (voice) => openAIVoiceOverride ?? OPENAI_VOICE_FOR[voice] ?? OPENAI_VOICE;
+/** Named once per unresolved voice, not once per clip. */
+const unmapped = new Set();
+const openAIVoiceFor = (voice) => {
+  if (openAIVoiceOverride) return openAIVoiceOverride;
+  if (OPENAI_VOICE_FOR[voice]) return OPENAI_VOICE_FOR[voice];
+  // Already one of OpenAI's own: use it as written.
+  if (OPENAI_VOICES.has(String(voice).toLowerCase())) return String(voice).toLowerCase();
+  if (voice && !unmapped.has(voice)) {
+    unmapped.add(voice);
+    console.warn(`  ! "${voice}" is not an OpenAI voice and has no mapping; using ${OPENAI_VOICE}`);
+  }
+  return OPENAI_VOICE;
+};
 
 /**
  * Stop after this many recordings, across all skills.
