@@ -30,6 +30,10 @@ const source = (id: string, category = "number-sense"): SkillCatalogSource => ({
 });
 
 describe("skill catalog", () => {
+  it("finds skills using their admin subject name", () => {
+    const entries = buildSkillCatalog([{ ...source("counting"), subjectId: "math", subjectName: "Mathematics" }, source("shapes")], {});
+    expect(filterSkillCatalog(entries, "mathematics", "all").map((entry) => entry.id)).toEqual(["counting"]);
+  });
   it("builds compact progress and resume metadata for each skill", () => {
     const [entry] = buildSkillCatalog([source("counting")], { 1: 3 });
     expect(entry.completedLessons).toBe(1);

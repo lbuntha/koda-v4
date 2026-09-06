@@ -11,6 +11,8 @@ export interface SkillCatalogEntry {
   author?: string;
   version?: string;
   category: string;
+  subjectId?: string;
+  subjectName?: string;
   ages?: [number, number];
   status: ReleaseStatus;
   publishedAt?: number | null;
@@ -109,7 +111,7 @@ export function filterSkillCatalog(
   return entries.filter((entry) => {
     if (category !== "all" && entry.category !== category) return false;
     if (!needle) return true;
-    return [entry.name, entry.tagline, entry.description, entry.category, entry.author]
+    return [entry.name, entry.tagline, entry.description, entry.category, entry.author, entry.subjectName]
       .filter(Boolean)
       .some((value) => value!.toLocaleLowerCase().includes(needle));
   });

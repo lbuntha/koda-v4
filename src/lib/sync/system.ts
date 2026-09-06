@@ -65,6 +65,11 @@ function store(next: SystemSettings): void {
   listeners.forEach((fn) => fn());
 }
 
+/** Cache a value returned by a successful admin save, including while offline next. */
+export function cacheSystemSetting(id: string, value: boolean | string): void {
+  store({ ...settings, [id]: value });
+}
+
 /** Refresh from the server. Quiet on failure: offline keeps what was cached. */
 export async function refreshSystem(): Promise<void> {
   const token = await accessToken();

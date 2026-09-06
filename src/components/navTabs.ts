@@ -19,6 +19,7 @@ export type TabId =
   | "koda"
   | "admin"
   | "scoring"
+  | "subjects"
   | "badges"
   | "billing"
   | "keys"

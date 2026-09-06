@@ -21,6 +21,8 @@ DEFAULT_MENU: list[dict] = [
     {"itemId": "profile", "label": "Profile", "icon": "user", "order": 25},
     {"itemId": "skills", "label": "Skills", "icon": "brain", "badge": "Manage",
      "requires": "content:write", "order": 30},
+    {"itemId": "subjects", "label": "Subjects", "icon": "list",
+     "requires": "content:write", "order": 35},
     {"itemId": "assets", "label": "Art", "icon": "shapes", "badge": "{art} SVG",
      "requires": "content:write", "order": 40},
     {"itemId": "users", "label": "Users", "icon": "users", "badge": "Manage",

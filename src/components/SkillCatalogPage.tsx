@@ -49,8 +49,8 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
   const [refreshError, setRefreshError] = useState<string | null>(null);
 
   const categories = useMemo(
-    () => subjects.subjects,
-    [subjects],
+    () => subjects.subjects.filter((subject) => viewer.showAllSkills || skills.some((skill) => skill.subjectId === subject.id)),
+    [subjects, skills, viewer.showAllSkills],
   );
   useEffect(() => {
     if (category !== "all" && !categories.some((subject) => subject.id === category)) {
@@ -195,7 +195,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
             setQuery(event.target.value);
             setVisibleLimit(PAGE_SIZE);
           }}
-          placeholder="Search skills"
+          placeholder="Search skills or subjects"
           aria-label="Search skills"
           className={themeSystem.field("lg", "w-full rounded-2xl py-3 pl-11 pr-4")}
         />
@@ -217,7 +217,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
                 : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-muted hover:border-indigo-300"
             }`}
           >
-            {name}
+            {name} <span className="ml-1 opacity-70">{value === "all" ? skills.length : skills.filter((skill) => skill.subjectId === value).length}</span>
           </button>
         ))}
       </div>
@@ -248,6 +248,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
           thumbnail={resume.thumbnail}
           fallbackIconName={resume.iconName}
           category={resume.category}
+          subjectName={resume.subjectName}
           lessonCount={resume.lessons.length}
           completedLessons={resume.completedLessons}
           progressPercent={resume.progressPercent}
@@ -283,6 +284,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
                 thumbnail={skill.thumbnail}
                 fallbackIconName={skill.iconName}
                 category={skill.category}
+                subjectName={skill.subjectName}
                 ages={skill.ages}
                 lessonCount={skill.lessons.length}
                 completedLessons={skill.completedLessons}
@@ -304,7 +306,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
         ) : (
           <div className={`${themeSystem.card("default")} p-8 text-center`}>
             <p className="font-mono font-black text-ink">No matching skills</p>
-            <p className="mt-1 text-sm text-muted">Try another search or category.</p>
+            <p className="mt-1 text-sm text-muted">Try another search or subject.</p>
             <UIButton
               className="mt-3"
               variant="secondary"

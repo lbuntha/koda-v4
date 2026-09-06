@@ -1,4 +1,9 @@
-# Skill launcher
+# Skill launcher (historical prototype)
+
+This describes an earlier simulated launcher, not the current skill authoring
+contract. New skills use `SkillHost`, `useSkillRound` and `SkillRound`; start at
+[NEW_SKILL_PROMPT.md](NEW_SKILL_PROMPT.md). Do not load this prototype guide when
+building a new skill.
 
 The skill launcher is a dedicated play page, not a home-page modal.
 

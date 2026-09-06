@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useSyncExternalStore } from "react";
+import { SkillSubjectEditor } from "./SkillSubjectEditor";
 import {
   BookOpen,
   Check,
@@ -439,6 +440,7 @@ const ListingEditor: React.FC<{
         </div>
       </div>
 
+      <SkillSubjectEditor skillId={manifest.id} />
       <label className="block space-y-1">
         <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
           Name

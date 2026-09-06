@@ -34,6 +34,7 @@ from app.system_defaults import BY_ID, with_master_applied
 router = APIRouter(prefix="/system", tags=["system"], dependencies=[AUTHENTICATED])
 
 CanOperate = Annotated[Principal, Depends(require("system:write"))]
+CanManageSubjects = Annotated[Principal, Depends(require("content:write"))]
 
 
 class SettingOut(Model):
@@ -153,6 +154,12 @@ async def listing(db: Db, p: CanOperate) -> SettingsOut:
     rows = await system_repo.all_settings(db)
     known = [row for row in rows if row["settingId"] in BY_ID]
     return SettingsOut(settings=[_out(row) for row in known])
+
+
+@router.patch("/subjects")
+async def update_subjects(body: ValueIn, db: Db, p: CanManageSubjects) -> SettingOut:
+    """Developers can organize learning content without access to system controls."""
+    return await update("learning.subjects", body, db, p)
 
 
 @router.patch("/settings/{setting_id}")

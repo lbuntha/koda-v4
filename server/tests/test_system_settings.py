@@ -5,10 +5,48 @@ senior, and that a switch thrown here is refused by the route it governs — a
 setting nothing checks is a setting that does nothing.
 """
 
+import json
+
 import pytest
 
 from app.repos import system as system_repo
 from app.system_defaults import DEFAULT_SETTINGS
+
+
+async def test_subject_lookup_round_trip_and_permissions(client, admin, owner):
+    catalog = {
+        "subjects": [{"id": f"subject-{i}", "name": f"Subject {i}"} for i in range(20)],
+        "assignments": {"counting": "subject-0", "addition": "subject-0", "subtraction": "subject-0"},
+    }
+    body = {"value": json.dumps(catalog)}
+    assert (await client.patch("/system/settings/learning.subjects", json=body, headers=owner)).status_code == 403
+    result = await client.patch("/system/settings/learning.subjects", json=body, headers=admin)
+    assert result.status_code == 200
+    effective = (await client.get("/system", headers=owner)).json()
+    assert json.loads(effective["learning.subjects"]) == catalog
+
+
+async def test_developer_manages_subjects_but_not_system_switches(client, db, owner):
+    from app.repos import users
+    from app.security import passwords
+    await users.create(db, "developer@example.com", passwords.hash_password("correct horse battery"), platform_role="developer")
+    pair = (await client.post("/auth/login", json={"email": "developer@example.com", "password": "correct horse battery"})).json()
+    headers = {"Authorization": f"Bearer {pair['accessToken']}"}
+    catalog = {"subjects": [{"id": "math", "name": "Math"}], "assignments": {"counting": "math"}}
+    body = {"value": json.dumps(catalog)}
+    assert (await client.patch("/system/subjects", json=body, headers=headers)).status_code == 200
+    assert (await client.patch("/system/subjects", json=body, headers=owner)).status_code == 403
+    assert (await client.patch("/system/settings/system.readOnly", json={"value": True}, headers=headers)).status_code == 403
+
+
+@pytest.mark.parametrize("catalog", [
+    {"subjects": [], "assignments": {"counting": "missing"}},
+    {"subjects": [{"id": "one", "name": "Math"}, {"id": "two", "name": " math "}], "assignments": {}},
+    {"subjects": [{"id": "math", "name": " "}], "assignments": {}},
+])
+async def test_invalid_subject_catalog_is_rejected(client, admin, catalog):
+    result = await client.patch("/system/settings/learning.subjects", json={"value": json.dumps(catalog)}, headers=admin)
+    assert result.status_code == 400
 
 
 @pytest.fixture(autouse=True)

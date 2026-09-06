@@ -30,6 +30,12 @@
      "requires": "content:write"
     },
     {
+     "id": "subjects",
+     "label": "Subjects",
+     "icon": "list",
+     "requires": "content:write"
+    },
+    {
      "id": "assets",
      "label": "Art",
      "icon": "shapes",

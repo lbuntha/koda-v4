@@ -423,24 +423,11 @@ here. No skill folder is touched.
 > house rules, the traps, and the definition of done. This section stays the
 > contract it all has to satisfy.
 
-1. **Start from the reference skill.** `counting/` is the worked example — manifest,
-   lessons, five activities all built on the kit, registered in two places, and a test
-   file that is two inherited lines. `docs/NEW_SKILL_PROMPT.md` is the standard prompt
-   that builds a new skill from it.
-2. **Declare the manifest.** Kebab-case `id`, a category, the feature flags the skill checks
-   at runtime, and settings defaults so Skill Manager can render controls before the skill runs.
-3. **Export your activities.** Check the registry first — if the interaction already exists
-   (a ten-frame, a number line), reference it instead of writing a second one.
-4. **Write your lessons** in `lessons.json`, each pointing at an activity and configuring it.
-   Include practice: the same engines with `params.question.practice: true` and a `modes`
-   cycle, in their own course unit. The flag — not the title — is what removes the help,
-   sorts the lesson into the Practice section, and marks its events as the ones speed may
-   be read from. `docs/SKILL_DEVELOPMENT.md` §8.
-5. **Register it** — one import, one array entry in `registry.ts`.
-6. **Place lessons in the course** (`curriculum/course.json`). Along with the registry, this is
-   the only edit outside your folder.
-7. **Verify in the Skill Manager.** Toggle the skill off and confirm it leaves the sidebar,
-   dashboard and routes; toggle each feature and confirm behaviour changes.
+Start with [NEW_SKILL_PROMPT.md](NEW_SKILL_PROMPT.md). It routes to the compact
+implementation guide and the specific references needed for a build. Counting is
+the structural example; addition is the larger-skill completeness benchmark.
+Use [SKILL_BUILD_TEMPLATE.md](SKILL_BUILD_TEMPLATE.md) when a release needs a
+lesson-to-engine plan. Avoid loading historical build plans as default instructions.
 
 ### Curriculum standards — the rule
 
@@ -479,111 +466,31 @@ tooling. And the codes drive nothing — they are displayed, never computed on. 
 the field that does the work, and unlike `standards` it must never be empty or invented,
 because mastery tracking aggregates on it.
 
-### 7.1 Tests — what a new skill inherits
+### 7.1 Tests and completion
 
-Testing a skill is mostly not writing tests. `src/skills/kit/testing/` holds the suite every
-skill is held to, so a new skill's structural test file is two lines:
-
-```ts
-import { describeSkillContract, describeActivitySmoke } from "../kit/testing";
-import { skill } from ".";
-
-describeSkillContract(skill);   // manifest, lessons, refs, requires chain, settings
-describeActivitySmoke(skill);   // every registered activity mounts and opens a round
-```
-
-That alone catches the class of bug that actually happens here: a lesson pointing at an
-activity that was renamed, a `requires` naming a concept nothing teaches, two lessons claiming
-level 7, a settings field describing a setting that does not exist. None of those are type
-errors — they are strings inside JSON — and every one of them shipped at least once while
-counting was being built.
-
-**Behaviour** needs one small driver per activity, because only the skill knows what its own
-buttons mean:
-
-```ts
-await expectStandardRound(activity, async (h) => {
-  await h.press(/^Show me$/);
-  await h.settle();                       // let a flash or animation finish
-  await h.press(new RegExp(`^${expected(h)}$`));
-});
-```
-
-`expectStandardRound` then asserts the part that is the same for every skill: `startLesson`
-lands before the first `present`, every answer is reported, the log closes once, XP is awarded
-once through the SDK, `onComplete` fires once, and a clean round is three stars.
-
-Two rules make these drivers stable:
-
-- **Read the answer out of the telemetry, never recompute it.** `expected(h)` reads what the
-  activity told the host via `learning.present`. A test that recomputes the answer can drift
-  from the activity; one that reads it cannot, and a missing `expected` fails loudly instead
-  of passing quietly.
-- **Drive by accessible name.** `press(/^Object 3\b/)` works because the button carries an
-  `aria-label`. An icon- or emoji-only control with no label is both untestable and unusable
-  with a screen reader — if a driver cannot find a control, that is the bug.
-
-The fake SDK (`createFakeKoda`) records every host call, so a test can assert on what the
-host *would have received* — which is the real contract, and is otherwise invisible: a round
-can look perfect on screen while filing no learning events at all.
-
-### Definition of done
-
-- [ ] Imports nothing from another skill folder. Reuse goes through
-      `resolveActivity("skill/activity")` or `kit/`. **A direct cross-folder import is the
-      failure mode that ends modularity** — worth a lint rule.
-- [ ] Touches the host only through `koda`. No direct import of `playSound`,
-      `SkillStoreAPI`, or app state.
-- [ ] Owns no lesson that belongs to another skill. If a lesson teaches number bonds it lives
-      in the number-bonds folder, even when it appears inside a counting unit.
-- [ ] Nothing outside imports past its `index.ts`.
-- [ ] Correct in light **and** dark, built on `themeSystem` tokens and checked in both.
-- [ ] Disabling it removes it from sidebar, dashboard and routes.
-- [ ] Logs under its own id only.
-- [ ] Built on `kit/` — `useSkillRound` for the loop, `SkillRound` for the chrome. A skill
-      that hand-rolls either will drift from every other skill, which is how one round
-      ended up with its own top bar and a non-standard feedback message.
-- [ ] Sets no XP anywhere. One rate lives in Settings; stars come from first-try accuracy.
-- [ ] Reaches the host only through `koda` — including sound, haptics and speech.
-- [ ] Every lesson names a `conceptKey` that already exists if the skill is not new, and
-      carries `standards` codes copied from the published source — or an empty array plus a
-      `trajectoryLevel`. See the rule above.
-- [ ] Ships at least one practice lesson, flagged with `params.question.practice`, in a unit
-      of its own. Without it the skill has no fluency evidence — mastery still works, but
-      "is this child getting faster?" has no answer.
-- [ ] Keyboard reachable; state never carried by colour alone.
-- [ ] Entry component under ~300 lines. Past that, the generic part belongs in the kit.
-- [ ] Has `<skill>.test.ts` calling `describeSkillContract` and `describeActivitySmoke`, and a
-      round test per activity. See §7.1 — this is two lines plus one small driver each.
-- [ ] `npm test` green.
+Use [SKILL_DEVELOPMENT.md §11](SKILL_DEVELOPMENT.md#11-validation-matrix) for the
+validation matrix and §14 for release checks. The shared contract/smoke tests do
+not prove all modes or answer correctness. Add interaction, content, practice,
+configuration, course and print checks as applicable; reuse the shared harness.
 
 ---
 
 ## 8. Lifecycle — from folder to learner
 
-| # | Stage | Owner | Status |
-| --- | --- | --- | --- |
-| 1 | Build from the template | developer | `draft` |
-| 2 | Register (one line); deploy seeds Mongo | developer | `draft` |
-| 3 | **Verify in Skill Manager** (the gate) | developer | `draft` |
-| 4 | Promote to beta | you | `beta` |
-| 5 | Place lessons in the course | curriculum owner | `beta` |
-| 6 | Publish in Skill Manager | platform developer/admin | `published` |
-| 7 | Manage listing, features, settings and lesson copy | platform developer/admin | — |
+Only `draft` and `published` are supported (`ReleaseStatus` in
+`src/skills/types.ts`). There is no beta status or beta opt-in stage.
 
-`status` lets a skill **ship in the bundle but stay hidden from learners**, which is what
-makes releasing safe. One resolver decides visibility, consulted by the sidebar, dashboard
-and router:
+| Stage | Status |
+| --- | --- |
+| Build and register code; append course units | `draft` |
+| Build generates the server seed; server startup registers manifests | `draft` |
+| Validate in Skill Manager preview and appropriate learner access | `draft` |
+| Publish through Skill Manager when ready | `published` |
+| Withdraw through Skill Manager if needed | `draft` |
 
-```ts
-export const visibleTo = (p: Skill, viewer: Viewer) =>
-  p.manifest.status === "published" ? matchesAudience(p, viewer) && enabledForInstall(p.manifest.id)
-: p.manifest.status === "beta"      ? viewer.betaOptIn && enabledForInstall(p.manifest.id)
-: /* draft */                         viewer.isDeveloper;
-```
-
-Stage 5 is deliberately separate from code review: whoever decides pedagogy is usually not
-the person who wrote the component, and placing lessons touches no code.
+Bundling a skill does not publish it. Visibility also depends on enabled state,
+viewer access, audience and lesson age limits, and course placement. Check the
+current resolver when diagnosing access rather than reimplementing it in a skill.
 
 > **Distribution and publication are separate.** Activity code is still bundled so a lesson
 > can run with no network. `npm run build` generates `server/app/skill_defaults.json`, and
@@ -611,7 +518,7 @@ Two changes make it a *skill* manager rather than a *counting* manager:
 - **Read the registry.** `selectedSkillId` defaults to `"counting-mastery"`, the feature list
   reads `countingSkill.features`, and there is a literal "Reset Counting Defaults" button.
   Skill two would not appear.
-- **Show release status**, so draft and beta skills are visible here and nowhere else.
+- **Show release status**, so operators can distinguish draft skills from published ones.
 
 ---
 

@@ -145,6 +145,7 @@ const MenuPage = lazy(() =>
 const AdminPage = lazy(() =>
   import("./components/account/AdminPage").then((m) => ({ default: m.AdminPage })),
 );
+const SubjectsPage = lazy(() => import("./components/account/SubjectsPage").then((m) => ({ default: m.SubjectsPage })));
 const KodaPage = lazy(() =>
   import("./components/account/KodaPage").then((m) => ({ default: m.KodaPage })),
 );
@@ -260,6 +261,7 @@ export default function App() {
     | "koda"
     | "admin"
     | "scoring"
+    | "subjects"
     | "badges"
     | "billing"
     | "keys"
@@ -991,6 +993,7 @@ export default function App() {
               />
             </Deferred>
           )}
+          {activeTab === "subjects" && <Deferred label="Loading Subjects"><SubjectsPage /></Deferred>}
 
           {activeTab === "settings" && (
             <SettingsPage

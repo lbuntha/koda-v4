@@ -5,6 +5,7 @@ import { useAudienceViewer } from "../skills/viewer";
 import { buildSkillCatalog, type SkillCatalogSource } from "./skillCatalog";
 import { SkillRegistryAPI, useSkillRegistryVersion } from "./skillRegistryApi";
 import { skillTitle, useInstalledSkills } from "./skillStore";
+import { subjectForSkill, useSubjects } from "./subjects";
 
 /**
  * One compact learner catalog resolver shared by Home and Learn.
@@ -17,6 +18,7 @@ export function useSkillCatalog(completedLevels: Record<number, number>) {
   const viewer = useAudienceViewer();
   const installed = useInstalledSkills();
   const registryVersion = useSkillRegistryVersion();
+  const subjects = useSubjects();
 
   const skills = useMemo(() => {
     const lessonsBySkill = new Map<string, ResolvedLesson[]>();
@@ -34,6 +36,7 @@ export function useSkillCatalog(completedLevels: Record<number, number>) {
       if (!skill) return [];
       const listing = installed.find((entry) => entry.id === skillId);
       const server = SkillRegistryAPI.get(skillId);
+      const subject = subjectForSkill(subjects, skillId);
       return [{
         id: skillId,
         // The deployment's name for it, else the manifest's. Everything a
@@ -46,6 +49,8 @@ export function useSkillCatalog(completedLevels: Record<number, number>) {
         author: skill.manifest.author,
         version: skill.manifest.version,
         category: skill.manifest.audience.category,
+        subjectId: subject?.id,
+        subjectName: subject?.name,
         ages: skill.manifest.audience.ages,
         status: server?.status ?? skill.manifest.status,
         publishedAt: server?.publishedAt,
@@ -54,7 +59,7 @@ export function useSkillCatalog(completedLevels: Record<number, number>) {
       }];
     });
     return buildSkillCatalog(sources, completedLevels);
-  }, [completedLevels, installed, registryVersion, viewer]);
+  }, [completedLevels, installed, registryVersion, viewer, subjects]);
 
   return { skills, viewer };
 }
