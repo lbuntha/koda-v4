@@ -10,6 +10,7 @@ import {
 import { playSound } from "../../utils/audio";
 import { UIBadge, UIButton, UIDialog, UISectionHeader, UITabs, UIToggle } from "../ui";
 import { PushDiagnostics } from "./PushDiagnostics";
+import { PushJobs } from "./PushJobs";
 import { PushTemplates } from "./PushTemplates";
 import { BadgesPage } from "./BadgesPage";
 import { BillingPage } from "./BillingPage";
@@ -354,6 +355,7 @@ const SystemPanel: React.FC<{
             whether one of those things actually works — the only feature here
             whose failure is silence rather than an error. */}
         {show !== "secrets" && <PushDiagnostics />}
+        {show !== "secrets" && <PushJobs />}
 
         {show !== "secrets" && <PushTemplates />}
 

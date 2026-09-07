@@ -22,7 +22,7 @@ and a job that only ran on Sundays UTC would simply never reach them.
 """
 
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
@@ -61,6 +61,28 @@ FAMILY_PAGE = 200
 def _local(at: datetime, offset_minutes: int) -> datetime:
     """The same instant, read off the family's own clock."""
     return at + timedelta(minutes=offset_minutes)
+
+
+def _next_summary_evening(local: datetime, offset_minutes: int) -> datetime:
+    """When this family's summary is actually due, from where they are now.
+
+    For a preview to say something an operator can check: "Sunday" is not a
+    date until you know whose Sunday, and the answer is different for a family
+    in Phnom Penh and one in Lisbon.
+
+    The offset is reattached rather than inherited. `_local` shifts a UTC
+    instant by the family's offset and leaves it labelled UTC, which is right
+    for the comparisons above — they only ever read the wall clock — and wrong
+    the moment the value is *shown* to somebody: "18:00+00:00" for a family two
+    hours east is a time that does not exist anywhere.
+    """
+    ahead = (SUNDAY - local.weekday()) % 7
+    due = (local + timedelta(days=ahead)).replace(
+        hour=SUMMARY_HOUR, minute=0, second=0, microsecond=0
+    )
+    if due < local:
+        due += timedelta(days=7)
+    return due.replace(tzinfo=timezone(timedelta(minutes=offset_minutes)))
 
 
 def _day_keys(end: datetime, days: int) -> list[str]:
@@ -109,6 +131,7 @@ async def weekly_summary(
     at: datetime | None = None,
     cursor: str | None = None,
     limit: int = FAMILY_PAGE,
+    preview: bool = False,
 ) -> dict[str, Any]:
     """Tell each parent how their children's week went, once, on Sunday evening.
 
@@ -116,10 +139,19 @@ async def weekly_summary(
     rather than waste: the filter that decides *whose* Sunday evening it is now
     costs one indexed lookup per family, and it is the only way one schedule can
     serve every timezone.
+
+    `preview` answers the question an operator actually has on a Tuesday: *what
+    would Sunday send?* It reports the same wording a parent would read, claims
+    nothing and sends nothing — and it drops the day-and-hour filter, because a
+    preview that is empty six days out of seven answers nothing. What it does
+    *not* drop is the operator ceiling or a family's own preference: a preview
+    that shows a summary somebody has switched off would be a preview of a
+    different product.
     """
     at = at or utc_now()
     report: dict[str, Any] = {
         "job": "weekly-summary",
+        "preview": preview,
         "families": 0,
         "due": 0,
         # What the run *decided* to send, and what actually left the process.
@@ -153,7 +185,7 @@ async def weekly_summary(
             continue
 
         local = _local(at, offset)
-        if local.weekday() != SUNDAY or local.hour != SUMMARY_HOUR:
+        if not preview and (local.weekday() != SUNDAY or local.hour != SUMMARY_HOUR):
             continue
         report["due"] += 1
 
@@ -170,7 +202,13 @@ async def weekly_summary(
                 # should not be told so by a phone on a Sunday evening.
                 continue
 
-            if not await push_runs.claim(
+            already = await push_runs.was_claimed(
+                db, kind=WEEKLY_SUMMARY, recipient_id=learner_id, date_key=date_key
+            )
+            # `claim` is the decision and `was_claimed` is only ever a report —
+            # a preview must not take the right to send the thing it is
+            # describing, or looking would stop Sunday from happening.
+            if not preview and not await push_runs.claim(
                 db, kind=WEEKLY_SUMMARY, recipient_id=learner_id, date_key=date_key
             ):
                 continue
@@ -191,6 +229,23 @@ async def weekly_summary(
                 },
             )
             report["summaries"] += 1
+            if preview:
+                # What a parent would read, and whether they already have. No
+                # token, no device id, nothing that is not already on the
+                # operator's own admin screens.
+                report.setdefault("would_send", []).append(
+                    {
+                        "familyId": family_id,
+                        "learnerId": learner_id,
+                        "learner": learner.get("displayName"),
+                        "days": practised,
+                        "title": title,
+                        "body": body,
+                        "alreadySent": already,
+                        "theirSundayEvening": _next_summary_evening(local, offset).isoformat(),
+                    }
+                )
+                continue
             # One tag per child: the collapse key in §5 is `weekly:{learnerId}`
             # precisely so that a family with three children reads three
             # summaries rather than the last one to arrive.

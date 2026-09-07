@@ -28,6 +28,7 @@ from app.repos import push_templates
 from app.repos import system as system_repo
 from app.security.rate_limit import PUSH_TEST_PER_ACCOUNT, limiter
 from app.services import push as push_service
+from app.services import tasks as task_service
 from app.settings import settings
 from app.system_defaults import BY_ID, with_master_applied
 
@@ -270,6 +271,75 @@ async def push_test(db: Db, p: CanOperate, body: TestSendIn | None = None) -> di
     """
     await limiter.hit(db, "push:test", p.subject_id, PUSH_TEST_PER_ACCOUNT)
     return await push_service.send_test(db, p.subject_id, body.kind if body else None, from_admin=True)
+
+
+#: The jobs an operator may run by hand, and what each one is.
+#:
+#: A closed map rather than a path parameter passed to `getattr`: the value
+#: arrives in a URL, and "which function does this string name" is not a
+#: question to answer by reflection on a route that sends notifications.
+RUNNABLE_JOBS = {
+    "weekly-summary": "Sunday's summary, for whoever it is Sunday evening for.",
+    "token-sweep": "Delete dead tokens, old notices and spent claims.",
+}
+
+
+class JobRunOut(Model):
+    """What one hand-run job did, or would have done."""
+
+    job: str
+    preview: bool
+    report: dict[str, Any]
+
+
+@router.get("/push/jobs")
+async def push_jobs(p: CanOperate) -> dict[str, Any]:
+    """What can be run by hand, so the screen does not hardcode the list."""
+    return {"jobs": [{"id": job, "description": text} for job, text in RUNNABLE_JOBS.items()]}
+
+
+@router.post("/push/jobs/{job}")
+async def push_job_run(
+    job: str, db: Db, p: CanOperate, preview: bool = False
+) -> JobRunOut:
+    """Run a scheduled job now, or show what it would do.
+
+    Cloud Scheduler owns the clock; this is the other door onto the same work,
+    for the two occasions the clock is no use. One is a deployment being set up,
+    where "does this work?" should not mean waiting until Sunday. The other is
+    an operator who has just changed the wording and wants to see it against
+    real families rather than against `SAMPLES`.
+
+    **`preview` is the one worth reaching for.** A summary run for real on a
+    Tuesday correctly does nothing — it is nobody's Sunday evening — which makes
+    it a useless way to check anything. The preview drops that filter, reports
+    the wording each parent would read, claims nothing and sends nothing, and
+    says of each line whether it has already gone.
+
+    A real run is safe to press twice: the ledger is what makes Cloud
+    Scheduler's retries harmless and it does not care that this caller has
+    hands. Pressing it on a Sunday evening simply does what the hourly tick was
+    about to do, once.
+
+    Staff only, and rate limited like the test send, because a real run spends
+    FCM quota and reaches real phones.
+    """
+    if job not in RUNNABLE_JOBS:
+        raise NotFound(f"There is no job called '{job}'.")
+
+    if not preview:
+        await limiter.hit(db, "push:job", p.subject_id, PUSH_TEST_PER_ACCOUNT)
+
+    if job == "token-sweep":
+        # Nothing to preview: it deletes rows nothing can use again, and a
+        # count of them is what a real run already reports.
+        return JobRunOut(job=job, preview=False, report=await task_service.token_sweep(db))
+
+    return JobRunOut(
+        job=job,
+        preview=preview,
+        report=await task_service.weekly_summary(db, preview=preview),
+    )
 
 
 class TemplateOut(Model):
