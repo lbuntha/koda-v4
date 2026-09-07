@@ -178,7 +178,11 @@ async def weekly_summary(
             title, body = await push.wording(
                 db,
                 WEEKLY_SUMMARY,
-                {"learner": learner.get("displayName", "Your child"), "days": practised},
+                {
+                    "learner": learner.get("displayName", "Your child"),
+                    # The noun travels with the number: see `push_defaults`.
+                    "practice": f"{practised} day" if practised == 1 else f"{practised} days",
+                },
             )
             report["summaries"] += 1
             # One tag per child: the collapse key in §5 is `weekly:{learnerId}`

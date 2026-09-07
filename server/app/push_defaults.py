@@ -77,11 +77,17 @@ DEFAULT_KINDS: list[dict[str, Any]] = [
     {
         "kindId": "learn.weekly_summary",
         "title": "{learner}'s week",
-        "body": '{learner} practised on {days} days this week.',
+        # `{practice}` carries its own noun — "1 day", "4 days" — rather than
+        # being a bare number with "days" written after it in the template. A
+        # child who practised once is the most likely case there is, and
+        # "practised on 1 days this week" is the sentence that gets a product
+        # laughed at. `{days}` stays a number for `streak_ending`, where it is
+        # only ever plural.
+        "body": '{learner} practised {practice} this week.',
         #: What a sender may substitute. Anything else an operator types is
         #: left visible rather than guessed at, so a typo shows up in the
         #: preview instead of on somebody's lock screen.
-        "placeholders": ['learner', 'days'],
+        "placeholders": ['learner', 'practice'],
         "class": "courtesy",
         "label": "Weekly summary",
         "settingId": "push.weeklySummary",
@@ -160,6 +166,7 @@ SAMPLES = {
     "rounds": "6",
     "skill": "Counting",
     "days": "4",
+    "practice": "4 days",
     "name": "Sam",
     "decision": "approved",
     "message": "Koda is down for maintenance until 6pm.",
