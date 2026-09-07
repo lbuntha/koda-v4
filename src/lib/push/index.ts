@@ -141,28 +141,87 @@ function describeThisBrowser(): string {
 }
 
 /**
+ * Why a registration did not happen.
+ *
+ * Five things can stop it and they used to collapse into the single word
+ * "unavailable", which the switch then discarded — so a parent pressed the
+ * switch, nothing moved, and the screen said nothing. That is the same failure
+ * mode `docs/PUSH.md` §7 was written about ("its failure mode is *silence*"),
+ * one layer up: silence is right for a *parent's notification*, and wrong for
+ * the person standing in front of a switch that will not turn on.
+ *
+ * Rule 3 at the top of this file still holds — nothing here throws, nothing
+ * interrupts, and a parent is never shown a stack trace. What changes is that
+ * the reason survives long enough for a screen to say one sentence about it.
+ */
+export type EnableFailure =
+  /** No Firebase project baked into this build. */
+  | "not-configured"
+  /** The browser cannot do web push at all, or not in this context. */
+  | "unsupported"
+  /** FCM answered, with nothing. Almost always a VAPID key from another project. */
+  | "no-token"
+  /** FCM refused. `detail` carries its own error code, which is the useful part. */
+  | "mint-failed"
+  /** The token exists; telling our own server about it failed. */
+  | "server-refused";
+
+export type EnableOutcome =
+  | { state: "on" }
+  | { state: "denied" }
+  | { state: "unavailable"; reason: EnableFailure; detail?: string };
+
+/** Firebase errors carry a `code` like `messaging/token-subscribe-failed`. */
+function describeError(error: unknown): string | undefined {
+  if (typeof error !== "object" || error === null) return undefined;
+  const { code, message } = error as { code?: unknown; message?: unknown };
+  if (typeof code === "string" && code) return code;
+  if (typeof message === "string" && message) return message.slice(0, 200);
+  return undefined;
+}
+
+/**
  * Ask for permission and register. Returns what the parent should be told.
  *
  * Call this from a tap, never from an effect.
  */
-export async function enableNotifications(): Promise<"on" | "denied" | "unavailable"> {
+export async function enableNotifications(): Promise<EnableOutcome> {
   const support = pushSupport();
-  if (support.state === "denied") return "denied";
-  if (support.state !== "granted" && support.state !== "askable") return "unavailable";
+  if (support.state === "denied") return { state: "denied" };
+  if (support.state === "not-configured") {
+    return { state: "unavailable", reason: "not-configured" };
+  }
+  if (support.state !== "granted" && support.state !== "askable") {
+    return { state: "unavailable", reason: "unsupported", detail: support.state };
+  }
 
   const permission =
     Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
-  if (permission !== "granted") return "denied";
+  if (permission !== "granted") return { state: "denied" };
+
+  let token: string | null;
+  try {
+    token = await mintToken();
+  } catch (error) {
+    // The most informative failure there is, and the one that used to vanish.
+    // `messaging/token-subscribe-failed` here almost always means the VAPID key
+    // in the bundle belongs to a different Firebase project than the one the
+    // service account sends from — a mismatch nothing else in the system can
+    // see, because both halves are individually valid.
+    return { state: "unavailable", reason: "mint-failed", detail: describeError(error) };
+  }
+
+  if (!token) return { state: "unavailable", reason: "no-token" };
 
   try {
-    const token = await mintToken();
-    if (!token) return "unavailable";
     await tellTheServer(token);
-    return "on";
-  } catch {
-    // Permission was granted; only the round trip failed. The next launch
-    // re-registers, so this is a retry rather than a failure to report.
-    return "unavailable";
+    return { state: "on" };
+  } catch (error) {
+    // Permission was granted and FCM minted a token; only our own round trip
+    // failed. The next launch re-registers, so this really is a retry — but it
+    // is still worth saying, because "press it again in a minute" and "your
+    // VAPID key is wrong" are different instructions.
+    return { state: "unavailable", reason: "server-refused", detail: describeError(error) };
   }
 }
 

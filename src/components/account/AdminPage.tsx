@@ -9,13 +9,11 @@ import {
 } from "../../lib/maintenanceReset";
 import { playSound } from "../../utils/audio";
 import { UIBadge, UIButton, UIDialog, UISectionHeader, UITabs, UIToggle } from "../ui";
-import { PushDiagnostics } from "./PushDiagnostics";
-import { PushJobs } from "./PushJobs";
-import { PushTemplates } from "./PushTemplates";
 import { BadgesPage } from "./BadgesPage";
 import { BillingPage } from "./BillingPage";
 import { ScoringPage } from "./ScoringPage";
 import { NoAccess } from "./NoAccess";
+import { NotificationsAdmin } from "./NotificationsAdmin";
 
 interface Setting {
   id: string;
@@ -354,10 +352,7 @@ const SystemPanel: React.FC<{
         {/* The switchboard above says what this deployment *offers*. This says
             whether one of those things actually works — the only feature here
             whose failure is silence rather than an error. */}
-        {show !== "secrets" && <PushDiagnostics />}
-        {show !== "secrets" && <PushJobs />}
 
-        {show !== "secrets" && <PushTemplates />}
 
         {/* Erasing data is switchboard work, not credential work. */}
         {show !== "secrets" && (
@@ -439,7 +434,7 @@ const SystemPanel: React.FC<{
   );
 };
 
-type AdminTab = "scoring" | "badges" | "billing" | "keys" | "system";
+type AdminTab = "scoring" | "badges" | "billing" | "keys" | "notifications" | "system";
 
 /**
  * What runs Koda, rather than what a family uses it with.
@@ -480,6 +475,11 @@ export const AdminPage: React.FC<{
         { id: "badges", label: "Badges" },
         { id: "billing", label: "Billing" },
         { id: "keys", label: "API keys" },
+        // Its own tab rather than three panels under the switchboard. Proving
+        // the pipe, writing the words and running the jobs are three different
+        // questions, and none of them is a *system setting* — an operator was
+        // reading past a list of switches to reach any of them.
+        { id: "notifications", label: "Notifications" },
         { id: "system", label: "System" },
       ]
     : [];
@@ -530,6 +530,9 @@ export const AdminPage: React.FC<{
       </div>
       <div hidden={active !== "keys"}>
         <SystemPanel embedded show="secrets" />
+      </div>
+      <div hidden={active !== "notifications"}>
+        <NotificationsAdmin />
       </div>
       <div hidden={active !== "system"}>
         <SystemPanel embedded show="switches" />
