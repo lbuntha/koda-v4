@@ -456,3 +456,23 @@ async def test_one_day_of_practice_is_one_day_not_one_days(db, family, seeded):
     await task_service.weekly_summary(db, at=SUNDAY_EVENING_UTC)
 
     assert (await told(db, "learn.weekly_summary"))[0]["body"] == "Mia practised 1 day this week."
+
+
+async def test_wording_saved_against_the_old_placeholder_still_fills(db, family, seeded):
+    """An operator's override predates the "1 day" fix; it must not leak braces."""
+    from app.repos import push_templates
+
+    await push_templates.set_wording(
+        db,
+        "learn.weekly_summary",
+        title="{learner}'s week",
+        body="{learner} practised on {days} days this week.",
+        updated_by="u_ops",
+    )
+    await practise(db, family, days=["2026-08-15", "2026-08-16"])
+
+    await task_service.weekly_summary(db, at=SUNDAY_EVENING_UTC)
+
+    body = (await told(db, "learn.weekly_summary"))[0]["body"]
+    assert "{" not in body, body
+    assert body == "Mia practised on 2 days this week."

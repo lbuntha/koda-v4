@@ -182,6 +182,12 @@ async def weekly_summary(
                     "learner": learner.get("displayName", "Your child"),
                     # The noun travels with the number: see `push_defaults`.
                     "practice": f"{practised} day" if practised == 1 else f"{practised} days",
+                    # The placeholder the shipped wording used before it learned
+                    # to say "1 day". Supplied so that wording an operator saved
+                    # against the old body still fills — `fill` leaves an
+                    # unknown placeholder standing, so dropping this would put a
+                    # literal "{days}" on somebody's lock screen.
+                    "days": practised,
                 },
             )
             report["summaries"] += 1
