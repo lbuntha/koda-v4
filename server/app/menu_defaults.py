@@ -19,6 +19,12 @@ DEFAULT_MENU: list[dict] = [
     {"itemId": "home", "label": "Home", "icon": "home", "order": 10},
     {"itemId": "game", "label": "Learn", "icon": "game", "order": 20},
     {"itemId": "profile", "label": "Profile", "icon": "user", "order": 25},
+    # Adults only, and `member:list` is what says so: nothing is ever addressed
+    # to a learner, so a child's rail would carry a row that is permanently
+    # empty. Beside Profile because it is about *you* rather than about the
+    # deployment — the operator's notification screens are Admin tabs.
+    {"itemId": "notifications", "label": "Notifications", "icon": "bell",
+     "requires": "member:list", "order": 26},
     {"itemId": "skills", "label": "Skills", "icon": "brain", "badge": "Manage",
      "requires": "content:write", "order": 30},
     {"itemId": "subjects", "label": "Subjects", "icon": "list",

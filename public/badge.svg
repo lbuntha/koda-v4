@@ -1,0 +1,21 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Koda">
+  <!--
+    The status-bar badge: the mark's glyph alone, white, on transparency.
+
+    Android draws a notification badge by taking the *alpha channel* and filling
+    it with the system colour, so the shape is the whole of it. The app icon was
+    being used here, and a full-colour rounded square has alpha everywhere —
+    which the mask turns into an indistinct white blob with no K in it. Anything
+    with a background is the wrong kind of image for this slot.
+
+    Scaled up about the centre because a badge is rendered at roughly 24dp: the
+    padding that gives a launcher icon room to breathe is, at that size, most of
+    the picture.
+  -->
+  <g transform="translate(256 256) scale(1.26) translate(-256 -256)"
+     fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="156" y1="116" x2="156" y2="396" stroke-width="68" />
+    <line x1="188" y1="252" x2="360" y2="116" stroke-width="60" />
+    <line x1="188" y1="262" x2="360" y2="396" stroke-width="60" />
+  </g>
+</svg>

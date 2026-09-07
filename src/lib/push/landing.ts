@@ -55,9 +55,9 @@ const TABS: Record<string, LandingTab> = {
   profile: "profile",
   devices: "devices",
   settings: "settings",
-  // The operator's own page. Reachable by a tap because the one notification
-  // that should open it — a deployment telling its staff something — is exactly
-  // the kind that arrives when nobody is looking at a console.
+  // The reader's own list. A tap that cannot be placed more precisely still
+  // has somewhere honest to go: the notification it came from is at the top of
+  // it, with everything else Koda has said.
   notifications: "notifications",
 };
 
@@ -89,20 +89,45 @@ export const landingFor = (path: string | undefined): Landing => {
 export const NOTIFICATION_CLICK = "KODA_NOTIFICATION_CLICK";
 
 /**
- * Listen for a tapped notification. Returns the unsubscribe.
+ * Somebody tapped a notification *inside* the app — a row in the bell.
+ *
+ * The same event as a tap on a phone, deliberately. A notification is one
+ * thing whether it is read on a lock screen or scrolled back to an hour later,
+ * and "Mia met today's goal" should open Mia either way. Routing the two
+ * through one listener is what stops the second one quietly becoming a list
+ * that cannot be tapped — which is what it was.
+ *
+ * A window event rather than a prop threaded down through the nav: the bell
+ * lives in `AppNav`, the screen state lives in `App`, and passing a callback
+ * across that distance to say the same thing the worker already says is a
+ * second way to express one idea.
+ */
+export const openNotification = (path: string | undefined): void => {
+  window.dispatchEvent(new CustomEvent(NOTIFICATION_CLICK, { detail: { path } }));
+};
+
+/**
+ * Listen for a tapped notification, from the worker or from the app itself.
+ * Returns the unsubscribe.
  *
  * Registered from `App.tsx` rather than from the push module that owns the
  * token, because what a tap does is navigation, and navigation is the app's.
  */
 export const onNotificationClick = (handle: (landing: Landing) => void): (() => void) => {
-  if (typeof navigator === "undefined" || !navigator.serviceWorker) return () => {};
-
-  const listener = (event: MessageEvent) => {
+  const fromWorker = (event: MessageEvent) => {
     const data = event.data as { type?: string; path?: string } | undefined;
     if (data?.type !== NOTIFICATION_CLICK) return;
     handle(landingFor(data.path));
   };
+  const fromApp = (event: Event) => {
+    const detail = (event as CustomEvent<{ path?: string }>).detail;
+    handle(landingFor(detail?.path));
+  };
 
-  navigator.serviceWorker.addEventListener("message", listener);
-  return () => navigator.serviceWorker.removeEventListener("message", listener);
+  navigator.serviceWorker?.addEventListener("message", fromWorker);
+  window.addEventListener(NOTIFICATION_CLICK, fromApp);
+  return () => {
+    navigator.serviceWorker?.removeEventListener("message", fromWorker);
+    window.removeEventListener(NOTIFICATION_CLICK, fromApp);
+  };
 };

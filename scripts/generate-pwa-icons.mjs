@@ -9,12 +9,20 @@
  *  - `maskable-*.png` pads the mark into the safe zone, because Android crops
  *    an adaptive icon to a circle or squircle and an un-padded mark loses its
  *    corners.
+ *
+ * And one that is not an icon at all: `badge-96.png`, the silhouette Android
+ * puts in the status bar beside a notification. It is drawn from the *alpha*
+ * channel and filled with the system colour, so it has to be a shape on
+ * transparency — the app icon was being used, and a full-colour rounded square
+ * has alpha everywhere, which the mask turns into a white blob with no mark in
+ * it.
  */
 import sharp from "sharp";
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const SRC = path.resolve("public/favicon.svg");
+const BADGE_SRC = path.resolve("public/badge.svg");
 const OUT = path.resolve("public/icons");
 const svg = await readFile(SRC);
 
@@ -55,5 +63,13 @@ const apple = await sharp(svg, { density: 512 })
   .png()
   .toBuffer();
 await writeFile(path.join(OUT, "apple-touch-icon.png"), apple);
+
+// 96px is the size Android asks for; it is drawn at about 24dp, so the detail
+// that survives is the glyph and nothing else.
+const badge = await sharp(await readFile(BADGE_SRC), { density: 512 })
+  .resize(96, 96)
+  .png()
+  .toBuffer();
+await writeFile(path.join(OUT, "badge-96.png"), badge);
 
 console.log("wrote icons to public/icons");
