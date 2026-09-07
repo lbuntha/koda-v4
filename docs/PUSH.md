@@ -573,7 +573,7 @@ Three things this needs to get right:
 | **0** ✅ | `injectManifest`, the worker ported with **no push code** | Both builds report the same *29 entries*, the hashed URLs diff clean, `tsc` passes over the worker's own project, 985 tests pass — and, in Chrome against a production build: the update prompt still installs, and a deep link still boots with the server stopped |
 | **1** ✅ | `services/push.py` with the `console` driver, `push_tokens`, the two endpoints, `device.new_signin` | 22 tests in `test_push.py`, 363 in the suite, `ruff` clean |
 | **2** ✅ | The worker's `push`/`notificationclick` handlers, Settings → Notifications, preferences, preflight and test send (§7) | 36 tests in `test_push.py` and 14 over the payload guard; 381 API tests, 1,002 frontend tests, both builds clean. **Still to do on hardware:** preflight green on staging, then a real Android phone and a real installed iPhone |
-| **3** ✅ | Cloud Scheduler, `weekly_summary`, `goal_met` | 22 tests in `test_tasks.py`; 450 API tests, `ruff` clean. **Still to do on hardware:** the two jobs created against staging, and a summary watched arriving on a real Sunday |
+| **3** ✅ | Cloud Scheduler, `weekly_summary`, `goal_met` | 24 tests in `test_tasks.py`; 452 API tests, `ruff` clean. **Still to do on hardware:** the two jobs created against staging, and a summary watched arriving on a real Sunday |
 | **4** | `practice_reminder`, `streak_ending`, the self-limiting counter | Off by default; on by choice; quiet by neglect |
 
 Each phase is deployable and none of them is load-bearing for the phase after,
@@ -707,6 +707,15 @@ Four things the building decided, none of them obvious from §10:
   Sunday evening, and §1 is explicit about what this must not become. The job
   skips them rather than sending "practised on 0 days" — which also means the
   ledger is never claimed for a child nothing was said about.
+- **`at` moves the clock, in development only.** A job that can only be
+  exercised on a Sunday evening is a job nobody checks before the first real
+  one, which is the failure §7 exists to prevent. It is *refused* rather than
+  ignored in production — a flag that silently did nothing would be worse than
+  one that is not there — and it is what caught the sentence below.
+- **"practised on 1 days this week."** Only a live run showed it, and one day is
+  the most likely week a child has. `{days}` is a bare number, so the shipped
+  wording now uses `{practice}`, which carries its own noun — "1 day", "4 days".
+  `{days}` stays a number for `streak_ending`, where it is only ever plural.
 - **The job pages over families that hold a browser**, read off `push_tokens`
   rather than the family table. A family with nobody to ring cannot be rung, so
   paging the rest of the deployment to discover that is work with a known

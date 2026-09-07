@@ -163,7 +163,7 @@ async def test_a_summary_goes_out_on_the_familys_own_sunday_evening(db, family, 
     assert report["summaries"] == 1
     notices = await told(db, "learn.weekly_summary")
     assert len(notices) == 1
-    assert "3 days" in notices[0]["body"], notices[0]["body"]
+    assert "practised 3 days" in notices[0]["body"], notices[0]["body"]
     assert notices[0]["userId"] == family["userId"]
 
 
@@ -418,3 +418,41 @@ async def test_yesterdays_rounds_do_not_meet_todays_goal(client, db, family, par
     await client.post("/sync/push", json={"schemaVersion": 1, "events": events}, headers=parent)
 
     assert await told(db, "learn.goal_met") == [], "neither day reached five"
+
+
+async def test_the_clock_can_be_moved_in_development_only(client, db, family, seeded, monkeypatch):
+    """A job only provable on a Sunday is a job nobody checks before the first one."""
+    await practise(db, family, days=["2026-08-16"])
+
+    # In production, with a real scheduler at the door, the clock is still fixed.
+    monkeypatch.setattr(settings(), "environment", "production")
+    monkeypatch.setattr(settings(), "push_task_service_account", "scheduler@koda.iam.gserviceaccount.com")
+    monkeypatch.setattr(settings(), "push_task_audience", "https://api.koda.example")
+    monkeypatch.setattr(
+        "app.services.google_identity.verify_oidc",
+        lambda token, audience: {
+            "email": "scheduler@koda.iam.gserviceaccount.com",
+            "email_verified": True,
+        },
+    )
+    scheduler = {"Authorization": "Bearer a.real.one"}
+
+    refused = await client.post("/tasks/weekly-summary?at=2026-08-16T16:00:00Z", headers=scheduler)
+    assert refused.status_code == 403
+    assert refused.json()["error"]["code"] == "task_time_travel_forbidden"
+    assert await told(db, "learn.weekly_summary") == []
+
+    # The same call, on a laptop, is how somebody proves this before Sunday.
+    monkeypatch.setattr(settings(), "environment", "development")
+    allowed = await client.post("/tasks/weekly-summary?at=2026-08-16T16:00:00Z", headers=scheduler)
+    assert allowed.json()["summaries"] == 1
+    assert len(await told(db, "learn.weekly_summary")) == 1
+
+
+async def test_one_day_of_practice_is_one_day_not_one_days(db, family, seeded):
+    """The most likely week there is, and the sentence a bare number gets wrong."""
+    await practise(db, family, days=["2026-08-16"])
+
+    await task_service.weekly_summary(db, at=SUNDAY_EVENING_UTC)
+
+    assert (await told(db, "learn.weekly_summary"))[0]["body"] == "Mia practised 1 day this week."
