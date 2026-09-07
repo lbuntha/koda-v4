@@ -17,7 +17,7 @@ from app.errors import Forbidden, NotFound
 from app.models.auth import Principal
 from app.models.common import Model
 from app.push_defaults import DEFAULT_KINDS, MASTER, SENDS
-from app.repos import notify_prefs, push_tokens
+from app.repos import notify_prefs, notify_schedule, push_tokens
 from app.repos import system as system_repo
 from app.security.rate_limit import PUSH_TEST_PER_ACCOUNT, limiter
 from app.services import push as push_service
@@ -38,6 +38,16 @@ class TokenIn(Model):
     token: str = Field(min_length=32, max_length=4096)
     ua: str | None = Field(default=None, max_length=400)
     platform: str | None = Field(default=None, max_length=60)
+    #: Minutes east of UTC, as this browser reports itself.
+    #:
+    #: Sent here rather than asked for on a screen, and it has to arrive here
+    #: rather than being derived from practice: a reminder is *for* a child who
+    #: has not practised, and one who never has leaves no event to read a
+    #: timezone from. Deriving it from the learning log would have worked for
+    #: every family except the ones this kind exists for.
+    tz_offset_minutes: int | None = Field(
+        default=None, alias="tzOffsetMinutes", ge=-840, le=840
+    )
 
 
 def _adult(p: Principal) -> str | None:
@@ -83,6 +93,13 @@ async def register(body: TokenIn, db: Db, p: CurrentPrincipal) -> None:
         ua=body.ua,
         platform=body.platform,
     )
+    if body.tz_offset_minutes is not None:
+        # Kept on the schedule rather than the token, because it answers a
+        # question about the *person* — what hour is it where they are — and one
+        # person's three browsers must not disagree about that.
+        await notify_schedule.save(
+            db, p.subject_id, tz_offset_minutes=body.tz_offset_minutes
+        )
 
 
 @router.delete("/tokens/{token}", status_code=204)
@@ -184,6 +201,64 @@ async def choose(body: PreferenceIn, db: Db, p: CurrentPrincipal) -> Preferences
 
     await notify_prefs.set_pref(db, p.subject_id, body.kind, body.on)
     return await _preferences(db, p)
+
+
+class ScheduleOut(Model):
+    """When this account may be rung, as a parent sets it."""
+
+    #: The hour a reminder goes out, in their own local time.
+    reminder_hour: int = Field(alias="reminderHour")
+    #: The window nothing courtesy-class may arrive in. Equal values mean none.
+    quiet_from: int = Field(alias="quietFrom")
+    quiet_to: int = Field(alias="quietTo")
+
+
+class ScheduleIn(Model):
+    """Every field optional: a screen changes one control at a time."""
+
+    reminder_hour: int | None = Field(default=None, alias="reminderHour", ge=0, le=23)
+    quiet_from: int | None = Field(default=None, alias="quietFrom", ge=0, le=23)
+    quiet_to: int | None = Field(default=None, alias="quietTo", ge=0, le=23)
+    #: What the browser reports about itself, so a job can tell whose evening it
+    #: is. Sent by the client rather than asked for: the alternative is a
+    #: timezone picker, which is a question nobody should be asked twice.
+    tz_offset_minutes: int | None = Field(
+        default=None, alias="tzOffsetMinutes", ge=-840, le=840
+    )
+
+
+def _schedule_out(row: dict) -> ScheduleOut:
+    return ScheduleOut(
+        reminderHour=row["reminderHour"], quietFrom=row["quietFrom"], quietTo=row["quietTo"]
+    )
+
+
+@router.get("/schedule")
+async def schedule(db: Db, p: CurrentPrincipal) -> ScheduleOut:
+    """When this account has said it may be rung."""
+    _adult(p)
+    return _schedule_out(await notify_schedule.for_user(db, p.subject_id))
+
+
+@router.put("/schedule")
+async def set_schedule(body: ScheduleIn, db: Db, p: CurrentPrincipal) -> ScheduleOut:
+    """Choose the reminder hour, or the window to be left alone in.
+
+    Both live here rather than beside the on/off switches because they are the
+    same kind of thing — *when*, not *whether* — and because quiet hours govern
+    every courtesy kind at once rather than any one of them.
+    """
+    _adult(p)
+    return _schedule_out(
+        await notify_schedule.save(
+            db,
+            p.subject_id,
+            reminder_hour=body.reminder_hour,
+            quiet_from=body.quiet_from,
+            quiet_to=body.quiet_to,
+            tz_offset_minutes=body.tz_offset_minutes,
+        )
+    )
 
 
 @router.post("/test", status_code=200)

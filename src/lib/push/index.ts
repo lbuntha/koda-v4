@@ -109,6 +109,13 @@ async function tellTheServer(token: string): Promise<void> {
       token,
       ua: navigator.userAgent.slice(0, 400),
       platform: describeThisBrowser(),
+      // Minutes east of UTC, the same sign convention the learning log uses.
+      //
+      // Sent with the token rather than asked for on a screen, and it has to
+      // arrive at registration rather than being derived from practice: a
+      // reminder is *for* a child who has not practised, and one who never has
+      // leaves no event to read a timezone from.
+      tzOffsetMinutes: -new Date().getTimezoneOffset(),
     },
   });
   remember(token);
@@ -506,4 +513,32 @@ export interface PushLog {
  */
 export async function notificationLog(limit = 50): Promise<PushLog> {
   return await request<PushLog>(`/system/push/log?limit=${limit}`, { token: await accessToken() });
+}
+
+export interface NotificationSchedule {
+  /** The hour a reminder goes out, in this account's own local time. */
+  reminderHour: number;
+  /** The window nothing courtesy-class arrives in. Equal values mean none. */
+  quietFrom: number;
+  quietTo: number;
+}
+
+export async function notificationSchedule(): Promise<NotificationSchedule> {
+  return await request<NotificationSchedule>("/push/schedule", { token: await accessToken() });
+}
+
+/**
+ * Change the reminder hour, or the window to be left alone in.
+ *
+ * One field at a time, like the switches: two browsers moving two controls at
+ * the same moment must not overwrite each other.
+ */
+export async function setNotificationSchedule(
+  patch: Partial<NotificationSchedule>,
+): Promise<NotificationSchedule> {
+  return await request<NotificationSchedule>("/push/schedule", {
+    method: "PUT",
+    token: await accessToken(),
+    body: { ...patch, tzOffsetMinutes: -new Date().getTimezoneOffset() },
+  });
 }

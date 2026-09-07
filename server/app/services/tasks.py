@@ -30,8 +30,8 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from app.models.common import now as utc_now
 from app.repos import events as events_repo
 from app.repos import learners as learners_repo
-from app.repos import notifications, push_log, push_runs, push_tokens
-from app.services import push
+from app.repos import notifications, notify_prefs, notify_schedule, push_log, push_runs, push_tokens
+from app.services import push, streaks
 
 log = logging.getLogger("koda.tasks")
 
@@ -296,4 +296,153 @@ async def token_sweep(db: AsyncIOMotorDatabase) -> dict[str, Any]:
         "log": await push_log.sweep(db),
     }
     log.info("token sweep: %s", report)
+    return report
+
+
+PRACTICE_REMINDER = "learn.practice_reminder"
+STREAK_ENDING = "learn.streak_ending"
+
+#: How late a streak warning may go out.
+#:
+#: Sent with the reminder rather than on its own schedule: a family who hears
+#: "time to practise" at five and "the streak ends today" at eight has been
+#: notified twice about one evening, which is how a courtesy becomes a nag. One
+#: tick, and the streak line replaces the reminder when there is a streak at
+#: stake — it is the same sentence with more reason behind it.
+async def daily_reminders(
+    db: AsyncIOMotorDatabase,
+    *,
+    at: datetime | None = None,
+    cursor: str | None = None,
+    limit: int = FAMILY_PAGE,
+    preview: bool = False,
+) -> dict[str, Any]:
+    """Remind whoever asked to be reminded, at the hour they chose.
+
+    Hourly, and the filter is per *person* rather than per family: two parents
+    on one account may have picked different hours, and one of them having
+    already been reminded is not a reason the other has been.
+
+    Three gates before anything is composed, in the order that costs least:
+    the deployment's switch, then whether it is that person's hour, then
+    whether the child has already practised — because the last is a query and
+    the first two are arithmetic.
+
+    Quiet hours are checked even though the chosen hour is the person's own: a
+    parent who picks 22:00 and has quiet hours from 21:00 has contradicted
+    themselves, and the window is the one that says "not now" out loud.
+    """
+    at = at or utc_now()
+    report: dict[str, Any] = {
+        "job": "daily-reminders",
+        "preview": preview,
+        "families": 0,
+        "due": 0,
+        "reminders": 0,
+        "streaks": 0,
+        "sent": 0,
+        "cursor": None,
+    }
+
+    allows_reminder = await push.deployment_allows(db, PRACTICE_REMINDER)
+    allows_streak = await push.deployment_allows(db, STREAK_ENDING)
+    if not (allows_reminder or allows_streak):
+        report["skipped"] = "the deployment does not send reminders"
+        return report
+
+    families = await _families_with_browsers(db, after=cursor, limit=limit)
+    report["families"] = len(families)
+    if len(families) == limit:
+        report["cursor"] = families[-1]
+
+    for family_id in families:
+        # Who in this family wants either kind, and at what hour.
+        people = await push.adults_of(db, family_id)
+        if not people:
+            continue
+        prefs = await notify_prefs.for_users(db, people)
+        schedules = await notify_schedule.for_users(db, people)
+
+        # The browser's own report first, the learning log second.
+        #
+        # The order matters here and nowhere else. A reminder is *for* a child
+        # who has not practised, and one who never has leaves no event to read a
+        # timezone from — so reading the log first would have worked for every
+        # family except exactly the ones this kind exists for.
+        offset = next(
+            (s["tzOffsetMinutes"] for s in schedules.values() if s["tzOffsetMinutes"] is not None),
+            None,
+        )
+        if offset is None:
+            offset = await events_repo.latest_tz_offset(db, family_id)
+        if offset is None:
+            # Nobody has told us what hour it is where they are, and guessing
+            # would ring somebody in the middle of their night.
+            continue
+
+        local = _local(at, offset)
+        today = local.date().isoformat()
+
+        due_now = [
+            user_id
+            for user_id in people
+            if schedules[user_id]["reminderHour"] == local.hour
+            and not notify_schedule.is_quiet(schedules[user_id], local.hour)
+            and (
+                (allows_reminder and push.wanted_by(PRACTICE_REMINDER, prefs.get(user_id)))
+                or (allows_streak and push.wanted_by(STREAK_ENDING, prefs.get(user_id)))
+            )
+        ]
+        if not preview and not due_now:
+            continue
+        report["due"] += 1
+
+        for learner in await learners_repo.for_family(db, family_id):
+            learner_id = learner["_id"]
+            name = learner.get("displayName", "Your child")
+
+            if await events_repo.practised_on(db, family_id, learner_id, today):
+                # The whole point of the kind. A child who has already had a go
+                # is a child nobody needs telling about.
+                continue
+
+            # A streak at stake outranks a plain reminder: same evening, better
+            # reason, and never both.
+            at_stake = await streaks.ending_today(db, family_id, learner_id, today=today)
+            kind = STREAK_ENDING if at_stake and allows_streak else PRACTICE_REMINDER
+            if kind == PRACTICE_REMINDER and not allows_reminder:
+                continue
+
+            values = {"learner": name, "days": at_stake}
+            title, body = await push.wording(db, kind, values)
+
+            if preview:
+                report.setdefault("would_send", []).append(
+                    {
+                        "familyId": family_id,
+                        "learnerId": learner_id,
+                        "learner": name,
+                        "kind": kind,
+                        "title": title,
+                        "body": body,
+                        "streak": at_stake,
+                        "people": len(due_now),
+                    }
+                )
+                continue
+
+            if not await push_runs.claim(db, kind=kind, recipient_id=learner_id, date_key=today):
+                continue
+
+            report["streaks" if kind == STREAK_ENDING else "reminders"] += 1
+            report["sent"] += await push.send(
+                db,
+                to=push.Recipient(family_id=family_id),
+                kind=kind,
+                title=title,
+                body=body,
+                path=f"/children/{learner_id}",
+                tag=f"{'streak' if kind == STREAK_ENDING else 'remind'}:{learner_id}",
+            )
+
     return report

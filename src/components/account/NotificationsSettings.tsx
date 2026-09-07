@@ -6,7 +6,10 @@ import {
   chooseNotification,
   disableNotifications,
   enableNotifications,
+  notificationSchedule,
+  setNotificationSchedule,
   type EnableOutcome,
+  type NotificationSchedule,
   notificationPreferences,
   notificationsAreOn,
   pushSupport,
@@ -52,6 +55,38 @@ export const NotificationsSettings: React.FC = () => {
   /* Why the switch would not turn on. Cleared on the next attempt, so a
      stale reason never sits under a switch that has since worked. */
   const [trouble, setTrouble] = useState<string | null>(null);
+  /* When this account may be rung: the reminder hour, and the window to be
+     left alone in. Loaded with the switches, because it is only meaningful
+     once notifications are on. */
+  const [schedule, setSchedule] = useState<NotificationSchedule | null>(null);
+
+  /**
+   * An hour, written the way a person says it.
+   *
+   * Not `toLocaleTimeString` on a made-up date: this is a bare hour with no
+   * day behind it, and formatting one through a Date is how "9 pm" becomes
+   * "21:00" on one device and "9:00 PM" on another for no reason a reader
+   * could name.
+   */
+  const hourLabel = (hour: number): string => {
+    if (hour === 0) return "midnight";
+    if (hour === 12) return "midday";
+    return hour < 12 ? `${hour}am` : `${hour - 12}pm`;
+  };
+
+  const HOURS = Array.from({ length: 24 }, (_, hour) => hour);
+
+  const changeSchedule = async (patch: Partial<NotificationSchedule>) => {
+    setBusy(true);
+    try {
+      setSchedule(await setNotificationSchedule(patch));
+    } catch {
+      // A courtesy setting that could not be saved is not an error a parent has
+      // to read; the control springs back and the next attempt is a tap away.
+      setSchedule(await notificationSchedule().catch(() => schedule));
+    }
+    setBusy(false);
+  };
 
   const load = useCallback(async () => {
     try {
@@ -67,6 +102,7 @@ export const NotificationsSettings: React.FC = () => {
 
   useEffect(() => {
     if (registered) void load();
+    if (registered) void notificationSchedule().then(setSchedule).catch(() => setSchedule(null));
   }, [registered, load]);
 
   if (support.state === "not-configured") return null;
@@ -224,6 +260,84 @@ export const NotificationsSettings: React.FC = () => {
               />
             </div>
           ))}
+
+        {/*
+          When, rather than whether. Drawn under the switches it governs and
+          only once a kind that uses it is on: a reminder hour means nothing to
+          somebody who has not asked for reminders, and quiet hours mean nothing
+          to a browser that is not being rung at all.
+        */}
+        {on && deploymentSends && schedule && (kinds ?? []).some((k) => k.on) && (
+          <>
+            {(kinds ?? []).some(
+              (k) => k.on && (k.id === "learn.practice_reminder" || k.id === "learn.streak_ending"),
+            ) && (
+              <div className={l.row}>
+                <div className="min-w-0">
+                  <h4 className={l.rowTitle}>Remind me at</h4>
+                  <p className={l.rowNote}>
+                    Once a day at most, and only when they have not had a go yet.
+                  </p>
+                </div>
+                <select
+                  disabled={busy}
+                  value={schedule.reminderHour}
+                  onChange={(e) => void changeSchedule({ reminderHour: Number(e.target.value) })}
+                  aria-label="The hour to be reminded at"
+                  className="bg-surface border border-line rounded-2xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-indigo-500"
+                >
+                  {HOURS.map((hour) => (
+                    <option key={hour} value={hour}>
+                      {hourLabel(hour)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div className={l.row}>
+              <div className="min-w-0">
+                <h4 className={l.rowTitle}>Quiet hours</h4>
+                <p className={l.rowNote}>
+                  {schedule.quietFrom === schedule.quietTo
+                    ? "Off — anything you have turned on can arrive at any hour."
+                    : `Nothing arrives between ${hourLabel(schedule.quietFrom)} and ${hourLabel(
+                        schedule.quietTo,
+                      )}. A new sign-in still does — that one is about your account.`}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <select
+                  disabled={busy}
+                  value={schedule.quietFrom}
+                  onChange={(e) => void changeSchedule({ quietFrom: Number(e.target.value) })}
+                  aria-label="Quiet hours start"
+                  className="bg-surface border border-line rounded-2xl px-2 py-2 text-sm text-ink focus:outline-none focus:border-indigo-500"
+                >
+                  {HOURS.map((hour) => (
+                    <option key={hour} value={hour}>
+                      {hourLabel(hour)}
+                    </option>
+                  ))}
+                </select>
+                <span className="text-xs text-muted">to</span>
+                <select
+                  disabled={busy}
+                  value={schedule.quietTo}
+                  onChange={(e) => void changeSchedule({ quietTo: Number(e.target.value) })}
+                  aria-label="Quiet hours end"
+                  className="bg-surface border border-line rounded-2xl px-2 py-2 text-sm text-ink focus:outline-none focus:border-indigo-500"
+                >
+                  {HOURS.map((hour) => (
+                    <option key={hour} value={hour}>
+                      {hourLabel(hour)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </>
+        )}
 
         {on && deploymentSends && (
           <div className={l.row}>

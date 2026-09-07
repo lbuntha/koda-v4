@@ -56,6 +56,12 @@ INDEXES: dict[str, list[IndexModel]] = {
         # The list is always "mine, newest first", so it is one compound index.
         IndexModel([("userId", ASCENDING), ("createdAt", DESCENDING)], name="by_person_recent"),
     ],
+    "notify_schedule": [
+        # Keyed by `_id` — one row per person — so there is nothing to index for
+        # the read. This is the job's own query: everyone who has told us what
+        # hour it is where they are.
+        IndexModel([("tzOffsetMinutes", ASCENDING)], name="by_offset", sparse=True),
+    ],
     "notify_prefs": [
         IndexModel([("userId", ASCENDING)], name="by_person"),
     ],

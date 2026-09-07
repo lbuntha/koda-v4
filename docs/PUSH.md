@@ -601,7 +601,7 @@ timer of its own:
 
 | Job | Cadence | Does |
 |---|---|---|
-| `daily-reminders` | Hourly, on the hour | Sends `practice_reminder` to families whose chosen hour is now in their timezone and who have not practised today |
+| `daily-reminders` | Hourly, on the hour | Sends `practice_reminder` — or `streak_ending`, when there is a streak at stake — to a child who has not practised, at the hour *their own parent* chose |
 | `weekly-summary` | Hourly, on the hour | Same, for families for whom it is now Sunday evening |
 | `token-sweep` | Nightly | Deletes rows `refreshedAt` older than 270 days and `disabledAt` older than 30 |
 
@@ -648,7 +648,7 @@ Three things this needs to get right:
 | **1** ✅ | `services/push.py` with the `console` driver, `push_tokens`, the two endpoints, `device.new_signin` | 22 tests in `test_push.py`, 363 in the suite, `ruff` clean |
 | **2** ✅ | The worker's `push`/`notificationclick` handlers, Settings → Notifications, preferences, preflight and test send (§7) | 36 tests in `test_push.py` and 14 over the payload guard; 381 API tests, 1,002 frontend tests, both builds clean. **Still to do on hardware:** preflight green on staging, then a real Android phone and a real installed iPhone |
 | **3** ✅ | Cloud Scheduler, `weekly_summary`, `goal_met` | 34 tests in `test_tasks.py`; 474 API tests, 1,710 frontend tests, `ruff` and `tsc` clean. **Proved on hardware:** a notification delivered to a real phone, and `gcloud scheduler jobs run token-sweep` answering 200 through the OIDC door. `weekly_summary` fires on its own on the first Sunday |
-| **4** | `practice_reminder`, `streak_ending`, the self-limiting counter | Off by default; on by choice; quiet by neglect |
+| **4** ✅ | `practice_reminder`, `streak_ending`, quiet hours, the reminder hour | 22 tests in `test_reminders.py`; 500 API tests, 1,710 frontend tests, `ruff` and `tsc` clean. **Not built:** the self-limiting counter (§9), which needs a tap to reach the server |
 
 Each phase is deployable and none of them is load-bearing for the phase after,
 which is what makes phase 0 safe to ship alone.
@@ -778,6 +778,45 @@ Three things the building taught, none of which was in the plan:
 What is still not built: the clock (§10) and the two reminder kinds, which are
 phases 3 and 4. And the app still has no URL routing, so `notificationclick`
 focuses the open window and posts it the path rather than navigating to it.
+
+**Phase 4, as built.** `notify_schedule` holds the two things that are about
+*when* rather than *whether* — the reminder hour and quiet hours — as a row per
+person rather than per kind, because "do not ring me after nine" is not a
+switch. `services/streaks.py` holds the streak rule, and `daily_reminders` in
+`services/tasks.py` is the job.
+
+Four things the building decided:
+
+- **The timezone has to come from the browser, not the learning log.** Every
+  other job here reads `events.latest_tz_offset`, and for this one that is
+  exactly backwards: a reminder is *for* a child who has not practised, and one
+  who never has leaves no event to read an offset from. Deriving it from
+  practice would have worked for every family except the ones this kind exists
+  for. `POST /v1/push/tokens` now carries `tzOffsetMinutes`, so the answer
+  arrives with the registration; the log is the fallback. This was caught by a
+  test asserting a family *is* reminded, which is the only kind of test that
+  could have caught it.
+- **A streak at stake replaces the reminder; it never joins it.** A family who
+  hears "time to practise" at five and "the streak ends today" at eight has been
+  notified twice about one evening, which is how a courtesy becomes the hook §1
+  forbids. One tick, one notification, and the streak line is the same sentence
+  with more reason behind it.
+- **A one-day run is not a streak.** A child who practised once yesterday has
+  not built anything a notification about losing it would be honest about.
+- **Quiet hours ship on, and everything else here ships off.** Every other
+  preference waits to be asked for; this one protects a child's evening from the
+  feature itself, and a default of "no quiet window" means the first parent to
+  turn reminders on discovers the policy by being woken at three in the morning.
+  Equal `from` and `to` means *off* rather than *always*, because somebody who
+  set both to the same time was switching the window off — a preference that
+  turns into its own opposite is worse than one that does nothing.
+
+**What phase 4 does not have** is the self-limiting counter of §9: a kind
+delivered eight times without a tap turning itself off. It needs a tap to reach
+the server, which means the worker's `notificationclick` reporting back — a
+round trip from a service worker, on a channel whose whole promise is that it
+costs a child's tablet nothing. Worth doing, worth designing rather than
+appending.
 
 **Phase 3, as built.** `repos/push_runs.py` is the ledger, `security/tasks.py`
 the door, `routers/tasks.py` the two endpoints and `services/tasks.py` the work.
