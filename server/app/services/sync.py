@@ -13,6 +13,7 @@ Two halves with different rules, which is the whole design:
 
 from typing import Any
 
+from fastapi import BackgroundTasks
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.errors import AppError, Forbidden
@@ -33,6 +34,7 @@ from app.repos import counters, rollups
 from app.repos import docs as docs_repo
 from app.repos import events as events_repo
 from app.security.permissions import principal_can
+from app.services import milestones
 from app.services.rollup import increments_for
 
 
@@ -64,7 +66,19 @@ def merge_progress(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[s
     return merged
 
 
-async def push(db: AsyncIOMotorDatabase, principal: Principal, body: PushIn) -> PushOut:
+async def push(
+    db: AsyncIOMotorDatabase,
+    principal: Principal,
+    body: PushIn,
+    tasks: BackgroundTasks | None = None,
+) -> PushOut:
+    """Take a device's batch.
+
+    `tasks` is where anything that is *about* the batch rather than part of it
+    goes — today, noticing that a child has met their goal. Handed in rather
+    than created here so the work runs after the response has been sent: a
+    tablet finishing a round waits on the insert, and never on a notification.
+    """
     family_id = principal.family_id
     assert family_id is not None  # the router's dependency guarantees it
 
@@ -101,6 +115,12 @@ async def push(db: AsyncIOMotorDatabase, principal: Principal, body: PushIn) -> 
             if event.id in inserted_ids
         ]
         await rollups.apply(db, [i for i in increments if i])
+
+        # After the response, and only over what was actually new: a device
+        # replaying its outbox on a bad connection must not congratulate the
+        # same child twice. See `milestones.goals_reached`.
+        if tasks is not None and inserted:
+            tasks.add_task(milestones.goals_reached, db, family_id, inserted)
 
     for mutation in body.mutations:
         outcome = await _apply_mutation(db, principal, mutation)

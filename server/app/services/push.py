@@ -117,8 +117,19 @@ async def send(
     title: str,
     body: str,
     path: str = "/",
+    tag: str | None = None,
 ) -> int:
     """Ring every live browser this recipient has. Returns how many went.
+
+    `tag` is what a later notification of the same sort *replaces*, and it
+    defaults to the kind because for most kinds that is right: a second "a new
+    device signed in" should sit on the first rather than beside it.
+
+    It has to be overridable for the kinds §5 collapses per learner. A weekly
+    summary tagged only `learn.weekly_summary` means a family with three
+    children reads one summary — the last to arrive — and never learns that two
+    others were sent. Every per-child kind therefore passes `weekly:{learnerId}`
+    and its neighbours.
 
     Never raises.
     """
@@ -151,7 +162,7 @@ async def send(
             # the app will show them next time somebody opens it.
             return 0
 
-        message = {"title": title, "body": body, "path": path, "kind": kind, "tag": kind}
+        message = {"title": title, "body": body, "path": path, "kind": kind, "tag": tag or kind}
         cfg = settings()
 
         if cfg.push_driver == "console":

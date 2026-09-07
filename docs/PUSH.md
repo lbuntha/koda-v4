@@ -54,8 +54,8 @@ Non-goals, stated so they cannot creep in:
 ## 2. Shape
 
 ```
-                        ┌── Cloud Scheduler ──► POST /v1/tasks/push/{job}   (OIDC)
-                        │        daily 18:00 local · weekly Sun 19:00
+                        ┌── Cloud Scheduler ──► POST /v1/tasks/{job}        (OIDC)
+                        │    hourly; the local hour is decided in the job
                         ▼
 browser ──► Cloud Run: koda-app (Express) ──► Cloud Run: koda-backend (FastAPI)
    │                                                    │
@@ -304,7 +304,7 @@ drivers, never raises.
 
 ```python
 async def send(db, *, to: Recipient, kind: str, title: str, body: str,
-               path: str = "/", data: dict | None = None) -> int:
+               path: str = "/", tag: str | None = None) -> int:
     """Ring every live device this recipient has. Returns how many went.
 
     Never raises. Every caller is a route or a job whose real work has already
@@ -528,12 +528,27 @@ timer of its own:
 | Job | Cadence | Does |
 |---|---|---|
 | `daily-reminders` | Hourly, on the hour | Sends `practice_reminder` to families whose chosen hour is now in their timezone and who have not practised today |
-| `weekly-summary` | Hourly on Sundays | Same, for families whose chosen evening hour is now |
+| `weekly-summary` | Hourly, on the hour | Same, for families for whom it is now Sunday evening |
 | `token-sweep` | Nightly | Deletes rows `refreshedAt` older than 270 days and `disabledAt` older than 30 |
 
 Hourly-with-a-timezone-filter, rather than a job per timezone: one schedule,
 and a family that moves country is right the next day without an operator
 touching anything.
+
+**The summary is hourly every day, not hourly on Sundays**, which is a
+correction this section carried until the job was built. Six in the evening on a
+*local* Sunday is a UTC Monday for everybody far enough east, so a schedule that
+only ran on Sundays UTC would silently never reach them. The day is part of what
+the filter decides, along with the hour — one `cron` line, `0 * * * *`, and the
+deciding in one place.
+
+**Where the timezone comes from.** Not a new field: every learning event already
+carries `tzOffsetMinutes`, because mastery counts days in the child's day rather
+than the server's, and `events.latest_tz_offset` reads the most recent one for
+the family. An offset rather than an IANA zone, so it can be an hour stale
+between a daylight-saving change and the next round played — which is not worth
+a field on every device registration, and a family who has not practised since
+the clocks changed has no summary to be sent anyway.
 
 Three things this needs to get right:
 
@@ -558,7 +573,7 @@ Three things this needs to get right:
 | **0** ✅ | `injectManifest`, the worker ported with **no push code** | Both builds report the same *29 entries*, the hashed URLs diff clean, `tsc` passes over the worker's own project, 985 tests pass — and, in Chrome against a production build: the update prompt still installs, and a deep link still boots with the server stopped |
 | **1** ✅ | `services/push.py` with the `console` driver, `push_tokens`, the two endpoints, `device.new_signin` | 22 tests in `test_push.py`, 363 in the suite, `ruff` clean |
 | **2** ✅ | The worker's `push`/`notificationclick` handlers, Settings → Notifications, preferences, preflight and test send (§7) | 36 tests in `test_push.py` and 14 over the payload guard; 381 API tests, 1,002 frontend tests, both builds clean. **Still to do on hardware:** preflight green on staging, then a real Android phone and a real installed iPhone |
-| **3** | Cloud Scheduler, `weekly_summary`, `goal_met` | A summary that arrives on Sunday and exactly once |
+| **3** ✅ | Cloud Scheduler, `weekly_summary`, `goal_met` | 22 tests in `test_tasks.py`; 450 API tests, `ruff` clean. **Still to do on hardware:** the two jobs created against staging, and a summary watched arriving on a real Sunday |
 | **4** | `practice_reminder`, `streak_ending`, the self-limiting counter | Off by default; on by choice; quiet by neglect |
 
 Each phase is deployable and none of them is load-bearing for the phase after,
@@ -665,6 +680,47 @@ What is still not built: the clock (§10) and the two reminder kinds, which are
 phases 3 and 4. And the app still has no URL routing, so `notificationclick`
 focuses the open window and posts it the path rather than navigating to it.
 
+**Phase 3, as built.** `repos/push_runs.py` is the ledger, `security/tasks.py`
+the door, `routers/tasks.py` the two endpoints and `services/tasks.py` the work.
+`services/milestones.py` is the other half — `goal_met`, which no clock can
+send.
+
+Four things the building decided, none of them obvious from §10:
+
+- **`goal_met` does not belong in a job at all.** It is the one kind in phase 3
+  the clock cannot serve: a congratulation that waits for the top of the hour
+  arrives after the child has gone to bed, which is a different notification. It
+  runs off the sync push instead, on a `BackgroundTasks` so a tablet finishing a
+  round never waits on it, and over the events `insert_many` reports as *new* —
+  a device replaying its outbox on a bad connection pushes the same rounds
+  again, and a check driven by the request body would congratulate a child once
+  per retry. The count it compares against the goal is the server's own, because
+  a batch of six that arrives after five are already stored is not six rounds.
+- **The collapse tags in §5 needed `push.send` to take one.** It hardcoded
+  `tag = kind`, which is right for an account kind and wrong for every per-child
+  one: a family with three children would have read one weekly summary — the
+  last to arrive — and never learned that two others were sent. `tag` is now a
+  parameter defaulting to the kind, and the jobs pass `weekly:{learnerId}` and
+  `goal:{learnerId}:{date}` as the table always said they would.
+- **A week with nothing in it is not summarised.** A child who did not practise
+  is exactly the child whose parent should not hear about it from a phone on a
+  Sunday evening, and §1 is explicit about what this must not become. The job
+  skips them rather than sending "practised on 0 days" — which also means the
+  ledger is never claimed for a child nothing was said about.
+- **The job pages over families that hold a browser**, read off `push_tokens`
+  rather than the family table. A family with nobody to ring cannot be rung, so
+  paging the rest of the deployment to discover that is work with a known
+  answer; the run's cost is proportional to the number of people who asked for
+  notifications rather than to the number of accounts. A full page always offers
+  a cursor — whether anything is behind it is the next call's answer, not a
+  guess this one makes.
+
+And one thing to be plain about, because it is a deliberate loss: the ledger is
+claimed **before** the send, so a process that dies in between loses that
+notification. A summary that does not arrive is a disappointment; a summary that
+arrives three times is why somebody turns notifications off. The cheaper mistake
+is the quiet one.
+
 ---
 
 ## 12. Configuration
@@ -675,7 +731,14 @@ Server (`settings.py`, joining `mail_driver` and its neighbours):
 push_driver: Literal["console", "fcm"] = "console"
 firebase_project_id: str | None = None      # "learn-with-koda"; unset ⇒ console
 push_task_audience: str | None = None       # OIDC audience Cloud Scheduler presents
+push_task_service_account: str | None = None  # the only caller /v1/tasks/* accepts
 ```
+
+The last two are both-or-neither, and unset **refuses every task call** outside
+development — the shape `main.py` already uses when it declines to start on the
+development JWT secret. Audience alone would not be enough: a great many service
+accounts can mint a token for a given Cloud Run URL, and the `email` claim is
+what says which one is ours.
 
 Client (public identifiers baked into the bundle by Vite, exactly like
 `VITE_GOOGLE_CLIENT_ID` — none of these is a secret):
@@ -697,9 +760,32 @@ One-time setup in Google Cloud, and it is genuinely all of it:
    downloaded, and nothing new goes into GitHub secrets.
 4. A second service account for Cloud Scheduler with `roles/run.invoker` on
    `koda-backend`.
-5. `deploy.yml` gains `PUSH_DRIVER`, `FIREBASE_PROJECT_ID` and
-   `PUSH_TASK_AUDIENCE` as repository *variables* — there is no new secret in
-   this feature, which is the part of this design worth keeping.
+5. `deploy.yml` gains `PUSH_DRIVER`, `FIREBASE_PROJECT_ID`,
+   `PUSH_TASK_AUDIENCE` and `PUSH_TASK_SERVICE_ACCOUNT` as repository
+   *variables* — there is no new secret in this feature, which is the part of
+   this design worth keeping.
+6. The two jobs themselves, once, with `SA` the account from step 4 and `URL`
+   the Cloud Run service (which is also `PUSH_TASK_AUDIENCE`):
+
+   ```bash
+   gcloud scheduler jobs create http weekly-summary \
+     --location=europe-west1 --schedule="0 * * * *" \
+     --uri="$URL/v1/tasks/weekly-summary" --http-method=POST \
+     --oidc-service-account-email="$SA" --oidc-token-audience="$URL" \
+     --attempt-deadline=300s
+
+   gcloud scheduler jobs create http token-sweep \
+     --location=europe-west1 --schedule="17 3 * * *" \
+     --uri="$URL/v1/tasks/token-sweep" --http-method=POST \
+     --oidc-service-account-email="$SA" --oidc-token-audience="$URL" \
+     --attempt-deadline=300s
+   ```
+
+   Hourly rather than Sunday-only for the reason §10 gives, and `17 3` rather
+   than `0 3` because a sweep is not urgent and the hour is quieter off the
+   hour. The five-minute deadline is what a cold start is measured against; a
+   run that needs longer answers with a `cursor` instead of holding the request
+   open.
 
 `koda-app` (the Node service) is untouched. It serves a bundle with three more
 public strings in it.
@@ -733,7 +819,13 @@ person it was sent to.
   its tokens.
 - A fake FCM transport for the error table in §8: `UNREGISTERED` deletes,
   `UNAVAILABLE` retries then retires, `QUOTA_EXCEEDED` stops the run.
-- `push_runs` idempotency: run the job twice, assert one send.
+- `test_tasks.py` — the door (`/v1/tasks/*` refuses no token, a token that is
+  not Google's, and a *different* service account holding a valid one), the
+  hour filter in two timezones, a week with nothing in it, two children as two
+  notifications, the operator ceiling, and the sweep.
+- `push_runs` idempotency: run the job twice, assert one send. And the same
+  claim from the other direction — five rounds, then five more, is one
+  congratulation; a replayed batch is not a second one.
 - The test send refuses a recipient: assert the route has no such parameter,
   that a family token gets 403, and that on the console driver it reports
   `sent: 0` rather than success.

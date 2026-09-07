@@ -91,6 +91,21 @@ class Settings(BaseSettings):
     #: a role, and no key file exists to leak.
     firebase_project_id: str | None = None
 
+    #: Who may call `/v1/tasks/*`, and what their token must have been made for.
+    #:
+    #: Both, or neither. `/v1/tasks/*` is the only prefix no browser calls — a
+    #: weekly summary has nobody to open a page — so it is reached by Cloud
+    #: Scheduler holding an OIDC token, and both halves of "is this the
+    #: scheduler?" have to be checked: the audience proves the token was minted
+    #: for this deployment, the email proves it was minted by the account we
+    #: named. Either alone lets in anything that can reach the service.
+    #:
+    #: Unset **refuses every task call** outside development, in the shape
+    #: `main.py` already uses for the development JWT secret. A deployment with
+    #: no scheduler has no jobs to lose.
+    push_task_audience: str | None = None
+    push_task_service_account: str | None = None
+
     cors_origins: list[str] = ["http://localhost:3001", "http://localhost:3002"]
     environment: str = "development"
 

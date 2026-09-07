@@ -59,6 +59,15 @@ INDEXES: dict[str, list[IndexModel]] = {
     "notify_prefs": [
         IndexModel([("userId", ASCENDING)], name="by_person"),
     ],
+    "push_runs": [
+        # No index on the key: the key *is* `_id`, which is what makes a claim
+        # atomic. A second job racing the first loses on the unique id rather
+        # than on a read that both of them passed.
+        #
+        # Claims expire on their own, so a deployment nobody runs the nightly
+        # sweep on does not accumulate a row per notification for ever.
+        IndexModel([("claimedAt", ASCENDING)], expireAfterSeconds=60 * 24 * 3600, name="ttl_60d"),
+    ],
     "push_tokens": [
         # One row per token, whoever presents it: the browser only ever hands
         # out one, so a second row for the same token would be a second

@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends
 
 from app.deps import AUTHENTICATED, Db, require
 from app.errors import Forbidden
@@ -31,7 +31,7 @@ def _family_of(principal: Principal) -> str:
 
 
 @router.post("/push")
-async def push(body: PushIn, db: Db, p: CanAppend) -> PushOut:
+async def push(body: PushIn, db: Db, p: CanAppend, tasks: BackgroundTasks) -> PushOut:
     _family_of(p)
 
     # Two deployment switches, and refusing here is safe in a way it would not
@@ -42,7 +42,7 @@ async def push(body: PushIn, db: Db, p: CanAppend) -> PushOut:
     if await system_repo.value_of(db, "system.readOnly", False):
         raise Forbidden("The service is in maintenance mode.", "read_only")
 
-    return await sync_service.push(db, p, body)
+    return await sync_service.push(db, p, body, tasks)
 
 
 @router.get("/changes")

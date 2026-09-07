@@ -90,3 +90,82 @@ async def conversations_for_learner(
         .to_list(length=500)
     )
     return rows
+
+
+#: The event that means a round was finished, rather than merely started.
+#:
+#: Everything the notification layer asks about practice is asked in these
+#: terms: a lesson opened and abandoned is not a day's practice, and counting
+#: `answer_submitted` would make one long round look like a fortnight of them.
+COMPLETED = "lesson_completed"
+
+
+async def latest_tz_offset(db: AsyncIOMotorDatabase, family_id: str) -> int | None:
+    """Minutes east of UTC, as the family's own device last reported it.
+
+    There is no timezone field on a family, and this is deliberately not a
+    reason to add one: every learning event already carries the offset the
+    browser was in when it was recorded, because mastery counts days in the
+    child's day rather than the server's. A scheduled job asking "is it six in
+    the evening where they are?" is asking the same question the log already
+    answers.
+
+    An *offset* rather than an IANA zone, so it is worth being plain about the
+    limit: it is the offset that was true when they last practised, which a
+    daylight-saving change can leave an hour stale until the next round is
+    played. An hour of drift on a Sunday summary is not worth a new field on
+    every device registration to prevent — and a family who has not practised
+    since the clocks changed has no summary to be sent anyway.
+
+    `None` means nobody in this family has ever practised, which every caller
+    reads as "nothing to say" rather than as an error.
+    """
+    row = await db.events.find_one(
+        {"familyId": family_id, "tzOffsetMinutes": {"$ne": None}},
+        {"tzOffsetMinutes": 1},
+        sort=[("receivedAt", -1)],
+    )
+    if row is None:
+        return None
+    offset = row.get("tzOffsetMinutes")
+    # A device is entitled to be wrong about itself; a job is not entitled to
+    # crash because of it. Real offsets run from -12:00 to +14:00.
+    return offset if isinstance(offset, int) and -840 <= offset <= 840 else None
+
+
+async def days_practised(
+    db: AsyncIOMotorDatabase, family_id: str, learner_id: str, days: list[str]
+) -> int:
+    """How many of these local days this learner finished something on.
+
+    The days are passed in rather than derived from a range here, because the
+    caller is the only thing that knows where the learner's week starts — and a
+    string comparison over `localDay` would quietly include a day the caller did
+    not mean the moment one client writes the field in another format.
+    """
+    if not days:
+        return 0
+    found = await db.events.distinct(
+        "localDay",
+        {
+            "familyId": family_id,
+            "learnerId": learner_id,
+            "type": COMPLETED,
+            "localDay": {"$in": days},
+        },
+    )
+    return len(found)
+
+
+async def completed_on(
+    db: AsyncIOMotorDatabase, family_id: str, learner_id: str, local_day: str
+) -> int:
+    """Rounds this learner finished on one of their own days."""
+    return await db.events.count_documents(
+        {
+            "familyId": family_id,
+            "learnerId": learner_id,
+            "type": COMPLETED,
+            "localDay": local_day,
+        }
+    )
