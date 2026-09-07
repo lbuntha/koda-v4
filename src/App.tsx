@@ -267,6 +267,7 @@ export default function App() {
     | "badges"
     | "billing"
     | "keys"
+    | "notifications"
     | "system"
     | "settings"
   >("home");
@@ -1037,13 +1038,20 @@ export default function App() {
             activeTab === "badges" ||
             activeTab === "billing" ||
             activeTab === "keys" ||
+            activeTab === "notifications" ||
             activeTab === "system") && (
             <Deferred label="Loading Admin">
               <AdminPage
                 initialTab={
                   activeTab === "admin"
                     ? undefined
-                    : (activeTab as "scoring" | "badges" | "billing" | "keys" | "system")
+                    : (activeTab as
+                        | "scoring"
+                        | "badges"
+                        | "billing"
+                        | "keys"
+                        | "notifications"
+                        | "system")
                 }
               />
             </Deferred>

@@ -6,6 +6,7 @@ import {
   chooseNotification,
   disableNotifications,
   enableNotifications,
+  type EnableOutcome,
   notificationPreferences,
   notificationsAreOn,
   pushSupport,
@@ -48,6 +49,9 @@ export const NotificationsSettings: React.FC = () => {
   const [busy, setBusy] = useState(false);
   /** What the last "send me one" attempt did, in a sentence. */
   const [tested, setTested] = useState<string | null>(null);
+  /* Why the switch would not turn on. Cleared on the next attempt, so a
+     stale reason never sits under a switch that has since worked. */
+  const [trouble, setTrouble] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -69,10 +73,16 @@ export const NotificationsSettings: React.FC = () => {
 
   const turnOn = async () => {
     setBusy(true);
+    setTrouble(null);
     const result = await enableNotifications();
     setSupport(pushSupport());
     setRegistered(notificationsAreOn());
-    if (result === "on") await load();
+    if (result.state === "on") await load();
+    // The switch used to discard this. A parent pressed it, nothing moved, and
+    // the screen said nothing — which is the one outcome a switch may never
+    // have. `denied` already has its own sentence in `note()`; this is for the
+    // five ways registration can fail *after* permission was granted.
+    if (result.state === "unavailable") setTrouble(explain(result));
     setBusy(false);
   };
 
@@ -115,6 +125,28 @@ export const NotificationsSettings: React.FC = () => {
       setKinds(prefs.kinds);
     } catch {
       void load();
+    }
+  };
+
+  /**
+   * One sentence for a parent, and the detail underneath for whoever is fixing
+   * it. Both, because the two readers are often the same person on a laptop
+   * setting a deployment up — and because "it did not work" is exactly the
+   * answer preflight exists to improve on.
+   */
+  const explain = (result: Extract<EnableOutcome, { state: "unavailable" }>): string => {
+    const detail = result.detail ? ` (${result.detail})` : "";
+    switch (result.reason) {
+      case "not-configured":
+        return "Notifications are not set up on this service yet.";
+      case "unsupported":
+        return `This browser cannot show notifications${detail}.`;
+      case "no-token":
+        return `Your browser allowed it, but the notification service returned nothing${detail}. On a deployment this usually means the Web Push certificate belongs to a different Firebase project.`;
+      case "mint-failed":
+        return `Your browser allowed it, but the notification service refused to register it${detail}. Try again in a moment; if it keeps happening, the Web Push certificate is the thing to check.`;
+      case "server-refused":
+        return `Your browser is ready — Koda could not record it${detail}. It will try again next time you open the app.`;
     }
   };
 
@@ -168,6 +200,14 @@ export const NotificationsSettings: React.FC = () => {
             />
           )}
         </div>
+
+        {trouble && (
+          <div className={l.row}>
+            {/* Under the switch, not in a toast: it explains the control the
+                reader is looking at, and it has to survive being read twice. */}
+            <p className="text-xs text-rose-600 dark:text-rose-400 break-words">{trouble}</p>
+          </div>
+        )}
 
         {on &&
           deploymentSends &&

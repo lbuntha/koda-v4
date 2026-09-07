@@ -23,7 +23,13 @@
  */
 
 /** The tabs a notification may open. A subset of `App.tsx`'s own union. */
-export type LandingTab = "home" | "children" | "profile" | "devices" | "settings";
+export type LandingTab =
+  | "home"
+  | "children"
+  | "profile"
+  | "devices"
+  | "settings"
+  | "notifications";
 
 export interface Landing {
   tab: LandingTab;
@@ -49,6 +55,10 @@ const TABS: Record<string, LandingTab> = {
   profile: "profile",
   devices: "devices",
   settings: "settings",
+  // The operator's own page. Reachable by a tap because the one notification
+  // that should open it — a deployment telling its staff something — is exactly
+  // the kind that arrives when nobody is looking at a console.
+  notifications: "notifications",
 };
 
 /**
