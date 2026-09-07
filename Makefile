@@ -52,6 +52,41 @@ test-api:
 lint-api:
 	$(COMPOSE) run --rm api ruff check app tests
 
+# --- scheduled work ---------------------------------------------------------
+#
+# There is no clock in the compose stack, on purpose. Cloud Scheduler is what
+# calls `/v1/tasks/*` in production, and the local equivalent is not a cron
+# container — a job that fires hourly is a job you would have to sit and wait
+# for, and the one that matters only fires at six on a Sunday evening. So the
+# laptop gets the other half of the deal: a way to *move the clock* and run one
+# tick now. That is what the `at` override is for, and it is refused outside
+# development.
+#
+# The endpoints are open in development (`security/tasks.py` says so loudly in
+# the log). In production they take a Cloud Scheduler OIDC token.
+
+## tasks-summary: run the weekly summary as if it were the coming Sunday evening
+tasks-summary:
+	@AT=$$(python3 -c "from datetime import datetime,timedelta,timezone; \
+	  n=datetime.now().astimezone(); \
+	  s=(n+timedelta(days=(6-n.weekday())%7)).replace(hour=18,minute=0,second=0,microsecond=0); \
+	  print(s.astimezone(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'))"); \
+	echo "pretending it is $$AT (your next Sunday, 18:00 local)"; \
+	curl -s -X POST "http://localhost:$(API_PORT)/v1/tasks/weekly-summary?at=$$AT" | python3 -m json.tool
+
+## tasks-summary-now: the same job at the real time — what the hourly tick does
+tasks-summary-now:
+	@curl -s -X POST "http://localhost:$(API_PORT)/v1/tasks/weekly-summary" | python3 -m json.tool
+
+## tasks-sweep: run the nightly tidy — dead tokens, old notices, spent claims
+tasks-sweep:
+	@curl -s -X POST "http://localhost:$(API_PORT)/v1/tasks/token-sweep" | python3 -m json.tool
+
+## tasks-replay: forget what has already been sent, so a job can be run again
+tasks-replay:
+	@$(COMPOSE) exec -T mongo mongosh koda_v4 --quiet --eval \
+	  'print("claims cleared: " + db.push_runs.deleteMany({}).deletedCount)'
+
 ## migrate: apply every index
 migrate:
 	$(COMPOSE) exec api python -m app.cli migrate
