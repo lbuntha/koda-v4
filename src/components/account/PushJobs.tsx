@@ -66,11 +66,18 @@ const Outcome: React.FC<{ run: JobRun }> = ({ run }) => {
   if (run.preview) {
     const lines = r.would_send ?? [];
     if (lines.length === 0) {
+      // Two different reasons for an empty preview, and telling them apart is
+      // the whole value of the message. On a fresh deployment nobody has
+      // turned notifications on, and saying "no child practised" then sends an
+      // operator to look at the learning data when the answer is that there is
+      // nobody to send to yet.
       return (
         <p className="text-xs text-muted">
-          Nothing to summarise. Looked at {r.families ?? 0}{" "}
-          {r.families === 1 ? "family" : "families"} with a browser registered — a child who has
-          not practised this week is deliberately left out.
+          {r.families
+            ? `Nothing to summarise. Looked at ${r.families} ${
+                r.families === 1 ? "family" : "families"
+              } with a browser registered — a child who has not practised this week is deliberately left out.`
+            : "Nobody has notifications turned on yet, so there is no one to summarise. Turn them on for one browser in Settings → Notifications, then look again."}
         </p>
       );
     }
@@ -104,6 +111,18 @@ const Outcome: React.FC<{ run: JobRun }> = ({ run }) => {
   // it will happen, and point at the button that answers something today —
   // otherwise pressing this is a dead end with no next step.
   if (r.due === 0) {
+    // Same fork as the preview: "it is not Sunday" and "there is nobody
+    // registered" are different answers, and only one of them is about the
+    // clock. A deployment where notifications have never been turned on should
+    // not be told to wait until Sunday.
+    if (!r.families) {
+      return (
+        <p className="text-xs text-ink">
+          Nothing to do — no browser on this deployment has notifications turned on yet. Turn them
+          on for one in Settings → Notifications, and this job will have somebody to reach.
+        </p>
+      );
+    }
     return (
       <div className="space-y-1">
         <p className="text-xs text-ink">
