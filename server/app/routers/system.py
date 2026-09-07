@@ -26,6 +26,7 @@ from app.push_defaults import BODY_MAX, DEFAULT_KINDS, TITLE_MAX
 from app.repos import maintenance as maintenance_repo
 from app.repos import push_log, push_templates
 from app.repos import system as system_repo
+from app.repos import users as users_repo
 from app.security.rate_limit import PUSH_TEST_PER_ACCOUNT, limiter
 from app.services import push as push_service
 from app.services import tasks as task_service
@@ -428,6 +429,43 @@ async def push_log_read(
             for row in rows
         ],
     )
+
+
+class BroadcastIn(Model):
+    """What an operator wants to tell the people who run this deployment."""
+
+    message: str = Field(min_length=1, max_length=BODY_MAX)
+
+
+@router.post("/push/broadcast")
+async def push_broadcast(body: BroadcastIn, db: Db, p: CanOperate) -> dict[str, Any]:
+    """Tell every member of staff something. Never a family.
+
+    The last kind in the catalog with no sender, and the one that needed the
+    most care about *who*. `system.broadcast` is addressed to the deployment's
+    own staff — the people who would be paged about it — and a route that could
+    reach families would be an announcement channel aimed at children's parents,
+    which §1's list of non-goals rules out in the same breath as marketing.
+
+    So the recipients are read from the platform roles, not from a family, and
+    there is no parameter here that names anybody. It is the same rule the test
+    send keeps: no route in this service takes a recipient.
+    """
+    await limiter.hit(db, "push:broadcast", p.subject_id, PUSH_TEST_PER_ACCOUNT)
+
+    staff = await users_repo.staff_ids(db)
+    if not staff:
+        return {"sent": 0, "staff": 0, "note": "This deployment has no staff accounts."}
+
+    title, text = await push_service.wording(db, "system.broadcast", {"message": body.message})
+    sent = 0
+    for user_id in staff:
+        # One send per person rather than one addressed to a family, because
+        # staff belong to no family — `Recipient` is family-scoped, and an
+        # operator's own row carries `familyId: null`.
+        sent += await push_service.send_to_account(db, user_id=user_id, kind="system.broadcast",
+                                                   title=title, body=text)
+    return {"sent": sent, "staff": len(staff)}
 
 
 class TemplateOut(Model):

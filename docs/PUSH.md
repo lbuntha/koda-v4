@@ -338,9 +338,9 @@ awaits the result because its whole purpose is the sending.
 ```
 
 `data` only, per §3. TTL is a day for courtesy kinds and a week for account
-kinds: a "new device signed in" that arrives late is still worth reading, and a
-Tuesday practice reminder delivered on Thursday is a wrong notification, not a
-late one.
+kinds — `fcm._ttl_for` reads the class off the catalog: a "new device signed in"
+that arrives late is still worth reading, and a Tuesday practice reminder
+delivered on Thursday is a wrong notification, not a late one.
 
 ---
 
@@ -538,7 +538,7 @@ Per-token, from the v1 error body, and each one has exactly one right answer:
 | `UNREGISTERED`, `INVALID_ARGUMENT` on the token | The browser threw the subscription away | **Delete the row.** Not disable — it will never work again |
 | `SENDER_ID_MISMATCH` | Token belongs to another Firebase project | Delete, and log loudly: it means a config change went half-way |
 | `UNAVAILABLE`, `INTERNAL` | FCM is having a moment | Retry twice with jittered backoff, then `failures += 1`; three consecutive retires the row |
-| `QUOTA_EXCEEDED` | Too many for this token/topic | Stop the run. A retry storm is how a quota problem becomes an outage |
+| `QUOTA_EXCEEDED` | Too many for this token/topic | **Stop the run** — the first refusal sets a flag every later send reads, so sends in flight finish and nothing new starts. A retry storm is how a quota problem becomes an outage |
 | `THIRD_PARTY_AUTH_ERROR` | Web push credential (VAPID) wrong | Alert; nothing will work until it is fixed |
 | 401 on the ADC token | Role or scope missing | Alert. Never retry — it will fail identically |
 
@@ -648,7 +648,7 @@ Three things this needs to get right:
 | **1** ✅ | `services/push.py` with the `console` driver, `push_tokens`, the two endpoints, `device.new_signin` | 22 tests in `test_push.py`, 363 in the suite, `ruff` clean |
 | **2** ✅ | The worker's `push`/`notificationclick` handlers, Settings → Notifications, preferences, preflight and test send (§7) | 36 tests in `test_push.py` and 14 over the payload guard; 381 API tests, 1,002 frontend tests, both builds clean. **Still to do on hardware:** preflight green on staging, then a real Android phone and a real installed iPhone |
 | **3** ✅ | Cloud Scheduler, `weekly_summary`, `goal_met` | 34 tests in `test_tasks.py`; 474 API tests, 1,710 frontend tests, `ruff` and `tsc` clean. **Proved on hardware:** a notification delivered to a real phone, and `gcloud scheduler jobs run token-sweep` answering 200 through the OIDC door. `weekly_summary` fires on its own on the first Sunday |
-| **4** ✅ | `practice_reminder`, `streak_ending`, quiet hours, the reminder hour | 22 tests in `test_reminders.py`; 500 API tests, 1,710 frontend tests, `ruff` and `tsc` clean. **Not built:** the self-limiting counter (§9), which needs a tap to reach the server |
+| **4** ✅ | `practice_reminder`, `streak_ending`, quiet hours, the reminder hour, §9's self-limiting counter | 22 tests in `test_reminders.py`; 509 API tests, 1,712 frontend tests, `ruff` and `tsc` clean |
 
 Each phase is deployable and none of them is load-bearing for the phase after,
 which is what makes phase 0 safe to ship alone.
@@ -811,12 +811,27 @@ Four things the building decided:
   set both to the same time was switching the window off — a preference that
   turns into its own opposite is worse than one that does nothing.
 
-**What phase 4 does not have** is the self-limiting counter of §9: a kind
-delivered eight times without a tap turning itself off. It needs a tap to reach
-the server, which means the worker's `notificationclick` reporting back — a
-round trip from a service worker, on a channel whose whole promise is that it
-costs a child's tablet nothing. Worth doing, worth designing rather than
-appending.
+**The self-limiting counter of §9 is built**, and the shape it took is worth
+recording. The run is *read from `push_log`* rather than stored as a tally: the
+log already knows what was delivered and `openedAt` records what was tapped, so
+a counter would have been a second copy of a fact — and the kind that drifts,
+because a send is written by a job and a tap by a browser and neither is looking
+at the other. Nothing is written when it trips, so a single tap on the next
+notification a person does see starts the run again; there is no flag to get
+stuck on and nothing for an operator to clear.
+
+The tap is reported by the **page**, not the worker. A service worker holds no
+access token — it is signed in to nothing — and minting one there would put a
+credential in a context that outlives every tab. `focusOrOpen` already wakes a
+page and hands it the path; the kind rides along, and the page tells the server
+from the session it already has. `POST /v1/notifications/opened` takes a *kind*
+and never an id: what the counter measures is whether this sort of notification
+is still read, and an endpoint that took an id would be one that can mark
+somebody else's record.
+
+Account kinds never self-limit, for the reason they cannot be switched off: a
+security notice that goes quiet because nobody happened to tap the last few is a
+worse thing than a noisy one.
 
 **Phase 3, as built.** `repos/push_runs.py` is the ledger, `security/tasks.py`
 the door, `routers/tasks.py` the two endpoints and `services/tasks.py` the work.

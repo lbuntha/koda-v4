@@ -333,3 +333,20 @@ async def clear_reset_token(db: AsyncIOMotorDatabase, user_id: str) -> None:
     await db.users.update_one(
         {"_id": user_id}, {"$unset": {"resetTokenHash": "", "resetExpiresAt": ""}}
     )
+
+
+async def staff_ids(db: AsyncIOMotorDatabase) -> list[str]:
+    """Everyone who runs this deployment, as ids.
+
+    The same reading of "staff" `admin_stats` counts: a platform role that is
+    not `none`. Suspended accounts are excluded — somebody whose access has
+    been taken away is not somebody to page.
+    """
+    rows = await db.users.find(
+        {
+            "platformRole": {"$nin": ["none", None]},
+            "$or": [{"status": "active"}, {"status": {"$exists": False}}],
+        },
+        {"_id": 1},
+    ).to_list(length=500)
+    return [row["_id"] for row in rows]

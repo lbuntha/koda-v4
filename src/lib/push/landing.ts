@@ -23,6 +23,8 @@
  */
 
 /** The tabs a notification may open. A subset of `App.tsx`'s own union. */
+import { noteNotificationOpened } from "./index";
+
 export type LandingTab =
   | "home"
   | "children"
@@ -102,8 +104,8 @@ export const NOTIFICATION_CLICK = "KODA_NOTIFICATION_CLICK";
  * across that distance to say the same thing the worker already says is a
  * second way to express one idea.
  */
-export const openNotification = (path: string | undefined): void => {
-  window.dispatchEvent(new CustomEvent(NOTIFICATION_CLICK, { detail: { path } }));
+export const openNotification = (path: string | undefined, kind?: string): void => {
+  window.dispatchEvent(new CustomEvent(NOTIFICATION_CLICK, { detail: { path, kind } }));
 };
 
 /**
@@ -114,13 +116,24 @@ export const openNotification = (path: string | undefined): void => {
  * token, because what a tap does is navigation, and navigation is the app's.
  */
 export const onNotificationClick = (handle: (landing: Landing) => void): (() => void) => {
+  /*
+   * A tap is also the only thing that resets §9's self-limiting counter, so it
+   * is reported here rather than at each call site — there are two of them and
+   * a third would forget. Unawaited: opening a screen is the tap's job, and a
+   * parent must never wait on our bookkeeping to reach their child's record.
+   */
+  const report = (kind: string | undefined) => {
+    if (kind) void noteNotificationOpened(kind);
+  };
   const fromWorker = (event: MessageEvent) => {
-    const data = event.data as { type?: string; path?: string } | undefined;
+    const data = event.data as { type?: string; path?: string; kind?: string } | undefined;
     if (data?.type !== NOTIFICATION_CLICK) return;
+    report(data.kind);
     handle(landingFor(data.path));
   };
   const fromApp = (event: Event) => {
-    const detail = (event as CustomEvent<{ path?: string }>).detail;
+    const detail = (event as CustomEvent<{ path?: string; kind?: string }>).detail;
+    report(detail?.kind);
     handle(landingFor(detail?.path));
   };
 

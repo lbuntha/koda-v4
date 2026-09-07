@@ -22,7 +22,7 @@ import re
 from datetime import datetime, timedelta
 from typing import Annotated, Any, Literal
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, Query
 from pydantic import Field
 
 from app.deps import AUTHENTICATED, CurrentPrincipal, Db, require
@@ -35,6 +35,7 @@ from app.repos import plans as plans_repo
 from app.repos import subscriptions as subs_repo
 from app.repos import upgrade_requests as wants_repo
 from app.security import principal_can
+from app.services import push as push_service
 from app.services.entitlements import entitlements
 
 router = APIRouter(prefix="/billing", tags=["billing"], dependencies=[AUTHENTICATED])
@@ -392,7 +393,9 @@ async def subscription_listing(
 
 
 @router.put("/subscriptions/{family_id}")
-async def grant(family_id: str, body: GrantIn, db: Db, p: CanOperate) -> SubscriptionRow:
+async def grant(
+    family_id: str, body: GrantIn, db: Db, p: CanOperate, tasks: BackgroundTasks
+) -> SubscriptionRow:
     """Put a family on a plan for a number of months, or take them off one."""
     family = await families_repo.by_id(db, family_id)
     if not family:
@@ -423,6 +426,27 @@ async def grant(family_id: str, body: GrantIn, db: Db, p: CanOperate) -> Subscri
     asked = await wants_repo.for_family(db, family_id)
     if asked and asked.get("planId") == body.plan_id:
         await wants_repo.clear(db, family_id)
+        # The family asked, and somebody answered. An account kind: it is about
+        # a request *they* made, it carries no preference, and the alternative
+        # is a parent checking the plan screen every day to find out.
+        #
+        # Only for the plan they actually asked for — a grant onto some other
+        # plan is a different conversation, which is the same reason the ask
+        # above is left standing in that case.
+        title, note = await push_service.wording(
+            db, "plan.request_decided", {"decision": "approved"}
+        )
+        tasks.add_task(
+            push_service.send,
+            db,
+            to=push_service.Recipient(
+                family_id=family_id, user_id=asked.get("requestedBy")
+            ),
+            kind="plan.request_decided",
+            title=title,
+            body=note,
+            path="/settings",
+        )
 
     state = await entitlements(db, family_id)
     return SubscriptionRow(

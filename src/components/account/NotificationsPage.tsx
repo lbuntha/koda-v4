@@ -200,7 +200,7 @@ export const NotificationsPage: React.FC = () => {
                   <button
                     key={row.id}
                     type="button"
-                    onClick={() => openNotification(row.path)}
+                    onClick={() => openNotification(row.path, row.kind)}
                     className="flex w-full items-start gap-3 px-4 py-3 text-left transition first:rounded-t-2xl last:rounded-b-2xl hover:bg-surface-muted focus:outline-none focus-visible:bg-surface-muted"
                   >
                     <span className="mt-0.5 shrink-0">{iconFor(row.kind)}</span>

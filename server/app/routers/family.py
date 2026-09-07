@@ -9,7 +9,7 @@ somebody being told they cannot do a thing the page just offered them.
 from datetime import timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, Request
 from pydantic import Field
 
 from app.deps import AUTHENTICATED, CurrentPrincipal, Db, require
@@ -20,6 +20,7 @@ from app.repos import devices, families, invites, learners, memberships, platfor
 from app.security import passwords
 from app.security import policy as rbac
 from app.security.rate_limit import FAMILY_PIN_PER_FAMILY, INVITE_PER_IP, limiter
+from app.services import push as push_service
 from app.services.codes import hash_code, new_code
 
 # Every route here needs a signed-in caller; the permission each one needs
@@ -383,7 +384,9 @@ async def revoke_invite(invite_id: str, db: Db, p: CanInvite) -> None:
 
 
 @router.post("/invites/redeem")
-async def redeem_invite(body: RedeemIn, db: Db, p: CurrentPrincipal, request: Request) -> RedeemOut:
+async def redeem_invite(
+    body: RedeemIn, db: Db, p: CurrentPrincipal, request: Request, tasks: BackgroundTasks
+) -> RedeemOut:
     """Accept an invite, as somebody who already has an account.
 
     Signed in rather than public: an invite adds *a person* to a family, and the
@@ -437,6 +440,32 @@ async def redeem_invite(body: RedeemIn, db: Db, p: CurrentPrincipal, request: Re
     await devices.reassign_family(db, p.subject_id, target)
 
     family = await families.by_id(db, target)
+
+    # Tell whoever sent it. An account kind: it is a fact about the family, it
+    # carries no preference, and somebody who invited a second parent last week
+    # should not have to go looking to find out whether they arrived.
+    #
+    # Addressed to the inviter rather than the family, because "your invite was
+    # accepted" is a sentence about a thing *they* did. Fire-and-forget: the
+    # membership is already written, and a notification that could turn a
+    # successful accept into a 500 is worse than no notification.
+    inviter = invite.get("createdBy")
+    if inviter:
+        who = await users.by_id(db, p.subject_id)
+        title, body_text = await push_service.wording(
+            db,
+            "family.invite_redeemed",
+            {"name": (who or {}).get("displayName") or (who or {}).get("email", "Somebody")},
+        )
+        tasks.add_task(
+            push_service.send,
+            db,
+            to=push_service.Recipient(family_id=target, user_id=inviter),
+            kind="family.invite_redeemed",
+            title=title,
+            body=body_text,
+        )
+
     return RedeemOut(
         familyId=target,
         familyName=(family or {}).get("name", ""),

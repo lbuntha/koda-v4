@@ -127,14 +127,14 @@ registerRoute(
  * A child may be mid-lesson in the tab that exists; opening another copy of the
  * app beside it is how a parent's tap loses somebody's round.
  */
-async function focusOrOpen(path: string): Promise<void> {
+async function focusOrOpen(path: string, kind?: string): Promise<void> {
   const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
 
   for (const client of windows) {
     if (new URL(client.url).origin === self.location.origin) {
       // The app has no URL routing yet — tabs are state — so the path is sent
       // as a message for it to act on rather than navigated to.
-      client.postMessage({ type: "KODA_NOTIFICATION_CLICK", path });
+      client.postMessage({ type: "KODA_NOTIFICATION_CLICK", path, kind });
       await client.focus();
       return;
     }
@@ -190,6 +190,12 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const path = (event.notification.data as { path?: string } | undefined)?.path ?? "/";
-  event.waitUntil(focusOrOpen(path));
+  const data = event.notification.data as { path?: string; kind?: string } | undefined;
+  // The page reports the tap, not the worker.
+  //
+  // The worker has no access token — it is not signed in to anything — and
+  // minting one here would put a credential in a context that outlives every
+  // tab. `focusOrOpen` already wakes a page and hands it the path; the kind
+  // rides along, and the page tells the server from where the session is.
+  event.waitUntil(focusOrOpen(data?.path ?? "/", data?.kind));
 });

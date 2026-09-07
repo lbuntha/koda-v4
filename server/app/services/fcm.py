@@ -80,6 +80,26 @@ def _session() -> Any:
     return AuthorizedSession(credentials)
 
 
+#: How long FCM holds a message for a phone that is off, per §6.
+#:
+#: A week for an account kind and a day for a courtesy one, and the difference
+#: is what the message *is*: "a new device signed in" arriving two days late is
+#: still worth reading, and a Tuesday practice reminder delivered on Thursday is
+#: not a late notification, it is a wrong one.
+TTL_ACCOUNT = 7 * 24 * 3600
+TTL_COURTESY = 24 * 3600
+
+
+def _ttl_for(kind: str) -> int:
+    # Imported here rather than at module scope: this file knows FCM's
+    # vocabulary and nothing about what a kind means, and a top-level import of
+    # the catalog would make the transport depend on the catalogue's shape.
+    from app.push_defaults import BY_KIND
+
+    definition = BY_KIND.get(kind)
+    return TTL_ACCOUNT if definition and definition["class"] == "account" else TTL_COURTESY
+
+
 def envelope(token: str, message: dict[str, str], *, validate_only: bool = False) -> dict[str, Any]:
     """The message as FCM wants it. One place, so the shape cannot drift.
 
@@ -96,9 +116,9 @@ def envelope(token: str, message: dict[str, str], *, validate_only: bool = False
             "token": token,
             "data": {key: str(value) for key, value in message.items()},
             "webpush": {
-                # A day for a courtesy notification: a practice reminder
-                # delivered on Thursday is a wrong notification, not a late one.
-                "headers": {"TTL": "86400", "Urgency": "normal"},
+                # See `_ttl_for`: a day for a courtesy notification, a week for
+                # one about the account itself.
+                "headers": {"TTL": str(_ttl_for(message.get("kind", ""))), "Urgency": "normal"},
                 "fcm_options": {"link": f"{cfg.app_base_url.rstrip('/')}{path}"},
             },
         }

@@ -542,3 +542,31 @@ export async function setNotificationSchedule(
     body: { ...patch, tzOffsetMinutes: -new Date().getTimezoneOffset() },
   });
 }
+
+/**
+ * Tell the server a notification of this kind was opened.
+ *
+ * The other half of §9's self-limiting rule: a kind delivered eight times
+ * without a tap stops being sent, and this is the only thing that ever resets
+ * that. Without it the counter is a one-way door — every courtesy kind would
+ * eventually switch itself off for everybody and never come back.
+ *
+ * A kind, not an id: what the counter measures is whether this *sort* of
+ * notification is still read, and one opened weekly summary answers that for
+ * weekly summaries.
+ *
+ * Silent and unawaited at every call site. A tap's job is to open a screen, and
+ * a parent must never wait on our bookkeeping to see their child's record.
+ */
+export async function noteNotificationOpened(kind: string): Promise<void> {
+  try {
+    await request("/notifications/opened", {
+      method: "POST",
+      token: await accessToken(),
+      body: { kind },
+    });
+  } catch {
+    // The next tap says the same thing. A counter that is one late is a
+    // notification somebody gets anyway.
+  }
+}
