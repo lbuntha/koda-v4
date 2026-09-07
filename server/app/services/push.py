@@ -288,12 +288,24 @@ async def preflight(db: AsyncIOMotorDatabase) -> dict[str, Any]:
     cfg = settings()
     checks: list[dict[str, Any]] = []
 
-    def note(name: str, ok: bool, detail: str, fix: str | None = None) -> bool:
-        # A passing check carries no fix. Printing "here is how to fix it"
-        # beside a PASS is how a diagnostic screen teaches people to stop
-        # reading it.
+    def note(name: str, ok: bool | None, detail: str, fix: str | None = None) -> bool:
+        """Record one check. `ok=None` means *not checked*, which is not a failure.
+
+        Three states rather than two, because two was a lie the screen told. The
+        last check needs a real token to validate against, and on a deployment
+        where nobody has turned notifications on yet there is not one — so it
+        was reported `False` and drawn as a red FAIL, directly above a `detail`
+        reading "not checked". An operator seeing that reasonably concludes push
+        is broken, when the honest answer is that this half cannot be proved
+        until somebody registers a browser.
+
+        A skipped check keeps its `fix`, because "turn notifications on and come
+        back" is exactly the next step. A *passing* one carries none: printing
+        "here is how to fix it" beside a PASS is how a diagnostic screen teaches
+        people to stop reading it.
+        """
         checks.append({"check": name, "ok": ok, "detail": detail, "fix": None if ok else fix})
-        return ok
+        return ok is True
 
     driver_ok = note(
         "driver",
@@ -317,7 +329,7 @@ async def preflight(db: AsyncIOMotorDatabase) -> dict[str, Any]:
             None if ok else "Grant roles/firebasemessaging.admin to the service account this runs as.",
         )
     else:
-        note("credential", False, "not checked", "Fix the driver and project first.")
+        note("credential", None, "not checked", "Fix the driver and project first.")
 
     note(
         "master",
@@ -359,11 +371,27 @@ async def preflight(db: AsyncIOMotorDatabase) -> dict[str, Any]:
             None if outcome is fcm.Outcome.OK else "FCM refused a message it was only asked to validate.",
         )
     elif not (driver_ok and project_ok):
-        note("reachability", False, "not checked — the driver or project is not configured yet")
+        # Not a second failure. The driver and project checks above have already
+        # said what is wrong; repeating it in red here only makes the screen
+        # look twice as broken as the deployment is.
+        note(
+            "reachability",
+            None,
+            "not checked — the driver or project is not configured yet",
+            "Fix the driver and project above, then check again.",
+        )
     else:
-        note("reachability", False, "not checked — no live token to validate against")
+        note(
+            "reachability",
+            None,
+            "not checked — no browser has notifications turned on yet",
+            "Turn notifications on in one browser (Settings → Notifications), then check again.",
+        )
 
-    return {"ok": all(check["ok"] for check in checks), "checks": checks}
+    # A check nobody could run does not make a deployment broken. `ok` is
+    # therefore "nothing failed", not "everything passed" — and the screen shows
+    # the skipped ones plainly, so the difference is never hidden.
+    return {"ok": all(check["ok"] is not False for check in checks), "checks": checks}
 
 
 def _credentials_check() -> tuple[bool, str]:
