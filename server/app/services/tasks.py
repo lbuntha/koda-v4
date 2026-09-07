@@ -200,6 +200,10 @@ async def weekly_summary(
                 kind=WEEKLY_SUMMARY,
                 title=title,
                 body=body,
+                # The child the summary is about, so the tap lands on their
+                # record rather than on the home screen. `landing.ts` maps it;
+                # the path names a screen and is never trusted to grant one.
+                path=f"/children/{learner_id}",
                 tag=f"weekly:{learner_id}",
             )
 

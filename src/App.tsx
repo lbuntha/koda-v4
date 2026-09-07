@@ -95,6 +95,7 @@ import {
   useSystem,
 } from "./lib/sync";
 import { refreshNotificationToken } from "./lib/push";
+import { onNotificationClick } from "./lib/push/landing";
 import { DailyStudyGoal } from "./components/DailyStudyGoal";
 import { DayDoneScreen } from "./components/DayDoneScreen";
 import { QuickMathPanel } from "./components/QuickMathPanel";
@@ -283,6 +284,28 @@ export default function App() {
     // tab you left should show the page, not the last thing you drilled into.
     if (activeTab !== "children") setChildReport(null);
   }, [activeTab]);
+
+  /*
+   * A tapped notification, landing somewhere.
+   *
+   * The service worker has always posted the path; nothing listened, so every
+   * tap focused Koda and left the reader where they were — a summary about Mia
+   * that could not open Mia. `landingFor` translates the path into a tab
+   * because Koda's screens are state rather than URLs (see the module).
+   *
+   * The capability guard below runs straight after and bounces anything this
+   * account may not open, so a path can name a screen without being trusted to
+   * grant one.
+   */
+  useEffect(
+    () =>
+      onNotificationClick(({ tab, learnerId }) => {
+        setActiveTab(tab);
+        // Set after the tab, because leaving the Children page clears it.
+        if (learnerId) setChildReport(learnerId);
+      }),
+    [],
+  );
 
   // Active-tab state survives sign-out. Re-check the capability on every
   // account change so a parent cannot inherit an operator's open Menu page.

@@ -26,7 +26,7 @@ from typing import Any
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
-from app.push_defaults import BODY_MAX, BY_KIND, MASTER, SAMPLES, TITLE_MAX
+from app.push_defaults import BODY_MAX, BY_KIND, MASTER, SAMPLES, SENDS, TITLE_MAX
 from app.repos import memberships, notifications, notify_prefs, push_templates, push_tokens
 from app.repos import system as system_repo
 from app.settings import settings
@@ -71,6 +71,14 @@ async def deployment_allows(db: AsyncIOMotorDatabase, kind: str) -> bool:
         # A kind nobody declared is a bug in the caller, and sending it anyway
         # would put words in front of a parent that no review ever saw.
         log.error("refusing to send unknown notification kind %r", kind)
+        return False
+
+    if kind not in SENDS:
+        # Declared in the catalog, with nothing behind it in this build. Louder
+        # than returning False quietly: a caller that has just written a send
+        # for a new kind needs to be told to add it to `SENDS`, not to watch
+        # nothing happen.
+        log.error("refusing to send %r: no call site is declared for it", kind)
         return False
 
     if not await system_repo.value_of(db, MASTER, True):
