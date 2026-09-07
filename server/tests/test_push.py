@@ -816,3 +816,42 @@ async def test_a_parents_own_test_does_not_name_a_screen_they_have_never_seen(
     data = sent[0]["message"]["data"]
     assert data["title"] == "Notifications are on"
     assert "Admin" not in data["body"], "a parent did not press anything in Admin"
+
+
+async def test_a_check_nobody_could_run_is_not_a_failure(client, admin, seeded):
+    """The screen used to draw a red FAIL beside the words "not checked".
+
+    On a fresh deployment nobody has turned notifications on, so there is no
+    token to validate a message against — and the honest answer is that this
+    half cannot be proved yet, not that it is broken. An operator who reads FAIL
+    goes looking for a fault that does not exist.
+    """
+    body = (await client.get("/system/push/preflight", headers=admin)).json()
+
+    reach = next(check for check in body["checks"] if check["check"] == "reachability")
+    assert reach["ok"] is None, "not checked is its own state"
+    assert "not checked" in reach["detail"]
+    # A skipped check keeps its next step, unlike a passing one.
+    assert reach["fix"], "a skipped check still says what would un-skip it"
+
+
+async def test_a_skipped_check_does_not_fail_the_whole_preflight(client, admin, db, seeded):
+    """`ok` means nothing failed, not that everything ran."""
+    from app.settings import settings as app_settings
+
+    # A deployment configured as far as it can be without a registered browser.
+    monkey = app_settings()
+    driver, project = monkey.push_driver, monkey.firebase_project_id
+    try:
+        object.__setattr__(monkey, "push_driver", "console")
+        body = (await client.get("/system/push/preflight", headers=admin)).json()
+        skipped = [c["check"] for c in body["checks"] if c["ok"] is None]
+        failed = [c["check"] for c in body["checks"] if c["ok"] is False]
+        assert "reachability" in skipped
+        # The console driver is a real misconfiguration for a deployment that
+        # means to send, so this one *should* fail — the point is only that the
+        # skip is not what did it.
+        assert "driver" in failed
+    finally:
+        object.__setattr__(monkey, "push_driver", driver)
+        object.__setattr__(monkey, "firebase_project_id", project)

@@ -430,6 +430,18 @@ They are drawn by `PushDiagnostics` in Admin → System: the check runs on open,
 the send is a separate button, and PASS/FAIL are words rather than only
 colours.
 
+**A check that could not run is not a check that failed.** `ok` is
+`true | false | null`, and the screen draws PASS, FAIL and **SKIP**. The
+reachability check needs a real registered browser to validate a message
+against, and on a deployment where nobody has turned notifications on there is
+not one — which used to be reported as `false` and drawn as a red FAIL directly
+above the words "not checked". The code's own comment said absence was not a
+failure while the code reported one, and an operator reading that goes hunting a
+fault that does not exist. A skipped check keeps its next step ("turn
+notifications on in one browser, then check again"); only a passing one carries
+nothing. The overall verdict is therefore *nothing failed*, not *everything
+passed*, with the skips shown plainly so the difference is never hidden.
+
 ### 7.2b Running a job by hand — `GET|POST /v1/system/push/jobs[/{job}]`
 
 Cloud Scheduler owns the clock, and for the summary that clock is six on a

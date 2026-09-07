@@ -30,17 +30,29 @@ import {
  *   will be: a test that can name a target is a way to put words on a
  *   stranger's lock screen.
  */
-const Verdict: React.FC<{ ok: boolean }> = ({ ok }) => (
+/**
+ * One check's verdict, in three states rather than two.
+ *
+ * `null` is "could not be run", and it needs its own word. The reachability
+ * check needs a real registered browser to validate a message against, and on a
+ * deployment where nobody has turned notifications on there is not one — which
+ * used to be drawn as a red FAIL directly above the words "not checked". That
+ * sends an operator hunting a fault that does not exist. Grey and "SKIP" says
+ * the true thing: this half cannot be proved yet.
+ */
+const Verdict: React.FC<{ ok: boolean | null }> = ({ ok }) => (
   /* The word, not only the colour: a state encoded in colour alone is a state
      somebody cannot read. */
   <span
     className={`shrink-0 font-mono text-[10px] font-black tracking-wider px-2 py-0.5 rounded-full border ${
-      ok
-        ? "text-emerald-700 dark:text-emerald-300 border-emerald-500/40 bg-emerald-500/10"
-        : "text-rose-700 dark:text-rose-300 border-rose-500/40 bg-rose-500/10"
+      ok === null
+        ? "text-slate-600 dark:text-slate-300 border-line bg-surface-muted"
+        : ok
+          ? "text-emerald-700 dark:text-emerald-300 border-emerald-500/40 bg-emerald-500/10"
+          : "text-rose-700 dark:text-rose-300 border-rose-500/40 bg-rose-500/10"
     }`}
   >
-    {ok ? "PASS" : "FAIL"}
+    {ok === null ? "SKIP" : ok ? "PASS" : "FAIL"}
   </span>
 );
 
@@ -111,7 +123,7 @@ export const PushDiagnostics: React.FC = () => {
               {row.fix && (
                 <p className="text-xs text-ink mt-1 break-words">
                   <span className="font-mono text-[10px] uppercase tracking-wider text-muted">
-                    Fix{" "}
+                    {row.ok === null ? "Next " : "Fix "}
                   </span>
                   {row.fix}
                 </p>

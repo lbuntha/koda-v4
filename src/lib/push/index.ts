@@ -234,7 +234,8 @@ export async function chooseNotification(kind: string, on: boolean): Promise<Not
 
 export interface PreflightCheck {
   check: string;
-  ok: boolean;
+  /** `null` means the check could not be run — which is not a failure. */
+  ok: boolean | null;
   detail: string;
   /** Present only when the check failed: the sentence that fixes it. */
   fix: string | null;
