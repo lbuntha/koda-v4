@@ -24,7 +24,7 @@ from app.models.common import Model
 from app.models.subjects import SubjectCatalog
 from app.push_defaults import BODY_MAX, DEFAULT_KINDS, TITLE_MAX
 from app.repos import maintenance as maintenance_repo
-from app.repos import push_templates
+from app.repos import push_log, push_templates
 from app.repos import system as system_repo
 from app.security.rate_limit import PUSH_TEST_PER_ACCOUNT, limiter
 from app.services import push as push_service
@@ -339,6 +339,86 @@ async def push_job_run(
         job=job,
         preview=preview,
         report=await task_service.weekly_summary(db, preview=preview),
+    )
+
+
+class SendOut(Model):
+    """One send, as an operator reads it."""
+
+    id: str
+    kind: str
+    title: str
+    body: str
+    #: Accounts told. Ids rather than names: this page is read beside the user
+    #: list, and resolving names here would be a second query per row to answer
+    #: a question most rows are never asked.
+    people: list[str]
+    family_id: str | None = Field(default=None, alias="familyId")
+    driver: str
+    devices: int
+    delivered: int
+    #: FCM's own vocabulary, counted — `dead`, `soft`, `config`, `quota`.
+    outcomes: dict[str, int]
+    at: str
+
+
+class SendSummaryOut(Model):
+    kind: str
+    sends: int
+    devices: int
+    delivered: int
+    last: str
+
+
+class PushLogOut(Model):
+    summary: list[SendSummaryOut]
+    sends: list[SendOut]
+
+
+@router.get("/push/log")
+async def push_log_read(
+    db: Db, p: CanOperate, limit: int = 50, kind: str | None = None
+) -> PushLogOut:
+    """What this deployment has sent, and what became of it.
+
+    Preflight answers "will a notification work" before one is sent. This
+    answers "did it" afterwards, which nothing did: the delivery outcome lived
+    in a return value and a log line, so a question asked on Monday about
+    Sunday's summary had no answer at all.
+
+    The summary above the list is the part worth reading first. A kind that has
+    sent forty notifications and delivered none is exactly this feature's
+    failure mode, and it is invisible in forty rows that each look fine.
+    """
+    rows = await push_log.recent(db, limit=limit, kind=kind)
+    totals = await push_log.summary(db)
+    return PushLogOut(
+        summary=[
+            SendSummaryOut(
+                kind=row["_id"],
+                sends=row["sends"],
+                devices=row["devices"],
+                delivered=row["delivered"],
+                last=row["last"].isoformat(),
+            )
+            for row in totals
+        ],
+        sends=[
+            SendOut(
+                id=row["_id"],
+                kind=row["kind"],
+                title=row.get("title", ""),
+                body=row.get("body", ""),
+                people=row.get("people", []),
+                familyId=row.get("familyId"),
+                driver=row.get("driver", "unknown"),
+                devices=row.get("devices", 0),
+                delivered=row.get("delivered", 0),
+                outcomes=row.get("outcomes", {}),
+                at=row["at"].isoformat(),
+            )
+            for row in rows
+        ],
     )
 
 

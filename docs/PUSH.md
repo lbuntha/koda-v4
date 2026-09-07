@@ -471,6 +471,39 @@ The job name is a key in a closed map rather than a string resolved to a
 function: it arrives in a URL, and "which code does this word name" is not a
 question to answer by reflection on a route that sends notifications.
 
+### 7.2c What was sent — `GET /v1/system/push/log`
+
+Preflight answers *will a notification work*, before one is sent. Nothing
+answered *did it*, afterwards: the delivery outcome lived in a return value and
+a log line, so a question asked on Monday about Sunday's summary had no answer
+once the job's report scrolled away. On a feature whose failure mode is silence,
+that is the wrong half to be missing.
+
+So `push_log` holds one row per `send()` — not per device. A family send fans
+out across however many browsers the adults hold, and the question is about the
+notification rather than the sockets: it went to two people across three
+browsers, one of which had thrown its subscription away. Per-device detail is
+kept as counts, in **FCM's own vocabulary** (`dead`, `soft`, `config`, `quota`)
+rather than translated, so an operator searching for the word they saw in a
+Google console finds the same word here.
+
+Three things worth stating:
+
+- **A send with nobody to ring is logged too.** "Composed, recorded for two
+  people, and no browser to ring" is a different fact from "delivered", and
+  leaving it out would let the log agree with itself while the deployment
+  reached nobody.
+- **The console driver says so.** A row reading `0 delivered` with no
+  explanation is every developer's normal state and reads as a fault.
+- **The summary is read before the list.** A kind that has sent forty
+  notifications and delivered none is exactly this failure mode, and it is
+  invisible in forty rows that each look individually fine.
+
+Nothing new is stored about a person: the title and body are the same sentences
+`notifications` already keeps for the parent, and §13 holds — a child's first
+name is the most that ever appears, and no token, device id or learning record
+goes in. Rows expire after 45 days, by TTL index and by the nightly sweep.
+
 ### 7.3 The words themselves — `GET|PATCH|DELETE /v1/system/push/templates`
 
 Wording that only a release can change is wording nobody fixes. Each kind

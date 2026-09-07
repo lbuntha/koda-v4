@@ -3,6 +3,7 @@ import { Bell, Mail } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
 import { PushDiagnostics } from "./PushDiagnostics";
 import { PushJobs } from "./PushJobs";
+import { PushLogPanel } from "./PushLogPanel";
 import { PushTemplates } from "./PushTemplates";
 
 /**
@@ -57,6 +58,10 @@ export const NotificationsAdmin: React.FC = () => (
       <div className="space-y-4">
         <PushDiagnostics />
         <PushJobs />
+        {/* After the two that *act*, because it is what you read once one of
+            them has: preflight says whether a send would work, the jobs send,
+            and this says what became of it. */}
+        <PushLogPanel />
         <PushTemplates />
       </div>
     </Channel>

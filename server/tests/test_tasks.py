@@ -324,11 +324,18 @@ async def test_the_sweep_deletes_what_nothing_can_use_again(db):
         {"_id": "learn.goal_met:l_1:2020-01-01", "kind": "learn.goal_met", "recipientId": "l_1",
          "dateKey": "2020-01-01", "claimedAt": now() - timedelta(days=90)}
     )
+    await db.push_log.insert_one(
+        {"_id": "pl_old", "kind": "learn.goal_met", "title": "t", "body": "b", "people": ["u_1"],
+         "devices": 1, "delivered": 1, "outcomes": {"ok": 1}, "at": now() - timedelta(days=90)}
+    )
 
     report = await task_service.token_sweep(db)
 
-    assert report == {"job": "token-sweep", "tokens": 1, "notifications": 1, "runs": 1}
+    assert report == {
+        "job": "token-sweep", "tokens": 1, "notifications": 1, "runs": 1, "log": 1,
+    }
     assert await db.push_tokens.count_documents({}) == 1
+    assert await db.push_log.count_documents({}) == 0
 
 
 # --- the goal, noticed as it lands ----------------------------------------

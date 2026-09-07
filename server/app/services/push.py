@@ -27,7 +27,7 @@ from typing import Any
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.push_defaults import BODY_MAX, BY_KIND, MASTER, SAMPLES, SENDS, TITLE_MAX
-from app.repos import memberships, notifications, notify_prefs, push_templates, push_tokens
+from app.repos import memberships, notifications, notify_prefs, push_log, push_templates, push_tokens
 from app.repos import system as system_repo
 from app.settings import settings
 
@@ -160,6 +160,7 @@ async def send(
                 db, user_id=user_id, family_id=to.family_id, kind=kind, title=title, body=body, path=path
             )
 
+        cfg = settings()
         rows = await push_tokens.live_for_family(
             db, to.family_id, user_id=to.user_id, exclude_device_id=to.exclude_device_id
         )
@@ -168,10 +169,19 @@ async def send(
         if not rows:
             # Nobody to ring is not nobody told: the records above stand, and
             # the app will show them next time somebody opens it.
+            #
+            # Logged all the same, and this is the row an operator most needs.
+            # "Composed, recorded for two people, and no browser to ring" is a
+            # different fact from "delivered", and leaving it out would make the
+            # log agree with itself while the deployment sent nothing — which is
+            # this feature's whole failure mode.
+            await push_log.record(
+                db, kind=kind, family_id=to.family_id, people=people, title=title, body=body,
+                path=path, driver=cfg.push_driver, devices=0, delivered=0, outcomes={},
+            )
             return 0
 
         message = {"title": title, "body": body, "path": path, "kind": kind, "tag": tag or kind}
-        cfg = settings()
 
         if cfg.push_driver == "console":
             # The whole message, so a developer can read it out of `make
@@ -186,16 +196,33 @@ async def send(
                     body,
                     path,
                 )
+            await push_log.record(
+                db, kind=kind, family_id=to.family_id, people=people, title=title, body=body,
+                path=path, driver="console", devices=len(rows), delivered=0, outcomes={},
+            )
             return 0
 
         semaphore = asyncio.Semaphore(CONCURRENCY)
 
-        async def one(row: dict[str, Any]) -> bool:
+        async def one(row: dict[str, Any]) -> Any:
             async with semaphore:
-                return await _deliver(db, row, message)
+                return await _deliver_one(db, row, message)
 
+        # The outcomes rather than a tally of booleans. They were being computed
+        # and thrown away, and they are the difference between "nothing arrived"
+        # and "nothing arrived *because the deployment's credentials are wrong*"
+        # — which is the whole question `push_log` exists to answer.
         results = await asyncio.gather(*(one(row) for row in rows))
-        return sum(1 for ok in results if ok)
+        outcomes: dict[str, int] = {}
+        for outcome in results:
+            outcomes[outcome.value] = outcomes.get(outcome.value, 0) + 1
+        delivered = outcomes.get("ok", 0)
+
+        await push_log.record(
+            db, kind=kind, family_id=to.family_id, people=people, title=title, body=body,
+            path=path, driver="fcm", devices=len(rows), delivered=delivered, outcomes=outcomes,
+        )
+        return delivered
     except Exception:  # noqa: BLE001 — every failure here is the same failure
         log.exception("could not send %s notification", kind)
         return 0
@@ -231,18 +258,14 @@ async def _people(db: AsyncIOMotorDatabase, to: Recipient) -> list[str]:
     return sorted(people)
 
 
-async def _deliver(db: AsyncIOMotorDatabase, row: dict[str, Any], message: dict[str, str]) -> bool:
-    """One token, one request, and the bookkeeping its answer demands."""
-    from app.services import fcm
-
-    return await _deliver_one(db, row, message) is fcm.Outcome.OK
-
-
 async def _deliver_one(db: AsyncIOMotorDatabase, row: dict[str, Any], message: dict[str, str]) -> Any:
-    """The same send, reporting *why* rather than only whether.
+    """One token, one request, the bookkeeping its answer demands, and *why*.
 
-    Split out for the operator test, which has to print FCM's own word for the
-    failure — "it did not work" is the answer preflight exists to improve on.
+    Reports FCM's own word for the failure rather than a boolean. That started
+    as something only the operator test needed — "it did not work" is the answer
+    preflight exists to improve on — and is now what every send records, because
+    "nothing arrived" and "nothing arrived because the credentials are wrong"
+    are the same row without it.
     """
     from app.services import fcm
 
