@@ -792,8 +792,18 @@ One-time setup in Google Cloud, and it is genuinely all of it:
 3. Grant the `koda-backend` runtime service account
    `roles/firebasemessaging.admin`. **This replaces a key file** — nothing is
    downloaded, and nothing new goes into GitHub secrets.
-4. A second service account for Cloud Scheduler with `roles/run.invoker` on
-   `koda-backend`.
+4. A second service account for Cloud Scheduler — `koda-scheduler` — with
+   `roles/run.invoker` on `koda-backend`.
+
+   **That grant is not what protects the endpoint, and it is worth being exact
+   about why.** `koda-backend` holds `roles/run.invoker` for `allUsers`, because
+   a browser calls it; the service is public and cannot not be. So Cloud Run IAM
+   refuses nobody, `/v1/tasks/*` is reachable from the open internet, and the
+   OIDC check in `security/tasks.py` is not defence in depth — it is the
+   defence. That is why it verifies the audience *and* the caller's email, and
+   why an unconfigured deployment refuses every call rather than falling back to
+   allowing one. The `run.invoker` binding is kept because it costs nothing and
+   is correct the day the service stops being public.
 5. `deploy.yml` gains `PUSH_DRIVER`, `FIREBASE_PROJECT_ID`,
    `PUSH_TASK_AUDIENCE` and `PUSH_TASK_SERVICE_ACCOUNT` as repository
    *variables* — there is no new secret in this feature, which is the part of
@@ -803,13 +813,13 @@ One-time setup in Google Cloud, and it is genuinely all of it:
 
    ```bash
    gcloud scheduler jobs create http weekly-summary \
-     --location=europe-west1 --schedule="0 * * * *" \
+     --location=us-central1 --schedule="0 * * * *" \
      --uri="$URL/v1/tasks/weekly-summary" --http-method=POST \
      --oidc-service-account-email="$SA" --oidc-token-audience="$URL" \
      --attempt-deadline=300s
 
    gcloud scheduler jobs create http token-sweep \
-     --location=europe-west1 --schedule="17 3 * * *" \
+     --location=us-central1 --schedule="17 3 * * *" \
      --uri="$URL/v1/tasks/token-sweep" --http-method=POST \
      --oidc-service-account-email="$SA" --oidc-token-audience="$URL" \
      --attempt-deadline=300s
@@ -819,7 +829,19 @@ One-time setup in Google Cloud, and it is genuinely all of it:
    than `0 3` because a sweep is not urgent and the hour is quieter off the
    hour. The five-minute deadline is what a cold start is measured against; a
    run that needs longer answers with a `cursor` instead of holding the request
-   open.
+   open. `us-central1` because that is where `deploy.yml` puts the service.
+
+   `token-sweep` is the one to prove the chain with — it sends no
+   notifications, so `gcloud scheduler jobs run token-sweep` answering 200 says
+   the token verified and the caller matched, without buzzing anybody.
+
+**Locally there is no clock, on purpose.** A job that fires hourly is one you
+would have to sit and wait for, and the job that matters only fires at six on a
+Sunday evening. So the compose stack gets the other half of the deal instead —
+`make tasks-summary` moves the clock to the coming Sunday and runs one tick,
+`make tasks-sweep` runs the nightly tidy, and `make tasks-replay` forgets the
+ledger so a job can be run again. The `at` override those use is refused
+outside development.
 
 `koda-app` (the Node service) is untouched. It serves a bundle with three more
 public strings in it.
