@@ -99,11 +99,31 @@ const Outcome: React.FC<{ run: JobRun }> = ({ run }) => {
     );
   }
 
+  // A real run that found nobody due is the *normal* answer six days out of
+  // seven, and "0 summaries" reads like a failure. Say what happened, say when
+  // it will happen, and point at the button that answers something today —
+  // otherwise pressing this is a dead end with no next step.
+  if (r.due === 0) {
+    return (
+      <div className="space-y-1">
+        <p className="text-xs text-ink">
+          Nothing was due. It is nobody&rsquo;s Sunday evening right now, which is this job
+          working rather than failing.
+        </p>
+        {r.nextDue && (
+          <p className="text-xs text-muted">
+            Next due {new Date(r.nextDue).toLocaleString()} — that family&rsquo;s own time, not
+            yours. Press <strong>Preview</strong> to read what it will say.
+          </p>
+        )}
+      </div>
+    );
+  }
+
   return (
     <p className="text-xs text-ink">
       {r.summaries ?? 0} {r.summaries === 1 ? "summary" : "summaries"} composed, {r.sent ?? 0}{" "}
-      delivered
-      {r.due === 0 && " — it is nobody's Sunday evening right now, which is the job working"}.
+      delivered.
     </p>
   );
 };
@@ -158,7 +178,7 @@ export const PushJobs: React.FC = () => {
                 <button
                   disabled={busy !== null}
                   onClick={() => void go(job.id, true)}
-                  className={themeSystem.button("secondary", "sm")}
+                  className={themeSystem.button("primary", "sm")}
                 >
                   <Eye className="w-4 h-4 mr-2" />
                   {busy === `${job.id}:true` ? "Looking…" : "Preview"}
@@ -190,9 +210,11 @@ export const PushJobs: React.FC = () => {
       {error && <p className="text-xs text-rose-600 dark:text-rose-400">{error}</p>}
 
       <p className="text-xs text-muted">
-        A preview sends nothing and claims nothing, so looking at Sunday does not stop Sunday from
-        happening. <em>Run now</em> does the real thing and is safe to press twice — the same
-        record that makes the scheduler's retries harmless applies here.
+        <strong>Preview</strong> is the one to reach for on any day that is not Sunday: it sends
+        nothing and claims nothing, so looking at Sunday does not stop Sunday from happening.{" "}
+        <em>Run now</em> does the real thing, and on a weekday it correctly does nothing — the
+        clock, not the button, decides whose evening it is. It is safe to press twice either way:
+        the same record that makes the scheduler&rsquo;s retries harmless applies here.
       </p>
     </section>
   );
