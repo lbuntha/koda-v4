@@ -647,7 +647,7 @@ Three things this needs to get right:
 | **0** ✅ | `injectManifest`, the worker ported with **no push code** | Both builds report the same *29 entries*, the hashed URLs diff clean, `tsc` passes over the worker's own project, 985 tests pass — and, in Chrome against a production build: the update prompt still installs, and a deep link still boots with the server stopped |
 | **1** ✅ | `services/push.py` with the `console` driver, `push_tokens`, the two endpoints, `device.new_signin` | 22 tests in `test_push.py`, 363 in the suite, `ruff` clean |
 | **2** ✅ | The worker's `push`/`notificationclick` handlers, Settings → Notifications, preferences, preflight and test send (§7) | 36 tests in `test_push.py` and 14 over the payload guard; 381 API tests, 1,002 frontend tests, both builds clean. **Still to do on hardware:** preflight green on staging, then a real Android phone and a real installed iPhone |
-| **3** ✅ | Cloud Scheduler, `weekly_summary`, `goal_met` | 25 tests in `test_tasks.py`; 455 API tests, 1,707 frontend tests, `ruff` and `tsc` clean. **Still to do on hardware:** the two jobs created against staging, and a summary watched arriving on a real Sunday |
+| **3** ✅ | Cloud Scheduler, `weekly_summary`, `goal_met` | 34 tests in `test_tasks.py`; 474 API tests, 1,710 frontend tests, `ruff` and `tsc` clean. **Proved on hardware:** a notification delivered to a real phone, and `gcloud scheduler jobs run token-sweep` answering 200 through the OIDC door. `weekly_summary` fires on its own on the first Sunday |
 | **4** | `practice_reminder`, `streak_ending`, the self-limiting counter | Off by default; on by choice; quiet by neglect |
 
 Each phase is deployable and none of them is load-bearing for the phase after,
@@ -908,6 +908,27 @@ One-time setup in Google Cloud, and it is genuinely all of it:
    `token-sweep` is the one to prove the chain with — it sends no
    notifications, so `gcloud scheduler jobs run token-sweep` answering 200 says
    the token verified and the caller matched, without buzzing anybody.
+
+7. **Let Cloud Scheduler mint a token as that account.** The step that is
+   missing from every tutorial and cost an hour the first time:
+
+   ```bash
+   gcloud iam service-accounts add-iam-policy-binding "$SA" \
+     --member="serviceAccount:service-$PROJECT_NUMBER@gcp-sa-cloudscheduler.iam.gserviceaccount.com" \
+     --role="roles/iam.serviceAccountTokenCreator"
+   ```
+
+   The project-level `roles/cloudscheduler.serviceAgent` grant, which the API
+   creates on its own, is **not** enough to mint an OIDC token *as another
+   service account*. Without this binding the failure is completely silent and
+   looks like nothing at all: `gcloud scheduler jobs run` exits 0, the audit log
+   records `RunJob` as a success, and then there is no outbound request, no
+   `lastAttemptTime` on the job, and no error in any log a person would think to
+   read. The only symptom is that Cloud Run never hears from it.
+
+   Worth writing down twice, because it is this feature's own failure mode
+   wearing infrastructure's clothes: everything individually reports success and
+   nothing arrives.
 
 **Locally there is no clock, on purpose.** A job that fires hourly is one you
 would have to sit and wait for, and the job that matters only fires at six on a

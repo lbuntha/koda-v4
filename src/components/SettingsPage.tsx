@@ -130,10 +130,20 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
    *
    * It belongs here: it is read when something goes wrong — a lost tablet, a
    * device somebody should no longer have — rather than navigated to, and a
-   * permanent row for it cost more attention than it earned. Same right the
-   * page itself checks, so this never draws a heading over a "no access" card.
+   * permanent row for it cost more attention than it earned.
+   *
+   * The right *and* a family, which is one condition more than it used to be.
+   * A staff account holds `device:list` and belongs to no family, so mirroring
+   * only the permission drew the section for an operator and then watched
+   * `GET /v1/devices` answer 403 — the endpoint scopes to a family before it
+   * reads anything, because counting on a `familyId` of `None` would reach
+   * across every family on the deployment.
+   *
+   * The rule `security/permissions.py` opens with — a screen may never offer
+   * what the API then refuses — is about permission, and this is the case it
+   * did not cover: permission said yes and tenancy said no.
    */
-  const showsDevices = can("device:list");
+  const showsDevices = can("device:list") && !!session?.familyId;
   /*
    * Notifications are an adult's setting, and the permission prompt behind them
    * is raised nowhere else in the app. A learner-scoped session never sees the
