@@ -23,6 +23,12 @@
      "icon": "user"
     },
     {
+     "id": "notifications",
+     "label": "Notifications",
+     "icon": "bell",
+     "requires": "member:list"
+    },
+    {
      "id": "skills",
      "label": "Skills",
      "icon": "brain",

@@ -155,10 +155,26 @@ self.addEventListener("push", (event) => {
       await self.registration.showNotification(payload.title, {
         body: payload.body,
         icon: "/icons/icon-192.png",
-        badge: "/icons/icon-64.png",
+        // The status-bar silhouette, and it has to be a *shape on
+        // transparency*: Android takes the alpha channel and fills it with the
+        // system colour. `icon-64.png` was here, and a full-colour rounded
+        // square has alpha everywhere — which the mask turns into a white blob
+        // with no mark in it. `badge.svg` is the glyph alone.
+        badge: "/icons/badge-96.png",
         // A second "Mia met her goal" replaces the first rather than stacking
         // two of the same sentence on a lock screen.
         tag: payload.tag,
+        // Replacing one deliberately does not buzz again — `renotify` defaults
+        // to false and is not set here, because setting it would need a cast
+        // past `NotificationOptions` to express the behaviour we already have.
+        // The first arrival is the notification; a redraw of the same sentence
+        // is not a second event, and a courtesy channel that vibrates twice for
+        // one fact is the thing §1 says this must never become.
+        //
+        // Never sticky. `requireInteraction` keeps a notification on screen
+        // until it is dealt with, which is right for an alarm and wrong for
+        // every kind here — a parent should be able to ignore all of these.
+        requireInteraction: false,
         data: { path: payload.path, kind: payload.kind },
       });
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { landingFor } from "./landing";
+import { landingFor, onNotificationClick, openNotification, type Landing } from "./landing";
 
 /**
  * The path in a notification arrives from the network, so this is a boundary
@@ -60,5 +60,32 @@ describe("where a tapped notification lands", () => {
       tab: "children",
       learnerId: "l_1234567890abcdef0123",
     });
+  });
+});
+
+describe("a notification tapped inside the app", () => {
+  it("reaches the same listener a tap on a phone does", () => {
+    // One notification, whether it is read on a lock screen or scrolled back
+    // to an hour later. Routing both through one listener is what stops the
+    // in-app list quietly becoming something a tap does nothing to — which is
+    // what it was until this existed.
+    const seen: Landing[] = [];
+    const stop = onNotificationClick((landing) => seen.push(landing));
+
+    openNotification("/children/l_1234567890abcdef0123");
+    stop();
+    openNotification("/settings");
+
+    expect(seen).toEqual([{ tab: "children", learnerId: "l_1234567890abcdef0123" }]);
+  });
+
+  it("sends a path it cannot read to the home screen, like every other tap", () => {
+    const seen: Landing[] = [];
+    const stop = onNotificationClick((landing) => seen.push(landing));
+
+    openNotification("/nowhere");
+    stop();
+
+    expect(seen).toEqual([{ tab: "home" }]);
   });
 });

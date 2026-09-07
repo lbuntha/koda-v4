@@ -78,6 +78,11 @@ import { ResetPasswordScreen, resetTokenFromUrl } from "./components/account/Res
 import { VerifyEmailScreen, verificationTokenFromUrl } from "./components/account/VerifyEmailScreen";
 import { LearnersPage } from "./components/account/LearnersPage";
 import { DevicesPage } from "./components/account/DevicesPage";
+const NotificationsPage = lazy(() =>
+  import("./components/account/NotificationsPage").then((m) => ({
+    default: m.NotificationsPage,
+  })),
+);
 import { ProfilePage } from "./components/account/ProfilePage";
 import { KodaAskModal } from "./components/KodaAskModal";
 import type { KodaContext } from "./lib/tutorApi";
@@ -1015,6 +1020,12 @@ export default function App() {
 
           {activeTab === "devices" && <DevicesPage />}
 
+          {activeTab === "notifications" && (
+            <Deferred label="Loading Notifications">
+              <NotificationsPage />
+            </Deferred>
+          )}
+
           {activeTab === "menu" && canManageMenu && (
             <Deferred label="Loading menu">
               <MenuPage />
@@ -1038,20 +1049,13 @@ export default function App() {
             activeTab === "badges" ||
             activeTab === "billing" ||
             activeTab === "keys" ||
-            activeTab === "notifications" ||
             activeTab === "system") && (
             <Deferred label="Loading Admin">
               <AdminPage
                 initialTab={
                   activeTab === "admin"
                     ? undefined
-                    : (activeTab as
-                        | "scoring"
-                        | "badges"
-                        | "billing"
-                        | "keys"
-                        | "notifications"
-                        | "system")
+                    : (activeTab as "scoring" | "badges" | "billing" | "keys" | "system")
                 }
               />
             </Deferred>
