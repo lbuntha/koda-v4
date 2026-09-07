@@ -30,7 +30,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from app.models.common import now as utc_now
 from app.repos import events as events_repo
 from app.repos import learners as learners_repo
-from app.repos import notifications, push_runs, push_tokens
+from app.repos import notifications, push_log, push_runs, push_tokens
 from app.services import push
 
 log = logging.getLogger("koda.tasks")
@@ -282,16 +282,18 @@ async def weekly_summary(
 async def token_sweep(db: AsyncIOMotorDatabase) -> dict[str, Any]:
     """The nightly tidy, for the three collections push leaves behind.
 
-    All three are unbounded without it, and each grows for a different reason: a
+    All four are unbounded without it, and each grows for a different reason: a
     token nobody refreshed, a notification nobody will ever scroll back to, a
-    claim no job could still repeat. None is urgent, which is why they share one
-    job at three in the morning rather than each getting a timer.
+    claim no job could still repeat, a send nobody will ask about again. None is
+    urgent, which is why they share one job at three in the morning rather than
+    each getting a timer.
     """
     report = {
         "job": "token-sweep",
         "tokens": await push_tokens.sweep(db),
         "notifications": await notifications.sweep(db),
         "runs": await push_runs.sweep(db),
+        "log": await push_log.sweep(db),
     }
     log.info("token sweep: %s", report)
     return report

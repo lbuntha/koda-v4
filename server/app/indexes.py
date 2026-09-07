@@ -59,6 +59,15 @@ INDEXES: dict[str, list[IndexModel]] = {
     "notify_prefs": [
         IndexModel([("userId", ASCENDING)], name="by_person"),
     ],
+    "push_log": [
+        # The operator's two reads: newest first, and newest of one kind.
+        IndexModel([("at", DESCENDING)], name="by_recent"),
+        IndexModel([("kind", ASCENDING), ("at", DESCENDING)], name="by_kind_recent"),
+        # "Did this parent get it" is the question that arrives as a support
+        # message, and it is asked of a list, not of a person's own bell.
+        IndexModel([("people", ASCENDING), ("at", DESCENDING)], name="by_person_recent"),
+        IndexModel([("at", ASCENDING)], expireAfterSeconds=45 * 24 * 3600, name="ttl_45d"),
+    ],
     "push_runs": [
         # No index on the key: the key *is* `_id`, which is what makes a claim
         # atomic. A second job racing the first loses on the unique id rather

@@ -467,3 +467,43 @@ export async function runNotificationJob(job: string, preview = false): Promise<
     { method: "POST", token: await accessToken() },
   );
 }
+
+export interface SendRecord {
+  id: string;
+  kind: string;
+  title: string;
+  body: string;
+  people: string[];
+  familyId: string | null;
+  driver: string;
+  devices: number;
+  delivered: number;
+  /** FCM's own vocabulary, counted: `dead`, `soft`, `config`, `quota`. */
+  outcomes: Record<string, number>;
+  at: string;
+}
+
+export interface SendSummary {
+  kind: string;
+  sends: number;
+  devices: number;
+  delivered: number;
+  last: string;
+}
+
+export interface PushLog {
+  summary: SendSummary[];
+  sends: SendRecord[];
+}
+
+/**
+ * What this deployment has sent, and what became of it.
+ *
+ * Preflight answers "will a notification work" before one is sent; this answers
+ * "did it" afterwards. Nothing did: the delivery outcome lived in a return
+ * value and a log line, so a question asked on Monday about Sunday's summary
+ * had no answer at all.
+ */
+export async function notificationLog(limit = 50): Promise<PushLog> {
+  return await request<PushLog>(`/system/push/log?limit=${limit}`, { token: await accessToken() });
+}

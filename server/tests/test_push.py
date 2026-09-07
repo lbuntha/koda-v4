@@ -855,3 +855,92 @@ async def test_a_skipped_check_does_not_fail_the_whole_preflight(client, admin, 
     finally:
         object.__setattr__(monkey, "push_driver", driver)
         object.__setattr__(monkey, "firebase_project_id", project)
+
+
+# --- what was sent, and what became of it ---------------------------------
+
+
+async def test_a_send_is_written_down_with_its_outcome(client, admin, db, seeded):
+    """Preflight answers "will it work". This answers "did it", which nothing did."""
+    await push_tokens.save(db, token=TOKEN, family_id="f_1", user_id="u_ops", device_id=None)
+
+    await push.send(
+        db,
+        to=push.Recipient(family_id="f_1", user_id="u_ops"),
+        kind="device.new_signin",
+        title="New sign-in to Koda",
+        body="Chrome on Mac just signed in.",
+    )
+
+    body = (await client.get("/system/push/log", headers=admin)).json()
+    row = body["sends"][0]
+    assert row["kind"] == "device.new_signin"
+    assert row["body"] == "Chrome on Mac just signed in."
+    # The console driver sends nothing, and the row says so rather than reading
+    # as a failure on every developer's machine.
+    assert row["driver"] == "console"
+    assert row["delivered"] == 0
+    assert row["devices"] == 1
+
+
+async def test_the_log_summarises_by_kind(client, admin, db, seeded):
+    """Forty sends and no deliveries is invisible in forty rows that each look fine."""
+    await push_tokens.save(db, token=TOKEN, family_id="f_1", user_id="u_ops", device_id=None)
+    for _ in range(3):
+        await push.send(
+            db, to=push.Recipient(family_id="f_1", user_id="u_ops"),
+            kind="device.new_signin", title="t", body="b",
+        )
+
+    body = (await client.get("/system/push/log", headers=admin)).json()
+
+    line = next(row for row in body["summary"] if row["kind"] == "device.new_signin")
+    assert line["sends"] == 3
+    assert line["delivered"] == 0
+
+
+async def test_a_dead_token_is_counted_in_fcms_own_words(client, admin, db, seeded, monkeypatch):
+    """`dead` rather than `failed`: an operator searching a Google console finds it."""
+    await push_tokens.save(db, token=TOKEN, family_id="f_1", user_id="u_ops", device_id=None)
+    monkeypatch.setattr(settings(), "push_driver", "fcm")
+
+    async def dead(*_a, **_k):
+        return fcm.Outcome.DEAD
+
+    monkeypatch.setattr(fcm, "send_one", dead)
+
+    await push.send(
+        db, to=push.Recipient(family_id="f_1", user_id="u_ops"),
+        kind="device.new_signin", title="t", body="b",
+    )
+
+    row = (await client.get("/system/push/log", headers=admin)).json()["sends"][0]
+    assert row["outcomes"] == {"dead": 1}
+    assert row["delivered"] == 0
+    assert row["driver"] == "fcm"
+
+
+async def test_the_log_is_staff_only(client, parent, seeded):
+    """Who was told what is not a thing a family reads about other families."""
+    assert (await client.get("/system/push/log", headers=parent)).status_code == 403
+
+
+async def test_a_send_with_nobody_to_ring_is_still_logged(client, admin, db, seeded):
+    """The row an operator most needs, and the one that used to be missing.
+
+    "Composed, recorded for one person, and no browser to ring" is a different
+    fact from "delivered". Leaving it out let the log agree with itself while
+    the deployment reached nobody — which is this feature's whole failure mode.
+    """
+    await push.send(
+        db,
+        to=push.Recipient(family_id="f_nobody", user_id="u_alone"),
+        kind="device.new_signin",
+        title="New sign-in to Koda",
+        body="Somewhere just signed in.",
+    )
+
+    row = (await client.get("/system/push/log", headers=admin)).json()["sends"][0]
+    assert row["devices"] == 0
+    assert row["delivered"] == 0
+    assert row["people"] == ["u_alone"]
