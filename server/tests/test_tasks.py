@@ -590,3 +590,24 @@ async def test_a_preview_names_the_familys_own_evening_in_their_own_offset(
     due = response.json()["report"]["would_send"][0]["theirSundayEvening"]
     assert due.endswith("+02:00"), due
     assert "T18:00:00" in due, due
+
+
+async def test_a_run_that_sends_nothing_says_when_it_will(db, family, seeded):
+    """"Nothing happened" is not an answer an operator can do anything with."""
+    await practise(db, family, days=["2026-08-16"])
+
+    # A Monday: nobody's Sunday evening.
+    report = await task_service.weekly_summary(db, at=SUNDAY_EVENING_UTC + timedelta(days=1))
+
+    assert report["due"] == 0
+    assert report["nextDue"].startswith("2026-08-23T18:00:00"), report["nextDue"]
+    assert report["nextDue"].endswith("+02:00"), "in their own offset, not the server's"
+
+
+async def test_a_run_that_did_something_does_not_promise_another(db, family, seeded):
+    await practise(db, family, days=["2026-08-16"])
+
+    report = await task_service.weekly_summary(db, at=SUNDAY_EVENING_UTC)
+
+    assert report["summaries"] == 1
+    assert report["nextDue"] is None, "nothing was passed over"

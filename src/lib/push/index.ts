@@ -370,6 +370,8 @@ export interface JobReport {
   sent?: number;
   cursor?: string | null;
   skipped?: string;
+  /** When the soonest family this run passed over is next due, in their time. */
+  nextDue?: string | null;
   would_send?: WouldSend[];
   /** The sweep's counts. */
   tokens?: number;

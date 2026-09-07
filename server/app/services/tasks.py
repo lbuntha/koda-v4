@@ -161,6 +161,10 @@ async def weekly_summary(
         "summaries": 0,
         "sent": 0,
         "cursor": None,
+        # When the earliest family this run passed over is next due. Present
+        # only when something was passed over, so "nothing happened" can say
+        # *when* instead of only *no*.
+        "nextDue": None,
     }
 
     # The operator's ceiling, asked once for the whole run rather than once per
@@ -186,6 +190,16 @@ async def weekly_summary(
 
         local = _local(at, offset)
         if not preview and (local.weekday() != SUNDAY or local.hour != SUMMARY_HOUR):
+            # Not their evening. Remember when it *will* be, soonest first.
+            #
+            # Only ever a report. An hourly tick throws this away, and it costs
+            # arithmetic on a value already in hand — but it is the difference
+            # between an operator pressing "run now" on a Tuesday and being told
+            # "nothing", and being told when the thing they pressed will happen.
+            due_at = _next_summary_evening(local, offset)
+            soonest = report.get("nextDue")
+            if soonest is None or due_at.isoformat() < soonest:
+                report["nextDue"] = due_at.isoformat()
             continue
         report["due"] += 1
 
