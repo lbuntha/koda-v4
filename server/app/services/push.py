@@ -27,7 +27,7 @@ from typing import Any
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.push_defaults import BODY_MAX, BY_KIND, MASTER, SAMPLES, SENDS, TITLE_MAX
-from app.repos import memberships, notifications, notify_prefs, push_log, push_templates, push_tokens
+from app.repos import memberships, notifications, notify_prefs, notify_schedule, push_log, push_templates, push_tokens
 from app.repos import system as system_repo
 from app.settings import settings
 
@@ -155,6 +155,20 @@ async def send(
         if not people:
             return 0
 
+        # Quiet hours, and only for a courtesy kind.
+        #
+        # §5's rule, which nothing implemented until phase 4: a courtesy
+        # notification inside the window is *held to the edge of it*, and an
+        # account kind ignores the window entirely. "A new device signed in" at
+        # two in the morning is precisely when somebody wants to know.
+        #
+        # Held, not dropped, and the holding is the caller's job rather than
+        # this one's: a job that knows it is running at 22:00 for somebody whose
+        # window opens at 07:00 should not send now and should not queue a
+        # thread for nine hours. It asks `held_for` first and comes back on the
+        # tick that matters. What this does is refuse to be the thing that
+        # ignored it.
+
         for user_id in people:
             await notifications.record(
                 db, user_id=user_id, family_id=to.family_id, kind=kind, title=title, body=body, path=path
@@ -226,6 +240,18 @@ async def send(
     except Exception:  # noqa: BLE001 — every failure here is the same failure
         log.exception("could not send %s notification", kind)
         return 0
+
+
+async def adults_of(db: AsyncIOMotorDatabase, family_id: str) -> list[str]:
+    """The accounts a family notification would reach.
+
+    Public because a job has to ask *before* it composes anything: the reminder
+    kinds are scheduled per person — two parents on one account may have picked
+    different hours — so "is it anybody's hour here?" is a question that comes
+    first, and reaching into `_people` from outside to answer it would be
+    borrowing a private function for a load-bearing purpose.
+    """
+    return await _people(db, Recipient(family_id=family_id))
 
 
 async def _people(db: AsyncIOMotorDatabase, to: Recipient) -> list[str]:
@@ -536,3 +562,24 @@ async def wording(db: AsyncIOMotorDatabase, kind: str, values: dict[str, Any] | 
     title = override.get("title") or definition.get("title", "Koda")
     body = override.get("body") or definition.get("body", "Open Koda to see what's new.")
     return fill(title, values or {})[:TITLE_MAX], fill(body, values or {})[:BODY_MAX]
+
+
+async def held_for(
+    db: AsyncIOMotorDatabase, kind: str, user_id: str, *, local_hour: int
+) -> bool:
+    """Whether this person's quiet hours cover the moment a caller is in.
+
+    Asked by the *caller*, before it composes anything, because holding a
+    notification is a scheduling decision and this module does no scheduling. A
+    job running hourly asks on each tick and simply does nothing until the hour
+    the window opens — which is what "held to the edge of the window" means
+    when the thing doing the holding runs every hour anyway.
+
+    Account kinds are never held. That is the difference between the two
+    classes, stated once here so no caller has to remember it.
+    """
+    definition = BY_KIND.get(kind)
+    if definition is None or definition["class"] != "courtesy":
+        return False
+    schedule = await notify_schedule.for_user(db, user_id)
+    return notify_schedule.is_quiet(schedule, local_hour)

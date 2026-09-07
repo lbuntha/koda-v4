@@ -46,6 +46,11 @@ SENDS: frozenset[str] = frozenset(
         "device.new_signin",
         "learn.goal_met",
         "learn.weekly_summary",
+        # Phase 4. Both ship *off* for families — the operator switch above
+        # them says only that this deployment is willing — so appearing here
+        # makes the switch visible, not the notification inevitable.
+        "learn.practice_reminder",
+        "learn.streak_ending",
     }
 )
 

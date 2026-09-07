@@ -169,3 +169,43 @@ async def completed_on(
             "localDay": local_day,
         }
     )
+
+
+async def practised_on(
+    db: AsyncIOMotorDatabase, family_id: str, learner_id: str, local_day: str
+) -> bool:
+    """Whether this learner finished anything on one of their own days.
+
+    A boolean rather than `completed_on(...) > 0` at the call site, because the
+    reminder asks a yes/no question and counting rows to answer it reads the
+    whole day when the first document would do.
+    """
+    return (
+        await db.events.find_one(
+            {
+                "familyId": family_id,
+                "learnerId": learner_id,
+                "type": COMPLETED,
+                "localDay": local_day,
+            },
+            {"_id": 1},
+        )
+        is not None
+    )
+
+
+async def practice_days(
+    db: AsyncIOMotorDatabase, family_id: str, learner_id: str, *, limit: int = 400
+) -> list[str]:
+    """Every local day this learner finished something on, newest first.
+
+    Distinct days rather than events: a streak counts days, and a child who did
+    nine rounds on Tuesday had one Tuesday. Bounded because the events
+    collection ages out at 400 days anyway, so a longer answer would be a
+    promise the data cannot keep.
+    """
+    days = await db.events.distinct(
+        "localDay",
+        {"familyId": family_id, "learnerId": learner_id, "type": COMPLETED},
+    )
+    return sorted((day for day in days if isinstance(day, str)), reverse=True)[:limit]

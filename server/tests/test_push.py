@@ -222,13 +222,17 @@ async def test_reminders_ship_off_for_families(db):
 async def test_a_kind_with_no_sender_is_never_sent(db):
     """The catalog is the design; `SENDS` is what this build actually does.
 
-    Two account kinds and both reminders are declared with no call site behind
-    them. Refused here rather than half-offered, so the gap shows up as a kind
-    that is absent rather than as a switch that does nothing.
+    Three kinds are still declared with no call site behind them —
+    `family.invite_redeemed`, `plan.request_decided` and `system.broadcast`.
+    Refused here rather than half-offered, so the gap shows up as a kind that is
+    absent rather than as a switch that does nothing.
     """
-    assert await push.deployment_allows(db, "learn.practice_reminder") is False
     assert await push.deployment_allows(db, "family.invite_redeemed") is False
+    assert await push.deployment_allows(db, "plan.request_decided") is False
+    assert await push.deployment_allows(db, "system.broadcast") is False
     assert await push.deployment_allows(db, "learn.goal_met") is True
+    # Phase 4 gave both reminders a sender, so they are no longer in that list.
+    assert await push.deployment_allows(db, "learn.practice_reminder") is True
 
 
 async def test_an_account_kind_ignores_a_preference(db):
@@ -370,19 +374,34 @@ async def test_a_parent_is_offered_the_courtesy_kinds_only(client, parent, seede
     assert body["enabled"] is True
 
 
-async def test_a_kind_nothing_sends_yet_is_not_offered(client, parent, seeded):
+async def test_only_kinds_with_a_sender_are_offered(client, parent, seeded):
     """A switch that does nothing is worse than an absent one.
 
-    A parent who turns on "Practice reminder", waits a week and concludes
-    notifications are broken has been told something false by a screen. The
-    switch appears in the same release as its sender.
+    A parent who turns on a kind, waits a week and concludes notifications are
+    broken has been told something false by a screen. A switch appears in the
+    same release as its sender — which is why both reminders are here now and
+    were not before phase 4.
     """
     body = (await client.get("/push/preferences", headers=parent)).json()
 
     offered = {kind["id"] for kind in body["kinds"]}
-    assert "learn.practice_reminder" not in offered
-    assert "learn.streak_ending" not in offered
-    assert offered == {"learn.weekly_summary", "learn.goal_met"}
+    assert offered == {
+        "learn.weekly_summary",
+        "learn.goal_met",
+        "learn.practice_reminder",
+        "learn.streak_ending",
+    }
+
+
+async def test_the_reminders_still_ship_off_for_families(client, parent, seeded):
+    """Visible is not the same as on. The operator switch is a ceiling, never a
+    subscription — a parent has to go and ask for these two."""
+    body = (await client.get("/push/preferences", headers=parent)).json()
+
+    by_id = {kind["id"]: kind["on"] for kind in body["kinds"]}
+    assert by_id["learn.practice_reminder"] is False
+    assert by_id["learn.streak_ending"] is False
+    assert by_id["learn.weekly_summary"] is True
 
 
 async def test_a_kind_the_operator_switched_off_is_absent_not_shown_off(client, parent, db, seeded):
@@ -408,13 +427,25 @@ async def test_a_parent_can_turn_a_summary_off_and_on(client, parent, db, seeded
     assert next(k for k in on["kinds"] if k["id"] == "learn.weekly_summary")["on"] is True
 
 
-async def test_a_switch_that_does_not_exist_yet_cannot_be_set(client, parent, seeded):
+async def test_a_switch_that_does_not_exist_cannot_be_set(client, parent, seeded):
     """Not merely hidden: the endpoint refuses it too, as it does an unknown kind."""
     response = await client.put(
-        "/push/preferences", headers=parent, json={"kind": "learn.practice_reminder", "on": True}
+        "/push/preferences", headers=parent, json={"kind": "system.broadcast", "on": True}
     )
 
     assert response.status_code == 404
+
+
+async def test_a_parent_can_now_ask_for_a_reminder(client, parent, db, seeded):
+    """The switch phase 4 exists to make real."""
+    body = (
+        await client.put(
+            "/push/preferences", headers=parent, json={"kind": "learn.practice_reminder", "on": True}
+        )
+    ).json()
+
+    assert next(k for k in body["kinds"] if k["id"] == "learn.practice_reminder")["on"] is True
+    assert await push.allowed(db, "learn.practice_reminder", {"learn.practice_reminder": True}) is True
 
 
 async def test_an_account_kind_cannot_be_muted(client, parent, seeded):
