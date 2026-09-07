@@ -48,6 +48,20 @@ Nothing outside this package reads a token, hashes a password or writes a
 
 ---
 
+### A screen may offer only what permission *and* tenancy allow
+
+`security/permissions.py` opens with the rule that a screen can never offer
+something the API then refuses, and it is written about permission. There is a
+second half. `GET /v1/devices` asks for `device:list` — which a staff account
+holds — and then calls `scoped(p)`, which raises for an account belonging to no
+family, because counting on a `familyId` of `None` would reach across every
+family on the deployment.
+
+So Settings drew the device list for an operator and watched the request answer
+403, from 2 September until it was noticed. A screen mirroring an endpoint's
+gate has to mirror both: the right, and whether this caller is inside a tenant
+at all.
+
 ## 2. Authentication
 
 Every router lists the guard **once**:
