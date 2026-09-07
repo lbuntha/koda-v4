@@ -43,6 +43,20 @@ async def seeded(db):
 
 
 @pytest.fixture
+async def admin(client, db):
+    """A platform operator: staff, no family, provisioned rather than signed up."""
+    from app.repos import users
+    from app.security import passwords
+
+    await users.create(db, "ops@example.com", passwords.hash_password("correct horse battery"),
+                       platform_role="admin")
+    tokens = (
+        await client.post("/auth/login", json={"email": "ops@example.com", "password": "correct horse battery"})
+    ).json()
+    return {"Authorization": f"Bearer {tokens['accessToken']}"}
+
+
+@pytest.fixture
 async def family(client, parent, db):
     """A family with a child, a browser to ring, and a week of practice behind it."""
     learner = (
@@ -476,3 +490,103 @@ async def test_wording_saved_against_the_old_placeholder_still_fills(db, family,
     body = (await told(db, "learn.weekly_summary"))[0]["body"]
     assert "{" not in body, body
     assert body == "Mia practised on 2 days this week."
+
+
+# --- running a job by hand ------------------------------------------------
+
+
+def recent_days(count: int) -> list[str]:
+    """This family's own last few days, as `localDay` writes them.
+
+    A preview reports on the week ending *now*, so a fixture cannot seed a fixed
+    date and expect to see it: the point of the preview is that it is about
+    today. The offset is the one `practise` stamps on the events.
+    """
+    today = (datetime.now(UTC) + timedelta(minutes=PLUS_TWO)).date()
+    return [(today - timedelta(days=offset)).isoformat() for offset in range(count)]
+
+
+async def test_a_preview_says_what_sunday_would_send_without_sending_it(
+    client, db, family, admin, seeded
+):
+    """The question an operator has on a Tuesday, which a real run cannot answer."""
+    await practise(db, family, days=recent_days(2))
+
+    response = await client.post("/system/push/jobs/weekly-summary?preview=true", headers=admin)
+
+    assert response.status_code == 200
+    report = response.json()["report"]
+    assert report["preview"] is True
+    line = report["would_send"][0]
+    assert line["learner"] == "Mia"
+    assert line["body"] == "Mia practised 2 days this week."
+    assert line["alreadySent"] is False
+    assert line["theirSundayEvening"], "a preview names whose Sunday it means"
+    # Nothing was sent, and — the part that matters — nothing was claimed, so
+    # looking at Sunday does not stop Sunday from happening.
+    assert await told(db, "learn.weekly_summary") == []
+    assert await db.push_runs.count_documents({}) == 0
+
+
+async def test_a_preview_says_what_has_already_gone(client, db, family, admin, seeded):
+    """Answered from the ledger, so an operator can tell a resend from a first send."""
+    days = recent_days(1)
+    await practise(db, family, days=days)
+    await push_runs.claim(
+        db, kind="learn.weekly_summary", recipient_id=family["learnerId"], date_key=days[0]
+    )
+
+    response = await client.post("/system/push/jobs/weekly-summary?preview=true", headers=admin)
+
+    assert response.json()["report"]["would_send"][0]["alreadySent"] is True
+
+
+async def test_running_the_sweep_by_hand_is_the_same_sweep(client, db, admin, seeded):
+    await db.push_tokens.insert_one(
+        {"_id": "pt_stale", "token": "a" * 140, "familyId": "f_1", "userId": "u_1",
+         "refreshedAt": now() - timedelta(days=300), "disabledAt": None}
+    )
+
+    response = await client.post("/system/push/jobs/token-sweep", headers=admin)
+
+    assert response.json()["report"]["tokens"] == 1
+    assert await db.push_tokens.count_documents({}) == 0
+
+
+async def test_a_job_that_does_not_exist_is_not_run(client, admin, seeded):
+    """A path parameter naming a function is not a thing to resolve by reflection."""
+    response = await client.post("/system/push/jobs/reset-everything", headers=admin)
+
+    assert response.status_code == 404
+
+
+async def test_a_parent_cannot_run_a_job(client, parent, seeded):
+    """Staff only: a real run spends FCM quota and reaches other people's phones."""
+    response = await client.post("/system/push/jobs/token-sweep", headers=parent)
+
+    assert response.status_code == 403
+
+
+async def test_a_hand_run_still_only_sends_once(client, db, family, admin, seeded):
+    """The ledger does not care that this caller has hands."""
+    await practise(db, family, days=["2026-08-16"])
+
+    first = await task_service.weekly_summary(db, at=SUNDAY_EVENING_UTC)
+    second = await client.post("/system/push/jobs/weekly-summary", headers=admin)
+
+    assert first["summaries"] == 1
+    assert second.json()["report"]["summaries"] == 0
+    assert len(await told(db, "learn.weekly_summary")) == 1
+
+
+async def test_a_preview_names_the_familys_own_evening_in_their_own_offset(
+    client, db, family, admin, seeded
+):
+    """"18:00+00:00" for a family two hours east is a time that exists nowhere."""
+    await practise(db, family, days=recent_days(1))
+
+    response = await client.post("/system/push/jobs/weekly-summary?preview=true", headers=admin)
+
+    due = response.json()["report"]["would_send"][0]["theirSundayEvening"]
+    assert due.endswith("+02:00"), due
+    assert "T18:00:00" in due, due

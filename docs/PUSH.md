@@ -430,6 +430,35 @@ They are drawn by `PushDiagnostics` in Admin → System: the check runs on open,
 the send is a separate button, and PASS/FAIL are words rather than only
 colours.
 
+### 7.2b Running a job by hand — `GET|POST /v1/system/push/jobs[/{job}]`
+
+Cloud Scheduler owns the clock, and for the summary that clock is six on a
+Sunday evening — a bad thing to have to wait for twice. Once while a deployment
+is being set up, where "does this work?" should not mean waiting five days. And
+again after an operator edits the wording and wants to read it against real
+families rather than against `SAMPLES`.
+
+Two different things, and the difference is the design:
+
+- **Preview** answers *what would Sunday send?* It drops the day-and-hour filter
+  — a preview that is empty six days out of seven answers nothing — reports the
+  wording each parent would read, says whether each has already gone, and
+  **claims nothing**. Looking at Sunday must not stop Sunday from happening,
+  which is why `push_runs.was_claimed` exists beside `claim` and why only one of
+  them decides anything.
+- **Run now** does the real thing. Safe to press twice: the ledger that makes
+  Scheduler's retries harmless does not care that this caller has hands. On a
+  Tuesday it correctly reports `due: 0`, which is the job working.
+
+What a preview does *not* drop is the operator ceiling or a family's own
+preference — a preview showing a summary somebody switched off would be a
+preview of a different product. Staff only, and a real run is rate limited like
+the test send, because it spends FCM quota and reaches other people's phones.
+
+The job name is a key in a closed map rather than a string resolved to a
+function: it arrives in a URL, and "which code does this word name" is not a
+question to answer by reflection on a route that sends notifications.
+
 ### 7.3 The words themselves — `GET|PATCH|DELETE /v1/system/push/templates`
 
 Wording that only a release can change is wording nobody fixes. Each kind

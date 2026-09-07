@@ -342,3 +342,66 @@ export async function markNotificationsRead(): Promise<NotificationHistory> {
     token: await accessToken(),
   });
 }
+
+export interface JobDefinition {
+  id: string;
+  description: string;
+}
+
+/** One line of a preview: what a parent would read, and whether they already have. */
+export interface WouldSend {
+  familyId: string;
+  learnerId: string;
+  learner: string | null;
+  days: number;
+  title: string;
+  body: string;
+  alreadySent: boolean;
+  /** When this family's summary is actually due, in their own time. */
+  theirSundayEvening: string;
+}
+
+export interface JobReport {
+  job: string;
+  preview?: boolean;
+  families?: number;
+  due?: number;
+  summaries?: number;
+  sent?: number;
+  cursor?: string | null;
+  skipped?: string;
+  would_send?: WouldSend[];
+  /** The sweep's counts. */
+  tokens?: number;
+  notifications?: number;
+  runs?: number;
+}
+
+export interface JobRun {
+  job: string;
+  preview: boolean;
+  report: JobReport;
+}
+
+/** Which jobs can be run by hand. Read rather than hardcoded on the screen. */
+export async function notificationJobs(): Promise<JobDefinition[]> {
+  const body = await request<{ jobs: JobDefinition[] }>("/system/push/jobs", {
+    token: await accessToken(),
+  });
+  return body.jobs;
+}
+
+/**
+ * Run a scheduled job now, or show what it would do.
+ *
+ * `preview` is the one to reach for on any day that is not Sunday: a real
+ * summary run on a Tuesday correctly does nothing, because it is nobody's
+ * Sunday evening, which makes it a useless way to check anything. The preview
+ * drops that filter, claims nothing and sends nothing.
+ */
+export async function runNotificationJob(job: string, preview = false): Promise<JobRun> {
+  return await request<JobRun>(
+    `/system/push/jobs/${job}${preview ? "?preview=true" : ""}`,
+    { method: "POST", token: await accessToken() },
+  );
+}
