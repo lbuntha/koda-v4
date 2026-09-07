@@ -130,6 +130,9 @@ async def goals_reached(
                 kind=GOAL_MET,
                 title=title,
                 body=body,
+                # See the weekly summary: a congratulation about a child opens
+                # that child.
+                path=f"/children/{learner_id}",
                 tag=f"goal:{learner_id}:{local_day}",
             )
             told += 1

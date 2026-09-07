@@ -30,6 +30,25 @@ from typing import Any
 #: its own staff — it rides this pipe rather than growing a second one.
 KIND_CLASSES = ("account", "courtesy", "operator")
 
+#: Every kind this build has a call site for.
+#:
+#: The catalog is the design; this is what the code actually does, and the two
+#: are allowed to differ while a phase is in flight. What is not allowed is
+#: drawing a parent a switch for a kind nothing sends: somebody turns on
+#: "Practice reminder", waits a week, and concludes notifications are broken —
+#: which is a worse first impression than the feature being visibly absent.
+#:
+#: A kind is added here in the same commit as its sender, so the list cannot
+#: quietly claim more than the build does. `routers/push.py` hides what is not
+#: in it, and `services/push.py` refuses to send it.
+SENDS: frozenset[str] = frozenset(
+    {
+        "device.new_signin",
+        "learn.goal_met",
+        "learn.weekly_summary",
+    }
+)
+
 DEFAULT_KINDS: list[dict[str, Any]] = [
     {
         "kindId": "device.new_signin",

@@ -16,7 +16,7 @@ from app.deps import AUTHENTICATED, CurrentPrincipal, Db
 from app.errors import Forbidden, NotFound
 from app.models.auth import Principal
 from app.models.common import Model
-from app.push_defaults import DEFAULT_KINDS, MASTER
+from app.push_defaults import DEFAULT_KINDS, MASTER, SENDS
 from app.repos import notify_prefs, push_tokens
 from app.repos import system as system_repo
 from app.security.rate_limit import PUSH_TEST_PER_ACCOUNT, limiter
@@ -134,13 +134,19 @@ async def _preferences(db, p: Principal) -> PreferencesOut:
     switch a family cannot move is not a setting, it is a decision somebody else
     made, and drawing it would invite a parent to fix something they cannot.
     Account kinds are absent for the same reason — they carry no preference.
+
+    So is a kind this build has no sender for. The catalog is the design and
+    `SENDS` is what the code does; while a phase is in flight they differ, and
+    the difference must not reach a parent as a switch. Turning on a reminder
+    that nothing sends, waiting a week and concluding notifications are broken
+    is a worse first impression than the switch not being there yet.
     """
     chosen = await notify_prefs.for_user(db, p.subject_id)
     master = await system_repo.value_of(db, MASTER, True)
 
     kinds: list[KindOut] = []
     for kind in DEFAULT_KINDS:
-        if kind["class"] != "courtesy":
+        if kind["class"] != "courtesy" or kind["kindId"] not in SENDS:
             continue
         if not await system_repo.value_of(db, kind["settingId"], True):
             continue
@@ -170,9 +176,10 @@ async def choose(body: PreferenceIn, db: Db, p: CurrentPrincipal) -> Preferences
     """
     _adult(p)
     definition = next((k for k in DEFAULT_KINDS if k["kindId"] == body.kind), None)
-    if definition is None or definition["class"] != "courtesy":
-        # An account kind has no preference to set, and an unknown one is a
-        # client bug. Both are the same answer: there is no such switch.
+    if definition is None or definition["class"] != "courtesy" or body.kind not in SENDS:
+        # An account kind has no preference to set, an unknown one is a client
+        # bug, and one nothing sends yet is not a switch this build offers.
+        # All three are the same answer: there is no such setting.
         raise NotFound(f"There is no notification setting called '{body.kind}'.")
 
     await notify_prefs.set_pref(db, p.subject_id, body.kind, body.on)

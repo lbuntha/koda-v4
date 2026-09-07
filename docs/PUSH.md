@@ -573,7 +573,7 @@ Three things this needs to get right:
 | **0** ✅ | `injectManifest`, the worker ported with **no push code** | Both builds report the same *29 entries*, the hashed URLs diff clean, `tsc` passes over the worker's own project, 985 tests pass — and, in Chrome against a production build: the update prompt still installs, and a deep link still boots with the server stopped |
 | **1** ✅ | `services/push.py` with the `console` driver, `push_tokens`, the two endpoints, `device.new_signin` | 22 tests in `test_push.py`, 363 in the suite, `ruff` clean |
 | **2** ✅ | The worker's `push`/`notificationclick` handlers, Settings → Notifications, preferences, preflight and test send (§7) | 36 tests in `test_push.py` and 14 over the payload guard; 381 API tests, 1,002 frontend tests, both builds clean. **Still to do on hardware:** preflight green on staging, then a real Android phone and a real installed iPhone |
-| **3** ✅ | Cloud Scheduler, `weekly_summary`, `goal_met` | 24 tests in `test_tasks.py`; 452 API tests, `ruff` clean. **Still to do on hardware:** the two jobs created against staging, and a summary watched arriving on a real Sunday |
+| **3** ✅ | Cloud Scheduler, `weekly_summary`, `goal_met` | 25 tests in `test_tasks.py`; 455 API tests, 1,707 frontend tests, `ruff` and `tsc` clean. **Still to do on hardware:** the two jobs created against staging, and a summary watched arriving on a real Sunday |
 | **4** | `practice_reminder`, `streak_ending`, the self-limiting counter | Off by default; on by choice; quiet by neglect |
 
 Each phase is deployable and none of them is load-bearing for the phase after,
@@ -629,6 +629,31 @@ that sets them is phase 2. And `device.new_signin` sends `path="/"` — the clie
 is a tab machine with no URL routing, so every deep link lands on the default
 screen. Giving a notification somewhere to land is a client-side prerequisite
 for phase 2, not a server one.
+
+**Beyond the plan, in phase 3.** Two more, both found by reading what was
+actually shipped rather than what was designed:
+
+- **A tapped notification now lands somewhere.** The worker had always posted
+  `KODA_NOTIFICATION_CLICK` with the path, and nothing in the app listened — so
+  every tap focused Koda and left the reader where they already were, which is
+  most of a summary missing. `src/lib/push/landing.ts` maps a path to a tab,
+  because Koda's screens are state rather than URLs and adding a router to make
+  one tap land correctly would change how every screen is reached. The map is
+  also the boundary: `safePath` in the worker refuses another origin, and this
+  refuses any destination we did not name. Both `learn.*` kinds now send
+  `/children/{learnerId}`, so a summary about a child opens that child.
+- **A switch nothing sends is no longer drawn.** `push_defaults.SENDS` is what
+  this build actually has a call site for, beside the catalog that says what a
+  kind *means*. While a phase is in flight the two differ, and the difference
+  must not reach a parent: turning on "Practice reminder", waiting a week and
+  concluding notifications are broken is worse than the switch being visibly
+  absent. `routers/push.py` hides what is not in it and refuses to set it;
+  `services/push.py` refuses to send it, loudly, so a call site added without
+  its kind being declared fails rather than half-working. Five kinds are
+  currently declared with no sender: both reminders (phase 4) and
+  `family.invite_redeemed`, `plan.request_decided` and `system.broadcast`,
+  which are not phased work — each needs a few lines at a call site that
+  already exists.
 
 **Beyond the plan.** Four things were built after phase 2 that the design did
 not call for, each because using it asked for them:
