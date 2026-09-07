@@ -219,20 +219,25 @@ async def test_reminders_ship_off_for_families(db):
     assert push.wanted_by("learn.practice_reminder", {"learn.practice_reminder": True}) is True
 
 
-async def test_a_kind_with_no_sender_is_never_sent(db):
-    """The catalog is the design; `SENDS` is what this build actually does.
+async def test_every_declared_kind_now_has_a_sender(db):
+    """The catalog is the design and `SENDS` is what the build does.
 
-    Three kinds are still declared with no call site behind them —
-    `family.invite_redeemed`, `plan.request_decided` and `system.broadcast`.
-    Refused here rather than half-offered, so the gap shows up as a kind that is
-    absent rather than as a switch that does nothing.
+    They were allowed to differ while phases were in flight, and the router
+    hid the difference so a parent never met a switch that did nothing. They no
+    longer differ — every kind in the catalog has a call site — so this asserts
+    the agreement rather than the gap. A kind added without one fails here,
+    which is the point: the failure belongs at the declaration, not on the
+    screen of somebody waiting for a notification that cannot come.
     """
-    assert await push.deployment_allows(db, "family.invite_redeemed") is False
-    assert await push.deployment_allows(db, "plan.request_decided") is False
-    assert await push.deployment_allows(db, "system.broadcast") is False
+    from app.push_defaults import BY_KIND, SENDS
+
+    assert SENDS == set(BY_KIND), "a declared kind with no sender is a switch that does nothing"
+
+
+async def test_an_undeclared_kind_is_still_refused(db):
+    """The guard itself, which is what keeps the assertion above honest."""
+    assert await push.deployment_allows(db, "learn.made_up") is False
     assert await push.deployment_allows(db, "learn.goal_met") is True
-    # Phase 4 gave both reminders a sender, so they are no longer in that list.
-    assert await push.deployment_allows(db, "learn.practice_reminder") is True
 
 
 async def test_an_account_kind_ignores_a_preference(db):
@@ -975,3 +980,116 @@ async def test_a_send_with_nobody_to_ring_is_still_logged(client, admin, db, see
     assert row["devices"] == 0
     assert row["delivered"] == 0
     assert row["people"] == ["u_alone"]
+
+
+# --- §9: a kind that has stopped being read stops being sent ---------------
+
+
+async def _deliver(db, *, kind: str, user_id: str, opened: bool = False) -> None:
+    """One delivered send in the log, as `push.send` would have written it."""
+    from uuid import uuid4
+
+    from app.models.common import now as utc_now
+
+    await db.push_log.insert_one(
+        {
+            "_id": f"pl_{uuid4().hex[:20]}",
+            "kind": kind,
+            "familyId": "f_1",
+            "people": [user_id],
+            "title": "t",
+            "body": "b",
+            "path": "/",
+            "driver": "fcm",
+            "devices": 1,
+            "delivered": 1,
+            "outcomes": {"ok": 1},
+            "at": utc_now(),
+            "openedAt": utc_now() if opened else None,
+        }
+    )
+
+
+async def test_eight_unopened_deliveries_stop_a_courtesy_kind(client, admin, db, seeded):
+    """"A reminder nobody opens is not a reminder, it is noise with our name on it."""
+    await push_tokens.save(db, token=TOKEN, family_id="f_1", user_id="u_ops", device_id=None)
+    for _ in range(8):
+        await _deliver(db, kind="learn.goal_met", user_id="u_ops")
+
+    await push.send(
+        db, to=push.Recipient(family_id="f_1", user_id="u_ops"),
+        kind="learn.goal_met", title="t", body="b",
+    )
+
+    # Nothing was composed for them at all — not recorded, not sent.
+    assert await db.notifications.count_documents({"kind": "learn.goal_met"}) == 0
+
+
+async def test_seven_is_not_yet_eight(db, seeded):
+    await push_tokens.save(db, token=TOKEN, family_id="f_1", user_id="u_ops", device_id=None)
+    for _ in range(7):
+        await _deliver(db, kind="learn.goal_met", user_id="u_ops")
+
+    await push.send(
+        db, to=push.Recipient(family_id="f_1", user_id="u_ops"),
+        kind="learn.goal_met", title="t", body="b",
+    )
+
+    assert await db.notifications.count_documents({"kind": "learn.goal_met"}) == 1
+
+
+async def test_one_tap_starts_the_run_again(client, parent, db, seeded):
+    """No flag to get stuck on, and nothing for an operator to clear.
+
+    The run is *read* from the log, so a single tap on the next one somebody
+    does see — from a phone, from the bell, from anywhere — is the whole of the
+    recovery.
+    """
+    from app.repos import push_log
+
+    user_id = "u_reader"
+    for _ in range(8):
+        await _deliver(db, kind="learn.goal_met", user_id=user_id)
+    assert await push_log.unopened_run(db, user_id, "learn.goal_met") == 8
+
+    await push_log.note_opened(db, user_id, "learn.goal_met")
+
+    assert await push_log.unopened_run(db, user_id, "learn.goal_met") == 0
+
+
+async def test_an_account_kind_never_self_limits(db, seeded):
+    """A security notice that goes quiet because nobody tapped the last few is a
+    worse thing than a noisy one."""
+    await push_tokens.save(db, token=TOKEN, family_id="f_1", user_id="u_ops", device_id=None)
+    for _ in range(12):
+        await _deliver(db, kind="device.new_signin", user_id="u_ops")
+
+    await push.send(
+        db, to=push.Recipient(family_id="f_1", user_id="u_ops"),
+        kind="device.new_signin", title="t", body="b",
+    )
+
+    assert await db.notifications.count_documents({"kind": "device.new_signin"}) == 1
+
+
+async def test_undelivered_sends_do_not_count_against_a_reader(db, seeded):
+    """Nobody declined to open a notification that never left the process."""
+    from app.models.common import now as utc_now
+    from app.repos import push_log
+
+    for index in range(10):
+        await db.push_log.insert_one(
+            {"_id": f"pl_{index}", "kind": "learn.goal_met", "people": ["u_x"], "delivered": 0,
+             "devices": 0, "at": utc_now(), "openedAt": None}
+        )
+
+    assert await push_log.unopened_run(db, "u_x", "learn.goal_met") == 0
+
+
+async def test_a_tap_is_reported_by_the_person_who_made_it(client, parent, db, seeded):
+    """The endpoint takes a kind, never an id — so it cannot mark anyone else's."""
+    response = await client.post(
+        "/notifications/opened", headers=parent, json={"kind": "learn.goal_met"}
+    )
+
+    assert response.status_code == 204

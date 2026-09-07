@@ -16,7 +16,7 @@ from pydantic import Field
 
 from app.deps import AUTHENTICATED, CurrentPrincipal, Db
 from app.models.common import Model
-from app.repos import notifications
+from app.repos import notifications, push_log
 
 router = APIRouter(prefix="/notifications", tags=["notifications"], dependencies=[AUTHENTICATED])
 
@@ -64,6 +64,31 @@ async def listing(db: Db, p: CurrentPrincipal) -> NotificationsOut:
         notifications=[_out(row) for row in rows],
         unread=await notifications.unread_count(db, p.subject_id),
     )
+
+
+class OpenedIn(Model):
+    """Which kind was tapped. Never *which notification* — see below."""
+
+    kind: str = Field(max_length=60)
+
+
+@router.post("/opened", status_code=204)
+async def opened(body: OpenedIn, db: Db, p: CurrentPrincipal) -> None:
+    """Somebody tapped a notification. Resets §9's counter for that kind.
+
+    A kind rather than an id, and the difference is the point: what the counter
+    measures is whether this *sort* of notification is still being read, and a
+    parent who opens one weekly summary has answered that for weekly summaries.
+    Taking an id would also make this a route that can mark somebody else's
+    record read, which is a thing no endpoint here needs to be able to do.
+
+    204, and it fails silently on a kind nobody declared: this is called from a
+    service worker with nothing to show a person, and an error it cannot render
+    would only ever be logged by the browser.
+    """
+    if p.learner_id or not p.subject_id:
+        return
+    await push_log.note_opened(db, p.subject_id, body.kind)
 
 
 @router.post("/read", status_code=200)

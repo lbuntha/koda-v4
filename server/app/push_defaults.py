@@ -51,6 +51,12 @@ SENDS: frozenset[str] = frozenset(
         # makes the switch visible, not the notification inevitable.
         "learn.practice_reminder",
         "learn.streak_ending",
+        # The three account and operator kinds the catalog declared from the
+        # start and nothing ever sent. Each needed a call site rather than a
+        # phase: an invite redeemed, a plan request answered, a word to staff.
+        "family.invite_redeemed",
+        "plan.request_decided",
+        "system.broadcast",
     }
 )
 

@@ -134,7 +134,7 @@ export const NotificationsBell: React.FC = () => {
   const follow = (row: NotificationRecord) => {
     setOpen(false);
     setWasNew(new Set());
-    openNotification(row.path);
+    openNotification(row.path, row.kind);
   };
 
   return (

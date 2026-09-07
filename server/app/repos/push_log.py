@@ -37,6 +37,15 @@ from app.models.common import now
 #: in `indexes.py` does the deleting; the nightly job only tidies after it.
 KEEP_DAYS = 45
 
+#: How many unopened deliveries of one kind turn it off for one person (§9).
+#:
+#: Eight, and the number matters less than the direction: a reminder nobody
+#: opens is not a reminder, it is noise with our name on it. Counted per person
+#: and per kind, because one parent ignoring the weekly summary says nothing
+#: about another, and ignoring summaries says nothing about whether they want to
+#: know a new device signed in.
+RUN_LIMIT = 8
+
 
 async def record(
     db: AsyncIOMotorDatabase,
@@ -83,6 +92,9 @@ async def record(
                 # finds the same word here.
                 "outcomes": outcomes,
                 "at": now(),
+                # Set when somebody taps this notification. Absent means it has
+                # not been opened, which is what §9's counter reads.
+                "openedAt": None,
             }
         )
     except Exception:  # noqa: BLE001 — a log that breaks a send is worse than no log
@@ -128,3 +140,46 @@ async def sweep(db: AsyncIOMotorDatabase) -> int:
     """Drop what is older than anybody would ask about."""
     result = await db.push_log.delete_many({"at": {"$lt": now() - timedelta(days=KEEP_DAYS)}})
     return result.deleted_count
+
+
+async def unopened_run(db: AsyncIOMotorDatabase, user_id: str, kind: str) -> int:
+    """How many of this kind this person has been sent since they last opened one.
+
+    §9's counter, read rather than stored: the log already knows what was sent
+    and `openedAt` records what was tapped, so a separate tally would be a
+    second copy of a fact — the kind that drifts, because a send is written by a
+    job and a tap by a browser and neither is looking at the other.
+
+    Only *delivered* sends count. A notification that never left the process,
+    because nobody had a browser registered or the driver was `console`, is not
+    something somebody declined to open.
+    """
+    rows = await (
+        db.push_log.find(
+            {"kind": kind, "people": user_id, "delivered": {"$gt": 0}},
+            {"openedAt": 1},
+        )
+        .sort("at", -1)
+        .limit(RUN_LIMIT + 1)
+        .to_list(length=RUN_LIMIT + 1)
+    )
+    run = 0
+    for row in rows:
+        if row.get("openedAt"):
+            break
+        run += 1
+    return run
+
+
+async def note_opened(db: AsyncIOMotorDatabase, user_id: str, kind: str) -> None:
+    """Record that this person opened one, which resets the run above.
+
+    The most recent unopened send of that kind to that person, not all of them:
+    a tap is one act, and marking a fortnight of them opened would erase the
+    very history the counter reads.
+    """
+    row = await db.push_log.find_one(
+        {"kind": kind, "people": user_id, "openedAt": None}, sort=[("at", -1)]
+    )
+    if row:
+        await db.push_log.update_one({"_id": row["_id"]}, {"$set": {"openedAt": now()}})

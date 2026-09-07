@@ -88,6 +88,33 @@ async def deployment_allows(db: AsyncIOMotorDatabase, kind: str) -> bool:
     return not (setting_id and not await system_repo.value_of(db, setting_id, True))
 
 
+async def _exhausted(db: AsyncIOMotorDatabase, kind: str, user_id: str) -> bool:
+    """§9: a kind delivered eight times without a tap has stopped being read.
+
+    "A reminder nobody opens is not a reminder, it is noise with our name on
+    it." Per person and per kind, because one parent ignoring the weekly summary
+    says nothing about another, and ignoring summaries says nothing about
+    whether they want to know a new device signed in.
+
+    Courtesy kinds only. An account kind cannot self-limit for the same reason
+    it cannot be switched off: three a year, each about something that happened
+    *to the account*, and a security notice that goes quiet because nobody
+    happened to tap the last few is a worse thing than a noisy one.
+
+    Nothing is stored when this trips. The run is read from the log, so a single
+    tap on the next one a person does see — from the bell, from anywhere —
+    starts it again; there is no flag to get stuck on and nothing for an
+    operator to have to clear.
+    """
+    definition = BY_KIND.get(kind)
+    if definition is None or definition["class"] != "courtesy":
+        return False
+    if await push_log.unopened_run(db, user_id, kind) < push_log.RUN_LIMIT:
+        return False
+    log.info("holding %s for %s: %s delivered unopened", kind, user_id, push_log.RUN_LIMIT)
+    return True
+
+
 def wanted_by(kind: str, prefs: dict[str, Any] | None) -> bool:
     """Whether one person wants this kind, given what they have chosen.
 
@@ -152,6 +179,7 @@ async def send(
         people = await _people(db, to)
         prefs = await notify_prefs.for_users(db, people)
         people = [user_id for user_id in people if wanted_by(kind, prefs.get(user_id))]
+        people = [user_id for user_id in people if not await _exhausted(db, kind, user_id)]
         if not people:
             return 0
 
@@ -216,11 +244,26 @@ async def send(
             )
             return 0
 
+        from app.services import fcm
+
         semaphore = asyncio.Semaphore(CONCURRENCY)
+        # §8: "Stop the run. A retry storm is how a quota problem becomes an
+        # outage." Set by the first token that is refused for quota, and read
+        # before every further send — the ones already in flight finish, and nothing
+        # new is started. A shared flag rather than cancelling the gather,
+        # because a cancelled send is one we cannot say anything about, and the
+        # log would then be less true than the outage.
+        stop = False
 
         async def one(row: dict[str, Any]) -> Any:
+            nonlocal stop
             async with semaphore:
-                return await _deliver_one(db, row, message)
+                if stop:
+                    return fcm.Outcome.QUOTA
+                outcome = await _deliver_one(db, row, message)
+                if outcome is fcm.Outcome.QUOTA:
+                    stop = True
+                return outcome
 
         # The outcomes rather than a tally of booleans. They were being computed
         # and thrown away, and they are the difference between "nothing arrived"
@@ -231,6 +274,12 @@ async def send(
         for outcome in results:
             outcomes[outcome.value] = outcomes.get(outcome.value, 0) + 1
         delivered = outcomes.get("ok", 0)
+        if stop:
+            log.error(
+                "FCM refused %s for quota; stopped the run after %s delivered",
+                kind,
+                delivered,
+            )
 
         await push_log.record(
             db, kind=kind, family_id=to.family_id, people=people, title=title, body=body,
@@ -583,3 +632,71 @@ async def held_for(
         return False
     schedule = await notify_schedule.for_user(db, user_id)
     return notify_schedule.is_quiet(schedule, local_hour)
+
+
+async def send_to_account(
+    db: AsyncIOMotorDatabase,
+    *,
+    user_id: str,
+    kind: str,
+    title: str,
+    body: str,
+    path: str = "/",
+    tag: str | None = None,
+) -> int:
+    """Ring one account's browsers, whatever family it does or does not belong to.
+
+    `send` is family-scoped, because every query in this service is — and staff
+    belong to no family, so an operator broadcast addressed through `Recipient`
+    would reach nobody. This is the same send with the tenancy filter replaced
+    by the one thing that identifies a person without one: their own id.
+
+    Deliberately not a general "send to anybody" door. It is reachable only from
+    the broadcast route, which takes no recipient and reads its list from the
+    platform roles — the rule that no route in this service names who to ring
+    is kept by the *callers*, and this does not weaken it.
+
+    Never raises, like everything else here.
+    """
+    try:
+        if not await deployment_allows(db, kind):
+            return 0
+
+        await notifications.record(
+            db, user_id=user_id, family_id=None, kind=kind, title=title, body=body, path=path
+        )
+
+        rows = await push_tokens.live_for_user(db, user_id)
+        cfg = settings()
+        if not rows or cfg.push_driver == "console":
+            if rows:
+                log.info(
+                    "push (console driver)\nTo: %s (%s browsers)\n%s\n%s",
+                    user_id, len(rows), title, body,
+                )
+            await push_log.record(
+                db, kind=kind, family_id=None, people=[user_id], title=title, body=body,
+                path=path, driver=cfg.push_driver, devices=len(rows), delivered=0, outcomes={},
+            )
+            return 0
+
+        message = {"title": title, "body": body, "path": path, "kind": kind, "tag": tag or kind}
+        semaphore = asyncio.Semaphore(CONCURRENCY)
+
+        async def one(row: dict[str, Any]) -> Any:
+            async with semaphore:
+                return await _deliver_one(db, row, message)
+
+        results = await asyncio.gather(*(one(row) for row in rows))
+        outcomes: dict[str, int] = {}
+        for outcome in results:
+            outcomes[outcome.value] = outcomes.get(outcome.value, 0) + 1
+        delivered = outcomes.get("ok", 0)
+        await push_log.record(
+            db, kind=kind, family_id=None, people=[user_id], title=title, body=body, path=path,
+            driver="fcm", devices=len(rows), delivered=delivered, outcomes=outcomes,
+        )
+        return delivered
+    except Exception:  # noqa: BLE001 — same rule as `send`
+        log.exception("could not send %s to %s", kind, user_id)
+        return 0
