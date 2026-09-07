@@ -94,6 +94,15 @@ vi.mock("firebase/app", () => ({ initializeApp: vi.fn(() => ({})), getApps: vi.f
 
 describe("when a browser will not register", () => {
   const ready = async () => {
+    // Stubbed explicitly rather than inherited. A developer's `.env` carries
+    // real VITE_FIREBASE_* values and CI carries none, so a test that reads
+    // whatever is ambient passes on a laptop and fails on the runner — which is
+    // exactly how these first reached `main`.
+    vi.stubEnv("VITE_FIREBASE_API_KEY", "test-key");
+    vi.stubEnv("VITE_FIREBASE_PROJECT_ID", "test-project");
+    vi.stubEnv("VITE_FIREBASE_APP_ID", "1:1:web:1");
+    vi.stubEnv("VITE_FIREBASE_MESSAGING_SENDER_ID", "1");
+    vi.stubEnv("VITE_FIREBASE_VAPID_KEY", "test-vapid");
     vi.stubGlobal("Notification", { permission: "granted", requestPermission: vi.fn() });
     vi.stubGlobal("PushManager", class {});
     Object.defineProperty(window, "PushManager", { value: class {}, configurable: true });
@@ -108,6 +117,8 @@ describe("when a browser will not register", () => {
     messaging.getToken.mockReset();
     messaging.isSupported.mockResolvedValue(true);
   });
+
+  afterEach(() => vi.unstubAllEnvs());
 
   it("keeps the reason a mint failure gave, because that is the useful half", async () => {
     // `messaging/token-subscribe-failed` almost always means the Web Push
