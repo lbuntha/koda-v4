@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="stickerBody" x1="18%" y1="8%" x2="82%" y2="96%">
+      <stop offset="0%" stop-color="#BAE6FD"/>
+      <stop offset="50%" stop-color="#0EA5E9"/>
+      <stop offset="100%" stop-color="#075985"/>
+    </linearGradient>
+    <radialGradient id="stickerShadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.24"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <ellipse cx="64" cy="118" rx="30" ry="6" fill="url(#stickerShadow)"/>
+  <circle cx="64" cy="62" r="50" fill="#FFFFFF" stroke="#BAE6FD" stroke-width="2"/>
+  <polygon points="64,18 76,48 108,50 83,70 92,102 64,84 36,102 45,70 20,50 52,48" fill="url(#stickerBody)" stroke="#075985" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M52 40 C46 48 44 56 45 64" fill="none" stroke="#E0F2FE" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+</svg>

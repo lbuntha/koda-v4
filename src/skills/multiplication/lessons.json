@@ -1,0 +1,3140 @@
+{
+  "lessons": [
+    {
+      "id": "equal-groups",
+      "title": "Make Equal Groups",
+      "concept": "Groups That All Hold the Same Number",
+      "conceptKey": "equal-grouper",
+      "requires": [
+        "counter"
+      ],
+      "activity": "multiplication/groups",
+      "params": {
+        "level": 1,
+        "question": {
+          "mode": "make_groups",
+          "groupRange": [
+            2,
+            6
+          ],
+          "sizeRange": [
+            2,
+            6
+          ],
+          "productMax": 36,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Build a set of groups that all hold the same number, then say how many there are altogether.",
+          "stepByStep": [
+            "Read how many groups you need, and how many go in each one.",
+            "Take one object at a time and put it into a group.",
+            "When every group holds the same number, count them all."
+          ],
+          "kidTip": "Every group must hold the same number. That is what makes them equal.",
+          "audioPrompt": "Make equal groups. Put the same number into every one, then count them all."
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "🧺",
+      "iconName": "boxes",
+      "iconTone": "purple",
+      "pedagogyTip": "The groups are built rather than shown, because a child who has filled them knows they are equal — a child who was told they are equal only knows it was said.",
+      "standards": [
+        "CCSS.2.OA.C.4",
+        "CCSS.3.OA.A.1"
+      ],
+      "trajectoryLevel": "beginning-grouper",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "equal-or-not",
+      "title": "Equal or Not?",
+      "concept": "Telling Equal Groups from Unequal Ones",
+      "conceptKey": "equal-group-checker",
+      "requires": [
+        "equal-grouper"
+      ],
+      "activity": "multiplication/groups",
+      "params": {
+        "level": 2,
+        "question": {
+          "mode": "equal_or_not",
+          "groupRange": [
+            3,
+            5
+          ],
+          "sizeRange": [
+            2,
+            6
+          ],
+          "productMax": 30,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Decide whether a set of groups is equal, and say which one is different when it is not.",
+          "stepByStep": [
+            "Count what is inside the first group.",
+            "Check each of the others against it.",
+            "If even one holds a different number, the groups are not equal."
+          ],
+          "kidTip": "Check every group, not just the first two.",
+          "audioPrompt": "Are all the groups holding the same number? Look carefully at each one."
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "⚖️",
+      "iconName": "scale",
+      "iconTone": "cyan",
+      "pedagogyTip": "Multiplication only works on equal groups, so a child has to be able to see when groups are not equal before the word is any use to them.",
+      "standards": [
+        "CCSS.2.OA.C.4"
+      ],
+      "trajectoryLevel": "beginning-grouper",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "repeated-addition",
+      "title": "Add It Again and Again",
+      "concept": "Counting Equal Groups by Adding the Same Number",
+      "conceptKey": "repeated-adder",
+      "requires": [
+        "equal-grouper",
+        "count-on"
+      ],
+      "activity": "multiplication/groups",
+      "params": {
+        "level": 3,
+        "question": {
+          "mode": "repeated_addition",
+          "groupRange": [
+            2,
+            6
+          ],
+          "sizeRange": [
+            2,
+            9
+          ],
+          "productMax": 40,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Count equal groups by adding the group size once for every group.",
+          "stepByStep": [
+            "Tap the first group to start the addition.",
+            "Keep tapping groups, adding the same number each time.",
+            "The total at the end is how many there are altogether."
+          ],
+          "kidTip": "The same number, once for every group.",
+          "audioPrompt": "Count the groups by adding. Add the same number once for every group."
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "➕",
+      "iconName": "waves",
+      "iconTone": "emerald",
+      "pedagogyTip": "Repeated addition is a route to the answer, not the meaning of multiplication. The groups stay on screen so the child is adding something they can see rather than reciting a string.",
+      "standards": [
+        "CCSS.2.OA.C.4",
+        "CCSS.3.OA.A.1"
+      ],
+      "trajectoryLevel": "grouper",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "groups-to-equation",
+      "title": "Write the Multiplication",
+      "concept": "Matching Equal Groups to a Multiplication Sentence",
+      "conceptKey": "multiplication-equation-reader",
+      "requires": [
+        "repeated-adder"
+      ],
+      "activity": "multiplication/groups",
+      "params": {
+        "level": 4,
+        "question": {
+          "mode": "groups_to_equation",
+          "groupRange": [
+            2,
+            8
+          ],
+          "sizeRange": [
+            2,
+            9
+          ],
+          "productMax": 60,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Choose the multiplication sentence that describes a set of equal groups.",
+          "stepByStep": [
+            "Count how many groups there are.",
+            "Count how many are inside one group.",
+            "Find the sentence with those two numbers, in that order."
+          ],
+          "kidTip": "Groups first, then how many are in each.",
+          "audioPrompt": "Which sentence matches these groups? Count the groups, then count inside one."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "✖️",
+      "iconName": "zap",
+      "iconTone": "indigo",
+      "pedagogyTip": "Every option is a true equation, so the task is reading the picture rather than checking the arithmetic. The commuted sentence is deliberately absent: it describes a different arrangement, which is the next lesson's question.",
+      "standards": [
+        "CCSS.3.OA.A.1"
+      ],
+      "trajectoryLevel": "grouper",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "which-factor-is-which",
+      "title": "Which Number Counts What",
+      "concept": "The Two Factors Do Different Jobs",
+      "conceptKey": "factor-role-reader",
+      "requires": [
+        "multiplication-equation-reader"
+      ],
+      "activity": "multiplication/groups",
+      "params": {
+        "level": 5,
+        "question": {
+          "mode": "factor_roles",
+          "groupRange": [
+            2,
+            8
+          ],
+          "sizeRange": [
+            2,
+            9
+          ],
+          "productMax": 60,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Say which factor counts the groups and which counts what is inside one.",
+          "stepByStep": [
+            "Look at the picture and count the containers.",
+            "Count what is inside one container.",
+            "Put each number beside the sentence it belongs to, then check both together."
+          ],
+          "kidTip": "The first number counts the groups. The second counts what is in one group.",
+          "audioPrompt": "Which number counts the groups, and which counts what is inside one?"
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🏷️",
+      "iconName": "scale",
+      "iconTone": "pink",
+      "pedagogyTip": "Both slots are checked together, once. Scoring them separately would let a child guess one, be told, and then have the other for free — and the idea being taught is the pair, not either half.",
+      "standards": [
+        "CCSS.3.OA.A.1"
+      ],
+      "trajectoryLevel": "grouper",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "multiply-by-one",
+      "title": "Multiply by One",
+      "concept": "One Group, or Groups of One",
+      "conceptKey": "multiplicative-identity",
+      "requires": [
+        "multiplication-equation-reader"
+      ],
+      "activity": "multiplication/groups",
+      "params": {
+        "level": 6,
+        "question": {
+          "mode": "times_one",
+          "groupRange": [
+            2,
+            12
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Multiply by one, and see why the answer is the other number.",
+          "stepByStep": [
+            "Look at whether there is one group, or many groups of one.",
+            "Either way, count what you can see.",
+            "The answer is the number that is not one."
+          ],
+          "kidTip": "Multiplying by one changes nothing.",
+          "audioPrompt": "Multiply by one. How many are there altogether?"
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "1️⃣",
+      "iconName": "star",
+      "iconTone": "cyan",
+      "pedagogyTip": "Both orders are shown because one group of six and six groups of one look nothing alike and are the same fact. Meeting only one of them leaves the rule looking like a coincidence.",
+      "standards": [
+        "CCSS.3.OA.B.5"
+      ],
+      "trajectoryLevel": "grouper",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "multiply-by-zero",
+      "title": "Multiply by Zero",
+      "concept": "Groups That Hold Nothing",
+      "conceptKey": "zero-property",
+      "requires": [
+        "multiplicative-identity"
+      ],
+      "activity": "multiplication/groups",
+      "params": {
+        "level": 7,
+        "question": {
+          "mode": "times_zero",
+          "groupRange": [
+            2,
+            12
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Multiply by zero, and see why the answer is always nothing.",
+          "stepByStep": [
+            "Look inside the containers.",
+            "Every one of them is empty.",
+            "However many empty containers there are, there is still nothing in them."
+          ],
+          "kidTip": "Any number of empty groups is still nothing.",
+          "audioPrompt": "All the groups are empty. How many are there altogether?"
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "0️⃣",
+      "iconName": "circleDot",
+      "iconTone": "indigo",
+      "pedagogyTip": "The empty containers are drawn rather than described. A child told that anything times zero is zero has learned a sentence; a child looking at eight empty baskets has seen the reason.",
+      "standards": [
+        "CCSS.3.OA.B.5"
+      ],
+      "trajectoryLevel": "grouper",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "build-an-array",
+      "title": "Build an Array",
+      "concept": "Equal Groups Stood in Rows",
+      "conceptKey": "array-builder",
+      "requires": [
+        "equal-grouper"
+      ],
+      "activity": "multiplication/array",
+      "params": {
+        "level": 8,
+        "question": {
+          "mode": "build_array",
+          "rowRange": [
+            2,
+            6
+          ],
+          "colRange": [
+            2,
+            6
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Build an array with a given number of rows and a given number in each row.",
+          "stepByStep": [
+            "Add rows until you have as many as the question asks for.",
+            "Add columns until each row holds the right number.",
+            "Count the squares, or work them out from the two numbers."
+          ],
+          "kidTip": "Rows go down the side. What is in a row goes across the top.",
+          "audioPrompt": "Build the array. Add rows down the side and squares along each row."
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "🟦",
+      "iconName": "boxes",
+      "iconTone": "cyan",
+      "pedagogyTip": "The array is resized rather than redrawn. A child who adds a row and watches the total jump by a whole row has seen where multiplication comes from.",
+      "standards": [
+        "CCSS.2.OA.C.4",
+        "CCSS.3.OA.A.1"
+      ],
+      "trajectoryLevel": "concrete-modeler",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "rows-and-columns",
+      "title": "Rows and Columns",
+      "concept": "Reading an Array as Rows Times Row-Length",
+      "conceptKey": "array-reader",
+      "requires": [
+        "array-builder"
+      ],
+      "activity": "multiplication/array",
+      "params": {
+        "level": 9,
+        "question": {
+          "mode": "read_array",
+          "rowRange": [
+            2,
+            10
+          ],
+          "colRange": [
+            2,
+            10
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Read a finished array as a multiplication and give its total.",
+          "stepByStep": [
+            "Count down the side to find how many rows there are.",
+            "Count along one row to find how many are in it.",
+            "Multiply the two numbers."
+          ],
+          "kidTip": "You do not have to count every square. Count the rows, then count one row.",
+          "audioPrompt": "How many squares altogether? Count the rows, then count along one row."
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "📐",
+      "iconName": "layers",
+      "iconTone": "indigo",
+      "pedagogyTip": "Counting every square is the strategy this lesson is trying to replace, so the arrays are large enough that counting one at a time stops being the easy way.",
+      "standards": [
+        "CCSS.3.OA.A.1"
+      ],
+      "trajectoryLevel": "concrete-modeler",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "turn-the-array",
+      "title": "Turn the Array",
+      "concept": "Order Does Not Change the Total",
+      "conceptKey": "multiplicative-commutativity",
+      "requires": [
+        "array-reader"
+      ],
+      "activity": "multiplication/array",
+      "params": {
+        "level": 10,
+        "question": {
+          "mode": "commute",
+          "rowRange": [
+            2,
+            10
+          ],
+          "colRange": [
+            2,
+            10
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Turn an array a quarter turn and explain why its total is unchanged.",
+          "stepByStep": [
+            "Read the array: so many rows, so many in each.",
+            "Turn it, and read it again.",
+            "Decide whether any squares were added or taken away."
+          ],
+          "kidTip": "Turning moves the squares around. It cannot make more of them.",
+          "audioPrompt": "Turn the array. Did the total change? And why?"
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🔄",
+      "iconName": "dice",
+      "iconTone": "purple",
+      "pedagogyTip": "Commutativity is a discovery, not a rule to be told. It is only surprising if the two factors were visibly different things first, which is why rows and columns keep different colours throughout the skill.",
+      "standards": [
+        "CCSS.3.OA.B.5"
+      ],
+      "trajectoryLevel": "parts-and-wholes",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "two-equations-one-array",
+      "title": "Two Sentences, One Array",
+      "concept": "Every Array Answers to Two Multiplications",
+      "conceptKey": "array-equation-writer",
+      "requires": [
+        "multiplicative-commutativity",
+        "multiplication-equation-reader"
+      ],
+      "activity": "multiplication/array",
+      "params": {
+        "level": 11,
+        "question": {
+          "mode": "array_to_equation",
+          "rowRange": [
+            2,
+            10
+          ],
+          "colRange": [
+            2,
+            10
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Choose both multiplication sentences that describe one array.",
+          "stepByStep": [
+            "Count the rows, and count along one row.",
+            "Find the sentence that reads rows first.",
+            "Find the one that reads the other way, and choose both."
+          ],
+          "kidTip": "One array, two sentences. Pick them both.",
+          "audioPrompt": "Choose both sentences that match this array."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🧩",
+      "iconName": "sparkles",
+      "iconTone": "pink",
+      "pedagogyTip": "Both are checked together, once. Choosing one and being told would hand the child the other for free, and the pair is the idea.",
+      "standards": [
+        "CCSS.3.OA.A.1",
+        "CCSS.3.OA.B.5"
+      ],
+      "trajectoryLevel": "parts-and-wholes",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "missing-side",
+      "title": "Find the Missing Side",
+      "concept": "Working Back from the Total to a Factor",
+      "conceptKey": "missing-dimension",
+      "requires": [
+        "array-reader"
+      ],
+      "activity": "multiplication/array",
+      "params": {
+        "level": 12,
+        "question": {
+          "mode": "missing_dimension",
+          "rowRange": [
+            2,
+            10
+          ],
+          "colRange": [
+            2,
+            10
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Given the total and one side of an array, find the other side.",
+          "stepByStep": [
+            "Read the total, and the side you have been given.",
+            "Grow the array until it holds the total.",
+            "Read off the side you were looking for."
+          ],
+          "kidTip": "Count up in the number you know until you reach the total.",
+          "audioPrompt": "You know the total and one side. How long is the other side?"
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🔎",
+      "iconName": "search",
+      "iconTone": "emerald",
+      "pedagogyTip": "The unknown factor, arrived at by building rather than by dividing. Division is a later skill; this is the multiplicative structure it will rest on.",
+      "standards": [
+        "CCSS.3.OA.A.4"
+      ],
+      "trajectoryLevel": "parts-and-wholes",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "skip-count-hops",
+      "title": "Equal Hops",
+      "concept": "Counting in Equal Steps",
+      "conceptKey": "skip-counter",
+      "requires": [
+        "repeated-adder"
+      ],
+      "activity": "multiplication/numberline",
+      "params": {
+        "level": 13,
+        "question": {
+          "mode": "skip_count",
+          "steps": [
+            2,
+            3,
+            4,
+            5,
+            10
+          ],
+          "hopRange": [
+            3,
+            10
+          ],
+          "max": 100,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Make equal hops along a number line and read the number you land on.",
+          "stepByStep": [
+            "Start at zero and hop the same distance every time.",
+            "Say each number you land on out loud.",
+            "Make all the hops the question asks for, then read the last landing."
+          ],
+          "kidTip": "Every hop is the same size. Say the number as you land.",
+          "audioPrompt": "Hop along the line in equal steps. Where do you land?"
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "🐾",
+      "iconName": "footprints",
+      "iconTone": "purple",
+      "pedagogyTip": "The last landing is named as the total, every time. A skip count that never says what it counted to has taught counting, not multiplying.",
+      "standards": [
+        "CCSS.2.NBT.A.2",
+        "CCSS.3.OA.A.1"
+      ],
+      "trajectoryLevel": "skip-counter",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "multiply-on-a-line",
+      "title": "Multiply on a Line",
+      "concept": "A Multiplication Is a Run of Equal Hops",
+      "conceptKey": "multiplication-number-line",
+      "requires": [
+        "skip-counter",
+        "multiplication-equation-reader"
+      ],
+      "activity": "multiplication/numberline",
+      "params": {
+        "level": 14,
+        "question": {
+          "mode": "hops_to_product",
+          "stepRange": [
+            2,
+            9
+          ],
+          "hopRange": [
+            2,
+            9
+          ],
+          "max": 81,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Read a multiplication as a number of hops of a given size, and find where it lands.",
+          "stepByStep": [
+            "Read the first number: that is how many hops.",
+            "Read the second: that is how long each hop is.",
+            "Make the hops, then say the landing."
+          ],
+          "kidTip": "Four times five means four hops of five.",
+          "audioPrompt": "Make the hops this multiplication asks for. Where do you land?"
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "➡️",
+      "iconName": "footprints",
+      "iconTone": "cyan",
+      "pedagogyTip": "The convention the whole skill holds to: a times b is a groups of b, so a is the number of hops and b is their size.",
+      "standards": [
+        "CCSS.3.OA.A.3"
+      ],
+      "trajectoryLevel": "skip-counter",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "count-the-hops",
+      "title": "Count the Hops",
+      "concept": "Working Back from the Landing to the Number of Groups",
+      "conceptKey": "hop-counter",
+      "requires": [
+        "multiplication-number-line"
+      ],
+      "activity": "multiplication/numberline",
+      "params": {
+        "level": 15,
+        "question": {
+          "mode": "missing_hop",
+          "stepRange": [
+            2,
+            10
+          ],
+          "hopRange": [
+            2,
+            10
+          ],
+          "max": 100,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Given where the hops land and how long each one is, find how many hops there were.",
+          "stepByStep": [
+            "Find the landing marked on the line.",
+            "Hop towards it in equal steps, counting as you go.",
+            "The number of hops it took is the answer."
+          ],
+          "kidTip": "Count the hops, not the numbers you pass.",
+          "audioPrompt": "You know where the hops land and how big they are. How many hops?"
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🔎",
+      "iconName": "search",
+      "iconTone": "emerald",
+      "pedagogyTip": "The unknown factor again, reached by building rather than by dividing — the same structure as the missing side of an array, on a different apparatus.",
+      "standards": [
+        "CCSS.3.OA.A.4"
+      ],
+      "trajectoryLevel": "skip-counter",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "spot-the-multiples",
+      "title": "Spot the Multiples",
+      "concept": "A Multiple Is a Number the Hops Land On",
+      "conceptKey": "multiple-recogniser",
+      "requires": [
+        "skip-counter",
+        "hop-counter"
+      ],
+      "activity": "multiplication/numberline",
+      "params": {
+        "level": 16,
+        "question": {
+          "mode": "count_multiples",
+          "stepRange": [
+            2,
+            10
+          ],
+          "max": 60,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Decide whether a number is a multiple of a given number.",
+          "stepByStep": [
+            "Hop along the line in the size you are given.",
+            "Watch whether a hop lands exactly on the number.",
+            "If the hops step over it, it is not a multiple."
+          ],
+          "kidTip": "If your hops step over it, it is not a multiple.",
+          "audioPrompt": "Hop along in equal steps. Do you land right on this number?"
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🎯",
+      "iconName": "star",
+      "iconTone": "pink",
+      "pedagogyTip": "The near misses sit within two of a real multiple on purpose. Asking whether ninety-seven is a multiple of ten is a question about size, not about multiples.",
+      "standards": [
+        "CCSS.4.OA.B.4"
+      ],
+      "trajectoryLevel": "skip-counter",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "times-two",
+      "title": "Times Two",
+      "concept": "Multiplying by Two Is Doubling",
+      "conceptKey": "doubles-knower",
+      "requires": [
+        "multiplication-equation-reader",
+        "skip-counter"
+      ],
+      "activity": "multiplication/facts",
+      "params": {
+        "level": 17,
+        "question": {
+          "mode": "doubles",
+          "partnerRange": [
+            2,
+            12
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Know the two times table as doubling.",
+          "stepByStep": [
+            "Read the fact: two of something, or something twice.",
+            "Picture the two rows.",
+            "Double the number and say the total."
+          ],
+          "kidTip": "Two of a number is that number doubled.",
+          "audioPrompt": "Two times a number is just that number doubled. What is the total?"
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "✌️",
+      "iconName": "zap",
+      "iconTone": "purple",
+      "pedagogyTip": "One of the three facts a child holds outright. Doubling is already known from addition, so this reuses that record rather than opening a second one for the same competence.",
+      "standards": [
+        "CCSS.3.OA.C.7"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "times-ten",
+      "title": "Times Ten",
+      "concept": "Ten of Something Is Ten of Them",
+      "conceptKey": "tens-multiplier",
+      "requires": [
+        "doubles-knower",
+        "place-value-builder"
+      ],
+      "activity": "multiplication/facts",
+      "params": {
+        "level": 18,
+        "question": {
+          "mode": "tens",
+          "partnerRange": [
+            2,
+            12
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Know the ten times table as a count of tens.",
+          "stepByStep": [
+            "Read how many tens the fact asks for.",
+            "Lay out that many sticks of ten.",
+            "Count them in tens and say the total."
+          ],
+          "kidTip": "Ten sevens is seven tens. Count the tens.",
+          "audioPrompt": "How many tens is this? Count the sticks of ten."
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "🔢",
+      "iconName": "layers",
+      "iconTone": "cyan",
+      "pedagogyTip": "Never taught as adding a zero. The digits move up a place and the ones column empties; the rule breaks the first time a decimal appears, and this is the age it gets installed.",
+      "standards": [
+        "CCSS.3.OA.C.7",
+        "CCSS.3.NBT.A.3"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "times-five",
+      "title": "Times Five",
+      "concept": "Five Is Half of Ten",
+      "conceptKey": "fives-multiplier",
+      "requires": [
+        "tens-multiplier"
+      ],
+      "activity": "multiplication/facts",
+      "params": {
+        "level": 19,
+        "question": {
+          "mode": "fives",
+          "partnerRange": [
+            2,
+            12
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Work out the five times table by halving the ten times table.",
+          "stepByStep": [
+            "Turn over the helper card to see the ten times fact.",
+            "Halve the number on it.",
+            "That is the answer."
+          ],
+          "kidTip": "Five of something is half of ten of it.",
+          "audioPrompt": "You already know the ten times fact. What is half of it?"
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "🖐️",
+      "iconName": "gem",
+      "iconTone": "emerald",
+      "pedagogyTip": "The first derived fact in the skill, and the one that makes five foundational rather than memorised. Turning the helper card over is recorded as a support, never as an answer.",
+      "standards": [
+        "CCSS.3.OA.C.7"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "read-the-table",
+      "title": "Read the Table",
+      "concept": "Finding a Product Where a Row Meets a Column",
+      "conceptKey": "table-reader",
+      "requires": [
+        "multiplication-equation-reader",
+        "fives-multiplier"
+      ],
+      "activity": "multiplication/table",
+      "params": {
+        "level": 20,
+        "question": {
+          "mode": "find_cell",
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Find a product on a times table by tracing its row and its column.",
+          "stepByStep": [
+            "Find the first number down the side of the chart.",
+            "Find the second along the top.",
+            "Tap the cell where the row and the column meet."
+          ],
+          "kidTip": "One finger on the row, one on the column. Slide them together.",
+          "audioPrompt": "Find this fact on the chart. Go along the row and down the column."
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "📊",
+      "iconName": "boxes",
+      "iconTone": "cyan",
+      "pedagogyTip": "The chart is a tool to read, not a table to memorise. Both cells that hold the answer are accepted, because the chart really is symmetric and level 23 is where that becomes the lesson.",
+      "standards": [
+        "CCSS.3.OA.C.7"
+      ],
+      "trajectoryLevel": "parts-and-wholes",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "patterns-in-the-table",
+      "title": "Patterns in the Table",
+      "concept": "Every Row Has a Rule You Can See",
+      "conceptKey": "table-pattern-finder",
+      "requires": [
+        "table-reader"
+      ],
+      "activity": "multiplication/table",
+      "params": {
+        "level": 21,
+        "question": {
+          "mode": "pattern_hunt",
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Spot which answers in a row follow a stated rule.",
+          "stepByStep": [
+            "Read the rule you are given.",
+            "Work along the row one cell at a time.",
+            "Tap every answer that follows the rule, then check them together."
+          ],
+          "kidTip": "Go along the row in order. Do not hunt for a shape.",
+          "audioPrompt": "Tap every answer in this row that follows the rule."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🔍",
+      "iconName": "search",
+      "iconTone": "purple",
+      "pedagogyTip": "The whole selection is checked once. Told cell by cell, a child would stop reasoning and start guessing against the feedback.",
+      "standards": [
+        "CCSS.3.OA.D.9"
+      ],
+      "trajectoryLevel": "parts-and-wholes",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "square-numbers",
+      "title": "Square Numbers",
+      "concept": "A Number Multiplied by Itself",
+      "conceptKey": "square-knower",
+      "requires": [
+        "table-reader"
+      ],
+      "activity": "multiplication/table",
+      "params": {
+        "level": 22,
+        "question": {
+          "mode": "squares",
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Know the square numbers and where they sit on the times table.",
+          "stepByStep": [
+            "Read the number that is being multiplied by itself.",
+            "Look at the square drawn above the chart.",
+            "Find the cell where that row meets that column."
+          ],
+          "kidTip": "A square number really does make a square.",
+          "audioPrompt": "This number is multiplied by itself. Find it on the diagonal."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "⬛",
+      "iconName": "gem",
+      "iconTone": "emerald",
+      "pedagogyTip": "Drawn as a true square, not asserted. The diagonal is highlighted so the child sees that all of them lie on one line.",
+      "standards": [
+        "CCSS.3.OA.C.7"
+      ],
+      "trajectoryLevel": "parts-and-wholes",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "commutative-pairs",
+      "title": "Every Fact Twice",
+      "concept": "Each Fact Appears on Both Sides of the Diagonal",
+      "conceptKey": "multiplicative-commutativity",
+      "requires": [
+        "multiplicative-commutativity",
+        "table-reader"
+      ],
+      "activity": "multiplication/table",
+      "params": {
+        "level": 23,
+        "question": {
+          "mode": "commutative_pairs",
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Pair a shaded cell with the cell that holds the same product.",
+          "stepByStep": [
+            "Read the shaded fact.",
+            "Swap the two numbers over.",
+            "Find that cell on the other side of the diagonal."
+          ],
+          "kidTip": "Swap the numbers round and look on the other side of the diagonal.",
+          "audioPrompt": "This fact appears twice. Find the other cell that holds the same answer."
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "🔁",
+      "iconName": "waves",
+      "iconTone": "pink",
+      "pedagogyTip": "Commutativity met at level 10 on one array, now seen across the whole table at once: half the chart is the other half reflected.",
+      "standards": [
+        "CCSS.3.OA.B.5"
+      ],
+      "trajectoryLevel": "parts-and-wholes",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "times-four",
+      "title": "Times Four",
+      "concept": "Double It, Then Double Again",
+      "conceptKey": "double-doubler",
+      "requires": [
+        "doubles-knower"
+      ],
+      "activity": "multiplication/facts",
+      "params": {
+        "level": 24,
+        "question": {
+          "mode": "double_double",
+          "partnerRange": [
+            2,
+            12
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Work out the four times table by doubling twice.",
+          "stepByStep": [
+            "Turn the card over to see the two times fact.",
+            "Double the number on it.",
+            "That is four of them."
+          ],
+          "kidTip": "Four is two lots of two. Double, then double again.",
+          "audioPrompt": "You know the two times fact. Double it, and double it again."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "✖️",
+      "iconName": "zap",
+      "iconTone": "purple",
+      "pedagogyTip": "The first fact derived from another derived fact's foundation. Doubling twice is cheaper to hold than a fourth table, and it survives into 8 x n at the next level.",
+      "standards": [
+        "CCSS.3.OA.B.5",
+        "CCSS.3.OA.C.7"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "times-eight",
+      "title": "Times Eight",
+      "concept": "Double the Fours",
+      "conceptKey": "triple-doubler",
+      "requires": [
+        "double-doubler"
+      ],
+      "activity": "multiplication/facts",
+      "params": {
+        "level": 25,
+        "question": {
+          "mode": "triple_double",
+          "partnerRange": [
+            2,
+            12
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Work out the eight times table by doubling three times.",
+          "stepByStep": [
+            "Turn the card over: it shows two of them, then four of them.",
+            "Double the four times answer.",
+            "That is eight of them."
+          ],
+          "kidTip": "Two, then four, then eight. Each one is double the last.",
+          "audioPrompt": "Double three times over. Two, then four, then eight."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🔗",
+      "iconName": "layers",
+      "iconTone": "cyan",
+      "pedagogyTip": "The chain is shown whole rather than only its last link: a child who sees 2n and 4n on the card understands why doubling again lands on 8n.",
+      "standards": [
+        "CCSS.3.OA.B.5",
+        "CCSS.3.OA.C.7"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "times-three",
+      "title": "Times Three",
+      "concept": "Two of Them, and One More",
+      "conceptKey": "group-adder",
+      "requires": [
+        "doubles-knower"
+      ],
+      "activity": "multiplication/facts",
+      "params": {
+        "level": 26,
+        "question": {
+          "mode": "add_a_group",
+          "drivers": [
+            3
+          ],
+          "partnerRange": [
+            2,
+            12
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Work out the three times table from the two times table.",
+          "stepByStep": [
+            "Turn the card over to see the two times fact.",
+            "Add one more group of the same number.",
+            "That is three of them."
+          ],
+          "kidTip": "Three is two, and one more.",
+          "audioPrompt": "You know two of them. Add one more group."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "3️⃣",
+      "iconName": "gem",
+      "iconTone": "emerald",
+      "pedagogyTip": "Adding a group, not counting on by one. The distinction is the whole strategy: a child adding 1 instead of n is the error the choices are built to surface.",
+      "standards": [
+        "CCSS.3.OA.B.5",
+        "CCSS.3.OA.C.7"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "times-six",
+      "title": "Times Six",
+      "concept": "Five of Them, and One More",
+      "conceptKey": "group-adder",
+      "requires": [
+        "fives-multiplier"
+      ],
+      "activity": "multiplication/facts",
+      "params": {
+        "level": 27,
+        "question": {
+          "mode": "add_a_group",
+          "drivers": [
+            6
+          ],
+          "partnerRange": [
+            2,
+            12
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Work out the six times table from the five times table.",
+          "stepByStep": [
+            "Turn the card over to see the five times fact.",
+            "Add one more group of the same number.",
+            "That is six of them."
+          ],
+          "kidTip": "Six is five, and one more.",
+          "audioPrompt": "You know five of them. Add one more group."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "6️⃣",
+      "iconName": "gem",
+      "iconTone": "cyan",
+      "pedagogyTip": "The same move as level 26 from a different helper, which is what makes it a strategy rather than a trick. Both share the group-adder record on purpose.",
+      "standards": [
+        "CCSS.3.OA.B.5",
+        "CCSS.3.OA.C.7"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "times-nine",
+      "title": "Times Nine",
+      "concept": "Ten of Them, Take One Away",
+      "conceptKey": "group-subtractor",
+      "requires": [
+        "tens-multiplier"
+      ],
+      "activity": "multiplication/facts",
+      "params": {
+        "level": 28,
+        "question": {
+          "mode": "subtract_a_group",
+          "partnerRange": [
+            2,
+            12
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Work out the nine times table from the ten times table.",
+          "stepByStep": [
+            "Turn the card over to see the ten times fact.",
+            "Take away one group of the same number.",
+            "That is nine of them."
+          ],
+          "kidTip": "Nine is ten, take one away.",
+          "audioPrompt": "You know ten of them. Take one group away."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "9️⃣",
+      "iconName": "scale",
+      "iconTone": "pink",
+      "pedagogyTip": "Subtracting a group is the mirror of adding one, and the ten times table is the easiest helper a child owns. Answering with the helper's own product is offered and named.",
+      "standards": [
+        "CCSS.3.OA.B.5",
+        "CCSS.3.OA.C.7"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "times-seven",
+      "title": "Times Seven",
+      "concept": "Five of Them and Two of Them",
+      "conceptKey": "fact-breaker",
+      "requires": [
+        "fives-multiplier",
+        "doubles-knower"
+      ],
+      "activity": "multiplication/facts",
+      "params": {
+        "level": 29,
+        "question": {
+          "mode": "break_apart",
+          "drivers": [
+            7
+          ],
+          "partnerRange": [
+            2,
+            12
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Work out the seven times table by splitting it into five and two.",
+          "stepByStep": [
+            "Turn the card over: it shows five of them and two of them.",
+            "Add the two answers together.",
+            "That is seven of them."
+          ],
+          "kidTip": "Seven splits into five and two, and you know them both.",
+          "audioPrompt": "Seven breaks into five and two. Add the two answers."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "7️⃣",
+      "iconName": "sparkles",
+      "iconTone": "purple",
+      "pedagogyTip": "The hardest table, reached from the two easiest. This is distributivity in the form a child can actually carry, and level 33 draws the same idea as a picture.",
+      "standards": [
+        "CCSS.3.OA.B.5",
+        "CCSS.3.OA.C.7"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "times-eleven-twelve",
+      "title": "Elevens and Twelves",
+      "concept": "Ten of Them, and a Bit More",
+      "conceptKey": "fact-breaker",
+      "requires": [
+        "tens-multiplier"
+      ],
+      "activity": "multiplication/facts",
+      "params": {
+        "level": 30,
+        "question": {
+          "mode": "break_apart",
+          "drivers": [
+            11,
+            12
+          ],
+          "partnerRange": [
+            2,
+            12
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Work out the eleven and twelve times tables from the ten times table.",
+          "stepByStep": [
+            "Turn the card over: it shows ten of them, and the rest.",
+            "Add the two answers together.",
+            "That is eleven or twelve of them."
+          ],
+          "kidTip": "Eleven is ten and one more. Twelve is ten and two more.",
+          "audioPrompt": "Start from ten of them, then add the rest."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🔟",
+      "iconName": "layers",
+      "iconTone": "indigo",
+      "pedagogyTip": "The same break-apart move past the ten times table, which is where a memorised chart runs out and a strategy does not.",
+      "standards": [
+        "CCSS.3.OA.B.5",
+        "CCSS.3.OA.C.7"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "near-squares",
+      "title": "Near Squares",
+      "concept": "One More Than a Square",
+      "conceptKey": "near-square-deriver",
+      "requires": [
+        "square-knower"
+      ],
+      "activity": "multiplication/facts",
+      "params": {
+        "level": 31,
+        "question": {
+          "mode": "near_square",
+          "partnerRange": [
+            4,
+            12
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Work out a fact next to a square number from the square itself.",
+          "stepByStep": [
+            "Turn the card over to see the square.",
+            "Add one more group of the smaller number.",
+            "That is the answer."
+          ],
+          "kidTip": "It is the square, and one more group.",
+          "audioPrompt": "You know the square. Add one more group."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "⬛",
+      "iconName": "star",
+      "iconTone": "emerald",
+      "pedagogyTip": "Squares were met as a set at level 22 so that they could be used as helpers here. The distractors are never the answer plus one, or the strategy could be skipped.",
+      "standards": [
+        "CCSS.3.OA.B.5",
+        "CCSS.3.OA.C.7"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "use-a-known-fact",
+      "title": "Use a Fact You Know",
+      "concept": "Choosing Which Fact to Start From",
+      "conceptKey": "known-fact-user",
+      "requires": [
+        "fact-breaker"
+      ],
+      "activity": "multiplication/facts",
+      "params": {
+        "level": 32,
+        "question": {
+          "mode": "known_fact",
+          "level": 32,
+          "partnerRange": [
+            2,
+            12
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Choose a fact you already know that gets you to a fact you do not.",
+          "stepByStep": [
+            "Read the fact you have been asked for.",
+            "Look at the four facts offered and pick the one that is one move away.",
+            "Make that move, then answer."
+          ],
+          "kidTip": "A fact helps when one move gets you from it to the answer.",
+          "audioPrompt": "Which of these facts would help you work this one out?"
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🔑",
+      "iconName": "crown",
+      "iconTone": "purple",
+      "pedagogyTip": "The whole ladder, handed back to the child to choose from. The three wrong options are true facts that simply do not help, so the choice is about route rather than arithmetic.",
+      "standards": [
+        "CCSS.3.OA.B.5",
+        "CCSS.3.OA.C.7"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "split-the-array",
+      "title": "Split the Array",
+      "concept": "Breaking a Rectangle into Two You Know",
+      "conceptKey": "distributor",
+      "requires": [
+        "array-reader",
+        "fact-breaker"
+      ],
+      "activity": "multiplication/array",
+      "params": {
+        "level": 33,
+        "question": {
+          "mode": "split_array",
+          "rowRange": [
+            6,
+            10
+          ],
+          "colRange": [
+            2,
+            12
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Cut an array into two smaller arrays and add their totals.",
+          "stepByStep": [
+            "Choose where to cut the rows.",
+            "Work out each piece on its own.",
+            "Add the two answers together."
+          ],
+          "kidTip": "Two easy pieces beat one hard one.",
+          "audioPrompt": "Cut the array into two pieces you know, then add them."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "✂️",
+      "iconName": "boxes",
+      "iconTone": "pink",
+      "pedagogyTip": "The break-apart strategy of level 29, drawn instead of written. The engine has been able to do this since Phase 2, which is what let the lesson arrive as data.",
+      "standards": [
+        "CCSS.3.OA.B.5"
+      ],
+      "trajectoryLevel": "parts-and-wholes",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "multiply-three-numbers",
+      "title": "Multiply Three Numbers",
+      "concept": "Grouping Does Not Change the Total",
+      "conceptKey": "associativity",
+      "requires": [
+        "multiplicative-commutativity",
+        "known-fact-user"
+      ],
+      "activity": "multiplication/factors",
+      "params": {
+        "level": 34,
+        "question": {
+          "mode": "associative",
+          "tileRange": [
+            2,
+            6
+          ],
+          "productMax": 120,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Multiply three numbers, choosing which two to multiply first.",
+          "stepByStep": [
+            "Look at the three numbers.",
+            "Choose the two that are easiest to multiply together.",
+            "Multiply that answer by the number left over."
+          ],
+          "kidTip": "Pick the easy pair first. The total comes out the same either way.",
+          "audioPrompt": "Three numbers to multiply. Which two would you do first?"
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🧩",
+      "iconName": "gem",
+      "iconTone": "indigo",
+      "pedagogyTip": "Neither grouping is refused, because neither is wrong. The freedom to choose is the property being taught, and taking it away would teach the opposite.",
+      "standards": [
+        "CCSS.3.OA.B.5"
+      ],
+      "trajectoryLevel": "parts-and-wholes",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "halve-and-double",
+      "title": "Halve and Double",
+      "concept": "Making a Hard Product into an Easy One",
+      "conceptKey": "halver-doubler",
+      "requires": [
+        "associativity",
+        "doubles-knower"
+      ],
+      "activity": "multiplication/factors",
+      "params": {
+        "level": 35,
+        "question": {
+          "mode": "halve_double",
+          "aRange": [
+            4,
+            30
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Halve one factor and double the other to reach an easier product.",
+          "stepByStep": [
+            "Find the number that can be halved into whole groups.",
+            "Halve it, and double the other one.",
+            "Work out the easier multiplication."
+          ],
+          "kidTip": "Halve one, double the other. The total does not move.",
+          "audioPrompt": "Halve one of these and double the other to make it easier."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "⚖️",
+      "iconName": "scale",
+      "iconTone": "cyan",
+      "pedagogyTip": "Halving the odd factor is refused rather than marked wrong: which number can be halved is the decision the strategy turns on, and getting it wrong is a move, not an answer.",
+      "standards": [
+        "CCSS.3.OA.B.5",
+        "CCSS.4.NBT.B.5"
+      ],
+      "trajectoryLevel": "parts-and-wholes",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "factor-pairs",
+      "title": "Factor Pairs",
+      "concept": "Every Way to Build a Number from Two Others",
+      "conceptKey": "factor-finder",
+      "requires": [
+        "missing-dimension",
+        "table-reader"
+      ],
+      "activity": "multiplication/factors",
+      "params": {
+        "level": 36,
+        "question": {
+          "mode": "factor_pairs",
+          "range": [
+            12,
+            100
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Find every pair of numbers that multiply to make a given total.",
+          "stepByStep": [
+            "Try 1, then 2, then 3, working up to 10.",
+            "Tap each one that divides the total exactly.",
+            "Check them all together when you have found them all."
+          ],
+          "kidTip": "Work up from 1 in order. Do not jump about.",
+          "audioPrompt": "Find every pair that makes this number."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🔗",
+      "iconName": "boxes",
+      "iconTone": "emerald",
+      "pedagogyTip": "The whole set is checked once. Told pair by pair, a child stops searching and starts guessing against the feedback.",
+      "standards": [
+        "CCSS.4.OA.B.4"
+      ],
+      "trajectoryLevel": "parts-and-wholes",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "prime-or-composite",
+      "title": "Prime or Composite",
+      "concept": "Numbers That Have a Pair, and Numbers That Do Not",
+      "conceptKey": "prime-identifier",
+      "requires": [
+        "factor-finder"
+      ],
+      "activity": "multiplication/factors",
+      "params": {
+        "level": 37,
+        "question": {
+          "mode": "prime_composite",
+          "range": [
+            2,
+            100
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Decide whether a number has any factor pair besides one and itself.",
+          "stepByStep": [
+            "Try dividing the number by 2, then 3, then 4, and so on.",
+            "If one of them works, the number is composite.",
+            "If none of them works, it is prime."
+          ],
+          "kidTip": "Try the numbers. If none of them fits, it is prime.",
+          "audioPrompt": "Try some numbers on the board. Is this one prime or composite?"
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🔬",
+      "iconName": "search",
+      "iconTone": "purple",
+      "pedagogyTip": "Answered by trying divisors, never by recall: a child who has never met the word can still be right. The board refuses an answer given before anything has been tried.",
+      "standards": [
+        "CCSS.4.OA.B.4"
+      ],
+      "trajectoryLevel": "parts-and-wholes",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "times-ten-and-hundred",
+      "title": "Times Ten and Times a Hundred",
+      "concept": "Every Digit Moves Up a Place",
+      "conceptKey": "tens-scaler",
+      "requires": [
+        "place-value-builder",
+        "tens-multiplier"
+      ],
+      "activity": "multiplication/chart",
+      "params": {
+        "level": 38,
+        "question": {
+          "mode": "times_ten_hundred",
+          "valueRange": [
+            2,
+            99
+          ],
+          "scales": [
+            10,
+            100
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Multiply a number by ten or a hundred by moving its digits.",
+          "stepByStep": [
+            "Read how many times bigger the number has to get.",
+            "Move every digit that many columns to the left.",
+            "Read the new number, including the empty column."
+          ],
+          "kidTip": "The digits move. The zero is what is left behind.",
+          "audioPrompt": "Move every digit to the left. What number do you have now?"
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "📈",
+      "iconName": "layers",
+      "iconTone": "cyan",
+      "pedagogyTip": "Never taught as adding a zero. That rule breaks the first time a child meets 0.7 times 10, and this is the age it gets installed — so the digits move and the zero appears because the ones column emptied.",
+      "standards": [
+        "CCSS.3.NBT.A.3",
+        "CCSS.4.NBT.B.5"
+      ],
+      "trajectoryLevel": "place-value",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "multiples-of-ten",
+      "title": "Multiply a Multiple of Ten",
+      "concept": "Counting in Tens Instead of Ones",
+      "conceptKey": "tens-multiple-multiplier",
+      "requires": [
+        "tens-scaler"
+      ],
+      "activity": "multiplication/chart",
+      "params": {
+        "level": 39,
+        "question": {
+          "mode": "multiples_of_ten",
+          "digitRange": [
+            2,
+            9
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Multiply by a multiple of ten by counting tens instead of ones.",
+          "stepByStep": [
+            "Read the multiple of ten as a number of tens.",
+            "Multiply the two single digits.",
+            "Put that many in the tens column."
+          ],
+          "kidTip": "Three forties is three lots of four tens.",
+          "audioPrompt": "How many tens does this make, and which column do they go in?"
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🔟",
+      "iconName": "boxes",
+      "iconTone": "emerald",
+      "pedagogyTip": "The ones column is offered as a place to put the answer, because choosing it is the mistake this level exists to correct.",
+      "standards": [
+        "CCSS.3.NBT.A.3"
+      ],
+      "trajectoryLevel": "place-value",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "tens-times-tens",
+      "title": "Tens Times Tens",
+      "concept": "A Ten of a Ten Is a Hundred",
+      "conceptKey": "place-value-scaler",
+      "requires": [
+        "tens-multiple-multiplier"
+      ],
+      "activity": "multiplication/chart",
+      "params": {
+        "level": 40,
+        "question": {
+          "mode": "tens_times_tens",
+          "digitRange": [
+            2,
+            9
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Multiply two multiples of ten and land the answer in the right place.",
+          "stepByStep": [
+            "Read both numbers as tens.",
+            "Multiply the two single digits.",
+            "A ten of a ten is a hundred, so put that many in the hundreds."
+          ],
+          "kidTip": "Tens times tens makes hundreds, not tens.",
+          "audioPrompt": "Both of these are tens. How many, and of what?"
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "⬜",
+      "iconName": "layers",
+      "iconTone": "indigo",
+      "pedagogyTip": "The two zeros come from the two places, never from a rule about counting them up. A child who picks tens rather than hundreds has made the error the level is named for, and the board lets them make it.",
+      "standards": [
+        "CCSS.4.NBT.B.5"
+      ],
+      "trajectoryLevel": "place-value",
+      "ageBand": [
+        9,
+        10
+      ]
+    },
+    {
+      "id": "area-of-a-rectangle",
+      "title": "Multiplication Is Area",
+      "concept": "The Space a Rectangle Covers",
+      "conceptKey": "area-finder",
+      "requires": [
+        "array-reader"
+      ],
+      "activity": "multiplication/area",
+      "params": {
+        "level": 41,
+        "question": {
+          "mode": "rect_area",
+          "sideRange": [
+            2,
+            12
+          ],
+          "unitsUntil": 2,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Find the area of a rectangle from the lengths of its two sides.",
+          "stepByStep": [
+            "Read how many squares go across the top.",
+            "Read how many go down the side.",
+            "Multiply the two."
+          ],
+          "kidTip": "Across times down. That is the area.",
+          "audioPrompt": "How many squares does this rectangle cover?"
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "🟩",
+      "iconName": "boxes",
+      "iconTone": "emerald",
+      "pedagogyTip": "The unit squares are shown for the first two questions and gone after that. A child should move from counting the squares to reading the sides inside one round, not across a term.",
+      "standards": [
+        "CCSS.3.MD.C.7.A",
+        "CCSS.3.MD.C.7.B"
+      ],
+      "trajectoryLevel": "concrete-modeler",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "area-model-2x1",
+      "title": "Split the Rectangle",
+      "concept": "Cutting a Side at Its Place Value",
+      "conceptKey": "area-modeler",
+      "requires": [
+        "area-finder",
+        "distributor",
+        "tens-multiple-multiplier"
+      ],
+      "activity": "multiplication/area",
+      "params": {
+        "level": 42,
+        "question": {
+          "mode": "area_2x1",
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Split a two-digit side by place value and fill in each piece.",
+          "stepByStep": [
+            "Look at the two numbers on each piece's edges.",
+            "Work out that piece on its own.",
+            "Fill in every piece, then check the total."
+          ],
+          "kidTip": "Each piece is its own little multiplication.",
+          "audioPrompt": "Fill in each piece of the rectangle, then add them up."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "✂️",
+      "iconName": "layers",
+      "iconTone": "cyan",
+      "pedagogyTip": "Every piece carries its own label and none is allowed to shrink to a sliver, so the model stays honest without pretending to be to scale.",
+      "standards": [
+        "CCSS.4.NBT.B.5",
+        "CCSS.3.MD.C.7.C"
+      ],
+      "trajectoryLevel": "place-value",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "partial-products",
+      "title": "Partial Products",
+      "concept": "The Same Cut, Written Down",
+      "conceptKey": "partial-products",
+      "requires": [
+        "area-modeler",
+        "partial-sums"
+      ],
+      "activity": "multiplication/area",
+      "params": {
+        "level": 43,
+        "question": {
+          "mode": "partial_products",
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Record each partial product on its own row and total them.",
+          "stepByStep": [
+            "Split the two-digit number by place value.",
+            "Multiply each piece and write it on its own row.",
+            "Add the rows together."
+          ],
+          "kidTip": "One row for each piece. Then add the rows.",
+          "audioPrompt": "Write each partial product on its own row, then add them."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "📝",
+      "iconName": "gem",
+      "iconTone": "indigo",
+      "pedagogyTip": "The same numbers as the level before, moved off the rectangle and onto paper. Nothing new is being worked out — only written differently, which is what makes the written method survive the picture going away.",
+      "standards": [
+        "CCSS.4.NBT.B.5"
+      ],
+      "trajectoryLevel": "place-value",
+      "ageBand": [
+        9,
+        10
+      ]
+    },
+    {
+      "id": "area-model-2x2",
+      "title": "Four Pieces",
+      "concept": "Both Sides Split at Once",
+      "conceptKey": "two-digit-area-modeler",
+      "requires": [
+        "partial-products",
+        "place-value-scaler"
+      ],
+      "activity": "multiplication/area",
+      "params": {
+        "level": 44,
+        "question": {
+          "mode": "area_2x2",
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Split both sides by place value and fill in all four pieces.",
+          "stepByStep": [
+            "Both numbers split, so the rectangle has four pieces.",
+            "Work out each piece from the numbers on its edges.",
+            "Fill them all in, then add."
+          ],
+          "kidTip": "Tens times tens makes hundreds. Watch the places.",
+          "audioPrompt": "Both sides are split. Fill in all four pieces."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🪟",
+      "iconName": "boxes",
+      "iconTone": "purple",
+      "pedagogyTip": "The pool of numbers offered includes each answer with its digits shifted a place, because writing eighty where eight hundred belongs is the error of this level and a child has to be able to make it.",
+      "standards": [
+        "CCSS.4.NBT.B.5",
+        "CCSS.5.NBT.B.5"
+      ],
+      "trajectoryLevel": "place-value",
+      "ageBand": [
+        9,
+        10
+      ]
+    },
+    {
+      "id": "column-no-regroup",
+      "title": "The Written Method",
+      "concept": "Multiplying a Column at a Time",
+      "conceptKey": "column-multiplier",
+      "requires": [
+        "partial-products"
+      ],
+      "activity": "multiplication/column",
+      "params": {
+        "level": 45,
+        "question": {
+          "mode": "no_regroup",
+          "digitsA": 2,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Multiply a two-digit number by a one-digit number in columns.",
+          "stepByStep": [
+            "Start with the ones column.",
+            "Multiply that digit and write the answer underneath it.",
+            "Move left and do the same."
+          ],
+          "kidTip": "Right to left, one column at a time.",
+          "audioPrompt": "Start with the ones and work left, one column at a time."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "📏",
+      "iconName": "layers",
+      "iconTone": "indigo",
+      "pedagogyTip": "No carrying yet. The layout and the direction of travel are enough to learn in one lesson; regrouping arrives once the shape of the method is familiar.",
+      "standards": [
+        "CCSS.4.NBT.B.5"
+      ],
+      "trajectoryLevel": "written-methods",
+      "ageBand": [
+        9,
+        10
+      ]
+    },
+    {
+      "id": "column-with-regroup",
+      "title": "Carrying",
+      "concept": "When a Column Holds More Than Nine",
+      "conceptKey": "multiplication-regrouper",
+      "requires": [
+        "column-multiplier"
+      ],
+      "activity": "multiplication/column",
+      "params": {
+        "level": 46,
+        "question": {
+          "mode": "regroup",
+          "digitsA": 2,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Multiply in columns, recording each carry.",
+          "stepByStep": [
+            "Multiply the ones. If the answer is ten or more, write only the ones digit.",
+            "Write what is left over in the carry box above the next column.",
+            "Add the carry in before you write the next column down."
+          ],
+          "kidTip": "A column only holds one digit. The rest moves left.",
+          "audioPrompt": "If a column comes to ten or more, carry the rest into the next one."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "⤴️",
+      "iconName": "layers",
+      "iconTone": "cyan",
+      "pedagogyTip": "The carry has its own box and is checked like any other digit, so a child who gets the total right by luck and the carries wrong is still told which column went astray.",
+      "standards": [
+        "CCSS.4.NBT.B.5"
+      ],
+      "trajectoryLevel": "written-methods",
+      "ageBand": [
+        9,
+        10
+      ]
+    },
+    {
+      "id": "two-digit-column",
+      "title": "Two Digits by Two Digits",
+      "concept": "A Row for the Ones and a Row for the Tens",
+      "conceptKey": "two-digit-column-multiplier",
+      "requires": [
+        "multiplication-regrouper",
+        "place-value-scaler"
+      ],
+      "activity": "multiplication/column",
+      "params": {
+        "level": 47,
+        "question": {
+          "mode": "two_digit",
+          "digitsA": 2,
+          "questionsPerRound": 4
+        },
+        "play": {
+          "targetObjective": "Multiply two two-digit numbers using two partial rows.",
+          "stepByStep": [
+            "Say what each row multiplies by: the ones, then the tens.",
+            "Work out each row.",
+            "Add the two rows together."
+          ],
+          "kidTip": "The second row multiplies by the tens. That is why it ends in a zero.",
+          "audioPrompt": "One row for the ones and one for the tens. What does the second row multiply by?"
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🧮",
+      "iconName": "gem",
+      "iconTone": "purple",
+      "pedagogyTip": "The child has to say what the second row multiplies by before writing it, and answering with the bare digit is refused with a reason. The placeholder zero is a consequence of multiplying by twenty, never a keystroke that goes in first.",
+      "standards": [
+        "CCSS.5.NBT.B.5"
+      ],
+      "trajectoryLevel": "written-methods",
+      "ageBand": [
+        9,
+        10
+      ]
+    },
+    {
+      "id": "estimate-by-rounding",
+      "title": "Estimate by Rounding",
+      "concept": "Answering a Nearby Question That Is Easier",
+      "conceptKey": "rounding-estimator",
+      "requires": [
+        "place-value-scaler",
+        "tens-multiple-multiplier"
+      ],
+      "activity": "multiplication/estimate",
+      "params": {
+        "level": 48,
+        "question": {
+          "mode": "round_estimate",
+          "digitsA": 2,
+          "digitsB": 1,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Estimate a product by rounding each factor first.",
+          "stepByStep": [
+            "Look at the bigger number and find the nearest ten.",
+            "Leave a small number as it is.",
+            "Multiply the rounded pair to get close."
+          ],
+          "kidTip": "Round first, then multiply. Close is the point.",
+          "audioPrompt": "Round these to get close, without working the real answer out."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "⚖️",
+      "iconName": "scale",
+      "iconTone": "cyan",
+      "pedagogyTip": "A single-digit factor gets no dial. Rounding six to the nearest ten is a bigger lie than the estimate is worth, and teaches a child to round things that did not need it.",
+      "standards": [
+        "CCSS.3.OA.D.8",
+        "CCSS.4.NBT.B.5"
+      ],
+      "trajectoryLevel": "estimation",
+      "ageBand": [
+        9,
+        10
+      ]
+    },
+    {
+      "id": "is-it-reasonable",
+      "title": "Is It Reasonable?",
+      "concept": "Judging an Answer Without Working It Out",
+      "conceptKey": "reasonableness-checker",
+      "requires": [
+        "rounding-estimator"
+      ],
+      "activity": "multiplication/estimate",
+      "params": {
+        "level": 49,
+        "question": {
+          "mode": "reasonable",
+          "digitsA": 2,
+          "digitsB": 1,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Decide whether a claimed answer could be right, by estimating.",
+          "stepByStep": [
+            "Round both numbers to get a rough answer.",
+            "Compare that with the answer being claimed.",
+            "An answer ten times out is not close, however tidy it looks."
+          ],
+          "kidTip": "If it is ten times out, it is wrong — you do not need the real answer.",
+          "audioPrompt": "Someone has given an answer. Could it be right?"
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🤔",
+      "iconName": "scale",
+      "iconTone": "purple",
+      "pedagogyTip": "Every wrong claim is out by a whole place, never by one. A claim of 847 against a true 846 cannot be judged by estimating at all, so offering it would teach computing under the name of estimation.",
+      "standards": [
+        "CCSS.3.OA.D.8"
+      ],
+      "trajectoryLevel": "estimation",
+      "ageBand": [
+        9,
+        10
+      ]
+    },
+    {
+      "id": "equal-groups-story",
+      "title": "Equal Groups in Words",
+      "concept": "Reading a Multiplication out of a Sentence",
+      "conceptKey": "equal-groups-modeler",
+      "requires": [
+        "multiplication-equation-reader",
+        "equal-grouper"
+      ],
+      "activity": "multiplication/story",
+      "params": {
+        "level": 50,
+        "question": {
+          "mode": "equal_groups_total",
+          "groupRange": [
+            2,
+            12
+          ],
+          "sizeRange": [
+            2,
+            12
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Find the total when a story gives the number of groups and the size of each.",
+          "stepByStep": [
+            "Find how many groups the story describes.",
+            "Find how many are in each group.",
+            "Multiply the two."
+          ],
+          "kidTip": "Groups, then how many in each. Multiply them.",
+          "audioPrompt": "How many are there altogether?"
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "📖",
+      "iconName": "search",
+      "iconTone": "emerald",
+      "pedagogyTip": "The bar model is drawn from the sentence, so the structure is visible before any arithmetic happens.",
+      "standards": [
+        "CCSS.3.OA.A.3"
+      ],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "how-many-groups-story",
+      "title": "How Many Groups?",
+      "concept": "The Number of Groups Is the Unknown",
+      "conceptKey": "group-count-modeler",
+      "requires": [
+        "equal-groups-modeler",
+        "missing-dimension"
+      ],
+      "activity": "multiplication/story",
+      "params": {
+        "level": 51,
+        "question": {
+          "mode": "groups_unknown",
+          "groupRange": [
+            2,
+            12
+          ],
+          "sizeRange": [
+            2,
+            12
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Find how many equal groups a total makes.",
+          "stepByStep": [
+            "Read the total, and how many go in each group.",
+            "Count up in that size until you reach the total.",
+            "How many it took is the answer."
+          ],
+          "kidTip": "Count up in the group size until you hit the total.",
+          "audioPrompt": "How many groups does that make?"
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🔍",
+      "iconName": "search",
+      "iconTone": "cyan",
+      "pedagogyTip": "The numbers are generated from the factors, never by dividing a total, so the sharing always comes out exactly.",
+      "standards": [
+        "CCSS.3.OA.A.4"
+      ],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "group-size-story",
+      "title": "How Many in Each?",
+      "concept": "The Size of a Group Is the Unknown",
+      "conceptKey": "group-size-modeler",
+      "requires": [
+        "group-count-modeler"
+      ],
+      "activity": "multiplication/story",
+      "params": {
+        "level": 52,
+        "question": {
+          "mode": "size_unknown",
+          "groupRange": [
+            2,
+            12
+          ],
+          "sizeRange": [
+            2,
+            12
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Find how many go in each group when a total is shared equally.",
+          "stepByStep": [
+            "Read the total, and how many groups it is shared between.",
+            "Split the total into that many equal parts.",
+            "One part is the answer."
+          ],
+          "kidTip": "Share it out equally. One share is the answer.",
+          "audioPrompt": "How many go in each group?"
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "⚖️",
+      "iconName": "scale",
+      "iconTone": "indigo",
+      "pedagogyTip": "The same three numbers as the level before, with a different one missing. Which operation to use is decided by where the unknown sits, never by a keyword (§12 trap 14).",
+      "standards": [
+        "CCSS.3.OA.A.4"
+      ],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "times-as-many",
+      "title": "Times as Many",
+      "concept": "Comparing by Multiplying, Not by Adding",
+      "conceptKey": "comparison-multiplier",
+      "requires": [
+        "equal-groups-modeler"
+      ],
+      "activity": "multiplication/story",
+      "params": {
+        "level": 53,
+        "question": {
+          "mode": "times_as_many",
+          "smallerRange": [
+            2,
+            12
+          ],
+          "multiplierRange": [
+            2,
+            6
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Work out an amount described as a number of times another amount.",
+          "stepByStep": [
+            "Find the first amount.",
+            "Read how many times as many the second one is.",
+            "Make that many whole copies of the first."
+          ],
+          "kidTip": "Times as many means copies, not extra.",
+          "audioPrompt": "One of them has several times as many. How many is that?"
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "📊",
+      "iconName": "waves",
+      "iconTone": "purple",
+      "pedagogyTip": "The additive misreading is offered as an answer every single time, because a round that never offers it has not tested the confusion this level exists to correct.",
+      "standards": [
+        "CCSS.4.OA.A.1",
+        "CCSS.4.OA.A.2"
+      ],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "rate-problems",
+      "title": "Rate Problems",
+      "concept": "One Amount, Used Over and Over",
+      "conceptKey": "rate-reasoner",
+      "requires": [
+        "equal-groups-modeler"
+      ],
+      "activity": "multiplication/story",
+      "params": {
+        "level": 54,
+        "question": {
+          "mode": "rate",
+          "groupRange": [
+            2,
+            12
+          ],
+          "sizeRange": [
+            2,
+            12
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Use a per-one amount to find a total.",
+          "stepByStep": [
+            "Find the amount that one of them holds.",
+            "Read how many of them there are.",
+            "Multiply."
+          ],
+          "kidTip": "The rate is the same for every one of them.",
+          "audioPrompt": "Every one holds the same amount. How many altogether?"
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🔁",
+      "iconName": "waves",
+      "iconTone": "cyan",
+      "pedagogyTip": "The rate is stated once and used many times, which is what makes it a rate rather than a list.",
+      "standards": [
+        "CCSS.3.OA.A.3",
+        "CCSS.4.OA.A.2"
+      ],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "multi-step-problems",
+      "title": "Two-Step Problems",
+      "concept": "A Multiplication and One More Move",
+      "conceptKey": "multiplicative-multi-step-solver",
+      "requires": [
+        "equal-groups-modeler",
+        "rounding-estimator"
+      ],
+      "activity": "multiplication/story",
+      "params": {
+        "level": 55,
+        "question": {
+          "mode": "multi_step",
+          "groupRange": [
+            2,
+            9
+          ],
+          "sizeRange": [
+            2,
+            9
+          ],
+          "changeRange": [
+            2,
+            20
+          ],
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Solve a problem that needs a multiplication and then one more step.",
+          "stepByStep": [
+            "Work out the multiplication first.",
+            "Read what happens next.",
+            "Add or take away to finish."
+          ],
+          "kidTip": "Multiply first, then do the second step.",
+          "audioPrompt": "There are two steps here. Do the multiplying first."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🧭",
+      "iconName": "sparkles",
+      "iconTone": "pink",
+      "pedagogyTip": "Every stage is kept non-negative by construction, so a child never meets a two-step story whose middle answer is impossible.",
+      "standards": [
+        "CCSS.3.OA.D.8",
+        "CCSS.4.OA.A.3"
+      ],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        9,
+        10
+      ]
+    },
+    {
+      "id": "explain-and-compare",
+      "title": "Choose a Route",
+      "concept": "More Than One Way Works, and Some Are Easier",
+      "conceptKey": "multiplication-strategy-chooser",
+      "requires": [
+        "known-fact-user",
+        "halver-doubler",
+        "partial-products"
+      ],
+      "activity": "multiplication/strategy",
+      "params": {
+        "level": 56,
+        "question": {
+          "mode": "compare_paths",
+          "aRange": [
+            3,
+            12
+          ],
+          "bRange": [
+            3,
+            12
+          ],
+          "questionsPerRound": 6
+        },
+        "play": {
+          "targetObjective": "Choose a route to a product, and compare it with another that also works.",
+          "stepByStep": [
+            "Look at the two numbers before deciding how to start.",
+            "Pick a route whose move can actually be made on them.",
+            "Look at the other route beside it and see which took fewer steps."
+          ],
+          "kidTip": "More than one way works. Pick the one that makes the numbers easy.",
+          "audioPrompt": "Which of these routes would work? Any that fits is a good one."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🧭",
+      "iconName": "sparkles",
+      "iconTone": "purple",
+      "pedagogyTip": "Every route that genuinely fits is accepted. Scoring one over another would teach the opposite of the lesson — what is refused is only a route whose move cannot be carried out on these two numbers, and the refusal says which move and why.",
+      "standards": [
+        "CCSS.3.OA.B.5",
+        "CCSS.4.NBT.B.5"
+      ],
+      "trajectoryLevel": "strategies",
+      "ageBand": [
+        9,
+        10
+      ]
+    },
+    {
+      "id": "practice-groups",
+      "title": "Practice: Equal Groups",
+      "concept": "Practice Without Help",
+      "conceptKey": "equal-grouper",
+      "requires": [
+        "equal-grouper"
+      ],
+      "activity": "multiplication/groups",
+      "params": {
+        "level": 57,
+        "question": {
+          "practice": true,
+          "modes": [
+            "make_groups",
+            "equal_or_not",
+            "repeated_addition",
+            "groups_to_equation",
+            "factor_roles",
+            "times_one",
+            "times_zero"
+          ],
+          "questionsPerRound": 9
+        },
+        "play": {
+          "targetObjective": "Work through equal groups unaided, with the techniques mixed.",
+          "stepByStep": [
+            "Read each question and decide what it is asking.",
+            "Choose the technique that fits.",
+            "Work it out on your own."
+          ]
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🧺",
+      "iconName": "boxes",
+      "iconTone": "purple",
+      "pedagogyTip": "Retrieving a technique unaided is a different act from being walked through it, and it is the one that makes it stick. The voice, the hints and the explanation are all off.",
+      "standards": [
+        "CCSS.3.OA.A.1"
+      ],
+      "trajectoryLevel": "practice",
+      "ageBand": [
+        6,
+        9
+      ]
+    },
+    {
+      "id": "practice-array",
+      "title": "Practice: Rows and Columns",
+      "concept": "Practice Without Help",
+      "conceptKey": "array-reader",
+      "requires": [
+        "array-reader"
+      ],
+      "activity": "multiplication/array",
+      "params": {
+        "level": 58,
+        "question": {
+          "practice": true,
+          "modes": [
+            "build_array",
+            "read_array",
+            "commute",
+            "array_to_equation",
+            "missing_dimension",
+            "split_array"
+          ],
+          "questionsPerRound": 9
+        },
+        "play": {
+          "targetObjective": "Work through rows and columns unaided, with the techniques mixed.",
+          "stepByStep": [
+            "Read each question and decide what it is asking.",
+            "Choose the technique that fits.",
+            "Work it out on your own."
+          ]
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🟦",
+      "iconName": "boxes",
+      "iconTone": "cyan",
+      "pedagogyTip": "Retrieving a technique unaided is a different act from being walked through it, and it is the one that makes it stick. The voice, the hints and the explanation are all off.",
+      "standards": [
+        "CCSS.3.OA.A.1"
+      ],
+      "trajectoryLevel": "practice",
+      "ageBand": [
+        7,
+        10
+      ]
+    },
+    {
+      "id": "practice-numberline",
+      "title": "Practice: Hops on a Line",
+      "concept": "Practice Without Help",
+      "conceptKey": "skip-counter",
+      "requires": [
+        "skip-counter"
+      ],
+      "activity": "multiplication/numberline",
+      "params": {
+        "level": 59,
+        "question": {
+          "practice": true,
+          "modes": [
+            "skip_count",
+            "hops_to_product",
+            "missing_hop",
+            "count_multiples"
+          ],
+          "max": 60,
+          "questionsPerRound": 8
+        },
+        "play": {
+          "targetObjective": "Work through hops on a line unaided, with the techniques mixed.",
+          "stepByStep": [
+            "Read each question and decide what it is asking.",
+            "Choose the technique that fits.",
+            "Work it out on your own."
+          ]
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🐾",
+      "iconName": "footprints",
+      "iconTone": "purple",
+      "pedagogyTip": "Retrieving a technique unaided is a different act from being walked through it, and it is the one that makes it stick. The voice, the hints and the explanation are all off.",
+      "standards": [
+        "CCSS.3.OA.A.3"
+      ],
+      "trajectoryLevel": "practice",
+      "ageBand": [
+        6,
+        10
+      ]
+    },
+    {
+      "id": "practice-facts",
+      "title": "Practice: Facts You Can Work Out",
+      "concept": "Practice Without Help",
+      "conceptKey": "known-fact-user",
+      "requires": [
+        "known-fact-user"
+      ],
+      "activity": "multiplication/facts",
+      "params": {
+        "level": 60,
+        "question": {
+          "practice": true,
+          "modes": [
+            "double_double",
+            "add_a_group",
+            "subtract_a_group",
+            "break_apart",
+            "near_square",
+            "doubles",
+            "tens",
+            "fives",
+            "triple_double",
+            "known_fact"
+          ],
+          "partnerRange": [
+            2,
+            12
+          ],
+          "level": 32,
+          "questionsPerRound": 9
+        },
+        "play": {
+          "targetObjective": "Work through facts you can work out unaided, with the techniques mixed.",
+          "stepByStep": [
+            "Read each question and decide what it is asking.",
+            "Choose the technique that fits.",
+            "Work it out on your own."
+          ]
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "⚡",
+      "iconName": "zap",
+      "iconTone": "indigo",
+      "pedagogyTip": "Retrieving a technique unaided is a different act from being walked through it, and it is the one that makes it stick. The voice, the hints and the explanation are all off.",
+      "standards": [
+        "CCSS.3.OA.C.7"
+      ],
+      "trajectoryLevel": "practice",
+      "ageBand": [
+        7,
+        10
+      ]
+    },
+    {
+      "id": "practice-table",
+      "title": "Practice: The Times Table",
+      "concept": "Practice Without Help",
+      "conceptKey": "table-reader",
+      "requires": [
+        "table-reader"
+      ],
+      "activity": "multiplication/table",
+      "params": {
+        "level": 61,
+        "question": {
+          "practice": true,
+          "modes": [
+            "find_cell",
+            "squares",
+            "commutative_pairs"
+          ],
+          "questionsPerRound": 8
+        },
+        "play": {
+          "targetObjective": "Work through the times table unaided, with the techniques mixed.",
+          "stepByStep": [
+            "Read each question and decide what it is asking.",
+            "Choose the technique that fits.",
+            "Work it out on your own."
+          ]
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "📊",
+      "iconName": "boxes",
+      "iconTone": "cyan",
+      "pedagogyTip": "Retrieving a technique unaided is a different act from being walked through it, and it is the one that makes it stick. The voice, the hints and the explanation are all off.",
+      "standards": [
+        "CCSS.3.OA.C.7"
+      ],
+      "trajectoryLevel": "practice",
+      "ageBand": [
+        7,
+        10
+      ]
+    },
+    {
+      "id": "practice-factors",
+      "title": "Practice: Factors",
+      "concept": "Practice Without Help",
+      "conceptKey": "factor-finder",
+      "requires": [
+        "factor-finder"
+      ],
+      "activity": "multiplication/factors",
+      "params": {
+        "level": 62,
+        "question": {
+          "practice": true,
+          "modes": [
+            "associative",
+            "halve_double",
+            "factor_pairs",
+            "prime_composite"
+          ],
+          "range": [
+            12,
+            60
+          ],
+          "questionsPerRound": 8
+        },
+        "play": {
+          "targetObjective": "Work through factors unaided, with the techniques mixed.",
+          "stepByStep": [
+            "Read each question and decide what it is asking.",
+            "Choose the technique that fits.",
+            "Work it out on your own."
+          ]
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🔗",
+      "iconName": "gem",
+      "iconTone": "emerald",
+      "pedagogyTip": "Retrieving a technique unaided is a different act from being walked through it, and it is the one that makes it stick. The voice, the hints and the explanation are all off.",
+      "standards": [
+        "CCSS.4.OA.B.4"
+      ],
+      "trajectoryLevel": "practice",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "practice-chart",
+      "title": "Practice: Places and Zeros",
+      "concept": "Practice Without Help",
+      "conceptKey": "tens-scaler",
+      "requires": [
+        "tens-scaler"
+      ],
+      "activity": "multiplication/chart",
+      "params": {
+        "level": 63,
+        "question": {
+          "practice": true,
+          "modes": [
+            "times_ten_hundred",
+            "multiples_of_ten",
+            "tens_times_tens"
+          ],
+          "questionsPerRound": 8
+        },
+        "play": {
+          "targetObjective": "Work through places and zeros unaided, with the techniques mixed.",
+          "stepByStep": [
+            "Read each question and decide what it is asking.",
+            "Choose the technique that fits.",
+            "Work it out on your own."
+          ]
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "📈",
+      "iconName": "layers",
+      "iconTone": "cyan",
+      "pedagogyTip": "Retrieving a technique unaided is a different act from being walked through it, and it is the one that makes it stick. The voice, the hints and the explanation are all off.",
+      "standards": [
+        "CCSS.4.NBT.B.5"
+      ],
+      "trajectoryLevel": "practice",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "practice-area",
+      "title": "Practice: Area and Parts",
+      "concept": "Practice Without Help",
+      "conceptKey": "area-modeler",
+      "requires": [
+        "area-modeler"
+      ],
+      "activity": "multiplication/area",
+      "params": {
+        "level": 64,
+        "question": {
+          "practice": true,
+          "modes": [
+            "rect_area",
+            "area_2x1",
+            "partial_products",
+            "area_2x2"
+          ],
+          "questionsPerRound": 8
+        },
+        "play": {
+          "targetObjective": "Work through area and parts unaided, with the techniques mixed.",
+          "stepByStep": [
+            "Read each question and decide what it is asking.",
+            "Choose the technique that fits.",
+            "Work it out on your own."
+          ]
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🟩",
+      "iconName": "boxes",
+      "iconTone": "emerald",
+      "pedagogyTip": "Retrieving a technique unaided is a different act from being walked through it, and it is the one that makes it stick. The voice, the hints and the explanation are all off.",
+      "standards": [
+        "CCSS.4.NBT.B.5"
+      ],
+      "trajectoryLevel": "practice",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "practice-column",
+      "title": "Practice: The Written Method",
+      "concept": "Practice Without Help",
+      "conceptKey": "column-multiplier",
+      "requires": [
+        "column-multiplier"
+      ],
+      "activity": "multiplication/column",
+      "params": {
+        "level": 65,
+        "question": {
+          "practice": true,
+          "modes": [
+            "no_regroup",
+            "regroup",
+            "two_digit"
+          ],
+          "questionsPerRound": 8
+        },
+        "play": {
+          "targetObjective": "Work through the written method unaided, with the techniques mixed.",
+          "stepByStep": [
+            "Read each question and decide what it is asking.",
+            "Choose the technique that fits.",
+            "Work it out on your own."
+          ]
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "📏",
+      "iconName": "layers",
+      "iconTone": "indigo",
+      "pedagogyTip": "Retrieving a technique unaided is a different act from being walked through it, and it is the one that makes it stick. The voice, the hints and the explanation are all off.",
+      "standards": [
+        "CCSS.4.NBT.B.5"
+      ],
+      "trajectoryLevel": "practice",
+      "ageBand": [
+        9,
+        10
+      ]
+    },
+    {
+      "id": "practice-estimate",
+      "title": "Practice: Estimating",
+      "concept": "Practice Without Help",
+      "conceptKey": "rounding-estimator",
+      "requires": [
+        "rounding-estimator"
+      ],
+      "activity": "multiplication/estimate",
+      "params": {
+        "level": 66,
+        "question": {
+          "practice": true,
+          "modes": [
+            "round_estimate",
+            "reasonable"
+          ],
+          "questionsPerRound": 8
+        },
+        "play": {
+          "targetObjective": "Work through estimating unaided, with the techniques mixed.",
+          "stepByStep": [
+            "Read each question and decide what it is asking.",
+            "Choose the technique that fits.",
+            "Work it out on your own."
+          ]
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "⚖️",
+      "iconName": "scale",
+      "iconTone": "cyan",
+      "pedagogyTip": "Retrieving a technique unaided is a different act from being walked through it, and it is the one that makes it stick. The voice, the hints and the explanation are all off.",
+      "standards": [
+        "CCSS.3.OA.D.8"
+      ],
+      "trajectoryLevel": "practice",
+      "ageBand": [
+        9,
+        10
+      ]
+    },
+    {
+      "id": "practice-story",
+      "title": "Practice: Story Problems",
+      "concept": "Practice Without Help",
+      "conceptKey": "equal-groups-modeler",
+      "requires": [
+        "equal-groups-modeler"
+      ],
+      "activity": "multiplication/story",
+      "params": {
+        "level": 67,
+        "question": {
+          "practice": true,
+          "modes": [
+            "equal_groups_total",
+            "groups_unknown",
+            "size_unknown",
+            "times_as_many",
+            "rate",
+            "multi_step"
+          ],
+          "questionsPerRound": 9
+        },
+        "play": {
+          "targetObjective": "Work through story problems unaided, with the techniques mixed.",
+          "stepByStep": [
+            "Read each question and decide what it is asking.",
+            "Choose the technique that fits.",
+            "Work it out on your own."
+          ]
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "📖",
+      "iconName": "search",
+      "iconTone": "emerald",
+      "pedagogyTip": "Retrieving a technique unaided is a different act from being walked through it, and it is the one that makes it stick. The voice, the hints and the explanation are all off.",
+      "standards": [
+        "CCSS.3.OA.A.3"
+      ],
+      "trajectoryLevel": "practice",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "practice-strategy",
+      "title": "Practice: Choosing a Route",
+      "concept": "Practice Without Help",
+      "conceptKey": "multiplication-strategy-chooser",
+      "requires": [
+        "multiplication-strategy-chooser"
+      ],
+      "activity": "multiplication/strategy",
+      "params": {
+        "level": 68,
+        "question": {
+          "practice": true,
+          "modes": [
+            "compare_paths"
+          ],
+          "questionsPerRound": 8
+        },
+        "play": {
+          "targetObjective": "Work through choosing a route unaided, with the techniques mixed.",
+          "stepByStep": [
+            "Read each question and decide what it is asking.",
+            "Choose the technique that fits.",
+            "Work it out on your own."
+          ]
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🧭",
+      "iconName": "sparkles",
+      "iconTone": "purple",
+      "pedagogyTip": "Retrieving a technique unaided is a different act from being walked through it, and it is the one that makes it stick. The voice, the hints and the explanation are all off.",
+      "standards": [
+        "CCSS.3.OA.B.5"
+      ],
+      "trajectoryLevel": "practice",
+      "ageBand": [
+        9,
+        10
+      ]
+    }
+  ]
+}

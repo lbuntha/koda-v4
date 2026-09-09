@@ -1,0 +1,247 @@
+{
+  "id": "multiplication",
+  "name": "Multiplication",
+  "version": "1.0.0",
+  "description": "Learn to make equal groups, read them as arrays, and work facts out from facts you already know.",
+  "category": "core",
+  "author": "Koda Math Lab",
+  "iconName": "Grid3x3",
+  "tagline": "Equal groups, arrays, and facts you can work out.",
+  "thumbnail": "multiplication-quest",
+  "status": "published",
+  "audience": {
+    "ages": [
+      6,
+      10
+    ],
+    "category": "operations"
+  },
+  "teaches": [
+    "equal-grouper",
+    "equal-group-checker",
+    "repeated-adder",
+    "multiplication-equation-reader",
+    "factor-role-reader",
+    "multiplicative-identity",
+    "zero-property",
+    "array-builder",
+    "array-reader",
+    "multiplicative-commutativity",
+    "array-equation-writer",
+    "missing-dimension",
+    "skip-counter",
+    "multiplication-number-line",
+    "hop-counter",
+    "multiple-recogniser",
+    "doubles-knower",
+    "tens-multiplier",
+    "fives-multiplier",
+    "table-reader",
+    "table-pattern-finder",
+    "square-knower",
+    "double-doubler",
+    "triple-doubler",
+    "group-adder",
+    "group-subtractor",
+    "fact-breaker",
+    "near-square-deriver",
+    "known-fact-user",
+    "distributor",
+    "associativity",
+    "halver-doubler",
+    "factor-finder",
+    "prime-identifier",
+    "tens-scaler",
+    "tens-multiple-multiplier",
+    "place-value-scaler",
+    "area-finder",
+    "area-modeler",
+    "partial-products",
+    "two-digit-area-modeler",
+    "column-multiplier",
+    "multiplication-regrouper",
+    "two-digit-column-multiplier",
+    "rounding-estimator",
+    "reasonableness-checker",
+    "equal-groups-modeler",
+    "group-count-modeler",
+    "group-size-modeler",
+    "comparison-multiplier",
+    "rate-reasoner",
+    "multiplicative-multi-step-solver",
+    "multiplication-strategy-chooser"
+  ],
+  "requires": [
+    "counter",
+    "skip-counter",
+    "pattern-continuer",
+    "count-on",
+    "doubles-knower",
+    "part-whole-decomposer",
+    "place-value-builder",
+    "unitiser-ten",
+    "unitiser-hundred",
+    "partial-sums",
+    "rounding-estimator"
+  ],
+  "features": [
+    {
+      "id": "audio_speech",
+      "name": "Spoken voice",
+      "description": "Reads prompts, counts aloud as groups are filled and hops are made, speaks hints, and says why a move was refused. Uses AI-generated voice recordings. Turn off for a silent lesson.",
+      "isEnabled": true,
+      "tag": "Audio"
+    },
+    {
+      "id": "sound_chimes",
+      "name": "Sound chimes",
+      "description": "Plays placement, counting and answer chimes.",
+      "isEnabled": true,
+      "tag": "Audio"
+    },
+    {
+      "id": "haptic_feedback",
+      "name": "Haptic vibration",
+      "description": "Adds a small vibration to placing an object, hopping along the line, and finishing a group.",
+      "isEnabled": true,
+      "tag": "Haptic"
+    },
+    {
+      "id": "counting_badges",
+      "name": "1-to-1 badges",
+      "description": "Numbers what has been counted so far — the objects inside each group, the squares of an array, and the landings along a number line.",
+      "isEnabled": true,
+      "tag": "Cognitive"
+    },
+    {
+      "id": "running_product_badge",
+      "name": "Running total",
+      "description": "Shows how many there are so far as groups are built, arrays grow, and hops are made.",
+      "isEnabled": true,
+      "tag": "Cognitive"
+    },
+    {
+      "id": "strategy_scaffold",
+      "name": "Strategy scaffold",
+      "description": "Shows the working as it is built: the repeated addition, the shape being aimed for, and the multiplication a run of hops is writing.",
+      "isEnabled": true,
+      "tag": "Cognitive"
+    },
+    {
+      "id": "times_table_chart",
+      "name": "Times table chart",
+      "description": "Adds a button to fact lessons that shows a full times table to look facts up in. Never offered during practice.",
+      "isEnabled": true,
+      "tag": "Cognitive"
+    },
+    {
+      "id": "step_context_tags",
+      "name": "Step framing tags",
+      "description": "Labels warm-up, guided, activity, and milestone steps.",
+      "isEnabled": true,
+      "tag": "Cognitive"
+    },
+    {
+      "id": "premium_lessons",
+      "name": "Charge for later lessons",
+      "description": "Uses the Free lessons setting to decide which lessons need a full plan.",
+      "isEnabled": false,
+      "tag": "Plan"
+    }
+  ],
+  "settings": {
+    "warmupLabel": "",
+    "activityLabel": "",
+    "guidedLabel": "",
+    "milestoneLabel": "",
+    "speechRate": 0.95,
+    "answerInput": "choices",
+    "freeLessons": 10,
+    "tableCeiling": "12"
+  },
+  "settingsSchema": [
+    {
+      "key": "warmupLabel",
+      "label": "Warm-up tag",
+      "help": "Custom wording for the first step.",
+      "type": "text",
+      "placeholder": "Warm-up Exercise 🌱",
+      "maxLength": 32
+    },
+    {
+      "key": "activityLabel",
+      "label": "Activity tag",
+      "help": "Custom wording for activity steps.",
+      "type": "text",
+      "placeholder": "Interactive Activity 🚀",
+      "maxLength": 32
+    },
+    {
+      "key": "guidedLabel",
+      "label": "Guided tag",
+      "help": "Custom wording for guided steps.",
+      "type": "text",
+      "placeholder": "Guided Challenge 🌟",
+      "maxLength": 32
+    },
+    {
+      "key": "milestoneLabel",
+      "label": "Final tag",
+      "help": "Custom wording for the last step.",
+      "type": "text",
+      "placeholder": "Final Milestone 🏆",
+      "maxLength": 32
+    },
+    {
+      "key": "speechRate",
+      "label": "Speech rate",
+      "help": "How fast Koda speaks prompts and hints.",
+      "type": "number",
+      "min": 0.5,
+      "max": 2,
+      "step": 0.05,
+      "unit": "x"
+    },
+    {
+      "key": "answerInput",
+      "label": "How answers are given",
+      "help": "Choose from four answers or type on the number pad.",
+      "type": "choice",
+      "options": [
+        {
+          "value": "choices",
+          "label": "Four choices"
+        },
+        {
+          "value": "pad",
+          "label": "Number pad"
+        }
+      ]
+    },
+    {
+      "key": "tableCeiling",
+      "label": "Times table size",
+      "help": "How far the times table runs. This sets the chart and the numbers questions are drawn from.",
+      "type": "choice",
+      "options": [
+        {
+          "value": "12",
+          "label": "Up to 12 x 12"
+        },
+        {
+          "value": "10",
+          "label": "Up to 10 x 10"
+        }
+      ]
+    },
+    {
+      "key": "freeLessons",
+      "label": "Free lessons",
+      "help": "How many lessons remain free when charging is enabled.",
+      "type": "number",
+      "min": 0,
+      "max": 100,
+      "step": 1
+    }
+  ]
+}

@@ -622,6 +622,227 @@
       "lessons": [
         "bottle-sort/practice-bottle-sort"
       ]
+    },
+    {
+      "id": "u48",
+      "unitNumber": 48,
+      "title": "Unit 48: Equal Groups",
+      "description": "Where multiplication starts: groups that all hold the same number",
+      "icon": "\ud83e\uddfa",
+      "lessons": [
+        "multiplication/equal-groups",
+        "multiplication/equal-or-not",
+        "multiplication/repeated-addition",
+        "multiplication/groups-to-equation"
+      ]
+    },
+    {
+      "id": "u49",
+      "unitNumber": 49,
+      "title": "Unit 49: Factors, One, and Zero",
+      "description": "What each number in a multiplication counts, and the two that behave differently",
+      "icon": "\u2716\ufe0f",
+      "lessons": [
+        "multiplication/which-factor-is-which",
+        "multiplication/multiply-by-one",
+        "multiplication/multiply-by-zero",
+        "multiplication/build-an-array"
+      ]
+    },
+    {
+      "id": "u50",
+      "unitNumber": 50,
+      "title": "Unit 50: Rows and Columns",
+      "description": "Equal groups stood in rows, turned round, and read both ways",
+      "icon": "\ud83d\udfe6",
+      "lessons": [
+        "multiplication/rows-and-columns",
+        "multiplication/turn-the-array",
+        "multiplication/two-equations-one-array",
+        "multiplication/missing-side"
+      ]
+    },
+    {
+      "id": "u51",
+      "unitNumber": 51,
+      "title": "Unit 51: Hops, Lines, and Multiples",
+      "description": "Equal groups laid end to end, counted in hops along a line",
+      "icon": "\ud83d\udc3e",
+      "lessons": [
+        "multiplication/skip-count-hops",
+        "multiplication/multiply-on-a-line",
+        "multiplication/count-the-hops",
+        "multiplication/spot-the-multiples"
+      ]
+    },
+    {
+      "id": "u52",
+      "unitNumber": 52,
+      "title": "Unit 52: Twos, Tens, Fives, and the Chart",
+      "description": "The three facts a child holds outright, and the first one worked out from another",
+      "icon": "\u26a1",
+      "lessons": [
+        "multiplication/times-two",
+        "multiplication/times-ten",
+        "multiplication/times-five",
+        "multiplication/read-the-table"
+      ]
+    },
+    {
+      "id": "u53",
+      "unitNumber": 53,
+      "title": "Unit 53: Patterns, Squares, and Pairs",
+      "description": "What the whole times table shows once you can read it",
+      "icon": "\ud83d\udcca",
+      "lessons": [
+        "multiplication/patterns-in-the-table",
+        "multiplication/square-numbers",
+        "multiplication/commutative-pairs",
+        "multiplication/times-four"
+      ]
+    },
+    {
+      "id": "u54",
+      "unitNumber": 54,
+      "title": "Unit 54: Doubling and Adding a Group",
+      "description": "Four, eight, three and six, each from a fact already held",
+      "icon": "\u2716\ufe0f",
+      "lessons": [
+        "multiplication/times-eight",
+        "multiplication/times-three",
+        "multiplication/times-six",
+        "multiplication/times-nine"
+      ]
+    },
+    {
+      "id": "u55",
+      "unitNumber": 55,
+      "title": "Unit 55: Breaking Facts Apart",
+      "description": "Seven, the elevens and twelves, near squares, and choosing a route",
+      "icon": "\ud83d\udd17",
+      "lessons": [
+        "multiplication/times-seven",
+        "multiplication/times-eleven-twelve",
+        "multiplication/near-squares",
+        "multiplication/use-a-known-fact"
+      ]
+    },
+    {
+      "id": "u56",
+      "unitNumber": 56,
+      "title": "Unit 56: Splitting and Regrouping Factors",
+      "description": "The same break-apart move, drawn as a rectangle",
+      "icon": "\u2702\ufe0f",
+      "lessons": [
+        "multiplication/split-the-array",
+        "multiplication/multiply-three-numbers",
+        "multiplication/halve-and-double",
+        "multiplication/factor-pairs"
+      ]
+    },
+    {
+      "id": "u57",
+      "unitNumber": 57,
+      "title": "Unit 57: Primes, Tens, and Hundreds",
+      "description": "Numbers with no pair, and what happens when place value scales",
+      "icon": "\ud83d\udd2c",
+      "lessons": [
+        "multiplication/prime-or-composite",
+        "multiplication/times-ten-and-hundred",
+        "multiplication/multiples-of-ten",
+        "multiplication/tens-times-tens"
+      ]
+    },
+    {
+      "id": "u58",
+      "unitNumber": 58,
+      "title": "Unit 58: Area and Partial Products",
+      "description": "Multiplication as a rectangle, cut into pieces you can already do",
+      "icon": "\ud83d\udfe9",
+      "lessons": [
+        "multiplication/area-of-a-rectangle",
+        "multiplication/area-model-2x1",
+        "multiplication/partial-products",
+        "multiplication/area-model-2x2"
+      ]
+    },
+    {
+      "id": "u59",
+      "unitNumber": 59,
+      "title": "Unit 59: The Written Method",
+      "description": "Columns, carries, and the row that multiplies by the tens",
+      "icon": "\ud83d\udccf",
+      "lessons": [
+        "multiplication/column-no-regroup",
+        "multiplication/column-with-regroup",
+        "multiplication/two-digit-column",
+        "multiplication/estimate-by-rounding"
+      ]
+    },
+    {
+      "id": "u60",
+      "unitNumber": 60,
+      "title": "Unit 60: Reasonable Answers and Equal-Group Stories",
+      "description": "Judging an answer before working it out, then multiplying in words",
+      "icon": "\u2696\ufe0f",
+      "lessons": [
+        "multiplication/is-it-reasonable",
+        "multiplication/equal-groups-story",
+        "multiplication/how-many-groups-story",
+        "multiplication/group-size-story"
+      ]
+    },
+    {
+      "id": "u61",
+      "unitNumber": 61,
+      "title": "Unit 61: Comparison, Rate, and Strategy",
+      "description": "Times as many, amounts per one, and problems that take two steps",
+      "icon": "\ud83d\udcca",
+      "lessons": [
+        "multiplication/times-as-many",
+        "multiplication/rate-problems",
+        "multiplication/multi-step-problems",
+        "multiplication/explain-and-compare"
+      ]
+    },
+    {
+      "id": "u62",
+      "unitNumber": 62,
+      "title": "Unit 62: Practice \u2014 Groups, Arrays, Lines, Facts",
+      "description": "Independent practice on the four engines the skill starts with",
+      "icon": "\u26a1",
+      "lessons": [
+        "multiplication/practice-groups",
+        "multiplication/practice-array",
+        "multiplication/practice-numberline",
+        "multiplication/practice-facts"
+      ]
+    },
+    {
+      "id": "u63",
+      "unitNumber": 63,
+      "title": "Unit 63: Practice \u2014 Tables, Factors, Places, Area",
+      "description": "Independent practice on the chart, the factor board and the area model",
+      "icon": "\ud83d\udcca",
+      "lessons": [
+        "multiplication/practice-table",
+        "multiplication/practice-factors",
+        "multiplication/practice-chart",
+        "multiplication/practice-area"
+      ]
+    },
+    {
+      "id": "u64",
+      "unitNumber": 64,
+      "title": "Unit 64: Practice \u2014 Columns, Estimation, Stories, Strategy",
+      "description": "Independent practice on everything the skill finishes with",
+      "icon": "\ud83e\udded",
+      "lessons": [
+        "multiplication/practice-column",
+        "multiplication/practice-estimate",
+        "multiplication/practice-story",
+        "multiplication/practice-strategy"
+      ]
     }
   ]
 }
