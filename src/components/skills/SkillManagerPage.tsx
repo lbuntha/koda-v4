@@ -728,17 +728,33 @@ type DetailTab = "features" | "listing" | "settings" | "lessons" | "practice" | 
  * differ only in which lessons they hold and what a row is called — and a
  * second copy of a row this detailed is a second place to fix a row bug.
  */
+/**
+ * The number a lesson answers to, for a list you have to scan.
+ *
+ * The teaching list uses each lesson's own `params.level`, so the number agrees
+ * with the one every other screen shows. The practice list counts from one
+ * instead: it is a list of twelve, read on its own, and numbering it 57 to 68
+ * tells a reader where it sits in a course they are not currently looking at.
+ */
+const numberFor = (lesson: Lesson, position: number, restart: boolean): number => {
+  if (restart) return position;
+  const level = (lesson.params as { level?: unknown } | undefined)?.level;
+  return typeof level === "number" ? level : position;
+};
+
 const LessonRows: React.FC<{
   skillId: string;
   lessons: Lesson[];
   titleOf?: (title: string) => string;
+  /** Count this list from one rather than from each lesson's course level. */
+  restartNumbering?: boolean;
   editingLessonId: string | null;
   onEdit: (id: string) => void;
   onPreview: (lesson: Lesson) => void;
-}> = ({ skillId, lessons, titleOf = (t) => t, editingLessonId, onEdit, onPreview }) => (
+}> = ({ skillId, lessons, titleOf = (t) => t, restartNumbering = false, editingLessonId, onEdit, onPreview }) => (
   <div className={themeSystem.card("default", "p-4 sm:p-5")}>
     <ol className="divide-y-2 divide-slate-100 dark:divide-slate-800">
-      {lessons.map((lesson) => (
+      {lessons.map((lesson, index) => (
         <li key={lesson.id}>
           <div className="flex items-center gap-1">
             <button
@@ -748,6 +764,13 @@ const LessonRows: React.FC<{
               }}
               className="flex-1 min-w-0 flex items-center gap-3 py-2.5 px-2 -mx-2 rounded-xl text-left hover:bg-slate-50 dark:hover:bg-slate-800/60 transition group"
             >
+              {/* Fixed width and tabular figures so a 5 and a 68 leave the
+                  titles on the same line as each other. Read aloud as "lesson
+                  12" rather than as a bare number running into the title. */}
+              <span className="w-7 shrink-0 text-right text-xs font-mono font-bold tabular-nums text-slate-400 dark:text-slate-500">
+                <span className="sr-only">Lesson </span>
+                {numberFor(lesson, index + 1, restartNumbering)}
+              </span>
               <UILessonIcon name={lesson.iconName} tone={lesson.iconTone} size="sm" />
               <span className="min-w-0 flex-1">
                 <span className="block text-sm font-bold text-slate-900 dark:text-white truncate">
@@ -1055,6 +1078,7 @@ const SkillDetail: React.FC<{
           skillId={manifest.id}
           lessons={practice}
           titleOf={practiceTitle}
+          restartNumbering
           editingLessonId={editingLessonId}
           onEdit={(id) => setEditingLessonId((open) => (open === id ? null : id))}
           onPreview={onPreview}
