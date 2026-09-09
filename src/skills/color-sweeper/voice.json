@@ -1,0 +1,11 @@
+{
+  "_comment": [
+    "Everything this skill says that is not a lesson prompt.",
+    "`npm run voice:record` reads this file plus every lesson audioPrompt; a line",
+    "not yet recorded plays through live TTS, which is the normal state mid-build.",
+    "No clips are recorded for Phase 1 — the user has not asked for a voice pass."
+  ],
+  "prompts": [
+    "That is the tile we are asking about."
+  ]
+}

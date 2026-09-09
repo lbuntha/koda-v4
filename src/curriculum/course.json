@@ -843,6 +843,145 @@
         "multiplication/practice-story",
         "multiplication/practice-strategy"
       ]
+    },
+    {
+      "id": "u65",
+      "unitNumber": 65,
+      "title": "Unit 65: Neighbours and Clues",
+      "description": "Reading a Color Sweeper board before anything is painted",
+      "icon": "\ud83e\udde9",
+      "lessons": [
+        "color-sweeper/touching-tiles",
+        "color-sweeper/edges-and-corners",
+        "color-sweeper/matching-colors",
+        "color-sweeper/what-a-clue-says",
+        "color-sweeper/the-other-color"
+      ]
+    },
+    {
+      "id": "u66",
+      "unitNumber": 66,
+      "title": "Unit 66: Zero and Full Clues",
+      "description": "The two clues that decide a whole neighbourhood at once",
+      "icon": "\ud83c\udfa8",
+      "lessons": [
+        "color-sweeper/zero-means-none",
+        "color-sweeper/zero-at-an-edge",
+        "color-sweeper/every-neighbor-matches"
+      ]
+    },
+    {
+      "id": "u67",
+      "unitNumber": 67,
+      "title": "Unit 67: Counting What Is Left",
+      "description": "Clues that need comparing, and a board that takes more than one move",
+      "icon": "\ud83d\udd17",
+      "lessons": [
+        "color-sweeper/matches-already-found",
+        "color-sweeper/one-more-match",
+        "color-sweeper/all-remaining-match",
+        "color-sweeper/follow-the-clues"
+      ]
+    },
+    {
+      "id": "u68",
+      "unitNumber": 68,
+      "title": "Unit 68: Two Clues at Once",
+      "description": "Comparing overlapping clues, and the walls that shape makes",
+      "icon": "\ud83e\uddf1",
+      "lessons": [
+        "color-sweeper/shared-neighbors",
+        "color-sweeper/overlap-chains",
+        "color-sweeper/the-one-two-one",
+        "color-sweeper/the-one-two-two-one"
+      ]
+    },
+    {
+      "id": "u69",
+      "unitNumber": 69,
+      "title": "Unit 69: Clues of Other Kinds",
+      "description": "The other colour, the whole board, a row, and a marked area",
+      "icon": "\ud83d\uddfa\ufe0f",
+      "lessons": [
+        "color-sweeper/count-the-other-color",
+        "color-sweeper/how-many-are-left",
+        "color-sweeper/a-whole-row",
+        "color-sweeper/a-marked-area"
+      ]
+    },
+    {
+      "id": "u70",
+      "unitNumber": 70,
+      "title": "Unit 70: Together, or Not",
+      "description": "Line clues that say where the tiles can sit, not only how many",
+      "icon": "\ud83c\udf09",
+      "lessons": [
+        "color-sweeper/all-in-a-run",
+        "color-sweeper/a-gap-somewhere"
+      ]
+    },
+    {
+      "id": "u71",
+      "unitNumber": 71,
+      "title": "Unit 71: Three Colours, and All Together",
+      "description": "Three colours, a total for each, and a board that mixes every kind of clue",
+      "icon": "\ud83d\udddd\ufe0f",
+      "lessons": [
+        "color-sweeper/three-color-choices",
+        "color-sweeper/three-colors-and-overlap",
+        "color-sweeper/three-color-totals",
+        "color-sweeper/every-kind-of-clue"
+      ]
+    },
+    {
+      "id": "u72",
+      "unitNumber": 72,
+      "title": "Unit 72: Give a Reason, Check the Board",
+      "description": "Judging evidence, explaining a move, and auditing somebody else's work",
+      "icon": "\ud83d\udd0e",
+      "lessons": [
+        "color-sweeper/which-clues-help",
+        "color-sweeper/explain-the-move",
+        "color-sweeper/spot-a-contradiction",
+        "color-sweeper/check-a-three-color-board"
+      ]
+    },
+    {
+      "id": "u73",
+      "unitNumber": 73,
+      "title": "Unit 73: Practice \u2014 Reading and Local Clues",
+      "description": "Independent practice on neighbourhoods, zero, full and remaining",
+      "icon": "\ud83d\udd01",
+      "lessons": [
+        "color-sweeper/practice-neighbors",
+        "color-sweeper/practice-zero",
+        "color-sweeper/practice-full",
+        "color-sweeper/practice-remaining"
+      ]
+    },
+    {
+      "id": "u74",
+      "unitNumber": 74,
+      "title": "Unit 74: Practice \u2014 Combining Evidence",
+      "description": "Independent practice on overlap, clue kinds, totals and three colours",
+      "icon": "\ud83d\udd01",
+      "lessons": [
+        "color-sweeper/practice-overlap",
+        "color-sweeper/practice-clue-kinds",
+        "color-sweeper/practice-totals",
+        "color-sweeper/practice-three-colors"
+      ]
+    },
+    {
+      "id": "u75",
+      "unitNumber": 75,
+      "title": "Unit 75: Practice \u2014 Reasoning and Checking",
+      "description": "Independent practice on judging evidence and auditing a board",
+      "icon": "\ud83d\udd01",
+      "lessons": [
+        "color-sweeper/practice-reasons",
+        "color-sweeper/practice-checking"
+      ]
     }
   ]
 }
