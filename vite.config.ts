@@ -124,6 +124,19 @@ export default defineConfig(() => {
           // definition — registering a token is a round trip. Precaching it
           // would put 100KB into every install to save nothing.
           globIgnores: ['**/node_modules/**/*', '**/firebase-*.js'],
+          /*
+           * The app bundle is precached however big it gets.
+           *
+           * Workbox refuses anything over 2 MiB by default, and the sixth skill
+           * took the entry chunk past it — at which point the build fails rather
+           * than quietly shipping an app that cannot start offline. Offline is
+           * the requirement here, not an optimisation: a child on an unstable
+           * connection needs the whole app on disk, so the ceiling moves and the
+           * chunk stays precached. Splitting the skills into lazy chunks would
+           * shrink the first load, but it would also mean a lesson that fails to
+           * open on a train, which is the worse trade.
+           */
+          maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
         },
 
         devOptions: {

@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 400 200">
+  <!--
+    Multiplication's card: a four-by-six array, and the two sentences it answers to.
+
+    An array rather than a times sign, because the array is what this skill
+    actually teaches — the rows and the columns are drawn in the skill's own two
+    factor colours (violet for the rows, sky for the columns) so the card and the
+    lessons agree about which number is which. No amber or yellow anywhere.
+  -->
+  <defs>
+    <linearGradient id="mulGround" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#251A46"/>
+      <stop offset="100%" stop-color="#100B24"/>
+    </linearGradient>
+    <linearGradient id="mulRow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C4B5FD"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="mulCol" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7DD3FC"/>
+      <stop offset="100%" stop-color="#0284C7"/>
+    </linearGradient>
+    <linearGradient id="mulTotal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6EE7B7"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <radialGradient id="mulGlow" cx="38%" cy="46%" r="60%">
+      <stop offset="0%" stop-color="#8B5CF6" stop-opacity="0.34"/>
+      <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="400" height="200" fill="url(#mulGround)"/>
+  <ellipse cx="152" cy="92" rx="150" ry="104" fill="url(#mulGlow)"/>
+
+  <!-- The array: four rows of six. -->
+  <g>
+    <g fill="url(#mulCol)">
+      <rect x="60"  y="46"  width="22" height="22" rx="5"/>
+      <rect x="88"  y="46"  width="22" height="22" rx="5"/>
+      <rect x="116" y="46"  width="22" height="22" rx="5"/>
+      <rect x="144" y="46"  width="22" height="22" rx="5"/>
+      <rect x="172" y="46"  width="22" height="22" rx="5"/>
+      <rect x="200" y="46"  width="22" height="22" rx="5"/>
+
+      <rect x="60"  y="74"  width="22" height="22" rx="5"/>
+      <rect x="88"  y="74"  width="22" height="22" rx="5"/>
+      <rect x="116" y="74"  width="22" height="22" rx="5"/>
+      <rect x="144" y="74"  width="22" height="22" rx="5"/>
+      <rect x="172" y="74"  width="22" height="22" rx="5"/>
+      <rect x="200" y="74"  width="22" height="22" rx="5"/>
+
+      <rect x="60"  y="102" width="22" height="22" rx="5"/>
+      <rect x="88"  y="102" width="22" height="22" rx="5"/>
+      <rect x="116" y="102" width="22" height="22" rx="5"/>
+      <rect x="144" y="102" width="22" height="22" rx="5"/>
+      <rect x="172" y="102" width="22" height="22" rx="5"/>
+      <rect x="200" y="102" width="22" height="22" rx="5"/>
+
+      <rect x="60"  y="130" width="22" height="22" rx="5"/>
+      <rect x="88"  y="130" width="22" height="22" rx="5"/>
+      <rect x="116" y="130" width="22" height="22" rx="5"/>
+      <rect x="144" y="130" width="22" height="22" rx="5"/>
+      <rect x="172" y="130" width="22" height="22" rx="5"/>
+      <rect x="200" y="130" width="22" height="22" rx="5"/>
+    </g>
+
+    <!-- The edge labels, in the two factor colours the lessons use. -->
+    <rect x="34" y="46" width="14" height="106" rx="7" fill="url(#mulRow)"/>
+    <rect x="60" y="24" width="162" height="12" rx="6" fill="url(#mulCol)"/>
+  </g>
+
+  <!-- Both sentences the same array answers to. -->
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="700">
+    <text x="252" y="80" font-size="26" fill="#E9D5FF">4 × 6</text>
+    <text x="252" y="112" font-size="26" fill="#BAE6FD">6 × 4</text>
+    <rect x="252" y="126" width="96" height="3" rx="1.5" fill="#334155"/>
+    <text x="252" y="158" font-size="30" fill="url(#mulTotal)">24</text>
+  </g>
+</svg>

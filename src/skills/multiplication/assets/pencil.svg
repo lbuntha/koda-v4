@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="pencilBody" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#C4B5FD"/>
+      <stop offset="45%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#5B21B6"/>
+    </linearGradient>
+    <radialGradient id="pencilShadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.24"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <ellipse cx="64" cy="118" rx="28" ry="6" fill="url(#pencilShadow)"/>
+  <rect x="44" y="30" width="40" height="70" rx="4" fill="url(#pencilBody)" stroke="#4C1D95" stroke-width="2"/>
+  <path d="M44 30 L64 6 L84 30 Z" fill="#FDF2F8" stroke="#4C1D95" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M54 18 L64 6 L74 18 Z" fill="#334155"/>
+  <rect x="44" y="100" width="40" height="14" rx="3" fill="#FB7185" stroke="#9F1239" stroke-width="2"/>
+  <line x1="58" y1="34" x2="58" y2="96" stroke="#DDD6FE" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+</svg>
