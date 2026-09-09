@@ -5129,6 +5129,1864 @@
     ]
   },
   {
+    "id": "color-sweeper",
+    "name": "Color Sweeper",
+    "version": "0.1.0",
+    "description": "Read colour clues, work out which tiles they are talking about, and solve a grid with a reason for every tile.",
+    "category": "core",
+    "author": "Koda Math Lab",
+    "iconName": "Grid3x3",
+    "tagline": "Every tile has a reason.",
+    "thumbnail": "color-sweeper-quest",
+    "status": "draft",
+    "audience": {
+      "ages": [
+        6,
+        14
+      ],
+      "category": "logic"
+    },
+    "teaches": [
+      "neighbor-identifier",
+      "color-neighbor-counter",
+      "color-clue-reader",
+      "color-complement-reader",
+      "zero-color-eliminator",
+      "full-color-deducer",
+      "remaining-color-deducer",
+      "overlapping-color-deducer",
+      "clue-pattern-solver",
+      "color-complement-deducer",
+      "board-total-deducer",
+      "line-clue-deducer",
+      "region-clue-deducer",
+      "run-clue-deducer",
+      "three-color-deducer",
+      "mixed-clue-solver",
+      "color-proof-checker",
+      "color-contradiction-checker"
+    ],
+    "requires": [
+      "counter"
+    ],
+    "features": [
+      {
+        "id": "audio_speech",
+        "name": "Spoken voice",
+        "description": "Reads the question aloud, speaks hints, and says why a move was not allowed. Turn off for a silent lesson.",
+        "isEnabled": true,
+        "tag": "Audio"
+      },
+      {
+        "id": "sound_chimes",
+        "name": "Sound chimes",
+        "description": "Plays a short sound when a tile is chosen and when an answer is checked.",
+        "isEnabled": true,
+        "tag": "Audio"
+      },
+      {
+        "id": "haptic_feedback",
+        "name": "Haptic vibration",
+        "description": "Adds a small vibration to a correct answer and to a move that was not allowed.",
+        "isEnabled": true,
+        "tag": "Haptic"
+      },
+      {
+        "id": "counting_badges",
+        "name": "1-to-1 badges",
+        "description": "Numbers the tiles as they are chosen, so a child selecting eight of them can see how many are already in.",
+        "isEnabled": true,
+        "tag": "Cognitive"
+      },
+      {
+        "id": "step_context_tags",
+        "name": "Step framing tags",
+        "description": "Labels warm-up, guided, activity and milestone steps.",
+        "isEnabled": true,
+        "tag": "Cognitive"
+      }
+    ],
+    "settings": {
+      "warmupLabel": "",
+      "activityLabel": "",
+      "guidedLabel": "",
+      "milestoneLabel": "",
+      "speechRate": 0.95
+    },
+    "settingsSchema": [
+      {
+        "key": "warmupLabel",
+        "label": "Warm-up tag",
+        "help": "Custom wording for the first step.",
+        "type": "text",
+        "placeholder": "Warm-up Exercise 🌱",
+        "maxLength": 32
+      },
+      {
+        "key": "activityLabel",
+        "label": "Activity tag",
+        "help": "Custom wording for activity steps.",
+        "type": "text",
+        "placeholder": "Interactive Activity 🚀",
+        "maxLength": 32
+      },
+      {
+        "key": "guidedLabel",
+        "label": "Guided tag",
+        "help": "Custom wording for guided steps.",
+        "type": "text",
+        "placeholder": "Guided Challenge 🌟",
+        "maxLength": 32
+      },
+      {
+        "key": "milestoneLabel",
+        "label": "Final tag",
+        "help": "Custom wording for the last step.",
+        "type": "text",
+        "placeholder": "Final Milestone 🏆",
+        "maxLength": 32
+      },
+      {
+        "key": "speechRate",
+        "label": "Speech rate",
+        "help": "How fast Koda speaks the question and hints.",
+        "type": "number",
+        "min": 0.5,
+        "max": 2,
+        "step": 0.05,
+        "unit": "x"
+      }
+    ],
+    "lessons": [
+      {
+        "id": "touching-tiles",
+        "title": "Touching Tiles",
+        "concept": "Which Tiles Touch a Tile",
+        "conceptKey": "neighbor-identifier",
+        "requires": [
+          "counter"
+        ],
+        "activity": "color-sweeper/neighbors",
+        "params": {
+          "level": 1,
+          "question": {
+            "mode": "select_neighbors",
+            "sizes": [
+              3,
+              4
+            ],
+            "anchors": [
+              "center"
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Find every tile that touches the outlined one, including the four corner-touching ones.",
+            "stepByStep": [
+              "Find the outlined tile.",
+              "Tap the tiles directly above, below, left and right of it.",
+              "Then tap the four that touch it only at a corner."
+            ],
+            "kidTip": "A tile in the middle touches eight others. The corners count.",
+            "audioPrompt": "Tap every tile that touches the outlined one. Do not forget the corners."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "🔲",
+        "iconName": "circleDot",
+        "iconTone": "purple",
+        "pedagogyTip": "Every clue in this skill counts a neighbourhood, so a child who is unsure which tiles are in one cannot read a single clue correctly. This is built by tapping rather than told, because the corners are the part that gets forgotten.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-reader",
+        "ageBand": [
+          6,
+          9
+        ]
+      },
+      {
+        "id": "edges-and-corners",
+        "title": "Edges and Corners",
+        "concept": "Neighbourhoods at the Side of a Board",
+        "conceptKey": "neighbor-identifier",
+        "requires": [
+          "neighbor-identifier"
+        ],
+        "activity": "color-sweeper/neighbors",
+        "params": {
+          "level": 2,
+          "question": {
+            "mode": "select_neighbors",
+            "sizes": [
+              3,
+              4
+            ],
+            "anchors": [
+              "edge",
+              "corner"
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Find every tile that touches an outlined tile sitting at the side or in a corner.",
+            "stepByStep": [
+              "Find the outlined tile and notice it is at the side of the board.",
+              "Tap only the tiles that are really there.",
+              "A tile off the edge of the board does not exist, so it cannot touch anything."
+            ],
+            "kidTip": "At a side there are five. In a corner there are only three.",
+            "audioPrompt": "This one is at the side. Tap only the tiles that are really on the board."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "📐",
+        "iconName": "layers",
+        "iconTone": "cyan",
+        "pedagogyTip": "A child who has only met the middle of a board learns 'eight' as the answer rather than as a count. An edge clue reading 5 then looks like a mistake in the puzzle.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-reader",
+        "ageBand": [
+          6,
+          9
+        ]
+      },
+      {
+        "id": "matching-colors",
+        "title": "Matching Colours",
+        "concept": "Counting the Neighbours That Match",
+        "conceptKey": "color-neighbor-counter",
+        "requires": [
+          "neighbor-identifier"
+        ],
+        "activity": "color-sweeper/neighbors",
+        "params": {
+          "level": 3,
+          "question": {
+            "mode": "count_same",
+            "sizes": [
+              3,
+              4
+            ],
+            "anchors": [
+              "center",
+              "edge",
+              "corner"
+            ],
+            "minSame": 0,
+            "maxSame": 3,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Count how many of the tiles touching the outlined one are the same colour as it.",
+            "stepByStep": [
+              "Look at the outlined tile's own colour.",
+              "Check each tile around it, one at a time.",
+              "Count only the ones that match. The outlined tile is not one of them."
+            ],
+            "kidTip": "Count the matching ones, not all of them.",
+            "audioPrompt": "How many tiles touching this one are the same colour as it?"
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "🔶",
+        "iconName": "gem",
+        "iconTone": "indigo",
+        "pedagogyTip": "This is what a clue's number is, arrived at by counting before it is ever read off a tile. The count and the clue meet in the next lesson.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-reader",
+        "ageBand": [
+          6,
+          9
+        ]
+      },
+      {
+        "id": "what-a-clue-says",
+        "title": "What a Clue Says",
+        "concept": "Reading a Colour Clue",
+        "conceptKey": "color-clue-reader",
+        "requires": [
+          "color-neighbor-counter"
+        ],
+        "activity": "color-sweeper/neighbors",
+        "params": {
+          "level": 4,
+          "question": {
+            "mode": "read_clue",
+            "size": 3,
+            "anchors": [
+              "center",
+              "edge",
+              "corner"
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Say exactly what a clue claims: which colour it counts, and how many of the tiles it touches.",
+            "stepByStep": [
+              "Read the colour of the tile the number is written on.",
+              "Read the number.",
+              "Say it as a sentence about the tiles it touches — not about itself."
+            ],
+            "kidTip": "A clue never counts its own tile.",
+            "audioPrompt": "What does this clue say? Read the colour as well as the number."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "🔍",
+        "iconName": "search",
+        "iconTone": "emerald",
+        "pedagogyTip": "The board is blank apart from the clue on purpose. If the neighbours were coloured a child could answer by counting the picture and never read the clue at all, which is the thing this lesson exists to test.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-reader",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "the-other-color",
+        "title": "The Other Colour",
+        "concept": "What a Clue Says About the Colour It Does Not Name",
+        "conceptKey": "color-complement-reader",
+        "requires": [
+          "color-clue-reader"
+        ],
+        "activity": "color-sweeper/neighbors",
+        "params": {
+          "level": 5,
+          "question": {
+            "mode": "complement",
+            "size": 3,
+            "anchors": [
+              "center",
+              "edge",
+              "corner"
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Work out how many of a clue's neighbours are the other colour, from the clue and the size of its neighbourhood.",
+            "stepByStep": [
+              "Count how many tiles the clue touches altogether.",
+              "The clue says how many of them are its own colour.",
+              "There are only two colours, so the rest are the other one."
+            ],
+            "kidTip": "Every clue tells you two numbers, not one.",
+            "audioPrompt": "This clue counts one colour. How many are the other one?"
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "🌊",
+        "iconName": "waves",
+        "iconTone": "pink",
+        "pedagogyTip": "Unlike a mine, which is either there or not, every tile here has a colour — so an orange three also says five are navy. That second number is free, and it is what makes clues of different colours comparable later on.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-reader",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "zero-means-none",
+        "title": "Zero Means None",
+        "concept": "A Zero Clue Rules a Colour Out",
+        "conceptKey": "zero-color-eliminator",
+        "requires": [
+          "color-clue-reader"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 6,
+          "question": {
+            "mode": "zero",
+            "questionsPerRound": 3,
+            "anchors": [
+              "center",
+              "edge",
+              "center"
+            ]
+          },
+          "play": {
+            "targetObjective": "Use a zero clue to colour every tile it touches.",
+            "stepByStep": [
+              "Find the clue with a 0 on it.",
+              "Nothing it touches can be that colour.",
+              "Colour every blank tile it touches the other colour."
+            ],
+            "kidTip": "Zero means none of that colour, not none of any colour.",
+            "audioPrompt": "This clue says zero. Colour the tiles it touches."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "⭕",
+        "iconName": "circleDot",
+        "iconTone": "cyan",
+        "pedagogyTip": "A zero is the only clue a child can act on without counting anything, which is why it comes first. The risk is reading it as ‘empty’ rather than as a count of one colour.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-deducer",
+        "ageBand": [
+          6,
+          9
+        ]
+      },
+      {
+        "id": "zero-at-an-edge",
+        "title": "Zero at an Edge",
+        "concept": "A Zero Clue in a Clipped Neighbourhood",
+        "conceptKey": "zero-color-eliminator",
+        "requires": [
+          "zero-color-eliminator"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 7,
+          "question": {
+            "mode": "zero",
+            "questionsPerRound": 3,
+            "anchors": [
+              "corner",
+              "edge",
+              "corner"
+            ]
+          },
+          "play": {
+            "targetObjective": "Use a zero clue that sits at the side or corner of the board.",
+            "stepByStep": [
+              "Find the zero and trace the tiles it really touches.",
+              "Tiles off the edge of the board do not exist.",
+              "Colour the blank ones the other colour."
+            ],
+            "kidTip": "A corner clue touches only three tiles.",
+            "audioPrompt": "This zero is in a corner. Which tiles does it actually touch?"
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "📐",
+        "iconName": "layers",
+        "iconTone": "indigo",
+        "pedagogyTip": "Joins the neighbourhood work of level 2 to the deduction of level 6. A child who counts eight out of habit will colour a tile the clue never mentioned.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-deducer",
+        "ageBand": [
+          6,
+          9
+        ]
+      },
+      {
+        "id": "every-neighbor-matches",
+        "title": "Every Neighbour Matches",
+        "concept": "A Clue That Fills Its Whole Neighbourhood",
+        "conceptKey": "full-color-deducer",
+        "requires": [
+          "color-clue-reader"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 8,
+          "question": {
+            "mode": "full",
+            "questionsPerRound": 3,
+            "anchors": [
+              "center",
+              "edge",
+              "corner"
+            ]
+          },
+          "play": {
+            "targetObjective": "Use a clue whose number equals the tiles it touches.",
+            "stepByStep": [
+              "Count how many tiles the clue touches.",
+              "Compare that with the clue's number.",
+              "If they are the same, every one of them is that colour."
+            ],
+            "kidTip": "When the number is as big as it can be, there is nothing left to decide.",
+            "audioPrompt": "This clue counts every tile it touches. What colour are they?"
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "💎",
+        "iconName": "gem",
+        "iconTone": "purple",
+        "pedagogyTip": "The mirror of zero, and worth teaching straight after it: both are the cases where a clue decides its whole neighbourhood at once, so a child meets the shape of a deduction before meeting its arithmetic.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-deducer",
+        "ageBand": [
+          6,
+          9
+        ]
+      },
+      {
+        "id": "matches-already-found",
+        "title": "Matches Already Found",
+        "concept": "A Clue Whose Count Is Already Met",
+        "conceptKey": "remaining-color-deducer",
+        "requires": [
+          "zero-color-eliminator",
+          "full-color-deducer"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 9,
+          "question": {
+            "mode": "remaining",
+            "remainingCase": "met",
+            "anchors": [
+              "center",
+              "edge",
+              "center"
+            ],
+            "questionsPerRound": 3
+          },
+          "play": {
+            "targetObjective": "Find a clue that already has all the matches it needs, and colour the rest.",
+            "stepByStep": [
+              "Pick a clue and count the tiles round it that already match its colour.",
+              "Compare that with the clue's number.",
+              "If it already has enough, nothing else it touches can be that colour."
+            ],
+            "kidTip": "A clue that has what it needs rules out everything else it touches.",
+            "audioPrompt": "Count what this clue already has. Does it need any more?"
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "✅",
+        "iconName": "search",
+        "iconTone": "emerald",
+        "pedagogyTip": "The first lesson where a clue's number has to be compared with something rather than simply read. Zero and full needed no counting; this one does.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-deducer",
+        "ageBand": [
+          7,
+          11
+        ]
+      },
+      {
+        "id": "one-more-match",
+        "title": "One More Match",
+        "concept": "Deducing the Last Tile a Clue Needs",
+        "conceptKey": "remaining-color-deducer",
+        "requires": [
+          "remaining-color-deducer"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 10,
+          "question": {
+            "mode": "remaining",
+            "remainingCase": "one",
+            "anchors": [
+              "center",
+              "edge",
+              "corner"
+            ],
+            "questionsPerRound": 3
+          },
+          "play": {
+            "targetObjective": "Work out the single tile a clue still needs.",
+            "stepByStep": [
+              "Count the matches the clue already has.",
+              "Take that away from the clue's number.",
+              "If one is missing and only one tile is blank, that tile is the one."
+            ],
+            "kidTip": "Clue number, minus what it already has, is what is left to find.",
+            "audioPrompt": "This clue still needs one more. Which tile is it?"
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "➕",
+        "iconName": "star",
+        "iconTone": "purple",
+        "pedagogyTip": "Subtraction inside a clue, with only one place for the answer to go. The arithmetic and the deduction are separated on purpose: level 11 keeps the arithmetic and takes away the single space.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-deducer",
+        "ageBand": [
+          7,
+          11
+        ]
+      },
+      {
+        "id": "all-remaining-match",
+        "title": "All the Rest Match",
+        "concept": "When the Spaces Left Equal the Matches Left",
+        "conceptKey": "remaining-color-deducer",
+        "requires": [
+          "remaining-color-deducer"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 11,
+          "question": {
+            "mode": "remaining",
+            "remainingCase": "all",
+            "anchors": [
+              "center",
+              "edge",
+              "center"
+            ],
+            "questionsPerRound": 3
+          },
+          "play": {
+            "targetObjective": "Fill every remaining tile when a clue needs exactly as many as are left.",
+            "stepByStep": [
+              "Work out how many matches the clue still needs.",
+              "Count the blank tiles it touches.",
+              "If the two numbers are the same, every one of those tiles matches."
+            ],
+            "kidTip": "Same number of spaces as matches still needed means they all match.",
+            "audioPrompt": "How many does this clue still need, and how many spaces are left?"
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "🔷",
+        "iconName": "gem",
+        "iconTone": "indigo",
+        "pedagogyTip": "The same subtraction as level 10 with more than one tile to place, which is where a child stops guessing which one and starts reasoning about all of them. Corner clues are excluded on purpose: a corner touches three tiles, so a clue needing three of them is level 8's whole-neighbourhood rule wearing this lesson's name.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-deducer",
+        "ageBand": [
+          7,
+          11
+        ]
+      },
+      {
+        "id": "follow-the-clues",
+        "title": "Follow the Clues",
+        "concept": "Using a Tile You Just Worked Out",
+        "conceptKey": "remaining-color-deducer",
+        "requires": [
+          "remaining-color-deducer"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 12,
+          "question": {
+            "mode": "chain",
+            "size": 3,
+            "questionsPerRound": 3
+          },
+          "play": {
+            "targetObjective": "Solve a board where one deduction is only possible after another.",
+            "stepByStep": [
+              "Find the one clue you can act on straight away.",
+              "Colour what it tells you.",
+              "Now look again: a clue that was stuck may not be any more."
+            ],
+            "kidTip": "A tile you have just worked out is evidence for the next clue.",
+            "audioPrompt": "Start with the clue you can already use, then look again."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "🔗",
+        "iconName": "waves",
+        "iconTone": "cyan",
+        "pedagogyTip": "The first board that cannot be finished in one move. Until here every deduction stood alone; this is where a child has to use their own answer as evidence.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-deducer",
+        "ageBand": [
+          7,
+          11
+        ]
+      },
+      {
+        "id": "shared-neighbors",
+        "title": "Shared Neighbours",
+        "concept": "Comparing Two Clues That Overlap",
+        "conceptKey": "overlapping-color-deducer",
+        "requires": [
+          "remaining-color-deducer"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 13,
+          "question": {
+            "mode": "overlap",
+            "partial": "reduction",
+            "questionsPerRound": 3
+          },
+          "play": {
+            "targetObjective": "Use two overlapping clues to settle the tiles they can, and leave the rest blank.",
+            "stepByStep": [
+              "Find two clues that touch some of the same tiles.",
+              "Separate the tiles they share from the tiles only one of them touches.",
+              "Take the smaller clue away from the bigger one. What is left over is decided.",
+              "Leave every other tile blank — these two clues cannot decide it yet."
+            ],
+            "kidTip": "Two clues can settle some tiles and not others. Blank is a real answer here.",
+            "audioPrompt": "These two clues share some tiles. Colour only what they can settle."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "🔗",
+        "iconName": "layers",
+        "iconTone": "indigo",
+        "pedagogyTip": "The plan's own point: a lesson that demanded a finished board here would be asking a child to guess the rest, and teaching that guessing is how you finish. Leaving a tile blank because no clue decides it is the answer, and level 14 completes the same board.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-reasoner",
+        "ageBand": [
+          8,
+          13
+        ]
+      },
+      {
+        "id": "overlap-chains",
+        "title": "Finish the Board",
+        "concept": "Completing a Board After a Reduction",
+        "conceptKey": "overlapping-color-deducer",
+        "requires": [
+          "overlapping-color-deducer"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 14,
+          "question": {
+            "mode": "overlap",
+            "questionsPerRound": 3
+          },
+          "play": {
+            "targetObjective": "Reduce two overlapping clues, then use what that tells you to finish the board.",
+            "stepByStep": [
+              "Start with the reduction: subtract the smaller clue from the bigger one.",
+              "Colour the tiles it settles.",
+              "Now read the clues again — one of them can decide more than it could before.",
+              "Keep going until every tile has a reason."
+            ],
+            "kidTip": "A tile you worked out by comparing clues is evidence for the next clue.",
+            "audioPrompt": "Compare the two clues first, then use what you find to finish."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "🧩",
+        "iconName": "zap",
+        "iconTone": "purple",
+        "pedagogyTip": "The same board as level 13, asked to the end. Splitting them is deliberate: a child who can reduce but cannot see what the reduction unlocks has learned a trick rather than a method.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-reasoner",
+        "ageBand": [
+          8,
+          13
+        ]
+      },
+      {
+        "id": "the-one-two-one",
+        "title": "The 1-2-1 Wall",
+        "concept": "A Named Pattern, and the Rule Behind It",
+        "conceptKey": "clue-pattern-solver",
+        "requires": [
+          "overlapping-color-deducer"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 15,
+          "question": {
+            "mode": "pattern",
+            "patterns": [
+              "121",
+              "121-lookalike",
+              "121"
+            ],
+            "questionsPerRound": 3
+          },
+          "play": {
+            "targetObjective": "Solve a wall of clues reading 1-2-1 by subtracting, not by remembering.",
+            "stepByStep": [
+              "Write down what each clue still needs.",
+              "The middle clue covers everything the outer ones do, and one tile more.",
+              "Subtract an outer clue from the middle one.",
+              "Some walls read 1-2-1 and do not come out the same way — read yours."
+            ],
+            "kidTip": "The shape is a result. The subtraction is the reason.",
+            "audioPrompt": "Three clues in a row. Work out what each one still needs."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🧱",
+        "iconName": "crown",
+        "iconTone": "emerald",
+        "pedagogyTip": "Minesweeper guides teach 1-2-1 as a picture to memorise. A child who learns only the picture cannot solve a wall that does not contain one, so this lesson mixes in a wall that reads 1-2-1 and settles differently — the memorised answer is wrong there and the subtraction is right.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-reasoner",
+        "ageBand": [
+          8,
+          13
+        ]
+      },
+      {
+        "id": "the-one-two-two-one",
+        "title": "The 1-2-2-1 Wall",
+        "concept": "The Same Subtraction, One Step Further",
+        "conceptKey": "clue-pattern-solver",
+        "requires": [
+          "clue-pattern-solver"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 16,
+          "question": {
+            "mode": "pattern",
+            "patterns": [
+              "1221",
+              "121-lookalike",
+              "1221"
+            ],
+            "questionsPerRound": 3
+          },
+          "play": {
+            "targetObjective": "Carry the same reduction along a longer wall.",
+            "stepByStep": [
+              "Start at one end and subtract, exactly as before.",
+              "That settles one tile.",
+              "Use it, then subtract at the other end.",
+              "Check every clue against what you have written."
+            ],
+            "kidTip": "A longer wall is not a new rule. It is the same one, used twice.",
+            "audioPrompt": "Four clues this time. Start at one end."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🏰",
+        "iconName": "rocket",
+        "iconTone": "pink",
+        "pedagogyTip": "Proof that the rule generalises and the picture does not: a child holding only the 1-2-1 shape has nothing to apply here, while a child holding the subtraction simply does it twice.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-reasoner",
+        "ageBand": [
+          8,
+          13
+        ]
+      },
+      {
+        "id": "count-the-other-color",
+        "title": "Count the Other Colour",
+        "concept": "Reading a Clue as the Colour It Does Not Name",
+        "conceptKey": "color-complement-deducer",
+        "requires": [
+          "color-complement-reader",
+          "remaining-color-deducer"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 17,
+          "question": {
+            "mode": "complement",
+            "partial": "decidable",
+            "questionsPerRound": 3
+          },
+          "play": {
+            "targetObjective": "Turn a clue into a statement about the other colour, so two clues counting different colours can be compared.",
+            "stepByStep": [
+              "One clue counts orange. The other counts navy.",
+              "Count how many tiles the navy clue touches altogether.",
+              "Take its number away: the rest of those tiles are orange.",
+              "Now both clues talk about orange, and you can compare them.",
+              "Colour only what that settles."
+            ],
+            "kidTip": "Two clues can only be compared once they count the same colour.",
+            "audioPrompt": "One clue counts orange and one counts navy. Say them both in the same colour first."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🔄",
+        "iconName": "waves",
+        "iconTone": "pink",
+        "pedagogyTip": "Every tile here has a colour, unlike a mine, which is there or not. So a clue states two numbers and the second is free. This is where that free number starts doing work, and it is what makes clues of different colours comparable at all.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-reasoner",
+        "ageBand": [
+          8,
+          13
+        ]
+      },
+      {
+        "id": "how-many-are-left",
+        "title": "How Many Are Left",
+        "concept": "A Count for the Whole Board",
+        "conceptKey": "board-total-deducer",
+        "requires": [
+          "remaining-color-deducer"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 18,
+          "question": {
+            "mode": "global",
+            "questionsPerRound": 3
+          },
+          "play": {
+            "targetObjective": "Use the strip above the board, which counts a colour across every tile.",
+            "stepByStep": [
+              "Read the total at the top: that is for the whole board, not one clue.",
+              "Count how many of that colour are already there.",
+              "Take one from the other.",
+              "If none are left, every blank tile is the other colour."
+            ],
+            "kidTip": "Count every tile on the board, not the ones near the blanks.",
+            "audioPrompt": "The strip at the top counts the whole board. How many are already there?"
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "🧮",
+        "iconName": "battery",
+        "iconTone": "emerald",
+        "pedagogyTip": "The first clue that is not about a neighbourhood at all. A child who has only met clues sitting on tiles will look for one near the blanks and find nothing; the information is there, in a place they have not learned to look.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-reasoner",
+        "ageBand": [
+          8,
+          13
+        ]
+      },
+      {
+        "id": "a-whole-row",
+        "title": "A Whole Row",
+        "concept": "A Clue That Counts Along a Line",
+        "conceptKey": "line-clue-deducer",
+        "requires": [
+          "remaining-color-deducer"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 19,
+          "question": {
+            "mode": "line",
+            "questionsPerRound": 3
+          },
+          "play": {
+            "targetObjective": "Use a clue that counts a colour along one row or column.",
+            "stepByStep": [
+              "Read which row or column the clue names.",
+              "Trace that line with a finger, and nothing else.",
+              "Count the ones already that colour.",
+              "If the line has all it needs, the rest of it is the other colour."
+            ],
+            "kidTip": "A line clue counts along its line. Tiles above and below do not count.",
+            "audioPrompt": "This clue counts along one row. Which tiles are in it?"
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "📏",
+        "iconName": "footprints",
+        "iconTone": "cyan",
+        "pedagogyTip": "The neighbourhood habit is strong by now, and this is where it misleads: a child who counts the tiles around the clue instead of along the line gets a different number and no warning.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-reasoner",
+        "ageBand": [
+          8,
+          13
+        ]
+      },
+      {
+        "id": "a-marked-area",
+        "title": "A Marked Area",
+        "concept": "A Clue That Counts Inside an Outline",
+        "conceptKey": "region-clue-deducer",
+        "requires": [
+          "line-clue-deducer"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 20,
+          "question": {
+            "mode": "region",
+            "questionsPerRound": 3
+          },
+          "play": {
+            "targetObjective": "Use a clue that counts a colour inside a marked area of any shape.",
+            "stepByStep": [
+              "Find the outlined tiles. The outline is part of the board.",
+              "Count only what is inside it.",
+              "Compare that with the clue's number.",
+              "A tile just outside the outline does not count, however close it is."
+            ],
+            "kidTip": "Trace the outline first. Then count only what is inside it.",
+            "audioPrompt": "The outlined tiles are the ones this clue counts."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "🗺️",
+        "iconName": "search",
+        "iconTone": "indigo",
+        "pedagogyTip": "The last step away from the neighbourhood: an area with no rule to its shape, so the only way to know what is counted is to look. The outline is drawn with the board rather than offered as a hint, because it is part of the puzzle.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-reasoner",
+        "ageBand": [
+          8,
+          13
+        ]
+      },
+      {
+        "id": "all-in-a-run",
+        "title": "All in a Run",
+        "concept": "A Line Clue Whose Tiles Sit Together",
+        "conceptKey": "run-clue-deducer",
+        "requires": [
+          "line-clue-deducer"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 21,
+          "question": {
+            "mode": "run_together",
+            "questionsPerRound": 3
+          },
+          "play": {
+            "targetObjective": "Use a line clue that says its tiles sit side by side.",
+            "stepByStep": [
+              "Read the clue: how many, and that they are together.",
+              "One tile in the line is already that colour, so the block includes it.",
+              "Work out where a block that size can sit and still cover it.",
+              "Everything outside the block is the other colour."
+            ],
+            "kidTip": "The count says how many. Together says where they can be.",
+            "audioPrompt": "These tiles sit side by side. Where can the block start?"
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🚋",
+        "iconName": "footprints",
+        "iconTone": "emerald",
+        "pedagogyTip": "The count on its own leaves several arrangements here, so a child who reads only the number cannot finish. That is deliberate: the condition has to change the answer, or the lesson is the previous one with different punctuation.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-reasoner",
+        "ageBand": [
+          8,
+          13
+        ]
+      },
+      {
+        "id": "a-gap-somewhere",
+        "title": "A Gap Somewhere",
+        "concept": "A Line Clue Whose Tiles Do Not All Touch",
+        "conceptKey": "run-clue-deducer",
+        "requires": [
+          "run-clue-deducer"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 22,
+          "question": {
+            "mode": "run_apart",
+            "questionsPerRound": 3
+          },
+          "play": {
+            "targetObjective": "Use a line clue that says its tiles are not all together.",
+            "stepByStep": [
+              "Read the clue: how many, and that they do not all touch.",
+              "List the ways that many could sit in the line.",
+              "Cross out every arrangement where they are all side by side.",
+              "If one arrangement is left, that is the answer."
+            ],
+            "kidTip": "Ruling an arrangement out is a move. It is how this clue works.",
+            "audioPrompt": "These do not all touch. Which arrangement does that rule out?"
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🌉",
+        "iconName": "waves",
+        "iconTone": "cyan",
+        "pedagogyTip": "The same count as the last lesson with the opposite condition, which is the cleanest way to show that the condition and not the number is doing the work. Rejecting a placement is the move, so the hint shows the rejected one rather than skipping to the answer.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-reasoner",
+        "ageBand": [
+          8,
+          13
+        ]
+      },
+      {
+        "id": "three-color-choices",
+        "title": "Three Colour Choices",
+        "concept": "Excluding One Colour Still Leaves Two",
+        "conceptKey": "three-color-deducer",
+        "requires": [
+          "overlapping-color-deducer"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 23,
+          "question": {
+            "mode": "three_color",
+            "questionsPerRound": 3
+          },
+          "play": {
+            "targetObjective": "Work out a tile's colour when two clues each rule one colour out.",
+            "stepByStep": [
+              "Start with all three colours as possibilities for the blank tile.",
+              "Read the first clue and cross out what it forbids.",
+              "Two are still left, so keep both.",
+              "Read the second clue and cross out again. One remains."
+            ],
+            "kidTip": "Not orange does not mean navy when there are three colours.",
+            "audioPrompt": "Three colours this time. One clue is not enough."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "🔻",
+        "iconName": "gem",
+        "iconTone": "purple",
+        "pedagogyTip": "The habit built by every two-colour board is that ruling one colour out decides the tile. Here it does not, and a child who carries the habit over will answer confidently and wrongly.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-reasoner",
+        "ageBand": [
+          9,
+          14
+        ]
+      },
+      {
+        "id": "three-colors-and-overlap",
+        "title": "Clues of Different Colours",
+        "concept": "Comparing Clues That Count Different Colours",
+        "conceptKey": "three-color-deducer",
+        "requires": [
+          "three-color-deducer",
+          "color-complement-deducer"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 24,
+          "question": {
+            "mode": "cross_color",
+            "partial": "decidable",
+            "questionsPerRound": 3
+          },
+          "play": {
+            "targetObjective": "Use clues counting different colours together, and colour only what they settle.",
+            "stepByStep": [
+              "Read what each clue counts — they are not all the same colour.",
+              "Over the same three tiles, work out how many of the third colour there must be.",
+              "Now compare the two clues that count that colour.",
+              "Only the tile they both cover is settled. Leave the others blank."
+            ],
+            "kidTip": "Work out the colour nobody counted, then compare.",
+            "audioPrompt": "These clues count different colours. Find the one nobody mentioned."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🎨",
+        "iconName": "sparkles",
+        "iconTone": "pink",
+        "pedagogyTip": "Three tiles, one cyan and one navy among them, so exactly one is orange: the counts over a set always add up to its size. That is the same free number level 5 introduced, doing the work here that the reduction alone cannot.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-reasoner",
+        "ageBand": [
+          9,
+          14
+        ]
+      },
+      {
+        "id": "three-color-totals",
+        "title": "Three Colour Totals",
+        "concept": "One Total for Each Colour",
+        "conceptKey": "board-total-deducer",
+        "requires": [
+          "three-color-deducer",
+          "board-total-deducer"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 25,
+          "question": {
+            "mode": "totals",
+            "questionsPerRound": 3
+          },
+          "play": {
+            "targetObjective": "Use a separate board total for each colour, one colour at a time.",
+            "stepByStep": [
+              "Take one colour and count how many of it are already on the board.",
+              "Compare that with its own total. If it is used up, no blank tile is that colour.",
+              "Do the same for the next colour.",
+              "A clue then separates the last two tiles."
+            ],
+            "kidTip": "Each colour has its own total. Never add them together.",
+            "audioPrompt": "Three totals, one for each colour. Take them one at a time."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🧾",
+        "iconName": "battery",
+        "iconTone": "emerald",
+        "pedagogyTip": "Tametsi gives a total per colour rather than one number, and this is why: with three colours a single total says almost nothing, while three of them can finish a board no neighbourhood clue reaches.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-reasoner",
+        "ageBand": [
+          9,
+          14
+        ]
+      },
+      {
+        "id": "every-kind-of-clue",
+        "title": "Every Kind of Clue",
+        "concept": "Choosing Which Clue Can Still Help",
+        "conceptKey": "mixed-clue-solver",
+        "requires": [
+          "region-clue-deducer",
+          "run-clue-deducer",
+          "board-total-deducer"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 26,
+          "question": {
+            "mode": "mixed",
+            "questionsPerRound": 3
+          },
+          "play": {
+            "targetObjective": "Finish a board that mixes several kinds of clue, choosing which to read next.",
+            "stepByStep": [
+              "Look at every clue on the board, and notice they are not all the same kind.",
+              "Find one that can say something right now.",
+              "Colour what it settles.",
+              "When the clues around a tile run out, ask which other kind still reaches it."
+            ],
+            "kidTip": "When you are stuck, change the kind of clue you are reading.",
+            "audioPrompt": "This board mixes clue kinds. Which one can help first?"
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🗝️",
+        "iconName": "crown",
+        "iconTone": "indigo",
+        "pedagogyTip": "Every earlier lesson told a child which technique to use by being about it. This one does not, and choosing is the skill: a board with a total, a line, a region and a neighbourhood on it is stuck only until you look somewhere else.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-reasoner",
+        "ageBand": [
+          9,
+          14
+        ]
+      },
+      {
+        "id": "which-clues-help",
+        "title": "Which Clues Help",
+        "concept": "Judging Whether Evidence Is Enough",
+        "conceptKey": "color-proof-checker",
+        "requires": [
+          "mixed-clue-solver"
+        ],
+        "activity": "color-sweeper/reason",
+        "params": {
+          "level": 27,
+          "question": {
+            "mode": "compare_clues",
+            "source": "overlap",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Decide which clues are enough, on their own, to settle a tile.",
+            "stepByStep": [
+              "Look at the outlined tile.",
+              "Take one set of clues and imagine the others were not there.",
+              "Ask whether the tile still comes out.",
+              "A clue can be true and still say nothing about this tile."
+            ],
+            "kidTip": "True is not the same as useful. Ask what each clue decides.",
+            "audioPrompt": "Which of these clues would be enough on their own?"
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🔎",
+        "iconName": "search",
+        "iconTone": "emerald",
+        "pedagogyTip": "Making a deduction and knowing what it rested on are different skills, and only the second survives a board a child has not seen. Every option here is re-solved when it is chosen, so a set nobody expected is accepted if it works.",
+        "standards": [
+          "CCSS.MATH.PRACTICE.MP3"
+        ],
+        "trajectoryLevel": "sweeper-prover",
+        "ageBand": [
+          9,
+          14
+        ]
+      },
+      {
+        "id": "explain-the-move",
+        "title": "Explain the Move",
+        "concept": "Saying Why a Move Works",
+        "conceptKey": "color-proof-checker",
+        "requires": [
+          "color-proof-checker"
+        ],
+        "activity": "color-sweeper/reason",
+        "params": {
+          "level": 28,
+          "question": {
+            "mode": "choose_reason",
+            "source": "remaining",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Choose a statement that really explains why a tile must be its colour.",
+            "stepByStep": [
+              "Read what the move claims.",
+              "A reason has to name a clue.",
+              "It has to say what that clue counts, and where.",
+              "Then it has to say what that leaves for this tile."
+            ],
+            "kidTip": "More than one of these can be a fair way of saying it.",
+            "audioPrompt": "Which of these says why the tile must be that colour?"
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "💬",
+        "iconName": "sparkles",
+        "iconTone": "purple",
+        "pedagogyTip": "Two of the options are the same reason worded differently and both are accepted, because a child who says it their own way has not made a different move. What separates the wrong ones is what they claim a clue counts.",
+        "standards": [
+          "CCSS.MATH.PRACTICE.MP3"
+        ],
+        "trajectoryLevel": "sweeper-prover",
+        "ageBand": [
+          9,
+          14
+        ]
+      },
+      {
+        "id": "spot-a-contradiction",
+        "title": "Spot a Contradiction",
+        "concept": "Finding the Clue a Board Breaks",
+        "conceptKey": "color-contradiction-checker",
+        "requires": [
+          "remaining-color-deducer"
+        ],
+        "activity": "color-sweeper/reason",
+        "params": {
+          "level": 29,
+          "question": {
+            "mode": "find_error",
+            "source": "overlap",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Find a clue that the coloured board does not satisfy.",
+            "stepByStep": [
+              "Pick a clue and read its colour and number.",
+              "Count that colour around it.",
+              "If the two disagree, that clue is broken.",
+              "If they agree, move to the next clue."
+            ],
+            "kidTip": "One wrong tile can break more than one clue. Any of them is a right answer.",
+            "audioPrompt": "One tile here is wrong. Which clue is no longer true?"
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🚨",
+        "iconName": "zap",
+        "iconTone": "pink",
+        "pedagogyTip": "Checking is not solving backwards: a child is given a finished board and has to test it, which is the first time in this skill that being able to say a thing is wrong matters more than being able to get it right.",
+        "standards": [
+          "CCSS.MATH.PRACTICE.MP3"
+        ],
+        "trajectoryLevel": "sweeper-prover",
+        "ageBand": [
+          9,
+          14
+        ]
+      },
+      {
+        "id": "check-a-three-color-board",
+        "title": "Check a Three-Colour Board",
+        "concept": "Auditing Somebody Else's Three-Colour Work",
+        "conceptKey": "color-contradiction-checker",
+        "requires": [
+          "three-color-deducer",
+          "color-contradiction-checker"
+        ],
+        "activity": "color-sweeper/reason",
+        "params": {
+          "level": 30,
+          "question": {
+            "mode": "find_error",
+            "source": "three_color",
+            "palette": [
+              "orange",
+              "navy",
+              "cyan"
+            ],
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Audit a three-colour board and find the clue it breaks.",
+            "stepByStep": [
+              "Read the clue's colour first — with three in play it matters more.",
+              "Count only that colour around it.",
+              "Compare with the number.",
+              "A tile of the third colour is neither right nor wrong until you check the clue that counts it."
+            ],
+            "kidTip": "Count the clue's own colour. Ignore the other two.",
+            "audioPrompt": "Three colours, and one tile is wrong. Which clue does it break?"
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "🔬",
+        "iconName": "crown",
+        "iconTone": "indigo",
+        "pedagogyTip": "The counting error this catches is specific to three colours: a child who counts 'tiles that are not the clue's colour' gets a number that is right for two colours and wrong here.",
+        "standards": [
+          "CCSS.MATH.PRACTICE.MP3"
+        ],
+        "trajectoryLevel": "sweeper-prover",
+        "ageBand": [
+          9,
+          14
+        ]
+      },
+      {
+        "id": "practice-neighbors",
+        "title": "Practice: Neighbours and Clues",
+        "concept": "Practice Without Help",
+        "conceptKey": "color-clue-reader",
+        "requires": [
+          "color-clue-reader"
+        ],
+        "activity": "color-sweeper/neighbors",
+        "params": {
+          "level": 31,
+          "question": {
+            "modes": [
+              "select_neighbors",
+              "count_same",
+              "read_clue",
+              "complement"
+            ],
+            "sizes": [
+              3,
+              4
+            ],
+            "anchors": [
+              "center",
+              "edge",
+              "corner"
+            ],
+            "practice": true,
+            "questionsPerRound": 9
+          },
+          "play": {
+            "targetObjective": "Answer nine on your own, with no hints and nothing read aloud.",
+            "stepByStep": [
+              "Read the board.",
+              "Answer.",
+              "Check."
+            ],
+            "kidTip": "",
+            "audioPrompt": ""
+          }
+        },
+        "difficulty": "Practice",
+        "icon": "🔁",
+        "iconName": "circleDot",
+        "iconTone": "cyan",
+        "pedagogyTip": "Labelled with the foundation key it reviews, not with all four it exercises: an aggregate score across four techniques is not evidence of any one of them.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-practice",
+        "ageBand": [
+          6,
+          9
+        ]
+      },
+      {
+        "id": "practice-zero",
+        "title": "Practice: Zero Clues",
+        "concept": "Practice Without Help",
+        "conceptKey": "zero-color-eliminator",
+        "requires": [
+          "zero-color-eliminator"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 32,
+          "question": {
+            "modes": [
+              "zero"
+            ],
+            "anchors": [
+              "center",
+              "edge",
+              "corner"
+            ],
+            "practice": true,
+            "questionsPerRound": 9
+          },
+          "play": {
+            "targetObjective": "Answer nine on your own, with no hints and nothing read aloud.",
+            "stepByStep": [
+              "Read the board.",
+              "Answer.",
+              "Check."
+            ],
+            "kidTip": "",
+            "audioPrompt": ""
+          }
+        },
+        "difficulty": "Practice",
+        "icon": "⭕",
+        "iconName": "circleDot",
+        "iconTone": "indigo",
+        "pedagogyTip": "One technique, nine times, at every board position it can take.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-practice",
+        "ageBand": [
+          6,
+          9
+        ]
+      },
+      {
+        "id": "practice-full",
+        "title": "Practice: Full Clues",
+        "concept": "Practice Without Help",
+        "conceptKey": "full-color-deducer",
+        "requires": [
+          "full-color-deducer"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 33,
+          "question": {
+            "modes": [
+              "full"
+            ],
+            "anchors": [
+              "center",
+              "edge",
+              "corner"
+            ],
+            "practice": true,
+            "questionsPerRound": 9
+          },
+          "play": {
+            "targetObjective": "Answer nine on your own, with no hints and nothing read aloud.",
+            "stepByStep": [
+              "Read the board.",
+              "Answer.",
+              "Check."
+            ],
+            "kidTip": "",
+            "audioPrompt": ""
+          }
+        },
+        "difficulty": "Practice",
+        "icon": "💎",
+        "iconName": "gem",
+        "iconTone": "purple",
+        "pedagogyTip": "The corner case matters most here: a corner clue needing three is the whole neighbourhood, and a child who has only seen centres will not expect it.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-practice",
+        "ageBand": [
+          6,
+          9
+        ]
+      },
+      {
+        "id": "practice-remaining",
+        "title": "Practice: Remaining Matches",
+        "concept": "Practice Without Help",
+        "conceptKey": "remaining-color-deducer",
+        "requires": [
+          "remaining-color-deducer"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 34,
+          "question": {
+            "modes": [
+              "remaining",
+              "remaining",
+              "remaining",
+              "chain"
+            ],
+            "anchors": [
+              "center",
+              "edge",
+              "corner"
+            ],
+            "practice": true,
+            "questionsPerRound": 9
+          },
+          "play": {
+            "targetObjective": "Answer nine on your own, with no hints and nothing read aloud.",
+            "stepByStep": [
+              "Read the board.",
+              "Answer.",
+              "Check."
+            ],
+            "kidTip": "",
+            "audioPrompt": ""
+          }
+        },
+        "difficulty": "Practice",
+        "icon": "➕",
+        "iconName": "star",
+        "iconTone": "emerald",
+        "pedagogyTip": "Three subtraction boards to one chain, because the chain is the same subtraction used twice and the arithmetic is what needs the repetitions.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-practice",
+        "ageBand": [
+          7,
+          11
+        ]
+      },
+      {
+        "id": "practice-overlap",
+        "title": "Practice: Overlapping Clues",
+        "concept": "Practice Without Help",
+        "conceptKey": "overlapping-color-deducer",
+        "requires": [
+          "overlapping-color-deducer",
+          "clue-pattern-solver"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 35,
+          "question": {
+            "modes": [
+              "overlap",
+              "pattern",
+              "overlap",
+              "pattern"
+            ],
+            "patterns": [
+              "121",
+              "1221",
+              "121-lookalike"
+            ],
+            "practice": true,
+            "questionsPerRound": 9
+          },
+          "play": {
+            "targetObjective": "Answer nine on your own, with no hints and nothing read aloud.",
+            "stepByStep": [
+              "Read the board.",
+              "Answer.",
+              "Check."
+            ],
+            "kidTip": "",
+            "audioPrompt": ""
+          }
+        },
+        "difficulty": "Practice",
+        "icon": "🧱",
+        "iconName": "zap",
+        "iconTone": "pink",
+        "pedagogyTip": "The pattern questions cycle through both named walls and the look-alike, so a child cannot get through by recognising one shape.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-practice",
+        "ageBand": [
+          8,
+          13
+        ]
+      },
+      {
+        "id": "practice-clue-kinds",
+        "title": "Practice: Every Kind of Clue",
+        "concept": "Practice Without Help",
+        "conceptKey": "mixed-clue-solver",
+        "requires": [
+          "mixed-clue-solver"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 36,
+          "question": {
+            "modes": [
+              "line",
+              "region",
+              "run_together",
+              "run_apart",
+              "complement",
+              "mixed"
+            ],
+            "practice": true,
+            "questionsPerRound": 9
+          },
+          "play": {
+            "targetObjective": "Answer nine on your own, with no hints and nothing read aloud.",
+            "stepByStep": [
+              "Read the board.",
+              "Answer.",
+              "Check."
+            ],
+            "kidTip": "",
+            "audioPrompt": ""
+          }
+        },
+        "difficulty": "Practice",
+        "icon": "🗝️",
+        "iconName": "crown",
+        "iconTone": "indigo",
+        "pedagogyTip": "Six kinds in one round, which is the only place a child has to work out which kind they are looking at before they can start. Labelled with the mixed key alone; the five component keys are exercised, not assessed.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-practice",
+        "ageBand": [
+          8,
+          13
+        ]
+      },
+      {
+        "id": "practice-totals",
+        "title": "Practice: Board Totals",
+        "concept": "Practice Without Help",
+        "conceptKey": "board-total-deducer",
+        "requires": [
+          "board-total-deducer"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 37,
+          "question": {
+            "modes": [
+              "global",
+              "totals",
+              "global"
+            ],
+            "practice": true,
+            "questionsPerRound": 9
+          },
+          "play": {
+            "targetObjective": "Answer nine on your own, with no hints and nothing read aloud.",
+            "stepByStep": [
+              "Read the board.",
+              "Answer.",
+              "Check."
+            ],
+            "kidTip": "",
+            "audioPrompt": ""
+          }
+        },
+        "difficulty": "Practice",
+        "icon": "🧮",
+        "iconName": "battery",
+        "iconTone": "emerald",
+        "pedagogyTip": "Two-colour and three-colour totals in the same round, because the habit that breaks is adding them together and that only shows up with three.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-practice",
+        "ageBand": [
+          8,
+          13
+        ]
+      },
+      {
+        "id": "practice-three-colors",
+        "title": "Practice: Three Colours",
+        "concept": "Practice Without Help",
+        "conceptKey": "three-color-deducer",
+        "requires": [
+          "three-color-deducer"
+        ],
+        "activity": "color-sweeper/board",
+        "params": {
+          "level": 38,
+          "question": {
+            "modes": [
+              "three_color"
+            ],
+            "practice": true,
+            "questionsPerRound": 9
+          },
+          "play": {
+            "targetObjective": "Answer nine on your own, with no hints and nothing read aloud.",
+            "stepByStep": [
+              "Read the board.",
+              "Answer.",
+              "Check."
+            ],
+            "kidTip": "",
+            "audioPrompt": ""
+          }
+        },
+        "difficulty": "Practice",
+        "icon": "🔻",
+        "iconName": "sparkles",
+        "iconTone": "purple",
+        "pedagogyTip": "Nine boards where ruling one colour out is never enough on its own.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-practice",
+        "ageBand": [
+          9,
+          14
+        ]
+      },
+      {
+        "id": "practice-reasons",
+        "title": "Practice: Give a Reason",
+        "concept": "Practice Without Help",
+        "conceptKey": "color-proof-checker",
+        "requires": [
+          "color-proof-checker"
+        ],
+        "activity": "color-sweeper/reason",
+        "params": {
+          "level": 39,
+          "question": {
+            "modes": [
+              "compare_clues",
+              "choose_reason"
+            ],
+            "practice": true,
+            "questionsPerRound": 9
+          },
+          "play": {
+            "targetObjective": "Answer nine on your own, with no hints and nothing read aloud.",
+            "stepByStep": [
+              "Read the board.",
+              "Answer.",
+              "Check."
+            ],
+            "kidTip": "",
+            "audioPrompt": ""
+          }
+        },
+        "difficulty": "Practice",
+        "icon": "💬",
+        "iconName": "search",
+        "iconTone": "emerald",
+        "pedagogyTip": "Judging evidence and explaining a move alternate, so a child cannot settle into one kind of answer.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-practice",
+        "ageBand": [
+          9,
+          14
+        ]
+      },
+      {
+        "id": "practice-checking",
+        "title": "Practice: Check the Clues",
+        "concept": "Practice Without Help",
+        "conceptKey": "color-contradiction-checker",
+        "requires": [
+          "color-contradiction-checker"
+        ],
+        "activity": "color-sweeper/reason",
+        "params": {
+          "level": 40,
+          "question": {
+            "modes": [
+              "find_error"
+            ],
+            "source": "overlap",
+            "practice": true,
+            "questionsPerRound": 9
+          },
+          "play": {
+            "targetObjective": "Answer nine on your own, with no hints and nothing read aloud.",
+            "stepByStep": [
+              "Read the board.",
+              "Answer.",
+              "Check."
+            ],
+            "kidTip": "",
+            "audioPrompt": ""
+          }
+        },
+        "difficulty": "Practice",
+        "icon": "🔬",
+        "iconName": "crown",
+        "iconTone": "cyan",
+        "pedagogyTip": "Nine boards to audit. The only round in the skill where every question is somebody else's work.",
+        "standards": [],
+        "trajectoryLevel": "sweeper-practice",
+        "ageBand": [
+          9,
+          14
+        ]
+      }
+    ]
+  },
+  {
     "id": "counting",
     "name": "Counting",
     "version": "1.0.0",

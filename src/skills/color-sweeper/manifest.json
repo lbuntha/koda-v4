@@ -1,0 +1,130 @@
+{
+  "id": "color-sweeper",
+  "name": "Color Sweeper",
+  "version": "0.1.0",
+  "description": "Read colour clues, work out which tiles they are talking about, and solve a grid with a reason for every tile.",
+  "category": "core",
+  "author": "Koda Math Lab",
+  "iconName": "Grid3x3",
+  "tagline": "Every tile has a reason.",
+  "thumbnail": "color-sweeper-quest",
+  "status": "draft",
+  "audience": {
+    "ages": [
+      6,
+      14
+    ],
+    "category": "logic"
+  },
+  "teaches": [
+    "neighbor-identifier",
+    "color-neighbor-counter",
+    "color-clue-reader",
+    "color-complement-reader",
+    "zero-color-eliminator",
+    "full-color-deducer",
+    "remaining-color-deducer",
+    "overlapping-color-deducer",
+    "clue-pattern-solver",
+    "color-complement-deducer",
+    "board-total-deducer",
+    "line-clue-deducer",
+    "region-clue-deducer",
+    "run-clue-deducer",
+    "three-color-deducer",
+    "mixed-clue-solver",
+    "color-proof-checker",
+    "color-contradiction-checker"
+  ],
+  "requires": [
+    "counter"
+  ],
+  "features": [
+    {
+      "id": "audio_speech",
+      "name": "Spoken voice",
+      "description": "Reads the question aloud, speaks hints, and says why a move was not allowed. Turn off for a silent lesson.",
+      "isEnabled": true,
+      "tag": "Audio"
+    },
+    {
+      "id": "sound_chimes",
+      "name": "Sound chimes",
+      "description": "Plays a short sound when a tile is chosen and when an answer is checked.",
+      "isEnabled": true,
+      "tag": "Audio"
+    },
+    {
+      "id": "haptic_feedback",
+      "name": "Haptic vibration",
+      "description": "Adds a small vibration to a correct answer and to a move that was not allowed.",
+      "isEnabled": true,
+      "tag": "Haptic"
+    },
+    {
+      "id": "counting_badges",
+      "name": "1-to-1 badges",
+      "description": "Numbers the tiles as they are chosen, so a child selecting eight of them can see how many are already in.",
+      "isEnabled": true,
+      "tag": "Cognitive"
+    },
+    {
+      "id": "step_context_tags",
+      "name": "Step framing tags",
+      "description": "Labels warm-up, guided, activity and milestone steps.",
+      "isEnabled": true,
+      "tag": "Cognitive"
+    }
+  ],
+  "settings": {
+    "warmupLabel": "",
+    "activityLabel": "",
+    "guidedLabel": "",
+    "milestoneLabel": "",
+    "speechRate": 0.95
+  },
+  "settingsSchema": [
+    {
+      "key": "warmupLabel",
+      "label": "Warm-up tag",
+      "help": "Custom wording for the first step.",
+      "type": "text",
+      "placeholder": "Warm-up Exercise 🌱",
+      "maxLength": 32
+    },
+    {
+      "key": "activityLabel",
+      "label": "Activity tag",
+      "help": "Custom wording for activity steps.",
+      "type": "text",
+      "placeholder": "Interactive Activity 🚀",
+      "maxLength": 32
+    },
+    {
+      "key": "guidedLabel",
+      "label": "Guided tag",
+      "help": "Custom wording for guided steps.",
+      "type": "text",
+      "placeholder": "Guided Challenge 🌟",
+      "maxLength": 32
+    },
+    {
+      "key": "milestoneLabel",
+      "label": "Final tag",
+      "help": "Custom wording for the last step.",
+      "type": "text",
+      "placeholder": "Final Milestone 🏆",
+      "maxLength": 32
+    },
+    {
+      "key": "speechRate",
+      "label": "Speech rate",
+      "help": "How fast Koda speaks the question and hints.",
+      "type": "number",
+      "min": 0.5,
+      "max": 2,
+      "step": 0.05,
+      "unit": "x"
+    }
+  ]
+}

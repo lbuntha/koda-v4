@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 400 200">
+  <defs>
+    <linearGradient id="csGround" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2A1F4D"/>
+      <stop offset="100%" stop-color="#120C24"/>
+    </linearGradient>
+    <radialGradient id="csGlow" cx="34%" cy="42%" r="58%">
+      <stop offset="0%" stop-color="#C2A3FF" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#C2A3FF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="200" fill="url(#csGround)"/>
+  <rect width="400" height="200" fill="url(#csGlow)"/>
+
+  <!--
+    The skill in one picture: three colours that are told apart by symbol as
+    well as hue, one clue counting a colour it is not, and two tiles still to
+    be reasoned out. A finished board would say "puzzle solved"; this says
+    "puzzle".
+  -->
+  <g transform="translate(28 26)" font-family="system-ui,-apple-system,'Segoe UI',sans-serif">
+    <g>
+      <rect x="0"   y="0" width="42" height="42" rx="10" fill="#FF5900"/>
+      <text x="21" y="30" font-size="20" font-weight="700" fill="#19283B" text-anchor="middle">●</text>
+      <rect x="49"  y="0" width="42" height="42" rx="10" fill="#19283B" stroke="#6E7F95" stroke-width="1.5"/>
+      <text x="70" y="30" font-size="20" font-weight="700" fill="#FFFFFF" text-anchor="middle">◆</text>
+      <rect x="98"  y="0" width="42" height="42" rx="10" fill="#2DC4D4"/>
+      <text x="119" y="30" font-size="20" font-weight="700" fill="#19283B" text-anchor="middle">▲</text>
+    </g>
+    <g>
+      <rect x="0"   y="49" width="42" height="42" rx="10" fill="#19283B" stroke="#6E7F95" stroke-width="1.5"/>
+      <text x="21" y="79" font-size="20" font-weight="700" fill="#FFFFFF" text-anchor="middle">◆</text>
+      <!-- The clue: an orange tile counting navy, ringed as the one in question. -->
+      <rect x="49"  y="49" width="42" height="42" rx="10" fill="#FF5900" stroke="#F2EDFF" stroke-width="3"/>
+      <text x="66" y="82" font-size="27" font-weight="800" fill="#19283B" text-anchor="middle">3</text>
+      <rect x="76" y="72" width="15" height="15" rx="4" fill="#19283B"/>
+      <text x="83.5" y="84" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">◆</text>
+      <rect x="98"  y="49" width="42" height="42" rx="10" fill="#FF5900"/>
+      <text x="119" y="79" font-size="20" font-weight="700" fill="#19283B" text-anchor="middle">●</text>
+    </g>
+    <g>
+      <!-- Still to be worked out. -->
+      <rect x="0"   y="98" width="42" height="42" rx="10" fill="none" stroke="#8E86A8" stroke-width="2.5" stroke-dasharray="6 5"/>
+      <text x="21" y="129" font-size="22" font-weight="800" fill="#8E86A8" text-anchor="middle">?</text>
+      <rect x="49"  y="98" width="42" height="42" rx="10" fill="#2DC4D4"/>
+      <text x="70" y="128" font-size="20" font-weight="700" fill="#19283B" text-anchor="middle">▲</text>
+      <rect x="98"  y="98" width="42" height="42" rx="10" fill="none" stroke="#8E86A8" stroke-width="2.5" stroke-dasharray="6 5"/>
+      <text x="119" y="129" font-size="22" font-weight="800" fill="#8E86A8" text-anchor="middle">?</text>
+    </g>
+  </g>
+
+  <g font-family="system-ui,-apple-system,'Segoe UI',sans-serif" text-anchor="start">
+    <text x="204" y="72" font-size="15" font-weight="800" fill="#FFFFFF" letter-spacing="2.4">COLOR</text>
+    <text x="204" y="94" font-size="15" font-weight="800" fill="#FFFFFF" letter-spacing="2.4">SWEEPER</text>
+    <rect x="204" y="106" width="34" height="3" rx="1.5" fill="#FF5900"/>
+    <text x="204" y="131" font-size="10.5" font-weight="600" fill="#C7BFDD">Read the clues · Colour every tile</text>
+    <text x="204" y="147" font-size="10.5" font-weight="600" fill="#C7BFDD">Every tile has a reason</text>
+  </g>
+</svg>

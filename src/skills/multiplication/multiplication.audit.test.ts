@@ -302,9 +302,20 @@ describe("the course holds the skill exactly once, in order", () => {
     }
   });
 
-  it("sits as one unbroken block at the end of the course", () => {
+  /*
+   * "One unbroken block", not "the block at the end".
+   *
+   * This asserted that everything from the first multiplication lesson to the
+   * end of the course was multiplication, which was true only while this was
+   * the last skill in the build. Color Sweeper appended a unit after it and
+   * the assertion failed with multiplication untouched and still contiguous.
+   * What the audit meant to protect is that these 68 lessons are not split
+   * around another skill's unit.
+   */
+  it("sits as one unbroken block", () => {
     const first = refs.findIndex((ref) => ref.startsWith("multiplication/"));
+    const last = refs.length - 1 - [...refs].reverse().findIndex((ref) => ref.startsWith("multiplication/"));
     expect(first).toBeGreaterThan(0);
-    expect(refs.slice(first).every((ref) => ref.startsWith("multiplication/"))).toBe(true);
+    expect(refs.slice(first, last + 1).every((ref) => ref.startsWith("multiplication/"))).toBe(true);
   });
 });
