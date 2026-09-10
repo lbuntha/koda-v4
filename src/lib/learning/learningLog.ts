@@ -462,13 +462,25 @@ const applyToSkill = (event: LearningEvent) => {
   profile.skills[event.skillId] = totals;
 };
 
-const applyToProfile = (event: LearningEvent) => {
-  applyToSkill(event);
-
+/**
+ * Fold one event into a set of concept totals.
+ *
+ * Pure, and separated from the profile it usually writes into, because the same
+ * fold has a second caller: `sync/unsentTotals.ts` folds events that are about
+ * to be dropped from the upload queue, so that what they proved survives even
+ * when the events themselves cannot be sent. Two implementations of this fold
+ * is how a device and the server come to disagree about the same child — the
+ * server's copy in `services/rollup.py` is already a deliberate mirror of it,
+ * and one mirror is enough.
+ */
+export const foldConcept = (
+  concepts: Record<string, ConceptTotals>,
+  event: LearningEvent,
+): Record<string, ConceptTotals> => {
   const key = event.conceptKey;
-  if (!key) return;
+  if (!key) return concepts;
 
-  const totals = profile.concepts[key] ?? emptyTotals(key, event.ts);
+  const totals = concepts[key] ?? emptyTotals(key, event.ts);
   totals.lastSeenTs = event.ts;
   // Defensive, not decorative: a profile written by an older build has neither
   // of these arrays under their current names, and a rollup that throws takes
@@ -505,7 +517,17 @@ const applyToProfile = (event: LearningEvent) => {
       break;
   }
 
-  profile.concepts[key] = totals;
+  concepts[key] = totals;
+  return concepts;
+};
+
+/** Every concept these events are evidence about, folded from nothing. */
+export const foldConcepts = (events: LearningEvent[]): Record<string, ConceptTotals> =>
+  events.reduce(foldConcept, {} as Record<string, ConceptTotals>);
+
+const applyToProfile = (event: LearningEvent) => {
+  applyToSkill(event);
+  foldConcept(profile.concepts, event);
 };
 
 /* -------------------------------------------------------------------------- */

@@ -92,11 +92,31 @@ const isSatisfied = (conceptKey: string): boolean => {
 /** A lesson is ready if every prerequisite concept is mastered. */
 export const isReady = (lesson: CatalogLesson): boolean => lesson.requires.every(isSatisfied);
 
-const notYetMastered = (lesson: CatalogLesson): boolean =>
-  getConceptMastery(lesson.conceptKey).status !== "mastered";
-
 const byLevel = (a: CatalogLesson, b: CatalogLesson) =>
   (a.levelNumber ?? Infinity) - (b.levelNumber ?? Infinity);
+
+/**
+ * Which lessons have actually been finished.
+ *
+ * Not a question mastery can answer, and asking it there is what let the path
+ * skip. Mastery is keyed by *concept*, and a concept is taught by up to eight
+ * lessons — `five-benchmark` has eight, `place-value-builder` seven. Finish the
+ * first of those well and the concept reads "mastered", at which point every
+ * filter written as "not yet mastered" quietly drops the other seven from the
+ * candidate list. They are never offered again, and the learner is advanced to
+ * the next concept having done an eighth of the work that teaches this one.
+ *
+ * Derived from the log rather than kept as new state. A caller holding the
+ * durable record should pass its own instead: `completedLevels` syncs and is
+ * never trimmed, while the local ring is capped and can only ever forget an old
+ * completion.
+ */
+const completedFromLog = (): Set<string> =>
+  new Set(
+    LearningLog.all()
+      .filter((e): e is LessonCompletedEvent => e.type === "lesson_completed")
+      .map((e) => `${e.skillId}/${e.lessonId}`),
+  );
 
 /**
  * Decide what comes after finishing `justFinished`.
@@ -109,8 +129,13 @@ const byLevel = (a: CatalogLesson, b: CatalogLesson) =>
 export function recommendNext(
   justFinished: { conceptKey: string; ref: string; skillId: string },
   catalog: Catalog,
+  options: { completed?: Set<string> } = {},
 ): Recommendation {
   const mastery = getConceptMastery(justFinished.conceptKey);
+  /* What has been done, lesson by lesson. The log is the fallback rather than
+     the source: a host holding `completedLevels` should hand that over, because
+     it is the record that syncs and the one the padlocks are drawn from. */
+  const completed = options.completed ?? completedFromLog();
 
   /* 1. Struggling — step back to a prerequisite the child can succeed at. */
   if (mastery.status === "struggling") {
@@ -143,8 +168,18 @@ export function recommendNext(
     !justDidWell &&
     (mastery.status === "learning" || mastery.status === "practising" || mastery.status === "struggling")
   ) {
+    /* Another lesson on the same concept — the *next* one, and one they have
+       not already done. Without the second condition "one more round" could
+       hand back a lesson finished three weeks ago, which is neither the round
+       they were promised nor a step forward. */
     const sameConcept = catalog.lessons
-      .filter((l) => l.conceptKey === justFinished.conceptKey && l.ref !== justFinished.ref && isReady(l))
+      .filter(
+        (l) =>
+          l.conceptKey === justFinished.conceptKey &&
+          l.ref !== justFinished.ref &&
+          !completed.has(l.ref) &&
+          isReady(l),
+      )
       .sort(byLevel)[0];
 
     const repeat = catalog.lessons.find((l) => l.ref === justFinished.ref);
@@ -161,12 +196,30 @@ export function recommendNext(
     };
   }
 
-  /* 3. Move on — the next lesson in this skill the child is ready for.
-        `isReady` still gates on mastered prerequisites, so a strong round does
-        not unlock something the child has no foundation for. */
-  const nextInSkill = catalog.lessons
-    .filter((l) => l.skillId === justFinished.skillId && notYetMastered(l) && isReady(l))
-    .sort(byLevel)[0];
+  /*
+   * 3. Move on — the next lesson on this skill's path.
+   *
+   * Next means next. This used to read "the first lesson in the skill whose
+   * concept is not yet mastered", which is a different question and answers it
+   * wrongly whenever a concept spans more than one lesson — most of the course.
+   * A child who finished lesson 1 of eight on `five-benchmark` well enough to
+   * master the concept was sent straight to lesson 9, and the seven in between
+   * became unreachable: nothing else offers them, because every surface asked
+   * mastery the same question.
+   *
+   * So the walk is positional — the first unfinished lesson *after* this one,
+   * and only then, when the path ahead has run out, back to anything unfinished
+   * behind it. That is the rule `curriculum.resumeLesson` uses for the Continue
+   * button, and the two agreeing is the point: a learner should not be able to
+   * tell which control they pressed by where it took them.
+   *
+   * `isReady` still gates on mastered prerequisites, so walking in order never
+   * opens something the child has no foundation for.
+   */
+  const path = catalog.lessons.filter((l) => l.skillId === justFinished.skillId).sort(byLevel);
+  const at = path.findIndex((l) => l.ref === justFinished.ref);
+  const stillOpen = (l: CatalogLesson) => !completed.has(l.ref) && isReady(l);
+  const nextInSkill = path.slice(at + 1).find(stillOpen) ?? path.find(stillOpen);
 
   if (nextInSkill) {
     return {
@@ -277,47 +330,101 @@ export function recommendNow(catalog: Catalog, options: RecommendNowOptions = {}
     isSatisfied: satisfied = isSatisfied,
   } = options;
 
-  const ready = catalog.lessons.filter((l) => l.requires.every(satisfied));
-  const open = ready.filter((l) => !completed.has(l.ref));
+  const ready = catalog.lessons.filter((l) => l.requires.every(satisfied)).sort(byLevel);
   const statusOf = (l: CatalogLesson) => getConceptMastery(l.conceptKey);
 
-  /* 1. Repair. At most one: a page that opens with nothing but remediation
-        tells a child they are behind, which is never the message. */
-  const repair: TodayPick[] = ready
-    .filter((l) => statusOf(l).status === "struggling")
-    .sort(byLevel)
-    .slice(0, 1)
-    .map((lesson) => ({
-      lesson,
-      kind: "review" as const,
-      kidMessage: "Let's warm up with something you already know!",
-      reason: `First-try accuracy on ${lesson.conceptKey} is ${(
-        statusOf(lesson).firstTryAccuracy * 100
-      ).toFixed(0)}%.`,
-    }));
+  /*
+   * Each skill's queue: everything still open in it, in the order the course
+   * teaches it — and Today only ever takes from the *front* of a queue.
+   *
+   * That is the whole of the sequencing rule, and it is here rather than in a
+   * sort because a sort can still be overtaken. The band used to be built from
+   * three global buckets keyed on concept mastery — struggling, in-progress,
+   * not-started — which skipped in both directions at once. Forwards, because a
+   * lesson whose concept a *sibling lesson* had already mastered matched none of
+   * the three and vanished: seven of the eight `five-benchmark` lessons were
+   * unreachable the moment the first one went well. Sideways, because a
+   * not-started lesson eleven along could outrank one in progress at position
+   * four, so the child was offered the eleventh with the fourth still open.
+   *
+   * Practice is not in here at all — `buildCatalog` drops it before the
+   * recommender sees it, and the front of a queue is a teaching lesson by
+   * construction. Practice is the learner's own choice to take up, from a set
+   * that is order-free by design, and `curriculum.practiceInvitation` picks
+   * within it at random for exactly that reason.
+   */
+  const queues = new Map<string, CatalogLesson[]>();
+  for (const lesson of ready) {
+    if (completed.has(lesson.ref)) continue;
+    const queue = queues.get(lesson.skillId);
+    if (queue) queue.push(lesson);
+    else queues.set(lesson.skillId, [lesson]);
+  }
 
-  /* 2. Finish what is started, most recently touched first — otherwise a child
-        accumulates a dozen half-open threads and closes none of them. */
-  const finish: TodayPick[] = open
-    .filter((l) => ["learning", "practising"].includes(statusOf(l).status))
-    .sort((a, b) => (statusOf(b).lastSeenTs ?? "").localeCompare(statusOf(a).lastSeenTs ?? ""))
-    .map((lesson) => ({
-      lesson,
-      kind: "practise" as const,
-      kidMessage: "One more round to make it stick!",
-      reason: `${lesson.conceptKey} is in progress but not yet secure.`,
-    }));
+  /* Why this lesson is being offered — read off the concept it teaches, once
+     the position has already decided *which* lesson it is. Position picks, and
+     mastery only supplies the words. */
+  const kindOf = (lesson: CatalogLesson): TodayPick["kind"] => {
+    const status = statusOf(lesson).status;
+    if (status === "struggling") return "review";
+    if (status === "learning" || status === "practising") return "practise";
+    return "advance";
+  };
 
-  /* 3. Something new. */
-  const advance: TodayPick[] = open
-    .filter((l) => statusOf(l).status === "not-started")
-    .sort(byLevel)
-    .map((lesson) => ({
+  const pickFor = (lesson: CatalogLesson): TodayPick => {
+    const mastery = statusOf(lesson);
+    const kind = kindOf(lesson);
+    if (kind === "review") {
+      return {
+        lesson,
+        kind,
+        kidMessage: "Let's warm up with something you already know!",
+        reason: `First-try accuracy on ${lesson.conceptKey} is ${(
+          mastery.firstTryAccuracy * 100
+        ).toFixed(0)}%.`,
+      };
+    }
+    if (kind === "practise") {
+      return {
+        lesson,
+        kind,
+        kidMessage: "One more round to make it stick!",
+        reason: `${lesson.conceptKey} is in progress but not yet secure.`,
+      };
+    }
+    return {
       lesson,
-      kind: "advance" as const,
+      kind,
       kidMessage: "Ready for something new?",
-      reason: `Every prerequisite for ${lesson.conceptKey} is met.`,
-    }));
+      reason:
+        mastery.status === "mastered"
+          ? `${lesson.conceptKey} is secure; this is the next lesson on the path.`
+          : `Every prerequisite for ${lesson.conceptKey} is met.`,
+    };
+  };
+
+  /* Which skill goes first — repair, then whatever is under way, then something
+     new. The ladder `recommendNext` climbs, applied across skills rather than
+     within one: it decides the *order* the queues are drawn from and never
+     which lesson comes out of a queue. */
+  const rank = (lesson: CatalogLesson) =>
+    kindOf(lesson) === "review" ? 0 : kindOf(lesson) === "practise" ? 1 : 2;
+
+  const order = (a: CatalogLesson, b: CatalogLesson): number => {
+    const byRank = rank(a) - rank(b);
+    if (byRank !== 0) return byRank;
+    /* Among things under way, the most recently touched — otherwise a child
+       accumulates half-open threads and closes none of them. */
+    if (rank(a) === 1) {
+      const byRecency = (statusOf(b).lastSeenTs ?? "").localeCompare(statusOf(a).lastSeenTs ?? "");
+      if (byRecency !== 0) return byRecency;
+    }
+    return byLevel(a, b);
+  };
+
+  const skillOrder = [...queues.entries()]
+    .sort(([, a], [, b]) => order(a[0], b[0]))
+    .map(([skillId]) => skillId);
 
   const picked: TodayPick[] = [];
   const perSkill = new Map<string, number>();
@@ -331,12 +438,37 @@ export function recommendNow(catalog: Catalog, options: RecommendNowOptions = {}
     return true;
   };
 
-  for (const pick of [...repair, ...finish, ...advance]) take(pick);
+  /*
+   * One step back, when something is not landing. At most one: a page that
+   * opens with nothing but remediation tells a child they are behind, which is
+   * never the message.
+   *
+   * Backwards or where they stand — never past open work. A struggling concept
+   * further along the path is repaired when the learner gets there; jumping to
+   * it now would skip the lessons in between, which is the thing this function
+   * exists to stop.
+   */
+  const repair = ready
+    .filter((l) => statusOf(l).status === "struggling")
+    .filter((l) => completed.has(l.ref) || queues.get(l.skillId)?.[0]?.ref === l.ref)[0];
+  if (repair) take(pickFor(repair));
+
+  /* Every skill's next lesson before any skill's lesson after that: one thing
+     to do in each subject reads as a choice, two in one and none in the other
+     reads as a list. */
+  for (let depth = 0; depth < maxPerSkill && picked.length < limit; depth += 1) {
+    for (const skillId of skillOrder) {
+      const lesson = queues.get(skillId)?.[depth];
+      if (lesson) take(pickFor(lesson));
+    }
+  }
 
   /* Always leave one door forward. All-review is accurate and demoralising. */
   if (picked.length === limit && !picked.some((p) => p.kind === "advance")) {
-    const forward = advance.find((p) => !picked.some((q) => q.lesson.ref === p.lesson.ref));
-    if (forward) picked[picked.length - 1] = forward;
+    const forward = skillOrder
+      .flatMap((skillId) => (queues.get(skillId) ?? []).slice(0, maxPerSkill))
+      .find((l) => kindOf(l) === "advance" && !picked.some((p) => p.lesson.ref === l.ref));
+    if (forward) picked[picked.length - 1] = pickFor(forward);
   }
 
   return picked;

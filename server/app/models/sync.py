@@ -24,6 +24,11 @@ DOC_KINDS = {
     "nav",  # a family's sidebar, overriding the bundled default
     "art",  # a family's own SVG, layered over the bundled collection
     "childSettings",  # what a parent decides for one child: caps, help, cadence
+    # What a device learned but could not send as events, as running per-concept
+    # totals. Written when an outbox overflows or a pre-account history is too
+    # long for the local ring; folded into `concept_totals` on arrival, so a
+    # month offline costs the event detail and never the evidence.
+    "conceptBaseline",
 }
 
 #: Kinds that take more than being signed in to write.

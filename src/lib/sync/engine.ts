@@ -237,6 +237,16 @@ export async function flush(): Promise<void> {
         applyChanges([conflict.doc], conflict.doc.serverSeq);
       }
 
+      /* One kind cannot simply concede. A baseline is this device's running
+         account of work it could not send as events, and only this device
+         writes its key — so a conflict there means a write was lost, not that
+         somebody else was right. Dropping it would drop the evidence with it,
+         so the current total is offered again against the revision the server
+         has just disclosed. */
+      if ((result.conflicts ?? []).some((c) => c.doc.kind === "conceptBaseline")) {
+        void import("./unsentTotals").then(({ UnsentTotals }) => UnsentTotals.resend());
+      }
+
       // Accepted *and* duplicate both mean the server has them — a replayed
       // batch is a no-op there, so anything else would strand the queue.
       Outbox.ack([...events.map((event) => event.id), ...mutations.map((m) => m.opId)]);
@@ -319,7 +329,13 @@ export async function pull(): Promise<number> {
 
 /** Queue events for upload. Called by the learning log's sink. */
 export function record(events: readonly unknown[]): void {
-  Outbox.add(events as never[]);
+  /* Anything the queue had no room for is folded into a total that is sent in
+     its place, so a long spell offline costs event detail and never evidence.
+     Imported lazily: `unsentTotals` records a document through this module. */
+  const dropped = Outbox.add(events as never[]);
+  if (dropped.length) {
+    void import("./unsentTotals").then(({ UnsentTotals }) => UnsentTotals.absorb(dropped));
+  }
   allowRetryAfterRefusal();
   setStatus({});
   void flush();

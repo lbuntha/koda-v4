@@ -328,3 +328,92 @@ async def test_conversations_are_scoped_to_the_family_that_had_them(client, pare
 
     assert r.status_code == 200
     assert r.json()["conversations"] == []
+
+
+def baseline(rev: int = 0, **totals) -> dict:
+    """One device's account of work it could not send, as a document."""
+    body = {
+        "conceptKey": "corresponder",
+        "skillIds": ["counting"],
+        "questionsAnswered": 0,
+        "correctFirstTry": 0,
+        "supportsUsed": 0,
+        "lessonsCompleted": 0,
+        "lessonsAbandoned": 0,
+        "totalResponseMs": 0,
+        "errors": {},
+        "practisedOn": ["2026-07-01"],
+        "lastSeenTs": "2026-07-01T09:00:00.000Z",
+    }
+    body.update(totals)
+    return {
+        "opId": f"op_{rev}",
+        "kind": "conceptBaseline",
+        "key": "l_mia:device-1",
+        "learnerId": "l_mia",
+        "baseRev": rev,
+        "body": {"concepts": {"corresponder": body}},
+    }
+
+
+async def test_a_baseline_counts_towards_the_learner_s_totals(client, parent):
+    """A tablet three weeks offline drops events; what they proved still counts.
+
+    The outbox has a ceiling, so a long spell away sends the oldest events over
+    the side. The device folds them into a running total first and sends that
+    instead — this is the half of the bargain the server keeps.
+    """
+    r = await client.post(
+        "/sync/push",
+        json={"mutations": [baseline(questionsAnswered=40, correctFirstTry=34, lessonsCompleted=5)]},
+        headers=parent,
+    )
+    assert r.status_code == 200, r.text
+    assert r.json()["conflicts"] == []
+
+    profile = (await client.get("/sync/profile/l_mia", headers=parent)).json()
+    totals = profile["concepts"][0]
+    assert totals["questionsAnswered"] == 40
+    assert totals["correctFirstTry"] == 34
+    assert totals["lessonsCompleted"] == 5
+    assert totals["practisedOn"] == ["2026-07-01"]
+    # No events were stored: a baseline is evidence about work, not the work.
+    assert profile["eventsStored"] == 0
+
+
+async def test_resending_a_baseline_changes_nothing(client, parent):
+    """The same acceptance test the events half has, for the same reason."""
+    body = baseline(questionsAnswered=40)
+
+    await client.post("/sync/push", json={"mutations": [body]}, headers=parent)
+    again = await client.post("/sync/push", json={"mutations": [body]}, headers=parent)
+    # The revision has moved on, so an unchanged re-send comes back as a
+    # conflict rather than a second helping — either way the totals hold.
+    assert again.status_code == 200
+
+    profile = (await client.get("/sync/profile/l_mia", headers=parent)).json()
+    assert profile["concepts"][0]["questionsAnswered"] == 40
+
+
+async def test_a_growing_baseline_adds_only_the_difference(client, parent):
+    """The body is cumulative, so what it adds is what is new in it."""
+    await client.post(
+        "/sync/push", json={"mutations": [baseline(questionsAnswered=40)]}, headers=parent
+    )
+    await client.post(
+        "/sync/push", json={"mutations": [baseline(rev=1, questionsAnswered=65)]}, headers=parent
+    )
+
+    profile = (await client.get("/sync/profile/l_mia", headers=parent)).json()
+    assert profile["concepts"][0]["questionsAnswered"] == 65
+
+
+async def test_a_baseline_and_the_events_it_does_not_cover_add_up(client, parent):
+    """Absorbed or acknowledged, never both — so the two halves simply sum."""
+    await client.post("/sync/push", json={"events": [event("e_1"), event("e_2")]}, headers=parent)
+    await client.post(
+        "/sync/push", json={"mutations": [baseline(questionsAnswered=40)]}, headers=parent
+    )
+
+    profile = (await client.get("/sync/profile/l_mia", headers=parent)).json()
+    assert profile["concepts"][0]["questionsAnswered"] == 42

@@ -308,18 +308,38 @@ export function pathPosition(
 }
 
 /**
+ * A stable pseudo-random index.
+ *
+ * Stable is the operative word. `Math.random()` in a render picks a different
+ * round every time React redraws, so the card under the child's finger changes
+ * between them seeing it and tapping it. Hashing a seed that only moves when
+ * something actually happens gives variety across sittings and none within one.
+ */
+const seededIndex = (count: number, seed: string): number => {
+  let h = 5381;
+  for (let i = 0; i < seed.length; i += 1) h = ((h << 5) + h + seed.charCodeAt(i)) | 0;
+  return count > 0 ? Math.abs(h) % count : 0;
+};
+
+/**
  * The practice round to offer a learner who has just finished the teaching.
  *
- * The first they have not played, or — once they have played them all — the
- * first of the set, because by then any of them is as good as any other.
- * Undefined when the skill ships no practice at all.
+ * One they have not played, picked at random from those; once they have played
+ * them all, at random from the set. **Random on purpose, and it is the one
+ * place in the course that is.** Teaching is a path: each lesson assumes the
+ * one before it, so `resumeLesson` and `lib/learning/recommend.ts` both walk it
+ * in order and refuse to skip. Practice is not a path — every round is the same
+ * techniques again with the hints, the voice and the explanation removed, and
+ * no round assumes any other. Handing back "the first one you have not played"
+ * made a set of five feel like five more lessons to get through, in a fixed
+ * order, when what it is is a bag to draw from.
  *
  * This is an *invitation*, never the next step: `resumeLesson` and the path
  * still refuse to walk teaching into practice. What it fixes is the dead end at
  * the other end of that rule — a child who finishes the last lesson was shown a
  * screen with nowhere to go, while five practice rounds sat unopened below.
  */
-export function firstPracticeLesson(
+export function practiceInvitation(
   skillId: string,
   completed: Record<number, number>,
   viewer?: Viewer,
@@ -330,5 +350,15 @@ export function firstPracticeLesson(
   const practice = getSkillLessons(skillId, viewer)
     .filter(isPracticeLesson)
     .filter((lesson) => isUnlocked(lesson, completed, viewer));
-  return practice.find((lesson) => (completed[lesson.levelNumber] ?? 0) === 0) ?? practice[0];
+
+  const unplayed = practice.filter((lesson) => (completed[lesson.levelNumber] ?? 0) === 0);
+  const pool = unplayed.length ? unplayed : practice;
+  if (!pool.length) return undefined;
+
+  /* The seed moves when the learner does. Two rounds finished is a different
+     draw from three, so the offer changes between sittings; nothing changes
+     while the screen is up, because nothing here changes without a round
+     ending. */
+  const rounds = Object.values(completed).filter((stars) => stars > 0).length;
+  return pool[seededIndex(pool.length, `${skillId}:${rounds}:${pool.length}`)];
 }

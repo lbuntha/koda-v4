@@ -330,16 +330,28 @@ async function performReissue(target: Session): Promise<Session | null> {
 }
 
 /**
- * Open a child again from the adult who is signed in right now.
+ * Open a child again from whoever is signed in right now.
  *
- * A child session that has gone stale is not a locked door: the parent holding
- * this device may switch to their own child at any time, which is the very
- * thing `/auth/switch` exists for. So rather than sending a parent to the
- * sign-in screen because a saved tablet session aged out, ask for a new one.
- * The server still decides — a child cannot reach another child this way.
+ * A child session that has gone stale is not a locked door: this device may ask
+ * for a new one, which is the very thing `/auth/switch` exists for. So rather
+ * than sending anybody to the sign-in screen because a saved tablet session
+ * aged out, ask for another.
+ *
+ * A sibling on the same tablet may ask too, and this used to be the line that
+ * said they could not — the guard read `current.learnerId`, so any child
+ * session was refused before the server was even asked. The result was the
+ * opposite of a safeguard: a saved sibling session that had aged out could not
+ * be renewed by the one person holding the device, so `switchAccount` forgot
+ * the account and the tablet ended up at the sign-in screen with a child who
+ * cannot get back in. A family tablet is exactly where taking turns happens.
+ *
+ * A student's own sign-in is a different thing wearing the same learner id, and
+ * is still refused — here so it costs no request, and again on the server,
+ * which is where the rule actually lives.
  */
 async function reopenChild(target: Session): Promise<Session | null> {
-  if (!target.learnerId || !current || current.learnerId) return null;
+  if (!target.learnerId || !current) return null;
+  if (current.learnerId && current.role !== "child") return null;
   try {
     const token = await accessToken();
     if (!token) return null;

@@ -4,7 +4,8 @@ import { getSkill, resolveActivity } from "../registry";
 import { createKodaSDK, type KodaHost } from "../sdk/createKodaSDK";
 import type { ActivityLesson, LearnerSnapshot, SkillResult } from "../types";
 import type { LearningContext, LessonEntry } from "../../lib/learning/events";
-import { getLessonByLevel } from "../../curriculum";
+import { getCourseLessons, getLessonByLevel } from "../../curriculum";
+import { loadCompletedLevels } from "../../lib/learnerProgress";
 import { buildCatalog } from "../catalog";
 import { recommendNext } from "../../lib/learning/recommend";
 import { useAudienceViewer } from "../viewer";
@@ -116,11 +117,34 @@ export const SkillHost: React.FC<SkillHostProps> = ({
       // for previews, so this resolver is not consulted there either.
       // Built fresh per call so a skill enabled or a lesson unlocked between
       // rounds is reflected immediately.
-      recommendNext: (finished) =>
-        recommendNext(
+      recommendNext: (finished) => {
+        /*
+         * What has been finished, from the record that syncs.
+         *
+         * The recommender can derive this from its own log, but the log is a
+         * capped ring: on a device a child has played on for a term, the
+         * earliest completions have been trimmed out of it, and a recommender
+         * reading only that would offer a lesson from last month as the next
+         * one. `completedLevels` is the durable half — the same document the
+         * padlocks and the star counts are drawn from — so the round-complete
+         * screen and the learning path cannot disagree about what is left.
+         *
+         * Read per call, not per mount: the level just played is written before
+         * this is asked, and a set captured at mount would not contain it.
+         */
+        const viewer = hostRef.current.viewer;
+        const stars = loadCompletedLevels();
+        const completed = new Set(
+          getCourseLessons(viewer)
+            .filter((l) => (stars[l.levelNumber] ?? 0) > 0)
+            .map((l) => `${l.skillId}/${l.id}`),
+        );
+        return recommendNext(
           { ...finished, ref: `${finished.skillId}/${finished.lessonId}` },
-          buildCatalog(hostRef.current.viewer),
-        ),
+          buildCatalog(viewer),
+          { completed },
+        );
+      },
       lessonForLevel: (n: number) => {
         const found = getLessonByLevel(n, hostRef.current.viewer);
         if (!found?.conceptKey) return undefined;

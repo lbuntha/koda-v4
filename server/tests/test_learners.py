@@ -46,11 +46,17 @@ async def test_parent_creates_child_and_one_time_join_code(client, db, signup_bo
     saved_learner = await db.learners.find_one({"_id": learner["id"]})
     assert saved_learner["avatarSeed"] == "a_mias_choice_123"
 
-    forbidden_switch = await client.post(
+    refreshed_child = await client.post(
         f"/auth/switch/{learner['id']}",
         headers={"Authorization": f"Bearer {child['accessToken']}"},
     )
-    assert forbidden_switch.status_code == 403
+    assert refreshed_child.status_code == 200
+    assert refreshed_child.json()["role"] == "child"
+    refreshed_me = await client.get(
+        "/auth/me",
+        headers={"Authorization": f"Bearer {refreshed_child.json()['accessToken']}"},
+    )
+    assert refreshed_me.json()["learnerId"] == learner["id"]
 
     replay = await client.post("/auth/join", json={"code": body["code"]})
     assert replay.status_code == 401

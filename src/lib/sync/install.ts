@@ -1,4 +1,10 @@
-import { LearningLog, setActiveLearner, setLearningSink } from "../learning/learningLog";
+import {
+  LearningLog,
+  activeLearnerId,
+  setActiveLearner,
+  setLearningSink,
+} from "../learning/learningLog";
+import { UnsentTotals, trimmedAway } from "./unsentTotals";
 import { SessionAPI } from "./session";
 import { ArtStore } from "./artStore";
 import { SyncEngine } from "./engine";
@@ -12,10 +18,19 @@ import { refreshPermissions } from "./permissions";
  * ring to the outbox once is safe — the server de-duplicates by `(family,
  * eventId)` and a second backfill would be a no-op anyway.
  *
- * What it cannot recover is anything already trimmed out of the ring. That
- * history survives only in the local rollup, which is a real limit rather than
- * an oversight: totals cannot be uploaded without double-counting the events
- * they were derived from.
+ * History already trimmed out of the ring cannot be re-sent as events — it is
+ * gone from this device in that form, and survives only in the local rollup.
+ * Uploading the rollup wholesale would double-count the events still in the
+ * ring, so what goes up is the rollup *minus* what the ring can account for:
+ * exactly the part the server will otherwise never hear about. That subtraction
+ * is only sound while nothing from this device has been uploaded yet, which is
+ * what `BACKFILL_KEY` guarantees — it runs once, on the first boot that has a
+ * sink, before a single event has been acknowledged.
+ *
+ * One thing it still cannot untangle: two children who shared this tablet
+ * before anybody signed in are one record in that rollup, because there was no
+ * account to tell them apart. Their combined history lands on whoever signs in
+ * first. That is a limit of playing signed-out, not of the backfill.
  */
 const BACKFILL_KEY = "koda_outbox_backfill_v1";
 
@@ -24,6 +39,10 @@ function backfillOnce(): void {
   try {
     const existing = LearningLog.all();
     if (existing.length) SyncEngine.record(existing);
+
+    const trimmed = trimmedAway(LearningLog.profile().concepts, existing);
+    if (Object.keys(trimmed).length) UnsentTotals.absorbTotals(activeLearnerId(), trimmed);
+
     localStorage.setItem(BACKFILL_KEY, new Date().toISOString());
   } catch {
     // Not worth failing a boot over; the next load tries again.

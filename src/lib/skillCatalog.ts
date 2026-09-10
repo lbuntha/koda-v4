@@ -1,4 +1,4 @@
-import type { ResolvedLesson } from "../curriculum";
+import { isPracticeLesson, type ResolvedLesson } from "../curriculum";
 import type { ReleaseStatus } from "../skills/types";
 
 export interface SkillCatalogEntry {
@@ -17,7 +17,21 @@ export interface SkillCatalogEntry {
   status: ReleaseStatus;
   publishedAt?: number | null;
   modified?: number;
+  /** Every lesson this skill contributes to the course, practice included. */
   lessons: ResolvedLesson[];
+  /**
+   * The teaching path: how many lessons this skill actually teaches.
+   *
+   * Not `lessons.length`. A skill's course entry ends with a practice set —
+   * the same engines again with the hints, the voice and the explanations
+   * removed, for a child who already has the technique. Those are an optional
+   * offer, not steps on the path, and the Learn page has always shown them as
+   * their own section with their own counter. A card that folded them into one
+   * total told a parent Addition was 64 lessons when it teaches 52, and put a
+   * learner on their first lesson at "1 of 64" against a path only 52 long.
+   */
+  lessonCount: number;
+  /** Completed lessons on the teaching path, counted against `lessonCount`. */
   completedLessons: number;
   progressPercent: number;
   nextLesson: ResolvedLesson;
@@ -25,7 +39,7 @@ export interface SkillCatalogEntry {
 
 export type SkillCatalogSource = Omit<
   SkillCatalogEntry,
-  "completedLessons" | "progressPercent" | "nextLesson"
+  "lessonCount" | "completedLessons" | "progressPercent" | "nextLesson"
 >;
 
 export function buildSkillCatalog(
@@ -35,17 +49,29 @@ export function buildSkillCatalog(
   return sources
     .filter((source) => source.lessons.length > 0)
     .map((source) => {
-      const completedLessons = source.lessons.filter(
-        (lesson) => (completedLevels[lesson.levelNumber] ?? 0) > 0,
-      ).length;
+      const done = (lesson: ResolvedLesson) => (completedLevels[lesson.levelNumber] ?? 0) > 0;
+      const teaching = source.lessons.filter((lesson) => !isPracticeLesson(lesson));
+      const completedLessons = teaching.filter(done).length;
+
+      /*
+       * Progress is measured against the teaching path, so 100% means the
+       * thing a learner set out to do is finished — but `nextLesson` still
+       * falls through to practice, because a finished path offers practice
+       * before it offers a replay, which is the order the Learn page uses.
+       */
       const nextLesson =
-        source.lessons.find((lesson) => (completedLevels[lesson.levelNumber] ?? 0) === 0) ??
+        teaching.find((lesson) => !done(lesson)) ??
+        source.lessons.find((lesson) => !done(lesson)) ??
         source.lessons[source.lessons.length - 1];
 
       return {
         ...source,
+        lessonCount: teaching.length,
         completedLessons,
-        progressPercent: Math.round((completedLessons / source.lessons.length) * 100),
+        // A skill that is all practice would divide by zero; it keeps its bar empty.
+        progressPercent: teaching.length
+          ? Math.round((completedLessons / teaching.length) * 100)
+          : 0,
         nextLesson,
       };
     });

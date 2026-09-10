@@ -256,8 +256,27 @@ async def join(body: JoinIn, db: Db, request: Request) -> TokenPair:
 async def switch_to_learner(
     learner_id: str, db: Db, p: CanSwitchLearner, body: SwitchIn | None = None
 ) -> TokenPair:
-    if p.family_id is None or p.learner_id:
+    if p.family_id is None:
+        # Staff. No family to switch inside, and inventing one here is how a
+        # support account starts holding a child's session.
         raise Forbidden("Only a family account can switch to a child.", "child_switch_forbidden")
+
+    if p.learner_id and p.role != "child":
+        # A `child` session is a device a grown-up set up and handed over — the
+        # family tablet — and on that tablet reaching a sibling is the whole
+        # point: two children take turns, and the one holding it cannot ask an
+        # adult to re-authorise every turn. Refusing this is what stranded them.
+        # When the token a sibling saved had aged out, the client had no way to
+        # mint another and dropped the account instead, so a child tapping their
+        # brother's face signed the tablet out and needed a parent to undo it.
+        #
+        # A `student` is the opposite case wearing the same learner id: their
+        # own sign-in, on their own phone, and their sibling's record is not
+        # theirs to open. That one stays refused.
+        raise Forbidden(
+            "This account cannot open another learner.", "child_switch_forbidden"
+        )
+
     learner = await learners.by_id(db, learner_id, p.family_id)
     if not learner:
         raise NotFound("No such child.")

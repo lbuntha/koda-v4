@@ -35,7 +35,7 @@ from app.repos import docs as docs_repo
 from app.repos import events as events_repo
 from app.security.permissions import principal_can
 from app.services import milestones
-from app.services.rollup import increments_for
+from app.services.rollup import baseline_increments, increments_for
 
 
 def _as_sync_doc(row: dict[str, Any]) -> SyncDoc:
@@ -186,18 +186,36 @@ async def _apply_mutation(
             return Conflict(opId=mutation.op_id, doc=_as_sync_doc(existing))
 
     server_seq = await counters.next_seq(db, family_id)
+    owner = mutation.learner_id or principal.learner_id
     saved = await docs_repo.put(
         db,
         family_id=family_id,
         kind=mutation.kind,
         key=mutation.key,
-        learner_id=mutation.learner_id or principal.learner_id,
+        learner_id=owner,
         body=body,
         rev=current_rev + 1,
         server_seq=server_seq,
         device_id=principal.device_id,
         deleted=mutation.deleted,
     )
+
+    if mutation.kind == "conceptBaseline" and not mutation.deleted and owner:
+        # Stored *and* folded in. The document is kept because it is the record
+        # of what this device could not send — the next one it writes is read
+        # against it — and the fold is what puts that work in front of a parent
+        # on another device. Applied here rather than on read so `concept_totals`
+        # stays the one place a learner's evidence is counted.
+        await rollups.apply(
+            db,
+            baseline_increments(
+                existing.get("body") if existing else None,
+                body,
+                family_id=family_id,
+                learner_id=owner,
+            ),
+        )
+
     return None if saved else None
 
 

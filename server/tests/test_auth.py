@@ -423,3 +423,82 @@ async def test_a_child_has_no_password_to_change(client, signup_body):
     )
     assert r.status_code == 403
     assert r.json()["error"]["code"] == "no_password_account"
+
+
+async def test_a_child_tablet_can_take_turns_with_a_sibling(client, signup_body, db):
+    """Two children, one tablet, no grown-up needed to swap between them.
+
+    The tablet is a `child` session, and it used to be refused here — so when
+    the session a sibling had saved aged out, nothing on the device could mint
+    another and the account was dropped instead. A child tapping their sister's
+    face signed the tablet out and needed a parent to undo it.
+    """
+    from app.repos import learners
+
+    parent = (await client.post("/auth/signup", json=signup_body())).json()
+    parent_auth = {"Authorization": f"Bearer {parent['accessToken']}"}
+
+    # Straight into the repo: the free plan covers one child, and this is a test
+    # about who may switch, not about what a family has paid for.
+    mia = await learners.create(db, parent["familyId"], "Mia")
+    sam = await learners.create(db, parent["familyId"], "Sam")
+
+    on_mia = (await client.post(f"/auth/switch/{mia['_id']}", headers=parent_auth)).json()
+    mia_auth = {"Authorization": f"Bearer {on_mia['accessToken']}"}
+
+    handover = await client.post(f"/auth/switch/{sam['_id']}", headers=mia_auth)
+    assert handover.status_code == 200, handover.text
+    assert handover.json()["role"] == "child"
+
+    # And it really is Sam holding it now, not Mia with a new token.
+    me = (
+        await client.get(
+            "/auth/me", headers={"Authorization": f"Bearer {handover.json()['accessToken']}"}
+        )
+    ).json()
+    assert me["learnerId"] == sam["_id"]
+    assert me["learnerName"] == "Sam"
+
+
+async def test_a_child_tablet_cannot_reach_another_family_s_child(client, signup_body, db):
+    """The rule that has not moved: inside this family, and nowhere else."""
+    from app.repos import learners
+
+    ours = (await client.post("/auth/signup", json=signup_body())).json()
+    ours_auth = {"Authorization": f"Bearer {ours['accessToken']}"}
+    mia = await learners.create(db, ours["familyId"], "Mia")
+    on_mia = (await client.post(f"/auth/switch/{mia['_id']}", headers=ours_auth)).json()
+    mia_auth = {"Authorization": f"Bearer {on_mia['accessToken']}"}
+
+    theirs = (
+        await client.post("/auth/signup", json=signup_body(email="other@example.com"))
+    ).json()
+    stranger = await learners.create(db, theirs["familyId"], "Ada")
+
+    refused = await client.post(f"/auth/switch/{stranger['_id']}", headers=mia_auth)
+    assert refused.status_code == 404, refused.text
+
+
+async def test_a_student_s_own_sign_in_cannot_use_this_door(client, signup_body):
+    """A learner id is not a family tablet.
+
+    A `student` is an older learner with their own account, on their own phone.
+    A `child` session is a device a grown-up set up and handed over. Both carry
+    a learner id, and only one of them is a tablet being passed between
+    children — so the door that opens for the tablet stays shut for the phone.
+    """
+    student = (
+        await client.post(
+            "/auth/signup",
+            json={**signup_body(email="ada@example.com"), "accountType": "student"},
+        )
+    ).json()
+    student_auth = {"Authorization": f"Bearer {student['accessToken']}"}
+
+    me = (await client.get("/auth/me", headers=student_auth)).json()
+    assert me["role"] == "student"
+    assert me["learnerId"]
+
+    refused = await client.post(f"/auth/switch/{me['learnerId']}", headers=student_auth)
+    assert refused.status_code == 403, refused.text
+    assert refused.json()["error"]["code"] == "child_switch_forbidden"

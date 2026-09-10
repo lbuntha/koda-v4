@@ -93,6 +93,28 @@ export function applyDoc(doc: SyncDoc): boolean {
 
   const spec = SYNC_KINDS[doc.kind as DocKind];
 
+  if (doc.kind === "conceptBaseline") {
+    /*
+     * Write-only, so this is where a pull stops.
+     *
+     * The body is one device's account of what its queue could not send, which
+     * the server has already folded into that learner's totals. Writing it here
+     * would give a second device a copy of the first device's backlog to hold —
+     * and, on the device that wrote it, replace a running total with a stale
+     * echo of itself. The revision is still remembered, because that is what
+     * stops the next local edit looking like a conflict.
+     *
+     * The server's body is remembered as what this device last agreed with —
+     * not written down as the truth, but recorded as "this is what they have".
+     * A device holding more than that then reads as an edit and re-sends;
+     * `SyncEngine` prompts it to, so a lost write cannot leave a child's work
+     * sitting on a tablet forever.
+     */
+    rememberRevision(doc.kind, doc.key, doc.rev);
+    rememberBody(doc.kind, doc.key, doc.body);
+    return true;
+  }
+
   if (doc.kind === "art") {
     // Its own store, and asynchronous — the only kind that is. Fire and forget:
     // the revision is remembered below either way, and a failed write means the

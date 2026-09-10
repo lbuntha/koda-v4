@@ -19,7 +19,8 @@ export type DocKind =
   | "preferences"
   | "nav"
   | "art"
-  | "childSettings";
+  | "childSettings"
+  | "conceptBaseline";
 
 export interface KindSpec {
   /**
@@ -156,6 +157,22 @@ export const SYNC_KINDS: Record<DocKind, KindSpec> = {
     scope: "learner",
     shape: "whole",
     notify: nudge("koda_child_settings_v1"),
+  },
+  /*
+   * What this device learned but could not send, as running totals.
+   *
+   * The one write-only kind. Every other document here describes something a
+   * person set and every device should agree about; this one describes what one
+   * device's queue had to drop, so another device's copy is none of its
+   * business — `apply.ts` takes the revision and writes nothing. Keyed per
+   * learner *per device* for the same reason, and owned by `unsentTotals.ts`
+   * rather than a settings store, which is why there is no key to nudge.
+   */
+  conceptBaseline: {
+    storageKey: null,
+    scope: "learner",
+    shape: "whole",
+    notify: () => undefined,
   },
 };
 

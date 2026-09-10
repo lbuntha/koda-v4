@@ -64,12 +64,12 @@ import { MainLayout } from "./components/layout/MainLayout";
 import { UIPageLoader } from "./components/ui";
 import { SkillHost } from "./skills/host/SkillHost";
 import {
-  firstPracticeLesson,
   getCourseLessons,
   getLessonByLevel,
   isPracticeLesson,
   nextSkillLesson,
   pathPosition,
+  practiceInvitation,
   skillLessonNumber,
 } from "./curriculum";
 import { useAudienceViewer } from "./skills/viewer";
@@ -767,9 +767,9 @@ export default function App() {
    * back to a list the child had just completed, which is the "no end" they
    * reported.
    */
-  const practiceInvitation =
+  const practiceOffer =
     activeLesson && !followingLesson && !isPracticeLesson(activeLesson)
-      ? firstPracticeLesson(activeLesson.skillId, completedGameLevels, viewer)
+      ? practiceInvitation(activeLesson.skillId, completedGameLevels, viewer)
       : undefined;
 
   const lessonHost = (
@@ -812,10 +812,10 @@ export default function App() {
               levelNumber: followingLesson.levelNumber,
               lessonNumber: pathPosition(followingLesson, viewer).number,
             }
-          : practiceInvitation
+          : practiceOffer
             ? {
-                levelNumber: practiceInvitation.levelNumber,
-                lessonNumber: pathPosition(practiceInvitation, viewer).number,
+                levelNumber: practiceOffer.levelNumber,
+                lessonNumber: pathPosition(practiceOffer, viewer).number,
                 practice: true,
               }
             : undefined

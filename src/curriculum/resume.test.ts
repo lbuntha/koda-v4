@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  firstPracticeLesson,
+  practiceInvitation,
   getCourseLessons,
   getSkillLessons,
   isPracticeLesson,
@@ -228,21 +228,37 @@ describe("the end of a path", () => {
     expect(pathPosition(rounds[0], viewer)).toEqual({ number: 1, total: rounds.length });
   });
 
-  it("offers the first practice round nobody has played", () => {
+  it("offers a practice round nobody has played", () => {
+    const rounds = practice();
+    const completed = { [rounds[0].levelNumber]: 3 };
+    const offered = practiceInvitation("counting", completed, viewer);
+
+    // Any of them but the one already played. Which one is deliberately not
+    // pinned: practice is a bag to draw from, not a queue to work through.
+    expect(offered?.ref).not.toBe(rounds[0].ref);
+    expect(rounds.map((lesson) => lesson.ref)).toContain(offered?.ref);
+  });
+
+  it("keeps the same offer while nothing has changed", () => {
     const rounds = practice();
     const completed = { [rounds[0].levelNumber]: 3 };
 
-    expect(firstPracticeLesson("counting", completed, viewer)?.ref).toBe(rounds[1].ref);
+    // The card must not change under the finger about to tap it, so the draw
+    // is seeded rather than rolled per render.
+    expect(practiceInvitation("counting", completed, viewer)?.ref).toBe(
+      practiceInvitation("counting", completed, viewer)?.ref,
+    );
   });
 
-  it("falls back to the first round once every one is played", () => {
+  it("still offers a round once every one is played", () => {
     const rounds = practice();
     const completed = Object.fromEntries(rounds.map((lesson) => [lesson.levelNumber, 3]));
+    const offered = practiceInvitation("counting", completed, viewer);
 
-    expect(firstPracticeLesson("counting", completed, viewer)?.ref).toBe(rounds[0].ref);
+    expect(rounds.map((lesson) => lesson.ref)).toContain(offered?.ref);
   });
 
   it("has nothing to offer for a skill that ships no practice", () => {
-    expect(firstPracticeLesson("nothing-here", {}, viewer)).toBeUndefined();
+    expect(practiceInvitation("nothing-here", {}, viewer)).toBeUndefined();
   });
 });

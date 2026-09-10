@@ -534,7 +534,7 @@ export const Home: React.FC<HomeProps> = ({
                     fallbackIconName={skill.iconName}
                     category={skill.category}
                     completedLessons={skill.completedLessons}
-                    lessonCount={skill.lessons.length}
+                    lessonCount={skill.lessonCount}
                     readyCount={ready}
                     onOpen={() => open(skill.id)}
                   />

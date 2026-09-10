@@ -73,15 +73,28 @@ export const Outbox = {
 
   peekMutations: (limit: number): Mutation[] => queue.mutations.slice(0, limit),
 
-  add(events: LearningEvent[]): void {
-    if (!events.length) return;
+  /**
+   * Queue events, and hand back any the queue could not keep.
+   *
+   * Oldest first when trimming: recent work is what a recommendation reads.
+   * This used to say "and the server's rollup already has whatever arrived
+   * earlier", which is true of a device that has been syncing and false of the
+   * one case that overflows — a tablet three weeks offline, where the oldest
+   * events are precisely the ones the server has never seen. They are returned
+   * rather than dropped so the caller can fold them into a total the server
+   * *can* be told about; see `unsentTotals.ts`.
+   */
+  add(events: LearningEvent[]): LearningEvent[] {
+    if (!events.length) return [];
     queue.events.push(...events);
-    // Oldest first when trimming: recent work is what a recommendation reads,
-    // and the server's rollup already has whatever arrived earlier.
+
+    let dropped: LearningEvent[] = [];
     if (queue.events.length > MAX_EVENTS) {
+      dropped = queue.events.slice(0, queue.events.length - MAX_EVENTS);
       queue.events = queue.events.slice(-MAX_EVENTS);
     }
     save();
+    return dropped;
   },
 
   /**

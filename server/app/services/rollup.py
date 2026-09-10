@@ -68,3 +68,78 @@ def increments_for(event: LearningEvent, *, family_id: str) -> dict[str, Any] | 
         # $max, so a batch arriving out of order cannot move "last seen" backwards.
         "set": {"lastSeenTs": event.ts},
     }
+
+
+#: Counters a baseline carries, under the names `concept_totals` already uses.
+BASELINE_COUNTERS = (
+    "questionsAnswered",
+    "correctFirstTry",
+    "supportsUsed",
+    "lessonsCompleted",
+    "lessonsAbandoned",
+    "totalResponseMs",
+)
+
+
+def baseline_increments(
+    previous: dict[str, Any] | None,
+    current: dict[str, Any],
+    *,
+    family_id: str,
+    learner_id: str,
+) -> list[dict[str, Any]]:
+    """What a `conceptBaseline` document adds to a learner's totals.
+
+    A baseline is one device's account of work it could not send as events —
+    an outbox that overflowed on a long journey, or a history older than the
+    device's own event ring. The body is *cumulative*, so what it adds is the
+    difference from the copy this server already had; re-sending an unchanged
+    document therefore adds nothing, which is what makes a retry after a lost
+    acknowledgement safe.
+
+    A device only ever writes its own key (`learner:device`), so two tablets
+    cannot read each other's running total as their own previous value. Falling
+    counters are ignored rather than applied: a total can only go up, and a
+    negative increment here would subtract another device's honest work.
+    """
+    previous_concepts = (previous or {}).get("concepts") or {}
+    increments: list[dict[str, Any]] = []
+
+    for concept_key, totals in (current.get("concepts") or {}).items():
+        before = previous_concepts.get(concept_key) or {}
+
+        inc: dict[str, int] = {}
+        for field in BASELINE_COUNTERS:
+            delta = int(totals.get(field, 0) or 0) - int(before.get(field, 0) or 0)
+            if delta > 0:
+                inc[field] = delta
+
+        errors_before = before.get("errors") or {}
+        for kind, count in (totals.get("errors") or {}).items():
+            delta = int(count or 0) - int(errors_before.get(kind, 0) or 0)
+            if delta > 0:
+                inc[f"errors.{kind}"] = delta
+
+        add = {
+            "skillIds": list(totals.get("skillIds") or []),
+            # Days are a set on both sides, so a day this device has already
+            # reported through an event costs nothing to report again.
+            "practisedOn": list(totals.get("practisedOn") or []),
+        }
+        add = {k: v for k, v in add.items() if v}
+
+        if not inc and not add:
+            continue
+
+        item: dict[str, Any] = {
+            "familyId": family_id,
+            "learnerId": learner_id,
+            "conceptKey": concept_key,
+            "inc": inc,
+            "add": add,
+        }
+        if totals.get("lastSeenTs"):
+            item["set"] = {"lastSeenTs": totals["lastSeenTs"]}
+        increments.append(item)
+
+    return increments

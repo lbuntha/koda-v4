@@ -181,6 +181,16 @@ export const LearnPage: React.FC<LearnPageProps> = ({
      by the one control on the page that is not asking them to choose. */
   const taught = teaching.flatMap((unit) => unit.lessons);
   /*
+   * What the hero card counts: the teaching path, not the whole course entry.
+   *
+   * `done` and `finished` above stay whole-skill, because they decide the one
+   * button — and a learner with practice still open is not finished with the
+   * skill. The card is answering a different question ("how long is this, and
+   * how far am I?"), and the answer to that is the path the sections below
+   * actually lay out. Practice keeps its own counter on its own heading.
+   */
+  const taughtDone = taught.filter((lesson) => starsFor(lesson) > 0).length;
+  /*
    * A finished path offers practice before it offers a replay.
    *
    * Once every lesson is played `next` is undefined, and the one button on this
@@ -328,8 +338,8 @@ export const LearnPage: React.FC<LearnPageProps> = ({
         thumbnail={listing?.thumbnail ?? skill.manifest.thumbnail}
         fallbackIconName={skill.manifest.iconName}
         category={category}
-        lessonCount={lessons.length}
-        completedLessons={done}
+        lessonCount={taught.length}
+        completedLessons={taughtDone}
         registered={registered}
         registering={registering}
         badges={
@@ -341,7 +351,7 @@ export const LearnPage: React.FC<LearnPageProps> = ({
             {server?.status === "draft" && <UIBadge variant="warning">Draft preview</UIBadge>}
           </>
         }
-        meta={`by ${skill.manifest.author} · v${skill.manifest.version} · ${lessons.length} lessons`}
+        meta={`by ${skill.manifest.author} · v${skill.manifest.version} · ${taught.length} lessons`}
         footnote={
           registered ? (
             next ? (

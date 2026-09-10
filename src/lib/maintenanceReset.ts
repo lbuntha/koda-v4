@@ -26,6 +26,10 @@ const LEARNING_KEYS = [
   "koda_completed_levels_v1",
   "koda_profile_stats_v1",
   "koda_outbox_backfill_v1",
+  // What the outbox could not send, folded into totals. It is learning work
+  // like the rest, so a reset that wipes the log and the queue but left this
+  // would push the erased history back up on the next flush.
+  "koda_unsent_totals_v1",
 ];
 
 /** Every stored key one of `bases` names, including its per-learner variants. */

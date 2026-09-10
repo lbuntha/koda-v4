@@ -1,86 +1,96 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 400 200">
+  <!--
+    Counting's card: a scattered set, touched in order, each one badged.
+
+    Not a row and not a grid, because the skill's hard part is exactly the one a
+    tidy arrangement hides — keeping track of what you have already counted when
+    the objects are not lined up for you. So the card draws what TouchOrbit
+    draws: a scatter, the numbered discs the `counting_badges` feature stamps on
+    each tap (orange on white, the lesson's own colours), the faint path through
+    them in tap order, and the last number said, which is how many there are.
+
+    Objects vary in colour the way a real set does — violet, sky, rose, emerald,
+    the app palette. No amber or yellow anywhere.
+  -->
   <defs>
-    <!-- Background Shield Gradient (Dark Indigo to Deep Purple) -->
-    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#2E1065" />
-      <stop offset="100%" stop-color="#1E1B4B" />
+    <linearGradient id="cntGround" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#281B52"/>
+      <stop offset="100%" stop-color="#110C28"/>
     </linearGradient>
-
-    <!-- Golden Purple Metallic Rim Gradient -->
-    <linearGradient id="purpleGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#E9D5FF" />
-      <stop offset="50%" stop-color="#A855F7" />
-      <stop offset="100%" stop-color="#581C87" />
+    <linearGradient id="cntViolet" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C4B5FD"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
     </linearGradient>
-
-    <!-- Number Gradients (Vibrant Purple Spectrum) -->
-    <!-- Number 1: Light Lavender / Orchid -->
-    <linearGradient id="num1Grad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#F472B6" />
-      <stop offset="100%" stop-color="#C084FC" />
+    <linearGradient id="cntSky" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7DD3FC"/>
+      <stop offset="100%" stop-color="#0284C7"/>
     </linearGradient>
-
-    <!-- Number 2: Bright Electric Violet -->
-    <linearGradient id="num2Grad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#E879F9" />
-      <stop offset="100%" stop-color="#A855F7" />
+    <linearGradient id="cntRose" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDA4AF"/>
+      <stop offset="100%" stop-color="#E11D48"/>
     </linearGradient>
-
-    <!-- Number 3: Neon Indigo/Violet -->
-    <linearGradient id="num3Grad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#A855F7" />
-      <stop offset="100%" stop-color="#6366F1" />
+    <linearGradient id="cntEmerald" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6EE7B7"/>
+      <stop offset="100%" stop-color="#059669"/>
     </linearGradient>
-
-    <!-- Banner Ribbon Gradient (Royal Purple) -->
-    <linearGradient id="bannerGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#7E22CE" />
-      <stop offset="100%" stop-color="#3B0764" />
+    <linearGradient id="cntTotal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6EE7B7"/>
+      <stop offset="100%" stop-color="#059669"/>
     </linearGradient>
-
-    <!-- Soft Drop Shadows -->
-    <filter id="dropShadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-opacity="0.4" />
-    </filter>
+    <radialGradient id="cntGlow" cx="40%" cy="52%" r="62%">
+      <stop offset="0%" stop-color="#8B5CF6" stop-opacity="0.42"/>
+      <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0"/>
+    </radialGradient>
   </defs>
 
-  <!-- SHIELD BACKGROUND -->
-  <!-- Outer Purple Metallic Rim -->
-  <path d="M 200,15 L 310,40 C 310,120 200,165 200,165 C 200,165 90,120 90,40 Z" 
-        fill="url(#purpleGoldGrad)" filter="url(#dropShadow)" />
-        
-  <!-- Inner Shield Body -->
-  <path d="M 200,22 L 300,45 C 300,115 200,155 200,155 C 200,155 100,115 100,45 Z" 
-        fill="url(#shieldGrad)" />
+  <rect width="400" height="200" rx="18" fill="url(#cntGround)"/>
+  <ellipse cx="150" cy="102" rx="156" ry="92" fill="url(#cntGlow)"/>
 
-  <!-- DECORATIVE STARS & SPARKLING ACCENTS -->
-  <path d="M 200,32 L 203,40 L 211,40 L 204,45 L 207,53 L 200,48 L 193,53 L 196,45 L 189,40 L 197,40 Z" fill="#F472B6" />
-  <circle cx="140" cy="55" r="3" fill="#E9D5FF" opacity="0.8" />
-  <circle cx="260" cy="55" r="3" fill="#E9D5FF" opacity="0.8" />
+  <text x="30" y="38" font-family="system-ui, sans-serif" font-size="19" font-weight="700"
+        letter-spacing="2.5" fill="#E9D5FF">COUNTING</text>
 
-  <!-- PLAYFUL NUMBERS (1, 2, 3) -->
-  <!-- Number 1 -->
-  <text x="145" y="110" font-family="'Arial Black', sans-serif" font-size="48" font-weight="900" 
-        fill="url(#num1Grad)" stroke="#3B0764" stroke-width="2" text-anchor="middle" filter="url(#dropShadow)">1</text>
-  
-  <!-- Number 2 -->
-  <text x="200" y="105" font-family="'Arial Black', sans-serif" font-size="56" font-weight="900" 
-        fill="url(#num2Grad)" stroke="#3B0764" stroke-width="2" text-anchor="middle" filter="url(#dropShadow)">2</text>
-  
-  <!-- Number 3 -->
-  <text x="255" y="110" font-family="'Arial Black', sans-serif" font-size="48" font-weight="900" 
-        fill="url(#num3Grad)" stroke="#1E1B4B" stroke-width="2" text-anchor="middle" filter="url(#dropShadow)">3</text>
+  <!-- The order you went in: "go in order so you do not miss any", drawn. -->
+  <polyline points="48,108 82,78 116,116 150,82 184,122 218,88 250,124"
+            fill="none" stroke="#A78BFA" stroke-opacity="0.5" stroke-width="3"
+            stroke-linecap="round" stroke-dasharray="2 7"/>
 
-  <!-- BANNER RIBBON & TEXT -->
-  <!-- Left Banner Tail -->
-  <polygon points="65,145 85,130 85,160" fill="#2E1065" />
-  <!-- Right Banner Tail -->
-  <polygon points="335,145 315,130 315,160" fill="#2E1065" />
+  <!-- The set. Seven, scattered, each already touched once — and only once. -->
+  <g>
+    <circle cx="48"  cy="108" r="15" fill="url(#cntViolet)"/>
+    <circle cx="82"  cy="78"  r="15" fill="url(#cntSky)"/>
+    <circle cx="116" cy="116" r="15" fill="url(#cntRose)"/>
+    <circle cx="150" cy="82"  r="15" fill="url(#cntEmerald)"/>
+    <circle cx="184" cy="122" r="15" fill="url(#cntViolet)"/>
+    <circle cx="218" cy="88"  r="15" fill="url(#cntSky)"/>
+    <circle cx="250" cy="124" r="15" fill="url(#cntRose)"/>
+  </g>
 
-  <!-- Main Banner Body -->
-  <rect x="75" y="130" width="250" height="36" rx="6" fill="url(#bannerGrad)" stroke="#E9D5FF" stroke-width="1.5" filter="url(#dropShadow)" />
+  <!-- The badges: a saturated disc with a white ring, exactly as the lesson
+       stamps them, so a child sees the same mark on the card and in the round. -->
+  <g fill="#F97316" stroke="#FFFFFF" stroke-width="1.8">
+    <circle cx="59"  cy="97"  r="8"/>
+    <circle cx="93"  cy="67"  r="8"/>
+    <circle cx="127" cy="105" r="8"/>
+    <circle cx="161" cy="71"  r="8"/>
+    <circle cx="195" cy="111" r="8"/>
+    <circle cx="229" cy="77"  r="8"/>
+    <circle cx="261" cy="113" r="8"/>
+  </g>
+  <g font-family="system-ui, sans-serif" font-size="10" font-weight="800"
+     fill="#FFFFFF" text-anchor="middle">
+    <text x="59"  y="101">1</text>
+    <text x="93"  y="71" >2</text>
+    <text x="127" y="109">3</text>
+    <text x="161" y="75" >4</text>
+    <text x="195" y="115">5</text>
+    <text x="229" y="81" >6</text>
+    <text x="261" y="117">7</text>
+  </g>
 
-  <!-- "COUNTING QUEST" TEXT -->
-  <text x="200" y="154" font-family="'Arial Black', sans-serif" font-size="20" font-weight="900" 
-        fill="#FFFFFF" text-anchor="middle" letter-spacing="2" filter="url(#dropShadow)">COUNTING QUEST</text>
+  <!-- The last number you said is how many there are. -->
+  <text x="336" y="122" text-anchor="middle" font-family="system-ui, sans-serif"
+        font-size="66" font-weight="800" fill="url(#cntTotal)">7</text>
+
+  <text x="30" y="176" font-family="system-ui, sans-serif" font-size="12" font-weight="700"
+        fill="#E9D5FF" fill-opacity="0.72">One to one · Compare · See at a glance</text>
 </svg>
