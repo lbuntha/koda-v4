@@ -470,6 +470,30 @@ describe("the chart keeps each mode's shape", () => {
     expect(deskSpec("partial_sums", { addendRange: [11, 20] }).regroup).toBe("ones");
   });
 
+  it("gives the total a hundreds column when the tens make one", () => {
+    // 52 and 88: partials of 130 and 10, and a total of 140 that a T and an O
+    // box cannot hold between them. Over half of what this lesson draws lands
+    // here, so the round was mostly unanswerable.
+    const ps = buildDesk({ mode: "partial_sums", aRange: [52, 52], bRange: [88, 88] }, 1, new Set());
+
+    expect(ps.sum).toBe(140);
+    expect(ps.places).toEqual(["hundreds", "tens", "ones"]);
+    expect(ps.blanks).toEqual(["tens", "ones", "sum-h", "sum-t", "sum-o"]);
+    expect(ps.answers).toEqual([130, 10, 1, 4, 0]);
+    // Every row as wide as the headings, or the digits sit under the wrong ones.
+    for (const row of ps.rows) expect(row.cells).toHaveLength(3);
+    // And 52 is still 52, not 052.
+    expect(ps.rows[0].cells.map((c) => c.value ?? c.text)).toEqual(["", 5, 2]);
+  });
+
+  it("leaves the hundreds column off a two-digit total", () => {
+    const ps = buildDesk({ mode: "partial_sums", aRange: [47, 47], bRange: [47, 47] }, 1, new Set());
+
+    expect(ps.places).toEqual(["tens", "ones"]);
+    expect(ps.blanks).toEqual(["tens", "ones", "sum-t", "sum-o"]);
+    expect(ps.answers).toEqual([80, 14, 9, 4]);
+  });
+
   it("spells each number out as the values it is made of", () => {
     const seen = new Set<string>();
     const q = buildDesk({ mode: "expanded", addendRange: [342, 342] }, 1, seen);

@@ -172,21 +172,46 @@ export const buildQuestion = (
   const onesPart = da.ones + db.ones;
 
   if (mode === "partial_sums") {
-    // Each column worked out on its own and *kept*, then put together at the
-    // end. Nothing is carried; the partials do that job in the open.
+    /*
+     * Each column worked out on its own and *kept*, then put together at the
+     * end. Nothing is carried; the partials do that job in the open.
+     *
+     * Two tens columns that make ten tens is the whole point of the lesson, so
+     * the total needs somewhere to put the hundred: 52 and 88 gives partials of
+     * 130 and 10, and an Altogether row of only T and O cannot hold 140. The
+     * hundreds column is drawn when the sum reaches one, and left off when it
+     * does not — an empty H column on a two-digit total invites a child to
+     * write a 0 in front of their answer.
+     */
+    const ds = digitsOf(sum);
+    const hundred = sum >= 100;
+    /** Keeps the addends and partials under T and O when H is drawn. */
+    const lead: DeskCell[] = hundred ? [{ text: "" }] : [];
+    const answers = hundred
+      ? [tensPart, onesPart, ds.hundreds, ds.tens, ds.ones]
+      : [tensPart, onesPart, ds.tens, ds.ones];
+
     return {
       ...base,
-      places,
+      places: hundred ? ["hundreds", "tens", "ones"] : places,
       rows: [
-        { label: String(a), cells: digitsFor(a, places).map((value) => ({ value })) },
-        { label: String(b), cells: digitsFor(b, places).map((value) => ({ value })) },
-        { label: "Tens", total: true, cells: [{ blank: "tens" }, { text: "" }] },
-        { label: "Ones", cells: [{ text: "" }, { blank: "ones" }] },
-        { label: "Altogether", total: true, cells: [{ blank: "sum-t" }, { blank: "sum-o" }] },
+        { label: String(a), cells: [...lead, ...digitsFor(a, places).map((value) => ({ value }))] },
+        { label: String(b), cells: [...lead, ...digitsFor(b, places).map((value) => ({ value }))] },
+        { label: "Tens", total: true, cells: [...lead, { blank: "tens" }, { text: "" }] },
+        { label: "Ones", cells: [...lead, { text: "" }, { blank: "ones" }] },
+        {
+          label: "Altogether",
+          total: true,
+          cells: hundred
+            ? [{ blank: "sum-h" }, { blank: "sum-t" }, { blank: "sum-o" }]
+            : [{ blank: "sum-t" }, { blank: "sum-o" }],
+        },
       ],
-      blanks: ["tens", "ones", "sum-t", "sum-o"],
-      answers: [tensPart, onesPart, digitsOf(sum).tens, digitsOf(sum).ones],
-      expected: `${tensPart},${onesPart},${digitsOf(sum).tens},${digitsOf(sum).ones}`,
+      blanks: hundred
+        ? ["tens", "ones", "sum-h", "sum-t", "sum-o"]
+        : ["tens", "ones", "sum-t", "sum-o"],
+      answers,
+      expected: answers.join(","),
       itemCount: sum,
     };
   }
