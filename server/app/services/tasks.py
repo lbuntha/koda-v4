@@ -302,6 +302,23 @@ async def token_sweep(db: AsyncIOMotorDatabase) -> dict[str, Any]:
 PRACTICE_REMINDER = "learn.practice_reminder"
 STREAK_ENDING = "learn.streak_ending"
 
+
+def _how_long(away: int | None) -> str:
+    """How long it has been, as the reminder says it out loud.
+
+    The noun travels with the number, for the reason the weekly summary already
+    gives: a body reading "It's been 1 days" is the sort of thing a nine-year-old
+    reads aloud to their parent.
+
+    `None` — a child who has never finished anything — becomes "a while" rather
+    than a count. It is the one case where the sentence cannot be precise, and
+    the alternative is a second kind and a second operator switch to say one
+    extra thing on the evening somebody first gets round to starting.
+    """
+    if away is None:
+        return "a while"
+    return "a day" if away <= 1 else f"{away} days"
+
 #: How late a streak warning may go out.
 #:
 #: Sent with the reminder rather than on its own schedule: a family who hears
@@ -407,13 +424,14 @@ async def daily_reminders(
                 continue
 
             # A streak at stake outranks a plain reminder: same evening, better
-            # reason, and never both.
-            at_stake = await streaks.ending_today(db, family_id, learner_id, today=today)
+            # reason, and never both. Both figures come back from one read — see
+            # `streaks.for_reminder`.
+            at_stake, away = await streaks.for_reminder(db, family_id, learner_id, today=today)
             kind = STREAK_ENDING if at_stake and allows_streak else PRACTICE_REMINDER
             if kind == PRACTICE_REMINDER and not allows_reminder:
                 continue
 
-            values = {"learner": name, "days": at_stake}
+            values = {"learner": name, "days": at_stake, "away": _how_long(away)}
             title, body = await push.wording(db, kind, values)
 
             if preview:

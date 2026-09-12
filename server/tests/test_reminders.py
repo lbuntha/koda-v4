@@ -118,6 +118,28 @@ def test_nonsense_in_the_field_does_not_crash_a_job():
     assert streaks.run_length(["2026-08-17"], today="rubbish") == 0
 
 
+# --- how long it has been -------------------------------------------------
+
+
+def test_the_gap_is_counted_from_the_last_day_that_counted():
+    assert streaks.days_away(["2026-08-15", "2026-08-14"], today="2026-08-18") == 3
+
+
+def test_a_child_who_practised_today_is_no_days_away():
+    assert streaks.days_away(["2026-08-18", "2026-08-11"], today="2026-08-18") == 0
+
+
+def test_a_child_who_has_never_practised_has_no_gap_to_report():
+    """`None`, not a large number: "away for 4,000 days" is a sentence about a
+    child who signed up this morning."""
+    assert streaks.days_away([], today="2026-08-18") is None
+    assert streaks.days_away(["rubbish"], today="2026-08-18") is None
+
+
+def test_a_clock_that_runs_ahead_does_not_produce_a_negative_gap():
+    assert streaks.days_away(["2026-08-19"], today="2026-08-18") == 0
+
+
 # --- quiet hours ----------------------------------------------------------
 
 
@@ -243,6 +265,37 @@ async def test_one_day_is_not_a_streak_worth_defending(db, family, seeded):
 
     assert report["streaks"] == 0
     assert report["reminders"] == 1
+
+
+async def test_the_reminder_says_how_long_it_has_been(db, family, seeded):
+    """A parent whose child has been away a week read "hasn't had a go today
+    yet" on each of those days, which is true and tells them nothing."""
+    await practise(db, family, ["2026-08-12"])
+
+    await task_service.daily_reminders(db, at=REMINDER_TIME_UTC)
+
+    body = (await told(db, "learn.practice_reminder"))[0]["body"]
+    assert "6 days" in body, body
+    assert "Mia" in body, body
+
+
+async def test_the_noun_travels_with_the_number(db, family, seeded):
+    """"It's been 1 days" is the sort of thing a child reads aloud to a parent."""
+    await practise(db, family, days_before("2026-08-18", 1))
+
+    await task_service.daily_reminders(db, at=REMINDER_TIME_UTC)
+
+    body = (await told(db, "learn.practice_reminder"))[0]["body"]
+    assert "a day" in body, body
+    assert "1 days" not in body, body
+
+
+async def test_a_child_who_has_never_started_is_not_given_a_number(db, family, seeded):
+    """There is no gap to count, so the sentence says the one true thing it can."""
+    await task_service.daily_reminders(db, at=REMINDER_TIME_UTC)
+
+    body = (await told(db, "learn.practice_reminder"))[0]["body"]
+    assert "a while" in body, body
 
 
 async def test_a_preview_shows_the_evening_without_sending_it(client, db, family, seeded):

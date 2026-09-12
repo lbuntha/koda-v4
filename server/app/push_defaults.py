@@ -142,11 +142,15 @@ DEFAULT_KINDS: list[dict[str, Any]] = [
         # still has to ask for them and choose the hour.
         "kindId": "learn.practice_reminder",
         "title": 'Time to practise',
-        "body": "{learner} hasn't had a go today yet.",
+        # "hasn't had a go today yet" was true and said nothing: a parent whose
+        # child has been away nine days read the same sentence on each of them.
+        # `{away}` is how long it has been, with its noun attached — "a day",
+        # "3 days", or "a while" for a child who has not started yet.
+        "body": "It's been {away} since {learner} practised.",
         #: What a sender may substitute. Anything else an operator types is
         #: left visible rather than guessed at, so a typo shows up in the
         #: preview instead of on somebody's lock screen.
-        "placeholders": ['learner'],
+        "placeholders": ['learner', 'away'],
         "class": "courtesy",
         "label": "Practice reminder",
         "settingId": "push.practiceReminder",
@@ -197,6 +201,14 @@ SAMPLES = {
     "skill": "Counting",
     "days": "4",
     "practice": "4 days",
+    # The noun travels with the number here for the reason it does in the job
+    # that fills it for real: a sample reading "1 days" teaches an operator that
+    # their copy is broken when it is not.
+    "away": "3 days",
+    # The noun travels with the number here for the reason it does in the job
+    # that fills it for real: a sample reading "1 days" teaches an operator that
+    # their copy is broken when it is not.
+
     "name": "Sam",
     "decision": "approved",
     "message": "Koda is down for maintenance until 6pm.",

@@ -1093,3 +1093,22 @@ async def test_a_tap_is_reported_by_the_person_who_made_it(client, parent, db, s
     )
 
     assert response.status_code == 204
+
+
+def test_every_placeholder_a_kind_declares_has_a_sample():
+    """Or the operator's own test send prints a literal `{brace}` at them.
+
+    The gap this closes is small and silent: a kind gains a placeholder, the job
+    that sends it for real fills it, and nobody notices that Admin's "send test
+    to my devices" — which fills from `SAMPLES` — now renders the brace instead.
+    The operator reads it on their own lock screen and concludes their copy is
+    broken. `learn.practice_reminder` did exactly this the day it learned to say
+    how long it had been.
+    """
+    from app.push_defaults import DEFAULT_KINDS, SAMPLES
+
+    missing = {
+        kind["kindId"]: [p for p in kind.get("placeholders", []) if p not in SAMPLES]
+        for kind in DEFAULT_KINDS
+    }
+    assert {k: v for k, v in missing.items() if v} == {}

@@ -39,6 +39,15 @@ Non-goals, stated so they cannot creep in:
   for permission and never holds a token. A kid's device is where the app is
   *played*, not where it is *advertised*. Enforced in code, not by policy: the
   token endpoint refuses a token from a principal carrying a `learnerId`.
+
+  This is not the same as saying nothing to a child who has been away. The band
+  on Home (`src/components/WelcomeBack.tsx`, ruled by `src/lib/absence.ts`) is
+  the learner-facing half, and it is deliberately *in* the app rather than on a
+  lock screen: it is read by somebody who has already decided to open Koda, it
+  needs no permission, no token and no service worker, and it cannot reach a
+  child who is doing something else. Nothing about it weakens the rule above —
+  the point of the rule is that Koda never rings a child, and a sentence above
+  the lesson cards does not ring anybody.
 - **No streak-panic, no "you're losing your progress", no daily hook.** The
   reminders below fire at a time a parent chose, at most once a day, and stop
   by themselves when nobody taps them (§9).
@@ -601,7 +610,7 @@ timer of its own:
 
 | Job | Cadence | Does |
 |---|---|---|
-| `daily-reminders` | Hourly, on the hour | Sends `practice_reminder` — or `streak_ending`, when there is a streak at stake — to a child who has not practised, at the hour *their own parent* chose |
+| `daily-reminders` | Hourly, on the hour | Sends `practice_reminder` — or `streak_ending`, when there is a streak at stake — to a child who has not practised, at the hour *their own parent* chose. The reminder says how long it has been (`{away}`), so a week away does not read as nine identical evenings |
 | `weekly-summary` | Hourly, on the hour | Same, for families for whom it is now Sunday evening |
 | `token-sweep` | Nightly | Deletes rows `refreshedAt` older than 270 days and `disabledAt` older than 30 |
 

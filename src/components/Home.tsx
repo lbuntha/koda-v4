@@ -17,6 +17,7 @@ import { BadgeIcon } from "./account/BadgeVisuals";
 import type { UserProgress } from "../types";
 import { playSound } from "../utils/audio";
 import { UIButton, UILessonCard, UISkillCard } from "./ui";
+import { WelcomeBack } from "./WelcomeBack";
 import { SvgAsset } from "../assets/svg";
 
 interface HomeProps {
@@ -466,6 +467,10 @@ export const Home: React.FC<HomeProps> = ({
       <div className={themeSystem.spacing.section}>
         {registered.length ? (
           <>
+            {/* Above Today, because it is about the gap before today rather
+                than about any lesson in it — and because the cards directly
+                under it are the answer to whatever it says. */}
+            <WelcomeBack userProgress={userProgress} />
             <section>
               <h1 className="font-mono font-black uppercase tracking-widest text-xs text-indigo-600">
                 Today

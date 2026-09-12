@@ -68,9 +68,28 @@ async def for_learner(
     return run_length(days, today=today)
 
 
-async def ending_today(
-    db: AsyncIOMotorDatabase, family_id: str, learner_id: str, *, today: str
-) -> int:
+def days_away(days: list[str], *, today: str) -> int | None:
+    """Whole days since the last practice, or `None` if there has never been one.
+
+    `None` rather than a large number, because "has not practised for 4,000
+    days" is a sentence about a child who signed up this morning. The two cases
+    are different facts and the caller has to word them differently.
+    """
+    anchor = _as_date(today)
+    if anchor is None:
+        return None
+    seen = sorted(
+        (parsed for parsed in (_as_date(day) for day in days) if parsed is not None),
+        reverse=True,
+    )
+    if not seen:
+        return None
+    # Never negative: a device whose clock is ahead can write tomorrow's day
+    # key, and "practised -1 days ago" is not a thing to put on a lock screen.
+    return max(0, (anchor - seen[0]).days)
+
+
+def ending(days: list[str], *, today: str) -> int:
     """The streak that lapses tonight, or 0 if there is nothing at stake.
 
     "At stake" is the precise thing: a streak that already includes today is not
@@ -78,8 +97,29 @@ async def ending_today(
     practised once yesterday has not built anything that a notification about
     losing it would be honest about.
     """
-    days = await events_repo.practice_days(db, family_id, learner_id)
     if today in days:
         return 0
     length = run_length(days, today=today)
     return length if length >= 2 else 0
+
+
+async def ending_today(
+    db: AsyncIOMotorDatabase, family_id: str, learner_id: str, *, today: str
+) -> int:
+    """`ending`, for a caller that holds a database rather than a list of days."""
+    return ending(await events_repo.practice_days(db, family_id, learner_id), today=today)
+
+
+async def for_reminder(
+    db: AsyncIOMotorDatabase, family_id: str, learner_id: str, *, today: str
+) -> tuple[int, int | None]:
+    """What tonight's reminder needs to know, in one read: at stake, and away for.
+
+    One function because it is one query. `practice_days` is a `distinct` over
+    the events collection — the most expensive thing the reminder job does — and
+    asking it twice per learner per evening, once for the streak and once for
+    the gap, would double the cost of the job to learn two facts that are in the
+    same list of days.
+    """
+    days = await events_repo.practice_days(db, family_id, learner_id)
+    return ending(days, today=today), days_away(days, today=today)
