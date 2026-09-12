@@ -130,6 +130,135 @@ async def test_progress_merges_instead_of_clobbering(client, parent):
     assert body["dailyGoal"] == 8, "a setting that is not a counter takes the later write"
 
 
+async def test_a_stale_device_cannot_roll_the_streak_back(client, parent):
+    """The later write is not the later day, and the streak follows the day."""
+    await client.post(
+        "/sync/push",
+        json={
+            "mutations": [
+                mutation(
+                    "op_1",
+                    kind="progress",
+                    key="l_mia",
+                    body={
+                        "streakDays": 9,
+                        "lastStreakDay": "2026-09-12",
+                        "longestStreak": 9,
+                        "dailySolved": 3,
+                        "lastPracticeDay": "2026-09-12",
+                    },
+                )
+            ]
+        },
+        headers=parent,
+    )
+
+    # The tablet that has been shut in a drawer since Tuesday, waking up.
+    await client.post(
+        "/sync/push",
+        json={
+            "mutations": [
+                mutation(
+                    "op_2",
+                    kind="progress",
+                    key="l_mia",
+                    body={
+                        "streakDays": 5,
+                        "lastStreakDay": "2026-09-08",
+                        "longestStreak": 5,
+                        "dailySolved": 1,
+                        "lastPracticeDay": "2026-09-08",
+                    },
+                    baseRev=0,
+                )
+            ]
+        },
+        headers=parent,
+    )
+
+    changes = (await client.get("/sync/changes?since=0", headers=parent)).json()
+    body = changes["docs"][0]["body"]
+    assert body["streakDays"] == 9, "an older day's figure does not win on arrival order"
+    assert body["lastStreakDay"] == "2026-09-12"
+    assert body["longestStreak"] == 9, "a best-ever run is never taken away"
+    assert body["dailySolved"] == 3
+    assert body["lastPracticeDay"] == "2026-09-12"
+
+
+async def test_a_streak_that_has_moved_on_takes_the_newer_day(client, parent):
+    """The rule is the day, not the size: a restarted run must still land."""
+    await client.post(
+        "/sync/push",
+        json={
+            "mutations": [
+                mutation(
+                    "op_1",
+                    kind="progress",
+                    key="l_mia",
+                    body={"streakDays": 9, "lastStreakDay": "2026-09-01", "longestStreak": 9},
+                )
+            ]
+        },
+        headers=parent,
+    )
+    await client.post(
+        "/sync/push",
+        json={
+            "mutations": [
+                mutation(
+                    "op_2",
+                    kind="progress",
+                    key="l_mia",
+                    body={"streakDays": 1, "lastStreakDay": "2026-09-12", "longestStreak": 9},
+                    baseRev=0,
+                )
+            ]
+        },
+        headers=parent,
+    )
+
+    changes = (await client.get("/sync/changes?since=0", headers=parent)).json()
+    body = changes["docs"][0]["body"]
+    assert body["streakDays"] == 1, "a lapsed run that restarted is the truth, not a rollback"
+    assert body["lastStreakDay"] == "2026-09-12"
+    assert body["longestStreak"] == 9, "and the best-ever run is still nine"
+
+
+async def test_two_devices_on_the_same_day_keep_the_fuller_count(client, parent):
+    await client.post(
+        "/sync/push",
+        json={
+            "mutations": [
+                mutation(
+                    "op_1",
+                    kind="progress",
+                    key="l_mia",
+                    body={"dailySolved": 4, "lastPracticeDay": "2026-09-12"},
+                )
+            ]
+        },
+        headers=parent,
+    )
+    await client.post(
+        "/sync/push",
+        json={
+            "mutations": [
+                mutation(
+                    "op_2",
+                    kind="progress",
+                    key="l_mia",
+                    body={"dailySolved": 2, "lastPracticeDay": "2026-09-12"},
+                    baseRev=0,
+                )
+            ]
+        },
+        headers=parent,
+    )
+
+    changes = (await client.get("/sync/changes?since=0", headers=parent)).json()
+    assert changes["docs"][0]["body"]["dailySolved"] == 4
+
+
 async def test_a_delete_travels_as_a_tombstone(client, parent, second_device):
     await client.post("/sync/push", json={"mutations": [mutation("op_1")]}, headers=parent)
     await client.post(

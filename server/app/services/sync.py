@@ -20,6 +20,7 @@ from app.errors import AppError, Forbidden
 from app.models.auth import Principal
 from app.models.events import PushIn, PushOut
 from app.models.sync import (
+    DAY_SCOPED_PROGRESS_FIELDS,
     DOC_KINDS,
     KIND_PERMISSIONS,
     LEARNER_OWNED_KINDS,
@@ -51,18 +52,45 @@ def _as_sync_doc(row: dict[str, Any]) -> SyncDoc:
 
 
 def merge_progress(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[str, Any]:
-    """Last write wins, except where a value can only go up.
+    """Last write wins, except where the later write is not the better answer.
 
-    Three lines that prevent the regression people actually notice: a tablet
-    syncing yesterday's XP after today's session should not roll a child back.
+    Two exceptions, and they prevent the regressions people actually notice: a
+    tablet syncing yesterday's XP after today's session must not roll a child
+    back, and neither must it roll back the streak that session extended. See
+    `MONOTONIC_PROGRESS_FIELDS` and `DAY_SCOPED_PROGRESS_FIELDS` for which is
+    which and why the two need different rules.
     """
     merged = {**existing, **incoming}
+
     for field in MONOTONIC_PROGRESS_FIELDS:
         if field in existing and field in incoming:
             try:
                 merged[field] = max(existing[field], incoming[field])
             except TypeError:
                 pass  # not a number after all — the later write stands
+
+    for day_field, count_field in DAY_SCOPED_PROGRESS_FIELDS:
+        was, now_ = existing.get(day_field), incoming.get(day_field)
+        # Day keys are `YYYY-MM-DD`, so they sort as strings. Anything else is a
+        # device writing nonsense into its own field, and the later write stands
+        # rather than this deciding which nonsense is newer.
+        if not isinstance(was, str) or not isinstance(now_, str):
+            continue
+        if was > now_:
+            # The incoming body counted for an earlier day: it knows nothing
+            # about what has happened since, so neither of its figures applies.
+            merged[day_field] = was
+            if count_field in existing:
+                merged[count_field] = existing[count_field]
+        elif was == now_ and count_field in existing and count_field in incoming:
+            # The same day on two devices — a child who played on both. Neither
+            # count includes the other's rounds, so the fuller one is the least
+            # wrong answer available.
+            try:
+                merged[count_field] = max(existing[count_field], incoming[count_field])
+            except TypeError:
+                pass
+
     return merged
 
 

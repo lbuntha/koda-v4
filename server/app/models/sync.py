@@ -70,12 +70,29 @@ MAX_ART_BYTES = 64 * 1024
 # larger value rather than the later write: two devices playing the same child
 # should never subtract XP from each other.
 #
-# Day-scoped figures are deliberately *not* here. A streak breaks and a daily
-# count rolls over at midnight, so taking the larger of two values would make
-# both permanent: a child who stopped playing a fortnight ago would keep a
-# fourteen-day flame forever. Those fields travel with the day key they were
-# counted for, so the later write is the right one.
-MONOTONIC_PROGRESS_FIELDS = ("xp", "level", "problemsSolved")
+# `longestStreak` belongs here and not below, despite being about days: it is a
+# best-ever figure, and a lapse never takes it away. It is also what the badge
+# rules are measured against, so a rollback here does not just show a smaller
+# number — it takes an earned badge off a child.
+MONOTONIC_PROGRESS_FIELDS = ("xp", "level", "problemsSolved", "longestStreak")
+
+# Day-scoped figures, and the field holding the day each was counted for.
+#
+# A streak breaks and a daily count rolls over at midnight, so `max()` is wrong
+# here: it would make both permanent, and a child who stopped playing a
+# fortnight ago would keep a fourteen-day flame forever.
+#
+# "The later write wins" was the first answer and is just as wrong, because the
+# later *write* is not the later *day*. A tablet that has been shut since
+# Tuesday pushes Tuesday's body on Friday and wins on arrival order alone,
+# rolling the child back to a streak that has since grown. So each of these
+# travels with its day key and is resolved by comparing those: the body that
+# counted for the later day carries the figure, and two bodies counting for the
+# same day take the larger.
+DAY_SCOPED_PROGRESS_FIELDS = (
+    ("lastStreakDay", "streakDays"),
+    ("lastPracticeDay", "dailySolved"),
+)
 
 
 class Mutation(Model):
