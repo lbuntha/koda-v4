@@ -234,6 +234,7 @@ behind it, which is a release, not a row.
 | `learn.goal_met` | Parents | On | Courtesy | `goal:{learnerId}:{date}` |
 | `learn.practice_reminder` | Parents | **Off** | Courtesy | `remind:{learnerId}` |
 | `learn.streak_ending` | Parents | **Off** | Courtesy | `streak:{learnerId}` |
+| `learn.skill_published` | Parents | On | Courtesy | `skill:{skillId}` |
 | `system.broadcast` | Staff | On | Operator | — |
 
 **Account-class kinds are not switchable and carry no preference row.** They
@@ -612,11 +613,23 @@ timer of its own:
 |---|---|---|
 | `daily-reminders` | Hourly, on the hour | Sends `practice_reminder` — or `streak_ending`, when there is a streak at stake — to a child who has not practised, at the hour *their own parent* chose. The reminder says how long it has been (`{away}`), so a week away does not read as nine identical evenings |
 | `weekly-summary` | Hourly, on the hour | Same, for families for whom it is now Sunday evening |
+| `skill-announcements` | Hourly, on the hour | Tells every family about a skill published in the last two days, once per family per skill |
 | `token-sweep` | Nightly | Deletes rows `refreshedAt` older than 270 days and `disabledAt` older than 30 |
 
 Hourly-with-a-timezone-filter, rather than a job per timezone: one schedule,
 and a family that moves country is right the next day without an operator
 touching anything.
+
+**An announcement is a job for the same reason a summary is.** Publishing a
+skill is one operator pressing one button, and telling every family about it is
+work that grows with the number of accounts — not something to do inside that
+request, where a timeout halfway through would tell a third of the deployment
+and leave the rest. It also needs the clock for a second reason: a family inside
+their quiet hours when the skill went out is reached on the next tick that is
+not their night, rather than at eleven or not at all. The ledger is claimed per
+family *per skill* rather than per day, so the hourly tick is harmless — almost
+every run claims nothing — and the two-day window is only there to stop the
+first run after release announcing the entire back catalogue.
 
 **The summary is hourly every day, not hourly on Sundays**, which is a
 correction this section carried until the job was built. Six in the evening on a

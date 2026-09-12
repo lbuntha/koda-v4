@@ -279,6 +279,168 @@ async def weekly_summary(
     return report
 
 
+SKILL_PUBLISHED = "learn.skill_published"
+
+#: How far back a run will look for something to announce.
+#:
+#: Two days, and the number is doing one job: it stops the first run after this
+#: job ships from announcing every skill the deployment has ever published. The
+#: claim ledger is what stops a *second* announcement of the same skill, so this
+#: only has to be long enough that a skill published at eleven at night is still
+#: announced the following evening when the quiet hours have lifted.
+ANNOUNCE_WINDOW = timedelta(days=2)
+
+
+async def _recently_published(db: AsyncIOMotorDatabase, since: datetime) -> list[dict[str, Any]]:
+    """Skills published inside the window, oldest first.
+
+    Oldest first so that a deployment releasing three at once announces them in
+    the order they were published rather than in whatever order Mongo returns —
+    a family reading three notifications should read them as a sequence.
+    """
+    rows = db.skill_registry.find(
+        {
+            "status": "published",
+            "deletedAt": None,
+            "publishedAt": {"$gte": since.isoformat()},
+        }
+    ).sort("publishedAt", 1)
+    return [row async for row in rows]
+
+
+async def skill_announcements(
+    db: AsyncIOMotorDatabase,
+    *,
+    at: datetime | None = None,
+    cursor: str | None = None,
+    limit: int = FAMILY_PAGE,
+    preview: bool = False,
+) -> dict[str, Any]:
+    """Tell every family when a skill is published. Once per skill, per family.
+
+    **A job rather than the publish that causes it.** Announcing to every family
+    on the deployment is exactly the shape §7 refuses to do inside a request:
+    the work grows with the number of accounts, and an operator pressing
+    Publish should not be waiting on it — or find that a timeout halfway through
+    told a third of the deployment and left the rest.
+
+    **Once, and provably.** The claim is per family and per skill rather than
+    per day, so the ledger says "this household has been told about Colour
+    Sweeper" for as long as it is kept. That is what makes the hourly tick
+    harmless: almost every run claims nothing and sends nothing.
+
+    **Quiet hours are the only clock.** There is no hour to choose here — a new
+    subject is news, not a routine — so a family is told on the first tick that
+    is not inside somebody's night. A skill published at eleven reaches them in
+    the morning, which is the whole of the scheduling.
+    """
+    at = at or utc_now()
+    report: dict[str, Any] = {
+        "job": "skill-announcements",
+        "preview": preview,
+        "families": 0,
+        "skills": 0,
+        "announcements": 0,
+        "sent": 0,
+        "cursor": None,
+    }
+
+    if not await push.deployment_allows(db, SKILL_PUBLISHED):
+        report["skipped"] = "the deployment does not announce new skills"
+        return report
+
+    published = await _recently_published(db, at - ANNOUNCE_WINDOW)
+    report["skills"] = len(published)
+    if not published:
+        # Said rather than left as a row of zeroes: "nothing was published in
+        # the last two days" and "nobody was reachable" are different answers to
+        # an operator pressing Run now, and only one of them is a problem.
+        report["skipped"] = "nothing has been published recently"
+        return report
+
+    families = await _families_with_browsers(db, after=cursor, limit=limit)
+    report["families"] = len(families)
+    if len(families) == limit:
+        report["cursor"] = families[-1]
+
+    for family_id in families:
+        people = await push.adults_of(db, family_id)
+        if not people:
+            continue
+        schedules = await notify_schedule.for_users(db, people)
+
+        offset = next(
+            (s["tzOffsetMinutes"] for s in schedules.values() if s["tzOffsetMinutes"] is not None),
+            None,
+        )
+        if offset is None:
+            offset = await events_repo.latest_tz_offset(db, family_id)
+        if offset is None:
+            # Nobody has told us what hour it is where they are, and news is
+            # never worth guessing that with.
+            continue
+
+        local = _local(at, offset)
+        # One person outside their own night is enough. `push.send` decides who
+        # in the household actually wants this kind; what this settles is
+        # whether *now* is a time to ring the house at all.
+        awake = [
+            user_id
+            for user_id in people
+            if not notify_schedule.is_quiet(schedules[user_id], local.hour)
+        ]
+        if not preview and not awake:
+            continue
+
+        for skill in published:
+            skill_id = skill.get("id")
+            name = skill.get("title") or skill_id
+            if not skill_id:
+                continue
+
+            already = await push_runs.was_claimed(
+                db, kind=SKILL_PUBLISHED, recipient_id=family_id, date_key=skill_id
+            )
+            # `claim` is the decision and `was_claimed` is only ever a report —
+            # a preview must not take the right to send the thing it describes.
+            if not preview and not await push_runs.claim(
+                db, kind=SKILL_PUBLISHED, recipient_id=family_id, date_key=skill_id
+            ):
+                continue
+
+            title, body = await push.wording(db, SKILL_PUBLISHED, {"skill": name})
+            report["announcements"] += 1
+
+            if preview:
+                report.setdefault("would_send", []).append(
+                    {
+                        "familyId": family_id,
+                        "skillId": skill_id,
+                        "skill": name,
+                        "title": title,
+                        "body": body,
+                        "alreadySent": already,
+                        "theirLocalHour": local.hour,
+                    }
+                )
+                continue
+
+            report["sent"] += await push.send(
+                db,
+                to=push.Recipient(family_id=family_id),
+                kind=SKILL_PUBLISHED,
+                title=title,
+                body=body,
+                # The catalogue, where the thing being announced actually is.
+                path="/learn",
+                # Per skill, so two released together are two notifications
+                # rather than the second replacing the first.
+                tag=f"skill:{skill_id}",
+            )
+
+    return report
+
+
 async def token_sweep(db: AsyncIOMotorDatabase) -> dict[str, Any]:
     """The nightly tidy, for the three collections push leaves behind.
 

@@ -222,6 +222,18 @@ DEFAULT_SETTINGS: list[dict] = [
         "order": 82,
     },
     {
+        "settingId": "push.skillPublished",
+        "group": "Notifications",
+        "label": "New skill published",
+        "description": (
+            "Tells every family when a skill is published, once per skill. "
+            "Off announces nothing, however many skills are released."
+        ),
+        "type": "bool",
+        "value": True,
+        "order": 83,
+    },
+    {
         "settingId": "push.goalMet",
         "group": "Notifications",
         "label": "Goal met",

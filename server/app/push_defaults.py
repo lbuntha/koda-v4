@@ -51,6 +51,9 @@ SENDS: frozenset[str] = frozenset(
         # makes the switch visible, not the notification inevitable.
         "learn.practice_reminder",
         "learn.streak_ending",
+        # Announced by a job rather than by the publish that causes it: telling
+        # every family on the deployment is not work to do inside a request.
+        "learn.skill_published",
         # The three account and operator kinds the catalog declared from the
         # start and nothing ever sent. Each needed a call site rather than a
         # phase: an invite redeemed, a plan request answered, a word to staff.
@@ -134,6 +137,28 @@ DEFAULT_KINDS: list[dict[str, Any]] = [
         "class": "courtesy",
         "label": "Goal met",
         "settingId": "push.goalMet",
+        "familyDefault": True,
+    },
+    {
+        "kindId": "learn.skill_published",
+        "title": 'New on Koda',
+        # The name and nothing else. A tagline is the skill's marketing copy,
+        # and the honest thing a notification can say about a new subject is
+        # that it exists and where to find it.
+        "body": "{skill} has just been published — open Koda to try it.",
+        #: What a sender may substitute. Anything else an operator types is
+        #: left visible rather than guessed at, so a typo shows up in the
+        #: preview instead of on somebody's lock screen.
+        "placeholders": ['skill'],
+        # Courtesy, not account: it is news rather than a fact about somebody's
+        # own account, so it waits for quiet hours to end like the rest.
+        "class": "courtesy",
+        "label": "New skill published",
+        "settingId": "push.skillPublished",
+        # On, unlike the reminders. A family cannot ask for a subject nobody has
+        # told them exists, and one notification per published skill is not a
+        # cadence anybody organises an evening around — the reasoning the weekly
+        # summary already ships on.
         "familyDefault": True,
     },
     {

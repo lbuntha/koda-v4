@@ -92,6 +92,29 @@ async def daily_reminders(
     return await task_service.daily_reminders(db, at=at, cursor=cursor, limit=limit)
 
 
+@router.post("/skill-announcements")
+async def skill_announcements(
+    db: Db,
+    cursor: Annotated[str | None, Query(max_length=64)] = None,
+    limit: Annotated[int, Query(ge=1, le=MAX_PAGE)] = task_service.FAMILY_PAGE,
+    at: Annotated[datetime | None, Query()] = None,
+) -> dict:
+    """Tell every family about a skill published in the last two days.
+
+    Hourly, and almost every call does nothing — a deployment publishes a skill
+    a few times a year. What the tick buys is that a family inside their quiet
+    hours when a skill went out is reached in the morning rather than missed,
+    without anything holding a thread open overnight.
+
+    `at` is development-only for the reason the summary's is — see above.
+    """
+    if at is not None and not settings().is_dev:
+        raise Forbidden(
+            "The clock can only be moved in development.", "task_time_travel_forbidden"
+        )
+    return await task_service.skill_announcements(db, at=at, cursor=cursor, limit=limit)
+
+
 @router.post("/token-sweep")
 async def token_sweep(db: Db) -> dict:
     """Delete what nothing can use again: dead tokens, old notices, spent claims."""

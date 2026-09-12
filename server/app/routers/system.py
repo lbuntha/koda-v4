@@ -282,6 +282,7 @@ async def push_test(db: Db, p: CanOperate, body: TestSendIn | None = None) -> di
 RUNNABLE_JOBS = {
     "weekly-summary": "Sunday's summary, for whoever it is Sunday evening for.",
     "daily-reminders": "A nudge for a child who has not practised, at the hour their parent chose.",
+    "skill-announcements": "Tell every family about a skill published in the last two days.",
     "token-sweep": "Delete dead tokens, old notices and spent claims.",
 }
 
@@ -336,6 +337,13 @@ async def push_job_run(
         # Nothing to preview: it deletes rows nothing can use again, and a
         # count of them is what a real run already reports.
         return JobRunOut(job=job, preview=False, report=await task_service.token_sweep(db))
+
+    if job == "skill-announcements":
+        return JobRunOut(
+            job=job,
+            preview=preview,
+            report=await task_service.skill_announcements(db, preview=preview),
+        )
 
     if job == "daily-reminders":
         return JobRunOut(
