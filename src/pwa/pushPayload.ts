@@ -58,6 +58,35 @@ export function safePath(raw: unknown): string {
 }
 
 /**
+ * FCM's envelope, opened.
+ *
+ * `fcm.envelope` sends `data` only and no `notification` block, deliberately —
+ * with a notification payload the browser draws its own and the copy, the icon
+ * and the tap target stop being ours. What that misses is that FCM then wraps
+ * those fields again on the way to the browser. What actually arrives at a raw
+ * `push` listener is
+ *
+ *     {"data": {"title": …, "body": …}, "from": …, "fcmMessageId": …}
+ *
+ * and this file was reading the outer object. So every real notification on
+ * every device fell through to the fallback: "Open Koda to see what's new" on a
+ * lock screen, over a server that had composed "Chrome on Mac just signed in"
+ * and written it correctly into the history the app shows. Two workers is the
+ * thing `docs/PUSH.md` §3 refuses, and binding the token to our own worker is
+ * right — it just means the unwrapping the Firebase SDK would have done is ours
+ * to do.
+ *
+ * The outer object wins where it says anything, so a flat payload — the console
+ * driver's log line, a hand-sent test, anything not from FCM — reads exactly as
+ * it did before.
+ */
+function unwrap(data: Record<string, unknown>): Record<string, unknown> {
+  const inner = data.data;
+  if (!inner || typeof inner !== "object" || Array.isArray(inner)) return data;
+  return { ...(inner as Record<string, unknown>), ...data };
+}
+
+/**
  * The payload as a message we are willing to display.
  *
  * Never throws and never returns a partial object: every field a caller reads
@@ -77,7 +106,7 @@ export function safeParse(raw: string | null | undefined): PushPayload {
   }
 
   if (typeof parsed !== "object" || parsed === null) return { ...FALLBACK };
-  const data = parsed as Record<string, unknown>;
+  const data = unwrap(parsed as Record<string, unknown>);
 
   const text = (value: unknown, fallback: string): string => {
     if (typeof value !== "string") return fallback;

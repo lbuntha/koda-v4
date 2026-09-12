@@ -19,6 +19,7 @@
 import { request } from "../sync/api";
 import { accessToken } from "../sync/session";
 import { firebaseConfig, pushSupport } from "./support";
+import { describeThisDevice } from "../thisDevice";
 
 export { pushSupport } from "./support";
 export type { PushSupport } from "./support";
@@ -122,30 +123,7 @@ async function tellTheServer(token: string): Promise<void> {
 }
 
 /** "Chrome on Android" — what a device list can print instead of a token. */
-function describeThisBrowser(): string {
-  const ua = navigator.userAgent;
-  const browser = /Edg\//.test(ua)
-    ? "Edge"
-    : /OPR\//.test(ua)
-      ? "Opera"
-      : /Chrome\//.test(ua)
-        ? "Chrome"
-        : /Firefox\//.test(ua)
-          ? "Firefox"
-          : /Safari\//.test(ua)
-            ? "Safari"
-            : "Browser";
-  const platform = /Android/.test(ua)
-    ? "Android"
-    : /iPhone|iPad|iPod/.test(ua)
-      ? "iOS"
-      : /Macintosh/.test(ua)
-        ? "Mac"
-        : /Windows/.test(ua)
-          ? "Windows"
-          : "this device";
-  return `${browser} on ${platform}`;
-}
+const describeThisBrowser = describeThisDevice;
 
 /**
  * Why a registration did not happen.

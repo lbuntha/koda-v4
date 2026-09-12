@@ -62,3 +62,58 @@ describe("reading the message", () => {
     expect(safeParse(JSON.stringify({ path: "https://evil.example" })).path).toBe("/");
   });
 });
+
+/**
+ * What FCM actually posts to the browser.
+ *
+ * The server sends `data` only and no `notification` block, so that the copy,
+ * the icon and the tap target stay ours. FCM then wraps those fields again, and
+ * a raw `push` listener — which is what Koda has, on purpose, rather than a
+ * second worker — receives the wrapper. Reading the outer object put "Open Koda
+ * to see what's new" on every lock screen while the server had composed the
+ * real sentence and recorded it correctly in the history.
+ */
+describe("the envelope FCM puts the message in", () => {
+  const fromFcm = JSON.stringify({
+    data: {
+      title: "New sign-in to Koda",
+      body: "Chrome on Mac just signed in. If that wasn't you, sign it out in Settings.",
+      path: "/settings",
+      kind: "device.new_signin",
+      tag: "device.new_signin",
+    },
+    from: "1234567890",
+    priority: "normal",
+    fcmMessageId: "abc-123",
+  });
+
+  it("reads the message inside it", () => {
+    const payload = safeParse(fromFcm);
+
+    expect(payload.title).toBe("New sign-in to Koda");
+    expect(payload.body).toBe(
+      "Chrome on Mac just signed in. If that wasn't you, sign it out in Settings.",
+    );
+    expect(payload.kind).toBe("device.new_signin");
+    expect(payload.tag).toBe("device.new_signin");
+  });
+
+  it("sanitises a path that arrives wrapped, exactly as it does one that does not", () => {
+    const payload = safeParse(JSON.stringify({ data: { title: "Hi", path: "//evil.example" } }));
+
+    expect(payload.path).toBe("/");
+  });
+
+  it("leaves a flat payload alone", () => {
+    // The console driver logs this shape, and so does a hand-sent test.
+    const payload = safeParse(JSON.stringify({ title: "Koda", body: "Flat and fine", path: "/" }));
+
+    expect(payload.body).toBe("Flat and fine");
+  });
+
+  it("is not fooled by a `data` that is not an object", () => {
+    const payload = safeParse(JSON.stringify({ data: "nonsense", title: "Koda", body: "Still me" }));
+
+    expect(payload.body).toBe("Still me");
+  });
+});

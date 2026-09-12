@@ -1,4 +1,5 @@
 import { ApiError, request } from "./api";
+import { describeThisDevice } from "../thisDevice";
 
 /**
  * Who this device is signed in as.
@@ -721,11 +722,7 @@ export const SessionAPI = {
   refresh,
 };
 
-function deviceName(): string {
-  const ua = navigator.userAgent;
-  if (/iPad|Tablet/i.test(ua)) return "Tablet";
-  if (/iPhone|Android/i.test(ua)) return "Phone";
-  if (/Macintosh/i.test(ua)) return "Mac";
-  if (/Windows/i.test(ua)) return "Windows PC";
-  return "This device";
-}
+/* Named in one place: this is also what fills `{device}` in "New sign-in to
+   Koda", and "Mac just signed in" tells a parent with a Mac nothing they can
+   check. See `lib/thisDevice.ts`. */
+const deviceName = describeThisDevice;
