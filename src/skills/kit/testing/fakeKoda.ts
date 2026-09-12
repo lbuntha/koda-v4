@@ -51,6 +51,8 @@ export interface FakeKodaOptions {
   /** Feature flags for `config.isEnabled`. */
   features?: Record<string, boolean>;
   snapshot?: Partial<LearnerSnapshot>;
+  /** Give the fake host a home screen, so `ui.goHome` is offered. */
+  goHome?: boolean;
   theme?: "light" | "dark";
   /** The learner's voice preference, as `speech.isEnabled()` reports it. */
   voiceEnabled?: boolean;
@@ -170,6 +172,9 @@ export function createFakeKoda(options: FakeKodaOptions = {}): FakeKoda {
       exit: () => record("ui.exit"),
       nextLesson: null,
       pathComplete: false,
+      /* Null by default, like a host with no home screen: a test that wants the
+         home door has to ask for it, so no test gets it by accident. */
+      goHome: options.goHome ? () => record("ui.goHome") : null,
     },
   };
 

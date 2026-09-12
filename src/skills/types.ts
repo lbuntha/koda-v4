@@ -198,6 +198,16 @@ export interface KodaSDK {
     readonly nextLesson: { lessonNumber: number; open(): void; practice?: boolean } | null;
     /** Whether the lesson just played was the last of its path. */
     readonly pathComplete: boolean;
+    /**
+     * Out of the round entirely, to the learner's home screen.
+     *
+     * Separate from `exit`, which returns to the lesson list this round was
+     * opened from — the two are different destinations and a child finishing
+     * for the day wants the second one. Null where the host has no home to go
+     * to, which is every embedding that is not the app: a teacher preview and
+     * the activity harness both have a list and no dashboard.
+     */
+    readonly goHome: (() => void) | null;
   };
 }
 

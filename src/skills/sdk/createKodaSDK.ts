@@ -44,6 +44,8 @@ export interface KodaHost {
   getSnapshot(): LearnerSnapshot;
   theme: "light" | "dark";
   exit(): void;
+  /** Leave for the home screen. Absent where the host has no home. */
+  goHome?(): void;
   /** Sequential next lesson in this skill. Null means this path is complete.
    *  `practice` marks an optional practice round offered after the last
    *  teaching lesson — an invitation, not the next step. */
@@ -374,6 +376,7 @@ export function createKodaSDK(
       exit: host.exit,
       nextLesson: host.nextLesson ?? null,
       pathComplete: host.pathComplete ?? false,
+      goHome: host.goHome ?? null,
     },
   };
 }

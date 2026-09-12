@@ -55,11 +55,13 @@ describe("what the round was worth", () => {
 
     // 340 XP is Level 4, forty into it, sixty short of Level 5. Named "XP
     // Level" because "Lesson 7" is on the same card and the two numbers are not
-    // the same kind of thing; the rule that turns one into the other is printed
-    // under the bar, which is the only place either is ever explained.
+    // the same kind of thing.
     expect(screen.getByText("XP Level 4")).toBeTruthy();
     expect(screen.getByText("60 XP to Level 5")).toBeTruthy();
-    expect(screen.getByText("100 XP earns a level")).toBeTruthy();
+    // "100 XP earns a level" used to sit under the bar as a third line. It was
+    // dropped for height when this card was compacted — Home's rail states the
+    // same rule under the same bar, and these two labels carry the scale.
+    expect(screen.queryByText("100 XP earns a level")).toBeNull();
     const bar = screen.getByRole("progressbar", { name: /Level 4 progress/ });
     expect(bar.getAttribute("aria-valuenow")).toBe("40");
     expect(bar.getAttribute("aria-valuemax")).toBe("100");
@@ -170,5 +172,71 @@ describe("the last lesson of a path", () => {
 
     expect(screen.getByText("Every practice round done!")).toBeTruthy();
     expect(screen.getByText("BACK TO LESSONS")).toBeTruthy();
+  });
+});
+
+/**
+ * The way out, mid-course.
+ *
+ * The exit used to be drawn only at the end of a path, where practice was on
+ * offer. Everywhere else the screen read "Next lesson" and "Practice Again" —
+ * both of which keep the child in the round — over a modal that covers the
+ * sidebar. A child who had finished for the day had to play another round or
+ * close the tab.
+ */
+describe("leaving at the end of a round", () => {
+  it("offers both doors in the ordinary mid-course case", () => {
+    const exit = vi.fn();
+    const home = vi.fn();
+    draw({ nextLevelNumber: 8, onBackToLessons: exit, onGoHome: home });
+
+    // The two that carry on are still the loud ones.
+    expect(screen.getByText("NEXT LESSON (8)")).toBeTruthy();
+    expect(screen.getByText("Practice Again")).toBeTruthy();
+
+    screen.getByText("Back to lessons").click();
+    expect(exit).toHaveBeenCalled();
+
+    screen.getByText("Home").click();
+    expect(home).toHaveBeenCalled();
+  });
+
+  it("does not offer the lesson list twice when that is already the main button", () => {
+    draw({ nextLevelNumber: undefined, onBackToLessons: vi.fn(), onGoHome: vi.fn() });
+
+    expect(screen.getByText("BACK TO LESSONS")).toBeTruthy();
+    expect(screen.queryByText("Back to lessons")).toBeNull();
+    // Home is never what the main button does, so it stays.
+    expect(screen.getByText("Home")).toBeTruthy();
+  });
+
+  it("draws no home door for a host that has no home", () => {
+    // The teacher preview and the activity harness both have a list and no
+    // dashboard; the SDK publishes `goHome` as null and this follows it.
+    draw({ nextLevelNumber: 8, onBackToLessons: vi.fn() });
+
+    expect(screen.queryByText("Home")).toBeNull();
+    expect(screen.getByText("Back to lessons")).toBeTruthy();
+  });
+});
+
+/**
+ * The card is the commonest screen in the app, so its height is a feature.
+ */
+describe("what the card does not repeat", () => {
+  it("stays quiet when the advice is the button underneath it", () => {
+    draw({ recommendation: { kind: "advance", kidMessage: "Nice work! Ready for the next one?" } });
+
+    expect(screen.getByText("NEXT LESSON (8)")).toBeTruthy();
+    expect(screen.queryByText("Nice work! Ready for the next one?")).toBeNull();
+  });
+
+  it("speaks up when the advice disagrees with the obvious move", () => {
+    // A concept that has not landed turns the primary into another round, and
+    // this line is the reason why — which the buttons cannot say on their own.
+    draw({ recommendation: { kind: "practise", kidMessage: "One more round to make it stick!" } });
+
+    expect(screen.getAllByText("One more round to make it stick!").length).toBeGreaterThan(0);
+    expect(screen.getByText("ONE MORE ROUND")).toBeTruthy();
   });
 });

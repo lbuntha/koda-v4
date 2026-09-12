@@ -90,6 +90,16 @@ export interface SkillRoundTopBarProps {
   voice?: SkillVoiceContext;
   /** Extra controls, placed before the sound toggle. Rarely needed. */
   extras?: React.ReactNode;
+  /**
+   * Whether the round has been scored.
+   *
+   * The standing is read once because the figures only move when a round ends
+   * — but that is exactly when they move, and this bar stays on screen behind
+   * the summary. Without this it spent the end of every round showing the
+   * streak and the XP the child had *before* the round that earned them, which
+   * reads as a flame that never lights.
+   */
+  scored?: boolean;
 }
 
 /**
@@ -123,6 +133,7 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
   identity,
   voice,
   extras,
+  scored = false,
 }) => {
   const percent = Math.min(100, Math.round((questionIndex / Math.max(1, totalQuestions)) * 100));
 
@@ -153,10 +164,12 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
   const askKoda = () =>
     mode && help.ask(mode, () => (mode === "voice" ? setShowVoice(true) : setShowAsk(true)));
 
-  // Read once per round: the numbers move when a round ends, not mid-question.
+  // Read as the round opens and again once it is scored: the figures move when
+  // a round ends, not mid-question, and the host has recorded the practice by
+  // the time this runs.
   useEffect(() => {
     void koda.progress.snapshot().then((s) => setStanding({ streakDays: s.streakDays, xp: s.xp }));
-  }, [koda]);
+  }, [koda, scored]);
 
   useEffect(() => {
     const onChange = () => setIsFullscreen(Boolean(document.fullscreenElement));

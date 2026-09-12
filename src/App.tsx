@@ -806,6 +806,14 @@ export default function App() {
         dailySolved: streak.solvedToday,
       }}
       onExit={() => setInRound(false)}
+      /* The other door off the round-complete screen. `onExit` goes back to
+         the lesson list this round was opened from; a child who has finished
+         for the day wants the dashboard, and before this the only way there
+         was the sidebar behind a modal that covers it. */
+      onGoHome={() => {
+        setInRound(false);
+        setActiveTab("home");
+      }}
       nextLesson={
         followingLesson
           ? {

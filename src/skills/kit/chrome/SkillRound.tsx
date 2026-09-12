@@ -236,6 +236,7 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
         onExit={onExit}
         voice={help}
         extras={extras}
+        scored={scored}
       />
 
       <main className="flex-1 p-3 sm:p-6 pb-32 flex flex-col justify-center max-w-4xl mx-auto w-full">
@@ -335,6 +336,9 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
           onNextLevel={onNextLevel ?? nextLesson?.open ?? onExit}
           onPracticeAgain={onPracticeAgain ?? round.restart}
           onBackToLessons={onExit}
+          /* Null where the host has no home screen, and the modal then draws
+             only the lesson-list door. */
+          onGoHome={koda.ui.goHome ?? undefined}
         />
       )}
     </div>

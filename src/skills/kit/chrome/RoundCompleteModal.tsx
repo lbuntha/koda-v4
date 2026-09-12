@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Star, RotateCcw, ArrowRight, Trophy, Sparkles, Flame, Zap, Target } from "lucide-react";
+import { Star, RotateCcw, ArrowRight, Trophy, Sparkles, Flame, Zap, Target, Home } from "lucide-react";
 import { playSound } from "../../../utils/audio";
 import { levelBar, roundPraise, type PraiseFacts } from "../round/roundPraise";
 
@@ -27,9 +27,16 @@ interface PracticeRoundCompleteModalProps {
   practiceRound?: boolean;
   onNextLevel: () => void;
   onPracticeAgain: () => void;
-  /** Leave the round for the lesson list. Drawn when neither button already
-   *  does, so a finished path always has a way out. */
+  /** Leave the round for the lesson list. Drawn whenever neither button above
+   *  already does, so every round has a way out. */
   onBackToLessons?: () => void;
+  /**
+   * Leave for the home screen. A different door from the lesson list.
+   *
+   * Omitted where the host has no home — a teacher preview, the activity
+   * harness — and then it is simply not drawn.
+   */
+  onGoHome?: () => void;
   /**
    * What the log says to do next, if anything.
    *
@@ -59,10 +66,14 @@ interface PracticeRoundCompleteModalProps {
 
 /** The one filled button. Shared so the three things it can say cannot drift. */
 const PRIMARY =
-  "w-full py-3.5 px-6 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-mono font-black text-sm tracking-wide shadow-lg hover:shadow-orange-500/20 active:scale-[0.98] transition-all transform flex items-center justify-center gap-2 cursor-pointer";
+  "w-full py-3 px-6 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-mono font-black text-sm tracking-wide shadow-lg hover:shadow-orange-500/20 active:scale-[0.98] transition-all transform flex items-center justify-center gap-2 cursor-pointer";
+
+/** The two doors out. Quiet on purpose — see where they are drawn. */
+const QUIET =
+  "inline-flex items-center gap-1.5 py-1 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500 hover:text-slate-300 transition-colors cursor-pointer";
 
 const SECONDARY =
-  "w-full py-3 rounded-full bg-slate-800/80 hover:bg-slate-750 text-slate-300 hover:text-white font-mono font-bold text-xs transition-all active:scale-[0.97] flex items-center justify-center gap-1.5 border border-slate-700/50 cursor-pointer";
+  "w-full py-2.5 rounded-full bg-slate-800/80 hover:bg-slate-750 text-slate-300 hover:text-white font-mono font-bold text-xs transition-all active:scale-[0.97] flex items-center justify-center gap-1.5 border border-slate-700/50 cursor-pointer";
 
 export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProps> = ({
   levelNumber,
@@ -77,6 +88,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
   onNextLevel,
   onPracticeAgain,
   onBackToLessons,
+  onGoHome,
   recommendation,
   standing,
   perfect = false,
@@ -123,9 +135,22 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
         ? "Try a practice round"
         : `Skip to Lesson ${nextLevelNumber}`,
   };
-  /* Both buttons keep the child in the round only when practice is the offer:
-     the repeat replays this lesson and the advance opens another one. */
-  const showExit = Boolean(onBackToLessons) && Boolean(nextLevelNumber) && nextIsPractice;
+  /*
+   * The way out, which used to be drawn almost never.
+   *
+   * The condition was "practice is on offer", on the reasoning that only then
+   * do both buttons above keep the child in the round. That was true of the end
+   * of a path and false everywhere else: mid-course the pair reads "Next lesson"
+   * and "Practice Again", which are also both ways of *staying*, and the modal
+   * covers the screen — so the round's own exit sits behind it, unreachable. A
+   * child who had simply finished for the day had to play another round or
+   * close the tab.
+   *
+   * So: whenever the primary is not already the way out. It says "BACK TO
+   * LESSONS" itself when there is no next lesson, and offering that twice is
+   * the only case worth suppressing.
+   */
+  const showExit = Boolean(onBackToLessons) && Boolean(nextLevelNumber);
   const bar = standing ? levelBar(standing.xpAfter) : null;
   const streak = standing?.streakDays ?? 0;
   const unit = standing?.cadence === "weekly" ? "week" : "day";
@@ -157,19 +182,19 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
          * a ceiling and somewhere for the overflow to go, not a shorter
          * screen: every line here is something a child earned.
          */
-        className="relative bg-slate-900 border-2 border-amber-500/30 rounded-[32px] max-w-md w-full p-6 sm:p-8 text-center shadow-2xl space-y-5 max-h-[92dvh] overflow-y-auto md:max-w-lg"
+        className="relative bg-slate-900 border-2 border-amber-500/30 rounded-[32px] max-w-md w-full p-5 sm:p-6 text-center shadow-2xl space-y-3.5 max-h-[92dvh] overflow-y-auto md:max-w-lg"
       >
         {/* Soft background ambient glows */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-amber-500/10 rounded-full filter blur-3xl pointer-events-none -z-10" />
 
         {/* 1. Golden Trophy Badge with Soft Glow */}
-        <div className="relative mx-auto flex items-center justify-center w-24 h-24">
+        <div className="relative mx-auto flex items-center justify-center w-16 h-16">
           {/* Pulsing Outer Glow Ring */}
           <div className="absolute inset-0 rounded-full bg-amber-500/20 animate-pulse scale-110 filter blur-md" />
           
           {/* Main Gold Trophy Circle Backdrop */}
-          <div className="relative w-20 h-20 rounded-full bg-gradient-to-b from-amber-400 to-orange-500 flex items-center justify-center shadow-[0_8px_30px_rgba(245,158,11,0.5)] border-2 border-amber-300">
-            <Trophy className="w-10 h-10 text-slate-950 stroke-[2.5]" />
+          <div className="relative w-14 h-14 rounded-full bg-gradient-to-b from-amber-400 to-orange-500 flex items-center justify-center shadow-[0_8px_30px_rgba(245,158,11,0.5)] border-2 border-amber-300">
+            <Trophy className="w-7 h-7 text-slate-950 stroke-[2.5]" />
           </div>
         </div>
 
@@ -178,7 +203,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
           <span className="text-[11px] font-mono font-black text-amber-400 uppercase tracking-widest block">
             {praise.tag}
           </span>
-          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
             {praise.headline}
           </h2>
           <p className="text-xs sm:text-sm text-slate-300 font-medium">{praise.note}</p>
@@ -201,7 +226,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
           accuracy: a two-star round showed three. An unearned star stays in
           place, hollow, so a child can see what is still there to win.
         */}
-        <div className="flex items-center justify-center gap-3 py-1">
+        <div className="flex items-center justify-center gap-2">
           {[1, 2, 3].map((n) => {
             const earned = n <= stars;
             const big = n === 2;
@@ -210,7 +235,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
                 key={n}
                 aria-hidden="true"
                 className={[
-                  big ? "w-10 h-10" : "w-8 h-8",
+                  big ? "w-9 h-9" : "w-7 h-7",
                   earned
                     ? `text-amber-400 fill-amber-400 filter ${
                         big
@@ -235,12 +260,12 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
           is keeping alive, and the goal they were actually aiming at today.
           Each is drawn only when there is something true to say.
         */}
-        <div className="space-y-3 max-w-xs mx-auto">
-          <div className="bg-slate-950/80 border border-slate-800/80 rounded-2xl px-3 py-3 grid grid-cols-3 items-start divide-x divide-slate-800/80 text-center font-mono">
+        <div className="space-y-2 max-w-xs mx-auto">
+          <div className="bg-slate-950/80 border border-slate-800/80 rounded-2xl px-3 py-2.5 grid grid-cols-3 items-start divide-x divide-slate-800/80 text-center font-mono">
             <div className="px-1">
               <div className="flex items-center justify-center gap-1 text-cyan-400">
                 <Zap className="w-3.5 h-3.5 fill-cyan-400" aria-hidden="true" />
-                <span className="text-lg font-black leading-none">+{xpWon}</span>
+                <span className="text-base font-black leading-none">+{xpWon}</span>
               </div>
               <span className="mt-1 block text-[10px] font-bold uppercase leading-tight tracking-wider text-slate-500">
                 XP won
@@ -257,7 +282,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
                   className={`w-3.5 h-3.5 ${streak > 0 ? "fill-orange-400" : ""}`}
                   aria-hidden="true"
                 />
-                <span className="text-lg font-black leading-none">{streak}</span>
+                <span className="text-base font-black leading-none">{streak}</span>
               </div>
               <span className="mt-1 block text-[10px] font-bold uppercase leading-tight tracking-wider text-slate-500">
                 {streak === 1 ? unit : `${unit}s`} in a row
@@ -273,7 +298,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
                 }`}
               >
                 <Target className="w-3.5 h-3.5" aria-hidden="true" />
-                <span className="text-lg font-black leading-none">
+                <span className="text-base font-black leading-none">
                   {standing ? `${standing.dailySolved}/${standing.dailyGoal}` : "—"}
                 </span>
               </div>
@@ -309,22 +334,27 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
                   style={{ width: `${Math.round((bar.into / bar.per) * 100)}%` }}
                 />
               </div>
-              {/* The rule, in one line, where the number it explains is.
-
-                  Two things on this card are called a number — the lesson at
-                  the top and the level here — and only one of them is earned by
-                  playing anything at all. Saying how XP turns into levels is
-                  what stops "Level 4" reading as "lesson 4", and it is the only
-                  place a child (or the grown-up beside them) is ever told. */}
-              <p className="text-center font-mono text-[9px] uppercase tracking-wider text-slate-600">
-                {bar.per} XP earns a level
-              </p>
+              {/* "{bar.per} XP earns a level" stood here as a third line, to
+                  stop "Level 4" reading as "lesson 4". It has gone for height:
+                  Home's rail states the same rule under the same bar
+                  ("100 XP earns a level. Every finished round pays XP."), which
+                  is a screen every learner passes through, and the two labels
+                  either side of this bar already carry the scale. */}
             </div>
           )}
         </div>
 
-        {/* 5. What the log says to do next */}
-        {recommendation && (
+        {/*
+          5. What the log says to do next — when that is news.
+
+          "Nice work! Ready for the next one?" sat directly above a button
+          reading NEXT LESSON (2): one sentence, said twice, costing a whole
+          card of height on the commonest screen in the app. The message earns
+          its place when it *disagrees* with the obvious move — a concept that
+          has not landed turns the primary into another round, and then the line
+          is the reason why.
+        */}
+        {recommendation && advance.primary && (
           <div className="flex items-start gap-2.5 text-left bg-slate-950/60 border border-slate-800 rounded-2xl px-4 py-3 max-w-xs mx-auto">
             <Sparkles className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
             <p className="text-xs text-slate-200 font-medium leading-snug">
@@ -343,7 +373,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
           "Next lesson" is what left a child on the last lesson tapping a button
           that took them nowhere.
         */}
-        <div className="space-y-3 pt-2">
+        <div className="space-y-2.5">
           {advance.primary ? (
             <button
               onClick={onPracticeAgain}
@@ -379,19 +409,34 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
           </button>
 
           {/*
-            A third, quiet way out — only when neither button above is one.
+            The quiet row: two doors out, neither of them loud.
 
-            At the end of a path with practice on offer, both of the buttons
-            above keep the child in the round; the modal covers the screen, so
-            the round's own exit is unreachable behind it. This is the door.
+            Deliberately smaller and greyer than the pair above — finishing a
+            lesson should still feel like it points forward, and a child who
+            wants to carry on must not have to pick their way past two exits to
+            do it. But they are always there, and they are two rather than one
+            because they go to different places: the lesson list is "show me
+            what else there is", home is "I am done for today".
           */}
-          {showExit && (
-            <button
-              onClick={onBackToLessons}
-              className="w-full py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500 hover:text-slate-300 transition-colors cursor-pointer"
-            >
-              Back to lessons
-            </button>
+          {(showExit || onGoHome) && (
+            <div className="flex items-center justify-center gap-4">
+              {showExit && (
+                <button onClick={onBackToLessons} className={QUIET}>
+                  Back to lessons
+                </button>
+              )}
+              {showExit && onGoHome && (
+                <span className="text-slate-700" aria-hidden="true">
+                  ·
+                </span>
+              )}
+              {onGoHome && (
+                <button onClick={onGoHome} className={QUIET}>
+                  <Home className="w-3 h-3" aria-hidden="true" />
+                  Home
+                </button>
+              )}
+            </div>
           )}
         </div>
       </div>

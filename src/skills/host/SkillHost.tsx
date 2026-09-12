@@ -21,6 +21,15 @@ export interface SkillHostProps {
   onAwardXp(amount: number): void;
   onComplete(result: SkillResult): void;
   onExit(): void;
+  /**
+   * Out of the round to the learner's home screen.
+   *
+   * Optional: `onExit` goes back to the list the round was opened from, which
+   * is the right door for "show me the other lessons" and the wrong one for
+   * "I am done for today". A host with no home screen — the teacher preview,
+   * the activity harness — simply omits it and the chrome stops offering it.
+   */
+  onGoHome?(): void;
   /** Course-owned route to the next lesson in this skill. `practice` marks the
    *  optional practice round offered once the teaching path is finished. */
   nextLesson?: { levelNumber: number; lessonNumber: number; practice?: boolean };
@@ -75,6 +84,7 @@ export const SkillHost: React.FC<SkillHostProps> = ({
   onAwardXp,
   onComplete,
   onExit,
+  onGoHome,
   nextLesson,
   pathComplete = false,
   onStartLesson,
@@ -94,8 +104,16 @@ export const SkillHost: React.FC<SkillHostProps> = ({
    * `lesson_completed`. Reading through a ref means the SDK is bound once per
    * activity and always calls the current handlers.
    */
-  const hostRef = useRef({ onAwardXp, onComplete, onExit, onStartLesson, snapshot, viewer });
-  hostRef.current = { onAwardXp, onComplete, onExit, onStartLesson, snapshot, viewer };
+  const hostRef = useRef({
+    onAwardXp,
+    onComplete,
+    onExit,
+    onGoHome,
+    onStartLesson,
+    snapshot,
+    viewer,
+  });
+  hostRef.current = { onAwardXp, onComplete, onExit, onGoHome, onStartLesson, snapshot, viewer };
 
   const koda = useMemo(() => {
     const skillId = activityRef.split("/")[0] ?? "unknown";
@@ -105,6 +123,10 @@ export const SkillHost: React.FC<SkillHostProps> = ({
       getSnapshot: () => hostRef.current.snapshot,
       theme,
       exit: () => hostRef.current.onExit(),
+      /* Bound only when the host actually has a home screen, because the SDK
+         publishes `goHome` as null when it does not and the chrome draws the
+         door from that. A closure that always exists would always draw it. */
+      ...(onGoHome ? { goHome: () => hostRef.current.onGoHome?.() } : {}),
       nextLesson: nextLesson
         ? {
             lessonNumber: nextLesson.lessonNumber,
@@ -197,6 +219,7 @@ export const SkillHost: React.FC<SkillHostProps> = ({
     nextLesson?.lessonNumber,
     nextLesson?.practice,
     pathComplete,
+    Boolean(onGoHome),
   ]);
 
   if (!activity) {
