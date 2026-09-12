@@ -213,12 +213,37 @@ export function recommendNext(
    * button, and the two agreeing is the point: a learner should not be able to
    * tell which control they pressed by where it took them.
    *
-   * `isReady` still gates on mastered prerequisites, so walking in order never
-   * opens something the child has no foundation for.
+   * What counts as open here is the *path's* rule, not the mastery bar — and
+   * that distinction is the whole of this paragraph.
+   *
+   * `isReady` asks whether every prerequisite concept is **mastered**, and
+   * mastery needs 85% first-try across two separate days. A concept therefore
+   * cannot be mastered on the day it is met, and almost every lesson in this
+   * course requires the concept the lesson before it teaches. So a child who
+   * finished their first lesson 5/5 was walked past every remaining lesson in
+   * the skill, fell out of the bottom of this function, and was told "You've
+   * finished everything here. Amazing!" — while the path behind the message
+   * showed lesson two unlocked and Continue opened it.
+   *
+   * The padlocks ask the lower bar: a concept is satisfied once a lesson that
+   * teaches it has been *finished*. That is the bar this walk has to use, or
+   * the round-complete screen and the path it sits on describe different
+   * courses. `curriculum.satisfiedConcepts` states the same rule for the same
+   * reason; it is derived here from the catalog rather than imported so the
+   * recommender keeps knowing nothing about the curriculum module.
+   *
+   * Mastery still decides plenty — it is what sends a struggling child back a
+   * step above, and what picks the *words* on every card. It just does not get
+   * to hide the next lesson.
    */
   const path = catalog.lessons.filter((l) => l.skillId === justFinished.skillId).sort(byLevel);
   const at = path.findIndex((l) => l.ref === justFinished.ref);
-  const stillOpen = (l: CatalogLesson) => !completed.has(l.ref) && isReady(l);
+  const finishedConcepts = new Set(
+    catalog.lessons.filter((l) => completed.has(l.ref)).map((l) => l.conceptKey),
+  );
+  const stillOpen = (l: CatalogLesson) =>
+    !completed.has(l.ref) &&
+    l.requires.every((key) => finishedConcepts.has(key) || isSatisfied(key));
   const nextInSkill = path.slice(at + 1).find(stillOpen) ?? path.find(stillOpen);
 
   if (nextInSkill) {

@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { getCourseLessons, isUnlocked, satisfiedConcepts } from "./index";
+import {
+  blockedFrom,
+  getCourseLessons,
+  isUnlocked,
+  satisfiedConcepts,
+  unlockedBy,
+} from "./index";
 import type { Viewer } from "../skills/viewer";
 
 /**
@@ -155,5 +161,92 @@ describe("a child placed past the early work", () => {
   it("changes nothing for a child who was not placed", () => {
     const gated = lessons.find((l) => (l.requires?.length ?? 0) > 0)!;
     expect(isUnlocked(gated, {}, viewer, null)).toBe(false);
+  });
+});
+
+/**
+ * What a padlock is able to say for itself.
+ *
+ * Colour Sweeper is the case these were written for: its first lesson requires
+ * a concept taught in counting, so a learner who had not been through counting
+ * met forty grey stones and no route out of them.
+ */
+describe("unlockedBy", () => {
+  it("says nothing about a lesson that is already open", () => {
+    expect(unlockedBy(bySlug("count-in-a-row"), {}, viewer, null)).toBeUndefined();
+  });
+
+  it("names the lesson that opens a locked one", () => {
+    const scattered = bySlug("count-scattered-objects");
+    expect(unlockedBy(scattered, {}, viewer, null)?.id).toBe("count-in-a-row");
+  });
+
+  it("walks past a prerequisite that is itself locked", () => {
+    /* `touching-tiles` needs `counter`, which is taught by a lesson that needs
+       `corresponder`. Answering "Counting Scattered Objects" would have moved
+       the padlock rather than explained it. */
+    const touching = bySlug("touching-tiles");
+    const opens = unlockedBy(touching, {}, viewer, null);
+
+    expect(opens?.id).toBe("count-in-a-row");
+    expect(isUnlocked(opens!, {}, viewer, null)).toBe(true);
+  });
+
+  it("crosses into another skill, because that is where the wall usually is", () => {
+    const touching = bySlug("touching-tiles");
+    expect(touching.skillId).toBe("color-sweeper");
+    expect(unlockedBy(touching, {}, viewer, null)?.skillId).toBe("counting");
+  });
+
+  it("stops pointing anywhere once the prerequisite is done", () => {
+    const done = completing("count-in-a-row", "count-scattered-objects");
+    expect(unlockedBy(bySlug("touching-tiles"), done, viewer, null)).toBeUndefined();
+  });
+
+  it("always answers with something the learner can open today", () => {
+    /* The whole promise. Every locked lesson in the course, from a standing
+       start, has to lead to a lesson that is playable now — a route that ends
+       in another padlock is the dead end this exists to remove. */
+    const locked = lessons.filter((l) => !isUnlocked(l, {}, viewer, null));
+    expect(locked.length).toBeGreaterThan(50);
+
+    for (const lesson of locked) {
+      const opens = unlockedBy(lesson, {}, viewer, null);
+      expect(opens, `${lesson.skillId}/${lesson.id} has no way in`).toBeDefined();
+      expect(isUnlocked(opens!, {}, viewer, null), `${opens!.id} is itself locked`).toBe(true);
+    }
+  });
+});
+
+/**
+ * Locked, or finished? The page that could not tell.
+ *
+ * Both states hand back no next lesson, and Colour Sweeper showed what reading
+ * one as the other costs: "Every lesson complete" printed over a path where
+ * nothing had ever been played.
+ */
+describe("blockedFrom", () => {
+  const sweeper = lessons.filter((l) => l.skillId === "color-sweeper");
+  const counting = lessons.filter((l) => l.skillId === "counting");
+
+  it("names the way in when none of the path has opened", () => {
+    expect(sweeper.length).toBeGreaterThan(0);
+    expect(blockedFrom(sweeper, {}, viewer, null)?.id).toBe("count-in-a-row");
+  });
+
+  it("says nothing when the learner has somewhere to go", () => {
+    expect(blockedFrom(counting, {}, viewer, null)).toBeUndefined();
+  });
+
+  it("says nothing about a path that is genuinely finished", () => {
+    // Every teaching lesson starred: there is no next lesson here either, and
+    // this is the state the page was right about all along.
+    const everyTaught = Object.fromEntries(counting.map((l) => [l.levelNumber, 3]));
+    expect(blockedFrom(counting, everyTaught, viewer, null)).toBeUndefined();
+  });
+
+  it("stops blocking once the prerequisite is done", () => {
+    const done = completing("count-in-a-row", "count-scattered-objects");
+    expect(blockedFrom(sweeper, done, viewer, null)).toBeUndefined();
   });
 });

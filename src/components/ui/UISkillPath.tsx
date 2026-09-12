@@ -12,6 +12,15 @@ export interface UISkillPathItem {
   stars?: number;
   /** The course tier is separate from whether this account can open it. */
   tier?: "free" | "premium";
+  /**
+   * A line under the node, for a padlock that owes an explanation.
+   *
+   * Only ever on the stone a learner is actually standing in front of — the
+   * caller decides which that is. A reason repeated under all thirty locked
+   * nodes of a path is not thirty explanations, it is a wall of text over a
+   * wall.
+   */
+  note?: string;
 }
 
 export interface UISkillPathProps {
@@ -99,7 +108,7 @@ export const UISkillPath: React.FC<UISkillPathProps> = ({
               disabled={locked}
               onClick={() => onSelect(item.id)}
               title={item.title}
-              aria-label={`${item.title}${tierLabel ? ` (${tierLabel})` : ""}${locked ? " (locked)" : premium ? " (subscription required)" : ""}`}
+              aria-label={`${item.title}${tierLabel ? ` (${tierLabel})` : ""}${locked ? ` (locked${item.note ? `: ${item.note}` : ""})` : premium ? " (subscription required)" : ""}`}
               className={s.circle(item.state)}
             >
               {locked || premium ? (
@@ -130,6 +139,11 @@ export const UISkillPath: React.FC<UISkillPathProps> = ({
             </button>
 
             <span className={s.pathLabel(item.state)}>{item.title}</span>
+            {item.note && (
+              <span className="max-w-[9rem] text-center text-[11px] font-semibold leading-tight text-muted">
+                {item.note}
+              </span>
+            )}
             {tierLabel && (
               <span
                 className={`rounded-full border px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wide ${

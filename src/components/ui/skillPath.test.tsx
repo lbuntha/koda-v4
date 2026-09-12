@@ -40,3 +40,34 @@ describe("UISkillPath access tiers", () => {
     expect(onSelect).toHaveBeenCalledWith("paid-locked");
   });
 });
+
+describe("a padlock that explains itself", () => {
+  it("says what opens the stone, in the label and to a screen reader", () => {
+    render(
+      <UISkillPath
+        onSelect={vi.fn()}
+        items={[
+          {
+            id: "touching",
+            title: "Which Tiles Touch a Tile",
+            state: "locked",
+            tier: "free",
+            note: "Unlocks after Counting in a Row",
+          },
+          { id: "edges", title: "Edges and Corners", state: "locked", tier: "free" },
+        ]}
+      />,
+    );
+
+    expect(screen.getByText("Unlocks after Counting in a Row")).toBeTruthy();
+    expect(
+      screen.getByRole("button", {
+        name: "Which Tiles Touch a Tile (Free) (locked: Unlocks after Counting in a Row)",
+      }),
+    ).toBeTruthy();
+
+    // The stone behind it is locked by the one in front, which the order
+    // already says — thirty repetitions is a wall of text over a wall.
+    expect(screen.getByRole("button", { name: "Edges and Corners (Free) (locked)" })).toBeTruthy();
+  });
+});

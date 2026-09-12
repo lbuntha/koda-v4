@@ -6,7 +6,9 @@ import {
   getCourseUnits,
   getSkillLessons,
   isPracticeLesson,
+  blockedFrom,
   isUnlocked,
+  unlockedBy,
   practiceTitle,
   resumeLesson,
 } from "../curriculum";
@@ -202,11 +204,27 @@ export const LearnPage: React.FC<LearnPageProps> = ({
   const openPractice = practice.find(
     (lesson) => starsFor(lesson) === 0 && isUnlocked(lesson, completedLevels, viewer),
   );
+  const registered = viewer.showAllSkills || registeredIds.has(skillId);
+
+  /*
+   * Nothing open, and nothing finished either — and what to do about it.
+   *
+   * This page used to read "no next lesson" as "the path is finished", so a
+   * learner looking at forty padlocks and "Ready to begin · 0%" was told every
+   * lesson was complete, and the one button on the page opened lesson thirty.
+   * `blockedFrom` holds the rule that tells the two states apart, and answers
+   * with a lesson that can be played today — for a cross-skill prerequisite,
+   * usually one in another skill entirely.
+   */
+  const blockedBy = registered ? blockedFrom(lessons, completedLevels, viewer) : undefined;
+
+  /* Ahead of the last-lesson fallback, which exists for a *finished* skill
+     offering revision. Handing it to a learner who has not started is how
+     "Start learning" came to open the hardest lesson in the course. */
   const resume =
-    next ?? openPractice ?? taught[taught.length - 1] ?? lessons[lessons.length - 1];
+    next ?? blockedBy ?? openPractice ?? taught[taught.length - 1] ?? lessons[lessons.length - 1];
   const category = skill.manifest.audience.category;
   const art = skillArtFor(category);
-  const registered = viewer.showAllSkills || registeredIds.has(skillId);
 
   const start = (levelNumber: number) => {
     if (!registered) return;
@@ -220,6 +238,16 @@ export const LearnPage: React.FC<LearnPageProps> = ({
    * difference is the wording above them.
    */
   const pathFor = (group: ResolvedLesson[], opts: { practice?: boolean } = {}) => {
+    /*
+     * The one stone that owes an explanation: the first locked lesson of this
+     * path. Every stone behind it is locked by the one in front, which the
+     * order already says — repeating "unlocks after…" under all thirty is a
+     * wall of text over a wall.
+     */
+    const firstLocked = registered
+      ? group.find((lesson) => !isUnlocked(lesson, completedLevels, viewer))
+      : undefined;
+
     const items: UISkillPathItem[] = group.map((lesson) => {
       const stars = starsFor(lesson);
       const locked = !registered || !isUnlocked(lesson, completedLevels, viewer);
@@ -228,12 +256,21 @@ export const LearnPage: React.FC<LearnPageProps> = ({
          is the honest answer, and it is the one the grey padlock gives. */
       const premium = isPremiumLesson(lesson);
       const subscriptionLocked = !locked && premium && !premiumIncluded;
+      /* Walked to something the learner can open today — for this path's first
+         stone that is often a lesson in another skill, which is exactly the
+         fact a padlock here was hiding. */
+      const opens =
+        lesson.ref === firstLocked?.ref
+          ? unlockedBy(lesson, completedLevels, viewer)
+          : undefined;
+
       return {
         id: lesson.ref,
         title: opts.practice ? practiceTitle(lesson.title) : lesson.title,
         icon: lesson.icon,
         stars,
         tier: premium ? "premium" : "free",
+        note: opens ? `Unlocks after ${opens.title}` : undefined,
         state: locked
           ? "locked"
           : subscriptionLocked
@@ -358,6 +395,14 @@ export const LearnPage: React.FC<LearnPageProps> = ({
               <>
                 Up next: <span className="font-bold text-ink">{next.title}</span>
               </>
+            ) : blockedBy ? (
+              /* The wall, and the way through it. Named rather than described:
+                 "finish the prerequisites" is not something a seven-year-old
+                 can act on, and the lesson that opens this one is. */
+              <>
+                Locked until <span className="font-bold text-ink">{blockedBy.title}</span> is
+                done{blockedBy.skillId !== skillId ? " — it is in another skill" : ""}.
+              </>
             ) : practice.length > practiceDone ? (
               /* The teaching is done and practice is not. Said as an invitation
                  rather than as the next step, because that is what practice is:
@@ -374,14 +419,22 @@ export const LearnPage: React.FC<LearnPageProps> = ({
             ? "Register skill"
             : finished
               ? "Review a lesson"
-              : /* Named for what it opens, not for the fiction that the path
-                   carries on: "Continue" on a finished course pointed at a
-                   lesson the child had already finished. */
-                !next && openPractice
-                ? "Start practice"
-                : done
-                  ? "Continue"
-                  : "Start learning"
+              : /* The button goes where the page says it goes. "Start learning"
+                   over a locked path was a promise it could not keep.
+                   "First:" rather than "Start", because half these titles are
+                   themselves imperative — "Start Count the Row" reads like a
+                   typo, and the word that carries the meaning here is the one
+                   saying this comes *before* the skill on screen. */
+                blockedBy
+                ? `First: ${blockedBy.title}`
+                : /* Named for what it opens, not for the fiction that the path
+                     carries on: "Continue" on a finished course pointed at a
+                     lesson the child had already finished. */
+                  !next && openPractice
+                  ? "Start practice"
+                  : done
+                    ? "Continue"
+                    : "Start learning"
         }
         onOpen={() => start(resume.levelNumber)}
         onRegister={() => void add()}

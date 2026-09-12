@@ -229,6 +229,114 @@ export function isUnlocked(
 }
 
 /**
+ * The lesson to play *first*, when this one is locked.
+ *
+ * A padlock that names no reason and no route is a dead end with a picture on
+ * it. Colour Sweeper is the case that made this necessary: its very first
+ * lesson requires `counter`, which is taught in counting, so a learner who had
+ * not been through counting found all forty stones grey and nothing on the page
+ * saying why — or that two lessons in another skill would open all of them.
+ *
+ * Walks the prerequisite graph rather than reading one hop, because one hop is
+ * usually another padlock. `counter` is taught by a lesson that itself needs
+ * `corresponder`, and answering "play Counting Scattered Objects" would have
+ * moved the wall rather than explained it. What comes back is a lesson the
+ * learner can actually open today.
+ *
+ * Teaching before practice, and the whole route is searched for a teaching
+ * answer before a practice one is entertained — not merely preferred at each
+ * step. `counter` is taught by a locked teaching lesson *and* by an open
+ * counting practice round, so a per-step preference handed a child the practice
+ * round: the one thing `resumeLesson` is explicit is never the next step. Two
+ * passes instead, so "Counting in a Row, two lessons back" wins over "a
+ * practice round you could play right now". A concept taught *only* by practice
+ * still answers with it on the second pass — a route the child can walk beats a
+ * silence.
+ *
+ * `undefined` means either the lesson is already open, or nothing in the course
+ * teaches what it asks for. The second is a curriculum bug rather than a state
+ * a learner can be in, and the caller says less rather than guessing.
+ */
+export function unlockedBy(
+  lesson: ResolvedLesson,
+  completed: Record<number, number>,
+  viewer?: Viewer,
+  startingPoint: number | null = ChildSettingsAPI.current().startingPoint,
+): ResolvedLesson | undefined {
+  if (isUnlocked(lesson, completed, viewer, startingPoint)) return undefined;
+
+  const course = getCourseLessons(viewer);
+  const satisfied = satisfiedConcepts(completed, viewer, startingPoint);
+
+  const search = (allowPractice: boolean): ResolvedLesson | undefined => {
+    // Keys rather than lessons: a concept taught in three places is one question
+    // asked once, and this is also what stops a cycle in a hand-edited course
+    // from turning into a stack overflow on a child's tablet. Fresh per pass,
+    // so the second is not short-circuited by what the first ruled out.
+    const asked = new Set<string>();
+
+    const walk = (target: ResolvedLesson): ResolvedLesson | undefined => {
+      for (const key of target.requires ?? []) {
+        if (satisfied.has(key) || asked.has(key)) continue;
+        asked.add(key);
+
+        const teachers = course.filter(
+          (l) => l.conceptKey === key && (allowPractice || !isPracticeLesson(l)),
+        );
+
+        const open = teachers.find((l) => isUnlocked(l, completed, viewer, startingPoint));
+        if (open) return open;
+
+        for (const teacher of teachers) {
+          const deeper = walk(teacher);
+          if (deeper) return deeper;
+        }
+      }
+      return undefined;
+    };
+
+    return walk(lesson);
+  };
+
+  return search(false) ?? search(true);
+}
+
+/**
+ * What is standing in the way of a whole skill, if anything is.
+ *
+ * `resumeLesson` hands back `undefined` for two states that look identical and
+ * could not be less alike — the path is finished, or none of it has opened yet
+ * — and leaves the caller to tell them apart. Every caller has to, so the rule
+ * lives here rather than being rediscovered in each page's JSX, which is where
+ * it was got wrong: the skill page read "no next lesson" as "finished" and told
+ * a learner staring at forty padlocks that every lesson was complete.
+ *
+ * The two are separated by the only thing that separates them: whether any of
+ * the *teaching* has been played. Practice is excluded for the reason it is
+ * excluded everywhere else — a single practice round played early does not mean
+ * a path has been started, and it is never the next step.
+ *
+ * `undefined` means there is nothing in the way: either something is open, or
+ * the path is genuinely done.
+ */
+export function blockedFrom(
+  lessons: ResolvedLesson[],
+  completed: Record<number, number>,
+  viewer?: Viewer,
+  startingPoint: number | null = ChildSettingsAPI.current().startingPoint,
+): ResolvedLesson | undefined {
+  if (resumeLesson(lessons, completed, viewer, startingPoint)) return undefined;
+
+  const taught = lessons.filter((lesson) => !isPracticeLesson(lesson));
+  const wall = taught.find(
+    (lesson) =>
+      (completed[lesson.levelNumber] ?? 0) === 0 &&
+      !isUnlocked(lesson, completed, viewer, startingPoint),
+  );
+  return wall ? unlockedBy(wall, completed, viewer, startingPoint) : undefined;
+}
+
+/**
  * The lesson "Continue" should open, out of a set the learner is looking at.
  *
  * `lessons` is whatever list is on screen — usually one skill's, in course

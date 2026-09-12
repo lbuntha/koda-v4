@@ -39,7 +39,8 @@ vi.mock("./mastery", () => ({
   }),
 }));
 
-vi.mock("./learningLog", () => ({ LearningLog: { all: () => [] } }));
+const log = vi.hoisted(() => ({ events: [] as unknown[] }));
+vi.mock("./learningLog", () => ({ LearningLog: { all: () => log.events } }));
 
 const { recommendNext, recommendNow } = await import("./recommend");
 
@@ -76,6 +77,7 @@ const catalog: Catalog = {
 const refs = (picks: { lesson: CatalogLesson }[]) => picks.map((p) => p.lesson.ref);
 
 beforeEach(() => {
+  log.events = [];
   state.statuses.clear();
   state.lastSeen.clear();
 });
@@ -187,5 +189,74 @@ describe("what comes after a round", () => {
 
     expect(next.kind).toBe("practise");
     expect(next.lesson?.ref).toBe("counting/l3");
+  });
+});
+
+/**
+ * The end of a child's very first round.
+ *
+ * Mastery needs 85% first-try across two separate days, so a concept cannot be
+ * mastered on the day it is met — and nearly every lesson in this course
+ * requires the concept the lesson before it teaches. Gating "what next" on
+ * mastery therefore hid the whole path on day one: a 5/5 round ended with
+ * "You've finished everything here. Amazing!" over a screen whose padlocks said
+ * otherwise.
+ */
+describe("a perfect round on the first day", () => {
+  /* One concept per lesson, each requiring the one before — the shape counting,
+     addition and colour sweeper all actually have. */
+  const chain: Catalog = {
+    lessons: [
+      lesson("counting", 1, "corresponder"),
+      lesson("counting", 2, "counter", ["corresponder"]),
+      lesson("counting", 3, "unitiser", ["counter"]),
+    ],
+    skills: [{ skillId: "counting", name: "Counting", teaches: ["corresponder"], requires: [] }],
+  };
+
+  const acedLessonOne = () => {
+    log.events = [
+      { type: "lesson_completed", lessonId: "l1", firstTryAccuracy: 1, ts: "2026-09-12T10:00:00Z" },
+    ];
+    // Day one: high accuracy, one day practised. Mastery's honest reading.
+    state.statuses.set("corresponder", "practising");
+    return recommendNext(
+      { conceptKey: "corresponder", ref: "counting/l1", skillId: "counting" },
+      chain,
+      { completed: new Set(["counting/l1"]) },
+    );
+  };
+
+  it("offers the next lesson rather than declaring the skill finished", () => {
+    const next = acedLessonOne();
+
+    expect(next.kind).toBe("advance");
+    expect(next.lesson?.ref).toBe("counting/l2");
+  });
+
+  it("agrees with the padlock behind it", () => {
+    /* The point of the fix: a learner must not be able to tell which control
+       they pressed by where it took them. Lesson 2 is open on the path because
+       lesson 1 is *finished*, and that is the bar this has to use too. */
+    const next = acedLessonOne();
+
+    expect(next.kind).not.toBe("none");
+    expect(next.lesson).toBeDefined();
+  });
+
+  it("still steps back when the round went badly, mastery bar and all", () => {
+    log.events = [
+      { type: "lesson_completed", lessonId: "l2", firstTryAccuracy: 0.2, ts: "2026-09-12T10:00:00Z" },
+    ];
+    state.statuses.set("counter", "struggling");
+
+    const next = recommendNext(
+      { conceptKey: "counter", ref: "counting/l2", skillId: "counting" },
+      chain,
+      { completed: new Set(["counting/l1", "counting/l2"]) },
+    );
+
+    expect(next.kind).toBe("review");
+    expect(next.lesson?.ref).toBe("counting/l1");
   });
 });
