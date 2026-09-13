@@ -8,6 +8,7 @@ import * as compare from "./activities/CompareBar";
 import * as mixed from "./activities/MixedBoard";
 import * as add from "./activities/AddStrip";
 import * as multiply from "./activities/AreaGrid";
+import * as divide from "./activities/ShareOut";
 import { registerSkillVoice } from "../../lib/voiceClips";
 import audioManifest from "./audio/manifest.json";
 
@@ -95,6 +96,12 @@ export const skill: Skill = {
       name: "A Fraction of Something",
       defaultParams: { mode: "of_whole", questionsPerRound: 5 },
       component: multiply.AreaGrid,
+    },
+    divide: {
+      id: "divide",
+      name: "How Many Fit?",
+      defaultParams: { mode: "measure", questionsPerRound: 5 },
+      component: divide.ShareOut,
     },
   },
 };

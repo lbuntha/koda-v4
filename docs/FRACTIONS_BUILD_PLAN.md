@@ -416,3 +416,17 @@ copies, and taking a piece of a piece. 37 lessons, 263 tests.
 - A test flaked one run in four with a real-looking failure: two activities were
   mounted at once in a single `it`, so `screen` saw two of everything and a press
   landed on whichever came first. One mounted activity per test, always.
+
+### Phase 9 — `ShareOut`, levels 38–42
+
+Dividing, which is measuring for four of the five levels and sharing for one.
+42 lessons, 296 tests.
+
+- **"Each seventh cut into 4 makes 28th."** Sharing keeps inventing piece sizes
+  — seven eighths between five people is fortieths — so the hand-written list of
+  names kept running out and the digits showed through. `ordinalWord` composes
+  them now, so there is no ceiling to move.
+- The level-41 round test read `1/2 ÷ 1/4` as "2 ÷ 1/4" and computed an answer
+  no button could match. Most specific pattern first.
+- A hint may repeat the question's own numbers. `1/4 ÷ 1/2` has the answer
+  `1/2`, and "how many 1/2 fit inside 1/4" is the question read back.

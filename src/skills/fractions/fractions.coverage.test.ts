@@ -10,6 +10,7 @@ import { buildCompareQuestion, type CompareMode } from "./internal/data/fraction
 import { buildMixedQuestion, type MixedMode } from "./internal/data/fractionMixed";
 import { buildAddQuestion, type AddMode } from "./internal/data/fractionAdd";
 import { buildMultiplyQuestion, type MultiplyMode } from "./internal/data/fractionMultiply";
+import { buildDivideQuestion, type DivideMode } from "./internal/data/fractionDivide";
 
 /**
  * Every technique is driven by a test, and the count is the claim.
@@ -49,6 +50,7 @@ const SUITE_NAME: Record<string, string> = {
   mixed: "mixed",
   add: "add",
   multiply: "area",
+  divide: "share",
 };
 
 /**
@@ -73,6 +75,8 @@ const builderFor = (activity: string) => {
       return buildAddQuestion;
     case "multiply":
       return buildMultiplyQuestion;
+    case "divide":
+      return buildDivideQuestion;
     default:
       throw new Error(`no builder registered for activity "${activity}"`);
   }
@@ -143,6 +147,7 @@ describe("every technique the lessons use", () => {
       "add_unlike", "subtract_unlike", "add_mixed", "subtract_mixed",
     ];
     const mul: MultiplyMode[] = ["of_whole", "whole_times", "area_model", "simplify_first", "scaling"];
+    const div: DivideMode[] = ["measure", "whole_by", "by_whole", "by_fraction", "explain_flip"];
     const used = new Set(modesInUse().map((m) => `${m.activity}/${m.mode}`));
     expect([...used].sort()).toEqual(
       [
@@ -153,6 +158,7 @@ describe("every technique the lessons use", () => {
         ...mx.map((m) => `mixed/${m}`),
         ...add.map((m) => `add/${m}`),
         ...mul.map((m) => `multiply/${m}`),
+        ...div.map((m) => `divide/${m}`),
       ].sort(),
     );
   });

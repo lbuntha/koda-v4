@@ -52,7 +52,12 @@
     "repeated-fraction-adder",
     "fraction-multiplier",
     "pre-simplifier",
-    "scaling-reasoner"
+    "scaling-reasoner",
+    "fraction-measurer",
+    "whole-divider",
+    "fraction-sharer",
+    "fraction-divider",
+    "reciprocal-reasoner"
   ],
   "requires": [
     "counter",

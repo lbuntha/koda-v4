@@ -1737,6 +1737,247 @@
         11,
         12
       ]
+    },
+    {
+      "id": "how-many-fit",
+      "title": "How Many Halves in Three?",
+      "concept": "Measuring with Unit Fractions",
+      "conceptKey": "fraction-measurer",
+      "requires": [
+        "unit-fraction-namer",
+        "measurer-divider"
+      ],
+      "activity": "fractions/divide",
+      "iconName": "Ruler",
+      "iconTone": "emerald",
+      "params": {
+        "level": 38,
+        "question": {
+          "mode": "measure",
+          "questionsPerRound": 5,
+          "partsRange": [
+            2,
+            6
+          ],
+          "wholeRange": [
+            2,
+            5
+          ]
+        },
+        "play": {
+          "targetObjective": "Count how many pieces of one size fit inside a whole number of strips.",
+          "stepByStep": [
+            "Mark one whole strip into the pieces you are counting.",
+            "Count them. Every whole strip holds the same number.",
+            "Now count that many for each whole strip you have.",
+            "There are more pieces than strips, because the pieces are smaller than a strip."
+          ],
+          "kidTip": "This is dividing, and the answer is bigger than what you started with. Look at the strip until you believe it.",
+          "audioPrompt": "Mark one strip into those pieces, then count them all.",
+          "prompts": {
+            "default": "How many fit?"
+          }
+        }
+      },
+      "standards": [
+        "CCSS.5.NF.B.7.B"
+      ],
+      "trajectoryLevel": "quotative",
+      "ageBand": [
+        11,
+        12
+      ]
+    },
+    {
+      "id": "divide-whole-by-fraction",
+      "title": "A Whole Number Divided by a Fraction",
+      "concept": "Dividing a Whole Number by a Fraction",
+      "conceptKey": "whole-divider",
+      "requires": [
+        "fraction-measurer"
+      ],
+      "activity": "fractions/divide",
+      "iconName": "Scissors",
+      "iconTone": "sky",
+      "params": {
+        "level": 39,
+        "question": {
+          "mode": "whole_by",
+          "questionsPerRound": 5,
+          "partsRange": [
+            2,
+            6
+          ],
+          "wholeRange": [
+            2,
+            6
+          ]
+        },
+        "play": {
+          "targetObjective": "Divide a whole number by a fraction by seeing how many of that fraction fit inside it.",
+          "stepByStep": [
+            "Cut every whole one into the pieces named at the bottom of the fraction.",
+            "The top number says how many pieces make one group.",
+            "Group the pieces up and count the groups.",
+            "That is the answer, and it is bigger than the number you started with."
+          ],
+          "kidTip": "Dividing by something smaller than one always gives you more than you started with.",
+          "audioPrompt": "Cut them all up, then group the pieces.",
+          "prompts": {
+            "default": "How many groups?"
+          }
+        }
+      },
+      "standards": [
+        "CCSS.5.NF.B.7.B"
+      ],
+      "trajectoryLevel": "quotative",
+      "ageBand": [
+        11,
+        12
+      ]
+    },
+    {
+      "id": "divide-fraction-by-whole",
+      "title": "Share a Fraction Between People",
+      "concept": "Dividing a Fraction by a Whole Number",
+      "conceptKey": "fraction-sharer",
+      "requires": [
+        "fraction-measurer",
+        "equal-sharer"
+      ],
+      "activity": "fractions/divide",
+      "iconName": "Users",
+      "iconTone": "violet",
+      "params": {
+        "level": 40,
+        "question": {
+          "mode": "by_whole",
+          "questionsPerRound": 5,
+          "partsRange": [
+            2,
+            8
+          ],
+          "sharesRange": [
+            2,
+            5
+          ]
+        },
+        "play": {
+          "targetObjective": "Share a fraction equally between several people by cutting each piece again.",
+          "stepByStep": [
+            "This one is sharing, not measuring. Three quarters between three people.",
+            "Cut each piece into as many bits as there are people.",
+            "Everybody takes one bit from each piece.",
+            "The pieces got smaller, so the bottom number got bigger."
+          ],
+          "kidTip": "Sharing makes each part smaller. Measuring counts how many fit. They are different questions.",
+          "audioPrompt": "Cut every piece again, one bit each.",
+          "prompts": {
+            "default": "How much does each one get?"
+          }
+        }
+      },
+      "standards": [
+        "CCSS.5.NF.B.7.A"
+      ],
+      "trajectoryLevel": "quotative",
+      "ageBand": [
+        11,
+        12
+      ]
+    },
+    {
+      "id": "divide-by-fraction",
+      "title": "Divide by a Fraction",
+      "concept": "Dividing a Fraction by a Fraction",
+      "conceptKey": "fraction-divider",
+      "requires": [
+        "whole-divider",
+        "fraction-sharer"
+      ],
+      "activity": "fractions/divide",
+      "iconName": "Divide",
+      "iconTone": "indigo",
+      "params": {
+        "level": 41,
+        "question": {
+          "mode": "by_fraction",
+          "questionsPerRound": 5,
+          "partsRange": [
+            2,
+            6
+          ]
+        },
+        "play": {
+          "targetObjective": "Work out how many of one fraction fit inside another.",
+          "stepByStep": [
+            "The question is still the same one: how many of the second fit inside the first?",
+            "Cut both into the same-sized pieces so you can compare them.",
+            "Now count how many of the second one fit.",
+            "It might not come out whole, and that is allowed. Half a group is a real answer."
+          ],
+          "kidTip": "Same question as before. Only the numbers are harder.",
+          "audioPrompt": "How many of the second one fit inside the first?",
+          "prompts": {
+            "default": "How many fit inside?"
+          }
+        }
+      },
+      "standards": [
+        "CCSS.6.NS.A.1"
+      ],
+      "trajectoryLevel": "quotative",
+      "ageBand": [
+        11,
+        12
+      ]
+    },
+    {
+      "id": "why-flip",
+      "title": "Why It Looks Like Flipping",
+      "concept": "Why Dividing by a Fraction Multiplies by its Reciprocal",
+      "conceptKey": "reciprocal-reasoner",
+      "requires": [
+        "fraction-divider",
+        "fraction-multiplier"
+      ],
+      "activity": "fractions/divide",
+      "iconName": "RefreshCw",
+      "iconTone": "rose",
+      "params": {
+        "level": 42,
+        "question": {
+          "mode": "explain_flip",
+          "questionsPerRound": 5,
+          "partsRange": [
+            2,
+            6
+          ]
+        },
+        "play": {
+          "targetObjective": "See why turning the second fraction upside down and multiplying answers the same question.",
+          "stepByStep": [
+            "Dividing asks how many of the second one fit inside the first.",
+            "The smaller the second one is, the more of them fit — so the answer grows as it shrinks.",
+            "Multiplying by a fraction turned upside down does exactly that.",
+            "The rule is not a trick. It is the same question written another way."
+          ],
+          "kidTip": "Nobody should learn the flip before they have seen why it works. Now you have.",
+          "audioPrompt": "Which multiplication asks the same question?",
+          "prompts": {
+            "default": "Which one asks the same thing?"
+          }
+        }
+      },
+      "standards": [
+        "CCSS.6.NS.A.1"
+      ],
+      "trajectoryLevel": "quotative",
+      "ageBand": [
+        11,
+        12
+      ]
     }
   ]
 }

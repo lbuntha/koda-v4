@@ -172,15 +172,41 @@ const PART_WORDS: Record<number, [string, string]> = {
  * a notation — "three quarters" is what the child says out loud, and a screen
  * that cannot say it back has stopped speaking their language.
  *
- * Written out to twenty-four, which is as far as anything here is ever cut.
- * Past that it falls back to the digits, which no level should reach — if one
- * does, "25ths" on a screen is the sign that the ceiling moved.
+ * Written out to twenty-four by hand, because those are the ones with names a
+ * child says out loud. Past that `ordinalWord` composes them, which matters
+ * because sharing keeps inventing sizes: seven eighths between five people is
+ * fortieths, and there is no honest ceiling to list up to.
  */
 export const partWord = (parts: number, plural = false): string => {
   const pair = PART_WORDS[parts];
-  if (!pair) return `${parts}th${plural ? "s" : ""}`;
-  return plural ? pair[1] : pair[0];
+  if (pair) return plural ? pair[1] : pair[0];
+  const word = ordinalWord(parts);
+  return plural ? `${word}s` : word;
 };
+
+/**
+ * The ordinal name of a number past the written-out list.
+ *
+ * Sharing cuts pieces into more pieces — three quarters between five people is
+ * twentieths, and seven eighths between five is fortieths — so the ceiling kept
+ * moving and the fallback kept showing through: "Each seventh cut into 4 makes
+ * 28th" is what a child was told. Composed rather than listed, so it cannot run
+ * out again.
+ */
+export function ordinalWord(n: number): string {
+  const UNITS = [
+    "zeroth", "first", "second", "third", "fourth", "fifth", "sixth", "seventh",
+    "eighth", "ninth", "tenth", "eleventh", "twelfth", "thirteenth", "fourteenth",
+    "fifteenth", "sixteenth", "seventeenth", "eighteenth", "nineteenth",
+  ];
+  const TENS = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
+  const TENTHS = ["", "", "twentieth", "thirtieth", "fortieth", "fiftieth", "sixtieth", "seventieth", "eightieth", "ninetieth"];
+  if (n < 20) return UNITS[n] ?? `${n}th`;
+  if (n > 99) return `${n}th`;
+  const tens = Math.floor(n / 10);
+  const rest = n % 10;
+  return rest === 0 ? TENTHS[tens] : `${TENS[tens]}-${UNITS[rest]}`;
+}
 
 /**
  * "an eighth", "a ninth".

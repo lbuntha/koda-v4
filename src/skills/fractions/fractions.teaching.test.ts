@@ -7,6 +7,7 @@ import { compareHints } from "./activities/CompareBar";
 import { mixedHints } from "./activities/MixedBoard";
 import { addHints } from "./activities/AddStrip";
 import { multiplyHints } from "./activities/AreaGrid";
+import { divideHints } from "./activities/ShareOut";
 import { buildStripQuestion, explainStrip, type StripMode } from "./internal/data/fractionStrip";
 import { buildLineQuestion, explainLine, type LineMode } from "./internal/data/fractionLine";
 import { buildMillQuestion, explainMill, type MillMode } from "./internal/data/fractionEquivalence";
@@ -14,6 +15,7 @@ import { buildCompareQuestion, explainCompare, type CompareMode } from "./intern
 import { buildMixedQuestion, explainMixed, type MixedMode } from "./internal/data/fractionMixed";
 import { buildAddQuestion, explainAdd, type AddMode } from "./internal/data/fractionAdd";
 import { buildMultiplyQuestion, explainMultiply, type MultiplyMode } from "./internal/data/fractionMultiply";
+import { buildDivideQuestion, explainDivide, type DivideMode } from "./internal/data/fractionDivide";
 import { skill } from ".";
 
 /**
@@ -91,6 +93,12 @@ function everything(): Rendered[] {
     for (let i = 0; i < 5; i += 1) {
       const q = buildMultiplyQuestion({ mode: m }, m, i);
       add("multiply", m, multiplyHints(q), explainMultiply(q, true), explainMultiply(q, false), q.expected);
+    }
+  }
+  for (const m of ["measure", "whole_by", "by_whole", "by_fraction", "explain_flip"] as DivideMode[]) {
+    for (let i = 0; i < 5; i += 1) {
+      const q = buildDivideQuestion({ mode: m }, m, i);
+      add("divide", m, divideHints(q), explainDivide(q, true), explainDivide(q, false), q.expected);
     }
   }
   return out;
