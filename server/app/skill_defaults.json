@@ -11586,7 +11586,12 @@
       "equivalence-reader",
       "equivalence-maker",
       "fraction-simplifier",
-      "simplest-form-finder"
+      "simplest-form-finder",
+      "like-comparer",
+      "unit-size-comparer",
+      "whole-comparer",
+      "benchmark-comparer",
+      "unlike-comparer"
     ],
     "requires": [
       "counter",
@@ -12394,6 +12399,234 @@
           "CCSS.4.NF.A.1"
         ],
         "trajectoryLevel": "equivalence",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "compare-same-bottom",
+        "title": "Count the Pieces",
+        "concept": "Comparing Fractions with the Same Denominator",
+        "conceptKey": "like-comparer",
+        "requires": [
+          "simplest-form-finder",
+          "comparer"
+        ],
+        "activity": "fractions/compare",
+        "iconName": "Equal",
+        "iconTone": "cyan",
+        "params": {
+          "level": 17,
+          "question": {
+            "mode": "same_denominator",
+            "questionsPerRound": 5,
+            "partsRange": [
+              3,
+              12
+            ]
+          },
+          "play": {
+            "targetObjective": "Compare two fractions that are cut the same way.",
+            "stepByStep": [
+              "Check the bottom numbers. They are the same.",
+              "That means every piece is the same size on both bars.",
+              "So you can simply count the coloured pieces.",
+              "More pieces of the same size is more."
+            ],
+            "kidTip": "This is the easy one, and it is the reason the next one catches people out.",
+            "audioPrompt": "Both bars are cut the same way. Count the pieces.",
+            "prompts": {
+              "default": "Which is more?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.NF.A.3.D"
+        ],
+        "trajectoryLevel": "comparer",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "compare-same-top",
+        "title": "Bigger Bottom, Smaller Pieces",
+        "concept": "Comparing Fractions with the Same Numerator",
+        "conceptKey": "unit-size-comparer",
+        "requires": [
+          "like-comparer"
+        ],
+        "activity": "fractions/compare",
+        "iconName": "Minimize2",
+        "iconTone": "pink",
+        "params": {
+          "level": 18,
+          "question": {
+            "mode": "same_numerator",
+            "questionsPerRound": 5,
+            "partsRange": [
+              2,
+              12
+            ]
+          },
+          "play": {
+            "targetObjective": "Compare two fractions with the same numerator by the size of their pieces.",
+            "stepByStep": [
+              "Count the coloured pieces. There are the same number on each.",
+              "So the number of pieces is not what decides it.",
+              "Look at how big the pieces are.",
+              "Cutting a whole into more parts makes each part smaller. A bigger bottom number means smaller pieces."
+            ],
+            "kidTip": "One eighth is smaller than one quarter, even though eight is bigger than four. Sharing between more people gives everybody less.",
+            "audioPrompt": "The same number of pieces. So look at how big they are.",
+            "prompts": {
+              "default": "Which is more?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.NF.A.3.D"
+        ],
+        "trajectoryLevel": "comparer",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "same-whole-only",
+        "title": "Only If It Is the Same Whole",
+        "concept": "Comparison as Meaningless Across Different Wholes",
+        "conceptKey": "whole-comparer",
+        "requires": [
+          "unit-size-comparer",
+          "whole-namer"
+        ],
+        "activity": "fractions/compare",
+        "iconName": "HelpCircle",
+        "iconTone": "purple",
+        "params": {
+          "level": 19,
+          "question": {
+            "mode": "different_wholes",
+            "questionsPerRound": 5,
+            "partsRange": [
+              2,
+              8
+            ]
+          },
+          "play": {
+            "targetObjective": "Recognise that fractions of different wholes cannot be compared.",
+            "stepByStep": [
+              "Look at the two wholes before you look at the colour.",
+              "They are not the same size to begin with.",
+              "So a half of one is not the same amount as a half of the other.",
+              "There is no answer to give. Saying so is the right answer."
+            ],
+            "kidTip": "Half a mouse is not more than a quarter of an elephant, and it is not less either. The question is broken.",
+            "audioPrompt": "Look at the two wholes before you look at the colour.",
+            "prompts": {
+              "default": "Which is more?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.NF.A.3.D"
+        ],
+        "trajectoryLevel": "comparer",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "compare-to-half",
+        "title": "More or Less Than a Half",
+        "concept": "Judging a Fraction Against a Benchmark",
+        "conceptKey": "benchmark-comparer",
+        "requires": [
+          "unit-size-comparer"
+        ],
+        "activity": "fractions/compare",
+        "iconName": "Scale",
+        "iconTone": "indigo",
+        "params": {
+          "level": 20,
+          "question": {
+            "mode": "benchmark_half",
+            "questionsPerRound": 5,
+            "partsRange": [
+              3,
+              12
+            ]
+          },
+          "play": {
+            "targetObjective": "Judge whether a fraction is more or less than one half.",
+            "stepByStep": [
+              "Work out half of the bottom number.",
+              "That many pieces would be exactly a half.",
+              "More pieces than that is more than a half.",
+              "Fewer is less. You never have to compare it with anything else."
+            ],
+            "kidTip": "A half is the most useful number to measure other fractions against.",
+            "audioPrompt": "Work out half of the bottom number first.",
+            "prompts": {
+              "default": "More or less than a half?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NF.A.2"
+        ],
+        "trajectoryLevel": "comparer",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "compare-unlike",
+        "title": "Make the Pieces Match",
+        "concept": "Comparing Fractions by Finding a Common Denominator",
+        "conceptKey": "unlike-comparer",
+        "requires": [
+          "benchmark-comparer",
+          "equivalence-maker"
+        ],
+        "activity": "fractions/compare",
+        "iconName": "GitMerge",
+        "iconTone": "emerald",
+        "params": {
+          "level": 21,
+          "question": {
+            "mode": "common_denominator",
+            "questionsPerRound": 5,
+            "partsRange": [
+              2,
+              8
+            ]
+          },
+          "play": {
+            "targetObjective": "Compare two fractions by re-cutting them to the same-sized pieces.",
+            "stepByStep": [
+              "The pieces are different sizes, so counting them tells you nothing yet.",
+              "Find a number that both bottom numbers go into.",
+              "Cut both bars until every piece is that size.",
+              "Now the pieces match, so you can count them."
+            ],
+            "kidTip": "You cannot compare four apples with three oranges until you turn them into the same fruit.",
+            "audioPrompt": "Make the pieces the same size before you count them.",
+            "prompts": {
+              "default": "Which is more?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NF.A.2"
+        ],
+        "trajectoryLevel": "comparer",
         "ageBand": [
           10,
           12

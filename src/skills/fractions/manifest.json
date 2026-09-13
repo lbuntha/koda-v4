@@ -31,7 +31,12 @@
     "equivalence-reader",
     "equivalence-maker",
     "fraction-simplifier",
-    "simplest-form-finder"
+    "simplest-form-finder",
+    "like-comparer",
+    "unit-size-comparer",
+    "whole-comparer",
+    "benchmark-comparer",
+    "unlike-comparer"
   ],
   "requires": [
     "counter",

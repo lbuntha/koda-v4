@@ -6,6 +6,7 @@ import { skill } from ".";
 import { buildStripQuestion, type StripMode } from "./internal/data/fractionStrip";
 import { buildLineQuestion, type LineMode } from "./internal/data/fractionLine";
 import { buildMillQuestion, type MillMode } from "./internal/data/fractionEquivalence";
+import { buildCompareQuestion, type CompareMode } from "./internal/data/fractionCompare";
 
 /**
  * Every technique is driven by a test, and the count is the claim.
@@ -38,6 +39,8 @@ const builderFor = (activity: string) => {
       return buildLineQuestion;
     case "equivalence":
       return buildMillQuestion;
+    case "compare":
+      return buildCompareQuestion;
     default:
       throw new Error(`no builder registered for activity "${activity}"`);
   }
@@ -98,12 +101,16 @@ describe("every technique the lessons use", () => {
     const strip: StripMode[] = ["equal_or_not", "name_unit", "which_whole", "build", "to_notation", "of_a_set"];
     const line: LineMode[] = ["place_unit", "place_any", "read_point", "makes_one", "improper"];
     const mill: MillMode[] = ["split", "two_names", "scale_up", "scale_down", "simplest"];
+    const cmp: CompareMode[] = [
+      "same_denominator", "same_numerator", "different_wholes", "benchmark_half", "common_denominator",
+    ];
     const used = new Set(modesInUse().map((m) => `${m.activity}/${m.mode}`));
     expect([...used].sort()).toEqual(
       [
         ...strip.map((m) => `strip/${m}`),
         ...line.map((m) => `numberline/${m}`),
         ...mill.map((m) => `equivalence/${m}`),
+        ...cmp.map((m) => `compare/${m}`),
       ].sort(),
     );
   });

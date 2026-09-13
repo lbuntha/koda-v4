@@ -4,6 +4,7 @@ import lessonsJson from "./lessons.json";
 import * as strip from "./activities/FoldStrip";
 import * as numberline from "./activities/FractionLine";
 import * as equivalence from "./activities/EquivalenceMill";
+import * as compare from "./activities/CompareBar";
 import { registerSkillVoice } from "../../lib/voiceClips";
 import audioManifest from "./audio/manifest.json";
 
@@ -67,6 +68,12 @@ export const skill: Skill = {
       name: "Same Amount, New Name",
       defaultParams: { mode: "split", questionsPerRound: 5 },
       component: equivalence.EquivalenceMill,
+    },
+    compare: {
+      id: "compare",
+      name: "Which Is More?",
+      defaultParams: { mode: "same_denominator", questionsPerRound: 5 },
+      component: compare.CompareBar,
     },
   },
 };
