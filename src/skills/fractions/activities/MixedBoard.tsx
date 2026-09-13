@@ -73,6 +73,10 @@ export function mixedHints(question: MixedQuestion): string[] {
   }
 }
 
+/** The same arrangement, not merely the same amount. */
+const sameBoard = (a: Board, b: Board): boolean =>
+  a.ones === b.ones && a.loose === b.loose && a.parts === b.parts;
+
 export const MixedBoard: React.FC<ActivityProps<MixedParams>> = ({ params, koda, onComplete, lesson }) => {
   const setup: MixedSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const practising = isPractice(setup);
@@ -171,6 +175,15 @@ export const MixedBoard: React.FC<ActivityProps<MixedParams>> = ({ params, koda,
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
       hints={practising ? [] : mixedHints(question)}
+      onStartOver={
+        !round.feedback && (marker !== null || (board && !sameBoard(board, startingBoard(question))))
+          ? () => {
+              setBoard(startingBoard(question));
+              setMarker(null);
+              setRefused(null);
+            }
+          : undefined
+      }
       iconName="Boxes"
       iconTone="emerald"
       onReadAloud={

@@ -148,6 +148,14 @@ export const ChunkPad: React.FC<ActivityProps<ChunkParams>> = ({ params, koda, o
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
       hints={practising ? [] : chunkHints(question)}
+      onStartOver={
+        !round.feedback && (taken.length > 0)
+          ? () => {
+              setTaken([]);
+              setRefused(null);
+            }
+          : undefined
+      }
       iconName="Minus"
       iconTone="purple"
       onReadAloud={

@@ -55,6 +55,19 @@ export interface SkillRoundProps {
   /** Extra controls for the bar. Rarely needed. */
   extras?: React.ReactNode;
   /**
+   * Put the work back the way the question started it, or undefined.
+   *
+   * Every engine where a child builds something owes them this. Without it a
+   * wrong answer leaves the strip shaded, the board grouped or the marker
+   * placed exactly as it was, "Try again" returns to the same question, and the
+   * only route back to a clean start is undoing each move by hand — which a
+   * child who is already stuck will not manage. Reported from a real session.
+   *
+   * Supply it only while there is something to undo: a button that resets
+   * nothing is one more thing on the screen to read.
+   */
+  onStartOver?(): void;
+  /**
    * A word about a move that was not allowed, or null.
    *
    * Shown in the same strip as the answer feedback, because it is the same
@@ -96,6 +109,7 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
   tagLabels,
   contextTag,
   extras,
+  onStartOver,
   nudge,
   recommendation,
   onNextLevel,
@@ -268,6 +282,20 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
               wanted. */}
           <SkillHint koda={koda} hints={hints} hint={round.hint} id={HINT_PANEL_ID} />
           {children}
+          {/* Under the work, because it is about the work. Quiet on purpose —
+              starting over is a normal move, not a failure, and it should not
+              compete with the answer buttons above it. */}
+          {onStartOver && (
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={onStartOver}
+                className="min-h-11 rounded-2xl px-4 py-2 text-sm font-semibold text-muted underline decoration-line underline-offset-4 hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              >
+                Start over
+              </button>
+            </div>
+          )}
         </div>
       </main>
 

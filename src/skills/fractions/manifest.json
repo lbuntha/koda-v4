@@ -39,7 +39,10 @@
     "unlike-comparer",
     "mixed-number-writer",
     "improper-writer",
-    "mixed-line-placer"
+    "mixed-line-placer",
+    "like-adder",
+    "like-subtractor",
+    "denominator-reasoner"
   ],
   "requires": [
     "counter",

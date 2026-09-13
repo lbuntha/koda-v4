@@ -178,6 +178,15 @@ export const HopBack: React.FC<ActivityProps<LineParams>> = ({ params, koda, onC
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
       hints={practising ? [] : lineHints(question)}
+      onStartOver={
+        !round.feedback && (landings.length > 0)
+          ? () => {
+              setPosition(question.prefilled ? (question.direction === "back" ? 0 : question.dividend) : question.start);
+              setLandings([]);
+              setRefused(null);
+            }
+          : undefined
+      }
       iconName="MoveHorizontal"
       iconTone="cyan"
       onReadAloud={

@@ -126,16 +126,21 @@ export const FoldStrip: React.FC<ActivityProps<StripParams>> = ({ params, koda, 
   const [shaded, setShaded] = useState<number[]>([]);
   const [refused, setRefused] = useState<StripBlock>(null);
 
+  /** How the strip looks before the child touches it. */
+  const opening = useCallback(
+    (q: StripQuestion): number[] =>
+      q.shadesIt
+        ? []
+        : Array.from({ length: q.mode === "equal_or_not" ? 0 : q.fraction.taken }, (_, i) => i),
+    [],
+  );
+
   useEffect(() => {
     if (!question) return;
     // Only `build` starts blank; the rest show the picture they are about.
-    setShaded(
-      question.shadesIt
-        ? []
-        : Array.from({ length: question.mode === "equal_or_not" ? 0 : question.fraction.taken }, (_, i) => i),
-    );
+    setShaded(opening(question));
     setRefused(null);
-  }, [question]);
+  }, [question, opening]);
 
   if (!question) return null;
 
@@ -217,6 +222,14 @@ export const FoldStrip: React.FC<ActivityProps<StripParams>> = ({ params, koda, 
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
       hints={practising ? [] : stripHints(question)}
+      onStartOver={
+        question.shadesIt && shaded.length > 0 && !round.feedback
+          ? () => {
+              setShaded(opening(question));
+              setRefused(null);
+            }
+          : undefined
+      }
       iconName="PieChart"
       iconTone="purple"
       onReadAloud={

@@ -166,6 +166,14 @@ export const FractionLine: React.FC<ActivityProps<LineParams>> = ({ params, koda
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
       hints={practising ? [] : lineHints(question)}
+      onStartOver={
+        marker !== null && !round.feedback
+          ? () => {
+              setMarker(null);
+              setRefused(null);
+            }
+          : undefined
+      }
       iconName="MoveHorizontal"
       iconTone="cyan"
       onReadAloud={

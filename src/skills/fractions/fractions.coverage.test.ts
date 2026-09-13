@@ -8,6 +8,7 @@ import { buildLineQuestion, type LineMode } from "./internal/data/fractionLine";
 import { buildMillQuestion, type MillMode } from "./internal/data/fractionEquivalence";
 import { buildCompareQuestion, type CompareMode } from "./internal/data/fractionCompare";
 import { buildMixedQuestion, type MixedMode } from "./internal/data/fractionMixed";
+import { buildAddQuestion, type AddMode } from "./internal/data/fractionAdd";
 
 /**
  * Every technique is driven by a test, and the count is the claim.
@@ -45,6 +46,7 @@ const SUITE_NAME: Record<string, string> = {
   equivalence: "mill",
   compare: "compare",
   mixed: "mixed",
+  add: "add",
 };
 
 /**
@@ -65,6 +67,8 @@ const builderFor = (activity: string) => {
       return buildCompareQuestion;
     case "mixed":
       return buildMixedQuestion;
+    case "add":
+      return buildAddQuestion;
     default:
       throw new Error(`no builder registered for activity "${activity}"`);
   }
@@ -130,6 +134,7 @@ describe("every technique the lessons use", () => {
     const cmp: CompareMode[] = [
       "same_denominator", "same_numerator", "different_wholes", "benchmark_half", "common_denominator",
     ];
+    const add: AddMode[] = ["add_like", "subtract_like", "refute"];
     const used = new Set(modesInUse().map((m) => `${m.activity}/${m.mode}`));
     expect([...used].sort()).toEqual(
       [
@@ -138,6 +143,7 @@ describe("every technique the lessons use", () => {
         ...mill.map((m) => `equivalence/${m}`),
         ...cmp.map((m) => `compare/${m}`),
         ...mx.map((m) => `mixed/${m}`),
+        ...add.map((m) => `add/${m}`),
       ].sort(),
     );
   });

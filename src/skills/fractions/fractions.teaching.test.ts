@@ -5,11 +5,14 @@ import { lineHints } from "./activities/FractionLine";
 import { millHints } from "./activities/EquivalenceMill";
 import { compareHints } from "./activities/CompareBar";
 import { mixedHints } from "./activities/MixedBoard";
+import { addHints } from "./activities/AddStrip";
 import { buildStripQuestion, explainStrip, type StripMode } from "./internal/data/fractionStrip";
 import { buildLineQuestion, explainLine, type LineMode } from "./internal/data/fractionLine";
 import { buildMillQuestion, explainMill, type MillMode } from "./internal/data/fractionEquivalence";
 import { buildCompareQuestion, explainCompare, type CompareMode } from "./internal/data/fractionCompare";
 import { buildMixedQuestion, explainMixed, type MixedMode } from "./internal/data/fractionMixed";
+import { buildAddQuestion, explainAdd, type AddMode } from "./internal/data/fractionAdd";
+import { skill } from ".";
 
 /**
  * What a child actually reads: the hints, and the sentence after they answer.
@@ -73,14 +76,47 @@ function everything(): Rendered[] {
       add("mixed", m, mixedHints(q), explainMixed(q, true), explainMixed(q, false), q.expected);
     }
   }
+  for (const m of ["add_like", "subtract_like", "refute"] as AddMode[]) {
+    for (let i = 0; i < 5; i += 1) {
+      const q = buildAddQuestion({ mode: m }, m, i);
+      add("add", m, addHints(q), explainAdd(q, true), explainAdd(q, false), q.expected);
+    }
+  }
   return out;
 }
 
 const ALL = everything();
 
+/*
+ * The list above is hand-written, which is a liability: an engine added without
+ * a line here is an engine whose hints and explanations nobody reads. So the
+ * list is checked against the lessons rather than trusted.
+ */
+describe("every technique a lesson uses is read here", () => {
+  it("leaves no mode unwalked", () => {
+    const walked = new Set(ALL.map((r) => `${r.engine}/${r.mode}`));
+    for (const lesson of skill.lessons) {
+      const q = (lesson.params as { question?: { mode?: string; modes?: string[] } })?.question;
+      const engine = lesson.activity.split("/")[1];
+      for (const mode of [q?.mode, ...(q?.modes ?? [])].filter(Boolean) as string[]) {
+        expect(walked.has(`${engine}/${mode}`), `${lesson.id} uses ${engine}/${mode}, unread here`).toBe(true);
+      }
+    }
+  });
+});
+
 describe("every technique has a hint ladder, and it climbs", () => {
-  it("covers all twenty-four modes", () => {
-    expect(new Set(ALL.map((r) => `${r.engine}/${r.mode}`)).size).toBe(24);
+  it("covers one mode per lesson, with nothing walked that no lesson uses", () => {
+    // Counted from the curriculum rather than written down, because a hard
+    // number here is a number somebody has to remember to change.
+    const taught = new Set(
+      skill.lessons.flatMap((lesson) => {
+        const q = (lesson.params as { question?: { mode?: string; modes?: string[] } })?.question;
+        const engine = lesson.activity.split("/")[1];
+        return [q?.mode, ...(q?.modes ?? [])].filter(Boolean).map((m) => `${engine}/${m as string}`);
+      }),
+    );
+    expect([...new Set(ALL.map((r) => `${r.engine}/${r.mode}`))].sort()).toEqual([...taught].sort());
   });
 
   it("gives two or three rungs, each a real sentence", () => {

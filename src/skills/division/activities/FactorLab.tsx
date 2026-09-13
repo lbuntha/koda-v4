@@ -207,6 +207,15 @@ export const FactorLab: React.FC<ActivityProps<FactorParams>> = ({ params, koda,
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
       hints={practising ? [] : factorHints(question)}
+      onStartOver={
+        !round.feedback && (picked.length > 0 || splitting !== null || leaves.length > (question.mode === "prime_factors" ? 1 : 0))
+          ? () => {
+              setPicked([]);
+              setLeaves(question.mode === "prime_factors" ? [question.value] : []);
+              setSplitting(null);
+            }
+          : undefined
+      }
       iconName="Sigma"
       iconTone="emerald"
       onReadAloud={

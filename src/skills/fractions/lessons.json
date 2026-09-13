@@ -1124,6 +1124,139 @@
         10,
         12
       ]
+    },
+    {
+      "id": "add-like",
+      "title": "Add the Same Pieces",
+      "concept": "Adding Fractions with the Same Denominator",
+      "conceptKey": "like-adder",
+      "requires": [
+        "fraction-notation-reader",
+        "mixed-number-writer"
+      ],
+      "activity": "fractions/add",
+      "iconName": "Plus",
+      "iconTone": "emerald",
+      "params": {
+        "level": 25,
+        "question": {
+          "mode": "add_like",
+          "questionsPerRound": 5,
+          "partsRange": [
+            3,
+            12
+          ]
+        },
+        "play": {
+          "targetObjective": "Add two fractions that are already made of the same-sized pieces.",
+          "stepByStep": [
+            "Look at the bottom numbers. They are the same, so the pieces are the same size.",
+            "That means you can just count them together.",
+            "Three eighths and two eighths is five eighths, the way three cats and two cats is five cats.",
+            "The bottom number does not change. You did not cut anything."
+          ],
+          "kidTip": "Same-sized pieces can be counted. That is all adding is.",
+          "audioPrompt": "The pieces are already the same size, so count them together.",
+          "prompts": {
+            "default": "Count them together."
+          }
+        }
+      },
+      "standards": [
+        "CCSS.4.NF.B.3.A"
+      ],
+      "trajectoryLevel": "additive",
+      "ageBand": [
+        9,
+        11
+      ]
+    },
+    {
+      "id": "subtract-like",
+      "title": "Take Away the Same Pieces",
+      "concept": "Subtracting Fractions with the Same Denominator",
+      "conceptKey": "like-subtractor",
+      "requires": [
+        "like-adder"
+      ],
+      "activity": "fractions/add",
+      "iconName": "Minus",
+      "iconTone": "sky",
+      "params": {
+        "level": 26,
+        "question": {
+          "mode": "subtract_like",
+          "questionsPerRound": 5,
+          "partsRange": [
+            3,
+            12
+          ]
+        },
+        "play": {
+          "targetObjective": "Take one fraction away from another when both are made of the same-sized pieces.",
+          "stepByStep": [
+            "Check the bottom numbers first. Same number means same-sized pieces.",
+            "Count how many you have, then take away that many.",
+            "Count what is left on the strip.",
+            "The bottom number stays put, because the pieces never changed size."
+          ],
+          "kidTip": "Taking away is counting backwards. The pieces still have to match.",
+          "audioPrompt": "Both are the same size, so take one count from the other.",
+          "prompts": {
+            "default": "Take them away."
+          }
+        }
+      },
+      "standards": [
+        "CCSS.4.NF.B.3.A"
+      ],
+      "trajectoryLevel": "additive",
+      "ageBand": [
+        9,
+        11
+      ]
+    },
+    {
+      "id": "why-not-add-bottoms",
+      "title": "Why the Bottoms Do Not Add",
+      "concept": "Why Denominators Are Not Added",
+      "conceptKey": "denominator-reasoner",
+      "requires": [
+        "like-adder",
+        "unlike-comparer"
+      ],
+      "activity": "fractions/add",
+      "iconName": "AlertCircle",
+      "iconTone": "rose",
+      "params": {
+        "level": 27,
+        "question": {
+          "mode": "refute",
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Show on the strip that adding the bottom numbers gives an answer that is too small.",
+          "stepByStep": [
+            "Somebody has added the tops and the bottoms. Put both fractions on the strip.",
+            "Half a strip and a third of a strip, laid end to end, reach past the halfway mark.",
+            "Two fifths does not even reach halfway. So it cannot be the total.",
+            "Cut both into the same-sized pieces first. Then, and only then, count."
+          ],
+          "kidTip": "If your answer is smaller than what you started with, something has gone wrong.",
+          "audioPrompt": "Somebody says this is the answer. Put both on the strip and see.",
+          "prompts": {
+            "default": "Show that this answer is too small."
+          }
+        }
+      },
+      "standards": [
+        "CCSS.5.NF.A.1"
+      ],
+      "trajectoryLevel": "additive",
+      "ageBand": [
+        10,
+        12
+      ]
     }
   ]
 }

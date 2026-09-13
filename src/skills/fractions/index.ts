@@ -6,6 +6,7 @@ import * as numberline from "./activities/FractionLine";
 import * as equivalence from "./activities/EquivalenceMill";
 import * as compare from "./activities/CompareBar";
 import * as mixed from "./activities/MixedBoard";
+import * as add from "./activities/AddStrip";
 import { registerSkillVoice } from "../../lib/voiceClips";
 import audioManifest from "./audio/manifest.json";
 
@@ -81,6 +82,12 @@ export const skill: Skill = {
       name: "Wholes and Parts",
       defaultParams: { mode: "to_mixed", questionsPerRound: 5 },
       component: mixed.MixedBoard,
+    },
+    add: {
+      id: "add",
+      name: "Adding Pieces",
+      defaultParams: { mode: "add_like", questionsPerRound: 5 },
+      component: add.AddStrip,
     },
   },
 };

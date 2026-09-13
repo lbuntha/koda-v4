@@ -373,6 +373,15 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
       hints={practising ? [] : trayHints(question)}
+      onStartOver={
+        !round.feedback && (plates.some((n) => n > 0) || leftover > 0)
+          ? () => {
+              setPlates(shape.plates !== undefined ? Array(shape.plates).fill(0) : []);
+              setLeftover(0);
+              setRefused(null);
+            }
+          : undefined
+      }
       iconName="Divide"
       iconTone="indigo"
       onReadAloud={

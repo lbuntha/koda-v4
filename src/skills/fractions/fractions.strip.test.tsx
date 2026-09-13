@@ -156,6 +156,27 @@ describe("build — three copies of one part", () => {
     }
   });
 
+  it("offers a way back to a blank strip, and only once there is something to clear", async () => {
+    /*
+     * A child who shades six parts, gets it wrong and presses "Try again" comes
+     * back to the same question with their six parts still shaded. Undoing them
+     * one at a time is not a thing a stuck eight-year-old does.
+     */
+    const h = renderActivity(strip, { params: { question: { mode: "build", partsRange: [4, 4] } } });
+    expect(h.buttons()).not.toContain("Start over");
+
+    const parts = h.screen.getByTestId("whole").querySelectorAll("rect, path");
+    (parts[0] as SVGElement).dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await h.settle();
+    expect(h.screen.getByTestId("count").textContent).toContain("1 shaded");
+    expect(h.buttons()).toContain("Start over");
+
+    await h.press("Start over");
+    expect(h.screen.getByTestId("count").textContent).toContain("0 shaded");
+    expect(h.buttons()).not.toContain("Start over");
+    h.unmount();
+  });
+
   it("runs a full round of real shading", async () => {
     await expectStandardRound(strip, shadeAndConfirm, {
       params: { question: { mode: "build", partsRange: [3, 6], wholeKinds: ["bar"] } },

@@ -249,6 +249,16 @@ export const DivisionPad: React.FC<ActivityProps<ColumnParams>> = ({ params, kod
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
       hints={practising ? [] : columnHints(question)}
+      onStartOver={
+        !round.feedback && (digits.length > 0 || decimals.length > 0 || remainder !== "")
+          ? () => {
+              setDigits([]);
+              setDecimals([]);
+              setRemainder("");
+              setRefused(null);
+            }
+          : undefined
+      }
       iconName="Divide"
       iconTone="indigo"
       onReadAloud={

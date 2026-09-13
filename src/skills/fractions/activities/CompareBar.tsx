@@ -174,6 +174,14 @@ export const CompareBar: React.FC<ActivityProps<CompareParams>> = ({ params, kod
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
       hints={practising ? [] : compareHints(question)}
+      onStartOver={
+        matchedYet && question.mustMatch && !round.feedback
+          ? () => {
+              setMatchedYet(false);
+              setRefused(null);
+            }
+          : undefined
+      }
       iconName="Scale"
       iconTone="cyan"
       onReadAloud={

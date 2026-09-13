@@ -348,3 +348,34 @@ Five of division's nineteen phases lost time to things this plan can avoid:
 5. **69 lessons is division's size again.** Fractions is arguably the hardest
    subject in primary mathematics and the one children most often lose. Is a
    bigger first release right, or is 1–32 (through mixed numbers) the honest cut?
+
+### Phase 6 — `AddStrip`, levels 25–27
+
+Built: `add_like`, `subtract_like`, `refute`, plus five more modes the engine
+already carries for phase 7. 27 lessons, 206 tests.
+
+What it caught:
+
+- **`1 1/2 − 1.5/3`.** The first draw swapped numerators between the two
+  fractions when a subtraction came out negative. A value matched against sixths
+  is not a value over thirds, so the swap produced a fraction of a piece. Now
+  each numerator is drawn in its own denominator, compared in matched terms and
+  re-drawn — bounded at 60 attempts — when the relationship is wrong.
+- **Three buttons on a four-button question.** `refuteQuestion` shuffled a list
+  of four and sliced it, and `1/2 + 1/4` put `2/4` in the list twice. React kept
+  one and dropped the other. Options are now collected through `uniqueOptions`,
+  which drops both repeated strings and second spellings of the same amount —
+  two buttons worth the same is a question with two right answers.
+- **Distractors that collapse.** Where the pieces already match, three of the
+  four method-shaped wrong answers *are* the right answer, so a like-denominator
+  question had two options. The pool now runs to eight candidates in priority
+  order, ending with the ordinary miscount.
+- **Half the like-adding draws never crossed a whole.** The plan asks for half;
+  random draws gave 21%. Now alternated by index, so a round shows both.
+- **No way back.** Reported from a real session: a wrong answer leaves the work
+  exactly as it was, and "Try again" returns to the same question. `SkillRound`
+  now takes `onStartOver`, wired into every engine in fractions and division
+  that holds something a child builds. Addition, subtraction, multiplication and
+  counting still have the gap.
+- The teaching walk was a hand-written list of modes, so an engine added without
+  a line in it went unread. It is now checked against the curriculum.

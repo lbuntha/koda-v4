@@ -84,6 +84,10 @@ export function millHints(question: MillQuestion): string[] {
   }
 }
 
+/** Two fractions written exactly the same way — not merely worth the same. */
+const sameFraction = (a: Fraction, b: Fraction): boolean =>
+  a.parts === b.parts && a.taken === b.taken;
+
 export const EquivalenceMill: React.FC<ActivityProps<MillParams>> = ({ params, koda, onComplete, lesson }) => {
   const setup: MillSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const practising = isPractice(setup);
@@ -168,6 +172,14 @@ export const EquivalenceMill: React.FC<ActivityProps<MillParams>> = ({ params, k
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
       hints={practising ? [] : millHints(question)}
+      onStartOver={
+        current && !round.feedback && !sameFraction(current, question.operates ? question.from : question.to)
+          ? () => {
+              setCurrent(question.operates ? question.from : question.to);
+              setRefused(null);
+            }
+          : undefined
+      }
       iconName="Repeat"
       iconTone="indigo"
       onReadAloud={

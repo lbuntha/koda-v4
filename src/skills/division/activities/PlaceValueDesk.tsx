@@ -166,6 +166,14 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceParams>> = ({
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
       hints={practising ? [] : placeHints(question)}
+      onStartOver={
+        !round.feedback && (entries.some((e) => e !== ""))
+          ? () => {
+              setEntries(question.parts.map(() => ""));
+              setSlot(0);
+            }
+          : undefined
+      }
       iconName="Columns3"
       iconTone="emerald"
       onReadAloud={

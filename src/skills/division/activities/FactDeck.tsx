@@ -197,6 +197,15 @@ export const FactDeck: React.FC<ActivityProps<FactParams>> = ({ params, koda, on
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
       hints={practising ? [] : factHints(question)}
+      onStartOver={
+        !round.feedback && (ticked.length > 0 || found !== null)
+          ? () => {
+              setTicked([]);
+              setHelper(null);
+              setFound(null);
+            }
+          : undefined
+      }
       iconName="Layers"
       iconTone="purple"
       onReadAloud={
