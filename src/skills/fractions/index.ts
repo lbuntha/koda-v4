@@ -5,6 +5,7 @@ import * as strip from "./activities/FoldStrip";
 import * as numberline from "./activities/FractionLine";
 import * as equivalence from "./activities/EquivalenceMill";
 import * as compare from "./activities/CompareBar";
+import * as mixed from "./activities/MixedBoard";
 import { registerSkillVoice } from "../../lib/voiceClips";
 import audioManifest from "./audio/manifest.json";
 
@@ -74,6 +75,12 @@ export const skill: Skill = {
       name: "Which Is More?",
       defaultParams: { mode: "same_denominator", questionsPerRound: 5 },
       component: compare.CompareBar,
+    },
+    mixed: {
+      id: "mixed",
+      name: "Wholes and Parts",
+      defaultParams: { mode: "to_mixed", questionsPerRound: 5 },
+      component: mixed.MixedBoard,
     },
   },
 };

@@ -162,6 +162,14 @@ describe("improper — past the one", () => {
     }
   });
 
+  it("never lands exactly on a whole number", () => {
+    // `4/2` is two. A level about fractions past one that offers a whole number
+    // in disguise has become a level about something else.
+    for (const q of questions("improper", 200)) {
+      expect(q.fraction.taken % q.fraction.parts, `${q.fraction.taken}/${q.fraction.parts}`).not.toBe(0);
+    }
+  });
+
   it("gives the line enough room for the fraction it asks for", () => {
     for (const q of questions("improper", 100)) {
       expect(q.tick, `${q.fraction.taken}/${q.fraction.parts} on a span of ${q.span}`).toBeLessThanOrEqual(q.intervals);

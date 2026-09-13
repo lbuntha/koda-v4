@@ -14,6 +14,7 @@
 
 import {
   equivalentsOf,
+  partWord,
   fractionKey,
   fractionDistractors,
   gcd,
@@ -97,7 +98,7 @@ export interface MillQuestion {
 const PROMPTS: Record<MillMode, (q: Omit<MillQuestion, "prompt">) => string> = {
   split: (q) => `Cut every part into ${q.factor}. What is it called now?`,
   two_names: () => "Which pair of names does this amount have?",
-  scale_up: (q) => `Write ${nameOf(q.from)} in ${q.to.parts}ths.`,
+  scale_up: (q) => `Write ${nameOf(q.from)} in ${partWord(q.to.parts, true)}.`,
   scale_down: (q) => `Both numbers divide by ${q.factor}. What does ${nameOf(q.from)} become?`,
   simplest: (q) => `Write ${nameOf(q.from)} as simply as it will go.`,
 };
@@ -243,3 +244,41 @@ export const applyJoin = (f: Fraction, k: number): Fraction => ({
 });
 
 export { equivalentsOf, simplify, valueOf };
+
+/* -------------------------------------------------------------------------- */
+/* What the child is told afterwards                                           */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The sentence a child reads after answering.
+ *
+ * Every one names the amount that did not move, because that is the claim the
+ * whole engine makes and the thing a child has to come away believing.
+ */
+export function explainMill(q: MillQuestion, correct: boolean): string {
+  const { from, to, factor } = q;
+  if (!correct) {
+    switch (q.mode) {
+      case "two_names":
+        return "One half of that pair is not what the bars show. Read both halves before choosing.";
+      case "scale_up":
+        return `Cut every part into ${to.parts / from.parts} — the shaded ones get cut as well.`;
+      case "simplest":
+        return "Keep joining parts up while both numbers still share a factor.";
+      default:
+        return "The shaded amount never moves. Only the number of parts changes.";
+    }
+  }
+  switch (q.mode) {
+    case "split":
+      return `${factor} times as many parts, and ${factor} times as many shaded — ${nameOf(from)} and ${nameOf(to)} are the same amount.`;
+    case "two_names":
+      return `Same amount, two names: ${nameOf(from)} and ${nameOf(to)}.`;
+    case "scale_up":
+      return `Every part cut into ${to.parts / from.parts}, so ${nameOf(from)} is written ${nameOf(to)} without changing.`;
+    case "scale_down":
+      return `Joining every ${factor} parts turns ${nameOf(from)} into ${nameOf(to)} — the same amount, fewer pieces.`;
+    default:
+      return `${nameOf(to)} is as far as it goes: nothing but one divides both numbers now.`;
+  }
+}

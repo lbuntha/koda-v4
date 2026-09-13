@@ -7,6 +7,7 @@ import { buildStripQuestion, type StripMode } from "./internal/data/fractionStri
 import { buildLineQuestion, type LineMode } from "./internal/data/fractionLine";
 import { buildMillQuestion, type MillMode } from "./internal/data/fractionEquivalence";
 import { buildCompareQuestion, type CompareMode } from "./internal/data/fractionCompare";
+import { buildMixedQuestion, type MixedMode } from "./internal/data/fractionMixed";
 
 /**
  * Every technique is driven by a test, and the count is the claim.
@@ -19,11 +20,32 @@ import { buildCompareQuestion, type CompareMode } from "./internal/data/fraction
  */
 
 const TEST_DIR = join(process.cwd(), "src/skills/fractions");
-const suiteText = readdirSync(TEST_DIR)
-  .filter((f) => f.endsWith(".test.tsx") || f.endsWith(".test.ts"))
-  .filter((f) => !f.startsWith("fractions.coverage"))
-  .map((f) => readFileSync(join(TEST_DIR, f), "utf8"))
-  .join("\n");
+
+/*
+ * Behaviour suites only — one per engine, named for it.
+ *
+ * This used to read every test file in the folder, which meant the cross-cutting
+ * teaching test (which lists every mode by name so it can render its hints)
+ * satisfied the check on its own. A whole engine went in with no behaviour tests
+ * at all and this passed. Naming a mode is not driving it.
+ */
+const BEHAVIOUR = /^fractions\.(strip|line|mill|compare|mixed|add|area|share|decimal|estimate|story|strategy)\.test\.tsx?$/;
+
+const suiteFor = (engine: string): string => {
+  const file = readdirSync(TEST_DIR).find(
+    (f) => BEHAVIOUR.test(f) && f.split(".")[1] === SUITE_NAME[engine],
+  );
+  return file ? readFileSync(join(TEST_DIR, file), "utf8") : "";
+};
+
+/** Which behaviour suite belongs to which activity. */
+const SUITE_NAME: Record<string, string> = {
+  strip: "strip",
+  numberline: "line",
+  equivalence: "mill",
+  compare: "compare",
+  mixed: "mixed",
+};
 
 /**
  * The builder behind each engine.
@@ -41,6 +63,8 @@ const builderFor = (activity: string) => {
       return buildMillQuestion;
     case "compare":
       return buildCompareQuestion;
+    case "mixed":
+      return buildMixedQuestion;
     default:
       throw new Error(`no builder registered for activity "${activity}"`);
   }
@@ -61,9 +85,10 @@ const modesInUse = (): { activity: string; mode: string; lesson: string }[] => {
 describe("every technique the lessons use", () => {
   it("is named somewhere in the behaviour tests", () => {
     for (const { activity, mode, lesson } of modesInUse()) {
+      const suite = suiteFor(activity);
       expect(
-        suiteText.includes(`"${mode}"`),
-        `${lesson} uses ${activity}/${mode}, which no test names`,
+        suite.includes(`"${mode}"`),
+        `${lesson} uses ${activity}/${mode}, which fractions.${SUITE_NAME[activity] ?? activity}.test.tsx does not drive`,
       ).toBe(true);
     }
   });
@@ -101,6 +126,7 @@ describe("every technique the lessons use", () => {
     const strip: StripMode[] = ["equal_or_not", "name_unit", "which_whole", "build", "to_notation", "of_a_set"];
     const line: LineMode[] = ["place_unit", "place_any", "read_point", "makes_one", "improper"];
     const mill: MillMode[] = ["split", "two_names", "scale_up", "scale_down", "simplest"];
+    const mx: MixedMode[] = ["to_mixed", "to_improper", "on_line"];
     const cmp: CompareMode[] = [
       "same_denominator", "same_numerator", "different_wholes", "benchmark_half", "common_denominator",
     ];
@@ -111,6 +137,7 @@ describe("every technique the lessons use", () => {
         ...line.map((m) => `numberline/${m}`),
         ...mill.map((m) => `equivalence/${m}`),
         ...cmp.map((m) => `compare/${m}`),
+        ...mx.map((m) => `mixed/${m}`),
       ].sort(),
     );
   });

@@ -36,7 +36,10 @@
     "unit-size-comparer",
     "whole-comparer",
     "benchmark-comparer",
-    "unlike-comparer"
+    "unlike-comparer",
+    "mixed-number-writer",
+    "improper-writer",
+    "mixed-line-placer"
   ],
   "requires": [
     "counter",

@@ -5,6 +5,7 @@ import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../
 import { FractionBar } from "../internal/ui/FractionBar";
 import {
   MILL_REFUSALS,
+  explainMill,
   applyJoin,
   applySplit,
   buildMillQuestion,
@@ -53,7 +54,7 @@ export function millHints(question: MillQuestion): string[] {
     case "split":
       return composeHints(
         "Watch the shaded part while you cut. It does not move.",
-        `Every part becomes ${factor}, so there are ${factor} times as many altogether.`,
+        `Every part turns into ${factor} smaller ones, so there are ${factor} times as many altogether.`,
         "The shaded ones multiply by the same number, because they were cut too.",
       );
     case "two_names":
@@ -149,22 +150,12 @@ export const EquivalenceMill: React.FC<ActivityProps<MillParams>> = ({ params, k
       say(MILL_REFUSALS[block]);
       return;
     }
-    submit(
-      nameOf(current),
-      true,
-      `${nameOf(question.from)} and ${nameOf(current)} are the same amount.`,
-    );
+    submit(nameOf(current), true, explainMill(question, true));
   };
 
   const answerPair = (text: string): void => {
     const correct = text === question.expected;
-    submit(
-      text,
-      correct,
-      correct
-        ? "Same amount, two names."
-        : "One half of that pair is not what the bars show.",
-    );
+    submit(text, correct, explainMill(question, correct));
   };
 
   return (

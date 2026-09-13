@@ -2,8 +2,10 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import { partWord } from "../internal/data/fractionNumbers";
 import {
   LINE_REFUSALS,
+  explainLine,
   buildLineQuestion,
   lineBlockedBecause,
   nameOf,
@@ -46,13 +48,13 @@ export function lineHints(question: LineQuestion): string[] {
   switch (question.mode) {
     case "place_unit":
       return composeHints(
-        `The line from 0 to 1 is cut into ${parts} equal jumps.`,
+        `The line from 0 to 1 is cut into ${parts} equal jumps, each one ${partWord(parts)}.`,
         "One of those jumps is the fraction you want.",
         "Count one jump from zero and stop there.",
       );
     case "place_any":
       return composeHints(
-        `Every jump along this line is one ${parts}th.`,
+        `Every jump along this line is one ${partWord(parts)}.`,
         `Count ${taken} jumps from zero.`,
         "The number on top tells you how many jumps, not where to stop guessing.",
       );
@@ -64,14 +66,14 @@ export function lineHints(question: LineQuestion): string[] {
       );
     case "makes_one":
       return composeHints(
-        `Count the jumps from 0 all the way to 1.`,
-        `It takes ${parts} of them, so ${parts} ${parts}ths is one whole.`,
+        "Count the jumps from 0 all the way to 1.",
+        `However many jumps that is, that many ${partWord(parts, true)} make one whole.`,
         "Any fraction with the same number top and bottom is one whole.",
       );
     default:
       return composeHints(
         "This line goes past 1, so the fraction can too.",
-        `Count ${taken} jumps of one ${parts}th from zero, straight past the 1.`,
+        `Count ${taken} jumps of one ${partWord(parts)} from zero, straight past the 1.`,
         "A fraction bigger than one is still one number with one place.",
       );
   }
@@ -146,24 +148,12 @@ export const FractionLine: React.FC<ActivityProps<LineParams>> = ({ params, koda
       return;
     }
     const correct = marker === question.tick;
-    submit(
-      `tick ${marker}`,
-      correct,
-      correct
-        ? `${nameOf(question.fraction)} is ${question.fraction.taken} jump${question.fraction.taken === 1 ? "" : "s"} from zero.`
-        : "Count the jumps from zero again — one jump at a time.",
-    );
+    submit(`tick ${marker}`, correct, explainLine(question, correct));
   };
 
   const answerName = (text: string): void => {
     const correct = text === question.expected;
-    submit(
-      text,
-      correct,
-      correct
-        ? "That is where it sits."
-        : "Count the jumps from zero, not the marks.",
-    );
+    submit(text, correct, explainLine(question, correct, text));
   };
 
   return (

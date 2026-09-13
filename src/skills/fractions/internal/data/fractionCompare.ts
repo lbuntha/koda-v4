@@ -256,3 +256,52 @@ export const BENCHMARK_WORDS: Record<Verdict, string> = {
 };
 
 export { canPartition, gcd, lcm, shuffle, valueOf, WHOLES, HALF_NAME };
+
+/* -------------------------------------------------------------------------- */
+/* What the child is told afterwards                                           */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The sentence a child reads after answering.
+ *
+ * The wrong-answer lines name the *belief* rather than the mistake wherever
+ * there is one to name — level 18's especially, since that belief is the reason
+ * the level exists and a child who is only told "no" will hold it a while longer.
+ */
+export function explainCompare(q: CompareQuestion, correct: boolean, given?: Verdict): string {
+  const { left, right } = q;
+  const bigger = valueOf(left) > valueOf(right) ? left : right;
+  const smaller = bigger === left ? right : left;
+
+  if (!correct) {
+    switch (q.mode) {
+      case "same_numerator":
+        return given === "same"
+          ? "The pieces are different sizes, so the amounts differ even though the counts match."
+          : "Careful: a bigger bottom number makes the pieces smaller, not bigger.";
+      case "different_wholes":
+        return "Look at the two wholes. They are not the same size, so neither answer can be right.";
+      case "benchmark_half":
+        return `Half of ${left.parts} is ${left.parts / 2}. Compare the shaded count with that.`;
+      case "common_denominator":
+        return "The pieces were different sizes. Make them match, then count.";
+      default:
+        return "Both bars are cut the same way, so just count the shaded pieces.";
+    }
+  }
+
+  switch (q.mode) {
+    case "same_denominator":
+      return `Same size pieces, so more pieces is more: ${bigger.taken}/${bigger.parts} beats ${smaller.taken}/${smaller.parts}.`;
+    case "same_numerator":
+      return `The same number of pieces — but cutting into ${smaller.parts} makes them smaller than cutting into ${bigger.parts}.`;
+    case "different_wholes":
+      return "They are fractions of two different things, so there is nothing to compare.";
+    case "benchmark_half":
+      return q.expected === "same"
+        ? `${left.taken} is exactly half of ${left.parts}, so it is exactly a half.`
+        : `Half of ${left.parts} is ${left.parts / 2}, and ${left.taken} is ${q.expected === "more" ? "more" : "less"} than that.`;
+    default:
+      return `Cut to the same size pieces, ${bigger.taken}/${bigger.parts} is the bigger one.`;
+  }
+}

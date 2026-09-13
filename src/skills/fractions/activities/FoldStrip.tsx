@@ -2,9 +2,11 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import { partWord } from "../internal/data/fractionNumbers";
 import { FractionBar, FractionCircle } from "../internal/ui/FractionBar";
 import {
   STRIP_REFUSALS,
+  explainStrip,
   buildStripQuestion,
   nameOf,
   stripBlockedBecause,
@@ -52,23 +54,23 @@ export function stripHints(question: StripQuestion): string[] {
       return composeHints(
         "Look along the parts, not at how many there are.",
         "A fraction only works when every part is the same size.",
-        "Find two that are different. If you can, the answer is no.",
+        "One pair that differ is enough to settle it. Look for a widest and a narrowest.",
       );
     case "name_unit":
       return composeHints(
         `Count the parts the whole is cut into. There are ${parts}.`,
-        `One of ${parts} equal parts is called one ${parts === 2 ? "half" : parts === 4 ? "quarter" : `${parts}th`}.`,
+        `One of ${parts} equal parts is called one ${partWord(parts)}.`,
         "The number of parts goes underneath. The number shaded goes on top.",
       );
     case "which_whole":
       return composeHints(
         "The same fraction is shaded on both. That is not the question.",
         "Look at how big the two wholes are to start with.",
-        "Half of something big is more than half of something small.",
+        "The same fraction of a bigger whole is a bigger amount.",
       );
     case "build":
       return composeHints(
-        `Each part is one ${parts}th of the whole.`,
+        `Each part is one ${partWord(parts)} of the whole.`,
         `Shade them one at a time and count as you go.`,
         "Stop when you have shaded as many as the question asked for.",
       );
@@ -164,42 +166,22 @@ export const FoldStrip: React.FC<ActivityProps<StripParams>> = ({ params, koda, 
 
   const answerYesNo = (said: boolean): void => {
     const correct = said === question.areEqual;
-    submit(
-      said ? "yes" : "no",
-      correct,
-      correct
-        ? question.areEqual
-          ? "Every part is the same size, so it is a fair split."
-          : "They are different sizes, so these are not fractions of the whole."
-        : "Look along the parts again and compare two of them.",
-    );
+    submit(said ? "yes" : "no", correct, explainStrip(question, correct));
   };
 
   const answerName = (text: string): void => {
     const correct = text === question.expected;
-    submit(
-      text,
-      correct,
-      correct
-        ? `${text} of ${fraction.whole.name}.`
-        : "Count the shaded parts, then count all of them.",
-    );
+    submit(text, correct, explainStrip(question, correct, text));
   };
 
   const answerCount = (value: number): void => {
     const correct = String(value) === question.expected;
-    submit(String(value), correct, correct ? "That is the answer." : "Find one group first, then take that many.");
+    submit(String(value), correct, explainStrip(question, correct, String(value)));
   };
 
   const answerWhich = (side: "left" | "right"): void => {
     const correct = side === question.bigger;
-    submit(
-      side,
-      correct,
-      correct
-        ? "The same fraction of a bigger whole is a bigger amount."
-        : "The fraction is the same on both. Look at the wholes.",
-    );
+    submit(side, correct, explainStrip(question, correct, side));
   };
 
   const confirmBuild = (): void => {
@@ -208,11 +190,7 @@ export const FoldStrip: React.FC<ActivityProps<StripParams>> = ({ params, koda, 
       say(STRIP_REFUSALS[block]);
       return;
     }
-    submit(
-      nameOf(fraction),
-      true,
-      `${fraction.taken} of the ${fraction.parts} parts — that is ${nameOf(fraction)}.`,
-    );
+    submit(nameOf(fraction), true, explainStrip(question, true));
   };
 
   const drawWhole = (f: typeof fraction, marks: number[], scale = 1, onToggle?: (i: number) => void) =>

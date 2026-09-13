@@ -15,6 +15,7 @@
 
 import {
   drawFraction,
+  partWord,
   fractionKey,
   pick,
   shuffle,
@@ -112,7 +113,7 @@ const PROMPTS: Record<LineMode, (q: Omit<LineQuestion, "prompt">) => string> = {
   place_unit: (q) => `Put the marker on ${nameOf(q.fraction)}.`,
   place_any: (q) => `Put the marker on ${nameOf(q.fraction)}.`,
   read_point: () => "What number is the marker on?",
-  makes_one: (q) => `How many ${q.fraction.parts}ths make one whole?`,
+  makes_one: (q) => `How many ${partWord(q.fraction.parts, true)} make one whole?`,
   improper: (q) => `Put the marker on ${nameOf(q.fraction)}.`,
 };
 
@@ -132,7 +133,18 @@ export function buildLineQuestion(
   };
 
   const draw = (): Fraction => {
-    const f = drawFraction(spec);
+    let f = drawFraction(spec);
+    /*
+     * Past one, but not *on* a whole number.
+     *
+     * `proper: "never"` happily draws `4/2`, which is two — a whole number
+     * wearing a fraction's clothes, and a level about fractions bigger than one
+     * that keeps offering one has quietly become a level about something else.
+     * Redrawn until the numerator does not divide the denominator.
+     */
+    for (let i = 0; i < 60 && mode === "improper" && f.taken % f.parts === 0; i += 1) {
+      f = drawFraction(spec);
+    }
     // The line owns its whole: it is a length, never a cake.
     return { ...f, whole: LINE_WHOLE };
   };
@@ -210,3 +222,46 @@ export const wholeTicks = (question: LineQuestion): number[] =>
   Array.from({ length: question.span + 1 }, (_, i) => i * question.fraction.parts);
 
 export { toMixed };
+
+/* -------------------------------------------------------------------------- */
+/* What the child is told afterwards                                           */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The sentence a child reads after answering.
+ *
+ * "That is where it sits" was one of these, and it is not an explanation — it
+ * restates that they were right. Each line below names the jumps, because
+ * counting jumps rather than marks is the whole technique and the whole way it
+ * goes wrong.
+ */
+export function explainLine(q: LineQuestion, correct: boolean, given?: string): string {
+  const { fraction: f } = q;
+  const piece = `one ${partWord(f.parts)}`;
+
+  if (!correct) {
+    if (q.mode === "read_point" && given === `${f.parts}/${f.taken}`) {
+      return "That is the two numbers the wrong way up. The jumps counted go on top.";
+    }
+    if (q.mode === "read_point") {
+      return "Count the jumps from zero, not the marks. There is always one more mark than jump.";
+    }
+    if (q.mode === "makes_one") {
+      return `Count the jumps from 0 all the way to 1, one ${partWord(f.parts)} at a time.`;
+    }
+    return `Every jump is ${piece}. Count them from zero, one at a time.`;
+  }
+
+  switch (q.mode) {
+    case "place_unit":
+      return `One jump of ${piece} from zero. That is where 1/${f.parts} lives.`;
+    case "place_any":
+      return `${f.taken} jumps of ${piece} from zero lands on ${f.taken}/${f.parts}.`;
+    case "read_point":
+      return `${f.taken} jumps from zero, out of ${f.parts} to reach one — ${f.taken}/${f.parts}.`;
+    case "makes_one":
+      return `${f.parts} jumps of ${piece} reach exactly 1, so ${f.parts}/${f.parts} is one whole.`;
+    default:
+      return `${f.taken} jumps of ${piece} carries straight past 1. A fraction can be bigger than one and still be one number.`;
+  }
+}

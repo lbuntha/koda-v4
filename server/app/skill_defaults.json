@@ -11591,7 +11591,10 @@
       "unit-size-comparer",
       "whole-comparer",
       "benchmark-comparer",
-      "unlike-comparer"
+      "unlike-comparer",
+      "mixed-number-writer",
+      "improper-writer",
+      "mixed-line-placer"
     ],
     "requires": [
       "counter",
@@ -12627,6 +12630,155 @@
           "CCSS.4.NF.A.2"
         ],
         "trajectoryLevel": "comparer",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "improper-to-mixed",
+        "title": "Loose Parts into Wholes",
+        "concept": "Writing an Improper Fraction as a Mixed Number",
+        "conceptKey": "mixed-number-writer",
+        "requires": [
+          "unlike-comparer",
+          "improper-reader"
+        ],
+        "activity": "fractions/mixed",
+        "iconName": "Boxes",
+        "iconTone": "emerald",
+        "params": {
+          "level": 22,
+          "question": {
+            "mode": "to_mixed",
+            "questionsPerRound": 5,
+            "partsRange": [
+              2,
+              6
+            ],
+            "onesRange": [
+              1,
+              3
+            ]
+          },
+          "play": {
+            "targetObjective": "Group loose parts into whole ones and write the amount as a mixed number.",
+            "stepByStep": [
+              "Count how many parts it takes to make one whole.",
+              "Group that many together. That is one whole one.",
+              "Keep going while you still have enough for another.",
+              "Whatever is left over is the fraction part."
+            ],
+            "kidTip": "Nothing is added or taken away. The same parts are just arranged differently.",
+            "audioPrompt": "Group them into whole ones, and see what is left.",
+            "prompts": {
+              "default": "Group them into whole ones."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NF.B.3.C"
+        ],
+        "trajectoryLevel": "mixed-numbers",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "mixed-to-improper",
+        "title": "Wholes Back into Parts",
+        "concept": "Writing a Mixed Number as an Improper Fraction",
+        "conceptKey": "improper-writer",
+        "requires": [
+          "mixed-number-writer"
+        ],
+        "activity": "fractions/mixed",
+        "iconName": "Split",
+        "iconTone": "cyan",
+        "params": {
+          "level": 23,
+          "question": {
+            "mode": "to_improper",
+            "questionsPerRound": 5,
+            "partsRange": [
+              2,
+              6
+            ],
+            "onesRange": [
+              1,
+              3
+            ]
+          },
+          "play": {
+            "targetObjective": "Break whole ones back into parts and write the amount as one fraction.",
+            "stepByStep": [
+              "Every whole one breaks into the same number of parts as the bottom number.",
+              "Break them all up, one whole at a time.",
+              "Add the parts that were already loose.",
+              "Now the whole amount is written as one fraction."
+            ],
+            "kidTip": "This is the last one run backwards. If you can do one, you can do the other.",
+            "audioPrompt": "Break the whole ones up, then count every part.",
+            "prompts": {
+              "default": "Break them back into parts."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NF.B.3.C"
+        ],
+        "trajectoryLevel": "mixed-numbers",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "mixed-on-a-line",
+        "title": "Both Names, One Place",
+        "concept": "Mixed Numbers and Improper Fractions on a Number Line",
+        "conceptKey": "mixed-line-placer",
+        "requires": [
+          "improper-writer",
+          "fraction-line-placer"
+        ],
+        "activity": "fractions/mixed",
+        "iconName": "MapPin",
+        "iconTone": "purple",
+        "params": {
+          "level": 24,
+          "question": {
+            "mode": "on_line",
+            "questionsPerRound": 5,
+            "partsRange": [
+              2,
+              4
+            ],
+            "onesRange": [
+              1,
+              3
+            ]
+          },
+          "play": {
+            "targetObjective": "Place a mixed number on a number line and see its other name at the same point.",
+            "stepByStep": [
+              "Find the whole number and go to that mark first.",
+              "Then count on in parts from there.",
+              "Stop on the mark, not between two.",
+              "Both names belong to that one mark, because they are the same number."
+            ],
+            "kidTip": "Two names, one place. That is the whole idea.",
+            "audioPrompt": "Find the whole number first, then count on in parts.",
+            "prompts": {
+              "default": "Put the marker on the number."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NF.B.3.C"
+        ],
+        "trajectoryLevel": "mixed-numbers",
         "ageBand": [
           10,
           12

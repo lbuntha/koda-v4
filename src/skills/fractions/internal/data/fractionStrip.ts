@@ -9,6 +9,7 @@
 
 import {
   WHOLES,
+  partWord,
   canPartition,
   drawFraction,
   fractionDistractors,
@@ -260,3 +261,61 @@ export const drawableWholes = (kinds: Whole["kind"][]): Whole[] =>
   WHOLES.filter((w) => kinds.includes(w.kind) && partitionsFor(w).length > 0);
 
 export { canPartition };
+
+/* -------------------------------------------------------------------------- */
+/* What the child is told afterwards                                           */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The sentence a child reads after answering.
+ *
+ * Never "Correct" and never "That is the answer" — both of those tell a child
+ * whether to feel good and nothing else, and the child who guessed right is
+ * left exactly where they started. Every line below says *what happened*, in the
+ * terms of the picture that is still on screen.
+ *
+ * Exported rather than written inside the component so that a test can walk
+ * every technique and check each one actually explains something. Two of these
+ * were "That is the answer." until somebody read them.
+ */
+export function explainStrip(q: StripQuestion, correct: boolean, given?: string): string {
+  const { fraction: f } = q;
+  const size = f.whole.size ?? 12;
+  const perGroup = size / f.parts;
+
+  if (!correct) {
+    switch (q.mode) {
+      case "equal_or_not":
+        return "Compare two parts side by side. If one is wider than another, the split is not fair.";
+      case "name_unit":
+        return `Count the parts the whole is cut into — there are ${f.parts}. One of them is one ${partWord(f.parts)}.`;
+      case "which_whole":
+        return "The same fraction is shaded on both. What differs is how big each whole was to start with.";
+      case "to_notation":
+        return given && given.startsWith(String(f.parts))
+          ? "That is the two numbers the wrong way up. The shaded parts go on top."
+          : "Count the shaded parts for the top number, and all of them for the bottom.";
+      case "of_a_set":
+        return `Split the ${size} into ${f.parts} equal groups first — that is ${perGroup} in each.`;
+      default:
+        return "Shade one part at a time and count as you go.";
+    }
+  }
+
+  switch (q.mode) {
+    case "equal_or_not":
+      return q.areEqual
+        ? "Every part is the same size, so each one really is one of that many equal parts."
+        : "The parts are different sizes, so they are not fractions of this whole at all.";
+    case "name_unit":
+      return `The whole is cut into ${f.parts} equal parts, so one of them is one ${partWord(f.parts)} — 1/${f.parts}.`;
+    case "which_whole":
+      return "Same fraction, different whole. A fraction is not an amount until you say what it is a fraction of.";
+    case "build":
+      return `${f.taken} copies of 1/${f.parts} is ${f.taken}/${f.parts}. One number, not two.`;
+    case "to_notation":
+      return `${f.taken} parts shaded out of ${f.parts} altogether — ${f.taken}/${f.parts}.`;
+    default:
+      return `${size} split into ${f.parts} groups is ${perGroup} in each, and ${f.taken} ${f.taken === 1 ? "group" : "groups"} is ${perGroup * f.taken}.`;
+  }
+}

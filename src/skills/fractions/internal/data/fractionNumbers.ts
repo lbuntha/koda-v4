@@ -128,6 +128,58 @@ export const WHOLES: readonly Whole[] = [
 ] as const;
 
 /* -------------------------------------------------------------------------- */
+/* Saying it out loud                                                          */
+/* -------------------------------------------------------------------------- */
+
+const PART_WORDS: Record<number, [string, string]> = {
+  2: ["half", "halves"],
+  3: ["third", "thirds"],
+  4: ["quarter", "quarters"],
+  5: ["fifth", "fifths"],
+  6: ["sixth", "sixths"],
+  7: ["seventh", "sevenths"],
+  8: ["eighth", "eighths"],
+  9: ["ninth", "ninths"],
+  10: ["tenth", "tenths"],
+  11: ["eleventh", "elevenths"],
+  12: ["twelfth", "twelfths"],
+};
+
+/**
+ * What one part is called, in English.
+ *
+ * Because `${parts}th` produces "one 2th" and "12 12ths", and both of those
+ * shipped in hints a child was meant to read. A fraction is a word before it is
+ * a notation — "three quarters" is what the child says out loud, and a screen
+ * that cannot say it back has stopped speaking their language.
+ *
+ * Past twelve it falls back to the digits, which is honest: nothing in this
+ * skill cuts a whole into more than twelve parts, so a "24th" only ever appears
+ * after a split, where the numeral is what a child is looking at anyway.
+ */
+export const partWord = (parts: number, plural = false): string => {
+  const pair = PART_WORDS[parts];
+  if (!pair) return `${parts}th${plural ? "s" : ""}`;
+  return plural ? pair[1] : pair[0];
+};
+
+/**
+ * "an eighth", "a ninth".
+ *
+ * Because "a eighth" appeared in a hint, and a child reading the app's own
+ * English badly does not trust the app's mathematics either. Only the two
+ * vowel-sound names need it, but they need it every time.
+ */
+export const withArticle = (parts: number): string => {
+  const word = partWord(parts);
+  return `${/^[aeiou]/i.test(word) ? "an" : "a"} ${word}`;
+};
+
+/** "three quarters", for a fraction read aloud rather than written. */
+export const spokenFraction = (taken: number, parts: number): string =>
+  `${taken} ${partWord(parts, taken !== 1)}`;
+
+/* -------------------------------------------------------------------------- */
 /* A fraction                                                                  */
 /* -------------------------------------------------------------------------- */
 

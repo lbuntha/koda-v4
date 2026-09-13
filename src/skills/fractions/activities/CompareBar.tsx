@@ -2,9 +2,11 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import { withArticle } from "../internal/data/fractionNumbers";
 import { FractionBar } from "../internal/ui/FractionBar";
 import {
   BENCHMARK_WORDS,
+  explainCompare,
   COMPARE_REFUSALS,
   VERDICT_WORDS,
   buildCompareQuestion,
@@ -60,7 +62,7 @@ export function compareHints(question: CompareQuestion): string[] {
       return composeHints(
         "Count the coloured pieces on each. There are the same number.",
         "So the pieces themselves must be doing the work. Look at how big they are.",
-        `Cutting a whole into ${Math.max(left.parts, right.parts)} makes smaller pieces than cutting it into ${Math.min(left.parts, right.parts)}. A bigger bottom number means smaller pieces.`,
+        `${withArticle(Math.max(left.parts, right.parts))[0].toUpperCase()}${withArticle(Math.max(left.parts, right.parts)).slice(1)} is smaller than ${withArticle(Math.min(left.parts, right.parts))}, because the whole was cut into more. A bigger bottom number means smaller pieces.`,
       );
     case "different_wholes":
       return composeHints(
@@ -158,17 +160,7 @@ export const CompareBar: React.FC<ActivityProps<CompareParams>> = ({ params, kod
       given: verdict,
       expected: question.expected,
       title: correct ? "Yes!" : "Not that one",
-      message: correct
-        ? question.mode === "different_wholes"
-          ? "They are fractions of two different things, so there is nothing to compare."
-          : question.mode === "same_numerator"
-            ? "The same number of pieces — but a bigger bottom number means smaller pieces."
-            : "That is right."
-        : question.mode === "same_numerator" && verdict !== "same"
-          ? "Careful: a bigger bottom number makes the pieces smaller, not bigger."
-          : question.mode === "different_wholes"
-            ? "Look at the two wholes. They are not the same size."
-            : "Look at the bars again.",
+      message: explainCompare(question, correct, verdict),
     });
   };
 
