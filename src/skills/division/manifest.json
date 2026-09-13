@@ -1,0 +1,153 @@
+{
+  "id": "division",
+  "name": "Division",
+  "version": "0.1.0",
+  "description": "Share a total out equally, or measure it into equal groups — then say what is left over and what it means.",
+  "category": "core",
+  "author": "Koda Math Lab",
+  "iconName": "Divide",
+  "tagline": "Sharing out, grouping up, and the bit left over.",
+  "thumbnail": "division-quest",
+  "status": "draft",
+  "audience": {
+    "ages": [
+      7,
+      12
+    ],
+    "category": "operations"
+  },
+  "teaches": [
+    "equal-sharer",
+    "measurer-divider",
+    "division-meaning-reader",
+    "division-equation-reader",
+    "halver",
+    "division-identity",
+    "zero-division-reasoner",
+    "leftover-noticer",
+    "array-divider",
+    "array-division-writer",
+    "array-remainder-reader",
+    "repeated-subtractor",
+    "hop-quotient-reader",
+    "skip-counter",
+    "multiplicative-fact-family",
+    "table-divider",
+    "missing-factor-finder",
+    "easy-divisor-knower",
+    "repeated-halver",
+    "known-fact-user",
+    "division-remainder-reader",
+    "remainder-bounds-checker",
+    "remainder-interpreter",
+    "tens-divider",
+    "place-value-scaler",
+    "place-value-divider",
+    "place-value-splitter",
+    "division-exchanger",
+    "chunker",
+    "efficient-chunker",
+    "short-divider",
+    "short-division-exchanger",
+    "short-division-remainder-writer",
+    "quotient-zero-placer",
+    "long-divider",
+    "long-division-remainder-writer",
+    "quotient-continuer",
+    "last-digit-tester",
+    "digit-sum-tester",
+    "composite-rule-tester",
+    "factor-finder",
+    "common-factor-finder",
+    "prime-factoriser",
+    "compatible-number-estimator",
+    "reasonableness-checker",
+    "inverse-checker",
+    "group-size-modeler",
+    "group-count-modeler",
+    "unit-rate-finder",
+    "multiplicative-comparer",
+    "division-multi-step-solver",
+    "mean-finder",
+    "division-strategy-chooser"
+  ],
+  "requires": [
+    "counter",
+    "skip-counter",
+    "count-on",
+    "part-whole-decomposer",
+    "place-value-builder",
+    "unitiser-ten",
+    "unitiser-hundred",
+    "unbundler-ten",
+    "unbundler-hundred",
+    "equal-grouper",
+    "repeated-adder",
+    "array-reader",
+    "missing-dimension",
+    "doubles-knower",
+    "known-fact-user",
+    "multiplicative-commutativity",
+    "partial-sums",
+    "column-multiplier",
+    "rounding-estimator"
+  ],
+  "features": [
+    {
+      "id": "audio_speech",
+      "name": "Spoken voice",
+      "description": "Reads the question, speaks hints, and says why the tray will not take an answer yet. Turn off for a silent lesson.",
+      "isEnabled": true,
+      "tag": "Audio"
+    },
+    {
+      "id": "sound_chimes",
+      "name": "Sound chimes",
+      "description": "Plays a sound as a counter is dealt and when an answer is checked.",
+      "isEnabled": true,
+      "tag": "Audio"
+    },
+    {
+      "id": "haptic_feedback",
+      "name": "Haptic vibration",
+      "description": "Adds a small vibration to dealing a counter and to checking an answer.",
+      "isEnabled": true,
+      "tag": "Haptic"
+    },
+    {
+      "id": "counting_badges",
+      "name": "Group counts",
+      "description": "Shows how many counters are in each group as they are dealt.",
+      "isEnabled": true,
+      "tag": "Cognitive"
+    },
+    {
+      "id": "inverse_scaffold",
+      "name": "Helper fact",
+      "description": "Shows the matching multiplication beside the division being worked. Never offered during practice.",
+      "isEnabled": true,
+      "tag": "Cognitive"
+    }
+  ],
+  "settings": {
+    "remainderNotation": "r"
+  },
+  "settingsSchema": [
+    {
+      "key": "remainderNotation",
+      "label": "How remainders are written",
+      "help": "Classrooms differ. A child copying a different form from school reads their own correct answer as wrong.",
+      "type": "choice",
+      "options": [
+        {
+          "value": "r",
+          "label": "3 r 2"
+        },
+        {
+          "value": "rem",
+          "label": "3 rem 2"
+        }
+      ]
+    }
+  ]
+}

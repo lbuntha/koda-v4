@@ -8350,6 +8350,3210 @@
     ]
   },
   {
+    "id": "division",
+    "name": "Division",
+    "version": "0.1.0",
+    "description": "Share a total out equally, or measure it into equal groups — then say what is left over and what it means.",
+    "category": "core",
+    "author": "Koda Math Lab",
+    "iconName": "Divide",
+    "tagline": "Sharing out, grouping up, and the bit left over.",
+    "thumbnail": "division-quest",
+    "status": "draft",
+    "audience": {
+      "ages": [
+        7,
+        12
+      ],
+      "category": "operations"
+    },
+    "teaches": [
+      "equal-sharer",
+      "measurer-divider",
+      "division-meaning-reader",
+      "division-equation-reader",
+      "halver",
+      "division-identity",
+      "zero-division-reasoner",
+      "leftover-noticer",
+      "array-divider",
+      "array-division-writer",
+      "array-remainder-reader",
+      "repeated-subtractor",
+      "hop-quotient-reader",
+      "skip-counter",
+      "multiplicative-fact-family",
+      "table-divider",
+      "missing-factor-finder",
+      "easy-divisor-knower",
+      "repeated-halver",
+      "known-fact-user",
+      "division-remainder-reader",
+      "remainder-bounds-checker",
+      "remainder-interpreter",
+      "tens-divider",
+      "place-value-scaler",
+      "place-value-divider",
+      "place-value-splitter",
+      "division-exchanger",
+      "chunker",
+      "efficient-chunker",
+      "short-divider",
+      "short-division-exchanger",
+      "short-division-remainder-writer",
+      "quotient-zero-placer",
+      "long-divider",
+      "long-division-remainder-writer",
+      "quotient-continuer",
+      "last-digit-tester",
+      "digit-sum-tester",
+      "composite-rule-tester",
+      "factor-finder",
+      "common-factor-finder",
+      "prime-factoriser",
+      "compatible-number-estimator",
+      "reasonableness-checker",
+      "inverse-checker",
+      "group-size-modeler",
+      "group-count-modeler",
+      "unit-rate-finder",
+      "multiplicative-comparer",
+      "division-multi-step-solver",
+      "mean-finder",
+      "division-strategy-chooser"
+    ],
+    "requires": [
+      "counter",
+      "skip-counter",
+      "count-on",
+      "part-whole-decomposer",
+      "place-value-builder",
+      "unitiser-ten",
+      "unitiser-hundred",
+      "unbundler-ten",
+      "unbundler-hundred",
+      "equal-grouper",
+      "repeated-adder",
+      "array-reader",
+      "missing-dimension",
+      "doubles-knower",
+      "known-fact-user",
+      "multiplicative-commutativity",
+      "partial-sums",
+      "column-multiplier",
+      "rounding-estimator"
+    ],
+    "features": [
+      {
+        "id": "audio_speech",
+        "name": "Spoken voice",
+        "description": "Reads the question, speaks hints, and says why the tray will not take an answer yet. Turn off for a silent lesson.",
+        "isEnabled": true,
+        "tag": "Audio"
+      },
+      {
+        "id": "sound_chimes",
+        "name": "Sound chimes",
+        "description": "Plays a sound as a counter is dealt and when an answer is checked.",
+        "isEnabled": true,
+        "tag": "Audio"
+      },
+      {
+        "id": "haptic_feedback",
+        "name": "Haptic vibration",
+        "description": "Adds a small vibration to dealing a counter and to checking an answer.",
+        "isEnabled": true,
+        "tag": "Haptic"
+      },
+      {
+        "id": "counting_badges",
+        "name": "Group counts",
+        "description": "Shows how many counters are in each group as they are dealt.",
+        "isEnabled": true,
+        "tag": "Cognitive"
+      },
+      {
+        "id": "inverse_scaffold",
+        "name": "Helper fact",
+        "description": "Shows the matching multiplication beside the division being worked. Never offered during practice.",
+        "isEnabled": true,
+        "tag": "Cognitive"
+      }
+    ],
+    "settings": {
+      "remainderNotation": "r"
+    },
+    "settingsSchema": [
+      {
+        "key": "remainderNotation",
+        "label": "How remainders are written",
+        "help": "Classrooms differ. A child copying a different form from school reads their own correct answer as wrong.",
+        "type": "choice",
+        "options": [
+          {
+            "value": "r",
+            "label": "3 r 2"
+          },
+          {
+            "value": "rem",
+            "label": "3 rem 2"
+          }
+        ]
+      }
+    ],
+    "lessons": [
+      {
+        "id": "share-equally",
+        "title": "Share It Out",
+        "concept": "Dealing a Total Equally Between a Known Number of Groups",
+        "conceptKey": "equal-sharer",
+        "requires": [
+          "counter",
+          "equal-grouper"
+        ],
+        "activity": "division/share",
+        "iconName": "Users",
+        "iconTone": "indigo",
+        "params": {
+          "level": 1,
+          "question": {
+            "mode": "share_out",
+            "divisorRange": [
+              2,
+              5
+            ],
+            "quotientRange": [
+              2,
+              6
+            ],
+            "totalMax": 30,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Share a pile equally between the plates, and say how many are on one.",
+            "stepByStep": [
+              "Look at how many plates there are.",
+              "Give one counter to each plate, then start again at the first plate.",
+              "Keep going until the pile is empty.",
+              "Count what is on just one plate. That is the answer."
+            ],
+            "kidTip": "One each, then one each again. Never a handful.",
+            "audioPrompt": "Share them all out. Give one to each plate, then go round again.",
+            "prompts": {
+              "default": "Share them all out. How many on each plate?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.OA.A.2"
+        ],
+        "trajectoryLevel": "sharer",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "make-groups-of",
+        "title": "Make Groups Of",
+        "concept": "Measuring a Total into Groups of a Known Size",
+        "conceptKey": "measurer-divider",
+        "requires": [
+          "equal-sharer",
+          "repeated-adder"
+        ],
+        "activity": "division/share",
+        "iconName": "Package",
+        "iconTone": "purple",
+        "params": {
+          "level": 2,
+          "question": {
+            "mode": "group_by_size",
+            "divisorRange": [
+              2,
+              6
+            ],
+            "quotientRange": [
+              2,
+              6
+            ],
+            "totalMax": 36,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Fill groups of a given size until nothing is left, then count the groups.",
+            "stepByStep": [
+              "Start a new group.",
+              "Fill it right up to the size you were given.",
+              "Start another group, and keep going while there are enough left.",
+              "Count the groups. Not the counters — the groups."
+            ],
+            "kidTip": "Fill one group all the way before you start the next.",
+            "audioPrompt": "Make groups of the same size. How many groups can you make?",
+            "prompts": {
+              "default": "Make groups of the same size. How many groups can you make?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.OA.A.2"
+        ],
+        "trajectoryLevel": "sharer",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "sharing-or-grouping",
+        "title": "Which Question Is It?",
+        "concept": "Telling Sharing from Grouping by What Is Missing",
+        "conceptKey": "division-meaning-reader",
+        "requires": [
+          "equal-sharer",
+          "measurer-divider"
+        ],
+        "activity": "division/share",
+        "iconName": "HelpCircle",
+        "iconTone": "cyan",
+        "params": {
+          "level": 3,
+          "question": {
+            "mode": "which_meaning",
+            "divisorRange": [
+              2,
+              6
+            ],
+            "quotientRange": [
+              2,
+              8
+            ],
+            "totalMax": 48,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Say what a division question is asking for, without working it out.",
+            "stepByStep": [
+              "Read the sentence twice.",
+              "Find what it already tells you: the number of groups, or the size of one group.",
+              "The other one is what the question wants.",
+              "You do not have to work out the answer. Only say what is missing."
+            ],
+            "kidTip": "\"Shared between 4\" gives you the groups. \"Groups of 4\" gives you the size.",
+            "audioPrompt": "Read it carefully. Is it asking how many in each, or how many groups?",
+            "prompts": {
+              "default": "What is this question asking for?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.OA.A.2"
+        ],
+        "trajectoryLevel": "sharer",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "write-the-division",
+        "title": "Write It Down",
+        "concept": "Recording a Completed Share as a Division Sentence",
+        "conceptKey": "division-equation-reader",
+        "requires": [
+          "division-meaning-reader"
+        ],
+        "activity": "division/share",
+        "iconName": "PenLine",
+        "iconTone": "emerald",
+        "params": {
+          "level": 4,
+          "question": {
+            "mode": "to_equation",
+            "divisorRange": [
+              2,
+              6
+            ],
+            "quotientRange": [
+              2,
+              8
+            ],
+            "totalMax": 48,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Match a completed share to the division sentence that says it.",
+            "stepByStep": [
+              "Find the number you started with. It goes first.",
+              "Find the number you shared it by. It goes after the divide sign.",
+              "What you ended up with goes after the equals sign.",
+              "Read the whole sentence back and check it against the picture."
+            ],
+            "kidTip": "The biggest number nearly always goes first in a division.",
+            "audioPrompt": "Which sentence says what happened? The number you started with comes first.",
+            "prompts": {
+              "default": "Which sentence says what happened?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.OA.A.2"
+        ],
+        "trajectoryLevel": "sharer",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "halving",
+        "title": "Halve It",
+        "concept": "Halving as Sharing Between Two",
+        "conceptKey": "halver",
+        "requires": [
+          "equal-sharer",
+          "doubles-knower"
+        ],
+        "activity": "division/share",
+        "iconName": "SplitSquareHorizontal",
+        "iconTone": "pink",
+        "params": {
+          "level": 5,
+          "question": {
+            "mode": "halve",
+            "divisorRange": [
+              2,
+              2
+            ],
+            "quotientRange": [
+              2,
+              10
+            ],
+            "totalMax": 20,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Share a total between two, and recognise that as halving.",
+            "stepByStep": [
+              "There are always two plates when you halve.",
+              "Give one to each plate, over and over.",
+              "Count one plate. That is half.",
+              "Check it: does your answer, doubled, give you back what you started with?"
+            ],
+            "kidTip": "Halving undoes doubling. If you know double six is twelve, you know half of twelve.",
+            "audioPrompt": "Share them between the two plates. How many on each?",
+            "prompts": {
+              "default": "Share them between the two plates. How many on each?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.OA.C.7"
+        ],
+        "trajectoryLevel": "sharer",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "divide-by-one-and-self",
+        "title": "By One, and By Itself",
+        "concept": "Dividing by One and by the Whole Amount",
+        "conceptKey": "division-identity",
+        "requires": [
+          "equal-sharer",
+          "division-equation-reader"
+        ],
+        "activity": "division/share",
+        "iconName": "Equal",
+        "iconTone": "cyan",
+        "params": {
+          "level": 6,
+          "question": {
+            "mode": "identity",
+            "totalMax": 12,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Share between one, and between as many groups as there are things, and say why each comes out as it does.",
+            "stepByStep": [
+              "Count the plates before you count anything else.",
+              "One plate means nobody else is sharing, so everything stays together.",
+              "One plate for every counter means each plate gets exactly one.",
+              "Say what happened out loud. These two are worth remembering, not working out."
+            ],
+            "kidTip": "Sharing with nobody else changes nothing. Sharing one each leaves one each.",
+            "audioPrompt": "Look at the plates first. How many are there?",
+            "prompts": {
+              "default": "Share them out. How many on each plate?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.OA.B.5"
+        ],
+        "trajectoryLevel": "division-properties",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "zero-and-nothing",
+        "title": "Nothing to Share",
+        "concept": "Zero Shared Out, and the Share That Cannot Be Made",
+        "conceptKey": "zero-division-reasoner",
+        "requires": [
+          "division-identity"
+        ],
+        "activity": "division/share",
+        "iconName": "CircleSlash",
+        "iconTone": "pink",
+        "params": {
+          "level": 7,
+          "question": {
+            "mode": "zero_rules",
+            "totalMax": 12,
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Share nothing between some groups, and recognise that sharing something between no groups is not a question that has an answer.",
+            "stepByStep": [
+              "Check the pile. Then check the plates.",
+              "An empty pile means every plate ends up empty, however many plates there are.",
+              "No plates at all is different. There is nowhere for anything to go.",
+              "When there is nowhere to put them, say so. That is the right answer."
+            ],
+            "kidTip": "Nothing shared out is nothing each. Something shared between nothing cannot be done at all.",
+            "audioPrompt": "Check the pile, then check the plates. Is this one you can do?",
+            "prompts": {
+              "default": "Share them out. How many on each plate?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.OA.B.5"
+        ],
+        "trajectoryLevel": "division-properties",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "some-are-left-over",
+        "title": "Some Are Left Over",
+        "concept": "Noticing What Will Not Go Round Again",
+        "conceptKey": "leftover-noticer",
+        "requires": [
+          "equal-sharer",
+          "zero-division-reasoner"
+        ],
+        "activity": "division/share",
+        "iconName": "Inbox",
+        "iconTone": "purple",
+        "params": {
+          "level": 8,
+          "question": {
+            "mode": "see_leftover",
+            "divisorRange": [
+              2,
+              5
+            ],
+            "quotientRange": [
+              2,
+              6
+            ],
+            "totalMax": 30,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Share until no more can go round, put what is left in the box, and say how many each group got.",
+            "stepByStep": [
+              "Share one to each plate, round and round, as you always do.",
+              "Stop when there are not enough left to give one to every plate.",
+              "Put what is left in the leftover box.",
+              "Count one plate. That is how many each group got."
+            ],
+            "kidTip": "If what is in the box could still go round once more, you stopped too early.",
+            "audioPrompt": "Share as many as you can. Anything that will not go round again goes in the box.",
+            "prompts": {
+              "default": "Share as many as you can. How many on each plate?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.OA.A.2"
+        ],
+        "trajectoryLevel": "remainder-reader",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "array-to-quotient",
+        "title": "The Array Knows",
+        "concept": "Finding a Side from the Total and the Other Side",
+        "conceptKey": "array-divider",
+        "requires": [
+          "leftover-noticer",
+          "array-reader",
+          "missing-dimension"
+        ],
+        "activity": "division/array",
+        "iconName": "Grid3x3",
+        "iconTone": "indigo",
+        "params": {
+          "level": 9,
+          "question": {
+            "mode": "total_and_side",
+            "divisorRange": [
+              2,
+              10
+            ],
+            "quotientRange": [
+              2,
+              10
+            ],
+            "totalMax": 100,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Build an array with the given number of rows and read the length of one row.",
+            "stepByStep": [
+              "Make the number of rows the question asks for.",
+              "Place every counter. They share themselves out between the rows.",
+              "Check that the rows are all the same length.",
+              "Count along one row. That is the answer."
+            ],
+            "kidTip": "The total and one side always tell you the other side.",
+            "audioPrompt": "Build the rows first, then count along just one of them.",
+            "prompts": {
+              "default": "How many in each row?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.OA.A.4",
+          "CCSS.3.OA.B.6"
+        ],
+        "trajectoryLevel": "concrete-modeler",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "two-divisions-one-array",
+        "title": "Two Divisions, One Array",
+        "concept": "Reading One Array as Both of Its Divisions",
+        "conceptKey": "array-division-writer",
+        "requires": [
+          "array-divider",
+          "multiplicative-commutativity"
+        ],
+        "activity": "division/array",
+        "iconName": "Rows3",
+        "iconTone": "purple",
+        "params": {
+          "level": 10,
+          "question": {
+            "mode": "two_divisions",
+            "divisorRange": [
+              2,
+              9
+            ],
+            "quotientRange": [
+              2,
+              9
+            ],
+            "totalMax": 81,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Write both of the divisions a single array shows.",
+            "stepByStep": [
+              "Count the rows.",
+              "Count along one row.",
+              "Dividing by the rows gives the length of a row.",
+              "Dividing by the length of a row gives the number of rows. Both are true at once."
+            ],
+            "kidTip": "Turn the array a quarter turn. It is the same counters and a different sentence.",
+            "audioPrompt": "One array, two sentences. Read both halves before you choose.",
+            "prompts": {
+              "default": "Which pair of sentences does this array show?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.OA.B.6"
+        ],
+        "trajectoryLevel": "concrete-modeler",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "array-with-remainder",
+        "title": "A Row That Does Not Finish",
+        "concept": "The Short Final Row as What Is Left Over",
+        "conceptKey": "array-remainder-reader",
+        "requires": [
+          "array-divider",
+          "leftover-noticer"
+        ],
+        "activity": "division/array",
+        "iconName": "AlignLeft",
+        "iconTone": "pink",
+        "params": {
+          "level": 11,
+          "question": {
+            "mode": "partial_row",
+            "divisorRange": [
+              3,
+              8
+            ],
+            "quotientRange": [
+              2,
+              8
+            ],
+            "totalMax": 64,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Fill rows of a fixed length and count only the rows that are full.",
+            "stepByStep": [
+              "Place every counter. Each row fills up before the next one starts.",
+              "Look at the last row. If it is short, it is not a row.",
+              "Count the full rows only.",
+              "What is in the short row is what is left over."
+            ],
+            "kidTip": "A row that does not finish is a leftover lying sideways.",
+            "audioPrompt": "Fill the rows. Then count only the ones that are completely full.",
+            "prompts": {
+              "default": "How many full rows can you make?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.OA.A.3"
+        ],
+        "trajectoryLevel": "concrete-modeler",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "hop-back",
+        "title": "Hop Back to Zero",
+        "concept": "Division as Taking the Same Amount Away Again and Again",
+        "conceptKey": "repeated-subtractor",
+        "requires": [
+          "array-divider",
+          "count-on"
+        ],
+        "activity": "division/numberline",
+        "iconName": "MoveHorizontal",
+        "iconTone": "cyan",
+        "params": {
+          "level": 12,
+          "question": {
+            "mode": "back_to_zero",
+            "divisorRange": [
+              2,
+              10
+            ],
+            "quotientRange": [
+              2,
+              6
+            ],
+            "totalMax": 60,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Take the divisor away repeatedly until nothing is left, and count how many times you could.",
+            "stepByStep": [
+              "Start at the total.",
+              "Hop back by the same amount every time.",
+              "Stop when the marker is sitting exactly on zero.",
+              "Count the hops. That is how many times it went in."
+            ],
+            "kidTip": "Dividing is just taking the same amount away over and over until it is gone.",
+            "audioPrompt": "Start at the total and hop back. Keep going until you land on zero.",
+            "prompts": {
+              "default": "How many hops to reach 0?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.OA.A.3"
+        ],
+        "trajectoryLevel": "repeated-subtraction",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "count-the-hops",
+        "title": "The Hops Are the Answer",
+        "concept": "Telling the Number of Hops from the Number Landed On",
+        "conceptKey": "hop-quotient-reader",
+        "requires": [
+          "repeated-subtractor"
+        ],
+        "activity": "division/numberline",
+        "iconName": "Footprints",
+        "iconTone": "indigo",
+        "params": {
+          "level": 13,
+          "question": {
+            "mode": "count_hops",
+            "divisorRange": [
+              2,
+              10
+            ],
+            "quotientRange": [
+              2,
+              8
+            ],
+            "totalMax": 80,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Report how many equal hops a line shows, not where they finish.",
+            "stepByStep": [
+              "Look at the arrows, not the numbers.",
+              "Count how many jumps there are.",
+              "Where the last jump lands is not the answer.",
+              "The answer is the number of jumps."
+            ],
+            "kidTip": "The answer to a division is how many times it went in, not what you were left looking at.",
+            "audioPrompt": "Count the jumps. Not the number you finish on.",
+            "prompts": {
+              "default": "How many hops are there?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.OA.A.3",
+          "CCSS.3.OA.B.6"
+        ],
+        "trajectoryLevel": "repeated-subtraction",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "skip-up-to-total",
+        "title": "Count Up to It",
+        "concept": "Reaching a Total by Equal Steps and Counting the Steps",
+        "conceptKey": "skip-counter",
+        "requires": [
+          "hop-quotient-reader"
+        ],
+        "activity": "division/numberline",
+        "iconName": "TrendingUp",
+        "iconTone": "emerald",
+        "params": {
+          "level": 14,
+          "question": {
+            "mode": "forward_to_total",
+            "divisorRange": [
+              2,
+              10
+            ],
+            "quotientRange": [
+              3,
+              10
+            ],
+            "totalMax": 100,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Skip count up to a total and use the number of steps as the quotient.",
+            "stepByStep": [
+              "Start at zero.",
+              "Count on by the same amount each time.",
+              "Stop the moment you land exactly on the total.",
+              "How many times you counted on is the answer."
+            ],
+            "kidTip": "Counting up gets you there just as well as counting down, and it is usually quicker.",
+            "audioPrompt": "Count up from zero in equal steps until you reach the total.",
+            "prompts": {
+              "default": "How many hops to reach the total?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.OA.C.7"
+        ],
+        "trajectoryLevel": "repeated-subtraction",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "fact-families",
+        "title": "Four Facts, Three Numbers",
+        "concept": "Four Equations from One Multiplicative Relationship",
+        "conceptKey": "multiplicative-fact-family",
+        "requires": [
+          "hop-quotient-reader",
+          "array-division-writer"
+        ],
+        "activity": "division/facts",
+        "iconName": "Network",
+        "iconTone": "indigo",
+        "params": {
+          "level": 15,
+          "question": {
+            "mode": "family",
+            "questionsPerRound": 5,
+            "divisorRange": [
+              2,
+              12
+            ],
+            "quotientRange": [
+              2,
+              12
+            ]
+          },
+          "play": {
+            "targetObjective": "Write all four true equations from a multiplication triple.",
+            "stepByStep": [
+              "Find the biggest of the three numbers. That is the total.",
+              "The other two multiply together to make it — in either order.",
+              "The total divided by one of them gives the other.",
+              "That is four sentences from three numbers, and they all say the same thing."
+            ],
+            "kidTip": "If you know one of the four, you know all four.",
+            "audioPrompt": "Three numbers, four true sentences. Find all four.",
+            "prompts": {
+              "default": "Which of these are true?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.OA.B.6"
+        ],
+        "trajectoryLevel": "inverse-thinker",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "table-divide",
+        "title": "Divide with the Table",
+        "concept": "Finding a Total in a Row and Reading Its Column",
+        "conceptKey": "table-divider",
+        "requires": [
+          "multiplicative-fact-family"
+        ],
+        "activity": "division/facts",
+        "iconName": "Table",
+        "iconTone": "cyan",
+        "params": {
+          "level": 16,
+          "question": {
+            "mode": "table_divide",
+            "questionsPerRound": 5,
+            "divisorRange": [
+              2,
+              12
+            ],
+            "quotientRange": [
+              2,
+              12
+            ]
+          },
+          "play": {
+            "targetObjective": "Use a times-table row backwards: find the total, read the column.",
+            "stepByStep": [
+              "Find the row for the number you are dividing by.",
+              "Run along it until you find the total.",
+              "Look up at the column it is in.",
+              "That column number is the answer."
+            ],
+            "kidTip": "A times table answers division questions if you read it backwards.",
+            "audioPrompt": "Run along the row until you find the total, then look up.",
+            "prompts": {
+              "default": "Which column is it in?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.OA.C.7"
+        ],
+        "trajectoryLevel": "inverse-thinker",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "missing-factor",
+        "title": "The Missing Factor",
+        "concept": "Division as an Unknown-Factor Problem",
+        "conceptKey": "missing-factor-finder",
+        "requires": [
+          "multiplicative-fact-family"
+        ],
+        "activity": "division/facts",
+        "iconName": "Puzzle",
+        "iconTone": "purple",
+        "params": {
+          "level": 17,
+          "question": {
+            "mode": "missing_factor",
+            "questionsPerRound": 5,
+            "divisorRange": [
+              2,
+              12
+            ],
+            "quotientRange": [
+              2,
+              12
+            ]
+          },
+          "play": {
+            "targetObjective": "Recognise a division and its missing-factor multiplication as one question.",
+            "stepByStep": [
+              "Read the multiplication with the gap in it.",
+              "Ask what fills the gap.",
+              "That same number is the answer to the division.",
+              "They are not two questions. They are one question written twice."
+            ],
+            "kidTip": "\"What times this makes that?\" is division wearing a different hat.",
+            "audioPrompt": "What fills the gap? That is your answer to both.",
+            "prompts": {
+              "default": "What is the answer?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.OA.A.4",
+          "CCSS.3.OA.B.6"
+        ],
+        "trajectoryLevel": "inverse-thinker",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "divide-by-2-5-10",
+        "title": "By 2, 5 and 10",
+        "concept": "The Divisors Whose Facts Come First",
+        "conceptKey": "easy-divisor-knower",
+        "requires": [
+          "missing-factor-finder",
+          "halver"
+        ],
+        "activity": "division/facts",
+        "iconName": "Star",
+        "iconTone": "emerald",
+        "params": {
+          "level": 18,
+          "question": {
+            "mode": "easy_divisors",
+            "questionsPerRound": 5,
+            "quotientRange": [
+              2,
+              12
+            ]
+          },
+          "play": {
+            "targetObjective": "Divide fluently by 2, 5 and 10.",
+            "stepByStep": [
+              "Dividing by 2 is halving.",
+              "Dividing by 10 asks how many tens are inside.",
+              "Dividing by 5 is close to dividing by 10 — there are twice as many.",
+              "These three come up more than any others. Learn them first."
+            ],
+            "kidTip": "Half of the answer to a ten is the answer to a five... the other way round. Ten first, then double it.",
+            "audioPrompt": "Two, five and ten. The three you will use most.",
+            "prompts": {
+              "default": "What is the answer?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.OA.C.7"
+        ],
+        "trajectoryLevel": "deriver",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "halve-again",
+        "title": "Halve, and Halve Again",
+        "concept": "Dividing by Four and Eight through Repeated Halving",
+        "conceptKey": "repeated-halver",
+        "requires": [
+          "easy-divisor-knower"
+        ],
+        "activity": "division/facts",
+        "iconName": "Scissors",
+        "iconTone": "pink",
+        "params": {
+          "level": 19,
+          "question": {
+            "mode": "repeated_halving",
+            "questionsPerRound": 5,
+            "quotientRange": [
+              2,
+              12
+            ]
+          },
+          "play": {
+            "targetObjective": "Divide by 4 and 8 by halving repeatedly.",
+            "stepByStep": [
+              "Dividing by 4 means halving, then halving what is left.",
+              "Dividing by 8 means halving three times.",
+              "Do one halving at a time.",
+              "Check: does your answer times four (or eight) give you back the total?"
+            ],
+            "kidTip": "Two halvings make a quarter. Three make an eighth.",
+            "audioPrompt": "Halve it. Then halve that. Take it one step at a time.",
+            "prompts": {
+              "default": "What is the answer?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.OA.B.5",
+          "CCSS.3.OA.C.7"
+        ],
+        "trajectoryLevel": "deriver",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "divide-by-3-6-9",
+        "title": "By 3, 6 and 9",
+        "concept": "Dividing from the Multiplication That Matches",
+        "conceptKey": "known-fact-user",
+        "requires": [
+          "repeated-halver"
+        ],
+        "activity": "division/facts",
+        "iconName": "Repeat",
+        "iconTone": "indigo",
+        "params": {
+          "level": 20,
+          "question": {
+            "mode": "known_multiple",
+            "questionsPerRound": 5,
+            "quotientRange": [
+              2,
+              12
+            ]
+          },
+          "play": {
+            "targetObjective": "Divide by 3, 6 and 9 using the matching multiplication.",
+            "stepByStep": [
+              "Ask what the number you are dividing by times something makes the total.",
+              "Count up in threes, sixes or nines if you need to.",
+              "Use the answer to the multiplication.",
+              "The sixes are double the threes, and the nines are one less group than the tens."
+            ],
+            "kidTip": "If you know the times table, you already know these.",
+            "audioPrompt": "What times three makes this? That is the whole question.",
+            "prompts": {
+              "default": "What is the answer?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.OA.C.7"
+        ],
+        "trajectoryLevel": "deriver",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "use-a-known-fact",
+        "title": "Use a Fact You Know",
+        "concept": "Choosing a Helper Fact and Using It",
+        "conceptKey": "known-fact-user",
+        "requires": [
+          "known-fact-user",
+          "table-divider"
+        ],
+        "activity": "division/facts",
+        "iconName": "Lightbulb",
+        "iconTone": "purple",
+        "params": {
+          "level": 21,
+          "question": {
+            "mode": "known_fact",
+            "questionsPerRound": 5,
+            "divisorRange": [
+              2,
+              12
+            ],
+            "quotientRange": [
+              2,
+              12
+            ]
+          },
+          "play": {
+            "targetObjective": "Pick the multiplication that answers a division, then use it.",
+            "stepByStep": [
+              "Look at the total you are dividing.",
+              "Find a multiplication that ends in that total.",
+              "Check the number you are dividing by appears in it.",
+              "The other number in the multiplication is your answer."
+            ],
+            "kidTip": "You are not remembering a division. You are remembering a multiplication and reading it backwards.",
+            "audioPrompt": "Which fact would help here? Choose it first, then answer.",
+            "prompts": {
+              "default": "What is the answer?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.OA.B.5",
+          "CCSS.3.OA.C.7"
+        ],
+        "trajectoryLevel": "deriver",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "write-the-remainder",
+        "title": "Write What Is Left",
+        "concept": "Recording a Quotient and Its Remainder",
+        "conceptKey": "division-remainder-reader",
+        "requires": [
+          "known-fact-user",
+          "array-remainder-reader"
+        ],
+        "activity": "division/remainder",
+        "iconName": "PenLine",
+        "iconTone": "purple",
+        "params": {
+          "level": 22,
+          "question": {
+            "mode": "record",
+            "questionsPerRound": 5,
+            "divisorRange": [
+              2,
+              9
+            ],
+            "quotientRange": [
+              2,
+              12
+            ],
+            "totalMax": 100
+          },
+          "play": {
+            "targetObjective": "Write a division answer as a whole number and a remainder.",
+            "stepByStep": [
+              "Work out how many whole groups fit.",
+              "Take those groups away from the total.",
+              "What is left is the remainder.",
+              "Write both: the groups, then the letter r, then what is left."
+            ],
+            "kidTip": "Two numbers, not one. The groups, and the bit that would not go.",
+            "audioPrompt": "How many whole ones fit, and what is left over?",
+            "prompts": {
+              "default": "Write the answer and the remainder."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.OA.A.3",
+          "CCSS.4.NBT.B.6"
+        ],
+        "trajectoryLevel": "remainder-reader",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "remainder-check",
+        "title": "The Leftover Must Be Smaller",
+        "concept": "Bounding the Remainder by the Divisor",
+        "conceptKey": "remainder-bounds-checker",
+        "requires": [
+          "division-remainder-reader"
+        ],
+        "activity": "division/remainder",
+        "iconName": "AlertCircle",
+        "iconTone": "pink",
+        "params": {
+          "level": 23,
+          "question": {
+            "mode": "too_big",
+            "questionsPerRound": 5,
+            "divisorRange": [
+              3,
+              9
+            ],
+            "quotientRange": [
+              2,
+              12
+            ],
+            "totalMax": 100
+          },
+          "play": {
+            "targetObjective": "Spot and fix an answer whose remainder is too big.",
+            "stepByStep": [
+              "Look at the leftover somebody has written.",
+              "Ask: could another whole group still come out of it?",
+              "If it could, the sharing was stopped too early.",
+              "Move the extra groups across and write the answer properly."
+            ],
+            "kidTip": "A leftover the same size as the divisor is not a leftover. It is another group.",
+            "audioPrompt": "Check the leftover. Is it small enough?",
+            "prompts": {
+              "default": "Write it properly."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NBT.B.6"
+        ],
+        "trajectoryLevel": "remainder-reader",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "remainder-in-context",
+        "title": "What the Leftover Means",
+        "concept": "Four Readings of One Remainder",
+        "conceptKey": "remainder-interpreter",
+        "requires": [
+          "remainder-bounds-checker"
+        ],
+        "activity": "division/remainder",
+        "iconName": "HelpCircle",
+        "iconTone": "indigo",
+        "params": {
+          "level": 24,
+          "question": {
+            "mode": "interpret",
+            "questionsPerRound": 8,
+            "divisorRange": [
+              3,
+              8
+            ],
+            "quotientRange": [
+              2,
+              9
+            ],
+            "totalMax": 80
+          },
+          "play": {
+            "targetObjective": "Give the answer the situation asks for, not just the calculation.",
+            "stepByStep": [
+              "Do the division first. Get the groups and the leftover.",
+              "Now read the question again, slowly.",
+              "Does it want the full ones? One more? What is left? Or both?",
+              "The sum is the same every time. The answer is not."
+            ],
+            "kidTip": "The maths gives you two numbers. The question tells you which one to say.",
+            "audioPrompt": "Same sum, different question. Which part does it want?",
+            "prompts": {
+              "default": "What does the question ask for?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.OA.A.3"
+        ],
+        "trajectoryLevel": "remainder-reader",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "choose-the-answer-form",
+        "title": "Which Answer Fits?",
+        "concept": "Choosing the Form of Answer a Situation Needs",
+        "conceptKey": "remainder-interpreter",
+        "requires": [
+          "remainder-interpreter"
+        ],
+        "activity": "division/remainder",
+        "iconName": "ListChecks",
+        "iconTone": "cyan",
+        "params": {
+          "level": 25,
+          "question": {
+            "mode": "choose_form",
+            "questionsPerRound": 5,
+            "divisorRange": [
+              3,
+              8
+            ],
+            "quotientRange": [
+              2,
+              9
+            ],
+            "totalMax": 80
+          },
+          "play": {
+            "targetObjective": "Pick the answer that fits the situation from four that all use the same numbers.",
+            "stepByStep": [
+              "All four answers come from the same division.",
+              "Only one of them answers what was asked.",
+              "Check the units: buses, eggs, left over.",
+              "Say the answer out loud with its units. If it sounds odd, it is the wrong one."
+            ],
+            "kidTip": "If nobody can be left behind, you always need one more.",
+            "audioPrompt": "Four answers, one question. Which one fits?",
+            "prompts": {
+              "default": "Which answer fits?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.OA.A.3"
+        ],
+        "trajectoryLevel": "remainder-reader",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "divide-multiples-of-ten",
+        "title": "Tens, Shared Out",
+        "concept": "Dividing a Multiple of Ten by a Single Digit",
+        "conceptKey": "tens-divider",
+        "requires": [
+          "remainder-interpreter",
+          "unitiser-ten"
+        ],
+        "activity": "division/chart",
+        "iconName": "Layers3",
+        "iconTone": "emerald",
+        "params": {
+          "level": 26,
+          "question": {
+            "mode": "tens_quotient",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Divide a multiple of ten by reading it as a number of tens.",
+            "stepByStep": [
+              "Read the total as tens: 240 is 24 tens.",
+              "Divide the tens, not the whole number.",
+              "Six tens each means sixty each.",
+              "Say the answer in ordinary numbers at the end."
+            ],
+            "kidTip": "If you can do 24 ÷ 3, you can do 240 ÷ 3. It is the same sum wearing a zero.",
+            "audioPrompt": "How many tens is it? Share the tens out.",
+            "prompts": {
+              "default": "What is the answer?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.NBT.A.3",
+          "CCSS.4.NBT.B.6"
+        ],
+        "trajectoryLevel": "place-value",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "divide-by-ten-hundred",
+        "title": "By Ten and By a Hundred",
+        "concept": "Scaling Down by Powers of Ten",
+        "conceptKey": "place-value-scaler",
+        "requires": [
+          "tens-divider",
+          "place-value-builder"
+        ],
+        "activity": "division/chart",
+        "iconName": "ArrowRightLeft",
+        "iconTone": "cyan",
+        "params": {
+          "level": 27,
+          "question": {
+            "mode": "scale_down",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Divide by 10 and 100 and say what happened to the digits.",
+            "stepByStep": [
+              "Look at where each digit is sitting.",
+              "Dividing by ten moves every digit one place to the right.",
+              "Dividing by a hundred moves them two places.",
+              "The zero disappears because it has run out of places, not because you rubbed it out."
+            ],
+            "kidTip": "Do not say 'take a zero off'. Say 'the digits move right'. It will save you when decimals arrive.",
+            "audioPrompt": "Watch the digits move right.",
+            "prompts": {
+              "default": "What is the answer?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.5.NBT.A.2"
+        ],
+        "trajectoryLevel": "place-value",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "tens-into-tens",
+        "title": "Tens into Tens",
+        "concept": "Dividing When Both Numbers Are Whole Tens",
+        "conceptKey": "place-value-divider",
+        "requires": [
+          "place-value-scaler"
+        ],
+        "activity": "division/chart",
+        "iconName": "Equal",
+        "iconTone": "indigo",
+        "params": {
+          "level": 28,
+          "question": {
+            "mode": "tens_into_tens",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Divide a multiple of ten by another multiple of ten.",
+            "stepByStep": [
+              "Both numbers are a whole number of tens.",
+              "Ask how many of those tens fit into these tens.",
+              "That is just the small division underneath.",
+              "The tens on each side cancel each other out."
+            ],
+            "kidTip": "600 ÷ 30 is 60 tens ÷ 3 tens, which is 60 ÷ 3... no: it is 6 ÷ 3 tens' worth. Cancel one zero from each side.",
+            "audioPrompt": "A zero on each side cancels out. What is left?",
+            "prompts": {
+              "default": "What is the answer?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.5.NBT.B.6"
+        ],
+        "trajectoryLevel": "place-value",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "split-by-place",
+        "title": "Split It by Place",
+        "concept": "Dividing Each Place on Its Own",
+        "conceptKey": "place-value-splitter",
+        "requires": [
+          "tens-divider",
+          "partial-sums"
+        ],
+        "activity": "division/chart",
+        "iconName": "Split",
+        "iconTone": "purple",
+        "params": {
+          "level": 29,
+          "question": {
+            "mode": "split_exact",
+            "questionsPerRound": 5,
+            "divisorRange": [
+              2,
+              9
+            ],
+            "quotientRange": [
+              11,
+              331
+            ],
+            "totalMax": 999
+          },
+          "play": {
+            "targetObjective": "Break a number into its places and divide each one separately.",
+            "stepByStep": [
+              "Split the number into hundreds, tens and ones.",
+              "Divide each part by itself.",
+              "Write down what each part gives.",
+              "Add those answers together."
+            ],
+            "kidTip": "96 ÷ 3 is really 90 ÷ 3 and 6 ÷ 3, added up.",
+            "audioPrompt": "Split it into its places, then divide each place.",
+            "prompts": {
+              "default": "Divide each part."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NBT.B.6"
+        ],
+        "trajectoryLevel": "place-value",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "split-with-exchange",
+        "title": "When a Place Will Not Divide",
+        "concept": "Choosing a Split When the Digits Refuse",
+        "conceptKey": "division-exchanger",
+        "requires": [
+          "place-value-splitter",
+          "unbundler-ten"
+        ],
+        "activity": "division/chart",
+        "iconName": "Shuffle",
+        "iconTone": "pink",
+        "params": {
+          "level": 30,
+          "question": {
+            "mode": "split_exchange",
+            "questionsPerRound": 5,
+            "divisorRange": [
+              3,
+              9
+            ],
+            "quotientRange": [
+              11,
+              111
+            ],
+            "totalMax": 999
+          },
+          "play": {
+            "targetObjective": "Choose a split whose parts divide, when the place split does not.",
+            "stepByStep": [
+              "Try the digits first: does each place divide?",
+              "When the tens will not divide, they have to be broken up differently.",
+              "Take the biggest lot of tens that does divide.",
+              "Whatever is left over joins the ones, and divides too."
+            ],
+            "kidTip": "84 ÷ 6: eighty will not go, but sixty will. Sixty and twenty-four.",
+            "audioPrompt": "The digits will not split this one. Find a split that works.",
+            "prompts": {
+              "default": "Divide each part."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NBT.B.6"
+        ],
+        "trajectoryLevel": "place-value",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "partial-quotients",
+        "title": "Take Away Chunks",
+        "concept": "Dividing by Subtracting Lots You Are Sure Of",
+        "conceptKey": "chunker",
+        "requires": [
+          "division-exchanger",
+          "repeated-subtractor"
+        ],
+        "activity": "division/chunk",
+        "iconName": "Minus",
+        "iconTone": "purple",
+        "params": {
+          "level": 31,
+          "question": {
+            "mode": "chunks",
+            "divisorRange": [
+              3,
+              12
+            ],
+            "quotientRange": [
+              12,
+              99
+            ],
+            "totalMax": 999,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Divide by repeatedly subtracting known multiples and tallying them.",
+            "stepByStep": [
+              "Look at the total. How many lots of the divisor are you sure fit?",
+              "Take that chunk away and write down how many lots it was.",
+              "Keep going with what is left.",
+              "Stop when what is left is smaller than the divisor. Add up your lots."
+            ],
+            "kidTip": "Ten lots is always easy to work out. Start there.",
+            "audioPrompt": "Take away chunks you are sure about, and keep a tally.",
+            "prompts": {
+              "default": "How many lots fit altogether?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NBT.B.6",
+          "CCSS.5.NBT.B.6"
+        ],
+        "trajectoryLevel": "chunker",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "efficient-chunks",
+        "title": "Fewer, Bigger Chunks",
+        "concept": "Choosing Large Chunks to Divide in Few Steps",
+        "conceptKey": "efficient-chunker",
+        "requires": [
+          "chunker"
+        ],
+        "activity": "division/chunk",
+        "iconName": "Zap",
+        "iconTone": "indigo",
+        "params": {
+          "level": 32,
+          "question": {
+            "mode": "big_chunks",
+            "divisorRange": [
+              4,
+              25
+            ],
+            "quotientRange": [
+              12,
+              140
+            ],
+            "totalMax": 3500,
+            "maxChunks": 3,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Reach the answer in three chunks or fewer by choosing big ones.",
+            "stepByStep": [
+              "Work out ten lots, and then a hundred lots.",
+              "Take the biggest one that still fits.",
+              "Do the same again with what is left.",
+              "Three goes is usually enough. If it is taking more, your first chunk was too small."
+            ],
+            "kidTip": "Twenty lots is just ten lots, doubled. Use it.",
+            "audioPrompt": "Big chunks. See if you can do it in three.",
+            "prompts": {
+              "default": "How many lots fit altogether?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.5.NBT.B.6"
+        ],
+        "trajectoryLevel": "chunker",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "short-division",
+        "title": "The Written Method",
+        "concept": "Short Division Where Every Place Divides",
+        "conceptKey": "short-divider",
+        "requires": [
+          "efficient-chunker",
+          "place-value-splitter"
+        ],
+        "activity": "division/column",
+        "iconName": "Divide",
+        "iconTone": "indigo",
+        "params": {
+          "level": 33,
+          "question": {
+            "mode": "short_exact",
+            "questionsPerRound": 5,
+            "divisorRange": [
+              2,
+              9
+            ],
+            "quotientRange": [
+              11,
+              444
+            ],
+            "totalMax": 999
+          },
+          "play": {
+            "targetObjective": "Divide place by place in the written layout, with nothing carried.",
+            "stepByStep": [
+              "Start at the left-hand digit.",
+              "Ask how many of the divisor fit into it.",
+              "Write that above the line, in the same column.",
+              "Move right and do the same again."
+            ],
+            "kidTip": "Left to right, one column at a time. Division is the only written method that starts at the big end.",
+            "audioPrompt": "Start at the left. How many fit into the first digit?",
+            "prompts": {
+              "default": "Divide it."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NBT.B.6"
+        ],
+        "trajectoryLevel": "written-methods",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "short-division-exchange",
+        "title": "Carry It Across",
+        "concept": "Short Division with an Exchange",
+        "conceptKey": "short-division-exchanger",
+        "requires": [
+          "short-divider",
+          "unbundler-ten"
+        ],
+        "activity": "division/column",
+        "iconName": "CornerDownRight",
+        "iconTone": "purple",
+        "params": {
+          "level": 34,
+          "question": {
+            "mode": "short_exchange",
+            "questionsPerRound": 5,
+            "divisorRange": [
+              2,
+              9
+            ],
+            "quotientRange": [
+              11,
+              1111
+            ],
+            "totalMax": 9999
+          },
+          "play": {
+            "targetObjective": "Carry a leftover into the next place and keep going.",
+            "stepByStep": [
+              "Divide the first digit as usual.",
+              "If something is left over, write it small in front of the next digit.",
+              "Now divide the whole of that new number, carry and all.",
+              "Keep going to the last digit."
+            ],
+            "kidTip": "The little number you write is not decoration. It joins the next digit and makes it bigger.",
+            "audioPrompt": "What is left over goes in front of the next digit.",
+            "prompts": {
+              "default": "Divide it."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NBT.B.6"
+        ],
+        "trajectoryLevel": "written-methods",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "short-division-remainder",
+        "title": "And Some Left Over",
+        "concept": "Short Division Ending in a Remainder",
+        "conceptKey": "short-division-remainder-writer",
+        "requires": [
+          "short-division-exchanger",
+          "division-remainder-reader"
+        ],
+        "activity": "division/column",
+        "iconName": "Inbox",
+        "iconTone": "pink",
+        "params": {
+          "level": 35,
+          "question": {
+            "mode": "short_remainder",
+            "questionsPerRound": 5,
+            "divisorRange": [
+              2,
+              9
+            ],
+            "quotientRange": [
+              11,
+              1111
+            ],
+            "totalMax": 9999
+          },
+          "play": {
+            "targetObjective": "Finish a written division that does not come out exactly.",
+            "stepByStep": [
+              "Work along every place as usual.",
+              "At the last digit, whatever is left cannot be carried anywhere.",
+              "That is the remainder.",
+              "Write it after the answer."
+            ],
+            "kidTip": "The last leftover has nowhere to go. That is all a remainder is.",
+            "audioPrompt": "Work to the end. Whatever is left at the last digit is the remainder.",
+            "prompts": {
+              "default": "Divide it, and say what is left."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NBT.B.6"
+        ],
+        "trajectoryLevel": "written-methods",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "zero-in-the-quotient",
+        "title": "A Place Holding Nothing",
+        "concept": "Writing a Zero Inside the Answer",
+        "conceptKey": "quotient-zero-placer",
+        "requires": [
+          "short-division-exchanger"
+        ],
+        "activity": "division/column",
+        "iconName": "CircleDashed",
+        "iconTone": "cyan",
+        "params": {
+          "level": 36,
+          "question": {
+            "mode": "zero_digit",
+            "questionsPerRound": 5,
+            "divisorRange": [
+              2,
+              9
+            ],
+            "quotientRange": [
+              101,
+              909
+            ],
+            "totalMax": 9999
+          },
+          "play": {
+            "targetObjective": "Write a zero in the answer when a place holds none, and see why it matters.",
+            "stepByStep": [
+              "Work along every place. Do not skip one because it looks too small.",
+              "When the divisor does not go at all, the answer for that place is zero.",
+              "Write the zero above the line.",
+              "Leaving it out makes the whole answer ten times too small."
+            ],
+            "kidTip": "A zero is a real digit. It is holding a place open.",
+            "audioPrompt": "Every place gets a digit. Even when the answer there is nothing.",
+            "prompts": {
+              "default": "Divide it."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NBT.B.6"
+        ],
+        "trajectoryLevel": "written-methods",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "long-division",
+        "title": "Long Division",
+        "concept": "Dividing by a Two-Digit Number",
+        "conceptKey": "long-divider",
+        "requires": [
+          "short-division-remainder-writer",
+          "column-multiplier",
+          "rounding-estimator"
+        ],
+        "activity": "division/column",
+        "iconName": "Divide",
+        "iconTone": "indigo",
+        "params": {
+          "level": 37,
+          "question": {
+            "mode": "long_exact",
+            "questionsPerRound": 5,
+            "divisorRange": [
+              11,
+              99
+            ],
+            "quotientRange": [
+              11,
+              99
+            ],
+            "totalMax": 9999
+          },
+          "play": {
+            "targetObjective": "Divide by a two-digit number using the written method.",
+            "stepByStep": [
+              "Look at the first part of the total and guess how many fit.",
+              "Check your guess by multiplying it out.",
+              "If too much is left, the guess was too small. If it goes past, too big.",
+              "Take it away, bring the next digit down, and go again."
+            ],
+            "kidTip": "Guessing is allowed. Checking the guess is the method.",
+            "audioPrompt": "Guess how many fit, then check it. Guessing is part of the method.",
+            "prompts": {
+              "default": "Divide it."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.5.NBT.B.6",
+          "CCSS.6.NS.B.2"
+        ],
+        "trajectoryLevel": "written-methods",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "long-division-remainder",
+        "title": "Long Division, Something Left",
+        "concept": "Two-Digit Division Ending in a Remainder",
+        "conceptKey": "long-division-remainder-writer",
+        "requires": [
+          "long-divider"
+        ],
+        "activity": "division/column",
+        "iconName": "Inbox",
+        "iconTone": "purple",
+        "params": {
+          "level": 38,
+          "question": {
+            "mode": "long_remainder",
+            "questionsPerRound": 5,
+            "divisorRange": [
+              11,
+              99
+            ],
+            "quotientRange": [
+              11,
+              99
+            ],
+            "totalMax": 9999
+          },
+          "play": {
+            "targetObjective": "Finish a two-digit division that does not come out exactly.",
+            "stepByStep": [
+              "Work every place as usual, guessing and checking.",
+              "At the end, what is left cannot be divided again.",
+              "Check it is smaller than the number you are dividing by.",
+              "Write it as the remainder."
+            ],
+            "kidTip": "If the leftover is bigger than the divisor, one of your guesses was too small.",
+            "audioPrompt": "Work to the end, then check what is left is small enough.",
+            "prompts": {
+              "default": "Divide it, and say what is left."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.5.NBT.B.6",
+          "CCSS.6.NS.B.2"
+        ],
+        "trajectoryLevel": "written-methods",
+        "ageBand": [
+          11,
+          12
+        ]
+      },
+      {
+        "id": "remainder-as-decimal",
+        "title": "Keep Going Past the Point",
+        "concept": "Continuing a Division into Decimal Places",
+        "conceptKey": "quotient-continuer",
+        "requires": [
+          "long-division-remainder-writer",
+          "place-value-scaler"
+        ],
+        "activity": "division/column",
+        "iconName": "MoveRight",
+        "iconTone": "emerald",
+        "params": {
+          "level": 39,
+          "question": {
+            "mode": "decimal_tail",
+            "questionsPerRound": 5,
+            "divisorRange": [
+              2,
+              50
+            ],
+            "quotientRange": [
+              2,
+              40
+            ],
+            "totalMax": 999
+          },
+          "play": {
+            "targetObjective": "Carry a division past the decimal point instead of stopping at a remainder.",
+            "stepByStep": [
+              "Divide the whole part first and see what is left.",
+              "Put a point in the answer, and a zero after the total.",
+              "What was left is now that many tenths. Divide them.",
+              "Keep going until nothing is left."
+            ],
+            "kidTip": "Nothing new happens at the point. You just carry on with tenths instead of ones.",
+            "audioPrompt": "Put a point in, add a zero, and carry on exactly as before.",
+            "prompts": {
+              "default": "Divide it, past the point."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.5.NBT.B.7",
+          "CCSS.6.NS.B.3"
+        ],
+        "trajectoryLevel": "written-methods",
+        "ageBand": [
+          11,
+          12
+        ]
+      },
+      {
+        "id": "divisible-by-2-5-10",
+        "title": "The Last Digit Tells You",
+        "concept": "Testing for 2, 5 and 10 from the Last Digit",
+        "conceptKey": "last-digit-tester",
+        "requires": [
+          "quotient-continuer",
+          "easy-divisor-knower"
+        ],
+        "activity": "division/factors",
+        "iconName": "Eye",
+        "iconTone": "emerald",
+        "params": {
+          "level": 40,
+          "question": {
+            "mode": "last_digit",
+            "questionsPerRound": 6,
+            "numberRange": [
+              20,
+              999
+            ]
+          },
+          "play": {
+            "targetObjective": "Decide whether 2, 5 or 10 divides a number without dividing it.",
+            "stepByStep": [
+              "Look only at the last digit.",
+              "An even last digit means it divides by 2.",
+              "A 0 or a 5 means it divides by 5.",
+              "Only a 0 means it divides by 10."
+            ],
+            "kidTip": "You never have to divide to answer these. The last digit already knows.",
+            "audioPrompt": "Look at the last digit. That is all you need.",
+            "prompts": {
+              "default": "Does it divide exactly?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.OA.B.4"
+        ],
+        "trajectoryLevel": "number-theory",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "divisible-by-3-9",
+        "title": "Add the Digits Up",
+        "concept": "Testing for 3 and 9 by the Digit Sum",
+        "conceptKey": "digit-sum-tester",
+        "requires": [
+          "last-digit-tester"
+        ],
+        "activity": "division/factors",
+        "iconName": "Plus",
+        "iconTone": "cyan",
+        "params": {
+          "level": 41,
+          "question": {
+            "mode": "digit_sum",
+            "questionsPerRound": 6,
+            "numberRange": [
+              20,
+              999
+            ]
+          },
+          "play": {
+            "targetObjective": "Decide whether 3 or 9 divides a number using its digit sum.",
+            "stepByStep": [
+              "Add every digit together.",
+              "If the total divides by 3, so does the number.",
+              "If the total divides by 9, so does the number.",
+              "If the total is still big, add its digits up again."
+            ],
+            "kidTip": "It works however long the number is. 111111 adds to 6, so it divides by 3.",
+            "audioPrompt": "Add the digits. What do you get?",
+            "prompts": {
+              "default": "Does it divide exactly?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.OA.B.4"
+        ],
+        "trajectoryLevel": "number-theory",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "divisible-by-4-6",
+        "title": "Two Tests at Once",
+        "concept": "Testing for 4 and 6 by Combining What You Know",
+        "conceptKey": "composite-rule-tester",
+        "requires": [
+          "digit-sum-tester"
+        ],
+        "activity": "division/factors",
+        "iconName": "CheckCheck",
+        "iconTone": "indigo",
+        "params": {
+          "level": 42,
+          "question": {
+            "mode": "combined_test",
+            "questionsPerRound": 6,
+            "numberRange": [
+              20,
+              999
+            ]
+          },
+          "play": {
+            "targetObjective": "Test for 4 and 6 by combining simpler tests.",
+            "stepByStep": [
+              "For 4, look at just the last two digits.",
+              "If those two digits divide by 4, the whole number does.",
+              "For 6, run two tests: does it divide by 2, and does it divide by 3?",
+              "It only divides by 6 if both say yes."
+            ],
+            "kidTip": "Six is two threes and three twos. It needs both tests to pass.",
+            "audioPrompt": "Two tests for six. Both have to pass.",
+            "prompts": {
+              "default": "Does it divide exactly?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.OA.B.4"
+        ],
+        "trajectoryLevel": "number-theory",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "factor-pairs-by-dividing",
+        "title": "Every Way It Splits",
+        "concept": "Finding All Factors by Dividing in Order",
+        "conceptKey": "factor-finder",
+        "requires": [
+          "composite-rule-tester"
+        ],
+        "activity": "division/factors",
+        "iconName": "ListTree",
+        "iconTone": "purple",
+        "params": {
+          "level": 43,
+          "question": {
+            "mode": "factor_pairs",
+            "questionsPerRound": 4,
+            "numberRange": [
+              12,
+              120
+            ]
+          },
+          "play": {
+            "targetObjective": "Find every factor of a number by dividing systematically.",
+            "stepByStep": [
+              "Try 1, then 2, then 3, and keep going.",
+              "Every one that goes exactly gives you a pair.",
+              "Write down both halves of the pair.",
+              "Stop when the two halves meet. Past there you only find them again backwards."
+            ],
+            "kidTip": "The stopping point is where a number times itself passes the total.",
+            "audioPrompt": "Work up in order. Do not skip any.",
+            "prompts": {
+              "default": "Find every factor."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.OA.B.4"
+        ],
+        "trajectoryLevel": "number-theory",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "common-factors",
+        "title": "Factors They Share",
+        "concept": "Finding the Factors Two Numbers Have in Common",
+        "conceptKey": "common-factor-finder",
+        "requires": [
+          "factor-finder"
+        ],
+        "activity": "division/factors",
+        "iconName": "GitMerge",
+        "iconTone": "pink",
+        "params": {
+          "level": 44,
+          "question": {
+            "mode": "common_factors",
+            "questionsPerRound": 4,
+            "numberRange": [
+              12,
+              100
+            ]
+          },
+          "play": {
+            "targetObjective": "Find the factors two numbers share, and the largest of them.",
+            "stepByStep": [
+              "Find the factors of the first number.",
+              "Test each one against the second number as well.",
+              "Only keep the ones that go into both.",
+              "The biggest one you keep is the highest common factor."
+            ],
+            "kidTip": "One always divides both. It is a common factor, just not a useful one.",
+            "audioPrompt": "It has to go into both. Test each one twice.",
+            "prompts": {
+              "default": "Which divide into both?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.6.NS.B.4"
+        ],
+        "trajectoryLevel": "number-theory",
+        "ageBand": [
+          11,
+          12
+        ]
+      },
+      {
+        "id": "prime-factorisation",
+        "title": "Down to Primes",
+        "concept": "Breaking a Number Apart Until Only Primes Are Left",
+        "conceptKey": "prime-factoriser",
+        "requires": [
+          "factor-finder"
+        ],
+        "activity": "division/factors",
+        "iconName": "Network",
+        "iconTone": "emerald",
+        "params": {
+          "level": 45,
+          "question": {
+            "mode": "prime_factors",
+            "questionsPerRound": 4,
+            "numberRange": [
+              12,
+              200
+            ]
+          },
+          "play": {
+            "targetObjective": "Split a number repeatedly until every part is prime.",
+            "stepByStep": [
+              "Split the number into any two factors.",
+              "Look at each part. Can it be split again?",
+              "Keep splitting the parts that can.",
+              "A prime cannot be split. When they are all prime, you are done."
+            ],
+            "kidTip": "It does not matter which split you start with. You always end up with the same primes.",
+            "audioPrompt": "Split it, then split the parts. Stop at primes.",
+            "prompts": {
+              "default": "Break it down to primes."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.OA.B.4",
+          "CCSS.6.NS.B.4"
+        ],
+        "trajectoryLevel": "number-theory",
+        "ageBand": [
+          11,
+          12
+        ]
+      },
+      {
+        "id": "compatible-estimate",
+        "title": "Numbers That Divide Nicely",
+        "concept": "Estimating by Moving the Total to a Multiple",
+        "conceptKey": "compatible-number-estimator",
+        "requires": [
+          "prime-factoriser",
+          "long-divider"
+        ],
+        "activity": "division/estimate",
+        "iconName": "Gauge",
+        "iconTone": "cyan",
+        "params": {
+          "level": 46,
+          "question": {
+            "mode": "compatible",
+            "questionsPerRound": 5,
+            "divisorRange": [
+              3,
+              9
+            ],
+            "totalMax": 4000
+          },
+          "play": {
+            "targetObjective": "Estimate a quotient by choosing a nearby total the divisor goes into.",
+            "stepByStep": [
+              "Leave the divisor exactly as it is.",
+              "Look for a number near the total that the divisor goes into.",
+              "There is usually one just below and one just above.",
+              "Take whichever is easier to divide — not whichever is nearest."
+            ],
+            "kidTip": "For 347 ÷ 6, think 360 ÷ 6. Not 350. Nearest is not the point; dividing nicely is.",
+            "audioPrompt": "Move the big number, not the small one.",
+            "prompts": {
+              "default": "About how much is it?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.OA.D.8",
+          "CCSS.5.NBT.B.6"
+        ],
+        "trajectoryLevel": "estimation",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "is-it-reasonable",
+        "title": "Could That Be Right?",
+        "concept": "Judging an Answer by Its Size",
+        "conceptKey": "reasonableness-checker",
+        "requires": [
+          "compatible-number-estimator"
+        ],
+        "activity": "division/estimate",
+        "iconName": "Scale",
+        "iconTone": "indigo",
+        "params": {
+          "level": 47,
+          "question": {
+            "mode": "reasonable",
+            "questionsPerRound": 5,
+            "divisorRange": [
+              3,
+              12
+            ],
+            "totalMax": 4000
+          },
+          "play": {
+            "targetObjective": "Judge whether a claimed quotient is the right size, without working it out.",
+            "stepByStep": [
+              "Do not calculate. Estimate.",
+              "Roughly how many of the divisor fit into the total?",
+              "Compare that with what has been claimed.",
+              "An answer ten times out is wrong even if every digit looks familiar."
+            ],
+            "kidTip": "Most wrong answers are not a bit wrong. They are a whole place wrong.",
+            "audioPrompt": "Do not work it out. Just ask whether it is the right size.",
+            "prompts": {
+              "default": "Could that be right?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.OA.D.8"
+        ],
+        "trajectoryLevel": "estimation",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "check-by-multiplying",
+        "title": "Check It Backwards",
+        "concept": "Checking a Division by Multiplying Back",
+        "conceptKey": "inverse-checker",
+        "requires": [
+          "reasonableness-checker",
+          "division-remainder-reader"
+        ],
+        "activity": "division/estimate",
+        "iconName": "Undo2",
+        "iconTone": "emerald",
+        "params": {
+          "level": 48,
+          "question": {
+            "mode": "check_back",
+            "questionsPerRound": 5,
+            "divisorRange": [
+              3,
+              12
+            ],
+            "totalMax": 900
+          },
+          "play": {
+            "targetObjective": "Check a division by rebuilding the total from the answer.",
+            "stepByStep": [
+              "Take your answer and multiply it by the number you divided by.",
+              "If there was a remainder, add it on.",
+              "You should get back exactly what you started with.",
+              "If you do not, something in the division went wrong."
+            ],
+            "kidTip": "Every division can be checked. There is no excuse for a wrong one going unnoticed.",
+            "audioPrompt": "Multiply back. Do you get the total again?",
+            "prompts": {
+              "default": "Which sum checks it?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NBT.B.6"
+        ],
+        "trajectoryLevel": "estimation",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "sharing-story",
+        "title": "Shared Between",
+        "concept": "A Sharing Story with the Group Size Unknown",
+        "conceptKey": "group-size-modeler",
+        "requires": [
+          "inverse-checker",
+          "equal-sharer"
+        ],
+        "activity": "division/story",
+        "iconName": "Users",
+        "iconTone": "purple",
+        "params": {
+          "level": 49,
+          "question": {
+            "mode": "size_unknown",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Solve a sharing word problem by modelling it on a bar.",
+            "stepByStep": [
+              "Find the total in the story.",
+              "Find how many people are sharing.",
+              "Cut the bar into that many equal parts.",
+              "One part is what each person gets."
+            ],
+            "kidTip": "The number of people tells you how many parts. Not what goes in them.",
+            "audioPrompt": "Cut the bar into as many parts as there are people.",
+            "prompts": {
+              "default": "How many does each get?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.OA.A.3"
+        ],
+        "trajectoryLevel": "problem-solver",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "grouping-story",
+        "title": "Put Into Groups Of",
+        "concept": "A Grouping Story with the Number of Groups Unknown",
+        "conceptKey": "group-count-modeler",
+        "requires": [
+          "group-size-modeler"
+        ],
+        "activity": "division/story",
+        "iconName": "Package",
+        "iconTone": "indigo",
+        "params": {
+          "level": 50,
+          "question": {
+            "mode": "count_unknown",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Solve a grouping word problem by modelling it on a bar.",
+            "stepByStep": [
+              "Find the total.",
+              "Find how big one group is.",
+              "Ask how many groups of that size fit.",
+              "The number of groups is the answer."
+            ],
+            "kidTip": "\"Bags of 5\" tells you a group's size, not how many bags.",
+            "audioPrompt": "How many of that size fit into the total?",
+            "prompts": {
+              "default": "How many groups?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.OA.A.3"
+        ],
+        "trajectoryLevel": "problem-solver",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "remainder-story",
+        "title": "And What About the Rest?",
+        "concept": "Deciding What a Remainder Means in a Story",
+        "conceptKey": "remainder-interpreter",
+        "requires": [
+          "group-count-modeler",
+          "remainder-interpreter"
+        ],
+        "activity": "division/story",
+        "iconName": "HelpCircle",
+        "iconTone": "pink",
+        "params": {
+          "level": 51,
+          "question": {
+            "mode": "remainder_context",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Choose whether a situation needs the full groups or one more.",
+            "stepByStep": [
+              "Divide, and notice that something is left.",
+              "Read the question again.",
+              "If nothing may be left out, you need one more.",
+              "If it is asking about full ones only, the leftover does not count."
+            ],
+            "kidTip": "\"So that none are left out\" always means one more.",
+            "audioPrompt": "Something is left over. Does the question want one more, or not?",
+            "prompts": {
+              "default": "How many are needed?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.OA.A.3"
+        ],
+        "trajectoryLevel": "problem-solver",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "unit-rate-story",
+        "title": "How Much for One?",
+        "concept": "Finding a Per-One Amount by Dividing",
+        "conceptKey": "unit-rate-finder",
+        "requires": [
+          "group-size-modeler"
+        ],
+        "activity": "division/story",
+        "iconName": "Boxes",
+        "iconTone": "emerald",
+        "params": {
+          "level": 52,
+          "question": {
+            "mode": "unit_rate",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Find a per-one amount from a total and a count.",
+            "stepByStep": [
+              "The total covers all of them together.",
+              "They are all the same size.",
+              "Share the total between them.",
+              "What one holds is the answer."
+            ],
+            "kidTip": "\"Each\", \"per\" and \"one of them\" all mean divide.",
+            "audioPrompt": "Share the total between them to find what one holds.",
+            "prompts": {
+              "default": "How many in one?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.6.RP.A.2"
+        ],
+        "trajectoryLevel": "problem-solver",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "how-many-times-story",
+        "title": "How Many Times as Many?",
+        "concept": "Multiplicative Comparison, Not Additive",
+        "conceptKey": "multiplicative-comparer",
+        "requires": [
+          "unit-rate-finder"
+        ],
+        "activity": "division/story",
+        "iconName": "GitCompare",
+        "iconTone": "cyan",
+        "params": {
+          "level": 53,
+          "question": {
+            "mode": "times_comparison",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Answer a times-as-many comparison rather than a how-many-more one.",
+            "stepByStep": [
+              "Find both amounts.",
+              "The question is not asking for the difference.",
+              "Ask how many of the smaller amount fit into the bigger one.",
+              "That is how many times as many."
+            ],
+            "kidTip": "\"How many more\" means take away. \"How many times\" means divide. They are different questions about the same two numbers.",
+            "audioPrompt": "Not how many more. How many times as many.",
+            "prompts": {
+              "default": "How many times as many?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.OA.A.1",
+          "CCSS.4.OA.A.2"
+        ],
+        "trajectoryLevel": "problem-solver",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "multi-step-story",
+        "title": "Two Things to Do",
+        "concept": "A Problem with a Division and One Other Step",
+        "conceptKey": "division-multi-step-solver",
+        "requires": [
+          "multiplicative-comparer"
+        ],
+        "activity": "division/story",
+        "iconName": "ListOrdered",
+        "iconTone": "indigo",
+        "params": {
+          "level": 54,
+          "question": {
+            "mode": "multi_step",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Solve a two-step problem where the division comes second.",
+            "stepByStep": [
+              "Read the whole story before doing anything.",
+              "Work out what is actually being shared.",
+              "Do the taking away first.",
+              "Then share what is left."
+            ],
+            "kidTip": "Dividing the whole total is the trap. Find out what is really being shared first.",
+            "audioPrompt": "Two steps. Which one comes first?",
+            "prompts": {
+              "default": "How many does each get?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.OA.A.3"
+        ],
+        "trajectoryLevel": "problem-solver",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "mean-as-fair-share",
+        "title": "If They Were All the Same",
+        "concept": "The Mean as an Equal Share of a Total",
+        "conceptKey": "mean-finder",
+        "requires": [
+          "division-multi-step-solver"
+        ],
+        "activity": "division/story",
+        "iconName": "BarChart3",
+        "iconTone": "purple",
+        "params": {
+          "level": 55,
+          "question": {
+            "mode": "mean",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Find the mean of a small set by totalling and sharing.",
+            "stepByStep": [
+              "Add every value together.",
+              "Count how many values there are.",
+              "Share the total between them.",
+              "That is what each one would be if they were all the same."
+            ],
+            "kidTip": "The mean is not one of the numbers. It is what they would all be if you levelled them off.",
+            "audioPrompt": "Add them all up, then share the total between the days.",
+            "prompts": {
+              "default": "How many each day?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.6.SP.B.5.C"
+        ],
+        "trajectoryLevel": "problem-solver",
+        "ageBand": [
+          11,
+          12
+        ]
+      },
+      {
+        "id": "explain-and-compare",
+        "title": "Which Way, and Why",
+        "concept": "Choosing a Division Route That Suits the Numbers",
+        "conceptKey": "division-strategy-chooser",
+        "requires": [
+          "mean-finder",
+          "inverse-checker",
+          "efficient-chunker"
+        ],
+        "activity": "division/strategy",
+        "iconName": "Route",
+        "iconTone": "indigo",
+        "params": {
+          "level": 56,
+          "question": {
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Choose a division method that suits the particular numbers in front of you.",
+            "stepByStep": [
+              "Look at the numbers before you look at the choices.",
+              "Is the divisor one you can halve by?",
+              "Does every place of the total divide on its own?",
+              "More than one way can be right. Pick one that genuinely fits."
+            ],
+            "kidTip": "There is no single best method. There is a best method for these numbers.",
+            "audioPrompt": "Look at the numbers first. Then choose a way that suits them.",
+            "prompts": {
+              "default": "Which way would you do it?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.OA.D.8",
+          "CCSS.5.NBT.B.6"
+        ],
+        "trajectoryLevel": "strategies",
+        "ageBand": [
+          11,
+          12
+        ]
+      },
+      {
+        "id": "practice-share",
+        "title": "Practice: Sharing Out",
+        "concept": "Practice Without Help",
+        "conceptKey": "equal-sharer",
+        "requires": [
+          "leftover-noticer"
+        ],
+        "activity": "division/share",
+        "iconName": "Users",
+        "iconTone": "indigo",
+        "params": {
+          "level": 57,
+          "question": {
+            "practice": true,
+            "questionsPerRound": 8,
+            "modes": [
+              "share_out",
+              "group_by_size",
+              "which_meaning",
+              "to_equation",
+              "halve",
+              "identity",
+              "zero_rules",
+              "see_leftover"
+            ]
+          }
+        },
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          7,
+          10
+        ]
+      },
+      {
+        "id": "practice-array",
+        "title": "Practice: The Array",
+        "concept": "Practice Without Help",
+        "conceptKey": "array-divider",
+        "requires": [
+          "array-remainder-reader"
+        ],
+        "activity": "division/array",
+        "iconName": "Grid3x3",
+        "iconTone": "indigo",
+        "params": {
+          "level": 58,
+          "question": {
+            "practice": true,
+            "questionsPerRound": 9,
+            "modes": [
+              "total_and_side",
+              "two_divisions",
+              "partial_row"
+            ]
+          }
+        },
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "practice-numberline",
+        "title": "Practice: Hopping",
+        "concept": "Practice Without Help",
+        "conceptKey": "repeated-subtractor",
+        "requires": [
+          "skip-counter"
+        ],
+        "activity": "division/numberline",
+        "iconName": "MoveHorizontal",
+        "iconTone": "cyan",
+        "params": {
+          "level": 59,
+          "question": {
+            "practice": true,
+            "questionsPerRound": 9,
+            "modes": [
+              "back_to_zero",
+              "count_hops",
+              "forward_to_total"
+            ]
+          }
+        },
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "practice-facts",
+        "title": "Practice: Division Facts",
+        "concept": "Practice Without Help",
+        "conceptKey": "known-fact-user",
+        "requires": [
+          "known-fact-user"
+        ],
+        "activity": "division/facts",
+        "iconName": "Layers",
+        "iconTone": "purple",
+        "params": {
+          "level": 60,
+          "question": {
+            "practice": true,
+            "questionsPerRound": 7,
+            "modes": [
+              "family",
+              "table_divide",
+              "missing_factor",
+              "easy_divisors",
+              "repeated_halving",
+              "known_multiple",
+              "known_fact"
+            ]
+          }
+        },
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          8,
+          11
+        ]
+      },
+      {
+        "id": "practice-remainder",
+        "title": "Practice: Remainders",
+        "concept": "Practice Without Help",
+        "conceptKey": "division-remainder-reader",
+        "requires": [
+          "remainder-interpreter"
+        ],
+        "activity": "division/remainder",
+        "iconName": "Inbox",
+        "iconTone": "pink",
+        "params": {
+          "level": 61,
+          "question": {
+            "practice": true,
+            "questionsPerRound": 8,
+            "modes": [
+              "record",
+              "too_big",
+              "interpret",
+              "choose_form"
+            ]
+          }
+        },
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "practice-chart",
+        "title": "Practice: Place by Place",
+        "concept": "Practice Without Help",
+        "conceptKey": "place-value-splitter",
+        "requires": [
+          "division-exchanger"
+        ],
+        "activity": "division/chart",
+        "iconName": "Columns3",
+        "iconTone": "emerald",
+        "params": {
+          "level": 62,
+          "question": {
+            "practice": true,
+            "questionsPerRound": 10,
+            "modes": [
+              "tens_quotient",
+              "scale_down",
+              "tens_into_tens",
+              "split_exact",
+              "split_exchange"
+            ]
+          }
+        },
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          9,
+          12
+        ]
+      },
+      {
+        "id": "practice-chunk",
+        "title": "Practice: Chunking",
+        "concept": "Practice Without Help",
+        "conceptKey": "chunker",
+        "requires": [
+          "efficient-chunker"
+        ],
+        "activity": "division/chunk",
+        "iconName": "Minus",
+        "iconTone": "purple",
+        "params": {
+          "level": 63,
+          "question": {
+            "practice": true,
+            "questionsPerRound": 8,
+            "modes": [
+              "chunks",
+              "big_chunks"
+            ]
+          }
+        },
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "practice-column",
+        "title": "Practice: The Written Method",
+        "concept": "Practice Without Help",
+        "conceptKey": "short-divider",
+        "requires": [
+          "quotient-continuer"
+        ],
+        "activity": "division/column",
+        "iconName": "Divide",
+        "iconTone": "indigo",
+        "params": {
+          "level": 64,
+          "question": {
+            "practice": true,
+            "questionsPerRound": 7,
+            "modes": [
+              "short_exact",
+              "short_exchange",
+              "short_remainder",
+              "zero_digit",
+              "long_exact",
+              "long_remainder",
+              "decimal_tail"
+            ]
+          }
+        },
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          9,
+          12
+        ]
+      },
+      {
+        "id": "practice-factors",
+        "title": "Practice: Does It Go?",
+        "concept": "Practice Without Help",
+        "conceptKey": "factor-finder",
+        "requires": [
+          "prime-factoriser"
+        ],
+        "activity": "division/factors",
+        "iconName": "Sigma",
+        "iconTone": "emerald",
+        "params": {
+          "level": 65,
+          "question": {
+            "practice": true,
+            "questionsPerRound": 6,
+            "modes": [
+              "last_digit",
+              "digit_sum",
+              "combined_test",
+              "factor_pairs",
+              "common_factors",
+              "prime_factors"
+            ]
+          }
+        },
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          9,
+          12
+        ]
+      },
+      {
+        "id": "practice-estimate",
+        "title": "Practice: About How Much?",
+        "concept": "Practice Without Help",
+        "conceptKey": "compatible-number-estimator",
+        "requires": [
+          "inverse-checker"
+        ],
+        "activity": "division/estimate",
+        "iconName": "Gauge",
+        "iconTone": "cyan",
+        "params": {
+          "level": 66,
+          "question": {
+            "practice": true,
+            "questionsPerRound": 9,
+            "modes": [
+              "compatible",
+              "reasonable",
+              "check_back"
+            ]
+          }
+        },
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "practice-story",
+        "title": "Practice: In Words",
+        "concept": "Practice Without Help",
+        "conceptKey": "group-size-modeler",
+        "requires": [
+          "mean-finder"
+        ],
+        "activity": "division/story",
+        "iconName": "BookOpen",
+        "iconTone": "purple",
+        "params": {
+          "level": 67,
+          "question": {
+            "practice": true,
+            "questionsPerRound": 7,
+            "modes": [
+              "size_unknown",
+              "count_unknown",
+              "remainder_context",
+              "unit_rate",
+              "times_comparison",
+              "multi_step",
+              "mean"
+            ]
+          }
+        },
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          8,
+          12
+        ]
+      },
+      {
+        "id": "practice-strategy",
+        "title": "Practice: Which Way?",
+        "concept": "Practice Without Help",
+        "conceptKey": "division-strategy-chooser",
+        "requires": [
+          "division-strategy-chooser"
+        ],
+        "activity": "division/strategy",
+        "iconName": "Route",
+        "iconTone": "indigo",
+        "params": {
+          "level": 68,
+          "question": {
+            "practice": true,
+            "questionsPerRound": 8
+          }
+        },
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          11,
+          12
+        ]
+      }
+    ]
+  },
+  {
     "id": "multiplication",
     "name": "Multiplication",
     "version": "1.0.0",

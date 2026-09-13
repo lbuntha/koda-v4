@@ -3,6 +3,7 @@ import { skill as counting } from "./counting";
 import { skill as addition } from "./addition";
 import { skill as subtraction } from "./subtraction";
 import { skill as multiplication } from "./multiplication";
+import { skill as division } from "./division";
 import { skill as observation } from "./observation";
 import { skill as bottleSort } from "./bottle-sort";
 import { skill as colorSweeper } from "./color-sweeper";
@@ -14,7 +15,7 @@ import { releaseStatusOf } from "../lib/skillRegistryApi";
  * Every skill in the build. Adding one is a single import and a single entry —
  * this is the only file outside a skill folder that a new skill touches.
  */
-export const SKILLS: Skill[] = [counting, addition, subtraction, multiplication, observation, bottleSort, colorSweeper];
+export const SKILLS: Skill[] = [counting, addition, subtraction, multiplication, division, observation, bottleSort, colorSweeper];
 
 /**
  * Publish every registered skill into the settings store.

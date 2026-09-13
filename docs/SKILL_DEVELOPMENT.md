@@ -48,7 +48,53 @@ red, and the skill looks finished. Check them before saying a skill is done.
 | `expected` on every question | The log records what the child did but not what was asked |
 | Register in `registry.ts` **and** `course.json` | Built, tested, and invisible |
 | `npm run voice:plan -- --skill <id>` reports 0 missing | Publishes with silent lessons |
+| A skill for readers sets `speaksPrompts: false` | Records ~60 clips nothing should play, and reads the question to a child who can read it |
 
+
+## 0.1 Voice: who is being read to
+
+A round speaks its lesson's `audioPrompt` when it opens, and that exists for a
+five-year-old who cannot read the instruction. From about seven they can, and
+reading the question aloud takes the reading out of the question — which in a
+word problem is most of the work.
+
+So a skill whose audience starts at 7 or above:
+
+- sets `"speaksPrompts": false` in its `voice.json`, which stops the recorder
+  collecting lesson prompts at all;
+- passes `intro: undefined` to `useSkillRound` rather than `copy.audioPrompt`;
+- records only what it says **back** to a child — reactions (usually the common
+  pack, so nothing of its own) and its refusals, the lines an engine gives when
+  it will not take an answer yet.
+
+Keep the read-aloud speaker button. It is pull rather than push, costs nothing
+until it is pressed, and is the way through for a child who can do the maths and
+is stuck on the reading. It runs on live TTS; it does not need clips.
+
+**The consequence is that the hint ladder is the only support left**, and it has
+to be written that way. A ladder that was adequate beside a spoken prompt is not
+adequate alone. The failures to check for, all of which look fine in a diff:
+
+- **One ladder shared across modes that go wrong differently.** Division's
+  written method had a single ladder for five modes; it offered the mode that
+  never carries advice about carrying, and its second and third rungs restated
+  each other. Write one per mode.
+- **A rung that restates the one above it.** Three rungs that say the same thing
+  in three ways is a one-rung ladder with a longer wait.
+- **Forward-referenced vocabulary.** Level 33's hint mentioned carrying, which
+  level 34 introduces. A child meeting a word for the first time in a hint is
+  further from the answer than before they opened it.
+- **Jargon that appears on no screen.** "Holders", "divisor". If the lessons say
+  "the number you are dividing by", the hint says that too.
+
+`division.hints.test.ts` checks all four mechanically against every mode.
+
+**Do not delete `audioPrompt` from the lessons.** `lib/worksheet.ts` prints it as
+the sheet's instruction line. What changes is whether anything says it.
+
+Division is the worked example: 74 clips became 18.
+
+---
 
 ## 1. Lessons configure engines
 

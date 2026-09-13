@@ -5,7 +5,7 @@
       "unitNumber": 1,
       "title": "Unit 1: Subitizing & Dot Matrix",
       "description": "Master instant sight counting, 1-to-1 correspondence & 5-anchor arrays",
-      "icon": "\ud83c\udf31",
+      "icon": "🌱",
       "lessons": [
         "counting/count-in-a-row",
         "counting/count-scattered-objects",
@@ -18,7 +18,7 @@
       "unitNumber": 2,
       "title": "Unit 2: Ten-Frames & Place Value",
       "description": "Build mental anchors of 5 and 10 with interactive frames & grouped rods",
-      "icon": "\u26a1",
+      "icon": "⚡",
       "lessons": [
         "counting/quick-dot-groups",
         "counting/two-color-groups",
@@ -31,7 +31,7 @@
       "unitNumber": 3,
       "title": "Unit 3: Quantity Comparison & Number Line",
       "description": "Compare sets, estimate spatial magnitudes, and explore sequences",
-      "icon": "\ud83d\udd2e",
+      "icon": "🔮",
       "lessons": [
         "counting/teen-numbers",
         "counting/skip-counting-by-2s-and-5s",
@@ -44,7 +44,7 @@
       "unitNumber": 4,
       "title": "Unit 4: 100-Chart & Skip Counting",
       "description": "Pattern recognition in 2s, 5s, and 10s up to 100 with master speed drills",
-      "icon": "\ud83d\udc51",
+      "icon": "👑",
       "lessons": [
         "counting/make-a-ten",
         "counting/make-a-hundred",
@@ -55,8 +55,8 @@
       "id": "u5",
       "unitNumber": 5,
       "title": "Unit 5: Putting Groups Together",
-      "description": "Join two groups and count them \u2014 all of them, then on from the first",
-      "icon": "\ud83e\uddfa",
+      "description": "Join two groups and count them — all of them, then on from the first",
+      "icon": "🧺",
       "lessons": [
         "addition/count-all",
         "addition/put-groups-together",
@@ -69,7 +69,7 @@
       "unitNumber": 6,
       "title": "Unit 6: Zero, One and Fingers",
       "description": "The two rules that need no counting, and the manipulative every child owns",
-      "icon": "\ud83d\udd90\ufe0f",
+      "icon": "🖐️",
       "lessons": [
         "addition/add-zero",
         "addition/add-one",
@@ -82,7 +82,7 @@
       "unitNumber": 7,
       "title": "Unit 7: Frames and Bonds",
       "description": "Add inside a frame of ten, and read what a number is made of",
-      "icon": "\ud83d\udc8e",
+      "icon": "💎",
       "lessons": [
         "addition/ten-frame",
         "addition/number-bonds",
@@ -95,7 +95,7 @@
       "unitNumber": 8,
       "title": "Unit 8: Blocks and Charts",
       "description": "See a number's tens and ones, then write them down",
-      "icon": "\ud83e\uddf1",
+      "icon": "🧱",
       "lessons": [
         "addition/base-ten-blocks",
         "addition/place-value-chart",
@@ -108,7 +108,7 @@
       "unitNumber": 9,
       "title": "Unit 9: Doubles and Neighbours",
       "description": "Facts worth knowing by heart, and the ones that sit beside them",
-      "icon": "\ud83d\udc6f",
+      "icon": "👯",
       "lessons": [
         "addition/near-doubles-one-less",
         "addition/make-5",
@@ -121,7 +121,7 @@
       "unitNumber": 10,
       "title": "Unit 10: Making Friendly Numbers",
       "description": "Reach a round number, and split a number so you can",
-      "icon": "\ud83c\udfaf",
+      "icon": "🎯",
       "lessons": [
         "addition/next-multiple-of-100",
         "addition/break-apart-an-addend",
@@ -134,7 +134,7 @@
       "unitNumber": 11,
       "title": "Unit 11: Facts That Help",
       "description": "Families of facts, and the freedom to add in either order",
-      "icon": "\ud83d\udca1",
+      "icon": "💡",
       "lessons": [
         "addition/fact-families",
         "addition/switch-the-addends",
@@ -147,7 +147,7 @@
       "unitNumber": 12,
       "title": "Unit 12: Tens and Hundreds",
       "description": "Whole tens, whole hundreds, and the jumps that use them",
-      "icon": "\ud83d\udd1f",
+      "icon": "🔟",
       "lessons": [
         "addition/add-multiples-of-10",
         "addition/add-multiples-of-100",
@@ -160,7 +160,7 @@
       "unitNumber": 13,
       "title": "Unit 13: Written Strategies",
       "description": "Three ways of writing an addition down, and what each one keeps",
-      "icon": "\ud83e\uddfe",
+      "icon": "🧾",
       "lessons": [
         "addition/expanded-form",
         "addition/partial-sums",
@@ -172,7 +172,7 @@
       "unitNumber": 14,
       "title": "Unit 14: Trading Up",
       "description": "Ten becomes one, and the carry that writes it down",
-      "icon": "\u26d3\ufe0f",
+      "icon": "⛓️",
       "lessons": [
         "addition/exchange-ten-ones",
         "addition/exchange-ten-tens",
@@ -185,7 +185,7 @@
       "unitNumber": 15,
       "title": "Unit 15: Chains and Totals",
       "description": "Whole lists of numbers, and the orders that make them easy",
-      "icon": "\ud83e\uddee",
+      "icon": "🧮",
       "lessons": [
         "addition/add-three-or-more",
         "addition/compatible-numbers",
@@ -198,7 +198,7 @@
       "unitNumber": 16,
       "title": "Unit 16: Judging and Missing Parts",
       "description": "Is that answer sensible, and what is missing from this one",
-      "icon": "\ud83e\udd14",
+      "icon": "🤔",
       "lessons": [
         "addition/is-it-reasonable",
         "addition/missing-addend",
@@ -211,7 +211,7 @@
       "unitNumber": 17,
       "title": "Unit 17: Stories with Something Missing",
       "description": "When the change, the start or the comparison is what you are after",
-      "icon": "\ud83d\udcd6",
+      "icon": "📖",
       "lessons": [
         "addition/change-unknown",
         "addition/start-unknown",
@@ -223,9 +223,9 @@
     {
       "id": "u18",
       "unitNumber": 18,
-      "title": "Unit 18: Practice \u2014 Counting and Frames",
+      "title": "Unit 18: Practice — Counting and Frames",
       "description": "The early techniques, mixed together with nothing to lean on",
-      "icon": "\ud83e\uddfa",
+      "icon": "🧺",
       "lessons": [
         "addition/practice-frames",
         "addition/practice-tray",
@@ -236,9 +236,9 @@
     {
       "id": "u19",
       "unitNumber": 19,
-      "title": "Unit 19: Practice \u2014 Place Value and Facts",
+      "title": "Unit 19: Practice — Place Value and Facts",
       "description": "Blocks, charts and facts, unaided",
-      "icon": "\u26a1",
+      "icon": "⚡",
       "lessons": [
         "addition/practice-base10",
         "addition/practice-chart",
@@ -249,9 +249,9 @@
     {
       "id": "u20",
       "unitNumber": 20,
-      "title": "Unit 20: Practice \u2014 Written Work and Problems",
+      "title": "Unit 20: Practice — Written Work and Problems",
       "description": "The written method, estimating, stories and choosing",
-      "icon": "\u270d\ufe0f",
+      "icon": "✍️",
       "lessons": [
         "addition/practice-column",
         "addition/practice-estimate",
@@ -262,9 +262,9 @@
     {
       "id": "u21",
       "unitNumber": 21,
-      "title": "Unit 21: Practice \u2014 Counting",
+      "title": "Unit 21: Practice — Counting",
       "description": "Every counting technique, mixed and unaided",
-      "icon": "\ud83c\udfb2",
+      "icon": "🎲",
       "lessons": [
         "counting/practice-orbit",
         "counting/practice-subitize",
@@ -278,7 +278,7 @@
       "unitNumber": 22,
       "title": "Unit 22: Taking Away",
       "description": "Remove a part, count what remains, and compare two groups",
-      "icon": "\u2796",
+      "icon": "➖",
       "lessons": [
         "subtraction/take-away",
         "subtraction/count-what-remains",
@@ -291,7 +291,7 @@
       "unitNumber": 23,
       "title": "Unit 23: Equations, Back, Zero, and All",
       "description": "Connect taking away to symbols, counting back, and subtraction rules",
-      "icon": "\ud83d\udd22",
+      "icon": "🔢",
       "lessons": [
         "subtraction/read-subtraction-equations",
         "subtraction/count-back",
@@ -304,7 +304,7 @@
       "unitNumber": 24,
       "title": "Unit 24: One, Fingers, and Frames",
       "description": "Use the previous number and concrete models to subtract",
-      "icon": "\ud83d\udd90\ufe0f",
+      "icon": "🖐️",
       "lessons": [
         "subtraction/subtract-one",
         "subtraction/use-fingers",
@@ -317,7 +317,7 @@
       "unitNumber": 25,
       "title": "Unit 25: Bonds, Paths, and Differences",
       "description": "Find a missing part, then move into subtraction paths",
-      "icon": "\ud83d\udc8e",
+      "icon": "💎",
       "lessons": [
         "subtraction/number-bonds",
         "subtraction/number-path-back",
@@ -330,7 +330,7 @@
       "unitNumber": 26,
       "title": "Unit 26: Facts That Undo",
       "description": "Use related addition facts, families, and doubles to subtract",
-      "icon": "\u26a1",
+      "icon": "⚡",
       "lessons": [
         "subtraction/fact-families",
         "subtraction/think-addition",
@@ -343,7 +343,7 @@
       "unitNumber": 27,
       "title": "Unit 27: Ten as a Bridge",
       "description": "Use ten and one hundred as landmarks, and a known fact as a shortcut",
-      "icon": "\ud83c\udf09",
+      "icon": "🌉",
       "lessons": [
         "subtraction/subtract-from-10",
         "subtraction/bridge-through-10",
@@ -356,7 +356,7 @@
       "unitNumber": 28,
       "title": "Unit 28: Friendly Differences",
       "description": "Round a part, adjust, and shift both numbers to keep the gap",
-      "icon": "\u2696\ufe0f",
+      "icon": "⚖️",
       "lessons": [
         "subtraction/compensation",
         "subtraction/constant-difference",
@@ -369,7 +369,7 @@
       "unitNumber": 29,
       "title": "Unit 29: Tens and Hundreds",
       "description": "Subtract whole tens and hundreds, then split a part by place",
-      "icon": "\ud83e\uddf1",
+      "icon": "🧱",
       "lessons": [
         "subtraction/subtract-multiples-of-10",
         "subtraction/subtract-multiples-of-100",
@@ -382,7 +382,7 @@
       "unitNumber": 30,
       "title": "Unit 30: Written Strategies",
       "description": "Expanded form, checking with addition, and working left to right",
-      "icon": "\ud83e\udde9",
+      "icon": "🧩",
       "lessons": [
         "subtraction/expanded-form",
         "subtraction/check-with-addition",
@@ -395,7 +395,7 @@
       "unitNumber": 31,
       "title": "Unit 31: Exchanging Down",
       "description": "Open a hundred, then record every exchange in columns",
-      "icon": "\ud83d\udd04",
+      "icon": "🔄",
       "lessons": [
         "subtraction/exchange-one-hundred",
         "subtraction/standard-algorithm",
@@ -408,7 +408,7 @@
       "unitNumber": 32,
       "title": "Unit 32: Estimate and Find the Unknown",
       "description": "Judge whether an answer is about right, then solve for a missing part",
-      "icon": "\ud83c\udfaf",
+      "icon": "🎯",
       "lessons": [
         "subtraction/estimate-by-rounding",
         "subtraction/is-it-reasonable",
@@ -421,7 +421,7 @@
       "unitNumber": 33,
       "title": "Unit 33: Take-Away Stories",
       "description": "Model removal stories with the result, the change, or the start unknown",
-      "icon": "\ud83d\udcd6",
+      "icon": "📖",
       "lessons": [
         "subtraction/take-away-result-unknown",
         "subtraction/take-away-change-unknown",
@@ -434,7 +434,7 @@
       "unitNumber": 34,
       "title": "Unit 34: Comparison Stories and Strategies",
       "description": "Compare two groups, solve two-step problems, and choose a method",
-      "icon": "\ud83e\udded",
+      "icon": "🧭",
       "lessons": [
         "subtraction/compare-bigger-unknown",
         "subtraction/compare-smaller-unknown",
@@ -445,9 +445,9 @@
     {
       "id": "u35",
       "unitNumber": 35,
-      "title": "Unit 35: Practice \u2014 Objects, Frames, Facts, and Bonds",
+      "title": "Unit 35: Practice — Objects, Frames, Facts, and Bonds",
       "description": "Mixed retrieval on the models that build subtraction",
-      "icon": "\ud83c\udfaa",
+      "icon": "🎪",
       "lessons": [
         "subtraction/practice-tray",
         "subtraction/practice-frames",
@@ -458,9 +458,9 @@
     {
       "id": "u36",
       "unitNumber": 36,
-      "title": "Unit 36: Practice \u2014 Lines, Blocks, Charts, and Columns",
+      "title": "Unit 36: Practice — Lines, Blocks, Charts, and Columns",
       "description": "Mixed retrieval on the models that record subtraction",
-      "icon": "\ud83c\udfaa",
+      "icon": "🎪",
       "lessons": [
         "subtraction/practice-numberline",
         "subtraction/practice-base10",
@@ -471,9 +471,9 @@
     {
       "id": "u37",
       "unitNumber": 37,
-      "title": "Unit 37: Practice \u2014 Estimation, Stories, and Strategies",
+      "title": "Unit 37: Practice — Estimation, Stories, and Strategies",
       "description": "Mixed retrieval on judging, modelling, and choosing",
-      "icon": "\ud83c\udfaa",
+      "icon": "🎪",
       "lessons": [
         "subtraction/practice-estimate",
         "subtraction/practice-story",
@@ -512,7 +512,7 @@
     {
       "id": "u39",
       "unitNumber": 39,
-      "title": "Unit 39: Practice \u2014 Observation Quest",
+      "title": "Unit 39: Practice — Observation Quest",
       "description": "Independent hidden-object practice across all ten locations and taught search modes",
       "icon": "O",
       "lessons": [
@@ -540,7 +540,7 @@
     {
       "id": "u41",
       "unitNumber": 41,
-      "title": "Unit 41: Practice \u2014 Bottle Sort",
+      "title": "Unit 41: Practice — Bottle Sort",
       "description": "Independent pouring practice across the taught techniques",
       "icon": "B",
       "lessons": [
@@ -550,7 +550,7 @@
     {
       "id": "u42",
       "unitNumber": 42,
-      "title": "Unit 42: Bottle Sort \u2014 Planning",
+      "title": "Unit 42: Bottle Sort — Planning",
       "description": "Corks, one-way bottles and a pour budget: work the order out before pouring",
       "icon": "B",
       "lessons": [
@@ -568,7 +568,7 @@
     {
       "id": "u43",
       "unitNumber": 43,
-      "title": "Unit 43: Practice \u2014 Bottle Sort Planning",
+      "title": "Unit 43: Practice — Bottle Sort Planning",
       "description": "Independent practice across every planning technique",
       "icon": "B",
       "lessons": [
@@ -578,7 +578,7 @@
     {
       "id": "u44",
       "unitNumber": 44,
-      "title": "Unit 44: Bottle Sort \u2014 Hidden and Predicted",
+      "title": "Unit 44: Bottle Sort — Hidden and Predicted",
       "description": "Sort what you cannot fully see, then say what a pour will do before making it",
       "icon": "B",
       "lessons": [
@@ -591,7 +591,7 @@
     {
       "id": "u45",
       "unitNumber": 45,
-      "title": "Unit 45: Bottle Sort \u2014 Order and Pattern",
+      "title": "Unit 45: Bottle Sort — Order and Pattern",
       "description": "When finished stops meaning one colour and starts meaning the right arrangement",
       "icon": "B",
       "lessons": [
@@ -606,7 +606,7 @@
     {
       "id": "u46",
       "unitNumber": 46,
-      "title": "Unit 46: Bottle Sort \u2014 Everything at Once",
+      "title": "Unit 46: Bottle Sort — Everything at Once",
       "description": "Eight bottles and a different rule on every rack",
       "icon": "B",
       "lessons": [
@@ -616,7 +616,7 @@
     {
       "id": "u47",
       "unitNumber": 47,
-      "title": "Unit 47: Practice \u2014 Bottle Sort",
+      "title": "Unit 47: Practice — Bottle Sort",
       "description": "Independent practice across everything the skill teaches",
       "icon": "B",
       "lessons": [
@@ -628,7 +628,7 @@
       "unitNumber": 48,
       "title": "Unit 48: Equal Groups",
       "description": "Where multiplication starts: groups that all hold the same number",
-      "icon": "\ud83e\uddfa",
+      "icon": "🧺",
       "lessons": [
         "multiplication/equal-groups",
         "multiplication/equal-or-not",
@@ -641,7 +641,7 @@
       "unitNumber": 49,
       "title": "Unit 49: Factors, One, and Zero",
       "description": "What each number in a multiplication counts, and the two that behave differently",
-      "icon": "\u2716\ufe0f",
+      "icon": "✖️",
       "lessons": [
         "multiplication/which-factor-is-which",
         "multiplication/multiply-by-one",
@@ -654,7 +654,7 @@
       "unitNumber": 50,
       "title": "Unit 50: Rows and Columns",
       "description": "Equal groups stood in rows, turned round, and read both ways",
-      "icon": "\ud83d\udfe6",
+      "icon": "🟦",
       "lessons": [
         "multiplication/rows-and-columns",
         "multiplication/turn-the-array",
@@ -667,7 +667,7 @@
       "unitNumber": 51,
       "title": "Unit 51: Hops, Lines, and Multiples",
       "description": "Equal groups laid end to end, counted in hops along a line",
-      "icon": "\ud83d\udc3e",
+      "icon": "🐾",
       "lessons": [
         "multiplication/skip-count-hops",
         "multiplication/multiply-on-a-line",
@@ -680,7 +680,7 @@
       "unitNumber": 52,
       "title": "Unit 52: Twos, Tens, Fives, and the Chart",
       "description": "The three facts a child holds outright, and the first one worked out from another",
-      "icon": "\u26a1",
+      "icon": "⚡",
       "lessons": [
         "multiplication/times-two",
         "multiplication/times-ten",
@@ -693,7 +693,7 @@
       "unitNumber": 53,
       "title": "Unit 53: Patterns, Squares, and Pairs",
       "description": "What the whole times table shows once you can read it",
-      "icon": "\ud83d\udcca",
+      "icon": "📊",
       "lessons": [
         "multiplication/patterns-in-the-table",
         "multiplication/square-numbers",
@@ -706,7 +706,7 @@
       "unitNumber": 54,
       "title": "Unit 54: Doubling and Adding a Group",
       "description": "Four, eight, three and six, each from a fact already held",
-      "icon": "\u2716\ufe0f",
+      "icon": "✖️",
       "lessons": [
         "multiplication/times-eight",
         "multiplication/times-three",
@@ -719,7 +719,7 @@
       "unitNumber": 55,
       "title": "Unit 55: Breaking Facts Apart",
       "description": "Seven, the elevens and twelves, near squares, and choosing a route",
-      "icon": "\ud83d\udd17",
+      "icon": "🔗",
       "lessons": [
         "multiplication/times-seven",
         "multiplication/times-eleven-twelve",
@@ -732,7 +732,7 @@
       "unitNumber": 56,
       "title": "Unit 56: Splitting and Regrouping Factors",
       "description": "The same break-apart move, drawn as a rectangle",
-      "icon": "\u2702\ufe0f",
+      "icon": "✂️",
       "lessons": [
         "multiplication/split-the-array",
         "multiplication/multiply-three-numbers",
@@ -745,7 +745,7 @@
       "unitNumber": 57,
       "title": "Unit 57: Primes, Tens, and Hundreds",
       "description": "Numbers with no pair, and what happens when place value scales",
-      "icon": "\ud83d\udd2c",
+      "icon": "🔬",
       "lessons": [
         "multiplication/prime-or-composite",
         "multiplication/times-ten-and-hundred",
@@ -758,7 +758,7 @@
       "unitNumber": 58,
       "title": "Unit 58: Area and Partial Products",
       "description": "Multiplication as a rectangle, cut into pieces you can already do",
-      "icon": "\ud83d\udfe9",
+      "icon": "🟩",
       "lessons": [
         "multiplication/area-of-a-rectangle",
         "multiplication/area-model-2x1",
@@ -771,7 +771,7 @@
       "unitNumber": 59,
       "title": "Unit 59: The Written Method",
       "description": "Columns, carries, and the row that multiplies by the tens",
-      "icon": "\ud83d\udccf",
+      "icon": "📏",
       "lessons": [
         "multiplication/column-no-regroup",
         "multiplication/column-with-regroup",
@@ -784,7 +784,7 @@
       "unitNumber": 60,
       "title": "Unit 60: Reasonable Answers and Equal-Group Stories",
       "description": "Judging an answer before working it out, then multiplying in words",
-      "icon": "\u2696\ufe0f",
+      "icon": "⚖️",
       "lessons": [
         "multiplication/is-it-reasonable",
         "multiplication/equal-groups-story",
@@ -797,7 +797,7 @@
       "unitNumber": 61,
       "title": "Unit 61: Comparison, Rate, and Strategy",
       "description": "Times as many, amounts per one, and problems that take two steps",
-      "icon": "\ud83d\udcca",
+      "icon": "📊",
       "lessons": [
         "multiplication/times-as-many",
         "multiplication/rate-problems",
@@ -808,9 +808,9 @@
     {
       "id": "u62",
       "unitNumber": 62,
-      "title": "Unit 62: Practice \u2014 Groups, Arrays, Lines, Facts",
+      "title": "Unit 62: Practice — Groups, Arrays, Lines, Facts",
       "description": "Independent practice on the four engines the skill starts with",
-      "icon": "\u26a1",
+      "icon": "⚡",
       "lessons": [
         "multiplication/practice-groups",
         "multiplication/practice-array",
@@ -821,9 +821,9 @@
     {
       "id": "u63",
       "unitNumber": 63,
-      "title": "Unit 63: Practice \u2014 Tables, Factors, Places, Area",
+      "title": "Unit 63: Practice — Tables, Factors, Places, Area",
       "description": "Independent practice on the chart, the factor board and the area model",
-      "icon": "\ud83d\udcca",
+      "icon": "📊",
       "lessons": [
         "multiplication/practice-table",
         "multiplication/practice-factors",
@@ -834,9 +834,9 @@
     {
       "id": "u64",
       "unitNumber": 64,
-      "title": "Unit 64: Practice \u2014 Columns, Estimation, Stories, Strategy",
+      "title": "Unit 64: Practice — Columns, Estimation, Stories, Strategy",
       "description": "Independent practice on everything the skill finishes with",
-      "icon": "\ud83e\udded",
+      "icon": "🧭",
       "lessons": [
         "multiplication/practice-column",
         "multiplication/practice-estimate",
@@ -849,7 +849,7 @@
       "unitNumber": 65,
       "title": "Unit 65: Neighbours and Clues",
       "description": "Reading a Color Sweeper board before anything is painted",
-      "icon": "\ud83e\udde9",
+      "icon": "🧩",
       "lessons": [
         "color-sweeper/touching-tiles",
         "color-sweeper/edges-and-corners",
@@ -863,7 +863,7 @@
       "unitNumber": 66,
       "title": "Unit 66: Zero and Full Clues",
       "description": "The two clues that decide a whole neighbourhood at once",
-      "icon": "\ud83c\udfa8",
+      "icon": "🎨",
       "lessons": [
         "color-sweeper/zero-means-none",
         "color-sweeper/zero-at-an-edge",
@@ -875,7 +875,7 @@
       "unitNumber": 67,
       "title": "Unit 67: Counting What Is Left",
       "description": "Clues that need comparing, and a board that takes more than one move",
-      "icon": "\ud83d\udd17",
+      "icon": "🔗",
       "lessons": [
         "color-sweeper/matches-already-found",
         "color-sweeper/one-more-match",
@@ -888,7 +888,7 @@
       "unitNumber": 68,
       "title": "Unit 68: Two Clues at Once",
       "description": "Comparing overlapping clues, and the walls that shape makes",
-      "icon": "\ud83e\uddf1",
+      "icon": "🧱",
       "lessons": [
         "color-sweeper/shared-neighbors",
         "color-sweeper/overlap-chains",
@@ -901,7 +901,7 @@
       "unitNumber": 69,
       "title": "Unit 69: Clues of Other Kinds",
       "description": "The other colour, the whole board, a row, and a marked area",
-      "icon": "\ud83d\uddfa\ufe0f",
+      "icon": "🗺️",
       "lessons": [
         "color-sweeper/count-the-other-color",
         "color-sweeper/how-many-are-left",
@@ -914,7 +914,7 @@
       "unitNumber": 70,
       "title": "Unit 70: Together, or Not",
       "description": "Line clues that say where the tiles can sit, not only how many",
-      "icon": "\ud83c\udf09",
+      "icon": "🌉",
       "lessons": [
         "color-sweeper/all-in-a-run",
         "color-sweeper/a-gap-somewhere"
@@ -925,7 +925,7 @@
       "unitNumber": 71,
       "title": "Unit 71: Three Colours, and All Together",
       "description": "Three colours, a total for each, and a board that mixes every kind of clue",
-      "icon": "\ud83d\udddd\ufe0f",
+      "icon": "🗝️",
       "lessons": [
         "color-sweeper/three-color-choices",
         "color-sweeper/three-colors-and-overlap",
@@ -938,7 +938,7 @@
       "unitNumber": 72,
       "title": "Unit 72: Give a Reason, Check the Board",
       "description": "Judging evidence, explaining a move, and auditing somebody else's work",
-      "icon": "\ud83d\udd0e",
+      "icon": "🔎",
       "lessons": [
         "color-sweeper/which-clues-help",
         "color-sweeper/explain-the-move",
@@ -949,9 +949,9 @@
     {
       "id": "u73",
       "unitNumber": 73,
-      "title": "Unit 73: Practice \u2014 Reading and Local Clues",
+      "title": "Unit 73: Practice — Reading and Local Clues",
       "description": "Independent practice on neighbourhoods, zero, full and remaining",
-      "icon": "\ud83d\udd01",
+      "icon": "🔁",
       "lessons": [
         "color-sweeper/practice-neighbors",
         "color-sweeper/practice-zero",
@@ -962,9 +962,9 @@
     {
       "id": "u74",
       "unitNumber": 74,
-      "title": "Unit 74: Practice \u2014 Combining Evidence",
+      "title": "Unit 74: Practice — Combining Evidence",
       "description": "Independent practice on overlap, clue kinds, totals and three colours",
-      "icon": "\ud83d\udd01",
+      "icon": "🔁",
       "lessons": [
         "color-sweeper/practice-overlap",
         "color-sweeper/practice-clue-kinds",
@@ -975,12 +975,215 @@
     {
       "id": "u75",
       "unitNumber": 75,
-      "title": "Unit 75: Practice \u2014 Reasoning and Checking",
+      "title": "Unit 75: Practice — Reasoning and Checking",
       "description": "Independent practice on judging evidence and auditing a board",
-      "icon": "\ud83d\udd01",
+      "icon": "🔁",
       "lessons": [
         "color-sweeper/practice-reasons",
         "color-sweeper/practice-checking"
+      ]
+    },
+    {
+      "id": "u76",
+      "unitNumber": 76,
+      "title": "Unit 76: Division: Sharing and Grouping",
+      "description": "The two meanings of the division sign, dealt out with counters",
+      "icon": "➗",
+      "lessons": [
+        "division/share-equally",
+        "division/make-groups-of",
+        "division/sharing-or-grouping",
+        "division/write-the-division",
+        "division/halving"
+      ]
+    },
+    {
+      "id": "u77",
+      "unitNumber": 77,
+      "title": "Unit 77: Division: One, Itself and Nothing",
+      "description": "Dividing by one, by itself, and the share that cannot be made",
+      "icon": "🚫",
+      "lessons": [
+        "division/divide-by-one-and-self",
+        "division/zero-and-nothing",
+        "division/some-are-left-over"
+      ]
+    },
+    {
+      "id": "u78",
+      "unitNumber": 78,
+      "title": "Unit 78: Division: Arrays and Number Lines",
+      "description": "Reading a division off a grid, and taking it away along a line",
+      "icon": "🔢",
+      "lessons": [
+        "division/array-to-quotient",
+        "division/two-divisions-one-array",
+        "division/array-with-remainder",
+        "division/hop-back",
+        "division/count-the-hops",
+        "division/skip-up-to-total"
+      ]
+    },
+    {
+      "id": "u79",
+      "unitNumber": 79,
+      "title": "Unit 79: Division: Facts You Already Know",
+      "description": "Division answered from multiplication",
+      "icon": "💡",
+      "lessons": [
+        "division/fact-families",
+        "division/table-divide",
+        "division/missing-factor",
+        "division/divide-by-2-5-10",
+        "division/halve-again",
+        "division/divide-by-3-6-9",
+        "division/use-a-known-fact"
+      ]
+    },
+    {
+      "id": "u80",
+      "unitNumber": 80,
+      "title": "Unit 80: Division: What Is Left Over",
+      "description": "Writing a remainder, bounding it, and reading what it means",
+      "icon": "📥",
+      "lessons": [
+        "division/write-the-remainder",
+        "division/remainder-check",
+        "division/remainder-in-context",
+        "division/choose-the-answer-form"
+      ]
+    },
+    {
+      "id": "u81",
+      "unitNumber": 81,
+      "title": "Unit 81: Division: Place by Place",
+      "description": "Dividing tens and hundreds, and splitting a number to divide it",
+      "icon": "🏛️",
+      "lessons": [
+        "division/divide-multiples-of-ten",
+        "division/divide-by-ten-hundred",
+        "division/tens-into-tens",
+        "division/split-by-place",
+        "division/split-with-exchange"
+      ]
+    },
+    {
+      "id": "u82",
+      "unitNumber": 82,
+      "title": "Unit 82: Division: Chunks and the Written Method",
+      "description": "Partial quotients, then short division",
+      "icon": "✏️",
+      "lessons": [
+        "division/partial-quotients",
+        "division/efficient-chunks",
+        "division/short-division",
+        "division/short-division-exchange",
+        "division/short-division-remainder",
+        "division/zero-in-the-quotient"
+      ]
+    },
+    {
+      "id": "u83",
+      "unitNumber": 83,
+      "title": "Unit 83: Division: Long Division",
+      "description": "Two-digit divisors, and carrying on past the point",
+      "icon": "📐",
+      "lessons": [
+        "division/long-division",
+        "division/long-division-remainder",
+        "division/remainder-as-decimal"
+      ]
+    },
+    {
+      "id": "u84",
+      "unitNumber": 84,
+      "title": "Unit 84: Division: Does It Go?",
+      "description": "Divisibility tests, factors and primes",
+      "icon": "🔍",
+      "lessons": [
+        "division/divisible-by-2-5-10",
+        "division/divisible-by-3-9",
+        "division/divisible-by-4-6",
+        "division/factor-pairs-by-dividing",
+        "division/common-factors",
+        "division/prime-factorisation"
+      ]
+    },
+    {
+      "id": "u85",
+      "unitNumber": 85,
+      "title": "Unit 85: Division: Estimating and Checking",
+      "description": "Compatible numbers, reasonableness, and multiplying back",
+      "icon": "⚖️",
+      "lessons": [
+        "division/compatible-estimate",
+        "division/is-it-reasonable",
+        "division/check-by-multiplying"
+      ]
+    },
+    {
+      "id": "u86",
+      "unitNumber": 86,
+      "title": "Unit 86: Division: In Words",
+      "description": "Word problems, comparison, and the mean",
+      "icon": "📖",
+      "lessons": [
+        "division/sharing-story",
+        "division/grouping-story",
+        "division/remainder-story",
+        "division/unit-rate-story",
+        "division/how-many-times-story",
+        "division/multi-step-story",
+        "division/mean-as-fair-share",
+        "division/explain-and-compare"
+      ]
+    },
+    {
+      "id": "u87",
+      "unitNumber": 87,
+      "title": "Unit 87: Practice — Division: Meanings and Models",
+      "description": "Independent practice on sharing, arrays and number lines",
+      "icon": "🔁",
+      "lessons": [
+        "division/practice-share",
+        "division/practice-array",
+        "division/practice-numberline"
+      ]
+    },
+    {
+      "id": "u88",
+      "unitNumber": 88,
+      "title": "Unit 88: Practice — Division: Facts and Remainders",
+      "description": "Independent practice on division facts and what is left over",
+      "icon": "🔁",
+      "lessons": [
+        "division/practice-facts",
+        "division/practice-remainder"
+      ]
+    },
+    {
+      "id": "u89",
+      "unitNumber": 89,
+      "title": "Unit 89: Practice — Division: Written Methods",
+      "description": "Independent practice on place value, chunking and the written method",
+      "icon": "🔁",
+      "lessons": [
+        "division/practice-chart",
+        "division/practice-chunk",
+        "division/practice-column"
+      ]
+    },
+    {
+      "id": "u90",
+      "unitNumber": 90,
+      "title": "Unit 90: Practice — Division: Reasoning",
+      "description": "Independent practice on factors, estimating, word problems and choosing a route",
+      "icon": "🔁",
+      "lessons": [
+        "division/practice-factors",
+        "division/practice-estimate",
+        "division/practice-story",
+        "division/practice-strategy"
       ]
     }
   ]

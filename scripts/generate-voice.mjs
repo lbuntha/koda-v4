@@ -303,8 +303,25 @@ async function phrasesFor(skillId) {
     });
   }
 
+  /*
+   * A skill for readers does not record its prompts.
+   *
+   * `audioPrompt` is spoken when a round opens, and that exists because a
+   * five-year-old cannot read the instruction. From about seven they can, and
+   * reading the question to them takes the reading out of the question — which
+   * in a word problem is most of the work. A skill whose audience starts at 7+
+   * sets `speaksPrompts: false` in its `voice.json` and records only the lines
+   * it says *back* to a child: the reactions, and the refusals.
+   *
+   * The field stays in `lessons.json` either way, because `lib/worksheet.ts`
+   * prints it as the sheet's instruction line. What changes is whether anything
+   * says it out loud.
+   */
+  const speaksPrompts = declared.speaksPrompts !== false;
+
   const lessons = (await readJson(path.join(dir, "lessons.json")))?.lessons ?? [];
   for (const lesson of lessons) {
+    if (!speaksPrompts) break;
     const play = lesson?.params?.play;
     if (!play) continue;
     /*
