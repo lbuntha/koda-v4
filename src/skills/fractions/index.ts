@@ -10,6 +10,8 @@ import * as add from "./activities/AddStrip";
 import * as multiply from "./activities/AreaGrid";
 import * as divide from "./activities/ShareOut";
 import * as decimal from "./activities/DecimalBridge";
+import * as estimate from "./activities/EstimateDial";
+import * as story from "./activities/StoryBoard";
 import { registerSkillVoice } from "../../lib/voiceClips";
 import audioManifest from "./audio/manifest.json";
 
@@ -109,6 +111,18 @@ export const skill: Skill = {
       name: "One Number, Three Names",
       defaultParams: { mode: "tenths", questionsPerRound: 5 },
       component: decimal.DecimalBridge,
+    },
+    estimate: {
+      id: "estimate",
+      name: "Roughly How Much?",
+      defaultParams: { mode: "benchmark", questionsPerRound: 6 },
+      component: estimate.EstimateDial,
+    },
+    story: {
+      id: "story",
+      name: "In Words",
+      defaultParams: { mode: "of_amount", questionsPerRound: 5 },
+      component: story.StoryBoard,
     },
   },
 };

@@ -448,3 +448,35 @@ three names side by side. 48 lessons, 326 tests.
 - `1/3` throws rather than rounding. A level that drew it would be asking a
   child to round without having taught rounding, and the answer key would be a
   lie either way.
+
+### Phase 11 — `EstimateDial`, levels 49–50
+
+Judging before calculating, which is the only check a person still has after
+they leave school. 50 lessons, 343 tests.
+
+- Level 49 never draws a fraction sitting between two benchmarks. `1/4` is
+  exactly as far from nothing as from a half, and the honest answer is
+  "neither", which is not one of the buttons. Anything within a tenth of a tie
+  is redrawn.
+- Level 50's wrong claims are always the added-denominators kind, never off by a
+  little: "could `1/2 + 1/3` be `2/5`?" is answerable by anybody who knows what
+  a half looks like, and "could it be 0.84?" teaches only mistrust. Half the
+  claims are sound, so "no" is not a free answer.
+
+### Phase 12 — `StoryBoard`, levels 51–56
+
+Word problems, modelled on a bar before anything is calculated. 56 lessons,
+370 tests.
+
+- **Level 55 sometimes served a level-51 question.** When the numbers missed,
+  `compare_context` handed off to `of_amount` — a different level with a
+  different lesson, inside this one's round. Constructed so the bigger share
+  always fits instead.
+- **Level 52 could divide exactly.** `8 cakes between 4` is two each with
+  nothing left, which is the division lesson from two years ago; this level is
+  about what happens to the one left over, so there has to be one.
+- Both named traps are on the buttons every time: "one each and one left over"
+  at 52, and the difference rather than the quotient at 55.
+- The round test pressed the bar cutters instead of the answers — they are
+  numbered 2 to 8, so every question whose answer was a small number pressed the
+  wrong control. Answers are found inside their own row now.

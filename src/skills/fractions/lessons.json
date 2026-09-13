@@ -2230,6 +2230,344 @@
         11,
         12
       ]
+    },
+    {
+      "id": "benchmarks",
+      "title": "Nearly Nothing, Nearly a Half, Nearly One",
+      "concept": "Estimating Fractions Against Benchmarks",
+      "conceptKey": "benchmark-estimator",
+      "requires": [
+        "benchmark-comparer"
+      ],
+      "activity": "fractions/estimate",
+      "iconName": "Gauge",
+      "iconTone": "sky",
+      "params": {
+        "level": 49,
+        "question": {
+          "mode": "benchmark",
+          "questionsPerRound": 6,
+          "partsRange": [
+            3,
+            12
+          ]
+        },
+        "play": {
+          "targetObjective": "Judge roughly where a fraction sits, without working anything out.",
+          "stepByStep": [
+            "Do not calculate. Look at the strip and see where the shading reaches.",
+            "Halfway along is a half. The far end is one whole one.",
+            "Ask which of the three marks it lands nearest to.",
+            "That rough answer is the thing that catches a wrong exact one later."
+          ],
+          "kidTip": "Knowing roughly is not a lesser kind of knowing. It is the check you carry with you.",
+          "audioPrompt": "Do not work it out. Just look at where it lands.",
+          "prompts": {
+            "default": "Nearest to what?"
+          }
+        }
+      },
+      "standards": [
+        "CCSS.5.NF.A.2"
+      ],
+      "trajectoryLevel": "estimation",
+      "ageBand": [
+        10,
+        12
+      ]
+    },
+    {
+      "id": "is-it-reasonable",
+      "title": "Could That Be Right?",
+      "concept": "Judging Whether a Fraction Answer Is Reasonable",
+      "conceptKey": "fraction-reasonableness-checker",
+      "requires": [
+        "benchmark-estimator",
+        "denominator-reasoner"
+      ],
+      "activity": "fractions/estimate",
+      "iconName": "HelpCircle",
+      "iconTone": "rose",
+      "params": {
+        "level": 50,
+        "question": {
+          "mode": "reasonable",
+          "questionsPerRound": 6
+        },
+        "play": {
+          "targetObjective": "Decide whether an answer could possibly be right, without doing the sum.",
+          "stepByStep": [
+            "You are not being asked to add them. You are being asked to judge the answer.",
+            "Lay both fractions along the strip, one after the other, and see how far they reach.",
+            "An answer smaller than one of the pieces you started with cannot be their total.",
+            "Some of these answers are perfectly fine, so look before you say no."
+          ],
+          "kidTip": "If an answer is smaller than what you started with, something went wrong. Check before you trust it.",
+          "audioPrompt": "Could that be right? Look at the strip before you decide.",
+          "prompts": {
+            "default": "Could that be right?"
+          }
+        }
+      },
+      "standards": [
+        "CCSS.5.NF.A.2"
+      ],
+      "trajectoryLevel": "estimation",
+      "ageBand": [
+        11,
+        12
+      ]
+    },
+    {
+      "id": "amount-story",
+      "title": "A Fraction of an Amount, in Words",
+      "concept": "Word Problems: a Fraction of a Quantity",
+      "conceptKey": "amount-story-solver",
+      "requires": [
+        "amount-fractioner"
+      ],
+      "activity": "fractions/story",
+      "iconName": "BookOpen",
+      "iconTone": "violet",
+      "params": {
+        "level": 51,
+        "question": {
+          "mode": "of_amount",
+          "questionsPerRound": 5,
+          "totalMax": 120
+        },
+        "play": {
+          "targetObjective": "Read a situation, model it on a bar, and find a fraction of an amount.",
+          "stepByStep": [
+            "Read it twice. The second time, look for what the whole amount is.",
+            "Cut the bar into as many parts as the bottom number says.",
+            "Work out how many are in one part.",
+            "Then take as many parts as the top number asks for."
+          ],
+          "kidTip": "Model it before you calculate. The bar decides what to do; the numbers only do it.",
+          "audioPrompt": "Cut the bar first. Then work out one part.",
+          "prompts": {
+            "default": "How many is that?"
+          }
+        }
+      },
+      "standards": [
+        "CCSS.4.NF.B.4.C"
+      ],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        9,
+        11
+      ]
+    },
+    {
+      "id": "sharing-story",
+      "title": "Four Cakes Between Three",
+      "concept": "Fractions as the Answer to a Division",
+      "conceptKey": "fraction-as-division",
+      "requires": [
+        "fraction-sharer",
+        "mixed-number-writer"
+      ],
+      "activity": "fractions/story",
+      "iconName": "Cake",
+      "iconTone": "rose",
+      "params": {
+        "level": 52,
+        "question": {
+          "mode": "share_leftover",
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Share things out where the leftover gets cut up, so the answer is a mixed number.",
+          "stepByStep": [
+            "Give everybody a whole one first, and see what is left over.",
+            "Now the important bit: the leftover does not stay left over.",
+            "It gets cut into as many pieces as there are people, and shared too.",
+            "So each person gets whole ones and a fraction of one more."
+          ],
+          "kidTip": "'One each and one left over' is a true sentence and the wrong answer. Cakes can be cut.",
+          "audioPrompt": "What happens to the one left over? It gets shared as well.",
+          "prompts": {
+            "default": "How much each?"
+          }
+        }
+      },
+      "standards": [
+        "CCSS.5.NF.B.3"
+      ],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        10,
+        12
+      ]
+    },
+    {
+      "id": "adding-story",
+      "title": "Adding in a Situation",
+      "concept": "Word Problems: Adding Unlike Fractions",
+      "conceptKey": "context-adder",
+      "requires": [
+        "unlike-adder"
+      ],
+      "activity": "fractions/story",
+      "iconName": "Plus",
+      "iconTone": "emerald",
+      "params": {
+        "level": 53,
+        "question": {
+          "mode": "add_context",
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Add two fractions of the same thing inside a story, matching the pieces first.",
+          "stepByStep": [
+            "Both amounts are parts of the same bottle, so they can be added.",
+            "But not yet — the pieces are different sizes.",
+            "Cut both into the same-sized pieces first.",
+            "Now count them together. That is how much is gone."
+          ],
+          "kidTip": "Same whole, different pieces. Match the pieces and it is just counting.",
+          "audioPrompt": "Both are parts of one bottle. Match the pieces, then count.",
+          "prompts": {
+            "default": "How much is gone?"
+          }
+        }
+      },
+      "standards": [
+        "CCSS.5.NF.A.2"
+      ],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        10,
+        12
+      ]
+    },
+    {
+      "id": "recipe-story",
+      "title": "Scaling a Recipe",
+      "concept": "Multiplying a Mixed Number by a Whole Number",
+      "conceptKey": "recipe-scaler",
+      "requires": [
+        "mixed-adder",
+        "repeated-fraction-adder"
+      ],
+      "activity": "fractions/story",
+      "iconName": "ChefHat",
+      "iconTone": "indigo",
+      "params": {
+        "level": 54,
+        "question": {
+          "mode": "scale",
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Multiply an amount with whole ones and parts by a whole number.",
+          "stepByStep": [
+            "The amount has two bits: whole cups and part cups. Both get multiplied.",
+            "Do the whole cups first. That is ordinary multiplication.",
+            "Then the parts, which is copies of a fraction.",
+            "If the parts add up past a whole cup, that cup joins the others."
+          ],
+          "kidTip": "Neither bit stays behind. The parts get multiplied too.",
+          "audioPrompt": "Whole cups first, then the parts.",
+          "prompts": {
+            "default": "How many cups?"
+          }
+        }
+      },
+      "standards": [
+        "CCSS.5.NF.B.6"
+      ],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        11,
+        12
+      ]
+    },
+    {
+      "id": "comparison-story",
+      "title": "How Many Times as Much?",
+      "concept": "Comparing Two Fractions by Division",
+      "conceptKey": "fraction-comparer-in-context",
+      "requires": [
+        "fraction-divider",
+        "unlike-comparer"
+      ],
+      "activity": "fractions/story",
+      "iconName": "Scale",
+      "iconTone": "sky",
+      "params": {
+        "level": 55,
+        "question": {
+          "mode": "compare_context",
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Answer 'how many times as much' by dividing, not by subtracting.",
+          "stepByStep": [
+            "'How many times as much' is a dividing question.",
+            "Ask how many of the smaller amount fit inside the bigger one.",
+            "Taking one away from the other answers a different question: how much more.",
+            "Both are real questions. Read carefully and answer the one that was asked."
+          ],
+          "kidTip": "How much more is subtraction. How many times as much is division. The words tell you which.",
+          "audioPrompt": "How many of the smaller fit inside the bigger?",
+          "prompts": {
+            "default": "How many times as much?"
+          }
+        }
+      },
+      "standards": [
+        "CCSS.6.NS.A.1"
+      ],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        11,
+        12
+      ]
+    },
+    {
+      "id": "multi-step-story",
+      "title": "Two Steps",
+      "concept": "Multi-Step Word Problems with Fractions",
+      "conceptKey": "fraction-multi-step-solver",
+      "requires": [
+        "amount-story-solver",
+        "context-adder"
+      ],
+      "activity": "fractions/story",
+      "iconName": "ListOrdered",
+      "iconTone": "purple",
+      "params": {
+        "level": 56,
+        "question": {
+          "mode": "multi_step",
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Solve a problem that needs a fraction step and then one more step.",
+          "stepByStep": [
+            "Two things happen here, one after the other. Do them in that order.",
+            "Work out the fraction step first, and write down what is left.",
+            "Then do the second step to that answer.",
+            "The answer to the first step is not the answer to the question."
+          ],
+          "kidTip": "Write the middle number down. Most mistakes here are people trying to hold it in their head.",
+          "audioPrompt": "Two steps. Do the fraction one first.",
+          "prompts": {
+            "default": "How many now?"
+          }
+        }
+      },
+      "standards": [
+        "CCSS.5.NF.B.6"
+      ],
+      "trajectoryLevel": "problem-solver",
+      "ageBand": [
+        11,
+        12
+      ]
     }
   ]
 }

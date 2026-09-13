@@ -9,6 +9,8 @@ import { addHints } from "./activities/AddStrip";
 import { multiplyHints } from "./activities/AreaGrid";
 import { divideHints } from "./activities/ShareOut";
 import { decimalHints } from "./activities/DecimalBridge";
+import { estimateHints } from "./activities/EstimateDial";
+import { storyHints } from "./activities/StoryBoard";
 import { buildStripQuestion, explainStrip, type StripMode } from "./internal/data/fractionStrip";
 import { buildLineQuestion, explainLine, type LineMode } from "./internal/data/fractionLine";
 import { buildMillQuestion, explainMill, type MillMode } from "./internal/data/fractionEquivalence";
@@ -18,6 +20,8 @@ import { buildAddQuestion, explainAdd, type AddMode } from "./internal/data/frac
 import { buildMultiplyQuestion, explainMultiply, type MultiplyMode } from "./internal/data/fractionMultiply";
 import { buildDivideQuestion, explainDivide, type DivideMode } from "./internal/data/fractionDivide";
 import { buildDecimalQuestion, explainDecimal, type DecimalMode } from "./internal/data/fractionDecimal";
+import { buildEstimateQuestion, explainEstimate, type EstimateMode } from "./internal/data/fractionEstimate";
+import { buildStoryQuestion, explainStory, type StoryMode } from "./internal/data/fractionStory";
 import { skill } from ".";
 
 /**
@@ -109,6 +113,20 @@ function everything(): Rendered[] {
     for (let i = 0; i < 5; i += 1) {
       const q = buildDecimalQuestion({ mode: m }, m, i);
       add("decimal", m, decimalHints(q), explainDecimal(q, true), explainDecimal(q, false), q.expected);
+    }
+  }
+  for (const m of ["benchmark", "reasonable"] as EstimateMode[]) {
+    for (let i = 0; i < 5; i += 1) {
+      const q = buildEstimateQuestion({ mode: m }, m, i);
+      add("estimate", m, estimateHints(q), explainEstimate(q, true), explainEstimate(q, false), q.expected);
+    }
+  }
+  for (const m of [
+    "of_amount", "share_leftover", "add_context", "scale", "compare_context", "multi_step",
+  ] as StoryMode[]) {
+    for (let i = 0; i < 5; i += 1) {
+      const q = buildStoryQuestion({ mode: m }, m, i);
+      add("story", m, storyHints(q), explainStory(q, true), explainStory(q, false), q.expected);
     }
   }
   return out;

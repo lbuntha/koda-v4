@@ -12,6 +12,8 @@ import { buildAddQuestion, type AddMode } from "./internal/data/fractionAdd";
 import { buildMultiplyQuestion, type MultiplyMode } from "./internal/data/fractionMultiply";
 import { buildDivideQuestion, type DivideMode } from "./internal/data/fractionDivide";
 import { buildDecimalQuestion, type DecimalMode } from "./internal/data/fractionDecimal";
+import { buildEstimateQuestion, type EstimateMode } from "./internal/data/fractionEstimate";
+import { buildStoryQuestion, type StoryMode } from "./internal/data/fractionStory";
 
 /**
  * Every technique is driven by a test, and the count is the claim.
@@ -53,6 +55,8 @@ const SUITE_NAME: Record<string, string> = {
   multiply: "area",
   divide: "share",
   decimal: "decimal",
+  estimate: "estimate",
+  story: "story",
 };
 
 /**
@@ -81,6 +85,10 @@ const builderFor = (activity: string) => {
       return buildDivideQuestion;
     case "decimal":
       return buildDecimalQuestion;
+    case "estimate":
+      return buildEstimateQuestion;
+    case "story":
+      return buildStoryQuestion;
     default:
       throw new Error(`no builder registered for activity "${activity}"`);
   }
@@ -155,6 +163,10 @@ describe("every technique the lessons use", () => {
     const dec: DecimalMode[] = [
       "tenths", "hundredths", "by_dividing", "from_decimal", "percent", "three_names",
     ];
+    const est: EstimateMode[] = ["benchmark", "reasonable"];
+    const sty: StoryMode[] = [
+      "of_amount", "share_leftover", "add_context", "scale", "compare_context", "multi_step",
+    ];
     const used = new Set(modesInUse().map((m) => `${m.activity}/${m.mode}`));
     expect([...used].sort()).toEqual(
       [
@@ -167,6 +179,8 @@ describe("every technique the lessons use", () => {
         ...mul.map((m) => `multiply/${m}`),
         ...div.map((m) => `divide/${m}`),
         ...dec.map((m) => `decimal/${m}`),
+        ...est.map((m) => `estimate/${m}`),
+        ...sty.map((m) => `story/${m}`),
       ].sort(),
     );
   });

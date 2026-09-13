@@ -63,7 +63,15 @@
     "fraction-decimal-converter",
     "decimal-fraction-converter",
     "percent-reader",
-    "representation-matcher"
+    "representation-matcher",
+    "benchmark-estimator",
+    "fraction-reasonableness-checker",
+    "amount-story-solver",
+    "fraction-as-division",
+    "context-adder",
+    "recipe-scaler",
+    "fraction-comparer-in-context",
+    "fraction-multi-step-solver"
   ],
   "requires": [
     "counter",
