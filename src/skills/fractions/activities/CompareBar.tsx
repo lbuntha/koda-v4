@@ -3,6 +3,8 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
 import { withArticle } from "../internal/data/fractionNumbers";
+import { printBar } from "../internal/ui/printFigures";
+import type { Fraction } from "../internal/data/fractionNumbers";
 import { FractionBar } from "../internal/ui/FractionBar";
 import {
   BENCHMARK_WORDS,
@@ -270,3 +272,83 @@ export const CompareBar: React.FC<ActivityProps<CompareParams>> = ({ params, kod
     </SkillRound>
   );
 };
+
+/* -------------------------------------------------------------------------- */
+/* On paper                                                                    */
+/* -------------------------------------------------------------------------- */
+
+/** `3/4`. Local because comparing never needs to name a fraction on screen. */
+const nameOf = (f: Fraction): string => `${f.taken}/${f.parts}`;
+
+/**
+ * Comparing prints well, and one of these prints better than it plays.
+ *
+ * Level 19 shows two fractions of *different* wholes and the honest answer is
+ * "you cannot tell". On paper that is a sentence to write, which is a better
+ * record of the thought than tapping a third button.
+ */
+export function printedFor(question: CompareQuestion): { text: string; answer: string } | null {
+  const words = question.mode === "benchmark_half" ? BENCHMARK_WORDS : VERDICT_WORDS;
+  if (question.mode === "benchmark_half") {
+    return {
+      text: `Is ${nameOf(question.left)} less than a half, exactly a half, or more than a half?`,
+      answer: words[question.expected],
+    };
+  }
+  if (question.mode === "different_wholes") {
+    return {
+      text: `${nameOf(question.left)} of a big pizza, and ${nameOf(question.right)} of a small one. Which is more — or can you not tell?`,
+      answer: words[question.expected],
+    };
+  }
+  return {
+    text: `Write < , > or = between ${nameOf(question.left)} and ${nameOf(question.right)}.`,
+    answer: question.expected === "less" ? "<" : question.expected === "more" ? ">" : "=",
+  };
+}
+
+/** Two bars to compare, except where the question is about a half. */
+export const figureFor = (question: CompareQuestion): React.ReactNode | null => {
+  if (question.mode === "benchmark_half") return printBar(question.left.parts, question.left.taken);
+  if (question.mode === "different_wholes") {
+    return (
+      <div className="flex flex-col gap-1">
+        {printBar(question.left.parts, question.left.taken, { width: 220 })}
+        {printBar(question.right.parts, question.right.taken, { width: 130 })}
+      </div>
+    );
+  }
+  return (
+    <div className="flex flex-col gap-1">
+      {printBar(question.left.parts, question.left.taken)}
+      {printBar(question.right.parts, question.right.taken)}
+    </div>
+  );
+};
+
+export function methodFor(question: CompareQuestion): string[] | null {
+  switch (question.mode) {
+    case "same_denominator":
+      return ["The pieces are the same size, so whoever has more pieces has more."];
+    case "same_numerator":
+      return [
+        "The same number of pieces, but the pieces are different sizes.",
+        "The more a whole is cut into, the smaller each piece is.",
+      ];
+    case "different_wholes":
+      return [
+        "A fraction is a fraction of something.",
+        "Two fractions of different-sized wholes cannot be compared without knowing the wholes.",
+      ];
+    case "benchmark_half":
+      return [
+        "Half is when the top number is exactly half of the bottom one.",
+        "More than half of the bottom number means more than a half.",
+      ];
+    default:
+      return [
+        "Cut both into the same-sized pieces first.",
+        "Then it is just counting which has more pieces.",
+      ];
+  }
+}

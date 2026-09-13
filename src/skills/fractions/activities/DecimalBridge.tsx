@@ -3,6 +3,7 @@ import React, { useCallback, useMemo } from "react";
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
 import { FractionBar } from "../internal/ui/FractionBar";
+import { printBar, printHundred } from "../internal/ui/printFigures";
 import {
   buildDecimalQuestion,
   decimalText,
@@ -246,3 +247,67 @@ export const DecimalBridge: React.FC<ActivityProps<BridgeParams>> = ({ params, k
     </SkillRound>
   );
 };
+
+/* -------------------------------------------------------------------------- */
+/* On paper                                                                    */
+/* -------------------------------------------------------------------------- */
+
+/** Every one of these prints as a written conversion. */
+export function printedFor(question: DecimalQuestion): { text: string; answer: string } | null {
+  const f = question.fraction;
+  switch (question.mode) {
+    case "tenths":
+    case "hundredths":
+      return { text: `${nameOf(f)} = ______ as a decimal`, answer: question.expected };
+    case "by_dividing":
+      return { text: `${f.taken} ÷ ${f.parts} = ______ (write ${nameOf(f)} as a decimal)`, answer: question.expected };
+    case "from_decimal":
+      return {
+        text: `${decimalText(f.taken, f.parts)} = ______ as a fraction in its simplest form`,
+        answer: question.expected,
+      };
+    case "percent":
+      return { text: `${nameOf(f)} = ______ %`, answer: question.expected };
+    default:
+      return {
+        text: `Write ${nameOf(f)} as a decimal and as a percentage.`,
+        answer: question.expected,
+      };
+  }
+}
+
+/** The hundred square, shaded, where the level is about hundredths. */
+export const figureFor = (question: DecimalQuestion): React.ReactNode | null => {
+  if (question.grid === "fraction") return printBar(question.fraction.parts, question.fraction.taken);
+  const shaded = (question.fraction.taken * (question.grid as number)) / question.fraction.parts;
+  return question.grid === 10 ? printBar(10, shaded) : printHundred(shaded);
+};
+
+export function methodFor(question: DecimalQuestion): string[] | null {
+  switch (question.mode) {
+    case "tenths":
+      return ["The first place after the point counts tenths."];
+    case "hundredths":
+      return [
+        "The first place after the point is tenths and the second is hundredths.",
+        "Fifty-eight hundredths uses both places.",
+      ];
+    case "by_dividing":
+      return [
+        "The line in a fraction is a division sign.",
+        "Divide the top by the bottom, carrying on past the point.",
+      ];
+    case "from_decimal":
+      return [
+        "Count the places after the point: one is tenths, two is hundredths.",
+        "Write the digits over that number, then cut it down.",
+      ];
+    case "percent":
+      return [
+        "Percent means out of a hundred.",
+        "Write the fraction with a hundred underneath; the top number is the percentage.",
+      ];
+    default:
+      return ["A fraction, a decimal and a percentage can all be the same number."];
+  }
+}

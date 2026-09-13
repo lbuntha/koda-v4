@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import { printBar } from "../internal/ui/printFigures";
 import { FractionBar } from "../internal/ui/FractionBar";
 import { partWord } from "../internal/data/fractionNumbers";
 import {
@@ -288,3 +289,82 @@ export const ShareOut: React.FC<ActivityProps<ShareParams>> = ({ params, koda, o
     </SkillRound>
   );
 };
+
+/* -------------------------------------------------------------------------- */
+/* On paper                                                                    */
+/* -------------------------------------------------------------------------- */
+
+/** Dividing prints, and the measuring levels print their strips unmarked. */
+export function printedFor(question: DivideQuestion): { text: string; answer: string } | null {
+  switch (question.mode) {
+    case "measure":
+      return {
+        text: `Mark each strip into ${partWord(question.divisor!.parts, true)}. How many are there altogether?`,
+        answer: question.expected,
+      };
+    case "whole_by":
+      return { text: `${question.whole} ÷ ${nameOf(question.divisor!)} =`, answer: question.expected };
+    case "by_whole":
+      return {
+        text: `${nameOf(question.dividend!)} shared equally between ${question.shares}. How much each?`,
+        answer: question.expected,
+      };
+    case "explain_flip":
+      return {
+        text: `Write the multiplication that asks the same thing as ${nameOf(question.dividend!)} ÷ ${nameOf(question.divisor!)}.`,
+        answer: question.expected,
+      };
+    default:
+      return {
+        text: `${nameOf(question.dividend!)} ÷ ${nameOf(question.divisor!)} =`,
+        answer: question.expected,
+      };
+  }
+}
+
+export const figureFor = (question: DivideQuestion): React.ReactNode | null => {
+  if (question.mode === "measure") {
+    return (
+      <div className="flex flex-col gap-0.5">
+        {Array.from({ length: question.whole ?? 1 }).map((_, i) => (
+          <React.Fragment key={i}>{printBar(1, 0, { width: 200 })}</React.Fragment>
+        ))}
+      </div>
+    );
+  }
+  if (question.mode === "by_whole") return printBar(question.dividend!.parts, question.dividend!.taken);
+  return null;
+};
+
+export function methodFor(question: DivideQuestion): string[] | null {
+  switch (question.mode) {
+    case "measure":
+      return [
+        "Every whole one holds the same number of those pieces.",
+        "Count them in one whole, then count that many for each whole you have.",
+      ];
+    case "whole_by":
+      return [
+        "Cut every whole one into the pieces named at the bottom of the fraction.",
+        "Group them: the top number says how many pieces make one group.",
+        "Count how many groups you made — that is the answer.",
+      ];
+    case "by_whole":
+      return [
+        "This one is sharing, not measuring.",
+        "Cut each piece into as many bits as there are people; everybody takes one bit from each.",
+        "The pieces get smaller, so the bottom number gets bigger.",
+      ];
+    case "explain_flip":
+      return [
+        "Dividing asks how many of the second fraction fit inside the first.",
+        "The smaller the second one is, the more of them fit.",
+        "Turning it upside down and multiplying does exactly that.",
+      ];
+    default:
+      return [
+        "Ask how many of the second one fit inside the first.",
+        "Cut both into the same-sized pieces, then count.",
+      ];
+  }
+}

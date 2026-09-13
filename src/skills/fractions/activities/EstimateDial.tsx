@@ -3,6 +3,7 @@ import React, { useCallback, useMemo } from "react";
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
 import { FractionBar } from "../internal/ui/FractionBar";
+import { printBar } from "../internal/ui/printFigures";
 import {
   buildEstimateQuestion,
   explainEstimate,
@@ -197,3 +198,43 @@ export const EstimateDial: React.FC<ActivityProps<DialParams>> = ({ params, koda
     </SkillRound>
   );
 };
+
+/* -------------------------------------------------------------------------- */
+/* On paper                                                                    */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Estimation prints better than it plays.
+ *
+ * On screen the three answers are buttons. On paper level 50 asks the child to
+ * write *why*, which is the thought the level is actually about and which no
+ * button can record.
+ */
+export function printedFor(question: EstimateQuestion): { text: string; answer: string } | null {
+  if (question.mode === "benchmark") {
+    return {
+      text: `Is ${nameOf(question.fraction)} nearly nothing, about a half, or nearly a whole one?`,
+      answer: question.expected,
+    };
+  }
+  return {
+    text: `Somebody says ${nameOf(question.left!)} + ${nameOf(question.right!)} = ${nameOf(question.claim!)}. Could that be right? Say why.`,
+    answer: question.expected,
+  };
+}
+
+export const figureFor = (question: EstimateQuestion): React.ReactNode | null =>
+  question.mode === "benchmark" ? printBar(question.fraction.parts, question.fraction.taken) : null;
+
+export function methodFor(question: EstimateQuestion): string[] | null {
+  if (question.mode === "benchmark") {
+    return [
+      "Do not work it out. Compare the top number with half of the bottom one.",
+      "Close to nothing, close to half, or close to all of it?",
+    ];
+  }
+  return [
+    "You are judging the answer, not calculating it.",
+    "An answer smaller than one of the pieces you started with cannot be their total.",
+  ];
+}

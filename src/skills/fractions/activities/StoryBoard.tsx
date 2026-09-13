@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import { printBar } from "../internal/ui/printFigures";
 import {
   buildStoryQuestion,
   explainStory,
@@ -236,3 +237,41 @@ export const StoryBoard: React.FC<ActivityProps<BoardParams>> = ({ params, koda,
     </SkillRound>
   );
 };
+
+/* -------------------------------------------------------------------------- */
+/* On paper                                                                    */
+/* -------------------------------------------------------------------------- */
+
+/** Word problems print as themselves. The bar is offered blank to model on. */
+export function printedFor(question: StoryQuestion): { text: string; answer: string } | null {
+  return { text: question.story, answer: question.expected };
+}
+
+/** An empty bar, ruled into nothing: the cutting is the child's decision. */
+export const figureFor = (question: StoryQuestion): React.ReactNode | null =>
+  printBar(1, 0, { width: 220, label: "an empty bar to model the story on" });
+
+export function methodFor(question: StoryQuestion): string[] | null {
+  switch (question.mode) {
+    case "share_leftover":
+      return [
+        "Give everybody a whole one first.",
+        "Then cut what is left between them — the leftover does not stay left over.",
+      ];
+    case "compare_context":
+      return [
+        "How many times as much is a dividing question.",
+        "How much more is a taking-away question. Read which one is being asked.",
+      ];
+    case "multi_step":
+      return [
+        "Do the fraction step first and write the middle number down.",
+        "Then do the second step to that number.",
+      ];
+    default:
+      return [
+        "Draw the bar as the whole amount, then cut it as the fraction says.",
+        "Work out one part before taking several.",
+      ];
+  }
+}

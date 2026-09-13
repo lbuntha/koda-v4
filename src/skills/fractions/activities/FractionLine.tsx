@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
 import { partWord } from "../internal/data/fractionNumbers";
+import { printLine } from "../internal/ui/printFigures";
 import {
   LINE_REFUSALS,
   explainLine,
@@ -267,3 +268,48 @@ export const FractionLine: React.FC<ActivityProps<LineParams>> = ({ params, koda
     </SkillRound>
   );
 };
+
+/* -------------------------------------------------------------------------- */
+/* On paper                                                                    */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * A number-line lesson on paper needs a line to mark.
+ *
+ * Printing "put the marker on 3/4" beside nothing is a caption, not a question,
+ * so every one of these carries a ruled but unmarked line. The mark is never
+ * drawn — a line that arrives with the answer on it is a picture of the answer.
+ */
+export function printedFor(question: LineQuestion): { text: string; answer: string } | null {
+  const { fraction } = question;
+  switch (question.mode) {
+    case "read_point":
+      return { text: "A cross is marked on the line. Write the fraction it sits on.", answer: question.expected };
+    case "makes_one":
+      return {
+        text: `Start at ${nameOf(fraction)} and mark where one whole is. How much further is it?`,
+        answer: question.expected,
+      };
+    case "improper":
+      return { text: `Mark ${nameOf(fraction)} on the line. Write it as a mixed number.`, answer: question.expected };
+    default:
+      return { text: `Mark ${nameOf(fraction)} on the line.`, answer: nameOf(fraction) };
+  }
+}
+
+export const figureFor = (question: LineQuestion): React.ReactNode =>
+  printLine(question.span, question.intervals);
+
+export function methodFor(question: LineQuestion): string[] | null {
+  if (question.mode === "makes_one") {
+    return [
+      "One whole is where every part has been counted.",
+      "Count the parts still to go from where you are to the whole number.",
+    ];
+  }
+  return [
+    "The bottom number says how many jumps there are between one whole number and the next.",
+    "The top number says how many of those jumps to count from zero.",
+    "Land on a mark, not between two.",
+  ];
+}

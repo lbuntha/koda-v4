@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import { printBar, printGrid } from "../internal/ui/printFigures";
 import { FractionBar } from "../internal/ui/FractionBar";
 import { gcd, partWord } from "../internal/data/fractionNumbers";
 import {
@@ -433,3 +434,77 @@ export const AreaGrid: React.FC<ActivityProps<AreaParams>> = ({ params, koda, on
     </SkillRound>
   );
 };
+
+/* -------------------------------------------------------------------------- */
+/* On paper                                                                    */
+/* -------------------------------------------------------------------------- */
+
+/** Multiplying prints, and the grid level prints its grid empty. */
+export function printedFor(question: MultiplyQuestion): { text: string; answer: string } | null {
+  switch (question.mode) {
+    case "of_whole":
+      return { text: `${nameOf(question.fraction)} of ${question.total} =`, answer: question.expected };
+    case "whole_times":
+      return { text: `${question.copies} × ${nameOf(question.fraction)} =`, answer: question.expected };
+    case "area_model":
+      return {
+        text: `Shade ${nameOf(question.fraction)} across the grid and ${nameOf(question.other!)} down it. What fraction is shaded both ways?`,
+        answer: question.expected,
+      };
+    case "simplify_first":
+      return {
+        text: `${nameOf(question.fraction)} × ${nameOf(question.other!)} = (cancel first)`,
+        answer: question.expected,
+      };
+    default:
+      return {
+        text: `Will ${nameOf(question.fraction)} × ${question.total} be bigger than ${question.total}, smaller, or the same? Do not work it out.`,
+        answer: question.expected,
+      };
+  }
+}
+
+export const figureFor = (question: MultiplyQuestion): React.ReactNode | null => {
+  if (question.mode === "area_model") return printGrid(question.fraction.parts, question.other!.parts);
+  if (question.mode === "whole_times") {
+    return (
+      <div className="flex flex-col gap-0.5">
+        {Array.from({ length: Math.min(question.copies ?? 0, 6) }).map((_, i) => (
+          <React.Fragment key={i}>{printBar(question.fraction.parts, question.fraction.taken, { width: 160 })}</React.Fragment>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
+
+export function methodFor(question: MultiplyQuestion): string[] | null {
+  switch (question.mode) {
+    case "of_whole":
+      return [
+        "Divide by the bottom number to find one group.",
+        "Multiply by the top number to take that many groups.",
+      ];
+    case "whole_times":
+      return [
+        "Multiplying by a whole number is making that many copies.",
+        "The pieces stay the same size, so only the top number changes.",
+      ];
+    case "area_model":
+      return [
+        "Shade the first fraction across the grid, in columns.",
+        "Shade the second down it, in rows.",
+        "The squares shaded twice are the answer, out of all the squares.",
+      ];
+    case "simplify_first":
+      return [
+        "Look diagonally for a number that divides a top and a bottom.",
+        "Divide both by it before multiplying. The answer does not change and the numbers stay small.",
+      ];
+    default:
+      return [
+        "Multiplying by less than one whole makes the amount smaller.",
+        "Multiplying by more than one makes it bigger. By exactly one, nothing changes.",
+      ];
+  }
+}

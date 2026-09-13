@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import { printBar } from "../internal/ui/printFigures";
 import { FractionBar } from "../internal/ui/FractionBar";
 import { partWord } from "../internal/data/fractionNumbers";
 import {
@@ -18,6 +19,7 @@ import {
   type AddQuestion,
   type AddSetup,
 } from "../internal/data/fractionAdd";
+import type { Fraction } from "../internal/data/fractionNumbers";
 
 /**
  * Adding and taking away — which is counting, once the pieces match.
@@ -269,3 +271,65 @@ export const AddStrip: React.FC<ActivityProps<AddParams>> = ({ params, koda, onC
     </SkillRound>
   );
 };
+
+/* -------------------------------------------------------------------------- */
+/* On paper                                                                    */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Adding prints as arithmetic, with the strips beside it where they help.
+ *
+ * The refutation at level 27 prints as the best question on the sheet: the
+ * claim is written out and the child has to say what is wrong with it in their
+ * own hand, which is a harder and better task than choosing a button.
+ */
+export function printedFor(question: AddQuestion): { text: string; answer: string } | null {
+  if (question.mode === "refute") {
+    return {
+      text: `Somebody says ${nameOf(question.left)} + ${nameOf(question.right)} = ${nameOf(question.claim as Fraction)}. Work out the real answer, and say why theirs is too small.`,
+      answer: `${question.expected} — the claim is smaller than ${nameOf(question.left)} on its own`,
+    };
+  }
+  const sign = question.operation === "add" ? "+" : "−";
+  const left = question.leftOnes > 0 ? mixedText(question.leftOnes, question.left) : nameOf(question.left);
+  const right = question.rightOnes > 0 ? mixedText(question.rightOnes, question.right) : nameOf(question.right);
+  return { text: `${left} ${sign} ${right} =`, answer: question.expected };
+}
+
+/** The two strips, drawn as they are written — uncut, because cutting is the work. */
+export const figureFor = (question: AddQuestion): React.ReactNode | null => {
+  if (!question.mustMatch) return null;
+  return (
+    <div className="flex flex-col gap-1">
+      {printBar(question.left.parts, question.left.taken)}
+      {printBar(question.right.parts, question.right.taken)}
+    </div>
+  );
+};
+
+export function methodFor(question: AddQuestion): string[] | null {
+  if (question.mode === "refute") {
+    return [
+      "Lay both fractions end to end and see how far they reach.",
+      "An answer smaller than one of the pieces you started with cannot be their total.",
+    ];
+  }
+  if (question.mode === "subtract_mixed") {
+    return [
+      "Cut both fractions to the same-sized pieces first.",
+      "If there are not enough loose parts, break one whole one up — it gives you a whole set more.",
+      "Then take them away and count the whole ones left.",
+    ];
+  }
+  if (!question.mustMatch) {
+    return [
+      "The bottom numbers are the same, so the pieces are the same size.",
+      "Count them together. The bottom number does not change.",
+    ];
+  }
+  return [
+    "The pieces are different sizes, so they cannot be counted yet.",
+    "Find a size they both fit into, and re-write both fractions in it.",
+    "Now the pieces match, so counting them together gives the answer.",
+  ];
+}

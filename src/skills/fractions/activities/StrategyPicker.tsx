@@ -266,3 +266,32 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyParams>> = ({ params
     </SkillRound>
   );
 };
+
+/* -------------------------------------------------------------------------- */
+/* On paper                                                                    */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * On paper this becomes a better question than it is on screen.
+ *
+ * The buttons become a blank line, so the child has to say which way they would
+ * do it *and why* in their own words — which is the level's real subject and
+ * something no multiple choice can capture.
+ */
+export function printedFor(question: StrategyQuestion): { text: string; answer: string } | null {
+  return {
+    text: `${nameOf(question.left)} + ${nameOf(question.right)}. Which way would you do this one, and why?`,
+    answer: question.fitting
+      .map((id) => ROUTES.find((r) => r.id === id)?.why(question.left, question.right))
+      .filter(Boolean)
+      .join("  /  "),
+  };
+}
+
+export function methodFor(): string[] | null {
+  return [
+    "Look at the two bottom numbers first.",
+    "The same? Nothing to cut. One goes into the other? Cut only one of them.",
+    "Sharing a factor? The pieces can be smaller than multiplying the bottoms would give.",
+  ];
+}

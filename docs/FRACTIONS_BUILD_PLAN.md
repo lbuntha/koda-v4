@@ -502,3 +502,24 @@ eight-question round reaches every mode it names, and that no hint button, no
 read-aloud and no technique-naming caption survives. It also caught itself —
 `/read|listen|aloud/` matched the route label "the pieces already match", which
 contains "read". Whole words now.
+
+### Phase 15 — worksheets
+
+All sixty-nine lessons print, each with its apparatus drawn for a pencil:
+hatched bars and circles, ruled number lines, empty grids, hundred squares, a
+row of things to circle. 69 printable, 446 tests.
+
+- **The typecheck had been a no-op all build.** `tsconfig.app.json` names
+  `@testing-library/jest-dom` in `types`, which is not installed, and TS2688
+  aborts the run before it checks anything — so every `npx tsc --noEmit` in this
+  session reported success without compiling a line. Re-running with that entry
+  removed found two undefined identifiers I had shipped into the worksheet
+  adapters: `printLine` in the number-line engine and `nameOf` in the comparer.
+  Both threw at runtime, which is why thirteen lessons silently printed zero
+  questions. Check with a copy of the config that drops the missing type.
+- Shading is hatched rather than filled, because a solid violet bar prints as a
+  grey slab a child cannot write on.
+- Two levels are better on paper than on screen and now say so: level 50 asks a
+  child to write *why* an answer cannot be right, and level 57 asks which route
+  they would take and why. Both are blank lines on a sheet and buttons in a
+  round, and the blank line is the better question.

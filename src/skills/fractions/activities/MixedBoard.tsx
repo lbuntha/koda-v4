@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
 import { partWord } from "../internal/data/fractionNumbers";
+import { printLine } from "../internal/ui/printFigures";
 import { FractionBar } from "../internal/ui/FractionBar";
 import {
   MIXED_REFUSALS,
@@ -318,3 +319,54 @@ export const MixedBoard: React.FC<ActivityProps<MixedParams>> = ({ params, koda,
     </SkillRound>
   );
 };
+
+/* -------------------------------------------------------------------------- */
+/* On paper                                                                    */
+/* -------------------------------------------------------------------------- */
+
+/** Both names of one amount, written out. */
+export function printedFor(question: MixedQuestion): { text: string; answer: string } | null {
+  switch (question.mode) {
+    case "to_mixed":
+      return {
+        text: `Write ${improperName(question.improper)} as a whole number and a fraction.`,
+        answer: question.expected,
+      };
+    case "to_improper":
+      return {
+        text: `Write ${mixedName(question.mixed)} as one fraction.`,
+        answer: question.expected,
+      };
+    default:
+      return {
+        text: `Mark ${mixedName(question.mixed)} on the line, and write its other name.`,
+        answer: improperName(question.improper),
+      };
+  }
+}
+
+/** Only the line level draws: the other two are written both ways. */
+export const figureFor = (question: MixedQuestion): React.ReactNode | null =>
+  question.mode === "on_line"
+    ? printLine(question.span ?? 1, question.intervals ?? question.improper.parts)
+    : null;
+
+export function methodFor(question: MixedQuestion): string[] | null {
+  if (question.mode === "to_improper") {
+    return [
+      "Every whole one breaks into as many parts as the bottom number says.",
+      "Break them all up, then add the parts that were already loose.",
+    ];
+  }
+  if (question.mode === "to_mixed") {
+    return [
+      "Gather the parts into whole ones: one whole for every full set of them.",
+      "Whatever is left over stays as a fraction.",
+    ];
+  }
+  return [
+    "Find the whole number first and go to that mark.",
+    "Then count on in parts from there.",
+    "Both names belong to the same mark, because they are the same number.",
+  ];
+}

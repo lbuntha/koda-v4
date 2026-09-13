@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import { partWord } from "../internal/data/fractionNumbers";
+import { printBar } from "../internal/ui/printFigures";
 import { FractionBar } from "../internal/ui/FractionBar";
 import {
   MILL_REFUSALS,
@@ -289,3 +291,56 @@ export const EquivalenceMill: React.FC<ActivityProps<MillParams>> = ({ params, k
     </SkillRound>
   );
 };
+
+/* -------------------------------------------------------------------------- */
+/* On paper                                                                    */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * These print as written questions with a bar beside them.
+ *
+ * The bar is the starting amount, drawn shaded. What the child does on paper is
+ * cut it further with a pencil and write the new name, which is the same act
+ * the mill performs on screen.
+ */
+export function printedFor(question: MillQuestion): { text: string; answer: string } | null {
+  const { from, to, factor } = question;
+  switch (question.mode) {
+    case "split":
+      return {
+        text: `Cut every part of ${nameOf(from)} into ${factor}. Write the new name for the same amount.`,
+        answer: question.expected,
+      };
+    case "two_names":
+      return {
+        text: `Write two names for the shaded amount.`,
+        answer: `${nameOf(from)} and ${nameOf(to)}`,
+      };
+    case "scale_up":
+      return { text: `Write ${nameOf(from)} in ${partWord(to.parts, true)}.`, answer: question.expected };
+    case "scale_down":
+      return {
+        text: `Both numbers in ${nameOf(from)} divide by ${factor}. Write what it becomes.`,
+        answer: question.expected,
+      };
+    default:
+      return { text: `Write ${nameOf(from)} as simply as it will go.`, answer: question.expected };
+  }
+}
+
+export const figureFor = (question: MillQuestion): React.ReactNode =>
+  printBar(question.from.parts, question.from.taken);
+
+export function methodFor(question: MillQuestion): string[] | null {
+  if (question.mode === "simplest" || question.mode === "scale_down") {
+    return [
+      "Look for a number that divides into the top and the bottom.",
+      "Divide both by it. The amount has not changed, only its name.",
+      "Keep going until nothing divides both any more.",
+    ];
+  }
+  return [
+    "Cutting every part into the same number of pieces does not change how much there is.",
+    "Both numbers get multiplied, so the fraction keeps its value.",
+  ];
+}
