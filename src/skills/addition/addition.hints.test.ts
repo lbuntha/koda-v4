@@ -901,3 +901,71 @@ describe("practice cycles the modes it is given", () => {
   });
 });
 
+
+describe("left to right holds one number, and says so", () => {
+  /*
+   * The bug this guards was reported from a screenshot: 25 + 36, with "Tens
+   * first" holding 50 and "Then the ones" holding 11. Eleven is what the child
+   * had just added, and the row was labelled with exactly that — but the box
+   * wanted 61, the total after adding it. The label and the expected answer
+   * were describing two different numbers.
+   *
+   * The third hint rung made it worse rather than catching it: "50 and 11 is
+   * 61" is partial-sums language, two parts put together, and it named 11 as
+   * the thing to write down.
+   */
+  const draw = (a: number, b: number) =>
+    buildDesk({ mode: "left_right", aRange: [a, a], bRange: [b, b] }, 1, new Set());
+
+  it("wants a running total in both boxes, not a partial in the second", () => {
+    const q = draw(25, 36);
+    expect(q.answers).toEqual([50, 61]);
+    // 11 is the ones part. It is never an answer here — that is partial sums.
+    expect(q.answers).not.toContain(11);
+    expect(q.expected).toBe("50,61");
+  });
+
+  it("labels both rows by what is held, never by what was added", () => {
+    const q = draw(25, 36);
+    const labels = q.rows.filter((r) => r.cells.some((c) => "blank" in c)).map((r) => r.label);
+    expect(labels).toHaveLength(2);
+    for (const label of labels) {
+      // "Then the ones" names the addend; the box holds the total after it.
+      expect(label, `"${label}" names what was added`).not.toMatch(/^then the|^the ones$/i);
+    }
+    expect(labels).toEqual(["After the tens", "After the ones"]);
+  });
+
+  it("keeps the hint in running-total language, not partial-sums language", () => {
+    const q = draw(25, 36);
+    const hints = deskHints(q, { entries: { "run-1": "50", "run-2": "" } });
+    const top = hints[hints.length - 1];
+    expect(top).toContain("61");
+    expect(top).toContain("50");
+    // The shape "A and B is C" is how partial sums are described, and it is
+    // what sent a child looking for a box to put B in.
+    expect(top, `"${top}"`).not.toMatch(/\b50 and 11 is\b/);
+    expect(top.toLowerCase()).toContain("holding");
+  });
+
+  it("draws a hundreds column when the running total reaches one", () => {
+    // 57 and 88: you hold 130, then 145. The header and every row have to be
+    // three wide, or the addends sit under the wrong columns.
+    const big = draw(57, 88);
+    expect(big.sum).toBe(145);
+    expect(big.places).toEqual(["hundreds", "tens", "ones"]);
+    for (const row of big.rows) {
+      expect(row.cells, `${row.label} is not three wide`).toHaveLength(3);
+    }
+    expect(big.answers).toEqual([130, 145]);
+  });
+
+  it("leaves the hundreds column off when the total does not need one", () => {
+    // An empty H column invites a child to write a 0 in front of their answer.
+    const small = draw(25, 36);
+    expect(small.places).toEqual(["tens", "ones"]);
+    for (const row of small.rows) {
+      expect(row.cells, `${row.label} is not two wide`).toHaveLength(2);
+    }
+  });
+});

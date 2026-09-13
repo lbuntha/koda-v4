@@ -226,14 +226,38 @@ export const buildQuestion = (
      * sums it was the same exercise under a different name — which it was, until
      * the lesson for it came to be written.
      */
+    /*
+     * A tens column that makes ten tens needs somewhere to put the hundred.
+     *
+     * 57 and 88: you hold 130, then 145 — and the addend rows were being drawn
+     * under a two-column header while the running total ran past it. Partial
+     * sums already had this fix and this mode never got it, which is what a
+     * mode written by copying half of its neighbour looks like a year later.
+     */
+    const hundred = sum >= 100;
+    /** Keeps the addends under T and O when H is drawn. */
+    const lead: DeskCell[] = hundred ? [{ text: "" }] : [];
+    /** And keeps the running rows the same width as the header. */
+    const tail: DeskCell[] = hundred ? [{ text: "" }, { text: "" }] : [{ text: "" }];
+
     return {
       ...base,
-      places,
+      places: hundred ? ["hundreds", "tens", "ones"] : places,
       rows: [
-        { label: String(a), cells: digitsFor(a, places).map((value) => ({ value })) },
-        { label: String(b), cells: digitsFor(b, places).map((value) => ({ value })) },
-        { label: "Tens first", total: true, cells: [{ blank: "run-1" }, { text: "" }] },
-        { label: "Then the ones", cells: [{ blank: "run-2" }, { text: "" }] },
+        { label: String(a), cells: [...lead, ...digitsFor(a, places).map((value) => ({ value }))] },
+        { label: String(b), cells: [...lead, ...digitsFor(b, places).map((value) => ({ value }))] },
+        /*
+         * Both rows hold a running total, and the labels have to say so.
+         *
+         * They used to read "Tens first" and "Then the ones", which name what
+         * you *add* at each step rather than what you are left holding — so a
+         * child on the second row wrote the ones they had just added (11) into
+         * a box that wanted the total after adding them (61). The label and the
+         * expected answer were describing two different numbers, and the child
+         * was right about the one the label named.
+         */
+        { label: "After the tens", total: true, cells: [{ blank: "run-1" }, ...tail] },
+        { label: "After the ones", total: true, cells: [{ blank: "run-2" }, ...tail] },
       ],
       blanks: ["run-1", "run-2"],
       answers: [tensPart, sum],
@@ -409,7 +433,13 @@ export function deskHints(
       empty > 1
         ? `Start with the tens: ${da.tens * 10} and ${db.tens * 10}. Write what you are holding after that.`
         : `You are holding ${afterTens}. Now add the ones — ${da.ones} and ${db.ones} — to that.`,
-      `${afterTens} and ${da.ones + db.ones} is ${q.sum}.`,
+      /*
+       * "50 and 11 is 61" is partial-sums language: two parts, put together.
+       * Here there is one number being adjusted, and the sentence has to keep
+       * that shape — otherwise the most helpful rung on the ladder is the one
+       * that teaches the other lesson.
+       */
+      `You are holding ${afterTens}. Add ${da.ones} and ${db.ones} to it and you are holding ${q.sum}.`,
     );
   }
 
