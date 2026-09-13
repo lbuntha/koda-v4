@@ -160,6 +160,20 @@ export const FrameTakeaway: React.FC<ActivityProps<FrameTakeawayParams>> = ({ pa
 
   useEffect(() => { setRemoved([]); nudge.clear(); }, [q.id, nudge.clear]);
 
+  /*
+   * Put the work back the way this question started.
+   *
+   * The same lines the effect above runs when a new question arrives, called
+   * from a button instead. A wrong answer keeps the child on the same question,
+   * and without this the board they got wrong is still in front of them with no
+   * way back except undoing every move by hand.
+   */
+  const restart = (): void => {
+    setRemoved([]);
+    nudge.clear();
+  };
+
+
   const speaks = !practising && koda.config.isEnabled("audio_speech", true);
   const badges = koda.config.isEnabled("counting_badges", true);
   const showsDifference = koda.config.isEnabled("running_difference_badge", true);
@@ -197,6 +211,9 @@ export const FrameTakeaway: React.FC<ActivityProps<FrameTakeawayParams>> = ({ pa
     totalQuestions={totalQuestions} prompt={prompt} iconName="boxes" iconTone="purple"
     tagLabels={tagLabelsFrom(koda)} nudge={nudge.message}
     hints={practising ? [] : frameHints(q, { removed: removed.length, kidTip: copy.kidTip })}
+    onStartOver={
+      !round.feedback && (removed.length > 0) ? restart : undefined
+    }
     onExit={koda.ui.exit} recommendation={nextStep}
     onReadAloud={practising ? undefined : () => { round.useSupport("audio_replay"); void koda.speech.say(prompt, speechRate(koda)); }}>
     <div className="space-y-4">

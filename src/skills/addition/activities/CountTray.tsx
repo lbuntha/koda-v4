@@ -645,6 +645,24 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
     nudge.clear();
   }, [question.id, finishing]);
 
+  /*
+   * Put the work back the way this question started.
+   *
+   * The same lines the effect above runs when a new question arrives, called
+   * from a button instead. A wrong answer keeps the child on the same question,
+   * and without this the board they got wrong is still in front of them with no
+   * way back except undoing every move by hand.
+   */
+  const restart = (): void => {
+    finishing.cancel();
+    setCounted([]);
+    setMerged(false);
+    setStartSide(null);
+    setFingers({ left: 0, right: 0 });
+    nudge.clear();
+  };
+
+
   // A pending nudge must not outlive the activity.
 
   /* Every feature the manifest declares is read here. A flag nothing checks is
@@ -851,6 +869,9 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
         fingers,
         kidTip: copy.kidTip,
       })}
+      onStartOver={
+        !round.feedback && (counted.length > 0 || merged || startSide !== null || fingers.left > 0 || fingers.right > 0) ? restart : undefined
+      }
       onExit={koda.ui.exit}
       onReadAloud={
         practising

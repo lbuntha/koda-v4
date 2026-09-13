@@ -560,6 +560,26 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
      */
   }, [question?.id, question?.groups, clearNudge]);
 
+  /*
+   * Put the work back the way this question started.
+   *
+   * The same lines the effect above runs when a new question arrives, called
+   * from a button instead. A wrong answer keeps the child on the same question,
+   * and without this the board they got wrong is still in front of them with no
+   * way back except undoing every move by hand.
+   */
+  const restart = (): void => {
+    setPlaced(Array.from({ length: question?.groups ?? 0 }, () => 0));
+    setCounted(Array.from({ length: question?.groups ?? 0 }, () => false));
+    setHolding(false);
+    setSlotGroups(undefined);
+    setSlotEach(undefined);
+    setHeld(undefined);
+    setTyped("");
+    clearNudge();
+  };
+
+
   if (!question) return null;
 
   const { mode, groups, size, asset, container } = question;
@@ -956,6 +976,9 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
       hints={hints}
+      onStartOver={
+        !round.feedback && (placed.some((n) => n > 0) || counted.some(Boolean) || holding || slotGroups !== undefined || slotEach !== undefined || typed !== "") ? restart : undefined
+      }
       iconName="Boxes"
       iconTone="purple"
       tagLabels={tagLabelsFrom(koda)}

@@ -383,6 +383,19 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
     setBuilt({ hundreds: 0, tens: 0, ones: 0 });
   }, [question.id]);
 
+  /*
+   * Put the work back the way this question started.
+   *
+   * The same lines the effect above runs when a new question arrives, called
+   * from a button instead. A wrong answer keeps the child on the same question,
+   * and without this the board they got wrong is still in front of them with no
+   * way back except undoing every move by hand.
+   */
+  const restart = (): void => {
+    setBuilt({ hundreds: 0, tens: 0, ones: 0 });
+  };
+
+
 
   const adjust = (key: Place["key"], delta: number, max: number) => {
     playChrome(koda, "pop");
@@ -562,6 +575,9 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
       iconName="boxes"
       iconTone="emerald"
       hints={practising ? [] : base10Hints(question, { built, setup, kidTip: copy.kidTip })}
+      onStartOver={
+        !round.feedback && (built.hundreds > 0 || built.tens > 0 || built.ones > 0) ? restart : undefined
+      }
       onExit={koda.ui.exit}
       onReadAloud={
         practising

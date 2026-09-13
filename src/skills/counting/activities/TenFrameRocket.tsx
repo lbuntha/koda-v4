@@ -372,6 +372,19 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
     setFrame(EMPTY_FRAME());
   }, [question.id]);
 
+  /*
+   * Put the work back the way this question started.
+   *
+   * The same lines the effect above runs when a new question arrives, called
+   * from a button instead. A wrong answer keeps the child on the same question,
+   * and without this the board they got wrong is still in front of them with no
+   * way back except undoing every move by hand.
+   */
+  const restart = (): void => {
+    setFrame(EMPTY_FRAME());
+  };
+
+
 
   const toggle = (idx: number) => {
     playChrome(koda, "pop");
@@ -469,6 +482,9 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
       iconName="rocket"
       iconTone="purple"
       hints={practising ? [] : tenFrameHints(question, { filled, kidTip: copy.kidTip })}
+      onStartOver={
+        !round.feedback && (frame.some(Boolean)) ? restart : undefined
+      }
       onExit={koda.ui.exit}
       onReadAloud={
         practising

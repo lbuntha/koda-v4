@@ -241,6 +241,25 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({ params, 
     clearNudge();
   }, [question, clearNudge]);
 
+  /*
+   * Put the work back the way this question started.
+   *
+   * The same lines the effect above runs when a new question arrives, called
+   * from a button instead. A wrong answer keeps the child on the same question,
+   * and without this the board they got wrong is still in front of them with no
+   * way back except undoing every move by hand.
+   */
+  const restart = (): void => {
+    if (!question) return;
+    /* Dials start on the factor itself, so the child moves it to a round
+       number rather than being handed one to accept. */
+    setDialA(question.a);
+    setDialB(question.b);
+    setRevealed(false);
+    clearNudge();
+  };
+
+
   if (!question) return null;
 
   const { mode, a, b, unitA, unitB } = question;
@@ -446,6 +465,9 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({ params, 
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
       hints={practising ? [] : estimateHints(question, copy.kidTip, { dialA, dialB, revealed })}
+      onStartOver={
+        !round.feedback && (revealed || dialA !== question.a || dialB !== question.b) ? restart : undefined
+      }
       iconName="scale"
       iconTone="cyan"
       tagLabels={tagLabelsFrom(koda)}

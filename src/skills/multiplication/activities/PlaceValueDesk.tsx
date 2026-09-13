@@ -313,6 +313,23 @@ export const PlaceValueDesk: React.FC<ActivityProps<DeskParams>> = ({ params, ko
     clearNudge();
   }, [question, clearNudge]);
 
+  /*
+   * Put the work back the way this question started.
+   *
+   * The same lines the effect above runs when a new question arrives, called
+   * from a button instead. A wrong answer keeps the child on the same question,
+   * and without this the board they got wrong is still in front of them with no
+   * way back except undoing every move by hand.
+   */
+  const restart = (): void => {
+    if (!question) return;
+    setMoved(0);
+    setCount(undefined);
+    setPlace(undefined);
+    clearNudge();
+  };
+
+
   if (!question) return null;
 
   const { mode, a, b } = question;
@@ -515,6 +532,9 @@ export const PlaceValueDesk: React.FC<ActivityProps<DeskParams>> = ({ params, ko
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
       hints={practising ? [] : deskHints(question, copy.kidTip, { moved, count, place })}
+      onStartOver={
+        !round.feedback && (moved !== 0 || count !== undefined || place !== undefined) ? restart : undefined
+      }
       iconName="layers"
       iconTone="cyan"
       tagLabels={tagLabelsFrom(koda)}

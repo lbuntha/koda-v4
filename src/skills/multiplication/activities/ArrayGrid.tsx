@@ -484,6 +484,35 @@ export const ArrayGrid: React.FC<ActivityProps<ArrayParams>> = ({ params, koda, 
     clearNudge();
   }, [question, clearNudge]);
 
+  /*
+   * Put the work back the way this question started.
+   *
+   * The same lines the effect above runs when a new question arrives, called
+   * from a button instead. A wrong answer keeps the child on the same question,
+   * and without this the board they got wrong is still in front of them with no
+   * way back except undoing every move by hand.
+   */
+  const restart = (): void => {
+    if (!question) return;
+    if (question.mode === "build_array") {
+      setRows(1);
+      setCols(1);
+    } else if (question.mode === "missing_dimension") {
+      // The known side is fixed; the unknown one starts at one and is grown.
+      setRows(question.unknown === "rows" ? 1 : question.rows);
+      setCols(question.unknown === "cols" ? 1 : question.cols);
+    } else {
+      setRows(question.rows);
+      setCols(question.cols);
+    }
+    setTurned(false);
+    setCutAt(undefined);
+    setPicked([]);
+    setTyped("");
+    clearNudge();
+  };
+
+
   if (!question) return null;
 
   const { mode } = question;
@@ -857,6 +886,9 @@ export const ArrayGrid: React.FC<ActivityProps<ArrayParams>> = ({ params, koda, 
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
       hints={practising ? [] : arrayHints(question, copy.kidTip, { rows, cols, turned, cutAt, picked })}
+      onStartOver={
+        !round.feedback && (turned || cutAt !== undefined || picked.length > 0 || typed !== "") ? restart : undefined
+      }
       iconName="Grid3x3"
       iconTone="cyan"
       tagLabels={tagLabelsFrom(koda)}

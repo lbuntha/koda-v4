@@ -355,3 +355,26 @@ Use the section for the failure instead of rereading every reference:
   browser environment is an unperformed check, not a pass.
 
 Documentation-only changes need link/example validation, not a full application build.
+
+### 0.2 A way back
+
+Every engine that holds what a child has built — blocks placed, digits typed,
+counters tapped, a bar cut, a strip shaded — passes `onStartOver` to
+`SkillRound`, which draws one quiet control under the work.
+
+It was missing everywhere until a child's session turned it up. A wrong answer
+keeps the round on the same question, which is right: it is what makes "right on
+the second try" different from "right first time" in the log. But it also leaves
+the board exactly as they built it, and the only route back was undoing each move
+by hand. A stuck eight-year-old does not do that. They press the same wrong
+answer again.
+
+Two rules, both held by `kit/chrome/startOver.test.tsx`:
+
+- **Offer it only when there is something to clear.** A control that resets
+  nothing is one more thing on the screen to read.
+- **It is not an attempt.** Starting over must not reach `learning.answered`, or
+  a child who tidies up is logged as a child who got it wrong.
+
+Engines whose entire state is one choice are exempt, and listed in that test:
+pressing a different button *is* starting over there.

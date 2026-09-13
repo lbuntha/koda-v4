@@ -441,6 +441,22 @@ export const SkipTrack: React.FC<ActivityProps<TrackParams>> = ({ params, koda, 
     clearNudge();
   }, [question, clearNudge]);
 
+  /*
+   * Put the work back the way this question started.
+   *
+   * The same lines the effect above runs when a new question arrives, called
+   * from a button instead. A wrong answer keeps the child on the same question,
+   * and without this the board they got wrong is still in front of them with no
+   * way back except undoing every move by hand.
+   */
+  const restart = (): void => {
+    if (!question) return;
+    setMade(0);
+    setTyped("");
+    clearNudge();
+  };
+
+
   if (!question) return null;
 
   const { mode, step, lineMax } = question;
@@ -768,6 +784,9 @@ export const SkipTrack: React.FC<ActivityProps<TrackParams>> = ({ params, koda, 
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
       hints={practising ? [] : trackHints(question, copy.kidTip, { made })}
+      onStartOver={
+        !round.feedback && (made !== 0 || typed !== "") ? restart : undefined
+      }
       iconName="footprints"
       iconTone="purple"
       tagLabels={tagLabelsFrom(koda)}

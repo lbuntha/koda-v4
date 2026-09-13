@@ -230,6 +230,21 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({ params, 
 
   useEffect(() => { setBuilt(false); setStep(0); nudge.clear(); }, [q.id, nudge.clear]);
 
+  /*
+   * Put the work back the way this question started.
+   *
+   * The same lines the effect above runs when a new question arrives, called
+   * from a button instead. A wrong answer keeps the child on the same question,
+   * and without this the board they got wrong is still in front of them with no
+   * way back except undoing every move by hand.
+   */
+  const restart = (): void => {
+    setBuilt(false);
+    setStep(0);
+    nudge.clear();
+  };
+
+
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
   const prompt = promptFor(q, copy.prompts?.default);
   const multi = q.mode === "multi_step";
@@ -261,6 +276,9 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({ params, 
     totalQuestions={totalQuestions} prompt={prompt} iconName="search" iconTone="cyan"
     tagLabels={tagLabelsFrom(koda)} nudge={nudge.message}
     hints={practising ? [] : storyHints(q, { answered: step, kidTip: copy.kidTip })}
+    onStartOver={
+      !round.feedback && (built || step > 0) ? restart : undefined
+    }
     onExit={koda.ui.exit} recommendation={nextStep}
     onReadAloud={practising ? undefined : () => { round.useSupport("audio_replay"); void koda.speech.say(`${q.sentence} ${q.question}`, speechRate(koda)); }}>
     <div className="space-y-4">

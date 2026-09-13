@@ -468,6 +468,21 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
     nudge.clear();
   }, [question.id, question.blanks]);
 
+  /*
+   * Put the work back the way this question started.
+   *
+   * The same lines the effect above runs when a new question arrives, called
+   * from a button instead. A wrong answer keeps the child on the same question,
+   * and without this the board they got wrong is still in front of them with no
+   * way back except undoing every move by hand.
+   */
+  const restart = (): void => {
+    setEntries({});
+    setActive(question.blanks[0] ?? null);
+    nudge.clear();
+  };
+
+
 
 
 
@@ -539,6 +554,9 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message}
       hints={practising ? [] : bondHints(question, { entries, kidTip: copy.kidTip })}
+      onStartOver={
+        !round.feedback && (Object.values(entries).some((v) => v !== "")) ? restart : undefined
+      }
       onExit={koda.ui.exit}
       onReadAloud={
         practising

@@ -551,6 +551,22 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
     nudge.clear();
   }, [question.id, question.from]);
 
+  /*
+   * Put the work back the way this question started.
+   *
+   * The same lines the effect above runs when a new question arrives, called
+   * from a button instead. A wrong answer keeps the child on the same question,
+   * and without this the board they got wrong is still in front of them with no
+   * way back except undoing every move by hand.
+   */
+  const restart = (): void => {
+    setAt(question.from);
+    setMade([]);
+    setEntry("");
+    nudge.clear();
+  };
+
+
 
   // Practice says nothing at all, on top of the family's own voice switch.
   const speaks = !practising && koda.config.isEnabled("audio_speech", true);
@@ -671,6 +687,9 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message}
       hints={practising ? [] : jumpHints(question, { at, made, entry, kidTip: copy.kidTip })}
+      onStartOver={
+        !round.feedback && (made.length > 0 || entry !== "" || at !== question.from) ? restart : undefined
+      }
       onExit={koda.ui.exit}
       onReadAloud={
         practising

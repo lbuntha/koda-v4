@@ -277,6 +277,22 @@ export const BlockExchange: React.FC<ActivityProps<BlockExchangeParams>> = ({ pa
 
   useEffect(() => { setHeld(q.start); setTaken(ZERO); setEntry(""); nudge.clear(); }, [q.id, q.start, nudge.clear]);
 
+  /*
+   * Put the work back the way this question started.
+   *
+   * The same lines the effect above runs when a new question arrives, called
+   * from a button instead. A wrong answer keeps the child on the same question,
+   * and without this the board they got wrong is still in front of them with no
+   * way back except undoing every move by hand.
+   */
+  const restart = (): void => {
+    setHeld(q.start);
+    setTaken(ZERO);
+    setEntry("");
+    nudge.clear();
+  };
+
+
   const badges = koda.config.isEnabled("counting_badges", true);
   const showsDifference = koda.config.isEnabled("running_difference_badge", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
@@ -347,6 +363,9 @@ export const BlockExchange: React.FC<ActivityProps<BlockExchangeParams>> = ({ pa
     totalQuestions={totalQuestions} prompt={prompt} iconName="boxes" iconTone="purple"
     tagLabels={tagLabelsFrom(koda)} nudge={nudge.message}
     hints={practising ? [] : blockHints(q, { held, taken, kidTip: copy.kidTip })}
+    onStartOver={
+      !round.feedback && (entry !== "" || JSON.stringify(held) !== JSON.stringify(q.start) || JSON.stringify(taken) !== JSON.stringify(ZERO)) ? restart : undefined
+    }
     onExit={koda.ui.exit} recommendation={nextStep}
     onReadAloud={practising ? undefined : () => { round.useSupport("audio_replay"); void koda.speech.say(prompt, speechRate(koda)); }}>
     <div className="space-y-4">

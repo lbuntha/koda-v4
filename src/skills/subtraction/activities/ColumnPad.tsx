@@ -172,6 +172,22 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({ params, ko
 
   useEffect(() => { setTop(q.top); setMarks({}); setWritten({}); nudge.clear(); }, [q.id, q.top, nudge.clear]);
 
+  /*
+   * Put the work back the way this question started.
+   *
+   * The same lines the effect above runs when a new question arrives, called
+   * from a button instead. A wrong answer keeps the child on the same question,
+   * and without this the board they got wrong is still in front of them with no
+   * way back except undoing every move by hand.
+   */
+  const restart = (): void => {
+    setTop(q.top);
+    setMarks({});
+    setWritten({});
+    nudge.clear();
+  };
+
+
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
   const prompt = promptFor(q, copy.prompts?.default);
   const width = q.answer.length;
@@ -227,6 +243,9 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({ params, ko
     totalQuestions={totalQuestions} prompt={prompt} iconName="layers" iconTone="indigo"
     tagLabels={tagLabelsFrom(koda)} nudge={nudge.message}
     hints={practising ? [] : columnHints(q, { top, filled, kidTip: copy.kidTip })}
+    onStartOver={
+      !round.feedback && (Object.keys(marks).length > 0 || Object.values(written).some((v) => v !== "") || JSON.stringify(top) !== JSON.stringify(q.top)) ? restart : undefined
+    }
     onExit={koda.ui.exit} recommendation={nextStep}
     onReadAloud={practising ? undefined : () => { round.useSupport("audio_replay"); void koda.speech.say(prompt, speechRate(koda)); }}>
     <div className="space-y-4">

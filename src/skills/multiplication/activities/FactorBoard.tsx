@@ -393,6 +393,25 @@ export const FactorBoard: React.FC<ActivityProps<FactorParams>> = ({ params, kod
     clearNudge();
   }, [question, clearNudge]);
 
+  /*
+   * Put the work back the way this question started.
+   *
+   * The same lines the effect above runs when a new question arrives, called
+   * from a button instead. A wrong answer keeps the child on the same question,
+   * and without this the board they got wrong is still in front of them with no
+   * way back except undoing every move by hand.
+   */
+  const restart = (): void => {
+    if (!question) return;
+    setGrouped(undefined);
+    setRewritten(false);
+    setPicked([]);
+    setTried([]);
+    setTyped("");
+    clearNudge();
+  };
+
+
   if (!question) return null;
 
   const { mode, a, b, c, value } = question;
@@ -763,6 +782,9 @@ export const FactorBoard: React.FC<ActivityProps<FactorParams>> = ({ params, kod
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
       hints={practising ? [] : factorHints(question, copy.kidTip, { grouped, rewritten, picked, tried })}
+      onStartOver={
+        !round.feedback && (grouped !== undefined || rewritten || picked.length > 0 || tried.length > 0 || typed !== "") ? restart : undefined
+      }
       iconName="gem"
       iconTone="indigo"
       tagLabels={tagLabelsFrom(koda)}

@@ -324,6 +324,24 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [question.id, question.values]);
 
+  /*
+   * Put the work back the way this question started.
+   *
+   * The same lines the effect above runs when a new question arrives, called
+   * from a button instead. A wrong answer keeps the child on the same question,
+   * and without this the board they got wrong is still in front of them with no
+   * way back except undoing every move by hand.
+   */
+  const restart = (): void => {
+    setChips(chipsFrom(question.values));
+    setHeld(null);
+    setStep(0);
+    setActive(0);
+    setEntries(Array(Math.max(0, question.values.length - 1)).fill(""));
+    nudge.clear();
+  };
+
+
   // Practice says nothing at all, on top of the family's own voice switch.
   const speaks = !practising && koda.config.isEnabled("audio_speech", true);
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
@@ -429,6 +447,9 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message}
       hints={practising ? [] : chainHints(question, { chips, step, kidTip: copy.kidTip })}
+      onStartOver={
+        !round.feedback && (step > 0 || held !== null || entries.some((e) => e !== "")) ? restart : undefined
+      }
       onExit={koda.ui.exit}
       onReadAloud={
         practising

@@ -411,6 +411,22 @@ export const AreaModel: React.FC<ActivityProps<AreaParams>> = ({ params, koda, o
     clearNudge();
   }, [question, clearNudge]);
 
+  /*
+   * Put the work back the way this question started.
+   *
+   * The same lines the effect above runs when a new question arrives, called
+   * from a button instead. A wrong answer keeps the child on the same question,
+   * and without this the board they got wrong is still in front of them with no
+   * way back except undoing every move by hand.
+   */
+  const restart = (): void => {
+    if (!question) return;
+    setFilled(question.parts.map(() => undefined));
+    setTarget(0);
+    clearNudge();
+  };
+
+
   if (!question) return null;
 
   const { mode, a, b, parts } = question;
@@ -713,6 +729,9 @@ export const AreaModel: React.FC<ActivityProps<AreaParams>> = ({ params, koda, o
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
       hints={practising ? [] : areaHints(question, copy.kidTip, { filled })}
+      onStartOver={
+        !round.feedback && (filled.some((f) => f !== undefined) || target !== 0) ? restart : undefined
+      }
       iconName="boxes"
       iconTone="emerald"
       tagLabels={tagLabelsFrom(koda)}

@@ -304,6 +304,26 @@ export const RemoveTray: React.FC<ActivityProps<RemoveTrayParams>> = ({ params, 
     nudge.clear();
   }, [q.id, q.minuend, finishing, nudge.clear]);
 
+  /*
+   * Put the work back the way this question started.
+   *
+   * The same lines the effect above runs when a new question arrives, called
+   * from a button instead. A wrong answer keeps the child on the same question,
+   * and without this the board they got wrong is still in front of them with no
+   * way back except undoing every move by hand.
+   */
+  const restart = (): void => {
+    finishing.cancel();
+    setRemoved([]);
+    setCounted([]);
+    setSelectedTop(undefined);
+    setPairs(0);
+    setCountValue(q.minuend);
+    setFingersUp(q.minuend);
+    nudge.clear();
+  };
+
+
   const speaks = !practising && koda.config.isEnabled("audio_speech", true);
   const badges = koda.config.isEnabled("counting_badges", true);
   const showsDifference = koda.config.isEnabled("running_difference_badge", true);
@@ -433,6 +453,9 @@ export const RemoveTray: React.FC<ActivityProps<RemoveTrayParams>> = ({ params, 
     totalQuestions={totalQuestions} prompt={prompt} iconName={ICONS[q.mode]} iconTone="purple"
     tagLabels={tagLabelsFrom(koda)} nudge={nudge.message}
     hints={practising ? [] : trayHints(q, { removed: removed.length, counted: counted.length, paired: pairs, countValue, fingersUp, kidTip: copy.kidTip })}
+    onStartOver={
+      !round.feedback && (removed.length > 0 || counted.length > 0 || pairs > 0 || selectedTop !== undefined) ? restart : undefined
+    }
     onExit={koda.ui.exit}
     onReadAloud={practising ? undefined : () => { round.useSupport("audio_replay"); void koda.speech.say(prompt, speechRate(koda)); }}
     recommendation={nextStep}

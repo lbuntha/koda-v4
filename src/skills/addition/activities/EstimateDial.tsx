@@ -317,6 +317,20 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [question.id]);
 
+  /*
+   * Put the work back the way this question started.
+   *
+   * The same lines the effect above runs when a new question arrives, called
+   * from a button instead. A wrong answer keeps the child on the same question,
+   * and without this the board they got wrong is still in front of them with no
+   * way back except undoing every move by hand.
+   */
+  const restart = (): void => {
+    setRounded([null, null]);
+    nudge.clear();
+  };
+
+
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
 
 
@@ -391,6 +405,9 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message}
       hints={practising ? [] : estimateHints(question, { rounded, kidTip: copy.kidTip })}
+      onStartOver={
+        !round.feedback && (rounded.some((r) => r !== null)) ? restart : undefined
+      }
       onExit={koda.ui.exit}
       onReadAloud={
         practising

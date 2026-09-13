@@ -341,6 +341,24 @@ export const ColumnPad: React.FC<ActivityProps<ColumnParams>> = ({ params, koda,
     clearNudge();
   }, [question, clearNudge]);
 
+  /*
+   * Put the work back the way this question started.
+   *
+   * The same lines the effect above runs when a new question arrives, called
+   * from a button instead. A wrong answer keeps the child on the same question,
+   * and without this the board they got wrong is still in front of them with no
+   * way back except undoing every move by hand.
+   */
+  const restart = (): void => {
+    if (!question) return;
+    setWritten(question.steps.map(() => undefined));
+    setChosen(undefined);
+    setTyped(["", "", ""]);
+    setActiveRow(0);
+    clearNudge();
+  };
+
+
   if (!question) return null;
 
   const { mode, a, b, steps, rows } = question;
@@ -623,6 +641,9 @@ export const ColumnPad: React.FC<ActivityProps<ColumnParams>> = ({ params, koda,
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
       hints={practising ? [] : columnHints(question, copy.kidTip, { done: nextStep, chosen })}
+      onStartOver={
+        !round.feedback && (written.some((w) => w !== undefined) || chosen !== undefined || typed.some((t) => t !== "")) ? restart : undefined
+      }
       iconName="layers"
       iconTone="indigo"
       tagLabels={tagLabelsFrom(koda)}

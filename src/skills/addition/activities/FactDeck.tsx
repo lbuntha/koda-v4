@@ -402,6 +402,22 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
     nudge.clear();
   }, [question.id]);
 
+  /*
+   * Put the work back the way this question started.
+   *
+   * The same lines the effect above runs when a new question arrives, called
+   * from a button instead. A wrong answer keeps the child on the same question,
+   * and without this the board they got wrong is still in front of them with no
+   * way back except undoing every move by hand.
+   */
+  const restart = (): void => {
+    setRevealed(false);
+    setEntry("");
+    setMembers({});
+    nudge.clear();
+  };
+
+
 
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
   /** A family may prefer four tiles to a pad. Read here, which is what makes it
@@ -512,6 +528,9 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message}
       hints={practising ? [] : factHints(question, { revealed, kidTip: copy.kidTip })}
+      onStartOver={
+        !round.feedback && (revealed || entry !== "" || Object.values(members).some((v) => v !== "")) ? restart : undefined
+      }
       onExit={koda.ui.exit}
       onReadAloud={
         practising

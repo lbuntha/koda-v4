@@ -225,6 +225,22 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
   });
   const q = round.question as FactQuestion;
   useEffect(() => { setHelperChosen(false); setEntry(""); setMembers({}); nudge.clear(); }, [q.id, nudge.clear]);
+
+  /*
+   * Put the work back the way this question started.
+   *
+   * The same lines the effect above runs when a new question arrives, called
+   * from a button instead. A wrong answer keeps the child on the same question,
+   * and without this the board they got wrong is still in front of them with no
+   * way back except undoing every move by hand.
+   */
+  const restart = (): void => {
+    setHelperChosen(false);
+    setEntry("");
+    setMembers({});
+    nudge.clear();
+  };
+
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
   const answerInput = koda.config.get<string>("answerInput", "choices");
   const prompt = promptFor(q, copy.prompts?.default);
@@ -259,6 +275,9 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
     totalQuestions={totalQuestions} prompt={prompt} iconName={q.mode === "family" ? "gem" : "zap"} iconTone="pink"
     tagLabels={tagLabelsFrom(koda)} nudge={nudge.message}
     hints={practising ? [] : factHints(q, { helperChosen, filled: Object.values(members).filter(Boolean).length, kidTip: copy.kidTip })}
+    onStartOver={
+      !round.feedback && (helperChosen || entry !== "" || Object.values(members).some((v) => v !== "")) ? restart : undefined
+    }
     onExit={koda.ui.exit} recommendation={nextStep}
     onReadAloud={practising ? undefined : () => { round.useSupport("audio_replay"); void koda.speech.say(prompt, speechRate(koda)); }}>
     <div className="space-y-4">
