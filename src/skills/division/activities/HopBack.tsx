@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Undo2 } from "lucide-react";
 
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
@@ -243,9 +244,10 @@ export const HopBack: React.FC<ActivityProps<LineParams>> = ({ params, koda, onC
               onClick={undoHop}
               disabled={landings.length === 0 || !!round.feedback}
               aria-label="Undo the last hop"
-              className="min-h-11 rounded-2xl bg-surface px-4 py-2 text-sm text-muted shadow-sm disabled:opacity-30"
+              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl bg-surface px-4 py-2 text-sm font-semibold text-muted shadow-sm disabled:opacity-30"
             >
-              ↩
+              <Undo2 className="h-4 w-4" aria-hidden="true" />
+              Undo
             </button>
           </div>
         )}

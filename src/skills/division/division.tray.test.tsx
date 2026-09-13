@@ -56,6 +56,39 @@ const dealAndAnswer = async (h: ActivityHarness): Promise<void> => {
   await h.press(String(onOnePlate));
 };
 
+describe("the undo control is drawn, not typed", () => {
+  it("puts an icon in the button rather than a character", async () => {
+    /*
+     * It was the character `↩`, which a phone renders from the emoji font: a
+     * blue-and-white picture in the middle of a muted grey tray. Nobody saw it
+     * on a laptop, where the same character comes from the text font and looks
+     * like a small arrow.
+     */
+    const h = renderActivity(skill.activities.share, { params: { question: { mode: "group_by_size" } } });
+    await h.press("Start a new group");
+    const undo = h.screen
+      .getAllByRole("button")
+      .filter((b) => /take one back/i.test(b.getAttribute("aria-label") ?? ""));
+    expect(undo.length, "no undo control on a group").toBeGreaterThan(0);
+    for (const button of undo) {
+      expect(button.querySelectorAll("svg").length, "undo has no icon").toBeGreaterThan(0);
+      expect(button.textContent ?? "", "undo still carries a glyph").not.toMatch(/[^\s]/);
+    }
+    h.unmount();
+  });
+
+  it("keeps the label a screen reader announces", async () => {
+    // An icon-only button says nothing without one. `buttons()` lists the
+    // enabled controls and undo starts disabled on an empty group, so the
+    // label is read off the DOM.
+    const h = renderActivity(skill.activities.share, { params: { question: { mode: "group_by_size" } } });
+    await h.press("Start a new group");
+    const labels = h.screen.getAllByRole("button").map((b) => b.getAttribute("aria-label"));
+    expect(labels).toContain("Take one back from group 1");
+    h.unmount();
+  });
+});
+
 describe("share_out — deal between a fixed number of plates", () => {
   it("fixes the plates and leaves the plate size to the child", () => {
     for (const q of questions("share_out")) {

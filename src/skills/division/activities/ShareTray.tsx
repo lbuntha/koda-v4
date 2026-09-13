@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Undo2 } from "lucide-react";
 
 import type { ActivityProps } from "../../types";
 import {
@@ -443,9 +444,9 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
                     onClick={() => takeFrom(i)}
                     disabled={count === 0 || !!round.feedback}
                     aria-label={`Take one back from group ${i + 1}`}
-                    className="min-h-11 min-w-11 rounded-xl px-3 text-sm text-muted disabled:opacity-30"
+                    className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl px-3 text-muted disabled:opacity-30"
                   >
-                    ↩
+                    <Undo2 className="h-4 w-4" aria-hidden="true" />
                   </button>
                 </div>
               ))}
@@ -484,9 +485,9 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
                   onClick={takeLeftover}
                   disabled={leftover === 0 || !!round.feedback}
                   aria-label="Take one back out of the leftover box"
-                  className="min-h-11 min-w-11 rounded-xl px-3 text-sm text-muted disabled:opacity-30"
+                  className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl px-3 text-muted disabled:opacity-30"
                 >
-                  ↩
+                  <Undo2 className="h-4 w-4" aria-hidden="true" />
                 </button>
               </div>
             ) : null}
