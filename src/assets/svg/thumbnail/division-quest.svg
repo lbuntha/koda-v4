@@ -9,14 +9,20 @@
     different from the three operations before it — every other card on the
     shelf comes out even.
 
+    The ground is the family's purple-black rather than a navy of its own, and
+    the title is set the way five of the six others set theirs. Multiplication
+    has no title, which is the one card this sat beside while being drawn — and
+    following the exception rather than the rule is how a shelf stops looking
+    like a shelf.
+
     The four colours are the skill's own and mean the same here as on screen:
     sky for what is being shared, violet for the groups it goes into, emerald
     for the answer, rose for what is left. No amber or yellow anywhere.
   -->
   <defs>
     <linearGradient id="divGround" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#1B2440"/>
-      <stop offset="100%" stop-color="#0B0F1F"/>
+      <stop offset="0%" stop-color="#251A46"/>
+      <stop offset="100%" stop-color="#100B24"/>
     </linearGradient>
     <linearGradient id="divCounter" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#7DD3FC"/>
@@ -30,52 +36,56 @@
       <stop offset="0%" stop-color="#6EE7B7"/>
       <stop offset="100%" stop-color="#059669"/>
     </linearGradient>
-    <radialGradient id="divGlow" cx="34%" cy="44%" r="62%">
-      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.28"/>
-      <stop offset="100%" stop-color="#38BDF8" stop-opacity="0"/>
+    <radialGradient id="divGlow" cx="34%" cy="48%" r="62%">
+      <stop offset="0%" stop-color="#8B5CF6" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0"/>
     </radialGradient>
   </defs>
 
   <rect width="400" height="200" fill="url(#divGround)"/>
-  <ellipse cx="140" cy="96" rx="152" ry="108" fill="url(#divGlow)"/>
+  <ellipse cx="138" cy="100" rx="152" ry="106" fill="url(#divGlow)"/>
+
+  <text x="28" y="34" font-family="ui-sans-serif, system-ui, sans-serif"
+        font-size="15" font-weight="700" letter-spacing="3.4" fill="#DDD6FE">DIVISION</text>
 
   <!-- Three plates, four on each. The equal share. -->
   <g>
     <g fill="none" stroke="#8B5CF6" stroke-width="2.5" opacity="0.85">
-      <rect x="28"  y="40" width="62" height="62" rx="14"/>
-      <rect x="100" y="40" width="62" height="62" rx="14"/>
-      <rect x="172" y="40" width="62" height="62" rx="14"/>
+      <rect x="28"  y="52" width="54" height="52" rx="12"/>
+      <rect x="88"  y="52" width="54" height="52" rx="12"/>
+      <rect x="148" y="52" width="54" height="52" rx="12"/>
     </g>
     <g fill="url(#divCounter)">
-      <circle cx="47"  cy="59" r="9"/><circle cx="71"  cy="59" r="9"/>
-      <circle cx="47"  cy="83" r="9"/><circle cx="71"  cy="83" r="9"/>
+      <circle cx="46"  cy="70" r="7.5"/><circle cx="64"  cy="70" r="7.5"/>
+      <circle cx="46"  cy="88" r="7.5"/><circle cx="64"  cy="88" r="7.5"/>
 
-      <circle cx="119" cy="59" r="9"/><circle cx="143" cy="59" r="9"/>
-      <circle cx="119" cy="83" r="9"/><circle cx="143" cy="83" r="9"/>
+      <circle cx="106" cy="70" r="7.5"/><circle cx="124" cy="70" r="7.5"/>
+      <circle cx="106" cy="88" r="7.5"/><circle cx="124" cy="88" r="7.5"/>
 
-      <circle cx="191" cy="59" r="9"/><circle cx="215" cy="59" r="9"/>
-      <circle cx="191" cy="83" r="9"/><circle cx="215" cy="83" r="9"/>
+      <circle cx="166" cy="70" r="7.5"/><circle cx="184" cy="70" r="7.5"/>
+      <circle cx="166" cy="88" r="7.5"/><circle cx="184" cy="88" r="7.5"/>
     </g>
   </g>
 
-  <!-- And the two that would not go round again. -->
+  <!-- And the two that would not go round again. The box is as wide as the
+       plates above it, so the label sits inside rather than across its edge. -->
   <g>
-    <rect x="28" y="122" width="134" height="46" rx="14" fill="none"
+    <rect x="28" y="122" width="174" height="40" rx="12" fill="none"
           stroke="#FB7185" stroke-width="2.5" stroke-dasharray="7 6" opacity="0.9"/>
     <g fill="url(#divLeft)">
-      <circle cx="60" cy="145" r="9"/>
-      <circle cx="88" cy="145" r="9"/>
+      <circle cx="52" cy="142" r="7.5"/>
+      <circle cx="76" cy="142" r="7.5"/>
     </g>
-    <text x="106" y="151" font-family="ui-sans-serif, system-ui, sans-serif"
-          font-size="13" font-weight="600" fill="#FDA4AF">left over</text>
+    <text x="96" y="147" font-family="ui-sans-serif, system-ui, sans-serif"
+          font-size="12.5" font-weight="600" fill="#FDA4AF">left over</text>
   </g>
 
   <!-- The sentence the picture writes. -->
   <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="700">
-    <text x="262" y="74" font-size="30" fill="#BAE6FD">14 ÷ 3</text>
-    <rect x="262" y="92" width="104" height="3" rx="1.5" fill="#334155"/>
-    <text x="262" y="134" font-size="34" fill="url(#divAnswer)">4</text>
-    <text x="292" y="134" font-size="22" fill="#64748B">r</text>
-    <text x="312" y="134" font-size="34" fill="url(#divLeft)">2</text>
+    <text x="236" y="88" font-size="28" fill="#BAE6FD">14 ÷ 3</text>
+    <rect x="236" y="104" width="106" height="3" rx="1.5" fill="#3B3260"/>
+    <text x="236" y="146" font-size="32" fill="url(#divAnswer)">4</text>
+    <text x="264" y="146" font-size="20" fill="#8B84A8">r</text>
+    <text x="283" y="146" font-size="32" fill="url(#divLeft)">2</text>
   </g>
 </svg>
