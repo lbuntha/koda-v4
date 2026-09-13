@@ -8,6 +8,7 @@ import { mixedHints } from "./activities/MixedBoard";
 import { addHints } from "./activities/AddStrip";
 import { multiplyHints } from "./activities/AreaGrid";
 import { divideHints } from "./activities/ShareOut";
+import { decimalHints } from "./activities/DecimalBridge";
 import { buildStripQuestion, explainStrip, type StripMode } from "./internal/data/fractionStrip";
 import { buildLineQuestion, explainLine, type LineMode } from "./internal/data/fractionLine";
 import { buildMillQuestion, explainMill, type MillMode } from "./internal/data/fractionEquivalence";
@@ -16,6 +17,7 @@ import { buildMixedQuestion, explainMixed, type MixedMode } from "./internal/dat
 import { buildAddQuestion, explainAdd, type AddMode } from "./internal/data/fractionAdd";
 import { buildMultiplyQuestion, explainMultiply, type MultiplyMode } from "./internal/data/fractionMultiply";
 import { buildDivideQuestion, explainDivide, type DivideMode } from "./internal/data/fractionDivide";
+import { buildDecimalQuestion, explainDecimal, type DecimalMode } from "./internal/data/fractionDecimal";
 import { skill } from ".";
 
 /**
@@ -99,6 +101,14 @@ function everything(): Rendered[] {
     for (let i = 0; i < 5; i += 1) {
       const q = buildDivideQuestion({ mode: m }, m, i);
       add("divide", m, divideHints(q), explainDivide(q, true), explainDivide(q, false), q.expected);
+    }
+  }
+  for (const m of [
+    "tenths", "hundredths", "by_dividing", "from_decimal", "percent", "three_names",
+  ] as DecimalMode[]) {
+    for (let i = 0; i < 5; i += 1) {
+      const q = buildDecimalQuestion({ mode: m }, m, i);
+      add("decimal", m, decimalHints(q), explainDecimal(q, true), explainDecimal(q, false), q.expected);
     }
   }
   return out;

@@ -9,6 +9,7 @@ import * as mixed from "./activities/MixedBoard";
 import * as add from "./activities/AddStrip";
 import * as multiply from "./activities/AreaGrid";
 import * as divide from "./activities/ShareOut";
+import * as decimal from "./activities/DecimalBridge";
 import { registerSkillVoice } from "../../lib/voiceClips";
 import audioManifest from "./audio/manifest.json";
 
@@ -102,6 +103,12 @@ export const skill: Skill = {
       name: "How Many Fit?",
       defaultParams: { mode: "measure", questionsPerRound: 5 },
       component: divide.ShareOut,
+    },
+    decimal: {
+      id: "decimal",
+      name: "One Number, Three Names",
+      defaultParams: { mode: "tenths", questionsPerRound: 5 },
+      component: decimal.DecimalBridge,
     },
   },
 };

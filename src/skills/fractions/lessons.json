@@ -1978,6 +1978,258 @@
         11,
         12
       ]
+    },
+    {
+      "id": "tenths",
+      "title": "Tenths, Two Ways",
+      "concept": "Tenths as Fractions and Decimals",
+      "conceptKey": "tenth-reader",
+      "requires": [
+        "fraction-notation-reader",
+        "place-value-builder"
+      ],
+      "activity": "fractions/decimal",
+      "iconName": "Circle",
+      "iconTone": "indigo",
+      "params": {
+        "level": 43,
+        "question": {
+          "mode": "tenths",
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Write tenths as a decimal, and see that the decimal point is a fraction in disguise.",
+          "stepByStep": [
+            "A strip cut into ten is tenths, and you already know how to name those.",
+            "The first place after the point counts tenths. That is all the point means.",
+            "So seven tenths is a seven in that first place: 0.7.",
+            "Same amount, same picture, different way of writing it down."
+          ],
+          "kidTip": "The decimal point does not make a new kind of number. It names the pieces by position.",
+          "audioPrompt": "Seven tenths goes into the first place after the point.",
+          "prompts": {
+            "default": "Write it as a decimal."
+          }
+        }
+      },
+      "standards": [
+        "CCSS.4.NF.C.6"
+      ],
+      "trajectoryLevel": "representations",
+      "ageBand": [
+        10,
+        12
+      ]
+    },
+    {
+      "id": "hundredths",
+      "title": "Hundredths",
+      "concept": "Hundredths as Fractions and Decimals",
+      "conceptKey": "hundredth-reader",
+      "requires": [
+        "tenth-reader",
+        "unitiser-hundred"
+      ],
+      "activity": "fractions/decimal",
+      "iconName": "Grid3x3",
+      "iconTone": "violet",
+      "params": {
+        "level": 44,
+        "question": {
+          "mode": "hundredths",
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Read and write hundredths in both names, using a hundred-square.",
+          "stepByStep": [
+            "A hundred squares, and some of them shaded. That is hundredths.",
+            "The second place after the point counts hundredths.",
+            "So fifty-eight hundredths uses both places: 0.58.",
+            "The first digit is still tenths. Five tenths and eight hundredths is the same thing."
+          ],
+          "kidTip": "Two places means hundredths. Count the places and you know the bottom number.",
+          "audioPrompt": "Two places after the point. Both digits are used.",
+          "prompts": {
+            "default": "Write it as a decimal."
+          }
+        }
+      },
+      "standards": [
+        "CCSS.4.NF.C.6"
+      ],
+      "trajectoryLevel": "representations",
+      "ageBand": [
+        10,
+        12
+      ]
+    },
+    {
+      "id": "fraction-to-decimal",
+      "title": "Divide to Get the Decimal",
+      "concept": "Converting a Fraction to a Decimal by Division",
+      "conceptKey": "fraction-decimal-converter",
+      "requires": [
+        "hundredth-reader",
+        "quotient-continuer"
+      ],
+      "activity": "fractions/decimal",
+      "iconName": "Divide",
+      "iconTone": "sky",
+      "params": {
+        "level": 45,
+        "question": {
+          "mode": "by_dividing",
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Turn any of these fractions into a decimal by dividing the top by the bottom.",
+          "stepByStep": [
+            "A fraction is a division that has not been done yet: the top shared between the bottom.",
+            "Do the division, carrying on past the point.",
+            "Three divided by four is nought point seven five.",
+            "These ones all stop. Some fractions do not, and those are a different lesson."
+          ],
+          "kidTip": "The line in a fraction is a division sign. It always was.",
+          "audioPrompt": "Divide the top by the bottom, and keep going past the point.",
+          "prompts": {
+            "default": "What is it as a decimal?"
+          }
+        }
+      },
+      "standards": [
+        "CCSS.5.NF.B.3"
+      ],
+      "trajectoryLevel": "representations",
+      "ageBand": [
+        11,
+        12
+      ]
+    },
+    {
+      "id": "decimal-to-fraction",
+      "title": "Decimal Back to a Fraction",
+      "concept": "Converting a Decimal to a Fraction in Simplest Form",
+      "conceptKey": "decimal-fraction-converter",
+      "requires": [
+        "hundredth-reader",
+        "simplest-form-finder"
+      ],
+      "activity": "fractions/decimal",
+      "iconName": "RefreshCw",
+      "iconTone": "emerald",
+      "params": {
+        "level": 46,
+        "question": {
+          "mode": "from_decimal",
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Write a decimal as a fraction and cut it down to its simplest form.",
+          "stepByStep": [
+            "Count the places after the point: one is tenths, two is hundredths.",
+            "That tells you the bottom number, and the digits are the top.",
+            "Nought point seven five is seventy-five hundredths.",
+            "Now cut it down: seventy-five hundredths is three quarters."
+          ],
+          "kidTip": "Count the places, write the fraction, then simplify. Three steps, every time.",
+          "audioPrompt": "Count the places after the point. That is the bottom number.",
+          "prompts": {
+            "default": "Write it as a fraction."
+          }
+        }
+      },
+      "standards": [
+        "CCSS.4.NF.C.6"
+      ],
+      "trajectoryLevel": "representations",
+      "ageBand": [
+        11,
+        12
+      ]
+    },
+    {
+      "id": "percent",
+      "title": "Per Hundred",
+      "concept": "Percent as Hundredths",
+      "conceptKey": "percent-reader",
+      "requires": [
+        "hundredth-reader"
+      ],
+      "activity": "fractions/decimal",
+      "iconName": "Percent",
+      "iconTone": "rose",
+      "params": {
+        "level": 47,
+        "question": {
+          "mode": "percent",
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Read a percentage as a number of hundredths, and write a fraction as a percentage.",
+          "stepByStep": [
+            "Percent means per hundred. The sign is short for 'out of a hundred'.",
+            "So write the fraction with a hundred underneath it.",
+            "Three quarters is seventy-five hundredths, which is seventy-five percent.",
+            "It is not new arithmetic. It is hundredths with a different sign after it."
+          ],
+          "kidTip": "Every percentage is a fraction with a hundred underneath. That is the whole idea.",
+          "audioPrompt": "Write it with a hundred underneath, then read the top number.",
+          "prompts": {
+            "default": "What percentage is it?"
+          }
+        }
+      },
+      "standards": [
+        "CCSS.6.RP.A.3.C"
+      ],
+      "trajectoryLevel": "representations",
+      "ageBand": [
+        11,
+        12
+      ]
+    },
+    {
+      "id": "three-names",
+      "title": "Three Names, One Number",
+      "concept": "Matching Fractions, Decimals and Percentages",
+      "conceptKey": "representation-matcher",
+      "requires": [
+        "percent-reader",
+        "fraction-decimal-converter",
+        "decimal-fraction-converter"
+      ],
+      "activity": "fractions/decimal",
+      "iconName": "Link",
+      "iconTone": "purple",
+      "params": {
+        "level": 48,
+        "question": {
+          "mode": "three_names",
+          "questionsPerRound": 6
+        },
+        "play": {
+          "targetObjective": "Match a fraction with its decimal and its percentage, and see that all three are one number.",
+          "stepByStep": [
+            "Start with the decimal: how many hundredths is it?",
+            "The percentage should be that same number of hundredths.",
+            "And the fraction should shade that many of the hundred squares.",
+            "If any one of them disagrees, the row is wrong."
+          ],
+          "kidTip": "Three quarters, nought point seven five, seventy-five percent. One amount, three names.",
+          "audioPrompt": "Which row is the same number written the other two ways?",
+          "prompts": {
+            "default": "Which row matches?"
+          }
+        }
+      },
+      "standards": [
+        "CCSS.6.RP.A.3.C"
+      ],
+      "trajectoryLevel": "representations",
+      "ageBand": [
+        11,
+        12
+      ]
     }
   ]
 }

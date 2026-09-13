@@ -430,3 +430,21 @@ Dividing, which is measuring for four of the five levels and sharing for one.
   no button could match. Most specific pattern first.
 - A hint may repeat the question's own numbers. `1/4 ÷ 1/2` has the answer
   `1/2`, and "how many 1/2 fit inside 1/4" is the question read back.
+
+### Phase 10 — `DecimalBridge`, levels 43–48
+
+Tenths, hundredths, dividing to get a decimal, back again, percent, and the
+three names side by side. 48 lessons, 326 tests.
+
+- **The picture lied at level 45.** `7/8` is `0.875`, and a hundred-square can
+  only shade 88 of its squares — the picture and the answer disagreed by half a
+  square. The dividing level draws its own denominator now; the hundred-square
+  is only used for fractions that actually divide a hundred.
+- **"23 100ths fills two places."** `ordinalWord` stopped at ninety-nine.
+  Hundredths and thousandths have names, and this level says them constantly.
+- Conversions are integer arithmetic with the point put in afterwards. Dividing
+  doubles and rounding would make the answer key wrong often enough to matter,
+  and `0.1 + 0.2` is the reason.
+- `1/3` throws rather than rounding. A level that drew it would be asking a
+  child to round without having taught rounding, and the answer key would be a
+  lie either way.

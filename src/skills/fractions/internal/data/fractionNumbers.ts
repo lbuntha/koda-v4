@@ -202,6 +202,10 @@ export function ordinalWord(n: number): string {
   const TENS = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
   const TENTHS = ["", "", "twentieth", "thirtieth", "fortieth", "fiftieth", "sixtieth", "seventieth", "eightieth", "ninetieth"];
   if (n < 20) return UNITS[n] ?? `${n}th`;
+  // Hundredths and thousandths have names too, and the decimal levels use them:
+  // "23 100ths fills two places" was on screen before this line existed.
+  if (n === 100) return "hundredth";
+  if (n === 1000) return "thousandth";
   if (n > 99) return `${n}th`;
   const tens = Math.floor(n / 10);
   const rest = n % 10;

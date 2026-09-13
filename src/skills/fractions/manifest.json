@@ -57,7 +57,13 @@
     "whole-divider",
     "fraction-sharer",
     "fraction-divider",
-    "reciprocal-reasoner"
+    "reciprocal-reasoner",
+    "tenth-reader",
+    "hundredth-reader",
+    "fraction-decimal-converter",
+    "decimal-fraction-converter",
+    "percent-reader",
+    "representation-matcher"
   ],
   "requires": [
     "counter",
