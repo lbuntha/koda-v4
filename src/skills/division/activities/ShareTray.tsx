@@ -571,3 +571,149 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
     </SkillRound>
   );
 };
+
+/* -------------------------------------------------------------------------- */
+/* On paper                                                                    */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The tray, drawn empty.
+ *
+ * A dealing question printed as its caption alone — "Share them all out" beside
+ * a blank line — is not a worksheet, which is why this engine reported itself
+ * unprintable for a whole release. What it needs is the *apparatus*: the
+ * counters to be shared, and the plates to share them onto, with nothing in them.
+ * The child does on paper exactly what they do on screen, and the sheet is the
+ * same lesson rather than a summary of it.
+ */
+export function printedFor(question: ShareQuestion): { text: string; answer: string } | null {
+  if (question.impossible) {
+    return { text: `Can ${question.dividend} be shared between 0 plates?`, answer: "No — there is nowhere to put them." };
+  }
+  switch (question.mode) {
+    case "which_meaning":
+      return {
+        text: `${question.story?.text ?? ""} What is the question asking for?   how many in each / how many groups`,
+        answer: question.unknown === "size" ? "how many in each" : "how many groups",
+      };
+    case "to_equation":
+      return {
+        text: `${question.story?.text ?? ""} Write the division sentence.`,
+        answer: question.expected,
+      };
+    case "group_by_size":
+      return {
+        text: `Ring groups of ${question.divisor}. How many groups?`,
+        answer: String(question.quotient),
+      };
+    case "see_leftover":
+      return {
+        text: `Share these between ${question.divisor} plates. How many each, and how many left over?`,
+        answer: `${question.quotient} each, ${question.remainder} left over`,
+      };
+    default:
+      return {
+        text: `Share these between ${question.divisor} plates. How many on each?`,
+        answer: String(question.quotient),
+      };
+  }
+}
+
+/** Counters in rows of ten, so a child can count them without losing their place. */
+const countersFigure = (total: number, y: number): React.ReactNode[] => {
+  const dots: React.ReactNode[] = [];
+  for (let i = 0; i < total; i += 1) {
+    dots.push(
+      <circle
+        key={i}
+        cx={10 + (i % 10) * 20}
+        cy={y + Math.floor(i / 10) * 20}
+        r={6}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+      />,
+    );
+  }
+  return dots;
+};
+
+export const figureFor = (question: ShareQuestion): React.ReactNode | null => {
+  // These two are complete in words; a picture would only restate the sentence.
+  if (question.mode === "which_meaning" || question.mode === "to_equation") return null;
+  if (question.impossible) return null;
+
+  const rows = Math.ceil(question.dividend / 10);
+  const pileHeight = Math.max(1, rows) * 20;
+  const plates = question.mode === "group_by_size" ? 0 : question.divisor;
+  const plateY = pileHeight + 16;
+  const plateW = Math.min(70, Math.floor(200 / Math.max(1, plates)) - 6);
+  const height = plateY + (plates > 0 ? 54 : 0) + (question.mode === "see_leftover" ? 44 : 0);
+
+  return (
+    <svg
+      viewBox={`0 0 220 ${height}`}
+      width={220}
+      height={height}
+      role="img"
+      aria-label={`${question.dividend} counters${plates ? ` and ${plates} empty plates` : ""}`}
+      className="text-slate-900"
+    >
+      {countersFigure(question.dividend, 10)}
+      {Array.from({ length: plates }, (_, i) => (
+        <rect
+          key={i}
+          x={4 + i * (plateW + 6)}
+          y={plateY}
+          width={plateW}
+          height={46}
+          rx={8}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.4"
+        />
+      ))}
+      {question.mode === "see_leftover" ? (
+        <>
+          <rect
+            x={4}
+            y={plateY + 54}
+            width={140}
+            height={34}
+            rx={8}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.2"
+            strokeDasharray="5 4"
+          />
+          <text x={12} y={plateY + 75} fontSize="11" fill="currentColor">
+            left over
+          </text>
+        </>
+      ) : null}
+    </svg>
+  );
+};
+
+export function methodFor(question: ShareQuestion): string[] {
+  switch (question.mode) {
+    case "group_by_size":
+      return [
+        "Ring the same number of them at a time, as the question says.",
+        "Keep going while there are enough left for a whole ring.",
+        "Count the rings, not the counters.",
+      ];
+    case "see_leftover":
+      return [
+        "Give one to each plate, then go round again.",
+        "Stop when there are not enough left to give one to every plate.",
+        "What is left over is not on a plate. Write it separately.",
+      ];
+    default:
+      return [
+        "Give one to each plate, then start again at the first.",
+        "Keep going until they are all shared out.",
+        "Count what is on one plate.",
+      ];
+  }
+}

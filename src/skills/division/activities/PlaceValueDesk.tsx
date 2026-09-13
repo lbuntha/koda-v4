@@ -240,7 +240,16 @@ export function printedFor(question: PlaceQuestion): { text: string; answer: str
 }
 
 export function methodFor(question: PlaceQuestion): string[] {
-  return question.parts.length > 1
+  /*
+   * Branch on the mode, not on the question.
+   *
+   * A sheet prints one method above all its questions, and this branched on
+   * `parts.length` — which varies between draws of the same lesson, so one
+   * sheet could describe two different techniques depending on which question
+   * happened to be drawn first.
+   */
+  const splitting = question.mode === "split_exact" || question.mode === "split_exchange";
+  return splitting
     ? [
         "Split the total into parts that each divide exactly.",
         "Divide each part on its own.",

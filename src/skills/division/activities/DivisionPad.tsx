@@ -353,7 +353,21 @@ export function printedFor(question: ColumnQuestion): { text: string; answer: st
 }
 
 export function methodFor(question: ColumnQuestion): string[] {
-  return question.divisor > 9
+  /*
+   * The mode decides, not the divisor.
+   *
+   * `decimal_tail` draws divisors either side of ten — 4 and 50 are both in its
+   * pool — so branching on `divisor > 9` gave one sheet the long-division
+   * method and another the short one, for the same lesson.
+   */
+  if (question.mode === "decimal_tail") {
+    return [
+      "Divide the whole part first and see what is left.",
+      "Put a point in the answer, and a zero after the total.",
+      "Carry on exactly as before: what was left becomes tenths.",
+    ];
+  }
+  return question.mode === "long_exact" || question.mode === "long_remainder"
     ? [
         "Guess how many fit into the first part, then check by multiplying.",
         "Take it away, and bring the next digit down.",

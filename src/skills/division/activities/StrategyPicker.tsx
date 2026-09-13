@@ -244,3 +244,33 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyParams>> = ({
 /** Kept for the worksheet adapter; the picker draws its own routes. */
 export const routeLabel = (id: string): string => ROUTES.find((r) => r.id === id)?.label ?? id;
 export const anyRoute = (): string => pick(ROUTES).id;
+
+/* -------------------------------------------------------------------------- */
+/* On paper                                                                    */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The one level with more than one right answer, printed as such.
+ *
+ * The sheet lists the routes offered and the key names *every* one that fits,
+ * because marking a child wrong for choosing the second valid route would teach
+ * the opposite of the lesson. No figure: the numbers are the whole question.
+ */
+export function printedFor(question: StrategyQuestion): { text: string; answer: string } | null {
+  const offered = question.offered.map((id, i) => `${"abcdef"[i]}) ${routeLabel(id)}`).join("   ");
+  return {
+    text: `${question.dividend} ÷ ${question.divisor}. Which way would you do it?   ${offered}`,
+    answer: question.fitting
+      .filter((id) => question.offered.includes(id))
+      .map((id) => routeLabel(id))
+      .join(" — or — "),
+  };
+}
+
+export function methodFor(): string[] {
+  return [
+    "Look at the numbers before you look at the choices.",
+    "Ask whether the divisor is one you can halve by, and whether every place divides.",
+    "More than one way can be right. Pick one that suits these numbers.",
+  ];
+}

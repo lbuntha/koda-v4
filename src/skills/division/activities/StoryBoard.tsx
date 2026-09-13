@@ -261,3 +261,110 @@ export const StoryBoard: React.FC<ActivityProps<StoryParams>> = ({ params, koda,
     </SkillRound>
   );
 };
+
+/* -------------------------------------------------------------------------- */
+/* On paper                                                                    */
+/* -------------------------------------------------------------------------- */
+
+export function printedFor(question: StoryQuestion): { text: string; answer: string } | null {
+  return { text: `${question.story} ${question.prompt}`, answer: String(question.answer) };
+}
+
+/**
+ * The bar, cut but not filled.
+ *
+ * The modelling is the work in these levels, so the sheet prints the bar with
+ * the cuts the story implies and nothing written in them. Where the story does
+ * not say how many parts there are — the comparison and the mean — it prints an
+ * uncut bar, or the values as columns, and the child decides.
+ */
+export const figureFor = (question: StoryQuestion): React.ReactNode | null => {
+  if (question.values) {
+    const max = Math.max(...question.values);
+    const w = question.values.length * 26 + 10;
+    return (
+      <svg
+        viewBox={`0 0 ${w} 70`}
+        width={w}
+        height={70}
+        role="img"
+        aria-label={`${question.values.length} columns to level off`}
+        className="text-slate-900"
+      >
+        {question.values.map((value, i) => (
+          <g key={i}>
+            <rect
+              x={8 + i * 26}
+              y={54 - (value / max) * 44}
+              width={18}
+              height={(value / max) * 44}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.3"
+            />
+            <text x={17 + i * 26} y={66} fontSize="9" textAnchor="middle" fill="currentColor">
+              {value}
+            </text>
+          </g>
+        ))}
+      </svg>
+    );
+  }
+
+  const parts = question.setsParts ? question.parts : 1;
+  const W = 240;
+  return (
+    <svg
+      viewBox="0 0 250 46"
+      width={250}
+      height={46}
+      role="img"
+      aria-label={`A bar in ${parts} part${parts === 1 ? "" : "s"}`}
+      className="text-slate-900"
+    >
+      <rect x={5} y={8} width={W} height={26} fill="none" stroke="currentColor" strokeWidth="1.5" />
+      {Array.from({ length: Math.max(0, parts - 1) }, (_, i) => (
+        <line
+          key={i}
+          x1={5 + ((i + 1) * W) / parts}
+          y1={8}
+          x2={5 + ((i + 1) * W) / parts}
+          y2={34}
+          stroke="currentColor"
+          strokeWidth="1.1"
+        />
+      ))}
+      <text x={5} y={44} fontSize="9" fill="currentColor">
+        {question.whole}
+      </text>
+    </svg>
+  );
+};
+
+export function methodFor(question: StoryQuestion): string[] {
+  switch (question.mode) {
+    case "times_comparison":
+      return [
+        "Draw both amounts as bars, one under the other.",
+        "Ask how many of the short bar fit along the long one.",
+        "That is how many times as many — not the difference.",
+      ];
+    case "multi_step":
+      return [
+        "Read the whole story before writing anything.",
+        "Take away what is kept back first.",
+        "Then share out what is left.",
+      ];
+    case "mean":
+      return [
+        "Add every value together.",
+        "Share the total between however many values there were.",
+      ];
+    default:
+      return [
+        "Draw the total as one bar.",
+        "Cut it into the parts the story describes.",
+        "One part, or the number of parts, is the answer.",
+      ];
+  }
+}

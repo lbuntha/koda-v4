@@ -244,9 +244,9 @@ export function printedFor(question: ChunkQuestion): { text: string; answer: str
   };
 }
 
-export function methodFor(question: ChunkQuestion): string[] {
+export function methodFor(): string[] {
   return [
-    `Take away a lot of ${question.divisor}s you are sure of — ten of them is ${question.divisor * 10}.`,
+    "Take away a lot you are sure of — ten of them is always easy to work out.",
     "Write down how many lots you took, and carry on with what is left.",
     "Stop when what is left is too small for another lot. Add up your lots.",
   ];

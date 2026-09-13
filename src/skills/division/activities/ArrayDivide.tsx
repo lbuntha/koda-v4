@@ -377,3 +377,127 @@ export const ArrayDivide: React.FC<ActivityProps<ArrayParams>> = ({
     </SkillRound>
   );
 };
+
+/* -------------------------------------------------------------------------- */
+/* On paper                                                                    */
+/* -------------------------------------------------------------------------- */
+
+export function printedFor(question: ArrayQuestion): { text: string; answer: string } | null {
+  switch (question.mode) {
+    case "two_divisions":
+      return {
+        text: `This array has ${question.divisor} rows of ${question.quotient}. Write both divisions it shows.`,
+        answer: `${question.dividend} ÷ ${question.divisor} = ${question.quotient} and ${question.dividend} ÷ ${question.quotient} = ${question.divisor}`,
+      };
+    case "partial_row":
+      return {
+        text: `Put all ${question.dividend} into rows of ${question.divisor}. How many full rows, and how many left?`,
+        answer: `${question.quotient} full rows, ${question.remainder} left over`,
+      };
+    default:
+      return {
+        text: `Put all ${question.dividend} into ${question.divisor} equal rows. How many in each row?`,
+        answer: String(question.quotient),
+      };
+  }
+}
+
+/**
+ * The grid, drawn empty — except where the question is to *read* one.
+ *
+ * `two_divisions` prints the array filled, because there the array is given and
+ * the sentences are the work. The other two print loose counters and an empty
+ * frame, because there the arranging is the work and a filled grid would do it
+ * for them.
+ */
+export const figureFor = (question: ArrayQuestion): React.ReactNode | null => {
+  if (question.mode === "two_divisions") {
+    const cell = 14;
+    const w = question.quotient * cell + 8;
+    const h = question.divisor * cell + 8;
+    return (
+      <svg
+        viewBox={`0 0 ${w} ${h}`}
+        width={w}
+        height={h}
+        role="img"
+        aria-label={`${question.divisor} rows of ${question.quotient}`}
+        className="text-slate-900"
+      >
+        {Array.from({ length: question.divisor }, (_, r) =>
+          Array.from({ length: question.quotient }, (_, c) => (
+            <rect
+              key={`${r}-${c}`}
+              x={4 + c * cell}
+              y={4 + r * cell}
+              width={cell - 3}
+              height={cell - 3}
+              rx={2}
+              fill="currentColor"
+              opacity={0.75}
+            />
+          )),
+        )}
+      </svg>
+    );
+  }
+
+  const perRow = 10;
+  const rows = Math.ceil(question.dividend / perRow);
+  const pile = rows * 18;
+  const height = pile + 74;
+  return (
+    <svg
+      viewBox={`0 0 220 ${height}`}
+      width={220}
+      height={height}
+      role="img"
+      aria-label={`${question.dividend} counters and an empty frame`}
+      className="text-slate-900"
+    >
+      {Array.from({ length: question.dividend }, (_, i) => (
+        <rect
+          key={i}
+          x={6 + (i % perRow) * 18}
+          y={6 + Math.floor(i / perRow) * 18}
+          width={12}
+          height={12}
+          rx={2}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.3"
+        />
+      ))}
+      <rect
+        x={6}
+        y={pile + 16}
+        width={200}
+        height={50}
+        rx={6}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeDasharray="5 4"
+      />
+      <text x={12} y={pile + 36} fontSize="10" fill="currentColor">
+        {question.mode === "partial_row"
+          ? `rows of ${question.divisor}`
+          : `${question.divisor} equal rows`}
+      </text>
+    </svg>
+  );
+};
+
+export function methodFor(question: ArrayQuestion): string[] {
+  return question.mode === "partial_row"
+    ? [
+        "Draw rows of the size the question names, filling each before starting the next.",
+        "Count only the rows that are completely full.",
+        "The short row at the end is what is left over.",
+      ]
+    : [
+        "Make the number of rows the question asks for.",
+        "Share the counters between them so the rows are all the same length.",
+        "Count along one row.",
+      ];
+}

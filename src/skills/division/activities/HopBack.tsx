@@ -264,3 +264,92 @@ export const HopBack: React.FC<ActivityProps<LineParams>> = ({ params, koda, onC
     </SkillRound>
   );
 };
+
+/* -------------------------------------------------------------------------- */
+/* On paper                                                                    */
+/* -------------------------------------------------------------------------- */
+
+export function printedFor(question: LineQuestion): { text: string; answer: string } | null {
+  switch (question.mode) {
+    case "count_hops":
+      return {
+        text: `Each hop is ${question.divisor}. How many hops are drawn?`,
+        answer: String(question.quotient),
+      };
+    case "forward_to_total":
+      return {
+        text: `Count on from 0 in ${question.divisor}s to ${question.dividend}. How many hops?`,
+        answer: String(question.quotient),
+      };
+    default:
+      return {
+        text: `Start at ${question.dividend} and hop back ${question.divisor} at a time. How many hops to reach 0?`,
+        answer: String(question.quotient),
+      };
+  }
+}
+
+/**
+ * The line, with its ticks and neither end filled in.
+ *
+ * Ticks sit at every multiple of the divisor because that is what a hop lands
+ * on — printing a line ruled in ones would be a different, harder task than the
+ * one on screen. Only the two ends are labelled; the landings in between are
+ * what the child is working out.
+ */
+export const figureFor = (question: LineQuestion): React.ReactNode | null => {
+  const stops = question.quotient;
+  const W = 280;
+  const at = (i: number) => (i / Math.max(1, stops)) * W;
+
+  return (
+    <svg
+      viewBox="-16 0 312 40"
+      width={312}
+      height={40}
+      role="img"
+      aria-label={`Number line from 0 to ${question.dividend} in steps of ${question.divisor}`}
+      className="text-slate-900"
+    >
+      <line x1={0} y1={16} x2={W} y2={16} stroke="currentColor" strokeWidth="1.5" />
+      {Array.from({ length: stops + 1 }, (_, i) => (
+        <line
+          key={i}
+          x1={at(i)}
+          y1={i === 0 || i === stops ? 8 : 11}
+          x2={at(i)}
+          y2={22}
+          stroke="currentColor"
+          strokeWidth={i === 0 || i === stops ? 2.2 : 1.2}
+        />
+      ))}
+      <text x={at(0)} y={35} fontSize="11" textAnchor="middle" fill="currentColor">
+        0
+      </text>
+      <text x={at(stops)} y={35} fontSize="11" textAnchor="middle" fill="currentColor">
+        {question.dividend}
+      </text>
+    </svg>
+  );
+};
+
+export function methodFor(question: LineQuestion): string[] {
+  /*
+   * No number from the question.
+   *
+   * A sheet prints one method for all twenty questions, taken from the first
+   * one drawn — so "jump back 7 each time" is wrong for the nineteen that hop
+   * by something else. It said exactly that until somebody printed one.
+   */
+  return question.direction === "back"
+    ? [
+        "Start at the total and jump back by the same amount each time.",
+        "Keep going until you land exactly on zero.",
+        "Count the jumps, not the numbers you land on.",
+      ]
+    : [
+        "Start at zero and count on by the same amount each time.",
+        "Stop when you land exactly on the total.",
+        "The answer is how many times you counted on.",
+      ];
+}

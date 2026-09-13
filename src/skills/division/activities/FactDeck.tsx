@@ -342,11 +342,77 @@ export const FactDeck: React.FC<ActivityProps<FactParams>> = ({ params, koda, on
  * what it is asking.
  */
 export function printedFor(question: FactQuestion): { text: string; answer: string } | null {
-  if (question.mode === "family" || question.mode === "table_divide") return null;
+  /*
+   * These two used to report themselves unprintable, and both were wrong about
+   * it. "Write the four facts" is a better question on paper than on screen —
+   * four blank lines instead of seven tick boxes — and the table row prints as
+   * a figure. A lesson that cannot print is a real answer; a lesson that has
+   * not been thought about is not.
+   */
+  if (question.mode === "family") {
+    return {
+      text: `Write the four facts that use ${question.divisor}, ${question.quotient} and ${question.dividend}.`,
+      answer: (question.trueEquations ?? []).join(",  "),
+    };
+  }
+  if (question.mode === "table_divide") {
+    return {
+      text: `Find ${question.dividend} in the ${question.divisor} times table. Which column is it in?`,
+      answer: String(question.quotient),
+    };
+  }
   return { text: `${question.dividend} ÷ ${question.divisor} =`, answer: String(question.quotient) };
 }
 
+/** Only the table lesson draws anything; the rest are written questions. */
+export const figureFor = (question: FactQuestion): React.ReactNode | null => {
+  if (question.mode !== "table_divide" || !question.row) return null;
+  const cell = 26;
+  const w = question.row.length * cell + 8;
+  return (
+    <svg
+      viewBox={`0 0 ${w} 44`}
+      width={w}
+      height={44}
+      role="img"
+      aria-label={`The ${question.divisor} times table row`}
+      className="text-slate-900"
+    >
+      {question.row.map((value, i) => (
+        <g key={value}>
+          <text x={4 + i * cell + cell / 2} y={12} fontSize="8" textAnchor="middle" fill="currentColor">
+            {i + 1}
+          </text>
+          <rect
+            x={4 + i * cell}
+            y={16}
+            width={cell - 3}
+            height={20}
+            rx={3}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.1"
+          />
+          <text x={4 + i * cell + (cell - 3) / 2} y={30} fontSize="10" textAnchor="middle" fill="currentColor">
+            {value}
+          </text>
+        </g>
+      ))}
+    </svg>
+  );
+};
+
 export function methodFor(question: FactQuestion): string[] {
+  if (question.mode === "family") {
+    return [
+      "The biggest of the three numbers is the total.",
+      "The other two multiply to make it, in either order.",
+      "The total divided by one of them gives the other.",
+    ];
+  }
+  if (question.mode === "table_divide") {
+    return ["Run along the row until you find the total.", "Read the column number above it."];
+  }
   return question.mode === "repeated_halving"
     ? ["Halve the number.", "Halve it again — and once more if you are dividing by 8."]
     : [
