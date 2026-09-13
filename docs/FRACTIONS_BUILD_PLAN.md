@@ -560,3 +560,47 @@ findings on the first run:
 
 Final: **69 lessons, 12 engines, 509 tests in the skill, 3448 across the repo**,
 every lesson printable, placed and seeded.
+
+
+---
+
+## 9. Where it ended up
+
+**69 lessons, 12 engines, ~58 modes, 509 tests in the skill.** Every lesson
+prints, every lesson is placed in the course, the skill is seeded and registered,
+and the refusals are scripted for recording. Nothing is pushed: the branch is
+local for testing first.
+
+### The five questions from §7, answered by building it
+
+1. **Circles.** Kept, but only where a lesson names them — `partitionsFor`
+   refuses a circle it cannot cut into visibly equal parts, so sevenths never
+   reach one. Bars do the rest of the work.
+2. **Level 27 shows a child a wrong answer.** Kept, and it turned out to be the
+   right call twice over: the same shape is now used at level 50 (could that be
+   right?) and on the printed sheet, where the child writes *why* it is wrong in
+   their own hand. A misconception nobody states is never examined.
+3. **Decimals here, or their own skill?** Here. Levels 43–48 lean entirely on
+   hundredths being a fraction, and the hundred-square in level 44 is the same
+   picture as level 6's set. Splitting them would repeat the apparatus and lose
+   the argument. Percent stays too, as hundredths renamed.
+4. **Percent.** In, at level 47, and only as hundredths — no percent arithmetic.
+5. **69 lessons, or cut at 32?** 69. The cut at 32 would have stopped exactly
+   where fractions start being useful, and levels 33–57 are where most children
+   are actually lost. The practice block makes the length survivable.
+
+### What this build would tell the next one
+
+- A *test that passes on a lie* is worse than no test. The coverage test scanned
+  every file in the folder, so naming a mode anywhere satisfied it; the
+  typecheck aborted before checking anything and printed nothing. Both looked
+  green for days.
+- Drive the round from what is **on the screen**, not from the question object.
+  Three real defects — two spellings of one answer, a level serving another
+  level's question, an unfair mark — were only visible to a test that read the
+  prompt and worked it out.
+- Every generator wants a **probe** before its engine exists: two hundred draws
+  per mode, checked against the quantities. Every one of the arithmetic bugs in
+  this build was caught that way, in seconds, before any UI existed.
+- When a child can be right in two ways, **accept both**. `9/7` and `1 2/7`,
+  `6/12` and `1/2`. The exception is a level whose subject is the spelling.
