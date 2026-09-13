@@ -179,7 +179,7 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceParams>> = ({
     >
       <div className="mx-auto flex w-full max-w-xl flex-col gap-3">
         {question.parts.length > 1 && scaffoldEnabled && !practising ? (
-          <p className="text-center text-sm text-ink-soft">
+          <p className="text-center text-sm text-muted">
             {question.placeSplitWorks
               ? "Each place divides on its own."
               : `The digits do not split here. ${question.parts.join(" and ")} do.`}
@@ -192,13 +192,13 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceParams>> = ({
               <span className="min-w-24 text-right font-semibold">
                 {part} ÷ {question.divisor}
               </span>
-              <span className="text-ink-soft">=</span>
+              <span className="text-muted">=</span>
               <button
                 type="button"
                 onClick={() => setSlot(i)}
                 aria-label={`Answer for ${part} divided by ${question.divisor}: ${entries[i] || "empty"}`}
                 className={`min-h-11 min-w-16 rounded-xl border-2 px-3 py-1 font-bold ${
-                  slot === i ? "border-emerald-500 bg-surface" : "border-ink-soft/30 bg-surface"
+                  slot === i ? "border-emerald-500 bg-surface" : "border-line/30 bg-surface"
                 }`}
               >
                 {entries[i] || " "}

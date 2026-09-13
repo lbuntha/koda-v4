@@ -55,7 +55,7 @@ export const NumberPad: React.FC<NumberPadProps> = ({
         onClick={onBackspace}
         disabled={disabled}
         aria-label="Delete the last digit"
-        className="min-h-11 flex-1 rounded-xl bg-surface py-2 text-base text-ink-soft shadow-sm disabled:opacity-30"
+        className="min-h-11 flex-1 rounded-xl bg-surface py-2 text-base text-muted shadow-sm disabled:opacity-30"
       >
         ⌫
       </button>

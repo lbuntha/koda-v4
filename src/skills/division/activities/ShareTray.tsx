@@ -408,7 +408,7 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
                 <Counter key={i} tone={question.tone} small={small} />
               ))}
               {pile === 0 ? (
-                <span className="text-sm text-ink-soft">The pile is empty.</span>
+                <span className="text-sm text-muted">The pile is empty.</span>
               ) : null}
             </div>
 
@@ -420,21 +420,21 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
                     onClick={() => addTo(i)}
                     disabled={!!round.feedback}
                     aria-label={`Group ${i + 1}, holding ${count}. Add one.`}
-                    className="flex min-h-16 min-w-16 max-w-24 flex-wrap content-start items-start justify-center gap-1 rounded-2xl border-2 border-dashed border-ink-soft/40 bg-surface p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                    className="flex min-h-16 min-w-16 max-w-24 flex-wrap content-start items-start justify-center gap-1 rounded-2xl border-2 border-dashed border-line/40 bg-surface p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                   >
                     {Array.from({ length: count }, (_, j) => (
                       <Counter key={j} tone={question.tone} small={small} />
                     ))}
                   </button>
                   {badgesEnabled ? (
-                    <span className="text-xs font-semibold text-ink-soft">{count}</span>
+                    <span className="text-xs font-semibold text-muted">{count}</span>
                   ) : null}
                   <button
                     type="button"
                     onClick={() => takeFrom(i)}
                     disabled={count === 0 || !!round.feedback}
                     aria-label={`Take one back from group ${i + 1}`}
-                    className="min-h-11 min-w-11 rounded-xl px-3 text-sm text-ink-soft disabled:opacity-30"
+                    className="min-h-11 min-w-11 rounded-xl px-3 text-sm text-muted disabled:opacity-30"
                   >
                     ↩
                   </button>
@@ -467,7 +467,7 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
                     <Counter key={j} tone={question.tone} small={small} />
                   ))}
                   {leftover === 0 ? (
-                    <span className="text-sm text-ink-soft">Left over</span>
+                    <span className="text-sm text-muted">Left over</span>
                   ) : null}
                 </button>
                 <button
@@ -475,7 +475,7 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
                   onClick={takeLeftover}
                   disabled={leftover === 0 || !!round.feedback}
                   aria-label="Take one back out of the leftover box"
-                  className="min-h-11 min-w-11 rounded-xl px-3 text-sm text-ink-soft disabled:opacity-30"
+                  className="min-h-11 min-w-11 rounded-xl px-3 text-sm text-muted disabled:opacity-30"
                 >
                   ↩
                 </button>
@@ -483,7 +483,7 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
             ) : null}
 
             {refused ? (
-              <p role="status" className="text-center text-sm text-ink-soft">
+              <p role="status" className="text-center text-sm text-muted">
                 {REFUSALS[refused]}
               </p>
             ) : null}
@@ -506,7 +506,7 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
 
         {question.impossible ? (
           <div className="flex flex-col gap-3">
-            <p className="text-center text-sm text-ink-soft">There are no plates.</p>
+            <p className="text-center text-sm text-muted">There are no plates.</p>
             <div className="flex flex-wrap justify-center gap-3">
               {choices.map((value) => (
                 <button

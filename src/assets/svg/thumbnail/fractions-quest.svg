@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 400 200">
+  <!--
+    Fractions' card: one bar cut into quarters with three of them shaded, and
+    the same amount again underneath cut into eighths.
+
+    Two bars rather than one, because the claim this skill is built on is that
+    3/4 and 6/8 are the *same amount* with two names — and a single shaded bar
+    says nothing about that. The two shaded regions end at the same place, which
+    is the whole argument, drawn.
+
+    Bars rather than a pie, and deliberately: a circle in sevenths has parts a
+    child can see are unequal, and this card sits next to five others that have
+    to look like they belong on the same shelf rather than like a clipart pie.
+
+    Title set the way five of the six others set theirs — division's card was
+    drawn beside the one sibling that has none, and copied the exception.
+
+    Colours are the skill's own: sky for the whole, violet for the parts taken,
+    emerald for the answer. No amber or yellow anywhere.
+  -->
+  <defs>
+    <linearGradient id="frGround" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#251A46"/>
+      <stop offset="100%" stop-color="#100B24"/>
+    </linearGradient>
+    <linearGradient id="frTaken" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C4B5FD"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="frEqual" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6EE7B7"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <radialGradient id="frGlow" cx="36%" cy="50%" r="62%">
+      <stop offset="0%" stop-color="#8B5CF6" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="400" height="200" fill="url(#frGround)"/>
+  <ellipse cx="140" cy="100" rx="152" ry="106" fill="url(#frGlow)"/>
+
+  <text x="28" y="34" font-family="ui-sans-serif, system-ui, sans-serif"
+        font-size="15" font-weight="700" letter-spacing="3.4" fill="#DDD6FE">FRACTIONS</text>
+
+  <!-- Three quarters. -->
+  <g>
+    <rect x="28" y="54" width="180" height="34" rx="6" fill="none" stroke="#7DD3FC" stroke-width="2"/>
+    <rect x="28" y="54" width="135" height="34" rx="6" fill="url(#frTaken)"/>
+    <g stroke="#0F172A" stroke-width="2" opacity="0.55">
+      <line x1="73" y1="54" x2="73" y2="88"/>
+      <line x1="118" y1="54" x2="118" y2="88"/>
+      <line x1="163" y1="54" x2="163" y2="88"/>
+    </g>
+  </g>
+
+  <!-- The same amount, in eighths. The shading stops in the same place. -->
+  <g>
+    <rect x="28" y="104" width="180" height="34" rx="6" fill="none" stroke="#7DD3FC" stroke-width="2"/>
+    <rect x="28" y="104" width="135" height="34" rx="6" fill="url(#frTaken)" opacity="0.85"/>
+    <g stroke="#0F172A" stroke-width="1.6" opacity="0.55">
+      <line x1="50.5" y1="104" x2="50.5" y2="138"/>
+      <line x1="73" y1="104" x2="73" y2="138"/>
+      <line x1="95.5" y1="104" x2="95.5" y2="138"/>
+      <line x1="118" y1="104" x2="118" y2="138"/>
+      <line x1="140.5" y1="104" x2="140.5" y2="138"/>
+      <line x1="163" y1="104" x2="163" y2="138"/>
+      <line x1="185.5" y1="104" x2="185.5" y2="138"/>
+    </g>
+  </g>
+
+  <!-- The line that says the two bars stop together. -->
+  <line x1="163" y1="48" x2="163" y2="150" stroke="#6EE7B7" stroke-width="1.6" stroke-dasharray="4 4" opacity="0.75"/>
+
+  <!-- The claim the picture makes. -->
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="700" fill="#E9D5FF">
+    <text x="240" y="72" font-size="26" text-anchor="middle">3</text>
+    <rect x="224" y="80" width="32" height="3" rx="1.5" fill="#8B84A8"/>
+    <text x="240" y="108" font-size="26" text-anchor="middle">4</text>
+
+    <text x="282" y="92" font-size="24" fill="url(#frEqual)">=</text>
+
+    <text x="326" y="72" font-size="26" text-anchor="middle">6</text>
+    <rect x="310" y="80" width="32" height="3" rx="1.5" fill="#8B84A8"/>
+    <text x="326" y="108" font-size="26" text-anchor="middle">8</text>
+  </g>
+  <text x="224" y="140" font-family="ui-sans-serif, system-ui, sans-serif"
+        font-size="11" font-weight="600" fill="#A5B4FC">same amount, two names</text>
+</svg>

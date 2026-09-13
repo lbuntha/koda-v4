@@ -284,7 +284,7 @@ export const DivisionPad: React.FC<ActivityProps<ColumnParams>> = ({ params, kod
             </span>
           </div>
           <div className="flex items-start">
-            <span className="pr-1 text-ink-soft">{question.divisor}</span>
+            <span className="pr-1 text-muted">{question.divisor}</span>
             <span className="border-l-2 border-ink px-1 pt-1">
               {question.dividendDigits.map((value, i) => (
                 <span key={i} className="relative inline-block min-w-7 text-center text-ink">
@@ -298,20 +298,20 @@ export const DivisionPad: React.FC<ActivityProps<ColumnParams>> = ({ params, kod
                   {value}
                 </span>
               ))}
-              {question.hasDecimal ? <span className="text-ink-soft">.0</span> : null}
+              {question.hasDecimal ? <span className="text-muted">.0</span> : null}
             </span>
           </div>
         </div>
 
         {working && scaffoldEnabled && !practising ? (
-          <p className="text-center text-sm text-ink-soft" data-testid="working">
+          <p className="text-center text-sm text-muted" data-testid="working">
             How many {question.divisor}s in {working.working}?
           </p>
         ) : null}
 
         {question.wantsRemainder && wholeDone ? (
           <div className="flex items-center justify-center gap-2 text-lg">
-            <span className="text-ink-soft">left over</span>
+            <span className="text-muted">left over</span>
             <span
               data-testid="remainder-slot"
               aria-label={`Left over: ${remainder || "empty"}`}
@@ -323,7 +323,7 @@ export const DivisionPad: React.FC<ActivityProps<ColumnParams>> = ({ params, kod
         ) : null}
 
         {refused ? (
-          <p role="status" className="text-center text-sm text-ink-soft">
+          <p role="status" className="text-center text-sm text-muted">
             {DIGIT_REFUSALS[refused]}
           </p>
         ) : null}
@@ -337,7 +337,7 @@ export const DivisionPad: React.FC<ActivityProps<ColumnParams>> = ({ params, kod
         />
 
         {leftOver > 0 && !question.wantsRemainder && !question.hasDecimal && wholeDone ? (
-          <p className="text-center text-xs text-ink-soft">Something is left over — check your digits.</p>
+          <p className="text-center text-xs text-muted">Something is left over — check your digits.</p>
         ) : null}
       </div>
     </SkillRound>

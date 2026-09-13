@@ -1,0 +1,86 @@
+{
+  "id": "fractions",
+  "name": "Fractions",
+  "version": "0.1.0",
+  "description": "A fraction is one number, made of equal parts of a whole somebody named — and every way of using one follows from that.",
+  "category": "core",
+  "author": "Koda Math Lab",
+  "iconName": "PieChart",
+  "tagline": "Equal parts, and what you can do with them.",
+  "thumbnail": "fractions-quest",
+  "status": "draft",
+  "audience": {
+    "ages": [
+      8,
+      12
+    ],
+    "category": "fractions"
+  },
+  "teaches": [
+    "equal-part-checker",
+    "unit-fraction-namer",
+    "whole-namer",
+    "unit-fraction-builder",
+    "fraction-notation-reader",
+    "set-fractioner",
+    "fraction-line-placer",
+    "fraction-line-reader",
+    "whole-completer",
+    "improper-reader"
+  ],
+  "requires": [
+    "counter",
+    "comparer",
+    "part-whole-decomposer",
+    "equal-grouper",
+    "place-value-builder",
+    "unitiser-ten",
+    "unitiser-hundred",
+    "multiplicative-commutativity",
+    "column-multiplier",
+    "equal-sharer",
+    "measurer-divider",
+    "halver",
+    "array-divider",
+    "division-remainder-reader",
+    "remainder-interpreter",
+    "short-divider",
+    "factor-finder",
+    "common-factor-finder",
+    "prime-factoriser",
+    "place-value-scaler",
+    "quotient-continuer"
+  ],
+  "features": [
+    {
+      "id": "audio_speech",
+      "name": "Spoken voice",
+      "description": "Speaks hints and says why the strip will not take an answer yet. Questions are never read aloud — this skill is for readers.",
+      "isEnabled": true,
+      "tag": "Audio"
+    },
+    {
+      "id": "sound_chimes",
+      "name": "Sound chimes",
+      "description": "Plays a sound as a part is shaded and when an answer is checked.",
+      "isEnabled": true,
+      "tag": "Audio"
+    },
+    {
+      "id": "haptic_feedback",
+      "name": "Haptic vibration",
+      "description": "Adds a small vibration to shading a part and to checking an answer.",
+      "isEnabled": true,
+      "tag": "Haptic"
+    },
+    {
+      "id": "part_labels",
+      "name": "Part labels",
+      "description": "Writes what one part is worth under the picture, so the pieces name themselves.",
+      "isEnabled": true,
+      "tag": "Cognitive"
+    }
+  ],
+  "settings": {},
+  "settingsSchema": []
+}

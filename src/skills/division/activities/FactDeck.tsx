@@ -246,7 +246,7 @@ export const FactDeck: React.FC<ActivityProps<FactParams>> = ({ params, koda, on
               <div className="flex flex-col gap-1 overflow-x-auto rounded-2xl bg-surface p-3">
                 <div className="flex gap-1">
                   {(question.row ?? []).map((_, i) => (
-                    <span key={i} className="min-w-10 text-center text-xs text-ink-soft">
+                    <span key={i} className="min-w-10 text-center text-xs text-muted">
                       {i + 1}
                     </span>
                   ))}
@@ -262,7 +262,7 @@ export const FactDeck: React.FC<ActivityProps<FactParams>> = ({ params, koda, on
                       className={`min-h-11 min-w-10 rounded-lg px-1 text-sm font-semibold shadow-sm ${
                         found === value && value === question.dividend
                           ? "bg-emerald-500 text-white"
-                          : "bg-surface-alt text-ink"
+                          : "bg-surface-muted text-ink"
                       }`}
                     >
                       {value}
@@ -273,13 +273,13 @@ export const FactDeck: React.FC<ActivityProps<FactParams>> = ({ params, koda, on
             ) : null}
 
             {scaffoldEnabled && !practising && question.mode !== "table_divide" ? (
-              <p className="rounded-2xl border border-violet-400/40 px-4 py-2 text-center text-base text-ink-soft">
+              <p className="rounded-2xl border border-violet-400/40 px-4 py-2 text-center text-base text-muted">
                 {question.helper}
               </p>
             ) : null}
 
             {question.chain && helper === null && scaffoldEnabled && !practising ? (
-              <div className="flex flex-col items-center gap-1 text-sm text-ink-soft">
+              <div className="flex flex-col items-center gap-1 text-sm text-muted">
                 {question.chain.map((line, i) => (
                   <span key={line}>
                     {i + 1}. {line.split(" = ")[0]} = ?
@@ -290,7 +290,7 @@ export const FactDeck: React.FC<ActivityProps<FactParams>> = ({ params, koda, on
 
             {question.helperChoices ? (
               <div className="flex flex-col gap-2">
-                <p className="text-center text-sm text-ink-soft">
+                <p className="text-center text-sm text-muted">
                   {helper ? "Now use it." : "Which fact would help?"}
                 </p>
                 {question.helperChoices.map((text) => (

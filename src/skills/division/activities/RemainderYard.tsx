@@ -241,18 +241,18 @@ export const RemainderYard: React.FC<ActivityProps<RemainderParams>> = ({
                 onClick={() => setSlot("quotient")}
                 aria-label={`How many whole groups: ${quotient || "empty"}`}
                 className={`min-h-14 min-w-16 rounded-xl border-2 px-3 py-2 ${
-                  slot === "quotient" ? "border-indigo-500 bg-surface" : "border-ink-soft/30 bg-surface"
+                  slot === "quotient" ? "border-indigo-500 bg-surface" : "border-line/30 bg-surface"
                 }`}
               >
                 {quotient || " "}
               </button>
-              <span className="text-base text-ink-soft">{notation}</span>
+              <span className="text-base text-muted">{notation}</span>
               <button
                 type="button"
                 onClick={() => setSlot("remainder")}
                 aria-label={`Left over: ${remainder || "empty"}`}
                 className={`min-h-14 min-w-16 rounded-xl border-2 px-3 py-2 ${
-                  slot === "remainder" ? "border-rose-500 bg-surface" : "border-ink-soft/30 bg-surface"
+                  slot === "remainder" ? "border-rose-500 bg-surface" : "border-line/30 bg-surface"
                 }`}
               >
                 {remainder || " "}
@@ -260,7 +260,7 @@ export const RemainderYard: React.FC<ActivityProps<RemainderParams>> = ({
             </div>
 
             {refused ? (
-              <p role="status" className="text-center text-sm text-ink-soft">
+              <p role="status" className="text-center text-sm text-muted">
                 {PAIR_REFUSALS[refused]}
               </p>
             ) : null}

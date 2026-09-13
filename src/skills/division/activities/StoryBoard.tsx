@@ -193,7 +193,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryParams>> = ({ params, koda,
                   className="w-8 rounded-t bg-violet-400"
                   style={{ height: `${(value / Math.max(...(question.values ?? [1]))) * 72 + 8}px` }}
                 />
-                <span className="text-xs text-ink-soft">{value}</span>
+                <span className="text-xs text-muted">{value}</span>
               </div>
             ))}
           </div>
@@ -209,7 +209,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryParams>> = ({ params, koda,
                 </div>
               ))}
             </div>
-            <p className="text-center text-xs text-ink-soft">
+            <p className="text-center text-xs text-muted">
               {question.whole} in {cuts} part{cuts === 1 ? "" : "s"}
             </p>
           </div>
@@ -239,7 +239,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryParams>> = ({ params, koda,
         ) : null}
 
         {refused ? (
-          <p role="status" className="text-center text-sm text-ink-soft">
+          <p role="status" className="text-center text-sm text-muted">
             Cut the bar into the right number of parts first.
           </p>
         ) : null}

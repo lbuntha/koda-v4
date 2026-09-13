@@ -222,7 +222,7 @@ export const FactorLab: React.FC<ActivityProps<FactorParams>> = ({ params, koda,
         {testing ? (
           <>
             {scaffoldEnabled && !practising ? (
-              <p className="rounded-2xl border border-emerald-400/40 px-4 py-2 text-center text-base text-ink-soft">
+              <p className="rounded-2xl border border-emerald-400/40 px-4 py-2 text-center text-base text-muted">
                 {question.evidence}
               </p>
             ) : null}
@@ -250,7 +250,7 @@ export const FactorLab: React.FC<ActivityProps<FactorParams>> = ({ params, koda,
         {collecting ? (
           <>
             {question.stopAt && scaffoldEnabled && !practising ? (
-              <p className="text-center text-sm text-ink-soft">
+              <p className="text-center text-sm text-muted">
                 Nothing new past {question.stopAt} — after that you only meet the partners again.
               </p>
             ) : null}

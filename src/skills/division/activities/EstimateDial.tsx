@@ -159,7 +159,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({
       <div className="mx-auto flex w-full max-w-xl flex-col gap-3">
         {question.mode === "compatible" ? (
           <>
-            <p className="text-center text-sm text-ink-soft">
+            <p className="text-center text-sm text-muted">
               Which total is easier to divide by {question.divisor}?
             </p>
             <div className="flex justify-center gap-3">
@@ -172,7 +172,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({
                   className="min-h-11 flex-1 rounded-2xl bg-surface px-4 py-3 text-center shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
                 >
                   <span className="block text-xl font-bold text-ink">{candidate}</span>
-                  <span className="block text-xs text-ink-soft">
+                  <span className="block text-xs text-muted">
                     ÷ {question.divisor} = {(question.estimates ?? [])[i]}
                   </span>
                 </button>

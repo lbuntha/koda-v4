@@ -281,7 +281,7 @@ export const ArrayDivide: React.FC<ActivityProps<ArrayParams>> = ({
           </>
         ) : (
           <>
-            <p className="text-center text-sm text-ink-soft">
+            <p className="text-center text-sm text-muted">
               {question.dividend - placed} still to place
               {fixedWidth ? null : ` · ${rows} row${rows === 1 ? "" : "s"}`}
             </p>
@@ -300,12 +300,12 @@ export const ArrayDivide: React.FC<ActivityProps<ArrayParams>> = ({
                     />
                   ))}
                   {badgesEnabled && count > 0 ? (
-                    <span className="pl-2 text-xs text-ink-soft">{count}</span>
+                    <span className="pl-2 text-xs text-muted">{count}</span>
                   ) : null}
                 </div>
               ))}
               {layout.length === 0 ? (
-                <span className="text-sm text-ink-soft">Nothing placed yet.</span>
+                <span className="text-sm text-muted">Nothing placed yet.</span>
               ) : null}
             </div>
 
@@ -353,7 +353,7 @@ export const ArrayDivide: React.FC<ActivityProps<ArrayParams>> = ({
             </div>
 
             {refused ? (
-              <p role="status" className="text-center text-sm text-ink-soft">
+              <p role="status" className="text-center text-sm text-muted">
                 {ARRAY_REFUSALS[refused]}
               </p>
             ) : null}

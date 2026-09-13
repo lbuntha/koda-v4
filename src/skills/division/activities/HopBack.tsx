@@ -203,16 +203,16 @@ export const HopBack: React.FC<ActivityProps<LineParams>> = ({ params, koda, onC
                 <div key={value} className="flex min-w-8 flex-col items-center gap-1">
                   <span
                     className={`h-3 w-3 rounded-full ${
-                      here ? TONE_CLASS[question.tone] : landed ? "bg-ink-soft/50" : "bg-ink-soft/15"
+                      here ? TONE_CLASS[question.tone] : landed ? "bg-muted/50" : "bg-muted/15"
                     }`}
                   />
-                  <span className={`text-xs ${here ? "font-bold text-ink" : "text-ink-soft"}`}>{value}</span>
+                  <span className={`text-xs ${here ? "font-bold text-ink" : "text-muted"}`}>{value}</span>
                 </div>
               );
             })}
           </div>
           {badgesEnabled ? (
-            <p className="text-center text-xs text-ink-soft">
+            <p className="text-center text-xs text-muted">
               {hops} hop{hops === 1 ? "" : "s"} of {question.divisor}
             </p>
           ) : null}
@@ -234,7 +234,7 @@ export const HopBack: React.FC<ActivityProps<LineParams>> = ({ params, koda, onC
               onClick={undoHop}
               disabled={landings.length === 0 || !!round.feedback}
               aria-label="Undo the last hop"
-              className="min-h-11 rounded-2xl bg-surface px-4 py-2 text-sm text-ink-soft shadow-sm disabled:opacity-30"
+              className="min-h-11 rounded-2xl bg-surface px-4 py-2 text-sm text-muted shadow-sm disabled:opacity-30"
             >
               ↩
             </button>
@@ -242,7 +242,7 @@ export const HopBack: React.FC<ActivityProps<LineParams>> = ({ params, koda, onC
         )}
 
         {refused ? (
-          <p role="status" className="text-center text-sm text-ink-soft">
+          <p role="status" className="text-center text-sm text-muted">
             {LINE_REFUSALS[refused]}
           </p>
         ) : null}

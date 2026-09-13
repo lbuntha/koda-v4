@@ -162,13 +162,13 @@ export const ChunkPad: React.FC<ActivityProps<ChunkParams>> = ({ params, koda, o
       <div className="mx-auto flex w-full max-w-xl flex-col gap-3">
         <div className="flex items-center justify-around rounded-2xl bg-surface p-3 text-center">
           <div>
-            <p className="text-xs uppercase tracking-wide text-ink-soft">Left</p>
+            <p className="text-xs uppercase tracking-wide text-muted">Left</p>
             <p data-testid="remaining" className="text-2xl font-bold text-ink">
               {remaining}
             </p>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-wide text-ink-soft">Lots so far</p>
+            <p className="text-xs uppercase tracking-wide text-muted">Lots so far</p>
             <p data-testid="tally" className="text-2xl font-bold text-emerald-600">
               {tally}
             </p>
@@ -176,7 +176,7 @@ export const ChunkPad: React.FC<ActivityProps<ChunkParams>> = ({ params, koda, o
         </div>
 
         {taken.length > 0 ? (
-          <ol className="flex flex-col gap-1 text-sm text-ink-soft">
+          <ol className="flex flex-col gap-1 text-sm text-muted">
             {taken.map((step, i) => (
               <li key={`${step}-${i}`}>
                 − {step} × {question.divisor} = {step * question.divisor}
@@ -199,12 +199,12 @@ export const ChunkPad: React.FC<ActivityProps<ChunkParams>> = ({ params, koda, o
             </button>
           ))}
           {fits.length === 0 ? (
-            <p className="text-sm text-ink-soft">Nothing more will fit.</p>
+            <p className="text-sm text-muted">Nothing more will fit.</p>
           ) : null}
         </div>
 
         {refused ? (
-          <p role="status" className="text-center text-sm text-ink-soft">
+          <p role="status" className="text-center text-sm text-muted">
             {CHUNK_REFUSALS[refused]}
           </p>
         ) : null}
@@ -215,7 +215,7 @@ export const ChunkPad: React.FC<ActivityProps<ChunkParams>> = ({ params, koda, o
             onClick={undo}
             disabled={taken.length === 0 || !!round.feedback}
             aria-label="Undo the last chunk"
-            className="min-h-11 rounded-2xl bg-surface px-4 py-2 text-sm text-ink-soft shadow-sm disabled:opacity-30"
+            className="min-h-11 rounded-2xl bg-surface px-4 py-2 text-sm text-muted shadow-sm disabled:opacity-30"
           >
             ↩
           </button>

@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
+
 import { renderActivity } from "../kit/testing";
 import { skill } from ".";
 import { SVG_ASSET_IDS } from "../../assets/svg/ids";
@@ -209,6 +212,48 @@ describe("nothing reads the question aloud unless asked", () => {
     for (const lesson of teaching) {
       const play = (lesson.params as { play?: { audioPrompt?: string } }).play;
       expect(play?.audioPrompt, lesson.id).toBeTruthy();
+    }
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/* The theme                                                                   */
+/* -------------------------------------------------------------------------- */
+
+describe("colours come from the theme, not from a guess", () => {
+  /*
+   * `text-ink-soft`, `bg-surface-alt` and friends are not tokens. `src/index.css`
+   * defines surface, surface-muted, ink, body, muted, line, canvas and play-*,
+   * and Tailwind emits nothing at all for a name outside that set — so an
+   * element wearing one silently inherits whatever colour is around it. It looks
+   * almost right in light, and it is the half of a dark-mode bug that no
+   * screenshot in light will ever show.
+   *
+   * Forty-eight of them shipped across this skill before anybody looked.
+   */
+  const PHANTOM = /\b(?:text|bg|border|fill|stroke)-(?:ink-soft|surface-alt|body-soft|muted-soft|line-soft)\b/;
+
+  const files = (): string[] => {
+    const walk = (d: string): string[] =>
+      readdirSync(d, { withFileTypes: true }).flatMap((e) =>
+        e.isDirectory() ? walk(join(d, e.name)) : [join(d, e.name)],
+      );
+    return walk(join(process.cwd(), "src/skills/division")).filter((f) => f.endsWith(".tsx") && !f.includes(".test."));
+  };
+
+  it("uses no colour name the theme does not define", () => {
+    for (const file of files()) {
+      const hit = PHANTOM.exec(readFileSync(file, "utf8"));
+      expect(hit?.[0], `${file.split("/skills/")[1]} uses "${hit?.[0]}"`).toBeUndefined();
+    }
+  });
+
+  it("hand-rolls no dark-mode pair where a token exists", () => {
+    for (const file of files()) {
+      expect(
+        /dark:(?:bg|text|fill)-(?:slate|zinc|gray|neutral)-/.test(readFileSync(file, "utf8")),
+        file.split("/skills/")[1],
+      ).toBe(false);
     }
   });
 });

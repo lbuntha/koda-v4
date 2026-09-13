@@ -1,0 +1,28 @@
+{
+  "_comment": [
+    "Everything this skill says that is not a number and not a lesson prompt.",
+    "Script only — recording happens separately and is not part of a build phase.",
+    "",
+    "`speaksPrompts: false` from the first commit. This skill starts at eight and",
+    "a child of eight can read; reading a word problem aloud to them takes the",
+    "reading out of the question. Division learned that after recording 74 clips",
+    "and needing 18 — see SKILL_DEVELOPMENT.md §0.1.",
+    "",
+    "What it does say is what it says *back* to a child: the reactions, which come",
+    "from the common pack and name no subject, and the refusals below — the",
+    "sentence an engine gives when it will not take an answer yet.",
+    "",
+    "Phase 0 has no engines. These four are the ones the plan already commits to:",
+    "the parts must be equal, the whole must be named, and a fraction of one thing",
+    "cannot be compared with a fraction of another."
+  ],
+  "speaksPrompts": false,
+  "prompts": [],
+  "templates": [],
+  "phrases": [
+    "The parts have to be the same size.",
+    "Half of what? Say what the whole is first.",
+    "These are parts of two different things, so you cannot tell.",
+    "That is a different amount, not a different name for the same one."
+  ]
+}

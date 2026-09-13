@@ -1,0 +1,504 @@
+{
+  "lessons": [
+    {
+      "id": "equal-parts",
+      "title": "Same Size or Not",
+      "concept": "Equal Parts as the Condition for a Fraction",
+      "conceptKey": "equal-part-checker",
+      "requires": [
+        "equal-sharer",
+        "comparer"
+      ],
+      "activity": "fractions/strip",
+      "iconName": "Scissors",
+      "iconTone": "purple",
+      "params": {
+        "level": 1,
+        "question": {
+          "mode": "equal_or_not",
+          "questionsPerRound": 6,
+          "partsRange": [
+            2,
+            8
+          ]
+        },
+        "play": {
+          "targetObjective": "Decide whether a whole has been cut into equal parts.",
+          "stepByStep": [
+            "Look along the parts, not at how many there are.",
+            "Compare two of them at a time.",
+            "If any two are different sizes, it is not a fair split.",
+            "A fraction only means something when every part is the same."
+          ],
+          "kidTip": "Four pieces is not quarters unless all four are the same size.",
+          "audioPrompt": "Are all the parts the same size?",
+          "prompts": {
+            "default": "Are all the parts the same size?"
+          }
+        }
+      },
+      "standards": [
+        "CCSS.3.G.A.2"
+      ],
+      "trajectoryLevel": "equal-parts",
+      "ageBand": [
+        8,
+        9
+      ]
+    },
+    {
+      "id": "unit-fraction",
+      "title": "One of Them",
+      "concept": "Naming One of a Number of Equal Parts",
+      "conceptKey": "unit-fraction-namer",
+      "requires": [
+        "equal-part-checker",
+        "halver"
+      ],
+      "activity": "fractions/strip",
+      "iconName": "PieChart",
+      "iconTone": "indigo",
+      "params": {
+        "level": 2,
+        "question": {
+          "mode": "name_unit",
+          "questionsPerRound": 5,
+          "partsRange": [
+            2,
+            12
+          ]
+        },
+        "play": {
+          "targetObjective": "Name one part of a whole cut into equal parts.",
+          "stepByStep": [
+            "Count how many equal parts the whole is cut into.",
+            "That number goes underneath.",
+            "One part is shaded, so a one goes on top.",
+            "One of four equal parts is one quarter."
+          ],
+          "kidTip": "The number underneath tells you how many pieces the whole was cut into — not how big they are.",
+          "audioPrompt": "One part is shaded. What is it called?",
+          "prompts": {
+            "default": "What is one part called?"
+          }
+        }
+      },
+      "standards": [
+        "CCSS.3.NF.A.1"
+      ],
+      "trajectoryLevel": "equal-parts",
+      "ageBand": [
+        8,
+        9
+      ]
+    },
+    {
+      "id": "name-the-whole",
+      "title": "Half of What?",
+      "concept": "A Fraction as a Quantity Only Once the Whole Is Named",
+      "conceptKey": "whole-namer",
+      "requires": [
+        "unit-fraction-namer"
+      ],
+      "activity": "fractions/strip",
+      "iconName": "Scale",
+      "iconTone": "cyan",
+      "params": {
+        "level": 3,
+        "question": {
+          "mode": "which_whole",
+          "questionsPerRound": 5,
+          "partsRange": [
+            2,
+            6
+          ]
+        },
+        "play": {
+          "targetObjective": "Recognise that the same fraction of different wholes is different amounts.",
+          "stepByStep": [
+            "Check the fraction shaded on each one. They are the same.",
+            "Now look at how big the two wholes are.",
+            "The same fraction of a bigger whole is a bigger amount.",
+            "A fraction on its own is not an amount until you say what it is a fraction of."
+          ],
+          "kidTip": "Half a biscuit and half a cake are both a half. They are not both the same amount of food.",
+          "audioPrompt": "Both have the same fraction shaded. Which is more?",
+          "prompts": {
+            "default": "Which is more?"
+          }
+        }
+      },
+      "standards": [
+        "CCSS.3.NF.A.1"
+      ],
+      "trajectoryLevel": "equal-parts",
+      "ageBand": [
+        8,
+        9
+      ]
+    },
+    {
+      "id": "build-from-units",
+      "title": "Three of Those",
+      "concept": "Building a Fraction from Copies of Its Unit Fraction",
+      "conceptKey": "unit-fraction-builder",
+      "requires": [
+        "unit-fraction-namer"
+      ],
+      "activity": "fractions/strip",
+      "iconName": "Layers",
+      "iconTone": "purple",
+      "params": {
+        "level": 4,
+        "question": {
+          "mode": "build",
+          "questionsPerRound": 5,
+          "partsRange": [
+            3,
+            12
+          ]
+        },
+        "play": {
+          "targetObjective": "Make a fraction by shading that many copies of one part.",
+          "stepByStep": [
+            "Look at how many parts the whole is cut into.",
+            "Each one of them is one of those parts.",
+            "Shade them one at a time, counting as you go.",
+            "Three quarters is three lots of one quarter. It is one number, not two."
+          ],
+          "kidTip": "Every fraction is just so many copies of one piece.",
+          "audioPrompt": "Shade that many of the parts, one at a time.",
+          "prompts": {
+            "default": "Shade the parts."
+          }
+        }
+      },
+      "standards": [
+        "CCSS.3.NF.A.1"
+      ],
+      "trajectoryLevel": "unit-builder",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "read-and-write",
+      "title": "Writing It Down",
+      "concept": "Reading a Picture as a Fraction",
+      "conceptKey": "fraction-notation-reader",
+      "requires": [
+        "unit-fraction-builder"
+      ],
+      "activity": "fractions/strip",
+      "iconName": "PenLine",
+      "iconTone": "emerald",
+      "params": {
+        "level": 5,
+        "question": {
+          "mode": "to_notation",
+          "questionsPerRound": 5,
+          "partsRange": [
+            2,
+            12
+          ]
+        },
+        "play": {
+          "targetObjective": "Write the fraction a picture shows.",
+          "stepByStep": [
+            "Count the shaded parts.",
+            "Count all the parts.",
+            "The shaded ones go on top; all of them go underneath.",
+            "Read it out loud to check it sounds right."
+          ],
+          "kidTip": "If you put them the other way up you have written something bigger than the whole.",
+          "audioPrompt": "Count the shaded parts, then count all of them.",
+          "prompts": {
+            "default": "What fraction is shaded?"
+          }
+        }
+      },
+      "standards": [
+        "CCSS.3.NF.A.1"
+      ],
+      "trajectoryLevel": "unit-builder",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "fraction-of-a-set",
+      "title": "A Fraction of a Group",
+      "concept": "Fractions of a Set Rather Than of One Object",
+      "conceptKey": "set-fractioner",
+      "requires": [
+        "fraction-notation-reader",
+        "equal-sharer"
+      ],
+      "activity": "fractions/strip",
+      "iconName": "Boxes",
+      "iconTone": "indigo",
+      "params": {
+        "level": 6,
+        "question": {
+          "mode": "of_a_set",
+          "questionsPerRound": 5,
+          "partsRange": [
+            2,
+            6
+          ]
+        },
+        "play": {
+          "targetObjective": "Find a fraction of a set of objects.",
+          "stepByStep": [
+            "The whole is the whole set, not one of the things in it.",
+            "Split the set into as many equal groups as the bottom number says.",
+            "Count how many are in one group.",
+            "Take as many groups as the top number says."
+          ],
+          "kidTip": "A third of twelve marbles is four marbles — the whole is all twelve.",
+          "audioPrompt": "Split the set into equal groups first.",
+          "prompts": {
+            "default": "How many is that?"
+          }
+        }
+      },
+      "standards": [
+        "CCSS.3.NF.A.1",
+        "CCSS.4.NF.B.4"
+      ],
+      "trajectoryLevel": "unit-builder",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "unit-on-a-line",
+      "title": "One Jump Along",
+      "concept": "Placing a Unit Fraction as a Number",
+      "conceptKey": "fraction-line-placer",
+      "requires": [
+        "set-fractioner",
+        "unit-fraction-namer"
+      ],
+      "activity": "fractions/numberline",
+      "iconName": "MoveHorizontal",
+      "iconTone": "cyan",
+      "params": {
+        "level": 7,
+        "question": {
+          "mode": "place_unit",
+          "questionsPerRound": 5,
+          "partsRange": [
+            2,
+            10
+          ]
+        },
+        "play": {
+          "targetObjective": "Put a unit fraction in its place on a number line.",
+          "stepByStep": [
+            "Look at how many equal jumps the line is cut into between 0 and 1.",
+            "Each jump is one of those parts.",
+            "Count one jump from zero.",
+            "Stop there. That is where the fraction lives."
+          ],
+          "kidTip": "A fraction is not only part of a cake. It is a number with a place of its own.",
+          "audioPrompt": "Count one jump from zero.",
+          "prompts": {
+            "default": "Put the marker on the fraction."
+          }
+        }
+      },
+      "standards": [
+        "CCSS.3.NF.A.2.A"
+      ],
+      "trajectoryLevel": "fraction-as-number",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "fraction-on-a-line",
+      "title": "Count the Jumps",
+      "concept": "Placing Any Proper Fraction as a Number",
+      "conceptKey": "fraction-line-placer",
+      "requires": [
+        "fraction-line-placer"
+      ],
+      "activity": "fractions/numberline",
+      "iconName": "Footprints",
+      "iconTone": "indigo",
+      "params": {
+        "level": 8,
+        "question": {
+          "mode": "place_any",
+          "questionsPerRound": 5,
+          "partsRange": [
+            2,
+            10
+          ]
+        },
+        "play": {
+          "targetObjective": "Put any fraction below one in its place on a number line.",
+          "stepByStep": [
+            "Every jump along the line is one of the bottom number's parts.",
+            "The top number tells you how many jumps to take.",
+            "Count them from zero, one at a time.",
+            "Land on the mark, not between two."
+          ],
+          "kidTip": "Top number, that many jumps. Bottom number, how big each jump is.",
+          "audioPrompt": "Count that many jumps from zero.",
+          "prompts": {
+            "default": "Put the marker on the fraction."
+          }
+        }
+      },
+      "standards": [
+        "CCSS.3.NF.A.2.B"
+      ],
+      "trajectoryLevel": "fraction-as-number",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "name-the-point",
+      "title": "What Is It Standing On?",
+      "concept": "Reading a Fraction off a Number Line",
+      "conceptKey": "fraction-line-reader",
+      "requires": [
+        "fraction-line-placer"
+      ],
+      "activity": "fractions/numberline",
+      "iconName": "MapPin",
+      "iconTone": "purple",
+      "params": {
+        "level": 9,
+        "question": {
+          "mode": "read_point",
+          "questionsPerRound": 5,
+          "partsRange": [
+            2,
+            10
+          ]
+        },
+        "play": {
+          "targetObjective": "Name the fraction a marker is sitting on.",
+          "stepByStep": [
+            "Count the jumps from zero up to the marker. That is the top number.",
+            "Count all the jumps from 0 to 1. That is the bottom number.",
+            "Count jumps, never marks — there is always one more mark than jump.",
+            "Read it back and check it sounds smaller than one."
+          ],
+          "kidTip": "The commonest slip here is counting the marks. Five marks means four jumps.",
+          "audioPrompt": "Count the jumps from zero to the marker.",
+          "prompts": {
+            "default": "What number is the marker on?"
+          }
+        }
+      },
+      "standards": [
+        "CCSS.3.NF.A.2.B"
+      ],
+      "trajectoryLevel": "fraction-as-number",
+      "ageBand": [
+        9,
+        11
+      ]
+    },
+    {
+      "id": "equal-to-one",
+      "title": "Enough to Make One",
+      "concept": "A Fraction with the Same Number Top and Bottom",
+      "conceptKey": "whole-completer",
+      "requires": [
+        "fraction-line-reader"
+      ],
+      "activity": "fractions/numberline",
+      "iconName": "Circle",
+      "iconTone": "emerald",
+      "params": {
+        "level": 10,
+        "question": {
+          "mode": "makes_one",
+          "questionsPerRound": 5,
+          "partsRange": [
+            2,
+            12
+          ]
+        },
+        "play": {
+          "targetObjective": "Recognise that a fraction can be exactly one whole.",
+          "stepByStep": [
+            "Count the jumps from 0 all the way to 1.",
+            "However many that is, that many of those parts make one whole.",
+            "So four quarters is one, and eight eighths is one.",
+            "Same number top and bottom always means one whole."
+          ],
+          "kidTip": "A fraction does not have to be less than one. Some fractions are whole numbers.",
+          "audioPrompt": "How many of those parts make one whole?",
+          "prompts": {
+            "default": "How many make one whole?"
+          }
+        }
+      },
+      "standards": [
+        "CCSS.3.NF.A.3.C"
+      ],
+      "trajectoryLevel": "fraction-as-number",
+      "ageBand": [
+        9,
+        11
+      ]
+    },
+    {
+      "id": "past-one",
+      "title": "Past the One",
+      "concept": "Improper Fractions as Numbers Beyond One",
+      "conceptKey": "improper-reader",
+      "requires": [
+        "whole-completer"
+      ],
+      "activity": "fractions/numberline",
+      "iconName": "ArrowRight",
+      "iconTone": "pink",
+      "params": {
+        "level": 11,
+        "question": {
+          "mode": "improper",
+          "questionsPerRound": 5,
+          "partsRange": [
+            2,
+            6
+          ]
+        },
+        "play": {
+          "targetObjective": "Place a fraction bigger than one on a number line.",
+          "stepByStep": [
+            "This line carries on past 1.",
+            "The jumps are all the same size as before.",
+            "Count them from zero and go straight past the 1 without stopping.",
+            "A fraction bigger than one is still one number with one place."
+          ],
+          "kidTip": "Seven quarters is just seven jumps of a quarter. Nothing stops at one.",
+          "audioPrompt": "Keep counting past the one.",
+          "prompts": {
+            "default": "Put the marker on the fraction."
+          }
+        }
+      },
+      "standards": [
+        "CCSS.4.NF.B.3.C"
+      ],
+      "trajectoryLevel": "fraction-as-number",
+      "ageBand": [
+        9,
+        11
+      ]
+    }
+  ]
+}
