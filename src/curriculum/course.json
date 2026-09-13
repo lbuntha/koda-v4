@@ -1185,6 +1185,228 @@
         "division/practice-story",
         "division/practice-strategy"
       ]
+    },
+    {
+      "id": "u91",
+      "unitNumber": 91,
+      "title": "Unit 91: Fractions: Equal Parts",
+      "description": "What a fraction is: equal parts of a whole somebody has named",
+      "icon": "🍰",
+      "lessons": [
+        "fractions/equal-parts",
+        "fractions/unit-fraction",
+        "fractions/name-the-whole"
+      ]
+    },
+    {
+      "id": "u92",
+      "unitNumber": 92,
+      "title": "Unit 92: Fractions: Building from Units",
+      "description": "Three quarters is three copies of one quarter",
+      "icon": "🧱",
+      "lessons": [
+        "fractions/build-from-units",
+        "fractions/read-and-write",
+        "fractions/fraction-of-a-set"
+      ]
+    },
+    {
+      "id": "u93",
+      "unitNumber": 93,
+      "title": "Unit 93: Fractions: A Fraction Is a Number",
+      "description": "Fractions on a number line, past one whole",
+      "icon": "📏",
+      "lessons": [
+        "fractions/unit-on-a-line",
+        "fractions/fraction-on-a-line",
+        "fractions/name-the-point",
+        "fractions/equal-to-one",
+        "fractions/past-one"
+      ]
+    },
+    {
+      "id": "u94",
+      "unitNumber": 94,
+      "title": "Unit 94: Fractions: Same Amount, New Name",
+      "description": "Equivalence, and cutting a fraction down to its simplest form",
+      "icon": "🔁",
+      "lessons": [
+        "fractions/split-every-part",
+        "fractions/same-point-two-names",
+        "fractions/make-equivalent",
+        "fractions/simplify-once",
+        "fractions/simplest-form"
+      ]
+    },
+    {
+      "id": "u95",
+      "unitNumber": 95,
+      "title": "Unit 95: Fractions: Which Is More?",
+      "description": "Comparing fractions, including the pair you cannot compare",
+      "icon": "⚖️",
+      "lessons": [
+        "fractions/compare-same-bottom",
+        "fractions/compare-same-top",
+        "fractions/same-whole-only",
+        "fractions/compare-to-half",
+        "fractions/compare-unlike"
+      ]
+    },
+    {
+      "id": "u96",
+      "unitNumber": 96,
+      "title": "Unit 96: Fractions: Wholes and Parts",
+      "description": "Mixed numbers and improper fractions, two names for one amount",
+      "icon": "🧩",
+      "lessons": [
+        "fractions/improper-to-mixed",
+        "fractions/mixed-to-improper",
+        "fractions/mixed-on-a-line"
+      ]
+    },
+    {
+      "id": "u97",
+      "unitNumber": 97,
+      "title": "Unit 97: Fractions: Adding the Same Pieces",
+      "description": "Adding and taking away when the pieces already match",
+      "icon": "➕",
+      "lessons": [
+        "fractions/add-like",
+        "fractions/subtract-like",
+        "fractions/why-not-add-bottoms"
+      ]
+    },
+    {
+      "id": "u98",
+      "unitNumber": 98,
+      "title": "Unit 98: Fractions: Making the Pieces Match",
+      "description": "Unlike denominators, and breaking a whole to take away",
+      "icon": "✂️",
+      "lessons": [
+        "fractions/add-one-divides",
+        "fractions/add-unlike",
+        "fractions/subtract-unlike",
+        "fractions/add-mixed",
+        "fractions/subtract-mixed"
+      ]
+    },
+    {
+      "id": "u99",
+      "unitNumber": 99,
+      "title": "Unit 99: Fractions: A Fraction of Something",
+      "description": "Multiplying, and why it usually makes things smaller",
+      "icon": "✖️",
+      "lessons": [
+        "fractions/fraction-of-amount",
+        "fractions/whole-times-fraction",
+        "fractions/fraction-of-fraction",
+        "fractions/multiply-and-simplify",
+        "fractions/multiplying-makes-smaller"
+      ]
+    },
+    {
+      "id": "u100",
+      "unitNumber": 100,
+      "title": "Unit 100: Fractions: How Many Fit?",
+      "description": "Dividing, which is measuring, and why the answer grows",
+      "icon": "➗",
+      "lessons": [
+        "fractions/how-many-fit",
+        "fractions/divide-whole-by-fraction",
+        "fractions/divide-fraction-by-whole",
+        "fractions/divide-by-fraction",
+        "fractions/why-flip"
+      ]
+    },
+    {
+      "id": "u101",
+      "unitNumber": 101,
+      "title": "Unit 101: Fractions: Three Names for One Number",
+      "description": "Fractions, decimals and percentages as the same amount",
+      "icon": "💯",
+      "lessons": [
+        "fractions/tenths",
+        "fractions/hundredths",
+        "fractions/fraction-to-decimal",
+        "fractions/decimal-to-fraction",
+        "fractions/percent",
+        "fractions/three-names"
+      ]
+    },
+    {
+      "id": "u102",
+      "unitNumber": 102,
+      "title": "Unit 102: Fractions: Judging Before Calculating",
+      "description": "Estimating against benchmarks, and checking whether an answer could be right",
+      "icon": "🎯",
+      "lessons": [
+        "fractions/benchmarks",
+        "fractions/is-it-reasonable"
+      ]
+    },
+    {
+      "id": "u103",
+      "unitNumber": 103,
+      "title": "Unit 103: Fractions: In Words",
+      "description": "Word problems, modelled on a bar before anything is worked out",
+      "icon": "📖",
+      "lessons": [
+        "fractions/amount-story",
+        "fractions/sharing-story",
+        "fractions/adding-story",
+        "fractions/recipe-story",
+        "fractions/comparison-story",
+        "fractions/multi-step-story",
+        "fractions/explain-and-compare"
+      ]
+    },
+    {
+      "id": "u104",
+      "unitNumber": 104,
+      "title": "Unit 104: Practice — Fractions: Parts and Numbers",
+      "description": "Independent practice on equal parts, the number line and equivalence",
+      "icon": "🔁",
+      "lessons": [
+        "fractions/practice-strip",
+        "fractions/practice-numberline",
+        "fractions/practice-equivalence"
+      ]
+    },
+    {
+      "id": "u105",
+      "unitNumber": 105,
+      "title": "Unit 105: Practice — Fractions: Comparing and Naming",
+      "description": "Independent practice on comparing, mixed numbers and the three names",
+      "icon": "🔁",
+      "lessons": [
+        "fractions/practice-compare",
+        "fractions/practice-mixed",
+        "fractions/practice-decimal"
+      ]
+    },
+    {
+      "id": "u106",
+      "unitNumber": 106,
+      "title": "Unit 106: Practice — Fractions: Arithmetic",
+      "description": "Independent practice on adding, taking away, multiplying and dividing",
+      "icon": "🔁",
+      "lessons": [
+        "fractions/practice-add",
+        "fractions/practice-multiply",
+        "fractions/practice-divide"
+      ]
+    },
+    {
+      "id": "u107",
+      "unitNumber": 107,
+      "title": "Unit 107: Practice — Fractions: Reasoning",
+      "description": "Independent practice on estimating, word problems and choosing a route",
+      "icon": "🔁",
+      "lessons": [
+        "fractions/practice-estimate",
+        "fractions/practice-story",
+        "fractions/practice-strategy"
+      ]
     }
   ]
 }

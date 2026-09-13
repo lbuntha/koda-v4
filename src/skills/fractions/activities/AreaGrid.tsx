@@ -355,7 +355,7 @@ export const AreaGrid: React.FC<ActivityProps<AreaParams>> = ({ params, koda, on
           : undefined
       }
       iconName="Grid3x3"
-      iconTone="violet"
+      iconTone="purple"
       onReadAloud={
         practising || !speechEnabled
           ? undefined

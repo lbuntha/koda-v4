@@ -138,7 +138,7 @@ export const EstimateDial: React.FC<ActivityProps<DialParams>> = ({ params, koda
       onExit={() => koda.ui.exit()}
       hints={practising ? [] : estimateHints(question)}
       iconName="Gauge"
-      iconTone="sky"
+      iconTone="cyan"
       onReadAloud={
         practising || !speechEnabled
           ? undefined

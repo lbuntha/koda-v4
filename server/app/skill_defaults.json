@@ -11594,7 +11594,40 @@
       "unlike-comparer",
       "mixed-number-writer",
       "improper-writer",
-      "mixed-line-placer"
+      "mixed-line-placer",
+      "like-adder",
+      "like-subtractor",
+      "denominator-reasoner",
+      "nested-adder",
+      "unlike-adder",
+      "unlike-subtractor",
+      "mixed-adder",
+      "mixed-exchanger",
+      "amount-fractioner",
+      "repeated-fraction-adder",
+      "fraction-multiplier",
+      "pre-simplifier",
+      "scaling-reasoner",
+      "fraction-measurer",
+      "whole-divider",
+      "fraction-sharer",
+      "fraction-divider",
+      "reciprocal-reasoner",
+      "tenth-reader",
+      "hundredth-reader",
+      "fraction-decimal-converter",
+      "decimal-fraction-converter",
+      "percent-reader",
+      "representation-matcher",
+      "benchmark-estimator",
+      "fraction-reasonableness-checker",
+      "amount-story-solver",
+      "fraction-as-division",
+      "context-adder",
+      "recipe-scaler",
+      "fraction-comparer-in-context",
+      "fraction-multi-step-solver",
+      "fraction-strategy-chooser"
     ],
     "requires": [
       "counter",
@@ -11731,7 +11764,7 @@
             "targetObjective": "Name one part of a whole cut into equal parts.",
             "stepByStep": [
               "Count how many equal parts the whole is cut into.",
-              "That number goes underneath.",
+              "That number is the one written underneath.",
               "One part is shaded, so a one goes on top.",
               "One of four equal parts is one quarter."
             ],
@@ -11865,8 +11898,8 @@
           "play": {
             "targetObjective": "Write the fraction a picture shows.",
             "stepByStep": [
-              "Count the shaded parts.",
-              "Count all the parts.",
+              "Count the parts that are shaded in.",
+              "Count how many parts there are altogether.",
               "The shaded ones go on top; all of them go underneath.",
               "Read it out loud to check it sounds right."
             ],
@@ -12781,6 +12814,1871 @@
         "trajectoryLevel": "mixed-numbers",
         "ageBand": [
           10,
+          12
+        ]
+      },
+      {
+        "id": "add-like",
+        "title": "Add the Same Pieces",
+        "concept": "Adding Fractions with the Same Denominator",
+        "conceptKey": "like-adder",
+        "requires": [
+          "fraction-notation-reader",
+          "mixed-number-writer"
+        ],
+        "activity": "fractions/add",
+        "iconName": "Plus",
+        "iconTone": "emerald",
+        "params": {
+          "level": 25,
+          "question": {
+            "mode": "add_like",
+            "questionsPerRound": 5,
+            "partsRange": [
+              3,
+              12
+            ]
+          },
+          "play": {
+            "targetObjective": "Add two fractions that are already made of the same-sized pieces.",
+            "stepByStep": [
+              "Look at the bottom numbers. They are the same, so the pieces are the same size.",
+              "That means you can just count them together.",
+              "Three eighths and two eighths is five eighths, the way three cats and two cats is five cats.",
+              "The bottom number does not change. You did not cut anything."
+            ],
+            "kidTip": "Same-sized pieces can be counted. That is all adding is.",
+            "audioPrompt": "The pieces are already the same size, so count them together.",
+            "prompts": {
+              "default": "Count them together."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NF.B.3.A"
+        ],
+        "trajectoryLevel": "additive",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "subtract-like",
+        "title": "Take Away the Same Pieces",
+        "concept": "Subtracting Fractions with the Same Denominator",
+        "conceptKey": "like-subtractor",
+        "requires": [
+          "like-adder"
+        ],
+        "activity": "fractions/add",
+        "iconName": "Minus",
+        "iconTone": "cyan",
+        "params": {
+          "level": 26,
+          "question": {
+            "mode": "subtract_like",
+            "questionsPerRound": 5,
+            "partsRange": [
+              3,
+              12
+            ]
+          },
+          "play": {
+            "targetObjective": "Take one fraction away from another when both are made of the same-sized pieces.",
+            "stepByStep": [
+              "Check the bottom numbers first. Same number means same-sized pieces.",
+              "Count how many you have, then take away that many.",
+              "Count what is left on the strip.",
+              "The bottom number stays put, because the pieces never changed size."
+            ],
+            "kidTip": "Taking away is counting backwards. The pieces still have to match.",
+            "audioPrompt": "Both are the same size, so take one count from the other.",
+            "prompts": {
+              "default": "Take them away."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NF.B.3.A"
+        ],
+        "trajectoryLevel": "additive",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "why-not-add-bottoms",
+        "title": "Why the Bottoms Do Not Add",
+        "concept": "Why Denominators Are Not Added",
+        "conceptKey": "denominator-reasoner",
+        "requires": [
+          "like-adder",
+          "unlike-comparer"
+        ],
+        "activity": "fractions/add",
+        "iconName": "AlertCircle",
+        "iconTone": "pink",
+        "params": {
+          "level": 27,
+          "question": {
+            "mode": "refute",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Show on the strip that adding the bottom numbers gives an answer that is too small.",
+            "stepByStep": [
+              "Somebody has added the tops and the bottoms. Put both fractions on the strip.",
+              "Half a strip and a third of a strip, laid end to end, reach past the halfway mark.",
+              "Two fifths does not even reach halfway. So it cannot be the total.",
+              "Cut both into the same-sized pieces first. Then, and only then, count."
+            ],
+            "kidTip": "If your answer is smaller than what you started with, something has gone wrong.",
+            "audioPrompt": "Somebody says this is the answer. Put both on the strip and see.",
+            "prompts": {
+              "default": "Show that this answer is too small."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.5.NF.A.1"
+        ],
+        "trajectoryLevel": "additive",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "add-one-divides",
+        "title": "When One Bottom Fits the Other",
+        "concept": "Adding Fractions Where One Denominator Divides the Other",
+        "conceptKey": "nested-adder",
+        "requires": [
+          "like-adder",
+          "equivalence-maker"
+        ],
+        "activity": "fractions/add",
+        "iconName": "Layers",
+        "iconTone": "indigo",
+        "params": {
+          "level": 28,
+          "question": {
+            "mode": "add_nested",
+            "questionsPerRound": 5,
+            "partsRange": [
+              2,
+              6
+            ]
+          },
+          "play": {
+            "targetObjective": "Add two fractions where only one of them needs re-cutting.",
+            "stepByStep": [
+              "Look at the two bottom numbers. One of them goes into the other exactly.",
+              "That means only the bigger pieces need cutting up.",
+              "Cut them, so both strips are made of the same-sized pieces.",
+              "Now count them together, the way you did when they already matched."
+            ],
+            "kidTip": "Cut the big pieces to match the small ones. Never the other way round.",
+            "audioPrompt": "One of these already fits inside the other. Cut it and count.",
+            "prompts": {
+              "default": "Cut one to match, then count."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.5.NF.A.1"
+        ],
+        "trajectoryLevel": "additive",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "add-unlike",
+        "title": "Make the Bottoms Match",
+        "concept": "Adding Fractions with Unlike Denominators",
+        "conceptKey": "unlike-adder",
+        "requires": [
+          "nested-adder",
+          "unlike-comparer"
+        ],
+        "activity": "fractions/add",
+        "iconName": "Plus",
+        "iconTone": "emerald",
+        "params": {
+          "level": 29,
+          "question": {
+            "mode": "add_unlike",
+            "questionsPerRound": 5,
+            "partsRange": [
+              2,
+              8
+            ]
+          },
+          "play": {
+            "targetObjective": "Find a piece size both fractions can be cut into, then add them.",
+            "stepByStep": [
+              "Neither bottom number goes into the other, so both strips need cutting.",
+              "Find a size they both fit into. Thirds and quarters both fit into twelfths.",
+              "Cut both, so every piece on the screen is the same size.",
+              "Now it is counting again."
+            ],
+            "kidTip": "You are not changing the amounts. You are changing what the pieces are called.",
+            "audioPrompt": "Find a size that fits both, cut them, then count.",
+            "prompts": {
+              "default": "Match the pieces, then add."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.5.NF.A.1"
+        ],
+        "trajectoryLevel": "additive",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "subtract-unlike",
+        "title": "Take Away Different Pieces",
+        "concept": "Subtracting Fractions with Unlike Denominators",
+        "conceptKey": "unlike-subtractor",
+        "requires": [
+          "unlike-adder",
+          "like-subtractor"
+        ],
+        "activity": "fractions/add",
+        "iconName": "Minus",
+        "iconTone": "cyan",
+        "params": {
+          "level": 30,
+          "question": {
+            "mode": "subtract_unlike",
+            "questionsPerRound": 5,
+            "partsRange": [
+              2,
+              8
+            ]
+          },
+          "play": {
+            "targetObjective": "Cut both fractions to the same size, then take one away from the other.",
+            "stepByStep": [
+              "Same first step as adding: the pieces have to match before anything happens.",
+              "Cut both strips into the size they both fit into.",
+              "Now take the second count away from the first.",
+              "Count what is left. The piece size has not changed."
+            ],
+            "kidTip": "Matching first, always. Adding and taking away need exactly the same setup.",
+            "audioPrompt": "Match the pieces first, then take one away from the other.",
+            "prompts": {
+              "default": "Match the pieces, then take away."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.5.NF.A.1"
+        ],
+        "trajectoryLevel": "additive",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "add-mixed",
+        "title": "Add Whole Ones and Parts",
+        "concept": "Adding Mixed Numbers",
+        "conceptKey": "mixed-adder",
+        "requires": [
+          "unlike-adder",
+          "improper-writer"
+        ],
+        "activity": "fractions/add",
+        "iconName": "PlusCircle",
+        "iconTone": "purple",
+        "params": {
+          "level": 31,
+          "question": {
+            "mode": "add_mixed",
+            "questionsPerRound": 5,
+            "partsRange": [
+              2,
+              6
+            ],
+            "onesRange": [
+              1,
+              2
+            ]
+          },
+          "play": {
+            "targetObjective": "Add numbers that have whole ones and parts, and group any new whole one.",
+            "stepByStep": [
+              "Add the whole ones first. They are easy and they get them out of the way.",
+              "Then the parts, which have to be cut to match like always.",
+              "If the parts add up to more than one whole, that whole joins the others.",
+              "Write what is left over as the fraction part."
+            ],
+            "kidTip": "Wholes with wholes, parts with parts. Then see if the parts made another whole.",
+            "audioPrompt": "Wholes first, then the parts. Watch for a new whole one.",
+            "prompts": {
+              "default": "Add the wholes, then the parts."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NF.B.3.C"
+        ],
+        "trajectoryLevel": "additive",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "subtract-mixed",
+        "title": "Break a Whole to Take Away",
+        "concept": "Subtracting Mixed Numbers with Regrouping",
+        "conceptKey": "mixed-exchanger",
+        "requires": [
+          "mixed-adder",
+          "unlike-subtractor"
+        ],
+        "activity": "fractions/add",
+        "iconName": "Split",
+        "iconTone": "pink",
+        "params": {
+          "level": 32,
+          "question": {
+            "mode": "subtract_mixed",
+            "questionsPerRound": 5,
+            "partsRange": [
+              2,
+              6
+            ],
+            "onesRange": [
+              1,
+              3
+            ]
+          },
+          "play": {
+            "targetObjective": "Break one whole into parts so there are enough to take away.",
+            "stepByStep": [
+              "Match the pieces first, as always.",
+              "Now look: there are not enough loose parts to take that many away.",
+              "Break one whole one up. It turns into that many more parts.",
+              "Now there are enough. Take them away, and count the whole ones left."
+            ],
+            "kidTip": "This is the same exchange as borrowing in column subtraction, done with parts.",
+            "audioPrompt": "There are not enough parts. Break a whole one up first.",
+            "prompts": {
+              "default": "Break a whole, then take away."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NF.B.3.C"
+        ],
+        "trajectoryLevel": "additive",
+        "ageBand": [
+          11,
+          12
+        ]
+      },
+      {
+        "id": "fraction-of-amount",
+        "title": "A Fraction of an Amount",
+        "concept": "Finding a Fraction of a Whole Number",
+        "conceptKey": "amount-fractioner",
+        "requires": [
+          "set-fractioner",
+          "equal-sharer"
+        ],
+        "activity": "fractions/multiply",
+        "iconName": "Users",
+        "iconTone": "purple",
+        "params": {
+          "level": 33,
+          "question": {
+            "mode": "of_whole",
+            "questionsPerRound": 5,
+            "partsRange": [
+              2,
+              6
+            ],
+            "totalRange": [
+              12,
+              60
+            ]
+          },
+          "play": {
+            "targetObjective": "Find a fraction of an amount by sharing it into equal groups and taking some of them.",
+            "stepByStep": [
+              "The bottom number tells you how many equal groups to make.",
+              "Share the whole amount out into that many groups.",
+              "The top number tells you how many of those groups to take.",
+              "Count what is in the groups you took. That is the answer."
+            ],
+            "kidTip": "Divide by the bottom, multiply by the top. In that order, and the numbers stay small.",
+            "audioPrompt": "Share it into equal groups first, then take the ones you need.",
+            "prompts": {
+              "default": "How many is that?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NF.B.4.C"
+        ],
+        "trajectoryLevel": "multiplicative",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "whole-times-fraction",
+        "title": "Copies of a Fraction",
+        "concept": "Multiplying a Fraction by a Whole Number",
+        "conceptKey": "repeated-fraction-adder",
+        "requires": [
+          "like-adder",
+          "amount-fractioner"
+        ],
+        "activity": "fractions/multiply",
+        "iconName": "Copy",
+        "iconTone": "indigo",
+        "params": {
+          "level": 34,
+          "question": {
+            "mode": "whole_times",
+            "questionsPerRound": 5,
+            "partsRange": [
+              2,
+              8
+            ],
+            "copiesRange": [
+              2,
+              6
+            ]
+          },
+          "play": {
+            "targetObjective": "Multiply a fraction by a whole number by making that many copies of it.",
+            "stepByStep": [
+              "Four times two fifths means four copies of two fifths, laid end to end.",
+              "Count all the shaded pieces. There are eight of them.",
+              "They are still fifths — making copies did not change the size of a piece.",
+              "Eight fifths is more than one whole, so it can also be written as one and three fifths."
+            ],
+            "kidTip": "Only the count goes up. The pieces stay the size they were.",
+            "audioPrompt": "Make that many copies, then count the pieces.",
+            "prompts": {
+              "default": "How much altogether?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NF.B.4.A"
+        ],
+        "trajectoryLevel": "multiplicative",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "fraction-of-fraction",
+        "title": "A Fraction of a Fraction",
+        "concept": "Multiplying Two Fractions with an Area Model",
+        "conceptKey": "fraction-multiplier",
+        "requires": [
+          "repeated-fraction-adder",
+          "equivalence-maker"
+        ],
+        "activity": "fractions/multiply",
+        "iconName": "Grid3x3",
+        "iconTone": "purple",
+        "params": {
+          "level": 35,
+          "question": {
+            "mode": "area_model",
+            "questionsPerRound": 5,
+            "partsRange": [
+              2,
+              5
+            ]
+          },
+          "play": {
+            "targetObjective": "Multiply two fractions by shading one across a grid and the other down it.",
+            "stepByStep": [
+              "Shade the first fraction across the grid, in columns.",
+              "Now shade the second one down the grid, in rows.",
+              "Some squares are shaded twice. Those are the ones in both fractions.",
+              "Count them, out of all the squares. That is a fraction of a fraction."
+            ],
+            "kidTip": "Two thirds of three quarters is smaller than either one. Taking a part of a part always is.",
+            "audioPrompt": "Shade one across and one down. The answer is where they cross.",
+            "prompts": {
+              "default": "How much is shaded twice?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.5.NF.B.4.A"
+        ],
+        "trajectoryLevel": "multiplicative",
+        "ageBand": [
+          11,
+          12
+        ]
+      },
+      {
+        "id": "multiply-and-simplify",
+        "title": "Cancel Before You Multiply",
+        "concept": "Simplifying Before Multiplying Fractions",
+        "conceptKey": "pre-simplifier",
+        "requires": [
+          "fraction-multiplier",
+          "fraction-simplifier"
+        ],
+        "activity": "fractions/multiply",
+        "iconName": "Scissors",
+        "iconTone": "pink",
+        "params": {
+          "level": 36,
+          "question": {
+            "mode": "simplify_first",
+            "questionsPerRound": 5,
+            "partsRange": [
+              2,
+              8
+            ]
+          },
+          "play": {
+            "targetObjective": "Divide out a shared factor across the diagonal before multiplying, so the numbers stay small.",
+            "stepByStep": [
+              "You could multiply straight across, but the numbers get big and then need cutting down again.",
+              "Look diagonally: a top number and a bottom number often share a factor.",
+              "Divide both of them by it. The answer does not change, because you divided a top and a bottom.",
+              "Now multiply the small numbers that are left."
+            ],
+            "kidTip": "Cancelling early is the same work done in an easier order.",
+            "audioPrompt": "Look for a factor across the diagonal before you multiply.",
+            "prompts": {
+              "default": "Cancel first, then multiply."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.5.NF.B.4.A"
+        ],
+        "trajectoryLevel": "multiplicative",
+        "ageBand": [
+          11,
+          12
+        ]
+      },
+      {
+        "id": "multiplying-makes-smaller",
+        "title": "Smaller, Not Bigger",
+        "concept": "Multiplication as Scaling",
+        "conceptKey": "scaling-reasoner",
+        "requires": [
+          "fraction-multiplier",
+          "benchmark-comparer"
+        ],
+        "activity": "fractions/multiply",
+        "iconName": "TrendingDown",
+        "iconTone": "cyan",
+        "params": {
+          "level": 37,
+          "question": {
+            "mode": "scaling",
+            "questionsPerRound": 6,
+            "partsRange": [
+              2,
+              6
+            ],
+            "totalRange": [
+              4,
+              24
+            ]
+          },
+          "play": {
+            "targetObjective": "Say whether multiplying will make an amount bigger, smaller or leave it alone, before working it out.",
+            "stepByStep": [
+              "Do not work it out. Just look at the fraction doing the multiplying.",
+              "Less than one whole? Then you are taking a part of the amount, so the answer is smaller.",
+              "More than one whole? Then there is more than all of it, so the answer is bigger.",
+              "Exactly one whole leaves the amount exactly as it was."
+            ],
+            "kidTip": "Multiplying only makes things bigger when you multiply by more than one. Nobody tells you that for years.",
+            "audioPrompt": "Look at the fraction first. Is it less than one whole, or more?",
+            "prompts": {
+              "default": "Bigger, smaller, or the same?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.5.NF.B.5"
+        ],
+        "trajectoryLevel": "multiplicative",
+        "ageBand": [
+          11,
+          12
+        ]
+      },
+      {
+        "id": "how-many-fit",
+        "title": "How Many Halves in Three?",
+        "concept": "Measuring with Unit Fractions",
+        "conceptKey": "fraction-measurer",
+        "requires": [
+          "unit-fraction-namer",
+          "measurer-divider"
+        ],
+        "activity": "fractions/divide",
+        "iconName": "Ruler",
+        "iconTone": "emerald",
+        "params": {
+          "level": 38,
+          "question": {
+            "mode": "measure",
+            "questionsPerRound": 5,
+            "partsRange": [
+              2,
+              6
+            ],
+            "wholeRange": [
+              2,
+              5
+            ]
+          },
+          "play": {
+            "targetObjective": "Count how many pieces of one size fit inside a whole number of strips.",
+            "stepByStep": [
+              "Mark one whole strip into the pieces you are counting.",
+              "Count them. Every whole strip holds the same number.",
+              "Now count that many for each whole strip you have.",
+              "There are more pieces than strips, because the pieces are smaller than a strip."
+            ],
+            "kidTip": "This is dividing, and the answer is bigger than what you started with. Look at the strip until you believe it.",
+            "audioPrompt": "Mark one strip into those pieces, then count them all.",
+            "prompts": {
+              "default": "How many fit?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.5.NF.B.7.B"
+        ],
+        "trajectoryLevel": "quotative",
+        "ageBand": [
+          11,
+          12
+        ]
+      },
+      {
+        "id": "divide-whole-by-fraction",
+        "title": "A Whole Number Divided by a Fraction",
+        "concept": "Dividing a Whole Number by a Fraction",
+        "conceptKey": "whole-divider",
+        "requires": [
+          "fraction-measurer"
+        ],
+        "activity": "fractions/divide",
+        "iconName": "Scissors",
+        "iconTone": "cyan",
+        "params": {
+          "level": 39,
+          "question": {
+            "mode": "whole_by",
+            "questionsPerRound": 5,
+            "partsRange": [
+              2,
+              6
+            ],
+            "wholeRange": [
+              2,
+              6
+            ]
+          },
+          "play": {
+            "targetObjective": "Divide a whole number by a fraction by seeing how many of that fraction fit inside it.",
+            "stepByStep": [
+              "Cut every whole one into the pieces named at the bottom of the fraction.",
+              "The top number says how many pieces make one group.",
+              "Group the pieces up and count the groups.",
+              "That is the answer, and it is bigger than the number you started with."
+            ],
+            "kidTip": "Dividing by something smaller than one always gives you more than you started with.",
+            "audioPrompt": "Cut them all up, then group the pieces.",
+            "prompts": {
+              "default": "How many groups?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.5.NF.B.7.B"
+        ],
+        "trajectoryLevel": "quotative",
+        "ageBand": [
+          11,
+          12
+        ]
+      },
+      {
+        "id": "divide-fraction-by-whole",
+        "title": "Share a Fraction Between People",
+        "concept": "Dividing a Fraction by a Whole Number",
+        "conceptKey": "fraction-sharer",
+        "requires": [
+          "fraction-measurer",
+          "equal-sharer"
+        ],
+        "activity": "fractions/divide",
+        "iconName": "Users",
+        "iconTone": "purple",
+        "params": {
+          "level": 40,
+          "question": {
+            "mode": "by_whole",
+            "questionsPerRound": 5,
+            "partsRange": [
+              2,
+              8
+            ],
+            "sharesRange": [
+              2,
+              5
+            ]
+          },
+          "play": {
+            "targetObjective": "Share a fraction equally between several people by cutting each piece again.",
+            "stepByStep": [
+              "This one is sharing, not measuring. Three quarters between three people.",
+              "Cut each piece into as many bits as there are people.",
+              "Everybody takes one bit from each piece.",
+              "The pieces got smaller, so the bottom number got bigger."
+            ],
+            "kidTip": "Sharing makes each part smaller. Measuring counts how many fit. They are different questions.",
+            "audioPrompt": "Cut every piece again, one bit each.",
+            "prompts": {
+              "default": "How much does each one get?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.5.NF.B.7.A"
+        ],
+        "trajectoryLevel": "quotative",
+        "ageBand": [
+          11,
+          12
+        ]
+      },
+      {
+        "id": "divide-by-fraction",
+        "title": "Divide by a Fraction",
+        "concept": "Dividing a Fraction by a Fraction",
+        "conceptKey": "fraction-divider",
+        "requires": [
+          "whole-divider",
+          "fraction-sharer"
+        ],
+        "activity": "fractions/divide",
+        "iconName": "Divide",
+        "iconTone": "indigo",
+        "params": {
+          "level": 41,
+          "question": {
+            "mode": "by_fraction",
+            "questionsPerRound": 5,
+            "partsRange": [
+              2,
+              6
+            ]
+          },
+          "play": {
+            "targetObjective": "Work out how many of one fraction fit inside another.",
+            "stepByStep": [
+              "The question is still the same one: how many of the second fit inside the first?",
+              "Cut both into the same-sized pieces so you can compare them.",
+              "Now count how many of the second one fit.",
+              "It might not come out whole, and that is allowed. Half a group is a real answer."
+            ],
+            "kidTip": "Same question as before. Only the numbers are harder.",
+            "audioPrompt": "How many of the second one fit inside the first?",
+            "prompts": {
+              "default": "How many fit inside?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.6.NS.A.1"
+        ],
+        "trajectoryLevel": "quotative",
+        "ageBand": [
+          11,
+          12
+        ]
+      },
+      {
+        "id": "why-flip",
+        "title": "Why It Looks Like Flipping",
+        "concept": "Why Dividing by a Fraction Multiplies by its Reciprocal",
+        "conceptKey": "reciprocal-reasoner",
+        "requires": [
+          "fraction-divider",
+          "fraction-multiplier"
+        ],
+        "activity": "fractions/divide",
+        "iconName": "RefreshCw",
+        "iconTone": "pink",
+        "params": {
+          "level": 42,
+          "question": {
+            "mode": "explain_flip",
+            "questionsPerRound": 5,
+            "partsRange": [
+              2,
+              6
+            ]
+          },
+          "play": {
+            "targetObjective": "See why turning the second fraction upside down and multiplying answers the same question.",
+            "stepByStep": [
+              "Dividing asks how many of the second one fit inside the first.",
+              "The smaller the second one is, the more of them fit — so the answer grows as it shrinks.",
+              "Multiplying by a fraction turned upside down does exactly that.",
+              "The rule is not a trick. It is the same question written another way."
+            ],
+            "kidTip": "Nobody should learn the flip before they have seen why it works. Now you have.",
+            "audioPrompt": "Which multiplication asks the same question?",
+            "prompts": {
+              "default": "Which one asks the same thing?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.6.NS.A.1"
+        ],
+        "trajectoryLevel": "quotative",
+        "ageBand": [
+          11,
+          12
+        ]
+      },
+      {
+        "id": "tenths",
+        "title": "Tenths, Two Ways",
+        "concept": "Tenths as Fractions and Decimals",
+        "conceptKey": "tenth-reader",
+        "requires": [
+          "fraction-notation-reader",
+          "place-value-builder"
+        ],
+        "activity": "fractions/decimal",
+        "iconName": "Circle",
+        "iconTone": "indigo",
+        "params": {
+          "level": 43,
+          "question": {
+            "mode": "tenths",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Write tenths as a decimal, and see that the decimal point is a fraction in disguise.",
+            "stepByStep": [
+              "A strip cut into ten is tenths, and you already know how to name those.",
+              "The first place after the point counts tenths. That is all the point means.",
+              "So seven tenths is a seven in that first place: 0.7.",
+              "Same amount, same picture, different way of writing it down."
+            ],
+            "kidTip": "The decimal point does not make a new kind of number. It names the pieces by position.",
+            "audioPrompt": "Seven tenths goes into the first place after the point.",
+            "prompts": {
+              "default": "Write it as a decimal."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NF.C.6"
+        ],
+        "trajectoryLevel": "representations",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "hundredths",
+        "title": "Hundredths",
+        "concept": "Hundredths as Fractions and Decimals",
+        "conceptKey": "hundredth-reader",
+        "requires": [
+          "tenth-reader",
+          "unitiser-hundred"
+        ],
+        "activity": "fractions/decimal",
+        "iconName": "Grid3x3",
+        "iconTone": "purple",
+        "params": {
+          "level": 44,
+          "question": {
+            "mode": "hundredths",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Read and write hundredths in both names, using a hundred-square.",
+            "stepByStep": [
+              "A hundred squares, and some of them shaded. That is hundredths.",
+              "The second place after the point counts hundredths.",
+              "So fifty-eight hundredths uses both places: 0.58.",
+              "The first digit is still tenths. Five tenths and eight hundredths is the same thing."
+            ],
+            "kidTip": "Two places means hundredths. Count the places and you know the bottom number.",
+            "audioPrompt": "Two places after the point. Both digits are used.",
+            "prompts": {
+              "default": "Write it as a decimal."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NF.C.6"
+        ],
+        "trajectoryLevel": "representations",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "fraction-to-decimal",
+        "title": "Divide to Get the Decimal",
+        "concept": "Converting a Fraction to a Decimal by Division",
+        "conceptKey": "fraction-decimal-converter",
+        "requires": [
+          "hundredth-reader",
+          "quotient-continuer"
+        ],
+        "activity": "fractions/decimal",
+        "iconName": "Divide",
+        "iconTone": "cyan",
+        "params": {
+          "level": 45,
+          "question": {
+            "mode": "by_dividing",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Turn any of these fractions into a decimal by dividing the top by the bottom.",
+            "stepByStep": [
+              "A fraction is a division that has not been done yet: the top shared between the bottom.",
+              "Do the division, carrying on past the point.",
+              "Three divided by four is nought point seven five.",
+              "These ones all stop. Some fractions do not, and those are a different lesson."
+            ],
+            "kidTip": "The line in a fraction is a division sign. It always was.",
+            "audioPrompt": "Divide the top by the bottom, and keep going past the point.",
+            "prompts": {
+              "default": "What is it as a decimal?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.5.NF.B.3"
+        ],
+        "trajectoryLevel": "representations",
+        "ageBand": [
+          11,
+          12
+        ]
+      },
+      {
+        "id": "decimal-to-fraction",
+        "title": "Decimal Back to a Fraction",
+        "concept": "Converting a Decimal to a Fraction in Simplest Form",
+        "conceptKey": "decimal-fraction-converter",
+        "requires": [
+          "hundredth-reader",
+          "simplest-form-finder"
+        ],
+        "activity": "fractions/decimal",
+        "iconName": "RefreshCw",
+        "iconTone": "emerald",
+        "params": {
+          "level": 46,
+          "question": {
+            "mode": "from_decimal",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Write a decimal as a fraction and cut it down to its simplest form.",
+            "stepByStep": [
+              "Count the places after the point: one is tenths, two is hundredths.",
+              "That tells you the bottom number, and the digits are the top.",
+              "Nought point seven five is seventy-five hundredths.",
+              "Now cut it down: seventy-five hundredths is three quarters."
+            ],
+            "kidTip": "Count the places, write the fraction, then simplify. Three steps, every time.",
+            "audioPrompt": "Count the places after the point. That is the bottom number.",
+            "prompts": {
+              "default": "Write it as a fraction."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NF.C.6"
+        ],
+        "trajectoryLevel": "representations",
+        "ageBand": [
+          11,
+          12
+        ]
+      },
+      {
+        "id": "percent",
+        "title": "Per Hundred",
+        "concept": "Percent as Hundredths",
+        "conceptKey": "percent-reader",
+        "requires": [
+          "hundredth-reader"
+        ],
+        "activity": "fractions/decimal",
+        "iconName": "Percent",
+        "iconTone": "pink",
+        "params": {
+          "level": 47,
+          "question": {
+            "mode": "percent",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Read a percentage as a number of hundredths, and write a fraction as a percentage.",
+            "stepByStep": [
+              "Percent means per hundred. The sign is short for 'out of a hundred'.",
+              "So write the fraction with a hundred underneath it.",
+              "Three quarters is seventy-five hundredths, which is seventy-five percent.",
+              "It is not new arithmetic. It is hundredths with a different sign after it."
+            ],
+            "kidTip": "Every percentage is a fraction with a hundred underneath. That is the whole idea.",
+            "audioPrompt": "Write it with a hundred underneath, then read the top number.",
+            "prompts": {
+              "default": "What percentage is it?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.6.RP.A.3.C"
+        ],
+        "trajectoryLevel": "representations",
+        "ageBand": [
+          11,
+          12
+        ]
+      },
+      {
+        "id": "three-names",
+        "title": "Three Names, One Number",
+        "concept": "Matching Fractions, Decimals and Percentages",
+        "conceptKey": "representation-matcher",
+        "requires": [
+          "percent-reader",
+          "fraction-decimal-converter",
+          "decimal-fraction-converter"
+        ],
+        "activity": "fractions/decimal",
+        "iconName": "Link",
+        "iconTone": "purple",
+        "params": {
+          "level": 48,
+          "question": {
+            "mode": "three_names",
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Match a fraction with its decimal and its percentage, and see that all three are one number.",
+            "stepByStep": [
+              "Start with the decimal: how many hundredths is it?",
+              "The percentage should be that same number of hundredths.",
+              "And the fraction should shade that many of the hundred squares.",
+              "If any one of them disagrees, the row is wrong."
+            ],
+            "kidTip": "Three quarters, nought point seven five, seventy-five percent. One amount, three names.",
+            "audioPrompt": "Which row is the same number written the other two ways?",
+            "prompts": {
+              "default": "Which row matches?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.6.RP.A.3.C"
+        ],
+        "trajectoryLevel": "representations",
+        "ageBand": [
+          11,
+          12
+        ]
+      },
+      {
+        "id": "benchmarks",
+        "title": "Nearly Nothing, Nearly a Half, Nearly One",
+        "concept": "Estimating Fractions Against Benchmarks",
+        "conceptKey": "benchmark-estimator",
+        "requires": [
+          "benchmark-comparer"
+        ],
+        "activity": "fractions/estimate",
+        "iconName": "Gauge",
+        "iconTone": "cyan",
+        "params": {
+          "level": 49,
+          "question": {
+            "mode": "benchmark",
+            "questionsPerRound": 6,
+            "partsRange": [
+              3,
+              12
+            ]
+          },
+          "play": {
+            "targetObjective": "Judge roughly where a fraction sits, without working anything out.",
+            "stepByStep": [
+              "Do not calculate. Look at the strip and see where the shading reaches.",
+              "Halfway along is a half. The far end is one whole one.",
+              "Ask which of the three marks it lands nearest to.",
+              "That rough answer is the thing that catches a wrong exact one later."
+            ],
+            "kidTip": "Knowing roughly is not a lesser kind of knowing. It is the check you carry with you.",
+            "audioPrompt": "Do not work it out. Just look at where it lands.",
+            "prompts": {
+              "default": "Nearest to what?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.5.NF.A.2"
+        ],
+        "trajectoryLevel": "estimation",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "is-it-reasonable",
+        "title": "Could That Be Right?",
+        "concept": "Judging Whether a Fraction Answer Is Reasonable",
+        "conceptKey": "fraction-reasonableness-checker",
+        "requires": [
+          "benchmark-estimator",
+          "denominator-reasoner"
+        ],
+        "activity": "fractions/estimate",
+        "iconName": "HelpCircle",
+        "iconTone": "pink",
+        "params": {
+          "level": 50,
+          "question": {
+            "mode": "reasonable",
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Decide whether an answer could possibly be right, without doing the sum.",
+            "stepByStep": [
+              "You are not being asked to add them. You are being asked to judge the answer.",
+              "Lay both fractions along the strip, one after the other, and see how far they reach.",
+              "An answer smaller than one of the pieces you started with cannot be their total.",
+              "Some of these answers are perfectly fine, so look before you say no."
+            ],
+            "kidTip": "If an answer is smaller than what you started with, something went wrong. Check before you trust it.",
+            "audioPrompt": "Could that be right? Look at the strip before you decide.",
+            "prompts": {
+              "default": "Could that be right?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.5.NF.A.2"
+        ],
+        "trajectoryLevel": "estimation",
+        "ageBand": [
+          11,
+          12
+        ]
+      },
+      {
+        "id": "amount-story",
+        "title": "A Fraction of an Amount, in Words",
+        "concept": "Word Problems: a Fraction of a Quantity",
+        "conceptKey": "amount-story-solver",
+        "requires": [
+          "amount-fractioner"
+        ],
+        "activity": "fractions/story",
+        "iconName": "BookOpen",
+        "iconTone": "purple",
+        "params": {
+          "level": 51,
+          "question": {
+            "mode": "of_amount",
+            "questionsPerRound": 5,
+            "totalMax": 120
+          },
+          "play": {
+            "targetObjective": "Read a situation, model it on a bar, and find a fraction of an amount.",
+            "stepByStep": [
+              "Read it twice. The second time, look for what the whole amount is.",
+              "Cut the bar into as many parts as the bottom number says.",
+              "Work out how many are in one part.",
+              "Then take as many parts as the top number asks for."
+            ],
+            "kidTip": "Model it before you calculate. The bar decides what to do; the numbers only do it.",
+            "audioPrompt": "Cut the bar first. Then work out one part.",
+            "prompts": {
+              "default": "How many is that?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NF.B.4.C"
+        ],
+        "trajectoryLevel": "problem-solver",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "sharing-story",
+        "title": "Four Cakes Between Three",
+        "concept": "Fractions as the Answer to a Division",
+        "conceptKey": "fraction-as-division",
+        "requires": [
+          "fraction-sharer",
+          "mixed-number-writer"
+        ],
+        "activity": "fractions/story",
+        "iconName": "Cake",
+        "iconTone": "pink",
+        "params": {
+          "level": 52,
+          "question": {
+            "mode": "share_leftover",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Share things out where the leftover gets cut up, so the answer is a mixed number.",
+            "stepByStep": [
+              "Give everybody a whole one first, and see what is left over.",
+              "Now the important bit: the leftover does not stay left over.",
+              "It gets cut into as many pieces as there are people, and shared too.",
+              "So each person gets whole ones and a fraction of one more."
+            ],
+            "kidTip": "'One each and one left over' is a true sentence and the wrong answer. Cakes can be cut.",
+            "audioPrompt": "What happens to the one left over? It gets shared as well.",
+            "prompts": {
+              "default": "How much each?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.5.NF.B.3"
+        ],
+        "trajectoryLevel": "problem-solver",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "adding-story",
+        "title": "Adding in a Situation",
+        "concept": "Word Problems: Adding Unlike Fractions",
+        "conceptKey": "context-adder",
+        "requires": [
+          "unlike-adder"
+        ],
+        "activity": "fractions/story",
+        "iconName": "Plus",
+        "iconTone": "emerald",
+        "params": {
+          "level": 53,
+          "question": {
+            "mode": "add_context",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Add two fractions of the same thing inside a story, matching the pieces first.",
+            "stepByStep": [
+              "Both amounts are parts of the same bottle, so they can be added.",
+              "But not yet — the pieces are different sizes.",
+              "Cut both into the same-sized pieces first.",
+              "Now count them together. That is how much is gone."
+            ],
+            "kidTip": "Same whole, different pieces. Match the pieces and it is just counting.",
+            "audioPrompt": "Both are parts of one bottle. Match the pieces, then count.",
+            "prompts": {
+              "default": "How much is gone?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.5.NF.A.2"
+        ],
+        "trajectoryLevel": "problem-solver",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "recipe-story",
+        "title": "Scaling a Recipe",
+        "concept": "Multiplying a Mixed Number by a Whole Number",
+        "conceptKey": "recipe-scaler",
+        "requires": [
+          "mixed-adder",
+          "repeated-fraction-adder"
+        ],
+        "activity": "fractions/story",
+        "iconName": "ChefHat",
+        "iconTone": "indigo",
+        "params": {
+          "level": 54,
+          "question": {
+            "mode": "scale",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Multiply an amount with whole ones and parts by a whole number.",
+            "stepByStep": [
+              "The amount has two bits: whole cups and part cups. Both get multiplied.",
+              "Do the whole cups first. That is ordinary multiplication.",
+              "Then the parts, which is copies of a fraction.",
+              "If the parts add up past a whole cup, that cup joins the others."
+            ],
+            "kidTip": "Neither bit stays behind. The parts get multiplied too.",
+            "audioPrompt": "Whole cups first, then the parts.",
+            "prompts": {
+              "default": "How many cups?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.5.NF.B.6"
+        ],
+        "trajectoryLevel": "problem-solver",
+        "ageBand": [
+          11,
+          12
+        ]
+      },
+      {
+        "id": "comparison-story",
+        "title": "How Many Times as Much?",
+        "concept": "Comparing Two Fractions by Division",
+        "conceptKey": "fraction-comparer-in-context",
+        "requires": [
+          "fraction-divider",
+          "unlike-comparer"
+        ],
+        "activity": "fractions/story",
+        "iconName": "Scale",
+        "iconTone": "cyan",
+        "params": {
+          "level": 55,
+          "question": {
+            "mode": "compare_context",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Answer 'how many times as much' by dividing, not by subtracting.",
+            "stepByStep": [
+              "'How many times as much' is a dividing question.",
+              "Ask how many of the smaller amount fit inside the bigger one.",
+              "Taking one away from the other answers a different question: how much more.",
+              "Both are real questions. Read carefully and answer the one that was asked."
+            ],
+            "kidTip": "How much more is subtraction. How many times as much is division. The words tell you which.",
+            "audioPrompt": "How many of the smaller fit inside the bigger?",
+            "prompts": {
+              "default": "How many times as much?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.6.NS.A.1"
+        ],
+        "trajectoryLevel": "problem-solver",
+        "ageBand": [
+          11,
+          12
+        ]
+      },
+      {
+        "id": "multi-step-story",
+        "title": "Two Steps",
+        "concept": "Multi-Step Word Problems with Fractions",
+        "conceptKey": "fraction-multi-step-solver",
+        "requires": [
+          "amount-story-solver",
+          "context-adder"
+        ],
+        "activity": "fractions/story",
+        "iconName": "ListOrdered",
+        "iconTone": "purple",
+        "params": {
+          "level": 56,
+          "question": {
+            "mode": "multi_step",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Solve a problem that needs a fraction step and then one more step.",
+            "stepByStep": [
+              "Two things happen here, one after the other. Do them in that order.",
+              "Work out the fraction step first, and write down what is left.",
+              "Then do the second step to that answer.",
+              "The answer to the first step is not the answer to the question."
+            ],
+            "kidTip": "Write the middle number down. Most mistakes here are people trying to hold it in their head.",
+            "audioPrompt": "Two steps. Do the fraction one first.",
+            "prompts": {
+              "default": "How many now?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.5.NF.B.6"
+        ],
+        "trajectoryLevel": "problem-solver",
+        "ageBand": [
+          11,
+          12
+        ]
+      },
+      {
+        "id": "explain-and-compare",
+        "title": "Which Way, and Why",
+        "concept": "Choosing a Route Through a Fraction Problem",
+        "conceptKey": "fraction-strategy-chooser",
+        "requires": [
+          "unlike-adder",
+          "fraction-simplifier",
+          "benchmark-estimator"
+        ],
+        "activity": "fractions/strategy",
+        "iconName": "GitBranch",
+        "iconTone": "cyan",
+        "params": {
+          "level": 57,
+          "question": {
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Choose a way of handling two fractions that suits those particular numbers.",
+            "stepByStep": [
+              "Look at the two bottom numbers before anything else.",
+              "Are they the same? Then there is nothing to cut.",
+              "Does one go into the other? Then only one of them needs cutting.",
+              "Do they share a factor? Then the pieces can be smaller than multiplying would give."
+            ],
+            "kidTip": "More than one way can be right. The question is which one suits these numbers.",
+            "audioPrompt": "Which way would you do this one?",
+            "prompts": {
+              "default": "Which way would you do it?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.5.NF.A.1",
+          "CCSS.5.NF.B.4"
+        ],
+        "trajectoryLevel": "strategies",
+        "ageBand": [
+          11,
+          12
+        ]
+      },
+      {
+        "id": "practice-strip",
+        "title": "Practice: Equal Parts",
+        "concept": "Practice Without Help",
+        "conceptKey": "equal-part-checker",
+        "requires": [
+          "equal-part-checker"
+        ],
+        "activity": "fractions/strip",
+        "iconName": "PieChart",
+        "iconTone": "purple",
+        "params": {
+          "level": 58,
+          "question": {
+            "practice": true,
+            "questionsPerRound": 8,
+            "modes": [
+              "equal_or_not",
+              "name_unit",
+              "which_whole",
+              "build",
+              "to_notation",
+              "of_a_set"
+            ]
+          }
+        },
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "practice-numberline",
+        "title": "Practice: Fractions on the Line",
+        "concept": "Practice Without Help",
+        "conceptKey": "fraction-line-placer",
+        "requires": [
+          "fraction-line-placer"
+        ],
+        "activity": "fractions/numberline",
+        "iconName": "Ruler",
+        "iconTone": "cyan",
+        "params": {
+          "level": 59,
+          "question": {
+            "practice": true,
+            "questionsPerRound": 8,
+            "modes": [
+              "place_unit",
+              "place_any",
+              "read_point",
+              "makes_one",
+              "improper"
+            ]
+          }
+        },
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          8,
+          11
+        ]
+      },
+      {
+        "id": "practice-equivalence",
+        "title": "Practice: Same Amount, New Name",
+        "concept": "Practice Without Help",
+        "conceptKey": "equivalence-maker",
+        "requires": [
+          "equivalence-maker"
+        ],
+        "activity": "fractions/equivalence",
+        "iconName": "Repeat",
+        "iconTone": "emerald",
+        "params": {
+          "level": 60,
+          "question": {
+            "practice": true,
+            "questionsPerRound": 8,
+            "modes": [
+              "split",
+              "two_names",
+              "scale_up",
+              "scale_down",
+              "simplest"
+            ]
+          }
+        },
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "practice-compare",
+        "title": "Practice: Which Is More",
+        "concept": "Practice Without Help",
+        "conceptKey": "unlike-comparer",
+        "requires": [
+          "unlike-comparer"
+        ],
+        "activity": "fractions/compare",
+        "iconName": "Scale",
+        "iconTone": "cyan",
+        "params": {
+          "level": 61,
+          "question": {
+            "practice": true,
+            "questionsPerRound": 8,
+            "modes": [
+              "same_denominator",
+              "same_numerator",
+              "different_wholes",
+              "benchmark_half",
+              "common_denominator"
+            ]
+          }
+        },
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          9,
+          12
+        ]
+      },
+      {
+        "id": "practice-mixed",
+        "title": "Practice: Wholes and Parts",
+        "concept": "Practice Without Help",
+        "conceptKey": "mixed-line-placer",
+        "requires": [
+          "mixed-line-placer"
+        ],
+        "activity": "fractions/mixed",
+        "iconName": "Split",
+        "iconTone": "indigo",
+        "params": {
+          "level": 62,
+          "question": {
+            "practice": true,
+            "questionsPerRound": 6,
+            "modes": [
+              "to_mixed",
+              "to_improper",
+              "on_line"
+            ]
+          }
+        },
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          9,
+          12
+        ]
+      },
+      {
+        "id": "practice-add",
+        "title": "Practice: Adding and Taking Away",
+        "concept": "Practice Without Help",
+        "conceptKey": "mixed-exchanger",
+        "requires": [
+          "mixed-exchanger"
+        ],
+        "activity": "fractions/add",
+        "iconName": "Plus",
+        "iconTone": "emerald",
+        "params": {
+          "level": 63,
+          "question": {
+            "practice": true,
+            "questionsPerRound": 8,
+            "modes": [
+              "add_like",
+              "subtract_like",
+              "refute",
+              "add_nested",
+              "add_unlike",
+              "subtract_unlike",
+              "add_mixed",
+              "subtract_mixed"
+            ]
+          }
+        },
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "practice-multiply",
+        "title": "Practice: A Fraction of Something",
+        "concept": "Practice Without Help",
+        "conceptKey": "scaling-reasoner",
+        "requires": [
+          "scaling-reasoner"
+        ],
+        "activity": "fractions/multiply",
+        "iconName": "Grid3x3",
+        "iconTone": "purple",
+        "params": {
+          "level": 64,
+          "question": {
+            "practice": true,
+            "questionsPerRound": 8,
+            "modes": [
+              "of_whole",
+              "whole_times",
+              "area_model",
+              "simplify_first",
+              "scaling"
+            ]
+          }
+        },
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "practice-divide",
+        "title": "Practice: How Many Fit",
+        "concept": "Practice Without Help",
+        "conceptKey": "reciprocal-reasoner",
+        "requires": [
+          "reciprocal-reasoner"
+        ],
+        "activity": "fractions/divide",
+        "iconName": "Ruler",
+        "iconTone": "emerald",
+        "params": {
+          "level": 65,
+          "question": {
+            "practice": true,
+            "questionsPerRound": 8,
+            "modes": [
+              "measure",
+              "whole_by",
+              "by_whole",
+              "by_fraction",
+              "explain_flip"
+            ]
+          }
+        },
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          11,
+          12
+        ]
+      },
+      {
+        "id": "practice-decimal",
+        "title": "Practice: Three Names",
+        "concept": "Practice Without Help",
+        "conceptKey": "representation-matcher",
+        "requires": [
+          "representation-matcher"
+        ],
+        "activity": "fractions/decimal",
+        "iconName": "Percent",
+        "iconTone": "indigo",
+        "params": {
+          "level": 66,
+          "question": {
+            "practice": true,
+            "questionsPerRound": 8,
+            "modes": [
+              "tenths",
+              "hundredths",
+              "by_dividing",
+              "from_decimal",
+              "percent",
+              "three_names"
+            ]
+          }
+        },
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "practice-estimate",
+        "title": "Practice: Roughly How Much",
+        "concept": "Practice Without Help",
+        "conceptKey": "fraction-reasonableness-checker",
+        "requires": [
+          "fraction-reasonableness-checker"
+        ],
+        "activity": "fractions/estimate",
+        "iconName": "Gauge",
+        "iconTone": "cyan",
+        "params": {
+          "level": 67,
+          "question": {
+            "practice": true,
+            "questionsPerRound": 6,
+            "modes": [
+              "benchmark",
+              "reasonable"
+            ]
+          }
+        },
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "practice-story",
+        "title": "Practice: In Words",
+        "concept": "Practice Without Help",
+        "conceptKey": "fraction-multi-step-solver",
+        "requires": [
+          "fraction-multi-step-solver"
+        ],
+        "activity": "fractions/story",
+        "iconName": "BookOpen",
+        "iconTone": "purple",
+        "params": {
+          "level": 68,
+          "question": {
+            "practice": true,
+            "questionsPerRound": 8,
+            "modes": [
+              "of_amount",
+              "share_leftover",
+              "add_context",
+              "scale",
+              "compare_context",
+              "multi_step"
+            ]
+          }
+        },
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "practice-strategy",
+        "title": "Practice: Which Way",
+        "concept": "Practice Without Help",
+        "conceptKey": "fraction-strategy-chooser",
+        "requires": [
+          "fraction-strategy-chooser"
+        ],
+        "activity": "fractions/strategy",
+        "iconName": "GitBranch",
+        "iconTone": "cyan",
+        "params": {
+          "level": 69,
+          "question": {
+            "practice": true,
+            "questionsPerRound": 6
+          }
+        },
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          11,
           12
         ]
       }

@@ -523,3 +523,40 @@ row of things to circle. 69 printable, 446 tests.
   child to write *why* an answer cannot be right, and level 57 asks which route
   they would take and why. Both are blank lines on a sheet and buttons in a
   round, and the blank line is the better question.
+
+### Phase 16 — voice
+
+Thirteen refusals, scripted; `speaksPrompts: false`; nothing else.
+
+`voice.json` was written in phase 0 from the plan, and **all four of its lines
+were sentences no engine ever said** — the wording moved as the engines were
+built and the script stayed where it was. Four clips would have been recorded
+for nothing while the thirteen real lines had none, and the only symptom would
+have been a refusal arriving in a different voice.
+
+`fractions.voice.test.ts` now checks both directions against the engines' own
+refusal tables, and holds the recordings to all-or-nothing: half recorded and
+half on live TTS is two voices in one round, which sounds like a fault.
+
+### Phase 17 — placement and seeds
+
+Seventeen units appended to `course.json` (units 91–107), thirteen teaching and
+four practice, every lesson placed once and in teaching order. Seeds regenerated
+and the api restarted: `skill_registry` now holds fractions with 69 lessons at
+`status: published`, and `art_assets` has the `fractions-quest` thumbnail.
+
+### Phase 18 — audit
+
+`fractions.audit.test.tsx` walks §0 of the development guide. Three real
+findings on the first run:
+
+- **Twenty-three lessons asked for an icon tone that does not exist.** There are
+  six — amber, cyan, indigo, purple, pink, emerald — and anything else silently
+  renders indigo. "sky", "violet" and "rose" are Tailwind colours, not tones.
+  Mapped onto cyan, purple and pink; amber is banned here for contrast.
+- A practice lesson claimed an age band starting at seven, below the skill's
+  own floor of eight.
+- Three `stepByStep` lines were fragments rather than sentences.
+
+Final: **69 lessons, 12 engines, 509 tests in the skill, 3448 across the repo**,
+every lesson printable, placed and seeded.

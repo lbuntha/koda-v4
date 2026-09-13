@@ -10,19 +10,34 @@
     "",
     "What it does say is what it says *back* to a child: the reactions, which come",
     "from the common pack and name no subject, and the refusals below — the",
-    "sentence an engine gives when it will not take an answer yet.",
+    "sentence an engine gives when it will not take an answer yet. Those fire",
+    "while a child is looking at a strip rather than at text, and apparatus that",
+    "refuses a move in silence reads as broken rather than as restrained.",
     "",
-    "Phase 0 has no engines. These four are the ones the plan already commits to:",
-    "the parts must be equal, the whole must be named, and a fraction of one thing",
-    "cannot be compared with a fraction of another."
+    "These are copied from the engines' own refusal tables, not written by hand.",
+    "The first version of this file was written from the plan before the engines",
+    "existed, and every one of its four lines turned out to be a sentence nothing",
+    "in the skill ever said. `fractions.voice.test.ts` now checks both directions.",
+    "",
+    "The speaker button stays, unrecorded, on the live TTS path: a child who can",
+    "do the fractions but is stuck on the reading should have a way through."
   ],
   "speaksPrompts": false,
   "prompts": [],
   "templates": [],
   "phrases": [
-    "The parts have to be the same size.",
-    "Half of what? Say what the whole is first.",
-    "These are parts of two different things, so you cannot tell.",
-    "That is a different amount, not a different name for the same one."
+    "Mark the strip into those pieces first, then count how many there are.",
+    "Not there yet — keep going.",
+    "Now shade the second one down the grid. The answer is where they cross.",
+    "Put the marker on the line first.",
+    "Shade more of them — count how many the question asked for.",
+    "Shade the first fraction across the grid before you answer.",
+    "That has gone past it. Come back one step.",
+    "That is an equal fraction, but it can still be made simpler.",
+    "That is too many. Take one off.",
+    "The pieces are different sizes. Make them match before you count.",
+    "There are still enough loose ones to make another whole.",
+    "There is still a whole one to break up.",
+    "These pieces are different sizes. Cut them to match before you count."
   ]
 }

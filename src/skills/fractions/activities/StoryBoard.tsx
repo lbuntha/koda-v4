@@ -177,7 +177,7 @@ export const StoryBoard: React.FC<ActivityProps<BoardParams>> = ({ params, koda,
           : undefined
       }
       iconName="BookOpen"
-      iconTone="violet"
+      iconTone="purple"
       onReadAloud={
         practising || !speechEnabled
           ? undefined

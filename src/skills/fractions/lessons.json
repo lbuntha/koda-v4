@@ -72,7 +72,7 @@
           "targetObjective": "Name one part of a whole cut into equal parts.",
           "stepByStep": [
             "Count how many equal parts the whole is cut into.",
-            "That number goes underneath.",
+            "That number is the one written underneath.",
             "One part is shaded, so a one goes on top.",
             "One of four equal parts is one quarter."
           ],
@@ -206,8 +206,8 @@
         "play": {
           "targetObjective": "Write the fraction a picture shows.",
           "stepByStep": [
-            "Count the shaded parts.",
-            "Count all the parts.",
+            "Count the parts that are shaded in.",
+            "Count how many parts there are altogether.",
             "The shaded ones go on top; all of them go underneath.",
             "Read it out loud to check it sounds right."
           ],
@@ -1181,7 +1181,7 @@
       ],
       "activity": "fractions/add",
       "iconName": "Minus",
-      "iconTone": "sky",
+      "iconTone": "cyan",
       "params": {
         "level": 26,
         "question": {
@@ -1227,7 +1227,7 @@
       ],
       "activity": "fractions/add",
       "iconName": "AlertCircle",
-      "iconTone": "rose",
+      "iconTone": "pink",
       "params": {
         "level": 27,
         "question": {
@@ -1361,7 +1361,7 @@
       ],
       "activity": "fractions/add",
       "iconName": "Minus",
-      "iconTone": "sky",
+      "iconTone": "cyan",
       "params": {
         "level": 30,
         "question": {
@@ -1407,7 +1407,7 @@
       ],
       "activity": "fractions/add",
       "iconName": "PlusCircle",
-      "iconTone": "violet",
+      "iconTone": "purple",
       "params": {
         "level": 31,
         "question": {
@@ -1457,7 +1457,7 @@
       ],
       "activity": "fractions/add",
       "iconName": "Split",
-      "iconTone": "rose",
+      "iconTone": "pink",
       "params": {
         "level": 32,
         "question": {
@@ -1507,7 +1507,7 @@
       ],
       "activity": "fractions/multiply",
       "iconName": "Users",
-      "iconTone": "violet",
+      "iconTone": "purple",
       "params": {
         "level": 33,
         "question": {
@@ -1653,7 +1653,7 @@
       ],
       "activity": "fractions/multiply",
       "iconName": "Scissors",
-      "iconTone": "rose",
+      "iconTone": "pink",
       "params": {
         "level": 36,
         "question": {
@@ -1699,7 +1699,7 @@
       ],
       "activity": "fractions/multiply",
       "iconName": "TrendingDown",
-      "iconTone": "sky",
+      "iconTone": "cyan",
       "params": {
         "level": 37,
         "question": {
@@ -1798,7 +1798,7 @@
       ],
       "activity": "fractions/divide",
       "iconName": "Scissors",
-      "iconTone": "sky",
+      "iconTone": "cyan",
       "params": {
         "level": 39,
         "question": {
@@ -1848,7 +1848,7 @@
       ],
       "activity": "fractions/divide",
       "iconName": "Users",
-      "iconTone": "violet",
+      "iconTone": "purple",
       "params": {
         "level": 40,
         "question": {
@@ -1944,7 +1944,7 @@
       ],
       "activity": "fractions/divide",
       "iconName": "RefreshCw",
-      "iconTone": "rose",
+      "iconTone": "pink",
       "params": {
         "level": 42,
         "question": {
@@ -2032,7 +2032,7 @@
       ],
       "activity": "fractions/decimal",
       "iconName": "Grid3x3",
-      "iconTone": "violet",
+      "iconTone": "purple",
       "params": {
         "level": 44,
         "question": {
@@ -2074,7 +2074,7 @@
       ],
       "activity": "fractions/decimal",
       "iconName": "Divide",
-      "iconTone": "sky",
+      "iconTone": "cyan",
       "params": {
         "level": 45,
         "question": {
@@ -2157,7 +2157,7 @@
       ],
       "activity": "fractions/decimal",
       "iconName": "Percent",
-      "iconTone": "rose",
+      "iconTone": "pink",
       "params": {
         "level": 47,
         "question": {
@@ -2241,7 +2241,7 @@
       ],
       "activity": "fractions/estimate",
       "iconName": "Gauge",
-      "iconTone": "sky",
+      "iconTone": "cyan",
       "params": {
         "level": 49,
         "question": {
@@ -2287,7 +2287,7 @@
       ],
       "activity": "fractions/estimate",
       "iconName": "HelpCircle",
-      "iconTone": "rose",
+      "iconTone": "pink",
       "params": {
         "level": 50,
         "question": {
@@ -2328,7 +2328,7 @@
       ],
       "activity": "fractions/story",
       "iconName": "BookOpen",
-      "iconTone": "violet",
+      "iconTone": "purple",
       "params": {
         "level": 51,
         "question": {
@@ -2371,7 +2371,7 @@
       ],
       "activity": "fractions/story",
       "iconName": "Cake",
-      "iconTone": "rose",
+      "iconTone": "pink",
       "params": {
         "level": 52,
         "question": {
@@ -2496,7 +2496,7 @@
       ],
       "activity": "fractions/story",
       "iconName": "Scale",
-      "iconTone": "sky",
+      "iconTone": "cyan",
       "params": {
         "level": 55,
         "question": {
@@ -2641,7 +2641,7 @@
       "standards": [],
       "trajectoryLevel": "practice",
       "ageBand": [
-        7,
+        8,
         10
       ]
     },
@@ -2655,7 +2655,7 @@
       ],
       "activity": "fractions/numberline",
       "iconName": "Ruler",
-      "iconTone": "sky",
+      "iconTone": "cyan",
       "params": {
         "level": 59,
         "question": {
@@ -2816,7 +2816,7 @@
       ],
       "activity": "fractions/multiply",
       "iconName": "Grid3x3",
-      "iconTone": "violet",
+      "iconTone": "purple",
       "params": {
         "level": 64,
         "question": {
@@ -2913,7 +2913,7 @@
       ],
       "activity": "fractions/estimate",
       "iconName": "Gauge",
-      "iconTone": "sky",
+      "iconTone": "cyan",
       "params": {
         "level": 67,
         "question": {
@@ -2942,7 +2942,7 @@
       ],
       "activity": "fractions/story",
       "iconName": "BookOpen",
-      "iconTone": "violet",
+      "iconTone": "purple",
       "params": {
         "level": 68,
         "question": {
