@@ -11581,7 +11581,12 @@
       "fraction-line-placer",
       "fraction-line-reader",
       "whole-completer",
-      "improper-reader"
+      "improper-reader",
+      "part-splitter",
+      "equivalence-reader",
+      "equivalence-maker",
+      "fraction-simplifier",
+      "simplest-form-finder"
     ],
     "requires": [
       "counter",
@@ -11632,6 +11637,13 @@
         "id": "part_labels",
         "name": "Part labels",
         "description": "Writes what one part is worth under the picture, so the pieces name themselves.",
+        "isEnabled": true,
+        "tag": "Cognitive"
+      },
+      {
+        "id": "equivalence_ghost",
+        "name": "Before and after",
+        "description": "Keeps the fraction you started with faintly behind the new one, so an equal fraction is seen rather than asserted. Never shown during practice.",
         "isEnabled": true,
         "tag": "Cognitive"
       }
@@ -12137,6 +12149,254 @@
         "ageBand": [
           9,
           11
+        ]
+      },
+      {
+        "id": "split-every-part",
+        "title": "Cut Them All Again",
+        "concept": "Equivalence Seen as Re-Cutting the Same Amount",
+        "conceptKey": "part-splitter",
+        "requires": [
+          "improper-reader",
+          "fraction-notation-reader"
+        ],
+        "activity": "fractions/equivalence",
+        "iconName": "Scissors",
+        "iconTone": "indigo",
+        "params": {
+          "level": 12,
+          "question": {
+            "mode": "split",
+            "questionsPerRound": 5,
+            "partsRange": [
+              2,
+              6
+            ],
+            "factorRange": [
+              2,
+              4
+            ]
+          },
+          "play": {
+            "targetObjective": "Cut every part of a fraction into smaller ones and see the amount stay the same.",
+            "stepByStep": [
+              "Look at how much is shaded before you start.",
+              "Cut every part into the same number of smaller pieces.",
+              "Watch the shading — it has not moved.",
+              "Count the new parts. There are more of them, and they are smaller."
+            ],
+            "kidTip": "Cutting a pizza into more slices does not give you more pizza.",
+            "audioPrompt": "Watch the shaded part while you cut. It does not move.",
+            "prompts": {
+              "default": "What is it called now?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.NF.A.3.A"
+        ],
+        "trajectoryLevel": "equivalence",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "same-point-two-names",
+        "title": "Two Names, One Amount",
+        "concept": "Recognising Equivalent Fractions from Two Pictures",
+        "conceptKey": "equivalence-reader",
+        "requires": [
+          "part-splitter"
+        ],
+        "activity": "fractions/equivalence",
+        "iconName": "Copy",
+        "iconTone": "purple",
+        "params": {
+          "level": 13,
+          "question": {
+            "mode": "two_names",
+            "questionsPerRound": 5,
+            "partsRange": [
+              2,
+              6
+            ],
+            "factorRange": [
+              2,
+              4
+            ]
+          },
+          "play": {
+            "targetObjective": "Recognise that two differently cut bars can show the same amount.",
+            "stepByStep": [
+              "Look at how far the colour reaches on each bar. It is the same.",
+              "Now count the parts on each — they are cut differently.",
+              "So the same amount has two names.",
+              "Read both halves of a pair before you choose it."
+            ],
+            "kidTip": "Equal fractions are not two amounts that are close. They are one amount with two names.",
+            "audioPrompt": "Both bars have the same amount coloured in.",
+            "prompts": {
+              "default": "Which pair of names does this amount have?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.3.NF.A.3.B"
+        ],
+        "trajectoryLevel": "equivalence",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "make-equivalent",
+        "title": "Make It in Eighths",
+        "concept": "Making an Equivalent Fraction with a Given Denominator",
+        "conceptKey": "equivalence-maker",
+        "requires": [
+          "equivalence-reader"
+        ],
+        "activity": "fractions/equivalence",
+        "iconName": "Maximize2",
+        "iconTone": "cyan",
+        "params": {
+          "level": 14,
+          "question": {
+            "mode": "scale_up",
+            "questionsPerRound": 5,
+            "partsRange": [
+              2,
+              6
+            ],
+            "factorRange": [
+              2,
+              5
+            ]
+          },
+          "play": {
+            "targetObjective": "Write a fraction again with a larger denominator.",
+            "stepByStep": [
+              "Work out how many smaller pieces each part has to become.",
+              "Cut every part into that many.",
+              "The shaded parts get cut as well, so there are that many times more of them.",
+              "Whatever you do to the bottom you do to the top — because you did it to both."
+            ],
+            "kidTip": "You are not multiplying for the sake of it. You are cutting, and the shaded ones get cut too.",
+            "audioPrompt": "How many smaller pieces does each part have to become?",
+            "prompts": {
+              "default": "Write it with the new bottom number."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NF.A.1"
+        ],
+        "trajectoryLevel": "equivalence",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "simplify-once",
+        "title": "Join Some Back Up",
+        "concept": "Dividing Top and Bottom by a Shared Factor",
+        "conceptKey": "fraction-simplifier",
+        "requires": [
+          "equivalence-maker",
+          "common-factor-finder"
+        ],
+        "activity": "fractions/equivalence",
+        "iconName": "Minimize2",
+        "iconTone": "emerald",
+        "params": {
+          "level": 15,
+          "question": {
+            "mode": "scale_down",
+            "questionsPerRound": 5,
+            "partsRange": [
+              4,
+              12
+            ],
+            "factorRange": [
+              2,
+              4
+            ]
+          },
+          "play": {
+            "targetObjective": "Make a fraction simpler by joining parts back together.",
+            "stepByStep": [
+              "Find a number that goes into the top and the bottom.",
+              "Join that many parts together, all along the bar.",
+              "The shading does not move, so the amount is the same.",
+              "Both numbers get smaller by the same factor."
+            ],
+            "kidTip": "Joining up is cutting backwards. Nothing is lost either way.",
+            "audioPrompt": "Both numbers divide by the same thing. Join them up.",
+            "prompts": {
+              "default": "What does it become?"
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NF.A.1"
+        ],
+        "trajectoryLevel": "equivalence",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "simplest-form",
+        "title": "As Simple As It Goes",
+        "concept": "Reducing a Fraction by the Highest Common Factor",
+        "conceptKey": "simplest-form-finder",
+        "requires": [
+          "fraction-simplifier",
+          "prime-factoriser"
+        ],
+        "activity": "fractions/equivalence",
+        "iconName": "Sparkles",
+        "iconTone": "pink",
+        "params": {
+          "level": 16,
+          "question": {
+            "mode": "simplest",
+            "questionsPerRound": 5,
+            "partsRange": [
+              4,
+              12
+            ],
+            "factorRange": [
+              2,
+              6
+            ]
+          },
+          "play": {
+            "targetObjective": "Reduce a fraction until nothing divides both numbers.",
+            "stepByStep": [
+              "Join parts up while both numbers still share a factor.",
+              "Keep going. One step is often not enough.",
+              "Stop when the only number that goes into both is one.",
+              "If you can still halve both, you have not finished."
+            ],
+            "kidTip": "Cancelling a two out of twelve twelfths is correct and unfinished. Keep going.",
+            "audioPrompt": "Keep going while both numbers still divide by something.",
+            "prompts": {
+              "default": "Make it as simple as it goes."
+            }
+          }
+        },
+        "standards": [
+          "CCSS.4.NF.A.1"
+        ],
+        "trajectoryLevel": "equivalence",
+        "ageBand": [
+          10,
+          12
         ]
       }
     ]

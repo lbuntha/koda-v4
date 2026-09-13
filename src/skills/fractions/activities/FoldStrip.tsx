@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import { FractionBar, FractionCircle } from "../internal/ui/FractionBar";
 import {
   STRIP_REFUSALS,
   buildStripQuestion,
@@ -86,80 +87,13 @@ export function stripHints(question: StripQuestion): string[] {
   }
 }
 
-const TAKEN = "fill-violet-400";
-const EMPTY = "fill-surface-muted";
-
-/** One bar, cut into its parts, with the shaded ones filled. */
-const Bar: React.FC<{
-  parts: number;
-  shaded: number[];
-  widths?: number[];
-  scale?: number;
-  onToggle?: (i: number) => void;
-  disabled?: boolean;
-}> = ({ parts, shaded, widths, scale = 1, onToggle, disabled }) => {
-  const W = 280 * scale;
-  const offsets: number[] = [];
-  let acc = 0;
-  for (let i = 0; i < parts; i += 1) {
-    offsets.push(acc);
-    acc += (widths?.[i] ?? 1 / parts) * W;
-  }
-  return (
-    <svg viewBox={`0 0 ${W + 4} 52`} width={W + 4} height={52} role="img" aria-label={`${parts} parts`}>
-      {Array.from({ length: parts }, (_, i) => {
-        const w = (widths?.[i] ?? 1 / parts) * W;
-        return (
-          <rect
-            key={i}
-            x={offsets[i] + 2}
-            y={6}
-            width={Math.max(2, w - 2)}
-            height={40}
-            rx={4}
-            className={shaded.includes(i) ? TAKEN : EMPTY}
-            stroke="currentColor"
-            strokeWidth={1.2}
-            style={{ cursor: onToggle && !disabled ? "pointer" : undefined }}
-            onClick={onToggle && !disabled ? () => onToggle(i) : undefined}
-          />
-        );
-      })}
-    </svg>
-  );
-};
-
-/** One circle, cut into its parts. Only partitions it can show honestly. */
-const Circle: React.FC<{ parts: number; shaded: number[]; onToggle?: (i: number) => void; disabled?: boolean }> = ({
-  parts,
-  shaded,
-  onToggle,
-  disabled,
-}) => {
-  const R = 54;
-  const C = 60;
-  const wedge = (i: number): string => {
-    const a0 = (i / parts) * Math.PI * 2 - Math.PI / 2;
-    const a1 = ((i + 1) / parts) * Math.PI * 2 - Math.PI / 2;
-    const large = a1 - a0 > Math.PI ? 1 : 0;
-    return `M ${C} ${C} L ${C + R * Math.cos(a0)} ${C + R * Math.sin(a0)} A ${R} ${R} 0 ${large} 1 ${C + R * Math.cos(a1)} ${C + R * Math.sin(a1)} Z`;
-  };
-  return (
-    <svg viewBox="0 0 120 120" width={120} height={120} role="img" aria-label={`${parts} parts`}>
-      {Array.from({ length: parts }, (_, i) => (
-        <path
-          key={i}
-          d={wedge(i)}
-          className={shaded.includes(i) ? TAKEN : EMPTY}
-          stroke="currentColor"
-          strokeWidth={1.2}
-          style={{ cursor: onToggle && !disabled ? "pointer" : undefined }}
-          onClick={onToggle && !disabled ? () => onToggle(i) : undefined}
-        />
-      ))}
-    </svg>
-  );
-};
+/*
+ * The strip and the circle come from `internal/ui`, not from here.
+ *
+ * The equivalence engine draws the same whole, and the claim it rests on — that
+ * the same amount can wear two names — is only visible if both engines draw it
+ * identically. Two renderers drift the first time one is nudged.
+ */
 
 export const FoldStrip: React.FC<ActivityProps<StripParams>> = ({ params, koda, onComplete, lesson }) => {
   const setup: StripSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
@@ -283,9 +217,9 @@ export const FoldStrip: React.FC<ActivityProps<StripParams>> = ({ params, koda, 
 
   const drawWhole = (f: typeof fraction, marks: number[], scale = 1, onToggle?: (i: number) => void) =>
     f.whole.kind === "circle" ? (
-      <Circle parts={f.parts} shaded={marks} onToggle={onToggle} disabled={!!round.feedback} />
+      <FractionCircle parts={f.parts} shaded={marks} onToggle={onToggle} disabled={!!round.feedback} />
     ) : (
-      <Bar
+      <FractionBar
         parts={f.parts}
         shaded={marks}
         widths={question.unequal}

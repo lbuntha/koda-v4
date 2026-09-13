@@ -26,7 +26,12 @@
     "fraction-line-placer",
     "fraction-line-reader",
     "whole-completer",
-    "improper-reader"
+    "improper-reader",
+    "part-splitter",
+    "equivalence-reader",
+    "equivalence-maker",
+    "fraction-simplifier",
+    "simplest-form-finder"
   ],
   "requires": [
     "counter",
@@ -77,6 +82,13 @@
       "id": "part_labels",
       "name": "Part labels",
       "description": "Writes what one part is worth under the picture, so the pieces name themselves.",
+      "isEnabled": true,
+      "tag": "Cognitive"
+    },
+    {
+      "id": "equivalence_ghost",
+      "name": "Before and after",
+      "description": "Keeps the fraction you started with faintly behind the new one, so an equal fraction is seen rather than asserted. Never shown during practice.",
       "isEnabled": true,
       "tag": "Cognitive"
     }

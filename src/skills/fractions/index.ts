@@ -3,6 +3,7 @@ import manifestJson from "./manifest.json";
 import lessonsJson from "./lessons.json";
 import * as strip from "./activities/FoldStrip";
 import * as numberline from "./activities/FractionLine";
+import * as equivalence from "./activities/EquivalenceMill";
 import { registerSkillVoice } from "../../lib/voiceClips";
 import audioManifest from "./audio/manifest.json";
 
@@ -60,6 +61,12 @@ export const skill: Skill = {
       name: "On the Line",
       defaultParams: { mode: "place_unit", questionsPerRound: 5 },
       component: numberline.FractionLine,
+    },
+    equivalence: {
+      id: "equivalence",
+      name: "Same Amount, New Name",
+      defaultParams: { mode: "split", questionsPerRound: 5 },
+      component: equivalence.EquivalenceMill,
     },
   },
 };

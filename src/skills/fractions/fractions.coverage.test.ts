@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { skill } from ".";
 import { buildStripQuestion, type StripMode } from "./internal/data/fractionStrip";
 import { buildLineQuestion, type LineMode } from "./internal/data/fractionLine";
+import { buildMillQuestion, type MillMode } from "./internal/data/fractionEquivalence";
 
 /**
  * Every technique is driven by a test, and the count is the claim.
@@ -22,6 +23,25 @@ const suiteText = readdirSync(TEST_DIR)
   .filter((f) => !f.startsWith("fractions.coverage"))
   .map((f) => readFileSync(join(TEST_DIR, f), "utf8"))
   .join("\n");
+
+/**
+ * The builder behind each engine.
+ *
+ * Keyed by activity id so that adding an engine without adding it here fails
+ * loudly, rather than quietly falling through to the wrong builder.
+ */
+const builderFor = (activity: string) => {
+  switch (activity) {
+    case "strip":
+      return buildStripQuestion;
+    case "numberline":
+      return buildLineQuestion;
+    case "equivalence":
+      return buildMillQuestion;
+    default:
+      throw new Error(`no builder registered for activity "${activity}"`);
+  }
+};
 
 /** Every mode any lesson actually asks for. */
 const modesInUse = (): { activity: string; mode: string; lesson: string }[] => {
@@ -47,7 +67,7 @@ describe("every technique the lessons use", () => {
 
   it("builds a question without throwing, for every mode", () => {
     for (const { activity, mode, lesson } of modesInUse()) {
-      const build = activity === "strip" ? buildStripQuestion : buildLineQuestion;
+      const build = builderFor(activity);
       for (let i = 0; i < 30; i += 1) {
         expect(
           () => build({ mode } as never, mode as never, i),
@@ -59,7 +79,7 @@ describe("every technique the lessons use", () => {
 
   it("gives every question an id, a task kind and an expected answer", () => {
     for (const { activity, mode, lesson } of modesInUse()) {
-      const build = activity === "strip" ? buildStripQuestion : buildLineQuestion;
+      const build = builderFor(activity);
       const seen = new Set<string>();
       for (let i = 0; i < 20; i += 1) {
         const q = build({ mode } as never, mode as never, i, seen) as {
@@ -74,12 +94,17 @@ describe("every technique the lessons use", () => {
     }
   });
 
-  it("covers all eleven built so far, and says so when a twelfth arrives", () => {
+  it("covers every mode built so far, and says so when the next arrives", () => {
     const strip: StripMode[] = ["equal_or_not", "name_unit", "which_whole", "build", "to_notation", "of_a_set"];
     const line: LineMode[] = ["place_unit", "place_any", "read_point", "makes_one", "improper"];
+    const mill: MillMode[] = ["split", "two_names", "scale_up", "scale_down", "simplest"];
     const used = new Set(modesInUse().map((m) => `${m.activity}/${m.mode}`));
     expect([...used].sort()).toEqual(
-      [...strip.map((m) => `strip/${m}`), ...line.map((m) => `numberline/${m}`)].sort(),
+      [
+        ...strip.map((m) => `strip/${m}`),
+        ...line.map((m) => `numberline/${m}`),
+        ...mill.map((m) => `equivalence/${m}`),
+      ].sort(),
     );
   });
 });
