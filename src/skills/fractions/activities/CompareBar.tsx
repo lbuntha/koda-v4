@@ -108,16 +108,28 @@ export const CompareBar: React.FC<ActivityProps<CompareParams>> = ({ params, kod
   const question = round.question as CompareQuestion;
 
   /** Whether the child has re-cut both bars to a shared denominator. */
-  const [matchedYet, setMatchedYet] = useState(false);
+  /*
+   * Which question's pieces have been cut — not a plain "yes, cut".
+   *
+   * A boolean reset by an effect is true for the gap between a new question
+   * rendering and that effect running, and in that gap the strip will accept an
+   * answer for a question whose pieces are still different sizes. Keyed to the
+   * question, there is no gap: a new question has not been cut because its id is
+   * not the one recorded.
+   */
+  const [matchedFor, setMatchedFor] = useState<string | null>(null);
   const [refused, setRefused] = useState<CompareBlock>(null);
 
   useEffect(() => {
     if (!question) return;
-    setMatchedYet(false);
+    setMatchedFor(null);
     setRefused(null);
   }, [question]);
 
   if (!question) return null;
+
+  /** Cut to match — for *this* question, not for whichever one came before. */
+  const matchedYet = !question.mustMatch || matchedFor === question.id;
 
   const shown = matchedYet ? matched(question) : { left: question.left, right: question.right };
   const shadedOf = (f: typeof shown.left) => Array.from({ length: f.taken }, (_, i) => i);
@@ -139,7 +151,7 @@ export const CompareBar: React.FC<ActivityProps<CompareParams>> = ({ params, kod
     if (soundEnabled && koda.sound.isEnabled()) koda.sound.play("clink");
     if (koda.config.isEnabled("haptic_feedback", true)) koda.haptics.pulse("light");
     setRefused(null);
-    setMatchedYet(true);
+    setMatchedFor(question.id);
   };
 
   const answer = (verdict: Verdict): void => {
@@ -177,7 +189,7 @@ export const CompareBar: React.FC<ActivityProps<CompareParams>> = ({ params, kod
       onStartOver={
         matchedYet && question.mustMatch && !round.feedback
           ? () => {
-              setMatchedYet(false);
+              setMatchedFor(null);
               setRefused(null);
             }
           : undefined

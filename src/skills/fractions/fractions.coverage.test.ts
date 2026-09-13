@@ -9,6 +9,7 @@ import { buildMillQuestion, type MillMode } from "./internal/data/fractionEquiva
 import { buildCompareQuestion, type CompareMode } from "./internal/data/fractionCompare";
 import { buildMixedQuestion, type MixedMode } from "./internal/data/fractionMixed";
 import { buildAddQuestion, type AddMode } from "./internal/data/fractionAdd";
+import { buildMultiplyQuestion, type MultiplyMode } from "./internal/data/fractionMultiply";
 
 /**
  * Every technique is driven by a test, and the count is the claim.
@@ -47,6 +48,7 @@ const SUITE_NAME: Record<string, string> = {
   compare: "compare",
   mixed: "mixed",
   add: "add",
+  multiply: "area",
 };
 
 /**
@@ -69,6 +71,8 @@ const builderFor = (activity: string) => {
       return buildMixedQuestion;
     case "add":
       return buildAddQuestion;
+    case "multiply":
+      return buildMultiplyQuestion;
     default:
       throw new Error(`no builder registered for activity "${activity}"`);
   }
@@ -134,7 +138,11 @@ describe("every technique the lessons use", () => {
     const cmp: CompareMode[] = [
       "same_denominator", "same_numerator", "different_wholes", "benchmark_half", "common_denominator",
     ];
-    const add: AddMode[] = ["add_like", "subtract_like", "refute"];
+    const add: AddMode[] = [
+      "add_like", "subtract_like", "refute", "add_nested",
+      "add_unlike", "subtract_unlike", "add_mixed", "subtract_mixed",
+    ];
+    const mul: MultiplyMode[] = ["of_whole", "whole_times", "area_model", "simplify_first", "scaling"];
     const used = new Set(modesInUse().map((m) => `${m.activity}/${m.mode}`));
     expect([...used].sort()).toEqual(
       [
@@ -144,6 +152,7 @@ describe("every technique the lessons use", () => {
         ...cmp.map((m) => `compare/${m}`),
         ...mx.map((m) => `mixed/${m}`),
         ...add.map((m) => `add/${m}`),
+        ...mul.map((m) => `multiply/${m}`),
       ].sort(),
     );
   });

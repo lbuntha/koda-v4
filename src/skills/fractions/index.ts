@@ -7,6 +7,7 @@ import * as equivalence from "./activities/EquivalenceMill";
 import * as compare from "./activities/CompareBar";
 import * as mixed from "./activities/MixedBoard";
 import * as add from "./activities/AddStrip";
+import * as multiply from "./activities/AreaGrid";
 import { registerSkillVoice } from "../../lib/voiceClips";
 import audioManifest from "./audio/manifest.json";
 
@@ -88,6 +89,12 @@ export const skill: Skill = {
       name: "Adding Pieces",
       defaultParams: { mode: "add_like", questionsPerRound: 5 },
       component: add.AddStrip,
+    },
+    multiply: {
+      id: "multiply",
+      name: "A Fraction of Something",
+      defaultParams: { mode: "of_whole", questionsPerRound: 5 },
+      component: multiply.AreaGrid,
     },
   },
 };

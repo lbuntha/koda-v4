@@ -168,16 +168,35 @@ export function buildAddQuestion(
   const operation: "add" | "subtract" =
     mode === "subtract_like" || mode === "subtract_unlike" || mode === "subtract_mixed" ? "subtract" : "add";
 
-  /** The two denominators this mode wants. */
+  /**
+   * The two denominators this mode wants.
+   *
+   * An unlike level must draw unlike denominators — that is the whole level —
+   * so when the first denominator has no partner inside the drawing ceiling
+   * (nothing pairs with sevenths under twenty-four parts) the *first* one is
+   * drawn again. The first version fell back to `[a, a]`, which quietly turned
+   * a lesson about matching pieces into a lesson about counting them.
+   */
   const denominators = (): [number, number] => {
-    const a = randInt(loParts, hiParts);
-    if (mode === "add_like" || mode === "subtract_like") return [a, a];
-    const options = Array.from({ length: hiParts - loParts + 1 }, (_, i) => loParts + i).filter((d) => {
-      if (d === a) return false;
-      if (lcm(a, d) > MAX_COMMON) return false;
-      return mode === "add_nested" ? a % d === 0 || d % a === 0 : true;
-    });
-    return options.length > 0 ? [a, pick(options)] : [a, a];
+    if (mode === "add_like" || mode === "subtract_like") {
+      const a = randInt(loParts, hiParts);
+      return [a, a];
+    }
+    const all = Array.from({ length: hiParts - loParts + 1 }, (_, i) => loParts + i);
+    const partners = (a: number) =>
+      all.filter((d) => {
+        if (d === a) return false;
+        if (lcm(a, d) > MAX_COMMON) return false;
+        return mode === "add_nested" ? a % d === 0 || d % a === 0 : true;
+      });
+    const usable = all.filter((a) => partners(a).length > 0);
+    if (usable.length === 0) {
+      throw new Error(
+        `fractions/${mode}: no two denominators in ${loParts}–${hiParts} match under ${MAX_COMMON} parts`,
+      );
+    }
+    const a = pick(usable);
+    return [a, pick(partners(a))];
   };
 
   const draw = (): AddQuestion => {
@@ -345,19 +364,38 @@ export function refuteQuestion(index: number): AddQuestion {
 }
 
 /**
- * Four buttons, no amount written twice.
+ * What an answer button is worth, as a fraction rather than a decimal.
  *
- * Two spellings of the same quantity is a question with two right answers, and
- * a repeated string is a React key collision that silently drops a button.
+ * `9/7` and `1 2/7` are the same number and they are not the same `double`:
+ * 1.2857142857142858 against 1.2857142857142856. Compared as decimals they
+ * looked different, so both went onto the screen, and the child who pressed the
+ * improper one was marked wrong for giving the right answer in the other name
+ * levels 22 and 23 had just taught them.
  */
+const amountOf = (text: string): { top: number; bottom: number } => {
+  const [ones, frac] = text.includes(" ") ? text.split(" ") : ["0", text];
+  if (!frac.includes("/")) return { top: Number(ones) + Number(frac), bottom: 1 };
+  const [top, bottom] = frac.split("/").map(Number);
+  return { top: Number(ones) * bottom + top, bottom };
+};
+
+/** The same quantity, whichever way it is written. */
+export const sameAmount = (a: string, b: string): boolean => {
+  const x = amountOf(a);
+  const y = amountOf(b);
+  return x.top * y.bottom === y.top * x.bottom;
+};
+
 function uniqueOptions(pool: string[]): string[] {
   const out: string[] = [];
-  const amounts = new Set<number>();
   for (const text of pool) {
     if (out.length === 4) break;
-    if (out.includes(text) || amounts.has(textAmount(text))) continue;
+    const { top, bottom } = amountOf(text);
+    // Nothing worth nothing or less. "0" is not an answer a child writes to a
+    // question about how much is left, and a negative one is years away.
+    if (!Number.isFinite(top / bottom) || top <= 0) continue;
+    if (out.some((seen) => seen === text || sameAmount(seen, text))) continue;
     out.push(text);
-    amounts.add(textAmount(text));
   }
   return shuffle(out);
 }
@@ -375,6 +413,17 @@ export type AddBlock = "pieces-differ" | null;
 export function addBlockedBecause(q: AddQuestion, matchedYet: boolean): AddBlock {
   if (!q.mustMatch || matchedYet) return null;
   return "pieces-differ";
+}
+
+/**
+ * Whether an answer is right, which is a question about the amount.
+ *
+ * `9/7` and `1 2/7` are one answer. The round asks for the mixed form because
+ * that is what the two levels before this one were about, but a child who
+ * writes the improper one has added correctly and is told so.
+ */
+export function isAddCorrect(q: AddQuestion, given: string): boolean {
+  return given === q.expected || sameAmount(given, q.expected);
 }
 
 export const ADD_REFUSALS: Record<Exclude<AddBlock, null>, string> = {
@@ -440,37 +489,47 @@ export function addOptions(q: AddQuestion): string[] {
   const m = matchedPair(q);
   const sign = q.operation === "add" ? 1 : -1;
   const wholes = q.leftOnes + sign * q.rightOnes;
-  const keep = (n: number, parts: number): string =>
-    wholes > 0 ? mixedText(wholes, { ...q.left, parts, taken: n }) : `${n}/${parts}`;
+
+  /** An answer, written the way the buttons write answers. */
+  const say = (ones: number, taken: number, parts: number): string =>
+    taken === 0 ? String(ones) : ones > 0 ? `${ones} ${taken}/${parts}` : `${taken}/${parts}`;
 
   const matchedCount = m.left.taken + sign * m.right.taken;
 
   const pool = [
     q.expected,
-    // Both numbers added straight across — the misconception, stated.
-    keep(q.left.taken + sign * q.right.taken, q.left.parts + sign * q.right.parts),
+    // Both numbers straight across — the misconception, stated. Nonsense for a
+    // subtraction that empties the bottom, and dropped below when it is.
+    say(wholes, q.left.taken + sign * q.right.taken, q.left.parts + sign * q.right.parts),
+    /*
+     * The parts subtracted the wrong way round, with no whole broken.
+     *
+     * `3 1/6 − 2 2/4` becomes `1 1/3` this way: take the smaller count from the
+     * larger, whichever side it is on, and leave the wholes alone. It is the
+     * single commonest answer to a mixed subtraction and for those levels it is
+     * the distractor that matters most.
+     */
+    say(wholes, Math.abs(m.left.taken - m.right.taken), q.common),
     // Matched correctly, then written over the original piece size. Where the
     // pieces already matched this is the right answer, and drops out.
-    keep(matchedCount, q.left.parts),
+    say(wholes, matchedCount, q.left.parts),
     // Right piece size, but the raw counts never re-cut.
-    keep(q.left.taken + sign * q.right.taken, q.common),
+    say(wholes, q.left.taken + sign * q.right.taken, q.common),
     // The other operation: read the sign wrong and the answer is still tidy.
-    keep(m.left.taken - sign * m.right.taken, q.common),
-    // One piece out — the ordinary miscount, and the one that survives when the
-    // pieces already match and every method-shaped distractor collapses.
-    keep(matchedCount + 1, q.common),
-    keep(matchedCount - 1, q.common),
-    // A whole one too many, for the levels where a whole gets broken.
-    answerText({ ones: q.answer.ones + 1, fraction: q.answer.fraction }),
+    say(wholes, m.left.taken - sign * m.right.taken, q.common),
+    // One piece out — the ordinary miscount.
+    say(wholes, matchedCount + 1, q.common),
+    say(wholes, matchedCount - 1, q.common),
+    // A whole one too many or too few, for the levels that break one.
+    say(q.answer.ones + 1, q.answer.fraction.taken, q.answer.fraction.parts),
+    say(Math.max(0, q.answer.ones - 1), q.answer.fraction.taken, q.answer.fraction.parts),
+    // Giving up and copying the bigger of the two down. Always available, which
+    // is why it is last: some questions have only three plausible wrong answers
+    // and a fourth button should still be a thing a child might believe.
+    mixedText(q.leftOnes, q.left),
+    mixedText(q.rightOnes, q.right),
   ];
 
   return uniqueOptions(pool.filter((text) => !/-|\/0\b|(^|\s)0\//.test(text)));
 }
 
-/** What an answer button is worth, so two spellings of one amount can be spotted. */
-const textAmount = (text: string): number => {
-  const [ones, frac] = text.includes(" ") ? text.split(" ") : ["0", text];
-  if (!frac.includes("/")) return Number(ones) + Number(frac);
-  const [top, bottom] = frac.split("/").map(Number);
-  return Number(ones) + top / bottom;
-};

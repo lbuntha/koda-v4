@@ -143,6 +143,25 @@ const PART_WORDS: Record<number, [string, string]> = {
   10: ["tenth", "tenths"],
   11: ["eleventh", "elevenths"],
   12: ["twelfth", "twelfths"],
+  /*
+   * Past twelve because adding two fractions matches them into a size neither
+   * one was: thirds and quarters become twelfths, quarters and fifths become
+   * twentieths, and "In 20ths they are 8 and 10" is what a child was told until
+   * these were written out. Nothing is cut past twenty-four parts, so the list
+   * ends there.
+   */
+  13: ["thirteenth", "thirteenths"],
+  14: ["fourteenth", "fourteenths"],
+  15: ["fifteenth", "fifteenths"],
+  16: ["sixteenth", "sixteenths"],
+  17: ["seventeenth", "seventeenths"],
+  18: ["eighteenth", "eighteenths"],
+  19: ["nineteenth", "nineteenths"],
+  20: ["twentieth", "twentieths"],
+  21: ["twenty-first", "twenty-firsts"],
+  22: ["twenty-second", "twenty-seconds"],
+  23: ["twenty-third", "twenty-thirds"],
+  24: ["twenty-fourth", "twenty-fourths"],
 };
 
 /**
@@ -153,9 +172,9 @@ const PART_WORDS: Record<number, [string, string]> = {
  * a notation — "three quarters" is what the child says out loud, and a screen
  * that cannot say it back has stopped speaking their language.
  *
- * Past twelve it falls back to the digits, which is honest: nothing in this
- * skill cuts a whole into more than twelve parts, so a "24th" only ever appears
- * after a split, where the numeral is what a child is looking at anyway.
+ * Written out to twenty-four, which is as far as anything here is ever cut.
+ * Past that it falls back to the digits, which no level should reach — if one
+ * does, "25ths" on a screen is the sign that the ceiling moved.
  */
 export const partWord = (parts: number, plural = false): string => {
   const pair = PART_WORDS[parts];

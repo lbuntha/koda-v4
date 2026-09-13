@@ -6,12 +6,14 @@ import { millHints } from "./activities/EquivalenceMill";
 import { compareHints } from "./activities/CompareBar";
 import { mixedHints } from "./activities/MixedBoard";
 import { addHints } from "./activities/AddStrip";
+import { multiplyHints } from "./activities/AreaGrid";
 import { buildStripQuestion, explainStrip, type StripMode } from "./internal/data/fractionStrip";
 import { buildLineQuestion, explainLine, type LineMode } from "./internal/data/fractionLine";
 import { buildMillQuestion, explainMill, type MillMode } from "./internal/data/fractionEquivalence";
 import { buildCompareQuestion, explainCompare, type CompareMode } from "./internal/data/fractionCompare";
 import { buildMixedQuestion, explainMixed, type MixedMode } from "./internal/data/fractionMixed";
 import { buildAddQuestion, explainAdd, type AddMode } from "./internal/data/fractionAdd";
+import { buildMultiplyQuestion, explainMultiply, type MultiplyMode } from "./internal/data/fractionMultiply";
 import { skill } from ".";
 
 /**
@@ -76,10 +78,19 @@ function everything(): Rendered[] {
       add("mixed", m, mixedHints(q), explainMixed(q, true), explainMixed(q, false), q.expected);
     }
   }
-  for (const m of ["add_like", "subtract_like", "refute"] as AddMode[]) {
+  for (const m of [
+    "add_like", "subtract_like", "refute", "add_nested",
+    "add_unlike", "subtract_unlike", "add_mixed", "subtract_mixed",
+  ] as AddMode[]) {
     for (let i = 0; i < 5; i += 1) {
       const q = buildAddQuestion({ mode: m }, m, i);
       add("add", m, addHints(q), explainAdd(q, true), explainAdd(q, false), q.expected);
+    }
+  }
+  for (const m of ["of_whole", "whole_times", "area_model", "simplify_first", "scaling"] as MultiplyMode[]) {
+    for (let i = 0; i < 5; i += 1) {
+      const q = buildMultiplyQuestion({ mode: m }, m, i);
+      add("multiply", m, multiplyHints(q), explainMultiply(q, true), explainMultiply(q, false), q.expected);
     }
   }
   return out;

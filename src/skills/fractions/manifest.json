@@ -42,7 +42,17 @@
     "mixed-line-placer",
     "like-adder",
     "like-subtractor",
-    "denominator-reasoner"
+    "denominator-reasoner",
+    "nested-adder",
+    "unlike-adder",
+    "unlike-subtractor",
+    "mixed-adder",
+    "mixed-exchanger",
+    "amount-fractioner",
+    "repeated-fraction-adder",
+    "fraction-multiplier",
+    "pre-simplifier",
+    "scaling-reasoner"
   ],
   "requires": [
     "counter",

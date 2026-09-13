@@ -379,3 +379,40 @@ What it caught:
   counting still have the gap.
 - The teaching walk was a hand-written list of modes, so an engine added without
   a line in it went unread. It is now checked against the curriculum.
+
+### Phase 7 — `AddStrip`, levels 28–32
+
+Unlike denominators and mixed numbers. 32 lessons, 221 tests.
+
+- **An unlike level drew like denominators.** When no second denominator paired
+  with the first under the drawing ceiling — nothing pairs with sevenths under
+  twenty-four parts — `denominators()` fell back to `[a, a]`, and a lesson about
+  matching pieces quietly became a lesson about counting them. It now re-draws
+  the first denominator, and throws if a level asks for a range where no pair
+  exists at all.
+- **"In 20ths they are 8 and 10."** Matching two fractions produces sizes
+  neither one was, and `partWord` stopped at twelfths. Written out to
+  twenty-four, which is as far as anything here is cut.
+- **`9/7` marked wrong for `1 2/7`.** Both were on the buttons: the duplicate
+  check compared decimals, and 1.2857142857142858 is not 1.2857142857142856. Now
+  compared as fractions, and either name is accepted — the two levels before
+  this one are the ones that taught the child they are the same number.
+
+### Phase 8 — `AreaGrid`, levels 33–37
+
+Five levels, three genuinely different ideas: sharing an amount out, making
+copies, and taking a piece of a piece. 37 lessons, 263 tests.
+
+- **Level 36 asked the same question 176 times in 300.** `cancellablePair`
+  constructed a pair and fell back to a fixed `3/4 × 8/9` whenever the
+  constraints missed. Rebuilt to construct from the shared factor outward, so
+  nothing is rejected: 64 distinct questions in 300 draws, none more than 14.
+- **`1/2 of 18` had two answer buttons.** One group, the part left behind and
+  the answer are all 9. The pool needed a distractor that survives halving.
+- **Level 35 marked the grid's own reading wrong.** A child counts six squares
+  out of twelve; insisting on `1/2` marks reading the picture wrong for not also
+  doing level 16's job. Accepted by amount there, and by spelling at level 36,
+  where the cancelled form is the technique being taught.
+- A test flaked one run in four with a real-looking failure: two activities were
+  mounted at once in a single `it`, so `screen` saw two of everything and a press
+  landed on whichever came first. One mounted activity per test, always.

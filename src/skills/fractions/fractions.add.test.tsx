@@ -10,6 +10,7 @@ import {
   answerText,
   buildAddQuestion,
   explainAdd,
+  isAddCorrect,
   matchedPair,
   nameOf,
   refuteQuestion,
@@ -30,7 +31,16 @@ import { valueOf } from "./internal/data/fractionNumbers";
 
 const strip = skill.activities.add;
 
-const LIVE: AddMode[] = ["add_like", "subtract_like", "refute"];
+const LIVE: AddMode[] = [
+  "add_like",
+  "subtract_like",
+  "refute",
+  "add_nested",
+  "add_unlike",
+  "subtract_unlike",
+  "add_mixed",
+  "subtract_mixed",
+];
 
 const questions = (mode: AddMode, n = 200): AddQuestion[] => {
   const seen = new Set<string>();
@@ -67,15 +77,27 @@ const promptValue = (text: string): number => {
 
 const answerRight = async (h: ActivityHarness): Promise<void> => {
   if (h.buttons().includes("Cut them to match")) await h.press("Cut them to match");
-  const sum = /Somebody says (.+?) = /.exec(h.text())
-    ? promptValue((/Somebody says (.+?) = /.exec(h.text()) as string[])[1])
-    : promptValue((/([\d /]+[+−][\d /]+)/.exec(h.text()) as string[])?.[1] ?? "");
+  const claimed = /Somebody says (.+?) = /.exec(h.text());
+  const raw = claimed ? claimed[1] : (/([\d /]+[+−][\d /]+)/.exec(h.text()) as string[])?.[1] ?? "";
+  const sum = promptValue(raw);
   const right = h
     .buttons()
     .filter((b) => /^\d/.test(b))
     .find((b) => Math.abs(textValue(b) - sum) < 1e-9);
   expect(right, `no button is worth ${sum} — options were ${h.buttons().join(", ")}`).toBeTruthy();
+  const before = h.koda.count("learning.answered");
   await h.press(right as string);
+  // A refusal looks like a press that did nothing, and a round that stalls on
+  // one is reported as a missing "Next" button three frames later.
+  expect(
+    h.koda.count("learning.answered"),
+    `pressing "${right}" was refused — the screen said: ${h.text().slice(0, 300)}`,
+  ).toBe(before + 1);
+  const [last] = h.koda.only("learning.answered").slice(-1);
+  expect(
+    (last.args[0] as { correct: boolean }).correct,
+    `"${right}" was worth ${sum} for "${raw}" and was marked wrong — screen: ${h.text().slice(0, 300)}`,
+  ).toBe(true);
 };
 
 describe("the answer is the quantity, not the digits", () => {
@@ -122,9 +144,11 @@ describe("the answer is the quantity, not the digits", () => {
     }
   });
 
-  it("never goes below zero", () => {
-    for (const q of questions("subtract_like", 200)) {
-      expect(trueTotal(q), q.prompt).toBeGreaterThan(0);
+  it("never goes below zero, in any of the three ways of taking away", () => {
+    for (const mode of ["subtract_like", "subtract_unlike", "subtract_mixed"] as AddMode[]) {
+      for (const q of questions(mode, 150)) {
+        expect(trueTotal(q), `${mode}: ${q.prompt}`).toBeGreaterThan(0);
+      }
     }
   });
 });
@@ -313,7 +337,10 @@ describe("hints climb, and stop short of the answer", () => {
     for (const mode of LIVE) {
       for (const q of questions(mode, 60)) {
         for (const hint of addHints(q)) {
-          expect(hint, `${mode}: "${hint}"`).not.toContain(q.expected);
+          // Whole words: "12 works for these" is not giving away an answer of
+          // "1", and a substring test says it is.
+          const written = new RegExp(`(^|[^\\d/])${q.expected.replace("/", "\\/")}([^\\d/]|$)`);
+          expect(written.test(hint), `${mode}: "${hint}" hands over ${q.expected}`).toBe(false);
         }
       }
     }
@@ -332,5 +359,193 @@ describe("a skill for readers", () => {
     const h = renderActivity(strip, { features: { audio_speech: true } });
     expect(h.koda.count("speech.say")).toBe(0);
     h.unmount();
+  });
+});
+
+describe("add_nested — only one strip needs cutting", () => {
+  it("always draws one denominator that divides the other", () => {
+    for (const q of questions("add_nested", 150)) {
+      const [a, b] = [q.left.parts, q.right.parts];
+      expect(a % b === 0 || b % a === 0, q.prompt).toBe(true);
+      expect(a).not.toBe(b);
+      expect(q.common).toBe(Math.max(a, b));
+    }
+  });
+
+  it("asks the child to cut before it will take an answer", () => {
+    for (const q of questions("add_nested", 40)) {
+      expect(q.mustMatch, q.prompt).toBe(true);
+      expect(addBlockedBecause(q, false)).toBe("pieces-differ");
+    }
+  });
+
+  it("runs a full round", async () => {
+    await expectStandardRound(strip, answerRight, {
+      params: { question: { mode: "add_nested", partsRange: [2, 6] } },
+      questions: 5,
+    });
+  });
+});
+
+describe("add_unlike and subtract_unlike — both strips need cutting", () => {
+  it("never quietly draws the same denominator twice", () => {
+    // The fallback used to be `[a, a]` when nothing paired under the ceiling,
+    // which turned a lesson about matching into a lesson about counting.
+    for (const mode of ["add_unlike", "subtract_unlike"] as AddMode[]) {
+      for (const q of questions(mode, 200)) {
+        expect(q.left.parts, `${mode}: ${q.prompt}`).not.toBe(q.right.parts);
+        expect(q.mustMatch).toBe(true);
+      }
+    }
+  });
+
+  it("holds the drawing inside the ceiling even at the widest range", () => {
+    for (const mode of ["add_unlike", "subtract_unlike"] as AddMode[]) {
+      const seen = new Set<string>();
+      for (let i = 0; i < 200; i += 1) {
+        const q = buildAddQuestion({ mode, partsRange: [2, 12] }, mode, i, seen);
+        expect(q.common, `${mode}: ${q.prompt}`).toBeLessThanOrEqual(MAX_COMMON);
+        expect(q.left.parts).not.toBe(q.right.parts);
+      }
+    }
+  });
+
+  it("says so rather than drawing something impossible", () => {
+    // Sevenths and elevenths pair with nothing under twenty-four parts. A
+    // lesson that asked for them would otherwise draw a like pair and teach the
+    // wrong thing quietly.
+    expect(() => buildAddQuestion({ mode: "add_unlike", partsRange: [7, 7] }, "add_unlike", 0)).toThrow(
+      /no two denominators/,
+    );
+  });
+
+  it("keeps adding inside one whole, where re-cutting is the new thing", () => {
+    for (const q of questions("add_unlike", 120)) {
+      expect(trueTotal(q), q.prompt).toBeLessThanOrEqual(1);
+    }
+  });
+
+  /*
+   * One mounted activity per test, always.
+   *
+   * These two rounds were one test, and the first harness was still mounted
+   * while the second ran: `screen` is global, so every query saw ten answer
+   * buttons and two of everything else, and a press landed on whichever mount
+   * came first in the document. It failed about one run in four, which is the
+   * worst kind of test — the failure was real, the cause was the test.
+   */
+  it("runs a full round of adding", async () => {
+    const h = await expectStandardRound(strip, answerRight, {
+      params: { question: { mode: "add_unlike", partsRange: [2, 6] } },
+      questions: 5,
+    });
+    h.unmount();
+  });
+
+  it("runs a full round of taking away", async () => {
+    const h = await expectStandardRound(strip, answerRight, {
+      params: { question: { mode: "subtract_unlike", partsRange: [2, 6] } },
+      questions: 5,
+    });
+    h.unmount();
+  });
+});
+
+describe("add_mixed — wholes and parts", () => {
+  it("always gives both numbers a whole one", () => {
+    for (const q of questions("add_mixed", 120)) {
+      expect(q.leftOnes, q.prompt).toBeGreaterThanOrEqual(1);
+      expect(q.rightOnes).toBeGreaterThanOrEqual(1);
+    }
+  });
+
+  it("writes the answer as wholes and parts, not as one big fraction", () => {
+    for (const q of questions("add_mixed", 120)) {
+      expect(q.expected, q.prompt).toMatch(/^\d+( \d+\/\d+)?$/);
+      expect(q.answer.ones).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  it("runs a full round", async () => {
+    await expectStandardRound(strip, answerRight, {
+      params: { question: { mode: "add_mixed", partsRange: [2, 6], onesRange: [1, 2] } },
+      questions: 5,
+    });
+  });
+});
+
+describe("subtract_mixed — a whole one always has to break", () => {
+  it("never has enough loose parts to take away without breaking one", () => {
+    // This is the technique. A draw that happens not to need the exchange is a
+    // question about the level before this one.
+    for (const q of questions("subtract_mixed", 200)) {
+      const m = matchedPair(q);
+      expect(m.left.taken, q.prompt).toBeLessThan(m.right.taken);
+    }
+  });
+
+  it("always has a whole one standing in front to break", () => {
+    for (const q of questions("subtract_mixed", 200)) {
+      expect(q.leftOnes, q.prompt).toBeGreaterThan(q.rightOnes);
+      expect(q.leftOnes).toBeGreaterThanOrEqual(1);
+    }
+  });
+
+  it("leaves a real amount behind", () => {
+    for (const q of questions("subtract_mixed", 200)) {
+      expect(trueTotal(q), q.prompt).toBeGreaterThan(0);
+      expect(textValue(q.expected)).toBeCloseTo(trueTotal(q), 10);
+    }
+  });
+
+  it("runs a full round", async () => {
+    await expectStandardRound(strip, answerRight, {
+      params: { question: { mode: "subtract_mixed", partsRange: [2, 6], onesRange: [1, 3] } },
+      questions: 5,
+    });
+  });
+});
+
+describe("the same number in either name is the same answer", () => {
+  it("accepts the improper form where the mixed one is asked for", () => {
+    /*
+     * `4/7 + 5/7` is `9/7` and `1 2/7`. Both appeared as buttons — the dedup
+     * compared decimals, and 1.2857142857142858 is not 1.2857142857142856 — and
+     * the child who pressed the improper one was marked wrong for using the
+     * other name the skill had just taught them.
+     */
+    for (const q of questions("add_like", 40)) {
+      expect(isAddCorrect(q, q.expected)).toBe(true);
+      // The same amount over the question's own denominator: "1 2/7" as "9/7",
+      // and a whole "1" as "5/5", which is the other name for one whole.
+      const [ones, frac] = q.expected.includes(" ") ? q.expected.split(" ") : ["0", q.expected];
+      const bottom = frac.includes("/") ? Number(frac.split("/")[1]) : q.common;
+      const top = frac.includes("/") ? Number(frac.split("/")[0]) : Number(frac) * bottom;
+      const improper = `${Number(ones) * bottom + top}/${bottom}`;
+      expect(isAddCorrect(q, improper), `${q.prompt} = ${q.expected}, rejected ${improper}`).toBe(true);
+    }
+  });
+
+  it("never puts two spellings of one amount on the buttons", () => {
+    for (const mode of LIVE) {
+      for (const q of questions(mode, 120)) {
+        const amounts = (q.options ?? []).map(textValue);
+        for (let i = 0; i < amounts.length; i += 1) {
+          for (let j = i + 1; j < amounts.length; j += 1) {
+            expect(
+              Math.abs(amounts[i] - amounts[j]),
+              `${mode}: ${q.prompt} offers ${q.options?.[i]} and ${q.options?.[j]}`,
+            ).toBeGreaterThan(1e-9);
+          }
+        }
+      }
+    }
+  });
+
+  it("still refuses an answer that is a different amount", () => {
+    for (const q of questions("add_like", 40)) {
+      const wrong = (q.options ?? []).filter((o) => Math.abs(textValue(o) - textValue(q.expected)) > 1e-9);
+      for (const option of wrong) expect(isAddCorrect(q, option), `${q.prompt}: ${option}`).toBe(false);
+    }
   });
 });

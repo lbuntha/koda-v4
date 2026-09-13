@@ -9,6 +9,7 @@ import {
   addBlockedBecause,
   buildAddQuestion,
   explainAdd,
+  isAddCorrect,
   matchedPair,
   mixedText,
   nameOf,
@@ -116,16 +117,28 @@ export const AddStrip: React.FC<ActivityProps<AddParams>> = ({ params, koda, onC
   });
   const question = round.question as AddQuestion;
 
-  const [matchedYet, setMatchedYet] = useState(false);
+  /*
+   * Which question's pieces have been cut — not a plain "yes, cut".
+   *
+   * A boolean reset by an effect is true for the gap between a new question
+   * rendering and that effect running, and in that gap the strip will accept an
+   * answer for a question whose pieces are still different sizes. Keyed to the
+   * question, there is no gap: a new question has not been cut because its id is
+   * not the one recorded.
+   */
+  const [matchedFor, setMatchedFor] = useState<string | null>(null);
   const [refused, setRefused] = useState<AddBlock>(null);
 
   useEffect(() => {
     if (!question) return;
-    setMatchedYet(!question.mustMatch);
+    setMatchedFor(null);
     setRefused(null);
   }, [question]);
 
   if (!question) return null;
+
+  /** Cut to match — for *this* question, not for whichever one came before. */
+  const matchedYet = !question.mustMatch || matchedFor === question.id;
 
   const options = question.options ?? [];
   const shown = matchedYet ? matchedPair(question) : { left: question.left, right: question.right };
@@ -140,7 +153,7 @@ export const AddStrip: React.FC<ActivityProps<AddParams>> = ({ params, koda, onC
     if (soundEnabled && koda.sound.isEnabled()) koda.sound.play("clink");
     if (koda.config.isEnabled("haptic_feedback", true)) koda.haptics.pulse("light");
     setRefused(null);
-    setMatchedYet(true);
+    setMatchedFor(question.id);
   };
 
   const answer = (text: string): void => {
@@ -150,7 +163,7 @@ export const AddStrip: React.FC<ActivityProps<AddParams>> = ({ params, koda, onC
       say(ADD_REFUSALS[block]);
       return;
     }
-    const correct = text === question.expected;
+    const correct = isAddCorrect(question, text);
     if (soundEnabled && koda.sound.isEnabled()) koda.sound.play(correct ? "success" : "error");
     if (koda.config.isEnabled("haptic_feedback", true)) {
       if (correct) koda.haptics.success();
@@ -178,7 +191,7 @@ export const AddStrip: React.FC<ActivityProps<AddParams>> = ({ params, koda, onC
       onStartOver={
         matchedYet && question.mustMatch && !round.feedback
           ? () => {
-              setMatchedYet(false);
+              setMatchedFor(null);
               setRefused(null);
             }
           : undefined
