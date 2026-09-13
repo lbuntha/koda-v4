@@ -11,6 +11,7 @@ import { divideHints } from "./activities/ShareOut";
 import { decimalHints } from "./activities/DecimalBridge";
 import { estimateHints } from "./activities/EstimateDial";
 import { storyHints } from "./activities/StoryBoard";
+import { buildQuestion as buildStrategyQuestion, explainStrategy, strategyHints } from "./activities/StrategyPicker";
 import { buildStripQuestion, explainStrip, type StripMode } from "./internal/data/fractionStrip";
 import { buildLineQuestion, explainLine, type LineMode } from "./internal/data/fractionLine";
 import { buildMillQuestion, explainMill, type MillMode } from "./internal/data/fractionEquivalence";
@@ -129,6 +130,10 @@ function everything(): Rendered[] {
       add("story", m, storyHints(q), explainStory(q, true), explainStory(q, false), q.expected);
     }
   }
+  for (let i = 0; i < 5; i += 1) {
+    const q = buildStrategyQuestion({}, i);
+    add("strategy", "compare_paths", strategyHints(q), explainStrategy(q, true), explainStrategy(q, false), q.expected);
+  }
   return out;
 }
 
@@ -145,6 +150,7 @@ describe("every technique a lesson uses is read here", () => {
     for (const lesson of skill.lessons) {
       const q = (lesson.params as { question?: { mode?: string; modes?: string[] } })?.question;
       const engine = lesson.activity.split("/")[1];
+      if (engine === "strategy") continue;
       for (const mode of [q?.mode, ...(q?.modes ?? [])].filter(Boolean) as string[]) {
         expect(walked.has(`${engine}/${mode}`), `${lesson.id} uses ${engine}/${mode}, unread here`).toBe(true);
       }
@@ -160,6 +166,9 @@ describe("every technique has a hint ladder, and it climbs", () => {
       skill.lessons.flatMap((lesson) => {
         const q = (lesson.params as { question?: { mode?: string; modes?: string[] } })?.question;
         const engine = lesson.activity.split("/")[1];
+        // The strategy level has no mode: its questions are one kind, and which
+        // routes fit is the variable. It is walked here under its task kind.
+        if (engine === "strategy") return ["strategy/compare_paths"];
         return [q?.mode, ...(q?.modes ?? [])].filter(Boolean).map((m) => `${engine}/${m as string}`);
       }),
     );

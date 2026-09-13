@@ -71,7 +71,8 @@
     "context-adder",
     "recipe-scaler",
     "fraction-comparer-in-context",
-    "fraction-multi-step-solver"
+    "fraction-multi-step-solver",
+    "fraction-strategy-chooser"
   ],
   "requires": [
     "counter",

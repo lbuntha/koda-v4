@@ -12,6 +12,7 @@ import * as divide from "./activities/ShareOut";
 import * as decimal from "./activities/DecimalBridge";
 import * as estimate from "./activities/EstimateDial";
 import * as story from "./activities/StoryBoard";
+import * as strategy from "./activities/StrategyPicker";
 import { registerSkillVoice } from "../../lib/voiceClips";
 import audioManifest from "./audio/manifest.json";
 
@@ -123,6 +124,12 @@ export const skill: Skill = {
       name: "In Words",
       defaultParams: { mode: "of_amount", questionsPerRound: 5 },
       component: story.StoryBoard,
+    },
+    strategy: {
+      id: "strategy",
+      name: "Which Way?",
+      defaultParams: { questionsPerRound: 5 },
+      component: strategy.StrategyPicker,
     },
   },
 };

@@ -480,3 +480,25 @@ Word problems, modelled on a bar before anything is calculated. 56 lessons,
 - The round test pressed the bar cutters instead of the answers — they are
   numbered 2 to 8, so every question whose answer was a small number pressed the
   wrong control. Answers are found inside their own row now.
+
+### Phase 13 — `StrategyPicker`, level 57
+
+The last teaching level, and the only one with more than one right answer. 57
+lessons, 387 tests.
+
+Six routes, each with a predicate saying when it genuinely suits a pair of
+fractions, and a question is only drawn when at least one route fits and at
+least one does not. "Multiply the bottom numbers" and "find the smallest size
+they both fit" are the same move when the denominators share nothing and
+different when they do, so exactly one of them is ever offered.
+
+### Phase 14 — practice, levels 58–69
+
+One per engine, modes cycled rather than sampled, and the help gone completely.
+69 lessons, 419 tests.
+
+The practice suite checks the two things that fail silently: that an
+eight-question round reaches every mode it names, and that no hint button, no
+read-aloud and no technique-naming caption survives. It also caught itself —
+`/read|listen|aloud/` matched the route label "the pieces already match", which
+contains "read". Whole words now.

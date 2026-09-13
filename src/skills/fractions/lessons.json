@@ -2568,6 +2568,427 @@
         11,
         12
       ]
+    },
+    {
+      "id": "explain-and-compare",
+      "title": "Which Way, and Why",
+      "concept": "Choosing a Route Through a Fraction Problem",
+      "conceptKey": "fraction-strategy-chooser",
+      "requires": [
+        "unlike-adder",
+        "fraction-simplifier",
+        "benchmark-estimator"
+      ],
+      "activity": "fractions/strategy",
+      "iconName": "GitBranch",
+      "iconTone": "cyan",
+      "params": {
+        "level": 57,
+        "question": {
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Choose a way of handling two fractions that suits those particular numbers.",
+          "stepByStep": [
+            "Look at the two bottom numbers before anything else.",
+            "Are they the same? Then there is nothing to cut.",
+            "Does one go into the other? Then only one of them needs cutting.",
+            "Do they share a factor? Then the pieces can be smaller than multiplying would give."
+          ],
+          "kidTip": "More than one way can be right. The question is which one suits these numbers.",
+          "audioPrompt": "Which way would you do this one?",
+          "prompts": {
+            "default": "Which way would you do it?"
+          }
+        }
+      },
+      "standards": [
+        "CCSS.5.NF.A.1",
+        "CCSS.5.NF.B.4"
+      ],
+      "trajectoryLevel": "strategies",
+      "ageBand": [
+        11,
+        12
+      ]
+    },
+    {
+      "id": "practice-strip",
+      "title": "Practice: Equal Parts",
+      "concept": "Practice Without Help",
+      "conceptKey": "equal-part-checker",
+      "requires": [
+        "equal-part-checker"
+      ],
+      "activity": "fractions/strip",
+      "iconName": "PieChart",
+      "iconTone": "purple",
+      "params": {
+        "level": 58,
+        "question": {
+          "practice": true,
+          "questionsPerRound": 8,
+          "modes": [
+            "equal_or_not",
+            "name_unit",
+            "which_whole",
+            "build",
+            "to_notation",
+            "of_a_set"
+          ]
+        }
+      },
+      "standards": [],
+      "trajectoryLevel": "practice",
+      "ageBand": [
+        7,
+        10
+      ]
+    },
+    {
+      "id": "practice-numberline",
+      "title": "Practice: Fractions on the Line",
+      "concept": "Practice Without Help",
+      "conceptKey": "fraction-line-placer",
+      "requires": [
+        "fraction-line-placer"
+      ],
+      "activity": "fractions/numberline",
+      "iconName": "Ruler",
+      "iconTone": "sky",
+      "params": {
+        "level": 59,
+        "question": {
+          "practice": true,
+          "questionsPerRound": 8,
+          "modes": [
+            "place_unit",
+            "place_any",
+            "read_point",
+            "makes_one",
+            "improper"
+          ]
+        }
+      },
+      "standards": [],
+      "trajectoryLevel": "practice",
+      "ageBand": [
+        8,
+        11
+      ]
+    },
+    {
+      "id": "practice-equivalence",
+      "title": "Practice: Same Amount, New Name",
+      "concept": "Practice Without Help",
+      "conceptKey": "equivalence-maker",
+      "requires": [
+        "equivalence-maker"
+      ],
+      "activity": "fractions/equivalence",
+      "iconName": "Repeat",
+      "iconTone": "emerald",
+      "params": {
+        "level": 60,
+        "question": {
+          "practice": true,
+          "questionsPerRound": 8,
+          "modes": [
+            "split",
+            "two_names",
+            "scale_up",
+            "scale_down",
+            "simplest"
+          ]
+        }
+      },
+      "standards": [],
+      "trajectoryLevel": "practice",
+      "ageBand": [
+        9,
+        11
+      ]
+    },
+    {
+      "id": "practice-compare",
+      "title": "Practice: Which Is More",
+      "concept": "Practice Without Help",
+      "conceptKey": "unlike-comparer",
+      "requires": [
+        "unlike-comparer"
+      ],
+      "activity": "fractions/compare",
+      "iconName": "Scale",
+      "iconTone": "cyan",
+      "params": {
+        "level": 61,
+        "question": {
+          "practice": true,
+          "questionsPerRound": 8,
+          "modes": [
+            "same_denominator",
+            "same_numerator",
+            "different_wholes",
+            "benchmark_half",
+            "common_denominator"
+          ]
+        }
+      },
+      "standards": [],
+      "trajectoryLevel": "practice",
+      "ageBand": [
+        9,
+        12
+      ]
+    },
+    {
+      "id": "practice-mixed",
+      "title": "Practice: Wholes and Parts",
+      "concept": "Practice Without Help",
+      "conceptKey": "mixed-line-placer",
+      "requires": [
+        "mixed-line-placer"
+      ],
+      "activity": "fractions/mixed",
+      "iconName": "Split",
+      "iconTone": "indigo",
+      "params": {
+        "level": 62,
+        "question": {
+          "practice": true,
+          "questionsPerRound": 6,
+          "modes": [
+            "to_mixed",
+            "to_improper",
+            "on_line"
+          ]
+        }
+      },
+      "standards": [],
+      "trajectoryLevel": "practice",
+      "ageBand": [
+        9,
+        12
+      ]
+    },
+    {
+      "id": "practice-add",
+      "title": "Practice: Adding and Taking Away",
+      "concept": "Practice Without Help",
+      "conceptKey": "mixed-exchanger",
+      "requires": [
+        "mixed-exchanger"
+      ],
+      "activity": "fractions/add",
+      "iconName": "Plus",
+      "iconTone": "emerald",
+      "params": {
+        "level": 63,
+        "question": {
+          "practice": true,
+          "questionsPerRound": 8,
+          "modes": [
+            "add_like",
+            "subtract_like",
+            "refute",
+            "add_nested",
+            "add_unlike",
+            "subtract_unlike",
+            "add_mixed",
+            "subtract_mixed"
+          ]
+        }
+      },
+      "standards": [],
+      "trajectoryLevel": "practice",
+      "ageBand": [
+        10,
+        12
+      ]
+    },
+    {
+      "id": "practice-multiply",
+      "title": "Practice: A Fraction of Something",
+      "concept": "Practice Without Help",
+      "conceptKey": "scaling-reasoner",
+      "requires": [
+        "scaling-reasoner"
+      ],
+      "activity": "fractions/multiply",
+      "iconName": "Grid3x3",
+      "iconTone": "violet",
+      "params": {
+        "level": 64,
+        "question": {
+          "practice": true,
+          "questionsPerRound": 8,
+          "modes": [
+            "of_whole",
+            "whole_times",
+            "area_model",
+            "simplify_first",
+            "scaling"
+          ]
+        }
+      },
+      "standards": [],
+      "trajectoryLevel": "practice",
+      "ageBand": [
+        10,
+        12
+      ]
+    },
+    {
+      "id": "practice-divide",
+      "title": "Practice: How Many Fit",
+      "concept": "Practice Without Help",
+      "conceptKey": "reciprocal-reasoner",
+      "requires": [
+        "reciprocal-reasoner"
+      ],
+      "activity": "fractions/divide",
+      "iconName": "Ruler",
+      "iconTone": "emerald",
+      "params": {
+        "level": 65,
+        "question": {
+          "practice": true,
+          "questionsPerRound": 8,
+          "modes": [
+            "measure",
+            "whole_by",
+            "by_whole",
+            "by_fraction",
+            "explain_flip"
+          ]
+        }
+      },
+      "standards": [],
+      "trajectoryLevel": "practice",
+      "ageBand": [
+        11,
+        12
+      ]
+    },
+    {
+      "id": "practice-decimal",
+      "title": "Practice: Three Names",
+      "concept": "Practice Without Help",
+      "conceptKey": "representation-matcher",
+      "requires": [
+        "representation-matcher"
+      ],
+      "activity": "fractions/decimal",
+      "iconName": "Percent",
+      "iconTone": "indigo",
+      "params": {
+        "level": 66,
+        "question": {
+          "practice": true,
+          "questionsPerRound": 8,
+          "modes": [
+            "tenths",
+            "hundredths",
+            "by_dividing",
+            "from_decimal",
+            "percent",
+            "three_names"
+          ]
+        }
+      },
+      "standards": [],
+      "trajectoryLevel": "practice",
+      "ageBand": [
+        10,
+        12
+      ]
+    },
+    {
+      "id": "practice-estimate",
+      "title": "Practice: Roughly How Much",
+      "concept": "Practice Without Help",
+      "conceptKey": "fraction-reasonableness-checker",
+      "requires": [
+        "fraction-reasonableness-checker"
+      ],
+      "activity": "fractions/estimate",
+      "iconName": "Gauge",
+      "iconTone": "sky",
+      "params": {
+        "level": 67,
+        "question": {
+          "practice": true,
+          "questionsPerRound": 6,
+          "modes": [
+            "benchmark",
+            "reasonable"
+          ]
+        }
+      },
+      "standards": [],
+      "trajectoryLevel": "practice",
+      "ageBand": [
+        10,
+        12
+      ]
+    },
+    {
+      "id": "practice-story",
+      "title": "Practice: In Words",
+      "concept": "Practice Without Help",
+      "conceptKey": "fraction-multi-step-solver",
+      "requires": [
+        "fraction-multi-step-solver"
+      ],
+      "activity": "fractions/story",
+      "iconName": "BookOpen",
+      "iconTone": "violet",
+      "params": {
+        "level": 68,
+        "question": {
+          "practice": true,
+          "questionsPerRound": 8,
+          "modes": [
+            "of_amount",
+            "share_leftover",
+            "add_context",
+            "scale",
+            "compare_context",
+            "multi_step"
+          ]
+        }
+      },
+      "standards": [],
+      "trajectoryLevel": "practice",
+      "ageBand": [
+        10,
+        12
+      ]
+    },
+    {
+      "id": "practice-strategy",
+      "title": "Practice: Which Way",
+      "concept": "Practice Without Help",
+      "conceptKey": "fraction-strategy-chooser",
+      "requires": [
+        "fraction-strategy-chooser"
+      ],
+      "activity": "fractions/strategy",
+      "iconName": "GitBranch",
+      "iconTone": "cyan",
+      "params": {
+        "level": 69,
+        "question": {
+          "practice": true,
+          "questionsPerRound": 6
+        }
+      },
+      "standards": [],
+      "trajectoryLevel": "practice",
+      "ageBand": [
+        11,
+        12
+      ]
     }
   ]
 }
