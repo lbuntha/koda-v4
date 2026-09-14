@@ -362,11 +362,12 @@ export const PushJobs: React.FC = () => {
       {error && <p className="text-xs text-rose-600 dark:text-rose-400">{error}</p>}
 
       <p className="text-xs text-muted">
-        <strong>Preview</strong> is the one to reach for on any day that is not Sunday: it sends
-        nothing and claims nothing, so looking at Sunday does not stop Sunday from happening.{" "}
-        <em>Run now</em> does the real thing, and on a weekday it correctly does nothing — the
-        clock, not the button, decides whose evening it is. It is safe to press twice either way:
-        the same record that makes the scheduler&rsquo;s retries harmless applies here.
+        <strong>Preview</strong> is the one to reach for at almost any hour: it drops the clock
+        these jobs are waiting on, sends nothing and claims nothing, so looking at Sunday does not
+        stop Sunday from happening. <em>Run now</em> does the real thing, and most of the time it
+        correctly does nothing — the clock, not the button, decides whose evening or whose chosen
+        hour it is. It is safe to press twice either way: the same record that makes the
+        scheduler&rsquo;s retries harmless applies here.
       </p>
     </section>
   );
