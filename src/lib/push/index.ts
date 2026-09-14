@@ -535,6 +535,47 @@ export async function notificationLog(limit = 50): Promise<PushLog> {
   return await request<PushLog>(`/system/push/log?limit=${limit}`, { token: await accessToken() });
 }
 
+export interface AudienceDevice {
+  platform: string | null;
+  ua: string | null;
+  createdAt: string | null;
+  refreshedAt: string | null;
+  failures: number;
+  /** Retired after repeated soft failures; the nightly sweep removes it. */
+  retired: boolean;
+}
+
+export interface AudiencePerson {
+  userId: string;
+  email: string | null;
+  name: string | null;
+  role: string | null;
+  familyId: string | null;
+  familyName: string | null;
+  devices: AudienceDevice[];
+  liveDevices: number;
+  /** Labels of the courtesy kinds this person currently accepts. */
+  kinds: string[];
+  reminderHour: number;
+  quietFrom: number;
+  quietTo: number;
+  tzOffsetMinutes: number | null;
+}
+
+export interface PushAudience {
+  people: number;
+  families: number;
+  liveDevices: number;
+  retiredDevices: number;
+  truncated: boolean;
+  rows: AudiencePerson[];
+}
+
+/** Everyone who has turned notifications on, and on which browsers. Never the tokens. */
+export async function notificationAudience(): Promise<PushAudience> {
+  return await request<PushAudience>("/system/push/audience", { token: await accessToken() });
+}
+
 export interface NotificationSchedule {
   /** The hour a reminder goes out, in this account's own local time. */
   reminderHour: number;

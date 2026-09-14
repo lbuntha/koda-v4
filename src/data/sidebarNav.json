@@ -29,6 +29,12 @@
      "requires": "member:list"
     },
     {
+     "id": "notification-settings",
+     "label": "Notification Settings",
+     "icon": "bell",
+     "requires": "member:list"
+    },
+    {
      "id": "skills",
      "label": "Skills",
      "icon": "brain",

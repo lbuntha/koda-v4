@@ -25,6 +25,8 @@ DEFAULT_MENU: list[dict] = [
     # deployment — the operator's notification screens are Admin tabs.
     {"itemId": "notifications", "label": "Notifications", "icon": "bell",
      "requires": "member:list", "order": 26},
+    {"itemId": "notification-settings", "label": "Notification Settings", "icon": "bell",
+     "requires": "member:list", "order": 27},
     {"itemId": "skills", "label": "Skills", "icon": "brain", "badge": "Manage",
      "requires": "content:write", "order": 30},
     {"itemId": "subjects", "label": "Subjects", "icon": "list",

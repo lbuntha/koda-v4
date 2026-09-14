@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { CalendarClock, Eye, Play } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
-import { UISectionHeader } from "../ui";
+import { UIDataTable, UISectionHeader } from "../ui";
 import {
   notificationJobs,
   runNotificationJob,
@@ -168,22 +168,39 @@ const Outcome: React.FC<{ run: JobRun }> = ({ run }) => {
           {lines.length} {noun} across {r.families ?? 0}{" "}
           {r.families === 1 ? "family" : "families"}. Nothing was sent and nothing was claimed.
         </p>
-        {lines.map((line) => {
-          const { key, note, sent } = lineNote(run.job, line);
-          return (
-            <div
-              key={key}
-              className="bg-surface border border-line rounded-2xl px-3 py-2 flex items-start justify-between gap-3"
-            >
-              <div className="min-w-0">
-                <h5 className="text-sm font-bold text-ink truncate">{line.title}</h5>
-                <p className="text-xs text-muted break-words">{line.body}</p>
-                <p className="text-[10px] font-mono text-muted mt-1">{note}</p>
-              </div>
-              {sent && <Pill tone="off">SENT</Pill>}
-            </div>
-          );
-        })}
+        <UIDataTable<WouldSend>
+          caption="Notification preview"
+          rows={lines}
+          rowKey={(line) => lineNote(run.job, line).key}
+          pageSize={10}
+          defaultSort={{ key: "title", direction: "asc" }}
+          columns={[
+            {
+              key: "title",
+              header: "Notification",
+              render: (line) => (
+                <div className="min-w-44">
+                  <p className="font-semibold text-ink truncate">{line.title}</p>
+                  <p className="text-[11px] text-muted break-words">{line.body}</p>
+                </div>
+              ),
+              sortValue: (line) => line.title,
+            },
+            {
+              key: "note",
+              header: "Details",
+              render: (line) => lineNote(run.job, line).note,
+              muted: true,
+            },
+            {
+              key: "status",
+              header: "Status",
+              render: (line) => lineNote(run.job, line).sent ? <Pill tone="off">SENT</Pill> : "Ready",
+              align: "right",
+              nowrap: true,
+            },
+          ]}
+        />
       </div>
     );
   }

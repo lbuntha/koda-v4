@@ -468,6 +468,46 @@ async def test_a_childs_device_cannot_read_preferences(client, child, seeded):
 # --- the operator's two functions -----------------------------------------
 
 
+async def test_the_audience_report_is_staff_only(client, parent, seeded):
+    assert (await client.get("/system/push/audience", headers=parent)).status_code == 403
+
+
+async def test_the_audience_report_lists_who_can_be_rung_without_the_token(
+    client, parent, admin, db, seeded
+):
+    await client.post("/push/tokens", headers=parent, json={"token": TOKEN, "platform": "Pixel"})
+    await client.put(
+        "/push/preferences", headers=parent, json={"kind": "learn.practice_reminder", "on": True}
+    )
+
+    response = await client.get("/system/push/audience", headers=admin)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["people"] == 1
+    assert body["liveDevices"] == 1
+    assert body["retiredDevices"] == 0
+    person = body["rows"][0]
+    assert person["email"]
+    assert person["familyName"]
+    assert person["role"] == "owner"
+    assert person["devices"][0]["platform"] == "Pixel"
+    assert "Practice reminder" in person["kinds"]
+    assert TOKEN not in response.text
+
+
+async def test_the_audience_report_marks_a_retired_browser(client, parent, admin, db, seeded):
+    await client.post("/push/tokens", headers=parent, json={"token": TOKEN, "platform": "Pixel"})
+    for _ in range(push_tokens.FAILURE_LIMIT):
+        await push_tokens.note_failure(db, TOKEN)
+
+    body = (await client.get("/system/push/audience", headers=admin)).json()
+
+    assert body["liveDevices"] == 0
+    assert body["retiredDevices"] == 1
+    assert body["rows"][0]["devices"][0]["retired"] is True
+
+
 async def test_preflight_is_staff_only(client, parent, seeded):
     assert (await client.get("/system/push/preflight", headers=parent)).status_code == 403
 

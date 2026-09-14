@@ -27,5 +27,6 @@ export type TabId =
   // here because the shell has to be able to *put it on screen*, which is not
   // the same question as whether the sidebar draws a row for it.
   | "notifications"
+  | "notification-settings"
   | "system"
   | "settings";

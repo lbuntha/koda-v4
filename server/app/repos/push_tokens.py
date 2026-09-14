@@ -126,6 +126,25 @@ async def coverage(db: AsyncIOMotorDatabase) -> dict[str, int]:
     return {"tokens": live, "families": len([f for f in families if f])}
 
 
+#: Most rows the audience report reads. A deployment past this has outgrown a
+#: list on a card, and the report says it was cut rather than silently undercount.
+REPORT_LIMIT = 2000
+
+
+async def for_report(db: AsyncIOMotorDatabase) -> list[dict[str, Any]]:
+    """Every registration, live and retired, without the token itself.
+
+    The token is left behind in the query rather than dropped in the router:
+    holding one is the ability to ring that browser, and a report about *who*
+    can be rung has no reason to carry the means.
+    """
+    return (
+        await db.push_tokens.find({}, {"token": 0})
+        .sort("refreshedAt", -1)
+        .to_list(length=REPORT_LIMIT)
+    )
+
+
 async def device_ids_with_tokens(db: AsyncIOMotorDatabase, device_ids: list[str]) -> set[str]:
     """Which of these sessions currently hold a live token.
 

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { History, RefreshCw } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
-import { UISectionHeader } from "../ui";
+import { UIDataTable, UISectionHeader } from "../ui";
 import { notificationLog, type PushLog, type SendRecord } from "../../lib/push";
 
 /**
@@ -76,48 +76,88 @@ export const PushLogPanel: React.FC = () => {
       />
 
       {log && log.summary.length > 0 && (
-        <div className="space-y-2">
-          {log.summary.map((row) => (
-            <div
-              key={row.kind}
-              className="bg-surface-muted border border-line rounded-2xl px-4 py-2 flex items-center justify-between gap-3"
-            >
-              <div className="min-w-0">
-                <h4 className="text-sm font-bold text-ink font-mono truncate">{row.kind}</h4>
-                <p className="text-[10px] font-mono text-muted">
-                  last {new Date(row.last).toLocaleString()}
-                </p>
-              </div>
-              <span
-                className={`shrink-0 font-mono text-[10px] ${
-                  row.delivered > 0 || row.devices === 0
-                    ? "text-muted"
-                    : "text-rose-600 dark:text-rose-400"
-                }`}
-              >
-                {row.sends} sent · {row.delivered}/{row.devices} delivered
-              </span>
-            </div>
-          ))}
-        </div>
+        <UIDataTable
+          caption="Notification summary"
+          rows={log.summary}
+          rowKey={(row) => row.kind}
+          pageSize={8}
+          defaultSort={{ key: "last", direction: "desc" }}
+          columns={[
+            {
+              key: "kind",
+              header: "Kind",
+              render: (row) => <span className="font-mono font-semibold text-ink">{row.kind}</span>,
+              sortValue: (row) => row.kind,
+            },
+            {
+              key: "last",
+              header: "Last sent",
+              render: (row) => new Date(row.last).toLocaleString(),
+              sortValue: (row) => row.last,
+              nowrap: true,
+              muted: true,
+            },
+            {
+              key: "delivery",
+              header: "Delivery",
+              render: (row) => (
+                <span className={row.delivered > 0 || row.devices === 0 ? "text-muted" : "text-rose-600 dark:text-rose-400"}>
+                  {row.sends} sent · {row.delivered}/{row.devices}
+                </span>
+              ),
+              sortValue: (row) => row.delivered,
+              align: "right",
+              nowrap: true,
+            },
+          ]}
+        />
       )}
 
-      <div className="space-y-2">
-        {(log?.sends ?? []).map((send) => (
-          <div key={send.id} className="bg-surface-muted border border-line rounded-2xl px-4 py-3">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <h4 className="text-sm font-bold text-ink truncate">{send.title}</h4>
-                <p className="text-xs text-muted break-words">{send.body}</p>
-                <p className="text-[10px] font-mono text-muted mt-1">
-                  {send.kind} · {new Date(send.at).toLocaleString()} ·{" "}
-                  {send.people.length} {send.people.length === 1 ? "person" : "people"}
-                </p>
-              </div>
-              <Result send={send} />
-            </div>
-          </div>
-        ))}
+      <div>
+        {log && log.sends.length > 0 && (
+          <UIDataTable
+            caption="Notification sends"
+            rows={log.sends}
+            rowKey={(send) => send.id}
+            pageSize={10}
+            defaultSort={{ key: "at", direction: "desc" }}
+            columns={[
+              {
+                key: "notification",
+                header: "Notification",
+                render: (send) => (
+                  <div className="min-w-44">
+                    <p className="font-semibold text-ink truncate">{send.title}</p>
+                    <p className="text-[11px] text-muted break-words">{send.body}</p>
+                  </div>
+                ),
+              },
+              {
+                key: "kind",
+                header: "Kind",
+                render: (send) => send.kind,
+                sortValue: (send) => send.kind,
+                muted: true,
+                nowrap: true,
+              },
+              {
+                key: "at",
+                header: "Sent",
+                render: (send) => new Date(send.at).toLocaleString(),
+                sortValue: (send) => send.at,
+                muted: true,
+                nowrap: true,
+              },
+              {
+                key: "result",
+                header: "Result",
+                render: (send) => <Result send={send} />,
+                align: "right",
+                nowrap: true,
+              },
+            ]}
+          />
+        )}
         {log && log.sends.length === 0 && !error && (
           <p className="text-xs text-muted">
             Nothing has been sent yet. A sign-in, a met goal or a Sunday summary will appear here.

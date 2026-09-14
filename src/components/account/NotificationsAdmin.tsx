@@ -1,6 +1,7 @@
 import React from "react";
 import { Bell, Mail } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
+import { PushAudiencePanel } from "./PushAudiencePanel";
 import { PushDiagnostics } from "./PushDiagnostics";
 import { PushJobs } from "./PushJobs";
 import { PushLogPanel } from "./PushLogPanel";
@@ -48,50 +49,51 @@ const Channel: React.FC<{
   </section>
 );
 
-export const NotificationsAdmin: React.FC = () => (
-  <div className="space-y-8">
-    <Channel
-      name="Push"
-      icon={<Bell className="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0" />}
-      summary="A notification on a phone, through Firebase Cloud Messaging"
-    >
-      <div className="space-y-4">
-        <PushDiagnostics />
-        <PushJobs />
-        {/* After the two that *act*, because it is what you read once one of
-            them has: preflight says whether a send would work, the jobs send,
-            and this says what became of it. */}
-        <PushLogPanel />
-        <PushTemplates />
-      </div>
-    </Channel>
+export type NotificationAdminSection = "overview" | "jobs" | "log" | "wording";
 
-    <Channel
-      name="Email"
-      icon={<Mail className="w-5 h-5 text-slate-500 dark:text-slate-400 shrink-0" />}
-      summary="Sign-in links, resets and verification, through SMTP"
-    >
-      {/*
-        A named gap rather than an absent one.
+export const NotificationsAdmin: React.FC<{
+  channel?: "all" | "push" | "email";
+  section?: NotificationAdminSection;
+}> = ({ channel = "all", section }) => {
+  const show = (target: NotificationAdminSection) => !section || section === target;
 
-        `services/mail.py` has sent password resets and verification links since
-        long before push existed, and it has no screen at all: whether mail
-        works on this deployment is currently answered by reading logs. Naming
-        the channel here says where that screen goes when somebody builds it,
-        and stops the next person adding a "Mail" tab somewhere else because
-        this page looked like it was only about push.
-      */}
-      <div className={themeSystem.card("default", `${themeSystem.spacing.card}`)}>
-        <p className="text-sm text-ink">
-          Mail already sends — resets, verification and sign-in links go out through{" "}
-          <code className="font-mono text-xs">MAIL_DRIVER</code>. It has no screen yet, so whether
-          it is working here is answered by reading the service log.
-        </p>
-        <p className="text-xs text-muted mt-2">
-          When it gets one it belongs on this page, beside push: the questions are the same for
-          both — does it work, what does it say, when does it go.
-        </p>
-      </div>
-    </Channel>
-  </div>
-);
+  return (
+    <div className="space-y-8">
+      {(channel === "all" || channel === "push") && (
+        <Channel
+          name="Push"
+          icon={<Bell className="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0" />}
+          summary="A notification on a phone, through Firebase Cloud Messaging"
+        >
+          <div className="space-y-4">
+            {show("overview") && <PushDiagnostics />}
+            {show("jobs") && <PushJobs />}
+            {show("log") && <PushLogPanel />}
+            {show("overview") && <PushAudiencePanel />}
+            {show("wording") && <PushTemplates />}
+          </div>
+        </Channel>
+      )}
+
+      {(channel === "all" || channel === "email") && (
+        <Channel
+          name="Email"
+          icon={<Mail className="w-5 h-5 text-slate-500 dark:text-slate-400 shrink-0" />}
+          summary="Sign-in links, resets and verification, through SMTP"
+        >
+          <div className={themeSystem.card("default", `${themeSystem.spacing.card}`)}>
+            <p className="text-sm text-ink">
+              Mail already sends — resets, verification and sign-in links go out through{" "}
+              <code className="font-mono text-xs">MAIL_DRIVER</code>. It has no screen yet, so whether
+              it is working here is answered by reading the service log.
+            </p>
+            <p className="text-xs text-muted mt-2">
+              When it gets one it belongs on this page, beside push: the questions are the same for
+              both — does it work, what does it say, when does it go.
+            </p>
+          </div>
+        </Channel>
+      )}
+    </div>
+  );
+};

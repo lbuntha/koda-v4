@@ -24,7 +24,7 @@ from app.models.common import Model
 from app.models.subjects import SubjectCatalog
 from app.push_defaults import BODY_MAX, DEFAULT_KINDS, TITLE_MAX
 from app.repos import maintenance as maintenance_repo
-from app.repos import push_log, push_templates
+from app.repos import notify_prefs, notify_schedule, push_log, push_templates, push_tokens
 from app.repos import system as system_repo
 from app.repos import users as users_repo
 from app.security.rate_limit import PUSH_TEST_PER_ACCOUNT, limiter
@@ -436,6 +436,140 @@ async def push_log_read(
             )
             for row in rows
         ],
+    )
+
+
+class AudienceDeviceOut(Model):
+    """One registered browser. Never the token: that is the means to ring it."""
+
+    platform: str | None = None
+    ua: str | None = None
+    created_at: str | None = Field(default=None, alias="createdAt")
+    refreshed_at: str | None = Field(default=None, alias="refreshedAt")
+    failures: int = 0
+    #: Retired after repeated soft failures; the nightly sweep removes it later.
+    retired: bool = False
+
+
+class AudiencePersonOut(Model):
+    user_id: str = Field(alias="userId")
+    email: str | None = None
+    name: str | None = None
+    #: The role in their family, or the platform role for staff with no family.
+    role: str | None = None
+    family_id: str | None = Field(default=None, alias="familyId")
+    family_name: str | None = Field(default=None, alias="familyName")
+    devices: list[AudienceDeviceOut]
+    live_devices: int = Field(alias="liveDevices")
+    #: Labels of the courtesy kinds this person would currently accept.
+    kinds: list[str]
+    reminder_hour: int = Field(alias="reminderHour")
+    quiet_from: int = Field(alias="quietFrom")
+    quiet_to: int = Field(alias="quietTo")
+    tz_offset_minutes: int | None = Field(default=None, alias="tzOffsetMinutes")
+
+
+class AudienceOut(Model):
+    people: int
+    families: int
+    live_devices: int = Field(alias="liveDevices")
+    retired_devices: int = Field(alias="retiredDevices")
+    #: True when the registrations outnumber what one report reads.
+    truncated: bool
+    rows: list[AudiencePersonOut]
+
+
+@router.get("/push/audience")
+async def push_audience(
+    db: Db, p: Annotated[Principal, Depends(require("user:manage"))]
+) -> AudienceOut:
+    """Who has turned notifications on, on which browsers, and for what.
+
+    Gated on `user:manage` rather than `system:write`, because this names people
+    across families — the same rule as the user list it is read beside.
+    """
+    tokens = await push_tokens.for_report(db)
+    user_ids = sorted({row["userId"] for row in tokens if row.get("userId")})
+
+    users = {
+        row["_id"]: row
+        for row in await db.users.find(
+            {"_id": {"$in": user_ids}}, {"email": 1, "displayName": 1, "platformRole": 1}
+        ).to_list(length=len(user_ids) or 1)
+    }
+    family_ids = sorted({row["familyId"] for row in tokens if row.get("familyId")})
+    families = {
+        row["_id"]: row.get("name")
+        for row in await db.families.find({"_id": {"$in": family_ids}}, {"name": 1}).to_list(
+            length=len(family_ids) or 1
+        )
+    }
+    roles = {
+        (row["userId"], row["familyId"]): row.get("role")
+        for row in await db.memberships.find(
+            {"userId": {"$in": user_ids}}, {"userId": 1, "familyId": 1, "role": 1}
+        ).to_list(length=len(user_ids) * 4 or 1)
+    }
+    prefs = await notify_prefs.for_users(db, user_ids)
+    schedules = await notify_schedule.for_users(db, user_ids)
+    courtesy = [kind for kind in DEFAULT_KINDS if kind["class"] == "courtesy"]
+
+    by_user: dict[str, list[dict[str, Any]]] = {}
+    for row in tokens:
+        if row.get("userId"):
+            by_user.setdefault(row["userId"], []).append(row)
+
+    def stamp(value: Any) -> str | None:
+        return value.isoformat() if value else None
+
+    rows: list[AudiencePersonOut] = []
+    # `tokens` is newest-refreshed first, so insertion order already puts the
+    # most recently active person at the top.
+    for user_id, owned in by_user.items():
+        user = users.get(user_id, {})
+        family_id = next((row["familyId"] for row in owned if row.get("familyId")), None)
+        schedule = schedules[user_id]
+        chosen = prefs.get(user_id, {})
+        rows.append(
+            AudiencePersonOut(
+                userId=user_id,
+                email=user.get("email"),
+                name=user.get("displayName"),
+                role=roles.get((user_id, family_id)) or user.get("platformRole"),
+                familyId=family_id,
+                familyName=families.get(family_id) if family_id else None,
+                devices=[
+                    AudienceDeviceOut(
+                        platform=row.get("platform"),
+                        ua=row.get("ua"),
+                        createdAt=stamp(row.get("createdAt")),
+                        refreshedAt=stamp(row.get("refreshedAt")),
+                        failures=row.get("failures", 0),
+                        retired=row.get("disabledAt") is not None,
+                    )
+                    for row in owned
+                ],
+                liveDevices=sum(1 for row in owned if row.get("disabledAt") is None),
+                kinds=[
+                    kind["label"]
+                    for kind in courtesy
+                    if chosen.get(kind["kindId"], kind["familyDefault"])
+                ],
+                reminderHour=schedule["reminderHour"],
+                quietFrom=schedule["quietFrom"],
+                quietTo=schedule["quietTo"],
+                tzOffsetMinutes=schedule["tzOffsetMinutes"],
+            )
+        )
+
+    live = sum(1 for row in tokens if row.get("disabledAt") is None)
+    return AudienceOut(
+        people=len(rows),
+        families=len({row.family_id for row in rows if row.family_id}),
+        liveDevices=live,
+        retiredDevices=len(tokens) - live,
+        truncated=len(tokens) >= push_tokens.REPORT_LIMIT,
+        rows=rows,
     )
 
 

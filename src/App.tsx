@@ -84,6 +84,7 @@ const NotificationsPage = lazy(() =>
   })),
 );
 import { ProfilePage } from "./components/account/ProfilePage";
+import { NotificationSettingsPage } from "./components/account/NotificationSettingsPage";
 import { KodaAskModal } from "./components/KodaAskModal";
 import type { KodaContext } from "./lib/tutorApi";
 import { Personas } from "./lib/personas";
@@ -274,6 +275,7 @@ export default function App() {
     | "billing"
     | "keys"
     | "notifications"
+    | "notification-settings"
     | "system"
     | "settings"
   >("home");
@@ -1046,6 +1048,7 @@ export default function App() {
               <NotificationsPage />
             </Deferred>
           )}
+          {activeTab === "notification-settings" && <NotificationSettingsPage />}
 
           {activeTab === "menu" && canManageMenu && (
             <Deferred label="Loading menu">

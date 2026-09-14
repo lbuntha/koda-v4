@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
 
@@ -48,6 +48,8 @@ export interface UIDataTableProps<Row> {
   maxHeight?: string;
   /** Announced to screen readers and shown above the table. */
   caption?: string;
+  /** Number of rows per page. Omit for an unpaginated table. */
+  pageSize?: number;
   onRowClick?(row: Row): void;
   className?: string;
 }
@@ -62,12 +64,14 @@ export function UIDataTable<Row>({
   emptyMessage = "Nothing to show yet.",
   maxHeight,
   caption,
+  pageSize,
   onRowClick,
   className = "",
 }: UIDataTableProps<Row>) {
   const [sort, setSort] = useState<{ key: string; direction: Direction } | null>(
     defaultSort ?? null,
   );
+  const [page, setPage] = useState(1);
 
   const sorted = useMemo(() => {
     if (!sort) return rows;
@@ -83,12 +87,27 @@ export function UIDataTable<Row>({
     });
   }, [rows, sort, columns]);
 
+  const totalPages = pageSize && pageSize > 0 ? Math.max(1, Math.ceil(sorted.length / pageSize)) : 1;
+
+  useEffect(() => {
+    setPage(1);
+  }, [rows, pageSize, sort]);
+
+  useEffect(() => {
+    setPage((current) => Math.min(current, totalPages));
+  }, [totalPages]);
+
+  const visibleRows = pageSize && pageSize > 0
+    ? sorted.slice((page - 1) * pageSize, page * pageSize)
+    : sorted;
+
   const toggle = (key: string) => {
     setSort((prev) =>
       prev?.key === key
         ? { key, direction: prev.direction === "asc" ? "desc" : "asc" }
         : { key, direction: "asc" },
     );
+    setPage(1);
   };
 
   if (rows.length === 0) {
@@ -166,7 +185,7 @@ export function UIDataTable<Row>({
         </thead>
 
         <tbody>
-          {sorted.map((row) => (
+          {visibleRows.map((row) => (
             <tr
               key={rowKey(row)}
               onClick={onRowClick ? () => onRowClick(row) : undefined}
@@ -181,6 +200,35 @@ export function UIDataTable<Row>({
           ))}
         </tbody>
       </table>
+      {pageSize && pageSize > 0 && totalPages > 1 && (
+        <nav
+          aria-label="Table pages"
+          className="flex items-center justify-between gap-3 border-t border-line px-4 py-3 text-xs text-muted"
+        >
+          <span>
+            Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, sorted.length)} of {sorted.length}
+          </span>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              disabled={page === 1}
+              onClick={() => setPage((current) => Math.max(1, current - 1))}
+              className="rounded-lg border border-line px-2 py-1 font-semibold text-ink disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Previous
+            </button>
+            <span className="px-2 font-mono text-ink">{page} / {totalPages}</span>
+            <button
+              type="button"
+              disabled={page === totalPages}
+              onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+              className="rounded-lg border border-line px-2 py-1 font-semibold text-ink disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Next
+            </button>
+          </div>
+        </nav>
+      )}
     </div>
   );
 }

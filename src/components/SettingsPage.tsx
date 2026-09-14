@@ -10,7 +10,6 @@ import { ChildSettingsAPI } from "../lib/childSettings";
 import { usePersona, usePersonaRoster } from "../lib/usePersona";
 import { PlanCard } from "./account/PlanCard";
 import { DevicesPage } from "./account/DevicesPage";
-import { NotificationsSettings } from "./account/NotificationsSettings";
 import { usePermissions, useSession } from "../lib/sync";
 import { NavShortcuts } from "./NavShortcuts";
 import type { TabId } from "./navTabs";
@@ -152,7 +151,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
    * switch — and never could use it, because the endpoint refuses a child's
    * token whatever this page draws.
    */
-  const showsNotifications = !session?.learnerId;
 
   const handleToggleSound = () => {
     // Toggle first so switching sound back on is confirmed by the pop itself.
@@ -269,8 +267,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
           </div>
         </SettingGroup>
       )}
-
-      {showsNotifications && <NotificationsSettings />}
 
       {showsPlan && <PlanCard />}
 
