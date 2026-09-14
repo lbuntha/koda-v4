@@ -211,7 +211,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
               setVisibleLimit(PAGE_SIZE);
             }}
             aria-pressed={category === value}
-            className={`shrink-0 rounded-full px-4 py-2 text-xs font-mono font-black border-2 transition pointer-coarse:min-h-11 ${
+            className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-mono font-black border-2 transition ${
               category === value
                 ? "bg-indigo-600 border-indigo-700 text-white"
                 : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-muted hover:border-indigo-300"

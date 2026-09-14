@@ -257,7 +257,7 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
 
   return (
     <div className="min-h-full bg-white dark:bg-canvas">
-      <div className="mx-auto max-w-5xl space-y-5">
+      <div className="mx-auto max-w-5xl space-y-4">
         {/*
           * On a phone the toolbar already says "Children" a couple of
           * centimetres higher up, so printing the heading and its line again
@@ -303,19 +303,19 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
         {error && <p className={themeSystem.flash("error")}>{error}</p>}
         {notice && <p className={themeSystem.flash("success")}>{notice}</p>}
 
-        {loading ? <div className="rounded-2xl border border-line bg-white p-8 text-center text-sm text-muted dark:bg-surface">Loading children…</div> : learners.length === 0 ? <section className={themeSystem.card("default", "p-8 text-center")}><UserRound className="mx-auto h-10 w-10 text-indigo-300" /><h2 className="mt-3 text-lg font-semibold text-ink">No child profiles yet</h2><p className="mx-auto mt-1 max-w-md text-sm text-muted">Add a child to create their learning space and pair their tablet with a secure one-time code.</p>{canCreate && <UIButton className="mt-4" icon={<Plus />} disabled={atLimit} onClick={() => setCreateOpen(true)}>Add first child</UIButton>}</section> : <div className="grid gap-4 sm:grid-cols-2">{learners.map((learner) => (
-          <article key={learner.id} className={themeSystem.card("default", "p-5")}>
+        {loading ? <div className="rounded-2xl border border-line bg-white p-6 text-center text-sm text-muted dark:bg-surface">Loading children…</div> : learners.length === 0 ? <section className={themeSystem.card("default", "p-6 text-center")}><UserRound className="mx-auto h-10 w-10 text-indigo-300" /><h2 className="mt-3 text-lg font-semibold text-ink">No child profiles yet</h2><p className="mx-auto mt-1 max-w-md text-sm text-muted">Add a child to create their learning space.</p>{canCreate && <UIButton className="mt-4" icon={<Plus />} disabled={atLimit} onClick={() => setCreateOpen(true)}>Add child</UIButton>}</section> : <div className="grid gap-3 sm:grid-cols-2">{learners.map((learner) => (
+          <article key={learner.id} className={themeSystem.card("default", "p-4")}>
             <div className="flex items-start justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">
                 <UIAvatar name={learner.displayName} seed={learner.avatarSeed} size="md" />
                 <div className="min-w-0">
                   <h2 className="truncate text-lg font-semibold text-ink">{learner.displayName}</h2>
-                  <p className="text-xs text-muted">Added {formatDate(learner.createdAt)}{learner.birthYear ? ` · born ${learner.birthYear}` : ""}</p>
-                  <p className="text-xs text-muted">Daily goal · {DailyGoalAPI.for(learner.id)} rounds</p>
+                  <p className="text-xs text-muted">{learner.birthYear ? `Born ${learner.birthYear}` : `Added ${formatDate(learner.createdAt)}`}</p>
+                  <p className="text-xs text-muted">Goal · {DailyGoalAPI.for(learner.id)} rounds</p>
                 </div>
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                {learner.hasActiveCode && <UIBadge variant="warning">Code active</UIBadge>}
+                {learner.hasActiveCode && <UIBadge variant="info">Code active</UIBadge>}
                 {/*
                   * Edit and Remove live here rather than in the row below. They
                   * are occasional, and Remove is destructive — a red button on
@@ -364,10 +364,10 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
                 )}
               </div>
             </div>
-            <div className="mt-5 flex flex-wrap gap-2">
-              {canReadRecord && <UIButton variant="primary" size="sm" icon={<LineChart />} onClick={() => { playSound("pop"); onOpenReport?.(learner.id); }}>View report</UIButton>}
-              {canSwitch && <UIButton variant="secondary" size="sm" icon={<UserRound />} isLoading={busy === `switch:${learner.id}`} onClick={() => void switchToChild(learner)}>Switch to child</UIButton>}
-              <UIButton variant={canReadRecord || canSwitch ? "secondary" : "primary"} size="sm" icon={<KeyRound />} isLoading={busy === `code:${learner.id}`} onClick={() => void issueCode(learner)}>Get device code</UIButton>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {canReadRecord && <UIButton variant="primary" size="sm" icon={<LineChart />} onClick={() => { playSound("pop"); onOpenReport?.(learner.id); }}>Report</UIButton>}
+              {canSwitch && <UIButton variant="secondary" size="sm" icon={<UserRound />} isLoading={busy === `switch:${learner.id}`} onClick={() => void switchToChild(learner)}>Switch</UIButton>}
+              <UIButton variant={canReadRecord || canSwitch ? "secondary" : "primary"} size="sm" icon={<KeyRound />} isLoading={busy === `code:${learner.id}`} onClick={() => void issueCode(learner)}>Device code</UIButton>
             </div>
           </article>
         ))}</div>}
@@ -388,10 +388,10 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
           <div className="space-y-3 border-t border-line pt-4">
             <div>
               <h3 className="koda-admin-label text-ink">
-                How Koda behaves for {editing.displayName.trim() || "this child"}
+                Koda settings
               </h3>
               <p className="text-xs text-muted">
-                These follow {editing.displayName.trim() || "this child"} to every device they sign in on.
+                Applies on every device.
               </p>
             </div>
             <ChildSettingsFields
@@ -408,7 +408,7 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
         </div>}
       </UIModal>
 
-      <UIModal isOpen={Boolean(codeResult)} onClose={() => setCodeResult(null)} title={`Device code for ${codeResult?.learner.displayName ?? "child"}`} footer={<UIButton variant="primary" onClick={() => setCodeResult(null)}>Done</UIButton>}>
+      <UIModal isOpen={Boolean(codeResult)} onClose={() => setCodeResult(null)} title={`Device code for ${codeResult?.learner.displayName ?? "child"}`} tone="plain" footer={<UIButton variant="primary" onClick={() => setCodeResult(null)}>Done</UIButton>}>
         {codeResult && <div className="space-y-5 text-center"><p className="text-sm text-muted">On the child's device, choose <strong>Child code</strong> on the sign-in screen and enter this code.</p><div className="rounded-2xl border-2 border-indigo-200 bg-indigo-50 px-4 py-5 dark:border-indigo-800 dark:bg-indigo-950/40"><div className="font-mono text-3xl font-bold tracking-[0.3em] text-indigo-800 dark:text-indigo-200">{codeResult.code}</div><p className="mt-2 text-xs text-indigo-700 dark:text-indigo-300">Expires {new Date(codeResult.expiresAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} · single use</p></div><UIButton variant="secondary" icon={copied ? <Check /> : <Copy />} onClick={() => void copyCode()}>{copied ? "Copied" : "Copy code"}</UIButton><p className="text-xs text-muted">Keep this code private. It cannot be used again after the child joins.</p></div>}
       </UIModal>
 

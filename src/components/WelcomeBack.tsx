@@ -1,5 +1,5 @@
-import React from "react";
-import { Flame, Sparkles } from "lucide-react";
+import React, { useState } from "react";
+import { Flame, Sparkles, X } from "lucide-react";
 
 import { useAbsence } from "../lib/absence";
 import { themeSystem } from "../lib/themeSystem";
@@ -27,7 +27,10 @@ import type { UserProgress } from "../types";
  */
 export const WelcomeBack: React.FC<{ userProgress: UserProgress }> = ({ userProgress }) => {
   const absence = useAbsence(userProgress);
+  const [closing, setClosing] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
   if (absence.state === "quiet") return null;
+  if (dismissed) return null;
 
   /*
    * What it says, and what it refuses to.
@@ -46,13 +49,27 @@ export const WelcomeBack: React.FC<{ userProgress: UserProgress }> = ({ userProg
       : `Your ${absence.streakDays}-day streak is waiting.`;
 
   return (
-    <p className={themeSystem.flash("info")} role="status">
+    <div
+      className={`${themeSystem.flash("info")} relative overflow-hidden bg-gradient-to-br from-sky-50 via-white to-indigo-50 shadow-[0_10px_30px_-16px_rgba(79,70,229,0.55)] transition-all duration-300 ${closing ? "translate-y-1 scale-[0.98] opacity-0" : "animate-[fade-in_300ms_ease-out]"}`}
+      role="status"
+    >
       {away ? (
         <Sparkles className="w-5 h-5 shrink-0" aria-hidden="true" />
       ) : (
         <Flame className="w-5 h-5 shrink-0 fill-current" aria-hidden="true" />
       )}
-      <span className="font-bold">{message}</span>
-    </p>
+      <span className="pr-6 font-bold">{message}</span>
+      <button
+        type="button"
+        aria-label="Dismiss welcome back message"
+        onClick={() => {
+          setClosing(true);
+          window.setTimeout(() => setDismissed(true), 280);
+        }}
+        className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full text-sky-700/70 transition hover:bg-white/80 hover:text-sky-950 active:scale-90 dark:text-sky-200/70 dark:hover:bg-sky-950/40 dark:hover:text-white"
+      >
+        <X className="h-4 w-4" />
+      </button>
+    </div>
   );
 };

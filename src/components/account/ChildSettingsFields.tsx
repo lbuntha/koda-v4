@@ -35,14 +35,12 @@ const CADENCE_CHOICES: { id: GoalCadence; label: string; detail: (who: string) =
   {
     id: "daily",
     label: "Days",
-    detail: (who) =>
-      `${who}'s flame grows on a day practised, and breaks on a day missed.`,
+    detail: () => "Practise today to grow it.",
   },
   {
     id: "weekly",
     label: "Weeks",
-    detail: (who) =>
-      `${who}'s flame grows on a week practised, so a busy day costs nothing. Best for a child who does not choose when they get the tablet.`,
+    detail: () => "Practise this week to grow it.",
   },
 ];
 
@@ -143,8 +141,8 @@ const hoursSummary = (hours: AllowedHours, who: string): string => {
   const from = hourLabel(hours.from);
   const to = hourLabel(hours.to);
   return hours.from < hours.to
-    ? `${who} can open Koda between ${from} and ${to}. Outside those hours Koda is asleep.`
-    : `${who} can open Koda from ${from} through the night until ${to}. Koda is asleep during the day — check this is what you meant.`;
+    ? `${who}: ${from}–${to}.`
+    : `${who}: ${from}–${to} overnight.`;
 };
 
 export interface ChildSettingsFieldsProps {
@@ -244,8 +242,8 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
         stacked
         icon={<Clock className="h-5 w-5" />}
         tint="text-indigo-500"
-        title="Time each day"
-        hint={`How long ${who} can play before Koda stops for the day`}
+        title="Daily play time"
+        hint="Set a daily time limit."
       >
         <Choices
           ariaLabel="Daily time limit"
@@ -266,7 +264,7 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
         />
         {value.sessionMinutes !== null && (
           <p className="text-xs text-muted">
-            A round already started is always finished, so a day can run a little over.
+            Started rounds can finish.
           </p>
         )}
       </Row>
@@ -280,8 +278,8 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
         stacked
         icon={<Moon className="h-5 w-5" />}
         tint="text-purple-500"
-        title="Hours of the day"
-        hint={`When ${who} can open Koda at all`}
+        title="Play hours"
+        hint="Choose when Koda is available."
       >
         <div className="flex flex-wrap items-center gap-2">
           <UIToggle
@@ -290,7 +288,7 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
               playSound("pop");
               onChange({ allowedHours: value.allowedHours ? null : DEFAULT_HOURS });
             }}
-            label="Limit the hours of the day"
+            label="Limit play hours"
           />
           {value.allowedHours && (
             <div className="flex flex-wrap items-center gap-2">
@@ -344,7 +342,7 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
         <p className="text-xs text-muted">
           {value.allowedHours
             ? hoursSummary(value.allowedHours, who)
-            : `${who} can open Koda at any time of day.`}
+            : "Available all day."}
         </p>
       </Row>
 
@@ -352,8 +350,8 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
         stacked
         icon={<Flag className="h-5 w-5" />}
         tint="text-emerald-500"
-        title="Starting point"
-        hint={`Skip ahead if ${who} already knows the early work`}
+        title="Starting lesson"
+        hint="Skip lessons they already know."
       >
         {/*
           * A dropdown, not the row of buttons the other settings use: the course
@@ -380,11 +378,11 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
         <p className="text-xs text-muted">
           {value.startingPoint === "age"
             ? childAge === null
-              ? `Add ${who}'s birth year above and Koda will place them by age. Until then they start at the first lesson.`
-              : `Koda places ${who} by the age each lesson is written for, and moves the start as they grow. Earlier units stay unlocked.`
+              ? `Add ${who}'s birth year to start by age.`
+              : `Starts at the right level for ${who}'s age.`
             : value.startingPoint === null
-              ? `${who} starts at the very first lesson, whatever their age.`
-              : `${who} opens on this unit. Everything before it stays unlocked, and still shows as not practised in your report.`}
+              ? `${who} starts at lesson one.`
+              : `${who} starts at this lesson.`}
         </p>
       </Row>
 
@@ -396,8 +394,8 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
           stacked
           icon={<GraduationCap className="h-5 w-5" />}
           tint="text-indigo-500"
-          title="Who teaches"
-          hint={`The teacher ${who} talks to. Each one explains things differently`}
+          title="Teacher"
+          hint="Choose who teaches them."
         >
           <PersonaPicker
             value={value.personaId}
@@ -413,8 +411,8 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
         title="Koda's help"
         hint={
           planHasAi
-            ? `Whether ${who} can ask Koda for hints and spoken guidance`
-            : "Not included on your plan yet — this is what will apply when it is"
+            ? "Allow hints and voice help."
+            : "Not included in your plan."
         }
       >
         <UIToggle
@@ -434,7 +432,7 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
         icon={<Flame className="h-5 w-5" />}
         tint="text-orange-500"
         title="Streak"
-        hint={`Whether ${who}'s flame counts days or weeks`}
+        hint="Count streaks by days or weeks."
       >
         <Choices
           ariaLabel="Whether the streak counts days or weeks"
@@ -455,7 +453,7 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
           * who assumes otherwise would set one meaning to get the other.
           */}
         <p className="text-xs text-muted">
-          The daily goal is separate — it always counts rounds in a single day.
+          Daily goals count rounds.
         </p>
       </Row>
     </div>

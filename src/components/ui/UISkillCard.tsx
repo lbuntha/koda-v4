@@ -252,8 +252,8 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
               </div>
             </div>
             <UIButton
-              size="lg"
-              className="w-full md:w-auto"
+              size="sm"
+              className="w-full rounded-full md:w-auto"
               icon={<Play />}
               isLoading={registering}
               onClick={act}

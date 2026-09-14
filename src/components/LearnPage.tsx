@@ -457,7 +457,7 @@ export const LearnPage: React.FC<LearnPageProps> = ({
             icon={<Sparkles className="w-5 h-5" />}
             tint="bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600"
             title="Learning path"
-            blurb="Finish each lesson to unlock the next challenge. Your plan decides which premium lessons you can open."
+            blurb="Complete lessons to unlock more challenges."
           />
 
           <div className="mt-4 flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-slate-50/80 p-3 dark:bg-slate-950/40">
@@ -470,8 +470,8 @@ export const LearnPage: React.FC<LearnPageProps> = ({
               {premiumLessons.length > 0
                 ? premiumIncluded
                   ? " · Premium lessons included"
-                  : " · Free lessons are open; premium lessons require an upgrade"
-                : " · Every lesson is free"}
+                  : " · Premium lessons need an upgrade"
+                : " · All lessons available"}
             </span>
           </div>
 

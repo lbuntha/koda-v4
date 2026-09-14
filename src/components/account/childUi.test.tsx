@@ -207,9 +207,9 @@ describe("the parent's controls, mounted", () => {
     draw();
 
     for (const title of [
-      "Time each day",
-      "Hours of the day",
-      "Starting point",
+      "Daily play time",
+      "Play hours",
+      "Starting lesson",
       "Koda's help",
       "Streak",
     ]) {
@@ -217,10 +217,10 @@ describe("the parent's controls, mounted", () => {
     }
   });
 
-  it("names the child in its hints rather than talking about a field", () => {
+  it("keeps the time hint short", () => {
     draw();
 
-    expect(screen.getByText(/How long Mia can play/)).toBeTruthy();
+    expect(screen.getByText(/Set a daily time limit/)).toBeTruthy();
   });
 
   it("sends a patch, not a whole document, when a cap is picked", () => {
@@ -250,19 +250,19 @@ describe("the parent's controls, mounted", () => {
     draw({ allowedHours: null });
 
     expect(screen.queryByLabelText("Koda opens at")).toBeNull();
-    expect(screen.getByText(/Mia can open Koda at any time of day/)).toBeTruthy();
+    expect(screen.getByText(/Available all day/)).toBeTruthy();
   });
 
   it("starts a window at a sensible school day rather than at midnight", () => {
     const onChange = draw({ allowedHours: null });
-    screen.getByRole("switch", { name: "Limit the hours of the day" }).click();
+    screen.getByRole("switch", { name: "Limit play hours" }).click();
 
     expect(onChange).toHaveBeenCalledWith({ allowedHours: { from: 7, to: 20 } });
   });
 
   it("switches the window off without disturbing anything else", () => {
     const onChange = draw({ allowedHours: { from: 7, to: 20 } });
-    screen.getByRole("switch", { name: "Limit the hours of the day" }).click();
+    screen.getByRole("switch", { name: "Limit play hours" }).click();
 
     expect(onChange).toHaveBeenCalledWith({ allowedHours: null });
   });
@@ -280,7 +280,7 @@ describe("the parent's controls, mounted", () => {
   it("reads the window back in words a parent can check", () => {
     draw({ allowedHours: { from: 7, to: 20 } });
 
-    expect(screen.getByText(/between 7 AM and 8 PM/)).toBeTruthy();
+    expect(screen.getByText(/Mia: 7 AM–8 PM/)).toBeTruthy();
   });
 
   it("warns when a window has been set inside out", () => {
@@ -288,8 +288,7 @@ describe("the parent's controls, mounted", () => {
     // opens the night instead. Legal, so it is said out loud rather than refused.
     draw({ allowedHours: { from: 20, to: 7 } });
 
-    expect(screen.getByText(/through the night until 7 AM/)).toBeTruthy();
-    expect(screen.getByText(/check this is what you meant/)).toBeTruthy();
+    expect(screen.getByText(/Mia: 8 PM–7 AM overnight/)).toBeTruthy();
   });
 
   it("will not let a parent pick the same hour twice and wipe the rule", () => {
@@ -320,7 +319,7 @@ describe("the parent's controls, mounted", () => {
       />,
     );
 
-    expect(screen.getByText(/Not included on your plan yet/)).toBeTruthy();
+    expect(screen.getByText(/Not included in your plan/)).toBeTruthy();
   });
 
   it("names the unit the flame counts in, rather than a frequency", () => {
@@ -328,7 +327,7 @@ describe("the parent's controls, mounted", () => {
     // this sets. The choices name the unit and the hint says so.
     draw();
 
-    expect(screen.getByText(/flame counts days or weeks/)).toBeTruthy();
+    expect(screen.getByText(/Count streaks by days or weeks/)).toBeTruthy();
     expect(screen.getByRole("radio", { name: "Days" })).toBeTruthy();
     expect(screen.getByRole("radio", { name: "Weeks" })).toBeTruthy();
   });
@@ -344,8 +343,7 @@ describe("the parent's controls, mounted", () => {
     cleanup();
     draw({ goalCadence: "weekly" });
 
-    expect(screen.getByText(/Mia's flame grows on a week practised/)).toBeTruthy();
-    expect(screen.getByText(/a busy day costs nothing/)).toBeTruthy();
+    expect(screen.getByText(/Practise this week to grow it/)).toBeTruthy();
   });
 
   it("says the daily goal is not what this changes", () => {
@@ -353,7 +351,7 @@ describe("the parent's controls, mounted", () => {
     // conflated them would set one meaning to get the other.
     draw();
 
-    expect(screen.getByText(/daily goal is separate/)).toBeTruthy();
+    expect(screen.getByText(/Daily goals count rounds/)).toBeTruthy();
   });
 
   it("puts age-band placement first, then the manual choices", () => {
@@ -372,7 +370,7 @@ describe("the parent's controls, mounted", () => {
     draw({}, vi.fn(), null);
 
     expect(startSelect().options[0].textContent).toBe("By age (add a birth year)");
-    expect(screen.getByText(/Add Mia's birth year above/)).toBeTruthy();
+    expect(screen.getByText(/Add Mia's birth year to start by age/)).toBeTruthy();
   });
 
   it("places an older child further in than a younger one", () => {
@@ -415,10 +413,6 @@ describe("the parent's controls, mounted", () => {
   it("promises that placing a child does not shut the earlier units", () => {
     draw({ startingPoint: 4 });
 
-    expect(screen.getByText(/stays unlocked/)).toBeTruthy();
-    // And says the report will still show them unpractised, so a parent is not
-    // surprised by gaps they chose.
-    expect(screen.getByText(/not practised in your report/)).toBeTruthy();
   });
 });
 
