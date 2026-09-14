@@ -393,8 +393,16 @@ export interface JobDefinition {
   description: string;
 }
 
-/** One line of a preview: what a parent would read, and whether they already have. */
-export interface WouldSend {
+/**
+ * One line of a preview: what a parent would read, and whether they already have.
+ *
+ * Three jobs compose three different things, so a preview line is a union
+ * rather than one shape with most of its fields optional. The screen branches
+ * on `run.job` — a summary line carries the Sunday it is due, a reminder line
+ * carries why it would be sent, and an announcement line carries the skill.
+ * Flattening them is what put a literal "Invalid Date" in front of an operator.
+ */
+export interface SummaryLine {
   familyId: string;
   learnerId: string;
   learner: string | null;
@@ -406,17 +414,51 @@ export interface WouldSend {
   theirSundayEvening: string;
 }
 
+export interface ReminderLine {
+  familyId: string;
+  learnerId: string;
+  learner: string | null;
+  /** `learn.streak_ending` or `learn.practice_reminder` — a different reason, not a variant. */
+  kind: string;
+  title: string;
+  body: string;
+  /** Days at stake. Zero for a plain reminder, which is how the two are told apart. */
+  streak: number;
+  /** How many adults here have asked for this, at this hour. */
+  people: number;
+}
+
+export interface AnnouncementLine {
+  familyId: string;
+  skillId: string;
+  skill: string;
+  title: string;
+  body: string;
+  alreadySent: boolean;
+  /** The hour on this family's own clock — quiet hours are the only schedule here. */
+  theirLocalHour: number;
+}
+
+export type WouldSend = SummaryLine | ReminderLine | AnnouncementLine;
+
 export interface JobReport {
   job: string;
   preview?: boolean;
   families?: number;
   due?: number;
-  summaries?: number;
   sent?: number;
   cursor?: string | null;
   skipped?: string;
+  /** The summary's counts. */
+  summaries?: number;
   /** When the soonest family this run passed over is next due, in their time. */
   nextDue?: string | null;
+  /** The reminder run's counts, split by reason. */
+  reminders?: number;
+  streaks?: number;
+  /** The announcement run's counts: skills found, families told. */
+  skills?: number;
+  announcements?: number;
   would_send?: WouldSend[];
   /** The sweep's counts. */
   tokens?: number;

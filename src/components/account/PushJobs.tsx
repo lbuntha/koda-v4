@@ -5,8 +5,12 @@ import { UISectionHeader } from "../ui";
 import {
   notificationJobs,
   runNotificationJob,
+  type AnnouncementLine,
   type JobDefinition,
   type JobRun,
+  type ReminderLine,
+  type SummaryLine,
+  type WouldSend,
 } from "../../lib/push";
 
 /**
@@ -45,6 +49,84 @@ const Pill: React.FC<{ tone: "on" | "off"; children: React.ReactNode }> = ({ ton
   </span>
 );
 
+/**
+ * Why a preview came back with nothing. Two different reasons, and telling them
+ * apart is the whole value of the message: on a fresh deployment nobody has
+ * turned notifications on, and saying "no child practised" then sends an
+ * operator to look at the learning data when the answer is that there is nobody
+ * to send to yet.
+ */
+const EmptyPreview: React.FC<{ job: string; families?: number }> = ({ job, families }) => {
+  if (!families) {
+    return (
+      <p className="text-xs text-muted">
+        Nobody has notifications turned on yet, so there is no one to reach. Turn them on for one
+        browser in Settings → Notifications, then look again. A browser signed in to an account
+        with no family counts for nothing here — the jobs read families, not people.
+      </p>
+    );
+  }
+  const reason =
+    job === "daily-reminders"
+      ? "a child who has already practised today is deliberately left out — a reminder is for the one who has not"
+      : job === "skill-announcements"
+        ? "every family here has already been told about what was published"
+        : "a child who has not practised this week is deliberately left out";
+  return (
+    <p className="text-xs text-muted">
+      Nothing to send. Looked at {families} {families === 1 ? "family" : "families"} with a browser
+      registered — {reason}.
+    </p>
+  );
+};
+
+/**
+ * The one line under a preview card that is different for every job.
+ *
+ * Three jobs compose three different things and say so in three different
+ * shapes, so the screen asks which job it is reading rather than reaching for
+ * fields that are only ever on one of them. Reading a summary's Sunday off a
+ * reminder is what put a literal "Invalid Date" in front of an operator.
+ */
+const lineNote = (job: string, line: WouldSend): { key: string; note: string; sent: boolean } => {
+  if (job === "daily-reminders") {
+    const l = line as ReminderLine;
+    const why = l.streak > 0 ? `${l.streak}-day streak at stake` : "has not practised today";
+    return {
+      key: `${l.familyId}-${l.learnerId}`,
+      // `people` is the number of adults whose chosen hour this is *and* who
+      // have the kind switched on. Zero is not a rounding error — it is the
+      // answer to "why did nothing arrive?", so it is shown rather than hidden.
+      note: `${why} · ${l.people} ${l.people === 1 ? "parent" : "parents"} would be told`,
+      sent: false,
+    };
+  }
+  if (job === "skill-announcements") {
+    const l = line as AnnouncementLine;
+    return {
+      key: `${l.familyId}-${l.skillId}`,
+      note: `${l.skill} · ${String(l.theirLocalHour).padStart(2, "0")}:00 their time`,
+      sent: l.alreadySent,
+    };
+  }
+  const l = line as SummaryLine;
+  return {
+    key: `${l.familyId}-${l.learnerId}`,
+    note: `due ${new Date(l.theirSundayEvening).toLocaleString()} their time`,
+    sent: l.alreadySent,
+  };
+};
+
+/** What a run composed but could not deliver, when that gap needs explaining. */
+const Undelivered: React.FC<{ composed: number; sent?: number }> = ({ composed, sent }) =>
+  composed > 0 && (sent ?? 0) === 0 ? (
+    <p className="text-xs text-muted">
+      Nothing actually left the process. That is what the console push driver does — it logs the
+      notification instead of sending it — so on a deployment with <code>PUSH_DRIVER=console</code>{" "}
+      this is the job working.
+    </p>
+  ) : null;
+
 /** The report, in the words an operator is actually asking in. */
 const Outcome: React.FC<{ run: JobRun }> = ({ run }) => {
   const r = run.report;
@@ -65,85 +147,136 @@ const Outcome: React.FC<{ run: JobRun }> = ({ run }) => {
 
   if (run.preview) {
     const lines = r.would_send ?? [];
-    if (lines.length === 0) {
-      // Two different reasons for an empty preview, and telling them apart is
-      // the whole value of the message. On a fresh deployment nobody has
-      // turned notifications on, and saying "no child practised" then sends an
-      // operator to look at the learning data when the answer is that there is
-      // nobody to send to yet.
-      return (
-        <p className="text-xs text-muted">
-          {r.families
-            ? `Nothing to summarise. Looked at ${r.families} ${
-                r.families === 1 ? "family" : "families"
-              } with a browser registered — a child who has not practised this week is deliberately left out.`
-            : "Nobody has notifications turned on yet, so there is no one to summarise. Turn them on for one browser in Settings → Notifications, then look again."}
-        </p>
-      );
-    }
+    if (lines.length === 0) return <EmptyPreview job={run.job} families={r.families} />;
+
+    const noun =
+      run.job === "daily-reminders"
+        ? lines.length === 1
+          ? "reminder"
+          : "reminders"
+        : run.job === "skill-announcements"
+          ? lines.length === 1
+            ? "announcement"
+            : "announcements"
+          : lines.length === 1
+            ? "summary"
+            : "summaries";
+
     return (
       <div className="space-y-2">
         <p className="text-xs text-muted">
-          {lines.length} {lines.length === 1 ? "summary" : "summaries"} across {r.families ?? 0}{" "}
+          {lines.length} {noun} across {r.families ?? 0}{" "}
           {r.families === 1 ? "family" : "families"}. Nothing was sent and nothing was claimed.
         </p>
-        {lines.map((line) => (
-          <div
-            key={`${line.familyId}-${line.learnerId}`}
-            className="bg-surface border border-line rounded-2xl px-3 py-2 flex items-start justify-between gap-3"
-          >
-            <div className="min-w-0">
-              <h5 className="text-sm font-bold text-ink truncate">{line.title}</h5>
-              <p className="text-xs text-muted break-words">{line.body}</p>
-              <p className="text-[10px] font-mono text-muted mt-1">
-                due {new Date(line.theirSundayEvening).toLocaleString()} their time
-              </p>
+        {lines.map((line) => {
+          const { key, note, sent } = lineNote(run.job, line);
+          return (
+            <div
+              key={key}
+              className="bg-surface border border-line rounded-2xl px-3 py-2 flex items-start justify-between gap-3"
+            >
+              <div className="min-w-0">
+                <h5 className="text-sm font-bold text-ink truncate">{line.title}</h5>
+                <p className="text-xs text-muted break-words">{line.body}</p>
+                <p className="text-[10px] font-mono text-muted mt-1">{note}</p>
+              </div>
+              {sent && <Pill tone="off">SENT</Pill>}
             </div>
-            {line.alreadySent && <Pill tone="off">SENT</Pill>}
-          </div>
-        ))}
+          );
+        })}
       </div>
     );
   }
 
-  // A real run that found nobody due is the *normal* answer six days out of
-  // seven, and "0 summaries" reads like a failure. Say what happened, say when
-  // it will happen, and point at the button that answers something today —
+  // A real run that found nobody due is the *normal* answer nearly every hour,
+  // and a row of zeroes reads like a failure. Say what happened, say when it
+  // will happen, and point at the button that answers something today —
   // otherwise pressing this is a dead end with no next step.
-  if (r.due === 0) {
-    // Same fork as the preview: "it is not Sunday" and "there is nobody
-    // registered" are different answers, and only one of them is about the
-    // clock. A deployment where notifications have never been turned on should
-    // not be told to wait until Sunday.
-    if (!r.families) {
+  //
+  // The fork below is the same in all three jobs: "nothing was due" and "there
+  // is nobody registered" are different answers, and only one of them is about
+  // the clock. A deployment where notifications have never been turned on
+  // should not be told to wait until Sunday.
+  const nobody = !r.families && (
+    <p className="text-xs text-ink">
+      Nothing to do — no browser on this deployment has notifications turned on yet. Turn them on
+      for one in Settings → Notifications, and this job will have somebody to reach.
+    </p>
+  );
+
+  if (run.job === "daily-reminders") {
+    if (r.due === 0) {
       return (
+        nobody || (
+          <p className="text-xs text-ink">
+            Nothing was due. It is nobody&rsquo;s chosen hour right now — the reminder goes at the
+            hour each parent picked, so this is the job working rather than failing. Press{" "}
+            <strong>Preview</strong> to read what it would say at that hour.
+          </p>
+        )
+      );
+    }
+    const composed = (r.reminders ?? 0) + (r.streaks ?? 0);
+    return (
+      <div className="space-y-1">
         <p className="text-xs text-ink">
-          Nothing to do — no browser on this deployment has notifications turned on yet. Turn them
-          on for one in Settings → Notifications, and this job will have somebody to reach.
+          {r.reminders ?? 0} {r.reminders === 1 ? "reminder" : "reminders"} and {r.streaks ?? 0}{" "}
+          streak {r.streaks === 1 ? "warning" : "warnings"} composed, {r.sent ?? 0} delivered.
         </p>
+        <Undelivered composed={composed} sent={r.sent} />
+      </div>
+    );
+  }
+
+  if (run.job === "skill-announcements") {
+    if (!r.announcements) {
+      return (
+        nobody || (
+          <p className="text-xs text-ink">
+            {r.skills ?? 0} {r.skills === 1 ? "skill" : "skills"} published recently, and every
+            family that can be reached has already been told. Nothing to say twice.
+          </p>
+        )
       );
     }
     return (
       <div className="space-y-1">
         <p className="text-xs text-ink">
-          Nothing was due. It is nobody&rsquo;s Sunday evening right now, which is this job
-          working rather than failing.
+          {r.skills ?? 0} {r.skills === 1 ? "skill" : "skills"} announced to {r.announcements}{" "}
+          {r.announcements === 1 ? "family" : "families"}, {r.sent ?? 0} delivered.
         </p>
-        {r.nextDue && (
-          <p className="text-xs text-muted">
-            Next due {new Date(r.nextDue).toLocaleString()} — that family&rsquo;s own time, not
-            yours. Press <strong>Preview</strong> to read what it will say.
-          </p>
-        )}
+        <Undelivered composed={r.announcements ?? 0} sent={r.sent} />
       </div>
     );
   }
 
+  if (r.due === 0) {
+    return (
+      nobody || (
+        <div className="space-y-1">
+          <p className="text-xs text-ink">
+            Nothing was due. It is nobody&rsquo;s Sunday evening right now, which is this job
+            working rather than failing.
+          </p>
+          {r.nextDue && (
+            <p className="text-xs text-muted">
+              Next due {new Date(r.nextDue).toLocaleString()} — that family&rsquo;s own time, not
+              yours. Press <strong>Preview</strong> to read what it will say.
+            </p>
+          )}
+        </div>
+      )
+    );
+  }
+
   return (
-    <p className="text-xs text-ink">
-      {r.summaries ?? 0} {r.summaries === 1 ? "summary" : "summaries"} composed, {r.sent ?? 0}{" "}
-      delivered.
-    </p>
+    <div className="space-y-1">
+      <p className="text-xs text-ink">
+        {r.summaries ?? 0} {r.summaries === 1 ? "summary" : "summaries"} composed, {r.sent ?? 0}{" "}
+        delivered.
+      </p>
+      <Undelivered composed={r.summaries ?? 0} sent={r.sent} />
+    </div>
   );
 };
 
