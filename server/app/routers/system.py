@@ -479,18 +479,14 @@ class AudienceOut(Model):
     rows: list[AudiencePersonOut]
 
 
-@router.get("/push/audience")
-async def push_audience(
-    db: Db, p: Annotated[Principal, Depends(require("user:manage"))]
-) -> AudienceOut:
-    """Who has turned notifications on, on which browsers, and for what.
+async def _owners_of(
+    db: Any, tokens: list[dict[str, Any]]
+) -> tuple[list[str], dict[str, dict[str, Any]], dict[str, str | None], dict[tuple[str, str], str | None]]:
+    """The accounts, family names and family roles behind a set of token rows.
 
-    Gated on `user:manage` rather than `system:write`, because this names people
-    across families — the same rule as the user list it is read beside.
+    Three queries for the whole set rather than three per person.
     """
-    tokens = await push_tokens.for_report(db)
     user_ids = sorted({row["userId"] for row in tokens if row.get("userId")})
-
     users = {
         row["_id"]: row
         for row in await db.users.find(
@@ -510,6 +506,84 @@ async def push_audience(
             {"userId": {"$in": user_ids}}, {"userId": 1, "familyId": 1, "role": 1}
         ).to_list(length=len(user_ids) * 4 or 1)
     }
+    return user_ids, users, families, roles
+
+
+class PushTokenOut(Model):
+    """One registration, token included. Admin only."""
+
+    token: str
+    user_id: str | None = Field(default=None, alias="userId")
+    email: str | None = None
+    name: str | None = None
+    role: str | None = None
+    family_id: str | None = Field(default=None, alias="familyId")
+    family_name: str | None = Field(default=None, alias="familyName")
+    platform: str | None = None
+    ua: str | None = None
+    created_at: str | None = Field(default=None, alias="createdAt")
+    refreshed_at: str | None = Field(default=None, alias="refreshedAt")
+    failures: int = 0
+    retired: bool = False
+
+
+class PushTokensOut(Model):
+    truncated: bool
+    rows: list[PushTokenOut]
+
+
+@router.get("/push/tokens")
+async def push_tokens_report(
+    db: Db, p: Annotated[Principal, Depends(require("user:manage"))]
+) -> PushTokensOut:
+    """Every FCM registration token, by user.
+
+    The only route that returns a token. Holding one is the ability to ring that
+    browser, so this is gated on `user:manage` — held by the platform admin
+    role alone — and the screen masks each token until it is asked for.
+    """
+    tokens = await push_tokens.tokens_for_report(db)
+    _, users, families, roles = await _owners_of(db, tokens)
+
+    def stamp(value: Any) -> str | None:
+        return value.isoformat() if value else None
+
+    rows = []
+    for row in tokens:
+        user_id = row.get("userId")
+        family_id = row.get("familyId")
+        user = users.get(user_id, {}) if user_id else {}
+        rows.append(
+            PushTokenOut(
+                token=row["token"],
+                userId=user_id,
+                email=user.get("email"),
+                name=user.get("displayName"),
+                role=roles.get((user_id, family_id)) or user.get("platformRole"),
+                familyId=family_id,
+                familyName=families.get(family_id) if family_id else None,
+                platform=row.get("platform"),
+                ua=row.get("ua"),
+                createdAt=stamp(row.get("createdAt")),
+                refreshedAt=stamp(row.get("refreshedAt")),
+                failures=row.get("failures", 0),
+                retired=row.get("disabledAt") is not None,
+            )
+        )
+    return PushTokensOut(truncated=len(tokens) >= push_tokens.REPORT_LIMIT, rows=rows)
+
+
+@router.get("/push/audience")
+async def push_audience(
+    db: Db, p: Annotated[Principal, Depends(require("user:manage"))]
+) -> AudienceOut:
+    """Who has turned notifications on, on which browsers, and for what.
+
+    Gated on `user:manage` rather than `system:write`, because this names people
+    across families — the same rule as the user list it is read beside.
+    """
+    tokens = await push_tokens.for_report(db)
+    user_ids, users, families, roles = await _owners_of(db, tokens)
     prefs = await notify_prefs.for_users(db, user_ids)
     schedules = await notify_schedule.for_users(db, user_ids)
     courtesy = [kind for kind in DEFAULT_KINDS if kind["class"] == "courtesy"]

@@ -1,11 +1,14 @@
 import React, { useState } from "react";
+import { Bell } from "lucide-react";
 
 import { themeSystem } from "../../lib/themeSystem";
-import { UIPageHeader, UITabs } from "../ui";
+import { UISectionHeader, UITabs } from "../ui";
 import { NotificationsSettings } from "./NotificationsSettings";
 import { NotificationsAdmin } from "./NotificationsAdmin";
+import { PushTokensPanel } from "./PushTokensPanel";
+import { usePermissions } from "../../lib/sync";
 
-type NotificationTab = "settings" | "push" | "scheduled" | "wording" | "sent" | "email";
+type NotificationTab = "settings" | "push" | "scheduled" | "wording" | "sent" | "tokens" | "email";
 
 export const NotificationSettingsPage: React.FC = () => (
   <NotificationSettingsTabs />
@@ -13,20 +16,25 @@ export const NotificationSettingsPage: React.FC = () => (
 
 const NotificationSettingsTabs: React.FC = () => {
   const [tab, setTab] = useState<NotificationTab>("settings");
+  // Tokens are the means to ring a browser; only platform admins hold `user:manage`.
+  const { can } = usePermissions();
+  const seesTokens = can("user:manage");
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <UIPageHeader
+      <UISectionHeader
         title="Notification Settings"
         subtitle="Choose what Koda can send to this device."
+        icon={<Bell className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
       />
       <UITabs
         items={[
-          { id: "settings", label: "Settings" },
+          { id: "settings", label: "Overview" },
           { id: "push", label: "Push" },
-          { id: "scheduled", label: "Scheduled notifications" },
-          { id: "wording", label: "Notification wording" },
+          { id: "scheduled", label: "Scheduled" },
+          { id: "wording", label: "Wording" },
           { id: "sent", label: "What was sent" },
+          ...(seesTokens ? [{ id: "tokens", label: "Tokens" }] : []),
           { id: "email", label: "Email" },
         ]}
         value={tab}
@@ -42,6 +50,7 @@ const NotificationSettingsTabs: React.FC = () => {
       {tab === "scheduled" && <NotificationsAdmin channel="push" section="jobs" />}
       {tab === "wording" && <NotificationsAdmin channel="push" section="wording" />}
       {tab === "sent" && <NotificationsAdmin channel="push" section="log" />}
+      {tab === "tokens" && seesTokens && <PushTokensPanel />}
       {tab === "email" && <NotificationsAdmin channel="email" />}
     </div>
   );

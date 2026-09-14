@@ -508,6 +508,25 @@ async def test_the_audience_report_marks_a_retired_browser(client, parent, admin
     assert body["rows"][0]["devices"][0]["retired"] is True
 
 
+async def test_the_token_report_is_admin_only(client, parent, seeded):
+    assert (await client.get("/system/push/tokens", headers=parent)).status_code == 403
+
+
+async def test_the_token_report_lists_each_token_by_user(client, parent, admin, db, seeded):
+    await client.post("/push/tokens", headers=parent, json={"token": TOKEN, "platform": "Pixel"})
+
+    response = await client.get("/system/push/tokens", headers=admin)
+
+    assert response.status_code == 200
+    rows = response.json()["rows"]
+    assert len(rows) == 1
+    assert rows[0]["token"] == TOKEN
+    assert rows[0]["email"]
+    assert rows[0]["familyName"]
+    assert rows[0]["platform"] == "Pixel"
+    assert rows[0]["retired"] is False
+
+
 async def test_preflight_is_staff_only(client, parent, seeded):
     assert (await client.get("/system/push/preflight", headers=parent)).status_code == 403
 

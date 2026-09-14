@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { RefreshCw, Users } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
-import { UIDataTable, UISectionHeader } from "../ui";
+import { UIDataTable, UIModal, UISectionHeader } from "../ui";
 import { notificationAudience, type AudiencePerson, type PushAudience } from "../../lib/push";
 
 /**
@@ -27,6 +27,53 @@ const offset = (minutes: number | null) => {
   return `UTC${sign}${Math.floor(abs / 60)}${mins ? `:${String(mins).padStart(2, "0")}` : ""}`;
 };
 
+const when = (iso: string | null) => (iso ? new Date(iso).toLocaleString() : "—");
+
+/** One person's registered browsers, opened from their row. */
+const Browsers: React.FC<{ person: AudiencePerson }> = ({ person }) => (
+  <div className="space-y-3">
+    <p className="text-xs text-muted break-words">
+      {person.email}
+      {person.familyName && ` · ${person.familyName}`}
+      {person.role && ` · ${person.role}`}
+    </p>
+    <p className="text-xs text-ink break-words">
+      {person.kinds.length > 0 ? person.kinds.join(" · ") : "Every courtesy kind switched off"}
+    </p>
+    <div className="space-y-2">
+      {person.devices.map((device, index) => (
+        <div
+          key={`${device.createdAt}-${index}`}
+          className="bg-surface-muted border border-line rounded-2xl px-3 py-2"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm font-semibold text-ink truncate">
+              {device.platform || "Unknown device"}
+            </p>
+            <span
+              className={`shrink-0 font-mono text-[10px] ${
+                device.retired
+                  ? "text-rose-600 dark:text-rose-400"
+                  : "text-emerald-700 dark:text-emerald-300"
+              }`}
+            >
+              {device.retired
+                ? "retired"
+                : device.failures > 0
+                  ? `live · ${device.failures} failed`
+                  : "live"}
+            </span>
+          </div>
+          <p className="text-[10px] font-mono text-muted mt-1">
+            turned on {when(device.createdAt)} · last seen {when(device.refreshedAt)}
+          </p>
+          {device.ua && <p className="text-[10px] text-muted break-words mt-1">{device.ua}</p>}
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
 const matches = (person: AudiencePerson, query: string) => {
   if (!query) return true;
   const haystack = [person.name, person.email, person.familyName, person.role]
@@ -39,6 +86,7 @@ const matches = (person: AudiencePerson, query: string) => {
 export const PushAudiencePanel: React.FC = () => {
   const [audience, setAudience] = useState<PushAudience | null>(null);
   const [query, setQuery] = useState("");
+  const [open, setOpen] = useState<AudiencePerson | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -110,6 +158,7 @@ export const PushAudiencePanel: React.FC = () => {
             rowKey={(person) => person.userId}
             pageSize={10}
             defaultSort={{ key: "person", direction: "asc" }}
+            onRowClick={setOpen}
             columns={[
               {
                 key: "person",
@@ -170,6 +219,14 @@ export const PushAudiencePanel: React.FC = () => {
       </div>
 
       {error && <p className="text-xs text-rose-600 dark:text-rose-400">{error}</p>}
+
+      <UIModal
+        isOpen={Boolean(open)}
+        onClose={() => setOpen(null)}
+        title={open ? `${open.name || open.email || open.userId} · browsers` : "Browsers"}
+      >
+        {open && <Browsers person={open} />}
+      </UIModal>
 
       <button
         disabled={busy}

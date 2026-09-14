@@ -32,7 +32,7 @@
      "id": "notification-settings",
      "label": "Notification Settings",
      "icon": "bell",
-     "requires": "member:list"
+     "requires": "system:write"
     },
     {
      "id": "skills",

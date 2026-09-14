@@ -145,6 +145,20 @@ async def for_report(db: AsyncIOMotorDatabase) -> list[dict[str, Any]]:
     )
 
 
+async def tokens_for_report(db: AsyncIOMotorDatabase) -> list[dict[str, Any]]:
+    """Every registration *with* its token, for the admin-only token report.
+
+    The one read in this module that hands the token out for display. Kept
+    separate from `for_report` so the audience report cannot start carrying
+    tokens by accident.
+    """
+    return (
+        await db.push_tokens.find({})
+        .sort([("userId", 1), ("refreshedAt", -1)])
+        .to_list(length=REPORT_LIMIT)
+    )
+
+
 async def device_ids_with_tokens(db: AsyncIOMotorDatabase, device_ids: list[str]) -> set[str]:
     """Which of these sessions currently hold a live token.
 

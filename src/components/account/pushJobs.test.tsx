@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { act, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -38,6 +39,25 @@ vi.mock("../../lib/themeSystem", () => ({
 
 vi.mock("../ui", () => ({
   UISectionHeader: ({ title }: { title: string }) => <h2>{title}</h2>,
+  UIDataTable: ({
+    columns,
+    rows,
+    rowKey,
+  }: {
+    columns: { key: string; render: (row: any) => ReactNode }[];
+    rows: any[];
+    rowKey: (row: any) => string;
+  }) => (
+    <div>
+      {rows.map((row) => (
+        <div key={rowKey(row)}>
+          {columns.map((column) => (
+            <span key={column.key}>{column.render(row)}</span>
+          ))}
+        </div>
+      ))}
+    </div>
+  ),
 }));
 
 const { PushJobs } = await import("./PushJobs");

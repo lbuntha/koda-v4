@@ -576,6 +576,32 @@ export async function notificationAudience(): Promise<PushAudience> {
   return await request<PushAudience>("/system/push/audience", { token: await accessToken() });
 }
 
+export interface PushTokenRow {
+  token: string;
+  userId: string | null;
+  email: string | null;
+  name: string | null;
+  role: string | null;
+  familyId: string | null;
+  familyName: string | null;
+  platform: string | null;
+  ua: string | null;
+  createdAt: string | null;
+  refreshedAt: string | null;
+  failures: number;
+  retired: boolean;
+}
+
+export interface PushTokenReport {
+  truncated: boolean;
+  rows: PushTokenRow[];
+}
+
+/** Every FCM registration token, by user. Platform admins only. */
+export async function pushTokenReport(): Promise<PushTokenReport> {
+  return await request<PushTokenReport>("/system/push/tokens", { token: await accessToken() });
+}
+
 export interface NotificationSchedule {
   /** The hour a reminder goes out, in this account's own local time. */
   reminderHour: number;
