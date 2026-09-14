@@ -297,12 +297,19 @@ async def _recently_published(db: AsyncIOMotorDatabase, since: datetime) -> list
     Oldest first so that a deployment releasing three at once announces them in
     the order they were published rather than in whatever order Mongo returns —
     a family reading three notifications should read them as a sequence.
+
+    **`since` goes in as a datetime, not as its ISO text.** `publishedAt` is
+    written by `repos.skills` as `now()` and stored as a BSON date, and Mongo
+    compares across types by type order rather than by value: a date is never
+    `$gte` a string, whatever the two of them say. Passing `since.isoformat()`
+    here did not narrow the window, it emptied it — every run reported "nothing
+    has been published recently" and no family was ever told about a new skill.
     """
     rows = db.skill_registry.find(
         {
             "status": "published",
             "deletedAt": None,
-            "publishedAt": {"$gte": since.isoformat()},
+            "publishedAt": {"$gte": since},
         }
     ).sort("publishedAt", 1)
     return [row async for row in rows]

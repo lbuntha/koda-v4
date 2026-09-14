@@ -62,7 +62,12 @@ async def publish(db, skill_id: str, title: str, *, at: datetime | None = None):
             "title": title,
             "status": "published",
             "deletedAt": None,
-            "publishedAt": (at or datetime(2026, 8, 18, 6, 0, tzinfo=UTC)).isoformat(),
+            # A datetime, because that is what `repos.skills` writes and what
+            # Mongo therefore stores. Written as ISO text here, these fixtures
+            # agreed with a query that compared a string against a date — so
+            # every test passed while the job matched nothing on a real
+            # deployment and no family was ever told about a new skill.
+            "publishedAt": at or datetime(2026, 8, 18, 6, 0, tzinfo=UTC),
             "updatedAt": now(),
         }
     )
@@ -126,7 +131,7 @@ async def test_a_draft_is_not_announced(db, family, seeded):
             "title": "Half Built",
             "status": "draft",
             "deletedAt": None,
-            "publishedAt": MORNING_UTC.isoformat(),
+            "publishedAt": MORNING_UTC,
         }
     )
 
