@@ -13,7 +13,7 @@ import pytest
 
 from app.models.common import now
 from app.repos import learners as learners_repo
-from app.repos import push_runs
+from app.repos import notify_schedule, push_runs
 from app.services import tasks as task_service
 from app.settings import settings
 from app.system_defaults import DEFAULT_SETTINGS
@@ -210,6 +210,37 @@ async def test_running_the_job_twice_tells_a_parent_once(db, family, seeded):
 
     assert (first["summaries"], second["summaries"]) == (1, 0)
     assert len(await told(db, "learn.weekly_summary")) == 1
+
+
+async def test_a_sunday_evening_inside_quiet_hours_waits_for_the_window_to_end(
+    db, family, seeded
+):
+    """Held to the edge of the window, never dropped — the rule for every courtesy kind."""
+    await practise(db, family, days=["2026-08-16"])
+    await notify_schedule.save(db, family["userId"], quiet_from=17, quiet_to=20)
+
+    at_six = await task_service.weekly_summary(db, at=SUNDAY_EVENING_UTC)
+    assert at_six["summaries"] == 0
+    assert await told(db, "learn.weekly_summary") == []
+
+    at_eight = await task_service.weekly_summary(db, at=SUNDAY_EVENING_UTC + timedelta(hours=2))
+    assert at_eight["summaries"] == 1
+    assert len(await told(db, "learn.weekly_summary")) == 1
+
+
+async def test_a_summary_held_overnight_still_describes_sundays_week(db, family, seeded):
+    """Delivered Monday at eight, about the week that ended on Sunday — so the
+    Monday a week earlier is still in it."""
+    await practise(db, family, days=["2026-08-10", "2026-08-16"])
+    await notify_schedule.save(db, family["userId"], quiet_from=17, quiet_to=8)
+
+    monday_morning = await task_service.weekly_summary(
+        db, at=SUNDAY_EVENING_UTC + timedelta(hours=14)
+    )
+
+    assert monday_morning["summaries"] == 1
+    notices = await told(db, "learn.weekly_summary")
+    assert "practised 2 days" in notices[0]["body"], notices[0]["body"]
 
 
 async def test_a_child_who_did_nothing_is_not_reported_on(db, family, seeded):
@@ -540,7 +571,10 @@ async def test_a_preview_says_what_has_already_gone(client, db, family, admin, s
     days = recent_days(1)
     await practise(db, family, days=days)
     await push_runs.claim(
-        db, kind="learn.weekly_summary", recipient_id=family["learnerId"], date_key=days[0]
+        db,
+        kind="learn.weekly_summary",
+        recipient_id=f"{family['learnerId']}:{family['userId']}",
+        date_key=days[0],
     )
 
     response = await client.post("/system/push/jobs/weekly-summary?preview=true", headers=admin)

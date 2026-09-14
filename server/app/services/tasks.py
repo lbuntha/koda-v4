@@ -85,6 +85,35 @@ def _next_summary_evening(local: datetime, offset_minutes: int) -> datetime:
     return due.replace(tzinfo=timezone(timedelta(minutes=offset_minutes)))
 
 
+def _hours_since_summary_evening(local: datetime) -> int:
+    """Whole hours since the most recent Sunday evening on this family's clock.
+
+    0 at Sunday 18:00, 14 at Monday 08:00, and 160 on the Sunday morning before
+    the next one. A summary is only ever sent within 24 hours of that evening,
+    so this is the cheap filter that runs before anybody's schedule is read.
+    """
+    evening = (local - timedelta(days=(local.weekday() - SUNDAY) % 7)).replace(
+        hour=SUMMARY_HOUR, minute=0, second=0, microsecond=0
+    )
+    if evening > local:
+        evening -= timedelta(days=7)
+    return int((local - evening).total_seconds() // 3600)
+
+
+def _summary_delay(schedule: dict[str, Any]) -> int:
+    """How many hours after Sunday evening this person's summary waits.
+
+    0 for almost everybody. A person whose quiet hours cover six o'clock is
+    held to the first hour after the window, which is §5's rule for every
+    courtesy kind: held to the edge, never dropped. A window is at most 23
+    hours, so there is always an open hour inside the day.
+    """
+    for delay in range(24):
+        if not notify_schedule.is_quiet(schedule, (SUMMARY_HOUR + delay) % 24):
+            return delay
+    return 0
+
+
 def _day_keys(end: datetime, days: int) -> list[str]:
     """The `localDay` strings for the window ending on `end`'s day, inclusive.
 
@@ -189,7 +218,8 @@ async def weekly_summary(
             continue
 
         local = _local(at, offset)
-        if not preview and (local.weekday() != SUNDAY or local.hour != SUMMARY_HOUR):
+        since = _hours_since_summary_evening(local)
+        if not preview and since >= 24:
             # Not their evening. Remember when it *will* be, soonest first.
             #
             # Only ever a report. An hourly tick throws this away, and it costs
@@ -201,9 +231,26 @@ async def weekly_summary(
             if soonest is None or due_at.isoformat() < soonest:
                 report["nextDue"] = due_at.isoformat()
             continue
+
+        # Whose summary is due this hour. Sunday evening for everybody, except a
+        # person whose quiet hours cover it — theirs waits for the window to end.
+        # Per person, because two parents on one account may keep different
+        # evenings, and one of them being asleep is no reason to wake the other
+        # late or to tell them early.
+        people = await push.adults_of(db, family_id)
+        schedules = await notify_schedule.for_users(db, people)
+        due_people = (
+            people
+            if preview
+            else [user_id for user_id in people if _summary_delay(schedules[user_id]) == since]
+        )
+        if not due_people:
+            continue
         report["due"] += 1
 
-        days = _day_keys(local, SUMMARY_DAYS)
+        # The week ends on Sunday even when quiet hours hold its summary until
+        # Monday morning — otherwise Monday's rounds would join "this week".
+        days = _day_keys(local if preview else local - timedelta(hours=since), SUMMARY_DAYS)
         date_key = days[0]
 
         for learner in await learners_repo.for_family(db, family_id):
@@ -214,17 +261,6 @@ async def weekly_summary(
                 # a nag — and §1 is explicit that this must not become one. The
                 # child who did not practise is exactly the child whose parent
                 # should not be told so by a phone on a Sunday evening.
-                continue
-
-            already = await push_runs.was_claimed(
-                db, kind=WEEKLY_SUMMARY, recipient_id=learner_id, date_key=date_key
-            )
-            # `claim` is the decision and `was_claimed` is only ever a report —
-            # a preview must not take the right to send the thing it is
-            # describing, or looking would stop Sunday from happening.
-            if not preview and not await push_runs.claim(
-                db, kind=WEEKLY_SUMMARY, recipient_id=learner_id, date_key=date_key
-            ):
                 continue
 
             title, body = await push.wording(
@@ -242,8 +278,22 @@ async def weekly_summary(
                     "days": practised,
                 },
             )
-            report["summaries"] += 1
             if preview:
+                report["summaries"] += 1
+                # `was_claimed` and never `claim`: a preview must not take the
+                # right to send the thing it is describing, or looking would
+                # stop Sunday from happening.
+                already = all(
+                    [
+                        await push_runs.was_claimed(
+                            db,
+                            kind=WEEKLY_SUMMARY,
+                            recipient_id=f"{learner_id}:{user_id}",
+                            date_key=date_key,
+                        )
+                        for user_id in due_people
+                    ]
+                )
                 # What a parent would read, and whether they already have. No
                 # token, no device id, nothing that is not already on the
                 # operator's own admin screens.
@@ -260,21 +310,34 @@ async def weekly_summary(
                     }
                 )
                 continue
-            # One tag per child: the collapse key in §5 is `weekly:{learnerId}`
-            # precisely so that a family with three children reads three
-            # summaries rather than the last one to arrive.
-            report["sent"] += await push.send(
-                db,
-                to=push.Recipient(family_id=family_id),
-                kind=WEEKLY_SUMMARY,
-                title=title,
-                body=body,
-                # The child the summary is about, so the tap lands on their
-                # record rather than on the home screen. `landing.ts` maps it;
-                # the path names a screen and is never trusted to grant one.
-                path=f"/children/{learner_id}",
-                tag=f"weekly:{learner_id}",
-            )
+
+            for user_id in due_people:
+                # Claimed per child *and* per parent: a parent held until
+                # Monday morning must not find Sunday's claim already taken
+                # by the one who was told on time.
+                if not await push_runs.claim(
+                    db,
+                    kind=WEEKLY_SUMMARY,
+                    recipient_id=f"{learner_id}:{user_id}",
+                    date_key=date_key,
+                ):
+                    continue
+                report["summaries"] += 1
+                # One tag per child: the collapse key in §5 is
+                # `weekly:{learnerId}` precisely so that a family with three
+                # children reads three summaries rather than the last one.
+                report["sent"] += await push.send(
+                    db,
+                    to=push.Recipient(family_id=family_id, user_id=user_id),
+                    kind=WEEKLY_SUMMARY,
+                    title=title,
+                    body=body,
+                    # The child the summary is about, so the tap lands on their
+                    # record rather than on the home screen. `landing.ts` maps
+                    # it; the path names a screen and is never trusted to grant one.
+                    path=f"/children/{learner_id}",
+                    tag=f"weekly:{learner_id}",
+                )
 
     return report
 
@@ -644,18 +707,26 @@ async def daily_reminders(
                 )
                 continue
 
-            if not await push_runs.claim(db, kind=kind, recipient_id=learner_id, date_key=today):
-                continue
+            # Only the parents whose hour this is. A family send here rang every
+            # adult who wanted reminders at the *first* parent's hour, and the
+            # claim then stopped the second parent's own hour sending anything.
+            for user_id in due_now:
+                if not push.wanted_by(kind, prefs.get(user_id)):
+                    continue
+                if not await push_runs.claim(
+                    db, kind=kind, recipient_id=f"{learner_id}:{user_id}", date_key=today
+                ):
+                    continue
 
-            report["streaks" if kind == STREAK_ENDING else "reminders"] += 1
-            report["sent"] += await push.send(
-                db,
-                to=push.Recipient(family_id=family_id),
-                kind=kind,
-                title=title,
-                body=body,
-                path=f"/children/{learner_id}",
-                tag=f"{'streak' if kind == STREAK_ENDING else 'remind'}:{learner_id}",
-            )
+                report["streaks" if kind == STREAK_ENDING else "reminders"] += 1
+                report["sent"] += await push.send(
+                    db,
+                    to=push.Recipient(family_id=family_id, user_id=user_id),
+                    kind=kind,
+                    title=title,
+                    body=body,
+                    path=f"/children/{learner_id}",
+                    tag=f"{'streak' if kind == STREAK_ENDING else 'remind'}:{learner_id}",
+                )
 
     return report

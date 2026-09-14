@@ -212,6 +212,26 @@ async def test_it_is_the_hour_the_parent_chose_and_no_other(db, family, seeded):
     assert at_eight["reminders"] == 1
 
 
+async def test_each_parent_is_reminded_at_their_own_hour(db, family, seeded):
+    """Mum picks 17:00, Dad picks 20:00. Dad's is not delivered at Mum's hour —
+    and Mum's having gone does not stop Dad's."""
+    from app.repos import memberships, users
+    from app.security import passwords
+
+    dad = await users.create(db, "dad@example.com", passwords.hash_password("correct horse battery"))
+    await memberships.add(db, dad["_id"], family["familyId"], role="parent")
+    await notify_prefs.set_pref(db, dad["_id"], "learn.practice_reminder", True)
+    await notify_schedule.save(db, dad["_id"], reminder_hour=20)
+
+    await task_service.daily_reminders(db, at=REMINDER_TIME_UTC)
+    at_five = [n["userId"] for n in await told(db, "learn.practice_reminder")]
+    assert at_five == [family["userId"]]
+
+    await task_service.daily_reminders(db, at=REMINDER_TIME_UTC + timedelta(hours=3))
+    at_eight = sorted(n["userId"] for n in await told(db, "learn.practice_reminder"))
+    assert at_eight == sorted([family["userId"], dad["_id"]])
+
+
 async def test_quiet_hours_outrank_a_chosen_hour(db, family, seeded):
     """A parent who picks 22:00 with quiet hours from 21:00 has contradicted
     themselves, and the window is the half that says "not now" out loud."""
