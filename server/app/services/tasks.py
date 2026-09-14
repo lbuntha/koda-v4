@@ -448,6 +448,32 @@ async def skill_announcements(
     return report
 
 
+async def announce_new_skills(db: AsyncIOMotorDatabase, *, at: datetime | None = None) -> int:
+    """Run `skill_announcements` to the end, straight after an operator publishes.
+
+    The hourly tick is still the promise; this is only so a family who is awake
+    hears within seconds rather than at the top of the hour. It shares the
+    ledger with the tick, so whichever of the two reaches a family first is the
+    one that tells them, and a family inside their quiet hours is left for the
+    tick exactly as before.
+
+    Never raises. It runs after the publish has already answered, and there is
+    nobody left to show an error to — the hourly tick is the retry.
+    """
+    sent = 0
+    cursor: str | None = None
+    try:
+        while True:
+            report = await skill_announcements(db, at=at, cursor=cursor)
+            sent += report["sent"]
+            cursor = report["cursor"]
+            if not cursor:
+                return sent
+    except Exception:
+        log.exception("announcing a newly published skill failed; the hourly tick will retry")
+        return sent
+
+
 async def token_sweep(db: AsyncIOMotorDatabase) -> dict[str, Any]:
     """The nightly tidy, for the three collections push leaves behind.
 

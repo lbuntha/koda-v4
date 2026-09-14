@@ -89,6 +89,50 @@ async def test_a_published_skill_reaches_a_family(db, family, seeded):
     assert "Colour Sweeper" in rows[0]["body"]
 
 
+async def test_announcing_on_publish_reaches_a_family_and_leaves_the_tick_nothing(
+    db, family, seeded
+):
+    await publish(db, "color-sweeper", "Colour Sweeper")
+
+    # Counted by what the parent can read rather than by `sent`, which is how
+    # many browsers FCM accepted — and is 0 wherever there is no real FCM.
+    await task_service.announce_new_skills(db, at=MORNING_UTC)
+    assert len(await told(db)) == 1
+
+    # The hourly tick shares the ledger, so the family is not told twice.
+    report = await task_service.skill_announcements(db, at=MORNING_UTC)
+    assert report["announcements"] == 0
+    assert len(await told(db)) == 1
+
+
+async def test_announcing_on_publish_reads_every_page(db, family, seeded, monkeypatch):
+    calls: list[str | None] = []
+    real = task_service.skill_announcements
+
+    async def counted(db, *, at=None, cursor=None, limit=task_service.FAMILY_PAGE, preview=False):
+        calls.append(cursor)
+        return await real(db, at=at, cursor=cursor, limit=1, preview=preview)
+
+    monkeypatch.setattr(task_service, "skill_announcements", counted)
+    await publish(db, "color-sweeper", "Colour Sweeper")
+
+    await task_service.announce_new_skills(db, at=MORNING_UTC)
+
+    # One family fills a page of one, so the run must ask again with its cursor.
+    assert len(calls) == 2
+    assert calls[1] is not None
+    assert len(await told(db)) == 1
+
+
+async def test_announcing_on_publish_never_raises(db, monkeypatch):
+    async def broken(*args, **kwargs):
+        raise RuntimeError("mongo went away")
+
+    monkeypatch.setattr(task_service, "skill_announcements", broken)
+
+    assert await task_service.announce_new_skills(db) == 0
+
+
 async def test_a_second_run_says_nothing(db, family, seeded):
     """The hourly tick has to be harmless, and the ledger is what makes it so."""
     await publish(db, "color-sweeper", "Colour Sweeper")

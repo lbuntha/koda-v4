@@ -103,6 +103,34 @@ async def test_operator_publishes_on_server_and_every_reader_sees_it(client, db,
     assert withdrawn.json()["statusChangedAt"] >= withdrawn.json()["publishedAt"]
 
 
+async def test_publishing_announces_straight_away_and_withdrawing_does_not(
+    client, db, monkeypatch
+):
+    from app.services import tasks as task_service
+
+    announced: list[object] = []
+
+    async def record(db):
+        announced.append(db)
+        return 0
+
+    monkeypatch.setattr(task_service, "announce_new_skills", record)
+    await skills_repo.seed_default(db, {**_bundled("counting"), "status": "draft"})
+    operator = await _operator(client, db)
+
+    published = await client.patch(
+        "/skills/counting/publication", json={"status": "published"}, headers=operator
+    )
+    assert published.status_code == 200, published.text
+    assert len(announced) == 1
+
+    withdrawn = await client.patch(
+        "/skills/counting/publication", json={"status": "draft"}, headers=operator
+    )
+    assert withdrawn.status_code == 200, withdrawn.text
+    assert len(announced) == 1
+
+
 async def test_deploy_refreshes_metadata_without_overwriting_publication(db):
     default = _bundled("counting")
     await skills_repo.seed_default(db, {**default, "status": "draft"})

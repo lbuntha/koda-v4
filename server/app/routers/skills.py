@@ -4,7 +4,7 @@ from datetime import datetime
 from math import floor, isfinite
 from typing import Annotated, Any, Literal
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends
 from pydantic import Field
 
 from app.deps import AUTHENTICATED, CurrentPrincipal, Db, require
@@ -14,6 +14,7 @@ from app.models.common import Model
 from app.repos import skills as skills_repo
 from app.repos import users as users_repo
 from app.security.permissions import principal_can
+from app.services import tasks as task_service
 from app.services.entitlements import has_feature
 
 router = APIRouter(prefix="/skills", tags=["skills"], dependencies=[AUTHENTICATED])
@@ -217,7 +218,7 @@ async def lesson_access(
 
 @router.patch("/{skill_id}/publication")
 async def publish_skill(
-    skill_id: str, body: PublicationWrite, db: Db, p: CanPublish
+    skill_id: str, body: PublicationWrite, db: Db, p: CanPublish, tasks: BackgroundTasks
 ) -> RegisteredSkill:
     user = await users_repo.by_id(db, p.subject_id)
     actor = {
@@ -232,6 +233,11 @@ async def publish_skill(
     row = await skills_repo.set_status(db, skill_id, body.status, actor)
     if row is None:
         raise NotFound(f'No registered skill "{skill_id}".', "skill_not_found")
+    if body.status == "published":
+        # After the response, so the button never waits on every family. The
+        # hourly `skill-announcements` tick shares the ledger and catches
+        # whoever this misses — a family asleep now, or a run cut short.
+        tasks.add_task(task_service.announce_new_skills, db)
     return _out(row)
 
 

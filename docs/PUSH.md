@@ -631,6 +631,16 @@ family *per skill* rather than per day, so the hourly tick is harmless — almos
 every run claims nothing — and the two-day window is only there to stop the
 first run after release announcing the entire back catalogue.
 
+**Publish also runs it once, straight away.** `PATCH /v1/skills/{id}/publication`
+to `published` hands `tasks.announce_new_skills` to `BackgroundTasks`, so the
+button answers at its usual speed and a family who is awake hears within
+seconds instead of at the top of the hour. It pages through to the end and never
+raises. It is a head start, not the delivery guarantee: it shares the ledger
+with the tick, so nobody is told twice, and anyone it misses (asleep, or a run
+cut short) is reached by the next hourly tick. This works only while the
+`skill-announcements` Scheduler job exists (§12, step 6). Without that job, a
+publish reaches only the families awake at that moment.
+
 **The summary is hourly every day, not hourly on Sundays**, which is a
 correction this section carried until the job was built. Six in the evening on a
 *local* Sunday is a UTC Monday for everybody far enough east, so a schedule that
@@ -958,13 +968,25 @@ One-time setup in Google Cloud, and it is genuinely all of it:
    `PUSH_TASK_AUDIENCE` and `PUSH_TASK_SERVICE_ACCOUNT` as repository
    *variables* — there is no new secret in this feature, which is the part of
    this design worth keeping.
-6. The two jobs themselves, once, with `SA` the account from step 4 and `URL`
+6. The four jobs themselves, once, with `SA` the account from step 4 and `URL`
    the Cloud Run service (which is also `PUSH_TASK_AUDIENCE`):
 
    ```bash
    gcloud scheduler jobs create http weekly-summary \
      --location=us-central1 --schedule="0 * * * *" \
      --uri="$URL/v1/tasks/weekly-summary" --http-method=POST \
+     --oidc-service-account-email="$SA" --oidc-token-audience="$URL" \
+     --attempt-deadline=300s
+
+   gcloud scheduler jobs create http daily-reminders \
+     --location=us-central1 --schedule="0 * * * *" \
+     --uri="$URL/v1/tasks/daily-reminders" --http-method=POST \
+     --oidc-service-account-email="$SA" --oidc-token-audience="$URL" \
+     --attempt-deadline=300s
+
+   gcloud scheduler jobs create http skill-announcements \
+     --location=us-central1 --schedule="0 * * * *" \
+     --uri="$URL/v1/tasks/skill-announcements" --http-method=POST \
      --oidc-service-account-email="$SA" --oidc-token-audience="$URL" \
      --attempt-deadline=300s
 
