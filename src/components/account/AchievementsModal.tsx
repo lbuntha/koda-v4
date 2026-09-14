@@ -66,6 +66,7 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({
       onClose={onClose}
       title="Achievements"
       maxWidth="max-w-lg"
+      tone="plain"
       footer={
         <div className="flex w-full items-center justify-between gap-3">
           <UIButton variant="secondary" size="sm" onClick={onClose}>
