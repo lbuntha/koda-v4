@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 
 import { DayDoneScreen } from "../DayDoneScreen";
 import { PinPrompt } from "./PinPrompt";
@@ -184,21 +184,35 @@ describe("a child's report, mounted", () => {
 });
 
 describe("the parent's controls, mounted", () => {
-  const draw = (value: Partial<ChildSettings> = {}, onChange = vi.fn()) => {
+  const draw = (
+    value: Partial<ChildSettings> = {},
+    onChange = vi.fn(),
+    childAge: number | null = 6,
+  ) => {
     render(
       <ChildSettingsFields
         value={{ ...CHILD_SETTINGS_DEFAULTS, ...value }}
         onChange={onChange}
         childName="Mia"
+        childAge={childAge}
       />,
     );
     return onChange;
   };
 
-  it("draws all four controls", () => {
+  const startSelect = () =>
+    screen.getByLabelText("Where this child starts") as HTMLSelectElement;
+
+  it("draws all five controls", () => {
     draw();
 
-    for (const title of ["Time each day", "Starting point", "Koda's help", "Streak"]) {
+    for (const title of [
+      "Time each day",
+      "Hours of the day",
+      "Starting point",
+      "Koda's help",
+      "Streak",
+    ]) {
       expect(screen.getByText(title), `${title} is missing`).toBeTruthy();
     }
   });
@@ -230,6 +244,63 @@ describe("the parent's controls, mounted", () => {
     draw({ sessionMinutes: 25 });
 
     expect(screen.getByRole("radio", { name: "25 min" }).getAttribute("aria-checked")).toBe("true");
+  });
+
+  it("offers no hour pickers until a parent limits the hours", () => {
+    draw({ allowedHours: null });
+
+    expect(screen.queryByLabelText("Koda opens at")).toBeNull();
+    expect(screen.getByText(/Mia can open Koda at any time of day/)).toBeTruthy();
+  });
+
+  it("starts a window at a sensible school day rather than at midnight", () => {
+    const onChange = draw({ allowedHours: null });
+    screen.getByRole("switch", { name: "Limit the hours of the day" }).click();
+
+    expect(onChange).toHaveBeenCalledWith({ allowedHours: { from: 7, to: 20 } });
+  });
+
+  it("switches the window off without disturbing anything else", () => {
+    const onChange = draw({ allowedHours: { from: 7, to: 20 } });
+    screen.getByRole("switch", { name: "Limit the hours of the day" }).click();
+
+    expect(onChange).toHaveBeenCalledWith({ allowedHours: null });
+  });
+
+  it("sends the whole window when one end of it moves", () => {
+    // A patch of `{ to }` alone would leave the store merging a half window.
+    const onChange = draw({ allowedHours: { from: 7, to: 20 } });
+    const until = screen.getByLabelText("Koda shuts at") as HTMLSelectElement;
+    until.value = "19";
+    until.dispatchEvent(new Event("change", { bubbles: true }));
+
+    expect(onChange).toHaveBeenCalledWith({ allowedHours: { from: 7, to: 19 } });
+  });
+
+  it("reads the window back in words a parent can check", () => {
+    draw({ allowedHours: { from: 7, to: 20 } });
+
+    expect(screen.getByText(/between 7 AM and 8 PM/)).toBeTruthy();
+  });
+
+  it("warns when a window has been set inside out", () => {
+    // "8 PM until 7 AM" is what a parent types when they mean bedtime, and it
+    // opens the night instead. Legal, so it is said out loud rather than refused.
+    draw({ allowedHours: { from: 20, to: 7 } });
+
+    expect(screen.getByText(/through the night until 7 AM/)).toBeTruthy();
+    expect(screen.getByText(/check this is what you meant/)).toBeTruthy();
+  });
+
+  it("will not let a parent pick the same hour twice and wipe the rule", () => {
+    // `clampHours` reads `from === to` as no window at all, so saving one would
+    // switch the whole setting off with nothing saying why.
+    draw({ allowedHours: { from: 7, to: 20 } });
+
+    const opens = screen.getByLabelText("Koda opens at") as HTMLSelectElement;
+    const shuts = screen.getByLabelText("Koda shuts at") as HTMLSelectElement;
+    expect([...opens.options].map((o) => o.value)).not.toContain("20");
+    expect([...shuts.options].map((o) => o.value)).not.toContain("7");
   });
 
   it("turns Koda's help off with the switch", () => {
@@ -285,19 +356,69 @@ describe("the parent's controls, mounted", () => {
     expect(screen.getByText(/daily goal is separate/)).toBeTruthy();
   });
 
-  it("offers units for the starting point, never level numbers", () => {
-    draw();
-    const group = screen.getByRole("radiogroup", { name: "Where this child starts" });
+  it("puts age-band placement first, then the manual choices", () => {
+    draw({}, vi.fn(), 12);
+    const labels = [...startSelect().options].map((option) => option.textContent ?? "");
 
-    expect(within(group).getByRole("radio", { name: "From the start" })).toBeTruthy();
-    expect(within(group).getByRole("radio", { name: "Unit 2" })).toBeTruthy();
-    expect(within(group).queryByRole("radio", { name: /level/i })).toBeNull();
+    // The default leads, and names the unit it will actually land on.
+    expect(labels[0]).toMatch(/^By age — Unit \d+: .+/);
+    expect(labels[1]).toBe("From the very start");
+    // Titles rather than bare numbers: a parent recognises the work, not "Unit 47".
+    expect(labels[2]).toMatch(/^Unit 2: .+/);
+    expect(labels.some((label) => /level/i.test(label))).toBe(false);
+  });
+
+  it("says what it has to go on when no birth year was entered", () => {
+    draw({}, vi.fn(), null);
+
+    expect(startSelect().options[0].textContent).toBe("By age (add a birth year)");
+    expect(screen.getByText(/Add Mia's birth year above/)).toBeTruthy();
+  });
+
+  it("places an older child further in than a younger one", () => {
+    draw({}, vi.fn(), 12);
+    const older = startSelect().options[0].textContent ?? "";
+    cleanup();
+    draw({}, vi.fn(), 7);
+    const younger = startSelect().options[0].textContent ?? "";
+
+    expect(older).not.toBe(younger);
+  });
+
+  it("sends the age rule, not a level, when a parent picks it back", () => {
+    const onChange = draw({ startingPoint: 40 }, vi.fn(), 12);
+    const where = startSelect();
+    where.value = "age";
+    where.dispatchEvent(new Event("change", { bubbles: true }));
+
+    expect(onChange).toHaveBeenCalledWith({ startingPoint: "age" });
+  });
+
+  it("lets a parent override the age band with the very start", () => {
+    const onChange = draw({ startingPoint: "age" }, vi.fn(), 12);
+    const where = startSelect();
+    where.value = "start";
+    where.dispatchEvent(new Event("change", { bubbles: true }));
+
+    expect(onChange).toHaveBeenCalledWith({ startingPoint: null });
+  });
+
+  it("puts the whole course behind one control rather than a wall of buttons", () => {
+    // 107 units. As a row of `Choices` this drew 106 buttons, which is why it
+    // is a dropdown — and why a regression to buttons should fail here.
+    draw();
+
+    expect(screen.queryByRole("radiogroup", { name: "Where this child starts" })).toBeNull();
+    expect(startSelect().options.length).toBeGreaterThan(50);
   });
 
   it("promises that placing a child does not shut the earlier units", () => {
     draw({ startingPoint: 4 });
 
-    expect(screen.getByText(/Earlier units stay open/)).toBeTruthy();
+    expect(screen.getByText(/stays unlocked/)).toBeTruthy();
+    // And says the report will still show them unpractised, so a parent is not
+    // surprised by gaps they chose.
+    expect(screen.getByText(/not practised in your report/)).toBeTruthy();
   });
 });
 

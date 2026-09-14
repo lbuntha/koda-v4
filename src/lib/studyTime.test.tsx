@@ -148,6 +148,8 @@ describe("the gate reads the parent's cap against that clock", () => {
         <span data-testid="done">{String(gate.dayDone)}</span>
         <span data-testid="left">{String(gate.left)}</span>
         <span data-testid="cap">{String(gate.cap)}</span>
+        <span data-testid="asleep">{String(gate.outsideHours)}</span>
+        <span data-testid="closed">{String(gate.closed)}</span>
       </div>
     );
   };
@@ -287,6 +289,155 @@ describe("the screen a child is shown when their time is up", () => {
 
     expect(screen.getByText(/Everything you earned today is saved/i)).toBeTruthy();
     // A cap with a "five more minutes" button a child can reach is not a cap.
+    const ways = screen.getAllByRole("button").map((b) => b.textContent ?? "");
+    expect(ways).toEqual(["Back home"]);
+  });
+});
+
+/**
+ * The hours half of the rule: *when*, as against how long.
+ *
+ * `FIXED_NOW` above is 09:00Z, which is not 9am everywhere, so nothing here
+ * leans on it — each test sets the wall clock it means with a local-time string.
+ * The predicate reads `getHours()`, which is the point: a bedtime is what the
+ * clock in the hall says, not what UTC says.
+ */
+describe("the hours a grown-up opens Koda for", () => {
+  const at = (local: string) => new Date(local);
+
+  it("is open all day and all night when nobody set a window", async () => {
+    const { withinAllowedHours } = await load();
+
+    expect(withinAllowedHours(null, at("2026-05-14T03:00:00"))).toBe(true);
+    expect(withinAllowedHours(null, at("2026-05-14T23:59:00"))).toBe(true);
+  });
+
+  it("opens on the hour the parent named and shuts on the stroke of the other", async () => {
+    const { withinAllowedHours } = await load();
+    const school = { from: 7, to: 20 };
+
+    // The minute before opening, and the first minute open.
+    expect(withinAllowedHours(school, at("2026-05-14T06:59:00"))).toBe(false);
+    expect(withinAllowedHours(school, at("2026-05-14T07:00:00"))).toBe(true);
+    // The last minute open, and the stroke of eight: `to` is when it shuts.
+    expect(withinAllowedHours(school, at("2026-05-14T19:59:00"))).toBe(true);
+    expect(withinAllowedHours(school, at("2026-05-14T20:00:00"))).toBe(false);
+  });
+
+  it("shuts a child out at eleven at night, which is the whole reason it exists", async () => {
+    const { withinAllowedHours } = await load();
+
+    expect(withinAllowedHours({ from: 7, to: 20 }, at("2026-05-14T23:00:00"))).toBe(false);
+    expect(withinAllowedHours({ from: 7, to: 20 }, at("2026-05-14T02:00:00"))).toBe(false);
+  });
+
+  it("carries a window over midnight for a household that meant it", async () => {
+    const { withinAllowedHours } = await load();
+    const evening = { from: 20, to: 7 };
+
+    expect(withinAllowedHours(evening, at("2026-05-14T21:00:00"))).toBe(true);
+    expect(withinAllowedHours(evening, at("2026-05-14T00:30:00"))).toBe(true);
+    expect(withinAllowedHours(evening, at("2026-05-14T06:59:00"))).toBe(true);
+    // And is shut in the middle of the day, which is what wrapping means.
+    expect(withinAllowedHours(evening, at("2026-05-14T12:00:00"))).toBe(false);
+  });
+
+  it("says the hour the way a grown-up would", async () => {
+    const { hourLabel } = await load();
+
+    expect(hourLabel(0)).toBe("midnight");
+    expect(hourLabel(12)).toBe("noon");
+    expect(hourLabel(7)).toBe("7 AM");
+    expect(hourLabel(20)).toBe("8 PM");
+  });
+});
+
+describe("the gate, reading the hours against the wall clock", () => {
+  /** The gate as the door sees it, at a named local time. */
+  const gateAt = async (local: string, setup: (mod: Loaded) => void) => {
+    const mod = await load();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(local));
+    setup(mod);
+    return mod.studyGateNow();
+  };
+
+  it("is open, with no cap spent and no window set", async () => {
+    const gate = await gateAt("2026-05-14T23:00:00", () => {});
+
+    expect(gate.outsideHours).toBe(false);
+    expect(gate.closed).toBe(false);
+  });
+
+  it("closes at bedtime even though not a minute has been spent", async () => {
+    const gate = await gateAt("2026-05-14T21:30:00", (m) => {
+      m.ChildSettingsAPI.set("l_mia", { allowedHours: { from: 7, to: 20 } });
+    });
+
+    expect(gate.outsideHours).toBe(true);
+    expect(gate.closed).toBe(true);
+    // The other rule has not fired, and the child must be told which did.
+    expect(gate.dayDone).toBe(false);
+  });
+
+  it("opens again in the morning with nothing else changing", async () => {
+    const gate = await gateAt("2026-05-15T08:00:00", (m) => {
+      m.ChildSettingsAPI.set("l_mia", { allowedHours: { from: 7, to: 20 } });
+    });
+
+    expect(gate.outsideHours).toBe(false);
+    expect(gate.closed).toBe(false);
+  });
+
+  it("reports both reasons when both are true, and keeps them apart", async () => {
+    const gate = await gateAt("2026-05-14T21:30:00", (m) => {
+      m.ChildSettingsAPI.set("l_mia", {
+        sessionMinutes: 15,
+        allowedHours: { from: 7, to: 20 },
+      });
+      m.SessionTimeAPI.record(15 * 60);
+    });
+
+    expect(gate.dayDone).toBe(true);
+    expect(gate.outsideHours).toBe(true);
+    expect(gate.closed).toBe(true);
+  });
+
+  it("hands back the window, so the child's screen can name the opening hour", async () => {
+    const gate = await gateAt("2026-05-14T21:30:00", (m) => {
+      m.ChildSettingsAPI.set("l_mia", { allowedHours: { from: 7, to: 20 } });
+    });
+
+    expect(gate.hours).toEqual({ from: 7, to: 20 });
+  });
+
+  it("still closes on a spent cap inside the open hours", async () => {
+    const gate = await gateAt("2026-05-14T10:00:00", (m) => {
+      m.ChildSettingsAPI.set("l_mia", {
+        sessionMinutes: 15,
+        allowedHours: { from: 7, to: 20 },
+      });
+      m.SessionTimeAPI.record(15 * 60);
+    });
+
+    expect(gate.outsideHours).toBe(false);
+    expect(gate.closed).toBe(true);
+  });
+});
+
+describe("the screen a child is shown when Koda is asleep", () => {
+  it("names the hour Koda wakes up rather than only refusing", async () => {
+    const { KodaAsleepScreen } = await import("../components/KodaAsleepScreen");
+    render(<KodaAsleepScreen opensAt={7} />);
+
+    expect(screen.getByText(/Koda is asleep/i)).toBeTruthy();
+    expect(screen.getByText(/wakes up at 7 AM/i)).toBeTruthy();
+  });
+
+  it("offers no way back into a lesson", async () => {
+    const { KodaAsleepScreen } = await import("../components/KodaAsleepScreen");
+    render(<KodaAsleepScreen opensAt={7} onGoHome={() => {}} />);
+
     const ways = screen.getAllByRole("button").map((b) => b.textContent ?? "");
     expect(ways).toEqual(["Back home"]);
   });

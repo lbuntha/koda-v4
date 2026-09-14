@@ -7,7 +7,7 @@
   "author": "Koda Learning Lab",
   "iconName": "Search",
   "tagline": "Look closely, scan the scene, and spot every match.",
-  "thumbnail": "observation-scene-beach-sandcastle-shore",
+  "thumbnail": "observation-quest",
   "status": "draft",
   "audience": { "ages": [5, 9], "category": "spatial-reasoning" },
   "teaches": ["visual-scanner", "visual-matcher", "selective-attender", "shape-feature-searcher", "feature-conjunction-searcher", "rotation-invariant-matcher", "scale-invariant-matcher", "partial-object-completer", "figure-ground-searcher", "themed-scene-searcher", "exhaustive-searcher", "figure-separator", "mirror-discriminator", "camouflage-breaker", "shadow-matcher", "category-searcher", "difference-comparer", "difference-checker", "difference-auditor", "independent-visual-searcher"],

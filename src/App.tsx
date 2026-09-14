@@ -49,7 +49,7 @@ import {
   subscribeLearnerRecord,
 } from "./lib/learnerProgress";
 import { recordPractice, useStreak } from "./lib/streak";
-import { useSessionClock, useStudyGate } from "./lib/sessionTime";
+import { studyGateNow, useSessionClock, useStudyGate } from "./lib/sessionTime";
 import { levelFromXp } from "./lib/level";
 import { publishLearnerFigures } from "./lib/profileStats";
 import { Billing } from "./lib/billing";
@@ -61,7 +61,7 @@ import { SkillCatalogPage } from "./components/SkillCatalogPage";
 import { AppNav } from "./components/AppNav";
 import { SidebarNav } from "./components/SidebarNav";
 import { MainLayout } from "./components/layout/MainLayout";
-import { UIPageLoader } from "./components/ui";
+import { UIPageLoader, UIModal } from "./components/ui";
 import { SkillHost } from "./skills/host/SkillHost";
 import {
   getCourseLessons,
@@ -103,6 +103,7 @@ import { refreshNotificationToken } from "./lib/push";
 import { onNotificationClick } from "./lib/push/landing";
 import { DailyStudyGoal } from "./components/DailyStudyGoal";
 import { DayDoneScreen } from "./components/DayDoneScreen";
+import { KodaAsleepScreen } from "./components/KodaAsleepScreen";
 import { QuickMathPanel } from "./components/QuickMathPanel";
 import { LiveVoiceCoachModal } from "./components/LiveVoiceCoachModal";
 import { playSound, playBase64Pcm, speakWebSpeech } from "./utils/audio";
@@ -276,6 +277,7 @@ export default function App() {
     | "system"
     | "settings"
   >("home");
+  const [profileSheetOpen, setProfileSheetOpen] = useState(false);
 
   /*
    * Which child's record is open, if any.
@@ -367,16 +369,16 @@ export default function App() {
    * their afternoon.
    */
   useSessionClock(inRound);
-  const { cap: sessionCap, dayDone } = useStudyGate();
+  const { cap: sessionCap, dayDone, hours: studyHours, outsideHours } = useStudyGate();
 
   /**
-   * Open a lesson, unless today's time is gone.
+   * Open a lesson, unless today's time is gone or Koda is shut for the night.
    *
-   * The one door into a round, so the cap is checked once rather than at each
-   * button that starts one. Checked on the way *in* and never mid-round: a
-   * child two questions from finishing should finish, which means a capped day
-   * can overrun by one round's length. That is the humane reading and it is
-   * deliberate.
+   * The one door into a round, so both of a grown-up's limits are checked once
+   * here rather than at each button that starts one. Checked on the way *in* and
+   * never mid-round: a child two questions from finishing should finish, which
+   * means a capped day can overrun by one round's length and so can a bedtime.
+   * That is the humane reading and it is deliberate.
    */
   const startLesson = async (levelNumber: number) => {
     if (lessonStartInFlight.current) return;
@@ -429,7 +431,10 @@ export default function App() {
     }
 
     setActiveTab("game");
-    if (dayDone) {
+    // Read now rather than from the render that drew the button: `outsideHours`
+    // turns over on the wall clock, so a child who has been sitting on the picker
+    // since 19:59 is holding a render that said "open".
+    if (studyGateNow().closed) {
       setInRound(false);
       return;
     }
@@ -917,6 +922,7 @@ export default function App() {
             activeTab={activeTab}
             onSelectTab={(tab) => setActiveTab(tab)}
             userProgress={userProgress}
+            onOpenProfile={() => setProfileSheetOpen(true)}
           />
         )
       }
@@ -944,6 +950,13 @@ export default function App() {
         {activeTab === "game" &&
           (inRound ? (
             lessonHost
+          ) : outsideHours && studyHours !== null ? (
+            /* Both reasons can be true at nine at night, and this one goes first
+               because it names a time: "Koda wakes up at 7 AM" is something a
+               five-year-old can act on, where "that's it for today" leaves them
+               to work out when today ends. The cap will have reset by then
+               anyway, so nothing is hidden by saying this instead. */
+            <KodaAsleepScreen opensAt={studyHours.from} onGoHome={() => setActiveTab("home")} />
           ) : dayDone && sessionCap !== null ? (
             /* Stands in for the picker rather than sitting beside it: a path a
                child can still tap is a path they will keep tapping. */
@@ -1082,9 +1095,19 @@ export default function App() {
                  all and the section hides itself. */
               activeTab={activeTab}
               onSelectTab={(tab) => setActiveTab(tab)}
+              onOpenProfile={() => setProfileSheetOpen(true)}
             />
           )}
       </>
+
+      <UIModal isOpen={profileSheetOpen} onClose={() => setProfileSheetOpen(false)} title="Profile" maxWidth="max-w-2xl">
+        <ProfilePage
+          onNavigate={(tab) => {
+            setProfileSheetOpen(false);
+            setActiveTab(tab);
+          }}
+        />
+      </UIModal>
 
       {/*
         * Ask Koda, floating bottom-right on every screen except a running round

@@ -23,6 +23,15 @@ import type { Viewer } from "../skills/viewer";
    confounds a test about prerequisites. */
 const viewer: Viewer = { age: 7, showAllSkills: true } as Viewer;
 
+/* Every call below passes its starting point explicitly, `null` where the test
+   is about prerequisites alone.
+
+   It used to rely on the default, which was "from the beginning". The default is
+   now "place the child by their age band", and this viewer is seven — so leaving
+   it out quietly placed the child past the first nine levels and two tests about
+   padlocks started asserting the placement rule instead. `placement.test.ts`
+   covers that rule; these cover `requires`. */
+
 const lessons = getCourseLessons(viewer);
 const bySlug = (id: string) => {
   const lesson = lessons.find((l) => l.id === id);
@@ -41,7 +50,7 @@ describe("isUnlocked", () => {
 
     expect(roots.length).toBeGreaterThan(1);
     for (const root of roots) {
-      expect(isUnlocked(root, none, viewer)).toBe(true);
+      expect(isUnlocked(root, none, viewer, null)).toBe(true);
     }
   });
 
@@ -49,14 +58,14 @@ describe("isUnlocked", () => {
     /* `quick-dice-patterns` is fourth in the counting skill and requires
        nothing. Under per-index gating it sat behind three unrelated lessons,
        which cost a beginner one of their two ways in. */
-    expect(isUnlocked(bySlug("quick-dice-patterns"), {}, viewer)).toBe(true);
+    expect(isUnlocked(bySlug("quick-dice-patterns"), {}, viewer, null)).toBe(true);
   });
 
   it("keeps a lesson shut until its prerequisite concept is done", () => {
     const scattered = bySlug("count-scattered-objects");
 
-    expect(isUnlocked(scattered, {}, viewer)).toBe(false);
-    expect(isUnlocked(scattered, completing("count-in-a-row"), viewer)).toBe(true);
+    expect(isUnlocked(scattered, {}, viewer, null)).toBe(false);
+    expect(isUnlocked(scattered, completing("count-in-a-row"), viewer, null)).toBe(true);
   });
 
   it("needs every prerequisite of a lesson that has more than one", () => {
@@ -67,9 +76,9 @@ describe("isUnlocked", () => {
     const viaSubitising = completing("count-in-a-row", "quick-dice-patterns", "quick-dot-groups");
     const viaCounting = completing("count-in-a-row", "count-scattered-objects");
 
-    expect(isUnlocked(twoColour, viaSubitising, viewer)).toBe(false);
-    expect(isUnlocked(twoColour, viaCounting, viewer)).toBe(false);
-    expect(isUnlocked(twoColour, { ...viaSubitising, ...viaCounting }, viewer)).toBe(true);
+    expect(isUnlocked(twoColour, viaSubitising, viewer, null)).toBe(false);
+    expect(isUnlocked(twoColour, viaCounting, viewer, null)).toBe(false);
+    expect(isUnlocked(twoColour, { ...viaSubitising, ...viaCounting }, viewer, null)).toBe(true);
   });
 
   it("opens both branches that a single concept feeds", () => {
@@ -77,8 +86,8 @@ describe("isUnlocked", () => {
        ever offer one of them, which is the behaviour this replaced. */
     const afterCounter = completing("count-in-a-row", "count-scattered-objects");
 
-    expect(isUnlocked(bySlug("comparing-two-groups"), afterCounter, viewer)).toBe(true);
-    expect(isUnlocked(bySlug("skip-counting-by-2s-and-5s"), afterCounter, viewer)).toBe(true);
+    expect(isUnlocked(bySlug("comparing-two-groups"), afterCounter, viewer, null)).toBe(true);
+    expect(isUnlocked(bySlug("skip-counting-by-2s-and-5s"), afterCounter, viewer, null)).toBe(true);
   });
 
   it("counts a concept as satisfied on completion, not on mastery", () => {
@@ -87,8 +96,8 @@ describe("isUnlocked", () => {
        out until the day after tomorrow. One completed round is the bar here. */
     const justPlayedOnce = { [bySlug("count-in-a-row").levelNumber]: 1 };
 
-    expect(satisfiedConcepts(justPlayedOnce, viewer).has("corresponder")).toBe(true);
-    expect(isUnlocked(bySlug("count-scattered-objects"), justPlayedOnce, viewer)).toBe(true);
+    expect(satisfiedConcepts(justPlayedOnce, viewer, null).has("corresponder")).toBe(true);
+    expect(isUnlocked(bySlug("count-scattered-objects"), justPlayedOnce, viewer, null)).toBe(true);
   });
 
   it("leaves a completed lesson open whatever its prerequisites say", () => {
@@ -96,7 +105,7 @@ describe("isUnlocked", () => {
        already done. */
     const deep = bySlug("build-numbers-with-hundreds-tens-ones");
 
-    expect(isUnlocked(deep, completing("build-numbers-with-hundreds-tens-ones"), viewer)).toBe(true);
+    expect(isUnlocked(deep, completing("build-numbers-with-hundreds-tens-ones"), viewer, null)).toBe(true);
   });
 });
 

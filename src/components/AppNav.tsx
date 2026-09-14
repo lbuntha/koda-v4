@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Flame, Zap } from "lucide-react";
 import { UserProgress } from "../types";
 import { playSound } from "../utils/audio";
@@ -9,6 +9,8 @@ import { AccountMenu, accountSubtitle } from "./AccountMenu";
 import { NotificationsBell } from "./account/NotificationsBell";
 import { navDefaults, splitTabs, useNavItems } from "./navRecord";
 import type { TabId } from "./navTabs";
+import { StatisticsModal } from "./account/StatisticsModal";
+import { AchievementsModal } from "./account/AchievementsModal";
 
 const config = navDefaults;
 
@@ -24,6 +26,7 @@ export interface AppNavProps {
   activeTab: TabId;
   onSelectTab: (tab: TabId) => void;
   userProgress: UserProgress;
+  onOpenProfile?: () => void;
 }
 
 /**
@@ -52,7 +55,10 @@ export const AppNav: React.FC<AppNavProps> = ({
   activeTab,
   onSelectTab,
   userProgress,
+  onOpenProfile,
 }) => {
+  const [statsOpen, setStatsOpen] = useState(false);
+  const [achievementsOpen, setAchievementsOpen] = useState(false);
   const session = useSession();
   const streak = useStreak(userProgress);
   const items = useNavItems();
@@ -96,34 +102,72 @@ export const AppNav: React.FC<AppNavProps> = ({
             {/* Hidden outright when a parent has switched streaks off — a flame
                 frozen at zero is a broken feature, not a disabled one. */}
             {streak.config.enabled && (
-              <UIAppBarChip
-                tone="streak"
-                /* The line icon, not the drawn flame from the art library: at
-                   16px that is a smudge, and it carries its own colours, which
-                   fight the chip it sits in. This one takes `currentColor`. */
-                icon={<Flame className="fill-current" />}
-                value={streak.days}
-                label={`${streak.days} ${streak.cadence === "weekly" ? "week" : "day"} streak`}
-              />
+              <button
+                type="button"
+                onClick={() => {
+                  playSound("pop");
+                  setStatsOpen(true);
+                }}
+                className="cursor-pointer transition hover:opacity-85 active:scale-95"
+                aria-label="View statistics"
+              >
+                <UIAppBarChip
+                  tone="streak"
+                  /* The line icon, not the drawn flame from the art library: at
+                     16px that is a smudge, and it carries its own colours, which
+                     fight the chip it sits in. This one takes `currentColor`. */
+                  icon={<Flame className="fill-current" />}
+                  value={streak.days}
+                  label={`${streak.days} ${streak.cadence === "weekly" ? "week" : "day"} streak`}
+                />
+              </button>
             )}
-            <UIAppBarChip
-              icon={<Zap className="fill-current" />}
-              value={compact(userProgress.xp)}
-              label={`${userProgress.xp} XP`}
-            />
+            <button
+              type="button"
+              onClick={() => {
+                playSound("pop");
+                setAchievementsOpen(true);
+              }}
+              className="cursor-pointer transition hover:opacity-85 active:scale-95"
+              aria-label="View achievements"
+            >
+              <UIAppBarChip
+                icon={<Zap className="fill-current" />}
+                value={compact(userProgress.xp)}
+                label={`${userProgress.xp} XP`}
+              />
+            </button>
             {/* Adults only. A child's bar has no bell because nothing is ever
                 addressed to a learner — the endpoint answers them with an empty
                 list rather than a refusal, and drawing one would be a control
                 that never has anything in it. */}
             {session && !session.learnerId && <NotificationsBell />}
             {config.profile && (
-              <AccountMenu profile={config.profile} onOpenProfile={() => onSelectTab("profile")} />
+              <AccountMenu profile={config.profile} onOpenProfile={onOpenProfile ?? (() => onSelectTab("profile"))} />
             )}
           </>
         }
       />
 
       <UITabBar items={tabs} activeId={activeInOverflow ? "settings" : activeTab} onSelect={go} />
+
+      <StatisticsModal
+        isOpen={statsOpen}
+        onClose={() => setStatsOpen(false)}
+        onOpenProfile={() => {
+          setStatsOpen(false);
+          onSelectTab("profile");
+        }}
+      />
+
+      <AchievementsModal
+        isOpen={achievementsOpen}
+        onClose={() => setAchievementsOpen(false)}
+        onOpenProfile={() => {
+          setAchievementsOpen(false);
+          onSelectTab("profile");
+        }}
+      />
 
     </>
   );

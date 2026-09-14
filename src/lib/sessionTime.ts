@@ -1,8 +1,8 @@
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { StreakAPI, dayKey } from "./streak";
 import { currentLearnerId } from "./learnerProgress";
-import { ChildSettingsAPI } from "./childSettings";
+import { ChildSettingsAPI, type AllowedHours } from "./childSettings";
 
 /**
  * How long a child has been playing today.
@@ -60,6 +60,35 @@ const read = (learnerId: string, now: Date = new Date()): Tally => {
 /** Whether a cap has been spent. `null` is no cap, and never reached. */
 export const capReached = (spentMinutes: number, cap: number | null): boolean =>
   cap !== null && spentMinutes >= cap;
+
+/**
+ * Whether Koda is open at `now`. No window means always.
+ *
+ * The wall clock where the child is — `getHours()`, not the learning day — for
+ * the reason `allowedHours` gives: a bedtime is what the clock in the hall says.
+ *
+ * Half-open, so `to` is the hour it shuts rather than the last hour allowed: at
+ * 20 the window `{ from: 7, to: 20 }` is closed. A window whose `to` is at or
+ * before its `from` wraps midnight, which is why this is not a single
+ * comparison — 20 to 7 must be open at 23:00 and at 02:00 and shut at noon.
+ */
+export const withinAllowedHours = (
+  hours: AllowedHours | null,
+  now: Date = new Date(),
+): boolean => {
+  if (!hours) return true;
+  const hour = now.getHours();
+  return hours.from < hours.to
+    ? hour >= hours.from && hour < hours.to
+    : hour >= hours.from || hour < hours.to;
+};
+
+/** An hour as a child's grown-up would say it, for both screens that name one. */
+export const hourLabel = (hour: number): string => {
+  if (hour === 0) return "midnight";
+  if (hour === 12) return "noon";
+  return hour < 12 ? `${hour} AM` : `${hour - 12} PM`;
+};
 
 /** How long is left, in whole minutes. `null` when there is no cap. */
 export const minutesLeft = (spentMinutes: number, cap: number | null): number | null =>
@@ -155,7 +184,46 @@ export interface StudyGate {
   left: number | null;
   /** Whether today's study time is spent, and a new round must be refused. */
   dayDone: boolean;
+  /** The hours the grown-up opened, or `null` for any time of day. */
+  hours: AllowedHours | null;
+  /** Whether Koda is shut by the clock on the wall rather than by minutes spent. */
+  outsideHours: boolean;
+  /**
+   * Whether a new round must be refused, for either reason.
+   *
+   * What the door asks. The two reasons stay separate beside it because the
+   * child is told *which* — "you have had your twenty minutes" and "Koda is
+   * asleep" are different sentences, and a screen that guessed would be wrong
+   * half the time.
+   */
+  closed: boolean;
 }
+
+/**
+ * The gate as it stands this instant, read fresh from both stores.
+ *
+ * Exists because a rendered value is the wrong thing to decide on. `dayDone`
+ * moves when the clock ticks, which React hears about; `outsideHours` moves
+ * when the hour changes, which nothing announces. A child sitting on the lesson
+ * picker at 19:59 holds a render that said "open", and a cap read from that
+ * render would let them start a round at 20:01. So the door reads this and the
+ * screens read the hook.
+ */
+export const studyGateNow = (now: Date = new Date()): StudyGate => {
+  const { sessionMinutes: cap, allowedHours: hours } = ChildSettingsAPI.current();
+  const spent = SessionTimeAPI.spentToday(undefined, now);
+  const dayDone = capReached(spent, cap);
+  const outsideHours = !withinAllowedHours(hours, now);
+  return {
+    cap,
+    spent,
+    left: minutesLeft(spent, cap),
+    dayDone,
+    hours,
+    outsideHours,
+    closed: dayDone || outsideHours,
+  };
+};
 
 export function useStudyGate(): StudyGate {
   // Both stores, because either one moving changes the answer: a parent
@@ -163,7 +231,49 @@ export function useStudyGate(): StudyGate {
   useSyncExternalStore(ChildSettingsAPI.subscribe, ChildSettingsAPI.version);
   useSyncExternalStore(SessionTimeAPI.subscribe, SessionTimeAPI.version);
 
-  const cap = ChildSettingsAPI.current().sessionMinutes;
-  const spent = SessionTimeAPI.spentToday();
-  return { cap, spent, left: minutesLeft(spent, cap), dayDone: capReached(spent, cap) };
+  /*
+   * The third input, and the only one with nobody to subscribe to: the hour.
+   *
+   * Without this, bedtime arrives on a child's screen only when something else
+   * happens to re-render it — so the picker they are staring at stays open past
+   * eight, and they find out by tapping it. Better that the screen changes under
+   * them than that the door does.
+   *
+   * Only while a window is actually set, so the families who never open this
+   * setting pay nothing for it.
+   */
+  const hours = ChildSettingsAPI.current().allowedHours;
+  // Depended on as a string, not the object: `current()` builds a fresh one
+  // every render, so an object dep would restart the interval on each beat.
+  const windowKey = hours ? `${hours.from}-${hours.to}` : "";
+  const [, setBeat] = useState(0);
+  useEffect(() => {
+    if (!windowKey) return;
+    let timer = 0;
+    /*
+     * Aimed at the turn of the hour rather than polling.
+     *
+     * The window only ever changes on the hour, so a 30-second interval would
+     * re-render `App` a hundred and twenty times to catch one moment — on a
+     * child's tablet, which is the device least able to spare it. A second past
+     * the hour is late enough that `getHours()` has certainly moved.
+     *
+     * Rescheduled from inside, so a device that was asleep through the boundary
+     * fires late, re-reads, and lines up again on the next one. Nothing about
+     * the rule depends on this being punctual: the door reads the clock itself.
+     */
+    const schedule = () => {
+      const now = new Date();
+      const untilNextHour =
+        (59 - now.getMinutes()) * 60_000 + (61 - now.getSeconds()) * 1_000;
+      timer = window.setTimeout(() => {
+        setBeat((beat) => beat + 1);
+        schedule();
+      }, untilNextHour);
+    };
+    schedule();
+    return () => window.clearTimeout(timer);
+  }, [windowKey]);
+
+  return studyGateNow();
 }

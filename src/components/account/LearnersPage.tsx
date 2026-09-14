@@ -9,6 +9,7 @@ import { useBilling } from "../../lib/useBilling";
 import { DailyGoalField } from "./DailyGoalField";
 import { ChildSettingsFields } from "./ChildSettingsFields";
 import { FamilyPinCard } from "./FamilyPinCard";
+import { ageFromBirthYear } from "../../skills/viewer";
 import { themeSystem } from "../../lib/themeSystem";
 import { playSound } from "../../utils/audio";
 import { UIAvatar, UIBadge, UIButton, UIDialog, UIMenu, UIMenuItem, UIMenuSeparator, UIModal } from "../ui";
@@ -33,6 +34,26 @@ interface JoinCodeResult {
 
 const field =
   themeSystem.field("lg", "w-full");
+
+/**
+ * Whether the draft is actually different from what is stored.
+ *
+ * Per key and by *value*. The reference comparison this replaced was correct
+ * only while every setting was a primitive: `allowedHours` is an object, and two
+ * reads of one stored window are two different objects, so `!==` on it was
+ * always true — every Save would write and re-sync a document nobody had
+ * touched, which is exactly what this guard exists to prevent.
+ */
+const settingsDiffer = (draft: ChildSettings, saved: ChildSettings): boolean =>
+  (Object.keys(draft) as (keyof ChildSettings)[]).some((key) => {
+    const mine = draft[key];
+    const theirs = saved[key];
+    // Only the object-valued fields need the deeper look; `null` against an
+    // object still falls to the cheap comparison and reads as a change.
+    return mine && theirs && typeof mine === "object" && typeof theirs === "object"
+      ? JSON.stringify(mine) !== JSON.stringify(theirs)
+      : mine !== theirs;
+  });
 
 const formatDate = (value: string) =>
   new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", year: "numeric" }).format(
@@ -186,10 +207,7 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
       // same request.
       if (goalDraft !== DailyGoalAPI.for(editing.id)) DailyGoalAPI.set(editing.id, goalDraft);
       const saved = ChildSettingsAPI.for(editing.id);
-      const changed = (Object.keys(settingsDraft) as (keyof ChildSettings)[]).some(
-        (key) => settingsDraft[key] !== saved[key],
-      );
-      if (changed) ChildSettingsAPI.set(editing.id, settingsDraft);
+      if (settingsDiffer(settingsDraft, saved)) ChildSettingsAPI.set(editing.id, settingsDraft);
       setLearners((current) => current.map((item) => item.id === updated.id ? updated : item));
       setEditing(null);
       setNotice("Child profile updated.");
@@ -381,6 +399,10 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
               onChange={(patch) => setSettingsDraft((current) => ({ ...current, ...patch }))}
               childName={editing.displayName}
               planHasAi={plan.ai}
+              /* Read from the draft, not the saved record, so a parent filling in
+                 the birth year sees the age-band placement move in the same
+                 gesture rather than after a save and a reopen. */
+              childAge={editing.birthYear ? ageFromBirthYear(editing.birthYear) : null}
             />
           </div>
         </div>}

@@ -1,8 +1,14 @@
 import React from "react";
-import { Clock, Flag, Flame, GraduationCap, Sparkles } from "lucide-react";
+import { Clock, Flag, Flame, GraduationCap, Moon, Sparkles } from "lucide-react";
 
-import type { ChildSettings, GoalCadence } from "../../lib/childSettings";
-import { getCourseUnits } from "../../curriculum";
+import type {
+  AllowedHours,
+  ChildSettings,
+  GoalCadence,
+  StartingPoint,
+} from "../../lib/childSettings";
+import { hourLabel } from "../../lib/sessionTime";
+import { getCourseUnits, startingPointForAge } from "../../curriculum";
 import { themeSystem } from "../../lib/themeSystem";
 import { playSound } from "../../utils/audio";
 import { usePersonaRoster } from "../../lib/usePersona";
@@ -109,6 +115,38 @@ const Choices = <T,>({
   </div>
 );
 
+/** The window a parent starts from when they first switch hours on. */
+const DEFAULT_HOURS: AllowedHours = { from: 7, to: 20 };
+
+const HOURS = Array.from({ length: 24 }, (_, hour) => hour);
+
+/**
+ * Every hour but one.
+ *
+ * The one is the other end of the window. `clampHours` refuses `from === to` and
+ * returns `null` for it, so a parent who picked "7 AM until 7 AM" would not get
+ * a zero-length window — they would get the whole setting switched back off on
+ * save, with nothing saying why. Cheaper to make it unpickable.
+ */
+const hoursExcept = (taken: number): number[] => HOURS.filter((hour) => hour !== taken);
+
+/**
+ * What the window a parent has picked will actually mean, in a sentence.
+ *
+ * Two independent dropdowns can express a window that wraps midnight, and a
+ * parent who set "8 PM" and "7 AM" meaning bedtime has in fact opened the night.
+ * Rather than forbid it — some households do play in the evening — the screen
+ * reads the setting back, so a wrapped window is something a parent sees here
+ * instead of something a child discovers.
+ */
+const hoursSummary = (hours: AllowedHours, who: string): string => {
+  const from = hourLabel(hours.from);
+  const to = hourLabel(hours.to);
+  return hours.from < hours.to
+    ? `${who} can open Koda between ${from} and ${to}. Outside those hours Koda is asleep.`
+    : `${who} can open Koda from ${from} through the night until ${to}. Koda is asleep during the day — check this is what you meant.`;
+};
+
 export interface ChildSettingsFieldsProps {
   value: ChildSettings;
   onChange(patch: Partial<ChildSettings>): void;
@@ -116,6 +154,14 @@ export interface ChildSettingsFieldsProps {
   childName?: string;
   /** Whether the family's plan covers Koda's help at all. */
   planHasAi?: boolean;
+  /**
+   * The child's age, for the age-band placement that is now the default.
+   *
+   * `null` when nobody entered a birth year — in which case "by age" has nothing
+   * to go on and the option says so rather than quietly behaving like "from the
+   * start".
+   */
+  childAge?: number | null;
 }
 
 /**
@@ -124,17 +170,58 @@ export interface ChildSettingsFieldsProps {
  * A parent knows "she can already count to twenty"; nobody knows what level 8
  * is. Choosing a unit sets the starting point to the level *before* its first
  * lesson, so the unit a parent picks is the one the child opens on.
+ *
+ * The label is the unit's own title, which already carries its number
+ * ("Unit 3: Quantity Comparison & Number Line"). The bare `Unit 3` this replaced
+ * asked a parent to know the syllabus by heart — and with a hundred and seven
+ * units, a row of numbered buttons was a wall no parent could read.
  */
-const startChoices = (): { id: string; label: string; level: number | null }[] => {
+interface StartChoice {
+  id: string;
+  label: string;
+  value: StartingPoint;
+}
+
+const startChoices = (age: number | null): StartChoice[] => {
   const units = getCourseUnits();
+  const pinned = units.slice(1).map((unit) => ({
+    id: unit.id,
+    label: unit.title,
+    value: (unit.lessons[0]?.levelNumber ?? 1) - 1 as StartingPoint,
+  }));
+
+  // What "by age" will actually do, named in the option itself. A default that
+  // does something invisible is a default a parent cannot check.
+  const byAge = age === null ? null : startingPointForAge(age);
+  const landsOn =
+    byAge === null
+      ? units[0]
+      : [...units].reverse().find((unit) => (unit.lessons[0]?.levelNumber ?? 1) - 1 <= byAge) ??
+        units[0];
+
   return [
-    { id: "start", label: "From the start", level: null },
-    ...units.slice(1).map((unit) => ({
-      id: unit.id,
-      label: `Unit ${unit.unitNumber}`,
-      level: (unit.lessons[0]?.levelNumber ?? 1) - 1,
-    })),
+    {
+      id: "age",
+      label:
+        age === null
+          ? "By age (add a birth year)"
+          : `By age — ${landsOn?.title ?? "the start"}`,
+      value: "age",
+    },
+    { id: "start", label: "From the very start", value: null },
+    ...pinned,
   ];
+};
+
+/** Which option a stored setting corresponds to. */
+const chosen = (starts: StartChoice[], value: StartingPoint): StartChoice => {
+  if (value === "age") return starts[0];
+  if (value === null) return starts[1];
+  return (
+    [...starts]
+      .reverse()
+      .find((choice) => typeof choice.value === "number" && choice.value <= value) ?? starts[1]
+  );
 };
 
 export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
@@ -142,15 +229,14 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
   onChange,
   childName,
   planHasAi = true,
+  childAge = null,
 }) => {
   const who = childName?.trim() || "this child";
   // Only to know whether there is a choice to offer at all; the picker itself
   // resolves the chosen one.
   const roster = usePersonaRoster();
-  const starts = React.useMemo(startChoices, []);
-  const start =
-    [...starts].reverse().find((c) => c.level !== null && value.startingPoint !== null && c.level <= value.startingPoint) ??
-    starts[0];
+  const starts = React.useMemo(() => startChoices(childAge), [childAge]);
+  const start = chosen(starts, value.startingPoint);
 
   return (
     <div className="space-y-3">
@@ -185,25 +271,120 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
         )}
       </Row>
 
+      {/*
+        * When, as against how long. Directly under the cap because a parent
+        * reading one is usually deciding the other, and the two together are the
+        * whole of "how much Koda".
+        */}
+      <Row
+        stacked
+        icon={<Moon className="h-5 w-5" />}
+        tint="text-purple-500"
+        title="Hours of the day"
+        hint={`When ${who} can open Koda at all`}
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          <UIToggle
+            checked={value.allowedHours !== null}
+            onChange={() => {
+              playSound("pop");
+              onChange({ allowedHours: value.allowedHours ? null : DEFAULT_HOURS });
+            }}
+            label="Limit the hours of the day"
+          />
+          {value.allowedHours && (
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="flex items-center gap-2 text-xs text-muted">
+                From
+                <select
+                  aria-label="Koda opens at"
+                  className={themeSystem.field("sm")}
+                  value={value.allowedHours.from}
+                  onChange={(event) =>
+                    onChange({
+                      allowedHours: {
+                        ...(value.allowedHours ?? DEFAULT_HOURS),
+                        from: Number(event.target.value),
+                      },
+                    })
+                  }
+                >
+                  {hoursExcept(value.allowedHours.to).map((hour) => (
+                    <option key={hour} value={hour}>
+                      {hourLabel(hour)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="flex items-center gap-2 text-xs text-muted">
+                until
+                <select
+                  aria-label="Koda shuts at"
+                  className={themeSystem.field("sm")}
+                  value={value.allowedHours.to}
+                  onChange={(event) =>
+                    onChange({
+                      allowedHours: {
+                        ...(value.allowedHours ?? DEFAULT_HOURS),
+                        to: Number(event.target.value),
+                      },
+                    })
+                  }
+                >
+                  {hoursExcept(value.allowedHours.from).map((hour) => (
+                    <option key={hour} value={hour}>
+                      {hourLabel(hour)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          )}
+        </div>
+        <p className="text-xs text-muted">
+          {value.allowedHours
+            ? hoursSummary(value.allowedHours, who)
+            : `${who} can open Koda at any time of day.`}
+        </p>
+      </Row>
+
       <Row
         stacked
         icon={<Flag className="h-5 w-5" />}
         tint="text-emerald-500"
         title="Starting point"
-        hint={`Where ${who} begins, if they already know the earlier work`}
+        hint={`Skip ahead if ${who} already knows the early work`}
       >
-        <Choices
-          ariaLabel="Where this child starts"
-          options={starts}
-          value={start}
-          keyOf={(choice) => choice.id}
-          labelOf={(choice) => choice.label}
-          onSelect={(choice) => onChange({ startingPoint: choice.level })}
-        />
+        {/*
+          * A dropdown, not the row of buttons the other settings use: the course
+          * is a hundred and seven units long, and `Choices` drew every one of
+          * them. Four caps wrap into a tidy row; a hundred and six units are a
+          * wall. The same reason the label is now the unit's title — a parent
+          * picking a starting point needs to recognise the work, not count.
+          */}
+        <select
+          aria-label="Where this child starts"
+          className={themeSystem.field("sm", "w-full")}
+          value={start.id}
+          onChange={(event) => {
+            const choice = starts.find((option) => option.id === event.target.value);
+            if (choice) onChange({ startingPoint: choice.value });
+          }}
+        >
+          {starts.map((choice) => (
+            <option key={choice.id} value={choice.id}>
+              {choice.label}
+            </option>
+          ))}
+        </select>
         <p className="text-xs text-muted">
-          {start.level === null
-            ? "Everything from the first lesson onwards."
-            : `Earlier units stay open, and still count as unpractised — ${who} can go back to them any time.`}
+          {value.startingPoint === "age"
+            ? childAge === null
+              ? `Add ${who}'s birth year above and Koda will place them by age. Until then they start at the first lesson.`
+              : `Koda places ${who} by the age each lesson is written for, and moves the start as they grow. Earlier units stay unlocked.`
+            : value.startingPoint === null
+              ? `${who} starts at the very first lesson, whatever their age.`
+              : `${who} opens on this unit. Everything before it stays unlocked, and still shows as not practised in your report.`}
         </p>
       </Row>
 

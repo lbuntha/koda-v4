@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { SVG_ASSET_IDS } from "../../assets/svg/ids";
 import course from "../../curriculum/course.json";
 import { skill } from ".";
 import audioManifest from "./audio/manifest.json";
@@ -17,7 +18,10 @@ describe("observation integration", () => {
 
   it("bundles every scene and object locally for offline rounds", () => {
     expect(skill.assets).toHaveLength(158);
-    expect(skill.assets).toContain(skill.manifest.thumbnail);
+  });
+
+  it("names a thumbnail from the shelf the other skills' cards sit on", () => {
+    expect(SVG_ASSET_IDS as readonly string[]).toContain(skill.manifest.thumbnail);
   });
 
   it("keeps every mapped recording backed by a bundled local file", () => {

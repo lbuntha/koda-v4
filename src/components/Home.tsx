@@ -73,10 +73,11 @@ const RailStat: React.FC<{
  * that the next one is four stars away. Nothing here is new state — it is the
  * family's rules read against figures the rail is already printing.
  */
-const NextBadge: React.FC<{ userProgress: UserProgress; starsEarned: number }> = ({
-  userProgress,
-  starsEarned,
-}) => {
+const NextBadge: React.FC<{
+  userProgress: UserProgress;
+  starsEarned: number;
+  className?: string;
+}> = ({ userProgress, starsEarned, className = "" }) => {
   const rules = useBadges();
   const next = nextBadge(rules, {
     xp: userProgress.xp,
@@ -92,7 +93,9 @@ const NextBadge: React.FC<{ userProgress: UserProgress; starsEarned: number }> =
   const toGo = Math.max(0, next.rule.threshold - next.standing);
 
   return (
-    <section className={`${themeSystem.card("default")} ${themeSystem.spacing.card}`}>
+    <section
+      className={`${themeSystem.card("default")} ${themeSystem.spacing.card} ${className}`}
+    >
       <h2 className="font-mono font-black text-xs uppercase tracking-widest text-muted">
         Next badge
       </h2>
@@ -140,8 +143,25 @@ const HomeRail: React.FC<{
   const percent = Math.min(100, Math.round((streak.solvedToday / goal) * 100));
 
   return (
-    <aside className="space-y-4 lg:sticky lg:top-6">
-      <section className={`${themeSystem.card("default")} ${themeSystem.spacing.card}`}>
+    /*
+     * The rail is the wide-screen shape only.
+     *
+     * It used to stack under the lesson path on a phone, which put three
+     * full-height cards of statistics between a child and what they opened the
+     * app for. Progress and the daily goal are a reference rather than something
+     * to act on, and the Profile page already carries every figure in them —
+     * streak, XP, level, stars, lessons mastered, and the daily goal with the
+     * stepper that sets it — so a phone sends a child there instead of printing
+     * it all twice. The badge is the exception and `Home` renders its own copy
+     * above the lesson band.
+     *
+     * Hidden as a whole rather than card by card: an empty `aside` is still a
+     * grid child, and it would leave the grid's gap behind on every phone.
+     */
+    <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-6">
+      <section
+        className={`${themeSystem.card("default")} ${themeSystem.spacing.card}`}
+      >
         <h2 className="font-mono font-black text-xs uppercase tracking-widest text-muted">
           Your progress
         </h2>
@@ -231,7 +251,9 @@ const HomeRail: React.FC<{
         </div>
       </section>
 
-      <section className={`${themeSystem.card("default")} ${themeSystem.spacing.card}`}>
+      <section
+        className={`${themeSystem.card("default")} ${themeSystem.spacing.card}`}
+      >
         <h2 className="font-mono font-black text-xs uppercase tracking-widest text-muted">
           Daily goal
         </h2>
@@ -471,6 +493,24 @@ export const Home: React.FC<HomeProps> = ({
                 than about any lesson in it — and because the cards directly
                 under it are the answer to whatever it says. */}
             <WelcomeBack userProgress={userProgress} />
+            {/*
+              * The badge, on a phone only.
+              *
+              * It belongs to the rail, and the rail stacks *below* this column
+              * on a phone — which put the one card that is a reason to start a
+              * round underneath everything it was meant to pull a child into.
+              * Ordering cannot fix that: the welcome band has to stay above it
+              * and the two are in different parents, so there is no common flex
+              * context to reorder. Rendering it here instead, and hiding the
+              * rail's copy, costs one cheap extra read of the badge rules and
+              * leaves the desktop layout untouched.
+              */}
+            <div className="lg:hidden">
+              <NextBadge
+                userProgress={userProgress}
+                starsEarned={Object.values(completedLevels).reduce((t, stars) => t + stars, 0)}
+              />
+            </div>
             <section>
               <h1 className="font-mono font-black uppercase tracking-widest text-xs text-indigo-600">
                 Today

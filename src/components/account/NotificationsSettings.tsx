@@ -274,9 +274,9 @@ export const NotificationsSettings: React.FC = () => {
             ) && (
               <div className={l.row}>
                 <div className="min-w-0">
-                  <h4 className={l.rowTitle}>Remind me at</h4>
+                  <h4 className={l.rowTitle}>Reminder</h4>
                   <p className={l.rowNote}>
-                    Once a day at most, and only when they have not had a go yet.
+                    Once a day, if you have not practised.
                   </p>
                 </div>
                 <select
@@ -300,10 +300,10 @@ export const NotificationsSettings: React.FC = () => {
                 <h4 className={l.rowTitle}>Quiet hours</h4>
                 <p className={l.rowNote}>
                   {schedule.quietFrom === schedule.quietTo
-                    ? "Off — anything you have turned on can arrive at any hour."
-                    : `Nothing arrives between ${hourLabel(schedule.quietFrom)} and ${hourLabel(
+                    ? "Alerts can arrive anytime."
+                    : `No alerts from ${hourLabel(schedule.quietFrom)} to ${hourLabel(
                         schedule.quietTo,
-                      )}. A new sign-in still does — that one is about your account.`}
+                      )}.`}
                 </p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
@@ -342,9 +342,9 @@ export const NotificationsSettings: React.FC = () => {
         {on && deploymentSends && (
           <div className={l.row}>
             <div className="min-w-0">
-              <h4 className={l.rowTitle}>Send me one now</h4>
+              <h4 className={l.rowTitle}>Test notification</h4>
               <p className={l.rowNote}>
-                {tested ?? "Checks that notifications actually arrive on this device."}
+                {tested ?? "Test notifications on this device."}
               </p>
             </div>
             <button

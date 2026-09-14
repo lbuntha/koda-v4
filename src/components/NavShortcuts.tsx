@@ -1,13 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import { playSound } from "../utils/audio";
 import { SidebarIcon, UINavTile } from "./ui";
 import { themeSystem } from "../lib/themeSystem";
 import { splitTabs, useNavItems } from "./navRecord";
 import type { TabId } from "./navTabs";
-
+import { StatisticsModal } from "./account/StatisticsModal";
+import { AchievementsModal } from "./account/AchievementsModal";
 export interface NavShortcutsProps {
   activeTab: TabId;
   onSelectTab: (tab: TabId) => void;
+  onOpenProfile?: () => void;
 }
 
 /**
@@ -30,27 +32,84 @@ export interface NavShortcutsProps {
 export const NavShortcuts: React.FC<NavShortcutsProps> = ({
   activeTab,
   onSelectTab,
+  onOpenProfile,
 }) => {
+  const [statsOpen, setStatsOpen] = useState(false);
+  const [achievementsOpen, setAchievementsOpen] = useState(false);
   const items = useNavItems();
   const { overflow } = splitTabs(items);
 
   return (
-    <section className="rail:hidden">
-      <div className={themeSystem.list.groupLabel}>Go to</div>
-      <div className="grid grid-cols-3 gap-2">
-        {overflow.map((item) => (
-          <UINavTile
-            key={item.id}
-            icon={<SidebarIcon name={item.icon} size={24} className="w-6 h-6" />}
-            label={item.label}
-            isActive={item.id === activeTab}
-            onClick={() => {
-              playSound("pop");
-              onSelectTab(item.id as TabId);
-            }}
-          />
-        ))}
-      </div>
-    </section>
+    <>
+      <section className="rail:hidden">
+        <div className={themeSystem.list.groupLabel}>Go to</div>
+        <div className="grid grid-cols-3 gap-2">
+          {overflow.map((item) => {
+            if (item.id === "profile") {
+              return (
+                <React.Fragment key={item.id}>
+                  <UINavTile
+                    icon={<SidebarIcon name={item.icon} size={24} className="w-6 h-6" />}
+                    label={item.label}
+                    isActive={item.id === activeTab}
+                    onClick={() => {
+                      playSound("pop");
+                      if (onOpenProfile) onOpenProfile();
+                      else onSelectTab(item.id as TabId);
+                    }}
+                  />
+                  <UINavTile
+                    icon={<SidebarIcon name="chart" size={24} className="w-6 h-6" />}
+                    label="Statistics"
+                    onClick={() => {
+                      playSound("pop");
+                      setStatsOpen(true);
+                    }}
+                  />
+                  <UINavTile
+                    icon={<SidebarIcon name="award" size={24} className="w-6 h-6" />}
+                    label="Achievements"
+                    onClick={() => {
+                      playSound("pop");
+                      setAchievementsOpen(true);
+                    }}
+                  />
+                </React.Fragment>
+              );
+            }
+            return (
+              <UINavTile
+                key={item.id}
+                icon={<SidebarIcon name={item.icon} size={24} className="w-6 h-6" />}
+                label={item.label}
+                isActive={item.id === activeTab}
+                onClick={() => {
+                  playSound("pop");
+                  onSelectTab(item.id as TabId);
+                }}
+              />
+            );
+          })}
+        </div>
+      </section>
+
+      <StatisticsModal
+        isOpen={statsOpen}
+        onClose={() => setStatsOpen(false)}
+        onOpenProfile={() => {
+          setStatsOpen(false);
+          onSelectTab("profile");
+        }}
+      />
+
+      <AchievementsModal
+        isOpen={achievementsOpen}
+        onClose={() => setAchievementsOpen(false)}
+        onOpenProfile={() => {
+          setAchievementsOpen(false);
+          onSelectTab("profile");
+        }}
+      />
+    </>
   );
 };

@@ -32,6 +32,7 @@ interface SettingsPageProps {
    */
   activeTab?: TabId;
   onSelectTab?: (tab: TabId) => void;
+  onOpenProfile?: () => void;
 }
 
 /**
@@ -105,6 +106,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   embedded = false,
   activeTab,
   onSelectTab,
+  onOpenProfile,
 }) => {
   const { theme, toggleTheme } = useTheme();
   const { can } = usePermissions();
@@ -172,6 +174,14 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
           this already says "Settings". */}
       {!embedded && (
         <UIPageHeader title="Settings" subtitle="Shared across your family’s devices." />
+      )}
+
+      {activeTab && onSelectTab && (
+        <NavShortcuts
+          activeTab={activeTab}
+          onSelectTab={onSelectTab}
+          onOpenProfile={onOpenProfile}
+        />
       )}
 
       <SettingGroup label="Appearance">
@@ -265,16 +275,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
       {showsPlan && <PlanCard />}
 
       {showsDevices && <DevicesPage embedded />}
-
-      {/* Last on the page on purpose: it is a way *out* of Settings, and a list
-          of doors above the switches somebody opened Settings to reach would
-          make this page look like a menu. */}
-      {activeTab && onSelectTab && (
-        <NavShortcuts
-          activeTab={activeTab}
-          onSelectTab={onSelectTab}
-        />
-      )}
     </div>
   );
 };

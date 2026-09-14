@@ -92,6 +92,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title="Edit profile"
+      tone="plain"
       footer={
         <>
           <UIButton variant="secondary" onClick={onClose}>
@@ -133,7 +134,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                   className={`h-full w-full overflow-hidden rounded-2xl border-2 p-1 transition ${
                     selected === seed
                       ? "border-indigo-600 bg-indigo-50 dark:border-indigo-400 dark:bg-indigo-950/40"
-                      : "border-line bg-surface hover:border-indigo-300"
+                      : "border-line bg-transparent hover:border-indigo-300"
                   }`}
                 >
                   <UIAvatar name="Avatar choice" seed={seed} size="fill" decorative />

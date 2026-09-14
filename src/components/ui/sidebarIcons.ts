@@ -23,6 +23,8 @@ import {
   UserRound,
   Users,
   Zap,
+  BarChart3,
+  Target,
   type LucideIcon,
 } from "lucide-react";
 
@@ -40,6 +42,7 @@ export const sidebarIcons = {
   book: BookOpen,
   bell: Bell,
   brain: Brain,
+  chart: BarChart3,
   flame: Flame,
   game: Gamepad2,
   home: Home,
@@ -54,6 +57,7 @@ export const sidebarIcons = {
   shop: ShoppingBag,
   sparkles: Sparkles,
   star: Star,
+  target: Target,
   trophy: Trophy,
   user: UserRound,
   users: Users,

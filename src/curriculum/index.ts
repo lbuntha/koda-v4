@@ -5,7 +5,7 @@ import type { Lesson } from "../skills/types";
 import { withoutPracticeLabel } from "../skills/kit/practice";
 import courseJson from "./course.json";
 import { withLessonEdits } from "../lib/lessonContent";
-import { ChildSettingsAPI } from "../lib/childSettings";
+import { ChildSettingsAPI, type StartingPoint } from "../lib/childSettings";
 
 /**
  * The course — what is taught, in what order.
@@ -73,6 +73,80 @@ function resolve(ref: string, levelNumber: number, viewer: Viewer): ResolvedLess
   // A teacher's wording edit applies here, once, rather than at each display.
   return { ...withLessonEdits(skillId, lesson), ref, skillId, levelNumber };
 }
+
+/**
+ * Every course position, ignoring who is looking.
+ *
+ * `resolve` hides lessons more than `STRETCH_YEARS` above the viewer, which is
+ * right for drawing a path and wrong for deciding where a child belongs: a
+ * placement computed from an age-filtered course would move depending on whose
+ * screen asked. Level numbers are assigned before that filter (`++level` runs
+ * for every reference, resolved or not), so positions from this list are the
+ * same positions every other reader sees.
+ */
+const wholeCourse = (): ResolvedLesson[] =>
+  getCourseLessons({ age: 99, isDeveloper: false, showAllSkills: true });
+
+/**
+ * Where a child of this age should start, from the age bands the curriculum
+ * already carries. `null` means the beginning.
+ *
+ * The rule: skip the run of lessons at the front of the course whose age band is
+ * *entirely* below the child, and stop at the first lesson whose band still
+ * reaches them. So the answer is the level before the first lesson that could
+ * still be aimed at this child, and a nine-year-old is never placed past
+ * nine-year-old work.
+ *
+ * Deliberately the conservative reading of the bands, not the generous one. The
+ * generous rule — "the last lesson anywhere in the course that is below them" —
+ * looks better on a spreadsheet and is wrong twice over: the bands are not
+ * monotonic (a wide practice band sits at level 81), so it skips real teaching
+ * to get past a practice set, and because the curriculum's highest band ends at
+ * 14 it places a thirteen-year-old past the entire course, with nothing left to
+ * open. Under-skipping costs a child some easy lessons and a parent one
+ * dropdown; over-skipping marks concepts satisfied that nobody did.
+ *
+ * Age alone is a guess, which is why this is a *starting* point and not a claim:
+ * nothing is recorded as completed, the earlier units stay open, and the parent
+ * can move it. See `startingPoint` in `childSettings.ts`.
+ */
+export function startingPointForAge(age: number): number | null {
+  if (!Number.isFinite(age) || age <= 0) return null;
+  const firstForThem = wholeCourse().find(
+    (lesson) => !lesson.ageBand || lesson.ageBand[1] >= age,
+  );
+  // No band reaches them — the child is older than anything Koda teaches. The
+  // last level would leave them nothing at all, so the last *lesson* is where
+  // they start rather than past it.
+  if (!firstForThem) {
+    const all = wholeCourse();
+    return all.length > 1 ? all[all.length - 1].levelNumber - 1 : null;
+  }
+  const before = firstForThem.levelNumber - 1;
+  return before > 0 ? before : null;
+}
+
+/**
+ * A stored starting point as a level the gating rules can compare against.
+ *
+ * Idempotent: a number resolves to itself, so the internal plumbing can keep
+ * passing plain levels and this may be applied more than once on one path
+ * without drifting.
+ */
+export const resolveStartingPoint = (
+  value: StartingPoint,
+  age: number,
+): number | null => (value === "age" ? startingPointForAge(age) : value);
+
+/**
+ * This child's starting point, resolved. The default for every gate below.
+ *
+ * Reads the viewer the caller already has rather than `getViewer()` where it can,
+ * so a screen rendering for a particular learner does not silently place them by
+ * whoever the local preview identity happens to be.
+ */
+const currentStartingPoint = (viewer?: Viewer): number | null =>
+  resolveStartingPoint(ChildSettingsAPI.current().startingPoint, (viewer ?? getViewer()).age);
 
 /**
  * The course as the dashboard should render it: units in order, each holding
@@ -177,7 +251,7 @@ export function nextSkillLesson(
 export function satisfiedConcepts(
   completed: Record<number, number>,
   viewer?: Viewer,
-  startingPoint: number | null = ChildSettingsAPI.current().startingPoint,
+  startingPoint: number | null = currentStartingPoint(viewer),
 ): Set<string> {
   const keys = new Set<string>();
   for (const lesson of getCourseLessons(viewer)) {
@@ -215,7 +289,7 @@ export function isUnlocked(
   lesson: ResolvedLesson,
   completed: Record<number, number>,
   viewer?: Viewer,
-  startingPoint: number | null = ChildSettingsAPI.current().startingPoint,
+  startingPoint: number | null = currentStartingPoint(viewer),
 ): boolean {
   if ((completed[lesson.levelNumber] ?? 0) > 0) return true;
   // Placed past it: open, but still unplayed. It shows as available rather than
@@ -261,7 +335,7 @@ export function unlockedBy(
   lesson: ResolvedLesson,
   completed: Record<number, number>,
   viewer?: Viewer,
-  startingPoint: number | null = ChildSettingsAPI.current().startingPoint,
+  startingPoint: number | null = currentStartingPoint(viewer),
 ): ResolvedLesson | undefined {
   if (isUnlocked(lesson, completed, viewer, startingPoint)) return undefined;
 
@@ -323,7 +397,7 @@ export function blockedFrom(
   lessons: ResolvedLesson[],
   completed: Record<number, number>,
   viewer?: Viewer,
-  startingPoint: number | null = ChildSettingsAPI.current().startingPoint,
+  startingPoint: number | null = currentStartingPoint(viewer),
 ): ResolvedLesson | undefined {
   if (resumeLesson(lessons, completed, viewer, startingPoint)) return undefined;
 

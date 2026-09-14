@@ -27,6 +27,40 @@ import { currentLearnerId } from "./learnerProgress";
 
 export type GoalCadence = "daily" | "weekly";
 
+/**
+ * The hours of the day Koda is open, as whole hours on a 24-hour clock.
+ *
+ * A half-open window: `{ from: 7, to: 20 }` opens at 7am and shuts on the
+ * stroke of 8pm. `to` before `from` wraps midnight — 20 to 7 is a household
+ * whose child plays in the evening and overnight — which is unusual but is the
+ * honest reading of two independent dropdowns, and the parent screen says in
+ * words what it will mean rather than leaving a wrapped window to be
+ * discovered by the child.
+ *
+ * Whole hours rather than minutes, deliberately: two lists of twenty-four a
+ * parent reads at a glance, against a precision nobody has asked for. If a
+ * school run needs 7:30 this becomes minutes-since-midnight and the predicate
+ * does not otherwise change.
+ */
+export type AllowedHours = { from: number; to: number };
+
+/**
+ * Where a child's course begins.
+ *
+ * Three states, not two, because "follow the age band" is a standing rule rather
+ * than a number somebody typed:
+ *
+ * - `"age"` — start where this child's age band starts, recomputed from their
+ *   birth year. The default, and the only one that keeps up as a child grows.
+ * - `null` — from the very first lesson, whatever their age.
+ * - a level — a unit a grown-up pinned by hand, which overrides both.
+ *
+ * The string is deliberately not a magic number: `0` would have read as "the
+ * beginning" to every existing comparison, and a sentinel like `-1` would be a
+ * value nobody could recognise in a stored document six months from now.
+ */
+export type StartingPoint = number | "age" | null;
+
 /*
  * A type alias rather than an interface, and not by taste: an interface has no
  * implicit index signature, so it cannot be handed to `recordDoc`, whose body
@@ -43,6 +77,22 @@ export type ChildSettings = {
    * means a session may overrun by up to one round's length, on purpose.
    */
   sessionMinutes: number | null;
+  /**
+   * The hours Koda answers the door, or `null` for any time of day.
+   *
+   * The cap beside it limits *how long*; this limits *when*, and the two are
+   * not the same rule — twenty minutes is no answer to a child playing at
+   * eleven at night. Checked against the wall clock where the child is, not
+   * against the learning day's `dayStartHour`: a bedtime is what the clock in
+   * the hall says, and a family who moved their day boundary to 4am did that to
+   * the streak, not to bedtime.
+   *
+   * Enforced at the same door as the cap and on the same terms — a round
+   * already open is finished, so a window may overrun by one round. A child
+   * pulled off mid-question would learn that the app is arbitrary, which is the
+   * lesson `goalCadence` exists to avoid teaching.
+   */
+  allowedHours: AllowedHours | null;
   /**
    * Whether Koda's help is offered to this child at all.
    *
@@ -61,8 +111,12 @@ export type ChildSettings = {
    */
   goalCadence: GoalCadence;
   /**
-   * The last level this child is treated as already past, or `null` to start
-   * at the beginning.
+   * Where this child's course begins: `"age"`, `null`, or a pinned level.
+   *
+   * Defaults to `"age"`, so a child is placed by the age bands the curriculum
+   * already carries rather than by a grown-up guessing among a hundred and seven
+   * units. `null` is now an explicit choice — "start at the very beginning" —
+   * and not the absence of one.
    *
    * The manual form of placement: "Mia already knows counting to twenty, start
    * her at Unit 3." Deliberately **not** implemented by writing mastery
@@ -75,7 +129,7 @@ export type ChildSettings = {
    * control and the automatic one then share one data model, and the report
    * stays honest under both.
    */
-  startingPoint: number | null;
+  startingPoint: StartingPoint;
   /**
    * Which teacher Koda is for this child, or `null` for the default.
    *
@@ -92,9 +146,10 @@ export type ChildSettings = {
 
 export const CHILD_SETTINGS_DEFAULTS: ChildSettings = {
   sessionMinutes: null,
+  allowedHours: null,
   aiHelpEnabled: true,
   goalCadence: "daily",
-  startingPoint: null,
+  startingPoint: "age",
   personaId: null,
 };
 
@@ -123,6 +178,34 @@ const clampMinutes = (value: unknown): number | null => {
   return Math.min(SESSION_MINUTES_MAX, Math.max(SESSION_MINUTES_MIN, Math.round(n)));
 };
 
+/** An hour of the day, or `null` for anything that is not one. */
+const clampHour = (value: unknown): number | null => {
+  // Explicitly, because `Number(null)` is `0` — a missing half of a window would
+  // otherwise read as a perfectly good midnight.
+  if (value === null || value === undefined || value === "") return null;
+  const n = Number(value);
+  if (!Number.isFinite(n)) return null;
+  const hour = Math.floor(n);
+  return hour >= 0 && hour <= 23 ? hour : null;
+};
+
+/**
+ * Read a stored window, or `null` if it is not one.
+ *
+ * `from === to` is refused rather than stored. A zero-length window is not a
+ * bedtime, it is a locked door, and it is the same judgement that keeps
+ * `SESSION_MINUTES_MIN` at five: a control a parent can accidentally set to
+ * "never" should decline instead.
+ */
+const clampHours = (value: unknown): AllowedHours | null => {
+  if (!value || typeof value !== "object") return null;
+  const raw = value as Partial<AllowedHours>;
+  const from = clampHour(raw.from);
+  const to = clampHour(raw.to);
+  if (from === null || to === null || from === to) return null;
+  return { from, to };
+};
+
 /**
  * Read a stored body into a complete, sane settings object.
  *
@@ -132,20 +215,30 @@ const clampMinutes = (value: unknown): number | null => {
  */
 const sanitise = (raw: Partial<ChildSettings> | null): ChildSettings => ({
   sessionMinutes: clampMinutes(raw?.sessionMinutes),
+  allowedHours: clampHours(raw?.allowedHours),
   // `!== false`, not `?? true`: anything that is not an explicit "off" leaves
   // help on, because losing it to a malformed document is the worse failure.
   aiHelpEnabled: raw?.aiHelpEnabled !== false,
   goalCadence: raw?.goalCadence === "weekly" ? "weekly" : "daily",
-  startingPoint: clampLevel(raw?.startingPoint),
+  startingPoint: clampStart(raw?.startingPoint),
   // A string or nothing. Not checked against the roster here: this runs before
   // the roster has loaded, and an id nobody recognises already falls back to
   // the default teacher when it is looked up.
   personaId: typeof raw?.personaId === "string" && raw.personaId ? raw.personaId : null,
 });
 
-/** A level number, or `null` for "from the beginning". Never negative. */
-const clampLevel = (value: unknown): number | null => {
-  if (value === null || value === undefined) return null;
+/**
+ * A starting point: `"age"`, a level, or `null` for the very beginning.
+ *
+ * A document written before this field had three states carries a number or
+ * `null`, and both still mean exactly what they meant. Anything unreadable falls
+ * back to `"age"` rather than to `null`, because `"age"` is the default and a
+ * damaged document should land on the default like every other field here.
+ */
+const clampStart = (value: unknown): StartingPoint => {
+  if (value === "age") return "age";
+  if (value === null) return null;
+  if (value === undefined) return "age";
   const n = Number(value);
   if (!Number.isFinite(n) || n <= 0) return null;
   return Math.round(n);

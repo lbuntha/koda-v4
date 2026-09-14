@@ -218,8 +218,7 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({ embedded = false }) =>
               <h1 className="koda-admin-page-title">Devices</h1>
             )}
             <p className="mt-1 text-sm text-[#6D6997] dark:text-muted">
-              Everything signed into this family. Sign out anything lost, or in the wrong
-              hands.
+              Family devices. Sign out lost or unknown devices.
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -369,10 +368,6 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({ embedded = false }) =>
           )}
         </section>
 
-        <p className="text-xs text-muted">
-          Each row is one browser or app. Signing out ends that session at once — getting back
-          in needs the password, or a new child code. Unused devices sign out on their own.
-        </p>
       </div>
 
       <UIDialog
