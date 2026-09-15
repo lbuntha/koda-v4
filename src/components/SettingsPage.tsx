@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Moon, Sun, Volume2, VolumeX } from "lucide-react";
 import { KodaFace } from "./KodaFace";
 import { useTheme } from "../context/ThemeContext";
@@ -10,6 +10,7 @@ import { ChildSettingsAPI } from "../lib/childSettings";
 import { usePersona, usePersonaRoster } from "../lib/usePersona";
 import { PlanCard } from "./account/PlanCard";
 import { DevicesPage } from "./account/DevicesPage";
+import { NotificationsSettings } from "./account/NotificationsSettings";
 import { usePermissions, useSession } from "../lib/sync";
 import { NavShortcuts } from "./NavShortcuts";
 import type { TabId } from "./navTabs";
@@ -32,6 +33,8 @@ interface SettingsPageProps {
   activeTab?: TabId;
   onSelectTab?: (tab: TabId) => void;
   onOpenProfile?: () => void;
+  /** A section to scroll to on arrival — the notification setup sheet sends people here. */
+  focus?: "notifications" | null;
 }
 
 /**
@@ -106,6 +109,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   activeTab,
   onSelectTab,
   onOpenProfile,
+  focus = null,
 }) => {
   const { theme, toggleTheme } = useTheme();
   const { can } = usePermissions();
@@ -151,6 +155,13 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
    * switch — and never could use it, because the endpoint refuses a child's
    * token whatever this page draws.
    */
+  const showsNotifications = !session?.learnerId;
+  const notificationsRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (focus === "notifications") {
+      notificationsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [focus]);
 
   const handleToggleSound = () => {
     // Toggle first so switching sound back on is confirmed by the pop itself.
@@ -266,6 +277,12 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             />
           </div>
         </SettingGroup>
+      )}
+
+      {showsNotifications && (
+        <div id="notifications" ref={notificationsRef} className="scroll-mt-4">
+          <NotificationsSettings />
+        </div>
       )}
 
       {showsPlan && <PlanCard />}

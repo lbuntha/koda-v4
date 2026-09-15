@@ -38,6 +38,7 @@ import { SocraticChatPanel } from "./components/SocraticChatPanel";
 import { Home } from "./components/Home";
 import { KodaFab } from "./components/KodaFab";
 import { UpgradePrompt } from "./components/UpgradePrompt";
+import { NotificationSetupPrompt } from "./components/account/NotificationSetupPrompt";
 import { requireFeature } from "./lib/featureGate";
 import { PREMIUM_FEATURE, isPremiumLesson, premiumLocked } from "./lib/premiumLessons";
 import { authorizeLesson } from "./lib/lessonAccess";
@@ -280,6 +281,11 @@ export default function App() {
     | "settings"
   >("home");
   const [profileSheetOpen, setProfileSheetOpen] = useState(false);
+  /** Where Settings should scroll to when it opens — set by the notification setup sheet. */
+  const [settingsFocus, setSettingsFocus] = useState<"notifications" | null>(null);
+  useEffect(() => {
+    if (activeTab !== "settings") setSettingsFocus(null);
+  }, [activeTab]);
 
   /*
    * Which child's record is open, if any.
@@ -1099,6 +1105,7 @@ export default function App() {
               activeTab={activeTab}
               onSelectTab={(tab) => setActiveTab(tab)}
               onOpenProfile={() => setProfileSheetOpen(true)}
+              focus={settingsFocus}
             />
           )}
       </>
@@ -1142,6 +1149,15 @@ export default function App() {
 
       {/* Mounted once. Any `requireFeature` call anywhere in the app shows it. */}
       <UpgradePrompt onOpenPlan={() => setActiveTab("settings")} />
+
+      {/* Asks an adult without notifications to set them up; Set up opens the switch. */}
+      <NotificationSetupPrompt
+        suppressed={inLesson}
+        onSetUp={() => {
+          setActiveTab("settings");
+          setSettingsFocus("notifications");
+        }}
+      />
 
       {/* Global Gemini Live Voice Coach Modal */}
       <LiveVoiceCoachModal
