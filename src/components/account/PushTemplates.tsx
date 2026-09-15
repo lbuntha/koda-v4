@@ -40,6 +40,7 @@ const SAMPLES: Record<string, string> = {
   name: "Sam",
   decision: "approved",
   message: "Koda is down for maintenance until 6pm.",
+  title: "Koda",
 };
 
 const filled = (text: string): string =>

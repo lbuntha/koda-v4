@@ -495,6 +495,55 @@ export async function runNotificationJob(job: string, preview = false): Promise<
   );
 }
 
+export type AnnouncementAudience = "families" | "staff" | "everyone";
+
+export interface AnnouncementDraft {
+  /** Blank sends as "Koda". */
+  title: string;
+  message: string;
+  audience: AnnouncementAudience;
+}
+
+export interface AnnouncementReport {
+  job: "announcement";
+  preview: boolean;
+  audience: AnnouncementAudience;
+  /** The words as sent, after the operator's wording frame is applied. */
+  title?: string;
+  body?: string;
+  families: number;
+  staff: number;
+  /** Adults addressed. A parent who switched announcements off is counted but not rung. */
+  people: number;
+  /** Live browsers among them — a preview only. */
+  devices?: number;
+  /** Browsers that FCM accepted it for. Always zero on the console driver. */
+  sent: number;
+  /** Why nothing could be sent at all. */
+  skipped?: string;
+}
+
+/**
+ * Send an announcement now, or with `preview` report who it would reach.
+ *
+ * An audience, never a person. The real send waits for every family to be rung
+ * before it answers, so it gets a longer deadline than an ordinary request.
+ */
+export async function sendAnnouncement(
+  draft: AnnouncementDraft,
+  preview = false,
+): Promise<AnnouncementReport> {
+  return await request<AnnouncementReport>(
+    `/system/push/announcement${preview ? "?preview=true" : ""}`,
+    {
+      method: "POST",
+      token: await accessToken(),
+      body: draft,
+      ...(preview ? {} : { timeoutMs: 60_000 }),
+    },
+  );
+}
+
 export interface SendRecord {
   id: string;
   kind: string;

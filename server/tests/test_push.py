@@ -397,6 +397,8 @@ async def test_only_kinds_with_a_sender_are_offered(client, parent, seeded):
         "learn.streak_ending",
         # Sent by `skill-announcements`, which shipped with it.
         "learn.skill_published",
+        # Sent by hand from Notification Settings → Announce.
+        "system.announcement",
     }
 
 

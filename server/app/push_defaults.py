@@ -60,6 +60,8 @@ SENDS: frozenset[str] = frozenset(
         "family.invite_redeemed",
         "plan.request_decided",
         "system.broadcast",
+        # Written and sent by hand from Notification Settings → Announce.
+        "system.announcement",
     }
 )
 
@@ -207,6 +209,21 @@ DEFAULT_KINDS: list[dict[str, Any]] = [
         "settingId": None,
         "familyDefault": True,
     },
+    {
+        # An operator's own words, sent when they press Send, to families,
+        # staff or both. The wording is two placeholders because the words are
+        # the operator's; an edit here is a frame around every announcement.
+        "kindId": "system.announcement",
+        "title": "{title}",
+        "body": "{message}",
+        "placeholders": ["title", "message"],
+        # Courtesy, not account: it is news, so a parent can switch it off and
+        # §9's unopened run applies to it like any other courtesy kind.
+        "class": "courtesy",
+        "label": "Announcements",
+        "settingId": "push.announcements",
+        "familyDefault": True,
+    },
 ]
 
 #: `kindId` -> its definition. A send names a kind, and an unknown one is a bug
@@ -237,6 +254,7 @@ SAMPLES = {
     "name": "Sam",
     "decision": "approved",
     "message": "Koda is down for maintenance until 6pm.",
+    "title": "Koda",
 }
 
 #: Longest a notification may be. A lock screen truncates well before this;

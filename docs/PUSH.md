@@ -32,6 +32,10 @@ Three jobs, in order of value:
    mail this service already sends.
 3. **Tell an operator their deployment needs them** — a broadcast to staff. It
    rides the same pipe rather than growing a second one.
+4. **Tell parents something an operator decided they need to know** — an
+   announcement, written and sent by hand (§5, `system.announcement`). A
+   parent can switch it off, so it is a courtesy rather than a channel for
+   marketing.
 
 Non-goals, stated so they cannot creep in:
 
@@ -236,6 +240,16 @@ behind it, which is a release, not a row.
 | `learn.streak_ending` | Parents | **Off** | Courtesy | `streak:{learnerId}` |
 | `learn.skill_published` | Parents | On | Courtesy | `skill:{skillId}` |
 | `system.broadcast` | Staff | On | Operator | — |
+| `system.announcement` | Families, staff or both — picked per send | On | Courtesy | `announcement:{id}` |
+
+**`system.announcement` is sent by hand.** An operator writes a title and a
+message under Notification Settings → Announce, picks an audience, checks how
+many people that reaches, and sends it at once (`POST /system/push/announcement`).
+It goes to adults only, is recorded under the bell even where no browser is
+registered, answers to its own `push.announcements` switch, and a parent can
+turn it off like any other courtesy kind. Quiet hours are not consulted: the
+operator chose the moment. It runs inside the request, so a deployment with
+thousands of families will need to move it to a paged job.
 
 **Account-class kinds are not switchable and carry no preference row.** They
 are the notification equivalent of a password-reset email: three of them a year,

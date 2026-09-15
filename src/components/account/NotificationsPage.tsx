@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Bell, GraduationCap, Inbox, ShieldCheck, Sparkles } from "lucide-react";
+import { Bell, GraduationCap, Inbox, Megaphone, ShieldCheck, Sparkles } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIPageHeader } from "../ui";
 import {
@@ -51,6 +51,7 @@ const ICONS: Record<string, React.ReactNode> = {
   "learn.weekly_summary": <GraduationCap className="h-4 w-4 text-sky-500" />,
   "learn.practice_reminder": <Bell className="h-4 w-4 text-emerald-500" />,
   "learn.streak_ending": <Bell className="h-4 w-4 text-rose-500" />,
+  "system.announcement": <Megaphone className="h-4 w-4 text-indigo-500" />,
 };
 
 /** A kind without artwork of its own still gets its category's mark. */

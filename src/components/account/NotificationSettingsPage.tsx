@@ -8,7 +8,7 @@ import { NotificationsAdmin } from "./NotificationsAdmin";
 import { PushTokensPanel } from "./PushTokensPanel";
 import { usePermissions } from "../../lib/sync";
 
-type NotificationTab = "settings" | "push" | "scheduled" | "wording" | "sent" | "tokens" | "email";
+type NotificationTab = "settings" | "push" | "announce" | "scheduled" | "wording" | "sent" | "tokens" | "email";
 
 export const NotificationSettingsPage: React.FC = () => (
   <NotificationSettingsTabs />
@@ -31,6 +31,7 @@ const NotificationSettingsTabs: React.FC = () => {
         items={[
           { id: "settings", label: "Overview" },
           { id: "push", label: "Push" },
+          { id: "announce", label: "Announce" },
           { id: "scheduled", label: "Scheduled" },
           { id: "wording", label: "Wording" },
           { id: "sent", label: "What was sent" },
@@ -47,7 +48,8 @@ const NotificationSettingsTabs: React.FC = () => {
         </section>
       )}
       {tab === "push" && <NotificationsAdmin channel="push" section="overview" />}
-      {tab === "scheduled" && <NotificationsAdmin channel="push" section="jobs" />}
+      {tab === "announce" && <NotificationsAdmin channel="push" section="announce" />}
+      {tab === "scheduled" &&<NotificationsAdmin channel="push" section="jobs" />}
       {tab === "wording" && <NotificationsAdmin channel="push" section="wording" />}
       {tab === "sent" && <NotificationsAdmin channel="push" section="log" />}
       {tab === "tokens" && seesTokens && <PushTokensPanel />}

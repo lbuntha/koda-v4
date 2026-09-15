@@ -264,6 +264,18 @@ DEFAULT_SETTINGS: list[dict] = [
         "order": 85,
     },
     {
+        "settingId": "push.announcements",
+        "group": "Notifications",
+        "label": "Announcements",
+        "description": (
+            "Allows an operator to send their own message from Notification Settings → Announce. "
+            "A parent can still switch announcements off for themselves."
+        ),
+        "type": "bool",
+        "value": True,
+        "order": 86,
+    },
+    {
         "settingId": "system.notice",
         "group": "Accounts & sync",
         "label": "Notice to everyone",

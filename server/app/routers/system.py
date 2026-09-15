@@ -12,7 +12,7 @@ check it again — because a hidden button is a hint, not a rule.
 """
 
 import secrets as stdlib_secrets
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, Header
 from pydantic import Field, ValidationError
@@ -682,6 +682,43 @@ async def push_broadcast(body: BroadcastIn, db: Db, p: CanOperate) -> dict[str, 
         sent += await push_service.send_to_account(db, user_id=user_id, kind="system.broadcast",
                                                    title=title, body=text)
     return {"sent": sent, "staff": len(staff)}
+
+
+class AnnouncementIn(Model):
+    """An operator's announcement: their words and an audience. Never a person."""
+
+    title: str = Field(default="", max_length=TITLE_MAX)
+    message: str = Field(min_length=1, max_length=BODY_MAX)
+    audience: Literal["families", "staff", "everyone"] = "families"
+
+
+@router.post("/push/announcement")
+async def push_announcement(
+    body: AnnouncementIn, db: Db, p: CanOperate, preview: bool = False
+) -> dict[str, Any]:
+    """Send an announcement now, or show who it would reach.
+
+    Families means every adult in every family — recorded under their bell
+    whether or not a browser is registered, and rung where one is. Staff means
+    the platform roles, as the broadcast above reads them. A learner device is
+    never reached, because it never holds a token.
+
+    Rate limited like the test send when it is real, because it reaches every
+    phone on the deployment.
+    """
+    message = body.message.strip()
+    if not message:
+        raise AppError(400, "bad_value", "Write the announcement before sending it.")
+    if not preview:
+        await limiter.hit(db, "push:announcement", p.subject_id, PUSH_TEST_PER_ACCOUNT)
+    return await task_service.announcement(
+        db,
+        title=body.title.strip(),
+        message=message,
+        audience=body.audience,
+        preview=preview,
+        sent_by=p.subject_id,
+    )
 
 
 class TemplateOut(Model):

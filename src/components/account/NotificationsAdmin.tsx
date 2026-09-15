@@ -1,6 +1,7 @@
 import React from "react";
 import { Bell, Mail } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
+import { PushAnnounce } from "./PushAnnounce";
 import { PushAudiencePanel } from "./PushAudiencePanel";
 import { PushDiagnostics } from "./PushDiagnostics";
 import { PushJobs } from "./PushJobs";
@@ -49,7 +50,7 @@ const Channel: React.FC<{
   </section>
 );
 
-export type NotificationAdminSection = "overview" | "jobs" | "log" | "wording";
+export type NotificationAdminSection = "overview" | "announce" | "jobs" | "log" | "wording";
 
 export const NotificationsAdmin: React.FC<{
   channel?: "all" | "push" | "email";
@@ -67,6 +68,7 @@ export const NotificationsAdmin: React.FC<{
         >
           <div className="space-y-4">
             {show("overview") && <PushDiagnostics />}
+            {show("announce") && <PushAnnounce />}
             {show("jobs") && <PushJobs />}
             {show("log") && <PushLogPanel />}
             {show("overview") && <PushAudiencePanel />}

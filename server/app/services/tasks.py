@@ -24,6 +24,7 @@ and a job that only ran on Sundays UTC would simply never reach them.
 import logging
 from datetime import datetime, timedelta, timezone
 from typing import Any
+from uuid import uuid4
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
@@ -31,6 +32,7 @@ from app.models.common import now as utc_now
 from app.repos import events as events_repo
 from app.repos import learners as learners_repo
 from app.repos import notifications, notify_prefs, notify_schedule, push_log, push_runs, push_tokens
+from app.repos import users as users_repo
 from app.services import push, streaks
 
 log = logging.getLogger("koda.tasks")
@@ -535,6 +537,121 @@ async def announce_new_skills(db: AsyncIOMotorDatabase, *, at: datetime | None =
     except Exception:
         log.exception("announcing a newly published skill failed; the hourly tick will retry")
         return sent
+
+
+ANNOUNCEMENT = "system.announcement"
+
+#: Who an announcement may be addressed to. An audience, never a person: the
+#: route that sends one takes no recipient, like every other route here.
+AUDIENCES = ("families", "staff", "everyone")
+
+
+async def _every_family(db: AsyncIOMotorDatabase, *, after: str | None, limit: int) -> list[str]:
+    """Family ids, a page at a time — all of them, browser or not.
+
+    The jobs above read the token table because a family nobody can ring is not
+    worth waking for. An announcement is also a record under the bell, and a
+    family who never turned push on should still find it there.
+    """
+    query: dict[str, Any] = {} if after is None else {"_id": {"$gt": after}}
+    rows = db.families.find(query, {"_id": 1}).sort("_id", 1).limit(limit)
+    return [row["_id"] async for row in rows]
+
+
+async def announcement(
+    db: AsyncIOMotorDatabase,
+    *,
+    title: str,
+    message: str,
+    audience: str,
+    preview: bool = False,
+    sent_by: str | None = None,
+) -> dict[str, Any]:
+    """An operator's own words, sent now, to the audience they picked.
+
+    No clock and no ledger, unlike every other job here: pressing Send is the
+    schedule, and each press is a new announcement. Quiet hours are not asked
+    either — the operator chose the moment. Everything `push.send` enforces
+    still applies: the master switch, `push.announcements`, a parent who has
+    switched announcements off, and §9's unopened run.
+
+    `preview` addresses nobody and reports who a real send would reach, with the
+    live browsers among them, so the screen can say how many people Send means.
+
+    Run inside the request rather than handed to `BackgroundTasks`. Cloud Run
+    throttles an instance once it has answered, and an announcement has no
+    hourly tick behind it to finish what a throttled run left — the operator
+    waits a few seconds and is told what actually happened.
+    """
+    report: dict[str, Any] = {
+        "job": "announcement",
+        "preview": preview,
+        "audience": audience,
+        "families": 0,
+        "staff": 0,
+        "people": 0,
+        "sent": 0,
+    }
+    if audience not in AUDIENCES:
+        report["skipped"] = f"there is no audience called '{audience}'"
+        return report
+    if not await push.deployment_allows(db, ANNOUNCEMENT):
+        report["skipped"] = "push notifications or announcements are switched off on this deployment"
+        return report
+
+    title, body = await push.wording(db, ANNOUNCEMENT, {"title": title or "Koda", "message": message})
+    report["title"], report["body"] = title, body
+    # One tag per announcement, so two sent an hour apart sit side by side on a
+    # lock screen rather than the second silently replacing the first.
+    tag = f"announcement:{uuid4().hex[:12]}"
+    reached: set[str] = set()
+
+    if audience in ("families", "everyone"):
+        cursor: str | None = None
+        while True:
+            page = await _every_family(db, after=cursor, limit=FAMILY_PAGE)
+            for family_id in page:
+                people = await push.adults_of(db, family_id)
+                if not people:
+                    continue
+                report["families"] += 1
+                reached.update(people)
+                if not preview:
+                    report["sent"] += await push.send(
+                        db,
+                        to=push.Recipient(family_id=family_id),
+                        kind=ANNOUNCEMENT,
+                        title=title,
+                        body=body,
+                        tag=tag,
+                    )
+            if len(page) < FAMILY_PAGE:
+                break
+            cursor = page[-1]
+
+    if audience in ("staff", "everyone"):
+        for user_id in await users_repo.staff_ids(db):
+            # A member of staff who is also a parent heard it with their family.
+            if user_id in reached:
+                continue
+            reached.add(user_id)
+            report["staff"] += 1
+            if not preview:
+                report["sent"] += await push.send_to_account(
+                    db, user_id=user_id, kind=ANNOUNCEMENT, title=title, body=body, tag=tag
+                )
+
+    report["people"] = len(reached)
+    if preview:
+        report["devices"] = await db.push_tokens.count_documents(
+            {"disabledAt": None, "userId": {"$in": sorted(reached)}}
+        )
+    else:
+        log.info(
+            "announcement by %s to %s: %s people, %s delivered",
+            sent_by, audience, report["people"], report["sent"],
+        )
+    return report
 
 
 async def token_sweep(db: AsyncIOMotorDatabase) -> dict[str, Any]:
