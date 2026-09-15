@@ -1,6 +1,6 @@
 import React from "react";
-import { Check, Lock, Star } from "lucide-react";
-import { type PathNodeState, themeSystem } from "../../lib/themeSystem";
+import { Check, Lock, Play, Star } from "lucide-react";
+import type { PathNodeState } from "../../lib/themeSystem";
 
 export interface UISkillPathItem {
   id: string;
@@ -13,11 +13,11 @@ export interface UISkillPathItem {
   /** The course tier is separate from whether this account can open it. */
   tier?: "free" | "premium";
   /**
-   * A line under the node, for a padlock that owes an explanation.
+   * A line under the lesson, for a padlock that owes an explanation.
    *
    * Only ever on the stone a learner is actually standing in front of — the
    * caller decides which that is. A reason repeated under all thirty locked
-   * nodes of a path is not thirty explanations, it is a wall of text over a
+   * lessons of a path is not thirty explanations, it is a wall of text over a
    * wall.
    */
   note?: string;
@@ -25,128 +25,144 @@ export interface UISkillPathItem {
 
 export interface UISkillPathProps {
   items: UISkillPathItem[];
-  /** Labels the current node. Defaults to "Start". */
+  /** Names the current lesson under its title. Defaults to "Start". */
   startLabel?: string;
   onSelect(id: string): void;
   className?: string;
 }
 
+/* The node's fill by state. Indigo for everything open, violet for the plan
+   lock — the same split the rest of the app draws — and no amber anywhere:
+   the old star badge was the one yellow on the page. */
+const NODE: Record<PathNodeState, string> = {
+  completed:
+    "bg-indigo-100 border-indigo-300 dark:bg-indigo-950/60 dark:border-indigo-700",
+  current:
+    "bg-indigo-600 border-indigo-700 text-white ring-4 ring-indigo-500/20 dark:bg-indigo-500 dark:border-indigo-400",
+  available: "bg-white border-slate-300 dark:bg-slate-800 dark:border-slate-600",
+  locked:
+    "bg-slate-100 border-slate-200 text-slate-400 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-500",
+  premium:
+    "bg-violet-50 border-violet-300 text-violet-600 dark:bg-violet-950/60 dark:border-violet-800 dark:text-violet-300",
+};
+
+const TITLE: Record<PathNodeState, string> = {
+  completed: "text-ink",
+  current: "text-indigo-700 dark:text-indigo-300",
+  available: "text-ink",
+  locked: "text-slate-400 dark:text-slate-500",
+  premium: "text-violet-700 dark:text-violet-300",
+};
+
 /**
- * The learning path as a winding column of stepping stones, centred on its
- * container — the shape a child already recognises from Duolingo.
+ * One unit's lessons as a timeline: a column of nodes joined by a rail, each
+ * lesson a full-width row with its name beside the node rather than under it.
  *
- * There is deliberately no connecting line. A line has to be drawn straight
- * while the nodes wander off-axis, so it never lines up with them; the wave
- * itself carries the sense of a route, which is how the apps that do this well
- * handle it.
+ * It replaced a Duolingo-style winding column of stones. That shape reads well
+ * at four lessons and badly at fifty: the wave shifted every label sideways, the
+ * "Continue" bubble floated up into the name of the lesson above it, and a
+ * course of thirteen units was a very long scroll of mostly empty space. A row
+ * keeps the order a child walks in, gives a long title room to be read, and
+ * costs the same height at any number of lessons.
  *
- * Each node keeps its lesson's emoji at every state, and names itself
- * underneath. An earlier version dropped both once a lesson was finished, which
- * turned a completed unit into a column of identical purple discs: nothing on
- * screen said which one was the dice game and which one was the ten-frame, and
- * the only way to find out was to hover — a gesture that does not exist on the
- * tablet this is mostly read on. The label is clamped to two lines and the
- * column is narrow, so the wave still reads as a path rather than a list.
+ * Every row keeps its lesson's emoji at every state except locked, for the
+ * reason the stones did: a finished unit of identical discs says nothing about
+ * which one was the dice game.
  */
-
-/*
- * One full wave of horizontal offset, as utilities so the amplitude can shrink
- * on a phone — 32px off-centre either way there, 48px from `sm` up.
- *
- * The period is four, and that matters more than it looks. An eight-step sine
- * spends its first half on the left, so a unit of three or four lessons never
- * reaches the right-hand half at all and the whole path sits visibly off to one
- * side. Centre-left-centre-right balances at every length a unit actually has.
- */
-const WAVE = [
-  "translate-x-0",
-  "-translate-x-8 sm:-translate-x-12",
-  "translate-x-0",
-  "translate-x-8 sm:translate-x-12",
-];
-
 export const UISkillPath: React.FC<UISkillPathProps> = ({
   items,
   startLabel = "Start",
   onSelect,
   className = "",
-}) => {
-  const s = themeSystem.pathNode;
-  /*
-   * `pt-16` is not decoration: the Start bubble floats above the current node,
-   * and without the reserved room it collides with whatever sits over the path.
-   * It travels with this component so no caller has to know — but only a path
-   * that *has* a current node needs it. Reserving it unconditionally left a
-   * band of dead space above every other unit in a list of them.
-   */
-  const hasStart = items.some((item) => item.state === "current");
+}) => (
+  <ol className={`relative ${className}`} aria-label="Lesson path">
+    {items.map((item, index) => {
+      const locked = item.state === "locked";
+      /* Locked by a plan rather than by the path. It still presses — the tap
+         is what explains it — so only the prerequisite lock is `disabled`. */
+      const premium = item.state === "premium";
+      const current = item.state === "current";
+      const completed = item.state === "completed";
+      const stars = Math.min(3, item.stars ?? 0);
+      const tierLabel =
+        item.tier === "premium" ? "Premium" : item.tier === "free" ? "Free" : null;
+      const last = index === items.length - 1;
 
-  return (
-    <div
-      className={`flex flex-col items-center gap-4 sm:gap-5 ${
-        hasStart ? "pt-16" : "pt-6"
-      } ${className}`}
-      role="list"
-      aria-label="Lesson path"
-    >
-      {items.map((item, index) => {
-        const locked = item.state === "locked";
-        /* Locked by a plan rather than by the path. It still presses — the tap
-           is what explains it — so only the prerequisite lock is `disabled`. */
-        const premium = item.state === "premium";
-        const stars = item.stars ?? 0;
-        const tierLabel =
-          item.tier === "premium" ? "Premium" : item.tier === "free" ? "Free" : null;
-        return (
-          <div
-            key={item.id}
-            role="listitem"
-            className={`flex flex-col items-center gap-1.5 ${WAVE[index % WAVE.length]}`}
+      return (
+        <li key={item.id} className="relative">
+          {/* The rail to the next node. Drawn from this node's foot to the next
+              one's head, and indigo once the lesson it leaves is finished, so a
+              unit shows how far along it is before a word is read. */}
+          {!last && (
+            <span
+              aria-hidden="true"
+              className={`pointer-events-none absolute left-[27px] top-12 -bottom-2 z-10 w-0.5 rounded-full ${
+                completed ? "bg-indigo-300 dark:bg-indigo-700" : "bg-slate-200 dark:bg-slate-700"
+              }`}
+            />
+          )}
+
+          <button
+            type="button"
+            disabled={locked}
+            onClick={() => onSelect(item.id)}
+            title={item.title}
+            aria-label={`${item.title}${tierLabel ? ` (${tierLabel})` : ""}${locked ? ` (locked${item.note ? `: ${item.note}` : ""})` : premium ? " (subscription required)" : ""}`}
+            className={`flex w-full items-center gap-3 rounded-2xl p-2 text-left transition ${
+              current
+                ? "bg-indigo-50 ring-1 ring-indigo-200 dark:bg-indigo-950/40 dark:ring-indigo-800"
+                : locked
+                  ? "cursor-not-allowed"
+                  : "cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60"
+            }`}
           >
-            <button
-              type="button"
-              disabled={locked}
-              onClick={() => onSelect(item.id)}
-              title={item.title}
-              aria-label={`${item.title}${tierLabel ? ` (${tierLabel})` : ""}${locked ? ` (locked${item.note ? `: ${item.note}` : ""})` : premium ? " (subscription required)" : ""}`}
-              className={s.circle(item.state)}
+            <span
+              className={`relative grid h-10 w-10 shrink-0 place-items-center rounded-full border-2 ${NODE[item.state]}`}
             >
               {locked || premium ? (
-                <Lock className="w-6 h-6" />
+                <Lock className="h-4 w-4" />
               ) : item.icon ? (
-                <span className="text-2xl sm:text-3xl">{item.icon}</span>
-              ) : item.state === "completed" ? (
-                <Star className="w-8 h-8 sm:w-9 sm:h-9 fill-current" />
+                <span className="text-lg leading-none">{item.icon}</span>
+              ) : completed ? (
+                <Star className="h-4 w-4 fill-current text-indigo-600" />
               ) : (
-                <Check className="w-7 h-7" />
+                <Check className="h-4 w-4" />
               )}
 
-              {/* A finished lesson always says so, whether or not it earned a
-                  star: the fill alone is the only other difference between
-                  "done" and "open", and colour on its own is not a signal. */}
-              {item.state === "completed" && (
-                <span className={s.starBadge}>
-                  {stars > 0 ? <>&#9733;{stars}</> : <>&#10003;</>}
+              {/* A finished lesson always says so, whatever it scored: the fill
+                  alone is the only other difference between "done" and "open",
+                  and colour on its own is not a signal. */}
+              {completed && (
+                <span className="absolute -bottom-1 -right-1 grid h-4 w-4 place-items-center rounded-full bg-indigo-600 text-white ring-2 ring-white dark:ring-slate-900">
+                  <Check className="h-2.5 w-2.5" strokeWidth={3.5} />
                 </span>
               )}
+            </span>
 
-              {item.state === "current" && (
-                <span className={s.startBadge}>
-                  {startLabel}
-                  <span className={s.startTail} aria-hidden="true" />
-                </span>
-              )}
-            </button>
-
-            <span className={s.pathLabel(item.state)}>{item.title}</span>
-            {item.note && (
-              <span className="max-w-[9rem] text-center text-[11px] font-semibold leading-tight text-muted">
-                {item.note}
+            <span className="min-w-0 flex-1">
+              <span className={`block text-sm font-bold leading-snug line-clamp-2 ${TITLE[item.state]}`}>
+                {item.title}
               </span>
-            )}
+              {current ? (
+                <span className="mt-0.5 block font-mono text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
+                  {startLabel}
+                </span>
+              ) : item.note ? (
+                <span className="mt-0.5 block text-xs text-muted">{item.note}</span>
+              ) : completed && stars > 0 ? (
+                <span
+                  aria-hidden="true"
+                  className="mt-0.5 block text-xs leading-none tracking-wider text-indigo-500 dark:text-indigo-400"
+                >
+                  {"★".repeat(stars)}
+                  <span className="text-slate-300 dark:text-slate-600">{"★".repeat(3 - stars)}</span>
+                </span>
+              ) : null}
+            </span>
+
             {tierLabel && (
               <span
-                className={`rounded-full border px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wide ${
+                className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wide ${
                   item.tier === "premium"
                     ? "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-300"
                     : "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"
@@ -155,9 +171,17 @@ export const UISkillPath: React.FC<UISkillPathProps> = ({
                 {tierLabel}
               </span>
             )}
-          </div>
-        );
-      })}
-    </div>
-  );
-};
+
+            {/* The row is the control; this is its mark, on the one lesson the
+                learner is meant to press. */}
+            {current && (
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-indigo-600 text-white shadow-sm">
+                <Play className="h-4 w-4 translate-x-px fill-current" />
+              </span>
+            )}
+          </button>
+        </li>
+      );
+    })}
+  </ol>
+);

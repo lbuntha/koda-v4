@@ -41,6 +41,41 @@ describe("UISkillPath access tiers", () => {
   });
 });
 
+describe("the timeline's rows", () => {
+  it("names the lesson a learner is up to, and nowhere else", () => {
+    render(
+      <UISkillPath
+        onSelect={vi.fn()}
+        startLabel="Continue"
+        items={[
+          { id: "done", title: "Count Them All", state: "completed", stars: 3 },
+          { id: "next", title: "Put Them Together", state: "current" },
+          { id: "open", title: "Count On", state: "available" },
+        ]}
+      />,
+    );
+
+    expect(screen.getAllByText("Continue")).toHaveLength(1);
+    // One control per lesson: the row is the button, the play mark is not.
+    expect(screen.getAllByRole("button")).toHaveLength(3);
+  });
+
+  it("does not let a padlocked lesson be pressed", () => {
+    const onSelect = vi.fn();
+    render(
+      <UISkillPath
+        onSelect={onSelect}
+        items={[{ id: "later", title: "Start with the Bigger Number", state: "locked" }]}
+      />,
+    );
+
+    const row = screen.getByRole("button", { name: /Start with the Bigger Number/ });
+    expect((row as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(row);
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+});
+
 describe("a padlock that explains itself", () => {
   it("says what opens the stone, in the label and to a screen reader", () => {
     render(

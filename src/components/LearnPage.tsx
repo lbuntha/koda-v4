@@ -1,5 +1,15 @@
 import React, { useMemo, useState } from "react";
-import { ArrowLeft, BookOpen, CheckCircle2, Printer, Repeat, Sparkles } from "lucide-react";
+import {
+  ArrowLeft,
+  BookOpen,
+  CheckCircle2,
+  Circle,
+  CircleDot,
+  Printer,
+  Repeat,
+  Sparkles,
+} from "lucide-react";
+import { outcomeSummary } from "../lib/learnOutcomes";
 import {
   type CourseUnit,
   type ResolvedLesson,
@@ -29,9 +39,8 @@ import {
   UIButton,
   UISkillCard,
   UISkillPath,
-  UIUnitHeader,
+  UIUnitSection,
   skillArtFor,
-  unitColor,
   type UISkillPathItem,
 } from "./ui";
 
@@ -69,6 +78,19 @@ const SectionIntro: React.FC<{
   </div>
 );
 
+/** One labelled group in the "What you'll learn" panel. */
+const OutcomeGroup: React.FC<{ label: string; children: React.ReactNode }> = ({
+  label,
+  children,
+}) => (
+  <div>
+    <h3 className="font-mono text-[10px] font-black uppercase tracking-widest text-muted">
+      {label}
+    </h3>
+    <div className="mt-2">{children}</div>
+  </div>
+);
+
 export const LearnPage: React.FC<LearnPageProps> = ({
   skillId,
   completedLevels,
@@ -86,6 +108,10 @@ export const LearnPage: React.FC<LearnPageProps> = ({
   const [registering, setRegistering] = useState(false);
   const [printing, setPrinting] = useState(false);
   const [registrationError, setRegistrationError] = useState<string | null>(null);
+  /* Only the units a learner has opened or closed themselves. Everything else
+     follows the page's default, so finishing a lesson moves the open unit along
+     with the learner instead of leaving the old one pinned open. */
+  const [unitToggles, setUnitToggles] = useState<Record<string, boolean>>({});
   const { progress: offline, prepare } = useOfflineDownload();
   const skill = getSkill(skillId);
   const lessons = useMemo(() => getSkillLessons(skillId, viewer), [skillId, viewer]);
@@ -225,6 +251,13 @@ export const LearnPage: React.FC<LearnPageProps> = ({
     next ?? blockedBy ?? openPractice ?? taught[taught.length - 1] ?? lessons[lessons.length - 1];
   const category = skill.manifest.audience.category;
   const art = skillArtFor(category);
+  /* A learner who has not added the skill has no "now" of their own, so the
+     panel previews the path from its first lesson. */
+  const outcomes = outcomeSummary(
+    taught,
+    (lesson) => starsFor(lesson) > 0,
+    registered ? next : taught[0],
+  );
 
   const start = (levelNumber: number) => {
     if (!registered) return;
@@ -295,24 +328,53 @@ export const LearnPage: React.FC<LearnPageProps> = ({
     );
   };
 
-  const unitPath = (unit: CourseUnit) => {
+  /*
+   * Which unit opens by itself: the one holding the lesson Continue goes to,
+   * else the first with anything left in it. A finished skill opens none — the
+   * whole path is a record by then, and the button above still has somewhere
+   * to go.
+   */
+  const defaultOpenUnit =
+    teaching.find((unit) => unit.lessons.some((lesson) => lesson.ref === next?.ref))?.id ??
+    teaching.find((unit) => unit.lessons.some((lesson) => starsFor(lesson) === 0))?.id;
+  const isOpen = (id: string, byDefault: boolean) => unitToggles[id] ?? byDefault;
+  const toggleUnit = (id: string, open: boolean) =>
+    setUnitToggles((toggles) => ({ ...toggles, [id]: !open }));
+  const practiceOpen = isOpen("practice", !next && Boolean(openPractice));
+
+  const unitPath = (unit: CourseUnit, index: number) => {
     const unitDone = unit.lessons.filter((lesson) => starsFor(lesson) > 0).length;
+    const open = isOpen(unit.id, unit.id === defaultOpenUnit);
+    /*
+     * Numbered within this skill, not the course.
+     *
+     * `unitNumber` is the unit's place in the whole course, which files every
+     * skill one after another — so Addition opened on "Unit 5" and Fractions
+     * on "Unit 91", numbers that only mean something to whoever wrote
+     * `course.json`. A learner on this page is counting this skill's units.
+     */
+    const number = index + 1;
 
     return (
-      <section key={unit.id}>
-        {/* The count rides in the eyebrow rather than as a badge on the right:
-            it is the same fact the bar at the top of the page states, and a
-            second pill on every unit is clutter once a course runs to four or
-            five of them. Units are counted over this skill's lessons only — a
-            unit may also hold lessons from skills the learner has not
-            registered, and those are not this page's to report on. */}
-        <UIUnitHeader
-          eyebrow={`Unit ${unit.unitNumber} · ${unitDone}/${unit.lessons.length} done`}
-          title={unitTitle(unit.title)}
-          color={unitColor(unit.unitNumber)}
-        />
+      <UIUnitSection
+        key={unit.id}
+        id={unit.id}
+        marker={number}
+        eyebrow={`Unit ${number}`}
+        title={unitTitle(unit.title)}
+        /* Counted over this skill's lessons only — a unit may also hold lessons
+           from skills the learner has not registered, and those are not this
+           page's to report on. */
+        done={unitDone}
+        total={unit.lessons.length}
+        locked={unit.lessons.every(
+          (lesson) => !registered || !isUnlocked(lesson, completedLevels, viewer),
+        )}
+        open={open}
+        onToggle={() => toggleUnit(unit.id, open)}
+      >
         {pathFor(unit.lessons)}
-      </section>
+      </UIUnitSection>
     );
   };
 
@@ -475,7 +537,7 @@ export const LearnPage: React.FC<LearnPageProps> = ({
             </span>
           </div>
 
-          <div className="mt-4 space-y-6">{teaching.map((unit) => unitPath(unit))}</div>
+          <div className="mt-4 space-y-3">{teaching.map(unitPath)}</div>
 
           {practice.length > 0 && (
             /* Its own heading behind a rule, inside the same card: practice is a
@@ -486,17 +548,22 @@ export const LearnPage: React.FC<LearnPageProps> = ({
                 icon={<Repeat className="w-5 h-5" />}
                 tint="bg-violet-50 dark:bg-violet-950/50 text-violet-600"
                 title="Practice"
-                blurb="The same activities with the hints, voice and explanations taken away — for when you already know the technique. Open any of them, in any order."
+                blurb="No hints this time — play any round, in any order."
               />
 
-              <div className="mt-4">
-                <UIUnitHeader
-                  eyebrow={`Practice · ${practiceDone}/${practice.length} done`}
-                  title="All techniques"
-                  color="bg-violet-600"
-                />
+              <UIUnitSection
+                className="mt-4"
+                id="practice"
+                marker={<Repeat />}
+                eyebrow="Practice"
+                title="All techniques"
+                done={practiceDone}
+                total={practice.length}
+                open={practiceOpen}
+                onToggle={() => toggleUnit("practice", practiceOpen)}
+              >
                 {pathFor(practice, { practice: true })}
-              </div>
+              </UIUnitSection>
             </div>
           )}
         </section>
@@ -504,18 +571,49 @@ export const LearnPage: React.FC<LearnPageProps> = ({
         <aside className={`${themeSystem.card("default")} p-5`}>
           <h2 className="font-mono font-black text-sm text-ink">What you’ll learn</h2>
           <p className="mt-2 text-sm text-muted leading-relaxed">{skill.manifest.description}</p>
-          <ul className="mt-4 space-y-2.5">
-            {lessons.slice(0, 5).map((lesson) => (
-              <li key={lesson.ref} className="flex items-start gap-2 text-xs text-muted">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                <span>{lesson.concept}</span>
-              </li>
-            ))}
-          </ul>
-          {lessons.length > 5 && (
-            <p className="mt-3 text-xs font-mono font-bold text-indigo-600">
-              +{lessons.length - 5} more outcomes
+
+          {outcomes.allLearned ? (
+            <p className="mt-4 flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-2.5 text-sm font-bold text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300">
+              <CheckCircle2 className="h-4 w-4 shrink-0" />
+              All {outcomes.total} learned
             </p>
+          ) : (
+            <div className="mt-4 space-y-4">
+              {outcomes.now && (
+                <OutcomeGroup label={outcomes.starting ? "Start with" : "Learning now"}>
+                  <p className="flex items-start gap-2 rounded-xl bg-indigo-50 px-3 py-2.5 text-sm font-bold leading-snug text-indigo-800 dark:bg-indigo-950/50 dark:text-indigo-200">
+                    <CircleDot className="mt-0.5 h-4 w-4 shrink-0 text-indigo-600 dark:text-indigo-400" />
+                    {outcomes.now.concept}
+                  </p>
+                </OutcomeGroup>
+              )}
+
+              {outcomes.learned.length > 0 && (
+                <OutcomeGroup label={`Learned · ${outcomes.learnedCount} of ${outcomes.total}`}>
+                  <ul className="space-y-2">
+                    {outcomes.learned.map((lesson) => (
+                      <li key={lesson.ref} className="flex items-start gap-2 text-xs text-muted">
+                        <CheckCircle2 className="mt-px h-4 w-4 shrink-0 text-emerald-500" />
+                        <span>{lesson.concept}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </OutcomeGroup>
+              )}
+
+              {outcomes.comingUp.length > 0 && (
+                <OutcomeGroup label="Coming up">
+                  <ul className="space-y-2">
+                    {outcomes.comingUp.map((lesson) => (
+                      <li key={lesson.ref} className="flex items-start gap-2 text-xs text-muted">
+                        <Circle className="mt-px h-4 w-4 shrink-0 text-slate-300 dark:text-slate-600" />
+                        <span>{lesson.concept}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </OutcomeGroup>
+              )}
+            </div>
           )}
         </aside>
       </div>

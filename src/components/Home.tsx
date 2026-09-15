@@ -1,6 +1,13 @@
 import React from "react";
 import { ArrowRight, BookOpen, Flame, Star, Target, Zap } from "lucide-react";
-import { getCourseLessons, isUnlocked, practiceTitle, satisfiedConcepts } from "../curriculum";
+import {
+  getCourseLessons,
+  isUnlocked,
+  pathPosition,
+  practiceTitle,
+  resumeLesson,
+  satisfiedConcepts,
+} from "../curriculum";
 import type { SkillCatalogEntry } from "../lib/skillCatalog";
 import { buildCatalog } from "../skills/catalog";
 import { premiumLocked } from "../lib/premiumLessons";
@@ -16,7 +23,7 @@ import { levelFromXp, levelProgress, XP_PER_LEVEL, xpToNextLevel } from "../lib/
 import { BadgeIcon } from "./account/BadgeVisuals";
 import type { UserProgress } from "../types";
 import { playSound } from "../utils/audio";
-import { UIButton, UILessonCard, UISkillCard } from "./ui";
+import { UIButton, UILessonCard, UISkillCard, UISubjectLessonCard } from "./ui";
 import { WelcomeBack } from "./WelcomeBack";
 import { SvgAsset } from "../assets/svg";
 
@@ -386,9 +393,32 @@ export const Home: React.FC<HomeProps> = ({
   /* Something to do first, then whatever changed most recently. A subject with
      nothing open still appears — it is the learner's, not a suggestion. */
   const subjects = registered
-    .map((skill) => ({ skill, ready: readyCountFor(skill.id) }))
-    .sort((a, b) => b.ready - a.ready || (b.skill.modified ?? 0) - (a.skill.modified ?? 0));
+    .map((skill) => ({
+      skill,
+      ready: readyCountFor(skill.id),
+      /* The lesson a started subject is on, by the rule the subject page's own
+         Continue button uses — so the two screens cannot name different
+         lessons. A finished subject, or one whose remaining lessons are all
+         locked, has none and stays a row. */
+      current:
+        skill.completedLessons > 0
+          ? resumeLesson(
+              lessons.filter((lesson) => lesson.skillId === skill.id),
+              completedLevels,
+              viewer,
+            )
+          : undefined,
+    }))
+    .sort(
+      (a, b) =>
+        Number(Boolean(b.current)) - Number(Boolean(a.current)) ||
+        b.ready - a.ready ||
+        (b.skill.modified ?? 0) - (a.skill.modified ?? 0),
+    );
   const visibleSubjects = showAllSubjects ? subjects : subjects.slice(0, SUBJECTS_SHOWN);
+  const inProgress = visibleSubjects.filter((entry) => entry.current);
+  const otherSubjects = visibleSubjects.filter((entry) => !entry.current);
+  const hasInProgress = subjects.some((entry) => entry.current);
 
   if (!skills.length) {
     return (
@@ -478,8 +508,14 @@ export const Home: React.FC<HomeProps> = ({
 
   /* Two, so the band is three things whichever way it was filled. A single
      lead with nothing beside it is left as it is: one thing to do is a clearer
-     message than one thing plus filler. */
-  const rest = (interrupted ? suggestions : suggestions.slice(1)).slice(0, 2);
+     message than one thing plus filler.
+
+     None once a subject is under way: its group below already offers the
+     lesson it is on, so the rows here were the same lessons a second time —
+     "Ten Frame · Addition" above a card for Addition's Ten Frame. */
+  const rest = hasInProgress
+    ? []
+    : (interrupted ? suggestions : suggestions.slice(1)).slice(0, 2);
 
   return (
     /* Column 1 is the app shell's sidebar; this is columns 2 and 3. Neither
@@ -569,22 +605,65 @@ export const Home: React.FC<HomeProps> = ({
                 Your subjects
               </h2>
 
-              <div className="mt-3 space-y-2.5">
-                {visibleSubjects.map(({ skill, ready }) => (
-                  <UISkillCard
-                    key={skill.id}
-                    size="sm"
-                    title={skill.name}
-                    thumbnail={skill.thumbnail}
-                    fallbackIconName={skill.iconName}
-                    category={skill.category}
-                    completedLessons={skill.completedLessons}
-                    lessonCount={skill.lessonCount}
-                    readyCount={ready}
-                    onOpen={() => open(skill.id)}
-                  />
-                ))}
-              </div>
+              {/* Started subjects are drawn as the lesson they are on; the rest
+                  keep the subject row, since there is no lesson to name yet. */}
+              {inProgress.length > 0 && (
+                <div className="mt-3 space-y-4">
+                  {inProgress.map(({ skill, current }) =>
+                    current ? (
+                      <UISubjectLessonCard
+                        key={skill.id}
+                        subject={skill.name}
+                        thumbnail={skill.thumbnail}
+                        fallbackIconName={skill.iconName}
+                        category={skill.category}
+                        lessonTitle={current.title}
+                        lessonNumber={pathPosition(current, viewer).number}
+                        completedLessons={skill.completedLessons}
+                        lessonCount={skill.lessonCount}
+                        onOpenSubject={() => open(skill.id)}
+                        onPlay={() => {
+                          /* A lesson the plan does not cover opens its subject,
+                             where the padlock explains itself, rather than
+                             starting and being refused. */
+                          if (premiumLocked({ skillId: current.skillId, levelNumber: current.levelNumber })) {
+                            open(skill.id);
+                            return;
+                          }
+                          playSound("pop");
+                          onStartLesson(current.levelNumber);
+                        }}
+                      />
+                    ) : null,
+                  )}
+                </div>
+              )}
+
+              {otherSubjects.length > 0 && (
+                <>
+                  {inProgress.length > 0 && (
+                    <h3 className="mt-6 font-mono font-black uppercase tracking-widest text-xs text-muted">
+                      More subjects
+                    </h3>
+                  )}
+                  <div className="mt-3 space-y-2.5">
+                    {otherSubjects.map(({ skill, ready }) => (
+                      <UISkillCard
+                        key={skill.id}
+                        size="sm"
+                        title={skill.name}
+                        thumbnail={skill.thumbnail}
+                        fallbackIconName={skill.iconName}
+                        category={skill.category}
+                        completedLessons={skill.completedLessons}
+                        lessonCount={skill.lessonCount}
+                        readyCount={ready}
+                        onOpen={() => open(skill.id)}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
 
               {subjects.length > SUBJECTS_SHOWN && (
                 <UIButton

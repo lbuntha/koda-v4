@@ -390,22 +390,6 @@ export const themeSystem = {
     },
 
     subtitle: "text-[10px] text-slate-500 dark:text-slate-400 hidden sm:block truncate",
-
-    /* The name under a stepping stone on the winding path. Narrow and clamped
-       to two lines on purpose: the column has to stay narrower than the wave's
-       amplitude or neighbouring labels collide as the path swings. */
-    pathLabel: (state: PathNodeState = "available") => {
-      const base =
-        "max-w-[8.5rem] sm:max-w-[10rem] text-center text-[11px] font-bold leading-tight line-clamp-2 text-balance";
-      const states = {
-        completed: "text-slate-600 dark:text-slate-300",
-        current: "text-indigo-700 dark:text-indigo-300",
-        available: "text-slate-700 dark:text-slate-300",
-        locked: "text-slate-400 dark:text-slate-500",
-        premium: "text-violet-600 dark:text-violet-300",
-      };
-      return `${base} ${states[state]}`;
-    },
   },
 
   sectionHeader: {
