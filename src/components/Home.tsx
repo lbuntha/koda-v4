@@ -25,6 +25,7 @@ import type { UserProgress } from "../types";
 import { playSound } from "../utils/audio";
 import { UIButton, UILessonCard, UISkillCard, UISubjectLessonCard } from "./ui";
 import { WelcomeBack } from "./WelcomeBack";
+import { ChildrenOverview } from "./account/ChildrenOverview";
 import { SvgAsset } from "../assets/svg";
 
 interface HomeProps {
@@ -33,6 +34,8 @@ interface HomeProps {
   onOpenSkill(skillId: string): void;
   onStartLesson(levelNumber: number): void;
   onBrowseSkills(): void;
+  /** A parent opening a child's report from "Your children". */
+  onOpenChild?(learnerId: string): void;
 }
 
 /** Beyond this many subjects the list folds, so Home stays about one screen. */
@@ -303,6 +306,7 @@ export const Home: React.FC<HomeProps> = ({
   onOpenSkill,
   onStartLesson,
   onBrowseSkills,
+  onOpenChild,
 }) => {
   const { skills, viewer } = useSkillCatalog(completedLevels);
   const { registrations } = useSkillRegistrations();
@@ -523,6 +527,9 @@ export const Home: React.FC<HomeProps> = ({
        grows with the number of skills, which is a small number. */
     <div className="w-full animate-fadeIn pb-6 grid gap-6 items-start lg:grid-cols-[minmax(0,1fr)_300px]">
       <div className={themeSystem.spacing.section}>
+        {/* A parent's first question, above their own path. Draws nothing for
+            a child, or for a family with no children. */}
+        <ChildrenOverview onOpenChild={onOpenChild} />
         {registered.length ? (
           <>
             {/* Above Today, because it is about the gap before today rather

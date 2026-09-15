@@ -157,6 +157,40 @@ async def days_practised(
     return len(found)
 
 
+async def rounds_and_time(
+    db: AsyncIOMotorDatabase, family_id: str, learner_id: str, days: list[str]
+) -> tuple[int, int]:
+    """Rounds finished on these local days, and the milliseconds they took.
+
+    Read off the client's own `durationMs` on each finished round — the same
+    figure the learning log totals — so a parent's "38 minutes" and the app's
+    agree. A round with no duration counts as a round and adds no time.
+    """
+    if not days:
+        return 0, 0
+    pipeline = [
+        {
+            "$match": {
+                "familyId": family_id,
+                "learnerId": learner_id,
+                "type": COMPLETED,
+                "localDay": {"$in": days},
+            }
+        },
+        {
+            "$group": {
+                "_id": None,
+                "rounds": {"$sum": 1},
+                "ms": {"$sum": {"$ifNull": ["$durationMs", 0]}},
+            }
+        },
+    ]
+    rows = [row async for row in db.events.aggregate(pipeline)]
+    if not rows:
+        return 0, 0
+    return int(rows[0]["rounds"]), int(rows[0]["ms"] or 0)
+
+
 async def completed_on(
     db: AsyncIOMotorDatabase, family_id: str, learner_id: str, local_day: str
 ) -> int:

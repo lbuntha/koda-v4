@@ -124,7 +124,8 @@ export const NotificationsSettings: React.FC = () => {
 
   useEffect(() => {
     void load();
-    if (registered) void notificationSchedule().then(setSchedule).catch(() => setSchedule(null));
+    // Always, now: the digest hour is an email setting and needs no browser.
+    void notificationSchedule().then(setSchedule).catch(() => setSchedule(null));
   }, [registered, load]);
 
   const turnOn = async () => {
@@ -456,6 +457,29 @@ export const NotificationsSettings: React.FC = () => {
                     />
                   </div>
                 ))}
+              {!email.stopped &&
+                schedule &&
+                email.kinds.some((kind) => kind.id === "learn.daily_digest" && kind.on) && (
+                  <div className={l.row}>
+                    <div className="min-w-0">
+                      <h4 className={l.rowTitle}>Digest time</h4>
+                      <p className={l.rowNote}>A note of the day, on days anyone practised.</p>
+                    </div>
+                    <select
+                      disabled={busy}
+                      value={schedule.digestHour ?? 19}
+                      onChange={(e) => void changeSchedule({ digestHour: Number(e.target.value) })}
+                      aria-label="The hour the daily digest is sent"
+                      className="bg-surface border border-line rounded-2xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-indigo-500"
+                    >
+                      {HOURS.map((hour) => (
+                        <option key={hour} value={hour}>
+                          {hourLabel(hour)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
             </>
           )}
         </div>

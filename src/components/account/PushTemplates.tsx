@@ -60,6 +60,9 @@ const SAMPLES: Record<string, string> = {
   app_link: "https://learn-with-koda.web.app",
   kind_label: "Announcements",
   unsubscribe_link: "https://learn-with-koda.web.app/v1/notifications/unsubscribe?token=…",
+  rounds_done: "12 rounds",
+  time: "38 minutes",
+  summary: "• Mia: practised on 4 days — 12 rounds, 38 minutes\n• Leo: practised on 2 days — 5 rounds, 14 minutes",
 };
 
 export const filled = (text: string): string =>
@@ -143,7 +146,9 @@ const WordingCard: React.FC<{
   onTemplates(templates: NotificationTemplate[]): void;
   onWording(wording: NotificationWording): void;
 }> = ({ row, frame, onTemplates, onWording }) => {
-  const [channel, setChannel] = useState<Channel>("push");
+  // An email-only kind — the daily digest — opens on its only channel.
+  const pushable = row.channels?.includes("push") ?? true;
+  const [channel, setChannel] = useState<Channel>(pushable ? "push" : "email");
   const [draft, setDraft] = useState<Draft>(() => draftOf(row));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -218,7 +223,8 @@ const WordingCard: React.FC<{
         <h4 className="text-sm font-bold text-ink">{row.label}</h4>
         {edited && <UIBadge variant="info">Edited</UIBadge>}
         {row.class === "account" && <UIBadge variant="neutral">Always sent</UIBadge>}
-        {row.email && (
+        {!pushable && <UIBadge variant="neutral">Email only</UIBadge>}
+        {row.email && pushable && (
           <div
             role="tablist"
             aria-label={`${row.label} channel`}

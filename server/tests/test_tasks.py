@@ -272,10 +272,12 @@ async def test_two_children_are_two_notifications_not_one(db, family, seeded):
 
 
 async def test_the_operator_switch_stops_the_whole_run(db, family, seeded):
+    """Both channels' switches: with only push off, the summary still goes by email."""
     await practise(db, family, days=["2026-08-16"])
-    await db.system_settings.update_one(
-        {"settingId": "push.weeklySummary"}, {"$set": {"value": False}}, upsert=True
-    )
+    for setting_id in ("push.weeklySummary", "email.weeklySummary"):
+        await db.system_settings.update_one(
+            {"settingId": setting_id}, {"$set": {"value": False}}, upsert=True
+        )
 
     report = await task_service.weekly_summary(db, at=SUNDAY_EVENING_UTC)
 
@@ -296,29 +298,23 @@ async def test_a_parent_who_turned_summaries_off_is_not_told(db, family, seeded)
     assert await told(db, "learn.weekly_summary") == []
 
 
-async def test_a_family_with_no_browser_is_never_looked_at(db, family, seeded):
-    """The job's cost is the number of people who asked, not the number of accounts."""
+async def test_a_family_with_no_browser_still_gets_its_summary(db, family, seeded):
+    """Phase 2: the summary also goes by email and into the bell, so the job
+    visits every family — one that never turned push on still wants its week."""
     await practise(db, family, days=["2026-08-16"])
     await db.push_tokens.delete_many({})
 
     report = await task_service.weekly_summary(db, at=SUNDAY_EVENING_UTC)
 
-    assert report["families"] == 0
-    assert await told(db, "learn.weekly_summary") == []
+    assert report["families"] == 1
+    assert len(await told(db, "learn.weekly_summary")) == 1
 
 
 async def test_a_long_run_says_where_it_stopped(db, family, seeded):
     """Bounded per call and resumable, so a cold start is a slow job not a failed one."""
     for index in range(3):
-        await db.push_tokens.insert_one(
-            {
-                "_id": f"pt_{index}",
-                "token": f"{index}" * 140,
-                "familyId": f"f_other_{index}",
-                "userId": f"u_{index}",
-                "deviceId": None,
-                "disabledAt": None,
-            }
+        await db.families.insert_one(
+            {"_id": f"f_other_{index}", "name": "Other", "ownerId": f"u_{index}", "createdAt": now()}
         )
 
     first = await task_service.weekly_summary(db, at=SUNDAY_EVENING_UTC, limit=2)
@@ -507,7 +503,10 @@ async def test_one_day_of_practice_is_one_day_not_one_days(db, family, seeded):
 
     await task_service.weekly_summary(db, at=SUNDAY_EVENING_UTC)
 
-    assert (await told(db, "learn.weekly_summary"))[0]["body"] == "Mia practised 1 day this week."
+    # These rounds carry no duration, so the time says so rather than "0 minutes".
+    assert (await told(db, "learn.weekly_summary"))[0]["body"] == (
+        "Mia practised 1 day this week — 1 round, under a minute."
+    )
 
 
 async def test_wording_saved_against_the_old_placeholder_still_fills(db, family, seeded):
@@ -557,7 +556,7 @@ async def test_a_preview_says_what_sunday_would_send_without_sending_it(
     assert report["preview"] is True
     line = report["would_send"][0]
     assert line["learner"] == "Mia"
-    assert line["body"] == "Mia practised 2 days this week."
+    assert line["body"] == "Mia practised 2 days this week — 2 rounds, under a minute."
     assert line["alreadySent"] is False
     assert line["theirSundayEvening"], "a preview names whose Sunday it means"
     # Nothing was sent, and — the part that matters — nothing was claimed, so

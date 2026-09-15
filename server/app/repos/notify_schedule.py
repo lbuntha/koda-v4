@@ -38,12 +38,17 @@ DEFAULT_REMINDER_HOUR = 17
 DEFAULT_QUIET_FROM = 21
 DEFAULT_QUIET_TO = 7
 
+#: When the daily digest goes, for a parent who asked for one and chose nothing.
+#: Early evening: after the day's practice, before quiet hours begin.
+DEFAULT_DIGEST_HOUR = 19
+
 
 def defaults() -> dict[str, Any]:
     return {
         "reminderHour": DEFAULT_REMINDER_HOUR,
         "quietFrom": DEFAULT_QUIET_FROM,
         "quietTo": DEFAULT_QUIET_TO,
+        "digestHour": DEFAULT_DIGEST_HOUR,
         "tzOffsetMinutes": None,
     }
 
@@ -64,6 +69,7 @@ async def for_user(db: AsyncIOMotorDatabase, user_id: str) -> dict[str, Any]:
         "reminderHour": _clamp_hour(row.get("reminderHour"), base["reminderHour"]),
         "quietFrom": _clamp_hour(row.get("quietFrom"), base["quietFrom"]),
         "quietTo": _clamp_hour(row.get("quietTo"), base["quietTo"]),
+        "digestHour": _clamp_hour(row.get("digestHour"), base["digestHour"]),
         "tzOffsetMinutes": row.get("tzOffsetMinutes"),
     }
 
@@ -80,6 +86,7 @@ async def for_users(db: AsyncIOMotorDatabase, user_ids: list[str]) -> dict[str, 
             "reminderHour": _clamp_hour(found.get(user_id, {}).get("reminderHour"), base["reminderHour"]),
             "quietFrom": _clamp_hour(found.get(user_id, {}).get("quietFrom"), base["quietFrom"]),
             "quietTo": _clamp_hour(found.get(user_id, {}).get("quietTo"), base["quietTo"]),
+            "digestHour": _clamp_hour(found.get(user_id, {}).get("digestHour"), base["digestHour"]),
             "tzOffsetMinutes": found.get(user_id, {}).get("tzOffsetMinutes"),
         }
         for user_id in user_ids
@@ -94,9 +101,12 @@ async def save(
     quiet_from: int | None = None,
     quiet_to: int | None = None,
     tz_offset_minutes: int | None = None,
+    digest_hour: int | None = None,
 ) -> dict[str, Any]:
     """Set what was named and leave the rest. Returns the whole schedule."""
     patch: dict[str, Any] = {"userId": user_id, "updatedAt": now()}
+    if digest_hour is not None:
+        patch["digestHour"] = _clamp_hour(digest_hour, DEFAULT_DIGEST_HOUR)
     if reminder_hour is not None:
         patch["reminderHour"] = _clamp_hour(reminder_hour, DEFAULT_REMINDER_HOUR)
     if quiet_from is not None:

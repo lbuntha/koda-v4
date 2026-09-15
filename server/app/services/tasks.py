@@ -41,7 +41,7 @@ from app.repos import (
     push_tokens,
 )
 from app.repos import users as users_repo
-from app.services import email_notify, push, streaks
+from app.services import email_notify, milestones, push, streaks
 
 log = logging.getLogger("koda.tasks")
 
@@ -223,11 +223,16 @@ async def weekly_summary(
     # The operator's ceiling, asked once for the whole run rather than once per
     # family. A deployment with the switch off should cost one query, not one
     # per household.
-    if not await push.deployment_allows(db, WEEKLY_SUMMARY):
+    emailing = await email_notify.deployment_allows(db, WEEKLY_SUMMARY)
+    if not emailing and not await push.deployment_allows(db, WEEKLY_SUMMARY):
         report["skipped"] = "the deployment does not send weekly summaries"
         return report
+    report["emailed"] = 0
 
-    families = await _families_with_browsers(db, after=cursor, limit=limit)
+    # Every family, not only the ones with a browser: the summary also goes by
+    # email and into the bell, and a family that never turned push on is still
+    # a family that wants to know how the week went.
+    families = await _every_family(db, after=cursor, limit=limit)
     report["families"] = len(families)
     if len(families) == limit:
         # More to do. Reported rather than continued: the caller decides whether
@@ -276,6 +281,8 @@ async def weekly_summary(
         # Monday morning — otherwise Monday's rounds would join "this week".
         days = _day_keys(local if preview else local - timedelta(hours=since), SUMMARY_DAYS)
         date_key = days[0]
+        # A line per child who practised, for the one email each parent gets.
+        lines: list[str] = []
 
         for learner in await learners_repo.for_family(db, family_id):
             learner_id = learner["_id"]
@@ -287,13 +294,21 @@ async def weekly_summary(
                 # should not be told so by a phone on a Sunday evening.
                 continue
 
+            rounds, spent_ms = await events_repo.rounds_and_time(db, family_id, learner_id, days)
+            practice = f"{practised} day" if practised == 1 else f"{practised} days"
+            lines.append(
+                f"• {learner.get('displayName', 'Your child')}: practised on {practice} — "
+                f"{_rounds_text(rounds)}, {_time_text(spent_ms)}"
+            )
             title, body = await push.wording(
                 db,
                 WEEKLY_SUMMARY,
                 {
                     "learner": learner.get("displayName", "Your child"),
                     # The noun travels with the number: see `push_defaults`.
-                    "practice": f"{practised} day" if practised == 1 else f"{practised} days",
+                    "practice": practice,
+                    "rounds_done": _rounds_text(rounds),
+                    "time": _time_text(spent_ms),
                     # The placeholder the shipped wording used before it learned
                     # to say "1 day". Supplied so that wording an operator saved
                     # against the old body still fills — `fill` leaves an
@@ -363,6 +378,23 @@ async def weekly_summary(
                     # it; the path names a screen and is never trusted to grant one.
                     path=f"/children/{learner_id}",
                     tag=f"weekly:{learner_id}",
+                )
+
+        # One email per parent for the whole family, claimed on its own so a
+        # retry never sends it twice and a push claim never stops it.
+        if emailing and lines and not preview:
+            summary = "\n".join(lines)
+            for user_id in due_people:
+                if not await push_runs.claim(
+                    db, kind=f"{WEEKLY_SUMMARY}:email", recipient_id=user_id, date_key=date_key
+                ):
+                    continue
+                report["emailed"] += await email_notify.send(
+                    db,
+                    kind=WEEKLY_SUMMARY,
+                    values={"summary": summary},
+                    family_id=family_id,
+                    user_ids=[user_id],
                 )
 
     return report
@@ -445,7 +477,9 @@ async def skill_announcements(
         report["skipped"] = JOB_OFF
         return report
 
-    if not await push.deployment_allows(db, SKILL_PUBLISHED):
+    if not await push.deployment_allows(db, SKILL_PUBLISHED) and not await email_notify.deployment_allows(
+        db, SKILL_PUBLISHED
+    ):
         report["skipped"] = "the deployment does not announce new skills"
         return report
 
@@ -458,7 +492,9 @@ async def skill_announcements(
         report["skipped"] = "nothing has been published recently"
         return report
 
-    families = await _families_with_browsers(db, after=cursor, limit=limit)
+    # Every family, so a parent who asked for new-skill emails is reached
+    # whether or not a browser here was ever registered.
+    families = await _every_family(db, after=cursor, limit=limit)
     report["families"] = len(families)
     if len(families) == limit:
         report["cursor"] = families[-1]
@@ -536,6 +572,10 @@ async def skill_announcements(
                 # Per skill, so two released together are two notifications
                 # rather than the second replacing the first.
                 tag=f"skill:{skill_id}",
+            )
+            # Under the same claim, so a family is told once on both channels.
+            report["emailed"] = report.get("emailed", 0) + await email_notify.send(
+                db, kind=SKILL_PUBLISHED, values={"skill": name}, family_id=family_id, path="/learn"
             )
 
     return report
@@ -707,6 +747,279 @@ async def announcement(
             sent_by, audience, report["people"], report["sent"],
         )
     return report
+
+
+ABSENCE = "learn.absence"
+DAILY_DIGEST = "learn.daily_digest"
+
+
+def _rounds_text(rounds: int) -> str:
+    return "1 round" if rounds == 1 else f"{rounds} rounds"
+
+
+def _time_text(duration_ms: int) -> str:
+    """Minutes, with the noun attached — and honest about a very short session."""
+    minutes = round(duration_ms / 60_000)
+    if minutes < 1:
+        return "under a minute"
+    return "1 minute" if minutes == 1 else f"{minutes} minutes"
+
+
+async def _family_clock(
+    db: AsyncIOMotorDatabase, family_id: str, schedules: dict[str, dict[str, Any]]
+) -> int | None:
+    """The family's offset: a browser's own report first, the learning log second."""
+    offset = next(
+        (s["tzOffsetMinutes"] for s in schedules.values() if s["tzOffsetMinutes"] is not None),
+        None,
+    )
+    if offset is None:
+        offset = await events_repo.latest_tz_offset(db, family_id)
+    return offset
+
+
+async def absence_check(
+    db: AsyncIOMotorDatabase,
+    *,
+    at: datetime | None = None,
+    cursor: str | None = None,
+    limit: int = FAMILY_PAGE,
+    preview: bool = False,
+) -> dict[str, Any]:
+    """Tell a parent once when a child has been away longer than the threshold.
+
+    **Once per gap, and provably.** The claim is keyed on the child's last day
+    of practice, so every hourly tick after the first finds it taken, and a new
+    gap — which can only begin after a new day of practice — has a new key.
+
+    At the parent's own reminder hour and outside their quiet hours, like a
+    reminder: this is news about an evening, not about an account. A child who
+    has never practised is not "away", and is left to the practice reminder.
+    """
+    at = at or utc_now()
+    report: dict[str, Any] = {
+        "job": "absence-check",
+        "preview": preview,
+        "families": 0,
+        "due": 0,
+        "absences": 0,
+        "sent": 0,
+        "emailed": 0,
+        "cursor": None,
+    }
+
+    job = await notify_jobs.get(db, "absence-check")
+    if not preview and not job["enabled"]:
+        report["skipped"] = JOB_OFF
+        return report
+    if not (
+        await push.deployment_allows(db, ABSENCE) or await email_notify.deployment_allows(db, ABSENCE)
+    ):
+        report["skipped"] = "the deployment does not send absence messages"
+        return report
+    threshold = job["days"]
+
+    families = await _every_family(db, after=cursor, limit=limit)
+    report["families"] = len(families)
+    if len(families) == limit:
+        report["cursor"] = families[-1]
+
+    for family_id in families:
+        people = await push.adults_of(db, family_id)
+        if not people:
+            continue
+        schedules = await notify_schedule.for_users(db, people)
+        offset = await _family_clock(db, family_id, schedules)
+        if offset is None:
+            continue
+
+        local = _local(at, offset)
+        today = local.date().isoformat()
+        due_now = (
+            people
+            if preview
+            else [
+                user_id
+                for user_id in people
+                if schedules[user_id]["reminderHour"] == local.hour
+                and not notify_schedule.is_quiet(schedules[user_id], local.hour)
+            ]
+        )
+        if not due_now:
+            continue
+        report["due"] += 1
+
+        for learner in await learners_repo.for_family(db, family_id):
+            learner_id = learner["_id"]
+            days = await events_repo.practice_days(db, family_id, learner_id)
+            away = streaks.days_away(days, today=today)
+            if away is None or away < threshold:
+                continue
+
+            name = learner.get("displayName", "Your child")
+            values = {"learner": name, "away": _how_long(away)}
+            title, body = await push.wording(db, ABSENCE, values)
+            gap = days[0]
+            report["absences"] += 1
+
+            if preview:
+                report.setdefault("would_send", []).append(
+                    {
+                        "familyId": family_id,
+                        "learnerId": learner_id,
+                        "learner": name,
+                        "title": title,
+                        "body": body,
+                        "away": away,
+                        "alreadySent": await push_runs.was_claimed(
+                            db, kind=ABSENCE, recipient_id=f"{learner_id}:{due_now[0]}", date_key=gap
+                        ),
+                    }
+                )
+                continue
+
+            path = f"/children/{learner_id}"
+            for user_id in due_now:
+                # Per child *and* per parent, like a reminder: two parents with
+                # two hours each hear it at their own.
+                if not await push_runs.claim(
+                    db, kind=ABSENCE, recipient_id=f"{learner_id}:{user_id}", date_key=gap
+                ):
+                    continue
+                report["sent"] += await push.send(
+                    db,
+                    to=push.Recipient(family_id=family_id, user_id=user_id),
+                    kind=ABSENCE,
+                    title=title,
+                    body=body,
+                    path=path,
+                    tag=f"absence:{learner_id}",
+                )
+                report["emailed"] += await email_notify.send(
+                    db, kind=ABSENCE, values=values, family_id=family_id, user_ids=[user_id], path=path
+                )
+
+    return report
+
+
+async def daily_digest(
+    db: AsyncIOMotorDatabase,
+    *,
+    at: datetime | None = None,
+    cursor: str | None = None,
+    limit: int = FAMILY_PAGE,
+    preview: bool = False,
+) -> dict[str, Any]:
+    """Email a parent who asked for one a note of their children's day.
+
+    Email only, at the digest hour each parent chose, and only on a day with
+    something in it: a digest that says nobody practised is the nag §1 rules
+    out, and the absence message is already the one that speaks to a gap.
+    """
+    at = at or utc_now()
+    report: dict[str, Any] = {
+        "job": "daily-digest",
+        "preview": preview,
+        "families": 0,
+        "due": 0,
+        "digests": 0,
+        "sent": 0,
+        "emailed": 0,
+        "cursor": None,
+    }
+
+    if not preview and not (await notify_jobs.get(db, "daily-digest"))["enabled"]:
+        report["skipped"] = JOB_OFF
+        return report
+    if not await email_notify.deployment_allows(db, DAILY_DIGEST):
+        report["skipped"] = "the deployment does not send a daily digest"
+        return report
+
+    families = await _every_family(db, after=cursor, limit=limit)
+    report["families"] = len(families)
+    if len(families) == limit:
+        report["cursor"] = families[-1]
+
+    for family_id in families:
+        people = await push.adults_of(db, family_id)
+        if not people:
+            continue
+        chosen = await notify_prefs.for_users(db, people, channel=email_notify.CHANNEL)
+        wanting = [user_id for user_id in people if email_notify.wanted_by(DAILY_DIGEST, chosen.get(user_id))]
+        if not wanting:
+            continue
+        schedules = await notify_schedule.for_users(db, wanting)
+        offset = await _family_clock(db, family_id, schedules)
+        if offset is None:
+            continue
+
+        local = _local(at, offset)
+        today = local.date().isoformat()
+        due_now = (
+            wanting
+            if preview
+            else [user_id for user_id in wanting if schedules[user_id]["digestHour"] == local.hour]
+        )
+        if not due_now:
+            continue
+        report["due"] += 1
+
+        lines: list[str] = []
+        for learner in await learners_repo.for_family(db, family_id):
+            rounds, spent_ms = await events_repo.rounds_and_time(db, family_id, learner["_id"], [today])
+            if not rounds:
+                continue
+            line = f"• {learner.get('displayName', 'Your child')}: {_rounds_text(rounds)}, {_time_text(spent_ms)}"
+            if rounds >= await milestones.goal_for(db, family_id, learner["_id"]):
+                line += " — today's goal met"
+            lines.append(line)
+        if not lines:
+            continue
+
+        summary = "\n".join(lines)
+        report["digests"] += 1
+        if preview:
+            report.setdefault("would_send", []).append(
+                {"familyId": family_id, "title": "Daily digest", "body": summary, "people": len(due_now)}
+            )
+            continue
+
+        for user_id in due_now:
+            if not await push_runs.claim(db, kind=DAILY_DIGEST, recipient_id=user_id, date_key=today):
+                continue
+            report["emailed"] += await email_notify.send(
+                db, kind=DAILY_DIGEST, values={"summary": summary}, family_id=family_id, user_ids=[user_id]
+            )
+
+    return report
+
+
+async def run_to_end(job: Any, db: AsyncIOMotorDatabase, *, at: datetime | None = None) -> dict[str, Any]:
+    """Page a family job through every family, adding up what it did. Never raises.
+
+    For the jobs that ride another job's hourly call: there is no scheduler
+    retry of their own to finish a run cut short, so this one does not stop at
+    the first page, and a failure part way is logged and left to the next tick —
+    which the ledger makes safe to repeat.
+    """
+    total: dict[str, Any] = {}
+    cursor: str | None = None
+    try:
+        while True:
+            report = await job(db, at=at, cursor=cursor)
+            for key, value in report.items():
+                if key not in total:
+                    total[key] = value
+                elif isinstance(value, int) and not isinstance(value, bool):
+                    total[key] += value
+            cursor = report.get("cursor")
+            if not cursor or report.get("skipped"):
+                break
+    except Exception:  # noqa: BLE001 — the next hourly tick continues it
+        log.exception("%s failed part way; the next tick continues it", getattr(job, "__name__", job))
+        total["failed"] = True
+    total["cursor"] = None
+    return total
 
 
 async def token_sweep(db: AsyncIOMotorDatabase) -> dict[str, Any]:

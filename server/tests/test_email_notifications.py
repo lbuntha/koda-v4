@@ -164,7 +164,13 @@ async def test_preferences_offer_email_only_for_what_is_emailed(client, parent, 
 
     assert body["emailEnabled"] is True
     assert body["emailVerified"] is True
-    assert {k["id"] for k in body["emailKinds"]} == {"system.announcement"}
+    assert {k["id"] for k in body["emailKinds"]} == {
+        "system.announcement",
+        "learn.weekly_summary",
+        "learn.absence",
+        "learn.daily_digest",
+        "learn.skill_published",
+    }
     refused = await client.put(
         "/push/preferences", headers=parent, json={"kind": "device.new_signin", "on": False, "channel": "email"}
     )

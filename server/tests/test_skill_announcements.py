@@ -188,7 +188,9 @@ async def test_the_operator_switch_stops_every_announcement(db, family, seeded):
     from app.repos import system as system_repo
 
     await publish(db, "color-sweeper", "Colour Sweeper")
+    # Both channels: with only push off, a parent who asked would still be emailed.
     await system_repo.set_value(db, "push.skillPublished", False, "u_admin")
+    await system_repo.set_value(db, "email.skillPublished", False, "u_admin")
 
     report = await task_service.skill_announcements(db, at=MORNING_UTC)
 

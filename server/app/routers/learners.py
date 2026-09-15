@@ -1,7 +1,7 @@
 """Parent-managed child profiles and device pairing."""
 
 from datetime import timedelta
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends
 from pydantic import Field
@@ -11,6 +11,7 @@ from app.errors import Conflict, NotFound, PaymentRequired
 from app.models.auth import Principal
 from app.models.common import Model, now
 from app.repos import learners
+from app.services import family_overview
 from app.services.codes import hash_code, new_code
 from app.services.entitlements import entitlements
 
@@ -63,6 +64,19 @@ async def listing(db: Db, p: CanRead) -> dict[str, list[LearnerOut]]:
     for row in rows:
         row["avatarSeed"] = await learners.ensure_avatar_seed(db, row["_id"], p.family_id)
     return {"learners": [_out(row) for row in rows]}
+
+
+@router.get("/overview")
+async def overview(db: Db, p: CanCreate) -> dict[str, Any]:
+    """Each child's day, week and gap, for the "Your children" section on Home.
+
+    `learner:create`, the right a parent holds and a child's session does not:
+    this is a view of every child in the family, which is a parent's to read.
+    Staff with no family get an empty list rather than a refusal.
+    """
+    if p.family_id is None or p.learner_id:
+        return {"children": [], "attention": None, "generatedAt": now().isoformat(), "absenceDays": 7}
+    return await family_overview.for_family(db, p.family_id, p.subject_id)
 
 
 @router.post("", status_code=201)

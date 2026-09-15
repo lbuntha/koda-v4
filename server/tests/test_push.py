@@ -229,9 +229,10 @@ async def test_every_declared_kind_now_has_a_sender(db):
     which is the point: the failure belongs at the declaration, not on the
     screen of somebody waiting for a notification that cannot come.
     """
-    from app.push_defaults import BY_KIND, SENDS
+    from app.push_defaults import BY_KIND, EMAIL_SENDS, SENDS
 
-    assert SENDS == set(BY_KIND), "a declared kind with no sender is a switch that does nothing"
+    # On some channel: the daily digest is email only, and is not a push kind.
+    assert SENDS | EMAIL_SENDS == set(BY_KIND), "a declared kind with no sender is a switch that does nothing"
 
 
 async def test_an_undeclared_kind_is_still_refused(db):
@@ -399,6 +400,8 @@ async def test_only_kinds_with_a_sender_are_offered(client, parent, seeded):
         "learn.skill_published",
         # Sent by hand from Notification Settings → Announce.
         "system.announcement",
+        # Sent once per gap by the absence check.
+        "learn.absence",
     }
 
 

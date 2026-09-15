@@ -63,6 +63,8 @@ SENDS: frozenset[str] = frozenset(
         "system.broadcast",
         # Written and sent by hand from Notification Settings → Announce.
         "system.announcement",
+        # Phase 2: a child away longer than the operator's threshold, once per gap.
+        "learn.absence",
     }
 )
 
@@ -70,16 +72,20 @@ SENDS: frozenset[str] = frozenset(
 #:
 #: The same rule as `SENDS`, one channel over: an email switch appears on a
 #: screen in the same commit as the code that sends it. Phase 1 of the parent
-#: notifications plan is the account notices and an operator's announcement;
-#: the weekly summary and the progress kinds join when their email senders do.
-#: `learn.skill_published` waits on purpose — its job only visits families with
-#: a browser registered, so an email-only family would never hear of a skill.
+#: notifications plan was the account notices and an operator's announcement.
+#: Phase 2 adds the weekly summary, the absence message, the daily digest and
+#: new skills — each of whose jobs now visits every family, not only the ones
+#: with a browser, so an email-only family is reached.
 EMAIL_SENDS: frozenset[str] = frozenset(
     {
         "device.new_signin",
         "family.invite_redeemed",
         "plan.request_decided",
         "system.announcement",
+        "learn.weekly_summary",
+        "learn.absence",
+        "learn.daily_digest",
+        "learn.skill_published",
     }
 )
 
@@ -163,11 +169,24 @@ DEFAULT_KINDS: list[dict[str, Any]] = [
         # "practised on 1 days this week" is the sentence that gets a product
         # laughed at. `{days}` stays a number for `streak_ending`, where it is
         # only ever plural.
-        "body": '{learner} practised {practice} this week.',
+        "body": '{learner} practised {practice} this week — {rounds_done}, {time}.',
         #: What a sender may substitute. Anything else an operator types is
         #: left visible rather than guessed at, so a typo shows up in the
         #: preview instead of on somebody's lock screen.
-        "placeholders": ['learner', 'practice'],
+        #:
+        #: `{rounds_done}` and `{time}` carry their nouns ("12 rounds", "38
+        #: minutes") for the reason `{practice}` does. What was mastered and the
+        #: next step wait until the server can judge mastery itself.
+        "placeholders": ['learner', 'practice', 'rounds_done', 'time'],
+        #: One email per parent for the whole family, rather than one per child:
+        #: `{summary}` is a line per child who practised.
+        "email": {
+            "subject": "Your family's week on Koda",
+            "body": "Here's how the week went.\n\n{summary}\n\nSee each child's progress:\n{app_link}",
+            "placeholders": ["summary"],
+            "settingId": "email.weeklySummary",
+            "default": True,
+        },
         #: Filled by the sender but gone from the shipped wording. Accepted when
         #: an operator saves, so an edit made against the old body still saves.
         "accepts": ["days"],
@@ -203,6 +222,14 @@ DEFAULT_KINDS: list[dict[str, Any]] = [
         # Courtesy, not account: it is news rather than a fact about somebody's
         # own account, so it waits for quiet hours to end like the rest.
         "class": "courtesy",
+        "email": {
+            "subject": "New on Koda: {skill}",
+            "body": "{skill} has just been published. Open Koda to try it:\n{app_link}",
+            "settingId": "email.skillPublished",
+            # Off: one push per skill is news; an email per skill is a newsletter
+            # nobody asked for. A parent can still ask.
+            "default": False,
+        },
         "label": "New skill published",
         "settingId": "push.skillPublished",
         # On, unlike the reminders. A family cannot ask for a subject nobody has
@@ -279,6 +306,51 @@ DEFAULT_KINDS: list[dict[str, Any]] = [
         "settingId": "push.announcements",
         "familyDefault": True,
     },
+    {
+        # A child away longer than the operator's threshold (Events → Schedules,
+        # seven days out of the box). Once per gap: the claim is keyed on the
+        # last day practised, so nothing repeats until a new gap begins.
+        "kindId": "learn.absence",
+        "title": "{learner} hasn't practised in {away}",
+        "body": "A 5-minute round is an easy way back in.",
+        "placeholders": ["learner", "away"],
+        "email": {
+            "subject": "{learner} hasn't practised in {away}",
+            "body": (
+                "It's been {away} since {learner}'s last round on Koda.\n\n"
+                "A short round is the easiest way back in:\n{app_link}\n\n"
+                "Taking a break on purpose? That's fine — this is only sent once."
+            ),
+            "placeholders": ["learner", "away"],
+            "settingId": "email.absence",
+            "default": True,
+        },
+        "class": "courtesy",
+        "label": "Hasn't practised for a while",
+        "settingId": "push.absence",
+        # On, by the parent's own choice in the plan: a real gap is exactly what
+        # a parent who hands over the tablet wants to hear about, once.
+        "familyDefault": True,
+    },
+    {
+        # Email only — it is not in `SENDS`, so it never rings a phone. A note of
+        # the day at the hour a parent picks, and only on a day with practice.
+        "kindId": "learn.daily_digest",
+        "title": "Today on Koda",
+        "body": "{summary}",
+        "placeholders": ["summary"],
+        "email": {
+            "subject": "Today on Koda for {family}",
+            "body": "Here's what happened today.\n\n{summary}\n\nSee each child's progress:\n{app_link}",
+            "placeholders": ["summary"],
+            "settingId": "email.dailyDigest",
+            "default": False,
+        },
+        "class": "courtesy",
+        "label": "Daily digest",
+        "settingId": None,
+        "familyDefault": False,
+    },
 ]
 
 #: `kindId` -> its definition. A send names a kind, and an unknown one is a bug
@@ -316,6 +388,9 @@ SAMPLES = {
     "app_link": "https://learn-with-koda.web.app",
     "kind_label": "Announcements",
     "unsubscribe_link": "https://learn-with-koda.web.app/v1/notifications/unsubscribe?token=…",
+    "rounds_done": "12 rounds",
+    "time": "38 minutes",
+    "summary": "• Mia: practised on 4 days — 12 rounds, 38 minutes\n• Leo: practised on 2 days — 5 rounds, 14 minutes",
 }
 
 #: Longest a notification may be. A lock screen truncates well before this;
@@ -373,6 +448,9 @@ def placeholders_for(kind: str, channel: str = "push") -> list[str]:
     definition = BY_KIND.get(kind, {})
     names = list(definition.get("placeholders", []))
     if channel == "email":
+        # An email may fill different things from its push — the weekly summary
+        # is one letter for the family, not one per child.
+        names = list((definition.get("email") or {}).get("placeholders", names))
         names += [name for name in EMAIL_COMMON_PLACEHOLDERS if name not in names]
     return names
 

@@ -344,6 +344,8 @@ export interface NotificationTemplate {
   edited: boolean;
   /** The email version, when this build emails the kind at all. */
   email?: EmailWording | null;
+  /** Which channels it goes on. The daily digest is email only. */
+  channels?: NotificationChannel[];
 }
 
 export interface EmailWording {
@@ -523,7 +525,26 @@ export interface AnnouncementLine {
   theirLocalHour: number;
 }
 
-export type WouldSend = SummaryLine | ReminderLine | AnnouncementLine;
+export interface AbsenceLine {
+  familyId: string;
+  learnerId: string;
+  learner: string | null;
+  title: string;
+  body: string;
+  /** Whole days since the child last practised. */
+  away: number;
+  alreadySent: boolean;
+}
+
+export interface DigestLine {
+  familyId: string;
+  title: string;
+  body: string;
+  /** Parents whose digest hour this is. */
+  people: number;
+}
+
+export type WouldSend = SummaryLine | ReminderLine | AnnouncementLine | AbsenceLine | DigestLine;
 
 export interface JobReport {
   job: string;
@@ -543,6 +564,10 @@ export interface JobReport {
   /** The announcement run's counts: skills found, families told. */
   skills?: number;
   announcements?: number;
+  /** The absence check's and the digest's counts. */
+  absences?: number;
+  digests?: number;
+  emailed?: number;
   would_send?: WouldSend[];
   /** The sweep's counts. */
   tokens?: number;
@@ -751,6 +776,8 @@ export interface NotificationSchedule {
   /** The window nothing courtesy-class arrives in. Equal values mean none. */
   quietFrom: number;
   quietTo: number;
+  /** The hour the daily digest email goes, for a parent who asked for one. */
+  digestHour?: number;
 }
 
 export async function notificationSchedule(): Promise<NotificationSchedule> {
@@ -833,6 +860,8 @@ export interface NotifyJob {
   /** Monday is 0 — the server's numbering. Only the weekly summary has one. */
   weekday: number | null;
   hour: number | null;
+  /** Days away before a parent is told. Only the absence check has one. */
+  days?: number | null;
   lastRunAt: string | null;
   lastSent: number | null;
   lastSkipped: string | null;
@@ -862,7 +891,7 @@ export async function setNotifySwitch(settingId: string, value: boolean): Promis
 
 export async function setNotifyJob(
   job: string,
-  patch: Partial<Pick<NotifyJob, "enabled" | "weekday" | "hour">>,
+  patch: Partial<Pick<NotifyJob, "enabled" | "weekday" | "hour" | "days">>,
 ): Promise<NotifyEvents> {
   return await request<NotifyEvents>(`/system/notify/jobs/${job}`, {
     method: "PATCH",

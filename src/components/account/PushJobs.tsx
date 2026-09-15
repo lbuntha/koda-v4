@@ -5,7 +5,9 @@ import { UIDataTable, UISectionHeader } from "../ui";
 import {
   notificationJobs,
   runNotificationJob,
+  type AbsenceLine,
   type AnnouncementLine,
+  type DigestLine,
   type JobDefinition,
   type JobRun,
   type ReminderLine,
@@ -71,11 +73,14 @@ const EmptyPreview: React.FC<{ job: string; families?: number }> = ({ job, famil
       ? "a child who has already practised today is deliberately left out — a reminder is for the one who has not"
       : job === "skill-announcements"
         ? "every family here has already been told about what was published"
-        : "a child who has not practised this week is deliberately left out";
+        : job === "absence-check"
+          ? "no child has been away longer than the threshold set in Events"
+          : job === "daily-digest"
+            ? "nobody who asked for a digest has a child who practised today"
+            : "a child who has not practised this week is deliberately left out";
   return (
     <p className="text-xs text-muted">
-      Nothing to send. Looked at {families} {families === 1 ? "family" : "families"} with a browser
-      registered — {reason}.
+      Nothing to send. Looked at {families} {families === 1 ? "family" : "families"} — {reason}.
     </p>
   );
 };
@@ -107,6 +112,22 @@ const lineNote = (job: string, line: WouldSend): { key: string; note: string; se
       key: `${l.familyId}-${l.skillId}`,
       note: `${l.skill} · ${String(l.theirLocalHour).padStart(2, "0")}:00 their time`,
       sent: l.alreadySent,
+    };
+  }
+  if (job === "absence-check") {
+    const l = line as AbsenceLine;
+    return {
+      key: `${l.familyId}-${l.learnerId}`,
+      note: `away ${l.away} ${l.away === 1 ? "day" : "days"}`,
+      sent: l.alreadySent,
+    };
+  }
+  if (job === "daily-digest") {
+    const l = line as DigestLine;
+    return {
+      key: l.familyId,
+      note: `${l.people} ${l.people === 1 ? "parent" : "parents"} asked for it`,
+      sent: false,
     };
   }
   const l = line as SummaryLine;
@@ -158,9 +179,17 @@ const Outcome: React.FC<{ run: JobRun }> = ({ run }) => {
           ? lines.length === 1
             ? "announcement"
             : "announcements"
-          : lines.length === 1
-            ? "summary"
-            : "summaries";
+          : run.job === "absence-check"
+            ? lines.length === 1
+              ? "absence message"
+              : "absence messages"
+            : run.job === "daily-digest"
+              ? lines.length === 1
+                ? "digest"
+                : "digests"
+              : lines.length === 1
+                ? "summary"
+                : "summaries";
 
     return (
       <div className="space-y-2">
@@ -264,6 +293,33 @@ const Outcome: React.FC<{ run: JobRun }> = ({ run }) => {
         </p>
         <Undelivered composed={r.announcements ?? 0} sent={r.sent} />
       </div>
+    );
+  }
+
+  if (run.job === "absence-check") {
+    return r.absences ? (
+      <p className="text-xs text-ink">
+        {r.absences} absence {r.absences === 1 ? "message" : "messages"} composed, {r.sent ?? 0} pushed and{" "}
+        {r.emailed ?? 0} emailed.
+      </p>
+    ) : (
+      <p className="text-xs text-ink">
+        Nobody is due one. It goes once, at each parent&rsquo;s reminder hour, for a child away longer
+        than the threshold in Events. Press <strong>Preview</strong> to see who would be told.
+      </p>
+    );
+  }
+
+  if (run.job === "daily-digest") {
+    return r.digests ? (
+      <p className="text-xs text-ink">
+        {r.digests} {r.digests === 1 ? "digest" : "digests"} composed, {r.emailed ?? 0} emailed.
+      </p>
+    ) : (
+      <p className="text-xs text-ink">
+        No digest was due. It goes at each parent&rsquo;s digest hour, only to parents who asked, and
+        only on a day a child practised.
+      </p>
     );
   }
 

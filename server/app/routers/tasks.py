@@ -94,6 +94,42 @@ async def daily_reminders(
         )
     report = await task_service.daily_reminders(db, at=at, cursor=cursor, limit=limit)
     await notify_jobs.note_run(db, "daily-reminders", report)
+
+    # The absence check and the daily digest ride this hourly call, so a
+    # deployment needs no new Cloud Scheduler job for them. Only on the first
+    # page: a caller working through reminder pages must not repeat them.
+    if cursor is None:
+        for job, run in (
+            ("absence-check", task_service.absence_check),
+            ("daily-digest", task_service.daily_digest),
+        ):
+            sub = await task_service.run_to_end(run, db, at=at)
+            await notify_jobs.note_run(db, job, sub)
+            report[job] = sub
+    return report
+
+
+@router.post("/absence-check")
+async def absence_check(db: Db, at: Annotated[datetime | None, Query()] = None) -> dict:
+    """The absence check on its own. `daily-reminders` already runs it hourly."""
+    if at is not None and not settings().is_dev:
+        raise Forbidden(
+            "The clock can only be moved in development.", "task_time_travel_forbidden"
+        )
+    report = await task_service.run_to_end(task_service.absence_check, db, at=at)
+    await notify_jobs.note_run(db, "absence-check", report)
+    return report
+
+
+@router.post("/daily-digest")
+async def daily_digest(db: Db, at: Annotated[datetime | None, Query()] = None) -> dict:
+    """The daily digest on its own. `daily-reminders` already runs it hourly."""
+    if at is not None and not settings().is_dev:
+        raise Forbidden(
+            "The clock can only be moved in development.", "task_time_travel_forbidden"
+        )
+    report = await task_service.run_to_end(task_service.daily_digest, db, at=at)
+    await notify_jobs.note_run(db, "daily-digest", report)
     return report
 
 

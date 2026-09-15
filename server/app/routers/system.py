@@ -300,6 +300,8 @@ RUNNABLE_JOBS = {
     "weekly-summary": "Sunday's summary, for whoever it is Sunday evening for.",
     "daily-reminders": "A nudge for a child who has not practised, at the hour their parent chose.",
     "skill-announcements": "Tell every family about a skill published in the last two days.",
+    "absence-check": "Tell a parent once when a child has been away longer than the threshold.",
+    "daily-digest": "Email each parent who asked for one a note of their children's day.",
     "token-sweep": "Delete dead tokens, old notices and spent claims.",
 }
 
@@ -357,6 +359,10 @@ async def push_job_run(
         preview = False
     elif job == "skill-announcements":
         report = await task_service.skill_announcements(db, preview=preview)
+    elif job == "absence-check":
+        report = await task_service.absence_check(db, preview=preview)
+    elif job == "daily-digest":
+        report = await task_service.daily_digest(db, preview=preview)
     elif job == "daily-reminders":
         report = await task_service.daily_reminders(db, preview=preview)
     else:
@@ -780,6 +786,8 @@ class TemplateOut(Model):
     edited: bool
     #: The email version, when this build emails the kind at all.
     email: EmailWordingOut | None = None
+    #: Which channels this kind is sent on — the daily digest is email only.
+    channels: list[str] = Field(default_factory=lambda: ["push"])
 
 
 class TemplatesOut(Model):
@@ -808,6 +816,8 @@ async def _templates(db) -> TemplatesOut:
                 body=edits.get(kind_id, {}).get("body") or kind["body"],
                 placeholders=kind.get("placeholders", []),
                 edited=kind_id in edits,
+                channels=(["push"] if kind_id in SENDS or kind_id not in EMAIL_SENDS else [])
+                + (["email"] if email_default else []),
                 email=EmailWordingOut(
                     subject=email_edit.get("subject") or email_default["subject"],
                     body=email_edit.get("body") or email_default["body"],
@@ -960,6 +970,8 @@ KIND_JOBS = {
     "learn.practice_reminder": "daily-reminders",
     "learn.streak_ending": "daily-reminders",
     "learn.skill_published": "skill-announcements",
+    "learn.absence": "absence-check",
+    "learn.daily_digest": "daily-digest",
 }
 
 
@@ -992,6 +1004,8 @@ class NotifyJobOut(Model):
     #: Monday is 0. Only the weekly summary has a day and an hour to move.
     weekday: int | None = None
     hour: int | None = None
+    #: Days away before a parent is told. Only the absence check has one.
+    days: int | None = None
     last_run_at: str | None = Field(default=None, alias="lastRunAt")
     last_sent: int | None = Field(default=None, alias="lastSent")
     last_skipped: str | None = Field(default=None, alias="lastSkipped")
@@ -1014,8 +1028,9 @@ async def _events(db) -> EventsOut:
     events: list[EventOut] = []
     for kind in DEFAULT_KINDS:
         kind_id = kind["kindId"]
-        if kind_id not in SENDS:
+        if kind_id not in SENDS and kind_id not in EMAIL_SENDS:
             continue
+        pushable = kind_id in SENDS
         push_setting = kind.get("settingId")
         email_default = kind.get("email") if kind_id in EMAIL_SENDS else None
         email_setting = (email_default or {}).get("settingId")
@@ -1025,10 +1040,10 @@ async def _events(db) -> EventsOut:
                 label=kind["label"],
                 **{"class": kind["class"]},
                 push=ChannelOut(
-                    available=True,
-                    settingId=push_setting,
-                    on=await _switch(db, push_setting),
-                    locked=push_setting is None,
+                    available=pushable,
+                    settingId=push_setting if pushable else None,
+                    on=pushable and await _switch(db, push_setting),
+                    locked=pushable and push_setting is None,
                 ),
                 email=ChannelOut(
                     available=email_default is not None,
@@ -1064,6 +1079,7 @@ class NotifyJobIn(Model):
     enabled: bool | None = None
     weekday: int | None = Field(default=None, ge=0, le=6)
     hour: int | None = Field(default=None, ge=0, le=23)
+    days: int | None = Field(default=None, ge=1, le=60)
 
 
 @router.patch("/notify/jobs/{job}")
@@ -1075,8 +1091,16 @@ async def notify_job_write(job: str, body: NotifyJobIn, db: Db, p: CanOperate) -
         raise AppError(
             400, "job_not_timed", "This job has no single time to move — it runs on each person's own."
         )
+    if body.days is not None and job not in notify_jobs.THRESHOLD:
+        raise AppError(400, "job_has_no_threshold", "Only the absence check has a number of days to set.")
     await notify_jobs.save(
-        db, job, enabled=body.enabled, weekday=body.weekday, hour=body.hour, updated_by=p.subject_id
+        db,
+        job,
+        enabled=body.enabled,
+        weekday=body.weekday,
+        hour=body.hour,
+        days=body.days,
+        updated_by=p.subject_id,
     )
     return await _events(db)
 

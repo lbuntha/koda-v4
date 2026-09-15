@@ -127,6 +127,32 @@ describe("the events screen", () => {
     await waitFor(() => expect(setNotifyJob).toHaveBeenCalledWith("weekly-summary", { weekday: 5 }));
   });
 
+  it("sets how many days away before a parent is told", async () => {
+    const withAbsence = {
+      ...events,
+      jobs: [
+        ...events.jobs,
+        {
+          id: "absence-check",
+          description: "Tell a parent once.",
+          enabled: true,
+          weekday: null,
+          hour: null,
+          days: 7,
+          lastRunAt: null,
+          lastSent: null,
+          lastSkipped: null,
+        },
+      ],
+    };
+    notifyEvents.mockResolvedValue(withAbsence);
+    render(<NotifyEventsPanel />);
+
+    fireEvent.change(await screen.findByLabelText("Absence check days"), { target: { value: "14" } });
+
+    await waitFor(() => expect(setNotifyJob).toHaveBeenCalledWith("absence-check", { days: 14 }));
+  });
+
   it("says when email is only being logged", async () => {
     render(<NotifyEventsPanel />);
 

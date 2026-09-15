@@ -1000,6 +1000,11 @@ export default function App() {
                 setInRound(false);
                 setActiveTab("game");
               }}
+              onOpenChild={(learnerId) => {
+                // Tab first: leaving the Children page clears the open record.
+                setActiveTab("children");
+                setChildReport(learnerId);
+              }}
             />
           )}
 

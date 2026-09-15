@@ -24,6 +24,10 @@ JOB_DEFAULTS: dict[str, dict[str, Any]] = {
     "weekly-summary": {"enabled": True, "weekday": 6, "hour": 18},
     "daily-reminders": {"enabled": True},
     "skill-announcements": {"enabled": True},
+    # Phase 2. Both ride the hourly `daily-reminders` call, so neither needs a
+    # Cloud Scheduler job of its own.
+    "absence-check": {"enabled": True, "days": 7},
+    "daily-digest": {"enabled": True},
     "token-sweep": {"enabled": True},
 }
 
@@ -31,6 +35,10 @@ JOB_DEFAULTS: dict[str, dict[str, Any]] = {
 #: reminders go at each parent's own hour, announcements as soon as there is a
 #: skill to announce, and the sweep at night when nothing notices it.
 TIMED = frozenset({"weekly-summary"})
+
+#: The jobs with a number of days an operator can set — how long a child is
+#: away before a parent is told.
+THRESHOLD = frozenset({"absence-check"})
 
 
 def _clamp(value: Any, low: int, high: int, fallback: int) -> int:
@@ -49,6 +57,7 @@ def _merge(job: str, row: dict[str, Any]) -> dict[str, Any]:
         "enabled": bool(row.get("enabled", base["enabled"])),
         "weekday": _clamp(row.get("weekday"), 0, 6, base["weekday"]) if job in TIMED else None,
         "hour": _clamp(row.get("hour"), 0, 23, base["hour"]) if job in TIMED else None,
+        "days": _clamp(row.get("days"), 1, 60, base["days"]) if job in THRESHOLD else None,
         "lastRunAt": last.isoformat() if last else None,
         "lastSent": row.get("lastSent"),
         "lastSkipped": row.get("lastSkipped"),
@@ -72,10 +81,13 @@ async def save(
     enabled: bool | None = None,
     weekday: int | None = None,
     hour: int | None = None,
+    days: int | None = None,
     updated_by: str | None = None,
 ) -> dict[str, Any]:
     """Change what was named and leave the rest. Returns the whole job."""
     patch: dict[str, Any] = {"updatedAt": now(), "updatedBy": updated_by}
+    if job in THRESHOLD and days is not None:
+        patch["days"] = _clamp(days, 1, 60, JOB_DEFAULTS[job]["days"])
     if enabled is not None:
         patch["enabled"] = enabled
     if job in TIMED and weekday is not None:

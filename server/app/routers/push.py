@@ -269,6 +269,8 @@ class ScheduleOut(Model):
     #: The window nothing courtesy-class may arrive in. Equal values mean none.
     quiet_from: int = Field(alias="quietFrom")
     quiet_to: int = Field(alias="quietTo")
+    #: When the daily digest email goes, for a parent who asked for one.
+    digest_hour: int = Field(default=19, alias="digestHour")
 
 
 class ScheduleIn(Model):
@@ -277,6 +279,7 @@ class ScheduleIn(Model):
     reminder_hour: int | None = Field(default=None, alias="reminderHour", ge=0, le=23)
     quiet_from: int | None = Field(default=None, alias="quietFrom", ge=0, le=23)
     quiet_to: int | None = Field(default=None, alias="quietTo", ge=0, le=23)
+    digest_hour: int | None = Field(default=None, alias="digestHour", ge=0, le=23)
     #: What the browser reports about itself, so a job can tell whose evening it
     #: is. Sent by the client rather than asked for: the alternative is a
     #: timezone picker, which is a question nobody should be asked twice.
@@ -287,7 +290,10 @@ class ScheduleIn(Model):
 
 def _schedule_out(row: dict) -> ScheduleOut:
     return ScheduleOut(
-        reminderHour=row["reminderHour"], quietFrom=row["quietFrom"], quietTo=row["quietTo"]
+        reminderHour=row["reminderHour"],
+        quietFrom=row["quietFrom"],
+        quietTo=row["quietTo"],
+        digestHour=row.get("digestHour", 19),
     )
 
 
@@ -315,6 +321,7 @@ async def set_schedule(body: ScheduleIn, db: Db, p: CurrentPrincipal) -> Schedul
             quiet_from=body.quiet_from,
             quiet_to=body.quiet_to,
             tz_offset_minutes=body.tz_offset_minutes,
+            digest_hour=body.digest_hour,
         )
     )
 

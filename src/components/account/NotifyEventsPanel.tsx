@@ -35,6 +35,8 @@ const JOB_NAMES: Record<string, string> = {
   "weekly-summary": "Weekly summary",
   "daily-reminders": "Daily reminders",
   "skill-announcements": "New skill announcements",
+  "absence-check": "Absence check",
+  "daily-digest": "Daily digest",
   "token-sweep": "Nightly clean-up",
 };
 
@@ -51,6 +53,10 @@ export const whenOf = (job: NotifyJob | undefined): string => {
   if (job.weekday !== null && job.hour !== null) {
     return `${WEEKDAYS[job.weekday]} · ${hourLabel(job.hour)}, each family's own time`;
   }
+  if (job.id === "absence-check") {
+    return `After ${job.days ?? 7} days away, at each parent's reminder hour, once`;
+  }
+  if (job.id === "daily-digest") return "At each parent's digest hour, on days with practice";
   if (job.id === "daily-reminders") return "At the hour each parent chose";
   if (job.id === "skill-announcements") return "Within the hour a skill is published";
   return "Nightly";
@@ -130,7 +136,10 @@ export const NotifyEventsPanel: React.FC = () => {
     setBusy(false);
   };
 
-  const saveJob = async (job: string, patch: Partial<Pick<NotifyJob, "enabled" | "weekday" | "hour">>) => {
+  const saveJob = async (
+    job: string,
+    patch: Partial<Pick<NotifyJob, "enabled" | "weekday" | "hour" | "days">>,
+  ) => {
     setBusy(true);
     setError(null);
     try {
@@ -300,6 +309,27 @@ export const NotifyEventsPanel: React.FC = () => {
                       ))}
                     </select>
                     <span>in each family&rsquo;s own time</span>
+                  </div>
+                )}
+                {typeof job.days === "number" && (
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
+                    <span>Tell a parent after</span>
+                    <select
+                      aria-label={`${name} days`}
+                      value={job.days}
+                      disabled={busy || !job.enabled}
+                      onChange={(e) => void saveJob(job.id, { days: Number(e.target.value) })}
+                      className={select}
+                    >
+                      {[...new Set([3, 5, 7, 10, 14, 21, 30, job.days])]
+                        .sort((a, b) => a - b)
+                        .map((days) => (
+                          <option key={days} value={days}>
+                            {days}
+                          </option>
+                        ))}
+                    </select>
+                    <span>days without practice</span>
                   </div>
                 )}
                 <p className="text-[11px] text-muted">{lastRunOf(job)}</p>

@@ -79,6 +79,11 @@ async def _goal_for(db: AsyncIOMotorDatabase, family_id: str, learner_id: str) -
     return min(20, max(1, goal))
 
 
+#: The family's own daily goal for one child — for the digest and the parent's
+#: overview, which ask the same question this module does.
+goal_for = _goal_for
+
+
 async def goals_reached(
     db: AsyncIOMotorDatabase, family_id: str, inserted: list[dict[str, Any]]
 ) -> int:

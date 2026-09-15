@@ -241,6 +241,8 @@ behind it, which is a release, not a row.
 | `learn.skill_published` | Parents | On | Courtesy | `skill:{skillId}` |
 | `system.broadcast` | Staff | On | Operator | — |
 | `system.announcement` | Families, staff or both — picked per send | On | Courtesy | `announcement:{id}` |
+| `learn.absence` | Parents, push and email | On | Courtesy | `absence:{learnerId}` |
+| `learn.daily_digest` | Parents, **email only** | **Off** | Courtesy | — |
 
 **`system.announcement` is sent by hand.** An operator writes a title and a
 message under Notification Settings → Announce, picks an audience, checks how
@@ -667,6 +669,19 @@ reads the row and decides. A switched-off job answers
 `{"skipped": "switched off in Notification Settings → Events"}`, and every run
 (scheduled or by hand) notes its time on the row so the screen can say when it
 last ran.
+
+**Phase 2 needs no new Scheduler job.** The absence check (`learn.absence`,
+once per gap, keyed on the last day practised, after `absence-check.days` — seven
+by default) and the daily digest (`learn.daily_digest`, email only, at each
+parent's `digestHour`, only on a day with practice) run from the hourly
+`daily-reminders` call, on its first page, paged to the end. Each also has its
+own `/v1/tasks/*` route and a Run now under Scheduled.
+
+**The weekly summary and skill announcements visit every family**, not only
+families with a browser: both now go by email too, and a family that never
+turned push on still gets the summary under the bell. The weekly summary is one
+email per parent with a line per child who practised (days, rounds, minutes);
+what was mastered and the next step wait for server-side mastery.
 
 **An announcement is a job for the same reason a summary is.** Publishing a
 skill is one operator pressing one button, and telling every family about it is
