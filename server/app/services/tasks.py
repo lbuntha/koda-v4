@@ -36,12 +36,13 @@ from app.repos import (
     notify_jobs,
     notify_prefs,
     notify_schedule,
+    progress_marks,
     push_log,
     push_runs,
     push_tokens,
 )
 from app.repos import users as users_repo
-from app.services import email_notify, milestones, push, streaks
+from app.services import email_notify, mastery, milestones, push, streaks
 
 log = logging.getLogger("koda.tasks")
 
@@ -299,6 +300,7 @@ async def weekly_summary(
             lines.append(
                 f"• {learner.get('displayName', 'Your child')}: practised on {practice} — "
                 f"{_rounds_text(rounds)}, {_time_text(spent_ms)}"
+                + await _progress_suffix(db, family_id, learner_id, days, next_up=True)
             )
             title, body = await push.wording(
                 db,
@@ -765,6 +767,32 @@ def _time_text(duration_ms: int) -> str:
     return "1 minute" if minutes == 1 else f"{minutes} minutes"
 
 
+async def _progress_suffix(
+    db: AsyncIOMotorDatabase, family_id: str, learner_id: str, days: list[str], *, next_up: bool
+) -> str:
+    """What changed in these days, for a summary or digest line: mastered, finding
+    tricky, the daily time spent — and, for the week, the lesson to do next."""
+    marks = await progress_marks.for_days(db, family_id, learner_id, days)
+    parts: list[str] = []
+    mastered = mastery.join_names(
+        [mastery.lesson_name(m["conceptKey"]) for m in marks if m["kind"] == "mastered" and m.get("conceptKey")]
+    )
+    if mastered:
+        parts.append(f"mastered {mastered}")
+    tricky = mastery.join_names(
+        [mastery.lesson_name(m["conceptKey"]) for m in marks if m["kind"] == "stuck" and m.get("conceptKey")]
+    )
+    if tricky:
+        parts.append(f"finding {tricky} tricky")
+    if any(m["kind"] == "time_limit" for m in marks):
+        parts.append("used the full daily time")
+    if next_up:
+        upcoming = await mastery.next_step(db, family_id, learner_id)
+        if upcoming:
+            parts.append(f"next up: {upcoming}")
+    return "".join(f"; {part}" for part in parts)
+
+
 async def _family_clock(
     db: AsyncIOMotorDatabase, family_id: str, schedules: dict[str, dict[str, Any]]
 ) -> int | None:
@@ -972,6 +1000,7 @@ async def daily_digest(
             line = f"• {learner.get('displayName', 'Your child')}: {_rounds_text(rounds)}, {_time_text(spent_ms)}"
             if rounds >= await milestones.goal_for(db, family_id, learner["_id"]):
                 line += " — today's goal met"
+            line += await _progress_suffix(db, family_id, learner["_id"], [today], next_up=False)
             lines.append(line)
         if not lines:
             continue

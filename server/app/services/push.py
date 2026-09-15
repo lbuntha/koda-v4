@@ -26,7 +26,17 @@ from typing import Any
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
-from app.push_defaults import BODY_MAX, BY_KIND, MASTER, SAMPLES, SENDS, TITLE_MAX
+from app.push_defaults import (
+    BODY_MAX,
+    BY_KIND,
+    CAPPED_KINDS,
+    COUNTED_KINDS,
+    DAILY_CAP,
+    MASTER,
+    SAMPLES,
+    SENDS,
+    TITLE_MAX,
+)
 from app.repos import memberships, notifications, notify_prefs, notify_schedule, push_log, push_templates, push_tokens
 from app.repos import system as system_repo
 from app.settings import settings
@@ -183,6 +193,16 @@ async def send(
         if not people:
             return 0
 
+        # The daily cap, for the bottom of the priority order only. A parent over
+        # it still gets the record under the bell; their phone just stays quiet.
+        capped: set[str] = set()
+        if kind in CAPPED_KINDS:
+            capped = {
+                user_id
+                for user_id in people
+                if await push_log.rings_today(db, user_id, COUNTED_KINDS) >= DAILY_CAP
+            }
+
         # Quiet hours, and only for a courtesy kind.
         #
         # §5's rule, which nothing implemented until phase 4: a courtesy
@@ -206,7 +226,7 @@ async def send(
         rows = await push_tokens.live_for_family(
             db, to.family_id, user_id=to.user_id, exclude_device_id=to.exclude_device_id
         )
-        wanted = set(people)
+        wanted = set(people) - capped
         rows = [row for row in rows if row.get("userId") in wanted]
         if not rows:
             # Nobody to ring is not nobody told: the records above stand, and

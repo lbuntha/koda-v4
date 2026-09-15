@@ -3,6 +3,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { StreakAPI, dayKey } from "./streak";
 import { currentLearnerId } from "./learnerProgress";
 import { ChildSettingsAPI, type AllowedHours } from "./childSettings";
+import { noteDailyLimitReached } from "./learning/dailyLimit";
 
 /**
  * How long a child has been playing today.
@@ -122,6 +123,12 @@ export const SessionTimeAPI = {
     } catch {
       // An unwritable store means the cap does not hold on this device. The
       // round still runs; nothing about a child's play depends on this.
+    }
+    // The moment the day's minutes first reach the cap is the one a parent is
+    // told about. Crossing, not "over": every later tick is the same fact.
+    const cap = ChildSettingsAPI.current().sessionMinutes;
+    if (cap !== null && Math.floor(tally.seconds / 60) < cap && Math.floor(next.seconds / 60) >= cap) {
+      noteDailyLimitReached(cap, now);
     }
     notify();
   },

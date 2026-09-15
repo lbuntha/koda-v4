@@ -170,6 +170,7 @@ async def test_preferences_offer_email_only_for_what_is_emailed(client, parent, 
         "learn.absence",
         "learn.daily_digest",
         "learn.skill_published",
+        "learn.stuck",
     }
     refused = await client.put(
         "/push/preferences", headers=parent, json={"kind": "device.new_signin", "on": False, "channel": "email"}

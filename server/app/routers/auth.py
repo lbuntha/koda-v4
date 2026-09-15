@@ -113,11 +113,18 @@ async def _issue(db, family_id: str | None, role: str, *, user_id=None, learner_
         ) if family_id else 0
 
         if family_id and others:
-            title, body = await push.wording(db, "device.new_signin", {"device": device_name})
+            kind, values = "device.new_signin", {"device": device_name}
+            if learner_id:
+                # A child's device joining with a code is its own notice: which
+                # child, on what — what a parent who handed out the code checks.
+                learner = await learners.by_id(db, learner_id, family_id)
+                kind = "family.child_device_joined"
+                values = {"device": device_name, "learner": (learner or {}).get("displayName") or "your child"}
+            title, body = await push.wording(db, kind, values)
             await push.send(
                 db,
                 to=push.Recipient(family_id=family_id, exclude_device_id=device_id),
-                kind="device.new_signin",
+                kind=kind,
                 title=title,
                 body=body,
                 # The device list, once the app can be opened at a screen. It is
@@ -129,9 +136,7 @@ async def _issue(db, family_id: str | None, role: str, *, user_id=None, learner_
             # the one signing in, which is what a sign-in notice is for.
             from app.services import email_notify
 
-            await email_notify.send(
-                db, kind="device.new_signin", values={"device": device_name}, family_id=family_id
-            )
+            await email_notify.send(db, kind=kind, values=values, family_id=family_id)
     else:
         # `spent_hash` is set only by /auth/refresh — the one caller that is
         # spending a token rather than minting a session. See devices.rotate.

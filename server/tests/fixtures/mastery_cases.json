@@ -1,0 +1,31 @@
+[
+  { "name": "nothing answered", "totals": {}, "status": "not-started" },
+  { "name": "too little to judge", "totals": { "questionsAnswered": 5, "correctFirstTry": 5 }, "status": "learning" },
+  {
+    "name": "too little, but abandoned twice",
+    "totals": { "questionsAnswered": 3, "correctFirstTry": 1, "lessonsAbandoned": 2 },
+    "status": "struggling"
+  },
+  { "name": "more wrong than right", "totals": { "questionsAnswered": 10, "correctFirstTry": 4 }, "status": "struggling" },
+  { "name": "exactly half is not struggling", "totals": { "questionsAnswered": 10, "correctFirstTry": 5 }, "status": "practising" },
+  {
+    "name": "secure on two days",
+    "totals": { "questionsAnswered": 10, "correctFirstTry": 9, "lessonsCompleted": 1, "practisedOn": ["2026-08-15", "2026-08-16"] },
+    "status": "mastered"
+  },
+  {
+    "name": "accurate but only one day",
+    "totals": { "questionsAnswered": 10, "correctFirstTry": 9, "lessonsCompleted": 1, "practisedOn": ["2026-08-16"] },
+    "status": "practising"
+  },
+  {
+    "name": "exactly the mastery accuracy",
+    "totals": { "questionsAnswered": 20, "correctFirstTry": 17, "lessonsCompleted": 1, "practisedOn": ["2026-08-15", "2026-08-16"] },
+    "status": "mastered"
+  },
+  {
+    "name": "accurate on two days but no round finished",
+    "totals": { "questionsAnswered": 10, "correctFirstTry": 10, "lessonsCompleted": 0, "practisedOn": ["2026-08-15", "2026-08-16"] },
+    "status": "practising"
+  }
+]

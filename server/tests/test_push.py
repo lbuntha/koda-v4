@@ -402,6 +402,10 @@ async def test_only_kinds_with_a_sender_are_offered(client, parent, seeded):
         "system.announcement",
         # Sent once per gap by the absence check.
         "learn.absence",
+        # Phases 3 and 4: decided as synced rounds land.
+        "learn.time_limit",
+        "learn.mastered",
+        "learn.stuck",
     }
 
 

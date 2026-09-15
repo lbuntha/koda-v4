@@ -185,6 +185,23 @@ async def unopened_run(db: AsyncIOMotorDatabase, user_id: str, kind: str) -> int
     return run
 
 
+async def rings_today(db: AsyncIOMotorDatabase, user_id: str, kinds: frozenset[str]) -> int:
+    """How many pushes of these kinds tried to ring this person in the last day.
+
+    Attempts rather than deliveries: the daily cap is about how often a phone
+    was asked to buzz, and on the console driver nothing is ever delivered.
+    """
+    return await db.push_log.count_documents(
+        {
+            "people": user_id,
+            "kind": {"$in": sorted(kinds)},
+            "devices": {"$gt": 0},
+            "channel": {"$ne": "email"},
+            "at": {"$gte": now() - timedelta(hours=24)},
+        }
+    )
+
+
 async def note_opened(db: AsyncIOMotorDatabase, user_id: str, kind: str) -> None:
     """Record that this person opened one, which resets the run above.
 

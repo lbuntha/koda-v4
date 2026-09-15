@@ -35,7 +35,7 @@ from app.repos import counters, rollups
 from app.repos import docs as docs_repo
 from app.repos import events as events_repo
 from app.security.permissions import principal_can
-from app.services import milestones
+from app.services import milestones, progress
 from app.services.rollup import baseline_increments, increments_for
 
 
@@ -142,6 +142,14 @@ async def push(
             for event in body.events
             if event.id in inserted_ids
         ]
+        # Each touched concept's status *before* these rounds count, so the task
+        # below can tell a lesson that just became secure from one that already was.
+        touched = {
+            (event.learner_id, event.concept_key)
+            for event in body.events
+            if event.id in inserted_ids and event.learner_id and event.concept_key
+        }
+        before = await progress.snapshot(db, family_id, touched) if tasks is not None else {}
         await rollups.apply(db, [i for i in increments if i])
 
         # After the response, and only over what was actually new: a device
@@ -149,6 +157,7 @@ async def push(
         # same child twice. See `milestones.goals_reached`.
         if tasks is not None and inserted:
             tasks.add_task(milestones.goals_reached, db, family_id, inserted)
+            tasks.add_task(progress.after_sync, db, family_id, inserted, before)
 
     for mutation in body.mutations:
         outcome = await _apply_mutation(db, principal, mutation)

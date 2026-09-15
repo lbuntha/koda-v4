@@ -243,6 +243,38 @@ behind it, which is a release, not a row.
 | `system.announcement` | Families, staff or both — picked per send | On | Courtesy | `announcement:{id}` |
 | `learn.absence` | Parents, push and email | On | Courtesy | `absence:{learnerId}` |
 | `learn.daily_digest` | Parents, **email only** | **Off** | Courtesy | — |
+| `family.child_device_joined` | Parents, push and email | **On, not switchable** | Account | — |
+| `learn.time_limit` | Parents | On | Courtesy | `time:{learnerId}` |
+| `learn.mastered` | Parents | On | Courtesy | `mastered:{learnerId}` |
+| `learn.stuck` | Parents, push and email | On | Courtesy | `stuck:{learnerId}:{concept}` |
+
+### Progress, decided as rounds land (phases 3 and 4)
+
+`services/progress.py` runs after `/sync/push`, beside `milestones.goals_reached`.
+`progress.snapshot` reads each touched concept's status just before
+`rollups.apply`, and `after_sync` reads it again: only a *change* is news.
+
+- **Mastered** — a concept becoming `mastered`. Claimed once per concept, and one
+  push per child per day however many land ("Count On and Make Ten").
+- **Stuck** — a concept `struggling` that has been practised on at least two
+  days. Once per concept per ISO week, by push and email.
+- **Time limit** — the child's device records `daily_limit_reached`
+  (`src/lib/learning/dailyLimit.ts`) the moment the day's minutes cross the cap;
+  the server tells the parents once per child per day.
+- **Child device joined** — a join code redeemed on a new device sends this
+  instead of the generic "new sign-in".
+
+The server's mastery rule (`services/mastery.py`) is a second implementation of
+`masteryFrom`. `tests/fixtures/mastery_cases.json` is asserted against both, so
+a threshold changed on one side fails the other side's test.
+
+Each change is also written to `progress_marks`, which the weekly summary and the
+digest read ("mastered Count On; finding Take Away tricky; next up: Make Ten").
+
+**The daily cap.** At most `DAILY_CAP` (2) learning pushes ring one parent a day,
+counted over stuck, time limit, mastered and absence, and enforced on mastered
+and absence only — the bottom of the priority order. A capped notification is
+still recorded under the bell.
 
 **`system.announcement` is sent by hand.** An operator writes a title and a
 message under Notification Settings → Announce, picks an audience, checks how

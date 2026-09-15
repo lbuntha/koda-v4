@@ -65,6 +65,12 @@ SENDS: frozenset[str] = frozenset(
         "system.announcement",
         # Phase 2: a child away longer than the operator's threshold, once per gap.
         "learn.absence",
+        # Phase 3: access and control.
+        "family.child_device_joined",
+        "learn.time_limit",
+        # Phase 4: progress, judged on the server by `services/mastery.py`.
+        "learn.mastered",
+        "learn.stuck",
     }
 )
 
@@ -86,8 +92,20 @@ EMAIL_SENDS: frozenset[str] = frozenset(
         "learn.absence",
         "learn.daily_digest",
         "learn.skill_published",
+        "family.child_device_joined",
+        "learn.stuck",
     }
 )
+
+#: At most this many courtesy pushes about learning ring one parent a day.
+#:
+#: Counted over `COUNTED_KINDS`, and enforced only on `CAPPED_KINDS` — the
+#: bottom of the priority order (stuck > time limit > mastered > absence). A
+#: stuck child or a spent time limit is always worth the tap; a third
+#: congratulation that day waits in the bell instead of ringing.
+DAILY_CAP = 2
+COUNTED_KINDS: frozenset[str] = frozenset({"learn.stuck", "learn.time_limit", "learn.mastered", "learn.absence"})
+CAPPED_KINDS: frozenset[str] = frozenset({"learn.mastered", "learn.absence"})
 
 DEFAULT_KINDS: list[dict[str, Any]] = [
     {
@@ -351,6 +369,75 @@ DEFAULT_KINDS: list[dict[str, Any]] = [
         "settingId": None,
         "familyDefault": False,
     },
+    {
+        # A child's device joining with a code — which child, on what. An account
+        # kind: the parent handed out the code and is the one who would know if
+        # this was not them.
+        "kindId": "family.child_device_joined",
+        "title": "{learner} is on a new device",
+        "body": "{device} joined as {learner}. Not expected? Sign it out in Settings.",
+        "placeholders": ["learner", "device"],
+        "email": {
+            "subject": "{learner} joined Koda on a new device",
+            "body": (
+                "{device} just joined your family's Koda account as {learner}.\n\n"
+                "If you set this up, there's nothing to do. If you didn't, open Koda and "
+                "sign it out under Settings:\n{app_link}"
+            ),
+            "settingId": None,
+            "default": True,
+        },
+        "class": "account",
+        "label": "Child joined on a new device",
+        "settingId": None,
+        "familyDefault": True,
+    },
+    {
+        # Sent by the server when a child's device reports the daily limit spent.
+        # Push only; the digest carries it for a parent who reads email instead.
+        "kindId": "learn.time_limit",
+        "title": "{learner} finished today's time",
+        "body": "{minutes} used. Koda opens again tomorrow.",
+        "placeholders": ["learner", "minutes"],
+        "class": "courtesy",
+        "label": "Daily time limit reached",
+        "settingId": "push.timeLimit",
+        "familyDefault": True,
+    },
+    {
+        # A lesson becoming secure. One push per child per day: several landing
+        # together are one message ("Count On and Make Ten").
+        "kindId": "learn.mastered",
+        "title": "{learner} mastered {lessons}",
+        "body": "Right on more than one day, so it's secure now.",
+        "placeholders": ["learner", "lessons"],
+        "class": "courtesy",
+        "label": "Mastered something",
+        "settingId": "push.mastered",
+        "familyDefault": True,
+    },
+    {
+        # Going wrong more often than right, on more than one day. Once per lesson
+        # per week, so a hard fortnight is two messages rather than a nag a day.
+        "kindId": "learn.stuck",
+        "title": "{learner} could use a hand",
+        "body": "{lesson} is tricky right now. Sit with them for one round — see what helps.",
+        "placeholders": ["learner", "lesson"],
+        "email": {
+            "subject": "A tip for {learner}'s {lesson}",
+            "body": (
+                "{learner} has found {lesson} hard on more than one day. That's normal when an idea is new.\n\n"
+                "What usually helps: sit with them for one round, and let them talk through what they're doing.\n\n"
+                "See exactly where it's going wrong:\n{app_link}"
+            ),
+            "settingId": "email.stuck",
+            "default": True,
+        },
+        "class": "courtesy",
+        "label": "Stuck on something",
+        "settingId": "push.stuck",
+        "familyDefault": True,
+    },
 ]
 
 #: `kindId` -> its definition. A send names a kind, and an unknown one is a bug
@@ -390,6 +477,9 @@ SAMPLES = {
     "unsubscribe_link": "https://learn-with-koda.web.app/v1/notifications/unsubscribe?token=…",
     "rounds_done": "12 rounds",
     "time": "38 minutes",
+    "lessons": "Count On",
+    "lesson": "Take Away",
+    "minutes": "30 minutes",
     "summary": "• Mia: practised on 4 days — 12 rounds, 38 minutes\n• Leo: practised on 2 days — 5 rounds, 14 minutes",
 }
 

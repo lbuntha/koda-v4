@@ -290,6 +290,20 @@ export interface KodaConversationEvent extends LearningEventBase {
   afterWrongAnswer?: boolean;
 }
 
+/**
+ * The day's time limit was spent on this device.
+ *
+ * Sent once per child per day, the moment the clock crosses the cap a parent
+ * set, so the server can tell that parent. It is about the day rather than any
+ * lesson: the context fields are empty, which both rollups read as "no concept"
+ * and skip — a spent limit is not evidence about what a child knows.
+ */
+export interface DailyLimitReachedEvent extends LearningEventBase {
+  type: "daily_limit_reached";
+  /** The cap that was reached, in minutes. */
+  limitMinutes: number;
+}
+
 /** How many of a child's questions one conversation keeps. */
 export const MAX_ASKED = 12;
 /** How much of any one question is kept. */
@@ -302,7 +316,8 @@ export type LearningEvent =
   | SupportUsedEvent
   | LessonCompletedEvent
   | LessonAbandonedEvent
-  | KodaConversationEvent;
+  | KodaConversationEvent
+  | DailyLimitReachedEvent;
 
 export type LearningEventType = LearningEvent["type"];
 

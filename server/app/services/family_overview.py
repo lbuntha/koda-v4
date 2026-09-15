@@ -17,10 +17,11 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from app.models.common import now as utc_now
 from app.repos import events as events_repo
 from app.repos import learners as learners_repo
-from app.repos import notify_jobs, notify_schedule
-from app.services import milestones, push, streaks
+from app.repos import notify_jobs, notify_schedule, progress_marks
+from app.services import mastery, milestones, push, streaks
 
 ABSENCE = "learn.absence"
+STUCK = "learn.stuck"
 
 
 def _away_text(away: int) -> str:
@@ -41,6 +42,9 @@ async def for_family(db: AsyncIOMotorDatabase, family_id: str, user_id: str | No
 
     children: list[dict[str, Any]] = []
     attention: dict[str, Any] | None = None
+    # A child stuck this week outranks a long absence: it is the one with a thing
+    # a parent can do about it today.
+    stuck: dict[str, Any] | None = None
     for learner in await learners_repo.for_family(db, family_id):
         learner_id = learner["_id"]
         name = learner.get("displayName") or "Your child"
@@ -66,13 +70,21 @@ async def for_family(db: AsyncIOMotorDatabase, family_id: str, user_id: str | No
             }
         )
 
+        if stuck is None:
+            marks = await progress_marks.for_days(db, family_id, learner_id, sorted(week))
+            mark = next((m for m in reversed(marks) if m["kind"] == "stuck" and m.get("conceptKey")), None)
+            if mark:
+                values = {"learner": name, "lesson": mastery.lesson_name(mark["conceptKey"])}
+                title, body = await push.wording(db, STUCK, values)
+                stuck = {"learnerId": learner_id, "kind": STUCK, "title": title, "body": body}
+
         if attention is None and away is not None and away >= threshold:
             title, body = await push.wording(db, ABSENCE, {"learner": name, "away": _away_text(away)})
             attention = {"learnerId": learner_id, "kind": ABSENCE, "title": title, "body": body}
 
     return {
         "children": children,
-        "attention": attention,
+        "attention": stuck or attention,
         "generatedAt": at.isoformat(),
         "absenceDays": threshold,
     }

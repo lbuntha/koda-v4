@@ -31,6 +31,9 @@ EventType = Literal[
     # other event does, so it is the one type worth reading the client's note on
     # before changing what is stored.
     "koda_conversation",
+    # A child's device spent the day's time limit. Carries `limitMinutes`; it has
+    # no concept, so the rollup ignores it and `services/progress.py` reads it.
+    "daily_limit_reached",
 ]
 
 # The fields the rollup reads. Everything else is carried but not interpreted.
