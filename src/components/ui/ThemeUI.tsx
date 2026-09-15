@@ -130,6 +130,12 @@ export interface UIModalProps {
    * and indigo.
    */
   tone?: "default" | "plain";
+  /**
+   * `"dim"` darkens and blurs the page behind, which is right for a form that
+   * wants all the attention. `"none"` leaves the page visible — for a short
+   * suggestion such as the notification setup prompt.
+   */
+  backdrop?: "dim" | "none";
 }
 
 /**
@@ -168,13 +174,16 @@ const RAIL_WIDTH: Record<string, string> = {
   "max-w-3xl": "rail:max-w-3xl",
 };
 
-export const UIModal: React.FC<UIModalProps> = ({ isOpen, onClose, title, children, footer, maxWidth = "max-w-lg", tone = "default" }) => {
+export const UIModal: React.FC<UIModalProps> = ({ isOpen, onClose, title, children, footer, maxWidth = "max-w-lg", tone = "default", backdrop = "dim" }) => {
   if (!isOpen) return null;
 
   const plain = tone === "plain";
 
   return overlay(
-    <div className={themeSystem.modal.overlay} onClick={onClose}>
+    <div
+      className={backdrop === "none" ? themeSystem.modal.overlayClear : themeSystem.modal.overlay}
+      onClick={onClose}
+    >
       <div
         className={`${themeSystem.modal.content} ${RAIL_WIDTH[maxWidth] ?? "rail:max-w-lg"}`}
         onClick={(e) => e.stopPropagation()}

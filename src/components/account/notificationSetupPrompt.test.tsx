@@ -21,18 +21,17 @@ vi.mock("../ui", () => ({
   UIModal: ({
     isOpen,
     title,
+    backdrop,
     children,
-    footer,
   }: {
     isOpen: boolean;
     title: string;
+    backdrop?: string;
     children: ReactNode;
-    footer?: ReactNode;
   }) =>
     isOpen ? (
-      <div role="dialog" aria-label={title}>
+      <div role="dialog" aria-label={title} data-backdrop={backdrop}>
         {children}
-        {footer}
       </div>
     ) : null,
 }));
@@ -48,14 +47,15 @@ beforeEach(() => {
   on = false;
 });
 
-describe("the notification setup sheet", () => {
+describe("the notification setup card", () => {
   it("asks on load, and Set up goes to the switch", async () => {
     const onSetUp = vi.fn();
     render(<NotificationSetupPrompt onSetUp={onSetUp} delayMs={0} />);
 
-    fireEvent.click(
-      await screen.findByRole("button", { name: "Set up" }),
-    );
+    const dialog = await screen.findByRole("dialog", { name: "Turn on notifications?" });
+    // Nothing dimmed behind it: it is a suggestion, not a form.
+    expect(dialog.getAttribute("data-backdrop")).toBe("none");
+    fireEvent.click(screen.getByRole("button", { name: "Set up" }));
 
     expect(onSetUp).toHaveBeenCalledTimes(1);
     expect(screen.queryByRole("dialog")).toBeNull();
@@ -69,6 +69,15 @@ describe("the notification setup sheet", () => {
 
     render(<NotificationSetupPrompt onSetUp={vi.fn()} delayMs={0} />);
     await settle();
+
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("Escape skips it", async () => {
+    render(<NotificationSetupPrompt onSetUp={vi.fn()} delayMs={0} />);
+    await screen.findByRole("dialog");
+
+    fireEvent.keyDown(window, { key: "Escape" });
 
     expect(screen.queryByRole("dialog")).toBeNull();
   });

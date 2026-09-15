@@ -235,6 +235,11 @@ export const themeSystem = {
   modal: {
     overlay:
       "fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-end justify-center rail:items-center rail:p-4 animate-fade-in",
+    /* The same placement with nothing drawn behind the sheet, for a light
+       suggestion the page should stay visible behind. The sheet's own shadow
+       is what separates it. */
+    overlayClear:
+      "fixed inset-0 z-50 flex items-end justify-center rail:items-center rail:p-4 animate-fade-in",
     content:
       "bg-surface border border-line shadow-2xl shadow-slate-900/25 dark:shadow-black/60 w-full flex flex-col overflow-hidden max-h-[92dvh] rounded-t-[1.75rem] pb-[env(safe-area-inset-bottom)] animate-[koda-sheet-in_240ms_cubic-bezier(0.32,0.72,0,1)] rail:max-h-[85vh] rail:rounded-2xl rail:pb-0 rail:animate-scale-up",
     /* The grabber. It does nothing — there is no drag-to-dismiss — but it is

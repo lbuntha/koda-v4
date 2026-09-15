@@ -4,19 +4,19 @@ import { themeSystem } from "../../lib/themeSystem";
 import { UIModal } from "../ui";
 import { useSession } from "../../lib/sync";
 import { notificationsAreOn, pushSupport } from "../../lib/push";
-import {
-  SKIP_DAYS,
-  shouldOfferNotificationSetup,
-  skipNotificationSetup,
-} from "../../lib/push/setupPrompt";
+import { shouldOfferNotificationSetup, skipNotificationSetup } from "../../lib/push/setupPrompt";
 
 /**
  * "Turn on notifications?" — asked once per launch, for an adult who has not.
  *
  * Set up goes to the switch in Settings rather than raising the browser's
  * permission prompt here: that prompt is the one a parent should meet beside
- * the sentence explaining it. Skip, or closing the sheet, keeps it away for
- * `SKIP_DAYS` on this device.
+ * the sentence explaining it. Skip, Escape, the close button or a tap outside
+ * keeps it away for `SKIP_DAYS` on this device.
+ *
+ * The shared sheet — a bottom sheet on a phone, a centred card from `rail:` up
+ * — in its plain tone and with no backdrop, so it matches Profile and
+ * Achievements without dimming the app for what is only a suggestion.
  *
  * Waits a moment after load, because the stored session is verified on boot
  * and a sheet that appears and then vanishes with a rejected session is worse
@@ -57,36 +57,49 @@ export const NotificationSetupPrompt: React.FC<{
     onSetUp();
   };
 
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") skip();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
+
   return (
     <UIModal
       isOpen={open}
       onClose={skip}
       title="Turn on notifications?"
-      footer={
-        <div className="flex w-full justify-end gap-2">
-          <button type="button" onClick={skip} className={themeSystem.button("secondary", "sm")}>
-            Skip
-          </button>
-          <button type="button" onClick={setUp} className={themeSystem.button("primary", "sm")}>
-            Set up
-          </button>
-        </div>
-      }
+      tone="plain"
+      backdrop="none"
+      maxWidth="max-w-md"
     >
       <div className="flex items-start gap-3">
-        <BellRing className="w-6 h-6 shrink-0 text-indigo-600 dark:text-indigo-400" />
-        <div className="space-y-2 text-sm text-body">
-          <p>
-            Koda can tell you about announcements, new skills and how your child is getting on, right
-            on this device.
-          </p>
-          <p>
-            {needsInstall
-              ? "On an iPhone or iPad, Koda needs to be on your Home Screen first — Set up shows you how."
-              : "Set up takes you to Settings, where you can turn them on."}
-          </p>
-          <p className="text-xs text-muted">Skip, and Koda will ask again in {SKIP_DAYS} days.</p>
-        </div>
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-indigo-50 dark:bg-indigo-500/15">
+          <BellRing className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+        </span>
+        <p className="pt-1 text-sm text-muted">
+          {needsInstall
+            ? "Add Koda to your Home Screen first to get updates on this device."
+            : "Get news and updates from Koda on this device."}
+        </p>
+      </div>
+      <div className="mt-5 flex flex-col gap-2">
+        <button
+          type="button"
+          onClick={setUp}
+          className={themeSystem.button("primary", "md", "w-full justify-center")}
+        >
+          Set up
+        </button>
+        <button
+          type="button"
+          onClick={skip}
+          className="w-full rounded-xl py-2.5 text-sm font-bold text-muted hover:text-ink transition-colors cursor-pointer"
+        >
+          Skip
+        </button>
       </div>
     </UIModal>
   );
