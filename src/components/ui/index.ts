@@ -3,6 +3,7 @@ export * from "./sidebarIcons";
 export * from "./sidebarIcon";
 export * from "./ThemeUI";
 export * from "./UIAvatar";
+export * from "./UIBanner";
 export * from "./UIDataTable";
 export * from "./UIIconPicker";
 export * from "./UIFeatureCard";

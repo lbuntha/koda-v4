@@ -301,6 +301,35 @@ export const themeSystem = {
       })[tone],
   },
 
+  /* A one-sentence message above the content it is about — "It's been 10 days",
+     "A new skill is out". A plain surface card: the hue lives on the icon only,
+     the same rule as `statTile`, so a banner never outshouts the cards below
+     it. Colour by meaning, from THEME.md: indigo primary, orange streak. */
+  banner: {
+    card: "relative rounded-2xl border-2 border-line bg-surface p-4 transition-all duration-300 motion-reduce:transition-none",
+    enter: "animate-[fade-in_300ms_ease-out] motion-reduce:animate-none",
+    leave: "translate-y-1 opacity-0",
+    row: "flex flex-wrap items-center gap-3",
+    /* Room for the close button, so a long sentence wraps before it. */
+    rowDismissable: "pr-8",
+    well: "w-10 h-10 rounded-xl bg-surface-muted flex items-center justify-center shrink-0 [&>svg]:w-5 [&>svg]:h-5",
+    text: "min-w-0 flex-1 basis-48",
+    title: "text-sm font-black text-ink leading-snug",
+    message: "mt-0.5 text-sm text-body",
+    /* With no title, the message is the headline. */
+    messageAlone: "text-sm font-bold text-ink leading-snug",
+    close:
+      "absolute right-2 top-2 w-8 h-8 rounded-full flex items-center justify-center text-muted hover:text-ink hover:bg-surface-muted transition cursor-pointer [&>svg]:w-4 [&>svg]:h-4",
+
+    tone: (tone: "primary" | "streak" | "success" | "danger" = "primary") =>
+      ({
+        primary: "text-indigo-600 dark:text-indigo-400",
+        streak: "text-orange-500 dark:text-orange-400",
+        success: "text-emerald-600 dark:text-emerald-400",
+        danger: "text-rose-600 dark:text-rose-400",
+      })[tone],
+  },
+
   /* Hero/feature card: an eyebrow row, a title, a highlighted note, meta chips,
      and one primary action. */
   featureCard: {
