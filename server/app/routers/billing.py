@@ -447,6 +447,18 @@ async def grant(
             body=note,
             path="/settings",
         )
+        from app.services import email_notify
+
+        requester = asked.get("requestedBy")
+        tasks.add_task(
+            email_notify.send,
+            db,
+            kind="plan.request_decided",
+            values={"decision": "approved"},
+            family_id=family_id,
+            user_ids=[requester] if requester else None,
+            path="/settings",
+        )
 
     state = await entitlements(db, family_id)
     return SubscriptionRow(

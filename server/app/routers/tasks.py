@@ -21,6 +21,7 @@ from fastapi import APIRouter, Depends, Query
 
 from app.deps import Db
 from app.errors import Forbidden
+from app.repos import notify_jobs
 from app.security.tasks import scheduler_only
 from app.services import tasks as task_service
 from app.settings import settings
@@ -68,7 +69,9 @@ async def weekly_summary(
         raise Forbidden(
             "The clock can only be moved in development.", "task_time_travel_forbidden"
         )
-    return await task_service.weekly_summary(db, at=at, cursor=cursor, limit=limit)
+    report = await task_service.weekly_summary(db, at=at, cursor=cursor, limit=limit)
+    await notify_jobs.note_run(db, "weekly-summary", report)
+    return report
 
 
 @router.post("/daily-reminders")
@@ -89,7 +92,9 @@ async def daily_reminders(
         raise Forbidden(
             "The clock can only be moved in development.", "task_time_travel_forbidden"
         )
-    return await task_service.daily_reminders(db, at=at, cursor=cursor, limit=limit)
+    report = await task_service.daily_reminders(db, at=at, cursor=cursor, limit=limit)
+    await notify_jobs.note_run(db, "daily-reminders", report)
+    return report
 
 
 @router.post("/skill-announcements")
@@ -112,10 +117,14 @@ async def skill_announcements(
         raise Forbidden(
             "The clock can only be moved in development.", "task_time_travel_forbidden"
         )
-    return await task_service.skill_announcements(db, at=at, cursor=cursor, limit=limit)
+    report = await task_service.skill_announcements(db, at=at, cursor=cursor, limit=limit)
+    await notify_jobs.note_run(db, "skill-announcements", report)
+    return report
 
 
 @router.post("/token-sweep")
 async def token_sweep(db: Db) -> dict:
     """Delete what nothing can use again: dead tokens, old notices, spent claims."""
-    return await task_service.token_sweep(db)
+    report = await task_service.token_sweep(db)
+    await notify_jobs.note_run(db, "token-sweep", report)
+    return report

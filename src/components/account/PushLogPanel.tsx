@@ -27,19 +27,22 @@ const Result: React.FC<{ send: SendRecord }> = ({ send }) => {
     // delivered" without saying why reads as a fault on every dev machine.
     return <span className="font-mono text-[10px] text-muted">logged only · console driver</span>;
   }
+  const email = send.channel === "email";
   if (send.devices === 0) {
     return (
-      <span className="font-mono text-[10px] text-muted">no browser registered to ring</span>
+      <span className="font-mono text-[10px] text-muted">
+        {email ? "no verified address to write to" : "no browser registered to ring"}
+      </span>
     );
   }
-  const failed = Object.entries(send.outcomes).filter(([name]) => name !== "ok");
+  const failed = Object.entries(send.outcomes).filter(([name]) => name !== "ok" && name !== "sent");
   return (
     <span
       className={`font-mono text-[10px] ${
         send.delivered > 0 ? "text-emerald-700 dark:text-emerald-300" : "text-rose-600 dark:text-rose-400"
       }`}
     >
-      {send.delivered}/{send.devices} delivered
+      {send.delivered}/{send.devices} {email ? "emailed" : "delivered"}
       {failed.length > 0 && ` · ${failed.map(([name, n]) => `${n} ${name}`).join(", ")}`}
     </span>
   );
@@ -79,7 +82,7 @@ export const PushLogPanel: React.FC = () => {
         <UIDataTable
           caption="Notification summary"
           rows={log.summary}
-          rowKey={(row) => row.kind}
+          rowKey={(row) => `${row.kind}:${row.channel ?? "push"}`}
           pageSize={8}
           defaultSort={{ key: "last", direction: "desc" }}
           columns={[
@@ -88,6 +91,14 @@ export const PushLogPanel: React.FC = () => {
               header: "Kind",
               render: (row) => <span className="font-mono font-semibold text-ink">{row.kind}</span>,
               sortValue: (row) => row.kind,
+            },
+            {
+              key: "channel",
+              header: "Channel",
+              render: (row) => (row.channel === "email" ? "Email" : "Push"),
+              sortValue: (row) => row.channel ?? "push",
+              muted: true,
+              nowrap: true,
             },
             {
               key: "last",
@@ -137,6 +148,14 @@ export const PushLogPanel: React.FC = () => {
                 header: "Kind",
                 render: (send) => send.kind,
                 sortValue: (send) => send.kind,
+                muted: true,
+                nowrap: true,
+              },
+              {
+                key: "channel",
+                header: "Channel",
+                render: (send) => (send.channel === "email" ? "Email" : "Push"),
+                sortValue: (send) => send.channel ?? "push",
                 muted: true,
                 nowrap: true,
               },

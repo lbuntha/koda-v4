@@ -40,3 +40,64 @@ async def reset(db: AsyncIOMotorDatabase, kind: str) -> bool:
     """Back to what the code ships. Deleting the row *is* the reset."""
     result = await db.push_templates.delete_one({"_id": kind})
     return result.deleted_count > 0
+
+
+# --- email wording -----------------------------------------------------------
+#
+# The same collection and the same override-only rule, under prefixed ids: a
+# kind id never starts with `email:`, so the push row and the email row for one
+# kind cannot collide, and a reset is still a delete.
+
+EMAIL_PREFIX = "email:"
+FRAME_ID = "email:frame"
+
+
+async def get_email(db: AsyncIOMotorDatabase, kind: str) -> dict[str, Any] | None:
+    return await db.push_templates.find_one({"_id": EMAIL_PREFIX + kind})
+
+
+async def set_email(
+    db: AsyncIOMotorDatabase, kind: str, *, subject: str, body: str, updated_by: str | None
+) -> None:
+    await db.push_templates.update_one(
+        {"_id": EMAIL_PREFIX + kind},
+        {"$set": {"subject": subject, "body": body, "updatedAt": now(), "updatedBy": updated_by}},
+        upsert=True,
+    )
+
+
+async def reset_email(db: AsyncIOMotorDatabase, kind: str) -> bool:
+    result = await db.push_templates.delete_one({"_id": EMAIL_PREFIX + kind})
+    return result.deleted_count > 0
+
+
+async def get_frame(db: AsyncIOMotorDatabase) -> dict[str, Any] | None:
+    return await db.push_templates.find_one({"_id": FRAME_ID})
+
+
+async def set_frame(
+    db: AsyncIOMotorDatabase,
+    *,
+    body: str,
+    footer: str,
+    account_footer: str,
+    updated_by: str | None,
+) -> None:
+    await db.push_templates.update_one(
+        {"_id": FRAME_ID},
+        {
+            "$set": {
+                "body": body,
+                "footer": footer,
+                "accountFooter": account_footer,
+                "updatedAt": now(),
+                "updatedBy": updated_by,
+            }
+        },
+        upsert=True,
+    )
+
+
+async def reset_frame(db: AsyncIOMotorDatabase) -> bool:
+    result = await db.push_templates.delete_one({"_id": FRAME_ID})
+    return result.deleted_count > 0

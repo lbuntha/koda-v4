@@ -5,10 +5,11 @@ import { themeSystem } from "../../lib/themeSystem";
 import { UISectionHeader, UITabs } from "../ui";
 import { NotificationsSettings } from "./NotificationsSettings";
 import { NotificationsAdmin } from "./NotificationsAdmin";
+import { NotifyEventsPanel } from "./NotifyEventsPanel";
 import { PushTokensPanel } from "./PushTokensPanel";
 import { usePermissions } from "../../lib/sync";
 
-type NotificationTab = "settings" | "push" | "announce" | "scheduled" | "wording" | "sent" | "tokens" | "email";
+type NotificationTab = "settings" | "events" | "push" | "announce" | "scheduled" | "wording" | "sent" | "tokens" | "email";
 
 export const NotificationSettingsPage: React.FC = () => (
   <NotificationSettingsTabs />
@@ -30,6 +31,7 @@ const NotificationSettingsTabs: React.FC = () => {
       <UITabs
         items={[
           { id: "settings", label: "Overview" },
+          { id: "events", label: "Events" },
           { id: "push", label: "Push" },
           { id: "announce", label: "Announce" },
           { id: "scheduled", label: "Scheduled" },
@@ -47,6 +49,7 @@ const NotificationSettingsTabs: React.FC = () => {
           <NotificationsSettings />
         </section>
       )}
+      {tab === "events" && <NotifyEventsPanel />}
       {tab === "push" && <NotificationsAdmin channel="push" section="overview" />}
       {tab === "announce" && <NotificationsAdmin channel="push" section="announce" />}
       {tab === "scheduled" &&<NotificationsAdmin channel="push" section="jobs" />}

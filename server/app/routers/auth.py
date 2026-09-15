@@ -125,6 +125,13 @@ async def _issue(db, family_id: str | None, role: str, *, user_id=None, learner_
                 # one — the client half of that is the notifications phase.
                 path="/",
             )
+            # And by email, to every adult with a verified address — including
+            # the one signing in, which is what a sign-in notice is for.
+            from app.services import email_notify
+
+            await email_notify.send(
+                db, kind="device.new_signin", values={"device": device_name}, family_id=family_id
+            )
     else:
         # `spent_hash` is set only by /auth/refresh — the one caller that is
         # spending a token rather than minting a session. See devices.rotate.

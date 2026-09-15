@@ -276,6 +276,30 @@ DEFAULT_SETTINGS: list[dict] = [
         "order": 86,
     },
     {
+        "settingId": "email.enabled",
+        "group": "Notifications",
+        "label": "Notification emails",
+        "description": (
+            "The master over every notification email, including account notices. "
+            "Sign-in, verification and password emails are not affected."
+        ),
+        "type": "bool",
+        "value": True,
+        "order": 90,
+    },
+    {
+        "settingId": "email.announcements",
+        "group": "Notifications",
+        "label": "Announcement emails",
+        "description": (
+            "Allows an operator to also send an announcement by email. "
+            "A parent can still switch these off for themselves."
+        ),
+        "type": "bool",
+        "value": True,
+        "order": 91,
+    },
+    {
         "settingId": "system.notice",
         "group": "Accounts & sync",
         "label": "Notice to everyone",

@@ -51,7 +51,7 @@ describe("announcing", () => {
     fireEvent.click(screen.getByRole("button", { name: "Send…" }));
 
     const confirm = await screen.findByRole("button", { name: "Send to 3 people" });
-    const draft = { title: "Holiday", message: "Closed Monday.", audience: "everyone" };
+    const draft = { title: "Holiday", message: "Closed Monday.", audience: "everyone", email: false };
     expect(sendAnnouncement).toHaveBeenCalledWith(draft, true);
     expect(screen.getByText(/2 families and 1 member of staff, with 4 browsers/)).toBeTruthy();
 
@@ -60,6 +60,21 @@ describe("announcing", () => {
     expect(await screen.findByText(/Sent to 3 people, and 4 browsers rang/)).toBeTruthy();
     expect(sendAnnouncement).toHaveBeenLastCalledWith(draft, false);
     expect((screen.getByLabelText("Announcement message") as HTMLTextAreaElement).value).toBe("");
+  });
+
+  it("sends by email too when asked, and counts the addresses", async () => {
+    sendAnnouncement.mockResolvedValueOnce({ ...reach, emails: 2 });
+    render(<PushAnnounce />);
+
+    write("", "Closed Monday.");
+    fireEvent.click(screen.getByLabelText("Also send by email"));
+    fireEvent.click(screen.getByRole("button", { name: "Send…" }));
+
+    expect(await screen.findByText(/and 2 verified email addresses/)).toBeTruthy();
+    expect(sendAnnouncement).toHaveBeenCalledWith(
+      { title: "", message: "Closed Monday.", audience: "families", email: true },
+      true,
+    );
   });
 
   it("withdraws the count when the message changes after checking", async () => {

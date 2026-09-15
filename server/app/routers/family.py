@@ -451,12 +451,11 @@ async def redeem_invite(
     # successful accept into a 500 is worse than no notification.
     inviter = invite.get("createdBy")
     if inviter:
+        from app.services import email_notify
+
         who = await users.by_id(db, p.subject_id)
-        title, body_text = await push_service.wording(
-            db,
-            "family.invite_redeemed",
-            {"name": (who or {}).get("displayName") or (who or {}).get("email", "Somebody")},
-        )
+        values = {"name": (who or {}).get("displayName") or (who or {}).get("email", "Somebody")}
+        title, body_text = await push_service.wording(db, "family.invite_redeemed", values)
         tasks.add_task(
             push_service.send,
             db,
@@ -464,6 +463,14 @@ async def redeem_invite(
             kind="family.invite_redeemed",
             title=title,
             body=body_text,
+        )
+        tasks.add_task(
+            email_notify.send,
+            db,
+            kind="family.invite_redeemed",
+            values=values,
+            family_id=target,
+            user_ids=[inviter],
         )
 
     return RedeemOut(

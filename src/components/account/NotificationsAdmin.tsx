@@ -1,6 +1,6 @@
 import React from "react";
 import { Bell, Mail } from "lucide-react";
-import { themeSystem } from "../../lib/themeSystem";
+import { EmailPanel } from "./EmailPanel";
 import { PushAnnounce } from "./PushAnnounce";
 import { PushAudiencePanel } from "./PushAudiencePanel";
 import { PushDiagnostics } from "./PushDiagnostics";
@@ -81,19 +81,9 @@ export const NotificationsAdmin: React.FC<{
         <Channel
           name="Email"
           icon={<Mail className="w-5 h-5 text-slate-500 dark:text-slate-400 shrink-0" />}
-          summary="Sign-in links, resets and verification, through SMTP"
+          summary="Notification emails, plus sign-in links and resets, through SMTP"
         >
-          <div className={themeSystem.card("default", `${themeSystem.spacing.card}`)}>
-            <p className="text-sm text-ink">
-              Mail already sends — resets, verification and sign-in links go out through{" "}
-              <code className="font-mono text-xs">MAIL_DRIVER</code>. It has no screen yet, so whether
-              it is working here is answered by reading the service log.
-            </p>
-            <p className="text-xs text-muted mt-2">
-              When it gets one it belongs on this page, beside push: the questions are the same for
-              both — does it work, what does it say, when does it go.
-            </p>
-          </div>
+          <EmailPanel />
         </Channel>
       )}
     </div>

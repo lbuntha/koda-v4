@@ -31,9 +31,17 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from app.models.common import now as utc_now
 from app.repos import events as events_repo
 from app.repos import learners as learners_repo
-from app.repos import notifications, notify_prefs, notify_schedule, push_log, push_runs, push_tokens
+from app.repos import (
+    notifications,
+    notify_jobs,
+    notify_prefs,
+    notify_schedule,
+    push_log,
+    push_runs,
+    push_tokens,
+)
 from app.repos import users as users_repo
-from app.services import push, streaks
+from app.services import email_notify, push, streaks
 
 log = logging.getLogger("koda.tasks")
 
@@ -59,13 +67,18 @@ SUMMARY_DAYS = 7
 #: getting through a hundred families.
 FAMILY_PAGE = 200
 
+#: What a job that an operator switched off says about itself.
+JOB_OFF = "switched off in Notification Settings → Events"
+
 
 def _local(at: datetime, offset_minutes: int) -> datetime:
     """The same instant, read off the family's own clock."""
     return at + timedelta(minutes=offset_minutes)
 
 
-def _next_summary_evening(local: datetime, offset_minutes: int) -> datetime:
+def _next_summary_evening(
+    local: datetime, offset_minutes: int, weekday: int = SUNDAY, hour: int = SUMMARY_HOUR
+) -> datetime:
     """When this family's summary is actually due, from where they are now.
 
     For a preview to say something an operator can check: "Sunday" is not a
@@ -78,31 +91,31 @@ def _next_summary_evening(local: datetime, offset_minutes: int) -> datetime:
     the moment the value is *shown* to somebody: "18:00+00:00" for a family two
     hours east is a time that does not exist anywhere.
     """
-    ahead = (SUNDAY - local.weekday()) % 7
-    due = (local + timedelta(days=ahead)).replace(
-        hour=SUMMARY_HOUR, minute=0, second=0, microsecond=0
-    )
+    ahead = (weekday - local.weekday()) % 7
+    due = (local + timedelta(days=ahead)).replace(hour=hour, minute=0, second=0, microsecond=0)
     if due < local:
         due += timedelta(days=7)
     return due.replace(tzinfo=timezone(timedelta(minutes=offset_minutes)))
 
 
-def _hours_since_summary_evening(local: datetime) -> int:
+def _hours_since_summary_evening(
+    local: datetime, weekday: int = SUNDAY, hour: int = SUMMARY_HOUR
+) -> int:
     """Whole hours since the most recent Sunday evening on this family's clock.
 
     0 at Sunday 18:00, 14 at Monday 08:00, and 160 on the Sunday morning before
     the next one. A summary is only ever sent within 24 hours of that evening,
     so this is the cheap filter that runs before anybody's schedule is read.
     """
-    evening = (local - timedelta(days=(local.weekday() - SUNDAY) % 7)).replace(
-        hour=SUMMARY_HOUR, minute=0, second=0, microsecond=0
+    evening = (local - timedelta(days=(local.weekday() - weekday) % 7)).replace(
+        hour=hour, minute=0, second=0, microsecond=0
     )
     if evening > local:
         evening -= timedelta(days=7)
     return int((local - evening).total_seconds() // 3600)
 
 
-def _summary_delay(schedule: dict[str, Any]) -> int:
+def _summary_delay(schedule: dict[str, Any], hour: int = SUMMARY_HOUR) -> int:
     """How many hours after Sunday evening this person's summary waits.
 
     0 for almost everybody. A person whose quiet hours cover six o'clock is
@@ -111,7 +124,7 @@ def _summary_delay(schedule: dict[str, Any]) -> int:
     hours, so there is always an open hour inside the day.
     """
     for delay in range(24):
-        if not notify_schedule.is_quiet(schedule, (SUMMARY_HOUR + delay) % 24):
+        if not notify_schedule.is_quiet(schedule, (hour + delay) % 24):
             return delay
     return 0
 
@@ -198,6 +211,15 @@ async def weekly_summary(
         "nextDue": None,
     }
 
+    # When "Sunday evening" is on this deployment, and whether the job runs at
+    # all. Both are an operator's, from Notification Settings → Events; the
+    # defaults are the Sunday 18:00 this job always had.
+    job = await notify_jobs.get(db, "weekly-summary")
+    if not preview and not job["enabled"]:
+        report["skipped"] = JOB_OFF
+        return report
+    weekday, hour = job["weekday"], job["hour"]
+
     # The operator's ceiling, asked once for the whole run rather than once per
     # family. A deployment with the switch off should cost one query, not one
     # per household.
@@ -220,7 +242,7 @@ async def weekly_summary(
             continue
 
         local = _local(at, offset)
-        since = _hours_since_summary_evening(local)
+        since = _hours_since_summary_evening(local, weekday, hour)
         if not preview and since >= 24:
             # Not their evening. Remember when it *will* be, soonest first.
             #
@@ -228,7 +250,7 @@ async def weekly_summary(
             # arithmetic on a value already in hand — but it is the difference
             # between an operator pressing "run now" on a Tuesday and being told
             # "nothing", and being told when the thing they pressed will happen.
-            due_at = _next_summary_evening(local, offset)
+            due_at = _next_summary_evening(local, offset, weekday, hour)
             soonest = report.get("nextDue")
             if soonest is None or due_at.isoformat() < soonest:
                 report["nextDue"] = due_at.isoformat()
@@ -244,7 +266,7 @@ async def weekly_summary(
         due_people = (
             people
             if preview
-            else [user_id for user_id in people if _summary_delay(schedules[user_id]) == since]
+            else [user_id for user_id in people if _summary_delay(schedules[user_id], hour) == since]
         )
         if not due_people:
             continue
@@ -308,7 +330,9 @@ async def weekly_summary(
                         "title": title,
                         "body": body,
                         "alreadySent": already,
-                        "theirSundayEvening": _next_summary_evening(local, offset).isoformat(),
+                        "theirSundayEvening": _next_summary_evening(
+                            local, offset, weekday, hour
+                        ).isoformat(),
                     }
                 )
                 continue
@@ -416,6 +440,10 @@ async def skill_announcements(
         "sent": 0,
         "cursor": None,
     }
+
+    if not preview and not (await notify_jobs.get(db, "skill-announcements"))["enabled"]:
+        report["skipped"] = JOB_OFF
+        return report
 
     if not await push.deployment_allows(db, SKILL_PUBLISHED):
         report["skipped"] = "the deployment does not announce new skills"
@@ -566,6 +594,7 @@ async def announcement(
     audience: str,
     preview: bool = False,
     sent_by: str | None = None,
+    email: bool = False,
 ) -> dict[str, Any]:
     """An operator's own words, sent now, to the audience they picked.
 
@@ -599,8 +628,16 @@ async def announcement(
         report["skipped"] = "push notifications or announcements are switched off on this deployment"
         return report
 
-    title, body = await push.wording(db, ANNOUNCEMENT, {"title": title or "Koda", "message": message})
+    # The operator's own words, kept apart from the push wording built from
+    # them: the email has its own subject and body around the same two values.
+    raw = {"title": title or "Koda", "message": message}
+    title, body = await push.wording(db, ANNOUNCEMENT, raw)
     report["title"], report["body"] = title, body
+    emailing = email and await email_notify.deployment_allows(db, ANNOUNCEMENT)
+    if email:
+        report["emailed"] = 0
+        if not emailing:
+            report["emailSkipped"] = "notification or announcement emails are switched off on this deployment"
     # One tag per announcement, so two sent an hour apart sit side by side on a
     # lock screen rather than the second silently replacing the first.
     tag = f"announcement:{uuid4().hex[:12]}"
@@ -625,6 +662,10 @@ async def announcement(
                         body=body,
                         tag=tag,
                     )
+                    if emailing:
+                        report["emailed"] += await email_notify.send(
+                            db, kind=ANNOUNCEMENT, values=raw, family_id=family_id
+                        )
             if len(page) < FAMILY_PAGE:
                 break
             cursor = page[-1]
@@ -640,12 +681,26 @@ async def announcement(
                 report["sent"] += await push.send_to_account(
                     db, user_id=user_id, kind=ANNOUNCEMENT, title=title, body=body, tag=tag
                 )
+                if emailing:
+                    report["emailed"] += await email_notify.send(
+                        db, kind=ANNOUNCEMENT, values=raw, user_ids=[user_id]
+                    )
 
     report["people"] = len(reached)
     if preview:
         report["devices"] = await db.push_tokens.count_documents(
             {"disabledAt": None, "userId": {"$in": sorted(reached)}}
         )
+        if emailing:
+            # Verified addresses among them. A parent who switched announcement
+            # emails off is still counted here, the way a muted browser is.
+            report["emails"] = await db.users.count_documents(
+                {
+                    "_id": {"$in": sorted(reached)},
+                    "email": {"$nin": [None, ""]},
+                    "emailVerifiedAt": {"$ne": None},
+                }
+            )
     else:
         log.info(
             "announcement by %s to %s: %s people, %s delivered",
@@ -663,6 +718,9 @@ async def token_sweep(db: AsyncIOMotorDatabase) -> dict[str, Any]:
     urgent, which is why they share one job at three in the morning rather than
     each getting a timer.
     """
+    if not (await notify_jobs.get(db, "token-sweep"))["enabled"]:
+        return {"job": "token-sweep", "skipped": JOB_OFF}
+
     report = {
         "job": "token-sweep",
         "tokens": await push_tokens.sweep(db),
@@ -735,6 +793,10 @@ async def daily_reminders(
         "sent": 0,
         "cursor": None,
     }
+
+    if not preview and not (await notify_jobs.get(db, "daily-reminders"))["enabled"]:
+        report["skipped"] = JOB_OFF
+        return report
 
     allows_reminder = await push.deployment_allows(db, PRACTICE_REMINDER)
     allows_streak = await push.deployment_allows(db, STREAK_ENDING)

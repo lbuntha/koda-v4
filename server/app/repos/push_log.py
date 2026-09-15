@@ -60,6 +60,7 @@ async def record(
     devices: int,
     delivered: int,
     outcomes: dict[str, int],
+    channel: str = "push",
 ) -> None:
     """Write one send down. Never raises.
 
@@ -73,6 +74,9 @@ async def record(
             {
                 "_id": f"pl_{uuid4().hex[:20]}",
                 "kind": kind,
+                # `push` or `email`. Rows from before email carry none and were
+                # all push, which is how every reader below treats a missing one.
+                "channel": channel,
                 "familyId": family_id,
                 # Who was told, as accounts. A count would not let an operator
                 # answer "did *this* parent get it", which is the question that
@@ -102,12 +106,20 @@ async def record(
 
 
 async def recent(
-    db: AsyncIOMotorDatabase, *, limit: int = 50, kind: str | None = None
+    db: AsyncIOMotorDatabase,
+    *,
+    limit: int = 50,
+    kind: str | None = None,
+    channel: str | None = None,
 ) -> list[dict[str, Any]]:
     """The newest sends, most recent first."""
     mongo_filter: dict[str, Any] = {}
     if kind:
         mongo_filter["kind"] = kind
+    if channel == "push":
+        mongo_filter["channel"] = {"$ne": "email"}
+    elif channel:
+        mongo_filter["channel"] = channel
     return await (
         db.push_log.find(mongo_filter).sort("at", -1).limit(max(1, min(limit, 200))).to_list(length=200)
     )
@@ -124,7 +136,7 @@ async def summary(db: AsyncIOMotorDatabase, *, days: int = 7) -> list[dict[str, 
         {"$match": {"at": {"$gte": now() - timedelta(days=days)}}},
         {
             "$group": {
-                "_id": "$kind",
+                "_id": {"kind": "$kind", "channel": {"$ifNull": ["$channel", "push"]}},
                 "sends": {"$sum": 1},
                 "devices": {"$sum": "$devices"},
                 "delivered": {"$sum": "$delivered"},
@@ -156,7 +168,9 @@ async def unopened_run(db: AsyncIOMotorDatabase, user_id: str, kind: str) -> int
     """
     rows = await (
         db.push_log.find(
-            {"kind": kind, "people": user_id, "delivered": {"$gt": 0}},
+            # Push only: an email is never tapped through the service worker,
+            # so counting one would stop a kind for somebody reading every one.
+            {"kind": kind, "people": user_id, "delivered": {"$gt": 0}, "channel": {"$ne": "email"}},
             {"openedAt": 1},
         )
         .sort("at", -1)
@@ -179,7 +193,8 @@ async def note_opened(db: AsyncIOMotorDatabase, user_id: str, kind: str) -> None
     very history the counter reads.
     """
     row = await db.push_log.find_one(
-        {"kind": kind, "people": user_id, "openedAt": None}, sort=[("at", -1)]
+        {"kind": kind, "people": user_id, "openedAt": None, "channel": {"$ne": "email"}},
+        sort=[("at", -1)],
     )
     if row:
         await db.push_log.update_one({"_id": row["_id"]}, {"$set": {"openedAt": now()}})

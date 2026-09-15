@@ -32,9 +32,13 @@ function reachOf(report: AnnouncementReport): string {
   if (report.audience !== "families") {
     groups.push(plural(report.staff, "member of staff", "members of staff"));
   }
+  const emails =
+    report.emails !== undefined
+      ? ` and ${plural(report.emails, "verified email address", "verified email addresses")}`
+      : "";
   return (
     `${plural(report.people, "person", "people")} across ${groups.join(" and ")}, ` +
-    `with ${plural(report.devices ?? 0, "browser")} to ring.`
+    `with ${plural(report.devices ?? 0, "browser")} to ring${emails}.`
   );
 }
 
@@ -49,10 +53,11 @@ export const PushAnnounce: React.FC = () => {
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [audience, setAudience] = useState<AnnouncementAudience>("families");
+  const [email, setEmail] = useState(false);
   const [stage, setStage] = useState<Stage>({ name: "writing" });
   const [error, setError] = useState<string | null>(null);
 
-  const draft = { title: title.trim(), message: message.trim(), audience };
+  const draft = { title: title.trim(), message: message.trim(), audience, email };
   const busy = stage.name === "checking" || stage.name === "sending";
 
   const edit = (apply: () => void) => {
@@ -159,6 +164,17 @@ export const PushAnnounce: React.FC = () => {
         })}
       </div>
 
+      <label className="flex cursor-pointer items-center gap-2 text-sm text-ink">
+        <input
+          type="checkbox"
+          checked={email}
+          disabled={busy}
+          onChange={(e) => edit(() => setEmail(e.target.checked))}
+          className="h-4 w-4 accent-indigo-600"
+        />
+        Also send by email
+      </label>
+
       {/* A lock screen shows about one line of each. */}
       <div className="rounded-xl border border-line bg-surface-muted px-3 py-2">
         <p className="font-mono text-[10px] uppercase tracking-wider text-muted">Preview</p>
@@ -200,6 +216,8 @@ export const PushAnnounce: React.FC = () => {
               {plural(stage.result.sent, "browser")} rang.
               {stage.result.sent === 0 &&
                 " It is still under everyone's bell — if phones should have rung, check Overview."}
+              {stage.result.emailed !== undefined && ` ${plural(stage.result.emailed, "email")} sent.`}
+              {stage.result.emailSkipped && ` Email was not sent: ${stage.result.emailSkipped}.`}
             </p>
           ) : (
             <p className="text-xs text-muted">

@@ -9,6 +9,8 @@ is no route here that names a recipient — not for an operator, not for a paren
 lock screen, and no screen in this product needs that.
 """
 
+from typing import Literal
+
 from fastapi import APIRouter
 from pydantic import Field
 
@@ -16,10 +18,12 @@ from app.deps import AUTHENTICATED, CurrentPrincipal, Db
 from app.errors import Forbidden, NotFound
 from app.models.auth import Principal
 from app.models.common import Model
-from app.push_defaults import DEFAULT_KINDS, MASTER, SENDS
+from app.push_defaults import DEFAULT_KINDS, EMAIL_MASTER, MASTER, SENDS
 from app.repos import notify_prefs, notify_schedule, push_tokens
 from app.repos import system as system_repo
+from app.repos import users as users_repo
 from app.security.rate_limit import PUSH_TEST_PER_ACCOUNT, limiter
+from app.services import email_notify
 from app.services import push as push_service
 
 router = APIRouter(prefix="/push", tags=["push"], dependencies=[AUTHENTICATED])
@@ -137,11 +141,23 @@ class PreferencesOut(Model):
     #: sending notifications here at all, rather than draw switches that lie.
     enabled: bool
     kinds: list[KindOut]
+    #: The email channel's master. False means no notification email goes at all.
+    email_enabled: bool = Field(default=False, alias="emailEnabled")
+    #: Only a verified address is emailed, so the screen says so rather than
+    #: drawing switches that would do nothing.
+    email_verified: bool = Field(default=False, alias="emailVerified")
+    email_address: str | None = Field(default=None, alias="emailAddress")
+    #: The courtesy kinds this account may choose to get by email.
+    email_kinds: list[KindOut] = Field(default_factory=list, alias="emailKinds")
+    #: "Stop all progress emails" is on — from a link, or from this screen.
+    email_stopped: bool = Field(default=False, alias="emailStopped")
 
 
 class PreferenceIn(Model):
+    #: A kind id, or `*` with the email channel for "all progress emails".
     kind: str = Field(max_length=60)
     on: bool
+    channel: Literal["push", "email"] = "push"
 
 
 async def _preferences(db, p: Principal) -> PreferencesOut:
@@ -175,7 +191,32 @@ async def _preferences(db, p: Principal) -> PreferencesOut:
             )
         )
 
-    return PreferencesOut(enabled=bool(master), kinds=kinds)
+    # The email half. The same rule as above — a kind the deployment will not
+    # email is absent rather than drawn off — and account kinds are absent
+    # because they carry no choice on this channel either.
+    user = await users_repo.by_id(db, p.subject_id) or {}
+    email_chosen = await notify_prefs.for_user(db, p.subject_id, channel=email_notify.CHANNEL)
+    email_kinds: list[KindOut] = []
+    for kind in DEFAULT_KINDS:
+        if kind["class"] != "courtesy" or not await email_notify.deployment_allows(db, kind["kindId"]):
+            continue
+        email_kinds.append(
+            KindOut(
+                id=kind["kindId"],
+                label=kind["label"],
+                on=bool(email_chosen.get(kind["kindId"], kind["email"].get("default", False))),
+            )
+        )
+
+    return PreferencesOut(
+        enabled=bool(master),
+        kinds=kinds,
+        emailEnabled=bool(await system_repo.value_of(db, EMAIL_MASTER, True)),
+        emailVerified=bool(user.get("emailVerifiedAt")),
+        emailAddress=user.get("email"),
+        emailKinds=email_kinds,
+        emailStopped=email_chosen.get(email_notify.STOP_ALL) is False,
+    )
 
 
 @router.get("/preferences")
@@ -192,6 +233,23 @@ async def choose(body: PreferenceIn, db: Db, p: CurrentPrincipal) -> Preferences
     switches at the same moment must not overwrite each other.
     """
     _adult(p)
+    if body.channel == "email":
+        if body.kind == email_notify.STOP_ALL:
+            # `on: false` is "stop all progress emails"; `on: true` lifts it.
+            await notify_prefs.set_pref(
+                db, p.subject_id, email_notify.STOP_ALL, body.on, channel=email_notify.CHANNEL
+            )
+            return await _preferences(db, p)
+        definition = next((k for k in DEFAULT_KINDS if k["kindId"] == body.kind), None)
+        if (
+            definition is None
+            or definition["class"] != "courtesy"
+            or not await email_notify.deployment_allows(db, body.kind)
+        ):
+            raise NotFound(f"There is no email setting called '{body.kind}'.")
+        await notify_prefs.set_pref(db, p.subject_id, body.kind, body.on, channel=email_notify.CHANNEL)
+        return await _preferences(db, p)
+
     definition = next((k for k in DEFAULT_KINDS if k["kindId"] == body.kind), None)
     if definition is None or definition["class"] != "courtesy" or body.kind not in SENDS:
         # An account kind has no preference to set, an unknown one is a client

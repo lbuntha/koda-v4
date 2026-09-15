@@ -251,6 +251,31 @@ turn it off like any other courtesy kind. Quiet hours are not consulted: the
 operator chose the moment. It runs inside the request, so a deployment with
 thousands of families will need to move it to a paged job.
 
+### Email, the second channel
+
+`services/email_notify.py` sends a kind by email behind the same three gates
+push asks: the deployment (`email.enabled`, then the kind's own `email.*`
+switch), the build (`EMAIL_SENDS` in `push_defaults.py` — the same rule as
+`SENDS`, one channel over), and the person (`notify_prefs` rows on the `email`
+channel, plus a `*` row for "stop all progress emails"). Account kinds skip the
+person's half, exactly as their push half does.
+
+- **Only verified addresses** are written to; an unverified one is logged as
+  `unverified` and skipped.
+- **One frame for every email** — a greeting and a footer, operator-editable
+  under Wording. The footer must keep `{unsubscribe_link}`, and account notices
+  use `accountFooter`, which has none.
+- **Unsubscribe is a signed link** (`/v1/notifications/unsubscribe`, no sign-in).
+  A GET only shows a page; the page's button and a mail client's one-click
+  (`List-Unsubscribe-Post`) POST. Mail scanners open every link, so a GET that
+  unsubscribed would switch people off without them knowing.
+- **Phase 1 emails** the three account kinds and announcements (when the operator
+  ticks "also send by email"). The weekly summary and the progress kinds join
+  when their senders do.
+- **Wording is editable per channel**, and a save naming a placeholder nothing
+  fills is refused (`unknown_placeholder`).
+- `push_log` rows carry `channel`, so **What was sent** shows both.
+
 **Account-class kinds are not switchable and carry no preference row.** They
 are the notification equivalent of a password-reset email: three of them a year,
 each about something that happened *to the account*, and a product that lets you
@@ -633,6 +658,15 @@ timer of its own:
 Hourly-with-a-timezone-filter, rather than a job per timezone: one schedule,
 and a family that moves country is right the next day without an operator
 touching anything.
+
+**When a job runs is a row, not a constant.** `repos/notify_jobs.py` holds
+whether each job is on and, for the weekly summary, its weekday and hour —
+edited under Notification Settings → Events, defaulting to the Sunday 18:00 this
+section describes. Cloud Scheduler still calls every job on the hour; the job
+reads the row and decides. A switched-off job answers
+`{"skipped": "switched off in Notification Settings → Events"}`, and every run
+(scheduled or by hand) notes its time on the row so the screen can say when it
+last ran.
 
 **An announcement is a job for the same reason a summary is.** Publishing a
 skill is one operator pressing one button, and telling every family about it is

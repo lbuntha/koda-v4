@@ -37,7 +37,18 @@ export interface NotificationPreferences {
   /** The deployment's master switch. False means Koda sends nothing here. */
   enabled: boolean;
   kinds: NotificationKind[];
+  /** The email channel's master. False means Koda sends no notification email. */
+  emailEnabled?: boolean;
+  /** Only a verified address is emailed, so the screen asks for one first. */
+  emailVerified?: boolean;
+  emailAddress?: string | null;
+  /** The courtesy kinds this account may choose to get by email. */
+  emailKinds?: NotificationKind[];
+  /** "Stop all progress emails" is on. */
+  emailStopped?: boolean;
 }
+
+export type NotificationChannel = "push" | "email";
 
 /**
  * Whether *this browser* is currently signed up to be rung.
@@ -262,11 +273,16 @@ export async function notificationPreferences(): Promise<NotificationPreferences
   return await request<NotificationPreferences>("/push/preferences", { token: await accessToken() });
 }
 
-export async function chooseNotification(kind: string, on: boolean): Promise<NotificationPreferences> {
+/** `kind` "*" on the email channel is "all progress emails". */
+export async function chooseNotification(
+  kind: string,
+  on: boolean,
+  channel: NotificationChannel = "push",
+): Promise<NotificationPreferences> {
   return await request<NotificationPreferences>("/push/preferences", {
     method: "PUT",
     token: await accessToken(),
-    body: { kind, on },
+    body: { kind, on, channel },
   });
 }
 
@@ -326,6 +342,74 @@ export interface NotificationTemplate {
   placeholders: string[];
   /** Whether these are the shipped words or somebody's edit. */
   edited: boolean;
+  /** The email version, when this build emails the kind at all. */
+  email?: EmailWording | null;
+}
+
+export interface EmailWording {
+  subject: string;
+  body: string;
+  /** The kind's own placeholders plus `{parent}`, `{family}` and `{app_link}`. */
+  placeholders: string[];
+  edited: boolean;
+}
+
+export type EmailFramePart = "body" | "footer" | "accountFooter";
+
+/** The greeting and footers every notification email is wrapped in. */
+export interface EmailFrame {
+  body: string;
+  footer: string;
+  accountFooter: string;
+  placeholders: Record<EmailFramePart, string[]>;
+  /** The placeholder a part cannot be saved without. */
+  required: Partial<Record<EmailFramePart, string>>;
+  edited: boolean;
+}
+
+export interface NotificationWording {
+  templates: NotificationTemplate[];
+  frame: EmailFrame;
+}
+
+/** Every kind's push and email wording, and the email frame. */
+export async function notificationWording(): Promise<NotificationWording> {
+  return await request<NotificationWording>("/system/push/templates", { token: await accessToken() });
+}
+
+export async function rewordNotificationEmail(
+  kind: string,
+  wording: { subject: string; body: string },
+): Promise<NotificationWording> {
+  return await request<NotificationWording>(`/system/push/templates/${kind}/email`, {
+    method: "PATCH",
+    token: await accessToken(),
+    body: wording,
+  });
+}
+
+export async function resetNotificationEmail(kind: string): Promise<NotificationWording> {
+  return await request<NotificationWording>(`/system/push/templates/${kind}/email`, {
+    method: "DELETE",
+    token: await accessToken(),
+  });
+}
+
+export async function rewordEmailFrame(
+  frame: Pick<EmailFrame, "body" | "footer" | "accountFooter">,
+): Promise<NotificationWording> {
+  return await request<NotificationWording>("/system/email/frame", {
+    method: "PATCH",
+    token: await accessToken(),
+    body: frame,
+  });
+}
+
+export async function resetEmailFrame(): Promise<NotificationWording> {
+  return await request<NotificationWording>("/system/email/frame", {
+    method: "DELETE",
+    token: await accessToken(),
+  });
 }
 
 export async function notificationTemplates(): Promise<NotificationTemplate[]> {
@@ -502,6 +586,8 @@ export interface AnnouncementDraft {
   title: string;
   message: string;
   audience: AnnouncementAudience;
+  /** Also email it, to the verified addresses in that audience. */
+  email?: boolean;
 }
 
 export interface AnnouncementReport {
@@ -521,6 +607,12 @@ export interface AnnouncementReport {
   sent: number;
   /** Why nothing could be sent at all. */
   skipped?: string;
+  /** Emails that left for a mail server. Present only when email was asked for. */
+  emailed?: number;
+  /** Verified addresses in the audience — a preview with email asked for. */
+  emails?: number;
+  /** Why email was asked for and not sent. */
+  emailSkipped?: string;
 }
 
 /**
@@ -557,10 +649,12 @@ export interface SendRecord {
   /** FCM's own vocabulary, counted: `dead`, `soft`, `config`, `quota`. */
   outcomes: Record<string, number>;
   at: string;
+  channel?: NotificationChannel;
 }
 
 export interface SendSummary {
   kind: string;
+  channel?: NotificationChannel;
   sends: number;
   devices: number;
   delivered: number;
@@ -705,4 +799,103 @@ export async function noteNotificationOpened(kind: string): Promise<void> {
     // The next tap says the same thing. A counter that is one late is a
     // notification somebody gets anyway.
   }
+}
+
+/* ---------------------------------------------------------------- *
+ * Events: every kind, its channels, and when its job runs. Staff
+ * only, like everything above.
+ * ---------------------------------------------------------------- */
+
+export interface NotifyChannelState {
+  /** Whether this build sends the kind on this channel at all. */
+  available: boolean;
+  /** The switch that turns it off for the deployment, if it has one. */
+  settingId: string | null;
+  on: boolean;
+  /** Sent whenever the channel's master is on, with no switch of its own. */
+  locked: boolean;
+}
+
+export interface NotifyEvent {
+  id: string;
+  label: string;
+  class: string;
+  push: NotifyChannelState;
+  email: NotifyChannelState;
+  /** The job that sends it, when a clock rather than an event does. */
+  job: string | null;
+}
+
+export interface NotifyJob {
+  id: string;
+  description: string;
+  enabled: boolean;
+  /** Monday is 0 — the server's numbering. Only the weekly summary has one. */
+  weekday: number | null;
+  hour: number | null;
+  lastRunAt: string | null;
+  lastSent: number | null;
+  lastSkipped: string | null;
+}
+
+export interface NotifyEvents {
+  pushEnabled: boolean;
+  emailEnabled: boolean;
+  pushDriver: string;
+  mailDriver: string;
+  events: NotifyEvent[];
+  jobs: NotifyJob[];
+}
+
+export async function notifyEvents(): Promise<NotifyEvents> {
+  return await request<NotifyEvents>("/system/notify/events", { token: await accessToken() });
+}
+
+/** Throw one of the deployment's switches — a channel master or a kind's own. */
+export async function setNotifySwitch(settingId: string, value: boolean): Promise<void> {
+  await request(`/system/settings/${settingId}`, {
+    method: "PATCH",
+    token: await accessToken(),
+    body: { value },
+  });
+}
+
+export async function setNotifyJob(
+  job: string,
+  patch: Partial<Pick<NotifyJob, "enabled" | "weekday" | "hour">>,
+): Promise<NotifyEvents> {
+  return await request<NotifyEvents>(`/system/notify/jobs/${job}`, {
+    method: "PATCH",
+    token: await accessToken(),
+    body: patch,
+  });
+}
+
+export interface EmailStatus {
+  driver: string;
+  from: string;
+  host: string | null;
+  enabled: boolean;
+  you: string | null;
+  youVerified: boolean;
+}
+
+export async function emailStatus(): Promise<EmailStatus> {
+  return await request<EmailStatus>("/system/email/status", { token: await accessToken() });
+}
+
+export interface TestEmailResult {
+  driver: string;
+  sent: boolean;
+  to: string | null;
+  note: string | null;
+}
+
+/** Email the caller's own address. `kind` previews that kind's wording; never a recipient. */
+export async function sendTestEmail(kind?: string): Promise<TestEmailResult> {
+  return await request<TestEmailResult>("/system/email/test", {
+    method: "POST",
+    token: await accessToken(),
+    body: { kind: kind ?? null },
+  });
 }

@@ -22,12 +22,29 @@ from app.errors import AppError, Forbidden, NotFound
 from app.models.auth import Principal
 from app.models.common import Model
 from app.models.subjects import SubjectCatalog
-from app.push_defaults import BODY_MAX, DEFAULT_KINDS, TITLE_MAX
+from app.push_defaults import (
+    BODY_MAX,
+    BY_KIND,
+    DEFAULT_KINDS,
+    EMAIL_BODY_MAX,
+    EMAIL_FRAME,
+    EMAIL_FRAME_PLACEHOLDERS,
+    EMAIL_FRAME_REQUIRED,
+    EMAIL_MASTER,
+    EMAIL_SENDS,
+    EMAIL_SUBJECT_MAX,
+    MASTER,
+    SENDS,
+    TITLE_MAX,
+    placeholders_for,
+    unknown_placeholders,
+)
 from app.repos import maintenance as maintenance_repo
-from app.repos import notify_prefs, notify_schedule, push_log, push_templates, push_tokens
+from app.repos import notify_jobs, notify_prefs, notify_schedule, push_log, push_templates, push_tokens
 from app.repos import system as system_repo
 from app.repos import users as users_repo
 from app.security.rate_limit import PUSH_TEST_PER_ACCOUNT, limiter
+from app.services import email_notify
 from app.services import push as push_service
 from app.services import tasks as task_service
 from app.settings import settings
@@ -336,27 +353,19 @@ async def push_job_run(
     if job == "token-sweep":
         # Nothing to preview: it deletes rows nothing can use again, and a
         # count of them is what a real run already reports.
-        return JobRunOut(job=job, preview=False, report=await task_service.token_sweep(db))
+        report = await task_service.token_sweep(db)
+        preview = False
+    elif job == "skill-announcements":
+        report = await task_service.skill_announcements(db, preview=preview)
+    elif job == "daily-reminders":
+        report = await task_service.daily_reminders(db, preview=preview)
+    else:
+        report = await task_service.weekly_summary(db, preview=preview)
 
-    if job == "skill-announcements":
-        return JobRunOut(
-            job=job,
-            preview=preview,
-            report=await task_service.skill_announcements(db, preview=preview),
-        )
-
-    if job == "daily-reminders":
-        return JobRunOut(
-            job=job,
-            preview=preview,
-            report=await task_service.daily_reminders(db, preview=preview),
-        )
-
-    return JobRunOut(
-        job=job,
-        preview=preview,
-        report=await task_service.weekly_summary(db, preview=preview),
-    )
+    # A real run by hand is a run, and the Events screen says when the last one was.
+    if not preview:
+        await notify_jobs.note_run(db, job, report)
+    return JobRunOut(job=job, preview=preview, report=report)
 
 
 class SendOut(Model):
@@ -377,10 +386,13 @@ class SendOut(Model):
     #: FCM's own vocabulary, counted — `dead`, `soft`, `config`, `quota`.
     outcomes: dict[str, int]
     at: str
+    #: `push` or `email`.
+    channel: str = "push"
 
 
 class SendSummaryOut(Model):
     kind: str
+    channel: str = "push"
     sends: int
     devices: int
     delivered: int
@@ -394,7 +406,11 @@ class PushLogOut(Model):
 
 @router.get("/push/log")
 async def push_log_read(
-    db: Db, p: CanOperate, limit: int = 50, kind: str | None = None
+    db: Db,
+    p: CanOperate,
+    limit: int = 50,
+    kind: str | None = None,
+    channel: str | None = None,
 ) -> PushLogOut:
     """What this deployment has sent, and what became of it.
 
@@ -407,12 +423,13 @@ async def push_log_read(
     sent forty notifications and delivered none is exactly this feature's
     failure mode, and it is invisible in forty rows that each look fine.
     """
-    rows = await push_log.recent(db, limit=limit, kind=kind)
+    rows = await push_log.recent(db, limit=limit, kind=kind, channel=channel)
     totals = await push_log.summary(db)
     return PushLogOut(
         summary=[
             SendSummaryOut(
-                kind=row["_id"],
+                kind=row["_id"]["kind"],
+                channel=row["_id"]["channel"],
                 sends=row["sends"],
                 devices=row["devices"],
                 delivered=row["delivered"],
@@ -428,6 +445,7 @@ async def push_log_read(
                 body=row.get("body", ""),
                 people=row.get("people", []),
                 familyId=row.get("familyId"),
+                channel=row.get("channel") or "push",
                 driver=row.get("driver", "unknown"),
                 devices=row.get("devices", 0),
                 delivered=row.get("delivered", 0),
@@ -690,6 +708,8 @@ class AnnouncementIn(Model):
     title: str = Field(default="", max_length=TITLE_MAX)
     message: str = Field(min_length=1, max_length=BODY_MAX)
     audience: Literal["families", "staff", "everyone"] = "families"
+    #: Also email it, to the verified addresses in that audience.
+    email: bool = False
 
 
 @router.post("/push/announcement")
@@ -718,7 +738,29 @@ async def push_announcement(
         audience=body.audience,
         preview=preview,
         sent_by=p.subject_id,
+        email=body.email,
     )
+
+
+class EmailWordingOut(Model):
+    """One kind's email subject and body, as an operator edits them."""
+
+    subject: str
+    body: str
+    placeholders: list[str]
+    edited: bool
+
+
+class FrameOut(Model):
+    """The greeting and footer every notification email is wrapped in."""
+
+    body: str
+    footer: str
+    account_footer: str = Field(alias="accountFooter")
+    placeholders: dict[str, list[str]]
+    #: The placeholder each part cannot be saved without.
+    required: dict[str, str]
+    edited: bool
 
 
 class TemplateOut(Model):
@@ -736,10 +778,13 @@ class TemplateOut(Model):
     #: Whether these are the shipped words or somebody's edit — which is also
     #: the only thing "reset" needs to know.
     edited: bool
+    #: The email version, when this build emails the kind at all.
+    email: EmailWordingOut | None = None
 
 
 class TemplatesOut(Model):
     templates: list[TemplateOut]
+    frame: FrameOut
 
 
 class TemplateIn(Model):
@@ -749,18 +794,58 @@ class TemplateIn(Model):
 
 async def _templates(db) -> TemplatesOut:
     edits = await push_templates.overrides(db)
-    return TemplatesOut(templates=[
-        TemplateOut(
-            id=kind["kindId"],
-            label=kind["label"],
-            **{"class": kind["class"]},
-            title=edits.get(kind["kindId"], {}).get("title") or kind["title"],
-            body=edits.get(kind["kindId"], {}).get("body") or kind["body"],
-            placeholders=kind.get("placeholders", []),
-            edited=kind["kindId"] in edits,
+    rows: list[TemplateOut] = []
+    for kind in DEFAULT_KINDS:
+        kind_id = kind["kindId"]
+        email_default = kind.get("email") if kind_id in EMAIL_SENDS else None
+        email_edit = edits.get(push_templates.EMAIL_PREFIX + kind_id, {})
+        rows.append(
+            TemplateOut(
+                id=kind_id,
+                label=kind["label"],
+                **{"class": kind["class"]},
+                title=edits.get(kind_id, {}).get("title") or kind["title"],
+                body=edits.get(kind_id, {}).get("body") or kind["body"],
+                placeholders=kind.get("placeholders", []),
+                edited=kind_id in edits,
+                email=EmailWordingOut(
+                    subject=email_edit.get("subject") or email_default["subject"],
+                    body=email_edit.get("body") or email_default["body"],
+                    placeholders=placeholders_for(kind_id, "email"),
+                    edited=bool(email_edit),
+                )
+                if email_default
+                else None,
+            )
         )
-        for kind in DEFAULT_KINDS
-    ])
+    frame_edit = edits.get(push_templates.FRAME_ID, {})
+    return TemplatesOut(
+        templates=rows,
+        frame=FrameOut(
+            body=frame_edit.get("body") or EMAIL_FRAME["body"],
+            footer=frame_edit.get("footer") or EMAIL_FRAME["footer"],
+            accountFooter=frame_edit.get("accountFooter") or EMAIL_FRAME["accountFooter"],
+            placeholders=EMAIL_FRAME_PLACEHOLDERS,
+            required=EMAIL_FRAME_REQUIRED,
+            edited=bool(frame_edit),
+        ),
+    )
+
+
+def _refuse_unknown(text: str, allowed: list[str]) -> None:
+    """Refuse a save that names a placeholder nothing will fill.
+
+    `fill` leaves one standing rather than guessing, which is right at send
+    time. At save time the operator is looking at the screen, and that is the
+    moment to say "{learnr} is not something this message can fill".
+    """
+    unknown = unknown_placeholders(text, allowed)
+    if unknown:
+        listed = ", ".join("{" + name + "}" for name in unknown)
+        verb = "is" if len(unknown) == 1 else "are"
+        raise AppError(
+            400, "unknown_placeholder", f"{listed} {verb} not something this message can fill."
+        )
 
 
 @router.get("/push/templates")
@@ -778,6 +863,11 @@ async def push_template_write(kind_id: str, body: TemplateIn, db: Db, p: CanOper
     """
     if kind_id not in {kind["kindId"] for kind in DEFAULT_KINDS}:
         raise NotFound(f"There is no notification called '{kind_id}'.")
+    definition = BY_KIND[kind_id]
+    _refuse_unknown(
+        f"{body.title}\n{body.body}",
+        placeholders_for(kind_id, "push") + list(definition.get("accepts", [])),
+    )
     await push_templates.set_wording(
         db, kind_id, title=body.title.strip(), body=body.body.strip(), updated_by=p.subject_id
     )
@@ -790,3 +880,231 @@ async def push_template_reset(kind_id: str, db: Db, p: CanOperate) -> TemplatesO
     writing a second copy of the default."""
     await push_templates.reset(db, kind_id)
     return await _templates(db)
+
+
+class EmailTemplateIn(Model):
+    subject: str = Field(min_length=1, max_length=EMAIL_SUBJECT_MAX)
+    body: str = Field(min_length=1, max_length=EMAIL_BODY_MAX)
+
+
+def _emailed(kind_id: str) -> dict[str, Any]:
+    definition = BY_KIND.get(kind_id)
+    if not definition or not definition.get("email") or kind_id not in EMAIL_SENDS:
+        raise NotFound(f"There is no notification email called '{kind_id}'.")
+    return definition
+
+
+@router.patch("/push/templates/{kind_id}/email")
+async def email_template_write(
+    kind_id: str, body: EmailTemplateIn, db: Db, p: CanOperate
+) -> TemplatesOut:
+    """Reword one kind's email. Refused if it names a placeholder nothing fills."""
+    _emailed(kind_id)
+    _refuse_unknown(f"{body.subject}\n{body.body}", placeholders_for(kind_id, "email"))
+    await push_templates.set_email(
+        db, kind_id, subject=body.subject.strip(), body=body.body.strip(), updated_by=p.subject_id
+    )
+    return await _templates(db)
+
+
+@router.delete("/push/templates/{kind_id}/email")
+async def email_template_reset(kind_id: str, db: Db, p: CanOperate) -> TemplatesOut:
+    _emailed(kind_id)
+    await push_templates.reset_email(db, kind_id)
+    return await _templates(db)
+
+
+class FrameIn(Model):
+    body: str = Field(min_length=1, max_length=EMAIL_BODY_MAX)
+    footer: str = Field(min_length=1, max_length=1000)
+    account_footer: str = Field(alias="accountFooter", min_length=1, max_length=1000)
+
+
+@router.patch("/email/frame")
+async def email_frame_write(body: FrameIn, db: Db, p: CanOperate) -> TemplatesOut:
+    """Reword the greeting and footers every notification email shares.
+
+    The body must keep `{message}` and the footer `{unsubscribe_link}`: without
+    the first every parent reads the same empty letter, and without the second
+    nobody can stop the emails.
+    """
+    parts = {"body": body.body, "footer": body.footer, "accountFooter": body.account_footer}
+    for part, text in parts.items():
+        _refuse_unknown(text, EMAIL_FRAME_PLACEHOLDERS[part])
+        required = EMAIL_FRAME_REQUIRED.get(part)
+        if required and "{" + required + "}" not in text:
+            raise AppError(
+                400, "missing_placeholder", f"The {part} has to keep {{{required}}}."
+            )
+    await push_templates.set_frame(
+        db,
+        body=body.body.strip(),
+        footer=body.footer.strip(),
+        account_footer=body.account_footer.strip(),
+        updated_by=p.subject_id,
+    )
+    return await _templates(db)
+
+
+@router.delete("/email/frame")
+async def email_frame_reset(db: Db, p: CanOperate) -> TemplatesOut:
+    await push_templates.reset_frame(db)
+    return await _templates(db)
+
+
+# --- the events screen: every kind, its channels, and when its job runs -------
+
+#: Which job sends each scheduled kind — where an operator moves its time.
+KIND_JOBS = {
+    "learn.weekly_summary": "weekly-summary",
+    "learn.practice_reminder": "daily-reminders",
+    "learn.streak_ending": "daily-reminders",
+    "learn.skill_published": "skill-announcements",
+}
+
+
+class ChannelOut(Model):
+    """One channel of one kind, as the Events table draws it."""
+
+    #: Whether this build sends the kind on this channel at all.
+    available: bool
+    #: The switch that turns it off for the deployment, if it has one.
+    setting_id: str | None = Field(default=None, alias="settingId")
+    on: bool = False
+    #: Sent whenever the channel's master is on, with no switch of its own —
+    #: the account notices.
+    locked: bool = False
+
+
+class EventOut(Model):
+    id: str
+    label: str
+    kind_class: str = Field(alias="class")
+    push: ChannelOut
+    email: ChannelOut
+    job: str | None = None
+
+
+class NotifyJobOut(Model):
+    id: str
+    description: str
+    enabled: bool
+    #: Monday is 0. Only the weekly summary has a day and an hour to move.
+    weekday: int | None = None
+    hour: int | None = None
+    last_run_at: str | None = Field(default=None, alias="lastRunAt")
+    last_sent: int | None = Field(default=None, alias="lastSent")
+    last_skipped: str | None = Field(default=None, alias="lastSkipped")
+
+
+class EventsOut(Model):
+    push_enabled: bool = Field(alias="pushEnabled")
+    email_enabled: bool = Field(alias="emailEnabled")
+    push_driver: str = Field(alias="pushDriver")
+    mail_driver: str = Field(alias="mailDriver")
+    events: list[EventOut]
+    jobs: list[NotifyJobOut]
+
+
+async def _switch(db, setting_id: str | None) -> bool:
+    return bool(await system_repo.value_of(db, setting_id, True)) if setting_id else True
+
+
+async def _events(db) -> EventsOut:
+    events: list[EventOut] = []
+    for kind in DEFAULT_KINDS:
+        kind_id = kind["kindId"]
+        if kind_id not in SENDS:
+            continue
+        push_setting = kind.get("settingId")
+        email_default = kind.get("email") if kind_id in EMAIL_SENDS else None
+        email_setting = (email_default or {}).get("settingId")
+        events.append(
+            EventOut(
+                id=kind_id,
+                label=kind["label"],
+                **{"class": kind["class"]},
+                push=ChannelOut(
+                    available=True,
+                    settingId=push_setting,
+                    on=await _switch(db, push_setting),
+                    locked=push_setting is None,
+                ),
+                email=ChannelOut(
+                    available=email_default is not None,
+                    settingId=email_setting,
+                    on=email_default is not None and await _switch(db, email_setting),
+                    locked=email_default is not None and email_setting is None,
+                ),
+                job=KIND_JOBS.get(kind_id),
+            )
+        )
+    cfg = settings()
+    return EventsOut(
+        pushEnabled=bool(await system_repo.value_of(db, MASTER, True)),
+        emailEnabled=bool(await system_repo.value_of(db, EMAIL_MASTER, True)),
+        pushDriver=cfg.push_driver,
+        mailDriver=cfg.mail_driver,
+        events=events,
+        jobs=[
+            NotifyJobOut(description=RUNNABLE_JOBS.get(row["id"], ""), **row)
+            for row in await notify_jobs.all_jobs(db)
+        ],
+    )
+
+
+@router.get("/notify/events")
+async def notify_events(db: Db, p: CanOperate) -> EventsOut:
+    """Every kind this build sends, on which channels, whether each is on, and
+    when the job behind it runs. Switches are thrown with `PATCH /settings/{id}`."""
+    return await _events(db)
+
+
+class NotifyJobIn(Model):
+    enabled: bool | None = None
+    weekday: int | None = Field(default=None, ge=0, le=6)
+    hour: int | None = Field(default=None, ge=0, le=23)
+
+
+@router.patch("/notify/jobs/{job}")
+async def notify_job_write(job: str, body: NotifyJobIn, db: Db, p: CanOperate) -> EventsOut:
+    """Switch a job on or off, or move the weekly summary's day and hour."""
+    if job not in notify_jobs.JOB_DEFAULTS:
+        raise NotFound(f"There is no job called '{job}'.")
+    if (body.weekday is not None or body.hour is not None) and job not in notify_jobs.TIMED:
+        raise AppError(
+            400, "job_not_timed", "This job has no single time to move — it runs on each person's own."
+        )
+    await notify_jobs.save(
+        db, job, enabled=body.enabled, weekday=body.weekday, hour=body.hour, updated_by=p.subject_id
+    )
+    return await _events(db)
+
+
+@router.get("/email/status")
+async def email_status(db: Db, p: CanOperate) -> dict[str, Any]:
+    """How notification email is set up here, without the password."""
+    cfg = settings()
+    user = await users_repo.by_id(db, p.subject_id) or {}
+    return {
+        "driver": cfg.mail_driver,
+        "from": cfg.mail_from,
+        "host": cfg.smtp_host if cfg.mail_driver == "smtp" else None,
+        "enabled": bool(await system_repo.value_of(db, EMAIL_MASTER, True)),
+        "you": user.get("email"),
+        "youVerified": bool(user.get("emailVerifiedAt")),
+    }
+
+
+class EmailTestIn(Model):
+    """Which kind's email to preview. Never a recipient: it goes to the caller."""
+
+    kind: str | None = Field(default=None, max_length=60)
+
+
+@router.post("/email/test")
+async def email_test(db: Db, p: CanOperate, body: EmailTestIn | None = None) -> dict[str, Any]:
+    """Email the caller's own address, and nobody else's."""
+    await limiter.hit(db, "email:test", p.subject_id, PUSH_TEST_PER_ACCOUNT)
+    user = await users_repo.by_id(db, p.subject_id) or {}
+    return await email_notify.send_test(db, user, body.kind if body else None)

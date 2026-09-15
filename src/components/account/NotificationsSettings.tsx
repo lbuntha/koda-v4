@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Bell, BellOff, Smartphone } from "lucide-react";
+import { Bell, BellOff, Mail, Smartphone } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIToggle } from "../ui";
 import {
@@ -15,7 +15,25 @@ import {
   pushSupport,
   testMyOwnDevices,
   type NotificationKind,
+  type NotificationPreferences,
 } from "../../lib/push";
+
+/** The email half of a person's choices, as the screen draws it. */
+interface EmailChoices {
+  enabled: boolean;
+  verified: boolean;
+  address: string | null;
+  kinds: NotificationKind[];
+  stopped: boolean;
+}
+
+const emailOf = (prefs: NotificationPreferences): EmailChoices => ({
+  enabled: prefs.emailEnabled ?? false,
+  verified: prefs.emailVerified ?? false,
+  address: prefs.emailAddress ?? null,
+  kinds: prefs.emailKinds ?? [],
+  stopped: prefs.emailStopped ?? false,
+});
 
 /**
  * Notifications, from a parent's side of the screen.
@@ -59,6 +77,9 @@ export const NotificationsSettings: React.FC = () => {
      left alone in. Loaded with the switches, because it is only meaningful
      once notifications are on. */
   const [schedule, setSchedule] = useState<NotificationSchedule | null>(null);
+  /* The email channel. Loaded whether or not this browser is registered: an
+     inbox has nothing to do with a push token. */
+  const [email, setEmail] = useState<EmailChoices | null>(null);
 
   /**
    * An hour, written the way a person says it.
@@ -93,6 +114,7 @@ export const NotificationsSettings: React.FC = () => {
       const prefs = await notificationPreferences();
       setDeploymentSends(prefs.enabled);
       setKinds(prefs.kinds);
+      setEmail(emailOf(prefs));
     } catch {
       // Offline, most likely. The switches are a courtesy; not drawing them is
       // better than an error a parent has to read.
@@ -101,11 +123,9 @@ export const NotificationsSettings: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (registered) void load();
+    void load();
     if (registered) void notificationSchedule().then(setSchedule).catch(() => setSchedule(null));
   }, [registered, load]);
-
-  if (support.state === "not-configured") return null;
 
   const turnOn = async () => {
     setBusy(true);
@@ -164,6 +184,21 @@ export const NotificationsSettings: React.FC = () => {
     }
   };
 
+  /** `*` is "all progress emails": off stops them, on lets them through again. */
+  const toggleEmail = async (kind: string, on: boolean) => {
+    setEmail((current) =>
+      current &&
+      (kind === "*"
+        ? { ...current, stopped: !on }
+        : { ...current, kinds: current.kinds.map((k) => (k.id === kind ? { ...k, on } : k)) }),
+    );
+    try {
+      setEmail(emailOf(await chooseNotification(kind, on, "email")));
+    } catch {
+      void load();
+    }
+  };
+
   /**
    * One sentence for a parent, and the detail underneath for whoever is fixing
    * it. Both, because the two readers are often the same person on a laptop
@@ -206,8 +241,15 @@ export const NotificationsSettings: React.FC = () => {
 
   const canAsk = support.state === "askable" || support.state === "granted";
   const on = registered;
+  // Push is absent on a deployment with no Firebase project; email is not.
+  const pushConfigured = support.state !== "not-configured";
+  const showEmail = Boolean(email?.enabled && email.kinds.length > 0);
+
+  if (!pushConfigured && !showEmail) return null;
 
   return (
+    <div className="space-y-6">
+    {pushConfigured && (
     <section>
       <div className={l.groupLabel}>Notifications</div>
       <div className={l.group}>
@@ -358,5 +400,67 @@ export const NotificationsSettings: React.FC = () => {
         )}
       </div>
     </section>
+    )}
+
+    {showEmail && email && (
+      <section>
+        <div className={l.groupLabel}>Email updates</div>
+        <div className={l.group}>
+          {!email.verified ? (
+            <div className={l.row}>
+              <div className="flex items-center gap-3 min-w-0">
+                <span className={l.rowIcon}>
+                  <Mail className="text-ink" />
+                </span>
+                <div className="min-w-0">
+                  <h4 className={l.rowTitle}>Email updates</h4>
+                  <p className={l.rowNote}>
+                    Verify {email.address ?? "your email address"} to get updates by email.
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className={l.row}>
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className={l.rowIcon}>
+                    <Mail className="text-ink" />
+                  </span>
+                  <div className="min-w-0">
+                    <h4 className={l.rowTitle}>Email updates</h4>
+                    <p className={l.rowNote}>
+                      {email.stopped
+                        ? "Koda won't email you updates. Account notices still arrive."
+                        : `Sent to ${email.address}.`}
+                    </p>
+                  </div>
+                </div>
+                <UIToggle
+                  checked={!email.stopped}
+                  onChange={() => void toggleEmail("*", email.stopped)}
+                  label="Email updates"
+                />
+              </div>
+              {!email.stopped &&
+                email.kinds.map((kind) => (
+                  <div key={kind.id} className={l.row}>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className={l.rowIcon} aria-hidden />
+                      <h4 className={l.rowTitle}>{kind.label}</h4>
+                    </div>
+                    <UIToggle
+                      checked={kind.on}
+                      onChange={() => void toggleEmail(kind.id, !kind.on)}
+                      label={`${kind.label} emails`}
+                    />
+                  </div>
+                ))}
+            </>
+          )}
+        </div>
+      </section>
+    )}
+    </div>
   );
 };

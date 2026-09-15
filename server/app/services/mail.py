@@ -25,11 +25,16 @@ from app.settings import settings
 log = logging.getLogger("koda.mail")
 
 
-def _compose(to: str, subject: str, body: str) -> EmailMessage:
+def _compose(to: str, subject: str, body: str, headers: dict[str, str] | None = None) -> EmailMessage:
     message = EmailMessage()
     message["From"] = settings().mail_from
     message["To"] = to
     message["Subject"] = subject
+    # `List-Unsubscribe` and its one-click partner, for a notification email:
+    # the button a mail client draws beside the sender is the unsubscribe
+    # people actually use, and Gmail expects it on anything sent in bulk.
+    for name, value in (headers or {}).items():
+        message[name] = value
     message.set_content(body)
     return message
 
@@ -50,7 +55,7 @@ def _send_smtp(message: EmailMessage) -> None:
         smtp.send_message(message)
 
 
-async def send(to: str, subject: str, body: str) -> bool:
+async def send(to: str, subject: str, body: str, headers: dict[str, str] | None = None) -> bool:
     """Send one message. Returns whether it went.
 
     Never raises. A caller here is a route that must not tell the world whether
@@ -66,7 +71,7 @@ async def send(to: str, subject: str, body: str) -> bool:
         return True
 
     try:
-        await asyncio.to_thread(_send_smtp, _compose(to, subject, body))
+        await asyncio.to_thread(_send_smtp, _compose(to, subject, body, headers))
         return True
     except Exception:  # noqa: BLE001 — every failure here is the same failure
         log.exception("could not send mail to %s", to)
