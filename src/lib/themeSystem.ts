@@ -307,12 +307,32 @@ export const themeSystem = {
      it. Colour by meaning, from THEME.md: indigo primary, orange streak. */
   banner: {
     card: "relative rounded-2xl border-2 border-line bg-surface p-4 transition-all duration-300 motion-reduce:transition-none",
+    /* The same card with the tone at its edge and under its icon, for a moment
+       rather than a notice — the goal-met card is the one that earns it.
+       A whole string rather than colours added on top of `card`: two
+       background utilities on one element is a coin toss, not a design. */
+    cardTinted: (tone: "primary" | "streak" | "success" | "danger" = "primary") =>
+      "relative rounded-2xl border-2 p-4 transition-all duration-300 motion-reduce:transition-none " +
+      ({
+        primary: "border-indigo-200 dark:border-indigo-500/30 bg-indigo-50/70 dark:bg-indigo-500/10",
+        streak: "border-orange-200 dark:border-orange-500/30 bg-orange-50/70 dark:bg-orange-500/10",
+        success: "border-emerald-200 dark:border-emerald-500/30 bg-emerald-50/70 dark:bg-emerald-500/10",
+        danger: "border-rose-200 dark:border-rose-500/30 bg-rose-50/70 dark:bg-rose-500/10",
+      })[tone],
     enter: "animate-[fade-in_300ms_ease-out] motion-reduce:animate-none",
     leave: "translate-y-1 opacity-0",
     row: "flex flex-wrap items-center gap-3",
     /* Room for the close button, so a long sentence wraps before it. */
     rowDismissable: "pr-8",
     well: "w-10 h-10 rounded-xl bg-surface-muted flex items-center justify-center shrink-0 [&>svg]:w-5 [&>svg]:h-5",
+    wellTinted: (tone: "primary" | "streak" | "success" | "danger" = "primary") =>
+      "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 [&>svg]:w-5 [&>svg]:h-5 " +
+      ({
+        primary: "bg-indigo-100 dark:bg-indigo-500/20",
+        streak: "bg-orange-100 dark:bg-orange-500/20",
+        success: "bg-emerald-100 dark:bg-emerald-500/20",
+        danger: "bg-rose-100 dark:bg-rose-500/20",
+      })[tone],
     text: "min-w-0 flex-1 basis-48",
     title: "text-sm font-black text-ink leading-snug",
     message: "mt-0.5 text-sm text-body",

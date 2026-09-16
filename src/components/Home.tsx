@@ -25,6 +25,7 @@ import type { UserProgress } from "../types";
 import { playSound } from "../utils/audio";
 import { UIButton, UILessonCard, UISkillCard, UISubjectLessonCard } from "./ui";
 import { WelcomeBack } from "./WelcomeBack";
+import { DailyGoalBanner } from "./DailyGoalBanner";
 import { ChildrenOverview } from "./account/ChildrenOverview";
 import { SvgAsset } from "../assets/svg";
 
@@ -535,6 +536,9 @@ export const Home: React.FC<HomeProps> = ({
             {/* Above Today, because it is about the gap before today rather
                 than about any lesson in it — and because the cards directly
                 under it are the answer to whatever it says. */}
+            {/* The two can never both speak: one is about a gap, the other
+                only exists on a day with practice in it. */}
+            <DailyGoalBanner userProgress={userProgress} />
             <WelcomeBack userProgress={userProgress} />
             {/*
               * The badge, on a phone only.

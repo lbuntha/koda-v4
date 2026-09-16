@@ -431,6 +431,54 @@ html.theme-light,
   }
 }
 
+/* ==========================================================================
+   CELEBRATION — the card that says today's goal is done.
+
+   Two movements, both finite and both over in well under a second: the card
+   arrives with a small overshoot, and the icon pops a beat later, so the eye
+   lands on the sentence and then on the mark. Nothing loops — a card that
+   never stops moving stops being a moment and becomes wallpaper.
+   ========================================================================== */
+@keyframes koda-celebrate-in {
+  0% {
+    transform: scale(0.94) translateY(6px);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.02) translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes koda-celebrate-pop {
+  0% {
+    transform: scale(0.6) rotate(-12deg);
+  }
+  45% {
+    transform: scale(1.18) rotate(8deg);
+  }
+  70% {
+    transform: scale(0.96) rotate(-4deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.koda-celebrate {
+  animation: koda-celebrate-in 0.42s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+.koda-celebrate-icon {
+  /* Around the popper's own handle, so it swings rather than spins. */
+  transform-origin: 60% 70%;
+  animation: koda-celebrate-pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.12s both;
+}
+
 .tap-pop-anim {
   animation: tactile-tap-pop 0.42s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   z-index: 30;
@@ -452,6 +500,7 @@ html.theme-light,
   .animate-pulse,
   .animate-spin-slow,
   .koda-bob,
+  .koda-celebrate-icon,
   .ready-to-unlock-node,
   .block-draggable:active,
   .chamber-snap-hundreds::before,
@@ -464,6 +513,7 @@ html.theme-light,
   .animate-fade-in,
   .animate-scale-up,
   .animate-slide-in-right,
+  .koda-celebrate,
   .tap-pop-anim,
   .block-snap-pull,
   [class*="koda-sheet-in"] {

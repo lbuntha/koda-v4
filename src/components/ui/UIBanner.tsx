@@ -15,6 +15,12 @@ export interface UIBannerProps {
   tone?: UIBannerTone;
   /** One action, on the right when there is room and under the text when not. */
   action?: { label: string; onClick: () => void };
+  /**
+   * Colours the card's edge and the icon's well with the tone, instead of the
+   * plain surface. For a card that is a moment — the day's goal met — rather
+   * than a notice about something.
+   */
+  tinted?: boolean;
   /** Draws a close button. Called once the card has faded out. */
   onDismiss?: () => void;
   dismissLabel?: string;
@@ -40,6 +46,7 @@ export const UIBanner: React.FC<UIBannerProps> = ({
   icon,
   tone = "primary",
   action,
+  tinted = false,
   onDismiss,
   dismissLabel = "Dismiss",
   role = "status",
@@ -63,10 +70,13 @@ export const UIBanner: React.FC<UIBannerProps> = ({
   };
 
   return (
-    <div role={role} className={`${b.card} ${closing ? b.leave : b.enter} ${className}`}>
+    <div
+      role={role}
+      className={`${tinted ? b.cardTinted(tone) : b.card} ${closing ? b.leave : b.enter} ${className}`}
+    >
       <div className={`${b.row} ${onDismiss ? b.rowDismissable : ""}`}>
         {icon && (
-          <span aria-hidden="true" className={`${b.well} ${b.tone(tone)}`}>
+          <span aria-hidden="true" className={`${tinted ? b.wellTinted(tone) : b.well} ${b.tone(tone)}`}>
             {icon}
           </span>
         )}
