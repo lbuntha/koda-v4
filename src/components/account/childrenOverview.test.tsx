@@ -17,11 +17,17 @@ vi.mock("../../lib/childrenOverview", async () => {
 });
 
 vi.mock("../../lib/themeSystem", () => ({
-  themeSystem: { list: { group: "", row: "", rowTitle: "", rowNote: "" } },
+  themeSystem: {
+    list: { group: "", row: "", rowTitle: "", rowNote: "" },
+    card: () => "",
+  },
 }));
 
 vi.mock("../ui", () => ({
   UIAvatar: () => <span />,
+  UIButton: ({ children, onClick }: { children: ReactNode; onClick?: () => void }) => (
+    <button onClick={onClick}>{children}</button>
+  ),
   UIBanner: ({
     title,
     children,
@@ -107,6 +113,39 @@ describe("Your children", () => {
     await Promise.resolve();
     expect(screen.queryByText("Your children")).toBeNull();
     expect(refresh).not.toHaveBeenCalled();
+  });
+
+  /**
+   * The first day of a parent's account.
+   *
+   * This section used to draw nothing for a family with no children, and Home
+   * fell through to a learner's empty state — telling a parent to build their
+   * own learning list, which is neither what they came for nor what the button
+   * under it did.
+   */
+  it("invites a parent with no children to add their first", async () => {
+    const onAddChild = vi.fn();
+    refresh.mockResolvedValue({
+      overview: { ...overview, children: [], attention: null },
+      savedAt: Date.now(),
+    });
+    render(<ChildrenOverview onAddChild={onAddChild} />);
+
+    expect(await screen.findByText("Add your first child")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Add child" }));
+    expect(onAddChild).toHaveBeenCalled();
+  });
+
+  it("says nothing until it knows whether there are children", async () => {
+    // The answer is still in flight and there is no cache. Guessing "none" here
+    // greets a parent of three with an invitation to make their first.
+    refresh.mockReturnValue(new Promise(() => {}));
+    render(<ChildrenOverview onAddChild={vi.fn()} />);
+
+    await Promise.resolve();
+    expect(screen.queryByText("Add your first child")).toBeNull();
+    expect(screen.queryByText("Your children")).toBeNull();
   });
 
   it("says a child who never started has not started", () => {

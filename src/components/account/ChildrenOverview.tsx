@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { CheckCircle2, Flame, Hand } from "lucide-react";
+import { CheckCircle2, Flame, Hand, Plus, UserRound } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
-import { UIAvatar, UIBanner } from "../ui";
+import { UIAvatar, UIBanner, UIButton } from "../ui";
 import { usePermissions, useSession } from "../../lib/sync";
 import {
   cachedChildrenOverview,
@@ -18,8 +18,13 @@ import {
  * the absence threshold, worded by the absence message an admin can edit. A
  * tap opens that child's report.
  *
- * Parents only (`learner:create`), and nothing at all for a family with no
- * children — an empty "Your children" is a heading with nothing under it.
+ * Parents only (`learner:create`). A family with no children gets an invitation
+ * rather than a heading with nothing under it — this is the first thing a
+ * parent sees on their first day, and the one action they need to take.
+ *
+ * Only once the answer is actually known. `data` is null while the first fetch
+ * is in flight, and drawing "add your first child" then would greet a parent who
+ * has three of them with an invitation to make one.
  */
 
 /** What a child's row says under their name. */
@@ -40,7 +45,11 @@ const ago = (savedAt: number, now: number): string => {
   return hours < 24 ? `${hours} h ago` : `${Math.round(hours / 24)} d ago`;
 };
 
-export const ChildrenOverview: React.FC<{ onOpenChild?: (learnerId: string) => void }> = ({ onOpenChild }) => {
+export const ChildrenOverview: React.FC<{
+  onOpenChild?: (learnerId: string) => void;
+  /** Takes a parent to the Children page, where a profile is actually made. */
+  onAddChild?: () => void;
+}> = ({ onOpenChild, onAddChild }) => {
   const session = useSession();
   const { can } = usePermissions();
   const userId = session?.userId ?? null;
@@ -66,7 +75,36 @@ export const ChildrenOverview: React.FC<{ onOpenChild?: (learnerId: string) => v
     };
   }, [isParent, userId]);
 
-  if (!isParent || !data || data.overview.children.length === 0) return null;
+  if (!isParent || !data) return null;
+
+  /*
+   * A family of nobody yet.
+   *
+   * Koda is for the children, so an account with none has nothing to show and
+   * exactly one thing to do. Saying so here beats the alternative this replaced:
+   * Home fell through to its learner's empty state and told a parent to build
+   * *their* learning list, which is not what they came for and not what the
+   * button under it did.
+   */
+  if (data.overview.children.length === 0) {
+    return (
+      <section aria-labelledby="your-children" className={themeSystem.card("default", "p-6 text-center")}>
+        <UserRound className="mx-auto h-10 w-10 text-indigo-500" />
+        <h2 id="your-children" className="mt-3 text-lg font-semibold text-ink">
+          Add your first child
+        </h2>
+        <p className="mx-auto mt-1 max-w-md text-sm text-muted">
+          Koda is for them. Create a profile and they get their own learning space — you
+          keep the settings, the goal and the progress.
+        </p>
+        {onAddChild && (
+          <UIButton className="mt-4" icon={<Plus />} onClick={onAddChild}>
+            Add child
+          </UIButton>
+        )}
+      </section>
+    );
+  }
 
   const { overview, savedAt } = data;
   const attention = overview.attention;

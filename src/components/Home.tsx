@@ -15,6 +15,7 @@ import { useBilling } from "../lib/useBilling";
 import { recommendNow, type TodayPick } from "../lib/learning/recommend";
 import { PracticeProgressAPI } from "../lib/practiceProgress";
 import { useSkillRegistrations } from "../lib/skillRegistrationApi";
+import { usePermissions, useSession } from "../lib/sync";
 import { useSkillCatalog } from "../lib/useSkillCatalog";
 import { themeSystem } from "../lib/themeSystem";
 import { useStreak } from "../lib/streak";
@@ -37,6 +38,8 @@ interface HomeProps {
   onBrowseSkills(): void;
   /** A parent opening a child's report from "Your children". */
   onOpenChild?(learnerId: string): void;
+  /** A parent with no children yet, going to the page that makes one. */
+  onAddChild?(): void;
 }
 
 /** Beyond this many subjects the list folds, so Home stays about one screen. */
@@ -308,7 +311,16 @@ export const Home: React.FC<HomeProps> = ({
   onStartLesson,
   onBrowseSkills,
   onOpenChild,
+  onAddChild,
 }) => {
+  const session = useSession();
+  const { can } = usePermissions();
+  /*
+   * Whether this screen is being read by somebody who manages learners rather
+   * than being one. The same test `ChildrenOverview` makes, so the two halves of
+   * this column cannot disagree about who is looking at it.
+   */
+  const isParent = Boolean(session && !session.learnerId && can("learner:create"));
   const { skills, viewer } = useSkillCatalog(completedLevels);
   const { registrations } = useSkillRegistrations();
   /* Subscribed so Today re-reads the plan: a family that upgrades should see
@@ -530,7 +542,7 @@ export const Home: React.FC<HomeProps> = ({
       <div className={themeSystem.spacing.section}>
         {/* A parent's first question, above their own path. Draws nothing for
             a child, or for a family with no children. */}
-        <ChildrenOverview onOpenChild={onOpenChild} />
+        <ChildrenOverview onOpenChild={onOpenChild} onAddChild={onAddChild} />
         {registered.length ? (
           <>
             {/* Above Today, because it is about the gap before today rather
@@ -688,7 +700,17 @@ export const Home: React.FC<HomeProps> = ({
               )}
             </section>
           </>
-        ) : (
+        ) : isParent ? null : (
+          /*
+           * Nothing added yet — said to the person who would add it.
+           *
+           * A parent is deliberately not shown this. Their registration scope is
+           * their own user id, which nothing ever fills, so this card was
+           * permanent for them: an invitation to build a learning list they were
+           * never going to build, above a button into the skill catalog, on the
+           * one screen where the answer is "add a child". `ChildrenOverview`
+           * above says that instead, and says it whether or not this branch runs.
+           */
           <div className={`${themeSystem.card("default")} p-6 sm:p-8 text-center`}>
             <BookOpen className="w-11 h-11 mx-auto text-indigo-500" />
             <h1 className="mt-3 font-mono font-black text-lg text-ink">Build your learning list</h1>

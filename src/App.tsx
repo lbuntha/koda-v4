@@ -1005,6 +1005,10 @@ export default function App() {
                 setActiveTab("children");
                 setChildReport(learnerId);
               }}
+              onAddChild={() => {
+                setChildReport(null);
+                setActiveTab("children");
+              }}
             />
           )}
 
