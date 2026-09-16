@@ -14,13 +14,42 @@ from app.plan_defaults import EDITABLE_PLAN_FIELDS
 
 
 async def seed_default(db: AsyncIOMotorDatabase, plan: dict[str, Any]) -> bool:
-    """Create a shipped plan if it is not there. Never overwrites an edit."""
+    """Create a shipped plan if it is not there, and carry a new feature onto it.
+
+    `$setOnInsert` alone is how a paying family loses something they bought.
+    `course.premium` was added to the Family plan in code long after the first
+    rows were written, so every deployment seeded before that day went on
+    selling Family without it: the plan screen promised every lesson and the
+    padlock on lesson eleven said otherwise.
+
+    Adding anything the shipped list has grown would fight the operator who
+    deliberately dropped a feature, so `knownFeatures` records what this row has
+    already been offered. A feature arrives exactly once; removing it afterwards
+    is a decision, and it stays removed.
+
+    Returns whether the plan was created, which is what the startup log counts.
+    """
+    seeded = {**plan, "knownFeatures": list(plan.get("features") or [])}
     result = await db.plans.update_one(
         {"_id": plan["planId"]},
-        {"$setOnInsert": {**plan, "createdAt": now(), "updatedAt": now()}},
+        {"$setOnInsert": {**seeded, "createdAt": now(), "updatedAt": now()}},
         upsert=True,
     )
-    return result.upserted_id is not None
+    if result.upserted_id is not None:
+        return True
+
+    row = await db.plans.find_one({"_id": plan["planId"]}) or {}
+    known = set(row.get("knownFeatures") or [])
+    fresh = [feature for feature in plan.get("features") or [] if feature not in known]
+    if fresh:
+        await db.plans.update_one(
+            {"_id": plan["planId"]},
+            {
+                "$addToSet": {"features": {"$each": fresh}, "knownFeatures": {"$each": fresh}},
+                "$set": {"updatedAt": now()},
+            },
+        )
+    return False
 
 
 async def listing(db: AsyncIOMotorDatabase) -> list[dict[str, Any]]:

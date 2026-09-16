@@ -1,11 +1,8 @@
 import React, { useSyncExternalStore } from "react";
 import { Sparkles } from "lucide-react";
 
-import { formatPrice } from "../lib/billing";
 import { FeatureGate } from "../lib/featureGate";
 import { usePermissions } from "../lib/sync";
-import { useBilling } from "../lib/useBilling";
-import { themeSystem } from "../lib/themeSystem";
 import { UIButton, UIModal } from "./ui";
 
 /**
@@ -25,10 +22,16 @@ import { UIButton, UIModal } from "./ui";
 /**
  * What each sellable feature is, in words a seven-year-old can read.
  *
- * Four sentences rather than one, because the reassurance is the half that has
- * to be true. "Everything else is still yours — every lesson" reads as kindness
- * under the Koda gate and as a lie under the lessons one, where lessons are
- * exactly what is being withheld. Each feature says what a child still has.
+ * Three short sentences: what is behind the plan, what the child still has, and
+ * who to ask. The reassurance is the half that has to be true — "everything
+ * else is still yours, every lesson" reads as kindness under the Koda gate and
+ * as a lie under the lessons one — so each feature says it in its own words.
+ *
+ * What this no longer says: which plan the family is on. "That part is on a
+ * paid plan, and yours is Family" is a contradiction on the screen of a family
+ * whose plan *includes* it, and naming the plan answers a question a child did
+ * not ask. Nor does it print a price: the plan screen says that, beside the
+ * sentence about no card being taken.
  */
 const FEATURE_COPY: Record<
   string,
@@ -36,17 +39,15 @@ const FEATURE_COPY: Record<
 > = {
   "ai.koda": {
     title: "Ask Koda",
-    blurb:
-      "Koda can talk you through a problem, read what you have drawn, and answer out loud.",
-    kept: "Everything else is still yours: every lesson, every star, your streak and your badges.",
-    ask: "Ask your grown-up if you would like Koda to start answering.",
+    blurb: "Koda can talk you through a problem and answer out loud. That comes with a paid plan.",
+    kept: "Your lessons, stars, streak and badges all stay yours.",
+    ask: "Ask your grown-up about turning Koda on.",
   },
   "course.premium": {
-    title: "The rest of this skill",
-    blurb:
-      "You have played all the lessons this skill gives away. The rest of the path comes with the plan.",
-    kept: "Every lesson you have already opened is still yours, with your stars, your streak and your badges.",
-    ask: "Ask your grown-up if you would like the rest of the path.",
+    title: "More lessons ahead",
+    blurb: "You've finished the free lessons in this skill. The rest come with a paid plan.",
+    kept: "Your lessons, stars, streak and badges all stay yours.",
+    ask: "Ask your grown-up about the rest.",
   },
 };
 
@@ -62,7 +63,6 @@ export interface UpgradePromptProps {
 
 export const UpgradePrompt: React.FC<UpgradePromptProps> = ({ onOpenPlan }) => {
   useSyncExternalStore(FeatureGate.subscribe, FeatureGate.version, FeatureGate.version);
-  const plan = useBilling();
   const { can } = usePermissions();
   // The same right the upgrade route checks, so this never offers a button
   // whose press comes back refused.
@@ -105,10 +105,10 @@ export const UpgradePrompt: React.FC<UpgradePromptProps> = ({ onOpenPlan }) => {
 
   if (!feature) return null;
   const copy = FEATURE_COPY[feature] ?? {
-    title: "Not on this plan",
-    blurb: "This part of Koda is included with a paid plan.",
-    kept: "Everything else is still yours: your stars, your streak and your badges.",
-    ask: "Ask your grown-up if you would like it.",
+    title: "On a paid plan",
+    blurb: "This part of Koda comes with a paid plan.",
+    kept: "Your lessons, stars, streak and badges all stay yours.",
+    ask: "Ask your grown-up about it.",
   };
 
   return (
@@ -142,31 +142,16 @@ export const UpgradePrompt: React.FC<UpgradePromptProps> = ({ onOpenPlan }) => {
       <div className="space-y-4">
         <div className="flex items-start gap-3 rounded-2xl border border-indigo-200 bg-indigo-50 p-4 dark:border-indigo-800 dark:bg-indigo-950/40">
           <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-indigo-600 dark:text-indigo-300" />
-          <p className="text-sm text-indigo-900 dark:text-indigo-200">
-            {copy.blurb} That part is on a paid plan, and yours is{" "}
-            <strong>{plan.planName}</strong>.
-          </p>
+          <p className="text-sm text-indigo-900 dark:text-indigo-200">{copy.blurb}</p>
         </div>
 
-        <p className="text-sm text-muted">
-          {copy.kept}
-          {mayBuy
-            ? " Your plan is under Settings, and you can ask to move to one that includes it."
-            : ` ${copy.ask}`}
-        </p>
-
         {/*
-          * Still no checkout here. "See plans" goes to the plan card, which
-          * records a request — the price is named on that screen beside the
-          * sentence saying no card is taken, and repeating half of that here
-          * would make this dialog read like a till.
+          * The child is told who to ask; the adult has the button instead, so
+          * repeating "see plans" in a sentence would be the same offer twice.
+          * Still no checkout and no price here: "See plans" goes to the plan
+          * card, which names the price beside the line saying no card is taken.
           */}
-        <p className={themeSystem.typography("body-sm")}>
-          <span className="font-mono text-ink">
-            Your plan: {plan.planName}
-            {plan.priceCents > 0 ? `, ${formatPrice(plan.priceCents, plan.currency)}/month` : ""}
-          </span>
-        </p>
+        <p className="text-sm text-muted">{mayBuy ? copy.kept : `${copy.kept} ${copy.ask}`}</p>
       </div>
     </UIModal>
   );
