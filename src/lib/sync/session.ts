@@ -171,6 +171,20 @@ function accountIdentity(account: Session): string {
   return `device:${account.deviceId}`;
 }
 
+/**
+ * Whether these two sessions belong to different households.
+ *
+ * Only ever true when both sides name a family and the names differ. A missing
+ * id is not evidence of anything — staff belong to no family, and a session
+ * stored before `familyId` was persisted has none either — so an unknown answer
+ * leaves behaviour exactly as it was rather than inventing a refusal for an
+ * account that has done nothing wrong.
+ */
+function isOtherFamily(a: Session | null, b: Session | null): boolean {
+  if (!a?.familyId || !b?.familyId) return false;
+  return a.familyId !== b.familyId;
+}
+
 function uniqueAccounts(accounts: Session[], preferred?: Session | null): Session[] {
   const result: Session[] = [];
   const seen = new Set<string>();
@@ -616,10 +630,20 @@ export const SessionAPI = {
    * reverse — a parent opening their child — is the gesture `switchToChild`
    * exists for and needs no ceremony. And a family with no PIN set behaves
    * exactly as it did before this existed.
+   *
+   * The PIN asked for is this family's, because `GET /family/pin` answers about
+   * the caller's family and nobody else's. That was the whole story while every
+   * account on a device belonged to one household — and stopped being it the
+   * day a student could sign in, because a student is a family of one. Their
+   * own family has no PIN, so asking it about a parent account from another
+   * household waved the switch straight through the guard that household had
+   * set. A different family is handled by `switchAccount` instead, which
+   * refuses to resume it at all; there is no PIN here that could cover it.
    */
   async switchNeedsPin(deviceId: string): Promise<boolean> {
     const target = SessionAPI.accounts().find((account) => account.deviceId === deviceId);
     if (!target || !current?.learnerId || target.learnerId) return false;
+    if (isOtherFamily(current, target)) return false;
     try {
       const token = await accessToken();
       const state = await request<{ isSet: boolean }>("/family/pin", { token });
@@ -636,6 +660,29 @@ export const SessionAPI = {
     const target = SessionAPI.accounts().find((account) => account.deviceId === deviceId);
     if (!target) return false;
     if (target.deviceId === current?.deviceId) return true;
+
+    /*
+     * A learner may not resume an account belonging to another household.
+     *
+     * The switcher lists whatever has signed in on this browser, which for a
+     * family tablet is the point. A student signing in on a browser a parent
+     * has used puts two *unrelated* families in that list, and the PIN cannot
+     * speak for the second one: it is the first family's PIN, and the account
+     * being opened is not theirs to let anybody into. Signing in again is the
+     * only answer that account's own household ever gave.
+     *
+     * Only a learner-scoped session is stopped. An adult returning to their own
+     * account on a shared browser is the ordinary case, and the account is
+     * forgotten rather than kept, so the list stops offering what it cannot open.
+     */
+    if (current?.learnerId && isOtherFamily(current, target)) {
+      forget(target.deviceId);
+      throw new ApiError(
+        401,
+        "session_expired",
+        `${target.displayName ?? target.email ?? "That account"} has to sign in again on this device.`,
+      );
+    }
 
     /*
      * A child leaving for an adult's account answers for it first.

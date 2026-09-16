@@ -538,6 +538,83 @@ describe("switching to a remembered account", () => {
     expect(SessionAPI.accounts().map((a) => a.deviceId)).not.toContain("d_2");
   });
 
+  /**
+   * A learner may not resume an account from another household.
+   *
+   * The switcher lists what this browser has signed into, which for a family
+   * tablet is the point and for a student is two unrelated families side by
+   * side. The PIN cannot speak for the second one — `GET /family/pin` answers
+   * about the caller's family, so a student's own family, which has none, was
+   * asked whether a *parent's* account needed one and said no.
+   */
+  const otherFamilyAdult = (overrides: Record<string, unknown> = {}) =>
+    stale({
+      deviceId: "d_other",
+      familyId: "f_2",
+      role: "owner",
+      refreshToken: "other-refresh",
+      email: "someone@example.com",
+      ...overrides,
+    });
+
+  const student = (overrides: Record<string, unknown> = {}) =>
+    storedSession({
+      deviceId: "d_student",
+      familyId: "f_1",
+      role: "student",
+      email: "jutta@example.com",
+      learnerId: "l_self",
+      learnerName: "Jutta",
+      ...overrides,
+    });
+
+  it("refuses to open another family's account from a learner's session", async () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(student()));
+    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify([student(), otherFamilyAdult()]));
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const SessionAPI = await loadSession();
+    await expect(SessionAPI.switchAccount("d_other")).rejects.toThrow(/sign in again/i);
+
+    // No stored token was put to the server: the refusal is the whole exchange.
+    expect(fetchMock).not.toHaveBeenCalled();
+    // The student stays where they were, and the list stops offering what it
+    // cannot open.
+    expect(SessionAPI.current()?.deviceId).toBe("d_student");
+    expect(SessionAPI.accounts().map((a) => a.deviceId)).not.toContain("d_other");
+  });
+
+  it("never asks another family's PIN, because that PIN is not theirs to ask", async () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(student()));
+    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify([student(), otherFamilyAdult()]));
+    const fetchMock = vi.fn().mockResolvedValue(jsonOk({ isSet: true }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const SessionAPI = await loadSession();
+
+    // Answering "yes" here would be the student's own family answering for a
+    // household it has nothing to do with.
+    await expect(SessionAPI.switchNeedsPin("d_other")).resolves.toBe(false);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("still lets a child reach the parent on the same family's tablet", async () => {
+    // The case the guard was built for, unchanged: one household, one PIN, and
+    // the switch asks for it rather than refusing outright.
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(child({ expiresAt: Date.now() + 600_000 })));
+    localStorage.setItem(
+      ACCOUNTS_KEY,
+      JSON.stringify([child({ expiresAt: Date.now() + 600_000 }), storedSession()]),
+    );
+    const fetchMock = vi.fn().mockResolvedValue(jsonOk({ isSet: true }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const SessionAPI = await loadSession();
+    await expect(SessionAPI.switchNeedsPin("d_1")).resolves.toBe(true);
+    expect(String(fetchMock.mock.calls[0][0])).toContain("/family/pin");
+  });
+
   it("still switches when there is no network at all", async () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(storedSession()));
     localStorage.setItem(ACCOUNTS_KEY, JSON.stringify([storedSession(), child()]));
