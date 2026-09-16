@@ -1000,9 +1000,19 @@
     "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 100 100\">\n  <defs>\n    <!-- Orange Fruit Gradient -->\n    <radialGradient id=\"orangeGrad\" cx=\"35%\" cy=\"35%\" r=\"65%\">\n      <stop offset=\"0%\" stop-color=\"#FFC107\" />    <!-- Bright highlight -->\n      <stop offset=\"50%\" stop-color=\"#FF9800\" />   <!-- Main orange -->\n      <stop offset=\"100%\" stop-color=\"#E65100\" />  <!-- Deep orange shadow -->\n    </radialGradient>\n\n    <!-- Leaf Gradient -->\n    <linearGradient id=\"leafGrad\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"100%\">\n      <stop offset=\"0%\" stop-color=\"#81C784\" />   <!-- Light green -->\n      <stop offset=\"100%\" stop-color=\"#2E7D32\" />  <!-- Dark green -->\n    </linearGradient>\n  </defs>\n\n  <!-- Leaf -->\n  <path \n    d=\"M 50,28 C 35,10 65,5 75,18 C 65,30 50,28 50,28 Z\" \n    fill=\"url(#leafGrad)\" \n  />\n\n  <!-- Stem -->\n  <path \n    d=\"M 50,28 Q 48,22 52,18\" \n    stroke=\"#4E342E\" \n    stroke-width=\"3\" \n    stroke-linecap=\"round\" \n    fill=\"none\" \n  />\n\n  <!-- Main Orange Body -->\n  <circle \n    cx=\"50\" \n    cy=\"58\" \n    r=\"32\" \n    fill=\"url(#orangeGrad)\" \n  />\n\n  <!-- Subtle Dimple at Top -->\n  <ellipse \n    cx=\"50\" \n    cy=\"28\" \n    rx=\"3\" \n    ry=\"1.5\" \n    fill=\"#BF360C\" \n    opacity=\"0.5\" \n  />\n</svg>"
   },
   {
+    "id": "points",
+    "category": "progress",
+    "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 100 100\">\n  <title>Total points</title>\n  <!--\n    A bolt, drawn in one colour.\n\n    Same rule as the flame beside it: `currentColor` only, so the tone comes from\n    the wrapper and the mark reads correctly on light and dark without a hue of\n    its own. The faint ring is the same shape offset, not a second colour.\n  -->\n  <g fill=\"currentColor\">\n    <circle cx=\"50\" cy=\"50\" r=\"40\" opacity=\"0.14\" />\n    <path d=\"M56 10 26 56h18l-6 34 32-48H51l5-32z\" fill-rule=\"evenodd\" />\n  </g>\n</svg>"
+  },
+  {
     "id": "star",
     "category": "shapes",
     "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 100 100\">\n  <defs>\n    <!-- Define the gradient -->\n    <linearGradient id=\"starGradient\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"100%\">\n      <stop offset=\"0%\" stop-color=\"#FFD700\" />    <!-- Gold -->\n      <stop offset=\"100%\" stop-color=\"#FF4500\" />  <!-- Orange-Red -->\n    </linearGradient>\n  </defs>\n\n  <!-- Star path filled with the gradient -->\n  <polygon \n    points=\"50,5 63,35 95,38 71,61 78,92 50,75 22,92 29,61 5,38 37,35\" \n    fill=\"url(#starGradient)\" \n    stroke=\"#D4AF37\" \n    stroke-width=\"1.5\" \n    stroke-linejoin=\"round\" \n  />\n</svg>"
+  },
+  {
+    "id": "streak",
+    "category": "progress",
+    "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 100 100\">\n  <title>Learning streak</title>\n  <!--\n    A flame, drawn in one colour.\n\n    `currentColor` is the whole point: the wrapper sets the tone (the profile and\n    Home both use indigo-600 on light, indigo-400 on dark), so the artwork follows\n    the theme in both modes instead of carrying a hue of its own. A flame painted\n    gold here is how the star ended up needing an amber wrapper, which docs/THEME.md\n    forbids.\n  -->\n  <g fill=\"currentColor\">\n    <path\n      d=\"M50 8c2 12-5 18-11 24-7 7-13 14-13 26 0 18 15 30 34 30 18 0 30-13 30-29 0-17-11-25-18-34-3 6-7 9-11 9 3-10 1-19-11-26z\"\n      fill-rule=\"evenodd\"\n      opacity=\"0.32\"\n    />\n    <path\n      d=\"M52 34c1 8-3 12-7 17-4 5-8 10-8 18 0 12 9 20 22 20 12 0 20-9 20-20 0-11-7-17-12-23-2 4-5 6-7 6 2-7 0-13-8-18z\"\n    />\n  </g>\n</svg>"
   },
   {
     "id": "subtraction-cookie",

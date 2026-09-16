@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 100 100">
+  <title>Learning streak</title>
+  <!--
+    A flame, drawn in one colour.
+
+    `currentColor` is the whole point: the wrapper sets the tone (the profile and
+    Home both use indigo-600 on light, indigo-400 on dark), so the artwork follows
+    the theme in both modes instead of carrying a hue of its own. A flame painted
+    gold here is how the star ended up needing an amber wrapper, which docs/THEME.md
+    forbids.
+  -->
+  <g fill="currentColor">
+    <path
+      d="M50 8c2 12-5 18-11 24-7 7-13 14-13 26 0 18 15 30 34 30 18 0 30-13 30-29 0-17-11-25-18-34-3 6-7 9-11 9 3-10 1-19-11-26z"
+      fill-rule="evenodd"
+      opacity="0.32"
+    />
+    <path
+      d="M52 34c1 8-3 12-7 17-4 5-8 10-8 18 0 12 9 20 22 20 12 0 20-9 20-20 0-11-7-17-12-23-2 4-5 6-7 6 2-7 0-13-8-18z"
+    />
+  </g>
+</svg>
