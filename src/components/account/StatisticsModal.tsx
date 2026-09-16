@@ -8,8 +8,10 @@ import {
   subscribeProfileStats,
   type ProfileStats,
 } from "../../lib/profileStats";
+import { getCourseLessons } from "../../curriculum";
 import { loadProgress } from "../../lib/learnerProgress";
 import { levelFromXp } from "../../lib/level";
+import { useAudienceViewer } from "../../skills/viewer";
 
 export interface StatisticsModalProps {
   isOpen: boolean;
@@ -25,6 +27,9 @@ export const StatisticsModal: React.FC<StatisticsModalProps> = ({
   stats: propStats,
 }) => {
   const [stats, setStats] = useState<ProfileStats>(propStats ?? EMPTY_STATS);
+  // The course is age-gated, so "how many lessons are there" is a question only
+  // a viewer can answer — the same one Home and the profile ask.
+  const viewer = useAudienceViewer();
 
   useEffect(() => {
     if (propStats) {
@@ -47,15 +52,28 @@ export const StatisticsModal: React.FC<StatisticsModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Fallback to local progress figures if stats are unpopulated
+  /*
+   * The stored row first, then this device's own record.
+   *
+   * `loadProgress` is a real fallback: it reads the learner's XP and streak from
+   * storage and resolves the goal through `DailyGoalAPI`, so nothing below has
+   * to invent a number. The two that did invent one — a course of 284 lessons
+   * with 2 of them mastered — printed a reading rather than a default: a learner
+   * whose stats row had not arrived was shown somebody's progress, and 284 was
+   * a count of the course as it stood on the day somebody typed it.
+   *
+   * The total is asked of the course itself, for this viewer, which is where
+   * every other screen gets it (`App.tsx` publishes the same figure). A learner
+   * with nothing recorded has mastered none of it, and says so.
+   */
   const local = loadProgress();
   const xp = stats.totalXp || local.xp || 0;
   const streak = stats.dayStreak || local.streakDays || 0;
   const level = stats.level || levelFromXp(xp);
-  const dailyGoal = stats.dailyGoal || local.dailyGoal || 4;
+  const dailyGoal = stats.dailyGoal || local.dailyGoal;
   const dailySolved = stats.dailySolved || 0;
-  const courseDone = stats.lessonsMastered || 2;
-  const courseTotal = stats.lessonsAvailable || 284;
+  const courseDone = stats.lessonsMastered || 0;
+  const courseTotal = stats.lessonsAvailable || getCourseLessons(viewer).length;
   const starsEarned = stats.starsEarned || 0;
 
   return (

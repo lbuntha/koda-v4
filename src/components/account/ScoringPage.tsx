@@ -189,7 +189,7 @@ export const ScoringPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
         <UISectionHeader
           title="Rewards"
           subtitle="Applies to every skill, installed or not yet written"
-          icon={<Star className="w-5 h-5 text-amber-500" />}
+          icon={<Star className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
           action={
             ScoringAPI.isEdited() ? (
               <button

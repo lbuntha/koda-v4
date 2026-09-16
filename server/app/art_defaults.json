@@ -1007,7 +1007,7 @@
   {
     "id": "star",
     "category": "shapes",
-    "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 100 100\">\n  <defs>\n    <!-- Define the gradient -->\n    <linearGradient id=\"starGradient\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"100%\">\n      <stop offset=\"0%\" stop-color=\"#FFD700\" />    <!-- Gold -->\n      <stop offset=\"100%\" stop-color=\"#FF4500\" />  <!-- Orange-Red -->\n    </linearGradient>\n  </defs>\n\n  <!-- Star path filled with the gradient -->\n  <polygon \n    points=\"50,5 63,35 95,38 71,61 78,92 50,75 22,92 29,61 5,38 37,35\" \n    fill=\"url(#starGradient)\" \n    stroke=\"#D4AF37\" \n    stroke-width=\"1.5\" \n    stroke-linejoin=\"round\" \n  />\n</svg>"
+    "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 100 100\">\n  <title>Star</title>\n  <!--\n    Drawn in `currentColor`, like the flame and the bolt beside it.\n\n    This carried a gold-to-orange-red gradient of its own, which no wrapper could\n    override: \"Lessons mastered\" rendered amber on Home and on the profile\n    whatever the CSS said, and amber is the one hue docs/THEME.md rules out. The\n    colour belongs to whoever draws the star, not to the star.\n\n    The geometry is untouched — same ten points, same rounded joins — so only its\n    paint has changed.\n  -->\n  <polygon\n    points=\"50,5 63,35 95,38 71,61 78,92 50,75 22,92 29,61 5,38 37,35\"\n    fill=\"currentColor\"\n    stroke=\"currentColor\"\n    stroke-width=\"1.5\"\n    stroke-linejoin=\"round\"\n  />\n</svg>"
   },
   {
     "id": "streak",
