@@ -5,9 +5,7 @@ import { useTheme } from "../context/ThemeContext";
 import { playSound } from "../utils/audio";
 import { themeSystem } from "../lib/themeSystem";
 import { UIPageHeader, UIToggle } from "./ui";
-import { PersonaPicker } from "./account/PersonaPicker";
-import { ChildSettingsAPI } from "../lib/childSettings";
-import { usePersona, usePersonaRoster } from "../lib/usePersona";
+import { YourLearning } from "./account/YourLearning";
 import { PlanCard } from "./account/PlanCard";
 import { DevicesPage } from "./account/DevicesPage";
 import { NotificationsSettings } from "./account/NotificationsSettings";
@@ -122,10 +120,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
    * makes, so this never draws a control whose save would be refused.
    */
   const ownLearnerId = session?.learnerId && can("learner:update") ? session.learnerId : null;
-  const teachers = usePersonaRoster();
-  // Read through the same store the picker's own subscription repaints on, so
-  // choosing a teacher updates this page without a reload.
-  const mySettings = usePersona();
   const isDark = theme === "dark";
   // Shown to whoever runs the family, not to a child: a seven-year-old has no
   // use for a renewal date, and "not included" reads as a scolding.
@@ -252,32 +246,20 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
       </SettingGroup>
 
       {/*
-        * The teacher, for a learner who signs in as themselves.
+        * Everything about how Koda treats this learner, for the learner.
         *
-        * A student *is* their own learner, so this writes the same record a
-        * parent edits on the Children page — one source of truth, not a second
-        * per-account setting that would then disagree with it. Gated on
-        * `learner:update`, which is exactly the right the server checks when
-        * this saves: a child on a parent-managed tablet does not hold it, so
-        * their teacher stays the parent's choice.
+        * It used to be the teacher alone, on the reasoning that "a cap a
+        * learner can lift is not a cap". True for a child whose parent sets
+        * one — and beside the point for a student, who has no parent account
+        * above them: the choice there is not between a firm limit and a soft
+        * one, it is between a soft one and none. So a student now sets the lot,
+        * writing the same documents the Children page writes.
         *
-        * Only the teacher is here. The daily cap and the starting point are on
-        * the parent's page and stay there — a cap a learner can lift is not a
-        * cap, while a character is a preference and safe to hand over.
+        * Gated on `learner:update` through `ownLearnerId`, the right the server
+        * checks on save: a child on a parent-managed tablet does not hold it,
+        * and sees none of this.
         */}
-      {ownLearnerId && teachers.length > 1 && (
-        <SettingGroup label="Who teaches you">
-          <div className="p-3">
-            <PersonaPicker
-              value={mySettings.personaId}
-              onChange={(personaId) =>
-                ownLearnerId && ChildSettingsAPI.set(ownLearnerId, { personaId })
-              }
-              ariaLabel="Who teaches you"
-            />
-          </div>
-        </SettingGroup>
-      )}
+      {ownLearnerId && <YourLearning learnerId={ownLearnerId} />}
 
       {showsNotifications && (
         <div id="notifications" ref={notificationsRef} className="scroll-mt-4">

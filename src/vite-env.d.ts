@@ -23,7 +23,9 @@ interface GoogleIdentityApi {
           theme: "outline";
           size: "large";
           shape: "rectangular";
-          text: "signin_with" | "signup_with";
+          // Google's own set. `continue_with` is what this form uses: one label
+          // for both tabs, so switching them never rebuilds the button.
+          text: "signin_with" | "signup_with" | "continue_with" | "signin";
           width: number;
         },
       ): void;

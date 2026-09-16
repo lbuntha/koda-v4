@@ -150,6 +150,16 @@ export interface ChildSettingsFieldsProps {
   onChange(patch: Partial<ChildSettings>): void;
   /** Used in the hints, so a parent reads the rule about a person. */
   childName?: string;
+  /**
+   * Who is reading. `parent` speaks about the child ("Skip lessons they already
+   * know"); `self` speaks to the learner setting their own ("You start at
+   * lesson one"), which is what a student with nobody above them sees.
+   *
+   * A flag rather than a second copy of these controls: the settings are the
+   * same document either way, and two components would drift the moment one
+   * gained a field.
+   */
+  voice?: "parent" | "self";
   /** Whether the family's plan covers Koda's help at all. */
   planHasAi?: boolean;
   /**
@@ -228,8 +238,10 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
   childName,
   planHasAi = true,
   childAge = null,
+  voice = "parent",
 }) => {
-  const who = childName?.trim() || "this child";
+  const self = voice === "self";
+  const who = self ? "You" : childName?.trim() || "this child";
   // Only to know whether there is a choice to offer at all; the picker itself
   // resolves the chosen one.
   const roster = usePersonaRoster();
@@ -341,7 +353,7 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
         </div>
         <p className="text-xs text-muted">
           {value.allowedHours
-            ? hoursSummary(value.allowedHours, who)
+            ? hoursSummary(value.allowedHours, self ? "Koda" : who)
             : "Available all day."}
         </p>
       </Row>
@@ -351,7 +363,7 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
         icon={<Flag className="h-5 w-5" />}
         tint="text-emerald-500"
         title="Starting lesson"
-        hint="Skip lessons they already know."
+        hint={self ? "Skip lessons you already know." : "Skip lessons they already know."}
       >
         {/*
           * A dropdown, not the row of buttons the other settings use: the course
@@ -361,7 +373,7 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
           * picking a starting point needs to recognise the work, not count.
           */}
         <select
-          aria-label="Where this child starts"
+          aria-label={self ? "Where you start" : "Where this child starts"}
           className={themeSystem.field("sm", "w-full")}
           value={start.id}
           onChange={(event) => {
@@ -378,11 +390,19 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
         <p className="text-xs text-muted">
           {value.startingPoint === "age"
             ? childAge === null
-              ? `Add ${who}'s birth year to start by age.`
-              : `Starts at the right level for ${who}'s age.`
+              ? self
+                ? "Add your birth year to start by age."
+                : `Add ${who}'s birth year to start by age.`
+              : self
+                ? "Starts at the right level for your age."
+                : `Starts at the right level for ${who}'s age.`
             : value.startingPoint === null
-              ? `${who} starts at lesson one.`
-              : `${who} starts at this lesson.`}
+              ? self
+                ? "You start at lesson one."
+                : `${who} starts at lesson one.`
+              : self
+                ? "You start at this lesson."
+                : `${who} starts at this lesson.`}
         </p>
       </Row>
 
@@ -395,12 +415,12 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
           icon={<GraduationCap className="h-5 w-5" />}
           tint="text-indigo-500"
           title="Teacher"
-          hint="Choose who teaches them."
+          hint={self ? "Choose who teaches you." : "Choose who teaches them."}
         >
           <PersonaPicker
             value={value.personaId}
             onChange={(personaId) => onChange({ personaId })}
-            ariaLabel={`Who teaches ${who}`}
+            ariaLabel={self ? "Who teaches you" : `Who teaches ${who}`}
           />
         </Row>
       )}

@@ -173,6 +173,25 @@ async def _issue(db, family_id: str | None, role: str, *, user_id=None, learner_
     )
 
 
+async def _learner_for_student(db, family_id: str, email: str) -> str | None:
+    """The learner a student *is* — found, or made if their account predates it.
+
+    Signing up as a student creates the row; signing in never looked for it, so
+    every session after the first carried no `learnerId` at all. Everything
+    learner-scoped then had nowhere to go: the daily goal, `childSettings`, the
+    profile, the settings a student sets for themselves.
+
+    Healed here rather than by a migration, for the reason plan features are:
+    an account made before the row existed fixes itself the next time its owner
+    signs in, and a deployment needs no database edit.
+    """
+    rows = await learners.for_family(db, family_id)
+    if rows:
+        return rows[0]["_id"]
+    created = await learners.create(db, family_id, _name_from_email(email))
+    return created["_id"]
+
+
 async def _issue_for_user(db, user: dict, *, device_name: str, install_id: str | None) -> TokenPair:
     """Turn an authenticated user into the same Koda session, however they signed in."""
     rows = await memberships.for_user(db, user["_id"])
@@ -180,11 +199,18 @@ async def _issue_for_user(db, user: dict, *, device_name: str, install_id: str |
 
     if rows:
         membership = rows[0]
+        # A student is their own learner, and the session has to say so.
+        learner_id = (
+            await _learner_for_student(db, membership["familyId"], user.get("email") or "")
+            if membership["role"] == "student"
+            else None
+        )
         return await _issue(
             db,
             membership["familyId"],
             membership["role"],
             user_id=user["_id"],
+            learner_id=learner_id,
             device_name=device_name,
             install_id=install_id,
             platform_role=platform_role,
@@ -327,6 +353,13 @@ async def signup(
         db,
         body.email,
         passwords.hash_password(body.password),
+        # A student's account is named the way their learner row is, from the
+        # local part of the address. Without it the only name anything had was
+        # the role, so the account menu called them "Student" — the word, where
+        # a person's name goes. A parent is left unnamed on purpose: they name
+        # themselves on the profile, and a guess from an address is a worse
+        # answer there than a blank one.
+        display_name=_name_from_email(body.email) if body.account_type == "student" else None,
         email_verified=not verification_required,
     )
     fallback_name = "My family" if body.account_type == "parent" else "My learning space"

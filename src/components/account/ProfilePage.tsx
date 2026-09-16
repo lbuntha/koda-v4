@@ -1,13 +1,18 @@
 import React, { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import {
   Baby,
+  Check,
+  Copy,
+  Flame,
   KeyRound,
   Pencil,
   ShieldCheck,
-  Sparkles,
+  Star,
+  Zap,
   UserRound,
 } from "lucide-react";
 
+import { SvgAsset } from "../../assets/svg";
 import { diceBearAvatar } from "../../lib/avatar";
 import { DailyGoalAPI } from "../../lib/dailyGoal";
 import { currentLearnerId } from "../../lib/learnerProgress";
@@ -18,6 +23,7 @@ import {
   subscribeProfileStats,
   type ProfileStats,
 } from "../../lib/profileStats";
+import { levelFromXp, levelProgress, XP_PER_LEVEL, xpToNextLevel } from "../../lib/level";
 import {
   ApiError,
   accessToken,
@@ -29,7 +35,7 @@ import {
 } from "../../lib/sync";
 import { themeSystem } from "../../lib/themeSystem";
 import { playSound } from "../../utils/audio";
-import { UIAvatar, UIBadge, UIButton, UISectionHeader } from "../ui";
+import { UIAvatar, UIBadge, UIButton, UISectionHeader, UIModal } from "../ui";
 import { ProfileEditModal } from "./ProfileEditModal";
 import { ChangePasswordCard } from "./ChangePasswordCard";
 
@@ -53,6 +59,12 @@ interface FamilyChild {
   birthYear: number | null;
   createdAt: string;
   hasActiveCode: boolean;
+}
+
+interface DeviceCodeResult {
+  learner: FamilyChild;
+  code: string;
+  expiresAt: string;
 }
 
 export interface ProfilePageProps {
@@ -118,12 +130,80 @@ const EmptyNote: React.FC<{ icon: React.ReactNode; title: string; detail: string
   </div>
 );
 
+const ProfileProgress: React.FC<{ stats: ProfileStats }> = ({ stats }) => {
+  const level = levelFromXp(stats.totalXp);
+  const progress = Math.round(levelProgress(stats.totalXp) * 100);
+
+  return (
+    <section className={`${themeSystem.card("default")} ${themeSystem.spacing.card}`}>
+      <h2 className="font-mono text-xs font-black uppercase tracking-widest text-muted">
+        Your progress
+      </h2>
+      <div className="mt-4 space-y-4">
+        <div className="flex items-center gap-3">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center text-purple-500 [&>svg]:h-10 [&>svg]:w-10">
+            <SvgAsset
+              id="streak"
+              size={50}
+              title="Learning streak"
+              fallback={<Flame className="fill-current" />}
+            />
+          </span>
+          <span className="min-w-0 flex-1 text-sm font-bold text-muted">Learning streak</span>
+          <span className="shrink-0 font-mono text-sm font-black text-ink">
+            {stats.dayStreak} {stats.dayStreak === 1 ? "day" : "days"}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center text-purple-500 [&>svg]:h-10 [&>svg]:w-10">
+            <SvgAsset id="points" size={50} title="Total points" fallback={<Zap className="fill-current" />} />
+          </span>
+          <span className="min-w-0 flex-1 text-sm font-bold text-muted">Total points</span>
+          <span className="shrink-0 font-mono text-sm font-black text-ink">{stats.totalXp} XP</span>
+        </div>
+
+        <div className="pl-[3.75rem]">
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="text-xs font-bold text-muted">XP Level {level}</span>
+            <span className="font-mono text-[0.6875rem] tabular-nums text-muted">
+              {xpToNextLevel(stats.totalXp)} XP to level {level + 1}
+            </span>
+          </div>
+          <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-surface-muted">
+            <div
+              className="h-full rounded-full bg-indigo-500 transition-all"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <p className="mt-1.5 text-[0.6875rem] text-muted">
+            {XP_PER_LEVEL} XP earns a level. Every finished round pays XP.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center text-amber-500 [&>svg]:h-10 [&>svg]:w-10">
+            <SvgAsset id="star" size={50} title="Lessons mastered" fallback={<Star className="fill-current" />} />
+          </span>
+          <span className="min-w-0 flex-1 truncate text-sm font-bold text-muted">Lessons mastered</span>
+          <span className="shrink-0 font-mono text-sm font-black text-ink">
+            {stats.lessonsMastered} / {stats.lessonsAvailable}
+          </span>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
   const session = useSession();
   const { can } = usePermissions();
   const [editOpen, setEditOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [children, setChildren] = useState<FamilyChild[] | null>(null);
+  const [deviceCode, setDeviceCode] = useState<DeviceCodeResult | null>(null);
+  const [deviceCodeBusy, setDeviceCodeBusy] = useState<string | null>(null);
+  const [deviceCodeCopied, setDeviceCodeCopied] = useState(false);
   // Every figure on this page comes from this row. Nothing below counts,
   // sums or infers a statistic — see `lib/profileStats.ts` for why.
   const [stats, setStats] = useState<ProfileStats | null>(null);
@@ -192,8 +272,36 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
     }
   };
 
+  const issueDeviceCode = async (child: FamilyChild) => {
+    setDeviceCodeBusy(child.id);
+    setError(null);
+    try {
+      const token = await accessToken();
+      const result = await request<DeviceCodeResult>(`/learners/${child.id}/join-code`, {
+        method: "POST",
+        token,
+      });
+      setDeviceCode(result);
+      setDeviceCodeCopied(false);
+    } catch (err) {
+      setError((err as ApiError).message);
+    } finally {
+      setDeviceCodeBusy(null);
+    }
+  };
+
+  const copyDeviceCode = async () => {
+    if (!deviceCode) return;
+    try {
+      await navigator.clipboard.writeText(deviceCode.code);
+      setDeviceCodeCopied(true);
+    } catch {
+      setError("The code could not be copied. Please select it manually.");
+    }
+  };
+
   return (
-    <div className={"mx-auto max-w-5xl space-y-6"}>
+    <div className={"mx-auto max-w-2xl space-y-6"}>
       {error && <p className={themeSystem.flash("error")}>{error}</p>}
 
       {/* ---------------------------------------------------------------- */}
@@ -224,33 +332,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
         <p className="text-base font-bold text-muted">@{handleOf(session)}</p>
         {joined && <p className="text-sm text-muted">Joined {joined}</p>}
 
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-3">
-          <div className="flex flex-wrap items-center gap-4 text-sm font-bold text-indigo-600 dark:text-indigo-400">
-            {isLearner ? (
-              <>
-                <span>{figures.lessonsMastered} Lessons mastered</span>
-                <span>{figures.starsEarned} Stars</span>
-              </>
-            ) : isParent ? (
-              <>
-                <span>{figures.childrenCount} Children</span>
-                <span>{session.familyName ?? "Family"}</span>
-              </>
-            ) : (
-              <>
-                <span>{figures.permissionsCount} Permissions</span>
-                <span>{session.platformRole && session.platformRole !== "none" ? session.platformRole : "No platform role"}</span>
-              </>
-            )}
-          </div>
-          <UIBadge variant={isLearner ? "success" : isParent ? "primary" : "info"}>
-            {audienceLabel[audience]}
-            {session.familyName ? ` · ${session.familyName}` : ""}
-          </UIBadge>
-        </div>
       </header>
 
-      <hr className="border-t border-line" />
+      {isLearner && <ProfileProgress stats={figures} />}
 
       {isParent && (
         <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
@@ -377,11 +461,73 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
               </div>
             ))}
         </dl>
+        {isParent && can("learner:update") && children && children.length > 0 && (
+          <div className="space-y-3 border-t border-line pt-4">
+            <div>
+              <h3 className="koda-admin-label text-ink">Child device access</h3>
+              <p className="text-xs text-muted">Generate a one-time code for a child&apos;s device.</p>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {children.map((child) => (
+                <div
+                  key={child.id}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface-muted p-3"
+                >
+                  <div className="flex min-w-0 items-center gap-2">
+                    <UIAvatar name={child.displayName} seed={child.avatarSeed} size="sm" />
+                    <span className="truncate text-sm font-semibold text-ink">{child.displayName}</span>
+                  </div>
+                  <UIButton
+                    variant="secondary"
+                    size="sm"
+                    icon={<KeyRound />}
+                    isLoading={deviceCodeBusy === child.id}
+                    onClick={() => void issueDeviceCode(child)}
+                  >
+                    Device code
+                  </UIButton>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Under Account, because it is the same subject: how this profile is
           identified, and the secret that proves it. */}
       <ChangePasswordCard />
+
+      <UIModal
+        isOpen={Boolean(deviceCode)}
+        onClose={() => setDeviceCode(null)}
+        title={`Device code for ${deviceCode?.learner.displayName ?? "child"}`}
+        tone="plain"
+        footer={<UIButton variant="primary" onClick={() => setDeviceCode(null)}>Done</UIButton>}
+      >
+        {deviceCode && (
+          <div className="space-y-5 text-center">
+            <p className="text-sm text-muted">
+              On the child&apos;s device, choose <strong>Child code</strong> on the sign-in screen and enter this code.
+            </p>
+            <div className="rounded-2xl border-2 border-indigo-200 bg-indigo-50 px-4 py-5 dark:border-indigo-800 dark:bg-indigo-950/40">
+              <div className="font-mono text-3xl font-bold tracking-[0.3em] text-indigo-800 dark:text-indigo-200">
+                {deviceCode.code}
+              </div>
+              <p className="mt-2 text-xs text-indigo-700 dark:text-indigo-300">
+                Expires {new Date(deviceCode.expiresAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} · single use
+              </p>
+            </div>
+            <UIButton
+              variant="secondary"
+              icon={deviceCodeCopied ? <Check /> : <Copy />}
+              onClick={() => void copyDeviceCode()}
+            >
+              {deviceCodeCopied ? "Copied" : "Copy code"}
+            </UIButton>
+            <p className="text-xs text-muted">Keep this code private. It cannot be used again after the child joins.</p>
+          </div>
+        )}
+      </UIModal>
 
       <ProfileEditModal
         isOpen={editOpen}

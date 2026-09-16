@@ -28,6 +28,10 @@ const initialsFor = (value?: string): string => {
 };
 
 export const accountType = (account: Session): string => {
+  // Before the learner check below, because a student *is* their own learner:
+  // they carry a learner name like a child does, and calling them "Child" is
+  // wrong about the one thing that distinguishes the two — who manages them.
+  if (account.role === "student") return "Student";
   if (account.role === "child" || account.learnerName) return "Child";
   if (account.role === "owner" || account.role === "parent") return "Parent";
   if (account.role === "student") return "Student";

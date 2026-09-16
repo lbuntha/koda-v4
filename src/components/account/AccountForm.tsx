@@ -104,11 +104,10 @@ function loadGoogleIdentity(): Promise<void> {
 }
 
 const GoogleSignInButton: React.FC<{
-  mode: AccountMode;
   busy: boolean;
   onCredential: (credential: string) => void;
   onUnavailable: () => void;
-}> = ({ mode, busy, onCredential, onUnavailable }) => {
+}> = ({ busy, onCredential, onUnavailable }) => {
   const host = useRef<HTMLDivElement>(null);
   const callback = useRef(onCredential);
   const unavailable = useRef(onUnavailable);
@@ -133,7 +132,15 @@ const GoogleSignInButton: React.FC<{
           theme: "outline",
           size: "large",
           shape: "rectangular",
-          text: mode === "signUp" ? "signup_with" : "signin_with",
+          // One label for both modes, deliberately.
+          //
+          // Saying "Sign up with" on one tab and "Sign in with" on the other
+          // meant re-rendering Google's iframe every time somebody switched —
+          // which is the blink you see: the button is destroyed and rebuilt
+          // under the cursor. "Continue with" is true on both tabs, and Google
+          // treats the two the same way anyway: a new account or an old one,
+          // depending on the address.
+          text: "continue_with",
           width: Math.min(400, Math.max(240, host.current.clientWidth)),
         });
       })
@@ -144,7 +151,9 @@ const GoogleSignInButton: React.FC<{
     return () => {
       live = false;
     };
-  }, [mode]);
+    // Rendered once per mount: nothing about the form's state changes the
+    // button, so nothing about the form's state may rebuild it.
+  }, []);
 
   if (!import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim()) return null;
   return (
@@ -164,18 +173,16 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
   const [password, setPassword] = useState("");
   const [familyName, setFamilyName] = useState("");
   /*
-   * Every signup here creates a parent.
+   * Who is signing up: somebody setting Koda up for children, or somebody
+   * learning on their own.
    *
-   * The `student` account — an older learner with their own sign-in and nobody
-   * above them — works end to end on the server: they get a learner row, their
-   * own record, and their own settings. It is not offered because the *content*
-   * does not serve them yet; the course tops out around age eight, so somebody
-   * choosing "Student" would get a first lesson counting to ten.
-   *
-   * Restoring the choice is putting the two buttons back and letting this be
-   * state again. Nothing behind it was removed.
+   * A student gets a learner row, their own record and their own settings — the
+   * server has always built that; the choice was simply not offered. What a
+   * student then meets is the same course, which still opens at counting, so
+   * the option says "working on your own" rather than promising a syllabus for
+   * a teenager. Settings → Your learning lets them skip ahead on day one.
    */
-  const signupType: SignupType = "parent";
+  const [signupType, setSignupType] = useState<SignupType>("parent");
   const [loginMethod, setLoginMethod] = useState<LoginMethod>("email");
   const [joinCode, setJoinCode] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -387,10 +394,15 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
        * child-code path, which is a different kind of credential entirely — a
        * child on a shared tablet has no Google account to offer.
        */}
-      {googleConfigured && !(mode === "signIn" && loginMethod === "childCode") && (
-        <div className="space-y-3">
+      {/* Hidden rather than unmounted on the child-code path: taking the
+          Google button out of the tree and putting it back rebuilds its iframe,
+          which is the same blink as re-rendering it on a tab switch. */}
+      {googleConfigured && (
+        <div
+          data-google-block
+          className={`space-y-3 ${mode === "signIn" && loginMethod === "childCode" ? "hidden" : ""}`}
+        >
           <GoogleSignInButton
-            mode={mode}
             busy={busy}
             onCredential={(credential) => void googleSignIn(credential)}
             onUnavailable={() => setGoogleUnavailable(true)}
@@ -416,7 +428,25 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
       )}
 
       <form onSubmit={submit} className="space-y-4">
-
+        {mode === "signUp" && (
+          <div className="space-y-1.5">
+            <Segmented
+              label="Who is this account for"
+              size="sm"
+              value={signupType}
+              options={[
+                ["parent", "For my children"],
+                ["student", "For myself"],
+              ]}
+              onChange={(value) => setSignupType(value as SignupType)}
+            />
+            <p className="text-xs leading-relaxed text-muted">
+              {signupType === "parent"
+                ? "You add each child, and set their goals and limits."
+                : "Your own space, with nobody above it. You set your own goal and limits, and Koda starts at counting — skip ahead in Settings."}
+            </p>
+          </div>
+        )}
 
         {mode === "signIn" && loginMethod === "childCode" ? (
           <div>
