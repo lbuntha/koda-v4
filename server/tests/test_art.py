@@ -21,22 +21,79 @@ async def _operator(client, db, role: str = "developer") -> dict[str, str]:
     return {"Authorization": f"Bearer {tokens['accessToken']}"}
 
 
-async def test_bundled_art_seeds_once_and_survives_edits(db):
+async def test_bundled_art_seeds_and_survives_edits(db):
     defaults = load_defaults()
     # Not a fixed count. Dropping a new .svg into src/assets/svg is a normal
     # thing to do — the README invites it — so an exact number here fails on
     # every new drawing, and a test that must be edited each time is a test that
-    # gets edited without being read. What this one is actually about is in its
-    # name: the seed runs once and does not overwrite an edit. The guard worth
-    # keeping is that the file is populated at all.
+    # gets edited without being read. The guard worth keeping is that the file is
+    # populated at all, and that a second boot changes nothing.
     assert defaults, "art_defaults.json is empty — did generate-art-seed.mjs run?"
-    assert sum([await art_repo.seed_default(db, item) for item in defaults]) == len(defaults)
+    first = [await art_repo.seed_default(db, item) for item in defaults]
+    assert first.count("created") == len(defaults)
+
+    assert all(r == "kept" for r in [await art_repo.seed_default(db, item) for item in defaults])
 
     await art_repo.put(db, "apple", "food", "<svg><circle r='4'/></svg>", "developer")
-    assert sum([await art_repo.seed_default(db, item) for item in defaults]) == 0
+    assert all(r == "kept" for r in [await art_repo.seed_default(db, item) for item in defaults])
     apple = await art_repo.get(db, "apple")
     assert apple and apple["category"] == "food"
     assert apple["markup"] == "<svg><circle r='4'/></svg>"
+
+
+async def test_a_redrawn_file_reaches_a_row_the_seed_still_owns(db):
+    """The point of the whole mechanism.
+
+    The library is read before the bundle, so before this a file edit was
+    invisible on any deployment that had already booted: the `.svg` in the repo
+    and the artwork on screen were two different things with no way to converge.
+    """
+    apple = next(item for item in load_defaults() if item["id"] == "apple")
+    assert await art_repo.seed_default(db, apple) == "created"
+
+    redrawn = {**apple, "markup": "<svg viewBox='0 0 10 10'><circle r='4' fill='currentColor'/></svg>"}
+    assert await art_repo.seed_default(db, redrawn) == "updated"
+
+    row = await art_repo.get(db, "apple")
+    assert row and row["markup"] == redrawn["markup"]
+    assert row["updatedBy"] == "seed", "still the seed's, so the next change lands too"
+    assert row["rev"] == 2
+
+    # And it settles: the same file on the next boot is not a write.
+    assert await art_repo.seed_default(db, redrawn) == "kept"
+
+
+async def test_a_redrawn_file_does_not_overwrite_an_operator(db):
+    apple = next(item for item in load_defaults() if item["id"] == "apple")
+    await art_repo.seed_default(db, apple)
+    await art_repo.put(db, "apple", "food", "<svg><circle r='4'/></svg>", "developer")
+
+    redrawn = {**apple, "markup": "<svg viewBox='0 0 10 10'><rect width='3' height='3'/></svg>"}
+    assert await art_repo.seed_default(db, redrawn) == "kept"
+
+    row = await art_repo.get(db, "apple")
+    assert row and row["markup"] == "<svg><circle r='4'/></svg>"
+    assert row["category"] == "food"
+
+
+async def test_a_row_seeded_before_hashes_existed_converges_on_its_file(db):
+    """Every deployment already running is in this state: seed-owned, no hash."""
+    apple = next(item for item in load_defaults() if item["id"] == "apple")
+    await db.art_assets.insert_one(
+        {
+            "id": "apple",
+            "category": apple["category"],
+            "markup": "<svg><!-- whatever shipped that day --></svg>",
+            "rev": 1,
+            "updatedBy": "seed",
+            "deletedAt": None,
+        }
+    )
+
+    assert await art_repo.seed_default(db, apple) == "updated"
+    row = await art_repo.get(db, "apple")
+    assert row and row["markup"] == apple["markup"]
+    assert row["seedHash"] == art_repo.seed_digest(apple)
 
 
 async def test_operator_can_create_rename_list_and_delete_art(client, db):
@@ -90,5 +147,7 @@ async def test_deleted_seed_asset_does_not_return_on_restart(db):
     apple = next(item for item in load_defaults() if item["id"] == "apple")
     await art_repo.seed_default(db, apple)
     assert await art_repo.delete(db, "apple", "admin")
-    assert not await art_repo.seed_default(db, apple)
+    # "kept" is the seeder declining to act, which is the whole guarantee: a
+    # tombstone outranks the bundle exactly as an operator's edit does.
+    assert await art_repo.seed_default(db, apple) == "kept"
     assert await art_repo.get(db, "apple") is None

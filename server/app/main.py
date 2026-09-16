@@ -107,9 +107,16 @@ async def lifespan(app: FastAPI):
     if pruned:
         log.info("pruned %s menu items the code no longer ships", pruned)
 
-    art_seeded = sum([await art_repo.seed_default(db, item) for item in load_art_defaults()])
+    # Art the operator has not touched follows the files it came from, so a
+    # redrawn icon ships with the release that redrew it. Said out loud, because
+    # "updated" means artwork changed on every screen in every family.
+    art_results = [await art_repo.seed_default(db, item) for item in load_art_defaults()]
+    art_seeded = art_results.count("created")
+    art_updated = art_results.count("updated")
     if art_seeded:
         log.info("seeded %s default art assets", art_seeded)
+    if art_updated:
+        log.info("updated %s art assets to match the bundle", art_updated)
 
     skill_seeded = sum([await skills_repo.seed_default(db, item) for item in load_skill_defaults()])
     if skill_seeded:
