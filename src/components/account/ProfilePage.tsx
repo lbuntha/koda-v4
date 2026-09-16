@@ -141,7 +141,7 @@ const ProfileProgress: React.FC<{ stats: ProfileStats }> = ({ stats }) => {
       </h2>
       <div className="mt-4 space-y-4">
         <div className="flex items-center gap-3">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center text-purple-500 [&>svg]:h-10 [&>svg]:w-10">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center text-indigo-600 dark:text-indigo-400 [&>svg]:h-10 [&>svg]:w-10">
             <SvgAsset
               id="streak"
               size={50}
@@ -156,7 +156,7 @@ const ProfileProgress: React.FC<{ stats: ProfileStats }> = ({ stats }) => {
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center text-purple-500 [&>svg]:h-10 [&>svg]:w-10">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center text-indigo-600 dark:text-indigo-400 [&>svg]:h-10 [&>svg]:w-10">
             <SvgAsset id="points" size={50} title="Total points" fallback={<Zap className="fill-current" />} />
           </span>
           <span className="min-w-0 flex-1 text-sm font-bold text-muted">Total points</span>
@@ -182,7 +182,7 @@ const ProfileProgress: React.FC<{ stats: ProfileStats }> = ({ stats }) => {
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center text-amber-500 [&>svg]:h-10 [&>svg]:w-10">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center text-indigo-600 dark:text-indigo-400 [&>svg]:h-10 [&>svg]:w-10">
             <SvgAsset id="star" size={50} title="Lessons mastered" fallback={<Star className="fill-current" />} />
           </span>
           <span className="min-w-0 flex-1 truncate text-sm font-bold text-muted">Lessons mastered</span>
