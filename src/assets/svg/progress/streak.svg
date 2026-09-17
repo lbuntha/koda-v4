@@ -1,22 +1,50 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 100 100">
   <title>Learning streak</title>
-  <!--
-    A flame, drawn in one colour.
+  <defs>
+    <!-- Flame Gradient (Gold) -->
+    <linearGradient id="flameGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#D97706" />
+      <stop offset="50%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#FCD34D" />
+    </linearGradient>
 
-    `currentColor` is the whole point: the wrapper sets the tone (the profile and
-    Home both use indigo-600 on light, indigo-400 on dark), so the artwork follows
-    the theme in both modes instead of carrying a hue of its own. A flame painted
-    gold here is how the star ended up needing an amber wrapper, which docs/THEME.md
-    forbids.
-  -->
-  <g fill="currentColor">
-    <path
-      d="M50 8c2 12-5 18-11 24-7 7-13 14-13 26 0 18 15 30 34 30 18 0 30-13 30-29 0-17-11-25-18-34-3 6-7 9-11 9 3-10 1-19-11-26z"
-      fill-rule="evenodd"
-      opacity="0.32"
+    <!-- Top Highlight Gradient (3D Light Effect) -->
+    <linearGradient id="highlightGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.0" />
+    </linearGradient>
+
+    <!-- Drop Shadow for 3D Depth -->
+    <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="4" stdDeviation="3" flood-color="#78350F" flood-opacity="0.35" />
+    </filter>
+  </defs>
+
+  <g filter="url(#dropShadow)">
+    <!-- Main Flame Base Layer -->
+    <path fill="url(#flameGradient)" d="
+      M 50,22
+      C 54,28 55,34 59,38
+      C 63,42 68,46 68,55
+      C 68,66 59,73 48,73
+      C 38,73 31,65 31,56
+      C 31,50 34,47 36,49
+      C 38,51 40,54 44,54
+      C 40,48 41,39 44,32
+      C 46,27 48,24 50,22
+      Z"
     />
-    <path
-      d="M52 34c1 8-3 12-7 17-4 5-8 10-8 18 0 12 9 20 22 20 12 0 20-9 20-20 0-11-7-17-12-23-2 4-5 6-7 6 2-7 0-13-8-18z"
+
+    <!-- 3D Curve Highlight Overlay -->
+    <path fill="url(#highlightGradient)" d="
+      M 50,22
+      C 52,26 53,30 55,33
+      C 52,38 50,42 48,46
+      C 42,48 38,50 36,49
+      C 38,51 40,54 44,54
+      C 40,48 41,39 44,32
+      C 46,27 48,24 50,22
+      Z"
     />
   </g>
 </svg>

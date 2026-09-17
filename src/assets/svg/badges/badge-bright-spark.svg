@@ -1,38 +1,33 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 100 100">
   <title>Bright Spark badge</title>
   <defs>
-    <linearGradient id="gold" x1="18%" y1="0%" x2="82%" y2="100%">
-      <stop offset="0%" stop-color="#FFF6D2" />
-      <stop offset="34%" stop-color="#F9CE4B" />
-      <stop offset="72%" stop-color="#E0A210" />
-      <stop offset="100%" stop-color="#B87503" />
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D97706" />
+      <stop offset="50%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#FCD34D" />
     </linearGradient>
-    <linearGradient id="sheen" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.72" />
-      <stop offset="42%" stop-color="#FFFFFF" stop-opacity="0.10" />
-      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+    <linearGradient id="bevel" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.55" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.0" />
     </linearGradient>
-    <!-- The hot core, the same device the flame uses: a second, brighter shape
-         inside the silhouette is what stops a flat gold cut-out reading as a
-         sticker. -->
-    <linearGradient id="core" x1="50%" y1="0%" x2="50%" y2="100%">
-      <stop offset="0%" stop-color="#FFFDF0" />
-      <stop offset="100%" stop-color="#FFD34E" />
+    <linearGradient id="facet" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.0" />
+      <stop offset="100%" stop-color="#451A03" stop-opacity="0.5" />
     </linearGradient>
-    <filter id="lift" x="-30%" y="-30%" width="160%" height="170%">
-      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#7C4A02" flood-opacity="0.42" />
+    <filter id="lift" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="4" stdDeviation="3" flood-color="#78350F" flood-opacity="0.4" />
     </filter>
   </defs>
 
   <g filter="url(#lift)">
-    <!-- Chunkier than a signage bolt: the thin zig-zag of the icon it replaces
-         lost its shape the moment it was drawn at 20px. -->
-    <path d="M62,4 L26,53 L46,53 L38,96 L76,43 L55,43 Z"
-      fill="url(#gold)" stroke="#8A5A05" stroke-width="2.4" stroke-linejoin="round" />
-    <path d="M62,4 L26,53 L46,53 L38,96 L76,43 L55,43 Z" fill="url(#sheen)" />
-    <path d="M57,17 L38,47 L51,47 L45,80 L65,49 L53,49 Z" fill="url(#core)" fill-opacity="0.9" />
+    <!-- Chunkier than a signage bolt: a thin zig-zag loses its shape at 20px. -->
+    <path d="M62,4 L26,53 L46,53 L38,96 L76,43 L55,43 Z" fill="url(#gold)" stroke-linejoin="round" />
+    <!-- The upper limb catches the light; the lower one is turned away. -->
+    <path d="M62,4 L26,53 L46,53 L50,49 L55,43 Z" fill="url(#bevel)" />
+    <path d="M46,53 L38,96 L76,43 L55,43 L50,49 Z" fill="url(#facet)" />
+
     <!-- Two sparks, so "spark" is in the drawing and not only in the name. -->
-    <circle cx="82" cy="20" r="4" fill="url(#gold)" stroke="#8A5A05" stroke-width="1.6" />
-    <circle cx="19" cy="78" r="3.2" fill="url(#gold)" stroke="#8A5A05" stroke-width="1.4" />
+    <circle cx="82" cy="20" r="4" fill="url(#gold)" />
+    <circle cx="19" cy="78" r="3.2" fill="url(#gold)" />
   </g>
 </svg>
