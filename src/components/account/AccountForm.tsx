@@ -684,12 +684,12 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
               maxLength={60}
               value={familyName}
               disabled={busy}
-              placeholder="The Riveras, Class 2B, Grandma's house…"
+              placeholder="My family, Class 2B, Grandma's house"
               onChange={(e) => setFamilyName(e.target.value)}
               className={field}
             />
             <p className="mt-1.5 text-xs leading-relaxed text-muted">
-              What the children's accounts sit under. You can rename it later.
+              The name for all your children's accounts. You can change it later.
             </p>
           </div>
         )}
