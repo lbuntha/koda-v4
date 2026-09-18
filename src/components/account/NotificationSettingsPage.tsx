@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Bell } from "lucide-react";
 
-import { themeSystem } from "../../lib/themeSystem";
 import { UISectionHeader, UITabs } from "../ui";
 import { NotificationsSettings } from "./NotificationsSettings";
 import { NotificationsAdmin } from "./NotificationsAdmin";
@@ -45,7 +44,7 @@ const NotificationSettingsTabs: React.FC = () => {
         label="Notification sections"
       />
       {tab === "settings" && (
-        <section className={themeSystem.card("default", "p-4 sm:p-5")}>
+        <section className="p-4 sm:p-5">
           <NotificationsSettings />
         </section>
       )}

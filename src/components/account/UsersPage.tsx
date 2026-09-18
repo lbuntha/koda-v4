@@ -563,7 +563,7 @@ export const UsersPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-full bg-[#FBFAFF] p-4 dark:bg-canvas md:p-8">
+    <div className="min-h-full bg-white p-4 dark:bg-canvas md:p-8">
       <div className="mx-auto max-w-[100rem] space-y-5">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div><h1 className="koda-admin-page-title">User Management</h1><p className="mt-1 text-sm text-[#6D6997] dark:text-muted">Manage accounts from initial access through active use.</p></div>
