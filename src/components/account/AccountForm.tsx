@@ -103,6 +103,53 @@ function loadGoogleIdentity(): Promise<void> {
   return googleScript;
 }
 
+/*
+ * A stand-in for Google's button, drawn to the same specification.
+ *
+ * Google's button is an iframe fetched from their servers, so on a cold load
+ * there is a stretch — a whole second on a bad connection — where the form has
+ * a hole in it, and then a button lands in the hole. Reserving the height with
+ * `min-h-10` fixed the layout jump but not that: an empty reserved box still
+ * fills in visibly.
+ *
+ * So the box is not empty. These are the numbers Google's own stylesheet uses
+ * for `theme: "outline"` at `size: "large"` — 40px tall, 4px corners, a
+ * #dadce0 hairline, #3c4043 label at 14px/500, an 18px mark — which is what
+ * makes the handover invisible rather than merely quick. If Google restyles
+ * their button, this is the thing to re-measure.
+ *
+ * It is `aria-hidden` and not focusable: there is nothing to operate yet, and
+ * the email form below is usable the whole time this waits.
+ */
+const GoogleButtonSkeleton: React.FC = () => (
+  <div
+    aria-hidden
+    className="pointer-events-none flex h-10 w-full items-center justify-center gap-2 rounded border border-[#dadce0] bg-white"
+  >
+    {/* Google's mark, from their brand guidelines. Inline because one more
+        network round trip is the opposite of the point. */}
+    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden>
+      <path
+        fill="#4285F4"
+        d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62Z"
+      />
+      <path
+        fill="#34A853"
+        d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18Z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M3.97 10.72a5.41 5.41 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.33Z"
+      />
+      <path
+        fill="#EA4335"
+        d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.59C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58Z"
+      />
+    </svg>
+    <span className="font-sans text-sm font-medium text-[#3c4043]">Continue with Google</span>
+  </div>
+);
+
 const GoogleSignInButton: React.FC<{
   busy: boolean;
   onCredential: (credential: string) => void;
@@ -113,21 +160,52 @@ const GoogleSignInButton: React.FC<{
   const unavailable = useRef(onUnavailable);
   callback.current = onCredential;
   unavailable.current = onUnavailable;
+  /*
+   * `ready` means painted, not requested.
+   *
+   * The first attempt at this revealed the button as soon as `renderButton`
+   * returned, which is why it changed nothing: that call only *schedules* the
+   * iframe. Google's code then creates it, fetches its document and paints it,
+   * and all of that happens after the function has come back. Revealing there
+   * swaps the stand-in for a blank frame and lets the real button pop in
+   * afterwards — the original flash, with an extra step in front of it.
+   *
+   * The iframe's own `load` event is the honest signal, and it is readable
+   * cross-origin. Two frames after it, the button has been painted.
+   */
+  const [ready, setReady] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim();
     if (!clientId || !host.current) return;
+    const mount = host.current;
     let live = true;
+    let watcher: MutationObserver | null = null;
+    let fallback: number | undefined;
+
+    const reveal = () => {
+      if (!live) return;
+      requestAnimationFrame(() => requestAnimationFrame(() => live && setReady(true)));
+    };
+
+    /* Google may create the iframe during `renderButton` or a tick later, so
+       take it whenever it appears rather than assuming it is already there. */
+    const watchFor = (frame: HTMLIFrameElement) => {
+      watcher?.disconnect();
+      watcher = null;
+      frame.addEventListener("load", reveal, { once: true });
+    };
 
     void loadGoogleIdentity()
       .then(() => {
-        if (!live || !host.current || !window.google) return;
+        if (!live || !window.google) return;
         window.google.accounts.id.initialize({
           client_id: clientId,
           callback: (response) => callback.current(response.credential),
         });
-        host.current.replaceChildren();
-        window.google.accounts.id.renderButton(host.current, {
+        mount.replaceChildren();
+        window.google.accounts.id.renderButton(mount, {
           type: "standard",
           theme: "outline",
           size: "large",
@@ -141,27 +219,66 @@ const GoogleSignInButton: React.FC<{
           // treats the two the same way anyway: a new account or an old one,
           // depending on the address.
           text: "continue_with",
-          width: Math.min(400, Math.max(240, host.current.clientWidth)),
+          width: Math.min(400, Math.max(240, mount.clientWidth)),
         });
+
+        const existing = mount.querySelector("iframe");
+        if (existing) watchFor(existing);
+        else {
+          watcher = new MutationObserver(() => {
+            const frame = mount.querySelector("iframe");
+            if (frame) watchFor(frame);
+          });
+          watcher.observe(mount, { childList: true, subtree: true });
+        }
+
+        /* Whatever happens to the load event, the stand-in must not become
+           permanent: a button nobody can press is worse than a swap nobody
+           was supposed to notice. */
+        fallback = window.setTimeout(reveal, 2500);
       })
       .catch(() => {
-        if (live) unavailable.current();
+        if (!live) return;
+        setFailed(true);
+        unavailable.current();
       });
 
     return () => {
       live = false;
+      watcher?.disconnect();
+      window.clearTimeout(fallback);
     };
     // Rendered once per mount: nothing about the form's state changes the
     // button, so nothing about the form's state may rebuild it.
   }, []);
 
   if (!import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim()) return null;
+  /*
+   * Both layers in one grid cell, so they occupy the same 40px without either
+   * being taken out of flow — the box is the right height from the first frame
+   * whether or not anything has loaded. The height is held only while there is
+   * still something to hold it for: once Google is known to be unreachable the
+   * box collapses and the notice under it moves up, rather than leaving 40px
+   * of nothing above an explanation of the nothing.
+   *
+   * The swap is instant rather than a cross-fade: the two are drawn to the
+   * same specification, so there is nothing to ease between, and a fade over
+   * near-identical layers is a shimmer where there was meant to be nothing.
+   */
   return (
     <div
-      className={`flex min-h-10 justify-center ${busy ? "pointer-events-none opacity-60" : ""}`}
+      className={`grid w-full justify-items-center ${failed ? "" : "min-h-10"} ${busy ? "pointer-events-none opacity-60" : ""}`}
       aria-busy={busy}
     >
-      <div ref={host} className="w-full max-w-[400px]" />
+      {!ready && !failed && (
+        <div className="col-start-1 row-start-1 w-full max-w-[400px]">
+          <GoogleButtonSkeleton />
+        </div>
+      )}
+      <div
+        ref={host}
+        className={`col-start-1 row-start-1 w-full max-w-[400px] ${ready ? "" : "invisible"}`}
+      />
     </div>
   );
 };

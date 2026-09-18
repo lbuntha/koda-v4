@@ -28,6 +28,14 @@
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#6B46C1" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0F172A" />
 
+    <!-- The sign-in screen fetches Google's button code from here the moment it
+         mounts. Opening the connection during head parsing means the TLS
+         handshake is already paid for by then, which is the part of the wait
+         that shows as an empty box in the form. Costs nothing on the screens
+         that never ask: an unused preconnect is closed again. -->
+    <link rel="preconnect" href="https://accounts.google.com" />
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <!-- iOS reads none of the manifest's icons, only this. -->
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
@@ -43,6 +51,43 @@
     />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
+    <!-- The theme, before the first pixel.
+
+         `ThemeContext` puts `.dark` on <html> from a React effect, which runs
+         after the browser has already painted — so a dark-theme device showed
+         the light canvas for a frame and then flipped to near-black. On the
+         sign-in screen, the first thing any device renders, that flash is the
+         whole page.
+
+         This reads the same `localStorage` document `lib/preferences.ts` reads
+         (and the same legacy key it falls back to), and sets the same classes
+         the effect sets, so the effect finds its work already done and changes
+         nothing. Inline and synchronous on purpose: a deferred or external
+         script is exactly the paint this is trying to get in front of.
+
+         The two colours below duplicate `--koda-canvas` from index.css because
+         in dev the stylesheet arrives with the JS bundle, well after this runs.
+         They are the page background only; if the canvas token changes, change
+         them here too. -->
+    <style>
+      html { background-color: #F8FAFC; }
+      html.dark { background-color: #0d061a; }
+    </style>
+    <script>
+      (function () {
+        try {
+          var raw = localStorage.getItem("koda_preferences_v1");
+          var theme = raw
+            ? JSON.parse(raw).theme
+            : localStorage.getItem("synthesis_tutor_theme");
+          var root = document.documentElement;
+          if (theme === "dark") root.classList.add("theme-dark", "dark");
+          else root.classList.add("theme-light");
+        } catch (e) {
+          document.documentElement.classList.add("theme-light");
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
