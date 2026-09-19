@@ -7,6 +7,7 @@ export * from "./UIBanner";
 export * from "./UIDataTable";
 export * from "./UIIconPicker";
 export * from "./UIFeatureCard";
+export * from "./UIGuideBubble";
 export * from "./UIKidMessage";
 export * from "./UILessonCard";
 export * from "./UILessonIcon";

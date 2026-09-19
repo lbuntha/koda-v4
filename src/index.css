@@ -454,6 +454,26 @@ html.theme-light,
   }
 }
 
+/*
+ * A bubble arriving beside the work.
+ *
+ * The celebration card's curve overshoots, which is right for a reward and
+ * wrong for help: this one interrupts a child mid-task, and a panel that
+ * bounces in reads as another thing happening to them rather than as somebody
+ * leaning over. Half the travel, no overshoot, and quick enough that it is
+ * finished before they have looked up.
+ */
+@keyframes koda-bubble-in {
+  from {
+    transform: translateY(-6px) scale(0.98);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
 @keyframes koda-celebrate-pop {
   0% {
     transform: scale(0.6) rotate(-12deg);
@@ -473,6 +493,9 @@ html.theme-light,
   animation: koda-celebrate-in 0.42s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
 }
 
+.koda-bubble-in {
+  animation: koda-bubble-in 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
 .koda-celebrate-icon {
   /* Around the popper's own handle, so it swings rather than spins. */
   transform-origin: 60% 70%;
@@ -513,6 +536,7 @@ html.theme-light,
   .animate-fade-in,
   .animate-scale-up,
   .animate-slide-in-right,
+  .koda-bubble-in,
   .koda-celebrate,
   .tap-pop-anim,
   .block-snap-pull,

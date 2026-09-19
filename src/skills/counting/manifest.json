@@ -56,6 +56,13 @@
       "tag": "Cognitive"
     },
     {
+      "id": "guide_coach",
+      "name": "Smart guide",
+      "description": "Steps in by itself when a child stalls, counts one twice or skips ahead — words first, then a light on the next object, then walking them through it. Works with no connection.",
+      "isEnabled": true,
+      "tag": "Cognitive"
+    },
+    {
       "id": "step_context_tags",
       "name": "Step framing tags",
       "description": "Labels each step — warm-up, guided challenge, final milestone — beside the step counter.",

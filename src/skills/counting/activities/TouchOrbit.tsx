@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
+import { ChevronDown } from "lucide-react";
 import type { ActivityProps, PrintedQuestion } from "../../types";
 import {
+  SkillGuide,
   SkillRound,
   SPRING,
   composeHints,
@@ -25,6 +27,8 @@ import {
   COUNT_BADGE,
   SCENE,
 } from "../internal/data/countingLayout";
+import { guideSetup, numberWord } from "../internal/guide/countGuide";
+import { useCountGuide } from "../internal/guide/useCountGuide";
 
 /**
  * Touch each thing and count as you go.
@@ -90,20 +94,6 @@ interface OrbitQuestion extends RoundQuestion {
     answer: "A" | "B" | "SAME";
   };
 }
-
-const NUMBER_WORDS = [
-  "",
-  "one",
-  "two",
-  "three",
-  "four",
-  "five",
-  "six",
-  "seven",
-  "eight",
-  "nine",
-  "ten",
-];
 
 const LAYOUTS: Layout[] = ["cluster", "line", "circle", "pairs", "scattered", "column"];
 
@@ -494,6 +484,53 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
   const question = round.question as OrbitQuestion;
 
   /**
+   * The offline coach.
+   *
+   * Off unless the lesson asks for it, and off in practice — practice is the
+   * lesson with the scaffolding taken away, and a tutor that leans in uninvited
+   * is the largest piece of scaffolding this activity has. Row mode only: every
+   * line it says is about a left-to-right route through a row, and the scatter
+   * has no such thing.
+   */
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising &&
+    (guideCfg.enabled ?? false) &&
+    question.mode === "row" &&
+    // A parent's switch, in the Skill Manager beside the badges and the voice.
+    // Some children find being interrupted worse than being stuck.
+    koda.config.isEnabled("guide_coach", true);
+
+  const guide = useCountGuide({
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    count: question.count,
+    item: singular(question.asset.name),
+    tapped,
+    /* Nothing to coach through: an answer has landed, the child has asked for
+       a hint and is reading it, or the round is over. */
+    paused: Boolean(round.feedback) || round.hint.open || Boolean(round.score),
+    onCue: (cue) => {
+      /*
+       * A cue the child did not ask for is still help the child received.
+       *
+       * Reported as a walkthrough rather than as a hint so the log can tell the
+       * two apart — "asked for help" and "was given help" are different facts
+       * about a learner, and `correctFirstTry` counting unaided work depends on
+       * both being filed.
+       */
+      round.useSupport("walkthrough", cue.level);
+      if (!koda.config.isEnabled("audio_speech", true)) return;
+      // A coach that cannot be heard is still a coach: never let the panel's
+      // rendering wait on a clip.
+      void koda.speech
+        .say(cue.say, { rate: koda.config.get("speechRate", 1.0) })
+        .catch(() => {});
+    },
+  });
+
+  /**
    * Report an answer.
    *
    * In practice the verdict stands on its own — a child working unaided is not
@@ -538,11 +575,20 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
   const countAloud = (n: number): Promise<void> => {
     if (!!practising && koda.config.isEnabled("audio_speech", true)) return Promise.resolve();
     return koda.speech
-      .say(NUMBER_WORDS[n] ?? String(n), { rate: koda.config.get("speechRate", 1.0) })
+      .say(numberWord(n), { rate: koda.config.get("speechRate", 1.0) })
       .catch(() => {});
   };
 
   const tap = (index: number) => {
+    /*
+     * Before the guard, not after.
+     *
+     * A second tap on an object that already carries a number is this
+     * activity's clearest signal that one-to-one has come apart — and the line
+     * below has always thrown it away without a sound. The coach is the first
+     * thing that has ever wanted to know.
+     */
+    guide.noteTap(index);
     if (tapped.includes(index)) return;
     const next = [...tapped, index];
     setTapped(next);
@@ -722,6 +768,18 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
         </div>
       ) : (
         <div className="space-y-4">
+          {/* Above the objects, with its tail on them. A child who has stopped
+              is looking at the row, so the help has to be where the row is —
+              not in the strip along the bottom, which on a phone is where the
+              answer feedback lives and is read as a verdict. */}
+          <SkillGuide
+            cue={guide.cue}
+            /* The lesson's own three sentences, behind Back and Next. The cue
+               says what to touch now; these say how the whole thing is done,
+               for the child who wants that and the adult sitting beside them. */
+            method={copy.stepByStep}
+            onDismiss={guide.dismiss}
+          />
           {/*
            * A place, not a panel.
            *
@@ -747,6 +805,13 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
             {Array.from({ length: question.count }, (_, i) => {
               const on = tapped.includes(i);
               const place = question.places?.[i];
+              /** The one the coach is pointing at. */
+              const lit = guide.target === i;
+              /* While the coach is walking a child through, everything that is
+                 not the next object steps back. Not hidden and not disabled —
+                 a child who wants to count their own way still can, and the
+                 coach follows them rather than the other way round. */
+              const hushed = guide.walking && !lit && !on;
               return (
                 <motion.button
                   key={i}
@@ -767,7 +832,11 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
                   transition={motionOK ? { ...SPRING.enter, delay: stagger(i) } : { duration: 0 }}
                   whileHover={{ scale: 1.08 }}
                   whileTap={{ scale: 0.85, rotate: i % 2 === 0 ? -6 : 6 }}
-                  aria-label={`${singular(question.asset.name)} ${i + 1}${on ? ", counted" : ""}`}
+                  /* The spotlight is a glow, and a glow is nothing to a screen
+                     reader — so the object the coach is pointing at says so. */
+                  aria-label={`${singular(question.asset.name)} ${i + 1}${
+                    on ? ", counted" : lit ? ", touch this one next" : ""
+                  }`}
                   style={
                     place
                       ? {
@@ -787,8 +856,54 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
                    * reliably hits. The counted state is carried by the object
                    * itself — dimmed and settled back — plus the number badge.
                    */
-                  className={`relative ${COUNTABLE} flex items-center justify-center rounded-full`}
+                  className={`relative ${COUNTABLE} flex items-center justify-center rounded-full transition-opacity duration-300 ${
+                    hushed ? "opacity-40" : "opacity-100"
+                  }`}
                 >
+                  {/*
+                   * The pointing finger, drawn as light.
+                   *
+                   * The coach's words name the number; this names the object,
+                   * and a child who cannot yet read the words still gets the
+                   * whole instruction from it. A ring plus an arrow rather than
+                   * either alone: the ring says *this one* and survives being
+                   * looked at sideways on a tablet, the arrow says *here* from
+                   * across a room.
+                   */}
+                  {lit && (
+                    <>
+                      <motion.span
+                        aria-hidden="true"
+                        initial={{ opacity: 0, scale: 0.85 }}
+                        animate={
+                          motionOK
+                            ? { opacity: [0.9, 0.35, 0.9], scale: [1, 1.1, 1] }
+                            : { opacity: 0.9, scale: 1 }
+                        }
+                        transition={
+                          motionOK
+                            ? { duration: 1.6, repeat: Infinity, ease: "easeInOut" }
+                            : { duration: 0 }
+                        }
+                        className="pointer-events-none absolute -inset-2 rounded-full bg-indigo-400/20 ring-4 ring-indigo-500"
+                      />
+                      <span
+                        aria-hidden="true"
+                        className="pointer-events-none absolute -top-9 left-0 right-0 flex justify-center text-indigo-600 dark:text-indigo-300"
+                      >
+                        <motion.span
+                          animate={motionOK ? { y: [0, 6, 0] } : { y: 0 }}
+                          transition={
+                            motionOK
+                              ? { duration: 1.1, repeat: Infinity, ease: "easeInOut" }
+                              : { duration: 0 }
+                          }
+                        >
+                          <ChevronDown className="h-7 w-7 drop-shadow-[0_2px_4px_rgba(255,255,255,0.9)]" strokeWidth={3} />
+                        </motion.span>
+                      </span>
+                    </>
+                  )}
                   {/*
                    * The dim marks the object as counted and must stay off the
                    * badge. Applied to the button, it faded the number too — and

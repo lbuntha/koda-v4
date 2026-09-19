@@ -523,6 +523,53 @@ export const themeSystem = {
     },
   },
 
+  /*
+   * Koda leaning in: a bubble with a tail on the work it is talking about.
+   *
+   * Deliberately not a `kidMessage` tone. Every tone that component has is a
+   * verdict on an answer — right, not yet, hold on — and this is said while the
+   * answer is still open and nothing has been judged. A child should be able to
+   * tell the two apart across a room, so they do not share a shape.
+   *
+   * Indigo, which is Koda's own colour everywhere else in the app, and never
+   * amber: this panel is read under a child's finger on a bright screen, and
+   * the whole point of it is the sentence being legible.
+   */
+  guideBubble: {
+    wrap:
+      "koda-bubble-in relative mx-auto flex w-full max-w-3xl items-start gap-3 rounded-[1.5rem] " +
+      "border-2 border-indigo-300 bg-indigo-50 p-4 shadow-lg shadow-slate-900/5 sm:p-5 " +
+      "dark:border-indigo-800 dark:bg-indigo-950/50 dark:shadow-black/40",
+    avatar:
+      "grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-indigo-600 text-white " +
+      "[&>svg]:h-6 [&>svg]:w-6",
+    body: "min-w-0 flex-1",
+    title: "text-xs font-black uppercase tracking-wider text-indigo-700 dark:text-indigo-300",
+    /* The instruction is the hero of the panel: it is the thing the child came
+       back to the screen for, and it competes with an illustrated scene. */
+    message: "mt-0.5 text-base font-bold text-ink sm:text-lg",
+    footer: "mt-3 flex flex-wrap items-center gap-2",
+    /* Quiet, because paging is a side road: the instruction on screen is the
+       help, and Back/Next are for the child who wants the sentence again. */
+    page:
+      "inline-flex min-h-11 items-center gap-1 rounded-2xl border-2 border-indigo-200 bg-surface " +
+      "px-3 py-2 text-sm font-black text-indigo-700 transition hover:bg-indigo-100 " +
+      "disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-surface " +
+      "dark:border-indigo-800 dark:text-indigo-300 dark:hover:bg-indigo-900/40 [&>svg]:h-4 [&>svg]:w-4",
+    count: "px-1 text-xs font-black tabular-nums text-indigo-700/80 dark:text-indigo-300/80",
+    action:
+      "ml-auto min-h-11 shrink-0 rounded-2xl border-2 border-b-4 border-indigo-800 bg-indigo-600 " +
+      "px-4 py-2 font-black font-mono text-sm uppercase tracking-wider text-white " +
+      "transition-all duration-100 hover:bg-indigo-500 active:translate-y-0.5 active:border-b-2",
+    /* Decorative, and pointed at the work. A bubble with nothing to point at is
+       a banner, and reads as an announcement rather than as somebody talking. */
+    tail: (side: "down" | "up" = "down") =>
+      "absolute left-10 h-4 w-4 rotate-45 bg-indigo-50 dark:bg-indigo-950/50 " +
+      (side === "down"
+        ? "-bottom-[9px] border-b-2 border-r-2 border-indigo-300 dark:border-indigo-800"
+        : "-top-[9px] border-l-2 border-t-2 border-indigo-300 dark:border-indigo-800"),
+  },
+
   menu: {
     panel:
       "min-w-[13rem] rounded-2xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 shadow-lg shadow-slate-900/5 dark:shadow-black/40 p-1.5 z-50",

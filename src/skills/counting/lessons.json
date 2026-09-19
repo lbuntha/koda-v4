@@ -17,6 +17,11 @@
           "questionsPerRound": 5,
           "mode": "row"
         },
+        "guide": {
+          "enabled": true,
+          "startMs": 7000,
+          "betweenMs": 5000
+        },
         "play": {
           "mode": "touch_orbit",
           "tier": "beginner",

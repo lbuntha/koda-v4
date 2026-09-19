@@ -44,6 +44,13 @@ export {
   type LessonPlayCopy,
 } from "./round/hints";
 export { SkillHint, type SkillHintProps } from "./chrome/SkillHint";
+/** Help the skill offers rather than help the child asked for: the standard
+ *  bubble, with the lesson's method behind Back and Next. */
+export {
+  SkillGuide,
+  type SkillGuideProps,
+  type SkillGuideCue,
+} from "./chrome/SkillGuide";
 /** Hold a round open until the last spoken number has been heard, so the
  *  praise clip cannot cut the answer off mid-word. */
 export {
