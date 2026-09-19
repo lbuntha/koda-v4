@@ -91,16 +91,18 @@ describe("a child's report, mounted", () => {
     await show([totals()]);
 
     expect(await screen.findByText("How often")).toBeTruthy();
-    expect(screen.getByText(/Where Mia is/)).toBeTruthy();
+    expect(screen.getByText("Every lesson so far")).toBeTruthy();
     // Named from the lesson that teaches it, not by its machine key. The title
     // is child-facing copy and may be reworded, so this asserts that the report
     // resolved *a* lesson title rather than pinning today's wording.
-    expect(screen.getByText("Friends of Ten")).toBeTruthy();
+    // More than once now: the concept row names it, and so does the chip on
+    // the day it was practised. Either is enough to prove the key resolved.
+    expect(screen.getAllByText("Friends of Ten").length).toBeGreaterThan(0);
     expect(screen.queryByText("make-ten"), "shows the title, not the key").toBeNull();
     // Once, on the group heading. The row inside used to repeat the same badge
     // on its right-hand side; that column now carries the thing a parent can
     // act on instead.
-    expect(screen.getAllByText("Secure")).toHaveLength(1);
+    expect(screen.getAllByText("Knows it")).toHaveLength(1);
   });
 
   it("says whether the week was enough practice, not just how many days", async () => {
@@ -123,7 +125,7 @@ describe("a child's report, mounted", () => {
     // Matched on the diagnosis rather than the instruction: the Nearly solo
     // section gives the same advice in its own subtitle, and both appearing is
     // the point rather than an ambiguity to work around.
-    expect(await screen.findByText(/Right most times, but with a hint/)).toBeTruthy();
+    expect(await screen.findByText(/Right most times, but using hints/)).toBeTruthy();
   });
 
   it("names the missing day when that is the only thing left", async () => {
@@ -133,7 +135,7 @@ describe("a child's report, mounted", () => {
       totals({ practisedOn: ["2026-08-21"], lastSeenTs: "2026-08-21T10:00:00.000Z" }),
     ]);
 
-    expect(await screen.findByText(/round on a different day/i)).toBeTruthy();
+    expect(await screen.findByText(/One more round on another day/i)).toBeTruthy();
   });
 
   it("keeps the groups a parent cannot act on shut, and says how many they hold", async () => {
@@ -142,7 +144,7 @@ describe("a child's report, mounted", () => {
 
     // "Secure" is finished work: present, counted, but not opened over the top
     // of anything that still needs doing.
-    const group = screen.getByText("Secure").closest("details");
+    const group = screen.getByText("Knows it").closest("details");
     expect(group).toBeTruthy();
     expect(group!.open, "a finished group opens on a tap, not on load").toBe(false);
   });
@@ -162,7 +164,7 @@ describe("a child's report, mounted", () => {
     await show([totals({ questionsAnswered: 3, correctFirstTry: 1, practisedOn: ["2026-08-21"] })]);
 
     expect(await screen.findByText(/Still getting to know Mia/)).toBeTruthy();
-    expect(screen.getByText(/About 5 more answers before this can say anything/)).toBeTruthy();
+    expect(screen.getByText(/about 5 more questions and we will know/i)).toBeTruthy();
     // No percentage, because three answers cannot support one.
     expect(screen.queryByText(/33%/)).toBeNull();
   });
@@ -170,7 +172,115 @@ describe("a child's report, mounted", () => {
   it("hides the nearly-solo section when it has nothing to say", async () => {
     await show([totals()]);
 
-    expect(screen.queryByText("Nearly solo")).toBeNull();
+    expect(screen.queryByText("Still using hints")).toBeNull();
+  });
+
+  it("answers 'what should they do now' above everything else", async () => {
+    cleanup();
+    // Accurate and finished, but all on one afternoon: the missing thing is a
+    // second day, and the card says so in a sentence.
+    await show([totals({ practisedOn: ["2026-08-21"] })]);
+
+    expect(await screen.findByText("Do this next")).toBeTruthy();
+    expect(screen.getByText(/One more round of Friends of Ten, on a different day/)).toBeTruthy();
+  });
+
+  it("puts the instruction before the evidence, not after it", async () => {
+    cleanup();
+    await show([totals({ practisedOn: ["2026-08-21"] })]);
+
+    const card = await screen.findByText("Do this next");
+    const rhythm = screen.getByText("How often");
+    // A parent reading top to bottom meets the instruction first.
+    expect(card.compareDocumentPosition(rhythm) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("keeps a whole card of 'nothing is wrong' off the page", async () => {
+    cleanup();
+    await show([totals()]);
+
+    // The section only appears when there is a pattern to name. Saying "no
+    // pattern to report" in its own card was a scroll that taught nothing.
+    expect(screen.queryByText("Mistakes to watch")).toBeNull();
+  });
+
+  it("opens the questions total up into the lessons it came from", async () => {
+    cleanup();
+    await show([
+      totals({ conceptKey: "make-ten", questionsAnswered: 12, correctFirstTry: 9 }),
+      totals({ conceptKey: "count-to-5", questionsAnswered: 4, correctFirstTry: 4 }),
+    ]);
+
+    // Shut on load: the page has to be readable in a glance before it is
+    // readable in detail.
+    expect(screen.queryByText(/questions came from/)).toBeNull();
+
+    screen.getByText("Questions answered").closest("button")!.click();
+
+    expect(await screen.findByText(/Where the 16 questions came from/)).toBeTruthy();
+    expect(screen.getByText("12 questions")).toBeTruthy();
+    // The count, not the rate: 9 of 12, recovered from the accuracy figure.
+    expect(screen.getByText("9 right first time")).toBeTruthy();
+  });
+
+  it("opens the finished-rounds total up the same way", async () => {
+    cleanup();
+    await show([totals({ lessonsCompleted: 2 })]);
+
+    screen.getByText("Lessons finished").closest("button")!.click();
+
+    expect(await screen.findByText(/The 2 finished rounds/)).toBeTruthy();
+    expect(screen.getByText("2 finished")).toBeTruthy();
+  });
+
+  it("says so plainly when nothing has been played to the end", async () => {
+    cleanup();
+    await show([totals({ lessonsCompleted: 0 })]);
+
+    screen.getByText("Lessons finished").closest("button")!.click();
+
+    expect(await screen.findByText(/Nothing finished yet/)).toBeTruthy();
+  });
+
+  it("opens one breakdown at a time", async () => {
+    cleanup();
+    await show([totals()]);
+
+    screen.getByText("Questions answered").closest("button")!.click();
+    expect(await screen.findByText(/questions came from/)).toBeTruthy();
+
+    screen.getByText("Lessons finished").closest("button")!.click();
+    expect(await screen.findByText(/finished rounds/)).toBeTruthy();
+    expect(screen.queryByText(/questions came from/)).toBeNull();
+  });
+
+  it("lists the days practised, newest first, with what was worked on", async () => {
+    cleanup();
+    await show([totals({ practisedOn: [localDay(0), localDay(3)] })]);
+
+    expect(await screen.findByText("Recent activity")).toBeTruthy();
+    expect(screen.getByText("Today")).toBeTruthy();
+    const days = screen.getAllByText(/^(Today|Yesterday|\w{3} \d+ \w{3})$/);
+    expect(days[0].textContent, "newest day first").toBe("Today");
+  });
+
+  it("says what a day held, never how much — the rollup does not know", async () => {
+    cleanup();
+    await show([totals({ practisedOn: [localDay(1)] })]);
+
+    const day = await screen.findByText("Yesterday");
+    // One lesson met that day, named. No question count: `practisedOn` carries
+    // dates only, and a per-day figure would have to be invented.
+    expect(day.closest("li")!.textContent).toContain("1 lesson");
+    expect(day.closest("li")!.textContent).not.toMatch(/\d+ questions/);
+  });
+
+  it("leaves the activity section out for a child who has never played", async () => {
+    cleanup();
+    await show([]);
+
+    expect(await screen.findByText(/Nothing to show yet/)).toBeTruthy();
+    expect(screen.queryByText("Recent activity")).toBeNull();
   });
 
   it("shows nearly-solo for a child who is right but still taking hints", async () => {
@@ -179,7 +289,7 @@ describe("a child's report, mounted", () => {
     cleanup();
     await show([totals({ supportsUsed: 15 })]);
 
-    expect(await screen.findByText("Nearly solo")).toBeTruthy();
+    expect(await screen.findByText("Still using hints")).toBeTruthy();
   });
 });
 

@@ -39,6 +39,19 @@ interface ProfileResponse {
 export const WEEK_DAYS = 7;
 
 /**
+ * How many practised days the activity list shows.
+ *
+ * Days *practised*, not days elapsed: a child who plays twice a month still
+ * gets a list with five things in it rather than a fortnight of blanks.
+ *
+ * Five, because this is a glance and not a history. A parent wants to know
+ * what has been going on lately, and by the fifth row back the answer has
+ * already been given — everything after it is scroll between them and the rest
+ * of the page.
+ */
+export const RECENT_DAYS = 5;
+
+/**
  * Help taken on this share of questions or more: the child has the idea but is
  * not yet working alone.
  *
@@ -85,6 +98,22 @@ export interface Rhythm {
   questionsEver: number;
 }
 
+/**
+ * One day a child practised, and what they touched on it.
+ *
+ * Deliberately *what*, never *how much*. `practisedOn` is a set of dates per
+ * concept, so the rollup knows a concept was met on a day and cannot say how
+ * many questions that day held — printing a per-day count would mean inventing
+ * one. A parent asking "what has she been doing?" is answered by the list of
+ * ideas; a parent asking "how much?" is answered by the tiles above it.
+ */
+export interface ActivityDay {
+  /** Local date, `YYYY-MM-DD` — the key `practisedOn` buckets by. */
+  day: string;
+  /** Concepts met that day, the ones needing attention first. */
+  conceptKeys: string[];
+}
+
 export interface ChildReport {
   learnerId: string;
   /** Raw events the server still holds. Ages out at 400 days; the rollup does not. */
@@ -92,7 +121,55 @@ export interface ChildReport {
   /** Every concept this child has touched, hardest-first. */
   concepts: ConceptMastery[];
   rhythm: Rhythm;
+  /** The last `RECENT_DAYS` days with practice on them, newest first. */
+  activity: ActivityDay[];
 }
+
+/**
+ * One concept's share of a headline figure.
+ *
+ * The tiles say 16 questions and 2 finished rounds; this says which lessons
+ * those came from. A total with no breakdown is the figure a parent cannot use
+ * — "16 answered" is the same number whether it was one lesson hammered or
+ * five lessons touched, and those are different evenings.
+ */
+export interface Contribution {
+  concept: ConceptMastery;
+  count: number;
+  /** This concept's share of the total, 0..1. */
+  share: number;
+}
+
+/**
+ * Break a headline figure back down into the lessons that made it.
+ *
+ * Largest first, and concepts that contributed nothing are left out rather
+ * than listed as zero: a breakdown of 16 answers is a list of where answers
+ * happened, not a roll-call of every concept in the course.
+ */
+export const contributionsTo = (
+  concepts: ConceptMastery[],
+  metric: (concept: ConceptMastery) => number,
+): Contribution[] => {
+  const rows = concepts
+    .map((concept) => ({ concept, count: metric(concept) }))
+    .filter((row) => row.count > 0)
+    .sort((a, b) => b.count - a.count || a.concept.conceptKey.localeCompare(b.concept.conceptKey));
+  const total = rows.reduce((sum, row) => sum + row.count, 0);
+  return rows.map((row) => ({ ...row, share: total > 0 ? row.count / total : 0 }));
+};
+
+/**
+ * Right first time, as a count rather than a rate.
+ *
+ * `masteryFrom` divides one by the other and keeps only the rate, so this
+ * multiplies it back. Exact, not approximate: the rate is a ratio of two small
+ * integers, and rounding the product recovers the numerator the division came
+ * from. A parent reads "9 of 9 right first time" far better than "100%", and
+ * at these counts the two are the same sentence.
+ */
+export const rightFirstTime = (concept: ConceptMastery): number =>
+  Math.round(concept.firstTryAccuracy * concept.questionsAnswered);
 
 /** The order a grown-up wants to read them in: trouble first, settled last. */
 const STATUS_ORDER: MasteryStatus[] = [
@@ -147,10 +224,33 @@ export function buildReport(
 
   /*
    * A day appears once per concept, so the union is the answer and a sum would
-   * count a single afternoon three times over.
+   * count a single afternoon three times over. Keeping *which* concepts landed
+   * on each day costs nothing here and is the whole of the activity list.
    */
-  const days = new Set<string>();
-  for (const t of totals) for (const day of t.practisedOn) days.add(day);
+  const days = new Map<string, Set<string>>();
+  for (const t of totals) {
+    for (const day of t.practisedOn) {
+      const touched = days.get(day);
+      if (touched) touched.add(t.conceptKey);
+      else days.set(day, new Set([t.conceptKey]));
+    }
+  }
+
+  /*
+   * Within a day, the same order the rest of the page reads in: whatever needs
+   * attention first. `concepts` is already sorted that way, so its position is
+   * the rank.
+   */
+  const rank = new Map(concepts.map((concept, i) => [concept.conceptKey, i]));
+  const activity = [...days.entries()]
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .slice(0, RECENT_DAYS)
+    .map(([day, touched]) => ({
+      day,
+      conceptKeys: [...touched].sort(
+        (a, b) => (rank.get(a) ?? Infinity) - (rank.get(b) ?? Infinity),
+      ),
+    }));
 
   const cutoff = new Date(now);
   cutoff.setDate(cutoff.getDate() - (WEEK_DAYS - 1));
@@ -168,11 +268,12 @@ export function buildReport(
     concepts,
     rhythm: {
       lastSeenTs: totals.map((t) => t.lastSeenTs).filter(Boolean).sort().pop() || undefined,
-      daysThisWeek: [...days].filter((day) => day >= firstDay).length,
+      daysThisWeek: [...days.keys()].filter((day) => day >= firstDay).length,
       daysEver: days.size,
       roundsEver: totals.reduce((sum, t) => sum + t.lessonsCompleted, 0),
       questionsEver: totals.reduce((sum, t) => sum + t.questionsAnswered, 0),
     },
+    activity,
   };
 }
 
@@ -256,11 +357,11 @@ export const ERROR_COPY: Record<ErrorKind, { label: string; detail: string; fix:
  * children sitting in the same band.
  */
 export const STATUS_COPY: Record<MasteryStatus, { label: string; detail: string }> = {
-  mastered: { label: "Secure", detail: "Done. Worth one round each in a week or two so it stays." },
-  practising: { label: "Getting there", detail: "A round or two from finished. Best use of the next session." },
-  learning: { label: "Just started", detail: "Too new to read. More rounds is the only thing that helps." },
-  struggling: { label: "Stuck", detail: "Going wrong more often than right. Start here." },
-  "not-started": { label: "Not met yet", detail: "No rounds on this one." },
+  mastered: { label: "Knows it", detail: "Learned. One quick round in a week or two keeps it." },
+  practising: { label: "Almost there", detail: "Nearly learned. The best place to spend the next session." },
+  learning: { label: "Just started", detail: "Too soon to tell how it is going. A few more rounds will show." },
+  struggling: { label: "Needs help", detail: "More wrong than right. Start here." },
+  "not-started": { label: "Not tried", detail: "Has not played this one yet." },
 };
 
 /**
@@ -314,26 +415,120 @@ export const nextStep = (concept: ConceptMastery): string => {
   // Said before the status, because below MIN_EVIDENCE the status is a
   // placeholder and any advice drawn from it would be advice about noise.
   if (gap > 0) {
-    return `About ${gap} more ${gap === 1 ? "answer" : "answers"} before this can say anything.`;
+    return `Too soon to tell — about ${gap} more ${gap === 1 ? "question" : "questions"} and we will know.`;
   }
 
   switch (concept.status) {
     case "struggling":
-      return "Sit with them for one round of this — more is going wrong than right.";
+      return "Sit with them for one round. More is going wrong than right.";
     case "practising":
       if (concept.supportRate >= LEANING_ON_HELP) {
-        return "Right most times, but with a hint. Try one round with hints closed.";
+        return "Right most times, but using hints. Try one round without them.";
       }
       if (concept.daysPractised < MASTERY_DAYS) {
-        return "Going well. One more round on a different day settles it.";
+        return "Doing well. One more round on another day and it is learned.";
       }
       if (concept.firstTryAccuracy < MASTERY_ACCURACY) {
-        return "Close. A round with fewer first-try slips will finish it.";
+        return "Nearly there. A round with fewer slips finishes it.";
       }
-      return "One finished round away from secure — a round left part-done does not count.";
+      return "Just needs one round played all the way to the end.";
     case "mastered":
-      return "Secure. Come back in a week or two so it stays that way.";
+      return "Learned. Come back in a week or two so it stays that way.";
     default:
       return "Nothing to do here yet.";
   }
+};
+
+/**
+ * The one thing to do next, for the whole child.
+ *
+ * A parent opening this page asks one question — *what should they do now?* —
+ * and the page used to answer it with four sections and thirteen rows, leaving
+ * the reader to work out which row mattered. This picks the row.
+ *
+ * The order is the pedagogy, not a convenience: something going wrong beats
+ * something nearly finished, which beats something too new to judge, which
+ * beats a suggestion to try something new. Within a band, the concept where a
+ * single session changes the most.
+ *
+ * `lessonOf` keeps this module free of the skill system, the same way the rest
+ * of the file is: concepts arrive as keys, and turning a key into a lesson
+ * title stays the caller's job.
+ */
+export interface NextMove {
+  /** The lesson this is about, or null when the advice is not about one. */
+  conceptKey: string | null;
+  /** What to do, in one sentence a parent can act on tonight. */
+  action: string;
+  /** Why it is the thing to do. One line, no numbers. */
+  why: string;
+}
+
+export const whatNext = (
+  report: ChildReport,
+  childName: string,
+  lessonOf: (conceptKey: string) => string,
+): NextMove | null => {
+  if (report.rhythm.questionsEver === 0) return null;
+
+  const inBand = (status: MasteryStatus) =>
+    report.concepts.filter((concept) => concept.status === status);
+
+  /* Worst first: the round that changes the most is the one going worst. */
+  const stuck = inBand("struggling").sort((a, b) => a.firstTryAccuracy - b.firstTryAccuracy)[0];
+  if (stuck) {
+    return {
+      conceptKey: stuck.conceptKey,
+      action: `Sit with ${childName} for one round of ${lessonOf(stuck.conceptKey)}.`,
+      why: "More is going wrong than right on this one, so it is where help counts most.",
+    };
+  }
+
+  /* Best first: the one closest to finished finishes soonest. */
+  const nearly = inBand("practising").sort((a, b) => b.firstTryAccuracy - a.firstTryAccuracy)[0];
+  if (nearly) {
+    const lesson = lessonOf(nearly.conceptKey);
+    if (nearly.supportRate >= LEANING_ON_HELP) {
+      return {
+        conceptKey: nearly.conceptKey,
+        action: `One round of ${lesson}, with the hints left closed.`,
+        why: `${childName} gets these right, but reaches for a hint most times.`,
+      };
+    }
+    if (nearly.daysPractised < MASTERY_DAYS) {
+      return {
+        conceptKey: nearly.conceptKey,
+        action: `One more round of ${lesson}, on a different day.`,
+        why: "It has only been practised on one day. A second day is what makes it stay.",
+      };
+    }
+    if (nearly.firstTryAccuracy < MASTERY_ACCURACY) {
+      return {
+        conceptKey: nearly.conceptKey,
+        action: `Another round of ${lesson}.`,
+        why: "Nearly learned — a round with fewer slips finishes it.",
+      };
+    }
+    return {
+      conceptKey: nearly.conceptKey,
+      action: `One round of ${lesson}, played all the way to the end.`,
+      why: "Every round so far was left part-way. A finished round is what counts.",
+    };
+  }
+
+  /* Most evidence first: the one closest to being readable at all. */
+  const early = inBand("learning").sort((a, b) => b.questionsAnswered - a.questionsAnswered)[0];
+  if (early) {
+    return {
+      conceptKey: early.conceptKey,
+      action: `A couple more rounds of ${lessonOf(early.conceptKey)}.`,
+      why: "It is too new to tell how it is going. More rounds is the only thing that helps.",
+    };
+  }
+
+  return {
+    conceptKey: null,
+    action: `Nothing needs fixing — time for something new.`,
+    why: `${childName} has learned everything they have met so far.`,
+  };
 };

@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest";
 
-import { buildReport, evidenceGap, tooEarlyToRead, WEEK_DAYS } from "./childReport";
+import {
+  buildReport,
+  contributionsTo,
+  evidenceGap,
+  RECENT_DAYS,
+  rightFirstTime,
+  tooEarlyToRead,
+  WEEK_DAYS,
+  whatNext,
+} from "./childReport";
 import { MASTERY_DAYS, MIN_EVIDENCE, masteryFrom } from "./learning/mastery";
 import type { ConceptTotals } from "./learning/learningLog";
 
@@ -166,5 +175,155 @@ describe("how much is known yet", () => {
   it("is not 'too early' for a child who has never played at all", () => {
     // A different page entirely: nothing to read, rather than not enough.
     expect(tooEarlyToRead(buildReport("l_1", []))).toBe(false);
+  });
+});
+
+describe("what a headline number is made of", () => {
+  it("names the lessons behind a total, largest share first", () => {
+    const report = buildReport("l_1", [
+      totals({ conceptKey: "a", questionsAnswered: 4, correctFirstTry: 4 }),
+      totals({ conceptKey: "b", questionsAnswered: 12, correctFirstTry: 6 }),
+    ]);
+
+    const rows = contributionsTo(report.concepts, (c) => c.questionsAnswered);
+    expect(rows.map((r) => r.concept.conceptKey)).toEqual(["b", "a"]);
+    expect(rows[0].count).toBe(12);
+    expect(rows[0].share).toBeCloseTo(0.75);
+  });
+
+  it("leaves out a lesson that contributed nothing rather than listing a zero", () => {
+    const report = buildReport("l_1", [
+      totals({ conceptKey: "finished", lessonsCompleted: 2 }),
+      totals({ conceptKey: "unfinished", lessonsCompleted: 0 }),
+    ]);
+
+    const rows = contributionsTo(report.concepts, (c) => c.lessonsCompleted);
+    expect(rows.map((r) => r.concept.conceptKey)).toEqual(["finished"]);
+  });
+
+  it("has nothing to break down when nothing has been finished", () => {
+    const report = buildReport("l_1", [totals({ lessonsCompleted: 0 })]);
+
+    expect(contributionsTo(report.concepts, (c) => c.lessonsCompleted)).toEqual([]);
+  });
+
+  it("recovers the count the accuracy rate was divided out of", () => {
+    // The panel says "9 right first time", not "75%", so the count has to come
+    // back exactly — a rate is all `masteryFrom` keeps.
+    const report = buildReport("l_1", [
+      totals({ questionsAnswered: 12, correctFirstTry: 9 }),
+    ]);
+
+    expect(rightFirstTime(report.concepts[0])).toBe(9);
+  });
+});
+
+describe("the days a child practised", () => {
+  it("lists each day once, newest first, with what was met on it", () => {
+    const report = buildReport("l_1", [
+      totals({ conceptKey: "a", practisedOn: ["2026-08-20", "2026-08-21"] }),
+      totals({ conceptKey: "b", practisedOn: ["2026-08-21"] }),
+    ]);
+
+    expect(report.activity.map((d) => d.day)).toEqual(["2026-08-21", "2026-08-20"]);
+    expect(report.activity[0].conceptKeys.sort()).toEqual(["a", "b"]);
+    expect(report.activity[1].conceptKeys).toEqual(["a"]);
+  });
+
+  it("puts what needs attention first within a day", () => {
+    const report = buildReport("l_1", [
+      totals({ conceptKey: "secure-one", practisedOn: ["2026-08-21"] }),
+      totals({
+        conceptKey: "stuck-one",
+        questionsAnswered: 20,
+        correctFirstTry: 2,
+        practisedOn: ["2026-08-21"],
+      }),
+    ]);
+
+    expect(report.activity[0].conceptKeys).toEqual(["stuck-one", "secure-one"]);
+  });
+
+  it("stops at the most recent days rather than every afternoon ever", () => {
+    const practisedOn = Array.from({ length: RECENT_DAYS + 6 }, (_, i) => `2026-08-${String(i + 1).padStart(2, "0")}`);
+    const report = buildReport("l_1", [totals({ practisedOn })]);
+
+    expect(report.activity).toHaveLength(RECENT_DAYS);
+    // Newest kept, oldest dropped.
+    expect(report.activity[0].day).toBe(practisedOn[practisedOn.length - 1]);
+    expect(report.rhythm.daysEver, "the count still knows about all of them").toBe(
+      practisedOn.length,
+    );
+  });
+
+  it("is empty for a child who has never played", () => {
+    expect(buildReport("l_1", []).activity).toEqual([]);
+  });
+});
+
+describe("the one thing to do next", () => {
+  /** Lesson titles are the caller's job, so the tests supply their own. */
+  const lessonOf = (key: string) => `Lesson ${key}`;
+  const move = (rows: ConceptTotals[]) => whatNext(buildReport("l_1", rows), "Mia", lessonOf);
+
+  it("sends a parent to what is going wrong before what is nearly done", () => {
+    const next = move([
+      totals({ conceptKey: "nearly", practisedOn: ["2026-08-21"] }),
+      totals({ conceptKey: "stuck", questionsAnswered: 20, correctFirstTry: 2 }),
+    ]);
+
+    expect(next?.conceptKey).toBe("stuck");
+    expect(next?.action).toContain("Sit with Mia");
+    expect(next?.action).toContain("Lesson stuck");
+  });
+
+  it("picks the worst of several that are going wrong", () => {
+    const next = move([
+      totals({ conceptKey: "bad", questionsAnswered: 20, correctFirstTry: 8 }),
+      totals({ conceptKey: "worse", questionsAnswered: 20, correctFirstTry: 2 }),
+    ]);
+
+    expect(next?.conceptKey).toBe("worse");
+  });
+
+  it("names the missing ingredient, not just the lesson", () => {
+    // Accurate, unaided, finished — and all on one afternoon. The only thing
+    // left is a second day, so that is what it asks for.
+    const next = move([totals({ practisedOn: ["2026-08-21"] })]);
+
+    expect(next?.action).toMatch(/different day/);
+    expect(next?.why).toMatch(/one day/);
+  });
+
+  it("asks for a round without hints when that is what is missing", () => {
+    // Under the mastery bar on accuracy, so it sits in "practising" — and the
+    // hint rate is the loudest thing wrong with it.
+    const next = move([totals({ questionsAnswered: 20, correctFirstTry: 16, supportsUsed: 15 })]);
+
+    expect(next?.action).toMatch(/hints left closed/);
+  });
+
+  it("asks for a finished round when every round was left part-way", () => {
+    const next = move([totals({ lessonsCompleted: 0 })]);
+
+    expect(next?.action).toMatch(/all the way to the end/);
+  });
+
+  it("asks for more rounds when there is not enough to judge yet", () => {
+    const next = move([totals({ questionsAnswered: 3, correctFirstTry: 2 })]);
+
+    expect(next?.conceptKey).toBe("make-ten");
+    expect(next?.action).toMatch(/couple more rounds/);
+  });
+
+  it("says to move on when everything met is learned", () => {
+    const next = move([totals()]);
+
+    expect(next?.conceptKey).toBeNull();
+    expect(next?.action).toMatch(/something new/);
+  });
+
+  it("has no advice for a child who has never played", () => {
+    expect(move([])).toBeNull();
   });
 });
