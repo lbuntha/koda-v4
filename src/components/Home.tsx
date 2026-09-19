@@ -538,8 +538,25 @@ export const Home: React.FC<HomeProps> = ({
     /* Column 1 is the app shell's sidebar; this is columns 2 and 3. Neither
        band grows with the lesson count — Today is capped, and the subject list
        grows with the number of skills, which is a small number. */
-    <div className="w-full animate-fadeIn pb-6 grid gap-6 items-start lg:grid-cols-[minmax(0,1fr)_300px]">
-      <div className={themeSystem.spacing.section}>
+    <div className="w-full animate-fadeIn pb-6 grid gap-6 items-start grid-cols-[minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_300px]">
+      {/*
+       * `min-w-0`, and a `minmax(0,1fr)` column at every width — not only at
+       * `lg`.
+       *
+       * A grid item's `min-width` is `auto`, which means a column sized `auto`
+       * is floored at its *content's* minimum. One long word, one wide
+       * thumbnail row, one card that cannot shrink any further, and the column
+       * grows past the page — and because every card in it is `w-full`, they
+       * all grow with it. That is what a phone shows as "the whole page has
+       * slid sideways": the toolbar and the tab bar are laid out against the
+       * viewport and stay put, while everything between them hangs off the
+       * right edge.
+       *
+       * `minmax(0, 1fr)` removes the floor, so the column is the page's width
+       * and the content inside it does the shrinking — which is what `truncate`
+       * and `min-w-0` further down are all waiting to do.
+       */}
+      <div className={`min-w-0 ${themeSystem.spacing.section}`}>
         {/* A parent's first question, above their own path. Draws nothing for
             a child, or for a family with no children. */}
         <ChildrenOverview onOpenChild={onOpenChild} onAddChild={onAddChild} />

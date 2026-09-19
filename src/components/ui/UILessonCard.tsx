@@ -139,7 +139,7 @@ export const UILessonCard: React.FC<UILessonCardProps> = ({
         {/* Title first on a phone row, eyebrow first everywhere else — one
             pair of lines, ordered for the shape they are in. */}
         <h3
-          className={`text-base font-black leading-tight text-ink mt-1 ${
+          className={`text-base font-black leading-tight text-ink mt-1 break-words ${
             compact ? "order-1 sm:order-none" : ""
           }`}
         >

@@ -48,7 +48,12 @@ export const UISubjectLessonCard: React.FC<UISubjectLessonCardProps> = ({
   onOpenSubject,
   className = "",
 }) => {
-  const percent = lessonCount ? Math.round((completedLessons / lessonCount) * 100) : 0;
+  /* Clamped: a registry that gains a lesson, or a record that counts a replay,
+     can put `completedLessons` above `lessonCount`, and a bar drawn at 140% is
+     a rendering fault rather than a nice surprise. */
+  const percent = lessonCount
+    ? Math.min(100, Math.round((completedLessons / lessonCount) * 100))
+    : 0;
 
   return (
     <section className={className}>
