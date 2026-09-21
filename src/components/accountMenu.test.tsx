@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { accountName, accountType } from "./AccountMenu";
+import { accountAvatarSeed, accountName, accountType } from "./AccountMenu";
 import type { Session } from "../lib/sync/session";
 
 /**
@@ -36,5 +36,11 @@ describe("naming an account", () => {
   it("falls back to the role only when nothing else names the account", () => {
     expect(accountName(session({ role: "student" }))).toBe("Student");
     expect(accountName(session({ role: "parent", displayName: "Mr. Ly" }))).toBe("Mr. Ly");
+  });
+});
+
+describe("rendering an account avatar", () => {
+  it("passes an Art avatar reference through without converting it to DiceBear", () => {
+    expect(accountAvatarSeed(session({ avatarSeed: "art:avatar-fox" }))).toBe("art:avatar-fox");
   });
 });

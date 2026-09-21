@@ -228,6 +228,7 @@ export const UISidebarProfile: React.FC<UISidebarProfileProps> = ({
     <div className={`${s.profileAvatar} overflow-hidden`}>
       <UIAvatar
         name={profile.initials ?? profile.name}
+        seed={profile.avatarSeed}
         src={profile.avatarUrl}
         size="fill"
         className="bg-transparent text-inherit"

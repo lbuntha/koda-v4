@@ -14,7 +14,6 @@ import {
 } from "./ui";
 import { themeSystem } from "../lib/themeSystem";
 import { ApiError, SessionAPI, type Session, useSession } from "../lib/sync";
-import { diceBearAvatar } from "../lib/avatar";
 import { AvatarPickerModal } from "./account/AvatarPickerModal";
 import { PinPrompt } from "./account/PinPrompt";
 
@@ -53,8 +52,9 @@ export const accountType = (account: Session): string => {
 export const accountName = (account: Session): string =>
   account.learnerName ?? account.displayName ?? accountType(account);
 
-export const accountAvatar = (account: Session): string =>
-  diceBearAvatar(account.avatarSeed ?? account.learnerId ?? account.userId ?? account.deviceId);
+/** Pass the stored choice through so `art:*` avatars are rendered by Art. */
+export const accountAvatarSeed = (account: Session): string =>
+  account.avatarSeed ?? account.learnerId ?? account.userId ?? account.deviceId;
 
 export const accountContext = (account: Session): string =>
   account.familyName ?? (account.platformRole && account.platformRole !== "none" ? "Platform account" : "");
@@ -162,7 +162,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
     ? {
         ...accountLines(session),
         initials: initialsFor(session.learnerName ?? session.email),
-        avatarUrl: accountAvatar(session),
+        avatarSeed: accountAvatarSeed(session),
       }
     : profile;
 
@@ -225,7 +225,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
                     icon={
                       <UIAvatar
                         name={accountName(session)}
-                        src={accountAvatar(session)}
+                        seed={accountAvatarSeed(session)}
                         size="xs"
                         decorative
                       />
@@ -250,7 +250,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
                       icon={
                         <UIAvatar
                           name={accountName(account)}
-                          src={accountAvatar(account)}
+                          seed={accountAvatarSeed(account)}
                           size="xs"
                           decorative
                         />
@@ -350,6 +350,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
           >
             <UIAvatar
               name={shown.initials ?? shown.name}
+              seed={shown.avatarSeed}
               src={shown.avatarUrl}
               size="fill"
               decorative
@@ -380,7 +381,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
                       <span className={l.accountAvatar}>
                         <UIAvatar
                           name={accountName(session)}
-                          src={accountAvatar(session)}
+                          seed={accountAvatarSeed(session)}
                           size="fill"
                           decorative
                         />
@@ -408,7 +409,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
                         <span className={l.accountAvatar}>
                           <UIAvatar
                             name={accountName(account)}
-                            src={accountAvatar(account)}
+                            seed={accountAvatarSeed(account)}
                             size="fill"
                             decorative
                           />

@@ -11,7 +11,7 @@ interface AvatarPickerModalProps {
   onSave: (seed: string) => Promise<void>;
 }
 
-/** Self-service Art-library picker shared by adult, student and child accounts. */
+/** Self-service Art and DiceBear picker shared by adult, student and child accounts. */
 export const AvatarPickerModal: React.FC<AvatarPickerModalProps> = ({
   isOpen,
   currentSeed,
@@ -57,7 +57,7 @@ export const AvatarPickerModal: React.FC<AvatarPickerModalProps> = ({
       )}
     >
       <p className="mb-4 text-sm text-body">
-        Pick a character from Koda Art. Your choice follows your account on every device.
+        Pick from Koda Art or the classic collection. Your choice follows your account on every device.
       </p>
       <AvatarArtChoices currentSeed={currentSeed} selectedSeed={selected} onSelect={setSelected} />
       {error && <p className="mt-3 text-sm text-rose-600">{error}</p>}

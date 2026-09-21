@@ -38,6 +38,8 @@ export interface NavBrandConfig {
 export interface NavProfileConfig {
   name: string;
   role?: string;
+  /** Stored avatar choice. Supports both DiceBear seeds and `art:*` references. */
+  avatarSeed?: string;
   /** Image URL. When absent the avatar falls back to `initials`, then the name. */
   avatarUrl?: string;
   initials?: string;

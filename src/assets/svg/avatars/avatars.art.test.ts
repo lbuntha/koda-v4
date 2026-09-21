@@ -20,6 +20,7 @@ describe("avatar art collection", () => {
     expect(path, `no drawing for ${id}`).toBeTruthy();
     const markup = preprocessSvgMarkup(files[path!]);
     expect(markup).toContain('viewBox="0 0 100 100"');
+    expect(markup).toContain('data-avatar-background="true"');
     expect(sanitizeSvgMarkup(markup)).toContain("<svg");
   });
 });

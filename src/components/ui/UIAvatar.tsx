@@ -17,11 +17,11 @@ export interface UIAvatarProps {
 }
 
 const sizes: Record<AvatarSize, string> = {
-  xs: "h-5 w-5 rounded-lg text-[9px]",
-  sm: "h-10 w-10 rounded-xl text-xs",
-  md: "h-11 w-11 rounded-2xl text-sm",
-  lg: "h-16 w-16 rounded-2xl text-base",
-  fill: "h-full w-full rounded-[inherit] text-sm",
+  xs: "h-5 w-5 rounded-full text-[9px]",
+  sm: "h-10 w-10 rounded-full text-xs",
+  md: "h-11 w-11 rounded-full text-sm",
+  lg: "h-16 w-16 rounded-full text-base",
+  fill: "h-full w-full rounded-full text-sm",
 };
 
 const initialsFor = (name: string): string => {
