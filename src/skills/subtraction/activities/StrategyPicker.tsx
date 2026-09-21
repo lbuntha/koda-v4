@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import type { ActivityProps, PrintedQuestion } from "../../types";
 import {
   SkillRound, SPRING, composeHints, isPractice, modeAt, playCopy,
-  useSkillRound, type PracticeSetup, type RoundQuestion,
+  useSkillRound, guideSetup, useGuide, type PracticeSetup, type RoundQuestion,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { COMPARISON, DIFFERENCE, REMOVED_PART, WHOLE } from "../internal/data/subtractionPalette";
@@ -101,7 +101,17 @@ export function strategyHints(
       : q.difference <= 5
         ? `${q.subtrahend} and ${q.minuend} are close together, so counting up is short.`
         : `${q.subtrahend} is the part being taken away. Ask what shape it has before you start.`,
-    `More than one strategy fits here: ${q.fits.map((id) => cardFor(id).name).join(", ")}.`,
+    /*
+     * Two named, not all of them.
+     *
+     * Every fitting strategy listed runs to nineteen words on the questions
+     * where four fit — and a child choosing between strategies is exactly the
+     * child who cannot hold a list of four. Two is enough to make the point
+     * that more than one works, which is the lesson.
+     */
+    q.fits.length > 2
+      ? `Several fit, including ${q.fits.slice(0, 2).map((id) => cardFor(id).name).join(" and ")}.`
+      : `More than one fits: ${q.fits.map((id) => cardFor(id).name).join(", ")}.`,
   );
 }
 
@@ -152,10 +162,37 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({ 
     });
   };
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const hints = practising ? [] : strategyHints(q, { chosen, kidTip: copy.kidTip });
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: q.id,
+    rungs: hints,
+    target: -1,
+    progress: chosen === undefined ? 0 : 1,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   return <SkillRound koda={koda} lesson={lesson} fallbackTitle="Choose a Strategy" round={round}
     totalQuestions={totalQuestions} prompt={prompt} iconName="scale" iconTone="emerald"
     tagLabels={tagLabelsFrom(koda)} nudge={nudge.message}
-    hints={practising ? [] : strategyHints(q, { chosen, kidTip: copy.kidTip })}
+    hints={hints}
+    guide={practising ? undefined : guide}
+    guideMethod={copy.stepByStep}
     onExit={koda.ui.exit} recommendation={nextStep}
     onReadAloud={practising ? undefined : () => { round.useSupport("audio_replay"); void koda.speech.say(prompt, speechRate(koda)); }}>
     <div className="space-y-4">

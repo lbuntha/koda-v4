@@ -27,6 +27,7 @@
           "totalMax": 30,
           "questionsPerRound": 5
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Share a pile equally between the plates, and say how many are on one.",
           "stepByStep": [
@@ -78,6 +79,7 @@
           "totalMax": 36,
           "questionsPerRound": 5
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Fill groups of a given size until nothing is left, then count the groups.",
           "stepByStep": [
@@ -129,6 +131,7 @@
           "totalMax": 48,
           "questionsPerRound": 5
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Say what a division question is asking for, without working it out.",
           "stepByStep": [
@@ -179,6 +182,7 @@
           "totalMax": 48,
           "questionsPerRound": 5
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Match a completed share to the division sentence that says it.",
           "stepByStep": [
@@ -230,6 +234,7 @@
           "totalMax": 20,
           "questionsPerRound": 5
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Share a total between two, and recognise that as halving.",
           "stepByStep": [
@@ -273,6 +278,7 @@
           "totalMax": 12,
           "questionsPerRound": 5
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Share between one, and between as many groups as there are things, and say why each comes out as it does.",
           "stepByStep": [
@@ -315,6 +321,7 @@
           "totalMax": 12,
           "questionsPerRound": 6
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Share nothing between some groups, and recognise that sharing something between no groups is not a question that has an answer.",
           "stepByStep": [
@@ -366,6 +373,7 @@
           "totalMax": 30,
           "questionsPerRound": 5
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Share until no more can go round, put what is left in the box, and say how many each group got.",
           "stepByStep": [
@@ -418,6 +426,7 @@
           "totalMax": 100,
           "questionsPerRound": 5
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Build an array with the given number of rows and read the length of one row.",
           "stepByStep": [
@@ -470,6 +479,7 @@
           "totalMax": 81,
           "questionsPerRound": 5
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Write both of the divisions a single array shows.",
           "stepByStep": [
@@ -521,6 +531,7 @@
           "totalMax": 64,
           "questionsPerRound": 5
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Fill rows of a fixed length and count only the rows that are full.",
           "stepByStep": [
@@ -572,6 +583,7 @@
           "totalMax": 60,
           "questionsPerRound": 5
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Take the divisor away repeatedly until nothing is left, and count how many times you could.",
           "stepByStep": [
@@ -622,6 +634,7 @@
           "totalMax": 80,
           "questionsPerRound": 5
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Report how many equal hops a line shows, not where they finish.",
           "stepByStep": [
@@ -630,7 +643,7 @@
             "Where the last jump lands is not the answer.",
             "The answer is the number of jumps."
           ],
-          "kidTip": "The answer to a division is how many times it went in, not what you were left looking at.",
+          "kidTip": "The answer is how many hops it took, not where you landed.",
           "audioPrompt": "Count the jumps. Not the number you finish on.",
           "prompts": {
             "default": "How many hops are there?"
@@ -673,6 +686,7 @@
           "totalMax": 100,
           "questionsPerRound": 5
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Skip count up to a total and use the number of steps as the quotient.",
           "stepByStep": [
@@ -723,6 +737,7 @@
             12
           ]
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Write all four true equations from a multiplication triple.",
           "stepByStep": [
@@ -772,6 +787,7 @@
             12
           ]
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Use a times-table row backwards: find the total, read the column.",
           "stepByStep": [
@@ -821,6 +837,7 @@
             12
           ]
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Recognise a division and its missing-factor multiplication as one question.",
           "stepByStep": [
@@ -868,6 +885,7 @@
             12
           ]
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Divide fluently by 2, 5 and 10.",
           "stepByStep": [
@@ -876,7 +894,7 @@
             "Dividing by 5 is close to dividing by 10 — there are twice as many.",
             "These three come up more than any others. Learn them first."
           ],
-          "kidTip": "Half of the answer to a ten is the answer to a five... the other way round. Ten first, then double it.",
+          "kidTip": "Divide by ten first, then double it. That is the five.",
           "audioPrompt": "Two, five and ten. The three you will use most.",
           "prompts": {
             "default": "What is the answer?"
@@ -913,6 +931,7 @@
             12
           ]
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Divide by 4 and 8 by halving repeatedly.",
           "stepByStep": [
@@ -959,6 +978,7 @@
             12
           ]
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Divide by 3, 6 and 9 using the matching multiplication.",
           "stepByStep": [
@@ -1009,6 +1029,7 @@
             12
           ]
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Pick the multiplication that answers a division, then use it.",
           "stepByStep": [
@@ -1061,6 +1082,7 @@
           ],
           "totalMax": 100
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Write a division answer as a whole number and a remainder.",
           "stepByStep": [
@@ -1112,6 +1134,7 @@
           ],
           "totalMax": 100
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Spot and fix an answer whose remainder is too big.",
           "stepByStep": [
@@ -1162,6 +1185,7 @@
           ],
           "totalMax": 80
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Give the answer the situation asks for, not just the calculation.",
           "stepByStep": [
@@ -1212,6 +1236,7 @@
           ],
           "totalMax": 80
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Pick the answer that fits the situation from four that all use the same numbers.",
           "stepByStep": [
@@ -1254,6 +1279,7 @@
           "mode": "tens_quotient",
           "questionsPerRound": 5
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Divide a multiple of ten by reading it as a number of tens.",
           "stepByStep": [
@@ -1262,7 +1288,7 @@
             "Six tens each means sixty each.",
             "Say the answer in ordinary numbers at the end."
           ],
-          "kidTip": "If you can do 24 ÷ 3, you can do 240 ÷ 3. It is the same sum wearing a zero.",
+          "kidTip": "If you can do 24 ÷ 3, you can do 240 ÷ 3.",
           "audioPrompt": "How many tens is it? Share the tens out.",
           "prompts": {
             "default": "What is the answer?"
@@ -1297,6 +1323,7 @@
           "mode": "scale_down",
           "questionsPerRound": 5
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Divide by 10 and 100 and say what happened to the digits.",
           "stepByStep": [
@@ -1305,7 +1332,7 @@
             "Dividing by a hundred moves them two places.",
             "The zero disappears because it has run out of places, not because you rubbed it out."
           ],
-          "kidTip": "Do not say 'take a zero off'. Say 'the digits move right'. It will save you when decimals arrive.",
+          "kidTip": "Not 'take a zero off'. The digits move one place right.",
           "audioPrompt": "Watch the digits move right.",
           "prompts": {
             "default": "What is the answer?"
@@ -1338,6 +1365,7 @@
           "mode": "tens_into_tens",
           "questionsPerRound": 5
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Divide a multiple of ten by another multiple of ten.",
           "stepByStep": [
@@ -1346,7 +1374,7 @@
             "That is just the small division underneath.",
             "The tens on each side cancel each other out."
           ],
-          "kidTip": "600 ÷ 30 is 60 tens ÷ 3 tens, which is 60 ÷ 3... no: it is 6 ÷ 3 tens' worth. Cancel one zero from each side.",
+          "kidTip": "Cancel one zero from each side, then divide what is left.",
           "audioPrompt": "A zero on each side cancels out. What is left?",
           "prompts": {
             "default": "What is the answer?"
@@ -1389,6 +1417,7 @@
           ],
           "totalMax": 999
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Break a number into its places and divide each one separately.",
           "stepByStep": [
@@ -1440,6 +1469,7 @@
           ],
           "totalMax": 999
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Choose a split whose parts divide, when the place split does not.",
           "stepByStep": [
@@ -1491,6 +1521,7 @@
           "totalMax": 999,
           "questionsPerRound": 5
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Divide by repeatedly subtracting known multiples and tallying them.",
           "stepByStep": [
@@ -1543,6 +1574,7 @@
           "maxChunks": 3,
           "questionsPerRound": 5
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Reach the answer in three chunks or fewer by choosing big ones.",
           "stepByStep": [
@@ -1594,6 +1626,7 @@
           ],
           "totalMax": 999
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Divide place by place in the written layout, with nothing carried.",
           "stepByStep": [
@@ -1602,7 +1635,7 @@
             "Write that above the line, in the same column.",
             "Move right and do the same again."
           ],
-          "kidTip": "Left to right, one column at a time. Division is the only written method that starts at the big end.",
+          "kidTip": "Left to right, one column at a time. Division starts big.",
           "audioPrompt": "Start at the left. How many fit into the first digit?",
           "prompts": {
             "default": "Divide it."
@@ -1645,6 +1678,7 @@
           ],
           "totalMax": 9999
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Carry a leftover into the next place and keep going.",
           "stepByStep": [
@@ -1653,7 +1687,7 @@
             "Now divide the whole of that new number, carry and all.",
             "Keep going to the last digit."
           ],
-          "kidTip": "The little number you write is not decoration. It joins the next digit and makes it bigger.",
+          "kidTip": "The little number you carry joins the next digit and grows it.",
           "audioPrompt": "What is left over goes in front of the next digit.",
           "prompts": {
             "default": "Divide it."
@@ -1696,6 +1730,7 @@
           ],
           "totalMax": 9999
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Finish a written division that does not come out exactly.",
           "stepByStep": [
@@ -1746,6 +1781,7 @@
           ],
           "totalMax": 9999
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Write a zero in the answer when a place holds none, and see why it matters.",
           "stepByStep": [
@@ -1798,6 +1834,7 @@
           ],
           "totalMax": 9999
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Divide by a two-digit number using the written method.",
           "stepByStep": [
@@ -1849,6 +1886,7 @@
           ],
           "totalMax": 9999
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Finish a two-digit division that does not come out exactly.",
           "stepByStep": [
@@ -1901,6 +1939,7 @@
           ],
           "totalMax": 999
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Carry a division past the decimal point instead of stopping at a remainder.",
           "stepByStep": [
@@ -1948,6 +1987,7 @@
             999
           ]
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Decide whether 2, 5 or 10 divides a number without dividing it.",
           "stepByStep": [
@@ -1993,6 +2033,7 @@
             999
           ]
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Decide whether 3 or 9 divides a number using its digit sum.",
           "stepByStep": [
@@ -2038,6 +2079,7 @@
             999
           ]
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Test for 4 and 6 by combining simpler tests.",
           "stepByStep": [
@@ -2083,6 +2125,7 @@
             120
           ]
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Find every factor of a number by dividing systematically.",
           "stepByStep": [
@@ -2128,6 +2171,7 @@
             100
           ]
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Find the factors two numbers share, and the largest of them.",
           "stepByStep": [
@@ -2173,6 +2217,7 @@
             200
           ]
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Split a number repeatedly until every part is prime.",
           "stepByStep": [
@@ -2181,7 +2226,7 @@
             "Keep splitting the parts that can.",
             "A prime cannot be split. When they are all prime, you are done."
           ],
-          "kidTip": "It does not matter which split you start with. You always end up with the same primes.",
+          "kidTip": "Whichever split you start with, the primes come out the same.",
           "audioPrompt": "Split it, then split the parts. Stop at primes.",
           "prompts": {
             "default": "Break it down to primes."
@@ -2221,6 +2266,7 @@
           ],
           "totalMax": 4000
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Estimate a quotient by choosing a nearby total the divisor goes into.",
           "stepByStep": [
@@ -2229,7 +2275,7 @@
             "There is usually one just below and one just above.",
             "Take whichever is easier to divide — not whichever is nearest."
           ],
-          "kidTip": "For 347 ÷ 6, think 360 ÷ 6. Not 350. Nearest is not the point; dividing nicely is.",
+          "kidTip": "Pick a number that divides nicely, not the nearest one.",
           "audioPrompt": "Move the big number, not the small one.",
           "prompts": {
             "default": "About how much is it?"
@@ -2268,6 +2314,7 @@
           ],
           "totalMax": 4000
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Judge whether a claimed quotient is the right size, without working it out.",
           "stepByStep": [
@@ -2315,6 +2362,7 @@
           ],
           "totalMax": 900
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Check a division by rebuilding the total from the answer.",
           "stepByStep": [
@@ -2357,6 +2405,7 @@
           "mode": "size_unknown",
           "questionsPerRound": 5
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Solve a sharing word problem by modelling it on a bar.",
           "stepByStep": [
@@ -2398,6 +2447,7 @@
           "mode": "count_unknown",
           "questionsPerRound": 5
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Solve a grouping word problem by modelling it on a bar.",
           "stepByStep": [
@@ -2440,6 +2490,7 @@
           "mode": "remainder_context",
           "questionsPerRound": 5
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Choose whether a situation needs the full groups or one more.",
           "stepByStep": [
@@ -2481,6 +2532,7 @@
           "mode": "unit_rate",
           "questionsPerRound": 5
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Find a per-one amount from a total and a count.",
           "stepByStep": [
@@ -2522,6 +2574,7 @@
           "mode": "times_comparison",
           "questionsPerRound": 5
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Answer a times-as-many comparison rather than a how-many-more one.",
           "stepByStep": [
@@ -2530,7 +2583,7 @@
             "Ask how many of the smaller amount fit into the bigger one.",
             "That is how many times as many."
           ],
-          "kidTip": "\"How many more\" means take away. \"How many times\" means divide. They are different questions about the same two numbers.",
+          "kidTip": "\"How many more\" takes away. \"How many times\" divides.",
           "audioPrompt": "Not how many more. How many times as many.",
           "prompts": {
             "default": "How many times as many?"
@@ -2564,6 +2617,7 @@
           "mode": "multi_step",
           "questionsPerRound": 5
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Solve a two-step problem where the division comes second.",
           "stepByStep": [
@@ -2605,6 +2659,7 @@
           "mode": "mean",
           "questionsPerRound": 5
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Find the mean of a small set by totalling and sharing.",
           "stepByStep": [
@@ -2613,7 +2668,7 @@
             "Share the total between them.",
             "That is what each one would be if they were all the same."
           ],
-          "kidTip": "The mean is not one of the numbers. It is what they would all be if you levelled them off.",
+          "kidTip": "The mean is what they would all be, levelled off.",
           "audioPrompt": "Add them all up, then share the total between the days.",
           "prompts": {
             "default": "How many each day?"
@@ -2647,6 +2702,7 @@
         "question": {
           "questionsPerRound": 5
         },
+        "guide": { "enabled": true },
         "play": {
           "targetObjective": "Choose a division method that suits the particular numbers in front of you.",
           "stepByStep": [

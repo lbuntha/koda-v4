@@ -31,6 +31,14 @@ export interface FractionBarProps {
   label?: string;
   /** Faint, for showing what a fraction looked like before it was re-cut. */
   ghost?: boolean;
+  /**
+   * The part the Smart guide is pointing at, or undefined.
+   *
+   * Drawn here rather than in each engine for the same reason the bar itself
+   * is one component: a strip that lights differently in two lessons is two
+   * strips, and the whole claim of this skill is that it is the same one.
+   */
+  lit?: number;
 }
 
 const FULL = 280;
@@ -44,6 +52,7 @@ export const FractionBar: React.FC<FractionBarProps> = ({
   disabled,
   label,
   ghost,
+  lit,
 }) => {
   const W = FULL * scale;
   const offsets: number[] = [];
@@ -59,7 +68,9 @@ export const FractionBar: React.FC<FractionBarProps> = ({
       width={FULL + 4}
       height={52}
       role="img"
-      aria-label={label ?? `${shaded.length} of ${parts} parts shaded`}
+      aria-label={`${label ?? `${shaded.length} of ${parts} parts shaded`}${
+        lit === undefined ? "" : `, part ${lit + 1} next`
+      }`}
       className="text-ink"
       opacity={ghost ? 0.35 : 1}
     >
@@ -74,8 +85,11 @@ export const FractionBar: React.FC<FractionBarProps> = ({
             height={40}
             rx={4}
             className={shaded.includes(i) ? "fill-violet-400" : "fill-surface-muted"}
-            stroke="currentColor"
-            strokeWidth={1.2}
+            /* The coach's light is a ring on the part, not a fill: a filled
+               part means "shaded", and borrowing that colour would tell a
+               child the part was already taken. */
+            stroke={i === lit ? "rgb(99 102 241)" : "currentColor"}
+            strokeWidth={i === lit ? 3.5 : 1.2}
             style={{ cursor: onToggle && !disabled ? "pointer" : undefined }}
             onClick={onToggle && !disabled ? () => onToggle(i) : undefined}
           />
@@ -92,7 +106,9 @@ export const FractionCircle: React.FC<{
   onToggle?: (index: number) => void;
   disabled?: boolean;
   label?: string;
-}> = ({ parts, shaded, onToggle, disabled, label }) => {
+  /** The part the Smart guide is pointing at — see `FractionBarProps`. */
+  lit?: number;
+}> = ({ parts, shaded, onToggle, disabled, label, lit }) => {
   const R = 54;
   const C = 60;
   const wedge = (i: number): string => {
@@ -107,7 +123,9 @@ export const FractionCircle: React.FC<{
       width={120}
       height={120}
       role="img"
-      aria-label={label ?? `${shaded.length} of ${parts} parts shaded`}
+      aria-label={`${label ?? `${shaded.length} of ${parts} parts shaded`}${
+        lit === undefined ? "" : `, part ${lit + 1} next`
+      }`}
       className="text-ink"
     >
       {Array.from({ length: parts }, (_, i) => (
@@ -115,8 +133,8 @@ export const FractionCircle: React.FC<{
           key={i}
           d={wedge(i)}
           className={shaded.includes(i) ? "fill-violet-400" : "fill-surface-muted"}
-          stroke="currentColor"
-          strokeWidth={1.2}
+          stroke={i === lit ? "rgb(99 102 241)" : "currentColor"}
+          strokeWidth={i === lit ? 3.5 : 1.2}
           style={{ cursor: onToggle && !disabled ? "pointer" : undefined }}
           onClick={onToggle && !disabled ? () => onToggle(i) : undefined}
         />

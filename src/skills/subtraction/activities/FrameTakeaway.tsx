@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import type { ActivityProps, PrintedQuestion } from "../../types";
 import {
   SkillRound, SPRING, composeHints, isPractice, modeAt, playCopy, stagger,
-  useSkillRound, type PracticeSetup, type RoundQuestion,
+  useSkillRound, guideSetup, useGuide, type PracticeSetup, type RoundQuestion,
   answerChoices,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
@@ -109,7 +109,7 @@ export const methodFor = (q: FrameQuestion): string[] => isRecall(q.mode) ? [
 export function frameHints(q: FrameQuestion, state: { removed: number; kidTip?: string }): string[] {
   if (isRecall(q.mode)) return composeHints(
     state.kidTip ?? `Remember the partners that make ${q.minuend}.`,
-    `The frame still holds all ${q.minuend}. Say what is left when ${q.subtrahend} go, and it will show you.`,
+    `The frame holds ${q.minuend}. Take ${q.subtrahend} out and count what is left.`,
     `${q.subtrahend} and ${q.difference} are the partners that make ${q.minuend}.`,
   );
   const left = q.subtrahend - state.removed;
@@ -207,10 +207,42 @@ export const FrameTakeaway: React.FC<ActivityProps<FrameTakeawayParams>> = ({ pa
   const ready = removed.length === q.subtrahend;
   const prompt = promptFor(q, copy.prompts?.default);
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const hints = practising ? [] : frameHints(q, { removed: removed.length, kidTip: copy.kidTip });
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: q.id,
+    rungs: hints,
+    /* The next counter to take out — the first one still in the frame.
+       Taking them in order is what keeps the five-and-some pattern readable,
+       which is the whole reason the frame is a frame. */
+    target: q.minuend - removed.length > q.minuend - q.subtrahend
+      ? Array.from({ length: q.minuend }, (_, i) => i).find((i) => !removed.includes(i)) ?? -1
+      : -1,
+    progress: removed.length,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   return <SkillRound koda={koda} lesson={lesson} fallbackTitle="Take Away in a Frame" round={round}
     totalQuestions={totalQuestions} prompt={prompt} iconName="boxes" iconTone="purple"
     tagLabels={tagLabelsFrom(koda)} nudge={nudge.message}
-    hints={practising ? [] : frameHints(q, { removed: removed.length, kidTip: copy.kidTip })}
+    hints={hints}
+    guide={practising ? undefined : guide}
+    guideMethod={copy.stepByStep}
     onStartOver={
       !round.feedback && (removed.length > 0) ? restart : undefined
     }
@@ -238,8 +270,14 @@ export const FrameTakeaway: React.FC<ActivityProps<FrameTakeawayParams>> = ({ pa
             return recall
               ? <motion.div key={i} className={cell} {...enter}>{contents}</motion.div>
               : <motion.button key={i} type="button" onClick={interactive ? () => take(i) : undefined} disabled={!interactive}
-                aria-label={`Frame space ${i + 1}, ${gone ? "removed" : filled ? "filled" : "empty"}`}
-                className={cell} {...enter}>{contents}</motion.button>;
+                /* The glow is nothing to a screen reader, so the space the
+                   coach points at says so in words. */
+                aria-label={`Frame space ${i + 1}, ${gone ? "removed" : filled ? "filled" : "empty"}${
+                  guide.target === i ? ", take this one out next" : ""
+                }`}
+                className={`${cell} ${
+                  guide.target === i ? "ring-4 ring-indigo-500 animate-pulse rounded-2xl" : ""
+                }`} {...enter}>{contents}</motion.button>;
           })}
         </div>
         {showsDifference && removed.length > 0 && <div aria-live="polite" className={`text-4xl font-black tabular-nums ${DIFFERENCE.text}`}>{q.minuend - removed.length}<span className="ml-2 text-xs uppercase text-ink/50">remain</span></div>}

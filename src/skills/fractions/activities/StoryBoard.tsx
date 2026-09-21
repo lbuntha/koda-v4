@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import { fractionGuideMethod, useFractionGuide } from "../internal/useFractionGuide";
 import { printBar } from "../internal/ui/printFigures";
 import {
   buildStoryQuestion,
@@ -109,6 +110,12 @@ export const StoryBoard: React.FC<ActivityProps<BoardParams>> = ({ params, koda,
     setCutFor(null);
   }, [question]);
 
+  const hints = !question || practising ? [] : storyHints(question);
+  const guide = useFractionGuide({
+    params, koda, practising, questionId: question?.id ?? "loading", rungs: hints, round,
+    progress: cutFor ? 1 : 0,
+  });
+
   if (!question) return null;
 
   const cut = cutFor?.id === question.id ? cutFor.parts : 1;
@@ -168,7 +175,9 @@ export const StoryBoard: React.FC<ActivityProps<BoardParams>> = ({ params, koda,
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : storyHints(question)}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={fractionGuideMethod(params)}
       onStartOver={
         cut > 1 && !round.feedback
           ? () => {
@@ -204,6 +213,7 @@ export const StoryBoard: React.FC<ActivityProps<BoardParams>> = ({ params, koda,
               onClick={() => {
                 if (soundEnabled && koda.sound.isEnabled()) koda.sound.play("clink");
                 setCutFor({ id: question.id, parts: n });
+                guide.moved();
               }}
               disabled={!!round.feedback}
               aria-pressed={cut === n}

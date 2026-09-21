@@ -136,6 +136,15 @@ INDEXES: dict[str, list[IndexModel]] = {
             [("familyId", ASCENDING), ("learnerId", ASCENDING), ("serverSeq", ASCENDING)],
             name="by_learner_seq",
         ),
+        IndexModel(
+            [
+                ("familyId", ASCENDING),
+                ("learnerId", ASCENDING),
+                ("type", ASCENDING),
+                ("localDay", ASCENDING),
+            ],
+            name="by_learner_week",
+        ),
         # Raw detail ages out; the rollup does not. 400 days keeps "a year of
         # practice still counts" true without an unbounded collection.
         IndexModel([("receivedAt", ASCENDING)], expireAfterSeconds=400 * 24 * 3600,
@@ -192,6 +201,32 @@ INDEXES: dict[str, list[IndexModel]] = {
             [("familyId", ASCENDING), ("learnerId", ASCENDING), ("conceptKey", ASCENDING)],
             unique=True,
             name="learner_concept_unique",
+        ),
+    ],
+    "leaderboard_privacy": [
+        # Family management reads its learners' choices; public ranking reads
+        # do not exist until buddy authorization lands in Phase 2.
+        IndexModel(
+            [("familyId", ASCENDING), ("sharingEnabled", ASCENDING)],
+            name="by_family_sharing",
+        ),
+        IndexModel(
+            [("visibility", ASCENDING), ("sharingEnabled", ASCENDING)],
+            name="by_public_sharing",
+        ),
+    ],
+    "buddy_invites": [
+        IndexModel([("codeHash", ASCENDING)], unique=True, name="buddy_code_unique"),
+        IndexModel(
+            [("learnerId", ASCENDING), ("expiresAt", DESCENDING)],
+            name="by_issuer_recent",
+        ),
+        IndexModel([("expiresAt", ASCENDING)], expireAfterSeconds=0, name="ttl"),
+    ],
+    "buddy_relationships": [
+        IndexModel(
+            [("participants.learnerId", ASCENDING), ("status", ASCENDING)],
+            name="by_participant_status",
         ),
     ],
 }

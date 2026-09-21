@@ -27,6 +27,9 @@
           ],
           "kidTip": "Look for the two bottles that share a colour.",
           "audioPrompt": "Pour the colours together. One pour finishes this rack."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Easy",
@@ -67,6 +70,9 @@
           ],
           "kidTip": "Only the top colour ever moves.",
           "audioPrompt": "Two pours this time. Move each colour onto its match."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Easy",
@@ -109,6 +115,9 @@
           ],
           "kidTip": "An empty bottle takes any colour.",
           "audioPrompt": "There is one empty bottle. It will take any colour you need to move."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Medium",
@@ -151,6 +160,9 @@
           ],
           "kidTip": "Three the same is still one pour.",
           "audioPrompt": "Colours that are stacked together move as one. Watch how many travel."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Medium",
@@ -193,6 +205,9 @@
           ],
           "kidTip": "Think about which bottle you want to empty, not just which pour is possible.",
           "audioPrompt": "Three colours now. Look at the whole rack before you pour."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Medium",
@@ -235,6 +250,9 @@
           ],
           "kidTip": "A taller bottle holds more. Count the space, not the bottles.",
           "audioPrompt": "These bottles are different sizes. Check how much room there is before you pour."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Medium",
@@ -277,6 +295,9 @@
           ],
           "kidTip": "Matching colours is not enough. There has to be room.",
           "audioPrompt": "Sometimes the colours match but there is not enough room. Count the space first."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Medium",
@@ -319,6 +340,9 @@
           ],
           "kidTip": "Half a bottle of one colour is not finished yet.",
           "audioPrompt": "A bottle is finished when it is full and holds one colour. Fill each one to the top."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Medium",
@@ -362,6 +386,9 @@
           ],
           "kidTip": "The number on the bottle is how many are about to move.",
           "audioPrompt": "When you pick a bottle up, the number tells you how many will pour."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Medium",
@@ -453,6 +480,9 @@
           ],
           "kidTip": "One more colour means one more thing to keep track of. Empty a bottle before you fill one.",
           "audioPrompt": "Four colours now. Keep one bottle free if you can."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Medium",
@@ -495,6 +525,9 @@
           ],
           "kidTip": "These bottles hold five. A run of five can move in one pour.",
           "audioPrompt": "Taller bottles. They hold five now, not four."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Medium",
@@ -537,6 +570,9 @@
           ],
           "kidTip": "There is only one space. Spend it on the pour that frees another.",
           "audioPrompt": "Only one space left. Choose what goes into it carefully."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -579,6 +615,9 @@
           ],
           "kidTip": "You have to make space before you can use it. Look for a bottle that is nearly one colour already.",
           "audioPrompt": "No empty bottle this time. Make one."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -621,6 +660,9 @@
           ],
           "kidTip": "The cork comes off when the bottle it waits on holds one colour. Work out which one that is.",
           "audioPrompt": "One bottle is corked. Finish the bottle it is waiting on."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -663,6 +705,9 @@
           ],
           "kidTip": "One cork opens another. Start with the bottle that is not waiting on anything.",
           "audioPrompt": "Two corks now. Find the one you can open first."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -705,6 +750,9 @@
           ],
           "kidTip": "Liquid goes into that bottle and never comes out. Be sure before you pour.",
           "audioPrompt": "One bottle only receives. Whatever goes in stays in."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -747,6 +795,9 @@
           ],
           "kidTip": "You have a couple of spare pours. Plan first and you will not need them.",
           "audioPrompt": "Watch your pours this time. You do not have many."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -789,6 +840,9 @@
           ],
           "kidTip": "Every pour has to count. Work it out before you start.",
           "audioPrompt": "The shortest way only. Every pour has to count."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -882,6 +936,9 @@
           ],
           "kidTip": "You cannot see the bottom yet. Work with the colours you can see, and find out the rest.",
           "audioPrompt": "Some colours are covered. You can always see the top one."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -924,6 +981,9 @@
           ],
           "kidTip": "Your first plan is a guess. Change it when a new colour appears.",
           "audioPrompt": "Four colours, mostly covered. Pour to find out what is underneath."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -967,6 +1027,9 @@
           ],
           "kidTip": "The whole run of one colour moves together, as long as there is room for it.",
           "audioPrompt": "Look before you pour. Which rack comes next?"
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -1010,6 +1073,9 @@
           ],
           "kidTip": "Do the first pour in your head, then the second on top of it.",
           "audioPrompt": "Two pours this time. Picture the first, then the second."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -1052,6 +1118,9 @@
           ],
           "kidTip": "The rule has changed: numbers no longer go on their own kind, they go on the number before them.",
           "audioPrompt": "New rule. Numbers go in order now, not on their match."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -1094,6 +1163,9 @@
           ],
           "kidTip": "Same rule, other direction. Start with the biggest at the bottom.",
           "audioPrompt": "Backwards this time. Biggest at the bottom."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -1136,6 +1208,9 @@
           ],
           "kidTip": "You are not matching numbers now, you are matching a property. Ask: is it odd or even?",
           "audioPrompt": "Odds with odds, evens with evens. The order inside does not matter."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -1176,8 +1251,11 @@
             "Bigger numbers underneath do not mean a bigger piece.",
             "Build from the smallest piece up."
           ],
-          "kidTip": "One third is smaller than one half, even though three is bigger than two. Think about the piece, not the digits.",
+          "kidTip": "One third is smaller than one half, although three is bigger than two. Think about the piece, not the digits.",
           "audioPrompt": "Fractions now. Smallest piece at the bottom."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -1220,6 +1298,9 @@
           ],
           "kidTip": "Two, four, six, eight. Each one goes on the one before it.",
           "audioPrompt": "Count by twos. Two at the bottom, then four, then six, then eight."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -1262,6 +1343,9 @@
           ],
           "kidTip": "Every bottle ends up identical. Build the pattern one step at a time.",
           "audioPrompt": "Every bottle the same order this time. Make the rainbow."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -1310,6 +1394,9 @@
           ],
           "kidTip": "Every rack here plays by a different rule. Find out which one before you start pouring.",
           "audioPrompt": "Bigger racks now, and the rule changes every time. Look first."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",

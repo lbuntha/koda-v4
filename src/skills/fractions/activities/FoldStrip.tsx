@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import { fractionGuideMethod, useFractionGuide } from "../internal/useFractionGuide";
 import { partWord } from "../internal/data/fractionNumbers";
 import { printBar, printCircle, printSet } from "../internal/ui/printFigures";
 import { FractionBar, FractionCircle } from "../internal/ui/FractionBar";
@@ -143,6 +144,27 @@ export const FoldStrip: React.FC<ActivityProps<StripParams>> = ({ params, koda, 
     setRefused(null);
   }, [question, opening]);
 
+  const hints = !question || practising ? [] : stripHints(question);
+  const guide = useFractionGuide({
+    params, koda, practising, questionId: question?.id ?? "loading", rungs: hints, round,
+    progress: question?.shadesIt ? shaded.length : 0,
+    /*
+     * The next part to shade: the lowest one not shaded yet.
+     *
+     * This was `Math.max(0, shaded.length)` — which is just `shaded.length`,
+     * because a length is never negative, and which is a *count* used as an
+     * *index*. It happened to name the right part while a child shaded left to
+     * right, and pointed past the end of the strip on the last one. Nothing
+     * drew it, so nothing ever showed.
+     */
+    target:
+      question?.shadesIt
+        ? Array.from({ length: question.fraction.parts }, (_, i) => i).find(
+            (i) => !shaded.includes(i),
+          ) ?? -1
+        : -1,
+  });
+
   if (!question) return null;
 
   const { fraction } = question;
@@ -159,6 +181,7 @@ export const FoldStrip: React.FC<ActivityProps<StripParams>> = ({ params, koda, 
     if (koda.config.isEnabled("haptic_feedback", true)) koda.haptics.pulse("light");
     setRefused(null);
     setShaded((current) => (current.includes(i) ? current.filter((n) => n !== i) : [...current, i]));
+    guide.moved();
   };
 
   const submit = (given: string, correct: boolean, message: string): void => {
@@ -193,15 +216,25 @@ export const FoldStrip: React.FC<ActivityProps<StripParams>> = ({ params, koda, 
   const confirmBuild = (): void => {
     if (block) {
       setRefused(block);
+      guide.stumbled();
       say(STRIP_REFUSALS[block]);
       return;
     }
     submit(nameOf(fraction), true, explainStrip(question, true));
   };
 
-  const drawWhole = (f: typeof fraction, marks: number[], scale = 1, onToggle?: (i: number) => void) =>
-    f.whole.kind === "circle" ? (
-      <FractionCircle parts={f.parts} shaded={marks} onToggle={onToggle} disabled={!!round.feedback} />
+  const drawWhole = (f: typeof fraction, marks: number[], scale = 1, onToggle?: (i: number) => void) => {
+    /* Only the strip the child is actually shading carries the light — the
+       ghosts and the "before" pictures beside it are not theirs to touch. */
+    const lit = onToggle && guide.target >= 0 ? guide.target : undefined;
+    return f.whole.kind === "circle" ? (
+      <FractionCircle
+        parts={f.parts}
+        shaded={marks}
+        onToggle={onToggle}
+        disabled={!!round.feedback}
+        lit={lit}
+      />
     ) : (
       <FractionBar
         parts={f.parts}
@@ -210,8 +243,10 @@ export const FoldStrip: React.FC<ActivityProps<StripParams>> = ({ params, koda, 
         scale={scale}
         onToggle={onToggle}
         disabled={!!round.feedback}
+        lit={lit}
       />
     );
+  };
 
   return (
     <SkillRound
@@ -222,7 +257,9 @@ export const FoldStrip: React.FC<ActivityProps<StripParams>> = ({ params, koda, 
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : stripHints(question)}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={fractionGuideMethod(params)}
       onStartOver={
         question.shadesIt && shaded.length > 0 && !round.feedback
           ? () => {

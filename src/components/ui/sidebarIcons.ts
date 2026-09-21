@@ -58,6 +58,7 @@ export const sidebarIcons = {
   sparkles: Sparkles,
   star: Star,
   target: Target,
+  leaderboard: Trophy,
   trophy: Trophy,
   user: UserRound,
   users: Users,

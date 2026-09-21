@@ -9,6 +9,7 @@ import { UNIFORM, bottleDone, goalFor, labelFor, numbered, type Goal } from "../
 import { minimumPours } from "../internal/solve";
 import { PIVOT_Y, POUR_ANGLE, aimPour, streamPath } from "../internal/bottle";
 import { topRun, type Bottle, type Rack } from "../internal/types";
+import { bottleGuideMethod, useBottleGuide } from "../internal/useBottleGuide";
 
 interface BottleSortSetup {
   /** One rack spec, or several for a practice round to cycle through. */
@@ -130,6 +131,11 @@ export function buildQuestion(params: BottleSortParams, index: number): BottleSo
  * job — the lesson's words, then this rack, then the actual move — and the
  * middle rung leads with whichever rule is the reason they are stuck.
  */
+/** A legal, useful-looking next pour; advice, not a hidden solved path. */
+export const suggestedPour = (rack: Rack, goal: Goal = UNIFORM) =>
+  legalPours(rack, goal).find((move) => topRun(rack[move.from]).n < rack[move.from].seg.length)
+  ?? legalPours(rack, goal)[0];
+
 export function bottleHints(
   rack: Rack,
   state: { kidTip?: string; budget?: number; poured?: number; goal?: Goal } = {},
@@ -154,8 +160,7 @@ export function bottleHints(
 
   // Rung 3: the worked step. Sorting is done rather than chosen, so this names
   // a real pour instead of stopping short of one.
-  const move = legalPours(rack, goal).find((m) => topRun(rack[m.from]).n < rack[m.from].seg.length)
-    ?? legalPours(rack, goal)[0];
+  const move = suggestedPour(rack, goal);
 
   return composeHints(
     state.kidTip ?? "Look for a bottle you could empty completely.",
@@ -262,6 +267,7 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
       void koda.speech.say(why, { rate: speechRate }).catch(() => {});
     }
     setPicked(null);
+    guide.stumbled();
   };
 
   /**
@@ -313,6 +319,7 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
       }
       setPicked(index);
       setNudge(null);
+      guide.moved();
       return;
     }
     if (picked === index) { setPicked(null); return; }
@@ -329,6 +336,7 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
     setHistory((h) => [...h, rack]);
     setPicked(null);
     setNudge(null);
+    guide.moved();
     void runPour(from, index, next, spent);
   };
 
@@ -482,15 +490,28 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
     action();
     setNudge(label);
     setPicked(null);
+    guide.moved();
   };
 
   const hints = practising || !hintsEnabled
     ? []
     : bottleHints(rack, { kidTip: copy.kidTip, budget: question.budget, poured, goal: question.goal });
+  const move = suggestedPour(rack, question.goal);
+  const guide = useBottleGuide({
+    params,
+    koda,
+    practising,
+    questionId: question.id,
+    rungs: hints,
+    round,
+    progress: poured,
+    target: move ? (picked === move.from ? move.to : move.from) : -1,
+  });
 
   return (
     <SkillRound koda={koda} lesson={lesson} fallbackTitle="Bottle Sort" round={round} totalQuestions={total}
-      prompt={promptFor(question)} onExit={() => koda.ui.exit()} hints={hints} nudge={nudge}
+      prompt={promptFor(question)} onExit={() => koda.ui.exit()} hints={hints}
+      guide={practising ? undefined : guide} guideMethod={bottleGuideMethod(params)} nudge={nudge}
       iconName="FlaskConical" iconTone="cyan"
       onReadAloud={practising || !speechEnabled ? undefined : () => {
         round.useSupport("audio_replay");
@@ -603,12 +624,13 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
                   // A child using the label instead of the picture has to be
                   // told the same rules the badges show.
                   + (b.lockedBy !== undefined && isCorked(rack, i) ? ` Corked until bottle ${b.lockedBy + 1} is finished.` : "")
-                  + (b.oneWay ? " Receives only." : "")}
+                  + (b.oneWay ? " Receives only." : "")
+                  + (guide.target === i ? " Smart guide focus." : "")}
                 data-pouring={pouring?.from === i || undefined}
                 style={pouring?.from === i
                   ? { transform: `translate(${pouring.dx}px, ${pouring.dy}px) rotate(${pouring.angle}deg)`, transformOrigin: `50% ${PIVOT_Y * 100}%`, zIndex: 6 }
                   : pouring?.to === i ? { zIndex: 5 } : undefined}
-                className={`block w-full min-w-11 cursor-pointer leading-none focus:outline-none ${pouring ? "" : "focus-visible:ring-2 focus-visible:ring-indigo-500"} ${picked === i && !pouring ? "-translate-y-2" : ""} ${animate ? "transition-transform duration-[340ms] ease-in-out" : ""}`}>
+                className={`block w-full min-w-11 cursor-pointer rounded-xl leading-none focus:outline-none ${pouring ? "" : "focus-visible:ring-2 focus-visible:ring-indigo-500"} ${guide.target === i ? "outline outline-4 outline-offset-4 outline-sky-400" : ""} ${picked === i && !pouring ? "-translate-y-2" : ""} ${animate ? "transition-transform duration-[340ms] ease-in-out" : ""}`}>
                 <svg viewBox={`0 0 ${W} ${geo.height}`} className="h-auto w-full" aria-hidden="true">
                   <defs>
                     <clipPath id={`bs-clip-${i}`}><path d={geo.body} /></clipPath>

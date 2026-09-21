@@ -120,6 +120,20 @@
       "tag": "Haptic"
     },
     {
+      "id": "guide_coach",
+      "name": "Smart guide",
+      "description": "Lets the Smart guide step in when a learner stalls. Each technique uses its own three clear steps; the Hint button opens the same guide.",
+      "isEnabled": true,
+      "tag": "Cognitive"
+    },
+    {
+      "id": "guide_voice",
+      "name": "Smart guide voice",
+      "description": "Reads each Smart guide step aloud as it appears. Off, the guide stays visible and silent.",
+      "isEnabled": true,
+      "tag": "Audio"
+    },
+    {
       "id": "part_labels",
       "name": "Part labels",
       "description": "Writes what one part is worth under the picture, so the pieces name themselves.",
@@ -134,6 +148,20 @@
       "tag": "Cognitive"
     }
   ],
-  "settings": {},
-  "settingsSchema": []
+  "settings": {
+    "coachPatience": "normal"
+  },
+  "settingsSchema": [
+    {
+      "key": "coachPatience",
+      "label": "Smart guide patience",
+      "help": "How long a learner is left to think before the Smart guide steps in. Relaxed waits about eleven seconds, Quick about four.",
+      "type": "choice",
+      "options": [
+        { "value": "relaxed", "label": "Relaxed" },
+        { "value": "normal", "label": "Normal" },
+        { "value": "quick", "label": "Quick" }
+      ]
+    }
+  ]
 }

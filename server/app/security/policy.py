@@ -40,6 +40,13 @@ PERMISSIONS = {
     "learner_data:write",
     "settings:read",
     "settings:write",
+    # Publishing a child's small leaderboard identity is a privacy decision,
+    # not an ordinary profile edit. Only owners/parents and self-managed
+    # students receive it below; managed child sessions never do.
+    "leaderboard:consent",
+    # Creating and accepting a connection is also an adult/self-managed
+    # learner decision. Viewing an accepted list stays under `learner:read`.
+    "buddy:manage",
     # Split out of `settings:write` because it is not the same risk. Changing a
     # skill's wording is content; re-pricing XP rewrites what every star a child
     # already earned was worth. A parent may be given it, but is not handed it
@@ -140,6 +147,8 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
     | {
         "learner:update",
         "settings:write",
+        "leaderboard:consent",
+        "buddy:manage",
     },
 }
 

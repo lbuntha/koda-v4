@@ -4,6 +4,11 @@
 export const SVG_ASSET_IDS = [
   "addition-quest",
   "apple",
+  "avatar-comet",
+  "avatar-fox",
+  "avatar-mango",
+  "avatar-otter",
+  "avatar-penguin",
   "badge-bright-spark",
   "badge-first-steps",
   "badge-star-champion",
@@ -29,6 +34,8 @@ export const SVG_ASSET_IDS = [
   "sund-flower",
   "ten-frame",
   "triangle",
+  "trophy",
+  "weekly-progress",
 ] as const;
 
 export type SvgAssetId = (typeof SVG_ASSET_IDS)[number];
@@ -37,6 +44,11 @@ export type SvgAssetId = (typeof SVG_ASSET_IDS)[number];
 export const SVG_ASSET_CATEGORIES: Record<string, string> = {
   "addition-quest": "thumbnail",
   "apple": "fruits",
+  "avatar-comet": "avatars",
+  "avatar-fox": "avatars",
+  "avatar-mango": "avatars",
+  "avatar-otter": "avatars",
+  "avatar-penguin": "avatars",
   "badge-bright-spark": "badges",
   "badge-first-steps": "badges",
   "badge-star-champion": "badges",
@@ -62,12 +74,16 @@ export const SVG_ASSET_CATEGORIES: Record<string, string> = {
   "sund-flower": "flowers",
   "ten-frame": "manipulatives",
   "triangle": "shapes",
+  "trophy": "icons",
+  "weekly-progress": "icons",
 };
 
 export const SVG_CATEGORIES = [
+  "avatars",
   "badges",
   "flowers",
   "fruits",
+  "icons",
   "manipulatives",
   "progress",
   "shapes",

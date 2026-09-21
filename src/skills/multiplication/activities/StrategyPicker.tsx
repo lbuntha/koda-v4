@@ -7,6 +7,8 @@ import {
   playCopy,
   useSkillRound,
   type RoundQuestion,
+  guideSetup,
+  useGuide,
 } from "../../kit";
 import { quietWhenPractising } from "../../kit/practice";
 import { themeSystem } from "../../../lib/themeSystem";
@@ -164,9 +166,9 @@ export function strategyHints(
     kidTip,
     state.chosen
       ? `You took one route. Look at the other one beside it — did it need fewer steps?`
-      : `Look at ${a} and ${b} first. Is either one even? Is either one next to a square?`,
+      : `Look at ${a} and ${b}. Is either even, or next to a square?`,
     // Never names a route: choosing is the question, and several are right.
-    `More than one of these fits. A route fits when its move can actually be made on these two numbers.`,
+    `More than one fits. A route fits when its move suits these numbers.`,
   );
 }
 
@@ -196,6 +198,15 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyParams>> = ({ params
   const refuse = (written: string, spoken: string) => {
     nudge.refuse(written);
     speak(spoken);
+    /*
+     * A refused move is this engine already knowing the move was wrong.
+     *
+     * What it never did was notice a child doing it repeatedly, which is the
+     * difference between a slip and not having the technique. Safe to call a
+     * coach declared further down: this only ever runs from a handler, long
+     * after the render that created it.
+     */
+    guide.stumbled();
   };
 
   const round = useSkillRound({
@@ -247,6 +258,31 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyParams>> = ({ params
     });
   };
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const hints = practising ? [] : strategyHints(question, copy.kidTip, { chosen });
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    target: -1,
+    progress: chosen === undefined ? 0 : 1,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   return (
     <SkillRound
       koda={koda}
@@ -256,7 +292,9 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyParams>> = ({ params
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : strategyHints(question, copy.kidTip, { chosen })}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       iconName="sparkles"
       iconTone="purple"
       tagLabels={tagLabelsFrom(koda)}

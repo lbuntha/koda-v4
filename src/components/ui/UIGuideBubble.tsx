@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, Lightbulb } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
 
 /**
@@ -57,7 +57,14 @@ export interface UIGuideBubbleProps {
   /** The single way out. Omit `onAction` to draw no button. */
   actionLabel?: string;
   onAction?(): void;
-  /** Koda's mark by default; a skill may lend its own. */
+  /**
+   * The lightbulb by default; a skill may lend its own.
+   *
+   * The same mark the Hint button carries, deliberately. Help a child asked for
+   * and help the app offered are the same help — a sparkle would have made this
+   * panel read as a different system, and as something the app was being clever
+   * at them with rather than a hand on the shoulder.
+   */
   icon?: React.ReactNode;
   /** Which way the tail points — at the work above, or the work below. */
   tail?: "down" | "up" | "none";
@@ -125,47 +132,61 @@ export const UIGuideBubble: React.FC<UIGuideBubbleProps> = ({
   return (
     <div id={id} role="status" aria-live="polite" className={s.wrap}>
       <span className={s.avatar} aria-hidden="true">
-        {icon ?? <Sparkles />}
+        {icon ?? <Lightbulb />}
       </span>
 
       <div className={s.body}>
-        <span className={s.title}>{title}</span>
+        <div className={s.titleRow}>
+          <span className={s.title}>{title}</span>
+          {/* Up here rather than among the controls: on a phone the footer has
+              to carry three targets across 300-odd pixels, and a counter is
+              not a target. */}
+          {paged && (
+            <span className={s.count} aria-hidden="true">
+              {at + 1}/{pages.length}
+            </span>
+          )}
+        </div>
         <p className={s.message}>{pages[at]}</p>
 
         {(paged || (actionLabel && onAction)) && (
           <div className={s.footer}>
             {paged && (
               <>
+                {/*
+                 * The arrow carries it on a phone, the word joins from `sm`.
+                 *
+                 * `aria-label` rather than the visible text, so the button is
+                 * still called "Back" at every width — a control that is only
+                 * named when the screen is wide enough is not named.
+                 *
+                 * Disabled rather than hidden at the ends, too: a control that
+                 * disappears moves the one beside it under a finger already on
+                 * its way down, which on the last page would put "Got it"
+                 * exactly where "Next" had been.
+                 */}
                 <button
                   type="button"
                   onClick={() => goTo(at - 1)}
                   disabled={at === 0}
+                  aria-label="Back"
                   className={s.page}
                 >
                   <ChevronLeft aria-hidden="true" />
-                  Back
+                  <span className="hidden sm:inline">Back</span>
                 </button>
-                {/*
-                 * Disabled rather than hidden at the ends.
-                 *
-                 * A control that disappears moves the one beside it under a
-                 * finger already on its way down — which on the last page would
-                 * put "Got it" exactly where "Next" had been.
-                 */}
                 <button
                   type="button"
                   onClick={() => goTo(at + 1)}
                   disabled={at === pages.length - 1}
+                  aria-label="Next"
                   className={s.page}
                 >
-                  Next
+                  <span className="hidden sm:inline">Next</span>
                   <ChevronRight aria-hidden="true" />
                 </button>
-                <span className={s.count} aria-hidden="true">
-                  {at + 1}/{pages.length}
-                </span>
                 {/* In words, because "2/3" is not what a screen reader should
-                    read out and the counter beside it says nothing at all. */}
+                    read out and the counter above says nothing at all. */}
                 <span className="sr-only">{`Step ${at + 1} of ${pages.length}`}</span>
               </>
             )}

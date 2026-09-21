@@ -12,8 +12,11 @@ import {
   isPractice,
   modeAt,
   playChrome,
+  guideSetup,
+  useGuide,
 } from "../../kit";
 import { FRAME_CELL, SCENE } from "../internal/data/countingLayout";
+import { nextCell, skippedTopRow } from "../internal/guide/countGuide";
 import { themeSystem } from "../../../lib/themeSystem";
 
 /**
@@ -210,33 +213,26 @@ export function tenFrameHints(
   const { filled } = state;
 
   if (question.mode === "complement") {
-    const empty = 10 - (question.initial ?? 0);
+    const start = question.initial ?? 0;
     return composeHints(
       state.kidTip ?? "Count the empty boxes. That is how many more.",
-      `The frame holds 10 when every box is full. ${question.initial} ${
-        question.initial === 1 ? "box is" : "boxes are"
-      } already filled, so what you need is however many boxes are still empty.`,
-      // Not "the answer is 6": pointing at the empty boxes and counting them is
-      // the whole method, and it is one the child can carry to the next frame.
-      empty === 1
-        ? "Only one box still has a question mark in it, so one more counter fills the frame. Tap 1 below."
-        : `Count the boxes with a question mark in them, one at a time — 1, 2, 3 — right to the end of the frame. There are ${empty} of them, and that number is how many more make 10. Tap it below.`,
+      `${start} ${start === 1 ? "box is" : "boxes are"} full. A full frame is 10.`,
+      // Counting the empty boxes *is* the method, and the child answers by
+      // choosing a number — so the rung stops one step short of saying which.
+      "Count the empty boxes one at a time, then tap that number.",
     );
   }
 
   if (question.mode === "teen") {
     const ones = question.target - 10;
-    const built = 10 + filled;
     return composeHints(
       state.kidTip ?? "One full frame is 10. Then count the extra ones.",
-      `Every teen number is 10 and some more. ${question.target} is 10 and ${ones} more, so the first frame fills right up and the ones go in the second frame.`,
+      `${question.target} is 10 and ${ones} more. Put ${ones} in the second frame.`,
       filled === ones
-        ? `The second frame has ${filled}, so you have 10 and ${filled} — that is ${built}. Press "Check Teen Number".`
-        : `You have 10 in the full frame and ${filled} in the second one, which makes ${built}. ${question.target} needs ${ones} in the second frame, so ${
-            filled < ones
-              ? `tap ${ones - filled} more.`
-              : `take ${filled - ones} back out.`
-          }`,
+        ? `10 and ${filled} makes ${question.target}. Press "Check Teen Number".`
+        : filled < ones
+          ? `You have 10 and ${filled}. Tap ${ones - filled} more.`
+          : `You have 10 and ${filled}. Take ${filled - ones} back out.`,
     );
   }
 
@@ -244,21 +240,15 @@ export function tenFrameHints(
   return composeHints(
     state.kidTip ?? "Fill the top row to 5 first. That makes it easy!",
     question.target <= 5
-      ? `${question.target} fits inside the top row on its own. Fill ${question.target} ${
-          question.target === 1 ? "box" : "boxes"
-        } along the top and stop there.`
-      : `${question.target} is a full top row of 5 and ${extra} more. Fill all five along the top first, then put ${extra} in the bottom row.`,
+      ? `${question.target} fits in the top row. Fill ${question.target} and stop.`
+      : `${question.target} is a full top row of 5, and ${extra} more below.`,
     filled === question.target
-      ? `The frame holds ${filled} now, which is exactly ${question.target}. Press Check.`
+      ? `That is ${question.target}. Press Check.`
       : filled === 0
-        ? `The frame is still empty and you need ${question.target}. Tap ${question.target} ${
-            question.target === 1 ? "box" : "boxes"
-          }${question.target > 5 ? " — five along the top first" : ", starting along the top row"}, then press Check.`
-        : `Count the lit boxes: there ${filled === 1 ? "is 1" : `are ${filled}`}, and you need ${question.target}. ${
-            filled < question.target
-              ? `Tap ${question.target - filled} more, then press Check.`
-              : `Tap ${filled - question.target} of them off again, then press Check.`
-          }`,
+        ? `Tap ${question.target} boxes, top row first, then press Check.`
+        : filled < question.target
+          ? `You have ${filled}. Tap ${question.target - filled} more, then press Check.`
+          : `You have ${filled}. Tap ${filled - question.target} off, then press Check.`,
   );
 }
 
@@ -286,7 +276,9 @@ const Cell: React.FC<{
   height?: string;
   /** 1-based position, so the cell has a name a screen reader can say. */
   position?: number;
-}> = ({ filled, tone, onClick, height = FRAME_CELL, position }) => {
+  /** The one the coach is pointing at. */
+  lit?: boolean;
+}> = ({ filled, tone, onClick, height = FRAME_CELL, position, lit = false }) => {
   const on =
     tone === "purple"
       ? "bg-purple-500 border-purple-300 shadow-[0_0_15px_rgba(168,85,247,0.5)] scale-95"
@@ -299,8 +291,14 @@ const Cell: React.FC<{
       whileHover={onClick ? { scale: 1.05 } : undefined}
       whileTap={onClick ? { scale: 0.88 } : undefined}
       transition={SPRING.tap}
-      aria-label={`Space ${position ?? ""}${filled ? ", filled" : ", empty"}`}
-      className={`${height} rounded-2xl border-2 flex items-center justify-center transition-all ${filled ? on : off}`}
+      /* The glow is nothing to a screen reader, so the cell the coach points
+         at says so in words. */
+      aria-label={`Space ${position ?? ""}${filled ? ", filled" : ", empty"}${
+        lit ? ", fill this one next" : ""
+      }`}
+      className={`${height} rounded-2xl border-2 flex items-center justify-center transition-all ${
+        filled ? on : off
+      } ${lit ? "ring-4 ring-indigo-500 ring-offset-2 ring-offset-transparent animate-pulse" : ""}`}
     >
       {filled && (
         /*
@@ -367,6 +365,41 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
     round.submit(practising ? { ...outcome, message: undefined } : outcome);
   const filled = frame.filter(Boolean).length;
 
+  /*
+   * Two different questions, so two different conditions.
+   *
+   * `guided` is whether Koda steps in *by itself* — the clock and the stumbles
+   * — and that is what the parent's switch turns off. Whether the help *looks
+   * like* the coach is not a setting at all: the Hint button shows the same
+   * bubble, the same rungs and the same "Got it" either way. It used to fall
+   * back to the old hint card when the switch was off, so turning off the
+   * interruptions also changed what help looked like, and a child had two
+   * panels to learn for one ladder.
+   */
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+
+  const hints = practising ? [] : tenFrameHints(question, { filled, kidTip: copy.kidTip });
+
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    /* The next empty box, in reading order. In `complement` the child answers
+       with a number button rather than by filling, so there is nothing in the
+       frame to touch and nothing is lit. */
+    target: question.mode === "complement" ? -1 : nextCell(frame),
+    progress: filled,
+    /* Never done by building alone: every mode here ends with Check, and the
+       last rung's job is to say so. */
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   // Each question starts from an empty frame.
   useEffect(() => {
     setFrame(EMPTY_FRAME());
@@ -387,6 +420,11 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
 
 
   const toggle = (idx: number) => {
+    /* Filling the bottom row while the top has gaps is not an error — the
+       total comes out the same — but it throws away what the frame is *for*,
+       which makes it the one move here worth a word. */
+    if (!frame[idx] && skippedTopRow(frame, idx)) guide.stumbled();
+    else guide.moved();
     playChrome(koda, "pop");
     koda.haptics.tap();
     setFrame((prev) => {
@@ -481,7 +519,9 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
       prompt={prompt}
       iconName="rocket"
       iconTone="purple"
-      hints={practising ? [] : tenFrameHints(question, { filled, kidTip: copy.kidTip })}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onStartOver={
         !round.feedback && (frame.some(Boolean)) ? restart : undefined
       }
@@ -504,12 +544,12 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
           <div className={`max-w-xl mx-auto ${SCENE} p-4 sm:p-6 space-y-3 sm:space-y-4`}>
             <div className="grid grid-cols-5 gap-2 sm:gap-2.5">
               {frame.slice(0, 5).map((on, idx) => (
-                <Cell key={idx} filled={on} tone="purple" position={idx + 1} onClick={() => toggle(idx)} />
+                <Cell key={idx} filled={on} tone="purple" position={idx + 1} lit={guide.target === idx} onClick={() => toggle(idx)} />
               ))}
             </div>
             <div className="grid grid-cols-5 gap-2 sm:gap-2.5">
               {frame.slice(5).map((on, idx) => (
-                <Cell key={idx + 5} filled={on} tone="cyan" position={idx + 6} onClick={() => toggle(idx + 5)} />
+                <Cell key={idx + 5} filled={on} tone="cyan" position={idx + 6} lit={guide.target === idx + 5} onClick={() => toggle(idx + 5)} />
               ))}
             </div>
           </div>
@@ -612,6 +652,7 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
                     tone="cyan"
                     height="h-10"
                     position={idx + 1}
+                    lit={guide.target === idx}
                     onClick={() => toggle(idx)}
                   />
                 ))}

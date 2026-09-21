@@ -9,6 +9,8 @@ import {
   useSkillRound,
   type RoundQuestion,
   playChrome,
+  guideSetup,
+  useGuide,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B, CHANGE, TOTAL } from "../internal/data/additionPalette";
@@ -172,7 +174,7 @@ export function estimateHints(
     const near = roundTo(q.a, q.unit) + roundTo(q.b, q.unit);
     return composeHints(
       state.kidTip ?? "You do not need the exact answer. Ask whether it is anywhere near.",
-      `Round them first: ${q.a} is about ${roundTo(q.a, q.unit)} and ${q.b} is about ${roundTo(q.b, q.unit)}. So the answer should be near ${near}.`,
+      `Rounded, they are about ${roundTo(q.a, q.unit)} and ${roundTo(q.b, q.unit)}. So look near ${near}.`,
       // Stops at the comparison: judging it is the question.
       `Compare ${q.claim} with about ${near}. Is it close, far too big, or far too small?`,
     );
@@ -341,6 +343,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
       // A wrong rounding is a wrong route, not a wrong answer — the child has
       // not said what the estimate is yet.
       const nearer = roundTo(value, question.unit);
+      guide.stumbled();
       nudge.refuse(`${value} is nearer to ${nearer} than to ${to}. Look at how far it is to each.`);
       return;
     }
@@ -352,6 +355,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
   const chooseEstimate = (value: number) => {
     if (round.feedback) return;
     if (rounded.some((r) => r === null)) {
+      guide.stumbled();
       nudge.refuse("Round both numbers first, then choose the estimate.");
       return;
     }
@@ -392,6 +396,41 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
   const prompt = promptFor(question, copy.prompts?.default);
   const estimating = question.mode === "round_estimate";
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived, rather than two systems with two vocabularies.
+   */
+  const hints = practising ? [] : estimateHints(question, { rounded, kidTip: copy.kidTip });
+  /*
+   * Two different questions, so two different conditions.
+   *
+   * `guided` is whether Koda steps in *by itself* — the clock and the stumbles
+   * — and that is what the parent's switch turns off. Whether the help *looks
+   * like* the coach is not a setting at all: the Hint button shows the same
+   * bubble, the same rungs and the same "Got it" either way. It used to fall
+   * back to the old hint card when the switch was off, so turning off the
+   * interruptions also changed what help looked like, and a child had two
+   * panels to learn for one ladder.
+   */
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    target: -1,
+    progress: rounded.filter((v) => v !== null).length,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   return (
     <SkillRound
       koda={koda}
@@ -404,7 +443,9 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
       iconTone="emerald"
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message}
-      hints={practising ? [] : estimateHints(question, { rounded, kidTip: copy.kidTip })}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onStartOver={
         !round.feedback && (rounded.some((r) => r !== null)) ? restart : undefined
       }

@@ -14,6 +14,8 @@ import {
   type PracticeSetup,
   type RoundQuestion,
   answerChoices,
+  guideSetup,
+  useGuide,
 } from "../../kit";
 import { SvgAsset } from "../../../assets/svg";
 import { themeSystem } from "../../../lib/themeSystem";
@@ -235,8 +237,10 @@ const Token: React.FC<{
   badge?: number;
   badges: boolean;
   onTap?: () => void;
+  /** The one the coach is pointing at. */
+  lit?: boolean;
   delay?: number;
-}> = ({ asset, label, state, badge, badges, onTap, delay = 0 }) => {
+}> = ({ asset, label, state, badge, badges, onTap, lit = false, delay = 0 }) => {
   const shell = `relative ${TOKEN_COMPACT} flex items-center justify-center rounded-2xl ${
     state === "removed" ? REMOVED : state === "separated" ? "ring-4 ring-rose-400/60 translate-y-1" : state === "held" ? HELD : state === "paired" ? "ring-4 ring-sky-400/60 opacity-55" : state === "counted" ? "opacity-55" : ""
   }`;
@@ -245,7 +249,9 @@ const Token: React.FC<{
     {badges && badge !== undefined && <span className={`${COUNT_BADGE} ${state === "removed" || state === "separated" ? REMOVED_PART.solid : DIFFERENCE.solid} text-white`}>{badge}</span>}
   </>;
   if (!onTap) return <div className={shell} role="img" aria-label={label}>{face}</div>;
-  return <motion.button type="button" onClick={onTap} aria-label={label} aria-pressed={Boolean(state)} className={shell}
+  return <motion.button type="button" onClick={onTap}
+    aria-label={`${label}${lit ? ", touch this one next" : ""}`}
+    aria-pressed={Boolean(state)} className={`${shell}${lit ? " ring-4 ring-indigo-500 animate-pulse" : ""}`}
     initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} transition={{ ...SPRING.enter, delay }}
     whileHover={{ scale: 1.07 }} whileTap={{ scale: 0.86 }}>{face}</motion.button>;
 };
@@ -359,6 +365,8 @@ export const RemoveTray: React.FC<ActivityProps<RemoveTrayParams>> = ({ params, 
   const choose = (value: number) => submit(String(value), value === q.difference, `${q.minuend} minus ${q.subtrahend} is ${q.difference}.`);
 
   const take = (i: number) => {
+    if (stateFor(i) !== undefined) guide.stumbled();
+    else guide.moved();
     if (round.feedback || removed.includes(i)) return;
     if (removed.length >= q.subtrahend) {
       nudge.refuse(`You have already taken away ${q.subtrahend}. Now find what remains.`);
@@ -422,7 +430,8 @@ export const RemoveTray: React.FC<ActivityProps<RemoveTrayParams>> = ({ params, 
         return <Token key={i} asset={q.asset}
           label={`${q.asset.one} ${i + 1}${state ? `, ${state}` : ""}`}
           state={state} badge={state === "removed" ? (preRemoved ? i + 1 : removed.indexOf(i) + 1) : state === "counted" ? counted.indexOf(i) + 1 : undefined}
-          badges={badges} onTap={round.feedback ? undefined : onTap} delay={stagger(i)} />;
+          badges={badges} onTap={round.feedback ? undefined : onTap}
+          lit={guide.target === i && onTap !== undefined} delay={stagger(i)} />;
       })}
     </div>
   );
@@ -448,11 +457,54 @@ export const RemoveTray: React.FC<ActivityProps<RemoveTrayParams>> = ({ params, 
     </div>
   );
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const hints = practising ? [] : trayHints(q, { removed: removed.length, counted: counted.length, paired: pairs, countValue, fingersUp, kidTip: copy.kidTip });
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: q.id,
+    rungs: hints,
+    /*
+     * The next object to act on: the first one still untouched.
+     *
+     * `count` mode has the taken-away ones already crossed off, so the first
+     * *countable* one is what matters there — pointing at a crossed-out object
+     * would send a child to recount what has already gone.
+     */
+    target: Array.from({ length: q.minuend }, (_, i) => i).find(
+      (i) => stateFor(i) === undefined && !(q.mode === "remainder" && i < q.subtrahend),
+    ) ?? -1,
+    /*
+     * What the learner has done, measured against how the question started.
+     *
+     * The fingers begin *all raised* — lowering them is the technique — so
+     * counting them as effort told the coach a child who had touched nothing
+     * was already mid-flow, and it stepped in at five seconds instead of seven.
+     */
+    progress: removed.length + counted.length + pairs + (q.minuend - fingersUp),
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   return <SkillRound
     koda={koda} lesson={lesson} fallbackTitle="Take Away and Compare" round={round}
     totalQuestions={totalQuestions} prompt={prompt} iconName={ICONS[q.mode]} iconTone="purple"
     tagLabels={tagLabelsFrom(koda)} nudge={nudge.message}
-    hints={practising ? [] : trayHints(q, { removed: removed.length, counted: counted.length, paired: pairs, countValue, fingersUp, kidTip: copy.kidTip })}
+    hints={hints}
+    guide={practising ? undefined : guide}
+    guideMethod={copy.stepByStep}
     onStartOver={
       !round.feedback && (removed.length > 0 || counted.length > 0 || pairs > 0 || selectedTop !== undefined) ? restart : undefined
     }

@@ -8,6 +8,7 @@ import { PALETTE } from "../internal/palette";
 import { generateLens, LENS_MODES, type Lens, type LensMode } from "../internal/lenses";
 import { chime, speechRate, tagLabelsFrom } from "../internal/sweeperChrome";
 import { useNudge } from "../internal/useNudge";
+import { sweeperGuideMethod, useSweeperGuide } from "../internal/useSweeperGuide";
 
 /**
  * Reading a board, before anything is painted.
@@ -232,6 +233,23 @@ export const NeighborLens: React.FC<ActivityProps<LensParams>> = ({ params, koda
     clearNudge();
   }, [question, clearNudge]);
 
+  const hints = !question || practising
+    ? []
+    : lensHints(question, copy.kidTip, { chosen: picked.length });
+  const guide = useSweeperGuide({
+    params,
+    koda,
+    practising,
+    questionId: question?.id ?? "loading",
+    rungs: hints,
+    round,
+    progress: picked.length,
+    target:
+      question?.mode === "select_neighbors"
+        ? question.neighborhood.find((cell) => !picked.includes(cell)) ?? -1
+        : -1,
+  });
+
   if (!question) return null;
 
   const finish = (correct: boolean, given: string, title: string, message: string) => {
@@ -247,6 +265,7 @@ export const NeighborLens: React.FC<ActivityProps<LensParams>> = ({ params, koda
          which is the commonest first move and is worth explaining rather than
          scoring. */
       nudge.refuse("That is the outlined tile itself. A tile never touches itself.");
+      guide.stumbled();
       speak("That is the tile we are asking about.");
       return;
     }
@@ -255,12 +274,14 @@ export const NeighborLens: React.FC<ActivityProps<LensParams>> = ({ params, koda
       chime(koda, already ? "unchosen" : "chosen");
       return already ? current.filter((c) => c !== cell) : [...current, cell];
     });
+    guide.moved();
   };
 
   const checkSelection = () => {
     if (round.feedback) return;
     if (!picked.length) {
       nudge.refuse("Choose the tiles that touch the outlined one first.");
+      guide.stumbled();
       return;
     }
     const correct = selectionKey(picked, question.board.size) === question.expected;
@@ -316,7 +337,9 @@ export const NeighborLens: React.FC<ActivityProps<LensParams>> = ({ params, koda
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : lensHints(question, copy.kidTip, { chosen: picked.length })}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={sweeperGuideMethod(params)}
       iconName="grid-3x3"
       iconTone="purple"
       tagLabels={tagLabelsFrom(koda)}
@@ -330,6 +353,7 @@ export const NeighborLens: React.FC<ActivityProps<LensParams>> = ({ params, koda
         <BoardGrid
           board={question.board}
           target={question.target}
+          guideTarget={guide.target >= 0 ? guide.target : undefined}
           availableWidth={question.board.size === 4 ? 380 : 320}
           selected={question.mode === "select_neighbors" ? picked : []}
           onTap={question.mode === "select_neighbors" ? toggle : undefined}

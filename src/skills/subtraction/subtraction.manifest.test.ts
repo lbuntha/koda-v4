@@ -80,11 +80,12 @@ describe("the subtraction manifest pins its identity", () => {
 describe("every feature and setting has a reader", () => {
   const source = JSON.stringify(lessonsJson);
 
-  it("declares the eight features the activities check", () => {
+  it("declares the ten features the activities check", () => {
     const declared = skill.features.map((feature) => feature.id).sort();
     expect(declared).toEqual([
-      "audio_speech", "counting_badges", "haptic_feedback", "premium_lessons",
-      "running_difference_badge", "sound_chimes", "step_context_tags", "strategy_scaffold",
+      "audio_speech", "counting_badges", "guide_coach", "guide_voice", "haptic_feedback",
+      "premium_lessons", "running_difference_badge", "sound_chimes", "step_context_tags",
+      "strategy_scaffold",
     ]);
   });
 

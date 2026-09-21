@@ -23,6 +23,12 @@
      "icon": "user"
     },
     {
+     "id": "leaderboard",
+     "label": "Leaderboard",
+     "icon": "leaderboard",
+     "requires": "learner:read"
+    },
+    {
      "id": "notifications",
      "label": "Notifications",
      "icon": "bell",

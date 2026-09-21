@@ -8,6 +8,7 @@ import { SCENE_BY_ID } from "../internal/scenes";
 import { buildDifferencePair, type DifferenceKind, type SceneDifference } from "../internal/differences";
 import { seedHash, seededShuffle } from "../internal/placement";
 import { keyOf, type ObjectHuntSetup, type ObservationRegion, type ObservationScene, type SceneObject } from "../internal/types";
+import { observationGuideMethod, useObservationGuide } from "../internal/useObservationGuide";
 
 export interface SpotTheDifferenceParams extends ObjectHuntSetup {
   question?: ObjectHuntSetup & { differenceCount?: number; kinds?: DifferenceKind[] };
@@ -72,12 +73,16 @@ export function buildQuestion(setup: SpotTheDifferenceParams, index: number): Di
   };
 }
 
-export function differenceHints(question: DifferenceQuestion, found: ReadonlySet<string>): string[] {
+export function differenceHints(
+  question: DifferenceQuestion,
+  found: ReadonlySet<string>,
+  kidTip?: string,
+): string[] {
   const next = question.targets.find((key) => !found.has(key));
   const placement = question.left.find((object) => keyOf(object) === next);
   const region = placement?.region.replace("-", " ");
   return composeHints(
-    "Compare one small part of both pictures at a time.",
+    kidTip ?? "Compare one small part of both pictures at a time.",
     region ? `Look near the ${region} part of the scene.` : undefined,
     region ? `Focus on the ${region} area. Check around objects that could partly hide it.` : undefined,
   );
@@ -188,6 +193,19 @@ export const SpotTheDifference: React.FC<ActivityProps<SpotTheDifferenceParams>>
     else koda.haptics.pulse("error");
   };
 
+  const hints = practising || !regionHintsEnabled
+    ? []
+    : differenceHints(question, found, copy.kidTip);
+  const guide = useObservationGuide({
+    params,
+    koda,
+    practising,
+    questionId: question.id,
+    rungs: hints,
+    round,
+    progress: found.size,
+  });
+
   // Tapping either picture at a difference finds it, and it is marked in both.
   const choose = (key: string) => {
     if (round.feedback) return;
@@ -199,10 +217,12 @@ export const SpotTheDifference: React.FC<ActivityProps<SpotTheDifferenceParams>>
     }
     if (found.has(key)) {
       setNudge("You already found that difference.");
+      guide.stumbled();
       if (speechEnabled) { koda.speech.stop(); void koda.speech.say("You already found that one.", { rate: speechRate }).catch(() => {}); }
       return;
     }
     const next = new Set(found); next.add(key); setFound(next); setNudge(null);
+    guide.moved();
     const complete = question.targets.every((id) => next.has(id));
     koda.speech.stop();
     chime(complete ? "success" : "pop");
@@ -211,12 +231,12 @@ export const SpotTheDifference: React.FC<ActivityProps<SpotTheDifferenceParams>>
     round.submit({ correct: true, given: [...next].sort().join(","), expected: question.expected, title: "Congratulations!", message: "You found every difference!" });
   };
 
-  const hints = practising || !regionHintsEnabled ? [] : differenceHints(question, found);
   useEffect(() => {
-    if (round.hint.level < 3) { setRegionHint(null); return; }
+    const level = Math.max(round.hint.level, guide.cue?.level ?? 0);
+    if (level < 3) { setRegionHint(null); return; }
     const next = question.targets.find((key) => !found.has(key));
     setRegionHint(question.left.find((object) => keyOf(object) === next)?.region ?? null);
-  }, [round.hint.level, question, found]);
+  }, [round.hint.level, guide.cue?.level, question, found]);
 
   // The grid is the union of both casts, so a missing object is still tappable.
   const grid = useMemo(() => {
@@ -228,7 +248,8 @@ export const SpotTheDifference: React.FC<ActivityProps<SpotTheDifferenceParams>>
 
   return (
     <SkillRound koda={koda} lesson={lesson} fallbackTitle="Spot the Difference" round={round} totalQuestions={total}
-      prompt={promptFor(question)} onExit={() => koda.ui.exit()} hints={hints} nudge={nudge}
+      prompt={promptFor(question)} onExit={() => koda.ui.exit()} hints={hints}
+      guide={practising ? undefined : guide} guideMethod={observationGuideMethod(params)} nudge={nudge}
       iconName="Search" iconTone="cyan"
       onReadAloud={practising || !speechEnabled ? undefined : () => { round.useSupport("audio_replay"); void koda.speech.say(promptFor(question), { rate: speechRate }); }}>
       <section aria-label={`${question.scene.name} spot the difference`} className="mx-auto w-full max-w-[760px] space-y-2">

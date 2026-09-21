@@ -8,6 +8,8 @@ import {
   playCopy,
   useSkillRound,
   type RoundQuestion,
+  guideSetup,
+  useGuide,
 } from "../../kit";
 import { quietWhenPractising } from "../../kit/practice";
 import { themeSystem } from "../../../lib/themeSystem";
@@ -361,7 +363,7 @@ export function trackHints(
       return composeHints(
         kidTip,
         `Hop along in ${step}s and watch whether a hop lands exactly on ${value}.`,
-        `A multiple of ${step} is a number a hop of ${step} lands on. Anything it steps over is not one.`,
+        `A multiple of ${step} is a number a hop of ${step} lands on.`,
       );
     case "skip_count":
     default:
@@ -412,6 +414,15 @@ export const SkipTrack: React.FC<ActivityProps<TrackParams>> = ({ params, koda, 
   const refuse = (written: string, spoken: string) => {
     nudge.refuse(written);
     speak(spoken);
+    /*
+     * A refused move is this engine already knowing the move was wrong.
+     *
+     * What it never did was notice a child doing it repeatedly, which is the
+     * difference between a slip and not having the technique. Safe to call a
+     * coach declared further down: this only ever runs from a handler, long
+     * after the render that created it.
+     */
+    guide.stumbled();
   };
 
   const round = useSkillRound({
@@ -565,6 +576,33 @@ export const SkipTrack: React.FC<ActivityProps<TrackParams>> = ({ params, koda, 
   const at = (n: number) =>
     HOP_LINE.inset + (HOP_LINE.width - HOP_LINE.inset * 2) * (n / lineMax);
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const hints = practising ? [] : trackHints(question, copy.kidTip, { made });
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    /* One control does the work here, so the light goes on the hop itself:
+       0 is "hop forward", and there is nothing else to point at. */
+    target: made < question.hops ? 0 : -1,
+    progress: made,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   const board = (
     <div className={SCROLL_BOX}>
       <svg
@@ -665,10 +703,12 @@ export const SkipTrack: React.FC<ActivityProps<TrackParams>> = ({ params, koda, 
       </span>
       <button
         type="button"
-        aria-label="Hop forward"
+        aria-label={`Hop forward${guide.target === 0 ? ", take this jump next" : ""}`}
         onClick={() => hop(1)}
         disabled={!!round.feedback}
-        className={themeSystem.button("secondary", "choice")}
+        className={`${themeSystem.button("secondary", "choice")}${
+          guide.target === 0 ? " ring-4 ring-indigo-500 animate-pulse" : ""
+        }`}
       >
         +
       </button>
@@ -774,6 +814,7 @@ export const SkipTrack: React.FC<ActivityProps<TrackParams>> = ({ params, koda, 
     }
   })();
 
+
   return (
     <SkillRound
       koda={koda}
@@ -783,7 +824,9 @@ export const SkipTrack: React.FC<ActivityProps<TrackParams>> = ({ params, koda, 
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : trackHints(question, copy.kidTip, { made })}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onStartOver={
         !round.feedback && (made !== 0 || typed !== "") ? restart : undefined
       }

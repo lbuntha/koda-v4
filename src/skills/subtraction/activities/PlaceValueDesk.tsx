@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { ActivityProps, PrintedQuestion } from "../../types";
 import {
   SkillRound, composeHints, isPractice, modeAt, playCopy,
-  useSkillRound, type PracticeSetup, type RoundQuestion,
+  useSkillRound, guideSetup, useGuide, type PracticeSetup, type RoundQuestion,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { COMPARISON, DIFFERENCE, REMOVED_PART, WHOLE } from "../internal/data/subtractionPalette";
@@ -285,12 +285,45 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({ 
   const box = (slot: typeof q.slots[number]) => <input key={slot.key} inputMode="numeric" pattern="[0-9]*"
     value={entries[slot.key] ?? ""} disabled={Boolean(round.feedback)}
     onChange={(event) => setEntries((current) => ({ ...current, [slot.key]: event.target.value.replace(/[^0-9]/g, "").slice(0, 3) }))}
-    aria-label={slot.label} className={themeSystem.field("md", "w-full text-center text-2xl font-black tabular-nums")} />;
+    aria-label={`${slot.label}${
+      q.slots.indexOf(slot) === guide.target ? ", fill this one next" : ""
+    }`}
+    className={themeSystem.field("md", `w-full text-center text-2xl font-black tabular-nums${
+      q.slots.indexOf(slot) === guide.target ? " ring-4 ring-indigo-500" : ""
+    }`)} />;
+
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const hints = practising ? [] : chartHints(q, { filled, kidTip: copy.kidTip });
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: q.id,
+    rungs: hints,
+    /* The next empty box, in the order the chart reads. */
+    target: q.slots.findIndex((slot) => (entries[slot.key] ?? "") === ""),
+    progress: filled,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
 
   return <SkillRound koda={koda} lesson={lesson} fallbackTitle="Place Value Desk" round={round}
     totalQuestions={totalQuestions} prompt={prompt} iconName="layers" iconTone="indigo"
     tagLabels={tagLabelsFrom(koda)} nudge={nudge.message}
-    hints={practising ? [] : chartHints(q, { filled, kidTip: copy.kidTip })}
+    hints={hints}
+    guide={practising ? undefined : guide}
+    guideMethod={copy.stepByStep}
     onStartOver={
       !round.feedback && (Object.values(entries).some((v) => v !== "")) ? restart : undefined
     }

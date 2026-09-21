@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import { fractionGuideMethod, useFractionGuide } from "../internal/useFractionGuide";
 import { withArticle } from "../internal/data/fractionNumbers";
 import { printBar } from "../internal/ui/printFigures";
 import type { Fraction } from "../internal/data/fractionNumbers";
@@ -64,7 +65,7 @@ export function compareHints(question: CompareQuestion): string[] {
       return composeHints(
         "Count the coloured pieces on each. There are the same number.",
         "So the pieces themselves must be doing the work. Look at how big they are.",
-        `${withArticle(Math.max(left.parts, right.parts))[0].toUpperCase()}${withArticle(Math.max(left.parts, right.parts)).slice(1)} is smaller than ${withArticle(Math.min(left.parts, right.parts))}, because the whole was cut into more. A bigger bottom number means smaller pieces.`,
+        `${withArticle(Math.max(left.parts, right.parts))[0].toUpperCase()}${withArticle(Math.max(left.parts, right.parts)).slice(1)} is smaller: a bigger bottom number means smaller pieces.`,
       );
     case "different_wholes":
       return composeHints(
@@ -128,6 +129,12 @@ export const CompareBar: React.FC<ActivityProps<CompareParams>> = ({ params, kod
     setRefused(null);
   }, [question]);
 
+  const hints = !question || practising ? [] : compareHints(question);
+  const guide = useFractionGuide({
+    params, koda, practising, questionId: question?.id ?? "loading", rungs: hints, round,
+    progress: matchedFor ? 1 : 0,
+  });
+
   if (!question) return null;
 
   /** Cut to match — for *this* question, not for whichever one came before. */
@@ -154,12 +161,14 @@ export const CompareBar: React.FC<ActivityProps<CompareParams>> = ({ params, kod
     if (koda.config.isEnabled("haptic_feedback", true)) koda.haptics.pulse("light");
     setRefused(null);
     setMatchedFor(question.id);
+    guide.moved();
   };
 
   const answer = (verdict: Verdict): void => {
     const block = compareBlockedBecause(question, matchedYet);
     if (block) {
       setRefused(block);
+      guide.stumbled();
       say(COMPARE_REFUSALS[block]);
       return;
     }
@@ -187,7 +196,9 @@ export const CompareBar: React.FC<ActivityProps<CompareParams>> = ({ params, kod
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : compareHints(question)}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={fractionGuideMethod(params)}
       onStartOver={
         matchedYet && question.mustMatch && !round.feedback
           ? () => {

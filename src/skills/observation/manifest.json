@@ -16,19 +16,22 @@
     { "id": "audio_speech", "name": "Spoken voice", "description": "Uses AI-generated voice recordings for directions, hints, object names, and celebrations.", "isEnabled": true, "tag": "Audio" },
     { "id": "sound_chimes", "name": "Sound chimes", "description": "Plays pop, success, and not-match feedback sounds.", "isEnabled": true, "tag": "Audio" },
     { "id": "haptic_feedback", "name": "Haptic feedback", "description": "Pairs correct and incorrect taps with device feedback.", "isEnabled": true, "tag": "Haptic" },
+    { "id": "guide_coach", "name": "Smart guide", "description": "Offers the next search technique and gradually narrows attention to a broad region without pointing out the hidden object.", "isEnabled": true, "tag": "Cognitive" },
+    { "id": "guide_voice", "name": "Smart guide voice", "description": "Reads each Smart guide step aloud as it appears. Off, the guide stays visible and silent.", "isEnabled": true, "tag": "Audio" },
     { "id": "target_preview", "name": "Target previews", "description": "Shows the object or silhouette the learner must find.", "isEnabled": true, "tag": "Cognitive" },
     { "id": "search_region_hints", "name": "Search-region hints", "description": "Guides attention toward a broad quadrant without revealing the answer.", "isEnabled": true, "tag": "Cognitive" },
     { "id": "accessible_list_view", "name": "Labelled list view", "description": "Offers a labelled, keyboard-friendly card list as an alternative to searching the scene.", "isEnabled": true, "tag": "Accessibility" },
     { "id": "step_context_tags", "name": "Step framing tags", "description": "Labels warm-up, challenge, and milestone steps.", "isEnabled": true, "tag": "Cognitive" },
     { "id": "premium_lessons", "name": "Charge for later lessons", "description": "Keeps a configurable number of lessons free.", "isEnabled": false, "tag": "Plan" }
   ],
-  "settings": { "warmupLabel": "", "activityLabel": "", "guidedLabel": "", "milestoneLabel": "", "speechRate": 0.95, "freeLessons": 3 },
+  "settings": { "warmupLabel": "", "activityLabel": "", "guidedLabel": "", "milestoneLabel": "", "speechRate": 0.95, "coachPatience": "normal", "freeLessons": 3 },
   "settingsSchema": [
     { "key": "warmupLabel", "label": "Warm-up tag", "help": "Optional wording for step 1.", "type": "text", "placeholder": "Warm-up Look", "maxLength": 32 },
     { "key": "activityLabel", "label": "Activity tag", "help": "Optional wording for activity steps.", "type": "text", "placeholder": "Observation Hunt", "maxLength": 32 },
     { "key": "guidedLabel", "label": "Guided tag", "help": "Optional wording for guided steps.", "type": "text", "placeholder": "Guided Search", "maxLength": 32 },
     { "key": "milestoneLabel", "label": "Final tag", "help": "Optional wording for the final step.", "type": "text", "placeholder": "Sharp Eyes Trophy", "maxLength": 32 },
     { "key": "speechRate", "label": "Speech rate", "help": "How quickly directions are spoken.", "type": "number", "min": 0.5, "max": 1.5, "step": 0.05, "unit": "x" },
+    { "key": "coachPatience", "label": "Smart guide patience", "help": "How long a learner is left to search before the Smart guide steps in.", "type": "choice", "options": [{ "value": "relaxed", "label": "Relaxed" }, { "value": "normal", "label": "Normal" }, { "value": "quick", "label": "Quick" }] },
     { "key": "freeLessons", "label": "Free lessons", "help": "Number of lessons available before a plan is needed.", "type": "number", "min": 0, "max": 21, "step": 1 }
   ]
 }

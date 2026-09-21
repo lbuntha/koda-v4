@@ -9,6 +9,7 @@ import type { BoardMode } from "../internal/puzzles";
 import { clueName, forces, generateLab, LAB_MODES, type Lab, type LabMode } from "../internal/reasons";
 import { chime, speechRate, tagLabelsFrom } from "../internal/sweeperChrome";
 import { useNudge } from "../internal/useNudge";
+import { sweeperGuideMethod, useSweeperGuide } from "../internal/useSweeperGuide";
 
 /**
  * Judging a deduction instead of making one.
@@ -123,7 +124,7 @@ export function labHints(question: LabQuestion, kidTip: string | undefined): str
     case "choose_reason":
       return composeHints(kidTip,
         "A reason has to name a clue, and say what that clue leaves for this tile.",
-        "More than one of these is a fair way of saying it. What makes the others wrong is what they claim a clue counts.");
+        "More than one reason may work. Reject any that misread what a clue counts.");
     case "find_error":
       return composeHints(kidTip,
         "Take one clue and count its colour around it. Compare that with its number.",
@@ -168,6 +169,18 @@ export const ClueLab: React.FC<ActivityProps<LabParams>> = ({ params, koda, onCo
 
   useEffect(() => { clearNudge(); }, [question, clearNudge]);
 
+  const hints = !question || practising ? [] : labHints(question, copy.kidTip);
+  const guide = useSweeperGuide({
+    params,
+    koda,
+    practising,
+    questionId: question?.id ?? "loading",
+    rungs: hints,
+    round,
+    /* Pointing at an option would reveal a proof answer, so this engine never does. */
+    target: -1,
+  });
+
   if (!question) return null;
 
   const finish = (correct: boolean, given: string, title: string, message: string) => {
@@ -209,6 +222,7 @@ export const ClueLab: React.FC<ActivityProps<LabParams>> = ({ params, koda, onCo
     if (!clue) {
       /* Not a wrong answer: the child pointed at a tile, not at a clue. */
       nudge.refuse("That tile has no clue on it. Tap one with a number.");
+      guide.stumbled();
       speak("Tap a clue.");
       return;
     }
@@ -234,7 +248,9 @@ export const ClueLab: React.FC<ActivityProps<LabParams>> = ({ params, koda, onCo
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : labHints(question, copy.kidTip)}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={sweeperGuideMethod(params)}
       iconName="search"
       iconTone="emerald"
       tagLabels={tagLabelsFrom(koda)}

@@ -11,6 +11,8 @@ import {
   isPractice,
   modeAt,
   playChrome,
+  guideSetup,
+  useGuide,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 
@@ -255,26 +257,20 @@ export function base10Hints(
    */
   const nextMove =
     setup.bundleOnes && built.ones >= 10
-      ? `You have ${built.ones} single ones. Ten of those are worth exactly one ten, so press "Make a Ten" — the total does not change, it just gets written properly.`
+      ? `You have ${built.ones} ones. Ten of them make one ten — press "Make a Ten".`
       : setup.bundleTens && built.tens >= 10
-        ? `You have ${built.tens} ten rods. Ten of those are worth one hundred, so press "Make a Hundred" — the total stays the same, it is only tidied up.`
+        ? `You have ${built.tens} tens. Ten of them make one hundred — press "Make a Hundred".`
         : short === 0
-          ? `The columns hold ${saidAsPlaces(built)}, which is ${question.target}. Press Check.`
+          ? `The columns hold ${saidAsPlaces(built)}. That is ${question.target}. Press Check.`
           : short > 0
             ? value === 0
-              ? `The columns are still empty. Drag in ${saidAsPlaces(
-                  placesOf(question.target, showHundreds),
-                )} to make ${question.target}.`
-              : `You have built ${value} so far, which is ${saidAsPlaces(built)}. Drag in ${saidAsPlaces(
-                  placesOf(short, showHundreds),
-                )} more to reach ${question.target}.`
-            : `You have built ${value}, which is ${Math.abs(short)} too many. Drag ${saidAsPlaces(
-                placesOf(Math.abs(short), showHundreds),
-              )} back out of the columns.`;
+              ? `Drag in ${saidAsPlaces(placesOf(question.target, showHundreds))}.`
+              : `You have ${value}. Drag in ${saidAsPlaces(placesOf(short, showHundreds))} more.`
+            : `You have ${value}, which is ${Math.abs(short)} too many. Drag some back out.`;
 
   return composeHints(
     state.kidTip ?? "Use the big blocks first, then the small ones.",
-    `Read ${question.target} in places: it is ${saidAsPlaces(want)}. Each column takes one kind of block, and a block only goes in its own column.`,
+    `Read ${question.target} in places: it is ${saidAsPlaces(want)}.`,
     nextMove,
   );
 }
@@ -289,9 +285,22 @@ interface Place {
   tone: string;
 }
 
+/**
+ * Where each place sits, for the coach to point at.
+ *
+ * Off `PLACES` rather than off the rendered list, because a lesson without
+ * hundreds renders two columns and the rendered index would then mean "tens" in
+ * one lesson and "hundreds" in another — a light on the wrong column being
+ * worse than no light at all.
+ */
+const PLACE_INDEX: Record<PlaceKey, number> = { hundreds: 0, tens: 1, ones: 2 };
+
 const PLACES: Place[] = [
   { key: "hundreds", label: "Hundreds", one: "hundred flat", worth: 100, max: 9, tone: "text-rose-700 dark:text-rose-400" },
-  { key: "tens", label: "Tens", one: "ten rod", worth: 10, max: 19, tone: "text-amber-700 dark:text-amber-400" },
+  /* Violet, not amber: the label is small type on the canvas, which is exactly
+     where yellow stops being readable, and violet stays clear of both the rose
+     hundreds and the cyan ones. */
+  { key: "tens", label: "Tens", one: "ten rod", worth: 10, max: 19, tone: "text-violet-700 dark:text-violet-400" },
   { key: "ones", label: "Ones", one: "one cube", worth: 1, max: 19, tone: "text-cyan-700 dark:text-cyan-400" },
 ];
 
@@ -301,7 +310,7 @@ const PLACES: Place[] = [
 
 const BLOCK_TONE: Record<PlaceKey, string> = {
   ones: "bg-cyan-400 border-cyan-600",
-  tens: "bg-amber-400 border-amber-600",
+  tens: "bg-violet-400 border-violet-600",
   hundreds: "bg-rose-400 border-rose-600",
 };
 
@@ -367,6 +376,21 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
   });
 
   const question = round.question as BuildQuestion;
+
+  /*
+   * Two different questions, so two different conditions.
+   *
+   * `guided` is whether Koda steps in *by itself* — the clock and the stumbles
+   * — and that is what the parent's switch turns off. Whether the help *looks
+   * like* the coach is not a setting at all: the Hint button shows the same
+   * bubble, the same rungs and the same "Got it" either way. It used to fall
+   * back to the old hint card when the switch was off, so turning off the
+   * interruptions also changed what help looked like, and a child had two
+   * panels to learn for one ladder.
+   */
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
 
   /**
    * Report an answer.
@@ -457,7 +481,13 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
       setRefused(target);
       window.setTimeout(() => setRefused(null), 600);
       playChrome(koda, "error");
+      /* This engine already refuses a block that does not belong in a column,
+         with a shake and a sound. What it never did was notice a child doing it
+         repeatedly, which is the difference between a slip and not knowing
+         which column is which. */
+      guide.stumbled();
     } else if (result.change) {
+      guide.moved();
       setBuilt(result.built);
       playChrome(koda, result.change === "added" ? "clink" : "pop");
       koda.haptics.tap();
@@ -467,6 +497,41 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
     setGhost(null);
     setHover(null);
   };
+
+  const hints = practising ? [] : base10Hints(question, { built, setup, kidTip: copy.kidTip });
+
+  /**
+   * The column to light.
+   *
+   * A bundle that is owed comes first, because that is the move `check` will
+   * refuse — a child holding thirteen ones has the right total and the wrong
+   * number, and pointing them at the next place to fill would send them further
+   * from the answer. Otherwise: the place still short of the target.
+   */
+  const guideTarget = (() => {
+    if (setup.bundleOnes && built.ones >= 10) return PLACE_INDEX.ones;
+    if (setup.bundleTens && built.tens >= 10) return PLACE_INDEX.tens;
+    const want = placesOf(question.target, Boolean(setup.hundreds));
+    if (setup.hundreds && built.hundreds < want.hundreds) return PLACE_INDEX.hundreds;
+    if (built.tens < want.tens) return PLACE_INDEX.tens;
+    if (built.ones < want.ones) return PLACE_INDEX.ones;
+    return -1;
+  })();
+
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    target: guideTarget,
+    progress: built.hundreds * 100 + built.tens * 10 + built.ones,
+    /* Built is not finished: every question here ends at Check, and the last
+       rung's job is to say so once the columns are right. */
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
 
   /** A block already in a column, which can be dragged back out to remove it. */
   const blocksIn = (key: PlaceKey) => Math.min(built[key], 12);
@@ -574,7 +639,9 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
       prompt={prompt}
       iconName="boxes"
       iconTone="emerald"
-      hints={practising ? [] : base10Hints(question, { built, setup, kidTip: copy.kidTip })}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onStartOver={
         !round.feedback && (built.hundreds > 0 || built.tens > 0 || built.ones > 0) ? restart : undefined
       }
@@ -667,6 +734,9 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
               <div
                 key={place.key}
                 data-place={place.key}
+                /* A refusal and a drag-over both say something about *this*
+                   moment and win over the coach's light, which is about the
+                   next move. */
                 className={`bg-canvas rounded-2xl border-2 p-4 space-y-3 text-center transition ${
                   refused === place.key
                     ? "border-rose-500 bg-rose-500/10"
@@ -674,9 +744,14 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
                       ? "border-emerald-500 bg-emerald-500/10"
                       : hover === place.key && held
                         ? "border-rose-400/60"
-                        : "border-line"
+                        : guide.target === PLACE_INDEX[place.key]
+                          ? "border-indigo-500 bg-indigo-500/10 ring-4 ring-indigo-500/30"
+                          : "border-line"
                 }`}
               >
+                {guide.target === PLACE_INDEX[place.key] && (
+                  <span className="sr-only">Work on this column next</span>
+                )}
                 <div className={`text-sm font-black ${place.tone}`}>{place.label}</div>
 
                 <div className="min-h-[64px] flex flex-wrap items-end justify-center gap-1">

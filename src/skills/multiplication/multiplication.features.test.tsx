@@ -1,6 +1,8 @@
+import { act } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderActivity, type ActivityHarness } from "../kit/testing";
 import { skill } from ".";
+import { GUIDE_DEFAULTS } from "../kit";
 
 const groups = skill.activities.groups;
 
@@ -206,6 +208,7 @@ describe("every multiplication feature changes behaviour", () => {
     const covered = new Set([
       "audio_speech", "sound_chimes", "haptic_feedback", "counting_badges",
       "running_product_badge", "strategy_scaffold", "step_context_tags",
+      "guide_coach", "guide_voice",
       "premium_lessons", "times_table_chart",
     ]);
     for (const feature of skill.features) {
@@ -267,12 +270,63 @@ describe("every setting has a reader", () => {
     }
   });
 
+  it("guide_coach: Koda stepping in on its own", () => {
+    /*
+     * The one flag whose effect is a *wait*, so it cannot be read off the
+     * opening frame like the others. Fake timers let the seven seconds pass
+     * without the test taking seven seconds.
+     */
+    vi.useFakeTimers();
+    try {
+      const lesson = skill.lessons.find(
+        (l) => l.activity === "multiplication/groups" && !(l.params as { question?: { practice?: boolean } }).question?.practice,
+      )!;
+      const play = (features: Record<string, boolean>, settings?: Record<string, unknown>) => {
+        const h = renderActivity(skill.activities.groups, {
+          params: lesson.params as Record<string, unknown>,
+          level: 1,
+          features,
+          settings,
+        });
+        act(() => {
+          vi.advanceTimersByTime(GUIDE_DEFAULTS.startMs + 500);
+        });
+        const out = { text: h.text(), said: h.koda.count("speech.say") };
+        h.unmount();
+        return out;
+      };
+
+      const on = play({});
+      expect(on.text, "the coach never stepped in").toContain("Koda is helping");
+      expect(play({ guide_coach: false }).text, "the coach ignored its switch").not.toContain(
+        "Koda is helping",
+      );
+
+      // Its voice is a separate switch: silenced, the guide still shows.
+      const silent = play({ guide_voice: false });
+      expect(silent.said).toBeLessThan(on.said);
+      expect(silent.text).toContain("Koda is helping");
+
+      // And patience is the dial that decides *when* — Relaxed waits longer
+      // than the seven seconds that were enough above.
+      expect(
+        play({}, { coachPatience: "relaxed" }).text,
+        "Relaxed stepped in at the Normal moment",
+      ).not.toContain("Koda is helping");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("covers every setting declared by the manifest", () => {
     // The four tag labels share one reader; `freeLessons` is read by the shared
     // premium gate and covered with it.
     const covered = new Set([
       "warmupLabel", "activityLabel", "guidedLabel", "milestoneLabel",
       "speechRate", "answerInput", "freeLessons", "tableCeiling",
+      // Read by the shared coach rather than by any engine here, so that
+      // twelve engines cannot each forget it. Covered by the guide test below.
+      "coachPatience",
     ]);
     for (const key of Object.keys(skill.settings)) {
       expect(covered.has(key), `${key} has no reader`).toBe(true);

@@ -9,6 +9,8 @@ import {
   useSkillRound,
   type RoundQuestion,
   playChrome,
+  guideSetup,
+  useGuide,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B, CHANGE } from "../internal/data/additionPalette";
@@ -195,19 +197,31 @@ export function columnHints(
   const onesSum = da.ones + db.ones;
   const missingCarry = q.carryInto.find((p) => (state.carries[p] ?? "") === "");
   const filled = q.places.filter((p) => (state.digits[p] ?? "") !== "").length;
+  /*
+   * A carry that lands on a column which is itself about to carry.
+   *
+   * This is the whole of what `cascade` teaches and what `standard` does not,
+   * and both lessons used to be given the same middle rung. A child meeting
+   * their first chain of carries was told "write the 2 underneath and carry the
+   * one" — the plain algorithm, which they already had — and nothing at all
+   * about the thing that was new.
+   */
+  const chains = q.carryInto.length > 1;
 
   return composeHints(
-    state.kidTip ?? "Start at the ones. When a column makes ten or more, write the carry above the next one.",
+    state.kidTip ?? "Start at the ones. Ten or more means carry to the next column.",
     filled === 0
-      ? `Start on the right: ${da.ones} and ${db.ones} is ${onesSum}. ${
-          onesSum >= 10
-            ? `That is more than nine, so write the ${onesSum % 10} underneath and carry the one.`
-            : `Write it underneath.`
-        }`
+      ? onesSum >= 10
+        ? `Ones first: ${da.ones} and ${db.ones} is ${onesSum}. Write ${onesSum % 10}, carry one.`
+        : `Ones first: ${da.ones} and ${db.ones} is ${onesSum}. Write it underneath.`
       : missingCarry
-        ? `A column made ten or more, so it has a carry to go above the ${missingCarry}. Write the small one in before you add that column.`
-        : `Keep going left. Remember to add the carry into the column as well as the two digits.`,
-    `${q.a} and ${q.b} is ${q.sum}.`,
+        ? `A column made ten or more. Write its carry above the ${missingCarry} first.`
+        : chains
+          ? `Keep going left. A carry can push the next column over ten too.`
+          : `Keep going left. Add the carry in as well as the two digits.`,
+    chains
+      ? `Each carry joins the next column, which may then carry again.`
+      : `Column by column from the right, the answer reads ${q.sum}.`,
   );
 }
 
@@ -218,19 +232,23 @@ const Cell: React.FC<{
   label: string;
   disabled: boolean;
   carry?: boolean;
-}> = ({ value, onChange, label, disabled, carry }) => (
+  /** The one the coach is pointing at. */
+  lit?: boolean;
+}> = ({ value, onChange, label, disabled, carry, lit = false }) => (
   <input
     inputMode="numeric"
     pattern="[0-9]*"
     value={value}
     onChange={(e) => onChange(e.target.value.replace(/[^0-9]/g, "").slice(0, 1))}
     disabled={disabled}
-    aria-label={label}
+    aria-label={`${label}${lit ? ", write this one next" : ""}`}
     className={themeSystem.field(
       carry ? "sm" : "lg",
-      carry
-        ? `w-9 h-9 text-center text-base font-black tabular-nums ${CHANGE.text}`
-        : "w-12 sm:w-14 text-center text-3xl font-black tabular-nums",
+      `${
+        carry
+          ? `w-9 h-9 text-center text-base font-black tabular-nums ${CHANGE.text}`
+          : "w-12 sm:w-14 text-center text-3xl font-black tabular-nums"
+      }${lit ? " ring-4 ring-indigo-500" : ""}`,
     )}
   />
 );
@@ -312,6 +330,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({
 
     const emptyDigit = question.places.find((p) => (digits[p] ?? "") === "");
     if (emptyDigit) {
+      guide.stumbled();
       nudge.refuse("Every column needs an answer underneath it.");
       return;
     }
@@ -325,6 +344,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({
      */
     const emptyCarry = question.carryInto.find((p) => (carries[p] ?? "") === "");
     if (emptyCarry) {
+      guide.stumbled();
       nudge.refuse(
         `One column made ten or more. Write its carry in the small box above the ${emptyCarry}.`,
       );
@@ -364,6 +384,51 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({
   const prompt = promptFor(question, copy.prompts?.default);
   const cols = question.places;
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived, rather than two systems with two vocabularies.
+   */
+  const hints = practising ? [] : columnHints(question, { digits, carries, kidTip: copy.kidTip });
+  /*
+   * Two different questions, so two different conditions.
+   *
+   * `guided` is whether Koda steps in *by itself* — the clock and the stumbles
+   * — and that is what the parent's switch turns off. Whether the help *looks
+   * like* the coach is not a setting at all: the Hint button shows the same
+   * bubble, the same rungs and the same "Got it" either way. It used to fall
+   * back to the old hint card when the switch was off, so turning off the
+   * interruptions also changed what help looked like, and a child had two
+   * panels to learn for one ladder.
+   */
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    /*
+     * The box to write in: an owed carry first, then the next answer digit.
+     *
+     * The carry wins because it is the move the column is waiting on — a child
+     * adding the next column without it is adding the wrong two numbers.
+     */
+    target: (() => {
+      const owed = question.carryInto.find((p) => (carries[p] ?? "") === "");
+      if (owed) return question.places.indexOf(owed) + question.places.length;
+      return question.places.findIndex((p) => (digits[p] ?? "") === "");
+    })(),
+    progress: Object.values(digits).filter(Boolean).length + Object.values(carries).filter(Boolean).length,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   return (
     <SkillRound
       koda={koda}
@@ -376,7 +441,9 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({
       iconTone="indigo"
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message}
-      hints={practising ? [] : columnHints(question, { digits, carries, kidTip: copy.kidTip })}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onStartOver={
         !round.feedback && (Object.values(digits).some((v) => v !== "") || Object.values(carries).some((v) => v !== "")) ? restart : undefined
       }
@@ -407,6 +474,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({
                     value={carries[p] ?? ""}
                     onChange={(v) => setCarries((prev) => ({ ...prev, [p]: v }))}
                     label={`Carry into ${p}`}
+                    lit={guide.target === question.places.indexOf(p) + question.places.length}
                     disabled={Boolean(round.feedback)}
                   />
                 ) : null}
@@ -454,6 +522,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({
                   value={digits[p] ?? ""}
                   onChange={(v) => setDigits((prev) => ({ ...prev, [p]: v }))}
                   label={`Answer, ${p}`}
+                  lit={guide.target === question.places.indexOf(p)}
                   disabled={Boolean(round.feedback)}
                 />
               </div>

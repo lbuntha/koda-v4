@@ -80,6 +80,25 @@ export function composeHints(...rungs: (string | false | null | undefined)[]): s
   return out;
 }
 
+/**
+ * Open a ladder with the lesson's own words.
+ *
+ * Most engines write their gentlest rung as `kidTip ?? "a fallback"`, so the
+ * lesson's voice is rung one by construction. Division's were written before
+ * that pattern existed: they take the question and nothing else, and their
+ * fifty-six authored `kidTip`s were read by nobody.
+ *
+ * Prepending is not enough on its own. `composeHints` keeps three, so a lesson
+ * whose engine already wrote three would lose its *last* rung — the worked
+ * step — which is the one rung that cannot be spared. So the tip replaces the
+ * engine's opener where there are three already, and simply joins the front
+ * where there are only two.
+ */
+export function openWith(kidTip: string | undefined, rungs: string[]): string[] {
+  if (!kidTip) return rungs;
+  return composeHints(kidTip, ...rungs.slice(rungs.length >= MAX_HINTS ? 1 : 0));
+}
+
 /** Which rung is actually showing, clamped to the ladder that exists now. */
 export function hintAt(hints: string[], level: number): string | undefined {
   if (level < 1 || hints.length === 0) return undefined;

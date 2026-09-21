@@ -9,6 +9,8 @@ import {
   useSkillRound,
   type RoundQuestion,
   playChrome,
+  guideSetup,
+  useGuide,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B, TOTAL } from "../internal/data/additionPalette";
@@ -67,6 +69,17 @@ export interface DeskRow {
   cells: DeskCell[];
   /** Drawn with a rule above it: this row is a total. */
   total?: boolean;
+  /**
+   * One box across the whole chart, rather than one box per column.
+   *
+   * A running total is a *number*, not a digit in a place. Left to right drew
+   * it as a single box sitting in the first cell — which, on a chart that grows
+   * a hundreds column when the total needs one, put a box wanting "105" under
+   * the heading "H", with a screen reader calling it "After +40, Hundreds".
+   * Every other row in this engine is one digit per column, so the one row that
+   * is not has to look different rather than look like a wrong digit.
+   */
+  span?: boolean;
 }
 
 export interface DeskQuestion extends RoundQuestion {
@@ -227,9 +240,30 @@ export const buildQuestion = (
      * the lesson for it came to be written.
      */
     /*
+     * The running total starts at the first number, not at zero.
+     *
+     * It used to start at zero, so the first box wanted `(1+2)*10` — thirty —
+     * for 15 plus 28. Thirty is not a total anybody is holding: it is partial
+     * sums' tens line, which is the *previous* lesson and a prerequisite of
+     * this one. So the first box rewarded the wrong method, confirmed it, and
+     * only the second box objected — by which point the child had written 13
+     * and been told to "check the columns". Reported from a real session, and
+     * the same confusion a comment below already records somebody trying to fix
+     * by renaming the rows. Renaming cannot fix it: while the first step is
+     * numerically identical under both methods, nothing on screen can tell them
+     * apart.
+     *
+     * Holding 15 and adding the tens gives 35, which partial sums never writes.
+     * The two methods now diverge at the first box, and this one finally
+     * matches its own title, its concept line and the pedagogy note under it:
+     * one number that grows.
+     */
+    const afterTens = a + db.tens * 10;
+
+    /*
      * A tens column that makes ten tens needs somewhere to put the hundred.
      *
-     * 57 and 88: you hold 130, then 145 — and the addend rows were being drawn
+     * 57 and 88: you hold 137, then 145 — and the addend rows were being drawn
      * under a two-column header while the running total ran past it. Partial
      * sums already had this fix and this mode never got it, which is what a
      * mode written by copying half of its neighbour looks like a year later.
@@ -256,12 +290,23 @@ export const buildQuestion = (
          * expected answer were describing two different numbers, and the child
          * was right about the one the label named.
          */
-        { label: "After the tens", total: true, cells: [{ blank: "run-1" }, ...tail] },
-        { label: "After the ones", total: true, cells: [{ blank: "run-2" }, ...tail] },
+        /*
+         * The labels name the amount, because "the tens" does not.
+         *
+         * "After the tens" reads two ways — after adding the other number's
+         * tens, or after adding both tens columns together — and a child
+         * arriving from partial sums reads it the second way, writes 130 for
+         * 77 plus 67, and is marked wrong. Naming the step it has just taken
+         * ("After +60") cannot be read the other way. It gives away no answer:
+         * splitting 67 into 60 and 7 *is* the technique, and the arithmetic —
+         * 77 and 60 — is still the child's to do.
+         */
+        { label: `After +${db.tens * 10}`, total: true, span: true, cells: [{ blank: "run-1" }] },
+        { label: `After +${db.ones}`, total: true, span: true, cells: [{ blank: "run-2" }] },
       ],
       blanks: ["run-1", "run-2"],
-      answers: [tensPart, sum],
-      expected: `${tensPart},${sum}`,
+      answers: [afterTens, sum],
+      expected: `${afterTens},${sum}`,
       itemCount: sum,
     };
   }
@@ -420,26 +465,28 @@ export function deskHints(
     return composeHints(
       state.kidTip ?? "Add one column at a time, and keep each answer before putting them together.",
       empty > 2
-        ? `The tens are ${da.tens * 10} and ${db.tens * 10}. Add those first and write the answer on the Tens row.`
+        ? `Tens first: ${da.tens * 10} and ${db.tens * 10}. Write that on the Tens row.`
         : `You have both parts. Put them together for the last row.`,
       `${da.tens * 10} and ${db.tens * 10} is ${(da.tens + db.tens) * 10}. ${da.ones} and ${db.ones} is ${da.ones + db.ones}. Together that is ${q.sum}.`,
     );
   }
 
   if (q.mode === "left_right") {
-    const afterTens = (da.tens + db.tens) * 10;
+    // The number in your head, which starts as the first addend — see
+    // `buildQuestion` for why it is not the sum of the tens column.
+    const afterTens = q.a + db.tens * 10;
     return composeHints(
-      state.kidTip ?? "Start with the biggest column, then let each one after it change the number you are holding.",
+      state.kidTip ?? "Hold the first number. Each column after it adjusts what you hold.",
       empty > 1
-        ? `Start with the tens: ${da.tens * 10} and ${db.tens * 10}. Write what you are holding after that.`
-        : `You are holding ${afterTens}. Now add the ones — ${da.ones} and ${db.ones} — to that.`,
+        ? `Hold ${q.a}. Add the tens of ${q.b}, which is ${db.tens * 10}.`
+        : `You are holding ${afterTens}. Now add the ones, ${db.ones}.`,
       /*
        * "50 and 11 is 61" is partial-sums language: two parts, put together.
        * Here there is one number being adjusted, and the sentence has to keep
        * that shape — otherwise the most helpful rung on the ladder is the one
        * that teaches the other lesson.
        */
-      `You are holding ${afterTens}. Add ${da.ones} and ${db.ones} to it and you are holding ${q.sum}.`,
+      `${q.a} and ${db.tens * 10} is ${afterTens}; ${afterTens} and ${db.ones} is ${q.sum}.`,
     );
   }
 
@@ -538,6 +585,7 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
     if (round.feedback) return;
     const missing = question.blanks.filter((id) => (entries[id] ?? "") === "");
     if (missing.length > 0) {
+      guide.stumbled();
       nudge.refuse(
         missing.length === question.blanks.length
           ? "Fill in the boxes, then check."
@@ -556,20 +604,82 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
     const rightDigitsWrongOrder =
       given.slice().sort().join(",") === question.answers.map(String).slice().sort().join(",");
 
+    /*
+     * The mistake this lesson actually produces, named rather than graded.
+     *
+     * A child arriving here has just finished partial sums, so the wrong answer
+     * is almost never a slip — it is the other method: they write the ones they
+     * added rather than the total they are holding. "15 and 28 is 43" is true
+     * and tells them nothing about that, so the round said the right answer to
+     * somebody who needed to know which question they were answering.
+     */
+    const wroteThePart =
+      question.mode === "left_right" &&
+      !correct &&
+      given[1] === String(digitsOf(question.a).ones + digitsOf(question.b).ones);
+
     submit({
       correct,
       given: given.join(","),
-      errorKind: correct ? undefined : rightDigitsWrongOrder ? "place_value" : "off_by_more",
-      title: correct ? "Every column is right!" : "Check the columns",
+      errorKind: correct
+        ? undefined
+        : rightDigitsWrongOrder
+          ? "place_value"
+          : wroteThePart
+            ? "place_value"
+            : "off_by_more",
+      title: correct
+        ? "Every column is right!"
+        : wroteThePart
+          ? "That is the part, not the total"
+          : "Check the columns",
       message: correct
         ? `${question.a} and ${question.b} is ${question.sum}.`
         : rightDigitsWrongOrder
           ? "The right digits, in the wrong columns. Ones go under ones."
-          : `${question.a} and ${question.b} is ${question.sum}.`,
+          : wroteThePart
+            ? `Add the ones to what you were holding: ${question.answers[0]} and ${digitsOf(question.b).ones}.`
+            : `${question.a} and ${question.b} is ${question.sum}.`,
     });
   };
 
   const prompt = promptFor(question, copy.prompts?.default);
+
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived, rather than two systems with two vocabularies.
+   */
+  const hints = practising ? [] : deskHints(question, { entries, kidTip: copy.kidTip });
+  /*
+   * Two different questions, so two different conditions.
+   *
+   * `guided` is whether Koda steps in *by itself* — the clock and the stumbles
+   * — and that is what the parent's switch turns off. Whether the help *looks
+   * like* the coach is not a setting at all: the Hint button shows the same
+   * bubble, the same rungs and the same "Got it" either way. It used to fall
+   * back to the old hint card when the switch was off, so turning off the
+   * interruptions also changed what help looked like, and a child had two
+   * panels to learn for one ladder.
+   */
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    /* The next empty box, in the order the chart reads. */
+    target: question.blanks.findIndex((id) => (entries[id] ?? "") === ""),
+    progress: Object.values(entries).filter(Boolean).length,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
 
   return (
     <SkillRound
@@ -583,7 +693,9 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
       iconTone="indigo"
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message}
-      hints={practising ? [] : deskHints(question, { entries, kidTip: copy.kidTip })}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onStartOver={
         !round.feedback && (Object.values(entries).some((v) => v !== "")) ? restart : undefined
       }
@@ -627,7 +739,11 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
                     {row.label}
                   </th>
                   {row.cells.map((cell, c) => (
-                    <td key={c} className="px-1.5 py-1.5">
+                    <td
+                      key={c}
+                      colSpan={row.span ? question.places.length : undefined}
+                      className="px-1.5 py-1.5"
+                    >
                       {cell.blank ? (
                         <input
                           inputMode="numeric"
@@ -638,10 +754,21 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
                             setEntries((prev) => ({ ...prev, [cell.blank!]: digits }));
                           }}
                           disabled={Boolean(round.feedback)}
-                          aria-label={`${question.rows[r].label}, ${HEADING[question.places[c]] ?? "column"}`}
+                          /* A spanning row has no column, so it must not claim
+                             one: "After +40, Hundreds" described a box that
+                             wants a whole number as a hundreds digit. */
+                          aria-label={`${
+                            row.span
+                              ? question.rows[r].label
+                              : `${question.rows[r].label}, ${HEADING[question.places[c]] ?? "column"}`
+                          }${question.blanks[guide.target] === cell.blank ? ", fill this one next" : ""}`}
                           className={themeSystem.field(
                             "lg",
-                            "w-16 sm:w-20 text-center text-2xl font-black tabular-nums",
+                            `w-16 sm:w-20 text-center text-2xl font-black tabular-nums${
+                              question.blanks[guide.target] === cell.blank
+                                ? " ring-4 ring-indigo-500"
+                                : ""
+                            }`,
                           )}
                         />
                       ) : (

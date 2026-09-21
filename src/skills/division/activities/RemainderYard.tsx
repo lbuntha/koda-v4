@@ -1,7 +1,18 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ActivityProps } from "../../types";
-import { SkillRound, answerChoices, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import {
+  SkillRound,
+  answerChoices,
+  composeHints,
+  guideSetup,
+  isPractice,
+  modeAt,
+  openWith,
+  playCopy,
+  useGuide,
+  useSkillRound,
+} from "../../kit";
 import { NumberPad } from "../internal/ui/NumberPad";
 import {
   PAIR_REFUSALS,
@@ -44,7 +55,18 @@ export function buildQuestion(
 
 export const promptFor = (question: RemainderQuestion): string => question.prompt;
 
-export function remainderHints(question: RemainderQuestion): string[] {
+/**
+ * The ladder, opening with the lesson's own words.
+ *
+ * All fifty-six division lessons author a `kidTip` and, until this, not one
+ * was read: these ladders took the question and nothing else. `openWith`
+ * puts it back as rung one without costing the worked step — see the kit.
+ */
+export function remainderHints(question: RemainderQuestion, kidTip?: string): string[] {
+  return openWith(kidTip, remainderHintsRungs(question));
+}
+
+function remainderHintsRungs(question: RemainderQuestion): string[] {
   switch (question.mode) {
     case "record":
       return composeHints(
@@ -124,6 +146,33 @@ export const RemainderYard: React.FC<ActivityProps<RemainderParams>> = ({
     setRefused(null);
   }, [question]);
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const copy = playCopy(params);
+  const hints = practising ? [] : remainderHints(question, copy.kidTip);
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    /* Two boxes, filled in order: how many whole groups, then what is left. */
+    target: quotient === "" ? 0 : remainder === "" ? 1 : -1,
+    progress: 0,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   if (!question) return null;
 
   const say = (text: string): void => {
@@ -157,6 +206,7 @@ export const RemainderYard: React.FC<ActivityProps<RemainderParams>> = ({
   const submitPair = (): void => {
     const block = pairBlockedBecause(question, quotient, remainder);
     if (block) {
+      guide.stumbled();
       setRefused(block);
       say(PAIR_REFUSALS[block]);
       return;
@@ -204,7 +254,9 @@ export const RemainderYard: React.FC<ActivityProps<RemainderParams>> = ({
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : remainderHints(question)}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       iconName="Inbox"
       iconTone="pink"
       onReadAloud={
@@ -239,7 +291,9 @@ export const RemainderYard: React.FC<ActivityProps<RemainderParams>> = ({
               <button
                 type="button"
                 onClick={() => setSlot("quotient")}
-                aria-label={`How many whole groups: ${quotient || "empty"}`}
+                aria-label={`How many whole groups: ${quotient || "empty"}${
+            guide.target === 0 ? ", fill this one next" : ""
+          }`}
                 className={`min-h-14 min-w-16 rounded-xl border-2 px-3 py-2 ${
                   slot === "quotient" ? "border-indigo-500 bg-surface" : "border-line/30 bg-surface"
                 }`}
@@ -250,7 +304,9 @@ export const RemainderYard: React.FC<ActivityProps<RemainderParams>> = ({
               <button
                 type="button"
                 onClick={() => setSlot("remainder")}
-                aria-label={`Left over: ${remainder || "empty"}`}
+                aria-label={`Left over: ${remainder || "empty"}${
+            guide.target === 1 ? ", fill this one next" : ""
+          }`}
                 className={`min-h-14 min-w-16 rounded-xl border-2 px-3 py-2 ${
                   slot === "remainder" ? "border-rose-500 bg-surface" : "border-line/30 bg-surface"
                 }`}

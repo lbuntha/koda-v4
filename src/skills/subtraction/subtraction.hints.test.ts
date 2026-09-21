@@ -173,7 +173,7 @@ describe("the recall frames", () => {
   it("hints name the partners instead of counting counters out", () => {
     const q = buildFrame({ mode: "from_ten", subtrahendRange: [4, 4] }, 0, new Set());
     const hints = frameHints(q, { removed: 0 });
-    expect(hints[1]).toContain("still holds all 10");
+    expect(hints[1]).toContain("The frame holds 10");
     expect(hints[1]).not.toContain("Take out");
     expect(hints.at(-1)).toBe("4 and 6 are the partners that make 10.");
   });
@@ -275,7 +275,8 @@ describe("the base-ten desk hints", () => {
   it("reads the desk out once every block is off", () => {
     const hints = blockHints(q(), { held: { ones: 4, tens: 3, hundreds: 0 }, taken: { ones: 8, tens: 1, hundreds: 0 } });
     expect(hints[1]).toContain("3 tens and 4 ones");
-    expect(hints.at(-1)).toBe("52 minus 18 is 34.");
+    // The trade is the technique, so the last rung names the trade, not the sum.
+    expect(hints.at(-1)).toBe("One block traded, nothing lost: the desk reads 34.");
   });
 
   it("stops owing an exchange once the column is paid", () => {

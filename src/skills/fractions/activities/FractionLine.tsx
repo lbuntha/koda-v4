@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import { fractionGuideMethod, useFractionGuide } from "../internal/useFractionGuide";
 import { partWord } from "../internal/data/fractionNumbers";
 import { printLine } from "../internal/ui/printFigures";
 import {
@@ -112,6 +113,12 @@ export const FractionLine: React.FC<ActivityProps<LineParams>> = ({ params, koda
     setRefused(null);
   }, [question]);
 
+  const hints = !question || practising ? [] : lineHints(question);
+  const guide = useFractionGuide({
+    params, koda, practising, questionId: question?.id ?? "loading", rungs: hints, round,
+    progress: marker === null ? 0 : 1,
+  });
+
   if (!question) return null;
 
   const { intervals } = question;
@@ -130,6 +137,7 @@ export const FractionLine: React.FC<ActivityProps<LineParams>> = ({ params, koda
     if (koda.config.isEnabled("haptic_feedback", true)) koda.haptics.pulse("light");
     setRefused(null);
     setMarker(i);
+    guide.moved();
   };
 
   const submit = (given: string, correct: boolean, message: string): void => {
@@ -145,6 +153,7 @@ export const FractionLine: React.FC<ActivityProps<LineParams>> = ({ params, koda
     const block = lineBlockedBecause(question, marker);
     if (block) {
       setRefused(block);
+      guide.stumbled();
       say(LINE_REFUSALS[block]);
       return;
     }
@@ -166,7 +175,9 @@ export const FractionLine: React.FC<ActivityProps<LineParams>> = ({ params, koda
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : lineHints(question)}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={fractionGuideMethod(params)}
       onStartOver={
         marker !== null && !round.feedback
           ? () => {

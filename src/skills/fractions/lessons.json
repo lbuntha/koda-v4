@@ -35,6 +35,9 @@
           "prompts": {
             "default": "Are all the parts the same size?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -81,6 +84,9 @@
           "prompts": {
             "default": "What is one part called?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -126,6 +132,9 @@
           "prompts": {
             "default": "Which is more?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -171,6 +180,9 @@
           "prompts": {
             "default": "Shade the parts."
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -216,6 +228,9 @@
           "prompts": {
             "default": "What fraction is shaded?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -262,6 +277,9 @@
           "prompts": {
             "default": "How many is that?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -309,6 +327,9 @@
           "prompts": {
             "default": "Put the marker on the fraction."
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -354,6 +375,9 @@
           "prompts": {
             "default": "Put the marker on the fraction."
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -399,6 +423,9 @@
           "prompts": {
             "default": "What number is the marker on?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -444,6 +471,9 @@
           "prompts": {
             "default": "How many make one whole?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -489,6 +519,9 @@
           "prompts": {
             "default": "Put the marker on the fraction."
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -539,6 +572,9 @@
           "prompts": {
             "default": "What is it called now?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -588,6 +624,9 @@
           "prompts": {
             "default": "Which pair of names does this amount have?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -637,6 +676,9 @@
           "prompts": {
             "default": "Write it with the new bottom number."
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -687,6 +729,9 @@
           "prompts": {
             "default": "What does it become?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -737,6 +782,9 @@
           "prompts": {
             "default": "Make it as simple as it goes."
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -783,6 +831,9 @@
           "prompts": {
             "default": "Which is more?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -828,6 +879,9 @@
           "prompts": {
             "default": "Which is more?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -874,6 +928,9 @@
           "prompts": {
             "default": "Which is more?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -919,6 +976,9 @@
           "prompts": {
             "default": "More or less than a half?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -965,6 +1025,9 @@
           "prompts": {
             "default": "Which is more?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -1015,6 +1078,9 @@
           "prompts": {
             "default": "Group them into whole ones."
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -1064,6 +1130,9 @@
           "prompts": {
             "default": "Break them back into parts."
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -1114,6 +1183,9 @@
           "prompts": {
             "default": "Put the marker on the number."
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -1160,6 +1232,9 @@
           "prompts": {
             "default": "Count them together."
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -1205,6 +1280,9 @@
           "prompts": {
             "default": "Take them away."
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -1247,6 +1325,9 @@
           "prompts": {
             "default": "Show that this answer is too small."
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -1293,6 +1374,9 @@
           "prompts": {
             "default": "Cut one to match, then count."
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -1339,6 +1423,9 @@
           "prompts": {
             "default": "Match the pieces, then add."
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -1385,6 +1472,9 @@
           "prompts": {
             "default": "Match the pieces, then take away."
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -1435,6 +1525,9 @@
           "prompts": {
             "default": "Add the wholes, then the parts."
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -1485,6 +1578,9 @@
           "prompts": {
             "default": "Break a whole, then take away."
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -1535,6 +1631,9 @@
           "prompts": {
             "default": "How many is that?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -1585,6 +1684,9 @@
           "prompts": {
             "default": "How much altogether?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -1631,6 +1733,9 @@
           "prompts": {
             "default": "How much is shaded twice?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -1677,6 +1782,9 @@
           "prompts": {
             "default": "Cancel first, then multiply."
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -1727,6 +1835,9 @@
           "prompts": {
             "default": "Bigger, smaller, or the same?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -1777,6 +1888,9 @@
           "prompts": {
             "default": "How many fit?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -1826,6 +1940,9 @@
           "prompts": {
             "default": "How many groups?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -1876,6 +1993,9 @@
           "prompts": {
             "default": "How much does each one get?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -1922,6 +2042,9 @@
           "prompts": {
             "default": "How many fit inside?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -1968,6 +2091,9 @@
           "prompts": {
             "default": "Which one asks the same thing?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -2010,6 +2136,9 @@
           "prompts": {
             "default": "Write it as a decimal."
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -2052,6 +2181,9 @@
           "prompts": {
             "default": "Write it as a decimal."
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -2094,6 +2226,9 @@
           "prompts": {
             "default": "What is it as a decimal?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -2136,6 +2271,9 @@
           "prompts": {
             "default": "Write it as a fraction."
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -2177,6 +2315,9 @@
           "prompts": {
             "default": "What percentage is it?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -2220,6 +2361,9 @@
           "prompts": {
             "default": "Which row matches?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -2265,6 +2409,9 @@
           "prompts": {
             "default": "Nearest to what?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -2307,6 +2454,9 @@
           "prompts": {
             "default": "Could that be right?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -2349,6 +2499,9 @@
           "prompts": {
             "default": "How many is that?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -2391,6 +2544,9 @@
           "prompts": {
             "default": "How much each?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -2432,6 +2588,9 @@
           "prompts": {
             "default": "How much is gone?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -2474,6 +2633,9 @@
           "prompts": {
             "default": "How many cups?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -2516,6 +2678,9 @@
           "prompts": {
             "default": "How many times as much?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -2558,6 +2723,9 @@
           "prompts": {
             "default": "How many now?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [
@@ -2600,6 +2768,9 @@
           "prompts": {
             "default": "Which way would you do it?"
           }
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "standards": [

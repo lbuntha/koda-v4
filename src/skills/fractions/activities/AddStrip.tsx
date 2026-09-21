@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import { fractionGuideMethod, useFractionGuide } from "../internal/useFractionGuide";
 import { printBar } from "../internal/ui/printFigures";
 import { FractionBar } from "../internal/ui/FractionBar";
 import { partWord } from "../internal/data/fractionNumbers";
@@ -68,7 +69,7 @@ export function addHints(question: AddQuestion): string[] {
       return composeHints(
         "Lay both fractions along the strip, one after the other.",
         `Cut them both into ${piece} so the pieces are the same size.`,
-        "Now count. The claimed answer is smaller than one of the pieces you started with — so it cannot be their total.",
+        "The claim is smaller than a starting piece, so it cannot be the total.",
       );
     case "add_nested":
       return composeHints(
@@ -87,6 +88,12 @@ export function addHints(question: AddQuestion): string[] {
         "There are not enough loose parts to take that many away.",
         `Break one whole up — it gives you ${common} more ${piece}.`,
         "Now take them away, and count the whole ones that are left.",
+      );
+    case "subtract_unlike":
+      return composeHints(
+        "The pieces differ, so you cannot take one count from the other yet.",
+        `Cut both bars into ${piece}; ${common} works for these.`,
+        "Now subtract the matching pieces and keep their common bottom number.",
       );
     default:
       return composeHints(
@@ -137,6 +144,12 @@ export const AddStrip: React.FC<ActivityProps<AddParams>> = ({ params, koda, onC
     setRefused(null);
   }, [question]);
 
+  const hints = !question || practising ? [] : addHints(question);
+  const guide = useFractionGuide({
+    params, koda, practising, questionId: question?.id ?? "loading", rungs: hints, round,
+    progress: matchedFor ? 1 : 0,
+  });
+
   if (!question) return null;
 
   /** Cut to match — for *this* question, not for whichever one came before. */
@@ -156,12 +169,14 @@ export const AddStrip: React.FC<ActivityProps<AddParams>> = ({ params, koda, onC
     if (koda.config.isEnabled("haptic_feedback", true)) koda.haptics.pulse("light");
     setRefused(null);
     setMatchedFor(question.id);
+    guide.moved();
   };
 
   const answer = (text: string): void => {
     const block = addBlockedBecause(question, matchedYet);
     if (block) {
       setRefused(block);
+      guide.stumbled();
       say(ADD_REFUSALS[block]);
       return;
     }
@@ -189,7 +204,9 @@ export const AddStrip: React.FC<ActivityProps<AddParams>> = ({ params, koda, onC
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : addHints(question)}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={fractionGuideMethod(params)}
       onStartOver={
         matchedYet && question.mustMatch && !round.feedback
           ? () => {

@@ -5,6 +5,7 @@ import { buildPrediction } from "../internal/predict";
 import { specFor } from "../internal/specs";
 import { GLYPH, cssColour, nameOf, shapeOf } from "../internal/paint";
 import { topRun, type Pour, type Rack } from "../internal/types";
+import { bottleGuideMethod, useBottleGuide } from "../internal/useBottleGuide";
 
 /**
  * "Which rack comes next?"
@@ -75,13 +76,17 @@ function describe(rack: Rack): string {
     .join("; ");
 }
 
-export function predictHints(question: PredictQuestion): string[] {
+export function predictHints(question: PredictQuestion, kidTip?: string): string[] {
   const first = question.moves[0];
   const run = topRun(question.start[first.from]);
   return composeHints(
-    "A pour moves the whole run of one colour, not just one.",
+    kidTip ?? (question.moves.length === 1
+      ? "A pour moves the whole top run, not one layer."
+      : "Picture the first pour completely; the second pour starts from that new rack."),
     `Bottle ${first.from + 1} has ${run.n} ${nameOf(run.colour)} on top.`,
-    `Count the room in bottle ${first.to + 1}, then move as many as will fit.`,
+    question.moves.length === 1
+      ? `Count the room in bottle ${first.to + 1}, then move as many as fit.`
+      : `Build the first result, then follow the second instruction from that rack.`,
   );
 }
 
@@ -168,6 +173,18 @@ export const PredictThePour: React.FC<ActivityProps<PredictParams>> = ({ params,
   });
   const question = round.question as PredictQuestion;
 
+  const hints = practising || !hintsEnabled ? [] : predictHints(question, copy.kidTip);
+  const guide = useBottleGuide({
+    params,
+    koda,
+    practising,
+    questionId: question.id,
+    rungs: hints,
+    round,
+    /* Highlighting a choice would hand over the prediction. */
+    target: -1,
+  });
+
   const choose = (index: number) => {
     if (round.feedback) return;
     const correct = index === question.answer;
@@ -192,7 +209,9 @@ export const PredictThePour: React.FC<ActivityProps<PredictParams>> = ({ params,
       koda={koda} lesson={lesson} fallbackTitle="Which rack comes next?"
       round={round} totalQuestions={total}
       prompt={promptFor(question)} onExit={() => koda.ui.exit()}
-      hints={practising || !hintsEnabled ? [] : predictHints(question)}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={bottleGuideMethod(params)}
       iconName="FlaskConical" iconTone="cyan">
       <section aria-label="Predict the pour" className="mx-auto flex w-full max-w-[640px] flex-col gap-5">
         <div className="rounded-2xl bg-slate-100 px-3 py-4 dark:bg-slate-900/50">

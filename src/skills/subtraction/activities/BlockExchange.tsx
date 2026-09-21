@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import type { ActivityProps, PrintedQuestion } from "../../types";
 import {
   SkillRound, SPRING, composeHints, isPractice, modeAt, playCopy, stagger,
-  useSkillRound, type PracticeSetup, type RoundQuestion,
+  useSkillRound, guideSetup, useGuide, type PracticeSetup, type RoundQuestion,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { DIFFERENCE, REMOVED_PART, WHOLE } from "../internal/data/subtractionPalette";
@@ -103,6 +103,9 @@ export const totalOf = (blocks: Digits): number =>
  * once the units have been paid the desk owes nothing, even though it now holds
  * fewer units than the question named.
  */
+/** Where each place sits, so the coach can point at a column. */
+const PLACE_INDEX: Record<Place, number> = { hundreds: 0, tens: 1, ones: 2 };
+
 export const owedExchange = (held: Digits, remaining: Digits): "tens" | "hundreds" | undefined => {
   if (remaining.ones > held.ones && held.tens > 0) return "tens";
   if (remaining.tens > held.tens && held.hundreds > 0) return "hundreds";
@@ -167,10 +170,27 @@ export function blockHints(
     `When the desk is done it will hold ${q.difference}.`,
   );
 
+  /*
+   * The last rung is the technique, not the answer.
+   *
+   * Six lessons on this engine and the column pad all ended on the same
+   * sentence — "72 minus 35 is 37" — which is true of every one of them and is
+   * the method of none. Taking whole tens away is not the same move as trading
+   * one ten for ten ones, and the rung a child reads last is where that
+   * difference either lands or is lost.
+   */
+  const asUnits = q.mode === "multiples_ten" || q.mode === "multiples_hundred";
+  const traded = q.mode === "trade_ten" || q.mode === "trade_hundred";
+  const unit = q.mode === "multiples_hundred" ? 100 : 10;
+
   return composeHints(
     state.kidTip ?? "Read the blocks that remain.",
     `The desk now holds ${state.held.hundreds} hundreds, ${state.held.tens} tens and ${state.held.ones} ones.`,
-    `${q.minuend} minus ${q.subtrahend} is ${q.difference}.`,
+    asUnits
+      ? `${q.minuend / unit} ${unit === 100 ? "hundreds" : "tens"} take away ${q.subtrahend / unit} leaves ${q.difference / unit}, so ${q.difference}.`
+      : traded
+        ? `One block traded, nothing lost: the desk reads ${q.difference}.`
+        : `Count the blocks left, place by place: ${q.difference}.`,
   );
 }
 
@@ -227,8 +247,10 @@ const Block: React.FC<{
 };
 
 const Desk: React.FC<{
+  /** The place the coach is pointing at, or undefined. */
+  lit?: Place;
   blocks: Digits; density: BlockDensity; onTake?: (place: Place) => void; gone?: boolean; caption: string;
-}> = ({ blocks, density, onTake, gone, caption }) => {
+}> = ({ blocks, density, onTake, gone, caption, lit }) => {
   const size = BLOCK_SIZES[density];
   const places: Array<{ place: Place; count: number; className: string }> = [
     { place: "hundreds", count: blocks.hundreds, className: size.flat },
@@ -242,7 +264,13 @@ const Desk: React.FC<{
         indistinguishable from each other. */}
     <div className="flex flex-wrap items-end justify-center gap-x-4 gap-y-2">
       {places.filter(({ count }) => count > 0).map(({ place, count, className }) =>
-        <div key={place} className={`flex flex-wrap items-end gap-x-0.5 gap-y-1 ${place === "ones" ? "max-w-[9.5rem]" : ""}`}>
+        /* The coach points at a *column*, not one cube: the work is "deal with
+           the ones", and lighting a single unit inside them would answer a
+           smaller question than the one the child is stuck on. */
+        <div key={place} className={`flex flex-wrap items-end gap-x-0.5 gap-y-1 rounded-xl ${place === "ones" ? "max-w-[9.5rem]" : ""} ${
+          lit === place ? "ring-4 ring-indigo-500 p-1" : ""
+        }`}>
+          {lit === place && <span className="sr-only">Work in this column next</span>}
           {Array.from({ length: count }, (_, i) => <Block key={`${place}-${i}`} place={place} size={className}
             gone={gone} index={i}
             label={`${gone ? "Taken" : "Take"} ${PLACE_NAMES[place].one} ${i + 1}`}
@@ -306,8 +334,13 @@ export const BlockExchange: React.FC<ActivityProps<BlockExchangeParams>> = ({ pa
     if (round.feedback) return;
     if (taken[place] >= q.need[place]) {
       nudge.refuse(`${q.need[place] === 0 ? "No" : `Only ${q.need[place]}`} ${PLACE_NAMES[place].many} come off this desk.`);
+      /* The desk already shakes off a block that does not belong. What it never
+         did was notice a child doing it again and again, which is the
+         difference between a slip and not knowing which column is which. */
+      guide.stumbled();
       return;
     }
+    guide.moved();
     setHeld((current) => ({ ...current, [place]: current[place] - 1 }));
     setTaken((current) => ({ ...current, [place]: current[place] + 1 }));
     chime(koda, "moved");
@@ -359,10 +392,44 @@ export const BlockExchange: React.FC<ActivityProps<BlockExchangeParams>> = ({ pa
     });
   };
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const hints = practising ? [] : blockHints(q, { held, taken, kidTip: copy.kidTip });
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: q.id,
+    rungs: hints,
+    /*
+     * The place to work in: the one that owes an exchange, or the next place
+     * still short. An owed trade wins, because that is the move `check`
+     * refuses — taking more blocks first only digs the column deeper.
+     */
+    target: owed
+      ? PLACE_INDEX[owed]
+      : (["hundreds", "tens", "ones"] as const).findIndex((place) => remaining[place] > 0),
+    progress: taken.hundreds + taken.tens + taken.ones,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   return <SkillRound koda={koda} lesson={lesson} fallbackTitle="Base-Ten Blocks" round={round}
     totalQuestions={totalQuestions} prompt={prompt} iconName="boxes" iconTone="purple"
     tagLabels={tagLabelsFrom(koda)} nudge={nudge.message}
-    hints={practising ? [] : blockHints(q, { held, taken, kidTip: copy.kidTip })}
+    hints={hints}
+    guide={practising ? undefined : guide}
+    guideMethod={copy.stepByStep}
     onStartOver={
       !round.feedback && (entry !== "" || JSON.stringify(held) !== JSON.stringify(q.start) || JSON.stringify(taken) !== JSON.stringify(ZERO)) ? restart : undefined
     }
@@ -370,7 +437,13 @@ export const BlockExchange: React.FC<ActivityProps<BlockExchangeParams>> = ({ pa
     onReadAloud={practising ? undefined : () => { round.useSupport("audio_replay"); void koda.speech.say(prompt, speechRate(koda)); }}>
     <div className="space-y-4">
       <div className={`${SCENE} p-3 sm:p-5 space-y-3`}>
-        <Desk blocks={held} density={density} onTake={take} caption="On the desk" />
+        <Desk
+          blocks={held}
+          density={density}
+          onTake={take}
+          lit={(["hundreds", "tens", "ones"] as const)[guide.target]}
+          caption="On the desk"
+        />
         <Desk blocks={taken} density={density} gone caption="Taken away" />
         {showsDifference && <div aria-live="polite" className={`text-center text-3xl font-black tabular-nums ${DIFFERENCE.text}`}>
           {totalOf(held)}<span className="ml-2 text-[10px] uppercase text-ink/50">on the desk</span>

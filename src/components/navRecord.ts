@@ -42,20 +42,19 @@ export const withCounts = <T extends string | null | undefined>(
  *
  * Four names, fixed. A tab bar holds about four before the targets stop being
  * comfortable under a thumb, and these are the four a family reaches for on a
- * phone: where they are, what to play, the children being looked after, and the
+ * phone: where they are, what to play, their private buddy board, and the
  * switches. Naming them means an operator adding "Roles" to the menu can never
  * push "Learn" off the bar — the tabs a five-year-old needs are not something
  * an admin has to remember to keep at the top of a list.
  *
- * `children` is in the record only for an account holding `learner:create`, so
- * a child's own tablet simply shows three tabs. That is deliberate: a short bar
- * is honest, and padding it out with whatever came next in the record would put
- * an admin page under a learner's thumb.
+ * Children remains one tap away in Settings for adults. The leaderboard earns
+ * the permanent slot because it is used by the learner as well as their grown-up,
+ * and privacy status should never be hard to find.
  *
  * The rail has no such limit and lists the record in full, which is the whole
  * reason it is still the layout for a screen with room for it.
  */
-export const MOBILE_TABS = ["home", "game", "children", "settings"] as const;
+export const MOBILE_TABS = ["home", "game", "leaderboard", "settings"] as const;
 
 export interface TabSplit {
   /** Drawn as tabs, in `MOBILE_TABS` order. */

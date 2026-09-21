@@ -1,10 +1,12 @@
-import React, { Suspense, lazy, useEffect, useState } from "react";
+import React, { Suspense, lazy, useEffect, useState, useSyncExternalStore } from "react";
 import {
   Flame,
   Maximize2,
   Minimize2,
   MoreHorizontal,
   ScrollText,
+  Volume2,
+  VolumeX,
   X,
   Zap,
 } from "lucide-react";
@@ -16,6 +18,7 @@ import { useKoda } from "../../../lib/useKoda";
 import { themeSystem } from "../../../lib/themeSystem";
 import { playChrome } from "../round/answerSound";
 import { SvgAsset } from "../../../assets/svg";
+import { PreferencesAPI } from "../../../lib/preferences";
 import type { KodaSDK } from "../../types";
 
 /**
@@ -109,11 +112,12 @@ export interface SkillRoundTopBarProps {
  * settings, fullscreen and the way out — so a skill gets the whole toolbar by
  * rendering this, not by wiring the buttons itself.
  *
- * No mute here: every question already carries its own read-aloud button, and
- * the app-wide Sound FX switch lives in Settings, which `playSound` honours on
- * its own. A third control for the same thing was one a child could hit by
- * accident and not understand. That is the
- * point: when each skill assembled its own, counting showed invented figures
+ * Spoken lesson audio can be muted here as well as in Settings. Both surfaces
+ * edit the same synced preference, so this is a convenient second door rather
+ * than a second setting. Sound effects remain separate, just as they are in
+ * Settings.
+ *
+ * When each skill assembled its own bar, counting showed invented figures
  * and addition showed none, and the two rounds stopped looking like one
  * product.
  *
@@ -142,6 +146,16 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
   const [showVoice, setShowVoice] = useState(false);
   const [showAsk, setShowAsk] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // This is the existing Settings preference, subscribed rather than copied.
+  // A change here updates Settings immediately; a synced change from another
+  // device updates this button while the round is still open.
+  useSyncExternalStore(PreferencesAPI.subscribe, PreferencesAPI.version, PreferencesAPI.version);
+  const voiceEnabled = PreferencesAPI.current().voiceEnabled;
+  const toggleVoice = () => {
+    if (voiceEnabled) koda.speech.stop();
+    PreferencesAPI.update({ voiceEnabled: !voiceEnabled });
+  };
 
   /*
    * Koda, mid-round.
@@ -249,6 +263,16 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
 
             {/* The controls a child uses, kept reachable on every width */}
             <div className="flex items-center gap-1 shrink-0 sm:hidden">
+              <button
+                type="button"
+                onClick={toggleVoice}
+                className={compactButton}
+                title={voiceEnabled ? "Turn Koda’s voice off" : "Turn Koda’s voice on"}
+                aria-label={voiceEnabled ? "Turn Koda’s voice off" : "Turn Koda’s voice on"}
+                aria-pressed={voiceEnabled}
+              >
+                {voiceEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+              </button>
               {mode && (
                 <button
                   onClick={() => {
@@ -369,6 +393,17 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
                 <span className="hidden md:inline">Ask Koda</span>
               </button>
             )}
+
+            <button
+              type="button"
+              onClick={toggleVoice}
+              className={iconButton}
+              title={voiceEnabled ? "Turn Koda’s voice off" : "Turn Koda’s voice on"}
+              aria-label={voiceEnabled ? "Turn Koda’s voice off" : "Turn Koda’s voice on"}
+              aria-pressed={voiceEnabled}
+            >
+              {voiceEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+            </button>
 
             {extras}
 

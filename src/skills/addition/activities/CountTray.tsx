@@ -12,6 +12,8 @@ import {
   type RoundQuestion,
   playChrome,
   answerChoices,
+  guideSetup,
+  useGuide,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { SvgAsset } from "../../../assets/svg";
@@ -309,6 +311,16 @@ export const choicesFor = (answer: number, seed: string): number[] => answerChoi
  * short wherever the child is choosing between answers rather than producing
  * one by counting.
  */
+/**
+ * "an apple", not "a apple".
+ *
+ * The nouns come from the asset list, where eight of them are ordinary words
+ * and one starts with a vowel — so the sentence was right for seven objects
+ * and wrong for the eighth, which is exactly the kind of thing that only ever
+ * shows up on a child's screen.
+ */
+const an = (noun: string) => `${/^[aeiou]/i.test(noun) ? "an" : "a"} ${noun}`;
+
 export function trayHints(
   q: TrayQuestion,
   state: {
@@ -328,10 +340,10 @@ export function trayHints(
         state.kidTip ?? "Adding means putting groups together. Then you count once.",
         state.merged
           ? state.counted === 0
-            ? `They are one pile now. Touch each ${one} in turn and say the numbers out loud.`
-            : `You have counted ${state.counted}. Keep going with the ${many} that have no number on them yet.`
-          : `The two groups are still apart. Tap "Put them together" first — that is what adding does.`,
-        `There were ${q.a} and ${q.b}. Together that is one pile of ${q.sum} ${many}.`,
+            ? `One pile now. Touch each ${one} and say the numbers out loud.`
+            : `You have ${state.counted}. Carry on with the ones still plain.`
+          : `Tap "Put them together" first. That is what adding does.`,
+        `${q.a} and ${q.b} poured together make one pile of ${q.sum}.`,
       );
 
     case "count_on": {
@@ -339,9 +351,9 @@ export function trayHints(
       return composeHints(
         state.kidTip ?? "The closed box is already counted. Start from its number.",
         state.counted === 0
-          ? `The box holds ${q.a}. Do not count it again — say "${say(q.a)}", then touch the first ${one} outside it and say "${say(q.a + 1)}".`
-          : `You are at ${q.a + state.counted}. There ${left === 1 ? "is 1" : `are ${left}`} still to touch — say ${say(q.a + state.counted + 1)} for the next one.`,
-        `Start at ${q.a} and count on ${q.b}: ${Array.from({ length: q.b }, (_, i) => q.a + i + 1).join(", ")}.`,
+          ? `The box is ${q.a} already. Say "${say(q.a)}", then "${say(q.a + 1)}" for the first loose one.`
+          : `You are at ${q.a + state.counted}. ${left === 1 ? "One" : left} still to touch.`,
+        `Count on ${q.b} from ${q.a}: ${Array.from({ length: q.b }, (_, i) => q.a + i + 1).join(", ")}.`,
       );
     }
 
@@ -350,10 +362,18 @@ export function trayHints(
       const smaller = Math.min(q.a, q.b);
       return composeHints(
         state.kidTip ?? "You can add in any order, so start from the bigger number.",
+        /*
+         * The choice is the technique, so the rung makes the choice and stops.
+         *
+         * This used to explain the choice as well — "starting from 3 would mean
+         * counting 8" — which is the right idea said to the wrong person at the
+         * wrong moment. A child who is stuck needs the move; the reason it is
+         * the better move is a page of the method, behind the bubble.
+         */
         state.startPicked === null
-          ? `${bigger} is bigger than ${smaller}. Start from ${bigger} and you only have ${smaller} more to count — starting from ${smaller} would mean counting ${bigger}.`
-          : `You started at ${state.startPicked}. Touch the ${many} in the other group one at a time, counting on.`,
-        `Start at ${bigger} and count on ${smaller}: ${Array.from({ length: smaller }, (_, i) => bigger + i + 1).join(", ")}.`,
+          ? `${bigger} is the bigger one. Start there, not at ${smaller}.`
+          : `You started at ${state.startPicked}. Now count the other group on.`,
+        `From the bigger, ${bigger}, count on ${smaller}: ${Array.from({ length: smaller }, (_, i) => bigger + i + 1).join(", ")}.`,
       );
     }
 
@@ -361,7 +381,7 @@ export function trayHints(
       const some = q.a === 0 ? q.b : q.a;
       return composeHints(
         state.kidTip ?? "Zero means none. The number stays the same.",
-        `One group is empty. Nothing is going in and nothing is coming out, so the ${some} ${many} are still there.`,
+        `One group is empty, so nothing joins the ${some} ${many}.`,
         // Stops at the rule rather than the number: the child is choosing
         // between answers here, so saying the total would answer it for them.
         `Adding zero always leaves a number exactly as it was.`,
@@ -372,8 +392,8 @@ export function trayHints(
       const some = q.b === 1 ? q.a : q.b;
       return composeHints(
         state.kidTip ?? "Adding one is just saying the next number.",
-        `You have ${some}, and one more is going in. Count on just once from ${some}.`,
-        `The number straight after ${some} when you count is the answer.`,
+        `You have ${some}, and one more joins it. Count on once.`,
+        `The number straight after ${some} is the answer.`,
       );
     }
 
@@ -381,9 +401,9 @@ export function trayHints(
       return composeHints(
         state.kidTip ?? "One number on each hand. Then count every finger that is up.",
         state.fingers.left + state.fingers.right === 0
-          ? `Put ${q.a} up on the left hand and ${q.b} up on the right hand.`
-          : `You have ${state.fingers.left} up on the left and ${state.fingers.right} on the right. You need ${q.a} and ${q.b}.`,
-        `Count every raised finger, starting on the left: ${Array.from({ length: q.sum }, (_, i) => i + 1).join(", ")}.`,
+          ? `Put ${q.a} up on the left hand and ${q.b} on the right.`
+          : `Left has ${state.fingers.left}, right has ${state.fingers.right}. You need ${q.a} and ${q.b}.`,
+        `Count every raised finger from the left, ending at ${q.sum}.`,
       );
 
     default: {
@@ -391,9 +411,9 @@ export function trayHints(
       return composeHints(
         state.kidTip ?? "Do not start again at the second group. Keep counting on.",
         state.counted === 0
-          ? `Start at the left-hand group. Touch a ${one} and say "one", and keep a number for each one you touch.`
-          : `You have counted ${state.counted}. There ${left === 1 ? "is 1 left" : `are ${left} left`} — carry straight on into the other group, saying ${say(state.counted + 1)} next.`,
-        `There are ${q.a} in one group and ${q.b} in the other. Counted straight through, that is ${q.sum} ${many} altogether.`,
+          ? `Start at the left group. Touch ${an(one)} and say "one".`
+          : `You have ${state.counted}. ${left === 1 ? "One" : left} left — say ${say(state.counted + 1)} next.`,
+        `Counted straight through both groups, ${q.a} and ${q.b} make ${q.sum}.`,
       );
     }
   }
@@ -430,7 +450,9 @@ const Token: React.FC<{
   tone: "a" | "b";
   onTap?: () => void;
   delay: number;
-}> = ({ asset, label, order, badges, tone, onTap, delay }) => (
+  /** The one the coach is pointing at. */
+  lit?: boolean;
+}> = ({ asset, label, order, badges, tone, onTap, delay , lit = false}) => (
   <motion.button
     type="button"
     onClick={onTap}
@@ -440,8 +462,10 @@ const Token: React.FC<{
     initial={{ opacity: 0, scale: 0.6 }}
     animate={{ opacity: 1, scale: 1 }}
     transition={{ ...SPRING.enter, delay }}
-    aria-label={label}
-    className={`relative ${TOKEN_COMPACT} flex items-center justify-center rounded-2xl`}
+    aria-label={`${label}${lit ? ", touch this one next" : ""}`}
+    className={`relative ${TOKEN_COMPACT} flex items-center justify-center rounded-2xl${
+      lit ? " ring-4 ring-indigo-500 animate-pulse" : ""
+    }`}
   >
     <span
       className={`block w-full h-full transition-[filter,opacity] duration-200 ${
@@ -746,6 +770,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
     if (value < bigger) {
       /* Not a wrong answer — a wrong *route*. The child has not said what the
          total is yet, so scoring this would file an answer they never gave. */
+      guide.stumbled();
       nudge.refuse(
         `Starting at ${value} means counting ${bigger} more. Start at ${bigger} and there are only ${value} to count.`,
       );
@@ -780,6 +805,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
     if (round.feedback) return;
     const raised = fingers.left + fingers.right;
     if (raised === 0) {
+      guide.stumbled();
       nudge.refuse(`No fingers are up yet. Put ${question.a} on one hand and ${question.b} on the other.`);
       return;
     }
@@ -839,6 +865,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
             label={`${side === "a" ? "First" : "Second"} group ${question.asset.one} ${i + 1}${
               orderOf(key) !== null ? ", counted" : ""
             }`}
+            lit={guide.target === counted.length && orderOf(key) === null && counted.length === i && side === (counted.length < question.a ? "a" : "b")}
             order={orderOf(key)}
             badges={badges}
             tone={side}
@@ -849,6 +876,51 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
       })}
     </div>
   );
+
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived, rather than two systems with two vocabularies.
+   */
+  const hints = practising
+    ? []
+    : trayHints(question, {
+        counted: counted.length,
+        merged,
+        startPicked,
+        fingers,
+        kidTip: copy.kidTip,
+      });
+  /*
+   * Two different questions, so two different conditions.
+   *
+   * `guided` is whether Koda steps in *by itself* — the clock and the stumbles
+   * — and that is what the parent's switch turns off. Whether the help *looks
+   * like* the coach is not a setting at all: the Hint button shows the same
+   * bubble, the same rungs and the same "Got it" either way. It used to fall
+   * back to the old hint card when the switch was off, so turning off the
+   * interruptions also changed what help looked like, and a child had two
+   * panels to learn for one ladder.
+   */
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    /* The next object to touch, so the light walks the count along the row —
+       the same promise counting's tray makes. */
+    target: counted.length,
+    progress: counted.length + (merged ? 1 : 0) + fingers.left + fingers.right,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
 
   return (
     <SkillRound
@@ -862,13 +934,9 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
       iconTone="purple"
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message}
-      hints={practising ? [] : trayHints(question, {
-        counted: counted.length,
-        merged,
-        startPicked,
-        fingers,
-        kidTip: copy.kidTip,
-      })}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onStartOver={
         !round.feedback && (counted.length > 0 || merged || startSide !== null || fingers.left > 0 || fingers.right > 0) ? restart : undefined
       }

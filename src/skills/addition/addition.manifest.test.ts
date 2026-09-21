@@ -15,7 +15,11 @@ import { skill } from ".";
  * changing — only that somebody asked about it. That is still the difference
  * between a switch that does nothing and a switch that might.
  */
-const SRC = join(process.cwd(), "src/skills/addition");
+/** The repo root, resolved once — see the two `fromRoot` reads below. */
+const ROOT = process.cwd();
+const fromRoot = (path: string) => readFileSync(join(ROOT, path), "utf8");
+
+const SRC = join(ROOT, "src/skills/addition");
 
 const sourceText = (() => {
   const parts: string[] = [];
@@ -33,7 +37,12 @@ const sourceText = (() => {
      as one file rather than scanning `src/lib`, so a stray mention of a key
      somewhere in the app cannot pass for reading it. See `skillContract`, which
      holds the same line for feature flags. */
-  parts.push(readFileSync(join(process.cwd(), "src/lib/premiumLessons.ts"), "utf8"));
+  parts.push(fromRoot("src/lib/premiumLessons.ts"));
+  /* And one the round honours on every skill's behalf: the Smart guide's
+     patience is read by the shared coach rather than by any engine, because
+     seventeen engines each reading it is seventeen chances to forget. Named,
+     like the line above, so a stray mention elsewhere cannot pass for a read. */
+  parts.push(fromRoot("src/skills/kit/round/useGuide.ts"));
   return parts.join("\n");
 })();
 

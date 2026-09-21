@@ -8,6 +8,8 @@ import {
   playCopy,
   useSkillRound,
   type RoundQuestion,
+  guideSetup,
+  useGuide,
 } from "../../kit";
 import { quietWhenPractising } from "../../kit/practice";
 import { themeSystem } from "../../../lib/themeSystem";
@@ -285,6 +287,15 @@ export const PlaceValueDesk: React.FC<ActivityProps<DeskParams>> = ({ params, ko
   const refuse = (written: string, spoken: string) => {
     nudge.refuse(written);
     speak(spoken);
+    /*
+     * A refused move is this engine already knowing the move was wrong.
+     *
+     * What it never did was notice a child doing it repeatedly, which is the
+     * difference between a slip and not having the technique. Safe to call a
+     * coach declared further down: this only ever runs from a handler, long
+     * after the render that created it.
+     */
+    guide.stumbled();
   };
 
   const round = useSkillRound({
@@ -398,6 +409,32 @@ export const PlaceValueDesk: React.FC<ActivityProps<DeskParams>> = ({ params, ko
   /* ---- the desk ---- */
   const digitsOn = String(shown === 0 ? "" : shown).padStart(COLUMNS.length, " ").split("");
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const hints = practising ? [] : deskHints(question, copy.kidTip, { moved, count, place });
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    /* The count the desk is waiting for: pick how many before placing them. */
+    target: count === undefined ? question.b : -1,
+    progress: moved,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   const desk = (
     <div className={SCROLL_BOX}>
       <div
@@ -478,7 +515,7 @@ export const PlaceValueDesk: React.FC<ActivityProps<DeskParams>> = ({ params, ko
             key={n}
             type="button"
             aria-pressed={count === n}
-            aria-label={`${n} of them`}
+            aria-label={`${n} of them${guide.target === n ? ", choose this one next" : ""}`}
             onClick={() => {
               if (round.feedback) return;
               setCount(n);
@@ -522,6 +559,7 @@ export const PlaceValueDesk: React.FC<ActivityProps<DeskParams>> = ({ params, ko
     </div>
   );
 
+
   return (
     <SkillRound
       koda={koda}
@@ -531,7 +569,9 @@ export const PlaceValueDesk: React.FC<ActivityProps<DeskParams>> = ({ params, ko
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : deskHints(question, copy.kidTip, { moved, count, place })}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onStartOver={
         !round.feedback && (moved !== 0 || count !== undefined || place !== undefined) ? restart : undefined
       }

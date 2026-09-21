@@ -10,6 +10,8 @@ import {
   type RoundQuestion,
   playChrome,
   answerChoices,
+  guideSetup,
+  useGuide,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B, CHANGE, TOTAL } from "../internal/data/additionPalette";
@@ -297,20 +299,30 @@ export function factHints(
   switch (q.mode) {
     case "near_up":
     case "near_down": {
-      const delta = q.mode === "near_up" ? "one more than" : "one less than";
+      /*
+       * Up and down are different techniques, so they get different words.
+       *
+       * Both lessons used to be handed the same middle rung — "tap the double
+       * first, this one sits right beside it" — which is true of both and
+       * teaches neither. Which *side* of the double you are on is the entire
+       * lesson, so the rung has to say it before the child taps anything.
+       */
+      const up = q.mode === "near_up";
       return composeHints(
         state.kidTip ?? "A near double is one step from a double you already know.",
         state.revealed
-          ? `You have the double: ${q.a} and ${q.a} is ${q.helper!.sum}. This fact is ${delta} that.`
-          : `Tap the double first. ${q.a} and ${q.a} is a fact you know, and this one sits right beside it.`,
-        `${q.helper!.sum} ${q.mode === "near_up" ? "and one more" : "take one away"} is ${q.sum}.`,
+          ? `The double ${q.a} and ${q.a} is ${q.helper!.sum}. This one is ${up ? "one more" : "one less"}.`
+          : up
+            ? `Tap the double ${q.a} and ${q.a}. This fact is one bigger.`
+            : `Tap the double ${q.a} and ${q.a}. This fact is one smaller.`,
+        `${q.helper!.sum} ${up ? "and one more" : "take one away"} is ${q.sum}.`,
       );
     }
     case "known_fact":
       return composeHints(
         state.kidTip ?? "Pick a fact you already know that is close to this one.",
-        `${q.a} and ${q.a} is a double, and doubles are the easiest facts to hold. That one is closest to ${q.a} plus ${q.b}.`,
-        `${q.helper!.sum} is the double. Count on from there to reach ${q.a} plus ${q.b}.`,
+        `The double ${q.a} and ${q.a} is the closest fact you already hold.`,
+        `The double is ${q.helper!.sum}. Count on from there to ${q.a} plus ${q.b}.`,
       );
     case "family":
       return composeHints(
@@ -328,8 +340,8 @@ export function factHints(
     default:
       return composeHints(
         state.kidTip ?? "A double is the same number twice.",
-        `Two rows of ${q.a}. Count one row, then the other — or count them in twos.`,
-        `${q.a} and ${q.a} is ${q.sum}.`,
+        `Two rows of ${q.a}. Count one row, then the other.`,
+        `Two rows of ${q.a} make ${q.sum}. That is the double.`,
       );
   }
 }
@@ -444,6 +456,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
     if (!sameFact(fact, question.helper!)) {
       // A wrong route, not a wrong answer: the child has not said what the
       // total is, so nothing may be filed against them for it.
+      guide.stumbled();
       nudge.refuse(
         `${fact.a} and ${fact.b} is a real fact, but it is not close to ${question.a} plus ${question.b}. Look for a double.`,
       );
@@ -495,6 +508,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
     if (round.feedback) return;
     const missing = question.members!.filter((_, i) => (members[i] ?? "") === "");
     if (missing.length > 0) {
+      guide.stumbled();
       nudge.refuse(`${missing.length} ${missing.length === 1 ? "fact is" : "facts are"} still empty.`);
       return;
     }
@@ -515,6 +529,41 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
   const needsHelper = question.mode === "near_up" || question.mode === "near_down";
   const picking = question.mode === "known_fact" && !revealed;
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived, rather than two systems with two vocabularies.
+   */
+  const hints = practising ? [] : factHints(question, { revealed, kidTip: copy.kidTip });
+  /*
+   * Two different questions, so two different conditions.
+   *
+   * `guided` is whether Koda steps in *by itself* — the clock and the stumbles
+   * — and that is what the parent's switch turns off. Whether the help *looks
+   * like* the coach is not a setting at all: the Hint button shows the same
+   * bubble, the same rungs and the same "Got it" either way. It used to fall
+   * back to the old hint card when the switch was off, so turning off the
+   * interruptions also changed what help looked like, and a child had two
+   * panels to learn for one ladder.
+   */
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    target: -1,
+    progress: revealed ? 1 : 0,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   return (
     <SkillRound
       koda={koda}
@@ -527,7 +576,9 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
       iconTone="pink"
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message}
-      hints={practising ? [] : factHints(question, { revealed, kidTip: copy.kidTip })}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onStartOver={
         !round.feedback && (revealed || entry !== "" || Object.values(members).some((v) => v !== "")) ? restart : undefined
       }

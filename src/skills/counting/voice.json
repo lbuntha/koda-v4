@@ -107,45 +107,6 @@
       ]
     }
   },
-  "_phrasesComment": [
-    "What the offline coach says when it steps in — see internal/guide/countGuide.ts.",
-    "",
-    "Recorded rather than left to live TTS because of when they are needed: the",
-    "coach speaks at the moment a child has stopped, and a line that arrives after",
-    "a request to the server and a four-second timeout arrives after they have",
-    "given up. These are the one part of this skill where the latency *is* the",
-    "pedagogy.",
-    "",
-    "Written out rather than templated, and that is deliberate twice over. A",
-    "template lands in audio/prompts, and none of these is a question — they are",
-    "asides, which is what audio/phrases is for. And enumerating them keeps the",
-    "count honest: the numbers here run to six because count-in-a-row draws 3-6",
-    "objects, so widen this list if that lesson's countRange grows.",
-    "",
-    "What the coach *shows* is not recorded and does not need to be: the screen",
-    "can afford 'touch the next butterfly', the voice cannot afford eight nouns",
-    "times six numbers. GuideCue carries both strings for exactly that reason."
-  ],
-  "phrases": [
-    "Start at the very left. Touch it and say one.",
-    "That one already has a number. Touch one that is still plain.",
-    "Count them in order, from left to right.",
-    "Keep going. Touch the next one and say two.",
-    "Keep going. Touch the next one and say three.",
-    "Keep going. Touch the next one and say four.",
-    "Keep going. Touch the next one and say five.",
-    "Keep going. Touch the next one and say six.",
-    "Touch the glowing one and say one.",
-    "Touch the glowing one and say two.",
-    "Touch the glowing one and say three.",
-    "Touch the glowing one and say four.",
-    "Touch the glowing one and say five.",
-    "Touch the glowing one and say six.",
-    "Last one! Say three. That is how many there are.",
-    "Last one! Say four. That is how many there are.",
-    "Last one! Say five. That is how many there are.",
-    "Last one! Say six. That is how many there are."
-  ],
   "_promptsComment": [
     "What an activity says as the question — the thing being asked.",
     "",
@@ -172,5 +133,20 @@
     "Add more blocks to make the number.",
     "Take some blocks away.",
     "That's the number! Press Check."
+  ],
+  "_phrasesComment": [
+    "No coach lines are declared here, and that is a decision rather than an omission.",
+    "",
+    "The coach speaks the lesson's hint ladder — the same words the Hint button",
+    "shows — and those rungs are written off live state: they carry counts, nouns",
+    "and how far the child has got. That is not a set anybody can record, so the",
+    "spoken half takes the server-TTS path and then the browser's own voice,",
+    "exactly as the hint panel always has.",
+    "",
+    "Eighteen short stand-ins were declared here while the coach had wording of its",
+    "own, and merging the two ladders retired them before they were ever recorded.",
+    "`useGuide` still takes a `spoken` array for a skill that wants recorded rungs;",
+    "filling it means first writing a ladder with a finite vocabulary, which is a",
+    "copy pass, not a recording run. See docs/COUNTING_GUIDE_BUILD_PLAN.md section 6."
   ]
 }

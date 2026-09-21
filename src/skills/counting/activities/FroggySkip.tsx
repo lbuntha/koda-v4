@@ -13,6 +13,8 @@ import {
   isPractice,
   modeAt,
   playChrome,
+  guideSetup,
+  useGuide,
 } from "../../kit";
 import { SvgAsset } from "../../../assets/svg";
 import { SCENE } from "../internal/data/countingLayout";
@@ -281,12 +283,14 @@ export function numberLineHints(
 
     return composeHints(
       state.kidTip ?? "Look at how much it grows each hop.",
-      `Look at two numbers that sit next to each other and work out the jump between them. Every hop on this line is the same size: it goes ${jump}.`,
+      `Every hop on this line is the same size. It goes ${jump}.`,
+      // The child answers by choosing, so the rung gives the move and stops
+      // short of the number.
       before !== null
-        ? `The gap comes straight after ${before}. Start at ${before} and go ${jump} — that number belongs in the empty pad.`
+        ? `Start at ${before} and go ${jump}. That lands on the empty pad.`
         : after !== null
-          ? `The gap comes straight before ${after}. Go back ${question.step} from ${after} — that is the number that belongs in the empty pad.`
-          : `Count ${jump} along the line, pad by pad, until you reach the empty one.`,
+          ? `Go back ${question.step} from ${after} to reach the empty pad.`
+          : `Count ${jump} along the line until you reach the empty pad.`,
     );
   }
 
@@ -298,11 +302,11 @@ export function numberLineHints(
   return composeHints(
     state.kidTip ?? "Say the numbers out loud as you hop.",
     next === undefined
-      ? `The frog is on ${here}, the last pad. That is the number you counted to.`
-      : `The frog is on ${here}. Every hop adds ${question.step}, so the next pad is ${here} + ${question.step} = ${next}. Press Hop and say it out loud.`,
+      ? `The frog is on ${here}, the last pad. That is your answer.`
+      : `The frog is on ${here}. ${here} + ${question.step} is ${next}. Press Hop.`,
     // Saying the whole chant is the point of skip counting: the pattern is
     // heard before it is understood, and the pads are on screen anyway.
-    `Keep hopping and chant the pads as you land: ${pads.join(", ")}. The last one, ${goal}, is where the frog is going.`,
+    `Chant the pads as you land: ${pads.join(", ")}. The frog stops at ${goal}.`,
   );
 }
 
@@ -339,6 +343,38 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
   });
 
   const question = round.question as LineQuestion;
+
+  /*
+   * Two different questions, so two different conditions.
+   *
+   * `guided` is whether Koda steps in *by itself* — the clock and the stumbles
+   * — and that is what the parent's switch turns off. Whether the help *looks
+   * like* the coach is not a setting at all: the Hint button shows the same
+   * bubble, the same rungs and the same "Got it" either way. It used to fall
+   * back to the old hint card when the switch was off, so turning off the
+   * interruptions also changed what help looked like, and a child had two
+   * panels to learn for one ladder.
+   */
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+
+  const hints = practising ? [] : numberLineHints(question, { hop, kidTip: copy.kidTip });
+
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    /* The pad the next hop lands on. In `missing` the child picks a number
+       from buttons, so there is no pad to light and the words do the work. */
+    target: question.mode === "missing" ? -1 : hop + 1,
+    progress: hop,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
 
   /**
    * Report an answer.
@@ -394,6 +430,16 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
     const pads = question.pads ?? [];
     if (hop >= pads.length - 1) return;
 
+    /*
+     * A hop is progress, and there is no such thing as a wrong one here.
+     *
+     * This line has a single button and the line above guards it, so a child
+     * cannot overshoot or land badly — which leaves stalling as the only thing
+     * the coach can see. Inventing a second signal to match the other engines
+     * would mean inventing a mistake the child cannot make.
+     */
+    guide.moved();
+
     const next = hop + 1;
     setHop(next);
     playChrome(koda, "clink");
@@ -445,7 +491,9 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
       prompt={prompt}
       iconName="footprints"
       iconTone="emerald"
-      hints={practising ? [] : numberLineHints(question, { hop, kidTip: copy.kidTip })}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onStartOver={
         !round.feedback && (hop > 0 || guess !== null) ? restart : undefined
       }
@@ -487,6 +535,10 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
             {(question.pads ?? []).map((val, idx) => {
               const reached = idx <= hop;
               const here = idx === hop;
+              /* Where the next hop lands. The frog is already the loudest thing
+                 on the line, so the coach lights the pad *ahead* of it — the
+                 place the child is going, which is what they have lost. */
+              const lit = guide.target === idx;
               return (
                 <div key={idx} className="flex flex-col items-center gap-2 shrink-0">
                   {here ? (
@@ -507,11 +559,12 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
                     </motion.div>
                   ) : (
                     <div
-                      className={`w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center transition-[filter,opacity] duration-200 ${
+                      className={`w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center rounded-full transition-[filter,opacity] duration-200 ${
                         reached ? "" : "opacity-70 saturate-[0.65]"
-                      }`}
+                      } ${lit ? "ring-4 ring-indigo-500 animate-pulse !opacity-100 !saturate-100" : ""}`}
                     >
                       <SvgAsset id="counting-lily-pad" size="100%" title="Lily pad" />
+                      {lit && <span className="sr-only">Hop to this pad next</span>}
                     </div>
                   )}
                   <span className="font-black text-base text-ink tabular-nums">{val}</span>
@@ -551,7 +604,7 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
                 transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
                 className={`w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-2xl border-2 flex flex-col items-center justify-center font-black text-lg shrink-0 ${
                   val === null
-                    ? "bg-amber-400/20 border-amber-400 text-slate-800 dark:text-amber-300"
+                    ? "bg-violet-400/20 border-violet-500 text-slate-800 dark:text-violet-200"
                     : "bg-surface border-line text-ink"
                 }`}
               >

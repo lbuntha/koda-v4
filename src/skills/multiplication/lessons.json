@@ -24,6 +24,9 @@
           "productMax": 36,
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Build a set of groups that all hold the same number, then say how many there are altogether.",
           "stepByStep": [
@@ -73,6 +76,9 @@
           ],
           "productMax": 30,
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "targetObjective": "Decide whether a set of groups is equal, and say which one is different when it is not.",
@@ -124,6 +130,9 @@
           "productMax": 40,
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Count equal groups by adding the group size once for every group.",
           "stepByStep": [
@@ -174,6 +183,9 @@
           "productMax": 60,
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Choose the multiplication sentence that describes a set of equal groups.",
           "stepByStep": [
@@ -223,6 +235,9 @@
           "productMax": 60,
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Say which factor counts the groups and which counts what is inside one.",
           "stepByStep": [
@@ -267,6 +282,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Multiply by one, and see why the answer is the other number.",
           "stepByStep": [
@@ -310,6 +328,9 @@
             12
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "targetObjective": "Multiply by zero, and see why the answer is always nothing.",
@@ -358,6 +379,9 @@
             6
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "targetObjective": "Build an array with a given number of rows and a given number in each row.",
@@ -408,6 +432,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Read a finished array as a multiplication and give its total.",
           "stepByStep": [
@@ -455,6 +482,9 @@
             10
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "targetObjective": "Turn an array a quarter turn and explain why its total is unchanged.",
@@ -505,6 +535,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Choose both multiplication sentences that describe one array.",
           "stepByStep": [
@@ -553,6 +586,9 @@
             10
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "targetObjective": "Given the total and one side of an array, find the other side.",
@@ -606,6 +642,9 @@
           "max": 100,
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Make equal hops along a number line and read the number you land on.",
           "stepByStep": [
@@ -657,6 +696,9 @@
           "max": 81,
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Read a multiplication as a number of hops of a given size, and find where it lands.",
           "stepByStep": [
@@ -706,6 +748,9 @@
           "max": 100,
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Given where the hops land and how long each one is, find how many hops there were.",
           "stepByStep": [
@@ -752,6 +797,9 @@
           "max": 60,
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Decide whether a number is a multiple of a given number.",
           "stepByStep": [
@@ -796,6 +844,9 @@
             12
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "targetObjective": "Know the two times table as doubling.",
@@ -842,6 +893,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Know the ten times table as a count of tens.",
           "stepByStep": [
@@ -887,6 +941,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Work out the five times table by halving the ten times table.",
           "stepByStep": [
@@ -928,6 +985,9 @@
           "mode": "find_cell",
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Find a product on a times table by tracing its row and its column.",
           "stepByStep": [
@@ -967,6 +1027,9 @@
         "question": {
           "mode": "pattern_hunt",
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "targetObjective": "Spot which answers in a row follow a stated rule.",
@@ -1008,6 +1071,9 @@
           "mode": "squares",
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Know the square numbers and where they sit on the times table.",
           "stepByStep": [
@@ -1048,6 +1114,9 @@
         "question": {
           "mode": "commutative_pairs",
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "targetObjective": "Pair a shaded cell with the cell that holds the same product.",
@@ -1093,6 +1162,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Work out the four times table by doubling twice.",
           "stepByStep": [
@@ -1137,6 +1209,9 @@
             12
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "targetObjective": "Work out the eight times table by doubling three times.",
@@ -1186,6 +1261,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Work out the three times table from the two times table.",
           "stepByStep": [
@@ -1234,6 +1312,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Work out the six times table from the five times table.",
           "stepByStep": [
@@ -1278,6 +1359,9 @@
             12
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "targetObjective": "Work out the nine times table from the ten times table.",
@@ -1328,6 +1412,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Work out the seven times table by splitting it into five and two.",
           "stepByStep": [
@@ -1377,6 +1464,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Work out the eleven and twelve times tables from the ten times table.",
           "stepByStep": [
@@ -1421,6 +1511,9 @@
             12
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "targetObjective": "Work out a fact next to a square number from the square itself.",
@@ -1467,6 +1560,9 @@
             12
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "targetObjective": "Choose a fact you already know that gets you to a fact you do not.",
@@ -1518,6 +1614,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Cut an array into two smaller arrays and add their totals.",
           "stepByStep": [
@@ -1564,6 +1663,9 @@
           "productMax": 120,
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Multiply three numbers, choosing which two to multiply first.",
           "stepByStep": [
@@ -1608,6 +1710,9 @@
             30
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "targetObjective": "Halve one factor and double the other to reach an easier product.",
@@ -1655,6 +1760,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Find every pair of numbers that multiply to make a given total.",
           "stepByStep": [
@@ -1698,6 +1806,9 @@
             100
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "targetObjective": "Decide whether a number has any factor pair besides one and itself.",
@@ -1748,6 +1859,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Multiply a number by ten or a hundred by moving its digits.",
           "stepByStep": [
@@ -1793,6 +1907,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Multiply by a multiple of ten by counting tens instead of ones.",
           "stepByStep": [
@@ -1836,6 +1953,9 @@
             9
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "targetObjective": "Multiply two multiples of ten and land the answer in the right place.",
@@ -1882,6 +2002,9 @@
           "unitsUntil": 2,
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Find the area of a rectangle from the lengths of its two sides.",
           "stepByStep": [
@@ -1925,6 +2048,9 @@
           "mode": "area_2x1",
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Split a two-digit side by place value and fill in each piece.",
           "stepByStep": [
@@ -1967,6 +2093,9 @@
           "mode": "partial_products",
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Record each partial product on its own row and total them.",
           "stepByStep": [
@@ -2007,6 +2136,9 @@
         "question": {
           "mode": "area_2x2",
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "targetObjective": "Split both sides by place value and fill in all four pieces.",
@@ -2050,6 +2182,9 @@
           "digitsA": 2,
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Multiply a two-digit number by a one-digit number in columns.",
           "stepByStep": [
@@ -2090,6 +2225,9 @@
           "mode": "regroup",
           "digitsA": 2,
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "targetObjective": "Multiply in columns, recording each carry.",
@@ -2132,6 +2270,9 @@
           "mode": "two_digit",
           "digitsA": 2,
           "questionsPerRound": 4
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "targetObjective": "Multiply two two-digit numbers using two partial rows.",
@@ -2176,6 +2317,9 @@
           "digitsB": 1,
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Estimate a product by rounding each factor first.",
           "stepByStep": [
@@ -2219,6 +2363,9 @@
           "digitsB": 1,
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Decide whether a claimed answer could be right, by estimating.",
           "stepByStep": [
@@ -2226,7 +2373,7 @@
             "Compare that with the answer being claimed.",
             "An answer ten times out is not close, however tidy it looks."
           ],
-          "kidTip": "If it is ten times out, it is wrong — you do not need the real answer.",
+          "kidTip": "Ten times out is wrong, whatever the real answer is.",
           "audioPrompt": "Someone has given an answer. Could it be right?"
         }
       },
@@ -2267,6 +2414,9 @@
             12
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "targetObjective": "Find the total when a story gives the number of groups and the size of each.",
@@ -2317,6 +2467,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Find how many equal groups a total makes.",
           "stepByStep": [
@@ -2364,6 +2517,9 @@
             12
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "targetObjective": "Find how many go in each group when a total is shared equally.",
@@ -2413,6 +2569,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Work out an amount described as a number of times another amount.",
           "stepByStep": [
@@ -2461,6 +2620,9 @@
             12
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "targetObjective": "Use a per-one amount to find a total.",
@@ -2516,6 +2678,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "targetObjective": "Solve a problem that needs a multiplication and then one more step.",
           "stepByStep": [
@@ -2566,6 +2731,9 @@
             12
           ],
           "questionsPerRound": 6
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "targetObjective": "Choose a route to a product, and compare it with another that also works.",

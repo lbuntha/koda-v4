@@ -1,7 +1,9 @@
+import { act } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderActivity, type ActivityHarness, type RenderActivityOptions } from "../kit/testing";
 import type { AnyActivityDefinition } from "../types";
 import { skill } from ".";
+import { GUIDE_DEFAULTS } from "../kit";
 
 /**
  * Every switch in the Skill Manager changes something.
@@ -115,6 +117,68 @@ describe("every feature toggle changes the round", () => {
     expect(off.count("speech.say"), "a silenced skill spoke").toBe(0);
   });
 
+  it("guide_coach: Koda stepping in on its own", async () => {
+    /*
+     * The one flag whose effect is a *wait*, so it cannot be read off the
+     * opening frame like the others — the coach is silent until a child has
+     * been still long enough to look stuck. Fake timers let that seven seconds
+     * pass without the test taking seven seconds.
+     */
+    vi.useFakeTimers();
+    try {
+      const lesson = skill.lessons.find((l) => l.id === "count-all")!;
+      const params = lesson.params as Record<string, unknown>;
+
+      const play = (features: Record<string, boolean>) => {
+        const h = renderActivity(tray, { params, level: 1, features });
+        act(() => {
+          vi.advanceTimersByTime(GUIDE_DEFAULTS.startMs + 500);
+        });
+        const text = h.text();
+        h.unmount();
+        return text;
+      };
+
+      expect(play({}), "the coach never stepped in").toContain("Koda is helping");
+      expect(
+        play({ guide_coach: false }),
+        "the coach ignored its own switch",
+      ).not.toContain("Koda is helping");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("guide_voice: the coach shown but not heard", () => {
+    vi.useFakeTimers();
+    try {
+      const lesson = skill.lessons.find((l) => l.id === "count-all")!;
+      const params = lesson.params as Record<string, unknown>;
+
+      const play = (features: Record<string, boolean>) => {
+        const h = renderActivity(tray, { params, level: 1, features });
+        act(() => {
+          vi.advanceTimersByTime(GUIDE_DEFAULTS.startMs + 500);
+        });
+        const out = { text: h.text(), said: h.koda.count("speech.say") };
+        h.unmount();
+        return out;
+      };
+
+      const heard = play({});
+      const silent = play({ guide_voice: false });
+
+      expect(heard.said, "the coach never spoke").toBeGreaterThan(0);
+      expect(silent.said, "the coach ignored its own voice switch").toBeLessThan(heard.said);
+      // A cue that cannot be heard is still a cue.
+      expect(silent.text, "silencing the voice took the help away too").toContain(
+        "Koda is helping",
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("covers every feature the manifest declares", () => {
     // So a new switch cannot be added without a check that it does anything.
     const covered = new Set([
@@ -125,6 +189,8 @@ describe("every feature toggle changes the round", () => {
       "sound_chimes",
       "haptic_feedback",
       "audio_speech",
+      "guide_coach",
+      "guide_voice",
       /* Not a round behaviour and so not comparable here: it decides which
          lessons the app *offers*, before a round exists. Its switch, its count
          and the plan behind it are covered in `lib/premiumLessons.test.ts`. */

@@ -38,6 +38,7 @@ export {
  *  question on screen, and the panel that reads them out. */
 export {
   composeHints,
+  openWith,
   hintAt,
   playCopy,
   MAX_HINTS,
@@ -46,6 +47,20 @@ export {
 export { SkillHint, type SkillHintProps } from "./chrome/SkillHint";
 /** Help the skill offers rather than help the child asked for: the standard
  *  bubble, with the lesson's method behind Back and Next. */
+export {
+  useGuide,
+  guideSetup,
+  levelFor,
+  waitMs,
+  GUIDE_DEFAULTS,
+  PATIENCE,
+  type GuideController,
+  type GuideCue,
+  type GuideLevel,
+  type GuideReason,
+  type GuideSetup,
+  type UseGuideOptions,
+} from "./round/useGuide";
 export {
   SkillGuide,
   type SkillGuideProps,

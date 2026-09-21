@@ -10,6 +10,8 @@ import {
   useSkillRound,
   type RoundQuestion,
   playChrome,
+  guideSetup,
+  useGuide,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, CHANGE, TOTAL } from "../internal/data/additionPalette";
@@ -204,7 +206,11 @@ export function chainHints(
           : left > 1
             ? `No pairs left to find. Add what is on the board in any order.`
             : `One chip left. That is the total.`,
-        `Altogether they make ${q.sum}.`,
+        // The pairs are the technique, and the two lessons want different
+        // things of them: one pair to spot, or every pair on the board.
+        q.mode === "compatible"
+          ? `Join every pair making ${q.target}, then add what is left: ${q.sum}.`
+          : `Join the pair that makes ${q.target} first. The rest adds to ${q.sum}.`,
       );
     case "running":
       return composeHints(
@@ -220,7 +226,7 @@ export function chainHints(
         left > 1
           ? `Tap two numbers to put them together. ${left} chips left.`
           : `One chip left, and it holds the total.`,
-        `Altogether they make ${q.sum}.`,
+        `Joined two at a time, in any order, the list makes ${q.sum}.`,
       );
   }
 }
@@ -396,6 +402,7 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
   const checkBoard = () => {
     if (round.feedback) return;
     if (chips.length > 1) {
+      guide.stumbled();
       nudge.refuse(
         `${chips.length} numbers are still on the board. Tap two at a time to put them together.`,
       );
@@ -409,6 +416,7 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
     if (round.feedback) return;
     const missing = entries.findIndex((e) => e === "");
     if (missing !== -1) {
+      guide.stumbled();
       nudge.refuse(`Step ${missing + 1} is still empty. Add each number in turn.`);
       return;
     }
@@ -434,6 +442,41 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
   const prompt = promptFor(question, copy.prompts?.default);
   const running = question.mode === "running";
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived, rather than two systems with two vocabularies.
+   */
+  const hints = practising ? [] : chainHints(question, { chips, step, kidTip: copy.kidTip });
+  /*
+   * Two different questions, so two different conditions.
+   *
+   * `guided` is whether Koda steps in *by itself* — the clock and the stumbles
+   * — and that is what the parent's switch turns off. Whether the help *looks
+   * like* the coach is not a setting at all: the Hint button shows the same
+   * bubble, the same rungs and the same "Got it" either way. It used to fall
+   * back to the old hint card when the switch was off, so turning off the
+   * interruptions also changed what help looked like, and a child had two
+   * panels to learn for one ladder.
+   */
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    target: -1,
+    progress: step + (question.values?.length ?? 0) - chips.length,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   return (
     <SkillRound
       koda={koda}
@@ -446,7 +489,9 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
       iconTone="cyan"
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message}
-      hints={practising ? [] : chainHints(question, { chips, step, kidTip: copy.kidTip })}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onStartOver={
         !round.feedback && (step > 0 || held !== null || entries.some((e) => e !== "")) ? restart : undefined
       }

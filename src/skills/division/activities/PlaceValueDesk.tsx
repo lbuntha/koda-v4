@@ -1,7 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ActivityProps } from "../../types";
-import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import {
+  SkillRound,
+  composeHints,
+  guideSetup,
+  isPractice,
+  modeAt,
+  openWith,
+  playCopy,
+  useGuide,
+  useSkillRound,
+} from "../../kit";
 import { NumberPad } from "../internal/ui/NumberPad";
 import {
   buildPlaceQuestion,
@@ -38,7 +48,18 @@ export function buildQuestion(params: PlaceParams, index: number, seen?: Set<str
 
 export const promptFor = (question: PlaceQuestion): string => question.prompt;
 
-export function placeHints(question: PlaceQuestion): string[] {
+/**
+ * The ladder, opening with the lesson's own words.
+ *
+ * All fifty-six division lessons author a `kidTip` and, until this, not one
+ * was read: these ladders took the question and nothing else. `openWith`
+ * puts it back as rung one without costing the worked step — see the kit.
+ */
+export function placeHints(question: PlaceQuestion, kidTip?: string): string[] {
+  return openWith(kidTip, placeHintsRungs(question));
+}
+
+function placeHintsRungs(question: PlaceQuestion): string[] {
   switch (question.mode) {
     case "tens_quotient":
       return composeHints(
@@ -50,7 +71,7 @@ export function placeHints(question: PlaceQuestion): string[] {
       return composeHints(
         `Dividing by ${question.divisor} asks how many ${question.divisor}s are inside.`,
         "Every digit moves one place to the right for a ten, two for a hundred.",
-        "It is not 'take a zero off'. The digits are moving, and the zero goes because it has nowhere left to sit.",
+        "The digits move a place right. The zero goes because nothing holds it.",
       );
     case "tens_into_tens":
       return composeHints(
@@ -118,6 +139,33 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceParams>> = ({
     setSlot(0);
   }, [question]);
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const copy = playCopy(params);
+  const hints = practising ? [] : placeHints(question, copy.kidTip);
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    /* The next empty answer box, in the order the chart reads. */
+    target: question ? entries.findIndex((e) => e === "") : -1,
+    progress: 0,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   if (!question || entries.length !== question.parts.length) return null;
 
   const running = entries.reduce((sum, value) => sum + (value === "" ? 0 : Number(value)), 0);
@@ -165,7 +213,9 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceParams>> = ({
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : placeHints(question)}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onStartOver={
         !round.feedback && (entries.some((e) => e !== ""))
           ? () => {
@@ -204,7 +254,9 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceParams>> = ({
               <button
                 type="button"
                 onClick={() => setSlot(i)}
-                aria-label={`Answer for ${part} divided by ${question.divisor}: ${entries[i] || "empty"}`}
+                aria-label={`Answer for ${part} divided by ${question.divisor}: ${
+              entries[i] || "empty"
+            }${guide.target === i ? ", fill this one next" : ""}`}
                 className={`min-h-11 min-w-16 rounded-xl border-2 px-3 py-1 font-bold ${
                   slot === i ? "border-emerald-500 bg-surface" : "border-line/30 bg-surface"
                 }`}

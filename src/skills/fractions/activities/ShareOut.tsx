@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import { fractionGuideMethod, useFractionGuide } from "../internal/useFractionGuide";
 import { printBar } from "../internal/ui/printFigures";
 import { FractionBar } from "../internal/ui/FractionBar";
 import { partWord } from "../internal/data/fractionNumbers";
@@ -114,6 +115,12 @@ export const ShareOut: React.FC<ActivityProps<ShareParams>> = ({ params, koda, o
     setRefused(null);
   }, [question]);
 
+  const hints = !question || practising ? [] : divideHints(question);
+  const guide = useFractionGuide({
+    params, koda, practising, questionId: question?.id ?? "loading", rungs: hints, round,
+    progress: markedFor ? 1 : 0,
+  });
+
   if (!question) return null;
 
   const marked = !question.mustMark || markedFor === question.id;
@@ -128,12 +135,14 @@ export const ShareOut: React.FC<ActivityProps<ShareParams>> = ({ params, koda, o
     if (koda.config.isEnabled("haptic_feedback", true)) koda.haptics.pulse("light");
     setRefused(null);
     setMarkedFor(question.id);
+    guide.moved();
   };
 
   const answer = (text: string): void => {
     const block = divideBlockedBecause(question, marked);
     if (block) {
       setRefused(block);
+      guide.stumbled();
       say(DIVIDE_REFUSALS[block]);
       return;
     }
@@ -216,7 +225,9 @@ export const ShareOut: React.FC<ActivityProps<ShareParams>> = ({ params, koda, o
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : divideHints(question)}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={fractionGuideMethod(params)}
       onStartOver={
         question.mustMark && marked && !round.feedback
           ? () => {

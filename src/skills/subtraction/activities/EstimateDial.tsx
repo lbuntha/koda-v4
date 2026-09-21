@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import type { ActivityProps, PrintedQuestion } from "../../types";
 import {
   SkillRound, SPRING, composeHints, isPractice, modeAt, playCopy,
-  useSkillRound, type PracticeSetup, type RoundQuestion,
+  useSkillRound, guideSetup, useGuide, type PracticeSetup, type RoundQuestion,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { COMPARISON, DIFFERENCE, REMOVED_PART, WHOLE } from "../internal/data/subtractionPalette";
@@ -221,10 +221,37 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({ para
     });
   };
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const hints = practising ? [] : estimateHints(q, { rounded, verdict, kidTip: copy.kidTip });
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: q.id,
+    rungs: hints,
+    target: -1,
+    progress: rounded ? 1 : 0,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   return <SkillRound koda={koda} lesson={lesson} fallbackTitle="Estimate and Judge" round={round}
     totalQuestions={totalQuestions} prompt={prompt} iconName="scale" iconTone="cyan"
     tagLabels={tagLabelsFrom(koda)} nudge={nudge.message}
-    hints={practising ? [] : estimateHints(q, { rounded, verdict, kidTip: copy.kidTip })}
+    hints={hints}
+    guide={practising ? undefined : guide}
+    guideMethod={copy.stepByStep}
     onExit={koda.ui.exit} recommendation={nextStep}
     onReadAloud={practising ? undefined : () => { round.useSupport("audio_replay"); void koda.speech.say(prompt, speechRate(koda)); }}>
     <div className="space-y-4">

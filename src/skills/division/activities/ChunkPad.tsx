@@ -2,7 +2,17 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Undo2 } from "lucide-react";
 
 import type { ActivityProps } from "../../types";
-import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import {
+  SkillRound,
+  composeHints,
+  guideSetup,
+  isPractice,
+  modeAt,
+  openWith,
+  playCopy,
+  useGuide,
+  useSkillRound,
+} from "../../kit";
 import {
   CHUNK_REFUSALS,
   buildChunkQuestion,
@@ -38,7 +48,18 @@ export function buildQuestion(params: ChunkParams, index: number, seen?: Set<str
 
 export const promptFor = (question: ChunkQuestion): string => question.prompt;
 
-export function chunkHints(question: ChunkQuestion): string[] {
+/**
+ * The ladder, opening with the lesson's own words.
+ *
+ * All fifty-six division lessons author a `kidTip` and, until this, not one
+ * was read: these ladders took the question and nothing else. `openWith`
+ * puts it back as rung one without costing the worked step — see the kit.
+ */
+export function chunkHints(question: ChunkQuestion, kidTip?: string): string[] {
+  return openWith(kidTip, chunkHintsRungs(question));
+}
+
+function chunkHintsRungs(question: ChunkQuestion): string[] {
   const ten = question.divisor * 10;
   return question.mode === "big_chunks"
     ? composeHints(
@@ -92,12 +113,46 @@ export const ChunkPad: React.FC<ActivityProps<ChunkParams>> = ({ params, koda, o
     setRefused(null);
   }, [question]);
 
+
   if (!question) return null;
 
   const tally = taken.reduce((a, b) => a + b, 0);
   const remaining = question.dividend - tally * question.divisor;
   const block = chunkBlockedBecause(question, taken);
   const fits = stepsThatFit(remaining, question.divisor);
+
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const copy = playCopy(params);
+  const hints = practising ? [] : chunkHints(question, copy.kidTip);
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    /*
+     * The biggest chunk that still fits.
+     *
+     * Chunking is a technique for getting there in few steps, so pointing at
+     * the smallest that fits would be pointing at counting. `fits` is already
+     * ordered, so the largest is the one to reach for.
+     */
+    target: fits.length > 0 ? Math.max(...fits) : -1,
+    progress: 0,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
 
   const say = (text: string): void => {
     if (!speechEnabled) return;
@@ -118,6 +173,7 @@ export const ChunkPad: React.FC<ActivityProps<ChunkParams>> = ({ params, koda, o
 
   const finish = (): void => {
     if (block) {
+      guide.stumbled();
       setRefused(block);
       say(CHUNK_REFUSALS[block]);
       return;
@@ -148,7 +204,9 @@ export const ChunkPad: React.FC<ActivityProps<ChunkParams>> = ({ params, koda, o
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : chunkHints(question)}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onStartOver={
         !round.feedback && (taken.length > 0)
           ? () => {
@@ -201,8 +259,10 @@ export const ChunkPad: React.FC<ActivityProps<ChunkParams>> = ({ params, koda, o
               type="button"
               onClick={() => take(step)}
               disabled={!!round.feedback}
-              aria-label={`Take away ${step} lots of ${question.divisor}`}
-              className="min-h-11 rounded-2xl bg-surface px-4 py-2 text-base font-semibold text-ink shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+              aria-label={`Take away ${step} lots of ${question.divisor}${
+                guide.target === step ? ", this chunk next" : ""
+              }`}
+              className={`min-h-11 rounded-2xl bg-surface px-4 py-2 text-base font-semibold text-ink shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500${guide.target === step ? ' ring-4 ring-indigo-500' : ''}`}
             >
               − {step} × {question.divisor}
             </button>

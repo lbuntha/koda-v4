@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import type { ActivityProps, PrintedQuestion } from "../../types";
 import {
   SkillRound, SPRING, composeHints, isPractice, modeAt, playCopy,
-  useSkillRound, type PracticeSetup, type RoundQuestion,
+  useSkillRound, guideSetup, useGuide, type PracticeSetup, type RoundQuestion,
   answerChoices,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
@@ -178,12 +178,21 @@ export function storyHints(
     state.answered === 0
       ? `First: ${q.values[0]} and ${q.values[1]} more.`
       : `Now take ${q.values[2]} away from ${q.intermediate}.`,
-    state.answered === 0 ? `${q.values[0]} plus ${q.values[1]} is ${q.intermediate}.` : `${q.intermediate} minus ${q.values[2]} is ${q.answer}.`,
+    state.answered === 0
+      ? `After the first change there are ${q.intermediate}.`
+      : `Then the second change leaves ${q.answer}.`,
   );
   if (q.comparison) return composeHints(
     state.kidTip ?? "Line the two groups up and look at the gap.",
     `Both groups keep everything they have. The unknown is the ${unknown.label}.`,
-    `The bars differ by ${q.mode === "compare_difference" ? q.answer : q.values[1]}, so the ${unknown.label} is ${q.answer}.`,
+    /* Which bar is missing *is* the technique: one lesson grows the shorter
+       bar by the gap, the other shortens the longer one by it. Both used to
+       end on the same sentence. */
+    q.mode === "compare_bigger"
+      ? `The shorter bar plus the gap of ${q.values[1]} reaches ${q.answer}.`
+      : q.mode === "compare_smaller"
+        ? `The longer bar less the gap of ${q.values[1]} leaves ${q.answer}.`
+        : `The bars differ by ${q.answer}, so the ${unknown.label} is ${q.answer}.`,
   );
   return composeHints(
     state.kidTip ?? "Find which part of the story is missing, then work out that part.",
@@ -272,10 +281,37 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({ params, 
     });
   };
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const hints = practising ? [] : storyHints(q, { answered: step, kidTip: copy.kidTip });
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: q.id,
+    rungs: hints,
+    target: -1,
+    progress: step,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   return <SkillRound koda={koda} lesson={lesson} fallbackTitle="Subtraction Stories" round={round}
     totalQuestions={totalQuestions} prompt={prompt} iconName="search" iconTone="cyan"
     tagLabels={tagLabelsFrom(koda)} nudge={nudge.message}
-    hints={practising ? [] : storyHints(q, { answered: step, kidTip: copy.kidTip })}
+    hints={hints}
+    guide={practising ? undefined : guide}
+    guideMethod={copy.stepByStep}
     onStartOver={
       !round.feedback && (built || step > 0) ? restart : undefined
     }

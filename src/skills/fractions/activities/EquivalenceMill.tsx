@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import { fractionGuideMethod, useFractionGuide } from "../internal/useFractionGuide";
 import { partWord } from "../internal/data/fractionNumbers";
 import { printBar } from "../internal/ui/printFigures";
 import { FractionBar } from "../internal/ui/FractionBar";
@@ -69,7 +70,7 @@ export function millHints(question: MillQuestion): string[] {
       return composeHints(
         `You need ${to.parts} parts, and you have ${from.parts}.`,
         `That means cutting every part into ${to.parts / from.parts}.`,
-        "Whatever you do to the bottom, you do to the top — because you are cutting the shaded ones as well.",
+        "Cut the shaded parts too: multiply the top and bottom by the same number.",
       );
     case "scale_down":
       return composeHints(
@@ -123,6 +124,15 @@ export const EquivalenceMill: React.FC<ActivityProps<MillParams>> = ({ params, k
     setRefused(null);
   }, [question]);
 
+  const hints = !question || practising ? [] : millHints(question);
+  const guide = useFractionGuide({
+    params, koda, practising, questionId: question?.id ?? "loading", rungs: hints, round,
+    progress:
+      question && current && !sameFraction(current, question.operates ? question.from : question.to)
+        ? 1
+        : 0,
+  });
+
   if (!question || !current) return null;
 
   const moves = movesFor(current);
@@ -138,6 +148,7 @@ export const EquivalenceMill: React.FC<ActivityProps<MillParams>> = ({ params, k
     if (koda.config.isEnabled("haptic_feedback", true)) koda.haptics.pulse("light");
     setRefused(null);
     setCurrent(next);
+    guide.moved();
   };
 
   const submit = (given: string, correct: boolean, message: string): void => {
@@ -153,6 +164,7 @@ export const EquivalenceMill: React.FC<ActivityProps<MillParams>> = ({ params, k
     const block = millBlockedBecause(question, current);
     if (block) {
       setRefused(block);
+      guide.stumbled();
       say(MILL_REFUSALS[block]);
       return;
     }
@@ -173,7 +185,9 @@ export const EquivalenceMill: React.FC<ActivityProps<MillParams>> = ({ params, k
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : millHints(question)}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={fractionGuideMethod(params)}
       onStartOver={
         current && !round.feedback && !sameFraction(current, question.operates ? question.from : question.to)
           ? () => {

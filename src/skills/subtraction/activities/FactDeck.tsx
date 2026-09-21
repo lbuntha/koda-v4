@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import type { ActivityProps, PrintedQuestion } from "../../types";
 import {
   SkillRound, SPRING, composeHints, isPractice, modeAt, playCopy,
-  useSkillRound, type PracticeSetup, type RoundQuestion,
+  useSkillRound, guideSetup, useGuide, type PracticeSetup, type RoundQuestion,
   answerChoices,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
@@ -178,7 +178,9 @@ export function factHints(q: FactQuestion, state: { helperChosen: boolean; fille
   );
   if (q.mode === "missing_addend") return composeHints(
     state.kidTip ?? "Think: known part plus what makes the whole?",
-    state.helperChosen ? `Use ${q.subtrahend} + ? = ${q.minuend}. Count up from ${q.subtrahend}.` : `Choose the addition equation that starts with the known part ${q.subtrahend} and ends at the whole ${q.minuend}.`,
+    state.helperChosen
+      ? `Use ${q.subtrahend} + ? = ${q.minuend}. Count up from ${q.subtrahend}.`
+      : `Pick the addition that starts at ${q.subtrahend} and ends at ${q.minuend}.`,
     `The missing addend is the same number as ${q.minuend} minus ${q.subtrahend}.`,
   );
   if (q.mode === "doubles") return composeHints(
@@ -271,10 +273,37 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
   };
   const readyForAnswer = q.mode === "family" || q.mode === "doubles" || helperChosen;
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const hints = practising ? [] : factHints(q, { helperChosen, filled: Object.values(members).filter(Boolean).length, kidTip: copy.kidTip });
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: q.id,
+    rungs: hints,
+    target: -1,
+    progress: (helperChosen ? 1 : 0) + Object.values(members).filter(Boolean).length,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   return <SkillRound koda={koda} lesson={lesson} fallbackTitle="Subtraction Fact Deck" round={round}
     totalQuestions={totalQuestions} prompt={prompt} iconName={q.mode === "family" ? "gem" : "zap"} iconTone="pink"
     tagLabels={tagLabelsFrom(koda)} nudge={nudge.message}
-    hints={practising ? [] : factHints(q, { helperChosen, filled: Object.values(members).filter(Boolean).length, kidTip: copy.kidTip })}
+    hints={hints}
+    guide={practising ? undefined : guide}
+    guideMethod={copy.stepByStep}
     onStartOver={
       !round.feedback && (helperChosen || entry !== "" || Object.values(members).some((v) => v !== "")) ? restart : undefined
     }

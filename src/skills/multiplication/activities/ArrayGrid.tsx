@@ -9,6 +9,8 @@ import {
   playCopy,
   useSkillRound,
   type RoundQuestion,
+  guideSetup,
+  useGuide,
 } from "../../kit";
 import { quietWhenPractising } from "../../kit/practice";
 import { themeSystem } from "../../../lib/themeSystem";
@@ -372,7 +374,15 @@ export function arrayHints(question: ArrayQuestion, kidTip: string | undefined, 
       return composeHints(
         kidTip,
         state.turned ? "Look at the squares. Were any added or taken away?" : "Turn the array first, then compare.",
-        "Turning moves the squares around. It cannot make more of them.",
+        /*
+         * The commutative fact on these numbers, not the idea again.
+         *
+         * This rung was word for word the lesson's own kidTip, so
+         * `composeHints` dropped it as a duplicate and the ladder was two rungs
+         * long: a child who climbed to the top was handed the sentence they
+         * had already read. Only a sweep over every lesson catches that.
+         */
+        `${rows} rows of ${cols} and ${cols} rows of ${rows} both hold ${total}.`,
       );
     case "array_to_equation":
       return composeHints(
@@ -433,6 +443,15 @@ export const ArrayGrid: React.FC<ActivityProps<ArrayParams>> = ({ params, koda, 
   const refuse = (written: string, spoken: string) => {
     nudge.refuse(written);
     speak(spoken);
+    /*
+     * A refused move is this engine already knowing the move was wrong.
+     *
+     * What it never did was notice a child doing it repeatedly, which is the
+     * difference between a slip and not having the technique. Safe to call a
+     * coach declared further down: this only ever runs from a handler, long
+     * after the render that created it.
+     */
+    guide.stumbled();
   };
 
   const round = useSkillRound({
@@ -876,6 +895,59 @@ export const ArrayGrid: React.FC<ActivityProps<ArrayParams>> = ({ params, koda, 
     }
   })();
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const hints = practising ? [] : arrayHints(question, copy.kidTip, { rows, cols, turned, cutAt, picked });
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    target: -1,
+    /*
+     * Effort, measured against where this mode seeds the grid.
+     *
+     * A build starts at one by one, a missing-dimension question fixes the
+     * known side and starts the other at one, and the rest open on the
+     * question's own shape. Subtracting a flat 1 was right for only the first
+     * of those, so the other two counted a child who had dragged nothing as
+     * already several moves in and were coached early.
+     */
+    progress: (() => {
+      const seedRows =
+        question.mode === "build_array"
+          ? 1
+          : question.mode === "missing_dimension" && question.unknown === "rows"
+            ? 1
+            : question.rows;
+      const seedCols =
+        question.mode === "build_array"
+          ? 1
+          : question.mode === "missing_dimension" && question.unknown === "cols"
+            ? 1
+            : question.cols;
+      return (
+        Math.abs(rows - seedRows) +
+        Math.abs(cols - seedCols) +
+        picked.length +
+        (turned ? 1 : 0)
+      );
+    })(),
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   return (
     <SkillRound
       koda={koda}
@@ -885,7 +957,9 @@ export const ArrayGrid: React.FC<ActivityProps<ArrayParams>> = ({ params, koda, 
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : arrayHints(question, copy.kidTip, { rows, cols, turned, cutAt, picked })}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onStartOver={
         !round.feedback && (turned || cutAt !== undefined || picked.length > 0 || typed !== "") ? restart : undefined
       }

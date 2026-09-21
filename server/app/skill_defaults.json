@@ -100,6 +100,20 @@
         "tag": "Haptic"
       },
       {
+        "id": "guide_coach",
+        "name": "Smart guide",
+        "description": "Lets the Smart guide speak up on its own when a child stalls or drops the technique. Off, it waits to be asked — the Hint button opens the same guide.",
+        "isEnabled": true,
+        "tag": "Cognitive"
+      },
+      {
+        "id": "guide_voice",
+        "name": "Smart guide voice",
+        "description": "Reads each step of the Smart guide aloud as it appears. Off, a child reads it without hearing it — the guide itself stays either way.",
+        "isEnabled": true,
+        "tag": "Audio"
+      },
+      {
         "id": "counting_badges",
         "name": "1-to-1 badges",
         "description": "Numbers each touched object, so nothing is counted twice.",
@@ -141,6 +155,7 @@
       "guidedLabel": "",
       "milestoneLabel": "",
       "speechRate": 0.95,
+      "coachPatience": "normal",
       "answerInput": "pad",
       "freeLessons": 10
     },
@@ -188,6 +203,26 @@
         "unit": "x"
       },
       {
+        "key": "coachPatience",
+        "label": "Smart guide patience",
+        "help": "How long a child is left to think before the Smart guide steps in. Relaxed waits about eleven seconds, Quick about four.",
+        "type": "choice",
+        "options": [
+          {
+            "value": "relaxed",
+            "label": "Relaxed"
+          },
+          {
+            "value": "normal",
+            "label": "Normal"
+          },
+          {
+            "value": "quick",
+            "label": "Quick"
+          }
+        ]
+      },
+      {
         "key": "answerInput",
         "label": "How answers are given",
         "help": "A number pad to type on, or four numbers to choose between. Choosing suits a younger child; typing is what the written lessons need.",
@@ -233,6 +268,9 @@
             ],
             "sumMax": 10,
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "count_tray",
@@ -287,6 +325,9 @@
             ],
             "sumMax": 10,
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "count_tray",
@@ -344,6 +385,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "count_tray",
             "tier": "intermediate",
@@ -400,6 +444,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "count_tray",
             "tier": "intermediate",
@@ -454,6 +501,9 @@
             "flipChance": 0.5,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "count_tray",
             "tier": "beginner",
@@ -506,6 +556,9 @@
             ],
             "flipChance": 0.4,
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "count_tray",
@@ -561,6 +614,9 @@
             "sumMax": 10,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "count_tray",
             "tier": "intermediate",
@@ -611,6 +667,9 @@
             ],
             "sumMax": 5,
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "frame_fill",
@@ -665,6 +724,9 @@
             "sumMax": 10,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "frame_fill",
             "tier": "intermediate",
@@ -717,6 +779,9 @@
             ],
             "sumMax": 10,
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "bond_tree",
@@ -775,6 +840,9 @@
             "sumMax": 20,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "jump_line",
             "tier": "beginner",
@@ -831,6 +899,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "jump_line",
             "tier": "master",
@@ -882,6 +953,9 @@
               88
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "block_yard",
@@ -935,6 +1009,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "place_value_desk",
             "tier": "intermediate",
@@ -986,6 +1063,9 @@
               10
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "fact_deck",
@@ -1039,6 +1119,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "fact_deck",
             "tier": "intermediate",
@@ -1090,6 +1173,9 @@
               10
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "fact_deck",
@@ -1143,6 +1229,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "frames_play",
             "tier": "intermediate",
@@ -1194,6 +1283,9 @@
               9
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "frames_play",
@@ -1247,6 +1339,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "numberline_play",
             "tier": "intermediate",
@@ -1298,6 +1393,9 @@
               890
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "numberline_play",
@@ -1355,6 +1453,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "bonds_play",
             "tier": "intermediate",
@@ -1406,6 +1507,9 @@
               88
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "bonds_play",
@@ -1460,6 +1564,9 @@
             "sumMax": 18,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "facts_play",
             "tier": "intermediate",
@@ -1512,6 +1619,9 @@
             ],
             "sumMax": 18,
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "facts_play",
@@ -1570,6 +1680,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "facts_play",
             "tier": "intermediate",
@@ -1619,6 +1732,9 @@
             "count": 4,
             "target": 10,
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "chain_board",
@@ -1677,6 +1793,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "jump_line",
             "tier": "master",
@@ -1729,6 +1848,9 @@
               90
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "base10_play",
@@ -1783,6 +1905,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "base10_play",
             "tier": "intermediate",
@@ -1834,6 +1959,9 @@
               88
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "numberline_play",
@@ -1887,6 +2015,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "chart_play",
             "tier": "intermediate",
@@ -1938,6 +2069,9 @@
               888
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "chart_play",
@@ -1992,6 +2126,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "chart_play",
             "tier": "intermediate",
@@ -2044,22 +2181,25 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "chart_play",
             "tier": "intermediate",
             "difficultyColor": "violet",
             "category": "Written Strategies",
-            "shortDesc": "Start with the biggest column and let each one after it adjust the total",
-            "targetObjective": "Start with the biggest column, then let each one after it change the number you are holding.",
+            "shortDesc": "Hold the first number and let each column after it adjust what you hold",
+            "targetObjective": "Hold the first number. Add the second number's tens, then its ones.",
             "stepByStep": [
-              "Add the tens first and hold that number.",
-              "Add the ones to the number you are holding.",
-              "You never write two answers down — only the one that grows."
+              "Start by holding the first number in your head.",
+              "Add the other number's tens to it. That is your new total.",
+              "Add the other number's ones to that. You only write what you hold."
             ],
-            "kidTip": "Start with the biggest column, then let each one after it change the number you are holding.",
-            "audioPrompt": "Left to right! Start with the tens and let the ones change what you are holding.",
+            "kidTip": "Hold the first number. Add the other one's tens, then its ones.",
+            "audioPrompt": "Left to right! Hold the first number, then add the other one's tens and ones.",
             "prompts": {
-              "default": "{a} plus {b}. Start with the biggest column and work right."
+              "default": "{a} plus {b}. Hold {a}. Add the tens of {b}, then its ones."
             }
           }
         },
@@ -2095,6 +2235,9 @@
               89
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "base10_play",
@@ -2149,6 +2292,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "base10_play",
             "tier": "master",
@@ -2201,6 +2347,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "column_play",
             "tier": "master",
@@ -2213,7 +2362,7 @@
               "Add the tens — including the carry — and it reaches ten as well.",
               "Write that carry above the hundreds and finish."
             ],
-            "kidTip": "Start at the ones. When a column makes ten or more, write the carry above the next one.",
+            "kidTip": "A carry can push the next column over ten as well.",
             "audioPrompt": "Two carries! One column carries, and that makes the next one carry too.",
             "prompts": {
               "default": "{a} plus {b}. Two columns carry — write each one down."
@@ -2253,6 +2402,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "column_play",
             "tier": "master",
@@ -2265,7 +2417,7 @@
               "If it reaches ten, write the small one above the tens.",
               "Add the tens, including the carry."
             ],
-            "kidTip": "Start at the ones. When a column makes ten or more, write the carry above the next one.",
+            "kidTip": "Start at the ones. Ten or more means carry to the next column.",
             "audioPrompt": "The written method! Start at the ones and write the carry above the next column.",
             "prompts": {
               "default": "{a} plus {b}. Add each column, and write the carry."
@@ -2307,6 +2459,9 @@
             ],
             "totalMax": 60,
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "chain_board",
@@ -2359,6 +2514,9 @@
             "target": 10,
             "pairsWanted": 2,
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "chain_board",
@@ -2414,6 +2572,9 @@
             "totalMax": 50,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "chain_board",
             "tier": "intermediate",
@@ -2463,6 +2624,9 @@
             "digits": 2,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "estimate_play",
             "tier": "master",
@@ -2511,6 +2675,9 @@
             "mode": "reasonable",
             "digits": 3,
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "estimate_play",
@@ -2564,6 +2731,9 @@
             ],
             "sumMax": 20,
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "bonds_play",
@@ -2626,6 +2796,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "story_board",
             "tier": "master",
@@ -2682,6 +2855,9 @@
               "{name} has {a} {thing} and {other} has {b}. How many do they have together?"
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "story_board",
@@ -2743,6 +2919,9 @@
               "{name} started with {a} {thing} and ended with {b}. How many did {name} collect?"
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "story_board",
@@ -2806,6 +2985,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "story_board",
             "tier": "master",
@@ -2865,6 +3047,9 @@
               "{name} collected {a} {thing}. {other} collected {b} more. How many did {other} collect?"
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "story_board",
@@ -2926,6 +3111,9 @@
             ],
             "questionsPerRound": 6
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "story_board",
             "tier": "master",
@@ -2977,6 +3165,9 @@
               48
             ],
             "questionsPerRound": 6
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "strategy_picker",
@@ -3658,6 +3849,20 @@
         "tag": "Haptic"
       },
       {
+        "id": "guide_coach",
+        "name": "Smart guide",
+        "description": "Offers the current rack rule, a legal pour to consider, and a moving bottle focus when a learner stalls.",
+        "isEnabled": true,
+        "tag": "Cognitive"
+      },
+      {
+        "id": "guide_voice",
+        "name": "Smart guide voice",
+        "description": "Reads each Smart guide step aloud as it appears. Off, the guide stays visible and silent.",
+        "isEnabled": true,
+        "tag": "Audio"
+      },
+      {
         "id": "pour_animation",
         "name": "Pouring animation",
         "description": "Tips the bottle and draws the stream. Off pours instantly; the result is the same either way.",
@@ -3692,6 +3897,7 @@
       "guidedLabel": "",
       "milestoneLabel": "",
       "speechRate": 0.95,
+      "coachPatience": "normal",
       "freeLessons": 3
     },
     "settingsSchema": [
@@ -3738,6 +3944,26 @@
         "unit": "x"
       },
       {
+        "key": "coachPatience",
+        "label": "Smart guide patience",
+        "help": "How long a learner is left to plan before the Smart guide steps in.",
+        "type": "choice",
+        "options": [
+          {
+            "value": "relaxed",
+            "label": "Relaxed"
+          },
+          {
+            "value": "normal",
+            "label": "Normal"
+          },
+          {
+            "value": "quick",
+            "label": "Quick"
+          }
+        ]
+      },
+      {
         "key": "freeLessons",
         "label": "Free lessons",
         "help": "Number of lessons available before a plan is needed.",
@@ -3775,6 +4001,9 @@
             ],
             "kidTip": "Look for the two bottles that share a colour.",
             "audioPrompt": "Pour the colours together. One pour finishes this rack."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Easy",
@@ -3815,6 +4044,9 @@
             ],
             "kidTip": "Only the top colour ever moves.",
             "audioPrompt": "Two pours this time. Move each colour onto its match."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Easy",
@@ -3857,6 +4089,9 @@
             ],
             "kidTip": "An empty bottle takes any colour.",
             "audioPrompt": "There is one empty bottle. It will take any colour you need to move."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Medium",
@@ -3899,6 +4134,9 @@
             ],
             "kidTip": "Three the same is still one pour.",
             "audioPrompt": "Colours that are stacked together move as one. Watch how many travel."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Medium",
@@ -3941,6 +4179,9 @@
             ],
             "kidTip": "Think about which bottle you want to empty, not just which pour is possible.",
             "audioPrompt": "Three colours now. Look at the whole rack before you pour."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Medium",
@@ -3983,6 +4224,9 @@
             ],
             "kidTip": "A taller bottle holds more. Count the space, not the bottles.",
             "audioPrompt": "These bottles are different sizes. Check how much room there is before you pour."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Medium",
@@ -4025,6 +4269,9 @@
             ],
             "kidTip": "Matching colours is not enough. There has to be room.",
             "audioPrompt": "Sometimes the colours match but there is not enough room. Count the space first."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Medium",
@@ -4067,6 +4314,9 @@
             ],
             "kidTip": "Half a bottle of one colour is not finished yet.",
             "audioPrompt": "A bottle is finished when it is full and holds one colour. Fill each one to the top."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Medium",
@@ -4110,6 +4360,9 @@
             ],
             "kidTip": "The number on the bottle is how many are about to move.",
             "audioPrompt": "When you pick a bottle up, the number tells you how many will pour."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Medium",
@@ -4201,6 +4454,9 @@
             ],
             "kidTip": "One more colour means one more thing to keep track of. Empty a bottle before you fill one.",
             "audioPrompt": "Four colours now. Keep one bottle free if you can."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Medium",
@@ -4243,6 +4499,9 @@
             ],
             "kidTip": "These bottles hold five. A run of five can move in one pour.",
             "audioPrompt": "Taller bottles. They hold five now, not four."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Medium",
@@ -4285,6 +4544,9 @@
             ],
             "kidTip": "There is only one space. Spend it on the pour that frees another.",
             "audioPrompt": "Only one space left. Choose what goes into it carefully."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -4327,6 +4589,9 @@
             ],
             "kidTip": "You have to make space before you can use it. Look for a bottle that is nearly one colour already.",
             "audioPrompt": "No empty bottle this time. Make one."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -4369,6 +4634,9 @@
             ],
             "kidTip": "The cork comes off when the bottle it waits on holds one colour. Work out which one that is.",
             "audioPrompt": "One bottle is corked. Finish the bottle it is waiting on."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -4411,6 +4679,9 @@
             ],
             "kidTip": "One cork opens another. Start with the bottle that is not waiting on anything.",
             "audioPrompt": "Two corks now. Find the one you can open first."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -4453,6 +4724,9 @@
             ],
             "kidTip": "Liquid goes into that bottle and never comes out. Be sure before you pour.",
             "audioPrompt": "One bottle only receives. Whatever goes in stays in."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -4495,6 +4769,9 @@
             ],
             "kidTip": "You have a couple of spare pours. Plan first and you will not need them.",
             "audioPrompt": "Watch your pours this time. You do not have many."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -4537,6 +4814,9 @@
             ],
             "kidTip": "Every pour has to count. Work it out before you start.",
             "audioPrompt": "The shortest way only. Every pour has to count."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -4630,6 +4910,9 @@
             ],
             "kidTip": "You cannot see the bottom yet. Work with the colours you can see, and find out the rest.",
             "audioPrompt": "Some colours are covered. You can always see the top one."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -4672,6 +4955,9 @@
             ],
             "kidTip": "Your first plan is a guess. Change it when a new colour appears.",
             "audioPrompt": "Four colours, mostly covered. Pour to find out what is underneath."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -4715,6 +5001,9 @@
             ],
             "kidTip": "The whole run of one colour moves together, as long as there is room for it.",
             "audioPrompt": "Look before you pour. Which rack comes next?"
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -4758,6 +5047,9 @@
             ],
             "kidTip": "Do the first pour in your head, then the second on top of it.",
             "audioPrompt": "Two pours this time. Picture the first, then the second."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -4800,6 +5092,9 @@
             ],
             "kidTip": "The rule has changed: numbers no longer go on their own kind, they go on the number before them.",
             "audioPrompt": "New rule. Numbers go in order now, not on their match."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -4842,6 +5137,9 @@
             ],
             "kidTip": "Same rule, other direction. Start with the biggest at the bottom.",
             "audioPrompt": "Backwards this time. Biggest at the bottom."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -4884,6 +5182,9 @@
             ],
             "kidTip": "You are not matching numbers now, you are matching a property. Ask: is it odd or even?",
             "audioPrompt": "Odds with odds, evens with evens. The order inside does not matter."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -4924,8 +5225,11 @@
               "Bigger numbers underneath do not mean a bigger piece.",
               "Build from the smallest piece up."
             ],
-            "kidTip": "One third is smaller than one half, even though three is bigger than two. Think about the piece, not the digits.",
+            "kidTip": "One third is smaller than one half, although three is bigger than two. Think about the piece, not the digits.",
             "audioPrompt": "Fractions now. Smallest piece at the bottom."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -4968,6 +5272,9 @@
             ],
             "kidTip": "Two, four, six, eight. Each one goes on the one before it.",
             "audioPrompt": "Count by twos. Two at the bottom, then four, then six, then eight."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -5010,6 +5317,9 @@
             ],
             "kidTip": "Every bottle ends up identical. Build the pattern one step at a time.",
             "audioPrompt": "Every bottle the same order this time. Make the rainbow."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -5058,6 +5368,9 @@
             ],
             "kidTip": "Every rack here plays by a different rule. Find out which one before you start pouring.",
             "audioPrompt": "Bigger racks now, and the rule changes every time. Look first."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -5192,6 +5505,20 @@
         "tag": "Haptic"
       },
       {
+        "id": "guide_coach",
+        "name": "Smart guide",
+        "description": "Offers the next readable clue or safe deduction when a learner stalls. It never reveals the correct proof choice or a hidden board solution.",
+        "isEnabled": true,
+        "tag": "Cognitive"
+      },
+      {
+        "id": "guide_voice",
+        "name": "Smart guide voice",
+        "description": "Reads each Smart guide step aloud as it appears. Off, the guide stays visible and silent.",
+        "isEnabled": true,
+        "tag": "Audio"
+      },
+      {
         "id": "counting_badges",
         "name": "1-to-1 badges",
         "description": "Numbers the tiles as they are chosen, so a child selecting eight of them can see how many are already in.",
@@ -5211,7 +5538,8 @@
       "activityLabel": "",
       "guidedLabel": "",
       "milestoneLabel": "",
-      "speechRate": 0.95
+      "speechRate": 0.95,
+      "coachPatience": "normal"
     },
     "settingsSchema": [
       {
@@ -5255,6 +5583,26 @@
         "max": 2,
         "step": 0.05,
         "unit": "x"
+      },
+      {
+        "key": "coachPatience",
+        "label": "Smart guide patience",
+        "help": "How long a learner is left to inspect the board before the Smart guide steps in.",
+        "type": "choice",
+        "options": [
+          {
+            "value": "relaxed",
+            "label": "Relaxed"
+          },
+          {
+            "value": "normal",
+            "label": "Normal"
+          },
+          {
+            "value": "quick",
+            "label": "Quick"
+          }
+        ]
       }
     ],
     "lessons": [
@@ -5289,6 +5637,9 @@
             ],
             "kidTip": "A tile in the middle touches eight others. The corners count.",
             "audioPrompt": "Tap every tile that touches the outlined one. Do not forget the corners."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Easy",
@@ -5335,6 +5686,9 @@
             ],
             "kidTip": "At a side there are five. In a corner there are only three.",
             "audioPrompt": "This one is at the side. Tap only the tiles that are really on the board."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Easy",
@@ -5384,6 +5738,9 @@
             ],
             "kidTip": "Count the matching ones, not all of them.",
             "audioPrompt": "How many tiles touching this one are the same colour as it?"
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Easy",
@@ -5428,6 +5785,9 @@
             ],
             "kidTip": "A clue never counts its own tile.",
             "audioPrompt": "What does this clue say? Read the colour as well as the number."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Medium",
@@ -5472,6 +5832,9 @@
             ],
             "kidTip": "Every clue tells you two numbers, not one.",
             "audioPrompt": "This clue counts one colour. How many are the other one?"
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Medium",
@@ -5515,6 +5878,9 @@
             ],
             "kidTip": "Zero means none of that colour, not none of any colour.",
             "audioPrompt": "This clue says zero. Colour the tiles it touches."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Easy",
@@ -5558,6 +5924,9 @@
             ],
             "kidTip": "A corner clue touches only three tiles.",
             "audioPrompt": "This zero is in a corner. Which tiles does it actually touch?"
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Easy",
@@ -5601,6 +5970,9 @@
             ],
             "kidTip": "When the number is as big as it can be, there is nothing left to decide.",
             "audioPrompt": "This clue counts every tile it touches. What colour are they?"
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Easy",
@@ -5646,6 +6018,9 @@
             ],
             "kidTip": "A clue that has what it needs rules out everything else it touches.",
             "audioPrompt": "Count what this clue already has. Does it need any more?"
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Medium",
@@ -5690,6 +6065,9 @@
             ],
             "kidTip": "Clue number, minus what it already has, is what is left to find.",
             "audioPrompt": "This clue still needs one more. Which tile is it?"
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Medium",
@@ -5734,6 +6112,9 @@
             ],
             "kidTip": "Same number of spaces as matches still needed means they all match.",
             "audioPrompt": "How many does this clue still need, and how many spaces are left?"
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Medium",
@@ -5773,6 +6154,9 @@
             ],
             "kidTip": "A tile you have just worked out is evidence for the next clue.",
             "audioPrompt": "Start with the clue you can already use, then look again."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Medium",
@@ -5813,6 +6197,9 @@
             ],
             "kidTip": "Two clues can settle some tiles and not others. Blank is a real answer here.",
             "audioPrompt": "These two clues share some tiles. Colour only what they can settle."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Medium",
@@ -5852,6 +6239,9 @@
             ],
             "kidTip": "A tile you worked out by comparing clues is evidence for the next clue.",
             "audioPrompt": "Compare the two clues first, then use what you find to finish."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Medium",
@@ -5896,6 +6286,9 @@
             ],
             "kidTip": "The shape is a result. The subtraction is the reason.",
             "audioPrompt": "Three clues in a row. Work out what each one still needs."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -5940,6 +6333,9 @@
             ],
             "kidTip": "A longer wall is not a new rule. It is the same one, used twice.",
             "audioPrompt": "Four clues this time. Start at one end."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -5982,6 +6378,9 @@
             ],
             "kidTip": "Two clues can only be compared once they count the same colour.",
             "audioPrompt": "One clue counts orange and one counts navy. Say them both in the same colour first."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -6021,6 +6420,9 @@
             ],
             "kidTip": "Count every tile on the board, not the ones near the blanks.",
             "audioPrompt": "The strip at the top counts the whole board. How many are already there?"
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Medium",
@@ -6060,6 +6462,9 @@
             ],
             "kidTip": "A line clue counts along its line. Tiles above and below do not count.",
             "audioPrompt": "This clue counts along one row. Which tiles are in it?"
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Medium",
@@ -6099,6 +6504,9 @@
             ],
             "kidTip": "Trace the outline first. Then count only what is inside it.",
             "audioPrompt": "The outlined tiles are the ones this clue counts."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Medium",
@@ -6138,6 +6546,9 @@
             ],
             "kidTip": "The count says how many. Together says where they can be.",
             "audioPrompt": "These tiles sit side by side. Where can the block start?"
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -6177,6 +6588,9 @@
             ],
             "kidTip": "Ruling an arrangement out is a move. It is how this clue works.",
             "audioPrompt": "These do not all touch. Which arrangement does that rule out?"
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -6216,6 +6630,9 @@
             ],
             "kidTip": "Not orange does not mean navy when there are three colours.",
             "audioPrompt": "Three colours this time. One clue is not enough."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Medium",
@@ -6257,6 +6674,9 @@
             ],
             "kidTip": "Work out the colour nobody counted, then compare.",
             "audioPrompt": "These clues count different colours. Find the one nobody mentioned."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -6297,6 +6717,9 @@
             ],
             "kidTip": "Each colour has its own total. Never add them together.",
             "audioPrompt": "Three totals, one for each colour. Take them one at a time."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -6338,6 +6761,9 @@
             ],
             "kidTip": "When you are stuck, change the kind of clue you are reading.",
             "audioPrompt": "This board mixes clue kinds. Which one can help first?"
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -6378,6 +6804,9 @@
             ],
             "kidTip": "True is not the same as useful. Ask what each clue decides.",
             "audioPrompt": "Which of these clues would be enough on their own?"
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -6420,6 +6849,9 @@
             ],
             "kidTip": "More than one of these can be a fair way of saying it.",
             "audioPrompt": "Which of these says why the tile must be that colour?"
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -6462,6 +6894,9 @@
             ],
             "kidTip": "One wrong tile can break more than one clue. Any of them is a right answer.",
             "audioPrompt": "One tile here is wrong. Which clue is no longer true?"
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -6510,6 +6945,9 @@
             ],
             "kidTip": "Count the clue's own colour. Ignore the other two.",
             "audioPrompt": "Three colours, and one tile is wrong. Which clue does it break?"
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -7046,9 +7484,16 @@
       {
         "id": "guide_coach",
         "name": "Smart guide",
-        "description": "Steps in by itself when a child stalls, counts one twice or skips ahead — words first, then a light on the next object, then walking them through it. Works with no connection.",
+        "description": "Lets the Smart guide speak up on its own when a child stalls or drops the technique. Off, it waits to be asked — the Hint button opens the same guide.",
         "isEnabled": true,
         "tag": "Cognitive"
+      },
+      {
+        "id": "guide_voice",
+        "name": "Smart guide voice",
+        "description": "Reads each step of the Smart guide aloud as it appears. Off, a child reads it without hearing it — the guide itself stays either way.",
+        "isEnabled": true,
+        "tag": "Audio"
       },
       {
         "id": "step_context_tags",
@@ -7078,8 +7523,8 @@
       "guidedLabel": "",
       "milestoneLabel": "",
       "speechRate": 1,
+      "coachPatience": "normal",
       "hapticIntensity": "crisp",
-      "popScaleFactor": 1.2,
       "freeLessons": 10
     },
     "settingsSchema": [
@@ -7126,6 +7571,26 @@
         "unit": "x"
       },
       {
+        "key": "coachPatience",
+        "label": "Smart guide patience",
+        "help": "How long a child is left to think before the Smart guide steps in. Relaxed waits about eleven seconds, Quick about four.",
+        "type": "choice",
+        "options": [
+          {
+            "value": "relaxed",
+            "label": "Relaxed"
+          },
+          {
+            "value": "normal",
+            "label": "Normal"
+          },
+          {
+            "value": "quick",
+            "label": "Quick"
+          }
+        ]
+      },
+      {
         "key": "hapticIntensity",
         "label": "Haptic intensity",
         "help": "Strength of the vibration on each tap.",
@@ -7144,16 +7609,6 @@
             "label": "Strong"
           }
         ]
-      },
-      {
-        "key": "popScaleFactor",
-        "label": "Tap pop scale",
-        "help": "How much an item grows when touched.",
-        "type": "number",
-        "min": 1,
-        "max": 1.6,
-        "step": 0.1,
-        "unit": "x"
       },
       {
         "key": "freeLessons",
@@ -7257,6 +7712,9 @@
             "questionsPerRound": 5,
             "mode": "scatter"
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "touch_orbit",
             "tier": "intermediate",
@@ -7323,6 +7781,9 @@
             "questionsPerRound": 5,
             "mode": "compare"
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "touch_orbit",
             "tier": "master",
@@ -7374,6 +7835,9 @@
             "flashMs": 1200,
             "questionsPerRound": 5,
             "display": "grid"
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "subitizing_rush",
@@ -7432,6 +7896,9 @@
             "questionsPerRound": 5,
             "display": "scatter"
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "subitizing_rush",
             "tier": "intermediate",
@@ -7486,6 +7953,9 @@
             "questionsPerRound": 5,
             "display": "twoColor"
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "subitizing_rush",
             "tier": "master",
@@ -7537,6 +8007,9 @@
             ],
             "questionsPerRound": 5,
             "mode": "fill"
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "tenframe_rocket",
@@ -7593,6 +8066,9 @@
             "questionsPerRound": 5,
             "mode": "complement"
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "tenframe_rocket",
             "tier": "intermediate",
@@ -7644,6 +8120,9 @@
             ],
             "questionsPerRound": 5,
             "mode": "teen"
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "tenframe_rocket",
@@ -7707,6 +8186,9 @@
             "questionsPerRound": 5,
             "mode": "hop"
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "froggy_skip",
             "tier": "beginner",
@@ -7762,6 +8244,9 @@
             ],
             "questionsPerRound": 5,
             "mode": "hop"
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "froggy_skip",
@@ -7834,6 +8319,9 @@
             "questionsPerRound": 5,
             "mode": "missing"
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "froggy_skip",
             "tier": "master",
@@ -7886,6 +8374,9 @@
               35
             ],
             "bundleOnes": true
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "base10_foundry",
@@ -7943,6 +8434,9 @@
             "bundleTens": true,
             "hundreds": true
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "base10_foundry",
             "tier": "intermediate",
@@ -7999,6 +8493,9 @@
             "bundleOnes": true,
             "bundleTens": true,
             "hundreds": true
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "base10_foundry",
@@ -8485,6 +8982,20 @@
         "tag": "Cognitive"
       },
       {
+        "id": "guide_coach",
+        "name": "Smart guide",
+        "description": "Lets the Smart guide speak up on its own when a child stalls or drops the technique. Off, it waits to be asked — the Hint button opens the same guide.",
+        "isEnabled": true,
+        "tag": "Cognitive"
+      },
+      {
+        "id": "guide_voice",
+        "name": "Smart guide voice",
+        "description": "Reads each step of the Smart guide aloud as it appears. Off, a child reads it without hearing it — the guide itself stays either way.",
+        "isEnabled": true,
+        "tag": "Audio"
+      },
+      {
         "id": "inverse_scaffold",
         "name": "Helper fact",
         "description": "Shows the matching multiplication beside the division being worked. Never offered during practice.",
@@ -8493,9 +9004,30 @@
       }
     ],
     "settings": {
+      "coachPatience": "normal",
       "remainderNotation": "r"
     },
     "settingsSchema": [
+      {
+        "key": "coachPatience",
+        "label": "Smart guide patience",
+        "help": "How long a child is left to think before the Smart guide steps in. Relaxed waits about eleven seconds, Quick about four.",
+        "type": "choice",
+        "options": [
+          {
+            "value": "relaxed",
+            "label": "Relaxed"
+          },
+          {
+            "value": "normal",
+            "label": "Normal"
+          },
+          {
+            "value": "quick",
+            "label": "Quick"
+          }
+        ]
+      },
       {
         "key": "remainderNotation",
         "label": "How remainders are written",
@@ -8540,6 +9072,9 @@
             ],
             "totalMax": 30,
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Share a pile equally between the plates, and say how many are on one.",
@@ -8592,6 +9127,9 @@
             "totalMax": 36,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Fill groups of a given size until nothing is left, then count the groups.",
             "stepByStep": [
@@ -8643,6 +9181,9 @@
             "totalMax": 48,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Say what a division question is asking for, without working it out.",
             "stepByStep": [
@@ -8692,6 +9233,9 @@
             ],
             "totalMax": 48,
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Match a completed share to the division sentence that says it.",
@@ -8744,6 +9288,9 @@
             "totalMax": 20,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Share a total between two, and recognise that as halving.",
             "stepByStep": [
@@ -8787,6 +9334,9 @@
             "totalMax": 12,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Share between one, and between as many groups as there are things, and say why each comes out as it does.",
             "stepByStep": [
@@ -8828,6 +9378,9 @@
             "mode": "zero_rules",
             "totalMax": 12,
             "questionsPerRound": 6
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Share nothing between some groups, and recognise that sharing something between no groups is not a question that has an answer.",
@@ -8879,6 +9432,9 @@
             ],
             "totalMax": 30,
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Share until no more can go round, put what is left in the box, and say how many each group got.",
@@ -8932,6 +9488,9 @@
             "totalMax": 100,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Build an array with the given number of rows and read the length of one row.",
             "stepByStep": [
@@ -8984,6 +9543,9 @@
             "totalMax": 81,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Write both of the divisions a single array shows.",
             "stepByStep": [
@@ -9034,6 +9596,9 @@
             ],
             "totalMax": 64,
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Fill rows of a fixed length and count only the rows that are full.",
@@ -9086,6 +9651,9 @@
             "totalMax": 60,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Take the divisor away repeatedly until nothing is left, and count how many times you could.",
             "stepByStep": [
@@ -9136,6 +9704,9 @@
             "totalMax": 80,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Report how many equal hops a line shows, not where they finish.",
             "stepByStep": [
@@ -9144,7 +9715,7 @@
               "Where the last jump lands is not the answer.",
               "The answer is the number of jumps."
             ],
-            "kidTip": "The answer to a division is how many times it went in, not what you were left looking at.",
+            "kidTip": "The answer is how many hops it took, not where you landed.",
             "audioPrompt": "Count the jumps. Not the number you finish on.",
             "prompts": {
               "default": "How many hops are there?"
@@ -9186,6 +9757,9 @@
             ],
             "totalMax": 100,
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Skip count up to a total and use the number of steps as the quotient.",
@@ -9237,6 +9811,9 @@
               12
             ]
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Write all four true equations from a multiplication triple.",
             "stepByStep": [
@@ -9285,6 +9862,9 @@
               2,
               12
             ]
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Use a times-table row backwards: find the total, read the column.",
@@ -9335,6 +9915,9 @@
               12
             ]
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Recognise a division and its missing-factor multiplication as one question.",
             "stepByStep": [
@@ -9382,6 +9965,9 @@
               12
             ]
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Divide fluently by 2, 5 and 10.",
             "stepByStep": [
@@ -9390,7 +9976,7 @@
               "Dividing by 5 is close to dividing by 10 — there are twice as many.",
               "These three come up more than any others. Learn them first."
             ],
-            "kidTip": "Half of the answer to a ten is the answer to a five... the other way round. Ten first, then double it.",
+            "kidTip": "Divide by ten first, then double it. That is the five.",
             "audioPrompt": "Two, five and ten. The three you will use most.",
             "prompts": {
               "default": "What is the answer?"
@@ -9426,6 +10012,9 @@
               2,
               12
             ]
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Divide by 4 and 8 by halving repeatedly.",
@@ -9472,6 +10061,9 @@
               2,
               12
             ]
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Divide by 3, 6 and 9 using the matching multiplication.",
@@ -9522,6 +10114,9 @@
               2,
               12
             ]
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Pick the multiplication that answers a division, then use it.",
@@ -9575,6 +10170,9 @@
             ],
             "totalMax": 100
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Write a division answer as a whole number and a remainder.",
             "stepByStep": [
@@ -9626,6 +10224,9 @@
             ],
             "totalMax": 100
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Spot and fix an answer whose remainder is too big.",
             "stepByStep": [
@@ -9675,6 +10276,9 @@
               9
             ],
             "totalMax": 80
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Give the answer the situation asks for, not just the calculation.",
@@ -9726,6 +10330,9 @@
             ],
             "totalMax": 80
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Pick the answer that fits the situation from four that all use the same numbers.",
             "stepByStep": [
@@ -9768,6 +10375,9 @@
             "mode": "tens_quotient",
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Divide a multiple of ten by reading it as a number of tens.",
             "stepByStep": [
@@ -9776,7 +10386,7 @@
               "Six tens each means sixty each.",
               "Say the answer in ordinary numbers at the end."
             ],
-            "kidTip": "If you can do 24 ÷ 3, you can do 240 ÷ 3. It is the same sum wearing a zero.",
+            "kidTip": "If you can do 24 ÷ 3, you can do 240 ÷ 3.",
             "audioPrompt": "How many tens is it? Share the tens out.",
             "prompts": {
               "default": "What is the answer?"
@@ -9811,6 +10421,9 @@
             "mode": "scale_down",
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Divide by 10 and 100 and say what happened to the digits.",
             "stepByStep": [
@@ -9819,7 +10432,7 @@
               "Dividing by a hundred moves them two places.",
               "The zero disappears because it has run out of places, not because you rubbed it out."
             ],
-            "kidTip": "Do not say 'take a zero off'. Say 'the digits move right'. It will save you when decimals arrive.",
+            "kidTip": "Not 'take a zero off'. The digits move one place right.",
             "audioPrompt": "Watch the digits move right.",
             "prompts": {
               "default": "What is the answer?"
@@ -9852,6 +10465,9 @@
             "mode": "tens_into_tens",
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Divide a multiple of ten by another multiple of ten.",
             "stepByStep": [
@@ -9860,7 +10476,7 @@
               "That is just the small division underneath.",
               "The tens on each side cancel each other out."
             ],
-            "kidTip": "600 ÷ 30 is 60 tens ÷ 3 tens, which is 60 ÷ 3... no: it is 6 ÷ 3 tens' worth. Cancel one zero from each side.",
+            "kidTip": "Cancel one zero from each side, then divide what is left.",
             "audioPrompt": "A zero on each side cancels out. What is left?",
             "prompts": {
               "default": "What is the answer?"
@@ -9902,6 +10518,9 @@
               331
             ],
             "totalMax": 999
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Break a number into its places and divide each one separately.",
@@ -9954,6 +10573,9 @@
             ],
             "totalMax": 999
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Choose a split whose parts divide, when the place split does not.",
             "stepByStep": [
@@ -10004,6 +10626,9 @@
             ],
             "totalMax": 999,
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Divide by repeatedly subtracting known multiples and tallying them.",
@@ -10057,6 +10682,9 @@
             "maxChunks": 3,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Reach the answer in three chunks or fewer by choosing big ones.",
             "stepByStep": [
@@ -10108,6 +10736,9 @@
             ],
             "totalMax": 999
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Divide place by place in the written layout, with nothing carried.",
             "stepByStep": [
@@ -10116,7 +10747,7 @@
               "Write that above the line, in the same column.",
               "Move right and do the same again."
             ],
-            "kidTip": "Left to right, one column at a time. Division is the only written method that starts at the big end.",
+            "kidTip": "Left to right, one column at a time. Division starts big.",
             "audioPrompt": "Start at the left. How many fit into the first digit?",
             "prompts": {
               "default": "Divide it."
@@ -10159,6 +10790,9 @@
             ],
             "totalMax": 9999
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Carry a leftover into the next place and keep going.",
             "stepByStep": [
@@ -10167,7 +10801,7 @@
               "Now divide the whole of that new number, carry and all.",
               "Keep going to the last digit."
             ],
-            "kidTip": "The little number you write is not decoration. It joins the next digit and makes it bigger.",
+            "kidTip": "The little number you carry joins the next digit and grows it.",
             "audioPrompt": "What is left over goes in front of the next digit.",
             "prompts": {
               "default": "Divide it."
@@ -10209,6 +10843,9 @@
               1111
             ],
             "totalMax": 9999
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Finish a written division that does not come out exactly.",
@@ -10259,6 +10896,9 @@
               909
             ],
             "totalMax": 9999
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Write a zero in the answer when a place holds none, and see why it matters.",
@@ -10312,6 +10952,9 @@
             ],
             "totalMax": 9999
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Divide by a two-digit number using the written method.",
             "stepByStep": [
@@ -10362,6 +11005,9 @@
               99
             ],
             "totalMax": 9999
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Finish a two-digit division that does not come out exactly.",
@@ -10415,6 +11061,9 @@
             ],
             "totalMax": 999
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Carry a division past the decimal point instead of stopping at a remainder.",
             "stepByStep": [
@@ -10462,6 +11111,9 @@
               999
             ]
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Decide whether 2, 5 or 10 divides a number without dividing it.",
             "stepByStep": [
@@ -10506,6 +11158,9 @@
               20,
               999
             ]
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Decide whether 3 or 9 divides a number using its digit sum.",
@@ -10552,6 +11207,9 @@
               999
             ]
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Test for 4 and 6 by combining simpler tests.",
             "stepByStep": [
@@ -10596,6 +11254,9 @@
               12,
               120
             ]
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Find every factor of a number by dividing systematically.",
@@ -10642,6 +11303,9 @@
               100
             ]
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Find the factors two numbers share, and the largest of them.",
             "stepByStep": [
@@ -10687,6 +11351,9 @@
               200
             ]
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Split a number repeatedly until every part is prime.",
             "stepByStep": [
@@ -10695,7 +11362,7 @@
               "Keep splitting the parts that can.",
               "A prime cannot be split. When they are all prime, you are done."
             ],
-            "kidTip": "It does not matter which split you start with. You always end up with the same primes.",
+            "kidTip": "Whichever split you start with, the primes come out the same.",
             "audioPrompt": "Split it, then split the parts. Stop at primes.",
             "prompts": {
               "default": "Break it down to primes."
@@ -10735,6 +11402,9 @@
             ],
             "totalMax": 4000
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Estimate a quotient by choosing a nearby total the divisor goes into.",
             "stepByStep": [
@@ -10743,7 +11413,7 @@
               "There is usually one just below and one just above.",
               "Take whichever is easier to divide — not whichever is nearest."
             ],
-            "kidTip": "For 347 ÷ 6, think 360 ÷ 6. Not 350. Nearest is not the point; dividing nicely is.",
+            "kidTip": "Pick a number that divides nicely, not the nearest one.",
             "audioPrompt": "Move the big number, not the small one.",
             "prompts": {
               "default": "About how much is it?"
@@ -10781,6 +11451,9 @@
               12
             ],
             "totalMax": 4000
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Judge whether a claimed quotient is the right size, without working it out.",
@@ -10829,6 +11502,9 @@
             ],
             "totalMax": 900
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Check a division by rebuilding the total from the answer.",
             "stepByStep": [
@@ -10871,6 +11547,9 @@
             "mode": "size_unknown",
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Solve a sharing word problem by modelling it on a bar.",
             "stepByStep": [
@@ -10911,6 +11590,9 @@
           "question": {
             "mode": "count_unknown",
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Solve a grouping word problem by modelling it on a bar.",
@@ -10954,6 +11636,9 @@
             "mode": "remainder_context",
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Choose whether a situation needs the full groups or one more.",
             "stepByStep": [
@@ -10994,6 +11679,9 @@
           "question": {
             "mode": "unit_rate",
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Find a per-one amount from a total and a count.",
@@ -11036,6 +11724,9 @@
             "mode": "times_comparison",
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Answer a times-as-many comparison rather than a how-many-more one.",
             "stepByStep": [
@@ -11044,7 +11735,7 @@
               "Ask how many of the smaller amount fit into the bigger one.",
               "That is how many times as many."
             ],
-            "kidTip": "\"How many more\" means take away. \"How many times\" means divide. They are different questions about the same two numbers.",
+            "kidTip": "\"How many more\" takes away. \"How many times\" divides.",
             "audioPrompt": "Not how many more. How many times as many.",
             "prompts": {
               "default": "How many times as many?"
@@ -11077,6 +11768,9 @@
           "question": {
             "mode": "multi_step",
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Solve a two-step problem where the division comes second.",
@@ -11119,6 +11813,9 @@
             "mode": "mean",
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Find the mean of a small set by totalling and sharing.",
             "stepByStep": [
@@ -11127,7 +11824,7 @@
               "Share the total between them.",
               "That is what each one would be if they were all the same."
             ],
-            "kidTip": "The mean is not one of the numbers. It is what they would all be if you levelled them off.",
+            "kidTip": "The mean is what they would all be, levelled off.",
             "audioPrompt": "Add them all up, then share the total between the days.",
             "prompts": {
               "default": "How many each day?"
@@ -11160,6 +11857,9 @@
           "level": 56,
           "question": {
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Choose a division method that suits the particular numbers in front of you.",
@@ -11687,6 +12387,20 @@
         "tag": "Haptic"
       },
       {
+        "id": "guide_coach",
+        "name": "Smart guide",
+        "description": "Lets the Smart guide step in when a learner stalls. Each technique uses its own three clear steps; the Hint button opens the same guide.",
+        "isEnabled": true,
+        "tag": "Cognitive"
+      },
+      {
+        "id": "guide_voice",
+        "name": "Smart guide voice",
+        "description": "Reads each Smart guide step aloud as it appears. Off, the guide stays visible and silent.",
+        "isEnabled": true,
+        "tag": "Audio"
+      },
+      {
         "id": "part_labels",
         "name": "Part labels",
         "description": "Writes what one part is worth under the picture, so the pieces name themselves.",
@@ -11701,8 +12415,31 @@
         "tag": "Cognitive"
       }
     ],
-    "settings": {},
-    "settingsSchema": [],
+    "settings": {
+      "coachPatience": "normal"
+    },
+    "settingsSchema": [
+      {
+        "key": "coachPatience",
+        "label": "Smart guide patience",
+        "help": "How long a learner is left to think before the Smart guide steps in. Relaxed waits about eleven seconds, Quick about four.",
+        "type": "choice",
+        "options": [
+          {
+            "value": "relaxed",
+            "label": "Relaxed"
+          },
+          {
+            "value": "normal",
+            "label": "Normal"
+          },
+          {
+            "value": "quick",
+            "label": "Quick"
+          }
+        ]
+      }
+    ],
     "lessons": [
       {
         "id": "equal-parts",
@@ -11739,6 +12476,9 @@
             "prompts": {
               "default": "Are all the parts the same size?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -11785,6 +12525,9 @@
             "prompts": {
               "default": "What is one part called?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -11830,6 +12573,9 @@
             "prompts": {
               "default": "Which is more?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -11875,6 +12621,9 @@
             "prompts": {
               "default": "Shade the parts."
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -11920,6 +12669,9 @@
             "prompts": {
               "default": "What fraction is shaded?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -11966,6 +12718,9 @@
             "prompts": {
               "default": "How many is that?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -12013,6 +12768,9 @@
             "prompts": {
               "default": "Put the marker on the fraction."
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -12058,6 +12816,9 @@
             "prompts": {
               "default": "Put the marker on the fraction."
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -12103,6 +12864,9 @@
             "prompts": {
               "default": "What number is the marker on?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -12148,6 +12912,9 @@
             "prompts": {
               "default": "How many make one whole?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -12193,6 +12960,9 @@
             "prompts": {
               "default": "Put the marker on the fraction."
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -12243,6 +13013,9 @@
             "prompts": {
               "default": "What is it called now?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -12292,6 +13065,9 @@
             "prompts": {
               "default": "Which pair of names does this amount have?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -12341,6 +13117,9 @@
             "prompts": {
               "default": "Write it with the new bottom number."
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -12391,6 +13170,9 @@
             "prompts": {
               "default": "What does it become?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -12441,6 +13223,9 @@
             "prompts": {
               "default": "Make it as simple as it goes."
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -12487,6 +13272,9 @@
             "prompts": {
               "default": "Which is more?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -12532,6 +13320,9 @@
             "prompts": {
               "default": "Which is more?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -12578,6 +13369,9 @@
             "prompts": {
               "default": "Which is more?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -12623,6 +13417,9 @@
             "prompts": {
               "default": "More or less than a half?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -12669,6 +13466,9 @@
             "prompts": {
               "default": "Which is more?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -12719,6 +13519,9 @@
             "prompts": {
               "default": "Group them into whole ones."
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -12768,6 +13571,9 @@
             "prompts": {
               "default": "Break them back into parts."
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -12818,6 +13624,9 @@
             "prompts": {
               "default": "Put the marker on the number."
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -12864,6 +13673,9 @@
             "prompts": {
               "default": "Count them together."
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -12909,6 +13721,9 @@
             "prompts": {
               "default": "Take them away."
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -12951,6 +13766,9 @@
             "prompts": {
               "default": "Show that this answer is too small."
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -12997,6 +13815,9 @@
             "prompts": {
               "default": "Cut one to match, then count."
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -13043,6 +13864,9 @@
             "prompts": {
               "default": "Match the pieces, then add."
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -13089,6 +13913,9 @@
             "prompts": {
               "default": "Match the pieces, then take away."
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -13139,6 +13966,9 @@
             "prompts": {
               "default": "Add the wholes, then the parts."
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -13189,6 +14019,9 @@
             "prompts": {
               "default": "Break a whole, then take away."
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -13239,6 +14072,9 @@
             "prompts": {
               "default": "How many is that?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -13289,6 +14125,9 @@
             "prompts": {
               "default": "How much altogether?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -13335,6 +14174,9 @@
             "prompts": {
               "default": "How much is shaded twice?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -13381,6 +14223,9 @@
             "prompts": {
               "default": "Cancel first, then multiply."
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -13431,6 +14276,9 @@
             "prompts": {
               "default": "Bigger, smaller, or the same?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -13481,6 +14329,9 @@
             "prompts": {
               "default": "How many fit?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -13530,6 +14381,9 @@
             "prompts": {
               "default": "How many groups?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -13580,6 +14434,9 @@
             "prompts": {
               "default": "How much does each one get?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -13626,6 +14483,9 @@
             "prompts": {
               "default": "How many fit inside?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -13672,6 +14532,9 @@
             "prompts": {
               "default": "Which one asks the same thing?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -13714,6 +14577,9 @@
             "prompts": {
               "default": "Write it as a decimal."
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -13756,6 +14622,9 @@
             "prompts": {
               "default": "Write it as a decimal."
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -13798,6 +14667,9 @@
             "prompts": {
               "default": "What is it as a decimal?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -13840,6 +14712,9 @@
             "prompts": {
               "default": "Write it as a fraction."
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -13881,6 +14756,9 @@
             "prompts": {
               "default": "What percentage is it?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -13924,6 +14802,9 @@
             "prompts": {
               "default": "Which row matches?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -13969,6 +14850,9 @@
             "prompts": {
               "default": "Nearest to what?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -14011,6 +14895,9 @@
             "prompts": {
               "default": "Could that be right?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -14053,6 +14940,9 @@
             "prompts": {
               "default": "How many is that?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -14095,6 +14985,9 @@
             "prompts": {
               "default": "How much each?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -14136,6 +15029,9 @@
             "prompts": {
               "default": "How much is gone?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -14178,6 +15074,9 @@
             "prompts": {
               "default": "How many cups?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -14220,6 +15119,9 @@
             "prompts": {
               "default": "How many times as much?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -14262,6 +15164,9 @@
             "prompts": {
               "default": "How many now?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -14304,6 +15209,9 @@
             "prompts": {
               "default": "Which way would you do it?"
             }
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "standards": [
@@ -14805,6 +15713,20 @@
         "tag": "Haptic"
       },
       {
+        "id": "guide_coach",
+        "name": "Smart guide",
+        "description": "Lets the Smart guide speak up on its own when a child stalls or drops the technique. Off, it waits to be asked — the Hint button opens the same guide.",
+        "isEnabled": true,
+        "tag": "Cognitive"
+      },
+      {
+        "id": "guide_voice",
+        "name": "Smart guide voice",
+        "description": "Reads each step of the Smart guide aloud as it appears. Off, a child reads it without hearing it — the guide itself stays either way.",
+        "isEnabled": true,
+        "tag": "Audio"
+      },
+      {
         "id": "counting_badges",
         "name": "1-to-1 badges",
         "description": "Numbers what has been counted so far — the objects inside each group, the squares of an array, and the landings along a number line.",
@@ -14853,6 +15775,7 @@
       "guidedLabel": "",
       "milestoneLabel": "",
       "speechRate": 0.95,
+      "coachPatience": "normal",
       "answerInput": "choices",
       "freeLessons": 10,
       "tableCeiling": "12"
@@ -14899,6 +15822,26 @@
         "max": 2,
         "step": 0.05,
         "unit": "x"
+      },
+      {
+        "key": "coachPatience",
+        "label": "Smart guide patience",
+        "help": "How long a child is left to think before the Smart guide steps in. Relaxed waits about eleven seconds, Quick about four.",
+        "type": "choice",
+        "options": [
+          {
+            "value": "relaxed",
+            "label": "Relaxed"
+          },
+          {
+            "value": "normal",
+            "label": "Normal"
+          },
+          {
+            "value": "quick",
+            "label": "Quick"
+          }
+        ]
       },
       {
         "key": "answerInput",
@@ -14967,6 +15910,9 @@
             "productMax": 36,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Build a set of groups that all hold the same number, then say how many there are altogether.",
             "stepByStep": [
@@ -15016,6 +15962,9 @@
             ],
             "productMax": 30,
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Decide whether a set of groups is equal, and say which one is different when it is not.",
@@ -15067,6 +16016,9 @@
             "productMax": 40,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Count equal groups by adding the group size once for every group.",
             "stepByStep": [
@@ -15117,6 +16069,9 @@
             "productMax": 60,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Choose the multiplication sentence that describes a set of equal groups.",
             "stepByStep": [
@@ -15166,6 +16121,9 @@
             "productMax": 60,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Say which factor counts the groups and which counts what is inside one.",
             "stepByStep": [
@@ -15210,6 +16168,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Multiply by one, and see why the answer is the other number.",
             "stepByStep": [
@@ -15253,6 +16214,9 @@
               12
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Multiply by zero, and see why the answer is always nothing.",
@@ -15301,6 +16265,9 @@
               6
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Build an array with a given number of rows and a given number in each row.",
@@ -15351,6 +16318,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Read a finished array as a multiplication and give its total.",
             "stepByStep": [
@@ -15398,6 +16368,9 @@
               10
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Turn an array a quarter turn and explain why its total is unchanged.",
@@ -15448,6 +16421,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Choose both multiplication sentences that describe one array.",
             "stepByStep": [
@@ -15496,6 +16472,9 @@
               10
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Given the total and one side of an array, find the other side.",
@@ -15549,6 +16528,9 @@
             "max": 100,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Make equal hops along a number line and read the number you land on.",
             "stepByStep": [
@@ -15600,6 +16582,9 @@
             "max": 81,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Read a multiplication as a number of hops of a given size, and find where it lands.",
             "stepByStep": [
@@ -15649,6 +16634,9 @@
             "max": 100,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Given where the hops land and how long each one is, find how many hops there were.",
             "stepByStep": [
@@ -15695,6 +16683,9 @@
             "max": 60,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Decide whether a number is a multiple of a given number.",
             "stepByStep": [
@@ -15739,6 +16730,9 @@
               12
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Know the two times table as doubling.",
@@ -15785,6 +16779,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Know the ten times table as a count of tens.",
             "stepByStep": [
@@ -15830,6 +16827,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Work out the five times table by halving the ten times table.",
             "stepByStep": [
@@ -15871,6 +16871,9 @@
             "mode": "find_cell",
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Find a product on a times table by tracing its row and its column.",
             "stepByStep": [
@@ -15910,6 +16913,9 @@
           "question": {
             "mode": "pattern_hunt",
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Spot which answers in a row follow a stated rule.",
@@ -15951,6 +16957,9 @@
             "mode": "squares",
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Know the square numbers and where they sit on the times table.",
             "stepByStep": [
@@ -15991,6 +17000,9 @@
           "question": {
             "mode": "commutative_pairs",
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Pair a shaded cell with the cell that holds the same product.",
@@ -16036,6 +17048,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Work out the four times table by doubling twice.",
             "stepByStep": [
@@ -16080,6 +17095,9 @@
               12
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Work out the eight times table by doubling three times.",
@@ -16129,6 +17147,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Work out the three times table from the two times table.",
             "stepByStep": [
@@ -16177,6 +17198,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Work out the six times table from the five times table.",
             "stepByStep": [
@@ -16221,6 +17245,9 @@
               12
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Work out the nine times table from the ten times table.",
@@ -16271,6 +17298,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Work out the seven times table by splitting it into five and two.",
             "stepByStep": [
@@ -16320,6 +17350,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Work out the eleven and twelve times tables from the ten times table.",
             "stepByStep": [
@@ -16364,6 +17397,9 @@
               12
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Work out a fact next to a square number from the square itself.",
@@ -16410,6 +17446,9 @@
               12
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Choose a fact you already know that gets you to a fact you do not.",
@@ -16461,6 +17500,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Cut an array into two smaller arrays and add their totals.",
             "stepByStep": [
@@ -16507,6 +17549,9 @@
             "productMax": 120,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Multiply three numbers, choosing which two to multiply first.",
             "stepByStep": [
@@ -16551,6 +17596,9 @@
               30
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Halve one factor and double the other to reach an easier product.",
@@ -16598,6 +17646,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Find every pair of numbers that multiply to make a given total.",
             "stepByStep": [
@@ -16641,6 +17692,9 @@
               100
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Decide whether a number has any factor pair besides one and itself.",
@@ -16691,6 +17745,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Multiply a number by ten or a hundred by moving its digits.",
             "stepByStep": [
@@ -16736,6 +17793,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Multiply by a multiple of ten by counting tens instead of ones.",
             "stepByStep": [
@@ -16779,6 +17839,9 @@
               9
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Multiply two multiples of ten and land the answer in the right place.",
@@ -16825,6 +17888,9 @@
             "unitsUntil": 2,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Find the area of a rectangle from the lengths of its two sides.",
             "stepByStep": [
@@ -16868,6 +17934,9 @@
             "mode": "area_2x1",
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Split a two-digit side by place value and fill in each piece.",
             "stepByStep": [
@@ -16910,6 +17979,9 @@
             "mode": "partial_products",
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Record each partial product on its own row and total them.",
             "stepByStep": [
@@ -16950,6 +18022,9 @@
           "question": {
             "mode": "area_2x2",
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Split both sides by place value and fill in all four pieces.",
@@ -16993,6 +18068,9 @@
             "digitsA": 2,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Multiply a two-digit number by a one-digit number in columns.",
             "stepByStep": [
@@ -17033,6 +18111,9 @@
             "mode": "regroup",
             "digitsA": 2,
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Multiply in columns, recording each carry.",
@@ -17075,6 +18156,9 @@
             "mode": "two_digit",
             "digitsA": 2,
             "questionsPerRound": 4
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Multiply two two-digit numbers using two partial rows.",
@@ -17119,6 +18203,9 @@
             "digitsB": 1,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Estimate a product by rounding each factor first.",
             "stepByStep": [
@@ -17162,6 +18249,9 @@
             "digitsB": 1,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Decide whether a claimed answer could be right, by estimating.",
             "stepByStep": [
@@ -17169,7 +18259,7 @@
               "Compare that with the answer being claimed.",
               "An answer ten times out is not close, however tidy it looks."
             ],
-            "kidTip": "If it is ten times out, it is wrong — you do not need the real answer.",
+            "kidTip": "Ten times out is wrong, whatever the real answer is.",
             "audioPrompt": "Someone has given an answer. Could it be right?"
           }
         },
@@ -17210,6 +18300,9 @@
               12
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Find the total when a story gives the number of groups and the size of each.",
@@ -17260,6 +18353,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Find how many equal groups a total makes.",
             "stepByStep": [
@@ -17307,6 +18403,9 @@
               12
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Find how many go in each group when a total is shared equally.",
@@ -17356,6 +18455,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Work out an amount described as a number of times another amount.",
             "stepByStep": [
@@ -17404,6 +18506,9 @@
               12
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Use a per-one amount to find a total.",
@@ -17459,6 +18564,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "targetObjective": "Solve a problem that needs a multiplication and then one more step.",
             "stepByStep": [
@@ -17509,6 +18617,9 @@
               12
             ],
             "questionsPerRound": 6
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "targetObjective": "Choose a route to a product, and compare it with another that also works.",
@@ -18145,6 +19256,20 @@
         "tag": "Haptic"
       },
       {
+        "id": "guide_coach",
+        "name": "Smart guide",
+        "description": "Offers the next search technique and gradually narrows attention to a broad region without pointing out the hidden object.",
+        "isEnabled": true,
+        "tag": "Cognitive"
+      },
+      {
+        "id": "guide_voice",
+        "name": "Smart guide voice",
+        "description": "Reads each Smart guide step aloud as it appears. Off, the guide stays visible and silent.",
+        "isEnabled": true,
+        "tag": "Audio"
+      },
+      {
         "id": "target_preview",
         "name": "Target previews",
         "description": "Shows the object or silhouette the learner must find.",
@@ -18186,6 +19311,7 @@
       "guidedLabel": "",
       "milestoneLabel": "",
       "speechRate": 0.95,
+      "coachPatience": "normal",
       "freeLessons": 3
     },
     "settingsSchema": [
@@ -18232,6 +19358,26 @@
         "unit": "x"
       },
       {
+        "key": "coachPatience",
+        "label": "Smart guide patience",
+        "help": "How long a learner is left to search before the Smart guide steps in.",
+        "type": "choice",
+        "options": [
+          {
+            "value": "relaxed",
+            "label": "Relaxed"
+          },
+          {
+            "value": "normal",
+            "label": "Normal"
+          },
+          {
+            "value": "quick",
+            "label": "Quick"
+          }
+        ]
+      },
+      {
         "key": "freeLessons",
         "label": "Free lessons",
         "help": "Number of lessons available before a plan is needed.",
@@ -18275,6 +19421,9 @@
             ],
             "kidTip": "Move your eyes slowly from left to right.",
             "audioPrompt": "Welcome to the beach. Look at the target, then find the matching hidden object."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Easy",
@@ -18323,6 +19472,9 @@
             ],
             "kidTip": "Find one target first, then look again for the other.",
             "audioPrompt": "Explore the city park and find two hidden objects in any order."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Easy",
@@ -18371,6 +19523,9 @@
             ],
             "kidTip": "Split the scene into four parts and check each part.",
             "audioPrompt": "Look through the family home and find all three hidden objects."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Medium",
@@ -18421,6 +19576,9 @@
             ],
             "kidTip": "Look for corners, curves, handles, and long edges.",
             "audioPrompt": "At Market Street, use each silhouette to find three hidden objects."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Medium",
@@ -18477,6 +19635,9 @@
             ],
             "kidTip": "Check shape first, then colour and small details.",
             "audioPrompt": "Look closely across the city places. Find the exact objects and ignore the look-alikes."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -18529,6 +19690,9 @@
             ],
             "kidTip": "The direction can change, but the object's parts stay the same.",
             "audioPrompt": "Search the farm and forest. Find the objects even when they are turned."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -18579,6 +19743,9 @@
             ],
             "kidTip": "Size can change, but the shape and details still match.",
             "audioPrompt": "Explore the school. Find the same objects even when their sizes are different."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -18629,6 +19796,9 @@
             ],
             "kidTip": "A handle, point, or curve can identify the whole object.",
             "audioPrompt": "Search the harbor and aquarium. Find four objects from the parts that are peeking out."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -18679,6 +19849,9 @@
             ],
             "kidTip": "Finish one small area before moving to the next.",
             "audioPrompt": "The science museum is busy. Search one section at a time and find all five objects."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Very Hard",
@@ -18728,6 +19901,9 @@
             ],
             "kidTip": "Check the shadows near the walls - things hide well there.",
             "audioPrompt": "Welcome to the castle. Find the four royal objects hidden in the courtyard."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Medium",
@@ -18777,6 +19953,9 @@
             ],
             "kidTip": "Finish one strip of the picture before moving to the next.",
             "audioPrompt": "Frogs are hiding all around the castle moat. Find every single one."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Medium",
@@ -18827,6 +20006,9 @@
             ],
             "kidTip": "Trace the edge with your finger to see where one thing ends.",
             "audioPrompt": "Welcome to the workshop. The tools are piled up. Follow one outline at a time."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -18876,6 +20058,9 @@
             ],
             "kidTip": "A mirror swaps left and right but nothing else.",
             "audioPrompt": "Some things in the hall of mirrors are flipped. Find the ones facing the same way as the picture."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -18926,6 +20111,9 @@
             ],
             "kidTip": "When colour is gone, the outline is all you have.",
             "audioPrompt": "These reef animals wear the colours around them. Look for their shapes."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -18975,6 +20163,9 @@
             ],
             "kidTip": "Shadows keep the edge and lose everything else.",
             "audioPrompt": "The lanterns are lit and everything is a shadow. Match each picture to its shape."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -19034,6 +20225,9 @@
             ],
             "kidTip": "There is no picture to copy, so you have to know what the thing is.",
             "audioPrompt": "This time there is no picture. Find everything that belongs to the group."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -19091,6 +20285,9 @@
             ],
             "kidTip": "Compare a small piece at a time, not the whole picture at once.",
             "audioPrompt": "Two pictures, almost the same. Find the three things that changed."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -19150,6 +20347,9 @@
             ],
             "kidTip": "Something can change without disappearing.",
             "audioPrompt": "Five things changed this time. Some moved, some turned, some were swapped."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -19211,6 +20411,9 @@
             ],
             "kidTip": "A thing can be the same shape but a different size, or facing the other way.",
             "audioPrompt": "Seven differences now, and some are only a size or a reflection. Take your time."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Hard",
@@ -19275,6 +20478,9 @@
             ],
             "kidTip": "Use the strategy that matches what changed in this scene.",
             "audioPrompt": "Take the hidden object challenge. Use every search strategy to find all five objects."
+          },
+          "guide": {
+            "enabled": true
           }
         },
         "difficulty": "Expert",
@@ -19495,6 +20701,20 @@
         "tag": "Cognitive"
       },
       {
+        "id": "guide_coach",
+        "name": "Smart guide",
+        "description": "Lets the Smart guide speak up on its own when a child stalls or drops the technique. Off, it waits to be asked — the Hint button opens the same guide.",
+        "isEnabled": true,
+        "tag": "Cognitive"
+      },
+      {
+        "id": "guide_voice",
+        "name": "Smart guide voice",
+        "description": "Reads each step of the Smart guide aloud as it appears. Off, a child reads it without hearing it — the guide itself stays either way.",
+        "isEnabled": true,
+        "tag": "Audio"
+      },
+      {
         "id": "step_context_tags",
         "name": "Step framing tags",
         "description": "Labels warm-up, guided, activity, and milestone steps.",
@@ -19515,6 +20735,7 @@
       "guidedLabel": "",
       "milestoneLabel": "",
       "speechRate": 0.95,
+      "coachPatience": "normal",
       "answerInput": "choices",
       "freeLessons": 10
     },
@@ -19560,6 +20781,26 @@
         "max": 2,
         "step": 0.05,
         "unit": "x"
+      },
+      {
+        "key": "coachPatience",
+        "label": "Smart guide patience",
+        "help": "How long a child is left to think before the Smart guide steps in. Relaxed waits about eleven seconds, Quick about four.",
+        "type": "choice",
+        "options": [
+          {
+            "value": "relaxed",
+            "label": "Relaxed"
+          },
+          {
+            "value": "normal",
+            "label": "Normal"
+          },
+          {
+            "value": "quick",
+            "label": "Quick"
+          }
+        ]
       },
       {
         "key": "answerInput",
@@ -19615,6 +20856,9 @@
               9
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "remove_tray",
@@ -19676,6 +20920,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "remove_tray",
             "tier": "beginner",
@@ -19735,6 +20982,9 @@
               9
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "remove_tray",
@@ -19797,6 +21047,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "remove_tray",
             "tier": "beginner",
@@ -19858,6 +21111,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "remove_tray",
             "tier": "intermediate",
@@ -19914,6 +21170,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "remove_tray",
             "tier": "intermediate",
@@ -19965,6 +21224,9 @@
               20
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "remove_tray",
@@ -20018,6 +21280,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "remove_tray",
             "tier": "beginner",
@@ -20069,6 +21334,9 @@
               20
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "remove_tray",
@@ -20127,6 +21395,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "remove_tray",
             "tier": "intermediate",
@@ -20180,6 +21451,9 @@
               4
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "frame_takeaway",
@@ -20237,6 +21511,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "frame_takeaway",
             "tier": "intermediate",
@@ -20292,6 +21569,9 @@
               9
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "bond_house",
@@ -20350,6 +21630,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "difference_line",
             "tier": "intermediate",
@@ -20405,6 +21688,9 @@
               29
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "difference_line",
@@ -20466,6 +21752,9 @@
               10
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "difference_line",
@@ -20529,6 +21818,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "fact_deck",
             "tier": "intermediate",
@@ -20589,6 +21881,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "fact_deck",
             "tier": "intermediate",
@@ -20642,6 +21937,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "fact_deck",
             "tier": "intermediate",
@@ -20693,6 +21991,9 @@
               4
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "frame_takeaway",
@@ -20746,6 +22047,9 @@
               9
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "frame_takeaway",
@@ -20809,6 +22113,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "difference_line",
             "tier": "advanced",
@@ -20868,6 +22175,9 @@
               99
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "difference_line",
@@ -20929,6 +22239,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "fact_deck",
             "tier": "advanced",
@@ -20984,6 +22297,9 @@
               79
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "difference_line",
@@ -21043,6 +22359,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "difference_line",
             "tier": "advanced",
@@ -21101,6 +22420,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "block_exchange",
             "tier": "intermediate",
@@ -21156,6 +22478,9 @@
               88
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "place_value_desk",
@@ -21213,6 +22538,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "block_exchange",
             "tier": "intermediate",
@@ -21268,6 +22596,9 @@
               800
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "block_exchange",
@@ -21326,6 +22657,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "difference_line",
             "tier": "advanced",
@@ -21382,6 +22716,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "place_value_desk",
             "tier": "advanced",
@@ -21437,6 +22774,9 @@
               88
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "place_value_desk",
@@ -21496,6 +22836,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "place_value_desk",
             "tier": "advanced",
@@ -21552,6 +22895,9 @@
               88
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "place_value_desk",
@@ -21610,6 +22956,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "block_exchange",
             "tier": "advanced",
@@ -21665,6 +23014,9 @@
               899
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "block_exchange",
@@ -21723,6 +23075,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "column_pad",
             "tier": "advanced",
@@ -21780,6 +23135,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "column_pad",
             "tier": "advanced",
@@ -21836,6 +23194,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "column_pad",
             "tier": "advanced",
@@ -21885,6 +23246,9 @@
             "digits": 3,
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "estimate_dial",
             "tier": "advanced",
@@ -21933,6 +23297,9 @@
             "mode": "reasonable",
             "digits": 3,
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "estimate_dial",
@@ -21991,6 +23358,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "bond_house",
             "tier": "advanced",
@@ -22046,6 +23416,9 @@
               10
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "bond_house",
@@ -22109,6 +23482,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "story_board",
             "tier": "advanced",
@@ -22171,6 +23547,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "story_board",
             "tier": "advanced",
@@ -22232,6 +23611,9 @@
               "{who} lost {v0} {item} and still has {v1}."
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "story_board",
@@ -22296,6 +23678,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "story_board",
             "tier": "advanced",
@@ -22357,6 +23742,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "story_board",
             "tier": "advanced",
@@ -22417,6 +23805,9 @@
               "{who} brought {v0} {item} to {place}. {other} brought {v1} fewer."
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "story_board",
@@ -22480,6 +23871,9 @@
             ],
             "questionsPerRound": 5
           },
+          "guide": {
+            "enabled": true
+          },
           "play": {
             "mode": "story_board",
             "tier": "advanced",
@@ -22537,6 +23931,9 @@
               89
             ],
             "questionsPerRound": 5
+          },
+          "guide": {
+            "enabled": true
           },
           "play": {
             "mode": "strategy_picker",

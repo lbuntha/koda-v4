@@ -36,18 +36,21 @@ vi.mock("../../../components/KodaAskModal", () => ({ KodaAskModal: () => null })
 vi.mock("../../../components/LiveVoiceCoachModal", () => ({ LiveVoiceCoachModal: () => null }));
 
 import { createFakeKoda } from "../testing/fakeKoda";
+import { PreferencesAPI } from "../../../lib/preferences";
 import { SkillRoundTopBar } from "./SkillRoundTopBar";
 
-const drawBar = () =>
+const drawBar = (koda = createFakeKoda()) => {
   render(
     <SkillRoundTopBar
-      koda={createFakeKoda().sdk}
+      koda={koda.sdk}
       title="Counting to ten"
       questionIndex={2}
       totalQuestions={5}
       onExit={() => undefined}
     />,
   );
+  return koda;
+};
 
 /** The bar draws the same control twice — one per breakpoint. */
 const askButtons = () => screen.queryAllByLabelText("Ask Koda about this question");
@@ -59,6 +62,7 @@ const running = (...capabilities: string[]) =>
 beforeEach(() => {
   offered.mockReset();
   ask.mockReset();
+  PreferencesAPI.update({ voiceEnabled: true });
 });
 
 afterEach(cleanup);
@@ -88,5 +92,23 @@ describe("asking Koda from inside a round", () => {
     running();
     drawBar();
     expect(askButtons()).toHaveLength(0);
+  });
+});
+
+describe("spoken lesson audio", () => {
+  it("uses the saved Koda voice preference from Settings", () => {
+    running();
+    const koda = drawBar();
+
+    const offButtons = screen.getAllByLabelText("Turn Koda’s voice off");
+    expect(offButtons).toHaveLength(2);
+    expect(offButtons[0].getAttribute("aria-pressed")).toBe("true");
+
+    fireEvent.click(offButtons[0]);
+
+    expect(screen.getAllByLabelText("Turn Koda’s voice on")).toHaveLength(2);
+    expect(PreferencesAPI.current().voiceEnabled).toBe(false);
+    expect(JSON.parse(localStorage.getItem("koda_preferences_v1") ?? "{}").voiceEnabled).toBe(false);
+    expect(koda.count("speech.stop")).toBe(1);
   });
 });

@@ -414,8 +414,12 @@ html.theme-light,
 /* ========================================================================== */
 /* TACTILE TOUCH POP ANIMATIONS FOR COUNTING OBJECTS                         */
 /* ========================================================================== */
-/* Peak scale is driven by --pop-scale, which the counting plugin sets from its
-   popScaleFactor setting. Falls back to the original 1.24 when unset. */
+/* DEAD, and kept only so the next person does not re-derive that it is.
+   Nothing applies `.tap-pop-anim` and nothing sets `--pop-scale`: counting's
+   objects pop through motion's own `whileTap`, and these keyframes have never
+   animated anything. The comment here used to say "the counting plugin sets it
+   from its popScaleFactor setting", which was the only evidence that the
+   setting did something — it did not, and that setting has been removed. */
 @keyframes tactile-tap-pop {
   0% {
     transform: scale(0.92);

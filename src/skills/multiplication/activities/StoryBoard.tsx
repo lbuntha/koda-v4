@@ -8,6 +8,8 @@ import {
   playCopy,
   useSkillRound,
   type RoundQuestion,
+  guideSetup,
+  useGuide,
 } from "../../kit";
 import { quietWhenPractising } from "../../kit/practice";
 import { themeSystem } from "../../../lib/themeSystem";
@@ -340,7 +342,10 @@ export function storyHints(question: StoryQuestion, kidTip: string | undefined):
       return composeHints(
         kidTip,
         `The ${values[0]} is the same for every ${cast.container.one}.`,
-        `So it is ${values[1]} lots of ${values[0]}.`,
+        /* A rate is "so many each, this many times" — naming the *per* is what
+           makes it a rate rather than a row of things, and the rows-and-columns
+           story was being handed this same sentence. */
+        `${values[0]} per ${cast.container.one}, ${values[1]} of them.`,
       );
     case "multi_step":
       return composeHints(
@@ -500,6 +505,31 @@ export const StoryBoard: React.FC<ActivityProps<StoryParams>> = ({ params, koda,
     );
   })();
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const hints = practising ? [] : storyHints(question, copy.kidTip);
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    target: -1,
+    progress: 0,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   return (
     <SkillRound
       koda={koda}
@@ -509,7 +539,9 @@ export const StoryBoard: React.FC<ActivityProps<StoryParams>> = ({ params, koda,
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : storyHints(question, copy.kidTip)}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       iconName="search"
       iconTone="emerald"
       tagLabels={tagLabelsFrom(koda)}

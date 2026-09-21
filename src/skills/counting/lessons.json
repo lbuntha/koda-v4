@@ -91,6 +91,9 @@
           "questionsPerRound": 5,
           "mode": "scatter"
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "touch_orbit",
           "tier": "intermediate",
@@ -157,6 +160,9 @@
           "questionsPerRound": 5,
           "mode": "compare"
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "touch_orbit",
           "tier": "master",
@@ -208,6 +214,9 @@
           "flashMs": 1200,
           "questionsPerRound": 5,
           "display": "grid"
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "subitizing_rush",
@@ -266,6 +275,9 @@
           "questionsPerRound": 5,
           "display": "scatter"
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "subitizing_rush",
           "tier": "intermediate",
@@ -320,6 +332,9 @@
           "questionsPerRound": 5,
           "display": "twoColor"
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "subitizing_rush",
           "tier": "master",
@@ -371,6 +386,9 @@
           ],
           "questionsPerRound": 5,
           "mode": "fill"
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "tenframe_rocket",
@@ -427,6 +445,9 @@
           "questionsPerRound": 5,
           "mode": "complement"
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "tenframe_rocket",
           "tier": "intermediate",
@@ -478,6 +499,9 @@
           ],
           "questionsPerRound": 5,
           "mode": "teen"
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "tenframe_rocket",
@@ -541,6 +565,9 @@
           "questionsPerRound": 5,
           "mode": "hop"
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "froggy_skip",
           "tier": "beginner",
@@ -596,6 +623,9 @@
           ],
           "questionsPerRound": 5,
           "mode": "hop"
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "froggy_skip",
@@ -668,6 +698,9 @@
           "questionsPerRound": 5,
           "mode": "missing"
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "froggy_skip",
           "tier": "master",
@@ -720,6 +753,9 @@
             35
           ],
           "bundleOnes": true
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "base10_foundry",
@@ -777,6 +813,9 @@
           "bundleTens": true,
           "hundreds": true
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "base10_foundry",
           "tier": "intermediate",
@@ -833,6 +872,9 @@
           "bundleOnes": true,
           "bundleTens": true,
           "hundreds": true
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "base10_foundry",

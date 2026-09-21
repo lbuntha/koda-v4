@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
-import { diceBearAvatar } from "../../lib/avatar";
+import { SvgAsset } from "../../assets/svg";
+import { artAvatarId, diceBearAvatar } from "../../lib/avatar";
 
 type AvatarSize = "xs" | "sm" | "md" | "lg" | "fill";
 
@@ -38,7 +39,8 @@ export const UIAvatar: React.FC<UIAvatarProps> = ({
   className = "",
   decorative = false,
 }) => {
-  const imageUrl = src ?? (seed ? diceBearAvatar(seed) : undefined);
+  const artId = src ? undefined : artAvatarId(seed);
+  const imageUrl = src ?? (!artId && seed ? diceBearAvatar(seed) : undefined);
   const [loadedUrl, setLoadedUrl] = useState<string | undefined>();
   const [failedUrl, setFailedUrl] = useState<string | undefined>();
   const loaded = Boolean(imageUrl && loadedUrl === imageUrl);
@@ -46,13 +48,16 @@ export const UIAvatar: React.FC<UIAvatarProps> = ({
 
   return (
     <span
-      className={`relative inline-flex shrink-0 overflow-hidden bg-indigo-100 text-indigo-700 ${sizes[size]} ${className}`}
+      className={`relative inline-flex shrink-0 overflow-hidden text-indigo-700 ${artId ? "bg-transparent" : "bg-indigo-100"} ${sizes[size]} ${className}`}
       aria-label={decorative ? undefined : `${name} avatar`}
       role={decorative ? undefined : "img"}
     >
       <span className="absolute inset-0 flex items-center justify-center font-semibold" aria-hidden="true">
         {initialsFor(name)}
       </span>
+      {artId && (
+        <SvgAsset id={artId} size="100%" className="absolute inset-0 z-10" />
+      )}
       {imageUrl && !loaded && !failed && (
         <span className="absolute inset-0 animate-pulse bg-indigo-100/70" aria-hidden="true" />
       )}

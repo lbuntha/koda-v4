@@ -10,6 +10,7 @@ import { PALETTE } from "../internal/palette";
 import { BOARD_MODES, generatePuzzle, type BoardMode, type PatternKind } from "../internal/puzzles";
 import { chime, speechRate, tagLabelsFrom } from "../internal/sweeperChrome";
 import { useNudge } from "../internal/useNudge";
+import { sweeperGuideMethod, useSweeperGuide } from "../internal/useSweeperGuide";
 
 /**
  * Painting a board, with a reason for every tile.
@@ -214,7 +215,10 @@ const where = (board: Board, cell: number) => {
 };
 
 /** The next move the supported rules can justify, in words. */
-export function nextStep(board: Board, assignment: Assignment): { name: string; worked: string } | null {
+export function nextStep(
+  board: Board,
+  assignment: Assignment,
+): { name: string; worked: string; target: number } | null {
   const result = deduce(board, assignment);
   const step = result.steps[0];
   if (!step) return null;
@@ -222,20 +226,23 @@ export function nextStep(board: Board, assignment: Assignment): { name: string; 
   const clue = board.clues.find((c) => c.id === evidence.clueId)!;
   const colour = PALETTE[step.color].name.toLowerCase();
   const name = `Look at the ${colour} ${clue.count} at ${where(board, clue.cell)}.`;
-  const cells = step.changes.map((c) => where(board, c.cell)).join(" and ");
+  const first = step.changes[0] ? where(board, step.changes[0].cell) : "the next open tile";
   const worked =
     step.rule === "zero"
       ? `It allows no ${colour} neighbours at all, so every blank tile it touches is the other colour.`
       : step.rule === "full"
-        ? `It needs every tile it touches to be ${colour}, so ${cells} must be ${colour}.`
+        ? `It needs every touching tile to be ${colour}. Start at ${first}.`
         : step.rule === "remaining-exclude"
-          ? `Its ${clue.count} ${colour} tiles are already there, so nothing else it touches is ${colour} — ${cells}.`
+          ? `It already has ${clue.count} ${colour} tiles. ${first} must be another colour.`
           : step.rule === "remaining-fill"
-            ? `It still needs ${evidence.remaining} more ${colour}, and only ${cells} can be. So they are.`
+            ? `It needs ${evidence.remaining} more ${colour}, exactly the open choices left. Start at ${first}.`
             : step.rule === "overlap-exclude"
-              ? `Compare it with the other clue over the same tiles: the shared ones account for all of them, so ${cells} cannot be ${colour}.`
-              : `Compare it with the other clue over the same tiles: what is left over must be ${colour} — ${cells}.`;
-  return { name, worked };
+              ? `Shared tiles already use the ${colour} count. ${first} cannot be ${colour}.`
+              : `Comparing the clues leaves ${colour} for ${first}. Colour that tile next.`;
+  /* Focus the next actionable tile, never a whole answer pattern. Once it is
+     painted, `deduce` recalculates and this focus moves with the learner. */
+  const target = step.changes[0]?.cell ?? -1;
+  return { name, worked, target };
 }
 
 export function sweeperHints(
@@ -310,10 +317,25 @@ export const SweeperBoard: React.FC<ActivityProps<SweeperParams>> = ({ params, k
     clearNudge();
   }, [question, clearNudge]);
 
+  const assignment: Assignment = question
+    ? painted.id === question.id ? painted.cells : question.board.givens
+    : [];
+  const hints = !question || practising ? [] : sweeperHints(question, copy.kidTip, assignment);
+  const liveStep = question ? nextStep(question.board, assignment) : null;
+  const guide = useSweeperGuide({
+    params,
+    koda,
+    practising,
+    questionId: question?.id ?? "loading",
+    rungs: hints,
+    round,
+    progress: question && painted.id === question.id ? history.length : 0,
+    target: liveStep?.target ?? -1,
+  });
+
   if (!question) return null;
 
   const { board } = question;
-  const assignment: Assignment = painted.id === question.id ? painted.cells : board.givens;
   const setAssignment = (cells: Assignment) => setPainted({ id: question.id, cells });
   const remaining = assignment.filter((c) => c === null).length;
 
@@ -333,6 +355,7 @@ export const SweeperBoard: React.FC<ActivityProps<SweeperParams>> = ({ params, k
     if (next[cell] === assignment[cell]) return;
     setHistory((h) => [...h, assignment]);
     setAssignment(next);
+    guide.moved();
     chime(koda, brush === "erase" ? "unchosen" : "chosen");
   };
 
@@ -340,6 +363,7 @@ export const SweeperBoard: React.FC<ActivityProps<SweeperParams>> = ({ params, k
     if (round.feedback || !history.length) return;
     setAssignment(history[history.length - 1]);
     setHistory((h) => h.slice(0, -1));
+    guide.moved();
     chime(koda, "unchosen");
   };
 
@@ -355,6 +379,7 @@ export const SweeperBoard: React.FC<ActivityProps<SweeperParams>> = ({ params, k
       const missing = question.asked.filter((c) => assignment[c] === null);
       if (missing.length) {
         nudge.refuse(`${missing.length} tile${missing.length === 1 ? "" : "s"} the clues do settle ${missing.length === 1 ? "is" : "are"} still blank.`);
+        guide.stumbled();
         return;
       }
       const correct = given === question.expected && guessed.length === 0;
@@ -375,6 +400,7 @@ export const SweeperBoard: React.FC<ActivityProps<SweeperParams>> = ({ params, k
       /* Not a wrong answer: an unfinished board is not an answer at all, and
          scoring it would cost a child a star for not having finished. */
       nudge.refuse(`${remaining} tile${remaining === 1 ? "" : "s"} still to colour.`);
+      guide.stumbled();
       return;
     }
     /* Recounts the clues from the visible board. Nothing here consults a
@@ -427,7 +453,9 @@ export const SweeperBoard: React.FC<ActivityProps<SweeperParams>> = ({ params, k
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : sweeperHints(question, copy.kidTip, assignment)}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={sweeperGuideMethod(params)}
       iconName="layers"
       iconTone="purple"
       tagLabels={tagLabelsFrom(koda)}
@@ -442,6 +470,7 @@ export const SweeperBoard: React.FC<ActivityProps<SweeperParams>> = ({ params, k
           board={board}
           mode="paint"
           assignment={assignment}
+          guideTarget={guide.target >= 0 ? guide.target : undefined}
           onTap={paint}
           locked={Boolean(round.feedback)}
           availableWidth={board.size === 4 ? 380 : 320}

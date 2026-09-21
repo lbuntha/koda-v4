@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 
 import { SvgAsset } from "../../assets/svg";
-import { diceBearAvatar } from "../../lib/avatar";
 import { DailyGoalAPI } from "../../lib/dailyGoal";
 import { currentLearnerId } from "../../lib/learnerProgress";
 
@@ -309,7 +308,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
       {/* ---------------------------------------------------------------- */}
       <section className="relative flex h-48 items-center justify-center overflow-hidden rounded-2xl border-2 border-line bg-surface-muted sm:h-64">
         <div className="h-28 w-28 overflow-hidden rounded-3xl border-2 border-line bg-surface shadow-sm sm:h-36 sm:w-36">
-          <UIAvatar name={name} src={diceBearAvatar(seed)} size="fill" decorative />
+          <UIAvatar name={name} seed={seed} size="fill" decorative />
         </div>
         <button
           type="button"

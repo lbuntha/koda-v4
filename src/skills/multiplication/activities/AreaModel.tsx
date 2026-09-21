@@ -9,6 +9,8 @@ import {
   playCopy,
   useSkillRound,
   type RoundQuestion,
+  guideSetup,
+  useGuide,
 } from "../../kit";
 import { quietWhenPractising } from "../../kit/practice";
 import { themeSystem } from "../../../lib/themeSystem";
@@ -354,7 +356,7 @@ export function areaHints(
           ? `${empty} piece${empty === 1 ? "" : "s"} still empty. Read the two numbers on that piece's edges.`
           : `Every piece is filled. Check the total.`,
         // Names the structure, never a cell's value.
-        `Each piece is its own multiplication, and the ${parts.length} of them add up to the whole rectangle.`,
+        `Each piece is its own multiplication. Add the ${parts.length} together.`,
       );
   }
 }
@@ -385,6 +387,15 @@ export const AreaModel: React.FC<ActivityProps<AreaParams>> = ({ params, koda, o
   const refuse = (writtenText: string, spoken: string) => {
     nudge.refuse(writtenText);
     speak(spoken);
+    /*
+     * A refused move is this engine already knowing the move was wrong.
+     *
+     * What it never did was notice a child doing it repeatedly, which is the
+     * difference between a slip and not having the technique. Safe to call a
+     * coach declared further down: this only ever runs from a handler, long
+     * after the render that created it.
+     */
+    guide.stumbled();
   };
 
   const round = useSkillRound({
@@ -510,6 +521,32 @@ export const AreaModel: React.FC<ActivityProps<AreaParams>> = ({ params, koda, o
 
   /* ---- the rectangle ---- */
   const density = densityFor(a, b);
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const hints = practising ? [] : areaHints(question, copy.kidTip, { filled });
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    /* The next empty piece of the rectangle, in the order it reads. */
+    target: filled.findIndex((v) => v === undefined),
+    progress: filled.filter((v) => v !== undefined).length,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   const grid = GRID_SIZES[density];
 
   const unitRectangle = (
@@ -605,18 +642,22 @@ export const AreaModel: React.FC<ActivityProps<AreaParams>> = ({ params, koda, o
                 <button
                   key={`${part.left}x${part.right}`}
                   type="button"
-                  aria-label={
+                  aria-label={`${
                     value === undefined
                       ? `${part.left} times ${part.right}, empty`
                       : `${part.left} times ${part.right}, holding ${value}`
-                  }
+                  }${guide.target === i ? ", fill this one next" : ""}`}
                   onClick={() => (value === undefined ? setTarget(i) : clearCell(i))}
                   disabled={!!round.feedback}
                   className={`flex flex-col items-center justify-center rounded-lg border-2 p-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${
                     value === undefined
                       ? isTarget
                         ? `${ADJUSTMENT.border} ${ADJUSTMENT.soft}`
-                        : `${NEUTRAL.border} bg-surface`
+                        /* The piece the child has selected wins; the coach's
+                           light is about the one to do next. */
+                        : guide.target === i
+                          ? "border-indigo-500 ring-4 ring-indigo-500/40 bg-surface"
+                          : `${NEUTRAL.border} bg-surface`
                       : `${PRODUCT.border} ${PRODUCT.soft}`
                   }`}
                 >
@@ -719,6 +760,7 @@ export const AreaModel: React.FC<ActivityProps<AreaParams>> = ({ params, koda, o
     </div>
   );
 
+
   return (
     <SkillRound
       koda={koda}
@@ -728,7 +770,9 @@ export const AreaModel: React.FC<ActivityProps<AreaParams>> = ({ params, koda, o
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : areaHints(question, copy.kidTip, { filled })}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onStartOver={
         !round.feedback && (filled.some((f) => f !== undefined) || target !== 0) ? restart : undefined
       }

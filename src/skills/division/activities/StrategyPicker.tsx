@@ -1,7 +1,15 @@
 import React, { useCallback, useMemo } from "react";
 
 import type { ActivityProps } from "../../types";
-import { SkillRound, composeHints, isPractice, useSkillRound } from "../../kit";
+import {
+  SkillRound,
+  composeHints,
+  guideSetup,
+  isPractice,
+  playCopy,
+  useGuide,
+  useSkillRound,
+} from "../../kit";
 import { drawQuotient, pick, shuffle, type Quotient } from "../internal/data/divisionNumbers";
 
 /**
@@ -189,6 +197,36 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyParams>> = ({
     });
   };
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * The rungs were written inline in the JSX here, which is why this engine
+   * alone never read the lesson's own `kidTip` — it had nowhere to put it.
+   */
+  const copy = playCopy(params);
+  const hints = practising
+    ? []
+    : composeHints(
+        copy.kidTip ?? "Look at the numbers before you look at the choices.",
+        "Is it a number you can halve by? Do all the places divide?",
+        "More than one way is right. Pick the one these numbers suit.",
+      );
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    target: -1,
+    progress: 0,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   return (
     <SkillRound
       koda={koda}
@@ -198,15 +236,9 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyParams>> = ({
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={
-        practising
-          ? []
-          : composeHints(
-              "Look at the numbers before you look at the choices.",
-              "Is it a number you can halve by? Is the total made of places that all divide?",
-              "More than one way can be right. Pick one that actually suits these numbers.",
-            )
-      }
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       iconName="Route"
       iconTone="indigo"
       onReadAloud={

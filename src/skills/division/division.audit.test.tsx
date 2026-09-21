@@ -1,10 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { act } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 import { renderActivity } from "../kit/testing";
 import { skill } from ".";
+import { GUIDE_DEFAULTS } from "../kit";
 import { SVG_ASSET_IDS } from "../../assets/svg/ids";
 import { buildQuestion as buildShare } from "./activities/ShareTray";
 import { buildQuestion as buildArray } from "./activities/ArrayDivide";
@@ -109,14 +111,58 @@ describe("every activity a lesson names actually exists", () => {
 });
 
 describe("every declared feature changes something", () => {
-  it("declares five, and no more than it uses", () => {
+  it("declares seven, and no more than it uses", () => {
     expect(skill.features.map((f) => f.id).sort()).toEqual([
       "audio_speech",
       "counting_badges",
+      "guide_coach",
+      "guide_voice",
       "haptic_feedback",
       "inverse_scaffold",
       "sound_chimes",
     ]);
+  });
+
+  it("guide_coach: Koda stepping in on its own", () => {
+    /*
+     * The one flag whose effect is a *wait*, so it cannot be read off the
+     * opening frame like the others. Fake timers let the seven seconds pass
+     * without the test taking seven seconds.
+     */
+    vi.useFakeTimers();
+    try {
+      const lesson = skill.lessons.find(
+        (l) =>
+          l.activity === "division/share" &&
+          !(l.params as { question?: { practice?: boolean } }).question?.practice,
+      )!;
+      const play = (features: Record<string, boolean>) => {
+        const h = renderActivity(skill.activities.share, {
+          params: lesson.params as Record<string, unknown>,
+          level: 1,
+          features,
+        });
+        act(() => {
+          vi.advanceTimersByTime(GUIDE_DEFAULTS.startMs + 500);
+        });
+        const out = { text: h.text(), said: h.koda.count("speech.say") };
+        h.unmount();
+        return out;
+      };
+
+      const on = play({});
+      expect(on.text, "the coach never stepped in").toContain("Koda is helping");
+      expect(play({ guide_coach: false }).text, "the coach ignored its switch").not.toContain(
+        "Koda is helping",
+      );
+
+      // Its voice is a separate switch: silenced, the guide still shows.
+      const silent = play({ guide_voice: false });
+      expect(silent.said).toBeLessThan(on.said);
+      expect(silent.text).toContain("Koda is helping");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("stops vibrating when haptic_feedback is off", async () => {

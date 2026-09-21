@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import type { ActivityProps, PrintedQuestion } from "../../types";
 import {
   SkillRound, SPRING, composeHints, isPractice, modeAt, playCopy,
-  useSkillRound, type PracticeSetup, type RoundQuestion,
+  useSkillRound, guideSetup, useGuide, type PracticeSetup, type RoundQuestion,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { DIFFERENCE, REMOVED_PART, WHOLE } from "../internal/data/subtractionPalette";
@@ -130,10 +130,16 @@ export function columnHints(
         : `Exchange one from the ${PLACES[(mark?.from ?? owed + 1)]} column: it becomes ${mark?.newValue}, and the ${name} become ${mark?.toValue}.`,
     );
   }
+  /* Which written method this is — see BlockExchange for why the bare
+     difference cannot be the last word on six different lessons. */
   return composeHints(
     state.kidTip ?? "Subtract each column from the ones end.",
     `${state.filled} of ${q.answer.length} columns are written. Every column can pay now.`,
-    `${q.minuend} minus ${q.subtrahend} is ${q.difference}.`,
+    q.mode === "cascade"
+      ? `Each exchange paid for the next: the columns read ${q.difference}.`
+      : q.mode === "across_zero"
+        ? `Opened from the far left, the columns come out as ${q.difference}.`
+        : `Column by column from the right, the answer reads ${q.difference}.`,
   );
 }
 
@@ -205,6 +211,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({ params, ko
    */
   const exchangeInto = (column: number) => {
     if (round.feedback) return;
+    guide.moved();
     setTop((current) => {
       const mark = markFor(current, column);
       if (!mark) return current;
@@ -239,10 +246,44 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({ params, ko
 
   const label = (i: number) => `${PLACES[i]} column`;
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const hints = practising ? [] : columnHints(q, { top, filled, kidTip: copy.kidTip });
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: q.id,
+    rungs: hints,
+    /*
+     * The column to work on: the one that cannot pay yet, or the next to write.
+     *
+     * An owed exchange wins, because that is the move `check` will refuse — a
+     * child writing digits while a column is short is doing the arithmetic on a
+     * number that is not there yet.
+     */
+    target: owed ?? nextColumn,
+    progress: filled,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   return <SkillRound koda={koda} lesson={lesson} fallbackTitle="Column Subtraction" round={round}
     totalQuestions={totalQuestions} prompt={prompt} iconName="layers" iconTone="indigo"
     tagLabels={tagLabelsFrom(koda)} nudge={nudge.message}
-    hints={practising ? [] : columnHints(q, { top, filled, kidTip: copy.kidTip })}
+    hints={hints}
+    guide={practising ? undefined : guide}
+    guideMethod={copy.stepByStep}
     onStartOver={
       !round.feedback && (Object.keys(marks).length > 0 || Object.values(written).some((v) => v !== "") || JSON.stringify(top) !== JSON.stringify(q.top)) ? restart : undefined
     }
@@ -289,8 +330,19 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({ params, ko
               const open = column === nextColumn;
               return <span key={column} className={`${DIGIT_CELL} shrink-0`}>
                 <input inputMode="numeric" pattern="[0-9]*" value={written[column] ?? ""} disabled={!open || Boolean(round.feedback)}
-                  onChange={(event) => setWritten((current) => ({ ...current, [column]: event.target.value.replace(/[^0-9]/g, "").slice(-1) }))}
-                  aria-label={label(column)} className={themeSystem.field("md", "w-full text-center text-2xl font-black tabular-nums")} />
+                  onChange={(event) => {
+                    /* Writing a digit while a column still cannot pay is the
+                       mistake this engine exists to catch, and it is the one
+                       `check` refuses. The coach says so now rather than
+                       waiting for the clock. */
+                    if (owed !== undefined) guide.stumbled();
+                    else guide.moved();
+                    setWritten((current) => ({ ...current, [column]: event.target.value.replace(/[^0-9]/g, "").slice(-1) }));
+                  }}
+                  aria-label={`${label(column)}${guide.target === column ? ", write this one next" : ""}`}
+                  className={themeSystem.field("md", `w-full text-center text-2xl font-black tabular-nums${
+                    guide.target === column ? " ring-4 ring-indigo-500" : ""
+                  }`)} />
               </span>;
             })}
           </div>

@@ -2,6 +2,7 @@ import React, { useCallback, useMemo } from "react";
 
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, useSkillRound } from "../../kit";
+import { fractionGuideMethod, useFractionGuide } from "../internal/useFractionGuide";
 import { gcd, partWord, randInt, shuffle, simplify, type Fraction, type Whole } from "../internal/data/fractionNumbers";
 
 /**
@@ -194,6 +195,11 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyParams>> = ({ params
   });
   const question = round.question as StrategyQuestion;
 
+  const hints = !question || practising ? [] : strategyHints(question);
+  const guide = useFractionGuide({
+    params, koda, practising, questionId: question?.id ?? "loading", rungs: hints, round,
+  });
+
   if (!question) return null;
 
   const choose = (id: string): void => {
@@ -225,7 +231,9 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyParams>> = ({ params
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : strategyHints(question)}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={fractionGuideMethod(params)}
       iconName="GitBranch"
       iconTone="cyan"
       onReadAloud={

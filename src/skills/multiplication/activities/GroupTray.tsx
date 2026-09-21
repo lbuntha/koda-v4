@@ -9,6 +9,8 @@ import {
   playCopy,
   useSkillRound,
   type RoundQuestion,
+  guideSetup,
+  useGuide,
 } from "../../kit";
 // Exported by the practice module rather than the kit barrel.
 import { quietWhenPractising } from "../../kit/practice";
@@ -407,7 +409,7 @@ export function groupHints(question: GroupQuestion, kidTip: string | undefined, 
         done === 0
           ? `Tap the first ${container.one} to start the addition.`
           : `You have counted ${done} of the ${groups} ${container.name}.`,
-        `Add ${size} once for every ${container.one}: ${Array.from({ length: groups }, () => size).join(" + ")}.`,
+        `Add them up: ${Array.from({ length: groups }, () => size).join(" + ")}.`,
       );
     }
     case "groups_to_equation":
@@ -512,6 +514,15 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
   const refuse = (written: string, spoken: string) => {
     nudge.refuse(written);
     speak(spoken);
+    /*
+     * A refused move is this engine already knowing the move was wrong.
+     *
+     * What it never did was notice a child doing it repeatedly, which is the
+     * difference between a slip and not having the technique. Safe to call a
+     * coach declared further down: this only ever runs from a handler, long
+     * after the render that created it.
+     */
+    guide.stumbled();
   };
 
   const round = useSkillRound({
@@ -777,6 +788,34 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
       : mode === "equal_or_not" ? question.bins
         : Array.from({ length: groups }, () => size);
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    /* The next bin: the first one not yet filled, or not yet counted. */
+    target:
+      slotGroups === undefined || slotEach === undefined
+        ? placed.findIndex((n) => n !== question.size)
+        : counted.findIndex((c) => !c),
+    progress: placed.reduce((t, n) => t + n, 0) + counted.filter(Boolean).length,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   const tray = (
     <div className="flex flex-wrap items-start justify-center gap-3">
       {binCounts.map((count, bin) => {
@@ -792,13 +831,15 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
           <button
             key={bin}
             type="button"
-            aria-label={label}
+            aria-label={`${label}${guide.target === bin ? ", this group next" : ""}`}
             aria-pressed={clickable ? (mode === "make_groups" ? count === size : isCounted) : undefined}
             disabled={!clickable || !!round.feedback}
             onClick={() => (mode === "make_groups" ? dropInto(bin) : countGroup(bin))}
             className={`${GROUP_BIN} ${TOUCH_TARGET} flex flex-col items-center justify-center border-2 ${
               isCounted ? `${PRODUCT.border} ${PRODUCT.soft}` : `${GROUPS.border} ${GROUPS.soft}`
-            } ${clickable && !round.feedback ? "cursor-pointer" : ""} focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500`}
+            } ${clickable && !round.feedback ? "cursor-pointer" : ""} ${
+              guide.target === bin ? "ring-4 ring-indigo-500" : ""
+            } focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500`}
           >
             <span className="flex flex-wrap items-center justify-center gap-1">
               {Array.from({ length: count }, (_, i) => (
@@ -966,6 +1007,7 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
     return null;
   })();
 
+
   return (
     <SkillRound
       koda={koda}
@@ -976,6 +1018,8 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
       hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onStartOver={
         !round.feedback && (placed.some((n) => n > 0) || counted.some(Boolean) || holding || slotGroups !== undefined || slotEach !== undefined || typed !== "") ? restart : undefined
       }

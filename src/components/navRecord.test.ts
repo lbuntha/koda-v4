@@ -44,18 +44,19 @@ describe("badges and labels coming from the menu record", () => {
 describe("splitting a menu into tabs and everywhere else", () => {
   const item = (id: string) => ({ id, label: id, icon: id });
 
-  it("gives a parent Home, Learn, Children and Settings, in that order", () => {
+  it("gives a family Home, Learn, Leaderboard and Settings, in that order", () => {
     const { primary, overflow } = splitTabs([
       item("settings"),
       item("children"),
+      item("leaderboard"),
       item("users"),
       item("game"),
       item("home"),
       item("profile"),
     ]);
 
-    expect(primary.map((i) => i.id)).toEqual(["home", "game", "children", "settings"]);
-    expect(overflow.map((i) => i.id)).toEqual(["users", "profile"]);
+    expect(primary.map((i) => i.id)).toEqual(["home", "game", "leaderboard", "settings"]);
+    expect(overflow.map((i) => i.id)).toEqual(["children", "users", "profile"]);
   });
 
   it("keeps Profile off the bar and reachable from Settings", () => {
@@ -65,19 +66,17 @@ describe("splitting a menu into tabs and everywhere else", () => {
     expect(overflow.map((i) => i.id)).toEqual(["profile"]);
   });
 
-  it("draws three tabs on a child's tablet rather than padding the bar out", () => {
-    // No Children entry: a learner does not hold `learner:create`.
+  it("puts the private buddy board under a learner's thumb", () => {
     const { primary, overflow } = splitTabs([
       item("home"),
       item("game"),
+      item("leaderboard"),
       item("profile"),
       item("settings"),
     ]);
 
-    expect(primary.map((i) => i.id)).toEqual(["home", "game", "settings"]);
-    // Never filled from the record — an admin page must not land under a
-    // learner's thumb because a slot happened to be free.
-    expect(primary).toHaveLength(3);
+    expect(primary.map((i) => i.id)).toEqual(["home", "game", "leaderboard", "settings"]);
+    expect(primary).toHaveLength(4);
     expect(overflow.map((i) => i.id)).toEqual(["profile"]);
   });
 
@@ -86,6 +85,7 @@ describe("splitting a menu into tabs and everywhere else", () => {
       item("home"),
       item("game"),
       item("profile"),
+      item("leaderboard"),
       item("skills"),
       item("assets"),
       item("users"),
@@ -93,8 +93,8 @@ describe("splitting a menu into tabs and everywhere else", () => {
       item("settings"),
     ]);
 
-    expect(primary.map((i) => i.id)).toEqual(["home", "game", "children", "settings"]);
-    expect(overflow.map((i) => i.id)).toEqual(["profile", "skills", "assets", "users"]);
+    expect(primary.map((i) => i.id)).toEqual(["home", "game", "leaderboard", "settings"]);
+    expect(overflow.map((i) => i.id)).toEqual(["profile", "skills", "assets", "users", "children"]);
   });
 
   it("never invents a tab the record does not carry", () => {

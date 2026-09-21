@@ -9,6 +9,8 @@ import {
   useSkillRound,
   type RoundQuestion,
   playChrome,
+  guideSetup,
+  useGuide,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B, CHANGE, TOTAL } from "../internal/data/additionPalette";
@@ -294,6 +296,26 @@ export const buildQuestion = (
 export const promptFor = (q: StoryQuestion): string =>
   q.step === 2 ? `${q.text} — and after the second lot?` : q.text;
 
+/**
+ * What the child is being asked to work out, per story type.
+ *
+ * These six lessons are not six wordings of one problem — they are six
+ * *structures*, and which one it is decides the whole move. A join story runs
+ * forwards; a start-unknown runs backwards from the end; a comparison is not
+ * about a total at all. One generic "put the number in the box" ladder served
+ * all six for as long as this engine has existed, which meant five of the six
+ * lessons taught their technique in the prompt and then helped with somebody
+ * else's.
+ */
+const STORY_MOVE: Record<StoryMode, string> = {
+  join: "It grows. Add what arrived to what there was.",
+  ppw: "Two parts, one whole. Put the parts together.",
+  change_unknown: "You know the start and the end. Count on from the start.",
+  start_unknown: "Work backwards. Take what was added off the end.",
+  compare: "Line them up. The gap is what the smaller one needs.",
+  multi_step: "Two changes. Do the first, then use that answer for the second.",
+};
+
 export function storyHints(
   q: StoryQuestion,
   state: { placed: Record<string, number>; kidTip?: string },
@@ -305,18 +327,21 @@ export function storyHints(
   if (left.length > 0) {
     return composeHints(
       state.kidTip ?? "Put each number the story gives you into the box it belongs in.",
-      `The story tells you ${toPlace.map((s) => s.value).join(" and ")}. The next empty box is ${left[0].label} — which number is that?`,
-      `Put ${left[0].value} in the box for ${left[0].label}.`,
+      /* Named, not described: "the box for to start with" is what reading the
+         label into a sentence produced, and it is not English. */
+      `Which number is the "${left[0].label}" box?`,
+      // Even while the bar is still being filled, the rung names this story's
+      // own shape — two lessons that place numbers the same way do not teach
+      // the same thing once the numbers are down.
+      `Put ${left[0].value} there. ${STORY_MOVE[q.mode]}`,
     );
   }
 
   return composeHints(
     state.kidTip ?? "The bar shows what you know. The empty box is what you are asked for.",
-    unknown
-      ? `The bar is built. The empty box is ${unknown.label} — that is what the question wants.`
-      : `The bar is built. Add the parts together.`,
-    // Stops short: the child produces this by adding what they placed.
-    `Add up what is in the bar to find it.`,
+    unknown ? `The bar is built. The empty box is ${unknown.label}.` : "The bar is built.",
+    // The technique, not the number: the child produces the answer by doing it.
+    STORY_MOVE[q.mode],
   );
 }
 
@@ -464,12 +489,14 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
     if (round.feedback || held === null) return;
     const value = question.chips[held];
     if (slot.value === undefined) {
+      guide.stumbled();
       nudge.refuse("That box is what the question is asking for. It is not one of the numbers you were told.");
       return;
     }
     if (slot.value !== value) {
       // Putting a number where it does not belong is the mistake the model
       // exists to prevent, so it is answered rather than silently accepted.
+      guide.stumbled();
       nudge.refuse(`${value} is not ${slot.label}. Read the story again and see which number that is.`);
       return;
     }
@@ -483,10 +510,12 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
   const check = () => {
     if (round.feedback) return;
     if (!built) {
+      guide.stumbled();
       nudge.refuse("Build the bar first — every number the story gives you has a box.");
       return;
     }
     if (entry === "") {
+      guide.stumbled();
       nudge.refuse("Now type what the empty box should be.");
       return;
     }
@@ -507,6 +536,41 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
 
   const prompt = promptFor(question);
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived, rather than two systems with two vocabularies.
+   */
+  const hints = practising ? [] : storyHints(question, { placed, kidTip: copy.kidTip });
+  /*
+   * Two different questions, so two different conditions.
+   *
+   * `guided` is whether Koda steps in *by itself* — the clock and the stumbles
+   * — and that is what the parent's switch turns off. Whether the help *looks
+   * like* the coach is not a setting at all: the Hint button shows the same
+   * bubble, the same rungs and the same "Got it" either way. It used to fall
+   * back to the old hint card when the switch was off, so turning off the
+   * interruptions also changed what help looked like, and a child had two
+   * panels to learn for one ladder.
+   */
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    target: -1,
+    progress: Object.keys(placed).length,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   return (
     <SkillRound
       koda={koda}
@@ -519,7 +583,9 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
       iconTone="pink"
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message}
-      hints={practising ? [] : storyHints(question, { placed, kidTip: copy.kidTip })}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onStartOver={
         !round.feedback && (usedChips.length > 0 || held !== null || entry !== "" || Object.keys(placed).length > 0) ? restart : undefined
       }

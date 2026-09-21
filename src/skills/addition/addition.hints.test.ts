@@ -43,6 +43,7 @@ import { buildQuestion as buildStory, type StoryMemory } from "./activities/Stor
 import { buildQuestion as buildStrategy, type ProblemMemory } from "./activities/StrategyPicker";
 import { STRATEGIES, fittingFor } from "./internal/data/strategyCards";
 import { isPractice, modeAt } from "../kit";
+import { skill } from ".";
 import {
   buildQuestion as buildFact,
   factHints,
@@ -51,6 +52,7 @@ import {
 import { COUNTABLES } from "./internal/data/additionAssets";
 import {
   carriesIn,
+  digitsOf,
   friendlyPairCount,
   isBridging,
   isRegrouping,
@@ -104,30 +106,30 @@ describe("the hint ladder", () => {
 
   it("counts what the child has actually done, not what the question holds", () => {
     const [, second] = trayHints(question(), { ...idle, counted: 4 });
-    expect(second).toContain("counted 4");
+    expect(second).toContain("You have 4");
     expect(second).toContain("3 left");
   });
 
   it("tells a child who has counted nothing where to start", () => {
     const [, second] = trayHints(question(), idle);
-    expect(second).toContain("Start at the left-hand group");
+    expect(second).toContain("Start at the left group");
   });
 
   it("counting on names the number in the closed box, and the one after it", () => {
     const [, second, third] = trayHints(question({ mode: "count_on", a: 6, b: 3, sum: 9 }), idle);
-    expect(second).toContain("The box holds 6");
+    expect(second).toContain("The box is 6 already");
     expect(second).toContain("seven");
     expect(third).toContain("7, 8, 9");
   });
 
-  it("starting from the larger explains the saving, in both numbers", () => {
+  it("starting from the larger names which number to start at, and which not to", () => {
     const [, second] = trayHints(
       question({ mode: "count_on_larger", a: 2, b: 8, sum: 10 }),
       idle,
     );
-    expect(second).toContain("8 is bigger than 2");
+    expect(second).toContain("8 is the bigger one");
     // The reason, not just the instruction: two counts instead of eight.
-    expect(second).toContain("only have 2 more");
+    expect(second).toContain("not at 2");
   });
 
   it("stops short of the answer where the child is choosing between answers", () => {
@@ -153,8 +155,8 @@ describe("the hint ladder", () => {
       ...idle,
       fingers: { left: 4, right: 1 },
     });
-    expect(second).toContain("4 up on the left");
-    expect(second).toContain("1 on the right");
+    expect(second).toContain("Left has 4");
+    expect(second).toContain("right has 1");
   });
 });
 
@@ -340,7 +342,7 @@ describe("the bond keeps each mode's shape", () => {
     const seen = new Set<string>();
     const q = buildBond({ mode: "split_one", aRange: [8, 8], bRange: [5, 5] }, 1, seen);
     const [, second] = bondHints(q, { entries: {} });
-    expect(second).toContain("8 needs 2 more");
+    expect(second).toContain("8 needs 2 to reach ten");
   });
 });
 
@@ -565,7 +567,7 @@ describe("the fact deck keeps each mode's shape", () => {
     const seen = new Set<string>();
     const q = buildFact({ mode: "near_up", nRange: [6, 6] }, 1, seen);
     const [, before] = factHints(q, { revealed: false });
-    expect(before).toContain("Tap the double first");
+    expect(before).toContain("Tap the double 6 and 6");
     const [, after] = factHints(q, { revealed: true });
     expect(after).toContain("6 and 6 is 12");
   });
@@ -620,19 +622,34 @@ describe("left to right is not partial sums under another name", () => {
 
     // Two boxes, and the second one is the whole answer — not a part of it.
     expect(lr.blanks).toHaveLength(2);
-    expect(lr.answers).toEqual([80, 94]);
+    // Hold 47, add the tens of 47, then its ones.
+    expect(lr.answers).toEqual([87, 94]);
     expect(lr.answers.at(-1)).toBe(lr.sum);
 
     // Partial sums keeps both columns and adds them afterwards.
     expect(ps.blanks).toHaveLength(4);
     expect(ps.answers.slice(0, 2)).toEqual([80, 14]);
+
+    /*
+     * The invariant this file is named for, and the one it was missing.
+     *
+     * The first box used to want 80 — which is the line directly above, the
+     * tens of partial sums. The two methods agreed on the first step, so a
+     * child doing the prerequisite lesson's method was told they were right,
+     * and only the second box disagreed. Nothing on screen could tell the two
+     * apart because there was nothing to tell apart.
+     */
+    expect(
+      lr.answers[0],
+      "the first box accepts partial sums, so the lesson cannot teach against it",
+    ).not.toBe(ps.answers[0]);
   });
 
   it("says what you are holding, not what the parts were", () => {
     const seen = new Set<string>();
     const q = buildDesk({ mode: "left_right", addendRange: [47, 47] }, 1, seen);
-    const [, second] = deskHints(q, { entries: { "run-1": "80" } });
-    expect(second).toContain("holding 80");
+    const [, second] = deskHints(q, { entries: { "run-1": "87" } });
+    expect(second).toContain("holding 87");
   });
 });
 
@@ -680,7 +697,7 @@ describe("the column pad keeps each mode's shape", () => {
     const seen = new Set<string>();
     const q = buildColumn({ mode: "standard" }, 1, seen);
     const [, second] = columnHints(q, { digits: { ones: "5" }, carries: {} });
-    expect(second).toContain("carry to go above the tens");
+    expect(second).toContain("Write its carry above the tens");
   });
 });
 
@@ -917,54 +934,132 @@ describe("left to right holds one number, and says so", () => {
   const draw = (a: number, b: number) =>
     buildDesk({ mode: "left_right", aRange: [a, a], bRange: [b, b] }, 1, new Set());
 
-  it("wants a running total in both boxes, not a partial in the second", () => {
+  it("wants a running total in both boxes, not a partial in either", () => {
     const q = draw(25, 36);
-    expect(q.answers).toEqual([50, 61]);
-    // 11 is the ones part. It is never an answer here — that is partial sums.
+    // Hold 25, add 30, then add 6.
+    expect(q.answers).toEqual([55, 61]);
+    // 11 is the ones part and 50 is the tens part. Neither is ever an answer
+    // here — both belong to partial sums, which is the lesson before this one.
     expect(q.answers).not.toContain(11);
-    expect(q.expected).toBe("50,61");
+    expect(q.answers).not.toContain(50);
+    expect(q.expected).toBe("55,61");
   });
 
-  it("labels both rows by what is held, never by what was added", () => {
+  it("asks for the method in the prompt, not just the direction", () => {
+    /*
+     * Reported from a real session: a parent read "start with the biggest
+     * column and work right", did partial sums, and was marked wrong.
+     *
+     * That sentence describes both methods equally well, which is why it could
+     * not be the instruction for the one that distinguishes them. The prompt
+     * has to name the number you start holding.
+     */
+    const lesson = skill.lessons.find((l) => l.id === "left-to-right")!;
+    const play = (lesson.params as { play: { prompts: { default: string }; kidTip: string } }).play;
+
+    expect(play.prompts.default, "the prompt never says where to start").toContain("{a}");
+    expect(play.prompts.default.toLowerCase()).toContain("hold");
+    expect(play.prompts.default.toLowerCase(), "this describes partial sums too").not.toContain(
+      "biggest column",
+    );
+    expect(play.kidTip.toLowerCase()).toContain("hold");
+  });
+
+  it("holds the technique over a whole round, and never meets partial sums", () => {
+    /*
+     * The sweep, because one worked example is not a technique.
+     *
+     * Two things have to hold for every draw this lesson can make. The boxes
+     * have to be a *running* total — the second is the first plus the second
+     * number's ones, not a fresh sum — and the first box must never land on the
+     * number partial sums would write there, or the lesson silently teaches
+     * against itself again.
+     *
+     * The second only holds because `regroup: "ones"` forces the ones to cross
+     * ten, which means the first addend always has ones, which means holding it
+     * always beats the bare tens column. That is load-bearing and invisible, so
+     * it is checked rather than trusted: relax the regroup rule and this test
+     * is what objects.
+     */
+    const seen = new Set<string>();
+    for (let i = 1; i <= 200; i += 1) {
+      const q = buildDesk({ mode: "left_right", addendRange: [11, 89] }, i, seen);
+      const da = digitsOf(q.a);
+      const db = digitsOf(q.b);
+
+      expect(q.answers[0], `${q.a}+${q.b} does not hold the first number`).toBe(
+        q.a + db.tens * 10,
+      );
+      expect(q.answers[1], `${q.a}+${q.b} is not a running total`).toBe(q.answers[0] + db.ones);
+      expect(q.answers[1]).toBe(q.sum);
+      expect(
+        q.answers[0],
+        `${q.a}+${q.b}: the first box is also what partial sums writes`,
+      ).not.toBe((da.tens + db.tens) * 10);
+    }
+  });
+
+  it("labels both rows with the step just taken, in a number", () => {
+    /*
+     * This rule replaces "never name what was added", which is what these rows
+     * were labelled by until a second real session went wrong on them.
+     *
+     * That rule produced "After the tens" — and *the tens* means both columns
+     * to anybody who has just finished partial sums, which is a prerequisite of
+     * this lesson. A parent read it that way, wrote 130 for 77 plus 67, and was
+     * marked wrong twice. A label carrying the actual step cannot be read the
+     * other way, and it gives nothing away: splitting 67 into 60 and 7 is the
+     * technique, and 77 and 60 is still theirs to work out.
+     */
     const q = draw(25, 36);
     const labels = q.rows.filter((r) => r.cells.some((c) => "blank" in c)).map((r) => r.label);
-    expect(labels).toHaveLength(2);
-    for (const label of labels) {
-      // "Then the ones" names the addend; the box holds the total after it.
-      expect(label, `"${label}" names what was added`).not.toMatch(/^then the|^the ones$/i);
-    }
-    expect(labels).toEqual(["After the tens", "After the ones"]);
+    expect(labels).toEqual(["After +30", "After +6"]);
+
+    // The amounts are the second addend's places, never the two columns summed.
+    expect(labels.join(" "), "a label that names both tens columns is the ambiguity again")
+      .not.toContain("50");
   });
 
   it("keeps the hint in running-total language, not partial-sums language", () => {
     const q = draw(25, 36);
-    const hints = deskHints(q, { entries: { "run-1": "50", "run-2": "" } });
+    const hints = deskHints(q, { entries: { "run-1": "55", "run-2": "" } });
     const top = hints[hints.length - 1];
     expect(top).toContain("61");
-    expect(top).toContain("50");
-    // The shape "A and B is C" is how partial sums are described, and it is
-    // what sent a child looking for a box to put B in.
+    expect(top).toContain("55");
+    // The shape "A and B is C" over the two *parts* is how partial sums are
+    // described, and it is what sent a child looking for a box to put B in.
     expect(top, `"${top}"`).not.toMatch(/\b50 and 11 is\b/);
-    expect(top.toLowerCase()).toContain("holding");
   });
 
   it("draws a hundreds column when the running total reaches one", () => {
-    // 57 and 88: you hold 130, then 145. The header and every row have to be
+    // 57 and 88: you hold 137, then 145. The header and every row have to be
     // three wide, or the addends sit under the wrong columns.
     const big = draw(57, 88);
     expect(big.sum).toBe(145);
     expect(big.places).toEqual(["hundreds", "tens", "ones"]);
-    for (const row of big.rows) {
+    /*
+     * The addends are digits in columns; the running totals are not.
+     *
+     * Both used to be padded to the same width, which put a box wanting 137
+     * under the heading "H" — a whole number sitting where a hundreds digit
+     * goes, on the one kind of chart where that means something. The running
+     * rows now say they span instead.
+     */
+    for (const row of big.rows.filter((r) => !r.span)) {
       expect(row.cells, `${row.label} is not three wide`).toHaveLength(3);
     }
-    expect(big.answers).toEqual([130, 145]);
+    for (const row of big.rows.filter((r) => r.span)) {
+      expect(row.cells, `${row.label} should be one box across the chart`).toHaveLength(1);
+    }
+    expect(big.rows.filter((r) => r.span)).toHaveLength(2);
+    expect(big.answers).toEqual([137, 145]);
   });
 
   it("leaves the hundreds column off when the total does not need one", () => {
     // An empty H column invites a child to write a 0 in front of their answer.
     const small = draw(25, 36);
     expect(small.places).toEqual(["tens", "ones"]);
-    for (const row of small.rows) {
+    for (const row of small.rows.filter((r) => !r.span)) {
       expect(row.cells, `${row.label} is not two wide`).toHaveLength(2);
     }
   });

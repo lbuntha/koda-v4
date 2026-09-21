@@ -19,12 +19,14 @@ DEFAULT_MENU: list[dict] = [
     {"itemId": "home", "label": "Home", "icon": "home", "order": 10},
     {"itemId": "game", "label": "Learn", "icon": "game", "order": 20},
     {"itemId": "profile", "label": "Profile", "icon": "user", "order": 25},
+    {"itemId": "leaderboard", "label": "Leaderboard", "icon": "leaderboard",
+     "requires": "learner:read", "order": 26},
     # Family notifications are for adults; notification settings are an
     # operator feature and are grouped under Admin by `system:write`.
     {"itemId": "notifications", "label": "Notifications", "icon": "bell",
-     "requires": "member:list", "order": 26},
+     "requires": "member:list", "order": 27},
     {"itemId": "notification-settings", "label": "Notification Settings", "icon": "bell",
-     "requires": "system:write", "order": 27},
+     "requires": "system:write", "order": 28},
     {"itemId": "skills", "label": "Skills", "icon": "brain", "badge": "Manage",
      "requires": "content:write", "order": 30},
     {"itemId": "subjects", "label": "Subjects", "icon": "list",

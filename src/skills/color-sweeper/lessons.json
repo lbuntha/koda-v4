@@ -37,10 +37,13 @@
           ],
           "kidTip": "A tile in the middle touches eight others. The corners count.",
           "audioPrompt": "Tap every tile that touches the outlined one. Do not forget the corners."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Easy",
-      "icon": "\ud83d\udd32",
+      "icon": "🔲",
       "iconName": "circleDot",
       "iconTone": "purple",
       "pedagogyTip": "Every clue in this skill counts a neighbourhood, so a child who is unsure which tiles are in one cannot read a single clue correctly. This is built by tapping rather than told, because the corners are the part that gets forgotten.",
@@ -83,10 +86,13 @@
           ],
           "kidTip": "At a side there are five. In a corner there are only three.",
           "audioPrompt": "This one is at the side. Tap only the tiles that are really on the board."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Easy",
-      "icon": "\ud83d\udcd0",
+      "icon": "📐",
       "iconName": "layers",
       "iconTone": "cyan",
       "pedagogyTip": "A child who has only met the middle of a board learns 'eight' as the answer rather than as a count. An edge clue reading 5 then looks like a mistake in the puzzle.",
@@ -132,10 +138,13 @@
           ],
           "kidTip": "Count the matching ones, not all of them.",
           "audioPrompt": "How many tiles touching this one are the same colour as it?"
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Easy",
-      "icon": "\ud83d\udd36",
+      "icon": "🔶",
       "iconName": "gem",
       "iconTone": "indigo",
       "pedagogyTip": "This is what a clue's number is, arrived at by counting before it is ever read off a tile. The count and the clue meet in the next lesson.",
@@ -172,14 +181,17 @@
           "stepByStep": [
             "Read the colour of the tile the number is written on.",
             "Read the number.",
-            "Say it as a sentence about the tiles it touches \u2014 not about itself."
+            "Say it as a sentence about the tiles it touches — not about itself."
           ],
           "kidTip": "A clue never counts its own tile.",
           "audioPrompt": "What does this clue say? Read the colour as well as the number."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Medium",
-      "icon": "\ud83d\udd0d",
+      "icon": "🔍",
       "iconName": "search",
       "iconTone": "emerald",
       "pedagogyTip": "The board is blank apart from the clue on purpose. If the neighbours were coloured a child could answer by counting the picture and never read the clue at all, which is the thing this lesson exists to test.",
@@ -220,13 +232,16 @@
           ],
           "kidTip": "Every clue tells you two numbers, not one.",
           "audioPrompt": "This clue counts one colour. How many are the other one?"
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Medium",
-      "icon": "\ud83c\udf0a",
+      "icon": "🌊",
       "iconName": "waves",
       "iconTone": "pink",
-      "pedagogyTip": "Unlike a mine, which is either there or not, every tile here has a colour \u2014 so an orange three also says five are navy. That second number is free, and it is what makes clues of different colours comparable later on.",
+      "pedagogyTip": "Unlike a mine, which is either there or not, every tile here has a colour — so an orange three also says five are navy. That second number is free, and it is what makes clues of different colours comparable later on.",
       "standards": [],
       "trajectoryLevel": "sweeper-reader",
       "ageBand": [
@@ -263,13 +278,16 @@
           ],
           "kidTip": "Zero means none of that colour, not none of any colour.",
           "audioPrompt": "This clue says zero. Colour the tiles it touches."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Easy",
-      "icon": "\u2b55",
+      "icon": "⭕",
       "iconName": "circleDot",
       "iconTone": "cyan",
-      "pedagogyTip": "A zero is the only clue a child can act on without counting anything, which is why it comes first. The risk is reading it as \u2018empty\u2019 rather than as a count of one colour.",
+      "pedagogyTip": "A zero is the only clue a child can act on without counting anything, which is why it comes first. The risk is reading it as ‘empty’ rather than as a count of one colour.",
       "standards": [],
       "trajectoryLevel": "sweeper-deducer",
       "ageBand": [
@@ -306,10 +324,13 @@
           ],
           "kidTip": "A corner clue touches only three tiles.",
           "audioPrompt": "This zero is in a corner. Which tiles does it actually touch?"
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Easy",
-      "icon": "\ud83d\udcd0",
+      "icon": "📐",
       "iconName": "layers",
       "iconTone": "indigo",
       "pedagogyTip": "Joins the neighbourhood work of level 2 to the deduction of level 6. A child who counts eight out of habit will colour a tile the clue never mentioned.",
@@ -349,10 +370,13 @@
           ],
           "kidTip": "When the number is as big as it can be, there is nothing left to decide.",
           "audioPrompt": "This clue counts every tile it touches. What colour are they?"
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Easy",
-      "icon": "\ud83d\udc8e",
+      "icon": "💎",
       "iconName": "gem",
       "iconTone": "purple",
       "pedagogyTip": "The mirror of zero, and worth teaching straight after it: both are the cases where a clue decides its whole neighbourhood at once, so a child meets the shape of a deduction before meeting its arithmetic.",
@@ -394,10 +418,13 @@
           ],
           "kidTip": "A clue that has what it needs rules out everything else it touches.",
           "audioPrompt": "Count what this clue already has. Does it need any more?"
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Medium",
-      "icon": "\u2705",
+      "icon": "✅",
       "iconName": "search",
       "iconTone": "emerald",
       "pedagogyTip": "The first lesson where a clue's number has to be compared with something rather than simply read. Zero and full needed no counting; this one does.",
@@ -438,10 +465,13 @@
           ],
           "kidTip": "Clue number, minus what it already has, is what is left to find.",
           "audioPrompt": "This clue still needs one more. Which tile is it?"
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Medium",
-      "icon": "\u2795",
+      "icon": "➕",
       "iconName": "star",
       "iconTone": "purple",
       "pedagogyTip": "Subtraction inside a clue, with only one place for the answer to go. The arithmetic and the deduction are separated on purpose: level 11 keeps the arithmetic and takes away the single space.",
@@ -482,10 +512,13 @@
           ],
           "kidTip": "Same number of spaces as matches still needed means they all match.",
           "audioPrompt": "How many does this clue still need, and how many spaces are left?"
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Medium",
-      "icon": "\ud83d\udd37",
+      "icon": "🔷",
       "iconName": "gem",
       "iconTone": "indigo",
       "pedagogyTip": "The same subtraction as level 10 with more than one tile to place, which is where a child stops guessing which one and starts reasoning about all of them. Corner clues are excluded on purpose: a corner touches three tiles, so a clue needing three of them is level 8's whole-neighbourhood rule wearing this lesson's name.",
@@ -521,10 +554,13 @@
           ],
           "kidTip": "A tile you have just worked out is evidence for the next clue.",
           "audioPrompt": "Start with the clue you can already use, then look again."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Medium",
-      "icon": "\ud83d\udd17",
+      "icon": "🔗",
       "iconName": "waves",
       "iconTone": "cyan",
       "pedagogyTip": "The first board that cannot be finished in one move. Until here every deduction stood alone; this is where a child has to use their own answer as evidence.",
@@ -557,14 +593,17 @@
             "Find two clues that touch some of the same tiles.",
             "Separate the tiles they share from the tiles only one of them touches.",
             "Take the smaller clue away from the bigger one. What is left over is decided.",
-            "Leave every other tile blank \u2014 these two clues cannot decide it yet."
+            "Leave every other tile blank — these two clues cannot decide it yet."
           ],
           "kidTip": "Two clues can settle some tiles and not others. Blank is a real answer here.",
           "audioPrompt": "These two clues share some tiles. Colour only what they can settle."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Medium",
-      "icon": "\ud83d\udd17",
+      "icon": "🔗",
       "iconName": "layers",
       "iconTone": "indigo",
       "pedagogyTip": "The plan's own point: a lesson that demanded a finished board here would be asking a child to guess the rest, and teaching that guessing is how you finish. Leaving a tile blank because no clue decides it is the answer, and level 14 completes the same board.",
@@ -595,15 +634,18 @@
           "stepByStep": [
             "Start with the reduction: subtract the smaller clue from the bigger one.",
             "Colour the tiles it settles.",
-            "Now read the clues again \u2014 one of them can decide more than it could before.",
+            "Now read the clues again — one of them can decide more than it could before.",
             "Keep going until every tile has a reason."
           ],
           "kidTip": "A tile you worked out by comparing clues is evidence for the next clue.",
           "audioPrompt": "Compare the two clues first, then use what you find to finish."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Medium",
-      "icon": "\ud83e\udde9",
+      "icon": "🧩",
       "iconName": "zap",
       "iconTone": "purple",
       "pedagogyTip": "The same board as level 13, asked to the end. Splitting them is deliberate: a child who can reduce but cannot see what the reduction unlocks has learned a trick rather than a method.",
@@ -640,17 +682,20 @@
             "Write down what each clue still needs.",
             "The middle clue covers everything the outer ones do, and one tile more.",
             "Subtract an outer clue from the middle one.",
-            "Some walls read 1-2-1 and do not come out the same way \u2014 read yours."
+            "Some walls read 1-2-1 and do not come out the same way — read yours."
           ],
           "kidTip": "The shape is a result. The subtraction is the reason.",
           "audioPrompt": "Three clues in a row. Work out what each one still needs."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
-      "icon": "\ud83e\uddf1",
+      "icon": "🧱",
       "iconName": "crown",
       "iconTone": "emerald",
-      "pedagogyTip": "Minesweeper guides teach 1-2-1 as a picture to memorise. A child who learns only the picture cannot solve a wall that does not contain one, so this lesson mixes in a wall that reads 1-2-1 and settles differently \u2014 the memorised answer is wrong there and the subtraction is right.",
+      "pedagogyTip": "Minesweeper guides teach 1-2-1 as a picture to memorise. A child who learns only the picture cannot solve a wall that does not contain one, so this lesson mixes in a wall that reads 1-2-1 and settles differently — the memorised answer is wrong there and the subtraction is right.",
       "standards": [],
       "trajectoryLevel": "sweeper-reasoner",
       "ageBand": [
@@ -688,10 +733,13 @@
           ],
           "kidTip": "A longer wall is not a new rule. It is the same one, used twice.",
           "audioPrompt": "Four clues this time. Start at one end."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
-      "icon": "\ud83c\udff0",
+      "icon": "🏰",
       "iconName": "rocket",
       "iconTone": "pink",
       "pedagogyTip": "Proof that the rule generalises and the picture does not: a child holding only the 1-2-1 shape has nothing to apply here, while a child holding the subtraction simply does it twice.",
@@ -730,10 +778,13 @@
           ],
           "kidTip": "Two clues can only be compared once they count the same colour.",
           "audioPrompt": "One clue counts orange and one counts navy. Say them both in the same colour first."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
-      "icon": "\ud83d\udd04",
+      "icon": "🔄",
       "iconName": "waves",
       "iconTone": "pink",
       "pedagogyTip": "Every tile here has a colour, unlike a mine, which is there or not. So a clue states two numbers and the second is free. This is where that free number starts doing work, and it is what makes clues of different colours comparable at all.",
@@ -769,10 +820,13 @@
           ],
           "kidTip": "Count every tile on the board, not the ones near the blanks.",
           "audioPrompt": "The strip at the top counts the whole board. How many are already there?"
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Medium",
-      "icon": "\ud83e\uddee",
+      "icon": "🧮",
       "iconName": "battery",
       "iconTone": "emerald",
       "pedagogyTip": "The first clue that is not about a neighbourhood at all. A child who has only met clues sitting on tiles will look for one near the blanks and find nothing; the information is there, in a place they have not learned to look.",
@@ -808,10 +862,13 @@
           ],
           "kidTip": "A line clue counts along its line. Tiles above and below do not count.",
           "audioPrompt": "This clue counts along one row. Which tiles are in it?"
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Medium",
-      "icon": "\ud83d\udccf",
+      "icon": "📏",
       "iconName": "footprints",
       "iconTone": "cyan",
       "pedagogyTip": "The neighbourhood habit is strong by now, and this is where it misleads: a child who counts the tiles around the clue instead of along the line gets a different number and no warning.",
@@ -847,10 +904,13 @@
           ],
           "kidTip": "Trace the outline first. Then count only what is inside it.",
           "audioPrompt": "The outlined tiles are the ones this clue counts."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Medium",
-      "icon": "\ud83d\uddfa\ufe0f",
+      "icon": "🗺️",
       "iconName": "search",
       "iconTone": "indigo",
       "pedagogyTip": "The last step away from the neighbourhood: an area with no rule to its shape, so the only way to know what is counted is to look. The outline is drawn with the board rather than offered as a hint, because it is part of the puzzle.",
@@ -886,10 +946,13 @@
           ],
           "kidTip": "The count says how many. Together says where they can be.",
           "audioPrompt": "These tiles sit side by side. Where can the block start?"
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
-      "icon": "\ud83d\ude8b",
+      "icon": "🚋",
       "iconName": "footprints",
       "iconTone": "emerald",
       "pedagogyTip": "The count on its own leaves several arrangements here, so a child who reads only the number cannot finish. That is deliberate: the condition has to change the answer, or the lesson is the previous one with different punctuation.",
@@ -925,10 +988,13 @@
           ],
           "kidTip": "Ruling an arrangement out is a move. It is how this clue works.",
           "audioPrompt": "These do not all touch. Which arrangement does that rule out?"
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
-      "icon": "\ud83c\udf09",
+      "icon": "🌉",
       "iconName": "waves",
       "iconTone": "cyan",
       "pedagogyTip": "The same count as the last lesson with the opposite condition, which is the cleanest way to show that the condition and not the number is doing the work. Rejecting a placement is the move, so the hint shows the rejected one rather than skipping to the answer.",
@@ -964,10 +1030,13 @@
           ],
           "kidTip": "Not orange does not mean navy when there are three colours.",
           "audioPrompt": "Three colours this time. One clue is not enough."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Medium",
-      "icon": "\ud83d\udd3b",
+      "icon": "🔻",
       "iconName": "gem",
       "iconTone": "purple",
       "pedagogyTip": "The habit built by every two-colour board is that ruling one colour out decides the tile. Here it does not, and a child who carries the habit over will answer confidently and wrongly.",
@@ -998,17 +1067,20 @@
         "play": {
           "targetObjective": "Use clues counting different colours together, and colour only what they settle.",
           "stepByStep": [
-            "Read what each clue counts \u2014 they are not all the same colour.",
+            "Read what each clue counts — they are not all the same colour.",
             "Over the same three tiles, work out how many of the third colour there must be.",
             "Now compare the two clues that count that colour.",
             "Only the tile they both cover is settled. Leave the others blank."
           ],
           "kidTip": "Work out the colour nobody counted, then compare.",
           "audioPrompt": "These clues count different colours. Find the one nobody mentioned."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
-      "icon": "\ud83c\udfa8",
+      "icon": "🎨",
       "iconName": "sparkles",
       "iconTone": "pink",
       "pedagogyTip": "Three tiles, one cyan and one navy among them, so exactly one is orange: the counts over a set always add up to its size. That is the same free number level 5 introduced, doing the work here that the reduction alone cannot.",
@@ -1045,10 +1117,13 @@
           ],
           "kidTip": "Each colour has its own total. Never add them together.",
           "audioPrompt": "Three totals, one for each colour. Take them one at a time."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
-      "icon": "\ud83e\uddfe",
+      "icon": "🧾",
       "iconName": "battery",
       "iconTone": "emerald",
       "pedagogyTip": "Tametsi gives a total per colour rather than one number, and this is why: with three colours a single total says almost nothing, while three of them can finish a board no neighbourhood clue reaches.",
@@ -1086,10 +1161,13 @@
           ],
           "kidTip": "When you are stuck, change the kind of clue you are reading.",
           "audioPrompt": "This board mixes clue kinds. Which one can help first?"
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
-      "icon": "\ud83d\udddd\ufe0f",
+      "icon": "🗝️",
       "iconName": "crown",
       "iconTone": "indigo",
       "pedagogyTip": "Every earlier lesson told a child which technique to use by being about it. This one does not, and choosing is the skill: a board with a total, a line, a region and a neighbourhood on it is stuck only until you look somewhere else.",
@@ -1126,10 +1204,13 @@
           ],
           "kidTip": "True is not the same as useful. Ask what each clue decides.",
           "audioPrompt": "Which of these clues would be enough on their own?"
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
-      "icon": "\ud83d\udd0e",
+      "icon": "🔎",
       "iconName": "search",
       "iconTone": "emerald",
       "pedagogyTip": "Making a deduction and knowing what it rested on are different skills, and only the second survives a board a child has not seen. Every option here is re-solved when it is chosen, so a set nobody expected is accepted if it works.",
@@ -1168,10 +1249,13 @@
           ],
           "kidTip": "More than one of these can be a fair way of saying it.",
           "audioPrompt": "Which of these says why the tile must be that colour?"
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
-      "icon": "\ud83d\udcac",
+      "icon": "💬",
       "iconName": "sparkles",
       "iconTone": "purple",
       "pedagogyTip": "Two of the options are the same reason worded differently and both are accepted, because a child who says it their own way has not made a different move. What separates the wrong ones is what they claim a clue counts.",
@@ -1210,10 +1294,13 @@
           ],
           "kidTip": "One wrong tile can break more than one clue. Any of them is a right answer.",
           "audioPrompt": "One tile here is wrong. Which clue is no longer true?"
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
-      "icon": "\ud83d\udea8",
+      "icon": "🚨",
       "iconName": "zap",
       "iconTone": "pink",
       "pedagogyTip": "Checking is not solving backwards: a child is given a finished board and has to test it, which is the first time in this skill that being able to say a thing is wrong matters more than being able to get it right.",
@@ -1251,17 +1338,20 @@
         "play": {
           "targetObjective": "Audit a three-colour board and find the clue it breaks.",
           "stepByStep": [
-            "Read the clue's colour first \u2014 with three in play it matters more.",
+            "Read the clue's colour first — with three in play it matters more.",
             "Count only that colour around it.",
             "Compare with the number.",
             "A tile of the third colour is neither right nor wrong until you check the clue that counts it."
           ],
           "kidTip": "Count the clue's own colour. Ignore the other two.",
           "audioPrompt": "Three colours, and one tile is wrong. Which clue does it break?"
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
-      "icon": "\ud83d\udd2c",
+      "icon": "🔬",
       "iconName": "crown",
       "iconTone": "indigo",
       "pedagogyTip": "The counting error this catches is specific to three colours: a child who counts 'tiles that are not the clue's colour' gets a number that is right for two colours and wrong here.",
@@ -1316,7 +1406,7 @@
         }
       },
       "difficulty": "Practice",
-      "icon": "\ud83d\udd01",
+      "icon": "🔁",
       "iconName": "circleDot",
       "iconTone": "cyan",
       "pedagogyTip": "Labelled with the foundation key it reviews, not with all four it exercises: an aggregate score across four techniques is not evidence of any one of them.",
@@ -1362,7 +1452,7 @@
         }
       },
       "difficulty": "Practice",
-      "icon": "\u2b55",
+      "icon": "⭕",
       "iconName": "circleDot",
       "iconTone": "indigo",
       "pedagogyTip": "One technique, nine times, at every board position it can take.",
@@ -1408,7 +1498,7 @@
         }
       },
       "difficulty": "Practice",
-      "icon": "\ud83d\udc8e",
+      "icon": "💎",
       "iconName": "gem",
       "iconTone": "purple",
       "pedagogyTip": "The corner case matters most here: a corner clue needing three is the whole neighbourhood, and a child who has only seen centres will not expect it.",
@@ -1457,7 +1547,7 @@
         }
       },
       "difficulty": "Practice",
-      "icon": "\u2795",
+      "icon": "➕",
       "iconName": "star",
       "iconTone": "emerald",
       "pedagogyTip": "Three subtraction boards to one chain, because the chain is the same subtraction used twice and the arithmetic is what needs the repetitions.",
@@ -1507,7 +1597,7 @@
         }
       },
       "difficulty": "Practice",
-      "icon": "\ud83e\uddf1",
+      "icon": "🧱",
       "iconName": "zap",
       "iconTone": "pink",
       "pedagogyTip": "The pattern questions cycle through both named walls and the look-alike, so a child cannot get through by recognising one shape.",
@@ -1553,7 +1643,7 @@
         }
       },
       "difficulty": "Practice",
-      "icon": "\ud83d\udddd\ufe0f",
+      "icon": "🗝️",
       "iconName": "crown",
       "iconTone": "indigo",
       "pedagogyTip": "Six kinds in one round, which is the only place a child has to work out which kind they are looking at before they can start. Labelled with the mixed key alone; the five component keys are exercised, not assessed.",
@@ -1596,7 +1686,7 @@
         }
       },
       "difficulty": "Practice",
-      "icon": "\ud83e\uddee",
+      "icon": "🧮",
       "iconName": "battery",
       "iconTone": "emerald",
       "pedagogyTip": "Two-colour and three-colour totals in the same round, because the habit that breaks is adding them together and that only shows up with three.",
@@ -1637,7 +1727,7 @@
         }
       },
       "difficulty": "Practice",
-      "icon": "\ud83d\udd3b",
+      "icon": "🔻",
       "iconName": "sparkles",
       "iconTone": "purple",
       "pedagogyTip": "Nine boards where ruling one colour out is never enough on its own.",
@@ -1679,7 +1769,7 @@
         }
       },
       "difficulty": "Practice",
-      "icon": "\ud83d\udcac",
+      "icon": "💬",
       "iconName": "search",
       "iconTone": "emerald",
       "pedagogyTip": "Judging evidence and explaining a move alternate, so a child cannot settle into one kind of answer.",
@@ -1721,7 +1811,7 @@
         }
       },
       "difficulty": "Practice",
-      "icon": "\ud83d\udd2c",
+      "icon": "🔬",
       "iconName": "crown",
       "iconTone": "cyan",
       "pedagogyTip": "Nine boards to audit. The only round in the skill where every question is somebody else's work.",

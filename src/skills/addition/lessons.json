@@ -20,6 +20,9 @@
           "sumMax": 10,
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "count_tray",
           "tier": "beginner",
@@ -73,6 +76,9 @@
           ],
           "sumMax": 10,
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "count_tray",
@@ -130,6 +136,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "count_tray",
           "tier": "intermediate",
@@ -186,6 +195,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "count_tray",
           "tier": "intermediate",
@@ -240,6 +252,9 @@
           "flipChance": 0.5,
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "count_tray",
           "tier": "beginner",
@@ -292,6 +307,9 @@
           ],
           "flipChance": 0.4,
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "count_tray",
@@ -347,6 +365,9 @@
           "sumMax": 10,
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "count_tray",
           "tier": "intermediate",
@@ -397,6 +418,9 @@
           ],
           "sumMax": 5,
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "frame_fill",
@@ -451,6 +475,9 @@
           "sumMax": 10,
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "frame_fill",
           "tier": "intermediate",
@@ -503,6 +530,9 @@
           ],
           "sumMax": 10,
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "bond_tree",
@@ -561,6 +591,9 @@
           "sumMax": 20,
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "jump_line",
           "tier": "beginner",
@@ -617,6 +650,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "jump_line",
           "tier": "master",
@@ -668,6 +704,9 @@
             88
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "block_yard",
@@ -721,6 +760,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "place_value_desk",
           "tier": "intermediate",
@@ -772,6 +814,9 @@
             10
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "fact_deck",
@@ -825,6 +870,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "fact_deck",
           "tier": "intermediate",
@@ -876,6 +924,9 @@
             10
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "fact_deck",
@@ -929,6 +980,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "frames_play",
           "tier": "intermediate",
@@ -980,6 +1034,9 @@
             9
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "frames_play",
@@ -1033,6 +1090,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "numberline_play",
           "tier": "intermediate",
@@ -1084,6 +1144,9 @@
             890
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "numberline_play",
@@ -1141,6 +1204,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "bonds_play",
           "tier": "intermediate",
@@ -1192,6 +1258,9 @@
             88
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "bonds_play",
@@ -1246,6 +1315,9 @@
           "sumMax": 18,
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "facts_play",
           "tier": "intermediate",
@@ -1298,6 +1370,9 @@
           ],
           "sumMax": 18,
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "facts_play",
@@ -1356,6 +1431,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "facts_play",
           "tier": "intermediate",
@@ -1405,6 +1483,9 @@
           "count": 4,
           "target": 10,
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "chain_board",
@@ -1463,6 +1544,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "jump_line",
           "tier": "master",
@@ -1515,6 +1599,9 @@
             90
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "base10_play",
@@ -1569,6 +1656,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "base10_play",
           "tier": "intermediate",
@@ -1620,6 +1710,9 @@
             88
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "numberline_play",
@@ -1673,6 +1766,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "chart_play",
           "tier": "intermediate",
@@ -1724,6 +1820,9 @@
             888
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "chart_play",
@@ -1778,6 +1877,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "chart_play",
           "tier": "intermediate",
@@ -1830,22 +1932,25 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "chart_play",
           "tier": "intermediate",
           "difficultyColor": "violet",
           "category": "Written Strategies",
-          "shortDesc": "Start with the biggest column and let each one after it adjust the total",
-          "targetObjective": "Start with the biggest column, then let each one after it change the number you are holding.",
+          "shortDesc": "Hold the first number and let each column after it adjust what you hold",
+          "targetObjective": "Hold the first number. Add the second number's tens, then its ones.",
           "stepByStep": [
-            "Add the tens first and hold that number.",
-            "Add the ones to the number you are holding.",
-            "You never write two answers down — only the one that grows."
+            "Start by holding the first number in your head.",
+            "Add the other number's tens to it. That is your new total.",
+            "Add the other number's ones to that. You only write what you hold."
           ],
-          "kidTip": "Start with the biggest column, then let each one after it change the number you are holding.",
-          "audioPrompt": "Left to right! Start with the tens and let the ones change what you are holding.",
+          "kidTip": "Hold the first number. Add the other one's tens, then its ones.",
+          "audioPrompt": "Left to right! Hold the first number, then add the other one's tens and ones.",
           "prompts": {
-            "default": "{a} plus {b}. Start with the biggest column and work right."
+            "default": "{a} plus {b}. Hold {a}. Add the tens of {b}, then its ones."
           }
         }
       },
@@ -1881,6 +1986,9 @@
             89
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "base10_play",
@@ -1935,6 +2043,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "base10_play",
           "tier": "master",
@@ -1987,6 +2098,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "column_play",
           "tier": "master",
@@ -1999,7 +2113,7 @@
             "Add the tens — including the carry — and it reaches ten as well.",
             "Write that carry above the hundreds and finish."
           ],
-          "kidTip": "Start at the ones. When a column makes ten or more, write the carry above the next one.",
+          "kidTip": "A carry can push the next column over ten as well.",
           "audioPrompt": "Two carries! One column carries, and that makes the next one carry too.",
           "prompts": {
             "default": "{a} plus {b}. Two columns carry — write each one down."
@@ -2039,6 +2153,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "column_play",
           "tier": "master",
@@ -2051,7 +2168,7 @@
             "If it reaches ten, write the small one above the tens.",
             "Add the tens, including the carry."
           ],
-          "kidTip": "Start at the ones. When a column makes ten or more, write the carry above the next one.",
+          "kidTip": "Start at the ones. Ten or more means carry to the next column.",
           "audioPrompt": "The written method! Start at the ones and write the carry above the next column.",
           "prompts": {
             "default": "{a} plus {b}. Add each column, and write the carry."
@@ -2093,6 +2210,9 @@
           ],
           "totalMax": 60,
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "chain_board",
@@ -2145,6 +2265,9 @@
           "target": 10,
           "pairsWanted": 2,
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "chain_board",
@@ -2200,6 +2323,9 @@
           "totalMax": 50,
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "chain_board",
           "tier": "intermediate",
@@ -2249,6 +2375,9 @@
           "digits": 2,
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "estimate_play",
           "tier": "master",
@@ -2297,6 +2426,9 @@
           "mode": "reasonable",
           "digits": 3,
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "estimate_play",
@@ -2350,6 +2482,9 @@
           ],
           "sumMax": 20,
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "bonds_play",
@@ -2412,6 +2547,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "story_board",
           "tier": "master",
@@ -2468,6 +2606,9 @@
             "{name} has {a} {thing} and {other} has {b}. How many do they have together?"
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "story_board",
@@ -2529,6 +2670,9 @@
             "{name} started with {a} {thing} and ended with {b}. How many did {name} collect?"
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "story_board",
@@ -2592,6 +2736,9 @@
           ],
           "questionsPerRound": 5
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "story_board",
           "tier": "master",
@@ -2651,6 +2798,9 @@
             "{name} collected {a} {thing}. {other} collected {b} more. How many did {other} collect?"
           ],
           "questionsPerRound": 5
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "story_board",
@@ -2712,6 +2862,9 @@
           ],
           "questionsPerRound": 6
         },
+        "guide": {
+          "enabled": true
+        },
         "play": {
           "mode": "story_board",
           "tier": "master",
@@ -2763,6 +2916,9 @@
             48
           ],
           "questionsPerRound": 6
+        },
+        "guide": {
+          "enabled": true
         },
         "play": {
           "mode": "strategy_picker",

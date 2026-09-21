@@ -8,6 +8,8 @@ import {
   playCopy,
   useSkillRound,
   type RoundQuestion,
+  guideSetup,
+  useGuide,
 } from "../../kit";
 import { quietWhenPractising } from "../../kit/practice";
 import { themeSystem } from "../../../lib/themeSystem";
@@ -264,7 +266,7 @@ export function columnHints(
           ? `The bottom number is ${placeValueSplit(question.b).join(" and ")}. The second row uses the tens.`
           : `The second row is ${a} × ${rows[1]?.multiplier}. Work it out like any other row.`,
         // Names why the zero is there rather than telling anyone to type one.
-        `Multiplying by ${rows[1]?.multiplier} lands on a whole number of tens, which is why that row ends in a zero.`,
+        `Multiplying by ${rows[1]?.multiplier} lands on whole tens, so that row ends in zero.`,
       );
     case "no_regroup":
     default:
@@ -302,6 +304,15 @@ export const ColumnPad: React.FC<ActivityProps<ColumnParams>> = ({ params, koda,
   const refuse = (writtenText: string, spoken: string) => {
     nudge.refuse(writtenText);
     speak(spoken);
+    /*
+     * A refused move is this engine already knowing the move was wrong.
+     *
+     * What it never did was notice a child doing it repeatedly, which is the
+     * difference between a slip and not having the technique. Safe to call a
+     * coach declared further down: this only ever runs from a handler, long
+     * after the render that created it.
+     */
+    guide.stumbled();
   };
 
   const round = useSkillRound({
@@ -541,11 +552,39 @@ export const ColumnPad: React.FC<ActivityProps<ColumnParams>> = ({ params, koda,
     </div>
   );
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const hints = practising ? [] : columnHints(question, copy.kidTip, { done: nextStep, chosen });
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    /* The row the pad is waiting on — the next partial the child must write. */
+    target: nextStep,
+    progress: nextStep,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   /** Each row is its own target; tapping one moves the pad to it. */
   const rowBox = (index: number, label: string, tone: string) => (
     <button
       type="button"
-      aria-label={`${label}, ${typed[index] || "empty"}`}
+      aria-label={`${label}, ${typed[index] || "empty"}${
+        guide.target === index ? ", write this one next" : ""
+      }`}
       aria-pressed={activeRow === index}
       onClick={() => {
         if (round.feedback) return;
@@ -553,7 +592,9 @@ export const ColumnPad: React.FC<ActivityProps<ColumnParams>> = ({ params, koda,
         nudge.clear();
       }}
       disabled={!!round.feedback}
-      className="flex items-center justify-between gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+      className={`flex items-center justify-between gap-3 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500${
+        guide.target === index ? " ring-4 ring-indigo-500" : ""
+      }`}
     >
       <span className={`text-sm font-bold tabular-nums ${NEUTRAL.text}`}>{label}</span>
       <span
@@ -631,6 +672,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnParams>> = ({ params, koda,
     />
   );
 
+
   return (
     <SkillRound
       koda={koda}
@@ -640,7 +682,9 @@ export const ColumnPad: React.FC<ActivityProps<ColumnParams>> = ({ params, koda,
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : columnHints(question, copy.kidTip, { done: nextStep, chosen })}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onStartOver={
         !round.feedback && (written.some((w) => w !== undefined) || chosen !== undefined || typed.some((t) => t !== "")) ? restart : undefined
       }

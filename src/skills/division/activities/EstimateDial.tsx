@@ -1,7 +1,17 @@
 import React, { useCallback, useMemo } from "react";
 
 import type { ActivityProps } from "../../types";
-import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import {
+  SkillRound,
+  composeHints,
+  guideSetup,
+  isPractice,
+  modeAt,
+  openWith,
+  playCopy,
+  useGuide,
+  useSkillRound,
+} from "../../kit";
 import {
   buildEstimateQuestion,
   friendliestTotal,
@@ -34,7 +44,18 @@ export function buildQuestion(params: EstimateParams, index: number): EstimateQu
 
 export const promptFor = (question: EstimateQuestion): string => question.prompt;
 
-export function estimateHints(question: EstimateQuestion): string[] {
+/**
+ * The ladder, opening with the lesson's own words.
+ *
+ * All fifty-six division lessons author a `kidTip` and, until this, not one
+ * was read: these ladders took the question and nothing else. `openWith`
+ * puts it back as rung one without costing the worked step — see the kit.
+ */
+export function estimateHints(question: EstimateQuestion, kidTip?: string): string[] {
+  return openWith(kidTip, estimateHintsRungs(question));
+}
+
+function estimateHintsRungs(question: EstimateQuestion): string[] {
   switch (question.mode) {
     case "compatible":
       return composeHints(
@@ -90,6 +111,32 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({
   });
   const question = round.question as EstimateQuestion;
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const copy = playCopy(params);
+  const hints = practising ? [] : estimateHints(question, copy.kidTip);
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    target: -1,
+    progress: 0,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   if (!question) return null;
 
   const submit = (given: string, correct: boolean, message: string): void => {
@@ -144,7 +191,9 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : estimateHints(question)}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       iconName="Gauge"
       iconTone="cyan"
       onReadAloud={

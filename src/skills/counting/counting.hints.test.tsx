@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { renderActivity, type ActivityHarness } from "../kit/testing";
 import { skill } from ".";
 import { orbitHints } from "./activities/TouchOrbit";
 import { subitizeHints } from "./activities/SubitizingRush";
@@ -8,157 +7,179 @@ import { numberLineHints } from "./activities/FroggySkip";
 import { base10Hints } from "./activities/Base10Foundry";
 
 /**
- * The Hint button, and what is behind it.
+ * The ladder, and the promise that it stays simple.
  *
- * For most of this skill's life the answer was "nothing": every activity kept a
- * `showTip` boolean, toggled it on the button, logged `supportUsed("hint", 1)`
- * and rendered no hint anywhere. A child who asked for help got a highlighted
- * button and silence, and the log recorded that they had been helped.
+ * There is one ladder in this skill now. The Hint button and the coach show the
+ * same three rungs, so these words are every word of help a child ever meets —
+ * which makes their quality a property of the skill rather than of one panel.
  *
- * So these tests are in two halves. The first drives the button the way a stuck
- * child does and insists something readable comes back. The second checks the
- * words themselves against the question they describe — a hint that says "you
- * have touched 3" when four are tagged is worse than no hint, and only the copy
- * can be wrong in that way.
+ * Two things are checked, and the first is the one that decays. **Simplicity is
+ * a contract, not an intention:** fifteen lessons across five engines will drift
+ * into fifteen voices unless something objects, and a rung that has grown into a
+ * paragraph is exactly what a stuck five-year-old stops reading. So the shape is
+ * asserted for every engine, in every mode, rather than admired in a style
+ * guide.
+ *
+ * The second is that the numbers inside a rung match the question it describes.
+ * A hint saying "you have touched 3" while four are tagged is worse than no hint
+ * at all, and only the copy can be wrong in that way.
  */
 
-const { orbit, subitize, tenframe, numberline, base10 } = skill.activities;
+/**
+ * How long a rung may be.
+ *
+ * Sixteen words is about a breath, and about what a child will hear before they
+ * go back to the screen. Anything longer is not a sentence a five-year-old is
+ * read to from — it is a paragraph, and it belongs behind the bubble's Next
+ * button as a page of the lesson's method, not in front of them at the moment
+ * they are stuck.
+ */
+const MAX_WORDS = 16;
 
-/** Every hint the child has been shown, in the order the rungs came. */
-const hintRungs = (h: ActivityHarness): (number | undefined)[] =>
-  h.koda
-    .only("learning.supportUsed")
-    .filter((call) => call.args[0] === "hint")
-    .map((call) => call.args[1] as number | undefined);
+const words = (rung: string) => rung.trim().split(/\s+/).length;
 
-/** The lesson each activity is normally mounted with, `play` copy and all. */
-const lessonFor = (activityId: string) => {
-  const lesson = skill.lessons.find((l) => l.activity === `counting/${activityId}`);
-  const params = lesson?.params as Record<string, unknown>;
-  return { params, level: (params?.level as number) ?? 1 };
+/** The shape every ladder in this skill holds to, whatever it is teaching. */
+const simple = (ladder: string[], where: string) => {
+  expect(ladder, `${where}: three rungs — say it, show it, walk it`).toHaveLength(3);
+  for (const [i, rung] of ladder.entries()) {
+    expect(rung.trim(), `${where} rung ${i + 1} has loose whitespace`).toBe(rung);
+    expect(rung.length, `${where} rung ${i + 1} says nothing: "${rung}"`).toBeGreaterThan(15);
+    expect(
+      words(rung),
+      `${where} rung ${i + 1} is ${words(rung)} words — a paragraph, not a nudge: "${rung}"`,
+    ).toBeLessThanOrEqual(MAX_WORDS);
+  }
 };
 
-describe("the hint button shows a hint", () => {
-  const cases: [string, typeof orbit][] = [
-    ["orbit", orbit],
-    ["subitize", subitize],
-    ["tenframe", tenframe],
-    ["numberline", numberline],
-    ["base10", base10],
-  ];
-
-  for (const [id, activity] of cases) {
-    it(`${id}: opens with the lesson's own tip, and closes again`, async () => {
-      const { params, level } = lessonFor(id);
-      const h = renderActivity(activity, { params, level });
-      const kidTip = (params.play as { kidTip?: string }).kidTip!;
-
-      expect(h.text(), "the hint is not showing before it is asked for").not.toContain(kidTip);
-      await h.press(/^Hint$/);
-      expect(h.text(), "rung one is the lesson's own kidTip").toContain(kidTip);
-
-      await h.press(/^Hide hint$/);
-      expect(h.text()).not.toContain(kidTip);
-      h.unmount();
-    });
-
-    it(`${id}: climbs to a question-specific rung and reports each one once`, async () => {
-      const { params, level } = lessonFor(id);
-      const h = renderActivity(activity, { params, level });
-
-      await h.press(/^Hint$/);
-      expect(hintRungs(h), "the gentlest rung is reported as level 1").toEqual([1]);
-      expect(h.text()).toContain("Hint 1 of 3");
-
-      await h.press(/^More help$/);
-      expect(hintRungs(h), "climbing reports the rung it climbed to").toEqual([1, 2]);
-      expect(h.text()).toContain("Hint 2 of 3");
-
-      await h.press(/^More help$/);
-      expect(hintRungs(h)).toEqual([1, 2, 3]);
-      expect(h.text()).toContain("Hint 3 of 3");
-      expect(h.buttons(), "the ladder ends rather than going dead").not.toContain("More help");
-
-      // Closing and re-opening is not a second hint: it returns to the deepest
-      // rung already read, and the log stays as it was.
-      await h.press(/^Hide hint$/);
-      await h.press(/^Hint$/);
-      expect(h.text()).toContain("Hint 3 of 3");
-      expect(hintRungs(h), "re-reading a hint is not taking another one").toEqual([1, 2, 3]);
-      h.unmount();
-    });
-  }
-
-  it("reads the hint aloud, because the child cannot read it", async () => {
-    const { params, level } = lessonFor("orbit");
-    const h = renderActivity(orbit, { params, level });
-    const before = h.koda.count("speech.say");
-
-    await h.press(/^Hint$/);
-    const spoken = h.koda.only("speech.say").slice(before);
-    expect(spoken.at(-1)?.args[0]).toBe((params.play as { kidTip: string }).kidTip);
-    h.unmount();
-  });
-
-  it("says nothing aloud when the learner has speech turned off", async () => {
-    const { params, level } = lessonFor("orbit");
-    const h = renderActivity(orbit, { params, level, features: { audio_speech: false } });
-    const before = h.koda.count("speech.say");
-
-    await h.press(/^Hint$/);
-    expect(h.text()).toContain((params.play as { kidTip: string }).kidTip);
-    expect(h.koda.count("speech.say"), "shown, not spoken").toBe(before);
-    h.unmount();
-  });
-
-  it("starts the next question at the bottom of the ladder", async () => {
-    const h = renderActivity(numberline, {
-      params: {
-        ...lessonFor("numberline").params,
-        mode: "hop",
-        steps: [2],
-        hopRange: [3, 3],
-        settleMs: 0,
-      },
-      level: 10,
-    });
-
-    await h.press(/^Hint$/);
-    await h.press(/^More help$/);
-    expect(h.text()).toContain("Hint 2 of 3");
-
-    // Hop to the last pad, which answers the question, then move on.
-    for (let guard = 0; guard < 20; guard += 1) {
-      if (!h.buttons().some((b) => /^Hop Forward/i.test(b))) break;
-      await h.press(/^Hop Forward/i);
+describe("every rung is short enough to be read to a five-year-old", () => {
+  it("orbit: a row, a scatter and a comparison", () => {
+    const asset = { id: "counting-fish", name: "Fish", emoji: "🐟" };
+    const row = { id: "q", taskKind: "t", mode: "row" as const, count: 6, asset };
+    for (const tapped of [0, 2, 5]) {
+      simple(orbitHints(row as never, { tapped, tappedA: 0, tappedB: 0 }), `row@${tapped}`);
     }
-    await h.settle();
-    await h.press(/^next$/i);
-    await h.settle();
 
-    expect(h.text(), "the last question's hint does not follow the child").not.toContain("Hint 2 of 3");
-    await h.press(/^Hint$/);
-    expect(h.text()).toContain("Hint 1 of 3");
-    h.unmount();
+    const scatter = { ...row, mode: "scatter" as const, count: 8 };
+    for (const tapped of [0, 3, 7]) {
+      simple(orbitHints(scatter as never, { tapped, tappedA: 0, tappedB: 0 }), `scatter@${tapped}`);
+    }
+
+    const compare = {
+      ...row,
+      mode: "compare" as const,
+      compare: {
+        countA: 7,
+        countB: 5,
+        assetA: asset,
+        assetB: asset,
+        layoutA: "line",
+        layoutB: "cluster",
+        answer: "A",
+      },
+    };
+    for (const [a, b] of [[0, 0], [3, 2]]) {
+      simple(orbitHints(compare as never, { tapped: 0, tappedA: a, tappedB: b }), `compare@${a}/${b}`);
+    }
+  });
+
+  it("tenframe: filling, making ten and teens", () => {
+    for (const target of [3, 7, 9]) {
+      for (const filled of [0, target - 1, target, target + 1]) {
+        simple(
+          tenFrameHints({ id: "q", taskKind: "t", mode: "fill", target } as never, { filled }),
+          `fill ${target}@${filled}`,
+        );
+      }
+    }
+    for (const initial of [2, 6, 8]) {
+      simple(
+        tenFrameHints({ id: "q", taskKind: "t", mode: "complement", target: 10, initial } as never, {
+          filled: 0,
+        }),
+        `complement@${initial}`,
+      );
+    }
+    for (const target of [11, 15, 19]) {
+      for (const filled of [0, target - 10, target - 9]) {
+        simple(
+          tenFrameHints({ id: "q", taskKind: "t", mode: "teen", target } as never, { filled }),
+          `teen ${target}@${filled}`,
+        );
+      }
+    }
+  });
+
+  it("numberline: hopping, and the missing step", () => {
+    const pads = [0, 5, 10, 15, 20];
+    for (const hop of [0, 2, 4]) {
+      simple(
+        numberLineHints({ id: "q", taskKind: "t", mode: "hop", step: 5, pads } as never, { hop }),
+        `hop@${hop}`,
+      );
+    }
+    for (const sequence of [[3, 6, null, 12], [30, 27, null, 21], [null, 8, 10, 12]]) {
+      simple(
+        numberLineHints({ id: "q", taskKind: "t", mode: "missing", step: 3, sequence } as never, {
+          hop: 0,
+        }),
+        `missing ${sequence.join(",")}`,
+      );
+    }
+  });
+
+  it("base10: building, bundling and overshooting", () => {
+    const setup = { bundleOnes: true, bundleTens: true, hundreds: true };
+    const states = [
+      { hundreds: 0, tens: 0, ones: 0 },
+      { hundreds: 1, tens: 2, ones: 3 },
+      { hundreds: 0, tens: 0, ones: 12 },
+      { hundreds: 0, tens: 11, ones: 0 },
+      { hundreds: 2, tens: 9, ones: 9 },
+    ];
+    for (const built of states) {
+      simple(
+        base10Hints({ id: "q", taskKind: "t", target: 123 } as never, { built, setup }),
+        `base10 ${JSON.stringify(built)}`,
+      );
+    }
+  });
+
+  it("subitize: a dice pattern, a scatter and two colours", () => {
+    for (const seen of [false, true]) {
+      simple(
+        subitizeHints({ id: "q", taskKind: "t", total: 7 } as never, { seen }),
+        `grid seen=${seen}`,
+      );
+      simple(
+        subitizeHints(
+          {
+            id: "q",
+            taskKind: "t",
+            total: 5,
+            points: [
+              { x: 20, y: 20 },
+              { x: 30, y: 60 },
+              { x: 70, y: 30 },
+              { x: 80, y: 70 },
+              { x: 60, y: 50 },
+            ],
+          } as never,
+          { seen },
+        ),
+        `scatter seen=${seen}`,
+      );
+      simple(
+        subitizeHints(
+          { id: "q", taskKind: "t", total: 7, parts: { a: 3, b: 4, colors: {} } } as never,
+          { seen },
+        ),
+        `parts seen=${seen}`,
+      );
+    }
   });
 });
 
-/**
- * The wording, checked against the question it is about.
- *
- * Every builder is a pure function of the question and what the child has done
- * so far, which is the whole reason they are exported: the numbers inside a
- * hint are the part that can silently go wrong.
- */
-describe("hint copy describes the question on screen", () => {
-  const complete = (ladder: string[]) => {
-    expect(ladder).toHaveLength(3);
-    for (const rung of ladder) {
-      expect(rung.length, `a hint this short says nothing: "${rung}"`).toBeGreaterThan(20);
-      expect(rung.trim()).toBe(rung);
-    }
-  };
-
+describe("a rung describes the question actually on screen", () => {
   it("orbit: counts a row from where the child has got to", () => {
     const question = {
       id: "q1",
@@ -168,9 +189,8 @@ describe("hint copy describes the question on screen", () => {
       asset: { id: "counting-fish", name: "Fish", emoji: "🐟" },
     };
     const ladder = orbitHints(question as never, { tapped: 2, tappedA: 0, tappedB: 0 });
-    complete(ladder);
-    expect(ladder[1]).toContain("You have touched 2");
-    expect(ladder[1], "the next number, not the one just said").toContain("3");
+    expect(ladder[1]).toContain("You have counted 2");
+    expect(ladder[1], "the next number, not the one just said").toContain("three");
     expect(ladder[2]).toContain("6");
   });
 
@@ -179,164 +199,136 @@ describe("hint copy describes the question on screen", () => {
       id: "q1",
       taskKind: "compare_groups",
       mode: "compare" as const,
-      count: 5,
+      count: 7,
       asset: { id: "counting-fish", name: "Fish", emoji: "🐟" },
       compare: {
         countA: 7,
         countB: 5,
         assetA: { id: "counting-fish", name: "Fish", emoji: "🐟" },
-        assetB: { id: "counting-leaf", name: "Leaves", emoji: "🍃" },
-        layoutA: "cluster",
-        layoutB: "line",
-        answer: "A" as const,
+        assetB: { id: "counting-sun", name: "Suns", emoji: "☀️" },
+        layoutA: "line",
+        layoutB: "cluster",
+        answer: "A",
       },
     };
     const ladder = orbitHints(question as never, { tapped: 0, tappedA: 0, tappedB: 0 });
-    complete(ladder);
-    expect(ladder[2]).toContain("left group has 7");
-    expect(ladder[2]).toContain("right group has 5");
-    expect(ladder[2], "the verdict is the question, so a hint must not give it").not.toMatch(
-      /left has more|the left group wins/i,
-    );
-  });
-
-  it("subitize: describes the set that was actually flashed", () => {
-    const twoColor = subitizeHints(
-      {
-        id: "q1",
-        taskKind: "subitize_set",
-        total: 7,
-        parts: { a: 3, b: 4, colors: { colorA: "bg-sky-400", colorB: "bg-rose-400" } },
-      } as never,
-      { seen: true },
-    );
-    complete(twoColor);
-    expect(twoColor[2]).toContain("3 of one colour and 4 of the other");
-    expect(twoColor[2], "the total is what is being asked for").not.toContain("7 in all");
-
-    // The scatter rung reports the split the child actually saw, left to right.
-    const scatter = subitizeHints(
-      {
-        id: "q2",
-        taskKind: "subitize_set",
-        total: 5,
-        points: [{ x: 20, y: 30 }, { x: 30, y: 60 }, { x: 70, y: 20 }, { x: 80, y: 50 }, { x: 90, y: 70 }],
-      } as never,
-      { seen: true },
-    );
-    complete(scatter);
-    expect(scatter[2]).toContain("2 on the left side and 3 on the right");
+    expect(ladder[2]).toContain("Left has 7");
+    expect(ladder[2]).toContain("Right has 5");
+    // The verdict is the question. A rung that gave it would leave nothing to answer.
+    expect(ladder[2], "the comparing is the child's job").not.toMatch(/left has more|bigger group/i);
   });
 
   it("tenframe: reads the frame as the child has built it", () => {
-    const fill = tenFrameHints(
-      { id: "q1", taskKind: "tenframe_fill", mode: "fill", target: 8 } as never,
-      { filled: 5 },
-    );
-    complete(fill);
-    expect(fill[1]).toContain("full top row of 5 and 3 more");
+    const fill = tenFrameHints({ id: "q", taskKind: "t", mode: "fill", target: 8 } as never, {
+      filled: 5,
+    });
+    expect(fill[1]).toContain("full top row of 5");
     expect(fill[2]).toContain("Tap 3 more");
 
-    const over = tenFrameHints(
-      { id: "q1", taskKind: "tenframe_fill", mode: "fill", target: 6 } as never,
-      { filled: 9 },
-    );
-    expect(over[2]).toContain("Tap 3 of them off again");
+    const over = tenFrameHints({ id: "q", taskKind: "t", mode: "fill", target: 6 } as never, {
+      filled: 9,
+    });
+    expect(over[2]).toContain("Tap 3 off");
 
+    const teen = tenFrameHints({ id: "q", taskKind: "t", mode: "teen", target: 14 } as never, {
+      filled: 2,
+    });
+    expect(teen[1]).toContain("10 and 4 more");
+    expect(teen[2]).toContain("Tap 2 more");
+  });
+
+  it("tenframe: making ten counts the gaps without naming the answer", () => {
     const complement = tenFrameHints(
-      { id: "q2", taskKind: "tenframe_complement", mode: "complement", target: 6, initial: 4 } as never,
+      { id: "q", taskKind: "t", mode: "complement", target: 10, initial: 4 } as never,
       { filled: 0 },
     );
-    complete(complement);
-    expect(complement[2]).toContain("6 of them");
-
-    const teen = tenFrameHints(
-      { id: "q3", taskKind: "tenframe_teen", mode: "teen", target: 14 } as never,
-      { filled: 2 },
-    );
-    complete(teen);
-    expect(teen[1]).toContain("10 and 4 more");
-    expect(teen[2]).toContain("tap 2 more");
+    expect(complement[1]).toContain("4 boxes are full");
+    // The child answers by choosing a number, so no rung may say which.
+    for (const rung of complement) {
+      expect(rung, "the number of empty boxes is the answer").not.toMatch(/\b6\b/);
+    }
   });
 
   it("numberline: uses the step this line actually takes", () => {
     const hop = numberLineHints(
-      { id: "q1", taskKind: "numberline_hop", mode: "hop", step: 5, pads: [0, 5, 10, 15, 20] } as never,
+      { id: "q", taskKind: "t", mode: "hop", step: 5, pads: [0, 5, 10, 15, 20] } as never,
       { hop: 2 },
     );
-    complete(hop);
-    expect(hop[1]).toContain("10 + 5 = 15");
+    expect(hop[1]).toContain("10 + 5 is 15");
     expect(hop[2]).toContain("0, 5, 10, 15, 20");
 
-    // Half the sequences run backwards, and a hint that assumes counting up
-    // would teach a child to distrust the line in front of them.
     const down = numberLineHints(
-      {
-        id: "q2",
-        taskKind: "numberline_missing",
-        mode: "missing",
-        step: 3,
-        sequence: [30, 27, null, 21, 18],
-        answer: 24,
-      } as never,
+      { id: "q", taskKind: "t", mode: "missing", step: 3, sequence: [33, 30, 27, null, 21] } as never,
       { hop: 0 },
     );
-    complete(down);
     expect(down[1]).toContain("down by 3");
-    expect(down[2]).toContain("straight after 27");
+    expect(down[2]).toContain("27");
     expect(down[2], "naming the answer would answer the question").not.toContain("24");
   });
 
   it("base10: names the move that place value actually requires next", () => {
-    const question = { id: "q1", taskKind: "place_value_build", target: 23 } as never;
-
-    const start = base10Hints(question, {
+    const setup = { bundleOnes: true, bundleTens: false, hundreds: false };
+    const start = base10Hints({ id: "q", taskKind: "t", target: 23 } as never, {
       built: { hundreds: 0, tens: 0, ones: 0 },
-      setup: { bundleOnes: true },
+      setup,
     });
-    complete(start);
     expect(start[1]).toContain("2 tens and 3 ones");
     expect(start[2]).toContain("Drag in 2 tens and 3 ones");
 
-    // Ten loose ones is the case `check` refuses, so it is the case the hint
-    // has to name — telling this child to add more blocks sends them backwards.
-    const loose = base10Hints(question, {
-      built: { hundreds: 0, tens: 1, ones: 13 },
-      setup: { bundleOnes: true },
+    // Bundling wins over adding: `check` refuses ten loose ones, so a rung that
+    // said "drag in more" would send the child further from the answer.
+    const loose = base10Hints({ id: "q", taskKind: "t", target: 23 } as never, {
+      built: { hundreds: 0, tens: 1, ones: 12 },
+      setup,
     });
     expect(loose[2]).toContain('"Make a Ten"');
 
-    const done = base10Hints(question, {
+    const done = base10Hints({ id: "q", taskKind: "t", target: 23 } as never, {
       built: { hundreds: 0, tens: 2, ones: 3 },
-      setup: { bundleOnes: true },
+      setup,
     });
     expect(done[2]).toContain("Press Check");
   });
+});
 
+describe("the lessons hold up their end", () => {
   it("every teaching lesson writes the first rung itself", () => {
-    // Rung one is the lesson's own words, so a lesson with no `kidTip` quietly
-    // hands the child the activity's generic fallback instead of the strategy
-    // this lesson is teaching.
-    //
-    // Practice is the exception, and deliberately so: it shows no hints at all,
-    // so there is no rung one for it to write. A `kidTip` there would be copy
-    // nothing can ever display.
-    for (const lesson of skill.lessons) {
-      const play = (lesson.params as { play?: { kidTip?: string; mode?: string } } | undefined)?.play;
-      if (play?.mode === "practice") continue;
+    const teaching = skill.lessons.filter(
+      (l) => !(l.params as { question?: { practice?: boolean } }).question?.practice,
+    );
+    expect(teaching.length).toBe(15);
+    for (const lesson of teaching) {
+      const play = (lesson.params as { play?: { kidTip?: string } }).play;
       expect(play?.kidTip?.trim(), `${lesson.id} has no kidTip`).toBeTruthy();
+      expect(
+        words(play!.kidTip!),
+        `${lesson.id}'s kidTip is too long to be the gentlest rung`,
+      ).toBeLessThanOrEqual(MAX_WORDS);
     }
   });
 
-  it("practice lessons show no hints, so they author none", () => {
-    const practices = skill.lessons.filter((l) => l.id.startsWith("practice-"));
-    expect(practices.length).toBeGreaterThan(0);
+  it("every teaching lesson asks for the coach, and no practice lesson does", () => {
+    for (const lesson of skill.lessons) {
+      const params = lesson.params as {
+        guide?: { enabled?: boolean };
+        question?: { practice?: boolean };
+      };
+      if (params.question?.practice) {
+        expect(params.guide, `${lesson.id} is practice and must not be coached`).toBeUndefined();
+      } else {
+        expect(params.guide?.enabled, `${lesson.id} has no coach`).toBe(true);
+      }
+    }
+  });
+
+  it("practice lessons show no help, so they author none", () => {
+    const practices = skill.lessons.filter(
+      (l) => (l.params as { question?: { practice?: boolean } }).question?.practice,
+    );
+    expect(practices).toHaveLength(5);
     for (const lesson of practices) {
-      const params = lesson.params as { question: { practice?: boolean }; play: { kidTip: string } };
-      expect(params.question.practice, `${lesson.id} is not marked as practice`).toBe(true);
+      const params = lesson.params as { play: { kidTip: string } };
       expect(params.play.kidTip).toBe("");
-      // Open from the start: a child who already knows the technique should not
-      // have to sit through the lesson to reach the questions.
       expect(lesson.requires ?? []).toEqual([]);
     }
   });

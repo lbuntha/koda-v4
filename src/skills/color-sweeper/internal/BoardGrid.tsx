@@ -39,6 +39,8 @@ export interface BoardGridProps {
   assignment?: Assignment;
   /** Outlined as the tile the question is about. */
   target?: number;
+  /** Cyan focus supplied by the Smart Guide; unlike `target`, this may move. */
+  guideTarget?: number;
   /** Cells the child has chosen so far. `select` only. */
   selected?: readonly number[];
   /** Omit to render a board that cannot be touched — a worked figure, or paper. */
@@ -106,6 +108,7 @@ export const BoardGrid: React.FC<BoardGridProps> = ({
   mode = "select",
   assignment,
   target,
+  guideTarget,
   selected = [],
   onTap,
   locked = false,
@@ -195,6 +198,7 @@ export const BoardGrid: React.FC<BoardGridProps> = ({
         {(assignment ?? board.givens).map((color: Color | null, cell: number) => {
           const clue: Clue | undefined = board.clues.find((c) => c.cell === cell);
           const isTarget = cell === target;
+          const isGuideTarget = cell === guideTarget;
           const badge = mode === "select" ? chosen.get(cell) : undefined;
           const paint = color ? PALETTE[color] : undefined;
           /* A fixed tile is the puzzle's evidence and never takes a colour. */
@@ -214,7 +218,7 @@ export const BoardGrid: React.FC<BoardGridProps> = ({
                     transition: SPRING.tap,
                   }
                 : { role: "img" as const })}
-              aria-label={tileLabel(board, cell, target, assignment)}
+              aria-label={`${tileLabel(board, cell, target, assignment)}${isGuideTarget ? ", Smart guide focus" : ""}`}
               /*
                * One outline, one meaning.
                *
@@ -230,6 +234,7 @@ export const BoardGrid: React.FC<BoardGridProps> = ({
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-surface",
                 paint ? "" : "border-dashed border-ink/25 bg-surface",
                 isTarget ? "ring-4 ring-ink ring-offset-2 ring-offset-surface" : "",
+                isGuideTarget ? "outline outline-4 outline-offset-4 outline-sky-400" : "",
                 /*
                  * Board furniture, drawn with the board and never on request —
                  * the outline is part of the puzzle, not a hint about it.

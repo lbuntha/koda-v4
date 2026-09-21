@@ -9,6 +9,7 @@ export type TabId =
   | "home"
   | "game"
   | "profile"
+  | "leaderboard"
   | "skills"
   | "assets"
   | "users"

@@ -10,7 +10,7 @@ from app.deps import AUTHENTICATED, Db, require
 from app.errors import Conflict, NotFound, PaymentRequired
 from app.models.auth import Principal
 from app.models.common import Model, now
-from app.repos import learners
+from app.repos import buddies, leaderboard_privacy, learners
 from app.services import family_overview
 from app.services.codes import hash_code, new_code
 from app.services.entitlements import entitlements
@@ -125,6 +125,8 @@ async def delete_learner(learner_id: str, db: Db, p: CanDelete) -> None:
     await db.events.delete_many({"familyId": p.family_id, "learnerId": learner_id})
     await db.docs.delete_many({"familyId": p.family_id, "learnerId": learner_id})
     await db.concept_totals.delete_many({"familyId": p.family_id, "learnerId": learner_id})
+    await leaderboard_privacy.remove(db, p.family_id, learner_id)
+    await buddies.remove_learner(db, learner_id)
 
 
 @router.post("/{learner_id}/join-code")

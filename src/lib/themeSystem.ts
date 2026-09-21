@@ -536,35 +536,61 @@ export const themeSystem = {
    * the whole point of it is the sentence being legible.
    */
   guideBubble: {
+    /*
+     * Tighter on a phone, and that is not only taste.
+     *
+     * This panel appears *above* the thing it is talking about, so every pixel
+     * it takes is a pixel of counting scene pushed down — and on a short phone
+     * the objects being counted are what goes off the bottom. Padding, avatar
+     * and gaps all step up at `sm`, where there is room to breathe.
+     */
     wrap:
-      "koda-bubble-in relative mx-auto flex w-full max-w-3xl items-start gap-3 rounded-[1.5rem] " +
-      "border-2 border-indigo-300 bg-indigo-50 p-4 shadow-lg shadow-slate-900/5 sm:p-5 " +
+      "koda-bubble-in relative mx-auto flex w-full max-w-3xl items-start gap-2.5 rounded-3xl " +
+      "border-2 border-indigo-300 bg-indigo-50 p-3 shadow-lg shadow-slate-900/5 " +
+      "sm:gap-3 sm:rounded-[1.5rem] sm:p-5 " +
       "dark:border-indigo-800 dark:bg-indigo-950/50 dark:shadow-black/40",
     avatar:
-      "grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-indigo-600 text-white " +
-      "[&>svg]:h-6 [&>svg]:w-6",
+      "grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-indigo-600 text-white " +
+      "sm:h-10 sm:w-10 sm:rounded-2xl [&>svg]:h-5 [&>svg]:w-5 sm:[&>svg]:h-6 sm:[&>svg]:w-6",
     body: "min-w-0 flex-1",
-    title: "text-xs font-black uppercase tracking-wider text-indigo-700 dark:text-indigo-300",
+    /* The title and the page count share a line, so the footer below is
+       controls only and has a chance of fitting across a 360px screen. */
+    titleRow: "flex items-baseline gap-2",
+    title:
+      "min-w-0 flex-1 truncate text-[11px] font-black uppercase tracking-wider " +
+      "text-indigo-700 sm:text-xs dark:text-indigo-300",
     /* The instruction is the hero of the panel: it is the thing the child came
-       back to the screen for, and it competes with an illustrated scene. */
-    message: "mt-0.5 text-base font-bold text-ink sm:text-lg",
-    footer: "mt-3 flex flex-wrap items-center gap-2",
-    /* Quiet, because paging is a side road: the instruction on screen is the
-       help, and Back/Next are for the child who wants the sentence again. */
+       back to the screen for, and it competes with an illustrated scene.
+       `break-words` because a single long word — a name, a number — must wrap
+       rather than push the panel wider than the phone. */
+    message: "mt-0.5 break-words text-base font-bold text-ink sm:text-lg",
+    footer: "mt-2.5 flex flex-wrap items-center gap-2 sm:mt-3",
+    /*
+     * Quiet, because paging is a side road: the instruction on screen is the
+     * help, and Back/Next are for the child who wants the sentence again.
+     *
+     * Square and wordless on a phone, labelled from `sm` up. Four controls with
+     * words on them do not fit across a small screen, and the wrap put "Got it"
+     * alone on a second line — which made the way out of the panel look like
+     * the next step of it. The word is still on the button for a screen reader;
+     * see `UIGuideBubble`.
+     */
     page:
-      "inline-flex min-h-11 items-center gap-1 rounded-2xl border-2 border-indigo-200 bg-surface " +
-      "px-3 py-2 text-sm font-black text-indigo-700 transition hover:bg-indigo-100 " +
-      "disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-surface " +
+      "inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-2xl border-2 " +
+      "border-indigo-200 bg-surface px-2 py-2 text-sm font-black text-indigo-700 transition " +
+      "hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-40 " +
+      "disabled:hover:bg-surface sm:px-3 " +
       "dark:border-indigo-800 dark:text-indigo-300 dark:hover:bg-indigo-900/40 [&>svg]:h-4 [&>svg]:w-4",
-    count: "px-1 text-xs font-black tabular-nums text-indigo-700/80 dark:text-indigo-300/80",
+    count: "text-xs font-black tabular-nums text-indigo-700/80 dark:text-indigo-300/80",
     action:
       "ml-auto min-h-11 shrink-0 rounded-2xl border-2 border-b-4 border-indigo-800 bg-indigo-600 " +
-      "px-4 py-2 font-black font-mono text-sm uppercase tracking-wider text-white " +
-      "transition-all duration-100 hover:bg-indigo-500 active:translate-y-0.5 active:border-b-2",
+      "px-3 py-2 font-black font-mono text-xs uppercase tracking-wide text-white " +
+      "transition-all duration-100 hover:bg-indigo-500 active:translate-y-0.5 active:border-b-2 " +
+      "sm:px-4 sm:text-sm sm:tracking-wider",
     /* Decorative, and pointed at the work. A bubble with nothing to point at is
        a banner, and reads as an announcement rather than as somebody talking. */
     tail: (side: "down" | "up" = "down") =>
-      "absolute left-10 h-4 w-4 rotate-45 bg-indigo-50 dark:bg-indigo-950/50 " +
+      "absolute left-8 h-4 w-4 rotate-45 bg-indigo-50 sm:left-10 dark:bg-indigo-950/50 " +
       (side === "down"
         ? "-bottom-[9px] border-b-2 border-r-2 border-indigo-300 dark:border-indigo-800"
         : "-top-[9px] border-l-2 border-t-2 border-indigo-300 dark:border-indigo-800"),

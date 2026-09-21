@@ -1,7 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ActivityProps } from "../../types";
-import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import {
+  SkillRound,
+  composeHints,
+  guideSetup,
+  isPractice,
+  modeAt,
+  openWith,
+  playCopy,
+  useGuide,
+  useSkillRound,
+} from "../../kit";
 import { NumberPad } from "../internal/ui/NumberPad";
 import {
   DIGIT_REFUSALS,
@@ -56,16 +66,27 @@ export const promptFor = (question: ColumnQuestion): string => question.prompt;
  * lessons are the hard ones, and with no prompt read aloud the ladder is the
  * only support left.
  */
-export function columnHints(question: ColumnQuestion): string[] {
+/**
+ * The ladder, opening with the lesson's own words.
+ *
+ * All fifty-six division lessons author a `kidTip` and, until this, not one
+ * was read: these ladders took the question and nothing else. `openWith`
+ * puts it back as rung one without costing the worked step — see the kit.
+ */
+export function columnHints(question: ColumnQuestion, kidTip?: string): string[] {
+  return openWith(kidTip, columnHintsRungs(question));
+}
+
+function columnHintsRungs(question: ColumnQuestion): string[] {
   const { divisor, dividend } = question;
   const first = question.dividendDigits[0];
 
   switch (question.mode) {
     case "short_exact":
       return composeHints(
-        "Start at the left-hand digit. Division is the one written method that begins at the big end.",
+        "Start at the left. Division is the method that begins big.",
         `Each digit of ${dividend} divides by ${divisor} exactly, so every column gives a clean answer.`,
-        "Work one column at a time to the right. Every digit gets an answer written above it.",
+        "One column at a time, rightwards. Every digit gets an answer above.",
       );
     case "short_exchange":
       return composeHints(
@@ -77,27 +98,31 @@ export function columnHints(question: ColumnQuestion): string[] {
       return composeHints(
         `Start at the left and carry leftovers along as usual.`,
         "Keep going all the way to the last digit.",
-        `At the last digit there is nowhere left to carry to. Whatever is left there is the remainder, and it is smaller than ${divisor}.`,
+        `Nothing left to carry into, so what remains is the remainder.`,
       );
     case "zero_digit":
       return composeHints(
-        "Work along the places one at a time, and do not skip one because it looks too small.",
-        `When ${divisor} does not go into a place at all, the answer for that place is zero.`,
-        "A zero above the line is a real digit holding a place open. Leaving it out makes the answer ten times too small.",
+        "Take the places one at a time. Never skip a small-looking one.",
+        `When ${divisor} will not go into a place, that place gets zero.`,
+        "A zero above the line holds the place. Leaving it out shrinks the answer.",
       );
     case "long_exact":
     case "long_remainder":
       return composeHints(
-        `${divisor} is too big to fit into one digit, so take the first two or three digits together.`,
+        `${divisor} will not fit one digit, so take two together.`,
         `Guess how many ${divisor}s fit, then multiply your guess out to check it.`,
         question.mode === "long_remainder"
-          ? `Too much left means the guess was too small; going past means it was too big. What is left at the very end is the remainder — check it is under ${divisor}.`
-          : "Too much left means the guess was too small; going past means it was too big. Fix it, take it away, and bring the next digit down.",
+          /* The two long-division lessons share their first two rungs and part
+             company here, which is the honest relationship between them: one
+             ends on nothing left, the other on what is left. Trimming both to
+             the same sentence lost that. */
+          ? `Too much left, guess bigger. What is left at the end is the remainder.`
+          : "Too much left, guess bigger. Gone past, guess smaller.",
       );
     default:
       return composeHints(
         "Work out the whole part first, and see what is left.",
-        "Put a point after the answer and a zero after the total, then carry on exactly as before.",
+        "Point after the answer, zero after the total, then carry on.",
         "What was left becomes tenths, then hundredths. Nothing about the method changes at the point.",
       );
   }
@@ -148,6 +173,32 @@ export const DivisionPad: React.FC<ActivityProps<ColumnParams>> = ({ params, kod
     setRefused(null);
   }, [question]);
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const copy = playCopy(params);
+  const hints = practising ? [] : columnHints(question, copy.kidTip);
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    target: -1,
+    progress: 0,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   if (!question) return null;
 
   const wholeDone = digits.length === question.dividendDigits.length;
@@ -180,6 +231,7 @@ export const DivisionPad: React.FC<ActivityProps<ColumnParams>> = ({ params, kod
       const verdict = judgeDigit(question.steps[digits.length].working, question.divisor, n);
       if (verdict !== "ok") {
         chime(false);
+        guide.stumbled();
         setRefused(verdict);
         say(DIGIT_REFUSALS[verdict]);
         return;
@@ -248,7 +300,9 @@ export const DivisionPad: React.FC<ActivityProps<ColumnParams>> = ({ params, kod
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : columnHints(question)}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onStartOver={
         !round.feedback && (digits.length > 0 || decimals.length > 0 || remainder !== "")
           ? () => {

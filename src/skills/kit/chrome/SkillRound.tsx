@@ -5,10 +5,12 @@ import type { ActivityLesson, KodaSDK } from "../../types";
 import { UIKidMessage } from "../../../components/ui";
 import { PracticeStepHeader, type StepTagLabels } from "./PracticeStepHeader";
 import { SkillHint } from "./SkillHint";
+import { SkillGuide } from "./SkillGuide";
 import { PracticeRoundCompleteModal } from "./RoundCompleteModal";
 import { SkillRoundTopBar, type SkillVoiceContext } from "./SkillRoundTopBar";
 import { withoutPracticeLabel } from "../practice";
 import type { RoundController } from "../round/useSkillRound";
+import type { GuideController } from "../round/useGuide";
 
 /**
  * How long a correct answer's praise stays up before the round moves on.
@@ -45,6 +47,18 @@ export interface SkillRoundProps {
    * `round.hint`, so a skill supplies the words and nothing else.
    */
   hints?: string[];
+  /**
+   * A coach, for a skill that mounts one. Absent leaves everything as it was.
+   *
+   * With it, the Hint button and the offered cue stop being two systems: the
+   * button opens *this*, the panel below is the bubble rather than the hint
+   * card, and `hints` is what both read from. Opt-in precisely because this is
+   * shared chrome — a skill that passes nothing keeps `SkillHint`, the pulled
+   * ladder and the wording it has today, unchanged.
+   */
+  guide?: GuideController;
+  /** Pages behind the cue — the lesson's `stepByStep`. With `guide` only. */
+  guideMethod?: string[];
   /** What the child is answering. The only part a skill draws itself. */
   children: React.ReactNode;
   iconName?: string;
@@ -102,6 +116,8 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
   onExit,
   onReadAloud,
   hints = [],
+  guide,
+  guideMethod,
   children,
   iconName,
   iconTone,
@@ -142,6 +158,28 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
    * passing one; the switch only ever takes it away.
    */
   const showsStepTag = koda.config.isEnabled("step_context_tags", true);
+
+  /*
+   * What a family has renamed the framing chips to — read here, like the switch
+   * above and for the same reason.
+   *
+   * Four skills each kept their own `tagLabelsFrom`, identical to the line; the
+   * skills that never wrote one simply ignored the setting. Counting is the
+   * case that shows what that costs: it declares all four labels in its Skill
+   * Manager, shows the chips, and read none of them — so a parent could rename
+   * "Warm-up Exercise", watch nothing happen, and have no way to tell that from
+   * a bug.
+   *
+   * A skill that passes its own still wins, so nothing that was already wired
+   * changes. Blank means "no opinion" and falls through to the kit's default;
+   * passing an empty string would replace the chip with nothing.
+   */
+  const labels: Partial<StepTagLabels> = tagLabels ?? {
+    warmup: koda.config.get("warmupLabel", "") || undefined,
+    activity: koda.config.get("activityLabel", "") || undefined,
+    guided: koda.config.get("guidedLabel", "") || undefined,
+    milestone: koda.config.get("milestoneLabel", "") || undefined,
+  };
 
   /*
    * What Koda is told about the question on screen.
@@ -267,20 +305,33 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
             stepNumber={round.index}
             totalSteps={totalQuestions}
             title={prompt}
-            showTip={round.hint.open}
-            onToggleTip={round.hint.toggle}
-            hintCount={hints.length}
+            /* One button, one ladder. With a coach mounted the button shows
+               and hides *it*, so a child never meets two kinds of help with
+               two sets of words; without one, this is the hint panel exactly
+               as every other skill has it. */
+            showTip={guide ? guide.open : round.hint.open}
+            onToggleTip={guide ? guide.ask : round.hint.toggle}
+            hintCount={guide ? guide.rungs : hints.length}
             hintPanelId={HINT_PANEL_ID}
             onReadAloud={onReadAloud}
             levelNumber={lessonNumber}
             contextTag={showsStepTag ? contextTag : null}
-            tagLabels={tagLabels}
+            tagLabels={labels}
           />
           {/* Above the play area, under the question it is a hint about. A
               child looking for help looks where the question is, and a panel
               below the scene would be off-screen on a phone exactly when it is
               wanted. */}
-          <SkillHint koda={koda} hints={hints} hint={round.hint} id={HINT_PANEL_ID} />
+          {guide ? (
+            <SkillGuide
+              cue={guide.cue}
+              method={guideMethod}
+              onDismiss={guide.dismiss}
+              id={HINT_PANEL_ID}
+            />
+          ) : (
+            <SkillHint koda={koda} hints={hints} hint={round.hint} id={HINT_PANEL_ID} />
+          )}
           {children}
           {/* Under the work, because it is about the work. Quiet on purpose —
               starting over is a normal move, not a failure, and it should not

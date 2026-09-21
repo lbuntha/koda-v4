@@ -1,7 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ActivityProps } from "../../types";
-import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import {
+  SkillRound,
+  composeHints,
+  guideSetup,
+  isPractice,
+  modeAt,
+  openWith,
+  playCopy,
+  useGuide,
+  useSkillRound,
+} from "../../kit";
 import {
   buildStoryQuestion,
   type StoryMode,
@@ -37,7 +47,18 @@ export function buildQuestion(params: StoryParams, index: number): StoryQuestion
 
 export const promptFor = (question: StoryQuestion): string => question.prompt;
 
-export function storyHints(question: StoryQuestion): string[] {
+/**
+ * The ladder, opening with the lesson's own words.
+ *
+ * All fifty-six division lessons author a `kidTip` and, until this, not one
+ * was read: these ladders took the question and nothing else. `openWith`
+ * puts it back as rung one without costing the worked step — see the kit.
+ */
+export function storyHints(question: StoryQuestion, kidTip?: string): string[] {
+  return openWith(kidTip, storyHintsRungs(question));
+}
+
+function storyHintsRungs(question: StoryQuestion): string[] {
   switch (question.mode) {
     case "size_unknown":
       return composeHints(
@@ -115,8 +136,35 @@ export const StoryBoard: React.FC<ActivityProps<StoryParams>> = ({ params, koda,
   useEffect(() => {
     if (!question) return;
     setCuts(question.setsParts ? 1 : question.parts);
+    guide.stumbled();
     setRefused(false);
   }, [question]);
+
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const copy = playCopy(params);
+  const hints = practising ? [] : storyHints(question, copy.kidTip);
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    target: -1,
+    progress: 0,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
 
   if (!question) return null;
 
@@ -124,12 +172,14 @@ export const StoryBoard: React.FC<ActivityProps<StoryParams>> = ({ params, koda,
 
   const setCut = (next: number): void => {
     if (soundEnabled && koda.sound.isEnabled()) koda.sound.play("pop");
+    guide.stumbled();
     setRefused(false);
     setCuts(Math.max(1, Math.min(12, next)));
   };
 
   const answerWith = (value: number): void => {
     if (!modelled) {
+      guide.stumbled();
       setRefused(true);
       if (speechEnabled) {
         void koda.speech.say("Cut the bar into the right number of parts first.", {
@@ -166,7 +216,9 @@ export const StoryBoard: React.FC<ActivityProps<StoryParams>> = ({ params, koda,
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : storyHints(question)}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       iconName="BookOpen"
       iconTone="purple"
       onReadAloud={

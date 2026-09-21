@@ -33,6 +33,9 @@
           ],
           "kidTip": "Move your eyes slowly from left to right.",
           "audioPrompt": "Welcome to the beach. Look at the target, then find the matching hidden object."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Easy",
@@ -81,6 +84,9 @@
           ],
           "kidTip": "Find one target first, then look again for the other.",
           "audioPrompt": "Explore the city park and find two hidden objects in any order."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Easy",
@@ -129,6 +135,9 @@
           ],
           "kidTip": "Split the scene into four parts and check each part.",
           "audioPrompt": "Look through the family home and find all three hidden objects."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Medium",
@@ -179,6 +188,9 @@
           ],
           "kidTip": "Look for corners, curves, handles, and long edges.",
           "audioPrompt": "At Market Street, use each silhouette to find three hidden objects."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Medium",
@@ -235,6 +247,9 @@
           ],
           "kidTip": "Check shape first, then colour and small details.",
           "audioPrompt": "Look closely across the city places. Find the exact objects and ignore the look-alikes."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -287,6 +302,9 @@
           ],
           "kidTip": "The direction can change, but the object's parts stay the same.",
           "audioPrompt": "Search the farm and forest. Find the objects even when they are turned."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -337,6 +355,9 @@
           ],
           "kidTip": "Size can change, but the shape and details still match.",
           "audioPrompt": "Explore the school. Find the same objects even when their sizes are different."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -387,6 +408,9 @@
           ],
           "kidTip": "A handle, point, or curve can identify the whole object.",
           "audioPrompt": "Search the harbor and aquarium. Find four objects from the parts that are peeking out."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -437,6 +461,9 @@
           ],
           "kidTip": "Finish one small area before moving to the next.",
           "audioPrompt": "The science museum is busy. Search one section at a time and find all five objects."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Very Hard",
@@ -486,6 +513,9 @@
           ],
           "kidTip": "Check the shadows near the walls - things hide well there.",
           "audioPrompt": "Welcome to the castle. Find the four royal objects hidden in the courtyard."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Medium",
@@ -535,6 +565,9 @@
           ],
           "kidTip": "Finish one strip of the picture before moving to the next.",
           "audioPrompt": "Frogs are hiding all around the castle moat. Find every single one."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Medium",
@@ -585,6 +618,9 @@
           ],
           "kidTip": "Trace the edge with your finger to see where one thing ends.",
           "audioPrompt": "Welcome to the workshop. The tools are piled up. Follow one outline at a time."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -634,6 +670,9 @@
           ],
           "kidTip": "A mirror swaps left and right but nothing else.",
           "audioPrompt": "Some things in the hall of mirrors are flipped. Find the ones facing the same way as the picture."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -684,6 +723,9 @@
           ],
           "kidTip": "When colour is gone, the outline is all you have.",
           "audioPrompt": "These reef animals wear the colours around them. Look for their shapes."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -733,6 +775,9 @@
           ],
           "kidTip": "Shadows keep the edge and lose everything else.",
           "audioPrompt": "The lanterns are lit and everything is a shadow. Match each picture to its shape."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -792,6 +837,9 @@
           ],
           "kidTip": "There is no picture to copy, so you have to know what the thing is.",
           "audioPrompt": "This time there is no picture. Find everything that belongs to the group."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -849,6 +897,9 @@
           ],
           "kidTip": "Compare a small piece at a time, not the whole picture at once.",
           "audioPrompt": "Two pictures, almost the same. Find the three things that changed."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -908,6 +959,9 @@
           ],
           "kidTip": "Something can change without disappearing.",
           "audioPrompt": "Five things changed this time. Some moved, some turned, some were swapped."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -969,6 +1023,9 @@
           ],
           "kidTip": "A thing can be the same shape but a different size, or facing the other way.",
           "audioPrompt": "Seven differences now, and some are only a size or a reflection. Take your time."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Hard",
@@ -1033,6 +1090,9 @@
           ],
           "kidTip": "Use the strategy that matches what changed in this scene.",
           "audioPrompt": "Take the hidden object challenge. Use every search strategy to find all five objects."
+        },
+        "guide": {
+          "enabled": true
         }
       },
       "difficulty": "Expert",

@@ -24,6 +24,9 @@ describe("UIGuideBubble", () => {
     expect(page()).toBe("Touch the glowing one and say three.");
     expect(screen.getByText("Koda is helping")).toBeTruthy();
 
+    // The same mark the Hint button carries: one help, not two systems.
+    expect(panel.querySelector("svg")?.getAttribute("class")).toContain("lightbulb");
+
     fireEvent.click(screen.getByRole("button", { name: "Got it" }));
     expect(onAction).toHaveBeenCalledTimes(1);
   });
@@ -38,7 +41,7 @@ describe("UIGuideBubble", () => {
     render(<UIGuideBubble message={["Touch each one in order.", "Count as you go.", "The last number is how many."]} />);
 
     expect(page()).toBe("Touch each one in order.");
-    expect(screen.getByText("1/3")).toBeTruthy();
+    expect(screen.getByText("1/3"), "the position sits with the title, off the control row").toBeTruthy();
     expect(
       (screen.getByRole("button", { name: "Back" }) as HTMLButtonElement).disabled,
       "there is nothing before the first page",
@@ -58,6 +61,27 @@ describe("UIGuideBubble", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
     expect(page()).toBe("Count as you go.");
+  });
+
+  it("keeps naming its controls where the words are too wide to draw", () => {
+    render(<UIGuideBubble message={["One.", "Two."]} />);
+
+    // The label is on the button, not in its text: on a phone these are bare
+    // arrows, and a control that is only named at wide widths is not named.
+    for (const name of ["Back", "Next"]) {
+      const button = screen.getByRole("button", { name });
+      expect(button.getAttribute("aria-label")).toBe(name);
+      expect(
+        button.querySelector("span")?.className,
+        "the word is drawn from the small breakpoint up",
+      ).toContain("sm:inline");
+    }
+
+    // Every target stays a thumb-sized one at every width.
+    for (const name of ["Back", "Next", "Got it"]) {
+      const button = screen.queryByRole("button", { name });
+      if (button) expect(button.className).toContain("min-h-11");
+    }
   });
 
   it("says where it is in words, not as a fraction", () => {

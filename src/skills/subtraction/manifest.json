@@ -41,12 +41,14 @@
     { "id": "counting_badges", "name": "1-to-1 badges", "description": "Numbers objects as they are removed, counted, or paired.", "isEnabled": true, "tag": "Cognitive" },
     { "id": "running_difference_badge", "name": "Running difference", "description": "Shows how many remain as the model changes.", "isEnabled": true, "tag": "Cognitive" },
     { "id": "strategy_scaffold", "name": "Strategy scaffold", "description": "Explains what the current model shows and what to do next.", "isEnabled": true, "tag": "Cognitive" },
+    { "id": "guide_coach", "name": "Smart guide", "description": "Lets the Smart guide speak up on its own when a child stalls or drops the technique. Off, it waits to be asked — the Hint button opens the same guide.", "isEnabled": true, "tag": "Cognitive" },
+    { "id": "guide_voice", "name": "Smart guide voice", "description": "Reads each step of the Smart guide aloud as it appears. Off, a child reads it without hearing it — the guide itself stays either way.", "isEnabled": true, "tag": "Audio" },
     { "id": "step_context_tags", "name": "Step framing tags", "description": "Labels warm-up, guided, activity, and milestone steps.", "isEnabled": true, "tag": "Cognitive" },
     { "id": "premium_lessons", "name": "Charge for later lessons", "description": "Uses the Free lessons setting to decide which lessons need a full plan.", "isEnabled": false, "tag": "Plan" }
   ],
   "settings": {
     "warmupLabel": "", "activityLabel": "", "guidedLabel": "", "milestoneLabel": "",
-    "speechRate": 0.95, "answerInput": "choices", "freeLessons": 10
+    "speechRate": 0.95, "coachPatience": "normal", "answerInput": "choices", "freeLessons": 10
   },
   "settingsSchema": [
     { "key": "warmupLabel", "label": "Warm-up tag", "help": "Custom wording for the first step.", "type": "text", "placeholder": "Warm-up Exercise 🌱", "maxLength": 32 },
@@ -54,6 +56,7 @@
     { "key": "guidedLabel", "label": "Guided tag", "help": "Custom wording for guided steps.", "type": "text", "placeholder": "Guided Challenge 🌟", "maxLength": 32 },
     { "key": "milestoneLabel", "label": "Final tag", "help": "Custom wording for the last step.", "type": "text", "placeholder": "Final Milestone 🏆", "maxLength": 32 },
     { "key": "speechRate", "label": "Speech rate", "help": "How fast Koda speaks prompts and hints.", "type": "number", "min": 0.5, "max": 2, "step": 0.05, "unit": "x" },
+    { "key": "coachPatience", "label": "Smart guide patience", "help": "How long a child is left to think before the Smart guide steps in. Relaxed waits about eleven seconds, Quick about four.", "type": "choice", "options": [{ "value": "relaxed", "label": "Relaxed" }, { "value": "normal", "label": "Normal" }, { "value": "quick", "label": "Quick" }] },
     { "key": "answerInput", "label": "How answers are given", "help": "Choose from four answers or use the number pad in later written lessons.", "type": "choice", "options": [{ "value": "choices", "label": "Four choices" }, { "value": "pad", "label": "Number pad" }] },
     { "key": "freeLessons", "label": "Free lessons", "help": "How many lessons remain free when charging is enabled.", "type": "number", "min": 0, "max": 100, "step": 1 }
   ]

@@ -107,6 +107,20 @@
       "tag": "Haptic"
     },
     {
+      "id": "guide_coach",
+      "name": "Smart guide",
+      "description": "Lets the Smart guide speak up on its own when a child stalls or drops the technique. Off, it waits to be asked — the Hint button opens the same guide.",
+      "isEnabled": true,
+      "tag": "Cognitive"
+    },
+    {
+      "id": "guide_voice",
+      "name": "Smart guide voice",
+      "description": "Reads each step of the Smart guide aloud as it appears. Off, a child reads it without hearing it — the guide itself stays either way.",
+      "isEnabled": true,
+      "tag": "Audio"
+    },
+    {
       "id": "counting_badges",
       "name": "1-to-1 badges",
       "description": "Numbers what has been counted so far — the objects inside each group, the squares of an array, and the landings along a number line.",
@@ -155,6 +169,7 @@
     "guidedLabel": "",
     "milestoneLabel": "",
     "speechRate": 0.95,
+    "coachPatience": "normal",
     "answerInput": "choices",
     "freeLessons": 10,
     "tableCeiling": "12"
@@ -201,6 +216,26 @@
       "max": 2,
       "step": 0.05,
       "unit": "x"
+    },
+    {
+      "key": "coachPatience",
+      "label": "Smart guide patience",
+      "help": "How long a child is left to think before the Smart guide steps in. Relaxed waits about eleven seconds, Quick about four.",
+      "type": "choice",
+      "options": [
+        {
+          "value": "relaxed",
+          "label": "Relaxed"
+        },
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "quick",
+          "label": "Quick"
+        }
+      ]
     },
     {
       "key": "answerInput",

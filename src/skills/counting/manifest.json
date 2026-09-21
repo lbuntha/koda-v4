@@ -58,9 +58,16 @@
     {
       "id": "guide_coach",
       "name": "Smart guide",
-      "description": "Steps in by itself when a child stalls, counts one twice or skips ahead — words first, then a light on the next object, then walking them through it. Works with no connection.",
+      "description": "Lets the Smart guide speak up on its own when a child stalls or drops the technique. Off, it waits to be asked — the Hint button opens the same guide.",
       "isEnabled": true,
       "tag": "Cognitive"
+    },
+    {
+      "id": "guide_voice",
+      "name": "Smart guide voice",
+      "description": "Reads each step of the Smart guide aloud as it appears. Off, a child reads it without hearing it — the guide itself stays either way.",
+      "isEnabled": true,
+      "tag": "Audio"
     },
     {
       "id": "step_context_tags",
@@ -90,8 +97,8 @@
     "guidedLabel": "",
     "milestoneLabel": "",
     "speechRate": 1.0,
+    "coachPatience": "normal",
     "hapticIntensity": "crisp",
-    "popScaleFactor": 1.2,
     "freeLessons": 10
   },
   "settingsSchema": [
@@ -138,6 +145,26 @@
       "unit": "x"
     },
     {
+      "key": "coachPatience",
+      "label": "Smart guide patience",
+      "help": "How long a child is left to think before the Smart guide steps in. Relaxed waits about eleven seconds, Quick about four.",
+      "type": "choice",
+      "options": [
+        {
+          "value": "relaxed",
+          "label": "Relaxed"
+        },
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "quick",
+          "label": "Quick"
+        }
+      ]
+    },
+    {
       "key": "hapticIntensity",
       "label": "Haptic intensity",
       "help": "Strength of the vibration on each tap.",
@@ -156,16 +183,6 @@
           "label": "Strong"
         }
       ]
-    },
-    {
-      "key": "popScaleFactor",
-      "label": "Tap pop scale",
-      "help": "How much an item grows when touched.",
-      "type": "number",
-      "min": 1.0,
-      "max": 1.6,
-      "step": 0.1,
-      "unit": "x"
     },
     {
       "key": "freeLessons",

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import { fractionGuideMethod, useFractionGuide } from "../internal/useFractionGuide";
 import { printBar, printGrid } from "../internal/ui/printFigures";
 import { FractionBar } from "../internal/ui/FractionBar";
 import { gcd, partWord } from "../internal/data/fractionNumbers";
@@ -138,6 +139,12 @@ export const AreaGrid: React.FC<ActivityProps<AreaParams>> = ({ params, koda, on
     setRefused(null);
   }, [question]);
 
+  const hints = !question || practising ? [] : multiplyHints(question);
+  const guide = useFractionGuide({
+    params, koda, practising, questionId: question?.id ?? "loading", rungs: hints, round,
+    progress: Number(Boolean(acrossFor)) + Number(Boolean(downFor)) + Number(Boolean(cancelledFor)),
+  });
+
   if (!question) return null;
 
   const across = acrossFor === question.id;
@@ -153,12 +160,14 @@ export const AreaGrid: React.FC<ActivityProps<AreaParams>> = ({ params, koda, on
     if (soundEnabled && koda.sound.isEnabled()) koda.sound.play("clink");
     if (koda.config.isEnabled("haptic_feedback", true)) koda.haptics.pulse("light");
     setRefused(null);
+    guide.moved();
   };
 
   const answer = (text: string): void => {
     const block = multiplyBlockedBecause(question, across, down);
     if (block) {
       setRefused(block);
+      guide.stumbled();
       say(MULTIPLY_REFUSALS[block]);
       return;
     }
@@ -343,7 +352,9 @@ export const AreaGrid: React.FC<ActivityProps<AreaParams>> = ({ params, koda, on
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : multiplyHints(question)}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={fractionGuideMethod(params)}
       onStartOver={
         !round.feedback && (across || down || cancelled)
           ? () => {

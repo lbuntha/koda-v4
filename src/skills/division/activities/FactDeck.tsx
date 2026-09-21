@@ -1,7 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ActivityProps } from "../../types";
-import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import {
+  SkillRound,
+  composeHints,
+  guideSetup,
+  isPractice,
+  modeAt,
+  openWith,
+  playCopy,
+  useGuide,
+  useSkillRound,
+} from "../../kit";
 import {
   buildFactQuestion,
   type FactMode,
@@ -36,13 +46,24 @@ export function buildQuestion(params: FactParams, index: number, seen?: Set<stri
 
 export const promptFor = (question: FactQuestion): string => question.prompt;
 
-export function factHints(question: FactQuestion): string[] {
+/**
+ * The ladder, opening with the lesson's own words.
+ *
+ * All fifty-six division lessons author a `kidTip` and, until this, not one
+ * was read: these ladders took the question and nothing else. `openWith`
+ * puts it back as rung one without costing the worked step — see the kit.
+ */
+export function factHints(question: FactQuestion, kidTip?: string): string[] {
+  return openWith(kidTip, factHintsRungs(question));
+}
+
+function factHintsRungs(question: FactQuestion): string[] {
   const { divisor, dividend, quotient } = question;
   switch (question.mode) {
     case "family":
       return composeHints(
         "Three numbers make four true sentences — two multiplications and two divisions.",
-        `The big number, ${dividend}, is on its own in the multiplications and at the front in the divisions.`,
+        `${dividend} stands alone in the times facts, and leads the divides.`,
       );
     case "table_divide":
       return composeHints(
@@ -75,7 +96,7 @@ export function factHints(question: FactQuestion): string[] {
       return composeHints(
         `Ask yourself: ${divisor} times what makes ${dividend}?`,
         `Count up in ${divisor}s if you need to. You want to land on ${dividend}.`,
-        `Ten ${divisor}s is ${divisor * 10}, which is ${divisor * 10 > dividend ? "past" : "not yet at"} ${dividend} — so the answer is ${divisor * 10 > dividend ? "less" : "more"} than ten.`,
+        `Ten ${divisor}s is ${divisor * 10}, so the answer is ${divisor * 10 > dividend ? "under" : "over"} ten.`,
       );
   }
 }
@@ -123,6 +144,32 @@ export const FactDeck: React.FC<ActivityProps<FactParams>> = ({ params, koda, on
     setHelper(null);
     setFound(null);
   }, [question]);
+
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const copy = playCopy(params);
+  const hints = practising ? [] : factHints(question, copy.kidTip);
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    target: -1,
+    progress: 0,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
 
   if (!question) return null;
 
@@ -196,7 +243,9 @@ export const FactDeck: React.FC<ActivityProps<FactParams>> = ({ params, koda, on
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : factHints(question)}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onStartOver={
         !round.feedback && (ticked.length > 0 || found !== null)
           ? () => {

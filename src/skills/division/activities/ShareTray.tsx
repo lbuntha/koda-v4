@@ -6,8 +6,12 @@ import {
   SkillRound,
   answerChoices,
   composeHints,
+  guideSetup,
   isPractice,
   modeAt,
+  openWith,
+  playCopy,
+  useGuide,
   useSkillRound,
 } from "../../kit";
 import {
@@ -76,12 +80,23 @@ export const promptFor = (question: ShareQuestion): string => question.prompt;
  * dealing in handfuls and losing count. Telling them to deal one at a time is
  * the actual help.
  */
-export function trayHints(question: ShareQuestion): string[] {
+/**
+ * The ladder, opening with the lesson's own words.
+ *
+ * All fifty-six division lessons author a `kidTip` and, until this, not one
+ * was read: these ladders took the question and nothing else. `openWith`
+ * puts it back as rung one without costing the worked step — see the kit.
+ */
+export function trayHints(question: ShareQuestion, kidTip?: string): string[] {
+  return openWith(kidTip, trayHintsRungs(question));
+}
+
+function trayHintsRungs(question: ShareQuestion): string[] {
   switch (question.mode) {
     case "share_out":
       return composeHints(
         `There are ${question.divisor} plates to fill.`,
-        "Give one to each plate, then start again at the first. Keep going until the pile is empty.",
+        "One to each plate, then round again, until the pile is empty.",
         "When the pile is empty, count what is on just one plate. That is the answer.",
       );
     /*
@@ -110,8 +125,8 @@ export function trayHints(question: ShareQuestion): string[] {
         // phrases that actually distinguish the meanings are quoted instead.
         "Read it again, slowly. The two numbers in it are telling you different kinds of thing.",
         question.unknown === "size"
-          ? "\u201cShared equally between\u201d counts the groups. So what it leaves out is how many go in each one."
-          : "\u201cPut into groups of\u201d tells you the size of one group. So what it leaves out is how many groups there are.",
+          ? "\u201cShared between\u201d gives the groups. What is missing is each share."
+          : "\u201cGroups of\u201d gives the size. What is missing is how many groups.",
         question.unknown === "size"
           ? "You are looking for the size of one share."
           : "You are looking for the number of shares.",
@@ -144,7 +159,7 @@ export function trayHints(question: ShareQuestion): string[] {
       return composeHints(
         "Go round again while every plate can still have one.",
         "Stop when there are not enough left to give one to every plate.",
-        "What is left over goes in the box. It is not on a plate, and it is not lost.",
+        "What is left over goes in the box, not on a plate.",
       );
     default:
       return composeHints("Look at the tray.");
@@ -227,6 +242,39 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
     setRefused(null);
   }, [question, shape.plates]);
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const copy = playCopy(params);
+  const hints = practising ? [] : trayHints(question, copy.kidTip);
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    /*
+     * The next plate in the round, which is the technique made visible.
+     *
+     * Sharing is one to each, then round again — so the plate to point at is
+     * always the one with the fewest on it, and pointing anywhere else would
+     * teach handfuls.
+     */
+    target: plates.length === 0 ? -1 : plates.indexOf(Math.min(...plates)),
+    progress: 0,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   if (!question) return null;
 
   const dealt = plates.reduce((sum, n) => sum + n, 0);
@@ -303,6 +351,7 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
   /** A dealing mode's numeric answer. Refused, not marked, while the tray is unfinished. */
   const answerWith = (value: number): void => {
     if (dealing && block) {
+      guide.stumbled();
       setRefused(block);
       say(REFUSALS[block]);
       return;
@@ -373,7 +422,9 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : trayHints(question)}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onStartOver={
         !round.feedback && (plates.some((n) => n > 0) || leftover > 0)
           ? () => {
@@ -429,8 +480,10 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
                     type="button"
                     onClick={() => addTo(i)}
                     disabled={!!round.feedback}
-                    aria-label={`Group ${i + 1}, holding ${count}. Add one.`}
-                    className="flex min-h-16 min-w-16 max-w-24 flex-wrap content-start items-start justify-center gap-1 rounded-2xl border-2 border-dashed border-line/40 bg-surface p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                    aria-label={`Group ${i + 1}, holding ${count}. Add one.${
+                      guide.target === i ? " Deal to this one next." : ""
+                    }`}
+                    className={`flex min-h-16 min-w-16 max-w-24 flex-wrap content-start items-start justify-center gap-1 rounded-2xl border-2 border-dashed border-line/40 bg-surface p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500${guide.target === i ? ' ring-4 ring-indigo-500' : ''}`}
                   >
                     {Array.from({ length: count }, (_, j) => (
                       <Counter key={j} tone={question.tone} small={small} />

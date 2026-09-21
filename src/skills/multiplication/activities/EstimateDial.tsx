@@ -8,6 +8,8 @@ import {
   playCopy,
   useSkillRound,
   type RoundQuestion,
+  guideSetup,
+  useGuide,
 } from "../../kit";
 import { quietWhenPractising } from "../../kit/practice";
 import { themeSystem } from "../../../lib/themeSystem";
@@ -171,7 +173,7 @@ export function estimateHints(
         ? `The estimate is about ${question.estimate}. Is ${question.claim} anywhere near it?`
         : `Round both numbers in your head first, then look at the claim again.`,
       // Names the size of the error without saying which way the answer goes.
-      `A claim that is ten times too big or too small is not close, however tidy it looks.`,
+      `Ten times too big, or ten times too small, is not close.`,
     );
   }
   return composeHints(
@@ -211,6 +213,15 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({ params, 
   const refuse = (written: string, spoken: string) => {
     nudge.refuse(written);
     speak(spoken);
+    /*
+     * A refused move is this engine already knowing the move was wrong.
+     *
+     * What it never did was notice a child doing it repeatedly, which is the
+     * difference between a slip and not having the technique. Safe to call a
+     * coach declared further down: this only ever runs from a handler, long
+     * after the render that created it.
+     */
+    guide.stumbled();
   };
 
   const round = useSkillRound({
@@ -455,6 +466,42 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({ params, 
     </div>
   );
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const hints = practising ? [] : estimateHints(question, copy.kidTip, { dialA, dialB, revealed });
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    target: -1,
+    /*
+     * Effort, measured against where the question set the dials.
+     *
+     * They open on the question's own numbers, not at zero, so "the dial is not
+     * zero" counted a child who had touched nothing as two moves in — the
+     * coach then stepped in at five seconds instead of seven. Third time this
+     * trap has appeared, in a third disguise.
+     */
+    progress:
+      (revealed ? 1 : 0) +
+      (dialA !== question.a ? 1 : 0) +
+      (dialB !== question.b ? 1 : 0),
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   return (
     <SkillRound
       koda={koda}
@@ -464,7 +511,9 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({ params, 
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : estimateHints(question, copy.kidTip, { dialA, dialB, revealed })}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onStartOver={
         !round.feedback && (revealed || dialA !== question.a || dialB !== question.b) ? restart : undefined
       }

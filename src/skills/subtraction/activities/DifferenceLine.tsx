@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import type { ActivityProps, PrintedQuestion } from "../../types";
 import {
   SkillRound, SPRING, composeHints, isPractice, modeAt, playCopy,
-  useSkillRound, type PracticeSetup, type RoundQuestion,
+  useSkillRound, guideSetup, useGuide, type PracticeSetup, type RoundQuestion,
   answerChoices,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
@@ -203,7 +203,7 @@ export function lineHints(q: LineQuestion, state: { at: number; made: number[]; 
     case "bridge_ten":
     case "bridge_hundred": {
       const boundary = q.mode === "bridge_ten" ? 10 : 100;
-      return composeHints(state.kidTip ?? `Land exactly on ${boundary} before continuing.`, state.made.length === 0 ? `The first jump is from ${q.minuend} back to ${boundary}.` : `You reached ${boundary}. Now subtract the part still left.`, `${q.minuend} minus ${q.subtrahend} lands on ${q.difference}.`);
+      return composeHints(state.kidTip ?? `Land exactly on ${boundary} before continuing.`, state.made.length === 0 ? `The first jump is from ${q.minuend} back to ${boundary}.` : `You reached ${boundary}. Now subtract the part still left.`, `Stopping at ${boundary} on the way makes the rest easy: ${q.difference}.`);
     }
     case "compensate_subtrahend": {
       const rounded = Math.ceil(q.subtrahend / 10) * 10;
@@ -212,9 +212,11 @@ export function lineHints(q: LineQuestion, state: { at: number; made: number[]; 
     case "constant_difference":
       return composeHints(state.kidTip ?? "Move both numbers by the same amount; the gap does not change.", state.made.length === 0 ? `Add ${q.offset} to both ${q.minuend} and ${q.subtrahend}.` : `Now subtract the friendly pair ${q.adjustedMinuend} minus ${q.adjustedSubtrahend}.`, `Both pairs have the same difference, ${q.difference}.`);
     case "jump_tens_ones":
-      return composeHints(state.kidTip ?? "Split the number being subtracted into tens and ones.", `You are at ${state.at}. ${next === undefined ? "Both parts are done." : `A jump of ${Math.abs(next)} is still available.`}`, `${q.subtrahend} is ${digitsOf(q.subtrahend).tens * 10} and ${digitsOf(q.subtrahend).ones}.`);
+      return composeHints(state.kidTip ?? "Split the number being subtracted into tens and ones.", `You are at ${state.at}. ${next === undefined ? "Both parts are done." : `A jump of ${Math.abs(next)} is still available.`}`, `Split ${q.subtrahend} into ${digitsOf(q.subtrahend).tens * 10} and ${digitsOf(q.subtrahend).ones}, then jump both back.`);
     default:
-      return composeHints(state.kidTip ?? "Backward jumps make the number smaller.", state.made.length === 0 ? `Start at ${q.from}. The first jump goes left.` : `You are at ${state.at}. ${q.required.length - state.made.length} jumps remain.`, `${q.minuend} minus ${q.subtrahend} lands on ${q.difference}.`);
+      /* A marked path is counted pad by pad; an open line is not, and the
+         last rung has to say which the child is on. */
+      return composeHints(state.kidTip ?? "Backward jumps make the number smaller.", state.made.length === 0 ? `Start at ${q.from}. The first jump goes left.` : `You are at ${state.at}. ${q.required.length - state.made.length} jumps remain.`, q.mode === "open_back" ? `Held in your head, the jumps back from ${q.minuend} end at ${q.difference}.` : `Counted back pad by pad, ${q.minuend} lands on ${q.difference}.`);
   }
 }
 
@@ -375,10 +377,41 @@ export const DifferenceLine: React.FC<ActivityProps<DifferenceLineParams>> = ({ 
   const crowded = tickValues.some((value) => value !== q.from && Math.abs(x(value) - x(q.from)) < LABEL_GAP);
   const labelY = (value: number) => (crowded && value === q.from ? SECOND_ROW : LABEL_ROW);
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived. The switch decides whether it steps in by itself, never what the
+   * help looks like.
+   */
+  const hints = practising ? [] : lineHints(q, { at, made, kidTip: copy.kidTip });
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: q.id,
+    rungs: hints,
+    /* The jump the line is waiting for, as an index into the buttons offered —
+       so rung two lights the move rather than describing it. */
+    target: q.offered.findIndex(
+      (step, i) => step === q.required[made.length] && consumed(step) < allowedCount(step) && i >= 0,
+    ),
+    progress: made.length,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   return <SkillRound koda={koda} lesson={lesson} fallbackTitle="Subtraction Number Lines" round={round}
     totalQuestions={totalQuestions} prompt={prompt} iconName="footprints" iconTone="cyan"
     tagLabels={tagLabelsFrom(koda)} nudge={nudge.message}
-    hints={practising ? [] : lineHints(q, { at, made, kidTip: copy.kidTip })}
+    hints={hints}
+    guide={practising ? undefined : guide}
+    guideMethod={copy.stepByStep}
     onStartOver={
       !round.feedback && (made.length > 0 || at !== q.from) ? restart : undefined
     }
@@ -404,7 +437,12 @@ export const DifferenceLine: React.FC<ActivityProps<DifferenceLineParams>> = ({ 
           const unavailable = spent >= allowedCount(step) || Boolean(round.feedback);
           const shift = q.mode === "constant_difference" && i === 0;
           return <motion.button key={`${step}-${i}`} type="button" onClick={() => jump(step)} disabled={unavailable}
-            className={themeSystem.button(step < 0 ? "secondary" : "primary", "lg")} whileTap={{ scale: 0.9 }}>
+            aria-label={`${shift ? `Shift both by ${step}` : `${step < 0 ? "Jump back" : "Jump forward"} ${Math.abs(step)}`}${
+              guide.target === i ? ", take this jump next" : ""
+            }`}
+            className={`${themeSystem.button(step < 0 ? "secondary" : "primary", "lg")}${
+              guide.target === i ? " ring-4 ring-indigo-500 animate-pulse" : ""
+            }`} whileTap={{ scale: 0.9 }}>
             {shift ? `Shift both by ${step}` : `${step < 0 ? "Jump back" : "Jump forward"} ${Math.abs(step)}`}
           </motion.button>;
         })}

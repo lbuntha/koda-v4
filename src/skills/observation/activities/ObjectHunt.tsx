@@ -9,6 +9,7 @@ import { SCENE_BY_ID } from "../internal/scenes";
 import { placeObjects, seedHash, seededShuffle } from "../internal/placement";
 import { keyOf, type ObjectHuntSetup, type ObservationMode, type ObservationRegion, type ObservationScene, type SceneObject } from "../internal/types";
 import { MatchFlight, type MatchFlightState } from "../internal/ui/MatchFlight";
+import { observationGuideMethod, useObservationGuide } from "../internal/useObservationGuide";
 
 export interface ObjectHuntParams extends ObjectHuntSetup {
   question?: ObjectHuntSetup;
@@ -243,13 +244,35 @@ export function buildQuestion(setup: ObjectHuntSetup, index: number): ObjectHunt
   };
 }
 
-export function objectHuntHints(question: ObjectHuntQuestion, found: ReadonlySet<string>): string[] {
+const searchMove = (mode: ObservationMode): string => {
+  switch (mode) {
+    case "silhouette": return "Match the outside shape first; colour is hidden on purpose.";
+    case "near_decoys": return "Check two details together. A lookalike matches one detail but not both.";
+    case "rotation": return "Turn the target in your mind; its parts stay in the same order.";
+    case "scale": return "Ignore size and match the shape, parts, and colours.";
+    case "occluded": return "Complete the hidden outline in your mind and follow the visible edges.";
+    case "clutter": return "Divide the busy scene into small areas and finish one before moving on.";
+    case "swarm": return "Count each matching copy once and scan past every place it could hide.";
+    case "overlap": return "Follow one outline at a time through the pile without switching objects.";
+    case "mirror": return "Check handed details: a mirrored object points the opposite way.";
+    case "camouflage": return "Trust the outline and parts when the background disguises the colour.";
+    case "shadow": return "Match the silhouette's bumps, gaps, and direction instead of its colour.";
+    case "category": return "Name the category first, then reject anything that does not belong.";
+    default: return "Match the target's shape and details, then scan left to right.";
+  }
+};
+
+export function objectHuntHints(
+  question: ObjectHuntQuestion,
+  found: ReadonlySet<string>,
+  kidTip?: string,
+): string[] {
   const next = question.targets.find((key) => !found.has(key));
   const placement = question.objects.find((object) => keyOf(object) === next);
   const name = placement ? OBJECT_BY_ID.get(placement.id)?.name : undefined;
   const region = placement?.region.replace("-", " ");
   return composeHints(
-    "Scan one small part at a time. Move your eyes from left to right.",
+    kidTip ?? searchMove(question.mode),
     region && name ? `Look near the ${region} part of the scene.` : undefined,
     region ? `Focus on the ${region} area. Check around objects that could partly hide it.` : undefined,
   );
@@ -350,6 +373,19 @@ export const ObjectHunt: React.FC<ActivityProps<ObjectHuntParams>> = ({ params, 
     else koda.haptics.pulse("error");
   };
 
+  const hints = practising || !regionHintsEnabled
+    ? []
+    : objectHuntHints(question, found, copy.kidTip);
+  const guide = useObservationGuide({
+    params,
+    koda,
+    practising,
+    questionId: question.id,
+    rungs: hints,
+    round,
+    progress: found.size,
+  });
+
   const choose = (object: SceneObject) => {
     if (round.feedback) return;
     const key = keyOf(object);
@@ -366,6 +402,7 @@ export const ObjectHunt: React.FC<ActivityProps<ObjectHuntParams>> = ({ params, 
       // The line stays generic because a swarm scene has fourteen frogs and
       // recording "you already found the frog" per copy would say no more.
       setNudge(`You already found the ${OBJECT_BY_ID.get(object.id)?.name}.`);
+      guide.stumbled();
       if (speechEnabled) {
         koda.speech.stop();
         void koda.speech.say("You already found that one.", { rate: speechRate }).catch(() => {});
@@ -373,6 +410,7 @@ export const ObjectHunt: React.FC<ActivityProps<ObjectHuntParams>> = ({ params, 
       return;
     }
     const next = new Set(found); next.add(key); setFound(next); setNudge(null);
+    guide.moved();
     if (celebrationTimer.current !== null) window.clearTimeout(celebrationTimer.current);
     setCelebratingId(key);
     celebrationTimer.current = window.setTimeout(() => setCelebratingId(null), 1100);
@@ -405,16 +443,17 @@ export const ObjectHunt: React.FC<ActivityProps<ObjectHuntParams>> = ({ params, 
     round.submit({ correct: true, given: [...next].join(","), expected: question.expected, title: "Congratulations!", message: "You found every hidden object!" });
   };
 
-  const hints = practising || !regionHintsEnabled ? [] : objectHuntHints(question, found);
   useEffect(() => {
-    if (round.hint.level < 3) { setRegionHint(null); return; }
+    const level = Math.max(round.hint.level, guide.cue?.level ?? 0);
+    if (level < 3) { setRegionHint(null); return; }
     const next = question.targets.find((key) => !found.has(key));
     setRegionHint(question.objects.find((object) => keyOf(object) === next)?.region ?? null);
-  }, [round.hint.level, question, found]);
+  }, [round.hint.level, guide.cue?.level, question, found]);
 
   return (
     <SkillRound koda={koda} lesson={lesson} fallbackTitle="Hidden Object Hunt" round={round} totalQuestions={total}
-      prompt={promptFor(question)} onExit={() => koda.ui.exit()} hints={hints} nudge={nudge}
+      prompt={promptFor(question)} onExit={() => koda.ui.exit()} hints={hints}
+      guide={practising ? undefined : guide} guideMethod={observationGuideMethod(params)} nudge={nudge}
       iconName="Search" iconTone="indigo"
       onReadAloud={practising || !speechEnabled ? undefined : () => { round.useSupport("audio_replay"); void koda.speech.say(promptFor(question), { rate: speechRate }); }}>
       <section aria-label={`${question.scene.name} hidden object game`} className="mx-auto w-full max-w-[760px] space-y-3 md:space-y-2">

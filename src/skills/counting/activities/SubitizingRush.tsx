@@ -12,10 +12,13 @@ import {
   modeAt,
   playChrome,
   answerChoices,
+  guideSetup,
+  useGuide,
 } from "../../kit";
 import { SCENE } from "../internal/data/countingLayout";
 import { themeSystem } from "../../../lib/themeSystem";
 import { DUAL_COLOR_PAIRS } from "../internal/data/countingAssets";
+import { numberWord } from "../internal/guide/countGuide";
 
 /**
  * Subitizing: a set is flashed, then named — without counting.
@@ -129,17 +132,21 @@ export function subitizeHints(
   question: SubitizingQuestion,
   state: { seen: boolean; kidTip?: string },
 ): string[] {
-  const again = state.seen
-    ? 'Press "Show me again" and'
-    : 'Press "Show me" and';
-
+  /*
+   * No "press Show me again" in any of these any more.
+   *
+   * The coach re-shows the set itself when it reaches rung two, and holds it on
+   * screen at rung three — so a rung spent telling a child to press a button is
+   * a rung spent on something that has already happened. What is left is the
+   * only thing words can do here: name the grouping to look for.
+   */
   if (question.parts) {
     const { a, b } = question.parts;
     return composeHints(
       state.kidTip ?? "Count one colour, then keep going with the other.",
-      `${again} look at one colour at a time. Take in the first colour as a group, then the second — you never have to count the whole lot at once.`,
+      "Take in one colour as a group, then the other.",
       // The two parts, not the total: putting them together is the question.
-      `There were ${a} of one colour and ${b} of the other. Start at ${a} and count on ${b} more to get the total.`,
+      `${a} of one colour, ${b} of the other. Put them together.`,
     );
   }
 
@@ -153,10 +160,10 @@ export function subitizeHints(
     const right = total - left;
     return composeHints(
       state.kidTip ?? "Look for small groups inside the big group.",
-      `${again} do not chase every dot. Take in one little clump, see how many it holds, then count on for the rest.`,
+      "Do not chase every dot. Take in one clump, then count on.",
       left === 0 || right === 0
-        ? `They were all bunched on one side. Look again and split them into two smaller groups — then put the two numbers together.`
-        : `There ${left === 1 ? "was" : "were"} ${left} on the left side and ${right} on the right. Start at ${left} and count on ${right} more.`,
+        ? "They were all bunched together. Split them into two smaller groups."
+        : `${left} on the left and ${right} on the right. Put them together.`,
     );
   }
 
@@ -166,18 +173,12 @@ export function subitizeHints(
   const threes = Array.from({ length: rows }, (_, i) => (i + 1) * 3).join(", ");
   return composeHints(
     state.kidTip ?? "Try to see the pattern without counting.",
-    `${again} look at the middle of the box, not at one dot. A dice pattern is made to be read in one glance.`,
+    "Look at the middle of the box, not at one dot.",
     rows === 0
-      ? `They sat in one short row of ${total}. Look again and take the whole row in at once, the way you would read a domino.`
+      ? `One short row of ${total}. Read it like a domino.`
       : rows === 1
-        ? `They filled one row of three${
-            spare > 0 ? `, with ${spare} more underneath — that is 3, and then ${spare} more.` : " and nothing else."
-          }`
-        : `They filled ${rows} rows of three${
-            spare > 0 ? `, with ${spare} more underneath` : ""
-          }. Count the rows in threes — ${threes} — ${
-            spare > 0 ? `then count on ${spare} more.` : "and that is the total."
-          }`,
+        ? `One row of three${spare > 0 ? `, and ${spare} more underneath.` : " and nothing else."}`
+        : `${rows} rows of three: ${threes}${spare > 0 ? `, then ${spare} more.` : "."}`,
   );
 }
 
@@ -254,12 +255,82 @@ export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
   const submit = (outcome: Parameters<typeof round.submit>[0]) =>
     round.submit(practising ? { ...outcome, message: undefined } : outcome);
 
-  const flash = useCallback(() => {
-    playChrome(koda, "pop");
-    setPhase("flashing");
-    if (timer.current) window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => setPhase("answering"), flashMs);
-  }, [koda, flashMs]);
+  /**
+   * Show the set.
+   *
+   * `hold` is what the coach's top rung uses: the dots stay until the child
+   * answers instead of vanishing after a second. A glance is the skill being
+   * taught, so holding is the strongest help this engine has — and it is the
+   * only honest one, because the alternative, lighting two of the answer
+   * buttons, turns counting into a coin toss.
+   */
+  const flash = useCallback(
+    (hold = false) => {
+      playChrome(koda, "pop");
+      setPhase("flashing");
+      if (timer.current) window.clearTimeout(timer.current);
+      if (hold) return;
+      timer.current = window.setTimeout(() => setPhase("answering"), flashMs);
+    },
+    [koda, flashMs],
+  );
+
+  /*
+   * Two different questions, so two different conditions.
+   *
+   * `guided` is whether Koda steps in *by itself* — the clock and the stumbles
+   * — and that is what the parent's switch turns off. Whether the help *looks
+   * like* the coach is not a setting at all: the Hint button shows the same
+   * bubble, the same rungs and the same "Got it" either way. It used to fall
+   * back to the old hint card when the switch was off, so turning off the
+   * interruptions also changed what help looked like, and a child had two
+   * panels to learn for one ladder.
+   */
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+
+  const hints = practising
+    ? []
+    : subitizeHints(question, { seen: phase !== "waiting", kidTip: copy.kidTip });
+
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    /* Nothing on this screen is touched to answer — the child taps a number —
+       so the coach never lights a thing. What its rungs do instead is give the
+       glance back: see the effect below. */
+    target: -1,
+    progress: phase === "waiting" ? 0 : 1,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
+  /*
+   * The rungs that do something rather than say something.
+   *
+   * Words are the weakest help here: a child who cannot say how many dots there
+   * were does not need the strategy described, they need to see the dots again.
+   * So rung two re-shows them, and rung three holds them on screen until the
+   * question is answered.
+   */
+  /** The top rung holds the set on screen rather than flashing it. */
+  const held = (guide.cue?.level ?? 0) >= 3 && phase === "flashing";
+
+  const actedOn = useRef(0);
+  useEffect(() => {
+    const level = guide.cue?.level ?? 0;
+    if (level < 2 || actedOn.current >= level) {
+      if (level === 0) actedOn.current = 0;
+      return;
+    }
+    actedOn.current = level;
+    flash(level >= 3);
+  }, [guide.cue?.level, flash]);
 
   // A new question starts hidden again, and a pending flash must not land on it.
   useEffect(() => {
@@ -297,7 +368,9 @@ export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
       prompt="Look fast! How many did you see?"
       iconName="dice"
       iconTone="purple"
-      hints={practising ? [] : subitizeHints(question, { seen: phase !== "waiting", kidTip: copy.kidTip })}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onExit={koda.ui.exit}
       onReadAloud={
         practising
@@ -317,7 +390,11 @@ export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
                 Ready? Watch closely!
               </p>
               <motion.button
-                onClick={flash}
+                /* Wrapped, not passed: `flash` now takes a `hold` flag, and
+                   handing it straight to onClick fed it the click event —
+                   truthy — so the set stayed on screen and the round never
+                   reached the answering phase. */
+                onClick={() => flash()}
                 whileHover={{ scale: 1.06 }}
                 whileTap={{ scale: 0.9, y: 2 }}
                 transition={SPRING.enter}
@@ -361,7 +438,46 @@ export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
               transition={SPRING.enter}
               className="flex items-center justify-center"
             >
-              {question.parts ? (
+              {/*
+                * The top rung: the set held still, and broken at five.
+                *
+                * Five is the benchmark the whole skill is built on, so the
+                * grouping shown is the one a child is being taught to see —
+                * not an arbitrary split, and not the answer. They still have to
+                * put "five and two" together and name it.
+                *
+                * The two-colour sets are left alone: they arrive already
+                * grouped, and regrouping them at five would take away the very
+                * structure that question is about.
+                */}
+              {held && !question.parts ? (
+                <div
+                  className={`flex flex-wrap items-center justify-center gap-3 px-5 py-5 sm:gap-4 sm:px-7 ${SCENE}`}
+                >
+                  {[Math.min(5, question.total), Math.max(0, question.total - 5)]
+                    .filter((n) => n > 0)
+                    .map((n, group) => (
+                      <React.Fragment key={group}>
+                        {group > 0 && (
+                          <span className="text-lg font-black text-ink/60">and</span>
+                        )}
+                        <span className="flex flex-col items-center gap-1.5">
+                          <span className="grid grid-cols-5 gap-2 rounded-2xl border-2 border-indigo-400 bg-indigo-500/10 p-2">
+                            {Array.from({ length: n }, (_, i) => (
+                              <Dot
+                                key={i}
+                                className="bg-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.9)]"
+                              />
+                            ))}
+                          </span>
+                          <span className="text-xs font-black uppercase tracking-wider text-indigo-700 dark:text-indigo-300">
+                            {numberWord(n)}
+                          </span>
+                        </span>
+                      </React.Fragment>
+                    ))}
+                </div>
+              ) : question.parts ? (
                 <div className={`flex items-center gap-5 sm:gap-8 px-6 sm:px-8 py-5 sm:py-6 ${SCENE}`}>
                   <div className="flex gap-2">
                     {Array.from({ length: question.parts.a }, (_, i) => (
@@ -381,7 +497,13 @@ export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
                     <div
                       key={i}
                       style={{ left: `${pt.x}%`, top: `${pt.y}%` }}
-                      className="absolute w-11 h-11 rounded-full bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.9)] -translate-x-1/2 -translate-y-1/2"
+                      /* The same dot the grid question draws.
+                         These were amber — a pale yellow disc on a pale
+                         sky-and-meadow scene, in the one task whose difficulty
+                         is meant to be *how many*, not whether they can be made
+                         out. It also meant a child met two different dots
+                         inside one lesson depending on which question came up. */
+                      className="absolute w-11 h-11 rounded-full bg-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.9)] -translate-x-1/2 -translate-y-1/2"
                     />
                   ))}
                 </div>

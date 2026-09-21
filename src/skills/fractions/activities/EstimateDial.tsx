@@ -2,6 +2,7 @@ import React, { useCallback, useMemo } from "react";
 
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import { fractionGuideMethod, useFractionGuide } from "../internal/useFractionGuide";
 import { FractionBar } from "../internal/ui/FractionBar";
 import { printBar } from "../internal/ui/printFigures";
 import {
@@ -83,6 +84,11 @@ export const EstimateDial: React.FC<ActivityProps<DialParams>> = ({ params, koda
   });
   const question = round.question as EstimateQuestion;
 
+  const hints = !question || practising ? [] : estimateHints(question);
+  const guide = useFractionGuide({
+    params, koda, practising, questionId: question?.id ?? "loading", rungs: hints, round,
+  });
+
   if (!question) return null;
 
   const say = (text: string): void => {
@@ -136,7 +142,9 @@ export const EstimateDial: React.FC<ActivityProps<DialParams>> = ({ params, koda
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : estimateHints(question)}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={fractionGuideMethod(params)}
       iconName="Gauge"
       iconTone="cyan"
       onReadAloud={

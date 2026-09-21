@@ -3,9 +3,10 @@ import { motion } from "motion/react";
 import { ChevronDown } from "lucide-react";
 import type { ActivityProps, PrintedQuestion } from "../../types";
 import {
-  SkillGuide,
   SkillRound,
   SPRING,
+  guideSetup,
+  useGuide,
   composeHints,
   idleFloat,
   playCopy,
@@ -27,8 +28,7 @@ import {
   COUNT_BADGE,
   SCENE,
 } from "../internal/data/countingLayout";
-import { guideSetup, numberWord } from "../internal/guide/countGuide";
-import { useCountGuide } from "../internal/guide/useCountGuide";
+import { isWander, nextTarget, numberWord } from "../internal/guide/countGuide";
 
 /**
  * Touch each thing and count as you go.
@@ -245,7 +245,7 @@ const TapGroup: React.FC<{
   layout: Layout;
   tapped: number[];
   onTap: (index: number) => void;
-  tone: "amber" | "cyan";
+  tone: "orange" | "cyan";
 }> = ({ count, asset, layout, tapped, onTap, tone }) => (
   <div className={LAYOUT_CLASS[layout]}>
     {Array.from({ length: count }, (_, i) => {
@@ -278,7 +278,7 @@ const TapGroup: React.FC<{
               animate={{ scale: 1, rotate: 0 }}
               transition={SPRING.celebrate}
               className={`${COUNT_BADGE} text-white ${
-                tone === "amber" ? "bg-orange-500" : "bg-cyan-600"
+                tone === "orange" ? "bg-orange-500" : "bg-cyan-600"
               }`}
             >
               {tapped.indexOf(i) + 1}
@@ -389,43 +389,40 @@ export function orbitHints(
     const c = question.compare!;
     const counted = state.tappedA > 0 || state.tappedB > 0;
     return composeHints(
-      state.kidTip ?? "Spreading things out does not make more. Count them, do not guess.",
+      state.kidTip ?? "Spreading things out does not make more.",
       counted
-        ? `So far you have counted ${state.tappedA} on the left and ${state.tappedB} on the right. Finish touching both groups, then compare the two numbers.`
-        : "Do not go by how much room a group takes up. Touch the left group one at a time and watch the number under it, then do the same on the right.",
-      // The counts, not the verdict: counting the two groups is the work, and
-      // deciding which number is bigger is the question. A hint that answered
-      // it would leave nothing to answer.
-      `Counted one at a time, the left group has ${c.countA} and the right group has ${c.countB}. Which of those two numbers is bigger — or are they the same?`,
+        ? `You have ${state.tappedA} on the left and ${state.tappedB} on the right. Finish both.`
+        : "Touch the left group one at a time, then do the right.",
+      // The two counts, not the verdict: counting is the work and deciding
+      // which is bigger is the question. A rung that answered it would leave
+      // nothing to answer.
+      `Left has ${c.countA}. Right has ${c.countB}. Which number is bigger?`,
     );
   }
 
   const left = question.count - state.tapped;
+  const next = numberWord(state.tapped + 1);
 
   if (question.mode === "scatter") {
     return composeHints(
       state.kidTip ?? "Go in order so you do not miss any.",
       state.tapped === 0
-        ? `Start at the top of the screen and work down. Touch a ${one} and it keeps the number you said, so you can see which ones are done.`
-        : `${
-            state.tapped === 1
-              ? `One ${one} has a number on it already`
-              : `${state.tapped} of the ${many} have a number on them already`
-          }. The ones still plain have not been counted — touch those.`,
+        ? `Start at the top and work down. Each ${one} keeps its number.`
+        : `${state.tapped} have numbers now. Touch a plain one and say "${next}".`,
       // Reaching the total is the answer here — the round is scored by touching
       // every one, not by naming a number — so the last rung may say it.
       left === 1
-        ? `There are ${question.count} ${many} altogether and just one left plain. Touch it and say ${question.count} — that is how many there are.`
-        : `There are ${question.count} ${many} altogether, and ${left} still need a number. Touch the next plain one and say ${state.tapped + 1}, then keep counting on to ${question.count}.`,
+        ? `One ${one} is still plain. Touch it and say "${numberWord(question.count)}".`
+        : `${left} ${many} still need a number. Keep counting on to ${question.count}.`,
     );
   }
 
   return composeHints(
     state.kidTip ?? "Say one number for each one you touch.",
     state.tapped === 0
-      ? `Start with the ${one} on the far left. Touch it and say "one".`
-      : `You have touched ${state.tapped}. The next ${one} to the right is ${state.tapped + 1} — touch it and say that number out loud.`,
-    `There are ${question.count} ${many} in the row. Touch every one from left to right, and the last number you say — ${question.count} — is how many there are.`,
+      ? `Start at the far-left ${one}. Touch it and say "one".`
+      : `You have counted ${state.tapped}. Touch the next ${one} and say "${next}".`,
+    `Touch every ${one} in order. The last number, ${question.count}, is how many.`,
   );
 }
 
@@ -457,6 +454,8 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
    */
   const [lastTap, setLastTap] = useState<{ index: number; n: number; key: number } | null>(null);
   const tapSeq = useRef(0);
+  /** Hops across the scene on this question. One is a shrug; two is a signal. */
+  const wanders = useRef(0);
   const motionOK = useMotionOK();
   /*
    * The last number has to be *heard* before the round reacts to it.
@@ -492,43 +491,87 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
    * line it says is about a left-to-right route through a row, and the scatter
    * has no such thing.
    */
+  /*
+   * Two different questions, so two different conditions.
+   *
+   * `guided` is whether Koda steps in *by itself* — the clock and the stumbles
+   * — and that is what the parent's switch turns off. Whether the help *looks
+   * like* the coach is not a setting at all: the Hint button shows the same
+   * bubble, the same rungs and the same "Got it" either way. It used to fall
+   * back to the old hint card when the switch was off, so turning off the
+   * interruptions also changed what help looked like, and a child had two
+   * panels to learn for one ladder.
+   */
   const guideCfg = guideSetup(params);
   const guided =
     !practising &&
     (guideCfg.enabled ?? false) &&
-    question.mode === "row" &&
     // A parent's switch, in the Skill Manager beside the badges and the voice.
     // Some children find being interrupted worse than being stuck.
     koda.config.isEnabled("guide_coach", true);
 
-  const guide = useCountGuide({
+  /*
+   * Where the coach points, per mode.
+   *
+   * A row or a scatter has a next object; a comparison has a next *group*, so
+   * the target is a side — 0 for the left, 1 for the right — and the scene
+   * rings the whole group rather than one butterfly inside it. Different index
+   * spaces, but the same promise: whatever rung two lights is the thing to
+   * touch next.
+   */
+  const guideTarget =
+    question.mode === "compare"
+      ? tappedA.length < (question.compare?.countA ?? 0)
+        ? 0
+        : tappedB.length < (question.compare?.countB ?? 0)
+          ? 1
+          : -1
+      : nextTarget(question.count, tapped);
+
+  const counted =
+    question.mode === "compare" ? tappedA.length + tappedB.length : tapped.length;
+
+  const hints = practising
+    ? []
+    : orbitHints(question, {
+        tapped: tapped.length,
+        tappedA: tappedA.length,
+        tappedB: tappedB.length,
+        kidTip: copy.kidTip,
+      });
+
+  const guide = useGuide({
+    koda,
     enabled: guided,
     setup: guideCfg,
     questionId: question.id,
-    count: question.count,
-    item: singular(question.asset.name),
-    tapped,
-    /* Nothing to coach through: an answer has landed, the child has asked for
-       a hint and is reading it, or the round is over. */
-    paused: Boolean(round.feedback) || round.hint.open || Boolean(round.score),
-    onCue: (cue) => {
-      /*
-       * A cue the child did not ask for is still help the child received.
-       *
-       * Reported as a walkthrough rather than as a hint so the log can tell the
-       * two apart — "asked for help" and "was given help" are different facts
-       * about a learner, and `correctFirstTry` counting unaided work depends on
-       * both being filed.
-       */
-      round.useSupport("walkthrough", cue.level);
-      if (!koda.config.isEnabled("audio_speech", true)) return;
-      // A coach that cannot be heard is still a coach: never let the panel's
-      // rendering wait on a clip.
-      void koda.speech
-        .say(cue.say, { rate: koda.config.get("speechRate", 1.0) })
-        .catch(() => {});
-    },
+    rungs: hints,
+    target: guideTarget,
+    progress: counted,
+    /* A comparison is not finished by touching everything — the child still has
+       to say which side has more — so only the counting modes are ever done. */
+    done: question.mode === "compare" ? false : guideTarget < 0,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
   });
+
+  /** One tap, weighed: a step onward, a repeat, or a hop across the scene. */
+  const noteTap = (index: number, already: boolean, list: number[]) => {
+    if (already) {
+      // A second tap on an object that already carries a number is this
+      // activity's clearest signal that one-to-one has come apart.
+      guide.stumbled();
+      return;
+    }
+    if (question.mode !== "compare" && isWander(list, index)) {
+      wanders.current += 1;
+      // One hop is a shrug; two in a question is a child with no route through
+      // the row, which is how objects get missed.
+      if (wanders.current >= 2) guide.stumbled();
+      return;
+    }
+    guide.moved();
+  };
 
   /**
    * Report an answer.
@@ -546,6 +589,7 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
     setTappedA([]);
     setTappedB([]);
     setLastTap(null);
+    wanders.current = 0;
   }, [question.id, finishing]);
 
   /*
@@ -562,6 +606,7 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
     setTappedA([]);
     setTappedB([]);
     setLastTap(null);
+    wanders.current = 0;
   };
 
 
@@ -581,14 +626,13 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
 
   const tap = (index: number) => {
     /*
-     * Before the guard, not after.
+     * Weighed before the guard, not after.
      *
-     * A second tap on an object that already carries a number is this
-     * activity's clearest signal that one-to-one has come apart — and the line
-     * below has always thrown it away without a sound. The coach is the first
-     * thing that has ever wanted to know.
+     * The line below has always thrown a repeat tap away without a sound, and
+     * a repeat tap is the loudest thing this activity ever sees. The coach is
+     * the first thing that has wanted to know.
      */
-    guide.noteTap(index);
+    noteTap(index, tapped.includes(index), tapped);
     if (tapped.includes(index)) return;
     const next = [...tapped, index];
     setTapped(next);
@@ -640,6 +684,9 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
   const tapGroup = (group: "A" | "B", index: number) => {
     const [list, set] = group === "A" ? [tappedA, setTappedA] : [tappedB, setTappedB];
     const on = list.includes(index);
+    /* Untapping is how a child corrects themselves here, so it is a move like
+       any other rather than a stumble — the groups toggle, unlike the row. */
+    noteTap(index, false, list as number[]);
     const next = on ? list.filter((i) => i !== index) : [...list, index];
     set(next);
     playChrome(koda, "pop");
@@ -687,12 +734,9 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
       prompt={prompt}
       iconName={question.mode === "compare" ? "scale" : "star"}
       iconTone="amber"
-      hints={practising ? [] : orbitHints(question, {
-        tapped: tapped.length,
-        tappedA: tappedA.length,
-        tappedB: tappedB.length,
-        kidTip: copy.kidTip,
-      })}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onStartOver={
         !round.feedback && (tapped.length > 0 || tappedA.length > 0 || tappedB.length > 0) ? restart : undefined
       }
@@ -721,10 +765,19 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
                      without reading either label. */
                   /* Both groups share the one play scene; the side is told by
                      the ring and the counter colour, not by a second palette. */
-                  className={`${SCENE} p-4 sm:p-5 min-h-[200px] sm:min-h-[230px] flex flex-col items-center justify-center gap-3 ring-2 ${
-                    isA ? "ring-orange-300/70" : "ring-cyan-300/70"
+                  /* The coach points at a *group* here, not at one butterfly:
+                     the work is "count this side", so lighting a single object
+                     inside it would answer a smaller question than the one the
+                     child is stuck on. */
+                  className={`${SCENE} p-4 sm:p-5 min-h-[200px] sm:min-h-[230px] flex flex-col items-center justify-center gap-3 transition-shadow duration-300 ${
+                    guide.target === (isA ? 0 : 1)
+                      ? "ring-4 ring-indigo-500 shadow-[0_0_0_6px_rgba(99,102,241,0.15)]"
+                      : `ring-2 ${isA ? "ring-orange-300/70" : "ring-cyan-300/70"}`
                   }`}
                 >
+                  {guide.target === (isA ? 0 : 1) && (
+                    <span className="sr-only">Count this group next</span>
+                  )}
                   <span className="text-sm font-extrabold text-ink/70">
                     {isA ? "Left" : "Right"}
                   </span>
@@ -734,7 +787,7 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
                     layout={isA ? c.layoutA : c.layoutB}
                     tapped={isA ? tappedA : tappedB}
                     onTap={(i) => tapGroup(side, i)}
-                    tone={isA ? "amber" : "cyan"}
+                    tone={isA ? "orange" : "cyan"}
                   />
                   {/* The running count, big enough to be the thing compared. */}
                   <span className="text-3xl font-black text-ink tabular-nums leading-none h-8">
@@ -768,18 +821,6 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
         </div>
       ) : (
         <div className="space-y-4">
-          {/* Above the objects, with its tail on them. A child who has stopped
-              is looking at the row, so the help has to be where the row is —
-              not in the strip along the bottom, which on a phone is where the
-              answer feedback lives and is read as a verdict. */}
-          <SkillGuide
-            cue={guide.cue}
-            /* The lesson's own three sentences, behind Back and Next. The cue
-               says what to touch now; these say how the whole thing is done,
-               for the child who wants that and the adult sitting beside them. */
-            method={copy.stepByStep}
-            onDismiss={guide.dismiss}
-          />
           {/*
            * A place, not a panel.
            *

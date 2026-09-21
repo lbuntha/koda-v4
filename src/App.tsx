@@ -159,6 +159,9 @@ const SubjectsPage = lazy(() => import("./components/account/SubjectsPage").then
 const KodaPage = lazy(() =>
   import("./components/account/KodaPage").then((m) => ({ default: m.KodaPage })),
 );
+const LeaderboardPage = lazy(() =>
+  import("./components/LeaderboardPage").then((m) => ({ default: m.LeaderboardPage })),
+);
 
 /**
  * The wait, while one of those chunks arrives.
@@ -261,6 +264,7 @@ export default function App() {
     | "home"
     | "game"
     | "profile"
+    | "leaderboard"
     | "skills"
     | "assets"
     | "users"
@@ -1038,6 +1042,12 @@ export default function App() {
                 setActiveTab(tab);
               }}
             />
+          )}
+
+          {activeTab === "leaderboard" && (
+            <Deferred label="Loading buddy leaderboard">
+              <LeaderboardPage />
+            </Deferred>
           )}
 
           {activeTab === "users" && (

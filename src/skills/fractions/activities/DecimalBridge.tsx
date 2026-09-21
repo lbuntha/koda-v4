@@ -2,6 +2,7 @@ import React, { useCallback, useMemo } from "react";
 
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import { fractionGuideMethod, useFractionGuide } from "../internal/useFractionGuide";
 import { FractionBar } from "../internal/ui/FractionBar";
 import { printBar, printHundred } from "../internal/ui/printFigures";
 import {
@@ -102,6 +103,11 @@ export const DecimalBridge: React.FC<ActivityProps<BridgeParams>> = ({ params, k
   });
   const question = round.question as DecimalQuestion;
 
+  const hints = !question || practising ? [] : decimalHints(question);
+  const guide = useFractionGuide({
+    params, koda, practising, questionId: question?.id ?? "loading", rungs: hints, round,
+  });
+
   if (!question) return null;
 
   const say = (text: string): void => {
@@ -198,7 +204,9 @@ export const DecimalBridge: React.FC<ActivityProps<BridgeParams>> = ({ params, k
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : decimalHints(question)}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={fractionGuideMethod(params)}
       iconName="Percent"
       iconTone="indigo"
       onReadAloud={

@@ -10,6 +10,8 @@ import {
   useSkillRound,
   type RoundQuestion,
   playChrome,
+  guideSetup,
+  useGuide,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B } from "../internal/data/additionPalette";
@@ -196,20 +198,20 @@ export function frameHints(
     return composeHints(
       state.kidTip ?? `Fill the frame right up. Count only the ones you put in.`,
       placed <= 0
-        ? `${q.given} spaces are already taken. Tap the empty ones until the frame is full — there ${empty === 1 ? "is 1" : `are ${empty}`} left.`
-        : `You have put in ${placed} and there ${empty === 1 ? "is 1 space" : `are ${empty} spaces`} still empty. Keep going until the frame is full, then count only the ones you added.`,
+        ? `${q.given} spaces are taken. Fill the other ${empty} to the top.`
+        : `You have added ${placed}. ${empty === 1 ? "One space" : `${empty} spaces`} still empty.`,
       // Stops at the method: the child produces this answer by filling, so
       // naming it would do the filling for them.
-      `A full frame holds ${q.size}. ${q.given} were there to start with, so the answer is however many you had to add.`,
+      `A full frame is ${q.size}. Count only the ones you added.`,
     );
   }
 
   return composeHints(
     state.kidTip ?? "The frame is already counted. Count on from the number in it.",
     state.filled <= q.given
-      ? `There ${q.given === 1 ? "is 1 counter" : `are ${q.given} counters`} in the frame. Tap ${q.added} more empty ${q.added === 1 ? "space" : "spaces"}.`
-      : `You have added ${placed} of ${q.added}. Do not count the frame again — carry on from ${q.given}.`,
-    `Start at ${q.given} and count on ${q.added}: ${Array.from({ length: q.added }, (_, i) => q.given + i + 1).join(", ")}.`,
+      ? `The frame holds ${q.given}. Tap ${q.added} more empty ${q.added === 1 ? "space" : "spaces"}.`
+      : `${placed} of ${q.added} added. Carry on from ${q.given}, do not recount.`,
+    `The frame is ${q.given} already. Count on: ${Array.from({ length: q.added }, (_, i) => q.given + i + 1).join(", ")}.`,
   );
 }
 
@@ -229,7 +231,9 @@ const Cell: React.FC<{
   state: "given" | "added" | "empty";
   onTap?: () => void;
   delay: number;
-}> = ({ position, state, onTap, delay }) => {
+  /** The one the coach is pointing at. */
+  lit?: boolean;
+}> = ({ position, state, onTap, delay , lit = false}) => {
   const filled = state !== "empty";
   const role = state === "given" ? ADDEND_A : ADDEND_B;
   return (
@@ -242,10 +246,12 @@ const Cell: React.FC<{
       initial={{ opacity: 0, scale: 0.7 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ ...SPRING.enter, delay }}
-      aria-label={`Space ${position}${filled ? ", filled" : ", empty"}`}
+      aria-label={`Space ${position}${filled ? ", filled" : ", empty"}${
+        lit ? ", fill this one next" : ""
+      }`}
       className={`${FRAME_CELL} rounded-2xl border-2 flex items-center justify-center transition-colors ${
         filled ? `${role.solid} ${role.border} shadow-lg` : "bg-surface/70 border-line"
-      }`}
+      } ${lit ? "ring-4 ring-indigo-500 animate-pulse" : ""}`}
     >
       {filled && (
         /* A plain disc, deliberately. A frame works because ten identical
@@ -420,6 +426,7 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
     if (round.feedback) return;
     const added = filled - question.given;
     if (added <= 0) {
+      guide.stumbled();
       nudge.refuse(
         question.asks === "added"
           ? `Nothing has been added yet. Tap the empty spaces until the frame is full.`
@@ -456,6 +463,47 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
   const rows = question.size === 5 ? 1 : 2;
   const emptyLeft = question.size - filled;
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived, rather than two systems with two vocabularies.
+   */
+  const hints = practising ? [] : frameHints(question, { filled, kidTip: copy.kidTip });
+  /*
+   * Two different questions, so two different conditions.
+   *
+   * `guided` is whether Koda steps in *by itself* — the clock and the stumbles
+   * — and that is what the parent's switch turns off. Whether the help *looks
+   * like* the coach is not a setting at all: the Hint button shows the same
+   * bubble, the same rungs and the same "Got it" either way. It used to fall
+   * back to the old hint card when the switch was off, so turning off the
+   * interruptions also changed what help looked like, and a child had two
+   * panels to learn for one ladder.
+   */
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    /* The next empty space, in reading order — top row first, which is the
+       structure the frame exists to make visible. */
+    target: filled < question.size ? filled : -1,
+    /* What the *learner* has done, not what is on the board: the frame arrives
+       with counters already in it, and counting those as progress told the
+       coach a child who had touched nothing was mid-flow — so it stepped in at
+       five seconds instead of seven. */
+    progress: filled - question.given,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   return (
     <SkillRound
       koda={koda}
@@ -468,7 +516,9 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
       iconTone="purple"
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message}
-      hints={practising ? [] : frameHints(question, { filled, kidTip: copy.kidTip })}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onStartOver={
         !round.feedback && (filled !== question.given) ? restart : undefined
       }
@@ -507,6 +557,7 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
                           ? () => takeBackTo(i)
                           : undefined
                   }
+                  lit={guide.target === i && state === "empty"}
                   delay={stagger(i)}
                 />
               );

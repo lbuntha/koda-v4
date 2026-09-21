@@ -9,6 +9,8 @@ import {
   useSkillRound,
   type RoundQuestion,
   playChrome,
+  guideSetup,
+  useGuide,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B, CHANGE, TOTAL } from "../internal/data/additionPalette";
@@ -309,7 +311,7 @@ export function bondHints(
       const toTen = 10 - q.a;
       return composeHints(
         state.kidTip ?? "Give the first number just enough to reach ten, then add what is left.",
-        `${q.a} needs ${toTen} more to reach ten. Take that much out of ${q.b} and see what is left over.`,
+        `${q.a} needs ${toTen} to reach ten. Take ${toTen} out of ${q.b}.`,
         `${q.b} splits into ${toTen} and ${q.b - toTen}.`,
       );
     }
@@ -318,13 +320,13 @@ export function bondHints(
         state.kidTip ?? "Every two-digit number is some tens and some ones.",
         left === 0
           ? "All four boxes are filled. Check that each pair adds back up to the number above it."
-          : `${left} ${left === 1 ? "box is" : "boxes are"} still empty. The left box is the tens — write it as a whole ten, like 40, not 4.`,
+          : `${left} still empty. The left box is a whole ten, like 40, not 4.`,
         `${q.a} is ${digitsOf(q.a).tens * 10} and ${digitsOf(q.a).ones}. ${q.b} is ${digitsOf(q.b).tens * 10} and ${digitsOf(q.b).ones}.`,
       );
     case "part_unknown":
       return composeHints(
         state.kidTip ?? "The two parts have to make the whole. One is missing.",
-        `The whole is ${q.sum}, and one part is ${q.bonds[0].parts.find((p) => p.value !== undefined)?.value}. Count on from that part until you reach ${q.sum}.`,
+        `The whole is ${q.sum}. Count on from the part you have until you reach it.`,
         // Stops short: counting on is how the child produces this answer.
         `Ask yourself: what goes with that part to make ${q.sum}?`,
       );
@@ -332,7 +334,7 @@ export function bondHints(
       return composeHints(
         state.kidTip ?? "The two parts underneath make the whole on top.",
         `Put ${q.a} and ${q.b} together. Start at ${q.a} and count on ${q.b}.`,
-        `${q.a} and ${q.b} make ${q.sum}.`,
+        `The two parts ${q.a} and ${q.b} fill the whole box: ${q.sum}.`,
       );
   }
 }
@@ -344,7 +346,9 @@ const Box: React.FC<{
   active?: boolean;
   tone: "whole" | "left" | "right";
   onSelect?: () => void;
-}> = ({ slot, entry, active, tone, onSelect }) => {
+  /** The one the coach is pointing at. */
+  lit?: boolean;
+}> = ({ slot, entry, active, tone, onSelect , lit = false}) => {
   const role = tone === "whole" ? TOTAL : tone === "left" ? ADDEND_A : ADDEND_B;
   const shell = `w-20 h-16 sm:w-24 sm:h-20 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl font-black tabular-nums ${role.soft} ${role.text}`;
 
@@ -362,10 +366,18 @@ const Box: React.FC<{
       onClick={onSelect}
       whileTap={{ scale: 0.95 }}
       transition={SPRING.tap}
-      aria-label={`Box ${slot.blank}${entry ? `, ${entry}` : ", empty"}`}
+      aria-label={`Box ${slot.blank}${entry ? `, ${entry}` : ", empty"}${
+        lit ? ", fill this one next" : ""
+      }`}
       aria-pressed={Boolean(active)}
+      /* Being selected is about now; the coach's light is about next, so the
+         selection ring wins where both apply. */
       className={`${shell} border-2 border-dashed ${
-        active ? `${CHANGE.border} ring-4 ring-rose-400/40 border-solid` : "border-line"
+        active
+          ? `${CHANGE.border} ring-4 ring-rose-400/40 border-solid`
+          : lit
+            ? "ring-4 ring-indigo-500 border-solid"
+            : "border-line"
       }`}
     >
       {entry || <span className="text-ink/25">?</span>}
@@ -378,8 +390,10 @@ const Bond: React.FC<{
   spec: BondSpec;
   entries: Record<string, string>;
   active: string | null;
+  /** The blank the coach is pointing at, if it is in this diagram. */
+  lit?: string;
   onSelect(id: string): void;
-}> = ({ spec, entries, active, onSelect }) => (
+}> = ({ spec, entries, active, lit, onSelect }) => (
   <div className="flex flex-col items-center gap-1">
     {spec.caption && (
       <span className="text-[11px] font-bold uppercase tracking-wide text-ink/45">
@@ -391,6 +405,7 @@ const Bond: React.FC<{
       tone="whole"
       entry={spec.whole.blank ? entries[spec.whole.blank] : undefined}
       active={Boolean(spec.whole.blank && active === spec.whole.blank)}
+      lit={Boolean(spec.whole.blank && lit === spec.whole.blank)}
       onSelect={spec.whole.blank ? () => onSelect(spec.whole.blank!) : undefined}
     />
     {/* The two strokes. Drawn rather than implied: the join is what makes this a
@@ -406,6 +421,7 @@ const Bond: React.FC<{
           tone={i === 0 ? "left" : "right"}
           entry={part.blank ? entries[part.blank] : undefined}
           active={Boolean(part.blank && active === part.blank)}
+          lit={Boolean(part.blank && lit === part.blank)}
           onSelect={part.blank ? () => onSelect(part.blank!) : undefined}
         />
       ))}
@@ -506,6 +522,7 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
     if (round.feedback) return;
     const missing = question.blanks.filter((id) => (entries[id] ?? "") === "");
     if (missing.length > 0) {
+      guide.stumbled();
       nudge.refuse(
         missing.length === question.blanks.length
           ? "Tap a box, then use the numbers below to fill it in."
@@ -541,6 +558,42 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
 
   const prompt = promptFor(question, copy.prompts?.default);
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived, rather than two systems with two vocabularies.
+   */
+  const hints = practising ? [] : bondHints(question, { entries, kidTip: copy.kidTip });
+  /*
+   * Two different questions, so two different conditions.
+   *
+   * `guided` is whether Koda steps in *by itself* — the clock and the stumbles
+   * — and that is what the parent's switch turns off. Whether the help *looks
+   * like* the coach is not a setting at all: the Hint button shows the same
+   * bubble, the same rungs and the same "Got it" either way. It used to fall
+   * back to the old hint card when the switch was off, so turning off the
+   * interruptions also changed what help looked like, and a child had two
+   * panels to learn for one ladder.
+   */
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    /* The next empty box, in the order the diagram reads. */
+    target: question.blanks.findIndex((id) => (entries[id] ?? "") === ""),
+    progress: Object.values(entries).filter(Boolean).length,
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   return (
     <SkillRound
       koda={koda}
@@ -553,7 +606,9 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
       iconTone="emerald"
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message}
-      hints={practising ? [] : bondHints(question, { entries, kidTip: copy.kidTip })}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onStartOver={
         !round.feedback && (Object.values(entries).some((v) => v !== "")) ? restart : undefined
       }
@@ -576,6 +631,7 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
               spec={spec}
               entries={entries}
               active={active}
+              lit={guide.target >= 0 ? question.blanks[guide.target] : undefined}
               onSelect={(id) => {
                 setActive(id);
                 playChrome(koda, "clink");

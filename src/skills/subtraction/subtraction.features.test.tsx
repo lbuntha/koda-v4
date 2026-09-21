@@ -1,6 +1,8 @@
+import { act } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderActivity, type ActivityHarness } from "../kit/testing";
 import { skill } from ".";
+import { GUIDE_DEFAULTS } from "../kit";
 
 const tray = skill.activities.tray;
 const facts = skill.activities.facts;
@@ -114,8 +116,47 @@ describe("every subtraction feature changes behaviour", () => {
     expect(play(false)).not.toContain("taken away");
   });
 
+  it("guide_coach: Koda stepping in on its own", () => {
+    /*
+     * The one flag whose effect is a *wait*, so it cannot be read off the
+     * opening frame like the others. Fake timers let the seven seconds pass
+     * without the test taking seven seconds.
+     */
+    vi.useFakeTimers();
+    try {
+      const lesson = skill.lessons.find((l) => l.activity === "subtraction/tray")!;
+      const play = (features: Record<string, boolean>) => {
+        const h = renderActivity(tray, {
+          params: lesson.params as Record<string, unknown>,
+          level: 1,
+          features,
+        });
+        act(() => {
+          vi.advanceTimersByTime(GUIDE_DEFAULTS.startMs + 500);
+        });
+        const out = { text: h.text(), said: h.koda.count("speech.say") };
+        h.unmount();
+        return out;
+      };
+
+      const on = play({});
+      const off = play({ guide_coach: false });
+      expect(on.text, "the coach never stepped in").toContain("Koda is helping");
+      expect(off.text, "the coach ignored its own switch").not.toContain("Koda is helping");
+
+      // And its voice is its own switch: silenced, the guide still shows.
+      const silent = play({ guide_voice: false });
+      expect(silent.said, "the guide spoke through its own voice switch").toBeLessThan(on.said);
+      expect(silent.text, "silencing the voice took the guide away too").toContain(
+        "Koda is helping",
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("covers every feature declared by the manifest", () => {
-    const covered = new Set(["audio_speech", "sound_chimes", "haptic_feedback", "counting_badges", "running_difference_badge", "strategy_scaffold", "step_context_tags", "premium_lessons"]);
+    const covered = new Set(["audio_speech", "sound_chimes", "haptic_feedback", "counting_badges", "running_difference_badge", "strategy_scaffold", "step_context_tags", "premium_lessons", "guide_coach", "guide_voice"]);
     for (const feature of skill.features) expect(covered.has(feature.id), `${feature.id} has no feature test`).toBe(true);
   });
 });

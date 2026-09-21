@@ -9,6 +9,8 @@ import {
   useSkillRound,
   type RoundQuestion,
   playChrome,
+  guideSetup,
+  useGuide,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
 import { ADDEND_A, ADDEND_B, CHANGE, TOTAL } from "../internal/data/additionPalette";
@@ -291,21 +293,34 @@ export function blockHints(
         ? `There are ${state.built.ones} ones in the yard, and a column only holds nine. Bundle ten of them into a single ten.`
         : bundle === "tens"
           ? `There are ${state.built.tens} tens in the yard. Bundle ten of them into one hundred.`
-          : `Nothing is left to bundle. Read the blocks: ${state.built.hundreds ? `${state.built.hundreds} hundreds, ` : ""}${state.built.tens} tens and ${state.built.ones} ones.`,
-      `${q.a} and ${q.b} is ${q.sum}.`,
+          : `Nothing left to bundle. Read the blocks as they now stand.`,
+      // The trade is the technique, so the last rung is the trade — not the
+      // total, which these lessons reach by tidying rather than by adding.
+      `Traded up, ${q.a} and ${q.b} sit as ${q.sum} with no column over nine.`,
     );
   }
+
+  /* Whole tens and whole hundreds are added *as units* — four tens and three
+     tens is seven tens — which is a different move from building a number out
+     of mixed blocks, and used to be given the same words. */
+  const asUnits = q.mode === "multiples_ten" || q.mode === "multiples_hundred";
+  const unit = q.mode === "multiples_hundred" ? 100 : 10;
 
   return composeHints(
     state.kidTip ?? "Build each number out of blocks, then read what you have.",
     have === 0
-      ? `Start with ${q.a}. Tap blocks in the tray to drop them into the yard.`
+      ? asUnits
+        ? `Drop in ${q.a / unit} ${unit === 100 ? "hundreds" : "tens"} first, then ${q.b / unit} more.`
+        : `Start with ${q.a}. Tap blocks in the tray to drop them into the yard.`
       : have < q.sum
         ? `The yard holds ${have}. You need ${q.sum - have} more.`
         : have > q.sum
           ? `The yard holds ${have}, which is ${have - q.sum} too many. Tap a block in the yard to take it back.`
           : `The yard holds ${q.sum}. That is the answer — check it.`,
-    `${q.a} and ${q.b} is ${q.sum}.`,
+    asUnits
+      ? `${q.a / unit} and ${q.b / unit} is ${q.sum / unit}, so the answer is ${q.sum}.`
+      // Read off the blocks, place by place: that is what building them was for.
+      : `Count the tens, then the ones. The yard reads ${q.sum}.`,
   );
 }
 
@@ -331,12 +346,14 @@ const BLOCK_NAME: Record<Place, string> = {
  * A rod shows its ten segments and a flat shows its ten rods. Without that a
  * child is told the rod is ten; with it, they can check.
  */
-const Block: React.FC<{ place: Place; tone: string; onTap?: () => void; label: string }> = ({
-  place,
-  tone,
-  onTap,
-  label,
-}) => (
+const Block: React.FC<{
+  place: Place;
+  tone: string;
+  onTap?: () => void;
+  label: string;
+  /** The block the coach is pointing at. */
+  lit?: boolean;
+}> = ({ place, tone, onTap, label, lit = false }) => (
   <motion.button
     type="button"
     onClick={onTap}
@@ -346,8 +363,10 @@ const Block: React.FC<{ place: Place; tone: string; onTap?: () => void; label: s
     initial={{ opacity: 0, scale: 0.6 }}
     animate={{ opacity: 1, scale: 1 }}
     transition={SPRING.enter}
-    aria-label={label}
-    className={`${BLOCK_CLASS[place]} rounded-md border-2 ${tone} relative overflow-hidden shrink-0`}
+    aria-label={`${label}${lit ? ", add this one next" : ""}`}
+    className={`${BLOCK_CLASS[place]} rounded-md border-2 ${tone} relative overflow-hidden shrink-0${
+      lit ? " ring-4 ring-indigo-500 animate-pulse" : ""
+    }`}
   >
     {place === "tens" &&
       Array.from({ length: 9 }, (_, i) => (
@@ -481,6 +500,7 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
        * the thing the lesson is about, and scoring it would say they got the
        * arithmetic wrong when they got the exchange unfinished.
        */
+      guide.stumbled();
       nudge.refuse(
         ready === "ones"
           ? `There are ${built.ones} ones in the yard. Bundle ten of them into a ten first.`
@@ -491,6 +511,7 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
 
     const have = valueOf(built);
     if (have === 0) {
+      guide.stumbled();
       nudge.refuse("The yard is empty. Tap blocks in the tray to build the answer.");
       return;
     }
@@ -520,6 +541,65 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
     (p) => question.offers.includes(p) || built[p] > 0 || p === "hundreds",
   );
 
+  /*
+   * The coach: the same ladder, offered rather than waited for.
+   *
+   * `hints` is built once and handed to both — the Hint button shows it and
+   * the coach raises it — so a child meets one set of words however the help
+   * arrived, rather than two systems with two vocabularies.
+   */
+  const hints = practising ? [] : blockHints(question, { built, kidTip: copy.kidTip });
+  /*
+   * Two different questions, so two different conditions.
+   *
+   * `guided` is whether Koda steps in *by itself* — the clock and the stumbles
+   * — and that is what the parent's switch turns off. Whether the help *looks
+   * like* the coach is not a setting at all: the Hint button shows the same
+   * bubble, the same rungs and the same "Got it" either way. It used to fall
+   * back to the old hint card when the switch was off, so turning off the
+   * interruptions also changed what help looked like, and a child had two
+   * panels to learn for one ladder.
+   */
+  const guideCfg = guideSetup(params);
+  const guided =
+    !practising && (guideCfg.enabled ?? false) && koda.config.isEnabled("guide_coach", true);
+  const guide = useGuide({
+    koda,
+    enabled: guided,
+    setup: guideCfg,
+    questionId: question.id,
+    rungs: hints,
+    /*
+     * The block to reach for next: the biggest place still short of the target.
+     *
+     * Biggest first, because that is the technique — a number is built out of
+     * its hundreds, then its tens, then its ones, and a child who starts with
+     * units is counting rather than building.
+     */
+    target: (() => {
+      const want = digitsOf(question.sum);
+      const short = (["hundreds", "tens", "ones"] as const).find(
+        (place) => built[place] < want[place],
+      );
+      return short ? question.offers.indexOf(short) : -1;
+    })(),
+    /*
+     * Blocks the learner moved, measured against what the question seeded.
+     *
+     * The yard opens holding `question.start`, so counting the blocks in it
+     * told the coach a child who had touched nothing was already mid-flow —
+     * and it stepped in at five seconds instead of seven. Progress means
+     * effort, everywhere; see FrameFill, which had the same trap.
+     */
+    progress:
+      Math.abs(built.hundreds - question.start.hundreds) +
+      Math.abs(built.tens - question.start.tens) +
+      Math.abs(built.ones - question.start.ones),
+    done: false,
+    paused: Boolean(round.feedback) || Boolean(round.score),
+    useSupport: round.useSupport,
+  });
+
   return (
     <SkillRound
       koda={koda}
@@ -532,7 +612,9 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
       iconTone="purple"
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message}
-      hints={practising ? [] : blockHints(question, { built, kidTip: copy.kidTip })}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={copy.stepByStep}
       onStartOver={
         !round.feedback && (JSON.stringify(built) !== JSON.stringify(question.start)) ? restart : undefined
       }
@@ -622,6 +704,7 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
                         : "bg-emerald-400 border-emerald-200"
                   }
                   label={`Add a ${BLOCK_NAME[p].toLowerCase()}`}
+                  lit={guide.target === question.offers.indexOf(p)}
                   onTap={round.feedback ? undefined : () => place(p)}
                 />
                 <span className="text-xs font-bold text-ink/50 tabular-nums">+{VALUE[p]}</span>

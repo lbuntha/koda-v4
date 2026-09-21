@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, useSkillRound } from "../../kit";
+import { fractionGuideMethod, useFractionGuide } from "../internal/useFractionGuide";
 import { partWord } from "../internal/data/fractionNumbers";
 import { printLine } from "../internal/ui/printFigures";
 import { FractionBar } from "../internal/ui/FractionBar";
@@ -111,6 +112,14 @@ export const MixedBoard: React.FC<ActivityProps<MixedParams>> = ({ params, koda,
     setRefused(null);
   }, [question]);
 
+  const hints = !question || practising ? [] : mixedHints(question);
+  const guide = useFractionGuide({
+    params, koda, practising, questionId: question?.id ?? "loading", rungs: hints, round,
+    progress:
+      (question && board && !sameBoard(board, startingBoard(question)) ? 1 : 0) +
+      (marker === null ? 0 : 1),
+  });
+
   if (!question || !board) return null;
 
   const { improper: f } = question;
@@ -125,6 +134,7 @@ export const MixedBoard: React.FC<ActivityProps<MixedParams>> = ({ params, koda,
     if (koda.config.isEnabled("haptic_feedback", true)) koda.haptics.pulse("light");
     setRefused(null);
     setBoard(next);
+    guide.moved();
   };
 
   const submit = (given: string, correct: boolean): void => {
@@ -146,6 +156,7 @@ export const MixedBoard: React.FC<ActivityProps<MixedParams>> = ({ params, koda,
     const block = mixedBlockedBecause(question, board);
     if (block) {
       setRefused(block);
+      guide.stumbled();
       say(MIXED_REFUSALS[block]);
       return;
     }
@@ -158,6 +169,7 @@ export const MixedBoard: React.FC<ActivityProps<MixedParams>> = ({ params, koda,
   const checkPlacement = (): void => {
     if (marker === null) {
       setRefused("not-placed");
+      guide.stumbled();
       say(MIXED_REFUSALS["not-placed"]);
       return;
     }
@@ -175,7 +187,9 @@ export const MixedBoard: React.FC<ActivityProps<MixedParams>> = ({ params, koda,
       totalQuestions={total}
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
-      hints={practising ? [] : mixedHints(question)}
+      hints={hints}
+      guide={practising ? undefined : guide}
+      guideMethod={fractionGuideMethod(params)}
       onStartOver={
         !round.feedback && (marker !== null || (board && !sameBoard(board, startingBoard(question))))
           ? () => {
@@ -223,7 +237,11 @@ export const MixedBoard: React.FC<ActivityProps<MixedParams>> = ({ params, koda,
                         r={9}
                         fill="transparent"
                         style={{ cursor: round.feedback ? undefined : "pointer" }}
-                        onClick={() => !round.feedback && setMarker(i)}
+                        onClick={() => {
+                          if (round.feedback) return;
+                          setMarker(i);
+                          guide.moved();
+                        }}
                       />
                     </g>
                   );

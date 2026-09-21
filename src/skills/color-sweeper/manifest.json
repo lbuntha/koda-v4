@@ -62,6 +62,20 @@
       "tag": "Haptic"
     },
     {
+      "id": "guide_coach",
+      "name": "Smart guide",
+      "description": "Offers the next readable clue or safe deduction when a learner stalls. It never reveals the correct proof choice or a hidden board solution.",
+      "isEnabled": true,
+      "tag": "Cognitive"
+    },
+    {
+      "id": "guide_voice",
+      "name": "Smart guide voice",
+      "description": "Reads each Smart guide step aloud as it appears. Off, the guide stays visible and silent.",
+      "isEnabled": true,
+      "tag": "Audio"
+    },
+    {
       "id": "counting_badges",
       "name": "1-to-1 badges",
       "description": "Numbers the tiles as they are chosen, so a child selecting eight of them can see how many are already in.",
@@ -81,7 +95,8 @@
     "activityLabel": "",
     "guidedLabel": "",
     "milestoneLabel": "",
-    "speechRate": 0.95
+    "speechRate": 0.95,
+    "coachPatience": "normal"
   },
   "settingsSchema": [
     {
@@ -125,6 +140,17 @@
       "max": 2,
       "step": 0.05,
       "unit": "x"
+    },
+    {
+      "key": "coachPatience",
+      "label": "Smart guide patience",
+      "help": "How long a learner is left to inspect the board before the Smart guide steps in.",
+      "type": "choice",
+      "options": [
+        { "value": "relaxed", "label": "Relaxed" },
+        { "value": "normal", "label": "Normal" },
+        { "value": "quick", "label": "Quick" }
+      ]
     }
   ]
 }

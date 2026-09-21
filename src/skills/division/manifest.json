@@ -122,6 +122,20 @@
       "tag": "Cognitive"
     },
     {
+      "id": "guide_coach",
+      "name": "Smart guide",
+      "description": "Lets the Smart guide speak up on its own when a child stalls or drops the technique. Off, it waits to be asked — the Hint button opens the same guide.",
+      "isEnabled": true,
+      "tag": "Cognitive"
+    },
+    {
+      "id": "guide_voice",
+      "name": "Smart guide voice",
+      "description": "Reads each step of the Smart guide aloud as it appears. Off, a child reads it without hearing it — the guide itself stays either way.",
+      "isEnabled": true,
+      "tag": "Audio"
+    },
+    {
       "id": "inverse_scaffold",
       "name": "Helper fact",
       "description": "Shows the matching multiplication beside the division being worked. Never offered during practice.",
@@ -130,9 +144,21 @@
     }
   ],
   "settings": {
+    "coachPatience": "normal",
     "remainderNotation": "r"
   },
   "settingsSchema": [
+    {
+      "key": "coachPatience",
+      "label": "Smart guide patience",
+      "help": "How long a child is left to think before the Smart guide steps in. Relaxed waits about eleven seconds, Quick about four.",
+      "type": "choice",
+      "options": [
+        { "value": "relaxed", "label": "Relaxed" },
+        { "value": "normal", "label": "Normal" },
+        { "value": "quick", "label": "Quick" }
+      ]
+    },
     {
       "key": "remainderNotation",
       "label": "How remainders are written",
