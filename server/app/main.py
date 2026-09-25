@@ -39,7 +39,6 @@ from app.routers import (
     family,
     health,
     leaderboard,
-    library,
     learners,
     library,
     menu,

@@ -264,7 +264,7 @@ describe("Library Studio", () => {
 
     // Publish refuses while it fails.
     fireEvent.click(screen.getByRole("button", { name: /Publish/ }));
-    expect((screen.getByRole("button", { name: /^Publish revision$/ }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole("button", { name: /^Publish$/ }) as HTMLButtonElement).disabled).toBe(true);
     expect(screen.getByText(/Not ready: 1 check failing/)).toBeTruthy();
 
     // Delete it and add another: the count check follows, then passes.
@@ -326,14 +326,14 @@ describe("Library Studio", () => {
     fireEvent.click(screen.getByRole("button", { name: /Draft the questions/ }));
     await screen.findByRole("tab", { name: /Understand/ });
     fireEvent.click(screen.getByRole("button", { name: /^7\s*Publish$/ }));
-    await act(async () => { fireEvent.click(screen.getByRole("button", { name: /^Publish revision$/ })); });
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: /^Publish$/ })); });
 
     await waitFor(() => expect(api.publishBook).toHaveBeenCalledWith("market-day"));
     expect(api.saveDraft).toHaveBeenCalledWith("market-day", expect.objectContaining({ title: "Market Day", band: "A", language: "en" }), true, "offline");
     expect(await screen.findByText(/Published revision 1/)).toBeTruthy();
 
     api.publishBook.mockRejectedValueOnce(new Error("q1: the right answer is the longest"));
-    await act(async () => { fireEvent.click(screen.getByRole("button", { name: /^Publish revision$/ })); });
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: /^Publish$/ })); });
     expect(await screen.findByText(/The server refused to publish: q1: the right answer is the longest/)).toBeTruthy();
   });
 

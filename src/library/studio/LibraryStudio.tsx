@@ -20,7 +20,7 @@ import { BookStore } from "../bookStore";
 import { clipSizes, clipUrl, pcmToWav, uploadClip } from "../clips";
 import { say, stop } from "../voice";
 import { tutorHeaders } from "../../lib/tutorApi";
-import { UIInput, UIRadio, UISelect, UITabs, type UITabItem } from "../../components/ui";
+import { UIInput, UIRadio, UISelect, UITabs, UIButton, type UITabItem } from "../../components/ui";
 import "../khmerFont";
 
 /**
@@ -226,10 +226,9 @@ function Editor({ row, categories, reports = [], onResolved, onClose }: { row: B
             {status.published ? `Published · rev ${status.rev}` : "Not published"}
           </span>
           {draft && (
-            <button type="button" className={quiet} onClick={() => void save()} disabled={busy !== "" || !dirty}>
-              <Upload className="h-4 w-4" aria-hidden="true" />
+            <UIButton type="button" variant="outline" size="sm" icon={<Upload className="h-4 w-4" aria-hidden="true" />} onClick={() => void save()} disabled={busy !== "" || !dirty} isLoading={busy === "save"}>
               {dirty ? "Save draft" : "Saved"}
-            </button>
+            </UIButton>
           )}
         </div>
       </div>
@@ -575,8 +574,9 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit }: {
       ))}
 
       {tab !== "splits" && <div className="flex flex-wrap items-center gap-2">
-        <span className={label}>Add</span>
-        <button type="button" className={quiet} onClick={() => add(tabKind[tab])}><Plus className="h-4 w-4" aria-hidden="true" />{tab === "understand" ? "Understand" : tab === "words" ? "Words" : "Spell"}</button>
+        <UIButton type="button" variant="outline" size="sm" icon={<Plus className="h-4 w-4" aria-hidden="true" />} onClick={() => add(tabKind[tab])}>
+          {tab === "understand" ? "Understand" : tab === "words" ? "Words" : "Spell"}
+        </UIButton>
         {addMessage && <p role="status" className="basis-full text-sm font-semibold text-rose-700 dark:text-rose-300">{addMessage}</p>}
       </div>}
 
@@ -644,7 +644,7 @@ function QuestionCard({ q, draft, checks, picWords, onChange, onPictures, onDele
         </div>
         <div className="flex items-center gap-2">
           <button type="button" className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-indigo-200 text-indigo-700 hover:bg-indigo-50 disabled:opacity-50 dark:border-indigo-800 dark:text-indigo-300 dark:hover:bg-indigo-950" onClick={() => void correctWithAi()} disabled={correcting} aria-label={correcting ? "Checking with AI" : "AI correction"} title={correcting ? "Checking with AI" : "AI correction"}>
-            <Sparkles className={`h-4 w-4 ${correcting ? "animate-pulse" : ""}`} aria-hidden="true" />
+            <Sparkles className={`h-4 w-4 ${correcting ? "animate-spin" : ""}`} aria-hidden="true" />
           </button>
           <button type="button" className="inline-flex h-9 w-9 items-center justify-center rounded-full text-rose-700 hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-950" onClick={onDelete} aria-label={`Delete ${tag} ${q.id}`} title={`Delete ${tag} ${q.id}`}>
             <Trash2 className="h-4 w-4" aria-hidden="true" />
@@ -1088,23 +1088,20 @@ function PublishStep({ verdict, band, counts, km, confirmed, status, busy, onPub
       </div>
       {!ready && <p className="rounded-xl bg-rose-50 px-3 py-2 text-sm font-bold text-rose-800 dark:bg-rose-950 dark:text-rose-200">Not ready: {reasons.join(" · ")}.</p>}
       <div className="flex flex-wrap items-center gap-2">
-        <button type="button" className={`${btn} bg-emerald-600 text-white hover:bg-emerald-700`} disabled={!ready || busy !== ""} onClick={onPublish}>
-          <BookOpen className="h-4 w-4" aria-hidden="true" />
-          {busy === "publish" ? "Publishing…" : "Publish revision"}
-        </button>
+        <UIButton type="button" variant="success" size="md" icon={<BookOpen className="h-4 w-4" aria-hidden="true" />} disabled={!ready || busy !== ""} isLoading={busy === "publish"} onClick={onPublish}>
+          Publish
+        </UIButton>
         {status.published && (
-          <button type="button" className={quiet} onClick={onUnpublish}>
-            <RefreshCw className="h-4 w-4" aria-hidden="true" />
+          <UIButton type="button" variant="ghost" size="sm" className="!rounded-full !border-0 !border-b-0 !px-2.5 !py-1 !font-semibold" icon={<RefreshCw className="h-4 w-4" aria-hidden="true" />} onClick={onUnpublish}>
             Remove from shelf
-          </button>
+          </UIButton>
         )}
         {onDelete && (sure ? (
-          <button type="button" className={`${btn} bg-rose-600 text-white`} onClick={onDelete}>Yes, delete this book</button>
+          <UIButton type="button" variant="ghost" size="sm" className="!rounded-full !border-0 !border-b-0 !px-2.5 !py-1 !font-semibold text-rose-700 dark:text-rose-300" onClick={onDelete}>Yes, delete this book</UIButton>
         ) : (
-          <button type="button" className={quiet} onClick={() => setSure(true)}>
-            <Trash2 className="h-4 w-4" aria-hidden="true" />
+          <UIButton type="button" variant="ghost" size="sm" className="!rounded-full !border-0 !border-b-0 !px-2.5 !py-1 !font-semibold text-rose-700 dark:text-rose-300" icon={<Trash2 className="h-4 w-4" aria-hidden="true" />} onClick={() => setSure(true)}>
             Delete
-          </button>
+          </UIButton>
         ))}
       </div>
     </div>
