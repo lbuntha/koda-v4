@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Koda Library — Phase 0 hand test</title>
+<style>
+:root{--ink:#0F172A;--body:#475569;--muted:#64748B;--indigo:#6B46C1;--line:#E2E8F0;--lav:#F3EEFE;--ok:#1F7A58;--okbg:#EDF8F3;--no:#B4245B;--nobg:#FFF1F6;--skip:#5B34A8}
+*{box-sizing:border-box}
+body{margin:0;background:#F8FAFC;color:var(--body);font:15px/1.55 "Plus Jakarta Sans",system-ui,sans-serif}
+main{width:min(1000px,calc(100% - 28px));margin:0 auto;padding:28px 0 60px}
+h1{margin:0 0 6px;color:var(--ink);font-size:30px;letter-spacing:-.03em}
+h2{margin:0 0 4px;color:var(--ink);font-size:19px}
+.lead{margin:0 0 20px;color:var(--muted)}
+.card{margin-bottom:18px;padding:20px;border:1px solid var(--line);border-radius:20px;background:#fff}
+.hint{margin:0 0 14px;color:var(--muted);font-size:13.5px}
+label{display:block;margin:10px 0 4px;color:var(--muted);font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase}
+input[type=text],textarea,select{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font:inherit}
+textarea{min-height:120px;font:13px/1.5 ui-monospace,Menlo,monospace}
+.kh{font-family:'Noto Sans Khmer','Khmer OS','Khmer MN',sans-serif}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+button{min-height:38px;padding:7px 14px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--ink);font:inherit;font-weight:700;cursor:pointer}
+button.pri{border-color:var(--indigo);background:var(--indigo);color:#fff}
+button[aria-pressed=true]{border-color:var(--indigo);background:var(--indigo);color:#fff}
+.tiles{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.tile{display:grid;min-width:52px;height:60px;padding:0 12px;place-items:center;border:2px solid #D8C9F5;border-radius:14px;background:var(--lav);color:#3F2A78;font-size:26px}
+.tile.extra{border-style:dashed;background:#fff}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:800}
+.pass{background:var(--okbg);color:var(--ok)} .fail{background:var(--nobg);color:var(--no)} .skipped{background:#EFE9FC;color:var(--skip)}
+.banner{margin:12px 0;padding:12px 14px;border-radius:14px;font-weight:700}
+.banner.pass{background:var(--okbg);color:var(--ok)} .banner.fail{background:var(--nobg);color:var(--no)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--muted);font-size:11.5px;letter-spacing:.05em;text-transform:uppercase}
+.mono{font-family:ui-monospace,Menlo,monospace;font-size:12.5px}
+.words{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
+.w{padding:5px 11px;border:1px solid #D8C9F5;border-radius:10px;background:var(--lav);color:#3F2A78;font-size:16px}
+.err{color:var(--no);font-weight:700}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:760px){.two{grid-template-columns:1fr}}
+.ring{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+.ring button{min-width:60px;height:60px;border-radius:50%;font-size:24px}
+.ring button:disabled{opacity:.35}
+.gap{display:inline-block;min-width:70px;border-bottom:3px solid var(--indigo);text-align:center;color:var(--indigo);font-weight:800}
+</style>
+</head>
+<body>
+<main>
+  <h1>Koda Library — Phase 0 hand test</h1>
+  <p class="lead">This page runs the real Phase 0 code — the same files the automated tests check — so you can try it yourself. There is no app screen for Phase 0; this is the screen.</p>
+
+  <section class="card">
+    <h2>1 · Tiles — what a learner spells with</h2>
+    <p class="hint">English spells in letters. Khmer spells in clusters: a base consonant with the subscripts under it is one tile, and every vowel sign is a tile of its own. Try <b class="kh">ស្វាយ</b>, <b class="kh">ស្ត្រី</b> (two subscripts on one base), or a word that cannot be drawn.</p>
+    <div class="row"><button id="tEn" aria-pressed="false">English</button><button id="tKm" aria-pressed="true">ភាសាខ្មែរ</button></div>
+    <label for="tWord">A word</label>
+    <input type="text" id="tWord" class="kh" value="ស្វាយ" spellcheck="false">
+    <div id="tOut"></div>
+    <label for="tAns">Your answer — typed as whole text, however you like to split it</label>
+    <input type="text" id="tAns" class="kh" spellcheck="false" placeholder="Type the word again to see it judged">
+    <div id="tJudge" class="hint" style="margin-top:8px"></div>
+  </section>
+
+  <section class="card">
+    <h2>2 · Split a story, and blank a word</h2>
+    <p class="hint">Paste a story. It becomes sentences and words. For Khmer the words are only a <b>proposal</b> from the browser's breaker — look for one that joined two words. A space you type forces a break.</p>
+    <div class="row"><button id="sEn" aria-pressed="false">English</button><button id="sKm" aria-pressed="true">ភាសាខ្មែរ</button></div>
+    <label for="sText">Story</label>
+    <textarea id="sText" class="kh" spellcheck="false">សុខាទៅផ្សារជាមួយម្តាយ។
+នាងទិញស្វាយមួយ។
+ស្វាយផ្អែមណាស់។</textarea>
+    <div id="sOut"></div>
+    <div class="row" style="margin-top:8px"><div style="flex:1;min-width:180px"><label for="gSent">Sentence</label><select id="gSent"></select></div><div style="flex:1;min-width:180px"><label for="gWord">Word to blank</label><input type="text" id="gWord" class="kh" spellcheck="false"></div></div>
+    <div id="gOut" style="margin-top:10px"></div>
+  </section>
+
+  <section class="card">
+    <h2>3 · Check a story</h2>
+    <p class="hint">The eight checks a story must pass before anyone is asked to publish it. Pick a starter story, then press a <b>Break it</b> button and watch exactly one rule turn red. You can also edit the JSON by hand.</p>
+    <div class="row">
+      <div style="flex:1;min-width:200px"><label for="cSel">Starter story</label><select id="cSel"></select></div>
+      <label style="margin:20px 0 0;text-transform:none;letter-spacing:0;font-size:14px"><input type="checkbox" id="cConf" checked> A person confirmed the word split</label>
+      <div><label for="cStage">Stage</label><select id="cStage"><option value="draft">Draft</option><option value="publish">Publish</option></select></div>
+    </div>
+    <div class="row" style="margin-top:10px"><b style="color:var(--ink)">Break it:</b>
+      <button data-m="longest">Right answer → longest</button><button data-m="evidence">Wrong evidence sentence</button><button data-m="nostory">Wrong choices not from the story</button>
+      <button data-m="spellword">Spelling word not in sentence</button><button data-m="audio">Remove a recording</button><button data-m="dropspell">Delete a spelling question</button><button data-m="rejoin">Words don't rejoin</button><button data-m="reset">Reset</button></div>
+    <div id="cBanner"></div>
+    <table id="cRules"></table>
+    <details style="margin-top:10px"><summary>Every individual check</summary><table id="cChecks"></table></details>
+    <details style="margin-top:10px"><summary>The story as JSON — editable</summary><textarea id="cJson" class="kh" spellcheck="false" style="min-height:260px"></textarea></details>
+  </section>
+
+  <section class="card">
+    <h2>4 · Spell it — the deck from the story above</h2>
+    <p class="hint">Each spelling question becomes the story sentence with a blank, and a ring of tiles. Tap tiles in order, then check. A story that cannot be played shows the error instead.</p>
+    <div id="dOut"></div>
+  </section>
+</main>
+<script>var KodaLibrary=(()=>{var W=Object.defineProperty;var ne=Object.getOwnPropertyDescriptor;var se=Object.getOwnPropertyNames;var oe=Object.prototype.hasOwnProperty;var re=(e,s)=>{for(var o in s)W(e,o,{get:s[o],enumerable:!0})},ie=(e,s,o,n)=>{if(s&&typeof s=="object"||typeof s=="function")for(let i of se(s))!oe.call(e,i)&&i!==o&&W(e,i,{get:()=>s[i],enumerable:!(n=ne(s,i))||n.enumerable});return e};var ae=e=>ie(W({},"__esModule",{value:!0}),e);var ve={};re(ve,{BANDS:()=>$,MAX_TILES:()=>A,MIN_TILES:()=>_,RING_MAX:()=>q,RULES:()=>C,STARTER_PASSAGES:()=>z,buildSpellingDeck:()=>F,core:()=>T,gapOf:()=>k,judgeSpelling:()=>K,parseStory:()=>U,pickExtras:()=>R,ringOf:()=>X,sentenceText:()=>f,spellsWord:()=>I,tilesOf:()=>S,verifyPassage:()=>J,whyUnspellable:()=>x});var $={A:{understand:2,words:2,spell:3,ages:[5,7]},B:{understand:3,words:2,spell:5,ages:[8,10]}},_=2,A=8,q=8,P=3;var Q={id:"starter-market",rev:1,language:"en",band:"A",title:"At the Market",category:"Food",picture:"market",sentences:[{id:"s1",text:"Sokha goes to the market with her mother.",words:["Sokha","goes","to","the","market","with","her","mother."],audio:"s1.m4a"},{id:"s2",text:"She buys a mango and two bananas.",words:["She","buys","a","mango","and","two","bananas."],audio:"s2.m4a"},{id:"s3",text:"The mango is sweet.",words:["The","mango","is","sweet."],audio:"s3.m4a"},{id:"s4",text:"They walk home under the hot sun.",words:["They","walk","home","under","the","hot","sun."],audio:"s4.m4a"}],questions:[{id:"q1",kind:"comprehension",prompt:"Where did they walk after the market?",options:["To the market","Home","Under the hot sun"],answer:1,evidence:"s4"},{id:"q2",kind:"comprehension",prompt:"What is sweet?",options:["The market","The mango","The sun"],answer:1,evidence:"s3"},{id:"q3",kind:"vocab",prompt:"Which picture is \u201Cbanana\u201D?",word:"banana",options:["mango","banana","orange"],answer:1},{id:"q4",kind:"vocab",prompt:"Which picture is \u201Cmarket\u201D?",word:"market",options:["market","cat","nest"],answer:0},{id:"sp1",kind:"spell",sentence:"s1",word:"market"},{id:"sp2",kind:"spell",sentence:"s2",word:"mango"},{id:"sp3",kind:"spell",sentence:"s3",word:"sweet"}],pictures:{market:"market",mango:"mango",banana:"banana",bananas:"banana"},noRecording:["Sokha"],provenance:"Hand-written sample for tests and the bundled starter shelf."};var H={id:"starter-market-km",rev:1,language:"km",band:"A",title:"\u1793\u17C5\u1795\u17D2\u179F\u17B6\u179A",category:"Food",picture:"market",sentences:[{id:"s1",text:"\u179F\u17BB\u1781\u17B6\u1791\u17C5\u1795\u17D2\u179F\u17B6\u179A\u1787\u17B6\u1798\u17BD\u1799\u1798\u17D2\u178F\u17B6\u1799\u17D4",words:["\u179F\u17BB\u1781\u17B6","\u1791\u17C5","\u1795\u17D2\u179F\u17B6\u179A","\u1787\u17B6\u1798\u17BD\u1799","\u1798\u17D2\u178F\u17B6\u1799\u17D4"],audio:"s1.m4a"},{id:"s2",text:"\u1793\u17B6\u1784\u1791\u17B7\u1789\u179F\u17D2\u179C\u17B6\u1799\u1798\u17BD\u1799\u17D4",words:["\u1793\u17B6\u1784","\u1791\u17B7\u1789","\u179F\u17D2\u179C\u17B6\u1799","\u1798\u17BD\u1799\u17D4"],audio:"s2.m4a"},{id:"s3",text:"\u179F\u17D2\u179C\u17B6\u1799\u1795\u17D2\u17A2\u17C2\u1798\u178E\u17B6\u179F\u17CB\u17D4",words:["\u179F\u17D2\u179C\u17B6\u1799","\u1795\u17D2\u17A2\u17C2\u1798","\u178E\u17B6\u179F\u17CB\u17D4"],audio:"s3.m4a"}],questions:[{id:"q1",kind:"comprehension",prompt:"\u178F\u17BE\u179F\u17BB\u1781\u17B6\u1791\u17C5\u1795\u17D2\u179F\u17B6\u179A\u1787\u17B6\u1798\u17BD\u1799\u1793\u179A\u178E\u17B6?",options:["\u17AA\u1796\u17BB\u1780","\u1798\u17D2\u178F\u17B6\u1799","\u179F\u17D2\u179C\u17B6\u1799"],answer:1,evidence:"s1"},{id:"q2",kind:"comprehension",prompt:"\u178F\u17BE\u17A2\u17D2\u179C\u17B8\u1795\u17D2\u17A2\u17C2\u1798?",options:["\u1795\u17D2\u179F\u17B6\u179A","\u179F\u17D2\u179C\u17B6\u1799","\u1798\u17D2\u178F\u17B6\u1799"],answer:1,evidence:"s3"},{id:"q3",kind:"vocab",prompt:"\u178F\u17BE\u179A\u17BC\u1794\u178E\u17B6\u1787\u17B6 \u201C\u179F\u17D2\u179C\u17B6\u1799\u201D?",word:"\u179F\u17D2\u179C\u17B6\u1799",options:["banana","mango","orange"],answer:1},{id:"q4",kind:"vocab",prompt:"\u178F\u17BE\u179A\u17BC\u1794\u178E\u17B6\u1787\u17B6 \u201C\u1795\u17D2\u179F\u17B6\u179A\u201D?",word:"\u1795\u17D2\u179F\u17B6\u179A",options:["cat","mango","market"],answer:2},{id:"sp1",kind:"spell",sentence:"s1",word:"\u1795\u17D2\u179F\u17B6\u179A"},{id:"sp2",kind:"spell",sentence:"s2",word:"\u179F\u17D2\u179C\u17B6\u1799"},{id:"sp3",kind:"spell",sentence:"s3",word:"\u1795\u17D2\u17A2\u17C2\u1798"}],pictures:{\u179F\u17D2\u179C\u17B6\u1799:"mango",\u1795\u17D2\u179F\u17B6\u179A:"market"},noRecording:["\u179F\u17BB\u1781\u17B6"],provenance:"Hand-written sample. The Khmer has NOT been reviewed by a native speaker and must be before this ships."};var G={id:"starter-rainy-day",rev:1,language:"en",band:"B",title:"A Rainy Day",category:"Weather & play",picture:"rain",sentences:[{id:"s1",text:"It rained all morning, so Dara stayed inside.",words:["It","rained","all","morning,","so","Dara","stayed","inside."],audio:"s1.m4a"},{id:"s2",text:"He built a tall tower from wooden blocks.",words:["He","built","a","tall","tower","from","wooden","blocks."],audio:"s2.m4a"},{id:"s3",text:"His little sister knocked it down and laughed.",words:["His","little","sister","knocked","it","down","and","laughed."],audio:"s3.m4a"},{id:"s4",text:"Dara was not angry, because it was only a game.",words:["Dara","was","not","angry,","because","it","was","only","a","game."],audio:"s4.m4a"},{id:"s5",text:"By lunch the storm had passed.",words:["By","lunch","the","storm","had","passed."],audio:"s5.m4a"},{id:"s6",text:"They ran outside to jump in the puddles.",words:["They","ran","outside","to","jump","in","the","puddles."],audio:"s6.m4a"}],questions:[{id:"q1",kind:"comprehension",prompt:"Why did Dara stay inside?",options:["He was angry all day","Because it rained","He was afraid of the storm"],answer:1,evidence:"s1"},{id:"q2",kind:"comprehension",prompt:"What did Dara build?",options:["A wooden boat","A little game","A tall tower"],answer:2,evidence:"s2"},{id:"q3",kind:"comprehension",prompt:"What did his sister do to the tower?",options:["She jumped in puddles","She knocked it down","She built it higher"],answer:1,evidence:"s3"},{id:"q4",kind:"vocab",prompt:"Which picture is \u201Ctower\u201D?",word:"tower",options:["puddle","tower","nest"],answer:1},{id:"q5",kind:"vocab",prompt:"Which picture is \u201Cpuddle\u201D?",word:"puddle",options:["cat","tower","puddle"],answer:2},{id:"sp1",kind:"spell",sentence:"s1",word:"rained"},{id:"sp2",kind:"spell",sentence:"s2",word:"tower"},{id:"sp3",kind:"spell",sentence:"s3",word:"laughed"},{id:"sp4",kind:"spell",sentence:"s5",word:"storm"},{id:"sp5",kind:"spell",sentence:"s6",word:"puddles"}],pictures:{tower:"tower",puddle:"puddle",puddles:"puddle"},noRecording:["Dara"],provenance:"Hand-written sample for tests and the bundled starter shelf."};var z=[Q,G,H];var b,pe=e=>{if(b===void 0)try{b=new Intl.Segmenter("km",{granularity:"word"})}catch{b=null}return b?[...b.segment(e)].map(s=>s.segment):[e]},ge=e=>e==="km"?"":" ",f=(e,s)=>e.join(ge(s)),T=e=>e.replace(/^[^\p{L}\p{M}\p{N}]+/u,"").replace(/[^\p{L}\p{M}\p{N}]+$/u,"");function ue(e){return e.split(/\n+/).flatMap(s=>s.trim().split(/(?<=[.!?។៕])\s*/u)).map(s=>s.trim()).filter(Boolean)}var he=e=>/^[\p{P}\p{S}]+$/u.test(e);function me(e,s,o=pe){let n=e.split(/\s+/).filter(Boolean);if(s!=="km")return n;let i=n.flatMap(p=>o(p)),a=[];for(let p of i)he(p)&&a.length?a[a.length-1]+=p:a.push(p);return a}function U(e,s,o){return ue(e).map((n,i)=>{let a=me(n,s,o);return{id:`s${i+1}`,text:f(a,s),words:a}})}function k(e,s,o){let n=s.normalize("NFC").toLowerCase(),i=e.words.findIndex(u=>T(u).normalize("NFC").toLowerCase()===n);if(i<0)return null;let a=T(e.words[i]),p=e.words.slice();return p[i]=p[i].replace(a,"___"),{text:f(p,o),original:a,index:i}}var M=6098,j=e=>e>=6016&&e<=6050,we=e=>e>=6051&&e<=6067,fe=e=>e>=6068&&e<=6085,ke=e=>e>=6086&&e<=6097||e===6099||e===6109,O=e=>j(e)||we(e),xe=e=>O(e)||fe(e)||ke(e)||e===M,V=(e,s)=>{let o=e.normalize("NFC");return s==="en"?o.toUpperCase():o};function S(e,s){let o=e.normalize("NFC");if(s==="en")return[...o.toUpperCase()];let n=[...o],i=[];for(let a=0;a<n.length;a++){let p=n[a].codePointAt(0)??0;if(O(p)){let u=n[a];for(;a+2<n.length&&(n[a+1].codePointAt(0)??0)===M&&j(n[a+2].codePointAt(0)??0);)u+=n[a+1]+n[a+2],a+=2;i.push(u)}else i.push(n[a])}return i}var ye=(e,s)=>V(e.join(""),s),I=(e,s,o)=>ye(e,o)===V(s,o);function x(e,s){let o=e.normalize("NFC");if(!o)return"empty";if(s==="en"){if(!/^[A-Za-z]+$/.test(o))return"not_letters"}else{let i=[...o].map(a=>a.codePointAt(0)??0);if(!i.every(xe))return"not_letters";if(!O(i[0]))return"starts_with_mark";for(let a=0;a<i.length;a++)if(i[a]===M&&!(a+1<i.length&&j(i[a+1])))return"dangling_coeng"}let n=S(o,s).length;return n<_?"too_few_tiles":n>A?"too_many_tiles":null}function R(e,s,o=1){return(s==="km"?["\u1780","\u1798","\u178F","\u1793","\u1794","\u179B"]:[..."ZQXJVWK"]).filter(i=>!e.includes(i)).slice(0,Math.max(0,o))}function F(e){let s=[];for(let o of e.questions){if(o.kind!=="spell")continue;let n=e.sentences.find(E=>E.id===o.sentence);if(!n)throw new Error(`${e.id}/${o.id}: sentence ${o.sentence} does not exist`);let i=k(n,o.word,e.language);if(!i)throw new Error(`${e.id}/${o.id}: \u201C${o.word}\u201D is not a word of ${n.id}`);let a=x(o.word,e.language);if(a)throw new Error(`${e.id}/${o.id}: \u201C${o.word}\u201D cannot be spelled (${a})`);let p=S(o.word,e.language),u=R(p,e.language,Math.max(0,Math.min(1,q-p.length)));s.push({id:`${e.id}/${o.id}`,sentenceId:n.id,word:o.word,original:i.original,tiles:p,extras:u,gapped:i.text})}return s}function X(e,s=Math.random){let o=[...e.tiles,...e.extras];for(let n=o.length-1;n>0;n--){let i=Math.floor(s()*(n+1));[o[n],o[i]]=[o[i],o[n]]}return o}var K=(e,s,o)=>I(s,e.word,o.language)?"correct":"wrong";var C={1:{title:"The answer is in the story",detail:"The right choice's key word is in its evidence sentence; a picture word is in the story."},2:{title:"Wrong choices come from the story",detail:"At least one wrong choice uses the story's own words; the rest are the same kind of thing."},3:{title:"The right answer is not the longest",detail:"Otherwise a child can pick it without reading."},4:{title:"Questions read no harder than the story",detail:"Every word is in the story or the child lexicon."},5:{title:"Spelling words fit the ring and re-join",detail:"2\u20138 tiles, and the gapped sentence re-joins to the original."},6:{title:"No two questions share an answer or a sentence",detail:"Within one part."},7:{title:"Every sentence has a recording",detail:"Recorded at publish."},8:{title:"Khmer word splits are confirmed by a person",detail:"The segmenter only proposes."}},be=new Set("the a an and is was were are to of in on at it he she they his her its with for from that this then so but or as by be had has have not all up down out into under over very we you i my your our their them him am do did does no yes if when while because".split(" ")),N=e=>e.toLowerCase().split(/[^\p{L}\p{M}]+/u).filter(Boolean),Z=e=>N(e).filter(s=>!be.has(s)&&[...s].length>=3).map(s=>[...s].slice(0,4).join("")),Se=e=>[...e].length;function J(e,s={}){let o=[],n=(t,r,d,c)=>o.push({rule:t,question:r,status:d==="skipped"?"skipped":d?"pass":"fail",message:c}),i=new Set;for(let t of e.sentences)i.has(t.id)&&n(0,"story",!1,`two sentences are called ${t.id}`),i.add(t.id),!t.words.length||t.words.some(r=>!r.trim())?n(0,t.id,!1,"the sentence has an empty word"):t.text!==f(t.words,e.language)&&n(0,t.id,!1,"the words no longer rejoin to the sentence text");e.sentences.length||n(0,"story",!1,"the story has no sentences"),e.title.trim()||n(0,"story",!1,"the story has no title");let a=new Set;for(let t of e.questions)if(a.has(t.id)&&n(0,t.id,!1,"two questions share this id"),a.add(t.id),t.kind!=="spell"){t.options.length!==P&&n(0,t.id,!1,`needs exactly ${P} choices`),t.answer>=0&&t.answer<t.options.length||n(0,t.id,!1,"the answer index is outside the choices");let r=new Set(t.options.map(d=>d.trim().toLowerCase()));(r.size!==t.options.length||r.has(""))&&n(0,t.id,!1,"the choices are not all different and non-empty")}let p=t=>e.sentences.find(r=>r.id===t),u=e.sentences.map(t=>t.text).join(" ").toLowerCase(),E=new Set(N(u)),Y=t=>t.kind==="spell"||t.answer>=0&&t.answer<t.options.length;for(let t of e.questions.filter(Y)){if(t.kind==="comprehension"){let r=p(t.evidence),d=t.options[t.answer];if(!r)n(1,t.id,!1,`evidence ${t.evidence} does not exist`);else{let w=Z(d).some(y=>r.text.toLowerCase().includes(y));n(1,t.id,w,w?`the answer's key word is in ${r.id}`:`the answer's key word is not in ${r.id}`)}let c=t.options.filter((w,y)=>y!==t.answer),l=c.filter(w=>Z(w).some(y=>u.includes(y))).length;n(2,t.id,l>=1,`${l} of ${c.length} wrong choices use the story's words`+(l===0?" \u2014 a child can rule them out without reading":l<c.length?" \u2014 a person confirms the rest":""));let h=t.options.map(Se),m=Math.max(...h),g=h[t.answer]===m&&h.filter(w=>w===m).length===1;n(3,t.id,!g,g?"the right answer is the longest \u2014 pickable without reading":"the right answer is not the longest")}if(t.kind==="vocab"){let r=e.pictures[t.word.toLowerCase()]??e.pictures[t.word],d=u.includes(t.word.toLowerCase());r?d?t.options[t.answer]!==r?n(1,t.id,!1,`the right picture should be \u201C${r}\u201D`):n(1,t.id,!0,"the word is in the story and its picture matches"):n(1,t.id,!1,`\u201C${t.word}\u201D is not in the story`):n(1,t.id,!1,`no picture is declared for \u201C${t.word}\u201D`)}if(t.kind==="spell"){let r=p(t.sentence),d=r&&k(r,t.word,e.language);if(!r)n(5,t.id,!1,`sentence ${t.sentence} does not exist`);else if(!d)n(5,t.id,!1,`\u201C${t.word}\u201D is not a word of ${r.id}`);else{let c=x(t.word,e.language),l=d.text.replace("___",d.original)===r.text;n(5,t.id,!c&&l,c?`cannot be spelled: ${c}`:l?"fits the ring and the gapped sentence re-joins":"the gapped sentence does NOT re-join")}}}for(let t of e.questions.filter(r=>r.kind!=="spell"))t.prompt.trim()||n(4,t.id,!1,"the question has no text");if(s.lexicon){let t=s.lexicon;for(let r of e.questions){if(r.kind==="spell")continue;let d=r.kind==="comprehension"?[r.prompt,...r.options].join(" "):r.prompt,c=[...new Set(N(d).filter(l=>!t.has(l)&&!E.has(l)))];n(4,r.id,c.length===0,c.length?`not in the story or the lexicon: ${c.slice(0,3).join(", ")}`:"every word is in the story or the lexicon")}}else n(4,"story","skipped","needs the child lexicon \u2014 not run");let ee=[["comprehension",t=>t.kind==="comprehension"?(t.options[t.answer]??"").toLowerCase():"",t=>t.kind==="comprehension"?t.evidence:null],["vocab",t=>t.kind==="vocab"?t.word.toLowerCase():"",()=>null],["spell",t=>t.kind==="spell"?t.word.toLowerCase():"",t=>t.kind==="spell"?t.sentence:null]];for(let[t,r,d]of ee){let c=e.questions.filter(l=>l.kind===t);for(let l of c){let h=c.some(m=>m!==l&&(r(m)===r(l)||d(l)!==null&&d(m)===d(l)));n(6,l.id,!h,h?"shares its answer or sentence with another question in this part":"unique answer and sentence in this part")}}if(s.stage==="publish"){let t=e.sentences.filter(r=>!r.audio).map(r=>r.id);n(7,"story",t.length===0,t.length?`no recording for ${t.join(", ")}`:"every sentence has a recording")}else n(7,"story",e.sentences.length>0,`${e.sentences.length} sentence recordings are made at publish`);n(8,"story",e.language!=="km"||!!s.confirmedSplit,e.language!=="km"?"English splits on spaces \u2014 nothing to confirm":s.confirmedSplit?"a person confirmed the split":"not confirmed yet");let te=Object.keys(C).map(t=>{let r=Number(t),d=o.filter(g=>g.rule===r),c=d.filter(g=>g.status==="fail"),l=d.find(g=>g.status==="skipped"),h=c.length?"fail":l?"skipped":"pass",m=c.length?c.slice(0,2).map(g=>`${g.question}: ${g.message}`).join(" \xB7 "):l?l.message:d.length?r>=7?d[0].message:`all ${d.length} pass`:"nothing to check";return{rule:r,title:C[r].title,status:h,message:m}}),v={comprehension:e.questions.filter(t=>t.kind==="comprehension").length,vocab:e.questions.filter(t=>t.kind==="vocab").length,spell:e.questions.filter(t=>t.kind==="spell").length},L=$[e.band],B=!!L&&v.comprehension===L.understand&&v.vocab===L.words&&v.spell===L.spell,D=o.filter(t=>t.status==="fail").length;return{checks:o,rules:te,counts:v,countsMatchBand:B,failures:D,publishable:D===0&&B}}return ae(ve);})();
+</script>
+<script>
+"use strict";
+const K = KodaLibrary, $ = (id) => document.getElementById(id);
+const esc = (x) => String(x).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const pair = (a, b, fn) => { $(a).onclick = () => { $(a).setAttribute("aria-pressed", "true"); $(b).setAttribute("aria-pressed", "false"); fn(a); }; $(b).onclick = () => { $(b).setAttribute("aria-pressed", "true"); $(a).setAttribute("aria-pressed", "false"); fn(b); }; };
+const REASONS = { empty: "there is no word", not_letters: "it has characters that are not letters of this language", starts_with_mark: "it starts with a mark that has no consonant to sit on", dangling_coeng: "a subscript marker points at nothing", too_few_tiles: "fewer than 2 tiles", too_many_tiles: "more than 8 tiles — it will not fit a 360px ring" };
+
+/* 1 · tiles */
+let tLang = "km";
+function tiles() {
+  const w = $("tWord").value.trim(), why = w ? K.whyUnspellable(w, tLang) : "empty", t = w ? K.tilesOf(w, tLang) : [];
+  const ex = !why ? K.pickExtras(t, tLang, 1) : [];
+  $("tOut").innerHTML = `<div class="tiles ${tLang === "km" ? "kh" : ""}">${t.map((x) => `<span class="tile">${esc(x)}</span>`).join("")}${ex.map((x) => `<span class="tile extra" title="the distractor">${esc(x)}</span>`).join("")}</div>
+    <div>${why ? `<span class="pill fail">cannot be a spelling word</span> ${esc(REASONS[why] || why)}` : `<span class="pill pass">can be a spelling word</span> ${t.length} tiles${ex.length ? ` · dashed tile is the distractor` : ""}`}</div>`;
+  const a = $("tAns").value.trim();
+  $("tJudge").innerHTML = a ? (K.spellsWord([a], w, tLang) ? '<span class="pill pass">correct</span> the whole text matches the word' : '<span class="pill fail">wrong</span> that is a different word') : "";
+}
+pair("tEn", "tKm", (id) => { tLang = id === "tEn" ? "en" : "km"; $("tWord").value = tLang === "en" ? "sheep" : "ស្វាយ"; $("tWord").classList.toggle("kh", tLang === "km"); $("tAns").value = ""; tiles(); });
+$("tWord").oninput = tiles; $("tAns").oninput = tiles; tiles();
+
+/* 2 · split + gap */
+let sLang = "km", story = [];
+function split() {
+  story = K.parseStory($("sText").value, sLang);
+  $("sOut").innerHTML = story.map((s) => `<div style="margin-top:10px"><b class="mono">${s.id}</b> <span class="mono" style="color:var(--muted)">${s.words.length} words</span><div class="words ${sLang === "km" ? "kh" : ""}">${s.words.map((w) => `<span class="w">${esc(w)}</span>`).join("")}</div></div>`).join("") || '<p class="hint">Nothing to split yet.</p>';
+  const cur = $("gSent").value; $("gSent").innerHTML = story.map((s) => `<option>${s.id}</option>`).join(""); if (story.some((s) => s.id === cur)) $("gSent").value = cur;
+  gap();
+}
+function gap() {
+  const s = story.find((x) => x.id === $("gSent").value), w = $("gWord").value.trim();
+  if (!s || !w) { $("gOut").innerHTML = '<span class="hint">Type a word from the sentence to blank it.</span>'; return; }
+  const g = K.gapOf(s, w, sLang);
+  $("gOut").innerHTML = g ? `<div class="${sLang === "km" ? "kh" : ""}" style="font-size:20px">${esc(g.text).replace("___", '<span class="gap">&nbsp;</span>')}</div><div class="hint">the word as the story wrote it: <b>${esc(g.original)}</b> · word number ${g.index + 1}</div>` : `<span class="pill fail">not in that sentence</span>`;
+}
+pair("sEn", "sKm", (id) => { sLang = id === "sEn" ? "en" : "km"; $("sText").value = sLang === "en" ? "Sokha goes to the market with her mother.\nShe buys a mango and two bananas." : "សុខាទៅផ្សារជាមួយម្តាយ។\nនាងទិញស្វាយមួយ។\nស្វាយផ្អែមណាស់។"; $("sText").classList.toggle("kh", sLang === "km"); $("gWord").classList.toggle("kh", sLang === "km"); $("gWord").value = ""; split(); });
+$("sText").oninput = split; $("gSent").onchange = gap; $("gWord").oninput = gap; split();
+
+/* 3 · check */
+const clone = (x) => JSON.parse(JSON.stringify(x));
+K.STARTER_PASSAGES.forEach((p, i) => $("cSel").insertAdjacentHTML("beforeend", `<option value="${i}">${esc(p.title)} — ${p.language.toUpperCase()}, band ${p.band}</option>`));
+const cur = () => { try { return JSON.parse($("cJson").value); } catch (e) { $("cBanner").innerHTML = `<div class="banner fail">The JSON is not valid: ${esc(e.message)}</div>`; return null; } };
+function load() { $("cJson").value = JSON.stringify(K.STARTER_PASSAGES[+$("cSel").value], null, 2); check(); }
+function check() {
+  const p = cur(); if (!p) return;
+  let v; try { v = K.verifyPassage(p, { confirmedSplit: $("cConf").checked, stage: $("cStage").value }); } catch (e) { $("cBanner").innerHTML = `<div class="banner fail">The checker threw: ${esc(e.message)}</div>`; return; }
+  const band = K.BANDS[p.band] || {};
+  $("cBanner").innerHTML = `<div class="banner ${v.publishable ? "pass" : "fail"}">${v.publishable ? "✓ Publishable" : "✕ Not publishable"} — ${v.failures} failing check${v.failures === 1 ? "" : "s"} · counts ${v.counts.comprehension}/${band.understand} understand, ${v.counts.vocab}/${band.words} words, ${v.counts.spell}/${band.spell} spell ${v.countsMatchBand ? "✓" : "✕ (must match exactly)"}</div>`;
+  $("cRules").innerHTML = `<tr><th></th><th>Rule</th><th>Result</th></tr>` + v.rules.map((r) => `<tr><td><span class="pill ${r.status}">${r.status}</span></td><td><b>${r.rule}</b> · ${esc(r.title)}</td><td>${esc(r.message)}</td></tr>`).join("");
+  const zero = v.checks.filter((c) => c.rule === 0 && c.status === "fail");
+  if (zero.length) $("cRules").innerHTML += `<tr><td><span class="pill fail">fail</span></td><td><b>0</b> · Is this a passage</td><td>${zero.map((c) => `${esc(c.question)}: ${esc(c.message)}`).join("<br>")}</td></tr>`;
+  $("cChecks").innerHTML = `<tr><th>Rule</th><th>Question</th><th></th><th>Message</th></tr>` + v.checks.map((c) => `<tr><td>${c.rule}</td><td class="mono">${esc(c.question)}</td><td><span class="pill ${c.status}">${c.status}</span></td><td>${esc(c.message)}</td></tr>`).join("");
+  deck(p);
+}
+const MUT = {
+  longest: (p) => { const q = p.questions.find((x) => x.kind === "comprehension"); q.options[q.answer] += " and some more words"; },
+  evidence: (p) => { const q = p.questions.find((x) => x.kind === "comprehension"); q.evidence = p.sentences.find((s) => s.id !== q.evidence).id; },
+  nostory: (p) => { const q = p.questions.find((x) => x.kind === "comprehension"); q.options = q.options.map((o, i) => (i === q.answer ? o : "Zebra " + "xyz".repeat(i + 1))); },
+  spellword: (p) => { p.questions.find((x) => x.kind === "spell").word = "zebra"; },
+  audio: (p) => { delete p.sentences[p.sentences.length - 1].audio; $("cStage").value = "publish"; },
+  dropspell: (p) => { const i = p.questions.findIndex((x) => x.kind === "spell"); p.questions.splice(i, 1); },
+  rejoin: (p) => { p.sentences[0].words[1] = "CHANGED"; },
+};
+document.querySelectorAll("[data-m]").forEach((b) => b.onclick = () => { if (b.dataset.m === "reset") return load(); const p = cur(); if (!p) return; MUT[b.dataset.m](p); $("cJson").value = JSON.stringify(p, null, 2); check(); });
+$("cSel").onchange = load; $("cConf").onchange = check; $("cStage").onchange = check; $("cJson").oninput = check;
+
+/* 4 · deck */
+let dk = [], di = 0, picked = [], dp = null, ring = [];
+function deck(p) {
+  dp = p; di = 0; picked = [];
+  try { dk = K.buildSpellingDeck(p); } catch (e) { dk = []; $("dOut").innerHTML = `<div class="banner fail">This story cannot be played: ${esc(e.message)}</div>`; return; }
+  ring = dk.length ? K.ringOf(dk[0]) : []; drawDeck();
+}
+function drawDeck(msg) {
+  if (!dk.length) { if (!$("dOut").innerHTML.includes("banner")) $("dOut").innerHTML = '<p class="hint">This story has no spelling questions.</p>'; return; }
+  const w = dk[di], km = dp.language === "km", used = new Set(picked);
+  $("dOut").innerHTML = `<div class="hint">Word ${di + 1} of ${dk.length} · <span class="mono">${esc(w.id)}</span></div>
+    <div class="${km ? "kh" : ""}" style="font-size:22px">${esc(w.gapped).replace("___", '<span class="gap">&nbsp;</span>')}</div>
+    <div class="tiles ${km ? "kh" : ""}" style="min-height:70px">${picked.map((i) => `<span class="tile">${esc(ring[i])}</span>`).join("") || '<span class="hint">tap tiles in order</span>'}</div>
+    <div class="ring ${km ? "kh" : ""}">${ring.map((t, i) => `<button data-t="${i}" ${used.has(i) ? "disabled" : ""}>${esc(t)}</button>`).join("")}</div>
+    <div class="row"><button id="dCheck" class="pri">Check</button><button id="dClear">Start over</button><button id="dNext">Next word ›</button><span id="dMsg">${msg || ""}</span></div>`;
+  document.querySelectorAll("[data-t]").forEach((b) => b.onclick = () => { picked.push(+b.dataset.t); drawDeck(); });
+  $("dClear").onclick = () => { picked = []; drawDeck(); };
+  $("dNext").onclick = () => { di = (di + 1) % dk.length; picked = []; ring = K.ringOf(dk[di]); drawDeck(); };
+  $("dCheck").onclick = () => { const r = K.judgeSpelling(w, picked.map((i) => ring[i]), dp); drawDeck(r === "correct" ? '<span class="pill pass">correct</span>' : '<span class="pill fail">wrong — try again</span>'); };
+}
+load();
+</script>
+</body>
+</html>

@@ -25,6 +25,7 @@
     "@anthropic-ai/sdk": "^0.120.0",
     "@dicebear/collection": "^9.4.2",
     "@dicebear/core": "^9.4.3",
+    "@fontsource/noto-sans-khmer": "^5.3.0",
     "@google/genai": "^2.4.0",
     "@tailwindcss/vite": "^4.1.14",
     "@vitejs/plugin-react": "^5.0.4",

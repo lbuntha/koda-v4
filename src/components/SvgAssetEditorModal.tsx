@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Check, Loader2, ShieldCheck, Sparkles, X } from "lucide-react";
 import { SvgMarkup } from "../assets/svg";
-import { preprocessSvgMarkup, sanitizeSvgMarkup, isSafeSvgMarkup } from "../utils/svg";
+import { preprocessSvgMarkup, inspectSvgMarkup } from "../utils/svg";
 import { themeSystem } from "../lib/themeSystem";
 import {
   SUGGESTED_SVG_CATEGORIES,
@@ -19,62 +19,17 @@ import {
 } from "../lib/artGenerationApi";
 import { useSystem } from "../lib/sync";
 
-/** Elements and attributes in a document, for comparing before and after sanitising. */
-function countMarkup(markup: string): { elements: number; attributes: number } | null {
-  if (!markup || typeof DOMParser === "undefined") return null;
-  const parsed = new DOMParser().parseFromString(markup, "image/svg+xml");
-  if (parsed.getElementsByTagName("parsererror").length > 0) return null;
-  const elements = parsed.querySelectorAll("*");
-  let attributes = 0;
-  elements.forEach((element) => {
-    attributes += element.attributes.length;
-  });
-  return { elements: elements.length, attributes };
-}
-
-type Verdict =
-  | { state: "empty" }
-  | { state: "invalid"; message: string }
-  | { state: "ok"; droppedElements: number; droppedAttributes: number };
-
-/**
- * What the pipeline will do to this markup, worked out while the author types.
- *
- * The sanitiser drops silently by design, so the one place that must not be
- * silent is here: paste artwork using something outside the allowlist and the
- * count tells you before it becomes a blank space in a lesson.
- */
-function inspect(markup: string): Verdict {
-  const trimmed = markup.trim();
-  if (!trimmed) return { state: "empty" };
-  if (!isSafeSvgMarkup(trimmed)) {
-    return {
-      state: "invalid",
-      message: "Must start with <svg> and carry no <script>, on… handlers, or embedded documents.",
-    };
-  }
-
-  const normalised = preprocessSvgMarkup(trimmed);
-  const sanitised = sanitizeSvgMarkup(normalised);
-  if (!sanitised) {
-    return {
-      state: "invalid",
-      message: "The SVG could not be parsed. Check its tags and quoting.",
-    };
-  }
-
-  const before = countMarkup(normalised);
-  const after = countMarkup(sanitised);
-  return {
-    state: "ok",
-    droppedElements: before && after ? Math.max(0, before.elements - after.elements) : 0,
-    droppedAttributes: before && after ? Math.max(0, before.attributes - after.attributes) : 0,
-  };
-}
-
 interface SvgAssetEditorModalProps {
   /** Editing an existing asset when set; adding a new one when null. */
   editingId: string | null;
+  /**
+   * The id a new asset opens with, for a caller that already knows the name.
+   *
+   * The Library Studio replacing a house drawing is the case: the art has to
+   * be saved as `banana` to win over the one shipped in the reader, and asking
+   * the author to retype that name is asking them to get it wrong.
+   */
+  initialId?: string;
   initialMarkup?: string;
   /** Category the asset is filed under. */
   initialCategory?: string;
@@ -88,6 +43,7 @@ interface SvgAssetEditorModalProps {
 
 export const SvgAssetEditorModal: React.FC<SvgAssetEditorModalProps> = ({
   editingId,
+  initialId = "",
   initialMarkup = "",
   initialCategory = "",
   existingIds,
@@ -96,7 +52,7 @@ export const SvgAssetEditorModal: React.FC<SvgAssetEditorModalProps> = ({
   onSaved,
 }) => {
   const isEdit = editingId !== null;
-  const [id, setId] = useState(editingId ?? "");
+  const [id, setId] = useState(editingId ?? initialId);
   const [category, setCategory] = useState(
     initialCategory === UNCATEGORISED ? "" : initialCategory,
   );
@@ -147,7 +103,7 @@ export const SvgAssetEditorModal: React.FC<SvgAssetEditorModalProps> = ({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const verdict = useMemo(() => inspect(markup), [markup]);
+  const verdict = useMemo(() => inspectSvgMarkup(markup), [markup]);
 
   const idError = (() => {
     if (!id) return null;

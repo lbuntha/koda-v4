@@ -140,6 +140,8 @@ import { refreshMaintenanceVersions } from "./lib/maintenanceReset";
 const SkillManagerPage = lazy(() =>
   import("./components/skills/SkillManagerPage").then((m) => ({ default: m.SkillManagerPage })),
 );
+const LibraryPage = lazy(() => import("./library/LibraryPage").then((m) => ({ default: m.LibraryPage })));
+const LibraryStudio = lazy(() => import("./library/studio/LibraryStudio").then((m) => ({ default: m.LibraryStudio })));
 const SvgAssetsPage = lazy(() =>
   import("./components/SvgAssetsPage").then((m) => ({ default: m.SvgAssetsPage })),
 );
@@ -180,8 +182,9 @@ export default function App() {
   // visibility resolver repaint when the online registry replaces its cache.
   useSkillRegistryVersion();
   const [skillNodes, setSkillNodes] = useState<SkillNode[]>(INITIAL_SKILL_NODES);
+  const [libraryReaderOpen, setLibraryReaderOpen] = useState(false);
   const session = useSession();
-  const { can } = usePermissions();
+  const { can, known: permissionsKnown } = usePermissions();
   const canManageMenu = Boolean(session && can("menu:manage"));
   const canManageRoles = Boolean(session && can("role:manage"));
   const canManageChildren = Boolean(session && can("learner:create"));
@@ -267,6 +270,8 @@ export default function App() {
     | "leaderboard"
     | "skills"
     | "assets"
+    | "library"
+    | "library-studio"
     | "users"
     | "roles"
     | "children"
@@ -330,13 +335,20 @@ export default function App() {
   // Active-tab state survives sign-out. Re-check the capability on every
   // account change so a parent cannot inherit an operator's open Menu page.
   useEffect(() => {
+    // Not before the permission table has loaded: until then `can()` says no to
+    // everything, and a click on Art or Library Studio in the first second after
+    // load bounced straight back to Home. The pages themselves stay unrendered
+    // until their capability is confirmed, so waiting exposes nothing.
+    if (!permissionsKnown) return;
     if (activeTab === "menu" && !canManageMenu) setActiveTab("home");
     if (activeTab === "roles" && !canManageRoles) setActiveTab("home");
     if (activeTab === "children" && !canManageChildren) setActiveTab("home");
     if (activeTab === "assets" && !canEditArt) setActiveTab("home");
+    if (activeTab === "library-studio" && !canEditArt) setActiveTab("home");
     if (activeTab === "skills" && !canManageSkills) setActiveTab("home");
     if (activeTab === "koda" && !canOperate) setActiveTab("home");
   }, [
+    permissionsKnown,
     activeTab,
     canEditArt,
     canManageChildren,
@@ -908,13 +920,14 @@ export default function App() {
    * The round's own top bar already carries an exit, so nothing is lost by
    * standing the shell down, and what is gained is that the activity is the only
    * thing on screen.
-   */
+  */
   const inLesson = activeTab === "game" && inRound;
 
   return (
     <MainLayout
       // Only a running round wants the full width; the picker is a normal page.
       contained={!inLesson}
+      hideMobileChrome={activeTab === "library" && libraryReaderOpen}
       /* Two shells, each hiding itself at the width that is not its own — the
          rail from `rail:` up, the toolbar and tab bar below it. A round stands
          both of them down: what a rail shows a five-year-old counting crowns is
@@ -1042,6 +1055,23 @@ export default function App() {
                 setActiveTab(tab);
               }}
             />
+          )}
+
+          {/* TAB: LIBRARY STUDIO — write, check and publish books (content:write) */}
+          {activeTab === "library-studio" && canEditArt && (
+            <Deferred label="Loading Library Studio">
+              <LibraryStudio />
+            </Deferred>
+          )}
+
+          {/* TAB: KODA LIBRARY — books to read, answer and spell */}
+          {activeTab === "library" && (
+            <Deferred label="Loading the library">
+              <LibraryPage
+                onAwardXp={(earnedXp) => setUserProgress((prev) => ({ ...prev, xp: prev.xp + earnedXp }))}
+                onReaderChange={setLibraryReaderOpen}
+              />
+            </Deferred>
           )}
 
           {activeTab === "leaderboard" && (

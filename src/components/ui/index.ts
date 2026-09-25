@@ -27,3 +27,4 @@ export * from "./UISpinner";
 export * from "./UIStatTile";
 export * from "./UITabs";
 export * from "./UIToggle";
+export * from "./UIForm";

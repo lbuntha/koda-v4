@@ -1,0 +1,196 @@
+{
+  "id": "starter-rainy-day",
+  "rev": 1,
+  "language": "en",
+  "band": "B",
+  "title": "A Rainy Day",
+  "category": "Weather & play",
+  "picture": "rain",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "It rained all morning, so Dara stayed inside.",
+      "words": [
+        "It",
+        "rained",
+        "all",
+        "morning,",
+        "so",
+        "Dara",
+        "stayed",
+        "inside."
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "He built a tall tower from wooden blocks.",
+      "words": [
+        "He",
+        "built",
+        "a",
+        "tall",
+        "tower",
+        "from",
+        "wooden",
+        "blocks."
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "His little sister knocked it down and laughed.",
+      "words": [
+        "His",
+        "little",
+        "sister",
+        "knocked",
+        "it",
+        "down",
+        "and",
+        "laughed."
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "Dara was not angry, because it was only a game.",
+      "words": [
+        "Dara",
+        "was",
+        "not",
+        "angry,",
+        "because",
+        "it",
+        "was",
+        "only",
+        "a",
+        "game."
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "By lunch the storm had passed.",
+      "words": [
+        "By",
+        "lunch",
+        "the",
+        "storm",
+        "had",
+        "passed."
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "They ran outside to jump in the puddles.",
+      "words": [
+        "They",
+        "ran",
+        "outside",
+        "to",
+        "jump",
+        "in",
+        "the",
+        "puddles."
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "kind": "comprehension",
+      "prompt": "Why did Dara stay inside?",
+      "options": [
+        "He was angry all day",
+        "Because it rained",
+        "He was afraid of the storm"
+      ],
+      "answer": 1,
+      "evidence": "s1"
+    },
+    {
+      "id": "q2",
+      "kind": "comprehension",
+      "prompt": "What did Dara build?",
+      "options": [
+        "A wooden boat",
+        "A little game",
+        "A tall tower"
+      ],
+      "answer": 2,
+      "evidence": "s2"
+    },
+    {
+      "id": "q3",
+      "kind": "comprehension",
+      "prompt": "What did his sister do to the tower?",
+      "options": [
+        "She jumped in puddles",
+        "She knocked it down",
+        "She built it higher"
+      ],
+      "answer": 1,
+      "evidence": "s3"
+    },
+    {
+      "id": "q4",
+      "kind": "vocab",
+      "prompt": "Which picture is “tower”?",
+      "word": "tower",
+      "options": [
+        "puddle",
+        "tower",
+        "nest"
+      ],
+      "answer": 1
+    },
+    {
+      "id": "q5",
+      "kind": "vocab",
+      "prompt": "Which picture is “puddle”?",
+      "word": "puddle",
+      "options": [
+        "cat",
+        "tower",
+        "puddle"
+      ],
+      "answer": 2
+    },
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s1",
+      "word": "rained"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "tower"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "laughed"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "storm"
+    },
+    {
+      "id": "sp5",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "puddles"
+    }
+  ],
+  "pictures": {
+    "tower": "tower",
+    "puddle": "puddle",
+    "puddles": "puddle"
+  },
+  "noRecording": [
+    "Dara"
+  ],
+  "provenance": "Hand-written sample for tests and the bundled starter shelf."
+}

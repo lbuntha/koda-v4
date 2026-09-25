@@ -15,6 +15,7 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 .venv/
+server/data/library-audio/
 
 # Local compose overrides carry host paths and personal credentials.
 docker-compose.override.yml

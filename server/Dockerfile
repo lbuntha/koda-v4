@@ -4,6 +4,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 WORKDIR /srv
 
+# Library recordings are normalized to the same compact 48 kbps mono M4A used
+# by bundled skill audio before they are sent to durable object storage.
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/*
+
 # Dependencies first, so editing a router does not reinstall them.
 COPY pyproject.toml ./
 COPY app/__init__.py app/__init__.py

@@ -111,9 +111,12 @@ services:
       # Source only — installed packages stay in the image.
       - ./server/app:/srv/app
       - ./server/tests:/srv/tests
+      # Runtime book recordings are files, not MongoDB documents.
+      - library-audio:/srv/data/library-audio
     depends_on:
       mongo:
         condition: service_healthy
 
 volumes:
   mongo-data:
+  library-audio:

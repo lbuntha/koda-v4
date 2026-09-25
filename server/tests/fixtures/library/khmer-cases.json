@@ -1,0 +1,252 @@
+{
+  "normalize": [
+    {
+      "why": "subscript before vowel: ខ ◌ែ ◌្ម រ → ខ្មែរ",
+      "in": "ខែ្មរ",
+      "out": "ខ្មែរ"
+    },
+    {
+      "why": "◌្រ after another subscript: ស្រ្តី → ស្ត្រី",
+      "in": "ស្រ្តី",
+      "out": "ស្ត្រី"
+    },
+    {
+      "why": "shifter after the subscript, before the vowel",
+      "in": "ម៉្យាង",
+      "out": "ម្យ៉ាង"
+    },
+    {
+      "why": "shifter before the vowel",
+      "in": "មា៉",
+      "out": "ម៉ា"
+    },
+    {
+      "why": "nikahit after ◌ុ: ក ◌ំ ◌ុ → កុំ",
+      "in": "កំុ",
+      "out": "កុំ"
+    },
+    {
+      "why": "nikahit after ◌ា: ក ◌ំ ◌ា → កាំ",
+      "in": "កំា",
+      "out": "កាំ"
+    },
+    {
+      "why": "◌េ + ◌ា is ◌ោ",
+      "in": "គេា",
+      "out": "គោ"
+    },
+    {
+      "why": "◌ា + ◌េ is ◌ោ too",
+      "in": "គាេ",
+      "out": "គោ"
+    },
+    {
+      "why": "◌េ + ◌ី is ◌ើ",
+      "in": "ដេី",
+      "out": "ដើ"
+    },
+    {
+      "why": "◌្ដ under ណ",
+      "in": "ណ្តា",
+      "out": "ណ្ដា"
+    },
+    {
+      "why": "◌្ត under ន",
+      "in": "ន្ដា",
+      "out": "ន្តា"
+    },
+    {
+      "why": "ស ◌ី ◌ុ is ស៊ី",
+      "in": "សីុ",
+      "out": "ស៊ី"
+    },
+    {
+      "why": "ម ◌ុ ◌ី is ម៉ី",
+      "in": "មុី",
+      "out": "ម៉ី"
+    },
+    {
+      "why": "ស ◌ាំ ◌ុ is ស៊ាំ",
+      "in": "សាំុ",
+      "out": "ស៊ាំ"
+    },
+    {
+      "why": "ប takes either shifter, so ◌ុ ◌ី is left for a person",
+      "in": "បុី",
+      "out": "បុី"
+    },
+    {
+      "why": "well-formed words are untouched",
+      "in": "ស្វាយ",
+      "out": "ស្វាយ"
+    },
+    {
+      "why": "a zero-width space between words is kept",
+      "in": "ខ្មែរ​ស្វាយ",
+      "out": "ខ្មែរ​ស្វាយ"
+    },
+    {
+      "why": "English passes through",
+      "in": "The mango is sweet.",
+      "out": "The mango is sweet."
+    }
+  ],
+  "units": [
+    {
+      "why": "ស · ជើងវ · ស្រៈអា · យ",
+      "word": "ស្វាយ",
+      "units": [
+        "ស",
+        "្វ",
+        "ា",
+        "យ"
+      ]
+    },
+    {
+      "why": "ខ · ជើងម · ស្រៈអែ · រ, though ◌ែ is drawn first",
+      "word": "ខ្មែរ",
+      "units": [
+        "ខ",
+        "្ម",
+        "ែ",
+        "រ"
+      ]
+    },
+    {
+      "why": "the same word typed in drawn order spells the same",
+      "word": "ខែ្មរ",
+      "units": [
+        "ខ",
+        "្ម",
+        "ែ",
+        "រ"
+      ]
+    },
+    {
+      "why": "two feet, ◌្រ last",
+      "word": "ស្ត្រី",
+      "units": [
+        "ស",
+        "្ត",
+        "្រ",
+        "ី"
+      ]
+    },
+    {
+      "why": "◌ុំ is one vowel",
+      "word": "កុំ",
+      "units": [
+        "ក",
+        "ុំ"
+      ]
+    },
+    {
+      "why": "◌ាំ is one vowel",
+      "word": "ចាំ",
+      "units": [
+        "ច",
+        "ាំ"
+      ]
+    },
+    {
+      "why": "◌ោះ is one vowel",
+      "word": "ពោះ",
+      "units": [
+        "ព",
+        "ោះ"
+      ]
+    },
+    {
+      "why": "◌ុះ is one vowel",
+      "word": "ចុះ",
+      "units": [
+        "ច",
+        "ុះ"
+      ]
+    },
+    {
+      "why": "◌េះ is one vowel",
+      "word": "សេះ",
+      "units": [
+        "ស",
+        "េះ"
+      ]
+    },
+    {
+      "why": "a bantoc is its own sign",
+      "word": "មាន់",
+      "units": [
+        "ម",
+        "ា",
+        "ន",
+        "់"
+      ]
+    },
+    {
+      "why": "a shifter is its own sign",
+      "word": "ប៉ា",
+      "units": [
+        "ប",
+        "៉",
+        "ា"
+      ]
+    },
+    {
+      "why": "an independent vowel starts a syllable",
+      "word": "ឪឡឹក",
+      "units": [
+        "ឪ",
+        "ឡ",
+        "ឹ",
+        "ក"
+      ]
+    }
+  ],
+  "problems": [
+    {
+      "why": "well formed",
+      "word": "ខ្មែរ",
+      "problem": null
+    },
+    {
+      "why": "corrected, then well formed",
+      "word": "សីុ",
+      "problem": null
+    },
+    {
+      "why": "two vowels on one syllable",
+      "word": "កាិ",
+      "problem": "two_vowels"
+    },
+    {
+      "why": "ប with ◌ុ ◌ី: which shifter is a person's call",
+      "word": "បុី",
+      "problem": "two_vowels"
+    },
+    {
+      "why": "two shifters",
+      "word": "ក៉៊ា",
+      "problem": "two_shifters"
+    },
+    {
+      "why": "a bantoc after a vowel",
+      "word": "កា់",
+      "problem": "bantoc_misplaced"
+    },
+    {
+      "why": "two subscript signs in a row",
+      "word": "ក្្ក",
+      "problem": "dangling_coeng"
+    },
+    {
+      "why": "a subscript sign with no consonant",
+      "word": "ក្",
+      "problem": "dangling_coeng"
+    },
+    {
+      "why": "a vowel with nothing to sit on",
+      "word": "ាក",
+      "problem": "starts_with_mark"
+    }
+  ]
+}

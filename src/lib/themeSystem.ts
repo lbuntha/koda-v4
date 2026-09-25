@@ -211,12 +211,25 @@ export const themeSystem = {
     return `${variants[variant]} ${className}`;
   },
 
+  /*
+   * One border for the whole table (the wrapper) and one line under the
+   * header — that is all. Rows used to carry a bottom border each, which on
+   * anything longer than a handful of rows reads as a grid rather than a
+   * list. Rows are told apart by a faint zebra tint instead (`rowZebra`),
+   * which a reader's eye uses to track across a wide row without adding a
+   * line every few pixels; the hover tint on top of it is what says "this one
+   * is interactive". Colours are the app's shared tokens (`border-line`,
+   * `text-ink`, `bg-surface*`), not a separate slate palette, so a table
+   * matches whatever theme and dark mode the rest of the page is in.
+   */
   table: {
-    wrapper: "w-full overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900",
+    wrapper: "w-full overflow-x-auto overflow-hidden rounded-xl border border-line bg-surface",
     table: "w-full text-left border-collapse text-sm",
-    header: "bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold px-4 py-3 uppercase tracking-wider text-xs",
-    row: "border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors",
-    cell: "px-4 py-3 text-slate-700 dark:text-slate-300",
+    header: "bg-surface-muted border-b border-line text-muted font-semibold px-4 py-3 uppercase tracking-wider text-xs",
+    row: "hover:bg-indigo-50/60 dark:hover:bg-indigo-950/30 transition-colors",
+    /** Every other row, so a wide row is easy to track without a line under each one. */
+    rowZebra: "bg-surface-muted/40",
+    cell: "px-4 py-3 text-ink",
   },
 
   /*

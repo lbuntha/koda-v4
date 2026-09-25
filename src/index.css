@@ -212,6 +212,18 @@
   .koda-admin-chip { font-size: 0.75rem; line-height: 1rem; font-weight: 500; }
 }
 
+/* A book reader is a focused activity on a phone. Keep its own controls, but
+   give the page back the space normally occupied by the app chrome. */
+@media (max-width: 44.999rem) {
+  [data-mobile-chrome-hidden] > header,
+  [data-mobile-chrome-hidden] > div:has(> nav[aria-label="Main"]),
+  .mobile-reader-pagination,
+  .mobile-reader-word-hint,
+  .mobile-reader-swipe-hint {
+    display: none;
+  }
+}
+
 @keyframes subtle-pulse-glow {
   0%, 100% {
     box-shadow: 0 0 12px rgba(79, 70, 229, 0.2);
@@ -297,6 +309,22 @@ html.theme-light,
   to {
     transform: translateY(0);
   }
+}
+
+/* A panel that arrives from the right edge, for the wide-screen half of the
+   same idea: the picture library opens beside the pages it belongs to rather
+   than over the middle of them. Below `rail:` it is the bottom sheet above. */
+@keyframes koda-panel-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: koda-panel-in 260ms cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 @keyframes haptic-pop {
@@ -478,6 +506,11 @@ html.theme-light,
   }
 }
 
+@keyframes koda-tooltip-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 @keyframes koda-celebrate-pop {
   0% {
     transform: scale(0.6) rotate(-12deg);
@@ -541,6 +574,7 @@ html.theme-light,
   .animate-scale-up,
   .animate-slide-in-right,
   .koda-bubble-in,
+  .koda-tooltip-in,
   .koda-celebrate,
   .tap-pop-anim,
   .block-snap-pull,

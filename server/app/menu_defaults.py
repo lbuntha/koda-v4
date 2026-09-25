@@ -18,6 +18,8 @@ hard-code the wording around it.
 DEFAULT_MENU: list[dict] = [
     {"itemId": "home", "label": "Home", "icon": "home", "order": 10},
     {"itemId": "game", "label": "Learn", "icon": "game", "order": 20},
+    # Koda Library — books to read, answer and spell. Everyone who can learn can read.
+    {"itemId": "library", "label": "Library", "icon": "book", "order": 22},
     {"itemId": "profile", "label": "Profile", "icon": "user", "order": 25},
     {"itemId": "leaderboard", "label": "Leaderboard", "icon": "leaderboard",
      "requires": "learner:read", "order": 26},
@@ -33,6 +35,9 @@ DEFAULT_MENU: list[dict] = [
      "requires": "content:write", "order": 35},
     {"itemId": "assets", "label": "Art", "icon": "shapes", "badge": "{art} SVG",
      "requires": "content:write", "order": 40},
+    # Where library books are written, reviewed and published. Same gate as Art.
+    {"itemId": "library-studio", "label": "Library Studio", "icon": "pen",
+     "requires": "content:write", "order": 42},
     {"itemId": "users", "label": "Users", "icon": "users", "badge": "Manage",
      "requires": "user:manage", "order": 45},
     {"itemId": "roles", "label": "Roles", "icon": "shield", "badge": "Access",

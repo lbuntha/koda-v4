@@ -113,7 +113,7 @@ export function UIDataTable<Row>({
   if (rows.length === 0) {
     return (
       <div className={`${themeSystem.table.wrapper} ${className}`}>
-        <p className="px-4 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
+        <p className="px-4 py-8 text-center text-sm text-muted">
           {emptyMessage}
         </p>
       </div>
@@ -126,7 +126,7 @@ export function UIDataTable<Row>({
       c.align === "right" ? "text-right" : "text-left",
       c.numeric ? "font-mono tabular-nums" : "",
       c.nowrap ? "whitespace-nowrap" : "",
-      c.muted ? "text-slate-500 dark:text-slate-400" : "",
+      c.muted ? "text-muted" : "",
     ]
       .filter(Boolean)
       .join(" ");
@@ -160,7 +160,7 @@ export function UIDataTable<Row>({
                   {sortable ? (
                     <button
                       onClick={() => toggle(c.key)}
-                      className={`inline-flex items-center gap-1 uppercase hover:text-slate-900 dark:hover:text-white transition cursor-pointer ${
+                      className={`inline-flex items-center gap-1 uppercase hover:text-ink transition cursor-pointer ${
                         c.align === "right" ? "flex-row-reverse" : ""
                       }`}
                     >
@@ -185,11 +185,11 @@ export function UIDataTable<Row>({
         </thead>
 
         <tbody>
-          {visibleRows.map((row) => (
+          {visibleRows.map((row, i) => (
             <tr
               key={rowKey(row)}
               onClick={onRowClick ? () => onRowClick(row) : undefined}
-              className={`${themeSystem.table.row} ${onRowClick ? "cursor-pointer" : ""}`}
+              className={`${themeSystem.table.row} ${i % 2 ? themeSystem.table.rowZebra : ""} ${onRowClick ? "cursor-pointer" : ""}`}
             >
               {columns.map((c) => (
                 <td key={c.key} className={cellClass(c)}>
@@ -203,7 +203,7 @@ export function UIDataTable<Row>({
       {pageSize && pageSize > 0 && totalPages > 1 && (
         <nav
           aria-label="Table pages"
-          className="flex items-center justify-between gap-3 border-t border-line px-4 py-3 text-xs text-muted"
+          className="flex items-center justify-between gap-3 bg-surface-muted/40 px-4 py-3 text-xs text-muted"
         >
           <span>
             Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, sorted.length)} of {sorted.length}
@@ -213,7 +213,7 @@ export function UIDataTable<Row>({
               type="button"
               disabled={page === 1}
               onClick={() => setPage((current) => Math.max(1, current - 1))}
-              className="rounded-lg border border-line px-2 py-1 font-semibold text-ink disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-lg px-2 py-1 font-semibold text-ink hover:bg-surface disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
             >
               Previous
             </button>
@@ -222,7 +222,7 @@ export function UIDataTable<Row>({
               type="button"
               disabled={page === totalPages}
               onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
-              className="rounded-lg border border-line px-2 py-1 font-semibold text-ink disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-lg px-2 py-1 font-semibold text-ink hover:bg-surface disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
             >
               Next
             </button>

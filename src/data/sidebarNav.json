@@ -18,6 +18,11 @@
      "icon": "game"
     },
     {
+     "id": "library",
+     "label": "Library",
+     "icon": "book"
+    },
+    {
      "id": "profile",
      "label": "Profile",
      "icon": "user"
@@ -58,6 +63,12 @@
      "label": "Art",
      "icon": "shapes",
      "badge": "{art} SVG",
+     "requires": "content:write"
+    },
+    {
+     "id": "library-studio",
+     "label": "Library Studio",
+     "icon": "pen",
      "requires": "content:write"
     },
     {

@@ -64,6 +64,9 @@ jobs:
       - name: Install API dependencies
         run: python -m pip install -e "./server[dev]"
 
+      - name: Install audio encoder
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
       - name: Lint API
         working-directory: server
         run: ruff check app tests
@@ -99,6 +102,9 @@ jobs:
       # deployment that has not been given a Firebase project yet.
       PUSH_DRIVER: ${{ vars.PUSH_DRIVER || 'console' }}
       FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
+      # Optional until the Library starts accepting production recordings.
+      # Once set, audio goes to GCS with the same sharded ids used locally.
+      LIBRARY_AUDIO_BUCKET: ${{ vars.LIBRARY_AUDIO_BUCKET }}
       PUSH_TASK_AUDIENCE: ${{ vars.PUSH_TASK_AUDIENCE }}
       PUSH_TASK_SERVICE_ACCOUNT: ${{ vars.PUSH_TASK_SERVICE_ACCOUNT }}
     steps:
@@ -145,7 +151,7 @@ jobs:
             --platform managed \
             --port 8000 \
             --allow-unauthenticated \
-            --set-env-vars "^|^ENVIRONMENT=production|MONGODB_URI=${MONGODB_URI}|MONGODB_DB=koda_v4|JWT_SECRET=${JWT_SECRET}|TUTOR_SERVICE_TOKEN=${TUTOR_SERVICE_TOKEN}|GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}|APP_BASE_URL=https://learn-with-koda.web.app|REQUIRE_EMAIL_VERIFICATION=${REQUIRE_EMAIL_VERIFICATION}|MAIL_DRIVER=${MAIL_DRIVER}|SMTP_HOST=${SMTP_HOST}|SMTP_PORT=${SMTP_PORT}|SMTP_STARTTLS=${SMTP_STARTTLS}|SMTP_USER=${SMTP_USER}|SMTP_PASSWORD=${SMTP_PASSWORD}|MAIL_FROM=${MAIL_FROM}|PUSH_DRIVER=${PUSH_DRIVER}|FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}|PUSH_TASK_AUDIENCE=${PUSH_TASK_AUDIENCE}|PUSH_TASK_SERVICE_ACCOUNT=${PUSH_TASK_SERVICE_ACCOUNT}"
+            --set-env-vars "^|^ENVIRONMENT=production|MONGODB_URI=${MONGODB_URI}|MONGODB_DB=koda_v4|JWT_SECRET=${JWT_SECRET}|TUTOR_SERVICE_TOKEN=${TUTOR_SERVICE_TOKEN}|GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}|APP_BASE_URL=https://learn-with-koda.web.app|LIBRARY_AUDIO_BUCKET=${LIBRARY_AUDIO_BUCKET}|REQUIRE_EMAIL_VERIFICATION=${REQUIRE_EMAIL_VERIFICATION}|MAIL_DRIVER=${MAIL_DRIVER}|SMTP_HOST=${SMTP_HOST}|SMTP_PORT=${SMTP_PORT}|SMTP_STARTTLS=${SMTP_STARTTLS}|SMTP_USER=${SMTP_USER}|SMTP_PASSWORD=${SMTP_PASSWORD}|MAIL_FROM=${MAIL_FROM}|PUSH_DRIVER=${PUSH_DRIVER}|FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}|PUSH_TASK_AUDIENCE=${PUSH_TASK_AUDIENCE}|PUSH_TASK_SERVICE_ACCOUNT=${PUSH_TASK_SERVICE_ACCOUNT}"
 
       - name: Verify API health
         run: |

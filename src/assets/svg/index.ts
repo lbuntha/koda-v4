@@ -10,6 +10,6 @@ export {
   svgCategories,
   type SvgAssetEntry,
 } from "./registry";
-export { useArtCategory, useHasArt } from "./useArt";
+export { useArtCategory, useArtLibrary, useHasArt } from "./useArt";
 export { getSkillArt, registerSkillArt, skillArtId, skillArtIds } from "./skillArt";
 export { SVG_ASSET_IDS, SVG_ASSET_CATEGORIES, SVG_CATEGORIES, type SvgAssetId } from "./ids";

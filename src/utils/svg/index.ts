@@ -20,6 +20,7 @@
  */
 export { isSafeSvgMarkup, sanitizeSvgMarkup, normalizeSvgDocumentMarkup } from "./svgSafety";
 export { preprocessSvgMarkup } from "./svgPreprocess";
+export { inspectSvgMarkup, type SvgVerdict } from "./svgInspect";
 export { createSvgAssetId, normalizeSvgAssetIds, scopeSvgIds } from "./svgIds";
 export {
   ALLOWED_ELEMENTS,

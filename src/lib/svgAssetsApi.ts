@@ -25,6 +25,8 @@ export const SUGGESTED_SVG_CATEGORIES = [
   // way the picker looks for it.
   "badges",
   "thumbnail",
+  // Book pictures: the Library Studio's page-picture picker opens on this one.
+  "story",
   "fruits",
   "vegetables",
   "animals",

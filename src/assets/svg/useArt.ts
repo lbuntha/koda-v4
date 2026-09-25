@@ -2,20 +2,19 @@ import { useEffect, useSyncExternalStore } from "react";
 
 import { SharedArtStore } from "../../lib/sharedArtStore";
 import { ArtStore } from "../../lib/sync/artStore";
-import { hasSvgAsset, svgAssets } from "./registry";
+import { hasSvgAsset, svgAssets, type SvgAssetEntry } from "./registry";
 
 /**
- * Every id filed under one collection, across the art libraries.
+ * Every asset the app can draw, resolved the way `SvgAsset` resolves one.
  *
- * The same order `SvgAsset` resolves markup in — family, shared, bundle —
- * deduped by id, so a family asset overriding a shipped one is offered once.
+ * Family art wins over shared art, which wins over the bundle, deduped by id —
+ * so a picker offers the same picture that will actually render, once, filed
+ * under the category whoever owns it filed it under.
+ *
  * A picker built on this shows art the moment somebody files it on the Art
- * page, without waiting for a release to bundle it.
- *
- * Empty is a normal state: it means nobody has drawn any yet, and a picker
- * should say so rather than look broken.
+ * page, without waiting for a release to bundle it. Empty is a normal state.
  */
-export const useArtCategory = (category: string): string[] => {
+export const useArtLibrary = (): SvgAssetEntry[] => {
   useSyncExternalStore(ArtStore.subscribe, ArtStore.version, ArtStore.version);
   useSyncExternalStore(SharedArtStore.subscribe, SharedArtStore.version, SharedArtStore.version);
 
@@ -24,23 +23,33 @@ export const useArtCategory = (category: string): string[] => {
     void SharedArtStore.load();
   }, []);
 
-  const ids = new Set<string>();
-  for (const asset of ArtStore.all().values()) {
-    if (asset.category === category) ids.add(asset.id);
-  }
-  for (const asset of SharedArtStore.all()) {
-    if (asset.category === category) ids.add(asset.id);
-  }
+  const byId = new Map<string, SvgAssetEntry>();
   // Once a complete shared snapshot has arrived it decides what exists, the
   // same rule `SvgAsset` renders by — otherwise a picker would offer a bundled
   // tile an operator deleted, and the tile would draw blank when picked.
   if (!SharedArtStore.isAuthoritative()) {
-    for (const asset of svgAssets) {
-      if (asset.category === category) ids.add(asset.id);
-    }
+    for (const asset of svgAssets) byId.set(asset.id, asset);
   }
-  return [...ids].sort();
+  for (const asset of SharedArtStore.all()) {
+    byId.set(asset.id, { id: asset.id, category: asset.category, markup: asset.markup });
+  }
+  for (const asset of ArtStore.all().values()) {
+    byId.set(asset.id, { id: asset.id, category: asset.category, markup: asset.markup });
+  }
+  return [...byId.values()].sort((a, b) => a.id.localeCompare(b.id));
 };
+
+/**
+ * Every id filed under one collection, across the art libraries.
+ *
+ * The same order `SvgAsset` resolves markup in — family, shared, bundle —
+ * deduped by id, so a family asset overriding a shipped one is offered once,
+ * under the category its owner filed it under.
+ */
+export const useArtCategory = (category: string): string[] =>
+  useArtLibrary()
+    .filter((asset) => asset.category === category)
+    .map((asset) => asset.id);
 
 /**
  * Whether an id names artwork in any of the libraries.

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Koda Library — Phase 0 hand test</title>
+<style>
+:root{--ink:#0F172A;--body:#475569;--muted:#64748B;--indigo:#6B46C1;--line:#E2E8F0;--lav:#F3EEFE;--ok:#1F7A58;--okbg:#EDF8F3;--no:#B4245B;--nobg:#FFF1F6;--skip:#5B34A8}
+*{box-sizing:border-box}
+body{margin:0;background:#F8FAFC;color:var(--body);font:15px/1.55 "Plus Jakarta Sans",system-ui,sans-serif}
+main{width:min(1000px,calc(100% - 28px));margin:0 auto;padding:28px 0 60px}
+h1{margin:0 0 6px;color:var(--ink);font-size:30px;letter-spacing:-.03em}
+h2{margin:0 0 4px;color:var(--ink);font-size:19px}
+.lead{margin:0 0 20px;color:var(--muted)}
+.card{margin-bottom:18px;padding:20px;border:1px solid var(--line);border-radius:20px;background:#fff}
+.hint{margin:0 0 14px;color:var(--muted);font-size:13.5px}
+label{display:block;margin:10px 0 4px;color:var(--muted);font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase}
+input[type=text],textarea,select{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font:inherit}
+textarea{min-height:120px;font:13px/1.5 ui-monospace,Menlo,monospace}
+.kh{font-family:'Noto Sans Khmer','Khmer OS','Khmer MN',sans-serif}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+button{min-height:38px;padding:7px 14px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--ink);font:inherit;font-weight:700;cursor:pointer}
+button.pri{border-color:var(--indigo);background:var(--indigo);color:#fff}
+button[aria-pressed=true]{border-color:var(--indigo);background:var(--indigo);color:#fff}
+.tiles{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.tile{display:grid;min-width:52px;height:60px;padding:0 12px;place-items:center;border:2px solid #D8C9F5;border-radius:14px;background:var(--lav);color:#3F2A78;font-size:26px}
+.tile.extra{border-style:dashed;background:#fff}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:800}
+.pass{background:var(--okbg);color:var(--ok)} .fail{background:var(--nobg);color:var(--no)} .skipped{background:#EFE9FC;color:var(--skip)}
+.banner{margin:12px 0;padding:12px 14px;border-radius:14px;font-weight:700}
+.banner.pass{background:var(--okbg);color:var(--ok)} .banner.fail{background:var(--nobg);color:var(--no)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--muted);font-size:11.5px;letter-spacing:.05em;text-transform:uppercase}
+.mono{font-family:ui-monospace,Menlo,monospace;font-size:12.5px}
+.words{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
+.w{padding:5px 11px;border:1px solid #D8C9F5;border-radius:10px;background:var(--lav);color:#3F2A78;font-size:16px}
+.err{color:var(--no);font-weight:700}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:760px){.two{grid-template-columns:1fr}}
+.ring{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+.ring button{min-width:60px;height:60px;border-radius:50%;font-size:24px}
+.ring button:disabled{opacity:.35}
+.gap{display:inline-block;min-width:70px;border-bottom:3px solid var(--indigo);text-align:center;color:var(--indigo);font-weight:800}
+</style>
+</head>
+<body>
+<main>
+  <h1>Koda Library — Phase 0 hand test</h1>
+  <p class="lead">This page runs the real Phase 0 code — the same files the automated tests check — so you can try it yourself. There is no app screen for Phase 0; this is the screen.</p>
+
+  <section class="card">
+    <h2>1 · Tiles — what a learner spells with</h2>
+    <p class="hint">English spells in letters. Khmer spells in clusters: a base consonant with the subscripts under it is one tile, and every vowel sign is a tile of its own. Try <b class="kh">ស្វាយ</b>, <b class="kh">ស្ត្រី</b> (two subscripts on one base), or a word that cannot be drawn.</p>
+    <div class="row"><button id="tEn" aria-pressed="false">English</button><button id="tKm" aria-pressed="true">ភាសាខ្មែរ</button></div>
+    <label for="tWord">A word</label>
+    <input type="text" id="tWord" class="kh" value="ស្វាយ" spellcheck="false">
+    <div id="tOut"></div>
+    <label for="tAns">Your answer — typed as whole text, however you like to split it</label>
+    <input type="text" id="tAns" class="kh" spellcheck="false" placeholder="Type the word again to see it judged">
+    <div id="tJudge" class="hint" style="margin-top:8px"></div>
+  </section>
+
+  <section class="card">
+    <h2>2 · Split a story, and blank a word</h2>
+    <p class="hint">Paste a story. It becomes sentences and words. For Khmer the words are only a <b>proposal</b> from the browser's breaker — look for one that joined two words. A space you type forces a break.</p>
+    <div class="row"><button id="sEn" aria-pressed="false">English</button><button id="sKm" aria-pressed="true">ភាសាខ្មែរ</button></div>
+    <label for="sText">Story</label>
+    <textarea id="sText" class="kh" spellcheck="false">សុខាទៅផ្សារជាមួយម្តាយ។
+នាងទិញស្វាយមួយ។
+ស្វាយផ្អែមណាស់។</textarea>
+    <div id="sOut"></div>
+    <div class="row" style="margin-top:8px"><div style="flex:1;min-width:180px"><label for="gSent">Sentence</label><select id="gSent"></select></div><div style="flex:1;min-width:180px"><label for="gWord">Word to blank</label><input type="text" id="gWord" class="kh" spellcheck="false"></div></div>
+    <div id="gOut" style="margin-top:10px"></div>
+  </section>
+
+  <section class="card">
+    <h2>3 · Check a story</h2>
+    <p class="hint">The eight checks a story must pass before anyone is asked to publish it. Pick a starter story, then press a <b>Break it</b> button and watch exactly one rule turn red. You can also edit the JSON by hand.</p>
+    <div class="row">
+      <div style="flex:1;min-width:200px"><label for="cSel">Starter story</label><select id="cSel"></select></div>
+      <label style="margin:20px 0 0;text-transform:none;letter-spacing:0;font-size:14px"><input type="checkbox" id="cConf" checked> A person confirmed the word split</label>
+      <div><label for="cStage">Stage</label><select id="cStage"><option value="draft">Draft</option><option value="publish">Publish</option></select></div>
+    </div>
+    <div class="row" style="margin-top:10px"><b style="color:var(--ink)">Break it:</b>
+      <button data-m="longest">Right answer → longest</button><button data-m="evidence">Wrong evidence sentence</button><button data-m="nostory">Wrong choices not from the story</button>
+      <button data-m="spellword">Spelling word not in sentence</button><button data-m="audio">Remove a recording</button><button data-m="dropspell">Delete a spelling question</button><button data-m="rejoin">Words don't rejoin</button><button data-m="reset">Reset</button></div>
+    <div id="cBanner"></div>
+    <table id="cRules"></table>
+    <details style="margin-top:10px"><summary>Every individual check</summary><table id="cChecks"></table></details>
+    <details style="margin-top:10px"><summary>The story as JSON — editable</summary><textarea id="cJson" class="kh" spellcheck="false" style="min-height:260px"></textarea></details>
+  </section>
+
+  <section class="card">
+    <h2>4 · Spell it — the deck from the story above</h2>
+    <p class="hint">Each spelling question becomes the story sentence with a blank, and a ring of tiles. Tap tiles in order, then check. A story that cannot be played shows the error instead.</p>
+    <div id="dOut"></div>
+  </section>
+</main>
+<script>/*BUNDLE*/</script>
+<script>
+"use strict";
+const K = KodaLibrary, $ = (id) => document.getElementById(id);
+const esc = (x) => String(x).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const pair = (a, b, fn) => { $(a).onclick = () => { $(a).setAttribute("aria-pressed", "true"); $(b).setAttribute("aria-pressed", "false"); fn(a); }; $(b).onclick = () => { $(b).setAttribute("aria-pressed", "true"); $(a).setAttribute("aria-pressed", "false"); fn(b); }; };
+const REASONS = { empty: "there is no word", not_letters: "it has characters that are not letters of this language", starts_with_mark: "it starts with a mark that has no consonant to sit on", dangling_coeng: "a subscript marker points at nothing", too_few_tiles: "fewer than 2 tiles", too_many_tiles: "more than 8 tiles — it will not fit a 360px ring" };
+
+/* 1 · tiles */
+let tLang = "km";
+function tiles() {
+  const w = $("tWord").value.trim(), why = w ? K.whyUnspellable(w, tLang) : "empty", t = w ? K.tilesOf(w, tLang) : [];
+  const ex = !why ? K.pickExtras(t, tLang, 1) : [];
+  $("tOut").innerHTML = `<div class="tiles ${tLang === "km" ? "kh" : ""}">${t.map((x) => `<span class="tile">${esc(x)}</span>`).join("")}${ex.map((x) => `<span class="tile extra" title="the distractor">${esc(x)}</span>`).join("")}</div>
+    <div>${why ? `<span class="pill fail">cannot be a spelling word</span> ${esc(REASONS[why] || why)}` : `<span class="pill pass">can be a spelling word</span> ${t.length} tiles${ex.length ? ` · dashed tile is the distractor` : ""}`}</div>`;
+  const a = $("tAns").value.trim();
+  $("tJudge").innerHTML = a ? (K.spellsWord([a], w, tLang) ? '<span class="pill pass">correct</span> the whole text matches the word' : '<span class="pill fail">wrong</span> that is a different word') : "";
+}
+pair("tEn", "tKm", (id) => { tLang = id === "tEn" ? "en" : "km"; $("tWord").value = tLang === "en" ? "sheep" : "ស្វាយ"; $("tWord").classList.toggle("kh", tLang === "km"); $("tAns").value = ""; tiles(); });
+$("tWord").oninput = tiles; $("tAns").oninput = tiles; tiles();
+
+/* 2 · split + gap */
+let sLang = "km", story = [];
+function split() {
+  story = K.parseStory($("sText").value, sLang);
+  $("sOut").innerHTML = story.map((s) => `<div style="margin-top:10px"><b class="mono">${s.id}</b> <span class="mono" style="color:var(--muted)">${s.words.length} words</span><div class="words ${sLang === "km" ? "kh" : ""}">${s.words.map((w) => `<span class="w">${esc(w)}</span>`).join("")}</div></div>`).join("") || '<p class="hint">Nothing to split yet.</p>';
+  const cur = $("gSent").value; $("gSent").innerHTML = story.map((s) => `<option>${s.id}</option>`).join(""); if (story.some((s) => s.id === cur)) $("gSent").value = cur;
+  gap();
+}
+function gap() {
+  const s = story.find((x) => x.id === $("gSent").value), w = $("gWord").value.trim();
+  if (!s || !w) { $("gOut").innerHTML = '<span class="hint">Type a word from the sentence to blank it.</span>'; return; }
+  const g = K.gapOf(s, w, sLang);
+  $("gOut").innerHTML = g ? `<div class="${sLang === "km" ? "kh" : ""}" style="font-size:20px">${esc(g.text).replace("___", '<span class="gap">&nbsp;</span>')}</div><div class="hint">the word as the story wrote it: <b>${esc(g.original)}</b> · word number ${g.index + 1}</div>` : `<span class="pill fail">not in that sentence</span>`;
+}
+pair("sEn", "sKm", (id) => { sLang = id === "sEn" ? "en" : "km"; $("sText").value = sLang === "en" ? "Sokha goes to the market with her mother.\nShe buys a mango and two bananas." : "សុខាទៅផ្សារជាមួយម្តាយ។\nនាងទិញស្វាយមួយ។\nស្វាយផ្អែមណាស់។"; $("sText").classList.toggle("kh", sLang === "km"); $("gWord").classList.toggle("kh", sLang === "km"); $("gWord").value = ""; split(); });
+$("sText").oninput = split; $("gSent").onchange = gap; $("gWord").oninput = gap; split();
+
+/* 3 · check */
+const clone = (x) => JSON.parse(JSON.stringify(x));
+K.STARTER_PASSAGES.forEach((p, i) => $("cSel").insertAdjacentHTML("beforeend", `<option value="${i}">${esc(p.title)} — ${p.language.toUpperCase()}, band ${p.band}</option>`));
+const cur = () => { try { return JSON.parse($("cJson").value); } catch (e) { $("cBanner").innerHTML = `<div class="banner fail">The JSON is not valid: ${esc(e.message)}</div>`; return null; } };
+function load() { $("cJson").value = JSON.stringify(K.STARTER_PASSAGES[+$("cSel").value], null, 2); check(); }
+function check() {
+  const p = cur(); if (!p) return;
+  let v; try { v = K.verifyPassage(p, { confirmedSplit: $("cConf").checked, stage: $("cStage").value }); } catch (e) { $("cBanner").innerHTML = `<div class="banner fail">The checker threw: ${esc(e.message)}</div>`; return; }
+  const band = K.BANDS[p.band] || {};
+  $("cBanner").innerHTML = `<div class="banner ${v.publishable ? "pass" : "fail"}">${v.publishable ? "✓ Publishable" : "✕ Not publishable"} — ${v.failures} failing check${v.failures === 1 ? "" : "s"} · counts ${v.counts.comprehension}/${band.understand} understand, ${v.counts.vocab}/${band.words} words, ${v.counts.spell}/${band.spell} spell ${v.countsMatchBand ? "✓" : "✕ (need at least 85% in each section)"}</div>`;
+  $("cRules").innerHTML = `<tr><th></th><th>Rule</th><th>Result</th></tr>` + v.rules.map((r) => `<tr><td><span class="pill ${r.status}">${r.status}</span></td><td><b>${r.rule}</b> · ${esc(r.title)}</td><td>${esc(r.message)}</td></tr>`).join("");
+  const zero = v.checks.filter((c) => c.rule === 0 && c.status === "fail");
+  if (zero.length) $("cRules").innerHTML += `<tr><td><span class="pill fail">fail</span></td><td><b>0</b> · Is this a passage</td><td>${zero.map((c) => `${esc(c.question)}: ${esc(c.message)}`).join("<br>")}</td></tr>`;
+  $("cChecks").innerHTML = `<tr><th>Rule</th><th>Question</th><th></th><th>Message</th></tr>` + v.checks.map((c) => `<tr><td>${c.rule}</td><td class="mono">${esc(c.question)}</td><td><span class="pill ${c.status}">${c.status}</span></td><td>${esc(c.message)}</td></tr>`).join("");
+  deck(p);
+}
+const MUT = {
+  longest: (p) => { const q = p.questions.find((x) => x.kind === "comprehension"); q.options[q.answer] += " and some more words"; },
+  evidence: (p) => { const q = p.questions.find((x) => x.kind === "comprehension"); q.evidence = p.sentences.find((s) => s.id !== q.evidence).id; },
+  nostory: (p) => { const q = p.questions.find((x) => x.kind === "comprehension"); q.options = q.options.map((o, i) => (i === q.answer ? o : "Zebra " + "xyz".repeat(i + 1))); },
+  spellword: (p) => { p.questions.find((x) => x.kind === "spell").word = "zebra"; },
+  audio: (p) => { delete p.sentences[p.sentences.length - 1].audio; $("cStage").value = "publish"; },
+  dropspell: (p) => { const i = p.questions.findIndex((x) => x.kind === "spell"); p.questions.splice(i, 1); },
+  rejoin: (p) => { p.sentences[0].words[1] = "CHANGED"; },
+};
+document.querySelectorAll("[data-m]").forEach((b) => b.onclick = () => { if (b.dataset.m === "reset") return load(); const p = cur(); if (!p) return; MUT[b.dataset.m](p); $("cJson").value = JSON.stringify(p, null, 2); check(); });
+$("cSel").onchange = load; $("cConf").onchange = check; $("cStage").onchange = check; $("cJson").oninput = check;
+
+/* 4 · deck */
+let dk = [], di = 0, picked = [], dp = null, ring = [];
+function deck(p) {
+  dp = p; di = 0; picked = [];
+  try { dk = K.buildSpellingDeck(p); } catch (e) { dk = []; $("dOut").innerHTML = `<div class="banner fail">This story cannot be played: ${esc(e.message)}</div>`; return; }
+  ring = dk.length ? K.ringOf(dk[0]) : []; drawDeck();
+}
+function drawDeck(msg) {
+  if (!dk.length) { if (!$("dOut").innerHTML.includes("banner")) $("dOut").innerHTML = '<p class="hint">This story has no spelling questions.</p>'; return; }
+  const w = dk[di], km = dp.language === "km", used = new Set(picked);
+  $("dOut").innerHTML = `<div class="hint">Word ${di + 1} of ${dk.length} · <span class="mono">${esc(w.id)}</span></div>
+    <div class="${km ? "kh" : ""}" style="font-size:22px">${esc(w.gapped).replace("___", '<span class="gap">&nbsp;</span>')}</div>
+    <div class="tiles ${km ? "kh" : ""}" style="min-height:70px">${picked.map((i) => `<span class="tile">${esc(ring[i])}</span>`).join("") || '<span class="hint">tap tiles in order</span>'}</div>
+    <div class="ring ${km ? "kh" : ""}">${ring.map((t, i) => `<button data-t="${i}" ${used.has(i) ? "disabled" : ""}>${esc(t)}</button>`).join("")}</div>
+    <div class="row"><button id="dCheck" class="pri">Check</button><button id="dClear">Start over</button><button id="dNext">Next word ›</button><span id="dMsg">${msg || ""}</span></div>`;
+  document.querySelectorAll("[data-t]").forEach((b) => b.onclick = () => { picked.push(+b.dataset.t); drawDeck(); });
+  $("dClear").onclick = () => { picked = []; drawDeck(); };
+  $("dNext").onclick = () => { di = (di + 1) % dk.length; picked = []; ring = K.ringOf(dk[di]); drawDeck(); };
+  $("dCheck").onclick = () => { const r = K.judgeSpelling(w, picked.map((i) => ring[i]), dp); drawDeck(r === "correct" ? '<span class="pill pass">correct</span>' : '<span class="pill fail">wrong — try again</span>'); };
+}
+load();
+</script>
+</body>
+</html>

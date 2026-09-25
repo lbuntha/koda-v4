@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { LIBRARY_CONCEPT_NAMES } from "../../library/session";
 import {
   ArrowLeft,
   BookOpen,
@@ -94,6 +95,8 @@ const conceptNames = (): Map<string, ConceptName> => {
       }
     }
   }
+  // Koda Library is a module, not a skill, so its concepts are named here.
+  for (const [key, name] of Object.entries(LIBRARY_CONCEPT_NAMES)) if (!names.has(key)) names.set(key, name);
   return names;
 };
 

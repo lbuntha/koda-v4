@@ -177,6 +177,25 @@ INDEXES: dict[str, list[IndexModel]] = {
         IndexModel([("id", ASCENDING)], unique=True, name="art_id_unique"),
         IndexModel([("category", ASCENDING), ("id", ASCENDING)], name="art_by_category"),
     ],
+    # Koda Library: one row per book; every published revision kept immutable.
+    "library_books": [
+        IndexModel([("id", ASCENDING)], unique=True, name="library_book_id_unique"),
+        IndexModel([("deletedAt", ASCENDING), ("updatedAt", DESCENDING)], name="library_book_recent"),
+    ],
+    "library_unit_voices": [
+        IndexModel([("unit", ASCENDING)], unique=True, name="library_unit_voice_unique"),
+    ],
+    "library_images": [
+        IndexModel([("id", ASCENDING)], unique=True, name="library_image_id_unique"),
+    ],
+    "library_reports": [
+        IndexModel([("resolvedAt", ASCENDING), ("bookId", ASCENDING)], name="library_report_open_by_book"),
+        IndexModel([("id", ASCENDING)], unique=True, name="library_report_id_unique"),
+        IndexModel([("resolvedAt", ASCENDING), ("createdAt", ASCENDING)], name="library_reports_open"),
+    ],
+    "library_revisions": [
+        IndexModel([("bookId", ASCENDING), ("rev", ASCENDING)], unique=True, name="library_revision_unique"),
+    ],
     "skill_registry": [
         IndexModel([("id", ASCENDING)], unique=True, name="skill_id_unique"),
         IndexModel([("status", ASCENDING), ("id", ASCENDING)], name="skills_by_status"),

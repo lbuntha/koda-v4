@@ -16,6 +16,11 @@ class Settings(BaseSettings):
     mongodb_uri: str = "mongodb://localhost:27017"
     mongodb_db: str = "koda_v4"
 
+    #: Runtime book recordings. Development uses the folder; production sets a
+    #: GCS bucket because a Cloud Run instance's own disk disappears with it.
+    library_audio_dir: str = "data/library-audio"
+    library_audio_bucket: str | None = None
+
     # Dev default so `make dev-local` works out of the box. Production supplies
     # a real one; `main.py` refuses to start with this value outside dev.
     jwt_secret: str = "dev-only-change-me-not-a-real-secret-32b"

@@ -1,0 +1,139 @@
+{
+  "id": "starter-market",
+  "rev": 1,
+  "language": "en",
+  "band": "A",
+  "title": "At the Market",
+  "category": "Food",
+  "picture": "market",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "Sokha goes to the market with her mother.",
+      "words": [
+        "Sokha",
+        "goes",
+        "to",
+        "the",
+        "market",
+        "with",
+        "her",
+        "mother."
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "She buys a mango and two bananas.",
+      "words": [
+        "She",
+        "buys",
+        "a",
+        "mango",
+        "and",
+        "two",
+        "bananas."
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "The mango is sweet.",
+      "words": [
+        "The",
+        "mango",
+        "is",
+        "sweet."
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "They walk home under the hot sun.",
+      "words": [
+        "They",
+        "walk",
+        "home",
+        "under",
+        "the",
+        "hot",
+        "sun."
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "kind": "comprehension",
+      "prompt": "Where did they walk after the market?",
+      "options": [
+        "To the market",
+        "Home",
+        "Under the hot sun"
+      ],
+      "answer": 1,
+      "evidence": "s4"
+    },
+    {
+      "id": "q2",
+      "kind": "comprehension",
+      "prompt": "What is sweet?",
+      "options": [
+        "The market",
+        "The mango",
+        "The sun"
+      ],
+      "answer": 1,
+      "evidence": "s3"
+    },
+    {
+      "id": "q3",
+      "kind": "vocab",
+      "prompt": "Which picture is “banana”?",
+      "word": "banana",
+      "options": [
+        "mango",
+        "banana",
+        "orange"
+      ],
+      "answer": 1
+    },
+    {
+      "id": "q4",
+      "kind": "vocab",
+      "prompt": "Which picture is “market”?",
+      "word": "market",
+      "options": [
+        "market",
+        "cat",
+        "nest"
+      ],
+      "answer": 0
+    },
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s1",
+      "word": "market"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "mango"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "sweet"
+    }
+  ],
+  "pictures": {
+    "market": "market",
+    "mango": "mango",
+    "banana": "banana",
+    "bananas": "banana"
+  },
+  "noRecording": [
+    "Sokha"
+  ],
+  "provenance": "Hand-written sample for tests and the bundled starter shelf."
+}

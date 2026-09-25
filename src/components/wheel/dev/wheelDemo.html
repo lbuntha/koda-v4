@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Letter ring — Phase 1 hand test</title>
+<style>
+:root{--koda-canvas:#F8FAFC;--koda-surface:#FFFFFF;--koda-surface-muted:#F0F4FF;--koda-ink:#0F172A;--koda-body:#475569;--koda-muted:#64748B;--koda-line:#E2E8F0;--color-indigo-600:#6B46C1;--color-rose-600:#FF2D78;--color-emerald-600:#2E9D73}
+html.dark{--koda-canvas:#0d061a;--koda-surface:#0F172A;--koda-surface-muted:#1E293B;--koda-ink:#F8FAFC;--koda-body:#CBD5E1;--koda-muted:#94A3B8;--koda-line:#334155}
+*{box-sizing:border-box}
+body{margin:0;background:var(--koda-canvas);color:var(--koda-body);font:15px/1.55 "Plus Jakarta Sans",system-ui,sans-serif}
+header,main{width:min(1060px,calc(100% - 28px));margin:0 auto}
+header{padding:24px 0 10px}
+h1{margin:0 0 4px;color:var(--koda-ink);font-size:28px;letter-spacing:-.03em}
+.muted,header p{color:var(--koda-muted)}
+header p{margin:0 0 12px}
+.grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,.9fr);gap:16px;padding-bottom:40px}
+.narrow .grid{grid-template-columns:minmax(0,1fr)}
+.narrow main{width:360px;padding:0 16px;border-left:1px dashed var(--koda-line);border-right:1px dashed var(--koda-line)}
+@media(max-width:820px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{margin-bottom:14px;padding:16px;border:1px solid var(--koda-line);border-radius:20px;background:var(--koda-surface)}
+label{display:block;margin:10px 0 6px;color:var(--koda-muted);font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase}
+label.check{display:flex;gap:8px;align-items:center;color:var(--koda-ink);font-size:14px;font-weight:600;letter-spacing:0;text-transform:none}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{min-height:40px;padding:7px 14px;border:1px solid var(--koda-line);border-radius:999px;background:var(--koda-surface);color:var(--koda-ink);font:inherit;font-weight:700;cursor:pointer}
+button[aria-pressed=true]{border-color:#6B46C1;background:#6B46C1;color:#fff}
+input[type=range]{width:100%;accent-color:#6B46C1}
+input:not([type]){min-height:40px;padding:6px 12px;border:1px solid var(--koda-line);border-radius:12px;background:var(--koda-surface);color:var(--koda-ink);font:inherit;font-size:18px}
+.kh{font-family:'Noto Sans Khmer','Khmer OS','Khmer MN',sans-serif}
+.sentence{margin:0 0 8px;color:var(--koda-ink);font-size:21px;line-height:1.9;text-align:center}
+.gap{display:inline-block;min-width:80px;border-bottom:3px solid #6B46C1;color:#1F7A58;font-weight:800;text-align:center}
+.err{color:#B4245B;font-weight:700;text-align:center}
+.log{max-height:340px;margin:8px 0 0;padding:0 0 0 20px;overflow:auto;font:12.5px/1.6 ui-monospace,Menlo,monospace;color:var(--koda-ink)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Letter ring — Phase 1 hand test</h1>
+  <p>The real component, spelling the real Phase 0 stories. Drag across letters, tap them one at a time, or Tab to a letter and use Enter, Backspace, Escape and the arrow keys.</p>
+  <div class="row">
+    <button id="light" aria-pressed="true">Light</button><button id="dark" aria-pressed="false">Dark</button>
+    <button id="wide" aria-pressed="true">Full width</button><button id="phone" aria-pressed="false">360px phone</button>
+  </div>
+</header>
+<main><div id="root"></div></main>
+<script>
+const pair=(a,b,on,off)=>{const A=document.getElementById(a),B=document.getElementById(b);A.onclick=()=>{A.setAttribute("aria-pressed","true");B.setAttribute("aria-pressed","false");on();};B.onclick=()=>{B.setAttribute("aria-pressed","true");A.setAttribute("aria-pressed","false");off();};};
+pair("light","dark",()=>document.documentElement.classList.remove("dark"),()=>document.documentElement.classList.add("dark"));
+pair("wide","phone",()=>document.body.classList.remove("narrow"),()=>document.body.classList.add("narrow"));
+</script>
+<script>/*BUNDLE*/</script>
+</body>
+</html>

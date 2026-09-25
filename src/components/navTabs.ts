@@ -8,6 +8,10 @@
 export type TabId =
   | "home"
   | "game"
+  // Koda Library: books to read, answer and spell. A module, not a skill.
+  | "library"
+  // Where library books are written and published. content:write, like Art.
+  | "library-studio"
   | "profile"
   | "leaderboard"
   | "skills"

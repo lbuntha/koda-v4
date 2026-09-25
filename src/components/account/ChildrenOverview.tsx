@@ -6,6 +6,7 @@ import { usePermissions, useSession } from "../../lib/sync";
 import {
   cachedChildrenOverview,
   refreshChildrenOverview,
+  isChildrenOverview,
   type ChildOverview,
   type StoredOverview,
 } from "../../lib/childrenOverview";
@@ -75,7 +76,7 @@ export const ChildrenOverview: React.FC<{
     };
   }, [isParent, userId]);
 
-  if (!isParent || !data) return null;
+  if (!isParent || !data || !isChildrenOverview(data.overview)) return null;
 
   /*
    * A family of nobody yet.

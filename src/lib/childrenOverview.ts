@@ -52,22 +52,64 @@ export interface StoredOverview {
 
 const KEY = "koda_children_overview_v1";
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+const isChildOverview = (value: unknown): value is ChildOverview => {
+  if (!isRecord(value) || !isRecord(value.today)) return false;
+  return (
+    typeof value.id === "string" &&
+    typeof value.displayName === "string" &&
+    typeof value.avatarSeed === "string" &&
+    typeof value.today.rounds === "number" &&
+    typeof value.today.minutes === "number" &&
+    typeof value.today.goal === "number" &&
+    typeof value.today.goalMet === "boolean" &&
+    typeof value.streak === "number" &&
+    (typeof value.daysAway === "number" || value.daysAway === null) &&
+    typeof value.daysThisWeek === "number"
+  );
+};
+
+/** Runtime guard for cache and network payloads, where TypeScript cannot help. */
+export const isChildrenOverview = (value: unknown): value is ChildrenOverview => {
+  if (!isRecord(value) || !Array.isArray(value.children)) return false;
+  return (
+    value.children.every(isChildOverview) &&
+    (value.attention === null || isRecord(value.attention)) &&
+    typeof value.generatedAt === "string" &&
+    typeof value.absenceDays === "number"
+  );
+};
+
 /** The last answer this account received on this device, if any. */
 export function cachedChildrenOverview(userId: string): StoredOverview | null {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return null;
-    const stored = JSON.parse(raw) as StoredOverview & { userId?: string };
+    const stored = JSON.parse(raw) as unknown;
     // Per account: a shared family tablet must not show one parent's cache to
     // another, even though today it would be the same children.
-    return stored.userId === userId ? { overview: stored.overview, savedAt: stored.savedAt } : null;
+    if (
+      !isRecord(stored) ||
+      stored.userId !== userId ||
+      typeof stored.savedAt !== "number" ||
+      !isChildrenOverview(stored.overview)
+    ) {
+      return null;
+    }
+    return { overview: stored.overview, savedAt: stored.savedAt };
   } catch {
     return null;
   }
 }
 
 export async function refreshChildrenOverview(userId: string, now = Date.now()): Promise<StoredOverview> {
-  const overview = await request<ChildrenOverview>("/learners/overview", { token: await accessToken() });
+  const payload = await request<unknown>("/learners/overview", { token: await accessToken() });
+  if (!isChildrenOverview(payload)) {
+    throw new Error("The children overview response was incomplete.");
+  }
+  const overview = payload;
   try {
     localStorage.setItem(KEY, JSON.stringify({ userId, savedAt: now, overview }));
   } catch {

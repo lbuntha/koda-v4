@@ -36,7 +36,7 @@ function getAudioContext(): AudioContext {
   return audioCtx;
 }
 
-export function playSound(type: "pop" | "clink" | "success" | "hint" | "levelup" | "error" | "pour") {
+export function playSound(type: "pop" | "clink" | "success" | "hint" | "levelup" | "error" | "pour" | "page") {
   if (!isSoundEnabled()) return;
   try {
     const ctx = getAudioContext();
@@ -166,6 +166,38 @@ export function playSound(type: "pop" | "clink" | "success" | "hint" | "levelup"
         osc.start(startTime);
         osc.stop(startTime + 0.4);
       });
+    } else if (type === "page") {
+      /*
+       * A page turning, built the same way "pour" is: paper is broadband noise,
+       * not a tone. A flip is quick and bright rather than a slow whoosh, so
+       * noise runs the whole short span through a highpass whose cutoff rises
+       * then falls — the sound of one sheet passing close by and settling.
+       */
+      const seconds = 0.22;
+      const frames = Math.floor(ctx.sampleRate * seconds);
+      const buffer = ctx.createBuffer(1, frames, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < frames; i += 1) data[i] = Math.random() * 2 - 1;
+
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+      const rustle = ctx.createBiquadFilter();
+      rustle.type = "highpass";
+      rustle.Q.value = 0.7;
+      rustle.frequency.setValueAtTime(1200, now);
+      rustle.frequency.linearRampToValueAtTime(3200, now + 0.08);
+      rustle.frequency.linearRampToValueAtTime(1600, now + seconds);
+
+      const sheet = ctx.createGain();
+      sheet.gain.setValueAtTime(0.0001, now);
+      sheet.gain.exponentialRampToValueAtTime(0.05, now + 0.03);
+      sheet.gain.exponentialRampToValueAtTime(0.0001, now + seconds);
+
+      noise.connect(rustle);
+      rustle.connect(sheet);
+      sheet.connect(ctx.destination);
+      noise.start(now);
+      noise.stop(now + seconds);
     } else if (type === "error") {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();

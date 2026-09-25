@@ -148,6 +148,26 @@ describe("Your children", () => {
     expect(screen.queryByText("Your children")).toBeNull();
   });
 
+  it("ignores an old cache whose overview is null", async () => {
+    localStorage.setItem(
+      "koda_children_overview_v1",
+      JSON.stringify({ userId: "u_parent", savedAt: Date.now(), overview: null }),
+    );
+    refresh.mockReturnValue(new Promise(() => {}));
+
+    expect(() => render(<ChildrenOverview />)).not.toThrow();
+    await Promise.resolve();
+    expect(screen.queryByText("Your children")).toBeNull();
+  });
+
+  it("does not crash when a malformed refresh result reaches the component", async () => {
+    refresh.mockResolvedValue({ overview: null, savedAt: Date.now() });
+
+    expect(() => render(<ChildrenOverview />)).not.toThrow();
+    await waitFor(() => expect(refresh).toHaveBeenCalled());
+    expect(screen.queryByText("Your children")).toBeNull();
+  });
+
   it("says a child who never started has not started", () => {
     expect(dayOf({ ...overview.children[1], daysAway: null })).toBe("Hasn't started yet");
     expect(dayOf({ ...overview.children[1], daysAway: 1 })).toBe("Last practised yesterday");

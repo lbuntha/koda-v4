@@ -21,6 +21,8 @@ export interface MainLayoutProps {
   loadingLabel?: string;
   /** Set false for views that manage their own padding and full-bleed width (games, canvases). */
   contained?: boolean;
+  /** Hides the phone shell while a focused mobile activity is open. */
+  hideMobileChrome?: boolean;
   className?: string;
 }
 
@@ -47,6 +49,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
   isRefreshing = false,
   loadingLabel = "Loading",
   contained = true,
+  hideMobileChrome = false,
   className = "",
 }) => {
   const s = themeSystem.appShell;
@@ -55,7 +58,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
     <div className={`${s.root} ${className}`}>
       {sidebar}
 
-      <div className={s.column}>
+      <div className={s.column} data-mobile-chrome-hidden={hideMobileChrome ? "true" : undefined}>
         {nav}
 
         <main
@@ -63,7 +66,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
             // The tab bar is fixed, so the page has to end above it. That
             // clearance lives in `page` rather than being added here, and it is
             // dropped at `rail:` where there is no bar to clear.
-            contained ? s.page(Boolean(nav)) : s.pageBleed
+            contained ? s.page(Boolean(nav) && !hideMobileChrome) : s.pageBleed
           }
         >
           {isLoading ? <UIPageLoader label={loadingLabel} /> : children}

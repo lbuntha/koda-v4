@@ -1,0 +1,117 @@
+{
+  "id": "starter-market-km",
+  "rev": 1,
+  "language": "km",
+  "band": "A",
+  "title": "នៅផ្សារ",
+  "category": "Food",
+  "picture": "market",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "សុខាទៅផ្សារជាមួយម្តាយ។",
+      "words": [
+        "សុខា",
+        "ទៅ",
+        "ផ្សារ",
+        "ជាមួយ",
+        "ម្តាយ។"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "នាងទិញស្វាយមួយ។",
+      "words": [
+        "នាង",
+        "ទិញ",
+        "ស្វាយ",
+        "មួយ។"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ស្វាយផ្អែមណាស់។",
+      "words": [
+        "ស្វាយ",
+        "ផ្អែម",
+        "ណាស់។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "kind": "comprehension",
+      "prompt": "តើសុខាទៅផ្សារជាមួយនរណា?",
+      "options": [
+        "ឪពុក",
+        "ម្តាយ",
+        "ស្វាយ"
+      ],
+      "answer": 1,
+      "evidence": "s1"
+    },
+    {
+      "id": "q2",
+      "kind": "comprehension",
+      "prompt": "តើអ្វីផ្អែម?",
+      "options": [
+        "ផ្សារ",
+        "ស្វាយ",
+        "ម្តាយ"
+      ],
+      "answer": 1,
+      "evidence": "s3"
+    },
+    {
+      "id": "q3",
+      "kind": "vocab",
+      "prompt": "តើរូបណាជា “ស្វាយ”?",
+      "word": "ស្វាយ",
+      "options": [
+        "banana",
+        "mango",
+        "orange"
+      ],
+      "answer": 1
+    },
+    {
+      "id": "q4",
+      "kind": "vocab",
+      "prompt": "តើរូបណាជា “ផ្សារ”?",
+      "word": "ផ្សារ",
+      "options": [
+        "cat",
+        "mango",
+        "market"
+      ],
+      "answer": 2
+    },
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s1",
+      "word": "ផ្សារ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "ស្វាយ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ផ្អែម"
+    }
+  ],
+  "pictures": {
+    "ស្វាយ": "mango",
+    "ផ្សារ": "market"
+  },
+  "noRecording": [
+    "សុខា"
+  ],
+  "provenance": "Hand-written sample. The Khmer has NOT been reviewed by a native speaker and must be before this ships."
+}
