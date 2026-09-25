@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "motion/react";
-import { ArrowLeft, ChevronLeft, ChevronRight, Pause, Volume2, X } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Moon, Pause, Sun, Volume2, X } from "lucide-react";
 import { BANDS, type Passage, type PicturePlace, type Sentence } from "./data/passage";
 import { layoutBook, type SetSentence, type SetToken } from "./bookLayout";
 import { FLAT, SPRING, TURNED, angularVelocity, castOf, completes, curlOf, dragAngle, shadeOf, type Dir } from "./pageTurn";
@@ -10,6 +10,7 @@ import { minutesToRead } from "./session";
 import { canSpeak, say, stop } from "./voice";
 import { playSound } from "../utils/audio";
 import { UIButton } from "../components/ui/ThemeUI";
+import { useTheme } from "../context/ThemeContext";
 
 /**
  * A story read as a book: one page at a time, turned by a swipe, the arrows or
@@ -74,6 +75,7 @@ export function spokenWordAt(sentence: Pick<Sentence, "words" | "audioCues">, el
 interface Turn { dir: Dir; from: number; to: number }
 
 export function BookReader({ book, onBack, onReady, preview = false }: { book: Passage; onBack(): void; onReady(): void; preview?: boolean }) {
+  const { theme, toggleTheme } = useTheme();
   const pages = useMemo(() => layoutBook(book), [book]);
   const reduce = useReducedMotion() ?? false;
   const km = book.language === "km";
@@ -344,6 +346,17 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
               {reading ? <Pause className="h-4 w-4" aria-hidden="true" /> : <Volume2 className="h-4 w-4" aria-hidden="true" />}
             </UIButton>
           )}
+          <UIButton
+            type="button"
+            variant="secondary"
+            size="icon"
+            onClick={toggleTheme}
+            aria-label={theme === "dark" ? "Use light mode" : "Use dark mode"}
+            aria-pressed={theme === "dark"}
+            title={theme === "dark" ? "Use light mode" : "Use dark mode"}
+          >
+            {theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
+          </UIButton>
         </div>
       </div>
 
@@ -441,7 +454,7 @@ function Sheet({ index, count, children }: { index: number; count: number; child
       aria-roledescription="page"
       aria-label={index === 0 ? "Cover" : `Page ${index} of ${count - 1}`}
       data-book-page={index}
-      className="flex min-h-[max(18rem,calc(100svh-22rem))] w-full flex-col py-4 sm:min-h-[34rem] sm:px-8 sm:py-8"
+      className="flex min-h-[max(18rem,calc(100svh-8rem))] w-full flex-col py-4 sm:min-h-[34rem] sm:px-8 sm:py-8"
     >
       {children}
     </div>
