@@ -41,6 +41,7 @@ from app.routers import (
     leaderboard,
     library,
     learners,
+    library,
     menu,
     notifications,
     personas,
