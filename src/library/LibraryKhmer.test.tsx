@@ -59,7 +59,7 @@ async function toSpelling() {
   fireEvent.click(screen.getByRole("button", { name: new RegExp(`^${KM.title}\\.`) }));
   fireEvent.click(screen.getByRole("button", { name: "Read" }));
   while (screen.queryByRole("button", { name: "Next page" })) fireEvent.click(screen.getByRole("button", { name: "Next page" }));
-  fireEvent.click(screen.getByRole("button", { name: "I’m ready" }));
+  fireEvent.click(screen.getByRole("button", { name: "Check My Learning" }));
   for (const q of KM.questions.filter((x): x is ComprehensionQuestion => x.kind === "comprehension")) {
     fireEvent.click(screen.getByRole("button", { name: q.options[q.answer] }));
     await advance();

@@ -98,7 +98,7 @@ describe("a whole book, as a child plays it", () => {
     fireEvent.click(screen.getByRole("button", { name: "mango" })); // bold: the quiz asks about it
     expect(screen.getByText("Picture word · tap the speaker to hear it")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Next page" }));
-    fireEvent.click(screen.getByRole("button", { name: "I’m ready" }));
+    fireEvent.click(screen.getByRole("button", { name: "Check My Learning" }));
 
     // Understand 1: one wrong answer first. It stays, locked and marked — and
     // each answer has its own sound, not the page-turn one BookReader just used.
@@ -193,18 +193,18 @@ describe("the reader is a book", () => {
   };
   const onPage = () => document.querySelector("[data-book-page]")?.getAttribute("data-book-page");
 
-  it("shows one page at a time, and I’m ready only on the last", () => {
+  it("shows one page at a time, and Quiz only on the last", () => {
     openBook();
     expect(screen.getByRole("heading", { name: "At the Market" })).toBeTruthy();
     expect((screen.getByRole("button", { name: "Previous page" }) as HTMLButtonElement).disabled).toBe(true);
-    expect(screen.queryByRole("button", { name: "I’m ready" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Check My Learning" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Next page" }));
     expect(screen.getByText("Page 1 of 2")).toBeTruthy();
     expect(screen.queryByText(/The mango is sweet/)).toBeNull(); // on the next page, not this one
     fireEvent.click(screen.getByRole("button", { name: "Next page" }));
     expect(screen.getByText("The end")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Next page" })).toBeNull();
-    expect(screen.getByRole("button", { name: "I’m ready" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Check My Learning" })).toBeTruthy();
   });
 
   it("turns with the arrow keys and with a swipe, but not with a small wobble", () => {

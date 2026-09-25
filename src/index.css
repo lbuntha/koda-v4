@@ -217,10 +217,23 @@
 @media (max-width: 44.999rem) {
   [data-mobile-chrome-hidden] > header,
   [data-mobile-chrome-hidden] > div:has(> nav[aria-label="Main"]),
-  .mobile-reader-pagination,
+  .mobile-reader-pagination:not(.mobile-reader-pagination-last),
   .mobile-reader-word-hint,
   .mobile-reader-swipe-hint {
     display: none;
+  }
+
+  .mobile-reader-final-actions {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 30;
+    margin: 0;
+    padding: 0.625rem max(1rem, env(safe-area-inset-left)) max(0.625rem, env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+    box-shadow: 0 -6px 20px rgb(15 23 42 / 10%);
   }
 }
 

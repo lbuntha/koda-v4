@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "motion/react";
-import { ArrowLeft, ChevronLeft, ChevronRight, Moon, Pause, Sun, Volume2, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Volume2, X } from "lucide-react";
 import { BANDS, type Passage, type PicturePlace, type Sentence } from "./data/passage";
 import { layoutBook, type SetSentence, type SetToken } from "./bookLayout";
 import { FLAT, SPRING, TURNED, angularVelocity, castOf, completes, curlOf, dragAngle, shadeOf, type Dir } from "./pageTurn";
@@ -8,8 +8,9 @@ import { Picture } from "./Picture";
 import { LibraryProgress } from "./progress";
 import { minutesToRead } from "./session";
 import { canSpeak, say, stop } from "./voice";
+import { prefetchBook } from "./clips";
 import { playSound } from "../utils/audio";
-import { UIButton } from "../components/ui/ThemeUI";
+import { UIReaderToolbar } from "../components/ui";
 import { useTheme } from "../context/ThemeContext";
 
 /**
@@ -154,6 +155,12 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
   useEffect(() => {
     if (!preview) LibraryProgress.set(book.id, { stage: "read", rev: book.rev });
   }, [book, preview]);
+  // Have the first recording ready before a phone tap. This keeps playback in
+  // the browser's user-gesture window and lets the same audio element continue
+  // through every recorded sentence on the page.
+  useEffect(() => {
+    void prefetchBook(book);
+  }, [book]);
   useEffect(() => () => { run.current++; stop(); spring.current?.stop(); }, []);
 
   const hush = () => {
@@ -320,45 +327,16 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
 
   return (
     <div className="mx-auto w-full max-w-3xl">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <UIButton type="button" variant="secondary" size="md" icon={<ArrowLeft className="h-4 w-4" aria-hidden="true" />} onClick={onBack} aria-label="Back to book">
-          Back
-        </UIButton>
-        <div className="flex items-center gap-2">
-          <div role="group" aria-label="Text size" className="flex items-center gap-1">
-            <UIButton type="button" variant="secondary" size="sm" onClick={() => setTextStep(textStep - 1)} disabled={textStep === 0} aria-label="Smaller text" className="!min-w-10 !px-2">
-              <span aria-hidden="true" className={`${SERIF} text-sm font-bold`}>A</span>
-            </UIButton>
-            <UIButton type="button" variant="secondary" size="sm" onClick={() => setTextStep(textStep + 1)} disabled={textStep === TEXT_STEPS.length - 1} aria-label="Larger text" className="!min-w-10 !px-2">
-              <span aria-hidden="true" className={`${SERIF} text-xl font-bold`}>A</span>
-            </UIButton>
-          </div>
-          {pageRecorded && (
-            <UIButton
-              type="button"
-              onClick={() => void readPage()}
-              variant="secondary"
-              size="sm"
-              aria-label={reading ? "Stop reading" : "Play page recording"}
-              title={reading ? "Stop reading" : "Play page recording"}
-              aria-pressed={reading}
-            >
-              {reading ? <Pause className="h-4 w-4" aria-hidden="true" /> : <Volume2 className="h-4 w-4" aria-hidden="true" />}
-            </UIButton>
-          )}
-          <UIButton
-            type="button"
-            variant="secondary"
-            size="icon"
-            onClick={toggleTheme}
-            aria-label={theme === "dark" ? "Use light mode" : "Use dark mode"}
-            aria-pressed={theme === "dark"}
-            title={theme === "dark" ? "Use light mode" : "Use dark mode"}
-          >
-            {theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
-          </UIButton>
-        </div>
-      </div>
+      <UIReaderToolbar
+        onBack={onBack}
+        onSmallerText={() => setTextStep(textStep - 1)}
+        onLargerText={() => setTextStep(textStep + 1)}
+        smallerDisabled={textStep === 0}
+        largerDisabled={textStep === TEXT_STEPS.length - 1}
+        audio={pageRecorded ? { playing: reading, onToggle: () => void readPage() } : undefined}
+        dark={theme === "dark"}
+        onToggleDark={toggleTheme}
+      />
 
       <section
         ref={bookEl}
@@ -396,11 +374,11 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
       </section>
 
       {/* Kept in reach while reading: pinned above the phone's tab bar, however long the page. */}
-      <nav aria-label="Pages" className="mobile-reader-pagination sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] z-10 mt-2 flex items-center justify-between gap-3 bg-surface/95 py-2 backdrop-blur rail:bottom-3">
-        <button type="button" onClick={() => turn(page - 1)} disabled={page === 0} aria-label="Previous page" className={round}>
+      <nav aria-label="Pages" className={`mobile-reader-pagination ${page === last ? "mobile-reader-pagination-last mobile-reader-final-actions" : ""} sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] z-10 mt-2 flex items-center justify-between gap-3 bg-surface/95 py-2 backdrop-blur rail:bottom-3`}>
+        {page !== last && <button type="button" onClick={() => turn(page - 1)} disabled={page === 0} aria-label="Previous page" className={round}>
           <ChevronLeft className="h-5 w-5" aria-hidden="true" />
-        </button>
-        <div className="flex min-w-0 flex-col items-center gap-1.5">
+        </button>}
+        {page !== last && <div className="flex min-w-0 flex-col items-center gap-1.5">
           <span className="text-sm font-bold tabular-nums text-muted" aria-live="polite">
             {page === 0 ? "Cover" : `Page ${page} of ${pages.story.length}`}
           </span>
@@ -409,14 +387,14 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
               <span key={i} className={`h-1.5 rounded-full transition-all ${i === page ? "w-5 bg-neutral-800 dark:bg-neutral-200" : "w-1.5 bg-neutral-300 dark:bg-neutral-700"}`} />
             ))}
           </span>
-        </div>
+        </div>}
         {page < last ? (
           <button type="button" onClick={() => turn(page + 1)} aria-label="Next page" className={round}>
             <ChevronRight className="h-5 w-5" aria-hidden="true" />
           </button>
         ) : (
-          <button type="button" onClick={() => { hush(); onReady(); }} className={primary}>
-            I’m ready
+          <button type="button" onClick={() => { hush(); onReady(); }} className={`${primary} min-h-12 w-full shadow-[0_6px_18px_rgba(79,70,229,0.22)] active:shadow-[0_3px_10px_rgba(79,70,229,0.18)]`}>
+            Check My Learning
           </button>
         )}
       </nav>

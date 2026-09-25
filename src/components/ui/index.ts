@@ -16,6 +16,7 @@ export * from "./UIPathNode";
 export * from "./UISectionHeader";
 export * from "./navConfig";
 export * from "./UIAppShell";
+export * from "./UIReaderToolbar";
 export * from "./UISidebar";
 export * from "./UISkillPath";
 export * from "./UISkillThumbnail";

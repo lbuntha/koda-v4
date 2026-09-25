@@ -68,6 +68,14 @@ let playingFrame: number | null = null;
 let audioElement: HTMLAudioElement | null = null;
 let finishPlaying: ((played: boolean) => void) | null = null;
 
+/** One configured media element is reused so iOS keeps playback permission between sentences. */
+function recordingPlayer(): HTMLAudioElement {
+  const player = audioElement ?? (audioElement = new Audio());
+  player.preload = "auto";
+  player.setAttribute("playsinline", "");
+  return player;
+}
+
 /** Play a book recording. Resolves true when it played to the end, false if it could not play. */
 async function playRecording(clipId: string, onTime?: (elapsedMs: number | null, durationMs?: number) => void): Promise<boolean> {
   const url = await clipUrl(clipId);
@@ -76,7 +84,7 @@ async function playRecording(clipId: string, onTime?: (elapsedMs: number | null,
     try {
       // Mobile Safari is much more reliable when a reader reuses one media
       // element for a sequence of clips instead of creating one per sentence.
-      const a = audioElement ?? (audioElement = new Audio());
+      const a = recordingPlayer();
       a.pause();
       a.src = url;
       a.currentTime = 0;
