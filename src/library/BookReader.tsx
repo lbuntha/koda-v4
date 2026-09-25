@@ -9,6 +9,7 @@ import { LibraryProgress } from "./progress";
 import { minutesToRead } from "./session";
 import { canSpeak, say, stop } from "./voice";
 import { playSound } from "../utils/audio";
+import { UIButton } from "../components/ui/ThemeUI";
 
 /**
  * A story read as a book: one page at a time, turned by a swipe, the arrows or
@@ -317,30 +318,31 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
 
   return (
     <div className="mx-auto w-full max-w-3xl">
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <button type="button" onClick={onBack} aria-label="Back to book" className={round}>
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        </button>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <UIButton type="button" variant="secondary" size="md" icon={<ArrowLeft className="h-4 w-4" aria-hidden="true" />} onClick={onBack} aria-label="Back to book">
+          Back
+        </UIButton>
         <div className="flex items-center gap-2">
           <div role="group" aria-label="Text size" className="flex items-center gap-1">
-            <button type="button" onClick={() => setTextStep(textStep - 1)} disabled={textStep === 0} aria-label="Smaller text" className={round}>
+            <UIButton type="button" variant="secondary" size="sm" onClick={() => setTextStep(textStep - 1)} disabled={textStep === 0} aria-label="Smaller text" className="!min-w-10 !px-2">
               <span aria-hidden="true" className={`${SERIF} text-sm font-bold`}>A</span>
-            </button>
-            <button type="button" onClick={() => setTextStep(textStep + 1)} disabled={textStep === TEXT_STEPS.length - 1} aria-label="Larger text" className={round}>
+            </UIButton>
+            <UIButton type="button" variant="secondary" size="sm" onClick={() => setTextStep(textStep + 1)} disabled={textStep === TEXT_STEPS.length - 1} aria-label="Larger text" className="!min-w-10 !px-2">
               <span aria-hidden="true" className={`${SERIF} text-xl font-bold`}>A</span>
-            </button>
+            </UIButton>
           </div>
           {pageRecorded && (
-            <button
+            <UIButton
               type="button"
               onClick={() => void readPage()}
-              className={round}
+              variant="secondary"
+              size="sm"
               aria-label={reading ? "Stop reading" : "Play page recording"}
               title={reading ? "Stop reading" : "Play page recording"}
               aria-pressed={reading}
             >
               {reading ? <Pause className="h-4 w-4" aria-hidden="true" /> : <Volume2 className="h-4 w-4" aria-hidden="true" />}
-            </button>
+            </UIButton>
           )}
         </div>
       </div>

@@ -84,8 +84,8 @@ describe("Khmer sound names", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Khmer sound names" }));
 
     const used = new Set(KM.questions.flatMap((q) => (q.kind === "spell" ? spellingUnits(q.word) : [])));
-    expect((await screen.findByRole("button", { name: `Used in books (${used.size})` })).getAttribute("aria-pressed")).toBe("true");
-    expect(document.querySelectorAll("[data-unit]")).toHaveLength(used.size);
+    expect((await screen.findByRole("button", { name: `Used in books (${used.size})` })).getAttribute("aria-pressed")).toBe("false");
+    expect(document.querySelectorAll("[data-unit]").length).toBeGreaterThan(used.size);
 
     const foot = [...used].find((u) => u.startsWith("\u17D2"))!;
     const input = document.querySelector(`[data-unit="${foot}"] input[type=file]`)!;

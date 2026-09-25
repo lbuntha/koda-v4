@@ -98,7 +98,7 @@ export function LibraryPage({ onAwardXp, onReaderChange }: LibraryPageProps) {
   };
 
   return (
-    <div ref={top} className={`mx-auto w-full max-w-5xl px-2 ${screen === "read" || screen === "quiz" ? "pb-4" : "pb-24"} pt-4 sm:px-6`} data-koda-library>
+    <div ref={top} className={`mx-auto w-full max-w-5xl ${screen === "read" || screen === "quiz" ? "px-0 pb-4" : "px-2 pb-24"} pt-4 sm:px-6`} data-koda-library>
       {screen === "catalog" && <Catalog shelf={shelf} lang={lang} onLang={setLang} onOpen={open} />}
       {book && screen === "book" && (
         <BookPage book={book} onBack={() => go("catalog")} onRead={() => go("read")} />

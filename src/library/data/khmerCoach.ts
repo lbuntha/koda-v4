@@ -139,12 +139,15 @@ const range = (a: number, b: number) => Array.from({ length: b - a + 1 }, (_, i)
 
 /**
  * Every unit a Khmer word can be spelled with, grouped as a class learns them —
- * the list a person records names for. Obsolete letters (ឣ ឤ ឨ) are left out.
+ * the list a person records names for. The two historical consonants ឝ and ឞ
+ * are left out of the classroom list because they are not part of the modern
+ * 33-consonant alphabet and can look duplicated in some fonts.
  */
+const MODERN_CONSONANTS = range(0x1780, 0x17a2).filter((c) => c !== 0x179d && c !== 0x179e);
 export const UNIT_GROUPS: ReadonlyArray<{ kind: UnitKind; title: string; units: string[] }> = [
-  { kind: "consonant", title: "Consonants", units: range(0x1780, 0x17a2).map((c) => k(c)) },
+  { kind: "consonant", title: "Consonants", units: MODERN_CONSONANTS.map((c) => k(c)) },
   { kind: "consonant", title: "Independent vowels", units: range(0x17a5, 0x17b3).filter((c) => c !== 0x17a8).map((c) => k(c)) },
-  { kind: "foot", title: "Feet (subscripts)", units: range(0x1780, 0x17a2).map((c) => k(COENG, c)) },
+  { kind: "foot", title: "Feet (subscripts)", units: MODERN_CONSONANTS.map((c) => k(COENG, c)) },
   {
     kind: "vowel",
     title: "Vowels",

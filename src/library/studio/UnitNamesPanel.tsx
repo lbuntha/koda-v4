@@ -26,6 +26,7 @@ const quiet = `${btn} border border-line bg-surface text-ink hover:border-indigo
 const chip = (on: boolean) =>
   `${btn} border ${on ? "border-indigo-600 bg-indigo-50 text-indigo-900 dark:bg-indigo-950 dark:text-indigo-100" : "border-line bg-surface text-ink hover:border-indigo-400"}`;
 const icon = "grid h-11 w-11 shrink-0 place-items-center rounded-full border border-line bg-surface text-ink hover:border-indigo-400 disabled:opacity-40";
+const chartIcon = "grid h-8 w-8 place-items-center rounded-full border border-line bg-surface text-ink hover:border-indigo-400 disabled:opacity-40";
 
 /** Phone recorders label the same formats several ways; the server takes the standard names. */
 const STANDARD: Record<string, string> = { "audio/x-m4a": "audio/mp4", "audio/m4a": "audio/mp4", "audio/aac": "audio/mp4", "audio/mp3": "audio/mpeg", "audio/x-wav": "audio/wav", "audio/wave": "audio/wav" };
@@ -53,7 +54,9 @@ export function UnitNamesPanel({ onClose }: { onClose(): void }) {
   }, []);
   const used = useMemo(() => new Set([...fromServer, ...unitsUsedBy(shelf)]), [fromServer, shelf]);
   const [choice, setOnly] = useState<boolean | null>(null);
-  const only = choice ?? used.size > 0;
+  // Open the voice catalog on the complete reference list so authors can
+  // verify every Khmer unit, including a foot not used by the current books.
+  const only = choice ?? false;
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState("");
   const recorder = useRecorder();
@@ -119,13 +122,55 @@ export function UnitNamesPanel({ onClose }: { onClose(): void }) {
       {UNIT_GROUPS.map((g) => {
         const units = only ? g.units.filter((u) => used.has(u)) : g.units;
         if (!units.length) return null;
+        const consonantChart = g.kind === "consonant" && g.title === "Consonants";
+        const independentVowelChart = g.kind === "consonant" && g.title === "Independent vowels";
+        const alignedChart = consonantChart || independentVowelChart;
         return (
           <section key={g.title} className="mt-6" aria-label={g.title}>
-            <h2 className="mb-2 text-xs font-extrabold uppercase tracking-wider text-muted">{g.title}</h2>
-            <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mb-2 flex items-end justify-between gap-3">
+              <h2 className="text-xs font-extrabold uppercase tracking-wider text-muted">{g.title}</h2>
+              {alignedChart && <span className="text-xs font-semibold text-muted">{units.length} {consonantChart ? "basic letters" : "vowels"}</span>}
+            </div>
+            <ul className={alignedChart ? `grid ${consonantChart ? "grid-cols-5" : "grid-cols-3"} gap-1.5 sm:gap-2` : "grid gap-2 sm:grid-cols-2 lg:grid-cols-3"}>
               {units.map((u) => {
                 const clip = voices[u];
                 const live = recorder.recording === u;
+                if (alignedChart) {
+                  return (
+                    <li key={u} data-unit={u} className="flex min-w-0 flex-col items-center gap-1.5 rounded-2xl border border-line bg-surface px-1 py-2 sm:px-2">
+                      <span className={`grid h-12 w-full place-items-center text-3xl font-bold leading-none text-indigo-950 ${KHMER}`} aria-label={u}>{unitLabel(u)}</span>
+                      <span className={`h-1.5 w-1.5 rounded-full ${clip ? "bg-emerald-500" : "bg-slate-300"}`} aria-label={clip ? "Recorded" : "Not recorded"} />
+                      <span className="flex max-w-full flex-wrap justify-center gap-1">
+                        {clip && (
+                          <button type="button" className={chartIcon} aria-label={`Play ${unitName(u)}`} onClick={() => void say(unitName(u), "km", clip)}>
+                            <Play className="h-3.5 w-3.5" aria-hidden="true" />
+                          </button>
+                        )}
+                        {canRecord && (
+                          <button
+                            type="button"
+                            className={`${chartIcon} ${live ? "border-rose-600 bg-rose-600 text-white" : ""}`}
+                            aria-label={live ? `Stop recording ${unitName(u)}` : `Record ${unitName(u)}`}
+                            disabled={busy !== null || (recorder.recording !== null && !live)}
+                            onClick={() => (live ? recorder.stop() : void recorder.start(u, (blob) => void keep(u, blob)).catch(() => setErr("The microphone could not be opened.")))}
+                          >
+                            {live ? <Square className="h-3.5 w-3.5" aria-hidden="true" /> : <Mic className="h-3.5 w-3.5" aria-hidden="true" />}
+                          </button>
+                        )}
+                        <label className={`${chartIcon} cursor-pointer`} aria-label={`Upload a recording of ${unitName(u)}`}>
+                          <Upload className="h-3.5 w-3.5" aria-hidden="true" />
+                          <input type="file" accept="audio/*" className="sr-only" disabled={busy !== null}
+                            onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void keep(u, f); }} />
+                        </label>
+                        {clip && (
+                          <button type="button" className={chartIcon} aria-label={`Remove the recording of ${unitName(u)}`} disabled={busy !== null} onClick={() => void forget(u)}>
+                            <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                          </button>
+                        )}
+                      </span>
+                    </li>
+                  );
+                }
                 return (
                   <li key={u} data-unit={u} className="flex items-center gap-3 rounded-2xl border border-line bg-surface px-3 py-2">
                     <span className={`grid h-12 w-12 shrink-0 place-items-center rounded-full bg-surface-muted text-2xl text-ink ${KHMER}`} aria-hidden="true">{unitLabel(u)}</span>

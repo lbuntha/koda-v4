@@ -65,6 +65,8 @@ async function serverVoice(text: string): Promise<string | null> {
 
 let playing: HTMLAudioElement | null = null;
 let playingFrame: number | null = null;
+let audioElement: HTMLAudioElement | null = null;
+let finishPlaying: ((played: boolean) => void) | null = null;
 
 /** Play a book recording. Resolves true when it played to the end, false if it could not play. */
 async function playRecording(clipId: string, onTime?: (elapsedMs: number | null, durationMs?: number) => void): Promise<boolean> {
@@ -72,24 +74,33 @@ async function playRecording(clipId: string, onTime?: (elapsedMs: number | null,
   if (!url) return false;
   return new Promise<boolean>((resolve) => {
     try {
-      const a = new Audio(url);
+      // Mobile Safari is much more reliable when a reader reuses one media
+      // element for a sequence of clips instead of creating one per sentence.
+      const a = audioElement ?? (audioElement = new Audio());
+      a.pause();
+      a.src = url;
+      a.currentTime = 0;
+      a.load();
       playing = a;
       let settled = false;
       const finish = (played: boolean) => {
         if (settled) return;
         settled = true;
+        if (finishPlaying === finish) finishPlaying = null;
+        if (playing === a) playing = null;
         if (playingFrame !== null) cancelAnimationFrame(playingFrame);
         playingFrame = null;
         onTime?.(null);
         resolve(played);
       };
+      finishPlaying = finish;
       const follow = () => {
         onTime?.(a.currentTime * 1000, Number.isFinite(a.duration) ? a.duration * 1000 : undefined);
         if (!a.paused && !a.ended) playingFrame = requestAnimationFrame(follow);
       };
       a.onended = () => finish(true);
       a.onerror = () => finish(false);
-      a.onpause = () => finish(true);
+      a.onpause = () => finish(false);
       void a.play().then(follow).catch(() => finish(false));
     } catch {
       resolve(false);
@@ -150,8 +161,12 @@ export async function say(text: string, lang: Language, clipId?: string, onTime?
 export function stop() {
   if (playingFrame !== null) cancelAnimationFrame(playingFrame);
   playingFrame = null;
+  const current = playing;
+  const finish = finishPlaying;
+  finishPlaying = null;
+  finish?.(false);
   try {
-    playing?.pause();
+    current?.pause();
   } catch {
     /* already stopped */
   }
