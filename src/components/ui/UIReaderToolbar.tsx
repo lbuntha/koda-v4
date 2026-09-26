@@ -8,7 +8,7 @@ export interface UIReaderToolbarProps {
   largerDisabled?: boolean;
   onSmallerText(): void;
   onLargerText(): void;
-  audio?: { playing: boolean; onToggle(): void; disabled?: boolean; disabledTitle?: string };
+  audio?: { playing: boolean; onToggle(): void; disabled?: boolean; disabledTitle?: string; retryTitle?: string };
   dark: boolean;
   onToggleDark(): void;
   backLabel?: string;
@@ -45,7 +45,7 @@ export const UIReaderToolbar: React.FC<UIReaderToolbarProps> = ({
           </UIButton>
         </div>
         {audio && (
-          <UIButton type="button" variant="secondary" size="icon" onClick={audio.onToggle} disabled={audio.disabled} aria-label={audio.playing ? "Stop reading" : "Play page recording"} title={audio.disabled ? audio.disabledTitle ?? "Preparing audio" : audio.playing ? "Stop reading" : "Play page recording"} aria-pressed={audio.playing}>
+          <UIButton type="button" variant="secondary" size="icon" onClick={audio.onToggle} disabled={audio.disabled} aria-label={audio.playing ? "Stop reading" : "Play page recording"} title={audio.disabled ? audio.disabledTitle ?? "Preparing audio" : audio.retryTitle ?? (audio.playing ? "Stop reading" : "Play page recording")} aria-pressed={audio.playing}>
             {audio.playing ? <Pause aria-hidden="true" /> : <Volume2 aria-hidden="true" />}
           </UIButton>
         )}

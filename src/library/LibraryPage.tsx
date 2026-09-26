@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import type React from "react";
+import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, BookOpen, Check, Lightbulb, Search, Volume2, X } from "lucide-react";
 import { LetterWheel } from "../components/wheel/LetterWheel";
@@ -49,6 +50,9 @@ const COVER: Record<string, string> = {
 const btn = "inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-4 font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-45";
 const primary = `${btn} bg-indigo-600 text-white hover:bg-indigo-700`;
 const quiet = `${btn} border border-line bg-surface text-ink hover:border-indigo-400`;
+/** Catalog layout knobs, named once so the page has no loose numbers. */
+const TILE_MIN = "16rem";
+const ROW_INTRINSIC = "22rem";
 const kh = (p: { language: Language }) => (p.language === "km" ? KHMER : "");
 
 function readLang(): Language {
@@ -94,10 +98,10 @@ export function LibraryPage({ onAwardXp, onReaderChange }: LibraryPageProps) {
     onReaderChange?.(screen === "read" || screen === "quiz");
   }, [onReaderChange, screen]);
 
-  const open = (id: string) => {
+  const open = useCallback((id: string) => {
     setBookId(id);
     go("book");
-  };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- go only touches refs and setters
 
   return (
     <div ref={top} className={`mx-auto w-full max-w-5xl ${screen === "read" || screen === "quiz" ? "px-0 pb-4" : "px-2 pb-24"} pt-4 sm:px-6`} data-koda-library>
@@ -167,15 +171,29 @@ export function BookPreview({ book, onExit }: { book: Passage; onExit(): void })
 /* -------------------------------------------------------------------------- */
 
 function useProgress(): (p: Passage) => BookProgress | null {
-  useSyncExternalStore(LibraryProgress.subscribe, LibraryProgress.version, LibraryProgress.version);
-  return (p) => LibraryProgress.get(p.id, p.rev);
+  const version = useSyncExternalStore(LibraryProgress.subscribe, LibraryProgress.version, LibraryProgress.version);
+  // Stable until progress changes, so memoised tiles are not re-rendered by unrelated state.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return useCallback((p: Passage) => LibraryProgress.get(p.id, p.rev), [version]);
 }
+
+const wordCounts = new WeakMap<Passage, number>();
+/** A book's word count, worked out once per book rather than on every render. */
+const wordsIn = (book: Passage): number => {
+  let n = wordCounts.get(book);
+  if (n === undefined) {
+    n = book.sentences.reduce((total, sentence) => total + sentence.words.length, 0);
+    wordCounts.set(book, n);
+  }
+  return n;
+};
+const categoryOf = (p: Passage) => p.category ?? "Everyday";
 
 function Cover({ book, size = "shelf", showTitle = size === "page" }: { book: Passage; size?: "shelf" | "page"; showTitle?: boolean }) {
   const shelf = size === "shelf";
   return (
     <span
-      className={`relative grid ${size === "page" ? "aspect-[4/3] sm:aspect-[3/4]" : "aspect-[2/1]"} ${shelf ? "bg-gradient-to-br from-slate-50 to-indigo-100 p-4" : "content-end overflow-hidden rounded-2xl bg-gradient-to-br p-3 shadow-md"} ${COVER[book.category ?? ""] ?? "from-indigo-500 to-indigo-800"} ${size === "page" ? "w-full max-w-none sm:max-w-[220px]" : "w-full"}`}
+      className={`relative grid ${size === "page" ? "aspect-[4/3] sm:aspect-[3/4]" : "aspect-[5/2] sm:aspect-[2/1]"} ${shelf ? "bg-gradient-to-br from-slate-50 to-indigo-100 p-3 sm:p-4" : "content-end overflow-hidden rounded-2xl bg-gradient-to-br p-3 shadow-md"} ${COVER[book.category ?? ""] ?? "from-indigo-500 to-indigo-800"} ${size === "page" ? "w-full max-w-none sm:max-w-[220px]" : "w-full"}`}
     >
       <span className={`absolute left-3 top-3 z-10 rounded-full px-3 py-1 text-[11px] font-black ${shelf ? "bg-emerald-700 text-white" : "bg-white/95 text-slate-900"}`}>Level {book.band}</span>
       {shelf && <span className="absolute right-3 top-3 z-10 rounded-full bg-indigo-100 px-3 py-1 text-[11px] font-black text-slate-700">{book.category ?? "Story"}</span>}
@@ -191,26 +209,33 @@ function Catalog({ shelf, lang, onLang, onOpen }: { shelf: readonly Passage[]; l
   const progressOf = useProgress();
   const [q, setQ] = useState("");
   const [cat, setCat] = useState("All");
-  const mine = shelf.filter((p) => p.language === lang);
-  const cats = [...new Set(mine.map((p) => p.category ?? "Everyday"))];
-  const query = q.trim().toLowerCase();
-  const list = mine.filter((p) => (cat === "All" || (p.category ?? "Everyday") === cat) && (!query || p.title.toLowerCase().includes(query)));
+  const deferredQ = useDeferredValue(q);
+  const query = deferredQ.trim().toLowerCase();
+  const mine = useMemo(() => shelf.filter((p) => p.language === lang), [shelf, lang]);
+  const cats = useMemo(() => [...new Set(mine.map(categoryOf))], [mine]);
+  const active = cat === "All" || cats.includes(cat) ? cat : "All";
+  const list = useMemo(
+    () => mine.filter((p) => (active === "All" || categoryOf(p) === active) && (!query || p.title.toLowerCase().includes(query))),
+    [mine, active, query],
+  );
   const reading = list.filter((p) => {
     const st = progressOf(p)?.stage;
     return st === "read" || st === "quiz";
   });
+  // A book already under "Continue reading" is not listed a second time below it.
+  const readingIds = new Set(reading.map((p) => p.id));
 
   const shelfRow = (title: string, books: readonly Passage[], note?: string) =>
     books.length ? (
-      <section key={title} className="mt-6">
-        <div className="mb-2 flex items-baseline justify-between gap-3">
+      <section key={title} className="mt-6 sm:mt-8 [content-visibility:auto]" style={{ containIntrinsicSize: `auto ${ROW_INTRINSIC}` }}>
+        <div className="mb-3 flex items-baseline justify-between gap-3">
           <h2 className="text-lg font-extrabold text-ink">{title}</h2>
           {note && <span className="text-xs text-muted">{note}</span>}
         </div>
-        <ul className="grid grid-cols-1 gap-5 pb-3 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-3 sm:gap-4 sm:[grid-template-columns:repeat(auto-fill,minmax(var(--tile-min),1fr))]" style={{ "--tile-min": TILE_MIN } as React.CSSProperties}>
           {books.map((b) => (
             <li key={b.id}>
-              <BookTile book={b} progress={progressOf(b)} onOpen={() => onOpen(b.id)} />
+              <BookTile book={b} progress={progressOf(b)} onOpen={onOpen} />
             </li>
           ))}
         </ul>
@@ -222,7 +247,7 @@ function Catalog({ shelf, lang, onLang, onOpen }: { shelf: readonly Passage[]; l
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-ink">Library</h1>
-          <p className="text-sm text-muted">Read a story, answer questions, then spell words from it.</p>
+          <p className="hidden text-sm text-muted sm:block">Read a story, answer questions, then spell words from it.</p>
         </div>
         <div role="group" aria-label="Language" className="flex flex-wrap justify-end gap-2">
           {(["en", "km"] as const).map((l) => (
@@ -245,20 +270,22 @@ function Catalog({ shelf, lang, onLang, onOpen }: { shelf: readonly Passage[]; l
         />
       </label>
 
-      <div role="group" aria-label="Category" className="mt-3 flex flex-wrap gap-2">
-        {["All", ...cats].map((c) => (
-          <UIButton key={c} type="button" size="sm" variant={cat === c ? "primary" : "secondary"} aria-pressed={cat === c} onClick={() => setCat(c)} className="rounded-full">
-            {c}
-          </UIButton>
-        ))}
-      </div>
+      {cats.length > 1 && (
+        <div role="group" aria-label="Category" className="mt-3 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
+          {["All", ...cats].map((c) => (
+            <UIButton key={c} type="button" size="sm" variant={active === c ? "primary" : "secondary"} aria-pressed={active === c} onClick={() => setCat(c)} className="shrink-0 rounded-full">
+              {c}
+            </UIButton>
+          ))}
+        </div>
+      )}
 
       {query ? (
-        shelfRow(`Results for “${q.trim()}”`, list, `${list.length} book${list.length === 1 ? "" : "s"}`) ?? <p className="mt-6 text-muted">No books match that.</p>
+        shelfRow(`Results for “${deferredQ.trim()}”`, list, `${list.length} book${list.length === 1 ? "" : "s"}`) ?? <p className="mt-6 text-muted">No books match that.</p>
       ) : (
         <>
           {shelfRow("Continue reading", reading)}
-          {(cat === "All" ? cats : [cat]).map((c) => shelfRow(c, list.filter((p) => (p.category ?? "Everyday") === c)))}
+          {(active === "All" ? cats : [active]).map((c) => shelfRow(c, list.filter((p) => categoryOf(p) === c && !readingIds.has(p.id))))}
           {!list.length && <p className="mt-6 text-muted">No books here yet.</p>}
         </>
       )}
@@ -266,23 +293,23 @@ function Catalog({ shelf, lang, onLang, onOpen }: { shelf: readonly Passage[]; l
   );
 }
 
-function BookTile({ book, progress, onOpen }: { book: Passage; progress: BookProgress | null; onOpen(): void }) {
+const BookTile = memo(function BookTile({ book, progress, onOpen }: { book: Passage; progress: BookProgress | null; onOpen(id: string): void }) {
   const st = progress?.stage;
   const label = st === "done" ? `Finished ✓${progress?.total ? ` ${progress.firstTry}/${progress.total}` : ""}` : st ? "In progress" : "New";
-  const wordCount = book.sentences.reduce((total, sentence) => total + sentence.words.length, 0);
+  const wordCount = wordsIn(book);
   return (
     <UIBookCard
       cover={<Cover book={book} />}
       title={<span className={kh(book)}>{book.title}</span>}
-      meta={`${minutesToRead(book)} min read · ${wordCount} words`}
+      meta={<>{minutesToRead(book)} min read<span className="hidden sm:inline"> · {wordCount} words</span></>}
       status={<span className={st === "done" ? "text-emerald-700 dark:text-emerald-400" : undefined}>{label}</span>}
       quizLabel={`${book.questions.length} Quizzes`}
       hasAudio={book.sentences.some((sentence) => Boolean(sentence.audio))}
-      onClick={onOpen}
+      onClick={() => onOpen(book.id)}
       ariaLabel={`${book.title}. Level ${book.band}. ${label}.`}
     />
   );
-}
+});
 
 /* -------------------------------------------------------------------------- */
 /* Book page                                                                   */
@@ -316,7 +343,7 @@ function BookPage({ book, onBack, onRead }: { book: Passage; onBack(): void; onR
   // A Khmer book's spelling level: its hardest spelling word.
   const levels = book.language === "km" ? book.questions.flatMap((q) => (q.kind === "spell" ? [spellingLevel(tilesOf(q.word, "km"))] : [])) : [];
   const level = levels.length ? (Math.max(...levels) as SpellingLevel) : null;
-  const wordCount = book.sentences.reduce((total, sentence) => total + sentence.words.length, 0);
+  const wordCount = wordsIn(book);
   const progressLabel = progress?.stage === "done" ? `Finished ✓${progress.total ? ` ${progress.firstTry}/${progress.total}` : ""}` : progress ? "In progress" : "New";
   return (
     <div>

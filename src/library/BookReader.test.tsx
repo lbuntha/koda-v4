@@ -10,13 +10,13 @@ const voice = vi.hoisted(() => ({
   voiceStatus: vi.fn<() => "ok" | "off" | "no-voice">(() => "no-voice"),
 }));
 vi.mock("./voice", () => ({ canSpeak: () => false, bookSpeaks: () => false, stop: vi.fn(), ...voice }));
-vi.mock("./clips", () => ({
-  prefetchBook: vi.fn(async () => ({ ready: 0, total: 0 })),
+vi.mock("./clips", () => ({ prefetchBook: vi.fn(async () => ({ ready: 0, total: 0 })), ...clips }));
+vi.mock("../assets/svg", () => ({ SvgAsset: ({ fallback }: { fallback?: React.ReactNode }) => <>{fallback}</>, SvgMarkup: () => null }));
+vi.mock("./photos", async (orig) => ({ ...(await orig<typeof import("./photos")>()), photoUrl: vi.fn(async () => "blob:farm"), knownPhotoUrl: () => null }));
+const clips = vi.hoisted(() => ({
   prefetchClips: vi.fn(async (ids: readonly string[]) => ({ ready: ids.length, total: ids.length })),
   recordingAudioSupported: vi.fn(() => true),
 }));
-vi.mock("../assets/svg", () => ({ SvgAsset: ({ fallback }: { fallback?: React.ReactNode }) => <>{fallback}</>, SvgMarkup: () => null }));
-vi.mock("./photos", async (orig) => ({ ...(await orig<typeof import("./photos")>()), photoUrl: vi.fn(async () => "blob:farm"), knownPhotoUrl: () => null }));
 const playSound = vi.hoisted(() => vi.fn());
 vi.mock("../utils/audio", () => ({ playSound }));
 
@@ -30,6 +30,51 @@ beforeEach(() => {
   voice.say.mockResolvedValue(undefined);
   voice.voiceStatus.mockReset();
   voice.voiceStatus.mockReturnValue("no-voice");
+  clips.prefetchClips.mockReset();
+  clips.prefetchClips.mockImplementation(async (ids: readonly string[]) => ({ ready: ids.length, total: ids.length }));
+  clips.recordingAudioSupported.mockReset();
+  clips.recordingAudioSupported.mockReturnValue(true);
+});
+
+/** A book whose first page is fully recorded, so the reader offers its speaker. */
+const recorded = () => {
+  const firstPageIds = new Set(layoutBook(MARKET).story[0].map((s) => s.sentence.id));
+  return { ...MARKET, sentences: MARKET.sentences.map((s) => firstPageIds.has(s.id) ? { ...s, audio: "a".repeat(64) } : s) };
+};
+
+describe("a recording that did not arrive", () => {
+  it("lets a reader try the download again, and plays once it arrives", async () => {
+    // Offline, or a connection that dropped: nothing downloaded.
+    clips.prefetchClips.mockImplementation(async (ids: readonly string[]) => ({ ready: 0, total: ids.length }));
+    voice.sentenceSpeaks.mockReturnValue(true);
+    render(<BookReader book={recorded()} preview onBack={() => {}} onReady={() => {}} />);
+    fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+
+    const play = screen.getByRole("button", { name: "Play page recording" });
+    // Still offered, and it says what went wrong rather than blaming the device.
+    await waitFor(() => expect(play.getAttribute("title")).toBe("Audio did not load — tap to try again"));
+    expect(play.hasAttribute("disabled")).toBe(false);
+
+    // Back online: the same button fetches again, and then reads the page.
+    clips.prefetchClips.mockImplementation(async (ids: readonly string[]) => ({ ready: ids.length, total: ids.length }));
+    await act(async () => { fireEvent.click(play); });
+    await waitFor(() => expect(play.getAttribute("title")).toBe("Play page recording"));
+    expect(voice.say).not.toHaveBeenCalled();
+
+    fireEvent.click(play);
+    await waitFor(() => expect(voice.say).toHaveBeenCalled());
+  });
+
+  it("does not offer a retry a browser that cannot play the format could never win", async () => {
+    clips.recordingAudioSupported.mockReturnValue(false);
+    voice.sentenceSpeaks.mockReturnValue(true);
+    render(<BookReader book={recorded()} preview onBack={() => {}} onReady={() => {}} />);
+    fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+
+    const play = screen.getByRole("button", { name: "Play page recording" });
+    await waitFor(() => expect(play.hasAttribute("disabled")).toBe(true));
+    expect(play.getAttribute("title")).toBe("This browser cannot play the recording");
+  });
 });
 
 describe("a page's picture in the reader", () => {

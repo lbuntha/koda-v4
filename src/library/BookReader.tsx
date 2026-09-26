@@ -1,8 +1,9 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, type RefObject } from "react";
 import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "motion/react";
 import { Volume2, X } from "lucide-react";
 import { BANDS, type Passage, type PicturePlace, type Sentence } from "./data/passage";
 import { layoutBook, type SetSentence, type SetToken } from "./bookLayout";
+import { FIT_MAX, nextFit } from "./fitPage";
 import { FLAT, SPRING, TURNED, angularVelocity, castOf, completes, curlOf, dragAngle, shadeOf, type Dir } from "./pageTurn";
 import { Picture } from "./Picture";
 import { LibraryProgress } from "./progress";
@@ -53,6 +54,51 @@ const readTextStep = (): number => {
   }
 };
 
+/** How tall a page's picture may stand on a phone, before the page's fit factor trims it. */
+const PICTURE_MAX = "30svh";
+/** The same, once picture and words sit side by side and the picture is the taller of the two. */
+const PICTURE_MAX_WIDE = "54svh";
+
+/**
+ * Draw a page, measure it against the reader's box, and hand back the factor it
+ * should be drawn at. The page is redrawn only when the factor actually changes,
+ * and a page that fits settles after the first measurement.
+ *
+ * A reader who has asked for text bigger than the page's own size is taken at
+ * their word: nothing shrinks it back, and the page scrolls instead. Otherwise
+ * "larger text" would quietly undo itself.
+ */
+function usePageFit(box: RefObject<HTMLElement | null>, page: number, scale: number, turning: boolean): number {
+  const [fit, setFit] = useState(FIT_MAX);
+  const enlarged = scale > 1;
+  const measure = useCallback(() => {
+    const el = box.current;
+    // Mid-turn two sheets are stacked in the same box and the taller one decides
+    // its height, so a page would be judged by the one it is replacing. The
+    // outgoing page's factor — a good guess, pages of a book being alike — is
+    // held until the sheet lands, and the page is measured for itself then.
+    if (!el || enlarged || turning) return;
+    setFit((current) => nextFit(current, el.scrollHeight, el.clientHeight));
+  }, [box, enlarged, turning]);
+  // A page just landed, or the reader chose a new size: start again from the
+  // page's own size, so each page is judged on its own rather than inheriting a
+  // squeeze the last one needed. Measuring runs before the browser paints, so
+  // the page is never shown at the size it was about to be corrected from.
+  useLayoutEffect(() => {
+    if (!turning) setFit(FIT_MAX);
+  }, [page, scale, turning]);
+  useLayoutEffect(measure);
+  useEffect(() => {
+    const el = box.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    // A rotated phone, a shown keyboard, a picture that has just loaded.
+    const watch = new ResizeObserver(measure);
+    watch.observe(el);
+    return () => watch.disconnect();
+  }, [box, measure]);
+  return fit;
+}
+
 /** Match the audio clock to an approved word; old/manual clips use a duration-weighted fallback. */
 export function spokenWordAt(sentence: Pick<Sentence, "words" | "audioCues">, elapsedMs: number, durationMs?: number): number | null {
   const cues = sentence.audioCues;
@@ -84,6 +130,11 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
   const [playingWord, setPlayingWord] = useState<{ sentence: string; index: number } | null>(null);
   const [reading, setReading] = useState(false);
   const [pageAudio, setPageAudio] = useState<"idle" | "preparing" | "ready" | "failed">("idle");
+  // Bumped when a grown-up taps a speaker that could not download its recording.
+  const [audioAttempt, setAudioAttempt] = useState(0);
+  // Whether this browser can play the recording format at all — probed once a
+  // page actually has recordings, never on a book without them.
+  const [audioSupported, setAudioSupported] = useState(true);
   const [peek, setPeek] = useState<string | null>(null);
   const [peekAnchor, setPeekAnchor] = useState<HTMLElement | null>(null);
   const [peekPosition, setPeekPosition] = useState<{ left: number; top: number; side: "top" | "bottom" | "left" | "right" } | null>(null);
@@ -174,16 +225,18 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
       return;
     }
     if (!recordingAudioSupported()) {
+      setAudioSupported(false);
       setPageAudio("failed");
       return;
     }
+    setAudioSupported(true);
     let live = true;
     setPageAudio("preparing");
     void prefetchClips(pageAudioIds).then(({ ready, total }) => {
       if (live) setPageAudio(total > 0 && ready === total ? "ready" : "failed");
     });
     return () => { live = false; };
-  }, [pageAudioIds, pageRecorded]);
+  }, [pageAudioIds, pageRecorded, audioAttempt]);
   useEffect(() => () => { run.current++; stop(); spring.current?.stop(); }, []);
 
   const hush = () => {
@@ -334,10 +387,13 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
 
   const peekPic = peek ? book.pictures[peek.toLowerCase()] ?? book.pictures[peek] : undefined;
   const scale = TEXT_STEPS[textStep];
+  // One factor for the whole page: the words and the picture shrink together
+  // until the page fits the reader's box on this screen.
+  const fit = usePageFit(scrollEl, page, scale, turning !== null);
   const sheet = (i: number) => (
     <Sheet index={i} count={pages.count}>
-      {i === 0 ? <TitlePage book={book} km={km} /> : (
-        <StoryPage book={book} sentences={pages.story[i - 1]} picture={pages.pictures[i - 1]} at={pages.places[i - 1]} scale={scale} playing={playing} playingWord={playingWord} peek={peek} onWord={tapWord} end={i === last} />
+      {i === 0 ? <TitlePage book={book} km={km} fit={fit} /> : (
+        <StoryPage book={book} sentences={pages.story[i - 1]} picture={pages.pictures[i - 1]} at={pages.places[i - 1]} scale={scale * fit} fit={fit} playing={playing} playingWord={playingWord} peek={peek} onWord={tapWord} end={i === last} />
       )}
     </Sheet>
   );
@@ -357,9 +413,11 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
         largerDisabled={textStep === TEXT_STEPS.length - 1}
         audio={pageRecorded ? {
           playing: reading,
-          disabled: pageAudio !== "ready",
-          disabledTitle: pageAudio === "failed" ? "Audio unavailable on this device" : "Preparing audio",
-          onToggle: () => void readPage(),
+          // A download that failed can be tried again; a browser that cannot play the format cannot.
+          disabled: pageAudio === "failed" ? !audioSupported : pageAudio !== "ready",
+          disabledTitle: pageAudio === "failed" ? "This browser cannot play the recording" : "Preparing audio",
+          retryTitle: pageAudio === "failed" && audioSupported ? "Audio did not load — tap to try again" : undefined,
+          onToggle: () => (pageAudio === "failed" ? setAudioAttempt((n) => n + 1) : void readPage()),
         } : undefined}
         dark={theme === "dark"}
         onToggleDark={toggleTheme}
@@ -399,7 +457,7 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
           <motion.div
             aria-hidden={over !== page || undefined}
             inert={over !== page || undefined}
-            style={{ rotateY: angle, skewY: curl }}
+            style={{ rotateY: angle, skewY: curl, willChange: "transform" }}
             className="relative col-start-1 row-start-1 origin-left bg-surface [backface-visibility:hidden] [transform-style:preserve-3d]"
           >
             {sheet(over)}
@@ -449,40 +507,43 @@ function Sheet({ index, count, children }: { index: number; count: number; child
 }
 
 /** The cover: the book's picture, edge to edge, with the title beneath it. */
-function TitlePage({ book, km }: { book: Passage; km: boolean }) {
+const TitlePage = memo(function TitlePage({ book, km, fit }: { book: Passage; km: boolean; fit: number }) {
   const [lo, hi] = BANDS[book.band].ages;
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex flex-1 flex-col" style={{ "--fit": fit } as CSSProperties}>
       <div className="relative min-h-56 flex-1 overflow-hidden rounded-3xl">
         <Picture name={book.picture} label={book.title} className="absolute inset-0 h-full w-full p-6 sm:p-10" />
       </div>
       <div className="px-2 pb-2 pt-7 text-center">
-        <h1 className={`text-[2rem] font-bold leading-tight tracking-tight sm:text-4xl ${km ? `${KHMER} leading-snug` : SERIF}`}>{book.title}</h1>
+        <h1 className={`font-bold leading-tight tracking-tight transition-[font-size] duration-200 ease-out motion-reduce:transition-none ${km ? `${KHMER} leading-snug` : SERIF}`} style={{ fontSize: "calc(clamp(1.75rem, 1.35rem + 1.8vw, 2.25rem) * var(--fit))" }}>{book.title}</h1>
         <p className="mt-3 text-xs uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">
           Level {book.band} · Ages {lo}–{hi} · {minutesToRead(book)} min
         </p>
       </div>
     </div>
   );
-}
+});
 
 /**
  * How a page is arranged for each place its picture can take. Left and right sit
  * beside the words from a small tablet up; on a phone there is no room for both
  * at a readable size, so left falls above the words and right below them.
  */
+const FRAME = "aspect-[16/10] w-full max-h-[calc(var(--picture-max)*var(--fit))] sm:max-h-[calc(var(--picture-max-wide)*var(--fit))]";
 const PLACE: Record<PicturePlace, { page: string; frame: string; words: string }> = {
-  top: { page: "flex-col", frame: "aspect-[16/10] max-h-[30svh] w-full sm:aspect-[2/1] sm:max-h-none", words: "" },
-  bottom: { page: "flex-col-reverse", frame: "aspect-[16/10] max-h-[30svh] w-full sm:aspect-[2/1] sm:max-h-none", words: "" },
-  left: { page: "flex-col sm:flex-row sm:items-center", frame: "aspect-[16/10] max-h-[30svh] w-full sm:aspect-[3/4] sm:max-h-none sm:w-[44%] sm:shrink-0", words: "sm:my-auto" },
-  right: { page: "flex-col-reverse sm:flex-row-reverse sm:items-center", frame: "aspect-[16/10] max-h-[30svh] w-full sm:aspect-[3/4] sm:max-h-none sm:w-[44%] sm:shrink-0", words: "sm:my-auto" },
+  top: { page: "flex-col", frame: `${FRAME} sm:aspect-[2/1]`, words: "" },
+  bottom: { page: "flex-col-reverse", frame: `${FRAME} sm:aspect-[2/1]`, words: "" },
+  left: { page: "flex-col sm:flex-row sm:items-center", frame: `${FRAME} sm:aspect-[3/4] sm:w-[44%] sm:shrink-0`, words: "sm:my-auto" },
+  right: { page: "flex-col-reverse sm:flex-row-reverse sm:items-center", frame: `${FRAME} sm:aspect-[3/4] sm:w-[44%] sm:shrink-0`, words: "sm:my-auto" },
 };
 
-function StoryPage({ book, sentences, picture, at = "top", scale, playing, playingWord, peek, onWord, end }: {
+const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top", scale, fit, playing, playingWord, peek, onWord, end }: {
   book: Passage;
   sentences: SetSentence[];
-  /** The reader's text size, as a multiple of the page's own. */
+  /** The reader's text size and the page's fit, as one multiple of the page's own size. */
   scale: number;
+  /** How far the page as a whole is scaled to fit this screen; the picture follows it too. */
+  fit: number;
   /** The page's illustration, drawn with the words as in a picture book. */
   picture: string | null;
   /** Where the illustration sits. */
@@ -506,11 +567,11 @@ function StoryPage({ book, sentences, picture, at = "top", scale, playing, playi
   const type = km ? `${KHMER} leading-[2.1]` : `${SERIF} leading-[1.7]`;
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex flex-1 flex-col" style={{ "--fit": fit, "--picture-max": PICTURE_MAX, "--picture-max-wide": PICTURE_MAX_WIDE } as CSSProperties}>
       <div data-picture-at={picture ? at : undefined} className={`flex gap-6 sm:gap-8 ${picture ? PLACE[at].page : "my-auto flex-col"} ${picture && at !== "top" ? "my-auto" : ""}`}>
       {picture && (
-        <div className={`overflow-hidden rounded-3xl ${PLACE[at].frame}`}>
-          <Picture name={picture} className="h-full w-full p-5" />
+        <div className={`overflow-hidden rounded-3xl transition-[max-height] duration-200 ease-out motion-reduce:transition-none ${PLACE[at].frame}`}>
+          <Picture name={picture} className="h-full w-full p-[4%]" />
         </div>
       )}
       <div className={`mx-auto grid w-full max-w-[34em] gap-6 px-1 ${picture ? PLACE[at].words : ""}`}>
@@ -522,14 +583,14 @@ function StoryPage({ book, sentences, picture, at = "top", scale, playing, playi
                   <span
                     key={wordIndex}
                     data-speaking={playingWord?.sentence === b.sentences[0].sentence.id && playingWord.index === wordIndex || undefined}
-                    className={`rounded-sm transition-colors ${playingWord?.sentence === b.sentences[0].sentence.id && playingWord.index === wordIndex ? "bg-amber-200 text-neutral-950 dark:bg-amber-400" : ""}`}
+                    className={`rounded-sm transition-colors ${playingWord?.sentence === b.sentences[0].sentence.id && playingWord.index === wordIndex ? "bg-violet-200 text-neutral-950 dark:bg-violet-500 dark:text-white" : ""}`}
                   >
                     {wordIndex === heading.length - 1 ? word.replace(/:$/, "") : word}{wordIndex === heading.length - 1 ? "" : " "}
                   </span>
                 ))}
               </h2>
             )}
-            <p className={`m-0 ${type} text-pretty`} data-text-scale={scale} style={{ fontSize: `calc(${base} * ${scale})` }}>
+            <p className={`m-0 ${type} text-pretty transition-[font-size] duration-200 ease-out motion-reduce:transition-none`} data-text-scale={scale} style={{ fontSize: `calc(${base} * ${scale})` }}>
               {b.sentences.map((s, j) => (
                 <span key={s.sentence.id}>
                   <span
@@ -565,7 +626,7 @@ function StoryPage({ book, sentences, picture, at = "top", scale, playing, playi
       )}
     </div>
   );
-}
+});
 
 /**
  * A word on the page. Every word answers a tap, but only the bold ones — the
@@ -574,7 +635,7 @@ function StoryPage({ book, sentences, picture, at = "top", scale, playing, playi
  */
 function Word({ token, active, speaking, onWord }: { token: SetToken; active: boolean; speaking: boolean; onWord(w: string, target: HTMLElement): void }) {
   const mark = active ? "underline decoration-2 underline-offset-[0.2em]" : "";
-  const spoken = speaking ? "bg-amber-200 text-neutral-950 dark:bg-amber-400 dark:text-neutral-950" : "";
+  const spoken = speaking ? "bg-violet-200 text-neutral-950 dark:bg-violet-500 dark:text-white" : "";
   if (token.emphasis === "key") {
     return (
       <button type="button" onClick={(event) => onWord(token.word, event.currentTarget)} aria-label={token.word} data-speaking={speaking || undefined} className={`cursor-pointer rounded-sm font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${mark} ${spoken}`}>

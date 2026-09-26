@@ -99,13 +99,24 @@ export function Picture({ name, label, className = "" }: { name: string; label?:
 /** Padding suits a drawing floating in its frame; a photo fills the frame edge to edge. */
 const withoutPadding = (c: string) => c.replace(/(^|\s)(?:[a-z]+:)*p[xytrbl]?-\S+/g, " ");
 
-/** An uploaded photo, cropped to fill its frame. The plain book picture stands in until it loads, or if it cannot. */
+/**
+ * An uploaded photo, cropped to fill its frame. The plain book picture stands in
+ * until it loads, or if it cannot.
+ *
+ * A photo arrives over the network, so it cannot be on the page at first paint.
+ * Rather than a hole that snaps shut, the frame holds a quiet tint and the photo
+ * fades in over it once the browser has actually decoded it — `onLoad`, not the
+ * moment the URL is known, or the fade would run against a blank frame. A photo
+ * already in hand skips the fade, so a page turned back to does not flicker.
+ */
 function Photo({ name, label, className }: { name: string; label?: string; className: string }) {
   const [url, setUrl] = useState<string | null>(() => knownPhotoUrl(name));
+  const [shown, setShown] = useState(() => knownPhotoUrl(name) !== null);
   const [failed, setFailed] = useState(false);
   useEffect(() => {
     let live = true;
     setFailed(false);
+    setShown(knownPhotoUrl(name) !== null);
     void photoUrl(name).then((u) => {
       if (!live) return;
       if (u) setUrl(u);
@@ -116,9 +127,16 @@ function Photo({ name, label, className }: { name: string; label?: string; class
     };
   }, [name]);
   return (
-    <span role={label ? "img" : undefined} aria-label={label} aria-hidden={label ? undefined : true} className={`relative block h-full w-full overflow-hidden ${withoutPadding(className)}`}>
+    <span role={label ? "img" : undefined} aria-label={label} aria-hidden={label ? undefined : true} className={`relative block h-full w-full overflow-hidden ${!shown && !failed ? "bg-surface-muted" : ""} ${withoutPadding(className)}`}>
       {url && !failed ? (
-        <img src={url} alt="" draggable={false} className="absolute inset-0 h-full w-full object-cover" />
+        <img
+          src={url}
+          alt=""
+          draggable={false}
+          onLoad={() => setShown(true)}
+          onError={() => setFailed(true)}
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ease-out motion-reduce:transition-none ${shown ? "opacity-100" : "opacity-0"}`}
+        />
       ) : failed ? (
         <span className="block h-full w-full p-4"><SvgMarkup markup={LOCAL.book} raw size="100%" /></span>
       ) : null}
