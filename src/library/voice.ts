@@ -17,7 +17,7 @@ import { playClip, stopClip, voiceFloorHeld } from "../lib/voiceClips";
 import { tutorHeaders } from "../lib/tutorApi";
 import { isVoiceEnabled, playBase64Pcm, speakWebSpeech } from "../utils/audio";
 import type { Language, Passage, Sentence } from "./data/passage";
-import { clipUrl } from "./clips";
+import { cachedClipUrl, clipUrl } from "./clips";
 
 const SERVER_TIMEOUT_MS = 4_000;
 
@@ -78,7 +78,10 @@ function recordingPlayer(): HTMLAudioElement {
 
 /** Play a book recording. Resolves true when it played to the end, false if it could not play. */
 async function playRecording(clipId: string, onTime?: (elapsedMs: number | null, durationMs?: number) => void): Promise<boolean> {
-  const url = await clipUrl(clipId);
+  // Keep the actual play call synchronous after a user taps the reader control
+  // whenever prefetch has already prepared the clip. This matters on Safari and
+  // mobile browsers, which reject playback after a late network await.
+  const url = cachedClipUrl(clipId) ?? await clipUrl(clipId);
   if (!url) return false;
   return new Promise<boolean>((resolve) => {
     try {

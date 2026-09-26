@@ -10,6 +10,11 @@ const voice = vi.hoisted(() => ({
   voiceStatus: vi.fn<() => "ok" | "off" | "no-voice">(() => "no-voice"),
 }));
 vi.mock("./voice", () => ({ canSpeak: () => false, bookSpeaks: () => false, stop: vi.fn(), ...voice }));
+vi.mock("./clips", () => ({
+  prefetchBook: vi.fn(async () => ({ ready: 0, total: 0 })),
+  prefetchClips: vi.fn(async (ids: readonly string[]) => ({ ready: ids.length, total: ids.length })),
+  recordingAudioSupported: vi.fn(() => true),
+}));
 vi.mock("../assets/svg", () => ({ SvgAsset: ({ fallback }: { fallback?: React.ReactNode }) => <>{fallback}</>, SvgMarkup: () => null }));
 vi.mock("./photos", async (orig) => ({ ...(await orig<typeof import("./photos")>()), photoUrl: vi.fn(async () => "blob:farm"), knownPhotoUrl: () => null }));
 const playSound = vi.hoisted(() => vi.fn());
@@ -96,7 +101,9 @@ describe("page recordings", () => {
 
     render(<BookReader book={recordedBook} preview onBack={() => {}} onReady={() => {}} />);
     fireEvent.click(screen.getByRole("button", { name: "Next page" }));
-    fireEvent.click(screen.getByRole("button", { name: "Play page recording" }));
+    const play = screen.getByRole("button", { name: "Play page recording" });
+    await waitFor(() => expect(play.hasAttribute("disabled")).toBe(false));
+    fireEvent.click(play);
 
     await waitFor(() => expect(document.querySelectorAll('[data-speaking="true"]')).toHaveLength(1));
     expect(document.querySelector('[data-speaking="true"]')?.textContent).toBe(recordedBook.sentences[0].words[1]);
@@ -117,7 +124,9 @@ describe("page recordings", () => {
     expect(screen.queryByRole("button", { name: "Play page recording" })).toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: "Next page" }));
-    fireEvent.click(screen.getByRole("button", { name: "Play page recording" }));
+    const play = screen.getByRole("button", { name: "Play page recording" });
+    await waitFor(() => expect(play.hasAttribute("disabled")).toBe(false));
+    fireEvent.click(play);
 
     await waitFor(() => expect(voice.say).toHaveBeenCalledTimes(firstPage.length));
     expect(voice.say.mock.calls.map(([text]) => text)).toEqual(firstPage.map((s) => s.sentence.text));

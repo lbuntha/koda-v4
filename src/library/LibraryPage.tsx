@@ -177,9 +177,9 @@ function Cover({ book, size = "shelf", showTitle = size === "page" }: { book: Pa
     <span
       className={`relative grid ${size === "page" ? "aspect-[4/3] sm:aspect-[3/4]" : "aspect-[2/1]"} ${shelf ? "bg-gradient-to-br from-slate-50 to-indigo-100 p-4" : "content-end overflow-hidden rounded-2xl bg-gradient-to-br p-3 shadow-md"} ${COVER[book.category ?? ""] ?? "from-indigo-500 to-indigo-800"} ${size === "page" ? "w-full max-w-none sm:max-w-[220px]" : "w-full"}`}
     >
-      <span className={`absolute left-3 top-3 rounded-full px-3 py-1 text-[11px] font-black ${shelf ? "bg-emerald-700 text-white" : "bg-white/95 text-slate-900"}`}>Level {book.band}</span>
-      {shelf && <span className="absolute right-3 top-3 rounded-full bg-indigo-100 px-3 py-1 text-[11px] font-black text-slate-700">{book.category ?? "Story"}</span>}
-      <span className={`absolute ${shelf ? "inset-x-[35%] top-[15%] bg-emerald-100 p-[7%]" : "inset-x-[14%] top-[13%] bg-white/90 p-[10%]"} aspect-square rounded-full`}>
+      <span className={`absolute left-3 top-3 z-10 rounded-full px-3 py-1 text-[11px] font-black ${shelf ? "bg-emerald-700 text-white" : "bg-white/95 text-slate-900"}`}>Level {book.band}</span>
+      {shelf && <span className="absolute right-3 top-3 z-10 rounded-full bg-indigo-100 px-3 py-1 text-[11px] font-black text-slate-700">{book.category ?? "Story"}</span>}
+      <span className={`absolute ${shelf ? "inset-0" : "inset-x-[14%] top-[13%] aspect-square rounded-full bg-white/90 p-[10%]"}`}>
         <Picture name={book.picture} />
       </span>
       {!shelf && showTitle && <span className={`relative text-[15px] font-extrabold leading-tight text-white drop-shadow ${kh(book)}`}>{book.title}</span>}
@@ -323,13 +323,14 @@ function BookPage({ book, onBack, onRead }: { book: Passage; onBack(): void; onR
       <BackBar label="Library" onBack={onBack} />
       <div className="grid gap-6 sm:grid-cols-[220px_minmax(0,1fr)]">
         <UIBookCard
-          cover={<Cover book={book} size="page" showTitle={false} />}
+          cover={<Cover book={book} />}
           title={<span className={kh(book)}>{book.title}</span>}
           meta={`${minutesToRead(book)} min read · ${wordCount} words`}
           status={<span className={progress?.stage === "done" ? "text-emerald-700 dark:text-emerald-400" : undefined}>{progressLabel}</span>}
           quizLabel={`${book.questions.length} Quizzes`}
           hasAudio={book.sentences.some((sentence) => Boolean(sentence.audio))}
           showAction={false}
+          className="h-fit self-start"
           onClick={onRead}
           ariaLabel={`${book.title}. ${progressLabel}.`}
         />

@@ -8,7 +8,7 @@ import { Picture } from "./Picture";
 import { LibraryProgress } from "./progress";
 import { minutesToRead } from "./session";
 import { canSpeak, say, stop } from "./voice";
-import { prefetchBook } from "./clips";
+import { prefetchBook, prefetchClips, recordingAudioSupported } from "./clips";
 import { playSound } from "../utils/audio";
 import { UIReaderFrame, UIReaderPagination, UIReaderToolbar } from "../components/ui";
 import { useTheme } from "../context/ThemeContext";
@@ -83,6 +83,7 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
   const [playing, setPlaying] = useState<string | null>(null);
   const [playingWord, setPlayingWord] = useState<{ sentence: string; index: number } | null>(null);
   const [reading, setReading] = useState(false);
+  const [pageAudio, setPageAudio] = useState<"idle" | "preparing" | "ready" | "failed">("idle");
   const [peek, setPeek] = useState<string | null>(null);
   const [peekAnchor, setPeekAnchor] = useState<HTMLElement | null>(null);
   const [peekPosition, setPeekPosition] = useState<{ left: number; top: number; side: "top" | "bottom" | "left" | "right" } | null>(null);
@@ -97,6 +98,12 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
   const gesture = useRef<{ x: number; y: number; id: number; dragging: boolean; turn: Turn | null; lastX: number; lastT: number; vx: number } | null>(null);
   const swallowClick = useRef(false);
   const last = pages.count - 1;
+  const pageSentences = useMemo(() => page > 0 ? pages.story[page - 1] ?? [] : [], [page, pages]);
+  const pageAudioIds = useMemo(
+    () => pageSentences.map((item) => item.sentence.audio).filter((id): id is string => Boolean(id)),
+    [pageSentences],
+  );
+  const pageRecorded = pageSentences.length > 0 && pageAudioIds.length === pageSentences.length;
 
   useLayoutEffect(() => {
     if (!peek || !peekAnchor || !peekRef.current) return;
@@ -161,6 +168,22 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
   useEffect(() => {
     void prefetchBook(book);
   }, [book]);
+  useEffect(() => {
+    if (!pageRecorded) {
+      setPageAudio("idle");
+      return;
+    }
+    if (!recordingAudioSupported()) {
+      setPageAudio("failed");
+      return;
+    }
+    let live = true;
+    setPageAudio("preparing");
+    void prefetchClips(pageAudioIds).then(({ ready, total }) => {
+      if (live) setPageAudio(total > 0 && ready === total ? "ready" : "failed");
+    });
+    return () => { live = false; };
+  }, [pageAudioIds, pageRecorded]);
   useEffect(() => () => { run.current++; stop(); spring.current?.stop(); }, []);
 
   const hush = () => {
@@ -310,8 +333,6 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
   };
 
   const peekPic = peek ? book.pictures[peek.toLowerCase()] ?? book.pictures[peek] : undefined;
-  const pageSentences = page > 0 ? pages.story[page - 1] ?? [] : [];
-  const pageRecorded = pageSentences.length > 0 && pageSentences.every((s) => Boolean(s.sentence.audio));
   const scale = TEXT_STEPS[textStep];
   const sheet = (i: number) => (
     <Sheet index={i} count={pages.count}>
@@ -334,7 +355,12 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
         onLargerText={() => setTextStep(textStep + 1)}
         smallerDisabled={textStep === 0}
         largerDisabled={textStep === TEXT_STEPS.length - 1}
-        audio={pageRecorded ? { playing: reading, onToggle: () => void readPage() } : undefined}
+        audio={pageRecorded ? {
+          playing: reading,
+          disabled: pageAudio !== "ready",
+          disabledTitle: pageAudio === "failed" ? "Audio unavailable on this device" : "Preparing audio",
+          onToggle: () => void readPage(),
+        } : undefined}
         dark={theme === "dark"}
         onToggleDark={toggleTheme}
       />}

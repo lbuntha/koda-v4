@@ -19,11 +19,31 @@ const pending = new Map<string, Promise<string | null>>();
 
 const cacheKey = (id: string) => `/library-audio/${id}`;
 
+/** Whether this browser reports support for the AAC-in-MP4 files stored by the library. */
+export function recordingAudioSupported(): boolean {
+  if (typeof document === "undefined") return true;
+  try {
+    const probe = document.createElement("audio");
+    return [
+      'audio/mp4; codecs="mp4a.40.2"',
+      "audio/mp4",
+      "audio/x-m4a",
+    ].some((mime) => probe.canPlayType(mime) !== "");
+  } catch {
+    return false;
+  }
+}
+
+/** A clip that has already been fetched and can be assigned without another async step. */
+export const cachedClipUrl = (id: string): string | null => urls.get(id) ?? null;
+
 async function fromCache(id: string): Promise<Blob | null> {
   try {
     if (typeof caches === "undefined") return null;
     const hit = await (await caches.open(CACHE)).match(cacheKey(id));
-    return hit ? await hit.blob() : null;
+    if (!hit) return null;
+    const blob = await hit.blob();
+    return blob.size > 0 ? blob : null;
   } catch {
     return null;
   }
@@ -52,6 +72,7 @@ export function clipUrl(id: string): Promise<string | null> {
         const res = await fetch(`${API_BASE}/library/audio/${encodeURIComponent(id)}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
         if (!res.ok) return null;
         blob = await res.blob();
+        if (blob.size === 0) return null;
         await toCache(id, blob);
       } catch {
         return null;
@@ -69,11 +90,16 @@ export function clipUrl(id: string): Promise<string | null> {
 export const clipsOf = (p: Pick<Passage, "sentences" | "wordAudio">): string[] =>
   [...new Set([...p.sentences.map((s) => s.audio).filter((x): x is string => !!x), ...Object.values(p.wordAudio ?? {})])];
 
+/** Prepare a known set of recordings and report whether each one is playable. */
+export async function prefetchClips(ids: readonly string[]): Promise<{ ready: number; total: number }> {
+  const unique = [...new Set(ids)];
+  const got = await Promise.all(unique.map((id) => clipUrl(id)));
+  return { ready: got.filter(Boolean).length, total: unique.length };
+}
+
 /** Fetch a book's recordings now, so it reads aloud offline later. Resolves to how many are ready. */
 export async function prefetchBook(p: Pick<Passage, "sentences" | "wordAudio">): Promise<{ ready: number; total: number }> {
-  const ids = clipsOf(p);
-  const got = await Promise.all(ids.map((id) => clipUrl(id)));
-  return { ready: got.filter(Boolean).length, total: ids.length };
+  return prefetchClips(clipsOf(p));
 }
 
 /** Upload a recording. Authors only; the server checks. */
