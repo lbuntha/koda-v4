@@ -217,23 +217,58 @@
 @media (max-width: 44.999rem) {
   [data-mobile-chrome-hidden] > header,
   [data-mobile-chrome-hidden] > div:has(> nav[aria-label="Main"]),
-  .mobile-reader-pagination:not(.mobile-reader-pagination-last),
   .mobile-reader-word-hint,
   .mobile-reader-swipe-hint {
     display: none;
   }
 
-  .mobile-reader-final-actions {
-    position: fixed;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 30;
-    margin: 0;
-    padding: 0.625rem max(1rem, env(safe-area-inset-left)) max(0.625rem, env(safe-area-inset-bottom));
-    border-top: 1px solid var(--line);
-    background: color-mix(in srgb, var(--surface) 94%, transparent);
-    box-shadow: 0 -6px 20px rgb(15 23 42 / 10%);
+  /* Use the same vertical contract as the standard app toolbar: safe area,
+     then one 56px control row. The reader frame already starts inside the
+     page's top padding, so it must not pull itself back out of that space. */
+  .mobile-reader-toolbar {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .mobile-reader-toolbar-row {
+    min-height: 3.5rem;
+  }
+
+}
+
+.ui-reader-frame {
+  /* The focused mobile page keeps 16px above and 24px below its content. */
+  height: calc(100dvh - 2.5rem);
+}
+
+.ui-reader-frame-toolbar {
+  border-bottom: 1px solid var(--line);
+}
+
+.ui-reader-frame-content {
+  scrollbar-gutter: stable;
+}
+
+.ui-reader-frame-footer {
+  padding-bottom: env(safe-area-inset-bottom);
+  border-top: 1px solid var(--line);
+}
+
+.ui-reader-pagination {
+  display: flex;
+  min-height: 4.5rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.ui-reader-pagination-final {
+  padding-inline: 0.75rem;
+}
+
+@media (min-width: 45rem) {
+  .ui-reader-frame {
+    height: calc(100dvh - 3rem);
   }
 }
 

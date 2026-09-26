@@ -68,6 +68,8 @@ export interface UIGuideBubbleProps {
   icon?: React.ReactNode;
   /** Which way the tail points — at the work above, or the work below. */
   tail?: "down" | "up" | "none";
+  /** A compact speech bubble for inline help, without the large guide panel. */
+  compact?: boolean;
   /** Ties the panel to whatever opened it, for a screen reader. */
   id?: string;
 }
@@ -82,6 +84,7 @@ export const UIGuideBubble: React.FC<UIGuideBubbleProps> = ({
   onAction,
   icon,
   tail = "down",
+  compact = false,
   id,
 }) => {
   const s = themeSystem.guideBubble;
@@ -130,14 +133,14 @@ export const UIGuideBubble: React.FC<UIGuideBubbleProps> = ({
   const paged = pages.length > 1;
 
   return (
-    <div id={id} role="status" aria-live="polite" className={s.wrap}>
-      <span className={s.avatar} aria-hidden="true">
+    <div id={id} role="status" aria-live="polite" className={compact ? s.compactWrap : s.wrap}>
+      <span className={compact ? s.compactAvatar : s.avatar} aria-hidden="true">
         {icon ?? <Lightbulb />}
       </span>
 
       <div className={s.body}>
         <div className={s.titleRow}>
-          <span className={s.title}>{title}</span>
+          <span className={compact ? "sr-only" : s.title}>{title}</span>
           {/* Up here rather than among the controls: on a phone the footer has
               to carry three targets across 300-odd pixels, and a counter is
               not a target. */}
@@ -147,7 +150,7 @@ export const UIGuideBubble: React.FC<UIGuideBubbleProps> = ({
             </span>
           )}
         </div>
-        <p className={s.message}>{pages[at]}</p>
+        <p className={compact ? s.compactMessage : s.message}>{pages[at]}</p>
 
         {(paged || (actionLabel && onAction)) && (
           <div className={s.footer}>
@@ -200,7 +203,7 @@ export const UIGuideBubble: React.FC<UIGuideBubbleProps> = ({
         )}
       </div>
 
-      {tail !== "none" && <span aria-hidden="true" className={s.tail(tail)} />}
+      {tail !== "none" && <span aria-hidden="true" className={compact ? s.compactTail(tail) : s.tail(tail)} />}
     </div>
   );
 };

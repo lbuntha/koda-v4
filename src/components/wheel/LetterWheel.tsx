@@ -410,6 +410,12 @@ export function LetterWheel({
           const at = picked.indexOf(i);
           const on = at >= 0;
           const rest = layout[order.indexOf(i)] ?? { x: VIEW.cx, y: VIEW.cy };
+          // Keep an explicit transform in React's tree even while the RAF loop
+          // animates it. If this is left undefined, a picked/dragging state
+          // render can remove the imperative SVG transform for one frame and
+          // flash the tile at (0, 0), which is especially visible on mobile.
+          const rendered = motionOK ? tilePos(i) : rest;
+          const renderedScale = motionOK ? (anim.current[i]?.sc.x ?? 1) : (on ? 1.08 : 1);
           return (
             <g
               key={`${wordKey}:${i}`}
@@ -419,7 +425,7 @@ export function LetterWheel({
               tabIndex={disabled ? -1 : 0}
               aria-label={`${display(t)}${on ? `, chosen ${ordinal(at + 1)}` : ""}${highlight === i ? ", suggested" : ""}`}
               aria-pressed={on}
-              transform={motionOK ? undefined : `translate(${rest.x.toFixed(1)} ${rest.y.toFixed(1)})`}
+              transform={`translate(${rendered.x.toFixed(1)} ${rendered.y.toFixed(1)})`}
               style={{ outline: "none" }}
               onKeyDown={onTileKey(i)}
               onFocus={() => setFocusTile(i)}
@@ -427,7 +433,7 @@ export function LetterWheel({
             >
               {focusTile === i && <circle r={r + 7} fill="none" stroke={COLOR.picked} strokeWidth={3} />}
               {highlight === i && !on && <circle data-wheel-hint r={r + 9} fill="none" stroke={COLOR.good} strokeWidth={3} strokeDasharray="6 5" />}
-              <g ref={(el) => { scaleRefs.current[i] = el; }} transform={motionOK ? undefined : `scale(${on ? 1.08 : 1})`}>
+              <g ref={(el) => { scaleRefs.current[i] = el; }} transform={`scale(${renderedScale.toFixed(3)})`}>
                 <circle r={r} fill={on ? COLOR.picked : COLOR.muted} stroke={on ? COLOR.pickedEdge : COLOR.edge} strokeOpacity={on ? 1 : 0.45} strokeWidth={3} />
                 <text
                   textAnchor="middle"

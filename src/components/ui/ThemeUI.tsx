@@ -53,6 +53,17 @@ export const UIButton: React.FC<UIButtonProps> = ({
   );
 };
 
+export interface UILinkButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  children: React.ReactNode;
+}
+
+/** A low-emphasis action that looks like a link without pretending to navigate. */
+export const UILinkButton: React.FC<UILinkButtonProps> = ({ children, className = "", ...props }) => (
+  <button className={themeSystem.linkButton(className)} {...props}>
+    {children}
+  </button>
+);
+
 export interface UICardProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: CardVariant;
 }
@@ -111,6 +122,7 @@ export interface UIModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
+  ariaLabel?: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
   /**
@@ -174,7 +186,7 @@ const RAIL_WIDTH: Record<string, string> = {
   "max-w-3xl": "rail:max-w-3xl",
 };
 
-export const UIModal: React.FC<UIModalProps> = ({ isOpen, onClose, title, children, footer, maxWidth = "max-w-lg", tone = "default", backdrop = "dim" }) => {
+export const UIModal: React.FC<UIModalProps> = ({ isOpen, onClose, title, ariaLabel, children, footer, maxWidth = "max-w-lg", tone = "default", backdrop = "dim" }) => {
   if (!isOpen) return null;
 
   const plain = tone === "plain";
@@ -186,6 +198,9 @@ export const UIModal: React.FC<UIModalProps> = ({ isOpen, onClose, title, childr
     >
       <div
         className={`${themeSystem.modal.content} ${RAIL_WIDTH[maxWidth] ?? "rail:max-w-lg"}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label={ariaLabel ?? title}
         onClick={(e) => e.stopPropagation()}
       >
         <div className={themeSystem.modal.grabber} aria-hidden="true" />

@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "motion/react";
-import { ChevronLeft, ChevronRight, Volume2, X } from "lucide-react";
+import { Volume2, X } from "lucide-react";
 import { BANDS, type Passage, type PicturePlace, type Sentence } from "./data/passage";
 import { layoutBook, type SetSentence, type SetToken } from "./bookLayout";
 import { FLAT, SPRING, TURNED, angularVelocity, castOf, completes, curlOf, dragAngle, shadeOf, type Dir } from "./pageTurn";
@@ -10,7 +10,7 @@ import { minutesToRead } from "./session";
 import { canSpeak, say, stop } from "./voice";
 import { prefetchBook } from "./clips";
 import { playSound } from "../utils/audio";
-import { UIReaderToolbar } from "../components/ui";
+import { UIReaderFrame, UIReaderPagination, UIReaderToolbar } from "../components/ui";
 import { useTheme } from "../context/ThemeContext";
 
 /**
@@ -34,8 +34,6 @@ import { useTheme } from "../context/ThemeContext";
 
 const KHMER = "font-['Noto_Sans_Khmer','Khmer_OS','Khmer_MN',sans-serif]";
 const SERIF = "font-['Iowan_Old_Style','Palatino_Linotype','Book_Antiqua',Georgia,'Times_New_Roman',serif]";
-const btn = "inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-4 font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-40";
-const primary = `${btn} bg-indigo-600 text-white hover:bg-indigo-700`;
 const round = "grid h-11 w-11 shrink-0 place-items-center rounded-full border border-line bg-surface text-ink transition-colors hover:border-indigo-400 disabled:cursor-not-allowed disabled:opacity-30";
 
 /** How far a finger must move sideways before it is a page turn, not a tap. */
@@ -95,6 +93,7 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
   const turnRef = useRef<Turn | null>(null);
   const spring = useRef<{ stop(): void } | null>(null);
   const bookEl = useRef<HTMLElement>(null);
+  const scrollEl = useRef<HTMLDivElement>(null);
   const gesture = useRef<{ x: number; y: number; id: number; dragging: boolean; turn: Turn | null; lastX: number; lastT: number; vx: number } | null>(null);
   const swallowClick = useRef(false);
   const last = pages.count - 1;
@@ -140,6 +139,7 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
   const setPage = (p: number) => {
     pageRef.current = p;
     setPageState(p);
+    if (scrollEl.current) scrollEl.current.scrollTop = 0;
     playSound("page");
   };
   const setTextStep = (n: number) => {
@@ -326,8 +326,9 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
   const over = turning ? (turning.dir === 1 ? turning.from : turning.to) : null;
 
   return (
-    <div className="mx-auto w-full max-w-3xl">
-      <UIReaderToolbar
+    <UIReaderFrame
+      contentRef={scrollEl}
+      toolbar={<UIReaderToolbar
         onBack={onBack}
         onSmallerText={() => setTextStep(textStep - 1)}
         onLargerText={() => setTextStep(textStep + 1)}
@@ -336,13 +337,21 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
         audio={pageRecorded ? { playing: reading, onToggle: () => void readPage() } : undefined}
         dark={theme === "dark"}
         onToggleDark={toggleTheme}
-      />
-
+      />}
+      footer={<UIReaderPagination
+        page={page}
+        pageCount={pages.count}
+        storyPageCount={pages.story.length}
+        onPrevious={() => turn(page - 1)}
+        onNext={() => turn(page + 1)}
+        onComplete={() => { hush(); onReady(); }}
+      />}
+    >
       <section
         ref={bookEl}
         aria-roledescription="book"
         aria-label={book.title}
-        className="relative grid touch-pan-y select-none overflow-hidden font-normal text-neutral-900 [perspective:2000px] dark:text-neutral-100"
+        className="relative grid min-h-full touch-pan-y select-none overflow-hidden font-normal text-neutral-900 [perspective:2000px] dark:text-neutral-100"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerEnd}
@@ -373,32 +382,6 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
         )}
       </section>
 
-      {/* Kept in reach while reading: pinned above the phone's tab bar, however long the page. */}
-      <nav aria-label="Pages" className={`mobile-reader-pagination ${page === last ? "mobile-reader-pagination-last mobile-reader-final-actions" : ""} sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] z-10 mt-2 flex items-center justify-between gap-3 bg-surface/95 py-2 backdrop-blur rail:bottom-3`}>
-        {page !== last && <button type="button" onClick={() => turn(page - 1)} disabled={page === 0} aria-label="Previous page" className={round}>
-          <ChevronLeft className="h-5 w-5" aria-hidden="true" />
-        </button>}
-        {page !== last && <div className="flex min-w-0 flex-col items-center gap-1.5">
-          <span className="text-sm font-bold tabular-nums text-muted" aria-live="polite">
-            {page === 0 ? "Cover" : `Page ${page} of ${pages.story.length}`}
-          </span>
-          <span className="flex gap-1.5" aria-hidden="true">
-            {Array.from({ length: pages.count }, (_, i) => (
-              <span key={i} className={`h-1.5 rounded-full transition-all ${i === page ? "w-5 bg-neutral-800 dark:bg-neutral-200" : "w-1.5 bg-neutral-300 dark:bg-neutral-700"}`} />
-            ))}
-          </span>
-        </div>}
-        {page < last ? (
-          <button type="button" onClick={() => turn(page + 1)} aria-label="Next page" className={round}>
-            <ChevronRight className="h-5 w-5" aria-hidden="true" />
-          </button>
-        ) : (
-          <button type="button" onClick={() => { hush(); onReady(); }} className={`${primary} min-h-12 w-full shadow-[0_6px_18px_rgba(79,70,229,0.22)] active:shadow-[0_3px_10px_rgba(79,70,229,0.18)]`}>
-            Check My Learning
-          </button>
-        )}
-      </nav>
-
       {peek && peekAnchor ? (
         <div ref={peekRef} role="tooltip" aria-label={`Word helper: ${peek}`} aria-live="polite" data-word-tooltip style={{ left: peekPosition?.left ?? 0, top: peekPosition?.top ?? 0, visibility: peekPosition ? "visible" : "hidden" }} className="koda-tooltip-in fixed z-50 flex w-[min(calc(100vw-1.5rem),24rem)] items-center gap-3 rounded-2xl border border-indigo-100 bg-white px-4 py-3 pr-12 shadow-xl dark:border-indigo-900 dark:bg-surface">
           <span aria-hidden="true" className={`absolute h-4 w-4 rotate-45 border-indigo-100 bg-white dark:border-indigo-900 dark:bg-surface ${peekPosition?.side === "top" ? "-bottom-2 left-1/2 -translate-x-1/2 border-b border-r" : peekPosition?.side === "left" ? "-right-2 top-1/2 -translate-y-1/2 border-r border-t" : peekPosition?.side === "right" ? "-left-2 top-1/2 -translate-y-1/2 border-b border-l" : "-top-2 left-1/2 -translate-x-1/2 border-l border-t"}`} />
@@ -420,7 +403,7 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
       ) : (
         null
       )}
-    </div>
+    </UIReaderFrame>
   );
 }
 
@@ -432,7 +415,7 @@ function Sheet({ index, count, children }: { index: number; count: number; child
       aria-roledescription="page"
       aria-label={index === 0 ? "Cover" : `Page ${index} of ${count - 1}`}
       data-book-page={index}
-      className="flex min-h-[max(18rem,calc(100svh-8rem))] w-full flex-col py-4 sm:min-h-[34rem] sm:px-8 sm:py-8"
+      className="flex min-h-full w-full flex-col py-4 sm:px-8 sm:py-8"
     >
       {children}
     </div>

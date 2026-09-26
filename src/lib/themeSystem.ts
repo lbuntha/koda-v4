@@ -160,6 +160,14 @@ export const themeSystem = {
     return `${base} ${sizes[size]} ${variants[variant]} ${className}`;
   },
 
+  linkButton: (className: string = "") => [
+    "inline-flex min-h-11 items-center justify-center rounded-lg px-2 text-sm font-bold text-muted",
+    "transition-colors hover:bg-indigo-50 hover:text-ink",
+    "focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2",
+    "disabled:cursor-not-allowed disabled:opacity-50",
+    className,
+  ].filter(Boolean).join(" "),
+
   card: (variant: CardVariant = "default", className: string = "") => {
     const base = "rounded-2xl transition-all duration-200";
     const variants = {
@@ -549,6 +557,16 @@ export const themeSystem = {
    * the whole point of it is the sentence being legible.
    */
   guideBubble: {
+    compactWrap:
+      "relative flex w-full items-start gap-2 rounded-2xl border border-line bg-white px-3 py-2 " +
+      "shadow-md shadow-slate-900/10 dark:bg-slate-900 dark:shadow-black/30",
+    compactAvatar:
+      "grid h-7 w-7 shrink-0 place-items-center rounded-full bg-indigo-600 text-white [&>svg]:h-4 [&>svg]:w-4",
+    compactMessage: "break-words text-sm font-bold leading-snug text-ink",
+    compactTail: (side: "down" | "up" = "down") =>
+      "absolute left-5 h-3 w-3 rotate-45 bg-white " +
+      (side === "down" ? "-bottom-1.5 border-b border-r border-line" : "-top-1.5 border-l border-t border-line") +
+      " dark:bg-slate-900",
     /*
      * Tighter on a phone, and that is not only taste.
      *

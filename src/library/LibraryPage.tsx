@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { ArrowLeft, BookOpen, Check, Lightbulb, Search, Volume2, X } from "lucide-react";
 import { LetterWheel } from "../components/wheel/LetterWheel";
 import { ScoringAPI } from "../lib/scoring";
@@ -20,6 +21,7 @@ import { prefetchPhotos } from "./photos";
 import { reportBook, type ReportReason } from "./api";
 import { BookReader } from "./BookReader";
 import { playSound } from "../utils/audio";
+import { UIButton, UIGuideBubble, UIBookCard, UILinkButton, UIInput, UIQuizToolbar, UIModal } from "../components/ui";
 import "./khmerFont";
 
 /**
@@ -169,16 +171,18 @@ function useProgress(): (p: Passage) => BookProgress | null {
   return (p) => LibraryProgress.get(p.id, p.rev);
 }
 
-function Cover({ book, size = "shelf" }: { book: Passage; size?: "shelf" | "page" }) {
+function Cover({ book, size = "shelf", showTitle = size === "page" }: { book: Passage; size?: "shelf" | "page"; showTitle?: boolean }) {
+  const shelf = size === "shelf";
   return (
     <span
-      className={`relative grid ${size === "page" ? "aspect-[4/3] sm:aspect-[3/4]" : "aspect-[3/4]"} content-end overflow-hidden rounded-2xl bg-gradient-to-br p-3 shadow-md ${COVER[book.category ?? ""] ?? "from-indigo-500 to-indigo-800"} ${size === "page" ? "w-full max-w-none sm:max-w-[220px]" : "w-full"}`}
+      className={`relative grid ${size === "page" ? "aspect-[4/3] sm:aspect-[3/4]" : "aspect-[2/1]"} ${shelf ? "bg-gradient-to-br from-slate-50 to-indigo-100 p-4" : "content-end overflow-hidden rounded-2xl bg-gradient-to-br p-3 shadow-md"} ${COVER[book.category ?? ""] ?? "from-indigo-500 to-indigo-800"} ${size === "page" ? "w-full max-w-none sm:max-w-[220px]" : "w-full"}`}
     >
-      <span className="absolute left-2 top-2 rounded-full bg-white/95 px-2 py-0.5 text-[11px] font-black text-slate-900">Level {book.band}</span>
-      <span className="absolute inset-x-[14%] top-[13%] aspect-square rounded-full bg-white/90 p-[10%]">
+      <span className={`absolute left-3 top-3 rounded-full px-3 py-1 text-[11px] font-black ${shelf ? "bg-emerald-700 text-white" : "bg-white/95 text-slate-900"}`}>Level {book.band}</span>
+      {shelf && <span className="absolute right-3 top-3 rounded-full bg-indigo-100 px-3 py-1 text-[11px] font-black text-slate-700">{book.category ?? "Story"}</span>}
+      <span className={`absolute ${shelf ? "inset-x-[35%] top-[15%] bg-emerald-100 p-[7%]" : "inset-x-[14%] top-[13%] bg-white/90 p-[10%]"} aspect-square rounded-full`}>
         <Picture name={book.picture} />
       </span>
-      <span className={`relative text-[15px] font-extrabold leading-tight text-white drop-shadow ${kh(book)}`}>{book.title}</span>
+      {!shelf && showTitle && <span className={`relative text-[15px] font-extrabold leading-tight text-white drop-shadow ${kh(book)}`}>{book.title}</span>}
     </span>
   );
 }
@@ -203,9 +207,9 @@ function Catalog({ shelf, lang, onLang, onOpen }: { shelf: readonly Passage[]; l
           <h2 className="text-lg font-extrabold text-ink">{title}</h2>
           {note && <span className="text-xs text-muted">{note}</span>}
         </div>
-        <ul className="flex snap-x gap-4 overflow-x-auto pb-3">
+        <ul className="grid grid-cols-1 gap-5 pb-3 sm:grid-cols-2 lg:grid-cols-3">
           {books.map((b) => (
-            <li key={b.id} className="w-[136px] shrink-0 snap-start">
+            <li key={b.id}>
               <BookTile book={b} progress={progressOf(b)} onOpen={() => onOpen(b.id)} />
             </li>
           ))}
@@ -220,11 +224,11 @@ function Catalog({ shelf, lang, onLang, onOpen }: { shelf: readonly Passage[]; l
           <h1 className="text-3xl font-extrabold tracking-tight text-ink">Library</h1>
           <p className="text-sm text-muted">Read a story, answer questions, then spell words from it.</p>
         </div>
-        <div role="group" aria-label="Language" className="inline-flex overflow-hidden rounded-full border border-line bg-surface">
+        <div role="group" aria-label="Language" className="flex flex-wrap justify-end gap-2">
           {(["en", "km"] as const).map((l) => (
-            <button key={l} type="button" aria-pressed={lang === l} onClick={() => onLang(l)} className={`min-h-11 px-4 font-bold ${lang === l ? "bg-indigo-600 text-white" : "text-muted"} ${l === "km" ? KHMER : ""}`}>
+            <UIButton key={l} type="button" size="sm" variant={lang === l ? "primary" : "secondary"} aria-pressed={lang === l} onClick={() => onLang(l)} className={`rounded-full ${l === "km" ? KHMER : ""}`}>
               {l === "en" ? "English" : "ភាសាខ្មែរ"}
-            </button>
+            </UIButton>
           ))}
         </div>
       </header>
@@ -232,20 +236,20 @@ function Catalog({ shelf, lang, onLang, onOpen }: { shelf: readonly Passage[]; l
       <label className="relative mt-4 block">
         <span className="sr-only">Search books</span>
         <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden="true" />
-        <input
+        <UIInput
           type="search"
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search books"
-          className="min-h-11 w-full rounded-full border border-line bg-surface py-2 pl-10 pr-4 text-ink placeholder:text-muted"
+          className="rounded-full pl-10 pr-4"
         />
       </label>
 
       <div role="group" aria-label="Category" className="mt-3 flex flex-wrap gap-2">
         {["All", ...cats].map((c) => (
-          <button key={c} type="button" aria-pressed={cat === c} onClick={() => setCat(c)} className={`min-h-11 rounded-full border px-4 text-sm font-bold ${cat === c ? "border-indigo-600 bg-indigo-600 text-white" : "border-line bg-surface text-ink"}`}>
+          <UIButton key={c} type="button" size="sm" variant={cat === c ? "primary" : "secondary"} aria-pressed={cat === c} onClick={() => setCat(c)} className="rounded-full">
             {c}
-          </button>
+          </UIButton>
         ))}
       </div>
 
@@ -253,7 +257,7 @@ function Catalog({ shelf, lang, onLang, onOpen }: { shelf: readonly Passage[]; l
         shelfRow(`Results for “${q.trim()}”`, list, `${list.length} book${list.length === 1 ? "" : "s"}`) ?? <p className="mt-6 text-muted">No books match that.</p>
       ) : (
         <>
-          {shelfRow("Continue reading", reading, "pick up where you left off")}
+          {shelfRow("Continue reading", reading)}
           {(cat === "All" ? cats : [cat]).map((c) => shelfRow(c, list.filter((p) => (p.category ?? "Everyday") === c)))}
           {!list.length && <p className="mt-6 text-muted">No books here yet.</p>}
         </>
@@ -265,14 +269,18 @@ function Catalog({ shelf, lang, onLang, onOpen }: { shelf: readonly Passage[]; l
 function BookTile({ book, progress, onOpen }: { book: Passage; progress: BookProgress | null; onOpen(): void }) {
   const st = progress?.stage;
   const label = st === "done" ? `Finished ✓${progress?.total ? ` ${progress.firstTry}/${progress.total}` : ""}` : st ? "In progress" : "New";
+  const wordCount = book.sentences.reduce((total, sentence) => total + sentence.words.length, 0);
   return (
-    <button type="button" onClick={onOpen} className="group grid w-full gap-1.5 text-left" aria-label={`${book.title}. Level ${book.band}. ${label}.`}>
-      <span className="rounded-2xl ring-indigo-400 ring-offset-2 ring-offset-canvas group-hover:ring-2 group-focus-visible:ring-2">
-        <Cover book={book} />
-      </span>
-      <span className="text-xs text-muted">{minutesToRead(book)} min · {book.sentences.length} sentences</span>
-      <span className={`text-xs font-bold ${st === "done" ? "text-emerald-700 dark:text-emerald-400" : "text-muted"}`}>{label}</span>
-    </button>
+    <UIBookCard
+      cover={<Cover book={book} />}
+      title={<span className={kh(book)}>{book.title}</span>}
+      meta={`${minutesToRead(book)} min read · ${wordCount} words`}
+      status={<span className={st === "done" ? "text-emerald-700 dark:text-emerald-400" : undefined}>{label}</span>}
+      quizLabel={`${book.questions.length} Quizzes`}
+      hasAudio={book.sentences.some((sentence) => Boolean(sentence.audio))}
+      onClick={onOpen}
+      ariaLabel={`${book.title}. Level ${book.band}. ${label}.`}
+    />
   );
 }
 
@@ -280,14 +288,16 @@ function BookTile({ book, progress, onOpen }: { book: Passage; progress: BookPro
 /* Book page                                                                   */
 /* -------------------------------------------------------------------------- */
 
-function BackBar({ label, onBack, right }: { label: string; onBack(): void; right?: ReactNode }) {
+function BackBar({ label, onBack, right, mobileSafe = false }: { label: string; onBack(): void; right?: ReactNode; mobileSafe?: boolean }) {
   return (
-    <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-      <button type="button" onClick={onBack} className={quiet}>
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        {label}
-      </button>
-      {right}
+    <div className={`${mobileSafe ? "mobile-reader-toolbar" : ""} mb-4`}>
+      <div className={`${mobileSafe ? "mobile-reader-toolbar-row" : ""} flex flex-wrap items-center justify-between gap-2`}>
+        <UILinkButton type="button" onClick={onBack} className="text-base">
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          {label}
+        </UILinkButton>
+        {right}
+      </div>
     </div>
   );
 }
@@ -306,23 +316,29 @@ function BookPage({ book, onBack, onRead }: { book: Passage; onBack(): void; onR
   // A Khmer book's spelling level: its hardest spelling word.
   const levels = book.language === "km" ? book.questions.flatMap((q) => (q.kind === "spell" ? [spellingLevel(tilesOf(q.word, "km"))] : [])) : [];
   const level = levels.length ? (Math.max(...levels) as SpellingLevel) : null;
+  const wordCount = book.sentences.reduce((total, sentence) => total + sentence.words.length, 0);
+  const progressLabel = progress?.stage === "done" ? `Finished ✓${progress.total ? ` ${progress.firstTry}/${progress.total}` : ""}` : progress ? "In progress" : "New";
   return (
     <div>
       <BackBar label="Library" onBack={onBack} />
       <div className="grid gap-6 sm:grid-cols-[220px_minmax(0,1fr)]">
-        <Cover book={book} size="page" />
+        <UIBookCard
+          cover={<Cover book={book} size="page" showTitle={false} />}
+          title={<span className={kh(book)}>{book.title}</span>}
+          meta={`${minutesToRead(book)} min read · ${wordCount} words`}
+          status={<span className={progress?.stage === "done" ? "text-emerald-700 dark:text-emerald-400" : undefined}>{progressLabel}</span>}
+          quizLabel={`${book.questions.length} Quizzes`}
+          hasAudio={book.sentences.some((sentence) => Boolean(sentence.audio))}
+          showAction={false}
+          onClick={onRead}
+          ariaLabel={`${book.title}. ${progressLabel}.`}
+        />
         <div>
-          <h1 className={`text-3xl font-extrabold tracking-tight text-ink ${kh(book)}`}>{book.title}</h1>
-          <div className="mt-2 flex flex-wrap gap-2 text-sm">
-            {[book.category ?? "Story", `Level ${book.band}`, `${minutesToRead(book)} min`, book.language === "km" ? "ភាសាខ្មែរ" : "English"].map((c) => (
-              <span key={c} className={`rounded-full bg-surface-muted px-3 py-1 font-bold text-ink ${c === "ភាសាខ្មែរ" ? KHMER : ""}`}>{c}</span>
-            ))}
-          </div>
+          <h1 className="sr-only">{book.title}</h1>
           <div className="mt-4">
-            <button type="button" onClick={onRead} className={primary}>
-              <BookOpen className="h-5 w-5" aria-hidden="true" />
+            <UIButton type="button" onClick={onRead} icon={<BookOpen className="h-5 w-5" aria-hidden="true" />}>
               {progress?.stage === "done" ? "Read again" : progress ? "Keep reading" : "Read"}
-            </button>
+            </UIButton>
           </div>
           <ol className="mt-5 grid gap-2">
             {[
@@ -412,8 +428,8 @@ function ReportBook({ book }: { book: Passage }) {
       </label>
       {state === "failed" && <p role="alert" className="text-sm font-bold text-rose-700 dark:text-rose-400">It could not be sent — this device may be offline. Try again when it is online.</p>}
       <div className="flex gap-2">
-        <button type="submit" className={primary} disabled={state === "sending"}>{state === "sending" ? "Sending…" : "Send report"}</button>
-        <button type="button" className={quiet} onClick={() => setOpen(false)}>Cancel</button>
+        <UIButton type="submit" size="sm" isLoading={state === "sending"}>{state === "sending" ? "Sending…" : "Send report"}</UIButton>
+        <UILinkButton type="button" onClick={() => setOpen(false)}>Cancel</UILinkButton>
       </div>
     </form>
   );
@@ -438,6 +454,7 @@ function Quiz({ book, onLeave, onFinish, preview = false }: { book: Passage; onL
   const [i, setI] = useState(0);
   const [outcomes, setOutcomes] = useState<Outcome[]>([]);
   const [sheet, setSheet] = useState<{ evidence: string | null } | null>(null);
+  const [hintHost, setHintHost] = useState<HTMLDivElement | null>(null);
   const cur = useRef<Outcome | null>(null);
   const finished = useRef(false);
   const item = quiz[i];
@@ -477,16 +494,9 @@ function Quiz({ book, onLeave, onFinish, preview = false }: { book: Passage; onL
 
   return (
     <div>
-      <BackBar
-        label="Stop"
-        onBack={onLeave}
-        right={
-          <button type="button" onClick={() => readAgain()} className={quiet}>
-            <BookOpen className="h-4 w-4" aria-hidden="true" />
-            Read again
-          </button>
-        }
-      />
+      <div className="mb-4">
+        <UIQuizToolbar onBack={onLeave} onReadAgain={() => readAgain()} hintHostRef={setHintHost} />
+      </div>
       <div className="mb-4 grid grid-cols-3 gap-2" aria-label="Progress">
         {parts.map(({ p, n }) => (
           <div key={p}>
@@ -514,6 +524,7 @@ function Quiz({ book, onLeave, onFinish, preview = false }: { book: Passage; onL
             if (level === 2 && item.part === "understand") readAgain(item.question.evidence);
             if (level === 2 && item.part === "words") void say(item.question.word, book.language);
           }}
+          hintHost={hintHost}
         />
       )}
       {item && item.part === "spell" && (
@@ -524,7 +535,7 @@ function Quiz({ book, onLeave, onFinish, preview = false }: { book: Passage; onL
           onWrong={(given) => { cur.current!.wrong++; recorder.answered(item, false, given); }}
           onRight={(given) => { recorder.answered(item, true, given); setTimeout(correct, 1000); }}
           onHint={(level) => { cur.current!.hints = Math.max(cur.current!.hints, level); recorder.support("hint", level); }}
-          onReadAgain={() => readAgain()}
+          hintHost={hintHost}
         />
       )}
 
@@ -534,53 +545,47 @@ function Quiz({ book, onLeave, onFinish, preview = false }: { book: Passage; onL
 }
 
 function StorySheet({ book, evidence, onClose }: { book: Passage; evidence: string | null; onClose(): void }) {
-  const close = useRef<HTMLButtonElement>(null);
   useEffect(() => {
-    close.current?.focus();
     const esc = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", esc);
     return () => window.removeEventListener("keydown", esc);
   }, [onClose]);
   return (
-    <div role="dialog" aria-modal="true" aria-label={`Read again: ${book.title}`} className="fixed inset-0 z-50 grid place-items-end bg-slate-950/45 p-4 sm:place-items-center" onClick={onClose}>
-      <div className="max-h-[80vh] w-full max-w-xl overflow-auto rounded-3xl border border-line bg-surface p-4" onClick={(e) => e.stopPropagation()}>
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <h2 className={`text-lg font-extrabold text-ink ${kh(book)}`}>{book.title}</h2>
-          <button ref={close} type="button" onClick={onClose} className={quiet}>
-            Close <X className="h-4 w-4" aria-hidden="true" />
-          </button>
-        </div>
-        <ol className="grid gap-2">
-          {book.sentences.map((s) => (
-            <li key={s.id} className={`flex items-center gap-3 px-1 py-2.5 ${s.id === evidence ? "font-semibold text-indigo-900 dark:text-indigo-100" : "text-ink"}`}>
-              <span className={`text-lg ${kh(book)}`}>{s.text}</span>
-              {s.id === evidence && <span className="ml-auto shrink-0 rounded-full bg-indigo-600 px-2.5 py-0.5 text-xs font-black text-white">◂ look here</span>}
-            </li>
-          ))}
-        </ol>
-      </div>
-    </div>
+    <UIModal isOpen onClose={onClose} title={book.title} ariaLabel={`Read again: ${book.title}`} maxWidth="max-w-3xl" tone="plain">
+      <ol className="grid gap-2">
+        {book.sentences.map((s) => (
+          <li key={s.id} className={`flex items-center gap-3 px-1 py-2.5 ${s.id === evidence ? "font-semibold text-indigo-900 dark:text-indigo-100" : "text-ink"}`}>
+            <span className={`text-lg ${kh(book)}`}>{s.text}</span>
+            {s.id === evidence && <span className="ml-auto shrink-0 rounded-full bg-indigo-600 px-2.5 py-0.5 text-xs font-black text-white">◂ Look here</span>}
+          </li>
+        ))}
+      </ol>
+    </UIModal>
   );
 }
 
-function HintBar({ text, level, onHint }: { text: string; level: number; onHint(): void }) {
+function HintBar({ text, level, onHint, host }: { text: string; level: number; onHint(): void; host: HTMLElement | null }) {
+  const label = level >= 3 ? "No more hints" : `Hint (${level + 1} of 3)`;
+  const action = (
+    <button type="button" onClick={onHint} disabled={level >= 3} className={`${quiet} !w-11 !px-0`} aria-label={label} title={label}>
+      <Lightbulb className="h-4 w-4" aria-hidden="true" />
+    </button>
+  );
   return (
-    <div className="mt-4 flex flex-wrap items-center gap-3">
-      <p aria-live="polite" className="min-h-11 flex-1 rounded-2xl border border-line bg-surface-muted px-3 py-2.5 text-sm text-ink">{text || "Hints are free. Ask for one whenever you like."}</p>
-      <button type="button" onClick={onHint} disabled={level >= 3} className={quiet}>
-        <Lightbulb className="h-4 w-4" aria-hidden="true" />
-        {level >= 3 ? "No more hints" : `Hint (${level + 1} of 3)`}
-      </button>
+    <div className={text ? "mt-4" : ""}>
+      {host && createPortal(action, host)}
+      {text && <UIGuideBubble compact title="Hint" message={text} tail="up" />}
     </div>
   );
 }
 
-function ChoiceQuestion({ book, item, onWrong, onRight, onHint }: {
+function ChoiceQuestion({ book, item, onWrong, onRight, onHint, hintHost }: {
   book: Passage;
   item: Extract<QuizItem, { part: "understand" | "words" }>;
   onWrong(given: string): void;
   onRight(given: string): void;
   onHint(level: number): void;
+  hintHost: HTMLElement | null;
 }) {
   const q = item.question;
   const pics = item.part === "words";
@@ -610,7 +615,7 @@ function ChoiceQuestion({ book, item, onWrong, onRight, onHint }: {
     setHint(level);
     onHint(level);
     if (level === 1) setHintText(pics ? "Say the word out loud. What does it look like?" : "The answer is in the story. Try Read again.");
-    if (level === 2) setHintText(pics ? "Listen to the word again." : "Look at the sentence marked “look here”.");
+    if (level === 2) setHintText(pics ? "Listen to the word again." : "Look at the sentence marked “Look here”.");
     if (level === 3) {
       const candidate = q.options.map((_, i) => i).find((i) => i !== q.answer && !wrong.includes(i) && !out.includes(i));
       if (candidate !== undefined) setOut((o) => [...o, candidate]);
@@ -655,18 +660,18 @@ function ChoiceQuestion({ book, item, onWrong, onRight, onHint }: {
         })}
       </div>
       <p aria-live="polite" className={`mt-3 min-h-6 text-sm font-bold ${right ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"}`}>{fb}</p>
-      <HintBar text={hintText} level={hint} onHint={nextHint} />
+      <HintBar text={hintText} level={hint} onHint={nextHint} host={hintHost} />
     </div>
   );
 }
 
-function SpellQuestion({ book, item, onWrong, onRight, onHint, onReadAgain }: {
+function SpellQuestion({ book, item, onWrong, onRight, onHint, hintHost }: {
   book: Passage;
   item: Extract<QuizItem, { part: "spell" }>;
   onWrong(given: string): void;
   onRight(given: string): void;
   onHint(level: number): void;
-  onReadAgain(): void;
+  hintHost: HTMLElement | null;
 }) {
   const w = item.word;
   const ring = useMemo(() => ringOf(w), [w]);
@@ -722,7 +727,11 @@ function SpellQuestion({ book, item, onWrong, onRight, onHint, onReadAgain }: {
           </span>
           {after}
         </p>
-        {km && !solved && traced.length > 0 && <WordForming traced={traced} />}
+        {km && !solved && (
+          <div className="mt-3 h-28 rail:h-auto" data-word-forming-slot>
+            {traced.length > 0 && <WordForming traced={traced} />}
+          </div>
+        )}
         <div className="mt-3 flex flex-wrap gap-2">
           {voice && (
             <button type="button" onClick={() => void say(full, book.language, sentence?.audio)} className={quiet}>
@@ -730,12 +739,8 @@ function SpellQuestion({ book, item, onWrong, onRight, onHint, onReadAgain }: {
               Read it to me
             </button>
           )}
-          <button type="button" onClick={onReadAgain} className={quiet}>
-            <BookOpen className="h-4 w-4" aria-hidden="true" />
-            Whole story
-          </button>
         </div>
-        <HintBar text={shownHint} level={hint} onHint={nextHint} />
+        <HintBar text={shownHint} level={hint} onHint={nextHint} host={hintHost} />
       </div>
       <LetterWheel
         tiles={ring}
@@ -780,7 +785,7 @@ function WordForming({ traced }: { traced: readonly string[] }) {
   const reduce = useReducedMotion() ?? false;
   const note = drawnLeftNote(traced);
   return (
-    <div data-word-forming aria-live="polite" className="mt-3 rounded-2xl border border-line bg-surface px-4 py-3">
+    <div data-word-forming aria-live="polite" className="h-full overflow-y-auto rounded-2xl border border-line bg-surface px-4 py-3 rail:h-auto rail:overflow-visible">
       <motion.span
         key={traced.length}
         initial={reduce ? false : { scale: 1.12, opacity: 0.55 }}

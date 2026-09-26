@@ -115,7 +115,7 @@ describe("a whole book, as a child plays it", () => {
     fireEvent.click(screen.getByRole("button", { name: "Hint (1 of 3)" }));
     fireEvent.click(screen.getByRole("button", { name: "Hint (2 of 3)" }));
     const sheet = screen.getByRole("dialog", { name: /Read again/ });
-    expect(within(sheet).getByText("◂ look here").closest("li")!.textContent).toContain("The mango is sweet.");
+    expect(within(sheet).getByText("◂ Look here").closest("li")!.textContent).toContain("The mango is sweet.");
     fireEvent.click(within(sheet).getByRole("button", { name: /Close/ }));
     fireEvent.click(screen.getByRole("button", { name: "The mango" }));
     expect(playSound).toHaveBeenLastCalledWith("success");
