@@ -332,9 +332,15 @@ function BackBar({ label, onBack, right, mobileSafe = false }: { label: string; 
 function BookPage({ book, onBack, onRead }: { book: Passage; onBack(): void; onRead(): void }) {
   const progress = useProgress()(book);
   const [clips, setClips] = useState<{ ready: number; total: number } | null>(null);
+  const [saving, setSaving] = useState(false);
   useEffect(() => {
     let live = true;
-    void prefetchBook(book).then((r) => live && setClips(r));
+    setSaving(true);
+    // Reported as it goes, not only when it finishes: the first save of a book
+    // on a slow connection takes a while, and a line that counts up is the
+    // difference between "it is working" and "it is broken".
+    void prefetchBook(book, (p) => live && setClips(p))
+      .then((r) => { if (live) { setClips(r); setSaving(false); } });
     void prefetchPhotos(book); // so its photos show on the bus too
     return () => { live = false; };
   }, [book]);
@@ -393,8 +399,12 @@ function BookPage({ book, onBack, onRead }: { book: Passage; onBack(): void; onR
             </div>
           )}
           {clips && clips.total > 0 && (
-            <p className="mt-4 text-xs font-bold text-muted">
-              {clips.ready === clips.total ? "🔊 Read in a recorded voice · saved for offline" : `🔊 Recorded voice · ${clips.ready} of ${clips.total} saved — open the book online once to save the rest`}
+            <p className="mt-4 text-xs font-bold text-muted" aria-live="polite">
+              {saving && clips.ready < clips.total
+                ? `🔊 Saving the voice for offline — ${clips.ready} of ${clips.total}. You can start reading.`
+                : clips.ready === clips.total
+                  ? "🔊 Read in a recorded voice · saved for offline"
+                  : `🔊 Recorded voice · ${clips.ready} of ${clips.total} saved — open the book online again to save the rest`}
             </p>
           )}
           {book.provenance && <p className="mt-4 text-xs text-muted">{book.provenance}</p>}

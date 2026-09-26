@@ -247,8 +247,14 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
     setAudioSupported(true);
     let live = true;
     setPageAudio("preparing");
-    void prefetchClips(pageAudioIds).then(({ ready, total }) => {
-      if (live) setPageAudio(total > 0 && ready === total ? "ready" : "failed");
+    // Whatever arrives can be heard. Holding the whole page back until the last
+    // clip lands means one recording stuck behind a bad connection silences the
+    // four that are already on the device — and on this connection something is
+    // always stuck.
+    void prefetchClips(pageAudioIds, ({ ready }) => {
+      if (live && ready > 0) setPageAudio("ready");
+    }).then(({ ready }) => {
+      if (live) setPageAudio(ready > 0 ? "ready" : "failed");
     });
     return () => { live = false; };
   }, [pageAudioIds, pageRecorded, audioAttempt]);

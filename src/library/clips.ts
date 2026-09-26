@@ -2,11 +2,21 @@
  * Book recordings on this device.
  *
  * A clip's id is the SHA-256 of its bytes, so a clip never changes: once it is in
- * the cache it is right for ever. Clips are fetched when a book page opens, so a
- * book opened once online reads aloud on the bus.
+ * the cache it is right for ever. That is the whole design — a book is slow the
+ * first time it is opened and instant every time after, on the bus, in a power
+ * cut, on a phone that has not seen the internet since.
  *
- * Everything here fails quietly. A clip that cannot be fetched is simply not
- * played, and the device voice reads the sentence instead.
+ * Getting it there is the hard part, because the connection this is written for
+ * is not a fast one that occasionally drops: it is a slow one that drops
+ * constantly. So every fetch has a deadline, because a request that hangs for
+ * ever leaves a book saying "preparing audio" until the child gives up; they go
+ * a few at a time, because forty at once on a phone is forty that all crawl; and
+ * a clip that fails is tried again, because on this connection the first failure
+ * means almost nothing. What arrives is kept, and a second attempt asks only for
+ * what is still missing.
+ *
+ * Everything here still fails quietly. A clip that cannot be fetched is simply
+ * not played, and the sentences that did arrive still read aloud.
  */
 
 import { API_BASE } from "../lib/sync";
@@ -17,7 +27,26 @@ const CACHE = "koda-library-audio-v1";
 const urls = new Map<string, string>();
 const pending = new Map<string, Promise<string | null>>();
 
+/**
+ * How long one clip may take before the device gives up on it.
+ *
+ * Generous next to the four seconds a sentence of text is allowed: a recording
+ * is tens of kilobytes, and on a bad connection tens of kilobytes take a while.
+ * What matters is that the number exists at all — without it a stalled request
+ * never resolves, and a book waits on it for ever.
+ */
+const CLIP_TIMEOUT_MS = 20_000;
+/** How many clips are asked for at once. A phone on a weak link does worse with more. */
+const AT_A_TIME = 3;
+/** How many times a clip is asked for before it is left for the next visit. */
+const ATTEMPTS = 3;
+/** The wait before asking again, doubling each time — a dropped link is often back by then. */
+const RETRY_BACKOFF_MS = 400;
+
 const cacheKey = (id: string) => `/library-audio/${id}`;
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+/** A device that knows it is offline says so; one that does not know is assumed online. */
+const offline = (): boolean => typeof navigator !== "undefined" && navigator.onLine === false;
 
 /** Whether this browser reports support for the AAC-in-MP4 files stored by the library. */
 export function recordingAudioSupported(): boolean {
@@ -58,6 +87,34 @@ async function toCache(id: string, blob: Blob) {
   }
 }
 
+/**
+ * One attempt at the network, with a deadline.
+ *
+ * The answer says whether asking again is worth anything. A dropped connection
+ * or a server having a moment is worth another try; a clip the server says it
+ * does not have is not, and trying twice more only makes a child wait longer
+ * for the same nothing.
+ */
+async function download(id: string): Promise<{ blob: Blob } | "gone" | "again"> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), CLIP_TIMEOUT_MS);
+  try {
+    const token = await accessToken();
+    const res = await fetch(`${API_BASE}/library/audio/${encodeURIComponent(id)}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      signal: controller.signal,
+    });
+    if (!res.ok) return res.status >= 500 ? "again" : "gone";
+    const blob = await res.blob();
+    return blob.size > 0 ? { blob } : "gone";
+  } catch {
+    // Refused, timed out, or the connection went away mid-answer.
+    return "again";
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 /** A playable URL for a clip, or null if it is not reachable now. */
 export function clipUrl(id: string): Promise<string | null> {
   const known = urls.get(id);
@@ -67,16 +124,19 @@ export function clipUrl(id: string): Promise<string | null> {
   const job = (async () => {
     let blob = await fromCache(id);
     if (!blob) {
-      try {
-        const token = await accessToken();
-        const res = await fetch(`${API_BASE}/library/audio/${encodeURIComponent(id)}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
-        if (!res.ok) return null;
-        blob = await res.blob();
-        if (blob.size === 0) return null;
-        await toCache(id, blob);
-      } catch {
-        return null;
+      for (let attempt = 0; attempt < ATTEMPTS && !blob; attempt++) {
+        if (attempt > 0) {
+          // Asking again the instant a request failed only wastes the battery;
+          // a device that knows it is offline should not ask again at all.
+          if (offline()) break;
+          await sleep(RETRY_BACKOFF_MS * 2 ** (attempt - 1));
+        }
+        const got = await download(id);
+        if (got === "gone") return null;
+        if (got !== "again") blob = got.blob;
       }
+      if (!blob) return null;
+      await toCache(id, blob);
     }
     const url = URL.createObjectURL(blob);
     urls.set(id, url);
@@ -86,20 +146,48 @@ export function clipUrl(id: string): Promise<string | null> {
   return job;
 }
 
+/** Whether a clip is already on this device — in hand, or saved from a past visit. */
+export async function clipSaved(id: string): Promise<boolean> {
+  return urls.has(id) || (await fromCache(id)) !== null;
+}
+
 /** Every recording a book points at. */
 export const clipsOf = (p: Pick<Passage, "sentences" | "wordAudio">): string[] =>
   [...new Set([...p.sentences.map((s) => s.audio).filter((x): x is string => !!x), ...Object.values(p.wordAudio ?? {})])];
 
-/** Prepare a known set of recordings and report whether each one is playable. */
-export async function prefetchClips(ids: readonly string[]): Promise<{ ready: number; total: number }> {
+/** How a save is going, for a page that wants to show it. */
+export interface ClipProgress {
+  ready: number;
+  total: number;
+}
+
+/**
+ * Prepare a known set of recordings and report how many are playable.
+ *
+ * A few at a time, in the order given, so the sentences at the start of a book
+ * are on the device before the ones at the end — a child reading page one does
+ * not wait on page eight. `onProgress` is called as each one lands, so a slow
+ * first save can show that it is moving rather than look stuck.
+ */
+export async function prefetchClips(ids: readonly string[], onProgress?: (p: ClipProgress) => void): Promise<ClipProgress> {
   const unique = [...new Set(ids)];
-  const got = await Promise.all(unique.map((id) => clipUrl(id)));
-  return { ready: got.filter(Boolean).length, total: unique.length };
+  const total = unique.length;
+  let ready = 0;
+  let next = 0;
+  const worker = async () => {
+    while (next < unique.length) {
+      const url = await clipUrl(unique[next++]);
+      if (url) ready++;
+      onProgress?.({ ready, total });
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(AT_A_TIME, total) }, worker));
+  return { ready, total };
 }
 
 /** Fetch a book's recordings now, so it reads aloud offline later. Resolves to how many are ready. */
-export async function prefetchBook(p: Pick<Passage, "sentences" | "wordAudio">): Promise<{ ready: number; total: number }> {
-  return prefetchClips(clipsOf(p));
+export async function prefetchBook(p: Pick<Passage, "sentences" | "wordAudio">, onProgress?: (p: ClipProgress) => void): Promise<ClipProgress> {
+  return prefetchClips(clipsOf(p), onProgress);
 }
 
 /** Upload a recording. Authors only; the server checks. */
