@@ -111,7 +111,11 @@ async function playRecording(clipId: string, onTime?: (elapsedMs: number | null,
       };
       a.onended = () => finish(true);
       a.onerror = () => finish(false);
-      a.onpause = () => finish(false);
+      // A clip that reaches its end pauses *before* it says it has ended — so a
+      // pause at the end is the end, and only a pause anywhere else is playback
+      // cut short. Reading this one as a failure is what stopped a page after
+      // its first sentence.
+      a.onpause = () => finish(a.ended || (a.duration > 0 && a.currentTime >= a.duration - 0.05));
       void a.play().then(follow).catch(() => finish(false));
     } catch {
       resolve(false);

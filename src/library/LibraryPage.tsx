@@ -749,25 +749,38 @@ function SpellQuestion({ book, item, onWrong, onRight, onHint, hintHost }: {
       <div>
         <h2 className="text-xs font-extrabold uppercase tracking-wider text-muted">Finish the sentence</h2>
         <p className={`mt-2 text-2xl leading-loose text-ink ${kh(book)}`}>
+          {voice && (
+            <button type="button" onClick={() => void say(full, book.language, sentence?.audio)} aria-label="Read the sentence to me" title="Read the sentence to me" className="mr-2 inline-grid h-11 w-11 place-items-center rounded-full border border-line bg-surface-muted align-middle">
+              <Volume2 className="h-5 w-5" aria-hidden="true" />
+            </button>
+          )}
           {before}
-          <span data-gap className={`mx-1 inline-block min-w-20 border-b-4 text-center font-extrabold ${solved || hint >= 3 ? "border-emerald-600 text-emerald-700 dark:text-emerald-400" : traced.length ? "border-indigo-600 text-indigo-700 dark:text-indigo-300" : "border-indigo-600 text-transparent"}`}>
-            {solved || hint >= 3 ? w.original : traced.length ? traced.join("") : " "}
+          {/*
+            * The blank is as wide as the finished word from the start.
+            *
+            * A blank that grows letter by letter re-wraps the sentence, and the
+            * sentence sits above the ring: the ring then moves while a finger is
+            * still on it. So the word itself holds the space open, unseen, and
+            * the letters land on top of it.
+            */}
+          <span className="mx-1 inline-grid min-w-20 align-baseline">
+            <span aria-hidden="true" className="invisible col-start-1 row-start-1 px-1 font-extrabold">{w.original}</span>
+            <span data-gap className={`col-start-1 row-start-1 border-b-4 text-center font-extrabold ${solved || hint >= 3 ? "border-emerald-600 text-emerald-700 dark:text-emerald-400" : traced.length ? "border-indigo-600 text-indigo-700 dark:text-indigo-300" : "border-indigo-600 text-transparent"}`}>
+              {solved || hint >= 3 ? w.original : traced.length ? traced.join("") : " "}
+            </span>
           </span>
           {after}
         </p>
+        {/*
+          * The explanation's space is held whether or not there is anything to
+          * say yet. Only once the ring has a column of its own does letting the
+          * panel grow stop pushing it around.
+          */}
         {km && !solved && (
-          <div className="mt-3 h-28 rail:h-auto" data-word-forming-slot>
+          <div className="mt-3 h-28 md:h-auto md:min-h-28" data-word-forming-slot>
             {traced.length > 0 && <WordForming traced={traced} />}
           </div>
         )}
-        <div className="mt-3 flex flex-wrap gap-2">
-          {voice && (
-            <button type="button" onClick={() => void say(full, book.language, sentence?.audio)} className={quiet}>
-              <Volume2 className="h-4 w-4" aria-hidden="true" />
-              Read it to me
-            </button>
-          )}
-        </div>
         <HintBar text={shownHint} level={hint} onHint={nextHint} host={hintHost} />
       </div>
       <LetterWheel
@@ -813,7 +826,7 @@ function WordForming({ traced }: { traced: readonly string[] }) {
   const reduce = useReducedMotion() ?? false;
   const note = drawnLeftNote(traced);
   return (
-    <div data-word-forming aria-live="polite" className="h-full overflow-y-auto rounded-2xl border border-line bg-surface px-4 py-3 rail:h-auto rail:overflow-visible">
+    <div data-word-forming aria-live="polite" className="h-full overflow-y-auto rounded-2xl border border-line bg-surface px-4 py-3 md:h-auto md:overflow-visible">
       <motion.span
         key={traced.length}
         initial={reduce ? false : { scale: 1.12, opacity: 0.55 }}

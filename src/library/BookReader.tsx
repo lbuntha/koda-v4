@@ -37,6 +37,18 @@ const KHMER = "font-['Noto_Sans_Khmer','Khmer_OS','Khmer_MN',sans-serif]";
 const SERIF = "font-['Iowan_Old_Style','Palatino_Linotype','Book_Antiqua',Georgia,'Times_New_Roman',serif]";
 const round = "grid h-11 w-11 shrink-0 place-items-center rounded-full border border-line bg-surface text-ink transition-colors hover:border-indigo-400 disabled:cursor-not-allowed disabled:opacity-30";
 
+/**
+ * Where a line of Khmer may break.
+ *
+ * Khmer writes without spaces between words, so a run of it offers a browser no
+ * break at all and the line runs off the page — which is why wrapping looked
+ * like luck: it held only where the browser's own Khmer dictionary happened to
+ * find a break, and larger text made the misses obvious. The book already knows
+ * where its words end, so it marks each boundary with a zero-width space: an
+ * invisible, spaceless "you may break here" that keeps the break on a word.
+ */
+const KHMER_WORD_BREAK = "\u200B";
+
 /** How far a finger must move sideways before it is a page turn, not a tap. */
 const DRAG_START = 8;
 const TURN_AT = 60;
@@ -329,10 +341,9 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
         const index = spokenWordAt(s.sentence, elapsedMs, durationMs);
         setPlayingWord(index === null ? null : { sentence: s.sentence.id, index });
       });
+      // Every sentence is tried, whatever the last one reported. One sentence
+      // wrongly called a failure must never cost a child the rest of the page.
       spoke = spoke || played;
-      // A device that refused the first sentence will refuse the rest: say so
-      // once rather than working silently through the page.
-      if (!played) break;
     }
     if (run.current === mine && !spoke) setSilent(true);
     if (run.current === mine) {
@@ -408,19 +419,22 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
     </Sheet>
   );
   /*
-   * What went wrong with the sound, in words, on the page.
+   * What went wrong with the sound, for whoever is looking into it.
    *
-   * A phone has no tooltips: a `title` on a greyed-out speaker is a message
-   * nobody on a touch screen will ever read, which is how a book that would not
-   * read aloud on one family's phone looked like a button that did nothing. So
-   * the reader says it out loud, and says which of the three it is, because the
-   * answer to each is different.
+   * This goes to the console, not the page: the page belongs to a child reading
+   * a story, and "check the silent switch" is neither their problem nor their
+   * language. The three cases stay apart because the answer to each is
+   * different — a browser that cannot play the format, a recording that never
+   * arrived, and bytes the device would not play once it had them.
    */
   const trouble = !pageRecorded ? null
-    : pageAudio === "failed" && !audioSupported ? "This browser cannot play the recording. Try Chrome or Safari."
-    : pageAudio === "failed" ? "The recording did not download. Check the connection, then tap the speaker to try again."
-    : silent ? "This device would not play it. Turn the volume up and check the silent switch, then tap the speaker again."
+    : pageAudio === "failed" && !audioSupported ? "this browser cannot play AAC-in-MP4"
+    : pageAudio === "failed" ? "the recordings for this page did not download"
+    : silent ? "the device would not play a recording it has — a damaged clip, a muted device, or a tap that came too late to count as a gesture"
     : null;
+  useEffect(() => {
+    if (trouble) console.warn(`[koda-library] page ${pageRef.current} of “${book.title}” will not read aloud: ${trouble}`);
+  }, [trouble, book.title]);
 
   // While a sheet turns, two pages are on the table: the one lying flat beneath,
   // and the one in the air. Forward, the page in view is the one that lifts.
@@ -430,8 +444,7 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
   return (
     <UIReaderFrame
       contentRef={scrollEl}
-      toolbar={<>
-      <UIReaderToolbar
+      toolbar={<UIReaderToolbar
         onBack={onBack}
         onSmallerText={() => setTextStep(textStep - 1)}
         onLargerText={() => setTextStep(textStep + 1)}
@@ -447,11 +460,7 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
         } : undefined}
         dark={theme === "dark"}
         onToggleDark={toggleTheme}
-      />
-      {trouble && (
-        <p role="status" className="px-1 pb-2 text-xs font-bold text-rose-700 dark:text-rose-400">{trouble}</p>
-      )}
-      </>}
+      />}
       footer={<UIReaderPagination
         page={page}
         pageCount={pages.count}
@@ -620,7 +629,7 @@ const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top"
                 ))}
               </h2>
             )}
-            <p className={`m-0 ${type} text-pretty transition-[font-size] duration-200 ease-out motion-reduce:transition-none`} data-text-scale={scale} style={{ fontSize: `calc(${base} * ${scale})` }}>
+            <p className={`m-0 ${type} text-pretty [overflow-wrap:anywhere] transition-[font-size] duration-200 ease-out motion-reduce:transition-none`} data-text-scale={scale} style={{ fontSize: `calc(${base} * ${scale})` }}>
               {b.sentences.map((s, j) => (
                 <span key={s.sentence.id}>
                   <span
@@ -636,11 +645,11 @@ const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top"
                           speaking={playingWord?.sentence === s.sentence.id && playingWord.index === s.sentence.words.length - s.tokens.length + k}
                           onWord={onWord}
                         />
-                        {km || k === s.tokens.length - 1 ? "" : " "}
+                        {k === s.tokens.length - 1 ? "" : km ? KHMER_WORD_BREAK : " "}
                       </span>
                     ))}
                   </span>
-                  {km || j === b.sentences.length - 1 ? "" : " "}
+                  {j === b.sentences.length - 1 ? "" : km ? KHMER_WORD_BREAK : " "}
                 </span>
               ))}
             </p>

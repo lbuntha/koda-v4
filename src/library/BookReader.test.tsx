@@ -65,10 +65,11 @@ describe("a recording that did not arrive", () => {
     await waitFor(() => expect(voice.say).toHaveBeenCalled());
   });
 
-  it("says so on the page when the device refuses to play a recording it has", async () => {
-    // The clip is downloaded and ready; the browser simply will not play it —
-    // a tap that came too late to count as a gesture, or a device that blocks
-    // audio outright. Before, this was silence and a speaker that looked broken.
+  it("reports a refused recording to the console, and not to the child", async () => {
+    // The clip is downloaded and ready; the browser simply will not play it.
+    // Whoever is looking into it needs to know which of the three it was; the
+    // reader is a child with a story open, and none of it is their problem.
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     voice.sentenceSpeaks.mockReturnValue(true);
     voice.say.mockResolvedValue(false);
     render(<BookReader book={recorded()} preview onBack={() => {}} onReady={() => {}} />);
@@ -78,9 +79,26 @@ describe("a recording that did not arrive", () => {
     await waitFor(() => expect(play.hasAttribute("disabled")).toBe(false));
     await act(async () => { fireEvent.click(play); });
 
-    expect(screen.getByRole("status").textContent).toContain("silent switch");
-    // It gives up after the first sentence rather than working silently to the end.
-    expect(voice.say).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls.flat().join(" ")).toContain("would not play a recording it has");
+    expect(screen.queryByRole("status")).toBeNull();
+    warn.mockRestore();
+  });
+
+  it("reads every sentence on the page, even if one reports that it did not play", async () => {
+    // A clip pauses before it says it has ended, so a sentence that played can
+    // still report false. Whatever one sentence says, the rest of the page is
+    // still read: this is what stopped a book after its first sentence.
+    const firstPage = layoutBook(MARKET).story[0];
+    voice.sentenceSpeaks.mockReturnValue(true);
+    voice.say.mockResolvedValue(false);
+    render(<BookReader book={recorded()} preview onBack={() => {}} onReady={() => {}} />);
+    fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+
+    const play = screen.getByRole("button", { name: "Play page recording" });
+    await waitFor(() => expect(play.hasAttribute("disabled")).toBe(false));
+    await act(async () => { fireEvent.click(play); });
+
+    expect(voice.say).toHaveBeenCalledTimes(firstPage.length);
   });
 
   it("does not offer a retry a browser that cannot play the format could never win", async () => {
