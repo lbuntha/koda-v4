@@ -6,7 +6,7 @@ import { STARTER_PASSAGES } from "./data/starterPassages";
 
 const voice = vi.hoisted(() => ({
   sentenceSpeaks: vi.fn(() => false),
-  say: vi.fn(async (_text: string, _language?: string, _clipId?: string, _onTime?: (elapsedMs: number | null, durationMs?: number) => void) => {}),
+  say: vi.fn(async (_text: string, _language?: string, _clipId?: string, _onTime?: (elapsedMs: number | null, durationMs?: number) => void) => true),
   voiceStatus: vi.fn<() => "ok" | "off" | "no-voice">(() => "no-voice"),
 }));
 vi.mock("./voice", () => ({ canSpeak: () => false, bookSpeaks: () => false, stop: vi.fn(), ...voice }));
@@ -27,7 +27,7 @@ beforeEach(() => {
   voice.sentenceSpeaks.mockReset();
   voice.sentenceSpeaks.mockReturnValue(false);
   voice.say.mockReset();
-  voice.say.mockResolvedValue(undefined);
+  voice.say.mockResolvedValue(true);
   voice.voiceStatus.mockReset();
   voice.voiceStatus.mockReturnValue("no-voice");
   clips.prefetchClips.mockReset();
@@ -63,6 +63,24 @@ describe("a recording that did not arrive", () => {
 
     fireEvent.click(play);
     await waitFor(() => expect(voice.say).toHaveBeenCalled());
+  });
+
+  it("says so on the page when the device refuses to play a recording it has", async () => {
+    // The clip is downloaded and ready; the browser simply will not play it —
+    // a tap that came too late to count as a gesture, or a device that blocks
+    // audio outright. Before, this was silence and a speaker that looked broken.
+    voice.sentenceSpeaks.mockReturnValue(true);
+    voice.say.mockResolvedValue(false);
+    render(<BookReader book={recorded()} preview onBack={() => {}} onReady={() => {}} />);
+    fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+
+    const play = screen.getByRole("button", { name: "Play page recording" });
+    await waitFor(() => expect(play.hasAttribute("disabled")).toBe(false));
+    await act(async () => { fireEvent.click(play); });
+
+    expect(screen.getByRole("status").textContent).toContain("silent switch");
+    // It gives up after the first sentence rather than working silently to the end.
+    expect(voice.say).toHaveBeenCalledTimes(1);
   });
 
   it("does not offer a retry a browser that cannot play the format could never win", async () => {
@@ -142,6 +160,7 @@ describe("page recordings", () => {
     voice.say.mockImplementation(async (_text, _language, _clip, onTime) => {
       onTime?.(150, 1000);
       await new Promise<void>((resolve) => { finish = resolve; });
+      return true;
     });
 
     render(<BookReader book={recordedBook} preview onBack={() => {}} onReady={() => {}} />);

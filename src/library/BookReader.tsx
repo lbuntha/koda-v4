@@ -135,6 +135,8 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
   // Whether this browser can play the recording format at all — probed once a
   // page actually has recordings, never on a book without them.
   const [audioSupported, setAudioSupported] = useState(true);
+  // Set when a page was asked to read aloud and nothing came out of it.
+  const [silent, setSilent] = useState(false);
   const [peek, setPeek] = useState<string | null>(null);
   const [peekAnchor, setPeekAnchor] = useState<HTMLElement | null>(null);
   const [peekPosition, setPeekPosition] = useState<{ left: number; top: number; side: "top" | "bottom" | "left" | "right" } | null>(null);
@@ -197,6 +199,7 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
   const setPage = (p: number) => {
     pageRef.current = p;
     setPageState(p);
+    setSilent(false);
     if (scrollEl.current) scrollEl.current.scrollTop = 0;
     playSound("page");
   };
@@ -312,19 +315,26 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
     if (current < 1 || current > pages.story.length) return;
     const mine = ++run.current;
     setReading(true);
+    setSilent(false);
     setPeek(null);
     setPeekAnchor(null);
     setPeekPosition(null);
+    let spoke = false;
     for (const s of pages.story[current - 1]) {
       if (run.current !== mine) return;
       if (!s.sentence.audio) continue;
       setPlaying(s.sentence.id);
-      await say(s.sentence.text, book.language, s.sentence.audio, (elapsedMs, durationMs) => {
+      const played = await say(s.sentence.text, book.language, s.sentence.audio, (elapsedMs, durationMs) => {
         if (run.current !== mine || elapsedMs === null) return setPlayingWord(null);
         const index = spokenWordAt(s.sentence, elapsedMs, durationMs);
         setPlayingWord(index === null ? null : { sentence: s.sentence.id, index });
       });
+      spoke = spoke || played;
+      // A device that refused the first sentence will refuse the rest: say so
+      // once rather than working silently through the page.
+      if (!played) break;
     }
+    if (run.current === mine && !spoke) setSilent(true);
     if (run.current === mine) {
       setPlaying(null);
       setPlayingWord(null);
@@ -397,6 +407,21 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
       )}
     </Sheet>
   );
+  /*
+   * What went wrong with the sound, in words, on the page.
+   *
+   * A phone has no tooltips: a `title` on a greyed-out speaker is a message
+   * nobody on a touch screen will ever read, which is how a book that would not
+   * read aloud on one family's phone looked like a button that did nothing. So
+   * the reader says it out loud, and says which of the three it is, because the
+   * answer to each is different.
+   */
+  const trouble = !pageRecorded ? null
+    : pageAudio === "failed" && !audioSupported ? "This browser cannot play the recording. Try Chrome or Safari."
+    : pageAudio === "failed" ? "The recording did not download. Check the connection, then tap the speaker to try again."
+    : silent ? "This device would not play it. Turn the volume up and check the silent switch, then tap the speaker again."
+    : null;
+
   // While a sheet turns, two pages are on the table: the one lying flat beneath,
   // and the one in the air. Forward, the page in view is the one that lifts.
   const under = turning ? (turning.dir === 1 ? turning.to : turning.from) : page;
@@ -405,7 +430,8 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
   return (
     <UIReaderFrame
       contentRef={scrollEl}
-      toolbar={<UIReaderToolbar
+      toolbar={<>
+      <UIReaderToolbar
         onBack={onBack}
         onSmallerText={() => setTextStep(textStep - 1)}
         onLargerText={() => setTextStep(textStep + 1)}
@@ -421,7 +447,11 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
         } : undefined}
         dark={theme === "dark"}
         onToggleDark={toggleTheme}
-      />}
+      />
+      {trouble && (
+        <p role="status" className="px-1 pb-2 text-xs font-bold text-rose-700 dark:text-rose-400">{trouble}</p>
+      )}
+      </>}
       footer={<UIReaderPagination
         page={page}
         pageCount={pages.count}

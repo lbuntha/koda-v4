@@ -131,30 +131,36 @@ export const bookSpeaks = (book: Pick<Passage, "language" | "sentences">): boole
  * Say `text`. A book's own recording comes first when `clipId` is given; then the
  * voices below. Resolves when it has been said, or at once if it will not be.
  * Never rejects.
+ *
+ * Resolves `true` only when something actually played. A browser that refuses
+ * the recording — the tap came too late to count as a gesture, or the device
+ * will not play audio at all — hands back `false`, and so does a language this
+ * device has no voice for. Silence is the one thing a reader cannot see, so a
+ * page that asked to be read aloud and got nothing has to be able to say so.
  */
-export async function say(text: string, lang: Language, clipId?: string, onTime?: (elapsedMs: number | null, durationMs?: number) => void): Promise<void> {
-  if (!text || voiceFloorHeld()) return;
+export async function say(text: string, lang: Language, clipId?: string, onTime?: (elapsedMs: number | null, durationMs?: number) => void): Promise<boolean> {
+  if (!text || voiceFloorHeld()) return false;
   stop();
-  if (clipId && (await playRecording(clipId, onTime))) return;
-  if (!isVoiceEnabled()) return;
+  if (clipId && (await playRecording(clipId, onTime))) return true;
+  if (!isVoiceEnabled()) return false;
 
   let done!: () => void;
   const finished = new Promise<void>((resolve) => (done = resolve));
-  if (playClip(text, 1, done)) return finished;
+  if (playClip(text, 1, done)) return finished.then(() => true);
 
   if (lang === "km") {
     const v = deviceVoiceFor("km");
-    if (!v) return;
-    return new Promise<void>((resolve) => {
+    if (!v) return false;
+    return new Promise<boolean>((resolve) => {
       try {
         const u = new SpeechSynthesisUtterance(text);
         u.voice = v;
         u.lang = v.lang;
-        u.onend = () => resolve();
-        u.onerror = () => resolve();
+        u.onend = () => resolve(true);
+        u.onerror = () => resolve(false);
         window.speechSynthesis.speak(u);
       } catch {
-        resolve();
+        resolve(false);
       }
     });
   }
@@ -162,10 +168,10 @@ export async function say(text: string, lang: Language, clipId?: string, onTime?
   const audio = await serverVoice(text);
   if (audio) {
     const source = playBase64Pcm(audio);
-    if (source) return new Promise<void>((resolve) => (source.onended = () => resolve()));
+    if (source) return new Promise<boolean>((resolve) => (source.onended = () => resolve(true)));
   }
-  return new Promise<void>((resolve) => {
-    speakWebSpeech(text, 0.95, resolve);
+  return new Promise<boolean>((resolve) => {
+    speakWebSpeech(text, 0.95, () => resolve(true));
   });
 }
 

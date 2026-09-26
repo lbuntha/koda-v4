@@ -104,4 +104,4 @@ export function prefetchUnits(units: readonly string[]): void {
 }
 
 /** Say a unit's name: its recording, else the device's Khmer voice, else nothing. */
-export const sayUnit = (unit: string): Promise<void> => say(unitName(unit), "km", voices[unit]);
+export const sayUnit = (unit: string): Promise<boolean> => say(unitName(unit), "km", voices[unit]);
