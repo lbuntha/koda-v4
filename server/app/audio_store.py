@@ -19,6 +19,39 @@ from app.settings import settings
 CONTENT_TYPE = "audio/mp4"
 
 
+# How a sentence is stored, and why each number is the number it is.
+#
+# AAC in MP4 because every browser and phone plays it — the one format that
+# needs no fallback, which matters more here than any codec that would be
+# smaller. Opus would be roughly half this, but it only reached Safari in 17.5,
+# and a recording that is silent on an older iPhone is worse than one that is
+# larger on every phone.
+#
+# 32 kbps mono at 24 kHz is speech, not music: one voice, no instruments,
+# nothing above 12 kHz worth keeping. Measured over a real Khmer book, 34 clips
+# went from 1392 KB to 918 KB — a third smaller — and 24 kHz is what the
+# generated voice arrives at anyway, so those are resampled by nothing at all.
+BITRATE = "32k"
+SAMPLE_RATE = "24000"
+# The quiet after somebody stops speaking, cut by reversing the audio, taking
+# the silence off what is now the front, and reversing back. A tenth of a second
+# is kept so nothing ends abruptly, and the threshold is low enough that a soft
+# Khmer ending is speech rather than silence.
+#
+# The silence at the *start* is deliberately left alone, though it is the larger
+# of the two. A generated clip arrives with word cues — the timings that move the
+# highlight along the sentence as it is read — measured from the first sample.
+# Shortening the front shifts every one of them, and the highlight would drift
+# away from the voice. Measured over a real book, trimming both ends saved 3%
+# more than trimming the tail; a read-along that no longer follows the words is
+# not worth 3%.
+TRIM_SILENCE = (
+    "areverse,"
+    "silenceremove=start_periods=1:start_silence=0.1:start_threshold=-50dB:detection=peak,"
+    "areverse"
+)
+
+
 def _encode_m4a(data: bytes, mime: str) -> bytes:
     suffix = {
         "audio/wav": ".wav",
@@ -33,7 +66,12 @@ def _encode_m4a(data: bytes, mime: str) -> bytes:
         source.write_bytes(data)
         try:
             subprocess.run(
-                ["ffmpeg", "-y", "-loglevel", "error", "-i", str(source), "-vn", "-c:a", "aac", "-b:a", "48k", "-ac", "1", str(target)],
+                [
+                    "ffmpeg", "-y", "-loglevel", "error", "-i", str(source),
+                    "-vn", "-c:a", "aac", "-b:a", BITRATE, "-ac", "1", "-ar", SAMPLE_RATE,
+                    "-af", TRIM_SILENCE,
+                    str(target),
+                ],
                 check=True,
                 capture_output=True,
                 timeout=30,

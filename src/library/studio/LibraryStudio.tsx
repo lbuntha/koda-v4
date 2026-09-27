@@ -14,6 +14,7 @@ import { PicturePanel } from "./PicturePanel";
 import { UnitNamesPanel } from "./UnitNamesPanel";
 import { StudioHome } from "./StudioHome";
 import { useRecorder } from "./recorder";
+import { WordVoicePanel } from "./WordVoicePanel";
 import { Picture, PICTURE_KEYS } from "../Picture";
 import { photosOf } from "../photos";
 import { BookStore } from "../bookStore";
@@ -1049,6 +1050,14 @@ function VoiceStep({ draft, onEdit }: { draft: Draft; onEdit(d: Draft): void }) 
         ))}
       </ol>
       {!canRecord && <p className="text-xs text-muted">This browser cannot record from a microphone.</p>}
+      {/* Sentences are for reading the story aloud; these are for a child who
+          stops at one word. Both, not either — see WordVoicePanel. */}
+      <WordVoicePanel
+        draft={draft}
+        onEdit={onEdit}
+        generatorName={selectedVoiceCharacter.name}
+        generate={async (word) => (await geminiVoice(word, [word], draft.language, voiceCharacter)).blob}
+      />
     </div>
   );
 }
