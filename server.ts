@@ -1006,6 +1006,165 @@ app.post("/api/library/voice", async (req, res) => {
   }
 });
 
+/* -------------------------------------------------------------------------- */
+/* Vox — a second voice for library books                                      */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * A self-hosted text-to-speech service (an ElevenLabs-compatible API), for the
+ * voices Gemini does not have: a Khmer voice, a cloned teacher's voice.
+ *
+ * Both values come from the environment and nowhere else. The key is a bearer
+ * credential for a service somebody is paying for, and the address is often a
+ * temporary tunnel that changes — neither belongs in the code, and the browser
+ * is never told either: it asks this server, which asks Vox.
+ */
+const voxUrl = () => (process.env.VOX_API_URL ?? "").trim().replace(/\/+$/, "");
+const voxKey = () => (process.env.VOX_API_KEY ?? "").trim();
+/** Speech can take a while to make; a request that hangs for ever must not hold an author's screen. */
+const VOX_TIMEOUT_MS = 90_000;
+const VOX_VOICE_ID = /^[A-Za-z0-9-]{1,64}$/;
+
+/** Only an operator may make library audio, same as the Gemini voice. Answers whether to go on. */
+async function libraryOperatorOnly(req: express.Request, res: express.Response): Promise<boolean> {
+  const authorization = req.headers.authorization;
+  if (!authorization) {
+    res.status(401).json({ error: { code: "auth", message: "Sign in to record a book." } });
+    return false;
+  }
+  try {
+    const may = await fetch(`${API_URL}/v1/library/can-author`, { headers: { Authorization: authorization } });
+    if (!may.ok) {
+      res.status(may.status === 401 ? 401 : 403).json({ error: { code: "not_an_operator", message: "Only an operator can record library books." } });
+      return false;
+    }
+  } catch {
+    res.status(503).json({ error: { code: "api_unreachable", message: "The data service is not running." } });
+    return false;
+  }
+  if (!(await systemAllows("ai.libraryVoice", authorization))) {
+    res.status(503).json({ error: { code: "feature_disabled", message: "Voice for library books is switched off (ai.libraryVoice)." } });
+    return false;
+  }
+  return true;
+}
+
+/** Vox needs an address and a key; without both there is nothing to ask. Answers whether to go on. */
+function voxConfigured(res: express.Response): boolean {
+  if (voxUrl() && voxKey()) return true;
+  res.status(503).json({ error: { code: "vox_not_configured", message: "The Vox voice service is not set up (VOX_API_URL and VOX_API_KEY)." } });
+  return false;
+}
+
+/** The voices Vox has, trimmed to what the studio shows. */
+app.get("/api/library/voices", async (req, res) => {
+  if (!(await libraryOperatorOnly(req, res)) || !voxConfigured(res)) return;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 20_000);
+  try {
+    const reply = await fetch(`${voxUrl()}/v1/voices`, { headers: { "X-API-Key": voxKey() }, signal: controller.signal });
+    if (!reply.ok) return res.status(502).json({ error: { code: "vox_failed", message: `Vox answered ${reply.status}.` } });
+    const body = (await reply.json()) as { voices?: Array<Record<string, unknown>> };
+    const voices = (body.voices ?? []).flatMap((v) =>
+      typeof v.voice_id === "string" && VOX_VOICE_ID.test(v.voice_id)
+        ? [{
+            id: v.voice_id,
+            name: String(v.name ?? v.voice_id).slice(0, 80),
+            category: String(v.category ?? "").slice(0, 80),
+            description: String(v.description ?? "").slice(0, 240),
+          }]
+        : [],
+    );
+    res.json({ voices });
+  } catch (error: any) {
+    console.error("Error in /api/library/voices:", error);
+    res.status(502).json({ error: { code: "vox_unreachable", message: error?.name === "AbortError" ? "Vox took too long to answer." : "Vox could not be reached." } });
+  } finally {
+    clearTimeout(timer);
+  }
+});
+
+/** One line read in a Vox voice. Answers the WAV itself. */
+app.post("/api/library/voice/vox", async (req, res) => {
+  const text = String(req.body?.text ?? "").trim().slice(0, 400);
+  const voiceId = String(req.body?.voiceId ?? "");
+  if (!text) return res.status(400).json({ error: { code: "no_text", message: "Nothing to read." } });
+  if (!VOX_VOICE_ID.test(voiceId)) return res.status(400).json({ error: { code: "bad_voice", message: "Choose a voice." } });
+  if (!(await libraryOperatorOnly(req, res)) || !voxConfigured(res)) return;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), VOX_TIMEOUT_MS);
+  try {
+    const reply = await fetch(`${voxUrl()}/v1/text-to-speech/${encodeURIComponent(voiceId)}`, {
+      method: "POST",
+      headers: { "X-API-Key": voxKey(), "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+      signal: controller.signal,
+    });
+    if (!reply.ok) return res.status(502).json({ error: { code: "vox_failed", message: `Vox answered ${reply.status}. Try again.` } });
+    const audio = Buffer.from(await reply.arrayBuffer());
+    if (!audio.length) return res.status(502).json({ error: { code: "no_audio", message: "The voice returned no audio. Try again." } });
+    res.type(reply.headers.get("content-type") ?? "audio/wav").send(audio);
+  } catch (error: any) {
+    console.error("Error in /api/library/voice/vox:", error);
+    res.status(502).json({ error: { code: "vox_unreachable", message: error?.name === "AbortError" ? "Vox took too long. Try a shorter line." : "Vox could not be reached." } });
+  } finally {
+    clearTimeout(timer);
+  }
+});
+
+/**
+ * ChatGPT's voices, for a book.
+ *
+ * The key is the one the deployment already keeps for ChatGPT drawing and drafting
+ * — saved under Admin → API keys, or `OPENAI_API_KEY` — so an operator sets up
+ * one credential, not one per feature. The tone goes in `instructions`, a field
+ * of its own, because put in front of the text the model would read the stage
+ * direction aloud.
+ */
+const OPENAI_LIBRARY_VOICES = ["alloy", "ash", "ballad", "coral", "echo", "fable", "nova", "onyx", "sage", "shimmer", "verse", "marin", "cedar"];
+const OPENAI_LIBRARY_TIMEOUT_MS = 60_000;
+
+app.post("/api/library/voice/openai", async (req, res) => {
+  const text = String(req.body?.text ?? "").trim().slice(0, 400);
+  const language = req.body?.language === "km" ? "km" : "en";
+  const voice = String(req.body?.voice ?? "marin");
+  if (!text) return res.status(400).json({ error: { code: "no_text", message: "Nothing to read." } });
+  if (!OPENAI_LIBRARY_VOICES.includes(voice)) return res.status(400).json({ error: { code: "bad_voice", message: "Choose one of ChatGPT's voices." } });
+  if (!(await libraryOperatorOnly(req, res))) return;
+  const authorization = req.headers.authorization;
+  const key = (await systemApiKey(authorization, "ai.openaiApiKey")).key ?? process.env.OPENAI_API_KEY;
+  if (!key) return res.status(503).json(noKey("ChatGPT"));
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), OPENAI_LIBRARY_TIMEOUT_MS);
+  try {
+    const reply = await fetch("https://api.openai.com/v1/audio/speech", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: process.env.KODA_OPENAI_TTS_MODEL || "gpt-4o-mini-tts",
+        voice,
+        input: text,
+        instructions: `Read this ${language === "km" ? "Khmer" : "English"} sentence from a children's story aloud, warmly, slowly and clearly, exactly as written. Do not translate or add anything.`,
+        response_format: "wav",
+      }),
+      signal: controller.signal,
+    });
+    if (!reply.ok) {
+      // Say what OpenAI said: a bad key, an empty balance and a rate limit each have a different fix.
+      const detail = (await reply.text()).slice(0, 200);
+      return res.status(502).json({ error: { code: "openai_failed", message: `ChatGPT answered ${reply.status}. ${detail}` } });
+    }
+    const audio = Buffer.from(await reply.arrayBuffer());
+    if (!audio.length) return res.status(502).json({ error: { code: "no_audio", message: "The voice returned no audio. Try again." } });
+    res.type("audio/wav").send(audio);
+  } catch (error: any) {
+    console.error("Error in /api/library/voice/openai:", error);
+    res.status(502).json({ error: { code: "openai_unreachable", message: error?.name === "AbortError" ? "ChatGPT took too long. Try a shorter line." : "ChatGPT could not be reached." } });
+  } finally {
+    clearTimeout(timer);
+  }
+});
+
 app.post("/api/library/draft", async (req, res) => {
   const { provider: askedProvider, language, band, questionCounts, sentences, pictures, easyWords } = req.body ?? {};
   const authorization = req.headers.authorization;

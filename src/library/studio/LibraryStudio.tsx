@@ -15,6 +15,7 @@ import { UnitNamesPanel } from "./UnitNamesPanel";
 import { StudioHome } from "./StudioHome";
 import { useRecorder } from "./recorder";
 import { WordVoicePanel } from "./WordVoicePanel";
+import { OPENAI_VOICES, fetchVoxVoices, openaiVoice, orderedFor, voxVoice, type VoxVoice } from "../voxApi";
 import { Picture, PICTURE_KEYS } from "../Picture";
 import { photosOf } from "../photos";
 import { BookStore } from "../bookStore";
@@ -852,6 +853,26 @@ const VOICE_CHARACTERS: ReadonlyArray<{ id: VoiceCharacterId; name: string; tone
   { id: "ari", name: "Ari", tone: "Warm & friendly", initial: "A" },
 ];
 
+type VoiceSource = "gemini" | "vox" | "openai";
+const SOURCE_NAME: Record<VoiceSource, string> = { gemini: "Gemini", vox: "Vox", openai: "ChatGPT" };
+const OPENAI_VOICE_KEY = "koda_library_openai_voice_v1";
+const VOICE_SOURCE_KEY = "koda_library_voice_source_v1";
+const VOX_VOICE_KEY = "koda_library_vox_voice_v1";
+const remembered = (key: string): string | null => {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+const remember = (key: string, value: string) => {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    /* an authoring preference is optional */
+  }
+};
+
 function rememberedVoiceCharacter(): VoiceCharacterId {
   try {
     const saved = localStorage.getItem(VOICE_CHARACTER_KEY);
@@ -883,6 +904,17 @@ function VoiceStep({ draft, onEdit }: { draft: Draft; onEdit(d: Draft): void }) 
   const recorder = useRecorder();
   const [sizes, setSizes] = useState<Record<string, number>>({});
   const [voiceCharacter, setVoiceCharacter] = useState<VoiceCharacterId>(rememberedVoiceCharacter);
+  const [source, setSourceState] = useState<VoiceSource>(() => {
+    const saved = remembered(VOICE_SOURCE_KEY);
+    return saved === "vox" || saved === "openai" ? saved : "gemini";
+  });
+  const [openaiVoiceId, setOpenaiVoiceIdState] = useState(() => {
+    const saved = remembered(OPENAI_VOICE_KEY);
+    return OPENAI_VOICES.some((v) => v.id === saved) ? (saved as string) : OPENAI_VOICES[0].id;
+  });
+  const [voxVoices, setVoxVoices] = useState<VoxVoice[] | null>(null);
+  const [voxProblem, setVoxProblem] = useState("");
+  const [voxVoiceId, setVoxVoiceIdState] = useState(() => remembered(VOX_VOICE_KEY) ?? "");
   const canRecord = typeof navigator !== "undefined" && !!navigator.mediaDevices?.getUserMedia && typeof MediaRecorder !== "undefined";
   const recorded = draft.sentences.filter((s) => s.audio).length;
   const clipIds = [...new Set(draft.sentences.flatMap((s) => s.audio ? [s.audio] : []))];
@@ -890,6 +922,52 @@ function VoiceStep({ draft, onEdit }: { draft: Draft; onEdit(d: Draft): void }) 
   const totalBytes = clipIds.reduce((total, id) => total + (sizes[id] ?? 0), 0);
   const sizesReady = clipIds.every((id) => sizes[id] !== undefined);
   const selectedVoiceCharacter = VOICE_CHARACTERS.find((character) => character.id === voiceCharacter) ?? VOICE_CHARACTERS[0];
+
+  const setSource = (next: VoiceSource) => {
+    setSourceState(next);
+    remember(VOICE_SOURCE_KEY, next);
+  };
+  const chooseOpenaiVoice = (id: string) => {
+    setOpenaiVoiceIdState(id);
+    remember(OPENAI_VOICE_KEY, id);
+  };
+  const chooseVoxVoice = (id: string) => {
+    setVoxVoiceIdState(id);
+    remember(VOX_VOICE_KEY, id);
+  };
+  // Vox's voices are fetched when they are first wanted, not for every author who
+  // opens this step: it is another service, and it may be down or not set up.
+  useEffect(() => {
+    if (source !== "vox" || voxVoices !== null) return;
+    let live = true;
+    fetchVoxVoices()
+      .then((got) => {
+        if (!live) return;
+        setVoxVoices(got);
+        setVoxProblem("");
+      })
+      .catch((e: unknown) => {
+        if (live) setVoxProblem(e instanceof Error ? e.message : "The Vox voices could not be loaded.");
+      });
+    return () => { live = false; };
+  }, [source, voxVoices]);
+  const orderedVox = useMemo(() => orderedFor(voxVoices ?? [], draft.language), [voxVoices, draft.language]);
+  const chosenVox = orderedVox.find((v) => v.id === voxVoiceId) ?? orderedVox[0] ?? null;
+  const usingVox = source === "vox";
+  const usingOpenai = source === "openai";
+  /** The name on the buttons: whoever is going to read. */
+  const readerName = usingVox ? (chosenVox?.name ?? "Vox") : usingOpenai ? openaiVoiceId : selectedVoiceCharacter.name;
+  /**
+   * One line read aloud, by whichever source is chosen. The rest of the step asks
+   * this and does not care who answers. Vox and ChatGPT give no word cues, so a line they read
+   * highlights by word length as a hand-made recording does; Gemini's carry timings.
+   */
+  const generateLine = async (text: string, words: string[]): Promise<{ blob: Blob; cues: WordCue[] }> => {
+    if (usingOpenai) return { blob: await openaiVoice(text, openaiVoiceId, draft.language), cues: [] };
+    if (!usingVox) return geminiVoice(text, words, draft.language, voiceCharacter);
+    if (!chosenVox) throw new Error(voxProblem || "Choose a Vox voice first.");
+    return { blob: await voxVoice(text, chosenVox.id), cues: [] };
+  };
 
   const chooseVoiceCharacter = (character: VoiceCharacterId) => {
     setVoiceCharacter(character);
@@ -935,7 +1013,7 @@ function VoiceStep({ draft, onEdit }: { draft: Draft; onEdit(d: Draft): void }) 
       let next = draft;
       for (const s of draft.sentences) {
         if (s.audio) continue;
-        const generated = await geminiVoice(s.text, s.words, draft.language, voiceCharacter);
+        const generated = await generateLine(s.text, s.words);
         const clip = await uploadClip(generated.blob);
         setSizes((current) => ({ ...current, [clip.id]: clip.bytes }));
         next = {
@@ -966,9 +1044,60 @@ function VoiceStep({ draft, onEdit }: { draft: Draft; onEdit(d: Draft): void }) 
   return (
     <div className="grid gap-3">
       <p className="text-sm text-muted">
-        Choose a recorded or Gemini voice for each sentence. Saved audio works online or offline. Read appears only when every sentence has audio.
+        Choose a recorded or Gemini voice for each sentence, or make one with Vox or ChatGPT. Saved audio works online or offline. Read appears only when every sentence has audio.
       </p>
-      <fieldset className="rounded-2xl border border-line bg-surface p-3">
+      <div role="group" aria-label="Where a generated voice comes from" className="flex flex-wrap gap-2">
+        {(["gemini", "vox", "openai"] as const).map((k) => (
+          <button key={k} type="button" aria-pressed={source === k} disabled={busy !== null} onClick={() => setSource(k)}
+            className={`${quiet} ${source === k ? "border-[#534AB7] bg-[#F1EFFF] text-[#0E0B55]" : ""}`}>
+            {SOURCE_NAME[k]} voices
+          </button>
+        ))}
+      </div>
+      {usingOpenai && (
+        <fieldset className="rounded-2xl border border-line bg-surface p-3">
+          <legend className="koda-admin-card-title px-1">Choose a ChatGPT voice</legend>
+          <label className="grid gap-1.5">
+            <span className="koda-admin-label px-1">Voice</span>
+            <select value={openaiVoiceId} disabled={busy !== null} onChange={(e) => chooseOpenaiVoice(e.target.value)}
+              className="min-h-11 w-full rounded-xl border border-line bg-surface px-3 text-ink">
+              {OPENAI_VOICES.map((v) => (
+                <option key={v.id} value={v.id}>{v.id} — {v.tone}</option>
+              ))}
+            </select>
+          </label>
+          {draft.language === "km" && (
+            <p className="mt-2 px-1 text-xs text-muted">ChatGPT's Khmer is not as steady as its English. Generate one sentence and listen before you do the whole book.</p>
+          )}
+        </fieldset>
+      )}
+      {usingVox && (
+        <fieldset className="rounded-2xl border border-line bg-surface p-3">
+          <legend className="koda-admin-card-title px-1">Choose a Vox voice</legend>
+          {voxProblem ? (
+            <p role="alert" className="rounded-2xl bg-rose-50 px-3 py-2 text-sm font-bold text-rose-800 dark:bg-rose-950 dark:text-rose-200">{voxProblem}</p>
+          ) : voxVoices === null ? (
+            <p className="text-sm text-muted">Loading voices…</p>
+          ) : orderedVox.length === 0 ? (
+            <p className="text-sm text-muted">Vox has no voices yet.</p>
+          ) : (
+            <>
+              <label className="grid gap-1.5">
+                <span className="koda-admin-label px-1">Voice — those named for this book's language come first</span>
+                <select value={chosenVox?.id ?? ""} disabled={busy !== null} onChange={(e) => chooseVoxVoice(e.target.value)}
+                  className="min-h-11 w-full rounded-xl border border-line bg-surface px-3 text-ink">
+                  {orderedVox.map((v) => (
+                    <option key={v.id} value={v.id}>{v.name}{v.category ? ` — ${v.category}` : ""}</option>
+                  ))}
+                </select>
+              </label>
+              {chosenVox?.description && <p className="mt-2 px-1 text-xs text-muted">{chosenVox.description}</p>}
+              <p className="mt-2 px-1 text-xs text-muted">Listen to a line before you keep the whole book: generate one sentence, press play, then do the rest.</p>
+            </>
+          )}
+        </fieldset>
+      )}
+      <fieldset className={`rounded-2xl border border-line bg-surface p-3 ${usingVox || usingOpenai ? "hidden" : ""}`}>
         <legend className="koda-admin-card-title px-1">Choose a Gemini reader</legend>
         <p className="koda-admin-label mb-3 px-1">This character is used for each Gemini clip you generate.</p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -1005,7 +1134,7 @@ function VoiceStep({ draft, onEdit }: { draft: Draft; onEdit(d: Draft): void }) 
         {recorded > 0 && sizesReady && <span className="text-sm font-bold text-muted">{formatBytes(totalBytes)} stored</span>}
         <button type="button" className={quiet} disabled={busy !== null || recorded === draft.sentences.length} onClick={() => void allByAi()}>
           <Sparkles className="h-4 w-4" aria-hidden="true" />
-          {busy === "all" ? "Generating…" : `${selectedVoiceCharacter.name} voice for the rest`}
+          {busy === "all" ? "Generating…" : `${readerName} voice for the rest`}
         </button>
       </div>
       {err && <p role="alert" className="rounded-2xl bg-rose-50 px-3 py-2 text-sm font-bold text-rose-800 dark:bg-rose-950 dark:text-rose-200">{err}</p>}
@@ -1035,11 +1164,11 @@ function VoiceStep({ draft, onEdit }: { draft: Draft; onEdit(d: Draft): void }) 
                 <Mic className="h-4 w-4" aria-hidden="true" />{s.audio ? "Re-record" : "Record"}
               </button>
             ))}
-            <button type="button" className={quiet} disabled={busy !== null} aria-label={`Gemini voice for ${s.id}`} onClick={() => void run(s.id, async () => {
-              const generated = await geminiVoice(s.text, s.words, draft.language, voiceCharacter);
+            <button type="button" className={quiet} disabled={busy !== null} aria-label={`${SOURCE_NAME[source]} voice for ${s.id}`} onClick={() => void run(s.id, async () => {
+              const generated = await generateLine(s.text, s.words);
               await attach(s.id, generated.blob, generated.cues);
             })}>
-              <Sparkles className="h-4 w-4" aria-hidden="true" />{busy === s.id ? "…" : selectedVoiceCharacter.name}
+              <Sparkles className="h-4 w-4" aria-hidden="true" />{busy === s.id ? "…" : readerName}
             </button>
             {s.audio && (
               <button type="button" className={quiet} aria-label={`Remove the recording of ${s.id}`} onClick={() => onEdit({ ...draft, sentences: draft.sentences.map((x) => (x.id === s.id ? { ...x, audio: undefined, audioCues: undefined } : x)) })}>
@@ -1055,8 +1184,8 @@ function VoiceStep({ draft, onEdit }: { draft: Draft; onEdit(d: Draft): void }) 
       <WordVoicePanel
         draft={draft}
         onEdit={onEdit}
-        generatorName={selectedVoiceCharacter.name}
-        generate={async (word) => (await geminiVoice(word, [word], draft.language, voiceCharacter)).blob}
+        generatorName={readerName}
+        generate={async (word) => (await generateLine(word, [word])).blob}
       />
     </div>
   );
