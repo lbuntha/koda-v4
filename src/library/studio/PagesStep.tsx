@@ -127,7 +127,7 @@ function PageCard({ label, selected, onSelect, picture, how, place = "", text, k
     >
       <span className="block aspect-[16/10] w-full bg-play-sky">
         {picture ? (
-          <Picture name={picture} className="p-2" />
+          <Picture name={picture} className="p-2" whole={title} />
         ) : (
           <span className="grid h-full w-full place-items-center bg-surface-muted text-muted">
             <ImageOff className="h-6 w-6" aria-hidden="true" />

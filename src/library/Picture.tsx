@@ -87,6 +87,12 @@ export const localPicture = (key: string): string => LOCAL[key] ?? "";
 export const PICTURE_KEYS: readonly string[] = [...Object.keys(LOCAL).filter((k) => k !== "book"), "apple", "grape", "mango", "orange"].sort();
 
 /**
+ * `whole` shows a photo in full, uncropped, with the frame's tint filling
+ * whatever the photo's own shape leaves over. A photo is otherwise cropped to fill
+ * its frame, which is right for a picture on a page and wrong for a cover, where
+ * the whole picture is the point. A drawing is always shown whole unless `cover`
+ * says otherwise, so this only changes photos.
+ *
  * `cover` fills the frame edge to edge and trims what overflows, as a photo does,
  * instead of fitting the whole drawing inside it. Used for a picture across the
  * top of a page, where fitting left a drawing that is nearly square small in a
@@ -94,8 +100,8 @@ export const PICTURE_KEYS: readonly string[] = [...Object.keys(LOCAL).filter((k)
  * changed; the drawing is scaled to its width and centred, so the middle of a
  * drawing is what stays in view.
  */
-export function Picture({ name, label, className = "", cover = false }: { name: string; label?: string; className?: string; cover?: boolean | number }) {
-  if (isPhoto(name)) return <Photo name={name} label={label} className={className} />;
+export function Picture({ name, label, className = "", cover = false, whole = false }: { name: string; label?: string; className?: string; cover?: boolean | number; whole?: boolean }) {
+  if (isPhoto(name)) return <Photo name={name} label={label} className={className} whole={whole} />;
   const fallback = <SvgMarkup markup={LOCAL[name] ?? LOCAL.book} raw size="100%" cover={cover} />;
   return (
     <span role={label ? "img" : undefined} aria-label={label} aria-hidden={label ? undefined : true} className={`block h-full w-full ${className}`}>
@@ -117,7 +123,7 @@ const withoutPadding = (c: string) => c.replace(/(^|\s)(?:[a-z]+:)*p[xytrbl]?-\S
  * moment the URL is known, or the fade would run against a blank frame. A photo
  * already in hand skips the fade, so a page turned back to does not flicker.
  */
-function Photo({ name, label, className }: { name: string; label?: string; className: string }) {
+function Photo({ name, label, className, whole = false }: { name: string; label?: string; className: string; whole?: boolean }) {
   const [url, setUrl] = useState<string | null>(() => knownPhotoUrl(name));
   const [shown, setShown] = useState(() => knownPhotoUrl(name) !== null);
   const [failed, setFailed] = useState(false);
@@ -143,7 +149,7 @@ function Photo({ name, label, className }: { name: string; label?: string; class
           draggable={false}
           onLoad={() => setShown(true)}
           onError={() => setFailed(true)}
-          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ease-out motion-reduce:transition-none ${shown ? "opacity-100" : "opacity-0"}`}
+          className={`absolute inset-0 h-full w-full ${whole ? "object-contain" : "object-cover"} transition-opacity duration-300 ease-out motion-reduce:transition-none ${shown ? "opacity-100" : "opacity-0"}`}
         />
       ) : failed ? (
         <span className="block h-full w-full p-4"><SvgMarkup markup={LOCAL.book} raw size="100%" /></span>

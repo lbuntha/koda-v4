@@ -565,7 +565,7 @@ const TitlePage = memo(function TitlePage({ book, km, fit }: { book: Passage; km
   return (
     <div className="flex flex-1 flex-col" style={{ "--fit": fit } as CSSProperties}>
       <div className="relative min-h-56 flex-1 overflow-hidden rounded-3xl">
-        <Picture name={book.picture} label={book.title} className="absolute inset-0 h-full w-full p-6 sm:p-10" />
+        <Picture name={book.picture} label={book.title} className="absolute inset-0 h-full w-full p-6 sm:p-10" whole />
       </div>
       <div className="px-2 pb-2 pt-7 text-center">
         <h1 className={`font-bold leading-tight tracking-tight transition-[font-size] duration-200 ease-out motion-reduce:transition-none ${km ? `${KHMER} leading-snug` : SERIF}`} style={{ fontSize: "calc(clamp(1.75rem, 1.35rem + 1.8vw, 2.25rem) * var(--fit))" }}>{book.title}</h1>
