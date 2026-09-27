@@ -638,7 +638,7 @@ const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top"
     <div className="flex flex-1 flex-col" style={{ "--fit": fit, "--picture-max": PICTURE_MAX, "--picture-max-wide": PICTURE_MAX_WIDE, "--banner": ratioOf(BANNER), "--banner-ratio": BANNER.width / BANNER.height, "--portrait": ratioOf(PORTRAIT) } as CSSProperties}>
       <div data-picture-at={picture ? at : undefined} className={`flex gap-6 sm:gap-8 ${picture ? PLACE[at].page : "my-auto flex-col"} ${picture && at !== "top" ? "my-auto" : ""}`}>
       {picture && (
-        <div className={`overflow-hidden rounded-3xl transition-[max-height] duration-200 ease-out motion-reduce:transition-none ${PLACE[at].frame}`}>
+        <div className={`overflow-hidden rounded-lg transition-[max-height] duration-200 ease-out motion-reduce:transition-none ${PLACE[at].frame}`}>
           {/* Across the top or bottom the drawing fills the frame's width; beside the
               words it stays whole, since a side frame is tall and narrow. */}
           <Picture name={picture} className={at === "top" || at === "bottom" ? "h-full w-full" : "h-full w-full p-[4%]"} cover={at === "top" || at === "bottom" ? COVER_FROM : false} />
