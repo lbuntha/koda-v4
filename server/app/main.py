@@ -52,7 +52,7 @@ from app.routers import (
     system,
     tasks,
 )
-from app.settings import settings
+from app.settings import Settings, settings
 from app.skill_defaults import load_defaults as load_skill_defaults
 from app.system_defaults import DEFAULT_SETTINGS
 
@@ -61,11 +61,36 @@ log = logging.getLogger("koda.api")
 API_PREFIX = "/v1"
 
 
+def refuse_unsafe_deployment(cfg: Settings) -> None:
+    """
+    Stop a deployment that would run but not work.
+
+    Both of these are silent in their own way. A development secret in
+    production is a door left open that nothing reports; a missing audio bucket
+    writes every recording to the instance's own disk, where it dies with the
+    instance and was never visible to the other instances behind the same URL —
+    so a book reads aloud for whoever recorded it and is silent for every other
+    family, with nothing anywhere saying why. Neither is worth serving, and a
+    deployment that refuses to start says so where somebody will see it.
+
+    Development is exempt: there the folder is a real folder on a real disk.
+    """
+    if cfg.is_dev:
+        return
+    if cfg.jwt_secret.startswith("dev-only-change-me"):
+        raise RuntimeError("JWT_SECRET is still the development default — refusing to start.")
+    if not cfg.library_audio_bucket:
+        raise RuntimeError(
+            "LIBRARY_AUDIO_BUCKET is not set — refusing to start. "
+            "Book recordings would be written to this instance's own disk, "
+            "lost on the next deploy and invisible to every other instance."
+        )
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     cfg = settings()
-    if not cfg.is_dev and cfg.jwt_secret.startswith("dev-only-change-me"):
-        raise RuntimeError("JWT_SECRET is still the development default — refusing to start.")
+    refuse_unsafe_deployment(cfg)
 
     db = database.connect()
     await ensure_indexes(db)
