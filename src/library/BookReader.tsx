@@ -6,7 +6,7 @@ import { layoutBook, type SetSentence, type SetToken } from "./bookLayout";
 import { FIT_MAX, nextFit, wordsFit } from "./fitPage";
 import { FLAT, SPRING, TURNED, angularVelocity, castOf, completes, curlOf, dragAngle, shadeOf, type Dir } from "./pageTurn";
 import { Picture } from "./Picture";
-import { BANNER, PORTRAIT, ratioOf } from "./pictureShape";
+import { BANNER, PORTRAIT } from "./pictureShape";
 import { LibraryProgress } from "./progress";
 import { minutesToRead } from "./session";
 import { canSpeak, say, stop } from "./voice";
@@ -67,8 +67,20 @@ const readTextStep = (): number => {
   }
 };
 
-/** How tall a page's picture may stand on a phone, before the page's fit factor trims it. */
-const PICTURE_MAX = "30svh";
+/**
+ * How tall a page's picture may stand on a phone, before the page's fit factor
+ * trims it.
+ *
+ * Generous, because on a phone the picture is across the page rather than beside
+ * the words, and the height is what lets it reach the full width: a 3:4 portrait
+ * at the width of a 390pt phone is about 520pt tall, which only fits under a cap
+ * of roughly this size. A cap of 30svh held the same picture to a third of the
+ * screen's width, marooned in the middle of the page. A wide picture never comes
+ * near this — a 2:1 banner at full width is a quarter of the screen — so this
+ * only ever governs the tall ones, and the fit factor still shrinks the whole
+ * page when the words would not otherwise have room.
+ */
+const PICTURE_MAX = "65svh";
 /** The same, once picture and words sit side by side and the picture is the taller of the two. */
 const PICTURE_MAX_WIDE = "54svh";
 
@@ -586,24 +598,57 @@ const TitlePage = memo(function TitlePage({ book, km, fit }: { book: Passage; km
 // pictureShape.ts). On a phone everything is a banner; a side picture becomes a
 // portrait only where there is room beside the words.
 /**
- * A drawing across the top or bottom fills the page's width only when it is
- * already about the banner's shape: at least this wide for its height. The
- * banner is 2:1; a drawing 1.7:1 or wider loses a sliver at the edges, and one
- * closer to square is shown whole rather than losing its top and bottom.
+ * The frame a picture sits in, shaped by the picture itself.
+ *
+ * It used to be the other way round: the frame's shape came from where the
+ * picture sat and how wide the screen was — a banner above or below the words, a
+ * portrait beside them — and the picture was then cropped to fill whatever it
+ * landed in. That is fine while the two agree and silently destroys a page when
+ * they do not. A picture placed *beside* the words on a computer stacks *above*
+ * them on a phone, where the frame becomes a banner; a 3:4 portrait cropped into
+ * a 2:1 banner keeps the middle third of its height and throws away the rest,
+ * which is how a classroom of children became a strip of their shoulders.
+ *
+ * So the picture's own width ÷ height decides the frame, everywhere, and nothing
+ * is ever cropped: `--shape` is the reserved shape until the picture has loaded
+ * and its real one after. The page still decides how *big* it may be — the
+ * height caps are expressed as a width (cap × the shape) so a tall picture on a
+ * short screen gets narrower rather than squashed out of shape — and `contain`
+ * is the floor under all of it, so even a frame forced off-shape shows the whole
+ * picture rather than part of one.
  */
-const COVER_FROM = 1.7;
-const FRAME = "aspect-[var(--banner)] w-full max-h-[calc(var(--picture-max)*var(--fit)*var(--fit))] sm:max-h-[calc(var(--picture-max-wide)*var(--fit)*var(--fit))]";
-// Above or below the words the frame keeps its shape when the page is short: the
-// height cap becomes a width cap (height × the banner's ratio), so the frame gets
-// narrower and stays a banner. Capping the height alone leaves the width at 100%
-// and squashes it into a strip the picture was never drawn for.
-const BANNER_FRAME = "mx-auto aspect-[var(--banner)] w-full max-w-[calc(var(--picture-max)*var(--fit)*var(--fit)*var(--banner-ratio))] sm:max-w-[calc(var(--picture-max-wide)*var(--fit)*var(--fit)*var(--banner-ratio))]";
+const FRAME = [
+  "mx-auto w-full aspect-[var(--shape)]",
+  "max-h-[calc(var(--picture-max)*var(--fit)*var(--fit))]",
+  "sm:max-h-[calc(var(--picture-max-wide)*var(--fit)*var(--fit))]",
+  "max-w-[calc(var(--picture-max)*var(--fit)*var(--fit)*var(--shape))]",
+  "sm:max-w-[calc(var(--picture-max-wide)*var(--fit)*var(--fit)*var(--shape))]",
+].join(" ");
 const PLACE: Record<PicturePlace, { page: string; frame: string; words: string }> = {
-  top: { page: "flex-col", frame: BANNER_FRAME, words: "" },
-  bottom: { page: "flex-col-reverse", frame: BANNER_FRAME, words: "" },
-  left: { page: "flex-col sm:flex-row sm:items-center", frame: `${FRAME} sm:aspect-[var(--portrait)] sm:w-[44%] sm:shrink-0`, words: "sm:my-auto" },
-  right: { page: "flex-col-reverse sm:flex-row-reverse sm:items-center", frame: `${FRAME} sm:aspect-[var(--portrait)] sm:w-[44%] sm:shrink-0`, words: "sm:my-auto" },
+  top: { page: "flex-col", frame: FRAME, words: "" },
+  bottom: { page: "flex-col-reverse", frame: FRAME, words: "" },
+  left: { page: "flex-col sm:flex-row sm:items-center", frame: `${FRAME} sm:w-[44%] sm:shrink-0`, words: "sm:my-auto" },
+  right: { page: "flex-col-reverse sm:flex-row-reverse sm:items-center", frame: `${FRAME} sm:w-[44%] sm:shrink-0`, words: "sm:my-auto" },
 };
+
+/**
+ * What a picture's shape is taken to be before the picture itself can say.
+ *
+ * The shape a page reserves (see pictureShape.ts), which is what every picture
+ * made in the studio is cropped to — so for those this is already right and the
+ * page never moves. An older picture that is some other shape corrects it the
+ * moment it loads.
+ */
+const reservedShape = (at: PicturePlace): number =>
+  at === "left" || at === "right" ? PORTRAIT.width / PORTRAIT.height : BANNER.width / BANNER.height;
+
+/**
+ * A picture's shape, remembered for as long as the app is open.
+ *
+ * A page turned back to should not move about while its picture loads a second
+ * time, and every page of a book asks about the same handful of pictures.
+ */
+const shapes = new Map<string, number>();
 
 const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top", scale, fit, playing, playingWord, peek, onWord, end }: {
   book: Passage;
@@ -623,6 +668,24 @@ const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top"
   end: boolean;
 }) {
   const km = book.language === "km";
+  /*
+   * The picture's own shape: what it was drawn to until it says otherwise.
+   *
+   * Worked out while rendering and kept against the picture it belongs to, not
+   * held in state and corrected afterwards. A page turn changes the picture and
+   * the shape in the same breath, and a shape that arrived a render late showed
+   * the new picture in the old one's frame for a moment — a visible jump on
+   * every turn between a tall picture and a wide one.
+   */
+  const [learned, setLearned] = useState<{ of: string; ratio: number } | null>(null);
+  const shape = (learned?.of === picture ? learned.ratio : null)
+    ?? (picture ? shapes.get(picture) : undefined)
+    ?? reservedShape(at);
+  const learnShape = useCallback((ratio: number) => {
+    if (!picture) return;
+    shapes.set(picture, ratio);
+    setLearned({ of: picture, ratio });
+  }, [picture]);
   // Sentences run on as one paragraph, as in a book; a heading starts a new one.
   const blocks: Array<{ heading: string | null; sentences: SetSentence[] }> = [];
   for (const s of sentences) {
@@ -635,13 +698,14 @@ const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top"
   const type = km ? `${KHMER} leading-[2.1]` : `${SERIF} leading-[1.7]`;
 
   return (
-    <div className="flex flex-1 flex-col" style={{ "--fit": fit, "--picture-max": PICTURE_MAX, "--picture-max-wide": PICTURE_MAX_WIDE, "--banner": ratioOf(BANNER), "--banner-ratio": BANNER.width / BANNER.height, "--portrait": ratioOf(PORTRAIT) } as CSSProperties}>
+    <div className="flex flex-1 flex-col" style={{ "--fit": fit, "--picture-max": PICTURE_MAX, "--picture-max-wide": PICTURE_MAX_WIDE, "--shape": shape } as CSSProperties}>
       <div data-picture-at={picture ? at : undefined} className={`flex gap-6 sm:gap-8 ${picture ? PLACE[at].page : "my-auto flex-col"} ${picture && at !== "top" ? "my-auto" : ""}`}>
       {picture && (
         <div className={`overflow-hidden rounded-lg transition-[max-height] duration-200 ease-out motion-reduce:transition-none ${PLACE[at].frame}`}>
-          {/* Across the top or bottom the drawing fills the frame's width; beside the
-              words it stays whole, since a side frame is tall and narrow. */}
-          <Picture name={picture} className={at === "top" || at === "bottom" ? "h-full w-full" : "h-full w-full p-[4%]"} cover={at === "top" || at === "bottom" ? COVER_FROM : false} />
+          {/* The frame is already this picture's shape, so nothing is cropped
+              and nothing is letterboxed; `whole` only matters where a height cap
+              has forced the frame off-shape. */}
+          <Picture name={picture} className="h-full w-full" whole onRatio={learnShape} />
         </div>
       )}
       <div className={`mx-auto grid w-full max-w-[34em] gap-6 px-1 ${picture ? PLACE[at].words : ""}`}>

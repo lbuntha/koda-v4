@@ -105,6 +105,11 @@ export const PICTURE_KEYS: readonly string[] = [...Object.keys(LOCAL).filter((k)
  * fixing it only by removing the losing side of the conflict, not by changing
  * anything about the numbers.
  *
+ * `onRatio` reports the picture's own width ÷ height once it is known — the
+ * photo's natural size, or a drawing's viewBox — so a caller can shape a frame
+ * around the picture rather than crop the picture to fit a frame it was never
+ * made for.
+ *
  * `whole` shows a photo in full, uncropped, with the frame's tint filling
  * whatever the photo's own shape leaves over. A photo is otherwise cropped to fill
  * its frame, which is right for a picture on a page and wrong for a cover, where
@@ -118,12 +123,12 @@ export const PICTURE_KEYS: readonly string[] = [...Object.keys(LOCAL).filter((k)
  * changed; the drawing is scaled to its width and centred, so the middle of a
  * drawing is what stays in view.
  */
-export function Picture({ name, label, className = "", cover = false, whole = false, fill = false }: { name: string; label?: string; className?: string; cover?: boolean | number; whole?: boolean; fill?: boolean }) {
-  if (isPhoto(name)) return <Photo name={name} label={label} className={className} whole={whole} fill={fill} />;
-  const fallback = <SvgMarkup markup={LOCAL[name] ?? LOCAL.book} raw size="100%" cover={cover} />;
+export function Picture({ name, label, className = "", cover = false, whole = false, fill = false, onRatio }: { name: string; label?: string; className?: string; cover?: boolean | number; whole?: boolean; fill?: boolean; onRatio?(ratio: number): void }) {
+  if (isPhoto(name)) return <Photo name={name} label={label} className={className} whole={whole} fill={fill} onRatio={onRatio} />;
+  const fallback = <SvgMarkup markup={LOCAL[name] ?? LOCAL.book} raw size="100%" cover={cover} onRatio={onRatio} />;
   return (
     <span role={label ? "img" : undefined} aria-label={label} aria-hidden={label ? undefined : true} className={`block ${fill ? "absolute inset-0" : "h-full w-full"} ${className}`}>
-      <SvgAsset id={name} size="100%" fallback={fallback} cover={cover} />
+      <SvgAsset id={name} size="100%" fallback={fallback} cover={cover} onRatio={onRatio} />
     </span>
   );
 }
@@ -141,7 +146,7 @@ const withoutPadding = (c: string) => c.replace(/(^|\s)(?:[a-z]+:)*p[xytrbl]?-\S
  * moment the URL is known, or the fade would run against a blank frame. A photo
  * already in hand skips the fade, so a page turned back to does not flicker.
  */
-function Photo({ name, label, className, whole = false, fill = false }: { name: string; label?: string; className: string; whole?: boolean; fill?: boolean }) {
+function Photo({ name, label, className, whole = false, fill = false, onRatio }: { name: string; label?: string; className: string; whole?: boolean; fill?: boolean; onRatio?(ratio: number): void }) {
   const [url, setUrl] = useState<string | null>(() => knownPhotoUrl(name));
   const [shown, setShown] = useState(() => knownPhotoUrl(name) !== null);
   const [failed, setFailed] = useState(false);
@@ -165,7 +170,11 @@ function Photo({ name, label, className, whole = false, fill = false }: { name: 
           src={url}
           alt=""
           draggable={false}
-          onLoad={() => setShown(true)}
+          onLoad={(e) => {
+            setShown(true);
+            const { naturalWidth, naturalHeight } = e.currentTarget;
+            if (naturalWidth > 0 && naturalHeight > 0) onRatio?.(naturalWidth / naturalHeight);
+          }}
           onError={() => setFailed(true)}
           className={`absolute inset-0 h-full w-full ${whole ? "object-contain" : "object-cover"} transition-opacity duration-300 ease-out motion-reduce:transition-none ${shown ? "opacity-100" : "opacity-0"}`}
         />

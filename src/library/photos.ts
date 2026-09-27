@@ -19,8 +19,35 @@ import type { Passage } from "./data/passage";
 
 export const PHOTO_PREFIX = "photo-";
 const CACHE = "koda-library-photos-v1";
-const LONG_SIDE = 1600;
-const QUALITY = 0.85;
+/**
+ * How big a stored photo is, and how it is encoded.
+ *
+ * Both measured against a real book's pictures rather than chosen by feel. A
+ * page's picture is never drawn wider than the reader itself — about 400pt
+ * across a phone, 700 beside the words on a computer — so 1200 covers a phone at
+ * three times the pixel density and a computer at nearly two, and 1600 was
+ * paying for detail no screen ever showed. On one book's photographs that alone
+ * took a 373 KB picture to 217 KB.
+ *
+ * WebP takes it to 178 KB — less than half — for the same picture at the same
+ * size. It is not assumed to exist: both encodings are made and the smaller one
+ * that is genuinely what it claims to be wins, so a browser that quietly answers
+ * a WebP request with a PNG (which is what the standard says it may do) cannot
+ * make a book's pictures *larger* without anybody noticing.
+ */
+const LONG_SIDE = 1200;
+const QUALITY = 0.82;
+/** How long one photo may take before the device gives up on it. */
+const PHOTO_TIMEOUT_MS = 20_000;
+/** How many are asked for at once. A phone on a weak link does worse with more. */
+const AT_A_TIME = 3;
+/** How many times a photo is asked for before it is left for the next visit. */
+const ATTEMPTS = 3;
+/** The wait before asking again, doubling each time. */
+const RETRY_BACKOFF_MS = 400;
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+/** A device that knows it is offline says so; one that does not know is assumed online. */
+const offline = (): boolean => typeof navigator !== "undefined" && navigator.onLine === false;
 
 const urls = new Map<string, string>();
 const pending = new Map<string, Promise<string | null>>();
@@ -48,6 +75,34 @@ async function toCache(id: string, blob: Blob) {
   }
 }
 
+/**
+ * One attempt at the network, with a deadline.
+ *
+ * The answer says whether asking again is worth anything: a dropped connection
+ * or a server having a moment is, a photo the server says it does not have is
+ * not. The same rule the recordings follow, for the same reason — this app is
+ * used on a connection that drops, and a request with no deadline leaves a page
+ * waiting on it for ever.
+ */
+async function download(id: string): Promise<{ blob: Blob } | "gone" | "again"> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), PHOTO_TIMEOUT_MS);
+  try {
+    const token = await accessToken();
+    const res = await fetch(`${API_BASE}/library/images/${encodeURIComponent(id)}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      signal: controller.signal,
+    });
+    if (!res.ok) return res.status >= 500 ? "again" : "gone";
+    const blob = await res.blob();
+    return blob.size > 0 ? { blob } : "gone";
+  } catch {
+    return "again";
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 /** A displayable URL for a photo key, or null if it is not reachable now. */
 export function photoUrl(key: string): Promise<string | null> {
   const id = photoId(key);
@@ -58,15 +113,17 @@ export function photoUrl(key: string): Promise<string | null> {
   const job = (async () => {
     let blob = await fromCache(id);
     if (!blob) {
-      try {
-        const token = await accessToken();
-        const res = await fetch(`${API_BASE}/library/images/${encodeURIComponent(id)}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
-        if (!res.ok) return null;
-        blob = await res.blob();
-        await toCache(id, blob);
-      } catch {
-        return null;
+      for (let attempt = 0; attempt < ATTEMPTS && !blob; attempt++) {
+        if (attempt > 0) {
+          if (offline()) break;
+          await sleep(RETRY_BACKOFF_MS * 2 ** (attempt - 1));
+        }
+        const got = await download(id);
+        if (got === "gone") return null;
+        if (got !== "again") blob = got.blob;
       }
+      if (!blob) return null;
+      await toCache(id, blob);
     }
     const url = URL.createObjectURL(blob);
     urls.set(id, url);
@@ -74,6 +131,12 @@ export function photoUrl(key: string): Promise<string | null> {
   })().finally(() => pending.delete(id));
   pending.set(id, job);
   return job;
+}
+
+/** Whether a photo is already on this device — in hand, or saved from a past visit. */
+export async function photoSaved(key: string): Promise<boolean> {
+  const id = photoId(key);
+  return urls.has(id) || (await fromCache(id)) !== null;
 }
 
 /** A photo URL already in memory, for a first render without a flash. */
@@ -93,17 +156,33 @@ type PhotoHolder = Pick<Passage, "picture" | "sentences"> & Partial<Pick<Passage
 export const photosOf = (p: PhotoHolder): string[] =>
   [...new Set([p.picture, ...p.sentences.map((s) => s.picture), ...Object.values(p.pictures ?? {})].filter(isPhoto))];
 
-/** Fetch a book's photos now, so it shows them offline later. */
-export async function prefetchPhotos(p: PhotoHolder): Promise<{ ready: number; total: number }> {
+/**
+ * Fetch a book's photos now, so it shows them offline later.
+ *
+ * A few at a time, in the order the book uses them, so the cover and the first
+ * page are on the device while the last page is still coming — and so a phone is
+ * not asked to hold a dozen downloads open at once on a link that struggles with
+ * three. `onProgress` is called as each one lands.
+ */
+export async function prefetchPhotos(p: PhotoHolder, onProgress?: (p: { ready: number; total: number }) => void): Promise<{ ready: number; total: number }> {
   const keys = photosOf(p);
-  const got = await Promise.all(keys.map((k) => photoUrl(k)));
-  return { ready: got.filter(Boolean).length, total: keys.length };
+  const total = keys.length;
+  let ready = 0;
+  let next = 0;
+  const worker = async () => {
+    while (next < keys.length) {
+      if (await photoUrl(keys[next++])) ready++;
+      onProgress?.({ ready, total });
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(AT_A_TIME, total) }, worker));
+  return { ready, total };
 }
 
 /** The file types an author may choose. HEIC and friends are shrunk to JPEG where the browser can read them. */
 export const PHOTO_ACCEPT = "image/jpeg,image/png,image/webp,image/heic,image/heif";
 
-/** Shrink a photo to LONG_SIDE and re-save it as JPEG, upright. */
+/** Shrink a photo to LONG_SIDE and re-encode it as small as it will honestly go, upright. */
 export async function shrinkPhoto(file: Blob): Promise<Blob> {
   const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
   const scale = Math.min(1, LONG_SIDE / Math.max(bitmap.width, bitmap.height));
@@ -118,9 +197,32 @@ export async function shrinkPhoto(file: Blob): Promise<Blob> {
   ctx.fillRect(0, 0, w, h);
   ctx.drawImage(bitmap, 0, 0, w, h);
   bitmap.close?.();
-  const out = await new Promise<Blob | null>((ok) => canvas.toBlob(ok, "image/jpeg", QUALITY));
-  if (!out) throw new Error("The photo could not be prepared.");
-  return out;
+  return smallestOf(canvas);
+}
+
+/**
+ * The smallest honest encoding of what is on the canvas.
+ *
+ * A browser asked for a format it cannot write does not say so — the standard
+ * has it quietly answer with a PNG instead, which for a photograph is several
+ * times *larger* than the JPEG it replaced. So neither format is assumed: both
+ * are written, anything that came back as something other than what was asked
+ * for is discarded, and the smaller of what remains wins. The cost is one extra
+ * encode on the author's own machine; what it buys is that no child ever
+ * downloads a PNG of a photograph because their author's browser was older than
+ * the code that chose the format for them.
+ */
+async function smallestOf(canvas: HTMLCanvasElement): Promise<Blob> {
+  const encode = (type: string) =>
+    new Promise<Blob | null>((ok) => canvas.toBlob(ok, type, QUALITY)).then((blob) =>
+      blob && blob.type === type && blob.size > 0 ? blob : null,
+    );
+  const candidates = (await Promise.all([encode("image/webp"), encode("image/jpeg")])).filter(
+    (blob): blob is Blob => blob !== null,
+  );
+  const best = candidates.sort((a, b) => a.size - b.size)[0];
+  if (!best) throw new Error("The photo could not be prepared.");
+  return best;
 }
 
 /** Shrink and upload a photo. Authors only; the server checks. Resolves to its picture key. */

@@ -42,6 +42,12 @@ interface SvgMarkupProps {
    * frame's shape fills it.
    */
   cover?: boolean | number;
+  /**
+   * Told the artwork's own width ÷ height, once it is known, so a caller can
+   * shape a frame around the picture instead of cropping the picture to fit a
+   * frame. Never called for artwork whose viewBox cannot be read.
+   */
+  onRatio?(ratio: number): void;
 }
 
 /** The artwork's width ÷ height, from its viewBox; null when it has none that can be read. */
@@ -83,6 +89,7 @@ export const SvgMarkup: React.FC<SvgMarkupProps> = ({
   fallback = null,
   raw = false,
   cover = false,
+  onRatio,
 }) => {
   const scope = useId();
 
@@ -97,6 +104,11 @@ export const SvgMarkup: React.FC<SvgMarkupProps> = ({
     const aspect = aspectOfViewBox(safe);
     return aspect !== null && aspect >= cover ? withCoverFit(safe) : safe;
   }, [markup, raw, scope, cover]);
+
+  const ratio = useMemo(() => (safeMarkup ? aspectOfViewBox(safeMarkup) : null), [safeMarkup]);
+  useEffect(() => {
+    if (ratio !== null) onRatio?.(ratio);
+  }, [ratio, onRatio]);
 
   if (!safeMarkup) return <>{fallback}</>;
 
