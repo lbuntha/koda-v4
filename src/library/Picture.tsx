@@ -87,6 +87,24 @@ export const localPicture = (key: string): string => LOCAL[key] ?? "";
 export const PICTURE_KEYS: readonly string[] = [...Object.keys(LOCAL).filter((k) => k !== "book"), "apple", "grape", "mango", "orange"].sort();
 
 /**
+ * `fill` makes the picture position itself with `absolute inset-0` against its
+ * own parent, instead of the usual `h-full w-full` (a normal-flow box that fills
+ * a parent already sized by CSS). Only the cover needs this: its frame carries
+ * padding on the picture itself, and `absolute inset-0` is what lets a box fill
+ * a positioned parent while its own padding still insets the content.
+ *
+ * The two must never both be present. `h-full`/`w-full` need the parent's
+ * *percentage* height to resolve, which the CSS spec only guarantees when the
+ * parent's height is a literal, specified length — a flex-grown or grid-stretched
+ * height (exactly what a book page's height is, several layers deep) does not
+ * count, however solid the number looks once rendered. `inset-0` sizes from the
+ * parent's actual layout box directly and has no such condition, so `fill` is
+ * the one that keeps working through a page's real layout — confirmed by
+ * reproducing the cover blanking out with the exact ancestor chain a book page
+ * has (a `grid` with no declared columns/rows, over nested flex columns) and
+ * fixing it only by removing the losing side of the conflict, not by changing
+ * anything about the numbers.
+ *
  * `whole` shows a photo in full, uncropped, with the frame's tint filling
  * whatever the photo's own shape leaves over. A photo is otherwise cropped to fill
  * its frame, which is right for a picture on a page and wrong for a cover, where
@@ -100,11 +118,11 @@ export const PICTURE_KEYS: readonly string[] = [...Object.keys(LOCAL).filter((k)
  * changed; the drawing is scaled to its width and centred, so the middle of a
  * drawing is what stays in view.
  */
-export function Picture({ name, label, className = "", cover = false, whole = false }: { name: string; label?: string; className?: string; cover?: boolean | number; whole?: boolean }) {
-  if (isPhoto(name)) return <Photo name={name} label={label} className={className} whole={whole} />;
+export function Picture({ name, label, className = "", cover = false, whole = false, fill = false }: { name: string; label?: string; className?: string; cover?: boolean | number; whole?: boolean; fill?: boolean }) {
+  if (isPhoto(name)) return <Photo name={name} label={label} className={className} whole={whole} fill={fill} />;
   const fallback = <SvgMarkup markup={LOCAL[name] ?? LOCAL.book} raw size="100%" cover={cover} />;
   return (
-    <span role={label ? "img" : undefined} aria-label={label} aria-hidden={label ? undefined : true} className={`block h-full w-full ${className}`}>
+    <span role={label ? "img" : undefined} aria-label={label} aria-hidden={label ? undefined : true} className={`block ${fill ? "absolute inset-0" : "h-full w-full"} ${className}`}>
       <SvgAsset id={name} size="100%" fallback={fallback} cover={cover} />
     </span>
   );
@@ -123,7 +141,7 @@ const withoutPadding = (c: string) => c.replace(/(^|\s)(?:[a-z]+:)*p[xytrbl]?-\S
  * moment the URL is known, or the fade would run against a blank frame. A photo
  * already in hand skips the fade, so a page turned back to does not flicker.
  */
-function Photo({ name, label, className, whole = false }: { name: string; label?: string; className: string; whole?: boolean }) {
+function Photo({ name, label, className, whole = false, fill = false }: { name: string; label?: string; className: string; whole?: boolean; fill?: boolean }) {
   const [url, setUrl] = useState<string | null>(() => knownPhotoUrl(name));
   const [shown, setShown] = useState(() => knownPhotoUrl(name) !== null);
   const [failed, setFailed] = useState(false);
@@ -141,7 +159,7 @@ function Photo({ name, label, className, whole = false }: { name: string; label?
     };
   }, [name]);
   return (
-    <span role={label ? "img" : undefined} aria-label={label} aria-hidden={label ? undefined : true} className={`relative block h-full w-full overflow-hidden ${!shown && !failed ? "bg-surface-muted" : ""} ${withoutPadding(className)}`}>
+    <span role={label ? "img" : undefined} aria-label={label} aria-hidden={label ? undefined : true} className={`block overflow-hidden ${fill ? "absolute inset-0" : "relative h-full w-full"} ${!shown && !failed ? "bg-surface-muted" : ""} ${withoutPadding(className)}`}>
       {url && !failed ? (
         <img
           src={url}
