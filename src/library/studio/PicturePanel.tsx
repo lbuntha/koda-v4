@@ -10,6 +10,7 @@ import { inspectSvgMarkup, preprocessSvgMarkup } from "../../utils/svg";
 import { playSound } from "../../utils/audio";
 import { isPhoto, PHOTO_ACCEPT, uploadPhoto } from "../photos";
 import { describeShape, type PictureKind } from "../pictureShape";
+import { cropToShape, generateBookImage, type ImageProvider } from "../imageGenerationApi";
 import { Picture, PICTURE_KEYS } from "../Picture";
 
 /**
@@ -54,7 +55,7 @@ const PLACE_ICON = { top: PanelTop, bottom: PanelBottom, left: PanelLeft, right:
 const collectionName = (id: string) =>
   id === UNCATEGORISED ? "Uncategorised" : id.replace(/-/g, " ").replace(/^./, (c) => c.toUpperCase());
 
-type Way = "library" | "draw" | "upload";
+type Way = "library" | "draw" | "photo" | "upload";
 
 /** A picture being made, before it is filed. The same three things the Art page's editor asks for. */
 interface Draft {
@@ -145,7 +146,7 @@ export function PicturePanel({ title, note, chosen, how, promptSeed, suggested, 
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-line px-5 py-3.5 rail:px-6 rail:py-4">
           <div className="min-w-0">
             <h3 className="truncate font-extrabold text-ink">{title}</h3>
-            <p className="text-xs text-muted">{note ?? "Pick one from the library, draw a new one, or upload a photo."}</p>
+            <p className="text-xs text-muted">{note ?? "Pick one from the library, draw a new one, make a photo, or upload one."}</p>
           </div>
           <button type="button" onClick={onClose} aria-label="Close"
             className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted transition hover:bg-surface-muted hover:text-ink">
@@ -193,7 +194,7 @@ export function PicturePanel({ title, note, chosen, how, promptSeed, suggested, 
         )}
 
         <div className="flex shrink-0 gap-2 border-b border-line px-5 py-3 rail:px-6" role="group" aria-label="Where the picture comes from">
-          {([["library", "Library"], ["draw", "Draw one"], ["upload", "Upload"]] as Array<[Way, string]>).map(([id, name]) => (
+          {([["library", "Library"], ["draw", "Draw one"], ["photo", "AI photo"], ["upload", "Upload"]] as Array<[Way, string]>).map(([id, name]) => (
             <button key={id} type="button" onClick={() => setWay(id)} aria-pressed={way === id}
               className={`${chip} ${way === id ? "border-indigo-600 bg-indigo-600 text-white" : "border-line text-muted"}`}>
               {name}
@@ -218,6 +219,7 @@ export function PicturePanel({ title, note, chosen, how, promptSeed, suggested, 
             />
           )}
           {way === "draw" && <DrawWay library={library} draft={draft} setDraft={setDraft} onUsed={use} />}
+          {way === "photo" && <PhotoWay onUsed={use} />}
           {way === "upload" && <UploadWay onUsed={use} />}
         </div>
       </div>
@@ -556,6 +558,127 @@ function UploadWay({ onUsed }: { onUsed(key: string): void }) {
         JPEG, PNG or WebP. Shrunk to 1600px before it is sent, and kept with this book. A photo is trimmed to fit its place, so shoot it at{" "}
         {describeShape("banner")} for the top or bottom of a page, or {describeShape("portrait")} to sit beside the words.
       </p>
+      {error && <p role="alert" className="rounded-xl bg-rose-50 px-3 py-2 text-sm font-bold text-rose-800 dark:bg-rose-950 dark:text-rose-200">{error}</p>}
+    </div>
+  );
+}
+
+/**
+ * A real (photographic or painted) picture, made to order.
+ *
+ * Distinct from "Draw one": that makes a flat vector icon and files it in the
+ * shared art library under a name, because a house-style icon is meant to be
+ * found and reused across books. This makes a one-off photo for this book
+ * alone, so it takes the *photo* path — `uploadPhoto` — landing on a
+ * content-addressed `photo-<hash>` key exactly as an uploaded phone photo
+ * would, with the same offline caching and the same cropping in the reader.
+ *
+ * Neither image model offers the exact shape a page reserves, so what comes
+ * back is cropped to it — never stretched, never padded — before it is ever
+ * shown or kept; the preview is already the picture the book will use.
+ */
+function PhotoWay({ onUsed }: { onUsed(key: string): void }) {
+  const allowed = useSystem().allows("ai.artGeneration");
+  const [prompt, setPrompt] = useState("");
+  const [kind, setKind] = useState<PictureKind>("banner");
+  const [provider, setProvider] = useState<ImageProvider>("gemini");
+  const [cropped, setCropped] = useState<Blob | null>(null);
+  const [preview, setPreview] = useState("");
+  const [busy, setBusy] = useState<"generating" | "saving" | null>(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
+
+  const generate = async () => {
+    if (!prompt.trim() || busy) return;
+    setBusy("generating");
+    setError("");
+    try {
+      const made = await generateBookImage(prompt, kind, provider);
+      const fitted = await cropToShape(made, kind);
+      setCropped(fitted);
+      setPreview((old) => {
+        if (old) URL.revokeObjectURL(old);
+        return URL.createObjectURL(fitted);
+      });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "The picture could not be made.");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const use = async () => {
+    if (!cropped) return;
+    setBusy("saving");
+    setError("");
+    try {
+      onUsed(await uploadPhoto(cropped));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "The picture could not be saved.");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  if (!allowed) {
+    return (
+      <p className="rounded-xl border border-dashed border-line px-3 py-4 text-sm text-muted">
+        Drawing is switched off for this deployment. Pick a picture from the library, upload a photo, or add artwork on the Art page.
+      </p>
+    );
+  }
+
+  return (
+    <div className="grid gap-3">
+      <label className="grid gap-1.5">
+        <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Describe the picture</span>
+        <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} rows={3}
+          placeholder="Three little pigs outside their new brick house, sunny afternoon"
+          className="w-full rounded-xl border border-line bg-surface p-3 text-ink" />
+      </label>
+
+      <div role="group" aria-label="Where the picture goes" className="flex flex-wrap gap-2">
+        {(["banner", "portrait"] as const).map((k) => (
+          <button key={k} type="button" aria-pressed={kind === k} onClick={() => setKind(k)}
+            className={`${chip} ${kind === k ? "border-indigo-600 bg-indigo-50 text-indigo-900 dark:bg-indigo-950 dark:text-indigo-100" : "border-line bg-surface text-ink hover:border-indigo-400"}`}>
+            {k === "banner" ? "Wide — top or bottom" : "Tall — beside the words"}
+          </button>
+        ))}
+      </div>
+
+      <div role="group" aria-label="Which model draws" className="flex flex-wrap gap-2">
+        {(["gemini", "openai"] as const).map((p) => (
+          <button key={p} type="button" aria-pressed={provider === p} onClick={() => setProvider(p)}
+            className={`${chip} ${provider === p ? "border-indigo-600 bg-indigo-50 text-indigo-900 dark:bg-indigo-950 dark:text-indigo-100" : "border-line bg-surface text-ink hover:border-indigo-400"}`}>
+            {p === "gemini" ? "Gemini" : "ChatGPT"}
+          </button>
+        ))}
+      </div>
+      <p className="text-xs text-muted">
+        Cropped to {describeShape(kind)} once it comes back — never stretched, so the shape a page reserves is the shape it gets.
+      </p>
+
+      <button type="button" onClick={() => void generate()} disabled={!prompt.trim() || busy !== null}
+        className={`${chip} justify-center border-indigo-600 bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-60`}>
+        {busy === "generating" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Sparkles className="h-4 w-4" aria-hidden="true" />}
+        {busy === "generating" ? "Making the picture…" : preview ? "Make it again" : "Make the picture"}
+      </button>
+
+      {preview && (
+        <div className="grid gap-2">
+          <p className="text-xs font-extrabold uppercase tracking-wider text-muted">What came back</p>
+          <div className={`mx-auto w-full overflow-hidden rounded-xl border border-line bg-play-sky ${kind === "banner" ? "max-w-sm" : "max-w-[10rem]"}`}>
+            <img src={preview} alt="" className="block h-auto w-full" />
+          </div>
+          <button type="button" onClick={() => void use()} disabled={busy !== null}
+            className={`${chip} justify-center border-indigo-600 bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-60`}>
+            {busy === "saving" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
+            {busy === "saving" ? "Saving…" : "Use this picture"}
+          </button>
+        </div>
+      )}
+
       {error && <p role="alert" className="rounded-xl bg-rose-50 px-3 py-2 text-sm font-bold text-rose-800 dark:bg-rose-950 dark:text-rose-200">{error}</p>}
     </div>
   );

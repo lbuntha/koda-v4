@@ -1026,23 +1026,30 @@ const VOX_TIMEOUT_MS = 90_000;
 const VOX_VOICE_ID = /^[A-Za-z0-9-]{1,64}$/;
 
 /** Only an operator may make library audio, same as the Gemini voice. Answers whether to go on. */
-async function libraryOperatorOnly(req: express.Request, res: express.Response): Promise<boolean> {
+/** Signed in, and an operator: the one check every library-authoring route shares. */
+async function canAuthorLibrary(req: express.Request, res: express.Response): Promise<boolean> {
   const authorization = req.headers.authorization;
   if (!authorization) {
-    res.status(401).json({ error: { code: "auth", message: "Sign in to record a book." } });
+    res.status(401).json({ error: { code: "auth", message: "Sign in to work on a book." } });
     return false;
   }
   try {
     const may = await fetch(`${API_URL}/v1/library/can-author`, { headers: { Authorization: authorization } });
     if (!may.ok) {
-      res.status(may.status === 401 ? 401 : 403).json({ error: { code: "not_an_operator", message: "Only an operator can record library books." } });
+      res.status(may.status === 401 ? 401 : 403).json({ error: { code: "not_an_operator", message: "Only an operator can work on library books." } });
       return false;
     }
+    return true;
   } catch {
     res.status(503).json({ error: { code: "api_unreachable", message: "The data service is not running." } });
     return false;
   }
-  if (!(await systemAllows("ai.libraryVoice", authorization))) {
+}
+
+/** `canAuthorLibrary`, and the switch for a *voice*: Vox and both TTS voices share it. */
+async function libraryOperatorOnly(req: express.Request, res: express.Response): Promise<boolean> {
+  if (!(await canAuthorLibrary(req, res))) return false;
+  if (!(await systemAllows("ai.libraryVoice", req.headers.authorization))) {
     res.status(503).json({ error: { code: "feature_disabled", message: "Voice for library books is switched off (ai.libraryVoice)." } });
     return false;
   }
@@ -1107,6 +1114,126 @@ app.post("/api/library/voice/vox", async (req, res) => {
   } catch (error: any) {
     console.error("Error in /api/library/voice/vox:", error);
     res.status(502).json({ error: { code: "vox_unreachable", message: error?.name === "AbortError" ? "Vox took too long. Try a shorter line." : "Vox could not be reached." } });
+  } finally {
+    clearTimeout(timer);
+  }
+});
+
+/* -------------------------------------------------------------------------- */
+/* AI photos for a book                                                        */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * A real (raster) picture for a book page, from a prompt — the photographic or
+ * painted counterpart to `/api/art/generate`'s flat vector drawing.
+ *
+ * Neither image API offers the exact ratio a page reserves (see
+ * `src/library/pictureShape.ts`): Imagen's nearest to a 2:1 banner is "16:9",
+ * and OpenAI's is a 1536×1024 canvas (3:2). Both are asked for their closest
+ * shape and cropped to the exact one afterwards, on the device, by
+ * `cropToShape` — so this only ever has to get close, never exact.
+ *
+ * The result becomes a normal library photo: this route hands back raw bytes,
+ * and the client runs it through the very upload path a phone photo takes
+ * (`uploadPhoto`), landing on the same content-addressed `photo-<hash>` key,
+ * cached and served the same way.
+ */
+const BOOK_IMAGE_BRIEF = "A warm, gentle children's storybook illustration. " +
+  "No text, no lettering, no watermark, no signature, nothing written anywhere in the image. " +
+  "Bright, friendly and safe for young children. A single clear scene or subject, not a collage.";
+const BOOK_IMAGE_TIMEOUT_MS = 90_000;
+
+/** Only an operator, and only where drawing from a prompt is switched on — the same gate `/api/art/generate` uses. */
+async function canGenerateBookImage(req: express.Request, res: express.Response): Promise<boolean> {
+  if (!(await canAuthorLibrary(req, res))) return false;
+  if (!(await systemAllows("ai.artGeneration", req.headers.authorization))) {
+    res.status(503).json({ error: { code: "feature_disabled", message: "Drawing artwork from a prompt is switched off (ai.artGeneration)." } });
+    return false;
+  }
+  return true;
+}
+
+/** A book image request, read and bounded the same way regardless of who answers it. */
+function readImageRequest(req: express.Request, res: express.Response): { prompt: string; kind: "banner" | "portrait" } | null {
+  const prompt = String(req.body?.prompt ?? "").trim();
+  const kind = req.body?.kind === "portrait" ? "portrait" : "banner";
+  if (!prompt) {
+    res.status(400).json({ error: { code: "no_prompt", message: "Describe the picture first." } });
+    return null;
+  }
+  if (prompt.length > 600) {
+    res.status(400).json({ error: { code: "prompt_too_long", message: "Keep the description under 600 characters." } });
+    return null;
+  }
+  return { prompt, kind };
+}
+
+app.post("/api/library/image/gemini", async (req, res) => {
+  const parsed = readImageRequest(req, res);
+  if (!parsed) return;
+  if (!(await canGenerateBookImage(req, res))) return;
+  const ai = getGeminiClient(await systemApiKey(req.headers.authorization));
+  if (!ai) return res.status(503).json(noKey("Gemini"));
+  try {
+    // The Imagen `predict` family (`generateImages`) needs its own API
+    // enablement and is not on every key; the `-image` Gemini models answer
+    // through the same `generateContent` call already used for text and for
+    // the library's own read-aloud voice, with the picture in `inlineData`
+    // instead of audio.
+    const response = await ai.models.generateContent({
+      model: process.env.GEMINI_IMAGE_MODEL ?? "gemini-3.1-flash-image",
+      contents: [{ parts: [{ text: `${BOOK_IMAGE_BRIEF}\n\n${parsed.prompt}` }] }],
+      config: {
+        responseModalities: ["IMAGE"],
+        // Neither offering is the exact shape; cropToShape does the rest.
+        imageConfig: { aspectRatio: parsed.kind === "portrait" ? "3:4" : "16:9" },
+      },
+    });
+    const part = response.candidates?.[0]?.content?.parts?.find((p) => p.inlineData?.data);
+    if (!part?.inlineData?.data) {
+      return res.status(502).json({ error: { code: "no_image", message: "No picture came back. Try describing it differently." } });
+    }
+    res.type(part.inlineData.mimeType ?? "image/png").send(Buffer.from(part.inlineData.data, "base64"));
+  } catch (error: any) {
+    console.error("Error in /api/library/image/gemini:", error);
+    res.status(502).json({ error: { code: "generate_failed", message: error?.message ?? "The picture could not be made." } });
+  }
+});
+
+app.post("/api/library/image/openai", async (req, res) => {
+  const parsed = readImageRequest(req, res);
+  if (!parsed) return;
+  if (!(await canGenerateBookImage(req, res))) return;
+  const key = (await systemApiKey(req.headers.authorization, "ai.openaiApiKey")).key ?? process.env.OPENAI_API_KEY;
+  if (!key) return res.status(503).json(noKey("ChatGPT"));
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), BOOK_IMAGE_TIMEOUT_MS);
+  try {
+    const reply = await fetch("https://api.openai.com/v1/images/generations", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: process.env.OPENAI_IMAGE_MODEL ?? "gpt-image-1",
+        prompt: `${BOOK_IMAGE_BRIEF}
+
+${parsed.prompt}`,
+        n: 1,
+        // gpt-image-1's closest offering to each shape; cropToShape does the rest.
+        size: parsed.kind === "portrait" ? "1024x1536" : "1536x1024",
+      }),
+      signal: controller.signal,
+    });
+    if (!reply.ok) {
+      const detail = (await reply.text()).slice(0, 200);
+      return res.status(502).json({ error: { code: "openai_failed", message: `ChatGPT answered ${reply.status}. ${detail}` } });
+    }
+    const body = (await reply.json()) as { data?: Array<{ b64_json?: string }> };
+    const b64 = body.data?.[0]?.b64_json;
+    if (!b64) return res.status(502).json({ error: { code: "no_image", message: "No picture came back. Try again." } });
+    res.type("image/png").send(Buffer.from(b64, "base64"));
+  } catch (error: any) {
+    console.error("Error in /api/library/image/openai:", error);
+    res.status(502).json({ error: { code: "openai_unreachable", message: error?.name === "AbortError" ? "ChatGPT took too long. Try again." : "ChatGPT could not be reached." } });
   } finally {
     clearTimeout(timer);
   }
