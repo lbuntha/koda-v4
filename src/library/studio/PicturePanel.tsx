@@ -9,6 +9,7 @@ import { useSystem } from "../../lib/sync";
 import { inspectSvgMarkup, preprocessSvgMarkup } from "../../utils/svg";
 import { playSound } from "../../utils/audio";
 import { isPhoto, PHOTO_ACCEPT, uploadPhoto } from "../photos";
+import { describeShape, type PictureKind } from "../pictureShape";
 import { Picture, PICTURE_KEYS } from "../Picture";
 
 /**
@@ -372,13 +373,16 @@ function DrawWay({ library, draft, setDraft, onUsed }: {
   const [drawing, setDrawing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  // Drawn to the shape the page will reserve for it, not to whatever the model
+  // likes: a page has to know how much room a picture takes before it arrives.
+  const [kind, setKind] = useState<PictureKind>("banner");
 
   const draw = async () => {
     if (!prompt.trim() || drawing) return;
     setDrawing(true);
     setError("");
     try {
-      const drawn = await generateSvg(prompt, { shape: "square" });
+      const drawn = await generateSvg(prompt, { shape: kind });
       setDraft({ ...draft, markup: drawn, name: name || KEBAB(prompt) });
     } catch (e) {
       setError(e instanceof Error ? e.message : "The picture could not be drawn.");
@@ -437,6 +441,15 @@ function DrawWay({ library, draft, setDraft, onUsed }: {
           placeholder="A wooden market stall with baskets of fruit"
           className="w-full rounded-xl border border-line bg-surface p-3 text-ink" />
       </label>
+      <div role="group" aria-label="Where the picture goes" className="flex flex-wrap gap-2">
+        {(["banner", "portrait"] as const).map((k) => (
+          <button key={k} type="button" aria-pressed={kind === k} onClick={() => setKind(k)}
+            className={`${chip} ${kind === k ? "border-indigo-600 bg-indigo-50 text-indigo-900 dark:bg-indigo-950 dark:text-indigo-100" : "border-line bg-surface text-ink hover:border-indigo-400"}`}>
+            {k === "banner" ? "Wide — top or bottom" : "Tall — beside the words"}
+          </button>
+        ))}
+      </div>
+      <p className="text-xs text-muted">Drawn at {describeShape(kind)}.</p>
       <button type="button" onClick={() => void draw()} disabled={!prompt.trim() || drawing}
         className={`${chip} justify-center border-indigo-600 bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-60`}>
         {drawing ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Sparkles className="h-4 w-4" aria-hidden="true" />}
@@ -539,7 +552,10 @@ function UploadWay({ onUsed }: { onUsed(key: string): void }) {
         <input type="file" accept={PHOTO_ACCEPT} className="sr-only" disabled={uploading}
           onChange={(e) => { void upload(e.target.files?.[0]); e.target.value = ""; }} />
       </label>
-      <p className="text-xs text-muted">JPEG, PNG or WebP. Shrunk to 1600px before it is sent, and kept with this book.</p>
+      <p className="text-xs text-muted">
+        JPEG, PNG or WebP. Shrunk to 1600px before it is sent, and kept with this book. A photo is trimmed to fit its place, so shoot it at{" "}
+        {describeShape("banner")} for the top or bottom of a page, or {describeShape("portrait")} to sit beside the words.
+      </p>
       {error && <p role="alert" className="rounded-xl bg-rose-50 px-3 py-2 text-sm font-bold text-rose-800 dark:bg-rose-950 dark:text-rose-200">{error}</p>}
     </div>
   );

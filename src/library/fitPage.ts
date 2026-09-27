@@ -45,3 +45,16 @@ export function nextFit(current: number, contentPx: number, availablePx: number)
 
 /** A fit factor held inside the range a page may be drawn at. */
 export const clampFit = (n: number): number => Math.min(FIT_MAX, Math.max(FIT_MIN, Math.round(n * 1000) / 1000));
+
+/**
+ * How much of the page's squeeze the words take.
+ *
+ * A page that does not fit has to give up height somewhere, and it should not
+ * give it all up in one place: the words are what a child is here to read and
+ * the picture is what can lose a little without being lost. So the picture is
+ * scaled by the whole factor twice over — it shrinks fastest — and the words by
+ * half of it, which keeps them readable for longer before the page falls back to
+ * scrolling. Squeezed to the floor (0.72) the picture is about half its height
+ * and the words are still 0.86 of theirs, rather than both being 0.72.
+ */
+export const wordsFit = (fit: number): number => 1 - (1 - fit) / 2;

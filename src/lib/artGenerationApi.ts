@@ -15,7 +15,7 @@
 import { tutorHeaders } from "./tutorApi";
 
 /** The frame the artwork is drawn to. */
-export type ArtShape = "thumbnail" | "square" | "free";
+export type ArtShape = "thumbnail" | "square" | "banner" | "portrait" | "free";
 
 /** Which model draws. Unset follows the deployment's default. */
 export type ArtProvider = "gemini" | "chatgpt" | "claude";

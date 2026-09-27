@@ -3,9 +3,10 @@ import { animate, motion, useMotionValue, useReducedMotion, useTransform } from 
 import { Volume2, X } from "lucide-react";
 import { BANDS, type Passage, type PicturePlace, type Sentence } from "./data/passage";
 import { layoutBook, type SetSentence, type SetToken } from "./bookLayout";
-import { FIT_MAX, nextFit } from "./fitPage";
+import { FIT_MAX, nextFit, wordsFit } from "./fitPage";
 import { FLAT, SPRING, TURNED, angularVelocity, castOf, completes, curlOf, dragAngle, shadeOf, type Dir } from "./pageTurn";
 import { Picture } from "./Picture";
+import { BANNER, PORTRAIT, ratioOf } from "./pictureShape";
 import { LibraryProgress } from "./progress";
 import { minutesToRead } from "./session";
 import { canSpeak, say, stop } from "./voice";
@@ -103,9 +104,16 @@ function usePageFit(box: RefObject<HTMLElement | null>, page: number, scale: num
   useEffect(() => {
     const el = box.current;
     if (!el || typeof ResizeObserver === "undefined") return;
-    // A rotated phone, a shown keyboard, a picture that has just loaded.
+    // A rotated phone, a shown keyboard — the box changing size — and the page's
+    // own content changing size inside a box that has not moved: a web font
+    // arriving and re-flowing the words, a picture landing. Watching the box alone
+    // missed the second kind, and a page that grew after it was measured stayed
+    // too tall for good.
     const watch = new ResizeObserver(measure);
     watch.observe(el);
+    if (el.firstElementChild) watch.observe(el.firstElementChild);
+    // Fonts settle after first paint and re-flow every line; measure once they have.
+    void document.fonts?.ready.then(measure);
     return () => watch.disconnect();
   }, [box, measure]);
   return fit;
@@ -420,7 +428,7 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
   const sheet = (i: number) => (
     <Sheet index={i} count={pages.count}>
       {i === 0 ? <TitlePage book={book} km={km} fit={fit} /> : (
-        <StoryPage book={book} sentences={pages.story[i - 1]} picture={pages.pictures[i - 1]} at={pages.places[i - 1]} scale={scale * fit} fit={fit} playing={playing} playingWord={playingWord} peek={peek} onWord={tapWord} end={i === last} />
+        <StoryPage book={book} sentences={pages.story[i - 1]} picture={pages.pictures[i - 1]} at={pages.places[i - 1]} scale={scale * wordsFit(fit)} fit={fit} playing={playing} playingWord={playingWord} peek={peek} onWord={tapWord} end={i === last} />
       )}
     </Sheet>
   );
@@ -574,12 +582,27 @@ const TitlePage = memo(function TitlePage({ book, km, fit }: { book: Passage; km
  * beside the words from a small tablet up; on a phone there is no room for both
  * at a readable size, so left falls above the words and right below them.
  */
-const FRAME = "aspect-[16/10] w-full max-h-[calc(var(--picture-max)*var(--fit))] sm:max-h-[calc(var(--picture-max-wide)*var(--fit))]";
+// The frame is the picture's shape, reserved before the picture arrives (see
+// pictureShape.ts). On a phone everything is a banner; a side picture becomes a
+// portrait only where there is room beside the words.
+/**
+ * A drawing across the top or bottom fills the page's width only when it is
+ * already about the banner's shape: at least this wide for its height. The
+ * banner is 2:1; a drawing 1.7:1 or wider loses a sliver at the edges, and one
+ * closer to square is shown whole rather than losing its top and bottom.
+ */
+const COVER_FROM = 1.7;
+const FRAME = "aspect-[var(--banner)] w-full max-h-[calc(var(--picture-max)*var(--fit)*var(--fit))] sm:max-h-[calc(var(--picture-max-wide)*var(--fit)*var(--fit))]";
+// Above or below the words the frame keeps its shape when the page is short: the
+// height cap becomes a width cap (height × the banner's ratio), so the frame gets
+// narrower and stays a banner. Capping the height alone leaves the width at 100%
+// and squashes it into a strip the picture was never drawn for.
+const BANNER_FRAME = "mx-auto aspect-[var(--banner)] w-full max-w-[calc(var(--picture-max)*var(--fit)*var(--fit)*var(--banner-ratio))] sm:max-w-[calc(var(--picture-max-wide)*var(--fit)*var(--fit)*var(--banner-ratio))]";
 const PLACE: Record<PicturePlace, { page: string; frame: string; words: string }> = {
-  top: { page: "flex-col", frame: `${FRAME} sm:aspect-[2/1]`, words: "" },
-  bottom: { page: "flex-col-reverse", frame: `${FRAME} sm:aspect-[2/1]`, words: "" },
-  left: { page: "flex-col sm:flex-row sm:items-center", frame: `${FRAME} sm:aspect-[3/4] sm:w-[44%] sm:shrink-0`, words: "sm:my-auto" },
-  right: { page: "flex-col-reverse sm:flex-row-reverse sm:items-center", frame: `${FRAME} sm:aspect-[3/4] sm:w-[44%] sm:shrink-0`, words: "sm:my-auto" },
+  top: { page: "flex-col", frame: BANNER_FRAME, words: "" },
+  bottom: { page: "flex-col-reverse", frame: BANNER_FRAME, words: "" },
+  left: { page: "flex-col sm:flex-row sm:items-center", frame: `${FRAME} sm:aspect-[var(--portrait)] sm:w-[44%] sm:shrink-0`, words: "sm:my-auto" },
+  right: { page: "flex-col-reverse sm:flex-row-reverse sm:items-center", frame: `${FRAME} sm:aspect-[var(--portrait)] sm:w-[44%] sm:shrink-0`, words: "sm:my-auto" },
 };
 
 const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top", scale, fit, playing, playingWord, peek, onWord, end }: {
@@ -612,11 +635,13 @@ const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top"
   const type = km ? `${KHMER} leading-[2.1]` : `${SERIF} leading-[1.7]`;
 
   return (
-    <div className="flex flex-1 flex-col" style={{ "--fit": fit, "--picture-max": PICTURE_MAX, "--picture-max-wide": PICTURE_MAX_WIDE } as CSSProperties}>
+    <div className="flex flex-1 flex-col" style={{ "--fit": fit, "--picture-max": PICTURE_MAX, "--picture-max-wide": PICTURE_MAX_WIDE, "--banner": ratioOf(BANNER), "--banner-ratio": BANNER.width / BANNER.height, "--portrait": ratioOf(PORTRAIT) } as CSSProperties}>
       <div data-picture-at={picture ? at : undefined} className={`flex gap-6 sm:gap-8 ${picture ? PLACE[at].page : "my-auto flex-col"} ${picture && at !== "top" ? "my-auto" : ""}`}>
       {picture && (
         <div className={`overflow-hidden rounded-3xl transition-[max-height] duration-200 ease-out motion-reduce:transition-none ${PLACE[at].frame}`}>
-          <Picture name={picture} className="h-full w-full p-[4%]" />
+          {/* Across the top or bottom the drawing fills the frame's width; beside the
+              words it stays whole, since a side frame is tall and narrow. */}
+          <Picture name={picture} className={at === "top" || at === "bottom" ? "h-full w-full" : "h-full w-full p-[4%]"} cover={at === "top" || at === "bottom" ? COVER_FROM : false} />
         </div>
       )}
       <div className={`mx-auto grid w-full max-w-[34em] gap-6 px-1 ${picture ? PLACE[at].words : ""}`}>

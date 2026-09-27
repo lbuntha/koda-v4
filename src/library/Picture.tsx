@@ -86,12 +86,20 @@ export const localPicture = (key: string): string => LOCAL[key] ?? "";
  */
 export const PICTURE_KEYS: readonly string[] = [...Object.keys(LOCAL).filter((k) => k !== "book"), "apple", "grape", "mango", "orange"].sort();
 
-export function Picture({ name, label, className = "" }: { name: string; label?: string; className?: string }) {
+/**
+ * `cover` fills the frame edge to edge and trims what overflows, as a photo does,
+ * instead of fitting the whole drawing inside it. Used for a picture across the
+ * top of a page, where fitting left a drawing that is nearly square small in a
+ * wide, short frame with empty bands either side. The frame's height is not
+ * changed; the drawing is scaled to its width and centred, so the middle of a
+ * drawing is what stays in view.
+ */
+export function Picture({ name, label, className = "", cover = false }: { name: string; label?: string; className?: string; cover?: boolean | number }) {
   if (isPhoto(name)) return <Photo name={name} label={label} className={className} />;
-  const fallback = <SvgMarkup markup={LOCAL[name] ?? LOCAL.book} raw size="100%" />;
+  const fallback = <SvgMarkup markup={LOCAL[name] ?? LOCAL.book} raw size="100%" cover={cover} />;
   return (
     <span role={label ? "img" : undefined} aria-label={label} aria-hidden={label ? undefined : true} className={`block h-full w-full ${className}`}>
-      <SvgAsset id={name} size="100%" fallback={fallback} />
+      <SvgAsset id={name} size="100%" fallback={fallback} cover={cover} />
     </span>
   );
 }

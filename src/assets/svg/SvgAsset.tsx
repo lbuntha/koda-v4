@@ -33,9 +33,24 @@ interface SvgMarkupProps {
    * and trimmed evenly on both sides of the long axis, rather than shown small
    * in a letterboxed band. Cropping is centred, so treat the middle of the
    * canvas as the safe area when drawing art that will be shown this way.
+   *
+   * A number makes the crop conditional: cover only when the artwork is at least
+   * that wide for its height (its viewBox's width ÷ height), and fit it whole
+   * otherwise. For a frame much wider than the drawing, cropping would cut the
+   * top and bottom off a drawing that was never made to lose them — a flag, a
+   * roof — so those are shown whole and only artwork already close to the
+   * frame's shape fills it.
    */
-  cover?: boolean;
+  cover?: boolean | number;
 }
+
+/** The artwork's width ÷ height, from its viewBox; null when it has none that can be read. */
+export const aspectOfViewBox = (svg: string): number | null => {
+  const m = svg.match(/<svg\b[^>]*\sviewBox\s*=\s*"([^"]*)"/i);
+  const parts = m?.[1].trim().split(/[\s,]+/).map(Number);
+  if (!parts || parts.length !== 4 || parts.some((n) => !Number.isFinite(n)) || parts[3] <= 0) return null;
+  return parts[2] / parts[3];
+};
 
 /**
  * Rewrites the root element's fit rule to crop rather than letterbox.
@@ -77,7 +92,10 @@ export const SvgMarkup: React.FC<SvgMarkupProps> = ({
     if (!markup) return "";
     const normalised = raw ? preprocessSvgMarkup(markup) : markup;
     const safe = scopeSvgIds(sanitizeSvgMarkup(normalised), scope);
-    return cover ? withCoverFit(safe) : safe;
+    if (!cover) return safe;
+    if (cover === true) return withCoverFit(safe);
+    const aspect = aspectOfViewBox(safe);
+    return aspect !== null && aspect >= cover ? withCoverFit(safe) : safe;
   }, [markup, raw, scope, cover]);
 
   if (!safeMarkup) return <>{fallback}</>;

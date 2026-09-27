@@ -637,6 +637,11 @@ Craft:
 const ART_SHAPES: Record<string, string> = {
   thumbnail: "Use viewBox=\"0 0 1600 900\" — a 16:9 store tile. Keep the subject and any lettering inside the middle 80%, because it can be cropped.",
   square: "Use viewBox=\"0 0 512 512\".",
+  // The two shapes a book picture is drawn to (see src/library/pictureShape.ts).
+  // A page reserves exactly this much room before the drawing arrives, so a model
+  // that chose its own shape would leave a page with the wrong hole in it.
+  banner: "Use viewBox=\"0 0 1600 800\" — a 2:1 banner shown edge to edge across a page, and trimmed on a narrow screen. Draw the background to every edge, and keep the subject and any lettering centred inside the middle 80% (x from 160 to 1440, y from 80 to 720), because the sides can be cropped.",
+  portrait: "Use viewBox=\"0 0 1200 1600\" — a 3:4 portrait shown beside the words. Draw the background to every edge, and keep the subject centred inside the middle 80% (x from 120 to 1080, y from 160 to 1440).",
   free: "Choose a viewBox that suits the subject.",
 };
 
