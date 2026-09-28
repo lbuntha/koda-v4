@@ -240,17 +240,12 @@
   height: calc(100dvh - 2.5rem);
 }
 
-.ui-reader-frame-toolbar {
-  border-bottom: 1px solid var(--line);
-}
-
 .ui-reader-frame-content {
   scrollbar-gutter: stable;
 }
 
 .ui-reader-frame-footer {
   padding-bottom: env(safe-area-inset-bottom);
-  border-top: 1px solid var(--line);
 }
 
 .ui-reader-pagination {
@@ -555,8 +550,34 @@ html.theme-light,
 }
 
 @keyframes koda-tooltip-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: translateY(4px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+
+/* A book opening: the cover settles, then its title rises in. */
+@keyframes koda-book-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+
+.koda-book-in {
+  animation: koda-book-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* A picture still on its way: a slow sheen across the frame, not a spinner. */
+@keyframes koda-shimmer {
+  from { background-position: 150% 0; }
+  to { background-position: -50% 0; }
+}
+
+.koda-shimmer {
+  background-image: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.45) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: koda-shimmer 1.6s ease-in-out infinite;
+}
+
+.dark .koda-shimmer {
+  background-image: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.06) 50%, transparent 70%);
 }
 
 @keyframes koda-celebrate-pop {
@@ -613,7 +634,8 @@ html.theme-light,
   .block-draggable:active,
   .chamber-snap-hundreds::before,
   .chamber-snap-tens::before,
-  .chamber-snap-ones::before {
+  .chamber-snap-ones::before,
+  .koda-shimmer {
     animation: none !important;
   }
 
@@ -623,6 +645,7 @@ html.theme-light,
   .animate-slide-in-right,
   .koda-bubble-in,
   .koda-tooltip-in,
+  .koda-book-in,
   .koda-celebrate,
   .tap-pop-anim,
   .block-snap-pull,

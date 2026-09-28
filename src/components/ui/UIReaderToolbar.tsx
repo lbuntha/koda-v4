@@ -1,6 +1,5 @@
 import React from "react";
 import { ArrowLeft, Moon, Pause, Sun, Volume2 } from "lucide-react";
-import { UIButton } from "./ThemeUI";
 
 export interface UIReaderToolbarProps {
   onBack(): void;
@@ -15,6 +14,16 @@ export interface UIReaderToolbarProps {
   className?: string;
   children?: React.ReactNode;
 }
+
+/**
+ * One quiet control: no border, no pushed-button edge, a soft fill on hover.
+ *
+ * The reader's controls sit around a page of a book, and a row of chunky
+ * bordered buttons pulled the eye off the page and onto the chrome. They are
+ * grouped in one pill instead, so they read as a single tool, and each keeps a
+ * 44px target for a finger.
+ */
+const tool = "grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink transition-[background-color,color,transform] duration-150 hover:bg-surface-muted active:scale-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:active:scale-100 motion-reduce:transition-none [&>svg]:h-[1.15rem] [&>svg]:w-[1.15rem]";
 
 /** Shared reader controls: one mobile-safe toolbar for books and other readers. */
 export const UIReaderToolbar: React.FC<UIReaderToolbarProps> = ({
@@ -31,27 +40,37 @@ export const UIReaderToolbar: React.FC<UIReaderToolbarProps> = ({
   children,
 }) => (
   <div className={`mobile-reader-toolbar ${className}`}>
-    <div className="mobile-reader-toolbar-row flex flex-wrap items-center justify-between gap-2">
-      <UIButton type="button" variant="secondary" size="md" icon={<ArrowLeft className="h-4 w-4" aria-hidden="true" />} onClick={onBack} aria-label={`${backLabel} to book`}>
+    <div className="mobile-reader-toolbar-row flex items-center justify-between gap-2 py-1">
+      <button type="button" onClick={onBack} aria-label={`${backLabel} to book`} className="-ml-2 inline-flex h-11 items-center gap-1.5 rounded-full pl-2.5 pr-4 text-sm font-bold text-ink transition-colors hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         {backLabel}
-      </UIButton>
-      <div className="flex items-center gap-2">
-        <div role="group" aria-label="Text size" className="flex items-center gap-1">
-          <UIButton type="button" variant="secondary" size="icon" onClick={onSmallerText} disabled={smallerDisabled} aria-label="Smaller text" className="!h-11 !min-h-11 !w-11 !min-w-11 !p-0">
-            <span aria-hidden="true" className="flex h-6 w-6 items-center justify-center font-serif text-sm font-bold leading-none">A</span>
-          </UIButton>
-          <UIButton type="button" variant="secondary" size="icon" onClick={onLargerText} disabled={largerDisabled} aria-label="Larger text" className="!h-11 !min-h-11 !w-11 !min-w-11 !p-0">
-            <span aria-hidden="true" className="flex h-6 w-6 items-center justify-center font-serif text-xl font-bold leading-none">A</span>
-          </UIButton>
+      </button>
+      <div className="flex items-center gap-0.5 rounded-full bg-surface-muted/60 p-0.5 dark:bg-surface-muted/50">
+        <div role="group" aria-label="Text size" className="flex items-center">
+          <button type="button" onClick={onSmallerText} disabled={smallerDisabled} aria-label="Smaller text" className={tool}>
+            <span aria-hidden="true" className="font-serif text-sm font-bold leading-none">A</span>
+          </button>
+          <button type="button" onClick={onLargerText} disabled={largerDisabled} aria-label="Larger text" className={tool}>
+            <span aria-hidden="true" className="font-serif text-xl font-bold leading-none">A</span>
+          </button>
         </div>
+        <span aria-hidden="true" className="mx-0.5 h-5 w-px bg-line" />
         {audio && (
-          <UIButton type="button" variant="secondary" size="icon" onClick={audio.onToggle} disabled={audio.disabled} aria-label={audio.playing ? "Stop reading" : "Play page recording"} title={audio.disabled ? audio.disabledTitle ?? "Preparing audio" : audio.retryTitle ?? (audio.playing ? "Stop reading" : "Play page recording")} aria-pressed={audio.playing}>
+          <button
+            type="button"
+            onClick={audio.onToggle}
+            disabled={audio.disabled}
+            aria-label={audio.playing ? "Stop reading" : "Play page recording"}
+            title={audio.disabled ? audio.disabledTitle ?? "Preparing audio" : audio.retryTitle ?? (audio.playing ? "Stop reading" : "Play page recording")}
+            aria-pressed={audio.playing}
+            className={`${tool} ${audio.playing ? "!bg-indigo-600 !text-white" : ""}`}
+          >
             {audio.playing ? <Pause aria-hidden="true" /> : <Volume2 aria-hidden="true" />}
-          </UIButton>
+          </button>
         )}
-        <UIButton type="button" variant="secondary" size="icon" onClick={onToggleDark} aria-label={dark ? "Use light mode" : "Use dark mode"} aria-pressed={dark} title={dark ? "Use light mode" : "Use dark mode"}>
+        <button type="button" onClick={onToggleDark} aria-label={dark ? "Use light mode" : "Use dark mode"} aria-pressed={dark} title={dark ? "Use light mode" : "Use dark mode"} className={tool}>
           {dark ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
-        </UIButton>
+        </button>
         {children}
       </div>
     </div>

@@ -164,7 +164,7 @@ function Photo({ name, label, className, whole = false, fill = false, onRatio }:
     };
   }, [name]);
   return (
-    <span role={label ? "img" : undefined} aria-label={label} aria-hidden={label ? undefined : true} className={`block overflow-hidden ${fill ? "absolute inset-0" : "relative h-full w-full"} ${!shown && !failed ? "bg-surface-muted" : ""} ${withoutPadding(className)}`}>
+    <span role={label ? "img" : undefined} aria-label={label} aria-hidden={label ? undefined : true} className={`block overflow-hidden ${fill ? "absolute inset-0" : "relative h-full w-full"} ${!shown && !failed ? "koda-shimmer bg-surface-muted" : ""} ${withoutPadding(className)}`}>
       {url && !failed ? (
         <img
           src={url}

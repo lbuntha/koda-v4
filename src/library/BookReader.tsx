@@ -174,6 +174,9 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
   const [peekPosition, setPeekPosition] = useState<{ left: number; top: number; side: "top" | "bottom" | "left" | "right" } | null>(null);
   const peekRef = useRef<HTMLDivElement>(null);
   const [textStep, setTextStepState] = useState(readTextStep);
+  // The cover settles in once, when the book is opened — not every time a
+  // reader turns back to it.
+  const [opened, setOpened] = useState(false);
   const run = useRef(0);
   const pageRef = useRef(0);
   const turnRef = useRef<Turn | null>(null);
@@ -231,6 +234,7 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
   const setPage = (p: number) => {
     pageRef.current = p;
     setPageState(p);
+    setOpened(true);
     setSilent(false);
     if (scrollEl.current) scrollEl.current.scrollTop = 0;
     playSound("page");
@@ -439,7 +443,7 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
   const fit = usePageFit(scrollEl, page, scale, turning !== null);
   const sheet = (i: number) => (
     <Sheet index={i} count={pages.count}>
-      {i === 0 ? <TitlePage book={book} km={km} fit={fit} /> : (
+      {i === 0 ? <TitlePage book={book} km={km} fit={fit} intro={!opened && !reduce} /> : (
         <StoryPage book={book} sentences={pages.story[i - 1]} picture={pages.pictures[i - 1]} at={pages.places[i - 1]} scale={scale * wordsFit(fit)} fit={fit} playing={playing} playingWord={playingWord} peek={peek} onWord={tapWord} end={i === last} />
       )}
     </Sheet>
@@ -470,6 +474,7 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
   return (
     <UIReaderFrame
       contentRef={scrollEl}
+      progress={last > 0 ? page / last : 1}
       toolbar={<UIReaderToolbar
         onBack={onBack}
         onSmallerText={() => setTextStep(textStep - 1)}
@@ -572,14 +577,14 @@ function Sheet({ index, count, children }: { index: number; count: number; child
 }
 
 /** The cover: the book's picture, edge to edge, with the title beneath it. */
-const TitlePage = memo(function TitlePage({ book, km, fit }: { book: Passage; km: boolean; fit: number }) {
+const TitlePage = memo(function TitlePage({ book, km, fit, intro }: { book: Passage; km: boolean; fit: number; intro: boolean }) {
   const [lo, hi] = BANDS[book.band].ages;
   return (
     <div className="flex flex-1 flex-col" style={{ "--fit": fit } as CSSProperties}>
-      <div className="relative min-h-56 flex-1 overflow-hidden rounded-3xl">
+      <div className={`relative min-h-56 flex-1 overflow-hidden rounded-3xl ${intro ? "koda-book-in" : ""}`}>
         <Picture name={book.picture} label={book.title} className="p-6 sm:p-10" whole fill />
       </div>
-      <div className="px-2 pb-2 pt-7 text-center">
+      <div className={`px-2 pb-2 pt-7 text-center ${intro ? "koda-book-in [animation-delay:140ms]" : ""}`}>
         <h1 className={`font-bold leading-tight tracking-tight transition-[font-size] duration-200 ease-out motion-reduce:transition-none ${km ? `${KHMER} leading-snug` : SERIF}`} style={{ fontSize: "calc(clamp(1.75rem, 1.35rem + 1.8vw, 2.25rem) * var(--fit))" }}>{book.title}</h1>
         <p className="mt-3 text-xs uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">
           Level {book.band} · Ages {lo}–{hi} · {minutesToRead(book)} min
@@ -617,18 +622,24 @@ const TitlePage = memo(function TitlePage({ book, km, fit }: { book: Passage; km
  * is the floor under all of it, so even a frame forced off-shape shows the whole
  * picture rather than part of one.
  */
-const FRAME = [
-  "mx-auto w-full aspect-[var(--shape)]",
-  "max-h-[calc(var(--picture-max)*var(--fit)*var(--fit))]",
-  "sm:max-h-[calc(var(--picture-max-wide)*var(--fit)*var(--fit))]",
-  "max-w-[calc(var(--picture-max)*var(--fit)*var(--fit)*var(--shape))]",
-  "sm:max-w-[calc(var(--picture-max-wide)*var(--fit)*var(--fit)*var(--shape))]",
-].join(" ");
+/*
+ * Picture and words share one column, so their edges line up the way a printed
+ * page's do. The picture's width is worked out rather than left to the frame —
+ * the page's width, a comfortable reading measure, or the height cap turned into
+ * a width through the picture's shape, whichever is least — and the words take
+ * that same width, never narrower than a readable line. A centred picture over
+ * ragged text of a different width is what made a page look unfinished.
+ */
+const PICTURE_W = "min(100cqw, 36rem, calc(var(--cap) * var(--fit) * var(--fit) * var(--shape)))";
+const FRAME = "mx-auto shrink-0 aspect-[var(--shape)] w-[var(--picture-w)]";
+const COLUMN = "mx-auto w-[min(100cqw,max(26rem,var(--picture-w)))]";
+const SIDE_FRAME = "sm:mx-0 sm:w-[min(44%,calc(var(--cap)*var(--fit)*var(--fit)*var(--shape)))]";
+const SIDE_WORDS = "sm:my-auto sm:w-auto sm:min-w-0 sm:flex-1 sm:max-w-[34em]";
 const PLACE: Record<PicturePlace, { page: string; frame: string; words: string }> = {
-  top: { page: "flex-col", frame: FRAME, words: "" },
-  bottom: { page: "flex-col-reverse", frame: FRAME, words: "" },
-  left: { page: "flex-col sm:flex-row sm:items-center", frame: `${FRAME} sm:w-[44%] sm:shrink-0`, words: "sm:my-auto" },
-  right: { page: "flex-col-reverse sm:flex-row-reverse sm:items-center", frame: `${FRAME} sm:w-[44%] sm:shrink-0`, words: "sm:my-auto" },
+  top: { page: "flex-col", frame: FRAME, words: COLUMN },
+  bottom: { page: "flex-col-reverse", frame: FRAME, words: COLUMN },
+  left: { page: "flex-col sm:flex-row sm:items-center", frame: `${FRAME} ${SIDE_FRAME}`, words: `${COLUMN} ${SIDE_WORDS}` },
+  right: { page: "flex-col-reverse sm:flex-row-reverse sm:items-center", frame: `${FRAME} ${SIDE_FRAME}`, words: `${COLUMN} ${SIDE_WORDS}` },
 };
 
 /**
@@ -668,6 +679,7 @@ const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top"
   end: boolean;
 }) {
   const km = book.language === "km";
+  const wordsEl = useRef<HTMLDivElement>(null);
   /*
    * The picture's own shape: what it was drawn to until it says otherwise.
    *
@@ -698,17 +710,18 @@ const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top"
   const type = km ? `${KHMER} leading-[2.1]` : `${SERIF} leading-[1.7]`;
 
   return (
-    <div className="flex flex-1 flex-col" style={{ "--fit": fit, "--picture-max": PICTURE_MAX, "--picture-max-wide": PICTURE_MAX_WIDE, "--shape": shape } as CSSProperties}>
+    <div className="@container flex flex-1 flex-col [--cap:var(--picture-max)] sm:[--cap:var(--picture-max-wide)]" style={{ "--fit": fit, "--picture-max": PICTURE_MAX, "--picture-max-wide": PICTURE_MAX_WIDE, "--shape": shape, "--picture-w": PICTURE_W } as CSSProperties}>
       <div data-picture-at={picture ? at : undefined} className={`flex gap-6 sm:gap-8 ${picture ? PLACE[at].page : "my-auto flex-col"} ${picture && at !== "top" ? "my-auto" : ""}`}>
       {picture && (
-        <div className={`overflow-hidden rounded-lg transition-[max-height] duration-200 ease-out motion-reduce:transition-none ${PLACE[at].frame}`}>
+        <div className={`overflow-hidden rounded-lg transition-[width] duration-200 ease-out motion-reduce:transition-none ${PLACE[at].frame}`}>
           {/* The frame is already this picture's shape, so nothing is cropped
               and nothing is letterboxed; `whole` only matters where a height cap
               has forced the frame off-shape. */}
           <Picture name={picture} className="h-full w-full" whole onRatio={learnShape} />
         </div>
       )}
-      <div className={`mx-auto grid w-full max-w-[34em] gap-6 px-1 ${picture ? PLACE[at].words : ""}`}>
+      <div ref={wordsEl} className={`relative isolate grid gap-6 px-1 ${picture ? PLACE[at].words : "mx-auto w-full max-w-[34em]"}`}>
+        <ReadMarker box={wordsEl} word={playingWord} scale={scale} />
         {blocks.map((b, i) => (
           <div key={i}>
             {b.heading && (
@@ -717,7 +730,7 @@ const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top"
                   <span
                     key={wordIndex}
                     data-speaking={playingWord?.sentence === b.sentences[0].sentence.id && playingWord.index === wordIndex || undefined}
-                    className={`rounded-sm transition-colors ${playingWord?.sentence === b.sentences[0].sentence.id && playingWord.index === wordIndex ? "bg-violet-200 text-neutral-950 dark:bg-violet-500 dark:text-white" : ""}`}
+                    className={`rounded-sm transition-colors ${playingWord?.sentence === b.sentences[0].sentence.id && playingWord.index === wordIndex ? "text-neutral-950 dark:text-white" : ""}`}
                   >
                     {wordIndex === heading.length - 1 ? word.replace(/:$/, "") : word}{wordIndex === heading.length - 1 ? "" : " "}
                   </span>
@@ -730,7 +743,7 @@ const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top"
                   <span
                     data-sentence={s.sentence.id}
                     data-playing={playing === s.sentence.id || undefined}
-                    className="rounded-sm box-decoration-clone"
+                    className={`rounded-sm box-decoration-clone transition-colors duration-300 motion-reduce:transition-none ${playing && playing !== s.sentence.id ? "text-neutral-400 dark:text-neutral-500" : ""}`}
                   >
                     {s.tokens.map((t, k) => (
                       <span key={k}>
@@ -763,16 +776,54 @@ const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top"
 });
 
 /**
+ * The highlight under the word being read aloud.
+ *
+ * There is only one on a page and it travels: from word to word it glides
+ * rather than blinking off one and on at the next, so a child's eye has
+ * something to follow along the line. It is measured from the spoken word
+ * itself and moved with a plain transition — nothing is remembered between
+ * one reading and the next, so a new reading starts on its first word rather
+ * than sliding in from wherever the last one stopped.
+ */
+function ReadMarker({ box, word, scale }: { box: RefObject<HTMLElement | null>; word: { sentence: string; index: number } | null; scale: number }) {
+  const [at, setAt] = useState<{ x: number; y: number; w: number; h: number; glide: boolean } | null>(null);
+  useLayoutEffect(() => {
+    const el = box.current?.querySelector<HTMLElement>("[data-speaking]");
+    const host = box.current;
+    if (!word || !el || !host) {
+      setAt(null);
+      return;
+    }
+    // Offsets, not screen rectangles: the page may be mid-turn and transformed.
+    let x = 0, y = 0;
+    for (let n: HTMLElement | null = el; n && n !== host; n = n.offsetParent as HTMLElement | null) {
+      x += n.offsetLeft;
+      y += n.offsetTop;
+    }
+    const pad = el.offsetHeight * 0.12;
+    setAt((prev) => ({ x: x - pad, y, w: el.offsetWidth + pad * 2, h: el.offsetHeight, glide: prev !== null }));
+  }, [box, word, scale]);
+  if (!at) return null;
+  return (
+    <span
+      aria-hidden="true"
+      className={`pointer-events-none absolute left-0 top-0 -z-10 rounded-md bg-violet-200 dark:bg-violet-500/70 ${at.glide ? "transition-[transform,width,height] duration-200 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none" : ""}`}
+      style={{ transform: `translate(${at.x}px, ${at.y}px)`, width: at.w, height: at.h }}
+    />
+  );
+}
+
+/**
  * A word on the page. Every word answers a tap, but only the bold ones — the
  * words the quiz asks about — are buttons a keyboard stops on; a Tab through
  * every word of a story would be a chore, not help.
  */
 function Word({ token, active, speaking, onWord }: { token: SetToken; active: boolean; speaking: boolean; onWord(w: string, target: HTMLElement): void }) {
   const mark = active ? "underline decoration-2 underline-offset-[0.2em]" : "";
-  const spoken = speaking ? "bg-violet-200 text-neutral-950 dark:bg-violet-500 dark:text-white" : "";
+  const spoken = speaking ? "text-neutral-950 dark:text-white" : "";
   if (token.emphasis === "key") {
     return (
-      <button type="button" onClick={(event) => onWord(token.word, event.currentTarget)} aria-label={token.word} data-speaking={speaking || undefined} className={`cursor-pointer rounded-sm font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${mark} ${spoken}`}>
+      <button type="button" onClick={(event) => onWord(token.word, event.currentTarget)} aria-label={token.word} data-speaking={speaking || undefined} className={`cursor-pointer rounded-sm font-bold transition-[color,transform] duration-150 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 motion-reduce:transition-none ${mark} ${spoken}`}>
         {token.text}
       </button>
     );
