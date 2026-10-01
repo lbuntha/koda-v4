@@ -3347,6 +3347,15 @@
     "home": {
       "due": "Check-up time",
       "continue": "Keep going"
+    },
+    "flow": {
+      "start": "Start",
+      "watch": "Watch",
+      "onceMore": "Once more! {done} of {total} done",
+      "checkUpIn": "A quick check-up in {days} days keeps it.",
+      "goTo": "Go to {step}",
+      "again": "Once more",
+      "moreOptions": "More ways to practise"
     }
   },
   "traceStudio": {

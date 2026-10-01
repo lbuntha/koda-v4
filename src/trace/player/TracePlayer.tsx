@@ -9,9 +9,10 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { ArrowLeft, ArrowRight, Check, CircleDot, Eraser, Eye, Flag, Ghost, Grid3x3, Hash, ListOrdered, MoveRight, Palette, RotateCcw, Route, SlidersHorizontal, Sparkles, Undo2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CircleDot, Eraser, Eye, Flag, Ghost, Grid3x3, Hash, ListOrdered, MoveRight, Palette, RotateCcw, Route, SlidersHorizontal, Sparkles, Undo2, ChevronDown } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { UIButton } from "../../components/ui";
+import { playSound } from "../../utils/audio";
 import type { AgeBand, Sensitivity, StepId, TraceItem } from "../geometry/types";
 import { isGuidedStep, modeOf } from "../geometry/types";
 import type { InkPoint } from "../score/capture";
@@ -24,7 +25,7 @@ import type { Point } from "../geometry/types";
 import type { CoachState, Suggestion } from "../progress/coach";
 import { aidsFor, coachAttempt, coachStroke, initialCoach } from "../progress/coach";
 import type { LadderEvent, StepPlan } from "../progress/ladder";
-import { applyAttempt, defaultPlan, isRecheckDue } from "../progress/ladder";
+import { RECHECK_DAYS, applyAttempt, defaultPlan, isRecheckDue, ruleFor } from "../progress/ladder";
 import { TraceProgress } from "../progress/store";
 import type { ReportReason } from "../data/api";
 import { reportProblem } from "../data/shelf";
@@ -95,7 +96,15 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
   const [watchOnly, setWatchOnly] = useState<number | null>(null);
   const [coach, setCoach] = useState<CoachState>(initialCoach);
   const [message, setMessage] = useState<{ text: string; tone: "good" | "fix" | "info" } | null>(null);
-  const [outcome, setOutcome] = useState<{ result: AttemptResult | null; event: LadderEvent | null; counted: boolean } | null>(null);
+  const [outcome, setOutcome] = useState<{
+    result: AttemptResult | null;
+    event: LadderEvent | null;
+    counted: boolean;
+    /** The step was passed this many times of the times it needs (when it needs more than one). */
+    passes?: { done: number; of: number };
+  } | null>(null);
+  /** The card that opens each step: what it is, where it sits in the journey, and Start. */
+  const [intro, setIntro] = useState(forceStep === undefined);
   const [suggestion, setSuggestion] = useState<Suggestion | null>(null);
   /** After checking a Copy / From memory attempt: the child's ink moved onto the model, shown over the answer. */
   const [review, setReview] = useState<Point[][] | null>(null);
@@ -114,7 +123,9 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
 
   const step: StepId =
     drill !== null ? "guided" : forceStep ? forceStep : play === "steps" ? (recheck ? plan.canDoAt : progress.step) : play === "myWay" ? myWayScoring(mySwitches).step : "guided";
-  const watching = watchOnly !== null || (play === "steps" && drill === null && step === "watch");
+  // The intro card is on screen only in Steps, for the item itself (not a drill), before the attempt.
+  const introShown = intro && play === "steps" && drill === null && !sandbox;
+  const watching = watchOnly !== null || (play === "steps" && drill === null && step === "watch" && !introShown);
   const guided = isGuidedStep(step);
   const current = guided && play !== "justDraw" ? prepared.findIndex((_, i) => !done.has(i)) : -1;
   const aids = current >= 0 && !(step === "copy" || step === "memory") ? aidsFor(coach, prepared[current].stroke.order) : [];
@@ -250,21 +261,31 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
 
   // From memory: show the item for 3 seconds, then hide it.
   useEffect(() => {
-    if (play !== "steps" || drill !== null || step !== "memory" || outcome) return;
+    if (play !== "steps" || drill !== null || step !== "memory" || outcome || introShown) return;
     setMemoryLeft(3);
     const id = window.setInterval(() => setMemoryLeft((s) => (s <= 1 ? (window.clearInterval(id), 0) : s - 1)), 1000);
     return () => window.clearInterval(id);
-  }, [play, drill, step, outcome]);
+  }, [play, drill, step, outcome, introShown]);
+
+  // A new step opens with its card.
+  const lastStep = useRef(step);
+  useEffect(() => {
+    if (lastStep.current !== step && play === "steps" && drill === null && !sandbox) setIntro(true);
+    lastStep.current = step;
+  }, [step, play, drill, sandbox]);
+  const bar = ruleFor(plan, step)?.pass ?? 0;
 
   const finish = (result: AttemptResult | null) => {
     let event: LadderEvent | null = null;
     let counted = false;
+    let passes: { done: number; of: number } | undefined;
     if (result) {
       const c = coachAttempt(coach, result.accepted);
       setCoach(c.state);
       if (c.suggestion) setSuggestion(c.suggestion);
     }
     if (sandbox && drill === null) {
+      soundFor(result, null);
       if (result) onResult?.(step, { accepted: result.accepted, score: result.score });
       setOutcome({ result, event: null, counted: false });
       return;
@@ -291,10 +312,22 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
         event = r.event;
         counted = true;
         if (recheck) setRecheck(false);
+        const times = ruleFor(plan, ladderStep).times;
+        if (event === "stay" && r.progress.passes > 0 && times > 1) passes = { done: r.progress.passes, of: times };
       }
       if (result.accepted && result.stars > 0) onAwardXp?.(result.stars * 5);
     }
-    setOutcome({ result, event, counted });
+    soundFor(result, event);
+    setOutcome({ result, event, counted, passes });
+  };
+
+  /** One sound per attempt, by how it went against this step's bar. */
+  const soundFor = (result: AttemptResult | null, event: LadderEvent | null) => {
+    if (!result || play === "justDraw") return;
+    if (event === "canDo" || event === "learned" || event === "rechecked" || event === "up") playSound("levelup");
+    else if (result.accepted && result.score >= bar) playSound("success");
+    else if (result.accepted) playSound("clink");
+    else playSound("hint");
   };
 
   const score = (entries: InkEntry[]) => scoreAttempt(active, cleanInk(entries.map((e) => e.raw)), opts);
@@ -322,11 +355,18 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
       setCoach(c);
       setDone(accepted);
       setMessage(null);
-      if (accepted.size === prepared.length) finish(result);
+      if (accepted.size === prepared.length) {
+        finish(result);
+        return;
+      }
+      // A stroke done: brighter the closer it stayed to the path.
+      const best = Math.max(...gained.map((i) => result.strokes[i].score));
+      playSound(best >= 90 ? "clink" : "pop");
       return;
     }
-    // A failed try: say why, fade the ink away.
+    // A failed try: say why, fade the ink away — and a gentle sound, never a buzzer.
     entry.state = "rejected";
+    playSound("hint");
     const failed = result.strokes.find((s) => !s.accepted && s.fault && s.tries > 0);
     if (failed?.fault) {
       const at = prepared.findIndex((p) => p.stroke.order === failed.order);
@@ -376,7 +416,7 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
   };
 
   /* ------------------------------------------------------------ pointer */
-  const canDraw = !watching && !outcome && memoryLeft === 0;
+  const canDraw = !watching && !outcome && memoryLeft === 0 && !introShown;
   const toUnits = (e: { clientX: number; clientY: number }): InkPoint => {
     const r = canvasRef.current!.getBoundingClientRect();
     return { x: ((e.clientX - r.left) / r.width) * 1000, y: ((e.clientY - r.top) / r.height) * 1000, t: performance.now() };
@@ -486,7 +526,7 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
       <div className="grid items-start gap-5 @3xl:grid-cols-[minmax(0,1fr)_300px] [@media(orientation:landscape)_and_(max-height:640px)]:grid-cols-1">
         {/* The slate, as large as the screen allows */}
         <section className="flex min-w-0 flex-col items-center gap-3 [@media(orientation:landscape)_and_(max-height:640px)]:flex-row [@media(orientation:landscape)_and_(max-height:640px)]:items-center [@media(orientation:landscape)_and_(max-height:640px)]:justify-center">
-          <p className="w-full text-center text-base font-medium text-slate-700 dark:text-slate-200 [@media(orientation:landscape)_and_(max-height:640px)]:hidden">{hint}</p>
+          <p className={`w-full text-center text-base font-medium text-slate-700 dark:text-slate-200 [@media(orientation:landscape)_and_(max-height:640px)]:hidden ${introShown && !outcome ? "invisible" : ""}`}>{hint}</p>
           <div className="relative aspect-square w-[min(100%,calc(100dvh_-_16rem))] shrink-0 [@media(orientation:landscape)_and_(max-height:640px)]:w-[calc(100dvh_-_8rem)]">
             <canvas
               ref={canvasRef}
@@ -502,6 +542,17 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
               <div className="pointer-events-none absolute inset-x-0 top-3 flex justify-center">
                 <span className="rounded-full bg-violet-600 px-4 py-1.5 text-sm font-semibold text-white shadow-lg">{t("trace.remember", { s: memoryLeft })}</span>
               </div>
+            )}
+            {introShown && !outcome && (
+              <StepIntro
+                steps={plan.steps.map((x) => ({ id: x.id, name: t(`trace.step.${x.id}`) }))}
+                at={plan.steps.findIndex((x) => x.id === step)}
+                allDone={progress.status !== "learning"}
+                title={recheck ? t("trace.checkUp") : t(`trace.step.${step}`)}
+                text={hint}
+                start={t(step === "watch" ? "trace.flow.watch" : "trace.flow.start")}
+                onStart={() => setIntro(false)}
+              />
             )}
             {message && !outcome && (
               <div role="status" className="pointer-events-none absolute inset-x-3 bottom-3 flex justify-center">
@@ -536,6 +587,8 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
                       {eventText(outcome.event)}
                     </p>
                   ))}
+                {outcome.passes && <p className="text-base font-bold text-violet-700 dark:text-violet-300">{t("trace.flow.onceMore", { done: outcome.passes.done, total: outcome.passes.of })}</p>}
+                {outcome.event === "canDo" && <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">{t("trace.flow.checkUpIn", { days: RECHECK_DAYS[0] })}</p>}
                 <p className="text-sm text-slate-700 dark:text-slate-200">{outcome.result?.feedback ? faultText(t, outcome.result.feedback, active, !guided) : t("trace.good")}</p>
                 {outcome.result && outcome.result.strokes.length > 1 && (
                   <ul className="flex flex-wrap gap-1" aria-label={t("trace.perStroke")}>
@@ -571,7 +624,13 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
               </>
             ) : outcome ? (
               <MainButton onClick={resetAttempt} icon={outcome.result?.accepted ? <ArrowRight className="h-5 w-5" /> : <RotateCcw className="h-5 w-5" />}>
-                {outcome.result?.accepted ? t("trace.action.next") : t("trace.action.tryAgain")}
+                {outcome.event === "up" || outcome.event === "down" || outcome.event === "lost"
+                  ? t("trace.flow.goTo", { step: t(`trace.step.${TraceProgress.get(item.id).step}`) })
+                  : outcome.passes
+                    ? t("trace.flow.again")
+                    : outcome.result?.accepted
+                      ? t("trace.action.next")
+                      : t("trace.action.tryAgain")}
               </MainButton>
             ) : (
               <>
@@ -629,6 +688,16 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
             </div>
           )}
 
+          <details
+            className="group rounded-3xl bg-white ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-700"
+            open={sandbox || play !== "steps" || undefined}
+          >
+            <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200">
+              <SlidersHorizontal className="h-4 w-4 text-violet-600" />
+              <span className="flex-1">{t("trace.flow.moreOptions")}</span>
+              <ChevronDown className="h-4 w-4 text-slate-400 transition group-open:rotate-180" />
+            </summary>
+            <div className="flex flex-col gap-3 px-3 pb-3">
           {!sandbox && (
             <div className="grid grid-cols-3 gap-1 rounded-2xl bg-slate-100 p-1 dark:bg-slate-800" role="radiogroup" aria-label={t("trace.mode.label")}>
               {(["steps", "myWay", ...(mode === "drawing" ? (["justDraw"] as const) : [])] as PlayMode[]).map((m) => (
@@ -652,7 +721,7 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
             </div>
           )}
 
-          <div className="rounded-3xl bg-white p-3 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-700">
+          <div>
             <div className="grid grid-cols-2 gap-1 @min-[13rem]/aside:grid-cols-3 @min-[26rem]/aside:grid-cols-6">
               {helpList.map((sw) => (
                 <button
@@ -677,6 +746,9 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
             </div>
             {locked && !sandbox && <p className="mt-2 px-1 text-xs text-slate-500 dark:text-slate-400">{t("trace.switchesLocked")}</p>}
           </div>
+
+            </div>
+          </details>
 
           {!sandbox && (
             <div className="flex justify-end">
@@ -792,6 +864,54 @@ function StepTrack({ steps, at, allDone, label }: { steps: string[]; at: number;
       <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
         {label} · <span className="font-semibold text-slate-700 dark:text-slate-200">{steps[Math.max(0, at)]}</span>
       </span>
+    </div>
+  );
+}
+
+/** The card that opens a step: the journey so far, this step, and one button to begin. */
+function StepIntro({
+  steps,
+  at,
+  allDone,
+  title,
+  text,
+  start,
+  onStart,
+}: {
+  steps: { id: string; name: string }[];
+  at: number;
+  allDone: boolean;
+  title: string;
+  text: string;
+  start: string;
+  onStart(): void;
+}) {
+  return (
+    <div className="absolute inset-0 flex items-center justify-center rounded-3xl bg-white/80 p-4 backdrop-blur-sm dark:bg-slate-950/70">
+      <div className="flex w-full max-w-sm flex-col items-center gap-4 text-center motion-safe:animate-[trace-pop_220ms_ease-out]">
+        <ol className="flex flex-wrap justify-center gap-1.5">
+          {steps.map((s, i) => (
+            <li
+              key={s.id}
+              title={s.name}
+              className={`flex h-8 min-w-8 items-center justify-center rounded-full px-2 text-xs font-bold ${
+                allDone || i < at ? "bg-emerald-500 text-white" : i === at ? "bg-violet-600 text-white ring-4 ring-violet-200 dark:ring-violet-900" : "bg-slate-100 text-slate-400 dark:bg-slate-800"
+              }`}
+            >
+              {allDone || i < at ? <Check className="h-4 w-4" /> : i + 1}
+            </li>
+          ))}
+        </ol>
+        <div className="flex flex-col gap-1">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{title}</h2>
+          <p className="text-base text-slate-600 dark:text-slate-300">{text}</p>
+        </div>
+        <div className="flex w-full justify-center">
+          <MainButton onClick={onStart} icon={<ArrowRight className="h-5 w-5" />}>
+            {start}
+          </MainButton>
+        </div>
+      </div>
     </div>
   );
 }
