@@ -13,6 +13,8 @@ COPY pyproject.toml ./
 COPY app/__init__.py app/__init__.py
 COPY app/art_defaults.json app/art_defaults.json
 COPY app/skill_defaults.json app/skill_defaults.json
+# Notification wording in each language; pyproject force-includes it in the package.
+COPY app/notify_locales app/notify_locales
 RUN pip install --no-cache-dir -e ".[dev]"
 
 COPY . .
