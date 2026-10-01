@@ -4,6 +4,7 @@ import { Lock } from "lucide-react";
 import { ApiError } from "../../lib/sync";
 import { PIN_LENGTH, isWellFormed } from "../../lib/familyPin";
 import { UIButton, UIModal } from "../ui";
+import { useT } from "../../lib/i18n";
 
 export interface PinPromptProps {
   isOpen: boolean;
@@ -27,6 +28,7 @@ export const PinPrompt: React.FC<PinPromptProps> = ({
   onClose,
   onSubmit,
 }) => {
+  const { t, tNodes } = useT();
   const [pin, setPin] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +54,7 @@ export const PinPrompt: React.FC<PinPromptProps> = ({
       const problem = err as ApiError;
       setError(
         problem.isOffline
-          ? "No connection, so this cannot be checked right now."
+          ? t("pin.offline")
           : problem.message,
       );
       setPin("");
@@ -68,7 +70,7 @@ export const PinPrompt: React.FC<PinPromptProps> = ({
       onClose={onClose}
       // A non-breaking hyphen: "grown-up" is one word, and a plain hyphen lets
       // a narrow dialog split it across two lines as "Ask a grown-" / "up".
-      title={"Ask a grown\u2011up"}
+      title={t("pin.askGrownUp")}
       // One sentence and four digits. At the default width the dialog is mostly
       // empty space with the slots marooned in the middle of it.
       maxWidth="max-w-md"
@@ -79,7 +81,7 @@ export const PinPrompt: React.FC<PinPromptProps> = ({
       footer={
         <>
           <UIButton variant="secondary" onClick={onClose}>
-            Cancel
+            {t("common.cancel")}
           </UIButton>
           <UIButton
             variant="primary"
@@ -87,7 +89,7 @@ export const PinPrompt: React.FC<PinPromptProps> = ({
             disabled={!isWellFormed(pin)}
             onClick={() => void submit()}
           >
-            Unlock
+            {t("pin.unlock")}
           </UIButton>
         </>
       }
@@ -102,11 +104,9 @@ export const PinPrompt: React.FC<PinPromptProps> = ({
 
         <p className="text-[15px] text-body">
           {accountName ? (
-            <>
-              Opening <strong className="text-ink">{accountName}</strong> needs the family PIN.
-            </>
+            tNodes("pin.opening", { name: <strong className="text-ink">{accountName}</strong> })
           ) : (
-            <>This account needs the family PIN.</>
+            t("pin.thisAccount")
           )}
         </p>
 
@@ -126,7 +126,7 @@ export const PinPrompt: React.FC<PinPromptProps> = ({
           className="relative mx-auto block w-full max-w-[15rem]"
           onClick={() => inputRef.current?.focus()}
         >
-          <span className="sr-only">Family PIN</span>
+          <span className="sr-only">{t("pin.title")}</span>
           <div className="grid grid-cols-4 gap-2 rail:gap-2.5" aria-hidden="true">
             {Array.from({ length: PIN_LENGTH }, (_, index) => {
               const filled = index < pin.length;

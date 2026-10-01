@@ -60,6 +60,35 @@ export function vocabQuestion(id: string, word: string, picture: string, lang: L
   return { id, kind: "vocab", prompt: vocabPrompt(word, lang), word, options, answer: at };
 }
 
+/** The story words a Words question can ask about, keyed the way `pictures` keys them. */
+export function storyWords(sentences: readonly Sentence[], lang: Language): string[] {
+  const out = new Set<string>();
+  for (const s of sentences)
+    for (const tok of s.words) {
+      const w = core(tok);
+      const k = lang === "km" ? w : w.toLowerCase();
+      if (!k || STOP.has(k) || KM_STOP.has(k) || (lang !== "km" && [...k].length < 3)) continue;
+      out.add(k);
+    }
+  return [...out];
+}
+
+export interface VocabEdit {
+  question: VocabQuestion;
+  pictures: Record<string, string>;
+  confirmedPictures: Record<string, string>;
+}
+
+/**
+ * A Words question on `word` with `picture` as the right one. A person picked
+ * both (or the curated word list did), so the picture is recorded as confirmed.
+ */
+export function withVocabWord(p: Pick<Passage, "language" | "pictures" | "confirmedPictures">, id: string, word: string, picture: string, keys: readonly string[]): VocabEdit | null {
+  const question = vocabQuestion(id, word, picture, p.language, keys, new Set(Object.values(p.pictures)));
+  if (!question) return null;
+  return { question, pictures: { ...p.pictures, [word]: picture }, confirmedPictures: { ...(p.confirmedPictures ?? {}), [word]: picture } };
+}
+
 /**
  * A picture question with one of its three pictures changed.
  *
@@ -76,6 +105,9 @@ export function vocabQuestion(id: string, word: string, picture: string, lang: L
  * That last step also settles the odd case of an author choosing the word's own
  * picture as a *wrong* one: the green mark follows the picture rather than the
  * slot, which is the only reading that leaves the question true.
+ *
+ * A person choosing the right picture has looked at it, so that choice is also
+ * recorded as confirmed.
  */
 export function withVocabPicture(
   q: VocabQuestion,
@@ -83,7 +115,8 @@ export function withVocabPicture(
   lang: Language,
   slot: number,
   key: string,
-): { question: VocabQuestion; pictures: Record<string, string> } {
+  confirmed: Readonly<Record<string, string>> = {},
+): { question: VocabQuestion; pictures: Record<string, string>; confirmedPictures: Record<string, string> } {
   const options = [...q.options];
   const held = options[slot];
   const already = options.indexOf(key);
@@ -96,7 +129,8 @@ export function withVocabPicture(
   const declared = next[wordKey] ?? next[q.word];
   const answer = options.indexOf(declared);
 
-  return { question: { ...q, options, answer: answer === -1 ? q.answer : answer }, pictures: next };
+  const confirmedPictures = slot === q.answer ? { ...confirmed, [wordKey]: key } : { ...confirmed };
+  return { question: { ...q, options, answer: answer === -1 ? q.answer : answer }, pictures: next, confirmedPictures };
 }
 
 const storyPictures = (sentences: readonly Sentence[], lang: Language, keys: readonly string[]) => {
@@ -183,7 +217,11 @@ export function fromModel(base: Omit<Passage, "rev">, reply: ModelDraft, keys: r
     questions.push({ id: `sp${++sp}`, kind: "spell", sentence: s.id, word: lang === "km" ? word : word.toLowerCase() } satisfies SpellQuestion);
   }
   const firstPic = questions.find((q): q is VocabQuestion => q.kind === "vocab");
-  return { ...base, questions, pictures, picture: firstPic ? firstPic.options[firstPic.answer] : Object.values(pictures)[0] ?? "book" };
+  // Only the curated word list vouches for a picture; a model's guess waits for a person.
+  const confirmedPictures = questions
+    .filter((q): q is VocabQuestion => q.kind === "vocab" && pictureFor(q.word, lang, keys) === q.options[q.answer])
+    .reduce<Record<string, string>>((m, q) => ({ ...m, [q.word]: q.options[q.answer] }), {});
+  return { ...base, questions, pictures, confirmedPictures, picture: firstPic ? firstPic.options[firstPic.answer] : Object.values(pictures)[0] ?? "book" };
 }
 
 /* -------------------------------------------------------------------------- */
@@ -325,4 +363,22 @@ export function joinSentences<T extends Pick<Passage, "sentences" | "questions" 
       : q.kind === "spell" && q.sentence === gone.id ? { ...q, sentence: prev.id }
       : q),
   };
+}
+
+/**
+ * The sentence an AI reply points at. Asked for an id, a model sometimes
+ * copies the sentence itself — or the part of it that proves the answer —
+ * so a reply is matched by id first, then by its text. Null when neither
+ * finds one sentence.
+ */
+export function sentenceIdFor(sentences: readonly Pick<Sentence, "id" | "text">[], ref: string): string | null {
+  const bare = (s: string) => s.normalize("NFC").replace(/[\s​"'“”«»‘’.,!?។៕:;()*-]+/gu, "").toLowerCase();
+  const byId = sentences.find((s) => s.id === ref.trim());
+  if (byId) return byId.id;
+  const want = bare(ref.replace(/^s\d+\s*[:·]\s*/u, ""));
+  if (!want) return null;
+  const exact = sentences.find((s) => bare(s.text) === want);
+  if (exact) return exact.id;
+  const holding = sentences.filter((s) => { const t = bare(s.text); return t && (t.includes(want) || want.includes(t)); });
+  return holding.length === 1 ? holding[0].id : null;
 }

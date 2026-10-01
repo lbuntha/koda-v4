@@ -8,6 +8,7 @@ import { themeSystem } from "../../lib/themeSystem";
 import { playSound } from "../../utils/audio";
 import { UIBadge, UIButton, UIModal, UISectionHeader } from "../ui";
 
+import { translate } from "../../lib/i18n";
 const when = (iso: string | null): string | null =>
   iso
     ? new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", year: "numeric" }).format(
@@ -96,13 +97,13 @@ export const PlanCard: React.FC = () => {
   return (
     <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
       <UISectionHeader
-        title="Your plan"
-        subtitle="What this family's account includes"
+        title={translate("admin.planCard.yourPlan")}
+        subtitle={translate("admin.planCard.whatThisFamilySAccountIncludes")}
         icon={<CreditCard className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
         action={
           mayBuy && !asked ? (
             <UIButton variant="primary" size="sm" icon={<ArrowUpRight />} onClick={() => void open()}>
-              Upgrade
+              {translate("admin.planCard.upgrade")}
             </UIButton>
           ) : undefined
         }
@@ -121,13 +122,11 @@ export const PlanCard: React.FC = () => {
             )}
           </div>
           <p className="mt-0.5 text-xs text-muted">
-            {plan.learnersUsed} of {plan.learnerLimit}{" "}
-            {plan.learnerLimit === 1 ? "child" : "children"}
-            {renews ? ` · renews ${renews}` : ""}
+            {translate("admin.planCard.learnersusedOfLearnerlimitValueValue2", { learnersUsed: plan.learnersUsed, learnerLimit: plan.learnerLimit, value: plan.learnerLimit === 1 ? translate("admin.planCard.child") : translate("admin.planCard.children"), value2: renews ? translate("admin.planCard.renewsRenews", { renews: renews }) : "" })}
           </p>
         </div>
         <UIBadge variant={plan.has(AI_FEATURE) ? "success" : "neutral"}>
-          {plan.has(AI_FEATURE) ? "Ask Koda included" : "Ask Koda not included"}
+          {plan.has(AI_FEATURE) ? translate("admin.planCard.askKodaIncluded") : translate("admin.planCard.askKodaNotIncluded")}
         </UIBadge>
       </div>
 
@@ -141,12 +140,11 @@ export const PlanCard: React.FC = () => {
       {asked ? (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-indigo-200 bg-indigo-50 p-4 dark:border-indigo-800 dark:bg-indigo-950/40">
           <p className="text-xs text-indigo-900 dark:text-indigo-200">
-            You asked for <strong>{asked.planName}</strong>. Card payment is not switched on yet,
-            so whoever runs your Koda turns it on by hand — your plan is unchanged until they do.
+            {translate("admin.planCard.youAskedFor")}{" "}<strong>{asked.planName}</strong>{translate("admin.planCard.cardPaymentIsNotSwitchedOn")}
           </p>
           {mayBuy && (
             <UIButton variant="ghost" size="sm" isLoading={busy} onClick={() => void withdraw()}>
-              Cancel request
+              {translate("admin.planCard.cancelRequest")}
             </UIButton>
           )}
         </div>
@@ -155,9 +153,7 @@ export const PlanCard: React.FC = () => {
           <div className="flex items-start gap-3 rounded-2xl border border-indigo-200 bg-indigo-50 p-4 dark:border-indigo-800 dark:bg-indigo-950/40">
             <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-indigo-600 dark:text-indigo-300" />
             <p className="text-xs text-indigo-900 dark:text-indigo-200">
-              Every lesson, every badge and the whole course are yours on this plan. What a paid
-              plan adds is <strong>Ask Koda</strong> — written help, spoken guidance, the voice
-              coach, and Koda reading what your child has drawn.
+              {translate("admin.planCard.everyLessonEveryBadgeAndThe")}{" "}<strong>{translate("admin.planCard.askKoda")}</strong>{" "}{translate("admin.planCard.writtenHelpSpokenGuidanceTheVoice")}
             </p>
           </div>
         )
@@ -166,11 +162,11 @@ export const PlanCard: React.FC = () => {
       <UIModal
         isOpen={choosing}
         onClose={() => setChoosing(false)}
-        title="Choose a plan"
+        title={translate("admin.planCard.chooseAPlan")}
         footer={
           <>
             <UIButton variant="secondary" onClick={() => setChoosing(false)}>
-              Cancel
+              {translate("admin.planCard.cancel")}
             </UIButton>
             <UIButton
               variant="primary"
@@ -178,7 +174,7 @@ export const PlanCard: React.FC = () => {
               disabled={!picked || picked === plan.planId}
               onClick={() => void send()}
             >
-              Request this plan
+              {translate("admin.planCard.requestThisPlan")}
             </UIButton>
           </>
         }
@@ -204,19 +200,18 @@ export const PlanCard: React.FC = () => {
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <h4 className="font-mono text-sm font-bold text-ink">{row.name}</h4>
-                    {isCurrent && <UIBadge variant="neutral">Your plan</UIBadge>}
+                    {isCurrent && <UIBadge variant="neutral">{translate("admin.planCard.yourPlan")}</UIBadge>}
                     {isPicked && !isCurrent && <Check className="h-4 w-4 text-indigo-600" />}
                   </div>
                   <span className="shrink-0 text-sm font-semibold text-ink">
                     {row.priceCents === 0
-                      ? "Free"
+                      ? translate("admin.planCard.free")
                       : `${formatPrice(row.priceCents, row.currency)}/month`}
                   </span>
                 </div>
                 <p className="mt-1 text-xs text-muted">{row.description}</p>
                 <p className="mt-1 text-xs text-muted">
-                  Up to {row.learnerLimit} {row.learnerLimit === 1 ? "child" : "children"}
-                  {row.features.includes(AI_FEATURE) ? " · Ask Koda included" : ""}
+                  {translate("admin.planCard.upToLearnerlimitValueValue2", { learnerLimit: row.learnerLimit, value: row.learnerLimit === 1 ? translate("admin.planCard.child") : translate("admin.planCard.children"), value2: row.features.includes(AI_FEATURE) ? translate("admin.planCard.askKodaIncluded2") : "" })}
                 </p>
               </button>
             );
@@ -229,8 +224,7 @@ export const PlanCard: React.FC = () => {
             * screen, and one sentence is what that costs to avoid.
             */}
           <p className="text-xs text-muted">
-            No card is taken yet. This tells whoever runs your Koda which plan you want; your
-            current plan keeps running until they switch it over.
+            {translate("admin.planCard.noCardIsTakenYetThis")}
           </p>
         </div>
       </UIModal>

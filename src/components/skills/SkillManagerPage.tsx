@@ -60,6 +60,7 @@ import {
 } from "../../lib/skillRegistryApi";
 import { usePermissions, useSession } from "../../lib/sync";
 
+import { translate } from "../../lib/i18n";
 const STATUS_TONE: Record<string, "success" | "warning" | "neutral"> = {
   published: "success",
   draft: "neutral",
@@ -131,7 +132,7 @@ export const NumberSetting: React.FC<{
         disabled={disabled}
         onChange={(e) => onChange(legal(parseFloat(e.target.value)))}
         className="w-28 sm:w-36 accent-indigo-600 disabled:opacity-40"
-        aria-label={`${field.label} slider`}
+        aria-label={translate("admin.skillManagerPage.labelSlider", { label: field.label })}
       />
       <div className="flex items-center gap-1">
         <input
@@ -321,14 +322,13 @@ const SkillRow: React.FC<{
             v{manifest.version}
           </span>
           <UIBadge variant={STATUS_TONE[releaseStatus] ?? "neutral"}>{releaseStatus}</UIBadge>
-          {hidden && <UIBadge variant="neutral">not shown</UIBadge>}
+          {hidden && <UIBadge variant="neutral">{translate("admin.skillManagerPage.notShown")}</UIBadge>}
         </span>
         {/* The byline first, because with more than a couple of skills
             installed "who published this?" is what an operator scans the list
             for — the counts are what they read once they have found the row. */}
         <span className="block text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-          by {manifest.author} · {skill.lessons.length} lessons · {activityLabel} · ages{" "}
-          {manifest.audience.ages[0]}–{manifest.audience.ages[1]} · {manifest.audience.category}
+          {translate("admin.skillManagerPage.byAuthorLengthLessonsActivitylabelAges", { author: manifest.author, length: skill.lessons.length, activityLabel: activityLabel, value: manifest.audience.ages[0], value2: manifest.audience.ages[1], category: manifest.audience.category })}
         </span>
       </span>
 
@@ -401,9 +401,9 @@ const ListingEditor: React.FC<{
     <div className={themeSystem.card("default", "p-4 sm:p-5 space-y-4")}>
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <div className={themeSystem.sectionHeader.subtitle}>Store listing</div>
+          <div className={themeSystem.sectionHeader.subtitle}>{translate("admin.skillManagerPage.storeListing")}</div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            What a learner sees on the Learn page. Blank falls back to what the skill shipped.
+            {translate("admin.skillManagerPage.whatALearnerSeesOnThe")}
           </p>
         </div>
         {edited && (
@@ -418,7 +418,7 @@ const ListingEditor: React.FC<{
             className={themeSystem.button("secondary", "sm")}
           >
             <RotateCcw />
-            Reset
+            {translate("admin.skillManagerPage.reset")}
           </button>
         )}
       </div>
@@ -443,7 +443,7 @@ const ListingEditor: React.FC<{
       <SkillSubjectEditor skillId={manifest.id} />
       <label className="block space-y-1">
         <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
-          Name
+          {translate("admin.skillManagerPage.name")}
         </span>
         <input
           type="text"
@@ -465,16 +465,15 @@ const ListingEditor: React.FC<{
           {/* What a rename does and does not touch. The id is what lessons,
               events and the course reference, and it never moves — an operator
               renaming a skill should know the record follows it. */}
-          Shown wherever a learner sees this skill. Clearing it goes back to{" "}
-          <span className="font-mono">{manifest.name}</span>. The skill's id (
-          <span className="font-mono">{manifest.id}</span>) never changes, so
-          progress and the learning log follow the rename.
+          {translate("admin.skillManagerPage.shownWhereverALearnerSeesThis")}{" "}
+          <span className="font-mono">{manifest.name}</span>{translate("admin.skillManagerPage.theSkillSId")}
+          <span className="font-mono">{manifest.id}</span>{translate("admin.skillManagerPage.neverChangesSoProgressAndThe")}
         </span>
       </label>
 
       <label className="block space-y-1">
         <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
-          Short description
+          {translate("admin.skillManagerPage.shortDescription")}
         </span>
         <input
           type="text"
@@ -496,12 +495,12 @@ const ListingEditor: React.FC<{
 
       <label className="block space-y-1">
         <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
-          Thumbnail
+          {translate("admin.skillManagerPage.thumbnail")}
         </span>
         <input
           type="text"
           value={draftThumb ?? thumbnail}
-          placeholder={firstLessonIcon ?? "emoji, art id, icon name, or image URL"}
+          placeholder={firstLessonIcon ?? translate("admin.skillManagerPage.emojiArtIdIconNameOr")}
           onChange={(e) => setDraftThumb(e.target.value)}
           onBlur={() => {
             if (draftThumb !== null) {
@@ -563,8 +562,8 @@ const ArtPicker: React.FC<{
         aria-expanded={open}
       >
         <ImageIcon />
-        {open ? "Hide artwork" : "Choose from Art"}
-        <span className="font-mono text-[11px] opacity-70">{ids.length} svg</span>
+        {open ? translate("admin.skillManagerPage.hideArtwork") : translate("admin.skillManagerPage.chooseFromArt")}
+        <span className="font-mono text-[11px] opacity-70">{translate("admin.skillManagerPage.lengthSvg", { length: ids.length })}</span>
       </button>
 
       {open && (
@@ -578,7 +577,7 @@ const ArtPicker: React.FC<{
                   onClick={() => onPick(isSelected ? "" : id)}
                   title={
                     isSelected
-                      ? `${id} — click to drop back to the shipped tile`
+                      ? translate("admin.skillManagerPage.idClickToDropBackTo", { id: id })
                       : `${id} · ${THUMBNAIL_ART_CATEGORY}`
                   }
                   className={`rounded-lg p-1 border-2 transition cursor-pointer ${
@@ -599,10 +598,10 @@ const ArtPicker: React.FC<{
           </div>
           <p className="px-1 pt-2 text-[11px] text-slate-500 dark:text-slate-400">
             {picked
-              ? "Click the selected artwork again to drop back to the shipped tile."
+              ? translate("admin.skillManagerPage.clickTheSelectedArtworkAgainTo")
               : ids.length === 0
-                ? `Nothing filed under ${THUMBNAIL_ART_CATEGORY} yet — file artwork there on the Art page and it shows up here.`
-                : `The ${THUMBNAIL_ART_CATEGORY} collection on the Art page. File art there to offer it here.`}
+                ? translate("admin.skillManagerPage.nothingFiledUnderThumbnailArtCategory", { THUMBNAIL_ART_CATEGORY: THUMBNAIL_ART_CATEGORY })
+                : translate("admin.skillManagerPage.theThumbnailArtCategoryCollectionOn", { THUMBNAIL_ART_CATEGORY: THUMBNAIL_ART_CATEGORY })}
           </p>
         </div>
       )}
@@ -685,10 +684,9 @@ export const ActivityTrail: React.FC<{ skillId: string }> = ({ skillId }) => {
     <div className={themeSystem.card("default", "p-4 sm:p-5 space-y-2")}>
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <div className={themeSystem.sectionHeader.subtitle}>Activity trail</div>
+          <div className={themeSystem.sectionHeader.subtitle}>{translate("admin.skillManagerPage.activityTrail")}</div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            What this skill reported while running. Diagnostics only — the last 500 across all
-            skills, and it is not saved between sessions.
+            {translate("admin.skillManagerPage.whatThisSkillReportedWhileRunning")}
           </p>
         </div>
         {mine.length > 0 && (
@@ -700,7 +698,7 @@ export const ActivityTrail: React.FC<{ skillId: string }> = ({ skillId }) => {
             className={themeSystem.button("secondary", "sm")}
           >
             <Trash2 />
-            Clear
+            {translate("admin.skillManagerPage.clear")}
           </button>
         )}
       </div>
@@ -711,8 +709,8 @@ export const ActivityTrail: React.FC<{ skillId: string }> = ({ skillId }) => {
         rowKey={(e) => e.id}
         defaultSort={{ key: "timestamp", direction: "desc" }}
         maxHeight="20rem"
-        caption="Actions this skill reported, newest first"
-        emptyMessage="Nothing yet. Play a round and the trail fills up."
+        caption={translate("admin.skillManagerPage.actionsThisSkillReportedNewestFirst")}
+        emptyMessage={translate("admin.skillManagerPage.nothingYetPlayARoundAnd")}
       />
     </div>
   );
@@ -768,7 +766,7 @@ const LessonRows: React.FC<{
                   titles on the same line as each other. Read aloud as "lesson
                   12" rather than as a bare number running into the title. */}
               <span className="w-7 shrink-0 text-right text-xs font-mono font-bold tabular-nums text-slate-400 dark:text-slate-500">
-                <span className="sr-only">Lesson </span>
+                <span className="sr-only">{translate("admin.skillManagerPage.lesson")}</span>
                 {numberFor(lesson, index + 1, restartNumbering)}
               </span>
               <UILessonIcon name={lesson.iconName} tone={lesson.iconTone} size="sm" />
@@ -783,7 +781,7 @@ const LessonRows: React.FC<{
               <span className="hidden sm:flex items-center gap-2 shrink-0">
                 {lesson.ageBand && (
                   <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
-                    ages {lesson.ageBand[0]}–{lesson.ageBand[1]}
+                    {translate("admin.skillManagerPage.agesValueValue2", { value: lesson.ageBand[0], value2: lesson.ageBand[1] })}
                   </span>
                 )}
                 <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500">
@@ -801,8 +799,8 @@ const LessonRows: React.FC<{
                 onEdit(lesson.id);
               }}
               aria-expanded={editingLessonId === lesson.id}
-              aria-label={`Edit the wording of ${lesson.title}`}
-              title="Edit wording"
+              aria-label={translate("admin.skillManagerPage.editTheWordingOfTitle", { title: lesson.title })}
+              title={translate("admin.skillManagerPage.editWording")}
               className={`p-2 rounded-xl shrink-0 transition cursor-pointer ${
                 editingLessonId === lesson.id
                   ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/15"
@@ -865,31 +863,31 @@ const SkillDetail: React.FC<{
   const tabs: UITabItem<DetailTab>[] = [
     {
       id: "features",
-      label: "Features",
+      label: translate("admin.skillManagerPage.features"),
       count: `${activeFeatures}/${features.length}`,
     },
-    { id: "listing", label: "Listing" },
+    { id: "listing", label: translate("admin.skillManagerPage.listing") },
     ...(skill.settingsSchema.length > 0
       ? [
           {
             id: "settings" as const,
-            label: "Settings",
+            label: translate("admin.skillManagerPage.settings"),
             count: skill.settingsSchema.length,
           },
         ]
       : []),
-    { id: "lessons", label: "Lessons", count: teaching.length },
+    { id: "lessons", label: translate("admin.skillManagerPage.lessons"), count: teaching.length },
     ...(practice.length > 0
-      ? [{ id: "practice" as const, label: "Practice", count: practice.length }]
+      ? [{ id: "practice" as const, label: translate("admin.skillManagerPage.practice"), count: practice.length }]
       : []),
-    { id: "trail", label: "Activity" },
+    { id: "trail", label: translate("admin.skillManagerPage.activity") },
   ];
 
   return (
     <div className={themeSystem.spacing.section}>
       <button onClick={onBack} className={themeSystem.button("ghost", "sm")}>
         <ChevronLeft />
-        All skills
+        {translate("admin.skillManagerPage.allSkills")}
       </button>
 
       <div className={themeSystem.card("default", "p-4 sm:p-5 space-y-5")}>
@@ -915,28 +913,24 @@ const SkillDetail: React.FC<{
                 {releaseStatus}
               </UIBadge>
               <UIBadge variant={registration ? "success" : "warning"}>
-                {registration ? "server registered" : "offline manifest"}
+                {registration ? translate("admin.skillManagerPage.serverRegistered") : translate("admin.skillManagerPage.offlineManifest")}
               </UIBadge>
-              {configurationPending && <UIBadge variant="warning">changes waiting to sync</UIBadge>}
+              {configurationPending && <UIBadge variant="warning">{translate("admin.skillManagerPage.changesWaitingToSync")}</UIBadge>}
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">
               {manifest.description}
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-mono">
-              by {manifest.author} · ages {manifest.audience.ages[0]}–{manifest.audience.ages[1]} ·{" "}
-              {manifest.audience.category}
+              {translate("admin.skillManagerPage.byAuthorAgesValueValue2Category", { author: manifest.author, value: manifest.audience.ages[0], value2: manifest.audience.ages[1], category: manifest.audience.category })}
             </p>
             {registration?.publishedBy && registration.publishedAt && (
               <p className="koda-admin-chip text-[#6D6997] dark:text-slate-400 mt-1">
-                {releaseStatus === "published" ? "Published" : "Last published"} by{" "}
-                {registration.publishedBy.displayName} ·{" "}
-                {new Date(registration.publishedAt).toLocaleString()}
+                {translate("admin.skillManagerPage.valueByDisplaynameValue2", { value: releaseStatus === "published" ? translate("admin.skillManagerPage.published") : translate("admin.skillManagerPage.lastPublished"), displayName: registration.publishedBy.displayName, value2: new Date(registration.publishedAt).toLocaleString() })}
               </p>
             )}
             {registration?.configurationChangedBy && registration.configurationChangedAt && (
               <p className="koda-admin-chip text-[#6D6997] dark:text-slate-400 mt-1">
-                Configuration saved by {registration.configurationChangedBy.displayName} ·{" "}
-                {new Date(registration.configurationChangedAt).toLocaleString()}
+                {translate("admin.skillManagerPage.configurationSavedByDisplaynameValue", { displayName: registration.configurationChangedBy.displayName, value: new Date(registration.configurationChangedAt).toLocaleString() })}
               </p>
             )}
           </div>
@@ -975,8 +969,8 @@ const SkillDetail: React.FC<{
               }}
             >
               {publishing
-                ? releaseStatus === "published" ? "Moving to draft..." : "Publishing..."
-                : releaseStatus === "published" ? "Move to draft" : "Publish skill"}
+                ? releaseStatus === "published" ? translate("admin.skillManagerPage.movingToDraft") : translate("admin.skillManagerPage.publishing")
+                : releaseStatus === "published" ? translate("admin.skillManagerPage.moveToDraft") : translate("admin.skillManagerPage.publishSkill")}
             </UIButton>
           )}
           <button
@@ -987,7 +981,7 @@ const SkillDetail: React.FC<{
             className={themeSystem.button(isEnabled ? "secondary" : "primary", "sm")}
           >
             <Power />
-            {isEnabled ? "Disable skill" : "Enable skill"}
+            {isEnabled ? translate("admin.skillManagerPage.disableSkill") : translate("admin.skillManagerPage.enableSkill")}
           </button>
           <button
             onClick={() => {
@@ -997,12 +991,12 @@ const SkillDetail: React.FC<{
             className={themeSystem.button("ghost", "sm")}
           >
             <RotateCcw />
-            Reset to defaults
+            {translate("admin.skillManagerPage.resetToDefaults")}
           </button>
         </div>
       </div>
 
-      <UITabs items={tabs} value={tab} onChange={setTab} label={`${manifest.name} sections`} />
+      <UITabs items={tabs} value={tab} onChange={setTab} label={translate("admin.skillManagerPage.nameSections", { name: manifest.name })} />
 
       {tab === "features" && (
         <div className={themeSystem.card("default", "p-4 sm:p-5")}>
@@ -1190,16 +1184,16 @@ const LessonContentEditor: React.FC<{ skillId: string; lesson: Lesson }> = ({
     <div className={themeSystem.card("default", "p-4 sm:p-5 space-y-4")}>
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <div className={themeSystem.sectionHeader.subtitle}>Lesson wording</div>
+          <div className={themeSystem.sectionHeader.subtitle}>{translate("admin.skillManagerPage.lessonWording")}</div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            What a learner reads. Saved on this device; blank uses what the skill shipped.
+            {translate("admin.skillManagerPage.whatALearnerReadsSavedOn")}
           </p>
         </div>
         {edited && (
           <div className="flex items-center gap-2">
             <button onClick={copyForFile} className={themeSystem.button("secondary", "sm")}>
               {copied ? <Check /> : <Copy />}
-              {copied ? "Copied" : "Copy for lessons.json"}
+              {copied ? translate("admin.skillManagerPage.copied") : translate("admin.skillManagerPage.copyForLessonsJson")}
             </button>
             <button
               onClick={() => {
@@ -1209,29 +1203,29 @@ const LessonContentEditor: React.FC<{ skillId: string; lesson: Lesson }> = ({
               className={themeSystem.button("secondary", "sm")}
             >
               <RotateCcw />
-              Reset
+              {translate("admin.skillManagerPage.reset")}
             </button>
           </div>
         )}
       </div>
 
       <ContentField
-        label="Title"
+        label={translate("admin.skillManagerPage.title")}
         value={edit.title ?? ""}
         placeholder={lesson.title}
         onCommit={(title) => LessonContentAPI.set(skillId, lesson.id, { title })}
       />
       <ContentField
-        label="Concept line"
+        label={translate("admin.skillManagerPage.conceptLine")}
         value={edit.concept ?? ""}
         placeholder={lesson.concept}
         onCommit={(concept) => LessonContentAPI.set(skillId, lesson.id, { concept })}
       />
       <ContentField
-        label="Teaching note"
+        label={translate("admin.skillManagerPage.teachingNote")}
         multiline
         value={edit.pedagogyTip ?? ""}
-        placeholder={lesson.pedagogyTip ?? "For the adult watching, not the child."}
+        placeholder={lesson.pedagogyTip ?? translate("admin.skillManagerPage.forTheAdultWatchingNotThe")}
         onCommit={(pedagogyTip) => LessonContentAPI.set(skillId, lesson.id, { pedagogyTip })}
       />
       {/* The first thing a stuck child is told, and the only rung of the hint
@@ -1239,18 +1233,17 @@ const LessonContentEditor: React.FC<{ skillId: string; lesson: Lesson }> = ({
           numbers on screen. Shown to the child and read aloud, so it is written
           to be heard — a short sentence, the strategy, no numbers. */}
       <ContentField
-        label="Hint (first tap)"
+        label={translate("admin.skillManagerPage.hintFirstTap")}
         multiline
         value={edit.kidTip ?? ""}
-        placeholder={play?.kidTip ?? "The strategy, in a child's words. Said out loud."}
+        placeholder={play?.kidTip ?? translate("admin.skillManagerPage.theStrategyInAChildS")}
         onCommit={(kidTip) => LessonContentAPI.set(skillId, lesson.id, { kidTip })}
       />
 
       {edited && (
         <p className="text-[11px] text-slate-500 dark:text-slate-400">
-          These words are on this device only. Copy them into{" "}
-          <code className="font-mono">src/skills/{skillId}/lessons.json</code> to ship them to
-          everyone.
+          {translate("admin.skillManagerPage.theseWordsAreOnThisDevice")}{" "}
+          <code className="font-mono">{translate("admin.skillManagerPage.srcSkillsSkillidLessonsJson", { skillId: skillId })}</code>{" "}{translate("admin.skillManagerPage.toShipThemToEveryone")}
         </p>
       )}
 
@@ -1258,11 +1251,10 @@ const LessonContentEditor: React.FC<{ skillId: string; lesson: Lesson }> = ({
         <div className="space-y-3 pt-2 border-t-2 border-slate-100 dark:border-slate-800">
           <div>
             <div className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
-              Question prompts
+              {translate("admin.skillManagerPage.questionPrompts")}
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              One per situation. Keep the {"{placeholders}"} — they are filled with the numbers the
-              child is looking at.
+              {translate("admin.skillManagerPage.onePerSituationKeepThePlaceholders")}
             </p>
           </div>
           {Object.entries(filePrompts).map(([key, fileText]) => (
@@ -1312,20 +1304,20 @@ const LessonPreview: React.FC<{ lesson: Lesson; onClose: () => void }> = ({ less
     <div className="fixed inset-0 z-50 flex flex-col bg-canvas">
       <div className="border-b-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
         <div className="flex items-center gap-3 px-4 pt-2.5">
-          <UIBadge variant="warning">Preview</UIBadge>
+          <UIBadge variant="warning">{translate("admin.skillManagerPage.preview")}</UIBadge>
           <UILessonIcon name={lesson.iconName} tone={lesson.iconTone} variant="bare" size="sm" />
           <div className="min-w-0 flex-1">
             <div className="text-sm font-bold text-slate-900 dark:text-white truncate">
               {lesson.title}
             </div>
             <div className="text-[11px] font-mono text-slate-500 dark:text-slate-400 truncate">
-              progress is not saved
+              {translate("admin.skillManagerPage.progressIsNotSaved")}
               {awarded > 0 && ` · ${awarded} XP discarded`}
             </div>
           </div>
           <button onClick={onClose} className={themeSystem.button("secondary", "sm")}>
             <X />
-            Close
+            {translate("admin.skillManagerPage.close")}
           </button>
         </div>
 
@@ -1430,25 +1422,25 @@ export const SkillManagerPage: React.FC = () => {
     <div className={themeSystem.spacing.section}>
       <UISectionHeader
         icon={<Puzzle />}
-        title="Skill Manager"
-        subtitle="Every skill in this build. Turn one on or off, tune how it behaves, or edit what it says."
+        title={translate("admin.skillManagerPage.skillManager")}
+        subtitle={translate("admin.skillManagerPage.everySkillInThisBuildTurn")}
       />
 
       {/* The log spans every skill, so it is a peer of the skill list rather
           than something buried inside one skill's detail page. */}
       <UITabs
         items={[
-          { id: "skills", label: "Skills", count: SKILLS.length },
-          { id: "log", label: "Learning log" },
+          { id: "skills", label: translate("admin.skillManagerPage.skills"), count: SKILLS.length },
+          { id: "log", label: translate("admin.skillManagerPage.learningLog") },
           // Its own tab rather than a section of the learning log: that log
           // answers "is this understood?", and this one answers "how fluent is
           // it?". Reading a speed table as a mastery table is the misreading
           // worth designing against, so they do not share a screen.
-          { id: "practice", label: "Practice log" },
+          { id: "practice", label: translate("admin.skillManagerPage.practiceLog") },
         ]}
         value={tab}
         onChange={setTab}
-        label="Skill manager sections"
+        label={translate("admin.skillManagerPage.skillManagerSections")}
       />
 
       {tab === "log" ? (
@@ -1458,28 +1450,28 @@ export const SkillManagerPage: React.FC = () => {
       ) : (
         <>
           <UIStatGrid>
-            <UIStatTile icon={<Package />} value={String(totals.skills)} label="Installed" />
+            <UIStatTile icon={<Package />} value={String(totals.skills)} label={translate("admin.skillManagerPage.installed")} />
             <UIStatTile
               icon={<Power />}
               value={String(totals.visible)}
-              label="Visible to learner"
+              label={translate("admin.skillManagerPage.visibleToLearner")}
               tone="success"
             />
-            <UIStatTile icon={<BookOpen />} value={String(totals.lessons)} label="Lessons" />
+            <UIStatTile icon={<BookOpen />} value={String(totals.lessons)} label={translate("admin.skillManagerPage.lessons")} />
             <UIStatTile
               icon={<SlidersHorizontal />}
               value={totals.activeFeatures}
-              label="Features on"
+              label={translate("admin.skillManagerPage.featuresOn")}
             />
           </UIStatGrid>
 
           {/* Who the gate is being evaluated against. No accounts yet, so this is
           per-device — see skills/viewer.ts. */}
           <div className={themeSystem.card("default", "p-4 flex flex-wrap items-center gap-4")}>
-            <span className="text-sm font-bold text-slate-900 dark:text-white">Viewing as</span>
+            <span className="text-sm font-bold text-slate-900 dark:text-white">{translate("admin.skillManagerPage.viewingAs")}</span>
 
             <label className="flex items-center gap-2 text-sm">
-              <span className="text-slate-600 dark:text-slate-300">Age</span>
+              <span className="text-slate-600 dark:text-slate-300">{translate("admin.skillManagerPage.age")}</span>
               <input
                 type="number"
                 min={3}
@@ -1498,7 +1490,7 @@ export const SkillManagerPage: React.FC = () => {
               onClick={() => setViewer({ isDeveloper: !viewer.isDeveloper })}
               className={themeSystem.button(viewer.isDeveloper ? "primary" : "secondary", "sm")}
             >
-              Include drafts
+              {translate("admin.skillManagerPage.includeDrafts")}
             </button>
           </div>
 

@@ -11,6 +11,7 @@ import { request } from "../lib/sync";
 import { accessToken } from "../lib/sync/session";
 import { tutorHeaders } from "../lib/tutorApi";
 import type { Band, Language, Passage, QuestionCounts } from "./data/passage";
+import { translate } from "../lib/i18n";
 
 /** How long a shelf refresh may take before the device plays what it already has. */
 export const BOOKS_DEADLINE_MS = 4_000;
@@ -139,6 +140,21 @@ export interface ModelDraft {
   spell?: unknown;
 }
 
+export async function requestAiStory(input: {
+  provider?: Provider;
+  language: Language;
+  band: Band;
+  idea: string;
+  category?: string;
+  story?: string;
+  takeawayOnly?: boolean;
+}): Promise<{ title: string; story: string; provider: string; takeaway?: string }> {
+  const res = await fetch("/api/library/story", { method: "POST", headers: await tutorHeaders(), body: JSON.stringify(input) });
+  const body = (await res.json().catch(() => null)) as { title?: string; story?: string; takeaway?: string; provider?: string; error?: { message?: string } } | null;
+  if (!res.ok || !body?.story) throw new Error(body?.error?.message ?? translate("studio.error.storyWriterFailed"));
+  return { title: body.title?.trim() ?? "", story: body.story.trim(), takeaway: body.takeaway?.trim(), provider: body.provider ?? input.provider ?? "gemini" };
+}
+
 export async function requestAiDraft(input: {
   provider?: Provider;
   language: Language;
@@ -150,7 +166,7 @@ export async function requestAiDraft(input: {
 }): Promise<{ draft: ModelDraft; provider: string }> {
   const res = await fetch("/api/library/draft", { method: "POST", headers: await tutorHeaders(), body: JSON.stringify(input) });
   const body = (await res.json().catch(() => null)) as { draft?: ModelDraft; provider?: string; error?: { message?: string } } | null;
-  if (!res.ok || !body?.draft) throw new Error(body?.error?.message ?? "The drafter could not be reached.");
+  if (!res.ok || !body?.draft) throw new Error(body?.error?.message ?? translate("studio.error.drafterUnreachable"));
   return { draft: body.draft, provider: body.provider ?? input.provider ?? "gemini" };
 }
 
@@ -158,14 +174,14 @@ export async function requestAiCorrection(input: {
   provider?: Provider;
   language: Language;
   band: Band;
-  sentences: string[];
+  sentences: Array<{ id: string; text: string }>;
   question: unknown;
   checks: Array<{ message: string; status: string }>;
   easyWords?: string[];
 }): Promise<{ question: unknown; explanation: string; provider: string }> {
   const res = await fetch("/api/library/correct-question", { method: "POST", headers: await tutorHeaders(), body: JSON.stringify(input) });
   const body = (await res.json().catch(() => null)) as { question?: unknown; explanation?: string; provider?: string; error?: { message?: string } } | null;
-  if (!res.ok || !body?.question) throw new Error(body?.error?.message ?? "The question could not be corrected.");
+  if (!res.ok || !body?.question) throw new Error(body?.error?.message ?? translate("studio.error.correctFailed"));
   return { question: body.question, explanation: body.explanation ?? "The AI suggested a corrected question.", provider: body.provider ?? input.provider ?? "gemini" };
 }
 

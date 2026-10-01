@@ -115,7 +115,7 @@ async def replace_legacy_label(
 
 async def reset_default(db: AsyncIOMotorDatabase, item: dict[str, Any]) -> None:
     """Force a shipped default back to what the code says. Used by the CLI."""
-    optional = {"badge", "requires", "roles"}
+    optional = {"badge", "labels", "badges", "requires", "roles"}
     unset = {
         **{key: "" for key in optional if key not in item},
         "visibilityPinned": "",

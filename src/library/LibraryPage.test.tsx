@@ -149,8 +149,18 @@ describe("a whole book, as a child plays it", () => {
     fireEvent.click(screen.getByRole("button", { name: "Back to the library" }));
     expect(screen.getByRole("button", { name: /^At the Market\. Level A\. Finished ✓/ })).toBeTruthy();
 
+    // The reading is traced page by page, ahead of the quiz, in the same log.
+    const all = LearningLog.all({ skillId: "koda-library" });
+    const reading = all.filter((e) => e.activityId === "reading");
+    expect(reading.map((e) => e.type)).toEqual(["reading_started", "page_read", "page_read", "reading_finished"]);
+    const pages = reading.filter((e) => e.type === "page_read") as Array<{ page: number; wordsTapped: string[]; readId: string }>;
+    expect(pages.map((p) => p.page)).toEqual([1, 2]);
+    expect(pages[0].wordsTapped).toEqual(["mango"]);
+    expect(new Set(reading.map((e) => (e as { readId?: string }).readId)).size).toBe(1);
+    expect(all.findIndex((e) => e.type === "reading_finished")).toBeLessThan(all.findIndex((e) => e.type === "lesson_started"));
+
     // The round is in the learning log exactly as a lesson's would be.
-    const events = LearningLog.all({ skillId: "koda-library" });
+    const events = all.filter((e) => e.activityId === "passage");
     const types = events.map((e) => e.type);
     expect(types[0]).toBe("lesson_started");
     expect(types.filter((t) => t === "question_presented")).toHaveLength(7);

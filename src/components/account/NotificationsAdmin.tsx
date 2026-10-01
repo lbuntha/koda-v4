@@ -8,6 +8,7 @@ import { PushJobs } from "./PushJobs";
 import { PushLogPanel } from "./PushLogPanel";
 import { PushTemplates } from "./PushTemplates";
 
+import { translate } from "../../lib/i18n";
 /**
  * Everything about how Koda reaches a person, in one place.
  *
@@ -64,7 +65,7 @@ export const NotificationsAdmin: React.FC<{
         <Channel
           name="Push"
           icon={<Bell className="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0" />}
-          summary="A notification on a phone, through Firebase Cloud Messaging"
+          summary={translate("admin.notificationsAdmin.aNotificationOnAPhoneThrough")}
         >
           <div className="space-y-4">
             {show("overview") && <PushDiagnostics />}
@@ -81,7 +82,7 @@ export const NotificationsAdmin: React.FC<{
         <Channel
           name="Email"
           icon={<Mail className="w-5 h-5 text-slate-500 dark:text-slate-400 shrink-0" />}
-          summary="Notification emails, plus sign-in links and resets, through SMTP"
+          summary={translate("admin.notificationsAdmin.notificationEmailsPlusSignInLinks")}
         >
           <EmailPanel />
         </Channel>

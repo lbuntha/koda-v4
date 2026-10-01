@@ -328,9 +328,26 @@ export async function sendTestNotification(kind?: string): Promise<TestSendResul
   return await request<TestSendResult>("/system/push/test", {
     method: "POST",
     token: await accessToken(),
-    body: { kind: kind ?? null },
+    body: { kind: kind ?? null, language: wordingLanguage },
   });
 }
+
+/**
+ * The language the wording editor is reading and writing.
+ *
+ * Every family hears notifications in the language they chose in the app, so
+ * each language has its own wording. Held here rather than threaded through
+ * every card: the editor sets it once, and each read, save, reset and test
+ * send below goes to that language.
+ */
+let wordingLanguage = "en";
+
+export function setWordingLanguage(code: string): void {
+  wordingLanguage = code;
+}
+
+const inLanguage = (path: string): string =>
+  wordingLanguage === "en" ? path : `${path}${path.includes("?") ? "&" : "?"}language=${encodeURIComponent(wordingLanguage)}`;
 
 export interface NotificationTemplate {
   id: string;
@@ -372,18 +389,22 @@ export interface EmailFrame {
 export interface NotificationWording {
   templates: NotificationTemplate[];
   frame: EmailFrame;
+  /** The language these words are in. */
+  language?: string;
+  /** Every language notifications may be worded in on this server. */
+  languages?: { code: string; name: string; englishName: string }[];
 }
 
 /** Every kind's push and email wording, and the email frame. */
 export async function notificationWording(): Promise<NotificationWording> {
-  return await request<NotificationWording>("/system/push/templates", { token: await accessToken() });
+  return await request<NotificationWording>(inLanguage("/system/push/templates"), { token: await accessToken() });
 }
 
 export async function rewordNotificationEmail(
   kind: string,
   wording: { subject: string; body: string },
 ): Promise<NotificationWording> {
-  return await request<NotificationWording>(`/system/push/templates/${kind}/email`, {
+  return await request<NotificationWording>(inLanguage(`/system/push/templates/${kind}/email`), {
     method: "PATCH",
     token: await accessToken(),
     body: wording,
@@ -391,7 +412,7 @@ export async function rewordNotificationEmail(
 }
 
 export async function resetNotificationEmail(kind: string): Promise<NotificationWording> {
-  return await request<NotificationWording>(`/system/push/templates/${kind}/email`, {
+  return await request<NotificationWording>(inLanguage(`/system/push/templates/${kind}/email`), {
     method: "DELETE",
     token: await accessToken(),
   });
@@ -400,7 +421,7 @@ export async function resetNotificationEmail(kind: string): Promise<Notification
 export async function rewordEmailFrame(
   frame: Pick<EmailFrame, "body" | "footer" | "accountFooter">,
 ): Promise<NotificationWording> {
-  return await request<NotificationWording>("/system/email/frame", {
+  return await request<NotificationWording>(inLanguage("/system/email/frame"), {
     method: "PATCH",
     token: await accessToken(),
     body: frame,
@@ -408,14 +429,14 @@ export async function rewordEmailFrame(
 }
 
 export async function resetEmailFrame(): Promise<NotificationWording> {
-  return await request<NotificationWording>("/system/email/frame", {
+  return await request<NotificationWording>(inLanguage("/system/email/frame"), {
     method: "DELETE",
     token: await accessToken(),
   });
 }
 
 export async function notificationTemplates(): Promise<NotificationTemplate[]> {
-  const body = await request<{ templates: NotificationTemplate[] }>("/system/push/templates", {
+  const body = await request<{ templates: NotificationTemplate[] }>(inLanguage("/system/push/templates"), {
     token: await accessToken(),
   });
   return body.templates;
@@ -426,7 +447,7 @@ export async function rewordNotification(
   wording: { title: string; body: string },
 ): Promise<NotificationTemplate[]> {
   const body = await request<{ templates: NotificationTemplate[] }>(
-    `/system/push/templates/${kind}`,
+    inLanguage(`/system/push/templates/${kind}`),
     { method: "PATCH", token: await accessToken(), body: wording },
   );
   return body.templates;
@@ -435,7 +456,7 @@ export async function rewordNotification(
 /** Back to the words the code ships. */
 export async function resetNotificationWording(kind: string): Promise<NotificationTemplate[]> {
   const body = await request<{ templates: NotificationTemplate[] }>(
-    `/system/push/templates/${kind}`,
+    inLanguage(`/system/push/templates/${kind}`),
     { method: "DELETE", token: await accessToken() },
   );
   return body.templates;
@@ -925,6 +946,6 @@ export async function sendTestEmail(kind?: string): Promise<TestEmailResult> {
   return await request<TestEmailResult>("/system/email/test", {
     method: "POST",
     token: await accessToken(),
-    body: { kind: kind ?? null },
+    body: { kind: kind ?? null, language: wordingLanguage },
   });
 }

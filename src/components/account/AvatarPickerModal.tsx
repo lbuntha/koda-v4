@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useT } from "../../lib/i18n";
 
 import { ApiError } from "../../lib/sync";
 import { UIButton, UIModal } from "../ui";
@@ -19,6 +20,7 @@ export const AvatarPickerModal: React.FC<AvatarPickerModalProps> = ({
   onSave,
 }) => {
   const [selected, setSelected] = useState(currentSeed ?? "");
+  const { t } = useT();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,18 +48,18 @@ export const AvatarPickerModal: React.FC<AvatarPickerModalProps> = ({
     <UIModal
       isOpen={isOpen}
       onClose={onClose}
-      title="Choose your avatar"
+      title={t("avatar.title")}
       footer={(
         <>
-          <UIButton variant="secondary" onClick={onClose}>Cancel</UIButton>
+          <UIButton variant="secondary" onClick={onClose}>{t("common.cancel")}</UIButton>
           <UIButton variant="primary" isLoading={saving} disabled={!selected} onClick={() => void save()}>
-            Use this avatar
+            {t("avatar.use")}
           </UIButton>
         </>
       )}
     >
       <p className="mb-4 text-sm text-body">
-        Pick from Koda Art or the classic collection. Your choice follows your account on every device.
+        {t("avatar.note")}
       </p>
       <AvatarArtChoices currentSeed={currentSeed} selectedSeed={selected} onSelect={setSelected} />
       {error && <p className="mt-3 text-sm text-rose-600">{error}</p>}

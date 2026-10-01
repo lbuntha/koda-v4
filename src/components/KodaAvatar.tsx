@@ -2,6 +2,7 @@ import React from "react";
 import { motion } from "motion/react";
 import { Sparkles, Volume2, Mic } from "lucide-react";
 
+import { translate } from "../lib/i18n";
 interface KodaAvatarProps {
   state: "thinking" | "speaking" | "listening" | "cheering" | "idle";
   isVoiceActive?: boolean;
@@ -71,30 +72,30 @@ export const KodaAvatar: React.FC<KodaAvatarProps> = ({ state, isVoiceActive }) 
       {/* Info Label */}
       <div className="flex flex-col z-10">
         <div className="flex items-center gap-2">
-          <span className="text-xs sm:text-sm font-bold text-white tracking-tight">Koda</span>
+          <span className="text-xs sm:text-sm font-bold text-white tracking-tight">{translate("app.kodaAvatar.koda")}</span>
           <span className="text-[10px] font-semibold uppercase tracking-wider text-cyan-300 bg-cyan-950 px-2 py-0.5 rounded-md border border-cyan-800/60">
-            AI Math Coach
+            {translate("app.kodaAvatar.aiMathCoach")}
           </span>
         </div>
         <div className="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5 font-medium">
           {state === "speaking" && (
             <span className="flex items-center gap-1 text-cyan-400 text-xs">
-              <Volume2 className="w-3 h-3 animate-pulse" /> Explaining concept...
+              <Volume2 className="w-3 h-3 animate-pulse" />{" "}{translate("app.kodaAvatar.explainingConcept")}
             </span>
           )}
           {state === "thinking" && (
-            <span className="text-purple-300 text-xs">Thinking of a guiding hint...</span>
+            <span className="text-purple-300 text-xs">{translate("app.kodaAvatar.thinkingOfAGuidingHint")}</span>
           )}
           {state === "listening" && (
             <span className="flex items-center gap-1 text-emerald-400 text-xs">
-              <Mic className="w-3 h-3 animate-pulse" /> Listening to you...
+              <Mic className="w-3 h-3 animate-pulse" />{" "}{translate("app.kodaAvatar.listeningToYou")}
             </span>
           )}
           {state === "cheering" && (
-            <span className="text-emerald-400 font-bold text-xs">Great intuition! Keep going!</span>
+            <span className="text-emerald-400 font-bold text-xs">{translate("app.kodaAvatar.greatIntuitionKeepGoing")}</span>
           )}
           {state === "idle" && (
-            <span className="text-slate-400 text-xs">Ready to explore with you</span>
+            <span className="text-slate-400 text-xs">{translate("app.kodaAvatar.readyToExploreWithYou")}</span>
           )}
         </div>
       </div>

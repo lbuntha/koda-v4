@@ -1,5 +1,6 @@
 import { tutorHeaders } from "../lib/tutorApi";
 import { BANNER, PORTRAIT, type PictureKind } from "./pictureShape";
+import { translate } from "../lib/i18n";
 
 /**
  * A real (raster) picture for a book, from a prompt.
@@ -10,6 +11,8 @@ import { BANNER, PORTRAIT, type PictureKind } from "./pictureShape";
  */
 
 export type ImageProvider = "gemini" | "openai";
+/** The look of a made picture. The description says what; this says how. */
+export type ImageStyle = "3d" | "flat" | "painted";
 
 async function reasonFrom(res: Response, fallback: string): Promise<string> {
   const body = (await res.json().catch(() => null)) as { error?: { message?: string } } | null;
@@ -17,16 +20,39 @@ async function reasonFrom(res: Response, fallback: string): Promise<string> {
 }
 
 /** One picture, close to `kind`'s shape but not yet exactly it. Throws the server's reason when it cannot. */
-export async function generateBookImage(prompt: string, kind: PictureKind, provider: ImageProvider): Promise<Blob> {
+export async function generateBookImage(prompt: string, kind: PictureKind, provider: ImageProvider, style: ImageStyle = "painted"): Promise<Blob> {
   const res = await fetch(`/api/library/image/${provider}`, {
     method: "POST",
     headers: await tutorHeaders(),
-    body: JSON.stringify({ prompt, kind }),
+    body: JSON.stringify({ prompt, kind, style }),
   });
-  if (!res.ok) throw new Error(await reasonFrom(res, "The picture could not be made. Try again."));
+  if (!res.ok) throw new Error(await reasonFrom(res, translate("studio.picture.makeFailedRetry")));
   const blob = await res.blob();
-  if (!blob.size) throw new Error("No picture came back. Try again.");
+  if (!blob.size) throw new Error(translate("studio.picture.noneBack"));
   return blob;
+}
+
+export interface BriefOptions {
+  provider: ImageProvider;
+  mode: "svg" | "image";
+  kind: PictureKind;
+  /** The subject alone — no people or animals unless they are the subject. */
+  subjectOnly: boolean;
+  /** Draw it as it looks in Cambodia. */
+  cambodia: boolean;
+}
+
+/** A short description ("សាលា", "a school") rewritten as a full brief for the picture models. */
+export async function improvePicturePrompt(text: string, options: BriefOptions): Promise<string> {
+  const res = await fetch("/api/library/image/prompt", {
+    method: "POST",
+    headers: await tutorHeaders(),
+    body: JSON.stringify({ text, ...options }),
+  });
+  if (!res.ok) throw new Error(await reasonFrom(res, translate("studio.picture.improveFailedRetry")));
+  const body = (await res.json().catch(() => null)) as { prompt?: string } | null;
+  if (!body?.prompt) throw new Error(translate("studio.picture.nothingBack"));
+  return body.prompt;
 }
 
 export interface CropRect {
@@ -64,10 +90,10 @@ export async function cropToShape(blob: Blob, kind: PictureKind): Promise<Blob> 
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("This browser cannot prepare pictures.");
+  if (!ctx) throw new Error(translate("studio.picture.browserCannotPictures"));
   ctx.drawImage(bitmap, sx, sy, width, height, 0, 0, width, height);
   bitmap.close?.();
   const out = await new Promise<Blob | null>((ok) => canvas.toBlob(ok, "image/png"));
-  if (!out) throw new Error("The picture could not be prepared.");
+  if (!out) throw new Error(translate("studio.picture.prepareFailed"));
   return out;
 }

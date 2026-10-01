@@ -562,7 +562,9 @@ async def test_the_test_send_takes_no_recipient(client, admin, seeded):
 
     assert not route.get("parameters"), "a test send that can name a target is an arbitrary-push primitive"
     fields = set(schema["components"]["schemas"]["TestSendIn"]["properties"])
-    assert fields == {"kind"}, fields
+    # Which wording to preview — the kind, and the language it is worded in.
+    # Neither names a person; anything beyond these two is a new question.
+    assert fields == {"kind", "language"}, fields
 
 
 async def test_the_test_send_is_honest_about_the_console_driver(client, admin, db, seeded):

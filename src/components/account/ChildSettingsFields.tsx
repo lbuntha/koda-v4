@@ -14,6 +14,7 @@ import { playSound } from "../../utils/audio";
 import { usePersonaRoster } from "../../lib/usePersona";
 import { PersonaPicker } from "./PersonaPicker";
 import { UIToggle } from "../ui";
+import { translate, useT } from "../../lib/i18n";
 
 /**
  * How Koda behaves for one child, as controls a parent can set in a glance.
@@ -31,18 +32,8 @@ import { UIToggle } from "../ui";
 /** The caps a parent actually picks. The store still accepts anything sane. */
 const CAP_CHOICES: (number | null)[] = [null, 15, 20, 30, 45, 60];
 
-const CADENCE_CHOICES: { id: GoalCadence; label: string; detail: (who: string) => string }[] = [
-  {
-    id: "daily",
-    label: "Days",
-    detail: () => "Practise today to grow it.",
-  },
-  {
-    id: "weekly",
-    label: "Weeks",
-    detail: () => "Practise this week to grow it.",
-  },
-];
+/* Worded under `childSettings.cadence.<id>.*`. */
+const CADENCE_CHOICES: { id: GoalCadence }[] = [{ id: "daily" }, { id: "weekly" }];
 
 /** One labelled control in the same shell `DailyGoalField` uses. */
 const Row: React.FC<{
@@ -140,9 +131,11 @@ const hoursExcept = (taken: number): number[] => HOURS.filter((hour) => hour !==
 const hoursSummary = (hours: AllowedHours, who: string): string => {
   const from = hourLabel(hours.from);
   const to = hourLabel(hours.to);
-  return hours.from < hours.to
-    ? `${who}: ${from}–${to}.`
-    : `${who}: ${from}–${to} overnight.`;
+  return translate(hours.from < hours.to ? "childSettings.hours.window" : "childSettings.hours.overnight", {
+    who,
+    from,
+    to,
+  });
 };
 
 export interface ChildSettingsFieldsProps {
@@ -212,11 +205,11 @@ const startChoices = (age: number | null): StartChoice[] => {
       id: "age",
       label:
         age === null
-          ? "By age (add a birth year)"
-          : `By age — ${landsOn?.title ?? "the start"}`,
+          ? translate("childSettings.start.byAgeNeedsYear")
+          : translate("childSettings.start.byAge", { unit: landsOn?.title ?? translate("childSettings.start.theStart") }),
       value: "age",
     },
-    { id: "start", label: "From the very start", value: null },
+    { id: "start", label: translate("childSettings.start.fromStart"), value: null },
     ...pinned,
   ];
 };
@@ -240,12 +233,15 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
   childAge = null,
   voice = "parent",
 }) => {
+  const { t, language } = useT();
   const self = voice === "self";
-  const who = self ? "You" : childName?.trim() || "this child";
+  const v = self ? "self" : "parent";
+  const who = self ? t("childSettings.you") : childName?.trim() || t("children.thisChild");
   // Only to know whether there is a choice to offer at all; the picker itself
   // resolves the chosen one.
   const roster = usePersonaRoster();
-  const starts = React.useMemo(() => startChoices(childAge), [childAge]);
+  // `language`: the option labels are words.
+  const starts = React.useMemo(() => startChoices(childAge), [childAge, language]);
   const start = chosen(starts, value.startingPoint);
 
   return (
@@ -254,11 +250,11 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
         stacked
         icon={<Clock className="h-5 w-5" />}
         tint="text-indigo-500"
-        title="Daily play time"
-        hint="Set a daily time limit."
+        title={t("childSettings.playTime.title")}
+        hint={t("childSettings.playTime.hint")}
       >
         <Choices
-          ariaLabel="Daily time limit"
+          ariaLabel={t("childSettings.playTime.aria")}
           /* A cap that is not one of the presets — set on another device, or
              from an older document — joins the row rather than leaving nothing
              selected, so opening this screen cannot silently change it. */
@@ -271,12 +267,12 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
           }
           value={value.sessionMinutes}
           keyOf={(minutes) => String(minutes)}
-          labelOf={(minutes) => (minutes === null ? "No limit" : `${minutes} min`)}
+          labelOf={(minutes) => (minutes === null ? t("childSettings.playTime.noLimit") : t("childSettings.playTime.minutes", { count: minutes }))}
           onSelect={(sessionMinutes) => onChange({ sessionMinutes })}
         />
         {value.sessionMinutes !== null && (
           <p className="text-xs text-muted">
-            Started rounds can finish.
+            {t("childSettings.playTime.finish")}
           </p>
         )}
       </Row>
@@ -290,8 +286,8 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
         stacked
         icon={<Moon className="h-5 w-5" />}
         tint="text-purple-500"
-        title="Play hours"
-        hint="Choose when Koda is available."
+        title={t("childSettings.hours.title")}
+        hint={t("childSettings.hours.hint")}
       >
         <div className="flex flex-wrap items-center gap-2">
           <UIToggle
@@ -300,14 +296,14 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
               playSound("pop");
               onChange({ allowedHours: value.allowedHours ? null : DEFAULT_HOURS });
             }}
-            label="Limit play hours"
+            label={t("childSettings.hours.limit")}
           />
           {value.allowedHours && (
             <div className="flex flex-wrap items-center gap-2">
               <label className="flex items-center gap-2 text-xs text-muted">
-                From
+                {t("childSettings.hours.from")}
                 <select
-                  aria-label="Koda opens at"
+                  aria-label={t("childSettings.hours.opensAt")}
                   className={themeSystem.field("sm")}
                   value={value.allowedHours.from}
                   onChange={(event) =>
@@ -327,9 +323,9 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
                 </select>
               </label>
               <label className="flex items-center gap-2 text-xs text-muted">
-                until
+                {t("childSettings.hours.until")}
                 <select
-                  aria-label="Koda shuts at"
+                  aria-label={t("childSettings.hours.shutsAt")}
                   className={themeSystem.field("sm")}
                   value={value.allowedHours.to}
                   onChange={(event) =>
@@ -354,7 +350,7 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
         <p className="text-xs text-muted">
           {value.allowedHours
             ? hoursSummary(value.allowedHours, self ? "Koda" : who)
-            : "Available all day."}
+            : t("childSettings.hours.allDay")}
         </p>
       </Row>
 
@@ -362,8 +358,8 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
         stacked
         icon={<Flag className="h-5 w-5" />}
         tint="text-emerald-500"
-        title="Starting lesson"
-        hint={self ? "Skip lessons you already know." : "Skip lessons they already know."}
+        title={t("childSettings.start.title")}
+        hint={t(`childSettings.start.hint.${v}`)}
       >
         {/*
           * A dropdown, not the row of buttons the other settings use: the course
@@ -373,7 +369,7 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
           * picking a starting point needs to recognise the work, not count.
           */}
         <select
-          aria-label={self ? "Where you start" : "Where this child starts"}
+          aria-label={t(`childSettings.start.aria.${v}`)}
           className={themeSystem.field("sm", "w-full")}
           value={start.id}
           onChange={(event) => {
@@ -388,21 +384,18 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
           ))}
         </select>
         <p className="text-xs text-muted">
-          {value.startingPoint === "age"
-            ? childAge === null
-              ? self
-                ? "Add your birth year to start by age."
-                : `Add ${who}'s birth year to start by age.`
-              : self
-                ? "Starts at the right level for your age."
-                : `Starts at the right level for ${who}'s age.`
-            : value.startingPoint === null
-              ? self
-                ? "You start at lesson one."
-                : `${who} starts at lesson one.`
-              : self
-                ? "You start at this lesson."
-                : `${who} starts at this lesson.`}
+          {t(
+            `childSettings.start.note.${
+              value.startingPoint === "age"
+                ? childAge === null
+                  ? "addYear"
+                  : "byAge"
+                : value.startingPoint === null
+                  ? "lessonOne"
+                  : "thisLesson"
+            }.${v}`,
+            { who },
+          )}
         </p>
       </Row>
 
@@ -414,13 +407,13 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
           stacked
           icon={<GraduationCap className="h-5 w-5" />}
           tint="text-indigo-500"
-          title="Teacher"
-          hint={self ? "Choose who teaches you." : "Choose who teaches them."}
+          title={t("childSettings.teacher.title")}
+          hint={t(`childSettings.teacher.hint.${v}`)}
         >
           <PersonaPicker
             value={value.personaId}
             onChange={(personaId) => onChange({ personaId })}
-            ariaLabel={self ? "Who teaches you" : `Who teaches ${who}`}
+            ariaLabel={t(`childSettings.teacher.aria.${v}`, { who })}
           />
         </Row>
       )}
@@ -428,12 +421,8 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
       <Row
         icon={<Sparkles className="h-5 w-5" />}
         tint="text-amber-500"
-        title="Koda's help"
-        hint={
-          planHasAi
-            ? "Allow hints and voice help."
-            : "Not included in your plan."
-        }
+        title={t("childSettings.help.title")}
+        hint={planHasAi ? t("childSettings.help.hint") : t("childSettings.help.notInPlan")}
       >
         <UIToggle
           checked={value.aiHelpEnabled}
@@ -443,7 +432,7 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
             playSound("pop");
             onChange({ aiHelpEnabled: !value.aiHelpEnabled });
           }}
-          label="Koda's help"
+          label={t("childSettings.help.title")}
         />
       </Row>
 
@@ -451,21 +440,19 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
         stacked
         icon={<Flame className="h-5 w-5" />}
         tint="text-orange-500"
-        title="Streak"
-        hint="Count streaks by days or weeks."
+        title={t("praise.streak.tag")}
+        hint={t("childSettings.cadence.hint")}
       >
         <Choices
-          ariaLabel="Whether the streak counts days or weeks"
+          ariaLabel={t("childSettings.cadence.aria")}
           options={CADENCE_CHOICES}
           value={CADENCE_CHOICES.find((c) => c.id === value.goalCadence) ?? CADENCE_CHOICES[0]}
           keyOf={(choice) => choice.id}
-          labelOf={(choice) => choice.label}
+          labelOf={(choice) => t(`childSettings.cadence.${choice.id}.label`)}
           onSelect={(choice) => onChange({ goalCadence: choice.id })}
         />
         <p className="text-xs text-muted">
-          {(CADENCE_CHOICES.find((c) => c.id === value.goalCadence) ?? CADENCE_CHOICES[0]).detail(
-            who,
-          )}
+          {t(`childSettings.cadence.${(CADENCE_CHOICES.find((c) => c.id === value.goalCadence) ?? CADENCE_CHOICES[0]).id}.detail`)}
         </p>
         {/*
           * Said here because the two controls sit together and both involve a
@@ -473,7 +460,7 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
           * who assumes otherwise would set one meaning to get the other.
           */}
         <p className="text-xs text-muted">
-          Daily goals count rounds.
+          {t("childSettings.cadence.goalNote")}
         </p>
       </Row>
     </div>

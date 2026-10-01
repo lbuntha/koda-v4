@@ -8,6 +8,7 @@ import {
 } from "../../lib/push";
 import { openNotification } from "../../lib/push/landing";
 
+import { translate } from "../../lib/i18n";
 /**
  * What Koda has told you, where you can go back and read it.
  *
@@ -141,7 +142,7 @@ export const NotificationsBell: React.FC = () => {
     <div className="relative" ref={holder}>
       <button
         onClick={() => void toggle()}
-        aria-label={unread ? `Notifications, ${unread} unread` : "Notifications"}
+        aria-label={unread ? translate("admin.notificationsBell.notificationsUnreadUnread", { unread: unread }) : translate("admin.notificationsBell.notifications")}
         className="relative flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface text-ink transition hover:bg-surface-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
       >
         <Bell className="h-4 w-4" />
@@ -162,7 +163,7 @@ export const NotificationsBell: React.FC = () => {
         >
           <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
             <h3 className="font-mono text-xs font-black uppercase tracking-wider text-muted">
-              Notifications
+              {translate("admin.notificationsBell.notifications")}
             </h3>
             {/* The bell is a glance and the page is a search. A dropdown is the
                 wrong shape for "when did that device sign in", so it says where
@@ -176,13 +177,13 @@ export const NotificationsBell: React.FC = () => {
               }}
               className="font-mono text-[10px] font-bold uppercase tracking-wider text-indigo-600 hover:underline dark:text-indigo-400"
             >
-              See all
+              {translate("admin.notificationsBell.seeAll")}
             </button>
           </div>
 
           {rows.length === 0 ? (
             <p className="px-4 py-6 text-center text-sm text-muted">
-              Nothing yet. Koda will tell you here when something happens on your account.
+              {translate("admin.notificationsBell.nothingYetKodaWillTellYou")}
             </p>
           ) : (
             <div className="max-h-96 overflow-y-auto">
@@ -223,7 +224,7 @@ export const NotificationsBell: React.FC = () => {
                             </span>
                           </div>
                           <p className="mt-0.5 pl-3.5 text-xs text-body">{row.body}</p>
-                          {wasNew.has(row.id) && <span className="sr-only">New</span>}
+                          {wasNew.has(row.id) && <span className="sr-only">{translate("admin.notificationsBell.new")}</span>}
                         </button>
                       </li>
                     ))}

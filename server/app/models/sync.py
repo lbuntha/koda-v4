@@ -20,7 +20,7 @@ DOC_KINDS = {
     "progress",  # XP, level, streak — merged, not overwritten
     "levels",  # stars per completed level
     "goals",  # one learner's daily goal — set by a parent, or by a student
-    "preferences",  # sound, voice, theme
+    "preferences",  # sound, voice, theme, language
     "nav",  # a family's sidebar, overriding the bundled default
     "art",  # a family's own SVG, layered over the bundled collection
     "childSettings",  # what a parent decides for one child: caps, help, cadence

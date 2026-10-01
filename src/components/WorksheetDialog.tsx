@@ -13,6 +13,7 @@ import { themeSystem } from "../lib/themeSystem";
 import { PrintPreview, UIPaper, UIPaperBreak, UIPaperNote, printPaper } from "./print/UIPaper";
 import { UIButton, UIModal } from "./ui";
 
+import { translate } from "../lib/i18n";
 /**
  * A lesson, printed.
  *
@@ -66,7 +67,7 @@ const Sheet: React.FC<{ sheet: Worksheet; withKey: boolean; withMethod: boolean 
       * other than the person sitting next to them.
       */}
     {withMethod && (sheet.method.length > 0 || sheet.example) && (
-      <UIPaperNote title="How it works" className="mb-5">
+      <UIPaperNote title={translate("app.worksheetDialog.howItWorks")} className="mb-5">
         {sheet.method.length > 0 && (
           <ol className="list-decimal space-y-0.5 pl-4">
             {sheet.method.map((step) => (
@@ -76,7 +77,7 @@ const Sheet: React.FC<{ sheet: Worksheet; withKey: boolean; withMethod: boolean 
         )}
         {sheet.example && (
           <div className={sheet.method.length > 0 ? "mt-2" : ""}>
-            <span className="font-black">Example: </span>
+            <span className="font-black">{translate("app.worksheetDialog.example")}</span>
             {sheet.example.prompt}{" "}
             <span className="font-black">
               {sheet.example.answer.split(",").join(", ")}
@@ -112,7 +113,7 @@ const Sheet: React.FC<{ sheet: Worksheet; withKey: boolean; withMethod: boolean 
 
     {withKey && (
       <UIPaperBreak className="mt-8 border-t-2 border-dashed border-slate-300 pt-4">
-        <h2 className="text-sm font-black uppercase tracking-widest text-slate-500">Answers</h2>
+        <h2 className="text-sm font-black uppercase tracking-widest text-slate-500">{translate("app.worksheetDialog.answers")}</h2>
         <ol className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1 sm:grid-cols-3">
           {sheet.items.map((item) => (
             <li key={item.number} className="text-sm tabular-nums">
@@ -154,12 +155,12 @@ export const WorksheetDialog: React.FC<WorksheetDialogProps> = ({ lessons, initi
     <UIModal
       isOpen
       onClose={onClose}
-      title="Print a worksheet"
+      title={translate("app.worksheetDialog.printAWorksheet")}
       maxWidth="max-w-3xl"
       footer={
         <>
           <UIButton variant="secondary" onClick={onClose}>
-            Close
+            {translate("app.worksheetDialog.close")}
           </UIButton>
           <UIButton
             variant="secondary"
@@ -167,7 +168,7 @@ export const WorksheetDialog: React.FC<WorksheetDialogProps> = ({ lessons, initi
             disabled={!sheet?.items.length}
             onClick={() => setDraw((n) => n + 1)}
           >
-            New questions
+            {translate("app.worksheetDialog.newQuestions")}
           </UIButton>
           <UIButton
             variant="primary"
@@ -175,15 +176,14 @@ export const WorksheetDialog: React.FC<WorksheetDialogProps> = ({ lessons, initi
             disabled={!sheet?.items.length}
             onClick={printPaper}
           >
-            Print
+            {translate("app.worksheetDialog.print")}
           </UIButton>
         </>
       }
     >
       {printable.length === 0 ? (
         <p className="text-sm text-muted">
-          None of this skill&rsquo;s lessons can be printed yet. Its questions are things to
-          touch, drag and count on screen — on paper they would be a caption and an empty box.
+          {translate("app.worksheetDialog.noneOfThisSkillRsquoS")}
         </p>
       ) : (
         <div className="space-y-4">
@@ -191,7 +191,7 @@ export const WorksheetDialog: React.FC<WorksheetDialogProps> = ({ lessons, initi
               marked for the print stylesheet to drop. */}
           <div data-print-hide className="space-y-3">
             <label className="block">
-              <span className="text-xs font-bold uppercase tracking-widest text-muted">Lesson</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-muted">{translate("app.worksheetDialog.lesson")}</span>
               <select
                 value={ref}
                 onChange={(e) => setRef(e.target.value)}
@@ -208,7 +208,7 @@ export const WorksheetDialog: React.FC<WorksheetDialogProps> = ({ lessons, initi
             <div className="flex flex-wrap items-center gap-4">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold uppercase tracking-widest text-muted">
-                  Questions
+                  {translate("app.worksheetDialog.questions")}
                 </span>
                 {WORKSHEET_SIZES.map((size) => (
                   <button
@@ -233,7 +233,7 @@ export const WorksheetDialog: React.FC<WorksheetDialogProps> = ({ lessons, initi
                   onChange={(e) => setWithMethod(e.target.checked)}
                   className="h-4 w-4 accent-indigo-600"
                 />
-                How it works
+                {translate("app.worksheetDialog.howItWorks")}
               </label>
 
               <label className="flex items-center gap-2 text-sm text-ink">
@@ -243,7 +243,7 @@ export const WorksheetDialog: React.FC<WorksheetDialogProps> = ({ lessons, initi
                   onChange={(e) => setWithKey(e.target.checked)}
                   className="h-4 w-4 accent-indigo-600"
                 />
-                Answer key
+                {translate("app.worksheetDialog.answerKey")}
               </label>
             </div>
 
@@ -252,9 +252,7 @@ export const WorksheetDialog: React.FC<WorksheetDialogProps> = ({ lessons, initi
                  questions than a long sheet asks for — "add zero" over ten
                  numbers cannot fill thirty rows without repeating. */
               <p className={themeSystem.flash("info", "text-sm")}>
-                This lesson has {sheet.items.length}{" "}
-                {sheet.items.length === 1 ? "question" : "different questions"} to give. The
-                sheet has {sheet.items.length === 1 ? "it" : "all of them"}.
+                {translate("app.worksheetDialog.thisLessonHasLengthValueTo", { length: sheet.items.length, value: sheet.items.length === 1 ? translate("app.worksheetDialog.question") : translate("app.worksheetDialog.differentQuestions"), value2: sheet.items.length === 1 ? translate("app.worksheetDialog.it") : translate("app.worksheetDialog.allOfThem") })}
               </p>
             )}
           </div>

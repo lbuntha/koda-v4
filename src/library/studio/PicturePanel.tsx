@@ -1,17 +1,20 @@
-import { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, ImageOff, ImagePlus, Loader2, PanelBottom, PanelLeft, PanelRight, PanelTop, Pencil, Search, ShieldCheck, Sparkles, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ImageOff, ImagePlus, PanelBottom, PanelLeft, PanelRight, PanelTop, Pencil, Search, Sparkles, Wand2, X } from "lucide-react";
 import { SvgMarkup, useArtLibrary } from "../../assets/svg";
 import type { PagePicture } from "../bookLayout";
 import { PICTURE_PLACES, type PicturePlace } from "../data/passage";
 import { generateSvg } from "../../lib/artGenerationApi";
-import { SUGGESTED_SVG_CATEGORIES, SVG_ID_PATTERN, UNCATEGORISED, listSvgAssets, saveSvgAsset } from "../../lib/svgAssetsApi";
+import { SVG_ID_PATTERN, UNCATEGORISED, listSvgAssets, saveSvgAsset } from "../../lib/svgAssetsApi";
 import { useSystem } from "../../lib/sync";
 import { inspectSvgMarkup, preprocessSvgMarkup } from "../../utils/svg";
 import { playSound } from "../../utils/audio";
 import { isPhoto, PHOTO_ACCEPT, uploadPhoto } from "../photos";
 import { describeShape, type PictureKind } from "../pictureShape";
-import { cropToShape, generateBookImage, type ImageProvider } from "../imageGenerationApi";
+import { cropToShape, generateBookImage, improvePicturePrompt, type ImageProvider, type ImageStyle } from "../imageGenerationApi";
 import { Picture, PICTURE_KEYS } from "../Picture";
+import { aiDefault } from "../../lib/aiDefaults";
+import { UIBadge, UIButton, UIFlashMessage, UIInput, UILinkButton, UITabs, UITextarea, UIToggle } from "../../components/ui";
+import { translate, useT } from "../../lib/i18n";
 
 /**
  * Where a page's picture comes from — the art library, a drawing made to order,
@@ -44,28 +47,66 @@ const KEBAB = (text: string) =>
     .slice(0, 3)
     .join("-");
 
-const chip = "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-sm font-bold transition-colors";
 const STORY = "story";
 const BUILT_IN = "built-in";
 const EVERYTHING = "all";
-const PLACE_NAME: Record<PicturePlace, string> = { top: "Top", bottom: "Bottom", left: "Left", right: "Right" };
+/* Place names are worded under `studio.pages.place.<at>`. */
 const PLACE_ICON = { top: PanelTop, bottom: PanelBottom, left: PanelLeft, right: PanelRight } as const;
 
 /** `uncategorised` is the art library's holding pen, not a collection name. */
 const collectionName = (id: string) =>
-  id === UNCATEGORISED ? "Uncategorised" : id.replace(/-/g, " ").replace(/^./, (c) => c.toUpperCase());
+  id === UNCATEGORISED ? translate("studio.picture.uncategorised") : id.replace(/-/g, " ").replace(/^./, (c) => c.toUpperCase());
 
-type Way = "library" | "draw" | "photo" | "upload";
+type Way = "library" | "ai" | "upload";
+type Provider = ImageProvider;
 
-/** A picture being made, before it is filed. The same three things the Art page's editor asks for. */
+/** A picture being made, before it is used — held above the tabs so a look at the library does not lose it. */
 interface Draft {
   prompt: string;
+  mode: "svg" | "image";
+  kind: PictureKind;
+  /** A drawing's markup, and the name and collection it will be filed under. */
   markup: string;
   name: string;
   category: string;
+  /** A painted picture, already cropped, and a URL to preview it by. */
+  photo: Blob | null;
+  preview: string;
+  /** What "Improve description" is told, set from the context and the author's to change. */
+  subjectOnly: boolean;
+  cambodia: boolean;
+  /** The description before the last improvement, so it can be put back. */
+  before: string | null;
 }
 
-export function PicturePanel({ title, note, chosen, how, promptSeed, suggested, suggestedLabel, photos, allowNone, at, onPlace, onChoose, onClose }: {
+/** The author's standing choices, remembered on this device. */
+interface Prefs {
+  provider: Provider;
+  style: ImageStyle;
+  autoImprove: boolean;
+}
+
+const fieldLabel = "text-xs font-extrabold uppercase tracking-wider text-muted";
+const PREFS_KEY = "koda_picture_prefs_v1";
+/** Only what this author changed is kept, so an untouched provider follows the admin's default. */
+const savedPrefs = (): Partial<Prefs> => {
+  try {
+    return JSON.parse(localStorage.getItem(PREFS_KEY) ?? "{}") as Partial<Prefs>;
+  } catch {
+    return {};
+  }
+};
+const readPrefs = (): Prefs => {
+  const saved = savedPrefs();
+  const provider = saved.provider ?? (aiDefault("ai.pictureProvider") === "openai" ? "openai" : "gemini");
+  return {
+    provider: provider === "openai" ? "openai" : "gemini",
+    style: saved.style === "flat" || saved.style === "painted" ? saved.style : "3d",
+    autoImprove: saved.autoImprove === true,
+  };
+};
+
+export function PicturePanel({ title, note, chosen, how, promptSeed, brief, suggested, suggestedLabel, photos, allowNone, at, onPlace, onChoose, onClose }: {
   title: string;
   /**
    * A consequence of choosing here that the author should know before they do.
@@ -78,12 +119,18 @@ export function PicturePanel({ title, note, chosen, how, promptSeed, suggested, 
   chosen: string | null;
   how: PagePicture["how"];
   /**
-   * What "Draw one" opens with — a finished instruction, not raw text to
+   * What "Make with AI" opens with — a finished instruction, not raw text to
    * interpret. The caller knows what this drawer is for (a page's own line, a
    * cover, a word to recognise) and says so plainly; the model should never
    * have to guess a subject out of a bare story sentence.
    */
   promptSeed?: string;
+  /**
+   * Where "Improve description" starts: a word to recognise wants its subject
+   * alone, and a Khmer book's pictures belong in Cambodia. The author can turn
+   * either off.
+   */
+  brief?: { subjectOnly?: boolean; cambodia?: boolean };
   /** Pictures worth offering first — this page's own words, or this question's three. */
   suggested: string[];
   /** What those first pictures are, since a question's are not a page's words. */
@@ -98,6 +145,7 @@ export function PicturePanel({ title, note, chosen, how, promptSeed, suggested, 
   onChoose(key: string | null | undefined): void;
   onClose(): void;
 }) {
+  const { t } = useT();
   const [way, setWay] = useState<Way>("library");
   const library = useArtLibrary();
   /* The drawing in progress lives here rather than in the tab that shows it: a
@@ -106,7 +154,22 @@ export function PicturePanel({ title, note, chosen, how, promptSeed, suggested, 
      already filled in. `promptSeed` only ever sets the *first* draft — once
      drawn, the field is the author's to edit, not something re-seeded out from
      under them. */
-  const [draft, setDraft] = useState<Draft>({ prompt: promptSeed ?? "", markup: "", name: "", category: STORY });
+  const [draft, setDraft] = useState<Draft>({
+    prompt: promptSeed ?? "", mode: "svg", kind: "banner", markup: "", name: "", category: STORY, photo: null, preview: "",
+    subjectOnly: brief?.subjectOnly ?? false, cambodia: brief?.cambodia ?? false, before: null,
+  });
+  const previewRef = useRef("");
+  previewRef.current = draft.preview;
+  useEffect(() => () => { if (previewRef.current) URL.revokeObjectURL(previewRef.current); }, []);
+  const [prefs, setPrefsState] = useState<Prefs>(readPrefs);
+  const setPrefs = (patch: Partial<Prefs>) => {
+    setPrefsState({ ...prefs, ...patch });
+    try {
+      localStorage.setItem(PREFS_KEY, JSON.stringify({ ...savedPrefs(), ...patch }));
+    } catch {
+      /* remembered for this visit only */
+    }
+  };
 
   // The pull the mounting is for. A failure leaves whatever this device already
   // has — the bundled art and the last snapshot — which is a shorter list, not
@@ -146,12 +209,9 @@ export function PicturePanel({ title, note, chosen, how, promptSeed, suggested, 
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-line px-5 py-3.5 rail:px-6 rail:py-4">
           <div className="min-w-0">
             <h3 className="truncate font-extrabold text-ink">{title}</h3>
-            <p className="text-xs text-muted">{note ?? "Pick one from the library, draw a new one, make a photo, or upload one."}</p>
+            <p className="text-xs text-muted">{note ?? t("studio.picture.note")}</p>
           </div>
-          <button type="button" onClick={onClose} aria-label="Close"
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted transition hover:bg-surface-muted hover:text-ink">
-            <X className="h-5 w-5" aria-hidden="true" />
-          </button>
+          <UIButton type="button" variant="ghost" size="icon" onClick={onClose} aria-label={t("common.close")} icon={<X aria-hidden="true" />} className="shrink-0" />
         </div>
 
         {/* What used to sit in the persistent panel beside the pages: whether
@@ -162,44 +222,38 @@ export function PicturePanel({ title, note, chosen, how, promptSeed, suggested, 
           <div className="grid shrink-0 gap-3 border-b border-line px-5 py-3 rail:px-6">
             {allowNone && (
               <div className="flex flex-wrap gap-2">
-                <button type="button" onClick={() => use(undefined)} aria-pressed={how === "auto"} className={`${chip} ${how === "auto" ? "border-indigo-600 text-ink" : "border-line text-muted"}`}>
-                  <Sparkles className="h-4 w-4" aria-hidden="true" />
-                  Automatic
-                </button>
-                <button type="button" onClick={() => use(null)} aria-pressed={how === "none"} className={`${chip} ${how === "none" ? "border-indigo-600 text-ink" : "border-line text-muted"}`}>
-                  <ImageOff className="h-4 w-4" aria-hidden="true" />
-                  No picture
-                </button>
+                <UIButton type="button" size="sm" variant={how === "auto" ? "primary" : "secondary"} aria-pressed={how === "auto"} onClick={() => use(undefined)} icon={<Sparkles aria-hidden="true" />}>
+                  {t("studio.pages.how.auto")}
+                </UIButton>
+                <UIButton type="button" size="sm" variant={how === "none" ? "primary" : "secondary"} aria-pressed={how === "none"} onClick={() => use(null)} icon={<ImageOff aria-hidden="true" />}>
+                  {t("studio.pages.how.none")}
+                </UIButton>
               </div>
             )}
             {at && chosen && (
               <div>
-                <p className="mb-2 text-xs font-extrabold uppercase tracking-wider text-muted">Picture position</p>
-                <div role="radiogroup" aria-label="Picture position" className="grid grid-cols-4 gap-2">
+                <p className="mb-2 text-xs font-extrabold uppercase tracking-wider text-muted">{t("studio.picture.position")}</p>
+                <div role="radiogroup" aria-label={t("studio.picture.position")} className="grid grid-cols-4 gap-2">
                   {PICTURE_PLACES.map((p) => {
                     const Icon = PLACE_ICON[p];
                     return (
                       <button key={p} type="button" role="radio" aria-checked={at === p} onClick={() => onPlace(p)}
                         className={`flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl border px-2 py-2 text-xs font-bold ${at === p ? "border-indigo-600 bg-surface text-ink" : "border-line text-muted hover:border-indigo-400"}`}>
                         <Icon className="h-5 w-5" aria-hidden="true" />
-                        {PLACE_NAME[p]}
+                        {t(`studio.pages.place.${p}`)}
                       </button>
                     );
                   })}
                 </div>
-                {(at === "left" || at === "right") && <p className="mt-2 text-xs text-muted">On a phone, left goes above the words and right below them, so the text stays large.</p>}
+                {(at === "left" || at === "right") && <p className="mt-2 text-xs text-muted">{t("studio.picture.phoneNote")}</p>}
               </div>
             )}
           </div>
         )}
 
-        <div className="flex shrink-0 gap-2 border-b border-line px-5 py-3 rail:px-6" role="group" aria-label="Where the picture comes from">
-          {([["library", "Library"], ["draw", "Draw one"], ["photo", "AI photo"], ["upload", "Upload"]] as Array<[Way, string]>).map(([id, name]) => (
-            <button key={id} type="button" onClick={() => setWay(id)} aria-pressed={way === id}
-              className={`${chip} ${way === id ? "border-indigo-600 bg-indigo-600 text-white" : "border-line text-muted"}`}>
-              {name}
-            </button>
-          ))}
+        <div className="shrink-0 border-b border-line px-5 py-3 rail:px-6">
+          <UITabs label={t("studio.picture.source")} value={way} onChange={setWay}
+            items={[{ id: "library", label: t("nav.library") }, { id: "ai", label: t("studio.picture.makeAi") }, { id: "upload", label: t("studio.picture.upload") }]} />
         </div>
 
         <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-4 rail:px-6">
@@ -213,13 +267,12 @@ export function PicturePanel({ title, note, chosen, how, promptSeed, suggested, 
               photos={photos}
               onUse={use}
               onRedraw={(key) => {
-                setDraft({ prompt: "", markup: "", name: key, category: library.find((a) => a.id === key)?.category ?? STORY });
-                setWay("draw");
+                setDraft((d) => ({ ...d, prompt: "", mode: "svg", markup: "", name: key, category: library.find((a) => a.id === key)?.category ?? STORY }));
+                setWay("ai");
               }}
             />
           )}
-          {way === "draw" && <DrawWay library={library} draft={draft} setDraft={setDraft} onUsed={use} />}
-          {way === "photo" && <PhotoWay onUsed={use} />}
+          {way === "ai" && <AiWay library={library} draft={draft} setDraft={setDraft} prefs={prefs} setPrefs={setPrefs} onUsed={use} />}
           {way === "upload" && <UploadWay onUsed={use} />}
         </div>
       </div>
@@ -229,6 +282,7 @@ export function PicturePanel({ title, note, chosen, how, promptSeed, suggested, 
 
 /** A row of tiles reused for "this page's words" and "photos in this book" — no redraw handle, just a pick. */
 function QuickTiles({ heading, keys, chosen, onUse }: { heading: string; keys: string[]; chosen: string | null; onUse(key: string): void }) {
+  const { t } = useT();
   if (!keys.length) return null;
   return (
     <div>
@@ -236,10 +290,10 @@ function QuickTiles({ heading, keys, chosen, onUse }: { heading: string; keys: s
       <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
         {keys.map((key) => (
           <li key={key}>
-            <button type="button" onClick={() => onUse(key)} aria-pressed={chosen === key} aria-label={isPhoto(key) ? "Photo" : key} title={isPhoto(key) ? "Photo" : key}
+            <button type="button" onClick={() => onUse(key)} aria-pressed={chosen === key} aria-label={isPhoto(key) ? t("studio.pages.photo") : key} title={isPhoto(key) ? t("studio.pages.photo") : key}
               className={`flex w-full flex-col overflow-hidden rounded-xl border text-left ${chosen === key ? "border-indigo-600 ring-2 ring-indigo-600/30" : "border-line hover:border-indigo-400"}`}>
               <span className="block aspect-square w-full bg-play-sky"><Picture name={key} className="p-2" /></span>
-              <span className="truncate px-2 py-1 text-xs text-muted">{isPhoto(key) ? "Photo" : key}</span>
+              <span className="truncate px-2 py-1 text-xs text-muted">{isPhoto(key) ? t("studio.pages.photo") : key}</span>
             </button>
           </li>
         ))}
@@ -259,6 +313,7 @@ function LibraryWay({ library, loading, chosen, suggested, suggestedLabel, photo
   onUse(key: string): void;
   onRedraw(key: string): void;
 }) {
+  const { t } = useT();
   const [collection, setCollection] = useState(EVERYTHING);
   const [query, setQuery] = useState("");
   const [displayed, setDisplayed] = useState(20);
@@ -270,12 +325,12 @@ function LibraryWay({ library, loading, chosen, suggested, suggestedLabel, photo
       .filter((c) => c !== STORY)
       .sort((a, b) => (a === UNCATEGORISED ? 1 : b === UNCATEGORISED ? -1 : a.localeCompare(b)));
     return [
-      { id: EVERYTHING, name: "All pictures" },
-      { id: STORY, name: "Story art" },
-      { id: BUILT_IN, name: "Built-in" },
+      { id: EVERYTHING, name: t("studio.picture.all") },
+      { id: STORY, name: t("studio.picture.story") },
+      { id: BUILT_IN, name: t("studio.picture.builtIn") },
       ...filed.map((c) => ({ id: c, name: collectionName(c) })),
     ];
-  }, [library]);
+  }, [library, t]);
 
   const keys =
     collection === BUILT_IN ? [...PICTURE_KEYS]
@@ -293,25 +348,24 @@ function LibraryWay({ library, loading, chosen, suggested, suggestedLabel, photo
 
   return (
     <div className="grid gap-4">
-      <QuickTiles heading={suggestedLabel ?? "From this page’s words"} keys={suggested} chosen={chosen} onUse={onUse} />
-      <QuickTiles heading="Photos in this book" keys={photos} chosen={chosen} onUse={onUse} />
+      <QuickTiles heading={suggestedLabel ?? t("studio.picture.fromWords")} keys={suggested} chosen={chosen} onUse={onUse} />
+      <QuickTiles heading={t("studio.picture.photosInBook")} keys={photos} chosen={chosen} onUse={onUse} />
 
       <div className="grid gap-3">
         <label className="relative block">
-          <span className="sr-only">Search pictures</span>
+          <span className="sr-only">{t("studio.picture.search")}</span>
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden="true" />
-          <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search pictures"
-            className="min-h-11 w-full rounded-xl border border-line bg-surface py-2 pl-9 pr-3 text-ink" />
+          <UIInput type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("studio.picture.search")} className="pl-9" />
         </label>
 
         {/* One row that scrolls sideways. A library with twenty collections in it
             would otherwise open on four rows of chips and no pictures. */}
-        <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-1" role="group" aria-label="Collection">
+        <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-1" role="group" aria-label={t("studio.picture.collection")}>
           {collections.map((c) => (
-            <button key={c.id} type="button" onClick={() => setCollection(c.id)} aria-pressed={collection === c.id}
-              className={`${chip} shrink-0 whitespace-nowrap ${collection === c.id ? "border-indigo-600 bg-surface text-ink" : "border-line text-muted"}`}>
+            <UIButton key={c.id} type="button" size="sm" variant={collection === c.id ? "primary" : "secondary"} aria-pressed={collection === c.id}
+              onClick={() => setCollection(c.id)} className="shrink-0 whitespace-nowrap">
               {c.name}
-            </button>
+            </UIButton>
           ))}
         </div>
 
@@ -327,23 +381,20 @@ function LibraryWay({ library, loading, chosen, suggested, suggestedLabel, photo
                   </button>
                   {/* Out of the way until the tile is hovered, focused or in use, so
                       a wall of pictures stays a wall of pictures. */}
-                  <button type="button" onClick={() => onRedraw(key)} aria-label={`Draw ${key} again`} title={`Draw ${key} again`}
-                    className={`absolute right-1 top-1 grid h-9 w-9 place-items-center rounded-full border border-line bg-surface/90 text-muted transition-opacity hover:text-ink focus-visible:opacity-100 group-hover:opacity-100 ${chosen === key ? "opacity-100" : "opacity-0"}`}>
-                    <Pencil className="h-4 w-4" aria-hidden="true" />
-                  </button>
+                  <UIButton type="button" variant="secondary" size="icon" onClick={() => onRedraw(key)} aria-label={t("studio.picture.makeAgainKey", { key })} title={t("studio.picture.makeAgainKey", { key })} icon={<Pencil aria-hidden="true" />}
+                    className={`absolute right-1 top-1 transition-opacity focus-visible:opacity-100 group-hover:opacity-100 ${chosen === key ? "opacity-100" : "opacity-0"}`} />
                 </li>
               ))}
             </ul>
             {allShown.length > displayed && (
-              <button type="button" onClick={() => setDisplayed((d) => d + BATCH_SIZE)}
-                className={`${chip} w-full justify-center border-line text-ink hover:border-indigo-400`}>
-                Load more ({displayed} of {allShown.length})
-              </button>
+              <UIButton type="button" variant="secondary" size="sm" fullWidth onClick={() => setDisplayed((d) => d + BATCH_SIZE)}>
+                {t("studio.picture.loadMore", { shown: displayed, total: allShown.length })}
+              </UIButton>
             )}
           </>
         ) : (
           <p className="rounded-xl border border-dashed border-line px-3 py-4 text-sm text-muted">
-            {loading ? "Fetching the art library…" : q ? `No picture called “${query}” here.` : "Nothing in this collection yet. Draw one, or add pictures on the Art page."}
+            {loading ? t("studio.picture.fetching") : q ? t("studio.picture.noneCalled", { query }) : t("studio.picture.emptyCollection")}
           </p>
         )}
       </div>
@@ -351,185 +402,10 @@ function LibraryWay({ library, loading, chosen, suggested, suggestedLabel, photo
   );
 }
 
-/**
- * A picture made to order, saved to the library under a name a person chose.
- *
- * The same pipeline the Art page's editor runs, because it writes to the same
- * Mongo collection: inspect what the sanitiser will do to the markup, refuse a
- * document that will not render, store `preprocessSvgMarkup`'s normalised form
- * so every client draws the same thing, and file it under a category. A picture
- * drawn here is on the Art page the moment it is saved, indistinguishable from
- * one drawn there.
- */
-function DrawWay({ library, draft, setDraft, onUsed }: {
-  library: ReturnType<typeof useArtLibrary>;
-  draft: Draft;
-  setDraft(d: Draft): void;
-  onUsed(key: string): void;
-}) {
-  const allowed = useSystem().allows("ai.artGeneration");
-  const { prompt, markup, name, category } = draft;
-  const setPrompt = (value: string) => setDraft({ ...draft, prompt: value });
-  const setName = (value: string) => setDraft({ ...draft, name: value });
-  const setCategory = (value: string) => setDraft({ ...draft, category: value });
-  const [drawing, setDrawing] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
-  // Drawn to the shape the page will reserve for it, not to whatever the model
-  // likes: a page has to know how much room a picture takes before it arrives.
-  const [kind, setKind] = useState<PictureKind>("banner");
-
-  const draw = async () => {
-    if (!prompt.trim() || drawing) return;
-    setDrawing(true);
-    setError("");
-    try {
-      const drawn = await generateSvg(prompt, { shape: kind });
-      setDraft({ ...draft, markup: drawn, name: name || KEBAB(prompt) });
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "The picture could not be drawn.");
-    } finally {
-      setDrawing(false);
-    }
-  };
-
-  const taken = library.find((a) => a.id === name);
-  const nameError = name && !SVG_ID_PATTERN.test(name) ? "Lowercase letters, numbers and single hyphens only." : "";
-  const categoryError = category && !SVG_ID_PATTERN.test(category) ? "Lowercase letters, numbers and single hyphens only." : "";
-  // What the sanitiser will make of it, worked out before it is filed rather
-  // than discovered as a blank frame in somebody's book.
-  const verdict = useMemo(() => inspectSvgMarkup(markup), [markup]);
-  const canSave = Boolean(markup && name) && !nameError && !categoryError && verdict.state === "ok" && !saving;
-
-  /** Blank files it in the holding pen, the same answer the Art page gives. */
-  const filedCategory = category.trim() || UNCATEGORISED;
-
-  const save = async () => {
-    if (!canSave) return;
-    setSaving(true);
-    setError("");
-    try {
-      await saveSvgAsset(name, preprocessSvgMarkup(markup.trim()), filedCategory);
-      await listSvgAssets().catch(() => undefined);
-      playSound("pop");
-      onUsed(name);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "The picture could not be saved.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const categoryOptions = [
-    ...new Set([
-      ...library.map((a) => a.category).filter((c) => c !== UNCATEGORISED),
-      ...SUGGESTED_SVG_CATEGORIES,
-    ]),
-  ];
-
-  if (!allowed) {
-    return (
-      <p className="rounded-xl border border-dashed border-line px-3 py-4 text-sm text-muted">
-        Drawing is switched off for this deployment. Pick a picture from the library, upload a photo, or add artwork on the Art page.
-      </p>
-    );
-  }
-
-  return (
-    <div className="grid gap-3">
-      <label className="grid gap-1.5">
-        <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Describe the picture</span>
-        <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} rows={3}
-          placeholder="A wooden market stall with baskets of fruit"
-          className="w-full rounded-xl border border-line bg-surface p-3 text-ink" />
-      </label>
-      <div role="group" aria-label="Where the picture goes" className="flex flex-wrap gap-2">
-        {(["banner", "portrait"] as const).map((k) => (
-          <button key={k} type="button" aria-pressed={kind === k} onClick={() => setKind(k)}
-            className={`${chip} ${kind === k ? "border-indigo-600 bg-indigo-50 text-indigo-900 dark:bg-indigo-950 dark:text-indigo-100" : "border-line bg-surface text-ink hover:border-indigo-400"}`}>
-            {k === "banner" ? "Wide — top or bottom" : "Tall — beside the words"}
-          </button>
-        ))}
-      </div>
-      <p className="text-xs text-muted">Drawn at {describeShape(kind)}.</p>
-      <button type="button" onClick={() => void draw()} disabled={!prompt.trim() || drawing}
-        className={`${chip} justify-center border-indigo-600 bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-60`}>
-        {drawing ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Sparkles className="h-4 w-4" aria-hidden="true" />}
-        {drawing ? "Drawing…" : markup ? "Draw it again" : "Draw it"}
-      </button>
-
-      {markup && (
-        <>
-          <div className="grid gap-2">
-            <p className="text-xs font-extrabold uppercase tracking-wider text-muted">What came back</p>
-            <div className="mx-auto w-40 overflow-hidden rounded-xl border border-line bg-play-sky p-3">
-              <SvgMarkup markup={markup} raw size="100%" />
-            </div>
-          </div>
-          {/* The sanitiser drops silently, so this is the one place it must not:
-              the same report the Art page's editor shows over the same check. */}
-          {verdict.state === "invalid" ? (
-            <p role="alert" className="flex items-start gap-2 rounded-xl bg-rose-50 px-3 py-2 text-xs font-bold text-rose-800 dark:bg-rose-950 dark:text-rose-200">
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-              <span>{verdict.message}</span>
-            </p>
-          ) : verdict.state === "ok" && (verdict.droppedElements > 0 || verdict.droppedAttributes > 0) ? (
-            <p className="flex items-start gap-2 rounded-xl bg-orange-50 px-3 py-2 text-xs font-bold text-orange-900 dark:bg-orange-950 dark:text-orange-200">
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-              <span>
-                The sanitiser drops {verdict.droppedElements} element{verdict.droppedElements === 1 ? "" : "s"} and{" "}
-                {verdict.droppedAttributes} attribute{verdict.droppedAttributes === 1 ? "" : "s"}. Check the preview above is still the picture you wanted.
-              </span>
-            </p>
-          ) : verdict.state === "ok" ? (
-            <p className="flex items-center gap-2 text-xs font-bold text-emerald-800 dark:text-emerald-300">
-              <ShieldCheck className="h-4 w-4 shrink-0" aria-hidden="true" />
-              Renders whole — nothing is dropped by the sanitiser.
-            </p>
-          ) : null}
-
-          <label className="grid gap-1.5">
-            <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Save it as</span>
-            <input value={name} onChange={(e) => setName(e.target.value.trim())} placeholder="market-stall"
-              className="min-h-11 w-full rounded-xl border border-line bg-surface px-3 text-ink" />
-            {nameError ? (
-              <span role="alert" className="text-xs font-bold text-rose-700 dark:text-rose-300">{nameError}</span>
-            ) : taken ? (
-              <span className="text-xs text-muted">This replaces the picture already called “{name}”, in every book using it.</span>
-            ) : (
-              <span className="text-xs text-muted">Saved to the art library, so other books can use it too.</span>
-            )}
-          </label>
-
-          <label className="grid gap-1.5">
-            <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Filed under</span>
-            <input value={category} onChange={(e) => setCategory(e.target.value.trim())} list="picture-panel-categories" placeholder={STORY}
-              className="min-h-11 w-full rounded-xl border border-line bg-surface px-3 text-ink" />
-            <datalist id="picture-panel-categories">
-              {categoryOptions.map((c) => <option key={c} value={c} />)}
-            </datalist>
-            {categoryError ? (
-              <span role="alert" className="text-xs font-bold text-rose-700 dark:text-rose-300">{categoryError}</span>
-            ) : (
-              <span className="text-xs text-muted">The collection it joins on the Art page. Book pictures belong in “story”.</span>
-            )}
-          </label>
-
-          <button type="button" onClick={() => void save()} disabled={!canSave}
-            className={`${chip} justify-center border-indigo-600 bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-60`}>
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
-            {saving ? "Saving…" : "Use this picture"}
-          </button>
-        </>
-      )}
-
-      {error && <p role="alert" className="rounded-xl bg-rose-50 px-3 py-2 text-sm font-bold text-rose-800 dark:bg-rose-950 dark:text-rose-200">{error}</p>}
-    </div>
-  );
-}
-
 /** A photo from the author's own device. */
 function UploadWay({ onUsed }: { onUsed(key: string): void }) {
+  const { t } = useT();
+  const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
 
@@ -540,7 +416,7 @@ function UploadWay({ onUsed }: { onUsed(key: string): void }) {
     try {
       onUsed(await uploadPhoto(file));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "The photo could not be uploaded.");
+      setError(e instanceof Error ? e.message : t("studio.picture.uploadFailed"));
     } finally {
       setUploading(false);
     }
@@ -548,74 +424,116 @@ function UploadWay({ onUsed }: { onUsed(key: string): void }) {
 
   return (
     <div className="grid gap-3">
-      <label className={`${chip} cursor-pointer justify-center border-indigo-600 bg-indigo-600 text-white hover:bg-indigo-700 ${uploading ? "pointer-events-none opacity-60" : ""}`}>
-        <ImagePlus className="h-4 w-4" aria-hidden="true" />
-        {uploading ? "Uploading…" : "Choose a photo"}
-        <input type="file" accept={PHOTO_ACCEPT} className="sr-only" disabled={uploading}
-          onChange={(e) => { void upload(e.target.files?.[0]); e.target.value = ""; }} />
-      </label>
+      <UIButton type="button" fullWidth isLoading={uploading} icon={<ImagePlus aria-hidden="true" />} onClick={() => fileRef.current?.click()}>
+        {uploading ? t("studio.picture.uploading") : t("studio.picture.choosePhoto")}
+      </UIButton>
+      <input ref={fileRef} type="file" accept={PHOTO_ACCEPT} className="sr-only" tabIndex={-1} aria-hidden="true" disabled={uploading}
+        onChange={(e) => { void upload(e.target.files?.[0]); e.target.value = ""; }} />
       <p className="text-xs text-muted">
-        JPEG, PNG or WebP. Shrunk to 1600px before it is sent, and kept with this book. A photo is trimmed to fit its place, so shoot it at{" "}
-        {describeShape("banner")} for the top or bottom of a page, or {describeShape("portrait")} to sit beside the words.
+        {t("studio.picture.uploadNote", { wide: describeShape("banner"), tall: describeShape("portrait") })}
       </p>
-      {error && <p role="alert" className="rounded-xl bg-rose-50 px-3 py-2 text-sm font-bold text-rose-800 dark:bg-rose-950 dark:text-rose-200">{error}</p>}
+      {error && <div role="alert"><UIFlashMessage type="error" message={error} /></div>}
     </div>
   );
 }
 
 /**
- * A real (photographic or painted) picture, made to order.
+ * A picture made to order, by the model the author picks, in one of two forms.
  *
- * Distinct from "Draw one": that makes a flat vector icon and files it in the
- * shared art library under a name, because a house-style icon is meant to be
- * found and reused across books. This makes a one-off photo for this book
- * alone, so it takes the *photo* path — `uploadPhoto` — landing on a
- * content-addressed `photo-<hash>` key exactly as an uploaded phone photo
- * would, with the same offline caching and the same cropping in the reader.
+ * A *drawing* is a flat SVG in the house style, filed in the shared art library
+ * under a name — the same pipeline the Art page's editor runs (inspect what the
+ * sanitiser will drop, refuse markup that will not render, store the normalised
+ * form) — because an icon is meant to be found and reused across books.
  *
- * Neither image model offers the exact shape a page reserves, so what comes
- * back is cropped to it — never stretched, never padded — before it is ever
- * shown or kept; the preview is already the picture the book will use.
+ * A *picture* is a painted one-off for this book alone. It takes the photo path
+ * (`uploadPhoto`, a content-addressed `photo-<hash>` key) and is cropped to the
+ * page's shape before it is shown, so the preview is what the book will use.
  */
-function PhotoWay({ onUsed }: { onUsed(key: string): void }) {
+function AiWay({ library, draft, setDraft, prefs, setPrefs, onUsed }: {
+  library: ReturnType<typeof useArtLibrary>;
+  draft: Draft;
+  setDraft(update: (d: Draft) => Draft): void;
+  prefs: Prefs;
+  setPrefs(patch: Partial<Prefs>): void;
+  onUsed(key: string): void;
+}) {
+  const { t } = useT();
   const allowed = useSystem().allows("ai.artGeneration");
-  const [prompt, setPrompt] = useState("");
-  const [kind, setKind] = useState<PictureKind>("banner");
-  const [provider, setProvider] = useState<ImageProvider>("gemini");
-  const [cropped, setCropped] = useState<Blob | null>(null);
-  const [preview, setPreview] = useState("");
-  const [busy, setBusy] = useState<"generating" | "saving" | null>(null);
+  const [busy, setBusy] = useState<"improving" | "making" | "saving" | null>(null);
   const [error, setError] = useState("");
+  const { mode, kind, markup, name, photo, preview, subjectOnly, cambodia, before } = draft;
+  const { provider, style, autoImprove } = prefs;
+  const made = mode === "svg" ? Boolean(markup) : Boolean(photo);
 
-  useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
+  /** The description rewritten as a full brief, shown in the box so it can be read and edited. */
+  const improve = async (text: string) => {
+    const better = await improvePicturePrompt(text, { provider, mode, kind, subjectOnly, cambodia });
+    setDraft((d) => ({ ...d, prompt: better, before: text }));
+    return better;
+  };
 
-  const generate = async () => {
-    if (!prompt.trim() || busy) return;
-    setBusy("generating");
+  const improveNow = async () => {
+    if (!draft.prompt.trim() || busy) return;
+    setBusy("improving");
     setError("");
     try {
-      const made = await generateBookImage(prompt, kind, provider);
-      const fitted = await cropToShape(made, kind);
-      setCropped(fitted);
-      setPreview((old) => {
-        if (old) URL.revokeObjectURL(old);
-        return URL.createObjectURL(fitted);
-      });
+      await improve(draft.prompt);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "The picture could not be made.");
+      setError(e instanceof Error ? e.message : t("studio.picture.improveFailed"));
     } finally {
       setBusy(null);
     }
   };
 
+  const make = async () => {
+    if (!draft.prompt.trim() || busy) return;
+    setError("");
+    try {
+      let prompt = draft.prompt;
+      if (autoImprove) {
+        setBusy("improving");
+        prompt = await improve(prompt);
+      }
+      setBusy("making");
+      if (mode === "svg") {
+        const drawn = await generateSvg(prompt, { shape: kind, provider: provider === "openai" ? "chatgpt" : "gemini" });
+        setDraft((d) => ({ ...d, markup: drawn, name: d.name || KEBAB(prompt) }));
+      } else {
+        const fitted = await cropToShape(await generateBookImage(prompt, kind, provider, style), kind);
+        setDraft((d) => {
+          if (d.preview) URL.revokeObjectURL(d.preview);
+          return { ...d, photo: fitted, preview: URL.createObjectURL(fitted) };
+        });
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t("studio.picture.makeFailed"));
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const taken = library.some((a) => a.id === name);
+  const nameError = name && !SVG_ID_PATTERN.test(name) ? t("studio.picture.nameRule") : "";
+  // What the sanitiser will make of it, worked out before it is filed rather
+  // than discovered as a blank frame in somebody's book.
+  const verdict = useMemo(() => inspectSvgMarkup(markup), [markup]);
+  const canUse = busy === null && (mode === "svg" ? Boolean(markup && name) && !nameError && verdict.state === "ok" : Boolean(photo));
+
   const use = async () => {
-    if (!cropped) return;
+    if (!canUse) return;
     setBusy("saving");
     setError("");
     try {
-      onUsed(await uploadPhoto(cropped));
+      if (mode === "svg") {
+        await saveSvgAsset(name, preprocessSvgMarkup(markup.trim()), draft.category.trim() || UNCATEGORISED);
+        await listSvgAssets().catch(() => undefined);
+        playSound("pop");
+        onUsed(name);
+      } else if (photo) {
+        onUsed(await uploadPhoto(photo));
+      }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "The picture could not be saved.");
+      setError(e instanceof Error ? e.message : t("studio.picture.saveFailed"));
     } finally {
       setBusy(null);
     }
@@ -624,62 +542,116 @@ function PhotoWay({ onUsed }: { onUsed(key: string): void }) {
   if (!allowed) {
     return (
       <p className="rounded-xl border border-dashed border-line px-3 py-4 text-sm text-muted">
-        Drawing is switched off for this deployment. Pick a picture from the library, upload a photo, or add artwork on the Art page.
+        {t("studio.picture.aiOff")}
       </p>
     );
   }
 
   return (
-    <div className="grid gap-3">
-      <label className="grid gap-1.5">
-        <span className="text-xs font-extrabold uppercase tracking-wider text-muted">Describe the picture</span>
-        <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} rows={3}
-          placeholder="Three little pigs outside their new brick house, sunny afternoon"
-          className="w-full rounded-xl border border-line bg-surface p-3 text-ink" />
-      </label>
-
-      <div role="group" aria-label="Where the picture goes" className="flex flex-wrap gap-2">
-        {(["banner", "portrait"] as const).map((k) => (
-          <button key={k} type="button" aria-pressed={kind === k} onClick={() => setKind(k)}
-            className={`${chip} ${kind === k ? "border-indigo-600 bg-indigo-50 text-indigo-900 dark:bg-indigo-950 dark:text-indigo-100" : "border-line bg-surface text-ink hover:border-indigo-400"}`}>
-            {k === "banner" ? "Wide — top or bottom" : "Tall — beside the words"}
-          </button>
-        ))}
-      </div>
-
-      <div role="group" aria-label="Which model draws" className="flex flex-wrap gap-2">
-        {(["gemini", "openai"] as const).map((p) => (
-          <button key={p} type="button" aria-pressed={provider === p} onClick={() => setProvider(p)}
-            className={`${chip} ${provider === p ? "border-indigo-600 bg-indigo-50 text-indigo-900 dark:bg-indigo-950 dark:text-indigo-100" : "border-line bg-surface text-ink hover:border-indigo-400"}`}>
-            {p === "gemini" ? "Gemini" : "ChatGPT"}
-          </button>
-        ))}
-      </div>
-      <p className="text-xs text-muted">
-        Cropped to {describeShape(kind)} once it comes back — never stretched, so the shape a page reserves is the shape it gets.
-      </p>
-
-      <button type="button" onClick={() => void generate()} disabled={!prompt.trim() || busy !== null}
-        className={`${chip} justify-center border-indigo-600 bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-60`}>
-        {busy === "generating" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Sparkles className="h-4 w-4" aria-hidden="true" />}
-        {busy === "generating" ? "Making the picture…" : preview ? "Make it again" : "Make the picture"}
-      </button>
-
-      {preview && (
-        <div className="grid gap-2">
-          <p className="text-xs font-extrabold uppercase tracking-wider text-muted">What came back</p>
-          <div className={`mx-auto w-full overflow-hidden rounded-xl border border-line bg-play-sky ${kind === "banner" ? "max-w-sm" : "max-w-[10rem]"}`}>
-            <img src={preview} alt="" className="block h-auto w-full" />
+    <div className="grid gap-4">
+      <div className="grid gap-1.5">
+        <div className="flex items-center justify-between gap-2">
+          <label htmlFor="picture-prompt" className={fieldLabel}>{t("studio.picture.describe")}</label>
+          <div className="flex items-center gap-1">
+            {before !== null && (
+              <UILinkButton type="button" onClick={() => setDraft((d) => ({ ...d, prompt: d.before ?? d.prompt, before: null }))}>{t("studio.picture.undo")}</UILinkButton>
+            )}
+            <UIButton type="button" variant="ghost" size="sm" icon={<Wand2 aria-hidden="true" />} isLoading={busy === "improving"}
+              disabled={!draft.prompt.trim() || busy !== null} onClick={() => void improveNow()}>
+              {t("studio.picture.improve")}
+            </UIButton>
           </div>
-          <button type="button" onClick={() => void use()} disabled={busy !== null}
-            className={`${chip} justify-center border-indigo-600 bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-60`}>
-            {busy === "saving" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
-            {busy === "saving" ? "Saving…" : "Use this picture"}
-          </button>
+        </div>
+        <UITextarea id="picture-prompt" aria-label={t("studio.picture.describe")} value={draft.prompt} rows={4}
+          onChange={(e) => setDraft((d) => ({ ...d, prompt: e.target.value, before: null }))}
+          placeholder={t("studio.picture.describeHint")} />
+      </div>
+
+      <div className="grid gap-2 rounded-2xl border border-line p-3">
+        <Option label={t("studio.picture.subjectOnly")} checked={subjectOnly} onChange={() => setDraft((d) => ({ ...d, subjectOnly: !d.subjectOnly }))} />
+        <Option label={t("studio.picture.cambodia")} checked={cambodia} onChange={() => setDraft((d) => ({ ...d, cambodia: !d.cambodia }))} />
+        <Option label={t("studio.picture.autoImprove")} checked={autoImprove} onChange={() => setPrefs({ autoImprove: !autoImprove })} />
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Choice label={t("studio.picture.kind")} value={mode} onChange={(m) => setDraft((d) => ({ ...d, mode: m }))} options={[["svg", t("studio.picture.drawing")], ["image", t("studio.picture.picture")]]} />
+        <Choice label={t("studio.picture.madeBy")} value={provider} onChange={(p) => setPrefs({ provider: p })} options={[["gemini", "Gemini"], ["openai", "OpenAI"]]} />
+        <Choice label={t("studio.picture.shape")} value={kind} onChange={(k) => setDraft((d) => ({ ...d, kind: k }))} options={[["banner", t("studio.picture.wide")], ["portrait", t("studio.picture.tall")]]} />
+        {mode === "image" && (
+          <Choice label={t("studio.picture.style")} value={style} onChange={(v) => setPrefs({ style: v })} options={[["3d", "3D"], ["flat", t("studio.picture.flat")], ["painted", t("studio.picture.painted")]]} />
+        )}
+      </div>
+      <div className="-mt-1 grid gap-1.5">
+        <p className="text-xs text-muted">
+          {mode === "svg" ? t("studio.picture.svgNote") : t("studio.picture.imageNote")}
+        </p>
+        <UIBadge variant="neutral" className="justify-self-start">{describeShape(kind)}</UIBadge>
+      </div>
+
+      <UIButton type="button" fullWidth variant={made ? "secondary" : "primary"} icon={<Sparkles aria-hidden="true" />} isLoading={busy === "improving" || busy === "making"}
+        disabled={!draft.prompt.trim() || busy !== null} onClick={() => void make()}>
+        {busy === "improving" ? t("studio.picture.improving") : busy === "making" ? t("studio.picture.making") : made ? t("studio.picture.makeAgain") : t("studio.picture.make")}
+      </UIButton>
+
+      {made && (
+        <div className="grid gap-3 rounded-2xl border border-line p-3">
+          <div className={`mx-auto w-full overflow-hidden rounded-xl bg-play-sky ${kind === "banner" ? "max-w-sm" : "max-w-[10rem]"}`}>
+            {mode === "svg" ? <div className="p-3"><SvgMarkup markup={markup} raw size="100%" /></div> : <img src={preview} alt="" className="block h-auto w-full" />}
+          </div>
+
+          {mode === "svg" && (
+            <>
+              {/* The sanitiser drops silently, so this is the one place it must not. */}
+              {verdict.state === "invalid" ? (
+                <div role="alert"><UIFlashMessage type="error" message={verdict.message} /></div>
+              ) : verdict.state === "ok" && (verdict.droppedElements > 0 || verdict.droppedAttributes > 0) ? (
+                <UIFlashMessage type="info" message={t("studio.picture.dropped")} />
+              ) : null}
+              <label className="grid gap-1.5">
+                <span className={fieldLabel}>{t("studio.picture.saveAs")}</span>
+                <UIInput value={name} onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value.trim() }))} placeholder="market-stall" />
+                {nameError ? (
+                  <span role="alert" className="text-xs font-bold text-rose-700 dark:text-rose-300">{nameError}</span>
+                ) : taken ? (
+                  <span className="text-xs text-muted">{t("studio.picture.replaces", { name })}</span>
+                ) : null}
+              </label>
+            </>
+          )}
+
+          <UIButton type="button" fullWidth variant="success" isLoading={busy === "saving"} disabled={!canUse} onClick={() => void use()}>
+            {busy === "saving" ? t("studio.picture.saving") : t("studio.picture.use")}
+          </UIButton>
         </div>
       )}
 
-      {error && <p role="alert" className="rounded-xl bg-rose-50 px-3 py-2 text-sm font-bold text-rose-800 dark:bg-rose-950 dark:text-rose-200">{error}</p>}
+      {error && <div role="alert"><UIFlashMessage type="error" message={error} /></div>}
+    </div>
+  );
+}
+
+/** One on/off choice, named beside its switch. */
+function Option({ label, checked, onChange }: { label: string; checked: boolean; onChange(): void }) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-sm font-semibold text-ink">{label}</span>
+      <UIToggle label={label} checked={checked} onChange={onChange} />
+    </div>
+  );
+}
+
+/** A small segmented switch with its name above it. */
+function Choice<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: Array<[T, string]>; onChange(v: T): void }) {
+  return (
+    <div className="grid gap-1.5">
+      <span className={fieldLabel}>{label}</span>
+      <div role="group" aria-label={label} className="grid auto-cols-fr grid-flow-col gap-1.5">
+        {options.map(([id, name]) => (
+          <UIButton key={id} type="button" size="sm" variant={value === id ? "primary" : "secondary"} aria-pressed={value === id} onClick={() => onChange(id)}>
+            {name}
+          </UIButton>
+        ))}
+      </div>
     </div>
   );
 }

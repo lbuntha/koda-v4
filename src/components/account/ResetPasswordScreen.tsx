@@ -5,6 +5,7 @@ import { ApiError, request } from "../../lib/sync";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIButton } from "../ui";
 
+import { translate } from "../../lib/i18n";
 /**
  * Choosing a new password from a link in an email.
  *
@@ -47,7 +48,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({ token,
     event.preventDefault();
     if (busy || !password) return;
     if (password !== confirm) {
-      setError("Those two do not match.");
+      setError(translate("admin.resetPasswordScreen.thoseTwoDoNotMatch"));
       return;
     }
     setBusy(true);
@@ -64,7 +65,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({ token,
       const problem = err as ApiError;
       setError(
         problem.isOffline
-          ? "No connection to the data service. Try again in a moment."
+          ? translate("admin.resetPasswordScreen.noConnectionToTheDataService")
           : problem.message,
       );
     } finally {
@@ -87,24 +88,24 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({ token,
             )}
           </div>
           <h1 className="font-mono text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-            {done ? "Password changed" : "Choose a new password"}
+            {done ? translate("admin.resetPasswordScreen.passwordChanged") : translate("admin.resetPasswordScreen.chooseANewPassword")}
           </h1>
           <p className="mx-auto max-w-sm text-sm text-slate-500 dark:text-slate-400">
             {done
-              ? "You can sign in with it now. Everything that was signed in before has been signed out."
-              : "This link works once. Pick something you will remember."}
+              ? translate("admin.resetPasswordScreen.youCanSignInWithIt")
+              : translate("admin.resetPasswordScreen.thisLinkWorksOncePickSomething")}
           </p>
         </div>
 
         <div className={themeSystem.card("default", "p-5 sm:p-6")}>
           {done ? (
             <UIButton variant="primary" className="w-full" onClick={onDone}>
-              Go to sign in
+              {translate("admin.resetPasswordScreen.goToSignIn")}
             </UIButton>
           ) : (
             <form onSubmit={submit} className="space-y-3">
               <label className="block space-y-1.5">
-                <span className="koda-admin-label text-ink">New password</span>
+                <span className="koda-admin-label text-ink">{translate("admin.resetPasswordScreen.newPassword")}</span>
                 <input
                   // eslint-disable-next-line jsx-a11y/no-autofocus -- the page exists to be typed in
                   autoFocus
@@ -117,7 +118,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({ token,
                 />
               </label>
               <label className="block space-y-1.5">
-                <span className="koda-admin-label text-ink">Again</span>
+                <span className="koda-admin-label text-ink">{translate("admin.resetPasswordScreen.again")}</span>
                 <input
                   className={field}
                   type="password"
@@ -144,14 +145,14 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({ token,
                 isLoading={busy}
                 disabled={!password || !confirm}
               >
-                Set new password
+                {translate("admin.resetPasswordScreen.setNewPassword")}
               </UIButton>
               <button
                 type="button"
                 onClick={onDone}
                 className="w-full text-center text-xs text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
               >
-                Back to sign in
+                {translate("admin.resetPasswordScreen.backToSignIn")}
               </button>
             </form>
           )}

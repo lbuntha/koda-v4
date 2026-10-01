@@ -9,11 +9,13 @@ import {
 } from "../../lib/maintenanceReset";
 import { playSound } from "../../utils/audio";
 import { UIBadge, UIButton, UIDialog, UISectionHeader, UITabs, UIToggle } from "../ui";
+import { ApiKeysPanel } from "./ApiKeysPanel";
 import { BadgesPage } from "./BadgesPage";
 import { BillingPage } from "./BillingPage";
 import { ScoringPage } from "./ScoringPage";
 import { NoAccess } from "./NoAccess";
 
+import { translate } from "../../lib/i18n";
 interface Setting {
   id: string;
   group: string;
@@ -28,7 +30,7 @@ interface Setting {
 }
 
 const SystemSettingsSkeleton: React.FC = () => (
-  <div className="space-y-6" aria-label="Loading system settings" aria-busy="true">
+  <div className="space-y-6" aria-label={translate("admin.adminPage.loadingSystemSettings")} aria-busy="true">
     {["Artwork", "Accounts & sync"].map((group) => (
       <section key={group} className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
         <div className="space-y-2 animate-pulse">
@@ -125,9 +127,9 @@ const SystemPanel: React.FC<{
   if (!allowed) {
     return (
       <NoAccess
-        title="System"
+        title={translate("admin.adminPage.system")}
         permission="system:write"
-        what="These switches govern every family on this deployment, not just yours."
+        what={translate("admin.adminPage.theseSwitchesGovernEveryFamilyOn")}
       />
     );
   }
@@ -192,6 +194,8 @@ const SystemPanel: React.FC<{
       // know which is authoritative. The key stays in the vault below, because
       // that tab is every credential this deployment holds.
       .filter((setting) => setting.id !== "learning.subjects")
+      // Keys and the default models live on the API keys tab, all together.
+      .filter((setting) => setting.group !== "AI defaults")
       .filter((setting) => setting.group !== "Ask Koda" || setting.type === "secret") ?? null;
 
   const groups = shown
@@ -206,10 +210,9 @@ const SystemPanel: React.FC<{
   return (
     <div className={embedded ? "space-y-6" : "max-w-3xl mx-auto space-y-6"}>
       {!embedded && <div>
-        <h2 className={themeSystem.typography("h2")}>System</h2>
+        <h2 className={themeSystem.typography("h2")}>{translate("admin.adminPage.system")}</h2>
         <p className={themeSystem.typography("body-sm", "mt-1")}>
-          What this deployment offers, for every family on it. A family can switch these off for
-          themselves — nothing they do switches on what is off here.
+          {translate("admin.adminPage.whatThisDeploymentOffersForEvery")}
         </p>
       </div>}
 
@@ -218,7 +221,7 @@ const SystemPanel: React.FC<{
       {maintenance && show !== "secrets" && (
         <p className={themeSystem.flash("warning")}>
           <AlertTriangle className="w-4 h-4 inline mr-1.5" />
-          Maintenance mode is on. Every device is refusing writes — rounds still play and queue.
+          {translate("admin.adminPage.maintenanceModeIsOnEveryDevice")}
         </p>
       )}
 
@@ -235,10 +238,10 @@ const SystemPanel: React.FC<{
               title={group}
               subtitle={
                 show === "secrets"
-                  ? "Credentials this deployment calls out with. Stored server-side; a browser never receives one"
+                  ? translate("admin.adminPage.credentialsThisDeploymentCallsOutWith")
                   : group === "Artwork"
-                    ? "Drawing an SVG from a prompt on the Art page. Ask Koda has its own page"
-                    : "The levers for a bad day"
+                    ? translate("admin.adminPage.drawingAnSvgFromAPrompt")
+                    : translate("admin.adminPage.theLeversForABadDay")
               }
               icon={
                 show === "secrets" ? (
@@ -261,7 +264,7 @@ const SystemPanel: React.FC<{
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <h4 className="text-sm font-bold text-ink font-mono">{setting.label}</h4>
-                        {setting.value === false && <UIBadge variant="warning">Off</UIBadge>}
+                        {setting.value === false && <UIBadge variant="warning">{translate("admin.adminPage.off")}</UIBadge>}
                       </div>
                       <p className="text-xs text-muted mt-0.5">{setting.description}</p>
                     </div>
@@ -282,16 +285,15 @@ const SystemPanel: React.FC<{
                       <KeyRound className="w-4 h-4 text-amber-500 shrink-0" />
                       <h4 className="text-sm font-bold text-ink font-mono">{setting.label}</h4>
                       {setting.isSet ? (
-                        <UIBadge variant="success">Set ····{setting.hint}</UIBadge>
+                        <UIBadge variant="success">{translate("admin.adminPage.setHint", { hint: setting.hint })}</UIBadge>
                       ) : (
-                        <UIBadge variant="neutral">Not set</UIBadge>
+                        <UIBadge variant="neutral">{translate("admin.adminPage.notSet")}</UIBadge>
                       )}
                     </div>
                     <p className="text-xs text-muted">{setting.description}</p>
                     <p className="text-xs text-muted flex items-start gap-1.5">
                       <ShieldCheck className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-                      Stored on the server and never sent back, so this can replace it but not
-                      show it. Save an empty field to remove it.
+                      {translate("admin.adminPage.storedOnTheServerAndNever")}
                     </p>
                     <div className="flex items-center gap-2">
                       <input
@@ -302,7 +304,7 @@ const SystemPanel: React.FC<{
                           setDrafts((d) => ({ ...d, [setting.id]: e.target.value }))
                         }
                         placeholder={
-                          setting.isSet ? "Enter a new key to replace it" : keyExample(setting.id)
+                          setting.isSet ? translate("admin.adminPage.enterANewKeyToReplace") : keyExample(setting.id)
                         }
                         className="flex-1 min-w-0 bg-surface border border-line rounded-xl px-3 py-2 text-sm font-mono text-ink placeholder:text-muted focus:outline-none focus:border-indigo-500"
                       />
@@ -311,7 +313,7 @@ const SystemPanel: React.FC<{
                         onClick={() => void write(setting, drafts[setting.id] ?? "")}
                         className={themeSystem.button("primary", "sm")}
                       >
-                        Save
+                        {translate("admin.adminPage.save")}
                       </button>
                     </div>
                   </div>
@@ -328,7 +330,7 @@ const SystemPanel: React.FC<{
                         onChange={(e) =>
                           setDrafts((d) => ({ ...d, [setting.id]: e.target.value }))
                         }
-                        placeholder="Nothing is shown while this is blank"
+                        placeholder={translate("admin.adminPage.nothingIsShownWhileThisIs")}
                         className="flex-1 min-w-0 bg-surface border border-line rounded-xl px-3 py-2 text-sm text-ink placeholder:text-muted focus:outline-none focus:border-indigo-500"
                       />
                       <button
@@ -338,7 +340,7 @@ const SystemPanel: React.FC<{
                         }
                         className={themeSystem.button("primary", "sm")}
                       >
-                        Save
+                        {translate("admin.adminPage.save")}
                       </button>
                     </div>
                   </div>
@@ -357,8 +359,8 @@ const SystemPanel: React.FC<{
         {show !== "secrets" && (
         <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
           <UISectionHeader
-            title="Data maintenance"
-            subtitle="Clear test learning data without removing users, learners, published skills, or publisher defaults."
+            title={translate("admin.adminPage.dataMaintenance")}
+            subtitle={translate("admin.adminPage.clearTestLearningDataWithoutRemoving")}
             icon={<AlertTriangle className="w-5 h-5 text-rose-600" />}
           />
 
@@ -367,11 +369,10 @@ const SystemPanel: React.FC<{
               <div className="space-y-1">
                 <h3 className="koda-admin-card-title flex items-center gap-2">
                   <BookX className="h-4 w-4 text-rose-600" />
-                  Erase learning progress
+                  {translate("admin.adminPage.eraseLearningProgress")}
                 </h3>
                 <p className="text-xs leading-5 text-muted">
-                  Removes all learning events, mastery totals, completed levels, XP profile stats,
-                  and queued learning progress from every device.
+                  {translate("admin.adminPage.removesAllLearningEventsMasteryTotals")}
                 </p>
               </div>
               <UIButton
@@ -382,7 +383,7 @@ const SystemPanel: React.FC<{
                 disabled={busy !== null}
                 onClick={() => setResetTarget("learning")}
               >
-                Erase all progress
+                {translate("admin.adminPage.eraseAllProgress")}
               </UIButton>
             </article>
 
@@ -390,11 +391,10 @@ const SystemPanel: React.FC<{
               <div className="space-y-1">
                 <h3 className="koda-admin-card-title flex items-center gap-2">
                   <UserMinus className="h-4 w-4 text-rose-600" />
-                  Clear skill registrations
+                  {translate("admin.adminPage.clearSkillRegistrations")}
                 </h3>
                 <p className="text-xs leading-5 text-muted">
-                  Unregisters every user and learner from every skill. Published skills, lessons,
-                  thumbnails, and default settings remain unchanged.
+                  {translate("admin.adminPage.unregistersEveryUserAndLearnerFrom")}
                 </p>
               </div>
               <UIButton
@@ -405,7 +405,7 @@ const SystemPanel: React.FC<{
                 disabled={busy !== null}
                 onClick={() => setResetTarget("registrations")}
               >
-                Clear all registrations
+                {translate("admin.adminPage.clearAllRegistrations")}
               </UIButton>
             </article>
           </div>
@@ -417,13 +417,13 @@ const SystemPanel: React.FC<{
       <UIDialog
         isOpen={resetTarget !== null}
         onClose={() => setResetTarget(null)}
-        title={resetTarget === "learning" ? "Erase all learning progress?" : "Clear all skill registrations?"}
+        title={resetTarget === "learning" ? translate("admin.adminPage.eraseAllLearningProgress") : translate("admin.adminPage.clearAllSkillRegistrations")}
         description={
           resetTarget === "learning"
-            ? "This permanently clears progress for every user and learner across the server and their offline devices. Accounts and skill content are kept."
-            : "This unregisters every user and learner from all skills across the server and their offline devices. Published skills and publisher defaults are kept."
+            ? translate("admin.adminPage.thisPermanentlyClearsProgressForEvery")
+            : translate("admin.adminPage.thisUnregistersEveryUserAndLearner")
         }
-        confirmText={resetTarget === "learning" ? "Erase all progress" : "Clear registrations"}
+        confirmText={resetTarget === "learning" ? translate("admin.adminPage.eraseAllProgress") : translate("admin.adminPage.clearRegistrations")}
         variant="danger"
         onConfirm={() => {
           if (resetTarget) void resetData(resetTarget);
@@ -470,11 +470,11 @@ export const AdminPage: React.FC<{
   // the old right would draw an editable page whose saves quietly failed.
   const tabs = can("system:write")
     ? [
-        { id: "scoring", label: "Scoring & XP" },
-        { id: "badges", label: "Badges" },
-        { id: "billing", label: "Billing" },
-        { id: "keys", label: "API keys" },
-        { id: "system", label: "System" },
+        { id: "scoring", label: translate("admin.adminPage.scoringXp") },
+        { id: "badges", label: translate("admin.adminPage.badges") },
+        { id: "billing", label: translate("admin.adminPage.billing") },
+        { id: "keys", label: translate("admin.adminPage.apiKeys") },
+        { id: "system", label: translate("admin.adminPage.system") },
       ]
     : [];
 
@@ -490,9 +490,9 @@ export const AdminPage: React.FC<{
   if (tabs.length === 0) {
     return (
       <NoAccess
-        title="Admin"
+        title={translate("admin.adminPage.admin")}
         permission="system:write"
-        what="Rewards, badges, plans and deployment controls are set for everybody, not by one family."
+        what={translate("admin.adminPage.rewardsBadgesPlansAndDeploymentControls")}
       />
     );
   }
@@ -500,8 +500,8 @@ export const AdminPage: React.FC<{
   return (
     <div className={"max-w-4xl mx-auto space-y-6"}>
       <UISectionHeader
-        title="Admin"
-        subtitle="What every family on this Koda gets: rewards, badges, plans and the deployment's own switches."
+        title={translate("admin.adminPage.admin")}
+        subtitle={translate("admin.adminPage.whatEveryFamilyOnThisKoda")}
         icon={<Sliders className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
       />
       {/* One tab is not a choice, so it is not drawn as one. */}
@@ -510,7 +510,7 @@ export const AdminPage: React.FC<{
           items={tabs}
           value={active ?? ""}
           onChange={(value) => setTab(value as AdminTab)}
-          label="Admin sections"
+          label={translate("admin.adminPage.adminSections")}
         />
       )}
       <div hidden={active !== "scoring"}>
@@ -523,7 +523,7 @@ export const AdminPage: React.FC<{
         <BillingPage embedded />
       </div>
       <div hidden={active !== "keys"}>
-        <SystemPanel embedded show="secrets" />
+        <ApiKeysPanel />
       </div>
       <div hidden={active !== "system"}>
         <SystemPanel embedded show="switches" />

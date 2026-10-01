@@ -123,6 +123,26 @@ def test_a_khmer_distractor_sharing_a_word_in_the_middle_is_seen():
     assert 2 not in failing(p)
 
 
+def test_a_picture_not_named_for_its_word_needs_that_exact_picture_confirmed():
+    p = copy.deepcopy(MARKET)
+    p["pictures"]["market"] = "nest"
+    q(p, "q4")["answer"] = 2
+    assert failing(p) == [1]
+    p["confirmedPictures"] = {"market": "nest"}
+    assert failing(p) == []
+    p["confirmedPictures"] = {"market": "cat"}
+    assert failing(p) == [1]
+
+
+def test_a_picture_word_is_a_whole_word_or_its_plural():
+    p = copy.deepcopy(MARKET)
+    q(p, "q4")["word"] = "mark"
+    p["pictures"]["mark"] = "market"
+    p["confirmedPictures"] = {"mark": "market"}
+    assert failing(p) == [1]
+    assert failing(copy.deepcopy(MARKET)) == []
+
+
 def test_a_malformed_book_is_refused_not_crashed_on():
     p = copy.deepcopy(MARKET)
     q(p, "q1")["answer"] = 7
@@ -507,3 +527,12 @@ async def test_a_report_needs_a_known_reason(client, db, signup_body):
     tokens = (await client.post("/auth/signup", json=signup_body())).json()
     parent = {"Authorization": f"Bearer {tokens['accessToken']}"}
     assert (await client.post("/library/books/farm-day/reports", json={"reason": "spam"}, headers=parent)).status_code == 400
+
+
+def test_khmer_marks_do_not_make_a_choice_look_longer():
+    """ប៊ូប៊ូ is six code points but two letters wide, like ម៉ូក and បូបូ."""
+    from app.library_verify import _looks_long
+
+    assert [_looks_long(o) for o in ["ប៊ូប៊ូ", "ម៉ូក", "បូបូ"]] == [2, 2, 2]
+    assert _looks_long("ក្បាល") == _looks_long("កាល") == 2  # the subscript rides on its letter
+    assert _looks_long("The mango") == 9

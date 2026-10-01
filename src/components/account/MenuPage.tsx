@@ -22,6 +22,7 @@ import { playSound } from "../../utils/audio";
 import { UIBadge, UISectionHeader, sidebarIcons } from "../ui";
 import { ART_ICON_PREFIX, SidebarIcon } from "../ui/sidebarIcon";
 import { UIIconPicker } from "../ui/UIIconPicker";
+import { BASE_LANGUAGE, availableLanguages, hasMessage, translate } from "../../lib/i18n";
 
 /**
  * The sidebar, as an editable list.
@@ -40,11 +41,23 @@ interface Item {
   label: string;
   icon: string;
   badge?: string | null;
+  labels?: Record<string, string> | null;
+  badges?: Record<string, string> | null;
   requires?: string | null;
   roles?: string[] | null;
   order: number;
   enabled: boolean;
 }
+
+/**
+ * What the sidebar shows in a language when this entry has no translation of
+ * its own — the app catalog's wording, else the English. Shown as the field's
+ * placeholder, so an empty box says what will actually appear.
+ */
+const fallbackWording = (item: Item, field: "label" | "badge", code: string): string => {
+  const key = field === "label" ? `nav.${item.id}` : `navBadge.${item.id}`;
+  return hasMessage(key, code) ? translate(key, undefined, code) : ((field === "label" ? item.label : item.badge) ?? "");
+};
 
 /** The roles an entry can be assigned to. Fetched, so a new one appears here. */
 interface Matrix {
@@ -55,10 +68,10 @@ interface Matrix {
 const ROLE_ORDER = ["owner", "parent", "caregiver", "student", "child"];
 
 const MENU_GROUPS = [
-  { id: "admin", label: "Admin", description: "Control features and access for end users", icon: ShieldCheck },
-  { id: "parents", label: "Parents", description: "Family and adult navigation", icon: Users },
-  { id: "child", label: "Child", description: "Child-facing navigation", icon: Baby },
-  { id: "students", label: "Students", description: "Student-facing navigation", icon: GraduationCap },
+  { id: "admin", get label() { return translate("admin.menuPage.admin"); }, get description() { return translate("admin.menuPage.controlFeaturesAndAccessForEnd"); }, icon: ShieldCheck },
+  { id: "parents", get label() { return translate("admin.menuPage.parents"); }, get description() { return translate("admin.menuPage.familyAndAdultNavigation"); }, icon: Users },
+  { id: "child", get label() { return translate("admin.menuPage.child"); }, get description() { return translate("admin.menuPage.childFacingNavigation"); }, icon: Baby },
+  { id: "students", get label() { return translate("admin.menuPage.students"); }, get description() { return translate("admin.menuPage.studentFacingNavigation"); }, icon: GraduationCap },
 ] as const;
 
 /** The family roles each audience tab stands for. Operators are not here: an
@@ -160,7 +173,7 @@ export const MenuPage: React.FC = () => {
       const problem = err as ApiError;
       setError(
         problem.isOffline
-          ? "Offline — the menu lives on the server, so this needs a connection."
+          ? translate("admin.menuPage.offlineTheMenuLivesOnThe")
           : problem.message,
       );
     });
@@ -182,7 +195,7 @@ export const MenuPage: React.FC = () => {
       const problem = err as ApiError;
       setError(
         problem.isOffline
-          ? "Offline — the menu is stored on the server, so this needs a connection."
+          ? translate("admin.menuPage.offlineTheMenuIsStoredOn")
           : problem.message,
       );
     } finally {
@@ -272,7 +285,7 @@ export const MenuPage: React.FC = () => {
   // role table, and guessing while it loads is what this page did before.
   if (!items || !matrix) {
     return (
-      <div className={"max-w-5xl mx-auto space-y-4"} aria-label="Loading menu" aria-busy="true">
+      <div className={"max-w-5xl mx-auto space-y-4"} aria-label={translate("admin.menuPage.loadingMenu")} aria-busy="true">
         <div className="h-8 w-40 rounded-lg bg-surface-muted animate-pulse" />
         <div className={themeSystem.card("default", "p-5 space-y-4")}>
           {[0, 1, 2, 3].map((row) => <div key={row} className="h-20 rounded-2xl bg-surface-muted animate-pulse" />)}
@@ -294,10 +307,9 @@ export const MenuPage: React.FC = () => {
   return (
     <div className={"max-w-5xl mx-auto space-y-6"}>
       <div>
-        <h2 className={themeSystem.typography("h2")}>Menu</h2>
+        <h2 className={themeSystem.typography("h2")}>{translate("admin.menuPage.menu")}</h2>
         <p className={themeSystem.typography("body-sm", "mt-1")}>
-          What the sidebar shows, and in what order. Stored on the server, so a change here reaches
-          every device in the family.
+          {translate("admin.menuPage.whatTheSidebarShowsAndIn")}
         </p>
       </div>
 
@@ -305,13 +317,13 @@ export const MenuPage: React.FC = () => {
 
       <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-2`)}>
         <UISectionHeader
-          title="Sidebar entries"
-          subtitle={`${items.filter((i) => i.enabled).length} shown of ${items.length}`}
+          title={translate("admin.menuPage.sidebarEntries")}
+          subtitle={translate("admin.menuPage.lengthShownOfLength2", { length: items.filter((i) => i.enabled).length, length2: items.length })}
           icon={<ListOrdered className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
           action={
             <button onClick={() => void resetAll()} disabled={busy !== null} className={themeSystem.button("secondary", "sm")}>
               <RotateCcw />
-              Reset all
+              {translate("admin.menuPage.resetAll")}
             </button>
           }
         />
@@ -322,14 +334,14 @@ export const MenuPage: React.FC = () => {
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search menu entries"
-              aria-label="Search menu entries"
+              placeholder={translate("admin.menuPage.searchMenuEntries")}
+              aria-label={translate("admin.menuPage.searchMenuEntries")}
               className={`${FIELD} w-full pl-10`}
             />
           </div>
           <label className="flex items-center gap-2 text-sm text-body px-1">
             <input type="checkbox" checked={showHidden} onChange={(event) => setShowHidden(event.target.checked)} className="h-4 w-4 accent-indigo-600" />
-            Include hidden entries
+            {translate("admin.menuPage.includeHiddenEntries")}
           </label>
         </div>
 
@@ -361,7 +373,7 @@ export const MenuPage: React.FC = () => {
                 <>
                   {group.id === "admin" && (
                     <p className="rounded-xl border border-indigo-100 dark:border-indigo-500/25 bg-indigo-50/70 dark:bg-indigo-500/10 px-3 py-2 text-xs text-body">
-                      Use <span className="font-semibold text-indigo-700 dark:text-indigo-300">Visibility</span> on each feature to choose whether it appears for Parents, Child, or Students.
+                      {translate("admin.menuPage.use")}{" "}<span className="font-semibold text-indigo-700 dark:text-indigo-300">{translate("admin.menuPage.visibility")}</span>{" "}{translate("admin.menuPage.onEachFeatureToChooseWhether")}
                     </p>
                   )}
 
@@ -389,7 +401,7 @@ export const MenuPage: React.FC = () => {
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-base font-semibold text-ink truncate">{item.label}</span>
                         <UIBadge variant={item.enabled ? "success" : "neutral"}>
-                          {item.enabled ? "Visible" : "Hidden"}
+                          {item.enabled ? translate("admin.menuPage.visible") : translate("admin.menuPage.hidden")}
                         </UIBadge>
                       </div>
                       <span className="block mt-0.5 text-xs font-mono text-muted truncate">{item.id}</span>
@@ -400,7 +412,7 @@ export const MenuPage: React.FC = () => {
                     <button
                       onClick={() => void move(index, -1)}
                       disabled={index === 0 || busy !== null}
-                      aria-label={`Move ${item.label} up`}
+                      aria-label={translate("admin.menuPage.moveLabelUp", { label: item.label })}
                       className="p-0.5 rounded text-slate-400 hover:text-indigo-600 disabled:opacity-25 cursor-pointer"
                     >
                       <ArrowUp className="w-4 h-4" />
@@ -408,7 +420,7 @@ export const MenuPage: React.FC = () => {
                     <button
                       onClick={() => void move(index, 1)}
                       disabled={index === items.length - 1 || busy !== null}
-                      aria-label={`Move ${item.label} down`}
+                      aria-label={translate("admin.menuPage.moveLabelDown", { label: item.label })}
                       className="p-0.5 rounded text-slate-400 hover:text-indigo-600 disabled:opacity-25 cursor-pointer"
                     >
                       <ArrowDown className="w-4 h-4" />
@@ -416,8 +428,8 @@ export const MenuPage: React.FC = () => {
                     <button
                       onClick={() => void save(item, { enabled: !item.enabled })}
                       disabled={busy !== null}
-                      title={item.enabled ? "Hide this entry for everyone" : "Show it again"}
-                      aria-label={item.enabled ? `Hide ${item.label}` : `Show ${item.label}`}
+                      title={item.enabled ? translate("admin.menuPage.hideThisEntryForEveryone") : translate("admin.menuPage.showItAgain")}
+                      aria-label={item.enabled ? translate("admin.menuPage.hideLabel", { label: item.label }) : translate("admin.menuPage.showLabel", { label: item.label })}
                       className="p-2 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer"
                     >
                       {item.enabled ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -425,8 +437,8 @@ export const MenuPage: React.FC = () => {
                     <button
                       onClick={() => void reset(item)}
                       disabled={busy !== null}
-                      title="Forget this family's changes to this entry"
-                      aria-label={`Reset ${item.label}`}
+                      title={translate("admin.menuPage.forgetThisFamilySChangesTo")}
+                      aria-label={translate("admin.menuPage.resetLabel", { label: item.label })}
                       className="p-2 rounded-lg text-slate-400 hover:text-rose-600 cursor-pointer"
                     >
                       <RotateCcw className="w-4 h-4" />
@@ -436,7 +448,7 @@ export const MenuPage: React.FC = () => {
 
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   <label className="block space-y-1">
-                    <span className="text-xs font-semibold text-body">Icon</span>
+                    <span className="text-xs font-semibold text-body">{translate("admin.menuPage.icon")}</span>
                     <button
                       type="button"
                       disabled={busy === item.id}
@@ -447,7 +459,7 @@ export const MenuPage: React.FC = () => {
                       // threw. It is mounted fresh on every open, so there is
                       // nothing left here to reset.
                       onClick={() => setIconPickerItem(item.id)}
-                      aria-label={`Change icon for ${item.id}`}
+                      aria-label={translate("admin.menuPage.changeIconForId", { id: item.id })}
                       className={`${FIELD} w-full flex items-center gap-2 text-left cursor-pointer`}
                     >
                       <span className="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-500/15 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
@@ -457,7 +469,7 @@ export const MenuPage: React.FC = () => {
                     </button>
                   </label>
                   <label className="block space-y-1">
-                    <span className="text-xs font-semibold text-body">Label</span>
+                    <span className="text-xs font-semibold text-body">{translate("admin.menuPage.labelEnglish")}</span>
                     <input
                       defaultValue={item.label}
                       disabled={busy === item.id}
@@ -465,25 +477,82 @@ export const MenuPage: React.FC = () => {
                         const label = e.target.value.trim();
                         if (label && label !== item.label) void save(item, { label });
                       }}
-                      aria-label={`Label for ${item.id}`}
+                      aria-label={translate("admin.menuPage.labelForId", { id: item.id })}
                       className={`${FIELD} w-full font-semibold`}
                     />
                   </label>
                   <label className="block space-y-1">
-                    <span className="text-xs font-semibold text-body">Badge</span>
+                    <span className="text-xs font-semibold text-body">{translate("admin.menuPage.badgeEnglish")}</span>
                     <input
                       defaultValue={item.badge ?? ""}
-                      placeholder="Optional"
+                      placeholder={translate("admin.menuPage.optional")}
                       disabled={busy === item.id}
                       onBlur={(e) => {
                         const badge = e.target.value.trim();
                         if (badge !== (item.badge ?? "")) void save(item, { badge });
                       }}
-                      aria-label={`Badge for ${item.id}`}
+                      aria-label={translate("admin.menuPage.badgeForId", { id: item.id })}
                       className={`${FIELD} w-full`}
                     />
                   </label>
                 </div>
+
+                {/*
+                  * The same entry in every other language the app ships.
+                  *
+                  * One row per catalog, so a language added to the app shows up
+                  * here with no change to this page. Empty means "use the
+                  * default", and the placeholder says what that default is.
+                  */}
+                {availableLanguages()
+                  .filter((lang) => lang.code !== BASE_LANGUAGE)
+                  .map((lang) => (
+                    <div key={lang.code} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      <span className="hidden lg:flex items-end pb-2.5 text-xs font-semibold text-muted">
+                        {lang.name} · {lang.englishName}
+                      </span>
+                      <label className="block space-y-1">
+                        <span className="text-xs font-semibold text-body">
+                          {translate("admin.menuPage.label")}{" "}<span lang={lang.code}>{lang.name}</span>
+                        </span>
+                        <input
+                          lang={lang.code}
+                          defaultValue={item.labels?.[lang.code] ?? ""}
+                          placeholder={fallbackWording(item, "label", lang.code)}
+                          disabled={busy === item.id}
+                          onBlur={(e) => {
+                            const text = e.target.value.trim();
+                            if (text !== (item.labels?.[lang.code] ?? "")) {
+                              void save(item, { labels: { ...item.labels, [lang.code]: text } });
+                            }
+                          }}
+                          aria-label={translate("admin.menuPage.englishnameLabelForId", { englishName: lang.englishName, id: item.id })}
+                          className={`${FIELD} w-full font-semibold`}
+                        />
+                      </label>
+                      {item.badge ? (
+                        <label className="block space-y-1">
+                          <span className="text-xs font-semibold text-body">
+                            {translate("admin.menuPage.badge")}{" "}<span lang={lang.code}>{lang.name}</span>
+                          </span>
+                          <input
+                            lang={lang.code}
+                            defaultValue={item.badges?.[lang.code] ?? ""}
+                            placeholder={fallbackWording(item, "badge", lang.code)}
+                            disabled={busy === item.id}
+                            onBlur={(e) => {
+                              const text = e.target.value.trim();
+                              if (text !== (item.badges?.[lang.code] ?? "")) {
+                                void save(item, { badges: { ...item.badges, [lang.code]: text } });
+                              }
+                            }}
+                            aria-label={translate("admin.menuPage.englishnameBadgeForId", { englishName: lang.englishName, id: item.id })}
+                            className={`${FIELD} w-full`}
+                          />
+                        </label>
+                      ) : null}
+                    </div>
+                  ))}
 
                 <button
                   onClick={() => {
@@ -494,7 +563,7 @@ export const MenuPage: React.FC = () => {
                   className="flex items-center justify-between gap-2 w-full rounded-xl border border-line bg-surface-muted px-3 py-2.5 text-left cursor-pointer group"
                 >
                   <span>
-                    <span className="block text-xs font-semibold uppercase tracking-wide text-muted">Visibility</span>
+                    <span className="block text-xs font-semibold uppercase tracking-wide text-muted">{translate("admin.menuPage.visibility")}</span>
                     <span className="block mt-0.5 text-sm text-body group-hover:text-indigo-600">{summarise(item)}</span>
                   </span>
                   <ChevronDown className={`w-4 h-4 shrink-0 text-muted transition ${ruleOpen ? "rotate-180" : ""}`} />
@@ -507,7 +576,7 @@ export const MenuPage: React.FC = () => {
                 );
                   }) : (
                     <div className="rounded-xl border border-dashed border-line px-4 py-5 text-sm text-muted">
-                      No entries in this audience.
+                      {translate("admin.menuPage.noEntriesInThisAudience")}
                     </div>
                   )}
                 </>
@@ -559,9 +628,9 @@ const Visibility: React.FC<{
     <div className="rounded-xl bg-slate-50 dark:bg-slate-800/60 p-3 space-y-3">
       <div className="flex items-center gap-2 flex-wrap">
         <span className="text-[11px] font-mono font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
-          Shown to
+          {translate("admin.menuPage.shownTo")}
         </span>
-        {!assigned.length && !item.requires && <UIBadge variant="neutral">everyone</UIBadge>}
+        {!assigned.length && !item.requires && <UIBadge variant="neutral">{translate("admin.menuPage.everyone")}</UIBadge>}
         {item.requires && (
           <UIBadge variant="primary">
             {CAPABILITY_HINT[item.requires] ?? item.requires}
@@ -590,7 +659,7 @@ const Visibility: React.FC<{
 
       <div className="flex items-center gap-2 flex-wrap">
         <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-          …and only if they can
+          {translate("admin.menuPage.andOnlyIfTheyCan")}
         </label>
         <select
           value={item.requires ?? ""}
@@ -600,7 +669,7 @@ const Visibility: React.FC<{
           }
           className={themeSystem.field("sm", "font-mono")}
         >
-          <option value="">— anything —</option>
+          <option value="">{translate("admin.menuPage.anything")}</option>
           {matrix.permissions.map((permission) => (
             <option key={permission} value={permission}>
               {permission}
@@ -610,8 +679,7 @@ const Visibility: React.FC<{
       </div>
 
       <p className="text-[11px] text-slate-500 dark:text-slate-400">
-        Roles narrow, they never grant: the page itself still checks what a person may do, so a
-        wrong list here can only hide something, never open it.
+        {translate("admin.menuPage.rolesNarrowTheyNeverGrantThe")}
       </p>
     </div>
   );

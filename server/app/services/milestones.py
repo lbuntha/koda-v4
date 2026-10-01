@@ -33,6 +33,7 @@ from typing import Any
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
+from app import notify_i18n
 from app.repos import docs, push_runs
 from app.repos import events as events_repo
 from app.repos import learners as learners_repo
@@ -120,14 +121,16 @@ async def goals_reached(
                 # a later attempt would find either.
                 continue
 
+            language = await notify_i18n.language_of_family(db, family_id)
             title, body = await push.wording(
                 db,
                 GOAL_MET,
                 {
-                    "learner": learner.get("displayName", "Your child"),
+                    "learner": learner.get("displayName") or notify_i18n.phrase(language, "yourChild"),
                     "rounds": goal,
                     "skill": _skill_of(inserted, learner_id, local_day),
                 },
+                language=language,
             )
             await push.send(
                 db,

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { KeyRound, MessageCircle, Mic, PenTool, ShieldCheck, Volume2 } from "lucide-react";
+import { KeyRound, MessageCircle, Mic, PenTool, Volume2 } from "lucide-react";
 
 import { ApiError, accessToken, refreshSystem, request, usePermissions } from "../../lib/sync";
 import { KODA_MASTER, KODA_SETTINGS, type KodaCapability } from "../../lib/koda";
@@ -10,6 +10,7 @@ import { UIBadge, UIButton, UISectionHeader, UIToggle, UIToggleRow } from "../ui
 import { KodaCharacters } from "./KodaCharacters";
 import { NoAccess } from "./NoAccess";
 
+import { translate } from "../../lib/i18n";
 /** One row of `/system/settings`, as the operator's screens see it. */
 interface Setting {
   id: string;
@@ -39,34 +40,32 @@ const CAPABILITIES: {
 }[] = [
   {
     capability: "voice",
-    title: "Voice conversation",
-    blurb:
-      "The live spoken coach — a child talks, Koda answers out loud. What a tap on Ask Koda opens, and the most expensive call in the app.",
+    get title() { return translate("admin.kodaPage.voiceConversation"); },
+    get blurb() { return translate("admin.kodaPage.theLiveSpokenCoachAChild"); },
     icon: <Mic className="h-4 w-4" />,
   },
   {
     capability: "chat",
-    title: "Written help",
-    blurb:
-      "A child types a question and Koda answers in writing. The cheapest way to run Koda, and what a tap opens where the voice coach is off.",
+    get title() { return translate("admin.kodaPage.writtenHelp"); },
+    get blurb() { return translate("admin.kodaPage.aChildTypesAQuestionAnd"); },
     icon: <MessageCircle className="h-4 w-4" />,
   },
   {
     capability: "speech",
-    title: "Spoken replies",
-    blurb: "Reading written answers aloud. Off falls back to the device's own voice, which costs nothing.",
+    get title() { return translate("admin.kodaPage.spokenReplies"); },
+    get blurb() { return translate("admin.kodaPage.readingWrittenAnswersAloudOffFalls"); },
     icon: <Volume2 className="h-4 w-4" />,
   },
   {
     capability: "whiteboard",
-    title: "Reading a drawing",
-    blurb: "Koda looking at what a child drew on the scratchpad and responding to it.",
+    get title() { return translate("admin.kodaPage.readingADrawing"); },
+    get blurb() { return translate("admin.kodaPage.kodaLookingAtWhatAChild"); },
     icon: <PenTool className="h-4 w-4" />,
   },
 ];
 
 const KodaSkeleton: React.FC = () => (
-  <div className="space-y-4" aria-label="Loading Ask Koda" aria-busy="true">
+  <div className="space-y-4" aria-label={translate("admin.kodaPage.loadingAskKoda")} aria-busy="true">
     {[0, 1].map((card) => (
       <section
         key={card}
@@ -104,14 +103,13 @@ const KodaSkeleton: React.FC = () => (
  * 5. **Who gets it** — the plan gate, stated rather than switched, because that
  *    is sold per family on the Billing tab and not decided here.
  */
-export const KodaPage: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
+export const KodaPage: React.FC<{ embedded?: boolean; onOpenKeys?: () => void }> = ({ embedded = false, onOpenKeys }) => {
   const { can } = usePermissions();
   const allowed = can("system:write");
 
   const [settings, setSettings] = useState<Setting[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
-  const [keyDraft, setKeyDraft] = useState("");
 
   useEffect(() => {
     if (!allowed) return;
@@ -133,9 +131,9 @@ export const KodaPage: React.FC<{ embedded?: boolean }> = ({ embedded = false })
   if (!allowed) {
     return (
       <NoAccess
-        title="Ask Koda"
+        title={translate("admin.kodaPage.askKoda")}
         permission="system:write"
-        what="Whether Koda answers at all is set for every family on this deployment, not by one of them."
+        what={translate("admin.kodaPage.whetherKodaAnswersAtAllIs")}
       />
     );
   }
@@ -151,7 +149,6 @@ export const KodaPage: React.FC<{ embedded?: boolean }> = ({ embedded = false })
         body: { value },
       });
       setSettings((prev) => prev?.map((s) => (s.id === updated.id ? updated : s)) ?? null);
-      setKeyDraft("");
       // This device obeys the ceiling too — adopt it now rather than leaving a
       // stale copy until the next load, so the FAB disappears as you watch.
       void refreshSystem();
@@ -182,8 +179,8 @@ export const KodaPage: React.FC<{ embedded?: boolean }> = ({ embedded = false })
     >
       {!embedded && (
         <UISectionHeader
-          title="Ask Koda"
-          subtitle="What Koda can do on this deployment, who it is, and the key it answers with."
+          title={translate("admin.kodaPage.askKoda")}
+          subtitle={translate("admin.kodaPage.whatKodaCanDoOnThis")}
           /* The character, because this page is about Koda itself. Sparkles is
              the glyph half the industry uses for "AI"; the child using this
              product knows Koda by its face. */
@@ -211,15 +208,15 @@ export const KodaPage: React.FC<{ embedded?: boolean }> = ({ embedded = false })
                 <KodaFace size={40} className="mt-0.5 shrink-0" />
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-mono text-base font-bold text-ink">Ask Koda</h3>
+                    <h3 className="font-mono text-base font-bold text-ink">{translate("admin.kodaPage.askKoda")}</h3>
                     <UIBadge variant={running ? "success" : "warning"}>
-                      {running ? "Running" : "Off for everyone"}
+                      {running ? translate("admin.kodaPage.running") : translate("admin.kodaPage.offForEveryone")}
                     </UIBadge>
                   </div>
                   <p className="mt-1 text-xs text-muted">
                     {running
-                      ? `${liveCount} of ${CAPABILITIES.length} kinds of help switched on. A family may still turn Koda off for themselves.`
-                      : "Every kind of help below is off while this is, whatever those switches say and whatever a family has paid for."}
+                      ? translate("admin.kodaPage.livecountOfLengthKindsOfHelp", { liveCount: liveCount, length: CAPABILITIES.length })
+                      : translate("admin.kodaPage.everyKindOfHelpBelowIs")}
                   </p>
                 </div>
               </div>
@@ -227,7 +224,7 @@ export const KodaPage: React.FC<{ embedded?: boolean }> = ({ embedded = false })
                 checked={running}
                 disabled={busy === KODA_MASTER}
                 onChange={() => void write(KODA_MASTER, !running)}
-                label="Ask Koda"
+                label={translate("admin.kodaPage.askKoda")}
                 tone="emerald"
               />
             </div>
@@ -240,8 +237,8 @@ export const KodaPage: React.FC<{ embedded?: boolean }> = ({ embedded = false })
             className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}
           >
             <UISectionHeader
-              title="What Koda can do"
-              subtitle="Each is a separate bill, so each is a separate switch"
+              title={translate("admin.kodaPage.whatKodaCanDo")}
+              subtitle={translate("admin.kodaPage.eachIsASeparateBillSo")}
               /* Koda for the group heading. The four rows underneath keep their
                  own icons: a mic, a speech bubble, a speaker and a pen tell the
                  capabilities apart, and four identical Koda heads would say
@@ -265,9 +262,9 @@ export const KodaPage: React.FC<{ embedded?: boolean }> = ({ embedded = false })
                     tone="emerald"
                     aside={
                       row.value !== true ? (
-                        <UIBadge variant="neutral">Off</UIBadge>
+                        <UIBadge variant="neutral">{translate("admin.kodaPage.off")}</UIBadge>
                       ) : !running ? (
-                        <UIBadge variant="warning">Held off</UIBadge>
+                        <UIBadge variant="warning">{translate("admin.kodaPage.heldOff")}</UIBadge>
                       ) : null
                     }
                   />
@@ -276,8 +273,7 @@ export const KodaPage: React.FC<{ embedded?: boolean }> = ({ embedded = false })
             </div>
             {!running && (
               <p className="text-xs text-muted">
-                These are held off by the master switch above. Nothing here has been changed —
-                switching Koda back on restores exactly what was on before.
+                {translate("admin.kodaPage.theseAreHeldOffByThe")}
               </p>
             )}
           </section>
@@ -291,56 +287,27 @@ export const KodaPage: React.FC<{ embedded?: boolean }> = ({ embedded = false })
               answer, and finding that out is a support ticket. */}
           {geminiKey && (
             <section
-              className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}
+              className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-3`)}
             >
               <UISectionHeader
-                title="What Koda calls with"
-                subtitle="The key Koda answers with. The same value as Admin → API keys."
-                icon={<KeyRound className="h-5 w-5 text-amber-500" />}
+                title={translate("admin.kodaPage.whatKodaCallsWith")}
+                subtitle={translate("admin.kodaPage.askKodaAnswersWithTheGemini")}
+                icon={<KeyRound className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
               />
-              <div className="space-y-3 rounded-2xl border border-line bg-surface-muted p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-surface-muted p-4">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h4 className="font-mono text-sm font-bold text-ink">{geminiKey.label}</h4>
+                  <h4 className="font-mono text-sm font-bold text-ink">{translate("admin.kodaPage.gemini")}</h4>
                   {geminiKey.isSet ? (
-                    <UIBadge variant="success">Set ····{geminiKey.hint}</UIBadge>
+                    <UIBadge variant="success">{translate("admin.kodaPage.savedHint", { hint: geminiKey.hint })}</UIBadge>
                   ) : (
-                    <UIBadge variant="warning">Not set</UIBadge>
+                    <UIBadge variant="warning">{translate("admin.kodaPage.notSavedUsesGeminiApiKey")}</UIBadge>
                   )}
                 </div>
-                {/* Only the case that needs saying. When the key is set the
-                    badge above already says so and the section says what it is
-                    for; a paragraph repeating both is noise on a settings page.
-                    When it is missing, that is a fault an operator must act on. */}
-                {!geminiKey.isSet && (
-                  <p className="text-xs text-muted">
-                    Without one Koda falls back to this server's{" "}
-                    <code className="font-mono">GEMINI_API_KEY</code>, then to canned
-                    encouragement.
-                  </p>
-                )}
-                <p className="flex items-start gap-1.5 text-xs text-muted">
-                  <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                  Stored on the server and never sent back. Save an empty field to remove it.
-                </p>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="password"
-                    autoComplete="off"
-                    value={keyDraft}
-                    onChange={(event) => setKeyDraft(event.target.value)}
-                    placeholder="AIzaSy..."
-                    aria-label={geminiKey.label}
-                    className="min-w-0 flex-1 rounded-xl border border-line bg-surface px-3 py-2 font-mono text-sm text-ink placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-                  />
-                  <UIButton
-                    variant="secondary"
-                    size="sm"
-                    isLoading={busy === geminiKey.id}
-                    onClick={() => void write(geminiKey.id, keyDraft)}
-                  >
-                    Save
+                {onOpenKeys && (
+                  <UIButton variant="secondary" size="sm" icon={<KeyRound />} onClick={onOpenKeys}>
+                    {translate("admin.kodaPage.manageApiKeys")}
                   </UIButton>
-                </div>
+                )}
               </div>
             </section>
           )}

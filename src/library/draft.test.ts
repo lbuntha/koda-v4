@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { verifyPassage } from "./data/verifyPassage";
 import { BANDS } from "./data/passage";
 import type { Passage, VocabQuestion } from "./data/passage";
-import { baseOf, draftLocally, fromModel, joinSentences, mergeWords, pictureFor, withVocabPicture, type StoryInput } from "./draft";
+import { baseOf, draftLocally, fromModel, joinSentences, mergeWords, pictureFor, sentenceIdFor, withVocabPicture, type StoryInput } from "./draft";
 import { PICTURE_KEYS } from "./Picture";
 import { STARTER_PASSAGES } from "./data/starterPassages";
 
@@ -139,8 +139,8 @@ describe("withVocabPicture — changing a picture question's pictures", () => {
     [...new Set(verifyPassage(p, { confirmedSplit: true }).checks.filter((c) => c.status === "fail").map((c) => c.rule))].sort();
 
   const applied = (slot: number, key: string): Passage => {
-    const next = withVocabPicture(vocab, MARKET.pictures, MARKET.language, slot, key);
-    return { ...MARKET, pictures: next.pictures, questions: MARKET.questions.map((q) => (q.id === vocab.id ? next.question : q)) };
+    const next = withVocabPicture(vocab, MARKET.pictures, MARKET.language, slot, key, MARKET.confirmedPictures);
+    return { ...MARKET, pictures: next.pictures, confirmedPictures: next.confirmedPictures, questions: MARKET.questions.map((q) => (q.id === vocab.id ? next.question : q)) };
   };
 
   it("moves the word's own picture with the answer, so the story still declares it", () => {
@@ -212,5 +212,23 @@ describe("joinSentences — a line that should never have been a sentence", () =
     const p = book();
     expect(joinSentences(p, p.sentences[0].id)).toBe(p);
     expect(joinSentences(p, "nope")).toBe(p);
+  });
+});
+
+describe("sentenceIdFor — the sentence an AI reply points at", () => {
+  const sentences = [
+    { id: "s1", text: "កាលពីព្រេងនាយមានសត្វចចកឈ្មោះម៉ូក(Mok)។" },
+    { id: "s3", text: "កូនទន្សាយនោះមានឈ្មោះថាប៊ូប៊ូ(Booboo)។" },
+    { id: "s4", text: "«ព្រោះខ្ញុំវង្វេងផ្លូវទៅផ្ទះហើយក្បាលពោះខ្ញុំទទេស្អាត!»" },
+  ];
+  it("keeps a real id", () => expect(sentenceIdFor(sentences, "s3")).toBe("s3"));
+  it("finds the sentence a model copied instead of its id", () => {
+    expect(sentenceIdFor(sentences, "កូនទន្សាយនោះមានឈ្មោះថាប៊ូប៊ូ(Booboo)។")).toBe("s3");
+    expect(sentenceIdFor(sentences, "«ព្រោះខ្ញុំវង្វេងផ្លូវទៅផ្ទះហើយក្បាលពោះខ្ញុំទទេស្អាត!")).toBe("s4");
+  });
+  it("finds a quoted part of one sentence", () => expect(sentenceIdFor(sentences, "ខ្ញុំវង្វេងផ្លូវទៅផ្ទះ")).toBe("s4"));
+  it("gives up on an id that is not there or text that matches nothing", () => {
+    expect(sentenceIdFor(sentences, "s2")).toBeNull();
+    expect(sentenceIdFor(sentences, "ឆ្កែ")).toBeNull();
   });
 });

@@ -9,6 +9,7 @@ import { UIBadge, UIButton, UISectionHeader } from "../ui";
 import { KodaMascot, type MascotState } from "../KodaMascot";
 import type { Character } from "./KodaCharacters";
 
+import { translate } from "../../lib/i18n";
 /**
  * What a character looks and sounds like, without a child having to meet them.
  *
@@ -28,11 +29,11 @@ import type { Character } from "./KodaCharacters";
 
 /** The five, in the order a real conversation moves through them. */
 const STATES: { state: MascotState; label: string; caption: string }[] = [
-  { state: "idle", label: "Waiting", caption: "is here, waiting for you" },
-  { state: "listening", label: "Listening", caption: "is listening — the microphone is open" },
-  { state: "thinking", label: "Thinking", caption: "is working out how to help" },
-  { state: "speaking", label: "Speaking", caption: "is answering out loud" },
-  { state: "celebrating", label: "Celebrating", caption: "saw you get it" },
+  { state: "idle", get label() { return translate("admin.characterPreview.waiting"); }, get caption() { return translate("admin.characterPreview.isHereWaitingForYou"); } },
+  { state: "listening", get label() { return translate("admin.characterPreview.listening"); }, get caption() { return translate("admin.characterPreview.isListeningTheMicrophoneIsOpen"); } },
+  { state: "thinking", get label() { return translate("admin.characterPreview.thinking"); }, get caption() { return translate("admin.characterPreview.isWorkingOutHowToHelp"); } },
+  { state: "speaking", get label() { return translate("admin.characterPreview.speaking"); }, get caption() { return translate("admin.characterPreview.isAnsweringOutLoud"); } },
+  { state: "celebrating", get label() { return translate("admin.characterPreview.celebrating"); }, get caption() { return translate("admin.characterPreview.sawYouGetIt"); } },
 ];
 
 /**
@@ -94,15 +95,15 @@ export const CharacterPreview: React.FC<{ roster: Character[] }> = ({ roster }) 
   return (
     <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
       <UISectionHeader
-        title="See them in action"
-        subtitle="How each teacher looks while they wait, listen, think and answer"
+        title={translate("admin.characterPreview.seeThemInAction")}
+        subtitle={translate("admin.characterPreview.howEachTeacherLooksWhileThey")}
         icon={<Eye className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
       />
 
       {/* Which teacher. A row of names rather than a dropdown: comparing two is
           the job, and a dropdown hides the thing being compared. */}
       {roster.length > 1 && (
-        <div className="flex flex-wrap gap-2" role="tablist" aria-label="Character to preview">
+        <div className="flex flex-wrap gap-2" role="tablist" aria-label={translate("admin.characterPreview.characterToPreview")}>
           {roster.map((row) => (
             <button
               key={row.personaId}
@@ -121,7 +122,7 @@ export const CharacterPreview: React.FC<{ roster: Character[] }> = ({ roster }) 
             >
               <span aria-hidden>{row.emoji}</span>
               {row.name}
-              {!row.enabled && <UIBadge variant="neutral">retired</UIBadge>}
+              {!row.enabled && <UIBadge variant="neutral">{translate("admin.characterPreview.retired")}</UIBadge>}
             </button>
           ))}
         </div>
@@ -181,7 +182,7 @@ export const CharacterPreview: React.FC<{ roster: Character[] }> = ({ roster }) 
             icon={playing ? <Pause /> : <Play />}
             onClick={() => setPlaying((on) => !on)}
           >
-            {playing ? "Stop" : "Play all"}
+            {playing ? translate("admin.characterPreview.stop") : translate("admin.characterPreview.playAll")}
           </UIButton>
           <UIButton
             variant="secondary"
@@ -189,7 +190,7 @@ export const CharacterPreview: React.FC<{ roster: Character[] }> = ({ roster }) 
             icon={<Volume2 />}
             onClick={() => speakWebSpeech(SAMPLE[state])}
           >
-            Hear it
+            {translate("admin.characterPreview.hearIt")}
           </UIButton>
         </div>
       </div>
@@ -204,10 +205,7 @@ export const CharacterPreview: React.FC<{ roster: Character[] }> = ({ roster }) 
         * whole screen.
         */}
       <p className="text-xs text-muted">
-        The movement is what a child sees. <strong className="text-ink">Hear it</strong> uses this
-        device's own voice, not {character.voice} — Koda's real voices only exist inside a live
-        session, so this previews the timing rather than the sound. Nothing on this panel calls the
-        model, so none of it costs anything or needs a key.
+        {translate("admin.characterPreview.theMovementIsWhatAChild")}{" "}<strong className="text-ink">{translate("admin.characterPreview.hearIt")}</strong>{" "}{translate("admin.characterPreview.usesThisDeviceSOwnVoice")}{" "}{character.voice}{" "}{translate("admin.characterPreview.kodaSRealVoicesOnlyExist")}
       </p>
     </section>
   );

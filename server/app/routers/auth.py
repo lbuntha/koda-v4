@@ -11,6 +11,7 @@ from fastapi import APIRouter, Depends, Request, status
 from fastapi.concurrency import run_in_threadpool
 from fastapi.security import OAuth2PasswordRequestForm
 
+from app import notify_i18n
 from app.deps import AUTHENTICATED, CurrentPrincipal, Db, require
 from app.errors import Conflict, Forbidden, NotFound, Unauthorized
 from app.models.auth import (
@@ -119,8 +120,12 @@ async def _issue(db, family_id: str | None, role: str, *, user_id=None, learner_
                 # child, on what — what a parent who handed out the code checks.
                 learner = await learners.by_id(db, learner_id, family_id)
                 kind = "family.child_device_joined"
-                values = {"device": device_name, "learner": (learner or {}).get("displayName") or "your child"}
-            title, body = await push.wording(db, kind, values)
+                values = {
+                    "device": device_name,
+                    "learner": (learner or {}).get("displayName")
+                    or notify_i18n.phrase(await notify_i18n.language_of_family(db, family_id), "yourChildLower"),
+                }
+            title, body = await push.wording(db, kind, values, family_id=family_id)
             await push.send(
                 db,
                 to=push.Recipient(family_id=family_id, exclude_device_id=device_id),

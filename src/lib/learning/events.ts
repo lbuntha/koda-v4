@@ -304,6 +304,66 @@ export interface DailyLimitReachedEvent extends LearningEventBase {
   limitMinutes: number;
 }
 
+/*
+ * Reading a book, page by page.
+ *
+ * A book's quiz is a lesson like any other (`src/library/learning.ts`); the
+ * reading before it is not — there is nothing to get right, so it is no
+ * `lesson_*` round with zero questions dragging every accuracy down. These
+ * four carry the book in the usual context (`skillId` "koda-library",
+ * `activityId` "reading", `lessonId` book@rev, the band's concept), so a
+ * reading day still counts as a day practised, and `readId` ties one
+ * read-through together when a child opens the same book twice in a session.
+ * Produced by `ReadingRecorder`; the rollups read none of their fields.
+ */
+export interface ReadingStartedEvent extends LearningEventBase {
+  type: "reading_started";
+  readId: string;
+  /** Pages in the book, the cover included. */
+  pageCount: number;
+}
+
+/** A story page left behind — by turning, by finishing, or by closing the book. */
+export interface PageReadEvent extends LearningEventBase {
+  type: "page_read";
+  readId: string;
+  /** 1-based story page; the cover is 0 and is never reported. */
+  page: number;
+  pageCount: number;
+  /** Time the page was open. A skim is as much a finding as a long look. */
+  dwellMs: number;
+  /** How many times "read to me" was started on this page. */
+  readAloud: number;
+  /** Words the child tapped to hear — the ones they could not read yet. Capped. */
+  wordsTapped: string[];
+}
+
+export interface ReadingFinishedEvent extends LearningEventBase {
+  type: "reading_finished";
+  readId: string;
+  pageCount: number;
+  /** Different story pages opened at least once. */
+  pagesSeen: number;
+  durationMs: number;
+  /** Story pages "read to me" was used on. */
+  readAloudPages: number;
+  wordsTapped: number;
+}
+
+/** Closed before the end. Not sent for a book shut on its cover — that is a mis-tap. */
+export interface ReadingAbandonedEvent extends LearningEventBase {
+  type: "reading_abandoned";
+  readId: string;
+  pageCount: number;
+  /** The furthest story page reached. */
+  furthestPage: number;
+  pagesSeen: number;
+  durationMs: number;
+}
+
+/** How many tapped words one page keeps. */
+export const MAX_WORDS_TAPPED = 20;
+
 /** How many of a child's questions one conversation keeps. */
 export const MAX_ASKED = 12;
 /** How much of any one question is kept. */
@@ -317,7 +377,11 @@ export type LearningEvent =
   | LessonCompletedEvent
   | LessonAbandonedEvent
   | KodaConversationEvent
-  | DailyLimitReachedEvent;
+  | DailyLimitReachedEvent
+  | ReadingStartedEvent
+  | PageReadEvent
+  | ReadingFinishedEvent
+  | ReadingAbandonedEvent;
 
 export type LearningEventType = LearningEvent["type"];
 

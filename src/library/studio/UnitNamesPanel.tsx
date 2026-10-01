@@ -10,6 +10,7 @@ import { tilesOf } from "../data/tiles";
 import { UnitVoices, useUnitVoices } from "../unitVoices";
 import { say, stop } from "../voice";
 import { useRecorder } from "./recorder";
+import { translate, useT } from "../../lib/i18n";
 
 /**
  * Khmer sound names — a person records each spelling unit's classroom name
@@ -42,7 +43,19 @@ export function unitsUsedBy(books: readonly Pick<Passage, "language" | "question
   return out;
 }
 
+/** A group's heading in the app's language; `UNIT_GROUPS` keeps the English titles its logic keys on. */
+const GROUP_KEY: Record<string, string> = {
+  Consonants: "consonants",
+  "Independent vowels": "independentVowels",
+  "Feet (subscripts)": "feet",
+  Vowels: "vowels",
+  "Consonant shifters": "shifters",
+  Signs: "signs",
+};
+const groupName = (title: string) => (GROUP_KEY[title] ? translate(`studio.units.group.${GROUP_KEY[title]}`) : title);
+
 export function UnitNamesPanel({ onClose }: { onClose(): void }) {
+  const { t } = useT();
   const voices = useUnitVoices();
   const shelf = useShelf();
   // Every book the server has (drafts too), plus what ships on the shelf.
@@ -72,7 +85,7 @@ export function UnitNamesPanel({ onClose }: { onClose(): void }) {
     try {
       await UnitVoices.save(unit, (await uploadClip(asStandardAudio(blob))).id);
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "The recording could not be saved.");
+      setErr(e instanceof Error ? e.message : t("studio.voice.saveFailed"));
     } finally {
       setBusy(null);
     }
@@ -83,7 +96,7 @@ export function UnitNamesPanel({ onClose }: { onClose(): void }) {
     try {
       await UnitVoices.save(unit, null);
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "Could not remove it.");
+      setErr(e instanceof Error ? e.message : t("studio.voice.removeFailed"));
     } finally {
       setBusy(null);
     }
@@ -93,31 +106,29 @@ export function UnitNamesPanel({ onClose }: { onClose(): void }) {
     <div className="mx-auto w-full max-w-5xl px-4 pb-24 pt-4 sm:px-6">
       <button type="button" className={quiet} onClick={() => { stop(); onClose(); }}>
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        Library Studio
+        {t("nav.library-studio")}
       </button>
       <header className="mt-4">
-        <h1 className="text-3xl font-extrabold tracking-tight text-ink">Khmer sound names</h1>
-        <p className="mt-1 max-w-3xl text-sm text-muted">
-          Record each piece’s classroom name once — a child hears it as they choose the tile, and when a hint names the next piece. Say the name clearly, as a
-          teacher would in class. Without a recording, a device with a Khmer voice reads the name; most phones have none.
-        </p>
+        <h1 className="text-3xl font-extrabold tracking-tight text-ink">{t("studio.soundNames")}</h1>
+        <p className="mt-1 max-w-3xl text-sm text-muted">{t("studio.units.intro")}</p>
         <p className="mt-2 text-sm font-bold text-ink">
-          {recorded} of {all.length} recorded{used.size > 0 && ` · ${usedRecorded} of the ${used.size} the books use`}
+          {t("studio.voice.recordedOf", { done: recorded, total: all.length })}
+          {used.size > 0 && ` · ${t("studio.units.usedRecorded", { done: usedRecorded, total: used.size })}`}
         </p>
       </header>
 
-      <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label="Show">
+      <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label={t("studio.units.show")}>
         {used.size > 0 && (
           <button type="button" aria-pressed={only} onClick={() => setOnly(true)} className={chip(only)}>
-            Used in books ({used.size})
+            {t("studio.units.usedInBooks", { count: used.size })}
           </button>
         )}
         <button type="button" aria-pressed={!only} onClick={() => setOnly(false)} className={chip(!only)}>
-          All ({all.length})
+          {t("studio.units.all", { count: all.length })}
         </button>
       </div>
       {err && <p role="alert" className="mt-3 rounded-2xl bg-rose-50 px-3 py-2 text-sm font-bold text-rose-800 dark:bg-rose-950 dark:text-rose-200">{err}</p>}
-      {!canRecord && <p className="mt-3 text-sm text-muted">This browser cannot use the microphone here — upload recordings from a phone instead.</p>}
+      {!canRecord && <p className="mt-3 text-sm text-muted">{t("studio.units.noMic")}</p>}
 
       {UNIT_GROUPS.map((g) => {
         const units = only ? g.units.filter((u) => used.has(u)) : g.units;
@@ -126,10 +137,10 @@ export function UnitNamesPanel({ onClose }: { onClose(): void }) {
         const independentVowelChart = g.kind === "consonant" && g.title === "Independent vowels";
         const alignedChart = consonantChart || independentVowelChart;
         return (
-          <section key={g.title} className="mt-6" aria-label={g.title}>
+          <section key={g.title} className="mt-6" aria-label={groupName(g.title)}>
             <div className="mb-2 flex items-end justify-between gap-3">
-              <h2 className="text-xs font-extrabold uppercase tracking-wider text-muted">{g.title}</h2>
-              {alignedChart && <span className="text-xs font-semibold text-muted">{units.length} {consonantChart ? "basic letters" : "vowels"}</span>}
+              <h2 className="text-xs font-extrabold uppercase tracking-wider text-muted">{groupName(g.title)}</h2>
+              {alignedChart && <span className="text-xs font-semibold text-muted">{t(consonantChart ? "studio.units.basicLetters" : "studio.units.vowels", { count: units.length })}</span>}
             </div>
             <ul className={alignedChart ? `grid ${consonantChart ? "grid-cols-5" : "grid-cols-3"} gap-1.5 sm:gap-2` : "grid gap-2 sm:grid-cols-2 lg:grid-cols-3"}>
               {units.map((u) => {
@@ -139,10 +150,10 @@ export function UnitNamesPanel({ onClose }: { onClose(): void }) {
                   return (
                     <li key={u} data-unit={u} className="flex min-w-0 flex-col items-center gap-1.5 rounded-2xl border border-line bg-surface px-1 py-2 sm:px-2">
                       <span className={`grid h-12 w-full place-items-center text-3xl font-bold leading-none text-indigo-950 ${KHMER}`} aria-label={u}>{unitLabel(u)}</span>
-                      <span className={`h-1.5 w-1.5 rounded-full ${clip ? "bg-emerald-500" : "bg-slate-300"}`} aria-label={clip ? "Recorded" : "Not recorded"} />
+                      <span className={`h-1.5 w-1.5 rounded-full ${clip ? "bg-emerald-500" : "bg-slate-300"}`} aria-label={clip ? t("studio.voice.recordedCap") : t("studio.voice.notRecorded")} />
                       <span className="flex max-w-full flex-wrap justify-center gap-1">
                         {clip && (
-                          <button type="button" className={chartIcon} aria-label={`Play ${unitName(u)}`} onClick={() => void say(unitName(u), "km", clip)}>
+                          <button type="button" className={chartIcon} aria-label={t("studio.voice.playName", { name: unitName(u) })} onClick={() => void say(unitName(u), "km", clip)}>
                             <Play className="h-3.5 w-3.5" aria-hidden="true" />
                           </button>
                         )}
@@ -150,20 +161,20 @@ export function UnitNamesPanel({ onClose }: { onClose(): void }) {
                           <button
                             type="button"
                             className={`${chartIcon} ${live ? "border-rose-600 bg-rose-600 text-white" : ""}`}
-                            aria-label={live ? `Stop recording ${unitName(u)}` : `Record ${unitName(u)}`}
+                            aria-label={live ? t("studio.voice.stopRecording", { name: unitName(u) }) : t("studio.voice.recordName", { name: unitName(u) })}
                             disabled={busy !== null || (recorder.recording !== null && !live)}
-                            onClick={() => (live ? recorder.stop() : void recorder.start(u, (blob) => void keep(u, blob)).catch(() => setErr("The microphone could not be opened.")))}
+                            onClick={() => (live ? recorder.stop() : void recorder.start(u, (blob) => void keep(u, blob)).catch(() => setErr(t("studio.voice.micFailed"))))}
                           >
                             {live ? <Square className="h-3.5 w-3.5" aria-hidden="true" /> : <Mic className="h-3.5 w-3.5" aria-hidden="true" />}
                           </button>
                         )}
-                        <label className={`${chartIcon} cursor-pointer`} aria-label={`Upload a recording of ${unitName(u)}`}>
+                        <label className={`${chartIcon} cursor-pointer`} aria-label={t("studio.voice.uploadFor", { name: unitName(u) })}>
                           <Upload className="h-3.5 w-3.5" aria-hidden="true" />
                           <input type="file" accept="audio/*" className="sr-only" disabled={busy !== null}
                             onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void keep(u, f); }} />
                         </label>
                         {clip && (
-                          <button type="button" className={chartIcon} aria-label={`Remove the recording of ${unitName(u)}`} disabled={busy !== null} onClick={() => void forget(u)}>
+                          <button type="button" className={chartIcon} aria-label={t("studio.voice.remove", { line: unitName(u) })} disabled={busy !== null} onClick={() => void forget(u)}>
                             <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                           </button>
                         )}
@@ -176,10 +187,10 @@ export function UnitNamesPanel({ onClose }: { onClose(): void }) {
                     <span className={`grid h-12 w-12 shrink-0 place-items-center rounded-full bg-surface-muted text-2xl text-ink ${KHMER}`} aria-hidden="true">{unitLabel(u)}</span>
                     <span className="min-w-0 flex-1">
                       <span className={`block truncate text-lg font-bold text-ink ${KHMER}`}>{unitName(u)}</span>
-                      <span className={`text-xs font-bold ${clip ? "text-emerald-700 dark:text-emerald-400" : "text-muted"}`}>{busy === u ? "Saving…" : clip ? "✓ Recorded" : "Not recorded"}</span>
+                      <span className={`text-xs font-bold ${clip ? "text-emerald-700 dark:text-emerald-400" : "text-muted"}`}>{busy === u ? t("studio.picture.saving") : clip ? `✓ ${t("studio.voice.recordedCap")}` : t("studio.voice.notRecorded")}</span>
                     </span>
                     {clip && (
-                      <button type="button" className={icon} aria-label={`Play ${unitName(u)}`} onClick={() => void say(unitName(u), "km", clip)}>
+                      <button type="button" className={icon} aria-label={t("studio.voice.playName", { name: unitName(u) })} onClick={() => void say(unitName(u), "km", clip)}>
                         <Play className="h-4 w-4" aria-hidden="true" />
                       </button>
                     )}
@@ -187,20 +198,20 @@ export function UnitNamesPanel({ onClose }: { onClose(): void }) {
                       <button
                         type="button"
                         className={`${icon} ${live ? "border-rose-600 bg-rose-600 text-white" : ""}`}
-                        aria-label={live ? `Stop recording ${unitName(u)}` : `Record ${unitName(u)}`}
+                        aria-label={live ? t("studio.voice.stopRecording", { name: unitName(u) }) : t("studio.voice.recordName", { name: unitName(u) })}
                         disabled={busy !== null || (recorder.recording !== null && !live)}
-                        onClick={() => (live ? recorder.stop() : void recorder.start(u, (blob) => void keep(u, blob)).catch(() => setErr("The microphone could not be opened.")))}
+                        onClick={() => (live ? recorder.stop() : void recorder.start(u, (blob) => void keep(u, blob)).catch(() => setErr(t("studio.voice.micFailed"))))}
                       >
                         {live ? <Square className="h-4 w-4" aria-hidden="true" /> : <Mic className="h-4 w-4" aria-hidden="true" />}
                       </button>
                     )}
-                    <label className={`${icon} cursor-pointer`} aria-label={`Upload a recording of ${unitName(u)}`}>
+                    <label className={`${icon} cursor-pointer`} aria-label={t("studio.voice.uploadFor", { name: unitName(u) })}>
                       <Upload className="h-4 w-4" aria-hidden="true" />
                       <input type="file" accept="audio/*" className="sr-only" disabled={busy !== null}
                         onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void keep(u, f); }} />
                     </label>
                     {clip && (
-                      <button type="button" className={icon} aria-label={`Remove the recording of ${unitName(u)}`} disabled={busy !== null} onClick={() => void forget(u)}>
+                      <button type="button" className={icon} aria-label={t("studio.voice.remove", { line: unitName(u) })} disabled={busy !== null} onClick={() => void forget(u)}>
                         <Trash2 className="h-4 w-4" aria-hidden="true" />
                       </button>
                     )}

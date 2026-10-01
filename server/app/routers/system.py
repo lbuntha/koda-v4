@@ -17,6 +17,7 @@ from typing import Annotated, Any, Literal
 from fastapi import APIRouter, Depends, Header
 from pydantic import Field, ValidationError
 
+from app import notify_i18n
 from app.deps import AUTHENTICATED, CurrentPrincipal, Db, require
 from app.errors import AppError, Forbidden, NotFound
 from app.models.auth import Principal
@@ -72,6 +73,10 @@ class SettingOut(Model):
     is_set: bool = Field(default=False, alias="isSet")
     hint: str | None = None
     updated_at: str | None = Field(default=None, alias="updatedAt")
+    #: The only values a text setting may take, when it is a choice.
+    options: list[str] | None = None
+    #: The environment variable a blank credential falls back to.
+    env: str | None = None
 
 
 class SettingsOut(Model):
@@ -117,6 +122,8 @@ def _out(row: dict) -> SettingOut:
         isSet=bool(stored) if is_secret else False,
         hint=_hint(str(stored)) if is_secret and stored else None,
         updatedAt=updated.isoformat() if updated else None,
+        options=BY_ID.get(row["settingId"], {}).get("options"),
+        env=BY_ID.get(row["settingId"], {}).get("env"),
     )
 
 
@@ -213,6 +220,8 @@ async def update(setting_id: str, body: ValueIn, db: Db, p: CanOperate) -> Setti
         if not isinstance(value, str):
             raise AppError(400, "bad_value", f"'{setting_id}' is text.")
         value = value.strip()[:500]
+        if definition.get("options") and value not in definition["options"]:
+            raise AppError(400, "bad_value", f"'{setting_id}' is one of: {', '.join(definition['options'])}.")
 
     row = await system_repo.set_value(db, setting_id, value, p.subject_id)
     if not row:
@@ -277,6 +286,8 @@ class TestSendIn(Model):
     """
 
     kind: str | None = Field(default=None, max_length=60)
+    #: Which language's wording to preview. Unknown codes read English.
+    language: str | None = Field(default=None, max_length=20)
 
 
 @router.post("/push/test")
@@ -288,7 +299,13 @@ async def push_test(db: Db, p: CanOperate, body: TestSendIn | None = None) -> di
     primitive wearing an admin badge.
     """
     await limiter.hit(db, "push:test", p.subject_id, PUSH_TEST_PER_ACCOUNT)
-    return await push_service.send_test(db, p.subject_id, body.kind if body else None, from_admin=True)
+    return await push_service.send_test(
+        db,
+        p.subject_id,
+        body.kind if body else None,
+        from_admin=True,
+        language=body.language if body else None,
+    )
 
 
 #: The jobs an operator may run by hand, and what each one is.
@@ -790,9 +807,18 @@ class TemplateOut(Model):
     channels: list[str] = Field(default_factory=lambda: ["push"])
 
 
+class LanguageOut(Model):
+    code: str
+    name: str
+    english_name: str = Field(alias="englishName")
+
+
 class TemplatesOut(Model):
     templates: list[TemplateOut]
     frame: FrameOut
+    #: The language these words are in, and every language they may be edited in.
+    language: str = "en"
+    languages: list[LanguageOut] = Field(default_factory=list)
 
 
 class TemplateIn(Model):
@@ -800,27 +826,46 @@ class TemplateIn(Model):
     body: str = Field(min_length=1, max_length=BODY_MAX)
 
 
-async def _templates(db) -> TemplatesOut:
+async def _templates(db, language: str = "en") -> TemplatesOut:
+    """Every kind's words in `language`, as a family of that language receives them.
+
+    Per field: that language's edit, else the words shipped for it, else the
+    English (edited or shipped). `edited` is about *this* language's edit only,
+    because that is what "reset" here would remove.
+    """
+    lang = notify_i18n.known(language)
     edits = await push_templates.overrides(db)
+    local = (lambda row_id: edits.get(push_templates.with_language(row_id, lang), {})) if lang != "en" else (lambda _row_id: {})
     rows: list[TemplateOut] = []
     for kind in DEFAULT_KINDS:
         kind_id = kind["kindId"]
+        shipped = notify_i18n.kind_text(lang, kind_id)
+        english = edits.get(kind_id, {})
+        push_edit = local(kind_id) if lang != "en" else english
         email_default = kind.get("email") if kind_id in EMAIL_SENDS else None
-        email_edit = edits.get(push_templates.EMAIL_PREFIX + kind_id, {})
+        email_english = edits.get(push_templates.EMAIL_PREFIX + kind_id, {})
+        email_edit = local(push_templates.EMAIL_PREFIX + kind_id) if lang != "en" else email_english
+        email_shipped = shipped.get("email") or {}
         rows.append(
             TemplateOut(
                 id=kind_id,
-                label=kind["label"],
+                label=shipped.get("label") or kind["label"],
                 **{"class": kind["class"]},
-                title=edits.get(kind_id, {}).get("title") or kind["title"],
-                body=edits.get(kind_id, {}).get("body") or kind["body"],
+                title=push_edit.get("title") or shipped.get("title") or english.get("title") or kind["title"],
+                body=push_edit.get("body") or shipped.get("body") or english.get("body") or kind["body"],
                 placeholders=kind.get("placeholders", []),
-                edited=kind_id in edits,
+                edited=bool(push_edit),
                 channels=(["push"] if kind_id in SENDS or kind_id not in EMAIL_SENDS else [])
                 + (["email"] if email_default else []),
                 email=EmailWordingOut(
-                    subject=email_edit.get("subject") or email_default["subject"],
-                    body=email_edit.get("body") or email_default["body"],
+                    subject=email_edit.get("subject")
+                    or email_shipped.get("subject")
+                    or email_english.get("subject")
+                    or email_default["subject"],
+                    body=email_edit.get("body")
+                    or email_shipped.get("body")
+                    or email_english.get("body")
+                    or email_default["body"],
                     placeholders=placeholders_for(kind_id, "email"),
                     edited=bool(email_edit),
                 )
@@ -828,17 +873,30 @@ async def _templates(db) -> TemplatesOut:
                 else None,
             )
         )
-    frame_edit = edits.get(push_templates.FRAME_ID, {})
+    frame_english = edits.get(push_templates.FRAME_ID, {})
+    frame_edit = local(push_templates.FRAME_ID) if lang != "en" else frame_english
+    frame_shipped = notify_i18n.frame_text(lang)
+
+    def part(name: str) -> str:
+        return (
+            frame_edit.get(name)
+            or frame_shipped.get(name)
+            or frame_english.get(name)
+            or EMAIL_FRAME[name]
+        )
+
     return TemplatesOut(
         templates=rows,
         frame=FrameOut(
-            body=frame_edit.get("body") or EMAIL_FRAME["body"],
-            footer=frame_edit.get("footer") or EMAIL_FRAME["footer"],
-            accountFooter=frame_edit.get("accountFooter") or EMAIL_FRAME["accountFooter"],
+            body=part("body"),
+            footer=part("footer"),
+            accountFooter=part("accountFooter"),
             placeholders=EMAIL_FRAME_PLACEHOLDERS,
             required=EMAIL_FRAME_REQUIRED,
             edited=bool(frame_edit),
         ),
+        language=lang,
+        languages=[LanguageOut(**item) for item in notify_i18n.languages()],
     )
 
 
@@ -859,13 +917,15 @@ def _refuse_unknown(text: str, allowed: list[str]) -> None:
 
 
 @router.get("/push/templates")
-async def push_templates_list(db: Db, p: CanOperate) -> TemplatesOut:
-    """What every kind of notification says on this deployment."""
-    return await _templates(db)
+async def push_templates_list(db: Db, p: CanOperate, language: str = "en") -> TemplatesOut:
+    """What every kind of notification says on this deployment, in `language`."""
+    return await _templates(db, language)
 
 
 @router.patch("/push/templates/{kind_id}")
-async def push_template_write(kind_id: str, body: TemplateIn, db: Db, p: CanOperate) -> TemplatesOut:
+async def push_template_write(
+    kind_id: str, body: TemplateIn, db: Db, p: CanOperate, language: str = "en"
+) -> TemplatesOut:
     """Reword one kind.
 
     A kind needs code behind it, so an unknown id is a client bug rather than a
@@ -878,18 +938,25 @@ async def push_template_write(kind_id: str, body: TemplateIn, db: Db, p: CanOper
         f"{body.title}\n{body.body}",
         placeholders_for(kind_id, "push") + list(definition.get("accepts", [])),
     )
+    lang = notify_i18n.known(language)
     await push_templates.set_wording(
-        db, kind_id, title=body.title.strip(), body=body.body.strip(), updated_by=p.subject_id
+        db,
+        kind_id,
+        title=body.title.strip(),
+        body=body.body.strip(),
+        updated_by=p.subject_id,
+        language=lang,
     )
-    return await _templates(db)
+    return await _templates(db, lang)
 
 
 @router.delete("/push/templates/{kind_id}")
-async def push_template_reset(kind_id: str, db: Db, p: CanOperate) -> TemplatesOut:
+async def push_template_reset(kind_id: str, db: Db, p: CanOperate, language: str = "en") -> TemplatesOut:
     """Back to the words the code ships — which is deleting the edit, not
-    writing a second copy of the default."""
-    await push_templates.reset(db, kind_id)
-    return await _templates(db)
+    writing a second copy of the default. Only `language`'s edit."""
+    lang = notify_i18n.known(language)
+    await push_templates.reset(db, kind_id, lang)
+    return await _templates(db, lang)
 
 
 class EmailTemplateIn(Model):
@@ -906,22 +973,29 @@ def _emailed(kind_id: str) -> dict[str, Any]:
 
 @router.patch("/push/templates/{kind_id}/email")
 async def email_template_write(
-    kind_id: str, body: EmailTemplateIn, db: Db, p: CanOperate
+    kind_id: str, body: EmailTemplateIn, db: Db, p: CanOperate, language: str = "en"
 ) -> TemplatesOut:
     """Reword one kind's email. Refused if it names a placeholder nothing fills."""
     _emailed(kind_id)
     _refuse_unknown(f"{body.subject}\n{body.body}", placeholders_for(kind_id, "email"))
+    lang = notify_i18n.known(language)
     await push_templates.set_email(
-        db, kind_id, subject=body.subject.strip(), body=body.body.strip(), updated_by=p.subject_id
+        db,
+        kind_id,
+        subject=body.subject.strip(),
+        body=body.body.strip(),
+        updated_by=p.subject_id,
+        language=lang,
     )
-    return await _templates(db)
+    return await _templates(db, lang)
 
 
 @router.delete("/push/templates/{kind_id}/email")
-async def email_template_reset(kind_id: str, db: Db, p: CanOperate) -> TemplatesOut:
+async def email_template_reset(kind_id: str, db: Db, p: CanOperate, language: str = "en") -> TemplatesOut:
     _emailed(kind_id)
-    await push_templates.reset_email(db, kind_id)
-    return await _templates(db)
+    lang = notify_i18n.known(language)
+    await push_templates.reset_email(db, kind_id, lang)
+    return await _templates(db, lang)
 
 
 class FrameIn(Model):
@@ -931,7 +1005,7 @@ class FrameIn(Model):
 
 
 @router.patch("/email/frame")
-async def email_frame_write(body: FrameIn, db: Db, p: CanOperate) -> TemplatesOut:
+async def email_frame_write(body: FrameIn, db: Db, p: CanOperate, language: str = "en") -> TemplatesOut:
     """Reword the greeting and footers every notification email shares.
 
     The body must keep `{message}` and the footer `{unsubscribe_link}`: without
@@ -946,20 +1020,23 @@ async def email_frame_write(body: FrameIn, db: Db, p: CanOperate) -> TemplatesOu
             raise AppError(
                 400, "missing_placeholder", f"The {part} has to keep {{{required}}}."
             )
+    lang = notify_i18n.known(language)
     await push_templates.set_frame(
         db,
         body=body.body.strip(),
         footer=body.footer.strip(),
         account_footer=body.account_footer.strip(),
         updated_by=p.subject_id,
+        language=lang,
     )
-    return await _templates(db)
+    return await _templates(db, lang)
 
 
 @router.delete("/email/frame")
-async def email_frame_reset(db: Db, p: CanOperate) -> TemplatesOut:
-    await push_templates.reset_frame(db)
-    return await _templates(db)
+async def email_frame_reset(db: Db, p: CanOperate, language: str = "en") -> TemplatesOut:
+    lang = notify_i18n.known(language)
+    await push_templates.reset_frame(db, lang)
+    return await _templates(db, lang)
 
 
 # --- the events screen: every kind, its channels, and when its job runs -------
@@ -1124,6 +1201,7 @@ class EmailTestIn(Model):
     """Which kind's email to preview. Never a recipient: it goes to the caller."""
 
     kind: str | None = Field(default=None, max_length=60)
+    language: str | None = Field(default=None, max_length=20)
 
 
 @router.post("/email/test")
@@ -1131,4 +1209,6 @@ async def email_test(db: Db, p: CanOperate, body: EmailTestIn | None = None) -> 
     """Email the caller's own address, and nobody else's."""
     await limiter.hit(db, "email:test", p.subject_id, PUSH_TEST_PER_ACCOUNT)
     user = await users_repo.by_id(db, p.subject_id) or {}
-    return await email_notify.send_test(db, user, body.kind if body else None)
+    return await email_notify.send_test(
+        db, user, body.kind if body else None, (body.language if body else None) or "en"
+    )

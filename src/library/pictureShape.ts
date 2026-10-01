@@ -1,3 +1,5 @@
+import { translate } from "../lib/i18n";
+
 /**
  * The shape of a picture in a book, defined once.
  *
@@ -42,5 +44,9 @@ export const SHAPES: Record<PictureKind, PictureShape> = { banner: BANNER, portr
 /** What an author is told about the size, in one line. */
 export const describeShape = (kind: PictureKind): string => {
   const s = SHAPES[kind];
-  return `${s.width} × ${s.height} px (${kind === "banner" ? "2:1, wide" : "3:4, tall"}) — keep the subject in the middle ${Math.round(SAFE_AREA * 100)}%`;
+  return translate(kind === "banner" ? "studio.picture.shapeWide" : "studio.picture.shapeTall", {
+    width: String(s.width),
+    height: String(s.height),
+    safe: String(Math.round(SAFE_AREA * 100)),
+  });
 };

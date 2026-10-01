@@ -8,6 +8,7 @@ import {
   type AnnouncementReport,
 } from "../../lib/push";
 
+import { translate } from "../../lib/i18n";
 /**
  * An operator's own message, pushed to phones the moment they press Send.
  *
@@ -19,9 +20,9 @@ import {
 const LIMITS = { title: 60, message: 160 };
 
 const AUDIENCES: { id: AnnouncementAudience; label: string; hint: string }[] = [
-  { id: "families", label: "Families", hint: "Every parent and caregiver" },
-  { id: "staff", label: "Staff", hint: "People who run this deployment" },
-  { id: "everyone", label: "Everyone", hint: "Families and staff" },
+  { id: "families", get label() { return translate("admin.pushAnnounce.families"); }, get hint() { return translate("admin.pushAnnounce.everyParentAndCaregiver"); } },
+  { id: "staff", get label() { return translate("admin.pushAnnounce.staff"); }, get hint() { return translate("admin.pushAnnounce.peopleWhoRunThisDeployment"); } },
+  { id: "everyone", get label() { return translate("admin.pushAnnounce.everyone"); }, get hint() { return translate("admin.pushAnnounce.familiesAndStaff"); } },
 ];
 
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
@@ -73,16 +74,16 @@ export const PushAnnounce: React.FC = () => {
       const reach = await sendAnnouncement(draft, true);
       if (reach.skipped) {
         setStage({ name: "writing" });
-        setError(`Nothing can be sent: ${reach.skipped}.`);
+        setError(translate("admin.pushAnnounce.nothingCanBeSentSkipped", { skipped: reach.skipped }));
       } else if (!reach.people) {
         setStage({ name: "writing" });
-        setError("Nobody is in that audience yet.");
+        setError(translate("admin.pushAnnounce.nobodyIsInThatAudienceYet"));
       } else {
         setStage({ name: "confirming", reach });
       }
     } catch {
       setStage({ name: "writing" });
-      setError("Could not check who this reaches. Try again.");
+      setError(translate("admin.pushAnnounce.couldNotCheckWhoThisReaches"));
     }
   };
 
@@ -93,7 +94,7 @@ export const PushAnnounce: React.FC = () => {
       const result = await sendAnnouncement(draft, false);
       if (result.skipped) {
         setStage({ name: "writing" });
-        setError(`Nothing was sent: ${result.skipped}.`);
+        setError(translate("admin.pushAnnounce.nothingWasSentSkipped", { skipped: result.skipped }));
         return;
       }
       setTitle("");
@@ -103,15 +104,15 @@ export const PushAnnounce: React.FC = () => {
       // A timeout is not proof it failed: the server may still be ringing
       // phones. Sending again blind is how a family gets it twice.
       setStage({ name: "confirming", reach });
-      setError("The announcement may not have gone out. Check What was sent before trying again.");
+      setError(translate("admin.pushAnnounce.theAnnouncementMayNotHaveGone"));
     }
   };
 
   return (
     <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
       <UISectionHeader
-        title="Announce"
-        subtitle="Write a message and push it to phones now"
+        title={translate("admin.pushAnnounce.announce")}
+        subtitle={translate("admin.pushAnnounce.writeAMessageAndPushIt")}
         icon={<Megaphone className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
       />
 
@@ -119,8 +120,8 @@ export const PushAnnounce: React.FC = () => {
         <input
           value={title}
           maxLength={LIMITS.title}
-          placeholder="Title (optional — Koda)"
-          aria-label="Announcement title"
+          placeholder={translate("admin.pushAnnounce.titleOptionalKoda")}
+          aria-label={translate("admin.pushAnnounce.announcementTitle")}
           disabled={busy}
           onChange={(e) => edit(() => setTitle(e.target.value))}
           className="w-full bg-surface border border-line rounded-xl px-3 py-2 text-sm font-bold text-ink focus:outline-none focus:border-indigo-500"
@@ -129,8 +130,8 @@ export const PushAnnounce: React.FC = () => {
           value={message}
           maxLength={LIMITS.message}
           rows={3}
-          placeholder="What do you want to tell people?"
-          aria-label="Announcement message"
+          placeholder={translate("admin.pushAnnounce.whatDoYouWantToTell")}
+          aria-label={translate("admin.pushAnnounce.announcementMessage")}
           disabled={busy}
           onChange={(e) => edit(() => setMessage(e.target.value))}
           className="w-full bg-surface border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-indigo-500"
@@ -140,7 +141,7 @@ export const PushAnnounce: React.FC = () => {
         </p>
       </div>
 
-      <div role="radiogroup" aria-label="Audience" className="grid gap-2 sm:grid-cols-3">
+      <div role="radiogroup" aria-label={translate("admin.pushAnnounce.audience")} className="grid gap-2 sm:grid-cols-3">
         {AUDIENCES.map((option) => {
           const selected = option.id === audience;
           return (
@@ -172,21 +173,21 @@ export const PushAnnounce: React.FC = () => {
           onChange={(e) => edit(() => setEmail(e.target.checked))}
           className="h-4 w-4 accent-indigo-600"
         />
-        Also send by email
+        {translate("admin.pushAnnounce.alsoSendByEmail")}
       </label>
 
       {/* A lock screen shows about one line of each. */}
       <div className="rounded-xl border border-line bg-surface-muted px-3 py-2">
-        <p className="font-mono text-[10px] uppercase tracking-wider text-muted">Preview</p>
-        <p className="mt-1 truncate text-sm font-bold text-ink">{draft.title || "Koda"}</p>
-        <p className="truncate text-xs text-body">{draft.message || "Your message"}</p>
+        <p className="font-mono text-[10px] uppercase tracking-wider text-muted">{translate("admin.pushAnnounce.preview")}</p>
+        <p className="mt-1 truncate text-sm font-bold text-ink">{draft.title || translate("admin.pushAnnounce.koda")}</p>
+        <p className="truncate text-xs text-body">{draft.message || translate("admin.pushAnnounce.yourMessage")}</p>
       </div>
 
       {error && <p className="text-xs text-rose-600 dark:text-rose-400">{error}</p>}
 
       {stage.name === "confirming" || stage.name === "sending" ? (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50 dark:bg-indigo-500/10 px-3 py-2">
-          <p className="text-sm text-ink">This reaches {reachOf(stage.reach)}</p>
+          <p className="text-sm text-ink">{translate("admin.pushAnnounce.thisReachesValue", { value: reachOf(stage.reach) })}</p>
           <div className="flex gap-2">
             <button
               type="button"
@@ -194,7 +195,7 @@ export const PushAnnounce: React.FC = () => {
               onClick={() => setStage({ name: "writing" })}
               className={themeSystem.button("secondary", "sm")}
             >
-              Cancel
+              {translate("admin.pushAnnounce.cancel")}
             </button>
             <button
               type="button"
@@ -203,8 +204,8 @@ export const PushAnnounce: React.FC = () => {
               className={themeSystem.button("primary", "sm")}
             >
               {stage.name === "sending"
-                ? "Sending…"
-                : `Send to ${plural(stage.reach.people, "person", "people")}`}
+                ? translate("admin.pushAnnounce.sending")
+                : translate("admin.pushAnnounce.sendToValue", { value: plural(stage.reach.people, "person", "people") })}
             </button>
           </div>
         </div>
@@ -212,8 +213,8 @@ export const PushAnnounce: React.FC = () => {
         <div className="flex flex-wrap items-center justify-between gap-3">
           {stage.name === "sent" ? (
             <p className="text-sm text-emerald-700 dark:text-emerald-400">
-              Sent to {plural(stage.result.people, "person", "people")}, and{" "}
-              {plural(stage.result.sent, "browser")} rang.
+              {translate("admin.pushAnnounce.sentTo")}{" "}{plural(stage.result.people, "person", "people")}{translate("admin.pushAnnounce.and")}{" "}
+              {plural(stage.result.sent, "browser")}{" "}{translate("admin.pushAnnounce.rang")}
               {stage.result.sent === 0 &&
                 " It is still under everyone's bell — if phones should have rung, check Overview."}
               {stage.result.emailed !== undefined && ` ${plural(stage.result.emailed, "email")} sent.`}
@@ -221,7 +222,7 @@ export const PushAnnounce: React.FC = () => {
             </p>
           ) : (
             <p className="text-xs text-muted">
-              Everyone also finds it under the bell. Parents who switched announcements off are not rung.
+              {translate("admin.pushAnnounce.everyoneAlsoFindsItUnderThe")}
             </p>
           )}
           <button
@@ -230,7 +231,7 @@ export const PushAnnounce: React.FC = () => {
             onClick={() => void check()}
             className={themeSystem.button("primary", "sm")}
           >
-            {stage.name === "checking" ? "Checking…" : "Send…"}
+            {stage.name === "checking" ? translate("admin.pushAnnounce.checking") : translate("admin.pushAnnounce.send")}
           </button>
         </div>
       )}

@@ -8,6 +8,7 @@ import { NotifyEventsPanel } from "./NotifyEventsPanel";
 import { PushTokensPanel } from "./PushTokensPanel";
 import { usePermissions } from "../../lib/sync";
 
+import { translate } from "../../lib/i18n";
 type NotificationTab = "settings" | "events" | "push" | "announce" | "scheduled" | "wording" | "sent" | "tokens" | "email";
 
 export const NotificationSettingsPage: React.FC = () => (
@@ -23,25 +24,25 @@ const NotificationSettingsTabs: React.FC = () => {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <UISectionHeader
-        title="Notification Settings"
-        subtitle="Choose what Koda can send to this device."
+        title={translate("admin.notificationSettingsPage.notificationSettings")}
+        subtitle={translate("admin.notificationSettingsPage.chooseWhatKodaCanSendTo")}
         icon={<Bell className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
       />
       <UITabs
         items={[
-          { id: "settings", label: "Overview" },
-          { id: "events", label: "Events" },
-          { id: "push", label: "Push" },
-          { id: "announce", label: "Announce" },
-          { id: "scheduled", label: "Scheduled" },
-          { id: "wording", label: "Wording" },
-          { id: "sent", label: "What was sent" },
-          ...(seesTokens ? [{ id: "tokens", label: "Tokens" }] : []),
-          { id: "email", label: "Email" },
+          { id: "settings", label: translate("admin.notificationSettingsPage.overview") },
+          { id: "events", label: translate("admin.notificationSettingsPage.events") },
+          { id: "push", label: translate("admin.notificationSettingsPage.push") },
+          { id: "announce", label: translate("admin.notificationSettingsPage.announce") },
+          { id: "scheduled", label: translate("admin.notificationSettingsPage.scheduled") },
+          { id: "wording", label: translate("admin.notificationSettingsPage.wording") },
+          { id: "sent", label: translate("admin.notificationSettingsPage.whatWasSent") },
+          ...(seesTokens ? [{ id: "tokens", label: translate("admin.notificationSettingsPage.tokens") }] : []),
+          { id: "email", label: translate("admin.notificationSettingsPage.email") },
         ]}
         value={tab}
         onChange={(value) => setTab(value as NotificationTab)}
-        label="Notification sections"
+        label={translate("admin.notificationSettingsPage.notificationSections")}
       />
       {tab === "settings" && (
         <section className="p-4 sm:p-5">

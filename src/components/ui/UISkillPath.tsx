@@ -1,6 +1,7 @@
 import React from "react";
 import { Check, Lock, Play, Star } from "lucide-react";
 import type { PathNodeState } from "../../lib/themeSystem";
+import { useT } from "../../lib/i18n";
 
 export interface UISkillPathItem {
   id: string;
@@ -71,11 +72,13 @@ const TITLE: Record<PathNodeState, string> = {
  */
 export const UISkillPath: React.FC<UISkillPathProps> = ({
   items,
-  startLabel = "Start",
+  startLabel,
   onSelect,
   className = "",
-}) => (
-  <ol className={`relative ${className}`} aria-label="Lesson path">
+}) => {
+  const { t } = useT();
+  return (
+  <ol className={`relative ${className}`} aria-label={t("path.label")}>
     {items.map((item, index) => {
       const locked = item.state === "locked";
       /* Locked by a plan rather than by the path. It still presses — the tap
@@ -85,7 +88,7 @@ export const UISkillPath: React.FC<UISkillPathProps> = ({
       const completed = item.state === "completed";
       const stars = Math.min(3, item.stars ?? 0);
       const tierLabel =
-        item.tier === "premium" ? "Premium" : item.tier === "free" ? "Free" : null;
+        item.tier === "premium" ? t("path.premium") : item.tier === "free" ? t("path.free") : null;
       const last = index === items.length - 1;
 
       return (
@@ -107,7 +110,17 @@ export const UISkillPath: React.FC<UISkillPathProps> = ({
             disabled={locked}
             onClick={() => onSelect(item.id)}
             title={item.title}
-            aria-label={`${item.title}${tierLabel ? ` (${tierLabel})` : ""}${locked ? ` (locked${item.note ? `: ${item.note}` : ""})` : premium ? " (subscription required)" : ""}`}
+            aria-label={[
+              item.title,
+              tierLabel && `(${tierLabel})`,
+              locked
+                ? `(${item.note ? t("path.lockedNote", { note: item.note }) : t("path.locked")})`
+                : premium
+                  ? `(${t("path.subscriptionRequired")})`
+                  : null,
+            ]
+              .filter(Boolean)
+              .join(" ")}
             className={`flex w-full items-center gap-3 rounded-2xl p-2 text-left transition ${
               current
                 ? "bg-indigo-50 ring-1 ring-indigo-200 dark:bg-indigo-950/40 dark:ring-indigo-800"
@@ -145,7 +158,7 @@ export const UISkillPath: React.FC<UISkillPathProps> = ({
               </span>
               {current ? (
                 <span className="mt-0.5 block font-mono text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
-                  {startLabel}
+                  {startLabel ?? t("learn.start")}
                 </span>
               ) : item.note ? (
                 <span className="mt-0.5 block text-xs text-muted">{item.note}</span>
@@ -184,4 +197,5 @@ export const UISkillPath: React.FC<UISkillPathProps> = ({
       );
     })}
   </ol>
-);
+  );
+};

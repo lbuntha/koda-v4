@@ -11,6 +11,7 @@ import {
   TypographyVariant,
 } from "../../lib/themeSystem";
 import { UIButtonSpinner } from "./UISpinner";
+import { translate } from "../../lib/i18n";
 
 export interface UIButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -206,7 +207,7 @@ export const UIModal: React.FC<UIModalProps> = ({ isOpen, onClose, title, ariaLa
         <div className={themeSystem.modal.grabber} aria-hidden="true" />
         <div className={plain ? themeSystem.modal.headerPlain : themeSystem.modal.header}>
           <h3 className={themeSystem.typography("h3", themeSystem.modal.headerTitle)}>{title}</h3>
-          <button onClick={onClose} className={themeSystem.modal.close} aria-label="Close">
+          <button onClick={onClose} className={themeSystem.modal.close} aria-label={translate("common.close")}>
             <X />
           </button>
         </div>
@@ -233,8 +234,8 @@ export const UIDialog: React.FC<UIDialogProps> = ({
   onClose,
   title,
   description,
-  confirmText = "Confirm",
-  cancelText = "Cancel",
+  confirmText,
+  cancelText,
   onConfirm,
   variant = "primary",
 }) => {
@@ -249,10 +250,10 @@ export const UIDialog: React.FC<UIDialogProps> = ({
         </div>
         <div className={themeSystem.dialog.actions}>
           <UIButton variant="secondary" size="sm" onClick={onClose}>
-            {cancelText}
+            {cancelText ?? translate("common.cancel")}
           </UIButton>
           <UIButton variant={variant === "danger" ? "danger" : "primary"} size="sm" onClick={() => { onConfirm(); onClose(); }}>
-            {confirmText}
+            {confirmText ?? translate("common.confirm")}
           </UIButton>
         </div>
       </div>

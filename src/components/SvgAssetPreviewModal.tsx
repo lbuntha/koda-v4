@@ -6,6 +6,7 @@ import { playSound } from "../utils/audio";
 import type { SvgAssetRecord } from "../lib/svgAssetsApi";
 import { copyText } from "../utils/clipboard";
 
+import { translate } from "../lib/i18n";
 /** The sizes artwork actually gets used at, so a shape that dies small shows it here. */
 const SAMPLE_SIZES = [16, 24, 32, 48, 96];
 
@@ -47,7 +48,7 @@ export const SvgAssetPreviewModal: React.FC<SvgAssetPreviewModalProps> = ({
   }) => (
     <button onClick={() => copy(label, text)} className={themeSystem.button("secondary", "sm")}>
       {copiedLabel === label ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-      {copiedLabel === label ? "Copied" : copiedLabel === `${label}-failed` ? "Copy blocked" : children}
+      {copiedLabel === label ? translate("admin.svgAssetPreviewModal.copied") : copiedLabel === `${label}-failed` ? translate("admin.svgAssetPreviewModal.copyBlocked") : children}
     </button>
   );
 
@@ -65,7 +66,7 @@ export const SvgAssetPreviewModal: React.FC<SvgAssetPreviewModalProps> = ({
         <div className={themeSystem.modal.header}>
           <div className="min-w-0">
             <h3 className="text-base font-black text-ink font-mono truncate">{asset.id}</h3>
-            <p className="text-xs text-muted truncate">src/assets/svg/{asset.id}.svg</p>
+            <p className="text-xs text-muted truncate">{translate("admin.svgAssetPreviewModal.srcAssetsSvgIdSvg", { id: asset.id })}</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {canEdit && (
@@ -77,12 +78,12 @@ export const SvgAssetPreviewModal: React.FC<SvgAssetPreviewModalProps> = ({
                 className={themeSystem.button("primary", "sm")}
               >
                 <Pencil className="w-4 h-4" />
-                Edit
+                {translate("admin.svgAssetPreviewModal.edit")}
               </button>
             )}
             <button
               onClick={onClose}
-              aria-label="Close"
+              aria-label={translate("admin.svgAssetPreviewModal.close")}
               className="p-2 rounded-xl text-muted hover:text-ink hover:bg-surface-muted transition cursor-pointer"
             >
               <X className="w-5 h-5" />
@@ -98,18 +99,18 @@ export const SvgAssetPreviewModal: React.FC<SvgAssetPreviewModalProps> = ({
               title={asset.id}
               fallback={
                 <span className="text-sm font-mono text-rose-600 dark:text-rose-400">
-                  Nothing survived sanitising — check the markup against svgPolicy.ts.
+                  {translate("admin.svgAssetPreviewModal.nothingSurvivedSanitisingCheckTheMarkup")}
                 </span>
               }
             />
           </div>
 
           <div>
-            <div className="text-xs font-mono font-bold text-body mb-2">At the sizes it gets used</div>
+            <div className="text-xs font-mono font-bold text-body mb-2">{translate("admin.svgAssetPreviewModal.atTheSizesItGetsUsed")}</div>
             <div className="rounded-2xl border border-line p-4 flex items-end justify-center gap-5 flex-wrap bg-checkerboard">
               {SAMPLE_SIZES.map((size) => (
                 <div key={size} className="flex flex-col items-center gap-1.5">
-                  <SvgMarkup markup={asset.markup} size={size} title={`${asset.id} at ${size}px`} />
+                  <SvgMarkup markup={asset.markup} size={size} title={translate("admin.svgAssetPreviewModal.idAtSizePx", { id: asset.id, size: size })} />
                   <span className="text-[10px] font-mono text-muted">{size}</span>
                 </div>
               ))}
@@ -118,13 +119,13 @@ export const SvgAssetPreviewModal: React.FC<SvgAssetPreviewModalProps> = ({
 
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-3 flex-wrap">
-              <div className="text-xs font-mono font-bold text-body">Source</div>
+              <div className="text-xs font-mono font-bold text-body">{translate("admin.svgAssetPreviewModal.source")}</div>
               <div className="flex items-center gap-2">
-                <CopyButton label="usage" text={`<SvgAsset id="${asset.id}" size={48} />`}>
-                  Copy usage
+                <CopyButton label={translate("admin.svgAssetPreviewModal.usage")} text={`<SvgAsset id="${asset.id}" size={48} />`}>
+                  {translate("admin.svgAssetPreviewModal.copyUsage")}
                 </CopyButton>
-                <CopyButton label="markup" text={asset.markup}>
-                  Copy markup
+                <CopyButton label={translate("admin.svgAssetPreviewModal.markup")} text={asset.markup}>
+                  {translate("admin.svgAssetPreviewModal.copyMarkup")}
                 </CopyButton>
               </div>
             </div>

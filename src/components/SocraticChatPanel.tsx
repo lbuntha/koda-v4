@@ -3,6 +3,7 @@ import { Send, Mic, MicOff, Volume2, VolumeX, Lightbulb, Sparkles } from "lucide
 import { ChatMessage } from "../types";
 import { playSound, playBase64Pcm } from "../utils/audio";
 
+import { translate } from "../lib/i18n";
 interface SocraticChatPanelProps {
   messages: ChatMessage[];
   onSendMessage: (text: string) => void;
@@ -81,7 +82,7 @@ export const SocraticChatPanel: React.FC<SocraticChatPanelProps> = ({
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-cyan-400" />
           <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">
-            Socratic AI Coach
+            {translate("app.socraticChatPanel.socraticAiCoach")}
           </span>
         </div>
 
@@ -93,10 +94,10 @@ export const SocraticChatPanel: React.FC<SocraticChatPanelProps> = ({
                 ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/30"
                 : "bg-slate-900 text-slate-500 border-slate-800"
             }`}
-            title="Toggle Voice Speech"
+            title={translate("app.socraticChatPanel.toggleVoiceSpeech")}
           >
             {voiceEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
-            <span>{voiceEnabled ? "Voice ON" : "Voice OFF"}</span>
+            <span>{voiceEnabled ? translate("app.socraticChatPanel.voiceOn") : translate("app.socraticChatPanel.voiceOff")}</span>
           </button>
         </div>
       </div>
@@ -125,11 +126,11 @@ export const SocraticChatPanel: React.FC<SocraticChatPanelProps> = ({
               >
                 <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 flex items-center justify-between gap-3">
                   <span className={isSora ? "text-cyan-400 font-bold" : "text-cyan-100"}>
-                    {isSora ? "Koda AI" : "You"}
+                    {isSora ? translate("app.socraticChatPanel.kodaAi") : translate("app.socraticChatPanel.you")}
                   </span>
                   {msg.xpEarned ? (
                     <span className="text-amber-400 font-mono font-bold text-[10px] bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/30">
-                      +{msg.xpEarned} XP
+                      {translate("app.socraticChatPanel.xpearnedXp", { xpEarned: msg.xpEarned })}
                     </span>
                   ) : null}
                 </div>
@@ -143,7 +144,7 @@ export const SocraticChatPanel: React.FC<SocraticChatPanelProps> = ({
         {isLoading && (
           <div className="flex items-center gap-2.5 p-2.5 bg-slate-950/80 rounded-xl border border-slate-800 w-fit text-xs text-cyan-400">
             <div className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-            <span className="text-xs font-medium">Koda is thinking...</span>
+            <span className="text-xs font-medium">{translate("app.socraticChatPanel.kodaIsThinking")}</span>
           </div>
         )}
         <div ref={chatEndRef} />
@@ -159,21 +160,21 @@ export const SocraticChatPanel: React.FC<SocraticChatPanelProps> = ({
           className="flex items-center gap-1 px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-lg text-xs font-medium whitespace-nowrap transition"
         >
           <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
-          Hint
+          {translate("app.socraticChatPanel.hint")}
         </button>
 
         <button
           onClick={() => onSendMessage("Why does this mathematical model work this way?")}
           className="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 rounded-lg text-xs font-medium whitespace-nowrap transition"
         >
-          💡 Why does this work?
+          {translate("app.socraticChatPanel.whyDoesThisWork")}
         </button>
 
         <button
           onClick={() => onSendMessage("Can you give me a visual clue?")}
           className="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 rounded-lg text-xs font-medium whitespace-nowrap transition"
         >
-          🔍 Visual clue
+          {translate("app.socraticChatPanel.visualClue")}
         </button>
       </div>
 
@@ -187,7 +188,7 @@ export const SocraticChatPanel: React.FC<SocraticChatPanelProps> = ({
               ? "bg-red-500/20 text-red-400 border-red-500/50 animate-pulse"
               : "bg-slate-900 text-slate-400 hover:text-white border-slate-800"
           }`}
-          title="Microphone Speech-to-Text"
+          title={translate("app.socraticChatPanel.microphoneSpeechToText")}
         >
           {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
         </button>
@@ -196,7 +197,7 @@ export const SocraticChatPanel: React.FC<SocraticChatPanelProps> = ({
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={isListening ? "Listening... speak clearly..." : "Ask a question or explain your reasoning..."}
+          placeholder={isListening ? translate("app.socraticChatPanel.listeningSpeakClearly") : translate("app.socraticChatPanel.askAQuestionOrExplainYour")}
           className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition"
         />
 

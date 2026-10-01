@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
+import { translate } from "../../lib/i18n";
 
 /** Colour by meaning, from THEME.md. It tints the icon and nothing else. */
 export type UIBannerTone = NonNullable<Parameters<typeof themeSystem.banner.tone>[0]>;
@@ -48,7 +49,7 @@ export const UIBanner: React.FC<UIBannerProps> = ({
   action,
   tinted = false,
   onDismiss,
-  dismissLabel = "Dismiss",
+  dismissLabel,
   role = "status",
   className = "",
 }) => {
@@ -98,7 +99,7 @@ export const UIBanner: React.FC<UIBannerProps> = ({
       </div>
 
       {onDismiss && (
-        <button type="button" aria-label={dismissLabel} onClick={dismiss} className={b.close}>
+        <button type="button" aria-label={dismissLabel ?? translate("common.dismiss")} onClick={dismiss} className={b.close}>
           <X />
         </button>
       )}

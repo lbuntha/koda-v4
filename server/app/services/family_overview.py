@@ -14,6 +14,7 @@ from typing import Any
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
+from app import notify_i18n
 from app.models.common import now as utc_now
 from app.repos import events as events_repo
 from app.repos import learners as learners_repo
@@ -24,8 +25,8 @@ ABSENCE = "learn.absence"
 STUCK = "learn.stuck"
 
 
-def _away_text(away: int) -> str:
-    return "a day" if away <= 1 else f"{away} days"
+def _away_text(away: int, language: str = notify_i18n.BASE) -> str:
+    return notify_i18n.phrase(language, "aDay") if away <= 1 else notify_i18n.phrase(language, "days", away)
 
 
 async def for_family(db: AsyncIOMotorDatabase, family_id: str, user_id: str | None) -> dict[str, Any]:
@@ -39,6 +40,7 @@ async def for_family(db: AsyncIOMotorDatabase, family_id: str, user_id: str | No
     today = local.date().isoformat()
     week = {(local.date() - timedelta(days=back)).isoformat() for back in range(7)}
     threshold = (await notify_jobs.get(db, "absence-check"))["days"]
+    language = await notify_i18n.language_of_family(db, family_id)
 
     children: list[dict[str, Any]] = []
     attention: dict[str, Any] | None = None
@@ -47,7 +49,7 @@ async def for_family(db: AsyncIOMotorDatabase, family_id: str, user_id: str | No
     stuck: dict[str, Any] | None = None
     for learner in await learners_repo.for_family(db, family_id):
         learner_id = learner["_id"]
-        name = learner.get("displayName") or "Your child"
+        name = learner.get("displayName") or notify_i18n.phrase(language, "yourChild")
         days = await events_repo.practice_days(db, family_id, learner_id)
         rounds, spent_ms = await events_repo.rounds_and_time(db, family_id, learner_id, [today])
         goal = await milestones.goal_for(db, family_id, learner_id)
@@ -75,11 +77,13 @@ async def for_family(db: AsyncIOMotorDatabase, family_id: str, user_id: str | No
             mark = next((m for m in reversed(marks) if m["kind"] == "stuck" and m.get("conceptKey")), None)
             if mark:
                 values = {"learner": name, "lesson": mastery.lesson_name(mark["conceptKey"])}
-                title, body = await push.wording(db, STUCK, values)
+                title, body = await push.wording(db, STUCK, values, language=language)
                 stuck = {"learnerId": learner_id, "kind": STUCK, "title": title, "body": body}
 
         if attention is None and away is not None and away >= threshold:
-            title, body = await push.wording(db, ABSENCE, {"learner": name, "away": _away_text(away)})
+            title, body = await push.wording(
+                db, ABSENCE, {"learner": name, "away": _away_text(away, language)}, language=language
+            )
             attention = {"learnerId": learner_id, "kind": ABSENCE, "title": title, "body": body}
 
     return {

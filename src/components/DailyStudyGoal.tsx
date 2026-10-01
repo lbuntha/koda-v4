@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Target, CheckCircle2, Flame, Trophy, Edit2, ChevronDown } from "lucide-react";
 import { playSound } from "../utils/audio";
 
+import { translate } from "../lib/i18n";
 interface DailyStudyGoalProps {
   dailySolved: number;
   dailyGoal: number;
@@ -77,9 +78,9 @@ export const DailyStudyGoal: React.FC<DailyStudyGoalProps> = ({
             setIsEditing(!isEditing);
           }}
           className="text-[10px] text-slate-400 hover:text-cyan-300 flex items-center gap-0.5 transition"
-          title="Change daily goal"
+          title={translate("app.dailyStudyGoal.changeDailyGoal")}
         >
-          <span>Goal</span>
+          <span>{translate("app.dailyStudyGoal.goal")}</span>
           <ChevronDown className="w-2.5 h-2.5" />
         </button>
       </div>
@@ -88,7 +89,7 @@ export const DailyStudyGoal: React.FC<DailyStudyGoalProps> = ({
       {isEditing && (
         <div className="absolute right-0 top-10 z-50 w-44 bg-slate-900 border border-slate-800 rounded-xl p-2.5 shadow-2xl backdrop-blur-md animate-fadeIn font-sans">
           <div className="text-[10px] font-bold uppercase tracking-wider text-cyan-400 mb-2 flex items-center justify-between">
-            <span>Set Daily Target</span>
+            <span>{translate("app.dailyStudyGoal.setDailyTarget")}</span>
             <Edit2 className="w-3 h-3 text-cyan-400" />
           </div>
           <div className="grid grid-cols-5 gap-1 font-mono">
@@ -111,7 +112,7 @@ export const DailyStudyGoal: React.FC<DailyStudyGoalProps> = ({
             ))}
           </div>
           <p className="text-[10px] text-slate-400 mt-2 leading-tight">
-            Target daily problems for steady mastery.
+            {translate("app.dailyStudyGoal.targetDailyProblemsForSteadyMastery")}
           </p>
         </div>
       )}

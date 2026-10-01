@@ -4,6 +4,7 @@ import { themeSystem } from "../../lib/themeSystem";
 import { UIDataTable, UISectionHeader } from "../ui";
 import { notificationLog, type PushLog, type SendRecord } from "../../lib/push";
 
+import { translate } from "../../lib/i18n";
 /**
  * What was sent, and what became of it.
  *
@@ -25,13 +26,13 @@ const Result: React.FC<{ send: SendRecord }> = ({ send }) => {
   if (send.driver === "console") {
     // Not a failure, and it is every developer's normal state. Saying "0
     // delivered" without saying why reads as a fault on every dev machine.
-    return <span className="font-mono text-[10px] text-muted">logged only · console driver</span>;
+    return <span className="font-mono text-[10px] text-muted">{translate("admin.pushLogPanel.loggedOnlyConsoleDriver")}</span>;
   }
   const email = send.channel === "email";
   if (send.devices === 0) {
     return (
       <span className="font-mono text-[10px] text-muted">
-        {email ? "no verified address to write to" : "no browser registered to ring"}
+        {email ? translate("admin.pushLogPanel.noVerifiedAddressToWriteTo") : translate("admin.pushLogPanel.noBrowserRegisteredToRing")}
       </span>
     );
   }
@@ -42,7 +43,7 @@ const Result: React.FC<{ send: SendRecord }> = ({ send }) => {
         send.delivered > 0 ? "text-emerald-700 dark:text-emerald-300" : "text-rose-600 dark:text-rose-400"
       }`}
     >
-      {send.delivered}/{send.devices} {email ? "emailed" : "delivered"}
+      {send.delivered}/{send.devices} {email ? translate("admin.pushLogPanel.emailed") : translate("admin.pushLogPanel.delivered")}
       {failed.length > 0 && ` · ${failed.map(([name, n]) => `${n} ${name}`).join(", ")}`}
     </span>
   );
@@ -59,7 +60,7 @@ export const PushLogPanel: React.FC = () => {
     try {
       setLog(await notificationLog());
     } catch {
-      setError("Could not read the send log.");
+      setError(translate("admin.pushLogPanel.couldNotReadTheSendLog"));
     }
     setBusy(false);
   }, []);
@@ -73,14 +74,14 @@ export const PushLogPanel: React.FC = () => {
   return (
     <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
       <UISectionHeader
-        title="What was sent"
-        subtitle="Every notification this deployment sent, and whether it arrived"
+        title={translate("admin.pushLogPanel.whatWasSent")}
+        subtitle={translate("admin.pushLogPanel.everyNotificationThisDeploymentSentAnd")}
         icon={<History className="w-5 h-5 text-sky-600 dark:text-sky-400" />}
       />
 
       {log && log.summary.length > 0 && (
         <UIDataTable
-          caption="Notification summary"
+          caption={translate("admin.pushLogPanel.notificationSummary")}
           rows={log.summary}
           rowKey={(row) => `${row.kind}:${row.channel ?? "push"}`}
           pageSize={8}
@@ -113,7 +114,7 @@ export const PushLogPanel: React.FC = () => {
               header: "Delivery",
               render: (row) => (
                 <span className={row.delivered > 0 || row.devices === 0 ? "text-muted" : "text-rose-600 dark:text-rose-400"}>
-                  {row.sends} sent · {row.delivered}/{row.devices}
+                  {translate("admin.pushLogPanel.sendsSentDeliveredDevices", { sends: row.sends, delivered: row.delivered, devices: row.devices })}
                 </span>
               ),
               sortValue: (row) => row.delivered,
@@ -127,7 +128,7 @@ export const PushLogPanel: React.FC = () => {
       <div>
         {log && log.sends.length > 0 && (
           <UIDataTable
-            caption="Notification sends"
+            caption={translate("admin.pushLogPanel.notificationSends")}
             rows={log.sends}
             rowKey={(send) => send.id}
             pageSize={10}
@@ -179,10 +180,10 @@ export const PushLogPanel: React.FC = () => {
         )}
         {log && log.sends.length === 0 && !error && (
           <p className="text-xs text-muted">
-            Nothing has been sent yet. A sign-in, a met goal or a Sunday summary will appear here.
+            {translate("admin.pushLogPanel.nothingHasBeenSentYetA")}
           </p>
         )}
-        {!log && !error && <p className="text-xs text-muted">Reading…</p>}
+        {!log && !error && <p className="text-xs text-muted">{translate("admin.pushLogPanel.reading")}</p>}
       </div>
 
       {error && <p className="text-xs text-rose-600 dark:text-rose-400">{error}</p>}
@@ -193,7 +194,7 @@ export const PushLogPanel: React.FC = () => {
         className={themeSystem.button("secondary", "sm")}
       >
         <RefreshCw className="w-4 h-4 mr-2" />
-        {busy ? "Reading…" : "Refresh"}
+        {busy ? translate("admin.pushLogPanel.reading") : translate("admin.pushLogPanel.refresh")}
       </button>
     </section>
   );

@@ -28,6 +28,7 @@ from uuid import uuid4
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
+from app import notify_i18n
 from app.models.common import now as utc_now
 from app.repos import events as events_repo
 from app.repos import learners as learners_repo
@@ -284,6 +285,7 @@ async def weekly_summary(
         date_key = days[0]
         # A line per child who practised, for the one email each parent gets.
         lines: list[str] = []
+        language = await notify_i18n.language_of_family(db, family_id)
 
         for learner in await learners_repo.for_family(db, family_id):
             learner_id = learner["_id"]
@@ -296,21 +298,28 @@ async def weekly_summary(
                 continue
 
             rounds, spent_ms = await events_repo.rounds_and_time(db, family_id, learner_id, days)
-            practice = f"{practised} day" if practised == 1 else f"{practised} days"
+            practice = notify_i18n.phrase(language, "days", practised)
+            child = learner.get("displayName") or notify_i18n.phrase(language, "yourChild")
             lines.append(
-                f"• {learner.get('displayName', 'Your child')}: practised on {practice} — "
-                f"{_rounds_text(rounds)}, {_time_text(spent_ms)}"
-                + await _progress_suffix(db, family_id, learner_id, days, next_up=True)
+                notify_i18n.phrase(
+                    language,
+                    "summaryLine",
+                    learner=child,
+                    practice=practice,
+                    rounds=_rounds_text(rounds, language),
+                    time=_time_text(spent_ms, language),
+                )
+                + await _progress_suffix(db, family_id, learner_id, days, next_up=True, language=language)
             )
             title, body = await push.wording(
                 db,
                 WEEKLY_SUMMARY,
                 {
-                    "learner": learner.get("displayName", "Your child"),
+                    "learner": child,
                     # The noun travels with the number: see `push_defaults`.
                     "practice": practice,
-                    "rounds_done": _rounds_text(rounds),
-                    "time": _time_text(spent_ms),
+                    "rounds_done": _rounds_text(rounds, language),
+                    "time": _time_text(spent_ms, language),
                     # The placeholder the shipped wording used before it learned
                     # to say "1 day". Supplied so that wording an operator saved
                     # against the old body still fills — `fill` leaves an
@@ -546,7 +555,7 @@ async def skill_announcements(
             ):
                 continue
 
-            title, body = await push.wording(db, SKILL_PUBLISHED, {"skill": name})
+            title, body = await push.wording(db, SKILL_PUBLISHED, {"skill": name}, family_id=family_id)
             report["announcements"] += 1
 
             if preview:
@@ -755,42 +764,51 @@ ABSENCE = "learn.absence"
 DAILY_DIGEST = "learn.daily_digest"
 
 
-def _rounds_text(rounds: int) -> str:
-    return "1 round" if rounds == 1 else f"{rounds} rounds"
+def _rounds_text(rounds: int, language: str = notify_i18n.BASE) -> str:
+    return notify_i18n.phrase(language, "rounds", rounds)
 
 
-def _time_text(duration_ms: int) -> str:
+def _time_text(duration_ms: int, language: str = notify_i18n.BASE) -> str:
     """Minutes, with the noun attached — and honest about a very short session."""
     minutes = round(duration_ms / 60_000)
     if minutes < 1:
-        return "under a minute"
-    return "1 minute" if minutes == 1 else f"{minutes} minutes"
+        return notify_i18n.phrase(language, "underAMinute")
+    return notify_i18n.phrase(language, "minutes", minutes)
 
 
 async def _progress_suffix(
-    db: AsyncIOMotorDatabase, family_id: str, learner_id: str, days: list[str], *, next_up: bool
+    db: AsyncIOMotorDatabase,
+    family_id: str,
+    learner_id: str,
+    days: list[str],
+    *,
+    next_up: bool,
+    language: str = notify_i18n.BASE,
 ) -> str:
     """What changed in these days, for a summary or digest line: mastered, finding
     tricky, the daily time spent — and, for the week, the lesson to do next."""
     marks = await progress_marks.for_days(db, family_id, learner_id, days)
     parts: list[str] = []
-    mastered = mastery.join_names(
-        [mastery.lesson_name(m["conceptKey"]) for m in marks if m["kind"] == "mastered" and m.get("conceptKey")]
+    mastered = notify_i18n.join_names(
+        [mastery.lesson_name(m["conceptKey"]) for m in marks if m["kind"] == "mastered" and m.get("conceptKey")],
+        language,
     )
     if mastered:
-        parts.append(f"mastered {mastered}")
-    tricky = mastery.join_names(
-        [mastery.lesson_name(m["conceptKey"]) for m in marks if m["kind"] == "stuck" and m.get("conceptKey")]
+        parts.append(notify_i18n.phrase(language, "mastered", lessons=mastered))
+    tricky = notify_i18n.join_names(
+        [mastery.lesson_name(m["conceptKey"]) for m in marks if m["kind"] == "stuck" and m.get("conceptKey")],
+        language,
     )
     if tricky:
-        parts.append(f"finding {tricky} tricky")
+        parts.append(notify_i18n.phrase(language, "tricky", lessons=tricky))
     if any(m["kind"] == "time_limit" for m in marks):
-        parts.append("used the full daily time")
+        parts.append(notify_i18n.phrase(language, "fullTime"))
     if next_up:
         upcoming = await mastery.next_step(db, family_id, learner_id)
         if upcoming:
-            parts.append(f"next up: {upcoming}")
-    return "".join(f"; {part}" for part in parts)
+            parts.append(notify_i18n.phrase(language, "nextUp", lesson=upcoming))
+    separator = notify_i18n.phrase(language, "partSeparator")
+    return "".join(f"{separator}{part}" for part in parts)
 
 
 async def _family_clock(
@@ -884,9 +902,10 @@ async def absence_check(
             if away is None or away < threshold:
                 continue
 
-            name = learner.get("displayName", "Your child")
-            values = {"learner": name, "away": _how_long(away)}
-            title, body = await push.wording(db, ABSENCE, values)
+            language = await notify_i18n.language_of_family(db, family_id)
+            name = learner.get("displayName") or notify_i18n.phrase(language, "yourChild")
+            values = {"learner": name, "away": _how_long(away, language)}
+            title, body = await push.wording(db, ABSENCE, values, language=language)
             gap = days[0]
             report["absences"] += 1
 
@@ -993,14 +1012,23 @@ async def daily_digest(
         report["due"] += 1
 
         lines: list[str] = []
+        language = await notify_i18n.language_of_family(db, family_id)
         for learner in await learners_repo.for_family(db, family_id):
             rounds, spent_ms = await events_repo.rounds_and_time(db, family_id, learner["_id"], [today])
             if not rounds:
                 continue
-            line = f"• {learner.get('displayName', 'Your child')}: {_rounds_text(rounds)}, {_time_text(spent_ms)}"
+            line = notify_i18n.phrase(
+                language,
+                "digestLine",
+                learner=learner.get("displayName") or notify_i18n.phrase(language, "yourChild"),
+                rounds=_rounds_text(rounds, language),
+                time=_time_text(spent_ms, language),
+            )
             if rounds >= await milestones.goal_for(db, family_id, learner["_id"]):
-                line += " — today's goal met"
-            line += await _progress_suffix(db, family_id, learner["_id"], [today], next_up=False)
+                line += notify_i18n.phrase(language, "goalMetToday")
+            line += await _progress_suffix(
+                db, family_id, learner["_id"], [today], next_up=False, language=language
+            )
             lines.append(line)
         if not lines:
             continue
@@ -1078,7 +1106,7 @@ PRACTICE_REMINDER = "learn.practice_reminder"
 STREAK_ENDING = "learn.streak_ending"
 
 
-def _how_long(away: int | None) -> str:
+def _how_long(away: int | None, language: str = notify_i18n.BASE) -> str:
     """How long it has been, as the reminder says it out loud.
 
     The noun travels with the number, for the reason the weekly summary already
@@ -1091,8 +1119,8 @@ def _how_long(away: int | None) -> str:
     extra thing on the evening somebody first gets round to starting.
     """
     if away is None:
-        return "a while"
-    return "a day" if away <= 1 else f"{away} days"
+        return notify_i18n.phrase(language, "aWhile")
+    return notify_i18n.phrase(language, "aDay") if away <= 1 else notify_i18n.phrase(language, "days", away)
 
 #: How late a streak warning may go out.
 #:
@@ -1178,6 +1206,7 @@ async def daily_reminders(
 
         local = _local(at, offset)
         today = local.date().isoformat()
+        language = await notify_i18n.language_of_family(db, family_id)
 
         due_now = [
             user_id
@@ -1195,7 +1224,7 @@ async def daily_reminders(
 
         for learner in await learners_repo.for_family(db, family_id):
             learner_id = learner["_id"]
-            name = learner.get("displayName", "Your child")
+            name = learner.get("displayName") or notify_i18n.phrase(language, "yourChild")
 
             if await events_repo.practised_on(db, family_id, learner_id, today):
                 # The whole point of the kind. A child who has already had a go
@@ -1210,8 +1239,8 @@ async def daily_reminders(
             if kind == PRACTICE_REMINDER and not allows_reminder:
                 continue
 
-            values = {"learner": name, "days": at_stake, "away": _how_long(away)}
-            title, body = await push.wording(db, kind, values)
+            values = {"learner": name, "days": at_stake, "away": _how_long(away, language)}
+            title, body = await push.wording(db, kind, values, language=language)
 
             if preview:
                 report.setdefault("would_send", []).append(

@@ -1,0 +1,168 @@
+{
+  "$meta": {
+    "name": "ខ្មែរ",
+    "englishName": "Khmer"
+  },
+  "phrases": {
+    "days": "{count} ថ្ងៃ",
+    "aDay": "មួយថ្ងៃ",
+    "aWhile": "មួយរយៈ",
+    "rounds": "{count} ជុំ",
+    "minutes": "{count} នាទី",
+    "underAMinute": "តិចជាងមួយនាទី",
+    "and": " និង ",
+    "yourChild": "កូនរបស់អ្នក",
+    "yourChildLower": "កូនរបស់អ្នក",
+    "somebody": "នរណាម្នាក់",
+    "there": "លោកអ្នក",
+    "yourFamily": "គ្រួសាររបស់អ្នក",
+    "approved": "ត្រូវបានយល់ព្រម",
+    "summaryLine": "• {learner}៖ បានហាត់ {practice} — {rounds}, {time}",
+    "digestLine": "• {learner}៖ {rounds}, {time}",
+    "mastered": "បានស្ទាត់ {lessons}",
+    "tricky": "កំពុងពិបាកនឹង {lessons}",
+    "fullTime": "បានប្រើពេលប្រចាំថ្ងៃអស់",
+    "nextUp": "បន្ទាប់៖ {lesson}",
+    "partSeparator": "; ",
+    "goalMetToday": " — សម្រេចគោលដៅថ្ងៃនេះ"
+  },
+  "kinds": {
+    "device.new_signin": {
+      "label": "ឧបករណ៍ថ្មីបានចូលគណនី",
+      "title": "មានការចូលគណនី Koda ថ្មី",
+      "body": "{device} ទើបតែបានចូលគណនី។ បើមិនមែនជាអ្នកទេ សូមចាកចេញវាក្នុងការកំណត់។",
+      "email": {
+        "subject": "មានការចូលគណនី Koda របស់អ្នកថ្មី",
+        "body": "{device} ទើបតែបានចូលគណនី Koda របស់គ្រួសារអ្នក។\n\nបើជាអ្នក គ្មានអ្វីត្រូវធ្វើទេ។ បើមិនមែនទេ សូមបើក Koda ហើយចាកចេញវានៅក្នុងការកំណត់៖\n{app_link}"
+      }
+    },
+    "family.invite_redeemed": {
+      "label": "ការអញ្ជើញត្រូវបានទទួលយក",
+      "title": "ការអញ្ជើញត្រូវបានទទួលយក",
+      "body": "{name} បានចូលរួមគ្រួសាររបស់អ្នកនៅលើ Koda។",
+      "email": {
+        "subject": "{name} បានចូលរួមគ្រួសាររបស់អ្នកនៅលើ Koda",
+        "body": "{name} បានទទួលយកការអញ្ជើញរបស់អ្នក ហើយឥឡូវជាផ្នែកមួយនៃគ្រួសាររបស់អ្នកនៅលើ Koda។\n\nមើលថានរណាខ្លះនៅក្នុងគ្រួសាររបស់អ្នក៖\n{app_link}"
+      }
+    },
+    "plan.request_decided": {
+      "label": "សំណើគម្រោងត្រូវបានសម្រេច",
+      "title": "សំណើគម្រោងរបស់អ្នក",
+      "body": "សំណើប្ដូរគម្រោងរបស់អ្នក{decision}។",
+      "email": {
+        "subject": "សំណើគម្រោង Koda របស់អ្នក{decision}",
+        "body": "សំណើប្ដូរគម្រោងរបស់អ្នក{decision}។\n\nមើលគម្រោងរបស់អ្នក៖\n{app_link}"
+      }
+    },
+    "learn.weekly_summary": {
+      "label": "សង្ខេបប្រចាំសប្តាហ៍",
+      "title": "សប្តាហ៍របស់ {learner}",
+      "body": "{learner} បានហាត់ {practice} ក្នុងសប្តាហ៍នេះ — {rounds_done}, {time}។",
+      "email": {
+        "subject": "សប្តាហ៍របស់គ្រួសារអ្នកនៅលើ Koda",
+        "body": "នេះជាអ្វីដែលបានកើតឡើងក្នុងសប្តាហ៍នេះ។\n\n{summary}\n\nមើលវឌ្ឍនភាពរបស់កូននីមួយៗ៖\n{app_link}"
+      }
+    },
+    "learn.goal_met": {
+      "label": "សម្រេចគោលដៅ",
+      "title": "{learner} បានសម្រេចគោលដៅថ្ងៃនេះ",
+      "body": "{rounds} ជុំនៃ {skill}។ ពូកែណាស់។"
+    },
+    "learn.skill_published": {
+      "label": "ជំនាញថ្មីត្រូវបានផ្សព្វផ្សាយ",
+      "title": "ថ្មីនៅលើ Koda",
+      "body": "{skill} ទើបតែត្រូវបានផ្សព្វផ្សាយ — បើក Koda ដើម្បីសាកល្បង។",
+      "email": {
+        "subject": "ថ្មីនៅលើ Koda៖ {skill}",
+        "body": "{skill} ទើបតែត្រូវបានផ្សព្វផ្សាយ។ បើក Koda ដើម្បីសាកល្បង៖\n{app_link}"
+      }
+    },
+    "learn.practice_reminder": {
+      "label": "ការរំលឹកឱ្យហាត់",
+      "title": "ដល់ពេលហាត់ហើយ",
+      "body": "រយៈពេល {away} ហើយ ដែល {learner} មិនបានហាត់។"
+    },
+    "learn.streak_ending": {
+      "label": "ការរៀនជាប់ៗគ្នាជិតបញ្ចប់",
+      "title": "ការរៀនជាប់ៗគ្នារបស់ {learner} នឹងបញ្ចប់ថ្ងៃនេះ",
+      "body": "{days} ថ្ងៃហើយ — មួយជុំទៀតនឹងរក្សាវាឱ្យបន្ត។"
+    },
+    "system.broadcast": {
+      "label": "ផ្សាយដល់បុគ្គលិក",
+      "title": "Koda",
+      "body": "{message}"
+    },
+    "system.announcement": {
+      "label": "សេចក្ដីប្រកាស",
+      "title": "{title}",
+      "body": "{message}",
+      "email": {
+        "subject": "{title}",
+        "body": "{message}\n\nបើក Koda៖\n{app_link}"
+      }
+    },
+    "learn.absence": {
+      "label": "មិនបានហាត់មួយរយៈ",
+      "title": "{learner} មិនបានហាត់រយៈពេល {away} ហើយ",
+      "body": "មួយជុំរយៈពេល 5 នាទី គឺជាវិធីងាយស្រួលក្នុងការចាប់ផ្ដើមវិញ។",
+      "email": {
+        "subject": "{learner} មិនបានហាត់រយៈពេល {away} ហើយ",
+        "body": "រយៈពេល {away} ហើយ ចាប់តាំងពីជុំចុងក្រោយរបស់ {learner} នៅលើ Koda។\n\nមួយជុំខ្លីគឺជាវិធីងាយស្រួលបំផុតក្នុងការចាប់ផ្ដើមវិញ៖\n{app_link}\n\nកំពុងសម្រាកដោយចេតនាមែនទេ? មិនអីទេ — សារនេះផ្ញើតែម្ដងប៉ុណ្ណោះ។"
+      }
+    },
+    "learn.daily_digest": {
+      "label": "សង្ខេបប្រចាំថ្ងៃ",
+      "title": "ថ្ងៃនេះនៅលើ Koda",
+      "body": "{summary}",
+      "email": {
+        "subject": "ថ្ងៃនេះនៅលើ Koda សម្រាប់ {family}",
+        "body": "នេះជាអ្វីដែលបានកើតឡើងថ្ងៃនេះ។\n\n{summary}\n\nមើលវឌ្ឍនភាពរបស់កូននីមួយៗ៖\n{app_link}"
+      }
+    },
+    "family.child_device_joined": {
+      "label": "កូនបានចូលលើឧបករណ៍ថ្មី",
+      "title": "{learner} នៅលើឧបករណ៍ថ្មី",
+      "body": "{device} បានចូលជា {learner}។ មិនបានរំពឹងទុកទេ? ចាកចេញវាក្នុងការកំណត់។",
+      "email": {
+        "subject": "{learner} បានចូល Koda លើឧបករណ៍ថ្មី",
+        "body": "{device} ទើបតែបានចូលគណនី Koda របស់គ្រួសារអ្នកជា {learner}។\n\nបើអ្នកបានរៀបចំវា គ្មានអ្វីត្រូវធ្វើទេ។ បើមិនមែនទេ សូមបើក Koda ហើយចាកចេញវានៅក្នុងការកំណត់៖\n{app_link}"
+      }
+    },
+    "learn.time_limit": {
+      "label": "បានប្រើពេលប្រចាំថ្ងៃអស់",
+      "title": "{learner} បានប្រើពេលថ្ងៃនេះអស់ហើយ",
+      "body": "បានប្រើ {minutes}។ Koda នឹងបើកម្ដងទៀតនៅថ្ងៃស្អែក។"
+    },
+    "learn.mastered": {
+      "label": "បានស្ទាត់អ្វីមួយ",
+      "title": "{learner} បានស្ទាត់ {lessons}",
+      "body": "ឆ្លើយត្រូវច្រើនជាងមួយថ្ងៃ ដូច្នេះឥឡូវវារឹងមាំហើយ។"
+    },
+    "learn.stuck": {
+      "label": "កំពុងពិបាកនឹងអ្វីមួយ",
+      "title": "{learner} ត្រូវការជំនួយបន្តិច",
+      "body": "{lesson} កំពុងពិបាកបន្តិចឥឡូវនេះ។ អង្គុយជាមួយពួកគេមួយជុំ — មើលថាអ្វីជួយបាន។",
+      "email": {
+        "subject": "គន្លឹះសម្រាប់ {lesson} របស់ {learner}",
+        "body": "{learner} បានជួបការលំបាកជាមួយ {lesson} ច្រើនជាងមួយថ្ងៃ។ វាជារឿងធម្មតា ពេលគំនិតមួយនៅថ្មី។\n\nអ្វីដែលជាធម្មតាជួយបាន៖ អង្គុយជាមួយពួកគេមួយជុំ ហើយឱ្យពួកគេនិយាយពីអ្វីដែលពួកគេកំពុងធ្វើ។\n\nមើលឱ្យច្បាស់ថាវាខុសត្រង់ណា៖\n{app_link}"
+      }
+    }
+  },
+  "frame": {
+    "body": "សួស្ដី {parent}\n\n{message}\n\n— Koda",
+    "footer": "អ្នកទទួលបានអ៊ីមែលនេះ ព្រោះអ៊ីមែល{kind_label}បានបើកសម្រាប់គណនី Koda របស់អ្នក។\nបញ្ឈប់អ៊ីមែលទាំងនេះ៖ {unsubscribe_link}",
+    "accountFooter": "នេះជាសេចក្ដីជូនដំណឹងអំពីគណនី Koda របស់អ្នក ដូច្នេះវាតែងតែត្រូវបានផ្ញើ។"
+  },
+  "samples": {
+    "practice": "4 ថ្ងៃ",
+    "away": "3 ថ្ងៃ",
+    "decision": "ត្រូវបានយល់ព្រម",
+    "message": "Koda កំពុងថែទាំរហូតដល់ម៉ោង 6 ល្ងាច។",
+    "family": "គ្រួសារសុខ",
+    "kind_label": "សេចក្ដីប្រកាស",
+    "rounds_done": "12 ជុំ",
+    "time": "38 នាទី",
+    "minutes": "30 នាទី",
+    "summary": "• Mia៖ បានហាត់ 4 ថ្ងៃ — 12 ជុំ, 38 នាទី\n• Leo៖ បានហាត់ 2 ថ្ងៃ — 5 ជុំ, 14 នាទី"
+  }
+}

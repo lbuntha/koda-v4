@@ -11,6 +11,7 @@ import { SkillRoundTopBar, type SkillVoiceContext } from "./SkillRoundTopBar";
 import { withoutPracticeLabel } from "../practice";
 import type { RoundController } from "../round/useSkillRound";
 import type { GuideController } from "../round/useGuide";
+import { useT } from "../../../lib/i18n";
 
 /**
  * How long a correct answer's praise stays up before the round moves on.
@@ -131,6 +132,7 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
   onNextLevel,
   onPracticeAgain,
 }) => {
+  const { t } = useT();
   /*
    * What the bar calls this lesson.
    *
@@ -373,7 +375,7 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
           transition={SPRING.enter}
           className="sticky bottom-0 left-0 right-0 z-30 p-3 sm:p-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-[calc(1rem+env(safe-area-inset-bottom))] bg-surface"
         >
-          <UIKidMessage tone="nudge" title="Not yet" message={nudge} />
+          <UIKidMessage tone="nudge" title={t("round.notYet")} message={nudge} />
         </motion.div>
       )}
 
@@ -392,7 +394,7 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
              * a child who wants to go *now* with nothing to tap and no way to
              * skip the praise. Both, so neither impatience nor inaction stalls.
              */
-            actionLabel={round.feedback.status === "correct" ? "Next" : "Try again"}
+            actionLabel={round.feedback.status === "correct" ? t("studio.next") : t("studio.tryAgain")}
             onAction={round.advance}
           />
         </div>

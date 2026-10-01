@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Mail, MessageSquare, RotateCcw, Send } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
-import { UIBadge, UISectionHeader } from "../ui";
+import { UIBadge, UISectionHeader, UISelect } from "../ui";
 import { ApiError } from "../../lib/sync";
 import {
+  setWordingLanguage,
   notificationWording,
   resetEmailFrame,
   resetNotificationEmail,
@@ -18,6 +19,7 @@ import {
   type NotificationWording,
 } from "../../lib/push";
 
+import { translate } from "../../lib/i18n";
 /**
  * What every notification says on this deployment — on a lock screen and in an
  * inbox.
@@ -124,8 +126,7 @@ const Chips: React.FC<{ names: string[]; onPick(name: string): void }> = ({ name
 const Unknown: React.FC<{ names: string[] }> = ({ names }) =>
   names.length ? (
     <p className="text-xs text-rose-600 dark:text-rose-400">
-      {names.map((name) => `{${name}}`).join(", ")} {names.length === 1 ? "isn't" : "aren't"} a
-      placeholder for this message.
+      {translate("admin.pushTemplates.valueValue2APlaceholderForThis", { value: names.map((name) => `{${name}}`).join(", "), value2: names.length === 1 ? translate("admin.pushTemplates.isnT") : translate("admin.pushTemplates.arenT") })}
     </p>
   ) : null;
 
@@ -214,20 +215,20 @@ const WordingCard: React.FC<{
   const test = () =>
     run(async () => {
       const result = await sendTestEmail(row.id);
-      setNote(result.sent ? `Sent to ${result.to}, using the saved wording.` : (result.note ?? "Nothing was sent."));
+      setNote(result.sent ? translate("admin.pushTemplates.sentToToUsingTheSaved", { to: result.to }) : (result.note ?? translate("admin.pushTemplates.nothingWasSent")));
     }, "The test email could not be sent.");
 
   return (
     <div data-wording={row.id} className="space-y-3 rounded-2xl border border-line bg-surface-muted p-4">
       <div className="flex flex-wrap items-center gap-2">
         <h4 className="text-sm font-bold text-ink">{row.label}</h4>
-        {edited && <UIBadge variant="info">Edited</UIBadge>}
-        {row.class === "account" && <UIBadge variant="neutral">Always sent</UIBadge>}
-        {!pushable && <UIBadge variant="neutral">Email only</UIBadge>}
+        {edited && <UIBadge variant="info">{translate("admin.pushTemplates.edited")}</UIBadge>}
+        {row.class === "account" && <UIBadge variant="neutral">{translate("admin.pushTemplates.alwaysSent")}</UIBadge>}
+        {!pushable && <UIBadge variant="neutral">{translate("admin.pushTemplates.emailOnly")}</UIBadge>}
         {row.email && pushable && (
           <div
             role="tablist"
-            aria-label={`${row.label} channel`}
+            aria-label={translate("admin.pushTemplates.labelChannel", { label: row.label })}
             className="ml-auto inline-flex rounded-full border border-line bg-surface p-0.5"
           >
             {(["push", "email"] as Channel[]).map((option) => (
@@ -245,7 +246,7 @@ const WordingCard: React.FC<{
                   channel === option ? "bg-indigo-600 text-white" : "text-muted hover:text-ink"
                 }`}
               >
-                {option === "push" ? "Push" : "Email"}
+                {option === "push" ? translate("admin.pushTemplates.push") : translate("admin.pushTemplates.email")}
               </button>
             ))}
           </div>
@@ -258,7 +259,7 @@ const WordingCard: React.FC<{
             {...bind("subject")}
             value={draft.subject}
             maxLength={LIMITS.subject}
-            aria-label={`${row.label} email subject`}
+            aria-label={translate("admin.pushTemplates.labelEmailSubject", { label: row.label })}
             onChange={(e) => set("subject", e.target.value)}
             className={`${INPUT} font-bold`}
           />
@@ -267,7 +268,7 @@ const WordingCard: React.FC<{
             value={draft.emailBody}
             maxLength={LIMITS.emailBody}
             rows={6}
-            aria-label={`${row.label} email body`}
+            aria-label={translate("admin.pushTemplates.labelEmailBody", { label: row.label })}
             onChange={(e) => set("emailBody", e.target.value)}
             className={INPUT}
           />
@@ -278,7 +279,7 @@ const WordingCard: React.FC<{
             {...bind("title")}
             value={draft.title}
             maxLength={LIMITS.title}
-            aria-label={`${row.label} title`}
+            aria-label={translate("admin.pushTemplates.labelTitle", { label: row.label })}
             onChange={(e) => set("title", e.target.value)}
             className={`${INPUT} font-bold`}
           />
@@ -287,7 +288,7 @@ const WordingCard: React.FC<{
             value={draft.body}
             maxLength={LIMITS.body}
             rows={2}
-            aria-label={`${row.label} body`}
+            aria-label={translate("admin.pushTemplates.labelBody", { label: row.label })}
             onChange={(e) => set("body", e.target.value)}
             className={INPUT}
           />
@@ -298,7 +299,7 @@ const WordingCard: React.FC<{
         {allowed.length ? (
           <Chips names={allowed} onPick={pick} />
         ) : (
-          <p className="text-xs text-muted">No placeholders — this one is the same sentence every time.</p>
+          <p className="text-xs text-muted">{translate("admin.pushTemplates.noPlaceholdersThisOneIsThe")}</p>
         )}
         {!email && (
           <p className="font-mono text-[11px] text-muted">
@@ -312,7 +313,7 @@ const WordingCard: React.FC<{
       {/* What it will actually look like. A lock screen shows one line of each
           and hides the rest, which is easier to believe when you can see it. */}
       <div className="rounded-xl border border-line bg-surface px-3 py-2">
-        <p className="font-mono text-[10px] uppercase tracking-wider text-muted">Preview</p>
+        <p className="font-mono text-[10px] uppercase tracking-wider text-muted">{translate("admin.pushTemplates.preview")}</p>
         {email ? (
           <>
             <p className="mt-1 break-words text-sm font-bold text-ink">{filled(draft.subject)}</p>
@@ -335,13 +336,13 @@ const WordingCard: React.FC<{
         {email && (
           <button type="button" disabled={busy} onClick={() => void test()} className={themeSystem.button("secondary", "sm")}>
             <Send className="w-4 h-4 mr-2" />
-            Send test to me
+            {translate("admin.pushTemplates.sendTestToMe")}
           </button>
         )}
         {edited && (
           <button type="button" disabled={busy} onClick={() => void reset()} className={themeSystem.button("secondary", "sm")}>
             <RotateCcw className="w-4 h-4 mr-2" />
-            Reset
+            {translate("admin.pushTemplates.reset")}
           </button>
         )}
         <button
@@ -350,7 +351,7 @@ const WordingCard: React.FC<{
           onClick={() => void save()}
           className={themeSystem.button("primary", "sm")}
         >
-          Save
+          {translate("admin.pushTemplates.save")}
         </button>
       </div>
     </div>
@@ -358,9 +359,9 @@ const WordingCard: React.FC<{
 };
 
 const FRAME_PARTS: { part: EmailFramePart; label: string; rows: number }[] = [
-  { part: "body", label: "Greeting", rows: 5 },
-  { part: "footer", label: "Footer on updates", rows: 3 },
-  { part: "accountFooter", label: "Footer on account notices", rows: 2 },
+  { part: "body", get label() { return translate("admin.pushTemplates.greeting"); }, rows: 5 },
+  { part: "footer", get label() { return translate("admin.pushTemplates.footerOnUpdates"); }, rows: 3 },
+  { part: "accountFooter", get label() { return translate("admin.pushTemplates.footerOnAccountNotices"); }, rows: 2 },
 ];
 
 const FrameEditor: React.FC<{ frame: EmailFrame; onWording(wording: NotificationWording): void }> = ({
@@ -407,7 +408,7 @@ const FrameEditor: React.FC<{ frame: EmailFrame; onWording(wording: Notification
               </label>
               {required && (
                 <span className={`text-[11px] ${lacking ? "text-rose-600 dark:text-rose-400" : "text-muted"}`}>
-                  Must keep {`{${required}}`}
+                  {translate("admin.pushTemplates.mustKeepValue", { value: `{${required}}` })}
                 </span>
               )}
             </div>
@@ -446,7 +447,7 @@ const FrameEditor: React.FC<{ frame: EmailFrame; onWording(wording: Notification
             className={themeSystem.button("secondary", "sm")}
           >
             <RotateCcw className="w-4 h-4 mr-2" />
-            Reset
+            {translate("admin.pushTemplates.reset")}
           </button>
         )}
         <button
@@ -455,7 +456,7 @@ const FrameEditor: React.FC<{ frame: EmailFrame; onWording(wording: Notification
           onClick={() => void run(() => rewordEmailFrame(draft), "That frame could not be saved.")}
           className={themeSystem.button("primary", "sm")}
         >
-          Save frame
+          {translate("admin.pushTemplates.saveFrame")}
         </button>
       </div>
     </div>
@@ -465,16 +466,29 @@ const FrameEditor: React.FC<{ frame: EmailFrame; onWording(wording: Notification
 export const PushTemplates: React.FC = () => {
   const [wording, setWording] = useState<NotificationWording | null>(null);
   const [error, setError] = useState<string | null>(null);
+  /*
+   * Which language's words are on screen. Each family hears notifications in
+   * the language they chose in the app, so each language is worded — and
+   * edited, reset and test-sent — on its own. Starts in English every visit:
+   * the English is what every other language falls back to.
+   */
+  const [language, setLanguage] = useState("en");
 
   const load = useCallback(async () => {
+    setWordingLanguage(language);
+    setWording(null);
+    setError(null);
     try {
       setWording(await notificationWording());
     } catch {
-      setError("Could not load the notification wording.");
+      setError(translate("admin.pushTemplates.couldNotLoadTheNotificationWording"));
     }
-  }, []);
+  }, [language]);
 
   useEffect(() => void load(), [load]);
+  // Leaving the page puts later callers (the diagnostics test send) back on English.
+  useEffect(() => () => setWordingLanguage("en"), []);
+  const languages = wording?.languages ?? [];
 
   const onTemplates = (templates: NotificationTemplate[]) =>
     setWording((current) => (current ? { ...current, templates } : current));
@@ -483,13 +497,35 @@ export const PushTemplates: React.FC = () => {
     <div className="space-y-4">
       <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
         <UISectionHeader
-          title="Notification wording"
-          subtitle="What each notification says — on a lock screen and in an inbox"
+          title={translate("admin.pushTemplates.notificationWording")}
+          subtitle={translate("admin.pushTemplates.whatEachNotificationSaysOnA")}
           icon={<MessageSquare className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
+          action={
+            languages.length > 1 ? (
+              <label className="flex items-center gap-2 text-xs font-semibold text-muted">
+                {translate("admin.pushTemplates.language")}
+                <UISelect
+                  value={language}
+                  onChange={(event) => setLanguage(event.target.value)}
+                  className="w-auto! min-h-9! py-1! text-sm!"
+                >
+                  {languages.map((lang) => (
+                    <option key={lang.code} value={lang.code} lang={lang.code}>
+                      {lang.name === lang.englishName ? lang.name : `${lang.name} · ${lang.englishName}`}
+                    </option>
+                  ))}
+                </UISelect>
+              </label>
+            ) : undefined
+          }
         />
 
+        {language !== "en" && (
+          <p className="text-xs text-muted">{translate("admin.pushTemplates.languageNote")}</p>
+        )}
+
         {error && <p className="text-xs text-rose-600 dark:text-rose-400">{error}</p>}
-        {!wording && !error && <p className="text-xs text-muted">Reading…</p>}
+        {!wording && !error && <p className="text-xs text-muted">{translate("admin.pushTemplates.reading")}</p>}
 
         <div className="space-y-3">
           {wording?.templates.map((row) => (
@@ -504,15 +540,15 @@ export const PushTemplates: React.FC = () => {
         </div>
 
         <p className="text-xs text-muted">
-          Kept short on purpose: a lock screen shows about one line of each, and hides the rest.
+          {translate("admin.pushTemplates.keptShortOnPurposeALock")}
         </p>
       </section>
 
       {wording && (
         <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
           <UISectionHeader
-            title="Email frame"
-            subtitle="The greeting and footer around every notification email"
+            title={translate("admin.pushTemplates.emailFrame")}
+            subtitle={translate("admin.pushTemplates.theGreetingAndFooterAroundEvery")}
             icon={<Mail className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
           />
           <FrameEditor frame={wording.frame} onWording={setWording} />

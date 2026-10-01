@@ -4,6 +4,7 @@ import { themeSystem } from "../../lib/themeSystem";
 import { UIDataTable, UIModal, UISectionHeader } from "../ui";
 import { notificationAudience, type AudiencePerson, type PushAudience } from "../../lib/push";
 
+import { translate } from "../../lib/i18n";
 /**
  * Who has turned notifications on.
  *
@@ -38,7 +39,7 @@ const Browsers: React.FC<{ person: AudiencePerson }> = ({ person }) => (
       {person.role && ` · ${person.role}`}
     </p>
     <p className="text-xs text-ink break-words">
-      {person.kinds.length > 0 ? person.kinds.join(" · ") : "Every courtesy kind switched off"}
+      {person.kinds.length > 0 ? person.kinds.join(" · ") : translate("admin.pushAudiencePanel.everyCourtesyKindSwitchedOff")}
     </p>
     <div className="space-y-2">
       {person.devices.map((device, index) => (
@@ -48,7 +49,7 @@ const Browsers: React.FC<{ person: AudiencePerson }> = ({ person }) => (
         >
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm font-semibold text-ink truncate">
-              {device.platform || "Unknown device"}
+              {device.platform || translate("admin.pushAudiencePanel.unknownDevice")}
             </p>
             <span
               className={`shrink-0 font-mono text-[10px] ${
@@ -58,14 +59,14 @@ const Browsers: React.FC<{ person: AudiencePerson }> = ({ person }) => (
               }`}
             >
               {device.retired
-                ? "retired"
+                ? translate("admin.pushAudiencePanel.retired")
                 : device.failures > 0
-                  ? `live · ${device.failures} failed`
-                  : "live"}
+                  ? translate("admin.pushAudiencePanel.liveFailuresFailed", { failures: device.failures })
+                  : translate("admin.pushAudiencePanel.live")}
             </span>
           </div>
           <p className="text-[10px] font-mono text-muted mt-1">
-            turned on {when(device.createdAt)} · last seen {when(device.refreshedAt)}
+            {translate("admin.pushAudiencePanel.turnedOnValueLastSeenValue2", { value: when(device.createdAt), value2: when(device.refreshedAt) })}
           </p>
           {device.ua && <p className="text-[10px] text-muted break-words mt-1">{device.ua}</p>}
         </div>
@@ -96,7 +97,7 @@ export const PushAudiencePanel: React.FC = () => {
     try {
       setAudience(await notificationAudience());
     } catch {
-      setError("Could not read who has notifications on. This needs permission to manage users.");
+      setError(translate("admin.pushAudiencePanel.couldNotReadWhoHasNotifications"));
     }
     setBusy(false);
   }, []);
@@ -113,8 +114,8 @@ export const PushAudiencePanel: React.FC = () => {
   return (
     <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
       <UISectionHeader
-        title="Who can be notified"
-        subtitle="Everyone who turned notifications on, and on which browsers"
+        title={translate("admin.pushAudiencePanel.whoCanBeNotified")}
+        subtitle={translate("admin.pushAudiencePanel.everyoneWhoTurnedNotificationsOnAnd")}
         icon={<Users className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />}
       />
 
@@ -136,7 +137,7 @@ export const PushAudiencePanel: React.FC = () => {
 
       {audience?.truncated && (
         <p className="text-xs text-rose-600 dark:text-rose-400">
-          Only the most recent 2,000 registrations are shown.
+          {translate("admin.pushAudiencePanel.onlyTheMostRecent2000")}
         </p>
       )}
 
@@ -144,8 +145,8 @@ export const PushAudiencePanel: React.FC = () => {
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Filter by name, email or family"
-          aria-label="Filter people"
+          placeholder={translate("admin.pushAudiencePanel.filterByNameEmailOrFamily")}
+          aria-label={translate("admin.pushAudiencePanel.filterPeople")}
           className="w-full bg-surface border border-line rounded-2xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-indigo-500"
         />
       )}
@@ -153,7 +154,7 @@ export const PushAudiencePanel: React.FC = () => {
       <div>
         {rows.length > 0 && (
           <UIDataTable<AudiencePerson>
-            caption="Notification audience"
+            caption={translate("admin.pushAudiencePanel.notificationAudience")}
             rows={rows}
             rowKey={(person) => person.userId}
             pageSize={10}
@@ -198,7 +199,7 @@ export const PushAudiencePanel: React.FC = () => {
                 header: "Schedule",
                 render: (person) => (
                   <span className="font-mono text-[10px]">
-                    {hour(person.reminderHour)} · quiet {hour(person.quietFrom)}–{hour(person.quietTo)} · {offset(person.tzOffsetMinutes)}
+                    {translate("admin.pushAudiencePanel.valueQuietValue2Value3Value4", { value: hour(person.reminderHour), value2: hour(person.quietFrom), value3: hour(person.quietTo), value4: offset(person.tzOffsetMinutes) })}
                   </span>
                 ),
                 muted: true,
@@ -209,13 +210,13 @@ export const PushAudiencePanel: React.FC = () => {
         )}
         {audience && audience.people === 0 && !error && (
           <p className="text-xs text-muted">
-            Nobody has turned notifications on yet. A parent does it from the switch in Settings.
+            {translate("admin.pushAudiencePanel.nobodyHasTurnedNotificationsOnYet")}
           </p>
         )}
         {audience && audience.people > 0 && rows.length === 0 && (
-          <p className="text-xs text-muted">Nobody matches that filter.</p>
+          <p className="text-xs text-muted">{translate("admin.pushAudiencePanel.nobodyMatchesThatFilter")}</p>
         )}
-        {!audience && !error && <p className="text-xs text-muted">Reading…</p>}
+        {!audience && !error && <p className="text-xs text-muted">{translate("admin.pushAudiencePanel.reading")}</p>}
       </div>
 
       {error && <p className="text-xs text-rose-600 dark:text-rose-400">{error}</p>}
@@ -223,7 +224,7 @@ export const PushAudiencePanel: React.FC = () => {
       <UIModal
         isOpen={Boolean(open)}
         onClose={() => setOpen(null)}
-        title={open ? `${open.name || open.email || open.userId} · browsers` : "Browsers"}
+        title={open ? translate("admin.pushAudiencePanel.valueBrowsers", { value: open.name || open.email || open.userId }) : translate("admin.pushAudiencePanel.browsers")}
       >
         {open && <Browsers person={open} />}
       </UIModal>
@@ -234,7 +235,7 @@ export const PushAudiencePanel: React.FC = () => {
         className={themeSystem.button("secondary", "sm")}
       >
         <RefreshCw className="w-4 h-4 mr-2" />
-        {busy ? "Reading…" : "Refresh"}
+        {busy ? translate("admin.pushAudiencePanel.reading") : translate("admin.pushAudiencePanel.refresh")}
       </button>
     </section>
   );

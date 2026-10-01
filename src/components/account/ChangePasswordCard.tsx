@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { KeyRound } from "lucide-react";
+import { useT } from "../../lib/i18n";
 
 import { ApiError, accessToken, request, useSession } from "../../lib/sync";
 import { themeSystem } from "../../lib/themeSystem";
@@ -18,6 +19,7 @@ import { UIButton, UISectionHeader } from "../ui";
  */
 export const ChangePasswordCard: React.FC = () => {
   const session = useSession();
+  const { t } = useT();
   const [open, setOpen] = useState(false);
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
@@ -53,17 +55,15 @@ export const ChangePasswordCard: React.FC = () => {
       // should hear it from us rather than discover it later.
       setNotice(
         result.signedOutSessions > 0
-          ? `Password changed. ${result.signedOutSessions} other ${
-              result.signedOutSessions === 1 ? "sign-in was" : "sign-ins were"
-            } ended — signing in again on those devices will need the new password.`
-          : "Password changed.",
+          ? t("password.changedSignedOut", { count: result.signedOutSessions })
+          : t("password.changed"),
       );
       playSound("pop");
     } catch (err) {
       const problem = err as ApiError;
       setError(
         problem.isOffline
-          ? "No connection to the data service, so this cannot be changed right now."
+          ? t("password.offline")
           : problem.message,
       );
     } finally {
@@ -77,8 +77,8 @@ export const ChangePasswordCard: React.FC = () => {
   return (
     <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-3`)}>
       <UISectionHeader
-        title="Password"
-        subtitle="Changing it signs your other sessions out"
+        title={t("account.password")}
+        subtitle={t("password.subtitle")}
         icon={<KeyRound className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
       />
 
@@ -88,7 +88,7 @@ export const ChangePasswordCard: React.FC = () => {
       {open ? (
         <form onSubmit={submit} className="space-y-3">
           <label className="block space-y-1.5">
-            <span className="koda-admin-label text-ink">Current password</span>
+            <span className="koda-admin-label text-ink">{t("password.current")}</span>
             <input
               className={field}
               type="password"
@@ -99,7 +99,7 @@ export const ChangePasswordCard: React.FC = () => {
             />
           </label>
           <label className="block space-y-1.5">
-            <span className="koda-admin-label text-ink">New password</span>
+            <span className="koda-admin-label text-ink">{t("password.new")}</span>
             <input
               className={field}
               type="password"
@@ -117,10 +117,10 @@ export const ChangePasswordCard: React.FC = () => {
               isLoading={busy}
               disabled={!current || !next}
             >
-              Change password
+              {t("password.change")}
             </UIButton>
             <UIButton variant="secondary" size="sm" type="button" onClick={reset}>
-              Cancel
+              {t("common.cancel")}
             </UIButton>
           </div>
         </form>
@@ -134,7 +134,7 @@ export const ChangePasswordCard: React.FC = () => {
             setOpen(true);
           }}
         >
-          Change password
+          {t("password.change")}
         </UIButton>
       )}
     </section>

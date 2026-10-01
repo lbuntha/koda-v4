@@ -6,6 +6,7 @@ import { useSession } from "../../lib/sync";
 import { notificationsAreOn, pushSupport } from "../../lib/push";
 import { shouldOfferNotificationSetup, skipNotificationSetup } from "../../lib/push/setupPrompt";
 
+import { translate } from "../../lib/i18n";
 /**
  * "Turn on notifications?" — asked once per launch, for an adult who has not.
  *
@@ -70,7 +71,7 @@ export const NotificationSetupPrompt: React.FC<{
     <UIModal
       isOpen={open}
       onClose={skip}
-      title="Turn on notifications?"
+      title={translate("admin.notificationSetupPrompt.turnOnNotifications")}
       tone="plain"
       backdrop="none"
       maxWidth="max-w-md"
@@ -81,8 +82,8 @@ export const NotificationSetupPrompt: React.FC<{
         </span>
         <p className="pt-1 text-sm text-muted">
           {needsInstall
-            ? "Add Koda to your Home Screen first to get updates on this device."
-            : "Get news and updates from Koda on this device."}
+            ? translate("admin.notificationSetupPrompt.addKodaToYourHomeScreen")
+            : translate("admin.notificationSetupPrompt.getNewsAndUpdatesFromKoda")}
         </p>
       </div>
       <div className="mt-5 flex flex-col gap-2">
@@ -91,14 +92,14 @@ export const NotificationSetupPrompt: React.FC<{
           onClick={setUp}
           className={themeSystem.button("primary", "md", "w-full justify-center")}
         >
-          Set up
+          {translate("admin.notificationSetupPrompt.setUp")}
         </button>
         <button
           type="button"
           onClick={skip}
           className="w-full rounded-xl py-2.5 text-sm font-bold text-muted hover:text-ink transition-colors cursor-pointer"
         >
-          Skip
+          {translate("admin.notificationSetupPrompt.skip")}
         </button>
       </div>
     </UIModal>

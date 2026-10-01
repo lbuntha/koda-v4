@@ -1,5 +1,6 @@
 import React from "react";
 import { Moon, Sparkles } from "lucide-react";
+import { useT } from "../lib/i18n";
 
 import { themeSystem } from "../lib/themeSystem";
 import { UIButton } from "./ui";
@@ -23,7 +24,9 @@ export interface DayDoneScreenProps {
  * child can reach is not a cap, and putting one here would move the argument
  * from the parent's screen to the child's.
  */
-export const DayDoneScreen: React.FC<DayDoneScreenProps> = ({ cap, onGoHome }) => (
+export const DayDoneScreen: React.FC<DayDoneScreenProps> = ({ cap, onGoHome }) => {
+  const { t } = useT();
+  return (
   <div className="flex min-h-[60vh] items-center justify-center px-4 py-10">
     <div className={themeSystem.card("default", "w-full max-w-md p-8 text-center")}>
       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-100 dark:bg-indigo-950/60">
@@ -31,24 +34,24 @@ export const DayDoneScreen: React.FC<DayDoneScreenProps> = ({ cap, onGoHome }) =
       </div>
 
       <h2 className="mt-4 font-mono text-xl font-black tracking-tight text-ink">
-        That&rsquo;s it for today
+        {t("rest.dayDone.title")}
       </h2>
 
       <p className="mx-auto mt-2 max-w-sm text-sm text-muted">
-        You have had your {cap} minutes of Koda today. Your grown-up picked that, and it starts
-        again tomorrow.
+        {t("rest.dayDone.body", { minutes: cap })}
       </p>
 
       <div className="mt-5 flex items-center justify-center gap-2 rounded-2xl bg-surface-muted p-3">
         <Sparkles className="h-4 w-4 shrink-0 text-amber-500" />
-        <p className="text-sm font-bold text-ink">Everything you earned today is saved.</p>
+        <p className="text-sm font-bold text-ink">{t("rest.savedToday")}</p>
       </div>
 
       {onGoHome && (
         <UIButton variant="secondary" className="mt-5" onClick={onGoHome}>
-          Back home
+          {t("rest.backHome")}
         </UIButton>
       )}
     </div>
   </div>
-);
+  );
+};

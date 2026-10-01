@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { translate } from "./i18n";
 import { clipUrlsFor } from "./voiceClips";
 
 /**
@@ -167,14 +168,12 @@ export function useOfflineDownload() {
 
 /** What to say about a download, in the words a parent or child would use. */
 export const offlineMessage = ({ state, done, total }: OfflineProgress): string | null => {
-  if (state === "preparing") return `Saving for offline… ${done} of ${total}`;
-  if (state === "incomplete") {
-    return `Saved ${done} of ${total}. The rest needs a connection — it will finish next time you open this skill.`;
-  }
+  // `translate`, not the hook: this is called from a render that already
+  // subscribes through `useT`, so it repaints when the language changes.
+  if (state === "preparing") return translate("offline.preparing", { done, total });
+  if (state === "incomplete") return translate("offline.incomplete", { done, total });
   if (state === "ready") {
-    return total === 0
-      ? "Ready to play offline. Spoken lines use your device's voice until this skill is recorded."
-      : "Ready to play offline.";
+    return total === 0 ? translate("offline.readyDeviceVoice") : translate("offline.ready");
   }
   return null;
 };

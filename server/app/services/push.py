@@ -26,6 +26,7 @@ from typing import Any
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
+from app import notify_i18n
 from app.push_defaults import (
     BODY_MAX,
     BY_KIND,
@@ -524,6 +525,7 @@ async def send_test(
     kind: str | None = None,
     *,
     from_admin: bool = False,
+    language: str | None = None,
 ) -> dict[str, Any]:
     """A real notification, to the caller's own browsers and nowhere else.
 
@@ -549,7 +551,8 @@ async def send_test(
     # A kind is not a recipient. This still rings the caller's own browsers and
     # nobody else's.
     if kind and kind in BY_KIND:
-        title, body = await wording(db, kind, SAMPLES)
+        lang = notify_i18n.known(language)
+        title, body = await wording(db, kind, {**SAMPLES, **notify_i18n.samples(lang)}, language=lang)
     elif from_admin:
         title, body = TEST_TITLE, TEST_BODY
     else:
@@ -624,12 +627,41 @@ def fill(template: str, values: dict[str, Any]) -> str:
     return filled
 
 
-async def wording(db: AsyncIOMotorDatabase, kind: str, values: dict[str, Any] | None = None) -> tuple[str, str]:
-    """What this kind says — the operator's wording if they changed it, else ours."""
+async def wording(
+    db: AsyncIOMotorDatabase,
+    kind: str,
+    values: dict[str, Any] | None = None,
+    *,
+    family_id: str | None = None,
+    language: str | None = None,
+) -> tuple[str, str]:
+    """What this kind says, in the family's language.
+
+    `language` when the caller already knows it (a job composing for one family
+    reads it once); otherwise `family_id`'s choice; otherwise English.
+
+    For each of title and body: the operator's edit in that language, else the
+    words shipped for that language, else the English — the operator's English
+    edit if there is one, else ours. A language file that says nothing about a
+    kind therefore sends English, never nothing.
+    """
+    lang = notify_i18n.known(language) if language else await notify_i18n.language_of_family(db, family_id)
     definition = BY_KIND.get(kind, {})
-    override = await push_templates.get(db, kind) or {}
-    title = override.get("title") or definition.get("title", "Koda")
-    body = override.get("body") or definition.get("body", "Open Koda to see what's new.")
+    english = await push_templates.get(db, kind) or {}
+    local = await push_templates.get(db, kind, lang) or {} if lang != notify_i18n.BASE else {}
+    shipped = notify_i18n.kind_text(lang, kind)
+    title = (
+        local.get("title")
+        or shipped.get("title")
+        or english.get("title")
+        or definition.get("title", "Koda")
+    )
+    body = (
+        local.get("body")
+        or shipped.get("body")
+        or english.get("body")
+        or definition.get("body", "Open Koda to see what's new.")
+    )
     return fill(title, values or {})[:TITLE_MAX], fill(body, values or {})[:BODY_MAX]
 
 

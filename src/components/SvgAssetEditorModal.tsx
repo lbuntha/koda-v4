@@ -18,7 +18,9 @@ import {
   type ArtStyle,
 } from "../lib/artGenerationApi";
 import { useSystem } from "../lib/sync";
+import { AI_COMPANY_NAME, aiDefault } from "../lib/aiDefaults";
 
+import { translate } from "../lib/i18n";
 interface SvgAssetEditorModalProps {
   /** Editing an existing asset when set; adding a new one when null. */
   editingId: string | null;
@@ -164,21 +166,21 @@ export const SvgAssetEditorModal: React.FC<SvgAssetEditorModalProps> = ({
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
-        aria-label={isEdit ? `Edit ${editingId}` : "Add SVG asset"}
+        aria-label={isEdit ? translate("admin.svgAssetEditorModal.editEditingid", { editingId: editingId }) : translate("admin.svgAssetEditorModal.addSvgAsset")}
       >
         <div className={themeSystem.modal.header}>
           <div>
             <h3 className="text-base font-black text-ink font-mono">
-              {isEdit ? `Edit ${editingId}` : "Add artwork"}
+              {isEdit ? translate("admin.svgAssetEditorModal.editEditingid", { editingId: editingId }) : translate("admin.svgAssetEditorModal.addArtwork")}
             </h3>
             <p className="text-xs text-muted">
-              Saved to the shared MongoDB art library as{" "}
+              {translate("admin.svgAssetEditorModal.savedToTheSharedMongodbArt")}{" "}
               <code className="font-mono">{id || "<id>"}</code>
             </p>
           </div>
           <button
             onClick={onClose}
-            aria-label="Close"
+            aria-label={translate("admin.svgAssetEditorModal.close")}
             className="p-2 rounded-xl text-muted hover:text-ink hover:bg-surface-muted transition cursor-pointer"
           >
             <X className="w-5 h-5" />
@@ -189,7 +191,7 @@ export const SvgAssetEditorModal: React.FC<SvgAssetEditorModalProps> = ({
           <div className="space-y-4 min-w-0">
             <div className="space-y-1.5">
               <label htmlFor="svg-asset-id" className="text-xs font-mono font-bold text-body">
-                Asset id
+                {translate("admin.svgAssetEditorModal.assetId")}
               </label>
               <input
                 id="svg-asset-id"
@@ -208,14 +210,14 @@ export const SvgAssetEditorModal: React.FC<SvgAssetEditorModalProps> = ({
 
             <div className="space-y-1.5">
               <label htmlFor="svg-asset-category" className="text-xs font-mono font-bold text-body">
-                Category
+                {translate("admin.svgAssetEditorModal.category")}
               </label>
               <input
                 id="svg-asset-category"
                 list="svg-asset-categories"
                 value={category}
                 onChange={(event) => setCategory(event.target.value.trim().toLowerCase())}
-                placeholder="fruits"
+                placeholder={translate("admin.svgAssetEditorModal.fruits")}
                 className="w-full bg-surface-muted border border-line rounded-xl px-3 py-2 text-sm font-mono text-ink placeholder:text-muted focus:outline-none focus:border-indigo-500"
               />
               <datalist id="svg-asset-categories">
@@ -226,8 +228,8 @@ export const SvgAssetEditorModal: React.FC<SvgAssetEditorModalProps> = ({
               <p className="text-[11px] text-muted">
                 {categoryError ||
                   (isEdit && initialCategory && filedCategory !== initialCategory
-                    ? `Saving moves the asset out of ${initialCategory}.`
-                    : "Used to organise the library. Leave blank to file it later.")}
+                    ? translate("admin.svgAssetEditorModal.savingMovesTheAssetOutOf", { initialCategory: initialCategory })
+                    : translate("admin.svgAssetEditorModal.usedToOrganiseTheLibraryLeave"))}
               </p>
             </div>
 
@@ -238,7 +240,7 @@ export const SvgAssetEditorModal: React.FC<SvgAssetEditorModalProps> = ({
                   className="text-xs font-mono font-bold text-body flex items-center gap-1.5"
                 >
                   <Sparkles className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-                  Draw it from a description
+                  {translate("admin.svgAssetEditorModal.drawItFromADescription")}
                 </label>
                 <textarea
                   id="svg-asset-prompt"
@@ -250,39 +252,39 @@ export const SvgAssetEditorModal: React.FC<SvgAssetEditorModalProps> = ({
                     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) void draw();
                   }}
                   maxLength={600}
-                  placeholder="a cat holding three balloons — describe the subject; Koda style does the rest"
+                  placeholder={translate("admin.svgAssetEditorModal.aCatHoldingThreeBalloonsDescribe")}
                   className="w-full bg-surface border border-line rounded-xl px-3 py-2 text-sm text-ink placeholder:text-muted focus:outline-none focus:border-indigo-500 resize-y"
                 />
                 <div className="flex items-center gap-2 flex-wrap">
                   <select
                     value={style}
                     onChange={(event) => setStyle(event.target.value as ArtStyle)}
-                    aria-label="Drawing style"
+                    aria-label={translate("admin.svgAssetEditorModal.drawingStyle")}
                     className="bg-surface border border-line rounded-xl px-2 py-1.5 text-xs font-mono text-ink focus:outline-none focus:border-indigo-500"
                   >
-                    <option value="koda">Koda style</option>
-                    <option value="plain">No house style</option>
+                    <option value="koda">{translate("admin.svgAssetEditorModal.kodaStyle")}</option>
+                    <option value="plain">{translate("admin.svgAssetEditorModal.noHouseStyle")}</option>
                   </select>
                   <select
                     value={shape}
                     onChange={(event) => setShape(event.target.value as ArtShape)}
-                    aria-label="Artwork shape"
+                    aria-label={translate("admin.svgAssetEditorModal.artworkShape")}
                     className="bg-surface border border-line rounded-xl px-2 py-1.5 text-xs font-mono text-ink focus:outline-none focus:border-indigo-500"
                   >
-                    <option value="free">Any shape</option>
-                    <option value="thumbnail">16:9 thumbnail</option>
-                    <option value="square">Square</option>
+                    <option value="free">{translate("admin.svgAssetEditorModal.anyShape")}</option>
+                    <option value="thumbnail">{translate("admin.svgAssetEditorModal.169Thumbnail")}</option>
+                    <option value="square">{translate("admin.svgAssetEditorModal.square")}</option>
                   </select>
                   <select
                     value={provider}
                     onChange={(event) => setProvider(event.target.value as ArtProvider | "")}
-                    aria-label="Which model draws"
+                    aria-label={translate("admin.svgAssetEditorModal.whichModelDraws")}
                     className="bg-surface border border-line rounded-xl px-2 py-1.5 text-xs font-mono text-ink focus:outline-none focus:border-indigo-500"
                   >
-                    <option value="">Default model</option>
-                    <option value="gemini">Gemini</option>
-                    <option value="chatgpt">ChatGPT</option>
-                    <option value="claude">Claude</option>
+                    <option value="">{translate("admin.svgAssetEditorModal.defaultValue", { value: AI_COMPANY_NAME[aiDefault("ai.artProvider")] })}</option>
+                    <option value="gemini">{translate("admin.svgAssetEditorModal.gemini")}</option>
+                    <option value="chatgpt">{translate("admin.svgAssetEditorModal.chatgpt")}</option>
+                    <option value="claude">{translate("admin.svgAssetEditorModal.claude")}</option>
                   </select>
                   <button
                     onClick={() => void draw()}
@@ -290,10 +292,10 @@ export const SvgAssetEditorModal: React.FC<SvgAssetEditorModalProps> = ({
                     className={themeSystem.button("primary", "sm")}
                   >
                     {drawing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles />}
-                    {drawing ? "Drawing…" : markup ? "Redraw" : "Draw"}
+                    {drawing ? translate("admin.svgAssetEditorModal.drawing") : markup ? translate("admin.svgAssetEditorModal.redraw") : translate("admin.svgAssetEditorModal.draw")}
                   </button>
                   <span className="text-[11px] text-muted">
-                    Replaces the markup below — review it before saving.
+                    {translate("admin.svgAssetEditorModal.replacesTheMarkupBelowReviewIt")}
                   </span>
                 </div>
                 {drawError && (
@@ -304,7 +306,7 @@ export const SvgAssetEditorModal: React.FC<SvgAssetEditorModalProps> = ({
 
             <div className="space-y-1.5">
               <label htmlFor="svg-asset-markup" className="text-xs font-mono font-bold text-body">
-                SVG markup
+                {translate("admin.svgAssetEditorModal.svgMarkup")}
               </label>
               <textarea
                 id="svg-asset-markup"
@@ -327,18 +329,16 @@ export const SvgAssetEditorModal: React.FC<SvgAssetEditorModalProps> = ({
                 <div className={themeSystem.flash("warning", "text-xs")}>
                   <AlertTriangle className="w-4 h-4 shrink-0" />
                   <span>
-                    The sanitiser drops {verdict.droppedElements} element
-                    {verdict.droppedElements === 1 ? "" : "s"} and {verdict.droppedAttributes}{" "}
-                    attribute
-                    {verdict.droppedAttributes === 1 ? "" : "s"} from this markup. Compare the
-                    preview with what you expected — if something is missing, its name needs adding
-                    to <code className="font-mono">utils/svg/svgPolicy.ts</code>.
+                    {translate("admin.svgAssetEditorModal.theSanitiserDrops")}{" "}{verdict.droppedElements}{" "}{translate("admin.svgAssetEditorModal.element")}
+                    {verdict.droppedElements === 1 ? "" : "s"}{" "}{translate("admin.svgAssetEditorModal.and")}{" "}{verdict.droppedAttributes}{" "}
+                    {translate("admin.svgAssetEditorModal.attribute")}
+                    {verdict.droppedAttributes === 1 ? "" : "s"}{" "}{translate("admin.svgAssetEditorModal.fromThisMarkupCompareThePreview")}{" "}<code className="font-mono">{translate("admin.svgAssetEditorModal.utilsSvgSvgpolicyTs")}</code>.
                   </span>
                 </div>
               ) : (
                 <div className={themeSystem.flash("success", "text-xs")}>
                   <ShieldCheck className="w-4 h-4 shrink-0" />
-                  <span>Renders whole — nothing is dropped by the sanitiser.</span>
+                  <span>{translate("admin.svgAssetEditorModal.rendersWholeNothingIsDroppedBy")}</span>
                 </div>
               ))}
             {error && (
@@ -351,30 +351,30 @@ export const SvgAssetEditorModal: React.FC<SvgAssetEditorModalProps> = ({
 
           {/* Live preview: exactly the pipeline the app renders through. */}
           <div className="space-y-3">
-            <div className="text-xs font-mono font-bold text-body">Preview</div>
+            <div className="text-xs font-mono font-bold text-body">{translate("admin.svgAssetEditorModal.preview")}</div>
             <div className="rounded-2xl border border-line p-4 flex items-center justify-center bg-checkerboard">
               <SvgMarkup
                 markup={markup}
                 raw
                 size={180}
-                title="Preview"
-                fallback={<span className="text-xs text-muted py-16">nothing to draw</span>}
+                title={translate("admin.svgAssetEditorModal.preview")}
+                fallback={<span className="text-xs text-muted py-16">{translate("admin.svgAssetEditorModal.nothingToDraw")}</span>}
               />
             </div>
             <div className="flex items-center justify-center gap-4 rounded-2xl border border-line p-3 bg-checkerboard">
               {[24, 48, 72].map((size) => (
-                <SvgMarkup key={size} markup={markup} raw size={size} title={`${size} pixels`} />
+                <SvgMarkup key={size} markup={markup} raw size={size} title={translate("admin.svgAssetEditorModal.sizePixels", { size: size })} />
               ))}
             </div>
             <p className="text-[11px] text-muted">
-              Drawn through sanitise → scope ids, the same path the app uses.
+              {translate("admin.svgAssetEditorModal.drawnThroughSanitiseScopeIdsThe")}
             </p>
           </div>
         </div>
 
         <div className={themeSystem.modal.footer}>
           <button onClick={onClose} className={themeSystem.button("secondary", "sm")}>
-            Cancel
+            {translate("admin.svgAssetEditorModal.cancel")}
           </button>
           <button
             onClick={handleSave}
@@ -382,7 +382,7 @@ export const SvgAssetEditorModal: React.FC<SvgAssetEditorModalProps> = ({
             className={themeSystem.button("primary", "sm")}
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-            {isEdit ? "Save changes" : "Add to collection"}
+            {isEdit ? translate("admin.svgAssetEditorModal.saveChanges") : translate("admin.svgAssetEditorModal.addToCollection")}
           </button>
         </div>
       </div>

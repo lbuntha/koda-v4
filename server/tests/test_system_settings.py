@@ -375,3 +375,31 @@ async def test_only_a_secret_row_can_be_resolved(client, admin, tutor_configured
         headers={**admin, "X-Service-Token": SERVICE_TOKEN},
     )
     assert r.status_code == 404
+
+
+async def test_every_ai_key_is_one_card_per_company_with_its_fallback(client, admin, owner):
+    rows = {r["id"]: r for r in (await client.get("/system/settings", headers=admin)).json()["settings"]}
+    for setting_id, env in [
+        ("ai.geminiApiKey", "GEMINI_API_KEY"),
+        ("ai.openaiApiKey", "OPENAI_API_KEY"),
+        ("ai.anthropicApiKey", "ANTHROPIC_API_KEY"),
+        ("ai.voxApiKey", "VOX_API_KEY"),
+        ("ai.voxApiUrl", "VOX_API_URL"),
+    ]:
+        assert rows[setting_id]["group"] == "AI providers"
+        assert rows[setting_id]["type"] == "secret"
+        assert rows[setting_id]["env"] == env
+    # The Vox address is a secret so it never reaches every signed-in device.
+    effective = (await client.get("/system", headers=owner)).json()
+    assert "ai.voxApiUrl" not in effective
+    assert effective["ai.pictureProvider"] == "gemini"
+
+
+async def test_a_default_model_is_one_of_its_options(client, admin):
+    rows = {r["id"]: r for r in (await client.get("/system/settings", headers=admin)).json()["settings"]}
+    assert rows["ai.pictureProvider"]["options"] == ["gemini", "openai"]
+    assert rows["ai.libraryProvider"]["options"] == ["gemini", "openai", "claude"]
+    bad = await client.patch("/system/settings/ai.pictureProvider", json={"value": "claude"}, headers=admin)
+    assert bad.status_code == 400
+    ok = await client.patch("/system/settings/ai.pictureProvider", json={"value": "openai"}, headers=admin)
+    assert ok.status_code == 200 and ok.json()["value"] == "openai"

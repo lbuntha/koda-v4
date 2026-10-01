@@ -164,6 +164,12 @@ def _meaningful(w: str) -> bool:
     return len(w) >= (2 if _has_khmer(w) else 3)
 
 
+def _names_itself(word: str, picture: str) -> bool:
+    """A picture named for the word — the client's `namesItself`."""
+    w = word.lower()
+    return picture == w or (w.endswith("es") and picture == w[:-2]) or (w.endswith("s") and picture == w[:-1])
+
+
 def _split_words(sentences: list[dict]) -> list[str]:
     """The words of some sentences, as the author split them.
 
@@ -202,6 +208,13 @@ def _draws_on(text: str, source_text: str, source_words: list[str]) -> bool:
 
 # -------------------------------------------------------------------------- verify
 
+
+
+def _looks_long(s: str) -> int:
+    """How long a choice looks: Khmer stacks vowels, signs and subscripts on
+    one letter, so ប៊ូប៊ូ is two letters wide, not six code points."""
+    s = re.sub("\u17d2.", "", unicodedata.normalize("NFC", s))
+    return sum(1 for ch in s if not unicodedata.category(ch).startswith("M"))
 
 @dataclass
 class Check:
@@ -296,6 +309,8 @@ def verify_passage(p: dict[str, Any], *, confirmed_split: bool = False) -> Verdi
     # The story's own splits, for the scripts a word regex cannot read.
     story_split = _split_words(sentences)
     pictures: dict[str, str] = p.get("pictures") or {}
+    story_tokens = {core(str(t)).lower() for s in sentences for t in (s.get("words") or [])}
+    confirmed_pictures: dict[str, str] = p.get("confirmedPictures") or {}
 
     # ---- rules 1, 2, 3, 4, 5
     for q in usable:
@@ -314,7 +329,7 @@ def verify_passage(p: dict[str, Any], *, confirmed_split: bool = False) -> Verdi
             wrong = [o for i, o in enumerate(opts) if i != q["answer"]]
             from_story = sum(1 for o in wrong if _draws_on(o, story, story_split))
             add(2, qid, from_story >= 1, f"{from_story} of {len(wrong)} wrong choices use the story's words")
-            lens = [len(o) for o in opts]
+            lens = [_looks_long(o) for o in opts]
             top = max(lens)
             longest = lens[q["answer"]] == top and lens.count(top) == 1
             add(3, qid, not longest, "the right answer is the longest" if longest else "the right answer is not the longest")
@@ -323,10 +338,16 @@ def verify_passage(p: dict[str, Any], *, confirmed_split: bool = False) -> Verdi
             expected = pictures.get(word.lower()) or pictures.get(word)
             if not expected:
                 add(1, qid, False, f"no picture is declared for “{word}”")
-            elif word.lower() not in story:
+            elif not (
+                word.lower() in story
+                if _has_khmer(word)
+                else any(x in story_tokens for x in (word.lower(), word.lower() + "s", word.lower() + "es"))
+            ):
                 add(1, qid, False, f"“{word}” is not in the story")
             elif q["options"][q["answer"]] != expected:
                 add(1, qid, False, f"the right picture should be “{expected}”")
+            elif not _names_itself(word, expected) and (confirmed_pictures.get(word) or confirmed_pictures.get(word.lower())) != expected:
+                add(1, qid, False, f"confirm the picture “{expected}” shows “{word}”")
             else:
                 add(1, qid, True, "the word is in the story and its picture matches")
         else:

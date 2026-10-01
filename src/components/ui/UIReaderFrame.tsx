@@ -1,6 +1,7 @@
 import React, { type RefObject } from "react";
 import { ArrowLeft, BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
 import { UIButton } from "./ThemeUI";
+import { useT } from "../../lib/i18n";
 
 export interface UIReaderFrameProps {
   toolbar: React.ReactNode;
@@ -46,21 +47,24 @@ export interface UIQuizToolbarProps {
 }
 
 /** Shared quiz toolbar: navigation and support actions stay in one stable row. */
-export const UIQuizToolbar: React.FC<UIQuizToolbarProps> = ({ onBack, onReadAgain, hintHostRef }) => (
+export const UIQuizToolbar: React.FC<UIQuizToolbarProps> = ({ onBack, onReadAgain, hintHostRef }) => {
+  const { t } = useT();
+  return (
   <div className="mobile-reader-toolbar">
     <div className="mobile-reader-toolbar-row flex items-center justify-between gap-2">
       <UIButton type="button" variant="secondary" size="md" icon={<ArrowLeft aria-hidden="true" />} onClick={onBack}>
-        Back
+        {t("reader.back")}
       </UIButton>
       <div className="flex items-center gap-2">
         <UIButton type="button" variant="secondary" size="md" icon={<BookOpen aria-hidden="true" />} onClick={onReadAgain}>
-          Read again
+          {t("reader.readAgain")}
         </UIButton>
         <div ref={hintHostRef} className="flex items-center" />
       </div>
     </div>
   </div>
-);
+  );
+};
 
 export interface UIReaderPaginationProps {
   page: number;
@@ -86,27 +90,28 @@ export const UIReaderPagination: React.FC<UIReaderPaginationProps> = ({
   onPrevious,
   onNext,
   onComplete,
-  completeLabel = "Check My Learning",
+  completeLabel,
 }) => {
+  const { t } = useT();
   const last = pageCount - 1;
   if (page === last) {
     return (
-      <nav aria-label="Pages" className="ui-reader-pagination ui-reader-pagination-final">
+      <nav aria-label={t("reader.pages")} className="ui-reader-pagination ui-reader-pagination-final">
         <UIButton type="button" variant="primary" size="md" onClick={onComplete} className="!min-h-12 w-full shadow-[0_6px_18px_rgba(79,70,229,0.22)] active:shadow-[0_3px_10px_rgba(79,70,229,0.18)]">
-          {completeLabel}
+          {completeLabel ?? t("reader.checkLearning")}
         </UIButton>
       </nav>
     );
   }
 
   return (
-    <nav aria-label="Pages" className="ui-reader-pagination">
-      <button type="button" onClick={onPrevious} disabled={page === 0} aria-label="Previous page" className={`${turnButton} border-line bg-surface text-ink hover:bg-surface-muted`}>
+    <nav aria-label={t("reader.pages")} className="ui-reader-pagination">
+      <button type="button" onClick={onPrevious} disabled={page === 0} aria-label={t("reader.previousPage")} className={`${turnButton} border-line bg-surface text-ink hover:bg-surface-muted`}>
         <ChevronLeft aria-hidden="true" />
       </button>
       <div className="flex min-w-0 flex-col items-center gap-2">
         <span className="text-xs font-bold uppercase tracking-[0.14em] tabular-nums text-muted" aria-live="polite">
-          {page === 0 ? "Cover" : `Page ${page} of ${storyPageCount}`}
+          {page === 0 ? t("reader.cover") : t("reader.pageOf", { page, total: storyPageCount })}
         </span>
         {/* One dot a page reads well up to a dozen; past that the row outgrows a phone. */}
         {pageCount <= 14 && (
@@ -117,7 +122,7 @@ export const UIReaderPagination: React.FC<UIReaderPaginationProps> = ({
           </span>
         )}
       </div>
-      <button type="button" onClick={onNext} aria-label="Next page" className={`${turnButton} border-indigo-600 bg-indigo-600 text-white hover:bg-indigo-700 dark:hover:bg-indigo-500`}>
+      <button type="button" onClick={onNext} aria-label={t("reader.nextPage")} className={`${turnButton} border-indigo-600 bg-indigo-600 text-white hover:bg-indigo-700 dark:hover:bg-indigo-500`}>
         <ChevronRight aria-hidden="true" />
       </button>
     </nav>

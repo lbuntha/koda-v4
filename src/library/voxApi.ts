@@ -1,5 +1,6 @@
 import { tutorHeaders } from "../lib/tutorApi";
 import type { Language } from "./data/passage";
+import { translate } from "../lib/i18n";
 
 /**
  * Vox, a second source of voices for a book.
@@ -37,9 +38,9 @@ export async function voxVoice(text: string, voiceId: string): Promise<Blob> {
     headers: await tutorHeaders(),
     body: JSON.stringify({ text, voiceId }),
   });
-  if (!res.ok) throw new Error(await reasonFrom(res, "Vox could not be reached. Record your own voice instead."));
+  if (!res.ok) throw new Error(await reasonFrom(res, translate("studio.voice.voxUnreachable")));
   const blob = await res.blob();
-  if (!blob.size) throw new Error("The voice returned no audio. Try again.");
+  if (!blob.size) throw new Error(translate("studio.voice.noAudio"));
   return blob;
 }
 
@@ -97,6 +98,6 @@ export async function openaiVoice(text: string, voice: string, language: Languag
   });
   if (!res.ok) throw new Error(await reasonFrom(res, "ChatGPT could not be reached. Record your own voice instead."));
   const blob = await res.blob();
-  if (!blob.size) throw new Error("The voice returned no audio. Try again.");
+  if (!blob.size) throw new Error(translate("studio.voice.noAudio"));
   return blob;
 }

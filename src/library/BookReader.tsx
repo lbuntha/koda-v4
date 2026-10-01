@@ -7,6 +7,7 @@ import { FIT_MAX, nextFit, wordsFit } from "./fitPage";
 import { FLAT, SPRING, TURNED, angularVelocity, castOf, completes, curlOf, dragAngle, shadeOf, type Dir } from "./pageTurn";
 import { Picture } from "./Picture";
 import { BANNER, PORTRAIT } from "./pictureShape";
+import { ReadingRecorder } from "./learning";
 import { LibraryProgress } from "./progress";
 import { minutesToRead } from "./session";
 import { canSpeak, say, stop } from "./voice";
@@ -14,6 +15,7 @@ import { prefetchBook, prefetchClips, recordingAudioSupported } from "./clips";
 import { playSound } from "../utils/audio";
 import { UIReaderFrame, UIReaderPagination, UIReaderToolbar } from "../components/ui";
 import { useTheme } from "../context/ThemeContext";
+import { useT } from "../lib/i18n";
 
 /**
  * A story read as a book: one page at a time, turned by a swipe, the arrows or
@@ -153,6 +155,7 @@ interface Turn { dir: Dir; from: number; to: number }
 
 export function BookReader({ book, onBack, onReady, preview = false }: { book: Passage; onBack(): void; onReady(): void; preview?: boolean }) {
   const { theme, toggleTheme } = useTheme();
+  const { t } = useT();
   const pages = useMemo(() => layoutBook(book), [book]);
   const reduce = useReducedMotion() ?? false;
   const km = book.language === "km";
@@ -192,6 +195,12 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
     [pageSentences],
   );
   const pageRecorded = pageSentences.length > 0 && pageAudioIds.length === pageSentences.length;
+  // The read-through, in the learning log. An author's preview is marked, as the quiz marks it.
+  const record = useMemo(() => new ReadingRecorder(book, pages.count, preview ? "preview" : "picker"), [book, pages.count, preview]);
+  useEffect(() => {
+    record.start();
+    return () => record.close();
+  }, [record]);
 
   useLayoutEffect(() => {
     if (!peek || !peekAnchor || !peekRef.current) return;
@@ -233,6 +242,7 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
   // of halfway through.
   const setPage = (p: number) => {
     pageRef.current = p;
+    record.turnTo(p);
     setPageState(p);
     setOpened(true);
     setSilent(false);
@@ -356,6 +366,7 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
     const current = pageRef.current;
     if (current < 1 || current > pages.story.length) return;
     const mine = ++run.current;
+    record.readAloud();
     setReading(true);
     setSilent(false);
     setPeek(null);
@@ -386,6 +397,7 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
   const tapWord = (w: string, target?: HTMLElement) => {
     if (!w) return;
     if (reading) hush();
+    record.tapWord(w);
     setPeek(w);
     setPeekAnchor(target ?? null);
     setPeekPosition(null);
@@ -485,8 +497,8 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
           playing: reading,
           // A download that failed can be tried again; a browser that cannot play the format cannot.
           disabled: pageAudio === "failed" ? !audioSupported : pageAudio !== "ready",
-          disabledTitle: pageAudio === "failed" ? "This browser cannot play the recording" : "Preparing audio",
-          retryTitle: pageAudio === "failed" && audioSupported ? "Audio did not load — tap to try again" : undefined,
+          disabledTitle: pageAudio === "failed" ? t("reader.cannotPlay") : t("reader.preparingAudio"),
+          retryTitle: pageAudio === "failed" && audioSupported ? t("reader.audioRetry") : undefined,
           onToggle: () => (pageAudio === "failed" ? setAudioAttempt((n) => n + 1) : void readPage()),
         } : undefined}
         dark={theme === "dark"}
@@ -498,7 +510,7 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
         storyPageCount={pages.story.length}
         onPrevious={() => turn(page - 1)}
         onNext={() => turn(page + 1)}
-        onComplete={() => { hush(); onReady(); }}
+        onComplete={() => { hush(); record.finish(); onReady(); }}
       />}
     >
       <section
@@ -537,20 +549,20 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
       </section>
 
       {peek && peekAnchor ? (
-        <div ref={peekRef} role="tooltip" aria-label={`Word helper: ${peek}`} aria-live="polite" data-word-tooltip style={{ left: peekPosition?.left ?? 0, top: peekPosition?.top ?? 0, visibility: peekPosition ? "visible" : "hidden" }} className="koda-tooltip-in fixed z-50 flex w-[min(calc(100vw-1.5rem),24rem)] items-center gap-3 rounded-2xl border border-indigo-100 bg-white px-4 py-3 pr-12 shadow-xl dark:border-indigo-900 dark:bg-surface">
+        <div ref={peekRef} role="tooltip" aria-label={t("reader.wordHelperFor", { word: peek })} aria-live="polite" data-word-tooltip style={{ left: peekPosition?.left ?? 0, top: peekPosition?.top ?? 0, visibility: peekPosition ? "visible" : "hidden" }} className="koda-tooltip-in fixed z-50 flex w-[min(calc(100vw-1.5rem),24rem)] items-center gap-3 rounded-2xl border border-indigo-100 bg-white px-4 py-3 pr-12 shadow-xl dark:border-indigo-900 dark:bg-surface">
           <span aria-hidden="true" className={`absolute h-4 w-4 rotate-45 border-indigo-100 bg-white dark:border-indigo-900 dark:bg-surface ${peekPosition?.side === "top" ? "-bottom-2 left-1/2 -translate-x-1/2 border-b border-r" : peekPosition?.side === "left" ? "-right-2 top-1/2 -translate-y-1/2 border-r border-t" : peekPosition?.side === "right" ? "-left-2 top-1/2 -translate-y-1/2 border-b border-l" : "-top-2 left-1/2 -translate-x-1/2 border-l border-t"}`} />
           {peekPic && <span className="relative h-12 w-16 shrink-0 overflow-hidden rounded-xl bg-play-sky"><Picture name={peekPic} /></span>}
           <span className="min-w-0 flex-1">
-            <span className="block text-[0.65rem] font-bold uppercase tracking-[0.16em] text-muted">Word helper</span>
+            <span className="block text-[0.65rem] font-bold uppercase tracking-[0.16em] text-muted">{t("reader.wordHelper")}</span>
             <span className={`block text-xl font-bold leading-tight text-ink ${km ? KHMER : SERIF}`}>{peek}</span>
-            <span className="text-xs text-muted">{peekPic ? "Picture word · tap the speaker to hear it" : "Tap the speaker to hear it"}</span>
+            <span className="text-xs text-muted">{peekPic ? t("reader.pictureWordHint") : t("reader.tapSpeaker")}</span>
           </span>
           {(canSpeak(book.language) || book.wordAudio?.[peek] || book.wordAudio?.[peek.toLowerCase()]) && (
             <button type="button" onClick={() => hear(peek)} aria-label={`Hear ${peek}`} className={round}>
               <Volume2 className="h-4 w-4" aria-hidden="true" />
             </button>
           )}
-          <button type="button" onClick={() => { setPeek(null); setPeekAnchor(null); setPeekPosition(null); }} aria-label="Close" className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full border border-indigo-200 bg-white/70 text-ink transition-colors hover:border-indigo-400 dark:border-indigo-800 dark:bg-indigo-950/70">
+          <button type="button" onClick={() => { setPeek(null); setPeekAnchor(null); setPeekPosition(null); }} aria-label={t("common.close")} className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full border border-indigo-200 bg-white/70 text-ink transition-colors hover:border-indigo-400 dark:border-indigo-800 dark:bg-indigo-950/70">
             <X className="h-3.5 w-3.5" aria-hidden="true" />
           </button>
         </div>
@@ -563,11 +575,12 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
 
 /** One sheet of the book. */
 function Sheet({ index, count, children }: { index: number; count: number; children: ReactNode }) {
+  const { t } = useT();
   return (
     <div
       role="group"
       aria-roledescription="page"
-      aria-label={index === 0 ? "Cover" : `Page ${index} of ${count - 1}`}
+      aria-label={index === 0 ? t("reader.cover") : t("reader.pageOf", { page: index, total: count - 1 })}
       data-book-page={index}
       className="flex min-h-full w-full flex-col py-4 sm:px-8 sm:py-8"
     >

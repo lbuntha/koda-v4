@@ -43,6 +43,7 @@ import {
   skillArtFor,
   type UISkillPathItem,
 } from "./ui";
+import { useT } from "../lib/i18n";
 
 export interface LearnPageProps {
   skillId: string;
@@ -98,6 +99,7 @@ export const LearnPage: React.FC<LearnPageProps> = ({
   onStartLesson,
 }) => {
   const viewer = useAudienceViewer();
+  const { t, tNodes } = useT();
   const installed = useInstalledSkills();
   /* Subscribed, not read once: the padlocks below are drawn from the plan, and
      a family that upgrades in another tab has to see them open without
@@ -303,7 +305,7 @@ export const LearnPage: React.FC<LearnPageProps> = ({
         icon: lesson.icon,
         stars,
         tier: premium ? "premium" : "free",
-        note: opens ? `Unlocks after ${opens.title}` : undefined,
+        note: opens ? t("learn.unlocksAfter", { lesson: opens.title }) : undefined,
         state: locked
           ? "locked"
           : subscriptionLocked
@@ -319,7 +321,7 @@ export const LearnPage: React.FC<LearnPageProps> = ({
     return (
       <UISkillPath
         items={items}
-        startLabel={done ? "Continue" : "Start"}
+        startLabel={done ? t("skillCard.continue") : t("learn.start")}
         onSelect={(ref) => {
           const lesson = group.find((l) => l.ref === ref);
           if (lesson) start(lesson.levelNumber);
@@ -360,7 +362,7 @@ export const LearnPage: React.FC<LearnPageProps> = ({
         key={unit.id}
         id={unit.id}
         marker={number}
-        eyebrow={`Unit ${number}`}
+        eyebrow={t("learn.unit", { number })}
         title={unitTitle(unit.title)}
         /* Counted over this skill's lessons only — a unit may also hold lessons
            from skills the learner has not registered, and those are not this
@@ -387,7 +389,7 @@ export const LearnPage: React.FC<LearnPageProps> = ({
     try {
       await register(skillId);
     } catch (error) {
-      setRegistrationError(error instanceof Error ? error.message : "Could not register this skill.");
+      setRegistrationError(error instanceof Error ? error.message : t("learn.registerFailed"));
       return;
     } finally {
       setRegistering(false);
@@ -404,7 +406,7 @@ export const LearnPage: React.FC<LearnPageProps> = ({
           and the touch floor with it. */}
       <div className="flex items-center justify-between gap-3">
         <UIButton variant="ghost" size="sm" icon={<ArrowLeft />} onClick={onBack}>
-          All skills
+          {t("learn.allSkills")}
         </UIButton>
 
         {/* Only where there is something to print. An engine whose question is
@@ -412,7 +414,7 @@ export const LearnPage: React.FC<LearnPageProps> = ({
             dialog to say so is worse than no button. */}
         {lessons.some(canPrint) && (
           <UIButton variant="secondary" size="sm" icon={<Printer />} onClick={() => setPrinting(true)}>
-            Print worksheet
+            {t("learn.printWorksheet")}
           </UIButton>
         )}
       </div>
@@ -445,42 +447,39 @@ export const LearnPage: React.FC<LearnPageProps> = ({
           <>
             <UIBadge variant="primary">{art.label}</UIBadge>
             <UIBadge variant="neutral">
-              Ages {skill.manifest.audience.ages[0]}–{skill.manifest.audience.ages[1]}
+              {t("skillCard.agesBadge", { from: skill.manifest.audience.ages[0], to: skill.manifest.audience.ages[1] })}
             </UIBadge>
-            {server?.status === "draft" && <UIBadge variant="warning">Draft preview</UIBadge>}
+            {server?.status === "draft" && <UIBadge variant="warning">{t("learn.draftPreview")}</UIBadge>}
           </>
         }
-        meta={`by ${skill.manifest.author} · v${skill.manifest.version} · ${taught.length} lessons`}
+        meta={t("learn.meta", { author: skill.manifest.author, version: skill.manifest.version, count: taught.length })}
         footnote={
           registered ? (
             next ? (
-              <>
-                Up next: <span className="font-bold text-ink">{next.title}</span>
-              </>
+              tNodes("learn.upNext", { lesson: <span className="font-bold text-ink">{next.title}</span> })
             ) : blockedBy ? (
               /* The wall, and the way through it. Named rather than described:
                  "finish the prerequisites" is not something a seven-year-old
                  can act on, and the lesson that opens this one is. */
-              <>
-                Locked until <span className="font-bold text-ink">{blockedBy.title}</span> is
-                done{blockedBy.skillId !== skillId ? " — it is in another skill" : ""}.
-              </>
+              tNodes(blockedBy.skillId !== skillId ? "learn.lockedUntilOther" : "learn.lockedUntil", {
+                lesson: <span className="font-bold text-ink">{blockedBy.title}</span>,
+              })
             ) : practice.length > practiceDone ? (
               /* The teaching is done and practice is not. Said as an invitation
                  rather than as the next step, because that is what practice is:
                  nothing above points a learner into it, so this is where they
                  find out it is there. */
-              <>Every lesson complete — practice is open below whenever you want it.</>
+              t("learn.completePracticeOpen")
             ) : (
-              <>Every lesson complete — play any of them again.</>
+              t("learn.completePlayAgain")
             )
           ) : undefined
         }
         actionLabel={
           !registered
-            ? "Register skill"
+            ? t("learn.register")
             : finished
-              ? "Review a lesson"
+              ? t("learn.reviewLesson")
               : /* The button goes where the page says it goes. "Start learning"
                    over a locked path was a promise it could not keep.
                    "First:" rather than "Start", because half these titles are
@@ -488,15 +487,15 @@ export const LearnPage: React.FC<LearnPageProps> = ({
                    typo, and the word that carries the meaning here is the one
                    saying this comes *before* the skill on screen. */
                 blockedBy
-                ? `First: ${blockedBy.title}`
+                ? t("learn.first", { lesson: blockedBy.title })
                 : /* Named for what it opens, not for the fiction that the path
                      carries on: "Continue" on a finished course pointed at a
                      lesson the child had already finished. */
                   !next && openPractice
-                  ? "Start practice"
+                  ? t("learn.startPractice")
                   : done
-                    ? "Continue"
-                    : "Start learning"
+                    ? t("skillCard.continue")
+                    : t("learn.startLearning")
         }
         onOpen={() => start(resume.levelNumber)}
         onRegister={() => void add()}
@@ -518,22 +517,23 @@ export const LearnPage: React.FC<LearnPageProps> = ({
           <SectionIntro
             icon={<Sparkles className="w-5 h-5" />}
             tint="bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600"
-            title="Learning path"
-            blurb="Complete lessons to unlock more challenges."
+            title={t("learn.path")}
+            blurb={t("learn.pathBlurb")}
           />
 
           <div className="mt-4 flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-slate-50/80 p-3 dark:bg-slate-950/40">
-            <UIBadge variant="success">{freeLessons} Free</UIBadge>
+            <UIBadge variant="success">{t("learn.free", { count: freeLessons })}</UIBadge>
             {premiumLessons.length > 0 && (
-              <UIBadge variant="primary">{premiumLessons.length} Premium</UIBadge>
+              <UIBadge variant="primary">{t("learn.premium", { count: premiumLessons.length })}</UIBadge>
             )}
             <span className="text-xs text-muted sm:ml-auto">
-              <span className="font-bold text-ink">{plan.planName} plan</span>
+              <span className="font-bold text-ink">{t("learn.plan", { plan: plan.planName })}</span>
+              {" · "}
               {premiumLessons.length > 0
                 ? premiumIncluded
-                  ? " · Premium lessons included"
-                  : " · Premium lessons need an upgrade"
-                : " · All lessons available"}
+                  ? t("learn.premiumIncluded")
+                  : t("learn.premiumUpgrade")
+                : t("learn.allAvailable")}
             </span>
           </div>
 
@@ -547,16 +547,16 @@ export const LearnPage: React.FC<LearnPageProps> = ({
               <SectionIntro
                 icon={<Repeat className="w-5 h-5" />}
                 tint="bg-violet-50 dark:bg-violet-950/50 text-violet-600"
-                title="Practice"
-                blurb="No hints this time — play any round, in any order."
+                title={t("learn.practice")}
+                blurb={t("learn.practiceBlurb")}
               />
 
               <UIUnitSection
                 className="mt-4"
                 id="practice"
                 marker={<Repeat />}
-                eyebrow="Practice"
-                title="All techniques"
+                eyebrow={t("learn.practice")}
+                title={t("learn.allTechniques")}
                 done={practiceDone}
                 total={practice.length}
                 open={practiceOpen}
@@ -569,18 +569,18 @@ export const LearnPage: React.FC<LearnPageProps> = ({
         </section>
 
         <aside className={`${themeSystem.card("default")} p-5`}>
-          <h2 className="font-mono font-black text-sm text-ink">What you’ll learn</h2>
+          <h2 className="font-mono font-black text-sm text-ink">{t("learn.whatYoullLearn")}</h2>
           <p className="mt-2 text-sm text-muted leading-relaxed">{skill.manifest.description}</p>
 
           {outcomes.allLearned ? (
             <p className="mt-4 flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-2.5 text-sm font-bold text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300">
               <CheckCircle2 className="h-4 w-4 shrink-0" />
-              All {outcomes.total} learned
+              {t("learn.allLearned", { count: outcomes.total })}
             </p>
           ) : (
             <div className="mt-4 space-y-4">
               {outcomes.now && (
-                <OutcomeGroup label={outcomes.starting ? "Start with" : "Learning now"}>
+                <OutcomeGroup label={outcomes.starting ? t("learn.startWith") : t("learn.learningNow")}>
                   <p className="flex items-start gap-2 rounded-xl bg-indigo-50 px-3 py-2.5 text-sm font-bold leading-snug text-indigo-800 dark:bg-indigo-950/50 dark:text-indigo-200">
                     <CircleDot className="mt-0.5 h-4 w-4 shrink-0 text-indigo-600 dark:text-indigo-400" />
                     {outcomes.now.concept}
@@ -589,7 +589,7 @@ export const LearnPage: React.FC<LearnPageProps> = ({
               )}
 
               {outcomes.learned.length > 0 && (
-                <OutcomeGroup label={`Learned · ${outcomes.learnedCount} of ${outcomes.total}`}>
+                <OutcomeGroup label={t("learn.learnedOf", { done: outcomes.learnedCount, total: outcomes.total })}>
                   <ul className="space-y-2">
                     {outcomes.learned.map((lesson) => (
                       <li key={lesson.ref} className="flex items-start gap-2 text-xs text-muted">
@@ -602,7 +602,7 @@ export const LearnPage: React.FC<LearnPageProps> = ({
               )}
 
               {outcomes.comingUp.length > 0 && (
-                <OutcomeGroup label="Coming up">
+                <OutcomeGroup label={t("learn.comingUp")}>
                   <ul className="space-y-2">
                     {outcomes.comingUp.map((lesson) => (
                       <li key={lesson.ref} className="flex items-start gap-2 text-xs text-muted">

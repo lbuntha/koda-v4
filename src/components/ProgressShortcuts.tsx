@@ -6,13 +6,14 @@ import { themeSystem } from "../lib/themeSystem";
 import { PROFILE_SECTIONS, openProfileAt, type ProfileSectionId } from "./account/profileSections";
 import type { TabId } from "./navTabs";
 
+import { translate } from "../lib/i18n";
 export interface ProgressShortcutsProps {
   onSelectTab: (tab: TabId) => void;
 }
 
 const SHORTCUTS: { id: ProfileSectionId; label: string; icon: string }[] = [
-  { id: PROFILE_SECTIONS.today, label: "Today", icon: "target" },
-  { id: PROFILE_SECTIONS.achievements, label: "Badges", icon: "award" },
+  { id: PROFILE_SECTIONS.today, get label() { return translate("app.progressShortcuts.today"); }, icon: "target" },
+  { id: PROFILE_SECTIONS.achievements, get label() { return translate("app.progressShortcuts.badges"); }, icon: "award" },
 ];
 
 /**
@@ -33,7 +34,7 @@ const SHORTCUTS: { id: ProfileSectionId; label: string; icon: string }[] = [
  */
 export const ProgressShortcuts: React.FC<ProgressShortcutsProps> = ({ onSelectTab }) => (
   <section className="rail:hidden">
-    <div className={themeSystem.list.groupLabel}>Your progress</div>
+    <div className={themeSystem.list.groupLabel}>{translate("app.progressShortcuts.yourProgress")}</div>
     <div className="grid grid-cols-3 gap-2">
       {SHORTCUTS.map((shortcut) => (
         <UINavTile

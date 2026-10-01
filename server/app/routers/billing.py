@@ -25,6 +25,7 @@ from typing import Annotated, Any, Literal
 from fastapi import APIRouter, BackgroundTasks, Depends, Query
 from pydantic import Field
 
+from app import notify_i18n
 from app.deps import AUTHENTICATED, CurrentPrincipal, Db, require
 from app.errors import Conflict, NotFound
 from app.models.auth import Principal
@@ -433,9 +434,9 @@ async def grant(
         # Only for the plan they actually asked for — a grant onto some other
         # plan is a different conversation, which is the same reason the ask
         # above is left standing in that case.
-        title, note = await push_service.wording(
-            db, "plan.request_decided", {"decision": "approved"}
-        )
+        language = await notify_i18n.language_of_family(db, family_id)
+        decided = {"decision": notify_i18n.phrase(language, "approved")}
+        title, note = await push_service.wording(db, "plan.request_decided", decided, language=language)
         tasks.add_task(
             push_service.send,
             db,
@@ -454,7 +455,7 @@ async def grant(
             email_notify.send,
             db,
             kind="plan.request_decided",
-            values={"decision": "approved"},
+            values=decided,
             family_id=family_id,
             user_ids=[requester] if requester else None,
             path="/settings",

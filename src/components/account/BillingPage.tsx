@@ -8,6 +8,7 @@ import { playSound } from "../../utils/audio";
 import { UIBadge, UIButton, UIModal, UISectionHeader } from "../ui";
 import { NoAccess } from "./NoAccess";
 
+import { translate } from "../../lib/i18n";
 interface Feature {
   featureId: string;
   label: string;
@@ -115,9 +116,9 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
   if (!allowed) {
     return (
       <NoAccess
-        title="Billing"
+        title={translate("admin.billingPage.billing")}
         permission="system:write"
-        what="Plans and subscriptions belong to whoever runs the service, not to one family."
+        what={translate("admin.billingPage.plansAndSubscriptionsBelongToWhoever")}
       />
     );
   }
@@ -144,7 +145,7 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
       await loadSubs(query);
       setEditing(null);
       setCreating(false);
-      setNotice(isNew ? "Plan added." : "Plan updated.");
+      setNotice(isNew ? translate("admin.billingPage.planAdded") : translate("admin.billingPage.planUpdated"));
       playSound("pop");
     } catch (e) {
       setError((e as ApiError).message);
@@ -166,7 +167,7 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
       });
       await loadSubs(query);
       setGranting(null);
-      setNotice("Subscription updated.");
+      setNotice(translate("admin.billingPage.subscriptionUpdated"));
       playSound("pop");
     } catch (e) {
       setError((e as ApiError).message);
@@ -179,9 +180,9 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
     <div className={embedded ? "space-y-6" : "max-w-4xl mx-auto space-y-6"}>
       {!embedded && (
         <div>
-          <h2 className={themeSystem.typography("h2")}>Billing</h2>
+          <h2 className={themeSystem.typography("h2")}>{translate("admin.billingPage.billing")}</h2>
           <p className={themeSystem.typography("body-sm", "mt-1")}>
-            What each plan costs and includes, and which families are on them.
+            {translate("admin.billingPage.whatEachPlanCostsAndIncludes")}
           </p>
         </div>
       )}
@@ -200,8 +201,8 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
       {/* ---- PLANS ---- */}
       <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
         <UISectionHeader
-          title="Plans"
-          subtitle="Price, how many children, and what each one includes"
+          title={translate("admin.billingPage.plans")}
+          subtitle={translate("admin.billingPage.priceHowManyChildrenAndWhat")}
           icon={<CreditCard className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
           action={
             <UIButton
@@ -222,7 +223,7 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
                 });
               }}
             >
-              Add plan
+              {translate("admin.billingPage.addPlan")}
             </UIButton>
           }
         />
@@ -233,18 +234,18 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h4 className="font-mono text-sm font-bold text-ink">{plan.name}</h4>
-                  <p className="text-xs text-muted">{plan.description || "No description"}</p>
+                  <p className="text-xs text-muted">{plan.description || translate("admin.billingPage.noDescription")}</p>
                 </div>
                 <span className="shrink-0 font-mono text-base font-black text-ink">
-                  {plan.priceCents === 0 ? "Free" : `${formatPrice(plan.priceCents, plan.currency)}/mo`}
+                  {plan.priceCents === 0 ? translate("admin.billingPage.free") : `${formatPrice(plan.priceCents, plan.currency)}/mo`}
                 </span>
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <UIBadge variant="info">
-                  {plan.learnerLimit} {plan.learnerLimit === 1 ? "child" : "children"}
+                  {plan.learnerLimit} {plan.learnerLimit === 1 ? translate("admin.billingPage.child") : translate("admin.billingPage.children")}
                 </UIBadge>
                 {plan.features.length === 0 ? (
-                  <UIBadge variant="neutral">No paid features</UIBadge>
+                  <UIBadge variant="neutral">{translate("admin.billingPage.noPaidFeatures")}</UIBadge>
                 ) : (
                   plan.features.map((id) => (
                     <UIBadge key={id} variant="success">
@@ -263,7 +264,7 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
                   setEditing({ ...plan });
                 }}
               >
-                Edit
+                {translate("admin.billingPage.edit")}
               </UIButton>
             </div>
           ))}
@@ -273,8 +274,8 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
       {/* ---- WHO IS ON WHAT ---- */}
       <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
         <UISectionHeader
-          title="Subscriptions"
-          subtitle="Every family, what they are on, and until when"
+          title={translate("admin.billingPage.subscriptions")}
+          subtitle={translate("admin.billingPage.everyFamilyWhatTheyAreOn")}
           icon={<Users className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
         />
 
@@ -283,7 +284,7 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
             <input
               className={`${field} pl-9`}
-              placeholder="Search by name, email or family"
+              placeholder={translate("admin.billingPage.searchByNameEmailOrFamily")}
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               onKeyDown={(event) => {
@@ -292,13 +293,13 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
             />
           </div>
           <UIButton variant="secondary" size="sm" onClick={() => void loadSubs(query)}>
-            Search
+            {translate("admin.billingPage.search")}
           </UIButton>
         </div>
 
         {subs.length === 0 ? (
           <p className="rounded-2xl border-2 border-dashed border-line bg-surface-muted p-6 text-center text-sm text-muted">
-            No families yet.
+            {translate("admin.billingPage.noFamiliesYet")}
           </p>
         ) : (
           <div className="space-y-2">
@@ -323,8 +324,7 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
                     </p>
                   )}
                   <p className="text-xs text-muted">
-                    {sub.learnersUsed} of {sub.learnerLimit}{" "}
-                    {sub.learnerLimit === 1 ? "child" : "children"} · {when(sub.renewsAt)}
+                    {translate("admin.billingPage.learnersusedOfLearnerlimitValueValue2", { learnersUsed: sub.learnersUsed, learnerLimit: sub.learnerLimit, value: sub.learnerLimit === 1 ? translate("admin.billingPage.child") : translate("admin.billingPage.children"), value2: when(sub.renewsAt) })}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
@@ -335,10 +335,10 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
                     * see that difference at a glance.
                     */}
                   <UIBadge variant={sub.live ? "success" : "neutral"}>
-                    {sub.live ? sub.planName : "Free"}
+                    {sub.live ? sub.planName : translate("admin.billingPage.free")}
                   </UIBadge>
                   {!sub.live && sub.planId !== "free" && (
-                    <UIBadge variant="warning">lapsed</UIBadge>
+                    <UIBadge variant="warning">{translate("admin.billingPage.lapsed")}</UIBadge>
                   )}
                   {/*
                     * A family has asked for this and is waiting on a person.
@@ -347,7 +347,7 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
                     * parent pressing a button into nothing.
                     */}
                   {sub.wantsPlanName && (
-                    <UIBadge variant="primary">wants {sub.wantsPlanName}</UIBadge>
+                    <UIBadge variant="primary">{translate("admin.billingPage.wantsWantsplanname", { wantsPlanName: sub.wantsPlanName })}</UIBadge>
                   )}
                   <UIButton
                     variant="secondary"
@@ -365,7 +365,7 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
                       setGrantMonths(1);
                     }}
                   >
-                    Change
+                    {translate("admin.billingPage.change")}
                   </UIButton>
                 </div>
               </div>
@@ -381,7 +381,7 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
           setEditing(null);
           setCreating(false);
         }}
-        title={creating ? "Add plan" : `Edit ${editing?.name ?? "plan"}`}
+        title={creating ? translate("admin.billingPage.addPlan") : translate("admin.billingPage.editValue", { value: editing?.name ?? translate("admin.billingPage.plan") })}
         footer={
           <>
             <UIButton
@@ -391,7 +391,7 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
                 setCreating(false);
               }}
             >
-              Cancel
+              {translate("admin.billingPage.cancel")}
             </UIButton>
             <UIButton
               variant="primary"
@@ -399,7 +399,7 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
               disabled={!editing?.name.trim() || (creating && !editing?.planId.trim())}
               onClick={() => editing && void savePlan(editing, creating)}
             >
-              {creating ? "Add plan" : "Save plan"}
+              {creating ? translate("admin.billingPage.addPlan") : translate("admin.billingPage.savePlan")}
             </UIButton>
           </>
         }
@@ -408,23 +408,23 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
           <div className="space-y-4">
             {creating && (
               <label className="block space-y-1.5">
-                <span className="koda-admin-label text-ink">Id</span>
+                <span className="koda-admin-label text-ink">{translate("admin.billingPage.id")}</span>
                 <input
                   className={field}
-                  placeholder="school"
+                  placeholder={translate("admin.billingPage.school")}
                   value={editing.planId}
                   onChange={(e) =>
                     setEditing({ ...editing, planId: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "") })
                   }
                 />
                 <span className="text-xs text-muted">
-                  Permanent — subscriptions point at it. Lowercase, no spaces.
+                  {translate("admin.billingPage.permanentSubscriptionsPointAtItLowercase")}
                 </span>
               </label>
             )}
 
             <label className="block space-y-1.5">
-              <span className="koda-admin-label text-ink">Name</span>
+              <span className="koda-admin-label text-ink">{translate("admin.billingPage.name")}</span>
               <input
                 className={field}
                 value={editing.name}
@@ -433,7 +433,7 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
             </label>
 
             <label className="block space-y-1.5">
-              <span className="koda-admin-label text-ink">Description</span>
+              <span className="koda-admin-label text-ink">{translate("admin.billingPage.description")}</span>
               <input
                 className={field}
                 value={editing.description}
@@ -443,7 +443,7 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
 
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block space-y-1.5">
-                <span className="koda-admin-label text-ink">Price per month (US cents)</span>
+                <span className="koda-admin-label text-ink">{translate("admin.billingPage.pricePerMonthUsCents")}</span>
                 <input
                   className={field}
                   type="number"
@@ -453,12 +453,12 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
                   onChange={(e) => setEditing({ ...editing, priceCents: Number(e.target.value) || 0 })}
                 />
                 <span className="text-xs text-muted">
-                  {editing.priceCents === 0 ? "Free" : `${formatPrice(editing.priceCents)} a month`}
+                  {editing.priceCents === 0 ? translate("admin.billingPage.free") : translate("admin.billingPage.valueAMonth", { value: formatPrice(editing.priceCents) })}
                 </span>
               </label>
 
               <label className="block space-y-1.5">
-                <span className="koda-admin-label text-ink">Children included</span>
+                <span className="koda-admin-label text-ink">{translate("admin.billingPage.childrenIncluded")}</span>
                 <input
                   className={field}
                   type="number"
@@ -473,11 +473,10 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
             </div>
 
             <div className="space-y-2">
-              <span className="koda-admin-label text-ink">Included features</span>
+              <span className="koda-admin-label text-ink">{translate("admin.billingPage.includedFeatures")}</span>
               {editing.planId === "free" ? (
                 <p className="rounded-xl bg-surface-muted p-3 text-xs text-muted">
-                  The free plan is the floor every lapsed subscription falls back to, so it cannot
-                  include paid features. Its price and child limit are still yours to set.
+                  {translate("admin.billingPage.theFreePlanIsTheFloor")}
                 </p>
               ) : (
                 features.map((feature) => {
@@ -524,18 +523,18 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
       <UIModal
         isOpen={Boolean(granting)}
         onClose={() => setGranting(null)}
-        title={`Subscription for ${granting?.familyName ?? ""}`}
+        title={translate("admin.billingPage.subscriptionForValue", { value: granting?.familyName ?? "" })}
         footer={
           <>
             <UIButton variant="secondary" onClick={() => setGranting(null)}>
-              Cancel
+              {translate("admin.billingPage.cancel")}
             </UIButton>
             <UIButton
               variant="primary"
               isLoading={Boolean(granting && busy === `grant:${granting.familyId}`)}
               onClick={() => void grant()}
             >
-              Apply
+              {translate("admin.billingPage.apply")}
             </UIButton>
           </>
         }
@@ -546,25 +545,24 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
               on purpose rather than because the row did not say. */}
           {granting?.wantsPlanName && (
             <p className="rounded-xl bg-indigo-50 p-3 text-sm text-indigo-900 dark:bg-indigo-950/40 dark:text-indigo-200">
-              This family asked for <strong>{granting.wantsPlanName}</strong>. Granting it clears
-              the request.
+              {translate("admin.billingPage.thisFamilyAskedFor")}{" "}<strong>{granting.wantsPlanName}</strong>{translate("admin.billingPage.grantingItClearsTheRequest")}
             </p>
           )}
 
           <label className="block space-y-1.5">
-            <span className="koda-admin-label text-ink">Plan</span>
+            <span className="koda-admin-label text-ink">{translate("admin.billingPage.plan2")}</span>
             <select className={field} value={grantPlan} onChange={(e) => setGrantPlan(e.target.value)}>
               {plans.map((plan) => (
                 <option key={plan.planId} value={plan.planId}>
-                  {plan.name} — {plan.priceCents === 0 ? "free" : `${formatPrice(plan.priceCents)}/mo`},{" "}
-                  {plan.learnerLimit} {plan.learnerLimit === 1 ? "child" : "children"}
+                  {plan.name} — {plan.priceCents === 0 ? translate("admin.billingPage.free2") : `${formatPrice(plan.priceCents)}/mo`},{" "}
+                  {plan.learnerLimit} {plan.learnerLimit === 1 ? translate("admin.billingPage.child") : translate("admin.billingPage.children")}
                 </option>
               ))}
             </select>
           </label>
 
           <label className="block space-y-1.5">
-            <span className="koda-admin-label text-ink">Months</span>
+            <span className="koda-admin-label text-ink">{translate("admin.billingPage.months")}</span>
             <input
               className={field}
               type="number"
@@ -575,14 +573,13 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
             />
             <span className="text-xs text-muted">
               {grantMonths === 0
-                ? "No end date — runs until somebody changes it."
-                : `Runs for ${grantMonths} month${grantMonths === 1 ? "" : "s"}, then falls back to Free on its own.`}
+                ? translate("admin.billingPage.noEndDateRunsUntilSomebody")
+                : translate("admin.billingPage.runsForGrantmonthsMonthValueThen", { grantMonths: grantMonths, value: grantMonths === 1 ? "" : "s" })}
             </span>
           </label>
 
           <p className="rounded-xl bg-indigo-50 p-3 text-xs text-indigo-900 dark:bg-indigo-950/40 dark:text-indigo-200">
-            Putting a family on Free takes Ask Koda away immediately. No child is ever deleted — a
-            family over the new limit simply cannot add another.
+            {translate("admin.billingPage.puttingAFamilyOnFreeTakes")}
           </p>
         </div>
       </UIModal>

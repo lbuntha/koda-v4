@@ -3,6 +3,7 @@ import { ChevronRight, Play } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIBadge, UIButton } from "./ThemeUI";
 import { UISkillThumbnail, skillArtFor, useHasSkillArtwork } from "./UISkillThumbnail";
+import { useT } from "../../lib/i18n";
 
 /**
  * How much room a skill is given.
@@ -118,13 +119,14 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
   className = "",
 }) => {
   const hasArtwork = useHasSkillArtwork(thumbnail);
+  const { t } = useT();
   const percent =
     progressPercent ?? (lessonCount ? Math.round((completedLessons / lessonCount) * 100) : 0);
   const complete = percent === 100;
   const categoryLabel = subjectName ?? skillArtFor(category).label;
   const label =
     actionLabel ??
-    (!registered ? "Add" : complete ? "Review" : completedLessons > 0 ? "Continue" : "Open");
+    t(!registered ? "skillCard.add" : complete ? "skillCard.review" : completedLessons > 0 ? "skillCard.continue" : "skillCard.open");
   const act = registered ? onOpen : onRegister;
 
   /*
@@ -154,7 +156,7 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
             <h3 className="min-w-0 flex-1 truncate text-sm font-black text-ink">{title}</h3>
             {readyCount > 0 && (
               <span className="shrink-0 rounded-full bg-indigo-100 px-2 py-0.5 font-mono text-[10px] font-black uppercase tracking-wider text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">
-                {readyCount} ready
+                {t("skillCard.ready", { count: readyCount })}
               </span>
             )}
           </div>
@@ -180,7 +182,7 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
           <ChevronRight className="w-4 h-4 shrink-0 text-muted" />
         ) : (
           <span className="shrink-0 rounded-full bg-indigo-600 px-3 py-1.5 text-xs font-black text-white">
-            {registering ? "Adding…" : label}
+            {registering ? t("skillCard.adding") : label}
           </span>
         )}
       </button>
@@ -240,13 +242,13 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
                 <div className="flex justify-between text-xs font-mono font-bold text-muted mb-1.5">
                   <span>
                     {completedLessons
-                      ? `${completedLessons} of ${lessonCount} lessons complete`
-                      : "Ready to begin"}
+                      ? t("skillCard.lessonsComplete", { done: completedLessons, total: lessonCount })
+                      : t("skillCard.readyToBegin")}
                   </span>
                   <span>{percent}%</span>
                 </div>
                 <div className="flex">
-                  <Progress percent={percent} size="lg" label={`${title} progress`} />
+                  <Progress percent={percent} size="lg" label={t("skillCard.progress", { title })} />
                 </div>
                 {footnote && <p className="mt-2 text-xs text-muted">{footnote}</p>}
               </div>
@@ -274,7 +276,7 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
       <button
         type="button"
         onClick={onOpen}
-        aria-label={`Open ${title}`}
+        aria-label={t("subjectCard.open", { subject: title })}
         /* Drawn artwork earns 16:9. A fallback glyph on a gradient does not —
            full-bleed on a phone that is a third of the screen carrying one
            symbol, which is what every skill looks like before it has art. */
@@ -293,7 +295,7 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
         />
         {status === "draft" && (
           <UIBadge variant="warning" className="absolute top-3 right-3">
-            Draft
+            {t("skillCard.draft")}
           </UIBadge>
         )}
       </button>
@@ -321,17 +323,17 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
             it — at poster width a third clause just truncates the ages away. */}
         <p className="text-[11px] font-bold text-muted truncate">
           {categoryLabel}
-          {ages ? ` · ages ${ages[0]}–${ages[1]}` : ""}
-          {completedLessons > 0 ? "" : ` · ${lessonCount} lessons`}
+          {ages ? ` · ${t("skillCard.ages", { from: ages[0], to: ages[1] })}` : ""}
+          {completedLessons > 0 ? "" : ` · ${t("skillCard.lessons", { count: lessonCount })}`}
         </p>
 
         {/* The bar and the count on one line. "1 of 56" above "2%" was the same
             fact twice, in two rows, on a card that already has five. */}
         {completedLessons > 0 && (
           <div className="flex items-center gap-2">
-            <Progress percent={percent} size="md" label={`${title} progress`} />
+            <Progress percent={percent} size="md" label={t("skillCard.progress", { title })} />
             <span className="shrink-0 text-[11px] font-bold text-muted tabular-nums">
-              {complete ? "Done" : `${completedLessons} of ${lessonCount}`}
+              {complete ? t("skillCard.done") : t("skillCard.xOfY", { done: completedLessons, total: lessonCount })}
             </span>
           </div>
         )}

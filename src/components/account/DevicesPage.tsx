@@ -8,6 +8,7 @@ import { UIBadge, UIButton, UIDialog, UISectionHeader } from "../ui";
 import { NoAccess } from "./NoAccess";
 import { disableNotifications } from "../../lib/push";
 
+import { translate } from "../../lib/i18n";
 interface Device {
   id: string;
   name: string;
@@ -138,8 +139,8 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({ embedded = false }) =>
       }
       setNotice(
         device.current
-          ? "This device will not be notified any more."
-          : `${device.name} will not be notified any more.`,
+          ? translate("admin.devicesPage.thisDeviceWillNotBeNotified")
+          : translate("admin.devicesPage.nameWillNotBeNotifiedAny", { name: device.name }),
       );
       playSound("pop");
       await load();
@@ -156,7 +157,7 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({ embedded = false }) =>
     try {
       const token = await accessToken();
       await request(`/devices/${device.id}`, { method: "DELETE", token });
-      setNotice(`${device.learnerName ?? device.name} was signed out.`);
+      setNotice(translate("admin.devicesPage.valueWasSignedOut", { value: device.learnerName ?? device.name }));
       playSound("pop");
       // Reloaded rather than spliced out of the list held here: a row leaving
       // pulls one up from the next page, and a page that quietly shrinks by
@@ -183,8 +184,8 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({ embedded = false }) =>
       });
       setNotice(
         signedOut === 0
-          ? "Nothing else was signed in."
-          : `${signedOut} ${signedOut === 1 ? "session was" : "sessions were"} signed out.`,
+          ? translate("admin.devicesPage.nothingElseWasSignedIn")
+          : translate("admin.devicesPage.signedoutValueSignedOut", { signedOut: signedOut, value: signedOut === 1 ? translate("admin.devicesPage.sessionWas") : translate("admin.devicesPage.sessionsWere") }),
       );
       playSound("pop");
       if (page === 1) await load();
@@ -200,9 +201,9 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({ embedded = false }) =>
   if (!canList) {
     return (
       <NoAccess
-        title="Devices"
+        title={translate("admin.devicesPage.devices")}
         permission="device:list"
-        what="Only family members with device access can see what is signed in."
+        what={translate("admin.devicesPage.onlyFamilyMembersWithDeviceAccess")}
       />
     );
   }
@@ -213,12 +214,12 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({ embedded = false }) =>
         <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             {embedded ? (
-              <h2 className={themeSystem.list.groupLabel}>Devices</h2>
+              <h2 className={themeSystem.list.groupLabel}>{translate("admin.devicesPage.devices")}</h2>
             ) : (
-              <h1 className="koda-admin-page-title">Devices</h1>
+              <h1 className="koda-admin-page-title">{translate("admin.devicesPage.devices")}</h1>
             )}
             <p className="mt-1 text-sm text-[#6D6997] dark:text-muted">
-              Family devices. Sign out lost or unknown devices.
+              {translate("admin.devicesPage.familyDevicesSignOutLostOr")}
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -230,7 +231,7 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({ embedded = false }) =>
                 isLoading={busy === "rest"}
                 onClick={() => setSigningOutRest(true)}
               >
-                Sign out the rest
+                {translate("admin.devicesPage.signOutTheRest")}
               </UIButton>
             )}
             <UIButton
@@ -239,7 +240,7 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({ embedded = false }) =>
               icon={<RefreshCw />}
               onClick={() => void load()}
             >
-              Refresh
+              {translate("admin.devicesPage.refresh")}
             </UIButton>
           </div>
         </header>
@@ -249,10 +250,10 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({ embedded = false }) =>
 
         <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
           <UISectionHeader
-            title="Signed in"
+            title={translate("admin.devicesPage.signedIn")}
             subtitle={
               loading
-                ? "Reading…"
+                ? translate("admin.devicesPage.reading")
                 : `${total} ${total === 1 ? "device" : "devices"}${
                     pages > 1 ? ` · page ${result?.page ?? page} of ${pages}` : ""
                   }`
@@ -261,10 +262,9 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({ embedded = false }) =>
           />
 
           {loading ? (
-            <p className="text-sm text-muted">Loading devices…</p>
+            <p className="text-sm text-muted">{translate("admin.devicesPage.loadingDevices")}</p>
           ) : devices.length === 0 ? (
-            <p className="text-sm text-muted">Nothing is signed in, which should not be possible
-              from a page you are reading. Try refreshing.</p>
+            <p className="text-sm text-muted">{translate("admin.devicesPage.nothingIsSignedInWhichShould")}</p>
           ) : (
             <ul className="space-y-2">
               {devices.map((device) => {
@@ -287,29 +287,16 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({ embedded = false }) =>
                       </span>
                       <div className="min-w-0">
                         <p className="truncate font-mono text-sm font-bold text-ink">
-                          {device.learnerName ? `${device.learnerName}'s device` : device.name}
+                          {device.learnerName ? translate("admin.devicesPage.learnernameSDevice", { learnerName: device.learnerName }) : device.name}
                         </p>
                         <p className="text-xs text-muted">
-                          {device.kind === "child" ? "Child tablet" : "Grown-up sign-in"}
-                          {/*
-                           * Which machine a child's session is on.
-                           *
-                           * The title above says who a row is *for*, which is
-                           * what a parent scans by — but a child who plays on
-                           * the tablet and on a parent's laptop then has two
-                           * rows reading "Thana's device", and the list cannot
-                           * be used for the thing it exists for: picking out
-                           * the one to sign out. The machine name is already on
-                           * the row; it was only being thrown away.
-                           */}
-                          {device.learnerName && device.name ? ` on ${device.name}` : ""} · last
-                          used {whenSeen(device.lastSeenAt)}
+                          {translate("admin.devicesPage.valueValue2LastUsedValue3", { value: device.kind === "child" ? translate("admin.devicesPage.childTablet") : translate("admin.devicesPage.grownUpSignIn"), value2: device.learnerName && device.name ? translate("admin.devicesPage.onName", { name: device.name }) : "", value3: whenSeen(device.lastSeenAt) })}
                         </p>
                       </div>
                     </div>
 
                     <div className="flex shrink-0 items-center gap-2">
-                      {device.current && <UIBadge variant="success">This one</UIBadge>}
+                      {device.current && <UIBadge variant="success">{translate("admin.devicesPage.thisOne")}</UIBadge>}
                       {device.notifications && (
                         <UIButton
                           variant="secondary"
@@ -318,7 +305,7 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({ embedded = false }) =>
                           isLoading={busy === device.id}
                           onClick={() => void silence(device)}
                         >
-                          Notifications on
+                          {translate("admin.devicesPage.notificationsOn")}
                         </UIButton>
                       )}
                       {mayRevoke && (
@@ -329,7 +316,7 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({ embedded = false }) =>
                           isLoading={busy === device.id}
                           onClick={() => setSigningOut(device)}
                         >
-                          Sign out
+                          {translate("admin.devicesPage.signOut")}
                         </UIButton>
                       )}
                     </div>
@@ -342,7 +329,7 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({ embedded = false }) =>
           {pages > 1 && (
             <div className="flex flex-col gap-2 border-t border-line pt-3 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
               <span>
-                {total} devices · page {result?.page ?? page} of {pages}
+                {translate("admin.devicesPage.totalDevicesPageValueOfPages", { total: total, value: result?.page ?? page, pages: pages })}
               </span>
               <div className="flex items-center gap-2">
                 <UIButton
@@ -352,7 +339,7 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({ embedded = false }) =>
                   disabled={page <= 1 || loading}
                   onClick={() => setPage((value) => value - 1)}
                 >
-                  Previous
+                  {translate("admin.devicesPage.previous")}
                 </UIButton>
                 <UIButton
                   variant="secondary"
@@ -361,7 +348,7 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({ embedded = false }) =>
                   disabled={page >= pages || loading}
                   onClick={() => setPage((value) => value + 1)}
                 >
-                  Next
+                  {translate("admin.devicesPage.next")}
                 </UIButton>
               </div>
             </div>
@@ -373,17 +360,15 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({ embedded = false }) =>
       <UIDialog
         isOpen={Boolean(signingOut)}
         onClose={() => setSigningOut(null)}
-        title={signingOut?.current ? "Sign out this device?" : "Sign out that device?"}
+        title={signingOut?.current ? translate("admin.devicesPage.signOutThisDevice") : translate("admin.devicesPage.signOutThatDevice")}
         description={
           signingOut?.current
-            ? "You are using this one. You will be returned to the sign-in screen."
-            : `${
-                signingOut?.learnerName
-                  ? `${signingOut.learnerName}'s session on ${signingOut.name}`
-                  : signingOut?.name
-              } will be signed out straight away, and will need to sign in again.`
+            ? translate("admin.devicesPage.youAreUsingThisOneYou")
+            : translate("admin.devicesPage.valueWillBeSignedOutStraight", { value: signingOut?.learnerName
+                  ? translate("admin.devicesPage.learnernameSSessionOnName", { learnerName: signingOut.learnerName, name: signingOut.name })
+                  : signingOut?.name })
         }
-        confirmText="Sign out"
+        confirmText={translate("admin.devicesPage.signOut")}
         variant="danger"
         onConfirm={() => {
           if (signingOut) void revoke(signingOut);
@@ -393,11 +378,9 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({ embedded = false }) =>
       <UIDialog
         isOpen={signingOutRest}
         onClose={() => setSigningOutRest(false)}
-        title="Sign out every other device?"
-        description={`Everything except the one you are using now will be signed out straight away — ${
-          total - 1
-        } ${total - 1 === 1 ? "session" : "sessions"}. Each will need to sign in again, and a child's tablet will need a fresh join code.`}
-        confirmText="Sign them out"
+        title={translate("admin.devicesPage.signOutEveryOtherDevice")}
+        description={translate("admin.devicesPage.everythingExceptTheOneYouAre", { value: total - 1, value2: total - 1 === 1 ? translate("admin.devicesPage.session") : translate("admin.devicesPage.sessions") })}
+        confirmText={translate("admin.devicesPage.signThemOut")}
         variant="danger"
         onConfirm={() => void revokeRest()}
       />

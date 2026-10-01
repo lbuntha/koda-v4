@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Flame, Hand } from "lucide-react";
+import { useT } from "../lib/i18n";
 
 import { useAbsence } from "../lib/absence";
 import type { UserProgress } from "../types";
@@ -28,6 +29,7 @@ import { UIBanner } from "./ui/UIBanner";
 export const WelcomeBack: React.FC<{ userProgress: UserProgress }> = ({ userProgress }) => {
   const absence = useAbsence(userProgress);
   const [dismissed, setDismissed] = useState(false);
+  const { t } = useT();
   if (absence.state === "quiet" || dismissed) return null;
 
   /*
@@ -41,17 +43,17 @@ export const WelcomeBack: React.FC<{ userProgress: UserProgress }> = ({ userProg
    */
   const away = absence.state === "away";
   const message = away
-    ? `It's been ${absence.daysAway} days. Pick anything below to start again.`
+    ? t("welcomeBack.away", { count: absence.daysAway })
     : absence.streakDays === 1
-      ? "You practised yesterday — one round keeps it going."
-      : `Your ${absence.streakDays}-day streak is waiting.`;
+      ? t("welcomeBack.yesterday")
+      : t("welcomeBack.streakWaiting", { count: absence.streakDays });
 
   return (
     <UIBanner
       tone={away ? "primary" : "streak"}
       icon={away ? <Hand /> : <Flame className="fill-current" />}
       onDismiss={() => setDismissed(true)}
-      dismissLabel="Dismiss welcome back message"
+      dismissLabel={t("welcomeBack.dismiss")}
     >
       {message}
     </UIBanner>

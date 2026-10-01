@@ -4,6 +4,7 @@ import { Eye, EyeOff, KeyRound, LogIn, MailCheck, RefreshCw, UserPlus } from "lu
 import { ApiError, SessionAPI, request } from "../../lib/sync";
 import { themeSystem } from "../../lib/themeSystem";
 import { playSound } from "../../utils/audio";
+import { currentLanguage, useT } from "../../lib/i18n";
 
 export type AccountMode = "signIn" | "signUp";
 type SignupType = "parent" | "student";
@@ -121,7 +122,9 @@ function loadGoogleIdentity(): Promise<void> {
  * It is `aria-hidden` and not focusable: there is nothing to operate yet, and
  * the email form below is usable the whole time this waits.
  */
-const GoogleButtonSkeleton: React.FC = () => (
+const GoogleButtonSkeleton: React.FC = () => {
+  const { t } = useT();
+  return (
   <div
     aria-hidden
     className="pointer-events-none flex h-10 w-full items-center justify-center gap-2 rounded border border-[#dadce0] bg-white"
@@ -146,9 +149,10 @@ const GoogleButtonSkeleton: React.FC = () => (
         d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.59C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58Z"
       />
     </svg>
-    <span className="font-sans text-sm font-medium text-[#3c4043]">Continue with Google</span>
+    <span className="font-sans text-sm font-medium text-[#3c4043]">{t("account.continueWithGoogle")}</span>
   </div>
-);
+  );
+};
 
 const GoogleSignInButton: React.FC<{
   busy: boolean;
@@ -219,6 +223,9 @@ const GoogleSignInButton: React.FC<{
           // treats the two the same way anyway: a new account or an old one,
           // depending on the address.
           text: "continue_with",
+          // The parent keys this component by language, so a switch rebuilds
+          // the button in the new one rather than leaving Google's words behind.
+          locale: currentLanguage(),
           width: Math.min(400, Math.max(240, mount.clientWidth)),
         });
 
@@ -285,6 +292,7 @@ const GoogleSignInButton: React.FC<{
 
 export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus = false }) => {
   const googleConfigured = Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim());
+  const { t, tNodes, language } = useT();
   const [mode, setMode] = useState<AccountMode>("signIn");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -319,7 +327,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
    */
   const forgot = async () => {
     if (!email.trim()) {
-      setError("Type your email first, then ask for a link.");
+      setError(t("account.error.emailFirst"));
       return;
     }
     setBusy(true);
@@ -334,7 +342,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
       const problem = err as ApiError;
       setError(
         problem.isOffline
-          ? "No connection to the data service. Try again in a moment."
+          ? t("account.error.offlineRetry")
           : problem.message,
       );
     } finally {
@@ -360,7 +368,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
       setVerificationSent(true);
     } catch (err) {
       const problem = err as ApiError;
-      setError(problem.isOffline ? "No connection. Try again in a moment." : problem.message);
+      setError(problem.isOffline ? t("account.error.offlineShort") : problem.message);
     } finally {
       setBusy(false);
     }
@@ -377,14 +385,14 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
         const result = await SessionAPI.signUp(
           email.trim(),
           password,
-          signupType === "parent" ? familyName.trim() || "My family" : "My learning space",
+          signupType === "parent" ? familyName.trim() || t("account.defaultFamilyName") : t("account.defaultStudentSpace"),
           signupType,
         );
         if ("verificationRequired" in result) {
           setVerificationEmail(result.email);
           setVerificationSent(result.emailSent);
           if (!result.emailSent) {
-            setError("We could not send the first message. Check the address, then send a new link.");
+            setError(t("account.error.firstMessage"));
           }
           setPassword("");
           return;
@@ -407,7 +415,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
       }
       setError(
         problem.isOffline
-          ? "No connection to the data service. Your work is saved on this device either way."
+          ? t("account.error.offlineSaved")
           : problem.message,
       );
     } finally {
@@ -431,7 +439,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
       const problem = err as ApiError;
       setError(
         problem.isOffline
-          ? "Google sign-in needs a connection. Your saved work is still on this device."
+          ? t("account.error.googleOffline")
           : problem.message,
       );
     } finally {
@@ -446,17 +454,17 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
           <MailCheck className="h-7 w-7 text-white" />
         </div>
         <div className="space-y-2">
-          <h2 className="text-xl font-black tracking-tight text-ink">Check your email</h2>
+          <h2 className="text-xl font-black tracking-tight text-ink">{t("account.verify.title")}</h2>
           <p className="text-sm leading-relaxed text-muted">
-            {verificationSent ? "Open the verification link sent to " : "Send a verification link to "}
-            <strong className="text-ink">{verificationEmail}</strong>. It works once and expires
-            after 24 hours.
+            {tNodes(verificationSent ? "account.verify.openLink" : "account.verify.sendLink", {
+              email: <strong className="text-ink">{verificationEmail}</strong>,
+            })}
           </p>
         </div>
 
         {verificationSent && (
           <p role="status" className={themeSystem.flash("success", "text-sm text-left")}>
-            A verification link is on its way. Check spam if it does not appear soon.
+            {t("account.verify.onItsWay")}
           </p>
         )}
         {error && (
@@ -472,7 +480,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
           className={themeSystem.button("secondary", "md", "w-full")}
         >
           <RefreshCw className={busy ? "animate-spin" : ""} />
-          {busy ? "Sending…" : "Send a new link"}
+          {busy ? t("account.sending") : t("account.verify.resend")}
         </button>
         <button
           type="button"
@@ -485,7 +493,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
           }}
           className="w-full text-sm font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
         >
-          Back to sign in
+          {t("account.backToSignIn")}
         </button>
       </div>
     );
@@ -494,11 +502,11 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
   return (
     <div className="space-y-5">
       <Segmented
-        label="Account"
+        label={t("account.label")}
         value={mode}
         options={[
-          ["signIn", "Sign in"],
-          ["signUp", "Create account"],
+          ["signIn", t("account.signIn")],
+          ["signUp", t("account.createAccount")],
         ]}
         onChange={(v) => switchMode(v as AccountMode)}
       />
@@ -520,6 +528,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
           className={`space-y-3 ${mode === "signIn" && loginMethod === "childCode" ? "hidden" : ""}`}
         >
           <GoogleSignInButton
+            key={language}
             busy={busy}
             onCredential={(credential) => void googleSignIn(credential)}
             onUnavailable={() => setGoogleUnavailable(true)}
@@ -530,7 +539,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
               role="status"
               className={themeSystem.flash("warning", "text-sm")}
             >
-              Google sign-in could not load. Check your connection or use email below.
+              {t("account.googleUnavailable")}
             </p>
           )}
 
@@ -538,7 +547,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
               as steps one after the other. */}
           <div className="flex items-center gap-3 pt-1">
             <span className="h-px flex-1 bg-line" />
-            <span className="text-xs font-semibold text-muted">or use email</span>
+            <span className="text-xs font-semibold text-muted">{t("account.orEmail")}</span>
             <span className="h-px flex-1 bg-line" />
           </div>
         </div>
@@ -548,19 +557,19 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
         {mode === "signUp" && (
           <div className="space-y-1.5">
             <Segmented
-              label="Who is this account for"
+              label={t("account.whoFor")}
               size="sm"
               value={signupType}
               options={[
-                ["parent", "For my children"],
-                ["student", "For myself"],
+                ["parent", t("account.forChildren")],
+                ["student", t("account.forMyself")],
               ]}
               onChange={(value) => setSignupType(value as SignupType)}
             />
             <p className="text-xs leading-relaxed text-muted">
               {signupType === "parent"
-                ? "You add each child, and set their goals and limits."
-                : "Your own space, with nobody above it. You set your own goal and limits, and Koda starts at counting — skip ahead in Settings."}
+                ? t("account.forChildrenNote")
+                : t("account.forMyselfNote")}
             </p>
           </div>
         )}
@@ -568,7 +577,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
         {mode === "signIn" && loginMethod === "childCode" ? (
           <div>
             <label className={labelClass} htmlFor="account-join-code">
-              Child code
+              {t("account.childCode")}
             </label>
             <input
               id="account-join-code"
@@ -585,12 +594,12 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
               className={`${field} font-mono tracking-[0.25em] uppercase`}
             />
             <p className="mt-1.5 text-xs leading-relaxed text-muted">
-              Ask a parent for their 8-character code. It works once, within 15 minutes.
+              {t("account.childCodeNote")}
             </p>
           </div>
         ) : <div>
           <label className={labelClass} htmlFor="account-email">
-            Email
+            {t("account.email")}
           </label>
           <input
             id="account-email"
@@ -614,7 +623,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
               submit button, competing with neither and found by nobody. */}
           <div className="flex items-baseline justify-between gap-3 mb-1.5">
             <label className="block text-sm font-bold text-ink" htmlFor="account-password">
-              Password
+              {t("account.password")}
             </label>
             {mode === "signIn" && loginMethod === "email" && (
               <button
@@ -623,7 +632,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
                 onClick={() => void forgot()}
                 className="text-sm font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 underline-offset-2 hover:underline transition cursor-pointer disabled:opacity-60"
               >
-                Forgot password?
+                {t("account.forgot")}
               </button>
             )}
           </div>
@@ -642,7 +651,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-label={showPassword ? t("account.hidePassword") : t("account.showPassword")}
               /* A 44px target, because on a phone this sits beside a field a
                  thumb is already aiming at, and tokens rather than slate so it
                  is the same grey in both themes. */
@@ -655,8 +664,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
 
         {sentTo && (
           <p role="status" className={themeSystem.flash("success", "text-sm")}>
-            If <strong>{sentTo}</strong> has an account, a reset link is on its way. It works
-            once and expires in 30 minutes.
+            {tNodes("account.resetSent", { email: <strong>{sentTo}</strong> })}
           </p>
         )}
 
@@ -674,9 +682,9 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
              */}
             <div className="flex items-baseline justify-between gap-3 mb-1.5">
               <label className="block text-sm font-bold text-ink" htmlFor="account-family">
-                Family or group name
+                {t("account.familyName")}
               </label>
-              <span className="text-xs font-semibold text-muted">Optional</span>
+              <span className="text-xs font-semibold text-muted">{t("common.optional")}</span>
             </div>
             <input
               id="account-family"
@@ -684,12 +692,12 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
               maxLength={60}
               value={familyName}
               disabled={busy}
-              placeholder="My family, Class 2B, Grandma's house"
+              placeholder={t("account.familyNamePlaceholder")}
               onChange={(e) => setFamilyName(e.target.value)}
               className={field}
             />
             <p className="mt-1.5 text-xs leading-relaxed text-muted">
-              The name for all your children's accounts. You can change it later.
+              {t("account.familyNameNote")}
             </p>
           </div>
         )}
@@ -706,7 +714,13 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
           className={themeSystem.button("primary", "lg", "w-full")}
         >
           {mode === "signUp" ? <UserPlus /> : loginMethod === "childCode" ? <KeyRound /> : <LogIn />}
-          {busy ? "Working…" : mode === "signUp" ? "Create account" : loginMethod === "childCode" ? "Join this device" : "Sign in"}
+          {busy
+            ? t("account.working")
+            : mode === "signUp"
+              ? t("account.createAccount")
+              : loginMethod === "childCode"
+                ? t("account.joinDevice")
+                : t("account.signIn")}
         </button>
 
         {/*
@@ -729,7 +743,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
             }}
             className="w-full text-center text-sm font-semibold text-muted hover:text-ink transition cursor-pointer disabled:opacity-60"
           >
-            {loginMethod === "email" ? "Signing in a child? Use a child code" : "Back to email sign-in"}
+            {loginMethod === "email" ? t("account.useChildCode") : t("account.backToEmail")}
           </button>
         )}
       </form>

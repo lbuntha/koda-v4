@@ -17,7 +17,7 @@ from app.models.common import now
 #: These come from the code and are refreshed on every boot: renaming a label or
 #: correcting a description is a deploy, and a row seeded once would otherwise
 #: keep the first wording it ever had for the life of the database.
-PRESENTATION_FIELDS = ("group", "label", "description", "type", "order")
+PRESENTATION_FIELDS = ("group", "label", "description", "type", "order", "options", "env")
 
 
 async def seed_default(db: AsyncIOMotorDatabase, item: dict[str, Any]) -> bool:

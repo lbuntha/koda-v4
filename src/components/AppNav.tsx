@@ -11,12 +11,13 @@ import { navDefaults, splitTabs, useNavItems } from "./navRecord";
 import type { TabId } from "./navTabs";
 import { StatisticsModal } from "./account/StatisticsModal";
 import { AchievementsModal } from "./account/AchievementsModal";
+import { formatNumber, useT } from "../lib/i18n";
 
 const config = navDefaults;
 
 /** Four figures becomes "4", four thousand becomes "4k" — a chip has one line. */
 const compact = (value: number): string => {
-  if (value < 1000) return String(value);
+  if (value < 1000) return formatNumber(value);
   const thousands = value / 1000;
   const digits = thousands < 10 && thousands % 1 !== 0 ? 1 : 0;
   return `${thousands.toFixed(digits).replace(/\.0$/, "")}k`;
@@ -62,6 +63,7 @@ export const AppNav: React.FC<AppNavProps> = ({
   const session = useSession();
   const streak = useStreak(userProgress);
   const items = useNavItems();
+  const { t } = useT();
 
   const { primary, overflow } = splitTabs(items);
 
@@ -109,7 +111,7 @@ export const AppNav: React.FC<AppNavProps> = ({
                   setStatsOpen(true);
                 }}
                 className="cursor-pointer transition hover:opacity-85 active:scale-95"
-                aria-label="View statistics"
+                aria-label={t("nav.viewStatistics")}
               >
                 <UIAppBarChip
                   tone="streak"
@@ -118,7 +120,7 @@ export const AppNav: React.FC<AppNavProps> = ({
                      fight the chip it sits in. This one takes `currentColor`. */
                   icon={<Flame className="fill-current" />}
                   value={streak.days}
-                  label={`${streak.days} ${streak.cadence === "weekly" ? "week" : "day"} streak`}
+                  label={t(streak.cadence === "weekly" ? "streak.weeksChip" : "streak.daysChip", { count: streak.days })}
                 />
               </button>
             )}
@@ -129,12 +131,12 @@ export const AppNav: React.FC<AppNavProps> = ({
                 setAchievementsOpen(true);
               }}
               className="cursor-pointer transition hover:opacity-85 active:scale-95"
-              aria-label="View achievements"
+              aria-label={t("nav.viewAchievements")}
             >
               <UIAppBarChip
                 icon={<Zap className="fill-current" />}
                 value={compact(userProgress.xp)}
-                label={`${userProgress.xp} XP`}
+                label={t("progress.xp", { xp: userProgress.xp })}
               />
             </button>
             {/* Adults only. A child's bar has no bell because nothing is ever

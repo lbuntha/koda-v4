@@ -32,6 +32,7 @@ import {
 } from "../ui";
 import { NoAccess } from "./NoAccess";
 
+import { translate } from "../../lib/i18n";
 type AccountStatus = "active" | "suspended";
 type OnboardingStatus = "pending" | "completed" | "blocked";
 type UserView = "directory" | "onboarding";
@@ -154,7 +155,7 @@ const UserAvatar: React.FC<{ user: UserRecord }> = ({ user }) => {
 };
 
 const LoadingTable: React.FC = () => (
-  <div className={themeSystem.table.wrapper} aria-label="Loading users" aria-busy="true">
+  <div className={themeSystem.table.wrapper} aria-label={translate("admin.usersPage.loadingUsers")} aria-busy="true">
     <table className={themeSystem.table.table}>
       <thead><tr>{["User", "Access", "Status", "Family", "Sessions", "Last login", "Actions"].map((label) => <th key={label} className={themeSystem.table.header}>{label}</th>)}</tr></thead>
       <tbody>
@@ -240,7 +241,7 @@ export const UsersPage: React.FC = () => {
           // Zero is open-ended — what the deployment's own test account wants,
           // and what a school gets. Anything else lapses on its own.
           months: planMonths || 0,
-          note: `Granted from user management for ${planFor.user.email}`,
+          note: translate("admin.usersPage.grantedFromUserManagementForEmail", { email: planFor.user.email }),
         },
       });
       setPlanFor(null);
@@ -387,7 +388,7 @@ export const UsersPage: React.FC = () => {
       key: "user",
       header: "User",
       sortValue: (user) => user.displayName || user.email,
-      render: (user) => <div className="flex min-w-[12rem] items-center gap-3"><UserAvatar user={user} /><div className="min-w-0"><div className="koda-admin-card-title flex items-center gap-2">{user.displayName || user.email.split("@")[0]}{user.isYou && <UIBadge variant="info">You</UIBadge>}</div><div className="koda-admin-label break-all">{user.email}</div></div></div>,
+      render: (user) => <div className="flex min-w-[12rem] items-center gap-3"><UserAvatar user={user} /><div className="min-w-0"><div className="koda-admin-card-title flex items-center gap-2">{user.displayName || user.email.split("@")[0]}{user.isYou && <UIBadge variant="info">{translate("admin.usersPage.you")}</UIBadge>}</div><div className="koda-admin-label break-all">{user.email}</div></div></div>,
     },
     {
       key: "access",
@@ -407,7 +408,7 @@ export const UsersPage: React.FC = () => {
       key: "family",
       header: "Family",
       sortValue: (user) => user.memberships[0]?.familyName ?? "",
-      render: (user) => user.memberships.length ? <div className="min-w-[8rem]">{user.memberships.slice(0, 2).map((item) => <div key={item.familyId}><span className="text-sm text-ink">{item.familyName || item.familyId}</span><span className="koda-admin-chip ml-1 text-muted">· {item.role}</span></div>)}</div> : <span className="text-muted">Staff account</span>,
+      render: (user) => user.memberships.length ? <div className="min-w-[8rem]">{user.memberships.slice(0, 2).map((item) => <div key={item.familyId}><span className="text-sm text-ink">{item.familyName || item.familyId}</span><span className="koda-admin-chip ml-1 text-muted">· {item.role}</span></div>)}</div> : <span className="text-muted">{translate("admin.usersPage.staffAccount")}</span>,
     },
     {
       key: "plan",
@@ -445,7 +446,7 @@ export const UsersPage: React.FC = () => {
                 setPlanMonths(1);
               }}
             >
-              Change
+              {translate("admin.usersPage.change")}
             </UIButton>
           </div>
         );
@@ -476,10 +477,10 @@ export const UsersPage: React.FC = () => {
       sortValue: (user) => user.notifiedBrowserCount,
       render: (user) =>
         user.notifiedBrowserCount === 0 ? (
-          <span className="text-muted">Off</span>
+          <span className="text-muted">{translate("admin.usersPage.off")}</span>
         ) : (
           <span className="text-ink font-bold">
-            {user.notifiedBrowserCount === 1 ? "1 browser" : `${user.notifiedBrowserCount} browsers`}
+            {user.notifiedBrowserCount === 1 ? translate("admin.usersPage.1Browser") : translate("admin.usersPage.notifiedbrowsercountBrowsers", { notifiedBrowserCount: user.notifiedBrowserCount })}
           </span>
         ),
       nowrap: true,
@@ -496,7 +497,7 @@ export const UsersPage: React.FC = () => {
     {
       key: "actions",
       header: "Actions",
-      render: (user) => <div className="flex min-w-[19rem] items-center justify-end gap-1.5" onClick={(event) => event.stopPropagation()}><UIButton variant="ghost" size="sm" icon={<Pencil />} onClick={() => setEditing({ ...user, memberships: user.memberships.map((membership) => ({ ...membership })) })}>Edit</UIButton><UIButton variant="ghost" size="sm" icon={<KeyRound />} onClick={() => setPasswordUser(user)}>Password</UIButton>{user.status === "active" ? <UIButton variant="warning" size="sm" icon={<Ban />} disabled={user.isYou} isLoading={busy === `status:${user.id}`} onClick={() => void setAccountStatus(user, "suspended")}>Suspend</UIButton> : <UIButton variant="success" size="sm" icon={<UserCheck />} isLoading={busy === `status:${user.id}`} onClick={() => void setAccountStatus(user, "active")}>Activate</UIButton>}<UIButton variant="danger" size="sm" icon={<Trash2 />} disabled={user.isYou || user.memberships.length > 0} onClick={() => setDeleting(user)}>Delete</UIButton></div>,
+      render: (user) => <div className="flex min-w-[19rem] items-center justify-end gap-1.5" onClick={(event) => event.stopPropagation()}><UIButton variant="ghost" size="sm" icon={<Pencil />} onClick={() => setEditing({ ...user, memberships: user.memberships.map((membership) => ({ ...membership })) })}>{translate("admin.usersPage.edit")}</UIButton><UIButton variant="ghost" size="sm" icon={<KeyRound />} onClick={() => setPasswordUser(user)}>{translate("admin.usersPage.password")}</UIButton>{user.status === "active" ? <UIButton variant="warning" size="sm" icon={<Ban />} disabled={user.isYou} isLoading={busy === `status:${user.id}`} onClick={() => void setAccountStatus(user, "suspended")}>{translate("admin.usersPage.suspend")}</UIButton> : <UIButton variant="success" size="sm" icon={<UserCheck />} isLoading={busy === `status:${user.id}`} onClick={() => void setAccountStatus(user, "active")}>{translate("admin.usersPage.activate")}</UIButton>}<UIButton variant="danger" size="sm" icon={<Trash2 />} disabled={user.isYou || user.memberships.length > 0} onClick={() => setDeleting(user)}>{translate("admin.usersPage.delete")}</UIButton></div>,
       align: "right",
       nowrap: true,
     },
@@ -507,7 +508,7 @@ export const UsersPage: React.FC = () => {
       key: "user",
       header: "User",
       sortValue: (user) => user.displayName || user.email,
-      render: (user) => <div className="flex min-w-[13rem] items-center gap-3"><UserAvatar user={user} /><div className="min-w-0"><div className="koda-admin-card-title flex items-center gap-2">{user.displayName || user.email.split("@")[0]}{user.isYou && <UIBadge variant="info">You</UIBadge>}</div><div className="koda-admin-label break-all">{user.email}</div></div></div>,
+      render: (user) => <div className="flex min-w-[13rem] items-center gap-3"><UserAvatar user={user} /><div className="min-w-0"><div className="koda-admin-card-title flex items-center gap-2">{user.displayName || user.email.split("@")[0]}{user.isYou && <UIBadge variant="info">{translate("admin.usersPage.you")}</UIBadge>}</div><div className="koda-admin-label break-all">{user.email}</div></div></div>,
     },
     {
       key: "access",
@@ -520,7 +521,7 @@ export const UsersPage: React.FC = () => {
       key: "onboarding",
       header: "Onboarding",
       sortValue: (user) => user.onboardingStatus,
-      render: (user) => <div className="min-w-[11rem]"><UIBadge variant={onboardingBadge(user.onboardingStatus)} className="gap-1">{user.onboardingStatus === "completed" ? <CheckCircle2 className="h-3 w-3" /> : user.onboardingStatus === "blocked" ? <Ban className="h-3 w-3" /> : <Clock3 className="h-3 w-3" />}{onboardingLabel(user.onboardingStatus)}</UIBadge>{user.onboardingStatus === "pending" && <div className="koda-admin-chip mt-1 text-muted">Waiting {daysSince(user.createdAt)} days</div>}</div>,
+      render: (user) => <div className="min-w-[11rem]"><UIBadge variant={onboardingBadge(user.onboardingStatus)} className="gap-1">{user.onboardingStatus === "completed" ? <CheckCircle2 className="h-3 w-3" /> : user.onboardingStatus === "blocked" ? <Ban className="h-3 w-3" /> : <Clock3 className="h-3 w-3" />}{onboardingLabel(user.onboardingStatus)}</UIBadge>{user.onboardingStatus === "pending" && <div className="koda-admin-chip mt-1 text-muted">{translate("admin.usersPage.waitingValueDays", { value: daysSince(user.createdAt) })}</div>}</div>,
     },
     {
       key: "created",
@@ -541,99 +542,99 @@ export const UsersPage: React.FC = () => {
     {
       key: "actions",
       header: "Actions",
-      render: (user) => <div className="flex min-w-[17rem] items-center justify-end gap-1.5" onClick={(event) => event.stopPropagation()}><UIButton variant="ghost" size="sm" icon={<Pencil />} onClick={() => setEditing({ ...user, memberships: user.memberships.map((membership) => ({ ...membership })) })}>Edit</UIButton><UIButton variant="ghost" size="sm" icon={<KeyRound />} onClick={() => setPasswordUser(user)}>{user.onboardingStatus === "pending" ? "Credentials" : "Password"}</UIButton>{user.status === "active" ? <UIButton variant="warning" size="sm" icon={<Ban />} disabled={user.isYou} isLoading={busy === `status:${user.id}`} onClick={() => void setAccountStatus(user, "suspended")}>Block</UIButton> : <UIButton variant="success" size="sm" icon={<UserCheck />} isLoading={busy === `status:${user.id}`} onClick={() => void setAccountStatus(user, "active")}>Reopen</UIButton>}</div>,
+      render: (user) => <div className="flex min-w-[17rem] items-center justify-end gap-1.5" onClick={(event) => event.stopPropagation()}><UIButton variant="ghost" size="sm" icon={<Pencil />} onClick={() => setEditing({ ...user, memberships: user.memberships.map((membership) => ({ ...membership })) })}>{translate("admin.usersPage.edit")}</UIButton><UIButton variant="ghost" size="sm" icon={<KeyRound />} onClick={() => setPasswordUser(user)}>{user.onboardingStatus === "pending" ? translate("admin.usersPage.credentials") : translate("admin.usersPage.password")}</UIButton>{user.status === "active" ? <UIButton variant="warning" size="sm" icon={<Ban />} disabled={user.isYou} isLoading={busy === `status:${user.id}`} onClick={() => void setAccountStatus(user, "suspended")}>{translate("admin.usersPage.block")}</UIButton> : <UIButton variant="success" size="sm" icon={<UserCheck />} isLoading={busy === `status:${user.id}`} onClick={() => void setAccountStatus(user, "active")}>{translate("admin.usersPage.reopen")}</UIButton>}</div>,
       align: "right",
       nowrap: true,
     },
   ], [busy, platformRoles]);
 
-  if (!allowed) return <NoAccess title="User Management" permission="user:manage" what="Only platform administrators can manage sign-in accounts." />;
+  if (!allowed) return <NoAccess title={translate("admin.usersPage.userManagement")} permission="user:manage" what={translate("admin.usersPage.onlyPlatformAdministratorsCanManageSign")} />;
 
   const stats = result?.stats ?? { total: 0, active: 0, suspended: 0, staff: 0, pendingOnboarding: 0, completedOnboarding: 0, blockedOnboarding: 0 };
   const statCards = view === "onboarding" ? [
-    { label: "Awaiting sign-in", value: stats.pendingOnboarding, icon: Clock3, tone: "text-amber-600", ground: "bg-amber-50" },
-    { label: "Onboarded", value: stats.completedOnboarding, icon: ClipboardCheck, tone: "text-emerald-600", ground: "bg-emerald-50" },
-    { label: "Blocked", value: stats.blockedOnboarding, icon: Ban, tone: "text-rose-600", ground: "bg-rose-50" },
-    { label: "All accounts", value: stats.total, icon: Users, tone: "text-indigo-600", ground: "bg-indigo-50" },
+    { label: translate("admin.usersPage.awaitingSignIn"), value: stats.pendingOnboarding, icon: Clock3, tone: "text-amber-600", ground: "bg-amber-50" },
+    { label: translate("admin.usersPage.onboarded"), value: stats.completedOnboarding, icon: ClipboardCheck, tone: "text-emerald-600", ground: "bg-emerald-50" },
+    { label: translate("admin.usersPage.blocked"), value: stats.blockedOnboarding, icon: Ban, tone: "text-rose-600", ground: "bg-rose-50" },
+    { label: translate("admin.usersPage.allAccounts"), value: stats.total, icon: Users, tone: "text-indigo-600", ground: "bg-indigo-50" },
   ] : [
-    { label: "Total users", value: stats.total, icon: Users, tone: "text-indigo-600", ground: "bg-indigo-50" },
-    { label: "Active", value: stats.active, icon: UserCheck, tone: "text-emerald-600", ground: "bg-emerald-50" },
-    { label: "Suspended", value: stats.suspended, icon: Ban, tone: "text-rose-600", ground: "bg-rose-50" },
-    { label: "Staff", value: stats.staff, icon: ShieldCheck, tone: "text-amber-600", ground: "bg-amber-50" },
+    { label: translate("admin.usersPage.totalUsers"), value: stats.total, icon: Users, tone: "text-indigo-600", ground: "bg-indigo-50" },
+    { label: translate("admin.usersPage.active"), value: stats.active, icon: UserCheck, tone: "text-emerald-600", ground: "bg-emerald-50" },
+    { label: translate("admin.usersPage.suspended"), value: stats.suspended, icon: Ban, tone: "text-rose-600", ground: "bg-rose-50" },
+    { label: translate("admin.usersPage.staff"), value: stats.staff, icon: ShieldCheck, tone: "text-amber-600", ground: "bg-amber-50" },
   ];
 
   return (
     <div className="min-h-full bg-white p-4 dark:bg-canvas md:p-8">
       <div className="mx-auto max-w-[100rem] space-y-5">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div><h1 className="koda-admin-page-title">User Management</h1><p className="mt-1 text-sm text-[#6D6997] dark:text-muted">Manage accounts from initial access through active use.</p></div>
-          <UIButton variant="primary" icon={<UserPlus />} onClick={() => setCreateOpen(true)}>Onboard user</UIButton>
+          <div><h1 className="koda-admin-page-title">{translate("admin.usersPage.userManagement")}</h1><p className="mt-1 text-sm text-[#6D6997] dark:text-muted">{translate("admin.usersPage.manageAccountsFromInitialAccessThrough")}</p></div>
+          <UIButton variant="primary" icon={<UserPlus />} onClick={() => setCreateOpen(true)}>{translate("admin.usersPage.onboardUser")}</UIButton>
         </header>
 
         <UITabs<UserView>
           items={[
-            { id: "directory", label: "All users", count: stats.total },
-            { id: "onboarding", label: "Onboarding", count: stats.pendingOnboarding },
+            { id: "directory", label: translate("admin.usersPage.allUsers"), count: stats.total },
+            { id: "onboarding", label: translate("admin.usersPage.onboarding"), count: stats.pendingOnboarding },
           ]}
           value={view}
           onChange={setView}
-          label="User management views"
+          label={translate("admin.usersPage.userManagementViews")}
         />
 
         {view === "onboarding" && (
-          <section className="grid gap-3 rounded-2xl border border-[#E8E4F6] bg-white p-4 shadow-sm dark:border-line dark:bg-surface md:grid-cols-3" aria-label="Onboarding workflow">
+          <section className="grid gap-3 rounded-2xl border border-[#E8E4F6] bg-white p-4 shadow-sm dark:border-line dark:bg-surface md:grid-cols-3" aria-label={translate("admin.usersPage.onboardingWorkflow")}>
             {[
-              { icon: UserPlus, title: "1. Add account", text: "Set their name, sign-in email, temporary password, and platform role." },
-              { icon: KeyRound, title: "2. Share access", text: "Send credentials through your approved secure channel." },
-              { icon: ClipboardCheck, title: "3. Confirm activity", text: "Koda marks onboarding complete after their first successful sign-in." },
+              { icon: UserPlus, title: translate("admin.usersPage.1AddAccount"), text: "Set their name, sign-in email, temporary password, and platform role." },
+              { icon: KeyRound, title: translate("admin.usersPage.2ShareAccess"), text: "Send credentials through your approved secure channel." },
+              { icon: ClipboardCheck, title: translate("admin.usersPage.3ConfirmActivity"), text: "Koda marks onboarding complete after their first successful sign-in." },
             ].map(({ icon: Icon, title, text }) => <div key={title} className="flex gap-3 rounded-xl bg-[#FBFAFF] p-3 dark:bg-surface-muted"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-[#534AB7] dark:bg-surface"><Icon className="h-4 w-4" /></div><div><h2 className="koda-admin-card-title">{title}</h2><p className="koda-admin-label mt-0.5 leading-relaxed">{text}</p></div></div>)}
           </section>
         )}
 
-        <section className="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="User totals">
+        <section className="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label={translate("admin.usersPage.userTotals")}>
           {statCards.map(({ label, value, icon: Icon, tone, ground }) => <div key={label} className="flex items-center gap-3 rounded-2xl border border-[#E8E4F6] bg-white p-4 shadow-sm dark:border-line dark:bg-surface"><div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${ground} dark:bg-surface-muted`}><Icon className={`h-5 w-5 ${tone}`} /></div><div><div className="koda-admin-metric">{value}</div><div className="koda-admin-label">{label}</div></div></div>)}
         </section>
 
         <section className="overflow-hidden rounded-2xl border border-[#E8E4F6] bg-white shadow-sm dark:border-line dark:bg-surface">
           <div className="flex flex-col gap-3 border-b border-line p-4 lg:flex-row lg:items-center">
-            <label className="relative min-w-0 flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" /><span className="sr-only">Search users</span><input value={query} onChange={(event) => setQuery(event.target.value)} className={`${inputClass} pl-9`} placeholder="Search by name or email" /></label>
-            <select value={role} onChange={(event) => setRole(event.target.value)} className={`${inputClass} lg:w-44`} aria-label="Filter by role"><option value="">All roles</option><optgroup label="Platform roles">{platformRoles.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</optgroup><optgroup label="Family roles"><option value="owner">Owner</option><option value="parent">Parent</option><option value="caregiver">Caregiver</option><option value="student">Student</option><option value="child">Child</option></optgroup></select>
-            {view === "directory" ? <select value={status} onChange={(event) => setStatus(event.target.value)} className={`${inputClass} lg:w-40`} aria-label="Filter by status"><option value="">All statuses</option><option value="active">Active</option><option value="suspended">Suspended</option></select> : <select value={onboarding} onChange={(event) => setOnboarding(event.target.value as "" | OnboardingStatus)} className={`${inputClass} lg:w-52`} aria-label="Filter by onboarding stage"><option value="">All onboarding</option><option value="pending">Awaiting sign-in</option><option value="completed">Onboarded</option><option value="blocked">Blocked</option></select>}
-            <UIButton variant="secondary" size="icon" icon={<RefreshCw />} onClick={() => void load()} isLoading={loading} aria-label="Refresh users" />
+            <label className="relative min-w-0 flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" /><span className="sr-only">{translate("admin.usersPage.searchUsers")}</span><input value={query} onChange={(event) => setQuery(event.target.value)} className={`${inputClass} pl-9`} placeholder={translate("admin.usersPage.searchByNameOrEmail")} /></label>
+            <select value={role} onChange={(event) => setRole(event.target.value)} className={`${inputClass} lg:w-44`} aria-label={translate("admin.usersPage.filterByRole")}><option value="">{translate("admin.usersPage.allRoles")}</option><optgroup label={translate("admin.usersPage.platformRoles")}>{platformRoles.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</optgroup><optgroup label={translate("admin.usersPage.familyRoles")}><option value="owner">{translate("admin.usersPage.owner")}</option><option value="parent">{translate("admin.usersPage.parent")}</option><option value="caregiver">{translate("admin.usersPage.caregiver")}</option><option value="student">{translate("admin.usersPage.student")}</option><option value="child">{translate("admin.usersPage.child")}</option></optgroup></select>
+            {view === "directory" ? <select value={status} onChange={(event) => setStatus(event.target.value)} className={`${inputClass} lg:w-40`} aria-label={translate("admin.usersPage.filterByStatus")}><option value="">{translate("admin.usersPage.allStatuses")}</option><option value="active">{translate("admin.usersPage.active")}</option><option value="suspended">{translate("admin.usersPage.suspended")}</option></select> : <select value={onboarding} onChange={(event) => setOnboarding(event.target.value as "" | OnboardingStatus)} className={`${inputClass} lg:w-52`} aria-label={translate("admin.usersPage.filterByOnboardingStage")}><option value="">{translate("admin.usersPage.allOnboarding")}</option><option value="pending">{translate("admin.usersPage.awaitingSignIn")}</option><option value="completed">{translate("admin.usersPage.onboarded")}</option><option value="blocked">{translate("admin.usersPage.blocked")}</option></select>}
+            <UIButton variant="secondary" size="icon" icon={<RefreshCw />} onClick={() => void load()} isLoading={loading} aria-label={translate("admin.usersPage.refreshUsers")} />
           </div>
 
           {error && <div className="m-4 mb-0"><p className={themeSystem.flash("error")}>{error}</p></div>}
           {notice && <div className="m-4 mb-0"><p className={themeSystem.flash("success")}>{notice}</p></div>}
-          <div className="p-4 pb-0">{loading ? <LoadingTable /> : <UIDataTable columns={view === "onboarding" ? onboardingColumns : columns} rows={result?.users ?? []} rowKey={(user) => user.id} defaultSort={{ key: "user", direction: "asc" }} emptyMessage={view === "onboarding" ? "No accounts match this onboarding stage." : "No users match these filters."} caption={view === "onboarding" ? "Koda user onboarding" : "Koda user accounts"} />}</div>
-          <div className="flex flex-col gap-2 px-4 py-3 text-sm text-muted sm:flex-row sm:items-center sm:justify-between"><span>{result?.total ?? 0} users · page {result?.page ?? page} of {result?.pages ?? 1}</span><div className="flex items-center gap-2"><UIButton variant="secondary" size="sm" icon={<ChevronLeft />} disabled={page <= 1 || loading} onClick={() => setPage((value) => value - 1)}>Previous</UIButton><UIButton variant="secondary" size="sm" iconRight={<ChevronRight />} disabled={page >= (result?.pages ?? 1) || loading} onClick={() => setPage((value) => value + 1)}>Next</UIButton></div></div>
+          <div className="p-4 pb-0">{loading ? <LoadingTable /> : <UIDataTable columns={view === "onboarding" ? onboardingColumns : columns} rows={result?.users ?? []} rowKey={(user) => user.id} defaultSort={{ key: "user", direction: "asc" }} emptyMessage={view === "onboarding" ? translate("admin.usersPage.noAccountsMatchThisOnboardingStage") : translate("admin.usersPage.noUsersMatchTheseFilters")} caption={view === "onboarding" ? translate("admin.usersPage.kodaUserOnboarding") : translate("admin.usersPage.kodaUserAccounts")} />}</div>
+          <div className="flex flex-col gap-2 px-4 py-3 text-sm text-muted sm:flex-row sm:items-center sm:justify-between"><span>{translate("admin.usersPage.valueUsersPageValue2OfValue3", { value: result?.total ?? 0, value2: result?.page ?? page, value3: result?.pages ?? 1 })}</span><div className="flex items-center gap-2"><UIButton variant="secondary" size="sm" icon={<ChevronLeft />} disabled={page <= 1 || loading} onClick={() => setPage((value) => value - 1)}>{translate("admin.usersPage.previous")}</UIButton><UIButton variant="secondary" size="sm" iconRight={<ChevronRight />} disabled={page >= (result?.pages ?? 1) || loading} onClick={() => setPage((value) => value + 1)}>{translate("admin.usersPage.next")}</UIButton></div></div>
         </section>
       </div>
 
-      <UIModal isOpen={createOpen} onClose={() => setCreateOpen(false)} title="Onboard a user" footer={<><UIButton variant="secondary" onClick={() => setCreateOpen(false)}>Cancel</UIButton><UIButton variant="primary" isLoading={busy === "create"} disabled={!form.email || form.password.length < 8} onClick={() => void createUser()}>Add to onboarding</UIButton></>}>
-        <div className="space-y-4"><div className="rounded-xl border border-indigo-100 bg-indigo-50/70 p-3 text-sm text-[#534AB7] dark:border-line dark:bg-surface-muted dark:text-indigo-300">This creates an active staff account in <strong>Awaiting sign-in</strong>. Koda marks it onboarded after the first successful login.</div><Field label="Display name"><input className={inputClass} value={form.displayName} onChange={(event) => setForm((value) => ({ ...value, displayName: event.target.value }))} placeholder="Person's full name" /></Field><Field label="Sign-in email"><input type="email" autoComplete="off" className={inputClass} value={form.email} onChange={(event) => setForm((value) => ({ ...value, email: event.target.value }))} placeholder="name@example.com" /></Field><Field label="Temporary password" hint="At least 8 characters. Share it through an approved secure channel."><input type="password" autoComplete="new-password" className={inputClass} value={form.password} onChange={(event) => setForm((value) => ({ ...value, password: event.target.value }))} /></Field><Field label="Platform role" hint="This controls what the user can access immediately after sign-in."><select className={inputClass} value={form.platformRole} onChange={(event) => setForm((value) => ({ ...value, platformRole: event.target.value }))}>{platformRoles.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></Field></div>
+      <UIModal isOpen={createOpen} onClose={() => setCreateOpen(false)} title={translate("admin.usersPage.onboardAUser")} footer={<><UIButton variant="secondary" onClick={() => setCreateOpen(false)}>{translate("admin.usersPage.cancel")}</UIButton><UIButton variant="primary" isLoading={busy === "create"} disabled={!form.email || form.password.length < 8} onClick={() => void createUser()}>{translate("admin.usersPage.addToOnboarding")}</UIButton></>}>
+        <div className="space-y-4"><div className="rounded-xl border border-indigo-100 bg-indigo-50/70 p-3 text-sm text-[#534AB7] dark:border-line dark:bg-surface-muted dark:text-indigo-300">{translate("admin.usersPage.thisCreatesAnActiveStaffAccount")}{" "}<strong>{translate("admin.usersPage.awaitingSignIn")}</strong>{translate("admin.usersPage.kodaMarksItOnboardedAfterThe")}</div><Field label={translate("admin.usersPage.displayName")}><input className={inputClass} value={form.displayName} onChange={(event) => setForm((value) => ({ ...value, displayName: event.target.value }))} placeholder={translate("admin.usersPage.personSFullName")} /></Field><Field label={translate("admin.usersPage.signInEmail")}><input type="email" autoComplete="off" className={inputClass} value={form.email} onChange={(event) => setForm((value) => ({ ...value, email: event.target.value }))} placeholder={translate("admin.usersPage.nameExampleCom")} /></Field><Field label={translate("admin.usersPage.temporaryPassword")} hint={translate("admin.usersPage.atLeast8CharactersShareIt")}><input type="password" autoComplete="new-password" className={inputClass} value={form.password} onChange={(event) => setForm((value) => ({ ...value, password: event.target.value }))} /></Field><Field label={translate("admin.usersPage.platformRole")} hint={translate("admin.usersPage.thisControlsWhatTheUserCan")}><select className={inputClass} value={form.platformRole} onChange={(event) => setForm((value) => ({ ...value, platformRole: event.target.value }))}>{platformRoles.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></Field></div>
       </UIModal>
 
-      <UIModal isOpen={Boolean(editing)} onClose={() => setEditing(null)} title="Edit user" footer={<><UIButton variant="secondary" onClick={() => setEditing(null)}>Cancel</UIButton><UIButton variant="primary" isLoading={Boolean(editing && busy === editing.id)} onClick={() => void saveUser()}>Save changes</UIButton></>}>
-        {editing && <div className="space-y-4"><Field label="Display name"><input className={inputClass} value={editing.displayName ?? ""} onChange={(event) => setEditing({ ...editing, displayName: event.target.value })} /></Field><Field label="Email"><input type="email" className={inputClass} value={editing.email} onChange={(event) => setEditing({ ...editing, email: event.target.value })} /></Field><Field label="Platform role" hint={editing.isYou ? "You may change your own role while another active admin remains." : "Platform access is independent from the user's role inside a family."}><select className={inputClass} value={editing.platformRole} onChange={(event) => setEditing({ ...editing, platformRole: event.target.value })}><option value="none">None</option>{platformRoles.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></Field><Field label="Account status"><select className={inputClass} value={editing.status} disabled={editing.isYou} onChange={(event) => setEditing({ ...editing, status: event.target.value as AccountStatus })}><option value="active">Active</option><option value="suspended">Suspended</option></select></Field>{editing.memberships.length > 0 && <div className="space-y-3 border-t border-line pt-4"><div><h3 className="koda-admin-section-title">Family roles</h3><p className="koda-admin-label mt-0.5">Change this user's access inside each family. Ownership must be transferred separately.</p></div>{editing.memberships.map((membership, index) => <Field key={membership.familyId} label={membership.familyName || membership.familyId} hint={membership.role === "owner" ? "The family owner cannot be demoted here." : undefined}><select className={inputClass} value={membership.role} disabled={membership.role === "owner"} onChange={(event) => setEditing({ ...editing, memberships: editing.memberships.map((item, itemIndex) => itemIndex === index ? { ...item, role: event.target.value } : item) })}><option value="owner" disabled>Owner</option><option value="parent">Parent</option><option value="caregiver">Caregiver</option><option value="student">Student</option><option value="child">Child</option></select></Field>)}</div>}</div>}
+      <UIModal isOpen={Boolean(editing)} onClose={() => setEditing(null)} title={translate("admin.usersPage.editUser")} footer={<><UIButton variant="secondary" onClick={() => setEditing(null)}>{translate("admin.usersPage.cancel")}</UIButton><UIButton variant="primary" isLoading={Boolean(editing && busy === editing.id)} onClick={() => void saveUser()}>{translate("admin.usersPage.saveChanges")}</UIButton></>}>
+        {editing && <div className="space-y-4"><Field label={translate("admin.usersPage.displayName")}><input className={inputClass} value={editing.displayName ?? ""} onChange={(event) => setEditing({ ...editing, displayName: event.target.value })} /></Field><Field label={translate("admin.usersPage.email")}><input type="email" className={inputClass} value={editing.email} onChange={(event) => setEditing({ ...editing, email: event.target.value })} /></Field><Field label={translate("admin.usersPage.platformRole")} hint={editing.isYou ? translate("admin.usersPage.youMayChangeYourOwnRole") : translate("admin.usersPage.platformAccessIsIndependentFromThe")}><select className={inputClass} value={editing.platformRole} onChange={(event) => setEditing({ ...editing, platformRole: event.target.value })}><option value="none">{translate("admin.usersPage.none")}</option>{platformRoles.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></Field><Field label={translate("admin.usersPage.accountStatus")}><select className={inputClass} value={editing.status} disabled={editing.isYou} onChange={(event) => setEditing({ ...editing, status: event.target.value as AccountStatus })}><option value="active">{translate("admin.usersPage.active")}</option><option value="suspended">{translate("admin.usersPage.suspended")}</option></select></Field>{editing.memberships.length > 0 && <div className="space-y-3 border-t border-line pt-4"><div><h3 className="koda-admin-section-title">{translate("admin.usersPage.familyRoles")}</h3><p className="koda-admin-label mt-0.5">{translate("admin.usersPage.changeThisUserSAccessInside")}</p></div>{editing.memberships.map((membership, index) => <Field key={membership.familyId} label={membership.familyName || membership.familyId} hint={membership.role === "owner" ? translate("admin.usersPage.theFamilyOwnerCannotBeDemoted") : undefined}><select className={inputClass} value={membership.role} disabled={membership.role === "owner"} onChange={(event) => setEditing({ ...editing, memberships: editing.memberships.map((item, itemIndex) => itemIndex === index ? { ...item, role: event.target.value } : item) })}><option value="owner" disabled>{translate("admin.usersPage.owner")}</option><option value="parent">{translate("admin.usersPage.parent")}</option><option value="caregiver">{translate("admin.usersPage.caregiver")}</option><option value="student">{translate("admin.usersPage.student")}</option><option value="child">{translate("admin.usersPage.child")}</option></select></Field>)}</div>}</div>}
       </UIModal>
 
-      <UIModal isOpen={Boolean(passwordUser)} onClose={() => { setPasswordUser(null); setPassword(""); }} title="Reset password" footer={<><UIButton variant="secondary" onClick={() => setPasswordUser(null)}>Cancel</UIButton><UIButton variant="warning" isLoading={Boolean(passwordUser && busy === `password:${passwordUser.id}`)} disabled={password.length < 8} onClick={() => void resetPassword()}>Reset password</UIButton></>}><p className="mb-4 text-sm text-body">Set a new password for <strong>{passwordUser?.email}</strong>. All of their current sessions will end.</p><Field label="New password" hint="At least 8 characters."><input type="password" autoComplete="new-password" className={inputClass} value={password} onChange={(event) => setPassword(event.target.value)} /></Field></UIModal>
+      <UIModal isOpen={Boolean(passwordUser)} onClose={() => { setPasswordUser(null); setPassword(""); }} title={translate("admin.usersPage.resetPassword")} footer={<><UIButton variant="secondary" onClick={() => setPasswordUser(null)}>{translate("admin.usersPage.cancel")}</UIButton><UIButton variant="warning" isLoading={Boolean(passwordUser && busy === `password:${passwordUser.id}`)} disabled={password.length < 8} onClick={() => void resetPassword()}>{translate("admin.usersPage.resetPassword")}</UIButton></>}><p className="mb-4 text-sm text-body">{translate("admin.usersPage.setANewPasswordFor")}{" "}<strong>{passwordUser?.email}</strong>{translate("admin.usersPage.allOfTheirCurrentSessionsWill")}</p><Field label={translate("admin.usersPage.newPassword")} hint={translate("admin.usersPage.atLeast8Characters")}><input type="password" autoComplete="new-password" className={inputClass} value={password} onChange={(event) => setPassword(event.target.value)} /></Field></UIModal>
 
       <UIModal
         isOpen={Boolean(planFor)}
         onClose={() => setPlanFor(null)}
-        title={`Plan for ${planFor?.family.familyName || "this family"}`}
+        title={translate("admin.usersPage.planForValue", { value: planFor?.family.familyName || translate("admin.usersPage.thisFamily") })}
         footer={
           <>
             <UIButton variant="secondary" onClick={() => setPlanFor(null)}>
-              Cancel
+              {translate("admin.usersPage.cancel")}
             </UIButton>
             <UIButton
               variant="primary"
               isLoading={Boolean(planFor && busy === `plan:${planFor.family.familyId}`)}
               onClick={() => void grantPlan()}
             >
-              Apply plan
+              {translate("admin.usersPage.applyPlan")}
             </UIButton>
           </>
         }
@@ -643,10 +644,10 @@ export const UsersPage: React.FC = () => {
             <p className="text-sm text-body">
               {planFor.user.displayName ? `${planFor.user.displayName} · ` : ""}
               <span className="font-mono">{planFor.user.email}</span>
-              {" — currently on "}
+              {translate("admin.usersPage.currentlyOn")}
               <strong>{planFor.family.planName}</strong>.
             </p>
-            <Field label="Plan">
+            <Field label={translate("admin.usersPage.plan")}>
               <select
                 className={inputClass}
                 value={planChoice}
@@ -660,28 +661,28 @@ export const UsersPage: React.FC = () => {
               </select>
             </Field>
             <Field
-              label="For how long"
-              hint="Zero months never expires — for a test account or a school. Anything else lapses on its own; nothing has to run at midnight."
+              label={translate("admin.usersPage.forHowLong")}
+              hint={translate("admin.usersPage.zeroMonthsNeverExpiresForA")}
             >
               <select
                 className={inputClass}
                 value={planMonths}
                 onChange={(event) => setPlanMonths(Number(event.target.value))}
               >
-                <option value={0}>No end date</option>
-                <option value={1}>1 month</option>
-                <option value={3}>3 months</option>
-                <option value={12}>12 months</option>
+                <option value={0}>{translate("admin.usersPage.noEndDate")}</option>
+                <option value={1}>{translate("admin.usersPage.1Month")}</option>
+                <option value={3}>{translate("admin.usersPage.3Months")}</option>
+                <option value={12}>{translate("admin.usersPage.12Months")}</option>
               </select>
             </Field>
             <p className="text-xs text-muted">
-              There is no payment here — a grant is a date, and it lapses when the date passes.
+              {translate("admin.usersPage.thereIsNoPaymentHereA")}
             </p>
           </div>
         )}
       </UIModal>
 
-      <UIDialog isOpen={Boolean(deleting)} onClose={() => setDeleting(null)} title="Delete user account?" description={`${deleting?.email ?? "This account"} will be permanently removed. This is only available for accounts that do not belong to a family.`} confirmText="Delete account" variant="danger" onConfirm={() => { if (deleting) void deleteUser(deleting); }} />
+      <UIDialog isOpen={Boolean(deleting)} onClose={() => setDeleting(null)} title={translate("admin.usersPage.deleteUserAccount")} description={translate("admin.usersPage.valueWillBePermanentlyRemovedThis", { value: deleting?.email ?? translate("admin.usersPage.thisAccount") })} confirmText={translate("admin.usersPage.deleteAccount")} variant="danger" onConfirm={() => { if (deleting) void deleteUser(deleting); }} />
     </div>
   );
 };

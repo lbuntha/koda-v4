@@ -12,6 +12,7 @@ from typing import Annotated
 from fastapi import APIRouter, BackgroundTasks, Depends, Request
 from pydantic import Field
 
+from app import notify_i18n
 from app.deps import AUTHENTICATED, CurrentPrincipal, Db, require
 from app.errors import Conflict, Forbidden, NotFound, Unauthorized
 from app.models.auth import Principal
@@ -454,8 +455,13 @@ async def redeem_invite(
         from app.services import email_notify
 
         who = await users.by_id(db, p.subject_id)
-        values = {"name": (who or {}).get("displayName") or (who or {}).get("email", "Somebody")}
-        title, body_text = await push_service.wording(db, "family.invite_redeemed", values)
+        language = await notify_i18n.language_of_family(db, target)
+        values = {
+            "name": (who or {}).get("displayName")
+            or (who or {}).get("email")
+            or notify_i18n.phrase(language, "somebody")
+        }
+        title, body_text = await push_service.wording(db, "family.invite_redeemed", values, language=language)
         tasks.add_task(
             push_service.send,
             db,

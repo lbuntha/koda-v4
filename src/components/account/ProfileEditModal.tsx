@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useT } from "../../lib/i18n";
 
 import { ApiError } from "../../lib/sync";
 import { UIButton, UIModal } from "../ui";
@@ -30,10 +31,11 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
   isOpen,
   currentName,
   currentSeed,
-  nameLabel = "Display name",
+  nameLabel,
   onClose,
   onSave,
 }) => {
+  const { t } = useT();
   const [name, setName] = useState(currentName);
   const [selected, setSelected] = useState(currentSeed ?? "");
   const [saving, setSaving] = useState(false);
@@ -66,12 +68,12 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
     <UIModal
       isOpen={isOpen}
       onClose={onClose}
-      title="Edit profile"
+      title={t("profile.edit")}
       tone="plain"
       footer={
         <>
           <UIButton variant="secondary" onClick={onClose}>
-            Cancel
+            {t("common.cancel")}
           </UIButton>
           <UIButton
             variant="primary"
@@ -79,25 +81,25 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
             disabled={!name.trim() || !selected}
             onClick={() => void save()}
           >
-            Save profile
+            {t("profile.editModal.save")}
           </UIButton>
         </>
       }
     >
       <div className="space-y-5">
         <label className="block space-y-1.5">
-          <span className="koda-admin-label text-ink">{nameLabel}</span>
+          <span className="koda-admin-label text-ink">{nameLabel ?? t("profile.editModal.displayName")}</span>
           <input
             className={field}
             value={name}
             maxLength={80}
             onChange={(event) => setName(event.target.value)}
-            placeholder="Your name"
+            placeholder={t("profile.editModal.yourName")}
           />
         </label>
 
         <div className="space-y-3">
-          <span className="koda-admin-label block text-ink">Avatar</span>
+          <span className="koda-admin-label block text-ink">{t("profile.editModal.avatar")}</span>
           <AvatarArtChoices currentSeed={currentSeed} selectedSeed={selected} onSelect={setSelected} />
         </div>
 

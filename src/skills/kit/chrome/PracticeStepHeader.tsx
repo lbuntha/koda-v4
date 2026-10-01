@@ -1,6 +1,7 @@
 import React from "react";
 import { themeSystem } from "../../../lib/themeSystem";
 import { Volume2, Lightbulb } from "lucide-react";
+import { translate, useT } from "../../../lib/i18n";
 
 /**
  * The four rungs of the step ladder, named rather than positional so a skill can
@@ -19,6 +20,14 @@ export const DEFAULT_STEP_TAGS: StepTagLabels = {
   guided: "Guided Challenge 🌟",
   milestone: "Final Milestone 🏆",
 };
+
+/** The defaults in the app's language — a skill's own labels still win over these. */
+const defaultStepTags = (): StepTagLabels => ({
+  warmup: translate("round.step.warmup"),
+  activity: translate("round.step.activity"),
+  guided: translate("round.step.guided"),
+  milestone: translate("round.step.milestone"),
+});
 
 interface PracticeStepHeaderProps {
   stepNumber: number;
@@ -75,6 +84,7 @@ export const PracticeStepHeader: React.FC<PracticeStepHeaderProps> = ({
   contextTag,
   tagLabels,
 }) => {
+  const { t: tr } = useT();
   // Determine an inviting contextual tag instead of a dry "CHALLENGE"
   const getContextTag = () => {
     /* Spread would not do: a skill that leaves a label blank sends `undefined`
@@ -82,7 +92,7 @@ export const PracticeStepHeader: React.FC<PracticeStepHeaderProps> = ({
        that undefined straight over the default. Both skills ship all four
        labels empty, so every step tag was blank and the switch that hides them
        had nothing to hide. */
-    const t = { ...DEFAULT_STEP_TAGS };
+    const t = defaultStepTags();
     for (const [key, label] of Object.entries(tagLabels ?? {})) {
       if (label) t[key as keyof StepTagLabels] = label;
     }
@@ -133,8 +143,8 @@ export const PracticeStepHeader: React.FC<PracticeStepHeaderProps> = ({
           <button
             onClick={onReadAloud}
             className={themeSystem.button("secondary", "icon", "min-w-[44px] min-h-[44px]")}
-            title="Read question aloud"
-            aria-label="Read question aloud"
+            title={tr("round.readAloud")}
+            aria-label={tr("round.readAloud")}
           >
             <Volume2 />
           </button>
@@ -148,7 +158,7 @@ export const PracticeStepHeader: React.FC<PracticeStepHeaderProps> = ({
             aria-controls={hintPanelId}
           >
             <Lightbulb />
-            <span>{showTip ? "Hide hint" : "Hint"}</span>
+            <span>{showTip ? tr("round.hideHint") : tr("library.hint.title")}</span>
           </button>
         )}
       </div>

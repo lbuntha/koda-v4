@@ -9,6 +9,7 @@ import { playSound } from "../../utils/audio";
 import { UISectionHeader, UIToggle } from "../ui";
 import { NoAccess } from "./NoAccess";
 
+import { translate } from "../../lib/i18n";
 /** One numeric scoring control: a slider and the value it is set to. */
 const ScoringSlider: React.FC<{
   label: string;
@@ -63,8 +64,8 @@ const StreakSection: React.FC = () => {
   return (
     <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
       <UISectionHeader
-        title="Learning streak"
-        subtitle="One day of practice, in any skill, is one day of streak"
+        title={translate("admin.scoringPage.learningStreak")}
+        subtitle={translate("admin.scoringPage.oneDayOfPracticeInAny")}
         icon={<Flame className="w-5 h-5 text-orange-500" />}
         action={
           StreakAPI.isEdited() ? (
@@ -76,7 +77,7 @@ const StreakSection: React.FC = () => {
               className={themeSystem.button("secondary", "sm")}
             >
               <RotateCcw />
-              Reset
+              {translate("admin.scoringPage.reset")}
             </button>
           ) : undefined
         }
@@ -85,10 +86,9 @@ const StreakSection: React.FC = () => {
       <div className="space-y-3">
         <div className="bg-surface-muted border border-line rounded-2xl p-4 flex items-center justify-between gap-4">
           <div className="min-w-0">
-            <h4 className="text-sm font-bold text-ink font-mono">Count streaks</h4>
+            <h4 className="text-sm font-bold text-ink font-mono">{translate("admin.scoringPage.countStreaks")}</h4>
             <p className="text-xs text-muted">
-              Off hides the flame everywhere and stops days being counted. Nothing already earned is
-              erased — switching it back on picks the run up where it left off.
+              {translate("admin.scoringPage.offHidesTheFlameEverywhereAnd")}
             </p>
           </div>
           <UIToggle
@@ -97,15 +97,15 @@ const StreakSection: React.FC = () => {
               playSound("pop");
               set({ enabled: !config.enabled });
             }}
-            label="Count streaks"
+            label={translate("admin.scoringPage.countStreaks")}
           />
         </div>
 
         {config.enabled && (
           <>
             <ScoringSlider
-              label="Rounds per day"
-              description="How many finished rounds make a day count. One means showing up is enough."
+              label={translate("admin.scoringPage.roundsPerDay")}
+              description={translate("admin.scoringPage.howManyFinishedRoundsMakeA")}
               value={config.roundsPerDay}
               min={1}
               max={10}
@@ -114,8 +114,8 @@ const StreakSection: React.FC = () => {
               onChange={(v) => set({ roundsPerDay: v })}
             />
             <ScoringSlider
-              label="Days forgiven"
-              description="Missed days a run survives. Zero means practise every day or start again."
+              label={translate("admin.scoringPage.daysForgiven")}
+              description={translate("admin.scoringPage.missedDaysARunSurvivesZero")}
               value={config.graceDays}
               min={0}
               max={6}
@@ -124,8 +124,8 @@ const StreakSection: React.FC = () => {
               onChange={(v) => set({ graceDays: v })}
             />
             <ScoringSlider
-              label="Day starts at"
-              description="When a new day begins on the device. Later than midnight keeps a late-night session on the day it belongs to."
+              label={translate("admin.scoringPage.dayStartsAt")}
+              description={translate("admin.scoringPage.whenANewDayBeginsOn")}
               value={config.dayStartHour}
               min={0}
               max={23}
@@ -164,9 +164,9 @@ export const ScoringPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
   if (!can("system:write")) {
     return (
       <NoAccess
-        title="Scoring & XP"
+        title={translate("admin.scoringPage.scoringXp")}
         permission="system:write"
-        what="What a finished level pays is set once for every family on this Koda."
+        what={translate("admin.scoringPage.whatAFinishedLevelPaysIs")}
       />
     );
   }
@@ -177,18 +177,16 @@ export const ScoringPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
   return (
     <div className={embedded ? "space-y-6" : "max-w-3xl mx-auto space-y-6"}>
       {!embedded && <div>
-        <h2 className={themeSystem.typography("h2")}>Scoring &amp; XP</h2>
+        <h2 className={themeSystem.typography("h2")}>{translate("admin.scoringPage.scoringAmpXp")}</h2>
         <p className={themeSystem.typography("body-sm", "mt-1")}>
-          What a finished level is worth, and what a day of practice has to be to keep a streak. One
-          economy, shared by every skill and every child in the family — changing it re-prices stars
-          already earned.
+          {translate("admin.scoringPage.whatAFinishedLevelIsWorth")}
         </p>
       </div>}
 
       <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
         <UISectionHeader
-          title="Rewards"
-          subtitle="Applies to every skill, installed or not yet written"
+          title={translate("admin.scoringPage.rewards")}
+          subtitle={translate("admin.scoringPage.appliesToEverySkillInstalledOr")}
           icon={<Star className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
           action={
             ScoringAPI.isEdited() ? (
@@ -200,7 +198,7 @@ export const ScoringPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
                 className={themeSystem.button("secondary", "sm")}
               >
                 <RotateCcw />
-                Reset
+                {translate("admin.scoringPage.reset")}
               </button>
             ) : undefined
           }
@@ -208,8 +206,8 @@ export const ScoringPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
 
         <div className="space-y-3">
           <ScoringSlider
-            label="Two-star share"
-            description="How much of a level's XP a two-star round pays."
+            label={translate("admin.scoringPage.twoStarShare")}
+            description={translate("admin.scoringPage.howMuchOfALevelS")}
             value={config.twoStarShare}
             min={0}
             max={1}
@@ -218,8 +216,8 @@ export const ScoringPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
             onChange={(v) => set({ twoStarShare: v })}
           />
           <ScoringSlider
-            label="One-star share"
-            description="Same, for a round below the two-star line."
+            label={translate("admin.scoringPage.oneStarShare")}
+            description={translate("admin.scoringPage.sameForARoundBelowThe")}
             value={config.oneStarShare}
             min={0}
             max={1}
@@ -228,8 +226,8 @@ export const ScoringPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
             onChange={(v) => set({ oneStarShare: v })}
           />
           <ScoringSlider
-            label="XP per level"
-            description="What one finished level is worth at three stars. The only place XP is set."
+            label={translate("admin.scoringPage.xpPerLevel")}
+            description={translate("admin.scoringPage.whatOneFinishedLevelIsWorth")}
             value={config.xpPerLevel}
             min={0}
             max={200}
@@ -238,8 +236,8 @@ export const ScoringPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
             onChange={(v) => set({ xpPerLevel: v })}
           />
           <ScoringSlider
-            label="Three stars at"
-            description="First-try accuracy needed for a perfect round."
+            label={translate("admin.scoringPage.threeStarsAt")}
+            description={translate("admin.scoringPage.firstTryAccuracyNeededForA")}
             value={config.threeStarAt}
             min={0.5}
             max={1}
@@ -248,8 +246,8 @@ export const ScoringPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
             onChange={(v) => set({ threeStarAt: v })}
           />
           <ScoringSlider
-            label="Two stars at"
-            description="Below this, a round earns one star."
+            label={translate("admin.scoringPage.twoStarsAt")}
+            description={translate("admin.scoringPage.belowThisARoundEarnsOne")}
             value={config.twoStarAt}
             min={0}
             max={0.95}

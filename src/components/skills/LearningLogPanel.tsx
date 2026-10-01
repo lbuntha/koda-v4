@@ -25,6 +25,7 @@ import {
   learnerId,
 } from "../../lib/learning";
 
+import { translate } from "../../lib/i18n";
 /**
  * What the learning log knows, made visible.
  *
@@ -88,7 +89,7 @@ const ConceptCard: React.FC<{ mastery: ConceptMastery }> = ({ mastery }) => (
     {mastery.topErrors.length > 0 && (
       <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
         <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-          What goes wrong
+          {translate("admin.learningLogPanel.whatGoesWrong")}
         </span>
         <ul className="mt-1.5 space-y-1">
           {mastery.topErrors.map((e) => (
@@ -137,6 +138,21 @@ const describe = (event: LearningEvent): string => {
       return `left after ${event.questionsAnswered} · ${secs(event.durationMs)}`;
     case "lesson_started":
       return `via ${event.entry}`;
+    case "reading_started":
+      return `${event.pageCount} pages · via ${event.entry}`;
+    case "page_read":
+      return [
+        `page ${event.page}/${event.pageCount - 1}`,
+        secs(event.dwellMs),
+        event.readAloud > 0 ? `read aloud ${event.readAloud}×` : "",
+        event.wordsTapped.length ? `tapped ${event.wordsTapped.join(", ")}` : "",
+      ]
+        .filter(Boolean)
+        .join(" · ");
+    case "reading_finished":
+      return `${event.pagesSeen} pages seen · ${secs(event.durationMs)} · ${event.readAloudPages} read aloud · ${event.wordsTapped} words tapped`;
+    case "reading_abandoned":
+      return `left on page ${event.furthestPage}/${event.pageCount - 1} · ${secs(event.durationMs)}`;
     default:
       return "";
   }
@@ -269,7 +285,7 @@ const QUESTION_COLUMNS: UIDataTableColumn<QuestionRecord>[] = [
         <>
           {q.given ?? "✓"}
           {q.expected && q.given !== q.expected && (
-            <span className="text-slate-500 dark:text-slate-400"> (want {q.expected})</span>
+            <span className="text-slate-500 dark:text-slate-400"> {translate("admin.learningLogPanel.wantExpected", { expected: q.expected })}</span>
           )}
         </>
       ),
@@ -280,18 +296,18 @@ const QUESTION_COLUMNS: UIDataTableColumn<QuestionRecord>[] = [
     key: "result",
     header: "Result",
     render: (q) => {
-      if (q.unanswered) return <UIBadge variant="neutral">no answer</UIBadge>;
-      if (q.correctFirstTry) return <UIBadge variant="success">correct</UIBadge>;
+      if (q.unanswered) return <UIBadge variant="neutral">{translate("admin.learningLogPanel.noAnswer")}</UIBadge>;
+      if (q.correctFirstTry) return <UIBadge variant="success">{translate("admin.learningLogPanel.correct")}</UIBadge>;
       if (q.eventuallyCorrect) {
         // Right first time but with a hint is a different state from right on
         // the third try, and "correct on 1" described neither.
         return (
           <UIBadge variant="warning">
-            {q.attempts > 1 ? `correct on try ${q.attempts}` : "correct with help"}
+            {q.attempts > 1 ? translate("admin.learningLogPanel.correctOnTryAttempts", { attempts: q.attempts }) : translate("admin.learningLogPanel.correctWithHelp")}
           </UIBadge>
         );
       }
-      return <UIBadge variant="danger">{ERROR_COPY[q.errorKind ?? ""] ?? "wrong"}</UIBadge>;
+      return <UIBadge variant="danger">{ERROR_COPY[q.errorKind ?? ""] ?? translate("admin.learningLogPanel.wrong")}</UIBadge>;
     },
     // Sorted worst-first so the rows worth reading come to the top.
     sortValue: (q) => (q.unanswered ? 0 : q.eventuallyCorrect ? (q.correctFirstTry ? 3 : 2) : 1),
@@ -417,7 +433,7 @@ const ShowMore: React.FC<{ remaining: number; noun: string; onClick: () => void 
   remaining === 0 ? null : (
     <div className="flex justify-center pt-1">
       <UIButton variant="secondary" size="sm" onClick={onClick}>
-        Show {Math.min(remaining, PAGE_SIZE)} more ({remaining} {noun} left)
+        {translate("admin.learningLogPanel.showValueMoreRemainingNounLeft", { value: Math.min(remaining, PAGE_SIZE), remaining: remaining, noun: noun })}
       </UIButton>
     </div>
   );
@@ -480,9 +496,9 @@ export const LearningLogPanel: React.FC = () => {
   if (events.length === 0) {
     return (
       <div className={themeSystem.card("default", "p-6 text-center")}>
-        <p className="text-sm font-bold text-slate-900 dark:text-white">Nothing logged yet</p>
+        <p className="text-sm font-bold text-slate-900 dark:text-white">{translate("admin.learningLogPanel.nothingLoggedYet")}</p>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-          Play a round from Learn. Teacher previews are deliberately not recorded.
+          {translate("admin.learningLogPanel.playARoundFromLearnTeacher")}
         </p>
       </div>
     );
@@ -491,13 +507,13 @@ export const LearningLogPanel: React.FC = () => {
   return (
     <div className="space-y-4">
       <UIStatGrid>
-        <UIStatTile icon={<CheckCircle2 />} value={String(answered)} label="Answers" />
-        <UIStatTile icon={<FlagTriangleRight />} value={String(rounds)} label="Rounds finished" />
-        <UIStatTile icon={<CalendarDays />} value={String(sessions)} label="Sessions" />
+        <UIStatTile icon={<CheckCircle2 />} value={String(answered)} label={translate("admin.learningLogPanel.answers")} />
+        <UIStatTile icon={<FlagTriangleRight />} value={String(rounds)} label={translate("admin.learningLogPanel.roundsFinished")} />
+        <UIStatTile icon={<CalendarDays />} value={String(sessions)} label={translate("admin.learningLogPanel.sessions")} />
         <UIStatTile
           icon={<Brain />}
           value={String(mastery.filter((m) => m.status === "mastered").length)}
-          label="Concepts mastered"
+          label={translate("admin.learningLogPanel.conceptsMastered")}
           tone="success"
         />
       </UIStatGrid>
@@ -509,18 +525,17 @@ export const LearningLogPanel: React.FC = () => {
       </div>
 
       <div className="space-y-2">
-        <h3 className="text-sm font-bold text-slate-900 dark:text-white">Skill usage</h3>
+        <h3 className="text-sm font-bold text-slate-900 dark:text-white">{translate("admin.learningLogPanel.skillUsage")}</h3>
         <UIDataTable
           columns={SKILL_COLUMNS}
           rows={skillUsage}
           rowKey={(s) => s.skillId}
           defaultSort={{ key: "plays", direction: "desc" }}
-          caption="How much each skill is played, and how it goes"
-          emptyMessage="No skill has been played yet."
+          caption={translate("admin.learningLogPanel.howMuchEachSkillIsPlayed")}
+          emptyMessage={translate("admin.learningLogPanel.noSkillHasBeenPlayedYet")}
         />
         <p className="text-[11px] text-slate-500 dark:text-slate-400">
-          One learner on this device. Counting distinct users per skill is a
-          server-side roll-up over <code className="font-mono">learnerId</code>.
+          {translate("admin.learningLogPanel.oneLearnerOnThisDeviceCounting")}{" "}<code className="font-mono">learnerId</code>.
         </p>
       </div>
 
@@ -529,7 +544,7 @@ export const LearningLogPanel: React.FC = () => {
           "how is this child doing?". */}
       <div className="space-y-2">
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white">Questions</h3>
+          <h3 className="text-sm font-bold text-slate-900 dark:text-white">{translate("admin.learningLogPanel.questions")}</h3>
           {skills.length > 1 && (
             <div className="flex flex-wrap gap-2">
               {["all", ...skills].map((id) => (
@@ -538,7 +553,7 @@ export const LearningLogPanel: React.FC = () => {
                   onClick={() => setSkillFilter(id)}
                   className={themeSystem.button(skillFilter === id ? "primary" : "secondary", "sm")}
                 >
-                  {id === "all" ? "All skills" : id}
+                  {id === "all" ? translate("admin.learningLogPanel.allSkills") : id}
                 </button>
               ))}
             </div>
@@ -551,8 +566,8 @@ export const LearningLogPanel: React.FC = () => {
           rowKey={(q) => q.questionId}
           defaultSort={{ key: "askedAt", direction: "desc" }}
           maxHeight="28rem"
-          caption="Every question asked, with the answer given and the time taken"
-          emptyMessage="No questions recorded for this skill."
+          caption={translate("admin.learningLogPanel.everyQuestionAskedWithTheAnswer")}
+          emptyMessage={translate("admin.learningLogPanel.noQuestionsRecordedForThisSkill")}
         />
         {/* Sorting is the table's, so a page is the newest hundred by the
             column it is sorted on — asked-at, until the reader picks another. */}
@@ -578,9 +593,9 @@ export const LearningLogPanel: React.FC = () => {
             <ChevronRight className="w-4 h-4 text-slate-500" />
           )}
           <span className="text-sm font-bold text-slate-900 dark:text-white flex-1">
-            Raw events
+            {translate("admin.learningLogPanel.rawEvents")}
             <span className="font-normal text-slate-500 dark:text-slate-400">
-              {" "}— what gets sent to the backend
+              {translate("admin.learningLogPanel.whatGetsSentToTheBackend")}
             </span>
           </span>
           <span className="font-mono text-xs text-slate-500 dark:text-slate-400 tabular-nums">
@@ -596,8 +611,8 @@ export const LearningLogPanel: React.FC = () => {
               rowKey={(e) => e.id}
               defaultSort={{ key: "ts", direction: "desc" }}
               maxHeight="24rem"
-              caption="Every recorded learning event, newest first"
-              emptyMessage="No events for this skill."
+              caption={translate("admin.learningLogPanel.everyRecordedLearningEventNewestFirst")}
+              emptyMessage={translate("admin.learningLogPanel.noEventsForThisSkill")}
             />
             <ShowMore remaining={eventPage.remaining} noun="events" onClick={eventPage.showMore} />
           </div>
@@ -605,15 +620,14 @@ export const LearningLogPanel: React.FC = () => {
       </div>
 
       <p className="font-mono text-[11px] text-slate-500 dark:text-slate-400">
-        learner <span className="text-slate-700 dark:text-slate-300">{learnerId}</span> · schema v1
-        · build {APP_VERSION} · UTC{new Date().getTimezoneOffset() > 0 ? "-" : "+"}
+        {translate("admin.learningLogPanel.learner")}{" "}<span className="text-slate-700 dark:text-slate-300">{learnerId}</span>{" "}{translate("admin.learningLogPanel.schemaV1Build")}{" "}{APP_VERSION}{" "}{translate("admin.learningLogPanel.utc")}{new Date().getTimezoneOffset() > 0 ? "-" : "+"}
         {Math.abs(new Date().getTimezoneOffset() / 60)}
       </p>
 
       <div className="flex flex-wrap gap-2">
         <button onClick={download} className={themeSystem.button("secondary", "sm")}>
           <Download />
-          Export JSON
+          {translate("admin.learningLogPanel.exportJson")}
         </button>
         {confirmClear ? (
           <>
@@ -625,16 +639,16 @@ export const LearningLogPanel: React.FC = () => {
               className={themeSystem.button("danger", "sm")}
             >
               <Trash2 />
-              Erase everything
+              {translate("admin.learningLogPanel.eraseEverything")}
             </button>
             <button
               onClick={() => setConfirmClear(false)}
               className={themeSystem.button("secondary", "sm")}
             >
-              Cancel
+              {translate("admin.learningLogPanel.cancel")}
             </button>
             <span className="text-xs text-slate-500 dark:text-slate-400 self-center">
-              Wipes every event and all mastery. Cannot be undone.
+              {translate("admin.learningLogPanel.wipesEveryEventAndAllMastery")}
             </span>
           </>
         ) : (
@@ -643,7 +657,7 @@ export const LearningLogPanel: React.FC = () => {
             className={themeSystem.button("secondary", "sm")}
           >
             <Trash2 />
-            Clear log
+            {translate("admin.learningLogPanel.clearLog")}
           </button>
         )}
       </div>

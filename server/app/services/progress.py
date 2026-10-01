@@ -27,6 +27,7 @@ from typing import Any
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
+from app import notify_i18n
 from app.repos import learners as learners_repo
 from app.repos import progress_marks, push_runs
 from app.services import email_notify, mastery, push
@@ -49,8 +50,8 @@ def _week_key(local_day: str) -> str:
     return f"{year}-W{week:02d}"
 
 
-def _minutes_text(minutes: int) -> str:
-    return "1 minute" if minutes == 1 else f"{minutes} minutes"
+def _minutes_text(minutes: int, language: str = notify_i18n.BASE) -> str:
+    return notify_i18n.phrase(language, "minutes", minutes)
 
 
 async def _totals(db: AsyncIOMotorDatabase, family_id: str, pairs: set[Pair]) -> dict[Pair, dict[str, Any]]:
@@ -112,8 +113,9 @@ async def _time_limits(db: AsyncIOMotorDatabase, family_id: str, inserted: list[
             minutes = int(event.get("limitMinutes") or 0)
         except (TypeError, ValueError):
             minutes = 0
-        values = {"learner": name, "minutes": _minutes_text(minutes)}
-        title, body = await push.wording(db, TIME_LIMIT, values)
+        language = await notify_i18n.language_of_family(db, family_id)
+        values = {"learner": name, "minutes": _minutes_text(minutes, language)}
+        title, body = await push.wording(db, TIME_LIMIT, values, language=language)
         await push.send(
             db,
             to=push.Recipient(family_id=family_id),
@@ -174,7 +176,7 @@ async def _learning_changes(
             if not names[learner_id]:
                 continue
             values = {"learner": names[learner_id], "lesson": mastery.lesson_name(concept)}
-            title, body = await push.wording(db, STUCK, values)
+            title, body = await push.wording(db, STUCK, values, family_id=family_id)
             path = f"/children/{learner_id}"
             await push.send(
                 db,
@@ -199,8 +201,12 @@ async def _learning_changes(
         # bell and the digest still have every lesson.
         if not await push_runs.claim(db, kind=f"{MASTERED}:day", recipient_id=learner_id, date_key=days[learner_id]):
             continue
-        values = {"learner": names[learner_id], "lessons": mastery.join_names([mastery.lesson_name(c) for c in concepts])}
-        title, body = await push.wording(db, MASTERED, values)
+        language = await notify_i18n.language_of_family(db, family_id)
+        values = {
+            "learner": names[learner_id],
+            "lessons": notify_i18n.join_names([mastery.lesson_name(c) for c in concepts], language),
+        }
+        title, body = await push.wording(db, MASTERED, values, language=language)
         await push.send(
             db,
             to=push.Recipient(family_id=family_id),

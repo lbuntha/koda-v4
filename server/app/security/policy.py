@@ -67,6 +67,13 @@ PERMISSIONS = {
     # Reading is deliberately *not* split: every device has to load the art to
     # draw a lesson, so listing stays on `settings:read`.
     "content:write",
+    # Making trace items and publishing trace collections (Koda Trace). Its own
+    # right rather than part of `content:write`, so a Koda admin can let a
+    # chosen adult — a teacher, a parent who makes worksheets — build and
+    # publish collections without handing them the whole content library.
+    # Granted only through a platform role; never by a family role, so a child
+    # can never hold it.
+    "trace:create",
     "device:list",
     "device:revoke",
     # Platform account lifecycle. Kept separate from family membership roles:
@@ -112,6 +119,7 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         # The shared library belongs to the deployment, not to the most senior
         # adult in one household.
         "content:write",
+        "trace:create",
     },
     # A second adult: everything except destroying or handing over the family,
     # and except the two the owner keeps — see `scoring:write` above. The Roles
@@ -129,6 +137,7 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         "role:manage",
         "menu:manage",
         "content:write",
+        "trace:create",
     },
     # A grandparent or tutor: reads the children and their records, changes nothing.
     "caregiver": {
@@ -163,6 +172,7 @@ PLATFORM_PERMISSIONS: dict[str, set[str]] = {
         "settings:read",
         "settings:write",
         "content:write",
+        "trace:create",
         "scoring:write",
         "menu:manage",
     },
@@ -172,6 +182,7 @@ PLATFORM_PERMISSIONS: dict[str, set[str]] = {
         "settings:read",
         "settings:write",
         "content:write",
+        "trace:create",
         "scoring:write",
         "system:write",
         "family:read",
@@ -235,5 +246,7 @@ def effective_permissions(
         "role:manage",
         # The shared library is the deployment's, not a family's — see above.
         "content:write",
+        # Publishing trace collections to everyone: a platform grant only.
+        "trace:create",
     }
     return allowed

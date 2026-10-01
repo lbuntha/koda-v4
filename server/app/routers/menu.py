@@ -5,6 +5,7 @@ release — but the app still ships a default JSON, because a sidebar has to dra
 before any request comes back, and a first run may have no network at all.
 """
 
+import re
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
@@ -28,9 +29,16 @@ CanEdit = Annotated[Principal, Depends(require("menu:manage"))]
 
 class MenuItem(Model):
     id: str
+    # The base-language (English) wording.
     label: str
     icon: str
     badge: str | None = None
+    # The same entry in other languages, keyed by BCP 47 code — `{"km": "…"}`.
+    # Open-ended on purpose: a language is added by shipping a catalog, and
+    # this must not need a migration each time. A language with no entry here
+    # falls back to the app's own catalog, then to `label`.
+    labels: dict[str, str] | None = None
+    badges: dict[str, str] | None = None
     # Two ways to say who sees an entry, and they answer different questions.
     # `requires` is capability — "whoever may change settings"; it keeps working
     # when roles change. `roles` is an explicit list — "these people" — for the
@@ -52,6 +60,10 @@ class MenuItemPatch(Model):
     label: str | None = None
     icon: str | None = None
     badge: str | None = None
+    # Merged into what the entry already has, one language at a time; an empty
+    # string removes that language, so it falls back again.
+    labels: dict[str, str] | None = None
+    badges: dict[str, str] | None = None
     order: int | None = None
     enabled: bool | None = None
     # Sent explicitly as null to clear, which is why these are not "exclude_none"
@@ -84,6 +96,8 @@ def _as_item(row: dict) -> MenuItem:
         label=row.get("label", row["itemId"]),
         icon=row.get("icon", "home"),
         badge=row.get("badge"),
+        labels=row.get("labels") or None,
+        badges=row.get("badges") or None,
         requires=row.get("requires"),
         roles=row.get("roles"),
         order=row.get("order", 100),
@@ -146,7 +160,24 @@ async def reset_item(item_id: str, db: Db, p: CanEdit) -> None:
 @router.patch("/{item_id}")
 async def edit_item(item_id: str, body: MenuItemPatch, db: Db, p: CanEdit) -> MenuItem:
     """A family's own override of one entry — renaming it, hiding it, moving it."""
-    patch = body.model_dump(exclude_none=True, exclude={"clear_requires", "clear_roles"})
+    patch = body.model_dump(
+        exclude_none=True, exclude={"clear_requires", "clear_roles", "labels", "badges"}
+    )
+
+    for field in ("labels", "badges"):
+        change = getattr(body, field)
+        if change is None:
+            continue
+        for code, text in change.items():
+            if not _LANGUAGE_TAG.match(code):
+                raise Conflict(f"Not a language code: {code}.", "unknown_language")
+            if len(text) > _MAX_TRANSLATION:
+                raise Conflict("That wording is too long for a menu entry.", "too_long")
+        # Merged against what this caller currently sees, so a family's override
+        # starts from the shipped translations rather than wiping them.
+        current = await _effective_row(db, p, item_id)
+        merged = {**(current.get(field) or {}), **{k: v.strip() for k, v in change.items()}}
+        patch[field] = {k: v for k, v in merged.items() if v}
 
     if body.requires and body.requires not in policy.PERMISSIONS:
         raise Conflict(f"Unknown permission: {body.requires}.", "unknown_permission")
@@ -178,6 +209,18 @@ async def edit_item(item_id: str, body: MenuItemPatch, db: Db, p: CanEdit) -> Me
         row = await menu_repo.set_for_family(db, p.family_id, item_id, patch)
 
     return _as_item({**row, "itemId": item_id})
+
+
+_LANGUAGE_TAG = re.compile(r"^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$")
+_MAX_TRANSLATION = 60
+
+
+async def _effective_row(db, p: Principal, item_id: str) -> dict:
+    """The entry as this caller sees it: the default, plus their family's override."""
+    if p.family_id is None:
+        return await menu_repo.get_default(db, item_id) or {}
+    rows = await menu_repo.for_family(db, p.family_id, include_disabled=True)
+    return next((row for row in rows if row["itemId"] == item_id), {})
 
 
 def _require_operator(p: Principal) -> None:

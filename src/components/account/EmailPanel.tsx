@@ -5,6 +5,7 @@ import { UISectionHeader } from "../ui";
 import { ApiError } from "../../lib/sync";
 import { emailStatus, notificationWording, sendTestEmail, type EmailStatus } from "../../lib/push";
 
+import { translate } from "../../lib/i18n";
 /**
  * Whether notification email works here, answered on a screen.
  *
@@ -24,7 +25,7 @@ export const EmailPanel: React.FC = () => {
   useEffect(() => {
     void emailStatus()
       .then(setStatus)
-      .catch(() => setError("Could not read how email is set up."));
+      .catch(() => setError(translate("admin.emailPanel.couldNotReadHowEmailIs")));
     void notificationWording()
       .then((wording) =>
         setKinds(wording.templates.filter((row) => row.email).map((row) => ({ id: row.id, label: row.label }))),
@@ -40,7 +41,7 @@ export const EmailPanel: React.FC = () => {
       const sent = await sendTestEmail(kind || undefined);
       setResult(sent.sent ? `Sent to ${sent.to}.` : (sent.note ?? "Nothing was sent."));
     } catch (e) {
-      setError(e instanceof ApiError && e.message ? e.message : "The test email could not be sent.");
+      setError(e instanceof ApiError && e.message ? e.message : translate("admin.emailPanel.theTestEmailCouldNotBe"));
     }
     setBusy(false);
   };
@@ -67,8 +68,8 @@ export const EmailPanel: React.FC = () => {
   return (
     <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
       <UISectionHeader
-        title="Email"
-        subtitle="Notification emails, and whether they arrive"
+        title={translate("admin.emailPanel.email")}
+        subtitle={translate("admin.emailPanel.notificationEmailsAndWhetherTheyArrive")}
         icon={<Mail className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
       />
 
@@ -82,22 +83,21 @@ export const EmailPanel: React.FC = () => {
           ))}
         </dl>
       )}
-      {!status && !error && <p className="text-xs text-muted">Reading…</p>}
+      {!status && !error && <p className="text-xs text-muted">{translate("admin.emailPanel.reading")}</p>}
 
       <div className="space-y-2">
-        <h4 className="text-sm font-bold text-ink">Send a test to yourself</h4>
+        <h4 className="text-sm font-bold text-ink">{translate("admin.emailPanel.sendATestToYourself")}</h4>
         <p className="text-xs text-muted">
-          It goes to your own address only. Pick a message to preview its saved wording, filled with
-          sample values.
+          {translate("admin.emailPanel.itGoesToYourOwnAddress")}
         </p>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <select
-            aria-label="Message to test"
+            aria-label={translate("admin.emailPanel.messageToTest")}
             value={kind}
             onChange={(e) => setKind(e.target.value)}
             className={themeSystem.field("lg", "sm:flex-1")}
           >
-            <option value="">A plain test email</option>
+            <option value="">{translate("admin.emailPanel.aPlainTestEmail")}</option>
             {kinds.map((row) => (
               <option key={row.id} value={row.id}>
                 {row.label}
@@ -111,7 +111,7 @@ export const EmailPanel: React.FC = () => {
             className={themeSystem.button("primary", "sm", "shrink-0")}
           >
             <Send className="w-4 h-4 mr-2" />
-            {busy ? "Sending…" : "Send test"}
+            {busy ? translate("admin.emailPanel.sending") : translate("admin.emailPanel.sendTest")}
           </button>
         </div>
         {result && <p className="text-xs text-ink">{result}</p>}

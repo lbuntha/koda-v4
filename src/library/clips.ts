@@ -22,6 +22,7 @@
 import { API_BASE } from "../lib/sync";
 import { accessToken } from "../lib/sync/session";
 import type { Passage } from "./data/passage";
+import { translate } from "../lib/i18n";
 
 const CACHE = "koda-library-audio-v1";
 const urls = new Map<string, string>();
@@ -202,7 +203,7 @@ export async function uploadClip(blob: Blob): Promise<{ id: string; bytes: numbe
     body: JSON.stringify({ mime: blob.type || "audio/wav", data: btoa(bin) }),
   });
   const body = (await res.json().catch(() => null)) as { id?: string; bytes?: number; error?: { message?: string } } | null;
-  if (!res.ok || !body?.id || typeof body.bytes !== "number") throw new Error(body?.error?.message ?? "The recording could not be uploaded.");
+  if (!res.ok || !body?.id || typeof body.bytes !== "number") throw new Error(body?.error?.message ?? translate("studio.error.recordingUpload"));
   // Cache the normalized M4A returned by the server, not the larger source
   // WAV/WebM the author uploaded under the same content id.
   await clipUrl(body.id);

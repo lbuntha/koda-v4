@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Flame, Star, Target, Trophy, Zap } from "lucide-react";
+import { useT } from "../../lib/i18n";
 
 import { UIModal, UIButton, UIStatTile } from "../ui";
 import {
@@ -26,6 +27,7 @@ export const StatisticsModal: React.FC<StatisticsModalProps> = ({
   onOpenProfile,
   stats: propStats,
 }) => {
+  const { t } = useT();
   const [stats, setStats] = useState<ProfileStats>(propStats ?? EMPTY_STATS);
   // The course is age-gated, so "how many lessons are there" is a question only
   // a viewer can answer — the same one Home and the profile ask.
@@ -80,17 +82,17 @@ export const StatisticsModal: React.FC<StatisticsModalProps> = ({
     <UIModal
       isOpen={isOpen}
       onClose={onClose}
-      title="Statistics"
+      title={t("nav.statistics")}
       maxWidth="max-w-lg"
       tone="plain"
       footer={
         <div className="flex w-full items-center justify-between gap-3">
           <UIButton variant="secondary" size="sm" onClick={onClose}>
-            Close
+            {t("common.close")}
           </UIButton>
           {onOpenProfile && (
             <UIButton variant="primary" size="sm" onClick={onOpenProfile}>
-              View in profile
+              {t("stats.viewInProfile")}
             </UIButton>
           )}
         </div>
@@ -102,10 +104,8 @@ export const StatisticsModal: React.FC<StatisticsModalProps> = ({
           <div className="flex items-center gap-2">
             <Target className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
             <div>
-              <h4 className="font-mono text-base font-bold text-ink">Today</h4>
-              <p className="text-xs text-muted">
-                The daily goal, and how far through the course this learner is
-              </p>
+              <h4 className="font-mono text-base font-bold text-ink">{t("home.today")}</h4>
+              <p className="text-xs text-muted">{t("stats.todayNote")}</p>
             </div>
           </div>
 
@@ -113,7 +113,7 @@ export const StatisticsModal: React.FC<StatisticsModalProps> = ({
             {/* Daily Goal */}
             <div className="rounded-2xl border border-line bg-surface-muted p-4">
               <div className="flex items-center justify-between gap-3">
-                <h5 className="font-mono text-sm font-bold text-ink">Daily goal</h5>
+                <h5 className="font-mono text-sm font-bold text-ink">{t("home.dailyGoal")}</h5>
                 <span className="font-mono text-sm font-black tabular-nums text-ink">
                   {dailySolved} / {dailyGoal}
                 </span>
@@ -131,7 +131,7 @@ export const StatisticsModal: React.FC<StatisticsModalProps> = ({
             {/* Course Progress */}
             <div className="rounded-2xl border border-line bg-surface-muted p-4">
               <div className="flex items-center justify-between gap-3">
-                <h5 className="font-mono text-sm font-bold text-ink">Course progress</h5>
+                <h5 className="font-mono text-sm font-bold text-ink">{t("stats.courseProgress")}</h5>
                 <span className="font-mono text-sm font-black tabular-nums text-ink">
                   {courseDone} / {courseTotal}
                 </span>
@@ -153,24 +153,24 @@ export const StatisticsModal: React.FC<StatisticsModalProps> = ({
           <UIStatTile
             icon={<Flame className="fill-current" />}
             value={`${streak}`}
-            label="Day streak"
+            label={t("stats.dayStreak")}
             tone="streak"
           />
           <UIStatTile
             icon={<Zap className="fill-current" />}
-            value={`${xp} XP`}
-            label="Total XP"
+            value={t("progress.xp", { xp })}
+            label={t("stats.totalXp")}
           />
           <UIStatTile
             icon={<Trophy />}
-            value={`Level ${level}`}
-            label="Current level"
+            value={t("stats.level", { level })}
+            label={t("stats.currentLevel")}
             tone="success"
           />
           <UIStatTile
             icon={<Star className="fill-current" />}
             value={`${starsEarned}`}
-            label="Stars earned"
+            label={t("stats.starsEarned")}
             tone="streak"
           />
         </div>

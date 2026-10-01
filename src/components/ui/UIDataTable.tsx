@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
+import { translate } from "../../lib/i18n";
 
 /**
  * The shared data table.
@@ -61,7 +62,7 @@ export function UIDataTable<Row>({
   rows,
   rowKey,
   defaultSort,
-  emptyMessage = "Nothing to show yet.",
+  emptyMessage = translate("common.nothingYet"),
   maxHeight,
   caption,
   pageSize,
@@ -202,7 +203,7 @@ export function UIDataTable<Row>({
       </table>
       {pageSize && pageSize > 0 && totalPages > 1 && (
         <nav
-          aria-label="Table pages"
+          aria-label={translate("common.tablePages")}
           className="flex items-center justify-between gap-3 bg-surface-muted/40 px-4 py-3 text-xs text-muted"
         >
           <span>

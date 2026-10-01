@@ -9,6 +9,7 @@ import {
   type MasteryStatus,
 } from "./learning/mastery";
 import type { ErrorKind } from "./learning/events";
+import { translate } from "./i18n";
 
 /**
  * What one child has learned, read by an adult.
@@ -301,53 +302,24 @@ export async function fetchChildReport(
  * It is the most useful thing on the page: everything else says *how much* a
  * child has practised, and only this says *what is going wrong*.
  */
-export const ERROR_COPY: Record<ErrorKind, { label: string; detail: string; fix: string }> = {
-  off_by_one: {
-    label: "Off by one",
-    detail: "Lands next to the right answer — the idea is there, the count slips at the end.",
-    fix: "Count out loud together and touch each thing once. The last word said is the answer.",
-  },
-  off_by_more: {
-    label: "Not close",
-    detail: "The answer is far from the target, which usually means the method was not used.",
-    fix: "Drop to smaller numbers for a round or two, until the method is being used again.",
-  },
-  reversed: {
-    label: "The wrong way round",
-    detail: "Right numbers, wrong direction — comparing or ordering the opposite way.",
-    fix: "Say it as a sentence before answering: “six is more than four”.",
-  },
-  guessed_fast: {
-    label: "Guessing",
-    detail: "Answering faster than the thinking takes. Often boredom, sometimes avoidance.",
-    fix: "Ask them to say the answer out loud before they tap it.",
-  },
-  timed_out: {
-    label: "Ran out of time",
-    detail: "No answer given. Worth watching whether the question is hard or just long.",
-    fix: "Sit alongside for one round and see where the pause comes.",
-  },
-  miscounted_items: {
-    label: "Lost count",
-    detail: "Counted more or fewer things than were there — one-to-one matching is not secure yet.",
-    fix: "Move each thing aside as it is counted, so nothing is counted twice or missed.",
-  },
-  sequence_slip: {
-    label: "Broke the pattern",
-    detail: "Wrong next term in a sequence: the rule, rather than the arithmetic.",
-    fix: "Say the run aloud from the start — 2, 4, 6 — and ask what comes next.",
-  },
-  place_value: {
-    label: "Tens and ones",
-    detail: "Reading tens and ones the wrong way round — 15 for 51, or 3 tens read as 3.",
-    fix: "Build the number with ten-sticks and single ones before writing it down.",
-  },
-  unknown: {
-    label: "Not classified",
-    detail: "A mistake the activity could not put a name to.",
-    fix: "Watch one round to see what is actually happening.",
-  },
-};
+/**
+ * Wording lives in the catalogs (`report.error.<kind>.*`, `report.status.<status>.*`);
+ * these are getters so every read is in the language on screen, and call sites
+ * keep reading `ERROR_COPY[kind].label` as they always did.
+ */
+const worded = <K extends string>(prefix: string, fields: readonly K[]): Record<K, string> =>
+  Object.defineProperties(
+    {} as Record<K, string>,
+    Object.fromEntries(fields.map((field) => [field, { get: () => translate(`${prefix}.${field}`), enumerable: true }])),
+  );
+
+const ERROR_KINDS: ErrorKind[] = [
+  "off_by_one", "off_by_more", "reversed", "guessed_fast", "timed_out",
+  "miscounted_items", "sequence_slip", "place_value", "unknown",
+];
+export const ERROR_COPY: Record<ErrorKind, { label: string; detail: string; fix: string }> = Object.fromEntries(
+  ERROR_KINDS.map((kind) => [kind, worded(`report.error.${kind}`, ["label", "detail", "fix"] as const)]),
+) as Record<ErrorKind, { label: string; detail: string; fix: string }>;
 
 /**
  * Words for each status, aimed at the adult reading them.
@@ -356,13 +328,10 @@ export const ERROR_COPY: Record<ErrorKind, { label: string; detail: string; fix:
  * `nextStep`, per concept, because the useful instruction differs between two
  * children sitting in the same band.
  */
-export const STATUS_COPY: Record<MasteryStatus, { label: string; detail: string }> = {
-  mastered: { label: "Knows it", detail: "Learned. One quick round in a week or two keeps it." },
-  practising: { label: "Almost there", detail: "Nearly learned. The best place to spend the next session." },
-  learning: { label: "Just started", detail: "Too soon to tell how it is going. A few more rounds will show." },
-  struggling: { label: "Needs help", detail: "More wrong than right. Start here." },
-  "not-started": { label: "Not tried", detail: "Has not played this one yet." },
-};
+const STATUSES: MasteryStatus[] = ["mastered", "practising", "learning", "struggling", "not-started"];
+export const STATUS_COPY: Record<MasteryStatus, { label: string; detail: string }> = Object.fromEntries(
+  STATUSES.map((status) => [status, worded(`report.status.${status}`, ["label", "detail"] as const)]),
+) as Record<MasteryStatus, { label: string; detail: string }>;
 
 /**
  * How many days a week of practice is the bar worth aiming for.
@@ -385,13 +354,13 @@ export const GOOD_WEEK_DAYS = 3;
 export const rhythmVerdict = (rhythm: Rhythm, name: string): string => {
   const days = rhythm.daysThisWeek;
   if (days === 0) {
-    return `${name} has not played this week. Ten minutes today is worth more than an hour on Sunday.`;
+    return translate("report.rhythm.none", { name });
   }
-  if (days >= 5) return `Practising most days. This is the thing that makes it stick — keep it.`;
+  if (days >= 5) return translate("report.rhythm.most");
   if (days >= GOOD_WEEK_DAYS) {
-    return `${days} days this week. Three or more is the bar, and ${name} is over it.`;
+    return translate("report.rhythm.good", { count: days, name });
   }
-  return `${days} ${days === 1 ? "day" : "days"} this week. Aim for ${GOOD_WEEK_DAYS} short sessions rather than one long one — spacing is what makes it stay.`;
+  return translate("report.rhythm.low", { count: days, target: GOOD_WEEK_DAYS });
 };
 
 /**
@@ -411,31 +380,31 @@ export const rhythmVerdict = (rhythm: Rhythm, name: string): string => {
  */
 export const nextStep = (concept: ConceptMastery): string => {
   const gap = evidenceGap(concept);
-  if (concept.questionsAnswered === 0) return "Not played yet.";
+  if (concept.questionsAnswered === 0) return translate("report.next.notPlayed");
   // Said before the status, because below MIN_EVIDENCE the status is a
   // placeholder and any advice drawn from it would be advice about noise.
   if (gap > 0) {
-    return `Too soon to tell — about ${gap} more ${gap === 1 ? "question" : "questions"} and we will know.`;
+    return translate("report.next.tooSoon", { count: gap });
   }
 
   switch (concept.status) {
     case "struggling":
-      return "Sit with them for one round. More is going wrong than right.";
+      return translate("report.next.struggling");
     case "practising":
       if (concept.supportRate >= LEANING_ON_HELP) {
-        return "Right most times, but using hints. Try one round without them.";
+        return translate("report.next.hints");
       }
       if (concept.daysPractised < MASTERY_DAYS) {
-        return "Doing well. One more round on another day and it is learned.";
+        return translate("report.next.anotherDay");
       }
       if (concept.firstTryAccuracy < MASTERY_ACCURACY) {
-        return "Nearly there. A round with fewer slips finishes it.";
+        return translate("report.next.fewerSlips");
       }
-      return "Just needs one round played all the way to the end.";
+      return translate("report.next.finishRound");
     case "mastered":
-      return "Learned. Come back in a week or two so it stays that way.";
+      return translate("report.next.mastered");
     default:
-      return "Nothing to do here yet.";
+      return translate("report.next.nothing");
   }
 };
 
@@ -479,8 +448,8 @@ export const whatNext = (
   if (stuck) {
     return {
       conceptKey: stuck.conceptKey,
-      action: `Sit with ${childName} for one round of ${lessonOf(stuck.conceptKey)}.`,
-      why: "More is going wrong than right on this one, so it is where help counts most.",
+      action: translate("report.move.stuck.action", { name: childName, lesson: lessonOf(stuck.conceptKey) }),
+      why: translate("report.move.stuck.why"),
     };
   }
 
@@ -491,28 +460,28 @@ export const whatNext = (
     if (nearly.supportRate >= LEANING_ON_HELP) {
       return {
         conceptKey: nearly.conceptKey,
-        action: `One round of ${lesson}, with the hints left closed.`,
-        why: `${childName} gets these right, but reaches for a hint most times.`,
+        action: translate("report.move.hints.action", { lesson }),
+        why: translate("report.move.hints.why", { name: childName }),
       };
     }
     if (nearly.daysPractised < MASTERY_DAYS) {
       return {
         conceptKey: nearly.conceptKey,
-        action: `One more round of ${lesson}, on a different day.`,
-        why: "It has only been practised on one day. A second day is what makes it stay.",
+        action: translate("report.move.day.action", { lesson }),
+        why: translate("report.move.day.why"),
       };
     }
     if (nearly.firstTryAccuracy < MASTERY_ACCURACY) {
       return {
         conceptKey: nearly.conceptKey,
-        action: `Another round of ${lesson}.`,
-        why: "Nearly learned — a round with fewer slips finishes it.",
+        action: translate("report.move.slips.action", { lesson }),
+        why: translate("report.move.slips.why"),
       };
     }
     return {
       conceptKey: nearly.conceptKey,
-      action: `One round of ${lesson}, played all the way to the end.`,
-      why: "Every round so far was left part-way. A finished round is what counts.",
+      action: translate("report.move.finish.action", { lesson }),
+      why: translate("report.move.finish.why"),
     };
   }
 
@@ -521,14 +490,14 @@ export const whatNext = (
   if (early) {
     return {
       conceptKey: early.conceptKey,
-      action: `A couple more rounds of ${lessonOf(early.conceptKey)}.`,
-      why: "It is too new to tell how it is going. More rounds is the only thing that helps.",
+      action: translate("report.move.early.action", { lesson: lessonOf(early.conceptKey) }),
+      why: translate("report.move.early.why"),
     };
   }
 
   return {
     conceptKey: null,
-    action: `Nothing needs fixing — time for something new.`,
-    why: `${childName} has learned everything they have met so far.`,
+    action: translate("report.move.done.action"),
+    why: translate("report.move.done.why", { name: childName }),
   };
 };

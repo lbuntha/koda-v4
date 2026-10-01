@@ -1,4 +1,5 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { translate } from "./i18n";
 
 import { StreakAPI, dayKey } from "./streak";
 import { currentLearnerId } from "./learnerProgress";
@@ -86,9 +87,12 @@ export const withinAllowedHours = (
 
 /** An hour as a child's grown-up would say it, for both screens that name one. */
 export const hourLabel = (hour: number): string => {
-  if (hour === 0) return "midnight";
-  if (hour === 12) return "noon";
-  return hour < 12 ? `${hour} AM` : `${hour - 12} PM`;
+  // Worded per language: Khmer names the part of the day — morning, afternoon,
+  // evening — where English has only AM and PM.
+  if (hour === 0) return translate("time.midnight");
+  if (hour === 12) return translate("time.noon");
+  if (hour < 12) return translate("time.morning", { hour: String(hour) });
+  return translate(hour < 18 ? "time.afternoon" : "time.evening", { hour: String(hour - 12) });
 };
 
 /** How long is left, in whole minutes. `null` when there is no cap. */

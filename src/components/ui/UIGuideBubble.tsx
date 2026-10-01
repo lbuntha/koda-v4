@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Lightbulb } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
+import { translate } from "../../lib/i18n";
 
 /**
  * Koda, saying what to do next.
@@ -75,12 +76,12 @@ export interface UIGuideBubbleProps {
 }
 
 export const UIGuideBubble: React.FC<UIGuideBubbleProps> = ({
-  title = "Koda is helping",
+  title = translate("guide.helping"),
   message,
   index,
   onIndexChange,
   resetKey,
-  actionLabel = "Got it",
+  actionLabel = translate("guide.gotIt"),
   onAction,
   icon,
   tail = "down",
@@ -172,20 +173,20 @@ export const UIGuideBubble: React.FC<UIGuideBubbleProps> = ({
                   type="button"
                   onClick={() => goTo(at - 1)}
                   disabled={at === 0}
-                  aria-label="Back"
+                  aria-label={translate("reader.back")}
                   className={s.page}
                 >
                   <ChevronLeft aria-hidden="true" />
-                  <span className="hidden sm:inline">Back</span>
+                  <span className="hidden sm:inline">{translate("reader.back")}</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => goTo(at + 1)}
                   disabled={at === pages.length - 1}
-                  aria-label="Next"
+                  aria-label={translate("studio.next")}
                   className={s.page}
                 >
-                  <span className="hidden sm:inline">Next</span>
+                  <span className="hidden sm:inline">{translate("studio.next")}</span>
                   <ChevronRight aria-hidden="true" />
                 </button>
                 {/* In words, because "2/3" is not what a screen reader should

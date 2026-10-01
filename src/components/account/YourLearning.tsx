@@ -8,6 +8,7 @@ import { SessionAPI, accessToken, request, useSession } from "../../lib/sync";
 import { themeSystem } from "../../lib/themeSystem";
 import { ChildSettingsFields } from "./ChildSettingsFields";
 import { DailyGoalField } from "./DailyGoalField";
+import { useT } from "../../lib/i18n";
 
 /**
  * A learner's own settings, for the learner.
@@ -32,6 +33,7 @@ import { DailyGoalField } from "./DailyGoalField";
  * preference.
  */
 export const YourLearning: React.FC<{ learnerId: string }> = ({ learnerId }) => {
+  const { t } = useT();
   useSyncExternalStore(ChildSettingsAPI.subscribe, ChildSettingsAPI.version);
   useSyncExternalStore(DailyGoalAPI.subscribe, DailyGoalAPI.version);
   const session = useSession();
@@ -72,23 +74,20 @@ export const YourLearning: React.FC<{ learnerId: string }> = ({ learnerId }) => 
       // says the new name without a reload.
       await SessionAPI.verify();
     } catch {
-      setError("That could not be saved. Try again in a moment.");
+      setError(t("yourLearning.saveFailed"));
     }
   };
 
   return (
     <section className="space-y-3">
       <div>
-        <div className={l.groupLabel}>Your learning</div>
-        <p className="text-xs text-muted">
-          Yours to set. Nobody else manages this account, so the limits below are the ones you
-          choose for yourself.
-        </p>
+        <div className={l.groupLabel}>{t("yourLearning.title")}</div>
+        <p className="text-xs text-muted">{t("yourLearning.note")}</p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="block space-y-1.5">
-          <span className="text-xs font-bold text-ink">Your name</span>
+          <span className="text-xs font-bold text-ink">{t("profile.editModal.yourName")}</span>
           <input
             className={themeSystem.field("lg")}
             value={name}
@@ -99,7 +98,7 @@ export const YourLearning: React.FC<{ learnerId: string }> = ({ learnerId }) => 
         </label>
         <label className="block space-y-1.5">
           <span className="text-xs font-bold text-ink">
-            Birth year <span className="font-normal text-muted">(optional)</span>
+            {t("children.birthYear")} <span className="font-normal text-muted">({t("common.optional").toLocaleLowerCase()})</span>
           </span>
           <input
             className={themeSystem.field("lg")}
@@ -117,7 +116,7 @@ export const YourLearning: React.FC<{ learnerId: string }> = ({ learnerId }) => 
       <DailyGoalField
         value={goal}
         onChange={(next) => DailyGoalAPI.set(learnerId, next)}
-        hint="Rounds you aim to finish each day"
+        hint={t("yourLearning.goalHint")}
       />
 
       <ChildSettingsFields

@@ -15,6 +15,7 @@ import {
   type WouldSend,
 } from "../../lib/push";
 
+import { translate } from "../../lib/i18n";
 /**
  * Running the scheduled work by hand.
  *
@@ -62,9 +63,7 @@ const EmptyPreview: React.FC<{ job: string; families?: number }> = ({ job, famil
   if (!families) {
     return (
       <p className="text-xs text-muted">
-        Nobody has notifications turned on yet, so there is no one to reach. Turn them on for one
-        browser in Settings → Notifications, then look again. A browser signed in to an account
-        with no family counts for nothing here — the jobs read families, not people.
+        {translate("admin.pushJobs.nobodyHasNotificationsTurnedOnYet")}
       </p>
     );
   }
@@ -80,7 +79,7 @@ const EmptyPreview: React.FC<{ job: string; families?: number }> = ({ job, famil
             : "a child who has not practised this week is deliberately left out";
   return (
     <p className="text-xs text-muted">
-      Nothing to send. Looked at {families} {families === 1 ? "family" : "families"} — {reason}.
+      {translate("admin.pushJobs.nothingToSendLookedAtFamilies", { families: families, value: families === 1 ? translate("admin.pushJobs.family") : translate("admin.pushJobs.families"), reason: reason })}
     </p>
   );
 };
@@ -102,7 +101,7 @@ const lineNote = (job: string, line: WouldSend): { key: string; note: string; se
       // `people` is the number of adults whose chosen hour this is *and* who
       // have the kind switched on. Zero is not a rounding error — it is the
       // answer to "why did nothing arrive?", so it is shown rather than hidden.
-      note: `${why} · ${l.people} ${l.people === 1 ? "parent" : "parents"} would be told`,
+      note: translate("admin.pushJobs.whyPeopleValueWouldBeTold", { why: why, people: l.people, value: l.people === 1 ? translate("admin.pushJobs.parent") : translate("admin.pushJobs.parents") }),
       sent: false,
     };
   }
@@ -110,7 +109,7 @@ const lineNote = (job: string, line: WouldSend): { key: string; note: string; se
     const l = line as AnnouncementLine;
     return {
       key: `${l.familyId}-${l.skillId}`,
-      note: `${l.skill} · ${String(l.theirLocalHour).padStart(2, "0")}:00 their time`,
+      note: translate("admin.pushJobs.skillValue00TheirTime", { skill: l.skill, value: String(l.theirLocalHour).padStart(2, "0") }),
       sent: l.alreadySent,
     };
   }
@@ -118,7 +117,7 @@ const lineNote = (job: string, line: WouldSend): { key: string; note: string; se
     const l = line as AbsenceLine;
     return {
       key: `${l.familyId}-${l.learnerId}`,
-      note: `away ${l.away} ${l.away === 1 ? "day" : "days"}`,
+      note: translate("admin.pushJobs.awayAwayValue", { away: l.away, value: l.away === 1 ? translate("admin.pushJobs.day") : translate("admin.pushJobs.days") }),
       sent: l.alreadySent,
     };
   }
@@ -126,14 +125,14 @@ const lineNote = (job: string, line: WouldSend): { key: string; note: string; se
     const l = line as DigestLine;
     return {
       key: l.familyId,
-      note: `${l.people} ${l.people === 1 ? "parent" : "parents"} asked for it`,
+      note: translate("admin.pushJobs.peopleValueAskedForIt", { people: l.people, value: l.people === 1 ? translate("admin.pushJobs.parent") : translate("admin.pushJobs.parents") }),
       sent: false,
     };
   }
   const l = line as SummaryLine;
   return {
     key: `${l.familyId}-${l.learnerId}`,
-    note: `due ${new Date(l.theirSundayEvening).toLocaleString()} their time`,
+    note: translate("admin.pushJobs.dueValueTheirTime", { value: new Date(l.theirSundayEvening).toLocaleString() }),
     sent: l.alreadySent,
   };
 };
@@ -142,9 +141,8 @@ const lineNote = (job: string, line: WouldSend): { key: string; note: string; se
 const Undelivered: React.FC<{ composed: number; sent?: number }> = ({ composed, sent }) =>
   composed > 0 && (sent ?? 0) === 0 ? (
     <p className="text-xs text-muted">
-      Nothing actually left the process. That is what the console push driver does — it logs the
-      notification instead of sending it — so on a deployment with <code>PUSH_DRIVER=console</code>{" "}
-      this is the job working.
+      {translate("admin.pushJobs.nothingActuallyLeftTheProcessThat")}{" "}<code>{translate("admin.pushJobs.pushDriverConsole")}</code>{" "}
+      {translate("admin.pushJobs.thisIsTheJobWorking")}
     </p>
   ) : null;
 
@@ -153,15 +151,13 @@ const Outcome: React.FC<{ run: JobRun }> = ({ run }) => {
   const r = run.report;
 
   if (r.skipped) {
-    return <p className="text-xs text-muted">Nothing sent — {r.skipped}.</p>;
+    return <p className="text-xs text-muted">{translate("admin.pushJobs.nothingSentSkipped", { skipped: r.skipped })}</p>;
   }
 
   if (run.job === "token-sweep") {
     return (
       <p className="text-xs text-ink">
-        Deleted {r.tokens ?? 0} dead {r.tokens === 1 ? "token" : "tokens"}, {r.notifications ?? 0}{" "}
-        old {r.notifications === 1 ? "notice" : "notices"} and {r.runs ?? 0} spent{" "}
-        {r.runs === 1 ? "claim" : "claims"}.
+        {translate("admin.pushJobs.deletedValueDeadValue2Value3Old", { value: r.tokens ?? 0, value2: r.tokens === 1 ? translate("admin.pushJobs.token") : translate("admin.pushJobs.tokens"), value3: r.notifications ?? 0, value4: r.notifications === 1 ? translate("admin.pushJobs.notice") : translate("admin.pushJobs.notices"), value5: r.runs ?? 0, value6: r.runs === 1 ? translate("admin.pushJobs.claim") : translate("admin.pushJobs.claims") })}
       </p>
     );
   }
@@ -194,11 +190,10 @@ const Outcome: React.FC<{ run: JobRun }> = ({ run }) => {
     return (
       <div className="space-y-2">
         <p className="text-xs text-muted">
-          {lines.length} {noun} across {r.families ?? 0}{" "}
-          {r.families === 1 ? "family" : "families"}. Nothing was sent and nothing was claimed.
+          {translate("admin.pushJobs.lengthNounAcrossValueValue2Nothing", { length: lines.length, noun: noun, value: r.families ?? 0, value2: r.families === 1 ? translate("admin.pushJobs.family") : translate("admin.pushJobs.families") })}
         </p>
         <UIDataTable<WouldSend>
-          caption="Notification preview"
+          caption={translate("admin.pushJobs.notificationPreview")}
           rows={lines}
           rowKey={(line) => lineNote(run.job, line).key}
           pageSize={10}
@@ -224,7 +219,7 @@ const Outcome: React.FC<{ run: JobRun }> = ({ run }) => {
             {
               key: "status",
               header: "Status",
-              render: (line) => lineNote(run.job, line).sent ? <Pill tone="off">SENT</Pill> : "Ready",
+              render: (line) => lineNote(run.job, line).sent ? <Pill tone="off">{translate("admin.pushJobs.sent")}</Pill> : "Ready",
               align: "right",
               nowrap: true,
             },
@@ -245,8 +240,7 @@ const Outcome: React.FC<{ run: JobRun }> = ({ run }) => {
   // should not be told to wait until Sunday.
   const nobody = !r.families && (
     <p className="text-xs text-ink">
-      Nothing to do — no browser on this deployment has notifications turned on yet. Turn them on
-      for one in Settings → Notifications, and this job will have somebody to reach.
+      {translate("admin.pushJobs.nothingToDoNoBrowserOn")}
     </p>
   );
 
@@ -255,9 +249,8 @@ const Outcome: React.FC<{ run: JobRun }> = ({ run }) => {
       return (
         nobody || (
           <p className="text-xs text-ink">
-            Nothing was due. It is nobody&rsquo;s chosen hour right now — the reminder goes at the
-            hour each parent picked, so this is the job working rather than failing. Press{" "}
-            <strong>Preview</strong> to read what it would say at that hour.
+            {translate("admin.pushJobs.nothingWasDueItIsNobody")}{" "}
+            <strong>{translate("admin.pushJobs.preview")}</strong>{" "}{translate("admin.pushJobs.toReadWhatItWouldSay")}
           </p>
         )
       );
@@ -266,8 +259,7 @@ const Outcome: React.FC<{ run: JobRun }> = ({ run }) => {
     return (
       <div className="space-y-1">
         <p className="text-xs text-ink">
-          {r.reminders ?? 0} {r.reminders === 1 ? "reminder" : "reminders"} and {r.streaks ?? 0}{" "}
-          streak {r.streaks === 1 ? "warning" : "warnings"} composed, {r.sent ?? 0} delivered.
+          {translate("admin.pushJobs.valueValue2AndValue3StreakValue4", { value: r.reminders ?? 0, value2: r.reminders === 1 ? translate("admin.pushJobs.reminder") : translate("admin.pushJobs.reminders"), value3: r.streaks ?? 0, value4: r.streaks === 1 ? translate("admin.pushJobs.warning") : translate("admin.pushJobs.warnings"), value5: r.sent ?? 0 })}
         </p>
         <Undelivered composed={composed} sent={r.sent} />
       </div>
@@ -279,8 +271,7 @@ const Outcome: React.FC<{ run: JobRun }> = ({ run }) => {
       return (
         nobody || (
           <p className="text-xs text-ink">
-            {r.skills ?? 0} {r.skills === 1 ? "skill" : "skills"} published recently, and every
-            family that can be reached has already been told. Nothing to say twice.
+            {translate("admin.pushJobs.valueValue2PublishedRecentlyAndEvery", { value: r.skills ?? 0, value2: r.skills === 1 ? translate("admin.pushJobs.skill") : translate("admin.pushJobs.skills") })}
           </p>
         )
       );
@@ -288,8 +279,7 @@ const Outcome: React.FC<{ run: JobRun }> = ({ run }) => {
     return (
       <div className="space-y-1">
         <p className="text-xs text-ink">
-          {r.skills ?? 0} {r.skills === 1 ? "skill" : "skills"} announced to {r.announcements}{" "}
-          {r.announcements === 1 ? "family" : "families"}, {r.sent ?? 0} delivered.
+          {translate("admin.pushJobs.valueValue2AnnouncedToAnnouncementsValue3", { value: r.skills ?? 0, value2: r.skills === 1 ? translate("admin.pushJobs.skill") : translate("admin.pushJobs.skills"), announcements: r.announcements, value3: r.announcements === 1 ? translate("admin.pushJobs.family") : translate("admin.pushJobs.families"), value4: r.sent ?? 0 })}
         </p>
         <Undelivered composed={r.announcements ?? 0} sent={r.sent} />
       </div>
@@ -299,13 +289,11 @@ const Outcome: React.FC<{ run: JobRun }> = ({ run }) => {
   if (run.job === "absence-check") {
     return r.absences ? (
       <p className="text-xs text-ink">
-        {r.absences} absence {r.absences === 1 ? "message" : "messages"} composed, {r.sent ?? 0} pushed and{" "}
-        {r.emailed ?? 0} emailed.
+        {translate("admin.pushJobs.absencesAbsenceValueComposedValue2Pushed", { absences: r.absences, value: r.absences === 1 ? translate("admin.pushJobs.message") : translate("admin.pushJobs.messages"), value2: r.sent ?? 0, value3: r.emailed ?? 0 })}
       </p>
     ) : (
       <p className="text-xs text-ink">
-        Nobody is due one. It goes once, at each parent&rsquo;s reminder hour, for a child away longer
-        than the threshold in Events. Press <strong>Preview</strong> to see who would be told.
+        {translate("admin.pushJobs.nobodyIsDueOneItGoes")}{" "}<strong>{translate("admin.pushJobs.preview")}</strong>{" "}{translate("admin.pushJobs.toSeeWhoWouldBeTold")}
       </p>
     );
   }
@@ -313,12 +301,11 @@ const Outcome: React.FC<{ run: JobRun }> = ({ run }) => {
   if (run.job === "daily-digest") {
     return r.digests ? (
       <p className="text-xs text-ink">
-        {r.digests} {r.digests === 1 ? "digest" : "digests"} composed, {r.emailed ?? 0} emailed.
+        {translate("admin.pushJobs.digestsValueComposedValue2Emailed", { digests: r.digests, value: r.digests === 1 ? translate("admin.pushJobs.digest") : translate("admin.pushJobs.digests"), value2: r.emailed ?? 0 })}
       </p>
     ) : (
       <p className="text-xs text-ink">
-        No digest was due. It goes at each parent&rsquo;s digest hour, only to parents who asked, and
-        only on a day a child practised.
+        {translate("admin.pushJobs.noDigestWasDueItGoes")}
       </p>
     );
   }
@@ -328,13 +315,11 @@ const Outcome: React.FC<{ run: JobRun }> = ({ run }) => {
       nobody || (
         <div className="space-y-1">
           <p className="text-xs text-ink">
-            Nothing was due. It is nobody&rsquo;s Sunday evening right now, which is this job
-            working rather than failing.
+            {translate("admin.pushJobs.nothingWasDueItIsNobody2")}
           </p>
           {r.nextDue && (
             <p className="text-xs text-muted">
-              Next due {new Date(r.nextDue).toLocaleString()} — that family&rsquo;s own time, not
-              yours. Press <strong>Preview</strong> to read what it will say.
+              {translate("admin.pushJobs.nextDue")}{" "}{new Date(r.nextDue).toLocaleString()}{" "}{translate("admin.pushJobs.thatFamilyRsquoSOwnTime")}{" "}<strong>{translate("admin.pushJobs.preview")}</strong>{" "}{translate("admin.pushJobs.toReadWhatItWillSay")}
             </p>
           )}
         </div>
@@ -345,8 +330,7 @@ const Outcome: React.FC<{ run: JobRun }> = ({ run }) => {
   return (
     <div className="space-y-1">
       <p className="text-xs text-ink">
-        {r.summaries ?? 0} {r.summaries === 1 ? "summary" : "summaries"} composed, {r.sent ?? 0}{" "}
-        delivered.
+        {translate("admin.pushJobs.valueValue2ComposedValue3Delivered", { value: r.summaries ?? 0, value2: r.summaries === 1 ? translate("admin.pushJobs.summary") : translate("admin.pushJobs.summaries"), value3: r.sent ?? 0 })}
       </p>
       <Undelivered composed={r.summaries ?? 0} sent={r.sent} />
     </div>
@@ -371,7 +355,7 @@ export const PushJobs: React.FC = () => {
     try {
       setRun(await runNotificationJob(job, preview));
     } catch {
-      setError("The job could not be run. Try again in a minute.");
+      setError(translate("admin.pushJobs.theJobCouldNotBeRun"));
     }
     setBusy(null);
   };
@@ -381,8 +365,8 @@ export const PushJobs: React.FC = () => {
   return (
     <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
       <UISectionHeader
-        title="Scheduled notifications"
-        subtitle="Run the work the clock normally does — or see what it would do"
+        title={translate("admin.pushJobs.scheduledNotifications")}
+        subtitle={translate("admin.pushJobs.runTheWorkTheClockNormally")}
         icon={<CalendarClock className="w-5 h-5 text-violet-600 dark:text-violet-400" />}
       />
 
@@ -406,7 +390,7 @@ export const PushJobs: React.FC = () => {
                   className={themeSystem.button("primary", "sm")}
                 >
                   <Eye className="w-4 h-4 mr-2" />
-                  {busy === `${job.id}:true` ? "Looking…" : "Preview"}
+                  {busy === `${job.id}:true` ? translate("admin.pushJobs.looking") : translate("admin.pushJobs.preview")}
                 </button>
               )}
               <button
@@ -415,7 +399,7 @@ export const PushJobs: React.FC = () => {
                 className={themeSystem.button("secondary", "sm")}
               >
                 <Play className="w-4 h-4 mr-2" />
-                {busy === `${job.id}:false` ? "Running…" : "Run now"}
+                {busy === `${job.id}:false` ? translate("admin.pushJobs.running") : translate("admin.pushJobs.runNow")}
               </button>
             </div>
           </div>
@@ -426,7 +410,7 @@ export const PushJobs: React.FC = () => {
         <div className="bg-surface-muted border border-line rounded-2xl px-4 py-3 space-y-2">
           <div className="flex items-center justify-between gap-3">
             <h4 className="text-sm font-bold text-ink font-mono">{run.job}</h4>
-            <Pill tone={run.preview ? "off" : "on"}>{run.preview ? "PREVIEW" : "RAN"}</Pill>
+            <Pill tone={run.preview ? "off" : "on"}>{run.preview ? translate("admin.pushJobs.preview2") : translate("admin.pushJobs.ran")}</Pill>
           </div>
           <Outcome run={run} />
         </div>
@@ -435,12 +419,7 @@ export const PushJobs: React.FC = () => {
       {error && <p className="text-xs text-rose-600 dark:text-rose-400">{error}</p>}
 
       <p className="text-xs text-muted">
-        <strong>Preview</strong> is the one to reach for at almost any hour: it drops the clock
-        these jobs are waiting on, sends nothing and claims nothing, so looking at Sunday does not
-        stop Sunday from happening. <em>Run now</em> does the real thing, and most of the time it
-        correctly does nothing — the clock, not the button, decides whose evening or whose chosen
-        hour it is. It is safe to press twice either way: the same record that makes the
-        scheduler&rsquo;s retries harmless applies here.
+        <strong>{translate("admin.pushJobs.preview")}</strong>{" "}{translate("admin.pushJobs.isTheOneToReachFor")}{" "}<em>{translate("admin.pushJobs.runNow")}</em>{" "}{translate("admin.pushJobs.doesTheRealThingAndMost")}
       </p>
     </section>
   );

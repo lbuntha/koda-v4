@@ -28,6 +28,12 @@ export interface Preferences {
   soundEnabled: boolean;
   /** Koda's spoken guidance. */
   voiceEnabled: boolean;
+  /**
+   * The language the app speaks, as a BCP 47 code — or null to follow the
+   * device. Any well-formed code is kept, even one this build has no catalog
+   * for: a newer device may have chosen it, and `lib/i18n` falls back safely.
+   */
+  language: string | null;
 }
 
 export const PREFERENCE_DEFAULTS: Preferences = {
@@ -38,6 +44,7 @@ export const PREFERENCE_DEFAULTS: Preferences = {
   // somebody deliberately turns the chimes on.
   soundEnabled: false,
   voiceEnabled: true,
+  language: null,
 };
 
 /** The key `SYNC_KINDS.preferences` already names, so a pulled doc lands here. */
@@ -47,6 +54,9 @@ const STORAGE_KEY = "koda_preferences_v1";
 const LEGACY_THEME_KEY = "synthesis_tutor_theme";
 const LEGACY_SOUND_KEY = "koda_sound_enabled";
 
+/** `en`, `km`, `pt-BR` — shape only; which ones exist is `lib/i18n`'s question. */
+const LANGUAGE_TAG = /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/;
+
 const listeners = new Set<() => void>();
 let version = 0;
 
@@ -55,6 +65,7 @@ const sanitise = (raw: Partial<Preferences>): Preferences => ({
   theme: raw.theme === "dark" ? "dark" : "light",
   soundEnabled: raw.soundEnabled === true,
   voiceEnabled: raw.voiceEnabled !== false,
+  language: typeof raw.language === "string" && LANGUAGE_TAG.test(raw.language) ? raw.language : null,
 });
 
 /**
@@ -69,6 +80,7 @@ const fromLegacyKeys = (): Preferences => {
       theme: localStorage.getItem(LEGACY_THEME_KEY) === "dark" ? "dark" : "light",
       soundEnabled: localStorage.getItem(LEGACY_SOUND_KEY) === "true",
       voiceEnabled: PREFERENCE_DEFAULTS.voiceEnabled,
+      language: PREFERENCE_DEFAULTS.language,
     });
   } catch {
     return { ...PREFERENCE_DEFAULTS };
@@ -148,7 +160,8 @@ export const PreferencesAPI = {
     if (
       next.theme === current.theme &&
       next.soundEnabled === current.soundEnabled &&
-      next.voiceEnabled === current.voiceEnabled
+      next.voiceEnabled === current.voiceEnabled &&
+      next.language === current.language
     ) {
       return;
     }

@@ -18,6 +18,7 @@ import {
   type NotificationPreferences,
 } from "../../lib/push";
 
+import { translate } from "../../lib/i18n";
 /** The email half of a person's choices, as the screen draws it. */
 interface EmailChoices {
   enabled: boolean;
@@ -252,7 +253,7 @@ export const NotificationsSettings: React.FC = () => {
     <div className="space-y-6">
     {pushConfigured && (
     <section>
-      <div className={l.groupLabel}>Notifications</div>
+      <div className={l.groupLabel}>{translate("admin.notificationsSettings.notifications")}</div>
       <div className={l.group}>
         <div className={l.row}>
           <div className="flex items-center gap-3 min-w-0">
@@ -266,7 +267,7 @@ export const NotificationsSettings: React.FC = () => {
               )}
             </span>
             <div className="min-w-0">
-              <h4 className={l.rowTitle}>Notifications on this device</h4>
+              <h4 className={l.rowTitle}>{translate("admin.notificationsSettings.notificationsOnThisDevice")}</h4>
               <p className={l.rowNote}>{note()}</p>
             </div>
           </div>
@@ -275,7 +276,7 @@ export const NotificationsSettings: React.FC = () => {
               checked={on}
               disabled={busy}
               onChange={() => void (on ? turnOff() : turnOn())}
-              label="Notifications on this device"
+              label={translate("admin.notificationsSettings.notificationsOnThisDevice")}
             />
           )}
         </div>
@@ -317,16 +318,16 @@ export const NotificationsSettings: React.FC = () => {
             ) && (
               <div className={l.row}>
                 <div className="min-w-0">
-                  <h4 className={l.rowTitle}>Reminder</h4>
+                  <h4 className={l.rowTitle}>{translate("admin.notificationsSettings.reminder")}</h4>
                   <p className={l.rowNote}>
-                    Once a day, if you have not practised.
+                    {translate("admin.notificationsSettings.onceADayIfYouHave")}
                   </p>
                 </div>
                 <select
                   disabled={busy}
                   value={schedule.reminderHour}
                   onChange={(e) => void changeSchedule({ reminderHour: Number(e.target.value) })}
-                  aria-label="The hour to be reminded at"
+                  aria-label={translate("admin.notificationsSettings.theHourToBeRemindedAt")}
                   className="bg-surface border border-line rounded-2xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-indigo-500"
                 >
                   {HOURS.map((hour) => (
@@ -340,13 +341,13 @@ export const NotificationsSettings: React.FC = () => {
 
             <div className={l.row}>
               <div className="min-w-0">
-                <h4 className={l.rowTitle}>Quiet hours</h4>
+                <h4 className={l.rowTitle}>{translate("admin.notificationsSettings.quietHours")}</h4>
                 <p className={l.rowNote}>
                   {schedule.quietFrom === schedule.quietTo
-                    ? "Alerts can arrive anytime."
-                    : `No alerts from ${hourLabel(schedule.quietFrom)} to ${hourLabel(
+                    ? translate("admin.notificationsSettings.alertsCanArriveAnytime")
+                    : translate("admin.notificationsSettings.noAlertsFromValueToValue2", { value: hourLabel(schedule.quietFrom), value2: hourLabel(
                         schedule.quietTo,
-                      )}.`}
+                      ) })}
                 </p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
@@ -354,7 +355,7 @@ export const NotificationsSettings: React.FC = () => {
                   disabled={busy}
                   value={schedule.quietFrom}
                   onChange={(e) => void changeSchedule({ quietFrom: Number(e.target.value) })}
-                  aria-label="Quiet hours start"
+                  aria-label={translate("admin.notificationsSettings.quietHoursStart")}
                   className="bg-surface border border-line rounded-2xl px-2 py-2 text-sm text-ink focus:outline-none focus:border-indigo-500"
                 >
                   {HOURS.map((hour) => (
@@ -363,12 +364,12 @@ export const NotificationsSettings: React.FC = () => {
                     </option>
                   ))}
                 </select>
-                <span className="text-xs text-muted">to</span>
+                <span className="text-xs text-muted">{translate("admin.notificationsSettings.to")}</span>
                 <select
                   disabled={busy}
                   value={schedule.quietTo}
                   onChange={(e) => void changeSchedule({ quietTo: Number(e.target.value) })}
-                  aria-label="Quiet hours end"
+                  aria-label={translate("admin.notificationsSettings.quietHoursEnd")}
                   className="bg-surface border border-line rounded-2xl px-2 py-2 text-sm text-ink focus:outline-none focus:border-indigo-500"
                 >
                   {HOURS.map((hour) => (
@@ -385,9 +386,9 @@ export const NotificationsSettings: React.FC = () => {
         {on && deploymentSends && (
           <div className={l.row}>
             <div className="min-w-0">
-              <h4 className={l.rowTitle}>Test notification</h4>
+              <h4 className={l.rowTitle}>{translate("admin.notificationsSettings.testNotification")}</h4>
               <p className={l.rowNote}>
-                {tested ?? "Test notifications on this device."}
+                {tested ?? translate("admin.notificationsSettings.testNotificationsOnThisDevice")}
               </p>
             </div>
             <button
@@ -395,7 +396,7 @@ export const NotificationsSettings: React.FC = () => {
               onClick={() => void sendMyself()}
               className={themeSystem.button("secondary", "sm")}
             >
-              Send
+              {translate("admin.notificationsSettings.send")}
             </button>
           </div>
         )}
@@ -405,7 +406,7 @@ export const NotificationsSettings: React.FC = () => {
 
     {showEmail && email && (
       <section>
-        <div className={l.groupLabel}>Email updates</div>
+        <div className={l.groupLabel}>{translate("admin.notificationsSettings.emailUpdates")}</div>
         <div className={l.group}>
           {!email.verified ? (
             <div className={l.row}>
@@ -414,9 +415,9 @@ export const NotificationsSettings: React.FC = () => {
                   <Mail className="text-ink" />
                 </span>
                 <div className="min-w-0">
-                  <h4 className={l.rowTitle}>Email updates</h4>
+                  <h4 className={l.rowTitle}>{translate("admin.notificationsSettings.emailUpdates")}</h4>
                   <p className={l.rowNote}>
-                    Verify {email.address ?? "your email address"} to get updates by email.
+                    {translate("admin.notificationsSettings.verifyValueToGetUpdatesBy", { value: email.address ?? translate("admin.notificationsSettings.yourEmailAddress") })}
                   </p>
                 </div>
               </div>
@@ -429,18 +430,18 @@ export const NotificationsSettings: React.FC = () => {
                     <Mail className="text-ink" />
                   </span>
                   <div className="min-w-0">
-                    <h4 className={l.rowTitle}>Email updates</h4>
+                    <h4 className={l.rowTitle}>{translate("admin.notificationsSettings.emailUpdates")}</h4>
                     <p className={l.rowNote}>
                       {email.stopped
-                        ? "Koda won't email you updates. Account notices still arrive."
-                        : `Sent to ${email.address}.`}
+                        ? translate("admin.notificationsSettings.kodaWonTEmailYouUpdates")
+                        : translate("admin.notificationsSettings.sentToAddress", { address: email.address })}
                     </p>
                   </div>
                 </div>
                 <UIToggle
                   checked={!email.stopped}
                   onChange={() => void toggleEmail("*", email.stopped)}
-                  label="Email updates"
+                  label={translate("admin.notificationsSettings.emailUpdates")}
                 />
               </div>
               {!email.stopped &&
@@ -453,7 +454,7 @@ export const NotificationsSettings: React.FC = () => {
                     <UIToggle
                       checked={kind.on}
                       onChange={() => void toggleEmail(kind.id, !kind.on)}
-                      label={`${kind.label} emails`}
+                      label={translate("admin.notificationsSettings.labelEmails", { label: kind.label })}
                     />
                   </div>
                 ))}
@@ -462,14 +463,14 @@ export const NotificationsSettings: React.FC = () => {
                 email.kinds.some((kind) => kind.id === "learn.daily_digest" && kind.on) && (
                   <div className={l.row}>
                     <div className="min-w-0">
-                      <h4 className={l.rowTitle}>Digest time</h4>
-                      <p className={l.rowNote}>A note of the day, on days anyone practised.</p>
+                      <h4 className={l.rowTitle}>{translate("admin.notificationsSettings.digestTime")}</h4>
+                      <p className={l.rowNote}>{translate("admin.notificationsSettings.aNoteOfTheDayOn")}</p>
                     </div>
                     <select
                       disabled={busy}
                       value={schedule.digestHour ?? 19}
                       onChange={(e) => void changeSchedule({ digestHour: Number(e.target.value) })}
-                      aria-label="The hour the daily digest is sent"
+                      aria-label={translate("admin.notificationsSettings.theHourTheDailyDigestIs")}
                       className="bg-surface border border-line rounded-2xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-indigo-500"
                     >
                       {HOURS.map((hour) => (

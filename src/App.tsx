@@ -141,6 +141,8 @@ const SkillManagerPage = lazy(() =>
   import("./components/skills/SkillManagerPage").then((m) => ({ default: m.SkillManagerPage })),
 );
 const LibraryPage = lazy(() => import("./library/LibraryPage").then((m) => ({ default: m.LibraryPage })));
+const TracePage = lazy(() => import("./trace/TracePage").then((m) => ({ default: m.TracePage })));
+const TraceStudio = lazy(() => import("./trace/studio/TraceStudio").then((m) => ({ default: m.TraceStudio })));
 const LibraryStudio = lazy(() => import("./library/studio/LibraryStudio").then((m) => ({ default: m.LibraryStudio })));
 const SvgAssetsPage = lazy(() =>
   import("./components/SvgAssetsPage").then((m) => ({ default: m.SvgAssetsPage })),
@@ -193,6 +195,8 @@ export default function App() {
   // `content:write` in the policy table. Hiding the nav entry is not enough on
   // its own: the tab id survives a sign-out, so the page itself is gated too.
   const canEditArt = Boolean(session && can("content:write"));
+  // Trace Studio is its own grant: a Koda admin gives it to chosen adults (never a child).
+  const canTrace = Boolean(session && can("trace:create"));
   // The deployment's own pages — Ask Koda and Admin. One right, because both
   // decide what every family on this Koda gets rather than what one family sets.
   const canOperate = Boolean(session && can("system:write"));
@@ -272,6 +276,8 @@ export default function App() {
     | "assets"
     | "library"
     | "library-studio"
+    | "trace"
+    | "trace-studio"
     | "users"
     | "roles"
     | "children"
@@ -345,6 +351,7 @@ export default function App() {
     if (activeTab === "children" && !canManageChildren) setActiveTab("home");
     if (activeTab === "assets" && !canEditArt) setActiveTab("home");
     if (activeTab === "library-studio" && !canEditArt) setActiveTab("home");
+    if (activeTab === "trace-studio" && !canTrace) setActiveTab("home");
     if (activeTab === "skills" && !canManageSkills) setActiveTab("home");
     if (activeTab === "koda" && !canOperate) setActiveTab("home");
   }, [
@@ -1074,6 +1081,20 @@ export default function App() {
             </Deferred>
           )}
 
+          {/* TAB: TRACE STUDIO — make trace items: strokes, steps, tests (content:write) */}
+          {activeTab === "trace-studio" && canTrace && (
+            <Deferred label="Loading Trace Studio">
+              <TraceStudio />
+            </Deferred>
+          )}
+
+          {/* TAB: KODA TRACE — write and draw, stroke by stroke */}
+          {activeTab === "trace" && (
+            <Deferred label="Loading Trace">
+              <TracePage canCreate={canTrace} onAwardXp={(earnedXp) => setUserProgress((prev) => ({ ...prev, xp: prev.xp + earnedXp }))} />
+            </Deferred>
+          )}
+
           {activeTab === "leaderboard" && (
             <Deferred label="Loading buddy leaderboard">
               <LeaderboardPage />
@@ -1115,7 +1136,7 @@ export default function App() {
               well as in the menu: a tab id survives a sign-out. */}
           {activeTab === "koda" && canOperate && (
             <Deferred label="Loading Ask Koda">
-              <KodaPage />
+              <KodaPage onOpenKeys={() => setActiveTab("keys")} />
             </Deferred>
           )}
 

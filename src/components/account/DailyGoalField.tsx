@@ -4,6 +4,7 @@ import { Minus, Plus, Target } from "lucide-react";
 import { DAILY_GOAL_MAX, DAILY_GOAL_MIN } from "../../lib/dailyGoal";
 import { themeSystem } from "../../lib/themeSystem";
 import { playSound } from "../../utils/audio";
+import { useT } from "../../lib/i18n";
 
 /**
  * How many rounds a day, as a control two very different readers can use.
@@ -23,7 +24,9 @@ export const DailyGoalField: React.FC<{
   label?: string;
   hint?: string;
   disabled?: boolean;
-}> = ({ value, onChange, label = "Daily goal", hint, disabled = false }) => {
+}> = ({ value, onChange, label: given, hint, disabled = false }) => {
+  const { t } = useT();
+  const label = given ?? t("home.dailyGoal");
   const step = (by: number) => {
     const next = Math.min(DAILY_GOAL_MAX, Math.max(DAILY_GOAL_MIN, value + by));
     if (next === value) return;
@@ -39,7 +42,7 @@ export const DailyGoalField: React.FC<{
         </span>
         <div className="min-w-0">
           <h4 className="font-mono text-sm font-bold text-ink">{label}</h4>
-          <p className="text-xs text-muted">{hint ?? "Rounds to finish each day"}</p>
+          <p className="text-xs text-muted">{hint ?? t("goal.hint")}</p>
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-2">
@@ -47,7 +50,7 @@ export const DailyGoalField: React.FC<{
           type="button"
           onClick={() => step(-1)}
           disabled={disabled || value <= DAILY_GOAL_MIN}
-          aria-label={`Lower ${label.toLowerCase()}`}
+          aria-label={t("goal.lower", { label })}
           className={themeSystem.button("secondary", "sm")}
         >
           <Minus />
@@ -62,7 +65,7 @@ export const DailyGoalField: React.FC<{
           type="button"
           onClick={() => step(1)}
           disabled={disabled || value >= DAILY_GOAL_MAX}
-          aria-label={`Raise ${label.toLowerCase()}`}
+          aria-label={t("goal.raise", { label })}
           className={themeSystem.button("secondary", "sm")}
         >
           <Plus />

@@ -5,6 +5,7 @@ import { FeatureGate } from "../lib/featureGate";
 import { usePermissions } from "../lib/sync";
 import { UIButton, UIModal } from "./ui";
 
+import { translate } from "../lib/i18n";
 /**
  * What a family is told when they reach for something their plan does not cover.
  *
@@ -38,14 +39,14 @@ const FEATURE_COPY: Record<
   { title: string; blurb: string; kept: string; ask: string }
 > = {
   "ai.koda": {
-    title: "Ask Koda",
-    blurb: "Koda can talk you through a problem and answer out loud. That comes with a paid plan.",
+    get title() { return translate("app.upgradePrompt.askKoda"); },
+    get blurb() { return translate("app.upgradePrompt.kodaCanTalkYouThroughA"); },
     kept: "Your lessons, stars, streak and badges all stay yours.",
     ask: "Ask your grown-up about turning Koda on.",
   },
   "course.premium": {
-    title: "More lessons ahead",
-    blurb: "You've finished the free lessons in this skill. The rest come with a paid plan.",
+    get title() { return translate("app.upgradePrompt.moreLessonsAhead"); },
+    get blurb() { return translate("app.upgradePrompt.youVeFinishedTheFreeLessons"); },
     kept: "Your lessons, stars, streak and badges all stay yours.",
     ask: "Ask your grown-up about the rest.",
   },
@@ -80,10 +81,10 @@ export const UpgradePrompt: React.FC<UpgradePromptProps> = ({ onOpenPlan }) => {
       <UIModal
         isOpen
         onClose={() => FeatureGate.dismiss()}
-        title={copy?.title ?? "Switched off"}
+        title={copy?.title ?? translate("app.upgradePrompt.switchedOff")}
         footer={
           <UIButton variant="primary" onClick={() => FeatureGate.dismiss()}>
-            Okay
+            {translate("app.upgradePrompt.okay")}
           </UIButton>
         }
       >
@@ -91,12 +92,11 @@ export const UpgradePrompt: React.FC<UpgradePromptProps> = ({ onOpenPlan }) => {
           <div className="flex items-start gap-3 rounded-2xl border border-indigo-200 bg-indigo-50 p-4 dark:border-indigo-800 dark:bg-indigo-950/40">
             <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-indigo-600 dark:text-indigo-300" />
             <p className="text-sm text-indigo-900 dark:text-indigo-200">
-              Koda&rsquo;s help is switched off for you right now. Your grown-up chose that, and
-              they can turn it back on.
+              {translate("app.upgradePrompt.kodaRsquoSHelpIsSwitched")}
             </p>
           </div>
           <p className="text-sm text-muted">
-            Everything else still works — every lesson, every star, your streak and your badges.
+            {translate("app.upgradePrompt.everythingElseStillWorksEveryLesson")}
           </p>
         </div>
       </UIModal>
@@ -105,8 +105,8 @@ export const UpgradePrompt: React.FC<UpgradePromptProps> = ({ onOpenPlan }) => {
 
   if (!feature) return null;
   const copy = FEATURE_COPY[feature] ?? {
-    title: "On a paid plan",
-    blurb: "This part of Koda comes with a paid plan.",
+    title: translate("app.upgradePrompt.onAPaidPlan"),
+    blurb: translate("app.upgradePrompt.thisPartOfKodaComesWith"),
     kept: "Your lessons, stars, streak and badges all stay yours.",
     ask: "Ask your grown-up about it.",
   };
@@ -120,7 +120,7 @@ export const UpgradePrompt: React.FC<UpgradePromptProps> = ({ onOpenPlan }) => {
         mayBuy && onOpenPlan ? (
           <>
             <UIButton variant="secondary" onClick={() => FeatureGate.dismiss()}>
-              Not now
+              {translate("app.upgradePrompt.notNow")}
             </UIButton>
             <UIButton
               variant="primary"
@@ -129,12 +129,12 @@ export const UpgradePrompt: React.FC<UpgradePromptProps> = ({ onOpenPlan }) => {
                 onOpenPlan();
               }}
             >
-              See plans
+              {translate("app.upgradePrompt.seePlans")}
             </UIButton>
           </>
         ) : (
           <UIButton variant="primary" onClick={() => FeatureGate.dismiss()}>
-            Got it
+            {translate("app.upgradePrompt.gotIt")}
           </UIButton>
         )
       }

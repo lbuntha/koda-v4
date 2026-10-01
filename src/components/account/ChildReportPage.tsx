@@ -37,6 +37,7 @@ import { SKILLS } from "../../skills/registry";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIAvatar, UIBadge, UIButton, UISectionHeader, UIStatGrid, UIStatTile } from "../ui";
 import { NoAccess } from "./NoAccess";
+import { formatDate, translate, useT } from "../../lib/i18n";
 
 /**
  * What one child has been doing, for the adult who looks after them.
@@ -151,31 +152,27 @@ const orderWithin = (status: MasteryStatus, concepts: ConceptMastery[]): Concept
 
 /** "3 days ago", and "today" rather than "0 days ago". */
 const sinceWords = (iso?: string, now: Date = new Date()): string => {
-  if (!iso) return "never";
+  if (!iso) return translate("report.since.never");
   const then = new Date(iso);
-  if (Number.isNaN(then.getTime())) return "never";
+  if (Number.isNaN(then.getTime())) return translate("report.since.never");
   const days = Math.floor((now.getTime() - then.getTime()) / 86_400_000);
-  if (days <= 0) return "today";
-  if (days === 1) return "yesterday";
-  if (days < 7) return `${days} days ago`;
-  if (days < 14) return "last week";
-  return new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short" }).format(then);
+  if (days <= 0) return translate("report.since.today");
+  if (days === 1) return translate("report.since.yesterday");
+  if (days < 7) return translate("report.since.daysAgo", { count: days });
+  if (days < 14) return translate("report.since.lastWeek");
+  return formatDate(then, { day: "numeric", month: "short" });
 };
 
 /** A practised day, named the way a parent would say it. */
 const dayWords = (day: string, now: Date = new Date()): string => {
   const today = localDayOf(now);
-  if (day === today) return "Today";
+  if (day === today) return translate("report.day.today");
   const yesterday = new Date(now);
   yesterday.setDate(yesterday.getDate() - 1);
-  if (day === localDayOf(yesterday)) return "Yesterday";
+  if (day === localDayOf(yesterday)) return translate("report.day.yesterday");
   const date = new Date(`${day}T00:00:00`);
   if (Number.isNaN(date.getTime())) return day;
-  return new Intl.DateTimeFormat(undefined, {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  }).format(date);
+  return formatDate(date, { weekday: "short", day: "numeric", month: "short" });
 };
 
 /** "4s", "1m 10s" — a typical answer, in units a person uses out loud. */
@@ -212,7 +209,7 @@ const StatDetail: React.FC<{
       <button
         type="button"
         onClick={onClose}
-        aria-label="Hide detail"
+        aria-label={translate("report.hideDetail")}
         className="-m-1 shrink-0 cursor-pointer rounded-xl p-1 text-muted transition hover:bg-white dark:hover:bg-surface"
       >
         <X className="h-4 w-4" />
@@ -232,14 +229,14 @@ const StatDetail: React.FC<{
 const spreadWords = (
   rows: Contribution[],
   names: Map<string, ConceptName>,
-  what: string,
+  what: "questions" | "finishes",
 ): string => {
   const top = rows[0];
   if (!top) return "";
   const lesson = names.get(top.concept.conceptKey)?.lesson ?? top.concept.conceptKey;
-  if (rows.length === 1) return `All of it on ${lesson}.`;
-  if (top.share >= 0.5) return `Over half of ${what} on ${lesson}.`;
-  return `Spread across ${rows.length} lessons, most on ${lesson}.`;
+  if (rows.length === 1) return translate("report.spread.all", { lesson });
+  if (top.share >= 0.5) return translate(`report.spread.half.${what}`, { lesson });
+  return translate("report.spread.across", { count: rows.length, lesson });
 };
 
 /**
@@ -299,10 +296,10 @@ const ConceptRow: React.FC<{ concept: ConceptMastery; name: ConceptName; showSki
   const right = rightFirstTime(concept);
   const evidence =
     concept.questionsAnswered === 0
-      ? "not played yet"
+      ? translate("report.evidence.notPlayed")
       : gap > 0
-        ? `${concept.questionsAnswered} ${concept.questionsAnswered === 1 ? "question" : "questions"} so far`
-        : `${right} of ${concept.questionsAnswered} right first time · ${concept.daysPractised} ${concept.daysPractised === 1 ? "day" : "days"}`;
+        ? translate("report.evidence.soFar", { count: concept.questionsAnswered })
+        : `${translate("report.evidence.rightOf", { right, total: concept.questionsAnswered })} · ${translate("streak.days", { count: concept.daysPractised })}`;
 
   return (
     <li className="rounded-2xl border border-line bg-surface-muted p-3">
@@ -340,7 +337,7 @@ const StatusGroup: React.FC<{
       {/* "1" on its own read as a rank, or a score. It is a count of lessons,
           so it says so. */}
       <span className="text-xs font-bold tabular-nums text-ink">
-        {concepts.length} {concepts.length === 1 ? "lesson" : "lessons"}
+        {translate("skillCard.lessons", { count: concepts.length })}
       </span>
       {/* On a phone the sentence takes a line of its own (`order-last` plus
           `basis-full`) so the badge, the count and the chevron stay on one row
@@ -371,6 +368,7 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
   onBack,
 }) => {
   const { can } = usePermissions();
+  const { t, language } = useT();
   const canRead = can("learner_data:read");
   const [report, setReport] = useState<ChildReport | null>(null);
   const [loading, setLoading] = useState(true);
@@ -392,7 +390,7 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
         const problem = err as ApiError;
         setError(
           problem.isOffline
-            ? "No connection to the data service, so this is not available right now."
+            ? t("report.offline")
             : problem.message,
         );
       })
@@ -448,7 +446,8 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
       report
         ? whatNext(report, learnerName, (key) => names.get(key)?.lesson ?? key)
         : null,
-    [report, learnerName, names],
+    // `language`: the advice is a sentence, and it is worded in the language on screen.
+    [report, learnerName, names, language],
   );
 
   /* Right when they answer, but reaching for a hint most of the time. */
@@ -466,9 +465,9 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
   if (!canRead) {
     return (
       <NoAccess
-        title={`${learnerName}'s progress`}
+        title={t("report.progressOf", { name: learnerName })}
         permission="learner_data:read"
-        what="Only family members with access to a child's record can see what they have practised."
+        what={t("report.noAccess")}
       />
     );
   }
@@ -500,13 +499,13 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
             <div className="min-w-0">
               <h1 className="koda-admin-page-title truncate text-2xl sm:text-3xl">{learnerName}</h1>
               <p className="mt-1 text-sm text-[#6D6997] dark:text-muted">
-                What {learnerName} has practised, and what it shows.
+                {t("report.subtitle", { name: learnerName })}
               </p>
             </div>
           </div>
           {onBack && (
             <UIButton variant="secondary" size="sm" icon={<ArrowLeft />} onClick={onBack}>
-              Back
+              {t("reader.back")}
             </UIButton>
           )}
         </header>
@@ -520,24 +519,19 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
           */}
         {report && tooEarlyToRead(report) && (
           <p className={themeSystem.flash("info")}>
-            Still getting to know {learnerName}. There is enough here to see the shape of what
-            they are meeting, but not yet enough to say how securely — a few more rounds will
-            settle it.
+            {t("report.tooEarly", { name: learnerName })}
           </p>
         )}
 
         {loading ? (
           <div className="rounded-2xl border border-line bg-white p-8 text-center text-sm text-muted dark:bg-surface">
-            Reading {learnerName}'s record…
+            {t("report.loading", { name: learnerName })}
           </div>
         ) : !played ? (
           <section className={themeSystem.card("default", "p-8 text-center")}>
             <BookOpen className="mx-auto h-10 w-10 text-indigo-300" />
-            <h2 className="mt-3 text-lg font-semibold text-ink">Nothing to show yet</h2>
-            <p className="mx-auto mt-1 max-w-md text-sm text-muted">
-              Once {learnerName} has played a few rounds, this page fills in with what they know,
-              what they are working on, and where they are going wrong.
-            </p>
+            <h2 className="mt-3 text-lg font-semibold text-ink">{t("common.nothingYet")}</h2>
+            <p className="mx-auto mt-1 max-w-md text-sm text-muted">{t("report.emptyNote", { name: learnerName })}</p>
           </section>
         ) : (
           <>
@@ -563,7 +557,7 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
               >
                 <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-indigo-600 dark:text-indigo-400">
                   <Lightbulb className="h-4 w-4" aria-hidden="true" />
-                  Do this next
+                  {t("report.doNext")}
                 </p>
                 <p className="text-lg font-bold leading-snug text-ink sm:text-xl">{move.action}</p>
                 <p className="text-sm leading-snug text-muted">{move.why}</p>
@@ -582,15 +576,15 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
               */}
             <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
               <UISectionHeader
-                title="How often"
-                subtitle={`How much ${learnerName} is practising. Little and often is what makes it stay.`}
+                title={t("report.howOften")}
+                subtitle={t("report.howOftenNote", { name: learnerName })}
                 icon={<CalendarDays className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
               />
               <UIStatGrid>
                 <UIStatTile
                   icon={<Clock />}
                   value={sinceWords(report?.rhythm.lastSeenTs)}
-                  label="Last played"
+                  label={t("report.lastPlayed")}
                 />
                 {/* Emerald rather than the amber `streak` tone. This is a
                     count of days, not the flame, and a saturated yellow at
@@ -599,8 +593,8 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
                 <UIStatTile
                   icon={<CalendarDays />}
                   tone="success"
-                  value={`${report?.rhythm.daysThisWeek ?? 0} of 7`}
-                  label="Days this week"
+                  value={t("skillCard.xOfY", { done: report?.rhythm.daysThisWeek ?? 0, total: 7 })}
+                  label={t("report.daysThisWeek")}
                 />
                 {/* The two tiles that open. A total is a fact; the lessons
                     behind it are the first thing a parent can act on, and
@@ -608,13 +602,13 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
                 <UIStatTile
                   icon={<Target />}
                   value={report?.rhythm.roundsEver ?? 0}
-                  label="Lessons finished"
+                  label={t("report.lessonsFinished")}
                   onClick={() => setDetail((open) => (open === "lessons" ? null : "lessons"))}
                 />
                 <UIStatTile
                   icon={<BookOpen />}
                   value={report?.rhythm.questionsEver ?? 0}
-                  label="Questions answered"
+                  label={t("report.questionsAnswered")}
                   onClick={() => setDetail((open) => (open === "questions" ? null : "questions"))}
                 />
               </UIStatGrid>
@@ -624,18 +618,18 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
                   these readers holding a phone. */}
               {detail === null && (
                 <p className="text-xs leading-snug text-muted">
-                  Tap a number to see which lessons it came from.
+                  {t("report.tapNumber")}
                 </p>
               )}
 
               {detail === "questions" && (
                 <StatDetail
-                  title={`Where the ${report?.rhythm.questionsEver ?? 0} questions came from`}
-                  hint={`${spreadWords(answerRows, names, "the questions")} The second line is the one to read: lots of questions but few right first time means that lesson needs help.`}
+                  title={t("report.questionsFrom", { count: report?.rhythm.questionsEver ?? 0 })}
+                  hint={`${spreadWords(answerRows, names, "questions")} ${t("report.questionsHint")}`}
                   onClose={() => setDetail(null)}
                 >
                   {answerRows.length === 0 ? (
-                    <p className="mt-3 text-sm text-muted">Nothing answered yet.</p>
+                    <p className="mt-3 text-sm text-muted">{t("report.nothingAnswered")}</p>
                   ) : (
                     <ul className="mt-3 grid gap-2 sm:grid-cols-2">
                       {answerRows.map((row) => (
@@ -648,8 +642,8 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
                             }
                           }
                           showSkill={manySkills}
-                          count={`${row.count} ${row.count === 1 ? "question" : "questions"}`}
-                          note={`${rightFirstTime(row.concept)} right first time`}
+                          count={t("studio.questions", { count: row.count })}
+                          note={t("report.rightFirstTime", { count: rightFirstTime(row.concept) })}
                         />
                       ))}
                     </ul>
@@ -659,16 +653,13 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
 
               {detail === "lessons" && (
                 <StatDetail
-                  title={`The ${report?.rhythm.roundsEver ?? 0} finished ${
-                    (report?.rhythm.roundsEver ?? 0) === 1 ? "round" : "rounds"
-                  }`}
-                  hint={`${spreadWords(lessonRows, names, "the finishes")} A round played all the way to the end — stopping half way still counts as practice, but not as finished.`}
+                  title={t("report.finishedRounds", { count: report?.rhythm.roundsEver ?? 0 })}
+                  hint={`${spreadWords(lessonRows, names, "finishes")} ${t("report.finishedHint")}`}
                   onClose={() => setDetail(null)}
                 >
                   {lessonRows.length === 0 ? (
                     <p className="mt-3 text-sm text-muted">
-                      Nothing finished yet — every round so far was left part-done. Worth sitting
-                      with {learnerName} for one short lesson from start to end.
+                      {t("report.nothingFinished", { name: learnerName })}
                     </p>
                   ) : (
                     <ul className="mt-3 grid gap-2 sm:grid-cols-2">
@@ -682,8 +673,8 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
                             }
                           }
                           showSkill={manySkills}
-                          count={`${row.count} finished`}
-                          note={`last ${sinceWords(row.concept.lastSeenTs)}`}
+                          count={t("report.nFinished", { count: row.count })}
+                          note={t("report.last", { when: sinceWords(row.concept.lastSeenTs) })}
                         />
                       ))}
                     </ul>
@@ -712,13 +703,13 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
                 className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}
               >
                 <UISectionHeader
-                  title="Recent activity"
+                  title={t("report.recent")}
                   /* Says how many, because the list is capped: "the days
                      they played" would be a promise of all of them. */
                   subtitle={
                     (report?.activity.length ?? 0) === 1
-                      ? `The one day ${learnerName} has played, and what they worked on`
-                      : `The last ${report?.activity.length ?? 0} days ${learnerName} played, and what they worked on`
+                      ? t("report.recentOne", { name: learnerName })
+                      : t("report.recentMany", { count: report?.activity.length ?? 0, name: learnerName })
                   }
                   icon={<History className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
                 />
@@ -728,7 +719,7 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
                       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
                         <p className="font-mono text-sm font-bold text-ink">{dayWords(day)}</p>
                         <span className="font-mono text-[11px] tabular-nums text-muted">
-                          {conceptKeys.length} {conceptKeys.length === 1 ? "lesson" : "lessons"}
+                          {t("skillCard.lessons", { count: conceptKeys.length })}
                         </span>
                       </div>
                       <ul className="mt-2 flex flex-wrap gap-1.5">
@@ -756,8 +747,8 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
             {/* WHERE THEY ARE — the concept map, trouble first. */}
             <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
               <UISectionHeader
-                title="Every lesson so far"
-                subtitle={`How ${learnerName} is doing on each one, and what it needs next`}
+                title={t("report.everyLesson")}
+                subtitle={t("report.everyLessonNote", { name: learnerName })}
                 icon={<Target className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
               />
               <div className="space-y-2">
@@ -784,8 +775,8 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
             {troubles.length > 0 && (
             <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
               <UISectionHeader
-                title="Mistakes to watch"
-                subtitle={`The same slip, more than once — and what helps with it`}
+                title={t("report.mistakes")}
+                subtitle={t("report.mistakesNote")}
                 icon={<CircleHelp className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
               />
               <ul className="space-y-2">
@@ -794,7 +785,7 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
                     <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
                       <p className="text-sm font-bold text-ink">{ERROR_COPY[kind].label}</p>
                       <span className="shrink-0 text-xs tabular-nums text-muted">
-                        {count} {count === 1 ? "time" : "times"}
+                        {t("report.times", { count })}
                       </span>
                     </div>
                     <p className="mt-1 text-sm text-muted">{ERROR_COPY[kind].detail}</p>
@@ -803,7 +794,7 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
                         without it a parent is told their child is going wrong
                         and left to work out the rest. */}
                     <p className="mt-1.5 text-sm font-semibold text-ink">
-                      Try: {ERROR_COPY[kind].fix}
+                      {t("report.try", { fix: ERROR_COPY[kind].fix })}
                     </p>
                   </li>
                 ))}
@@ -817,8 +808,8 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
                 className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}
               >
                 <UISectionHeader
-                  title="Still using hints"
-                  subtitle={`${learnerName} gets these right, but asks for a hint most times. One round with the hints closed is the next step.`}
+                  title={t("report.stillHints")}
+                  subtitle={t("report.stillHintsNote", { name: learnerName })}
                   icon={<HandHelping className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
                 />
                 <ul className="grid gap-2 sm:grid-cols-2">
@@ -833,8 +824,10 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
                       {/* A count, not a rate: "help on 75%" makes a parent do
                           the arithmetic before they can picture it. */}
                       <span className="shrink-0 text-xs tabular-nums text-muted">
-                        {Math.round(concept.supportRate * concept.questionsAnswered)} hints in{" "}
-                        {concept.questionsAnswered}
+                        {t("report.hintsIn", {
+                          hints: Math.round(concept.supportRate * concept.questionsAnswered),
+                          total: concept.questionsAnswered,
+                        })}
                       </span>
                     </li>
                   ))}

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { themeSystem } from "../../lib/themeSystem";
+import { translate } from "../../lib/i18n";
 
 /**
  * The chrome a phone wears: a toolbar at the top and a tab bar at the bottom,
@@ -129,7 +130,7 @@ export interface UITabBarProps {
  */
 export const UITabBar: React.FC<UITabBarProps> = ({ items, activeId, onSelect }) => (
   <div className={s.tabBarWrap}>
-    <nav className={s.tabBar} aria-label="Main">
+    <nav className={s.tabBar} aria-label={translate("common.mainNav")}>
       {items.map((item) => {
         const isActive = item.id === activeId;
         return (

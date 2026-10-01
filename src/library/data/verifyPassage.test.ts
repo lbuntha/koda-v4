@@ -110,6 +110,27 @@ describe("rule 1 — the answer is in the story", () => {
     expect(failingRules(b)).toEqual([1]);
   });
 
+  it("fails a picture that is not named for its word until a person confirms that exact picture", () => {
+    const p = clone(MARKET);
+    p.pictures.market = "nest"; // a drafter's guess: consistent with itself, and wrong
+    (q(p, "q4") as { answer: number }).answer = 2;
+    expect(verifyPassage(p, { confirmedSplit: true }).checks.find((c) => c.question === "q4" && c.rule === 1)?.message).toMatch(/confirm the picture/);
+    expect(failingRules(p)).toEqual([1]);
+    p.confirmedPictures = { market: "nest" };
+    expect(failingRules(p)).toEqual([]);
+    p.confirmedPictures = { market: "cat" }; // confirmed a picture it no longer has
+    expect(failingRules(p)).toEqual([1]);
+  });
+
+  it("finds a picture word as a whole word or its plural, not inside another word", () => {
+    const p = clone(MARKET);
+    (q(p, "q4") as { word: string }).word = "mark"; // inside "market", not a word of the story
+    p.pictures.mark = "market";
+    p.confirmedPictures = { mark: "market" };
+    expect(failingRules(p)).toEqual([1]);
+    expect(failingRules(clone(MARKET))).toEqual([]); // "banana" is found through "bananas"
+  });
+
   it("matches on the stem, so a paraphrase still counts", () => {
     const p = clone(RAINY);
     // "Because it rained" is the right answer to a question whose evidence says "It rained all morning".
@@ -164,8 +185,18 @@ describe("rule 3 — the right answer is not the longest", () => {
     expect(failingRules(p)).toEqual([]);
   });
 
-  it("measures code points, so Khmer is judged fairly", () => {
+  it("measures letters, so Khmer is judged fairly", () => {
     expect(failingRules(MARKET_KM)).toEqual([]);
+  });
+
+  it("does not count Khmer vowels, signs or subscripts as extra length", () => {
+    const p = clone(MARKET_KM);
+    const target = p.questions.find((x) => x.kind === "comprehension")! as { id: string; options: string[]; answer: number };
+    // ប៊ូប៊ូ is six code points but two letters wide — as wide as ម៉ូក and បូបូ.
+    target.options = ["ប៊ូប៊ូ", "ម៉ូក", "បូបូ"];
+    target.answer = 0;
+    const rule3 = verifyPassage(p, { confirmedSplit: true }).checks.find((c) => c.rule === 3 && c.question === target.id)!;
+    expect(rule3.status).toBe("pass");
   });
 });
 

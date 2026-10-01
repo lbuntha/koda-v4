@@ -1,4 +1,5 @@
 import { levelFromXp, xpIntoLevel, XP_PER_LEVEL } from "../../../lib/level";
+import { translate } from "../../../lib/i18n";
 
 /**
  * What a finished round is congratulated *for*.
@@ -78,11 +79,6 @@ const isMilestone = (days: number): boolean =>
   (STREAK_MILESTONES as readonly number[]).includes(days);
 
 /** "day" / "days", or the weekly learner's "week" / "weeks". */
-const unit = (n: number, cadence: PraiseFacts["cadence"]): string => {
-  const word = cadence === "weekly" ? "week" : "day";
-  return n === 1 ? word : `${word}s`;
-};
-
 /**
  * Whether this round's XP carried the learner over a level boundary.
  *
@@ -103,47 +99,47 @@ export function roundPraise(facts: PraiseFacts): RoundPraise {
     return facts.practiceRound
       ? {
           kind: "finale",
-          tag: "Practice complete",
-          headline: "Every practice round done!",
-          note: "All of it again, with no help at all. That is what knowing something looks like.",
+          tag: translate("praise.practiceComplete.tag"),
+          headline: translate("praise.practiceComplete.headline"),
+          note: translate("praise.practiceComplete.note"),
         }
       : {
           kind: "finale",
-          tag: "Skill complete",
-          headline: "You finished every lesson!",
+          tag: translate("praise.skillComplete.tag"),
+          headline: translate("praise.skillComplete.headline"),
           // Says what was finished, not how well: a child who took three goes at
           // half of them has still reached the end, and this is the sentence
           // about reaching the end. The stars already report the last round.
-          note: "That is the whole path, first lesson to last. Nothing here is beyond you.",
+          note: translate("praise.skillComplete.note"),
         };
   }
 
   if (levelledUp(xpAfter, xpWon)) {
     return {
       kind: "levelUp",
-      tag: "New level",
-      headline: `Level ${levelFromXp(xpAfter)}!`,
-      note: "Every round you have ever played added up to this.",
+      tag: translate("praise.levelUp.tag"),
+      headline: translate("praise.levelUp.headline", { level: levelFromXp(xpAfter) }),
+      note: translate("praise.levelUp.note"),
     };
   }
 
   if (isMilestone(streakDays)) {
     return {
       kind: "streak",
-      tag: "Streak",
-      headline: `${streakDays} ${unit(streakDays, cadence)} in a row!`,
+      tag: translate("praise.streak.tag"),
+      headline: translate(cadence === "weekly" ? "praise.streak.weeks" : "praise.streak.days", { count: streakDays }),
       // Said about the child rather than the number: showing up is the habit
       // the streak exists to build, and it is the part they control.
-      note: "You keep coming back. That is the hard part, and you are doing it.",
+      note: translate("praise.streak.note"),
     };
   }
 
   if (perfect) {
     return {
       kind: "perfect",
-      tag: "Perfect round",
-      headline: "Every single one!",
-      note: "Right first time, all the way through. No hints needed.",
+      tag: translate("praise.perfect.tag"),
+      headline: translate("praise.perfect.headline"),
+      note: translate("praise.perfect.note"),
     };
   }
 
@@ -152,28 +148,19 @@ export function roundPraise(facts: PraiseFacts): RoundPraise {
   if (dailyGoal > 0 && dailySolved >= dailyGoal && dailySolved - 1 < dailyGoal) {
     return {
       kind: "goal",
-      tag: "Goal met",
-      headline: "That is today's goal!",
-      note: `${dailyGoal} ${dailyGoal === 1 ? "round" : "rounds"} done. Anything more today is extra.`,
+      tag: translate("praise.goal.tag"),
+      headline: translate("praise.goal.headline"),
+      note: translate("praise.goal.note", { count: dailyGoal }),
     };
   }
 
   const byStars: Record<1 | 2 | 3, { headline: string; note: string }> = {
-    3: {
-      headline: "Brilliantly done!",
-      note: "Nearly all of them right first time.",
-    },
-    2: {
-      headline: "Nicely done!",
-      note: "You worked some of those out the hard way, and you got there.",
-    },
-    1: {
-      headline: "You finished it!",
-      note: "Some of those were tricky. Finishing anyway is what counts.",
-    },
+    3: { headline: translate("praise.stars3.headline"), note: translate("praise.stars3.note") },
+    2: { headline: translate("praise.stars2.headline"), note: translate("praise.stars2.note") },
+    1: { headline: translate("praise.stars1.headline"), note: translate("praise.stars1.note") },
   };
 
-  return { kind: "stars", tag: "Round complete", ...byStars[stars] };
+  return { kind: "stars", tag: translate("praise.roundComplete"), ...byStars[stars] };
 }
 
 /** How far into the current level, for the bar under the XP. */

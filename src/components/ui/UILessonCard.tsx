@@ -2,6 +2,7 @@ import React from "react";
 import { Play } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
 import { UILessonIcon } from "./UILessonIcon";
+import { useT } from "../../lib/i18n";
 
 export type UILessonCardTone = "review" | "practise" | "advance" | "resume";
 
@@ -48,6 +49,8 @@ export interface UILessonCardProps {
  * of a five-year-old would be both unkind and useless. The grown-up wording
  * lives in the recommendation's `reason`.
  */
+/* The words live in the catalog, under `lessonCard.tone.<tone>`; the English
+   here is only what a reader of this file sees for each colour. */
 const TONES: Record<UILessonCardTone, { label: string; chip: string; accent: string }> = {
   /* Rose, not amber. Amber on this chip measured 168,143,0 on 255,249,196 —
      a yellow on a yellow, and the reason yellow is not a Koda colour. */
@@ -102,12 +105,13 @@ export const UILessonCard: React.FC<UILessonCardProps> = ({
   iconName,
   iconTone,
   tone = "advance",
-  actionLabel = "Play",
+  actionLabel,
   variant = "card",
   onClick,
   className = "",
 }) => {
-  const t = TONES[tone];
+  const { t } = useT();
+  const look = { ...TONES[tone], label: t(`lessonCard.tone.${tone}`) };
   const compact = variant === "compact";
 
   return (
@@ -126,10 +130,10 @@ export const UILessonCard: React.FC<UILessonCardProps> = ({
             same word rides on the subject line below the title. */}
         <span
           className={`ml-auto shrink-0 rounded-full px-2.5 py-1 font-mono text-[10px] font-black uppercase tracking-wider ${
-            t.chip
+            look.chip
           } ${compact ? "hidden sm:inline-block" : ""}`}
         >
-          {t.label}
+          {look.label}
         </span>
       </div>
 
@@ -157,7 +161,7 @@ export const UILessonCard: React.FC<UILessonCardProps> = ({
               {/* The reason, on the line a phone actually reads. Above 640px the
                   chip in the corner carries it and this drops back to the skill. */}
               <span className="sm:hidden">
-                {subject} · <span className={`font-bold ${t.accent}`}>{t.label}</span>
+                {subject} · <span className={`font-bold ${look.accent}`}>{look.label}</span>
               </span>
               <span className="hidden sm:inline">{subject}</span>
             </>
@@ -183,7 +187,7 @@ export const UILessonCard: React.FC<UILessonCardProps> = ({
               />
             </span>
             <span className="mt-1 block text-xs text-muted">
-              Question {progress.answered} of {progress.total}
+              {t("lessonCard.questionOf", { answered: progress.answered, total: progress.total })}
             </span>
           </span>
         ) : (
@@ -210,7 +214,7 @@ export const UILessonCard: React.FC<UILessonCardProps> = ({
       <span className={`mt-auto w-full ${compact ? "hidden sm:block" : "block"}`}>
         <span className={`${themeSystem.button("primary", "sm")} w-full pointer-events-none`}>
           <Play className="fill-current" />
-          {actionLabel}
+          {actionLabel ?? t("common.play")}
         </span>
       </span>
     </button>

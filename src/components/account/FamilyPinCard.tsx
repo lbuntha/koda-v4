@@ -6,6 +6,7 @@ import { FamilyPin, PIN_LENGTH, isWellFormed } from "../../lib/familyPin";
 import { themeSystem } from "../../lib/themeSystem";
 import { playSound } from "../../utils/audio";
 import { UIBadge, UIButton, UIDialog, UISectionHeader } from "../ui";
+import { useT } from "../../lib/i18n";
 
 /**
  * Setting the four digits that stop a child tapping back into a parent account.
@@ -20,6 +21,7 @@ import { UIBadge, UIButton, UIDialog, UISectionHeader } from "../ui";
  * costs one line.
  */
 export const FamilyPinCard: React.FC = () => {
+  const { t } = useT();
   const { can } = usePermissions();
   const mayChange = can("family:update");
   const [isSet, setIsSet] = useState<boolean | null>(null);
@@ -40,7 +42,7 @@ export const FamilyPinCard: React.FC = () => {
   const save = async () => {
     if (!isWellFormed(pin)) return;
     if (pin !== confirm) {
-      setError("Those two do not match.");
+      setError(t("pin.mismatch"));
       return;
     }
     setBusy(true);
@@ -51,7 +53,7 @@ export const FamilyPinCard: React.FC = () => {
       setEditing(false);
       setPin("");
       setConfirm("");
-      setNotice("Family PIN saved.");
+      setNotice(t("pin.saved"));
       playSound("pop");
     } catch (err) {
       setError((err as ApiError).message);
@@ -65,7 +67,7 @@ export const FamilyPinCard: React.FC = () => {
     try {
       await FamilyPin.clear();
       setIsSet(false);
-      setNotice("Family PIN removed. Switching accounts no longer asks for one.");
+      setNotice(t("pin.removed"));
     } catch (err) {
       setError((err as ApiError).message);
     } finally {
@@ -82,14 +84,14 @@ export const FamilyPinCard: React.FC = () => {
   return (
     <section className={themeSystem.card("default", "p-4 space-y-3")}>
       <UISectionHeader
-        title="Family PIN"
-        subtitle="Protects parent account switching."
+        title={t("pin.title")}
+        subtitle={t("pin.subtitle")}
         icon={<ShieldCheck className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
         action={
           isSet === null ? undefined : isSet ? (
-            <UIBadge variant="success">On</UIBadge>
+            <UIBadge variant="success">{t("pin.on")}</UIBadge>
           ) : (
-            <UIBadge variant="neutral">Not set</UIBadge>
+            <UIBadge variant="neutral">{t("pin.notSet")}</UIBadge>
           )
         }
       />
@@ -101,7 +103,7 @@ export const FamilyPinCard: React.FC = () => {
         <div className="space-y-3">
           <div className="flex flex-wrap items-end gap-3">
             <label className="space-y-1">
-              <span className="koda-admin-label text-ink">New PIN</span>
+              <span className="koda-admin-label text-ink">{t("pin.new")}</span>
               <input
                 className={field}
                 type="password"
@@ -112,7 +114,7 @@ export const FamilyPinCard: React.FC = () => {
               />
             </label>
             <label className="space-y-1">
-              <span className="koda-admin-label text-ink">Again</span>
+              <span className="koda-admin-label text-ink">{t("pin.again")}</span>
               <input
                 className={field}
                 type="password"
@@ -131,7 +133,7 @@ export const FamilyPinCard: React.FC = () => {
               disabled={!isWellFormed(pin) || !isWellFormed(confirm)}
               onClick={() => void save()}
             >
-              Save PIN
+              {t("pin.save")}
             </UIButton>
             <UIButton
               variant="secondary"
@@ -143,18 +145,18 @@ export const FamilyPinCard: React.FC = () => {
                 setError(null);
               }}
             >
-              Cancel
+              {t("common.cancel")}
             </UIButton>
           </div>
         </div>
       ) : (
         <div className="flex flex-wrap items-center gap-2">
           <UIButton variant={isSet ? "secondary" : "primary"} size="sm" icon={<Lock />} onClick={() => setEditing(true)}>
-            {isSet ? "Change PIN" : "Set a PIN"}
+            {isSet ? t("pin.change") : t("pin.set")}
           </UIButton>
           {isSet && (
             <UIButton variant="ghost" size="sm" onClick={() => setClearing(true)}>
-              Remove
+              {t("pin.remove")}
             </UIButton>
           )}
         </div>
@@ -167,15 +169,15 @@ export const FamilyPinCard: React.FC = () => {
         * device — for that, the answer is not a PIN.
         */}
       <p className="text-xs text-muted">
-        Four digits to stop accidental account switches.
+        {t("pin.note")}
       </p>
 
       <UIDialog
         isOpen={clearing}
         onClose={() => setClearing(false)}
-        title="Remove the family PIN?"
-        description="Switching from a child's session back to a grown-up's account will stop asking for it."
-        confirmText="Remove PIN"
+        title={t("pin.removeTitle")}
+        description={t("pin.removeBody")}
+        confirmText={t("pin.removeConfirm")}
         variant="danger"
         onConfirm={() => void remove()}
       />

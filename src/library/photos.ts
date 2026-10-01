@@ -16,6 +16,7 @@
 import { API_BASE } from "../lib/sync";
 import { accessToken } from "../lib/sync/session";
 import type { Passage } from "./data/passage";
+import { translate } from "../lib/i18n";
 
 export const PHOTO_PREFIX = "photo-";
 const CACHE = "koda-library-photos-v1";
@@ -139,6 +140,34 @@ export async function photoSaved(key: string): Promise<boolean> {
   return urls.has(id) || (await fromCache(id)) !== null;
 }
 
+/** Stored byte sizes for uploaded book photos; built-in drawings have no per-book download size. */
+export async function photoSizes(keys: string[]): Promise<Record<string, number>> {
+  const out: Record<string, number> = {};
+  await Promise.all([...new Set(keys.filter(isPhoto))].map(async (key) => {
+    const url = await photoUrl(key);
+    if (!url) return;
+    try {
+      const blob = await fetch(url).then((response) => response.blob());
+      if (blob.size > 0) out[key] = blob.size;
+    } catch {
+      /* A missing size should not block the publication summary. */
+    }
+  }));
+  return out;
+}
+
+export async function photoDimensions(key: string): Promise<string | null> {
+  const url = await photoUrl(key);
+  if (!url) return null;
+  return new Promise((resolve) => {
+    const image = new Image();
+    const timer = setTimeout(() => resolve(null), 10_000);
+    image.onload = () => { clearTimeout(timer); resolve(`${image.naturalWidth} × ${image.naturalHeight} px`); };
+    image.onerror = () => { clearTimeout(timer); resolve(null); };
+    image.src = url;
+  });
+}
+
 /** A photo URL already in memory, for a first render without a flash. */
 export const knownPhotoUrl = (key: string): string | null => urls.get(photoId(key)) ?? null;
 
@@ -192,7 +221,7 @@ export async function shrinkPhoto(file: Blob): Promise<Blob> {
   canvas.width = w;
   canvas.height = h;
   const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("This browser cannot prepare photos.");
+  if (!ctx) throw new Error(translate("studio.picture.browserCannotPhotos"));
   ctx.fillStyle = "#fff"; // a transparent PNG becomes white, not black, as JPEG
   ctx.fillRect(0, 0, w, h);
   ctx.drawImage(bitmap, 0, 0, w, h);
@@ -221,7 +250,7 @@ async function smallestOf(canvas: HTMLCanvasElement): Promise<Blob> {
     (blob): blob is Blob => blob !== null,
   );
   const best = candidates.sort((a, b) => a.size - b.size)[0];
-  if (!best) throw new Error("The photo could not be prepared.");
+  if (!best) throw new Error(translate("studio.picture.photoPrepareFailed"));
   return best;
 }
 
@@ -231,7 +260,7 @@ export async function uploadPhoto(file: Blob): Promise<string> {
   try {
     blob = await shrinkPhoto(file);
   } catch {
-    throw new Error("That file could not be read as a photo. Try a JPEG or PNG.");
+    throw new Error(translate("studio.picture.notAPhoto"));
   }
   const buf = new Uint8Array(await blob.arrayBuffer());
   let bin = "";
@@ -243,7 +272,7 @@ export async function uploadPhoto(file: Blob): Promise<string> {
     body: JSON.stringify({ mime: blob.type || "image/jpeg", data: btoa(bin) }),
   });
   const body = (await res.json().catch(() => null)) as { id?: string; error?: { message?: string } } | null;
-  if (!res.ok || !body?.id) throw new Error(body?.error?.message ?? "The photo could not be uploaded.");
+  if (!res.ok || !body?.id) throw new Error(body?.error?.message ?? translate("studio.picture.uploadFailed"));
   urls.set(body.id, URL.createObjectURL(blob));
   await toCache(body.id, blob);
   return PHOTO_PREFIX + body.id;

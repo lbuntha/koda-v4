@@ -14,6 +14,7 @@ import sidebarNav from "../data/sidebarNav.json";
 import { getCourseLessons } from "../curriculum";
 import { useAudienceViewer } from "../skills/viewer";
 import { svgAssetIds } from "../assets/svg";
+import { BASE_LANGUAGE, hasMessage, useT } from "../lib/i18n";
 
 export const navDefaults = sidebarNav as NavConfig;
 
@@ -107,6 +108,29 @@ export const useNavItems = (): NavItemConfig[] => {
   const session = useSession();
   const { can, known } = usePermissions();
   const fromServer = useMenu();
+  const { t, language } = useT();
+  /*
+   * An entry's wording, in the language on screen. Looked up in this order:
+   *
+   * 1. The entry's own translation (`labels[lang]`), typed on the Menu screen.
+   *    It is the operator's, like the English label, so it wins.
+   * 2. In the base language, the record's `label` — an operator may have
+   *    renamed an entry, and that choice stands.
+   * 3. In any other language, the app catalog's `nav.<id>`, so a shipped entry
+   *    reads right before anybody translates it by hand.
+   * 4. The record's `label` — a new entry nobody has translated yet shows its
+   *    English rather than nothing.
+   */
+  const labelFor = (item: NavItemConfig): string =>
+    item.labels?.[language] ||
+    (language !== BASE_LANGUAGE && hasMessage(`nav.${item.id}`, language) ? t(`nav.${item.id}`) : item.label);
+  const badgeFor = (item: NavItemConfig): string | undefined => {
+    if (!item.badge) return undefined;
+    return (
+      item.badges?.[language] ||
+      (language !== BASE_LANGUAGE && hasMessage(`navBadge.${item.id}`, language) ? t(`navBadge.${item.id}`) : item.badge)
+    );
+  };
 
   const source: NavConfig =
     fromServer !== null
@@ -127,8 +151,8 @@ export const useNavItems = (): NavItemConfig[] => {
     .flatMap((section) => section.items)
     .map((item) => ({
       ...item,
-      label: withCounts(item.label, counts),
-      badge: withCounts(item.badge ?? undefined, counts),
+      label: withCounts(labelFor(item), counts),
+      badge: withCounts(badgeFor(item), counts),
     }))
     // Not presentation: an entry with nothing behind it leads to an empty page,
     // so it is dropped however the record words it.

@@ -12,6 +12,10 @@ export type TabId =
   | "library"
   // Where library books are written and published. content:write, like Art.
   | "library-studio"
+  // Koda Trace: write letters and numbers, draw pictures, stroke by stroke. A module, not a skill.
+  | "trace"
+  // Where trace items are made: strokes, steps, tests. content:write, like Library Studio.
+  | "trace-studio"
   | "profile"
   | "leaderboard"
   | "skills"

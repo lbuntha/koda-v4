@@ -6,8 +6,10 @@
  * browser downloads the Khmer part only when Khmer is on screen, and the files are
  * precached with the rest of the build, so it works offline.
  *
- * Imported by the library's two pages, not the app shell: an English-only session
- * never pays for it.
+ * Imported by `main.tsx` for the whole app — Khmer is a UI language as well as a
+ * book language now. An English-only session still never pays for it: the CSS
+ * is a few `@font-face` rules, and `unicode-range` keeps the files unfetched
+ * until a Khmer character is drawn.
  */
 import "@fontsource/noto-sans-khmer/400.css";
 import "@fontsource/noto-sans-khmer/600.css";

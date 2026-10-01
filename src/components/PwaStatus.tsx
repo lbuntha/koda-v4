@@ -4,6 +4,7 @@ import { themeSystem } from "../lib/themeSystem";
 import { useOnlineStatus, useServiceWorker } from "../pwa/useServiceWorker";
 import { useSyncStatus } from "../lib/sync";
 
+import { translate } from "../lib/i18n";
 /**
  * The two things a child or parent needs told about the app itself.
  *
@@ -105,13 +106,13 @@ export const PwaStatus: React.FC = () => {
           }`}
           // The full sentence stays available to a screen reader and on hover
           // even once the pill has shrunk to its icon.
-          title="No internet — you can still play!"
-          aria-label="No internet — you can still play!"
+          title={translate("app.pwaStatus.noInternetYouCanStillPlay")}
+          aria-label={translate("app.pwaStatus.noInternetYouCanStillPlay")}
         >
           <CloudOff className="w-4 h-4 text-amber-800 dark:text-amber-400 shrink-0" />
           {!offlineCollapsed && (
             <p className="text-xs font-bold text-slate-800 dark:text-amber-100 whitespace-nowrap">
-              No internet — you can still play!
+              {translate("app.pwaStatus.noInternetYouCanStillPlay")}
             </p>
           )}
         </div>
@@ -120,23 +121,23 @@ export const PwaStatus: React.FC = () => {
       {waiting > 0 && (
         <div
           className="flex items-center gap-2.5 rounded-2xl border-2 border-line bg-surface px-4 py-2.5 shadow-sm"
-          title={`${waiting} things still to save`}
+          title={translate("app.pwaStatus.waitingThingsStillToSave", { waiting: waiting })}
         >
           <UploadCloud className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
-          <p className="text-xs font-bold text-ink whitespace-nowrap">Saving your work…</p>
+          <p className="text-xs font-bold text-ink whitespace-nowrap">{translate("app.pwaStatus.savingYourWork")}</p>
         </div>
       )}
 
       {updateReady && (
         <div className="flex items-center gap-2.5 rounded-2xl border-2 border-line bg-surface px-4 py-2.5 shadow-sm">
           <Download className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
-          <p className="text-xs font-bold text-ink flex-1">A new version is ready.</p>
+          <p className="text-xs font-bold text-ink flex-1">{translate("app.pwaStatus.aNewVersionIsReady")}</p>
           <button onClick={applyUpdate} className={themeSystem.button("primary", "sm")}>
-            Update
+            {translate("app.pwaStatus.update")}
           </button>
           <button
             onClick={dismiss}
-            aria-label="Not now"
+            aria-label={translate("app.pwaStatus.notNow")}
             className="p-1 rounded-lg text-muted hover:text-ink cursor-pointer"
           >
             <X className="w-4 h-4" />
@@ -146,7 +147,7 @@ export const PwaStatus: React.FC = () => {
 
       {showOfflineReady && online && !updateReady && (
         <div className="flex items-center gap-2.5 rounded-2xl border-2 border-line bg-surface px-4 py-2.5 shadow-sm">
-          <p className="text-xs font-bold text-ink">Ready to play without internet.</p>
+          <p className="text-xs font-bold text-ink">{translate("app.pwaStatus.readyToPlayWithoutInternet")}</p>
         </div>
       )}
     </div>

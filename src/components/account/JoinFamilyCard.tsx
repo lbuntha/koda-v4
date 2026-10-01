@@ -6,6 +6,7 @@ import { themeSystem } from "../../lib/themeSystem";
 import { playSound } from "../../utils/audio";
 import { UIButton, UISectionHeader } from "../ui";
 
+import { translate } from "../../lib/i18n";
 /**
  * The other side of an invite: entering the code you were given.
  *
@@ -57,25 +58,25 @@ export const JoinFamilyCard: React.FC<{ hasChildren: boolean; onJoined?: () => v
   return (
     <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-3`)}>
       <UISectionHeader
-        title="Join a family"
-        subtitle="If somebody gave you a code to join theirs"
+        title={translate("admin.joinFamilyCard.joinAFamily")}
+        subtitle={translate("admin.joinFamilyCard.ifSomebodyGaveYouACode")}
         icon={<LogIn className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
       />
 
       {joined ? (
         <p className={themeSystem.flash("success")}>
-          You are in <strong>{joined}</strong> now. Their children and settings are yours to see.
+          {translate("admin.joinFamilyCard.youAreIn")}{" "}<strong>{joined}</strong>{" "}{translate("admin.joinFamilyCard.nowTheirChildrenAndSettingsAre")}
         </p>
       ) : (
         <form onSubmit={submit} className="flex flex-wrap items-end gap-3">
           <label className="space-y-1.5">
-            <span className="koda-admin-label text-ink">Invite code</span>
+            <span className="koda-admin-label text-ink">{translate("admin.joinFamilyCard.inviteCode")}</span>
             <input
               value={code}
               disabled={busy}
               maxLength={8}
               autoCapitalize="characters"
-              placeholder="ABCD2345"
+              placeholder={translate("admin.joinFamilyCard.abcd2345")}
               onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z2-9]/g, ""))}
               className={themeSystem.field("lg", "w-44 text-center font-mono tracking-[0.25em]")}
             />
@@ -87,7 +88,7 @@ export const JoinFamilyCard: React.FC<{ hasChildren: boolean; onJoined?: () => v
             isLoading={busy}
             disabled={code.length < 8}
           >
-            Join
+            {translate("admin.joinFamilyCard.join")}
           </UIButton>
         </form>
       )}

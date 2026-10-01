@@ -196,6 +196,22 @@ INDEXES: dict[str, list[IndexModel]] = {
     "library_revisions": [
         IndexModel([("bookId", ASCENDING), ("rev", ASCENDING)], unique=True, name="library_revision_unique"),
     ],
+    # Koda Trace: items made once, used in collections; published revisions immutable.
+    "trace_items": [
+        IndexModel([("id", ASCENDING)], unique=True, name="trace_item_id_unique"),
+        IndexModel([("deletedAt", ASCENDING), ("updatedAt", DESCENDING)], name="trace_item_recent"),
+    ],
+    "trace_collections": [
+        IndexModel([("id", ASCENDING)], unique=True, name="trace_collection_id_unique"),
+        IndexModel([("deletedAt", ASCENDING), ("updatedAt", DESCENDING)], name="trace_collection_recent"),
+    ],
+    "trace_reports": [
+        IndexModel([("id", ASCENDING)], unique=True, name="trace_report_id_unique"),
+        IndexModel([("resolvedAt", ASCENDING), ("createdAt", DESCENDING)], name="trace_reports_open"),
+    ],
+    "trace_revisions": [
+        IndexModel([("collectionId", ASCENDING), ("rev", ASCENDING)], unique=True, name="trace_revision_unique"),
+    ],
     "skill_registry": [
         IndexModel([("id", ASCENDING)], unique=True, name="skill_id_unique"),
         IndexModel([("status", ASCENDING), ("id", ASCENDING)], name="skills_by_status"),

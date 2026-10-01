@@ -15,6 +15,7 @@ import {
 import { SvgAsset } from "../../assets/svg";
 import { DailyGoalAPI } from "../../lib/dailyGoal";
 import { currentLearnerId } from "../../lib/learnerProgress";
+import { formatDate, translate, useT } from "../../lib/i18n";
 
 import {
   EMPTY_STATS,
@@ -83,18 +84,13 @@ const audienceOf = (session: Session): Audience => {
   return "staff";
 };
 
-const audienceLabel: Record<Audience, string> = {
-  child: "Child",
-  parent: "Parent",
-  student: "Student",
-  staff: "Staff",
-};
+/* Words under `account.role.<audience>` in the catalogs. */
 
 const displayNameOf = (session: Session): string =>
   session.learnerName ??
   session.displayName ??
   (session.email ? session.email.split("@")[0] : "") ??
-  "Your profile";
+  translate("profile.yourProfile");
 
 /** "Ly Buntha" -> "LyBuntha", so the handle reads like one the account chose. */
 const handleOf = (session: Session): string => {
@@ -107,13 +103,11 @@ const monthYear = (iso?: string): string | null => {
   if (!iso) return null;
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return null;
-  return new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" }).format(date);
+  return formatDate(date, { month: "long", year: "numeric" });
 };
 
 const dayMonthYear = (iso: string): string =>
-  new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", year: "numeric" }).format(
-    new Date(iso),
-  );
+  formatDate(iso, { day: "numeric", month: "short", year: "numeric" });
 
 const EmptyNote: React.FC<{ icon: React.ReactNode; title: string; detail: string }> = ({
   icon,
@@ -132,11 +126,12 @@ const EmptyNote: React.FC<{ icon: React.ReactNode; title: string; detail: string
 const ProfileProgress: React.FC<{ stats: ProfileStats }> = ({ stats }) => {
   const level = levelFromXp(stats.totalXp);
   const progress = Math.round(levelProgress(stats.totalXp) * 100);
+  const { t } = useT();
 
   return (
     <section className={`${themeSystem.card("default")} ${themeSystem.spacing.card}`}>
       <h2 className="font-mono text-xs font-black uppercase tracking-widest text-muted">
-        Your progress
+        {t("home.yourProgress")}
       </h2>
       <div className="mt-4 space-y-4">
         <div className="flex items-center gap-3">
@@ -144,29 +139,29 @@ const ProfileProgress: React.FC<{ stats: ProfileStats }> = ({ stats }) => {
             <SvgAsset
               id="streak"
               size={50}
-              title="Learning streak"
+              title={t("home.learningStreak")}
               fallback={<Flame className="fill-current" />}
             />
           </span>
-          <span className="min-w-0 flex-1 text-sm font-bold text-muted">Learning streak</span>
+          <span className="min-w-0 flex-1 text-sm font-bold text-muted">{t("home.learningStreak")}</span>
           <span className="shrink-0 font-mono text-sm font-black text-ink">
-            {stats.dayStreak} {stats.dayStreak === 1 ? "day" : "days"}
+            {t("streak.days", { count: stats.dayStreak })}
           </span>
         </div>
 
         <div className="flex items-center gap-3">
           <span className="flex h-12 w-12 shrink-0 items-center justify-center text-indigo-600 dark:text-indigo-400 [&>svg]:h-10 [&>svg]:w-10">
-            <SvgAsset id="points" size={50} title="Total points" fallback={<Zap className="fill-current" />} />
+            <SvgAsset id="points" size={50} title={t("home.totalPoints")} fallback={<Zap className="fill-current" />} />
           </span>
-          <span className="min-w-0 flex-1 text-sm font-bold text-muted">Total points</span>
-          <span className="shrink-0 font-mono text-sm font-black text-ink">{stats.totalXp} XP</span>
+          <span className="min-w-0 flex-1 text-sm font-bold text-muted">{t("home.totalPoints")}</span>
+          <span className="shrink-0 font-mono text-sm font-black text-ink">{t("progress.xp", { xp: stats.totalXp })}</span>
         </div>
 
         <div className="pl-[3.75rem]">
           <div className="flex items-baseline justify-between gap-2">
-            <span className="text-xs font-bold text-muted">XP Level {level}</span>
+            <span className="text-xs font-bold text-muted">{t("home.xpLevel", { level })}</span>
             <span className="font-mono text-[0.6875rem] tabular-nums text-muted">
-              {xpToNextLevel(stats.totalXp)} XP to level {level + 1}
+              {t("home.xpToLevel", { xp: xpToNextLevel(stats.totalXp), level: level + 1 })}
             </span>
           </div>
           <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-surface-muted">
@@ -176,15 +171,15 @@ const ProfileProgress: React.FC<{ stats: ProfileStats }> = ({ stats }) => {
             />
           </div>
           <p className="mt-1.5 text-[0.6875rem] text-muted">
-            {XP_PER_LEVEL} XP earns a level. Every finished round pays XP.
+            {t("home.xpRule", { xp: XP_PER_LEVEL })}
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <span className="flex h-12 w-12 shrink-0 items-center justify-center text-indigo-600 dark:text-indigo-400 [&>svg]:h-10 [&>svg]:w-10">
-            <SvgAsset id="star" size={50} title="Lessons mastered" fallback={<Star className="fill-current" />} />
+            <SvgAsset id="star" size={50} title={t("home.lessonsMastered")} fallback={<Star className="fill-current" />} />
           </span>
-          <span className="min-w-0 flex-1 truncate text-sm font-bold text-muted">Lessons mastered</span>
+          <span className="min-w-0 flex-1 truncate text-sm font-bold text-muted">{t("home.lessonsMastered")}</span>
           <span className="shrink-0 font-mono text-sm font-black text-ink">
             {stats.lessonsMastered} / {stats.lessonsAvailable}
           </span>
@@ -197,6 +192,7 @@ const ProfileProgress: React.FC<{ stats: ProfileStats }> = ({ stats }) => {
 export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
   const session = useSession();
   const { can } = usePermissions();
+  const { t, tNodes } = useT();
   const [editOpen, setEditOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [children, setChildren] = useState<FamilyChild[] | null>(null);
@@ -266,7 +262,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
       playSound("pop");
     } catch (err) {
       const problem = err as ApiError;
-      setError(problem.isOffline ? "No connection — your profile was not changed." : problem.message);
+      setError(problem.isOffline ? t("profile.error.offline") : problem.message);
       throw err;
     }
   };
@@ -295,7 +291,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
       await navigator.clipboard.writeText(deviceCode.code);
       setDeviceCodeCopied(true);
     } catch {
-      setError("The code could not be copied. Please select it manually.");
+      setError(t("profile.error.copy"));
     }
   };
 
@@ -312,7 +308,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
         </div>
         <button
           type="button"
-          aria-label="Edit profile"
+          aria-label={t("profile.edit")}
           onClick={() => {
             playSound("pop");
             setEditOpen(true);
@@ -329,7 +325,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
       <header className="space-y-1">
         <h1 className={themeSystem.typography("h1")}>{name}</h1>
         <p className="text-base font-bold text-muted">@{handleOf(session)}</p>
-        {joined && <p className="text-sm text-muted">Joined {joined}</p>}
+        {joined && <p className="text-sm text-muted">{t("profile.joinedOn", { date: joined })}</p>}
 
       </header>
 
@@ -338,13 +334,13 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
       {isParent && (
         <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
           <UISectionHeader
-            title="Children"
-            subtitle="The profiles under this family"
+            title={t("profile.children.title")}
+            subtitle={t("profile.children.subtitle")}
             icon={<Baby className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
             action={
               onNavigate && can("learner:create") ? (
                 <UIButton variant="secondary" size="sm" onClick={() => onNavigate("children")}>
-                  Manage
+                  {t("profile.children.manage")}
                 </UIButton>
               ) : undefined
             }
@@ -352,16 +348,16 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
           {!canReadLearners ? (
             <EmptyNote
               icon={<Baby />}
-              title="Not visible to this account"
-              detail="Viewing children needs the learner:read permission."
+              title={t("profile.children.hidden")}
+              detail={t("profile.children.hiddenDetail")}
             />
           ) : children === null ? (
-            <p className="text-sm text-muted">Loading children…</p>
+            <p className="text-sm text-muted">{t("profile.children.loading")}</p>
           ) : children.length === 0 ? (
             <EmptyNote
               icon={<Baby />}
-              title="No child profiles yet"
-              detail="Add a child to give them their own learning space and profile."
+              title={t("profile.children.none")}
+              detail={t("profile.children.noneDetail")}
             />
           ) : (
             <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -375,13 +371,18 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
                       </p>
                       <p className="truncate text-xs text-muted">
                         {canReadRecord
-                          ? "See what they have practised"
-                          : `Added ${dayMonthYear(child.createdAt)}${child.birthYear ? ` · born ${child.birthYear}` : ""}`}
+                          ? t("profile.children.seePractice")
+                          : [
+                              t("profile.children.added", { date: dayMonthYear(child.createdAt) }),
+                              child.birthYear ? t("profile.children.born", { year: String(child.birthYear) }) : null,
+                            ]
+                              .filter(Boolean)
+                              .join(" · ")}
                       </p>
                     </div>
                     {child.hasActiveCode && (
                       <UIBadge variant="warning" className="ml-auto shrink-0">
-                        Code
+                        {t("profile.children.code")}
                       </UIBadge>
                     )}
                   </>
@@ -412,15 +413,15 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
       {audience === "staff" && (
         <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
           <UISectionHeader
-            title="Access"
-            subtitle="What this account is allowed to do on this deployment"
+            title={t("profile.access.title")}
+            subtitle={t("profile.access.subtitle")}
             icon={<ShieldCheck className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
           />
           {permissions.length === 0 ? (
             <EmptyNote
               icon={<ShieldCheck />}
-              title="No permissions loaded"
-              detail="The effective set arrives with the account; reconnect to see it."
+              title={t("profile.access.none")}
+              detail={t("profile.access.noneDetail")}
             />
           ) : (
             <div className="flex flex-wrap gap-2">
@@ -439,18 +440,18 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
           behaves. */}
       <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-3`)}>
         <UISectionHeader
-          title="Account"
-          subtitle="How this profile is identified"
+          title={t("account.label")}
+          subtitle={t("profile.account.subtitle")}
           icon={<UserRound className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
         />
         <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {[
-            ["Name", name],
-            ["Handle", `@${handleOf(session)}`],
-            session.email ? ["Email", session.email] : null,
-            session.familyName ? ["Family", session.familyName] : null,
-            ["Role", audienceLabel[audience]],
-            joined ? ["Joined", joined] : null,
+            [t("profile.account.name"), name],
+            [t("profile.account.handle"), `@${handleOf(session)}`],
+            session.email ? [t("account.email"), session.email] : null,
+            session.familyName ? [t("profile.account.family"), session.familyName] : null,
+            [t("profile.account.role"), t(`account.role.${audience}`)],
+            joined ? [t("profile.account.joined"), joined] : null,
           ]
             .filter((row): row is [string, string] => row !== null)
             .map(([label, value]) => (
@@ -463,8 +464,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
         {isParent && can("learner:update") && children && children.length > 0 && (
           <div className="space-y-3 border-t border-line pt-4">
             <div>
-              <h3 className="koda-admin-label text-ink">Child device access</h3>
-              <p className="text-xs text-muted">Generate a one-time code for a child&apos;s device.</p>
+              <h3 className="koda-admin-label text-ink">{t("profile.device.title")}</h3>
+              <p className="text-xs text-muted">{t("profile.device.subtitle")}</p>
             </div>
             <div className="grid gap-2 sm:grid-cols-2">
               {children.map((child) => (
@@ -483,7 +484,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
                     isLoading={deviceCodeBusy === child.id}
                     onClick={() => void issueDeviceCode(child)}
                   >
-                    Device code
+                    {t("profile.device.button")}
                   </UIButton>
                 </div>
               ))}
@@ -499,21 +500,23 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
       <UIModal
         isOpen={Boolean(deviceCode)}
         onClose={() => setDeviceCode(null)}
-        title={`Device code for ${deviceCode?.learner.displayName ?? "child"}`}
+        title={t("profile.device.modalTitle", { name: deviceCode?.learner.displayName ?? t("account.role.child") })}
         tone="plain"
-        footer={<UIButton variant="primary" onClick={() => setDeviceCode(null)}>Done</UIButton>}
+        footer={<UIButton variant="primary" onClick={() => setDeviceCode(null)}>{t("skillCard.done")}</UIButton>}
       >
         {deviceCode && (
           <div className="space-y-5 text-center">
             <p className="text-sm text-muted">
-              On the child&apos;s device, choose <strong>Child code</strong> on the sign-in screen and enter this code.
+              {tNodes("profile.device.howTo", { childCode: <strong>{t("account.childCode")}</strong> })}
             </p>
             <div className="rounded-2xl border-2 border-indigo-200 bg-indigo-50 px-4 py-5 dark:border-indigo-800 dark:bg-indigo-950/40">
               <div className="font-mono text-3xl font-bold tracking-[0.3em] text-indigo-800 dark:text-indigo-200">
                 {deviceCode.code}
               </div>
               <p className="mt-2 text-xs text-indigo-700 dark:text-indigo-300">
-                Expires {new Date(deviceCode.expiresAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} · single use
+                {t("profile.device.expires", {
+                  time: formatDate(deviceCode.expiresAt, { hour: "numeric", minute: "2-digit" }),
+                })}
               </p>
             </div>
             <UIButton
@@ -521,9 +524,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
               icon={deviceCodeCopied ? <Check /> : <Copy />}
               onClick={() => void copyDeviceCode()}
             >
-              {deviceCodeCopied ? "Copied" : "Copy code"}
+              {deviceCodeCopied ? t("profile.device.copied") : t("profile.device.copy")}
             </UIButton>
-            <p className="text-xs text-muted">Keep this code private. It cannot be used again after the child joins.</p>
+            <p className="text-xs text-muted">{t("profile.device.private")}</p>
           </div>
         )}
       </UIModal>
@@ -532,7 +535,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
         isOpen={editOpen}
         currentName={name}
         currentSeed={session.avatarSeed}
-        nameLabel={audience === "child" ? "Your name" : "Display name"}
+        nameLabel={audience === "child" ? t("profile.editModal.yourName") : t("profile.editModal.displayName")}
         onClose={() => setEditOpen(false)}
         onSave={saveProfile}
       />

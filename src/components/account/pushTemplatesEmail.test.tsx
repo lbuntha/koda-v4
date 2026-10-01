@@ -46,6 +46,7 @@ vi.mock("../../lib/push", () => ({
   resetNotificationEmail: vi.fn(),
   resetEmailFrame: vi.fn(),
   sendTestEmail: vi.fn(),
+  setWordingLanguage: vi.fn(),
 }));
 
 vi.mock("../../lib/sync", () => ({ ApiError: class ApiError extends Error {} }));

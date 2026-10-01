@@ -2,6 +2,8 @@ import React from "react";
 
 import { themeSystem } from "../../lib/themeSystem";
 import { AccountForm } from "./AccountForm";
+import { LanguagePicker } from "../LanguagePicker";
+import { useT } from "../../lib/i18n";
 
 /**
  * The sign-in page.
@@ -15,9 +17,17 @@ import { AccountForm } from "./AccountForm";
  * session is local and lessons keep working with no connection; this screen is
  * the one thing that needs a network, on a device that has never used it.
  */
-export const SignInScreen: React.FC = () => (
+export const SignInScreen: React.FC = () => {
+  const { t } = useT();
+  return (
   <div className="min-h-screen w-full bg-canvas flex flex-col items-center justify-center px-4 py-10">
     <div className="w-full max-w-[400px]">
+      {/* Before the form, not in Settings: a family that cannot read English
+          has to be able to change it before they have an account to change it
+          in. Saved on the device and carried into the family's preferences. */}
+      <div className="mb-4 flex justify-end">
+        <LanguagePicker compact />
+      </div>
       {/*
        * The product's own mark, not a stock shield.
        *
@@ -39,7 +49,7 @@ export const SignInScreen: React.FC = () => (
           className="mx-auto mb-4 h-16 w-16 rounded-2xl shadow-lg shadow-indigo-600/25"
         />
         <h1 className="text-[26px] font-extrabold tracking-tight text-ink">
-          Learning your child asks for
+          {t("signIn.headline")}
         </h1>
         {/*
          * Specific, and one line.
@@ -54,7 +64,7 @@ export const SignInScreen: React.FC = () => (
          * where a parent looks after deciding to read on rather than before.
         */}
         <p className="mt-2 text-sm text-muted">
-          Kids’ maths practice: counting, addition and number bonds. Ages 5–11.
+          {t("signIn.tagline")}
         </p>
       </div>
 
@@ -70,8 +80,9 @@ export const SignInScreen: React.FC = () => (
        * than as a feature list.
       */}
       <p className="mt-5 text-center text-xs leading-relaxed text-muted">
-        Works offline after sign-in
+        {t("signIn.offline")}
       </p>
     </div>
   </div>
-);
+  );
+};

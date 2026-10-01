@@ -9,6 +9,7 @@ import {
 } from "../../lib/push";
 import { openNotification } from "../../lib/push/landing";
 
+import { translate } from "../../lib/i18n";
 /**
  * Everything Koda has told this account, with room to read it.
  *
@@ -83,9 +84,9 @@ function timeOf(iso: string): string {
 }
 
 const TABS: { id: Category; label: string }[] = [
-  { id: "all", label: "All" },
-  { id: "learning", label: "Learning" },
-  { id: "account", label: "Account" },
+  { id: "all", get label() { return translate("admin.notificationsPage.all"); } },
+  { id: "learning", get label() { return translate("admin.notificationsPage.learning"); } },
+  { id: "account", get label() { return translate("admin.notificationsPage.account"); } },
 ];
 
 export const NotificationsPage: React.FC = () => {
@@ -139,9 +140,9 @@ export const NotificationsPage: React.FC = () => {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <UIPageHeader
-        eyebrow="Your account"
-        title="Notifications"
-        subtitle="What Koda has told you — kept here whether or not it reached your phone."
+        eyebrow={translate("admin.notificationsPage.yourAccount")}
+        title={translate("admin.notificationsPage.notifications")}
+        subtitle={translate("admin.notificationsPage.whatKodaHasToldYouKept")}
       />
 
       {/* One tab is not a choice, so an account with only one kind of
@@ -171,15 +172,14 @@ export const NotificationsPage: React.FC = () => {
           <Inbox className="mx-auto h-8 w-8 text-muted" />
           <p className="mt-3 text-sm text-ink">
             {!loaded
-              ? "Reading…"
+              ? translate("admin.notificationsPage.reading")
               : rows.length === 0
-                ? "Nothing yet."
-                : "Nothing in this category."}
+                ? translate("admin.notificationsPage.nothingYet")
+                : translate("admin.notificationsPage.nothingInThisCategory")}
           </p>
           {loaded && rows.length === 0 && (
             <p className="mt-1 text-xs text-muted">
-              Koda will tell you here when something happens on your account, or when one of your
-              children reaches something worth hearing about.
+              {translate("admin.notificationsPage.kodaWillTellYouHereWhen")}
             </p>
           )}
         </div>
@@ -222,7 +222,7 @@ export const NotificationsPage: React.FC = () => {
                           aria-hidden
                           className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-500"
                         />
-                        <span className="sr-only">New</span>
+                        <span className="sr-only">{translate("admin.notificationsPage.new")}</span>
                       </>
                     )}
                   </button>

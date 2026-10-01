@@ -5,6 +5,7 @@ import { ApiError, SessionAPI } from "../../lib/sync";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIButton } from "../ui";
 
+import { translate } from "../../lib/i18n";
 /** The token on the current URL, if this is an email-verification link. */
 export const verificationTokenFromUrl = (): string | null => {
   if (typeof window === "undefined") return null;
@@ -45,7 +46,7 @@ export const VerifyEmailScreen: React.FC<VerifyEmailScreenProps> = ({ token, onD
         const problem = err as ApiError;
         setError(
           problem.isOffline
-            ? "No connection to the data service. Try this link again when you are online."
+            ? translate("admin.verifyEmailScreen.noConnectionToTheDataService")
             : problem.message,
         );
       })
@@ -64,21 +65,21 @@ export const VerifyEmailScreen: React.FC<VerifyEmailScreenProps> = ({ token, onD
         </div>
         <div className="space-y-2">
           <h1 className="font-mono text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-            {busy ? "Verifying your email…" : verified ? "Email verified" : "Link not accepted"}
+            {busy ? translate("admin.verifyEmailScreen.verifyingYourEmail") : verified ? translate("admin.verifyEmailScreen.emailVerified") : translate("admin.verifyEmailScreen.linkNotAccepted")}
           </h1>
           <p className="mx-auto max-w-sm text-sm text-slate-500 dark:text-slate-400">
             {busy
-              ? "This will only take a moment."
+              ? translate("admin.verifyEmailScreen.thisWillOnlyTakeAMoment")
               : verified
-                ? "Your Koda account is ready and you are signed in."
-                : error ?? "This link is invalid or has expired."}
+                ? translate("admin.verifyEmailScreen.yourKodaAccountIsReadyAnd")
+                : error ?? translate("admin.verifyEmailScreen.thisLinkIsInvalidOrHas")}
           </p>
         </div>
 
         {!busy && (
           <div className={themeSystem.card("default", "p-5 sm:p-6")}>
             <UIButton variant="primary" className="w-full" onClick={onDone}>
-              {verified ? "Continue to Koda" : "Back to sign in"}
+              {verified ? translate("admin.verifyEmailScreen.continueToKoda") : translate("admin.verifyEmailScreen.backToSignIn")}
             </UIButton>
           </div>
         )}

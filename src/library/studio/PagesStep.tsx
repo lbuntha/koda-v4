@@ -7,6 +7,7 @@ import { core } from "../data/text";
 import { pictureFor } from "../draft";
 import { Picture, PICTURE_KEYS } from "../Picture";
 import { PicturePanel } from "./PicturePanel";
+import { useT } from "../../lib/i18n";
 
 /**
  * Pages & pictures — the book as a reader will turn it, one card a page, with a
@@ -29,10 +30,10 @@ type Draft = Omit<Passage, "rev">;
 const KHMER = "font-['Noto_Sans_Khmer','Khmer_OS','Khmer_MN',sans-serif]";
 const SERIF = "font-['Iowan_Old_Style','Palatino_Linotype','Book_Antiqua',Georgia,'Times_New_Roman',serif]";
 
-const HOW: Record<PagePicture["how"], string> = { chosen: "Chosen", auto: "Automatic", none: "No picture" };
-const PLACE_NAME: Record<PicturePlace, string> = { top: "Top", bottom: "Bottom", left: "Left", right: "Right" };
+/* Worded under `studio.pages.how.<how>` and `studio.pages.place.<at>`. */
 
 export function PagesStep({ draft, onEdit }: { draft: Draft; onEdit(d: Draft): void }) {
+  const { t } = useT();
   const km = draft.language === "km";
   const book = useMemo(() => layoutBook(draft), [draft]);
   // null = drawer closed; 0 = cover open; n = page n open.
@@ -64,7 +65,7 @@ export function PagesStep({ draft, onEdit }: { draft: Draft; onEdit(d: Draft): v
   };
   const chosenKey = open === null ? null : current ? current.picture.key : draft.picture;
   /**
-   * What "Draw one" opens with, so the model is told what to draw rather than
+   * What "Make with AI" opens with, so the model is told what to draw rather than
    * handed a bare line of the story and left to guess a subject out of it.
    */
   const promptSeed = current
@@ -76,30 +77,28 @@ export function PagesStep({ draft, onEdit }: { draft: Draft; onEdit(d: Draft): v
   return (
     <div className="grid gap-5">
       <div>
-        <h2 className="text-lg font-extrabold text-ink">Pages &amp; pictures</h2>
-        <p className="text-sm text-muted">
-          This is the book as a reader turns it — {pages.length} page{pages.length === 1 ? "" : "s"} after the cover. Pick a card to change its picture. A page left on
-          Automatic shows the picture of a word on it.
-        </p>
+        <h2 className="text-lg font-extrabold text-ink">{t("studio.step.pages")}</h2>
+        <p className="text-sm text-muted">{t("studio.pages.intro", { count: pages.length })}</p>
       </div>
 
-      <ol className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4" aria-label="Pages">
+      <ol className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4" aria-label={t("reader.pages")}>
         <li>
-          <PageCard label="Cover" selected={open === 0} onSelect={() => setOpen(0)} picture={draft.picture} how="" km={km} text={draft.title} title />
+          <PageCard label={t("reader.cover")} selected={open === 0} onSelect={() => setOpen(0)} picture={draft.picture} how="" km={km} text={draft.title} title />
         </li>
         {pages.map((p) => (
           <li key={p.n}>
-            <PageCard label={`Page ${p.n}`} selected={open === p.n} onSelect={() => setOpen(p.n)} picture={p.picture.key} how={HOW[p.picture.how]} place={p.picture.key && p.picture.at !== "top" ? PLACE_NAME[p.picture.at] : ""} km={km} text={p.text} />
+            <PageCard label={t("studio.pages.page", { n: p.n })} selected={open === p.n} onSelect={() => setOpen(p.n)} picture={p.picture.key} how={t(`studio.pages.how.${p.picture.how}`)} chosen={p.picture.how === "chosen"} place={p.picture.key && p.picture.at !== "top" ? t(`studio.pages.place.${p.picture.at}`) : ""} km={km} text={p.text} />
           </li>
         ))}
       </ol>
 
       {open !== null && (
         <PicturePanel
-          title={current ? `Picture for page ${current.n}` : "Picture for the cover"}
+          title={current ? t("studio.pages.pictureFor", { n: current.n }) : t("studio.pages.pictureForCover")}
           chosen={chosenKey}
           how={current?.picture.how ?? "chosen"}
           promptSeed={promptSeed}
+          brief={{ cambodia: km }}
           suggested={suggested}
           photos={photosOf(draft)}
           allowNone={!!current}
@@ -113,10 +112,11 @@ export function PagesStep({ draft, onEdit }: { draft: Draft; onEdit(d: Draft): v
   );
 }
 
-function PageCard({ label, selected, onSelect, picture, how, place = "", text, km, title = false }: {
-  label: string; selected: boolean; onSelect(): void; picture: string | null; how: string; place?: string; text: string; km: boolean; title?: boolean;
+function PageCard({ label, selected, onSelect, picture, how, chosen = false, place = "", text, km, title = false }: {
+  label: string; selected: boolean; onSelect(): void; picture: string | null; how: string; chosen?: boolean; place?: string; text: string; km: boolean; title?: boolean;
 }) {
-  const what = picture ? (isPhoto(picture) ? "photo" : picture) : "no picture";
+  const { t } = useT();
+  const what = picture ? (isPhoto(picture) ? t("studio.pages.photoLower") : picture) : t("studio.pages.noPictureLower");
   return (
     <button
       type="button"
@@ -137,7 +137,7 @@ function PageCard({ label, selected, onSelect, picture, how, place = "", text, k
       <span className="grid gap-1 p-3">
         <span className="flex items-center justify-between gap-2 text-xs font-extrabold uppercase tracking-wider text-muted">
           <span>{label}{place && <span className="ml-1 normal-case tracking-normal text-muted">· {place}</span>}</span>
-          {how && <span className={`rounded-full px-2 py-0.5 normal-case tracking-normal ${how === "Chosen" ? "bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-200" : "bg-surface-muted text-ink"}`}>{how}</span>}
+          {how && <span className={`rounded-full px-2 py-0.5 normal-case tracking-normal ${chosen ? "bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-200" : "bg-surface-muted text-ink"}`}>{how}</span>}
         </span>
         <span className={`line-clamp-3 text-sm text-ink ${km ? KHMER : SERIF} ${title ? "font-bold" : ""}`}>{text}</span>
       </span>

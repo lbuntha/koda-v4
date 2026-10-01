@@ -3,6 +3,7 @@ import type { KodaSDK } from "../../types";
 import { UIKidMessage } from "../../../components/ui";
 import { hintAt } from "../round/hints";
 import type { HintController } from "../round/useSkillRound";
+import { useT } from "../../../lib/i18n";
 
 /**
  * The hint itself.
@@ -28,6 +29,7 @@ export interface SkillHintProps {
 }
 
 export const SkillHint: React.FC<SkillHintProps> = ({ koda, hints, hint, id }) => {
+  const { t } = useT();
   const text = hint.open ? hintAt(hints, hint.level) : undefined;
   const hasMore = hint.level < hints.length;
 
@@ -65,7 +67,7 @@ export const SkillHint: React.FC<SkillHintProps> = ({ koda, hints, hint, id }) =
     <div id={id}>
       <UIKidMessage
         tone="hint"
-        title={hints.length > 1 ? `Hint ${hint.level} of ${hints.length}` : "Hint"}
+        title={hints.length > 1 ? t("round.hintOf", { level: hint.level, total: hints.length }) : t("library.hint.title")}
         message={text}
         /*
          * Climbing is the panel's job, showing and hiding is the header's.
@@ -76,7 +78,7 @@ export const SkillHint: React.FC<SkillHintProps> = ({ koda, hints, hint, id }) =
          * header opens and closes, this asks for the next one, and it
          * disappears at the top of the ladder rather than going dead.
          */
-        actionLabel={hasMore ? "More help" : undefined}
+        actionLabel={hasMore ? t("round.moreHelp") : undefined}
         onAction={hasMore ? hint.more : undefined}
       />
     </div>

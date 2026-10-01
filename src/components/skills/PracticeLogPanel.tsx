@@ -24,6 +24,7 @@ import {
 } from "../../lib/learning";
 import { getCourseLessons, practiceTitle } from "../../curriculum";
 
+import { translate } from "../../lib/i18n";
 /**
  * A lesson id, as the family would name it.
  *
@@ -81,7 +82,7 @@ const LearnerName: React.FC<{ learnerId: string }> = ({ learnerId }) => {
   return (
     <span className="inline-flex items-center gap-1.5">
       <span className={name ? "font-bold" : "font-mono text-xs"}>{name ?? learnerId}</span>
-      {isCurrent && <UIBadge variant="neutral">signed in</UIBadge>}
+      {isCurrent && <UIBadge variant="neutral">{translate("admin.practiceLogPanel.signedIn")}</UIBadge>}
     </span>
   );
 };
@@ -91,17 +92,17 @@ const Trend: React.FC<{ standing: PracticeStanding }> = ({ standing }) => {
   if (standing.speedUpPercent === undefined) {
     return (
       <span className="text-slate-400 dark:text-slate-500">
-        needs {TREND_SAMPLE * 2} answers
+        {translate("admin.practiceLogPanel.needs")}{" "}{TREND_SAMPLE * 2}{" "}{translate("admin.practiceLogPanel.answers")}
       </span>
     );
   }
   const change = Math.round(standing.speedUpPercent);
   // Below ten per cent either way is noise on a median of eight answers, and
   // drawing it as a trend invites a parent to read a good afternoon as progress.
-  if (Math.abs(change) < 10) return <span className="text-slate-500">holding steady</span>;
+  if (Math.abs(change) < 10) return <span className="text-slate-500">{translate("admin.practiceLogPanel.holdingSteady")}</span>;
   return (
     <span className={change > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}>
-      {change > 0 ? `${change}% faster` : `${Math.abs(change)}% slower`}
+      {change > 0 ? translate("admin.practiceLogPanel.changeFaster", { change: change }) : translate("admin.practiceLogPanel.valueSlower", { value: Math.abs(change) })}
     </span>
   );
 };
@@ -164,7 +165,7 @@ const STANDING_COLUMNS: UIDataTableColumn<PracticeStanding>[] = [
       ) : (
         <span className="inline-flex items-center gap-1.5">
           {s.questionsAnswered}
-          <UIBadge variant="warning">too few</UIBadge>
+          <UIBadge variant="warning">{translate("admin.practiceLogPanel.tooFew")}</UIBadge>
         </span>
       ),
     sortValue: (s) => s.questionsAnswered,
@@ -270,11 +271,11 @@ const RUN_COLUMNS: UIDataTableColumn<PracticeRun>[] = [
     header: "Round",
     render: (r) =>
       r.finished ? (
-        <UIBadge variant="success">finished</UIBadge>
+        <UIBadge variant="success">{translate("admin.practiceLogPanel.finished")}</UIBadge>
       ) : r.abandoned ? (
-        <UIBadge variant="warning">left early</UIBadge>
+        <UIBadge variant="warning">{translate("admin.practiceLogPanel.leftEarly")}</UIBadge>
       ) : (
-        <UIBadge variant="neutral">in progress</UIBadge>
+        <UIBadge variant="neutral">{translate("admin.practiceLogPanel.inProgress")}</UIBadge>
       ),
     sortValue: (r) => (r.finished ? 2 : r.abandoned ? 1 : 0),
     nowrap: true,
@@ -373,10 +374,9 @@ export const PracticeLogPanel: React.FC = () => {
   if (runs.length === 0 && skillFilter === "all") {
     return (
       <div className={themeSystem.card("default", "p-6 text-center")}>
-        <p className="text-sm font-bold text-slate-900 dark:text-white">No practice yet</p>
+        <p className="text-sm font-bold text-slate-900 dark:text-white">{translate("admin.practiceLogPanel.noPracticeYet")}</p>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-          Speed is only read off practice rounds — the ones with the hints, the voice and the
-          explanation switched off. Play one from the Practice section of a skill's path.
+          {translate("admin.practiceLogPanel.speedIsOnlyReadOffPractice")}
         </p>
       </div>
     );
@@ -388,7 +388,7 @@ export const PracticeLogPanel: React.FC = () => {
         <UIStatTile
           icon={<Timer />}
           value={best ? secs(best.responseMs) : "—"}
-          label={best ? `Top speed · ${learnerNameOf(best.learnerId) ?? "this device"}` : "Top speed"}
+          label={best ? translate("admin.practiceLogPanel.topSpeedValue", { value: learnerNameOf(best.learnerId) ?? translate("admin.practiceLogPanel.thisDevice") }) : translate("admin.practiceLogPanel.topSpeed")}
           tone="success"
         />
         <UIStatTile
@@ -396,8 +396,8 @@ export const PracticeLogPanel: React.FC = () => {
           value={quickest ? secs(quickest.medianResponseMs) : "—"}
           label={
             quickest
-              ? `Quickest pace · ${learnerNameOf(quickest.learnerId) ?? "this device"}`
-              : "Quickest pace"
+              ? translate("admin.practiceLogPanel.quickestPaceValue", { value: learnerNameOf(quickest.learnerId) ?? translate("admin.practiceLogPanel.thisDevice") })
+              : translate("admin.practiceLogPanel.quickestPace")
           }
         />
         <UIStatTile
@@ -409,30 +409,27 @@ export const PracticeLogPanel: React.FC = () => {
           }
           label={
             improved
-              ? `Faster than they were · ${learnerNameOf(improved.learnerId) ?? "this device"}`
-              : "Faster than they were"
+              ? translate("admin.practiceLogPanel.fasterThanTheyWereValue", { value: learnerNameOf(improved.learnerId) ?? translate("admin.practiceLogPanel.thisDevice") })
+              : translate("admin.practiceLogPanel.fasterThanTheyWere")
           }
           tone="success"
         />
-        <UIStatTile icon={<Repeat />} value={String(answers)} label="Practice answers" />
+        <UIStatTile icon={<Repeat />} value={String(answers)} label={translate("admin.practiceLogPanel.practiceAnswers")} />
       </UIStatGrid>
 
       <div className={themeSystem.card("default", "p-4 space-y-1")}>
         <p className="text-xs text-slate-600 dark:text-slate-300">
-          Timed from the question appearing to the first answer, in practice rounds only. An answer
-          only counts towards a speed if it was <strong>right</strong>, <strong>unaided</strong> and
-          slower than a reflex tap — a lucky jab at the keypad is kept in the log and kept out of
-          the record.
+          {translate("admin.practiceLogPanel.timedFromTheQuestionAppearingTo")}{" "}<strong>{translate("admin.practiceLogPanel.right")}</strong>, <strong>{translate("admin.practiceLogPanel.unaided")}</strong>{" "}{translate("admin.practiceLogPanel.andSlowerThanAReflexTap")}
         </p>
         <p className="text-xs text-slate-500 dark:text-slate-400">
-          A learner is ranked once they have {MIN_PRACTICE_ANSWERS} practice answers, and{" "}
-          <em>getting faster</em> compares their most recent {TREND_SAMPLE} with their first{" "}
-          {TREND_SAMPLE}. Below that the row still shows — it just is not judged.
+          {translate("admin.practiceLogPanel.aLearnerIsRankedOnceThey")}{" "}{MIN_PRACTICE_ANSWERS}{" "}{translate("admin.practiceLogPanel.practiceAnswersAnd")}{" "}
+          <em>{translate("admin.practiceLogPanel.gettingFaster")}</em>{" "}{translate("admin.practiceLogPanel.comparesTheirMostRecent")}{" "}{TREND_SAMPLE}{" "}{translate("admin.practiceLogPanel.withTheirFirst")}{" "}
+          {TREND_SAMPLE}{translate("admin.practiceLogPanel.belowThatTheRowStillShows")}
         </p>
       </div>
 
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h3 className="text-sm font-bold text-slate-900 dark:text-white">Learners</h3>
+        <h3 className="text-sm font-bold text-slate-900 dark:text-white">{translate("admin.practiceLogPanel.learners")}</h3>
         <div className="flex flex-wrap items-center gap-2">
           {skills.length > 1 &&
             ["all", ...skills].map((id) => (
@@ -441,12 +438,12 @@ export const PracticeLogPanel: React.FC = () => {
                 onClick={() => setSkillFilter(id)}
                 className={themeSystem.button(skillFilter === id ? "primary" : "secondary", "sm")}
               >
-                {id === "all" ? "All skills" : id}
+                {id === "all" ? translate("admin.practiceLogPanel.allSkills") : id}
               </button>
             ))}
           <UIButton variant="secondary" size="sm" onClick={download}>
             <Download />
-            Export
+            {translate("admin.practiceLogPanel.export")}
           </UIButton>
         </div>
       </div>
@@ -456,32 +453,32 @@ export const PracticeLogPanel: React.FC = () => {
         rows={standings}
         rowKey={(s) => s.learnerId}
         defaultSort={{ key: "pace", direction: "asc" }}
-        caption="Practice speed per learner, quickest pace first"
-        emptyMessage="Nobody has practised this skill yet."
+        caption={translate("admin.practiceLogPanel.practiceSpeedPerLearnerQuickestPace")}
+        emptyMessage={translate("admin.practiceLogPanel.nobodyHasPractisedThisSkillYet")}
       />
 
       <div className="space-y-2">
-        <h3 className="text-sm font-bold text-slate-900 dark:text-white">Fastest answers</h3>
+        <h3 className="text-sm font-bold text-slate-900 dark:text-white">{translate("admin.practiceLogPanel.fastestAnswers")}</h3>
         <UIDataTable
           columns={SPEED_COLUMNS}
           rows={speeds}
           rowKey={(a) => a.questionId}
           defaultSort={{ key: "time", direction: "asc" }}
-          caption="The quickest correct unaided answers on record, with the question that was asked"
-          emptyMessage="No answer has qualified for a speed record yet."
+          caption={translate("admin.practiceLogPanel.theQuickestCorrectUnaidedAnswersOn")}
+          emptyMessage={translate("admin.practiceLogPanel.noAnswerHasQualifiedForA")}
         />
       </div>
 
       <div className="space-y-2">
-        <h3 className="text-sm font-bold text-slate-900 dark:text-white">Practice rounds</h3>
+        <h3 className="text-sm font-bold text-slate-900 dark:text-white">{translate("admin.practiceLogPanel.practiceRounds")}</h3>
         <UIDataTable
           columns={RUN_COLUMNS}
           rows={runs}
           rowKey={(r) => r.runId}
           defaultSort={{ key: "startedAt", direction: "desc" }}
           maxHeight="28rem"
-          caption="Every practice round, finished or not"
-          emptyMessage="No practice rounds for this skill."
+          caption={translate("admin.practiceLogPanel.everyPracticeRoundFinishedOrNot")}
+          emptyMessage={translate("admin.practiceLogPanel.noPracticeRoundsForThisSkill")}
         />
       </div>
     </div>

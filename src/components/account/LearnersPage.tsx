@@ -16,6 +16,7 @@ import { UIAvatar, UIBadge, UIButton, UIDialog, UIMenu, UIMenuItem, UIMenuSepara
 import { ChildReportPage } from "./ChildReportPage";
 import { NoAccess } from "./NoAccess";
 import { useIsCompact } from "../../lib/useBreakpoint";
+import { formatDate as formatInLanguage, useT } from "../../lib/i18n";
 
 interface Learner {
   id: string;
@@ -56,9 +57,7 @@ const settingsDiffer = (draft: ChildSettings, saved: ChildSettings): boolean =>
   });
 
 const formatDate = (value: string) =>
-  new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", year: "numeric" }).format(
-    new Date(value),
-  );
+  formatInLanguage(value, { day: "numeric", month: "short", year: "numeric" });
 
 export interface LearnersPageProps {
   /**
@@ -77,6 +76,7 @@ export interface LearnersPageProps {
 export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, onOpenReport }) => {
   useSyncExternalStore(DailyGoalAPI.subscribe, DailyGoalAPI.version);
   const plan = useBilling();
+  const { t, tNodes } = useT();
   const isCompact = useIsCompact();
   const { can } = usePermissions();
   const session = useSession();
@@ -151,7 +151,7 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
       setName("");
       setBirthYear("");
       setCodeResult(code);
-      setNotice("Child profile created. Share this code with the child.");
+      setNotice(t("children.notice.created"));
       playSound("pop");
     } catch (err) {
       setError((err as ApiError).message);
@@ -210,7 +210,7 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
       if (settingsDiffer(settingsDraft, saved)) ChildSettingsAPI.set(editing.id, settingsDraft);
       setLearners((current) => current.map((item) => item.id === updated.id ? updated : item));
       setEditing(null);
-      setNotice("Child profile updated.");
+      setNotice(t("children.notice.updated"));
     } catch (err) {
       setError((err as ApiError).message);
     } finally {
@@ -224,7 +224,7 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
       const token = await accessToken();
       await request(`/learners/${learner.id}`, { method: "DELETE", token });
       setLearners((current) => current.filter((item) => item.id !== learner.id));
-      setNotice(`${learner.displayName} was removed.`);
+      setNotice(t("children.notice.removed", { name: learner.displayName }));
     } catch (err) {
       setError((err as ApiError).message);
     } finally {
@@ -240,7 +240,7 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
   };
 
   if (!canRead) {
-    return <NoAccess title="Children" permission="learner:read" what="Only family members with child access can view children." />;
+    return <NoAccess title={t("profile.children.title")} permission="learner:read" what={t("children.noAccess")} />;
   }
 
   const showing = reportFor ? learners.find((item) => item.id === reportFor) : undefined;
@@ -273,7 +273,7 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
         {(!isCompact || canCreate) && (
         <header className={isCompact ? "flex justify-end" : "flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"}>
           {!isCompact && (
-          <div><h1 className="koda-admin-page-title">Children</h1><p className="mt-1 text-sm text-[#6D6997] dark:text-muted">Each child learns on their own device.</p></div>
+          <div><h1 className="koda-admin-page-title">{t("profile.children.title")}</h1><p className="mt-1 text-sm text-[#6D6997] dark:text-muted">{t("children.subtitle")}</p></div>
           )}
           {canCreate && (
             <div className="flex flex-wrap items-center gap-3">
@@ -283,7 +283,7 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
                 disabled={atLimit}
                 onClick={() => setCreateOpen(true)}
               >
-                Add child
+                {t("children.add")}
               </UIButton>
               {/*
                 * Only shown once the limit is reached, to say why the button is
@@ -292,7 +292,7 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
                 */}
               {atLimit && (
                 <span className="text-xs text-muted">
-                  {`The ${plan.planName} plan covers ${plan.learnerLimit} ${plan.learnerLimit === 1 ? "child" : "children"}. Upgrade to add another.`}
+                  {t("children.atLimit", { plan: plan.planName, count: plan.learnerLimit })}
                 </span>
               )}
             </div>
@@ -303,19 +303,19 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
         {error && <p className={themeSystem.flash("error")}>{error}</p>}
         {notice && <p className={themeSystem.flash("success")}>{notice}</p>}
 
-        {loading ? <div className="rounded-2xl border border-line bg-white p-6 text-center text-sm text-muted dark:bg-surface">Loading children…</div> : learners.length === 0 ? <section className={themeSystem.card("default", "p-6 text-center")}><UserRound className="mx-auto h-10 w-10 text-indigo-300" /><h2 className="mt-3 text-lg font-semibold text-ink">No child profiles yet</h2><p className="mx-auto mt-1 max-w-md text-sm text-muted">Add a child to create their learning space.</p>{canCreate && <UIButton className="mt-4" icon={<Plus />} disabled={atLimit} onClick={() => setCreateOpen(true)}>Add child</UIButton>}</section> : <div className="grid gap-3 sm:grid-cols-2">{learners.map((learner) => (
+        {loading ? <div className="rounded-2xl border border-line bg-white p-6 text-center text-sm text-muted dark:bg-surface">{t("profile.children.loading")}</div> : learners.length === 0 ? <section className={themeSystem.card("default", "p-6 text-center")}><UserRound className="mx-auto h-10 w-10 text-indigo-300" /><h2 className="mt-3 text-lg font-semibold text-ink">{t("profile.children.none")}</h2><p className="mx-auto mt-1 max-w-md text-sm text-muted">{t("children.noneNote")}</p>{canCreate && <UIButton className="mt-4" icon={<Plus />} disabled={atLimit} onClick={() => setCreateOpen(true)}>{t("children.add")}</UIButton>}</section> : <div className="grid gap-3 sm:grid-cols-2">{learners.map((learner) => (
           <article key={learner.id} className={themeSystem.card("default", "p-4")}>
             <div className="flex items-start justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">
                 <UIAvatar name={learner.displayName} seed={learner.avatarSeed} size="md" />
                 <div className="min-w-0">
                   <h2 className="truncate text-lg font-semibold text-ink">{learner.displayName}</h2>
-                  <p className="text-xs text-muted">{learner.birthYear ? `Born ${learner.birthYear}` : `Added ${formatDate(learner.createdAt)}`}</p>
-                  <p className="text-xs text-muted">Goal · {DailyGoalAPI.for(learner.id)} rounds</p>
+                  <p className="text-xs text-muted">{learner.birthYear ? t("children.born", { year: String(learner.birthYear) }) : t("profile.children.added", { date: formatDate(learner.createdAt) })}</p>
+                  <p className="text-xs text-muted">{t("children.goalRounds", { count: DailyGoalAPI.for(learner.id) })}</p>
                 </div>
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                {learner.hasActiveCode && <UIBadge variant="info">Code active</UIBadge>}
+                {learner.hasActiveCode && <UIBadge variant="info">{t("children.codeActive")}</UIBadge>}
                 {/*
                   * Edit and Remove live here rather than in the row below. They
                   * are occasional, and Remove is destructive — a red button on
@@ -331,7 +331,7 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
                         onClick={() => { playSound("pop"); toggle(); }}
                         aria-haspopup="menu"
                         aria-expanded={isOpen}
-                        aria-label={`More actions for ${learner.displayName}`}
+                        aria-label={t("children.moreActions", { name: learner.displayName })}
                         className={`rounded-xl p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 ${isOpen ? "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100" : ""}`}
                       >
                         <MoreVertical className="h-5 w-5" />
@@ -345,7 +345,7 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
                             icon={<Pencil />}
                             onSelect={() => { close(); setGoalDraft(DailyGoalAPI.for(learner.id)); setSettingsDraft(ChildSettingsAPI.for(learner.id)); setEditing({ ...learner }); }}
                           >
-                            Edit profile
+                            {t("profile.edit")}
                           </UIMenuItem>
                         )}
                         {canUpdate && canDelete && <UIMenuSeparator />}
@@ -355,7 +355,7 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
                             icon={<Trash2 />}
                             onSelect={() => { close(); setDeleting(learner); }}
                           >
-                            Remove child
+                            {t("children.remove")}
                           </UIMenuItem>
                         )}
                       </>
@@ -365,9 +365,9 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
               </div>
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
-              {canReadRecord && <UIButton variant="primary" size="sm" icon={<LineChart />} onClick={() => { playSound("pop"); onOpenReport?.(learner.id); }}>Report</UIButton>}
-              {canSwitch && <UIButton variant="secondary" size="sm" icon={<UserRound />} isLoading={busy === `switch:${learner.id}`} onClick={() => void switchToChild(learner)}>Switch</UIButton>}
-              <UIButton variant={canReadRecord || canSwitch ? "secondary" : "primary"} size="sm" icon={<KeyRound />} isLoading={busy === `code:${learner.id}`} onClick={() => void issueCode(learner)}>Device code</UIButton>
+              {canReadRecord && <UIButton variant="primary" size="sm" icon={<LineChart />} onClick={() => { playSound("pop"); onOpenReport?.(learner.id); }}>{t("children.report")}</UIButton>}
+              {canSwitch && <UIButton variant="secondary" size="sm" icon={<UserRound />} isLoading={busy === `switch:${learner.id}`} onClick={() => void switchToChild(learner)}>{t("children.switch")}</UIButton>}
+              <UIButton variant={canReadRecord || canSwitch ? "secondary" : "primary"} size="sm" icon={<KeyRound />} isLoading={busy === `code:${learner.id}`} onClick={() => void issueCode(learner)}>{t("profile.device.button")}</UIButton>
             </div>
           </article>
         ))}</div>}
@@ -375,10 +375,10 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
         <FamilyPinCard />
       </div>
 
-      <UIModal isOpen={createOpen} onClose={() => setCreateOpen(false)} title="Add child" footer={<><UIButton variant="secondary" onClick={() => setCreateOpen(false)}>Cancel</UIButton><UIButton variant="primary" isLoading={busy === "create"} disabled={!name.trim()} onClick={() => void createLearner()}>Create and get code</UIButton></>}><div className="space-y-4"><p className="rounded-xl bg-indigo-50 p-3 text-sm text-indigo-900 dark:bg-indigo-950/40 dark:text-indigo-200">The child does not need an email or password. You will receive a one-time code after creating this profile.</p><label className="block space-y-1.5"><span className="koda-admin-label text-ink">Child's name</span><input className={field} autoFocus value={name} onChange={(event) => setName(event.target.value)} placeholder="Mia" /></label><label className="block space-y-1.5"><span className="koda-admin-label text-ink">Birth year <span className="font-normal text-muted">(optional)</span></span><input className={field} type="number" min="1900" max={new Date().getFullYear()} value={birthYear} onChange={(event) => setBirthYear(event.target.value)} placeholder="2017" /></label></div></UIModal>
+      <UIModal isOpen={createOpen} onClose={() => setCreateOpen(false)} title={t("children.add")} footer={<><UIButton variant="secondary" onClick={() => setCreateOpen(false)}>{t("common.cancel")}</UIButton><UIButton variant="primary" isLoading={busy === "create"} disabled={!name.trim()} onClick={() => void createLearner()}>{t("children.createAndCode")}</UIButton></>}><div className="space-y-4"><p className="rounded-xl bg-indigo-50 p-3 text-sm text-indigo-900 dark:bg-indigo-950/40 dark:text-indigo-200">{t("children.createNote")}</p><label className="block space-y-1.5"><span className="koda-admin-label text-ink">{t("children.name")}</span><input className={field} autoFocus value={name} onChange={(event) => setName(event.target.value)} placeholder={t("children.namePlaceholder")} /></label><label className="block space-y-1.5"><span className="koda-admin-label text-ink">{t("children.birthYear")} <span className="font-normal text-muted">({t("common.optional").toLocaleLowerCase()})</span></span><input className={field} type="number" min="1900" max={new Date().getFullYear()} value={birthYear} onChange={(event) => setBirthYear(event.target.value)} placeholder="2017" /></label></div></UIModal>
 
-      <UIModal isOpen={Boolean(editing)} onClose={() => setEditing(null)} title="Edit child" footer={<><UIButton variant="secondary" onClick={() => setEditing(null)}>Cancel</UIButton><UIButton variant="primary" isLoading={Boolean(editing && busy === `edit:${editing.id}`)} onClick={() => void saveLearner()}>Save changes</UIButton></>}>
-        {editing && <div className="space-y-4"><label className="block space-y-1.5"><span className="koda-admin-label text-ink">Child's name</span><input className={field} value={editing.displayName} onChange={(event) => setEditing({ ...editing, displayName: event.target.value })} /></label><label className="block space-y-1.5"><span className="koda-admin-label text-ink">Birth year <span className="font-normal text-muted">(optional)</span></span><input className={field} type="number" value={editing.birthYear ?? ""} onChange={(event) => setEditing({ ...editing, birthYear: event.target.value ? Number(event.target.value) : null })} /></label><DailyGoalField label="Daily goal" hint={`Rounds ${editing.displayName || "this child"} aims to finish each day`} value={goalDraft} onChange={setGoalDraft} />
+      <UIModal isOpen={Boolean(editing)} onClose={() => setEditing(null)} title={t("children.edit")} footer={<><UIButton variant="secondary" onClick={() => setEditing(null)}>{t("common.cancel")}</UIButton><UIButton variant="primary" isLoading={Boolean(editing && busy === `edit:${editing.id}`)} onClick={() => void saveLearner()}>{t("children.save")}</UIButton></>}>
+        {editing && <div className="space-y-4"><label className="block space-y-1.5"><span className="koda-admin-label text-ink">{t("children.name")}</span><input className={field} value={editing.displayName} onChange={(event) => setEditing({ ...editing, displayName: event.target.value })} /></label><label className="block space-y-1.5"><span className="koda-admin-label text-ink">{t("children.birthYear")} <span className="font-normal text-muted">({t("common.optional").toLocaleLowerCase()})</span></span><input className={field} type="number" value={editing.birthYear ?? ""} onChange={(event) => setEditing({ ...editing, birthYear: event.target.value ? Number(event.target.value) : null })} /></label><DailyGoalField label={t("home.dailyGoal")} hint={t("children.goalHint", { name: editing.displayName || t("children.thisChild") })} value={goalDraft} onChange={setGoalDraft} />
           {/*
             * The rules, under a heading of their own. Above this line is who the
             * child is; below it is how Koda treats them — two different kinds of
@@ -388,11 +388,9 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
           <div className="space-y-3 border-t border-line pt-4">
             <div>
               <h3 className="koda-admin-label text-ink">
-                Koda settings
+                {t("children.kodaSettings")}
               </h3>
-              <p className="text-xs text-muted">
-                Applies on every device.
-              </p>
+              <p className="text-xs text-muted">{t("children.everyDevice")}</p>
             </div>
             <ChildSettingsFields
               value={settingsDraft}
@@ -408,12 +406,12 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
         </div>}
       </UIModal>
 
-      <UIModal isOpen={Boolean(codeResult)} onClose={() => setCodeResult(null)} title={`Device code for ${codeResult?.learner.displayName ?? "child"}`} tone="plain" footer={<UIButton variant="primary" onClick={() => setCodeResult(null)}>Done</UIButton>}>
-        {codeResult && <div className="space-y-5 text-center"><p className="text-sm text-muted">On the child's device, choose <strong>Child code</strong> on the sign-in screen and enter this code.</p><div className="rounded-2xl border-2 border-indigo-200 bg-indigo-50 px-4 py-5 dark:border-indigo-800 dark:bg-indigo-950/40"><div className="font-mono text-3xl font-bold tracking-[0.3em] text-indigo-800 dark:text-indigo-200">{codeResult.code}</div><p className="mt-2 text-xs text-indigo-700 dark:text-indigo-300">Expires {new Date(codeResult.expiresAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} · single use</p></div><UIButton variant="secondary" icon={copied ? <Check /> : <Copy />} onClick={() => void copyCode()}>{copied ? "Copied" : "Copy code"}</UIButton><p className="text-xs text-muted">Keep this code private. It cannot be used again after the child joins.</p></div>}
+      <UIModal isOpen={Boolean(codeResult)} onClose={() => setCodeResult(null)} title={t("profile.device.modalTitle", { name: codeResult?.learner.displayName ?? t("account.role.child") })} tone="plain" footer={<UIButton variant="primary" onClick={() => setCodeResult(null)}>{t("skillCard.done")}</UIButton>}>
+        {codeResult && <div className="space-y-5 text-center"><p className="text-sm text-muted">{tNodes("profile.device.howTo", { childCode: <strong>{t("account.childCode")}</strong> })}</p><div className="rounded-2xl border-2 border-indigo-200 bg-indigo-50 px-4 py-5 dark:border-indigo-800 dark:bg-indigo-950/40"><div className="font-mono text-3xl font-bold tracking-[0.3em] text-indigo-800 dark:text-indigo-200">{codeResult.code}</div><p className="mt-2 text-xs text-indigo-700 dark:text-indigo-300">{t("profile.device.expires", { time: formatInLanguage(codeResult.expiresAt, { hour: "numeric", minute: "2-digit" }) })}</p></div><UIButton variant="secondary" icon={copied ? <Check /> : <Copy />} onClick={() => void copyCode()}>{copied ? t("profile.device.copied") : t("profile.device.copy")}</UIButton><p className="text-xs text-muted">{t("profile.device.private")}</p></div>}
       </UIModal>
 
       {/* Removing a child takes their profile and their devices with it, so it is confirmed. */}
-      <UIDialog isOpen={Boolean(deleting)} onClose={() => setDeleting(null)} title="Remove child?" description={`${deleting?.displayName ?? "This child"} will be removed and their devices signed out. Their learning history goes with the profile.`} confirmText="Remove child" variant="danger" onConfirm={() => { if (deleting) void deleteLearner(deleting); }} />
+      <UIDialog isOpen={Boolean(deleting)} onClose={() => setDeleting(null)} title={t("children.removeTitle")} description={t("children.removeBody", { name: deleting?.displayName ?? t("children.thisChildCap") })} confirmText={t("children.remove")} variant="danger" onConfirm={() => { if (deleting) void deleteLearner(deleting); }} />
     </div>
   );
 };

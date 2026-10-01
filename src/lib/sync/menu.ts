@@ -18,6 +18,9 @@ export interface MenuItem {
   label: string;
   icon: string;
   badge?: string | null;
+  /** Other languages, keyed by code. Absent on a menu cached before they existed. */
+  labels?: Record<string, string> | null;
+  badges?: Record<string, string> | null;
   requires?: string | null;
   order: number;
 }

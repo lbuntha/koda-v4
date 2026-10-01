@@ -23,6 +23,11 @@
      "icon": "book"
     },
     {
+     "id": "trace",
+     "label": "Trace",
+     "icon": "pencil"
+    },
+    {
      "id": "profile",
      "label": "Profile",
      "icon": "user"
@@ -70,6 +75,12 @@
      "label": "Library Studio",
      "icon": "pen",
      "requires": "content:write"
+    },
+    {
+     "id": "trace-studio",
+     "label": "Trace Studio",
+     "icon": "pencil",
+     "requires": "trace:create"
     },
     {
      "id": "users",

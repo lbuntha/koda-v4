@@ -1,6 +1,7 @@
 import React from "react";
 import { CheckCircle2, Lock } from "lucide-react";
 import { type PathNodeState, themeSystem } from "../../lib/themeSystem";
+import { useT } from "../../lib/i18n";
 
 export interface UIPathNodeProps {
   state?: PathNodeState;
@@ -31,6 +32,7 @@ export const UIPathNode: React.FC<UIPathNodeProps> = ({
   onClick,
 }) => {
   const s = themeSystem.pathNode;
+  const { t } = useT();
   const isLocked = state === "locked";
   /* A plan lock, not a path lock: it draws the padlock but stays pressable,
      because pressing it is what explains the plan. See `PathNodeState`. */
@@ -43,7 +45,7 @@ export const UIPathNode: React.FC<UIPathNodeProps> = ({
         onClick={onClick}
         className={s.circle(state)}
         title={title}
-        aria-label={`${title}${isLocked ? " (locked)" : isPremium ? " (on the plan)" : ""}`}
+        aria-label={`${title}${isLocked ? ` (${t("path.locked")})` : isPremium ? ` (${t("path.onPlan")})` : ""}`}
       >
         {state === "completed" ? (
           <CheckCircle2 className="w-8 h-8 sm:w-9 sm:h-9" />

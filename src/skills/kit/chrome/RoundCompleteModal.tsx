@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Star, RotateCcw, ArrowRight, Trophy, Sparkles, Flame, Zap, Target, Home } from "lucide-react";
 import { playSound } from "../../../utils/audio";
 import { levelBar, roundPraise, type PraiseFacts } from "../round/roundPraise";
+import { useT } from "../../../lib/i18n";
 
 interface PracticeRoundCompleteModalProps {
   levelNumber: number;
@@ -93,6 +94,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
   standing,
   perfect = false,
 }) => {
+  const { t } = useT();
   /*
    * What this round is congratulated for.
    *
@@ -124,16 +126,19 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
    */
   const advance = {
     primary: recommendation?.kind === "practise" || recommendation?.kind === "review",
-    label: !nextLevelNumber
-      ? "BACK TO LESSONS"
+    // Upper case by style, not by spelling: `toLocaleUpperCase` leaves a
+    // script without case (Khmer) exactly as it is.
+    label: (!nextLevelNumber
+      ? t("round.backToLessons")
       : nextIsPractice
-        ? "TRY A PRACTICE ROUND"
-        : `NEXT LESSON (${nextLevelNumber})`,
+        ? t("round.tryPractice")
+        : t("round.nextLessonN", { n: nextLevelNumber })
+    ).toLocaleUpperCase(),
     short: !nextLevelNumber
-      ? "Back to lessons"
+      ? t("round.backToLessons")
       : nextIsPractice
-        ? "Try a practice round"
-        : `Skip to Lesson ${nextLevelNumber}`,
+        ? t("round.tryPractice")
+        : t("round.skipToLesson", { n: nextLevelNumber }),
   };
   /*
    * The way out, which used to be drawn almost never.
@@ -213,8 +218,10 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
               "Lesson", not "Level" — the level bar below is the learner's XP
               level, and one word cannot mean both on one card. */}
           <p className="text-[11px] text-slate-500 font-medium pt-1">
-            {practiceRound ? "Practice" : "Lesson"} {levelNumber}
-            {totalLessons ? ` of ${totalLessons}` : ""} · {levelTitle}
+            {totalLessons
+              ? t(practiceRound ? "round.practiceNOf" : "round.lessonNOf", { n: levelNumber, total: totalLessons })
+              : t(practiceRound ? "round.practiceN" : "round.lessonN", { n: levelNumber })}{" "}
+            · {levelTitle}
           </p>
         </div>
 
@@ -318,7 +325,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
           {bar && (
             <div className="space-y-1.5">
               <div className="flex items-baseline justify-between font-mono text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                <span>XP Level {bar.level}</span>
+                <span>{t("home.xpLevel", { level: bar.level })}</span>
                 <span>{bar.toNext} XP to Level {bar.level + 1}</span>
               </div>
               <div
@@ -327,7 +334,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
                 aria-valuemin={0}
                 aria-valuemax={bar.per}
                 aria-valuenow={bar.into}
-                aria-label={`Level ${bar.level} progress`}
+                aria-label={t("round.levelProgress", { level: bar.level })}
               >
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-indigo-400 transition-[width] duration-700 ease-out"
@@ -358,7 +365,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
           <div className="flex items-start gap-2.5 text-left bg-slate-950/60 border border-slate-800 rounded-2xl px-4 py-3 max-w-xs mx-auto">
             <Sparkles className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
             <p className="text-xs text-slate-200 font-medium leading-snug">
-              {recommendation.kidMessage}
+              {t(`today.${recommendation.kind}`)}
             </p>
           </div>
         )}
@@ -380,7 +387,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
               className={PRIMARY}
             >
               <RotateCcw className="w-4 h-4 stroke-[3]" />
-              <span>ONE MORE ROUND</span>
+              <span>{t("round.oneMore").toLocaleUpperCase()}</span>
             </button>
           ) : (
             <button onClick={onNextLevel} className={PRIMARY}>
@@ -403,8 +410,8 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
               {advance.primary
                 ? advance.short
                 : nextIsPractice
-                  ? "Play this lesson again"
-                  : "Practice Again"}
+                  ? t("round.playAgain")
+                  : t("round.practiceAgain")}
             </span>
           </button>
 
@@ -422,7 +429,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
             <div className="flex items-center justify-center gap-4">
               {showExit && (
                 <button onClick={onBackToLessons} className={QUIET}>
-                  Back to lessons
+                  {t("round.backToLessons")}
                 </button>
               )}
               {showExit && onGoHome && (
@@ -433,7 +440,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
               {onGoHome && (
                 <button onClick={onGoHome} className={QUIET}>
                   <Home className="w-3 h-3" aria-hidden="true" />
-                  Home
+                  {t("nav.home")}
                 </button>
               )}
             </div>

@@ -120,15 +120,6 @@ DEFAULT_SETTINGS: list[dict] = [
         "value": True,
         "order": 44,
     },
-    {
-        "settingId": "ai.geminiApiKey",
-        "group": "Ask Koda",
-        "label": "Gemini API key",
-        "description": "What the tutor calls Gemini with. Blank falls back to the deployment's GEMINI_API_KEY.",
-        "type": "secret",
-        "value": "",
-        "order": 45,
-    },
     # ---- Artwork. A different job with different keys: the Art page drawing
     # ---- an SVG has nothing to do with a child asking Koda a question, and
     # ---- putting them under one heading made both harder to find.
@@ -141,32 +132,95 @@ DEFAULT_SETTINGS: list[dict] = [
         "value": True,
         "order": 46,
     },
+    # ---- AI providers. Every credential a model is called with, one per
+    # ---- company, whatever feature spends it — the key behind Ask Koda is the
+    # ---- same key that drafts a book's questions. Blank falls back to the
+    # ---- deployment's environment variable, so a fresh deploy works before
+    # ---- anybody opens this screen.
     {
-        "settingId": "ai.openaiApiKey",
-        "group": "Artwork",
-        "label": "ChatGPT (OpenAI) API key",
-        "description": "Used when artwork is drawn by ChatGPT. Blank falls back to the deployment's OPENAI_API_KEY.",
+        "settingId": "ai.geminiApiKey",
+        "group": "AI providers",
+        "label": "Gemini",
+        "description": "Ask Koda (chat, speech, live voice, whiteboard), question drafts, pictures, artwork and read-aloud voices.",
         "type": "secret",
         "value": "",
-        "order": 47,
+        "env": "GEMINI_API_KEY",
+        "order": 145,
+    },
+    {
+        "settingId": "ai.openaiApiKey",
+        "group": "AI providers",
+        "label": "OpenAI (ChatGPT)",
+        "description": "Question drafts, pictures, artwork and read-aloud voices, when OpenAI is chosen.",
+        "type": "secret",
+        "value": "",
+        "env": "OPENAI_API_KEY",
+        "order": 146,
     },
     {
         "settingId": "ai.anthropicApiKey",
-        "group": "Artwork",
-        "label": "Claude (Anthropic) API key",
-        "description": "Used when artwork is drawn by Claude. Blank falls back to the deployment's ANTHROPIC_API_KEY.",
+        "group": "AI providers",
+        "label": "Claude (Anthropic)",
+        "description": "Question drafts and artwork, when Claude is chosen.",
         "type": "secret",
         "value": "",
-        "order": 48,
+        "env": "ANTHROPIC_API_KEY",
+        "order": 147,
+    },
+    {
+        "settingId": "ai.voxApiKey",
+        "group": "AI providers",
+        "label": "Vox voices — key",
+        "description": "Read-aloud voices from the Vox service. Needs the address below as well.",
+        "type": "secret",
+        "value": "",
+        "env": "VOX_API_KEY",
+        "order": 148,
+    },
+    {
+        # A secret, although an address is not one: text settings go to every
+        # signed-in device, and where this deployment's voice service lives is
+        # nobody's business but the tutor server's.
+        "settingId": "ai.voxApiUrl",
+        "group": "AI providers",
+        "label": "Vox voices — address",
+        "description": "Where the Vox service answers, e.g. https://vox.example.com.",
+        "type": "secret",
+        "value": "",
+        "env": "VOX_API_URL",
+        "order": 149,
+    },
+    # ---- Which model does each job when nobody picks. An author's own pick
+    # ---- still wins where a screen offers one.
+    {
+        "settingId": "ai.libraryProvider",
+        "group": "AI defaults",
+        "label": "Question drafts",
+        "description": "Who drafts a library book's questions when the author does not choose.",
+        "type": "text",
+        "value": "gemini",
+        "options": ["gemini", "openai", "claude"],
+        "order": 150,
+    },
+    {
+        "settingId": "ai.pictureProvider",
+        "group": "AI defaults",
+        "label": "Book pictures",
+        "description": "Which model a book's Make with AI starts on. An author's own choice on their device wins.",
+        "type": "text",
+        "value": "gemini",
+        "options": ["gemini", "openai"],
+        "order": 151,
     },
     {
         "settingId": "ai.artProvider",
-        "group": "Artwork",
-        "label": "Default art model",
-        "description": "Which model draws artwork when nobody picks: 'gemini', 'chatgpt' or 'claude'. Each uses its own key.",
+        "group": "AI defaults",
+        "label": "Artwork",
+        "description": "Which model draws on the Art page when “Default model” is left chosen.",
         "type": "text",
         "value": "gemini",
-        "order": 49,
+        "options": ["gemini", "openai", "claude"],
+        "order": 152,
     },
     # ---- Account and sync. The levers an operator reaches for on a bad day.
     {

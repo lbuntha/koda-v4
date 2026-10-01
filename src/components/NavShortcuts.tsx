@@ -6,6 +6,7 @@ import { splitTabs, useNavItems } from "./navRecord";
 import type { TabId } from "./navTabs";
 import { StatisticsModal } from "./account/StatisticsModal";
 import { AchievementsModal } from "./account/AchievementsModal";
+import { useT } from "../lib/i18n";
 export interface NavShortcutsProps {
   activeTab: TabId;
   onSelectTab: (tab: TabId) => void;
@@ -34,6 +35,7 @@ export const NavShortcuts: React.FC<NavShortcutsProps> = ({
   onSelectTab,
   onOpenProfile,
 }) => {
+  const { t } = useT();
   const [statsOpen, setStatsOpen] = useState(false);
   const [achievementsOpen, setAchievementsOpen] = useState(false);
   const items = useNavItems();
@@ -42,7 +44,7 @@ export const NavShortcuts: React.FC<NavShortcutsProps> = ({
   return (
     <>
       <section className="rail:hidden">
-        <div className={themeSystem.list.groupLabel}>Go to</div>
+        <div className={themeSystem.list.groupLabel}>{t("nav.goTo")}</div>
         <div className="grid grid-cols-3 gap-2">
           {overflow.map((item) => {
             if (item.id === "profile") {
@@ -60,7 +62,7 @@ export const NavShortcuts: React.FC<NavShortcutsProps> = ({
                   />
                   <UINavTile
                     icon={<SidebarIcon name="chart" size={24} className="w-6 h-6" />}
-                    label="Statistics"
+                    label={t("nav.statistics")}
                     onClick={() => {
                       playSound("pop");
                       setStatsOpen(true);
@@ -68,7 +70,7 @@ export const NavShortcuts: React.FC<NavShortcutsProps> = ({
                   />
                   <UINavTile
                     icon={<SidebarIcon name="award" size={24} className="w-6 h-6" />}
-                    label="Achievements"
+                    label={t("nav.achievements")}
                     onClick={() => {
                       playSound("pop");
                       setAchievementsOpen(true);

@@ -12,6 +12,7 @@ import { usePersona } from "../lib/usePersona";
 import { playSound } from "../utils/audio";
 import { UIButton } from "./ui";
 
+import { translate } from "../lib/i18n";
 /**
  * Ask Koda in writing, and the door back to talking.
  *
@@ -155,7 +156,7 @@ export const KodaAskModal: React.FC<{
      */
     <div
       role="dialog"
-      aria-label={`Ask ${character.name}`}
+      aria-label={translate("app.kodaAskModal.askName", { name: character.name })}
       className="fixed z-[90] flex flex-col overflow-hidden rounded-3xl border border-line bg-surface shadow-2xl
                  inset-x-3 bottom-3 max-h-[80dvh]
                  sm:inset-x-auto sm:right-5 sm:bottom-5 sm:w-[380px] sm:max-h-[min(560px,78dvh)]"
@@ -163,7 +164,7 @@ export const KodaAskModal: React.FC<{
       <div className="flex shrink-0 items-center justify-between gap-3 border-b border-line px-4 py-3">
         <h3 className="flex items-center gap-2 font-mono text-sm font-black text-ink">
           <MessageCircle className="h-4 w-4 text-indigo-500" aria-hidden="true" />
-          Ask {character.name}
+          {translate("app.kodaAskModal.ask")}{" "}{character.name}
         </h3>
         <div className="flex items-center gap-0.5">
           {/*
@@ -182,8 +183,8 @@ export const KodaAskModal: React.FC<{
                 onClose();
                 onStartVoice();
               }}
-              title={`Talk to ${character.name} out loud`}
-              aria-label={`Talk to ${character.name} out loud instead of typing`}
+              title={translate("app.kodaAskModal.talkToNameOutLoud", { name: character.name })}
+              aria-label={translate("app.kodaAskModal.talkToNameOutLoudInstead", { name: character.name })}
               className="rounded-xl p-1.5 text-muted transition-colors hover:bg-surface-muted hover:text-indigo-500"
             >
               <Mic className="h-4 w-4" />
@@ -191,7 +192,7 @@ export const KodaAskModal: React.FC<{
           )}
           <button
             onClick={onClose}
-            aria-label="Close"
+            aria-label={translate("app.kodaAskModal.close")}
             className="rounded-xl p-1.5 text-muted transition-colors hover:bg-surface-muted hover:text-ink"
           >
             <X className="h-4 w-4" />
@@ -225,7 +226,7 @@ export const KodaAskModal: React.FC<{
                       facing="right"
                     />
                     <p>
-                      I'm {character.name}. Ask me anything about what you're working on.
+                      {translate("app.kodaAskModal.iMNameAskMeAnything", { name: character.name })}
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -297,7 +298,7 @@ export const KodaAskModal: React.FC<{
                     {turn.standIn && (
                       <p className="flex items-center gap-1 text-[11px] text-amber-700 dark:text-amber-400">
                         <AlertTriangle className="h-3 w-3 shrink-0" />
-                        Koda could not be reached — this is a general nudge, not an answer.
+                        {translate("app.kodaAskModal.kodaCouldNotBeReachedThis")}
                       </p>
                     )}
                   </div>
@@ -327,7 +328,7 @@ export const KodaAskModal: React.FC<{
                   <span
                     className="flex items-center gap-1 rounded-2xl border border-line bg-surface px-3.5 py-3"
                     role="status"
-                    aria-label={`${character.name} is thinking`}
+                    aria-label={translate("app.kodaAskModal.nameIsThinking", { name: character.name })}
                   >
                     {[0, 1, 2].map((dot) => (
                       <span
@@ -355,15 +356,15 @@ export const KodaAskModal: React.FC<{
                 ref={inputRef}
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
-                placeholder="Type your question…"
-                aria-label="Your question for Koda"
+                placeholder={translate("app.kodaAskModal.typeYourQuestion")}
+                aria-label={translate("app.kodaAskModal.yourQuestionForKoda")}
                 maxLength={500}
                 className="min-w-0 flex-1 rounded-full border border-line bg-surface px-4 py-2.5 text-sm text-ink placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
               />
               <button
                 type="submit"
                 disabled={!draft.trim() || thinking}
-                aria-label="Send"
+                aria-label={translate("app.kodaAskModal.send")}
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-white transition-transform hover:scale-105 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100"
               >
                 <Send className="h-4 w-4" />
@@ -388,7 +389,7 @@ export const KodaAskModal: React.FC<{
               />
             </span>
             <p className="text-sm text-muted">
-              {character.name} listens and answers out loud here. Written help is switched off.
+              {translate("app.kodaAskModal.nameListensAndAnswersOutLoud", { name: character.name })}
             </p>
             <UIButton
               variant="primary"
@@ -399,7 +400,7 @@ export const KodaAskModal: React.FC<{
                 onStartVoice();
               }}
             >
-              Talk to {character.name}
+              {translate("app.kodaAskModal.talkToName", { name: character.name })}
             </UIButton>
           </div>
         )}

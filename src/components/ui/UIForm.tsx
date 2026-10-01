@@ -9,6 +9,13 @@ export const UIInput = React.forwardRef<HTMLInputElement, UIInputProps>(({ class
 ));
 UIInput.displayName = "UIInput";
 
+export interface UITextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
+
+export const UITextarea = React.forwardRef<HTMLTextAreaElement, UITextareaProps>(({ className = "", ...props }, ref) => (
+  <textarea ref={ref} className={`${fieldClass} ${className}`} {...props} />
+));
+UITextarea.displayName = "UITextarea";
+
 export interface UISelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {}
 
 export const UISelect = React.forwardRef<HTMLSelectElement, UISelectProps>(({ className = "", ...props }, ref) => (

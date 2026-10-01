@@ -29,6 +29,7 @@ import { WelcomeBack } from "./WelcomeBack";
 import { DailyGoalBanner } from "./DailyGoalBanner";
 import { ChildrenOverview } from "./account/ChildrenOverview";
 import { SvgAsset } from "../assets/svg";
+import { useT } from "../lib/i18n";
 
 interface HomeProps {
   userProgress: UserProgress;
@@ -93,6 +94,7 @@ const NextBadge: React.FC<{
   className?: string;
 }> = ({ userProgress, starsEarned, className = "" }) => {
   const rules = useBadges();
+  const { t } = useT();
   const next = nextBadge(rules, {
     xp: userProgress.xp,
     longestStreak: userProgress.longestStreak,
@@ -103,15 +105,15 @@ const NextBadge: React.FC<{
   // rather than printing a bar at 100% forever.
   if (!next) return null;
 
-  const unit = BADGE_METRICS.find((m) => m.id === next.rule.metric)?.unit ?? "";
   const toGo = Math.max(0, next.rule.threshold - next.standing);
+  const metric = BADGE_METRICS.find((m) => m.id === next.rule.metric);
 
   return (
     <section
       className={`${themeSystem.card("default")} ${themeSystem.spacing.card} ${className}`}
     >
       <h2 className="font-mono font-black text-xs uppercase tracking-widest text-muted">
-        Next badge
+        {t("home.nextBadge")}
       </h2>
       <div className="mt-3 flex items-center gap-3">
         {/* No tile, and the mark at the same 50px the streak and the points
@@ -125,7 +127,7 @@ const NextBadge: React.FC<{
         <div className="min-w-0 flex-1">
           <p className="font-bold text-sm text-ink truncate">{next.rule.label}</p>
           <p className="text-xs text-muted">
-            {toGo} {unit} to go
+            {metric ? t(`home.toGo.${metric.id}`, { count: toGo }) : toGo}
           </p>
         </div>
       </div>
@@ -153,6 +155,7 @@ const HomeRail: React.FC<{
   // empty goal and a streak that has lapsed, without anything having run
   // overnight to reset them.
   const streak = useStreak(userProgress);
+  const { t } = useT();
   const goal = Math.max(1, userProgress.dailyGoal);
   const percent = Math.min(100, Math.round((streak.solvedToday / goal) * 100));
 
@@ -177,7 +180,7 @@ const HomeRail: React.FC<{
         className={`${themeSystem.card("default")} ${themeSystem.spacing.card}`}
       >
         <h2 className="font-mono font-black text-xs uppercase tracking-widest text-muted">
-          Your progress
+          {t("home.yourProgress")}
         </h2>
         <div className="mt-3 space-y-3">
           {/* Hidden outright when a parent has switched streaks off — a flame
@@ -188,23 +191,15 @@ const HomeRail: React.FC<{
                 <SvgAsset
                   id="streak"
                   size={50}
-                  title="Learning streak"
+                  title={t("home.learningStreak")}
                   fallback={<Flame className="fill-current" />}
                 />
               }
-              label="Learning streak"
+              label={t("home.learningStreak")}
               /* The unit follows the cadence the view was produced with — a run
                  of three weeks printed as "3 days" is the whole reason the view
                  carries it. */
-              value={`${streak.days} ${
-                streak.cadence === "weekly"
-                  ? streak.days === 1
-                    ? "week"
-                    : "weeks"
-                  : streak.days === 1
-                    ? "day"
-                    : "days"
-              }`}
+              value={t(streak.cadence === "weekly" ? "streak.weeks" : "streak.days", { count: streak.days })}
             />
           )}
           <RailStat
@@ -212,12 +207,12 @@ const HomeRail: React.FC<{
               <SvgAsset
                 id="points"
                 size={50}
-                title="Total points"
+                title={t("home.totalPoints")}
                 fallback={<Zap className="fill-current" />}
               />
             }
-            label="Total points"
-            value={`${userProgress.xp} XP`}
+            label={t("home.totalPoints")}
+            value={t("progress.xp", { xp: userProgress.xp })}
           />
           {/*
             * What the XP is for.
@@ -230,10 +225,10 @@ const HomeRail: React.FC<{
           <div className="pl-[3.75rem] -mt-1">
             <div className="flex items-baseline justify-between gap-2">
               <span className="text-xs font-bold text-muted">
-                XP Level {levelFromXp(userProgress.xp)}
+                {t("home.xpLevel", { level: levelFromXp(userProgress.xp) })}
               </span>
               <span className="font-mono text-[0.6875rem] tabular-nums text-muted">
-                {xpToNextLevel(userProgress.xp)} XP to level {levelFromXp(userProgress.xp) + 1}
+                {t("home.xpToLevel", { xp: xpToNextLevel(userProgress.xp), level: levelFromXp(userProgress.xp) + 1 })}
               </span>
             </div>
             <div className="mt-1 h-1.5 rounded-full bg-surface-muted overflow-hidden">
@@ -247,7 +242,7 @@ const HomeRail: React.FC<{
                 sentence that keeps them apart: levels come from points, and
                 points come from rounds — nothing else moves either. */}
             <p className="mt-1 text-[0.6875rem] text-muted">
-              {XP_PER_LEVEL} XP earns a level. Every finished round pays XP.
+              {t("home.xpRule", { xp: XP_PER_LEVEL })}
             </p>
           </div>
           <RailStat
@@ -255,11 +250,11 @@ const HomeRail: React.FC<{
               <SvgAsset
                 id="star"
                 size={50}
-                title="Lessons mastered"
+                title={t("home.lessonsMastered")}
                 fallback={<Star className="fill-current" />}
               />
             }
-            label="Lessons mastered"
+            label={t("home.lessonsMastered")}
             value={`${totalMastered} / ${totalLessons}`}
           />
         </div>
@@ -269,14 +264,14 @@ const HomeRail: React.FC<{
         className={`${themeSystem.card("default")} ${themeSystem.spacing.card}`}
       >
         <h2 className="font-mono font-black text-xs uppercase tracking-widest text-muted">
-          Daily goal
+          {t("home.dailyGoal")}
         </h2>
         <div className="mt-3 flex items-center gap-3">
           <span className="w-11 h-11 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
             <SvgAsset
               id="daily-goal"
               size={50}
-              title="Daily goal"
+              title={t("home.dailyGoal")}
               fallback={<Target className="w-8 h-8" />}
             />
           </span>
@@ -284,7 +279,7 @@ const HomeRail: React.FC<{
             {streak.solvedToday} / {goal}
           </p>
           <p className="text-xs text-muted flex-1 min-w-0">
-            {percent >= 100 ? "Goal met today" : "lessons today"}
+            {percent >= 100 ? t("home.goalMet") : t("home.lessonsToday")}
           </p>
         </div>
         {/* Indigo, for the reason the badge bar below already gives: amber was
@@ -328,6 +323,7 @@ export const Home: React.FC<HomeProps> = ({
      unused — `premiumLocked` asks `Billing` itself. */
   useBilling();
   const [showAllSubjects, setShowAllSubjects] = React.useState(false);
+  const { t } = useT();
 
   const byId = new Map(skills.map((skill) => [skill.id, skill]));
   const registered = registrations
@@ -442,10 +438,8 @@ export const Home: React.FC<HomeProps> = ({
       <div className="w-full flex-1 min-h-[50vh] flex items-center justify-center text-center">
         <div className="max-w-sm">
           <BookOpen className="w-10 h-10 mx-auto text-indigo-500" />
-          <p className="mt-3 font-mono font-black text-ink">No skills available</p>
-          <p className="mt-1 text-sm text-muted">
-            No published, enabled skills currently match this learner.
-          </p>
+          <p className="mt-3 font-mono font-black text-ink">{t("home.noSkills")}</p>
+          <p className="mt-1 text-sm text-muted">{t("home.noSkillsNote")}</p>
         </div>
       </div>
     );
@@ -503,7 +497,7 @@ export const Home: React.FC<HomeProps> = ({
       iconName={interrupted.lesson.iconName}
       iconTone={interrupted.lesson.iconTone}
       tone="resume"
-      actionLabel="Carry on"
+      actionLabel={t("home.carryOn")}
       onClick={() => {
         playSound("pop");
         onStartLesson(interrupted.lesson.levelNumber);
@@ -515,7 +509,7 @@ export const Home: React.FC<HomeProps> = ({
       className={leadSpan}
       title={leadPick.lesson.title}
       subject={byId.get(leadPick.lesson.skillId)?.name ?? leadPick.lesson.skillId}
-      message={leadPick.kidMessage}
+      message={t(`today.${leadPick.kind}`)}
       iconName={leadLesson?.iconName}
       iconTone={leadLesson?.iconTone}
       tone={leadPick.kind}
@@ -589,7 +583,7 @@ export const Home: React.FC<HomeProps> = ({
             </div>
             <section>
               <h1 className="font-mono font-black uppercase tracking-widest text-xs text-indigo-600">
-                Today
+                {t("home.today")}
               </h1>
 
               {today.length || interrupted ? (
@@ -621,7 +615,7 @@ export const Home: React.FC<HomeProps> = ({
                         variant="compact"
                         title={pick.lesson.title}
                         subject={byId.get(pick.lesson.skillId)?.name ?? pick.lesson.skillId}
-                        message={pick.kidMessage}
+                        message={t(`today.${pick.kind}`)}
                         iconName={lesson?.iconName}
                         iconTone={lesson?.iconTone}
                         tone={pick.kind}
@@ -634,15 +628,14 @@ export const Home: React.FC<HomeProps> = ({
                 <p
                   className={`mt-3 ${themeSystem.card("default")} ${themeSystem.spacing.card} text-sm text-muted`}
                 >
-                  Everything open right now is finished. Pick a subject below to play it
-                  again, or add another skill.
+                  {t("home.allFinished")}
                 </p>
               )}
             </section>
 
             <section>
               <h2 className="font-mono font-black uppercase tracking-widest text-xs text-muted">
-                Your subjects
+                {t("home.yourSubjects")}
               </h2>
 
               {/* Started subjects are drawn as the lesson they are on; the rest
@@ -683,7 +676,7 @@ export const Home: React.FC<HomeProps> = ({
                 <>
                   {inProgress.length > 0 && (
                     <h3 className="mt-6 font-mono font-black uppercase tracking-widest text-xs text-muted">
-                      More subjects
+                      {t("home.moreSubjects")}
                     </h3>
                   )}
                   <div className="mt-3 space-y-2.5">
@@ -712,7 +705,7 @@ export const Home: React.FC<HomeProps> = ({
                   size="sm"
                   onClick={() => setShowAllSubjects((shown) => !shown)}
                 >
-                  {showAllSubjects ? "Show fewer" : `Show all ${subjects.length} subjects`}
+                  {showAllSubjects ? t("home.showFewer") : t("home.showAll", { count: subjects.length })}
                 </UIButton>
               )}
             </section>
@@ -730,13 +723,10 @@ export const Home: React.FC<HomeProps> = ({
            */
           <div className={`${themeSystem.card("default")} p-6 sm:p-8 text-center`}>
             <BookOpen className="w-11 h-11 mx-auto text-indigo-500" />
-            <h1 className="mt-3 font-mono font-black text-lg text-ink">Build your learning list</h1>
-            <p className="mt-1 text-sm text-muted max-w-md mx-auto">
-              Browse the skill catalog and add the skills you want to learn. What to do next
-              appears here.
-            </p>
+            <h1 className="mt-3 font-mono font-black text-lg text-ink">{t("home.buildList")}</h1>
+            <p className="mt-1 text-sm text-muted max-w-md mx-auto">{t("home.buildListNote")}</p>
             <UIButton className="mt-4" iconRight={<ArrowRight />} onClick={onBrowseSkills}>
-              Browse skills
+              {t("home.browseSkills")}
             </UIButton>
           </div>
         )}

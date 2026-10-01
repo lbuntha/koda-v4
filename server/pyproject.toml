@@ -30,6 +30,7 @@ packages = ["app"]
 [tool.hatch.build.targets.wheel.force-include]
 "app/art_defaults.json" = "app/art_defaults.json"
 "app/skill_defaults.json" = "app/skill_defaults.json"
+"app/notify_locales" = "app/notify_locales"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

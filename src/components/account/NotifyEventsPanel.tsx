@@ -12,6 +12,7 @@ import {
   type NotifyJob,
 } from "../../lib/push";
 
+import { translate } from "../../lib/i18n";
 /**
  * Every notification Koda sends, on which channel, and when.
  *
@@ -82,7 +83,7 @@ const ChannelCell: React.FC<{
 }> = ({ state, label, master, busy, onToggle }) => {
   if (!state.available) {
     return (
-      <span className="text-xs text-muted" title="Not sent on this channel">
+      <span className="text-xs text-muted" title={translate("admin.notifyEventsPanel.notSentOnThisChannel")}>
         —
       </span>
     );
@@ -91,7 +92,7 @@ const ChannelCell: React.FC<{
     return (
       <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted">
         <Lock className="h-3.5 w-3.5" aria-hidden="true" />
-        Always
+        {translate("admin.notifyEventsPanel.always")}
       </span>
     );
   }
@@ -158,7 +159,7 @@ export const NotifyEventsPanel: React.FC = () => {
         {error ? (
           <p className="text-xs text-rose-600 dark:text-rose-400">{error}</p>
         ) : (
-          <p className="text-xs text-muted">Reading…</p>
+          <p className="text-xs text-muted">{translate("admin.notifyEventsPanel.reading")}</p>
         )}
       </section>
     );
@@ -171,29 +172,29 @@ export const NotifyEventsPanel: React.FC = () => {
     <div className="space-y-4">
       <section className={card}>
         <UISectionHeader
-          title="Events"
-          subtitle="Every notification Koda sends, on which channel, and when"
+          title={translate("admin.notifyEventsPanel.events")}
+          subtitle={translate("admin.notifyEventsPanel.everyNotificationKodaSendsOnWhich")}
           icon={<SlidersHorizontal className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
         />
 
         <div className="grid gap-3 rail:grid-cols-2">
           <UIToggleRow
-            title="Push notifications"
+            title={translate("admin.notifyEventsPanel.pushNotifications")}
             description={
               data.pushDriver === "console"
-                ? "PUSH_DRIVER is console — notifications are logged, not sent."
-                : "The master over every push below."
+                ? translate("admin.notifyEventsPanel.pushDriverIsConsoleNotificationsAre")
+                : translate("admin.notifyEventsPanel.theMasterOverEveryPushBelow")
             }
             checked={data.pushEnabled}
             disabled={busy}
             onChange={() => void flip("push.enabled", !data.pushEnabled)}
           />
           <UIToggleRow
-            title="Notification emails"
+            title={translate("admin.notifyEventsPanel.notificationEmails")}
             description={
               data.mailDriver === "console"
-                ? "MAIL_DRIVER is console — emails are logged, not sent."
-                : "The master over every email below."
+                ? translate("admin.notifyEventsPanel.mailDriverIsConsoleEmailsAre")
+                : translate("admin.notifyEventsPanel.theMasterOverEveryEmailBelow")
             }
             checked={data.emailEnabled}
             disabled={busy}
@@ -207,10 +208,10 @@ export const NotifyEventsPanel: React.FC = () => {
           <div
             className={`hidden rail:grid ${GRID} gap-3 px-4 py-2 text-[11px] font-black uppercase tracking-wide text-muted`}
           >
-            <span>Notification</span>
-            <span>Push</span>
-            <span>Email</span>
-            <span>When</span>
+            <span>{translate("admin.notifyEventsPanel.notification")}</span>
+            <span>{translate("admin.notifyEventsPanel.push")}</span>
+            <span>{translate("admin.notifyEventsPanel.email")}</span>
+            <span>{translate("admin.notifyEventsPanel.when")}</span>
           </div>
           {data.events.map((event) => (
             <div
@@ -222,43 +223,41 @@ export const NotifyEventsPanel: React.FC = () => {
                 <p className="text-xs text-muted">{CLASS_NOTES[event.class] ?? ""}</p>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-10 text-xs text-muted rail:hidden">Push</span>
+                <span className="w-10 text-xs text-muted rail:hidden">{translate("admin.notifyEventsPanel.push")}</span>
                 <ChannelCell
                   state={event.push}
-                  label={`${event.label} push`}
+                  label={translate("admin.notifyEventsPanel.labelPush", { label: event.label })}
                   master={data.pushEnabled}
                   busy={busy}
                   onToggle={(id, value) => void flip(id, value)}
                 />
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-10 text-xs text-muted rail:hidden">Email</span>
+                <span className="w-10 text-xs text-muted rail:hidden">{translate("admin.notifyEventsPanel.email")}</span>
                 <ChannelCell
                   state={event.email}
-                  label={`${event.label} email`}
+                  label={translate("admin.notifyEventsPanel.labelEmail", { label: event.label })}
                   master={data.emailEnabled}
                   busy={busy}
                   onToggle={(id, value) => void flip(id, value)}
                 />
               </div>
               <p className="col-span-2 text-xs text-body rail:col-span-1">
-                {event.job ? whenOf(jobs[event.job]) : "As it happens"}
+                {event.job ? whenOf(jobs[event.job]) : translate("admin.notifyEventsPanel.asItHappens")}
               </p>
             </div>
           ))}
         </div>
 
         <p className="text-xs text-muted">
-          A switch here is this deployment&rsquo;s ceiling: parents still choose for themselves
-          underneath it. Account notices have no switch because they tell a family about their own
-          account.
+          {translate("admin.notifyEventsPanel.aSwitchHereIsThisDeployment")}
         </p>
       </section>
 
       <section className={card}>
         <UISectionHeader
-          title="Schedules"
-          subtitle="When the jobs behind these notifications run"
+          title={translate("admin.notifyEventsPanel.schedules")}
+          subtitle={translate("admin.notifyEventsPanel.whenTheJobsBehindTheseNotifications")}
           icon={<CalendarClock className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
         />
         <div className="space-y-2">
@@ -275,14 +274,14 @@ export const NotifyEventsPanel: React.FC = () => {
                     checked={job.enabled}
                     disabled={busy}
                     onChange={() => void saveJob(job.id, { enabled: !job.enabled })}
-                    label={`${name} runs`}
+                    label={translate("admin.notifyEventsPanel.nameRuns", { name: name })}
                   />
                 </div>
                 {job.weekday !== null && job.hour !== null && (
                   <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
-                    <span>Sends on</span>
+                    <span>{translate("admin.notifyEventsPanel.sendsOn")}</span>
                     <select
-                      aria-label={`${name} day`}
+                      aria-label={translate("admin.notifyEventsPanel.nameDay", { name: name })}
                       value={job.weekday}
                       disabled={busy || !job.enabled}
                       onChange={(e) => void saveJob(job.id, { weekday: Number(e.target.value) })}
@@ -294,9 +293,9 @@ export const NotifyEventsPanel: React.FC = () => {
                         </option>
                       ))}
                     </select>
-                    <span>at</span>
+                    <span>{translate("admin.notifyEventsPanel.at")}</span>
                     <select
-                      aria-label={`${name} hour`}
+                      aria-label={translate("admin.notifyEventsPanel.nameHour", { name: name })}
                       value={job.hour}
                       disabled={busy || !job.enabled}
                       onChange={(e) => void saveJob(job.id, { hour: Number(e.target.value) })}
@@ -308,14 +307,14 @@ export const NotifyEventsPanel: React.FC = () => {
                         </option>
                       ))}
                     </select>
-                    <span>in each family&rsquo;s own time</span>
+                    <span>{translate("admin.notifyEventsPanel.inEachFamilyRsquoSOwn")}</span>
                   </div>
                 )}
                 {typeof job.days === "number" && (
                   <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
-                    <span>Tell a parent after</span>
+                    <span>{translate("admin.notifyEventsPanel.tellAParentAfter")}</span>
                     <select
-                      aria-label={`${name} days`}
+                      aria-label={translate("admin.notifyEventsPanel.nameDays", { name: name })}
                       value={job.days}
                       disabled={busy || !job.enabled}
                       onChange={(e) => void saveJob(job.id, { days: Number(e.target.value) })}
@@ -329,7 +328,7 @@ export const NotifyEventsPanel: React.FC = () => {
                           </option>
                         ))}
                     </select>
-                    <span>days without practice</span>
+                    <span>{translate("admin.notifyEventsPanel.daysWithoutPractice")}</span>
                   </div>
                 )}
                 <p className="text-[11px] text-muted">{lastRunOf(job)}</p>

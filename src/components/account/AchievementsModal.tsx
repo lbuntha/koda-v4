@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Award } from "lucide-react";
+import { useT } from "../../lib/i18n";
 
 import { UIModal, UIButton } from "../ui";
 import { BADGE_METRICS, badgeShelf, useBadges } from "../../lib/badges";
@@ -25,6 +26,7 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({
   onOpenProfile,
   stats: propStats,
 }) => {
+  const { t } = useT();
   const [stats, setStats] = useState<ProfileStats>(propStats ?? EMPTY_STATS);
   const rules = useBadges();
 
@@ -64,17 +66,17 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({
     <UIModal
       isOpen={isOpen}
       onClose={onClose}
-      title="Achievements"
+      title={t("nav.achievements")}
       maxWidth="max-w-lg"
       tone="plain"
       footer={
         <div className="flex w-full items-center justify-between gap-3">
           <UIButton variant="secondary" size="sm" onClick={onClose}>
-            Close
+            {t("common.close")}
           </UIButton>
           {onOpenProfile && (
             <UIButton variant="primary" size="sm" onClick={onOpenProfile}>
-              View in profile
+              {t("stats.viewInProfile")}
             </UIButton>
           )}
         </div>
@@ -84,14 +86,14 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({
         <div className="flex items-center gap-2">
           <Award className="h-5 w-5 text-amber-500" />
           <div>
-            <h4 className="font-mono text-base font-bold text-ink">Badges</h4>
-            <p className="text-xs text-muted">Won, and the next one to go for</p>
+            <h4 className="font-mono text-base font-bold text-ink">{t("stats.badges")}</h4>
+            <p className="text-xs text-muted">{t("stats.badgesNote")}</p>
           </div>
         </div>
 
         <div className="space-y-3">
           {shelf.map(({ rule, earned, standing, progress }) => {
-            const unit = BADGE_METRICS.find((m) => m.id === rule.metric)?.unit ?? "";
+            const metric = BADGE_METRICS.find((m) => m.id === rule.metric)?.id;
             return (
               <div
                 key={rule.id}
@@ -127,7 +129,7 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({
                   </div>
                   {earned ? (
                     <p className="truncate text-xs text-muted">
-                      {rule.description || `${rule.threshold} ${unit}`}
+                      {rule.description || (metric ? t(`stats.amount.${metric}`, { count: rule.threshold }) : rule.threshold)}
                     </p>
                   ) : (
                     <>
@@ -138,7 +140,9 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({
                         />
                       </div>
                       <p className="mt-1 text-xs text-muted">
-                        {Math.max(0, rule.threshold - standing)} {unit} to go
+                        {metric
+                          ? t(`home.toGo.${metric}`, { count: Math.max(0, rule.threshold - standing) })
+                          : Math.max(0, rule.threshold - standing)}
                       </p>
                     </>
                   )}

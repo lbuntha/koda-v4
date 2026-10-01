@@ -51,6 +51,7 @@ from app.routers import (
     sync,
     system,
     tasks,
+    trace,
 )
 from app.settings import Settings, settings
 from app.skill_defaults import load_defaults as load_skill_defaults
@@ -265,6 +266,7 @@ def create_app() -> FastAPI:
         system.router,
         skills.router,
         tasks.router,
+        trace.router,
     ):
         app.include_router(router, prefix=API_PREFIX)
 

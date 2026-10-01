@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Moon, Sun, Volume2, VolumeX } from "lucide-react";
+import { Languages, Moon, Sun, Volume2, VolumeX } from "lucide-react";
 import { KodaFace } from "./KodaFace";
 import { useTheme } from "../context/ThemeContext";
 import { playSound } from "../utils/audio";
@@ -12,6 +12,8 @@ import { NotificationsSettings } from "./account/NotificationsSettings";
 import { usePermissions, useSession } from "../lib/sync";
 import { NavShortcuts } from "./NavShortcuts";
 import type { TabId } from "./navTabs";
+import { LanguagePicker } from "./LanguagePicker";
+import { useT } from "../lib/i18n";
 
 interface SettingsPageProps {
   soundEnabled: boolean;
@@ -110,6 +112,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   focus = null,
 }) => {
   const { theme, toggleTheme } = useTheme();
+  const { t } = useT();
   const { can } = usePermissions();
   const session = useSession();
   /*
@@ -176,7 +179,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
       {/* Same duplication the skill library had: on a phone the toolbar above
           this already says "Settings". */}
       {!embedded && (
-        <UIPageHeader title="Settings" subtitle="Shared across your family’s devices." />
+        <UIPageHeader title={t("settings.title")} subtitle={t("settings.subtitle")} />
       )}
 
       {activeTab && onSelectTab && (
@@ -187,7 +190,18 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
         />
       )}
 
-      <SettingGroup label="Appearance">
+      {/* First, because a family that cannot read the page cannot find the
+          switch anywhere lower down it. */}
+      <SettingGroup label={t("settings.language.group")}>
+        <SettingRow
+          icon={<Languages className="text-ink" />}
+          title={t("settings.language.title")}
+          note={t("settings.language.note")}
+          control={<LanguagePicker />}
+        />
+      </SettingGroup>
+
+      <SettingGroup label={t("settings.appearance.group")}>
         <SettingRow
           /* `text-ink`, not amber and not indigo: the icon reads as the row's
              own mark rather than as a third accent colour in a card that has
@@ -195,7 +209,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
              black on white and white on the dark canvas — a literal black
              would disappear the moment the switch it sits beside is on. */
           icon={isDark ? <Moon className="text-ink" /> : <Sun className="text-ink" />}
-          title="Dark mode"
+          title={t("settings.appearance.darkMode")}
           control={
             <UIToggle
               checked={isDark}
@@ -203,13 +217,13 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 playSound("pop");
                 toggleTheme();
               }}
-              label="Dark mode"
+              label={t("settings.appearance.darkMode")}
             />
           }
         />
       </SettingGroup>
 
-      <SettingGroup label="Sound">
+      <SettingGroup label={t("settings.sound.group")}>
         <SettingRow
           icon={
             soundEnabled ? (
@@ -218,16 +232,16 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
               <VolumeX />
             )
           }
-          title="Sound effects"
+          title={t("settings.sound.effects")}
           /* Names its scope. This is the master switch — each skill also has its
              own chimes toggle under Skills, and a parent who reads only this one
              has no way to know the narrower control exists. */
-          note="Each skill can also be silenced on its own"
+          note={t("settings.sound.effectsNote")}
           control={
             <UIToggle
               checked={soundEnabled}
               onChange={handleToggleSound}
-              label="Sound effects"
+              label={t("settings.sound.effects")}
               tone="emerald"
             />
           }
@@ -238,9 +252,9 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
              half of the thing it controls. Greyed out when the switch is off,
              so the row still reads as inactive at a glance. */
           icon={<KodaFace size={22} className={voiceEnabled ? "" : "opacity-40 saturate-0"} />}
-          title="Koda’s voice"
+          title={t("settings.sound.voice")}
           control={
-            <UIToggle checked={voiceEnabled} onChange={handleToggleVoice} label="Voice speech" />
+            <UIToggle checked={voiceEnabled} onChange={handleToggleVoice} label={t("settings.sound.voice")} />
           }
         />
       </SettingGroup>

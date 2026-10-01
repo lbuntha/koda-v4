@@ -2,6 +2,7 @@ import React from "react";
 import { ChevronRight, Play } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
 import { UISkillThumbnail } from "./UISkillThumbnail";
+import { useT } from "../../lib/i18n";
 
 export interface UISubjectLessonCardProps {
   /** The skill's name — the group's heading. */
@@ -43,7 +44,7 @@ export const UISubjectLessonCard: React.FC<UISubjectLessonCardProps> = ({
   lessonNumber,
   completedLessons,
   lessonCount,
-  actionLabel = "Play",
+  actionLabel,
   onPlay,
   onOpenSubject,
   className = "",
@@ -51,6 +52,8 @@ export const UISubjectLessonCard: React.FC<UISubjectLessonCardProps> = ({
   /* Clamped: a registry that gains a lesson, or a record that counts a replay,
      can put `completedLessons` above `lessonCount`, and a bar drawn at 140% is
      a rendering fault rather than a nice surprise. */
+  const { t } = useT();
+  const action = actionLabel ?? t("common.play");
   const percent = lessonCount
     ? Math.min(100, Math.round((completedLessons / lessonCount) * 100))
     : 0;
@@ -60,7 +63,7 @@ export const UISubjectLessonCard: React.FC<UISubjectLessonCardProps> = ({
       <button
         type="button"
         onClick={onOpenSubject}
-        aria-label={`Open ${subject}`}
+        aria-label={t("subjectCard.open", { subject })}
         className="flex w-full items-center gap-2 px-1 text-left text-muted hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg"
       >
         <span className="min-w-0 flex-1 truncate font-mono text-[11px] font-black uppercase tracking-widest">
@@ -75,7 +78,7 @@ export const UISubjectLessonCard: React.FC<UISubjectLessonCardProps> = ({
       <button
         type="button"
         onClick={onPlay}
-        aria-label={`${actionLabel} ${lessonTitle}, lesson ${lessonNumber} of ${subject}`}
+        aria-label={t("subjectCard.playLabel", { action, lesson: lessonTitle, number: lessonNumber, subject })}
         className={`${themeSystem.card("interactive")} mt-1.5 flex w-full items-center gap-3 p-3 text-left`}
       >
         {/* A fixed 16:9 frame, so a subject still waiting for artwork holds the
@@ -92,7 +95,7 @@ export const UISubjectLessonCard: React.FC<UISubjectLessonCardProps> = ({
 
         <span className="min-w-0 flex-1">
           <span className="block font-mono text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
-            Lesson {lessonNumber}
+            {t("subjectCard.lesson", { number: lessonNumber })}
           </span>
           <span className="mt-0.5 block truncate text-base font-black leading-tight text-ink">
             {lessonTitle}

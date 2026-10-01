@@ -141,10 +141,16 @@ export interface Passage {
    * this word", so a picture question can be checked without a library.
    */
   pictures: Record<string, string>;
+  /**
+   * Word → the picture a person looked at and agreed shows it. A picture not
+   * named for its word passes the check only while it is still this one.
+   */
+  confirmedPictures?: Record<string, string>;
   /** Optional recordings of single words, word → clip id, for tap-a-word. */
   wordAudio?: Record<string, string>;
   /** Words with no recording, so tapping one shows text and no dead speaker. */
   noRecording?: string[];
   /** Where the text came from — a person reading a draft should know. */
   provenance?: string;
+  learningTakeaway?: string;
 }

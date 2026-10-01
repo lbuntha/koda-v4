@@ -2,6 +2,7 @@ import React from "react";
 import { Lock } from "lucide-react";
 
 import { themeSystem } from "../../lib/themeSystem";
+import { useT } from "../../lib/i18n";
 
 /**
  * What a page says when the account may not have it.
@@ -15,7 +16,9 @@ export const NoAccess: React.FC<{ title: string; permission: string; what: strin
   title,
   permission,
   what,
-}) => (
+}) => {
+  const { t, tNodes } = useT();
+  return (
   <div className={"max-w-3xl mx-auto"}>
     <section
       className={themeSystem.card("default", `${themeSystem.spacing.card} flex items-start gap-4`)}
@@ -26,10 +29,11 @@ export const NoAccess: React.FC<{ title: string; permission: string; what: strin
       <div className="min-w-0">
         <h2 className="text-lg font-bold text-ink font-mono">{title}</h2>
         <p className="text-sm text-muted mt-1">
-          {what} This takes <span className="font-mono text-ink">{permission}</span>, which the
-          family owner can grant you on the Roles page.
+          {what}{" "}
+          {tNodes("noAccess.takes", { permission: <span className="font-mono text-ink">{permission}</span> })}
         </p>
       </div>
     </section>
   </div>
-);
+  );
+};

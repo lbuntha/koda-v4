@@ -9,10 +9,34 @@ import { blockPinchZoom } from './pwa/blockPinchZoom';
 // registers its own on import; this belongs to no skill, so it is registered here.
 import './voice/common';
 import './index.css';
+import './library/khmerFont';
+import { syncDocumentLanguage, useT } from './lib/i18n';
 
 /* Before the first render: a child can pinch the splash screen too. Never torn
    down — it lives as long as the document does. */
 blockPinchZoom();
+
+/* `<html lang dir>` follows the chosen language from the first paint, so the
+   right font and the right screen-reader voice are picked before React runs. */
+syncDocumentLanguage();
+
+/*
+ * Repaints the whole app when the language changes.
+ *
+ * Most screens read their words with `translate()` during render rather than
+ * each subscribing through `useT`; re-rendering from the root reaches all of
+ * them in one step. Creating `<App />` here, rather than receiving it as
+ * `children`, is what makes React re-render it instead of reusing the element.
+ */
+function LanguageRoot() {
+  useT();
+  return (
+    <>
+      <App />
+      <PwaStatus />
+    </>
+  );
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -29,8 +53,7 @@ createRoot(document.getElementById('root')!).render(
       */}
     <MotionConfig reducedMotion="user">
       <ThemeProvider>
-        <App />
-        <PwaStatus />
+        <LanguageRoot />
       </ThemeProvider>
     </MotionConfig>
   </StrictMode>,

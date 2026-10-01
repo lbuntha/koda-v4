@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { cropRect, generateBookImage } from "./imageGenerationApi";
+import { cropRect, generateBookImage, improvePicturePrompt } from "./imageGenerationApi";
 
 vi.mock("../lib/tutorApi", () => ({ tutorHeaders: async () => ({ Authorization: "Bearer t" }) }));
 
@@ -57,13 +57,30 @@ describe("the rectangle cropped from a generated picture", () => {
 });
 
 describe("asking for a book picture", () => {
-  it("posts the prompt and shape to this app's own server, by provider", async () => {
+  it("posts the prompt, shape and style to this app's own server, by provider", async () => {
     const fetchMock = vi.fn(async () => new Response(new Uint8Array([1, 2, 3])));
     vi.stubGlobal("fetch", fetchMock);
-    await generateBookImage("a market stall", "portrait", "openai");
+    await generateBookImage("a market stall", "portrait", "openai", "3d");
     const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).toBe("/api/library/image/openai");
-    expect(JSON.parse(String(init.body))).toEqual({ prompt: "a market stall", kind: "portrait" });
+    expect(JSON.parse(String(init.body))).toEqual({ prompt: "a market stall", kind: "portrait", style: "3d" });
+    vi.unstubAllGlobals();
+  });
+
+  it("asks for a fuller description with the author's options, and returns it", async () => {
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ prompt: "A Cambodian primary school…" })));
+    vi.stubGlobal("fetch", fetchMock);
+    const options = { provider: "gemini", mode: "image", kind: "banner", subjectOnly: true, cambodia: true } as const;
+    await expect(improvePicturePrompt("សាលា", options)).resolves.toBe("A Cambodian primary school…");
+    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe("/api/library/image/prompt");
+    expect(JSON.parse(String(init.body))).toEqual({ text: "សាលា", ...options });
+    vi.unstubAllGlobals();
+  });
+
+  it("says why a description could not be improved", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ error: { message: "Gemini has no key" } }), { status: 503 })));
+    await expect(improvePicturePrompt("x", { provider: "gemini", mode: "svg", kind: "banner", subjectOnly: false, cambodia: false })).rejects.toThrow("no key");
     vi.unstubAllGlobals();
   });
 

@@ -7,6 +7,7 @@ import { usePersonaRoster } from "../../lib/usePersona";
 import { playSound } from "../../utils/audio";
 import { CharacterAvatar, tintFor } from "./CharacterVisuals";
 
+import { translate } from "../../lib/i18n";
 /**
  * Choosing a teacher.
  *
@@ -81,7 +82,7 @@ export const PersonaPicker: React.FC<{
               <span
                 className={`mt-1.5 inline-block rounded-full px-2 py-0.5 text-[11px] font-mono font-bold ${tint.bg} ${tint.text}`}
               >
-                ages {option.minAge}–{option.maxAge}
+                {translate("admin.personaPicker.agesMinageMaxage", { minAge: option.minAge, maxAge: option.maxAge })}
               </span>
             </span>
             {/* The tick, animated in, so choosing feels like a choice landing

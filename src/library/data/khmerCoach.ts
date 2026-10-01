@@ -24,6 +24,7 @@
  */
 
 import { isKhmerConsonant, isKhmerIndependentVowel, normalizeKhmer } from "./khmer";
+import { translate } from "../../lib/i18n";
 
 export type UnitKind = "consonant" | "foot" | "shifter" | "vowel" | "sign";
 
@@ -108,13 +109,16 @@ export function orderFeedback(tiles: readonly string[], chosen: readonly string[
   const kw = unitKind(want);
   const kg = unitKind(got);
   if (kw !== "consonant" && RANK[kg] > RANK[kw]) {
-    const left = drawnLeft(got) ? `, even though ${unitCue(got)} is written on the left` : "";
-    return `Nearly! ${unitCue(want)} comes before ${unitCue(got)}${left}. Spell it in the order you say it.`;
+    // The coaching is app language; the letters and their names stay Khmer.
+    return translate(drawnLeft(got) ? "coach.comesBeforeLeft" : "coach.comesBefore", {
+      want: unitCue(want),
+      got: unitCue(got),
+    });
   }
   if (drawnLeft(got) && kw === "consonant") {
-    return `Nearly! ${unitCue(got)} is written on the left, but it is spelled after its consonant. Start with ${unitCue(tiles[0])}.`;
+    return translate("coach.leftAfterConsonant", { got: unitCue(got), first: unitCue(tiles[0]) });
   }
-  return `Nearly! These are the right pieces in a different order. Start with ${unitCue(tiles[0])}.`;
+  return translate("coach.wrongOrder", { first: unitCue(tiles[0]) });
 }
 
 /**
@@ -130,7 +134,7 @@ export function drawnLeftNote(traced: readonly string[]): string | null {
   while (start > 0 && unitKind(traced[start]) !== "consonant") start--;
   const before = start >= 0 ? traced.slice(start, traced.length - 1).join("") : "";
   if (!before) return null;
-  return `${unitCue(last)} is written on the left of ${before}, but it is spelled after it.`;
+  return translate("coach.drawnLeft", { unit: unitCue(last), before });
 }
 
 /* --------------------------------------------------------- every unit, named */
@@ -172,6 +176,9 @@ export const UNIT_GROUPS: ReadonlyArray<{ kind: UnitKind; title: string; units: 
  * A word is the highest level any of its syllables reaches.
  */
 export type SpellingLevel = 1 | 2 | 3 | 4 | 5;
+
+/** A level's name in the app's language — for readers. `LEVEL_NAME` is the studio's English. */
+export const levelName = (level: SpellingLevel): string => translate(`coach.level.${level}`);
 
 export const LEVEL_NAME: Record<SpellingLevel, string> = {
   1: "Consonants and vowels",

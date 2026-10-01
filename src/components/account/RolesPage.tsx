@@ -9,6 +9,7 @@ import { InvitePeopleCard } from "./InvitePeopleCard";
 import { JoinFamilyCard } from "./JoinFamilyCard";
 import { PlatformRolesPanel } from "./PlatformRolesPanel";
 
+import { translate } from "../../lib/i18n";
 /**
  * Who is in this family, and what each of them may do.
  *
@@ -64,34 +65,49 @@ const ROLE_BLURB: Record<string, string> = {
  * written a label for it yet.
  */
 const LABELS: Record<string, { area: string; label: string }> = {
-  "settings:read": { area: "Skills & lessons", label: "See skill settings" },
-  "settings:write": { area: "Skills & lessons", label: "Change skills, art and the menu" },
+  "settings:read": { area: "Skills & lessons", get label() { return translate("admin.rolesPage.seeSkillSettings"); } },
+  "settings:write": { area: "Skills & lessons", get label() { return translate("admin.rolesPage.changeSkillsArtAndTheMenu"); } },
   // Split out of `settings:write`, and worded as the consequence rather than
   // the act: "change scoring" sounds like a preference, which is exactly the
   // misreading that put it in Settings in the first place.
-  "scoring:write": { area: "Rewards", label: "Re-price XP and stars, and set the badges, for everyone" },
+  "scoring:write": { area: "Rewards", get label() { return translate("admin.rolesPage.rePriceXpAndStarsAnd"); } },
   // Listed so the page does not go quiet about a right it can see in the
   // matrix, and worded so nobody expects a checkbox to grant it: it is a
   // platform right, and `effective_permissions` strips it from every grant.
-  "system:write": { area: "Operator", label: "Run the deployment's switchboard (staff only)" },
-  "user:manage": { area: "Operator", label: "Manage user accounts and credentials" },
-  "role:manage": { area: "Operator", label: "Create and manage platform roles" },
-  "menu:manage": { area: "Operator", label: "Manage the platform sidebar menu" },
-  "learner:create": { area: "Children", label: "Add a child" },
-  "learner:read": { area: "Children", label: "See the children" },
-  "learner:update": { area: "Children", label: "Rename or edit a child" },
-  "learner:delete": { area: "Children", label: "Delete a child" },
-  "learner_data:read": { area: "Children", label: "See what a child has practised" },
-  "learner_data:append": { area: "Children", label: "Record a round played here" },
-  "learner_data:write": { area: "Children", label: "Rewrite a child's record" },
-  "family:read": { area: "Family", label: "See the family" },
-  "family:update": { area: "Family", label: "Rename the family, and set the PIN" },
-  "member:list": { area: "People", label: "See who is in the family" },
-  "member:invite": { area: "People", label: "Invite a second adult" },
-  "member:role": { area: "People", label: "Change roles and rights" },
-  "member:remove": { area: "People", label: "Remove someone" },
-  "device:list": { area: "Devices", label: "See signed-in devices" },
-  "device:revoke": { area: "Devices", label: "Sign a device out" },
+  "system:write": { area: "Operator", get label() { return translate("admin.rolesPage.runTheDeploymentSSwitchboardStaff"); } },
+  "user:manage": { area: "Operator", get label() { return translate("admin.rolesPage.manageUserAccountsAndCredentials"); } },
+  "role:manage": { area: "Operator", get label() { return translate("admin.rolesPage.createAndManagePlatformRoles"); } },
+  // Koda Trace: make trace items and publish collections everyone can practise.
+  // A platform grant — give it to a custom platform role, not a family role.
+  "trace:create": { area: "Operator", get label() { return translate("admin.rolesPage.makeAndPublishTraceCollections"); } },
+  "menu:manage": { area: "Operator", get label() { return translate("admin.rolesPage.manageThePlatformSidebarMenu"); } },
+  "learner:create": { area: "Children", get label() { return translate("admin.rolesPage.addAChild"); } },
+  "learner:read": { area: "Children", get label() { return translate("admin.rolesPage.seeTheChildren"); } },
+  "learner:update": { area: "Children", get label() { return translate("admin.rolesPage.renameOrEditAChild"); } },
+  "learner:delete": { area: "Children", get label() { return translate("admin.rolesPage.deleteAChild"); } },
+  "learner_data:read": { area: "Children", get label() { return translate("admin.rolesPage.seeWhatAChildHasPractised"); } },
+  "learner_data:append": { area: "Children", get label() { return translate("admin.rolesPage.recordARoundPlayedHere"); } },
+  "learner_data:write": { area: "Children", get label() { return translate("admin.rolesPage.rewriteAChildSRecord"); } },
+  "family:read": { area: "Family", get label() { return translate("admin.rolesPage.seeTheFamily"); } },
+  "family:update": { area: "Family", get label() { return translate("admin.rolesPage.renameTheFamilyAndSetThe"); } },
+  "member:list": { area: "People", get label() { return translate("admin.rolesPage.seeWhoIsInTheFamily"); } },
+  "member:invite": { area: "People", get label() { return translate("admin.rolesPage.inviteASecondAdult"); } },
+  "member:role": { area: "People", get label() { return translate("admin.rolesPage.changeRolesAndRights"); } },
+  "member:remove": { area: "People", get label() { return translate("admin.rolesPage.removeSomeone"); } },
+  "device:list": { area: "Devices", get label() { return translate("admin.rolesPage.seeSignedInDevices"); } },
+  "device:revoke": { area: "Devices", get label() { return translate("admin.rolesPage.signADeviceOut"); } },
+};
+
+/* `area` is also the grouping key, so only the heading is worded. */
+const AREA_KEY: Record<string, string> = {
+  "Skills & lessons": "skills",
+  Rewards: "rewards",
+  Children: "children",
+  Family: "family",
+  People: "people",
+  Devices: "devices",
+  Operator: "operator",
+  Other: "other",
 };
 
 const AREA_ORDER = [
@@ -132,7 +148,7 @@ export const RolesPage: React.FC = () => {
         const problem = err as ApiError;
         setError(
           problem.isOffline
-            ? "Offline — this page reads the rules from the server, so it needs a connection."
+            ? translate("admin.rolesPage.offlineThisPageReadsTheRules")
             : problem.message,
         );
       }
@@ -267,9 +283,9 @@ export const RolesPage: React.FC = () => {
   return (
     <div className={"max-w-6xl mx-auto space-y-6"}>
       <div>
-        <h2 className={themeSystem.typography("h2")}>Roles &amp; access</h2>
+        <h2 className={themeSystem.typography("h2")}>{translate("admin.rolesPage.rolesAmpAccess")}</h2>
         <p className={themeSystem.typography("body-sm", "mt-1")}>
-          A role covers almost everyone. Adjust a single person only when their role does not fit.
+          {translate("admin.rolesPage.aRoleCoversAlmostEveryoneAdjust")}
         </p>
       </div>
 
@@ -289,8 +305,8 @@ export const RolesPage: React.FC = () => {
       {members && (
         <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-3`)}>
           <UISectionHeader
-            title="People"
-            subtitle={`${members.members.length} in ${members.familyName}`}
+            title={translate("admin.rolesPage.people")}
+            subtitle={translate("admin.rolesPage.lengthInFamilyname", { length: members.members.length, familyName: members.familyName })}
             icon={<Users className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
           />
 
@@ -307,9 +323,9 @@ export const RolesPage: React.FC = () => {
                       <span className="font-bold text-slate-900 dark:text-white truncate">
                         {member.email}
                       </span>
-                      {member.isYou && <UIBadge variant="neutral">you</UIBadge>}
+                      {member.isYou && <UIBadge variant="neutral">{translate("admin.rolesPage.you")}</UIBadge>}
                       {adjusted > 0 && (
-                        <UIBadge variant="warning">{adjusted} adjusted</UIBadge>
+                        <UIBadge variant="warning">{translate("admin.rolesPage.adjustedAdjusted", { adjusted: adjusted })}</UIBadge>
                       )}
                     </div>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -323,7 +339,7 @@ export const RolesPage: React.FC = () => {
                         value={member.role}
                         disabled={busy}
                         onChange={(e) => void changeRole(member, e.target.value)}
-                        aria-label={`Role for ${member.email}`}
+                        aria-label={translate("admin.rolesPage.roleForEmail", { email: member.email })}
                         className={themeSystem.field("lg", "font-mono")}
                       >
                         {matrix.assignableRoles.map((role) => (
@@ -347,7 +363,7 @@ export const RolesPage: React.FC = () => {
                         aria-expanded={open}
                         className={themeSystem.button("secondary", "sm")}
                       >
-                        Rights
+                        {translate("admin.rolesPage.rights")}
                         <ChevronDown className={open ? "rotate-180 transition" : "transition"} />
                       </button>
                     )}
@@ -358,9 +374,8 @@ export const RolesPage: React.FC = () => {
                   <div className="rounded-xl border-2 border-slate-200 dark:border-slate-700 p-4 space-y-4">
                     <div className="flex items-start justify-between gap-3 flex-wrap">
                       <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md">
-                        Ticked is what this person can do. A tick that differs from the{" "}
-                        <strong>{member.role}</strong> role is stored as an exception, so changing
-                        their role later still moves everything else.
+                        {translate("admin.rolesPage.tickedIsWhatThisPersonCan")}{" "}
+                        <strong>{member.role}</strong>{" "}{translate("admin.rolesPage.roleIsStoredAsAnException")}
                       </p>
                       {adjusted > 0 && (
                         <button
@@ -369,7 +384,7 @@ export const RolesPage: React.FC = () => {
                           className={themeSystem.button("ghost", "sm")}
                         >
                           <RotateCcw />
-                          Back to the role
+                          {translate("admin.rolesPage.backToTheRole")}
                         </button>
                       )}
                     </div>
@@ -377,7 +392,7 @@ export const RolesPage: React.FC = () => {
                     {areas.map((area) => (
                       <div key={area} className="space-y-1.5">
                         <div className="text-[11px] font-mono font-black uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-                          {area}
+                          {translate(`admin.rolesPage.area.${AREA_KEY[area] ?? "other"}`)}
                         </div>
                         {matrix.permissions
                           .filter((permission) => describe(permission).area === area)
@@ -408,7 +423,7 @@ export const RolesPage: React.FC = () => {
                                 </span>
                                 {held !== fromRole && (
                                   <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
-                                    {held ? "added" : "removed"}
+                                    {held ? translate("admin.rolesPage.added") : translate("admin.rolesPage.removed")}
                                   </span>
                                 )}
                               </label>
@@ -425,8 +440,7 @@ export const RolesPage: React.FC = () => {
 
           {members.members.length === 1 && (
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Inviting a second parent or a caregiver is not built yet. When it is, they appear here
-              and their role and rights are set from this row.
+              {translate("admin.rolesPage.invitingASecondParentOrA")}
             </p>
           )}
         </section>

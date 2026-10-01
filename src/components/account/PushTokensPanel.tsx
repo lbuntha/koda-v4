@@ -4,6 +4,7 @@ import { themeSystem } from "../../lib/themeSystem";
 import { UIDataTable, UISectionHeader } from "../ui";
 import { pushTokenReport, type PushTokenReport, type PushTokenRow } from "../../lib/push";
 
+import { translate } from "../../lib/i18n";
 /**
  * Every FCM registration token, by user. Platform admins only.
  *
@@ -55,7 +56,7 @@ const TokenCell: React.FC<{ token: string }> = ({ token }) => {
           }}
           className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400"
         >
-          {shown ? "Hide" : "Reveal"}
+          {shown ? translate("admin.pushTokensPanel.hide") : translate("admin.pushTokensPanel.reveal")}
         </button>
         <button
           type="button"
@@ -65,7 +66,7 @@ const TokenCell: React.FC<{ token: string }> = ({ token }) => {
           }}
           className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400"
         >
-          {copied ? "Copied" : "Copy"}
+          {copied ? translate("admin.pushTokensPanel.copied") : translate("admin.pushTokensPanel.copy")}
         </button>
       </div>
     </div>
@@ -84,7 +85,7 @@ export const PushTokensPanel: React.FC = () => {
     try {
       setReport(await pushTokenReport());
     } catch {
-      setError("Could not read the tokens. This report is for platform admins only.");
+      setError(translate("admin.pushTokensPanel.couldNotReadTheTokensThis"));
     }
     setBusy(false);
   }, []);
@@ -102,15 +103,15 @@ export const PushTokensPanel: React.FC = () => {
   return (
     <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
       <UISectionHeader
-        title="Push tokens"
-        subtitle="Every FCM registration token, by user — masked until revealed"
+        title={translate("admin.pushTokensPanel.pushTokens")}
+        subtitle={translate("admin.pushTokensPanel.everyFcmRegistrationTokenByUser")}
         icon={<KeyRound className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
       />
 
       {report && (
         <p className="text-xs text-muted">
-          {rows.length} {rows.length === 1 ? "token" : "tokens"} across {people}{" "}
-          {people === 1 ? "person" : "people"}
+          {rows.length} {rows.length === 1 ? translate("admin.pushTokensPanel.token") : translate("admin.pushTokensPanel.tokens")}{" "}{translate("admin.pushTokensPanel.across")}{" "}{people}{" "}
+          {people === 1 ? translate("admin.pushTokensPanel.person") : translate("admin.pushTokensPanel.people")}
           {report.truncated && " · only the most recent 2,000 registrations are shown"}
         </p>
       )}
@@ -119,15 +120,15 @@ export const PushTokensPanel: React.FC = () => {
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Filter by name, email, family or device"
-          aria-label="Filter tokens"
+          placeholder={translate("admin.pushTokensPanel.filterByNameEmailFamilyOr")}
+          aria-label={translate("admin.pushTokensPanel.filterTokens")}
           className="w-full bg-surface border border-line rounded-2xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-indigo-500"
         />
       )}
 
       {rows.length > 0 && (
         <UIDataTable<PushTokenRow>
-          caption="Push tokens by user"
+          caption={translate("admin.pushTokensPanel.pushTokensByUser")}
           rows={rows}
           rowKey={(row) => row.token}
           pageSize={20}
@@ -152,7 +153,7 @@ export const PushTokensPanel: React.FC = () => {
               key: "device",
               header: "Device",
               render: (row) => (
-                <span title={row.ua ?? undefined}>{row.platform || "Unknown device"}</span>
+                <span title={row.ua ?? undefined}>{row.platform || translate("admin.pushTokensPanel.unknownDevice")}</span>
               ),
               sortValue: (row) => row.platform || "",
               muted: true,
@@ -168,7 +169,7 @@ export const PushTokensPanel: React.FC = () => {
                       : "text-emerald-700 dark:text-emerald-300"
                   }
                 >
-                  {row.retired ? "retired" : row.failures > 0 ? `live · ${row.failures} failed` : "live"}
+                  {row.retired ? translate("admin.pushTokensPanel.retired") : row.failures > 0 ? translate("admin.pushTokensPanel.liveFailuresFailed", { failures: row.failures }) : translate("admin.pushTokensPanel.live")}
                 </span>
               ),
               sortValue: (row) => (row.retired ? 1 : 0),
@@ -192,12 +193,12 @@ export const PushTokensPanel: React.FC = () => {
       )}
 
       {report && report.rows.length === 0 && !error && (
-        <p className="text-xs text-muted">No browser has registered for notifications yet.</p>
+        <p className="text-xs text-muted">{translate("admin.pushTokensPanel.noBrowserHasRegisteredForNotifications")}</p>
       )}
       {report && report.rows.length > 0 && rows.length === 0 && (
-        <p className="text-xs text-muted">Nothing matches that filter.</p>
+        <p className="text-xs text-muted">{translate("admin.pushTokensPanel.nothingMatchesThatFilter")}</p>
       )}
-      {!report && !error && <p className="text-xs text-muted">Reading…</p>}
+      {!report && !error && <p className="text-xs text-muted">{translate("admin.pushTokensPanel.reading")}</p>}
       {error && <p className="text-xs text-rose-600 dark:text-rose-400">{error}</p>}
 
       <button
@@ -206,7 +207,7 @@ export const PushTokensPanel: React.FC = () => {
         className={themeSystem.button("secondary", "sm")}
       >
         <RefreshCw className="w-4 h-4 mr-2" />
-        {busy ? "Reading…" : "Refresh"}
+        {busy ? translate("admin.pushTokensPanel.reading") : translate("admin.pushTokensPanel.refresh")}
       </button>
     </section>
   );

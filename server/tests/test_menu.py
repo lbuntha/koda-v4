@@ -250,3 +250,37 @@ async def test_the_gemini_key_stays_an_operators_setting(client, db, signup_body
     assert keys, "the Gemini key is a system setting"
     # A secret is never sent back, however senior the caller.
     assert keys[0]["value"] is None
+
+
+async def test_an_entry_carries_its_wording_in_other_languages(client, db, signup_body):
+    admin = await _admin_auth(client, db)
+
+    first = await client.patch("/menu/home", headers=admin, json={"labels": {"km": "ទំព័រដើម"}})
+    assert first.status_code == 200, first.text
+    # A second language is merged in, not swapped for the first.
+    second = await client.patch("/menu/home", headers=admin, json={"labels": {"th": "หน้าแรก"}})
+    assert second.json()["labels"] == {"km": "ទំព័រដើម", "th": "หน้าแรก"}
+
+    # Every family starts from the operator's translations.
+    parent = (await client.post("/auth/signup", json=signup_body())).json()
+    parent_auth = {"Authorization": f"Bearer {parent['accessToken']}"}
+    home = next(i for i in (await client.get("/menu", headers=parent_auth)).json()["items"] if i["id"] == "home")
+    assert home["labels"]["km"] == "ទំព័រដើម"
+
+
+async def test_an_empty_translation_hands_the_language_back_to_the_fallback(client, db):
+    admin = await _admin_auth(client, db)
+    await client.patch("/menu/home", headers=admin, json={"labels": {"km": "ទំព័រដើម"}})
+
+    cleared = await client.patch("/menu/home", headers=admin, json={"labels": {"km": ""}})
+
+    assert cleared.status_code == 200, cleared.text
+    assert cleared.json()["labels"] is None
+
+
+async def test_a_translation_needs_a_real_language_code(client, db):
+    admin = await _admin_auth(client, db)
+
+    refused = await client.patch("/menu/home", headers=admin, json={"labels": {"<b>": "x"}})
+
+    assert refused.status_code == 409

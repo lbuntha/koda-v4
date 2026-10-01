@@ -11,6 +11,7 @@ import {
   type TestSendResult,
 } from "../../lib/push";
 
+import { translate } from "../../lib/i18n";
 /**
  * Whether notifications actually work on this deployment.
  *
@@ -52,7 +53,7 @@ const Verdict: React.FC<{ ok: boolean | null }> = ({ ok }) => (
           : "text-rose-700 dark:text-rose-300 border-rose-500/40 bg-rose-500/10"
     }`}
   >
-    {ok === null ? "SKIP" : ok ? "PASS" : "FAIL"}
+    {ok === null ? translate("admin.pushDiagnostics.skip") : ok ? translate("admin.pushDiagnostics.pass") : translate("admin.pushDiagnostics.fail")}
   </span>
 );
 
@@ -76,7 +77,7 @@ export const PushDiagnostics: React.FC = () => {
     try {
       setPreflight(await pushPreflight());
     } catch {
-      setError("Could not reach the service to check.");
+      setError(translate("admin.pushDiagnostics.couldNotReachTheServiceTo"));
     }
     setChecking(false);
   }, []);
@@ -98,7 +99,7 @@ export const PushDiagnostics: React.FC = () => {
       // A send can retire a dead token, so the counts above may have moved.
       await check();
     } catch {
-      setError("The test could not be sent. Try again in a minute.");
+      setError(translate("admin.pushDiagnostics.theTestCouldNotBeSent"));
     }
     setSending(false);
   };
@@ -106,8 +107,8 @@ export const PushDiagnostics: React.FC = () => {
   return (
     <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
       <UISectionHeader
-        title="Notifications"
-        subtitle="Whether push actually works here — proved rather than assumed"
+        title={translate("admin.pushDiagnostics.notifications")}
+        subtitle={translate("admin.pushDiagnostics.whetherPushActuallyWorksHereProved")}
         icon={<Bell className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
       />
 
@@ -123,7 +124,7 @@ export const PushDiagnostics: React.FC = () => {
               {row.fix && (
                 <p className="text-xs text-ink mt-1 break-words">
                   <span className="font-mono text-[10px] uppercase tracking-wider text-muted">
-                    {row.ok === null ? "Next " : "Fix "}
+                    {row.ok === null ? translate("admin.pushDiagnostics.next") : translate("admin.pushDiagnostics.fix")}
                   </span>
                   {row.fix}
                 </p>
@@ -133,7 +134,7 @@ export const PushDiagnostics: React.FC = () => {
           </div>
         ))}
         {!preflight && !error && (
-          <p className="text-xs text-muted">Checking…</p>
+          <p className="text-xs text-muted">{translate("admin.pushDiagnostics.checking")}</p>
         )}
       </div>
 
@@ -141,7 +142,7 @@ export const PushDiagnostics: React.FC = () => {
         <div className="bg-surface-muted border border-line rounded-2xl px-4 py-3 space-y-2">
           <div className="flex items-center justify-between gap-3">
             <h4 className="text-sm font-bold text-ink font-mono">
-              {test.sent} sent · driver {test.driver}
+              {translate("admin.pushDiagnostics.sentSentDriverDriver", { sent: test.sent, driver: test.driver })}
             </h4>
             <Verdict ok={test.sent > 0} />
           </div>
@@ -167,18 +168,18 @@ export const PushDiagnostics: React.FC = () => {
           className={themeSystem.button("secondary", "sm")}
         >
           <RefreshCw className="w-4 h-4 mr-2" />
-          {checking ? "Checking…" : "Check setup"}
+          {checking ? translate("admin.pushDiagnostics.checking") : translate("admin.pushDiagnostics.checkSetup")}
         </button>
         <select
           value={kind}
           onChange={(e) => setKind(e.target.value)}
-          aria-label="Which notification to preview"
+          aria-label={translate("admin.pushDiagnostics.whichNotificationToPreview")}
           className="bg-surface border border-line rounded-2xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-indigo-500"
         >
-          <option value="">Plain test message</option>
+          <option value="">{translate("admin.pushDiagnostics.plainTestMessage")}</option>
           {kinds.map((row) => (
             <option key={row.id} value={row.id}>
-              Preview: {row.label}
+              {translate("admin.pushDiagnostics.previewLabel", { label: row.label })}
             </option>
           ))}
         </select>
@@ -188,14 +189,12 @@ export const PushDiagnostics: React.FC = () => {
           className={themeSystem.button("primary", "sm")}
         >
           <Send className="w-4 h-4 mr-2" />
-          {sending ? "Sending…" : "Send test to my devices"}
+          {sending ? translate("admin.pushDiagnostics.sending") : translate("admin.pushDiagnostics.sendTestToMyDevices")}
         </button>
       </div>
 
       <p className="text-xs text-muted">
-        Picking a kind sends <em>that kind's wording</em>, filled with sample values, so you can
-        read your own copy on your own lock screen. The test rings only the browsers you have
-        turned notifications on in — it takes no recipient. Checking delivers nothing to anybody.
+        {translate("admin.pushDiagnostics.pickingAKindSends")}{" "}<em>{translate("admin.pushDiagnostics.thatKindSWording")}</em>{translate("admin.pushDiagnostics.filledWithSampleValuesSoYou")}
       </p>
     </section>
   );

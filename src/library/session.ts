@@ -11,6 +11,7 @@
 
 import { BANDS, type Band, type ComprehensionQuestion, type Passage, type VocabQuestion } from "./data/passage";
 import { buildSpellingDeck, type DeckWord } from "./data/spellingDeck";
+import { translate } from "../lib/i18n";
 
 export type Part = "understand" | "words" | "spell";
 
@@ -93,10 +94,19 @@ export function reward(outcomes: readonly Outcome[], questions: number, s: Scori
 export function parentSummary(p: Passage, outcomes: readonly Outcome[], quiz: readonly QuizItem[]): string {
   const [u, w, s] = tally(outcomes, quiz);
   const need = wordsToPractise(outcomes);
-  const lang = p.language === "km" ? "Khmer" : "English";
-  return `Read “${p.title}” (${lang}). Understood ${u.firstTry}/${u.total}, matched ${w.firstTry}/${w.total}, spelled ${s.firstTry}/${s.total} on the first try. ${
-    need.length ? `Needs practice: ${need.join(", ")}.` : "Nothing needs practice."
-  }`;
+  // In the app's language, for the parent reading it; the title and the words
+  // to practise stay in the book's.
+  const summary = translate("library.summary.read", {
+    title: p.title,
+    language: translate(`library.bookLanguage.${p.language}`),
+    understood: `${u.firstTry}/${u.total}`,
+    matched: `${w.firstTry}/${w.total}`,
+    spelled: `${s.firstTry}/${s.total}`,
+  });
+  const practice = need.length
+    ? translate("library.summary.needs", { words: need.join(", ") })
+    : translate("library.summary.nothing");
+  return `${summary} ${practice}`;
 }
 
 /** The concept a book is filed under in the learning log, by band. */

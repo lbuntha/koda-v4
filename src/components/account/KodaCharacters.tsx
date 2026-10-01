@@ -12,6 +12,7 @@ import { CharacterPreview } from "./CharacterPreview";
 import { KodaMascot } from "../KodaMascot";
 import { newAvatarSeed } from "../../lib/avatar";
 
+import { translate } from "../../lib/i18n";
 /**
  * One character as an operator edits it — `manner` included, which a family
  * never sees. Mirrors `PersonaOut` on the API.
@@ -160,8 +161,8 @@ export const KodaCharacters: React.FC = () => {
   return (
     <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
       <UISectionHeader
-        title="Who Koda can be"
-        subtitle="Characters a parent chooses between, per child. The rules they all obey are part of Koda, not settings"
+        title={translate("admin.kodaCharacters.whoKodaCanBe")}
+        subtitle={translate("admin.kodaCharacters.charactersAParentChoosesBetweenPer")}
         icon={<GraduationCap className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
         action={
           <UIButton
@@ -173,7 +174,7 @@ export const KodaCharacters: React.FC = () => {
               setEditing({ ...BLANK, voice: voices[0] ?? "Aoede" });
             }}
           >
-            Add teacher
+            {translate("admin.kodaCharacters.addTeacher")}
           </UIButton>
         }
       />
@@ -230,9 +231,7 @@ export const KodaCharacters: React.FC = () => {
       )}
 
       <p className="text-xs text-muted">
-        A parent chooses one per child on the Children page. Retiring a teacher takes them out of
-        that choice and keeps their wording; the default cannot be retired, because it is what a
-        child gets when nobody has chosen.
+        {translate("admin.kodaCharacters.aParentChoosesOnePerChild")}
       </p>
 
 
@@ -256,9 +255,9 @@ export const KodaCharacters: React.FC = () => {
       <UIDialog
         isOpen={removing !== null}
         onClose={() => setRemoving(null)}
-        title={`Delete ${removing?.name ?? "this character"}?`}
-        description="Any child who had this teacher falls back to the default. Retiring them with the switch instead keeps the wording in case you want them back."
-        confirmText="Delete"
+        title={translate("admin.kodaCharacters.deleteValue", { value: removing?.name ?? translate("admin.kodaCharacters.thisCharacter") })}
+        description={translate("admin.kodaCharacters.anyChildWhoHadThisTeacher")}
+        confirmText={translate("admin.kodaCharacters.delete")}
         variant="danger"
         onConfirm={() => {
           if (!removing) return;
@@ -325,7 +324,7 @@ const CharacterCard: React.FC<{
           // default teacher is retired has no teacher at all.
           disabled={isDefault || busy}
           onChange={onToggle}
-          label={`${character.name} available to families`}
+          label={translate("admin.kodaCharacters.nameAvailableToFamilies", { name: character.name })}
           tone="emerald"
         />
       </div>
@@ -333,23 +332,23 @@ const CharacterCard: React.FC<{
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <h4 className="font-mono text-sm font-black text-ink">{character.name}</h4>
-          {isDefault && <UIBadge variant="primary">Default</UIBadge>}
-          {retired && <UIBadge variant="neutral">Retired</UIBadge>}
+          {isDefault && <UIBadge variant="primary">{translate("admin.kodaCharacters.default")}</UIBadge>}
+          {retired && <UIBadge variant="neutral">{translate("admin.kodaCharacters.retired")}</UIBadge>}
         </div>
         <p className="mt-1 line-clamp-2 text-xs leading-snug text-muted">
-          {character.blurb || "No description yet."}
+          {character.blurb || translate("admin.kodaCharacters.noDescriptionYet")}
         </p>
       </div>
 
       <div className="flex items-center gap-2 text-[11px] font-mono font-bold text-muted">
         <span className={`rounded-full px-2 py-0.5 ${tint.bg} ${tint.text}`}>
-          ages {character.minAge}–{character.maxAge}
+          {translate("admin.kodaCharacters.agesMinageMaxage", { minAge: character.minAge, maxAge: character.maxAge })}
         </span>
-        <span className="truncate">speaks as {character.voice}</span>
+        <span className="truncate">{translate("admin.kodaCharacters.speaksAsVoice", { voice: character.voice })}</span>
       </div>
 
       <UIButton variant="secondary" size="sm" fullWidth onClick={onEdit}>
-        Edit
+        {translate("admin.kodaCharacters.edit")}
       </UIButton>
     </motion.article>
   );
@@ -390,22 +389,22 @@ const CharacterEditor: React.FC<{
     <UIModal
       isOpen
       onClose={onClose}
-      title={isNew ? "A new teacher" : `Edit ${draft.name}`}
+      title={isNew ? translate("admin.kodaCharacters.aNewTeacher") : translate("admin.kodaCharacters.editName", { name: draft.name })}
       maxWidth="max-w-2xl"
       footer={
         <div className="flex w-full items-center justify-between gap-3">
           {!isNew && !isDefault ? (
             <UIButton variant="ghost" size="sm" icon={<Trash2 />} onClick={onDelete}>
-              Delete
+              {translate("admin.kodaCharacters.delete")}
             </UIButton>
           ) : (
             <span className="text-[11px] text-muted">
-              {isDefault ? "The default teacher cannot be deleted." : ""}
+              {isDefault ? translate("admin.kodaCharacters.theDefaultTeacherCannotBeDeleted") : ""}
             </span>
           )}
           <div className="flex items-center gap-2">
             <UIButton variant="ghost" size="sm" onClick={onClose}>
-              Cancel
+              {translate("admin.kodaCharacters.cancel")}
             </UIButton>
             <UIButton
               variant="primary"
@@ -414,7 +413,7 @@ const CharacterEditor: React.FC<{
               disabled={!ready}
               onClick={() => onSave(value)}
             >
-              {isNew ? "Add teacher" : "Save"}
+              {isNew ? translate("admin.kodaCharacters.addTeacher") : translate("admin.kodaCharacters.save")}
             </UIButton>
           </div>
         </div>
@@ -440,12 +439,12 @@ const CharacterEditor: React.FC<{
           </motion.div>
           <div className="min-w-0 flex-1 space-y-2">
             <label className="block space-y-1">
-              <span className={LABEL}>Name</span>
+              <span className={LABEL}>{translate("admin.kodaCharacters.name")}</span>
               <input
                 className={FIELD}
                 value={value.name}
                 maxLength={40}
-                placeholder="Ms Vega"
+                placeholder={translate("admin.kodaCharacters.msVega")}
                 onChange={(e) => set({ name: e.target.value })}
               />
             </label>
@@ -458,14 +457,14 @@ const CharacterEditor: React.FC<{
               icon={<Shuffle />}
               onClick={() => set({ avatarSeed: newAvatarSeed() })}
             >
-              Different face
+              {translate("admin.kodaCharacters.differentFace")}
             </UIButton>
           </div>
         </div>
 
         {isNew && (
           <label className="block space-y-1">
-            <span className={LABEL}>Id</span>
+            <span className={LABEL}>{translate("admin.kodaCharacters.id")}</span>
             <input
               className={FIELD}
               value={value.personaId}
@@ -474,21 +473,21 @@ const CharacterEditor: React.FC<{
             />
             <span className="block text-[11px] text-muted">
               {idClash
-                ? "A teacher with that id already exists."
+                ? translate("admin.kodaCharacters.aTeacherWithThatIdAlready")
                 : value.personaId && !idShape
-                  ? "Lowercase letters, numbers and hyphens only."
-                  : "Permanent — a child's settings point at it. Lowercase, no spaces."}
+                  ? translate("admin.kodaCharacters.lowercaseLettersNumbersAndHyphensOnly")
+                  : translate("admin.kodaCharacters.permanentAChildSSettingsPoint")}
             </span>
           </label>
         )}
 
         <label className="block space-y-1">
-          <span className={LABEL}>How a parent sees them</span>
+          <span className={LABEL}>{translate("admin.kodaCharacters.howAParentSeesThem")}</span>
           <input
             className={FIELD}
             value={value.blurb}
             maxLength={160}
-            placeholder="Precise and calm. Names the idea behind the question."
+            placeholder={translate("admin.kodaCharacters.preciseAndCalmNamesTheIdea")}
             onChange={(e) => set({ blurb: e.target.value })}
           />
         </label>
@@ -496,18 +495,17 @@ const CharacterEditor: React.FC<{
         {/* The one field that changes how a child is taught, given the room to
             say so. Everything above is identity; this is the teacher. */}
         <label className="block space-y-1">
-          <span className={LABEL}>How they teach</span>
+          <span className={LABEL}>{translate("admin.kodaCharacters.howTheyTeach")}</span>
           <textarea
             className={`${FIELD} min-h-[8rem] leading-relaxed`}
             value={value.manner}
             maxLength={600}
-            placeholder="You are calm, precise and encouraging, like a teacher who has taught this for twenty years…"
+            placeholder={translate("admin.kodaCharacters.youAreCalmPreciseAndEncouraging")}
             onChange={(e) => set({ manner: e.target.value })}
           />
           <span className="flex items-center justify-between gap-3 text-[11px] text-muted">
             <span>
-              Manner only. Never giving the answer away, one idea per reply, staying on maths —
-              those are part of Koda and every character obeys them.
+              {translate("admin.kodaCharacters.mannerOnlyNeverGivingTheAnswer")}
             </span>
             <span className="shrink-0 font-mono tabular-nums">{value.manner.length}/600</span>
           </span>
@@ -515,7 +513,7 @@ const CharacterEditor: React.FC<{
 
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block space-y-1">
-            <span className={LABEL}>Voice</span>
+            <span className={LABEL}>{translate("admin.kodaCharacters.voice")}</span>
             <select
               className={FIELD}
               value={value.voice}
@@ -528,28 +526,28 @@ const CharacterEditor: React.FC<{
               ))}
             </select>
             <span className="block text-[11px] text-muted">
-              What they sound like in a spoken session.
+              {translate("admin.kodaCharacters.whatTheySoundLikeInA")}
             </span>
           </label>
 
           <div className="space-y-1">
-            <span className={LABEL}>Suits ages</span>
+            <span className={LABEL}>{translate("admin.kodaCharacters.suitsAges")}</span>
             <div className="flex items-center gap-2">
               <input
                 type="number"
                 min={3}
                 max={18}
-                aria-label="Youngest age"
+                aria-label={translate("admin.kodaCharacters.youngestAge")}
                 className={FIELD}
                 value={value.minAge}
                 onChange={(e) => set({ minAge: Number(e.target.value) })}
               />
-              <span className="text-sm text-muted">to</span>
+              <span className="text-sm text-muted">{translate("admin.kodaCharacters.to")}</span>
               <input
                 type="number"
                 min={3}
                 max={18}
-                aria-label="Oldest age"
+                aria-label={translate("admin.kodaCharacters.oldestAge")}
                 className={FIELD}
                 value={value.maxAge}
                 onChange={(e) => set({ maxAge: Number(e.target.value) })}
@@ -557,8 +555,8 @@ const CharacterEditor: React.FC<{
             </div>
             <span className="block text-[11px] text-muted">
               {value.minAge > value.maxAge
-                ? "The youngest age cannot be above the oldest."
-                : "Shown to a parent choosing. Nothing switches automatically."}
+                ? translate("admin.kodaCharacters.theYoungestAgeCannotBeAbove")
+                : translate("admin.kodaCharacters.shownToAParentChoosingNothing")}
             </span>
           </div>
         </div>

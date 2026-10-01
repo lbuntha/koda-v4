@@ -25,6 +25,7 @@ from typing import Any
 import jwt
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
+from app import notify_i18n
 from app.push_defaults import BY_KIND, EMAIL_FRAME, EMAIL_MASTER, EMAIL_SENDS, EMAIL_SUBJECT_MAX, SAMPLES
 from app.repos import notify_prefs, push_log, push_templates
 from app.repos import system as system_repo
@@ -114,24 +115,46 @@ def wanted_by(kind: str, prefs: dict[str, bool] | None) -> bool:
     return bool(prefs.get(kind, email.get("default", False)))
 
 
-async def wording(db: AsyncIOMotorDatabase, kind: str, values: dict[str, Any] | None = None) -> tuple[str, str]:
-    """This kind's subject and message — the operator's words if edited, else ours."""
+async def wording(
+    db: AsyncIOMotorDatabase,
+    kind: str,
+    values: dict[str, Any] | None = None,
+    language: str = notify_i18n.BASE,
+) -> tuple[str, str]:
+    """This kind's subject and message, in `language` — edit, then shipped, then English."""
     definition = (BY_KIND.get(kind) or {}).get("email") or {}
-    override = await push_templates.get_email(db, kind) or {}
-    subject = override.get("subject") or definition.get("subject", "A message from Koda")
-    body = override.get("body") or definition.get("body", "{message}")
+    english = await push_templates.get_email(db, kind) or {}
+    local = await push_templates.get_email(db, kind, language) or {} if language != notify_i18n.BASE else {}
+    shipped = notify_i18n.kind_text(language, kind).get("email") or {}
+    subject = (
+        local.get("subject")
+        or shipped.get("subject")
+        or english.get("subject")
+        or definition.get("subject", "A message from Koda")
+    )
+    body = local.get("body") or shipped.get("body") or english.get("body") or definition.get("body", "{message}")
     filled = values or {}
     return push.fill(subject, filled)[:EMAIL_SUBJECT_MAX], push.fill(body, filled)
 
 
-async def frame(db: AsyncIOMotorDatabase) -> dict[str, str]:
-    override = await push_templates.get_frame(db) or {}
-    return {part: override.get(part) or default for part, default in EMAIL_FRAME.items()}
+async def frame(db: AsyncIOMotorDatabase, language: str = notify_i18n.BASE) -> dict[str, str]:
+    english = await push_templates.get_frame(db) or {}
+    local = await push_templates.get_frame(db, language) or {} if language != notify_i18n.BASE else {}
+    shipped = notify_i18n.frame_text(language)
+    return {
+        part: local.get(part) or shipped.get(part) or english.get(part) or default
+        for part, default in EMAIL_FRAME.items()
+    }
 
 
-def first_name(user: dict[str, Any]) -> str:
+def kind_label(kind: str, language: str = notify_i18n.BASE) -> str:
+    """A kind's name as the reader's footer says it."""
+    return notify_i18n.kind_text(language, kind).get("label") or BY_KIND[kind]["label"]
+
+
+def first_name(user: dict[str, Any], language: str = notify_i18n.BASE) -> str:
     name = (user.get("displayName") or "").strip()
-    return name.split()[0] if name else "there"
+    return name.split()[0] if name else notify_i18n.phrase(language, "there")
 
 
 async def compose(
@@ -142,17 +165,18 @@ async def compose(
     user_id: str,
     parent: str,
     family: str | None = None,
+    language: str = notify_i18n.BASE,
 ) -> tuple[str, str, str]:
-    """(subject, message, the finished text) for one person."""
+    """(subject, message, the finished text) for one person, in `language`."""
     cfg = settings()
     filled = {
         "parent": parent,
-        "family": family or "your family",
+        "family": family or notify_i18n.phrase(language, "yourFamily"),
         "app_link": cfg.app_base_url,
         **(values or {}),
     }
-    subject, message = await wording(db, kind, filled)
-    parts = await frame(db)
+    subject, message = await wording(db, kind, filled, language)
+    parts = await frame(db, language)
     text = push.fill(parts["body"], {"parent": parent, "message": message})
     if BY_KIND[kind]["class"] == "account":
         footer = push.fill(parts["accountFooter"], {"app_link": cfg.app_base_url})
@@ -160,7 +184,7 @@ async def compose(
         footer = push.fill(
             parts["footer"],
             {
-                "kind_label": BY_KIND[kind]["label"],
+                "kind_label": kind_label(kind, language),
                 "app_link": cfg.app_base_url,
                 "unsubscribe_link": unsubscribe_link(user_id, kind),
             },
@@ -202,6 +226,10 @@ async def send(
             row = await db.families.find_one({"_id": family_id}, {"name": 1})
             family = (row or {}).get("name")
 
+        # The family's language, read once; a send addressed to named accounts
+        # with no family (staff) reads each person's own.
+        family_language = await notify_i18n.language_of_family(db, family_id) if family_id else None
+
         cfg = settings()
         told: list[str] = []
         sent = failed = unreachable = 0
@@ -220,8 +248,15 @@ async def send(
                 unreachable += 1
                 continue
 
+            language = family_language or await notify_i18n.language_of_user(db, user_id)
             subject, message, text = await compose(
-                db, kind, values, user_id=user_id, parent=first_name(user), family=family
+                db,
+                kind,
+                values,
+                user_id=user_id,
+                parent=first_name(user, language),
+                family=family,
+                language=language,
             )
             headers = None
             if BY_KIND[kind]["class"] != "account":
@@ -271,7 +306,9 @@ async def send(
         return 0
 
 
-async def send_test(db: AsyncIOMotorDatabase, user: dict[str, Any], kind: str | None) -> dict[str, Any]:
+async def send_test(
+    db: AsyncIOMotorDatabase, user: dict[str, Any], kind: str | None, language: str = notify_i18n.BASE
+) -> dict[str, Any]:
     """A real email to the caller's own address, and nobody else's.
 
     Naming a kind previews that kind's wording, filled with sample values and
@@ -284,8 +321,16 @@ async def send_test(db: AsyncIOMotorDatabase, user: dict[str, Any], kind: str | 
         return {"driver": cfg.mail_driver, "sent": False, "to": None, "note": "This account has no email address."}
 
     if kind and (BY_KIND.get(kind) or {}).get("email"):
+        language = notify_i18n.known(language)
+        samples = {**SAMPLES, **notify_i18n.samples(language)}
         subject, _, text = await compose(
-            db, kind, SAMPLES, user_id=user["_id"], parent=first_name(user), family=SAMPLES["family"]
+            db,
+            kind,
+            samples,
+            user_id=user["_id"],
+            parent=first_name(user, language),
+            family=samples["family"],
+            language=language,
         )
         subject = f"[Test] {subject}"
     else:

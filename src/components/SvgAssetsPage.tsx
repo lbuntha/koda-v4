@@ -33,6 +33,7 @@ import { SvgAssetPreviewModal } from "./SvgAssetPreviewModal";
 import { useSession } from "../lib/sync";
 import { UISectionHeader, UIStatGrid, UIStatTile } from "./ui";
 
+import { translate } from "../lib/i18n";
 const usageSnippet = (id: string) => `<SvgAsset id="${id}" size={48} />`;
 
 /** Uncategorised sorts last; it is a holding pen, not a category. */
@@ -213,8 +214,8 @@ export const SvgAssetsPage: React.FC = () => {
     <div className={`${themeSystem.spacing.section} w-full max-w-[1560px] mx-auto px-2 sm:px-4 lg:px-6 pb-20`}>
       <UISectionHeader
         icon={<Shapes />}
-        title="Art library"
-        subtitle={`${assets.length} shared assets · stored in MongoDB`}
+        title={translate("admin.svgAssetsPage.artLibrary")}
+        subtitle={translate("admin.svgAssetsPage.lengthSharedAssetsStoredInMongodb", { length: assets.length })}
         action={
           canEdit ? (
             <button
@@ -225,30 +226,30 @@ export const SvgAssetsPage: React.FC = () => {
               className={themeSystem.button("primary", "sm")}
             >
               <Plus />
-              Add artwork
+              {translate("admin.svgAssetsPage.addArtwork")}
             </button>
           ) : undefined
         }
       />
 
       <UIStatGrid>
-        <UIStatTile icon={<Shapes />} value={assets.length} label="Total artwork" />
-        <UIStatTile icon={<FolderInput />} value={categories.length} label="Categories" tone="success" />
-        <UIStatTile icon={<Database />} value="MongoDB" label="Storage" tone="primary" />
-        <UIStatTile icon={<Copy />} value="SVG" label="Format" tone="streak" />
+        <UIStatTile icon={<Shapes />} value={assets.length} label={translate("admin.svgAssetsPage.totalArtwork")} />
+        <UIStatTile icon={<FolderInput />} value={categories.length} label={translate("admin.svgAssetsPage.categories")} tone="success" />
+        <UIStatTile icon={<Database />} value="MongoDB" label={translate("admin.svgAssetsPage.storage")} tone="primary" />
+        <UIStatTile icon={<Copy />} value="SVG" label={translate("admin.svgAssetsPage.format")} tone="streak" />
       </UIStatGrid>
 
       <section className={themeSystem.card("default", "overflow-hidden")}>
         <div className="flex items-end justify-between gap-3 border-b border-line px-5 py-5 sm:px-7">
           <div>
-            <h3 className="text-lg font-semibold text-ink">Shared artwork</h3>
+            <h3 className="text-lg font-semibold text-ink">{translate("admin.svgAssetsPage.sharedArtwork")}</h3>
             <p className="mt-1 text-base text-body">
-              {assets.length} assets across {categories.length} {categories.length === 1 ? "category" : "categories"}
+              {assets.length}{" "}{translate("admin.svgAssetsPage.assetsAcross")}{" "}{categories.length} {categories.length === 1 ? translate("admin.svgAssetsPage.category") : translate("admin.svgAssetsPage.categories2")}
               {!canEdit && " · operator-managed"}
             </p>
           </div>
           <span className="hidden items-center gap-1.5 text-xs font-mono uppercase tracking-wide text-muted sm:flex">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Live collection
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />{" "}{translate("admin.svgAssetsPage.liveCollection")}
           </span>
         </div>
 
@@ -256,10 +257,9 @@ export const SvgAssetsPage: React.FC = () => {
         <div className={themeSystem.flash("error", "m-4 text-sm")}>
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span>
-            Two assets share {duplicateIds.length === 1 ? "the id" : "the ids"}{" "}
-            <strong className="font-mono">{duplicateIds.join(", ")}</strong>. Ids are global, so{" "}
-            <code className="font-mono">ids.ts</code> cannot be regenerated and saving will fail
-            until one is renamed or deleted.
+            {translate("admin.svgAssetsPage.twoAssetsShare")}{" "}{duplicateIds.length === 1 ? translate("admin.svgAssetsPage.theId") : translate("admin.svgAssetsPage.theIds")}{" "}
+            <strong className="font-mono">{duplicateIds.join(", ")}</strong>{translate("admin.svgAssetsPage.idsAreGlobalSo")}{" "}
+            <code className="font-mono">ids.ts</code>{" "}{translate("admin.svgAssetsPage.cannotBeRegeneratedAndSavingWill")}
           </span>
         </div>
       )}
@@ -273,7 +273,7 @@ export const SvgAssetsPage: React.FC = () => {
         >
           <Shapes className="w-8 h-8 mx-auto text-muted" />
           <p className={themeSystem.typography("body-sm")}>
-            No artwork yet. An operator can add the first asset here.
+            {translate("admin.svgAssetsPage.noArtworkYetAnOperatorCan")}
           </p>
         </div>
       ) : (
@@ -281,7 +281,7 @@ export const SvgAssetsPage: React.FC = () => {
           {/* Category rail — the collection's shape, always visible. */}
           <aside className={themeSystem.card("default", "p-2.5 space-y-1 md:sticky md:top-6")}>
             <CategoryRow
-              label="All artwork"
+              label={translate("admin.svgAssetsPage.allArtwork")}
               count={assets.length}
               isActive={activeCategory === "all"}
               onClick={() => setActiveCategory("all")}
@@ -305,8 +305,8 @@ export const SvgAssetsPage: React.FC = () => {
                 <input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Search by id or category"
-                  aria-label="Search artwork"
+                  placeholder={translate("admin.svgAssetsPage.searchByIdOrCategory")}
+                  aria-label={translate("admin.svgAssetsPage.searchArtwork")}
                   className="w-full bg-surface border border-line rounded-xl pl-10 pr-4 py-3 text-sm sm:text-base font-mono text-ink placeholder:text-muted focus:outline-none focus:border-indigo-500"
                 />
               </div>
@@ -321,7 +321,7 @@ export const SvgAssetsPage: React.FC = () => {
                   },
                   {
                     id: "recent" as const,
-                    label: "Recent",
+                    label: translate("admin.svgAssetsPage.recent"),
                     icon: <Clock className="w-3.5 h-3.5" />,
                   },
                 ].map((option) => (
@@ -332,7 +332,7 @@ export const SvgAssetsPage: React.FC = () => {
                       setSort(option.id);
                     }}
                     aria-pressed={sort === option.id}
-                    title={option.id === "recent" ? "Most recently changed first" : "Alphabetical"}
+                    title={option.id === "recent" ? translate("admin.svgAssetsPage.mostRecentlyChangedFirst") : translate("admin.svgAssetsPage.alphabetical")}
                       className={`flex items-center gap-2 px-3.5 py-3 text-sm font-mono font-semibold transition cursor-pointer ${
                       sort === option.id
                         ? "bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300"
@@ -348,7 +348,7 @@ export const SvgAssetsPage: React.FC = () => {
 
             {groups.length === 0 ? (
               <p className={themeSystem.typography("body-sm")}>
-                Nothing matches {query ? `“${query}”` : "this filter"}.
+                {translate("admin.svgAssetsPage.nothingMatchesValue", { value: query ? `“${query}”` : translate("admin.svgAssetsPage.thisFilter") })}
               </p>
             ) : (
               groups.map((group) => (
@@ -389,7 +389,7 @@ export const SvgAssetsPage: React.FC = () => {
                               type="checkbox"
                               checked={selected.has(asset.id)}
                               onChange={() => toggleSelected(asset.id)}
-                              aria-label={`Select ${asset.id}`}
+                              aria-label={translate("admin.svgAssetsPage.selectId", { id: asset.id })}
                               className="w-4 h-4 accent-indigo-600 cursor-pointer"
                             />
                           </label>
@@ -399,7 +399,7 @@ export const SvgAssetsPage: React.FC = () => {
                           <button
                             onClick={() => copySnippet(asset.id)}
                             title={`Copy <SvgAsset id="${asset.id}" />`}
-                            aria-label={`Copy usage for ${asset.id}`}
+                            aria-label={translate("admin.svgAssetsPage.copyUsageForId", { id: asset.id })}
                             className="p-1 rounded-md bg-surface border border-line text-muted hover:text-ink cursor-pointer"
                           >
                             {copied?.id === asset.id ? (
@@ -422,8 +422,8 @@ export const SvgAssetsPage: React.FC = () => {
                                   category: asset.category,
                                 });
                               }}
-                              title={`Edit ${asset.id}`}
-                              aria-label={`Edit ${asset.id}`}
+                              title={translate("admin.svgAssetsPage.editId", { id: asset.id })}
+                              aria-label={translate("admin.svgAssetsPage.editId", { id: asset.id })}
                               className="p-1 rounded-md bg-surface border border-line text-muted hover:text-ink cursor-pointer"
                             >
                               <Pencil className="w-3 h-3" />
@@ -436,7 +436,7 @@ export const SvgAssetsPage: React.FC = () => {
                             playSound("pop");
                             setPreviewId(asset.id);
                           }}
-                          title={`Preview ${asset.id}`}
+                          title={translate("admin.svgAssetsPage.previewId", { id: asset.id })}
                           className="w-full cursor-pointer"
                         >
                           <div className="w-full h-[156px] rounded-xl bg-checkerboard flex items-center justify-center overflow-hidden">
@@ -446,7 +446,7 @@ export const SvgAssetsPage: React.FC = () => {
                               title={asset.id}
                               fallback={
                                 <span className="text-sm font-mono font-semibold text-rose-600 dark:text-rose-400 px-2 text-center">
-                                  did not render
+                                  {translate("admin.svgAssetsPage.didNotRender")}
                                 </span>
                               }
                             />
@@ -470,7 +470,7 @@ export const SvgAssetsPage: React.FC = () => {
       {canEdit && selected.size > 0 && (
         <div className="sticky bottom-4 z-30 mt-5">
           <div className="mx-auto max-w-3xl bg-surface border-2 border-line rounded-2xl shadow-lg p-3 flex items-center gap-3 flex-wrap">
-            <span className="text-sm font-mono font-semibold text-ink">{selected.size} selected</span>
+            <span className="text-sm font-mono font-semibold text-ink">{translate("admin.svgAssetsPage.sizeSelected", { size: selected.size })}</span>
 
             <div className="flex items-center gap-1.5">
               <FolderInput className="w-4 h-4 text-muted" />
@@ -486,10 +486,10 @@ export const SvgAssetsPage: React.FC = () => {
                   }
                   runBulk((id) => moveSvgAsset(id, { category: target }), [...selected]);
                 }}
-                aria-label="Move selected to category"
+                aria-label={translate("admin.svgAssetsPage.moveSelectedToCategory")}
                 className="bg-surface-muted border border-line rounded-xl px-3 py-2 text-sm font-mono text-ink focus:outline-none focus:border-indigo-500 cursor-pointer"
               >
-                <option value="">Move to…</option>
+                <option value="">{translate("admin.svgAssetsPage.moveTo")}</option>
                 {[
                   ...new Set([
                     ...categories.map((category) => category.name),
@@ -501,7 +501,7 @@ export const SvgAssetsPage: React.FC = () => {
                     {categoryLabel(name)}
                   </option>
                 ))}
-                <option value="__new">New category…</option>
+                <option value="__new">{translate("admin.svgAssetsPage.newCategory")}</option>
               </select>
             </div>
 
@@ -511,14 +511,14 @@ export const SvgAssetsPage: React.FC = () => {
               className={themeSystem.button("danger", "sm")}
             >
               <Trash2 className="w-4 h-4" />
-              Delete
+              {translate("admin.svgAssetsPage.delete")}
             </button>
 
             <button
               onClick={() => setSelected(new Set())}
               className={themeSystem.button("ghost", "sm")}
             >
-              Clear
+              {translate("admin.svgAssetsPage.clear")}
             </button>
 
             {bulk.running && <Loader2 className="w-4 h-4 animate-spin text-muted" />}
@@ -539,20 +539,20 @@ export const SvgAssetsPage: React.FC = () => {
             onClick={(event) => event.stopPropagation()}
             role="dialog"
             aria-modal="true"
-            aria-label="Move to a new category"
+            aria-label={translate("admin.svgAssetsPage.moveToANewCategory")}
           >
             <div>
-              <h3 className="text-base font-black text-ink font-mono">New category</h3>
+              <h3 className="text-base font-black text-ink font-mono">{translate("admin.svgAssetsPage.newCategory2")}</h3>
               <p className="text-sm text-muted mt-1">
-                Moves {selected.size} {selected.size === 1 ? "asset" : "assets"} into the{" "}
-                <code className="font-mono">{moveTarget || "<name>"}</code> category.
+                {translate("admin.svgAssetsPage.moves")}{" "}{selected.size} {selected.size === 1 ? translate("admin.svgAssetsPage.asset") : translate("admin.svgAssetsPage.assets")}{" "}{translate("admin.svgAssetsPage.intoThe")}{" "}
+                <code className="font-mono">{moveTarget || "<name>"}</code>{" "}{translate("admin.svgAssetsPage.category2")}
               </p>
             </div>
             <input
               autoFocus
               value={moveTarget}
               onChange={(event) => setMoveTarget(event.target.value.trim().toLowerCase())}
-              placeholder="vegetables"
+              placeholder={translate("admin.svgAssetsPage.vegetables")}
               className="w-full bg-surface-muted border border-line rounded-xl px-3 py-2 text-sm font-mono text-ink placeholder:text-muted focus:outline-none focus:border-indigo-500"
             />
             <div className="flex items-center justify-end gap-2">
@@ -560,7 +560,7 @@ export const SvgAssetsPage: React.FC = () => {
                 onClick={() => setMoveTarget(null)}
                 className={themeSystem.button("secondary", "sm")}
               >
-                Cancel
+                {translate("admin.svgAssetsPage.cancel")}
               </button>
               <button
                 disabled={!moveTarget || !SVG_ID_PATTERN.test(moveTarget)}
@@ -571,7 +571,7 @@ export const SvgAssetsPage: React.FC = () => {
                 }}
                 className={themeSystem.button("primary", "sm")}
               >
-                Move
+                {translate("admin.svgAssetsPage.move")}
               </button>
             </div>
           </div>
@@ -586,17 +586,16 @@ export const SvgAssetsPage: React.FC = () => {
             onClick={(event) => event.stopPropagation()}
             role="dialog"
             aria-modal="true"
-            aria-label="Confirm delete"
+            aria-label={translate("admin.svgAssetsPage.confirmDelete")}
           >
             <div>
               <h3 className="text-base font-black text-ink font-mono">
-                Delete {confirmDelete.length} {confirmDelete.length === 1 ? "asset" : "assets"}?
+                {translate("admin.svgAssetsPage.deleteLengthValue", { length: confirmDelete.length, value: confirmDelete.length === 1 ? translate("admin.svgAssetsPage.asset") : translate("admin.svgAssetsPage.assets") })}
               </h3>
               <p className="text-sm text-muted mt-1">
-                Removes the {confirmDelete.length === 1 ? "asset" : "assets"} from the shared
-                library. Anything still calling{" "}
-                <code className="font-mono">&lt;SvgAsset id=…&gt;</code> for{" "}
-                {confirmDelete.length === 1 ? "it" : "them"} stops compiling until you fix the call.
+                {translate("admin.svgAssetsPage.removesThe")}{" "}{confirmDelete.length === 1 ? translate("admin.svgAssetsPage.asset") : translate("admin.svgAssetsPage.assets")}{" "}{translate("admin.svgAssetsPage.fromTheSharedLibraryAnythingStill")}{" "}
+                <code className="font-mono">{translate("admin.svgAssetsPage.ltSvgassetIdGt")}</code>{" "}{translate("admin.svgAssetsPage.for")}{" "}
+                {confirmDelete.length === 1 ? translate("admin.svgAssetsPage.it") : translate("admin.svgAssetsPage.them")}{" "}{translate("admin.svgAssetsPage.stopsCompilingUntilYouFixThe")}
               </p>
             </div>
             <div className="bg-surface-muted border border-line rounded-xl p-2.5 max-h-32 overflow-y-auto">
@@ -611,7 +610,7 @@ export const SvgAssetsPage: React.FC = () => {
                 onClick={() => setConfirmDelete(null)}
                 className={themeSystem.button("secondary", "sm")}
               >
-                Cancel
+                {translate("admin.svgAssetsPage.cancel")}
               </button>
               <button
                 onClick={() => {
@@ -622,7 +621,7 @@ export const SvgAssetsPage: React.FC = () => {
                 className={themeSystem.button("danger", "sm")}
               >
                 <Trash2 className="w-4 h-4" />
-                Delete
+                {translate("admin.svgAssetsPage.delete")}
               </button>
             </div>
           </div>

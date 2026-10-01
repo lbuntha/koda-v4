@@ -34,6 +34,14 @@ EventType = Literal[
     # A child's device spent the day's time limit. Carries `limitMinutes`; it has
     # no concept, so the rollup ignores it and `services/progress.py` reads it.
     "daily_limit_reached",
+    # A child reading a book, before its quiz. Produced by `ReadingRecorder` in
+    # `src/library/learning.ts`. They carry the book's concept, so a reading day
+    # counts as a day practised, but no totals — pages, dwell times and tapped
+    # words ride in `extra`.
+    "reading_started",
+    "page_read",
+    "reading_finished",
+    "reading_abandoned",
 ]
 
 # The fields the rollup reads. Everything else is carried but not interpreted.

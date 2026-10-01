@@ -6,6 +6,7 @@ import { themeSystem } from "../../lib/themeSystem";
 import { playSound } from "../../utils/audio";
 import { UIBadge, UIButton, UIModal, UISectionHeader } from "../ui";
 
+import { translate } from "../../lib/i18n";
 interface Invite {
   id: string;
   role: string;
@@ -27,8 +28,8 @@ interface Invite {
  */
 
 const ROLES: { id: string; label: string; detail: string }[] = [
-  { id: "parent", label: "Parent", detail: "Everything except handing the family on" },
-  { id: "caregiver", label: "Caregiver", detail: "Sees the children and their records; changes nothing" },
+  { id: "parent", get label() { return translate("admin.invitePeopleCard.parent"); }, get detail() { return translate("admin.invitePeopleCard.everythingExceptHandingTheFamilyOn"); } },
+  { id: "caregiver", get label() { return translate("admin.invitePeopleCard.caregiver"); }, get detail() { return translate("admin.invitePeopleCard.seesTheChildrenAndTheirRecords"); } },
 ];
 
 const expiryWords = (iso: string): string => {
@@ -99,8 +100,8 @@ export const InvitePeopleCard: React.FC = () => {
   return (
     <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
       <UISectionHeader
-        title="Invite someone"
-        subtitle="A second parent, or a grandparent who should see how the children are getting on"
+        title={translate("admin.invitePeopleCard.inviteSomeone")}
+        subtitle={translate("admin.invitePeopleCard.aSecondParentOrAGrandparent")}
         icon={<Mail className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
       />
 
@@ -108,8 +109,8 @@ export const InvitePeopleCard: React.FC = () => {
 
       <div className="flex flex-wrap items-end gap-3">
         <div className="space-y-1.5">
-          <span className="koda-admin-label text-ink">Join as</span>
-          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Invite as">
+          <span className="koda-admin-label text-ink">{translate("admin.invitePeopleCard.joinAs")}</span>
+          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={translate("admin.invitePeopleCard.inviteAs")}>
             {ROLES.map((option) => (
               <button
                 key={option.id}
@@ -134,7 +135,7 @@ export const InvitePeopleCard: React.FC = () => {
           isLoading={busy === "create"}
           onClick={() => void create()}
         >
-          Make a code
+          {translate("admin.invitePeopleCard.makeACode")}
         </UIButton>
       </div>
 
@@ -149,12 +150,12 @@ export const InvitePeopleCard: React.FC = () => {
             >
               <div className="min-w-0">
                 <p className="font-mono text-sm font-bold text-ink">
-                  Waiting to be used · {invite.role}
+                  {translate("admin.invitePeopleCard.waitingToBeUsedRole", { role: invite.role })}
                 </p>
                 <p className="text-xs text-muted">{expiryWords(invite.expiresAt)}</p>
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                <UIBadge variant="warning">Outstanding</UIBadge>
+                <UIBadge variant="warning">{translate("admin.invitePeopleCard.outstanding")}</UIBadge>
                 <UIButton
                   variant="ghost"
                   size="sm"
@@ -162,7 +163,7 @@ export const InvitePeopleCard: React.FC = () => {
                   isLoading={busy === invite.id}
                   onClick={() => void revoke(invite)}
                 >
-                  Withdraw
+                  {translate("admin.invitePeopleCard.withdraw")}
                 </UIButton>
               </div>
             </li>
@@ -173,17 +174,17 @@ export const InvitePeopleCard: React.FC = () => {
       <UIModal
         isOpen={Boolean(made)}
         onClose={() => setMade(null)}
-        title="Share this code"
+        title={translate("admin.invitePeopleCard.shareThisCode")}
         footer={
           <UIButton variant="primary" onClick={() => setMade(null)}>
-            Done
+            {translate("admin.invitePeopleCard.done")}
           </UIButton>
         }
       >
         {made && (
           <div className="space-y-5 text-center">
             <p className="text-sm text-muted">
-              They create their own Koda account, then enter this on the Roles page to join as{" "}
+              {translate("admin.invitePeopleCard.theyCreateTheirOwnKodaAccount")}{" "}
               <strong className="text-ink">{made.role}</strong>.
             </p>
             <div className="rounded-2xl border-2 border-indigo-200 bg-indigo-50 px-4 py-5 dark:border-indigo-800 dark:bg-indigo-950/40">
@@ -191,7 +192,7 @@ export const InvitePeopleCard: React.FC = () => {
                 {made.code}
               </div>
               <p className="mt-2 text-xs text-indigo-700 dark:text-indigo-300">
-                {expiryWords(made.expiresAt)} · single use
+                {translate("admin.invitePeopleCard.valueSingleUse", { value: expiryWords(made.expiresAt) })}
               </p>
             </div>
             <UIButton
@@ -203,7 +204,7 @@ export const InvitePeopleCard: React.FC = () => {
                 setTimeout(() => setCopied(false), 1800);
               }}
             >
-              {copied ? "Copied" : "Copy code"}
+              {copied ? translate("admin.invitePeopleCard.copied") : translate("admin.invitePeopleCard.copyCode")}
             </UIButton>
             {/*
               * Said plainly because it is the one surprising thing here: the
@@ -211,8 +212,7 @@ export const InvitePeopleCard: React.FC = () => {
               * shown. Closing it without copying means making another.
               */}
             <p className="text-xs text-muted">
-              This is the only time the code is shown. If you lose it, withdraw the invite and
-              make another.
+              {translate("admin.invitePeopleCard.thisIsTheOnlyTimeThe")}
             </p>
           </div>
         )}

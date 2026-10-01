@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { PartyPopper } from "lucide-react";
+import { translate, useT } from "../lib/i18n";
 
 import { useStreak } from "../lib/streak";
 import { currentLearnerId } from "../lib/learnerProgress";
@@ -49,14 +50,13 @@ const remember = (learnerId: string, day: string): void => {
 
 /** What the card says under its title, given the run behind today. */
 export const streakLine = (days: number, cadence: "daily" | "weekly"): string => {
-  if (days < 2) return "Come back tomorrow to start a streak.";
-  return cadence === "weekly"
-    ? `That's ${days} weeks in a row.`
-    : `That's ${days} days in a row.`;
+  if (days < 2) return translate("goalBanner.startStreak");
+  return translate(cadence === "weekly" ? "goalBanner.weeksInRow" : "goalBanner.daysInRow", { count: days });
 };
 
 export const DailyGoalBanner: React.FC<{ userProgress: UserProgress }> = ({ userProgress }) => {
   const streak = useStreak(userProgress);
+  const { t } = useT();
   const goal = Math.max(1, userProgress.dailyGoal);
   // The day this counts for is the day the record last practised on — which,
   // while `solvedToday` is above zero, is today on the learner's own clock.
@@ -74,8 +74,8 @@ export const DailyGoalBanner: React.FC<{ userProgress: UserProgress }> = ({ user
       // later. Both are finite, and both stop for a reduced-motion setting.
       className="koda-celebrate"
       icon={<PartyPopper className="koda-celebrate-icon" />}
-      title={`Goal met — ${streak.solvedToday} of ${goal} today`}
-      dismissLabel="Dismiss goal met message"
+      title={t("goalBanner.title", { done: streak.solvedToday, goal })}
+      dismissLabel={t("goalBanner.dismiss")}
       onDismiss={() => {
         remember(learnerId, day);
         setDismissed(true);

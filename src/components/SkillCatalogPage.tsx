@@ -11,6 +11,7 @@ import { useIsCompact } from "../lib/useBreakpoint";
 import { UIBadge, UIButton, UIPageHeader, UISkillCard } from "./ui";
 import { subjectForSkill, useSubjects } from "../lib/subjects";
 import { refreshSystem } from "../lib/sync/system";
+import { useT } from "../lib/i18n";
 
 export interface SkillCatalogPageProps {
   activeLevelNumber: number;
@@ -36,6 +37,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
   onSelectSkill,
 }) => {
   const { skills, viewer } = useSkillCatalog(completedLevels);
+  const { t } = useT();
   const subjects = useSubjects();
   const { registeredIds, register } = useSkillRegistrations();
   const [query, setQuery] = useState("");
@@ -116,7 +118,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
     try {
       await register(skillId);
     } catch (error) {
-      setRegistrationError(error instanceof Error ? error.message : "Could not add this skill.");
+      setRegistrationError(error instanceof Error ? error.message : t("catalog.error.add"));
       return;
     } finally {
       setRegisteringId(null);
@@ -132,7 +134,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
       await refreshSkillRegistry();
       await refreshSystem();
     } catch (error) {
-      setRefreshError(error instanceof Error ? error.message : "The skill library could not be refreshed.");
+      setRefreshError(error instanceof Error ? error.message : t("catalog.error.refresh"));
     } finally {
       setRefreshing(false);
     }
@@ -146,12 +148,12 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
             <BookOpen className="h-7 w-7" aria-hidden="true" />
           </div>
           <h1 className="mt-4 text-xl sm:text-2xl font-black tracking-tight text-ink">
-            No skills available yet
+            {t("catalog.empty.title")}
           </h1>
           <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted">
             {viewer.showAllSkills
-              ? "Publish a skill with at least one lesson from Skills Manager to make it appear here."
-              : `No published skills currently match age ${viewer.age}. New age-matched skills will appear here automatically.`}
+              ? t("catalog.empty.admin")
+              : t("catalog.empty.age", { age: viewer.age })}
           </p>
 
           <div className="mt-5 flex flex-col items-center gap-2">
@@ -161,10 +163,10 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
               isLoading={refreshing}
               onClick={() => void refresh()}
             >
-              Refresh skill library
+              {t("catalog.refresh")}
             </UIButton>
             {refreshError && <p className={themeSystem.flash("error")}>{refreshError}</p>}
-            {!viewer.showAllSkills && <p className="text-xs text-muted">Ask an adult to check the learner age and published skills.</p>}
+            {!viewer.showAllSkills && <p className="text-xs text-muted">{t("catalog.empty.askAdult")}</p>}
           </div>
         </div>
       </div>
@@ -177,14 +179,14 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
           stays: it is the only thing here explaining why unreleased skills are
           on screen. */}
       <UIPageHeader
-        eyebrow="Skill library"
-        title="Learn"
+        eyebrow={t("catalog.eyebrow")}
+        title={t("nav.game")}
         subtitle={
           viewer.showAllSkills
-            ? `${skills.length} skills · admin catalog includes every age and release state.`
-            : `Skills selected for age ${viewer.age}. Choose one to open its learning path.`
+            ? t("catalog.subtitleAdmin", { count: skills.length })
+            : t("catalog.subtitle", { age: viewer.age })
         }
-        action={viewer.showAllSkills ? <UIBadge variant="primary">Admin · all skills</UIBadge> : undefined}
+        action={viewer.showAllSkills ? <UIBadge variant="primary">{t("catalog.adminBadge")}</UIBadge> : undefined}
       />
 
       <div className="relative">
@@ -195,14 +197,14 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
             setQuery(event.target.value);
             setVisibleLimit(PAGE_SIZE);
           }}
-          placeholder="Search skills or subjects"
-          aria-label="Search skills"
+          placeholder={t("catalog.searchPlaceholder")}
+          aria-label={t("catalog.search")}
           className={themeSystem.field("lg", "w-full rounded-2xl py-3 pl-11 pr-4")}
         />
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Skill subjects">
-        {[{ id: "all", name: "For you" }, ...categories].map(({ id: value, name }) => (
+      <div className="flex gap-2 overflow-x-auto pb-1" aria-label={t("catalog.subjects")}>
+        {[{ id: "all", name: t("catalog.forYou") }, ...categories].map(({ id: value, name }) => (
           <button
             key={value}
             type="button"
@@ -231,7 +233,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
           aria-live="polite"
           className={themeSystem.flash(offline.state === "incomplete" ? "warning" : "info")}
         >
-          {skills.find((skill) => skill.id === offlineSkillId)?.name ?? "This skill"} —{" "}
+          {skills.find((skill) => skill.id === offlineSkillId)?.name ?? t("catalog.thisSkill")} —{" "}
           {offlineMessage(offline)}
         </p>
       )}
@@ -242,7 +244,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
       {showResume && resume && (
         <UISkillCard
           size="lg"
-          eyebrow="Continue learning"
+          eyebrow={t("catalog.continueLearning")}
           title={resume.name}
           tagline={resume.tagline}
           thumbnail={resume.thumbnail}
@@ -252,7 +254,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
           lessonCount={resume.lessonCount}
           completedLessons={resume.completedLessons}
           progressPercent={resume.progressPercent}
-          actionLabel="Open skill"
+          actionLabel={t("catalog.openSkill")}
           onOpen={() => open(resume.id)}
         />
       )}
@@ -261,15 +263,15 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
         <div className="mb-3 flex items-end justify-between gap-3">
           <div>
             <h2 className="font-black text-lg text-ink">
-              {!unfiltered ? "Search results" : shownAbove.size ? "More skills" : "All skills"}
+              {!unfiltered ? t("catalog.searchResults") : shownAbove.size ? t("catalog.moreSkills") : t("learn.allSkills")}
             </h2>
             <p className="text-xs text-muted">
-              {browse.length} {browse.length === 1 ? "skill" : "skills"}
+              {t("catalog.skills", { count: browse.length })}
             </p>
           </div>
           {skills.every((skill) => skill.progressPercent === 100) && (
             <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600">
-              <CheckCircle2 className="w-4 h-4" /> All complete
+              <CheckCircle2 className="w-4 h-4" /> {t("catalog.allComplete")}
             </span>
           )}
         </div>
@@ -301,12 +303,12 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
           /* Everything this learner has is already on screen above. Saying "no
              matching skills" under it would read as the library being empty. */
           <p className="text-sm text-muted">
-            That is every skill available to this learner.
+            {t("catalog.everySkill")}
           </p>
         ) : (
           <div className={`${themeSystem.card("default")} p-8 text-center`}>
-            <p className="font-mono font-black text-ink">No matching skills</p>
-            <p className="mt-1 text-sm text-muted">Try another search or subject.</p>
+            <p className="font-mono font-black text-ink">{t("catalog.noMatch")}</p>
+            <p className="mt-1 text-sm text-muted">{t("catalog.noMatchHint")}</p>
             <UIButton
               className="mt-3"
               variant="secondary"
@@ -317,7 +319,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
                 setVisibleLimit(PAGE_SIZE);
               }}
             >
-              Clear filters
+              {t("studio.clearFilters")}
             </UIButton>
           </div>
         )}
@@ -328,7 +330,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
               variant="secondary"
               onClick={() => setVisibleLimit((current) => current + PAGE_SIZE)}
             >
-              Show more skills
+              {t("catalog.showMore")}
             </UIButton>
           </div>
         )}

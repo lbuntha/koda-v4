@@ -20,6 +20,7 @@ import { playChrome } from "../round/answerSound";
 import { SvgAsset } from "../../../assets/svg";
 import { PreferencesAPI } from "../../../lib/preferences";
 import type { KodaSDK } from "../../types";
+import { useT } from "../../../lib/i18n";
 
 /**
  * This skill's activity log, opened from inside its round.
@@ -139,6 +140,7 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
   extras,
   scored = false,
 }) => {
+  const { t } = useT();
   const percent = Math.min(100, Math.round((questionIndex / Math.max(1, totalQuestions)) * 100));
 
   const [standing, setStanding] = useState<{ streakDays: number; xp: number } | null>(null);
@@ -267,8 +269,8 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
                 type="button"
                 onClick={toggleVoice}
                 className={compactButton}
-                title={voiceEnabled ? "Turn Koda’s voice off" : "Turn Koda’s voice on"}
-                aria-label={voiceEnabled ? "Turn Koda’s voice off" : "Turn Koda’s voice on"}
+                title={voiceEnabled ? t("round.voiceOff") : t("round.voiceOn")}
+                aria-label={voiceEnabled ? t("round.voiceOff") : t("round.voiceOn")}
                 aria-pressed={voiceEnabled}
               >
                 {voiceEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
@@ -291,8 +293,8 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
                    * chrome.
                    */
                   className="min-w-[44px] min-h-[44px] grid place-items-center shrink-0 cursor-pointer rounded-xl transition active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-                  title="Ask Koda about this question"
-                  aria-label="Ask Koda about this question"
+                  title={t("round.askKoda")}
+                  aria-label={t("round.askKoda")}
                 >
                   <KodaFace size={34} />
                 </button>
@@ -300,8 +302,8 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
               <button
                 onClick={onExit}
                 className="p-2 min-w-[44px] min-h-[44px] rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 cursor-pointer"
-                title="Leave this round"
-                aria-label="Leave this round"
+                title={t("round.leave")}
+                aria-label={t("round.leave")}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -328,7 +330,7 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
               aria-valuenow={percent}
               aria-valuemin={0}
               aria-valuemax={100}
-              aria-label={`Question ${questionIndex} of ${totalQuestions}`}
+              aria-label={t("lessonCard.questionOf", { answered: questionIndex, total: totalQuestions })}
             >
               <div
                 className="h-full bg-gradient-to-r from-amber-400 via-orange-400 to-orange-500 rounded-full transition-[width] duration-500 ease-out"
@@ -351,7 +353,7 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
             <div className="hidden lg:flex items-center gap-1.5">
               <span
                 className="flex items-center gap-1.5 rounded-xl bg-orange-500/10 px-2.5 py-1.5 text-orange-700 dark:text-orange-300"
-                aria-label={`${standing?.streakDays ?? 0} day streak`}
+                aria-label={t("streak.daysChip", { count: standing?.streakDays ?? 0 })}
               >
                 <SvgAsset
                   id="streak"
@@ -362,7 +364,7 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
               </span>
               <span
                 className="flex items-center gap-1.5 rounded-xl bg-indigo-500/10 px-2.5 py-1.5 text-indigo-700 dark:text-indigo-300"
-                aria-label={`${standing?.xp ?? 0} experience points`}
+                aria-label={t("round.xpPoints", { count: standing?.xp ?? 0 })}
               >
                 <SvgAsset id="points" size={20} fallback={<Zap className="w-4 h-4" />} />
                 <span className="text-sm font-black tabular-nums">
@@ -380,8 +382,8 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
                 /* Amber-on-white was the loudest thing on a screen whose subject is the
    question. Help should be findable, not the focal point. */
                 className="flex items-center gap-2 pl-1.5 pr-3 py-1.5 min-h-[40px] rounded-xl bg-surface-muted hover:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 font-bold text-sm transition active:scale-95 shrink-0 cursor-pointer"
-                title="Ask Koda about this question"
-                aria-label="Ask Koda about this question"
+                title={t("round.askKoda")}
+                aria-label={t("round.askKoda")}
               >
                 {/* The same character the floating buddy is, and the same one a
                     tablet sees — one Koda across every width, which is what
@@ -398,8 +400,8 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
               type="button"
               onClick={toggleVoice}
               className={iconButton}
-              title={voiceEnabled ? "Turn Koda’s voice off" : "Turn Koda’s voice on"}
-              aria-label={voiceEnabled ? "Turn Koda’s voice off" : "Turn Koda’s voice on"}
+              title={voiceEnabled ? t("round.voiceOff") : t("round.voiceOn")}
+              aria-label={voiceEnabled ? t("round.voiceOff") : t("round.voiceOn")}
               aria-pressed={voiceEnabled}
             >
               {voiceEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
@@ -425,21 +427,21 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
                     toggle();
                   }}
                   className={iconButton}
-                  title="More"
-                  aria-label="More options"
+                  title={t("round.more")}
+                  aria-label={t("round.moreOptions")}
                 >
                   <MoreHorizontal className="w-4 h-4" />
                 </button>
               )}
             >
               <UIMenuItem icon={<ScrollText />} onSelect={() => setShowSettings(true)}>
-                Activity log
+                {t("round.activityLog")}
               </UIMenuItem>
               <UIMenuItem
                 icon={isFullscreen ? <Minimize2 /> : <Maximize2 />}
                 onSelect={toggleFullscreen}
               >
-                {isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+                {isFullscreen ? t("round.exitFullscreen") : t("round.fullscreen")}
               </UIMenuItem>
             </UIMenu>
 
@@ -449,8 +451,8 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
                  system already has a tone for that — a bespoke rose block was a
                  second opinion about the same thing. */
               className={themeSystem.button("ghost", "icon", "text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 min-w-[40px] min-h-[40px]")}
-              title="Leave this round"
-              aria-label="Leave this round"
+              title={t("round.leave")}
+              aria-label={t("round.leave")}
             >
               <X className="w-4 h-4" />
             </button>
@@ -463,12 +465,12 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
           <div className="bg-surface border-2 border-line rounded-3xl max-w-4xl w-full p-4 sm:p-6 max-h-[92vh] overflow-y-auto custom-scrollbar shadow-2xl">
             <div className="flex items-center justify-between pb-3 mb-4 border-b border-line">
               <h3 className="text-sm sm:text-base font-black text-ink font-mono">
-                Activity log
+                {t("round.activityLog")}
               </h3>
               <button
                 onClick={() => setShowSettings(false)}
                 className={iconButton}
-                aria-label="Close settings"
+                aria-label={t("common.close")}
               >
                 <X className="w-5 h-5" />
               </button>

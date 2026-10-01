@@ -23,6 +23,7 @@ import {
 } from "./BadgeVisuals";
 import { NoAccess } from "./NoAccess";
 
+import { translate } from "../../lib/i18n";
 const field =
   themeSystem.field("lg", "w-full");
 
@@ -82,9 +83,9 @@ export const BadgesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false 
   if (!can("system:write")) {
     return (
       <NoAccess
-        title="Badges"
+        title={translate("admin.badgesPage.badges")}
         permission="system:write"
-        what="What a badge is, and what it takes to earn one, is set once for every family on this Koda."
+        what={translate("admin.badgesPage.whatABadgeIsAndWhat")}
       />
     );
   }
@@ -119,18 +120,17 @@ export const BadgesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false 
     >
       {!embedded && (
         <div>
-          <h2 className={themeSystem.typography("h2")}>Badges</h2>
+          <h2 className={themeSystem.typography("h2")}>{translate("admin.badgesPage.badges")}</h2>
           <p className={themeSystem.typography("body-sm", "mt-1")}>
-            What a learner has to reach to earn one. Shared by every child in the family, and
-            re-checked against what each of them has already done.
+            {translate("admin.badgesPage.whatALearnerHasToReach")}
           </p>
         </div>
       )}
 
       <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
         <UISectionHeader
-          title="Achievements"
-          subtitle="Earned on lifetime XP, longest streak or stars — whichever the badge names"
+          title={translate("admin.badgesPage.achievements")}
+          subtitle={translate("admin.badgesPage.earnedOnLifetimeXpLongestStreak")}
           icon={<Award className="h-5 w-5 text-amber-500" />}
           action={
             BadgeAPI.isEdited() ? (
@@ -143,7 +143,7 @@ export const BadgesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false 
                 className={themeSystem.button("secondary", "sm")}
               >
                 <RotateCcw />
-                Reset
+                {translate("admin.badgesPage.reset")}
               </button>
             ) : undefined
           }
@@ -152,9 +152,9 @@ export const BadgesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false 
         {rules.length === 0 ? (
           <div className="rounded-2xl border-2 border-dashed border-line bg-surface-muted p-6 text-center">
             <Award className="mx-auto h-8 w-8 text-amber-400" />
-            <h4 className="mt-2 text-sm font-bold text-ink">No badges yet</h4>
+            <h4 className="mt-2 text-sm font-bold text-ink">{translate("admin.badgesPage.noBadgesYet")}</h4>
             <p className="mx-auto mt-1 max-w-sm text-xs text-muted">
-              Add one and every learner who has already passed it earns it straight away.
+              {translate("admin.badgesPage.addOneAndEveryLearnerWho")}
             </p>
           </div>
         ) : (
@@ -176,7 +176,7 @@ export const BadgesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false 
                   <div className="min-w-0">
                     <h4 className="truncate font-mono text-sm font-bold text-ink">{rule.label}</h4>
                     <p className="truncate text-xs text-muted">
-                      {rule.description || "No description"}
+                      {rule.description || translate("admin.badgesPage.noDescription")}
                     </p>
                   </div>
                 </div>
@@ -192,14 +192,14 @@ export const BadgesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false 
                       setDraft({ ...rule });
                       setEditingId(rule.id);
                     }}
-                    aria-label={`Edit ${rule.label}`}
+                    aria-label={translate("admin.badgesPage.editLabel", { label: rule.label })}
                     className={themeSystem.button("secondary", "sm")}
                   >
                     <Pencil />
                   </button>
                   <button
                     onClick={() => remove(rule)}
-                    aria-label={`Remove ${rule.label}`}
+                    aria-label={translate("admin.badgesPage.removeLabel", { label: rule.label })}
                     className={themeSystem.button("danger", "sm")}
                   >
                     <Trash2 />
@@ -221,10 +221,10 @@ export const BadgesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false 
               setEditingId(null);
             }}
           >
-            Add badge
+            {translate("admin.badgesPage.addBadge")}
           </UIButton>
           <p className="text-xs text-muted">
-            Raising a badge's number takes it back off a learner who no longer meets it.
+            {translate("admin.badgesPage.raisingABadgeSNumberTakes")}
           </p>
         </div>
       </section>
@@ -235,7 +235,7 @@ export const BadgesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false 
           setDraft(null);
           setEditingId(null);
         }}
-        title={editingId ? "Edit badge" : "Add badge"}
+        title={editingId ? translate("admin.badgesPage.editBadge") : translate("admin.badgesPage.addBadge")}
         footer={
           <>
             <UIButton
@@ -245,10 +245,10 @@ export const BadgesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false 
                 setEditingId(null);
               }}
             >
-              Cancel
+              {translate("admin.badgesPage.cancel")}
             </UIButton>
             <UIButton variant="primary" disabled={!draft?.label.trim()} onClick={save}>
-              {editingId ? "Save badge" : "Add badge"}
+              {editingId ? translate("admin.badgesPage.saveBadge") : translate("admin.badgesPage.addBadge")}
             </UIButton>
           </>
         }
@@ -256,33 +256,33 @@ export const BadgesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false 
         {draft && (
           <div className="space-y-4">
             <label className="block space-y-1.5">
-              <span className="koda-admin-label text-ink">Name</span>
+              <span className="koda-admin-label text-ink">{translate("admin.badgesPage.name")}</span>
               <input
                 className={field}
                 autoFocus
                 maxLength={40}
                 value={draft.label}
                 onChange={(event) => setDraft({ ...draft, label: event.target.value })}
-                placeholder="Week Warrior"
+                placeholder={translate("admin.badgesPage.weekWarrior")}
               />
             </label>
 
             <label className="block space-y-1.5">
               <span className="koda-admin-label text-ink">
-                Description <span className="font-normal text-muted">(what the learner reads)</span>
+                {translate("admin.badgesPage.description")}{" "}<span className="font-normal text-muted">{translate("admin.badgesPage.whatTheLearnerReads")}</span>
               </span>
               <input
                 className={field}
                 maxLength={120}
                 value={draft.description}
                 onChange={(event) => setDraft({ ...draft, description: event.target.value })}
-                placeholder="Practised seven days in a row."
+                placeholder={translate("admin.badgesPage.practisedSevenDaysInARow")}
               />
             </label>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block space-y-1.5">
-                <span className="koda-admin-label text-ink">Earned on</span>
+                <span className="koda-admin-label text-ink">{translate("admin.badgesPage.earnedOn")}</span>
                 <select
                   className={field}
                   value={draft.metric}
@@ -300,7 +300,7 @@ export const BadgesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false 
 
               <label className="block space-y-1.5">
                 <span className="koda-admin-label text-ink">
-                  Reaching{" "}
+                  {translate("admin.badgesPage.reaching")}{" "}
                   <span className="font-normal text-muted">
                     ({BADGE_METRICS.find((m) => m.id === draft.metric)?.unit})
                   </span>
@@ -322,7 +322,7 @@ export const BadgesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false 
             </p>
 
             <div className="space-y-1.5">
-              <span className="koda-admin-label text-ink">Picture</span>
+              <span className="koda-admin-label text-ink">{translate("admin.badgesPage.picture")}</span>
               <div className="flex flex-wrap gap-2">
                 {BADGE_ICONS.map((icon) => (
                   <IconChoice
@@ -341,12 +341,11 @@ export const BadgesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false 
                 * these are the ones a family drew for their own children, and
                 * they are drawn at the size they will actually appear.
                 */}
-              <p className="pt-2 text-xs font-bold text-muted">Your badge artwork</p>
+              <p className="pt-2 text-xs font-bold text-muted">{translate("admin.badgesPage.yourBadgeArtwork")}</p>
               {art.length === 0 ? (
                 <p className="text-xs text-muted">
-                  Nothing here yet. Add SVGs to a{" "}
-                  <span className="font-mono text-ink">{BADGE_ART_CATEGORY}</span> collection on the
-                  Art page and they will show up in this list.
+                  {translate("admin.badgesPage.nothingHereYetAddSvgsTo")}{" "}
+                  <span className="font-mono text-ink">{BADGE_ART_CATEGORY}</span>{" "}{translate("admin.badgesPage.collectionOnTheArtPageAnd")}
                 </p>
               ) : (
                 <div className="flex flex-wrap gap-2">

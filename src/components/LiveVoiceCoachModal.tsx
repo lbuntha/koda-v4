@@ -33,6 +33,7 @@ import { KODA_BRAND } from "./KodaFace";
 import { liveCaption, mascotStateFor } from "../lib/kodaLive";
 import { KodaConversation } from "../lib/koda/conversationLog";
 
+import { translate } from "../lib/i18n";
 interface LiveVoiceCoachModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -550,7 +551,7 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                     {character.name}
                   </h2>
                   <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-violet-500/15 text-violet-700 dark:text-violet-300 border border-violet-500/30 shrink-0">
-                    Live
+                    {translate("app.liveVoiceCoachModal.live")}
                   </span>
                 </div>
               </div>
@@ -561,21 +562,21 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                   disabled={isLiveActive}
                   onChange={(e) => setSelectedVoice(e.target.value as any)}
                   className="bg-surface-muted/90 border border-line text-ink text-[11px] font-medium rounded-lg px-2 py-1 focus:outline-none focus:border-violet-500 cursor-pointer max-w-[130px] truncate"
-                  title="Select Koda Voice"
+                  title={translate("app.liveVoiceCoachModal.selectKodaVoice")}
                 >
-                  <option value="Aoede">Aoede (Warm)</option>
-                  <option value="Puck">Puck (Fun)</option>
-                  <option value="Kore">Kore (Calm)</option>
-                  <option value="Fenrir">Fenrir (Deep)</option>
-                  <option value="Zephyr">Zephyr (Tutor)</option>
+                  <option value="Aoede">{translate("app.liveVoiceCoachModal.aoedeWarm")}</option>
+                  <option value="Puck">{translate("app.liveVoiceCoachModal.puckFun")}</option>
+                  <option value="Kore">{translate("app.liveVoiceCoachModal.koreCalm")}</option>
+                  <option value="Fenrir">{translate("app.liveVoiceCoachModal.fenrirDeep")}</option>
+                  <option value="Zephyr">{translate("app.liveVoiceCoachModal.zephyrTutor")}</option>
                 </select>
 
                 {onSwitchToText && (
                   <button
                     onClick={onSwitchToText}
                     className="p-1.5 rounded-xl bg-surface-muted/80 hover:bg-surface-muted text-muted hover:text-ink transition cursor-pointer"
-                    title="Type to Koda instead"
-                    aria-label="Type to Koda instead"
+                    title={translate("app.liveVoiceCoachModal.typeToKodaInstead")}
+                    aria-label={translate("app.liveVoiceCoachModal.typeToKodaInstead")}
                   >
                     <Keyboard className="w-3.5 h-3.5" />
                   </button>
@@ -583,14 +584,14 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                 <button
                   onClick={() => setIsExpanded(false)}
                   className="p-1.5 rounded-xl bg-surface-muted/80 hover:bg-surface-muted text-muted hover:text-ink transition cursor-pointer"
-                  title="Floating Pop-up Mode"
+                  title={translate("app.liveVoiceCoachModal.floatingPopUpMode")}
                 >
                   <Minimize2 className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={onClose}
                   className="p-1.5 rounded-xl bg-surface-muted/80 hover:bg-surface-muted text-muted hover:text-ink transition cursor-pointer"
-                  title="Close Voice Coach"
+                  title={translate("app.liveVoiceCoachModal.closeVoiceCoach")}
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -607,7 +608,7 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-violet-500">
-                      Question {currentQuestionIndex ? `${currentQuestionIndex}/${totalQuestions}` : ""}
+                      {translate("app.liveVoiceCoachModal.questionValue", { value: currentQuestionIndex ? `${currentQuestionIndex}/${totalQuestions}` : "" })}
                     </span>
                   </div>
                   <p className="text-xs sm:text-sm font-bold text-ink mt-0.5 leading-snug">
@@ -619,7 +620,7 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                     onClick={() => handleQuickPrompt(`Hi ${character.name}! Can you give me a hint to help me solve this question: "${currentQuestionText}"?`)}
                     className="px-2 py-1 rounded-xl bg-violet-400/20 hover:bg-violet-400/30 border border-violet-500/40 text-[10px] font-mono font-bold text-violet-500 hover:text-violet-700 transition cursor-pointer"
                   >
-                    Ask Hint
+                    {translate("app.liveVoiceCoachModal.askHint")}
                   </button>
                   {onNextQuestion && (
                     <button
@@ -628,9 +629,9 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                         handleQuickPrompt(`Let's move to the next question!`);
                       }}
                       className="px-2 py-1 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-[10px] font-mono font-bold text-cyan-600 hover:text-cyan-800 transition cursor-pointer flex items-center gap-1"
-                      title="Move to the next question"
+                      title={translate("app.liveVoiceCoachModal.moveToTheNextQuestion")}
                     >
-                      <span>Next Question</span>
+                      <span>{translate("app.liveVoiceCoachModal.nextQuestion")}</span>
                       <ArrowRight className="h-3 w-3" aria-hidden="true" />
                     </button>
                   )}
@@ -664,7 +665,7 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                   <button
                     type="button"
                     onClick={handleToggleLiveSession}
-                    aria-label={isLiveActive ? "End the voice session" : "Start the voice session"}
+                    aria-label={isLiveActive ? translate("app.liveVoiceCoachModal.endTheVoiceSession") : translate("app.liveVoiceCoachModal.startTheVoiceSession")}
                     className="relative z-10 cursor-pointer rounded-2xl transition-transform active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
                     style={{ transform: `scale(${orbScale})`, transition: "transform 0.08s ease-out" }}
                   >
@@ -706,10 +707,10 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                     <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-surface-muted/90 border border-line/80 shadow-sm">
                       <span className="text-[11px] font-bold text-ink">
                         {sessionStatus === "error"
-                          ? "Connection Error"
+                          ? translate("app.liveVoiceCoachModal.connectionError")
                           : sessionStatus === "disconnected"
-                            ? `Tap ${character.name} to start`
-                            : "Microphone off"}
+                            ? translate("app.liveVoiceCoachModal.tapNameToStart", { name: character.name })
+                            : translate("app.liveVoiceCoachModal.microphoneOff")}
                       </span>
                     </div>
                   )}
@@ -733,12 +734,12 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                     {isLiveActive ? (
                       <>
                         <Radio className="w-3.5 h-3.5" />
-                        <span>End Voice</span>
+                        <span>{translate("app.liveVoiceCoachModal.endVoice")}</span>
                       </>
                     ) : (
                       <>
                         <Radio className="w-3.5 h-3.5" />
-                        <span>Start Live Voice</span>
+                        <span>{translate("app.liveVoiceCoachModal.startLiveVoice")}</span>
                       </>
                     )}
                   </button>
@@ -756,7 +757,7 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                           ? "bg-rose-950/60 border-rose-500/50 text-rose-300"
                           : "bg-surface-muted/80 border-line text-muted hover:text-ink"
                       }`}
-                      title={isMuted ? "Unmute Microphone" : "Mute Microphone"}
+                      title={isMuted ? translate("app.liveVoiceCoachModal.unmuteMicrophone") : translate("app.liveVoiceCoachModal.muteMicrophone")}
                     >
                       {isMuted ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
                     </button>
@@ -772,21 +773,21 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                     className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-muted/80 hover:bg-surface-muted border border-line text-[11px] font-medium text-muted hover:text-violet-500 hover:border-violet-400 transition whitespace-nowrap cursor-pointer shrink-0"
                   >
                     <Lightbulb className="h-3.5 w-3.5" aria-hidden="true" />
-                    Hint Q{currentQuestionIndex}
+                    {translate("app.liveVoiceCoachModal.hintQ")}{currentQuestionIndex}
                   </button>
                   <button
                     onClick={() => handleQuickPrompt(`How do I use the visual tools on screen?`)}
                     className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-muted/80 hover:bg-surface-muted border border-line text-[11px] font-medium text-muted hover:text-violet-500 hover:border-violet-400 transition whitespace-nowrap cursor-pointer shrink-0"
                   >
                     <Wrench className="h-3.5 w-3.5" aria-hidden="true" />
-                    Visual Tools
+                    {translate("app.liveVoiceCoachModal.visualTools")}
                   </button>
                   <button
                     onClick={() => handleQuickPrompt(`Can you explain the main math concept here?`)}
                     className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-muted/80 hover:bg-surface-muted border border-line text-[11px] font-medium text-muted hover:text-violet-500 hover:border-violet-400 transition whitespace-nowrap cursor-pointer shrink-0"
                   >
                     <Brain className="h-3.5 w-3.5" aria-hidden="true" />
-                    Concept
+                    {translate("app.liveVoiceCoachModal.concept")}
                   </button>
                 </div>
               </div>
@@ -796,7 +797,7 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                 {transcript.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-center py-4 text-muted">
                     <MessageSquare className="w-6 h-6 mb-1 opacity-40 text-violet-500" />
-                    <p className="text-[11px] font-medium text-muted">Live Voice Transcripts</p>
+                    <p className="text-[11px] font-medium text-muted">{translate("app.liveVoiceCoachModal.liveVoiceTranscripts")}</p>
                   </div>
                 ) : (
                   transcript.map((msg) => (
@@ -808,7 +809,7 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                     >
                       <div className="flex items-center gap-1 mb-0.5 px-1">
                         <span className="text-[9px] font-bold text-muted">
-                          {msg.sender === "user" ? studentName : "Koda"}
+                          {msg.sender === "user" ? studentName : translate("app.liveVoiceCoachModal.koda")}
                         </span>
                         <span className="text-[8px] text-muted">{msg.time}</span>
                       </div>
@@ -837,7 +838,7 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                 type="text"
                 value={textInput}
                 onChange={(e) => setTextInput(e.target.value)}
-                placeholder="Type or speak a question to Koda..."
+                placeholder={translate("app.liveVoiceCoachModal.typeOrSpeakAQuestionTo")}
                 className="flex-1 bg-surface border border-line focus:border-violet-500 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-ink placeholder:text-muted focus:outline-none"
               />
               <button
@@ -845,7 +846,7 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                 disabled={!textInput.trim()}
                 className="px-4 py-2 bg-violet-500 hover:bg-violet-400 disabled:opacity-40 text-white font-bold rounded-xl text-xs sm:text-sm transition cursor-pointer"
               >
-                Send
+                {translate("app.liveVoiceCoachModal.send")}
               </button>
             </form>
           </div>
@@ -874,7 +875,7 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
               onMouseDown={handleDragStart}
               onTouchStart={handleDragStart}
               className="relative group flex items-center justify-center w-28 h-28 cursor-grab active:cursor-grabbing select-none"
-              title="Click and drag to move Koda anywhere!"
+              title={translate("app.liveVoiceCoachModal.clickAndDragToMoveKoda")}
             >
               {/*
                 * The character, with nothing drawn around it.
@@ -893,7 +894,7 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                 }}
                 className="relative z-10 flex flex-col items-center justify-center w-20 h-20 rounded-full transition-transform duration-300"
                 onClick={handleToggleLiveSession}
-                title={isLiveActive ? "Voice is ACTIVE! Click to pause/disconnect." : "Voice is offline. Click to connect!"}
+                title={isLiveActive ? translate("app.liveVoiceCoachModal.voiceIsActiveClickToPause") : translate("app.liveVoiceCoachModal.voiceIsOfflineClickToConnect")}
               >
                 {/*
                   * The character, not a drawing of one.
@@ -936,7 +937,7 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                 className={`p-1.5 rounded-full transition transform active:scale-90 cursor-pointer ${
                   isLiveActive ? "text-cyan-400 hover:text-cyan-300" : "text-muted hover:text-violet-500"
                 }`}
-                title={isLiveActive ? "Disconnect Session" : "Connect Session"}
+                title={isLiveActive ? translate("app.liveVoiceCoachModal.disconnectSession") : translate("app.liveVoiceCoachModal.connectSession")}
               >
                 <Radio className="w-3.5 h-3.5" />
               </button>
@@ -952,7 +953,7 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                   className={`p-1.5 rounded-full transition transform active:scale-90 cursor-pointer ${
                     isMuted ? "text-rose-400 hover:text-rose-300" : "text-muted hover:text-ink"
                   }`}
-                  title={isMuted ? "Unmute Mic" : "Mute Mic"}
+                  title={isMuted ? translate("app.liveVoiceCoachModal.unmuteMic") : translate("app.liveVoiceCoachModal.muteMic")}
                 >
                   {isMuted ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
                 </button>
@@ -962,8 +963,8 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
                 <button
                   onClick={onSwitchToText}
                   className="p-1.5 text-muted hover:text-ink rounded-full transition transform active:scale-90 cursor-pointer"
-                  title="Type to Koda instead"
-                  aria-label="Type to Koda instead"
+                  title={translate("app.liveVoiceCoachModal.typeToKodaInstead")}
+                  aria-label={translate("app.liveVoiceCoachModal.typeToKodaInstead")}
                 >
                   <Keyboard className="w-3.5 h-3.5" />
                 </button>
@@ -973,7 +974,7 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
               <button
                 onClick={onClose}
                 className="p-1.5 text-rose-400 hover:text-rose-300 rounded-full transition transform active:scale-90 cursor-pointer"
-                title="Close Koda Coach"
+                title={translate("app.liveVoiceCoachModal.closeKodaCoach")}
               >
                 <X className="w-3.5 h-3.5" />
               </button>

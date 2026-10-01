@@ -4,6 +4,7 @@ import { themeSystem } from "../../lib/themeSystem";
 import { SidebarIcon } from "./sidebarIcon";
 import { UIAvatar } from "./UIAvatar";
 import type { NavProfileConfig, NavSectionConfig } from "./navConfig";
+import { useT } from "../../lib/i18n";
 
 /**
  * The sidebar rail — Koda's navigation from `rail:` (720px) up.
@@ -66,6 +67,7 @@ export const UISidebar: React.FC<UISidebarProps> = ({
   className = "",
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
+  const { t } = useT();
 
   const s = themeSystem.sidebar;
 
@@ -106,8 +108,8 @@ export const UISidebar: React.FC<UISidebarProps> = ({
                   setIsCollapsed(true);
                 }}
                 className={s.iconButton}
-                title="Collapse sidebar"
-                aria-label="Collapse sidebar"
+                title={t("sidebar.collapse")}
+                aria-label={t("sidebar.collapse")}
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
@@ -124,8 +126,8 @@ export const UISidebar: React.FC<UISidebarProps> = ({
                 setIsCollapsed(false);
               }}
               className={`${s.iconButton} mx-auto mt-3`}
-              title="Expand sidebar"
-              aria-label="Expand sidebar"
+              title={t("sidebar.expand")}
+              aria-label={t("sidebar.expand")}
             >
               <ChevronRight className="w-4 h-4" />
             </button>

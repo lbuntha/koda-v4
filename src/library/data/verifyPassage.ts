@@ -84,7 +84,22 @@ const STOP = new Set(
 const words = (s: string) => s.toLowerCase().split(/[^\p{L}\p{M}]+/u).filter(Boolean);
 /** First four letters of each meaningful word, so "raining" matches "rained". */
 const stemsOf = (s: string) => words(s).filter((w) => !STOP.has(w) && [...w].length >= 3).map((w) => [...w].slice(0, 4).join(""));
-const length = (s: string) => [...s].length;
+/**
+ * How long a choice looks. Khmer stacks its vowels, signs and subscript
+ * consonants on one letter, so ប៊ូប៊ូ is two letters wide, not six code points.
+ */
+export const choiceLength = (s: string) => [...s.trim().normalize("NFC").replace(/\u17D2./gu, "").replace(/\p{M}/gu, "")].length;
+/** Rule 3: the right choice is longer than every other — a child can pick it by its size. */
+export const answerStandsOut = (options: readonly string[], answer: number) => {
+  const lens = options.map(choiceLength);
+  const top = Math.max(...lens);
+  return lens[answer] === top && lens.filter((l) => l === top).length === 1;
+};
+/** A picture named for the word — "cat", or "banana" for "bananas". */
+export const namesItself = (word: string, picture: string) => {
+  const w = word.toLowerCase();
+  return picture === w || (w.endsWith("es") && picture === w.slice(0, -2)) || (w.endsWith("s") && picture === w.slice(0, -1));
+};
 
 /** The Khmer block. Khmer writes without spaces, so `words` cannot find its words. */
 const hasKhmer = (s: string) => /[ក-៿]/u.test(s);
@@ -157,6 +172,8 @@ export function verifyPassage(p: Passage, opts: VerifyOptions = {}): Verdict {
   const storyStems = new Set(stemsOf(storyText));
   /** The story's own splits, for the scripts a word regex cannot read. */
   const storySplit = splitWords(p.sentences);
+  const storyTokens = new Set(p.sentences.flatMap((s) => s.words.map((t) => core(t).toLowerCase())));
+  const confirmed = p.confirmedPictures ?? {};
   const usable = (q: Question) => q.kind === "spell" || (q.answer >= 0 && q.answer < q.options.length);
 
   /* ---- rules 1, 2, 3, 4, 5 -------------------------------------------- */
@@ -176,18 +193,23 @@ export function verifyPassage(p: Passage, opts: VerifyOptions = {}): Verdict {
         `${fromStory} of ${wrong.length} wrong choices use the story's words` +
           (fromStory === 0 ? " — a child can rule them out without reading" : fromStory < wrong.length ? " — a person confirms the rest" : ""));
 
-      const lens = q.options.map(length);
-      const top = Math.max(...lens);
-      const longest = lens[q.answer] === top && lens.filter((l) => l === top).length === 1;
+      const longest = answerStandsOut(q.options, q.answer);
       add(3, q.id, !longest, longest ? "the right answer is the longest — pickable without reading" : "the right answer is not the longest");
     }
 
     if (q.kind === "vocab") {
       const expected = p.pictures[q.word.toLowerCase()] ?? p.pictures[q.word];
-      const inStory = storyText.includes(q.word.toLowerCase());
+      // A whole word, or its plural — "cat" is not in "catch". Khmer has no
+      // spaces to find a whole word by, so there the text is searched.
+      const w = q.word.toLowerCase();
+      const inStory = hasKhmer(w) ? storyText.includes(w) : [w, `${w}s`, `${w}es`].some((x) => storyTokens.has(x));
       if (!expected) add(1, q.id, false, `no picture is declared for “${q.word}”`);
       else if (!inStory) add(1, q.id, false, `“${q.word}” is not in the story`);
       else if (q.options[q.answer] !== expected) add(1, q.id, false, `the right picture should be “${expected}”`);
+      // A declared picture only says the question agrees with itself; whether
+      // the drawing shows the word takes its name, or a person looking at it.
+      else if (!namesItself(q.word, expected) && (confirmed[q.word] ?? confirmed[q.word.toLowerCase()]) !== expected)
+        add(1, q.id, false, `confirm the picture “${expected}” shows “${q.word}”`);
       else add(1, q.id, true, "the word is in the story and its picture matches");
     }
 

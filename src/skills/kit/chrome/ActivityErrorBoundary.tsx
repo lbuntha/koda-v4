@@ -2,6 +2,7 @@ import React from "react";
 import { RotateCcw, X } from "lucide-react";
 
 import { themeSystem } from "../../../lib/themeSystem";
+import { translate } from "../../../lib/i18n";
 
 /**
  * Catches a throw inside an activity so it costs the round, not the app.
@@ -69,22 +70,20 @@ export class ActivityErrorBoundary extends React.Component<Props, State> {
                 nothing is broken about them; the tone is "oops", not "alert". */}
             🧩
           </div>
-          <h2 className="text-xl font-extrabold text-ink">That didn't work</h2>
-          <p className="mt-1.5 text-sm leading-relaxed text-muted">
-            Something went wrong with this lesson. Your progress is safe.
-          </p>
+          <h2 className="text-xl font-extrabold text-ink">{translate("round.crash.title")}</h2>
+          <p className="mt-1.5 text-sm leading-relaxed text-muted">{translate("round.crash.body")}</p>
 
           <div className="mt-5 flex flex-col gap-2">
             <button onClick={this.retry} className={themeSystem.button("primary", "lg", "w-full")}>
               <RotateCcw />
-              Try again
+              {translate("studio.tryAgain")}
             </button>
             <button
               onClick={this.props.onExit}
               className={themeSystem.button("secondary", "lg", "w-full")}
             >
               <X />
-              Back to lessons
+              {translate("round.backToLessons")}
             </button>
           </div>
         </div>

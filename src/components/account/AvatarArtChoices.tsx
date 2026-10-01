@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { RefreshCw } from "lucide-react";
+import { useT } from "../../lib/i18n";
 
 import { useArtCategory } from "../../assets/svg";
 import { artAvatarId, artAvatarSeed, newAvatarSeed } from "../../lib/avatar";
@@ -34,7 +35,9 @@ interface ChoiceGridProps {
   label: string;
 }
 
-const ChoiceGrid: React.FC<ChoiceGridProps> = ({ choices, selectedSeed, onSelect, label }) => (
+const ChoiceGrid: React.FC<ChoiceGridProps> = ({ choices, selectedSeed, onSelect, label }) => {
+  const { t } = useT();
+  return (
   <div className="grid grid-cols-3 gap-3 sm:grid-cols-4" role="radiogroup" aria-label={label}>
     {choices.map((choice) => {
       const selected = selectedSeed === choice.seed;
@@ -44,7 +47,7 @@ const ChoiceGrid: React.FC<ChoiceGridProps> = ({ choices, selectedSeed, onSelect
           type="button"
           role="radio"
           aria-checked={selected}
-          aria-label={`Choose ${choice.label}`}
+          aria-label={t("avatar.choose", { name: choice.label })}
           onClick={() => onSelect(choice.seed)}
           className={`min-w-0 rounded-2xl border-2 p-2 transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-300/50 ${selected ? "border-[#534AB7] bg-[#F2EFFF] dark:border-indigo-400 dark:bg-indigo-950/40" : "border-[#E8E4F6] bg-white hover:border-[#B8AFE8] dark:border-slate-700 dark:bg-slate-900 dark:hover:border-indigo-600"}`}
         >
@@ -58,7 +61,8 @@ const ChoiceGrid: React.FC<ChoiceGridProps> = ({ choices, selectedSeed, onSelect
       );
     })}
   </div>
-);
+  );
+};
 
 /** Art and classic DiceBear avatar choices shared by Profile and the account menu. */
 export const AvatarArtChoices: React.FC<AvatarArtChoicesProps> = ({
@@ -67,6 +71,7 @@ export const AvatarArtChoices: React.FC<AvatarArtChoicesProps> = ({
   onSelect,
 }) => {
   const artIds = useArtCategory("avatars");
+  const { t } = useT();
   const artChoices = useMemo(
     () => artIds.map((id) => ({ seed: artAvatarSeed(id), label: labelOf(id) })),
     [artIds],
@@ -79,7 +84,7 @@ export const AvatarArtChoices: React.FC<AvatarArtChoicesProps> = ({
 
   const classicChoices = diceSeeds.map((seed, index) => ({
     seed,
-    label: seed === currentSeed ? "Current avatar" : `Classic ${index + 1}`,
+    label: seed === currentSeed ? t("avatar.current") : t("avatar.classicN", { number: index + 1 }),
   }));
 
   return (
@@ -91,28 +96,28 @@ export const AvatarArtChoices: React.FC<AvatarArtChoicesProps> = ({
             choices={artChoices}
             selectedSeed={selectedSeed}
             onSelect={onSelect}
-            label="Koda Art avatars"
+            label={t("avatar.kodaArtGroup")}
           />
         </section>
       )}
 
       <section className="space-y-2.5" aria-labelledby="classic-avatars">
         <div className="flex items-center justify-between gap-3">
-          <h3 id="classic-avatars" className="koda-admin-label text-ink">Classic avatars</h3>
+          <h3 id="classic-avatars" className="koda-admin-label text-ink">{t("avatar.classicGroup")}</h3>
           <UIButton
             variant="secondary"
             size="sm"
             icon={<RefreshCw />}
             onClick={() => setDiceSeeds(diceBearChoices())}
           >
-            New choices
+            {t("avatar.newChoices")}
           </UIButton>
         </div>
         <ChoiceGrid
           choices={classicChoices}
           selectedSeed={selectedSeed}
           onSelect={onSelect}
-          label="Classic avatars"
+          label={t("avatar.classicGroup")}
         />
       </section>
     </div>

@@ -10,6 +10,7 @@ import {
   type ChildOverview,
   type StoredOverview,
 } from "../../lib/childrenOverview";
+import { translate, useT } from "../../lib/i18n";
 
 /**
  * "Your children" — the first thing a parent sees on Home.
@@ -31,19 +32,23 @@ import {
 /** What a child's row says under their name. */
 export const dayOf = (child: ChildOverview): string => {
   if (child.today.rounds > 0) {
-    return child.today.minutes < 1 ? "Practised today" : `${child.today.minutes} min today`;
+    return child.today.minutes < 1
+      ? translate("overview.practisedToday")
+      : translate("overview.minToday", { count: child.today.minutes });
   }
-  if (child.daysAway === null) return "Hasn't started yet";
-  if (child.daysAway <= 1) return "Last practised yesterday";
-  return `Last practised ${child.daysAway} days ago`;
+  if (child.daysAway === null) return translate("overview.notStarted");
+  if (child.daysAway <= 1) return translate("overview.yesterday");
+  return translate("overview.daysAgo", { count: child.daysAway });
 };
 
 const ago = (savedAt: number, now: number): string => {
   const minutes = Math.round((now - savedAt) / 60_000);
-  if (minutes < 1) return "just now";
-  if (minutes < 60) return `${minutes} min ago`;
+  if (minutes < 1) return translate("overview.justNow");
+  if (minutes < 60) return translate("overview.minAgo", { count: minutes });
   const hours = Math.round(minutes / 60);
-  return hours < 24 ? `${hours} h ago` : `${Math.round(hours / 24)} d ago`;
+  return hours < 24
+    ? translate("overview.hoursAgo", { count: hours })
+    : translate("overview.dAgo", { count: Math.round(hours / 24) });
 };
 
 export const ChildrenOverview: React.FC<{
@@ -53,6 +58,7 @@ export const ChildrenOverview: React.FC<{
 }> = ({ onOpenChild, onAddChild }) => {
   const session = useSession();
   const { can } = usePermissions();
+  const { t } = useT();
   const userId = session?.userId ?? null;
   const isParent = Boolean(session && !session.learnerId && can("learner:create"));
   const [data, setData] = useState<StoredOverview | null>(() => (userId ? cachedChildrenOverview(userId) : null));
@@ -92,15 +98,12 @@ export const ChildrenOverview: React.FC<{
       <section aria-labelledby="your-children" className={themeSystem.card("default", "p-6 text-center")}>
         <UserRound className="mx-auto h-10 w-10 text-indigo-500" />
         <h2 id="your-children" className="mt-3 text-lg font-semibold text-ink">
-          Add your first child
+          {t("overview.addFirst")}
         </h2>
-        <p className="mx-auto mt-1 max-w-md text-sm text-muted">
-          Koda is for them. Create a profile and they get their own learning space — you
-          keep the settings, the goal and the progress.
-        </p>
+        <p className="mx-auto mt-1 max-w-md text-sm text-muted">{t("overview.addFirstNote")}</p>
         {onAddChild && (
           <UIButton className="mt-4" icon={<Plus />} onClick={onAddChild}>
-            Add child
+            {t("children.add")}
           </UIButton>
         )}
       </section>
@@ -118,9 +121,9 @@ export const ChildrenOverview: React.FC<{
           id="your-children"
           className="text-xs font-black uppercase tracking-[0.18em] text-indigo-600 dark:text-indigo-400"
         >
-          Your children
+          {t("overview.title")}
         </h2>
-        {stale && <span className="text-[11px] text-muted">Updated {ago(savedAt, Date.now())}</span>}
+        {stale && <span className="text-[11px] text-muted">{t("overview.updated", { when: ago(savedAt, Date.now()) })}</span>}
       </div>
 
       {attention && (
@@ -129,7 +132,7 @@ export const ChildrenOverview: React.FC<{
           icon={<Hand />}
           title={attention.title}
           action={
-            onOpenChild ? { label: "Open report", onClick: () => onOpenChild(attention.learnerId) } : undefined
+            onOpenChild ? { label: t("overview.openReport"), onClick: () => onOpenChild(attention.learnerId) } : undefined
           }
         >
           {attention.body}
@@ -142,7 +145,7 @@ export const ChildrenOverview: React.FC<{
             key={child.id}
             type="button"
             onClick={() => onOpenChild?.(child.id)}
-            aria-label={`${child.displayName}: ${dayOf(child)}. Open report`}
+            aria-label={`${child.displayName}: ${dayOf(child)}. ${t("overview.openReport")}`}
             className={`${l.row} w-full cursor-pointer text-left`}
           >
             <div className="flex min-w-0 items-center gap-3">
@@ -156,13 +159,13 @@ export const ChildrenOverview: React.FC<{
               {child.today.goalMet && (
                 <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400">
                   <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-                  Goal met
+                  {t("praise.goal.tag")}
                 </span>
               )}
               {child.streak >= 2 && (
                 <span className="inline-flex items-center gap-1 text-orange-600 dark:text-orange-400">
                   <Flame className="h-4 w-4 fill-current" aria-hidden="true" />
-                  {child.streak}-day streak
+                  {t("overview.streak", { count: child.streak })}
                 </span>
               )}
             </div>

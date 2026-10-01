@@ -16,6 +16,7 @@ import { themeSystem } from "../lib/themeSystem";
 import { ApiError, SessionAPI, type Session, useSession } from "../lib/sync";
 import { AvatarPickerModal } from "./account/AvatarPickerModal";
 import { PinPrompt } from "./account/PinPrompt";
+import { translate, useT } from "../lib/i18n";
 
 /** Two letters from the active account's name, so the avatar stays recognisable. */
 const initialsFor = (value?: string): string => {
@@ -30,10 +31,9 @@ export const accountType = (account: Session): string => {
   // Before the learner check below, because a student *is* their own learner:
   // they carry a learner name like a child does, and calling them "Child" is
   // wrong about the one thing that distinguishes the two — who manages them.
-  if (account.role === "student") return "Student";
-  if (account.role === "child" || account.learnerName) return "Child";
-  if (account.role === "owner" || account.role === "parent") return "Parent";
-  if (account.role === "student") return "Student";
+  if (account.role === "student") return translate("account.role.student");
+  if (account.role === "child" || account.learnerName) return translate("account.role.child");
+  if (account.role === "owner" || account.role === "parent") return translate("account.role.parent");
   return account.platformRole && account.platformRole !== "none" ? account.platformRole : account.role;
 };
 
@@ -57,7 +57,7 @@ export const accountAvatarSeed = (account: Session): string =>
   account.avatarSeed ?? account.learnerId ?? account.userId ?? account.deviceId;
 
 export const accountContext = (account: Session): string =>
-  account.familyName ?? (account.platformRole && account.platformRole !== "none" ? "Platform account" : "");
+  account.familyName ?? (account.platformRole && account.platformRole !== "none" ? translate("account.platformAccount") : "");
 
 /*
  * What a *shell* prints about the account — and never an email address.
@@ -142,6 +142,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
   variant = "bar",
 }) => {
   const { theme, setTheme } = useTheme();
+  const { t } = useT();
   const session = useSession();
   const accounts = SessionAPI.accounts();
   const [sheetOpen, setSheetOpen] = React.useState(false);
@@ -220,7 +221,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
             <>
               {session && (
                 <>
-                  <UIMenuLabel>Current account</UIMenuLabel>
+                  <UIMenuLabel>{t("menu.currentAccount")}</UIMenuLabel>
                   <UIMenuItem
                     icon={
                       <UIAvatar
@@ -243,7 +244,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
 
               {others.length > 0 && (
                 <>
-                  <UIMenuLabel>Switch account</UIMenuLabel>
+                  <UIMenuLabel>{t("menu.switchAccount")}</UIMenuLabel>
                   {others.map((account) => (
                     <UIMenuItem
                       key={account.deviceId}
@@ -278,7 +279,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
                       choose(onOpenProfile)();
                     }}
                   >
-                    View profile
+                    {t("menu.viewProfile")}
                   </UIMenuItem>
                   <UIMenuItem
                     icon={<Smile />}
@@ -287,12 +288,12 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
                       choose(() => setAvatarOpen(true))();
                     }}
                   >
-                    Change avatar
+                    {t("menu.changeAvatar")}
                   </UIMenuItem>
                 </>
               )}
 
-              <UIMenuLabel>Appearance</UIMenuLabel>
+              <UIMenuLabel>{t("settings.appearance.group")}</UIMenuLabel>
               <UIMenuItem
                 icon={<Sun />}
                 isActive={theme === "light"}
@@ -301,7 +302,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
                   choose(() => setTheme("light"))();
                 }}
               >
-                Light
+                {t("menu.light")}
               </UIMenuItem>
               <UIMenuItem
                 icon={<Moon />}
@@ -311,7 +312,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
                   choose(() => setTheme("dark"))();
                 }}
               >
-                Dark
+                {t("menu.dark")}
               </UIMenuItem>
 
               <UIMenuSeparator />
@@ -320,7 +321,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
                   somebody signed in — "sign in" here would be an offer with
                   nothing behind it. */}
               <UIMenuLabel>
-                {session ? `Signed in as ${accountName(session)}` : "Signed in"}
+                {session ? t("menu.signedInAs", { name: accountName(session) }) : t("menu.signedIn")}
               </UIMenuLabel>
               <UIMenuItem
                 icon={<LogOut />}
@@ -330,7 +331,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
                   choose(() => void SessionAPI.signOut())();
                 }}
               >
-                Sign out
+                {t("menu.signOut")}
               </UIMenuItem>
             </>
           )}
@@ -345,7 +346,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
             }}
             aria-haspopup="dialog"
             aria-expanded={sheetOpen}
-            aria-label={`Account: ${shown.name}`}
+            aria-label={t("menu.accountLabel", { name: shown.name })}
             title={shown.name}
           >
             <UIAvatar
@@ -369,13 +370,13 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
           <UIModal
             isOpen={sheetOpen}
             onClose={close}
-            title="Account"
+            title={t("account.label")}
             maxWidth="max-w-md"
           >
             <div className="space-y-5">
               {session && (
                 <div>
-                  <div className={l.groupLabel}>You are signed in as</div>
+                  <div className={l.groupLabel}>{t("menu.youAreSignedInAs")}</div>
                   <div className={l.group}>
                     <div className={l.account(true)}>
                       <span className={l.accountAvatar}>
@@ -398,7 +399,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
 
               {others.length > 0 && (
                 <div>
-                  <div className={l.groupLabel}>Switch to</div>
+                  <div className={l.groupLabel}>{t("menu.switchTo")}</div>
                   <div className={l.group}>
                     {others.map((account) => (
                       <button
@@ -425,7 +426,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
               )}
 
               <div>
-                <div className={l.groupLabel}>Appearance</div>
+                <div className={l.groupLabel}>{t("settings.appearance.group")}</div>
                 <div className={`${l.group} divide-y-0`}>
                   <div className={l.segmentRow}>
                     <button
@@ -437,7 +438,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
                       aria-pressed={theme === "light"}
                     >
                       <Sun />
-                      Light
+                      {t("menu.light")}
                     </button>
                     <button
                       className={l.segment(theme === "dark")}
@@ -448,7 +449,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
                       aria-pressed={theme === "dark"}
                     >
                       <Moon />
-                      Dark
+                      {t("menu.dark")}
                     </button>
                   </div>
                 </div>
@@ -461,7 +462,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
                       <span className={l.rowIcon}>
                         <UserRound />
                       </span>
-                      <span className={l.rowTitle}>View profile</span>
+                      <span className={l.rowTitle}>{t("menu.viewProfile")}</span>
                     </span>
                   </button>
                   <button className={l.rowTap} onClick={choose(() => setAvatarOpen(true))}>
@@ -469,7 +470,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
                       <span className={l.rowIcon}>
                         <Smile />
                       </span>
-                      <span className={l.rowTitle}>Change avatar</span>
+                      <span className={l.rowTitle}>{t("menu.changeAvatar")}</span>
                     </span>
                   </button>
                   <button
@@ -480,7 +481,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
                       <span className={l.rowIcon}>
                         <LogOut />
                       </span>
-                      <span className={l.rowDanger}>Sign out</span>
+                      <span className={l.rowDanger}>{t("menu.signOut")}</span>
                     </span>
                   </button>
                 </div>

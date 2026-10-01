@@ -6,6 +6,7 @@ import { clipSizes, uploadClip } from "../clips";
 import { say } from "../voice";
 import { useRecorder } from "./recorder";
 import { asStandardAudio } from "./UnitNamesPanel";
+import { useT } from "../../lib/i18n";
 
 /**
  * A recording for each word a child can tap.
@@ -70,6 +71,7 @@ export function WordVoicePanel({ draft, onEdit, generate, generatorName }: {
   generate?(word: string): Promise<Blob>;
   generatorName?: string;
 }) {
+  const { t } = useT();
   const km = draft.language === "km";
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState("");
@@ -98,7 +100,7 @@ export function WordVoicePanel({ draft, onEdit, generate, generatorName }: {
       setSizes((now) => ({ ...now, [clip.id]: clip.bytes }));
       onEdit({ ...draft, wordAudio: { ...audio, [key]: clip.id } });
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "The recording could not be saved.");
+      setErr(e instanceof Error ? e.message : t("studio.voice.saveFailed"));
     } finally {
       setBusy(null);
     }
@@ -117,7 +119,7 @@ export function WordVoicePanel({ draft, onEdit, generate, generatorName }: {
       setSizes((now) => ({ ...now, [clip.id]: clip.bytes }));
       onEdit({ ...draft, wordAudio: { ...audio, [word.key]: clip.id } });
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "That voice could not be reached.");
+      setErr(e instanceof Error ? e.message : t("studio.voice.unreachable"));
     } finally {
       setBusy(null);
     }
@@ -136,7 +138,7 @@ export function WordVoicePanel({ draft, onEdit, generate, generatorName }: {
         next = { ...next, wordAudio: { ...(next.wordAudio ?? {}), [word.key]: clip.id } };
         onEdit(next);
       } catch (e) {
-        setErr(e instanceof Error ? e.message : "That voice could not be reached.");
+        setErr(e instanceof Error ? e.message : t("studio.voice.unreachable"));
         break;
       }
     }
@@ -149,24 +151,21 @@ export function WordVoicePanel({ draft, onEdit, generate, generatorName }: {
   return (
     <details className="rounded-2xl border border-line bg-surface">
       <summary className="cursor-pointer list-none px-3 py-3 text-sm font-extrabold text-ink marker:content-none">
-        ▾ Tap-a-word recordings — {recorded} of {words.length} words
+        ▾ {t("studio.words.summary", { done: recorded, total: words.length })}
         {recorded > 0 && known && <span className="ml-2 font-bold text-muted">{Math.round(stored / 1024)} KB</span>}
       </summary>
       <div className="grid gap-3 border-t border-line px-3 py-3">
-        <p className="text-sm text-muted">
-          A child who stops at a word taps it and hears this. One recording per word, however many times the story uses it — say the word on its own, the way
-          you would to a child asking. Leave a word out and tapping it just shows the word.
-        </p>
+        <p className="text-sm text-muted">{t("studio.words.intro")}</p>
         {generate && (
           <div>
             <button type="button" className={quiet} disabled={busy !== null || recorded === words.length} onClick={() => void readTheRest()}>
               <Sparkles className="h-4 w-4" aria-hidden="true" />
-              {busy !== null ? "Generating…" : `${generatorName ?? "Generated"} voice for the rest`}
+              {busy !== null ? t("studio.voice.generating") : t("studio.voice.forTheRest", { name: generatorName ?? t("studio.voice.generated") })}
             </button>
           </div>
         )}
         {err && <p role="alert" className="rounded-2xl bg-rose-50 px-3 py-2 text-sm font-bold text-rose-800 dark:bg-rose-950 dark:text-rose-200">{err}</p>}
-        {!canRecord && <p className="text-xs text-muted">This browser cannot record from a microphone — upload a recording instead.</p>}
+        {!canRecord && <p className="text-xs text-muted">{t("studio.words.noMic")}</p>}
         <ul className="grid gap-2 sm:grid-cols-2">
           {words.map((w) => {
             const clip = audio[w.key];
@@ -176,12 +175,12 @@ export function WordVoicePanel({ draft, onEdit, generate, generatorName }: {
                 <span className="min-w-0 flex-1">
                   <span className={`block truncate font-bold text-ink ${km ? `${KHMER} text-lg` : ""}`}>{w.shown}</span>
                   <span className={`text-xs font-bold ${clip ? "text-emerald-700 dark:text-emerald-400" : "text-muted"}`}>
-                    {busy === w.key ? "Saving…" : clip ? "✓ Recorded" : "Not recorded"}
+                    {busy === w.key ? t("studio.picture.saving") : clip ? `✓ ${t("studio.voice.recordedCap")}` : t("studio.voice.notRecorded")}
                     {w.times > 1 && <span className="ml-1 font-normal text-muted">· {w.times}×</span>}
                   </span>
                 </span>
                 {clip && (
-                  <button type="button" className={icon} aria-label={`Play ${w.shown}`} onClick={() => void say(w.shown, draft.language, clip)}>
+                  <button type="button" className={icon} aria-label={t("studio.voice.playName", { name: w.shown })} onClick={() => void say(w.shown, draft.language, clip)}>
                     <Play className="h-4 w-4" aria-hidden="true" />
                   </button>
                 )}
@@ -189,25 +188,25 @@ export function WordVoicePanel({ draft, onEdit, generate, generatorName }: {
                   <button
                     type="button"
                     className={`${icon} ${live ? "border-rose-600 bg-rose-600 text-white" : ""}`}
-                    aria-label={live ? `Stop recording ${w.shown}` : `Record ${w.shown}`}
+                    aria-label={live ? t("studio.voice.stopRecording", { name: w.shown }) : t("studio.voice.recordName", { name: w.shown })}
                     disabled={busy !== null || (recorder.recording !== null && !live)}
-                    onClick={() => (live ? recorder.stop() : void recorder.start(w.key, (blob) => void keep(w.key, blob)).catch(() => setErr("The microphone could not be opened.")))}
+                    onClick={() => (live ? recorder.stop() : void recorder.start(w.key, (blob) => void keep(w.key, blob)).catch(() => setErr(t("studio.voice.micFailed"))))}
                   >
                     {live ? <Square className="h-4 w-4" aria-hidden="true" /> : <Mic className="h-4 w-4" aria-hidden="true" />}
                   </button>
                 )}
                 {generate && (
-                  <button type="button" className={icon} aria-label={`Read ${w.shown} in the chosen voice`} disabled={busy !== null} onClick={() => void readIt(w)}>
+                  <button type="button" className={icon} aria-label={t("studio.words.readIt", { word: w.shown })} disabled={busy !== null} onClick={() => void readIt(w)}>
                     <Sparkles className="h-4 w-4" aria-hidden="true" />
                   </button>
                 )}
-                <label className={`${icon} cursor-pointer`} aria-label={`Upload a recording of ${w.shown}`}>
+                <label className={`${icon} cursor-pointer`} aria-label={t("studio.voice.uploadFor", { name: w.shown })}>
                   <Upload className="h-4 w-4" aria-hidden="true" />
                   <input type="file" accept="audio/*" className="sr-only" disabled={busy !== null}
                     onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void keep(w.key, f); }} />
                 </label>
                 {clip && (
-                  <button type="button" className={icon} aria-label={`Remove the recording of ${w.shown}`} disabled={busy !== null} onClick={() => forget(w.key)}>
+                  <button type="button" className={icon} aria-label={t("studio.voice.remove", { line: w.shown })} disabled={busy !== null} onClick={() => forget(w.key)}>
                     <Trash2 className="h-4 w-4" aria-hidden="true" />
                   </button>
                 )}

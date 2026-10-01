@@ -3,6 +3,7 @@ import { Zap, Sparkles, CheckCircle2, XCircle, Flame, Timer, RefreshCw, HelpCirc
 import { playSound } from "../utils/audio";
 import { ChatMessage, TopicCategory } from "../types";
 
+import { translate } from "../lib/i18n";
 interface QuickMathProblem {
   id: string;
   category: TopicCategory | "mixed";
@@ -212,11 +213,11 @@ export const QuickMathPanel: React.FC<QuickMathPanelProps> = ({
               <Zap className="w-4 h-4" />
             </span>
             <span className="text-amber-400 font-mono uppercase tracking-[0.25em] text-[10px] font-bold">
-              RAPID REINFORCEMENT MODE
+              {translate("app.quickMathPanel.rapidReinforcementMode")}
             </span>
           </div>
           <h3 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight flex items-center gap-2">
-            Quick <span className="text-amber-400">Math</span> Drills
+            {translate("app.quickMathPanel.quick")}{" "}<span className="text-amber-400">{translate("app.quickMathPanel.math")}</span>{" "}{translate("app.quickMathPanel.drills")}
           </h3>
         </div>
 
@@ -225,7 +226,7 @@ export const QuickMathPanel: React.FC<QuickMathPanelProps> = ({
           <div className="flex items-center gap-1.5 bg-orange-500/10 border border-orange-500/30 px-3 py-1.5 rounded-xl">
             <Flame className="w-4 h-4 text-orange-400 animate-bounce" />
             <span className="text-xs font-bold text-orange-300">
-              {streak} Hot Streak
+              {translate("app.quickMathPanel.streakHotStreak", { streak: streak })}
             </span>
           </div>
 
@@ -239,13 +240,13 @@ export const QuickMathPanel: React.FC<QuickMathPanelProps> = ({
       {/* Category Pills */}
       <div className="flex items-center gap-2 py-4 overflow-x-auto no-scrollbar font-mono text-xs relative z-10">
         {[
-          { id: "all", label: "⚡ All Mixed" },
-          { id: "balance_equations", label: "⚖️ Algebra" },
-          { id: "fraction_lab", label: "🥧 Fractions" },
-          { id: "exponent_growth", label: "📈 Exponents" },
-          { id: "spatial_puzzles", label: "📐 Geometry" },
-          { id: "coordinate_quest", label: "🗺️ Coordinates" },
-          { id: "logic_matrix", label: "💻 Logic" },
+          { id: "all", label: translate("app.quickMathPanel.allMixed") },
+          { id: "balance_equations", label: translate("app.quickMathPanel.algebra") },
+          { id: "fraction_lab", label: translate("app.quickMathPanel.fractions") },
+          { id: "exponent_growth", label: translate("app.quickMathPanel.exponents") },
+          { id: "spatial_puzzles", label: translate("app.quickMathPanel.geometry") },
+          { id: "coordinate_quest", label: translate("app.quickMathPanel.coordinates") },
+          { id: "logic_matrix", label: translate("app.quickMathPanel.logic") },
         ].map((cat) => (
           <button
             key={cat.id}
@@ -276,7 +277,7 @@ export const QuickMathPanel: React.FC<QuickMathPanelProps> = ({
               {currentProblem.category.replace("_", " ")}
             </span>
             <span className="text-xs text-gray-400">
-              Question {(currentIndex % activePool.length) + 1} of {activePool.length}
+              {translate("app.quickMathPanel.question")}{" "}{(currentIndex % activePool.length) + 1}{" "}{translate("app.quickMathPanel.of")}{" "}{activePool.length}
             </span>
           </div>
 
@@ -287,7 +288,7 @@ export const QuickMathPanel: React.FC<QuickMathPanelProps> = ({
           {/* Visual Clue Box */}
           {currentProblem.visualClue && (
             <div className="bg-[#050505] border border-white/10 rounded-xl p-3 font-mono text-xs text-cyan-300 w-fit mb-4">
-              <span className="text-[10px] text-gray-500 uppercase block mb-1">Visual Clue Model:</span>
+              <span className="text-[10px] text-gray-500 uppercase block mb-1">{translate("app.quickMathPanel.visualClueModel")}</span>
               {currentProblem.visualClue}
             </div>
           )}
@@ -300,7 +301,7 @@ export const QuickMathPanel: React.FC<QuickMathPanelProps> = ({
             value={userAnswer}
             onChange={(e) => setUserAnswer(e.target.value)}
             disabled={feedbackState === "correct"}
-            placeholder="Type your mental math answer..."
+            placeholder={translate("app.quickMathPanel.typeYourMentalMathAnswer")}
             className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm sm:text-base text-white placeholder-gray-500 focus:outline-none focus:border-amber-400/60 font-mono transition-all disabled:opacity-50"
           />
 
@@ -312,7 +313,7 @@ export const QuickMathPanel: React.FC<QuickMathPanelProps> = ({
                 className="px-6 py-3 bg-amber-400 hover:bg-amber-300 text-black font-bold font-mono text-xs uppercase tracking-wider rounded-xl shadow-[0_0_15px_rgba(251,191,36,0.4)] disabled:opacity-40 transition-all flex items-center justify-center gap-2 shrink-0"
               >
                 <Zap className="w-4 h-4 fill-black" />
-                Submit Answer
+                {translate("app.quickMathPanel.submitAnswer")}
               </button>
             ) : (
               <button
@@ -320,7 +321,7 @@ export const QuickMathPanel: React.FC<QuickMathPanelProps> = ({
                 onClick={handleNextProblem}
                 className="px-6 py-3 bg-cyan-400 hover:bg-cyan-300 text-black font-bold font-mono text-xs uppercase tracking-wider rounded-xl shadow-[0_0_15px_rgba(34,211,238,0.4)] transition-all flex items-center justify-center gap-2 shrink-0"
               >
-                Next Problem <ArrowRight className="w-4 h-4" />
+                {translate("app.quickMathPanel.nextProblem")}{" "}<ArrowRight className="w-4 h-4" />
               </button>
             )}
 
@@ -328,7 +329,7 @@ export const QuickMathPanel: React.FC<QuickMathPanelProps> = ({
               type="button"
               onClick={() => setShowHint(!showHint)}
               className="p-3 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl border border-white/10 transition-all shrink-0"
-              title="Request Koda Hint"
+              title={translate("app.quickMathPanel.requestKodaHint")}
             >
               <HelpCircle className="w-5 h-5 text-amber-400" />
             </button>
@@ -339,7 +340,7 @@ export const QuickMathPanel: React.FC<QuickMathPanelProps> = ({
         {showHint && (
           <div className="mt-4 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-amber-200 font-sans animate-fadeIn">
             <span className="font-mono font-bold uppercase tracking-wider text-amber-400 block mb-1">
-              💡 Koda's Socratic Mental Hint:
+              {translate("app.quickMathPanel.kodaSSocraticMentalHint")}
             </span>
             {currentProblem.hint}
           </div>
@@ -358,12 +359,12 @@ export const QuickMathPanel: React.FC<QuickMathPanelProps> = ({
               {feedbackState === "correct" ? (
                 <>
                   <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  <span className="text-emerald-400">Correct! +30 XP</span>
+                  <span className="text-emerald-400">{translate("app.quickMathPanel.correct30Xp")}</span>
                 </>
               ) : (
                 <>
                   <XCircle className="w-4 h-4 text-red-400" />
-                  <span className="text-red-400">Keep Reasoning!</span>
+                  <span className="text-red-400">{translate("app.quickMathPanel.keepReasoning")}</span>
                 </>
               )}
             </div>
@@ -374,8 +375,8 @@ export const QuickMathPanel: React.FC<QuickMathPanelProps> = ({
 
       {/* Footer Info */}
       <div className="flex items-center justify-between text-[10px] font-mono uppercase text-gray-500 pt-2 px-1">
-        <span>Socratic Speed Engine Active</span>
-        <span>Solve rapid problems to double daily XP momentum</span>
+        <span>{translate("app.quickMathPanel.socraticSpeedEngineActive")}</span>
+        <span>{translate("app.quickMathPanel.solveRapidProblemsToDoubleDaily")}</span>
       </div>
     </div>
   );

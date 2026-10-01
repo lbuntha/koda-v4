@@ -40,6 +40,7 @@ import {
   UISpinner,
 } from "./ui";
 
+import { currentLanguage, translate } from "../lib/i18n";
 interface LearnerChoice {
   id: string;
   displayName: string;
@@ -67,7 +68,7 @@ const leaderboardAvatarSeed = (name: string, stored?: string | null): string | u
 const codePattern = /^KODA-[A-HJ-NP-Z2-9]{6}$/i;
 
 const friendlyWeek = (start: string, end: string): string => {
-  const format = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" });
+  const format = new Intl.DateTimeFormat(currentLanguage(), { month: "short", day: "numeric" });
   return `${format.format(new Date(`${start}T12:00:00`))} – ${format.format(new Date(`${end}T12:00:00`))}`;
 };
 
@@ -184,8 +185,8 @@ export const LeaderboardPage: React.FC = () => {
       setConfirmed(false);
       setNotice(
         consentVisibility === "public"
-          ? "This learner is now included on the public leaderboard."
-          : "Leaderboard sharing is on for approved buddies only.",
+          ? translate("leaderboard.thisLearnerIsNowIncludedOn")
+          : translate("leaderboard.leaderboardSharingIsOnForApproved"),
       );
       playSound("success");
       await loadBoard(learnerId, true);
@@ -201,7 +202,7 @@ export const LeaderboardPage: React.FC = () => {
     setBusy("privacy");
     try {
       await LeaderboardAPI.setPrivacy(learnerId, "private");
-      setNotice("Sharing stopped. This learner disappeared from all leaderboards.");
+      setNotice(translate("leaderboard.sharingStoppedThisLearnerDisappearedFrom"));
       await loadBoard(learnerId, true);
     } catch (caught) {
       setError((caught as ApiError).message);
@@ -231,7 +232,7 @@ export const LeaderboardPage: React.FC = () => {
     try {
       await LeaderboardAPI.acceptInvite(learnerId, buddyCode);
       setBuddyCode("");
-      setNotice("Buddy added. Sharing remains a separate choice for each learner.");
+      setNotice(translate("leaderboard.buddyAddedSharingRemainsASeparate"));
       await loadBoard(learnerId, true);
     } catch (caught) {
       setError((caught as ApiError).message);
@@ -246,7 +247,7 @@ export const LeaderboardPage: React.FC = () => {
     try {
       if (block) await LeaderboardAPI.blockBuddy(learnerId, buddy.relationshipId);
       else await LeaderboardAPI.removeBuddy(learnerId, buddy.relationshipId);
-      setNotice(block ? "Buddy blocked and removed." : "Buddy removed.");
+      setNotice(block ? translate("leaderboard.buddyBlockedAndRemoved") : translate("leaderboard.buddyRemoved"));
       await loadBoard(learnerId, true);
     } catch (caught) {
       setError((caught as ApiError).message);
@@ -262,12 +263,12 @@ export const LeaderboardPage: React.FC = () => {
     setTimeout(() => setCopied(false), 1800);
   };
 
-  if (loading && !privacy && learners.length === 0) return <UIPageLoader label="Loading buddy leaderboard" />;
+  if (loading && !privacy && learners.length === 0) return <UIPageLoader label={translate("leaderboard.loadingBuddyLeaderboard")} />;
 
   if (!learnerId) {
     return (
       <div className="mx-auto max-w-5xl py-8">
-        <UIFlashMessage type="info" title="No learner profile" message="Add or select a learner profile before opening the buddy leaderboard." />
+        <UIFlashMessage type="info" title={translate("leaderboard.noLearnerProfile")} message={translate("leaderboard.addOrSelectALearnerProfile")} />
       </div>
     );
   }
@@ -275,7 +276,7 @@ export const LeaderboardPage: React.FC = () => {
   const sharedCount = buddies.filter((buddy) => buddy.sharingEnabled).length;
   const activeBoard = boardScope === "public" ? publicBoard : board;
   const filteredBuddies = buddies.filter((buddy) =>
-    (buddy.nickname ?? "Private buddy").toLocaleLowerCase().includes(buddySearch.trim().toLocaleLowerCase()),
+    (buddy.nickname ?? translate("leaderboard.privateBuddy")).toLocaleLowerCase().includes(buddySearch.trim().toLocaleLowerCase()),
   );
   const participating = boardScope === "public"
     ? privacy?.visibility === "public"
@@ -291,9 +292,9 @@ export const LeaderboardPage: React.FC = () => {
     <div className="min-h-full bg-white dark:bg-canvas">
       <div className="mx-auto max-w-6xl space-y-5">
         <UIPageHeader
-          eyebrow="Friends & progress"
-          title="Leaderboards"
-          subtitle="Choose a public challenge or a private board with approved buddies."
+          eyebrow={translate("leaderboard.friendsProgress")}
+          title={translate("leaderboard.leaderboards")}
+          subtitle={translate("leaderboard.chooseAPublicChallengeOrA")}
           action={!isCompact ? (
             <UIButton
               variant="secondary"
@@ -301,9 +302,9 @@ export const LeaderboardPage: React.FC = () => {
               icon={<RefreshCw className={refreshing ? "animate-spin" : ""} />}
               onClick={() => void loadBoard(learnerId, true)}
               disabled={refreshing}
-              aria-label="Refresh leaderboard"
+              aria-label={translate("leaderboard.refreshLeaderboard")}
             >
-              Refresh
+              {translate("leaderboard.refresh")}
             </UIButton>
           ) : undefined}
         />
@@ -312,7 +313,7 @@ export const LeaderboardPage: React.FC = () => {
           <section className="max-w-2xl" aria-labelledby="leaderboard-learner-label">
             <div className="mb-2 flex items-center justify-between gap-3">
               <h2 id="leaderboard-learner-label" className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Choose player
+                {translate("leaderboard.choosePlayer")}
               </h2>
               <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-300">
                 {selectedLearner?.displayName}
@@ -350,15 +351,15 @@ export const LeaderboardPage: React.FC = () => {
           </section>
         )}
 
-        {error && <UIFlashMessage type="error" title="Couldn’t update the leaderboard" message={error} onClose={() => setError(null)} />}
+        {error && <UIFlashMessage type="error" title={translate("leaderboard.couldnTUpdateTheLeaderboard")} message={error} onClose={() => setError(null)} />}
         {notice && <UIFlashMessage type="success" message={notice} onClose={() => setNotice(null)} />}
 
         {switchingLearner ? (
           <UICard className="flex min-h-48 items-center justify-center p-5" aria-live="polite">
             <div className="flex flex-col items-center gap-3 text-center">
-              <UISpinner size="md" label={`Loading ${selectedLearner?.displayName ?? "player"} leaderboard`} />
+              <UISpinner size="md" label={translate("leaderboard.loadingValueLeaderboard", { value: selectedLearner?.displayName ?? translate("leaderboard.player") })} />
               <p className="text-sm font-bold text-slate-500 dark:text-slate-300">
-                Loading {selectedLearner?.displayName ?? "player"}…
+                {translate("leaderboard.loadingValue", { value: selectedLearner?.displayName ?? translate("leaderboard.player") })}
               </p>
             </div>
           </UICard>
@@ -366,7 +367,7 @@ export const LeaderboardPage: React.FC = () => {
         <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(19rem,0.8fr)]">
           {(!isCompact || !manageOpen) && (
           <section className="space-y-4" aria-labelledby="weekly-ranking-title">
-            <div className="grid grid-cols-2 rounded-2xl bg-slate-100 p-1.5 dark:bg-slate-800" role="tablist" aria-label="Leaderboard type">
+            <div className="grid grid-cols-2 rounded-2xl bg-slate-100 p-1.5 dark:bg-slate-800" role="tablist" aria-label={translate("leaderboard.leaderboardType")}>
               <button
                 type="button"
                 role="tab"
@@ -374,7 +375,7 @@ export const LeaderboardPage: React.FC = () => {
                 onClick={() => setBoardScope("buddies")}
                 className={`flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-black transition ${boardScope === "buddies" ? "bg-white text-indigo-700 shadow-sm dark:bg-slate-900 dark:text-indigo-300" : "text-slate-500 dark:text-slate-400"}`}
               >
-                <Users className="h-4 w-4" /> Buddies
+                <Users className="h-4 w-4" />{" "}{translate("leaderboard.buddies")}
               </button>
               <button
                 type="button"
@@ -383,17 +384,17 @@ export const LeaderboardPage: React.FC = () => {
                 onClick={() => setBoardScope("public")}
                 className={`flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-black transition ${boardScope === "public" ? "bg-white text-indigo-700 shadow-sm dark:bg-slate-900 dark:text-indigo-300" : "text-slate-500 dark:text-slate-400"}`}
               >
-                <Globe2 className="h-4 w-4" /> Public
+                <Globe2 className="h-4 w-4" />{" "}{translate("leaderboard.public")}
               </button>
             </div>
 
             {boardScope === "buddies" && !privacy?.sharingEnabled ? (
               <UICard className="overflow-hidden border-indigo-200 p-4 text-center rail:p-5">
                 <span className="inline-flex items-center rounded-full border-2 border-[#F0B90B] bg-white px-2.5 py-1 text-xs font-black text-[#0B0E11] dark:bg-slate-900 dark:text-white">
-                  <LockKeyhole className="mr-1 h-3 w-3 text-[#F0B90B]" /> Not sharing
+                  <LockKeyhole className="mr-1 h-3 w-3 text-[#F0B90B]" />{" "}{translate("leaderboard.notSharing")}
                 </span>
-                <h2 className="mt-3 text-xl font-black tracking-tight text-slate-950 dark:text-white">You’re private by default</h2>
-                <p className="mx-auto mt-1 max-w-xl text-xs leading-5 text-slate-600 dark:text-slate-300 rail:text-sm">Choose Buddies only or Public. Nothing is shared until an eligible account confirms it.</p>
+                <h2 className="mt-3 text-xl font-black tracking-tight text-slate-950 dark:text-white">{translate("leaderboard.youRePrivateByDefault")}</h2>
+                <p className="mx-auto mt-1 max-w-xl text-xs leading-5 text-slate-600 dark:text-slate-300 rail:text-sm">{translate("leaderboard.chooseBuddiesOnlyOrPublicNothing")}</p>
                 <div className="mx-auto mt-4 flex max-w-xs items-end justify-center" aria-hidden="true">
                   {selectedLearner && (
                     <UIAvatar
@@ -412,7 +413,7 @@ export const LeaderboardPage: React.FC = () => {
                   </span>
                 </div>
                 <div className="mx-auto mt-4 max-w-lg rounded-2xl border border-sky-200 bg-sky-50 p-3 text-left dark:border-sky-900 dark:bg-sky-950/40">
-                  {["Nickname and avatar", "Weekly XP and rank", "No email, age, real name, or lesson details"].map((item) => (
+                  {[translate("leaderboard.shared.nickname"), translate("leaderboard.shared.xp"), translate("leaderboard.shared.private")].map((item) => (
                     <div key={item} className="flex items-center gap-2 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 rail:text-sm">
                       <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white"><Check className="h-3.5 w-3.5" /></span>
                       {item}
@@ -421,12 +422,12 @@ export const LeaderboardPage: React.FC = () => {
                 </div>
                 {canConsent ? (
                   <div className="mt-4 flex flex-col justify-center gap-2 rail:flex-row">
-                    <UIButton className="w-full rail:w-auto" size="md" icon={<Users />} onClick={() => { setConsentVisibility("buddies"); setConsentOpen(true); }}>Buddies only</UIButton>
-                    <UIButton className="w-full rail:w-auto" variant="outline" size="md" icon={<Globe2 />} onClick={() => { setConsentVisibility("public"); setConsentOpen(true); }}>Join public</UIButton>
+                    <UIButton className="w-full rail:w-auto" size="md" icon={<Users />} onClick={() => { setConsentVisibility("buddies"); setConsentOpen(true); }}>{translate("leaderboard.buddiesOnly")}</UIButton>
+                    <UIButton className="w-full rail:w-auto" variant="outline" size="md" icon={<Globe2 />} onClick={() => { setConsentVisibility("public"); setConsentOpen(true); }}>{translate("leaderboard.joinPublic")}</UIButton>
                   </div>
                 ) : (
                   <p className="mt-6 rounded-2xl bg-amber-50 p-4 text-sm font-bold text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
-                    Ask a parent or account owner to turn on sharing.
+                    {translate("leaderboard.askAParentOrAccountOwner")}
                   </p>
                 )}
               </UICard>
@@ -437,17 +438,17 @@ export const LeaderboardPage: React.FC = () => {
                     <UIBadge variant={participating ? "success" : "neutral"}>
                       {boardScope === "public" ? <Globe2 className="mr-1 h-3.5 w-3.5" /> : <Users className="mr-1 h-3.5 w-3.5" />}
                       {boardScope === "public"
-                        ? participating ? "Included publicly" : "Viewing only"
-                        : `Sharing with ${sharedCount} ${sharedCount === 1 ? "buddy" : "buddies"}`}
+                        ? participating ? translate("leaderboard.includedPublicly") : translate("leaderboard.viewingOnly")
+                        : translate("leaderboard.sharingWithSharedcountValue", { sharedCount: sharedCount, value: sharedCount === 1 ? translate("leaderboard.buddy") : translate("leaderboard.buddies2") })}
                     </UIBadge>
                     {boardScope === "public" ? <Globe2 className="h-8 w-8 text-violet-500" aria-hidden="true" /> : <SvgAsset id="trophy" size={36} />}
                   </div>
                   <div className="mt-4 flex items-end justify-between gap-3">
                     <div>
-                      <h2 id="weekly-ranking-title" className="text-lg font-black text-slate-950 dark:text-white">This week</h2>
-                      {activeBoard && <p className="mt-0.5 text-xs font-semibold text-slate-500 dark:text-slate-400">{friendlyWeek(activeBoard.weekStart, activeBoard.weekEnd)} · resets Monday</p>}
+                      <h2 id="weekly-ranking-title" className="text-lg font-black text-slate-950 dark:text-white">{translate("leaderboard.thisWeek")}</h2>
+                      {activeBoard && <p className="mt-0.5 text-xs font-semibold text-slate-500 dark:text-slate-400">{translate("leaderboard.valueResetsMonday", { value: friendlyWeek(activeBoard.weekStart, activeBoard.weekEnd) })}</p>}
                     </div>
-                    <span className="text-xs font-black uppercase tracking-wider text-indigo-600 dark:text-indigo-300">Top 20 + you</span>
+                    <span className="text-xs font-black uppercase tracking-wider text-indigo-600 dark:text-indigo-300">{translate("leaderboard.top20You")}</span>
                   </div>
                   {yourRow && (
                     <div className="mt-3 rounded-2xl border border-white/80 bg-white/80 p-3 text-left dark:border-slate-700 dark:bg-slate-900/70">
@@ -455,8 +456,8 @@ export const LeaderboardPage: React.FC = () => {
                         <SvgAsset id="weekly-progress" size={36} />
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-3 text-xs font-black text-slate-700 dark:text-slate-200">
-                            <span>Your weekly progress</span>
-                            <span className="tabular-nums">{yourRow.weeklyXp.toLocaleString()} XP</span>
+                            <span>{translate("leaderboard.yourWeeklyProgress")}</span>
+                            <span className="tabular-nums">{translate("leaderboard.valueXp", { value: yourRow.weeklyXp.toLocaleString() })}</span>
                           </div>
                           <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
                             <div className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-[width]" style={{ width: `${weeklyProgress}%` }} />
@@ -466,26 +467,26 @@ export const LeaderboardPage: React.FC = () => {
                     </div>
                   )}
                   {boardScope === "public" && !participating && canConsent && (
-                    <UIButton className="mt-4" size="sm" icon={<Globe2 />} onClick={() => { setConsentVisibility("public"); setConsentOpen(true); }}>Join public leaderboard</UIButton>
+                    <UIButton className="mt-4" size="sm" icon={<Globe2 />} onClick={() => { setConsentVisibility("public"); setConsentOpen(true); }}>{translate("leaderboard.joinPublicLeaderboard")}</UIButton>
                   )}
                 </UICard>
 
                 <div>
                   {activeBoard?.rows.length ? (
-                    <ol className="space-y-2" aria-label={`Weekly ${boardScope} rankings`}>
+                    <ol className="space-y-2" aria-label={translate("leaderboard.weeklyBoardscopeRankings", { boardScope: boardScope })}>
                       {activeBoard.rows.map((row, index) => (
                         <React.Fragment key={`${row.rank}:${row.nickname}`}>
-                        {index === 20 && row.isYou && <li className="py-1 text-center text-xs font-black uppercase tracking-widest text-slate-400">Your position</li>}
+                        {index === 20 && row.isYou && <li className="py-1 text-center text-xs font-black uppercase tracking-widest text-slate-400">{translate("leaderboard.yourPosition")}</li>}
                         <li
                           className={`flex items-center gap-3 rounded-2xl border-2 bg-transparent px-3 py-3 rail:px-4 ${row.isYou ? "border-violet-300 dark:border-violet-700" : "border-slate-200 dark:border-slate-700"}`}
                         >
-                          <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-sm font-black ${rankTone(row.rank)}`} aria-label={`Rank ${row.rank}`}>{row.rank}</span>
+                          <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-sm font-black ${rankTone(row.rank)}`} aria-label={translate("leaderboard.rankRank", { rank: row.rank })}>{row.rank}</span>
                           <UIAvatar name={row.nickname} seed={leaderboardAvatarSeed(row.nickname, row.avatarSeed)} size="md" decorative />
                           <div className="min-w-0 flex-1">
-                            <p className="truncate font-black text-slate-950 dark:text-white">{row.isYou ? "You" : row.nickname}</p>
+                            <p className="truncate font-black text-slate-950 dark:text-white">{row.isYou ? translate("leaderboard.you") : row.nickname}</p>
                             {row.isYou && <p className="truncate text-xs font-semibold text-violet-600 dark:text-violet-300">{row.nickname}</p>}
                           </div>
-                          <span className="shrink-0 font-black tabular-nums text-slate-800 dark:text-slate-100">{row.weeklyXp.toLocaleString()} XP</span>
+                          <span className="shrink-0 font-black tabular-nums text-slate-800 dark:text-slate-100">{translate("leaderboard.valueXp", { value: row.weeklyXp.toLocaleString() })}</span>
                         </li>
                         </React.Fragment>
                       ))}
@@ -493,8 +494,8 @@ export const LeaderboardPage: React.FC = () => {
                   ) : (
                     <div className="px-5 py-12 text-center">
                       <SvgAsset id="trophy" size={56} className="mx-auto" />
-                      <h3 className="mt-3 font-black text-slate-900 dark:text-white">No scores yet this week</h3>
-                      <p className="mt-1 text-sm text-slate-500">Complete a lesson to place on the board.</p>
+                      <h3 className="mt-3 font-black text-slate-900 dark:text-white">{translate("leaderboard.noScoresYetThisWeek")}</h3>
+                      <p className="mt-1 text-sm text-slate-500">{translate("leaderboard.completeALessonToPlaceOn")}</p>
                     </div>
                   )}
                 </div>
@@ -502,10 +503,10 @@ export const LeaderboardPage: React.FC = () => {
                 {canConsent && privacy?.sharingEnabled && (
                   <div className="grid gap-2 rail:grid-cols-2">
                     <UIButton variant="secondary" fullWidth onClick={() => { setConsentVisibility(privacy.visibility === "public" ? "public" : "buddies"); setConsentOpen(true); }}>
-                      Change sharing option
+                      {translate("leaderboard.changeSharingOption")}
                     </UIButton>
                     <UIButton variant="outline" fullWidth isLoading={busy === "privacy"} onClick={() => void stopSharing()}>
-                      Make private
+                      {translate("leaderboard.makePrivate")}
                     </UIButton>
                   </div>
                 )}
@@ -514,7 +515,7 @@ export const LeaderboardPage: React.FC = () => {
 
             {isCompact && (
               <UIButton variant="secondary" fullWidth icon={<UserRoundPlus />} onClick={() => setManageOpen((open) => !open)} aria-expanded={manageOpen}>
-                {manageOpen ? "Hide buddy management" : `Manage buddies (${buddies.length})`}
+                {manageOpen ? translate("leaderboard.hideBuddyManagement") : translate("leaderboard.manageBuddiesLength", { length: buddies.length })}
               </UIButton>
             )}
           </section>
@@ -528,21 +529,21 @@ export const LeaderboardPage: React.FC = () => {
                   variant="ghost"
                   size="icon"
                   icon={<ChevronLeft />}
-                  aria-label="Back to leaderboard"
+                  aria-label={translate("leaderboard.backToLeaderboard")}
                   onClick={() => setManageOpen(false)}
                 />
                 <div className="min-w-0">
-                  <h2 id="manage-buddies-title" className="text-xl font-black text-slate-950 dark:text-white">Manage buddies</h2>
+                  <h2 id="manage-buddies-title" className="text-xl font-black text-slate-950 dark:text-white">{translate("leaderboard.manageBuddies")}</h2>
                   <p className="truncate text-xs font-semibold text-slate-500 dark:text-slate-400">
-                    {selectedLearner ? `Connections for ${selectedLearner.displayName}` : "Private connections"}
+                    {selectedLearner ? translate("leaderboard.connectionsForDisplayname", { displayName: selectedLearner.displayName }) : translate("leaderboard.privateConnections")}
                   </p>
                 </div>
               </div>
             )}
             <UICard className="border-orange-200 p-4 dark:border-orange-900/70 rail:p-5">
               <UISectionHeader
-                title={<span id={isCompact ? undefined : "manage-buddies-title"}>{isCompact ? "Buddy code" : "Manage buddies"}</span>}
-                subtitle={isCompact ? undefined : selectedLearner ? `Connections for ${selectedLearner.displayName}` : "Private connections"}
+                title={<span id={isCompact ? undefined : "manage-buddies-title"}>{isCompact ? translate("leaderboard.buddyCode") : translate("leaderboard.manageBuddies")}</span>}
+                subtitle={isCompact ? undefined : selectedLearner ? translate("leaderboard.connectionsForDisplayname", { displayName: selectedLearner.displayName }) : translate("leaderboard.privateConnections")}
                 icon={<UserRoundPlus className="h-5 w-5 text-orange-500" />}
               />
               {canManage ? (
@@ -551,46 +552,46 @@ export const LeaderboardPage: React.FC = () => {
                     <div className="rounded-2xl border border-sky-200 bg-sky-50 p-3 dark:border-sky-900 dark:bg-sky-950/40">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <span className="font-mono text-lg font-black tracking-wider text-slate-950 dark:text-white">{invite.code}</span>
-                        <UIButton size="sm" icon={copied ? <Check /> : <Copy />} onClick={() => void copyInvite()}>{copied ? "Copied" : "Copy code"}</UIButton>
+                        <UIButton size="sm" icon={copied ? <Check /> : <Copy />} onClick={() => void copyInvite()}>{copied ? translate("leaderboard.copied") : translate("leaderboard.copyCode")}</UIButton>
                       </div>
-                      <p className="mt-1 text-xs font-semibold text-slate-500 dark:text-slate-400">Expires in 15 minutes and works once.</p>
+                      <p className="mt-1 text-xs font-semibold text-slate-500 dark:text-slate-400">{translate("leaderboard.expiresIn15MinutesAndWorks")}</p>
                     </div>
                   ) : (
                     <UIButton fullWidth variant="secondary" icon={<Link2 />} isLoading={busy === "invite"} onClick={() => void createCode()}>
-                      Create buddy code
+                      {translate("leaderboard.createBuddyCode")}
                     </UIButton>
                   )}
                   <div>
-                    <label htmlFor="buddy-code" className="text-sm font-bold text-slate-800 dark:text-slate-100">Enter a buddy code</label>
+                    <label htmlFor="buddy-code" className="text-sm font-bold text-slate-800 dark:text-slate-100">{translate("leaderboard.enterABuddyCode")}</label>
                     <input
                       id="buddy-code"
                       value={buddyCode}
                       onChange={(event) => setBuddyCode(event.target.value.toUpperCase())}
-                      placeholder="KODA-XXXXXX"
+                      placeholder={translate("leaderboard.kodaXxxxxx")}
                       maxLength={11}
                       autoCapitalize="characters"
                       className="mt-2 w-full rounded-2xl border-2 border-slate-200 bg-white px-4 py-3 font-mono text-lg font-black uppercase tracking-wider text-slate-900 outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                     />
                   </div>
                   <UIButton fullWidth icon={<Plus />} isLoading={busy === "accept"} disabled={!codePattern.test(buddyCode.trim())} onClick={() => void addBuddy()}>
-                    Add buddy
+                    {translate("leaderboard.addBuddy")}
                   </UIButton>
                 </div>
               ) : (
-                <p className="mt-4 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600 dark:bg-slate-800 dark:text-slate-300">A parent or account owner manages buddy connections.</p>
+                <p className="mt-4 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600 dark:bg-slate-800 dark:text-slate-300">{translate("leaderboard.aParentOrAccountOwnerManages")}</p>
               )}
             </UICard>
 
             <UICard className="p-5">
-              <UISectionHeader title="Your buddies" subtitle={`${buddies.length} connected`} icon={<Users className="h-5 w-5 text-cyan-600" />} />
+              <UISectionHeader title={translate("leaderboard.yourBuddies")} subtitle={translate("leaderboard.lengthConnected", { length: buddies.length })} icon={<Users className="h-5 w-5 text-cyan-600" />} />
               {buddies.length > 5 && (
                 <label className="relative mt-4 block">
                   <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  <span className="sr-only">Search buddies</span>
+                  <span className="sr-only">{translate("leaderboard.searchBuddies")}</span>
                   <input
                     value={buddySearch}
                     onChange={(event) => setBuddySearch(event.target.value)}
-                    placeholder="Search buddies"
+                    placeholder={translate("leaderboard.searchBuddies")}
                     className="w-full rounded-2xl border-2 border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-900 outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                   />
                 </label>
@@ -599,39 +600,39 @@ export const LeaderboardPage: React.FC = () => {
                 {filteredBuddies.length ? filteredBuddies.map((buddy) => (
                   <div key={buddy.relationshipId} className="flex items-center gap-3 rounded-2xl border border-slate-200 p-3 dark:border-slate-700">
                     <UIAvatar
-                      name={buddy.nickname ?? "Private buddy"}
+                      name={buddy.nickname ?? translate("leaderboard.privateBuddy")}
                       seed={leaderboardAvatarSeed(buddy.nickname ?? "", buddy.avatarSeed)}
                       size="sm"
                       decorative
                     />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-black text-slate-900 dark:text-white">{buddy.nickname ?? "Private buddy"}</p>
-                      <p className="text-xs text-slate-500">{buddy.sharingEnabled ? "Sharing leaderboard" : "Leaderboard hidden"}</p>
+                      <p className="truncate text-sm font-black text-slate-900 dark:text-white">{buddy.nickname ?? translate("leaderboard.privateBuddy")}</p>
+                      <p className="text-xs text-slate-500">{buddy.sharingEnabled ? translate("leaderboard.sharingLeaderboard") : translate("leaderboard.leaderboardHidden")}</p>
                     </div>
                     {canManage && (
                       <div className="flex shrink-0 gap-1">
-                        <button type="button" className="rounded-xl px-2 py-2 text-xs font-bold text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/40" onClick={() => setRemoving(buddy)}>Remove</button>
-                        <button type="button" className="rounded-xl px-2 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40" onClick={() => setBlocking(buddy)}>Block</button>
+                        <button type="button" className="rounded-xl px-2 py-2 text-xs font-bold text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/40" onClick={() => setRemoving(buddy)}>{translate("leaderboard.remove")}</button>
+                        <button type="button" className="rounded-xl px-2 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40" onClick={() => setBlocking(buddy)}>{translate("leaderboard.block")}</button>
                       </div>
                     )}
                   </div>
                 )) : buddies.length ? (
                   <div className="rounded-2xl border border-dashed border-slate-300 px-4 py-8 text-center dark:border-slate-700">
                     <Search className="mx-auto h-9 w-9 text-slate-300" />
-                    <p className="mt-2 text-sm font-bold text-slate-700 dark:text-slate-200">No buddies match “{buddySearch}”</p>
-                    <button type="button" className="mt-2 text-xs font-black text-indigo-600" onClick={() => setBuddySearch("")}>Clear search</button>
+                    <p className="mt-2 text-sm font-bold text-slate-700 dark:text-slate-200">{translate("leaderboard.noBuddiesMatchBuddysearch", { buddySearch: buddySearch })}</p>
+                    <button type="button" className="mt-2 text-xs font-black text-indigo-600" onClick={() => setBuddySearch("")}>{translate("leaderboard.clearSearch")}</button>
                   </div>
                 ) : (
                   <div className="rounded-2xl border border-dashed border-slate-300 px-4 py-8 text-center dark:border-slate-700">
                     <Users className="mx-auto h-9 w-9 text-slate-300" />
-                    <p className="mt-2 text-sm font-bold text-slate-700 dark:text-slate-200">No buddies yet</p>
-                    <p className="mt-1 text-xs text-slate-500">Use a one-time code to connect safely.</p>
+                    <p className="mt-2 text-sm font-bold text-slate-700 dark:text-slate-200">{translate("leaderboard.noBuddiesYet")}</p>
+                    <p className="mt-1 text-xs text-slate-500">{translate("leaderboard.useAOneTimeCodeTo")}</p>
                   </div>
                 )}
               </div>
               <div className="mt-4 flex gap-2 rounded-2xl bg-emerald-50 p-3 text-xs font-semibold leading-5 text-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-200">
                 <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
-                Adding a buddy never turns on leaderboard sharing.
+                {translate("leaderboard.addingABuddyNeverTurnsOn")}
               </div>
             </UICard>
           </section>
@@ -640,9 +641,9 @@ export const LeaderboardPage: React.FC = () => {
         )}
       </div>
 
-      <UIModal isOpen={consentOpen} onClose={() => !busy && setConsentOpen(false)} title="Choose leaderboard sharing" maxWidth="max-w-lg" tone="plain">
+      <UIModal isOpen={consentOpen} onClose={() => !busy && setConsentOpen(false)} title={translate("leaderboard.chooseLeaderboardSharing")} maxWidth="max-w-lg" tone="plain">
         <div className="space-y-5">
-          <div className="grid gap-2 rail:grid-cols-2" role="radiogroup" aria-label="Who can see this learner">
+          <div className="grid gap-2 rail:grid-cols-2" role="radiogroup" aria-label={translate("leaderboard.whoCanSeeThisLearner")}>
             <button
               type="button"
               role="radio"
@@ -651,8 +652,8 @@ export const LeaderboardPage: React.FC = () => {
               className={`rounded-2xl border-2 p-4 text-left ${consentVisibility === "buddies" ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40" : "border-slate-200 dark:border-slate-700"}`}
             >
               <Users className="h-5 w-5 text-cyan-600" />
-              <span className="mt-2 block font-black text-slate-900 dark:text-white">Buddies only</span>
-              <span className="mt-1 block text-xs leading-5 text-slate-500">Only direct, accepted buddies.</span>
+              <span className="mt-2 block font-black text-slate-900 dark:text-white">{translate("leaderboard.buddiesOnly")}</span>
+              <span className="mt-1 block text-xs leading-5 text-slate-500">{translate("leaderboard.onlyDirectAcceptedBuddies")}</span>
             </button>
             <button
               type="button"
@@ -662,20 +663,20 @@ export const LeaderboardPage: React.FC = () => {
               className={`rounded-2xl border-2 p-4 text-left ${consentVisibility === "public" ? "border-violet-500 bg-violet-50 dark:bg-violet-950/40" : "border-slate-200 dark:border-slate-700"}`}
             >
               <Globe2 className="h-5 w-5 text-violet-600" />
-              <span className="mt-2 block font-black text-slate-900 dark:text-white">Public</span>
-              <span className="mt-1 block text-xs leading-5 text-slate-500">Any signed-in Koda learner.</span>
+              <span className="mt-2 block font-black text-slate-900 dark:text-white">{translate("leaderboard.public")}</span>
+              <span className="mt-1 block text-xs leading-5 text-slate-500">{translate("leaderboard.anySignedInKodaLearner")}</span>
             </button>
           </div>
           <div className={`rounded-2xl border p-4 text-sm leading-6 ${consentVisibility === "public" ? "border-violet-200 bg-violet-50 text-violet-950 dark:border-violet-800 dark:bg-violet-950/40 dark:text-violet-100" : "border-indigo-200 bg-indigo-50 text-indigo-950 dark:border-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-100"}`}>
-            {consentVisibility === "public" ? "Any signed-in Koda learner can see" : "Approved buddies can see"} only this nickname, avatar, weekly XP, and rank. A real name, email, age, family, and lesson details stay private.
+            {translate("leaderboard.valueOnlyThisNicknameAvatarWeekly", { value: consentVisibility === "public" ? translate("leaderboard.anySignedInKodaLearnerCan") : translate("leaderboard.approvedBuddiesCanSee") })}
           </div>
           <label className="block text-sm font-bold text-slate-800 dark:text-slate-100">
-            Leaderboard nickname
+            {translate("leaderboard.leaderboardNickname")}
             <input
               value={nickname}
               onChange={(event) => setNickname(event.target.value)}
               maxLength={24}
-              placeholder="Example: StarFox"
+              placeholder={translate("leaderboard.exampleStarfox")}
               className="mt-2 w-full rounded-2xl border-2 border-slate-200 bg-white px-4 py-3 text-base text-slate-900 outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
             />
           </label>
@@ -683,24 +684,24 @@ export const LeaderboardPage: React.FC = () => {
             <input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} className="mt-1 h-5 w-5 accent-indigo-600" />
             <span className="text-sm font-semibold leading-6 text-slate-700 dark:text-slate-200">
               {consentVisibility === "public"
-                ? "I understand this profile will be visible to any signed-in Koda learner."
-                : "I confirm this learner may appear to direct, approved buddies."}
+                ? translate("leaderboard.iUnderstandThisProfileWillBe")
+                : translate("leaderboard.iConfirmThisLearnerMayAppear")}
             </span>
           </label>
           <div className="flex flex-col-reverse gap-2 rail:flex-row rail:justify-end">
-            <UIButton variant="secondary" onClick={() => setConsentOpen(false)} disabled={busy === "consent"}>Not now</UIButton>
-            <UIButton icon={consentVisibility === "public" ? <Globe2 /> : <ShieldCheck />} isLoading={busy === "consent"} disabled={!confirmed || nickname.trim().length < 2 || nickname.includes("@")} onClick={() => void enableSharing()}>{consentVisibility === "public" ? "Confirm public sharing" : "Confirm buddies only"}</UIButton>
+            <UIButton variant="secondary" onClick={() => setConsentOpen(false)} disabled={busy === "consent"}>{translate("leaderboard.notNow")}</UIButton>
+            <UIButton icon={consentVisibility === "public" ? <Globe2 /> : <ShieldCheck />} isLoading={busy === "consent"} disabled={!confirmed || nickname.trim().length < 2 || nickname.includes("@")} onClick={() => void enableSharing()}>{consentVisibility === "public" ? translate("leaderboard.confirmPublicSharing") : translate("leaderboard.confirmBuddiesOnly")}</UIButton>
           </div>
         </div>
       </UIModal>
 
-      <UIModal isOpen={Boolean(invite) && !isCompact} onClose={() => setInvite(null)} title="Buddy code" maxWidth="max-w-md" tone="plain">
+      <UIModal isOpen={Boolean(invite) && !isCompact} onClose={() => setInvite(null)} title={translate("leaderboard.buddyCode")} maxWidth="max-w-md" tone="plain">
         {invite?.code && (
           <div className="space-y-4 text-center">
-            <p className="text-sm text-slate-600 dark:text-slate-300">Share this code directly with the buddy you want to add.</p>
+            <p className="text-sm text-slate-600 dark:text-slate-300">{translate("leaderboard.shareThisCodeDirectlyWithThe")}</p>
             <div className="rounded-2xl border-2 border-sky-200 bg-sky-50 px-4 py-5 font-mono text-2xl font-black tracking-wider text-slate-950 dark:border-sky-900 dark:bg-sky-950/40 dark:text-white">{invite.code}</div>
-            <p className="text-xs font-semibold text-slate-500">Expires in 15 minutes and works once.</p>
-            <UIButton fullWidth icon={copied ? <Check /> : <Copy />} onClick={() => void copyInvite()}>{copied ? "Copied" : "Copy code"}</UIButton>
+            <p className="text-xs font-semibold text-slate-500">{translate("leaderboard.expiresIn15MinutesAndWorks")}</p>
+            <UIButton fullWidth icon={copied ? <Check /> : <Copy />} onClick={() => void copyInvite()}>{copied ? translate("leaderboard.copied") : translate("leaderboard.copyCode")}</UIButton>
           </div>
         )}
       </UIModal>
@@ -708,18 +709,18 @@ export const LeaderboardPage: React.FC = () => {
       <UIDialog
         isOpen={Boolean(removing)}
         onClose={() => setRemoving(null)}
-        title="Remove this buddy?"
-        description="They will disappear from both buddy lists and leaderboards. A new code is required to reconnect."
-        confirmText="Remove buddy"
+        title={translate("leaderboard.removeThisBuddy")}
+        description={translate("leaderboard.theyWillDisappearFromBothBuddy")}
+        confirmText={translate("leaderboard.removeBuddy")}
         onConfirm={() => removing && void removeBuddy(removing)}
         variant="danger"
       />
       <UIDialog
         isOpen={Boolean(blocking)}
         onClose={() => setBlocking(null)}
-        title="Block this buddy?"
-        description="They will be removed immediately and cannot reconnect until unblocked."
-        confirmText="Block buddy"
+        title={translate("leaderboard.blockThisBuddy")}
+        description={translate("leaderboard.theyWillBeRemovedImmediatelyAnd")}
+        confirmText={translate("leaderboard.blockBuddy")}
         onConfirm={() => blocking && void removeBuddy(blocking, true)}
         variant="danger"
       />

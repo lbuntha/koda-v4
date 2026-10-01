@@ -1,5 +1,6 @@
 import React from "react";
 import { Clock3, ListChecks, Volume2 } from "lucide-react";
+import { useT } from "../../lib/i18n";
 
 export interface UIBookCardProps {
   cover: React.ReactNode;
@@ -15,7 +16,9 @@ export interface UIBookCardProps {
 }
 
 /** A responsive story card: one full-width choice on phones, a grid tile on larger screens. */
-export const UIBookCard: React.FC<UIBookCardProps> = ({ cover, title, meta, status, quizLabel, hasAudio = false, showAction = true, onClick, ariaLabel, className = "" }) => (
+export const UIBookCard: React.FC<UIBookCardProps> = ({ cover, title, meta, status, quizLabel, hasAudio = false, showAction = true, onClick, ariaLabel, className = "" }) => {
+  const { t } = useT();
+  return (
   <button
     type="button"
     onClick={onClick}
@@ -24,7 +27,7 @@ export const UIBookCard: React.FC<UIBookCardProps> = ({ cover, title, meta, stat
   >
     <span className="block w-full overflow-hidden">{cover}</span>
     <span className="grid gap-1 p-3">
-      <span className="min-w-0 break-words inline-flex items-center gap-1.5 text-xs text-muted"><Clock3 className="h-4 w-4 shrink-0 text-indigo-500" aria-hidden="true" />{meta}{hasAudio && <Volume2 className="ml-1 h-4 w-4 shrink-0 text-emerald-600" aria-label="Audio available" />}</span>
+      <span className="min-w-0 break-words inline-flex items-center gap-1.5 text-xs text-muted"><Clock3 className="h-4 w-4 shrink-0 text-indigo-500" aria-hidden="true" />{meta}{hasAudio && <Volume2 className="ml-1 h-4 w-4 shrink-0 text-emerald-600" aria-label={t("library.audioAvailable")} />}</span>
       <span className="min-w-0 break-words text-lg font-extrabold leading-tight text-ink">{title}</span>
       <span className="min-w-0 break-words text-xs text-muted">{status}</span>
       <span className={`${showAction ? "mt-2" : "mt-1"} flex min-h-10 items-center ${showAction ? "justify-between" : "justify-start"} gap-3 text-sm font-medium text-indigo-600 dark:text-indigo-300`}>
@@ -33,4 +36,5 @@ export const UIBookCard: React.FC<UIBookCardProps> = ({ cover, title, meta, stat
       </span>
     </span>
   </button>
-);
+  );
+};

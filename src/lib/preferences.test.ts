@@ -28,6 +28,7 @@ describe("defaults", () => {
       theme: "light",
       soundEnabled: false,
       voiceEnabled: true,
+      language: null,
     });
   });
 
@@ -49,6 +50,7 @@ describe("a change", () => {
       theme: "light",
       soundEnabled: true,
       voiceEnabled: true,
+      language: null,
     });
   });
 
@@ -79,7 +81,7 @@ describe("a document from another device", () => {
     PreferencesAPI.subscribe(seen);
 
     // What `apply.ts` does with a pulled doc: write the key, then nudge.
-    const pulled = { theme: "dark", soundEnabled: true, voiceEnabled: false };
+    const pulled = { theme: "dark", soundEnabled: true, voiceEnabled: false, language: "km" };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(pulled));
     window.dispatchEvent(
       new StorageEvent("storage", { key: STORAGE_KEY, newValue: JSON.stringify(pulled) }),
@@ -99,7 +101,24 @@ describe("a document from another device", () => {
       theme: "light",
       soundEnabled: false,
       voiceEnabled: true,
+      language: null,
     });
+  });
+});
+
+describe("language", () => {
+  it("keeps any well-formed code, and drops anything else to 'follow the device'", async () => {
+    const PreferencesAPI = await store();
+
+    PreferencesAPI.update({ language: "km" });
+    expect(PreferencesAPI.current().language).toBe("km");
+
+    // Not a language this build ships — still kept, for the day it does.
+    PreferencesAPI.update({ language: "pt-BR" });
+    expect(PreferencesAPI.current().language).toBe("pt-BR");
+
+    PreferencesAPI.update({ language: "<script>" });
+    expect(PreferencesAPI.current().language).toBeNull();
   });
 });
 
@@ -114,6 +133,7 @@ describe("a device that predates the document", () => {
       theme: "dark",
       soundEnabled: true,
       voiceEnabled: true,
+      language: null,
     });
   });
 });

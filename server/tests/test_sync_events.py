@@ -417,3 +417,43 @@ async def test_a_baseline_and_the_events_it_does_not_cover_add_up(client, parent
 
     profile = (await client.get("/sync/profile/l_mia", headers=parent)).json()
     assert profile["concepts"][0]["questionsAnswered"] == 42
+
+
+def reading_event(event_id: str, **fields) -> dict:
+    """The shape `ReadingRecorder` sends: the book's context, no answer fields."""
+    e = event(event_id, **{"skillId": "koda-library", "activityId": "reading", "lessonId": "starter-market@1",
+                           "conceptKey": "read-and-answer", "entry": "picker", "readId": "r_1", **fields})
+    for answer_field in ("correct", "attempt", "responseMs", "supportsUsed"):
+        e.pop(answer_field)
+    return e
+
+
+async def test_a_book_read_lands_page_by_page_and_counts_as_a_day_practised(client, parent, db):
+    """Reading is traced like a lesson: the four types are accepted, the page
+    details survive as extras, and the rollup takes the day but no totals."""
+    body = {
+        "schemaVersion": 1,
+        "events": [
+            reading_event("rd_1", type="reading_started", pageCount=4),
+            reading_event("rd_2", type="page_read", page=1, pageCount=4, dwellMs=12000, readAloud=1, wordsTapped=["mango"]),
+            reading_event("rd_3", type="page_read", page=2, pageCount=4, dwellMs=3000, readAloud=0, wordsTapped=[]),
+            reading_event("rd_4", type="reading_finished", pageCount=4, pagesSeen=2, durationMs=15000, readAloudPages=1, wordsTapped=1),
+            reading_event("rd_5", type="reading_abandoned", readId="r_2", pageCount=4, furthestPage=1, pagesSeen=1, durationMs=4000),
+        ],
+    }
+    r = await client.post("/sync/push", json=body, headers=parent)
+    assert r.status_code == 200, r.text
+    assert r.json()["accepted"] == 5
+
+    page = await db.events.find_one({"eventId": "rd_2"})
+    assert page["type"] == "page_read"
+    assert page["readId"] == "r_1"
+    assert (page["page"], page["dwellMs"], page["readAloud"], page["wordsTapped"]) == (1, 12000, 1, ["mango"])
+    finished = await db.events.find_one({"eventId": "rd_4"})
+    assert (finished["pagesSeen"], finished["readAloudPages"]) == (2, 1)
+
+    totals = (await client.get("/sync/profile/l_mia", headers=parent)).json()["concepts"][0]
+    assert totals["conceptKey"] == "read-and-answer"
+    assert totals["practisedOn"] == ["2026-08-19"]
+    assert totals["questionsAnswered"] == 0
+    assert totals.get("lessonsCompleted", 0) == 0
