@@ -5,7 +5,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { AlertCircle, ArrowLeft, Check, ChevronLeft, ChevronRight, Flag, GripVertical, ListPlus, Pencil, Plus, Rocket, Search, Settings2, Star, Trash2, Undo2, X } from "lucide-react";
+import { AlertCircle, ArrowLeft, Check, ChevronLeft, ChevronRight, Flag, GripVertical, ListPlus, Pencil, Plus, Rocket, Search, Settings2, Star, Trash2, Undo2, Wand2, X } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { usePermissions } from "../../lib/sync";
 import { UIButton } from "../../components/ui";
@@ -31,6 +31,7 @@ import { runChecks } from "./checks";
 import type { TraceDraft } from "./drafts";
 import { TraceDrafts, newDraft } from "./drafts";
 import { Field, IconButton, Section, inputCls } from "./ui";
+import { AutoStrokesForSet } from "./AutoStrokesPanel";
 
 const uid = (p: string) => `${p}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 const GRIDS: TraceItem["grid"][] = ["4x3-moeys", "3x3", "baseline-4-lines", "dots", "none"];
@@ -294,7 +295,7 @@ export function CollectionBoard({ id, onBack, onOpenItem }: { id: string; onBack
   useSyncExternalStore(TraceDrafts.subscribe, TraceDrafts.version);
   const [col, setCol] = useState<StudioCollection | null>(null);
   const [saving, setSaving] = useState<"saved" | "saving" | "error">("saved");
-  const [panel, setPanel] = useState<"list" | "existing" | "apply" | null>(null);
+  const [panel, setPanel] = useState<"list" | "existing" | "apply" | "auto" | null>(null);
   const [problems, setProblems] = useState<Problem[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ tone: "good" | "bad"; text: string } | null>(null);
@@ -469,6 +470,9 @@ export function CollectionBoard({ id, onBack, onOpenItem }: { id: string; onBack
               <UIButton size="sm" icon={<Plus className="h-4 w-4" />} variant={panel === "existing" ? "primary" : "secondary"} onClick={() => setPanel(panel === "existing" ? null : "existing")}>
                 {t("traceStudio.col.addExisting")}
               </UIButton>
+              <UIButton size="sm" icon={<Wand2 className="h-4 w-4" />} variant={panel === "auto" ? "primary" : "secondary"} disabled={items.length === 0} onClick={() => setPanel(panel === "auto" ? null : "auto")}>
+                {t("traceStudio.auto.forSet")}
+              </UIButton>
               <UIButton size="sm" icon={<Settings2 className="h-4 w-4" />} variant={panel === "apply" ? "primary" : "secondary"} disabled={items.length === 0} onClick={() => setPanel(panel === "apply" ? null : "apply")}>
                 {t("traceStudio.col.applyAll")}
               </UIButton>
@@ -493,6 +497,7 @@ export function CollectionBoard({ id, onBack, onOpenItem }: { id: string; onBack
               }}
             />
           )}
+          {panel === "auto" && <AutoStrokesForSet itemIds={col.itemIds} onDone={() => undefined} />}
           {panel === "apply" && (
             <ApplyAll
               onApply={(patch) => {

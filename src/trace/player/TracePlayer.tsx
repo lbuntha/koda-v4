@@ -9,8 +9,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { ArrowLeft, Check, CircleDot, Eraser, Eye, Flag, Ghost, Grid3x3, Hash, ListOrdered, MoveRight, Palette, RotateCcw, Route, SlidersHorizontal, Undo2 } from "lucide-react";
-import { IconButton } from "../studio/ui";
+import { ArrowLeft, ArrowRight, Check, CircleDot, Eraser, Eye, Flag, Ghost, Grid3x3, Hash, ListOrdered, MoveRight, Palette, RotateCcw, Route, SlidersHorizontal, Sparkles, Undo2 } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { UIButton } from "../../components/ui";
 import type { AgeBand, Sensitivity, StepId, TraceItem } from "../geometry/types";
@@ -391,7 +390,7 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
   const onPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const d = drawingRef.current;
     if (!d) return;
-    const events = e.nativeEvent.getCoalescedEvents?.() ?? [e.nativeEvent];
+    const events = coalesced(e.nativeEvent);
     for (const ev of events) d.push(toUnits(ev));
   };
 
@@ -449,48 +448,50 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
     progress.status === "canDo" ? (mode === "writing" ? "canWrite" : "canDraw") : progress.status === "learning" ? null : progress.status;
 
   /* ------------------------------------------------------------ view */
+  const helpList = play === "justDraw" ? (["ghost"] as Switch[]) : [...SWITCHES];
+  const locked = play === "steps" || drill !== null;
+
   return (
-    <div className="@container mx-auto flex w-full max-w-5xl flex-col gap-4 pb-10">
+    <div className="@container mx-auto flex w-full max-w-6xl flex-col gap-4 pb-8">
       {!sandbox && (
-      <div className="flex flex-wrap items-center gap-3">
-        <UIButton variant="secondary" size="sm" icon={<ArrowLeft className="h-4 w-4" />} onClick={onExit}>
-          {t("trace.action.backToList")}
-        </UIButton>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white" lang={item.script === "khmer" ? "km" : undefined}>
-          {item.title}
-        </h1>
-        {status && <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200">{t(`trace.status.${status}`)}</span>}
-        {recheck && play === "steps" && <span className="rounded-full bg-violet-100 px-3 py-1 text-sm font-semibold text-violet-800 dark:bg-violet-900/40 dark:text-violet-200">{t("trace.checkUp")}</span>}
-      </div>
+        <header className="flex items-start gap-3">
+          <RoundIcon label={t("trace.action.backToList")} onClick={onExit}>
+            <ArrowLeft className="h-5 w-5" />
+          </RoundIcon>
+          <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="truncate text-xl font-bold leading-tight text-slate-900 dark:text-white" lang={item.script === "khmer" ? "km" : undefined}>
+                {item.title}
+              </h1>
+              {status && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200">
+                  <Check className="h-3.5 w-3.5" />
+                  {t(`trace.status.${status}`)}
+                </span>
+              )}
+              {recheck && play === "steps" && <span className="rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-semibold text-violet-800 dark:bg-violet-900/40 dark:text-violet-200">{t("trace.checkUp")}</span>}
+            </div>
+            {play === "steps" && (
+              <StepTrack
+                steps={plan.steps.map((x) => t(`trace.step.${x.id}`))}
+                at={stepIndex}
+                allDone={progress.status !== "learning"}
+                label={t("trace.stepProgress", { n: stepIndex + 1, total: plan.steps.length })}
+              />
+            )}
+          </div>
+        </header>
       )}
 
-      {/* Step dots */}
-      {!sandbox && (
-      <ol className="flex flex-wrap gap-2" aria-label={t("trace.stepProgress", { n: stepIndex + 1, total: plan.steps.length })}>
-        {plan.steps.map((s, i) => (
-          <li
-            key={s.id}
-            className={`rounded-full px-3 py-1 text-xs font-semibold ${
-              i === stepIndex && play === "steps"
-                ? "bg-violet-600 text-white"
-                : i < stepIndex || progress.status !== "learning"
-                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200"
-                  : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
-            }`}
-          >
-            {t(`trace.step.${s.id}`)}
-          </li>
-        ))}
-      </ol>
-      )}
-
-      <div className="grid gap-4 @3xl:grid-cols-[minmax(0,560px)_minmax(0,1fr)]">
-        <div className="flex min-w-0 flex-col gap-3">
-          <div className="relative">
+      <div className="grid items-start gap-5 @3xl:grid-cols-[minmax(0,1fr)_300px] [@media(orientation:landscape)_and_(max-height:640px)]:grid-cols-1">
+        {/* The slate, as large as the screen allows */}
+        <section className="flex min-w-0 flex-col items-center gap-3 [@media(orientation:landscape)_and_(max-height:640px)]:flex-row [@media(orientation:landscape)_and_(max-height:640px)]:items-center [@media(orientation:landscape)_and_(max-height:640px)]:justify-center">
+          <p className="w-full text-center text-base font-medium text-slate-700 dark:text-slate-200 [@media(orientation:landscape)_and_(max-height:640px)]:hidden">{hint}</p>
+          <div className="relative aspect-square w-[min(100%,calc(100dvh_-_16rem))] shrink-0 [@media(orientation:landscape)_and_(max-height:640px)]:w-[calc(100dvh_-_8rem)]">
             <canvas
               ref={canvasRef}
               aria-label={t("trace.slate")}
-              className="block aspect-square w-full touch-none rounded-2xl border border-slate-200 shadow-sm dark:border-slate-700"
+              className="absolute inset-0 block h-full w-full touch-none rounded-3xl shadow-[0_18px_40px_-20px_rgba(91,63,217,0.45)] ring-1 ring-slate-200 dark:ring-slate-700"
               style={{ cursor: canDraw ? "crosshair" : "default" }}
               onPointerDown={onPointerDown}
               onPointerMove={onPointerMove}
@@ -498,89 +499,84 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
               onPointerCancel={penUp}
             />
             {memoryLeft > 0 && (
-              <div className="pointer-events-none absolute inset-x-0 top-3 text-center">
-                <span className="rounded-full bg-violet-600 px-4 py-1.5 text-sm font-semibold text-white">{t("trace.remember", { s: memoryLeft })}</span>
+              <div className="pointer-events-none absolute inset-x-0 top-3 flex justify-center">
+                <span className="rounded-full bg-violet-600 px-4 py-1.5 text-sm font-semibold text-white shadow-lg">{t("trace.remember", { s: memoryLeft })}</span>
+              </div>
+            )}
+            {message && !outcome && (
+              <div role="status" className="pointer-events-none absolute inset-x-3 bottom-3 flex justify-center">
+                <span
+                  className={`max-w-full rounded-2xl px-4 py-2 text-center text-sm font-semibold text-white shadow-lg motion-safe:animate-[trace-pop_200ms_ease-out] ${
+                    message.tone === "fix" ? "bg-rose-600" : message.tone === "good" ? "bg-emerald-600" : "bg-violet-600"
+                  }`}
+                >
+                  {message.text}
+                </span>
               </div>
             )}
           </div>
-          {message && (
-            <p
-              role="status"
-              className={`rounded-xl px-4 py-3 text-base font-medium ${
-                message.tone === "fix"
-                  ? "bg-rose-50 text-rose-800 dark:bg-rose-950/50 dark:text-rose-200"
-                  : message.tone === "good"
-                    ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200"
-                    : "bg-violet-50 text-violet-800 dark:bg-violet-950/50 dark:text-violet-200"
-              }`}
-            >
-              {message.text}
-            </p>
-          )}
 
           {outcome && (
-            <div role="status" className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-              {outcome.result && (
-                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <span className="text-4xl font-bold tabular-nums text-slate-900 dark:text-white">{outcome.result.score}%</span>
-                  <span className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{t("trace.accuracy")}</span>
-                  <span className="ml-auto text-2xl tracking-widest text-violet-600" aria-label={t("trace.starsLabel", { count: outcome.result.stars })}>
+            <div role="status" className="flex w-full max-w-xl items-start gap-4 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-700">
+              {outcome.result && <ScoreRing score={outcome.result.score} label={t("trace.accuracy")} />}
+              <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                {outcome.result && (
+                  <span className="text-2xl tracking-widest text-violet-600" aria-label={t("trace.starsLabel", { count: outcome.result.stars })}>
                     {"★".repeat(outcome.result.stars)}
-                    {"☆".repeat(3 - outcome.result.stars)}
+                    <span className="text-slate-300 dark:text-slate-600">{"★".repeat(3 - outcome.result.stars)}</span>
                   </span>
-                </div>
-              )}
-              <p className="text-base text-slate-800 dark:text-slate-100">
-                {outcome.result?.feedback ? faultText(t, outcome.result.feedback, active, !guided) : t("trace.good")}
-              </p>
-              {outcome.result && outcome.result.strokes.length > 1 && (
-                <ul className="flex flex-wrap gap-1.5" aria-label={t("trace.perStroke")}>
-                  {outcome.result.strokes.map((r) => (
-                    <li
-                      key={r.order}
-                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${
-                        r.accepted ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200" : "bg-rose-50 text-rose-800 dark:bg-rose-950/50 dark:text-rose-200"
-                      }`}
-                    >
-                      <span className="text-sm">{badge(r.order, active)}</span>
-                      {r.accepted ? `✓ ${r.score}` : `✗ ${t(`trace.faultShort.${r.fault ?? "missing"}`)}`}
-                    </li>
+                )}
+                {eventText(outcome.event) &&
+                  (outcome.event === "down" || outcome.event === "lost" ? (
+                    // Moving back a step is help, not a prize: said plainly.
+                    <p className="text-base font-semibold text-violet-700 dark:text-violet-300">{eventText(outcome.event)}</p>
+                  ) : (
+                    <p className="flex items-center gap-1.5 text-base font-bold text-emerald-700 dark:text-emerald-300">
+                      <Sparkles className="h-4 w-4" />
+                      {eventText(outcome.event)}
+                    </p>
                   ))}
-                </ul>
-              )}
-              {reviewing && !outcome.result?.accepted && <p className="text-sm text-slate-500 dark:text-slate-400">{t("trace.reviewNote")}</p>}
-              {eventText(outcome.event) && <p className="text-base font-semibold text-emerald-700 dark:text-emerald-300">{eventText(outcome.event)}</p>}
-              {!outcome.counted && play === "myWay" && <p className="text-sm text-slate-500 dark:text-slate-400">{t("trace.practiceOnly")}</p>}
+                <p className="text-sm text-slate-700 dark:text-slate-200">{outcome.result?.feedback ? faultText(t, outcome.result.feedback, active, !guided) : t("trace.good")}</p>
+                {outcome.result && outcome.result.strokes.length > 1 && (
+                  <ul className="flex flex-wrap gap-1" aria-label={t("trace.perStroke")}>
+                    {outcome.result.strokes.map((r) => (
+                      <li
+                        key={r.order}
+                        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                          r.accepted ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200" : "bg-rose-50 text-rose-800 dark:bg-rose-950/50 dark:text-rose-200"
+                        }`}
+                      >
+                        <span className="text-sm">{badge(r.order, active)}</span>
+                        {r.accepted ? `✓ ${r.score}` : `✗ ${t(`trace.faultShort.${r.fault ?? "missing"}`)}`}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {reviewing && !outcome.result?.accepted && <p className="text-xs text-slate-500 dark:text-slate-400">{t("trace.reviewNote")}</p>}
+                {!outcome.counted && play === "myWay" && <p className="text-xs text-slate-500 dark:text-slate-400">{t("trace.practiceOnly")}</p>}
+              </div>
             </div>
           )}
 
-          <div className="flex flex-wrap items-center gap-2">
+          {/* Actions: big round touch targets, the main one wide — a column beside the slate on a short landscape screen */}
+          <div className="flex w-full max-w-xl items-center justify-center gap-2.5 [@media(orientation:landscape)_and_(max-height:640px)]:w-auto [@media(orientation:landscape)_and_(max-height:640px)]:flex-col [@media(orientation:landscape)_and_(max-height:640px)]:[&>button]:flex-none">
             {watching ? (
               <>
-                <UIButton icon={<Check className="h-4 w-4" />} onClick={watched} disabled={!watchDone}>
-                  {watchOnly !== null ? t("trace.action.continue") : t("trace.action.watched")}
-                </UIButton>
-                <IconButton label={t("trace.action.watchAgain")} onClick={() => setWatchKey((k) => k + 1)}>
+                <RoundIcon label={t("trace.action.watchAgain")} onClick={() => setWatchKey((k) => k + 1)}>
                   <RotateCcw className="h-5 w-5" />
-                </IconButton>
+                </RoundIcon>
+                <MainButton onClick={watched} disabled={!watchDone} icon={<Check className="h-5 w-5" />}>
+                  {watchOnly !== null ? t("trace.action.continue") : t("trace.action.watched")}
+                </MainButton>
               </>
             ) : outcome ? (
-              <UIButton onClick={resetAttempt}>{outcome.result?.accepted ? t("trace.action.next") : t("trace.action.tryAgain")}</UIButton>
+              <MainButton onClick={resetAttempt} icon={outcome.result?.accepted ? <ArrowRight className="h-5 w-5" /> : <RotateCcw className="h-5 w-5" />}>
+                {outcome.result?.accepted ? t("trace.action.next") : t("trace.action.tryAgain")}
+              </MainButton>
             ) : (
               <>
-                {!guided && play !== "justDraw" && (
-                  <UIButton icon={<Check className="h-4 w-4" />} onClick={check} disabled={inkCount === 0}>
-                    {t("trace.action.check")}
-                  </UIButton>
-                )}
-                <IconButton label={t("trace.action.undo")} onClick={undo} disabled={inkCount === 0}>
-                  <Undo2 className="h-5 w-5" />
-                </IconButton>
-                <IconButton label={t("trace.action.clear")} onClick={resetAttempt} disabled={inkCount === 0}>
-                  <Eraser className="h-5 w-5" />
-                </IconButton>
                 {play !== "justDraw" && (
-                  <IconButton
+                  <RoundIcon
                     label={t("trace.action.watchAgain")}
                     onClick={() => {
                       setWatchOnly(current >= 0 ? current : 0);
@@ -588,20 +584,113 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
                     }}
                   >
                     <Eye className="h-5 w-5" />
-                  </IconButton>
+                  </RoundIcon>
+                )}
+                <RoundIcon label={t("trace.action.undo")} onClick={undo} disabled={inkCount === 0}>
+                  <Undo2 className="h-5 w-5" />
+                </RoundIcon>
+                <RoundIcon label={t("trace.action.clear")} onClick={resetAttempt} disabled={inkCount === 0}>
+                  <Eraser className="h-5 w-5" />
+                </RoundIcon>
+                {!guided && play !== "justDraw" && (
+                  <MainButton onClick={check} disabled={inkCount === 0} icon={<Check className="h-5 w-5" />}>
+                    {t("trace.action.check")}
+                  </MainButton>
                 )}
               </>
             )}
-            {!sandbox && (
-              <span className="ml-auto">
-                <IconButton label={t("trace.report.button")} active={reporting !== null} onClick={() => setReporting(reporting ? null : { reason: null, note: "", sent: false })}>
-                  <Flag className="h-5 w-5" />
-                </IconButton>
-              </span>
-            )}
           </div>
+        </section>
+
+        {/* How to practise, help, and what the coach suggests */}
+        <aside className="@container/aside flex min-w-0 flex-col gap-3">
+          <p className="hidden text-base font-medium text-slate-700 dark:text-slate-200 [@media(orientation:landscape)_and_(max-height:640px)]:block">{hint}</p>
+          {suggestion && (
+            <div className="flex flex-col gap-3 rounded-3xl bg-violet-600 p-4 text-white shadow-lg">
+              <p className="flex items-start gap-2 text-base font-semibold">
+                <Sparkles className="mt-0.5 h-5 w-5 shrink-0" />
+                {suggestion.kind === "rest" ? t("trace.coach.rest") : t(`trace.coach.${suggestion.kind}`, { n: badge(suggestion.order, item) })}
+              </p>
+              <div className="flex gap-2">
+                <button onClick={takeSuggestion} className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-violet-700 hover:bg-violet-50">
+                  {suggestion.kind === "rest" ? t("trace.action.backToList") : t("trace.action.continue")}
+                </button>
+                <button onClick={() => setSuggestion(null)} className="rounded-xl px-4 py-2 text-sm font-semibold text-white/90 hover:bg-white/10">
+                  {t("trace.action.notNow")}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Copy: the model beside the empty grid */}
+          {step === "copy" && play === "steps" && drill === null && !watching && (
+            <div className="flex flex-col items-center gap-2 rounded-3xl bg-white p-3 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-700">
+              <ModelPreview item={item} />
+            </div>
+          )}
+
+          {!sandbox && (
+            <div className="grid grid-cols-3 gap-1 rounded-2xl bg-slate-100 p-1 dark:bg-slate-800" role="radiogroup" aria-label={t("trace.mode.label")}>
+              {(["steps", "myWay", ...(mode === "drawing" ? (["justDraw"] as const) : [])] as PlayMode[]).map((m) => (
+                <button
+                  key={m}
+                  role="radio"
+                  aria-checked={play === m}
+                  onClick={() => {
+                    setPlay(m);
+                    setDrill(null);
+                    resetAttempt();
+                  }}
+                  className={`flex min-w-0 flex-col items-center gap-0.5 rounded-xl px-1 py-2 text-xs font-semibold transition @min-[20rem]/aside:flex-row @min-[20rem]/aside:justify-center @min-[20rem]/aside:gap-1.5 @min-[20rem]/aside:text-sm ${
+                    play === m ? "bg-white text-violet-700 shadow-sm dark:bg-slate-900 dark:text-violet-300" : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+                  }`}
+                >
+                  {MODE_ICON[m]}
+                  {t(`trace.mode.${m}`)}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className="rounded-3xl bg-white p-3 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-700">
+            <div className="grid grid-cols-2 gap-1 @min-[13rem]/aside:grid-cols-3 @min-[26rem]/aside:grid-cols-6">
+              {helpList.map((sw) => (
+                <button
+                  key={sw}
+                  type="button"
+                  role="switch"
+                  aria-checked={switches[sw]}
+                  aria-label={`${t(`trace.switch.${sw}`)} · ${switches[sw] ? t("trace.on") : t("trace.off")}`}
+                  disabled={locked}
+                  onClick={() => {
+                    setMySwitches((x) => ({ ...x, [sw]: !x[sw] }));
+                    resetAttempt();
+                  }}
+                  className={`flex flex-col items-center gap-1 rounded-2xl px-1 py-2 text-[11px] font-semibold leading-tight transition disabled:cursor-default ${
+                    switches[sw] ? "bg-violet-50 text-violet-700 dark:bg-violet-950/50 dark:text-violet-200" : "text-slate-400 dark:text-slate-500"
+                  } ${locked ? "" : "hover:bg-violet-100 dark:hover:bg-violet-900/40"}`}
+                >
+                  {SWITCH_ICON[sw]}
+                  <span className="truncate">{t(`trace.switch.${sw}`)}</span>
+                </button>
+              ))}
+            </div>
+            {locked && !sandbox && <p className="mt-2 px-1 text-xs text-slate-500 dark:text-slate-400">{t("trace.switchesLocked")}</p>}
+          </div>
+
+          {!sandbox && (
+            <div className="flex justify-end">
+              <button
+                onClick={() => setReporting(reporting ? null : { reason: null, note: "", sent: false })}
+                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+              >
+                <Flag className="h-3.5 w-3.5" />
+                {t("trace.report.button")}
+              </button>
+            </div>
+          )}
           {reporting && (
-            <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+            <div className="flex flex-col gap-3 rounded-3xl bg-white p-4 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-700">
               {reporting.sent ? (
                 <p role="status" className="text-base text-emerald-800 dark:text-emerald-200">
                   {t("trace.report.thanks")}
@@ -648,73 +737,96 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
               )}
             </div>
           )}
-        </div>
-
-        <div className="flex min-w-0 flex-col gap-4">
-          {/* Mode */}
-          <div className={`flex flex-wrap gap-2 ${sandbox ? "hidden" : ""}`} role="radiogroup" aria-label={t("trace.mode.label")}>
-            {(["steps", "myWay", ...(mode === "drawing" ? (["justDraw"] as const) : [])] as PlayMode[]).map((m) => (
-              <button
-                key={m}
-                role="radio"
-                aria-checked={play === m}
-                onClick={() => {
-                  setPlay(m);
-                  setDrill(null);
-                  resetAttempt();
-                }}
-                className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-semibold ${play === m ? "bg-violet-600 text-white" : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200"}`}
-              >
-                {MODE_ICON[m]}
-                {t(`trace.mode.${m}`)}
-              </button>
-            ))}
-          </div>
-
-          {/* Help switches */}
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-wrap gap-2">
-              {(play === "justDraw" ? (["ghost"] as Switch[]) : [...SWITCHES]).map((sw) => {
-                const locked = play === "steps" || drill !== null;
-                return (
-                  <IconButton
-                    key={sw}
-                    label={`${t(`trace.switch.${sw}`)} · ${switches[sw] ? t("trace.on") : t("trace.off")}`}
-                    active={switches[sw]}
-                    disabled={locked}
-                    onClick={() => {
-                      setMySwitches((x) => ({ ...x, [sw]: !x[sw] }));
-                      resetAttempt();
-                    }}
-                  >
-                    {SWITCH_ICON[sw]}
-                  </IconButton>
-                );
-              })}
-            </div>
-            {play === "steps" && drill === null && <p className="text-xs text-slate-500 dark:text-slate-400">{t("trace.switchesLocked")}</p>}
-          </div>
-
-          <p className="text-base text-slate-700 dark:text-slate-200">{hint}</p>
-
-          {/* Copy: the model beside the empty grid */}
-          {step === "copy" && play === "steps" && drill === null && !watching && <ModelPreview item={item} />}
-
-          {suggestion && (
-            <div className="flex flex-wrap items-center gap-3 rounded-2xl bg-violet-50 p-4 dark:bg-violet-950/50">
-              <p className="text-base text-violet-900 dark:text-violet-100">
-                {suggestion.kind === "rest" ? t("trace.coach.rest") : t(`trace.coach.${suggestion.kind}`, { n: badge(suggestion.order, item) })}
-              </p>
-              <UIButton size="sm" onClick={takeSuggestion}>
-                {suggestion.kind === "rest" ? t("trace.action.backToList") : t("trace.action.continue")}
-              </UIButton>
-              <UIButton size="sm" variant="secondary" onClick={() => setSuggestion(null)}>
-                {t("trace.action.notNow")}
-              </UIButton>
-            </div>
-          )}
-        </div>
+        </aside>
       </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------ pieces */
+
+/** A large, round, touch-sized icon button with a tooltip. */
+function RoundIcon({ label, onClick, disabled, children }: { label: string; onClick(): void; disabled?: boolean; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      onClick={onClick}
+      disabled={disabled}
+      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-violet-50 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 active:scale-95 disabled:opacity-35 disabled:hover:bg-white dark:bg-slate-900 dark:text-slate-200 dark:ring-slate-700 dark:hover:bg-violet-950/50"
+    >
+      {children}
+    </button>
+  );
+}
+
+/** The one thing to press next. */
+function MainButton({ onClick, disabled, icon, children }: { onClick(): void; disabled?: boolean; icon?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="flex h-12 min-w-0 max-w-xs flex-1 items-center justify-center gap-2 rounded-full bg-violet-600 px-6 text-base font-bold text-white shadow-[0_10px_24px_-10px_rgba(91,63,217,0.8)] transition hover:bg-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300 active:scale-[0.98] disabled:opacity-40 disabled:shadow-none"
+    >
+      {icon}
+      <span className="truncate">{children}</span>
+    </button>
+  );
+}
+
+/** Where the child is on the writing steps: a slim segmented bar and its name. */
+function StepTrack({ steps, at, allDone, label }: { steps: string[]; at: number; allDone: boolean; label: string }) {
+  return (
+    <div className="flex flex-col gap-1" aria-label={label}>
+      <div className="flex gap-1">
+        {steps.map((s, i) => (
+          <span
+            key={s}
+            title={s}
+            className={`h-1.5 flex-1 rounded-full ${allDone || i < at ? "bg-emerald-500" : i === at ? "bg-violet-600" : "bg-slate-200 dark:bg-slate-700"}`}
+          />
+        ))}
+      </div>
+      <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+        {label} · <span className="font-semibold text-slate-700 dark:text-slate-200">{steps[Math.max(0, at)]}</span>
+      </span>
+    </div>
+  );
+}
+
+/** Accuracy as a ring that fills up. */
+function ScoreRing({ score, label }: { score: number; label: string }) {
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setShown(score));
+    return () => cancelAnimationFrame(id);
+  }, [score]);
+  const r = 30;
+  const c = 2 * Math.PI * r;
+  const color = score >= 90 ? "#059669" : score >= 70 ? "#6d28d9" : score >= 40 ? "#2563eb" : "#e11d48";
+  return (
+    <div className="relative h-20 w-20 shrink-0" role="img" aria-label={`${score}% ${label}`}>
+      <svg viewBox="0 0 72 72" className="h-full w-full -rotate-90">
+        <circle cx="36" cy="36" r={r} fill="none" stroke="currentColor" strokeWidth="7" className="text-slate-100 dark:text-slate-800" />
+        <circle
+          cx="36"
+          cy="36"
+          r={r}
+          fill="none"
+          stroke={color}
+          strokeWidth="7"
+          strokeLinecap="round"
+          strokeDasharray={c}
+          strokeDashoffset={c * (1 - shown / 100)}
+          className="motion-safe:transition-[stroke-dashoffset] motion-safe:duration-700 motion-safe:ease-out"
+        />
+      </svg>
+      <span className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-lg font-bold tabular-nums text-slate-900 dark:text-white">{score}%</span>
+        <span className="text-[9px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</span>
+      </span>
     </div>
   );
 }
@@ -734,4 +846,10 @@ function ModelPreview({ item }: { item: TraceItem }) {
     drawWatch(ctx, item, prepared, prepared.length, canvas.width / 1000);
   }, [item]);
   return <canvas ref={ref} aria-hidden="true" className="aspect-square w-full max-w-64 rounded-xl border border-slate-200 dark:border-slate-700" />;
+}
+
+/** The pointer's in-between positions — or the event itself where a browser returns none (some do, and so do synthetic events). */
+function coalesced(e: PointerEvent): PointerEvent[] {
+  const list = e.getCoalescedEvents?.();
+  return list && list.length ? list : [e];
 }

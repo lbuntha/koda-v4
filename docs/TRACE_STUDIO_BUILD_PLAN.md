@@ -549,7 +549,14 @@ offline download, report-a-problem; then the admin builds the Lines collection a
 ~125 Khmer items (§3.3). **Done when:** all Khmer collections are published and work in
 airplane mode on a child's tablet.
 
-### Phase 4 — AI
+### Phase 4 — AI · **built 2026-10-01, awaiting review**
+
+Built: free on-device starter strokes (guide → mask → Zhang–Suen centre line → pieces →
+Béziers, numbered in reading order) and, for the `trace.ai` plan feature (admins always),
+AI ordering via `/api/trace/stroke-order` (Gemini, JSON, checked and repaired client-side).
+Per item (rail "Auto strokes") and per collection ("Auto strokes" for every empty item).
+Not yet: AI-drawn line-art pictures for drawings, removing grid lines from book-page photos,
+running the vectoriser in a Web Worker.
 Line-art preset, vectoriser worker, stroke-order route with validation/fallback, book-page
 cleanup. **Done when:** "a cat sitting" and a photo of a book grid become sensible
 numbered strokes needing only small edits.

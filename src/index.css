@@ -773,3 +773,15 @@ html.theme-light,
 :lang(km) body {
   line-height: 1.7;
 }
+
+/* Koda Trace: a coach tip popping onto the slate. */
+@keyframes trace-pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

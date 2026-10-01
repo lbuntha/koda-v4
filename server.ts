@@ -593,6 +593,93 @@ app.post("/api/tutor/analyze-drawing", async (req, res) => {
 });
 
 /**
+ * Koda Trace: put a letter's (or a picture's) stroke pieces in writing order.
+ *
+ * The browser has already turned the guide into centre-line pieces (free, on
+ * the device). This only answers the question a model is good at: which pieces
+ * make one stroke, in which order, and which way each is drawn — as taught in
+ * school. A paid feature (`trace.ai`); the data service decides who may ask,
+ * so the Studio's button and this route cannot disagree. The browser checks the
+ * answer against the pieces and repairs anything careless.
+ */
+const TRACE_ORDER_RULES: Record<string, string> = {
+  khmer:
+    "Khmer handwriting as taught in Cambodian primary schools (MoEYS): most consonants begin with the small head (the little loop or hook at the top left) and continue in one motion where the letter is written without lifting the pen; work left to right and top to bottom; a subscript foot is written after its letter; vowel signs after the consonant they belong to.",
+  latin:
+    "School print handwriting (ball and stick): vertical lines top to bottom; horizontal lines left to right; circles and round letters start near the top (about one o'clock) and go anticlockwise; lift the pen between separate parts; the dot of i and j last.",
+  drawing:
+    "Drawing a picture: the big outline first, then the inner details; top to bottom, left to right; one continuous stroke wherever a child would not lift the pen.",
+};
+
+app.post("/api/trace/stroke-order", async (req, res) => {
+  const authorization = req.headers.authorization;
+  if (!authorization) {
+    return res.status(401).json({ error: { code: "sign_in", message: "Sign in to use AI strokes." } });
+  }
+  try {
+    const gate = await fetch(`${API_URL}/v1/trace/studio/ai`, { headers: { Authorization: authorization } });
+    if (gate.status === 401 || gate.status === 403) {
+      return res.status(403).json({ error: { code: "not_a_trace_creator", message: "AI strokes are for Trace Studio creators." } });
+    }
+    const verdict = (await gate.json()) as { allowed?: boolean };
+    if (!verdict.allowed) {
+      return res.status(402).json({
+        error: "plan_required",
+        code: "plan_required",
+        feature: "trace.ai",
+        message: "AI starter strokes are part of a paid plan.",
+      });
+    }
+  } catch {
+    return res.status(503).json({ error: { code: "unavailable", message: "Could not check your plan. Try again in a moment." } });
+  }
+
+  const { image, pieces, title, kind, script } = (req.body ?? {}) as {
+    image?: string;
+    pieces?: { id: number; start: [number, number]; end: [number, number]; length: number; closed: boolean }[];
+    title?: string;
+    kind?: string;
+    script?: string;
+  };
+  if (typeof image !== "string" || image.length > 3_000_000 || !Array.isArray(pieces) || pieces.length === 0 || pieces.length > 80) {
+    return res.status(400).json({ error: { code: "bad_request", message: "Send the picture and between 1 and 80 pieces." } });
+  }
+  const ai = getGeminiClient(await systemApiKey(authorization));
+  if (!ai) {
+    return res.status(503).json({ error: { code: "no_ai_key", message: "No AI key is set up for this Koda. Ask an admin." } });
+  }
+
+  const rules = kind === "drawing" || kind === "line" ? TRACE_ORDER_RULES.drawing : TRACE_ORDER_RULES[script === "khmer" ? "khmer" : "latin"];
+  const brief = `You are planning how a child writes "${String(title ?? "").slice(0, 40)}" (${String(kind ?? "letter")}).
+The picture shows it in grey with numbered coloured pieces of its centre line. Each piece is listed with its id,
+its two ends (x, y on a 0–1000 canvas, y down), its length and whether it is a closed loop:
+${JSON.stringify(pieces.map((p) => ({ id: p.id, start: p.start, end: p.end, length: Math.round(p.length), closed: p.closed })))}
+
+Follow ${rules}
+
+Decide the strokes a child writes, in order. A stroke is one or more pieces drawn in one motion without lifting
+the pen; join pieces that meet end to end and are written in one go. For each piece say whether it is drawn
+from its "end" to its "start" (reverse: true) or start to end (reverse: false). Use every piece exactly once.
+Set "lift": false on a stroke only when the pen does not lift between it and the previous stroke.
+
+Reply with JSON only: {"strokes":[{"pieces":[{"id":1,"reverse":false}],"lift":true,"name":"short description"}]}`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-3.7-flash",
+      contents: { parts: [{ inlineData: { mimeType: "image/png", data: image.replace(/^data:image\/png;base64,/, "") } }, { text: brief }] },
+      config: { responseMimeType: "application/json", temperature: 0.2 },
+    });
+    const parsed = JSON.parse(response.text || "{}") as { strokes?: unknown };
+    res.json({ strokes: Array.isArray(parsed.strokes) ? parsed.strokes : [] });
+  } catch (error) {
+    console.error("Error in /api/trace/stroke-order:", error);
+    // The Studio falls back to reading order; the creator loses nothing but the AI's guess.
+    res.status(502).json({ error: { code: "ai_failed", message: "The AI could not order the strokes this time." } });
+  }
+});
+
+/**
  * What a model is allowed to hand back when asked for artwork.
  *
  * The prompt asks for these; the sanitiser in `src/utils/svg` enforces them.

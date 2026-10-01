@@ -412,7 +412,7 @@ export function StrokeEditor({ item, selection, selectedNode, mode, magic, showC
     }
     const p = toUnits(e);
     if (d.kind === "pen") {
-      const events = e.nativeEvent.getCoalescedEvents?.() ?? [e.nativeEvent];
+      const events = coalesced(e.nativeEvent);
       for (const ev of events) d.points.push(toUnits(ev));
       setPen([...d.points]);
       return;
@@ -721,4 +721,10 @@ export function StrokeEditor({ item, selection, selectedNode, mode, magic, showC
       {pen && pen.length > 1 && <polyline points={pen.map((p) => `${p.x},${p.y}`).join(" ")} fill="none" stroke="#1f2544" strokeWidth={8 * Math.max(0.6, k)} strokeLinecap="round" strokeLinejoin="round" pointerEvents="none" />}
     </svg>
   );
+}
+
+/** The pointer's in-between positions — or the event itself where a browser returns none (some do, and so do synthetic events). */
+function coalesced(e: PointerEvent): PointerEvent[] {
+  const list = e.getCoalescedEvents?.();
+  return list && list.length ? list : [e];
 }

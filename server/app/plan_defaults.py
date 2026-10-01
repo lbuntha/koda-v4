@@ -58,6 +58,16 @@ PLAN_FEATURES: list[dict] = [
         ),
         "order": 20,
     },
+    {
+        "featureId": "trace.ai",
+        "label": "AI starter strokes",
+        "description": (
+            "In Trace Studio, an AI puts a letter's or picture's strokes in "
+            "writing order and direction, so a creator fixes a draft instead of "
+            "drawing every stroke. Shaping strokes by hand stays free."
+        ),
+        "order": 30,
+    },
 ]
 
 FEATURE_IDS = frozenset(feature["featureId"] for feature in PLAN_FEATURES)

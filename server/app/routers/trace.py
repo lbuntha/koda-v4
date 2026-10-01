@@ -29,6 +29,7 @@ from app.models.auth import Principal
 from app.models.common import Model
 from app.repos import trace as trace_repo
 from app.security import principal_can
+from app.services.entitlements import entitlements
 from app.trace_verify import for_children, item_problems
 
 router = APIRouter(prefix="/trace", tags=["trace"], dependencies=[AUTHENTICATED])
@@ -496,3 +497,21 @@ async def item_stats(db: Db, p: CanWrite) -> dict[str, dict[str, Any]]:
     for s in out.values():
         s["topFault"] = _top_fault(s.pop("faults"))
     return out
+
+
+# ------------------------------------------------------------------ AI starter strokes
+
+
+@router.get("/studio/ai")
+async def ai_allowed(db: Db, p: CanWrite) -> dict[str, Any]:
+    """May this creator ask the AI to order strokes? A paid feature (`trace.ai`); Koda admins always may.
+
+    The Studio asks to decide what to offer, and the AI route asks before it
+    spends anything — one rule, answered here.
+    """
+    if _is_admin(p) or principal_can(p, "system:write"):
+        return {"allowed": True}
+    state = await entitlements(db, p.family_id, staff=False)
+    if "trace.ai" in (state.get("features") or []):
+        return {"allowed": True}
+    return {"allowed": False, "reason": "plan_required"}

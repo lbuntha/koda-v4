@@ -90,6 +90,7 @@ import { badge } from "../player/render";
 import { allPass, runChecks } from "./checks";
 import { StrokeClipboard, pasteStrokes } from "./clipboard";
 import { CollectionBoard, CollectionsList } from "./Collections";
+import { AutoStrokesButton } from "./AutoStrokesPanel";
 import { expandGroups, groupStrokes, mirrorSelection, remapGroups, ungroupStrokes } from "./groups";
 import type { TraceDraft } from "./drafts";
 import { TraceDrafts, newDraft, strokesPrint } from "./drafts";
@@ -554,6 +555,14 @@ function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
               <Divider vertical />
             </span>
             <ShapePicker onPick={addPrimitive} />
+            <AutoStrokesButton
+              item={item}
+              onStrokes={(strokes) => {
+                edit({ ...item, strokes: renumber(strokes) });
+                select(strokes.length ? 0 : null);
+                setMode("adjust");
+              }}
+            />
           </nav>
 
           {/* Canvas */}

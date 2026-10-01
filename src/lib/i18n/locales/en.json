@@ -3343,6 +3343,10 @@
       "note": "Tell us more (optional)",
       "send": "Send",
       "thanks": "Thank you! The person who made it will take a look."
+    },
+    "home": {
+      "due": "Check-up time",
+      "continue": "Keep going"
     }
   },
   "traceStudio": {
@@ -3699,6 +3703,53 @@
     "stats": {
       "line": "{learners} learners · {pct}% can",
       "often": "Most common mistake: {fault}"
+    },
+    "auto": {
+      "button": "Auto strokes",
+      "title": "Starter strokes",
+      "intro": "Turns the guide into numbered strokes you can then shape and test. It is a draft: check every stroke.",
+      "noGuide": "Type a letter or upload a picture in the Guide panel first.",
+      "from": {
+        "glyph": "Typed letter",
+        "image": "Picture"
+      },
+      "useAi": "Order the strokes with AI",
+      "aiNote": "The AI puts the strokes in the order and direction a child is taught.",
+      "aiPaid": "Part of a paid plan. Without it, strokes are numbered top to bottom, left to right.",
+      "replaces": {
+        "one": "This replaces the {count} stroke there now (Undo brings it back).",
+        "other": "This replaces the {count} strokes there now (Undo brings them back)."
+      },
+      "make": "Make strokes",
+      "nothing": "Nothing to trace was found in the guide.",
+      "made": {
+        "one": "Made {count} stroke, numbered top to bottom. Check the order and directions.",
+        "other": "Made {count} strokes, numbered top to bottom. Check the order and directions."
+      },
+      "madeAi": {
+        "one": "Made {count} stroke in the order the AI suggests. Check it before testing.",
+        "other": "Made {count} strokes in the order the AI suggests. Check them before testing."
+      },
+      "aiFellBack": "Made {count} strokes, numbered top to bottom: {reason}",
+      "reason": {
+        "plan_required": "AI strokes are part of a paid plan.",
+        "no_ai_key": "no AI key is set up for this Koda.",
+        "offline": "the AI could not be reached.",
+        "ai_failed": "the AI could not order them this time.",
+        "failed": "the AI could not order them this time.",
+        "not_a_trace_creator": "AI strokes are for Trace Studio creators."
+      },
+      "forSet": "Auto strokes",
+      "setIntro": {
+        "one": "Make starter strokes for the {count} item with no strokes yet, from its guide letter.",
+        "other": "Make starter strokes for the {count} items with no strokes yet, from their guide letters."
+      },
+      "makeN": {
+        "one": "Make strokes for {count} item",
+        "other": "Make strokes for {count} items"
+      },
+      "working": "Working… {done} of {total}",
+      "setDone": "Done: {count} items drafted ({ai} ordered by AI). Open each to check and test it."
     }
   }
 }

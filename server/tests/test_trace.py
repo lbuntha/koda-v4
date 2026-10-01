@@ -300,3 +300,10 @@ async def test_a_parent_reads_a_childs_writing_with_titles_and_the_common_mistak
     ]
     stats = (await client.get("/trace/studio/stats", headers=dev)).json()
     assert stats["line-1"] == {"learners": 1, "canDo": 1, "attempts": 6, "topFault": "start"}
+
+
+async def test_ai_strokes_are_for_admins_and_paid_creators(client, db):
+    admin = await _login(client, db, "admin@example.com", platform_role="admin")
+    assert (await client.get("/trace/studio/ai", headers=admin)).json() == {"allowed": True}
+    ann = await _creator(client, db, "ann@example.com")
+    assert (await client.get("/trace/studio/ai", headers=ann)).json() == {"allowed": False, "reason": "plan_required"}
