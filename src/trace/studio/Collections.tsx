@@ -7,9 +7,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { AlertCircle, ArrowLeft, Check, ChevronLeft, ChevronRight, Flag, GripVertical, ListPlus, Pencil, Plus, Rocket, Search, Settings2, Star, Trash2, Undo2, X } from "lucide-react";
 import { useT } from "../../lib/i18n";
+import { usePermissions } from "../../lib/sync";
 import { UIButton } from "../../components/ui";
-import type { Problem, Report, StudioCollection } from "../data/api";
+import type { ItemStats, PendingCollection, Problem, Report, StudioCollection } from "../data/api";
 import {
+  approveCollection,
+  fetchItemStats,
+  fetchReviewQueue,
+  rejectCollection,
   fetchReports,
   resolveReport,
   checkStudioCollection,
@@ -33,6 +38,8 @@ const GRIDS: TraceItem["grid"][] = ["4x3-moeys", "3x3", "baseline-4-lines", "dot
 function StatusChip({ c }: { c: StudioCollection }) {
   const { t } = useT();
   const cls = "rounded-full px-2.5 py-0.5 text-xs font-semibold";
+  if (c.reviewState === "pending") return <span className={`${cls} bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-200`}>{t("traceStudio.review.waiting")}</span>;
+  if (c.reviewState === "rejected") return <span className={`${cls} bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200`}>{t("traceStudio.review.sentBack")}</span>;
   if (c.publishedRev === null) return <span className={`${cls} bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300`}>{t("traceStudio.col.draft")}</span>;
   if (c.changed) return <span className={`${cls} bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-200`}>{t("traceStudio.col.changed", { rev: c.publishedRev })}</span>;
   return <span className={`${cls} bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200`}>{t("traceStudio.col.published", { rev: c.publishedRev })}</span>;
@@ -165,6 +172,9 @@ export function CollectionsList({ onOpen, onOpenItem }: { onOpen(id: string): vo
   const { t } = useT();
   const [rows, setRows] = useState<StudioCollection[] | null>(null);
   const [reports, setReports] = useState<Report[]>([]);
+  const [queue, setQueue] = useState<PendingCollection[]>([]);
+  const { can } = usePermissions();
+  const isAdmin = can("content:write");
   const [error, setError] = useState(false);
   useSyncExternalStore(TraceDrafts.subscribe, TraceDrafts.version);
 
@@ -175,7 +185,11 @@ export function CollectionsList({ onOpen, onOpenItem }: { onOpen(id: string): vo
     fetchReports()
       .then(setReports)
       .catch(() => {});
-  }, []);
+    if (isAdmin)
+      fetchReviewQueue()
+        .then(setQueue)
+        .catch(() => {});
+  }, [isAdmin]);
 
   const [creating, setCreating] = useState(false);
 
@@ -193,6 +207,7 @@ export function CollectionsList({ onOpen, onOpenItem }: { onOpen(id: string): vo
         )}
       </div>
       {creating && <NewCollection onCreated={onOpen} onCancel={() => setCreating(false)} />}
+      {queue.length > 0 && <ReviewQueue queue={queue} onDone={(id) => setQueue((q) => q.filter((c) => c.id !== id))} />}
       {reports.length > 0 && (
         <Section title={t("traceStudio.reports.title", { count: reports.length })} aside={<Flag className="h-4 w-4 text-rose-600" />}>
           <ul className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800">
@@ -285,11 +300,17 @@ export function CollectionBoard({ id, onBack, onOpenItem }: { id: string; onBack
   const [message, setMessage] = useState<{ tone: "good" | "bad"; text: string } | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [flags, setFlags] = useState<Record<string, number>>({});
+  const [stats, setStats] = useState<Record<string, ItemStats>>({});
+  const { can } = usePermissions();
+  const isAdmin = can("content:write");
   const [dragFrom, setDragFrom] = useState<number | null>(null);
   const [dragOver, setDragOver] = useState<number | null>(null);
 
   useEffect(() => {
     void TraceDrafts.pull();
+    fetchItemStats()
+      .then(setStats)
+      .catch(() => {});
     fetchReports()
       .then((rs) => setFlags(rs.filter((r) => r.collectionId === id || !r.collectionId).reduce<Record<string, number>>((m, r) => ({ ...m, [r.itemId]: (m[r.itemId] ?? 0) + 1 }), {})))
       .catch(() => {});
@@ -350,7 +371,11 @@ export function CollectionBoard({ id, onBack, onOpenItem }: { id: string; onBack
       }
       const saved = await publishStudioCollection(col.id);
       setCol({ ...col, ...saved });
-      setMessage({ tone: "good", text: t("traceStudio.col.publishedNow", { rev: saved.publishedRev ?? 1 }) });
+      setMessage(
+        saved.reviewState === "pending"
+          ? { tone: "good", text: t("traceStudio.review.sent") }
+          : { tone: "good", text: t("traceStudio.col.publishedNow", { rev: saved.publishedRev ?? 1 }) },
+      );
     } catch {
       setMessage({ tone: "bad", text: t("traceStudio.col.publishFailed") });
     } finally {
@@ -391,12 +416,20 @@ export function CollectionBoard({ id, onBack, onOpenItem }: { id: string; onBack
               {t("traceStudio.col.unpublish")}
             </UIButton>
           )}
-          <UIButton icon={<Rocket className="h-4 w-4" />} isLoading={busy} disabled={col.itemIds.length === 0} onClick={publish}>
-            {col.publishedRev === null ? t("traceStudio.col.publish") : t("traceStudio.col.republish")}
+          <UIButton icon={<Rocket className="h-4 w-4" />} isLoading={busy} disabled={col.itemIds.length === 0 || (!isAdmin && col.reviewState === "pending" && !col.changed)} onClick={publish}>
+            {!isAdmin ? t("traceStudio.review.send") : col.publishedRev === null ? t("traceStudio.col.publish") : t("traceStudio.col.republish")}
           </UIButton>
         </div>
       </div>
 
+      {col.reviewState === "rejected" && (
+        <p role="alert" className="rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:bg-rose-950/50 dark:text-rose-200">
+          <span className="font-semibold">{t("traceStudio.review.sentBackBy")}</span> {col.reviewNote || t("traceStudio.review.noNote")}
+        </p>
+      )}
+      {col.reviewState === "pending" && (
+        <p className="rounded-xl bg-violet-50 px-4 py-3 text-sm text-violet-800 dark:bg-violet-950/50 dark:text-violet-200">{t("traceStudio.review.pendingNote")}</p>
+      )}
       {message && (
         <p role="status" className={`rounded-xl px-4 py-3 text-sm font-medium ${message.tone === "good" ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200" : "bg-rose-50 text-rose-800 dark:bg-rose-950/50 dark:text-rose-200"}`}>
           {message.text}
@@ -529,6 +562,12 @@ export function CollectionBoard({ id, onBack, onOpenItem }: { id: string; onBack
                         )}
                       </span>
                       <span className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">{draft?.item.title ?? itemId}</span>
+                      {stats[itemId] && stats[itemId].learners > 0 && (
+                        <span className="text-[11px] text-slate-500 dark:text-slate-400" title={stats[itemId].topFault ? t("traceStudio.stats.often", { fault: t(`trace.faultShort.${stats[itemId].topFault}`) }) : undefined}>
+                          {t("traceStudio.stats.line", { learners: stats[itemId].learners, pct: Math.round((100 * stats[itemId].canDo) / stats[itemId].learners) })}
+                          {stats[itemId].topFault && <span className="text-rose-600 dark:text-rose-300"> · {t(`trace.faultShort.${stats[itemId].topFault}`)}</span>}
+                        </span>
+                      )}
                       <span className={`flex items-center gap-1 text-[11px] font-semibold ${issues === 0 ? "text-emerald-700 dark:text-emerald-300" : "text-rose-700 dark:text-rose-300"}`}>
                         {issues === 0 ? <Check className="h-3.5 w-3.5" /> : <AlertCircle className="h-3.5 w-3.5" />}
                         {issues === -1 ? t("traceStudio.col.missing") : issues === 0 ? t("traceStudio.ready") : t("traceStudio.issues", { count: issues })}
@@ -739,5 +778,75 @@ function ApplyAll({ onApply }: { onApply(patch: Partial<TraceItem>): void }) {
         </UIButton>
       </div>
     </div>
+  );
+}
+
+/* ============================================================ review */
+
+/** Admins: collections creators asked to publish. Approve makes them live for everyone; Send back returns a note. */
+function ReviewQueue({ queue, onDone }: { queue: PendingCollection[]; onDone(id: string): void }) {
+  const { t } = useT();
+  const [notes, setNotes] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState<string | null>(null);
+  return (
+    <Section title={t("traceStudio.review.queue", { count: queue.length })} aside={<Rocket className="h-4 w-4 text-violet-600" />}>
+      <p className="text-xs text-slate-500 dark:text-slate-400">{t("traceStudio.review.queueNote")}</p>
+      <ul className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800">
+        {queue.map((c) => (
+          <li key={c.id} className="flex flex-col gap-2 py-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-base font-semibold text-slate-900 dark:text-white">{c.pending.title}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">{t("traceStudio.col.itemCount", { count: c.pending.items.length })}</span>
+            </div>
+            <div className="flex flex-wrap gap-1 text-violet-700 dark:text-violet-300">
+              {c.pending.items.slice(0, 24).map(({ item }) => (
+                <ItemThumb key={item.id} item={item} className="h-10 w-10" />
+              ))}
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                className={`${inputCls} min-w-56 flex-1`}
+                placeholder={t("traceStudio.review.notePlaceholder")}
+                aria-label={t("traceStudio.review.notePlaceholder")}
+                value={notes[c.id] ?? ""}
+                onChange={(e) => setNotes({ ...notes, [c.id]: e.target.value })}
+              />
+              <UIButton
+                size="sm"
+                variant="secondary"
+                isLoading={busy === `${c.id}:reject`}
+                onClick={async () => {
+                  setBusy(`${c.id}:reject`);
+                  try {
+                    await rejectCollection(c.id, notes[c.id] ?? "");
+                    onDone(c.id);
+                  } finally {
+                    setBusy(null);
+                  }
+                }}
+              >
+                {t("traceStudio.review.sendBack")}
+              </UIButton>
+              <UIButton
+                size="sm"
+                icon={<Check className="h-4 w-4" />}
+                isLoading={busy === `${c.id}:approve`}
+                onClick={async () => {
+                  setBusy(`${c.id}:approve`);
+                  try {
+                    await approveCollection(c.id);
+                    onDone(c.id);
+                  } finally {
+                    setBusy(null);
+                  }
+                }}
+              >
+                {t("traceStudio.review.approve")}
+              </UIButton>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </Section>
   );
 }

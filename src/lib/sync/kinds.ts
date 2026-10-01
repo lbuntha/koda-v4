@@ -20,7 +20,8 @@ export type DocKind =
   | "nav"
   | "art"
   | "childSettings"
-  | "conceptBaseline";
+  | "conceptBaseline"
+  | "traceProgress";
 
 export interface KindSpec {
   /**
@@ -173,6 +174,17 @@ export const SYNC_KINDS: Record<DocKind, KindSpec> = {
     scope: "learner",
     shape: "whole",
     notify: () => undefined,
+  },
+  /*
+   * Koda Trace: where this child is on each trace item's writing steps — can
+   * write, check-ups due, their usual mistakes. One document per child, the
+   * items its keys; the server merges two devices item by item (newer wins).
+   */
+  traceProgress: {
+    storageKey: "koda_trace_progress_v2",
+    scope: "learner",
+    shape: "whole",
+    notify: nudge("koda_trace_progress_v2"),
   },
 };
 

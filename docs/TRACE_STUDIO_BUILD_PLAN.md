@@ -554,7 +554,14 @@ Line-art preset, vectoriser worker, stroke-order route with validation/fallback,
 cleanup. **Done when:** "a cat sitting" and a photo of a book grid become sensible
 numbered strokes needing only small edits.
 
-### Phase 5 — Record, report, connect
+### Phase 5 — Record, report, connect · **built 2026-10-01 (except "connect"), awaiting review**
+
+Built: per-child `traceProgress` synced doc (merged item by item, newer wins), fault
+counts per item, parent report section "Writing and drawing" (`/trace/learners/{id}`),
+creator ownership (a creator edits only their own work), per-creator limits, review
+before public (a creator's publish waits; admins approve or send back with a note),
+per-item stats for creators (learners, % can, most common mistake). Not yet: embedding
+trace items in Library / Learn Khmer lessons ("connect").
 Learning events and error kinds with parent wording, XP/stars, per-item stats in the
 Studio, the §4 contract exported for Library and Learn Khmer. **Done when:** a parent sees
 "ខ — can write ✓" and a Library or lesson page can embed a trace item by id.

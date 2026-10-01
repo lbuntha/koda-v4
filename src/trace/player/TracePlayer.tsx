@@ -281,8 +281,14 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
     if (result && play !== "justDraw") {
       const ladderStep = play === "steps" ? step : myWayScoring(mySwitches).counts && progress.step === plan.canDoAt ? plan.canDoAt : null;
       if (ladderStep) {
-        const r = applyAttempt(progress, plan, { step: ladderStep, accepted: result.accepted, score: result.score }, Date.now(), recheck && play === "steps");
-        TraceProgress.set(item.id, r.progress);
+        const r = applyAttempt(
+          progress,
+          plan,
+          { step: ladderStep, accepted: result.accepted, score: result.score, fault: result.feedback?.fault },
+          Date.now(),
+          recheck && play === "steps",
+        );
+        TraceProgress.set(item.id, { ...r.progress, title: item.title, kind: item.kind });
         event = r.event;
         counted = true;
         if (recheck) setRecheck(false);
@@ -401,7 +407,7 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
       return;
     }
     const r = applyAttempt(progress, plan, { step: "watch", accepted: true, score: 100 });
-    TraceProgress.set(item.id, r.progress);
+    TraceProgress.set(item.id, { ...r.progress, title: item.title, kind: item.kind });
     resetAttempt();
     setMessage({ text: t("trace.event.up", { step: t(`trace.step.${r.progress.step}`) }), tone: "info" });
   };

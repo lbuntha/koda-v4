@@ -1574,6 +1574,66 @@
         "detail": "A mistake the activity could not put a name to.",
         "fix": "Watch one round to see what is actually happening."
       }
+    },
+    "trace": {
+      "title": "Writing and drawing",
+      "subtitle": "What {name} can write and draw on their own, in Koda Trace.",
+      "count": {
+        "canWrite": "Can write",
+        "canDraw": "Can draw",
+        "learned": "Learned for good",
+        "practice": "Needs practice"
+      },
+      "dueNow": "Check-up due now",
+      "needsPractice": "Needs more practice",
+      "canNow": "Can do on their own",
+      "checkOn": "check-up {date}",
+      "stillLearning": {
+        "one": "{count} more still being learned.",
+        "other": "{count} more still being learned."
+      },
+      "fault": {
+        "start": {
+          "label": "Often starts a stroke in the wrong place",
+          "fix": "let them watch the stroke once more, then put the pencil on the green dot before starting"
+        },
+        "direction": {
+          "label": "Often draws strokes the wrong way",
+          "fix": "trace the stroke in the air together, following the arrow, before writing it"
+        },
+        "order": {
+          "label": "Often writes the strokes out of order",
+          "fix": "say the numbers out loud together — one, two, three — as they write"
+        },
+        "checkpoint": {
+          "label": "Often skips part of a curve or loop",
+          "fix": "slow down at the curls; ask them to touch each star on the path"
+        },
+        "coverage": {
+          "label": "Often stops a stroke too early",
+          "fix": "ask them to keep going until they reach the end of the path"
+        },
+        "path": {
+          "label": "Writing is wobbly",
+          "fix": "use Strokes on for a few more tries, and go slowly"
+        },
+        "scribble": {
+          "label": "Writes very fast",
+          "fix": "praise slow, careful strokes more than finishing quickly"
+        },
+        "placement": {
+          "label": "Puts vowels on the wrong side of the letter",
+          "fix": "say where the vowel sits — before, after, above or below — before they write"
+        },
+        "missing": {
+          "label": "Leaves out a stroke",
+          "fix": "count the strokes together before writing"
+        },
+        "unfit": {
+          "label": "Stops after a little writing",
+          "fix": "sit with them for the first try and encourage the whole letter"
+        }
+      }
     }
   },
   "leaderboard": {
@@ -3618,6 +3678,27 @@
     "allStatus": "Any status",
     "statusReady": "Ready",
     "statusIssues": "Needs work",
-    "noMatch": "Nothing matches."
+    "noMatch": "Nothing matches.",
+    "review": {
+      "waiting": "Waiting for review",
+      "sentBack": "Sent back",
+      "send": "Send for review",
+      "sent": "Sent for review. A Koda admin will check it; it goes live for everyone once approved.",
+      "pendingNote": "A Koda admin is checking this collection. You can keep editing; send it again if you change it.",
+      "sentBackBy": "A Koda admin sent this back:",
+      "noNote": "No note was given.",
+      "queue": {
+        "one": "{count} collection waiting for review",
+        "other": "{count} collections waiting for review"
+      },
+      "queueNote": "Check the items, then approve it for every learner or send it back with a note for its creator.",
+      "notePlaceholder": "Note for the creator (if sending back)",
+      "sendBack": "Send back",
+      "approve": "Approve"
+    },
+    "stats": {
+      "line": "{learners} learners · {pct}% can",
+      "often": "Most common mistake: {fault}"
+    }
   }
 }

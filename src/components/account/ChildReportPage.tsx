@@ -37,6 +37,7 @@ import { SKILLS } from "../../skills/registry";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIAvatar, UIBadge, UIButton, UISectionHeader, UIStatGrid, UIStatTile } from "../ui";
 import { NoAccess } from "./NoAccess";
+import { TraceReport } from "../../trace/report/TraceReport";
 import { formatDate, translate, useT } from "../../lib/i18n";
 
 /**
@@ -834,6 +835,9 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
                 </ul>
               </section>
             )}
+
+            {/* Koda Trace: what they can write and draw now. Draws nothing until they have tried an item. */}
+            <TraceReport learnerId={learnerId} learnerName={learnerName} />
           </>
         )}
       </div>

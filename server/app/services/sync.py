@@ -51,6 +51,18 @@ def _as_sync_doc(row: dict[str, Any]) -> SyncDoc:
     )
 
 
+def merge_trace_progress(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[str, Any]:
+    """Each trace item keeps whichever device's record of it is newer."""
+    merged = dict(existing)
+    for item_id, record in incoming.items():
+        have = merged.get(item_id)
+        if not isinstance(record, dict):
+            continue
+        if not isinstance(have, dict) or (record.get("updatedAt") or 0) >= (have.get("updatedAt") or 0):
+            merged[item_id] = record
+    return merged
+
+
 def merge_progress(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[str, Any]:
     """Last write wins, except where the later write is not the better answer.
 
@@ -219,6 +231,9 @@ async def _apply_mutation(
         if mutation.kind == "progress" and not mutation.deleted:
             # Merged rather than refused: both devices are right about the child.
             body = merge_progress(existing.get("body") or {}, mutation.body)
+        elif mutation.kind == "traceProgress" and not mutation.deleted:
+            # Item by item: two tablets the same child uses each know some items best.
+            body = merge_trace_progress(existing.get("body") or {}, mutation.body)
         else:
             return Conflict(opId=mutation.op_id, doc=_as_sync_doc(existing))
 

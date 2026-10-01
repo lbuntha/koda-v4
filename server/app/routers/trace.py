@@ -43,6 +43,24 @@ def _may_author(p: CurrentPrincipal) -> Principal:
 
 
 CanWrite = Annotated[Principal, Depends(_may_author)]
+CanReadChild = Annotated[Principal, Depends(require("learner:read"))]
+
+
+def _is_admin(p: Principal) -> bool:
+    """An operator: sees and edits every creator's work, publishes without review."""
+    return principal_can(p, "content:write")
+
+
+def _mine(row: dict[str, Any] | None, p: Principal) -> None:
+    """A creator changes only what they made; an admin changes anything."""
+    if row is not None and not _is_admin(p) and row.get("ownerId") != p.subject_id:
+        raise Forbidden("Someone else made this. Only they or a Koda admin can change it.", "not_your_trace_work")
+
+
+async def _room_for(db: Any, collection: str, p: Principal, limit: int) -> None:
+    if not _is_admin(p) and await trace_repo.count_owned(db, collection, p.subject_id) >= limit:
+        raise AppError(429, "trace_quota", f"You have reached the limit of {limit}. Delete some you no longer need, or ask a Koda admin.")
+
 
 ID_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 MAX_ID = 64
@@ -51,6 +69,9 @@ MAX_ITEM_BYTES = 1_500_000
 MAX_ITEMS_PER_COLLECTION = 500
 MAX_TITLE = 80
 MAX_DESCRIPTION = 400
+# How much one creator may make. Admins (who hold `content:write`) are not limited.
+MAX_ITEMS_PER_CREATOR = 1500
+MAX_COLLECTIONS_PER_CREATOR = 60
 
 
 def _id(raw: str) -> str:
@@ -103,6 +124,10 @@ class CollectionOut(Model):
     order: int
     cover: str | None
     rev: int
+    ownerId: str | None = None
+    # "pending" — waiting for an admin to approve it; "rejected" — sent back, with a note.
+    reviewState: str | None = None
+    reviewNote: str = ""
     publishedRev: int | None
     publishedAt: str | None
     updatedAt: str
@@ -136,6 +161,9 @@ def _collection_out(row: dict[str, Any]) -> CollectionOut:
         order=d.get("order", 100),
         cover=d.get("cover"),
         rev=int(row.get("rev") or 0),
+        ownerId=row.get("ownerId"),
+        reviewState=(row.get("review") or {}).get("state"),
+        reviewNote=(row.get("review") or {}).get("note", ""),
         publishedRev=pub["rev"] if pub else None,
         publishedAt=published_at.isoformat() if pub and published_at else None,
         updatedAt=row["updatedAt"].isoformat(),
@@ -180,8 +208,9 @@ async def published_bundle(collection_id: str, db: Db, _: CanRead) -> dict[str, 
 
 
 @router.get("/studio/items")
-async def list_items(db: Db, _: CanWrite) -> dict[str, list[ItemOut]]:
-    return {"items": [_item_out(r) for r in await trace_repo.list_items(db)]}
+async def list_items(db: Db, p: CanWrite) -> dict[str, list[ItemOut]]:
+    """A creator's own items; every item for an admin."""
+    return {"items": [_item_out(r) for r in await trace_repo.list_items(db, None if _is_admin(p) else p.subject_id)]}
 
 
 @router.put("/studio/items/{item_id}")
@@ -190,11 +219,16 @@ async def save_item(item_id: str, body: ItemWrite, db: Db, p: CanWrite) -> ItemO
     draft = {"item": {**body.item, "id": item_id}, "plan": body.plan, "tests": body.tests}
     if len(json.dumps(draft, ensure_ascii=False).encode()) > MAX_ITEM_BYTES:
         raise AppError(413, "item_too_large", "This item is too large to save. Use a smaller guide picture.")
+    existing = await trace_repo.get_item(db, item_id)
+    _mine(existing, p)
+    if existing is None:
+        await _room_for(db, "trace_items", p, MAX_ITEMS_PER_CREATOR)
     return _item_out(await trace_repo.save_item(db, item_id, draft, p.subject_id))
 
 
 @router.delete("/studio/items/{item_id}", status_code=204)
 async def delete_item(item_id: str, db: Db, p: CanWrite) -> None:
+    _mine(await trace_repo.get_item(db, _id(item_id)), p)
     if not await trace_repo.delete_item(db, _id(item_id), p.subject_id):
         raise NotFound(f'No item "{item_id}".', "item_not_found")
 
@@ -203,8 +237,8 @@ async def delete_item(item_id: str, db: Db, p: CanWrite) -> None:
 
 
 @router.get("/studio/collections")
-async def list_collections(db: Db, _: CanWrite) -> dict[str, list[CollectionOut]]:
-    return {"collections": [_collection_out(r) for r in await trace_repo.list_collections(db)]}
+async def list_collections(db: Db, p: CanWrite) -> dict[str, list[CollectionOut]]:
+    return {"collections": [_collection_out(r) for r in await trace_repo.list_collections(db, None if _is_admin(p) else p.subject_id)]}
 
 
 @router.put("/studio/collections/{collection_id}")
@@ -213,6 +247,10 @@ async def save_collection(collection_id: str, body: CollectionWrite, db: Db, p: 
     ids = [_id(i) for i in body.item_ids]
     if len(set(ids)) != len(ids):
         raise AppError(422, "duplicate_item", "An item can be in a collection only once.")
+    existing = await trace_repo.get_collection(db, collection_id)
+    _mine(existing, p)
+    if existing is None:
+        await _room_for(db, "trace_collections", p, MAX_COLLECTIONS_PER_CREATOR)
     cover = body.cover if body.cover in ids else None
     draft = {
         "title": body.title,
@@ -226,11 +264,12 @@ async def save_collection(collection_id: str, body: CollectionWrite, db: Db, p: 
 
 
 @router.post("/studio/collections/{collection_id}/check")
-async def check_collection(collection_id: str, db: Db, _: CanWrite) -> dict[str, list[Problem]]:
+async def check_collection(collection_id: str, db: Db, p: CanWrite) -> dict[str, list[Problem]]:
     """What would stop this collection publishing, item by item — the same rules publish applies."""
     row = await trace_repo.get_collection(db, _id(collection_id))
     if row is None:
         raise NotFound(f'No collection "{collection_id}".', "collection_not_found")
+    _mine(row, p)
     return {"problems": await _problems(db, row)}
 
 
@@ -261,6 +300,7 @@ async def publish(collection_id: str, db: Db, p: CanWrite) -> CollectionOut:
     row = await trace_repo.get_collection(db, collection_id)
     if row is None:
         raise NotFound(f'No collection "{collection_id}".', "collection_not_found")
+    _mine(row, p)
     problems = await _problems(db, row)
     if problems:
         first = problems[:3]
@@ -283,11 +323,15 @@ async def publish(collection_id: str, db: Db, p: CanWrite) -> CollectionOut:
         "cover": d.get("cover"),
         "items": items,
     }
+    if not _is_admin(p):
+        # Public to every learner: a creator's collection waits for an admin.
+        return _collection_out(await trace_repo.set_pending(db, collection_id, bundle, p.subject_id))
     return _collection_out(await trace_repo.publish(db, collection_id, bundle, p.subject_id))
 
 
 @router.post("/studio/collections/{collection_id}/unpublish")
 async def unpublish(collection_id: str, db: Db, p: CanWrite) -> CollectionOut:
+    _mine(await trace_repo.get_collection(db, _id(collection_id)), p)
     row = await trace_repo.unpublish(db, _id(collection_id), p.subject_id)
     if row is None:
         raise NotFound(f'No collection "{collection_id}".', "collection_not_found")
@@ -296,6 +340,7 @@ async def unpublish(collection_id: str, db: Db, p: CanWrite) -> CollectionOut:
 
 @router.delete("/studio/collections/{collection_id}", status_code=204)
 async def delete_collection(collection_id: str, db: Db, p: CanWrite) -> None:
+    _mine(await trace_repo.get_collection(db, _id(collection_id)), p)
     if not await trace_repo.delete_collection(db, _id(collection_id), p.subject_id):
         raise NotFound(f'No collection "{collection_id}".', "collection_not_found")
 
@@ -339,3 +384,115 @@ async def list_reports(db: Db, _: CanWrite) -> dict[str, list[dict[str, Any]]]:
 async def resolve_report(report_id: str, db: Db, p: CanWrite) -> None:
     if not await trace_repo.resolve_report(db, report_id[:32], p.subject_id):
         raise NotFound("That report is already resolved or does not exist.", "report_not_found")
+
+
+# ------------------------------------------------------------------ review (admins)
+
+
+class ReviewDecision(Model):
+    note: str = Field(default="", max_length=400)
+
+
+def _admin(p: Principal) -> None:
+    if not _is_admin(p):
+        raise Forbidden("Only a Koda admin reviews collections.", "not_an_operator")
+
+
+@router.get("/studio/review")
+async def review_queue(db: Db, p: CanWrite) -> dict[str, list[dict[str, Any]]]:
+    """Collections creators asked to publish, oldest first, with the items they would publish."""
+    _admin(p)
+    out = []
+    for row in await trace_repo.list_pending(db):
+        out.append({**_collection_out(row).model_dump(), "pending": row["pending"]})
+    return {"collections": out}
+
+
+@router.post("/studio/review/{collection_id}/approve")
+async def approve(collection_id: str, db: Db, p: CanWrite) -> CollectionOut:
+    _admin(p)
+    row = await trace_repo.get_collection(db, _id(collection_id))
+    if row is None or not row.get("pending"):
+        raise NotFound("Nothing is waiting for review on this collection.", "nothing_pending")
+    await trace_repo.publish(db, row["id"], row["pending"], p.subject_id)
+    out = await trace_repo.close_review(db, row["id"], "approved", "", p.subject_id)
+    assert out is not None
+    return _collection_out(out)
+
+
+@router.post("/studio/review/{collection_id}/reject")
+async def reject(collection_id: str, body: ReviewDecision, db: Db, p: CanWrite) -> CollectionOut:
+    _admin(p)
+    row = await trace_repo.get_collection(db, _id(collection_id))
+    if row is None or not row.get("pending"):
+        raise NotFound("Nothing is waiting for review on this collection.", "nothing_pending")
+    out = await trace_repo.close_review(db, row["id"], "rejected", body.note.strip(), p.subject_id)
+    assert out is not None
+    return _collection_out(out)
+
+
+# ------------------------------------------------------------------ progress
+
+
+def _top_fault(faults: Any) -> str | None:
+    if not isinstance(faults, dict) or not faults:
+        return None
+    best = max(faults.items(), key=lambda kv: kv[1] if isinstance(kv[1], (int, float)) else 0)
+    return best[0] if isinstance(best[1], (int, float)) and best[1] > 0 else None
+
+
+@router.get("/learners/{learner_id}")
+async def learner_progress(learner_id: str, db: Db, p: CanReadChild) -> dict[str, list[dict[str, Any]]]:
+    """One child's writing and drawing, for the parent report: where they are on each item they have tried."""
+    if p.family_id is None:
+        raise Forbidden("This account is not part of a family.", "no_family")
+    if p.learner_id and learner_id != p.learner_id:
+        raise Forbidden("That is not this device's learner.", "not_your_learner")
+    body = await trace_repo.learner_progress(db, p.family_id, learner_id)
+    names = await trace_repo.titles(db)
+    rows = []
+    for item_id, rec in body.items():
+        if not isinstance(rec, dict):
+            continue
+        name = names.get(item_id, {})
+        rows.append(
+            {
+                "itemId": item_id,
+                "title": name.get("title") or rec.get("title") or item_id,
+                "collection": name.get("collection", ""),
+                "kind": name.get("kind") or rec.get("kind", ""),
+                "status": rec.get("status", "learning"),
+                "step": rec.get("step", "watch"),
+                "dueAt": rec.get("dueAt"),
+                "attempts": rec.get("attempts", 0),
+                "topFault": _top_fault(rec.get("faults")),
+                "updatedAt": rec.get("updatedAt", 0),
+            }
+        )
+    rows.sort(key=lambda r: r["updatedAt"] or 0, reverse=True)
+    return {"items": rows}
+
+
+@router.get("/studio/stats")
+async def item_stats(db: Db, p: CanWrite) -> dict[str, dict[str, Any]]:
+    """For each item: how many learners tried it, how many can write it, and their most common mistake.
+
+    A creator sees numbers only for their own items. An item most children
+    fail the same way usually has a stroke drawn wrongly — this is how to find it.
+    """
+    mine = None if _is_admin(p) else {r["id"] for r in await trace_repo.list_items(db, p.subject_id)}
+    out: dict[str, dict[str, Any]] = {}
+    for body in await trace_repo.all_progress(db):
+        for item_id, rec in body.items():
+            if not isinstance(rec, dict) or (mine is not None and item_id not in mine):
+                continue
+            s = out.setdefault(item_id, {"learners": 0, "canDo": 0, "attempts": 0, "faults": {}})
+            s["learners"] += 1
+            s["canDo"] += 1 if rec.get("status") in ("canDo", "learned") else 0
+            s["attempts"] += int(rec.get("attempts") or 0)
+            for fault, n in (rec.get("faults") or {}).items():
+                if isinstance(n, (int, float)):
+                    s["faults"][fault] = s["faults"].get(fault, 0) + n
+    for s in out.values():
+        s["topFault"] = _top_fault(s.pop("faults"))
+    return out

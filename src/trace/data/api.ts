@@ -48,6 +48,10 @@ export interface StudioCollection {
   publishedAt: string | null;
   updatedAt: string;
   changed: boolean;
+  ownerId?: string | null;
+  /** A creator's publish waiting for an admin, or sent back with a note. */
+  reviewState?: "pending" | "rejected" | null;
+  reviewNote?: string;
 }
 
 export interface StudioItemRow extends Pick<TraceDraft, "item" | "plan" | "tests"> {
@@ -146,4 +150,52 @@ export async function fetchReports(): Promise<Report[]> {
 
 export async function resolveReport(id: string): Promise<void> {
   await request<void>(`/trace/studio/reports/${enc(id)}/resolve`, { method: "POST", token: await token() });
+}
+
+/* ---------------------------------------------------- parents */
+
+export interface ChildTraceItem {
+  itemId: string;
+  title: string;
+  collection: string;
+  kind: string;
+  status: "learning" | "canDo" | "learned" | "needsPractice";
+  step: string;
+  dueAt: number | null;
+  attempts: number;
+  topFault: string | null;
+  updatedAt: number;
+}
+
+export async function fetchChildTrace(learnerId: string, signal?: AbortSignal): Promise<ChildTraceItem[]> {
+  return (await request<{ items: ChildTraceItem[] }>(`/trace/learners/${enc(learnerId)}`, { token: await token(), signal })).items;
+}
+
+export interface ItemStats {
+  learners: number;
+  canDo: number;
+  attempts: number;
+  topFault: string | null;
+}
+
+export async function fetchItemStats(): Promise<Record<string, ItemStats>> {
+  return request<Record<string, ItemStats>>("/trace/studio/stats", { token: await token() });
+}
+
+/* ---------------------------------------------------- review (admins) */
+
+export interface PendingCollection extends StudioCollection {
+  pending: { title: string; items: { item: TraceItem; plan: StepPlan }[] };
+}
+
+export async function fetchReviewQueue(): Promise<PendingCollection[]> {
+  return (await request<{ collections: PendingCollection[] }>("/trace/studio/review", { token: await token() })).collections;
+}
+
+export async function approveCollection(id: string): Promise<StudioCollection> {
+  return request<StudioCollection>(`/trace/studio/review/${enc(id)}/approve`, { method: "POST", token: await token() });
+}
+
+export async function rejectCollection(id: string, note: string): Promise<StudioCollection> {
+  return request<StudioCollection>(`/trace/studio/review/${enc(id)}/reject`, { method: "POST", token: await token(), body: { note } });
 }

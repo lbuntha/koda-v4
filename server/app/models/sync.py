@@ -29,6 +29,10 @@ DOC_KINDS = {
     # long for the local ring; folded into `concept_totals` on arrival, so a
     # month offline costs the event detail and never the evidence.
     "conceptBaseline",
+    # Koda Trace: where one child is on each trace item's writing steps (can
+    # write, check-ups due, common mistakes). Merged item by item, not refused
+    # — two tablets the same child uses are both right about different items.
+    "traceProgress",
 }
 
 #: Kinds that take more than being signed in to write.
@@ -58,7 +62,7 @@ KIND_PERMISSIONS = {
 #: learners in one family — a student and their younger sibling — share a
 #: permission but not a record, and the key is the only thing that distinguishes
 #: them. An adult is unaffected: they have no learner id to be held to.
-LEARNER_OWNED_KINDS = {"goals", "childSettings"}
+LEARNER_OWNED_KINDS = {"goals", "childSettings", "traceProgress"}
 
 #: Art bodies are markup rather than settings, so they need a ceiling the other
 #: kinds do not. 64 KB is a generous illustration and a firm "that is a mistake"

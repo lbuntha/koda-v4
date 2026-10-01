@@ -11,6 +11,7 @@
  */
 
 import type { StepId, TraceItem } from "../geometry/types";
+import type { Fault } from "../score/score";
 import { modeOf } from "../geometry/types";
 
 export interface StepRule {
@@ -62,6 +63,12 @@ export interface ItemProgress {
   dueAt?: number;
   /** Best score per step, for the parent report later. */
   best: Partial<Record<StepId, number>>;
+  /** Attempts made, and how often each mistake happened — the parent report's tip. */
+  attempts?: number;
+  faults?: Partial<Record<Fault, number>>;
+  /** So a report can name an item that is not (or no longer) published. */
+  title?: string;
+  kind?: TraceItem["kind"];
   updatedAt: number;
 }
 
@@ -86,6 +93,8 @@ export interface AttemptSummary {
   step: StepId;
   accepted: boolean;
   score: number;
+  /** The mistake the child was told about, if any. */
+  fault?: Fault;
 }
 
 /** Passed the step's bar? Watch always passes once watched. */
@@ -106,8 +115,10 @@ export function applyAttempt(
   now = Date.now(),
   recheck = false,
 ): { progress: ItemProgress; event: LadderEvent } {
-  const p: ItemProgress = { ...prev, best: { ...prev.best }, updatedAt: now };
+  const p: ItemProgress = { ...prev, best: { ...prev.best }, faults: { ...prev.faults }, updatedAt: now };
   if (a.accepted) p.best[a.step] = Math.max(p.best[a.step] ?? 0, a.score);
+  if (a.step !== "watch") p.attempts = (p.attempts ?? 0) + 1;
+  if (a.fault) p.faults![a.fault] = (p.faults![a.fault] ?? 0) + 1;
   const ok = passes(plan, a);
 
   if (recheck) {
