@@ -174,13 +174,14 @@ async def test_a_cover_picture_is_saved_and_published(client, db):
     dev = await _login(client, db, "dev@example.com", platform_role="developer")
     await client.put("/trace/studio/items/line-1", json={"item": LINE, "plan": PLAN, "tests": PASSED}, headers=dev)
     photo = "photo-" + "a" * 64
-    saved = await client.put("/trace/studio/collections/lines", json={"title": "Lines", "itemIds": ["line-1"], "picture": photo}, headers=dev)
+    url = "/trace/studio/collections/lines"
+    saved = await client.put(url, json={"title": "Lines", "itemIds": ["line-1"], "picture": photo}, headers=dev)
     assert saved.json()["picture"] == photo
     await client.post("/trace/studio/collections/lines/publish", headers=dev)
     assert (await client.get("/trace/collections", headers=dev)).json()["collections"][0]["picture"] == photo
     assert (await client.get("/trace/collections/lines", headers=dev)).json()["picture"] == photo
     # Only a picture name or a photo key, never markup or a URL.
-    bad = await client.put("/trace/studio/collections/lines", json={"title": "Lines", "itemIds": ["line-1"], "picture": "https://x/y.png"}, headers=dev)
+    bad = await client.put(url, json={"title": "Lines", "itemIds": ["line-1"], "picture": "https://x/y.png"}, headers=dev)
     assert bad.status_code == 422
 
 
@@ -188,13 +189,14 @@ async def test_a_cover_picture_is_saved_and_published(client, db):
 async def test_a_collections_xp_per_step_is_saved_and_published(client, db):
     dev = await _login(client, db, "dev@example.com", platform_role="developer")
     await client.put("/trace/studio/items/line-1", json={"item": LINE, "plan": PLAN, "tests": PASSED}, headers=dev)
-    saved = await client.put("/trace/studio/collections/lines", json={"title": "Lines", "itemIds": ["line-1"], "xpPerStep": 35}, headers=dev)
+    url = "/trace/studio/collections/lines"
+    saved = await client.put(url, json={"title": "Lines", "itemIds": ["line-1"], "xpPerStep": 35}, headers=dev)
     assert saved.json()["xpPerStep"] == 35
     await client.post("/trace/studio/collections/lines/publish", headers=dev)
     assert (await client.get("/trace/collections/lines", headers=dev)).json()["xpPerStep"] == 35
     # Absent means the deployment's XP per level; out of range is refused.
-    assert (await client.put("/trace/studio/collections/lines", json={"title": "Lines", "itemIds": ["line-1"]}, headers=dev)).json()["xpPerStep"] is None
-    assert (await client.put("/trace/studio/collections/lines", json={"title": "Lines", "xpPerStep": 9999}, headers=dev)).status_code == 422
+    assert (await client.put(url, json={"title": "Lines", "itemIds": ["line-1"]}, headers=dev)).json()["xpPerStep"] is None
+    assert (await client.put(url, json={"title": "Lines", "xpPerStep": 9999}, headers=dev)).status_code == 422
 
 # ------------------------------------------------- creators, review, progress
 
