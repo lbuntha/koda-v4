@@ -18,16 +18,16 @@ export const COLORS = {
   paper: "#ffffff",
   grid: "#e2e4ee",
   carrier: "#d5d8e6",
-  ghost: "#e7e4f7",
-  band: "#8b7cf0",
+  ghost: "#E6E0FA",
+  band: "#805AD5",
   bandDone: "#bfe9d6",
   ok: "#0f9d6b",
   bad: "#e0245e",
   start: "#10b981",
-  badge: "#6d4ee8",
+  badge: "#6B46C1",
   badgeText: "#ffffff",
   ink: "#1f2544",
-  tip: "#a78bfa",
+  tip: "#9F7AEA",
 } as const;
 
 const KM_DIGITS = ["០", "១", "២", "៣", "៤", "៥", "៦", "៧", "៨", "៩"];
@@ -94,7 +94,7 @@ export function drawCarrier(ctx: CanvasRenderingContext2D, item: TraceItem, s: n
   if (!item.carrier) return;
   const b = item.carrier.box;
   if (highlightZone && item.zone && item.zone !== "around") {
-    ctx.fillStyle = "rgba(139,124,240,0.12)";
+    ctx.fillStyle = "rgba(128,90,213,0.12)";
     const z = { above: [b.x, 0, b.w, b.y], below: [b.x, b.y + b.h, b.w, 1000 - b.y - b.h], left: [0, b.y, b.x, b.h], right: [b.x + b.w, b.y, 1000 - b.x - b.w, b.h] }[item.zone];
     ctx.fillRect(z[0] * s, z[1] * s, z[2] * s, z[3] * s);
   }
@@ -129,7 +129,7 @@ function star(ctx: CanvasRenderingContext2D, c: Point, r: number, s: number) {
 
 /** `c` is the badge's centre (see badgeCenters). */
 export function drawBadge(ctx: CanvasRenderingContext2D, item: TraceItem, order: number, c: Point, s: number, lit: boolean) {
-  ctx.fillStyle = lit ? COLORS.badge : "#c9c3ef";
+  ctx.fillStyle = lit ? COLORS.badge : "#D0C3F6";
   ctx.beginPath();
   ctx.arc(c.x * s, c.y * s, 24 * s, 0, Math.PI * 2);
   ctx.fill();
@@ -172,7 +172,7 @@ export function drawScene(ctx: CanvasRenderingContext2D, scene: Scene, s: number
         continue;
       }
       if (scene.dotted) {
-        ctx.strokeStyle = "#b8b0ea";
+        ctx.strokeStyle = "#B794F4";
         ctx.lineWidth = 6 * s;
         ctx.setLineDash([2 * s, 18 * s]);
         line(ctx, poly, s);
@@ -327,8 +327,8 @@ export function drawWatch(ctx: CanvasRenderingContext2D, item: TraceItem, prepar
     if (local < 1) {
       // The magic pen's glowing tip.
       const g = ctx.createRadialGradient(tip.x * s, tip.y * s, 0, tip.x * s, tip.y * s, 34 * s);
-      g.addColorStop(0, "rgba(167,139,250,0.95)");
-      g.addColorStop(1, "rgba(167,139,250,0)");
+      g.addColorStop(0, "rgba(159,122,234,0.95)");
+      g.addColorStop(1, "rgba(159,122,234,0)");
       ctx.fillStyle = g;
       ctx.beginPath();
       ctx.arc(tip.x * s, tip.y * s, 34 * s, 0, Math.PI * 2);

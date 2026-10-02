@@ -83,7 +83,7 @@ export function TraceReport({ learnerId, learnerName }: { learnerId: string; lea
       {summary.due.length > 0 && (
         <div className="space-y-1.5">
           <p className="text-sm font-bold text-ink">{t("report.trace.dueNow")}</p>
-          <ul className="flex flex-wrap gap-1.5">{summary.due.map((i) => chip(i, "bg-violet-100 text-violet-900 dark:bg-violet-900/40 dark:text-violet-100"))}</ul>
+          <ul className="flex flex-wrap gap-1.5">{summary.due.map((i) => chip(i, "bg-indigo-100 text-indigo-900 dark:bg-indigo-900/40 dark:text-indigo-100"))}</ul>
         </div>
       )}
       {summary.practice.length > 0 && (

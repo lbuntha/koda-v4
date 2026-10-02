@@ -1091,7 +1091,7 @@ export default function App() {
           {/* TAB: KODA TRACE — write and draw, stroke by stroke */}
           {activeTab === "trace" && (
             <Deferred label="Loading Trace">
-              <TracePage canCreate={canTrace} onAwardXp={(earnedXp) => setUserProgress((prev) => ({ ...prev, xp: prev.xp + earnedXp }))} />
+              <TracePage canCreate={canTrace} onAwardXp={(earnedXp) => setUserProgress((prev) => ({ ...prev, xp: prev.xp + earnedXp }))} onGoHome={() => setActiveTab("home")} />
             </Deferred>
           )}
 

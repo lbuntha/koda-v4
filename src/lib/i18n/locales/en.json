@@ -3302,11 +3302,6 @@
     "draft": "Draft",
     "on": "on",
     "off": "off",
-    "accuracy": "accuracy",
-    "starsLabel": {
-      "one": "{count} star",
-      "other": "{count} stars"
-    },
     "faultFree": {
       "start": "Begin stroke {n} where the model begins it.",
       "direction": "Stroke {n} goes the other way. Look at the model."
@@ -3323,7 +3318,6 @@
       "placement": "wrong side",
       "path": "off the path"
     },
-    "perStroke": "Each stroke",
     "reviewNote": "The numbered strokes show how it is written. Your writing is on top, moved onto the model.",
     "noCollections": "No collections yet. New ones appear here when they are published.",
     "loadingShelf": "Getting the collections…",
@@ -3353,9 +3347,10 @@
       "watch": "Watch",
       "onceMore": "Once more! {done} of {total} done",
       "checkUpIn": "A quick check-up in {days} days keeps it.",
-      "goTo": "Go to {step}",
-      "again": "Once more",
       "moreOptions": "More ways to practise"
+    },
+    "result": {
+      "pass": "Nice work!"
     }
   },
   "traceStudio": {

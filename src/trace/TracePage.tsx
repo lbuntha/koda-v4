@@ -26,6 +26,8 @@ interface Props {
   onAwardXp?(xp: number): void;
   /** Has the Trace Studio permission: also show drafts and test items. */
   canCreate?: boolean;
+  /** Leave Trace for the home screen, offered when an item is finished. */
+  onGoHome?(): void;
 }
 
 interface Entry {
@@ -36,16 +38,20 @@ interface Entry {
 
 const isDone = (p: ItemProgress) => p.status === "canDo" || p.status === "learned";
 
-export function TracePage({ onAwardXp, canCreate = false }: Props) {
+export function TracePage({ onAwardXp, canCreate = false, onGoHome }: Props) {
   const { t } = useT();
   const [open, setOpen] = useState<Entry | null>(null);
   const shelf = useTraceShelf();
   useSyncExternalStore(TraceProgress.subscribe, TraceProgress.version);
   useSyncExternalStore(TraceDrafts.subscribe, TraceDrafts.version);
 
-  if (open) return <TracePlayer key={open.item.id} item={open.item} plan={open.plan} source={open.source} onExit={() => setOpen(null)} onAwardXp={onAwardXp} />;
-
   const collections = shelf.collections.flatMap((c) => (shelf.bundles[c.id] ? [shelf.bundles[c.id]] : []));
+
+  if (open) {
+    const place = placeOf(open, collections, setOpen);
+    return <TracePlayer key={open.item.id} item={open.item} plan={open.plan} source={open.source} place={place} onExit={() => setOpen(null)} onAwardXp={onAwardXp} onGoHome={onGoHome} />;
+  }
+
   const published: Entry[] = collections.flatMap((c) => c.items.map((e) => ({ ...e, source: { collectionId: c.id, rev: c.rev } })));
   const drafts = canCreate ? TraceDrafts.list().filter((d) => d.item.strokes.length > 0) : [];
   const everything: Entry[] = [...published, ...drafts.map((d) => ({ item: d.item, plan: d.plan }))];
@@ -66,11 +72,11 @@ export function TracePage({ onAwardXp, canCreate = false }: Props) {
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 pb-10">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-1">
-          <h1 className="flex items-center gap-2 text-3xl font-bold text-slate-900 dark:text-white">
-            <PenLine className="h-7 w-7 text-violet-600" />
+          <h1 className="flex items-center gap-2 text-3xl font-bold text-ink">
+            <PenLine className="h-7 w-7 text-indigo-600" />
             {t("trace.title")}
           </h1>
-          <p className="text-base text-slate-600 dark:text-slate-300">{t("trace.subtitle")}</p>
+          <p className="text-base text-body">{t("trace.subtitle")}</p>
         </div>
         {(canWrite > 0 || canDraw > 0) && (
           <div className="flex gap-2">
@@ -81,14 +87,14 @@ export function TracePage({ onAwardXp, canCreate = false }: Props) {
       </header>
 
       {due.length > 0 && (
-        <Row title={t("trace.home.due")} icon={<AlarmClock className="h-5 w-5 text-violet-600" />} tone="violet">
+        <Row title={t("trace.home.due")} icon={<AlarmClock className="h-5 w-5 text-indigo-600" />} tone="indigo">
           {due.map((e) => (
             <Tile key={e.item.id} entry={e} onOpen={() => setOpen(e)} />
           ))}
         </Row>
       )}
       {going.length > 0 && (
-        <Row title={t("trace.home.continue")} icon={<Play className="h-5 w-5 text-violet-600" />}>
+        <Row title={t("trace.home.continue")} icon={<Play className="h-5 w-5 text-indigo-600" />}>
           {going.map((e) => (
             <Tile key={e.item.id} entry={e} onOpen={() => setOpen(e)} />
           ))}
@@ -106,9 +112,9 @@ export function TracePage({ onAwardXp, canCreate = false }: Props) {
       ))}
 
       {collections.length === 0 && (
-        <div className="flex flex-col items-center gap-3 rounded-3xl border border-dashed border-slate-300 px-6 py-14 text-center dark:border-slate-700">
-          <PenLine className="h-10 w-10 text-violet-500" />
-          <p className="max-w-md text-slate-600 dark:text-slate-300">{shelf.checkedAt ? t("trace.noCollections") : t("trace.loadingShelf")}</p>
+        <div className="flex flex-col items-center gap-3 rounded-3xl border border-dashed border-line px-6 py-14 text-center">
+          <PenLine className="h-10 w-10 text-indigo-500" />
+          <p className="max-w-md text-body">{shelf.checkedAt ? t("trace.noCollections") : t("trace.loadingShelf")}</p>
         </div>
       )}
 
@@ -118,6 +124,28 @@ export function TracePage({ onAwardXp, canCreate = false }: Props) {
       {canCreate && <Shelf title={t("trace.testShelf")} description={t("trace.testItems")} entries={GOLDEN_ITEMS.map((item) => ({ item }))} onOpen={setOpen} />}
     </div>
   );
+}
+
+type Bundle = { id: string; rev: number; items: Omit<Entry, "source">[] };
+
+/**
+ * Where an open item sits, and what to offer when it is finished: the next item
+ * of its collection, or — after the last — the first not-yet-done item of the
+ * next collection. Drafts and test items have no place.
+ */
+function placeOf(open: Entry, collections: Bundle[], go: (e: Entry) => void) {
+  const at = collections.findIndex((c) => c.id === open.source?.collectionId);
+  if (at < 0) return undefined;
+  const c = collections[at];
+  const i = c.items.findIndex((e) => e.item.id === open.item.id);
+  if (i < 0) return undefined;
+  const entry = (b: Bundle, e: Omit<Entry, "source">): Entry => ({ ...e, source: { collectionId: b.id, rev: b.rev } });
+  if (i + 1 < c.items.length) return { n: i + 1, total: c.items.length, next: { n: i + 2, newCollection: false, open: () => go(entry(c, c.items[i + 1])) } };
+  for (const b of collections.slice(at + 1)) {
+    const j = b.items.findIndex((e) => !isDone(TraceProgress.get(e.item.id)));
+    if (j >= 0) return { n: i + 1, total: c.items.length, next: { n: j + 1, newCollection: true, open: () => go(entry(b, b.items[j])) } };
+  }
+  return { n: i + 1, total: c.items.length };
 }
 
 function Stat({ value, label }: { value: number; label: string }) {
@@ -130,10 +158,10 @@ function Stat({ value, label }: { value: number; label: string }) {
 }
 
 /** A short row of what to do next: scrolls sideways on a phone. */
-function Row({ title, icon, tone, children }: { title: string; icon: React.ReactNode; tone?: "violet"; children: React.ReactNode }) {
+function Row({ title, icon, tone, children }: { title: string; icon: React.ReactNode; tone?: "indigo"; children: React.ReactNode }) {
   return (
-    <section className={`flex flex-col gap-3 rounded-3xl p-4 ${tone === "violet" ? "bg-violet-50 dark:bg-violet-950/30" : "bg-slate-50 dark:bg-slate-900/60"}`}>
-      <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-white">
+    <section className={`flex flex-col gap-3 rounded-3xl p-4 ${tone === "indigo" ? "bg-indigo-50 dark:bg-indigo-900/30" : "bg-surface-muted"}`}>
+      <h2 className="flex items-center gap-2 text-lg font-bold text-ink">
         {icon}
         {title}
       </h2>
@@ -147,15 +175,15 @@ function Shelf({ title, description, entries, onOpen, draft = false }: { title: 
   const done = entries.filter((e) => isDone(TraceProgress.get(e.item.id))).length;
   const pct = entries.length ? Math.round((100 * done) / entries.length) : 0;
   return (
-    <section className="flex flex-col gap-4 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200 sm:p-5 dark:bg-slate-900 dark:ring-slate-800">
+    <section className="flex flex-col gap-4 rounded-3xl bg-surface p-4 ring-1 ring-line sm:p-5">
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white">{title}</h2>
-          <span className="text-sm font-semibold tabular-nums text-slate-600 dark:text-slate-300">{t("trace.shelfProgress", { done, total: entries.length })}</span>
+          <h2 className="text-xl font-bold text-ink">{title}</h2>
+          <span className="text-sm font-semibold tabular-nums text-body">{t("trace.shelfProgress", { done, total: entries.length })}</span>
         </div>
-        {description && <p className="text-sm text-slate-600 dark:text-slate-300">{description}</p>}
-        <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
-          <div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-emerald-500 transition-all" style={{ width: `${pct}%` }} />
+        {description && <p className="text-sm text-body">{description}</p>}
+        <div className="h-2 overflow-hidden rounded-full bg-surface-muted" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
+          <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${pct}%` }} />
         </div>
       </div>
       <ul className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7">
@@ -185,34 +213,34 @@ function Tile({ entry, draft = false, onOpen }: { entry: Entry; draft?: boolean;
       <button
         onClick={onOpen}
         aria-label={`${item.title} · ${label}`}
-        className={`group relative flex aspect-square w-full flex-col items-center justify-center overflow-hidden rounded-2xl p-2 text-center ring-1 transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 active:translate-y-0 ${
-          done ? "bg-emerald-50 ring-emerald-200 dark:bg-emerald-950/30 dark:ring-emerald-900" : "bg-white ring-slate-200 hover:ring-violet-300 dark:bg-slate-900 dark:ring-slate-700"
+        className={`group relative flex aspect-square w-full flex-col items-center justify-center overflow-hidden rounded-2xl p-2 text-center ring-1 transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 active:translate-y-0 ${
+          done ? "bg-emerald-50 ring-emerald-200 dark:bg-emerald-950/30 dark:ring-emerald-900" : "bg-surface ring-line hover:ring-indigo-300"
         }`}
       >
         {/* Status in the corner: done, check-up, or needs practice */}
         {(done || due || p.status === "needsPractice") && (
           <span
-            className={`absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full text-white ${due ? "bg-violet-600" : done ? "bg-emerald-500" : "bg-rose-500"}`}
+            className={`absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full text-white ${due ? "bg-indigo-600" : done ? "bg-emerald-500" : "bg-rose-500"}`}
             aria-hidden="true"
           >
             {due ? <AlarmClock className="h-3.5 w-3.5" /> : done ? <Check className="h-3.5 w-3.5" /> : <RotateCcw className="h-3.5 w-3.5" />}
           </span>
         )}
-        {draft && <span className="absolute left-1.5 top-1.5 rounded-full bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold text-violet-800 dark:bg-violet-900/50 dark:text-violet-200">{t("trace.draft")}</span>}
-        <span className="flex flex-1 items-center justify-center text-slate-900 dark:text-white">
+        {draft && <span className="absolute left-1.5 top-1.5 rounded-full bg-indigo-100 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-200">{t("trace.draft")}</span>}
+        <span className="flex flex-1 items-center justify-center text-ink">
           {showText ? (
             <span className="text-4xl font-bold leading-none sm:text-5xl" lang={item.script === "khmer" ? "km" : undefined}>
               {item.carrier ? `${item.carrier.text}${item.title}` : item.title}
             </span>
           ) : (
-            <span className="text-violet-700 dark:text-violet-300">
+            <span className="text-indigo-700 dark:text-indigo-300">
               <ItemThumb item={item} className="h-14 w-14 sm:h-16 sm:w-16" />
             </span>
           )}
         </span>
         <span className="flex w-full gap-0.5 px-1 pb-0.5" aria-hidden="true">
           {plan.steps.map((s, i) => (
-            <span key={s.id} className={`h-1 flex-1 rounded-full ${i < stepsDone ? "bg-emerald-500" : i === at ? "bg-violet-500" : "bg-slate-200 dark:bg-slate-700"}`} />
+            <span key={s.id} className={`h-1 flex-1 rounded-full ${i < stepsDone ? "bg-emerald-500" : i === at ? "bg-indigo-500" : "bg-line"}`} />
           ))}
         </span>
       </button>
