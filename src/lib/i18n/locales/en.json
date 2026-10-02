@@ -3469,7 +3469,8 @@
     "hero": {
       "carryOn": "Pick up where you left off",
       "tryNew": "Try something new",
-      "allItems": "See all items"
+      "allItems": "See all items",
+      "again": "Practise again"
     }
   },
   "traceStudio": {

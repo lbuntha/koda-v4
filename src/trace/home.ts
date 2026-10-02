@@ -46,7 +46,7 @@ export function stateOf(c: ShelfCollection, progress: (id: string) => ItemProgre
 export type RowId = "continue" | "new" | "finished";
 
 export interface HomeRows<C> {
-  /** The banner: the collection practised most recently and not finished, else the first not started. */
+  /** The banner: the collection practised most recently and not finished, else the first not started, else the finished one practised last. */
   hero: C | null;
   rows: { id: RowId; collections: C[] }[];
 }
@@ -62,7 +62,9 @@ export function homeRows<C extends ShelfCollection>(collections: readonly C[], p
   const finished = withState.filter(({ s }) => s.total > 0 && s.done === s.total);
   const going = withState.filter(({ s }) => s.started && s.done < s.total).sort((a, b) => b.s.lastAt - a.s.lastAt);
   const fresh = withState.filter(({ s }) => !s.started && s.done < s.total);
-  const hero = going[0]?.c ?? fresh[0]?.c ?? null;
+  // With everything finished, the one practised last, to go again — never an empty page.
+  const again = [...finished].sort((a, b) => b.s.lastAt - a.s.lastAt);
+  const hero = going[0]?.c ?? fresh[0]?.c ?? again[0]?.c ?? null;
   const rows = ([
     ["continue", going],
     ["new", fresh],

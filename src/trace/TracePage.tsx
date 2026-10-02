@@ -25,6 +25,7 @@ import { TraceProgress } from "./progress/store";
 import { TracePlayer } from "./player/TracePlayer";
 import { ItemThumb } from "./player/Thumb";
 import { Picture } from "../library/Picture";
+import { isPhoto } from "../library/photos";
 import { TraceDrafts } from "./studio/drafts";
 
 interface Props {
@@ -218,7 +219,12 @@ function CoverArt({ item, picture, others, tone, className = "" }: { item: Trace
   if (picture)
     return (
       <span className={`relative block overflow-hidden ${tone ? `bg-gradient-to-br ${tone}` : ""} ${className}`} aria-hidden="true">
-        <Picture name={picture} cover fill className="transition-transform duration-300 group-hover:scale-105" />
+        {/* A photo fills the frame; a drawing is shown whole, as the Library's shelf does. */}
+        {isPhoto(picture) ? (
+          <Picture name={picture} fill className="transition-transform duration-300 group-hover:scale-105" />
+        ) : (
+          <span className="absolute inset-0 p-3 transition-transform duration-300 group-hover:scale-105"><Picture name={picture} /></span>
+        )}
       </span>
     );
   return (
@@ -264,14 +270,36 @@ function ProgressBar({ pct }: { pct: number }) {
   );
 }
 
+/**
+ * The banner's picture, as the Library's: a band across the top on a phone and
+ * the right-hand side on a wider screen. A photo fills it and fades into the
+ * colour; a drawing floats whole, since cropping one cuts off what it shows.
+ */
+function Banner({ item, picture, others }: { item: TraceItem | null; picture: string | null; others: TraceItem[] }) {
+  if (picture && isPhoto(picture))
+    return (
+      <span className="relative block h-44 [mask-image:linear-gradient(to_bottom,black_55%,transparent)] sm:order-last sm:h-auto sm:min-h-64 sm:[mask-image:linear-gradient(to_right,transparent,black_35%)]" aria-hidden="true">
+        <Picture name={picture} fill />
+      </span>
+    );
+  if (picture)
+    return (
+      <span className="relative flex h-40 items-center justify-center p-4 sm:order-last sm:h-auto sm:min-h-64 sm:p-8" aria-hidden="true">
+        <span className="block h-full w-full max-w-56 drop-shadow-lg"><Picture name={picture} /></span>
+      </span>
+    );
+  return <CoverArt item={item} others={others} tone="" className="h-40 sm:order-last sm:h-auto sm:min-h-56" />;
+}
+
 /** The collection to carry on with, large, with Play going straight to its next item. */
 function Hero({ title, description, cover, picture, tone, entries, onPlay, onBrowse }: { title: string; description: string; cover: TraceItem | null; picture: string | null; tone: string; entries: Entry[]; onPlay(e: Entry): void; onBrowse(): void }) {
   const { t } = useT();
   const p = collectionProgress(entries);
   return (
     <section className={`relative grid overflow-hidden rounded-3xl bg-gradient-to-br text-white sm:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] ${tone}`} aria-label={title}>
-      <div className="relative z-10 flex flex-col gap-3 p-5 sm:p-8">
-        <span className="text-xs font-extrabold uppercase tracking-widest text-white/80">{p.started ? t("trace.hero.carryOn") : t("trace.hero.tryNew")}</span>
+      <Banner item={cover} picture={picture} others={entries.map((e) => e.item).filter((i) => i.id !== cover?.id)} />
+      <div className="relative z-10 flex flex-col gap-3 p-5 pt-1 sm:p-8">
+        <span className="text-xs font-extrabold uppercase tracking-widest text-white/80">{p.all ? t("trace.hero.again") : p.started ? t("trace.hero.carryOn") : t("trace.hero.tryNew")}</span>
         <h2 className="text-3xl font-extrabold leading-tight text-white sm:text-4xl">{title}</h2>
         {description && description !== title && <p className="line-clamp-2 max-w-lg text-sm text-white/85 sm:text-base">{description}</p>}
         <div className="flex max-w-sm flex-col gap-1.5">
@@ -284,7 +312,7 @@ function Hero({ title, description, cover, picture, tone, entries, onPlay, onBro
           {p.next && (
             <button type="button" onClick={() => onPlay(p.next)} className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-white px-5 text-base font-extrabold text-ink shadow-sm transition hover:bg-white/90 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/50">
               <Play className="h-5 w-5 fill-current" />
-              {p.started ? t("trace.action.continue") : t("trace.flow.start")}
+              {p.all ? t("trace.cover.again") : p.started ? t("trace.action.continue") : t("trace.flow.start")}
             </button>
           )}
           <button type="button" onClick={onBrowse} className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-white/20 px-5 text-base font-bold text-white backdrop-blur-sm transition hover:bg-white/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/50">
@@ -293,38 +321,41 @@ function Hero({ title, description, cover, picture, tone, entries, onPlay, onBro
           </button>
         </div>
       </div>
-      <CoverArt item={cover} picture={picture} others={entries.map((e) => e.item).filter((i) => i.id !== cover?.id)} tone="" className="hidden min-h-56 sm:flex" />
     </section>
   );
 }
 
-/** One collection in a row: a tall poster with its name and how far the child is. */
+/** One collection in a row, as the Library shows a book: a wide cover, then its name and how far the child is. */
 function Poster({ title, cover, picture, tone, entries, onOpen }: { title: string; cover: TraceItem | null; picture: string | null; tone: string; entries: Entry[]; onOpen(): void }) {
   const { t } = useT();
   const p = collectionProgress(entries);
+  const status = p.all ? t("trace.cover.allDone") : t("trace.shelfProgress", { done: p.done, total: entries.length });
   return (
-    <button type="button" onClick={onOpen} aria-label={`${title} · ${t("trace.shelfProgress", { done: p.done, total: entries.length })}`}
-      className="group flex w-full flex-col gap-2 text-left focus-visible:outline-none">
-      <span className="relative block overflow-hidden rounded-2xl ring-2 ring-transparent transition group-hover:-translate-y-1 group-hover:ring-indigo-300 group-focus-visible:ring-indigo-500">
-        <CoverArt item={cover} picture={picture} others={entries.map((e) => e.item).filter((i) => i.id !== cover?.id)} tone={tone} className="aspect-[3/4] w-full" />
-        <span className="absolute left-2 top-2 rounded-full bg-black/25 px-2 py-0.5 text-xs font-bold text-white backdrop-blur-sm">{t("trace.cover.count", { count: entries.length })}</span>
+    <button type="button" onClick={onOpen} aria-label={`${title} · ${status}`}
+      className="group grid w-full overflow-hidden rounded-2xl border-2 border-line bg-surface text-left transition hover:border-indigo-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
+      <span className="relative block overflow-hidden">
+        <CoverArt item={cover} picture={picture} others={entries.map((e) => e.item).filter((i) => i.id !== cover?.id)} tone={tone} className="aspect-[2/1] w-full" />
+        <span className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1 text-[11px] font-black text-slate-900">{t("trace.cover.count", { count: entries.length })}</span>
         {p.all && (
-          <span className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white ring-2 ring-white">
+          <span className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white ring-2 ring-white">
             <Check className="h-4 w-4" />
           </span>
         )}
-        {p.started && !p.all && (
-          <span className="absolute inset-x-0 bottom-0 block h-1.5 bg-black/25">
-            <span className="block h-full bg-white" style={{ width: `${p.pct}%` }} />
-          </span>
-        )}
       </span>
-      <span className="line-clamp-2 text-sm font-extrabold leading-tight text-ink sm:text-base">{title}</span>
+      <span className="grid gap-2 p-3">
+        <span className="line-clamp-2 text-lg font-extrabold leading-tight text-ink">{title}</span>
+        <ProgressBar pct={p.pct} />
+        <span className="flex min-h-10 items-center justify-between gap-3">
+          <span className={`text-sm font-semibold tabular-nums ${p.all ? "text-emerald-700 dark:text-emerald-400" : "text-muted"}`}>{status}</span>
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-indigo-50 text-xl text-indigo-600 transition group-hover:bg-indigo-100 dark:bg-indigo-950 dark:text-indigo-300" aria-hidden="true">→</span>
+        </span>
+      </span>
     </button>
   );
 }
 
-const POSTERS = { itemClass: "[&>li]:w-36 sm:[&>li]:w-44", gridClass: "grid-cols-2 sm:grid-cols-4 lg:grid-cols-6", seeAllAfter: 5 };
+/* As the Library's rows: one card across a phone, a sideways row on wider screens. */
+const POSTERS = { itemClass: "[&>li]:w-full sm:[&>li]:w-72", gridClass: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4", seeAllAfter: 3 };
 const TILES = { itemClass: "[&>li]:w-28 sm:[&>li]:w-32", gridClass: "grid-cols-3 sm:grid-cols-5 lg:grid-cols-8", seeAllAfter: 7 };
 
 /** A collection's own page: its cover as a banner, one button to play on, and every item. */

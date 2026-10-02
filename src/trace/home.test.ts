@@ -33,11 +33,12 @@ describe("Trace home", () => {
     expect(stateOf(cs[3], get)).toMatchObject({ done: 1, total: 1, started: true });
   });
 
-  it("offers the first new collection when nothing is under way, and nothing when all are done", () => {
+  it("offers the first new collection when nothing is under way, and a finished one to go again when all are done", () => {
     const fresh = homeRows([{ id: "A", itemIds: ["x"] }], () => p({}));
     expect(fresh.hero?.id).toBe("A");
     expect(fresh.rows.map((r) => r.id)).toEqual(["new"]);
     const done = homeRows([{ id: "A", itemIds: ["x"] }], () => p({ status: "learned" }));
-    expect(done.hero).toBeNull();
+    expect(done.hero?.id).toBe("A");
+    expect(homeRows([], () => p({})).hero).toBeNull();
   });
 });
