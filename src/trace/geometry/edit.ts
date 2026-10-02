@@ -6,6 +6,7 @@
 
 import { splitCubic, strokePolyline, strokeSegments } from "./bezier";
 import { fitNodes } from "./fit";
+import { polylineLength } from "./polyline";
 import type { Handle, NodeType, Point, Stroke, TraceNode } from "./types";
 import { add, clamp, dist, len, normal, normalize, scale, sub } from "./vec";
 
@@ -157,6 +158,50 @@ export function splitSegment(stroke: Stroke, i: number, t = 0.5): Stroke {
   return withNodes(stroke, nodes);
 }
 
+/** How far a cubic's handles reach to draw a quarter circle. */
+const KAPPA = 0.5523;
+
+/**
+ * Add a round loop at node `i` — the head of ង, the curl of a ៩ — without
+ * touching the rest of the stroke. The pen arrives at the node, goes once round
+ * a circle that leaves in the direction it was already travelling, comes back
+ * to the same spot and carries on. `turn` is which way it curls as seen on the
+ * screen ("left" = anticlockwise); `radius` defaults to a size that reads as a
+ * loop at the stroke's width. The four new points are smooth, so dragging any
+ * of them reshapes the loop rather than kinking it.
+ */
+export function addLoop(stroke: Stroke, i: number, turn: "left" | "right", radius?: number): Stroke {
+  if (stroke.shape === "dot" || stroke.nodes.length < 2 || i < 0 || i >= stroke.nodes.length) return stroke;
+  const nodes = stroke.nodes.map(cloneNode);
+  const node = nodes[i];
+  const [prev, nxt] = neighbours(stroke, i);
+  // The direction of travel through the node: its handles if it has them, else its neighbours.
+  const arriving = node.in && len(fromHandle(node.in)) > 1e-6 ? scale(fromHandle(node.in), -1) : prev ? sub(node, prev) : { x: 0, y: 0 };
+  const leaving = node.out && len(fromHandle(node.out)) > 1e-6 ? fromHandle(node.out) : nxt ? sub(nxt, node) : { x: 0, y: 0 };
+  let travel = add(normalize(arriving), normalize(leaving));
+  if (len(travel) < 1e-6) travel = len(leaving) > 1e-6 ? leaving : arriving;
+  if (len(travel) < 1e-6) return stroke;
+  const d = normalize(travel);
+  // y points down, so turning "left" on screen is (d.y, -d.x).
+  const side = turn === "left" ? { x: d.y, y: -d.x } : { x: -d.y, y: d.x };
+  const r = radius ?? Math.max(30, Math.min(120, stroke.width * 1.1));
+  const k = r * KAPPA;
+  const centre = add(node, scale(side, r));
+  const at = (offset: Point, tangent: Point): TraceNode => ({
+    x: clamp(centre.x + offset.x * r, 0, CANVAS),
+    y: clamp(centre.y + offset.y * r, 0, CANVAS),
+    type: "symmetric",
+    in: toHandle(scale(tangent, -k)),
+    out: toHandle(scale(tangent, k)),
+  });
+  const minus = (v: Point) => scale(v, -1);
+  const loop = [at(d, side), at(side, minus(d)), at(minus(d), minus(side))];
+  const back: TraceNode = { x: node.x, y: node.y, type: nxt ? "smooth" : "corner", in: toHandle(scale(d, -k)), out: node.out };
+  const start: TraceNode = { ...node, type: prev ? "smooth" : "corner", out: toHandle(scale(d, k)) };
+  nodes.splice(i, 1, start, ...loop, back);
+  return withNodes(stroke, nodes);
+}
+
 /** Add a node at the end (Add Points in empty space). */
 export function extendStroke(stroke: Stroke, to: Point): Stroke {
   return withNodes(stroke, [...stroke.nodes.map(cloneNode), { x: clamp(to.x, 0, CANVAS), y: clamp(to.y, 0, CANVAS), type: "corner" }]);
@@ -267,4 +312,48 @@ export function fitStroke(stroke: Stroke, target: Box, how: FitHow): Stroke {
     sx = sy = ratio(th, h);
   }
   return transformStroke(stroke, sx, sy, c, tc.x - c.x, tc.y - c.y);
+}
+
+/**
+ * Cut one stroke into two at node `i`: the first ends there, the second starts
+ * there with the pen lifted — what a generated outline needs when it has run a
+ * letter's separate strokes together. The shape is unchanged; the node is
+ * shared, keeping its incoming handle on the first and its outgoing one on the
+ * second. Pinned checkpoints go to the half they were on, re-measured along it.
+ *
+ * A closed loop has no ends to keep, so cutting it opens it at `i` and returns
+ * one stroke. An end node, a dot, or a node that is not there returns null.
+ */
+export function splitStrokeAt(stroke: Stroke, i: number, newId: string): [Stroke] | [Stroke, Stroke] | null {
+  const n = stroke.nodes.length;
+  if (stroke.shape === "dot" || i < 0 || i >= n) return null;
+  if (stroke.closed) {
+    const nodes = [...stroke.nodes.slice(i), ...stroke.nodes.slice(0, i), stroke.nodes[i]].map(cloneNode);
+    nodes[0] = { ...nodes[0], in: undefined };
+    nodes[nodes.length - 1] = { ...nodes[nodes.length - 1], out: undefined };
+    return [{ ...stroke, nodes, closed: false, shape: stroke.shape === "loop" ? "curve" : stroke.shape, checkpoints: stroke.checkpoints.filter((c) => !c.pinned) }];
+  }
+  if (i === 0 || i === n - 1) return null;
+  const head = stroke.nodes.slice(0, i + 1).map(cloneNode);
+  const tail = stroke.nodes.slice(i).map(cloneNode);
+  head[head.length - 1] = { ...head[head.length - 1], out: undefined };
+  tail[0] = { ...tail[0], in: undefined };
+  const first: Stroke = { ...stroke, nodes: head };
+  const second: Stroke = { ...stroke, id: newId, nodes: tail, join: "lift", badge: undefined, instruction: undefined };
+  const a = polylineLength(strokePolyline(first, 0.25));
+  const b = polylineLength(strokePolyline(second, 0.25));
+  const at = a + b > 0 ? a / (a + b) : 0.5;
+  const pinned = stroke.checkpoints.filter((c) => c.pinned);
+  return [
+    { ...first, checkpoints: pinned.filter((c) => c.t < at).map((c) => ({ ...c, t: c.t / at })) },
+    { ...second, checkpoints: pinned.filter((c) => c.t > at).map((c) => ({ ...c, t: (c.t - at) / (1 - at) })) },
+  ];
+}
+
+/** Cut a stroke at any point along it: a node is added there first if there is none. */
+export function cutStrokeAt(stroke: Stroke, segment: number, t: number, newId: string): [Stroke] | [Stroke, Stroke] | null {
+  const end = 0.02;
+  if (t <= end) return splitStrokeAt(stroke, segment, newId);
+  if (t >= 1 - end) return splitStrokeAt(stroke, (segment + 1) % stroke.nodes.length, newId);
+  return splitStrokeAt(splitSegment(stroke, segment, t), segment + 1, newId);
 }

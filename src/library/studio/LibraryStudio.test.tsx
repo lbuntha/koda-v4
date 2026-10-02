@@ -84,7 +84,8 @@ describe("Khmer sound names", () => {
     api.fetchSpellingUnitsInUse.mockResolvedValueOnce([...new Set(KM.questions.flatMap((q) => (q.kind === "spell" ? spellingUnits(q.word) : [])))]);
     const save = vi.spyOn(UnitVoices, "save").mockResolvedValue();
     render(<LibraryStudio />);
-    fireEvent.click(await screen.findByRole("button", { name: "Khmer sound names" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Tools" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Khmer sound names" }));
 
     const used = new Set(KM.questions.flatMap((q) => (q.kind === "spell" ? spellingUnits(q.word) : [])));
     expect((await screen.findByRole("button", { name: `Used in books (${used.size})` })).getAttribute("aria-pressed")).toBe("false");
@@ -201,8 +202,9 @@ describe("Library Studio", () => {
       .toBe(`“${word}” on its own, clearly the main subject.`);
     // A word's picture starts as the subject alone; the author can change that
     // and choose whether the short description is expanded, and undo it.
-    expect(within(right).getByRole("switch", { name: "Subject only — no people" }).getAttribute("aria-checked")).toBe("true");
-    expect(within(right).getByRole("switch", { name: "Set in Cambodia" }).getAttribute("aria-checked")).toBe("false");
+    fireEvent.click(within(right).getByRole("button", { name: "Picture options" }));
+    expect(within(right).getByRole("menuitemcheckbox", { name: "Subject only — no people" }).getAttribute("aria-checked")).toBe("true");
+    expect(within(right).getByRole("menuitemcheckbox", { name: "Set in Cambodia" }).getAttribute("aria-checked")).toBe("false");
     fireEvent.click(within(right).getByRole("button", { name: /Improve description/ }));
     const box = within(right).getByRole("textbox", { name: "Describe the picture" }) as HTMLTextAreaElement;
     await waitFor(() => expect(box.value).toBe("A clear picture of the word, on its own."));
@@ -230,7 +232,8 @@ describe("Library Studio", () => {
     expect(pagePrompt.value).toMatch(/^Illustrate this line from the story: “/);
     expect(pagePrompt.value).toMatch(/market/);
     // A page is a scene, so people are welcome there unless the author says otherwise.
-    expect(within(picker).getByRole("switch", { name: "Subject only — no people" }).getAttribute("aria-checked")).toBe("false");
+    fireEvent.click(within(picker).getByRole("button", { name: "Picture options" }));
+    expect(within(picker).getByRole("menuitemcheckbox", { name: "Subject only — no people" }).getAttribute("aria-checked")).toBe("false");
     fireEvent.click(within(picker).getByRole("button", { name: "Close" }));
 
     // The cover, with no page of its own, gets the book's title instead.

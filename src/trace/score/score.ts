@@ -13,7 +13,7 @@
 import { strokePolyline } from "../geometry/bezier";
 import { withCheckpoints } from "../geometry/checkpoints";
 import type { Nearest, Track } from "../geometry/polyline";
-import { centroid, nearest, pointAt, polylineLength, resample, signedArea, track } from "../geometry/polyline";
+import { centroid, nearest, nearestWithin, pointAt, polylineLength, resample, signedArea, track } from "../geometry/polyline";
 import type { Point, StepId, Stroke, StrokeShape, TraceItem, Zone } from "../geometry/types";
 import { isGuidedStep, modeOf } from "../geometry/types";
 import { clamp, dist } from "../geometry/vec";
@@ -133,6 +133,32 @@ function percentile(sorted: number[], p: number) {
   return sorted[Math.min(sorted.length - 1, Math.floor(p * (sorted.length - 1)))];
 }
 
+/**
+ * How far along the target each ink point is, following the hand rather than
+ * jumping to whichever part of the line happens to be closest.
+ *
+ * A letter like ង passes close to itself — its head loop starts and ends at
+ * one spot, and its right side runs up beside the middle — so the nearest
+ * point of the line can be a part the child reached long ago, or has not
+ * reached yet. Read that way, a clean trace "turned back" at every such place
+ * and was called a scribble. Each point is placed near where the last one was,
+ * unless somewhere else on the line is clearly closer: then the hand really
+ * did go there.
+ */
+function progressAlong(target: PreparedStroke, ink: Point[], near: Nearest[], r: number): number[] {
+  const out: number[] = [];
+  let at = near[0]?.s ?? 0;
+  for (let i = 0; i < ink.length; i++) {
+    if (i > 0) {
+      const step = dist(ink[i - 1], ink[i]);
+      const local = nearestWithin(target.track, ink[i], at - step - r, at + step + 2 * r);
+      at = local.dist <= near[i].dist + r ? local.s : near[i].s;
+    }
+    out.push(at);
+  }
+  return out;
+}
+
 function reversalsAlong(positions: number[], r: number): number {
   let dir = 0;
   let extreme = positions[0] ?? 0;
@@ -228,7 +254,7 @@ export function measureStroke(target: PreparedStroke, rawInk: Point[], r: number
   }
 
   // Turning back by more than 2r counts; corners and wobble near the line don't.
-  const reversals = target.stroke.closed ? 0 : reversalsAlong(near.map((n) => n.s), 2 * r);
+  const reversals = target.stroke.closed ? 0 : reversalsAlong(progressAlong(target, ink, near, r), 2 * r);
 
   // Checkpoints, in order along the ink.
   const hits: boolean[] = [];

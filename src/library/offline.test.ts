@@ -50,13 +50,12 @@ describe("the shelf", () => {
     expect(stored).toEqual([expect.objectContaining({ id: "farm", rev: 3 })]);
   });
 
-  it("lets a published book replace a starter with the same id, so a starter can be corrected", async () => {
-    const fixed = { ...STARTER_PASSAGES[0], rev: 2, title: "At the Market (fixed)" };
-    fetchPublished.mockResolvedValueOnce([fixed]);
+  it("shows the starter books only while nothing is published", async () => {
+    expect(BookStore.shelf().map((p) => p.id)).toEqual(STARTER_PASSAGES.map((p) => p.id));
+    fetchPublished.mockResolvedValueOnce([book("farm")]);
     await BookStore.refresh();
-    const shelf = BookStore.shelf();
-    expect(shelf.filter((p) => p.id === fixed.id)).toEqual([expect.objectContaining({ title: "At the Market (fixed)", rev: 2 })]);
-    expect(shelf).toHaveLength(STARTER_PASSAGES.length);
+    // Real books in: the shelf is exactly what was published — no starter left to delete.
+    expect(BookStore.shelf().map((p) => p.id)).toEqual(["farm"]);
   });
 
   it("drops a book the server has taken off the shelf, once the server says so", async () => {

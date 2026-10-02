@@ -153,4 +153,6 @@ export interface Passage {
   /** Where the text came from — a person reading a draft should know. */
   provenance?: string;
   learningTakeaway?: string;
+  /** What finishing the book pays at three stars; the app's XP per level when absent. */
+  xp?: number | null;
 }

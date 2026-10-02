@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ImageOff, ImagePlus, PanelBottom, PanelLeft, PanelRight, PanelTop, Pencil, Search, Sparkles, Wand2, X } from "lucide-react";
+import { Check, ChevronDown, ImageOff, ImagePlus, PanelBottom, PanelLeft, PanelRight, PanelTop, Pencil, Search, Settings2, Sparkles, Wand2, X } from "lucide-react";
+import { themeSystem } from "../../lib/themeSystem";
 import { SvgMarkup, useArtLibrary } from "../../assets/svg";
 import type { PagePicture } from "../bookLayout";
 import { PICTURE_PLACES, type PicturePlace } from "../data/passage";
@@ -13,7 +14,7 @@ import { describeShape, type PictureKind } from "../pictureShape";
 import { cropToShape, generateBookImage, improvePicturePrompt, type ImageProvider, type ImageStyle } from "../imageGenerationApi";
 import { Picture, PICTURE_KEYS } from "../Picture";
 import { aiDefault } from "../../lib/aiDefaults";
-import { UIBadge, UIButton, UIFlashMessage, UIInput, UILinkButton, UITabs, UITextarea, UIToggle } from "../../components/ui";
+import { UIButton, UIFlashMessage, UIInput, UILinkButton, UIMenu, UIMenuItem, UIMenuLabel, UIMenuSeparator, UITabs, UITextarea } from "../../components/ui";
 import { translate, useT } from "../../lib/i18n";
 
 /**
@@ -80,7 +81,7 @@ interface Draft {
 }
 
 /** The author's standing choices, remembered on this device. */
-interface Prefs {
+export interface Prefs {
   provider: Provider;
   style: ImageStyle;
   autoImprove: boolean;
@@ -96,7 +97,7 @@ const savedPrefs = (): Partial<Prefs> => {
     return {};
   }
 };
-const readPrefs = (): Prefs => {
+export const readPrefs = (): Prefs => {
   const saved = savedPrefs();
   const provider = saved.provider ?? (aiDefault("ai.pictureProvider") === "openai" ? "openai" : "gemini");
   return {
@@ -106,7 +107,16 @@ const readPrefs = (): Prefs => {
   };
 };
 
-export function PicturePanel({ title, note, chosen, how, promptSeed, brief, suggested, suggestedLabel, photos, allowNone, at, onPlace, onChoose, onClose }: {
+/** Keep what this author changed, so the drawer and a batch open on the same choices. */
+export const rememberPrefs = (patch: Partial<Prefs>) => {
+  try {
+    localStorage.setItem(PREFS_KEY, JSON.stringify({ ...savedPrefs(), ...patch }));
+  } catch {
+    /* remembered for this visit only */
+  }
+};
+
+export function PicturePanel({ title, note, chosen, how, promptSeed, brief, suggested, suggestedLabel, photos, allowNone, at, startOn = "library", onPlace, onChoose, onClose }: {
   title: string;
   /**
    * A consequence of choosing here that the author should know before they do.
@@ -141,12 +151,14 @@ export function PicturePanel({ title, note, chosen, how, promptSeed, brief, sugg
   allowNone: boolean;
   /** Where the page's picture sits; null for the cover, which has no choice. */
   at: PicturePlace | null;
+  /** The tab it opens on — "ai" where making a picture is the usual reason to be here. */
+  startOn?: Way;
   onPlace(at: PicturePlace): void;
   onChoose(key: string | null | undefined): void;
   onClose(): void;
 }) {
   const { t } = useT();
-  const [way, setWay] = useState<Way>("library");
+  const [way, setWay] = useState<Way>(startOn);
   const library = useArtLibrary();
   /* The drawing in progress lives here rather than in the tab that shows it: a
      glance back at the library is not a reason to throw away a picture the
@@ -164,11 +176,7 @@ export function PicturePanel({ title, note, chosen, how, promptSeed, brief, sugg
   const [prefs, setPrefsState] = useState<Prefs>(readPrefs);
   const setPrefs = (patch: Partial<Prefs>) => {
     setPrefsState({ ...prefs, ...patch });
-    try {
-      localStorage.setItem(PREFS_KEY, JSON.stringify({ ...savedPrefs(), ...patch }));
-    } catch {
-      /* remembered for this visit only */
-    }
+    rememberPrefs(patch);
   };
 
   // The pull the mounting is for. A failure leaves whatever this device already
@@ -219,35 +227,33 @@ export function PicturePanel({ title, note, chosen, how, promptSeed, brief, sugg
             not scrolled away, because both apply no matter which tab below is
             open. */}
         {(allowNone || (at && chosen)) && (
-          <div className="grid shrink-0 gap-3 border-b border-line px-5 py-3 rail:px-6">
-            {allowNone && (
-              <div className="flex flex-wrap gap-2">
-                <UIButton type="button" size="sm" variant={how === "auto" ? "primary" : "secondary"} aria-pressed={how === "auto"} onClick={() => use(undefined)} icon={<Sparkles aria-hidden="true" />}>
-                  {t("studio.pages.how.auto")}
-                </UIButton>
-                <UIButton type="button" size="sm" variant={how === "none" ? "primary" : "secondary"} aria-pressed={how === "none"} onClick={() => use(null)} icon={<ImageOff aria-hidden="true" />}>
-                  {t("studio.pages.how.none")}
-                </UIButton>
-              </div>
-            )}
-            {at && chosen && (
-              <div>
-                <p className="mb-2 text-xs font-extrabold uppercase tracking-wider text-muted">{t("studio.picture.position")}</p>
-                <div role="radiogroup" aria-label={t("studio.picture.position")} className="grid grid-cols-4 gap-2">
+          <div className="grid shrink-0 gap-2 border-b border-line px-5 py-3 rail:px-6">
+            <div className="flex flex-wrap items-center gap-2">
+              {allowNone && (
+                <>
+                  <UIButton type="button" size="sm" variant={how === "auto" ? "primary" : "secondary"} aria-pressed={how === "auto"} onClick={() => use(undefined)} icon={<Sparkles aria-hidden="true" />}>
+                    {t("studio.pages.how.auto")}
+                  </UIButton>
+                  <UIButton type="button" size="sm" variant={how === "none" ? "primary" : "secondary"} aria-pressed={how === "none"} onClick={() => use(null)} icon={<ImageOff aria-hidden="true" />}>
+                    {t("studio.pages.how.none")}
+                  </UIButton>
+                </>
+              )}
+              {at && chosen && (
+                <div role="radiogroup" aria-label={t("studio.picture.position")} title={t("studio.picture.position")} className="ml-auto flex gap-1 rounded-xl border border-line p-1">
                   {PICTURE_PLACES.map((p) => {
                     const Icon = PLACE_ICON[p];
                     return (
-                      <button key={p} type="button" role="radio" aria-checked={at === p} onClick={() => onPlace(p)}
-                        className={`flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl border px-2 py-2 text-xs font-bold ${at === p ? "border-indigo-600 bg-surface text-ink" : "border-line text-muted hover:border-indigo-400"}`}>
-                        <Icon className="h-5 w-5" aria-hidden="true" />
-                        {t(`studio.pages.place.${p}`)}
+                      <button key={p} type="button" role="radio" aria-checked={at === p} aria-label={t(`studio.pages.place.${p}`)} title={t(`studio.pages.place.${p}`)} onClick={() => onPlace(p)}
+                        className={`grid h-8 w-9 place-items-center rounded-lg ${at === p ? "bg-indigo-600 text-white" : "text-muted hover:bg-surface-muted hover:text-ink"}`}>
+                        <Icon className="h-4 w-4" aria-hidden="true" />
                       </button>
                     );
                   })}
                 </div>
-                {(at === "left" || at === "right") && <p className="mt-2 text-xs text-muted">{t("studio.picture.phoneNote")}</p>}
-              </div>
-            )}
+              )}
+            </div>
+            {at && chosen && (at === "left" || at === "right") && <p className="text-xs text-muted">{t("studio.picture.phoneNote")}</p>}
           </div>
         )}
 
@@ -562,31 +568,52 @@ function AiWay({ library, draft, setDraft, prefs, setPrefs, onUsed }: {
             </UIButton>
           </div>
         </div>
-        <UITextarea id="picture-prompt" aria-label={t("studio.picture.describe")} value={draft.prompt} rows={4}
+        <UITextarea id="picture-prompt" aria-label={t("studio.picture.describe")} value={draft.prompt} rows={3}
           onChange={(e) => setDraft((d) => ({ ...d, prompt: e.target.value, before: null }))}
           placeholder={t("studio.picture.describeHint")} />
       </div>
 
-      <div className="grid gap-2 rounded-2xl border border-line p-3">
-        <Option label={t("studio.picture.subjectOnly")} checked={subjectOnly} onChange={() => setDraft((d) => ({ ...d, subjectOnly: !d.subjectOnly }))} />
-        <Option label={t("studio.picture.cambodia")} checked={cambodia} onChange={() => setDraft((d) => ({ ...d, cambodia: !d.cambodia }))} />
-        <Option label={t("studio.picture.autoImprove")} checked={autoImprove} onChange={() => setPrefs({ autoImprove: !autoImprove })} />
+      <div className="flex flex-wrap items-center gap-2">
+        <div role="group" aria-label={t("studio.picture.kind")} className="flex gap-1.5">
+          {([["svg", t("studio.picture.drawing")], ["image", t("studio.picture.picture")]] as const).map(([id, name]) => (
+            <UIButton key={id} type="button" size="sm" variant={mode === id ? "primary" : "secondary"} aria-pressed={mode === id} onClick={() => setDraft((d) => ({ ...d, mode: id }))}>
+              {name}
+            </UIButton>
+          ))}
+        </div>
+        <UIMenu align="end" className="w-64" trigger={({ toggle, isOpen }) => (
+          <UIButton type="button" size="sm" variant="secondary" className="ml-auto" aria-haspopup="menu" aria-expanded={isOpen} aria-label={t("studio.batch.options")} icon={<Settings2 aria-hidden="true" />} onClick={toggle}>
+            {[provider === "openai" ? "OpenAI" : "Gemini", kind === "portrait" ? t("studio.picture.tall") : t("studio.picture.wide"), ...(mode === "image" ? [styleName(style)] : [])].join(" · ")}
+            <ChevronDown className="ml-1 h-4 w-4" aria-hidden="true" />
+          </UIButton>
+        )}>
+          <UIMenuLabel>{t("studio.picture.madeBy")}</UIMenuLabel>
+          {([["gemini", "Gemini"], ["openai", "OpenAI"]] as const).map(([id, name]) => (
+            <UIMenuItem key={id} isActive={provider === id} onSelect={() => setPrefs({ provider: id })}>{name}</UIMenuItem>
+          ))}
+          <UIMenuSeparator />
+          <UIMenuLabel>{t("studio.picture.shape")}</UIMenuLabel>
+          {(["banner", "portrait"] as const).map((id) => (
+            <UIMenuItem key={id} isActive={kind === id} onSelect={() => setDraft((d) => ({ ...d, kind: id }))}>{id === "banner" ? t("studio.picture.wide") : t("studio.picture.tall")}</UIMenuItem>
+          ))}
+          {mode === "image" && (
+            <>
+              <UIMenuSeparator />
+              <UIMenuLabel>{t("studio.picture.style")}</UIMenuLabel>
+              {(["3d", "flat", "painted"] as const).map((id) => (
+                <UIMenuItem key={id} isActive={style === id} onSelect={() => setPrefs({ style: id })}>{styleName(id)}</UIMenuItem>
+              ))}
+            </>
+          )}
+          <UIMenuSeparator />
+          <MenuCheck label={t("studio.picture.subjectOnly")} checked={subjectOnly} onChange={() => setDraft((d) => ({ ...d, subjectOnly: !d.subjectOnly }))} />
+          <MenuCheck label={t("studio.picture.cambodia")} checked={cambodia} onChange={() => setDraft((d) => ({ ...d, cambodia: !d.cambodia }))} />
+          <MenuCheck label={t("studio.picture.autoImprove")} checked={autoImprove} onChange={() => setPrefs({ autoImprove: !autoImprove })} />
+        </UIMenu>
       </div>
-
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Choice label={t("studio.picture.kind")} value={mode} onChange={(m) => setDraft((d) => ({ ...d, mode: m }))} options={[["svg", t("studio.picture.drawing")], ["image", t("studio.picture.picture")]]} />
-        <Choice label={t("studio.picture.madeBy")} value={provider} onChange={(p) => setPrefs({ provider: p })} options={[["gemini", "Gemini"], ["openai", "OpenAI"]]} />
-        <Choice label={t("studio.picture.shape")} value={kind} onChange={(k) => setDraft((d) => ({ ...d, kind: k }))} options={[["banner", t("studio.picture.wide")], ["portrait", t("studio.picture.tall")]]} />
-        {mode === "image" && (
-          <Choice label={t("studio.picture.style")} value={style} onChange={(v) => setPrefs({ style: v })} options={[["3d", "3D"], ["flat", t("studio.picture.flat")], ["painted", t("studio.picture.painted")]]} />
-        )}
-      </div>
-      <div className="-mt-1 grid gap-1.5">
-        <p className="text-xs text-muted">
-          {mode === "svg" ? t("studio.picture.svgNote") : t("studio.picture.imageNote")}
-        </p>
-        <UIBadge variant="neutral" className="justify-self-start">{describeShape(kind)}</UIBadge>
-      </div>
+      <p className="-mt-1 text-xs text-muted">
+        {mode === "svg" ? t("studio.picture.svgNote") : t("studio.picture.imageNote")} {describeShape(kind)}
+      </p>
 
       <UIButton type="button" fullWidth variant={made ? "secondary" : "primary"} icon={<Sparkles aria-hidden="true" />} isLoading={busy === "improving" || busy === "making"}
         disabled={!draft.prompt.trim() || busy !== null} onClick={() => void make()}>
@@ -630,28 +657,16 @@ function AiWay({ library, draft, setDraft, prefs, setPrefs, onUsed }: {
   );
 }
 
-/** One on/off choice, named beside its switch. */
-function Option({ label, checked, onChange }: { label: string; checked: boolean; onChange(): void }) {
-  return (
-    <div className="flex items-center justify-between gap-3">
-      <span className="text-sm font-semibold text-ink">{label}</span>
-      <UIToggle label={label} checked={checked} onChange={onChange} />
-    </div>
-  );
-}
+const styleName = (id: ImageStyle) => (id === "3d" ? "3D" : id === "flat" ? translate("studio.picture.flat") : translate("studio.picture.painted"));
 
-/** A small segmented switch with its name above it. */
-function Choice<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: Array<[T, string]>; onChange(v: T): void }) {
+/** An on/off choice inside the options menu; it stays open so several can be set. */
+function MenuCheck({ label, checked, onChange }: { label: string; checked: boolean; onChange(): void }) {
   return (
-    <div className="grid gap-1.5">
-      <span className={fieldLabel}>{label}</span>
-      <div role="group" aria-label={label} className="grid auto-cols-fr grid-flow-col gap-1.5">
-        {options.map(([id, name]) => (
-          <UIButton key={id} type="button" size="sm" variant={value === id ? "primary" : "secondary"} aria-pressed={value === id} onClick={() => onChange(id)}>
-            {name}
-          </UIButton>
-        ))}
-      </div>
-    </div>
+    <button type="button" role="menuitemcheckbox" aria-checked={checked} onClick={onChange} className={themeSystem.menu.item(false, "default")}>
+      <span className={`grid h-4 w-4 shrink-0 place-items-center rounded border ${checked ? "border-indigo-600 bg-indigo-600 text-white" : "border-slate-400"}`} aria-hidden="true">
+        {checked && <Check className="h-3 w-3" />}
+      </span>
+      <span className="flex-1 text-left">{label}</span>
+    </button>
   );
 }

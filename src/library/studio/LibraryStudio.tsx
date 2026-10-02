@@ -25,6 +25,7 @@ import { layoutBook, pagePicture } from "../bookLayout";
 import { say, stop } from "../voice";
 import { tutorHeaders } from "../../lib/tutorApi";
 import { aiDefault } from "../../lib/aiDefaults";
+import { ScoringAPI } from "../../lib/scoring";
 import { UIBadge, UIButton, UICard, UIFlashMessage, UIInput, UISelect, UITabs, UITextarea, type UITabItem } from "../../components/ui";
 import { themeSystem } from "../../lib/themeSystem";
 import "../khmerFont";
@@ -337,7 +338,7 @@ function Editor({ row, categories, reports = [], onResolved, onClose }: { row: B
               const storyChanged = next.text !== input.text || next.language !== input.language || next.band !== input.band;
               if (storyChanged && input.text.trim()) setUndoStory({ input, draft, confirmed });
               if (draft && storyChanged) {
-                setDraft({ ...baseOf({ ...next, id }), learningTakeaway: draft.learningTakeaway });
+                setDraft({ ...baseOf({ ...next, id }), learningTakeaway: draft.learningTakeaway, xp: draft.xp });
                 setConfirmed(false);
                 setNote({ kind: "info", text: t("studio.storyChanged") });
               }
@@ -1295,6 +1296,21 @@ function SummaryStep({ draft, verdict, confirmed, onEdit, onNavigate, onQuestion
             finally { setSuggesting(false); }
           }}>{t("studio.summary.suggest")}</UIButton>}
           {suggestError && <UIFlashMessage type="error" message={suggestError} />}
+          <label className="mt-3 block border-t border-line pt-2">
+            <span className="koda-admin-label">{t("studio.summary.xp")}</span>
+            <UIInput
+              type="number"
+              inputMode="numeric"
+              min={0}
+              max={500}
+              step={5}
+              className="max-w-32 text-sm"
+              placeholder={String(ScoringAPI.current().xpPerLevel)}
+              value={draft.xp ?? ""}
+              onChange={(event) => onEdit({ ...draft, xp: event.target.value === "" ? null : Math.min(500, Math.max(0, Math.round(Number(event.target.value)))) })}
+            />
+            <span className="mt-1 block text-xs text-muted">{t("studio.summary.xpNote", { xp: ScoringAPI.current().xpPerLevel })}</span>
+          </label>
           <ul className="mt-3 grid gap-1.5 border-t border-line pt-2 text-sm text-ink">
             <li>{t("studio.summary.understandLearning", { count: verdict.counts.comprehension })}</li>
             <li>{t("studio.summary.vocabLearning", { words: vocabWords.join(", ") || "—" })}</li>

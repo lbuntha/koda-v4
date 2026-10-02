@@ -11,7 +11,7 @@ import type { Stroke, TraceItem } from "../geometry/types";
 import type { Source } from "./autoStrokes";
 import { autoStrokes, canUseAi } from "./autoStrokes";
 import { TraceDrafts } from "./drafts";
-import { IconButton } from "./ui";
+import { IconButton, panelCls } from "./ui";
 
 const uid = () => `s${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
@@ -26,14 +26,14 @@ function useAiAllowed(): boolean | null {
 function AiSwitch({ allowed, on, onChange }: { allowed: boolean | null; on: boolean; onChange(v: boolean): void }) {
   const { t } = useT();
   return (
-    <label className={`flex items-start gap-2 rounded-xl border p-3 text-sm ${allowed ? "border-violet-200 dark:border-violet-900" : "border-slate-200 opacity-80 dark:border-slate-700"}`}>
-      <input type="checkbox" className="mt-0.5 h-4 w-4 accent-violet-600" checked={Boolean(allowed) && on} disabled={!allowed} onChange={(e) => onChange(e.target.checked)} />
+    <label className={`flex items-start gap-2 rounded-xl border p-3 text-sm ${allowed ? "border-indigo-200 dark:border-indigo-900" : "border-line opacity-80"}`}>
+      <input type="checkbox" className="mt-0.5 h-4 w-4 accent-indigo-600" checked={Boolean(allowed) && on} disabled={!allowed} onChange={(e) => onChange(e.target.checked)} />
       <span className="flex flex-col gap-0.5">
-        <span className="flex items-center gap-1.5 font-semibold text-slate-900 dark:text-white">
-          {allowed ? <Sparkles className="h-4 w-4 text-violet-600" /> : <Lock className="h-4 w-4 text-slate-400" />}
+        <span className="flex items-center gap-1.5 font-semibold text-ink">
+          {allowed ? <Sparkles className="h-4 w-4 text-indigo-600" /> : <Lock className="h-4 w-4 text-muted" />}
           {t("traceStudio.auto.useAi")}
         </span>
-        <span className="text-xs text-slate-500 dark:text-slate-400">{allowed === false ? t("traceStudio.auto.aiPaid") : t("traceStudio.auto.aiNote")}</span>
+        <span className="text-xs text-muted">{allowed === false ? t("traceStudio.auto.aiPaid") : t("traceStudio.auto.aiNote")}</span>
       </span>
     </label>
   );
@@ -92,9 +92,9 @@ export function AutoStrokesButton({ item, onStrokes }: { item: TraceItem; onStro
         <Wand2 className="h-5 w-5" />
       </IconButton>
       {open && (
-        <div className="absolute left-0 top-full z-40 mt-2 flex w-80 flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-xl lg:left-full lg:top-0 lg:ml-2 lg:mt-0 dark:border-slate-700 dark:bg-slate-900">
-          <p className="text-sm font-semibold text-slate-900 dark:text-white">{t("traceStudio.auto.title")}</p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">{t("traceStudio.auto.intro")}</p>
+        <div className="absolute left-0 top-full z-40 mt-2 flex w-80 flex-col gap-3 rounded-2xl border border-line bg-surface p-4 shadow-xl lg:left-full lg:top-0 lg:ml-2 lg:mt-0">
+          <p className="text-sm font-semibold text-ink">{t("traceStudio.auto.title")}</p>
+          <p className="text-xs text-muted">{t("traceStudio.auto.intro")}</p>
           {!hasGlyph && !hasImage ? (
             <p className="text-sm text-rose-700 dark:text-rose-300">{t("traceStudio.auto.noGuide")}</p>
           ) : (
@@ -107,7 +107,7 @@ export function AutoStrokesButton({ item, onStrokes }: { item: TraceItem; onStro
                     aria-checked={source === s}
                     disabled={s === "glyph" ? !hasGlyph : !hasImage}
                     onClick={() => setSource(s)}
-                    className={`flex-1 rounded-xl border px-3 py-2 text-sm font-medium disabled:opacity-40 ${source === s ? "border-violet-500 bg-violet-50 text-violet-900 dark:bg-violet-950/40 dark:text-violet-100" : "border-slate-200 text-slate-700 dark:border-slate-700 dark:text-slate-200"}`}
+                    className={`flex-1 rounded-xl border px-3 py-2 text-sm font-medium disabled:opacity-40 ${source === s ? "border-indigo-500 bg-indigo-50 text-indigo-900 dark:bg-indigo-950/40 dark:text-indigo-100" : "border-line text-body"}`}
                   >
                     {t(`traceStudio.auto.from.${s}`)}
                   </button>
@@ -156,15 +156,15 @@ export function AutoStrokesForSet({ itemIds, onDone }: { itemIds: string[]; onDo
   };
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-violet-200 bg-violet-50/60 p-4 dark:border-violet-900 dark:bg-violet-950/30">
-      <p className="text-sm text-slate-700 dark:text-slate-200">{t("traceStudio.auto.setIntro", { count: empty.length })}</p>
+    <div className={panelCls}>
+      <p className="text-sm text-body">{t("traceStudio.auto.setIntro", { count: empty.length })}</p>
       <AiSwitch allowed={allowed} on={ai} onChange={setAi} />
       {progress ? (
         <div className="flex flex-col gap-1.5">
-          <div className="h-2 overflow-hidden rounded-full bg-white dark:bg-slate-800">
-            <div className="h-full bg-violet-600 transition-all" style={{ width: `${(100 * progress.done) / Math.max(1, progress.total)}%` }} />
+          <div className="h-2 overflow-hidden rounded-full bg-surface-muted">
+            <div className="h-full bg-indigo-600 transition-all" style={{ width: `${(100 * progress.done) / Math.max(1, progress.total)}%` }} />
           </div>
-          <p className="text-sm text-slate-700 dark:text-slate-200">
+          <p className="text-sm text-body">
             {progress.done < progress.total ? t("traceStudio.auto.working", { done: progress.done, total: progress.total }) : t("traceStudio.auto.setDone", { count: progress.total, ai: progress.ai })}
           </p>
         </div>

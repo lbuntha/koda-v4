@@ -13,7 +13,11 @@
     "dismiss": "Dismiss",
     "mainNav": "Main",
     "nothingYet": "Nothing to show yet.",
-    "tablePages": "Table pages"
+    "tablePages": "Table pages",
+    "seeAll": "See all ({count})",
+    "showLess": "Show less",
+    "scrollBack": "Scroll back",
+    "scrollOn": "Scroll on"
   },
   "nav": {
     "home": "Home",
@@ -539,13 +543,21 @@
     "results": {
       "finished": "You finished “{title}”",
       "stars": "{stars} of {total} stars",
-      "legend": "✓ first try · + needed a second try, a hint or Read again",
+      "legend": "✓ first try · ↻ needed another try, a hint or Read again",
       "firstTry": "on the first try",
       "wordsToPractise": "Words to practise",
       "nothing": "Nothing — every answer was right first time.",
       "parentSees": "What a parent will see",
       "backToLibrary": "Back to the library",
-      "readItAgain": "Read it again"
+      "readItAgain": "Read it again",
+      "eyebrow": "Story finished",
+      "howYouDid": "How you did",
+      "nextStory": "Next story",
+      "praise": {
+        "three": "Every answer right first time — brilliant reading!",
+        "two": "Great reading! A few took a second try.",
+        "one": "Well done for finishing! Read it again to get more first time."
+      }
     },
     "bookLanguage": {
       "en": "English",
@@ -555,7 +567,28 @@
       "read": "Read “{title}” ({language}). Understood {understood}, matched {matched}, spelled {spelled} on the first try.",
       "needs": "Needs practice: {words}.",
       "nothing": "Nothing needs practice."
-    }
+    },
+    "hero": {
+      "carryOn": "Pick up where you left off",
+      "tryNew": "A new story for you",
+      "keepReading": "Keep reading",
+      "startReading": "Start reading"
+    },
+    "shelfEmpty": {
+      "title": "No {language} stories yet",
+      "note": "New stories are on their way. Check back soon."
+    },
+    "allHere": {
+      "title": "That’s every {language} story for now",
+      "note": "New stories are added often — come back soon for more."
+    },
+    "readIn": {
+      "one": "Read in {language} · {count} story",
+      "other": "Read in {language} · {count} stories"
+    },
+    "noMatchFor": "No books match “{query}”",
+    "noMatchNote": "Try a shorter word, or another spelling.",
+    "clearSearch": "Clear search"
   },
   "coach": {
     "comesBefore": "Nearly! {want} comes before {got}. Spell it in the order you say it.",
@@ -1031,7 +1064,9 @@
       "ready": "Ready for the Publish step.",
       "reviewNeeded": "Some publication requirements still need attention.",
       "shelf": "Shelf: {shelf}",
-      "noShelf": "No shelf selected yet."
+      "noShelf": "No shelf selected yet.",
+      "xp": "XP for finishing",
+      "xpNote": "Paid at three stars, with the same star shares as a skill lesson. Leave empty to use the app’s {xp} XP per level."
     },
     "publish": {
       "deleteN": "delete {count}",
@@ -1048,6 +1083,70 @@
       "remove": "Remove from shelf",
       "confirmDelete": "Yes, delete this book",
       "delete": "Delete"
+    },
+    "batch": {
+      "open": "Make pictures with AI",
+      "title": "Make pictures with AI",
+      "note": "Tick the pages you want; pictures are made one by one and placed as they arrive.",
+      "select": "Choose pages",
+      "selected": {
+        "one": "{count} selected",
+        "other": "{count} selected"
+      },
+      "all": "All",
+      "missing": "Still on Automatic",
+      "clear": "Clear",
+      "improve": "Improve each description first",
+      "make": {
+        "one": "Make {count} picture",
+        "other": "Make {count} pictures"
+      },
+      "retry": {
+        "one": "Try {count} again",
+        "other": "Try {count} again"
+      },
+      "stop": "Stop after this one",
+      "progress": "Making {n} of {total}…",
+      "stay": "Stay on this step until it finishes — leaving stops the run.",
+      "summary": "{done} made, {failed} failed",
+      "done": "Done",
+      "state": {
+        "queued": "Waiting",
+        "making": "Making",
+        "done": "Made",
+        "failed": "Failed"
+      },
+      "options": "Picture options"
+    },
+    "tools": "Tools",
+    "rev": "rev {rev}",
+    "selectBook": "Select {title}",
+    "selectedCount": {
+      "one": "{count} selected",
+      "other": "{count} selected"
+    },
+    "selectPage": "Select this page",
+    "clearSelection": "Clear selection",
+    "deleteSelected": {
+      "one": "Delete {count}",
+      "other": "Delete {count}"
+    },
+    "deleteBook": "Delete {title}",
+    "deleted": {
+      "one": "Deleted {count} book.",
+      "other": "Deleted {count} books."
+    },
+    "deleteFailed": {
+      "one": "Could not delete {titles}. Try again.",
+      "other": "Could not delete {count} books: {titles}. Try again."
+    },
+    "confirmDelete": {
+      "title": {
+        "one": "Delete this book?",
+        "other": "Delete {count} books?"
+      },
+      "one": "“{title}” will be removed from the studio and from every child’s library. This cannot be undone here.",
+      "many": "These {count} books will be removed from the studio and from every child’s library. This cannot be undone here."
     }
   },
   "time": {
@@ -3340,7 +3439,13 @@
     },
     "home": {
       "due": "Check-up time",
-      "continue": "Keep going"
+      "continue": "Keep going",
+      "collections": "Collections",
+      "row": {
+        "continue": "Continue your collections",
+        "new": "Start something new",
+        "finished": "Finished — practise again"
+      }
     },
     "flow": {
       "start": "Start",
@@ -3351,13 +3456,26 @@
     },
     "result": {
       "pass": "Nice work!"
+    },
+    "cover": {
+      "count": {
+        "one": "{count} item",
+        "other": "{count} items"
+      },
+      "allDone": "All done",
+      "back": "All collections",
+      "again": "Play again"
+    },
+    "hero": {
+      "carryOn": "Pick up where you left off",
+      "tryNew": "Try something new",
+      "allItems": "See all items"
     }
   },
   "traceStudio": {
     "title": "Trace Studio",
-    "subtitle": "Make trace items: type the letter or upload a book page as the guide, build its strokes in order, set the writing steps, and test-write every step.",
+    "subtitle": "Build letters and drawings for children to trace, then group them into collections.",
     "newItem": "New item",
-    "fromExample": "Start from an example…",
     "empty": "No items yet. Start a new one, or copy an example.",
     "localNote": "Drafts are kept on this device for now. Publishing to every child comes next.",
     "allItems": "All items",
@@ -3385,14 +3503,16 @@
       "add": "Add points",
       "pen": "Freehand pen",
       "pin": "Pin checkpoints",
-      "hand": "Hand (pan)"
+      "hand": "Hand (pan)",
+      "cut": "Cut"
     },
     "modeHint": {
       "adjust": "Drag a stroke to move it, or drag its points and handles. ⌥/Alt-drag the curve to bend it. The box around the selected stroke resizes it (Shift keeps its shape). Drag a stroke’s number to move the number. Arrow keys nudge a point, or the whole stroke when no point is selected; Shift moves 10. Shift+click adds strokes to the selection; ⌘G groups them, ⇧⌘G ungroups.",
       "add": "Click on the selected stroke to add a point there. Click empty space to extend it.",
       "pen": "Draw a stroke with your finger or mouse. It becomes smooth, editable points. A tap makes a dot.",
       "pin": "Click on the selected stroke to pin a checkpoint the child must pass. Click a pinned one to remove it.",
-      "hand": "Drag to move around a zoomed canvas. Hold Space to pan with any tool; Ctrl or ⌘ + scroll zooms."
+      "hand": "Drag to move around a zoomed canvas. Hold Space to pan with any tool; Ctrl or ⌘ + scroll zooms.",
+      "cut": "Click a stroke where one stroke should end and the next begin. Each piece gets its own number."
     },
     "undo": "Undo",
     "redo": "Redo",
@@ -3437,6 +3557,8 @@
     "bendDown": "Bend down",
     "straighten": "Straighten",
     "blendAll": "Blend all",
+    "loopLeft": "Add a loop, curling left (at the chosen point, or the end)",
+    "loopRight": "Add a loop, curling right (at the chosen point, or the end)",
     "reverse": "Reverse",
     "mirrorH": "Mirror ↔",
     "mirrorV": "Mirror ↕",
@@ -3592,14 +3714,14 @@
       },
       "danger": "Delete",
       "delete": "Delete this collection",
-      "deleteSure": "Delete it? Children lose it from their shelves; its items stay in the Studio.",
+      "deleteSure": "Children lose it from their shelves. Its items stay in the Studio.",
       "description": "Description",
       "draft": "Not published",
       "empty": "No collections yet. A collection is a set children practise together, like A–Z, 0–9 or the Khmer consonants.",
       "english": "English",
       "fromList": "New items from a list",
       "fromListNote": "Type a range like A-Z, 0-9, ក-អ or ១-៩, or paste characters or words. One item is made for each, with its guide letter ready; you then draw its strokes.",
-      "intro": "A collection is a set children practise together. Everything you publish is public: every learner on Koda can practise it.",
+      "intro": "Collections are sets children practise together. Published ones are open to every learner.",
       "itemCount": {
         "one": "{count} item",
         "other": "{count} items"
@@ -3635,7 +3757,24 @@
       "untitled": "New collection",
       "useAsCover": "Use as the cover",
       "coverBadge": "The cover",
-      "dragHint": "Drag items to change their order."
+      "coverPicture": "Cover picture",
+      "makeCover": "Make a cover with AI",
+      "changeCover": "Change",
+      "removeCover": "Remove",
+      "coverNote": "A drawing or a picture, from a description. Without one, the cover item is drawn.",
+      "dragHint": "Drag items to change their order.",
+      "xpPerStep": "XP per step",
+      "xpPerStepNote": "What passing one writing step pays at three stars. Two and one star pay less, as in a lesson. Empty uses the app’s {xp} XP.",
+      "search": "Search collections",
+      "total": {
+        "one": "{count} collection",
+        "other": "{count} collections"
+      },
+      "deleteNamed": "Delete {title}",
+      "deleteTitle": "Delete “{title}”?",
+      "deleteFailed": "Could not delete the collection. Check the connection and try again.",
+      "showMore": "Show more ({shown} of {total})",
+      "more": "More actions"
     },
     "view": {
       "collections": "Collections",
@@ -3754,6 +3893,51 @@
       },
       "working": "Working… {done} of {total}",
       "setDone": "Done: {count} items drafted ({ai} ordered by AI). Open each to check and test it."
-    }
+    },
+    "order": "Order",
+    "swapWith": "Swap with stroke {n}",
+    "orderHint": "Tap a number to swap this stroke with that one. The others keep their place.",
+    "sort": "Sort",
+    "sortRecent": "Recently edited",
+    "sortTitle": "Title A–Z",
+    "itemTotal": {
+      "one": "{count} item",
+      "other": "{count} items"
+    },
+    "confirmDelete": {
+      "title": {
+        "one": "Delete this item?",
+        "other": "Delete {count} items?"
+      },
+      "note": "This cannot be undone.",
+      "held": {
+        "one": "{count} of them is in a collection and will be taken out of it.",
+        "other": "{count} of them are in collections and will be taken out of them."
+      }
+    },
+    "eyebrow": "Koda Trace",
+    "statusUnused": "Not in any collection",
+    "inCollections": {
+      "one": "in {count} collection",
+      "other": "in {count} collections"
+    },
+    "inNoCollection": "in no collection",
+    "colStatus": {
+      "draft": "Draft",
+      "changed": "Unpublished changes",
+      "published": "Published",
+      "pending": "Waiting for review",
+      "rejected": "Sent back"
+    },
+    "splitHere": "Split the stroke here"
+  },
+  "pager": {
+    "label": "Pages",
+    "first": "First page",
+    "previous": "Previous page",
+    "next": "Next page",
+    "last": "Last page",
+    "page": "Page",
+    "of": "of {pages}"
   }
 }

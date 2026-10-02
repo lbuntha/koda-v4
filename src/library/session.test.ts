@@ -88,6 +88,13 @@ describe("reward", () => {
     expect(reward(firstTries(5), n, SCORING_DEFAULTS).xp).toBe(Math.round(SCORING_DEFAULTS.xpPerLevel * SCORING_DEFAULTS.twoStarShare));
   });
 
+  it("pays a book's own XP in place of the level's, with the same star shares", () => {
+    expect(reward(firstTries(7), n, SCORING_DEFAULTS, 50).xp).toBe(50);
+    expect(reward(firstTries(5), n, SCORING_DEFAULTS, 50).xp).toBe(Math.round(50 * SCORING_DEFAULTS.twoStarShare));
+    expect(reward(firstTries(7), n, SCORING_DEFAULTS, null).xp).toBe(SCORING_DEFAULTS.xpPerLevel);
+    expect(reward(firstTries(7), n, SCORING_DEFAULTS, 0).xp).toBe(0);
+  });
+
   it("never divides by zero", () => {
     expect(reward([], 0, SCORING_DEFAULTS)).toMatchObject({ stars: 1, accuracy: 0 });
   });

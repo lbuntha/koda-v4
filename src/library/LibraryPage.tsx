@@ -1,7 +1,7 @@
 import type React from "react";
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeft, BookOpen, Check, Lightbulb, Search, Volume2, X } from "lucide-react";
+import { ArrowLeft, BookOpen, Check, ChevronDown, Globe, Lightbulb, RotateCcw, Search, Star, Volume2, X, Zap } from "lucide-react";
 import { LetterWheel } from "../components/wheel/LetterWheel";
 import { ScoringAPI } from "../lib/scoring";
 import type { Language, Passage } from "./data/passage";
@@ -14,6 +14,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { prefetchUnits, sayUnit, useUnitVoices } from "./unitVoices";
 import { BookRecorder } from "./learning";
 import { Picture } from "./Picture";
+import { isPhoto } from "./photos";
 import { LibraryProgress, type BookProgress } from "./progress";
 import { isFirstTry, minutesToRead, parentSummary, quizOf, reward, tally, wordsToPractise, type Outcome, type QuizItem } from "./session";
 import { canSpeak, say, sentenceSpeaks, stop } from "./voice";
@@ -22,7 +23,7 @@ import { prefetchPhotos } from "./photos";
 import { reportBook, type ReportReason } from "./api";
 import { BookReader } from "./BookReader";
 import { playSound } from "../utils/audio";
-import { UIButton, UICard, UIGuideBubble, UIBookCard, UILinkButton, UIInput, UIQuizToolbar, UIModal } from "../components/ui";
+import { UIButton, UICard, UICarousel, UIMenu, UIMenuItem, UIGuideBubble, UIBookCard, UILinkButton, UIInput, UIQuizToolbar, UIModal } from "../components/ui";
 import "./khmerFont";
 import { useT } from "../lib/i18n";
 
@@ -39,6 +40,8 @@ import { useT } from "../lib/i18n";
 type Screen = "catalog" | "book" | "read" | "quiz" | "results";
 
 const LANG_KEY = "koda_library_lang_v1";
+/** Each book language in its own name, so a reader finds theirs whatever the app is set to. */
+const LANGUAGE_NAMES: Record<Language, string> = { en: "English", km: "ភាសាខ្មែរ" };
 const KHMER = "font-['Noto_Sans_Khmer','Khmer_OS','Khmer_MN',sans-serif]";
 const COVER: Record<string, string> = {
   Animals: "from-indigo-500 to-indigo-800",
@@ -52,7 +55,9 @@ const btn = "inline-flex min-h-11 items-center justify-center gap-2 rounded-full
 const quiet = `${btn} border border-line bg-surface text-ink hover:border-indigo-400`;
 /** Catalog layout knobs, named once so the page has no loose numbers. */
 const TILE_MIN = "16rem";
-const ROW_INTRINSIC = "22rem";
+/** A book card's width in a sideways row, and the grid a row opens into. */
+const ROW_ITEM = "[&>li]:w-full sm:[&>li]:w-72";
+const ROW_GRID = "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
 const kh = (p: { language: Language }) => (p.language === "km" ? KHMER : "");
 
 function readLang(): Language {
@@ -78,6 +83,10 @@ export function LibraryPage({ onAwardXp, onReaderChange }: LibraryPageProps) {
   const [earned, setEarned] = useState<{ stars: number; xp: number } | null>(null);
   const shelf = useShelf();
   const book = shelf.find((p) => p.id === bookId) ?? null;
+  // What "Next story" opens: the next book in this language not yet finished.
+  const nextStory = book && screen === "results"
+    ? shelf.find((p) => p.language === book.language && p.id !== book.id && LibraryProgress.get(p.id, p.rev)?.stage !== "done") ?? null
+    : null;
   const top = useRef<HTMLDivElement>(null);
 
   const setLang = (l: Language) => {
@@ -126,7 +135,7 @@ export function LibraryPage({ onAwardXp, onReaderChange }: LibraryPageProps) {
           onLeave={() => go("book")}
           onFinish={(result) => {
             const quiz = quizOf(book);
-            const r = reward(result, quiz.length, ScoringAPI.current());
+            const r = reward(result, quiz.length, ScoringAPI.current(), book.xp);
             const [u, w, s] = tally(result, quiz);
             LibraryProgress.set(book.id, { stage: "done", rev: book.rev, firstTry: u.firstTry + w.firstTry + s.firstTry, total: quiz.length, stars: r.stars });
             if (r.xp > 0) onAwardXp?.(r.xp);
@@ -137,7 +146,7 @@ export function LibraryPage({ onAwardXp, onReaderChange }: LibraryPageProps) {
         />
       )}
       {book && screen === "results" && (
-        <Results book={book} outcomes={outcomes} earned={earned} onShelf={() => go("catalog")} onAgain={() => go("read")} />
+        <Results book={book} outcomes={outcomes} earned={earned} next={nextStory} onNext={open} onShelf={() => go("catalog")} onAgain={() => go("read")} />
       )}
     </div>
   );
@@ -221,16 +230,28 @@ function Catalog({ shelf, lang, onLang, onOpen }: { shelf: readonly Passage[]; l
     () => mine.filter((p) => (active === "All" || categoryOf(p) === active) && (!query || p.title.toLowerCase().includes(query))),
     [mine, active, query],
   );
-  const reading = list.filter((p) => {
-    const st = progressOf(p)?.stage;
-    return st === "read" || st === "quiz";
-  });
+  const reading = list
+    .filter((p) => {
+      const st = progressOf(p)?.stage;
+      return st === "read" || st === "quiz";
+    })
+    .sort((a, b) => (progressOf(b)?.updatedAt ?? 0) - (progressOf(a)?.updatedAt ?? 0));
   // A book already under "Continue reading" is not listed a second time below it.
   const readingIds = new Set(reading.map((p) => p.id));
+  // The banner: the book being read most recently, else the first one not yet opened.
+  const hero = reading[0] ?? mine.find((p) => !progressOf(p)) ?? null;
+  const browsing = !query && active === "All";
+  const belowReading = reading.filter((p) => p.id !== hero?.id);
+  const belowShelves = cats
+    .map((c) => [c, list.filter((p) => categoryOf(p) === c && !readingIds.has(p.id))] as const)
+    .filter(([, books]) => books.length > 0);
+  const other: Language = lang === "en" ? "km" : "en";
+  const otherCount = useMemo(() => shelf.filter((p) => p.language === other).length, [shelf, other]);
 
-  const shelfRow = (title: string, books: readonly Passage[], note?: string) =>
+  /** A searched or filtered list: everything at once, as a grid. */
+  const gridRow = (title: string, books: readonly Passage[], note?: string) =>
     books.length ? (
-      <section key={title} className="mt-6 sm:mt-8 [content-visibility:auto]" style={{ containIntrinsicSize: `auto ${ROW_INTRINSIC}` }}>
+      <section key={title} className="mt-6 sm:mt-8">
         <div className="mb-3 flex items-baseline justify-between gap-3">
           <h2 className="text-lg font-extrabold text-ink">{title}</h2>
           {note && <span className="text-xs text-muted">{note}</span>}
@@ -245,23 +266,44 @@ function Catalog({ shelf, lang, onLang, onOpen }: { shelf: readonly Passage[]; l
       </section>
     ) : null;
 
+  /** Browsing: one row a shelf, scrolling sideways, opened out on "See all". */
+  const shelfRow = (title: string, books: readonly Passage[]) =>
+    books.length ? (
+      <UICarousel key={title} title={title} count={books.length} itemClass={ROW_ITEM} gridClass={ROW_GRID} seeAllAfter={3}
+        className="mt-6 sm:mt-8 [content-visibility:auto] [contain-intrinsic-size:auto_22rem]">
+        {books.map((b) => (
+          <li key={b.id}>
+            <BookTile book={b} progress={progressOf(b)} onOpen={onOpen} />
+          </li>
+        ))}
+      </UICarousel>
+    ) : null;
+
   return (
     <div>
       <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-ink">{tr("nav.library")}</h1>
+        <div className="min-w-0">
+          {/* Below `rail:` the app bar already names the page; the heading stays for screen readers. */}
+          <h1 className="sr-only text-3xl font-extrabold tracking-tight text-ink rail:not-sr-only">{tr("nav.library")}</h1>
           <p className="hidden text-sm text-muted sm:block">{tr("library.tagline")}</p>
         </div>
-        <div role="group" aria-label={tr("library.bookLanguageLabel")} className="flex flex-wrap justify-end gap-2">
-          {(["en", "km"] as const).map((l) => (
-            <UIButton key={l} type="button" size="sm" variant={lang === l ? "primary" : "secondary"} aria-pressed={lang === l} onClick={() => onLang(l)} className={`rounded-full ${l === "km" ? KHMER : ""}`}>
-              {l === "en" ? "English" : "ភាសាខ្មែរ"}
-            </UIButton>
+        <UIMenu align="end" className="w-44" trigger={({ toggle, isOpen }) => (
+          <UIButton type="button" size="sm" variant="secondary" className="rounded-full" icon={<Globe className="h-4 w-4" />} iconRight={<ChevronDown className="h-4 w-4" />}
+            aria-haspopup="menu" aria-expanded={isOpen} aria-label={`${tr("library.bookLanguageLabel")}: ${LANGUAGE_NAMES[lang]}`} onClick={toggle}>
+            <span className={lang === "km" ? KHMER : ""}>{LANGUAGE_NAMES[lang]}</span>
+          </UIButton>
+        )}>
+          {({ close }) => (["en", "km"] as const).map((l) => (
+            <UIMenuItem key={l} isActive={lang === l} onSelect={() => { onLang(l); close(); }}>
+              <span className={l === "km" ? KHMER : ""}>{LANGUAGE_NAMES[l]}</span>
+            </UIMenuItem>
           ))}
-        </div>
+        </UIMenu>
       </header>
 
-      <label className="relative mt-4 block">
+      {browsing && hero && <LibraryHero book={hero} reading={readingIds.has(hero.id)} progress={progressOf(hero)} onOpen={onOpen} />}
+
+      {mine.length > 0 && <label className="relative mt-5 block">
         <span className="sr-only">{tr("library.search")}</span>
         <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden="true" />
         <UIInput
@@ -271,7 +313,7 @@ function Catalog({ shelf, lang, onLang, onOpen }: { shelf: readonly Passage[]; l
           placeholder={tr("library.search")}
           className="rounded-full pl-10 pr-4"
         />
-      </label>
+      </label>}
 
       {cats.length > 1 && (
         <div role="group" aria-label={tr("library.category")} className="mt-3 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
@@ -283,16 +325,102 @@ function Catalog({ shelf, lang, onLang, onOpen }: { shelf: readonly Passage[]; l
         </div>
       )}
 
-      {query ? (
-        shelfRow(tr("library.resultsFor", { query: deferredQ.trim() }), list, tr("library.books", { count: list.length })) ?? <p className="mt-6 text-muted">{tr("library.noMatch")}</p>
+      {mine.length === 0 ? (
+        <ShelfNote
+          title={tr("library.shelfEmpty.title", { language: tr(`library.bookLanguage.${lang}`) })}
+          note={tr("library.shelfEmpty.note")}
+          other={otherCount ? { label: LANGUAGE_NAMES[other], count: otherCount, onSwitch: () => onLang(other) } : null}
+        />
+      ) : query ? (
+        gridRow(tr("library.resultsFor", { query: deferredQ.trim() }), list, tr("library.books", { count: list.length })) ?? (
+          <ShelfNote icon="search" title={tr("library.noMatchFor", { query: deferredQ.trim() })} note={tr("library.noMatchNote")} action={{ label: tr("library.clearSearch"), onClick: () => setQ("") }} />
+        )
+      ) : !browsing ? (
+        gridRow(active, list, tr("library.books", { count: list.length }))
       ) : (
         <>
-          {shelfRow(tr("library.continueReading"), reading)}
-          {(active === "All" ? cats : [active]).map((c) => shelfRow(c, list.filter((p) => categoryOf(p) === c && !readingIds.has(p.id))))}
-          {!list.length && <p className="mt-6 text-muted">{tr("library.empty")}</p>}
+          {/* The banner already shows the book read last; the row is for the rest. */}
+          {shelfRow(tr("library.continueReading"), belowReading)}
+          {belowShelves.map(([c, books]) => shelfRow(c, books))}
+          {/* Everything there is is already in the banner: say so, rather than leave a blank page. */}
+          {belowReading.length === 0 && belowShelves.length === 0 && (
+            <ShelfNote
+              icon="done"
+              title={tr("library.allHere.title", { language: tr(`library.bookLanguage.${lang}`) })}
+              note={tr("library.allHere.note")}
+              other={otherCount ? { label: LANGUAGE_NAMES[other], count: otherCount, onSwitch: () => onLang(other) } : null}
+            />
+          )}
         </>
       )}
     </div>
+  );
+}
+
+/**
+ * What the shelf says instead of going blank: no books in this language yet,
+ * nothing more beyond the banner, or a search with no match — each with the one
+ * thing worth doing next.
+ */
+function ShelfNote({ title, note, icon = "book", other = null, action }: {
+  title: string; note: string; icon?: "book" | "done" | "search";
+  other?: { label: string; count: number; onSwitch(): void } | null;
+  action?: { label: string; onClick(): void };
+}) {
+  const { t: tr } = useT();
+  const Icon = icon === "search" ? Search : icon === "done" ? Check : BookOpen;
+  return (
+    <section className="mt-6 flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-line bg-surface px-6 py-10 text-center sm:mt-8">
+      <span className="grid h-16 w-16 place-items-center rounded-full bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-300" aria-hidden="true">
+        <Icon className="h-8 w-8" />
+      </span>
+      <h2 className="text-lg font-extrabold text-ink">{title}</h2>
+      <p className="max-w-sm text-sm text-muted">{note}</p>
+      {other && (
+        <UIButton type="button" variant="secondary" icon={<Globe className="h-4 w-4" />} onClick={other.onSwitch}>
+          <span className={other.label === LANGUAGE_NAMES.km ? KHMER : ""}>{tr("library.readIn", { language: other.label, count: other.count })}</span>
+        </UIButton>
+      )}
+      {action && <UIButton type="button" variant="secondary" onClick={action.onClick}>{action.label}</UIButton>}
+    </section>
+  );
+}
+
+/** The book to carry on with, or a new one to start: large, one tap to its page. */
+function LibraryHero({ book, reading, progress, onOpen }: { book: Passage; reading: boolean; progress: BookProgress | null; onOpen(id: string): void }) {
+  const { t: tr } = useT();
+  const tone = COVER[book.category ?? ""] ?? "from-indigo-500 to-indigo-800";
+  return (
+    <section className={`relative mt-5 grid overflow-hidden rounded-3xl bg-gradient-to-br text-white sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] ${tone}`} aria-label={tr(reading ? "library.hero.carryOn" : "library.hero.tryNew")}>
+      <div className="relative z-10 flex flex-col justify-center gap-3 p-5 pt-0 sm:p-8">
+        <span className="text-xs font-extrabold uppercase tracking-widest text-white/80">{tr(reading ? "library.hero.carryOn" : "library.hero.tryNew")}</span>
+        <h2 className={`text-3xl font-extrabold leading-tight text-white sm:text-4xl ${kh(book)}`}>{book.title}</h2>
+        <p className="text-sm font-semibold text-white/85">
+          {tr("library.level", { level: book.band })} · {tr("library.minRead", { count: minutesToRead(book) })}
+          {book.category ? ` · ${book.category}` : ""}
+          {reading && progress?.stage === "quiz" ? ` · ${tr("library.inProgress")}` : ""}
+        </p>
+        <div className="mt-2">
+          <button type="button" onClick={() => onOpen(book.id)}
+            className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-white px-5 text-base font-extrabold text-ink shadow-sm transition hover:bg-white/90 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/50">
+            <BookOpen className="h-5 w-5" aria-hidden="true" />
+            {tr(reading ? "library.hero.keepReading" : "library.hero.startReading")}
+          </button>
+        </div>
+      </div>
+      {/* A photo fills its side and fades into the colour, a poster rather than a
+          picture in a box; on a phone it is a band across the top. A drawing
+          floats large and whole — cropping one cuts off what it shows. */}
+      {isPhoto(book.picture) ? (
+        <span className="relative order-first block h-44 [mask-image:linear-gradient(to_bottom,black_55%,transparent)] sm:order-none sm:h-auto sm:min-h-64 sm:[mask-image:linear-gradient(to_right,transparent,black_35%)]" aria-hidden="true">
+          <Picture name={book.picture} fill />
+        </span>
+      ) : (
+        <span className="relative order-first flex h-40 items-center justify-center p-4 sm:order-none sm:h-auto sm:min-h-64 sm:p-8" aria-hidden="true">
+          <span className="block h-full w-full max-w-56 drop-shadow-lg"><Picture name={book.picture} /></span>
+        </span>
+      )}
+    </section>
   );
 }
 
@@ -528,7 +656,7 @@ function Quiz({ book, onLeave, onFinish, preview = false }: { book: Passage; onL
     if (i + 1 < quiz.length) setI(i + 1);
     else {
       finished.current = true;
-      const r = reward(done, quiz.length, ScoringAPI.current());
+      const r = reward(done, quiz.length, ScoringAPI.current(), book.xp);
       recorder.complete(r.stars, r.xp);
       onFinish(done);
     }
@@ -869,53 +997,131 @@ function WordForming({ traced }: { traced: readonly string[] }) {
 /* Results                                                                     */
 /* -------------------------------------------------------------------------- */
 
-function Results({ book, outcomes, earned, onShelf, onAgain }: { book: Passage; outcomes: Outcome[]; earned: { stars: number; xp: number } | null; onShelf(): void; onAgain(): void }) {
+/**
+ * The end of a book: first, plainly, that it is finished — a banner in the
+ * book's own colour with its cover, the stars and the XP — then how each part
+ * went, the words worth practising, and what to do next. The parent's summary
+ * is there for a grown-up to open, not in the child's way.
+ */
+function Results({ book, outcomes, earned, next, onNext, onShelf, onAgain }: {
+  book: Passage; outcomes: Outcome[]; earned: { stars: number; xp: number } | null;
+  /** The next story in this language not yet finished, if there is one. */
+  next?: Passage | null; onNext?(id: string): void;
+  onShelf(): void; onAgain(): void;
+}) {
   const { t: tr, tNodes } = useT();
+  const reduce = useReducedMotion();
   const quiz = quizOf(book);
   const parts = tally(outcomes, quiz);
   const need = wordsToPractise(outcomes);
+  const stars = earned?.stars ?? 0;
+  const tone = COVER[book.category ?? ""] ?? "from-indigo-500 to-indigo-800";
+  useEffect(() => {
+    if (earned) playSound("levelup");
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- once, on arrival
+  const praise = stars === 3 ? "three" : stars === 2 ? "two" : "one";
+
   return (
-    <div>
-      <h1 className="text-2xl font-extrabold text-ink">{tNodes("library.results.finished", { title: <span className={kh(book)}>{book.title}</span> })}</h1>
-      {earned && (
-        <p className="mt-1 text-sm text-muted">
-          <span aria-label={tr("library.results.stars", { stars: earned.stars, total: 3 })}>{"★".repeat(earned.stars)}{"☆".repeat(3 - earned.stars)}</span>
-          {earned.xp > 0 && ` · +${earned.xp} XP`}
-        </p>
-      )}
-      <p className="mt-3 text-sm text-muted">{tr("library.results.legend")}</p>
-      <div className="mt-3 grid gap-3 sm:grid-cols-3">
-        {parts.map((t) => (
-          <div key={t.part} className="rounded-2xl border border-line bg-surface p-4">
-            <div className="text-sm text-muted">{tr(`library.part.${t.part}`)}</div>
-            <div className="text-3xl font-extrabold text-ink">{t.firstTry}/{t.total}</div>
-            <div className="text-xs text-muted">{tr("library.results.firstTry")}</div>
-            <div className="mt-2 flex gap-1" aria-hidden="true">
-              {outcomes.filter((o) => o.part === t.part).map((o, i) => (
-                <span key={i} className={`grid h-5 w-5 place-items-center rounded-full text-[11px] font-black text-white ${isFirstTry(o) ? "bg-emerald-600" : "bg-purple-600"}`}>{isFirstTry(o) ? "✓" : "+"}</span>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="mt-3 rounded-2xl border border-line bg-surface p-4">
-        <h2 className="text-xs font-extrabold uppercase tracking-wider text-muted">{tr("library.results.wordsToPractise")}</h2>
-        {need.length ? (
+    <div className="flex flex-col gap-4">
+      <section className={`relative grid overflow-hidden rounded-3xl bg-gradient-to-br text-white sm:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] ${tone}`}>
+        <div className="relative z-10 flex flex-col gap-3 p-5 sm:p-8">
+          <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-extrabold uppercase tracking-widest text-white">
+            <Check className="h-4 w-4" aria-hidden="true" />
+            {tr("library.results.eyebrow")}
+          </span>
+          <h1 className="text-2xl font-extrabold leading-tight text-white sm:text-3xl">
+            {tNodes("library.results.finished", { title: <span className={kh(book)}>{book.title}</span> })}
+          </h1>
+          {earned && (
+            <>
+              <div className="flex items-center gap-1.5" role="img" aria-label={tr("library.results.stars", { stars, total: 3 })}>
+                {[1, 2, 3].map((n) => (
+                  <motion.span key={n}
+                    initial={reduce ? false : { scale: 0, rotate: -30 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ delay: reduce ? 0 : 0.15 + n * 0.15, type: "spring", stiffness: 380, damping: 16 }}>
+                    <Star className={`h-9 w-9 sm:h-10 sm:w-10 ${n <= stars ? "fill-white text-white drop-shadow" : "text-white/40"}`} aria-hidden="true" />
+                  </motion.span>
+                ))}
+                {earned.xp > 0 && (
+                  <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-sm font-extrabold text-ink">
+                    <Zap className="h-4 w-4 fill-indigo-600 text-indigo-600" aria-hidden="true" />+{earned.xp} XP
+                  </span>
+                )}
+              </div>
+              <p className="text-sm font-semibold text-white/90 sm:text-base">{tr(`library.results.praise.${praise}`)}</p>
+            </>
+          )}
+        </div>
+        <span className="relative hidden min-h-48 sm:block [mask-image:linear-gradient(to_right,transparent,black_35%)]" aria-hidden="true">
+          {isPhoto(book.picture) ? <Picture name={book.picture} fill /> : <span className="absolute inset-6"><Picture name={book.picture} /></span>}
+        </span>
+      </section>
+
+      <section aria-labelledby="how-you-did">
+        <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
+          <h2 id="how-you-did" className="text-lg font-extrabold text-ink">{tr("library.results.howYouDid")}</h2>
+          <span className="text-xs text-muted">{tr("library.results.legend")}</span>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          {parts.map((t) => {
+            const all = t.total > 0 && t.firstTry === t.total;
+            return (
+              <UICard key={t.part} className="p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-bold text-muted">{tr(`library.part.${t.part}`)}</span>
+                  {all && <span className="grid h-6 w-6 place-items-center rounded-full bg-emerald-500 text-white" aria-hidden="true"><Check className="h-4 w-4" /></span>}
+                </div>
+                <div className="mt-1 text-3xl font-extrabold tabular-nums text-ink">{t.firstTry}/{t.total}</div>
+                <div className="text-xs text-muted">{tr("library.results.firstTry")}</div>
+                <div className="mt-3 flex flex-wrap gap-1" aria-hidden="true">
+                  {outcomes.filter((o) => o.part === t.part).map((o, i) => (
+                    <span key={i} className={`grid h-6 w-6 place-items-center rounded-full text-white ${isFirstTry(o) ? "bg-emerald-500" : "bg-indigo-400"}`}>
+                      {isFirstTry(o) ? <Check className="h-3.5 w-3.5" /> : <RotateCcw className="h-3 w-3" />}
+                    </span>
+                  ))}
+                </div>
+              </UICard>
+            );
+          })}
+        </div>
+      </section>
+
+      {need.length ? (
+        <UICard className="p-4">
+          <h2 className="text-sm font-extrabold text-ink">{tr("library.results.wordsToPractise")}</h2>
           <div className="mt-2 flex flex-wrap gap-2">
             {need.map((w) => <span key={w} className={`rounded-full bg-indigo-50 px-3 py-1 font-bold text-indigo-800 dark:bg-indigo-950 dark:text-indigo-200 ${kh(book)}`}>{w}</span>)}
           </div>
+        </UICard>
+      ) : (
+        <p className="flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">
+          <Check className="h-5 w-5 shrink-0" aria-hidden="true" />
+          {tr("library.results.nothing")}
+        </p>
+      )}
+
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+        {next && onNext ? (
+          <>
+            <UIButton type="button" variant="primary" size="lg" icon={<BookOpen />} onClick={() => onNext(next.id)} className="sm:w-auto">
+              <span>{tr("library.results.nextStory")}: <span className={kh(next)}>{next.title}</span></span>
+            </UIButton>
+            <UIButton type="button" variant="secondary" size="lg" onClick={onShelf}>{tr("library.results.backToLibrary")}</UIButton>
+          </>
         ) : (
-          <p className="mt-1 text-sm text-muted">{tr("library.results.nothing")}</p>
+          <UIButton type="button" variant="primary" size="lg" onClick={onShelf}>{tr("library.results.backToLibrary")}</UIButton>
         )}
+        <UIButton type="button" variant="ghost" size="lg" icon={<RotateCcw />} onClick={onAgain}>{tr("library.results.readItAgain")}</UIButton>
       </div>
-      <UICard className="mt-3 border-l-4 border-l-indigo-600 bg-surface p-4 text-sm text-ink">
-        <div className="mb-1 text-[11px] font-extrabold uppercase tracking-wider text-muted">{tr("library.results.parentSees")}</div>
-        {parentSummary(book, outcomes, quiz)}
-      </UICard>
-      <div className="mt-5 flex flex-wrap items-center gap-3">
-        <UIButton type="button" variant="primary" onClick={onShelf}>{tr("library.results.backToLibrary")}</UIButton>
-        <UILinkButton type="button" onClick={onAgain}>{tr("library.results.readItAgain")}</UILinkButton>
-      </div>
+
+      <details className="group rounded-2xl border border-line bg-surface p-4 text-sm">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-2 font-bold text-muted">
+          {tr("library.results.parentSees")}
+          <ChevronDown className="h-4 w-4 transition group-open:rotate-180" aria-hidden="true" />
+        </summary>
+        <p className="mt-2 text-ink">{parentSummary(book, outcomes, quiz)}</p>
+      </details>
     </div>
   );
 }

@@ -55,7 +55,8 @@ function tap(units: string[]) {
 
 async function toSpelling() {
   render(<LibraryPage />);
-  fireEvent.click(screen.getByRole("button", { name: KHMER_BUTTON }));
+  fireEvent.click(screen.getByRole("button", { name: /^Book language/ }));
+  fireEvent.click(screen.getByRole("menuitem", { name: KHMER_BUTTON }));
   fireEvent.click(screen.getByRole("button", { name: new RegExp(`^${KM.title}\\.`) }));
   fireEvent.click(screen.getByRole("button", { name: "Read" }));
   while (screen.queryByRole("button", { name: "Next page" })) fireEvent.click(screen.getByRole("button", { name: "Next page" }));

@@ -29,6 +29,8 @@ import { aidsFor, coachAttempt, coachStroke, initialCoach } from "../progress/co
 import type { LadderEvent, StepPlan } from "../progress/ladder";
 import { RECHECK_DAYS, applyAttempt, defaultPlan, isRecheckDue, ruleFor } from "../progress/ladder";
 import { TraceProgress } from "../progress/store";
+import { stepXp } from "../progress/reward";
+import { ScoringAPI } from "../../lib/scoring";
 import type { ReportReason } from "../data/api";
 import { reportProblem } from "../data/shelf";
 import type { PlayMode, Switch, Switches } from "./help";
@@ -50,6 +52,8 @@ interface Props {
   source?: { collectionId: string; rev: number };
   /** Where this item sits in its collection, and what comes after it — for the screen that ends an item. */
   place?: TracePlace;
+  /** What passing one step pays at three stars — the collection's setting; the app's XP per level when absent. */
+  xpPerStep?: number | null;
   /** Leave Trace for the home screen. Omitted: the end screen offers no Home. */
   onGoHome?(): void;
 }
@@ -97,7 +101,7 @@ interface InkEntry extends SceneInk {
   hidden?: boolean;
 }
 
-export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: planProp, forceStep, onResult, source, place, onGoHome }: Props) {
+export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: planProp, forceStep, onResult, source, place, xpPerStep, onGoHome }: Props) {
   const { t } = useT();
   const plan = useMemo(() => planProp ?? defaultPlan(item), [item, planProp]);
   const sandbox = forceStep !== undefined;
@@ -121,6 +125,8 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
     counted: boolean;
     /** The step was passed this many times of the times it needs (when it needs more than one). */
     passes?: { done: number; of: number };
+    /** What this try paid: something only when it passed a step. */
+    xp?: number;
   } | null>(null);
   /** The card that opens each step: what it is, where it sits in the journey, and Start. */
   const [intro, setIntro] = useState(forceStep === undefined);
@@ -305,6 +311,7 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
     let event: LadderEvent | null = null;
     let counted = false;
     let passes: { done: number; of: number } | undefined;
+    let xp = 0;
     if (result) {
       const c = coachAttempt(coach, result.accepted);
       setCoach(c.state);
@@ -341,13 +348,14 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
         const times = ruleFor(plan, ladderStep).times;
         if (event === "stay" && r.progress.passes > 0 && times > 1) passes = { done: r.progress.passes, of: times };
       }
-      if (result.accepted && result.stars > 0) onAwardXp?.(result.stars * 5);
+      xp = stepXp(event, result.stars, xpPerStep, ScoringAPI.current());
+      if (xp > 0) onAwardXp?.(xp);
     }
     const ends = !sandbox && result !== null && (event === "canDo" || event === "learned" || event === "rechecked");
     // The end screen brings its own fanfare.
-    if (ends) setFinished({ stars: result.stars, xp: result.accepted ? result.stars * 5 : 0 });
+    if (ends) setFinished({ stars: result.stars, xp });
     else soundFor(result, event);
-    setOutcome({ result, event, counted, passes });
+    setOutcome({ result, event, counted, passes, xp });
   };
 
   /** One sound per attempt, by how it went against this step's bar. */
@@ -543,7 +551,7 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
   const outcomeText = !outcome
     ? undefined
     : [outcome.result?.feedback ? faultText(t, outcome.result.feedback, active, !guided) : t("trace.good"), outcomeNote].filter(Boolean).join(" ");
-  const outcomeXp = outcome?.result?.accepted && play !== "justDraw" && !sandbox && drill === null ? outcome.result.stars * 5 : 0;
+  const outcomeXp = outcome?.xp ?? 0;
 
   const options = (
     <>

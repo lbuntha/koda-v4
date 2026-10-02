@@ -31,3 +31,5 @@ export * from "./UIStatTile";
 export * from "./UITabs";
 export * from "./UIToggle";
 export * from "./UIForm";
+export * from "./UIPagination";
+export * from "./UICarousel";

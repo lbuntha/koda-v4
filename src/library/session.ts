@@ -82,12 +82,16 @@ export interface Scoring {
   oneStarShare: number;
 }
 
-/** The same stars-and-XP rule as a lesson, so a book is worth what a lesson is. */
-export function reward(outcomes: readonly Outcome[], questions: number, s: Scoring): { stars: 1 | 2 | 3; xp: number; accuracy: number } {
+/**
+ * The same stars-and-XP rule as a lesson, so a book is worth what a lesson is —
+ * unless the book sets its own `xp`, which replaces the XP per level and keeps
+ * the same star shares below three stars.
+ */
+export function reward(outcomes: readonly Outcome[], questions: number, s: Scoring, xp?: number | null): { stars: 1 | 2 | 3; xp: number; accuracy: number } {
   const accuracy = questions > 0 ? outcomes.filter(isFirstTry).length / questions : 0;
   const stars = accuracy >= s.threeStarAt ? 3 : accuracy >= s.twoStarAt ? 2 : 1;
   const share = stars === 3 ? 1 : stars === 2 ? s.twoStarShare : s.oneStarShare;
-  return { stars, xp: Math.round(s.xpPerLevel * share), accuracy };
+  return { stars, xp: Math.round((xp ?? s.xpPerLevel) * share), accuracy };
 }
 
 /** The sentence a parent reads. Built from the same outcomes as the results screen. */

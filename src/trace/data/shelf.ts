@@ -11,6 +11,7 @@
 import { useEffect, useSyncExternalStore } from "react";
 import type { CollectionBundle, CollectionSummary, ReportIn } from "./api";
 import { fetchBundle, fetchShelf, sendReport } from "./api";
+import { isPhoto, photoUrl } from "../../library/photos";
 
 interface Stored {
   collections: CollectionSummary[];
@@ -119,6 +120,8 @@ export const TraceShelf = {
           }
         }
         write({ collections: list, bundles, checkedAt: Date.now() });
+        // A photo cover is kept on the device too, so the shelf looks the same offline.
+        await Promise.all(Object.values(bundles).map((b) => (isPhoto(b.picture) ? photoUrl(b.picture).catch(() => null) : null)));
         await flushOutbox();
       } catch {
         /* offline or slow: keep what is stored */

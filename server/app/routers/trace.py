@@ -114,6 +114,10 @@ class CollectionWrite(Model):
     order: int = Field(default=100, ge=0, le=100_000)
     # Which item draws the collection's cover; the first item when absent.
     cover: str | None = Field(default=None, max_length=MAX_ID)
+    # A cover picture made for the collection: an art-library name or a `photo-<hash>` key. The cover item draws it when absent.
+    picture: str | None = Field(default=None, max_length=100, pattern=r"^[a-z0-9]+(-[a-z0-9]+)*$")
+    # What passing one writing step pays at three stars; the deployment's XP per level when absent.
+    xp_per_step: int | None = Field(default=None, alias="xpPerStep", ge=0, le=500)
 
 
 class CollectionOut(Model):
@@ -124,6 +128,8 @@ class CollectionOut(Model):
     itemIds: list[str]
     order: int
     cover: str | None
+    picture: str | None = None
+    xpPerStep: int | None = None
     rev: int
     ownerId: str | None = None
     # "pending" — waiting for an admin to approve it; "rejected" — sent back, with a note.
@@ -161,6 +167,8 @@ def _collection_out(row: dict[str, Any]) -> CollectionOut:
         itemIds=d.get("itemIds", []),
         order=d.get("order", 100),
         cover=d.get("cover"),
+        picture=d.get("picture"),
+        xpPerStep=d.get("xpPerStep"),
         rev=int(row.get("rev") or 0),
         ownerId=row.get("ownerId"),
         reviewState=(row.get("review") or {}).get("state"),
@@ -191,6 +199,7 @@ async def published_collections(db: Db, _: CanRead) -> dict[str, list[dict[str, 
                 "count": len(items),
                 # The chosen item's strokes are the cover (else the first); small, drawn without images.
                 "cover": next((x["item"] for x in items if x["item"].get("id") == b.get("cover")), items[0]["item"] if items else None),
+                "picture": b.get("picture"),
             }
         )
     return {"collections": out}
@@ -260,6 +269,8 @@ async def save_collection(collection_id: str, body: CollectionWrite, db: Db, p: 
         "itemIds": ids,
         "order": body.order,
         "cover": cover,
+        "picture": body.picture,
+        "xpPerStep": body.xp_per_step,
     }
     return _collection_out(await trace_repo.save_collection(db, collection_id, draft, p.subject_id))
 
@@ -322,6 +333,8 @@ async def publish(collection_id: str, db: Db, p: CanWrite) -> CollectionOut:
         "language": d.get("language", "km"),
         "order": d.get("order", 100),
         "cover": d.get("cover"),
+        "picture": d.get("picture"),
+        "xpPerStep": d.get("xpPerStep"),
         "items": items,
     }
     if not _is_admin(p):

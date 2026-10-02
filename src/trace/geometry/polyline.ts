@@ -80,6 +80,28 @@ export function nearest(t: Track, p: Point): Nearest {
   return best;
 }
 
+/** The nearest point among the part of the track between arc positions `from` and `to`. */
+export function nearestWithin(t: Track, p: Point, from: number, to: number): Nearest {
+  const { points, cum } = t;
+  if (points.length === 1) return { dist: dist(points[0], p), s: 0, point: points[0] };
+  let best: Nearest = { dist: Infinity, s: 0, point: points[0] };
+  for (let i = 1; i < points.length; i++) {
+    if (cum[i] < from) continue;
+    if (cum[i - 1] > to) break;
+    const a = points[i - 1];
+    const b = points[i];
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const l2 = dx * dx + dy * dy;
+    let u = l2 === 0 ? 0 : ((p.x - a.x) * dx + (p.y - a.y) * dy) / l2;
+    u = u < 0 ? 0 : u > 1 ? 1 : u;
+    const q = { x: a.x + dx * u, y: a.y + dy * u };
+    const d = dist(q, p);
+    if (d < best.dist) best = { dist: d, s: cum[i - 1] + (cum[i] - cum[i - 1]) * u, point: q };
+  }
+  return best;
+}
+
 /** Shoelace area, closing the polyline. On a y-down screen, positive = clockwise as seen. */
 export function signedArea(points: Point[]): number {
   let area = 0;

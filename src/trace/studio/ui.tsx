@@ -6,9 +6,13 @@
 
 import { useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
+import { themeSystem } from "../../lib/themeSystem";
 
-export const inputCls =
-  "min-h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:ring-violet-900";
+/** The app's own field, at the studio's compact height. */
+export const inputCls = themeSystem.field("lg", "min-h-9 !py-1.5 bg-surface");
+
+/** A tinted panel for an inline task (add items, apply to all, auto strokes). */
+export const panelCls = "flex flex-col gap-3 rounded-2xl border-2 border-indigo-200 bg-indigo-50/60 p-4 dark:border-indigo-900 dark:bg-indigo-950/30";
 
 interface IconButtonProps {
   label: string;
@@ -34,40 +38,40 @@ export function IconButton({ label, shortcut, active, disabled, onClick, childre
       aria-pressed={active}
       disabled={disabled}
       onClick={onClick}
-      className={`group relative flex ${box} shrink-0 items-center justify-center rounded-xl transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 disabled:cursor-not-allowed disabled:opacity-35 ${
+      className={`group relative flex ${box} shrink-0 items-center justify-center rounded-xl transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-35 ${
         active
-          ? "bg-violet-600 text-white shadow-sm"
+          ? "bg-indigo-600 text-white shadow-sm"
           : tone === "danger"
             ? "text-rose-600 hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-950/50"
-            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+            : "text-muted hover:bg-surface-muted hover:text-ink"
       }`}
     >
       {children}
       <span
         role="tooltip"
-        className={`pointer-events-none absolute z-30 whitespace-nowrap rounded-lg bg-slate-900 px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-lg transition group-hover:opacity-100 group-focus-visible:opacity-100 dark:bg-slate-100 dark:text-slate-900 ${place}`}
+        className={`pointer-events-none absolute z-30 whitespace-nowrap rounded-lg bg-ink px-2.5 py-1.5 text-xs font-medium text-surface opacity-0 shadow-lg transition group-hover:opacity-100 group-focus-visible:opacity-100 ${place}`}
       >
         {label}
-        {shortcut && <kbd className="ml-2 rounded bg-white/15 px-1.5 py-0.5 font-mono text-[11px] dark:bg-slate-900/10">{shortcut}</kbd>}
+        {shortcut && <kbd className="ml-2 rounded bg-surface/15 px-1.5 py-0.5 font-mono text-[11px]">{shortcut}</kbd>}
       </span>
     </button>
   );
 }
 
 export function Divider({ vertical = false }: { vertical?: boolean }) {
-  return <span aria-hidden="true" className={vertical ? "mx-1 h-6 w-px bg-slate-200 dark:bg-slate-700" : "my-1 h-px w-6 bg-slate-200 dark:bg-slate-700"} />;
+  return <span aria-hidden="true" className={vertical ? "mx-1 h-6 w-px bg-line" : "my-1 h-px w-6 bg-line"} />;
 }
 
 export function Section({ title, aside, defaultOpen = true, children }: { title: string; aside?: ReactNode; defaultOpen?: boolean; children: ReactNode }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+    <section className={themeSystem.card("default")}>
       <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className="flex w-full items-center gap-2 px-4 py-3 text-left">
-        <span className="text-sm font-semibold text-slate-900 dark:text-white">{title}</span>
-        <span className="ml-auto flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">{aside}</span>
-        <ChevronDown className={`h-4 w-4 text-slate-400 transition ${open ? "rotate-180" : ""}`} />
+        <span className="text-sm font-semibold text-ink">{title}</span>
+        <span className="ml-auto flex items-center gap-2 text-xs text-muted">{aside}</span>
+        <ChevronDown className={`h-4 w-4 text-muted transition ${open ? "rotate-180" : ""}`} />
       </button>
-      {open && <div className="flex flex-col gap-3 border-t border-slate-100 px-4 py-3 dark:border-slate-800">{children}</div>}
+      {open && <div className="flex flex-col gap-3 border-t border-line px-4 py-3">{children}</div>}
     </section>
   );
 }
@@ -75,7 +79,7 @@ export function Section({ title, aside, defaultOpen = true, children }: { title:
 export function Group({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">{label}</span>
+      <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">{label}</span>
       <div className="flex flex-wrap items-center gap-1">{children}</div>
     </div>
   );
@@ -84,7 +88,7 @@ export function Group({ label, children }: { label: string; children: ReactNode 
 export function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="flex min-w-0 flex-col gap-1 text-sm">
-      <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{label}</span>
+      <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">{label}</span>
       {children}
     </label>
   );
@@ -93,11 +97,11 @@ export function Field({ label, children }: { label: string; children: ReactNode 
 export function Slider({ label, value, min, max, step = 1, onChange, format }: { label: string; value: number; min: number; max: number; step?: number; onChange(v: number): void; format?(v: number): string }) {
   return (
     <label className="flex min-w-0 flex-col gap-1 text-sm">
-      <span className="flex justify-between text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+      <span className="flex justify-between text-[11px] font-semibold uppercase tracking-wider text-muted">
         <span>{label}</span>
         <span className="font-mono normal-case tabular-nums">{format ? format(value) : Math.round(value * 100) / 100}</span>
       </span>
-      <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} className="accent-violet-600" />
+      <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} className="accent-indigo-600" />
     </label>
   );
 }
@@ -105,7 +109,7 @@ export function Slider({ label, value, min, max, step = 1, onChange, format }: {
 /** A segmented control whose options are icons with tooltips. */
 export function IconSegment<T extends string>({ value, options, onChange, disabled }: { value: T; options: { value: T; label: string; icon: ReactNode }[]; onChange(v: T): void; disabled?: boolean }) {
   return (
-    <div className="flex gap-0.5 rounded-xl bg-slate-100 p-0.5 dark:bg-slate-800">
+    <div className="flex gap-0.5 rounded-xl bg-surface-muted p-0.5">
       {options.map((o) => (
         <IconButton key={o.value} label={o.label} size="sm" active={value === o.value} disabled={disabled} onClick={() => onChange(o.value)}>
           {o.icon}

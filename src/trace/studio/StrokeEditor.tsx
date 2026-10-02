@@ -16,7 +16,7 @@ import { evalCubic, strokePolyline, strokeSegments } from "../geometry/bezier";
 import { withCheckpoints } from "../geometry/checkpoints";
 import type { Box } from "../geometry/edit";
 import { expandGroups, selectionBox } from "./groups";
-import { extendStroke, moveNode, splitSegment, transformStroke } from "../geometry/edit";
+import { cutStrokeAt, extendStroke, moveNode, splitSegment, splitStrokeAt, transformStroke } from "../geometry/edit";
 import { fitNodes } from "../geometry/fit";
 import { nearest, pointAt, polylineLength, track } from "../geometry/polyline";
 import { snapPoint } from "../geometry/snap";
@@ -24,7 +24,7 @@ import type { Point, Stroke, TraceItem, TraceNode } from "../geometry/types";
 import { dist, len, normalize, sub } from "../geometry/vec";
 import { badge } from "../player/render";
 
-export type EditMode = "adjust" | "add" | "pen" | "pin" | "hand";
+export type EditMode = "adjust" | "add" | "pen" | "pin" | "hand" | "cut";
 
 export interface Magic {
   snap: boolean;
@@ -369,6 +369,22 @@ export function StrokeEditor({ item, selection, selectedNode, mode, magic, showC
       return;
     }
 
+    // Cut: a click on a stroke ends it there and starts a new stroke, pen lifted.
+    // On a point it cuts at that point; anywhere else on the line, a point is made there first.
+    if (mode === "cut") {
+      if (si === null || (role !== "stroke" && role !== "node")) return onSelect([], null);
+      const s = strokes[si];
+      const parts = role === "node" && ni !== null ? splitStrokeAt(s, ni, newId()) : (() => {
+        const at = nearestOnSegments(s, p);
+        return cutStrokeAt(s, at.segment, at.t, newId());
+      })();
+      if (!parts) return onSelect([si], role === "node" ? ni : null);
+      onBegin();
+      onChange([...strokes.slice(0, si), ...parts, ...strokes.slice(si + 1)]);
+      onSelect([parts.length === 2 ? si + 1 : si], null);
+      return;
+    }
+
     if (mode === "add") {
       if (role === "stroke" && si !== null && si === selected && sel && sel.shape !== "dot") {
         const at = nearestOnSegments(sel, p);
@@ -523,13 +539,13 @@ export function StrokeEditor({ item, selection, selectedNode, mode, magic, showC
   /* ---------------------------------------------------- render */
   const { x: gx, y: gy } = gridLines(item.grid);
   const guide = item.guide;
-  const cursor = drag.current?.kind === "pan" ? "grabbing" : panning ? "grab" : mode === "pen" ? "crosshair" : mode === "adjust" ? "default" : "copy";
+  const cursor = drag.current?.kind === "pan" ? "grabbing" : panning ? "grab" : mode === "pen" || mode === "cut" ? "crosshair" : mode === "adjust" ? "default" : "copy";
 
   return (
     <svg
       ref={svgRef}
       viewBox={`${view.x} ${view.y} ${view.size} ${view.size}`}
-      className="block aspect-square w-full touch-none select-none bg-slate-100 dark:bg-slate-800"
+      className="block aspect-square w-full touch-none select-none bg-surface-muted"
       style={{ cursor }}
       onPointerDown={onDown}
       onPointerMove={onMove}

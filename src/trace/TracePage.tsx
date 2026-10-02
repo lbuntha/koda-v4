@@ -1,7 +1,9 @@
 /**
- * Koda Trace — the learner's page. What to do next comes first (check-ups due,
- * items in progress), then one card per published collection with how much of
- * it the child can already do. Collections are kept on the device (see
+ * Koda Trace — the learner's page, laid out like a streaming home: one banner
+ * for the collection to carry on with, then rows that scroll sideways —
+ * check-ups due, items in progress, and the collections by where the child is
+ * with them (under way, not tried, finished). A row with many in it can be
+ * opened out into a grid, so a long shelf never becomes one endless scroll. Collections are kept on the device (see
  * data/shelf.ts), so the page opens and plays offline.
  *
  * People with the Trace Studio permission also see their drafts, to try them
@@ -9,17 +11,20 @@
  */
 
 import { useState, useSyncExternalStore } from "react";
-import { AlarmClock, Check, PenLine, Play, RotateCcw } from "lucide-react";
+import { AlarmClock, ArrowLeft, Check, LayoutGrid, PenLine, Play, RotateCcw } from "lucide-react";
+import { UIButton, UICarousel } from "../components/ui";
 import { useT } from "../lib/i18n";
 import { useTraceShelf } from "./data/shelf";
 import { GOLDEN_ITEMS } from "./fixtures/items";
 import type { TraceItem } from "./geometry/types";
 import { modeOf } from "./geometry/types";
-import type { ItemProgress, StepPlan } from "./progress/ladder";
+import type { StepPlan } from "./progress/ladder";
 import { defaultPlan, isRecheckDue } from "./progress/ladder";
+import { homeRows, isDone, uniqueById, type RowId } from "./home";
 import { TraceProgress } from "./progress/store";
 import { TracePlayer } from "./player/TracePlayer";
 import { ItemThumb } from "./player/Thumb";
+import { Picture } from "../library/Picture";
 import { TraceDrafts } from "./studio/drafts";
 
 interface Props {
@@ -36,11 +41,14 @@ interface Entry {
   source?: { collectionId: string; rev: number };
 }
 
-const isDone = (p: ItemProgress) => p.status === "canDo" || p.status === "learned";
+/** What a step of this entry pays at three stars: its collection's setting, if it has one. */
+const xpOf = (e: Entry, collections: { id: string; xpPerStep?: number | null }[]) => collections.find((c) => c.id === e.source?.collectionId)?.xpPerStep ?? null;
 
 export function TracePage({ onAwardXp, canCreate = false, onGoHome }: Props) {
   const { t } = useT();
   const [open, setOpen] = useState<Entry | null>(null);
+  /** The collection whose cover was tapped: its page, until the child goes back. */
+  const [shelfId, setShelfId] = useState<string | null>(null);
   const shelf = useTraceShelf();
   useSyncExternalStore(TraceProgress.subscribe, TraceProgress.version);
   useSyncExternalStore(TraceDrafts.subscribe, TraceDrafts.version);
@@ -49,30 +57,59 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome }: Props) {
 
   if (open) {
     const place = placeOf(open, collections, setOpen);
-    return <TracePlayer key={open.item.id} item={open.item} plan={open.plan} source={open.source} place={place} onExit={() => setOpen(null)} onAwardXp={onAwardXp} onGoHome={onGoHome} />;
+    return <TracePlayer key={open.item.id} item={open.item} plan={open.plan} source={open.source} place={place} xpPerStep={xpOf(open, collections)} onExit={() => setOpen(null)} onAwardXp={onAwardXp} onGoHome={onGoHome} />;
   }
 
-  const published: Entry[] = collections.flatMap((c) => c.items.map((e) => ({ ...e, source: { collectionId: c.id, rev: c.rev } })));
-  const drafts = canCreate ? TraceDrafts.list().filter((d) => d.item.strokes.length > 0) : [];
-  const everything: Entry[] = [...published, ...drafts.map((d) => ({ item: d.item, plan: d.plan }))];
+  const entriesOf = (c: (typeof collections)[number]): Entry[] => c.items.map((e) => ({ ...e, source: { collectionId: c.id, rev: c.rev } }));
+  const coverOf = (c: (typeof collections)[number]) => shelf.collections.find((x) => x.id === c.id)?.cover ?? c.items[0]?.item ?? null;
+  /** A cover picture made in the Studio; the bundle's, since that is what the device keeps. */
+  const pictureOf = (c: (typeof collections)[number]) => c.picture ?? null;
+
+  const chosen = collections.find((c) => c.id === shelfId);
+  if (chosen) {
+    return (
+      <CollectionView
+        title={chosen.title}
+        description={chosen.description}
+        cover={coverOf(chosen)}
+        picture={pictureOf(chosen)}
+        tone={toneOf(chosen.id)}
+        entries={entriesOf(chosen)}
+        onOpen={setOpen}
+        onBack={() => setShelfId(null)}
+      />
+    );
+  }
+
+  // Each item once: an item in two collections, or an author's draft of a
+  // published item, would otherwise be listed twice.
+  const published: Entry[] = uniqueById(collections.flatMap(entriesOf));
+  const publishedIds = new Set(published.map((e) => e.item.id));
+  const drafts = canCreate ? TraceDrafts.list().filter((d) => d.item.strokes.length > 0 && !publishedIds.has(d.item.id)) : [];
+  const draftEntries: Entry[] = drafts.map((d) => ({ item: d.item, plan: d.plan }));
+  const everything: Entry[] = [...published, ...draftEntries];
 
   const progressOf = (e: Entry) => TraceProgress.get(e.item.id);
   const due = everything.filter((e) => isRecheckDue(progressOf(e)));
   const going = everything
     .filter((e) => {
       const p = progressOf(e);
-      return (p.status === "learning" && p.step !== "watch") || p.status === "needsPractice";
+      return !isRecheckDue(p) && ((p.status === "learning" && p.step !== "watch") || p.status === "needsPractice");
     })
     .sort((a, b) => progressOf(b).updatedAt - progressOf(a).updatedAt)
-    .slice(0, 8);
+    .slice(0, 12);
   const canWrite = published.filter((e) => modeOf(e.item.kind) === "writing" && isDone(progressOf(e))).length;
   const canDraw = published.filter((e) => modeOf(e.item.kind) === "drawing" && isDone(progressOf(e))).length;
 
+  const shelfOf = collections.map((c) => ({ id: c.id, itemIds: c.items.map((e) => e.item.id), c }));
+  const { hero, rows } = homeRows(shelfOf, (id) => TraceProgress.get(id));
+
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 pb-10">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-7 pb-10">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-1">
-          <h1 className="flex items-center gap-2 text-3xl font-bold text-ink">
+          {/* Below `rail:` the app bar already names the page; the heading stays for screen readers. */}
+          <h1 className="sr-only items-center gap-2 text-3xl font-bold text-ink rail:not-sr-only rail:flex">
             <PenLine className="h-7 w-7 text-indigo-600" />
             {t("trace.title")}
           </h1>
@@ -86,29 +123,38 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome }: Props) {
         )}
       </header>
 
-      {due.length > 0 && (
-        <Row title={t("trace.home.due")} icon={<AlarmClock className="h-5 w-5 text-indigo-600" />} tone="indigo">
-          {due.map((e) => (
-            <Tile key={e.item.id} entry={e} onOpen={() => setOpen(e)} />
-          ))}
-        </Row>
-      )}
-      {going.length > 0 && (
-        <Row title={t("trace.home.continue")} icon={<Play className="h-5 w-5 text-indigo-600" />}>
-          {going.map((e) => (
-            <Tile key={e.item.id} entry={e} onOpen={() => setOpen(e)} />
-          ))}
-        </Row>
+      {hero && (
+        <Hero
+          title={hero.c.title}
+          description={hero.c.description}
+          cover={coverOf(hero.c)}
+          picture={pictureOf(hero.c)}
+          tone={toneOf(hero.c.id)}
+          entries={entriesOf(hero.c)}
+          onPlay={setOpen}
+          onBrowse={() => setShelfId(hero.c.id)}
+        />
       )}
 
-      {collections.map((c) => (
-        <Shelf
-          key={c.id}
-          title={c.title}
-          description={c.description}
-          entries={c.items.map((e) => ({ ...e, source: { collectionId: c.id, rev: c.rev } }))}
-          onOpen={setOpen}
-        />
+      {due.length > 0 && (
+        <UICarousel title={t("trace.home.due")} icon={<AlarmClock className="h-5 w-5 text-indigo-600" />} count={due.length} {...TILES}>
+          {due.map((e) => <Tile key={e.item.id} entry={e} onOpen={() => setOpen(e)} />)}
+        </UICarousel>
+      )}
+      {going.length > 0 && (
+        <UICarousel title={t("trace.home.continue")} icon={<Play className="h-5 w-5 text-indigo-600" />} count={going.length} {...TILES}>
+          {going.map((e) => <Tile key={e.item.id} entry={e} onOpen={() => setOpen(e)} />)}
+        </UICarousel>
+      )}
+
+      {rows.map((row) => (
+        <UICarousel key={row.id} title={t(`trace.home.row.${row.id satisfies RowId}`)} count={row.collections.length} {...POSTERS}>
+          {row.collections.map(({ c }) => (
+            <li key={c.id}>
+              <Poster title={c.title} cover={coverOf(c)} picture={pictureOf(c)} tone={toneOf(c.id)} entries={entriesOf(c)} onOpen={() => setShelfId(c.id)} />
+            </li>
+          ))}
+        </UICarousel>
       ))}
 
       {collections.length === 0 && (
@@ -118,10 +164,16 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome }: Props) {
         </div>
       )}
 
-      {canCreate && drafts.length > 0 && (
-        <Shelf title={t("trace.draftsShelf")} description={t("trace.draftsShelfNote")} entries={drafts.map((d) => ({ item: d.item, plan: d.plan }))} onOpen={setOpen} draft />
+      {canCreate && draftEntries.length > 0 && (
+        <UICarousel title={t("trace.draftsShelf")} subtitle={t("trace.draftsShelfNote")} count={draftEntries.length} {...TILES}>
+          {draftEntries.map((e) => <Tile key={e.item.id} entry={e} draft onOpen={() => setOpen(e)} />)}
+        </UICarousel>
       )}
-      {canCreate && <Shelf title={t("trace.testShelf")} description={t("trace.testItems")} entries={GOLDEN_ITEMS.map((item) => ({ item }))} onOpen={setOpen} />}
+      {canCreate && (
+        <UICarousel title={t("trace.testShelf")} subtitle={t("trace.testItems")} count={GOLDEN_ITEMS.length} {...TILES}>
+          {GOLDEN_ITEMS.map((item) => <Tile key={item.id} entry={{ item }} onOpen={() => setOpen({ item })} />)}
+        </UICarousel>
+      )}
     </div>
   );
 }
@@ -148,50 +200,177 @@ function placeOf(open: Entry, collections: Bundle[], go: (e: Entry) => void) {
   return { n: i + 1, total: c.items.length };
 }
 
+/* ------------------------------------------------------------ covers */
+
+/** Each collection keeps one colour, picked from its id, so a child finds it again by colour. Never yellow. */
+const TONES = [
+  "from-indigo-500 to-purple-600",
+  "from-pink-500 to-rose-600",
+  "from-emerald-500 to-cyan-600",
+  "from-cyan-500 to-indigo-600",
+  "from-purple-500 to-pink-500",
+] as const;
+
+const toneOf = (id: string) => TONES[[...id].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) >>> 0, 7) % TONES.length];
+
+/** The collection's picture: its cover item drawn large on the collection's colour, two more items faint behind. */
+function CoverArt({ item, picture, others, tone, className = "" }: { item: TraceItem | null; picture?: string | null; others: TraceItem[]; tone: string; className?: string }) {
+  if (picture)
+    return (
+      <span className={`relative block overflow-hidden ${tone ? `bg-gradient-to-br ${tone}` : ""} ${className}`} aria-hidden="true">
+        <Picture name={picture} cover fill className="transition-transform duration-300 group-hover:scale-105" />
+      </span>
+    );
+  return (
+    <span className={`relative flex items-center justify-center overflow-hidden text-white ${tone ? `bg-gradient-to-br ${tone}` : ""} ${className}`} aria-hidden="true">
+      {others.slice(0, 2).map((o, i) => (
+        <span key={o.id} className={`absolute opacity-20 ${i === 0 ? "-left-3 -top-2 rotate-[-12deg]" : "-bottom-3 -right-2 rotate-[10deg]"}`}>
+          <Glyph item={o} className="h-20 w-20 text-6xl" />
+        </span>
+      ))}
+      {item && (
+        <span className="relative drop-shadow-sm transition-transform duration-300 group-hover:scale-110">
+          <Glyph item={item} className="h-24 w-24 text-7xl sm:h-28 sm:w-28 sm:text-8xl" />
+        </span>
+      )}
+    </span>
+  );
+}
+
+/** A short letter reads best as itself; anything else as its own strokes. */
+function Glyph({ item, className }: { item: TraceItem; className: string }) {
+  if (modeOf(item.kind) === "writing" && item.title.length <= 4)
+    return (
+      <span className={`flex items-center justify-center font-bold leading-none ${className}`} lang={item.script === "khmer" ? "km" : undefined}>
+        {item.carrier ? `${item.carrier.text}${item.title}` : item.title}
+      </span>
+    );
+  return <ItemThumb item={item} className={className} />;
+}
+
+function collectionProgress(entries: Entry[]) {
+  const done = entries.filter((e) => isDone(TraceProgress.get(e.item.id))).length;
+  const started = entries.some((e) => TraceProgress.get(e.item.id).step !== "watch");
+  // Where Play goes: the first item not yet done, or the first item once all are.
+  const next = entries.find((e) => !isDone(TraceProgress.get(e.item.id))) ?? entries[0];
+  return { done, started, next, pct: entries.length ? Math.round((100 * done) / entries.length) : 0, all: entries.length > 0 && done === entries.length };
+}
+
+function ProgressBar({ pct }: { pct: number }) {
+  return (
+    <span className="block h-2 overflow-hidden rounded-full bg-surface-muted" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
+      <span className="block h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${pct}%` }} />
+    </span>
+  );
+}
+
+/** The collection to carry on with, large, with Play going straight to its next item. */
+function Hero({ title, description, cover, picture, tone, entries, onPlay, onBrowse }: { title: string; description: string; cover: TraceItem | null; picture: string | null; tone: string; entries: Entry[]; onPlay(e: Entry): void; onBrowse(): void }) {
+  const { t } = useT();
+  const p = collectionProgress(entries);
+  return (
+    <section className={`relative grid overflow-hidden rounded-3xl bg-gradient-to-br text-white sm:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] ${tone}`} aria-label={title}>
+      <div className="relative z-10 flex flex-col gap-3 p-5 sm:p-8">
+        <span className="text-xs font-extrabold uppercase tracking-widest text-white/80">{p.started ? t("trace.hero.carryOn") : t("trace.hero.tryNew")}</span>
+        <h2 className="text-3xl font-extrabold leading-tight text-white sm:text-4xl">{title}</h2>
+        {description && description !== title && <p className="line-clamp-2 max-w-lg text-sm text-white/85 sm:text-base">{description}</p>}
+        <div className="flex max-w-sm flex-col gap-1.5">
+          <span className="block h-2 overflow-hidden rounded-full bg-white/25" role="progressbar" aria-valuenow={p.pct} aria-valuemin={0} aria-valuemax={100}>
+            <span className="block h-full rounded-full bg-white transition-all" style={{ width: `${p.pct}%` }} />
+          </span>
+          <span className="text-sm font-semibold tabular-nums text-white/85">{t("trace.shelfProgress", { done: p.done, total: entries.length })}</span>
+        </div>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {p.next && (
+            <button type="button" onClick={() => onPlay(p.next)} className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-white px-5 text-base font-extrabold text-ink shadow-sm transition hover:bg-white/90 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/50">
+              <Play className="h-5 w-5 fill-current" />
+              {p.started ? t("trace.action.continue") : t("trace.flow.start")}
+            </button>
+          )}
+          <button type="button" onClick={onBrowse} className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-white/20 px-5 text-base font-bold text-white backdrop-blur-sm transition hover:bg-white/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/50">
+            <LayoutGrid className="h-5 w-5" />
+            {t("trace.hero.allItems")}
+          </button>
+        </div>
+      </div>
+      <CoverArt item={cover} picture={picture} others={entries.map((e) => e.item).filter((i) => i.id !== cover?.id)} tone="" className="hidden min-h-56 sm:flex" />
+    </section>
+  );
+}
+
+/** One collection in a row: a tall poster with its name and how far the child is. */
+function Poster({ title, cover, picture, tone, entries, onOpen }: { title: string; cover: TraceItem | null; picture: string | null; tone: string; entries: Entry[]; onOpen(): void }) {
+  const { t } = useT();
+  const p = collectionProgress(entries);
+  return (
+    <button type="button" onClick={onOpen} aria-label={`${title} · ${t("trace.shelfProgress", { done: p.done, total: entries.length })}`}
+      className="group flex w-full flex-col gap-2 text-left focus-visible:outline-none">
+      <span className="relative block overflow-hidden rounded-2xl ring-2 ring-transparent transition group-hover:-translate-y-1 group-hover:ring-indigo-300 group-focus-visible:ring-indigo-500">
+        <CoverArt item={cover} picture={picture} others={entries.map((e) => e.item).filter((i) => i.id !== cover?.id)} tone={tone} className="aspect-[3/4] w-full" />
+        <span className="absolute left-2 top-2 rounded-full bg-black/25 px-2 py-0.5 text-xs font-bold text-white backdrop-blur-sm">{t("trace.cover.count", { count: entries.length })}</span>
+        {p.all && (
+          <span className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white ring-2 ring-white">
+            <Check className="h-4 w-4" />
+          </span>
+        )}
+        {p.started && !p.all && (
+          <span className="absolute inset-x-0 bottom-0 block h-1.5 bg-black/25">
+            <span className="block h-full bg-white" style={{ width: `${p.pct}%` }} />
+          </span>
+        )}
+      </span>
+      <span className="line-clamp-2 text-sm font-extrabold leading-tight text-ink sm:text-base">{title}</span>
+    </button>
+  );
+}
+
+const POSTERS = { itemClass: "[&>li]:w-36 sm:[&>li]:w-44", gridClass: "grid-cols-2 sm:grid-cols-4 lg:grid-cols-6", seeAllAfter: 5 };
+const TILES = { itemClass: "[&>li]:w-28 sm:[&>li]:w-32", gridClass: "grid-cols-3 sm:grid-cols-5 lg:grid-cols-8", seeAllAfter: 7 };
+
+/** A collection's own page: its cover as a banner, one button to play on, and every item. */
+function CollectionView({ title, description, cover, picture, tone, entries, onOpen, onBack }: { title: string; description: string; cover: TraceItem | null; picture: string | null; tone: string; entries: Entry[]; onOpen(e: Entry): void; onBack(): void }) {
+  const { t } = useT();
+  const p = collectionProgress(entries);
+  return (
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 pb-10">
+      <div className="flex">
+        <UIButton variant="ghost" size="sm" icon={<ArrowLeft />} onClick={onBack}>
+          {t("trace.cover.back")}
+        </UIButton>
+      </div>
+      <section className="grid overflow-hidden rounded-3xl border-2 border-line bg-surface sm:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+        <CoverArt item={cover} picture={picture} others={entries.map((e) => e.item).filter((i) => i.id !== cover?.id)} tone={tone} className="aspect-[16/9] sm:aspect-auto sm:min-h-56" />
+        <div className="flex flex-col gap-3 p-4 sm:p-6">
+          <h1 className="text-2xl font-extrabold leading-tight text-ink sm:text-3xl">{title}</h1>
+          {description && <p className="text-sm text-body sm:text-base">{description}</p>}
+          <div className="flex flex-col gap-1.5">
+            <ProgressBar pct={p.pct} />
+            <span className="text-sm font-semibold tabular-nums text-muted">{t("trace.shelfProgress", { done: p.done, total: entries.length })}</span>
+          </div>
+          {p.next && (
+            <div className="mt-auto">
+              <UIButton size="lg" icon={p.all ? <RotateCcw /> : <Play />} onClick={() => onOpen(p.next)} className="w-full sm:w-auto">
+                {p.all ? t("trace.cover.again") : p.started ? t("trace.action.continue") : t("trace.flow.start")}
+              </UIButton>
+            </div>
+          )}
+        </div>
+      </section>
+      <ul className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7">
+        {entries.map((e) => (
+          <Tile key={e.item.id} entry={e} onOpen={() => onOpen(e)} />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function Stat({ value, label }: { value: number; label: string }) {
   return (
     <div className="flex items-center gap-2 rounded-2xl bg-emerald-50 px-3 py-2 dark:bg-emerald-950/40">
       <span className="text-2xl font-bold tabular-nums text-emerald-700 dark:text-emerald-300">{value}</span>
       <span className="text-xs font-semibold leading-tight text-emerald-800 dark:text-emerald-200">{label}</span>
     </div>
-  );
-}
-
-/** A short row of what to do next: scrolls sideways on a phone. */
-function Row({ title, icon, tone, children }: { title: string; icon: React.ReactNode; tone?: "indigo"; children: React.ReactNode }) {
-  return (
-    <section className={`flex flex-col gap-3 rounded-3xl p-4 ${tone === "indigo" ? "bg-indigo-50 dark:bg-indigo-900/30" : "bg-surface-muted"}`}>
-      <h2 className="flex items-center gap-2 text-lg font-bold text-ink">
-        {icon}
-        {title}
-      </h2>
-      <ul className="-mx-1 flex snap-x gap-3 overflow-x-auto px-1 pb-1 [&>li]:w-28 [&>li]:shrink-0 [&>li]:snap-start sm:[&>li]:w-32">{children}</ul>
-    </section>
-  );
-}
-
-function Shelf({ title, description, entries, onOpen, draft = false }: { title: string; description?: string; entries: Entry[]; onOpen(e: Entry): void; draft?: boolean }) {
-  const { t } = useT();
-  const done = entries.filter((e) => isDone(TraceProgress.get(e.item.id))).length;
-  const pct = entries.length ? Math.round((100 * done) / entries.length) : 0;
-  return (
-    <section className="flex flex-col gap-4 rounded-3xl bg-surface p-4 ring-1 ring-line sm:p-5">
-      <div className="flex flex-col gap-2">
-        <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-          <h2 className="text-xl font-bold text-ink">{title}</h2>
-          <span className="text-sm font-semibold tabular-nums text-body">{t("trace.shelfProgress", { done, total: entries.length })}</span>
-        </div>
-        {description && <p className="text-sm text-body">{description}</p>}
-        <div className="h-2 overflow-hidden rounded-full bg-surface-muted" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
-          <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${pct}%` }} />
-        </div>
-      </div>
-      <ul className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7">
-        {entries.map((e) => (
-          <Tile key={e.item.id} entry={e} draft={draft} onOpen={() => onOpen(e)} />
-        ))}
-      </ul>
-    </section>
   );
 }
 

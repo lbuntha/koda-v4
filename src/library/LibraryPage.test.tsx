@@ -4,6 +4,7 @@ import { LearningLog } from "../lib/learning";
 import { LibraryPage } from "./LibraryPage";
 import { LibraryProgress } from "./progress";
 import { STARTER_PASSAGES } from "./data/starterPassages";
+import { BookStore } from "./bookStore";
 
 /**
  * A child's whole visit, driven by what is on screen: open the library, pick a
@@ -61,12 +62,41 @@ describe("the catalog", () => {
 
   it("switches language, and remembers it", () => {
     const { unmount } = render(<LibraryPage />);
-    fireEvent.click(screen.getByRole("button", { name: "ភាសាខ្មែរ" }));
+    fireEvent.click(screen.getByRole("button", { name: /^Book language/ }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "ភាសាខ្មែរ" }));
     expect(screen.getByRole("button", { name: /^នៅផ្សារ\./ })).toBeTruthy();
     expect(screen.queryByRole("button", { name: /^At the Market/ })).toBeNull();
     unmount();
     render(<LibraryPage />);
     expect(screen.getByRole("button", { name: /^នៅផ្សារ\./ })).toBeTruthy();
+  });
+
+  it("puts a book to start in the banner, and opens it", () => {
+    render(<LibraryPage />);
+    const banner = screen.getByRole("region", { name: "A new story for you" });
+    fireEvent.click(within(banner).getByRole("button", { name: "Start reading" }));
+    expect(screen.getByRole("button", { name: "Read" })).toBeTruthy();
+  });
+
+  it("says when a language has no stories, and offers the one that does", () => {
+    BookStore.reset([STARTER_PASSAGES[2]]); // the Khmer book only
+    try {
+      render(<LibraryPage />);
+      expect(screen.getByRole("heading", { name: "No English stories yet" })).toBeTruthy();
+      expect(screen.queryByRole("searchbox")).toBeNull();
+      fireEvent.click(screen.getByRole("button", { name: /Read in ភាសាខ្មែរ · 1 story/ }));
+      expect(screen.getByRole("button", { name: /^នៅផ្សារ\./ })).toBeTruthy();
+    } finally {
+      BookStore.reset([]);
+    }
+  });
+
+  it("says a search found nothing, and clears it", () => {
+    render(<LibraryPage />);
+    fireEvent.change(screen.getByRole("searchbox", { name: "Search books" }), { target: { value: "zebra" } });
+    expect(screen.getByRole("heading", { name: "No books match “zebra”" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Clear search" }));
+    expect((screen.getByRole("searchbox") as HTMLInputElement).value).toBe("");
   });
 
   it("searches by title and filters by category", () => {
@@ -146,6 +176,8 @@ describe("a whole book, as a child plays it", () => {
     expect(onAwardXp).toHaveBeenCalledTimes(1);
     expect(LibraryProgress.get(MARKET.id, MARKET.rev)?.stage).toBe("done");
 
+    // The next unread story in the same language is one tap away.
+    expect(screen.getByRole("button", { name: "Next story: A Rainy Day" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Back to the library" }));
     expect(screen.getByRole("button", { name: /^At the Market\. Level A\. Finished ✓/ })).toBeTruthy();
 

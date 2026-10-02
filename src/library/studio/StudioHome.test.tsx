@@ -10,7 +10,8 @@ import type { BookSummary, StudioMeta, StudioPage, StudioQuery } from "../api";
  */
 
 const fetchStudioBooks = vi.hoisted(() => vi.fn<(q: StudioQuery, signal?: AbortSignal) => Promise<StudioPage>>());
-vi.mock("../api", () => ({ fetchStudioBooks }));
+const deleteBook = vi.hoisted(() => vi.fn<(id: string) => Promise<void>>());
+vi.mock("../api", () => ({ fetchStudioBooks, deleteBook }));
 vi.mock("../../assets/svg", () => ({ SvgAsset: ({ fallback }: { fallback?: React.ReactNode }) => <>{fallback}</>, SvgMarkup: () => null }));
 
 import { StudioHome } from "./StudioHome";
@@ -34,6 +35,8 @@ const last = () => fetchStudioBooks.mock.calls.at(-1)![0];
 beforeEach(() => {
   localStorage.clear();
   fetchStudioBooks.mockReset();
+  deleteBook.mockReset();
+  deleteBook.mockResolvedValue(undefined);
   fetchStudioBooks.mockResolvedValue(pageOf([book(1), book(2, { status: "published", rev: 3, changed: true, reports: 2 })], { total: 40, pages: 2 }));
 });
 
@@ -45,7 +48,8 @@ describe("the studio list", () => {
     renderHome();
     expect(await screen.findByRole("button", { name: "Book 1" })).toBeTruthy();
     const row = screen.getByRole("button", { name: "Book 2" }).closest("tr")!;
-    expect(row.textContent).toContain("Published · rev 3");
+    expect(row.textContent).toContain("rev 3");
+    expect(row.textContent).toContain("English · Level A");
     expect(row.textContent).toContain("Unpublished changes");
     expect(row.textContent).toContain("⚑ 2 reports");
     expect(screen.getByRole("tab", { name: /Drafts/ }).textContent).toContain("30");
@@ -114,5 +118,32 @@ describe("the studio list", () => {
     expect((await screen.findByRole("alert")).textContent).toContain("not answering");
     await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Try again" })); });
     expect(await screen.findByRole("button", { name: "Book 1" })).toBeTruthy();
+  });
+
+  it("deletes one book, or the ticked ones, only after asking", async () => {
+    renderHome();
+    fireEvent.click(await screen.findByRole("button", { name: "Delete Book 1" }));
+    expect(screen.getByText("Delete this book?")).toBeTruthy();
+    expect(deleteBook).not.toHaveBeenCalled();
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Delete" })); });
+    expect(deleteBook).toHaveBeenCalledWith("book-1");
+    expect(await screen.findByText("Deleted 1 book.")).toBeTruthy();
+
+    deleteBook.mockClear();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Select Book 1" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Select Book 2" }));
+    fireEvent.click(screen.getByRole("button", { name: "Delete 2" }));
+    expect(screen.getByText("Delete 2 books?")).toBeTruthy();
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Delete" })); });
+    expect(deleteBook.mock.calls.map(([id]) => id)).toEqual(["book-1", "book-2"]);
+  });
+
+  it("jumps to a typed page", async () => {
+    renderHome();
+    await screen.findByRole("button", { name: "Book 1" });
+    const box = screen.getByRole("textbox", { name: "Page" });
+    fireEvent.change(box, { target: { value: "2" } });
+    fireEvent.keyDown(box, { key: "Enter" });
+    await waitFor(() => expect(last().page).toBe(2));
   });
 });

@@ -1,11 +1,11 @@
 /**
- * The shelf a device can play: bundled starter books plus published ones.
+ * The shelf a device can play: the published books, or the bundled starters when there are none.
  *
  * Offline-first. Published books are kept in localStorage the moment they
  * arrive, and a refresh has a deadline; when it runs out, or the device is
  * offline, the shelf is whatever it held last time — never empty, never a
- * spinner. A published book with the same id as a starter book replaces it, so a
- * starter can be corrected without an app release.
+ * spinner. Starter books fill the shelf only while there are no published
+ * books; once there are, the shelf is exactly what was published.
  *
  * Books here are frozen revisions from the server; nothing on the device edits
  * them.
@@ -50,11 +50,15 @@ export const BookStore = {
   },
   version: () => version,
 
-  /** Starter books, overlaid by published ones with the same id, then the rest. */
+  /**
+   * The published books — or, on a device that has none yet (never online, or
+   * nothing published), the starter books that ship in the app. Starters are a
+   * floor for an empty shelf, not part of the catalog: once real books arrive
+   * they step aside, so a library is exactly what its authors published and
+   * nothing in it is undeletable from the Studio.
+   */
   shelf(): Passage[] {
-    const byId = new Map<string, Passage>(STARTER_PASSAGES.map((p) => [p.id, p]));
-    for (const p of published) byId.set(p.id, p);
-    return [...byId.values()];
+    return published.length ? [...published] : [...STARTER_PASSAGES];
   },
 
   /** Ask the server. Resolves either way; a failure keeps the shelf as it was. */

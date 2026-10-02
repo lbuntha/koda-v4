@@ -23,6 +23,8 @@ export interface CollectionSummary {
   language: string;
   count: number;
   cover: TraceItem | null;
+  /** A cover picture made for it (art-library name or photo key); the cover item draws it when absent. */
+  picture?: string | null;
 }
 
 export interface CollectionBundle {
@@ -32,6 +34,10 @@ export interface CollectionBundle {
   description: string;
   language: string;
   items: { item: TraceItem; plan: StepPlan }[];
+  /** A cover picture made for it (art-library name or photo key); the cover item draws it when absent. */
+  picture?: string | null;
+  /** What passing one step pays at three stars; the app's XP per level when absent. */
+  xpPerStep?: number | null;
   publishedAt: string;
 }
 
@@ -43,6 +49,10 @@ export interface StudioCollection {
   itemIds: string[];
   order: number;
   cover: string | null;
+  /** A cover picture made for it (art-library name or photo key); null draws the cover item. */
+  picture?: string | null;
+  /** What passing one step pays at three stars; null uses the app's XP per level. */
+  xpPerStep?: number | null;
   rev: number;
   publishedRev: number | null;
   publishedAt: string | null;
@@ -98,12 +108,12 @@ export async function fetchStudioCollections(): Promise<StudioCollection[]> {
 }
 
 export async function saveStudioCollection(
-  c: Pick<StudioCollection, "id" | "title" | "description" | "language" | "itemIds" | "order"> & { cover?: string | null },
+  c: Pick<StudioCollection, "id" | "title" | "description" | "language" | "itemIds" | "order"> & { cover?: string | null; picture?: string | null; xpPerStep?: number | null },
 ): Promise<StudioCollection> {
   return request<StudioCollection>(`/trace/studio/collections/${enc(c.id)}`, {
     method: "PUT",
     token: await token(),
-    body: { title: c.title, description: c.description, language: c.language, itemIds: c.itemIds, order: c.order, cover: c.cover ?? null },
+    body: { title: c.title, description: c.description, language: c.language, itemIds: c.itemIds, order: c.order, cover: c.cover ?? null, picture: c.picture ?? null, xpPerStep: c.xpPerStep ?? null },
   });
 }
 
