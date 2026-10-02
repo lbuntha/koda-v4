@@ -41,21 +41,21 @@ export const withCounts = <T extends string | null | undefined>(
 /**
  * The destinations the phone's tab bar carries, in the order it carries them.
  *
- * Four names, fixed. A tab bar holds about four before the targets stop being
- * comfortable under a thumb, and these are the four a family reaches for on a
- * phone: where they are, what to play, their private buddy board, and the
- * switches. Naming them means an operator adding "Roles" to the menu can never
- * push "Learn" off the bar — the tabs a five-year-old needs are not something
- * an admin has to remember to keep at the top of a list.
+ * Five names, fixed — as many as a phone's bar holds before the targets stop
+ * being comfortable under a thumb, and short words, so none is cut off. These
+ * are the places a child goes every day: where they are, what to play, books to
+ * read, letters to trace, and the switches. Naming them means an operator adding
+ * "Roles" to the menu can never push "Learn" off the bar — the tabs a
+ * five-year-old needs are not something an admin has to remember to keep at the
+ * top of a list.
  *
- * Children remains one tap away in Settings for adults. The leaderboard earns
- * the permanent slot because it is used by the learner as well as their grown-up,
- * and privacy status should never be hard to find.
+ * The leaderboard and Children stay one tap away in Settings, which lists
+ * everything the bar has no room for.
  *
  * The rail has no such limit and lists the record in full, which is the whole
  * reason it is still the layout for a screen with room for it.
  */
-export const MOBILE_TABS = ["home", "game", "leaderboard", "settings"] as const;
+export const MOBILE_TABS = ["home", "game", "library", "trace", "settings"] as const;
 
 export interface TabSplit {
   /** Drawn as tabs, in `MOBILE_TABS` order. */

@@ -44,19 +44,21 @@ describe("badges and labels coming from the menu record", () => {
 describe("splitting a menu into tabs and everywhere else", () => {
   const item = (id: string) => ({ id, label: id, icon: id });
 
-  it("gives a family Home, Learn, Leaderboard and Settings, in that order", () => {
+  it("gives a family Home, Learn, Library, Trace and Settings, in that order", () => {
     const { primary, overflow } = splitTabs([
       item("settings"),
+      item("trace"),
       item("children"),
       item("leaderboard"),
+      item("library"),
       item("users"),
       item("game"),
       item("home"),
       item("profile"),
     ]);
 
-    expect(primary.map((i) => i.id)).toEqual(["home", "game", "leaderboard", "settings"]);
-    expect(overflow.map((i) => i.id)).toEqual(["children", "users", "profile"]);
+    expect(primary.map((i) => i.id)).toEqual(["home", "game", "library", "trace", "settings"]);
+    expect(overflow.map((i) => i.id)).toEqual(["children", "leaderboard", "users", "profile"]);
   });
 
   it("keeps Profile off the bar and reachable from Settings", () => {
@@ -66,18 +68,20 @@ describe("splitting a menu into tabs and everywhere else", () => {
     expect(overflow.map((i) => i.id)).toEqual(["profile"]);
   });
 
-  it("puts the private buddy board under a learner's thumb", () => {
+  it("keeps the leaderboard off the bar and reachable from Settings", () => {
     const { primary, overflow } = splitTabs([
       item("home"),
       item("game"),
+      item("library"),
+      item("trace"),
       item("leaderboard"),
       item("profile"),
       item("settings"),
     ]);
 
-    expect(primary.map((i) => i.id)).toEqual(["home", "game", "leaderboard", "settings"]);
-    expect(primary).toHaveLength(4);
-    expect(overflow.map((i) => i.id)).toEqual(["profile"]);
+    expect(primary.map((i) => i.id)).toEqual(["home", "game", "library", "trace", "settings"]);
+    expect(primary).toHaveLength(5);
+    expect(overflow.map((i) => i.id)).toEqual(["leaderboard", "profile"]);
   });
 
   it("keeps an admin's extra destinations off the bar, in record order", () => {
@@ -93,8 +97,8 @@ describe("splitting a menu into tabs and everywhere else", () => {
       item("settings"),
     ]);
 
-    expect(primary.map((i) => i.id)).toEqual(["home", "game", "leaderboard", "settings"]);
-    expect(overflow.map((i) => i.id)).toEqual(["profile", "skills", "assets", "users", "children"]);
+    expect(primary.map((i) => i.id)).toEqual(["home", "game", "settings"]);
+    expect(overflow.map((i) => i.id)).toEqual(["profile", "leaderboard", "skills", "assets", "users", "children"]);
   });
 
   it("never invents a tab the record does not carry", () => {

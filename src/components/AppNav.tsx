@@ -40,10 +40,10 @@ export interface AppNavProps {
  * The split exists because the two widths want genuinely different things. A
  * rail lists thirteen destinations at once and a 390px screen cannot, so rather
  * than shrinking the rail until it is a hamburger — one tap in front of every
- * screen on the device a child actually holds — the phone carries the four from
+ * screen on the device a child actually holds — the phone carries the five from
  * `MOBILE_TABS`, permanently visible, inside the thumb's reach.
  *
- * Nothing hangs off the end of the bar. What the four leave out — Profile and
+ * Nothing hangs off the end of the bar. What the five leave out — Leaderboard, Profile and
  * the management pages — is listed inside Settings by `NavShortcuts`, which is
  * a tap further away and the right distance: those are places an adult goes
  * deliberately, not places a thumb lands on the way past.
