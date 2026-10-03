@@ -23,7 +23,7 @@ import { prefetchPhotos } from "./photos";
 import { reportBook, type ReportReason } from "./api";
 import { BookReader } from "./BookReader";
 import { playSound } from "../utils/audio";
-import { UIButton, UICard, UICarousel, UIMenu, UIMenuItem, UIGuideBubble, UIBookCard, UILinkButton, UIInput, UIQuizToolbar, UIModal } from "../components/ui";
+import { UIButton, UICard, UICarousel, UIMenu, UIMenuItem, UIGuideBubble, UIBookCard, UILinkButton, UIInput, UIQuizToolbar, UIModal, UIMatchPairs } from "../components/ui";
 import "./khmerFont";
 import { useT } from "../lib/i18n";
 
@@ -864,15 +864,6 @@ function ChoiceQuestion({ book, item, onWrong, onRight, onHint, hintHost }: {
   );
 }
 
-/** Each pair's colour once it is joined. No yellow — it is hard to read here. */
-const PAIR_TONES = [
-  "border-indigo-500 bg-indigo-50 text-indigo-900 dark:bg-indigo-950 dark:text-indigo-100",
-  "border-emerald-500 bg-emerald-50 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-100",
-  "border-sky-500 bg-sky-50 text-sky-900 dark:bg-sky-950 dark:text-sky-100",
-  "border-rose-500 bg-rose-50 text-rose-900 dark:bg-rose-950 dark:text-rose-100",
-  "border-violet-500 bg-violet-50 text-violet-900 dark:bg-violet-950 dark:text-violet-100",
-];
-
 /**
  * The answers' order on screen: shuffled the same way every time this question
  * is shown, and never left in the order they were written — or the answer to
@@ -890,7 +881,7 @@ export function matchOrder(id: string, n: number): number[] {
   return order;
 }
 
-/** "Match each question to its answer": tap one on the left, then its answer on the right. */
+/** "Match each question to its answer": the shared board, with this quiz's sounds, hints and scoring. */
 function MatchQuestionView({ book, item, onWrong, onRight, onHint, hintHost }: {
   book: Passage;
   item: Extract<QuizItem, { part: "match" }>;
@@ -902,11 +893,7 @@ function MatchQuestionView({ book, item, onWrong, onRight, onHint, hintHost }: {
   const { t: tr } = useT();
   const q = item.question;
   const order = useMemo(() => matchOrder(q.id, q.pairs.length), [q.id, q.pairs.length]);
-  /** Left index → the order it was joined in, which picks its colour. */
   const [joined, setJoined] = useState<Record<number, number>>({});
-  const [left, setLeft] = useState<number | null>(null);
-  const [right, setRight] = useState<number | null>(null);
-  const [miss, setMiss] = useState<{ left: number; right: number } | null>(null);
   const [hint, setHint] = useState(0);
   const [hintText, setHintText] = useState("");
   const [fb, setFb] = useState("");
@@ -915,40 +902,17 @@ function MatchQuestionView({ book, item, onWrong, onRight, onHint, hintHost }: {
   const join = (l: number) => {
     const next = { ...joined, [l]: Object.keys(joined).length };
     setJoined(next);
-    setLeft(null);
-    setRight(null);
+    setFb("");
     if (Object.keys(next).length === q.pairs.length) {
       setFb(tr("library.feedback.right"));
       playSound("success");
       onRight(q.pairs.map((pr) => `${pr.left} → ${pr.right}`).join("; "));
     } else playSound("pop");
   };
-  /** A left and a right are both chosen: the same pair joins, anything else is a wrong try. */
-  const tryPair = (l: number, r: number) => {
-    if (l === r) {
-      setFb("");
-      join(l);
-      return;
-    }
-    setMiss({ left: l, right: r });
+  const miss = (l: number, r: number) => {
     setFb(tr("library.feedback.wrong"));
     playSound("error");
     onWrong(`${q.pairs[l].left} → ${q.pairs[r].right}`);
-    setTimeout(() => {
-      setMiss(null);
-      setLeft(null);
-      setRight(null);
-    }, 650);
-  };
-  const pickLeft = (l: number) => {
-    if (done || l in joined || miss) return;
-    if (right !== null) tryPair(l, right);
-    else setLeft(l === left ? null : l);
-  };
-  const pickRight = (r: number) => {
-    if (done || r in joined || miss) return;
-    if (left !== null) tryPair(left, r);
-    else setRight(r === right ? null : r);
   };
   const nextHint = () => {
     const level = hint + 1;
@@ -963,46 +927,22 @@ function MatchQuestionView({ book, item, onWrong, onRight, onHint, hintHost }: {
     }
   };
 
-  const tile = (state: "joined" | "chosen" | "miss" | "open", tone: string) =>
-    `flex min-h-14 w-full items-center rounded-2xl border-2 px-3 py-2 text-left text-base font-bold transition-colors sm:text-lg ${kh(book)} ${
-      state === "joined" ? tone
-      : state === "miss" ? "border-rose-400 bg-rose-50 text-rose-800 dark:bg-rose-950 dark:text-rose-200"
-      : state === "chosen" ? "border-indigo-600 bg-indigo-600 text-white"
-      : "border-line bg-surface text-ink hover:border-indigo-400"
-    }`;
-
   return (
     <div>
       <p className={`text-2xl font-extrabold leading-snug text-ink ${kh(book)}`}>{q.prompt}</p>
       <p className="mt-1 text-sm text-muted">{tr("library.matchHow")}</p>
-      <div className="mt-4 grid grid-cols-2 gap-x-3 gap-y-2">
-        <ul className="grid content-start gap-2" aria-label={tr("library.matchQuestions")}>
-          {q.pairs.map((pr, l) => {
-            const state = l in joined ? "joined" : miss?.left === l ? "miss" : left === l ? "chosen" : "open";
-            return (
-              <li key={l}>
-                <button type="button" onClick={() => pickLeft(l)} disabled={l in joined || done} aria-pressed={left === l}
-                  className={tile(state, PAIR_TONES[(joined[l] ?? 0) % PAIR_TONES.length])}>
-                  {l in joined && <Check className="mr-2 h-4 w-4 shrink-0" aria-hidden="true" />}
-                  <span className="min-w-0 break-words">{pr.left}</span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-        <ul className="grid content-start gap-2" aria-label={tr("library.matchAnswers")}>
-          {order.map((r) => {
-            const state = r in joined ? "joined" : miss?.right === r ? "miss" : right === r ? "chosen" : "open";
-            return (
-              <li key={r}>
-                <button type="button" onClick={() => pickRight(r)} disabled={r in joined || done} aria-pressed={right === r}
-                  className={tile(state, PAIR_TONES[(joined[r] ?? 0) % PAIR_TONES.length])}>
-                  <span className="min-w-0 break-words">{q.pairs[r].right}</span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+      <div className="mt-4">
+        <UIMatchPairs
+          pairs={q.pairs}
+          order={order}
+          joined={joined}
+          onJoin={join}
+          onMiss={miss}
+          leftLabel={tr("library.matchQuestions")}
+          rightLabel={tr("library.matchAnswers")}
+          textClassName={kh(book)}
+          disabled={done}
+        />
       </div>
       <p aria-live="polite" className={`mt-3 min-h-6 text-sm font-bold ${done ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"}`}>{fb}</p>
       <HintBar text={hintText} level={hint} onHint={nextHint} host={hintHost} />

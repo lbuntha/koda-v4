@@ -8,6 +8,7 @@ export * from "./UIDataTable";
 export * from "./UIIconPicker";
 export * from "./UIFeatureCard";
 export * from "./UIBookCard";
+export * from "./UIMatchPairs";
 export * from "./UIGuideBubble";
 export * from "./UIKidMessage";
 export * from "./UILessonCard";
