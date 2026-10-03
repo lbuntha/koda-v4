@@ -107,14 +107,18 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome }: Props) {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-7 pb-10">
-      <header className="flex flex-wrap items-end justify-between gap-3">
+      {/* As the Library does: on a phone the app bar names the page and the
+          tagline is a sentence read once, so the banner leads. With no counts
+          to show the header is empty there, and the column's gap is taken
+          back so the banner sits at the top instead of under a blank band. */}
+      <header className={`flex flex-wrap items-end justify-between gap-3 ${canWrite > 0 || canDraw > 0 ? "" : "max-sm:-mb-7"}`}>
         <div className="flex min-w-0 flex-col gap-1">
           {/* Below `rail:` the app bar already names the page; the heading stays for screen readers. */}
           <h1 className="sr-only items-center gap-2 text-3xl font-bold text-ink rail:not-sr-only rail:flex">
             <PenLine className="h-7 w-7 text-indigo-600" />
             {t("trace.title")}
           </h1>
-          <p className="text-base text-body">{t("trace.subtitle")}</p>
+          <p className="hidden text-sm text-muted sm:block">{t("trace.subtitle")}</p>
         </div>
         {(canWrite > 0 || canDraw > 0) && (
           <div className="flex gap-2">
@@ -310,7 +314,7 @@ function Hero({ title, description, cover, picture, tone, entries, onPlay, onBro
         </div>
         <div className="mt-2 flex flex-wrap gap-2">
           {p.next && (
-            <button type="button" onClick={() => onPlay(p.next)} className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-white px-5 text-base font-extrabold text-ink shadow-sm transition hover:bg-white/90 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/50">
+            <button type="button" onClick={() => onPlay(p.next)} className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-white px-5 text-base font-extrabold text-slate-900 shadow-sm transition hover:bg-white/90 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/50">
               <Play className="h-5 w-5 fill-current" />
               {p.all ? t("trace.cover.again") : p.started ? t("trace.action.continue") : t("trace.flow.start")}
             </button>

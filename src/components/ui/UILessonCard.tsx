@@ -3,6 +3,8 @@ import { Play } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
 import { UILessonIcon } from "./UILessonIcon";
 import { useT } from "../../lib/i18n";
+import { heroTone } from "./UISkillCard";
+import { UISkillThumbnail, useHasSkillArtwork } from "./UISkillThumbnail";
 
 export type UILessonCardTone = "review" | "practise" | "advance" | "resume";
 
@@ -14,7 +16,7 @@ export type UILessonCardTone = "review" | "practise" | "advance" | "resume";
  * collapses to a row — see the component note below for why only some of them
  * do that.
  */
-export type UILessonCardVariant = "card" | "compact";
+export type UILessonCardVariant = "card" | "compact" | "hero";
 
 export interface UILessonCardProps {
   title: string;
@@ -37,6 +39,9 @@ export interface UILessonCardProps {
   tone?: UILessonCardTone;
   actionLabel?: string;
   variant?: UILessonCardVariant;
+  /** `hero`: the skill's artwork and category, which pick its picture and colour. */
+  thumbnail?: string;
+  category?: string;
   onClick(): void;
   className?: string;
 }
@@ -107,12 +112,83 @@ export const UILessonCard: React.FC<UILessonCardProps> = ({
   tone = "advance",
   actionLabel,
   variant = "card",
+  thumbnail,
+  category,
   onClick,
   className = "",
 }) => {
   const { t } = useT();
+  const hasArtwork = useHasSkillArtwork(thumbnail);
   const look = { ...TONES[tone], label: t(`lessonCard.tone.${tone}`) };
   const compact = variant === "compact";
+  const percent = progress
+    ? Math.min(100, Math.round((progress.answered / Math.max(1, progress.total)) * 100))
+    : 0;
+
+  /*
+   * The lead of the Today band, drawn as the subject banners below it are: the
+   * skill's colour with the words in white and one white Play. Sideways rather
+   * than art-on-top, so it does not repeat the "Continue learning" banner a few
+   * centimetres lower with the same picture — the artwork fades in at the right
+   * instead, and the card stays about half the banner's height.
+   */
+  if (variant === "hero") {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={`group relative flex w-full overflow-hidden rounded-3xl bg-gradient-to-br text-left text-white shadow-sm transition active:scale-[0.99] focus:outline-none focus-visible:ring-4 focus-visible:ring-indigo-400/50 ${heroTone(category)} ${className}`}
+      >
+        {hasArtwork && (
+          <span
+            aria-hidden="true"
+            className="absolute inset-y-0 right-0 w-[55%] [mask-image:linear-gradient(to_right,transparent,black_55%)]"
+          >
+            <UISkillThumbnail thumbnail={thumbnail} category={category ?? ""} size="lg" fill cover />
+          </span>
+        )}
+
+        <span className="relative z-10 flex min-w-0 flex-1 flex-col items-start gap-2 p-5">
+          <span className="flex items-center gap-2">
+            {!hasArtwork && (
+              <span className="rounded-2xl bg-white/90 p-0.5">
+                <UILessonIcon name={iconName} tone={iconTone} />
+              </span>
+            )}
+            <span className="rounded-full bg-white/20 px-2.5 py-1 text-xs font-black text-white backdrop-blur-sm">
+              {look.label}
+            </span>
+          </span>
+
+          <span className="max-w-[65%] text-xs font-extrabold uppercase tracking-widest text-white/80">
+            {subject}
+          </span>
+          <h3 className="max-w-[65%] text-2xl font-extrabold leading-tight tracking-tight text-white break-words">
+            {title}
+          </h3>
+
+          {progress ? (
+            <span className="block w-full max-w-[60%]">
+              <span aria-hidden="true" className="block h-2 overflow-hidden rounded-full bg-white/25">
+                <span className="block h-full rounded-full bg-white" style={{ width: `${percent}%` }} />
+              </span>
+              <span className="mt-1 block text-xs font-semibold text-white/85">
+                {t("lessonCard.questionOf", { answered: progress.answered, total: progress.total })}
+              </span>
+            </span>
+          ) : (
+            message && <p className="max-w-[65%] text-sm text-white/85 line-clamp-2">{message}</p>
+          )}
+
+          {/* A span, not a nested button — the whole card is already the control. */}
+          <span className="mt-2 inline-flex min-h-12 items-center gap-2 rounded-2xl bg-white px-5 text-base font-extrabold text-slate-900 shadow-sm transition group-hover:bg-white/90">
+            <Play className="h-5 w-5 fill-current" aria-hidden="true" />
+            {actionLabel ?? t("common.play")}
+          </span>
+        </span>
+      </button>
+    );
+  }
 
   return (
     <button

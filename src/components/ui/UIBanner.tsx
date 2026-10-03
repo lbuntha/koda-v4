@@ -22,6 +22,8 @@ export interface UIBannerProps {
    * than a notice about something.
    */
   tinted?: boolean;
+  /** The tone as a white-on-gradient poster, for the home page. */
+  vivid?: boolean;
   /** Draws a close button. Called once the card has faded out. */
   onDismiss?: () => void;
   dismissLabel?: string;
@@ -48,6 +50,7 @@ export const UIBanner: React.FC<UIBannerProps> = ({
   tone = "primary",
   action,
   tinted = false,
+  vivid = false,
   onDismiss,
   dismissLabel,
   role = "status",
@@ -73,18 +76,18 @@ export const UIBanner: React.FC<UIBannerProps> = ({
   return (
     <div
       role={role}
-      className={`${tinted ? b.cardTinted(tone) : b.card} ${closing ? b.leave : b.enter} ${className}`}
+      className={`${vivid ? b.cardVivid(tone) : tinted ? b.cardTinted(tone) : b.card} ${closing ? b.leave : b.enter} ${className}`}
     >
       <div className={`${b.row} ${onDismiss ? b.rowDismissable : ""}`}>
         {icon && (
-          <span aria-hidden="true" className={`${tinted ? b.wellTinted(tone) : b.well} ${b.tone(tone)}`}>
+          <span aria-hidden="true" className={vivid ? b.wellVivid : `${tinted ? b.wellTinted(tone) : b.well} ${b.tone(tone)}`}>
             {icon}
           </span>
         )}
 
         <div className={b.text}>
           {title && <div className={b.title}>{title}</div>}
-          <div className={title ? b.message : b.messageAlone}>{children}</div>
+          <div className={vivid && !title ? b.messageVivid : title ? b.message : b.messageAlone}>{children}</div>
         </div>
 
         {action && (
@@ -99,7 +102,7 @@ export const UIBanner: React.FC<UIBannerProps> = ({
       </div>
 
       {onDismiss && (
-        <button type="button" aria-label={dismissLabel ?? translate("common.dismiss")} onClick={dismiss} className={b.close}>
+        <button type="button" aria-label={dismissLabel ?? translate("common.dismiss")} onClick={dismiss} className={vivid ? b.closeVivid : b.close}>
           <X />
         </button>
       )}

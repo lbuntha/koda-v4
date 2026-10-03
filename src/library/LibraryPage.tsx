@@ -286,6 +286,23 @@ function Catalog({ shelf, lang, onLang, onOpen }: { shelf: readonly Passage[]; l
       </UICarousel>
     ) : null;
 
+  /* Beside the search rather than alone in the header, where on a phone it
+     left a band of empty space above the banner. */
+  const languageMenu = (
+    <UIMenu align="end" className="w-44" trigger={({ toggle, isOpen }) => (
+      <UIButton type="button" size="sm" variant="secondary" className="rounded-full" icon={<Globe className="h-4 w-4" />} iconRight={<ChevronDown className="h-4 w-4" />}
+        aria-haspopup="menu" aria-expanded={isOpen} aria-label={`${tr("library.bookLanguageLabel")}: ${LANGUAGE_NAMES[lang]}`} onClick={toggle}>
+        <span className={lang === "km" ? KHMER : ""}>{LANGUAGE_NAMES[lang]}</span>
+      </UIButton>
+    )}>
+      {({ close }) => (["en", "km"] as const).map((l) => (
+        <UIMenuItem key={l} isActive={lang === l} onSelect={() => { onLang(l); close(); }}>
+          <span className={l === "km" ? KHMER : ""}>{LANGUAGE_NAMES[l]}</span>
+        </UIMenuItem>
+      ))}
+    </UIMenu>
+  );
+
   return (
     <div>
       <header className="flex flex-wrap items-end justify-between gap-3">
@@ -294,33 +311,24 @@ function Catalog({ shelf, lang, onLang, onOpen }: { shelf: readonly Passage[]; l
           <h1 className="sr-only text-3xl font-extrabold tracking-tight text-ink rail:not-sr-only">{tr("nav.library")}</h1>
           <p className="hidden text-sm text-muted sm:block">{tr("library.tagline")}</p>
         </div>
-        <UIMenu align="end" className="w-44" trigger={({ toggle, isOpen }) => (
-          <UIButton type="button" size="sm" variant="secondary" className="rounded-full" icon={<Globe className="h-4 w-4" />} iconRight={<ChevronDown className="h-4 w-4" />}
-            aria-haspopup="menu" aria-expanded={isOpen} aria-label={`${tr("library.bookLanguageLabel")}: ${LANGUAGE_NAMES[lang]}`} onClick={toggle}>
-            <span className={lang === "km" ? KHMER : ""}>{LANGUAGE_NAMES[lang]}</span>
-          </UIButton>
-        )}>
-          {({ close }) => (["en", "km"] as const).map((l) => (
-            <UIMenuItem key={l} isActive={lang === l} onSelect={() => { onLang(l); close(); }}>
-              <span className={l === "km" ? KHMER : ""}>{LANGUAGE_NAMES[l]}</span>
-            </UIMenuItem>
-          ))}
-        </UIMenu>
       </header>
 
       {browsing && hero && <LibraryHero book={hero} reading={readingIds.has(hero.id)} progress={progressOf(hero)} onOpen={onOpen} />}
 
-      {mine.length > 0 && <label className="relative mt-5 block">
-        <span className="sr-only">{tr("library.search")}</span>
-        <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden="true" />
-        <UIInput
-          type="search"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder={tr("library.search")}
-          className="rounded-full pl-10 pr-4"
-        />
-      </label>}
+      <div className="mt-4 flex items-center justify-end gap-2 sm:mt-5">
+        {mine.length > 0 && <label className="relative block min-w-0 flex-1">
+          <span className="sr-only">{tr("library.search")}</span>
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden="true" />
+          <UIInput
+            type="search"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder={tr("library.search")}
+            className="rounded-full pl-10 pr-4"
+          />
+        </label>}
+        <div className="shrink-0">{languageMenu}</div>
+      </div>
 
       {cats.length > 1 && (
         <div role="group" aria-label={tr("library.category")} className="mt-3 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
@@ -398,7 +406,7 @@ function LibraryHero({ book, reading, progress, onOpen }: { book: Passage; readi
   const { t: tr } = useT();
   const tone = COVER[book.category ?? ""] ?? "from-indigo-500 to-indigo-800";
   return (
-    <section className={`relative mt-5 grid overflow-hidden rounded-3xl bg-gradient-to-br text-white sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] ${tone}`} aria-label={tr(reading ? "library.hero.carryOn" : "library.hero.tryNew")}>
+    <section className={`relative mt-0 grid overflow-hidden rounded-3xl sm:mt-5 bg-gradient-to-br text-white sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] ${tone}`} aria-label={tr(reading ? "library.hero.carryOn" : "library.hero.tryNew")}>
       <div className="relative z-10 flex flex-col justify-center gap-3 p-5 pt-0 sm:p-8">
         <span className="text-xs font-extrabold uppercase tracking-widest text-white/80">{tr(reading ? "library.hero.carryOn" : "library.hero.tryNew")}</span>
         <h2 className={`text-3xl font-extrabold leading-tight text-white sm:text-4xl ${kh(book)}`}>{book.title}</h2>
@@ -409,7 +417,7 @@ function LibraryHero({ book, reading, progress, onOpen }: { book: Passage; readi
         </p>
         <div className="mt-2">
           <button type="button" onClick={() => onOpen(book.id)}
-            className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-white px-5 text-base font-extrabold text-ink shadow-sm transition hover:bg-white/90 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/50">
+            className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-white px-5 text-base font-extrabold text-slate-900 shadow-sm transition hover:bg-white/90 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/50">
             <BookOpen className="h-5 w-5" aria-hidden="true" />
             {tr(reading ? "library.hero.keepReading" : "library.hero.startReading")}
           </button>

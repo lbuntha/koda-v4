@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowRight, BookOpen, Flame, Star, Target, Zap } from "lucide-react";
+import { ArrowRight, BookOpen, Flame, Star, Target, X, Zap } from "lucide-react";
 import {
   getCourseLessons,
   isUnlocked,
@@ -24,7 +24,7 @@ import { levelFromXp, levelProgress, XP_PER_LEVEL, xpToNextLevel } from "../lib/
 import { BadgeIcon } from "./account/BadgeVisuals";
 import type { UserProgress } from "../types";
 import { playSound } from "../utils/audio";
-import { UIButton, UILessonCard, UISkillCard, UISubjectLessonCard } from "./ui";
+import { UIButton, UILessonCard, UISkillCard } from "./ui";
 import { WelcomeBack } from "./WelcomeBack";
 import { DailyGoalBanner } from "./DailyGoalBanner";
 import { ChildrenOverview } from "./account/ChildrenOverview";
@@ -91,10 +91,23 @@ const RailStat: React.FC<{
 const NextBadge: React.FC<{
   userProgress: UserProgress;
   starsEarned: number;
+  /** The phone's copy, drawn as a poster beside the skill banners. */
+  banner?: boolean;
   className?: string;
-}> = ({ userProgress, starsEarned, className = "" }) => {
+}> = ({ userProgress, starsEarned, banner = false, className = "" }) => {
   const rules = useBadges();
   const { t } = useT();
+  /* Closed per badge, per learner: the card comes back when the next badge
+     replaces this one, since that is news. A convenience only — storage that
+     throws just means the card shows again. */
+  const dismissKey = `koda.nextBadgeDismissed.${useSession()?.learnerId ?? "me"}`;
+  const [dismissedId, setDismissedId] = React.useState<string | null>(() => {
+    try {
+      return localStorage.getItem(dismissKey);
+    } catch {
+      return null;
+    }
+  });
   const next = nextBadge(rules, {
     xp: userProgress.xp,
     longestStreak: userProgress.longestStreak,
@@ -107,6 +120,60 @@ const NextBadge: React.FC<{
 
   const toGo = Math.max(0, next.rule.threshold - next.standing);
   const metric = BADGE_METRICS.find((m) => m.id === next.rule.metric);
+
+  const percent = Math.round(next.progress * 100);
+  const toGoLabel = metric ? t(`home.toGo.${metric.id}`, { count: toGo }) : toGo;
+
+  /* On a phone this card sits in the column with the skill banners, so it
+     wears their poster: colour, white words, the badge drawn large. The rail's
+     copy on a wide screen stays a plain card among the rail's other cards. */
+  if (banner) {
+    if (dismissedId === next.rule.id) return null;
+    const dismiss = () => {
+      setDismissedId(next.rule.id);
+      try {
+        localStorage.setItem(dismissKey, next.rule.id);
+      } catch {
+        /* Closed for this visit only. */
+      }
+    };
+    return (
+      <section
+        className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-800 via-indigo-700 to-sky-700 p-5 text-white shadow-sm ${className}`}
+      >
+        <button
+          type="button"
+          aria-label={t("common.dismiss")}
+          onClick={dismiss}
+          className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full text-white/80 transition hover:bg-white/15 hover:text-white"
+        >
+          <X className="h-4 w-4" />
+        </button>
+        <div className="flex items-center gap-4 pr-6">
+          <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-white/15">
+            <BadgeIcon icon={next.rule.icon} size={52} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-xs font-extrabold uppercase tracking-widest text-white/80">
+              {t("home.nextBadge")}
+            </h2>
+            <p className="mt-0.5 truncate text-xl font-extrabold leading-tight text-white">{next.rule.label}</p>
+            <p className="text-sm text-white/85">{toGoLabel}</p>
+          </div>
+        </div>
+        <div
+          className="mt-4 h-2 overflow-hidden rounded-full bg-white/25"
+          role="progressbar"
+          aria-valuenow={percent}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={next.rule.label}
+        >
+          <div className="h-full rounded-full bg-white transition-all" style={{ width: `${percent}%` }} />
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section
@@ -127,7 +194,7 @@ const NextBadge: React.FC<{
         <div className="min-w-0 flex-1">
           <p className="font-bold text-sm text-ink truncate">{next.rule.label}</p>
           <p className="text-xs text-muted">
-            {metric ? t(`home.toGo.${metric.id}`, { count: toGo }) : toGo}
+            {toGoLabel}
           </p>
         </div>
       </div>
@@ -137,7 +204,7 @@ const NextBadge: React.FC<{
             unrelated measures rather than one rail. */}
         <div
           className="h-full rounded-full bg-indigo-500 transition-all"
-          style={{ width: `${Math.round(next.progress * 100)}%` }}
+          style={{ width: `${percent}%` }}
         />
       </div>
     </section>
@@ -491,6 +558,9 @@ export const Home: React.FC<HomeProps> = ({
     <UILessonCard
       key={`resume-${interrupted.saved.levelNumber}`}
       className={leadSpan}
+      variant="hero"
+      thumbnail={byId.get(interrupted.lesson.skillId)?.thumbnail}
+      category={byId.get(interrupted.lesson.skillId)?.category}
       title={practiceTitle(interrupted.lesson.title)}
       subject={byId.get(interrupted.lesson.skillId)?.name ?? interrupted.lesson.skillId}
       progress={{ answered: interrupted.saved.answered, total: interrupted.saved.total }}
@@ -507,6 +577,9 @@ export const Home: React.FC<HomeProps> = ({
     <UILessonCard
       key={leadPick.lesson.ref}
       className={leadSpan}
+      variant="hero"
+      thumbnail={byId.get(leadPick.lesson.skillId)?.thumbnail}
+      category={byId.get(leadPick.lesson.skillId)?.category}
       title={leadPick.lesson.title}
       subject={byId.get(leadPick.lesson.skillId)?.name ?? leadPick.lesson.skillId}
       message={t(`today.${leadPick.kind}`)}
@@ -577,6 +650,7 @@ export const Home: React.FC<HomeProps> = ({
               */}
             <div className="lg:hidden">
               <NextBadge
+                banner
                 userProgress={userProgress}
                 starsEarned={Object.values(completedLevels).reduce((t, stars) => t + stars, 0)}
               />
@@ -638,24 +712,32 @@ export const Home: React.FC<HomeProps> = ({
                 {t("home.yourSubjects")}
               </h2>
 
-              {/* Started subjects are drawn as the lesson they are on; the rest
-                  keep the subject row, since there is no lesson to name yet. */}
+              {/* Started subjects are drawn as the banner the catalog uses for
+                  "Continue learning" — the subject's colour, its artwork across
+                  the top on a phone, and one big Play into the lesson it is on.
+                  The rest are posters, as the Library shows a book. */}
               {inProgress.length > 0 && (
                 <div className="mt-3 space-y-4">
                   {inProgress.map(({ skill, current }) =>
                     current ? (
-                      <UISubjectLessonCard
+                      <UISkillCard
                         key={skill.id}
-                        subject={skill.name}
+                        size="lg"
+                        eyebrow={t("catalog.continueLearning")}
+                        title={skill.name}
+                        tagline={skill.tagline}
                         thumbnail={skill.thumbnail}
                         fallbackIconName={skill.iconName}
                         category={skill.category}
-                        lessonTitle={current.title}
-                        lessonNumber={pathPosition(current, viewer).number}
-                        completedLessons={skill.completedLessons}
+                        subjectName={skill.subjectName}
                         lessonCount={skill.lessonCount}
-                        onOpenSubject={() => open(skill.id)}
-                        onPlay={() => {
+                        completedLessons={skill.completedLessons}
+                        progressPercent={skill.progressPercent}
+                        footnote={t("learn.upNext", {
+                          lesson: `${t("subjectCard.lesson", { number: pathPosition(current, viewer).number })} · ${current.title}`,
+                        })}
+                        actionLabel={t("common.play")}
+                        onOpen={() => {
                           /* A lesson the plan does not cover opens its subject,
                              where the padlock explains itself, rather than
                              starting and being refused. */
@@ -679,18 +761,19 @@ export const Home: React.FC<HomeProps> = ({
                       {t("home.moreSubjects")}
                     </h3>
                   )}
-                  <div className="mt-3 space-y-2.5">
-                    {otherSubjects.map(({ skill, ready }) => (
+                  <div className="mt-3 grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-3">
+                    {otherSubjects.map(({ skill }) => (
                       <UISkillCard
                         key={skill.id}
-                        size="sm"
+                        size="md"
                         title={skill.name}
+                        tagline={skill.tagline}
                         thumbnail={skill.thumbnail}
                         fallbackIconName={skill.iconName}
                         category={skill.category}
+                        subjectName={skill.subjectName}
                         completedLessons={skill.completedLessons}
                         lessonCount={skill.lessonCount}
-                        readyCount={ready}
                         onOpen={() => open(skill.id)}
                       />
                     ))}

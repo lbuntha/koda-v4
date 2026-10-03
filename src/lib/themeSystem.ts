@@ -340,6 +340,22 @@ export const themeSystem = {
         success: "border-emerald-200 dark:border-emerald-500/30 bg-emerald-50/70 dark:bg-emerald-500/10",
         danger: "border-rose-200 dark:border-rose-500/30 bg-rose-50/70 dark:bg-rose-500/10",
       })[tone],
+    /* A banner in the home page's poster colours: the tone as a gradient with
+       the words in white, so it sits with the skill banners under it rather
+       than reading as a system notice above them. */
+    cardVivid: (tone: "primary" | "streak" | "success" | "danger" = "primary") =>
+      "relative rounded-2xl bg-gradient-to-br p-4 text-white shadow-sm transition-all duration-300 motion-reduce:transition-none " +
+      ({
+        primary: "from-indigo-500 to-violet-700",
+        streak: "from-orange-500 to-rose-600",
+        success: "from-emerald-500 to-teal-700",
+        danger: "from-rose-500 to-pink-700",
+      })[tone],
+    wellVivid:
+      "w-10 h-10 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0 [&>svg]:w-5 [&>svg]:h-5",
+    messageVivid: "text-sm font-bold text-white leading-snug",
+    closeVivid:
+      "absolute right-2 top-2 w-8 h-8 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/15 transition cursor-pointer [&>svg]:w-4 [&>svg]:h-4",
     enter: "animate-[fade-in_300ms_ease-out] motion-reduce:animate-none",
     leave: "translate-y-1 opacity-0",
     row: "flex flex-wrap items-center gap-3",

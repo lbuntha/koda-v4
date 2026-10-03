@@ -68,7 +68,7 @@ const HERO_TONE: Record<string, string> = {
   measurement: "from-emerald-600 to-green-800",
   geometry: "from-fuchsia-600 to-purple-800",
 };
-const heroTone = (category?: string) => HERO_TONE[category ?? ""] ?? "from-indigo-500 to-indigo-800";
+export const heroTone = (category?: string) => HERO_TONE[category ?? ""] ?? "from-indigo-500 to-indigo-800";
 
 /**
  * One progress bar, at the weight its card size calls for.
@@ -266,7 +266,7 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
               type="button"
               onClick={act}
               disabled={registering}
-              className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-white px-5 text-base font-extrabold text-ink shadow-sm transition hover:bg-white/90 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/50 disabled:opacity-60"
+              className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-white px-5 text-base font-extrabold text-slate-900 shadow-sm transition hover:bg-white/90 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/50 disabled:opacity-60"
             >
               <Play className="h-5 w-5 fill-current" aria-hidden="true" />
               {registering ? t("skillCard.adding") : label}
