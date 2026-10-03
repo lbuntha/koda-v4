@@ -129,7 +129,8 @@ export interface UITabBarProps {
  * they are allowed to claim.
  */
 export const UITabBar: React.FC<UITabBarProps> = ({ items, activeId, onSelect }) => (
-  <div className={s.tabBarWrap}>
+  // `data-tab-bar` is what CSS hides it by: the label is translated, so it cannot be.
+  <div className={s.tabBarWrap} data-tab-bar>
     <nav className={s.tabBar} aria-label={translate("common.mainNav")}>
       {items.map((item) => {
         const isActive = item.id === activeId;

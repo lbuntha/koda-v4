@@ -220,8 +220,10 @@
    give the page back the space normally occupied by the app chrome. */
 @media (max-width: 44.999rem) {
   [data-mobile-chrome-hidden] > header,
-  [data-mobile-chrome-hidden] > div:has(> nav[aria-label="Main"]),
-  [data-mobile-tabbar-hidden] > div:has(> nav[aria-label="Main"]),
+  /* By attribute, never by the nav's label: the label is translated, and in
+     Khmer "Main" matched nothing, so the bar stayed on phones. */
+  [data-mobile-chrome-hidden] [data-tab-bar],
+  [data-mobile-tabbar-hidden] [data-tab-bar],
   .mobile-reader-word-hint,
   .mobile-reader-swipe-hint {
     display: none;
